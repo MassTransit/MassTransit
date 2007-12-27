@@ -1,4 +1,5 @@
 using NUnit.Framework;
+using NUnit.Framework.SyntaxHelpers;
 
 namespace MassTransit.ServiceBus.Tests
 {
@@ -9,9 +10,13 @@ namespace MassTransit.ServiceBus.Tests
         [Test]
         public void The_Caller_Should_Be_Able_To_Wait_On_The_Response()
         {
+        	_log.Debug("Sending Request Message");
+
             PingMessage pm = new PingMessage();
 
-            _serviceBus.Request(pm);
+            IServiceBusAsyncResult asyncResult = _serviceBus.Request(pm);
+
+        	Assert.That(asyncResult, Is.Not.Null);
         }
     }
 }
