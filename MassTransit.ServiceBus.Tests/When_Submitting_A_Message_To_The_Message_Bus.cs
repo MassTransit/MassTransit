@@ -7,13 +7,6 @@ namespace MassTransit.ServiceBus.Tests
     public class When_Submitting_A_Message_To_The_Message_Bus : 
         ServiceBusSetupFixture
     {
-		//[Test]
-		//public void The_Type_Of_Message_Should_Be_Used_To_Resolve_The_Destination()
-		//{
-		//    PingMessage message = new PingMessage();
-
-		//    _serviceBus.Send(message);
-		//}
 
         [Test]
         public void A_Destination_May_Be_Specified()

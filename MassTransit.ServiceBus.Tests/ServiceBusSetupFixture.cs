@@ -1,6 +1,8 @@
 using System;
 using System.Messaging;
+using System.Reflection;
 using System.Runtime.Serialization.Formatters.Binary;
+using log4net;
 using MassTransit.ServiceBus.Subscriptions;
 using NUnit.Framework;
 using NUnit.Framework.SyntaxHelpers;
@@ -9,6 +11,10 @@ namespace MassTransit.ServiceBus.Tests
 {
     public abstract class ServiceBusSetupFixture
     {
+		//protected static readonly ILog _log = LogManager.GetLogger("default");
+
+		protected static readonly ILog _log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+
         protected IServiceBus _serviceBus;
         protected IServiceBus _remoteServiceBus;
 
