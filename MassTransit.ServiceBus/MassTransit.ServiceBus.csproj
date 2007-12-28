@@ -55,7 +55,7 @@
     <Compile Include="MessageEndpoint.cs" />
     <Compile Include="MessageQueueEndpoint.cs" />
     <Compile Include="MessageQueueEndpointFactory.cs" />
-    <Compile Include="MessageReceivedEventArgs.cs" />
+    <Compile Include="MessageContext.cs" />
     <Compile Include="Messages\PingMessage.cs" />
     <Compile Include="MessageTypeAddressBook.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
