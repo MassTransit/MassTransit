@@ -35,16 +35,6 @@ namespace MassTransit.ServiceBus
 
         #region IServiceBus Members
 
-        public void Send<T>(params T[] messages) where T : IMessage
-        {
-            // for now, we'll only send to ourself
-            IEndpoint endpoint = DefaultEndpoint;
-
-            Envelope envelope = new Envelope(endpoint, messages as IMessage[]);
-
-            endpoint.Transport.Send(envelope);
-        }
-
         public void Publish<T>(params T[] messages) where T : IMessage
         {
             IList<IEndpoint> subscribers = _subscriptionStorage.List<T>();
