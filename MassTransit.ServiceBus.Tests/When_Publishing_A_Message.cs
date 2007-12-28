@@ -55,6 +55,36 @@ namespace MassTransit.ServiceBus.Tests
             Assert.That(_updated, Is.True);
         }
 
+        [Test]
+        public void The_Message_Should_Be_Handled_By_A_Remote_Service_And_Replyable()
+        {
+            bool _updated = false;
+            bool _replied = false;
+            ManualResetEvent _updateEvent = new ManualResetEvent(false);
+
+            EventHandler<MessageReceivedEventArgs<UpdateMessage>> handler = delegate(object sender, MessageReceivedEventArgs<UpdateMessage> args)
+            {
+                _updated = true;
+                _updateEvent.Set();
+                _remoteServiceBus.Send(args.Envelope.ReturnTo, new UpdateMessage());
+            };
+
+            _remoteServiceBus.Subscribe<UpdateMessage>().MessageReceived += handler;
+            _serviceBus.Subscribe<UpdateMessage>().MessageReceived += delegate { _replied = true; };
+
+            Thread.Sleep(TimeSpan.FromSeconds(5));
+
+            UpdateMessage um = new UpdateMessage();
+
+            _serviceBus.Publish(um);
+
+            Assert.That(_updateEvent.WaitOne(TimeSpan.FromSeconds(3), true), Is.True,
+                        "Timeout expired waiting for message");
+
+            Assert.That(_updated, Is.True);
+            Assert.That(_replied, Is.True, "Reply Failed");
+        }
+
 		[Test]
 		public void Multiple_Local_Services_Should_Be_Available()
 		{
