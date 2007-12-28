@@ -15,14 +15,19 @@ namespace MassTransit.ServiceBus
 
         public event EventHandler<MessageReceivedEventArgs<T>> MessageReceived;
 
-        public string Address
-        {
-            get { throw new NotImplementedException(); }
-        }
+    	public void Send(IEnvelope e)
+    	{
+    		_endpoint.Send(e);
+    	}
 
-        public ITransport Transport
+    	public event EventHandler<EnvelopeReceivedEventArgs> EnvelopeReceived;
+
+    	public string Address
         {
-            get { return _endpoint.Transport; }
+            get
+            {
+            	return _endpoint.Address;
+            }
         }
 
     	public void OnMessageReceived(IEnvelope envelope, IMessage message)

@@ -4,22 +4,22 @@ using System.Messaging;
 
 namespace MassTransit.ServiceBus
 {
-	public class MsmqTransportFactory
+	public class MessageQueueEndpointFactory
 	{
-		private static readonly MsmqTransportFactory _instance;
-		private readonly Dictionary<string, MsmqTransport> _transportCache;
+		private static readonly MessageQueueEndpointFactory _instance;
+		private readonly Dictionary<string, MessageQueueEndpoint> _transportCache;
 
-		static MsmqTransportFactory()
+		static MessageQueueEndpointFactory()
 		{
-			_instance = new MsmqTransportFactory();
+			_instance = new MessageQueueEndpointFactory();
 		}
 
-		protected MsmqTransportFactory()
+		protected MessageQueueEndpointFactory()
 		{
-			_transportCache = new Dictionary<string, MsmqTransport>();
+			_transportCache = new Dictionary<string, MessageQueueEndpoint>();
 		}
 
-		public ITransport Resolve(string queuePath)
+		public MessageQueueEndpoint Resolve(string queuePath)
 		{
 			string key;
 			string queueName = NormalizeQueueName(queuePath, out key);
@@ -29,7 +29,7 @@ namespace MassTransit.ServiceBus
 				if (_transportCache.ContainsKey(key))
 					return _transportCache[key];
 
-				MsmqTransport transport = new MsmqTransport(queueName);
+				MessageQueueEndpoint transport = new MessageQueueEndpoint(queueName);
 
 				_transportCache.Add(key, transport);
 
@@ -53,7 +53,7 @@ namespace MassTransit.ServiceBus
 			}
 		}
 
-		public static MsmqTransportFactory Instance
+		public static MessageQueueEndpointFactory Instance
 		{
 			get { return _instance; }
 		}

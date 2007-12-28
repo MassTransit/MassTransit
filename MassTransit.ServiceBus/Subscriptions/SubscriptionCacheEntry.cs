@@ -33,7 +33,7 @@ namespace MassTransit.ServiceBus.Subscriptions
             if (other == null)
                 return false;
 
-			if (string.Compare(_endpoint.Transport.Address, other.Endpoint.Transport.Address, true) != 0)
+			if (string.Compare(_endpoint.Address, other.Endpoint.Address, true) != 0)
 				return false;
 
 			if (string.Compare(_messageId, other.MessageId, true) != 0)

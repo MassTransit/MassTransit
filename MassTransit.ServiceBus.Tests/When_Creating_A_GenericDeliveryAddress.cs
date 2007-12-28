@@ -12,7 +12,7 @@ namespace MassTransit.ServiceBus.Tests
         public void AutoCast_From_String()
         {
             MessageQueueEndpoint addr = @".\private$\test_endpoint";
-            Assert.That(addr.Transport.Address, Is.EqualTo(Environment.MachineName + @"\private$\test_endpoint"));
+            Assert.That(addr.Address, Is.EqualTo(Environment.MachineName + @"\private$\test_endpoint"));
         }
     }
 }

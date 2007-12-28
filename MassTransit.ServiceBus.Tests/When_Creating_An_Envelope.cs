@@ -15,7 +15,7 @@ namespace MassTransit.ServiceBus.Tests
 
             IEnvelope e = new Envelope(returnTo);
 
-            Assert.That(e.ReturnTo.Transport.Address, Is.EqualTo(Environment.MachineName + @"\private$\test_endpoint"));
+            Assert.That(e.ReturnTo.Address, Is.EqualTo(Environment.MachineName + @"\private$\test_endpoint"));
         }
 
         [Test]
