@@ -2,6 +2,6 @@ namespace MassTransit.ServiceBus
 {
 	public interface IMessageEndpointReceive
 	{
-		void OnMessageReceived(IEnvelope envelope, IMessage message);
+		void OnMessageReceived(IServiceBus bus, IEnvelope envelope, IMessage message);
 	}
 }

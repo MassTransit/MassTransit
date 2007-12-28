@@ -13,7 +13,7 @@ namespace MassTransit.ServiceBus
             _endpoint = endpoint;
         }
 
-        public event EventHandler<MessageReceivedEventArgs<T>> MessageReceived;
+        public event MessageHandler<T> MessageReceived;
 
     	public void Send(IEnvelope e)
     	{
@@ -30,13 +30,13 @@ namespace MassTransit.ServiceBus
             }
         }
 
-    	public void OnMessageReceived(IEnvelope envelope, IMessage message)
+    	public void OnMessageReceived(IServiceBus bus, IEnvelope envelope, IMessage message)
     	{
 			if (message is T)
 			{
 				if (MessageReceived != null)
 				{
-					MessageReceived(this, new MessageReceivedEventArgs<T>(envelope, (T) message));
+					MessageReceived(bus, envelope, (T) message);
 				}
 			}
     	}
