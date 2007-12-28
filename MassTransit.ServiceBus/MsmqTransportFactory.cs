@@ -21,22 +21,23 @@ namespace MassTransit.ServiceBus
 
 		public ITransport Resolve(string queuePath)
 		{
-			string queueName = NormalizeQueueName(queuePath);
+			string key;
+			string queueName = NormalizeQueueName(queuePath, out key);
 
 			lock (_instance)
 			{
-				if (_transportCache.ContainsKey(queueName))
-					return _transportCache[queueName];
+				if (_transportCache.ContainsKey(key))
+					return _transportCache[key];
 
 				MsmqTransport transport = new MsmqTransport(queueName);
 
-				_transportCache.Add(queueName, transport);
+				_transportCache.Add(key, transport);
 
 				return transport;
 			}
 		}
 
-		private static string NormalizeQueueName(string queuePath)
+		private static string NormalizeQueueName(string queuePath, out string key)
 		{
 			using (MessageQueue queue = new MessageQueue(queuePath))
 			{
@@ -45,6 +46,8 @@ namespace MassTransit.ServiceBus
 				{
 					queue.MachineName = Environment.MachineName;
 				}
+
+				key = queue.Path.Replace("FORMATNAME:DIRECT=OS:", "");
 
 				return queue.Path;
 			}
