@@ -1,3 +1,4 @@
+using System;
 using System.Messaging;
 using NUnit.Framework;
 using NUnit.Framework.SyntaxHelpers;
@@ -12,7 +13,7 @@ namespace MassTransit.ServiceBus.Tests
         {
             string queuePath = @".\private$\test_servicebus";
 
-            ValidateAndPurgeQueue(queuePath);
+            queuePath = ValidateAndPurgeQueue(queuePath);
 
             MessageQueueEndpoint defaultEndpoint = queuePath;
 
@@ -21,7 +22,7 @@ namespace MassTransit.ServiceBus.Tests
             Assert.That(serviceBus.DefaultEndpoint.Transport.Address, Is.EqualTo(queuePath));
         }
 
-        private static void ValidateAndPurgeQueue(string queuePath)
+        private static string ValidateAndPurgeQueue(string queuePath)
         {
             try
             {
@@ -35,6 +36,11 @@ namespace MassTransit.ServiceBus.Tests
 
             MessageQueue queue = new MessageQueue(queuePath, QueueAccessMode.ReceiveAndAdmin);
             queue.Purge();
+
+			if (queue.MachineName == ".")
+				queue.MachineName = Environment.MachineName;
+
+        	return queue.Path;
         }
     }
 }

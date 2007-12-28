@@ -11,11 +11,11 @@ namespace MassTransit.ServiceBus.Tests
         [Test]
         public void A_Return_Address_Should_Be_Stored_With_The_Envelope()
         {
-            MessageQueueEndpoint returnTo = "home";
+            MessageQueueEndpoint returnTo = @".\private$\test_endpoint";
 
             IEnvelope e = new Envelope(returnTo);
 
-            Assert.That(e.ReturnTo.Transport.Address, Is.EqualTo("home"));
+            Assert.That(e.ReturnTo.Transport.Address, Is.EqualTo(Environment.MachineName + @"\private$\test_endpoint"));
         }
 
         [Test]
@@ -25,7 +25,7 @@ namespace MassTransit.ServiceBus.Tests
 
             IMessage message = mocks.CreateMock<IMessage>();
 
-            MessageQueueEndpoint returnTo = "home";
+            MessageQueueEndpoint returnTo = @".\private$\test_endpoint";
 
             IEnvelope e = new Envelope(returnTo, message);
 
@@ -41,7 +41,7 @@ namespace MassTransit.ServiceBus.Tests
             messages[0] = mocks.CreateMock<IMessage>();
             messages[1] = mocks.CreateMock<IMessage>();
 
-            MessageQueueEndpoint returnTo = "home";
+            MessageQueueEndpoint returnTo = @".\private$\test_endpoint";
 
             IEnvelope e = new Envelope(returnTo, messages);
 
@@ -56,7 +56,7 @@ namespace MassTransit.ServiceBus.Tests
             IMessage message = mocks.CreateMock<IMessage>();
             IMessage message1 = mocks.CreateMock<IMessage>();
 
-            MessageQueueEndpoint returnTo = "home";
+            MessageQueueEndpoint returnTo = @".\private$\test_endpoint";
 
             IEnvelope e = new Envelope(returnTo, message, message1);
 
