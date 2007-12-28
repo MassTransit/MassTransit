@@ -22,9 +22,9 @@ namespace MassTransit.ServiceBus
             Check.Parameter(endpoint).WithMessage("endpoint").IsNotNull();
 
             _endpoint = endpoint;
-            _endpoint.Transport.EnvelopeReceived += Transport_EnvelopeReceived;
+            _endpoint.EnvelopeReceived += Transport_EnvelopeReceived;
 
-        	_log.DebugFormat("Added event handler for envelope to {0}", _endpoint.Transport.Address);
+        	_log.DebugFormat("Added event handler for envelope to {0}", _endpoint.Address);
         }
 
         public ISubscriptionStorage SubscriptionStorage
@@ -44,7 +44,7 @@ namespace MassTransit.ServiceBus
 
                 foreach (IEndpoint endpoint in subscribers)
                 {
-                    endpoint.Transport.Send(envelope);
+                    endpoint.Send(envelope);
                 }
             }
         }
@@ -53,7 +53,7 @@ namespace MassTransit.ServiceBus
         {
             Envelope e = new Envelope(DefaultEndpoint, messages as IMessage[]);
 
-            endpoint.Transport.Send(e);
+            endpoint.Send(e);
         }
 
         public IEndpoint DefaultEndpoint

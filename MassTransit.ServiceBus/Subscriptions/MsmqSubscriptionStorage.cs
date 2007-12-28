@@ -86,7 +86,7 @@ namespace MassTransit.ServiceBus.Subscriptions
 		public void Add(Type messageType, IEndpoint endpoint)
 		{
 			SubscriptionMessage subscriptionMessage =
-				new SubscriptionMessage(messageType, endpoint.Transport.Address,
+				new SubscriptionMessage(messageType, endpoint.Address,
 				                        SubscriptionMessage.SubscriptionChangeType.Add);
 
 			Send(subscriptionMessage);
@@ -94,14 +94,14 @@ namespace MassTransit.ServiceBus.Subscriptions
 			_subscriptionCache.Add(messageType, endpoint);
 
 			if (_log.IsDebugEnabled)
-				_log.DebugFormat("Adding Subscription to {0} for {1}", messageType, endpoint.Transport.Address);
+				_log.DebugFormat("Adding Subscription to {0} for {1}", messageType, endpoint.Address);
 		}
 
 		private void Send(IMessage message)
 		{
 			Message msg = new Message();
 
-			msg.ResponseQueue = new MessageQueue(_defaultEndpoint.Transport.Address);
+			msg.ResponseQueue = new MessageQueue(_defaultEndpoint.Address);
 			msg.Recoverable = true;
 
 			_formatter.Serialize(msg.BodyStream, new IMessage[] {message});
@@ -114,13 +114,13 @@ namespace MassTransit.ServiceBus.Subscriptions
 			_subscriptionCache.Remove(messageType, endpoint);
 
 			SubscriptionMessage subscriptionMessage =
-				new SubscriptionMessage(messageType, endpoint.Transport.Address,
+				new SubscriptionMessage(messageType, endpoint.Address,
 				                        SubscriptionMessage.SubscriptionChangeType.Remove);
 
 			Send(subscriptionMessage);
 
 			if (_log.IsDebugEnabled)
-				_log.DebugFormat("Removing Subscription to {0} for {1}", messageType, endpoint.Transport.Address);
+				_log.DebugFormat("Removing Subscription to {0} for {1}", messageType, endpoint.Address);
 		}
 	}
 }

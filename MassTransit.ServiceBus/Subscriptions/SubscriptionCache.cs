@@ -42,7 +42,7 @@ namespace MassTransit.ServiceBus.Subscriptions
 				if (!_messageTypeSubscriptions[messageType].Contains(entry))
 				{
                 if(_log.IsDebugEnabled)
-				    _log.DebugFormat("Adding new subscription entry for endpoint {0} on {1}", endpoint.Transport.Address, GetHashCode());
+				    _log.DebugFormat("Adding new subscription entry for endpoint {0} on {1}", endpoint.Address, GetHashCode());
 					_messageTypeSubscriptions[messageType].Add(entry);
 				}
 			}

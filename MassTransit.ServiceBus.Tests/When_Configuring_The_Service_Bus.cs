@@ -19,7 +19,7 @@ namespace MassTransit.ServiceBus.Tests
 
             IServiceBus serviceBus = new ServiceBus(defaultEndpoint);
 
-            Assert.That(serviceBus.DefaultEndpoint.Transport.Address, Is.EqualTo(queuePath));
+            Assert.That(serviceBus.DefaultEndpoint.Address, Is.EqualTo(queuePath));
         }
 
         private static string ValidateAndPurgeQueue(string queuePath)
