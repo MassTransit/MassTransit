@@ -10,19 +10,6 @@ namespace MassTransit.ServiceBus
 		IMessageEndpoint<T> Endpoint<T>() where T : IMessage;
 
 		/// <summary>
-		/// Sends a list of messages to the destinations associated with the message types
-		/// </summary>
-		/// <param name="messages"></param>
-		void Send<T>(params T[] messages) where T : IMessage;
-
-		/// <summary>
-		/// Sends a list of messages to the specified destination
-		/// </summary>
-		/// <param name="endpoint">The destination endpoint for the message</param>
-		/// <param name="messages">The list of messages</param>
-		void Send<T>(IEndpoint endpoint, params T[] messages) where T : IMessage;
-
-		/// <summary>
 		/// Publishes a message to all subscribed consumers for the message type
 		/// </summary>
 		/// <typeparam name="T">The type of the message</typeparam>
@@ -36,5 +23,12 @@ namespace MassTransit.ServiceBus
 		/// <param name="messages">The messages to be sent</param>
 		/// <returns>An IAsyncResult that can be used to wait for the response</returns>
 		IServiceBusAsyncResult Request<T>(params T[] messages) where T : IMessage;
+
+		/// <summary>
+		/// Sends a list of messages to the specified destination
+		/// </summary>
+		/// <param name="endpoint">The destination endpoint for the message</param>
+		/// <param name="messages">The list of messages</param>
+		void Send<T>(IEndpoint endpoint, params T[] messages) where T : IMessage;
 	}
 }

@@ -24,7 +24,7 @@ namespace MassTransit.ServiceBus.Tests
         	_serviceBus.Endpoint<PingMessage>().MessageReceived += handler;
 
             PingMessage pm = new PingMessage();
-            _serviceBus.Send(pm);
+            _serviceBus.Publish(pm);
 
         	Assert.That(_receivedEvent.WaitOne(TimeSpan.FromSeconds(5), true), Is.True);
 
