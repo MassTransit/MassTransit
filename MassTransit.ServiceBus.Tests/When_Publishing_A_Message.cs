@@ -67,6 +67,9 @@ namespace MassTransit.ServiceBus.Tests
                         _updated = true;
                         _updateEvent.Set();
 
+						// NOTE: The bus passed to the delegate is the one from which the message was received
+						// NOTE: So if we were subscribed to the remote bus, this would be the remote bus
+
                         //this was supposed to be the remote bus responding
                         bus.Send(envelope.ReturnTo, new UpdateAcceptedMessage());
                     };
