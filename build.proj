@@ -7,7 +7,14 @@
 		<MSBuildCommunityTasksPath>$(MSBuildProjectDirectory)\libs\MSBuild.Community.Tasks\MSBuild.Community.Tasks.Targets</MSBuildCommunityTasksPath>
     </PropertyGroup>
 	
-	<Target Name="Go" DependsOnTargets="Build">
+	<ItemGroup>
+		<ZipFiles Include=".\ci_src\bin\*.*" />
+		<TestAssembly Include=".\ci_src\bin\*.Tests.dll" />
+	</ItemGroup>
+
+
+			
+	<Target Name="Go" DependsOnTargets="Build;Zip">
 	</Target>
 	
 	<Target Name="Build" DependsOnTargets="GetSource">
@@ -25,12 +32,12 @@
 		<Message Text="Revision: $(Revision)"/>
 	</Target>
 	
-	<ItemGroup>
-		<TestAssembly Include=".\ci_src\bin\*.Tests.dll" />
-	</ItemGroup>
-	
 	<Target Name="UnitTest">
 		<NUnit Assemblies="@(TestAssembly)" />
 	</Target>
 
+	<Target Name="Zip">
+		<Zip Files="@(ZipFiles)" 
+			ZipFileName=".\MassTransit.zip" />
+	</Target>
 </Project>
