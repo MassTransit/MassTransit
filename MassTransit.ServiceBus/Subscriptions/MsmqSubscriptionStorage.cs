@@ -10,22 +10,27 @@ namespace MassTransit.ServiceBus.Subscriptions
     public class MsmqSubscriptionStorage :
         ISubscriptionStorage
     {
-		private static readonly ILog _log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+        private static readonly ILog _log = LogManager.GetLogger(typeof(MsmqSubscriptionStorage));
 
 		private BinaryFormatter _formatter;
         private Cursor _peekCursor;
         private MessageQueue _storageQueue;
         private string _storageQueueName;
-    	private readonly ISubscriptionStorage _subscriptionCache; // i like this
+    	private readonly ISubscriptionStorage _subscriptionCache;
         private IEndpoint _defaultEndpoint;
 
-        public MsmqSubscriptionStorage(string storageQueueName, IEndpoint defaultEndpoint, ISubscriptionStorage subscriptionCache) //what if this is the cache? maybe have another constructor?
+        public MsmqSubscriptionStorage(string storageQueueName, IEndpoint defaultEndpoint, ISubscriptionStorage subscriptionCache)
         {
             _storageQueueName = storageQueueName;
             _defaultEndpoint = defaultEndpoint;
             _subscriptionCache = subscriptionCache;
             _storageQueue = new MessageQueue(_storageQueueName, QueueAccessMode.SendAndReceive);
 
+            Initialize();
+        }
+
+        private void Initialize()
+        {
             MessagePropertyFilter mpf = new MessagePropertyFilter();
             mpf.SetAll();
 
@@ -35,13 +40,7 @@ namespace MassTransit.ServiceBus.Subscriptions
 
             _peekCursor = _storageQueue.CreateCursor();
 
-            _storageQueue.PeekCompleted += Queue_PeekCompleted;
-
             _storageQueue.BeginPeek(TimeSpan.FromHours(24), _peekCursor, PeekAction.Current, this, QueuePeekCompleted);
-        }
-
-        private void Queue_PeekCompleted(object sender, PeekCompletedEventArgs e)
-        {
         }
 
 
@@ -49,14 +48,17 @@ namespace MassTransit.ServiceBus.Subscriptions
         {
             Message msg = _storageQueue.EndPeek(asyncResult);
 
-			_log.DebugFormat("Subscription Update Received: Id {0}", msg.Id);
+            if(_log.IsDebugEnabled)
+			    _log.DebugFormat("Subscription Update Received: Id {0}", msg.Id);
 
 			IMessage[] messages = _formatter.Deserialize(msg.BodyStream) as IMessage[];
             if (messages != null)
             {
                 foreach (SubscriptionMessage subscriptionMessage in messages)
                 {
-					_log.DebugFormat("Subscription Endpoint: {0} Message Type: {1} Mode: {2}", msg.ResponseQueue.Path, subscriptionMessage.MessageType, subscriptionMessage.ChangeType.ToString());
+                    if (_log.IsDebugEnabled)
+					    _log.DebugFormat("Subscription Endpoint: {0} Message Type: {1} Mode: {2}", msg.ResponseQueue.Path, subscriptionMessage.MessageType, subscriptionMessage.ChangeType.ToString());
+
                     if (subscriptionMessage.ChangeType == SubscriptionMessage.SubscriptionChangeType.Add) //would there ever be anything but?
                     {
                     	IEndpoint endpoint = (MessageQueueEndpoint)subscriptionMessage.Address;
@@ -85,6 +87,9 @@ namespace MassTransit.ServiceBus.Subscriptions
             Send(subscriptionMessage);
 
             _subscriptionCache.Add(messageType, endpoint);
+
+            if(_log.IsDebugEnabled)
+                _log.DebugFormat("Adding Subscription to {0} for {1}", messageType, endpoint.Transport.Address);
         }
 
         private void Send(IMessage message)
@@ -108,6 +113,9 @@ namespace MassTransit.ServiceBus.Subscriptions
                                          SubscriptionMessage.SubscriptionChangeType.Remove);
 
             Send(subscriptionMessage);
+
+            if (_log.IsDebugEnabled)
+                _log.DebugFormat("Removing Subscription to {0} for {1}", messageType, endpoint.Transport.Address);
         }
 
     }
