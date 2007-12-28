@@ -18,6 +18,12 @@ namespace MassTransit.ServiceBus.Subscriptions
 		private readonly ISubscriptionStorage _subscriptionCache;
 		private IEndpoint _defaultEndpoint;
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="storageQueueName">the name of the queue that stores all of the subscriptions</param>
+        /// <param name="defaultEndpoint"></param>
+        /// <param name="subscriptionCache">in memory cache</param>
 		public MsmqSubscriptionStorage(string storageQueueName, IEndpoint defaultEndpoint, ISubscriptionStorage subscriptionCache)
 		{
 			_storageQueueName = storageQueueName;
