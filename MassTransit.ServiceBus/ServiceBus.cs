@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using log4net;
 using MassTransit.ServiceBus.Util;
 
@@ -8,12 +9,11 @@ namespace MassTransit.ServiceBus
     public class ServiceBus :
         IServiceBus
     {
-        private static readonly ILog _log = LogManager.GetLogger("default");
-        private readonly Dictionary<Type, IEndpoint> _messageEndpoints = new Dictionary<Type, IEndpoint>();
+		private static readonly ILog _log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+
+		private readonly Dictionary<Type, IEndpoint> _messageEndpoints = new Dictionary<Type, IEndpoint>();
 
         private IEndpoint _endpoint;
-
-        private Dictionary<string, IEndpoint> _otherEndpoints;
 
         private ISubscriptionStorage _subscriptionStorage;
 
@@ -24,12 +24,7 @@ namespace MassTransit.ServiceBus
             _endpoint = endpoint;
             _endpoint.Transport.EnvelopeReceived += Transport_EnvelopeReceived;
 
-            _otherEndpoints = new Dictionary<string, IEndpoint>();
-
-            foreach (IEndpoint otherEndpoint in otherEndpoints)
-            {
-                _otherEndpoints.Add(otherEndpoint.Transport.Address, otherEndpoint);
-            }
+        	_log.DebugFormat("Added event handler for envelope to {0}", _endpoint.Transport.Address);
         }
 
         public ISubscriptionStorage SubscriptionStorage
@@ -94,9 +89,9 @@ namespace MassTransit.ServiceBus
             return result as IMessageEndpoint<T>;
         }
 
-        public IServiceBusAsyncResult Request<T>(params T[] messages) where T : IMessage
+    	public IServiceBusAsyncResult Request<T>(params T[] messages) where T : IMessage
         {
-            //IEndpoint endpoint = _endpointDirectory.Get<T>();
+            //IEndpoint endpoint = _endpointDirectory.Resolve<T>();
 
             //IEnvelope envelope = _envelopeBuilder.Build(messages);
 
@@ -109,27 +104,39 @@ namespace MassTransit.ServiceBus
 
         private void Transport_EnvelopeReceived(object sender, EnvelopeReceivedEventArgs e)
         {
-            if (e.Envelope.Messages != null)
-            {
-                foreach (IMessage message in e.Envelope.Messages)
-                {
-                    if (_messageEndpoints.ContainsKey(message.GetType()))
-                    {
-                        IMessageEndpointReceive receivingEndpoint =
-                            _messageEndpoints[message.GetType()] as IMessageEndpointReceive;
-                        if (receivingEndpoint != null)
-                        {
-                            try
-                            {
-                                receivingEndpoint.OnMessageReceived(e.Envelope, message);
-                            }
-                            catch
-                            {
-                            }
-                        }
-                    }
-                }
-            }
+			try
+			{
+				_log.DebugFormat("Envelope {0} Received By {1}", e.Envelope.Id, GetHashCode());
+
+				if (e.Envelope.Messages != null)
+				{
+					foreach (IMessage message in e.Envelope.Messages)
+					{
+						_log.DebugFormat("Message Received: {0}", message.GetType());
+
+						if (_messageEndpoints.ContainsKey(message.GetType()))
+						{
+							IMessageEndpointReceive receivingEndpoint =
+								_messageEndpoints[message.GetType()] as IMessageEndpointReceive;
+							if (receivingEndpoint != null)
+							{
+								try
+								{
+									receivingEndpoint.OnMessageReceived(e.Envelope, message);
+								}
+								catch (Exception ex)
+								{
+									_log.Error("Exception from OnMessageReceived: ", ex);
+								}
+							}
+						}
+					}
+				}
+			}
+			catch(Exception ex)
+			{
+				_log.Error("Exception in Transport_EnvelopeReceived: ", ex);
+			}
         }
     }
 }

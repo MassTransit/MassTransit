@@ -1,12 +1,16 @@
 using System;
 using System.Collections.Generic;
+using System.Reflection;
+using log4net;
 
 namespace MassTransit.ServiceBus.Subscriptions
 {
     public class SubscriptionCache : //this is effectively the inmemory stuff right?
         ISubscriptionStorage
     {
-        private readonly Dictionary<Type, List<SubscriptionCacheEntry>> _messageTypeSubscriptions =
+		private static readonly ILog _log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+		
+		private readonly Dictionary<Type, List<SubscriptionCacheEntry>> _messageTypeSubscriptions =
             new Dictionary<Type, List<SubscriptionCacheEntry>>();
 
         #region ISubscriptionStorage Members
@@ -25,13 +29,19 @@ namespace MassTransit.ServiceBus.Subscriptions
 
         public void Add(Type messageType, IEndpoint endpoint)
         {
-            if (!_messageTypeSubscriptions.ContainsKey(messageType))
-                _messageTypeSubscriptions.Add(messageType, new List<SubscriptionCacheEntry>());
+			if (!_messageTypeSubscriptions.ContainsKey(messageType))
+			{
+				_log.DebugFormat("Adding new subscription list for type {0} on {1}", messageType.ToString(), GetHashCode());
+				_messageTypeSubscriptions.Add(messageType, new List<SubscriptionCacheEntry>());
+			}
 
-            SubscriptionCacheEntry entry = new SubscriptionCacheEntry(endpoint);
+        	SubscriptionCacheEntry entry = new SubscriptionCacheEntry(endpoint);
 
-            if (!_messageTypeSubscriptions[messageType].Contains(entry))
-                _messageTypeSubscriptions[messageType].Add(entry);
+			if (!_messageTypeSubscriptions[messageType].Contains(entry))
+			{
+				_log.DebugFormat("Adding new subscription entry for endpoint {0} on {1}", endpoint.Transport.Address, GetHashCode());
+				_messageTypeSubscriptions[messageType].Add(entry);
+			}
         }
 
         public void Remove(Type messageType, IEndpoint endpoint)

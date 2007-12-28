@@ -9,10 +9,6 @@ namespace MassTransit.ServiceBus.Tests
     public class When_Publishing_A_Message :
         ServiceBusSetupFixture
     {
-        private void DeleteMessage_Received(object sender, MessageReceivedEventArgs<DeleteMessage> e)
-        {
-        }
-
         [Test]
         public void The_Message_Should_Be_Delivered_To_All_Subscribers()
         {
@@ -47,7 +43,7 @@ namespace MassTransit.ServiceBus.Tests
 				_updateEvent.Set();
 			};
 
-            Thread.Sleep(TimeSpan.FromSeconds(3));
+        	Thread.Sleep(TimeSpan.FromSeconds(5));
 
             UpdateMessage um = new UpdateMessage();
 
@@ -80,7 +76,7 @@ namespace MassTransit.ServiceBus.Tests
 				_deleteEvent.Set();
 			};
 
-			Thread.Sleep(TimeSpan.FromSeconds(3));
+			Thread.Sleep(TimeSpan.FromSeconds(5));
 
 			DeleteMessage dm = new DeleteMessage();
 

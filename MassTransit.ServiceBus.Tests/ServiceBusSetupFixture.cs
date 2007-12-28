@@ -11,8 +11,6 @@ namespace MassTransit.ServiceBus.Tests
 {
     public abstract class ServiceBusSetupFixture
     {
-		//protected static readonly ILog _log = LogManager.GetLogger("default");
-
 		protected static readonly ILog _log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 
         protected IServiceBus _serviceBus;
@@ -21,7 +19,8 @@ namespace MassTransit.ServiceBus.Tests
         protected MessageQueueEndpoint _serviceBusEndPoint;
         protected MessageQueueEndpoint _remoteServiceBusEndPoint;
         protected MessageQueueEndpoint _testEndPoint;
-        protected MessageQueueEndpoint _subscriptionEndPoint;
+
+    	protected string _subscriptionQueueName;
 
         protected ISubscriptionStorage _subscriptionCache;
         protected ISubscriptionStorage _subscriptionStorage;
@@ -32,33 +31,31 @@ namespace MassTransit.ServiceBus.Tests
         [SetUp]
         public virtual void Before_Each_Test_In_The_Fixture()
         {
+        	_log.Debug("Starting Test");
+
             _serviceBusEndPoint = @".\private$\test_servicebus";
             _remoteServiceBusEndPoint = @".\private$\test_remoteservicebus";
             _testEndPoint = @".\private$\test_endpoint";
-            _subscriptionEndPoint = @".\private$\test_subscriptions";
+			_subscriptionQueueName = @".\private$\test_subscriptions";
 
             ValidateAndPurgeQueue(_serviceBusEndPoint);
             ValidateAndPurgeQueue(_remoteServiceBusEndPoint);
             ValidateAndPurgeQueue(_testEndPoint);
-            ValidateAndPurgeQueue(_subscriptionEndPoint);
+			ValidateAndPurgeQueue(_subscriptionQueueName);
 
-            _subscriptionCache = new SubscriptionCache();
+			ServiceBus bus = new ServiceBus(_serviceBusEndPoint, _testEndPoint);
 
-            _subscriptionStorage = new MsmqSubscriptionStorage(_subscriptionEndPoint.Transport.Address, _serviceBusEndPoint,
-                                                               _subscriptionCache);
-
-            ServiceBus bus = new ServiceBus(_serviceBusEndPoint, _testEndPoint);
-            bus.SubscriptionStorage = _subscriptionStorage;
+			_subscriptionCache = new SubscriptionCache();
+			_subscriptionStorage = new MsmqSubscriptionStorage(_subscriptionQueueName, _serviceBusEndPoint, _subscriptionCache);
+			bus.SubscriptionStorage = _subscriptionStorage;
 
             _serviceBus = bus;
 
-            _remoteSubscriptionCache = new SubscriptionCache();
+            bus = new ServiceBus(_remoteServiceBusEndPoint);
 
-            _remoteSubscriptionStorage = new MsmqSubscriptionStorage(_subscriptionEndPoint.Transport.Address, _remoteServiceBusEndPoint,
-                                                               _remoteSubscriptionCache);
-
-            bus = new ServiceBus(_remoteServiceBusEndPoint, _testEndPoint, _serviceBusEndPoint);
-            bus.SubscriptionStorage = _remoteSubscriptionStorage;
+			_remoteSubscriptionCache = new SubscriptionCache();
+			_remoteSubscriptionStorage = new MsmqSubscriptionStorage(_subscriptionQueueName, _remoteServiceBusEndPoint, _remoteSubscriptionCache);
+			bus.SubscriptionStorage = _remoteSubscriptionStorage;
 
             _remoteServiceBus = bus;
         }
@@ -66,9 +63,10 @@ namespace MassTransit.ServiceBus.Tests
         [TearDown]
         public virtual void After_Each_Test_In_The_Fixture()
         {
-            //TeardownQueue(_serviceBusEndPoint);
+			_log.Debug("Ending Test");
+
+			//TeardownQueue(_serviceBusEndPoint);
             //TeardownQueue(_testEndPoint);
-            //TeardownQueue(_subscriptionEndPoint);
             //_serviceBus.Dispose();
         }
 

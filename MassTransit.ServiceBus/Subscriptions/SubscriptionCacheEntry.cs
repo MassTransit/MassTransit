@@ -7,7 +7,7 @@ namespace MassTransit.ServiceBus.Subscriptions
     {
         private IEndpoint _endpoint;
 
-        private string _messageId;
+    	private string _messageId = string.Empty;
 
         public SubscriptionCacheEntry(IEndpoint endpoint)
         {
@@ -33,7 +33,13 @@ namespace MassTransit.ServiceBus.Subscriptions
             if (other == null)
                 return false;
 
-            return Equals(_endpoint, other.Endpoint) && Equals(_messageId, other.MessageId);
+			if (string.Compare(_endpoint.Transport.Address, other.Endpoint.Transport.Address, true) != 0)
+				return false;
+
+			if (string.Compare(_messageId, other.MessageId, true) != 0)
+				return false;
+
+        	return true;
         }
 
         #endregion

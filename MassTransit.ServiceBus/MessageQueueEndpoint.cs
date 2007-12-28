@@ -15,10 +15,9 @@ namespace MassTransit.ServiceBus
             get { return _transport; }
         }
 
-
         public static implicit operator MessageQueueEndpoint(string queuePath)
         {
-            ITransport transport = new MsmqTransport(queuePath);
+        	ITransport transport = MsmqTransportFactory.Instance.Resolve(queuePath);
 
             return new MessageQueueEndpoint(transport);
         }
