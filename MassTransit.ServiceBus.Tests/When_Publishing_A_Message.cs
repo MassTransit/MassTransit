@@ -12,14 +12,14 @@ namespace MassTransit.ServiceBus.Tests
         [Test]
         public void The_Message_Should_Be_Delivered_To_All_Subscribers()
         {
-			bool _updated = false;
-        	ManualResetEvent _updateEvent = new ManualResetEvent(false);
+            bool _updated = false;
+            ManualResetEvent _updateEvent = new ManualResetEvent(false);
 
-			_serviceBus.Subscribe<UpdateMessage>().MessageReceived += delegate
-			{
-				_updated = true;
-				_updateEvent.Set();
-			};
+            _serviceBus.Subscribe<UpdateMessage>().MessageReceived += delegate
+                                                                          {
+                                                                              _updated = true;
+                                                                              _updateEvent.Set();
+                                                                          };
 
             UpdateMessage um = new UpdateMessage();
 
@@ -34,16 +34,16 @@ namespace MassTransit.ServiceBus.Tests
         [Test]
         public void The_Message_Should_Be_Handled_By_A_Remote_Service()
         {
-			bool _updated = false;
-			ManualResetEvent _updateEvent = new ManualResetEvent(false);
+            bool _updated = false;
+            ManualResetEvent _updateEvent = new ManualResetEvent(false);
 
-			_remoteServiceBus.Subscribe<UpdateMessage>().MessageReceived += delegate
-			{
-				_updated = true;
-				_updateEvent.Set();
-			};
+            _remoteServiceBus.Subscribe<UpdateMessage>().MessageReceived += delegate
+                                                                                {
+                                                                                    _updated = true;
+                                                                                    _updateEvent.Set();
+                                                                                };
 
-        	Thread.Sleep(TimeSpan.FromSeconds(5));
+            Thread.Sleep(TimeSpan.FromSeconds(5));
 
             UpdateMessage um = new UpdateMessage();
 
@@ -59,18 +59,28 @@ namespace MassTransit.ServiceBus.Tests
         public void The_Message_Should_Be_Handled_By_A_Remote_Service_And_Replyable()
         {
             bool _updated = false;
-            bool _replied = false;
             ManualResetEvent _updateEvent = new ManualResetEvent(false);
 
-            EventHandler<MessageReceivedEventArgs<UpdateMessage>> handler = delegate(object sender, MessageReceivedEventArgs<UpdateMessage> args)
-            {
-                _updated = true;
-                _updateEvent.Set();
-                _remoteServiceBus.Send(args.Envelope.ReturnTo, new UpdateMessage());
-            };
+            EventHandler<MessageReceivedEventArgs<UpdateMessage>> handler =
+                delegate(object sender, MessageReceivedEventArgs<UpdateMessage> args)
+                    {
+                        _updated = true;
+                        _updateEvent.Set();
+
+                        _remoteServiceBus.Send(args.Envelope.ReturnTo, new UpdateAcceptedMessage());
+                    };
+
+            bool _replied = false;
+            ManualResetEvent _repliedEvent = new ManualResetEvent(false);
 
             _remoteServiceBus.Subscribe<UpdateMessage>().MessageReceived += handler;
-            _serviceBus.Subscribe<UpdateMessage>().MessageReceived += delegate { _replied = true; };
+
+            _serviceBus.Subscribe<UpdateAcceptedMessage>().MessageReceived +=
+                delegate
+                    {
+                        _replied = true;
+                        _repliedEvent.Set();
+                    };
 
             Thread.Sleep(TimeSpan.FromSeconds(5));
 
@@ -82,71 +92,74 @@ namespace MassTransit.ServiceBus.Tests
                         "Timeout expired waiting for message");
 
             Assert.That(_updated, Is.True);
+
+            Assert.That(_repliedEvent.WaitOne(TimeSpan.FromSeconds(3), true), Is.True, "NO response message received");
+
             Assert.That(_replied, Is.True, "Reply Failed");
         }
 
-		[Test]
-		public void Multiple_Local_Services_Should_Be_Available()
-		{
-			bool _updated = false;
-			ManualResetEvent _updateEvent = new ManualResetEvent(false);
+        [Test]
+        public void Multiple_Local_Services_Should_Be_Available()
+        {
+            bool _updated = false;
+            ManualResetEvent _updateEvent = new ManualResetEvent(false);
 
-			_serviceBus.Subscribe<UpdateMessage>().MessageReceived += delegate
-			{
-				_updated = true;
-				_updateEvent.Set();
-			};
+            _serviceBus.Subscribe<UpdateMessage>().MessageReceived += delegate
+                                                                          {
+                                                                              _updated = true;
+                                                                              _updateEvent.Set();
+                                                                          };
 
-			bool _deleted = false;
-			ManualResetEvent _deleteEvent = new ManualResetEvent(false);
+            bool _deleted = false;
+            ManualResetEvent _deleteEvent = new ManualResetEvent(false);
 
-			_serviceBus.Subscribe<DeleteMessage>().MessageReceived += delegate
-			{
-				_deleted = true;
-				_deleteEvent.Set();
-			};
+            _serviceBus.Subscribe<DeleteMessage>().MessageReceived += delegate
+                                                                          {
+                                                                              _deleted = true;
+                                                                              _deleteEvent.Set();
+                                                                          };
 
-			Thread.Sleep(TimeSpan.FromSeconds(5));
+            Thread.Sleep(TimeSpan.FromSeconds(5));
 
-			DeleteMessage dm = new DeleteMessage();
+            DeleteMessage dm = new DeleteMessage();
 
-			_serviceBus.Publish(dm);
+            _serviceBus.Publish(dm);
 
-			Assert.That(_deleteEvent.WaitOne(TimeSpan.FromSeconds(12), true), Is.True,
-						"Timeout expired waiting for message");
+            Assert.That(_deleteEvent.WaitOne(TimeSpan.FromSeconds(12), true), Is.True,
+                        "Timeout expired waiting for message");
 
-			Assert.That(_deleted, Is.True);
+            Assert.That(_deleted, Is.True);
 
-			UpdateMessage um = new UpdateMessage();
+            UpdateMessage um = new UpdateMessage();
 
-			_serviceBus.Publish(um);
+            _serviceBus.Publish(um);
 
-			Assert.That(_updateEvent.WaitOne(TimeSpan.FromSeconds(12), true), Is.True,
-						"Timeout expired waiting for message");
+            Assert.That(_updateEvent.WaitOne(TimeSpan.FromSeconds(12), true), Is.True,
+                        "Timeout expired waiting for message");
 
-			Assert.That(_updated, Is.True);
-		}
+            Assert.That(_updated, Is.True);
+        }
 
         [Test]
         public void Multiple_Remote_Services_Should_Be_Available()
         {
-			bool _updated = false;
-			ManualResetEvent _updateEvent = new ManualResetEvent(false);
+            bool _updated = false;
+            ManualResetEvent _updateEvent = new ManualResetEvent(false);
 
-			_remoteServiceBus.Subscribe<UpdateMessage>().MessageReceived += delegate
-			{
-				_updated = true;
-				_updateEvent.Set();
-			};
+            _remoteServiceBus.Subscribe<UpdateMessage>().MessageReceived += delegate
+                                                                                {
+                                                                                    _updated = true;
+                                                                                    _updateEvent.Set();
+                                                                                };
 
-			bool _deleted = false;
-			ManualResetEvent _deleteEvent = new ManualResetEvent(false);
+            bool _deleted = false;
+            ManualResetEvent _deleteEvent = new ManualResetEvent(false);
 
-			_remoteServiceBus.Subscribe<DeleteMessage>().MessageReceived += delegate
-			{
-				_deleted = true;
-				_deleteEvent.Set();
-			};
+            _remoteServiceBus.Subscribe<DeleteMessage>().MessageReceived += delegate
+                                                                                {
+                                                                                    _deleted = true;
+                                                                                    _deleteEvent.Set();
+                                                                                };
 
             Thread.Sleep(TimeSpan.FromSeconds(3));
 
@@ -168,11 +181,15 @@ namespace MassTransit.ServiceBus.Tests
 
             Assert.That(_updated, Is.True);
         }
-
     }
 
     [Serializable]
     public class UpdateMessage : IMessage
+    {
+    }
+
+    [Serializable]
+    public class UpdateAcceptedMessage : IMessage
     {
     }
 
