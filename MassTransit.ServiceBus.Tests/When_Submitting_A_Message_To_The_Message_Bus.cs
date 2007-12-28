@@ -10,7 +10,7 @@ namespace MassTransit.ServiceBus.Tests
     	[Test]
         public void The_Address_Of_The_Message_Bus_Transport_Should_Be_Available()
         {
-            IEndpoint endpoint = _serviceBus.DefaultEndpoint;
+            IEndpoint endpoint = _serviceBus.Endpoint;
 
             Assert.That(endpoint, Is.Not.Null);
 

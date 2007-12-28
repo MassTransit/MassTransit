@@ -49,12 +49,10 @@
     <Compile Include="IMessage.cs" />
     <Compile Include="IMessageEndpoint.cs" />
     <Compile Include="IMessageEndpointReceive.cs" />
-    <Compile Include="IMessageHandlerLookup.cs" />
     <Compile Include="IServiceBus.cs" />
     <Compile Include="IServiceBusAsyncResult.cs" />
     <Compile Include="ISubscriptionStorage.cs" />
     <Compile Include="MessageEndpoint.cs" />
-    <Compile Include="MessageHandlerLookup.cs" />
     <Compile Include="MessageQueueEndpoint.cs" />
     <Compile Include="MessageQueueEndpointFactory.cs" />
     <Compile Include="MessageReceivedEventArgs.cs" />

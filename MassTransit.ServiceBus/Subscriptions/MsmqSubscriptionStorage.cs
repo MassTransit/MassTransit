@@ -16,18 +16,18 @@ namespace MassTransit.ServiceBus.Subscriptions
 		private MessageQueue _storageQueue;
 		private string _storageQueueName;
 		private readonly ISubscriptionStorage _subscriptionCache;
-		private IEndpoint _defaultEndpoint;
+		private IEndpoint _endpoint;
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="storageQueueName">the name of the queue that stores all of the subscriptions</param>
-        /// <param name="defaultEndpoint"></param>
+        /// <param name="endpoint"></param>
         /// <param name="subscriptionCache">in memory cache</param>
-		public MsmqSubscriptionStorage(string storageQueueName, IEndpoint defaultEndpoint, ISubscriptionStorage subscriptionCache)
+		public MsmqSubscriptionStorage(string storageQueueName, IEndpoint endpoint, ISubscriptionStorage subscriptionCache)
 		{
 			_storageQueueName = storageQueueName;
-			_defaultEndpoint = defaultEndpoint;
+			_endpoint = endpoint;
 			_subscriptionCache = subscriptionCache;
 			_storageQueue = new MessageQueue(_storageQueueName, QueueAccessMode.SendAndReceive);
 
@@ -62,7 +62,7 @@ namespace MassTransit.ServiceBus.Subscriptions
 				foreach (SubscriptionMessage subscriptionMessage in messages)
 				{
 					if (_log.IsDebugEnabled)
-						_log.DebugFormat("Subscription Endpoint: {0} Message Type: {1} Mode: {2}", msg.ResponseQueue.Path, subscriptionMessage.MessageType, subscriptionMessage.ChangeType.ToString());
+						_log.DebugFormat("Subscription Subscribe: {0} Message Type: {1} Mode: {2}", msg.ResponseQueue.Path, subscriptionMessage.MessageType, subscriptionMessage.ChangeType.ToString());
 
 					if (subscriptionMessage.ChangeType == SubscriptionMessage.SubscriptionChangeType.Add) //would there ever be anything but?
 					{
@@ -101,7 +101,7 @@ namespace MassTransit.ServiceBus.Subscriptions
 		{
 			Message msg = new Message();
 
-			msg.ResponseQueue = new MessageQueue(_defaultEndpoint.Address);
+			msg.ResponseQueue = new MessageQueue(_endpoint.Address);
 			msg.Recoverable = true;
 
 			_formatter.Serialize(msg.BodyStream, new IMessage[] {message});

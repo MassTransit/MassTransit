@@ -5,9 +5,9 @@ namespace MassTransit.ServiceBus
 	/// </summary>
 	public interface IServiceBus
 	{
-		IEndpoint DefaultEndpoint { get; }
+		IEndpoint Endpoint { get; }
 
-		IMessageEndpoint<T> Endpoint<T>() where T : IMessage;
+		IMessageEndpoint<T> Subscribe<T>() where T : IMessage;
 
 		/// <summary>
 		/// Publishes a message to all subscribed consumers for the message type

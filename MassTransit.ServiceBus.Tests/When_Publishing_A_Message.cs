@@ -15,7 +15,7 @@ namespace MassTransit.ServiceBus.Tests
 			bool _updated = false;
         	ManualResetEvent _updateEvent = new ManualResetEvent(false);
 
-			_serviceBus.Endpoint<UpdateMessage>().MessageReceived += delegate
+			_serviceBus.Subscribe<UpdateMessage>().MessageReceived += delegate
 			{
 				_updated = true;
 				_updateEvent.Set();
@@ -37,7 +37,7 @@ namespace MassTransit.ServiceBus.Tests
 			bool _updated = false;
 			ManualResetEvent _updateEvent = new ManualResetEvent(false);
 
-			_remoteServiceBus.Endpoint<UpdateMessage>().MessageReceived += delegate
+			_remoteServiceBus.Subscribe<UpdateMessage>().MessageReceived += delegate
 			{
 				_updated = true;
 				_updateEvent.Set();
@@ -61,7 +61,7 @@ namespace MassTransit.ServiceBus.Tests
 			bool _updated = false;
 			ManualResetEvent _updateEvent = new ManualResetEvent(false);
 
-			_serviceBus.Endpoint<UpdateMessage>().MessageReceived += delegate
+			_serviceBus.Subscribe<UpdateMessage>().MessageReceived += delegate
 			{
 				_updated = true;
 				_updateEvent.Set();
@@ -70,7 +70,7 @@ namespace MassTransit.ServiceBus.Tests
 			bool _deleted = false;
 			ManualResetEvent _deleteEvent = new ManualResetEvent(false);
 
-			_serviceBus.Endpoint<DeleteMessage>().MessageReceived += delegate
+			_serviceBus.Subscribe<DeleteMessage>().MessageReceived += delegate
 			{
 				_deleted = true;
 				_deleteEvent.Set();
@@ -103,7 +103,7 @@ namespace MassTransit.ServiceBus.Tests
 			bool _updated = false;
 			ManualResetEvent _updateEvent = new ManualResetEvent(false);
 
-			_remoteServiceBus.Endpoint<UpdateMessage>().MessageReceived += delegate
+			_remoteServiceBus.Subscribe<UpdateMessage>().MessageReceived += delegate
 			{
 				_updated = true;
 				_updateEvent.Set();
@@ -112,7 +112,7 @@ namespace MassTransit.ServiceBus.Tests
 			bool _deleted = false;
 			ManualResetEvent _deleteEvent = new ManualResetEvent(false);
 
-			_remoteServiceBus.Endpoint<DeleteMessage>().MessageReceived += delegate
+			_remoteServiceBus.Subscribe<DeleteMessage>().MessageReceived += delegate
 			{
 				_deleted = true;
 				_deleteEvent.Set();
