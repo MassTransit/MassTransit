@@ -40,7 +40,7 @@ namespace MassTransit.ServiceBus
             IList<IEndpoint> subscribers = _subscriptionStorage.List<T>();
             if (subscribers.Count > 0)
             {
-                Envelope envelope = new Envelope(DefaultEndpoint, messages as IMessage[]);
+                Envelope envelope = new Envelope(Endpoint, messages as IMessage[]);
 
                 foreach (IEndpoint endpoint in subscribers)
                 {
@@ -51,29 +51,29 @@ namespace MassTransit.ServiceBus
 
         public void Send<T>(IEndpoint endpoint, params T[] messages) where T : IMessage
         {
-            Envelope e = new Envelope(DefaultEndpoint, messages as IMessage[]);
+            Envelope e = new Envelope(Endpoint, messages as IMessage[]);
 
             endpoint.Send(e);
         }
 
-        public IEndpoint DefaultEndpoint
+        public IEndpoint Endpoint
         {
             get { return _endpoint; }
             set { _endpoint = value; }
         }
 
-        public IMessageEndpoint<T> Endpoint<T>() where T : IMessage
+        public IMessageEndpoint<T> Subscribe<T>() where T : IMessage
         {
             IEndpoint result;
             _messageEndpoints.TryGetValue(typeof (T), out result);
 
             if (result == null)
             {
-                _messageEndpoints[typeof (T)] = new MessageEndpoint<T>(DefaultEndpoint);
+                _messageEndpoints[typeof (T)] = new MessageEndpoint<T>(Endpoint);
 
                 result = _messageEndpoints[typeof (T)];
 
-                _subscriptionStorage.Add(typeof (T), DefaultEndpoint);
+                _subscriptionStorage.Add(typeof (T), Endpoint);
             }
 
             return result as IMessageEndpoint<T>;
