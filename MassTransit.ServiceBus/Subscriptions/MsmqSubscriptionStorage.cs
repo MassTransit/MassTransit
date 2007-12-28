@@ -1,18 +1,22 @@
 using System;
 using System.Collections.Generic;
 using System.Messaging;
+using System.Reflection;
 using System.Runtime.Serialization.Formatters.Binary;
+using log4net;
 
 namespace MassTransit.ServiceBus.Subscriptions
 {
     public class MsmqSubscriptionStorage :
         ISubscriptionStorage
     {
-        private BinaryFormatter _formatter;
+		private static readonly ILog _log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+
+		private BinaryFormatter _formatter;
         private Cursor _peekCursor;
         private MessageQueue _storageQueue;
         private string _storageQueueName;
-        private readonly ISubscriptionStorage _subscriptionCache; // i like this
+    	private readonly ISubscriptionStorage _subscriptionCache; // i like this
         private IEndpoint _defaultEndpoint;
 
         public MsmqSubscriptionStorage(string storageQueueName, IEndpoint defaultEndpoint, ISubscriptionStorage subscriptionCache) //what if this is the cache? maybe have another constructor?
@@ -45,14 +49,21 @@ namespace MassTransit.ServiceBus.Subscriptions
         {
             Message msg = _storageQueue.EndPeek(asyncResult);
 
-            IMessage[] messages = _formatter.Deserialize(msg.BodyStream) as IMessage[];
+			_log.DebugFormat("Subscription Update Received: Id {0}", msg.Id);
+
+			IMessage[] messages = _formatter.Deserialize(msg.BodyStream) as IMessage[];
             if (messages != null)
             {
                 foreach (SubscriptionMessage subscriptionMessage in messages)
                 {
+					_log.DebugFormat("Subscription Endpoint: {0} Message Type: {1} Mode: {2}", msg.ResponseQueue.Path, subscriptionMessage.MessageType, subscriptionMessage.ChangeType.ToString());
                     if (subscriptionMessage.ChangeType == SubscriptionMessage.SubscriptionChangeType.Add) //would there ever be anything but?
                     {
-                        _subscriptionCache.Add(subscriptionMessage.MessageType, (MessageQueueEndpoint)subscriptionMessage.Address);
+                    	IEndpoint endpoint = (MessageQueueEndpoint)subscriptionMessage.Address;
+						if(endpoint != null)
+						{
+							_subscriptionCache.Add(subscriptionMessage.MessageType, endpoint);
+						}
                     }
                 }
             }

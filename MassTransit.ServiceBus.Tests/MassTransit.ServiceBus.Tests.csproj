@@ -51,6 +51,7 @@
     <Compile Include="ServiceBusSetupFixture.cs" />
     <Compile Include="Subscriptions\InMemory_When_Subscribing.cs" />
     <Compile Include="Subscriptions\Msmq_When_Subscribing.cs" />
+    <Compile Include="Subscriptions\When_Working_With_Subscription_Entries.cs" />
     <Compile Include="When_A_Message_Is_Received_On_The_Service_Bus.cs" />
     <Compile Include="When_Configuring_The_Service_Bus.cs" />
     <Compile Include="When_Creating_An_Envelope.cs" />
