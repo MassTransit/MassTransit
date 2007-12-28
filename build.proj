@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003"
+         DefaultTargets="Go">
+	<Import  Project=".\libs\MSBuild.Community.Tasks\MSBuild.Community.Tasks.Targets"/>
+	
+	<PropertyGroup>
+		<MSBuildCommunityTasksPath>$(MSBuildProjectDirectory)\libs\MSBuild.Community.Tasks\MSBuild.Community.Tasks.Targets</MSBuildCommunityTasksPath>
+    </PropertyGroup>
+	
+	<Target Name="Go" DependsOnTargets="Build">
+	</Target>
+	
+	<Target Name="Build" DependsOnTargets="GetSource">
+		<MSBuild Projects=".\ci_src\MassTransit.sln" Properties="Configuration=Debug" />
+	</Target>
+
+	<Target Name="GetSource">
+		<RemoveDir Directories="$(MSBuildProjectDirectory)\ci_src" />
+		
+		<SvnExport RepositoryPath="http://masstransit.googlecode.com/svn/trunk/"
+				   LocalPath="$(MSBuildProjectDirectory)\ci_src">
+			<Output TaskParameter="Revision" PropertyName="Revision" />
+		</SvnExport>
+		
+		<Message Text="Revision: $(Revision)"/>
+	</Target>
+	
+	<ItemGroup>
+		<TestAssembly Include=".\ci_src\bin\*.Tests.dll" />
+	</ItemGroup>
+	
+	<Target Name="UnitTest">
+		<NUnit Assemblies="@(TestAssembly)" />
+	</Target>
+
+</Project>
