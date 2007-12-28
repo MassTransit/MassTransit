@@ -15,7 +15,7 @@ namespace MassTransit.ServiceBus.Tests
         	bool _received = false;
         	ManualResetEvent _receivedEvent = new ManualResetEvent(false);
 
-			EventHandler<MessageReceivedEventArgs<PingMessage>> handler = delegate
+			MessageHandler<PingMessage> handler = delegate
         	{
         		_received = true;
         		_receivedEvent.Set();

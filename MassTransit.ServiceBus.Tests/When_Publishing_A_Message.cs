@@ -61,13 +61,13 @@ namespace MassTransit.ServiceBus.Tests
             bool _updated = false;
             ManualResetEvent _updateEvent = new ManualResetEvent(false);
 
-            EventHandler<MessageReceivedEventArgs<UpdateMessage>> handler =
-                delegate(object sender, MessageReceivedEventArgs<UpdateMessage> args)
+            MessageHandler<UpdateMessage> handler =
+                delegate(IServiceBus bus, IEnvelope envelope, UpdateMessage message)
                     {
                         _updated = true;
                         _updateEvent.Set();
 
-                        _remoteServiceBus.Send(args.Envelope.ReturnTo, new UpdateAcceptedMessage());
+                        bus.Send(envelope.ReturnTo, new UpdateAcceptedMessage());
                     };
 
             bool _replied = false;

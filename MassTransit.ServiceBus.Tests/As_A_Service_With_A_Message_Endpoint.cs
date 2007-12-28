@@ -16,7 +16,7 @@ namespace MassTransit.ServiceBus.Tests
 			Assert.That(_serviceBus.Subscribe<MyUpdateMessage>(), Is.Not.Null);
 		}
 
-		private static void MyUpdateMessage_Received(object sender, MessageReceivedEventArgs<MyUpdateMessage> e)
+		private static void MyUpdateMessage_Received(IServiceBus b, IEnvelope e, MyUpdateMessage m)
 		{
 		}
 

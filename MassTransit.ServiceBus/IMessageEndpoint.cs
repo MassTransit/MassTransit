@@ -5,6 +5,8 @@ namespace MassTransit.ServiceBus
     public interface IMessageEndpoint<T> : 
 		IEndpoint where T : IMessage
     {
-        event EventHandler<MessageReceivedEventArgs<T>> MessageReceived;
+        event MessageHandler<T> MessageReceived;
     }
+
+    public delegate void MessageHandler<T>(IServiceBus bus, IEnvelope envelope, T message);
 }

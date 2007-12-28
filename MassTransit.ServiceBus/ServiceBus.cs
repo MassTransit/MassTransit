@@ -112,7 +112,7 @@ namespace MassTransit.ServiceBus
 							{
 								try
 								{
-									receivingEndpoint.OnMessageReceived(e.Envelope, message);
+									receivingEndpoint.OnMessageReceived(this, e.Envelope, message);
 								}
 								catch (Exception ex)
 								{
