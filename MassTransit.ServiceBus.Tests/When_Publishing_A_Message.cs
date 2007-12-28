@@ -67,6 +67,7 @@ namespace MassTransit.ServiceBus.Tests
                         _updated = true;
                         _updateEvent.Set();
 
+                        //this was supposed to be the remote bus responding
                         bus.Send(envelope.ReturnTo, new UpdateAcceptedMessage());
                     };
 
