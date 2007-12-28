@@ -1,14 +1,13 @@
 using System;
 using System.Collections.Generic;
-using System.Reflection;
 using log4net;
 
 namespace MassTransit.ServiceBus.Subscriptions
 {
-    public class SubscriptionCache : //this is effectively the inmemory stuff right?
+    public class SubscriptionCache :
         ISubscriptionStorage
     {
-		private static readonly ILog _log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+        private static readonly ILog _log = LogManager.GetLogger(typeof(SubscriptionCache));
 		
 		private readonly Dictionary<Type, List<SubscriptionCacheEntry>> _messageTypeSubscriptions =
             new Dictionary<Type, List<SubscriptionCacheEntry>>();
@@ -31,7 +30,8 @@ namespace MassTransit.ServiceBus.Subscriptions
         {
 			if (!_messageTypeSubscriptions.ContainsKey(messageType))
 			{
-				_log.DebugFormat("Adding new subscription list for type {0} on {1}", messageType.ToString(), GetHashCode());
+                if(_log.IsDebugEnabled)
+				    _log.DebugFormat("Adding new subscription list for type {0} on {1}", messageType.ToString(), GetHashCode());
 				_messageTypeSubscriptions.Add(messageType, new List<SubscriptionCacheEntry>());
 			}
 
@@ -39,7 +39,8 @@ namespace MassTransit.ServiceBus.Subscriptions
 
 			if (!_messageTypeSubscriptions[messageType].Contains(entry))
 			{
-				_log.DebugFormat("Adding new subscription entry for endpoint {0} on {1}", endpoint.Transport.Address, GetHashCode());
+                if(_log.IsDebugEnabled)
+				    _log.DebugFormat("Adding new subscription entry for endpoint {0} on {1}", endpoint.Transport.Address, GetHashCode());
 				_messageTypeSubscriptions[messageType].Add(entry);
 			}
         }
