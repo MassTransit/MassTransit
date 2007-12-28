@@ -191,7 +191,8 @@ namespace MassTransit.ServiceBus
 
 				envelope.Id = msg.Id;
 
-				_log.DebugFormat("Message Sent: Id = {0}, Message Type = {1}", msg.Id, envelope.Messages != null ? envelope.Messages[0].GetType().ToString() : "");
+                if(_log.IsDebugEnabled)
+				    _log.DebugFormat("Message Sent: Id = {0}, Message Type = {1}", msg.Id, envelope.Messages != null ? envelope.Messages[0].GetType().ToString() : "");
 			}
 		}
 
