@@ -1,3 +1,5 @@
+using System;
+
 namespace MassTransit.ServiceBus.Tests
 {
     using NUnit.Framework;
@@ -9,8 +11,8 @@ namespace MassTransit.ServiceBus.Tests
         [Test]
         public void AutoCast_From_String()
         {
-            MessageQueueEndpoint addr = "bob";
-            Assert.That(addr.Transport.Address, Is.EqualTo("bob"));
+            MessageQueueEndpoint addr = @".\private$\test_endpoint";
+            Assert.That(addr.Transport.Address, Is.EqualTo(Environment.MachineName + @"\private$\test_endpoint"));
         }
     }
 }

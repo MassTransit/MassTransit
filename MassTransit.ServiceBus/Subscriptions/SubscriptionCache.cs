@@ -28,35 +28,41 @@ namespace MassTransit.ServiceBus.Subscriptions
 
         public void Add(Type messageType, IEndpoint endpoint)
         {
-			if (!_messageTypeSubscriptions.ContainsKey(messageType))
+			lock (this)
 			{
+				if (!_messageTypeSubscriptions.ContainsKey(messageType))
+				{
                 if(_log.IsDebugEnabled)
 				    _log.DebugFormat("Adding new subscription list for type {0} on {1}", messageType.ToString(), GetHashCode());
-				_messageTypeSubscriptions.Add(messageType, new List<SubscriptionCacheEntry>());
-			}
+					_messageTypeSubscriptions.Add(messageType, new List<SubscriptionCacheEntry>());
+				}
 
-        	SubscriptionCacheEntry entry = new SubscriptionCacheEntry(endpoint);
+				SubscriptionCacheEntry entry = new SubscriptionCacheEntry(endpoint);
 
-			if (!_messageTypeSubscriptions[messageType].Contains(entry))
-			{
+				if (!_messageTypeSubscriptions[messageType].Contains(entry))
+				{
                 if(_log.IsDebugEnabled)
 				    _log.DebugFormat("Adding new subscription entry for endpoint {0} on {1}", endpoint.Transport.Address, GetHashCode());
-				_messageTypeSubscriptions[messageType].Add(entry);
+					_messageTypeSubscriptions[messageType].Add(entry);
+				}
 			}
         }
 
         public void Remove(Type messageType, IEndpoint endpoint)
         {
-            if (_messageTypeSubscriptions.ContainsKey(messageType))
-            {
-                SubscriptionCacheEntry entry = new SubscriptionCacheEntry(endpoint);
+			lock (this)
+			{
+				if (_messageTypeSubscriptions.ContainsKey(messageType))
+				{
+					SubscriptionCacheEntry entry = new SubscriptionCacheEntry(endpoint);
 
-                if (_messageTypeSubscriptions[messageType].Contains(entry))
-                    _messageTypeSubscriptions[messageType].Remove(entry);
+					if (_messageTypeSubscriptions[messageType].Contains(entry))
+						_messageTypeSubscriptions[messageType].Remove(entry);
 
-                if (_messageTypeSubscriptions[messageType].Count == 0)
-                    _messageTypeSubscriptions.Remove(messageType);
-            }
+					if (_messageTypeSubscriptions[messageType].Count == 0)
+						_messageTypeSubscriptions.Remove(messageType);
+				}
+			}
         }
 
         #endregion
