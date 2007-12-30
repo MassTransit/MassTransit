@@ -49,6 +49,7 @@
     <Compile Include="IMessage.cs" />
     <Compile Include="IMessageEndpoint.cs" />
     <Compile Include="IMessageEndpointReceive.cs" />
+    <Compile Include="IMessageHandler.cs" />
     <Compile Include="IServiceBus.cs" />
     <Compile Include="IServiceBusAsyncResult.cs" />
     <Compile Include="ISubscriptionStorage.cs" />

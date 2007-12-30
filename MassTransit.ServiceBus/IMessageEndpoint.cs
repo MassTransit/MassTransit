@@ -15,4 +15,5 @@ namespace MassTransit.ServiceBus
 	// NOTE: sender could be (a) the event sender, (b) the message source, or (c) the originator
 	// NOTE: So how to make that happy from a "soluability" perspective is still out there.
 	// NOTE: MessageContext<T> having a method Reply(), is that something we want to do?
+    // NOTE: DRU: YEAH!
 }

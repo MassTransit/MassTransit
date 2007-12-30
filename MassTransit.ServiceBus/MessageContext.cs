@@ -6,13 +6,14 @@ namespace MassTransit.ServiceBus
 		EventArgs where T : IMessage
 	{
 		private IEnvelope _envelope;
-
 		private T _message;
+	    private IServiceBus _bus;
 
-		public MessageContext(IEnvelope envelope, T message)
+		public MessageContext(IEnvelope envelope, T message, IServiceBus bus)
 		{
 			_envelope = envelope;
-			_message = message;
+		    _bus = bus;
+		    _message = message;
 		}
 
 		public IEnvelope Envelope
@@ -26,5 +27,11 @@ namespace MassTransit.ServiceBus
 			get { return _message; }
 			set { _message = value; }
 		}
+
+	    public IServiceBus Bus
+	    {
+	        get { return _bus; }
+	        set { _bus = value; }
+	    }
 	}
 }
