@@ -33,5 +33,10 @@ namespace MassTransit.ServiceBus
 	        get { return _bus; }
 	        set { _bus = value; }
 	    }
+
+	    public void Reply(params IMessage[] messages)
+	    {
+	        Bus.Send(Envelope.ReturnTo, messages);
+	    }
 	}
 }
