@@ -34,9 +34,10 @@ namespace MassTransit.ServiceBus
     	{
 			if (message is T)
 			{
-				if (MessageReceived != null)
+			    MessageHandler<T> local = MessageReceived;
+				if (local != null)
 				{
-					MessageReceived(bus, envelope, (T) message);
+					local(bus, envelope, (T) message);
 				}
 			}
     	}
