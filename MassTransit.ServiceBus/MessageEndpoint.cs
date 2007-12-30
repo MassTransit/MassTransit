@@ -41,5 +41,11 @@ namespace MassTransit.ServiceBus
 				}
 			}
     	}
+
+
+        public IEndpoint Poison
+        {
+            get { throw new NotImplementedException(); }
+        }
     }
 }

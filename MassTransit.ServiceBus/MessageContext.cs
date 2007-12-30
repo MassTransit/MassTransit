@@ -38,5 +38,24 @@ namespace MassTransit.ServiceBus
 	    {
 	        Bus.Send(Envelope.ReturnTo, messages);
 	    }
+
+        /// <summary>
+        /// Marks the whole context as poison
+        /// </summary>
+        public void MarkPoison()
+        {
+            Bus.Endpoint.Poison.Send(Envelope);
+        }
+
+        /// <summary>
+        /// Marks a specific message as poison
+        /// </summary>
+        public void MarkPoison(IMessage msg)
+        {
+            IEnvelope env = (IEnvelope)this.Envelope.Clone(); //Should this be cloned?
+            env.Messages = new IMessage[] { this.Message };
+
+            Bus.Endpoint.Poison.Send(env);
+        }
 	}
 }

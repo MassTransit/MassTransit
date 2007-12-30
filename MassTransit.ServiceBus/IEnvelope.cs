@@ -5,7 +5,7 @@ namespace MassTransit.ServiceBus
 	/// <summary>
 	/// A public interface to the envelope containing message(s)
 	/// </summary>
-	public interface IEnvelope
+	public interface IEnvelope : ICloneable
 	{
 		/// <summary>
 		/// The messages contained in the envelope
