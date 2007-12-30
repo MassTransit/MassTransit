@@ -21,6 +21,7 @@ namespace MassTransit.ServiceBus.Tests
         protected MessageQueueEndpoint _testEndPoint;
 
     	protected string _subscriptionQueueName;
+    	protected string _poisonQueueName;
 
         protected ISubscriptionStorage _subscriptionCache;
         protected ISubscriptionStorage _subscriptionStorage;
@@ -37,11 +38,13 @@ namespace MassTransit.ServiceBus.Tests
             _remoteServiceBusEndPoint = @".\private$\test_remoteservicebus";
             _testEndPoint = @".\private$\test_endpoint";
 			_subscriptionQueueName = @".\private$\test_subscriptions";
+			_poisonQueueName = @".\private$\test_poison";
 
             ValidateAndPurgeQueue(_serviceBusEndPoint);
             ValidateAndPurgeQueue(_remoteServiceBusEndPoint);
             ValidateAndPurgeQueue(_testEndPoint);
 			ValidateAndPurgeQueue(_subscriptionQueueName);
+			ValidateAndPurgeQueue(_poisonQueueName);
 
 			ServiceBus bus = new ServiceBus(_serviceBusEndPoint, _testEndPoint);
 

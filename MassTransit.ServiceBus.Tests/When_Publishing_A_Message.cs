@@ -185,7 +185,58 @@ namespace MassTransit.ServiceBus.Tests
 
             Assert.That(_updated, Is.True);
         }
+
+        [Test]
+        public void Poison_Letters_Should_Be_Moved_To_A_Poison_Queue()
+        {
+
+            ManualResetEvent updateEvent = new ManualResetEvent(false);
+
+            ErrorWrapper bob = new ErrorWrapper(new Handler());
+
+            //this ends up in a seperate thread and I am therefore unable to figure out how to test
+            _serviceBus.Subscribe<UpdateMessage>().MessageReceived += bob.Wrap;
+
+            UpdateMessage um = new UpdateMessage();
+
+            _serviceBus.Publish(um);
+
+            updateEvent.WaitOne(TimeSpan.FromSeconds(3), true);
+        }
+
+     
     }
+
+    public class ErrorWrapper
+    {
+        private Handler _handler;
+
+
+        public ErrorWrapper(Handler handler)
+        {
+            _handler = handler;
+        }
+
+        public void Wrap(IServiceBus bus, IEnvelope env, IMessage msg)
+        {
+            try
+            {
+                _handler.Wrap(bus, env, msg);
+            }
+            catch(Exception ex)
+            {
+                throw ex;
+            }
+        }
+    }
+    public class Handler
+    {
+        public void Wrap(IServiceBus bus, IEnvelope env, IMessage msg)
+        {
+            throw new Exception("bob");
+        }
+    }
+
 
     [Serializable]
     public class UpdateMessage : IMessage
