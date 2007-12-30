@@ -120,5 +120,22 @@ namespace MassTransit.ServiceBus
         {
             return _id.GetHashCode();
         }
+
+
+        public object Clone()
+        {
+            Envelope env = new Envelope(this.ReturnTo, this.Messages);
+            env.ArrivedTime = this.ArrivedTime;
+            env.CorrelationId = this.CorrelationId;
+            //id?
+            env.Label = this.Label;
+            env.Messages = this.Messages;
+            env.MessagesObj = this.MessagesObj;
+            env.Recoverable = this.Recoverable;
+            env.SentTime = this.SentTime;
+            env.TimeToBeReceived = this.TimeToBeReceived;
+
+            return env;
+        }
     }
 }

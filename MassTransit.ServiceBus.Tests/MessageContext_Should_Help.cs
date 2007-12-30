@@ -44,6 +44,52 @@ namespace MassTransit.ServiceBus.Tests
                 cxt.Reply(replyMessage);
             }
         }
+
+        [Test]
+        public void With_Poison_Letters()
+        {
+            IEnvelope mockEnvelope = mocks.CreateMock<IEnvelope>();
+            IEndpoint mockEndpoint = mocks.CreateMock<IEndpoint>();
+            IEndpoint mockPoisonEndpoint = mocks.CreateMock<IEndpoint>();
+            RequestMessage requestMessage = new RequestMessage();
+            MessageContext<RequestMessage> cxt = new MessageContext<RequestMessage>(mockEnvelope, requestMessage, mockBus);
+
+            using (mocks.Record())
+            {
+                Expect.Call(mockBus.Endpoint).Return(mockEndpoint);
+                Expect.Call(mockEndpoint.Poison).Return(mockPoisonEndpoint);
+                mockPoisonEndpoint.Send(mockEnvelope);
+            }
+
+            using (mocks.Playback())
+            {
+                cxt.MarkPoison();
+            }
+        }
+
+        [Test]
+        public void With_Poison_Letter()
+        {
+            IEnvelope mockEnvelope = mocks.CreateMock<IEnvelope>();
+            IEndpoint mockEndpoint = mocks.CreateMock<IEndpoint>();
+            IEndpoint mockPoisonEndpoint = mocks.CreateMock<IEndpoint>();
+            RequestMessage requestMessage = new RequestMessage();
+            MessageContext<RequestMessage> cxt = new MessageContext<RequestMessage>(mockEnvelope, requestMessage, mockBus);
+
+            using (mocks.Record())
+            {
+                Expect.Call(mockEnvelope.Clone()).Return(mockEnvelope);
+                mockEnvelope.Messages = new IMessage[] { requestMessage };
+                Expect.Call(mockBus.Endpoint).Return(mockEndpoint);
+                Expect.Call(mockEndpoint.Poison).Return(mockPoisonEndpoint);
+                mockPoisonEndpoint.Send(mockEnvelope);
+            }
+
+            using (mocks.Playback())
+            {
+                cxt.MarkPoison(cxt.Message);
+            }
+        }
     }
 
     public class RequestMessage : IMessage { }

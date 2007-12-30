@@ -21,6 +21,7 @@ namespace MassTransit.ServiceBus
 
 		private readonly CustomBackgroundWorker _worker;
 		private readonly MessageQueue _queue;
+		private readonly IEndpoint _poisonEnpoint;
 
 		private object _eventLock = new object();
 
@@ -42,6 +43,8 @@ namespace MassTransit.ServiceBus
 			_formatter = new BinaryFormatter();
 
 			_worker = new CustomBackgroundWorker(Receive, true);
+
+		    _poisonEnpoint = new MessageQueueEndpoint(queueName + "_poison");
 		}
 
 		private static string NormalizeQueueName(MessageQueue queue)
@@ -228,7 +231,13 @@ namespace MassTransit.ServiceBus
 			_formatter.Serialize(stream, messages);
 		}
 
-		public void Dispose()
+
+	    public IEndpoint Poison
+	    {
+            get { return this._poisonEnpoint; }
+	    }
+
+	    public void Dispose()
 		{
 			_worker.Stop();
 			_queue.Close();
