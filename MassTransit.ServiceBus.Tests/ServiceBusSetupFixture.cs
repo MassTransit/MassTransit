@@ -81,9 +81,14 @@ namespace MassTransit.ServiceBus.Tests
 
         protected static void ValidateAndPurgeQueue(string queuePath)
         {
+            ValidateAndPurgeQueue(queuePath, false);
+        }
+
+        protected static void ValidateAndPurgeQueue(string queuePath, bool isTransactional)
+        {
             try
             {
-                MessageQueue.Create(queuePath);
+                MessageQueue.Create(queuePath,isTransactional);
             }
             catch (MessageQueueException ex)
             {

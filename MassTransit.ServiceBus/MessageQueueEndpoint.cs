@@ -196,7 +196,11 @@ namespace MassTransit.ServiceBus
 
                 msg.ResponseQueue = new MessageQueue(envelope.ReturnTo.Address);
 
-                q.Send(msg);
+                MessageQueueTransactionType tt = MessageQueueTransactionType.None;
+                if(q.Transactional)
+                    tt = MessageQueueTransactionType.Automatic;
+
+                q.Send(msg, tt);
 
                 envelope.Id = msg.Id;
 
