@@ -262,29 +262,6 @@ namespace MassTransit.ServiceBus
             return endpoint.Address;
         }
 
-        public static class EnvelopeFactory
-        {
-            public static IEnvelope NewEnvelope(params IMessage[] messages)
-            {
-                Envelope e = new Envelope();
-
-                e.Messages = messages;
-
-                return e;
-            }
-
-            public static IEnvelope NewEnvelope(IEndpoint returnTo, params IMessage[] messages)
-            {
-                Envelope e = new Envelope();
-
-                e.ReturnTo = returnTo;
-
-                e.Messages = messages;
-
-                return e;
-            }
-        }
-
         public IEnvelope NewEnvelope(params IMessage[] messages)
         {
             return EnvelopeFactory.NewEnvelope(messages);
