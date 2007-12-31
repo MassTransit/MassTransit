@@ -19,13 +19,13 @@ namespace MassTransit.ServiceBus
     	private DateTime _arrivedTime;
     	private string _label;
 
-    	public Envelope(IEndpoint returnTo, params IMessage[] messages)
+        public Envelope(IEndpoint returnTo, params IMessage[] messages)
         {
             _returnTo = returnTo;
             _messages = messages;
         }
 
-    	public Envelope()
+        public Envelope()
     	{
     	}
 
