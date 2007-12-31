@@ -45,7 +45,12 @@ namespace MassTransit.ServiceBus.Tests
                 tr.Complete();
             }
 
-            VerifyMessageInQueue(nonTransactionalQueueName, msg);
+            using (TransactionScope tr = new TransactionScope())
+            {
+                VerifyMessageInQueue(nonTransactionalQueueName, msg);
+                
+                tr.Complete();
+            }
         }
 
 
@@ -60,13 +65,18 @@ namespace MassTransit.ServiceBus.Tests
                 tr.Complete();
             }
 
-            VerifyMessageInQueue(transactionalQueueName, msg);
+
+            using (TransactionScope tr = new TransactionScope())
+            {
+                VerifyMessageInQueue(transactionalQueueName, msg);
+
+                tr.Complete();
+            }
         }
 
 
         [Test]
-        [Ignore("What do we want to do here?")]
-        [ExpectedException("No Transaction You Fool Exception")]
+        [ExpectedException(typeof(Exception))]
         public void When_The_Queue_Is_Transactional_Not_In_A_Transaction()
         {
             MessageQueueEndpoint ep = new MessageQueueEndpoint(transactionalQueueName);

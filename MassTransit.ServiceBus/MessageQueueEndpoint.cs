@@ -6,6 +6,7 @@ using System.Messaging;
 using System.Reflection;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Threading;
+using System.Transactions;
 using log4net;
 using MassTransit.ServiceBus.Util;
 
@@ -197,8 +198,14 @@ namespace MassTransit.ServiceBus
                 msg.ResponseQueue = new MessageQueue(envelope.ReturnTo.Address);
 
                 MessageQueueTransactionType tt = MessageQueueTransactionType.None;
-                if(q.Transactional)
+                if (q.Transactional)
+                {
+                    //TODO: move this into the check util class?
+                    if(Transaction.Current == null)
+                       throw new Exception(string.Format("The current queue {0} is transactional and this MessageQueueEndpoint is not running in a transaction.", this._queueName));
+
                     tt = MessageQueueTransactionType.Automatic;
+                }
 
                 q.Send(msg, tt);
 
@@ -247,7 +254,7 @@ namespace MassTransit.ServiceBus
 
         public IEndpoint Poison
         {
-            get { return this._poisonEnpoint; }
+            get { throw new NotImplementedException(); }
         }
 
         public void Dispose()
