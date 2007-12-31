@@ -29,7 +29,7 @@ namespace MassTransit.ServiceBus.Tests
             IEnvelope mockEnvelope = mocks.CreateMock<IEnvelope>();
             IEndpoint mockEndpoint = mocks.CreateMock<IEndpoint>();
             RequestMessage requestMessage = new RequestMessage();
-            MessageContext<RequestMessage> cxt = new MessageContext<RequestMessage>(mockEnvelope, requestMessage, mockBus);
+            MessageContext<RequestMessage> cxt = new MessageContext<RequestMessage>(mockBus, mockEnvelope, requestMessage);
             ReplyMessage replyMessage = new ReplyMessage();
             IMessage[] messages = new IMessage[1]{replyMessage};
 
@@ -52,7 +52,7 @@ namespace MassTransit.ServiceBus.Tests
             IEndpoint mockEndpoint = mocks.CreateMock<IEndpoint>();
             IEndpoint mockPoisonEndpoint = mocks.CreateMock<IEndpoint>();
             RequestMessage requestMessage = new RequestMessage();
-            MessageContext<RequestMessage> cxt = new MessageContext<RequestMessage>(mockEnvelope, requestMessage, mockBus);
+            MessageContext<RequestMessage> cxt = new MessageContext<RequestMessage>(mockBus, mockEnvelope, requestMessage);
 
             using (mocks.Record())
             {
@@ -74,7 +74,7 @@ namespace MassTransit.ServiceBus.Tests
             IEndpoint mockEndpoint = mocks.CreateMock<IEndpoint>();
             IEndpoint mockPoisonEndpoint = mocks.CreateMock<IEndpoint>();
             RequestMessage requestMessage = new RequestMessage();
-            MessageContext<RequestMessage> cxt = new MessageContext<RequestMessage>(mockEnvelope, requestMessage, mockBus);
+            MessageContext<RequestMessage> cxt = new MessageContext<RequestMessage>(mockBus, mockEnvelope, requestMessage);
 
             using (mocks.Record())
             {

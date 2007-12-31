@@ -40,20 +40,28 @@ namespace MassTransit.ServiceBus
             IList<IEndpoint> subscribers = _subscriptionStorage.List<T>();
             if (subscribers.Count > 0)
             {
-                Envelope envelope = new Envelope(Endpoint, messages as IMessage[]);
-
                 foreach (IEndpoint endpoint in subscribers)
                 {
-                    endpoint.Send(envelope);
+                    IEnvelopeFactory envelopeFactory = endpoint as IEnvelopeFactory;
+                    if(envelopeFactory != null)
+                    {
+                        IEnvelope envelope = envelopeFactory.NewEnvelope(Endpoint, messages as IMessage[]);
+
+                        endpoint.Send(envelope);
+                    }
                 }
             }
         }
 
         public void Send<T>(IEndpoint endpoint, params T[] messages) where T : IMessage
         {
-            Envelope e = new Envelope(Endpoint, messages as IMessage[]);
+            IEnvelopeFactory envelopeFactory = endpoint as IEnvelopeFactory;
+            if (envelopeFactory == null)
+                throw new ArgumentNullException("endPoint", "Envelope Factory Not Supported");
 
-            endpoint.Send(e);
+            IEnvelope envelope = envelopeFactory.NewEnvelope(Endpoint, messages as IMessage[]);
+
+            endpoint.Send(envelope);
         }
 
         public IEndpoint Endpoint
