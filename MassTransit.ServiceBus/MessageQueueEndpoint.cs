@@ -1,33 +1,25 @@
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.IO;
 using System.Messaging;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Threading;
 using System.Transactions;
 using log4net;
-using MassTransit.ServiceBus.Util;
 
 namespace MassTransit.ServiceBus
 {
     public class MessageQueueEndpoint :
         IEndpoint, IDisposable, IEnvelopeFactory
     {
-        private static readonly ILog _log = LogManager.GetLogger(typeof(MessageQueueEndpoint));
+        private static readonly ILog _log = LogManager.GetLogger(typeof (MessageQueueEndpoint));
 
         private readonly BinaryFormatter _formatter;
         private readonly string _queueName;
 
-        private readonly CustomBackgroundWorker _worker;
         private readonly MessageQueue _queue;
         private readonly IEndpoint _poisonEnpoint;
 
-        private object _eventLock = new object();
-
-        private Queue<IEnvelope> _envelopes = new Queue<IEnvelope>();
-
-        private IAsyncResult _peekAsyncResult;
+        private readonly object _eventLock = new object();
 
         public MessageQueueEndpoint(string queueName)
         {
@@ -42,9 +34,13 @@ namespace MassTransit.ServiceBus
 
             _formatter = new BinaryFormatter();
 
-            _worker = new CustomBackgroundWorker(Receive, true);
-
             _poisonEnpoint = new WriteOnlyMessageQueueEndpoint(queueName + "_poison");
+
+            _queue.ReceiveCompleted += Queue_ReceiveCompleted;
+
+            _queue.BeginReceive(); 
+            
+            // TODO this may scale at some point to multiple receives althought not sure if that works
         }
 
         //TODO: Duplicate Code
@@ -59,57 +55,20 @@ namespace MassTransit.ServiceBus
             return queue.Path;
         }
 
-        private void Receive(object sender, DoWorkEventArgs e)
+        private void Receive(object obj)
         {
-            if (sender is CustomBackgroundWorker)
+            IEnvelope envelope = obj as Envelope;
+            if (envelope == null)
+                return;
+
+            try
             {
-                CustomBackgroundWorker worker = sender as CustomBackgroundWorker;
-
-                // startup code (if needed)
-
-                _log.DebugFormat("Queue: {0} Peek Waiting for {1}", _queue.Path, GetHashCode());
-
-                _queue.ReceiveCompleted += Queue_ReceiveCompleted;
-
-                _peekAsyncResult = _queue.BeginReceive();
-
-                int waitResult;
-                while ((waitResult = WaitHandle.WaitAny(worker.WaitHandles.ToArray(), Timeout.Infinite, false)) !=
-                       (int) CustomBackgroundWorker.WaitHandleIndex.Exit)
-                {
-                    if (waitResult == WaitHandle.WaitTimeout)
-                    {
-                        // if we timed out, do we have an interval item to evaluate
-                    }
-                    else if (waitResult == (int) CustomBackgroundWorker.WaitHandleIndex.Trigger)
-                    {
-                        try
-                        {
-                            lock (_eventLock)
-                            {
-                                IEnvelope envelope;
-                                lock (_envelopes)
-                                    envelope = _envelopes.Dequeue();
-
-                                NotifyHandlers(new EnvelopeReceivedEventArgs(envelope));
-
-                                //if (EnvelopeReceived != null)
-                                //    EnvelopeReceived(this, new EnvelopeReceivedEventArgs(e));
-                                //else
-                                //{
-                                //    _log.DebugFormat("Envelope dropped: {0}", e.Id);
-                                //}
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            _log.Error("Envelope Exception", ex);
-                        }
-                    }
-                }
+                NotifyHandlers(new EnvelopeReceivedEventArgs(envelope));
             }
-
-            e.Result = true;
+            catch (Exception ex)
+            {
+                _log.Error("Envelope Exception", ex);
+            }
         }
 
         private void Queue_ReceiveCompleted(object sender, ReceiveCompletedEventArgs eventArgs)
@@ -147,21 +106,7 @@ namespace MassTransit.ServiceBus
 
                 try
                 {
-                    lock (_eventLock)
-                    {
-                        lock (_envelopes)
-                            _envelopes.Enqueue(e);
-                        _worker.Trigger();
-
-                        //NotifyHandlers(new EnvelopeReceivedEventArgs(e));
-
-                        //if (EnvelopeReceived != null)
-                        //    EnvelopeReceived(this, new EnvelopeReceivedEventArgs(e));
-                        //else
-                        //{
-                        //    _log.DebugFormat("Envelope dropped: {0}", e.Id);
-                        //}
-                    }
+                    ThreadPool.QueueUserWorkItem(Receive, e);
                 }
                 catch (Exception ex)
                 {
@@ -176,7 +121,7 @@ namespace MassTransit.ServiceBus
                     return;
             }
 
-            _peekAsyncResult = _queue.BeginReceive();
+            _queue.BeginReceive();
         }
 
         public string Address
@@ -201,8 +146,11 @@ namespace MassTransit.ServiceBus
                 if (q.Transactional)
                 {
                     //TODO: move this into the check util class?
-                    if(Transaction.Current == null)
-                       throw new Exception(string.Format("The current queue {0} is transactional and this MessageQueueEndpoint is not running in a transaction.", this._queueName));
+                    if (Transaction.Current == null)
+                        throw new Exception(
+                            string.Format(
+                                "The current queue {0} is transactional and this MessageQueueEndpoint is not running in a transaction.",
+                                _queueName));
 
                     tt = MessageQueueTransactionType.Automatic;
                 }
@@ -252,7 +200,6 @@ namespace MassTransit.ServiceBus
             _formatter.Serialize(stream, messages);
         }
 
-
         public IEndpoint Poison
         {
             get { return _poisonEnpoint; }
@@ -260,7 +207,6 @@ namespace MassTransit.ServiceBus
 
         public void Dispose()
         {
-            _worker.Stop();
             _queue.Close();
         }
 
