@@ -1,5 +1,3 @@
-using System;
-
 namespace MassTransit.ServiceBus
 {
     public abstract class BaseMessageHandler<T> 
@@ -27,7 +25,6 @@ namespace MassTransit.ServiceBus
         /// </summary>
         /// <param name="message"></param>
         public abstract void Handle(T message);
-
 
         #endregion
     }

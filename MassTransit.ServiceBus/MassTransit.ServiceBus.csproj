@@ -46,7 +46,6 @@
     <Compile Include="IEnvelopeFactory.cs" />
     <Compile Include="EnvelopeReceivedEventArgs.cs" />
     <Compile Include="Handlers\PingMessageHandler.cs" />
-    <Compile Include="IAddressBook.cs" />
     <Compile Include="IEndpoint.cs" />
     <Compile Include="IEnvelope.cs" />
     <Compile Include="IMessage.cs" />
@@ -61,7 +60,6 @@
     <Compile Include="MessageQueueEndpointFactory.cs" />
     <Compile Include="MessageContext.cs" />
     <Compile Include="Messages\PingMessage.cs" />
-    <Compile Include="MessageTypeAddressBook.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ServiceBus.cs" />
     <Compile Include="ServiceBusAsyncResult.cs" />
@@ -70,9 +68,6 @@
     <Compile Include="Subscriptions\SubscriptionCacheEntry.cs" />
     <Compile Include="Subscriptions\SubscriptionMessage.cs" />
     <Compile Include="Util\Check.cs" />
-    <Compile Include="Util\CustomBackgroundWorker.cs">
-      <SubType>Component</SubType>
-    </Compile>
     <Compile Include="WriteOnlyMessageQueueEndpoint.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
