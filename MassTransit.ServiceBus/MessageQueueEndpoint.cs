@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Messaging;
-using System.Reflection;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Threading;
 using System.Transactions;
@@ -15,7 +14,7 @@ namespace MassTransit.ServiceBus
     public class MessageQueueEndpoint :
         IEndpoint, IDisposable, IEnvelopeFactory
     {
-        private static readonly ILog _log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+        private static readonly ILog _log = LogManager.GetLogger(typeof(MessageQueueEndpoint));
 
         private readonly BinaryFormatter _formatter;
         private readonly string _queueName;
@@ -45,9 +44,10 @@ namespace MassTransit.ServiceBus
 
             _worker = new CustomBackgroundWorker(Receive, true);
 
-            //_poisonEnpoint = new MessageQueueEndpoint(queueName + "_poison");
+            _poisonEnpoint = new WriteOnlyMessageQueueEndpoint(queueName + "_poison");
         }
 
+        //TODO: Duplicate Code
         private static string NormalizeQueueName(MessageQueue queue)
         {
             string machineName = queue.MachineName;
@@ -246,6 +246,7 @@ namespace MassTransit.ServiceBus
                 _log.DebugFormat("Envelope {0} dropped by {1}", e.Envelope.Id, GetHashCode());
         }
 
+        //TODO: Duplicated Code
         private void SerializeMessages(Stream stream, IMessage[] messages)
         {
             _formatter.Serialize(stream, messages);
@@ -254,7 +255,7 @@ namespace MassTransit.ServiceBus
 
         public IEndpoint Poison
         {
-            get { throw new NotImplementedException(); }
+            get { return _poisonEnpoint; }
         }
 
         public void Dispose()
