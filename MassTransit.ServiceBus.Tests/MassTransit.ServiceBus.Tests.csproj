@@ -61,6 +61,7 @@
     <Compile Include="When_Publishing_A_Message.cs" />
     <Compile Include="When_Submitting_A_Message_To_The_Message_Bus.cs" />
     <Compile Include="When_Submitting_A_Request_Message.cs" />
+    <Compile Include="WriteOnlyMessageQueueEndpointTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\MassTransit.ServiceBus\MassTransit.ServiceBus.csproj">
