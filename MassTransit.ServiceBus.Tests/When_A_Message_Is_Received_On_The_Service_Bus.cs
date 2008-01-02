@@ -2,6 +2,7 @@ using System;
 using System.Threading;
 using NUnit.Framework;
 using NUnit.Framework.SyntaxHelpers;
+using MassTransit.ServiceBus.Tests.Messages;
 
 namespace MassTransit.ServiceBus.Tests
 {

@@ -45,7 +45,6 @@
     <Compile Include="EnvelopeFactory.cs" />
     <Compile Include="IEnvelopeFactory.cs" />
     <Compile Include="EnvelopeReceivedEventArgs.cs" />
-    <Compile Include="Handlers\PingMessageHandler.cs" />
     <Compile Include="IEndpoint.cs" />
     <Compile Include="IEnvelope.cs" />
     <Compile Include="IMessage.cs" />
@@ -59,7 +58,6 @@
     <Compile Include="MessageQueueEndpoint.cs" />
     <Compile Include="MessageQueueEndpointFactory.cs" />
     <Compile Include="MessageContext.cs" />
-    <Compile Include="Messages\PingMessage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ServiceBus.cs" />
     <Compile Include="ServiceBusAsyncResult.cs" />
