@@ -24,7 +24,7 @@ namespace MassTransit.ServiceBus.Tests
         protected string _remoteServiceBusQueueName = @".\private$\test_remoteservicebus";
         protected string _testEndPointQueueName = @".\private$\test_endpoint";
         protected string _subscriptionQueueName = @".\private$\test_subscriptions";
-        protected string _poisonQueueName = @".\private$\test_poison";
+        protected string _poisonQueueName = @".\private$\test_servicebus_poison";
 
         [SetUp]
         public virtual void Before_Each_Test_In_The_Fixture()
@@ -84,7 +84,7 @@ namespace MassTransit.ServiceBus.Tests
             TeardownQueue(_remoteServiceBusQueueName);
             TeardownQueue(_testEndPointQueueName);
             TeardownQueue(_subscriptionQueueName);
-            //TeardownQueue(_poisonQueueName);
+            TeardownQueue(_poisonQueueName);
         }
 
         protected static void TeardownQueue(string point)

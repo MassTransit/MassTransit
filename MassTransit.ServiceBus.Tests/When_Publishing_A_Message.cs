@@ -202,7 +202,7 @@ namespace MassTransit.ServiceBus.Tests
                                                                                //should throw an exception
                                                                                string name = cxt.Message.Name;
                                                                            }
-                                                                           catch(Exception ex)
+                                                                           catch(Exception)
                                                                            {
                                                                                cxt.MarkPoison();
                                                                            }
@@ -213,7 +213,7 @@ namespace MassTransit.ServiceBus.Tests
            _serviceBus.Publish(new PoisonMessage());
 
             updateEvent.WaitOne(TimeSpan.FromSeconds(3), true);
-            VerifyMessageInQueue(base._poisonQueueName, new PoisonMessage());
+            VerifyMessageInQueue(_serviceBus.Endpoint.Poison.Address, new PoisonMessage());
         }
     }
 

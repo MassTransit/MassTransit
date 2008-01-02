@@ -20,7 +20,7 @@ namespace MassTransit.ServiceBus
 
         public WriteOnlyMessageQueueEndpoint(string queueName)
         {
-            _queue = new MessageQueue(queueName, QueueAccessMode.ReceiveAndAdmin);
+            _queue = new MessageQueue(queueName, QueueAccessMode.Send);
 
             _queueName = MsmqUtilities.NormalizeQueueName(_queue);
 
