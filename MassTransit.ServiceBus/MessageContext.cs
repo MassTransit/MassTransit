@@ -2,12 +2,16 @@ using System;
 
 namespace MassTransit.ServiceBus
 {
+    using System.Collections.Generic;
+    using log4net;
+
     public class MessageContext<T> :
         EventArgs where T : IMessage
     {
         private IEnvelope _envelope;
         private T _message;
         private IServiceBus _bus;
+        private ILog _log = LogManager.GetLogger(typeof (MessageContext<T>));
 
         public MessageContext(IServiceBus bus, IEnvelope envelope, T message)
         {
@@ -44,6 +48,8 @@ namespace MassTransit.ServiceBus
         /// </summary>
         public void MarkPoison()
         {
+            if (_log.IsDebugEnabled)
+                _log.DebugFormat("Envelope {0} Was Marked Poisonous", this._envelope.Id);
             Bus.Endpoint.Poison.Send(Envelope);
         }
 
@@ -52,9 +58,12 @@ namespace MassTransit.ServiceBus
         /// </summary>
         public void MarkPoison(IMessage msg)
         {
+            if (_log.IsDebugEnabled)
+                _log.DebugFormat("A Message (Index:{1}) in Envelope {0} Was Marked Poisonous", this._envelope.Id, new List<IMessage>(Envelope.Messages).IndexOf(msg));
+
             IEnvelope env = (IEnvelope) this.Envelope.Clone(); //Should this be cloned?
             env.Messages = new IMessage[] {this.Message};
-
+            
             Bus.Endpoint.Poison.Send(env);
         }
     }

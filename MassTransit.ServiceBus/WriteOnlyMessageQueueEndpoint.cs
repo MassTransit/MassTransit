@@ -50,7 +50,6 @@ namespace MassTransit.ServiceBus
                 {
                     Check.RequireTransaction(string.Format("The current queue {0} is transactional and this MessageQueueEndpoint is not running in a transaction.", this._queueName));
 
-
                     tt = MessageQueueTransactionType.Automatic;
                 }
 

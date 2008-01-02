@@ -2,6 +2,7 @@ namespace MassTransit.ServiceBus.Tests
 {
     using System;
     using NUnit.Framework;
+    using NUnit.Framework.SyntaxHelpers;
 
     [TestFixture]
     public class WriteOnlyMessageQueueEndpointTests :
@@ -12,7 +13,7 @@ namespace MassTransit.ServiceBus.Tests
         public override void Before_Each_Test_In_The_Fixture()
         {
             base.Before_Each_Test_In_The_Fixture();
-            endpoint = new WriteOnlyMessageQueueEndpoint(@".\private$\test_poison");
+            endpoint = new WriteOnlyMessageQueueEndpoint(this._poisonQueueName);
         }
 
         public override void After_Each_Test_In_The_Fixture()
@@ -31,7 +32,7 @@ namespace MassTransit.ServiceBus.Tests
         [Test]
         public void Address_Is_Right()
         {
-            Assert.IsTrue(endpoint.Address.Contains("test_poison"));
+            Assert.That(endpoint.Address, Is.EqualTo(Environment.MachineName + @"\private$\test_poison"));
         }
 
         [Test]

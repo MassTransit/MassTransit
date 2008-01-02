@@ -193,50 +193,38 @@ namespace MassTransit.ServiceBus.Tests
         {
             ManualResetEvent updateEvent = new ManualResetEvent(false);
 
-            ErrorWrapper bob = new ErrorWrapper(new Handler());
 
             //this ends up in a seperate thread and I am therefore unable to figure out how to test
-            _serviceBus.MessageEndpoint<UpdateMessage>().Subscribe(bob.Wrap);
+            _serviceBus.MessageEndpoint<PoisonMessage>().Subscribe(delegate(MessageContext<PoisonMessage> cxt)
+                                                                       {
+                                                                           try
+                                                                           {
+                                                                               //should throw an exception
+                                                                               string name = cxt.Message.Name;
+                                                                           }
+                                                                           catch(Exception ex)
+                                                                           {
+                                                                               cxt.MarkPoison();
+                                                                           }
+                                                                       }
+                
+                );
 
-            UpdateMessage um = new UpdateMessage();
-
-            _serviceBus.Publish(um);
+           _serviceBus.Publish(new PoisonMessage());
 
             updateEvent.WaitOne(TimeSpan.FromSeconds(3), true);
+            VerifyMessageInQueue(base._poisonQueueName, new PoisonMessage());
         }
     }
 
-    public class ErrorWrapper
+    [Serializable]
+    public class PoisonMessage : IMessage
     {
-        private Handler _handler;
-
-
-        public ErrorWrapper(Handler handler)
+        public string Name
         {
-            _handler = handler;
-        }
-
-        public void Wrap(MessageContext<UpdateMessage> ctx)
-        {
-            try
-            {
-                _handler.Wrap(ctx);
-            }
-            catch (Exception ex)
-            {
-                throw;
-            }
+            get { throw new Exception("POISON"); }
         }
     }
-
-    public class Handler
-    {
-        public void Wrap(MessageContext<UpdateMessage> ctx)
-        {
-            throw new Exception("bob");
-        }
-    }
-
 
     [Serializable]
     public class UpdateMessage : IMessage

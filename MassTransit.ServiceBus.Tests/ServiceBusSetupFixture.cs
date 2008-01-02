@@ -84,7 +84,7 @@ namespace MassTransit.ServiceBus.Tests
             TeardownQueue(_remoteServiceBusQueueName);
             TeardownQueue(_testEndPointQueueName);
             TeardownQueue(_subscriptionQueueName);
-            TeardownQueue(_poisonQueueName);
+            //TeardownQueue(_poisonQueueName);
         }
 
         protected static void TeardownQueue(string point)
