@@ -57,7 +57,7 @@ namespace MassTransit.ServiceBus
         {
             IEnvelopeFactory envelopeFactory = endpoint as IEnvelopeFactory;
             if (envelopeFactory == null)
-                throw new ArgumentNullException("endPoint", "Envelope Factory Not Supported");
+                throw new ArgumentNullException("endpoint", "Envelope Factory Not Supported");
 
             IEnvelope envelope = envelopeFactory.NewEnvelope(Endpoint, messages as IMessage[]);
 

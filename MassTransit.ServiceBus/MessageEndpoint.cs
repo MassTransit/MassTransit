@@ -46,5 +46,11 @@ namespace MassTransit.ServiceBus
         {
             get { throw new NotImplementedException(); }
         }
+
+
+        public void Dispose()
+        {
+            this._endpoint.Dispose();
+        }
     }
 }

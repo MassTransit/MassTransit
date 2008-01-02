@@ -84,5 +84,10 @@ namespace MassTransit.ServiceBus
         {
             get { throw new NotImplementedException("Write Only Queues don't have poison queues"); }
         }
+
+        public void Dispose()
+        {
+            _queue.Close();
+        }
     }
 }

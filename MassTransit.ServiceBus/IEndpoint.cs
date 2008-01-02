@@ -2,7 +2,8 @@ using System;
 
 namespace MassTransit.ServiceBus
 {
-    public interface IEndpoint
+    public interface IEndpoint :
+        IDisposable
     {
 		void Send(IEnvelope e);
 

@@ -10,7 +10,7 @@ namespace MassTransit.ServiceBus
     using Util;
 
     public class MessageQueueEndpoint :
-        IEndpoint, IDisposable, IEnvelopeFactory
+        IEndpoint, IEnvelopeFactory
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof (MessageQueueEndpoint));
 
