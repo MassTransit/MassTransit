@@ -32,7 +32,7 @@ namespace MassTransit.ServiceBus.Tests
         [Test]
         public void Address_Is_Right()
         {
-            Assert.That(endpoint.Address, Is.EqualTo(Environment.MachineName + @"\private$\test_poison"));
+            Assert.That(endpoint.Address, Is.EqualTo(Environment.MachineName + @"\private$\test_servicebus_poison"));
         }
 
         [Test]
