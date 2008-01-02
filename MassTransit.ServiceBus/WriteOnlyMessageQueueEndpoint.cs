@@ -4,8 +4,8 @@ namespace MassTransit.ServiceBus
     using System.IO;
     using System.Messaging;
     using System.Runtime.Serialization.Formatters.Binary;
-    using System.Transactions;
     using log4net;
+    using Util;
 
     public class WriteOnlyMessageQueueEndpoint :
         IEndpoint
@@ -22,7 +22,7 @@ namespace MassTransit.ServiceBus
         {
             _queue = new MessageQueue(queueName, QueueAccessMode.ReceiveAndAdmin);
 
-            _queueName = NormalizeQueueName(_queue);
+            _queueName = MsmqUtilities.NormalizeQueueName(_queue);
 
             MessagePropertyFilter mpf = new MessagePropertyFilter();
             mpf.SetAll();
@@ -30,18 +30,6 @@ namespace MassTransit.ServiceBus
             _queue.MessageReadPropertyFilter = mpf;
 
             _formatter = new BinaryFormatter();
-        }
-
-        //TODO: Duplicate Code
-        private static string NormalizeQueueName(MessageQueue queue)
-        {
-            string machineName = queue.MachineName;
-            if (machineName == "." || string.Compare(machineName, "localhost", true) == 0)
-            {
-                queue.MachineName = Environment.MachineName;
-            }
-
-            return queue.Path;
         }
 
         public void Send(IEnvelope envelope)
@@ -60,9 +48,8 @@ namespace MassTransit.ServiceBus
                 MessageQueueTransactionType tt = MessageQueueTransactionType.None;
                 if (q.Transactional)
                 {
-                    //TODO: move this into the check util class?
-                    if (Transaction.Current == null)
-                        throw new Exception(string.Format("The current queue {0} is transactional and this MessageQueueEndpoint is not running in a transaction.", this._queueName));
+                    Check.RequireTransaction(string.Format("The current queue {0} is transactional and this MessageQueueEndpoint is not running in a transaction.", this._queueName));
+
 
                     tt = MessageQueueTransactionType.Automatic;
                 }

@@ -68,6 +68,7 @@
     <Compile Include="Subscriptions\SubscriptionCacheEntry.cs" />
     <Compile Include="Subscriptions\SubscriptionMessage.cs" />
     <Compile Include="Util\Check.cs" />
+    <Compile Include="Util\MsmqUtilities.cs" />
     <Compile Include="WriteOnlyMessageQueueEndpoint.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
