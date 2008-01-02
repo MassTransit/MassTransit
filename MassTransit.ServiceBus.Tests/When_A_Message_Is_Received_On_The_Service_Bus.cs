@@ -30,5 +30,19 @@ namespace MassTransit.ServiceBus.Tests
 
         	Assert.That(_received, Is.True);
         }
+
+        [Test]
+        public void What_Happens_If_No_Subscriptions()
+        {
+            bool _received = false;
+            ManualResetEvent _receivedEvent = new ManualResetEvent(false);
+
+            PingMessage pm = new PingMessage();
+            _serviceBus.Publish(pm);
+
+            Assert.That(_receivedEvent.WaitOne(TimeSpan.FromSeconds(5), true), Is.False);
+
+            Assert.That(_received, Is.False);
+        }
     }
 }
