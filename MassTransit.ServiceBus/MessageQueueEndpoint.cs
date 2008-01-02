@@ -3,11 +3,12 @@ using System.IO;
 using System.Messaging;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Threading;
-using System.Transactions;
 using log4net;
 
 namespace MassTransit.ServiceBus
 {
+    using Util;
+
     public class MessageQueueEndpoint :
         IEndpoint, IDisposable, IEnvelopeFactory
     {
@@ -25,7 +26,7 @@ namespace MassTransit.ServiceBus
         {
             _queue = new MessageQueue(queueName, QueueAccessMode.ReceiveAndAdmin);
 
-            _queueName = NormalizeQueueName(_queue);
+            _queueName = MsmqUtilities.NormalizeQueueName(_queue);
 
             MessagePropertyFilter mpf = new MessagePropertyFilter();
             mpf.SetAll();
@@ -41,18 +42,6 @@ namespace MassTransit.ServiceBus
             _queue.BeginReceive(); 
             
             // TODO this may scale at some point to multiple receives althought not sure if that works
-        }
-
-        //TODO: Duplicate Code
-        private static string NormalizeQueueName(MessageQueue queue)
-        {
-            string machineName = queue.MachineName;
-            if (machineName == "." || string.Compare(machineName, "localhost", true) == 0)
-            {
-                queue.MachineName = Environment.MachineName;
-            }
-
-            return queue.Path;
         }
 
         private void Receive(object obj)
@@ -145,12 +134,7 @@ namespace MassTransit.ServiceBus
                 MessageQueueTransactionType tt = MessageQueueTransactionType.None;
                 if (q.Transactional)
                 {
-                    //TODO: move this into the check util class?
-                    if (Transaction.Current == null)
-                        throw new Exception(
-                            string.Format(
-                                "The current queue {0} is transactional and this MessageQueueEndpoint is not running in a transaction.",
-                                _queueName));
+                    Check.RequireTransaction(string.Format( "The current queue {0} is transactional and this MessageQueueEndpoint is not running in a transaction.", _queueName));
 
                     tt = MessageQueueTransactionType.Automatic;
                 }

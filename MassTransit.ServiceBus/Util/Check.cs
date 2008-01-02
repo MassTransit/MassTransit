@@ -3,7 +3,9 @@ using System.Diagnostics;
 
 namespace MassTransit.ServiceBus.Util
 {
-	/// <summary>
+    using System.Transactions;
+
+    /// <summary>
 	/// Check class for verifying the condition of items included in interface contracts
 	/// </summary>
 	public static class Check
@@ -46,6 +48,11 @@ namespace MassTransit.ServiceBus.Util
 			}
 		}
 
+        public static void RequireTransaction(string message)
+        {
+            if (Transaction.Current == null)
+                throw new Exception("Transaction Required: " + message);
+        }
 
 		public static void Ensure(bool assertion, string message)
 		{
