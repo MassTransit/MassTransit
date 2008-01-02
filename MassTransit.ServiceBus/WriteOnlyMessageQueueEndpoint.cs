@@ -1,12 +1,12 @@
+using System;
+using System.IO;
+using System.Messaging;
+using System.Runtime.Serialization.Formatters.Binary;
+using log4net;
+using MassTransit.ServiceBus.Util;
+
 namespace MassTransit.ServiceBus
 {
-    using System;
-    using System.IO;
-    using System.Messaging;
-    using System.Runtime.Serialization.Formatters.Binary;
-    using log4net;
-    using Util;
-
     public class WriteOnlyMessageQueueEndpoint :
         IEndpoint
     {
