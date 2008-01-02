@@ -6,7 +6,8 @@ using Rhino.Mocks;
 namespace MassTransit.ServiceBus.Tests
 {
     [TestFixture]
-    public class When_Creating_An_Envelope
+    public class When_Creating_An_Envelope : 
+        ServiceBusSetupFixture
     {
         [Test]
         public void A_Return_Address_Should_Be_Stored_With_The_Envelope()

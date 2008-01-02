@@ -15,13 +15,13 @@ namespace MassTransit.ServiceBus.Tests
         	bool _received = false;
         	ManualResetEvent _receivedEvent = new ManualResetEvent(false);
 
-			MessageHandler<PingMessage> handler = delegate
+			MessageReceivedCallback<PingMessage> handler = delegate
         	{
         		_received = true;
         		_receivedEvent.Set();
         	};
 			
-        	_serviceBus.Subscribe<PingMessage>().MessageReceived += handler;
+        	_serviceBus.MessageEndpoint<PingMessage>().Subscribe(handler);
 
             PingMessage pm = new PingMessage();
             _serviceBus.Publish(pm);

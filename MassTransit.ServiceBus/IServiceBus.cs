@@ -1,13 +1,17 @@
+using System;
+
 namespace MassTransit.ServiceBus
 {
+
 	/// <summary>
 	/// The base service bus interface
 	/// </summary>
-	public interface IServiceBus
+	public interface IServiceBus : 
+        IDisposable
 	{
 		IEndpoint Endpoint { get; }
 
-		IMessageEndpoint<T> Subscribe<T>() where T : IMessage;
+		IMessageEndpoint<T> MessageEndpoint<T>() where T : IMessage;
 
 		/// <summary>
 		/// Publishes a message to all subscribed consumers for the message type

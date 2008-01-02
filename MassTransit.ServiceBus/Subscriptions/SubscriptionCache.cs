@@ -65,6 +65,11 @@ namespace MassTransit.ServiceBus.Subscriptions
 			}
         }
 
+        public void Dispose()
+        {
+            
+        }
+
         #endregion
     }
 }

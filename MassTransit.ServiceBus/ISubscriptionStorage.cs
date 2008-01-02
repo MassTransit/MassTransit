@@ -26,5 +26,7 @@ namespace MassTransit.ServiceBus
         /// Removes a message from the subscription store.
         /// </summary>
         void Remove(Type messageType, IEndpoint endpoint);
+
+        void Dispose();
     }
 }

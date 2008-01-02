@@ -11,6 +11,7 @@ namespace MassTransit.ServiceBus
     {
 		private static readonly ILog _log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 
+        private readonly object _messageEndpointLock = new object();
 		private readonly Dictionary<Type, IEndpoint> _messageEndpoints = new Dictionary<Type, IEndpoint>();
 
         private IEndpoint _endpoint;
@@ -25,6 +26,19 @@ namespace MassTransit.ServiceBus
             _endpoint.EnvelopeReceived += Transport_EnvelopeReceived;
 
         	_log.DebugFormat("Added event handler for envelope to {0}", _endpoint.Address);
+        }
+
+        public void Dispose()
+        {
+            foreach(IEndpoint endpoint in _messageEndpoints.Values)
+            {
+                endpoint.Dispose();
+            }
+            _messageEndpoints.Clear();
+
+            _endpoint.Dispose();
+
+            _subscriptionStorage.Dispose();
         }
 
         public ISubscriptionStorage SubscriptionStorage
@@ -70,24 +84,27 @@ namespace MassTransit.ServiceBus
             set { _endpoint = value; }
         }
 
-        public IMessageEndpoint<T> Subscribe<T>() where T : IMessage
+        public IMessageEndpoint<T> MessageEndpoint<T>() where T : IMessage
         {
-            IEndpoint result;
-            _messageEndpoints.TryGetValue(typeof (T), out result);
-
-            if (result == null)
+            lock (_messageEndpointLock)
             {
-                _messageEndpoints[typeof (T)] = new MessageEndpoint<T>(Endpoint);
+                IEndpoint result;
+                _messageEndpoints.TryGetValue(typeof (T), out result);
 
-                result = _messageEndpoints[typeof (T)];
+                if (result == null)
+                {
+                    _messageEndpoints[typeof (T)] = new MessageEndpoint<T>(Endpoint);
 
-                _subscriptionStorage.Add(typeof (T), Endpoint);
+                    result = _messageEndpoints[typeof (T)];
+
+                    _subscriptionStorage.Add(typeof (T), Endpoint);
+                }
+
+                return result as IMessageEndpoint<T>;
             }
-
-            return result as IMessageEndpoint<T>;
         }
 
-    	public IServiceBusAsyncResult Request<T>(params T[] messages) where T : IMessage
+        public IServiceBusAsyncResult Request<T>(params T[] messages) where T : IMessage
         {
             //IEndpoint endpoint = _endpointDirectory.Resolve<T>();
 
@@ -136,5 +153,6 @@ namespace MassTransit.ServiceBus
 				_log.Error("Exception in Transport_EnvelopeReceived: ", ex);
 			}
         }
+
     }
 }

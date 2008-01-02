@@ -62,6 +62,9 @@ namespace MassTransit.ServiceBus
 
         private void Queue_ReceiveCompleted(object sender, ReceiveCompletedEventArgs eventArgs)
         {
+            if (eventArgs.Message == null)
+                return;
+
             try
             {
                 Message msg = eventArgs.Message;

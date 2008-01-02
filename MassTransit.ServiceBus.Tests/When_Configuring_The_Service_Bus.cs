@@ -1,3 +1,4 @@
+ using System.Messaging;
  using NUnit.Framework;
 using NUnit.Framework.SyntaxHelpers;
 
@@ -11,6 +12,8 @@ namespace MassTransit.ServiceBus.Tests
         public void A_MessageQueue_Transport_Should_Be_Usable()
         {
             string queuePath = @".\private$\test_servicebus";
+
+            queuePath = Util.MsmqUtilities.NormalizeQueueName(new MessageQueue(queuePath));
 
             ValidateAndPurgeQueue(queuePath);
 
