@@ -15,11 +15,12 @@ namespace MassTransit.ServiceBus.Tests
             bool _updated = false;
             ManualResetEvent _updateEvent = new ManualResetEvent(false);
 
-            _serviceBus.Subscribe<UpdateMessage>().MessageReceived += delegate
-                                                                          {
-                                                                              _updated = true;
-                                                                              _updateEvent.Set();
-                                                                          };
+            _serviceBus.MessageEndpoint<UpdateMessage>().Subscribe(
+                delegate
+                    {
+                        _updated = true;
+                        _updateEvent.Set();
+                    });
 
             UpdateMessage um = new UpdateMessage();
 
@@ -37,11 +38,12 @@ namespace MassTransit.ServiceBus.Tests
             bool _updated = false;
             ManualResetEvent _updateEvent = new ManualResetEvent(false);
 
-            _remoteServiceBus.Subscribe<UpdateMessage>().MessageReceived += delegate
-                                                                                {
-                                                                                    _updated = true;
-                                                                                    _updateEvent.Set();
-                                                                                };
+            _remoteServiceBus.MessageEndpoint<UpdateMessage>().Subscribe(
+                delegate
+                    {
+                        _updated = true;
+                        _updateEvent.Set();
+                    });
 
             Thread.Sleep(TimeSpan.FromSeconds(5));
 
@@ -61,30 +63,26 @@ namespace MassTransit.ServiceBus.Tests
             bool _updated = false;
             ManualResetEvent _updateEvent = new ManualResetEvent(false);
 
-            MessageHandler<UpdateMessage> handler =
-                delegate(IServiceBus bus, IEnvelope envelope, UpdateMessage message)
+            MessageReceivedCallback<UpdateMessage> handler =
+                delegate(MessageContext<UpdateMessage> ctx)
                     {
                         _updated = true;
                         _updateEvent.Set();
 
-						// NOTE: The bus passed to the delegate is the one from which the message was received
-						// NOTE: So if we were subscribed to the remote bus, this would be the remote bus
-
-                        //this was supposed to be the remote bus responding
-                        bus.Send(envelope.ReturnTo, new UpdateAcceptedMessage());
+                        ctx.Bus.Send(ctx.Envelope.ReturnTo, new UpdateAcceptedMessage());
                     };
 
             bool _replied = false;
             ManualResetEvent _repliedEvent = new ManualResetEvent(false);
 
-            _remoteServiceBus.Subscribe<UpdateMessage>().MessageReceived += handler;
+            _remoteServiceBus.MessageEndpoint<UpdateMessage>().Subscribe(handler);
 
-            _serviceBus.Subscribe<UpdateAcceptedMessage>().MessageReceived +=
+            _serviceBus.MessageEndpoint<UpdateAcceptedMessage>().Subscribe(
                 delegate
                     {
                         _replied = true;
                         _repliedEvent.Set();
-                    };
+                    });
 
             Thread.Sleep(TimeSpan.FromSeconds(5));
 
@@ -108,20 +106,22 @@ namespace MassTransit.ServiceBus.Tests
             bool _updated = false;
             ManualResetEvent _updateEvent = new ManualResetEvent(false);
 
-            _serviceBus.Subscribe<UpdateMessage>().MessageReceived += delegate
-                                                                          {
-                                                                              _updated = true;
-                                                                              _updateEvent.Set();
-                                                                          };
+            _serviceBus.MessageEndpoint<UpdateMessage>().Subscribe(
+                delegate
+                    {
+                        _updated = true;
+                        _updateEvent.Set();
+                    });
 
             bool _deleted = false;
             ManualResetEvent _deleteEvent = new ManualResetEvent(false);
 
-            _serviceBus.Subscribe<DeleteMessage>().MessageReceived += delegate
-                                                                          {
-                                                                              _deleted = true;
-                                                                              _deleteEvent.Set();
-                                                                          };
+            _serviceBus.MessageEndpoint<DeleteMessage>().Subscribe(
+                delegate
+                    {
+                        _deleted = true;
+                        _deleteEvent.Set();
+                    });
 
             Thread.Sleep(TimeSpan.FromSeconds(5));
 
@@ -150,20 +150,22 @@ namespace MassTransit.ServiceBus.Tests
             bool _updated = false;
             ManualResetEvent _updateEvent = new ManualResetEvent(false);
 
-            _remoteServiceBus.Subscribe<UpdateMessage>().MessageReceived += delegate
-                                                                                {
-                                                                                    _updated = true;
-                                                                                    _updateEvent.Set();
-                                                                                };
+            _remoteServiceBus.MessageEndpoint<UpdateMessage>().Subscribe(
+                delegate
+                {
+                    _updated = true;
+                    _updateEvent.Set();
+                });
 
             bool _deleted = false;
             ManualResetEvent _deleteEvent = new ManualResetEvent(false);
 
-            _remoteServiceBus.Subscribe<DeleteMessage>().MessageReceived += delegate
-                                                                                {
-                                                                                    _deleted = true;
-                                                                                    _deleteEvent.Set();
-                                                                                };
+            _remoteServiceBus.MessageEndpoint<DeleteMessage>().Subscribe(
+                delegate
+                {
+                    _deleted = true;
+                    _deleteEvent.Set();
+                });
 
             Thread.Sleep(TimeSpan.FromSeconds(3));
 
@@ -189,13 +191,12 @@ namespace MassTransit.ServiceBus.Tests
         [Test]
         public void Poison_Letters_Should_Be_Moved_To_A_Poison_Queue()
         {
-
             ManualResetEvent updateEvent = new ManualResetEvent(false);
 
             ErrorWrapper bob = new ErrorWrapper(new Handler());
 
             //this ends up in a seperate thread and I am therefore unable to figure out how to test
-            _serviceBus.Subscribe<UpdateMessage>().MessageReceived += bob.Wrap;
+            _serviceBus.MessageEndpoint<UpdateMessage>().Subscribe(bob.Wrap);
 
             UpdateMessage um = new UpdateMessage();
 
@@ -203,8 +204,6 @@ namespace MassTransit.ServiceBus.Tests
 
             updateEvent.WaitOne(TimeSpan.FromSeconds(3), true);
         }
-
-     
     }
 
     public class ErrorWrapper
@@ -217,21 +216,22 @@ namespace MassTransit.ServiceBus.Tests
             _handler = handler;
         }
 
-        public void Wrap(IServiceBus bus, IEnvelope env, IMessage msg)
+        public void Wrap(MessageContext<UpdateMessage> ctx)
         {
             try
             {
-                _handler.Wrap(bus, env, msg);
+                _handler.Wrap(ctx);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 throw;
             }
         }
     }
+
     public class Handler
     {
-        public void Wrap(IServiceBus bus, IEnvelope env, IMessage msg)
+        public void Wrap(MessageContext<UpdateMessage> ctx)
         {
             throw new Exception("bob");
         }

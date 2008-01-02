@@ -122,5 +122,14 @@ namespace MassTransit.ServiceBus.Subscriptions
 			if (_log.IsDebugEnabled)
 				_log.DebugFormat("Removing Subscription to {0} for {1}", messageType, endpoint.Address);
 		}
+
+	    public void Dispose()
+	    {
+	        _storageQueue.Close();
+	        _storageQueue.Dispose();
+            _storageQueue = null;
+
+	        _subscriptionCache.Dispose();
+	    }
 	}
 }

@@ -11,7 +11,7 @@ namespace MassTransit.ServiceBus.Tests
 {
     public abstract class ServiceBusSetupFixture
     {
-		protected static readonly ILog _log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+        protected static readonly ILog _log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 
         protected IServiceBus _serviceBus;
         protected IServiceBus _remoteServiceBus;
@@ -20,45 +20,48 @@ namespace MassTransit.ServiceBus.Tests
         protected MessageQueueEndpoint _remoteServiceBusEndPoint;
         protected MessageQueueEndpoint _testEndPoint;
 
-    	protected string _subscriptionQueueName;
-    	protected string _poisonQueueName;
-
-        protected ISubscriptionStorage _subscriptionCache;
-        protected ISubscriptionStorage _subscriptionStorage;
-
-        protected ISubscriptionStorage _remoteSubscriptionCache;
-        protected ISubscriptionStorage _remoteSubscriptionStorage;
+        protected string _serviceBusQueueName = @".\private$\test_servicebus";
+        protected string _remoteServiceBusQueueName = @".\private$\test_remoteservicebus";
+        protected string _testEndPointQueueName = @".\private$\test_endpoint";
+        protected string _subscriptionQueueName = @".\private$\test_subscriptions";
+        protected string _poisonQueueName = @".\private$\test_poison";
 
         [SetUp]
         public virtual void Before_Each_Test_In_The_Fixture()
         {
-        	_log.Debug("Starting Test");
+            _log.Debug("Starting Test");
+
+            ValidateAndPurgeQueue(_serviceBusQueueName);
+            ValidateAndPurgeQueue(_remoteServiceBusQueueName);
+            ValidateAndPurgeQueue(_testEndPointQueueName);
+            ValidateAndPurgeQueue(_subscriptionQueueName);
+            ValidateAndPurgeQueue(_poisonQueueName);
 
             _serviceBusEndPoint = @".\private$\test_servicebus";
             _remoteServiceBusEndPoint = @".\private$\test_remoteservicebus";
             _testEndPoint = @".\private$\test_endpoint";
-			_subscriptionQueueName = @".\private$\test_subscriptions";
-			_poisonQueueName = @".\private$\test_poison";
 
-            ValidateAndPurgeQueue(_serviceBusEndPoint);
-            ValidateAndPurgeQueue(_remoteServiceBusEndPoint);
-            ValidateAndPurgeQueue(_testEndPoint);
-			ValidateAndPurgeQueue(_subscriptionQueueName);
-			ValidateAndPurgeQueue(_poisonQueueName);
+            ServiceBus bus = new ServiceBus(_serviceBusEndPoint, _testEndPoint);
 
-			ServiceBus bus = new ServiceBus(_serviceBusEndPoint, _testEndPoint);
+            ISubscriptionStorage _subscriptionCache;
+            ISubscriptionStorage _subscriptionStorage;
 
-			_subscriptionCache = new SubscriptionCache();
-			_subscriptionStorage = new MsmqSubscriptionStorage(_subscriptionQueueName, _serviceBusEndPoint, _subscriptionCache);
-			bus.SubscriptionStorage = _subscriptionStorage;
+            ISubscriptionStorage _remoteSubscriptionCache;
+            ISubscriptionStorage _remoteSubscriptionStorage;
+
+            _subscriptionCache = new SubscriptionCache();
+            _subscriptionStorage =
+                new MsmqSubscriptionStorage(_subscriptionQueueName, _serviceBusEndPoint, _subscriptionCache);
+            bus.SubscriptionStorage = _subscriptionStorage;
 
             _serviceBus = bus;
 
             bus = new ServiceBus(_remoteServiceBusEndPoint);
 
-			_remoteSubscriptionCache = new SubscriptionCache();
-			_remoteSubscriptionStorage = new MsmqSubscriptionStorage(_subscriptionQueueName, _remoteServiceBusEndPoint, _remoteSubscriptionCache);
-			bus.SubscriptionStorage = _remoteSubscriptionStorage;
+            _remoteSubscriptionCache = new SubscriptionCache();
+            _remoteSubscriptionStorage =
+                new MsmqSubscriptionStorage(_subscriptionQueueName, _remoteServiceBusEndPoint, _remoteSubscriptionCache);
+            bus.SubscriptionStorage = _remoteSubscriptionStorage;
 
             _remoteServiceBus = bus;
         }
@@ -66,16 +69,27 @@ namespace MassTransit.ServiceBus.Tests
         [TearDown]
         public virtual void After_Each_Test_In_The_Fixture()
         {
-			_log.Debug("Ending Test");
+            _log.Debug("Ending Test");
 
-			//TeardownQueue(_serviceBusEndPoint);
-            //TeardownQueue(_testEndPoint);
-            //_serviceBus.Dispose();
+            _serviceBus.Dispose();
+            _remoteServiceBus.Dispose();
+
+            _serviceBusEndPoint.Dispose();
+            _remoteServiceBusEndPoint.Dispose();
+
+            _testEndPoint.Dispose();
+
+
+            TeardownQueue(_serviceBusQueueName);
+            TeardownQueue(_remoteServiceBusQueueName);
+            TeardownQueue(_testEndPointQueueName);
+            TeardownQueue(_subscriptionQueueName);
+            TeardownQueue(_poisonQueueName);
         }
 
         protected static void TeardownQueue(string point)
         {
-            if(MessageQueue.Exists(point))
+            if (MessageQueue.Exists(point))
                 MessageQueue.Delete(point);
         }
 
@@ -88,12 +102,12 @@ namespace MassTransit.ServiceBus.Tests
         {
             try
             {
-                MessageQueue.Create(queuePath,isTransactional);
+                MessageQueue.Create(queuePath, isTransactional);
             }
             catch (MessageQueueException ex)
             {
                 if (ex.MessageQueueErrorCode != MessageQueueErrorCode.QueueExists)
-                    throw;
+                    _log.Error("Error creating queue: ", ex);
             }
 
             MessageQueue queue = new MessageQueue(queuePath, QueueAccessMode.ReceiveAndAdmin);

@@ -11,12 +11,12 @@ namespace MassTransit.ServiceBus.Tests
 		[Test]
 		public void I_Want_To_Be_Able_To_Register_An_Event_Handler_For_Messages()
 		{
-			_serviceBus.Subscribe<MyUpdateMessage>().MessageReceived += MyUpdateMessage_Received;
+            _serviceBus.MessageEndpoint<MyUpdateMessage>().Subscribe(MyUpdateMessage_Received);
 
-			Assert.That(_serviceBus.Subscribe<MyUpdateMessage>(), Is.Not.Null);
+            Assert.That(_serviceBus.MessageEndpoint<MyUpdateMessage>(), Is.Not.Null);
 		}
 
-		private static void MyUpdateMessage_Received(IServiceBus b, IEnvelope e, MyUpdateMessage m)
+		private static void MyUpdateMessage_Received(MessageContext<MyUpdateMessage> ctx)
 		{
 		}
 
