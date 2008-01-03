@@ -74,6 +74,11 @@ namespace MassTransit.ServiceBus
         /// </summary>
         public event EventHandler<EnvelopeReceivedEventArgs> EnvelopeReceived;
 
+        public void AcceptEnvelope(string id)
+        {
+            throw new NotImplementedException();
+        }
+
         public string Address
         {
             get { return _queueName; }

@@ -37,9 +37,11 @@ namespace MassTransit.ServiceBus
 
             _poisonEnpoint = new WriteOnlyMessageQueueEndpoint(queueName + "_poison");
 
-            _queue.ReceiveCompleted += Queue_ReceiveCompleted;
+            //_queue.PeekCompleted += Queue_PeekCompleted;
 
-            _queue.BeginReceive(); 
+            _peekCursor = _queue.CreateCursor();
+
+            _queue.BeginPeek(TimeSpan.FromHours(24), _peekCursor, PeekAction.Current, this, Queue_PeekCompleted);
             
             // TODO this may scale at some point to multiple receives althought not sure if that works
         }
@@ -60,60 +62,80 @@ namespace MassTransit.ServiceBus
             }
         }
 
-        private void Queue_ReceiveCompleted(object sender, ReceiveCompletedEventArgs eventArgs)
+        public void AcceptEnvelope(string id)
         {
-            if (eventArgs.Message == null)
-                return;
-
             try
             {
-                Message msg = eventArgs.Message;
-
-                _log.DebugFormat("Queue: {0} Received Message Id {1}", _queue.Path, msg.Id);
-
-                IEnvelope e;
-
-                if (msg.ResponseQueue != null)
-                    e = EnvelopeFactory.NewEnvelope((MessageQueueEndpoint) msg.ResponseQueue.Path);
-                else
-                    e = EnvelopeFactory.NewEnvelope(this);
-
-                e.Id = msg.Id;
-                e.CorrelationId = (msg.CorrelationId == "00000000-0000-0000-0000-000000000000\\0"
-                                       ? null
-                                       : msg.CorrelationId);
-
-                e.TimeToBeReceived = msg.TimeToBeReceived;
-                e.Recoverable = msg.Recoverable;
-                e.SentTime = msg.SentTime;
-                e.ArrivedTime = msg.ArrivedTime;
-                e.Label = msg.Label;
+                Message msg = _queue.ReceiveById(id);
+            }
+            catch (Exception ex)
+            {
+                _log.Error("Receive Exception", ex);
+            }
+        }
 
 
-                IMessage[] messages = _formatter.Deserialize(msg.BodyStream) as IMessage[];
-                if (messages != null)
+        private void Queue_PeekCompleted(IAsyncResult asyncResult)
+        {
+            try
+            {
+                Message msg = _queue.EndPeek(asyncResult);
+
+                if (msg != null)
                 {
-                    e.Messages = messages;
-                }
+                    _log.DebugFormat("Queue: {0} Received Message Id {1}", _queue.Path, msg.Id);
 
-                try
-                {
-                    ThreadPool.QueueUserWorkItem(Receive, e);
-                }
-                catch (Exception ex)
-                {
-                    _log.Error("Exception from Envelope Received: ", ex);
+                    IEnvelope e;
+
+                    if (msg.ResponseQueue != null)
+                        e = EnvelopeFactory.NewEnvelope((MessageQueueEndpoint) msg.ResponseQueue.Path);
+                    else
+                        e = EnvelopeFactory.NewEnvelope(this);
+
+                    e.Id = msg.Id;
+                    e.CorrelationId = (msg.CorrelationId == "00000000-0000-0000-0000-000000000000\\0"
+                                           ? null
+                                           : msg.CorrelationId);
+
+                    e.TimeToBeReceived = msg.TimeToBeReceived;
+                    e.Recoverable = msg.Recoverable;
+                    e.SentTime = msg.SentTime;
+                    e.ArrivedTime = msg.ArrivedTime;
+                    e.Label = msg.Label;
+
+
+                    IMessage[] messages = _formatter.Deserialize(msg.BodyStream) as IMessage[];
+                    if (messages != null)
+                    {
+                        e.Messages = messages;
+                    }
+
+                    try
+                    {
+                        ThreadPool.QueueUserWorkItem(Receive, e);
+                    }
+                    catch (Exception ex)
+                    {
+                        _log.Error("Exception from Envelope Received: ", ex);
+                    }
                 }
             }
             catch (MessageQueueException ex)
             {
-                _log.Error("Exception in Queue_ReceiveCompleted: ", ex);
-
-                if (ex.MessageQueueErrorCode == MessageQueueErrorCode.IOTimeout)
+                if ((uint)ex.MessageQueueErrorCode == 0xC0000120)
                     return;
+
+                if (ex.MessageQueueErrorCode == MessageQueueErrorCode.IllegalCursorAction)
+                    return;
+
+                if (ex.MessageQueueErrorCode != MessageQueueErrorCode.IOTimeout)
+                {
+                    _log.ErrorFormat("Queue_PeekCompleted Exception ({0}): {1} ", ex.Message, ex.MessageQueueErrorCode);
+                }
             }
 
-            _queue.BeginReceive();
+            if(_queue.CanRead)
+                _queue.BeginPeek(TimeSpan.FromHours(24), _peekCursor, PeekAction.Next, this, Queue_PeekCompleted);
         }
 
         public string Address
@@ -153,6 +175,7 @@ namespace MassTransit.ServiceBus
         }
 
         private EventHandler<EnvelopeReceivedEventArgs> _onEnvelopeReceived;
+        private Cursor _peekCursor;
 
         public event EventHandler<EnvelopeReceivedEventArgs> EnvelopeReceived
         {

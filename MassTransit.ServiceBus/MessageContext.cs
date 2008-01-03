@@ -38,6 +38,22 @@ namespace MassTransit.ServiceBus
             set { _bus = value; }
         }
 
+        private bool _accepted = false;
+
+        public bool WasAccepted
+        {
+            get { return _accepted; }
+        }
+
+        public void Accept()
+        {
+            if (!_accepted)
+            {
+                Bus.Endpoint.AcceptEnvelope(_envelope.Id);
+                _accepted = true;
+            }
+        }
+
         public void Reply(params IMessage[] messages)
         {
             Bus.Send(Envelope.ReturnTo, messages);
@@ -57,8 +73,8 @@ namespace MassTransit.ServiceBus
         /// </summary>
         public void MarkPoison()
         {
-            if (_log.IsDebugEnabled)
-                _log.DebugFormat("Envelope {0} Was Marked Poisonous", this._envelope.Id);
+           // if (_log.IsDebugEnabled)
+             //   _log.DebugFormat("Envelope {0} Was Marked Poisonous", this._envelope.Id);
             Bus.Endpoint.Poison.Send(Envelope);
         }
 
