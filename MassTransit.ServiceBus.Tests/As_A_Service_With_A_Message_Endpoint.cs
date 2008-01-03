@@ -35,7 +35,6 @@ namespace MassTransit.ServiceBus.Tests
 		{
             using(mocks.Record())
             {
-                Expect.Call(mockEndpoint.Address).Return(@".\private$\endpointa");
                 mockEndpoint.EnvelopeReceived += delegate { };
                 LastCall.IgnoreArguments();
                 mockSubscriptionStorage.Add(typeof(PingMessage), mockEndpoint);
