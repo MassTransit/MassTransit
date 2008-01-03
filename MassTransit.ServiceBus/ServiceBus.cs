@@ -18,14 +18,18 @@ namespace MassTransit.ServiceBus
 
         private ISubscriptionStorage _subscriptionStorage;
 
-        public ServiceBus(IEndpoint endpoint, params IEndpoint[] otherEndpoints)
+        public ServiceBus(IEndpoint endpoint, ISubscriptionStorage subscriptionStorage)
         {
             Check.Parameter(endpoint).WithMessage("endpoint").IsNotNull();
+            Check.Parameter(subscriptionStorage).WithMessage("subscriptionStorage").IsNotNull();
 
             _endpoint = endpoint;
             _endpoint.EnvelopeReceived += Transport_EnvelopeReceived;
 
-        	_log.DebugFormat("Added event handler for envelope to {0}", _endpoint.Address);
+            _subscriptionStorage = subscriptionStorage;
+
+            if(_log.IsDebugEnabled)
+        	    _log.DebugFormat("Added event handler for envelope to {0}", _endpoint.Address);
         }
 
         public void Dispose()
@@ -44,7 +48,6 @@ namespace MassTransit.ServiceBus
         public ISubscriptionStorage SubscriptionStorage
         {
             get { return _subscriptionStorage; }
-            set { _subscriptionStorage = value; }
         }
 
         #region IServiceBus Members
