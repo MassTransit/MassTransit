@@ -22,7 +22,7 @@ namespace MassTransit.ServiceBus.Tests
             ValidateAndPurgeQueue(nonTransactionalQueueName);
             ValidateAndPurgeQueue(transactionalQueueName, true);
 
-            returnTo = new MessageQueueEndpoint(_testEndPoint);
+            returnTo = _testEndPoint;
             env = new Envelope(returnTo, msg);
         }
 
@@ -30,7 +30,7 @@ namespace MassTransit.ServiceBus.Tests
         [Ignore("Broken")]
         public void When_The_Queue_Is_NonTransactional()
         {
-            MessageQueueEndpoint ep = new MessageQueueEndpoint(nonTransactionalQueueName);
+            MessageQueueEndpoint ep = nonTransactionalQueueName;
             ep.Send(env);
 
             VerifyMessageInQueue(nonTransactionalQueueName, msg);
@@ -42,7 +42,7 @@ namespace MassTransit.ServiceBus.Tests
         {
             using (TransactionScope tr = new TransactionScope())
             {
-                MessageQueueEndpoint ep = new MessageQueueEndpoint(nonTransactionalQueueName);
+                MessageQueueEndpoint ep = nonTransactionalQueueName;
                 ep.Send(env);
 
                 tr.Complete();
@@ -63,7 +63,7 @@ namespace MassTransit.ServiceBus.Tests
         {
             using (TransactionScope tr = new TransactionScope())
             {
-                MessageQueueEndpoint ep = new MessageQueueEndpoint(transactionalQueueName);
+                MessageQueueEndpoint ep = transactionalQueueName;
                 ep.Send(env);
 
                 tr.Complete();
@@ -83,7 +83,7 @@ namespace MassTransit.ServiceBus.Tests
         [ExpectedException(typeof(Exception))]
         public void When_The_Queue_Is_Transactional_Not_In_A_Transaction()
         {
-            MessageQueueEndpoint ep = new MessageQueueEndpoint(transactionalQueueName);
+            MessageQueueEndpoint ep = transactionalQueueName;
             ep.Send(env);
         }
         
