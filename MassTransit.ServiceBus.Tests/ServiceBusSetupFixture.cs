@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Messaging;
 using System.Reflection;
 using System.Runtime.Serialization.Formatters.Binary;
@@ -29,7 +30,13 @@ namespace MassTransit.ServiceBus.Tests
         [SetUp]
         public virtual void Before_Each_Test_In_The_Fixture()
         {
-            _log.Debug("Starting Test");
+        	MessageQueue.EnableConnectionCache = false;
+
+			StackTrace stackTrace = new StackTrace();
+			StackFrame stackFrame = stackTrace.GetFrame(1);
+			MethodBase methodBase = stackFrame.GetMethod();
+
+        	_log.DebugFormat("Starting Test For {0}", methodBase.Name);
 
             ValidateAndPurgeQueue(_serviceBusQueueName);
             ValidateAndPurgeQueue(_remoteServiceBusQueueName);
@@ -66,20 +73,20 @@ namespace MassTransit.ServiceBus.Tests
         {
             _log.Debug("Ending Test");
 
-            _serviceBus.Dispose();
-            _remoteServiceBus.Dispose();
+            //_serviceBus.Dispose();
+            //_remoteServiceBus.Dispose();
 
-            _serviceBusEndPoint.Dispose();
-            _remoteServiceBusEndPoint.Dispose();
+            //_serviceBusEndPoint.Dispose();
+            //_remoteServiceBusEndPoint.Dispose();
 
-            _testEndPoint.Dispose();
+            //_testEndPoint.Dispose();
 
 
-            TeardownQueue(_serviceBusQueueName);
-            TeardownQueue(_remoteServiceBusQueueName);
-            TeardownQueue(_testEndPointQueueName);
-            TeardownQueue(_subscriptionQueueName);
-            TeardownQueue(_poisonQueueName);
+            //TeardownQueue(_serviceBusQueueName);
+            //TeardownQueue(_remoteServiceBusQueueName);
+            //TeardownQueue(_testEndPointQueueName);
+            //TeardownQueue(_subscriptionQueueName);
+            //TeardownQueue(_poisonQueueName);
         }
 
         protected static void TeardownQueue(string point)

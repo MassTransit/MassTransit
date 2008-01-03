@@ -9,7 +9,7 @@ namespace MassTransit.ServiceBus
 {
     using Util;
 
-    public class MessageQueueEndpoint :
+    public partial class MessageQueueEndpoint :
         IEndpoint, IEnvelopeFactory
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof (MessageQueueEndpoint));
@@ -22,7 +22,7 @@ namespace MassTransit.ServiceBus
 
         private readonly object _eventLock = new object();
 
-        public MessageQueueEndpoint(string queueName)
+        protected MessageQueueEndpoint(string queueName)
         {
             _queue = new MessageQueue(queueName, QueueAccessMode.ReceiveAndAdmin);
 
