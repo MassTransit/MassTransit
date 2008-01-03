@@ -44,6 +44,15 @@ namespace MassTransit.ServiceBus
         }
 
         /// <summary>
+        /// Moves the specified messages to the back of the list of available 
+        /// messages so they can be handled later. Could screw up message order.
+        /// </summary>
+        public void HandleMessagesLater(params IMessage[] messages)
+        {
+            Bus.Send(Bus.Endpoint, messages);
+        }
+
+        /// <summary>
         /// Marks the whole context as poison
         /// </summary>
         public void MarkPoison()
