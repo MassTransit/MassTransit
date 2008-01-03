@@ -5,6 +5,8 @@ using NUnit.Framework.SyntaxHelpers;
 
 namespace MassTransit.ServiceBus.Tests
 {
+    using Messages;
+
     [TestFixture]
     public class When_Publishing_A_Message :
         ServiceBusSetupFixture
@@ -199,8 +201,7 @@ namespace MassTransit.ServiceBus.Tests
                                                                        {
                                                                            try
                                                                            {
-                                                                               //should throw an exception
-                                                                               string name = cxt.Message.Name;
+                                                                               cxt.Message.ThrowException();
                                                                            }
                                                                            catch(Exception)
                                                                            {
@@ -214,15 +215,6 @@ namespace MassTransit.ServiceBus.Tests
 
             updateEvent.WaitOne(TimeSpan.FromSeconds(3), true);
             VerifyMessageInQueue(_serviceBus.Endpoint.Poison.Address, new PoisonMessage());
-        }
-    }
-
-    [Serializable]
-    public class PoisonMessage : IMessage
-    {
-        public string Name
-        {
-            get { throw new Exception("POISON"); }
         }
     }
 

@@ -1,6 +1,7 @@
 using System;
 using System.Transactions;
 using NUnit.Framework;
+using MassTransit.ServiceBus.Tests.Messages;
 
 namespace MassTransit.ServiceBus.Tests
 {
@@ -12,7 +13,7 @@ namespace MassTransit.ServiceBus.Tests
         private readonly string transactionalQueueName = @".\private$\test_transaction";
 
         IEndpoint returnTo;
-        TransactionalTestMessage msg = new TransactionalTestMessage();
+        PingMessage msg = new PingMessage();
         Envelope env;
 
         public override void Before_Each_Test_In_The_Fixture()
@@ -87,7 +88,4 @@ namespace MassTransit.ServiceBus.Tests
         }
         
     }
-
-    [Serializable]
-    public class TransactionalTestMessage : IMessage {}
 }

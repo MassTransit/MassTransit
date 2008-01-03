@@ -51,6 +51,7 @@
     <Compile Include="A_MessageQueueEndpoint_Should_Hide_Transaction_Issues.cs" />
     <Compile Include="MessageContext_Should_Help.cs" />
     <Compile Include="Messages\PingMessage.cs" />
+    <Compile Include="Messages\PoisonMessage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ServiceBusSetupFixture.cs" />
     <Compile Include="Subscriptions\When_Working_With_Subscriptions.cs" />
