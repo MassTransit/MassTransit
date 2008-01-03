@@ -10,11 +10,14 @@ namespace Client
     {
         static void Main(string[] args)
         {
-            IEndpoint endpointa = new MessageQueueEndpoint(@".\private$\endpointd");
-            ServiceBus bus = new ServiceBus(endpointa);
-            bus.SubscriptionStorage = new MsmqSubscriptionStorage(@".\private$\test_subscriptions", new MessageQueueEndpoint(@".\private$\test"), new SubscriptionCache());
+            IEndpoint clientEndpoint = MessageQueueEndpoint.MessageQueueEndpointFactory.Instance.Resolve(@".\private$\test_client");
+            IEndpoint subscriptionMgrEndpoint = MessageQueueEndpoint.MessageQueueEndpointFactory.Instance.Resolve(@".\private$\test_subscriptionMgr");
+            IEndpoint serverEndpoint = MessageQueueEndpoint.MessageQueueEndpointFactory.Instance.Resolve(@".\private$\test_server");
 
-            bus.Subscribe<PasswordUpdateComplete>().MessageReceived += Program_MessageReceived;
+            ISubscriptionStorage storage = new MsmqSubscriptionStorage(@".\private$\test_subscriptions", subscriptionMgrEndpoint, new SubscriptionCache());
+            ServiceBus bus = new ServiceBus(clientEndpoint, storage);
+
+            bus.MessageEndpoint<PasswordUpdateComplete>().Subscribe(Program_MessageReceived);
 
             Console.WriteLine("New Password Client");
             Console.WriteLine("What would you like to set your new password to?");
@@ -23,8 +26,7 @@ namespace Client
 
             using (TransactionScope tr = new TransactionScope())
             {
-                IEndpoint endpointb = new MessageQueueEndpoint(@".\private$\endpointc");
-                bus.Send(endpointb, new RequestPasswordUpdate(newPassword));
+                bus.Send(serverEndpoint, new RequestPasswordUpdate(newPassword));
 
                 tr.Complete();
             }
@@ -33,7 +35,7 @@ namespace Client
             Console.ReadKey(true);
         }
 
-        static void Program_MessageReceived(IServiceBus bus, IEnvelope envelope, PasswordUpdateComplete message)
+        static void Program_MessageReceived(MessageContext<PasswordUpdateComplete> cxt)
         {
             Console.WriteLine("Password Set");
             Console.WriteLine("Thank You. Press any key to exit");
