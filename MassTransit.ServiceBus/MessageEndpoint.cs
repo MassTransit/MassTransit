@@ -7,8 +7,37 @@ namespace MassTransit.ServiceBus
         IMessageEndpoint<T>,
         IMessageEndpointReceive where T : IMessage
     {
+        internal class CallbackItem<T> where T : IMessage
+        {
+            private MessageReceivedCallback<T> _callback;
+            private Predicate<T> _condition;
+
+            public MessageReceivedCallback<T> Callback
+            {
+                get { return _callback; }
+                set { _callback = value; }
+            }
+
+            public Predicate<T> Condition
+            {
+                get { return _condition; }
+                set { _condition = value; }
+            }
+
+            public CallbackItem(MessageReceivedCallback<T> callback)
+            {
+                _callback = callback;
+            }
+
+            public CallbackItem(MessageReceivedCallback<T> callback, Predicate<T> condition)
+            {
+                _callback = callback;
+                _condition = condition;
+            }
+        }
+
         private readonly IEndpoint _endpoint;
-        private readonly List<MessageReceivedCallback<T>> _callbacks = new List<MessageReceivedCallback<T>>();
+        private readonly List<CallbackItem<T>> _callbacks = new List<CallbackItem<T>>();
 
         public MessageEndpoint(IEndpoint endpoint)
         {
@@ -33,19 +62,24 @@ namespace MassTransit.ServiceBus
 
         public void OnMessageReceived(IServiceBus bus, IEnvelope envelope, IMessage message)
         {
-            MessageContext<T> context = new MessageContext<T>(bus, envelope, (T)message);
+            MessageContext<T> context = new MessageContext<T>(bus, envelope, (T) message);
 
             _callbacks.ForEach(
-                delegate(MessageReceivedCallback<T> callback)
+                delegate(CallbackItem<T> item)
                     {
                         try
                         {
-                            callback(context);
+                            if (item.Condition != null)
+                            {
+                                if (item.Condition(context.Message) == false)
+                                    return;
+                            }
+
+                            item.Callback(context);
                         }
                         catch (Exception ex)
                         {
                         }
-                        
                     });
         }
 
@@ -57,24 +91,17 @@ namespace MassTransit.ServiceBus
 
         public void Dispose()
         {
-            this._endpoint.Dispose();
+            _callbacks.Clear();
         }
 
         public void Subscribe(MessageReceivedCallback<T> callback)
         {
-            _callbacks.Add(callback);
+            _callbacks.Add(new CallbackItem<T>(callback));
         }
 
         public void Subscribe(MessageReceivedCallback<T> callback, Predicate<T> condition)
         {
-            _callbacks.Add(
-                delegate(MessageContext<T> ctx)
-                    {
-                        if (condition(ctx.Message) == false)
-                            return;
-
-                        callback(ctx);
-                    });
+            _callbacks.Add(new CallbackItem<T>(callback, condition));
         }
     }
 }
