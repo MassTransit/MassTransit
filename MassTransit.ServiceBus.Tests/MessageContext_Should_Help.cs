@@ -46,6 +46,28 @@ namespace MassTransit.ServiceBus.Tests
         }
 
         [Test]
+        public void With_Handling_Later()
+        {
+            IEnvelope mockEnvelope = mocks.CreateMock<IEnvelope>();
+            IEndpoint mockEndpoint = mocks.CreateMock<IEndpoint>();
+            RequestMessage requestMessage = new RequestMessage();
+            MessageContext<RequestMessage> cxt = new MessageContext<RequestMessage>(mockBus, mockEnvelope, requestMessage);
+            ReplyMessage replyMessage = new ReplyMessage();
+            IMessage[] messages = new IMessage[1] { replyMessage };
+
+            using (mocks.Record())
+            {
+                Expect.Call(mockBus.Endpoint).Return(mockEndpoint);
+                mockBus.Send(mockEndpoint, messages);
+            }
+
+            using (mocks.Playback())
+            {
+                cxt.HandleMessagesLater(replyMessage);
+            }
+        }
+
+        [Test]
         public void With_Poison_Letters()
         {
             IEnvelope mockEnvelope = mocks.CreateMock<IEnvelope>();
