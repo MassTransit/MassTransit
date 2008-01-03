@@ -95,12 +95,12 @@ namespace MassTransit.ServiceBus.Tests
                 MessageQueue.Delete(point);
         }
 
-        protected static void ValidateAndPurgeQueue(string queuePath)
+        public static void ValidateAndPurgeQueue(string queuePath)
         {
             ValidateAndPurgeQueue(queuePath, false);
         }
 
-        protected static void ValidateAndPurgeQueue(string queuePath, bool isTransactional)
+        public static void ValidateAndPurgeQueue(string queuePath, bool isTransactional)
         {
             try
             {
@@ -116,7 +116,7 @@ namespace MassTransit.ServiceBus.Tests
             queue.Purge();
         }
 
-        protected static void VerifyMessageInQueue<T>(string queuePath, T message)
+        public static void VerifyMessageInQueue<T>(string queuePath, T message)
         {
             using (MessageQueue mq = new MessageQueue(queuePath, QueueAccessMode.Receive))
             {
