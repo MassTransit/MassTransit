@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using log4net;
 
 namespace MassTransit.ServiceBus
 {
@@ -7,29 +8,31 @@ namespace MassTransit.ServiceBus
         IMessageEndpoint<T>,
         IMessageEndpointReceive where T : IMessage
     {
-        internal class CallbackItem<T> where T : IMessage
-        {
-            private MessageReceivedCallback<T> _callback;
-            private Predicate<T> _condition;
+        private static readonly ILog _log = LogManager.GetLogger(typeof(MessageQueueEndpoint));
 
-            public MessageReceivedCallback<T> Callback
+        internal class CallbackItem<T1> where T1 : IMessage
+        {
+            private MessageReceivedCallback<T1> _callback;
+            private Predicate<T1> _condition;
+
+            public MessageReceivedCallback<T1> Callback
             {
                 get { return _callback; }
                 set { _callback = value; }
             }
 
-            public Predicate<T> Condition
+            public Predicate<T1> Condition
             {
                 get { return _condition; }
                 set { _condition = value; }
             }
 
-            public CallbackItem(MessageReceivedCallback<T> callback)
+            public CallbackItem(MessageReceivedCallback<T1> callback)
             {
                 _callback = callback;
             }
 
-            public CallbackItem(MessageReceivedCallback<T> callback, Predicate<T> condition)
+            public CallbackItem(MessageReceivedCallback<T1> callback, Predicate<T1> condition)
             {
                 _callback = callback;
                 _condition = condition;
@@ -55,6 +58,11 @@ namespace MassTransit.ServiceBus
             remove { throw new NotImplementedException(); }
         }
 
+        public void AcceptEnvelope(string id)
+        {
+            _endpoint.AcceptEnvelope(id);
+        }
+
         public string Address
         {
             get { return _endpoint.Address; }
@@ -75,12 +83,19 @@ namespace MassTransit.ServiceBus
                                     return;
                             }
 
+                            context.Accept();
+
                             item.Callback(context);
                         }
                         catch (Exception ex)
                         {
                         }
                     });
+
+            if(!context.WasAccepted)
+            {
+                _log.InfoFormat("Envelope Id {0} was not accepted", context.Envelope.Id);
+            }
         }
 
         public IEndpoint Poison

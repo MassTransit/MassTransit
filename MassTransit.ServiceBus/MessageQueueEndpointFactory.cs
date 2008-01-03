@@ -60,5 +60,6 @@ namespace MassTransit.ServiceBus
 				get { return _instance; }
 			}
 		}
+
 	}
 }
