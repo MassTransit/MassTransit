@@ -56,7 +56,6 @@
     <Compile Include="ISubscriptionStorage.cs" />
     <Compile Include="MessageEndpoint.cs" />
     <Compile Include="MessageQueueEndpoint.cs" />
-    <Compile Include="MessageQueueEndpointFactory.cs" />
     <Compile Include="MessageContext.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ServiceBus.cs" />
