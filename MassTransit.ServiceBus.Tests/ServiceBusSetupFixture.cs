@@ -41,8 +41,6 @@ namespace MassTransit.ServiceBus.Tests
             _remoteServiceBusEndPoint = @".\private$\test_remoteservicebus";
             _testEndPoint = @".\private$\test_endpoint";
 
-            ServiceBus bus = new ServiceBus(_serviceBusEndPoint, _testEndPoint);
-
             ISubscriptionStorage _subscriptionCache;
             ISubscriptionStorage _subscriptionStorage;
 
@@ -52,18 +50,15 @@ namespace MassTransit.ServiceBus.Tests
             _subscriptionCache = new SubscriptionCache();
             _subscriptionStorage =
                 new MsmqSubscriptionStorage(_subscriptionQueueName, _serviceBusEndPoint, _subscriptionCache);
-            bus.SubscriptionStorage = _subscriptionStorage;
 
-            _serviceBus = bus;
+            _serviceBus = new ServiceBus(_serviceBusEndPoint, _subscriptionStorage);
 
-            bus = new ServiceBus(_remoteServiceBusEndPoint);
 
+            
             _remoteSubscriptionCache = new SubscriptionCache();
             _remoteSubscriptionStorage =
                 new MsmqSubscriptionStorage(_subscriptionQueueName, _remoteServiceBusEndPoint, _remoteSubscriptionCache);
-            bus.SubscriptionStorage = _remoteSubscriptionStorage;
-
-            _remoteServiceBus = bus;
+            _remoteServiceBus = new ServiceBus(_remoteServiceBusEndPoint, _remoteSubscriptionStorage);
         }
 
         [TearDown]
