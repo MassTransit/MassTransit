@@ -1,10 +1,10 @@
 using NUnit.Framework;
 using NUnit.Framework.SyntaxHelpers;
 using MassTransit.ServiceBus.Tests.Messages;
+using Rhino.Mocks;
 
 namespace MassTransit.ServiceBus.Tests
 {
-    using Rhino.Mocks;
 
     [TestFixture]
 	public class As_A_Service_With_A_Message_Endpoint
