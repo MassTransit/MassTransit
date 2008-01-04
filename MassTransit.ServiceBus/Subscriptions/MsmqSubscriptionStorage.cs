@@ -78,7 +78,7 @@ namespace MassTransit.ServiceBus.Subscriptions
 			_storageQueue.BeginPeek(TimeSpan.FromHours(24), _peekCursor, PeekAction.Next, this, QueuePeekCompleted);
 		}
 
-		public IList<IEndpoint> List<T>(params T[] messages)
+		public IList<IEndpoint> List<T>(params T[] messages) where T : IMessage
 		{
 			return _subscriptionCache.List(messages);
 		}
