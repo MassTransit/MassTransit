@@ -33,11 +33,16 @@
       <HintPath>..\libs\NHibernate.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Messages\CacheUpdateResponse.cs" />
     <Compile Include="Messages\RequestCacheUpdate.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Subscription.cs" />
+    <Compile Include="SubscriptionMapper.cs" />
+    <Compile Include="SubscriptionRepository.cs" />
     <Compile Include="SubscriptionServiceBus.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -45,6 +50,12 @@
       <Project>{90482397-6282-465E-8B86-39865FC30127}</Project>
       <Name>MassTransit.ServiceBus</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Subscriptions.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="NHibernateMaps\Subscription.hbm.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
