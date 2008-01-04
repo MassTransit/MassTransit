@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<hibernate-mapping xmlns="urn:nhibernate-mapping-2.2"
+                   schema="bus" 
+                   assembly="MassTransit.ServiceBus.SubscriptionsManager"
+                   namespace="MassTransit.ServiceBus.SubscriptionsManager">
+
+  <class name="Subscription" table="Subscriptions">
+    
+    <id name="Id" column="SubscriptionId" type="Int32">
+      <generator class="native"/>
+    </id>
+    
+    <property name="Address" not-null="true" update="false" />
+    <property name="Message" not-null="true" update="false" />
+    <property name="IsActive" not-null="true" />
+  
+  </class>
+
+</hibernate-mapping>
