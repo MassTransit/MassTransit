@@ -14,7 +14,7 @@ namespace MassTransit.ServiceBus.Subscriptions
 
         #region ISubscriptionStorage Members
 
-        public IList<IEndpoint> List<T>(params T[] messages)
+        public IList<IEndpoint> List<T>(params T[] messages) where T : IMessage
         {
             List<IEndpoint> result = new List<IEndpoint>();
             if (_messageTypeSubscriptions.ContainsKey(typeof (T)))
