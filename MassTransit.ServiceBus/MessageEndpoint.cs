@@ -58,9 +58,9 @@ namespace MassTransit.ServiceBus
             remove { throw new NotImplementedException(); }
         }
 
-        public void AcceptEnvelope(string id)
+        public bool AcceptEnvelope(string id)
         {
-            _endpoint.AcceptEnvelope(id);
+            return _endpoint.AcceptEnvelope(id);
         }
 
         public string Address
@@ -83,9 +83,10 @@ namespace MassTransit.ServiceBus
                                     return;
                             }
 
-                            context.Accept();
-
-                            item.Callback(context);
+                            if ( context.Accept() )
+                            {
+                                item.Callback(context);
+                            }
                         }
                         catch (Exception ex)
                         {

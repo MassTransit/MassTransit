@@ -24,9 +24,10 @@ namespace MassTransit.ServiceBus
 		/// Submits a request message to the default destination for the message type
 		/// </summary>
 		/// <typeparam name="T">The type of message</typeparam>
+		/// <param name="endpoint">The destination endpoint for the request</param>
 		/// <param name="messages">The messages to be sent</param>
 		/// <returns>An IAsyncResult that can be used to wait for the response</returns>
-		IServiceBusAsyncResult Request<T>(params T[] messages) where T : IMessage;
+		IServiceBusAsyncResult Request<T>(IEndpoint endpoint, params T[] messages) where T : IMessage;
 
 		/// <summary>
 		/// Sends a list of messages to the specified destination

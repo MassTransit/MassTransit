@@ -19,7 +19,7 @@ namespace MassTransit.ServiceBus
 		private readonly BinaryFormatter _formatter;
 		private readonly Cursor _peekCursor;
 		private readonly IEndpoint _poisonEnpoint;
-		private readonly MessageQueue _queue;
+		private MessageQueue _queue;
 		private readonly string _queueName;
 		private EventHandler<EnvelopeReceivedEventArgs> _onEnvelopeReceived;
 
@@ -49,18 +49,21 @@ namespace MassTransit.ServiceBus
 
 		#region IEndpoint Members
 
-		public void AcceptEnvelope(string id)
+		public bool AcceptEnvelope(string id)
 		{
 			try
 			{
 				_queue.ReceiveById(id);
+
+			    return true;
 			}
 			catch (Exception ex)
 			{
 				_log.Error("Receive Exception", ex);
 			}
-		}
 
+		    return false;
+		}
 
 		public string Address
 		{
@@ -80,7 +83,18 @@ namespace MassTransit.ServiceBus
 
 				msg.ResponseQueue = new MessageQueue(envelope.ReturnTo.Address);
 
-				MessageQueueTransactionType tt = MessageQueueTransactionType.None;
+                if(envelope.TimeToBeReceived < MessageQueue.InfiniteTimeout)
+                    msg.TimeToBeReceived = envelope.TimeToBeReceived;
+
+                if(!string.IsNullOrEmpty(envelope.Label))
+			        msg.Label = envelope.Label;
+
+			    msg.Recoverable = envelope.Recoverable;
+
+                if(!string.IsNullOrEmpty(envelope.CorrelationId))
+                    msg.CorrelationId = envelope.CorrelationId;
+
+                MessageQueueTransactionType tt = MessageQueueTransactionType.None;
 				if (q.Transactional)
 				{
 					Check.RequireTransaction(string.Format("The current queue {0} is transactional and this MessageQueueEndpoint is not running in a transaction.", _queueName));
@@ -121,7 +135,11 @@ namespace MassTransit.ServiceBus
 
 		public void Dispose()
 		{
-			_queue.Close();
+            Remove(_queueName);
+
+            _queue.Close();
+            _queue.Dispose();
+            _queue = null;
 		}
 
 		#endregion
@@ -254,6 +272,18 @@ namespace MassTransit.ServiceBus
 				return transport;
 			}
 		}
+
+        public static void Remove(string queuePath)
+        {
+            string key;
+            string queueName = NormalizeQueueName(queuePath, out key);
+
+            lock (_transportCache)
+            {
+                if (_transportCache.ContainsKey(key))
+                    _transportCache.Remove(key);
+            }
+        }
 
 		private static string NormalizeQueueName(string queuePath, out string key)
 		{

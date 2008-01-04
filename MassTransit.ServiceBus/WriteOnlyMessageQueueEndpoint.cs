@@ -74,7 +74,7 @@ namespace MassTransit.ServiceBus
         /// </summary>
         public event EventHandler<EnvelopeReceivedEventArgs> EnvelopeReceived;
 
-        public void AcceptEnvelope(string id)
+        public bool AcceptEnvelope(string id)
         {
             throw new NotImplementedException();
         }

@@ -9,14 +9,15 @@ namespace MassTransit.ServiceBus
     public class ServiceBus :
         IServiceBus
     {
-		private static readonly ILog _log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+        private static readonly ILog _log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 
         private readonly object _messageEndpointLock = new object();
-		private readonly Dictionary<Type, IEndpoint> _messageEndpoints = new Dictionary<Type, IEndpoint>();
+        private readonly Dictionary<Type, IEndpoint> _messageEndpoints = new Dictionary<Type, IEndpoint>();
 
         private IEndpoint _endpoint;
 
-        private ISubscriptionStorage _subscriptionStorage;
+        private readonly ISubscriptionStorage _subscriptionStorage;
+        private readonly Dictionary<string, ServiceBusAsyncResult> _asyncResultDictionary = new Dictionary<string, ServiceBusAsyncResult>();
 
         public ServiceBus(IEndpoint endpoint, ISubscriptionStorage subscriptionStorage)
         {
@@ -28,21 +29,8 @@ namespace MassTransit.ServiceBus
 
             _subscriptionStorage = subscriptionStorage;
 
-            if(_log.IsDebugEnabled)
-        	    _log.DebugFormat("Added event handler for envelope to {0}", _endpoint.Address);
-        }
-
-        public void Dispose()
-        {
-            foreach(IEndpoint endpoint in _messageEndpoints.Values)
-            {
-                endpoint.Dispose();
-            }
-            _messageEndpoints.Clear();
-
-            _endpoint.Dispose();
-
-            _subscriptionStorage.Dispose();
+            if (_log.IsDebugEnabled)
+                _log.DebugFormat("Added event handler for envelope to {0}", _endpoint.Address);
         }
 
         public ISubscriptionStorage SubscriptionStorage
@@ -52,6 +40,15 @@ namespace MassTransit.ServiceBus
 
         #region IServiceBus Members
 
+        public void Dispose()
+        {
+            _messageEndpoints.Clear();
+
+            _endpoint.Dispose();
+
+            _subscriptionStorage.Dispose();
+        }
+
         public void Publish<T>(params T[] messages) where T : IMessage
         {
             IList<IEndpoint> subscribers = _subscriptionStorage.List<T>();
@@ -60,7 +57,7 @@ namespace MassTransit.ServiceBus
                 foreach (IEndpoint endpoint in subscribers)
                 {
                     IEnvelopeFactory envelopeFactory = endpoint as IEnvelopeFactory;
-                    if(envelopeFactory != null)
+                    if (envelopeFactory != null)
                     {
                         IEnvelope envelope = envelopeFactory.NewEnvelope(Endpoint, messages as IMessage[]);
 
@@ -107,55 +104,90 @@ namespace MassTransit.ServiceBus
             }
         }
 
-        public IServiceBusAsyncResult Request<T>(params T[] messages) where T : IMessage
+        public IServiceBusAsyncResult Request<T>(IEndpoint endpoint, params T[] messages) where T : IMessage
         {
-            //IEndpoint endpoint = _endpointDirectory.Resolve<T>();
+            IEnvelopeFactory envelopeFactory = endpoint as IEnvelopeFactory;
+            if (envelopeFactory == null)
+                throw new ArgumentException("Endpoint does not support IEnvelopeFactory");
 
-            //IEnvelope envelope = _envelopeBuilder.Build(messages);
+            IEnvelope envelope = envelopeFactory.NewEnvelope(Endpoint, messages as IMessage[]);
 
-            //endpoint.Transport.Send(endpoint, envelope);
+            lock (_asyncResultDictionary)
+            {
+                endpoint.Send(envelope);
 
-            throw new NotSupportedException();
+                ServiceBusAsyncResult asyncResult = new ServiceBusAsyncResult();
+
+                _log.DebugFormat("Recording request correlation ID {0}", envelope.Id);
+
+                _asyncResultDictionary.Add(envelope.Id, asyncResult);
+
+                return asyncResult;
+            }
         }
 
         #endregion
 
         private void Transport_EnvelopeReceived(object sender, EnvelopeReceivedEventArgs e)
         {
-			try
-			{
-				_log.DebugFormat("Envelope {0} Received By {1}", e.Envelope.Id, GetHashCode());
+            try
+            {
+                _log.DebugFormat("Envelope {0} Received By {1}", e.Envelope.Id, GetHashCode());
 
-				if (e.Envelope.Messages != null)
-				{
-					foreach (IMessage message in e.Envelope.Messages)
-					{
-						_log.DebugFormat("Message Received: {0}", message.GetType());
+                if(!string.IsNullOrEmpty(e.Envelope.CorrelationId ))
+                {
+                    _log.DebugFormat("Correlation Id = {0}", e.Envelope.CorrelationId);
 
-						if (_messageEndpoints.ContainsKey(message.GetType()))
-						{
-							IMessageEndpointReceive receivingEndpoint =
-								_messageEndpoints[message.GetType()] as IMessageEndpointReceive;
-							if (receivingEndpoint != null)
-							{
-								try
-								{
-									receivingEndpoint.OnMessageReceived(this, e.Envelope, message);
-								}
-								catch (Exception ex)
-								{
-									_log.Error("Exception from OnMessageReceived: ", ex);
-								}
-							}
-						}
-					}
-				}
-			}
-			catch(Exception ex)
-			{
-				_log.Error("Exception in Transport_EnvelopeReceived: ", ex);
-			}
+                    lock (_asyncResultDictionary)
+                    {
+                        if (_asyncResultDictionary.ContainsKey(e.Envelope.CorrelationId))
+                        {
+                            ServiceBusAsyncResult asyncResult = _asyncResultDictionary[e.Envelope.CorrelationId];
+                            _asyncResultDictionary.Remove(e.Envelope.CorrelationId);
+
+                            IEndpoint sourceEndpoint = sender as IEndpoint;
+                            if (sourceEndpoint != null)
+                            {
+                                if (Endpoint.AcceptEnvelope(e.Envelope.Id))
+                                {
+                                    asyncResult.Complete(e.Envelope.Messages);
+                                }
+                            }
+                        }
+                    }
+
+                    return;
+                }
+
+                if (e.Envelope.Messages != null)
+                {
+                    foreach (IMessage message in e.Envelope.Messages)
+                    {
+                        _log.DebugFormat("Message Received: {0}", message.GetType());
+
+                        if (_messageEndpoints.ContainsKey(message.GetType()))
+                        {
+                            IMessageEndpointReceive receivingEndpoint =
+                                _messageEndpoints[message.GetType()] as IMessageEndpointReceive;
+                            if (receivingEndpoint != null)
+                            {
+                                try
+                                {
+                                    receivingEndpoint.OnMessageReceived(this, e.Envelope, message);
+                                }
+                                catch (Exception ex)
+                                {
+                                    _log.Error("Exception from OnMessageReceived: ", ex);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _log.Error("Exception in Transport_EnvelopeReceived: ", ex);
+            }
         }
-
     }
 }
