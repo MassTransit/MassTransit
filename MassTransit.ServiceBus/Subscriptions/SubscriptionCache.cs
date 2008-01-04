@@ -67,7 +67,7 @@ namespace MassTransit.ServiceBus.Subscriptions
 
         public void Dispose()
         {
-            
+            _messageTypeSubscriptions.Clear();
         }
 
         #endregion

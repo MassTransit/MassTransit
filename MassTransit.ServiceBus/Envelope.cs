@@ -14,7 +14,7 @@ namespace MassTransit.ServiceBus
         private string _id;
     	private string _correlationId;
     	private bool _recoverable;
-    	private TimeSpan _timeToBeReceived;
+        private TimeSpan _timeToBeReceived = TimeSpan.MaxValue;
     	private DateTime _sentTime;
     	private DateTime _arrivedTime;
     	private string _label;

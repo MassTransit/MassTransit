@@ -45,18 +45,33 @@ namespace MassTransit.ServiceBus
             get { return _accepted; }
         }
 
-        public void Accept()
+        public bool Accept()
         {
             if (!_accepted)
             {
-                Bus.Endpoint.AcceptEnvelope(_envelope.Id);
-                _accepted = true;
+                if ( Bus.Endpoint.AcceptEnvelope(_envelope.Id) )
+                    _accepted = true;
             }
+
+            return _accepted;
         }
 
+        /// <summary>
+        /// Builds an envelope with the correlation id set to the id of the incoming envelope
+        /// </summary>
+        /// <param name="messages">The messages to include with the reply</param>
         public void Reply(params IMessage[] messages)
         {
-            Bus.Send(Envelope.ReturnTo, messages);
+            IEndpoint replyEndpoint = Envelope.ReturnTo;
+
+            IEnvelopeFactory envelopeFactory = replyEndpoint as IEnvelopeFactory;
+            if (envelopeFactory == null)
+                throw new NullReferenceException("Envelope Factory Not Supported");
+            
+            IEnvelope envelope = envelopeFactory.NewEnvelope(Bus.Endpoint, messages);
+            envelope.CorrelationId = Envelope.Id;
+
+            replyEndpoint.Send(envelope);
         }
 
         /// <summary>

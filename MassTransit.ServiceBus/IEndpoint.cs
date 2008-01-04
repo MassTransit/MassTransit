@@ -9,7 +9,7 @@ namespace MassTransit.ServiceBus
 
 		event EventHandler<EnvelopeReceivedEventArgs> EnvelopeReceived;
 
-        void AcceptEnvelope(string id);
+        bool AcceptEnvelope(string id);
 
 		string Address { get; }
 

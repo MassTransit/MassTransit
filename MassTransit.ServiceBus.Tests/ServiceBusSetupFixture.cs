@@ -73,8 +73,9 @@ namespace MassTransit.ServiceBus.Tests
         {
             _log.Debug("Ending Test");
 
-            //_serviceBus.Dispose();
-            //_remoteServiceBus.Dispose();
+            _serviceBus.Dispose();
+            
+            _remoteServiceBus.Dispose();
 
             //_serviceBusEndPoint.Dispose();
             //_remoteServiceBusEndPoint.Dispose();
