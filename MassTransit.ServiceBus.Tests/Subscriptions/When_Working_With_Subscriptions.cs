@@ -8,8 +8,6 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
         ServiceBusSetupFixture
     {
 
-        [Test]
-        [Ignore]
         public void Subscriptions_Should_Collect()
         {
             //MsmqSubscriptionStorage subs = new MsmqSubscriptionStorage(base._subscriptionQueueName, null, base._subscriptionCache);

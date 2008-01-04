@@ -27,7 +27,6 @@ namespace MassTransit.ServiceBus.Tests
         }
 
         [Test]
-        [Ignore("Broken")]
         public void When_The_Queue_Is_NonTransactional()
         {
             MessageQueueEndpoint ep = nonTransactionalQueueName;
@@ -37,7 +36,6 @@ namespace MassTransit.ServiceBus.Tests
         }
 
         [Test]
-        [Ignore("Broken")]
         public void When_The_Queue_Is_NonTransactional_In_A_Transaction()
         {
             using (TransactionScope tr = new TransactionScope())
@@ -58,7 +56,6 @@ namespace MassTransit.ServiceBus.Tests
 
 
         [Test]
-        [Ignore("Broken")]
         public void When_The_Queue_Is_Transactional()
         {
             using (TransactionScope tr = new TransactionScope())
