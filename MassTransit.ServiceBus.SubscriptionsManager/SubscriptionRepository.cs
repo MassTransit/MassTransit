@@ -50,9 +50,13 @@ namespace MassTransit.ServiceBus.SubscriptionsManager
                     .Add(Expression.Eq("Message", subscription.Message));
                 
                 Subscription obj = crit.UniqueResult<Subscription>();
-                obj.IsActive = false;
+                if(obj != null)
+                {
+                    obj.IsActive = false;
 
-                sess.Update(obj);
+                    sess.Update(obj);    
+                }
+                
             }
             
         }
