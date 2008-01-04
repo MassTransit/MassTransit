@@ -7,6 +7,12 @@ namespace MassTransit.ServiceBus.SubscriptionsManager
         private string _message;
         private bool _isActive;
 
+        /// <summary>
+        /// For NHibernate
+        /// </summary>
+        private Subscription()
+        {
+        }
 
         public Subscription(string address, string message)
         {
