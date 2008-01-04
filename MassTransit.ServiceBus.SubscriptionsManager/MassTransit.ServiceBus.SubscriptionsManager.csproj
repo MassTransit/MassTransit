@@ -40,7 +40,7 @@
     <Compile Include="ISubscriptionRepository.cs" />
     <Compile Include="Messages\CacheUpdateResponse.cs" />
     <Compile Include="Messages\RequestCacheUpdate.cs" />
-    <Compile Include="Messages\RequestSubscribersForMessage.cs" />
+    <Compile Include="Messages\RequestCacheUpdateForMessage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Subscription.cs" />
     <Compile Include="SubscriptionMapper.cs" />
