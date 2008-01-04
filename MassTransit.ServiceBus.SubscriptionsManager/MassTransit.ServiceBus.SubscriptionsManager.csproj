@@ -57,7 +57,7 @@
     <None Include="Subscriptions.sql" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="NHibernateMaps\Subscription.hbm.xml" />
+    <EmbeddedResource Include="NHibernateMaps\Subscription.hbm.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

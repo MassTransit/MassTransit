@@ -18,6 +18,7 @@ namespace MassTransit.ServiceBus.SubscriptionsManager
         public void Add(Subscription subscription)
         {
             using(ISession sess = _factory.OpenSession())
+            using(ITransaction tr = sess.BeginTransaction())
             {
                 ICriteria crit = sess.CreateCriteria(typeof(Subscription));
 
@@ -37,12 +38,14 @@ namespace MassTransit.ServiceBus.SubscriptionsManager
                 }
 
 
+                tr.Commit();                
             }
         }
 
         public void Deactivate(Subscription subscription)
         {
             using(ISession sess = _factory.OpenSession())
+            using(ITransaction tr = sess.BeginTransaction())
             {
                 ICriteria crit = sess.CreateCriteria(typeof(Subscription));
                 
@@ -57,6 +60,7 @@ namespace MassTransit.ServiceBus.SubscriptionsManager
                     sess.Update(obj);    
                 }
                 
+                tr.Commit();
             }
             
         }

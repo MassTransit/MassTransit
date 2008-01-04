@@ -4,14 +4,14 @@
                    assembly="MassTransit.ServiceBus.SubscriptionsManager"
                    namespace="MassTransit.ServiceBus.SubscriptionsManager">
 
-  <class name="Subscription" table="Subscriptions">
+  <class name="Subscription" table="Subscriptions" lazy="false">
     
-    <id name="Id" column="SubscriptionId" type="Int32">
+    <id name="Id" column="SubscriptionId" type="Int32" access="field.camelcase-underscore">
       <generator class="native"/>
     </id>
     
-    <property name="Address" not-null="true" update="false" />
-    <property name="Message" not-null="true" update="false" />
+    <property name="Address" not-null="true" update="false" access="field.camelcase-underscore" />
+    <property name="Message" not-null="true" update="false" access="field.camelcase-underscore" />
     <property name="IsActive" not-null="true" />
   
   </class>
