@@ -1,12 +1,19 @@
 namespace MassTransit.ServiceBus.SubscriptionsManager
 {
+    using System;
     using NHibernate;
     using NHibernate.Expression;
     using System.Collections.Generic;
 
-    public class SubscriptionRepository
+    public class SubscriptionRepository : ISubscriptionRepository
     {
         private ISessionFactory _factory;
+
+
+        public SubscriptionRepository(ISessionFactory factory)
+        {
+            _factory = factory;
+        }
 
         public void Add(Subscription subscription)
         {
@@ -55,6 +62,17 @@ namespace MassTransit.ServiceBus.SubscriptionsManager
             using (ISession sess = _factory.OpenSession())
             {
                 ICriteria crit = sess.CreateCriteria(typeof (Subscription));
+
+                return new List<Subscription>(crit.List<Subscription>());
+            }
+        }
+
+        public List<Subscription> List(Type message)
+        {
+            using (ISession sess = _factory.OpenSession())
+            {
+                ICriteria crit = sess.CreateCriteria(typeof(Subscription));
+                crit.Add(Expression.Eq("Message", message.FullName));
 
                 return new List<Subscription>(crit.List<Subscription>());
             }

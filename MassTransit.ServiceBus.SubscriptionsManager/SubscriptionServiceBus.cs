@@ -6,16 +6,16 @@ namespace MassTransit.ServiceBus.SubscriptionsManager
 
     public class SubscriptionServiceBus : ServiceBus
     {
-        private SubscriptionRepository _repository;
+        private ISubscriptionRepository _repository;
 
 
-        public SubscriptionServiceBus(IEndpoint endpoint, ISubscriptionStorage subscriptionStorage, SubscriptionRepository repository) : base(endpoint, subscriptionStorage)
+        public SubscriptionServiceBus(IEndpoint endpoint, ISubscriptionStorage subscriptionStorage, ISubscriptionRepository repository) : base(endpoint, subscriptionStorage)
         {
             _repository = repository;
             this.MessageEndpoint<SubscriptionMessage>().Subscribe(OnSubscriptionMessageReceived);
             this.MessageEndpoint<RequestCacheUpdate>().Subscribe(OnRequestCacheUpdate);
-            //request full cache
-            //request cache by message
+            this.MessageEndpoint<RequestSubscribersForMessage>().Subscribe(OnRequestSubscribersForMessage);
+            
         }
 
 
@@ -42,6 +42,13 @@ namespace MassTransit.ServiceBus.SubscriptionsManager
         {
             //return a complete list of SubscriptionMessages
             ctx.Reply(new CacheUpdateResponse(SubscriptionMapper.MapFrom(_repository.List())));
+        }
+
+
+        public void OnRequestSubscribersForMessage(MessageContext<RequestSubscribersForMessage> ctx)
+        {
+            //return a complete list of SubscriptionMessages
+            ctx.Reply(new CacheUpdateResponse(SubscriptionMapper.MapFrom(_repository.List(ctx.Message.Message))));
         }
     }
 }
