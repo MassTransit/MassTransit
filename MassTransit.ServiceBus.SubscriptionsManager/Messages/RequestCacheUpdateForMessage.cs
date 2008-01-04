@@ -3,12 +3,12 @@ namespace MassTransit.ServiceBus.SubscriptionsManager.Messages
     using System;
 
     [Serializable]
-    public class RequestSubscribersForMessage : IMessage
+    public class RequestCacheUpdateForMessage : IMessage
     {
         private Type _message;
 
 
-        public RequestSubscribersForMessage(Type message)
+        public RequestCacheUpdateForMessage(Type message)
         {
             _message = message;
         }

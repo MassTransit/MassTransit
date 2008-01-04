@@ -14,7 +14,7 @@ namespace MassTransit.ServiceBus.SubscriptionsManager
             _repository = repository;
             this.MessageEndpoint<SubscriptionMessage>().Subscribe(OnSubscriptionMessageReceived);
             this.MessageEndpoint<RequestCacheUpdate>().Subscribe(OnRequestCacheUpdate);
-            this.MessageEndpoint<RequestSubscribersForMessage>().Subscribe(OnRequestSubscribersForMessage);
+            this.MessageEndpoint<RequestCacheUpdateForMessage>().Subscribe(OnRequestSubscribersForMessage);
             
         }
 
@@ -45,7 +45,7 @@ namespace MassTransit.ServiceBus.SubscriptionsManager
         }
 
 
-        public void OnRequestSubscribersForMessage(MessageContext<RequestSubscribersForMessage> ctx)
+        public void OnRequestSubscribersForMessage(MessageContext<RequestCacheUpdateForMessage> ctx)
         {
             //return a complete list of SubscriptionMessages
             ctx.Reply(new CacheUpdateResponse(SubscriptionMapper.MapFrom(_repository.List(ctx.Message.Message))));
