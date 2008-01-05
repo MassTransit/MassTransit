@@ -15,7 +15,6 @@ namespace MassTransit.ServiceBus.SubscriptionsManager
             this.MessageEndpoint<SubscriptionMessage>().Subscribe(OnSubscriptionMessageReceived);
             this.MessageEndpoint<RequestCacheUpdate>().Subscribe(OnRequestCacheUpdate);
             this.MessageEndpoint<RequestCacheUpdateForMessage>().Subscribe(OnRequestSubscribersForMessage);
-            
         }
 
 
