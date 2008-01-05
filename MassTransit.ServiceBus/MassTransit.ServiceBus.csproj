@@ -48,13 +48,13 @@
     <Compile Include="IEndpoint.cs" />
     <Compile Include="IEnvelope.cs" />
     <Compile Include="IMessage.cs" />
-    <Compile Include="IMessageEndpoint.cs" />
-    <Compile Include="IMessageEndpointReceive.cs" />
+    <Compile Include="IMessageConsumer.cs" />
+    <Compile Include="INotifyMessageConsumer.cs" />
     <Compile Include="IMessageHandler.cs" />
     <Compile Include="IServiceBus.cs" />
     <Compile Include="IServiceBusAsyncResult.cs" />
     <Compile Include="ISubscriptionStorage.cs" />
-    <Compile Include="MessageEndpoint.cs" />
+    <Compile Include="MessageConsumer.cs" />
     <Compile Include="MessageQueueEndpoint.cs" />
     <Compile Include="MessageContext.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

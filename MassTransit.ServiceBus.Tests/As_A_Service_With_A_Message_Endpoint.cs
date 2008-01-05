@@ -44,10 +44,10 @@ namespace MassTransit.ServiceBus.Tests
             {
                 _serviceBus = new ServiceBus(mockEndpoint, mockSubscriptionStorage);
 
-                _serviceBus.MessageEndpoint<PingMessage>().Subscribe(MyUpdateMessage_Received);
+                _serviceBus.Consumer<PingMessage>().Subscribe(MyUpdateMessage_Received);
             }
 
-            Assert.That(_serviceBus.MessageEndpoint<PingMessage>(), Is.Not.Null);
+            Assert.That(_serviceBus.Consumer<PingMessage>(), Is.Not.Null);
 		}
 
         private static void MyUpdateMessage_Received(MessageContext<PingMessage> ctx)
