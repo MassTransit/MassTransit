@@ -42,8 +42,6 @@
   <ItemGroup>
     <Compile Include="BaseMessageHandler.cs" />
     <Compile Include="Envelope.cs" />
-    <Compile Include="EnvelopeFactory.cs" />
-    <Compile Include="IEnvelopeFactory.cs" />
     <Compile Include="EnvelopeReceivedEventArgs.cs" />
     <Compile Include="IEndpoint.cs" />
     <Compile Include="IEnvelope.cs" />
@@ -66,7 +64,6 @@
     <Compile Include="Subscriptions\SubscriptionMessage.cs" />
     <Compile Include="Util\Check.cs" />
     <Compile Include="Util\MsmqUtilities.cs" />
-    <Compile Include="WriteOnlyMessageQueueEndpoint.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

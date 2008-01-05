@@ -13,6 +13,6 @@ namespace MassTransit.ServiceBus
 
 		string Address { get; }
 
-        IEndpoint Poison { get; }
+        IEndpoint PoisonEndpoint { get; }
     }
 }

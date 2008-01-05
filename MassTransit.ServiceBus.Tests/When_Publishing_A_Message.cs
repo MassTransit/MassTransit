@@ -214,7 +214,7 @@ namespace MassTransit.ServiceBus.Tests
            _serviceBus.Publish(new PoisonMessage());
 
             updateEvent.WaitOne(TimeSpan.FromSeconds(3), true);
-            VerifyMessageInQueue(_serviceBus.Endpoint.Poison.Address, new PoisonMessage());
+            VerifyMessageInQueue(_serviceBus.Endpoint.PoisonEndpoint.Address, new PoisonMessage());
         }
     }
 

@@ -25,9 +25,10 @@ namespace MassTransit.ServiceBus
             _messages = messages;
         }
 
-        public Envelope()
+        public Envelope(params IMessage[] messages)
     	{
-    	}
+            _messages = messages;
+        }
 
         /// <remarks>
         /// Since the XmlSerializer doesn't work well with interfaces,

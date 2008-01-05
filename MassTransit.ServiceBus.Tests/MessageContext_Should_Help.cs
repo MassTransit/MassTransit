@@ -79,7 +79,7 @@ namespace MassTransit.ServiceBus.Tests
             using (mocks.Record())
             {
                 Expect.Call(mockBus.Endpoint).Return(mockEndpoint);
-                Expect.Call(mockEndpoint.Poison).Return(mockPoisonEndpoint);
+                Expect.Call(mockEndpoint.PoisonEndpoint).Return(mockPoisonEndpoint);
                 mockPoisonEndpoint.Send(mockEnvelope);
             }
 
@@ -103,7 +103,7 @@ namespace MassTransit.ServiceBus.Tests
                 Expect.Call(mockEnvelope.Clone()).Return(mockEnvelope);
                 mockEnvelope.Messages = new IMessage[] { requestMessage };
                 Expect.Call(mockBus.Endpoint).Return(mockEndpoint);
-                Expect.Call(mockEndpoint.Poison).Return(mockPoisonEndpoint);
+                Expect.Call(mockEndpoint.PoisonEndpoint).Return(mockPoisonEndpoint);
                 mockPoisonEndpoint.Send(mockEnvelope);
             }
 
