@@ -21,8 +21,8 @@ namespace MassTransit.ServiceBus.Tests
         		_received = true;
         		_receivedEvent.Set();
         	};
-			
-        	_serviceBus.MessageEndpoint<PingMessage>().Subscribe(handler);
+
+            _serviceBus.Subscribe(handler);
 
             PingMessage pm = new PingMessage();
             _serviceBus.Publish(pm);

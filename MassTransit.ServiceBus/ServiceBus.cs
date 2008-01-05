@@ -84,6 +84,17 @@ namespace MassTransit.ServiceBus
             set { _endpoint = value; }
         }
 
+
+        public void Subscribe<T>(MessageReceivedCallback<T> callback) where T : IMessage
+        {
+            this.MessageEndpoint<T>().Subscribe(callback);
+        }
+
+        public void Subscribe<T>(MessageReceivedCallback<T> callback, Predicate<T> condition) where T : IMessage
+        {
+            this.MessageEndpoint<T>().Subscribe(callback, condition);
+        }
+
         public IMessageEndpoint<T> MessageEndpoint<T>() where T : IMessage
         {
             lock (_messageEndpointLock)
