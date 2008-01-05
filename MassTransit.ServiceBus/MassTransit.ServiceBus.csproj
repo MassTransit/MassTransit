@@ -40,7 +40,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BaseMessageHandler.cs" />
     <Compile Include="Envelope.cs" />
     <Compile Include="EnvelopeReceivedEventArgs.cs" />
     <Compile Include="IEndpoint.cs" />
