@@ -56,8 +56,8 @@ namespace MassTransit.ServiceBus
             }
             catch (Exception ex)
             {
-                if(_log.IsErrorEnabled)
-                    _log.Error("Receive Exception", ex);
+                if (_log.IsErrorEnabled)
+                    _log.Error("ProcessMessage Exception", ex);
             }
 
             return wasAccepted;
@@ -159,27 +159,53 @@ namespace MassTransit.ServiceBus
 
         #endregion
 
-        private void Receive(object obj)
+        private void ProcessMessage(object obj)
         {
-            IEnvelope envelope = obj as Envelope;
-            if (envelope == null)
+            Message msg = obj as Message;
+            if (msg == null)
                 return;
+
+            if (_log.IsDebugEnabled)
+                _log.DebugFormat("Queue: {0} Received Message Id {1}", _queue.Path, msg.Id);
+
+            IEnvelope e;
+
+            if (msg.ResponseQueue != null)
+                e = new Envelope(Open(msg.ResponseQueue.Path));
+            else
+                e = new Envelope(this);
+
+            e.Id = msg.Id;
+            e.CorrelationId = (msg.CorrelationId == "00000000-0000-0000-0000-000000000000\\0"
+                                   ? null
+                                   : msg.CorrelationId);
+
+            e.TimeToBeReceived = msg.TimeToBeReceived;
+            e.Recoverable = msg.Recoverable;
+            e.SentTime = msg.SentTime;
+            e.ArrivedTime = msg.ArrivedTime;
+            e.Label = msg.Label;
+
+            IMessage[] messages = _formatter.Deserialize(msg.BodyStream) as IMessage[];
+            if (messages != null)
+            {
+                e.Messages = messages;
+            }
 
             try
             {
                 if (_onEnvelopeReceived != null)
                 {
                     if (_log.IsDebugEnabled)
-                        _log.DebugFormat("Delivering Envelope {0} by {1}", envelope.Id, GetHashCode());
+                        _log.DebugFormat("Delivering Envelope {0} by {1}", e.Id, GetHashCode());
 
-                    _onEnvelopeReceived(this, new EnvelopeReceivedEventArgs(envelope));
+                    _onEnvelopeReceived(this, new EnvelopeReceivedEventArgs(e));
                 }
                 else
                 {
                     if (_log.IsDebugEnabled)
-                        _log.DebugFormat("Envelope {0} dropped by {1}", envelope.Id, GetHashCode());
+                        _log.DebugFormat("Envelope {0} dropped by {1}", e.Id, GetHashCode());
                 }
-
             }
             catch (Exception ex)
             {
@@ -198,43 +224,7 @@ namespace MassTransit.ServiceBus
 
                 if (msg != null)
                 {
-                    if(_log.IsDebugEnabled)
-                        _log.DebugFormat("Queue: {0} Received Message Id {1}", _queue.Path, msg.Id);
-
-                    IEnvelope e;
-
-                    if (msg.ResponseQueue != null)
-                        e = new Envelope(Open(msg.ResponseQueue.Path));
-                    else
-                        e = new Envelope(this);
-
-                    e.Id = msg.Id;
-                    e.CorrelationId = (msg.CorrelationId == "00000000-0000-0000-0000-000000000000\\0"
-                                           ? null
-                                           : msg.CorrelationId);
-
-                    e.TimeToBeReceived = msg.TimeToBeReceived;
-                    e.Recoverable = msg.Recoverable;
-                    e.SentTime = msg.SentTime;
-                    e.ArrivedTime = msg.ArrivedTime;
-                    e.Label = msg.Label;
-
-
-                    IMessage[] messages = _formatter.Deserialize(msg.BodyStream) as IMessage[];
-                    if (messages != null)
-                    {
-                        e.Messages = messages;
-                    }
-
-                    try
-                    {
-                        ThreadPool.QueueUserWorkItem(Receive, e);
-                    }
-                    catch (Exception ex)
-                    {
-                        if(_log.IsDebugEnabled)
-                            _log.Error("Exception from Envelope Received: ", ex);
-                    }
+                    ThreadPool.QueueUserWorkItem(ProcessMessage, msg);
                 }
             }
             catch (MessageQueueException ex)
@@ -255,12 +245,10 @@ namespace MassTransit.ServiceBus
                 _queue.BeginPeek(TimeSpan.FromHours(24), _peekCursor, PeekAction.Next, this, Queue_PeekCompleted);
         }
 
-        //TODO: Duplicated Code
         private void SerializeMessages(Stream stream, IMessage[] messages)
         {
             _formatter.Serialize(stream, messages);
         }
-
 
         public static MessageQueueEndpoint Open(string queuePath)
         {
