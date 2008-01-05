@@ -11,7 +11,8 @@ namespace MassTransit.ServiceBus
 	{
 		IEndpoint Endpoint { get; }
 
-		IMessageEndpoint<T> MessageEndpoint<T>() where T : IMessage;
+        void Subscribe<T>(MessageReceivedCallback<T> callback) where T : IMessage;
+        void Subscribe<T>(MessageReceivedCallback<T> callback, Predicate<T> condition) where T : IMessage;
 
 		/// <summary>
 		/// Publishes a message to all subscribed consumers for the message type

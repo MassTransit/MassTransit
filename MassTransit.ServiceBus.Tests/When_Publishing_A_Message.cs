@@ -17,7 +17,7 @@ namespace MassTransit.ServiceBus.Tests
             bool _updated = false;
             ManualResetEvent _updateEvent = new ManualResetEvent(false);
 
-            _serviceBus.MessageEndpoint<UpdateMessage>().Subscribe(
+            _serviceBus.Subscribe<UpdateMessage>(
                 delegate
                     {
                         _updated = true;
@@ -40,7 +40,7 @@ namespace MassTransit.ServiceBus.Tests
             bool _updated = false;
             ManualResetEvent _updateEvent = new ManualResetEvent(false);
 
-            _remoteServiceBus.MessageEndpoint<UpdateMessage>().Subscribe(
+            _remoteServiceBus.Subscribe<UpdateMessage>(
                 delegate
                     {
                         _updated = true;
@@ -77,9 +77,9 @@ namespace MassTransit.ServiceBus.Tests
             bool _replied = false;
             ManualResetEvent _repliedEvent = new ManualResetEvent(false);
 
-            _remoteServiceBus.MessageEndpoint<UpdateMessage>().Subscribe(handler);
+            _remoteServiceBus.Subscribe<UpdateMessage>(handler);
 
-            _serviceBus.MessageEndpoint<UpdateAcceptedMessage>().Subscribe(
+            _serviceBus.Subscribe<UpdateAcceptedMessage>(
                 delegate
                     {
                         _replied = true;
@@ -108,7 +108,7 @@ namespace MassTransit.ServiceBus.Tests
             bool _updated = false;
             ManualResetEvent _updateEvent = new ManualResetEvent(false);
 
-            _serviceBus.MessageEndpoint<UpdateMessage>().Subscribe(
+            _serviceBus.Subscribe<UpdateMessage>(
                 delegate
                     {
                         _updated = true;
@@ -118,7 +118,7 @@ namespace MassTransit.ServiceBus.Tests
             bool _deleted = false;
             ManualResetEvent _deleteEvent = new ManualResetEvent(false);
 
-            _serviceBus.MessageEndpoint<DeleteMessage>().Subscribe(
+            _serviceBus.Subscribe<DeleteMessage>(
                 delegate
                     {
                         _deleted = true;
@@ -152,7 +152,7 @@ namespace MassTransit.ServiceBus.Tests
             bool _updated = false;
             ManualResetEvent _updateEvent = new ManualResetEvent(false);
 
-            _remoteServiceBus.MessageEndpoint<UpdateMessage>().Subscribe(
+            _remoteServiceBus.Subscribe<UpdateMessage>(
                 delegate
                 {
                     _updated = true;
@@ -162,7 +162,7 @@ namespace MassTransit.ServiceBus.Tests
             bool _deleted = false;
             ManualResetEvent _deleteEvent = new ManualResetEvent(false);
 
-            _remoteServiceBus.MessageEndpoint<DeleteMessage>().Subscribe(
+            _remoteServiceBus.Subscribe<DeleteMessage>(
                 delegate
                 {
                     _deleted = true;
@@ -197,7 +197,7 @@ namespace MassTransit.ServiceBus.Tests
 
 
             //this ends up in a seperate thread and I am therefore unable to figure out how to test
-            _serviceBus.MessageEndpoint<PoisonMessage>().Subscribe(delegate(MessageContext<PoisonMessage> cxt)
+            _serviceBus.Subscribe<PoisonMessage>(delegate(MessageContext<PoisonMessage> cxt)
                                                                        {
                                                                            try
                                                                            {

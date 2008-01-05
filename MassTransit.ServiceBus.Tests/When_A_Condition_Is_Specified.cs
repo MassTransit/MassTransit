@@ -27,7 +27,7 @@ namespace MassTransit.ServiceBus.Tests
                         return true;
                     };
 
-            _serviceBus.MessageEndpoint<ClientMessage>().Subscribe(handler, condition);
+            _serviceBus.Subscribe(handler, condition);
 
             Thread.Sleep(TimeSpan.FromSeconds(5));
 
@@ -61,7 +61,7 @@ namespace MassTransit.ServiceBus.Tests
                     return true;
                 };
 
-            _serviceBus.MessageEndpoint<ClientMessage>().Subscribe(handler, condition);
+            _serviceBus.Subscribe(handler, condition);
 
             Thread.Sleep(TimeSpan.FromSeconds(5));
 

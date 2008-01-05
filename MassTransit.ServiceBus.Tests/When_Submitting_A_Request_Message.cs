@@ -26,7 +26,7 @@ namespace MassTransit.ServiceBus.Tests
         {
             PingMessage ping = new PingMessage();
 
-            _serviceBus.MessageEndpoint<PingMessage>().Subscribe(
+            _serviceBus.Subscribe<PingMessage>(
                 delegate(MessageContext<PingMessage> context) { context.Reply(new PongMessage()); });
 
 
