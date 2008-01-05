@@ -11,12 +11,6 @@ namespace MassTransit.ServiceBus
         private static readonly ILog _log = LogManager.GetLogger(typeof (MessageQueueEndpoint));
 
         private readonly List<CallbackItem<T>> _callbacks = new List<CallbackItem<T>>();
-        private readonly IEndpoint _endpoint;
-
-        public MessageConsumer(IEndpoint endpoint)
-        {
-            _endpoint = endpoint;
-        }
 
         #region IMessageConsumer<T> Members
 
