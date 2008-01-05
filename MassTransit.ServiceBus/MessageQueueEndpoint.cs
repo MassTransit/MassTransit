@@ -159,15 +159,8 @@ namespace MassTransit.ServiceBus
 
         #endregion
 
-        private void ProcessMessage(object obj)
+        private IEnvelope MapFrom(Message msg)
         {
-            Message msg = obj as Message;
-            if (msg == null)
-                return;
-
-            if (_log.IsDebugEnabled)
-                _log.DebugFormat("Queue: {0} Received Message Id {1}", _queue.Path, msg.Id);
-
             IEnvelope e;
 
             if (msg.ResponseQueue != null)
@@ -191,6 +184,20 @@ namespace MassTransit.ServiceBus
             {
                 e.Messages = messages;
             }
+
+            return e;
+
+        }
+        private void ProcessMessage(object obj)
+        {
+            Message msg = obj as Message;
+            if (msg == null)
+                return;
+
+            if (_log.IsDebugEnabled)
+                _log.DebugFormat("Queue: {0} Received Message Id {1}", _queue.Path, msg.Id);
+
+            IEnvelope e = MapFrom(msg);
 
             try
             {
