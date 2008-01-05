@@ -8,12 +8,14 @@ namespace MassTransit.ServiceBus.Tests
     {
         private MockRepository mocks;
         private IServiceBus mockBus;
+        private IReadWriteEndpoint mockBusEndpoint;
 
         [SetUp]
         public void SetUp()
         {
             mocks = new MockRepository();
             mockBus = mocks.CreateMock<IServiceBus>();
+            mockBusEndpoint = mocks.CreateMock<IReadWriteEndpoint>();
         }
 
         [TearDown]
@@ -21,6 +23,7 @@ namespace MassTransit.ServiceBus.Tests
         {
             mocks = null;
             mockBus = null;
+            mockBusEndpoint = null;
         }
 
         [Test]
@@ -36,7 +39,10 @@ namespace MassTransit.ServiceBus.Tests
             using(mocks.Record())
             {
                 Expect.Call(mockEnvelope.ReturnTo).Return(mockEndpoint);
-                mockBus.Send(mockEndpoint, messages);
+                Expect.Call(mockBus.Endpoint).Return(mockBusEndpoint);
+                Expect.Call(mockEnvelope.Id).Return("");
+                mockEndpoint.Send(null);
+                LastCall.IgnoreArguments();
             }
 
             using(mocks.Playback())
