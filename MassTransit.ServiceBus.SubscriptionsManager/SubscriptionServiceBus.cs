@@ -12,9 +12,9 @@ namespace MassTransit.ServiceBus.SubscriptionsManager
         public SubscriptionServiceBus(IEndpoint endpoint, ISubscriptionStorage subscriptionStorage, ISubscriptionRepository repository) : base(endpoint, subscriptionStorage)
         {
             _repository = repository;
-            this.MessageEndpoint<SubscriptionMessage>().Subscribe(OnSubscriptionMessageReceived);
-            this.MessageEndpoint<RequestCacheUpdate>().Subscribe(OnRequestCacheUpdate);
-            this.MessageEndpoint<RequestCacheUpdateForMessage>().Subscribe(OnRequestSubscribersForMessage);
+            this.Consumer<SubscriptionMessage>().Subscribe(OnSubscriptionMessageReceived);
+            this.Consumer<RequestCacheUpdate>().Subscribe(OnRequestCacheUpdate);
+            this.Consumer<RequestCacheUpdateForMessage>().Subscribe(OnRequestSubscribersForMessage);
         }
 
 

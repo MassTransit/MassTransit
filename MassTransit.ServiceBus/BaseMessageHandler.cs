@@ -18,7 +18,7 @@ namespace MassTransit.ServiceBus
             set { _bus = value; }
         }
 
-        #region IMessageEndpoint<T> Members
+        #region IMessageConsumer<T> Members
 
         /// <summary>
         /// Called by the service bus implementation when a message needs to be handled

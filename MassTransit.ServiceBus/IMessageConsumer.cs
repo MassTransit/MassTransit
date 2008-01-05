@@ -2,8 +2,7 @@ using System;
 
 namespace MassTransit.ServiceBus
 {
-    public interface IMessageEndpoint<T> : 
-		IEndpoint where T : IMessage
+    public interface IMessageConsumer<T> where T : IMessage
     {
         void Subscribe(MessageReceivedCallback<T> callback);
 

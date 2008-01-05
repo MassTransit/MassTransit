@@ -77,7 +77,7 @@ namespace MassTransit.ServiceBus.Tests
             bool _replied = false;
             ManualResetEvent _repliedEvent = new ManualResetEvent(false);
 
-            _remoteServiceBus.Subscribe<UpdateMessage>(handler);
+            _remoteServiceBus.Subscribe(handler);
 
             _serviceBus.Subscribe<UpdateAcceptedMessage>(
                 delegate
