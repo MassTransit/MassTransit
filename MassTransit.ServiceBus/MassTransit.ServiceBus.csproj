@@ -41,9 +41,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Envelope.cs" />
-    <Compile Include="EnvelopeReceivedEventArgs.cs" />
     <Compile Include="IEndpoint.cs" />
     <Compile Include="IEnvelope.cs" />
+    <Compile Include="IEnvelopeConsumer.cs" />
     <Compile Include="IMessage.cs" />
     <Compile Include="IMessageConsumer.cs" />
     <Compile Include="INotifyMessageConsumer.cs" />

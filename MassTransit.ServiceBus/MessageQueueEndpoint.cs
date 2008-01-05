@@ -17,14 +17,12 @@ namespace MassTransit.ServiceBus
         private static readonly Dictionary<string, MessageQueueEndpoint> _transportCache =
             new Dictionary<string, MessageQueueEndpoint>();
 
-        private readonly object _eventLock = new object();
-
         private readonly BinaryFormatter _formatter;
         private readonly string _queueName;
+        private readonly List<IEnvelopeConsumer> _consumers = new List<IEnvelopeConsumer>();
 
-        private EventHandler<EnvelopeReceivedEventArgs> _onEnvelopeReceived;
         private IAsyncResult _peekAsyncResult;
-        private Cursor _peekCursor;
+        private readonly Cursor _peekCursor;
         private IEndpoint _poisonEndpoint;
         private MessageQueue _queue;
 
@@ -40,28 +38,11 @@ namespace MassTransit.ServiceBus
             _queue.MessageReadPropertyFilter = mpf;
 
             _formatter = new BinaryFormatter();
+
+            _peekCursor = _queue.CreateCursor();
         }
 
         #region IReadWriteEndpoint Members
-
-        public bool AcceptEnvelope(string id)
-        {
-            bool wasAccepted = false;
-
-            try
-            {
-                _queue.ReceiveById(id);
-
-                wasAccepted = true;
-            }
-            catch (Exception ex)
-            {
-                if (_log.IsErrorEnabled)
-                    _log.Error("ProcessMessage Exception", ex);
-            }
-
-            return wasAccepted;
-        }
 
         public string Address
         {
@@ -110,28 +91,18 @@ namespace MassTransit.ServiceBus
                                  envelope.Messages != null ? envelope.Messages[0].GetType().ToString() : "");
         }
 
-        public event EventHandler<EnvelopeReceivedEventArgs> EnvelopeReceived
+        public void Subscribe(IEnvelopeConsumer consumer)
         {
-            add
+            if (!_consumers.Contains(consumer))
             {
-                lock (_eventLock)
-                    _onEnvelopeReceived =
-                        (EventHandler<EnvelopeReceivedEventArgs>) Delegate.Combine(_onEnvelopeReceived, value);
-
-                if (_peekAsyncResult == null)
-                {
-                    _peekCursor = _queue.CreateCursor();
-
-                    _peekAsyncResult =
-                        _queue.BeginPeek(TimeSpan.FromHours(24), _peekCursor, PeekAction.Current, this,
-                                         Queue_PeekCompleted);
-                }
+                _consumers.Add(consumer);
             }
-            remove
+
+            if (_peekAsyncResult == null)
             {
-                lock (_eventLock)
-                    _onEnvelopeReceived =
-                        (EventHandler<EnvelopeReceivedEventArgs>) Delegate.Remove(_onEnvelopeReceived, value);
+                _peekAsyncResult =
+                    _queue.BeginPeek(TimeSpan.FromHours(24), _peekCursor, PeekAction.Current, this,
+                                     Queue_PeekCompleted);
             }
         }
 
@@ -186,8 +157,8 @@ namespace MassTransit.ServiceBus
             }
 
             return e;
-
         }
+
         private void ProcessMessage(object obj)
         {
             Message msg = obj as Message;
@@ -197,26 +168,34 @@ namespace MassTransit.ServiceBus
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Queue: {0} Received Message Id {1}", _queue.Path, msg.Id);
 
-            IEnvelope e = MapFrom(msg);
-
-            try
+            if (_consumers.Count > 0)
             {
-                if (_onEnvelopeReceived != null)
-                {
-                    if (_log.IsDebugEnabled)
-                        _log.DebugFormat("Delivering Envelope {0} by {1}", e.Id, GetHashCode());
+                IEnvelope e = MapFrom(msg);
 
-                    _onEnvelopeReceived(this, new EnvelopeReceivedEventArgs(e));
-                }
-                else
+                try
                 {
-                    if (_log.IsDebugEnabled)
-                        _log.DebugFormat("Envelope {0} dropped by {1}", e.Id, GetHashCode());
+                    bool handleMessage = false;
+                    foreach (IEnvelopeConsumer consumer in _consumers)
+                    {
+                        if (consumer.MeetsCriteria(e))
+                        {
+                            handleMessage = true;
+                            break;
+                        }
+                    }
+
+                    if (handleMessage)
+                    {
+                        if (_log.IsDebugEnabled)
+                            _log.DebugFormat("Delivering Envelope {0} by {1}", e.Id, GetHashCode());
+
+                        _consumers.ForEach(delegate(IEnvelopeConsumer consumer) { consumer.Deliver(e); });
+                    }
                 }
-            }
-            catch (Exception ex)
-            {
-                _log.Error("Envelope Exception", ex);
+                catch (Exception ex)
+                {
+                    _log.Error("Envelope Exception", ex);
+                }
             }
         }
 
@@ -278,7 +257,7 @@ namespace MassTransit.ServiceBus
         public static void Remove(string queuePath)
         {
             string key;
-            string queueName = NormalizeQueueName(queuePath, out key);
+            NormalizeQueueName(queuePath, out key);
 
             lock (_transportCache)
             {

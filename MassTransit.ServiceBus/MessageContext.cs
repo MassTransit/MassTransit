@@ -8,10 +8,10 @@ namespace MassTransit.ServiceBus
     public class MessageContext<T> :
         EventArgs where T : IMessage
     {
-        private IEnvelope _envelope;
-        private T _message;
-        private IServiceBus _bus;
-        private ILog _log = LogManager.GetLogger(typeof (MessageContext<T>));
+        private readonly IEnvelope _envelope;
+        private readonly T _message;
+        private readonly IServiceBus _bus;
+        private readonly ILog _log = LogManager.GetLogger(typeof (MessageContext<T>));
 
         public MessageContext(IServiceBus bus, IEnvelope envelope, T message)
         {
@@ -33,32 +33,6 @@ namespace MassTransit.ServiceBus
         public IServiceBus Bus
         {
             get { return _bus; }
-        }
-
-        private bool _accepted = false;
-
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public bool WasAccepted
-        {
-            get { return _accepted; }
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
-        public bool Accept()
-        {
-            if (!_accepted)
-            {
-                if ( Bus.Endpoint.AcceptEnvelope(_envelope.Id) )
-                    _accepted = true;
-            }
-
-            return _accepted;
         }
 
         /// <summary>
@@ -90,7 +64,7 @@ namespace MassTransit.ServiceBus
         public void MarkPoison()
         {
             if (_log.IsDebugEnabled)
-                _log.DebugFormat("Envelope {0} Was Marked Poisonous", this._envelope.Id);
+                _log.DebugFormat("Envelope {0} Was Marked Poisonous", _envelope.Id);
 
             Bus.Endpoint.PoisonEndpoint.Send(Envelope);
         }
@@ -101,10 +75,10 @@ namespace MassTransit.ServiceBus
         public void MarkPoison(IMessage msg)
         {
             if (_log.IsDebugEnabled)
-                _log.DebugFormat("A Message (Index:{1}) in Envelope {0} Was Marked Poisonous", this._envelope.Id, new List<IMessage>(Envelope.Messages).IndexOf(msg));
+                _log.DebugFormat("A Message (Index:{1}) in Envelope {0} Was Marked Poisonous", _envelope.Id, new List<IMessage>(Envelope.Messages).IndexOf(msg));
 
-            IEnvelope env = (IEnvelope) this.Envelope.Clone(); //Should this be cloned?
-            env.Messages = new IMessage[] {this.Message};
+            IEnvelope env = (IEnvelope) Envelope.Clone(); //Should this be cloned?
+            env.Messages = new IMessage[] {Message};
             
             Bus.Endpoint.PoisonEndpoint.Send(env);
         }

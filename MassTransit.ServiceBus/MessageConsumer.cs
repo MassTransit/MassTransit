@@ -28,38 +28,47 @@ namespace MassTransit.ServiceBus
 
         #region INotifyMessageConsumer Members
 
-        public void OnMessageReceived(IServiceBus bus, IEnvelope envelope, IMessage message)
+        public void Deliver(IServiceBus bus, IEnvelope envelope, IMessage message)
         {
             MessageContext<T> context = new MessageContext<T>(bus, envelope, (T) message);
 
-            _callbacks.ForEach(
-                delegate(CallbackItem<T> item)
-                    {
-                        try
-                        {
-                            if (item.Condition != null)
-                            {
-                                if (item.Condition(context.Message) == false)
-                                    return;
-                            }
-
-                            if (context.Accept())
-                            {
-                                item.Callback(context);
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            if(_log.IsDebugEnabled)
-                                _log.Debug("Error in Callback", ex);
-                        }
-                    });
-
-            if (!context.WasAccepted)
+            foreach (CallbackItem<T> item in _callbacks)
             {
-                if(_log.IsInfoEnabled)
-                    _log.InfoFormat("Envelope Id {0} was not accepted", context.Envelope.Id);
+                try
+                {
+                    if (item.Condition != null)
+                    {
+                        if (item.Condition(context.Message) == false)
+                            return;
+                    }
+
+                    item.Callback(context);
+                }
+                catch (Exception ex)
+                {
+                    if (_log.IsDebugEnabled)
+                        _log.Debug("Error in Callback", ex);
+                }
             }
+        }
+
+        public bool MeetsCriteria(IMessage message)
+        {
+            foreach (CallbackItem<T> item in _callbacks)
+            {
+                if (item.Condition == null)
+                    return true;
+
+                try
+                {
+                    return item.Condition((T)message);
+                }
+                catch (Exception ex)
+                {
+                }
+            }
+
+            return false;
         }
 
         #endregion
