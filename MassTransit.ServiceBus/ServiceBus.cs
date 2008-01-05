@@ -76,7 +76,6 @@ namespace MassTransit.ServiceBus
         public IReadWriteEndpoint Endpoint
         {
             get { return _endpoint; }
-            set { _endpoint = value; }
         }
 
 
@@ -117,7 +116,7 @@ namespace MassTransit.ServiceBus
                 if (_consumers.ContainsKey(typeof (T)))
                     return _consumers[typeof (T)] as IMessageConsumer<T>;
 
-                MessageConsumer<T> consumer = new MessageConsumer<T>(Endpoint);
+                MessageConsumer<T> consumer = new MessageConsumer<T>();
 
                 _consumers[typeof (T)] = consumer;
 
