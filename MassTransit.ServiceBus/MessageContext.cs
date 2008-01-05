@@ -23,19 +23,16 @@ namespace MassTransit.ServiceBus
         public IEnvelope Envelope
         {
             get { return _envelope; }
-            set { _envelope = value; }
         }
 
         public T Message
         {
             get { return _message; }
-            set { _message = value; }
         }
 
         public IServiceBus Bus
         {
             get { return _bus; }
-            set { _bus = value; }
         }
 
         private bool _accepted = false;
