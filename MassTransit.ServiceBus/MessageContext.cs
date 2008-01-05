@@ -84,8 +84,9 @@ namespace MassTransit.ServiceBus
         /// </summary>
         public void MarkPoison()
         {
-           // if (_log.IsDebugEnabled)
-             //   _log.DebugFormat("Envelope {0} Was Marked Poisonous", this._envelope.Id);
+            if (_log.IsDebugEnabled)
+                _log.DebugFormat("Envelope {0} Was Marked Poisonous", this._envelope.Id);
+
             Bus.Endpoint.PoisonEndpoint.Send(Envelope);
         }
 

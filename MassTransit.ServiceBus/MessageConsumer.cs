@@ -56,12 +56,15 @@ namespace MassTransit.ServiceBus
                         }
                         catch (Exception ex)
                         {
+                            if(_log.IsDebugEnabled)
+                                _log.Debug("Error in Callback", ex);
                         }
                     });
 
             if (!context.WasAccepted)
             {
-                _log.InfoFormat("Envelope Id {0} was not accepted", context.Envelope.Id);
+                if(_log.IsInfoEnabled)
+                    _log.InfoFormat("Envelope Id {0} was not accepted", context.Envelope.Id);
             }
         }
 

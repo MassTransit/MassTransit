@@ -37,49 +37,19 @@ namespace MassTransit.ServiceBus.SubscriptionManager.Proxy
 
             return result;
         }
-
         public void Add(Type messageType, IEndpoint endpoint)
         {
-            lock (this)
-            {
-                if (!_messageTypeSubscriptions.ContainsKey(messageType))
-                {
-                    if (_log.IsDebugEnabled)
-                        _log.DebugFormat("Adding new subscription list for type {0} on {1}", messageType.ToString(), GetHashCode());
-                    _messageTypeSubscriptions.Add(messageType, new List<SubscriptionCacheEntry>());
-                }
-
-                SubscriptionCacheEntry entry = new SubscriptionCacheEntry(endpoint);
-
-                if (!_messageTypeSubscriptions[messageType].Contains(entry))
-                {
-                    if (_log.IsDebugEnabled)
-                        _log.DebugFormat("Adding new subscription entry for endpoint {0} on {1}", endpoint.Address,
-                                         GetHashCode());
-                    _messageTypeSubscriptions[messageType].Add(entry);
-                }
-
-                _bus.Send(_wellKnownSubscriptionManagerEndpoint, new SubscriptionMessage(messageType, endpoint.Address, SubscriptionMessage.SubscriptionChangeType.Add));
-            }
+            InternalAdd(messageType, endpoint);
+            if(_log.IsInfoEnabled)
+                _log.InfoFormat("Sending Subscription Update ({0}, {1}) to Master Repository", messageType, endpoint.Address);
+            _bus.Send(_wellKnownSubscriptionManagerEndpoint, new SubscriptionMessage(messageType, endpoint.Address, SubscriptionMessage.SubscriptionChangeType.Add));
         }
-
         public void Remove(Type messageType, IEndpoint endpoint)
         {
-            lock (this)
-            {
-                if (_messageTypeSubscriptions.ContainsKey(messageType))
-                {
-                    SubscriptionCacheEntry entry = new SubscriptionCacheEntry(endpoint);
-
-                    if (_messageTypeSubscriptions[messageType].Contains(entry))
-                        _messageTypeSubscriptions[messageType].Remove(entry);
-
-                    if (_messageTypeSubscriptions[messageType].Count == 0)
-                        _messageTypeSubscriptions.Remove(messageType);
-                }
-
-                _bus.Send(_wellKnownSubscriptionManagerEndpoint, new SubscriptionMessage(messageType, endpoint.Address, SubscriptionMessage.SubscriptionChangeType.Remove));
-            }
+            InternalRemove(messageType, endpoint);
+            if (_log.IsInfoEnabled)
+                _log.InfoFormat("Sending Subscription Update ({0}, {1}) to Master Repository", messageType, endpoint.Address);
+            _bus.Send(_wellKnownSubscriptionManagerEndpoint, new SubscriptionMessage(messageType, endpoint.Address, SubscriptionMessage.SubscriptionChangeType.Remove));
         }
 
         public void Dispose()
@@ -88,25 +58,77 @@ namespace MassTransit.ServiceBus.SubscriptionManager.Proxy
             _messageTypeSubscriptions.Clear();
         }
 
-
         private void ReactToCacheUpdateResponse(MessageContext<CacheUpdateResponse> cxt)
         {
+            
             cxt.Message.Subscriptions.ForEach(delegate (SubscriptionMessage msg)
                                                   {
                                                       switch(msg.ChangeType)
                                                       {
                                                           case SubscriptionMessage.SubscriptionChangeType.Add:
-                                                              //TODO: Infinite Messages?
-                                                              Add(msg.MessageType, new MessageQueueEndpoint(msg.Address));
+                                                              InternalAdd(msg.MessageType, new MessageQueueEndpoint(msg.Address));
                                                               break;
                                                           case SubscriptionMessage.SubscriptionChangeType.Remove:
                                                               //TODO: Infinite Messages?
-                                                              Remove(msg.MessageType, new MessageQueueEndpoint(msg.Address));
+                                                              InternalRemove(msg.MessageType, new MessageQueueEndpoint(msg.Address));
                                                               break;
                                                           default:
                                                               throw new ArgumentOutOfRangeException();
                                                       }
                                                   });
+            if (_log.IsInfoEnabled)
+                _log.InfoFormat("Cache Update Complete");
+        }
+        
+        private void InternalRemove(Type messageType, IEndpoint endpoint)
+        {
+            if (_log.IsDebugEnabled)
+                _log.DebugFormat("Removing Local Subscription {0} : {1}", messageType, endpoint.Address);
+
+            lock (this)
+            {
+                if (_messageTypeSubscriptions.ContainsKey(messageType))
+                {
+                    SubscriptionCacheEntry entry = new SubscriptionCacheEntry(endpoint);
+
+                    if (_messageTypeSubscriptions[messageType].Contains(entry))
+                    {
+                        if (_log.IsDebugEnabled)
+                            _log.DebugFormat("Removing local subscription entry for endpoint {0} on {1}", endpoint.Address,
+                                             GetHashCode());
+                        _messageTypeSubscriptions[messageType].Remove(entry);
+                    }
+
+                    if (_messageTypeSubscriptions[messageType].Count == 0)
+                    {
+                        if (_log.IsDebugEnabled)
+                            _log.DebugFormat("Removing local subscription list for type {0} on {1}", messageType.ToString(), GetHashCode());
+                        _messageTypeSubscriptions.Remove(messageType);
+                    }
+                }   
+            }
+        }
+        private void InternalAdd(Type messageType, IEndpoint endpoint)
+        {
+            lock (this)
+            {
+                if (!_messageTypeSubscriptions.ContainsKey(messageType))
+                {
+                    if (_log.IsDebugEnabled)
+                        _log.DebugFormat("Adding new local subscription list for type {0} on {1}", messageType.ToString(), GetHashCode());
+                    _messageTypeSubscriptions.Add(messageType, new List<SubscriptionCacheEntry>());
+                }
+
+                SubscriptionCacheEntry entry = new SubscriptionCacheEntry(endpoint);
+
+                if (!_messageTypeSubscriptions[messageType].Contains(entry))
+                {
+                    if (_log.IsDebugEnabled)
+                        _log.DebugFormat("Adding new local subscription entry for endpoint {0} on {1}", endpoint.Address,
+                                         GetHashCode());
+                    _messageTypeSubscriptions[messageType].Add(entry);
+                }
+            }
         }
     }
 }
