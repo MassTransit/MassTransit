@@ -143,61 +143,74 @@ namespace MassTransit.ServiceBus
         {
             try
             {
-                _log.DebugFormat("Envelope {0} Received By {1}", e.Envelope.Id, GetHashCode());
+                if(_log.IsDebugEnabled)
+                    _log.DebugFormat("Envelope {0} Received By {1}", e.Envelope.Id, GetHashCode());
 
-                if(!string.IsNullOrEmpty(e.Envelope.CorrelationId ))
+                if(string.IsNullOrEmpty(e.Envelope.CorrelationId ))
                 {
-                    _log.DebugFormat("Correlation Id = {0}", e.Envelope.CorrelationId);
-
-                    lock (_asyncResultDictionary)
-                    {
-                        if (_asyncResultDictionary.ContainsKey(e.Envelope.CorrelationId))
-                        {
-                            ServiceBusAsyncResult asyncResult = _asyncResultDictionary[e.Envelope.CorrelationId];
-                            _asyncResultDictionary.Remove(e.Envelope.CorrelationId);
-
-                            IEndpoint sourceEndpoint = sender as IEndpoint;
-                            if (sourceEndpoint != null)
-                            {
-                                if (Endpoint.AcceptEnvelope(e.Envelope.Id))
-                                {
-                                    asyncResult.Complete(e.Envelope.Messages);
-                                }
-                            }
-                        }
-                    }
-
-                    return;
+                    MessageDoesntHaveCorrelationId(e);
                 }
-
-                if (e.Envelope.Messages != null)
+                else
                 {
-                    foreach (IMessage message in e.Envelope.Messages)
-                    {
-                        _log.DebugFormat("Message Received: {0}", message.GetType());
-
-                        if (_messageEndpoints.ContainsKey(message.GetType()))
-                        {
-                            IMessageEndpointReceive receivingEndpoint =
-                                _messageEndpoints[message.GetType()] as IMessageEndpointReceive;
-                            if (receivingEndpoint != null)
-                            {
-                                try
-                                {
-                                    receivingEndpoint.OnMessageReceived(this, e.Envelope, message);
-                                }
-                                catch (Exception ex)
-                                {
-                                    _log.Error("Exception from OnMessageReceived: ", ex);
-                                }
-                            }
-                        }
-                    }
+                    MessageHasCorrelationId(e, sender);    
                 }
             }
             catch (Exception ex)
             {
                 _log.Error("Exception in Transport_EnvelopeReceived: ", ex);
+            }
+        }
+
+        private void MessageDoesntHaveCorrelationId(EnvelopeReceivedEventArgs e)
+        {
+            if (e.Envelope.Messages != null)
+            {
+                foreach (IMessage message in e.Envelope.Messages)
+                {
+                    if (_log.IsDebugEnabled)
+                        _log.DebugFormat("Message Received: {0}", message.GetType());
+
+                    if (_messageEndpoints.ContainsKey(message.GetType()))
+                    {
+                        IMessageEndpointReceive receivingEndpoint =
+                            _messageEndpoints[message.GetType()] as IMessageEndpointReceive;
+                        if (receivingEndpoint != null)
+                        {
+                            try
+                            {
+                                receivingEndpoint.OnMessageReceived(this, e.Envelope, message);
+                            }
+                            catch (Exception ex)
+                            {
+                                _log.Error("Exception from OnMessageReceived: ", ex);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        private void MessageHasCorrelationId(EnvelopeReceivedEventArgs e, object sender)
+        {
+            if (_log.IsDebugEnabled)
+                _log.DebugFormat("Correlation Id = {0}", e.Envelope.CorrelationId);
+
+            lock (_asyncResultDictionary)
+            {
+                if (_asyncResultDictionary.ContainsKey(e.Envelope.CorrelationId))
+                {
+                    ServiceBusAsyncResult asyncResult = _asyncResultDictionary[e.Envelope.CorrelationId];
+                    _asyncResultDictionary.Remove(e.Envelope.CorrelationId);
+
+                    IEndpoint sourceEndpoint = sender as IEndpoint;
+                    if (sourceEndpoint != null)
+                    {
+                        if (Endpoint.AcceptEnvelope(e.Envelope.Id))
+                        {
+                            asyncResult.Complete(e.Envelope.Messages);
+                        }
+                    }
+                }
             }
         }
     }

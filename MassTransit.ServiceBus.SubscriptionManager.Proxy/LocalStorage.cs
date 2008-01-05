@@ -8,6 +8,7 @@ namespace MassTransit.ServiceBus.SubscriptionManager.Proxy
     {
         private IServiceBus _bus;
         private IEndpoint _wellKnownSubscriptionManagerEndpoint;
+        
 
 
         public LocalStorage(IServiceBus bus, IEndpoint wellKnownSubscriptionManagerEndpoint)
