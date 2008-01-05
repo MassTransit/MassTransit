@@ -1,8 +1,9 @@
+using System;
+using NUnit.Framework;
+using NUnit.Framework.SyntaxHelpers;
+
 namespace MassTransit.ServiceBus.Tests
 {
-    using System;
-    using NUnit.Framework;
-    using NUnit.Framework.SyntaxHelpers;
 
     [TestFixture]
     public class WriteOnlyMessageQueueEndpointTests :
