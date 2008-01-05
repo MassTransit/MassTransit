@@ -37,11 +37,19 @@ namespace MassTransit.ServiceBus
 
         private bool _accepted = false;
 
+
+        /// <summary>
+        /// 
+        /// </summary>
         public bool WasAccepted
         {
             get { return _accepted; }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         public bool Accept()
         {
             if (!_accepted)
