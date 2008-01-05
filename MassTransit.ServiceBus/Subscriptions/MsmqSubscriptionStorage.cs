@@ -21,12 +21,12 @@ namespace MassTransit.ServiceBus.Subscriptions
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="storageQueueName">the name of the queue that stores all of the subscriptions</param>
+        /// <param name="storageEndpoint">the name of the queue that stores all of the subscriptions</param>
         /// <param name="endpoint"></param>
         /// <param name="subscriptionCache">in memory cache</param>
-		public MsmqSubscriptionStorage(string storageQueueName, IEndpoint endpoint, ISubscriptionStorage subscriptionCache)
+		public MsmqSubscriptionStorage(IEndpoint storageEndpoint, IEndpoint endpoint, ISubscriptionStorage subscriptionCache)
 		{
-			_storageQueueName = storageQueueName;
+            _storageQueueName = storageEndpoint.Address;
 			_endpoint = endpoint;
 			_subscriptionCache = subscriptionCache;
 			_storageQueue = new MessageQueue(_storageQueueName, QueueAccessMode.SendAndReceive);

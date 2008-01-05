@@ -30,21 +30,22 @@ namespace MassTransit.ServiceBus.Subscriptions
         {
 			lock (this)
 			{
-				if (!_messageTypeSubscriptions.ContainsKey(messageType))
-				{
-                if(_log.IsDebugEnabled)
-				    _log.DebugFormat("Adding new subscription list for type {0} on {1}", messageType.ToString(), GetHashCode());
-					_messageTypeSubscriptions.Add(messageType, new List<SubscriptionCacheEntry>());
-				}
+                if (!_messageTypeSubscriptions.ContainsKey(messageType))
+                {
+                    if (_log.IsDebugEnabled)
+                        _log.DebugFormat("Adding new subscription list for type {0} on {1}", messageType.ToString(), GetHashCode());
+                    _messageTypeSubscriptions.Add(messageType, new List<SubscriptionCacheEntry>());
+                }
 
-				SubscriptionCacheEntry entry = new SubscriptionCacheEntry(endpoint);
+			    SubscriptionCacheEntry entry = new SubscriptionCacheEntry(endpoint);
 
-				if (!_messageTypeSubscriptions[messageType].Contains(entry))
-				{
-                if(_log.IsDebugEnabled)
-				    _log.DebugFormat("Adding new subscription entry for endpoint {0} on {1}", endpoint.Address, GetHashCode());
-					_messageTypeSubscriptions[messageType].Add(entry);
-				}
+                if (!_messageTypeSubscriptions[messageType].Contains(entry))
+                {
+                    if (_log.IsDebugEnabled)
+                        _log.DebugFormat("Adding new subscription entry for endpoint {0} on {1}", endpoint.Address,
+                                         GetHashCode());
+                    _messageTypeSubscriptions[messageType].Add(entry);
+                }
 			}
         }
 

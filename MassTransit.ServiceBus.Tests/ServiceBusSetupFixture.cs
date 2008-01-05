@@ -20,6 +20,7 @@ namespace MassTransit.ServiceBus.Tests
         protected MessageQueueEndpoint _serviceBusEndPoint;
         protected MessageQueueEndpoint _remoteServiceBusEndPoint;
         protected MessageQueueEndpoint _testEndPoint;
+        protected MessageQueueEndpoint _storageEndPoint;
 
         protected string _serviceBusQueueName = @".\private$\test_servicebus";
         protected string _remoteServiceBusQueueName = @".\private$\test_remoteservicebus";
@@ -47,6 +48,7 @@ namespace MassTransit.ServiceBus.Tests
             _serviceBusEndPoint = @".\private$\test_servicebus";
             _remoteServiceBusEndPoint = @".\private$\test_remoteservicebus";
             _testEndPoint = @".\private$\test_endpoint";
+            _storageEndPoint = _subscriptionQueueName;
 
             ISubscriptionStorage _subscriptionCache;
             ISubscriptionStorage _subscriptionStorage;
@@ -56,7 +58,7 @@ namespace MassTransit.ServiceBus.Tests
 
             _subscriptionCache = new SubscriptionCache();
             _subscriptionStorage =
-                new MsmqSubscriptionStorage(_subscriptionQueueName, _serviceBusEndPoint, _subscriptionCache);
+                new MsmqSubscriptionStorage(_storageEndPoint, _serviceBusEndPoint, _subscriptionCache);
 
             _serviceBus = new ServiceBus(_serviceBusEndPoint, _subscriptionStorage);
 
@@ -64,7 +66,7 @@ namespace MassTransit.ServiceBus.Tests
             
             _remoteSubscriptionCache = new SubscriptionCache();
             _remoteSubscriptionStorage =
-                new MsmqSubscriptionStorage(_subscriptionQueueName, _remoteServiceBusEndPoint, _remoteSubscriptionCache);
+                new MsmqSubscriptionStorage(_storageEndPoint, _remoteServiceBusEndPoint, _remoteSubscriptionCache);
             _remoteServiceBus = new ServiceBus(_remoteServiceBusEndPoint, _remoteSubscriptionStorage);
         }
 
