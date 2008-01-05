@@ -167,7 +167,19 @@ namespace MassTransit.ServiceBus
 
             try
             {
-                NotifyHandlers(new EnvelopeReceivedEventArgs(envelope));
+                if (_onEnvelopeReceived != null)
+                {
+                    if (_log.IsDebugEnabled)
+                        _log.DebugFormat("Delivering Envelope {0} by {1}", envelope.Id, GetHashCode());
+
+                    _onEnvelopeReceived(this, new EnvelopeReceivedEventArgs(envelope));
+                }
+                else
+                {
+                    if (_log.IsDebugEnabled)
+                        _log.DebugFormat("Envelope {0} dropped by {1}", envelope.Id, GetHashCode());
+                }
+
             }
             catch (Exception ex)
             {
@@ -186,7 +198,8 @@ namespace MassTransit.ServiceBus
 
                 if (msg != null)
                 {
-                    _log.DebugFormat("Queue: {0} Received Message Id {1}", _queue.Path, msg.Id);
+                    if(_log.IsDebugEnabled)
+                        _log.DebugFormat("Queue: {0} Received Message Id {1}", _queue.Path, msg.Id);
 
                     IEnvelope e;
 
@@ -219,7 +232,8 @@ namespace MassTransit.ServiceBus
                     }
                     catch (Exception ex)
                     {
-                        _log.Error("Exception from Envelope Received: ", ex);
+                        if(_log.IsDebugEnabled)
+                            _log.Error("Exception from Envelope Received: ", ex);
                     }
                 }
             }
@@ -239,17 +253,6 @@ namespace MassTransit.ServiceBus
 
             if (_queue.CanRead)
                 _queue.BeginPeek(TimeSpan.FromHours(24), _peekCursor, PeekAction.Next, this, Queue_PeekCompleted);
-        }
-
-        private void NotifyHandlers(EnvelopeReceivedEventArgs e)
-        {
-            if (_onEnvelopeReceived != null)
-            {
-                _log.DebugFormat("Delivering Envelope {0} by {1}", e.Envelope.Id, GetHashCode());
-                _onEnvelopeReceived(this, e);
-            }
-            else
-                _log.DebugFormat("Envelope {0} dropped by {1}", e.Envelope.Id, GetHashCode());
         }
 
         //TODO: Duplicated Code
