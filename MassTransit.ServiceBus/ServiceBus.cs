@@ -59,24 +59,16 @@ namespace MassTransit.ServiceBus
             {
                 foreach (IEndpoint endpoint in subscribers)
                 {
-                    IEnvelopeFactory envelopeFactory = endpoint as IEnvelopeFactory;
-                    if (envelopeFactory != null)
-                    {
-                        IEnvelope envelope = envelopeFactory.NewEnvelope(Endpoint, messages as IMessage[]);
+                    IEnvelope envelope = new Envelope(Endpoint, messages as IMessage[]);
 
-                        endpoint.Send(envelope);
-                    }
+                    endpoint.Send(envelope);
                 }
             }
         }
 
         public void Send<T>(IEndpoint endpoint, params T[] messages) where T : IMessage
         {
-            IEnvelopeFactory envelopeFactory = endpoint as IEnvelopeFactory;
-            if (envelopeFactory == null)
-                throw new ArgumentNullException("endpoint", "Envelope Factory Not Supported");
-
-            IEnvelope envelope = envelopeFactory.NewEnvelope(Endpoint, messages as IMessage[]);
+            IEnvelope envelope = new Envelope(Endpoint, messages as IMessage[]);
 
             endpoint.Send(envelope);
         }
@@ -100,11 +92,7 @@ namespace MassTransit.ServiceBus
 
         public IServiceBusAsyncResult Request<T>(IEndpoint endpoint, params T[] messages) where T : IMessage
         {
-            IEnvelopeFactory envelopeFactory = endpoint as IEnvelopeFactory;
-            if (envelopeFactory == null)
-                throw new ArgumentException("Endpoint does not support IEnvelopeFactory");
-
-            IEnvelope envelope = envelopeFactory.NewEnvelope(Endpoint, messages as IMessage[]);
+            IEnvelope envelope = new Envelope(Endpoint, messages as IMessage[]);
 
             lock (_asyncResultDictionary)
             {

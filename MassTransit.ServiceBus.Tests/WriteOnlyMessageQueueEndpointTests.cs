@@ -8,12 +8,12 @@ namespace MassTransit.ServiceBus.Tests
     public class WriteOnlyMessageQueueEndpointTests :
         ServiceBusSetupFixture
     {
-        private WriteOnlyMessageQueueEndpoint endpoint;
+        private MessageQueueEndpoint endpoint;
 
         public override void Before_Each_Test_In_The_Fixture()
         {
             base.Before_Each_Test_In_The_Fixture();
-            endpoint = new WriteOnlyMessageQueueEndpoint(this._poisonQueueName);
+            endpoint = new MessageQueueEndpoint(this._poisonQueueName);
         }
 
         public override void After_Each_Test_In_The_Fixture()
@@ -26,7 +26,7 @@ namespace MassTransit.ServiceBus.Tests
         [ExpectedException(typeof(NotImplementedException))]
         public void Poison_Not_Implemented()
         {
-            object o = endpoint.Poison;
+            object o = endpoint.PoisonEndpoint;
         }
 
         [Test]

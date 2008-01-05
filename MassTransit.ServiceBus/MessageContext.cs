@@ -64,11 +64,7 @@ namespace MassTransit.ServiceBus
         {
             IEndpoint replyEndpoint = Envelope.ReturnTo;
 
-            IEnvelopeFactory envelopeFactory = replyEndpoint as IEnvelopeFactory;
-            if (envelopeFactory == null)
-                throw new NullReferenceException("Envelope Factory Not Supported");
-            
-            IEnvelope envelope = envelopeFactory.NewEnvelope(Bus.Endpoint, messages);
+            IEnvelope envelope = new Envelope(Bus.Endpoint, messages);
             envelope.CorrelationId = Envelope.Id;
 
             replyEndpoint.Send(envelope);
@@ -90,7 +86,7 @@ namespace MassTransit.ServiceBus
         {
            // if (_log.IsDebugEnabled)
              //   _log.DebugFormat("Envelope {0} Was Marked Poisonous", this._envelope.Id);
-            Bus.Endpoint.Poison.Send(Envelope);
+            Bus.Endpoint.PoisonEndpoint.Send(Envelope);
         }
 
         /// <summary>
@@ -104,7 +100,7 @@ namespace MassTransit.ServiceBus
             IEnvelope env = (IEnvelope) this.Envelope.Clone(); //Should this be cloned?
             env.Messages = new IMessage[] {this.Message};
             
-            Bus.Endpoint.Poison.Send(env);
+            Bus.Endpoint.PoisonEndpoint.Send(env);
         }
     }
 }
