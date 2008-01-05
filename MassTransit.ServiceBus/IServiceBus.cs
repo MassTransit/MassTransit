@@ -9,7 +9,7 @@ namespace MassTransit.ServiceBus
 	public interface IServiceBus : 
         IDisposable
 	{
-		IEndpoint Endpoint { get; }
+		IReadWriteEndpoint Endpoint { get; }
 
         void Subscribe<T>(MessageReceivedCallback<T> callback) where T : IMessage;
         void Subscribe<T>(MessageReceivedCallback<T> callback, Predicate<T> condition) where T : IMessage;

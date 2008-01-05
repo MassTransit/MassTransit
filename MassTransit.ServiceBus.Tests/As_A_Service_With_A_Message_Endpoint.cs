@@ -11,7 +11,7 @@ namespace MassTransit.ServiceBus.Tests
 	{
         private ServiceBus _serviceBus;
         private MockRepository mocks;
-        private IEndpoint mockEndpoint;
+        private IReadWriteEndpoint mockEndpoint;
         private ISubscriptionStorage mockSubscriptionStorage;
 
 
@@ -19,7 +19,7 @@ namespace MassTransit.ServiceBus.Tests
         public void SetUp()
         {
             mocks = new MockRepository();
-            mockEndpoint = mocks.CreateMock<IEndpoint>();
+            mockEndpoint = mocks.CreateMock<IReadWriteEndpoint>();
             mockSubscriptionStorage = mocks.CreateMock<ISubscriptionStorage>();
         }
 

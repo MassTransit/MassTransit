@@ -49,7 +49,7 @@ namespace MassTransit.ServiceBus.Tests
         public void With_Handling_Later()
         {
             IEnvelope mockEnvelope = mocks.CreateMock<IEnvelope>();
-            IEndpoint mockEndpoint = mocks.CreateMock<IEndpoint>();
+            IReadWriteEndpoint mockEndpoint = mocks.CreateMock<IReadWriteEndpoint>();
             RequestMessage requestMessage = new RequestMessage();
             MessageContext<RequestMessage> cxt = new MessageContext<RequestMessage>(mockBus, mockEnvelope, requestMessage);
             ReplyMessage replyMessage = new ReplyMessage();
@@ -71,7 +71,7 @@ namespace MassTransit.ServiceBus.Tests
         public void With_Poison_Letters()
         {
             IEnvelope mockEnvelope = mocks.CreateMock<IEnvelope>();
-            IEndpoint mockEndpoint = mocks.CreateMock<IEndpoint>();
+            IReadWriteEndpoint mockEndpoint = mocks.CreateMock<IReadWriteEndpoint>();
             IEndpoint mockPoisonEndpoint = mocks.CreateMock<IEndpoint>();
             RequestMessage requestMessage = new RequestMessage();
             MessageContext<RequestMessage> cxt = new MessageContext<RequestMessage>(mockBus, mockEnvelope, requestMessage);
@@ -93,7 +93,7 @@ namespace MassTransit.ServiceBus.Tests
         public void With_Poison_Letter()
         {
             IEnvelope mockEnvelope = mocks.CreateMock<IEnvelope>();
-            IEndpoint mockEndpoint = mocks.CreateMock<IEndpoint>();
+            IReadWriteEndpoint mockEndpoint = mocks.CreateMock<IReadWriteEndpoint>();
             IEndpoint mockPoisonEndpoint = mocks.CreateMock<IEndpoint>();
             RequestMessage requestMessage = new RequestMessage();
             MessageContext<RequestMessage> cxt = new MessageContext<RequestMessage>(mockBus, mockEnvelope, requestMessage);

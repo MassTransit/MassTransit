@@ -5,14 +5,8 @@ namespace MassTransit.ServiceBus
     public interface IEndpoint :
         IDisposable
     {
-		void Send(IEnvelope e);
+        string Address { get; }
 
-		event EventHandler<EnvelopeReceivedEventArgs> EnvelopeReceived;
-
-        bool AcceptEnvelope(string id);
-
-		string Address { get; }
-
-        IEndpoint PoisonEndpoint { get; }
+        void Send(IEnvelope e);
     }
 }

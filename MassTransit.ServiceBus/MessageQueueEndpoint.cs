@@ -10,14 +10,12 @@ using MassTransit.ServiceBus.Util;
 namespace MassTransit.ServiceBus
 {
     public class MessageQueueEndpoint :
-        IEndpoint
+        IReadWriteEndpoint
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof (MessageQueueEndpoint));
 
         private static readonly Dictionary<string, MessageQueueEndpoint> _transportCache =
             new Dictionary<string, MessageQueueEndpoint>();
-
-        private IAsyncResult _peekAsyncResult;
 
         private readonly object _eventLock = new object();
 
@@ -25,6 +23,7 @@ namespace MassTransit.ServiceBus
         private readonly string _queueName;
 
         private EventHandler<EnvelopeReceivedEventArgs> _onEnvelopeReceived;
+        private IAsyncResult _peekAsyncResult;
         private Cursor _peekCursor;
         private IEndpoint _poisonEndpoint;
         private MessageQueue _queue;
@@ -43,7 +42,7 @@ namespace MassTransit.ServiceBus
             _formatter = new BinaryFormatter();
         }
 
-        #region IEndpoint Members
+        #region IReadWriteEndpoint Members
 
         public bool AcceptEnvelope(string id)
         {

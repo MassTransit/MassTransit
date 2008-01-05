@@ -20,9 +20,9 @@ namespace MassTransit.ServiceBus
         private readonly object _consumersLock = new object();
 
         private readonly ISubscriptionStorage _subscriptionStorage;
-        private IEndpoint _endpoint;
+        private IReadWriteEndpoint _endpoint;
 
-        public ServiceBus(IEndpoint endpoint, ISubscriptionStorage subscriptionStorage)
+        public ServiceBus(IReadWriteEndpoint endpoint, ISubscriptionStorage subscriptionStorage)
         {
             Check.Parameter(endpoint).WithMessage("endpoint").IsNotNull();
             Check.Parameter(subscriptionStorage).WithMessage("subscriptionStorage").IsNotNull();
@@ -73,7 +73,7 @@ namespace MassTransit.ServiceBus
             endpoint.Send(envelope);
         }
 
-        public IEndpoint Endpoint
+        public IReadWriteEndpoint Endpoint
         {
             get { return _endpoint; }
             set { _endpoint = value; }
@@ -190,7 +190,7 @@ namespace MassTransit.ServiceBus
                     ServiceBusAsyncResult asyncResult = _asyncResultDictionary[e.Envelope.CorrelationId];
                     _asyncResultDictionary.Remove(e.Envelope.CorrelationId);
 
-                    IEndpoint sourceEndpoint = sender as IEndpoint;
+                    IReadWriteEndpoint sourceEndpoint = sender as IReadWriteEndpoint;
                     if (sourceEndpoint != null)
                     {
                         if (sourceEndpoint.AcceptEnvelope(e.Envelope.Id))
