@@ -23,7 +23,7 @@ namespace MassTransit.ServiceBus
 		private readonly string _queueName;
 		private EventHandler<EnvelopeReceivedEventArgs> _onEnvelopeReceived;
 
-		protected MessageQueueEndpoint(string queueName)
+		public MessageQueueEndpoint(string queueName)
 		{
 			_queue = new MessageQueue(queueName, QueueAccessMode.ReceiveAndAdmin);
 
@@ -178,6 +178,9 @@ namespace MassTransit.ServiceBus
 		{
 			try
 			{
+				if (_queue == null)
+					return;
+
 				Message msg = _queue.EndPeek(asyncResult);
 
 				if (msg != null)

@@ -51,6 +51,9 @@ namespace MassTransit.ServiceBus.Subscriptions
 
 		private void QueuePeekCompleted(IAsyncResult asyncResult)
 		{
+			if (_storageQueue == null)
+				return;
+
 			Message msg = _storageQueue.EndPeek(asyncResult);
 
 			if (_log.IsDebugEnabled)
