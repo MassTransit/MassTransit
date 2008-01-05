@@ -47,7 +47,6 @@
     <Compile Include="IMessage.cs" />
     <Compile Include="IMessageConsumer.cs" />
     <Compile Include="INotifyMessageConsumer.cs" />
-    <Compile Include="IMessageHandler.cs" />
     <Compile Include="IReadWriteEndpoint.cs" />
     <Compile Include="IServiceBus.cs" />
     <Compile Include="IServiceBusAsyncResult.cs" />
