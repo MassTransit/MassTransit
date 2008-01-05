@@ -46,18 +46,21 @@ namespace MassTransit.ServiceBus
 
         public bool AcceptEnvelope(string id)
         {
+            bool wasAccepted = false;
+
             try
             {
                 _queue.ReceiveById(id);
 
-                return true;
+                wasAccepted = true;
             }
             catch (Exception ex)
             {
-                _log.Error("Receive Exception", ex);
+                if(_log.IsErrorEnabled)
+                    _log.Error("Receive Exception", ex);
             }
 
-            return false;
+            return wasAccepted;
         }
 
         public string Address
