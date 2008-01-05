@@ -35,7 +35,7 @@ namespace MassTransit.ServiceBus.Tests
 		{
             using(mocks.Record())
             {
-                mockEndpoint.EnvelopeReceived += delegate { };
+                //mockEndpoint.EnvelopeReceived += delegate { };
                 LastCall.IgnoreArguments();
                 mockSubscriptionStorage.Add(typeof(PingMessage), mockEndpoint);
             }

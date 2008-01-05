@@ -5,9 +5,7 @@ namespace MassTransit.ServiceBus
     public interface IReadWriteEndpoint : 
         IEndpoint
     {
-        event EventHandler<EnvelopeReceivedEventArgs> EnvelopeReceived;
-
-        bool AcceptEnvelope(string id);
+        void Subscribe(IEnvelopeConsumer consumer);
 
         IEndpoint PoisonEndpoint { get; }
     }

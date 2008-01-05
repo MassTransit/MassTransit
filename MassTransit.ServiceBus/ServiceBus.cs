@@ -7,7 +7,8 @@ using MassTransit.ServiceBus.Util;
 namespace MassTransit.ServiceBus
 {
     public class ServiceBus :
-        IServiceBus
+        IServiceBus,
+        IEnvelopeConsumer
     {
         private static readonly ILog _log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 
@@ -28,9 +29,10 @@ namespace MassTransit.ServiceBus
             Check.Parameter(subscriptionStorage).WithMessage("subscriptionStorage").IsNotNull();
 
             _endpoint = endpoint;
-            _endpoint.EnvelopeReceived += Endpoint_EnvelopeReceived;
 
             _subscriptionStorage = subscriptionStorage;
+            
+            _endpoint.Subscribe(this);
 
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Added event handler for envelope to {0}", _endpoint.Address);
@@ -126,33 +128,11 @@ namespace MassTransit.ServiceBus
             }
         }
 
-        private void Endpoint_EnvelopeReceived(object sender, EnvelopeReceivedEventArgs e)
+        private void MessageDoesntHaveCorrelationId(IEnvelope envelope)
         {
-            try
+            if (envelope.Messages != null)
             {
-                if (_log.IsDebugEnabled)
-                    _log.DebugFormat("Envelope {0} Received By {1}", e.Envelope.Id, GetHashCode());
-
-                if (string.IsNullOrEmpty(e.Envelope.CorrelationId))
-                {
-                    MessageDoesntHaveCorrelationId(e);
-                }
-                else
-                {
-                    MessageHasCorrelationId(e, sender);
-                }
-            }
-            catch (Exception ex)
-            {
-                _log.Error("Exception in Endpoint_EnvelopeReceived: ", ex);
-            }
-        }
-
-        private void MessageDoesntHaveCorrelationId(EnvelopeReceivedEventArgs e)
-        {
-            if (e.Envelope.Messages != null)
-            {
-                foreach (IMessage message in e.Envelope.Messages)
+                foreach (IMessage message in envelope.Messages)
                 {
                     if (_log.IsDebugEnabled)
                         _log.DebugFormat("Message Received: {0}", message.GetType());
@@ -165,11 +145,11 @@ namespace MassTransit.ServiceBus
                         {
                             try
                             {
-                                receivingConsumer.OnMessageReceived(this, e.Envelope, message);
+                                receivingConsumer.Deliver(this, envelope, message);
                             }
                             catch (Exception ex)
                             {
-                                _log.Error("Exception from OnMessageReceived: ", ex);
+                                _log.Error("Exception from Deliver: ", ex);
                             }
                         }
                     }
@@ -177,27 +157,77 @@ namespace MassTransit.ServiceBus
             }
         }
 
-        private void MessageHasCorrelationId(EnvelopeReceivedEventArgs e, object sender)
+        private void MessageHasCorrelationId(IEnvelope envelope)
         {
             if (_log.IsDebugEnabled)
-                _log.DebugFormat("Correlation Id = {0}", e.Envelope.CorrelationId);
+                _log.DebugFormat("Correlation Id = {0}", envelope.CorrelationId);
 
             lock (_asyncResultDictionary)
             {
-                if (_asyncResultDictionary.ContainsKey(e.Envelope.CorrelationId))
+                if (_asyncResultDictionary.ContainsKey(envelope.CorrelationId))
                 {
-                    ServiceBusAsyncResult asyncResult = _asyncResultDictionary[e.Envelope.CorrelationId];
-                    _asyncResultDictionary.Remove(e.Envelope.CorrelationId);
+                    ServiceBusAsyncResult asyncResult = _asyncResultDictionary[envelope.CorrelationId];
+                    _asyncResultDictionary.Remove(envelope.CorrelationId);
 
-                    IReadWriteEndpoint sourceEndpoint = sender as IReadWriteEndpoint;
-                    if (sourceEndpoint != null)
+                        asyncResult.Complete(envelope.Messages);
+                }
+            }
+        }
+
+        public bool MeetsCriteria(IEnvelope envelope)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(envelope.CorrelationId))
+                {
+                    if (envelope.Messages != null)
                     {
-                        if (sourceEndpoint.AcceptEnvelope(e.Envelope.Id))
+                        foreach (IMessage message in envelope.Messages)
                         {
-                            asyncResult.Complete(e.Envelope.Messages);
+                            if (_consumers.ContainsKey(message.GetType()))
+                            {
+                                INotifyMessageConsumer receivingConsumer =
+                                    _consumers[message.GetType()];
+
+                                if ( receivingConsumer.MeetsCriteria(message) )
+                                    return true;
+                            }
                         }
                     }
                 }
+                else
+                {
+                    if (_asyncResultDictionary.ContainsKey(envelope.CorrelationId))
+                        return true;
+                }
+            }
+            catch (Exception ex)
+            {
+                _log.Error("Exception in Endpoint_EnvelopeReceived: ", ex);
+            }
+
+            return false;
+        }
+
+        public void Deliver(IEnvelope envelope)
+        {
+            try
+            {
+                if (_log.IsDebugEnabled)
+                    _log.DebugFormat("Envelope {0} Received By {1}", envelope.Id, GetHashCode());
+
+                if (string.IsNullOrEmpty(envelope.CorrelationId))
+                {
+                    MessageDoesntHaveCorrelationId(envelope);
+                }
+                else
+                {
+                    MessageHasCorrelationId(envelope);
+                }
+            }
+            catch (Exception ex)
+            {
+                _log.Error("Exception in Endpoint_EnvelopeReceived: ", ex);
             }
         }
     }

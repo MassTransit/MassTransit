@@ -2,6 +2,7 @@ namespace MassTransit.ServiceBus
 {
 	public interface INotifyMessageConsumer
 	{
-		void OnMessageReceived(IServiceBus bus, IEnvelope envelope, IMessage message);
+		void Deliver(IServiceBus bus, IEnvelope envelope, IMessage message);
+	    bool MeetsCriteria(IMessage message);
 	}
 }
