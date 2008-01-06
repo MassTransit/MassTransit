@@ -146,9 +146,13 @@ namespace MassTransit.ServiceBus
 
             e.TimeToBeReceived = msg.TimeToBeReceived;
             e.Recoverable = msg.Recoverable;
-            //causes unit testing issues
-            e.SentTime = msg.SentTime;
-            e.ArrivedTime = msg.ArrivedTime;
+
+            if(!string.IsNullOrEmpty(e.Id))
+            {
+                //causes unit testing issues if not a real message
+                e.SentTime = msg.SentTime;
+                e.ArrivedTime = msg.ArrivedTime;
+            }
             e.Label = msg.Label;
 
             IMessage[] messages = _formatter.Deserialize(msg.BodyStream) as IMessage[];
