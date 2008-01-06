@@ -61,7 +61,8 @@ namespace MassTransit.ServiceBus
 
                 try
                 {
-                    return item.Condition((T)message);
+                    if (item.Condition((T)message))
+                        return true;
                 }
                 catch (Exception ex)
                 {
