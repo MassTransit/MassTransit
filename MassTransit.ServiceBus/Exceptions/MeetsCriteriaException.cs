@@ -5,15 +5,15 @@ namespace MassTransit.ServiceBus.Exceptions
     public class MeetsCriteriaException<T> 
         : Exception where T : IMessage
     {
-        private readonly MessageConsumer<T>.CallbackItem<T> _item;
+        private readonly MessageConsumerCallbackItem<T> _item;
 
-        public MeetsCriteriaException(MessageConsumer<T>.CallbackItem<T> item, string s, Exception ex) : base(s, ex)
+        public MeetsCriteriaException(MessageConsumerCallbackItem<T> item, string s, Exception ex) : base(s, ex)
         {
             _item = item;
         }
 
 
-        public MessageConsumer<T>.CallbackItem<T> Item
+        public MessageConsumerCallbackItem<T> Item
         {
             get { return _item; }
         }
