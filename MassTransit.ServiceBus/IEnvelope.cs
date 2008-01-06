@@ -1,4 +1,5 @@
 using System;
+using MassTransit.ServiceBus.Util;
 
 namespace MassTransit.ServiceBus
 {
@@ -17,9 +18,9 @@ namespace MassTransit.ServiceBus
 		/// </summary>
 		IEndpoint ReturnTo { get; }
 
-		string Id { get; set; }
+		MessageId Id { get; set; }
 
-		string CorrelationId { get; set; }
+		MessageId CorrelationId { get; set; }
 
 		bool Recoverable { get; set; }
 
