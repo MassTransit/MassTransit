@@ -1,12 +1,11 @@
+using System;
+using System.Collections.Generic;
+using MassTransit.ServiceBus.Subscriptions.Messages;
+using NUnit.Framework;
+using Rhino.Mocks;
+
 namespace MassTransit.ServiceBus.SubscriptionsManager.Tests
 {
-    using System;
-    using System.Collections.Generic;
-    using Messages;
-    using NUnit.Framework;
-    using Rhino.Mocks;
-    using Rhino.Mocks.Interfaces;
-
     [TestFixture]
     public class SubscriptionServiceBusTests
     {
@@ -40,15 +39,11 @@ namespace MassTransit.ServiceBus.SubscriptionsManager.Tests
             ISubscriptionStorage ss = mocks.CreateMock<ISubscriptionStorage>();
             IReadWriteEndpoint ep = mocks.CreateMock<IReadWriteEndpoint>();
             IEndpoint returnEndpoint = mocks.CreateMock<IEndpoint>();
-            IEventRaiser evt;
             IEnvelope env = mocks.CreateMock<IEnvelope>();
             string envId = Guid.NewGuid().ToString();
 
             using (mocks.Record())
             {
-                //ep.EnvelopeReceived += null;
-                
-                evt = LastCall.IgnoreArguments().GetEventRaiser();
                 ss.Add(null, ep);
                 LastCall.IgnoreArguments().Repeat.Times(3);
                 Expect.Call(env.Id).Return(envId);
@@ -60,9 +55,7 @@ namespace MassTransit.ServiceBus.SubscriptionsManager.Tests
             }
             using (mocks.Playback())
             {
-                SubscriptionServiceBus bus = new SubscriptionServiceBus(ep, ss, sr);
-                //evt.Raise(null, new EnvelopeReceivedEventArgs(env));
-                
+                SubscriptionServiceBus bus = new SubscriptionServiceBus(ep, ss, sr);               
             }
         }
     }

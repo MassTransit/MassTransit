@@ -60,10 +60,14 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ServiceBus.cs" />
     <Compile Include="ServiceBusAsyncResult.cs" />
+    <Compile Include="Subscriptions\LocalSubscriptionCache.cs" />
+    <Compile Include="Subscriptions\Messages\CacheUpdateResponse.cs" />
+    <Compile Include="Subscriptions\Messages\RequestCacheUpdate.cs" />
+    <Compile Include="Subscriptions\Messages\RequestCacheUpdateForMessage.cs" />
+    <Compile Include="Subscriptions\Messages\SubscriptionMessage.cs" />
     <Compile Include="Subscriptions\MsmqSubscriptionStorage.cs" />
     <Compile Include="Subscriptions\SubscriptionCache.cs" />
     <Compile Include="Subscriptions\SubscriptionCacheEntry.cs" />
-    <Compile Include="Subscriptions\SubscriptionMessage.cs" />
     <Compile Include="Util\Check.cs" />
     <Compile Include="Util\MessageId.cs" />
     <Compile Include="Util\MsmqUtilities.cs" />

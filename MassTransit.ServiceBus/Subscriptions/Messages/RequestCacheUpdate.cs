@@ -1,4 +1,4 @@
-namespace MassTransit.ServiceBus.SubscriptionsManager.Messages
+namespace MassTransit.ServiceBus.Subscriptions.Messages
 {
     using System;
 

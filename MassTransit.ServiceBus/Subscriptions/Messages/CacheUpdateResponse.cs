@@ -1,8 +1,7 @@
-namespace MassTransit.ServiceBus.SubscriptionsManager.Messages
+namespace MassTransit.ServiceBus.Subscriptions.Messages
 {
     using System;
     using System.Collections.Generic;
-    using Subscriptions;
 
     [Serializable]
     public class CacheUpdateResponse : IMessage
