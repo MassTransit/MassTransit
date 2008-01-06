@@ -50,6 +50,7 @@
     <Compile Include="As_A_Service_With_A_Message_Endpoint.cs" />
     <Compile Include="A_MessageQueueEndpoint_Should_Hide_Transaction_Issues.cs" />
     <Compile Include="MessageContext_Should_Help.cs" />
+    <Compile Include="MessageId_Tests.cs" />
     <Compile Include="Messages\PingMessage.cs" />
     <Compile Include="Messages\PoisonMessage.cs" />
     <Compile Include="Messages\PongMessage.cs" />
