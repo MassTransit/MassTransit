@@ -6,8 +6,8 @@ namespace MassTransit.ServiceBus.Util
     {
         private static readonly MessageId _empty = new MessageId(Guid.Empty, 0);
 
-        private Guid _id;
-        private uint _sequence;
+        private readonly Guid _id;
+        private readonly uint _sequence;
 
         protected MessageId(Guid id, uint sequence)
         {
@@ -19,6 +19,12 @@ namespace MassTransit.ServiceBus.Util
         {
             _id = _empty.Id;
             _sequence = _empty.Sequence;
+        }
+
+        public MessageId(MessageId other)
+        {
+            _id = other._id;
+            _sequence = other._sequence;
         }
 
         public MessageId(string s)
@@ -35,13 +41,11 @@ namespace MassTransit.ServiceBus.Util
         public Guid Id
         {
             get { return _id; }
-            set { _id = value; }
         }
 
         public uint Sequence
         {
             get { return _sequence; }
-            set { _sequence = value; }
         }
 
         public static MessageId Empty
@@ -71,8 +75,8 @@ namespace MassTransit.ServiceBus.Util
 
         public override bool Equals(object obj)
         {
-            if(obj is MessageId)
-                return Equals((MessageId)obj);
+            if (obj is MessageId)
+                return Equals((MessageId) obj);
 
             return false;
         }
