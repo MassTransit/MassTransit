@@ -12,8 +12,8 @@ namespace MassTransit.ServiceBus
     {
         private static readonly ILog _log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 
-        private readonly Dictionary<string, ServiceBusAsyncResult> _asyncResultDictionary =
-            new Dictionary<string, ServiceBusAsyncResult>();
+        private readonly Dictionary<MessageId, ServiceBusAsyncResult> _asyncResultDictionary =
+            new Dictionary<MessageId, ServiceBusAsyncResult>();
 
         private readonly Dictionary<Type, INotifyMessageConsumer> _consumers =
             new Dictionary<Type, INotifyMessageConsumer>();
@@ -169,7 +169,7 @@ namespace MassTransit.ServiceBus
         {
             try
             {
-                if (string.IsNullOrEmpty(envelope.CorrelationId))
+                if (envelope.CorrelationId == MessageId.Empty)
                 {
                     if (envelope.Messages != null)
                     {
@@ -207,7 +207,7 @@ namespace MassTransit.ServiceBus
                 if (_log.IsDebugEnabled)
                     _log.DebugFormat("Envelope {0} Received By {1}", envelope.Id, GetHashCode());
 
-                if (string.IsNullOrEmpty(envelope.CorrelationId))
+                if (envelope.CorrelationId == MessageId.Empty)
                 {
                     MessageDoesntHaveCorrelationId(envelope);
                 }

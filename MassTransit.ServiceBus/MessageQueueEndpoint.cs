@@ -68,7 +68,7 @@ namespace MassTransit.ServiceBus
 
             msg.Recoverable = envelope.Recoverable;
 
-            if (!string.IsNullOrEmpty(envelope.CorrelationId))
+            if(envelope.CorrelationId != MessageId.Empty)
                 msg.CorrelationId = envelope.CorrelationId;
 
             MessageQueueTransactionType tt = MessageQueueTransactionType.None;
@@ -140,20 +140,17 @@ namespace MassTransit.ServiceBus
                 e = new Envelope(this);
 
             e.Id = msg.Id;
-            e.CorrelationId = (msg.CorrelationId == "00000000-0000-0000-0000-000000000000\\0"
-                                   ? null
-                                   : msg.CorrelationId);
+            e.CorrelationId = msg.CorrelationId;
 
             e.TimeToBeReceived = msg.TimeToBeReceived;
             e.Recoverable = msg.Recoverable;
+            e.Label = msg.Label;
 
-            if(!string.IsNullOrEmpty(e.Id))
+            if(e.Id != MessageId.Empty)
             {
-                //causes unit testing issues if not a real message
                 e.SentTime = msg.SentTime;
                 e.ArrivedTime = msg.ArrivedTime;
             }
-            e.Label = msg.Label;
 
             IMessage[] messages = _formatter.Deserialize(msg.BodyStream) as IMessage[];
             if (messages != null)

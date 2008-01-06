@@ -1,4 +1,5 @@
 using System;
+using MassTransit.ServiceBus.Util;
 using NUnit.Framework;
 using NUnit.Framework.SyntaxHelpers;
 using Rhino.Mocks;
@@ -91,7 +92,7 @@ namespace MassTransit.ServiceBus.Tests
         [Test]
         public void The_Id_Should_Be_Set()
         {
-            string id = Guid.NewGuid().ToString();
+            MessageId id = Guid.NewGuid() + "\\27";
 
             Envelope e = new Envelope();
 
@@ -103,7 +104,7 @@ namespace MassTransit.ServiceBus.Tests
         [Test]
         public void The_CorrelationId_Should_Be_Set()
         {
-            string id = Guid.NewGuid().ToString();
+            MessageId id = Guid.NewGuid() + "\\27";
 
             Envelope e = new Envelope();
 
