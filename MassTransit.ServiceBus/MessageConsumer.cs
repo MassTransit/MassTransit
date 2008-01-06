@@ -4,6 +4,8 @@ using log4net;
 
 namespace MassTransit.ServiceBus
 {
+    using Exceptions;
+
     public class MessageConsumer<T> :
         IMessageConsumer<T>,
         INotifyMessageConsumer where T : IMessage
@@ -66,9 +68,11 @@ namespace MassTransit.ServiceBus
                 }
                 catch (Exception ex)
                 {
-                    //TODO: why are we swallowing the exception
-                    if(_log.IsWarnEnabled)
-                        _log.Warn("Meets Criteria Issue", ex);
+                    //TODO: We may be able to remove the logging here and add it at the area that catches this exception
+                    if(_log.IsErrorEnabled)
+                        _log.Error("There was an exception in the MessageConsumer.MeetsCriteria", ex);
+
+                    throw new MeetsCriteriaException<T>(item, "There was an exception in the MessageConsumer.MeetsCriteria", ex);
                 }
             }
 
@@ -78,8 +82,8 @@ namespace MassTransit.ServiceBus
         #endregion
 
         #region Nested type: CallbackItem
-
-        internal class CallbackItem<T1> where T1 : IMessage
+        //TODO: We may want to unnest this?
+        public class CallbackItem<T1> where T1 : IMessage
         {
             private MessageReceivedCallback<T1> _callback;
             private Predicate<T1> _condition;

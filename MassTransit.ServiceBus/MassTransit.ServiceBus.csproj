@@ -42,6 +42,7 @@
   <ItemGroup>
     <Compile Include="Envelope.cs" />
     <Compile Include="EnvelopeMessageMapper.cs" />
+    <Compile Include="Exceptions\MeetsCriteriaException.cs" />
     <Compile Include="IEndpoint.cs" />
     <Compile Include="IEnvelope.cs" />
     <Compile Include="IEnvelopeConsumer.cs" />
