@@ -146,6 +146,7 @@ namespace MassTransit.ServiceBus
 
             e.TimeToBeReceived = msg.TimeToBeReceived;
             e.Recoverable = msg.Recoverable;
+            //causes unit testing issues
             e.SentTime = msg.SentTime;
             e.ArrivedTime = msg.ArrivedTime;
             e.Label = msg.Label;
@@ -159,7 +160,8 @@ namespace MassTransit.ServiceBus
             return e;
         }
 
-        private void ProcessMessage(object obj)
+        //TODO: Need to make this public so it can be tested
+        public void ProcessMessage(object obj)
         {
             Message msg = obj as Message;
             if (msg == null)
@@ -235,7 +237,8 @@ namespace MassTransit.ServiceBus
                 _queue.BeginPeek(TimeSpan.FromHours(24), _peekCursor, PeekAction.Next, this, Queue_PeekCompleted);
         }
 
-        private void SerializeMessages(Stream stream, IMessage[] messages)
+        //TODO: Need to make public so we can test
+        public void SerializeMessages(Stream stream, IMessage[] messages)
         {
             _formatter.Serialize(stream, messages);
         }

@@ -55,6 +55,7 @@
     <Compile Include="Messages\PongMessage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ServiceBusSetupFixture.cs" />
+    <Compile Include="MessageQueueEndpoint_MeetsCriteria.cs" />
     <Compile Include="Subscriptions\When_Working_With_Subscriptions.cs" />
     <Compile Include="Subscriptions\When_Working_With_Subscription_Entries.cs" />
     <Compile Include="When_A_Condition_Is_Specified.cs" />
