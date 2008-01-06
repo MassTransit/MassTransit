@@ -51,44 +51,27 @@ namespace MassTransit.ServiceBus
 
         public void Send(IEnvelope envelope)
         {
-            Message msg = new Message();
+            Message msg = EnvelopeMessageMapper.MapFrom(envelope);
 
-            if (envelope.Messages != null && envelope.Messages.Length > 0)
-            {
-                SerializeMessages(msg.BodyStream, envelope.Messages);
-            }
-
-            msg.ResponseQueue = new MessageQueue(envelope.ReturnTo.Address);
-
-            if (envelope.TimeToBeReceived < MessageQueue.InfiniteTimeout)
-                msg.TimeToBeReceived = envelope.TimeToBeReceived;
-
-            if (!string.IsNullOrEmpty(envelope.Label))
-                msg.Label = envelope.Label;
-
-            msg.Recoverable = envelope.Recoverable;
-
-            if(envelope.CorrelationId != MessageId.Empty)
-                msg.CorrelationId = envelope.CorrelationId;
-
-            MessageQueueTransactionType tt = MessageQueueTransactionType.None;
-            if (_queue.Transactional)
-            {
-                Check.RequireTransaction(
-                    string.Format(
-                        "The current queue {0} is transactional and this MessageQueueEndpoint is not running in a transaction.",
-                        _queueName));
-
-                tt = MessageQueueTransactionType.Automatic;
-            }
-
-            _queue.Send(msg, tt);
+            _queue.Send(msg, GetTransactionType());
 
             envelope.Id = msg.Id;
 
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Message Sent: Id = {0}, Message Type = {1}", msg.Id,
                                  envelope.Messages != null ? envelope.Messages[0].GetType().ToString() : "");
+        }
+
+        private MessageQueueTransactionType GetTransactionType()
+        {
+            MessageQueueTransactionType tt = MessageQueueTransactionType.None;
+            if (_queue.Transactional)
+            {
+                Check.RequireTransaction(string.Format("The current queue {0} is transactional and this MessageQueueEndpoint is not running in a transaction.", _queueName));
+
+                tt = MessageQueueTransactionType.Automatic;
+            }
+            return tt;
         }
 
         public void Subscribe(IEnvelopeConsumer consumer)
@@ -130,37 +113,6 @@ namespace MassTransit.ServiceBus
 
         #endregion
 
-        private IEnvelope MapFrom(Message msg)
-        {
-            IEnvelope e;
-
-            if (msg.ResponseQueue != null)
-                e = new Envelope(Open(msg.ResponseQueue.Path));
-            else
-                e = new Envelope(this);
-
-            e.Id = msg.Id;
-            e.CorrelationId = msg.CorrelationId;
-
-            e.TimeToBeReceived = msg.TimeToBeReceived;
-            e.Recoverable = msg.Recoverable;
-            e.Label = msg.Label;
-
-            if(e.Id != MessageId.Empty)
-            {
-                e.SentTime = msg.SentTime;
-                e.ArrivedTime = msg.ArrivedTime;
-            }
-
-            IMessage[] messages = _formatter.Deserialize(msg.BodyStream) as IMessage[];
-            if (messages != null)
-            {
-                e.Messages = messages;
-            }
-
-            return e;
-        }
-
         //TODO: Need to make this public so it can be tested
         public void ProcessMessage(object obj)
         {
@@ -173,7 +125,7 @@ namespace MassTransit.ServiceBus
 
             if (_consumers.Count > 0)
             {
-                IEnvelope e = MapFrom(msg);
+                IEnvelope e = EnvelopeMessageMapper.MapFrom(msg);
 
                 try
                 {
@@ -197,7 +149,8 @@ namespace MassTransit.ServiceBus
                 }
                 catch (Exception ex)
                 {
-                    _log.Error("Envelope Exception", ex);
+                    if(_log.IsErrorEnabled)
+                        _log.Error("Envelope Exception", ex);
                 }
             }
         }
