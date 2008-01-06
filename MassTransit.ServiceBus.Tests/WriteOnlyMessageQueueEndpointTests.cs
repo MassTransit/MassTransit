@@ -24,13 +24,6 @@ namespace MassTransit.ServiceBus.Tests
         }
 
         [Test]
-        [ExpectedException(typeof(NotImplementedException))]
-        public void Poison_Not_Implemented()
-        {
-            object o = endpoint.PoisonEndpoint;
-        }
-
-        [Test]
         public void Address_Is_Right()
         {
             Assert.That(endpoint.Address, Is.EqualTo(Environment.MachineName + @"\private$\test_servicebus_poison"));
