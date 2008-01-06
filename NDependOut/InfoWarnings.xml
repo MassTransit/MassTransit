@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<InfoWarnings>
+  <Info>01/06/2008 11:09:58 Begin analysis with NDepend v2.6.3.1691</Info>
+  <Info>01/06/2008 11:09:58 Retrieve dependencies of your application.</Info>
+  <Info>Don't load a previous analysis to compare with.</Info>
+  <Info>Assemblies loaded from {C:\WINDOWS\Microsoft.NET\Framework\v2.0.50727} 
+   mscorlib.dll   v2.0.0.0
+   System.Messaging.dll   v2.0.0.0
+   System.dll   v2.0.0.0
+   System.Transactions.dll   v2.0.0.0
+   System.Xml.dll   v2.0.0.0</Info>
+  <Warning>No assemblies found in directory {C:\Program Files\Reference Assemblies\Microsoft\Framework\v3.0}</Warning>
+  <Info>Assemblies loaded from {C:\Home\MassTransit\trunk\bin} 
+   MassTransit.ServiceBus.dll   v1.0.0.0
+   log4net.dll   v1.2.10.0</Info>
+  <Info>0 CQL constraint has been extracted from code.</Info>
+  <Info>01/06/2008 11:10:04 Analyse dependencies of your application.</Info>
+  <Info>No dependency cycle detected in assemblies referencement graph.</Info>
+  <Info>01/06/2008 11:10:10 End NDepend analyse.</Info>
+  <Info>01/06/2008 11:10:10 Duration: 00:00:12</Info>
+  <Info>01/06/2008 11:10:11 Building the report (standard).</Info>
+</InfoWarnings>
