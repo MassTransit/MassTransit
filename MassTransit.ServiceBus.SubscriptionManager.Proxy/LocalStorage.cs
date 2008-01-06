@@ -69,7 +69,6 @@ namespace MassTransit.ServiceBus.SubscriptionManager.Proxy
                                                               InternalAdd(msg.MessageType, new MessageQueueEndpoint(msg.Address));
                                                               break;
                                                           case SubscriptionMessage.SubscriptionChangeType.Remove:
-                                                              //TODO: Infinite Messages?
                                                               InternalRemove(msg.MessageType, new MessageQueueEndpoint(msg.Address));
                                                               break;
                                                           default:
