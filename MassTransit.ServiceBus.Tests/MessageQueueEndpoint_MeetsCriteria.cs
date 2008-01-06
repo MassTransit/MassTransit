@@ -11,6 +11,8 @@ namespace MassTransit.ServiceBus.Tests
     public class MessageQueueEndpoint_MeetsCriteria
         : ServiceBusSetupFixture
     {
+        MockRepository mocks = new MockRepository();
+
         [Test]
         public void The_Service_Bus_Should_Return_False_If_The_Message_Will_Not_Be_Handled()
         {
@@ -78,30 +80,26 @@ namespace MassTransit.ServiceBus.Tests
         [Test]
         public void The_Message_Endpoint_Should_Check_If_The_Message_Will_Be_Handled()
         {
+            IEndpoint mockReturnEndpoint = mocks.CreateMock<IEndpoint>();
             MessageQueueEndpoint endpoint = MessageQueueEndpoint.Open(@".\private$\test_endpoint");
-
-            MockRepository mocks = new MockRepository();
 
             IEnvelopeConsumer consumer = mocks.CreateMock<IEnvelopeConsumer>();
 
             endpoint.Subscribe(consumer);
 
-            IEnvelope envelope = new Envelope();
+            PingMessage ping = new PingMessage();
+            IEnvelope envelope = new Envelope(mockReturnEndpoint, ping);
 
             using(mocks.Record())
             {
-                consumer.MeetsCriteria(envelope);
-                LastCall.IgnoreArguments();
-                LastCall.Return(false);
+                Expect.Call(mockReturnEndpoint.Address).Return(@".\private$\test_endpoint");
+                Expect.Call(consumer.MeetsCriteria(envelope)).Return(false).IgnoreArguments();
             }
 
             using (mocks.Playback())
             {
-                Message queueMessage = new Message();
+                Message queueMessage = EnvelopeMessageMapper.MapFrom(envelope);
 
-                PingMessage ping = new PingMessage();
-
-                endpoint.SerializeMessages(queueMessage.BodyStream, new IMessage[] {ping});
                 queueMessage.BodyStream.Seek(0, SeekOrigin.Begin);
 
                 endpoint.ProcessMessage(queueMessage);

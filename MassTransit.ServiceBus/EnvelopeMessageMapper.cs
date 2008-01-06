@@ -1,13 +1,13 @@
 namespace MassTransit.ServiceBus
 {
-    using System.IO;
     using System.Messaging;
+    using System.Runtime.Serialization;
     using System.Runtime.Serialization.Formatters.Binary;
     using Util;
 
     public class EnvelopeMessageMapper
     {
-        private readonly static BinaryFormatter _formatter = new BinaryFormatter();
+        private readonly static IFormatter _formatter = new BinaryFormatter();
 
         public static IEnvelope MapFrom(Message msg)
         {
@@ -45,8 +45,7 @@ namespace MassTransit.ServiceBus
 
             if (envelope.Messages != null && envelope.Messages.Length > 0)
             {
-                //TODO: Does this need to be a separate function?
-                SerializeMessages(msg.BodyStream, envelope.Messages);
+                _formatter.Serialize(msg.BodyStream, envelope.Messages);
             }
 
             msg.ResponseQueue = new MessageQueue(envelope.ReturnTo.Address);
@@ -63,11 +62,6 @@ namespace MassTransit.ServiceBus
                 msg.CorrelationId = envelope.CorrelationId;
 
             return msg;
-        }
-
-        public static void SerializeMessages(Stream stream, IMessage[] messages)
-        {
-            _formatter.Serialize(stream, messages);
         }
     }
 }

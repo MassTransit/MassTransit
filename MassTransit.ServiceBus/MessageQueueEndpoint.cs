@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Messaging;
-using System.Runtime.Serialization.Formatters.Binary;
 using System.Threading;
 using log4net;
 using MassTransit.ServiceBus.Util;
@@ -17,7 +15,6 @@ namespace MassTransit.ServiceBus
         private static readonly Dictionary<string, MessageQueueEndpoint> _transportCache =
             new Dictionary<string, MessageQueueEndpoint>();
 
-        private readonly BinaryFormatter _formatter;
         private readonly string _queueName;
         private readonly List<IEnvelopeConsumer> _consumers = new List<IEnvelopeConsumer>();
 
@@ -36,8 +33,6 @@ namespace MassTransit.ServiceBus
             mpf.SetAll();
 
             _queue.MessageReadPropertyFilter = mpf;
-
-            _formatter = new BinaryFormatter();
 
             _peekCursor = _queue.CreateCursor();
         }
@@ -189,12 +184,6 @@ namespace MassTransit.ServiceBus
             //TODO: If we can't read do we want to error?
             if (_queue.CanRead)
                 _queue.BeginPeek(TimeSpan.FromHours(24), _peekCursor, PeekAction.Next, this, Queue_PeekCompleted);
-        }
-
-        //TODO: Need to make public so we can test
-        public void SerializeMessages(Stream stream, IMessage[] messages)
-        {
-            _formatter.Serialize(stream, messages);
         }
 
         public static MessageQueueEndpoint Open(string queuePath)
