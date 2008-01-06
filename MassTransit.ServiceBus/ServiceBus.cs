@@ -12,16 +12,14 @@ namespace MassTransit.ServiceBus
     {
         private static readonly ILog _log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 
-        private readonly Dictionary<MessageId, ServiceBusAsyncResult> _asyncResultDictionary =
-            new Dictionary<MessageId, ServiceBusAsyncResult>();
-
         private readonly Dictionary<Type, INotifyMessageConsumer> _consumers =
             new Dictionary<Type, INotifyMessageConsumer>();
 
         private readonly object _consumersLock = new object();
 
         private readonly ISubscriptionStorage _subscriptionStorage;
-        private IReadWriteEndpoint _endpoint;
+        private readonly CorrelatedMessageController _correlatedMessageController = new CorrelatedMessageController();
+        private readonly IReadWriteEndpoint _endpoint;
 
         public ServiceBus(IReadWriteEndpoint endpoint, ISubscriptionStorage subscriptionStorage)
         {
@@ -31,7 +29,7 @@ namespace MassTransit.ServiceBus
             _endpoint = endpoint;
 
             _subscriptionStorage = subscriptionStorage;
-            
+
             _endpoint.Subscribe(this);
 
             if (_log.IsDebugEnabled)
@@ -42,6 +40,65 @@ namespace MassTransit.ServiceBus
         {
             get { return _subscriptionStorage; }
         }
+
+        #region IEnvelopeConsumer Members
+
+        public bool MeetsCriteria(IEnvelope envelope)
+        {
+            try
+            {
+                if (envelope.CorrelationId == MessageId.Empty)
+                {
+                    if (envelope.Messages != null)
+                    {
+                        foreach (IMessage message in envelope.Messages)
+                        {
+                            if (_consumers.ContainsKey(message.GetType()))
+                            {
+                                INotifyMessageConsumer receivingConsumer =
+                                    _consumers[message.GetType()];
+
+                                if (receivingConsumer.MeetsCriteria(message))
+                                    return true;
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    return _correlatedMessageController.Match(envelope.CorrelationId);
+                }
+            }
+            catch (Exception ex)
+            {
+                _log.Error("Exception in Endpoint_EnvelopeReceived: ", ex);
+            }
+
+            return false;
+        }
+
+        public void Deliver(IEnvelope envelope)
+        {
+            try
+            {
+                if (_log.IsDebugEnabled)
+                    _log.DebugFormat("Envelope {0} Received By {1}", envelope.Id, GetHashCode());
+
+                lock (_correlatedMessageController)
+                {
+                    if (_correlatedMessageController.Process(envelope))
+                        return;
+                }
+
+                MessageDoesntHaveCorrelationId(envelope);
+            }
+            catch (Exception ex)
+            {
+                _log.Error("Exception in Endpoint_EnvelopeReceived: ", ex);
+            }
+        }
+
+        #endregion
 
         #region IServiceBus Members
 
@@ -84,17 +141,18 @@ namespace MassTransit.ServiceBus
         {
             Subscribe(callback, null);
         }
+
         public void Subscribe<T>(MessageReceivedCallback<T> callback, Predicate<T> condition) where T : IMessage
         {
             lock (_consumersLock)
             {
-                if (!_consumers.ContainsKey(typeof(T)))
+                if (!_consumers.ContainsKey(typeof (T)))
                 {
-                    _consumers[typeof(T)] = new MessageConsumer<T>();
-                    _subscriptionStorage.Add(typeof(T), Endpoint);
+                    _consumers[typeof (T)] = new MessageConsumer<T>();
+                    _subscriptionStorage.Add(typeof (T), Endpoint);
                 }
 
-                ((IMessageConsumer<T>)_consumers[typeof(T)]).Subscribe(callback, condition);
+                ((IMessageConsumer<T>) _consumers[typeof (T)]).Subscribe(callback, condition);
             }
         }
 
@@ -102,18 +160,11 @@ namespace MassTransit.ServiceBus
         {
             IEnvelope envelope = new Envelope(Endpoint, messages as IMessage[]);
 
-            lock (_asyncResultDictionary)
+            lock (_correlatedMessageController)
             {
                 endpoint.Send(envelope);
 
-                ServiceBusAsyncResult asyncResult = new ServiceBusAsyncResult();
-
-                if(_log.IsDebugEnabled)
-                    _log.DebugFormat("Recording request correlation ID {0}", envelope.Id);
-
-                _asyncResultDictionary.Add(envelope.Id, asyncResult);
-
-                return asyncResult;
+                return _correlatedMessageController.Track(envelope.Id);
             }
         }
 
@@ -145,80 +196,6 @@ namespace MassTransit.ServiceBus
                         }
                     }
                 }
-            }
-        }
-
-        private void MessageHasCorrelationId(IEnvelope envelope)
-        {
-            if (_log.IsDebugEnabled)
-                _log.DebugFormat("Correlation Id = {0}", envelope.CorrelationId);
-
-            lock (_asyncResultDictionary)
-            {
-                if (_asyncResultDictionary.ContainsKey(envelope.CorrelationId))
-                {
-                    ServiceBusAsyncResult asyncResult = _asyncResultDictionary[envelope.CorrelationId];
-                    _asyncResultDictionary.Remove(envelope.CorrelationId);
-
-                        asyncResult.Complete(envelope.Messages);
-                }
-            }
-        }
-
-        public bool MeetsCriteria(IEnvelope envelope)
-        {
-            try
-            {
-                if (envelope.CorrelationId == MessageId.Empty)
-                {
-                    if (envelope.Messages != null)
-                    {
-                        foreach (IMessage message in envelope.Messages)
-                        {
-                            if (_consumers.ContainsKey(message.GetType()))
-                            {
-                                INotifyMessageConsumer receivingConsumer =
-                                    _consumers[message.GetType()];
-
-                                if ( receivingConsumer.MeetsCriteria(message) )
-                                    return true;
-                            }
-                        }
-                    }
-                }
-                else
-                {
-                    if (_asyncResultDictionary.ContainsKey(envelope.CorrelationId))
-                        return true;
-                }
-            }
-            catch (Exception ex)
-            {
-                _log.Error("Exception in Endpoint_EnvelopeReceived: ", ex);
-            }
-
-            return false;
-        }
-
-        public void Deliver(IEnvelope envelope)
-        {
-            try
-            {
-                if (_log.IsDebugEnabled)
-                    _log.DebugFormat("Envelope {0} Received By {1}", envelope.Id, GetHashCode());
-
-                if (envelope.CorrelationId == MessageId.Empty)
-                {
-                    MessageDoesntHaveCorrelationId(envelope);
-                }
-                else
-                {
-                    MessageHasCorrelationId(envelope);
-                }
-            }
-            catch (Exception ex)
-            {
-                _log.Error("Exception in Endpoint_EnvelopeReceived: ", ex);
             }
         }
     }
