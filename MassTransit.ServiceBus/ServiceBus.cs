@@ -17,9 +17,9 @@ namespace MassTransit.ServiceBus
 
         private readonly object _consumersLock = new object();
 
-        private readonly ISubscriptionStorage _subscriptionStorage;
         private readonly CorrelatedMessageController _correlatedMessageController = new CorrelatedMessageController();
         private readonly IReadWriteEndpoint _endpoint;
+        private readonly ISubscriptionStorage _subscriptionStorage;
 
         public ServiceBus(IReadWriteEndpoint endpoint, ISubscriptionStorage subscriptionStorage)
         {
@@ -66,7 +66,8 @@ namespace MassTransit.ServiceBus
                 }
                 else
                 {
-                    return _correlatedMessageController.Match(envelope.CorrelationId);
+                    if (_correlatedMessageController.Match(envelope.CorrelationId).Found)
+                        return true;
                 }
             }
             catch (Exception ex)
@@ -86,7 +87,7 @@ namespace MassTransit.ServiceBus
 
                 lock (_correlatedMessageController)
                 {
-                    if (_correlatedMessageController.Process(envelope))
+                    if (_correlatedMessageController.Process(envelope).WasHandled)
                         return;
                 }
 

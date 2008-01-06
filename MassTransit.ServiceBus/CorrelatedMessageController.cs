@@ -24,12 +24,12 @@ namespace MassTransit.ServiceBus
             return asyncResult;
         }
 
-        public bool Match(MessageId id)
+        public Result Match(MessageId id)
         {
             return _asyncResultDictionary.ContainsKey(id);
         }
 
-        public bool Process(IEnvelope envelope)
+        public Result Process(IEnvelope envelope)
         {
             if (_asyncResultDictionary.ContainsKey(envelope.CorrelationId))
             {
@@ -42,6 +42,31 @@ namespace MassTransit.ServiceBus
             }
 
             return false;
+        }
+
+        public sealed class Result
+        {
+            private readonly bool _result;
+
+            private Result(bool result)
+            {
+                _result = result;
+            }
+
+            public bool Found
+            {
+                get { return _result; }
+            }
+
+            public bool WasHandled
+            {
+                get { return _result; }
+            }
+
+            public static implicit operator Result(bool result)
+            {
+                return new Result(result);
+            }
         }
     }
 }
