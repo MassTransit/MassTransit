@@ -1,4 +1,0 @@
-﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<AssembliesMetrics>
-  <Assembly Assembly="MassTransit.ServiceBus v1.0.0.0" NTypes="33" NAbstractTypes="10" NILInstructionInAsm="3330" NbLinesOfCodeInAsm="507" NbLinesOfCommentInAsm="170" PercentageCommentInAsm="25%" AfferentCoupling="0" EfferentCoupling="75" RelationalCohesion="2.58" Instability="1" Abstractness="0.3" DistFrMainSeq="0.21" NormDistFrMainSeq="0.3" />
-</AssembliesMetrics>

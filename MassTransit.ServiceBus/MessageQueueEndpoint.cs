@@ -15,11 +15,12 @@ namespace MassTransit.ServiceBus
         private static readonly Dictionary<string, MessageQueueEndpoint> _transportCache =
             new Dictionary<string, MessageQueueEndpoint>();
 
-        private readonly string _queueName;
         private readonly List<IEnvelopeConsumer> _consumers = new List<IEnvelopeConsumer>();
 
-        private IAsyncResult _peekAsyncResult;
         private readonly Cursor _peekCursor;
+        private readonly string _queueName;
+
+        private IAsyncResult _peekAsyncResult;
         private IEndpoint _poisonEndpoint;
         private MessageQueue _queue;
 
@@ -55,18 +56,6 @@ namespace MassTransit.ServiceBus
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Message Sent: Id = {0}, Message Type = {1}", msg.Id,
                                  envelope.Messages != null ? envelope.Messages[0].GetType().ToString() : "");
-        }
-
-        private MessageQueueTransactionType GetTransactionType()
-        {
-            MessageQueueTransactionType tt = MessageQueueTransactionType.None;
-            if (_queue.Transactional)
-            {
-                Check.RequireTransaction(string.Format("The current queue {0} is transactional and this MessageQueueEndpoint is not running in a transaction.", _queueName));
-
-                tt = MessageQueueTransactionType.Automatic;
-            }
-            return tt;
         }
 
         public void Subscribe(IEnvelopeConsumer consumer)
@@ -108,6 +97,21 @@ namespace MassTransit.ServiceBus
 
         #endregion
 
+        private MessageQueueTransactionType GetTransactionType()
+        {
+            MessageQueueTransactionType tt = MessageQueueTransactionType.None;
+            if (_queue.Transactional)
+            {
+                Check.RequireTransaction(
+                    string.Format(
+                        "The current queue {0} is transactional and this MessageQueueEndpoint is not running in a transaction.",
+                        _queueName));
+
+                tt = MessageQueueTransactionType.Automatic;
+            }
+            return tt;
+        }
+
         //TODO: Need to make this public so it can be tested
         public void ProcessMessage(object obj)
         {
@@ -144,7 +148,7 @@ namespace MassTransit.ServiceBus
                 }
                 catch (Exception ex)
                 {
-                    if(_log.IsErrorEnabled)
+                    if (_log.IsErrorEnabled)
                         _log.Error("Envelope Exception", ex);
                 }
             }
@@ -166,24 +170,26 @@ namespace MassTransit.ServiceBus
             }
             catch (MessageQueueException ex)
             {
-                //TODO: What does this mean?
-                if ((uint) ex.MessageQueueErrorCode == 0xC0000120)
-                    return;
+                if ((uint) ex.MessageQueueErrorCode == 0xC0000120 ||
+                    ex.MessageQueueErrorCode == MessageQueueErrorCode.IllegalCursorAction)
+                {
+                    if (_log.IsInfoEnabled)
+                        _log.InfoFormat("The queue ({0}) was closed during an asynchronous operation", _queueName);
 
-                //TODO: What does this mean?
-                if (ex.MessageQueueErrorCode == MessageQueueErrorCode.IllegalCursorAction)
                     return;
+                }
 
                 if (ex.MessageQueueErrorCode != MessageQueueErrorCode.IOTimeout)
                 {
-                    if(_log.IsErrorEnabled)
-                        _log.ErrorFormat("Queue_PeekCompleted Exception ({0}): {1} ", ex.Message, ex.MessageQueueErrorCode);
+                    if (_log.IsErrorEnabled)
+                        _log.ErrorFormat("Queue_PeekCompleted Exception ({0}): {1} ", ex.Message,
+                                         ex.MessageQueueErrorCode);
+
+                    return;
                 }
             }
 
-            //TODO: If we can't read do we want to error?
-            if (_queue.CanRead)
-                _queue.BeginPeek(TimeSpan.FromHours(24), _peekCursor, PeekAction.Next, this, Queue_PeekCompleted);
+            _queue.BeginPeek(TimeSpan.FromHours(24), _peekCursor, PeekAction.Next, this, Queue_PeekCompleted);
         }
 
         public static MessageQueueEndpoint Open(string queuePath)
@@ -193,10 +199,10 @@ namespace MassTransit.ServiceBus
 
             lock (_transportCache)
             {
-                if(!_transportCache.ContainsKey(key))
+                if (!_transportCache.ContainsKey(key))
                     _transportCache.Add(key, new MessageQueueEndpoint(queueName));
 
-                return _transportCache[key]; ;
+                return _transportCache[key];
             }
         }
 
