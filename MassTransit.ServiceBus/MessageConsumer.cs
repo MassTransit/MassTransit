@@ -39,7 +39,7 @@ namespace MassTransit.ServiceBus
                     if (item.Condition != null)
                     {
                         if (item.Condition(context.Message) == false)
-                            return;
+                            break;
                     }
 
                     item.Callback(context);
