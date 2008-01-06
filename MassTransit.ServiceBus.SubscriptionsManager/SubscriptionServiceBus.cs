@@ -1,8 +1,10 @@
+using System;
+using MassTransit.ServiceBus.SubscriptionsManager.Messages;
+using MassTransit.ServiceBus.Subscriptions;
+
 namespace MassTransit.ServiceBus.SubscriptionsManager
 {
-    using System;
-    using Messages;
-    using Subscriptions;
+    
 
     public class SubscriptionServiceBus : ServiceBus
     {
