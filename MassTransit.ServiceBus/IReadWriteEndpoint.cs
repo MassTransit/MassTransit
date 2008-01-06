@@ -1,5 +1,3 @@
-using System;
-
 namespace MassTransit.ServiceBus
 {
     public interface IReadWriteEndpoint : 

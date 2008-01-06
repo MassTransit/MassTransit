@@ -215,18 +215,22 @@ namespace MassTransit.ServiceBus
             }
             catch (MessageQueueException ex)
             {
+                //TODO: What does this mean?
                 if ((uint) ex.MessageQueueErrorCode == 0xC0000120)
                     return;
 
+                //TODO: What does this mean?
                 if (ex.MessageQueueErrorCode == MessageQueueErrorCode.IllegalCursorAction)
                     return;
 
                 if (ex.MessageQueueErrorCode != MessageQueueErrorCode.IOTimeout)
                 {
-                    _log.ErrorFormat("Queue_PeekCompleted Exception ({0}): {1} ", ex.Message, ex.MessageQueueErrorCode);
+                    if(_log.IsErrorEnabled)
+                        _log.ErrorFormat("Queue_PeekCompleted Exception ({0}): {1} ", ex.Message, ex.MessageQueueErrorCode);
                 }
             }
 
+            //TODO: If we can't read do we want to error?
             if (_queue.CanRead)
                 _queue.BeginPeek(TimeSpan.FromHours(24), _peekCursor, PeekAction.Next, this, Queue_PeekCompleted);
         }
@@ -243,17 +247,14 @@ namespace MassTransit.ServiceBus
 
             lock (_transportCache)
             {
-                if (_transportCache.ContainsKey(key))
-                    return _transportCache[key];
+                if(!_transportCache.ContainsKey(key))
+                    _transportCache.Add(key, new MessageQueueEndpoint(queueName));
 
-                MessageQueueEndpoint transport = new MessageQueueEndpoint(queueName);
-
-                _transportCache.Add(key, transport);
-
-                return transport;
+                return _transportCache[key]; ;
             }
         }
 
+        //TODO: If one is open should the other be close?
         public static void Remove(string queuePath)
         {
             string key;
