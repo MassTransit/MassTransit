@@ -59,11 +59,11 @@ namespace MassTransit.ServiceBus
             IList<IEndpoint> subscribers = _subscriptionStorage.List<T>();
             if (subscribers.Count > 0)
             {
-                foreach (IEndpoint endpoint in subscribers)
-                {
-                    IEnvelope envelope = new Envelope(Endpoint, messages as IMessage[]);
+                IEnvelope envelope = new Envelope(Endpoint, messages as IMessage[]);
 
-                    endpoint.Send(envelope);
+                foreach (IEndpoint subscribersEndpoint in subscribers)
+                {
+                    subscribersEndpoint.Send(envelope);
                 }
             }
         }
@@ -80,15 +80,22 @@ namespace MassTransit.ServiceBus
             get { return _endpoint; }
         }
 
-
         public void Subscribe<T>(MessageReceivedCallback<T> callback) where T : IMessage
         {
-            this.Consumer<T>().Subscribe(callback);
+            Subscribe(callback, null);
         }
-
         public void Subscribe<T>(MessageReceivedCallback<T> callback, Predicate<T> condition) where T : IMessage
         {
-            Consumer<T>().Subscribe(callback, condition);
+            lock (_consumersLock)
+            {
+                if (!_consumers.ContainsKey(typeof(T)))
+                {
+                    _consumers[typeof(T)] = new MessageConsumer<T>();
+                    _subscriptionStorage.Add(typeof(T), Endpoint);
+                }
+
+                ((IMessageConsumer<T>)_consumers[typeof(T)]).Subscribe(callback, condition);
+            }
         }
 
         public IServiceBusAsyncResult Request<T>(IEndpoint endpoint, params T[] messages) where T : IMessage
@@ -101,7 +108,8 @@ namespace MassTransit.ServiceBus
 
                 ServiceBusAsyncResult asyncResult = new ServiceBusAsyncResult();
 
-                _log.DebugFormat("Recording request correlation ID {0}", envelope.Id);
+                if(_log.IsDebugEnabled)
+                    _log.DebugFormat("Recording request correlation ID {0}", envelope.Id);
 
                 _asyncResultDictionary.Add(envelope.Id, asyncResult);
 
@@ -110,20 +118,6 @@ namespace MassTransit.ServiceBus
         }
 
         #endregion
-
-        public IMessageConsumer<T> Consumer<T>() where T : IMessage
-        {
-            lock (_consumersLock)
-            {
-                if (!_consumers.ContainsKey(typeof(T)))
-                {
-                    _consumers[typeof(T)] = new MessageConsumer<T>();
-                    _subscriptionStorage.Add(typeof(T), Endpoint);
-                }
-
-                return _consumers[typeof(T)] as IMessageConsumer<T>;
-            }
-        }
 
         private void MessageDoesntHaveCorrelationId(IEnvelope envelope)
         {
