@@ -1,0 +1,462 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<CQLResult>
+  <Group Name="Source Code Quality constraints" Status="Warn">
+    <Query Status="Warn" Name="Methods poorly commented" NbNodeMatched="10" NbNodeTested="320" KindOfNode=" methods">
+      <QueryHtml>&lt;font color='#008000'&gt;//&amp;nbsp;&amp;lt;Name&amp;gt;Methods&amp;nbsp;poorly&amp;nbsp;commented&amp;lt;/Name&amp;gt;&lt;br/&gt;&lt;/font&gt;&lt;font color='#0000FF'&gt;WARN&lt;/font&gt;&amp;nbsp;&lt;font color='#0000FF'&gt;IF&lt;/font&gt;&amp;nbsp;&lt;font color='#000064'&gt;Count&lt;/font&gt;&amp;nbsp;&lt;font color='#000000'&gt;&amp;gt;&lt;/font&gt;&amp;nbsp;&lt;b style="color:#000000;background-color:#FFFF99"&gt;0&lt;/b&gt;&amp;nbsp;&lt;font color='#0000FF'&gt;IN&lt;/font&gt;&amp;nbsp;&lt;font color='#0000FF'&gt;SELECT&lt;/font&gt;&amp;nbsp;&lt;font color='#0000FF'&gt;TOP&lt;/font&gt;&amp;nbsp;&lt;b style="color:#000000;background-color:#FFFF99"&gt;10&lt;/b&gt;&amp;nbsp;&lt;font color='#0000FF'&gt;METHODS&lt;/font&gt;&amp;nbsp;&lt;font color='#0000FF'&gt;WHERE&lt;/font&gt;&amp;nbsp;&lt;font color='#000064'&gt;PercentageComment&lt;/font&gt;&amp;nbsp;&lt;font color='#000000'&gt;&amp;lt;&lt;/font&gt;&amp;nbsp;&lt;b style="color:#000000;background-color:#FFFF99"&gt;20&lt;/b&gt;&amp;nbsp;&lt;font color='#0000FF'&gt;AND&lt;/font&gt;&amp;nbsp;&lt;font color='#000064'&gt;NbLinesOfCode&lt;/font&gt;&amp;nbsp;&lt;font color='#000000'&gt;&amp;gt;&lt;/font&gt;&amp;nbsp;&lt;b style="color:#000000;background-color:#FFFF99"&gt;10&lt;/b&gt;&amp;nbsp;&amp;nbsp;&lt;font color='#0000FF'&gt;ORDER&lt;/font&gt;&amp;nbsp;&lt;font color='#0000FF'&gt;BY&lt;/font&gt;&amp;nbsp;&lt;font color='#000064'&gt;PercentageComment&lt;/font&gt;&amp;nbsp;&lt;font color='#0000FF'&gt;ASC&lt;/font&gt;&lt;br/&gt;&lt;font color='#008000'&gt;//&amp;nbsp;METHODS&amp;nbsp;WHERE&amp;nbsp;%Comment&amp;nbsp;&amp;lt;&amp;nbsp;20&amp;nbsp;and&amp;nbsp;that&amp;nbsp;have&amp;nbsp;at&amp;nbsp;least&amp;nbsp;10&amp;nbsp;lines&amp;nbsp;of&amp;nbsp;code&amp;nbsp;should&amp;nbsp;be&amp;nbsp;more&amp;nbsp;commented.&lt;br/&gt;&lt;/font&gt;&lt;font color='#008000'&gt;//&amp;nbsp;See&amp;nbsp;the&amp;nbsp;definition&amp;nbsp;of&amp;nbsp;the&amp;nbsp;PercentageComment&amp;nbsp;metric&amp;nbsp;here&amp;nbsp;http://www.ndepend.com/Metrics.aspx#PercentageComment&lt;/font&gt;</QueryHtml>
+      <Columns>
+        <Column>methods</Column>
+        <Column>Percentage Comment</Column>
+        <Column># lines of code (LOC)</Column>
+      </Columns>
+      <Rows>
+        <Row Name="MessageDoesntHaveCorrelationId(IEnvelope)" FullName="MassTransit.ServiceBus.ServiceBus.MessageDoesntHaveCorrelationId(IEnvelope)">
+          <Val>0</Val>
+          <Val>13</Val>
+        </Row>
+        <Row Name="MeetsCriteria(IEnvelope)" FullName="MassTransit.ServiceBus.ServiceBus.MeetsCriteria(IEnvelope)">
+          <Val>0</Val>
+          <Val>15</Val>
+        </Row>
+        <Row Name="Deliver(IServiceBus,IEnvelope,IMessage)" FullName="MassTransit.ServiceBus.MessageConsumer&lt;T&gt;.Deliver(IServiceBus,IEnvelope,IMessage)">
+          <Val>0</Val>
+          <Val>12</Val>
+        </Row>
+        <Row Name=".ctor(IReadWriteEndpoint,ISubscriptionStorage)" FullName="MassTransit.ServiceBus.ServiceBus..ctor(IReadWriteEndpoint,ISubscriptionStorage)">
+          <Val>0</Val>
+          <Val>11</Val>
+        </Row>
+        <Row Name="Send(IEnvelope)" FullName="MassTransit.ServiceBus.MessageQueueEndpoint.Send(IEnvelope)">
+          <Val>0</Val>
+          <Val>19</Val>
+        </Row>
+        <Row Name="ProcessMessage(Object)" FullName="MassTransit.ServiceBus.MessageQueueEndpoint.ProcessMessage(Object)">
+          <Val>0</Val>
+          <Val>21</Val>
+        </Row>
+        <Row Name="MapFrom(Message)" FullName="MassTransit.ServiceBus.MessageQueueEndpoint.MapFrom(Message)">
+          <Val>0</Val>
+          <Val>15</Val>
+        </Row>
+        <Row Name="QueuePeekCompleted(IAsyncResult)" FullName="MassTransit.ServiceBus.Subscriptions.MsmqSubscriptionStorage.QueuePeekCompleted(IAsyncResult)">
+          <Val>5</Val>
+          <Val>18</Val>
+        </Row>
+        <Row Name="MeetsCriteria(IMessage)" FullName="MassTransit.ServiceBus.MessageConsumer&lt;T&gt;.MeetsCriteria(IMessage)">
+          <Val>7</Val>
+          <Val>12</Val>
+        </Row>
+        <Row Name="Queue_PeekCompleted(IAsyncResult)" FullName="MassTransit.ServiceBus.MessageQueueEndpoint.Queue_PeekCompleted(IAsyncResult)">
+          <Val>16</Val>
+          <Val>15</Val>
+        </Row>
+        <Row Name="Sum:" FullName="Stat">
+          <Val>28</Val>
+          <Val>151</Val>
+        </Row>
+        <Row Name="Average:" FullName="Stat">
+          <Val>2.8</Val>
+          <Val>15.1</Val>
+        </Row>
+        <Row Name="Minimum:" FullName="Stat">
+          <Val>0</Val>
+          <Val>11</Val>
+        </Row>
+        <Row Name="Maximum:" FullName="Stat">
+          <Val>16</Val>
+          <Val>21</Val>
+        </Row>
+        <Row Name="Standard deviation:" FullName="Stat">
+          <Val>5.016</Val>
+          <Val>3.1448</Val>
+        </Row>
+        <Row Name="Variance:" FullName="Stat">
+          <Val>25.16</Val>
+          <Val>9.89</Val>
+        </Row>
+      </Rows>
+    </Query>
+  </Group>
+  <Group Name="Code Quality constraints" Status="Warn">
+    <Query Status="Warn" Name="Types with too many methods" NbNodeMatched="1" NbNodeTested="108" KindOfNode=" types">
+      <QueryHtml>&lt;font color='#008000'&gt;//&amp;nbsp;&amp;lt;Name&amp;gt;Types&amp;nbsp;with&amp;nbsp;too&amp;nbsp;many&amp;nbsp;methods&amp;lt;/Name&amp;gt;&lt;br/&gt;&lt;/font&gt;&lt;font color='#0000FF'&gt;WARN&lt;/font&gt;&amp;nbsp;&lt;font color='#0000FF'&gt;IF&lt;/font&gt;&amp;nbsp;&lt;font color='#000064'&gt;Count&lt;/font&gt;&amp;nbsp;&lt;font color='#000000'&gt;&amp;gt;&lt;/font&gt;&amp;nbsp;&lt;b style="color:#000000;background-color:#FFFF99"&gt;0&lt;/b&gt;&amp;nbsp;&lt;font color='#0000FF'&gt;IN&lt;/font&gt;&amp;nbsp;&lt;font color='#0000FF'&gt;SELECT&lt;/font&gt;&amp;nbsp;&lt;font color='#0000FF'&gt;TOP&lt;/font&gt;&amp;nbsp;&lt;b style="color:#000000;background-color:#FFFF99"&gt;10&lt;/b&gt;&amp;nbsp;&lt;font color='#0000FF'&gt;TYPES&lt;/font&gt;&amp;nbsp;&lt;font color='#0000FF'&gt;WHERE&lt;/font&gt;&amp;nbsp;&lt;font color='#000064'&gt;NbMethods&lt;/font&gt;&amp;nbsp;&lt;font color='#000000'&gt;&amp;gt;&lt;/font&gt;&amp;nbsp;&lt;b style="color:#000000;background-color:#FFFF99"&gt;20&lt;/b&gt;&amp;nbsp;&lt;font color='#0000FF'&gt;ORDER&lt;/font&gt;&amp;nbsp;&lt;font color='#0000FF'&gt;BY&lt;/font&gt;&amp;nbsp;&lt;font color='#000064'&gt;NbMethods&lt;/font&gt;&amp;nbsp;&lt;font color='#0000FF'&gt;DESC&lt;/font&gt;&lt;br/&gt;&lt;font color='#008000'&gt;//&amp;nbsp;TYPES&amp;nbsp;WHERE&amp;nbsp;NbMethods&amp;nbsp;&amp;gt;&amp;nbsp;20&amp;nbsp;might&amp;nbsp;be&amp;nbsp;hard&amp;nbsp;to&amp;nbsp;understand&amp;nbsp;and&amp;nbsp;maintain&amp;nbsp;&lt;br/&gt;&lt;/font&gt;&lt;font color='#008000'&gt;//&amp;nbsp;but&amp;nbsp;there&amp;nbsp;might&amp;nbsp;be&amp;nbsp;cases&amp;nbsp;where&amp;nbsp;it&amp;nbsp;is&amp;nbsp;relevant&amp;nbsp;to&amp;nbsp;have&amp;nbsp;a&amp;nbsp;high&amp;nbsp;value&amp;nbsp;for&amp;nbsp;NbMethods.&amp;nbsp;&lt;br/&gt;&lt;/font&gt;&lt;font color='#008000'&gt;//&amp;nbsp;For&amp;nbsp;example,&amp;nbsp;the&amp;nbsp;System.Windows.Forms.DataGridView&amp;nbsp;standard&amp;nbsp;class&amp;nbsp;has&amp;nbsp;more&amp;nbsp;than&amp;nbsp;1000&amp;nbsp;methods.&lt;br/&gt;&lt;/font&gt;&lt;font color='#008000'&gt;//&amp;nbsp;See&amp;nbsp;the&amp;nbsp;definition&amp;nbsp;of&amp;nbsp;the&amp;nbsp;NbMethods&amp;nbsp;metric&amp;nbsp;here&amp;nbsp;http://www.ndepend.com/Metrics.aspx#NbMethods&lt;/font&gt;</QueryHtml>
+      <Columns>
+        <Column>types</Column>
+        <Column># Methods</Column>
+      </Columns>
+      <Rows>
+        <Row Name="Envelope" FullName="MassTransit.ServiceBus.Envelope">
+          <Val>26</Val>
+        </Row>
+        <Row Name="Sum:" FullName="Stat">
+          <Val>26</Val>
+        </Row>
+        <Row Name="Average:" FullName="Stat">
+          <Val>26</Val>
+        </Row>
+        <Row Name="Minimum:" FullName="Stat">
+          <Val>26</Val>
+        </Row>
+        <Row Name="Maximum:" FullName="Stat">
+          <Val>26</Val>
+        </Row>
+        <Row Name="Standard deviation:" FullName="Stat">
+          <Val>0</Val>
+        </Row>
+        <Row Name="Variance:" FullName="Stat">
+          <Val>0</Val>
+        </Row>
+      </Rows>
+    </Query>
+  </Group>
+  <Group Name="Performance constraints" Status="Warn">
+    <Query Status="Warn" Name="Types which instances are too big (SizeOfInst)" NbNodeMatched="3" NbNodeTested="108" KindOfNode=" types">
+      <QueryHtml>&lt;font color='#008000'&gt;//&amp;nbsp;&amp;lt;Name&amp;gt;Types&amp;nbsp;which&amp;nbsp;instances&amp;nbsp;are&amp;nbsp;too&amp;nbsp;big&amp;nbsp;(SizeOfInst)&amp;lt;/Name&amp;gt;&lt;br/&gt;&lt;/font&gt;&lt;font color='#0000FF'&gt;WARN&lt;/font&gt;&amp;nbsp;&lt;font color='#0000FF'&gt;IF&lt;/font&gt;&amp;nbsp;&lt;font color='#000064'&gt;Count&lt;/font&gt;&amp;nbsp;&lt;font color='#000000'&gt;&amp;gt;&lt;/font&gt;&amp;nbsp;&lt;b style="color:#000000;background-color:#FFFF99"&gt;0&lt;/b&gt;&amp;nbsp;&lt;font color='#0000FF'&gt;IN&lt;/font&gt;&amp;nbsp;&lt;font color='#0000FF'&gt;SELECT&lt;/font&gt;&amp;nbsp;&lt;font color='#0000FF'&gt;TOP&lt;/font&gt;&amp;nbsp;&lt;b style="color:#000000;background-color:#FFFF99"&gt;10&lt;/b&gt;&amp;nbsp;&lt;font color='#0000FF'&gt;TYPES&lt;/font&gt;&amp;nbsp;&lt;font color='#0000FF'&gt;WHERE&lt;/font&gt;&amp;nbsp;&lt;font color='#000064'&gt;SizeOfInst&lt;/font&gt;&amp;nbsp;&lt;font color='#000000'&gt;&amp;gt;&lt;/font&gt;&amp;nbsp;&lt;b style="color:#000000;background-color:#FFFF99"&gt;64&lt;/b&gt;&amp;nbsp;&lt;font color='#0000FF'&gt;ORDER&lt;/font&gt;&amp;nbsp;&lt;font color='#0000FF'&gt;BY&lt;/font&gt;&amp;nbsp;&lt;font color='#000064'&gt;SizeOfInst&lt;/font&gt;&amp;nbsp;&lt;font color='#0000FF'&gt;DESC&lt;/font&gt;&lt;br/&gt;&lt;font color='#008000'&gt;//&amp;nbsp;TYPES&amp;nbsp;WHERE&amp;nbsp;SizeOfInst&amp;nbsp;&amp;gt;&amp;nbsp;64&amp;nbsp;might&amp;nbsp;degrade&amp;nbsp;performance&amp;nbsp;(depending&amp;nbsp;on&amp;nbsp;the&amp;nbsp;number&amp;nbsp;of&amp;nbsp;&lt;br/&gt;&lt;/font&gt;&lt;font color='#008000'&gt;//&amp;nbsp;instances&amp;nbsp;created&amp;nbsp;at&amp;nbsp;runtime)&amp;nbsp;and&amp;nbsp;might&amp;nbsp;be&amp;nbsp;hard&amp;nbsp;to&amp;nbsp;maintain.&amp;nbsp;&lt;br/&gt;&lt;/font&gt;&lt;font color='#008000'&gt;//&amp;nbsp;However&amp;nbsp;it&amp;nbsp;is&amp;nbsp;not&amp;nbsp;a&amp;nbsp;rule&amp;nbsp;since&amp;nbsp;sometime&amp;nbsp;there&amp;nbsp;is&amp;nbsp;no&amp;nbsp;alternative&amp;nbsp;&lt;br/&gt;&lt;/font&gt;&lt;font color='#008000'&gt;//&amp;nbsp;(the&amp;nbsp;size&amp;nbsp;of&amp;nbsp;instances&amp;nbsp;of&amp;nbsp;the&amp;nbsp;System.Net.NetworkInformation.SystemIcmpV6Statistics&amp;nbsp;&lt;br/&gt;&lt;/font&gt;&lt;font color='#008000'&gt;//&amp;nbsp;standard&amp;nbsp;class&amp;nbsp;is&amp;nbsp;2064&amp;nbsp;bytes).&lt;br/&gt;&lt;/font&gt;&lt;font color='#008000'&gt;//&amp;nbsp;See&amp;nbsp;the&amp;nbsp;definition&amp;nbsp;of&amp;nbsp;the&amp;nbsp;SizeOfInst&amp;nbsp;metric&amp;nbsp;here&amp;nbsp;http://www.ndepend.com/Metrics.aspx#SizeOfInst&lt;/font&gt;</QueryHtml>
+      <Columns>
+        <Column>types</Column>
+        <Column>Size of instance</Column>
+      </Columns>
+      <Rows>
+        <Row Name="PreconditionException" FullName="MassTransit.ServiceBus.Util.PreconditionException">
+          <Val>72</Val>
+        </Row>
+        <Row Name="CheckException" FullName="MassTransit.ServiceBus.Util.CheckException">
+          <Val>72</Val>
+        </Row>
+        <Row Name="PostconditionException" FullName="MassTransit.ServiceBus.Util.PostconditionException">
+          <Val>72</Val>
+        </Row>
+        <Row Name="Sum:" FullName="Stat">
+          <Val>216</Val>
+        </Row>
+        <Row Name="Average:" FullName="Stat">
+          <Val>72</Val>
+        </Row>
+        <Row Name="Minimum:" FullName="Stat">
+          <Val>72</Val>
+        </Row>
+        <Row Name="Maximum:" FullName="Stat">
+          <Val>72</Val>
+        </Row>
+        <Row Name="Standard deviation:" FullName="Stat">
+          <Val>0</Val>
+        </Row>
+        <Row Name="Variance:" FullName="Stat">
+          <Val>0</Val>
+        </Row>
+      </Rows>
+    </Query>
+    <Query Status="Warn" Name="Types that use boxing/unboxing" NbNodeMatched="7" NbNodeTested="108" KindOfNode=" types">
+      <QueryHtml>&lt;font color='#008000'&gt;//&amp;nbsp;&amp;lt;Name&amp;gt;Types&amp;nbsp;that&amp;nbsp;use&amp;nbsp;boxing/unboxing&amp;lt;/Name&amp;gt;&lt;br/&gt;&lt;/font&gt;&lt;font color='#0000FF'&gt;WARN&lt;/font&gt;&amp;nbsp;&lt;font color='#0000FF'&gt;IF&lt;/font&gt;&amp;nbsp;&lt;font color='#000064'&gt;Percentage&lt;/font&gt;&amp;nbsp;&lt;font color='#000000'&gt;&amp;gt;&lt;/font&gt;&amp;nbsp;&lt;b style="color:#000000;background-color:#FFFF99"&gt;5&lt;/b&gt;&amp;nbsp;&lt;font color='#0000FF'&gt;IN&lt;/font&gt;&amp;nbsp;&lt;font color='#0000FF'&gt;SELECT&lt;/font&gt;&amp;nbsp;&lt;font color='#0000FF'&gt;TYPES&lt;/font&gt;&amp;nbsp;&lt;font color='#0000FF'&gt;WHERE&lt;/font&gt;&amp;nbsp;&lt;font color='#000064'&gt;IsUsingBoxing&lt;/font&gt;&amp;nbsp;&lt;font color='#0000FF'&gt;OR&lt;/font&gt;&amp;nbsp;&lt;font color='#000064'&gt;IsUsingUnboxing&lt;/font&gt;&amp;nbsp;&lt;br/&gt;&lt;font color='#008000'&gt;//&amp;nbsp;Thanks&amp;nbsp;to&amp;nbsp;generics,&amp;nbsp;boxing&amp;nbsp;and&amp;nbsp;unboxing&amp;nbsp;should&amp;nbsp;be&amp;nbsp;rare.&lt;/font&gt;</QueryHtml>
+      <Columns>
+        <Column>types</Column>
+        <Column># lines of code (LOC)</Column>
+      </Columns>
+      <Rows>
+        <Row Name="Sum:" FullName="Stat">
+          <Val>347</Val>
+        </Row>
+        <Row Name="Average:" FullName="Stat">
+          <Val>49.571</Val>
+        </Row>
+        <Row Name="Minimum:" FullName="Stat">
+          <Val>21</Val>
+        </Row>
+        <Row Name="Maximum:" FullName="Stat">
+          <Val>108</Val>
+        </Row>
+        <Row Name="Standard deviation:" FullName="Stat">
+          <Val>31.117</Val>
+        </Row>
+        <Row Name="Variance:" FullName="Stat">
+          <Val>968.24</Val>
+        </Row>
+      </Rows>
+    </Query>
+  </Group>
+  <Group Name="Design constraints" Status="Warn">
+    <Query Status="Warn" Name="Classes that should be sealed" NbNodeMatched="10" NbNodeTested="108" KindOfNode=" types">
+      <QueryHtml>&lt;font color='#008000'&gt;//&amp;nbsp;&amp;lt;Name&amp;gt;Classes&amp;nbsp;that&amp;nbsp;should&amp;nbsp;be&amp;nbsp;sealed&amp;lt;/Name&amp;gt;&lt;br/&gt;&lt;/font&gt;&lt;font color='#0000FF'&gt;WARN&lt;/font&gt;&amp;nbsp;&lt;font color='#0000FF'&gt;IF&lt;/font&gt;&amp;nbsp;&lt;font color='#000064'&gt;Count&lt;/font&gt;&amp;nbsp;&lt;font color='#000000'&gt;&amp;gt;&lt;/font&gt;&amp;nbsp;&lt;b style="color:#000000;background-color:#FFFF99"&gt;0&lt;/b&gt;&amp;nbsp;&lt;font color='#0000FF'&gt;IN&lt;/font&gt;&amp;nbsp;&lt;font color='#0000FF'&gt;SELECT&lt;/font&gt;&amp;nbsp;&lt;font color='#0000FF'&gt;TOP&lt;/font&gt;&amp;nbsp;&lt;b style="color:#000000;background-color:#FFFF99"&gt;10&lt;/b&gt;&amp;nbsp;&lt;font color='#0000FF'&gt;TYPES&lt;/font&gt;&amp;nbsp;&lt;font color='#0000FF'&gt;WHERE&lt;/font&gt;&amp;nbsp;&lt;font color='#000064'&gt;IsClass&lt;/font&gt;&amp;nbsp;&lt;font color='#0000FF'&gt;AND&lt;/font&gt;&amp;nbsp;&lt;font color='#000064'&gt;NbChildren&lt;/font&gt;&amp;nbsp;&lt;font color='#000000'&gt;==&lt;/font&gt;&lt;b style="color:#000000;background-color:#FFFF99"&gt;0&lt;/b&gt;&amp;nbsp;&lt;font color='#0000FF'&gt;AND&lt;/font&gt;&amp;nbsp;&lt;font color='#000000'&gt;!&lt;/font&gt;&lt;font color='#000064'&gt;IsSealed&lt;/font&gt;&amp;nbsp;&lt;font color='#0000FF'&gt;AND&lt;/font&gt;&amp;nbsp;&lt;font color='#000000'&gt;!&lt;/font&gt;&lt;font color='#000064'&gt;IsStatic&lt;/font&gt;&amp;nbsp;&lt;font color='#0000FF'&gt;ORDER&lt;/font&gt;&amp;nbsp;&lt;font color='#0000FF'&gt;BY&lt;/font&gt;&amp;nbsp;&lt;font color='#000064'&gt;NbLinesOfCode&lt;/font&gt;&amp;nbsp;&lt;br/&gt;&amp;nbsp;&lt;font color='#008000'&gt;//&amp;nbsp;Classes&amp;nbsp;with&amp;nbsp;no&amp;nbsp;descendant&amp;nbsp;should&amp;nbsp;be&amp;nbsp;sealed.&lt;/font&gt;</QueryHtml>
+      <Columns>
+        <Column>types</Column>
+        <Column># Children</Column>
+        <Column># lines of code (LOC)</Column>
+      </Columns>
+      <Rows>
+        <Row Name="PostconditionException" FullName="MassTransit.ServiceBus.Util.PostconditionException">
+          <Val>0</Val>
+          <Val>3</Val>
+        </Row>
+        <Row Name="PreconditionException" FullName="MassTransit.ServiceBus.Util.PreconditionException">
+          <Val>0</Val>
+          <Val>3</Val>
+        </Row>
+        <Row Name="Check+ObjectCheck" FullName="MassTransit.ServiceBus.Util.Check+ObjectCheck">
+          <Val>0</Val>
+          <Val>6</Val>
+        </Row>
+        <Row Name="Check+StringCheck" FullName="MassTransit.ServiceBus.Util.Check+StringCheck">
+          <Val>0</Val>
+          <Val>6</Val>
+        </Row>
+        <Row Name="MessageConsumer&lt;T&gt;+CallbackItem&lt;T1&gt;" FullName="MassTransit.ServiceBus.MessageConsumer&lt;T&gt;+CallbackItem&lt;T1&gt;">
+          <Val>0</Val>
+          <Val>9</Val>
+        </Row>
+        <Row Name="SubscriptionMessage" FullName="MassTransit.ServiceBus.Subscriptions.SubscriptionMessage">
+          <Val>0</Val>
+          <Val>17</Val>
+        </Row>
+        <Row Name="SubscriptionCacheEntry" FullName="MassTransit.ServiceBus.Subscriptions.SubscriptionCacheEntry">
+          <Val>0</Val>
+          <Val>18</Val>
+        </Row>
+        <Row Name="MessageContext&lt;T&gt;" FullName="MassTransit.ServiceBus.MessageContext&lt;T&gt;">
+          <Val>0</Val>
+          <Val>21</Val>
+        </Row>
+        <Row Name="ServiceBusAsyncResult" FullName="MassTransit.ServiceBus.ServiceBusAsyncResult">
+          <Val>0</Val>
+          <Val>22</Val>
+        </Row>
+        <Row Name="SubscriptionCache" FullName="MassTransit.ServiceBus.Subscriptions.SubscriptionCache">
+          <Val>0</Val>
+          <Val>24</Val>
+        </Row>
+        <Row Name="Sum:" FullName="Stat">
+          <Val>0</Val>
+          <Val>129</Val>
+        </Row>
+        <Row Name="Average:" FullName="Stat">
+          <Val>0</Val>
+          <Val>12.9</Val>
+        </Row>
+        <Row Name="Minimum:" FullName="Stat">
+          <Val>0</Val>
+          <Val>3</Val>
+        </Row>
+        <Row Name="Maximum:" FullName="Stat">
+          <Val>0</Val>
+          <Val>24</Val>
+        </Row>
+        <Row Name="Standard deviation:" FullName="Stat">
+          <Val>0</Val>
+          <Val>7.8797</Val>
+        </Row>
+        <Row Name="Variance:" FullName="Stat">
+          <Val>0</Val>
+          <Val>62.09</Val>
+        </Row>
+      </Rows>
+    </Query>
+  </Group>
+  <Group Name="Potentially unused code (dead code)" Status="Ok" />
+  <Group Name="Optimal Encapsulation" Status="Warn">
+    <Query Status="Warn" Name="Methods that could be declared as 'internal' in C#,  'Friend' in VB.NET" NbNodeMatched="10" NbNodeTested="320" KindOfNode=" methods">
+      <QueryHtml>&lt;font color='#008000'&gt;//&amp;nbsp;&amp;lt;Name&amp;gt;Methods&amp;nbsp;that&amp;nbsp;could&amp;nbsp;be&amp;nbsp;declared&amp;nbsp;as&amp;nbsp;'internal'&amp;nbsp;in&amp;nbsp;C#,&amp;nbsp;&amp;nbsp;'Friend'&amp;nbsp;in&amp;nbsp;VB.NET&amp;lt;/Name&amp;gt;&lt;br/&gt;&lt;/font&gt;&lt;font color='#0000FF'&gt;WARN&lt;/font&gt;&amp;nbsp;&lt;font color='#0000FF'&gt;IF&lt;/font&gt;&amp;nbsp;&lt;font color='#000064'&gt;Count&lt;/font&gt;&amp;nbsp;&lt;font color='#000000'&gt;&amp;gt;&lt;/font&gt;&amp;nbsp;&lt;b style="color:#000000;background-color:#FFFF99"&gt;0&lt;/b&gt;&amp;nbsp;&lt;font color='#0000FF'&gt;IN&lt;/font&gt;&amp;nbsp;&lt;font color='#0000FF'&gt;SELECT&lt;/font&gt;&amp;nbsp;&lt;font color='#0000FF'&gt;TOP&lt;/font&gt;&amp;nbsp;&lt;b style="color:#000000;background-color:#FFFF99"&gt;10&lt;/b&gt;&amp;nbsp;&lt;font color='#0000FF'&gt;METHODS&lt;/font&gt;&amp;nbsp;&lt;font color='#0000FF'&gt;WHERE&lt;/font&gt;&amp;nbsp;&lt;font color='#000064'&gt;CouldBeInternal&lt;/font&gt;</QueryHtml>
+      <Columns>
+        <Column>methods</Column>
+        <Column># lines of code (LOC)</Column>
+      </Columns>
+      <Rows>
+        <Row Name="op_Implicit(String)" FullName="MassTransit.ServiceBus.MessageQueueEndpoint.op_Implicit(String)">
+          <Val>1</Val>
+        </Row>
+        <Row Name=".ctor(IEndpoint,IMessage[])" FullName="MassTransit.ServiceBus.Envelope..ctor(IEndpoint,IMessage[])">
+          <Val>6</Val>
+        </Row>
+        <Row Name=".ctor()" FullName="MassTransit.ServiceBus.MessageConsumer&lt;T&gt;..ctor()">
+          <Val>1</Val>
+        </Row>
+        <Row Name="Complete(IMessage[])" FullName="MassTransit.ServiceBus.ServiceBusAsyncResult.Complete(IMessage[])">
+          <Val>3</Val>
+        </Row>
+        <Row Name=".ctor()" FullName="MassTransit.ServiceBus.ServiceBusAsyncResult..ctor()">
+          <Val>3</Val>
+        </Row>
+        <Row Name=".ctor(IServiceBus,IEnvelope,T)" FullName="MassTransit.ServiceBus.MessageContext&lt;T&gt;..ctor(IServiceBus,IEnvelope,T)">
+          <Val>5</Val>
+        </Row>
+        <Row Name="get_Message()" FullName="MassTransit.ServiceBus.MessageContext&lt;T&gt;.get_Message()">
+          <Val>1</Val>
+        </Row>
+        <Row Name=".ctor(MessageReceivedCallback&lt;T1&gt;,Predicate&lt;T1&gt;)" FullName="MassTransit.ServiceBus.MessageConsumer&lt;T&gt;+CallbackItem&lt;T1&gt;..ctor(MessageReceivedCallback&lt;T1&gt;,Predicate&lt;T1&gt;)">
+          <Val>3</Val>
+        </Row>
+        <Row Name=".ctor(MessageReceivedCallback&lt;T1&gt;)" FullName="MassTransit.ServiceBus.MessageConsumer&lt;T&gt;+CallbackItem&lt;T1&gt;..ctor(MessageReceivedCallback&lt;T1&gt;)">
+          <Val>2</Val>
+        </Row>
+        <Row Name="get_Condition()" FullName="MassTransit.ServiceBus.MessageConsumer&lt;T&gt;+CallbackItem&lt;T1&gt;.get_Condition()">
+          <Val>1</Val>
+        </Row>
+        <Row Name="Sum:" FullName="Stat">
+          <Val>26</Val>
+        </Row>
+        <Row Name="Average:" FullName="Stat">
+          <Val>2.6</Val>
+        </Row>
+        <Row Name="Minimum:" FullName="Stat">
+          <Val>1</Val>
+        </Row>
+        <Row Name="Maximum:" FullName="Stat">
+          <Val>6</Val>
+        </Row>
+        <Row Name="Standard deviation:" FullName="Stat">
+          <Val>1.6852</Val>
+        </Row>
+        <Row Name="Variance:" FullName="Stat">
+          <Val>2.84</Val>
+        </Row>
+      </Rows>
+    </Query>
+    <Query Status="Warn" Name="Methods that could be declared as 'private' in C#,  'Private' in VB.NET" NbNodeMatched="10" NbNodeTested="320" KindOfNode=" methods">
+      <QueryHtml>&lt;font color='#008000'&gt;//&amp;nbsp;&amp;lt;Name&amp;gt;Methods&amp;nbsp;that&amp;nbsp;could&amp;nbsp;be&amp;nbsp;declared&amp;nbsp;as&amp;nbsp;'private'&amp;nbsp;in&amp;nbsp;C#,&amp;nbsp;&amp;nbsp;'Private'&amp;nbsp;in&amp;nbsp;VB.NET&amp;lt;/Name&amp;gt;&lt;br/&gt;&lt;/font&gt;&lt;font color='#0000FF'&gt;WARN&lt;/font&gt;&amp;nbsp;&lt;font color='#0000FF'&gt;IF&lt;/font&gt;&amp;nbsp;&lt;font color='#000064'&gt;Count&lt;/font&gt;&amp;nbsp;&lt;font color='#000000'&gt;&amp;gt;&lt;/font&gt;&amp;nbsp;&lt;b style="color:#000000;background-color:#FFFF99"&gt;0&lt;/b&gt;&amp;nbsp;&lt;font color='#0000FF'&gt;IN&lt;/font&gt;&amp;nbsp;&lt;font color='#0000FF'&gt;SELECT&lt;/font&gt;&amp;nbsp;&lt;font color='#0000FF'&gt;TOP&lt;/font&gt;&amp;nbsp;&lt;b style="color:#000000;background-color:#FFFF99"&gt;10&lt;/b&gt;&amp;nbsp;&lt;font color='#0000FF'&gt;METHODS&lt;/font&gt;&amp;nbsp;&lt;font color='#0000FF'&gt;WHERE&lt;/font&gt;&amp;nbsp;&lt;font color='#000064'&gt;CouldBePrivate&lt;/font&gt;</QueryHtml>
+      <Columns>
+        <Column>methods</Column>
+        <Column># lines of code (LOC)</Column>
+      </Columns>
+      <Rows>
+        <Row Name="ProcessMessage(Object)" FullName="MassTransit.ServiceBus.MessageQueueEndpoint.ProcessMessage(Object)">
+          <Val>21</Val>
+        </Row>
+        <Row Name=".ctor(String)" FullName="MassTransit.ServiceBus.MessageQueueEndpoint..ctor(String)">
+          <Val>9</Val>
+        </Row>
+        <Row Name="Open(String)" FullName="MassTransit.ServiceBus.MessageQueueEndpoint.Open(String)">
+          <Val>5</Val>
+        </Row>
+        <Row Name="Remove(String)" FullName="MassTransit.ServiceBus.MessageQueueEndpoint.Remove(String)">
+          <Val>4</Val>
+        </Row>
+        <Row Name="op_Implicit(MessageQueueEndpoint)" FullName="MassTransit.ServiceBus.MessageQueueEndpoint.op_Implicit(MessageQueueEndpoint)">
+          <Val>1</Val>
+        </Row>
+        <Row Name="SerializeMessages(Stream,IMessage[])" FullName="MassTransit.ServiceBus.MessageQueueEndpoint.SerializeMessages(Stream,IMessage[])">
+          <Val>1</Val>
+        </Row>
+        <Row Name=".ctor(IReadWriteEndpoint,ISubscriptionStorage)" FullName="MassTransit.ServiceBus.ServiceBus..ctor(IReadWriteEndpoint,ISubscriptionStorage)">
+          <Val>11</Val>
+        </Row>
+        <Row Name="get_SubscriptionStorage()" FullName="MassTransit.ServiceBus.ServiceBus.get_SubscriptionStorage()">
+          <Val>1</Val>
+        </Row>
+        <Row Name=".ctor(IMessage[])" FullName="MassTransit.ServiceBus.Envelope..ctor(IMessage[])">
+          <Val>5</Val>
+        </Row>
+        <Row Name="set_ReturnTo(IEndpoint)" FullName="MassTransit.ServiceBus.Envelope.set_ReturnTo(IEndpoint)">
+          <Val>1</Val>
+        </Row>
+        <Row Name="Sum:" FullName="Stat">
+          <Val>59</Val>
+        </Row>
+        <Row Name="Average:" FullName="Stat">
+          <Val>5.9</Val>
+        </Row>
+        <Row Name="Minimum:" FullName="Stat">
+          <Val>1</Val>
+        </Row>
+        <Row Name="Maximum:" FullName="Stat">
+          <Val>21</Val>
+        </Row>
+        <Row Name="Standard deviation:" FullName="Stat">
+          <Val>6.0407</Val>
+        </Row>
+        <Row Name="Variance:" FullName="Stat">
+          <Val>36.49</Val>
+        </Row>
+      </Rows>
+    </Query>
+    <Query Status="Warn" Name="Types that could be declared as internal" NbNodeMatched="10" NbNodeTested="108" KindOfNode=" types">
+      <QueryHtml>&lt;font color='#008000'&gt;//&amp;nbsp;&amp;lt;Name&amp;gt;Types&amp;nbsp;that&amp;nbsp;could&amp;nbsp;be&amp;nbsp;declared&amp;nbsp;as&amp;nbsp;internal&amp;lt;/Name&amp;gt;&lt;br/&gt;&lt;/font&gt;&lt;font color='#0000FF'&gt;WARN&lt;/font&gt;&amp;nbsp;&lt;font color='#0000FF'&gt;IF&lt;/font&gt;&amp;nbsp;&lt;font color='#000064'&gt;Count&lt;/font&gt;&amp;nbsp;&lt;font color='#000000'&gt;&amp;gt;&lt;/font&gt;&amp;nbsp;&lt;b style="color:#000000;background-color:#FFFF99"&gt;0&lt;/b&gt;&amp;nbsp;&lt;font color='#0000FF'&gt;IN&lt;/font&gt;&amp;nbsp;&lt;font color='#0000FF'&gt;SELECT&lt;/font&gt;&amp;nbsp;&lt;font color='#0000FF'&gt;TOP&lt;/font&gt;&amp;nbsp;&lt;b style="color:#000000;background-color:#FFFF99"&gt;10&lt;/b&gt;&amp;nbsp;&lt;font color='#0000FF'&gt;TYPES&lt;/font&gt;&amp;nbsp;&lt;font color='#0000FF'&gt;WHERE&lt;/font&gt;&amp;nbsp;&lt;font color='#000064'&gt;CouldBeInternal&lt;/font&gt;</QueryHtml>
+      <Columns>
+        <Column>types</Column>
+        <Column># lines of code (LOC)</Column>
+      </Columns>
+      <Rows>
+        <Row Name="MessageQueueEndpoint" FullName="MassTransit.ServiceBus.MessageQueueEndpoint">
+          <Val>108</Val>
+        </Row>
+        <Row Name="ServiceBus" FullName="MassTransit.ServiceBus.ServiceBus">
+          <Val>83</Val>
+        </Row>
+        <Row Name="Envelope" FullName="MassTransit.ServiceBus.Envelope">
+          <Val>49</Val>
+        </Row>
+        <Row Name="MessageConsumer&lt;T&gt;" FullName="MassTransit.ServiceBus.MessageConsumer&lt;T&gt;">
+          <Val>28</Val>
+        </Row>
+        <Row Name="ServiceBusAsyncResult" FullName="MassTransit.ServiceBus.ServiceBusAsyncResult">
+          <Val>22</Val>
+        </Row>
+        <Row Name="MessageContext&lt;T&gt;" FullName="MassTransit.ServiceBus.MessageContext&lt;T&gt;">
+          <Val>21</Val>
+        </Row>
+        <Row Name="IEnvelope" FullName="MassTransit.ServiceBus.IEnvelope">
+          <Val>0</Val>
+        </Row>
+        <Row Name="IMessageConsumer&lt;T&gt;" FullName="MassTransit.ServiceBus.IMessageConsumer&lt;T&gt;">
+          <Val>0</Val>
+        </Row>
+        <Row Name="MessageReceivedCallback&lt;T&gt;" FullName="MassTransit.ServiceBus.MessageReceivedCallback&lt;T&gt;">
+          <Val>0</Val>
+        </Row>
+        <Row Name="IServiceBusAsyncResult" FullName="MassTransit.ServiceBus.IServiceBusAsyncResult">
+          <Val>0</Val>
+        </Row>
+        <Row Name="Sum:" FullName="Stat">
+          <Val>311</Val>
+        </Row>
+        <Row Name="Average:" FullName="Stat">
+          <Val>31.1</Val>
+        </Row>
+        <Row Name="Minimum:" FullName="Stat">
+          <Val>0</Val>
+        </Row>
+        <Row Name="Maximum:" FullName="Stat">
+          <Val>108</Val>
+        </Row>
+        <Row Name="Standard deviation:" FullName="Stat">
+          <Val>36.043</Val>
+        </Row>
+        <Row Name="Variance:" FullName="Stat">
+          <Val>1299.1</Val>
+        </Row>
+      </Rows>
+    </Query>
+    <Query Status="Warn" Name="Types that could be declared as 'private' in C#,  'Private' in VB.NET" NbNodeMatched="2" NbNodeTested="108" KindOfNode=" types">
+      <QueryHtml>&lt;font color='#008000'&gt;//&amp;nbsp;&amp;lt;Name&amp;gt;Types&amp;nbsp;that&amp;nbsp;could&amp;nbsp;be&amp;nbsp;declared&amp;nbsp;as&amp;nbsp;'private'&amp;nbsp;in&amp;nbsp;C#,&amp;nbsp;&amp;nbsp;'Private'&amp;nbsp;in&amp;nbsp;VB.NET&amp;lt;/Name&amp;gt;&lt;br/&gt;&lt;/font&gt;&lt;font color='#0000FF'&gt;WARN&lt;/font&gt;&amp;nbsp;&lt;font color='#0000FF'&gt;IF&lt;/font&gt;&amp;nbsp;&lt;font color='#000064'&gt;Count&lt;/font&gt;&amp;nbsp;&lt;font color='#000000'&gt;&amp;gt;&lt;/font&gt;&amp;nbsp;&lt;b style="color:#000000;background-color:#FFFF99"&gt;0&lt;/b&gt;&amp;nbsp;&lt;font color='#0000FF'&gt;IN&lt;/font&gt;&amp;nbsp;&lt;font color='#0000FF'&gt;SELECT&lt;/font&gt;&amp;nbsp;&lt;font color='#0000FF'&gt;TOP&lt;/font&gt;&amp;nbsp;&lt;b style="color:#000000;background-color:#FFFF99"&gt;10&lt;/b&gt;&amp;nbsp;&lt;font color='#0000FF'&gt;TYPES&lt;/font&gt;&amp;nbsp;&lt;font color='#0000FF'&gt;WHERE&lt;/font&gt;&amp;nbsp;&lt;font color='#000064'&gt;CouldBePrivate&lt;/font&gt;</QueryHtml>
+      <Columns>
+        <Column>types</Column>
+        <Column># lines of code (LOC)</Column>
+      </Columns>
+      <Rows>
+        <Row Name="MessageConsumer&lt;T&gt;+CallbackItem&lt;T1&gt;" FullName="MassTransit.ServiceBus.MessageConsumer&lt;T&gt;+CallbackItem&lt;T1&gt;">
+          <Val>9</Val>
+        </Row>
+        <Row Name="Check+StringCheck" FullName="MassTransit.ServiceBus.Util.Check+StringCheck">
+          <Val>6</Val>
+        </Row>
+        <Row Name="Sum:" FullName="Stat">
+          <Val>15</Val>
+        </Row>
+        <Row Name="Average:" FullName="Stat">
+          <Val>7.5</Val>
+        </Row>
+        <Row Name="Minimum:" FullName="Stat">
+          <Val>6</Val>
+        </Row>
+        <Row Name="Maximum:" FullName="Stat">
+          <Val>9</Val>
+        </Row>
+        <Row Name="Standard deviation:" FullName="Stat">
+          <Val>1.5</Val>
+        </Row>
+        <Row Name="Variance:" FullName="Stat">
+          <Val>2.25</Val>
+        </Row>
+      </Rows>
+    </Query>
+  </Group>
+  <Group Name="Naming constraints" Status="Ok" />
+  <Group Name="Queries to understand code" Status="Ok" />
+  <Group Name="Constraints extracted from code" Status="Ok" />
+</CQLResult>
