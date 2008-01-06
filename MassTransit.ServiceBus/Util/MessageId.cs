@@ -7,9 +7,9 @@ namespace MassTransit.ServiceBus.Util
         private static readonly MessageId _empty = new MessageId(Guid.Empty, 0);
 
         private readonly Guid _id;
-        private readonly uint _sequence;
+        private readonly int _sequence;
 
-        protected MessageId(Guid id, uint sequence)
+        protected MessageId(Guid id, int sequence)
         {
             _id = id;
             _sequence = sequence;
@@ -34,7 +34,7 @@ namespace MassTransit.ServiceBus.Util
             if (parts.Length == 2)
             {
                 _id = new Guid(parts[0]);
-                _sequence = uint.Parse(parts[1]);
+                _sequence = int.Parse(parts[1]);
             }
         }
 
@@ -43,7 +43,7 @@ namespace MassTransit.ServiceBus.Util
             get { return _id; }
         }
 
-        public uint Sequence
+        public int Sequence
         {
             get { return _sequence; }
         }
