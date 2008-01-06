@@ -2,7 +2,7 @@ namespace MassTransit.ServiceBus.SubscriptionsManager
 {
     using System;
     using System.Collections.Generic;
-    using Subscriptions;
+    using MassTransit.ServiceBus.Subscriptions.Messages;
 
     public class SubscriptionMapper
     {

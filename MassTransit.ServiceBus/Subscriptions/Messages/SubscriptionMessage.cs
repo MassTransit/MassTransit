@@ -1,6 +1,6 @@
 using System;
 
-namespace MassTransit.ServiceBus.Subscriptions
+namespace MassTransit.ServiceBus.Subscriptions.Messages
 {
     [Serializable]
     public class SubscriptionMessage : IEquatable<SubscriptionMessage>, IMessage

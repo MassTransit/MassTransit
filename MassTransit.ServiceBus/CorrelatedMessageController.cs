@@ -44,7 +44,7 @@ namespace MassTransit.ServiceBus
             return false;
         }
 
-        public sealed class Result
+        public class Result
         {
             private readonly bool _result;
 

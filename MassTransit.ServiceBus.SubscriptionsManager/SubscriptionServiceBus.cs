@@ -1,6 +1,5 @@
 using System;
-using MassTransit.ServiceBus.SubscriptionsManager.Messages;
-using MassTransit.ServiceBus.Subscriptions;
+using MassTransit.ServiceBus.Subscriptions.Messages;
 
 namespace MassTransit.ServiceBus.SubscriptionsManager
 {
