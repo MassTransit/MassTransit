@@ -115,16 +115,13 @@ namespace MassTransit.ServiceBus
         {
             lock (_consumersLock)
             {
-                if (_consumers.ContainsKey(typeof (T)))
-                    return _consumers[typeof (T)] as IMessageConsumer<T>;
+                if (!_consumers.ContainsKey(typeof(T)))
+                {
+                    _consumers[typeof(T)] = new MessageConsumer<T>();
+                    _subscriptionStorage.Add(typeof(T), Endpoint);
+                }
 
-                MessageConsumer<T> consumer = new MessageConsumer<T>();
-
-                _consumers[typeof (T)] = consumer;
-
-                _subscriptionStorage.Add(typeof (T), Endpoint);
-
-                return consumer;
+                return _consumers[typeof(T)] as IMessageConsumer<T>;
             }
         }
 
