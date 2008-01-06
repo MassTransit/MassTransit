@@ -65,6 +65,9 @@ namespace MassTransit.ServiceBus
                 }
                 catch (Exception ex)
                 {
+                    //TODO: why are we swallowing the exception
+                    if(_log.IsWarnEnabled)
+                        _log.Warn("Meets Criteria Issue", ex);
                 }
             }
 

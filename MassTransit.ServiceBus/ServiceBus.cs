@@ -83,7 +83,7 @@ namespace MassTransit.ServiceBus
 
         public void Subscribe<T>(MessageReceivedCallback<T> callback) where T : IMessage
         {
-            Consumer<T>().Subscribe(callback);
+            this.Consumer<T>().Subscribe(callback);
         }
 
         public void Subscribe<T>(MessageReceivedCallback<T> callback, Predicate<T> condition) where T : IMessage
