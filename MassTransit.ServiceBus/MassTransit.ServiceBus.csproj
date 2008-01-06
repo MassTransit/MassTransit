@@ -40,6 +40,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CorrelatedMessageController.cs" />
     <Compile Include="Envelope.cs" />
     <Compile Include="EnvelopeMessageMapper.cs" />
     <Compile Include="Exceptions\MeetsCriteriaException.cs" />
