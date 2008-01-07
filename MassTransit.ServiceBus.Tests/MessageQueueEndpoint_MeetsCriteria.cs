@@ -1,6 +1,5 @@
 using System.IO;
 using System.Messaging;
-using MassTransit.ServiceBus.Tests.Messages;
 using NUnit.Framework;
 using NUnit.Framework.SyntaxHelpers;
 using Rhino.Mocks;

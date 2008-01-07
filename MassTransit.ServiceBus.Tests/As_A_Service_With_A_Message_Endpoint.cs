@@ -1,4 +1,3 @@
-using MassTransit.ServiceBus.Tests.Messages;
 using NUnit.Framework;
 using Rhino.Mocks;
 

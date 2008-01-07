@@ -1,10 +1,10 @@
 using System;
 
-namespace MassTransit.ServiceBus.Tests.Messages
+namespace MassTransit.ServiceBus.Tests
 {
-    [Serializable]
-    public class PongMessage : IMessage
-    {
+	[Serializable]
+	public class PongMessage : IMessage
+	{
         
-    }
+	}
 }

@@ -3,7 +3,6 @@ namespace MassTransit.ServiceBus.Tests
     using System.Messaging;
     using MassTransit.ServiceBus.Subscriptions;
     using MassTransit.ServiceBus.Subscriptions.Messages;
-    using Messages;
     using NUnit.Framework;
 
     [TestFixture]

@@ -10,32 +10,34 @@ using NUnit.Framework.SyntaxHelpers;
 
 namespace MassTransit.ServiceBus.Tests
 {
-	public class TestQueueContext : IDisposable
+	public class QueueTestContext :
+		IDisposable
 	{
 		protected static readonly ILog _log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 
-		private readonly string _serviceBusQueueName = @".\private$\test_servicebus";
-		private MessageQueueEndpoint _serviceBusEndPoint;
-		private IServiceBus _serviceBus;
-		private ServiceBus _remoteServiceBus;
 		private readonly string _remoteServiceBusQueueName = @".\private$\test_remoteservicebus";
+		private readonly string _serviceBusQueueName = @".\private$\test_servicebus";
+		private readonly string _subscriptionQueueName = @".\private$\test_subscriptions";
+
+		private ServiceBus _remoteServiceBus;
 		private MessageQueueEndpoint _remoteServiceBusEndPoint;
 
-		private string _subscriptionQueueName = @".\private$\test_subscriptions";
+		private IServiceBus _serviceBus;
+		private MessageQueueEndpoint _serviceBusEndPoint;
 
-		public TestQueueContext()
+		private MessageQueueEndpoint _subscriptionEndpoint;
+
+		public QueueTestContext()
 		{
 			StackTrace stackTrace = new StackTrace();
 			StackFrame stackFrame = stackTrace.GetFrame(1);
 			MethodBase methodBase = stackFrame.GetMethod();
 
-			_log.InfoFormat("TestQueueContext Created for {0}", methodBase.Name);
+			_log.InfoFormat("QueueTestContext Created for {0}", methodBase.Name);
 
 			MessageQueue.EnableConnectionCache = false;
 
-			// we need to create this first so we can actually receive and send messages
-            //TODO: Why not just do this?
-			IServiceBus ignore = this.ServiceBus;
+			IServiceBus ignore = ServiceBus;
 		}
 
 		public IServiceBus ServiceBus
@@ -44,11 +46,9 @@ namespace MassTransit.ServiceBus.Tests
 			{
 				if (_serviceBus == null)
 				{
-					ServiceBus bus = new ServiceBus(ServiceBusEndPoint);
+					ISubscriptionStorage subscriptionStorage = CreateSubscriptionStorage(ServiceBusEndPoint);
 
-					bus.SubscriptionStorage = CreateSubscriptionStorage(_subscriptionQueueName, bus.Endpoint);
-
-					_serviceBus = bus;
+					_serviceBus = new ServiceBus(ServiceBusEndPoint, subscriptionStorage);
 				}
 
 				return _serviceBus;
@@ -61,11 +61,9 @@ namespace MassTransit.ServiceBus.Tests
 			{
 				if (_remoteServiceBus == null)
 				{
-					ServiceBus bus = new ServiceBus(RemoteServiceBusEndPoint);
+					ISubscriptionStorage subscriptionStorage = CreateSubscriptionStorage(ServiceBusEndPoint);
 
-					bus.SubscriptionStorage = CreateSubscriptionStorage(_subscriptionQueueName, bus.Endpoint);
-
-					_remoteServiceBus = bus;
+					_remoteServiceBus = new ServiceBus(RemoteServiceBusEndPoint, subscriptionStorage);
 				}
 
 				return _remoteServiceBus;
@@ -80,7 +78,7 @@ namespace MassTransit.ServiceBus.Tests
 				{
 					ValidateAndPurgeQueue(_remoteServiceBusQueueName);
 
-					_remoteServiceBusEndPoint = MessageQueueEndpointFactory.Instance.Resolve(_remoteServiceBusQueueName);
+					_remoteServiceBusEndPoint = new MessageQueueEndpoint(_remoteServiceBusQueueName);
 				}
 
 				return _remoteServiceBusEndPoint;
@@ -96,23 +94,51 @@ namespace MassTransit.ServiceBus.Tests
 				{
 					ValidateAndPurgeQueue(_serviceBusQueueName);
 
-					_serviceBusEndPoint = MessageQueueEndpointFactory.Instance.Resolve(_serviceBusQueueName);
+					_serviceBusEndPoint = new MessageQueueEndpoint(_serviceBusQueueName);
 				}
 
 				return _serviceBusEndPoint;
 			}
 		}
 
-		private static ISubscriptionStorage CreateSubscriptionStorage(string queuePath, IEndpoint endpoint)
+		public IEndpoint SubscriptionEndpoint
 		{
-			ValidateAndPurgeQueue(queuePath);
+			get
+			{
+				if (_subscriptionEndpoint == null)
+				{
+					ValidateAndPurgeQueue(_subscriptionQueueName);
 
+					_subscriptionEndpoint = new MessageQueueEndpoint(_subscriptionQueueName);
+				}
+
+				return _subscriptionEndpoint;
+			}
+		}
+
+		#region IDisposable Members
+
+		public void Dispose()
+		{
+			_log.Info("QueueTestContext Disposing");
+
+			if (_remoteServiceBus != null)
+				_remoteServiceBus.Dispose();
+
+			if (_serviceBus != null)
+				_serviceBus.Dispose();
+		}
+
+		#endregion
+
+		private ISubscriptionStorage CreateSubscriptionStorage(IEndpoint endpoint)
+		{
 			ISubscriptionStorage subscriptionCache;
 			ISubscriptionStorage subscriptionStorage;
 
-			subscriptionCache = new SubscriptionCache();
+			subscriptionCache = new LocalSubscriptionCache();
 			subscriptionStorage =
-				new MsmqSubscriptionStorage(queuePath, endpoint, subscriptionCache);
+				new MsmqSubscriptionStorage(SubscriptionEndpoint, endpoint, subscriptionCache);
 
 			return subscriptionStorage;
 		}
@@ -121,7 +147,7 @@ namespace MassTransit.ServiceBus.Tests
 		{
 			using (MessageQueue mq = new MessageQueue(queuePath, QueueAccessMode.Receive))
 			{
-				Message msg = mq.Receive(TimeSpan.FromSeconds(30));
+				Message msg = mq.Receive(TimeSpan.FromSeconds(3));
 
 				IMessage[] messages = new BinaryFormatter().Deserialize(msg.BodyStream) as IMessage[];
 
@@ -155,17 +181,6 @@ namespace MassTransit.ServiceBus.Tests
 
 			MessageQueue queue = new MessageQueue(queuePath, QueueAccessMode.ReceiveAndAdmin);
 			queue.Purge();
-		}
-
-		public void Dispose()
-		{
-			_log.Info("TestQueueContext Disposing");
-
-			if (_remoteServiceBus != null)
-				_remoteServiceBus.Dispose();
-
-			if (_serviceBus != null)
-				_serviceBus.Dispose();
 		}
 	}
 }
