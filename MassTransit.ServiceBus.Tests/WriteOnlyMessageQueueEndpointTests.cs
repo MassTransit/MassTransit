@@ -14,7 +14,7 @@ namespace MassTransit.ServiceBus.Tests
         public override void Before_Each_Test_In_The_Fixture()
         {
             base.Before_Each_Test_In_The_Fixture();
-            endpoint = new MessageQueueEndpoint(this._poisonQueueName);
+            endpoint = new MessageQueueEndpoint(_poisonQueueName);
         }
 
         public override void After_Each_Test_In_The_Fixture()
@@ -34,7 +34,7 @@ namespace MassTransit.ServiceBus.Tests
         {
             DeleteMessage msg = new DeleteMessage();
             Envelope env = new Envelope(base._testEndPoint, msg);
-            endpoint.Send(env);
+            MessageSenderFactory.Create(endpoint).Send(env);
             VerifyMessageInQueue(endpoint.Address, msg);
         }
     }

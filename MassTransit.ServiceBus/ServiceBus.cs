@@ -18,22 +18,32 @@ namespace MassTransit.ServiceBus
         private readonly object _consumersLock = new object();
 
         private readonly CorrelatedMessageController _correlatedMessageController = new CorrelatedMessageController();
-        private readonly IReadWriteEndpoint _endpoint;
+        private readonly IEndpoint _endpoint;
+        private readonly IMessageReceiver _receiver;
+        private readonly IMessageSender _sender;
         private readonly ISubscriptionStorage _subscriptionStorage;
+        private IEndpoint _poisonEndpoint;
 
-        public ServiceBus(IReadWriteEndpoint endpoint, ISubscriptionStorage subscriptionStorage)
+        public ServiceBus(IEndpoint endpoint, ISubscriptionStorage subscriptionStorage)
         {
             Check.Parameter(endpoint).WithMessage("endpoint").IsNotNull();
             Check.Parameter(subscriptionStorage).WithMessage("subscriptionStorage").IsNotNull();
 
             _endpoint = endpoint;
-
             _subscriptionStorage = subscriptionStorage;
 
-            _endpoint.Subscribe(this);
+            _receiver = MessageReceiverFactory.Create(_endpoint);
+            if (_receiver != null)
+            {
+                _receiver.Subscribe(this);
+            }
 
-            if (_log.IsDebugEnabled)
-                _log.DebugFormat("Added event handler for envelope to {0}", _endpoint.Address);
+            _sender = MessageSenderFactory.Create(_endpoint);
+
+
+            // TODO find this a new home in the receiver
+            //if (_log.IsDebugEnabled)
+            //    _log.DebugFormat("Added event handler for envelope to {0}", _endpoint.Address);
         }
 
         public ISubscriptionStorage SubscriptionStorage
@@ -105,11 +115,15 @@ namespace MassTransit.ServiceBus
 
         public void Dispose()
         {
+            _subscriptionStorage.Dispose();
+
             _consumers.Clear();
 
-            _endpoint.Dispose();
+            _receiver.Dispose();
 
-            _subscriptionStorage.Dispose();
+            _sender.Dispose();
+
+            _endpoint.Dispose();
         }
 
         public void Publish<T>(params T[] messages) where T : IMessage
@@ -117,25 +131,41 @@ namespace MassTransit.ServiceBus
             IList<IEndpoint> subscribers = _subscriptionStorage.List<T>();
             if (subscribers.Count > 0)
             {
-                IEnvelope envelope = new Envelope(Endpoint, messages as IMessage[]);
+                IEnvelope envelope = new Envelope(_endpoint, messages as IMessage[]);
 
                 foreach (IEndpoint subscribersEndpoint in subscribers)
                 {
-                    subscribersEndpoint.Send(envelope);
+                    IMessageSender send = MessageSenderFactory.Create(subscribersEndpoint);
+                    send.Send(envelope);
                 }
             }
         }
 
-        public void Send<T>(IEndpoint endpoint, params T[] messages) where T : IMessage
+        public void Send<T>(IEndpoint destinationEndpoint, params T[] messages) where T : IMessage
         {
-            IEnvelope envelope = new Envelope(Endpoint, messages as IMessage[]);
+            IEnvelope envelope = new Envelope(_endpoint, messages as IMessage[]);
 
-            endpoint.Send(envelope);
+            IMessageSender send = MessageSenderFactory.Create(destinationEndpoint);
+            send.Send(envelope);
         }
 
-        public IReadWriteEndpoint Endpoint
+        public IEndpoint Endpoint
         {
             get { return _endpoint; }
+        }
+
+        public IEndpoint PoisonEndpoint
+        {
+            get
+            {
+                if (_poisonEndpoint == null)
+                {
+                    _poisonEndpoint = new MessageQueueEndpoint(_endpoint.Address + "_poison");
+                }
+
+                return _poisonEndpoint;
+            }
+            set { _poisonEndpoint = value; }
         }
 
         public void Subscribe<T>(MessageReceivedCallback<T> callback) where T : IMessage
@@ -157,14 +187,15 @@ namespace MassTransit.ServiceBus
             }
         }
 
-        public IServiceBusAsyncResult Request<T>(IEndpoint endpoint, params T[] messages) where T : IMessage
+        public IServiceBusAsyncResult Request<T>(IEndpoint destinationEndpoint, params T[] messages) where T : IMessage
         {
-            IEnvelope envelope = new Envelope(Endpoint, messages as IMessage[]);
+            IEnvelope envelope = new Envelope(_endpoint, messages as IMessage[]);
 
+            IMessageSender send = MessageSenderFactory.Create(destinationEndpoint);
             lock (_correlatedMessageController)
-            {
-                endpoint.Send(envelope);
-
+            {            
+                send.Send(envelope);
+ 
                 return _correlatedMessageController.Track(envelope.Id);
             }
         }

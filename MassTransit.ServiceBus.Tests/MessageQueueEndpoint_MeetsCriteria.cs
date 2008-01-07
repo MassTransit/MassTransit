@@ -81,11 +81,12 @@ namespace MassTransit.ServiceBus.Tests
         public void The_Message_Endpoint_Should_Check_If_The_Message_Will_Be_Handled()
         {
             IEndpoint mockReturnEndpoint = mocks.CreateMock<IEndpoint>();
-            MessageQueueEndpoint endpoint = MessageQueueEndpoint.Open(@".\private$\test_endpoint");
+            MessageQueueEndpoint endpoint = new MessageQueueEndpoint(@".\private$\test_endpoint");
 
             IEnvelopeConsumer consumer = mocks.CreateMock<IEnvelopeConsumer>();
 
-            endpoint.Subscribe(consumer);
+            IMessageReceiver receiver = MessageReceiverFactory.Create(endpoint);
+            receiver.Subscribe(consumer);
 
             PingMessage ping = new PingMessage();
             IEnvelope envelope = new Envelope(mockReturnEndpoint, ping);
@@ -102,7 +103,7 @@ namespace MassTransit.ServiceBus.Tests
 
                 queueMessage.BodyStream.Seek(0, SeekOrigin.Begin);
 
-                endpoint.ProcessMessage(queueMessage);
+                ((MessageQueueReceiver)receiver).ProcessMessage(queueMessage);
             }
         }
     }
