@@ -5,7 +5,8 @@ namespace MassTransit.ServiceBus.Subscriptions
     using log4net;
     using Messages;
 
-    public class LocalSubscriptionCache : ISubscriptionStorage
+    public class LocalSubscriptionCache : 
+        ISubscriptionStorage
     {
         private IServiceBus _bus;
         private IEndpoint _wellKnownSubscriptionManagerEndpoint;
@@ -13,6 +14,13 @@ namespace MassTransit.ServiceBus.Subscriptions
             new Dictionary<Type, List<SubscriptionCacheEntry>>();
         private static readonly ILog _log = LogManager.GetLogger(typeof(LocalSubscriptionCache));
 
+        // just a shared local cache
+        public LocalSubscriptionCache()
+        {
+            
+        }
+
+        // use a remote cache (msmq or db)
         public LocalSubscriptionCache(IServiceBus bus, IEndpoint wellKnownSubscriptionManagerEndpoint)
         {
             _bus = bus;
@@ -22,7 +30,7 @@ namespace MassTransit.ServiceBus.Subscriptions
 
         public void Initialize()
         {
-            _bus.Send(_wellKnownSubscriptionManagerEndpoint, new RequestCacheUpdate());
+            InternalSend(new RequestCacheUpdate());
         }
 
         public IList<IEndpoint> List<T>(params T[] messages) where T : IMessage
@@ -41,19 +49,21 @@ namespace MassTransit.ServiceBus.Subscriptions
             InternalAdd(messageType, endpoint);
             if(_log.IsInfoEnabled)
                 _log.InfoFormat("Sending Subscription Update ({0}, {1}) to Master Repository", messageType, endpoint.Address);
-            _bus.Send(_wellKnownSubscriptionManagerEndpoint, new SubscriptionMessage(messageType, endpoint.Address, SubscriptionMessage.SubscriptionChangeType.Add));
+            InternalSend(new SubscriptionMessage(messageType, endpoint.Address, SubscriptionMessage.SubscriptionChangeType.Add));
         }
         public void Remove(Type messageType, IEndpoint endpoint)
         {
             InternalRemove(messageType, endpoint);
             if (_log.IsInfoEnabled)
                 _log.InfoFormat("Sending Subscription Update ({0}, {1}) to Master Repository", messageType, endpoint.Address);
-            _bus.Send(_wellKnownSubscriptionManagerEndpoint, new SubscriptionMessage(messageType, endpoint.Address, SubscriptionMessage.SubscriptionChangeType.Remove));
+            InternalSend(new SubscriptionMessage(messageType, endpoint.Address, SubscriptionMessage.SubscriptionChangeType.Remove));
         }
 
         public void Dispose()
         {
-            _wellKnownSubscriptionManagerEndpoint.Dispose();
+            if(_wellKnownSubscriptionManagerEndpoint != null)
+                _wellKnownSubscriptionManagerEndpoint.Dispose();
+
             _messageTypeSubscriptions.Clear();
         }
 
@@ -126,6 +136,14 @@ namespace MassTransit.ServiceBus.Subscriptions
                                          GetHashCode());
                     _messageTypeSubscriptions[messageType].Add(entry);
                 }
+            }
+        }
+
+        private void InternalSend(IMessage message)
+        {
+            if (_bus != null)
+            {
+                _bus.Send(_wellKnownSubscriptionManagerEndpoint, message);
             }
         }
     }

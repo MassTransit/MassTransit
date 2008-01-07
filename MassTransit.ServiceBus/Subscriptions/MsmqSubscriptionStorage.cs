@@ -32,6 +32,8 @@ namespace MassTransit.ServiceBus.Subscriptions
             _subscriptionCache = subscriptionCache;
             _storageQueue = new MessageQueue(_storageQueueName, QueueAccessMode.SendAndReceive);
 
+            //TODO: should there be a bus instance here so we can subscribe to messages and send messages?
+
             Initialize();
         }
 
@@ -52,6 +54,7 @@ namespace MassTransit.ServiceBus.Subscriptions
 
         private void QueuePeekCompleted(IAsyncResult asyncResult)
         {
+            //TODO: Shouldn't we check this when we are created?
             if (_storageQueue == null)
                 return;
 
