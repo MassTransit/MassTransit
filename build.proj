@@ -12,7 +12,6 @@
 		<TestAssembly Include=".\ci_src\bin\*.Tests.dll" />
 	</ItemGroup>
 
-
 			
 	<Target Name="Go" DependsOnTargets="Build;Zip">
 	</Target>
