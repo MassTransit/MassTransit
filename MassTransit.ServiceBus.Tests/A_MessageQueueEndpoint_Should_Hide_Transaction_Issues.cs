@@ -1,7 +1,6 @@
 using System;
 using System.Transactions;
 using NUnit.Framework;
-using MassTransit.ServiceBus.Tests.Messages;
 
 namespace MassTransit.ServiceBus.Tests
 {
