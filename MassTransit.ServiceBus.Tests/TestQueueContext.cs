@@ -34,6 +34,7 @@ namespace MassTransit.ServiceBus.Tests
 			MessageQueue.EnableConnectionCache = false;
 
 			// we need to create this first so we can actually receive and send messages
+            //TODO: Why not just do this?
 			IServiceBus ignore = this.ServiceBus;
 		}
 

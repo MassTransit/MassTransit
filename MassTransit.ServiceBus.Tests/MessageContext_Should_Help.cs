@@ -1,7 +1,9 @@
 namespace MassTransit.ServiceBus.Tests
 {
+    using Messages;
     using NUnit.Framework;
     using Rhino.Mocks;
+    using Util;
 
     [TestFixture]
     public class MessageContext_Should_Help
@@ -9,13 +11,23 @@ namespace MassTransit.ServiceBus.Tests
         private MockRepository mocks;
         private IServiceBus mockBus;
         private IReadWriteEndpoint mockBusEndpoint;
+        private IEnvelope mockEnvelope;
+        private IEndpoint mockPoisonEndpoint;
+        private IReadWriteEndpoint mockEndpoint;
 
+        private PingMessage requestMessage = new PingMessage();
+        private PongMessage replyMessage = new PongMessage();
+
+        #region SetUp / TearDown
         [SetUp]
         public void SetUp()
         {
             mocks = new MockRepository();
             mockBus = mocks.CreateMock<IServiceBus>();
             mockBusEndpoint = mocks.CreateMock<IReadWriteEndpoint>();
+            mockEnvelope = mocks.CreateMock<IEnvelope>();
+            mockEndpoint = mocks.CreateMock<IReadWriteEndpoint>();
+            mockPoisonEndpoint = mocks.CreateMock<IEndpoint>();
         }
 
         [TearDown]
@@ -24,17 +36,16 @@ namespace MassTransit.ServiceBus.Tests
             mocks = null;
             mockBus = null;
             mockBusEndpoint = null;
+            mockEnvelope = null;
+            mockEndpoint = null;
+            mockPoisonEndpoint = null;
         }
+        #endregion
 
         [Test]
         public void With_Replies()
         {
-            IEnvelope mockEnvelope = mocks.CreateMock<IEnvelope>();
-            IEndpoint mockEndpoint = mocks.CreateMock<IEndpoint>();
-            RequestMessage requestMessage = new RequestMessage();
-            MessageContext<RequestMessage> cxt = new MessageContext<RequestMessage>(mockBus, mockEnvelope, requestMessage);
-            ReplyMessage replyMessage = new ReplyMessage();
-            IMessage[] messages = new IMessage[1]{replyMessage};
+            MessageContext<PingMessage> cxt = new MessageContext<PingMessage>(mockBus, mockEnvelope, requestMessage);
 
             using(mocks.Record())
             {
@@ -54,11 +65,9 @@ namespace MassTransit.ServiceBus.Tests
         [Test]
         public void With_Handling_Later()
         {
-            IEnvelope mockEnvelope = mocks.CreateMock<IEnvelope>();
-            IReadWriteEndpoint mockEndpoint = mocks.CreateMock<IReadWriteEndpoint>();
-            RequestMessage requestMessage = new RequestMessage();
-            MessageContext<RequestMessage> cxt = new MessageContext<RequestMessage>(mockBus, mockEnvelope, requestMessage);
-            ReplyMessage replyMessage = new ReplyMessage();
+            
+            MessageContext<PingMessage> cxt = new MessageContext<PingMessage>(mockBus, mockEnvelope, requestMessage);
+            
             IMessage[] messages = new IMessage[1] { replyMessage };
 
             using (mocks.Record())
@@ -76,14 +85,12 @@ namespace MassTransit.ServiceBus.Tests
         [Test]
         public void With_Poison_Letters()
         {
-            IEnvelope mockEnvelope = mocks.CreateMock<IEnvelope>();
-            IReadWriteEndpoint mockEndpoint = mocks.CreateMock<IReadWriteEndpoint>();
-            IEndpoint mockPoisonEndpoint = mocks.CreateMock<IEndpoint>();
-            RequestMessage requestMessage = new RequestMessage();
-            MessageContext<RequestMessage> cxt = new MessageContext<RequestMessage>(mockBus, mockEnvelope, requestMessage);
+            MessageContext<PingMessage> cxt = new MessageContext<PingMessage>(mockBus, mockEnvelope, requestMessage);
 
             using (mocks.Record())
             {
+                Expect.Call(mockEnvelope.Id).PropertyBehavior(); //stupid log4net
+                Expect.Call(mockEnvelope.Messages).PropertyBehavior(); //stupid log4net
                 Expect.Call(mockBus.Endpoint).Return(mockEndpoint);
                 Expect.Call(mockEndpoint.PoisonEndpoint).Return(mockPoisonEndpoint);
                 mockPoisonEndpoint.Send(mockEnvelope);
@@ -98,14 +105,12 @@ namespace MassTransit.ServiceBus.Tests
         [Test]
         public void With_Poison_Letter()
         {
-            IEnvelope mockEnvelope = mocks.CreateMock<IEnvelope>();
-            IReadWriteEndpoint mockEndpoint = mocks.CreateMock<IReadWriteEndpoint>();
-            IEndpoint mockPoisonEndpoint = mocks.CreateMock<IEndpoint>();
-            RequestMessage requestMessage = new RequestMessage();
-            MessageContext<RequestMessage> cxt = new MessageContext<RequestMessage>(mockBus, mockEnvelope, requestMessage);
+            MessageContext<PingMessage> cxt = new MessageContext<PingMessage>(mockBus, mockEnvelope, requestMessage);
 
             using (mocks.Record())
             {
+                Expect.Call(mockEnvelope.Id).PropertyBehavior(); //stupid log4net
+                Expect.Call(mockEnvelope.Messages).PropertyBehavior(); //stupid log4net
                 Expect.Call(mockEnvelope.Clone()).Return(mockEnvelope);
                 mockEnvelope.Messages = new IMessage[] { requestMessage };
                 Expect.Call(mockBus.Endpoint).Return(mockEndpoint);
@@ -119,7 +124,4 @@ namespace MassTransit.ServiceBus.Tests
             }
         }
     }
-
-    public class RequestMessage : IMessage { }
-    public class ReplyMessage : IMessage { }
 }

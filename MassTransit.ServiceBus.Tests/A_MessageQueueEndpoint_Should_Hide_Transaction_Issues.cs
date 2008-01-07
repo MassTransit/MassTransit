@@ -5,73 +5,104 @@ using MassTransit.ServiceBus.Tests.Messages;
 
 namespace MassTransit.ServiceBus.Tests
 {
-    [TestFixture]
+    using Rhino.Mocks;
+
+    [Explicit]
+    [TestFixture(Description = "Integration Test for Transaction Handling")]
     public class A_MessageQueueEndpoint_Should_Hide_Transaction_Issues
-        : ServiceBusSetupFixture
     {
         private readonly string nonTransactionalQueueName = @".\private$\test_nonTransaction";
         private readonly string transactionalQueueName = @".\private$\test_transaction";
+        private readonly string returnToQueueName = @".\private$\test_return";
 
+        private MockRepository mocks;
         IEndpoint returnTo;
         PingMessage msg = new PingMessage();
         Envelope env;
 
-        public override void Before_Each_Test_In_The_Fixture()
+        [SetUp]
+        public void SetUp()
         {
-            base.Before_Each_Test_In_The_Fixture();
-            ValidateAndPurgeQueue(nonTransactionalQueueName);
-            ValidateAndPurgeQueue(transactionalQueueName, true);
-
-            returnTo = _testEndPoint;
+            mocks = new MockRepository();
+            ServiceBusSetupFixture.ValidateAndPurgeQueue(nonTransactionalQueueName);
+            ServiceBusSetupFixture.ValidateAndPurgeQueue(returnToQueueName);
+            ServiceBusSetupFixture.ValidateAndPurgeQueue(transactionalQueueName, true);
+            returnTo = mocks.CreateMock<IEndpoint>();
+            
             env = new Envelope(returnTo, msg);
+        }
+        [TearDown]
+        public void TearDown()
+        {
+            mocks = null;
         }
 
         [Test]
         public void When_The_Queue_Is_NonTransactional()
         {
-            MessageQueueEndpoint ep = nonTransactionalQueueName;
-            ep.Send(env);
+            using(mocks.Record())
+            {
+                Expect.Call(returnTo.Address).Return(returnToQueueName);
+            }
+            using(mocks.Playback())
+            {
+                MessageQueueEndpoint ep = nonTransactionalQueueName;
+                ep.Send(env);
+            }
 
-            VerifyMessageInQueue(nonTransactionalQueueName, msg);
+            ServiceBusSetupFixture.VerifyMessageInQueue(nonTransactionalQueueName, msg);
         }
 
         [Test]
         public void When_The_Queue_Is_NonTransactional_In_A_Transaction()
         {
-            using (TransactionScope tr = new TransactionScope())
+             using(mocks.Record())
             {
-                MessageQueueEndpoint ep = nonTransactionalQueueName;
-                ep.Send(env);
-
-                tr.Complete();
+                Expect.Call(returnTo.Address).Return(returnToQueueName);
             }
-
-            using (TransactionScope tr = new TransactionScope())
+            using (mocks.Playback())
             {
-                VerifyMessageInQueue(nonTransactionalQueueName, msg);
-                
-                tr.Complete();
+                using (TransactionScope tr = new TransactionScope())
+                {
+                    MessageQueueEndpoint ep = nonTransactionalQueueName;
+                    ep.Send(env);
+
+                    tr.Complete();
+                }
+
+                using (TransactionScope tr = new TransactionScope())
+                {
+                    ServiceBusSetupFixture.VerifyMessageInQueue(nonTransactionalQueueName, msg);
+
+                    tr.Complete();
+                }
             }
         }
 
 
         [Test]
         public void When_The_Queue_Is_Transactional()
-        {
-            using (TransactionScope tr = new TransactionScope())
+        { using(mocks.Record())
             {
-                MessageQueueEndpoint ep = transactionalQueueName;
-                ep.Send(env);
-
-                tr.Complete();
+                Expect.Call(returnTo.Address).Return(returnToQueueName);
             }
-
-
-            using (TransactionScope tr = new TransactionScope())
+            using (mocks.Playback())
             {
-                VerifyMessageInQueue(transactionalQueueName, msg);
+                using (TransactionScope tr = new TransactionScope())
+                {
+                    MessageQueueEndpoint ep = transactionalQueueName;
+                    ep.Send(env);
 
-                tr.Complete();
+                    tr.Complete();
+                }
+
+
+                using (TransactionScope tr = new TransactionScope())
+                {
+                    ServiceBusSetupFixture.VerifyMessageInQueue(transactionalQueueName, msg);
+
+                    tr.Complete();
+                }
             }
         }
 
@@ -80,8 +111,15 @@ namespace MassTransit.ServiceBus.Tests
         [ExpectedException(typeof(Exception))]
         public void When_The_Queue_Is_Transactional_Not_In_A_Transaction()
         {
-            MessageQueueEndpoint ep = transactionalQueueName;
-            ep.Send(env);
+             using(mocks.Record())
+            {
+                Expect.Call(returnTo.Address).Return(returnToQueueName);
+            }
+            using (mocks.Playback())
+            {
+                MessageQueueEndpoint ep = transactionalQueueName;
+                ep.Send(env);
+            }
         }
         
     }
