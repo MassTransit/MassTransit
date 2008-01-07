@@ -2,9 +2,9 @@ using System;
 
 namespace MassTransit.ServiceBus
 {
-    public interface IEndpoint :
+    public interface IMessageSender :
         IDisposable
     {
-        string Address { get; }
+        void Send(IEnvelope e);
     }
 }

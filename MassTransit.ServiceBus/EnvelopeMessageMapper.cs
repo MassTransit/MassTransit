@@ -14,7 +14,7 @@ namespace MassTransit.ServiceBus
             IEnvelope e;
 
             if (msg.ResponseQueue != null)
-                e = new Envelope(MessageQueueEndpoint.Open(msg.ResponseQueue.Path));
+                e = new Envelope(new MessageQueueEndpoint(msg.ResponseQueue.Path));
             else
                 e = new Envelope(); //TODO: How to get the endpoint in here
 

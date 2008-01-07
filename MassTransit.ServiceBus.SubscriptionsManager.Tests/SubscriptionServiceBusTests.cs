@@ -15,7 +15,7 @@ namespace MassTransit.ServiceBus.SubscriptionsManager.Tests
             MockRepository  mocks = new MockRepository();
             ISubscriptionRepository sr = mocks.CreateMock<ISubscriptionRepository>();
             ISubscriptionStorage ss = mocks.CreateMock<ISubscriptionStorage>();
-            IReadWriteEndpoint ep = mocks.CreateMock<IReadWriteEndpoint>();
+            IEndpoint ep = mocks.CreateMock<IEndpoint>();
 
             using(mocks.Record())
             {
@@ -37,7 +37,7 @@ namespace MassTransit.ServiceBus.SubscriptionsManager.Tests
             MockRepository mocks = new MockRepository();
             ISubscriptionRepository sr = mocks.CreateMock<ISubscriptionRepository>();
             ISubscriptionStorage ss = mocks.CreateMock<ISubscriptionStorage>();
-            IReadWriteEndpoint ep = mocks.CreateMock<IReadWriteEndpoint>();
+            IEndpoint ep = mocks.CreateMock<IEndpoint>();
             IEndpoint returnEndpoint = mocks.CreateMock<IEndpoint>();
             IEnvelope env = mocks.CreateMock<IEnvelope>();
             string envId = Guid.NewGuid().ToString();

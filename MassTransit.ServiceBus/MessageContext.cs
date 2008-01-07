@@ -46,7 +46,9 @@ namespace MassTransit.ServiceBus
             IEnvelope envelope = new Envelope(Bus.Endpoint, messages);
             envelope.CorrelationId = Envelope.Id;
 
-            replyEndpoint.Send(envelope);
+            IMessageSender send = MessageSenderFactory.Create(replyEndpoint);
+
+            send.Send(envelope);
         }
 
         /// <summary>
@@ -66,7 +68,7 @@ namespace MassTransit.ServiceBus
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Envelope {0} Was Marked Poisonous", _envelope.Id);
 
-            Bus.Endpoint.PoisonEndpoint.Send(Envelope);
+            MessageSenderFactory.Create(Bus.PoisonEndpoint).Send(_envelope);
         }
 
         /// <summary>
@@ -80,7 +82,7 @@ namespace MassTransit.ServiceBus
             IEnvelope env = (IEnvelope) Envelope.Clone(); //Should this be cloned?
             env.Messages = new IMessage[] {Message};
             
-            Bus.Endpoint.PoisonEndpoint.Send(env);
+            MessageSenderFactory.Create(Bus.PoisonEndpoint).Send(env);
         }
     }
 }

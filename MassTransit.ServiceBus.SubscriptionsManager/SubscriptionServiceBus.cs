@@ -10,7 +10,7 @@ namespace MassTransit.ServiceBus.SubscriptionsManager
         private ISubscriptionRepository _repository;
 
 
-        public SubscriptionServiceBus(IReadWriteEndpoint endpoint, ISubscriptionStorage subscriptionStorage, ISubscriptionRepository repository)
+        public SubscriptionServiceBus(IEndpoint endpoint, ISubscriptionStorage subscriptionStorage, ISubscriptionRepository repository)
             : base(endpoint, subscriptionStorage)
         {
             _repository = repository;
