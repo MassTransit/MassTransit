@@ -81,8 +81,8 @@ namespace MassTransit.ServiceBus
 
     public class MessageConsumerCallbackItem<T1> where T1 : IMessage
     {
-        private MessageReceivedCallback<T1> _callback;
-        private Predicate<T1> _condition;
+        private readonly MessageReceivedCallback<T1> _callback;
+        private readonly Predicate<T1> _condition;
 
         public MessageConsumerCallbackItem(MessageReceivedCallback<T1> callback)
         {
@@ -98,13 +98,11 @@ namespace MassTransit.ServiceBus
         public MessageReceivedCallback<T1> Callback
         {
             get { return _callback; }
-            set { _callback = value; }
         }
 
         public Predicate<T1> Condition
         {
             get { return _condition; }
-            set { _condition = value; }
         }
     }
 }
