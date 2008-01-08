@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 using log4net;
@@ -12,12 +13,12 @@ namespace MassTransit.ServiceBus
         private readonly Dictionary<MessageId, ServiceBusAsyncResult> _asyncResultDictionary =
             new Dictionary<MessageId, ServiceBusAsyncResult>();
 
-        public ServiceBusAsyncResult Track(MessageId id)
+        public ServiceBusAsyncResult Track(MessageId id, AsyncCallback callback, object state)
         {
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Recording request correlation ID {0}", id);
 
-            ServiceBusAsyncResult asyncResult = new ServiceBusAsyncResult();
+            ServiceBusAsyncResult asyncResult = new ServiceBusAsyncResult(callback, state);
 
             _asyncResultDictionary.Add(id, asyncResult);
 
