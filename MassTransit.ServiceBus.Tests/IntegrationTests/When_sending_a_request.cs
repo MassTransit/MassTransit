@@ -23,7 +23,7 @@ namespace MassTransit.ServiceBus.Tests
                 Assert.That(asyncResult, Is.Not.Null);
 
                 Assert.That(asyncResult.AsyncWaitHandle.WaitOne(TimeSpan.FromSeconds(10), true), Is.True,
-                            "Timeout Expired Waiting For Response");
+                    "Timeout Expired Waiting For Response");
 
                 Assert.That(asyncResult.Messages, Is.Not.Null);
 
@@ -48,29 +48,28 @@ namespace MassTransit.ServiceBus.Tests
                 ManualResetEvent _called = new ManualResetEvent(false);
 
                 IServiceBusAsyncResult asyncResult = qtc.ServiceBus.Request(qtc.ServiceBus.Endpoint,
-                                                                            delegate(IAsyncResult ar)
-                                                                                {
-                                                                                    IServiceBusAsyncResult sbar = ar as IServiceBusAsyncResult;
-                                                                                    Assert.That(sbar, Is.Not.Null);
+                    delegate(IAsyncResult ar)
+                        {
+                            IServiceBusAsyncResult sbar = ar as IServiceBusAsyncResult;
+                            Assert.That(sbar, Is.Not.Null);
 
-                                                                                    Assert.That(sbar.Messages, Is.Not.Null);
+                            Assert.That(sbar.Messages, Is.Not.Null);
 
-                                                                                    Assert.That(sbar.Messages, Is.Not.Empty);
+                            Assert.That(sbar.Messages, Is.Not.Empty);
 
-                                                                                    PongMessage pong = sbar.Messages[0] as PongMessage;
+                            PongMessage pong = sbar.Messages[0] as PongMessage;
 
-                                                                                    Assert.That(pong, Is.Not.Null);
+                            Assert.That(pong, Is.Not.Null);
 
-                                                                                    _called.Set();
-                                                                                },
-                                                                            27,
-                                                                            ping);
+                            _called.Set();
+                        },
+                    27,
+                    ping);
+
                 Assert.That(asyncResult, Is.Not.Null);
 
                 Assert.That(_called.WaitOne(TimeSpan.FromSeconds(10), true), Is.True,
-                            "Timeout Expired Waiting For Response");
-
-
+                    "Timeout Expired Waiting For Response");
             }
         }
     }
