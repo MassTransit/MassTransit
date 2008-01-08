@@ -8,15 +8,15 @@
     </PropertyGroup>
 	
 	<ItemGroup>
-		<ZipFiles Include=".\ci_src\bin\*.*" />
-		<TestAssembly Include=".\ci_src\bin\*.Tests.dll" />
+		<ZipFiles Include=".\bin\*.*" />
+		<TestAssembly Include=".\bin\*.Tests.dll" />
 	</ItemGroup>
 			
 	<Target Name="Go" DependsOnTargets="Build;Zip">
 	</Target>
 	
-	<Target Name="Build" DependsOnTargets="GetSource">
-		<MSBuild Projects=".\ci_src\MassTransit.sln" Properties="Configuration=Debug" />
+	<Target Name="Build">
+		<MSBuild Projects=".\MassTransit.sln" Properties="Configuration=Debug" />
 	</Target>
 
 	<Target Name="GetSource">
