@@ -41,7 +41,7 @@ namespace MassTransit.ServiceBus
         /// <param name="messages">The messages to include with the reply</param>
         public void Reply(params IMessage[] messages)
         {
-            IEndpoint replyEndpoint = Envelope.ReturnTo;
+            IEndpoint replyEndpoint = Envelope.ReturnEndpoint;
 
             IEnvelope envelope = new Envelope(Bus.Endpoint, messages);
             envelope.CorrelationId = Envelope.Id;

@@ -11,12 +11,9 @@ namespace MassTransit.ServiceBus
 
         public static IEnvelope MapFrom(Message msg)
         {
-            IEnvelope e;
-
-            if (msg.ResponseQueue != null)
-                e = new Envelope(new MessageQueueEndpoint(msg.ResponseQueue.Path));
-            else
-                e = new Envelope(); //TODO: How to get the endpoint in here
+            IMessageQueueEndpoint returnAddress = (msg.ResponseQueue != null) ? MessageQueueEndpoint.FromQueuePath(msg.ResponseQueue.Path) : null;
+                
+            IEnvelope e = new Envelope(returnAddress);
 
             e.Id = msg.Id;
             e.CorrelationId = msg.CorrelationId;
@@ -39,6 +36,7 @@ namespace MassTransit.ServiceBus
 
             return e;
         }
+
         public static Message MapFrom(IEnvelope envelope)
         {
             Message msg = new Message();
@@ -48,7 +46,10 @@ namespace MassTransit.ServiceBus
                 _formatter.Serialize(msg.BodyStream, envelope.Messages);
             }
 
-            msg.ResponseQueue = new MessageQueue(envelope.ReturnTo.Address);
+        	IMessageQueueEndpoint endpoint = envelope.ReturnEndpoint as IMessageQueueEndpoint;
+
+			if(endpoint != null)
+				msg.ResponseQueue = new MessageQueue(endpoint.QueueName);
 
             if (envelope.TimeToBeReceived < MessageQueue.InfiniteTimeout)
                 msg.TimeToBeReceived = envelope.TimeToBeReceived;

@@ -5,6 +5,6 @@ namespace MassTransit.ServiceBus
     public interface IEndpoint :
         IDisposable
     {
-        string Address { get; }
+		Uri Uri { get; }
     }
 }

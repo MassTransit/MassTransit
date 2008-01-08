@@ -15,7 +15,7 @@ namespace MassTransit.ServiceBus.Subscriptions
         private BinaryFormatter _formatter;
         private Cursor _peekCursor;
         private MessageQueue _storageQueue;
-        private string _storageQueueName;
+        private IMessageQueueEndpoint _storageEndpoint;
         private readonly ISubscriptionStorage _subscriptionCache;
         private IEndpoint _endpoint;
 
@@ -25,12 +25,12 @@ namespace MassTransit.ServiceBus.Subscriptions
         /// <param name="storageEndpoint">the name of the queue that stores all of the subscriptions</param>
         /// <param name="endpoint"></param>
         /// <param name="subscriptionCache">in memory cache</param>
-        public MsmqSubscriptionStorage(IEndpoint storageEndpoint, IEndpoint endpoint, ISubscriptionStorage subscriptionCache)
+        public MsmqSubscriptionStorage(IMessageQueueEndpoint storageEndpoint, IEndpoint endpoint, ISubscriptionStorage subscriptionCache)
         {
-            _storageQueueName = storageEndpoint.Address;
+			_storageEndpoint = storageEndpoint;
             _endpoint = endpoint;
             _subscriptionCache = subscriptionCache;
-            _storageQueue = new MessageQueue(_storageQueueName, QueueAccessMode.SendAndReceive);
+			_storageQueue = new MessageQueue(_storageEndpoint.QueueName, QueueAccessMode.SendAndReceive);
 
             //TODO: should there be a bus instance here so we can subscribe to messages and send messages?
 
@@ -93,7 +93,7 @@ namespace MassTransit.ServiceBus.Subscriptions
         public void Add(Type messageType, IEndpoint endpoint)
         {
             SubscriptionMessage subscriptionMessage =
-                new SubscriptionMessage(messageType, endpoint.Address,
+                new SubscriptionMessage(messageType, endpoint.Uri.AbsoluteUri,
                                         SubscriptionMessage.SubscriptionChangeType.Add);
 
             Send(subscriptionMessage);
@@ -101,14 +101,14 @@ namespace MassTransit.ServiceBus.Subscriptions
             _subscriptionCache.Add(messageType, endpoint);
 
             if (_log.IsDebugEnabled)
-                _log.DebugFormat("Adding Subscription to {0} for {1}", messageType, endpoint.Address);
+                _log.DebugFormat("Adding Subscription to {0} for {1}", messageType, endpoint.Uri);
         }
 
         private void Send(IMessage message)
         {
             Message msg = new Message();
 
-            msg.ResponseQueue = new MessageQueue(_endpoint.Address);
+            msg.ResponseQueue = new MessageQueue(_storageEndpoint.QueueName);
             msg.Recoverable = true;
 
             _formatter.Serialize(msg.BodyStream, new IMessage[] {message});
@@ -121,13 +121,13 @@ namespace MassTransit.ServiceBus.Subscriptions
             _subscriptionCache.Remove(messageType, endpoint);
 
             SubscriptionMessage subscriptionMessage =
-                new SubscriptionMessage(messageType, endpoint.Address,
+                new SubscriptionMessage(messageType, endpoint.Uri.AbsoluteUri,
                                         SubscriptionMessage.SubscriptionChangeType.Remove);
 
             Send(subscriptionMessage);
 
             if (_log.IsDebugEnabled)
-                _log.DebugFormat("Removing Subscription to {0} for {1}", messageType, endpoint.Address);
+                _log.DebugFormat("Removing Subscription to {0} for {1}", messageType, endpoint.Uri);
         }
 
         public void Dispose()

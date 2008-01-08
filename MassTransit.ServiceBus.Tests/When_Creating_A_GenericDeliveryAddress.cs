@@ -11,8 +11,8 @@ namespace MassTransit.ServiceBus.Tests
         [Test]
         public void AutoCast_From_String()
         {
-            MessageQueueEndpoint addr = @".\private$\test_endpoint";
-            Assert.That(addr.Address, Is.EqualTo(Environment.MachineName + @"\private$\test_endpoint"));
+            MessageQueueEndpoint addr = @"msmq://localhost/test_endpoint";
+            Assert.That(addr.Uri.AbsoluteUri, Is.EqualTo("msmq://localhost/test_endpoint"));
         }
     }
 }

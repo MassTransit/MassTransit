@@ -26,7 +26,7 @@ namespace MassTransit.ServiceBus.Tests
         [Test]
         public void Address_Is_Right()
         {
-            Assert.That(endpoint.Address, Is.EqualTo(Environment.MachineName + @"\private$\test_servicebus_poison"));
+            Assert.That(endpoint.Uri.AbsoluteUri, Is.EqualTo("msmq://localhost/test_servicebus_poison"));
         }
 
         [Test]
@@ -35,7 +35,7 @@ namespace MassTransit.ServiceBus.Tests
             DeleteMessage msg = new DeleteMessage();
             Envelope env = new Envelope(base._testEndPoint, msg);
             MessageSenderFactory.Create(endpoint).Send(env);
-            VerifyMessageInQueue(endpoint.Address, msg);
+            VerifyMessageInQueue(endpoint.QueueName, msg);
         }
     }
 }

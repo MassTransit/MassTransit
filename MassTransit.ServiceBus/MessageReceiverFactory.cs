@@ -6,9 +6,9 @@ namespace MassTransit.ServiceBus
     {
         public static IMessageReceiver Create(IEndpoint endpoint)
         {
-            if (endpoint is MessageQueueEndpoint)
+            if (endpoint is IMessageQueueEndpoint)
             {
-                return new MessageQueueReceiver(endpoint);
+                return new MessageQueueReceiver(endpoint as IMessageQueueEndpoint);
             }
 
             throw new EndpointException(endpoint, "No Message Receiver Available");

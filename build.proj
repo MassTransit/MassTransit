@@ -5,19 +5,18 @@
 	
 	<PropertyGroup>
 		<MSBuildCommunityTasksPath>$(MSBuildProjectDirectory)\libs\MSBuild.Community.Tasks\MSBuild.Community.Tasks.Targets</MSBuildCommunityTasksPath>
-		 <NUnit-ToolPath>.\libs\NUnit</NUnit-ToolPath>
     </PropertyGroup>
 	
 	<ItemGroup>
-		<ZipFiles Include=".\bin\*.*" />
-		<TestAssembly Include=".\bin\*.Tests.dll" />
+		<ZipFiles Include=".\ci_src\bin\*.*" />
+		<TestAssembly Include=".\ci_src\bin\*.Tests.dll" />
 	</ItemGroup>
 			
-	<Target Name="Go" DependsOnTargets="Build;UnitTest">
+	<Target Name="Go" DependsOnTargets="Build;Zip">
 	</Target>
 	
-	<Target Name="Build">
-		<MSBuild Projects=".\MassTransit.sln" Properties="Configuration=Debug" />
+	<Target Name="Build" DependsOnTargets="GetSource">
+		<MSBuild Projects=".\ci_src\MassTransit.sln" Properties="Configuration=Debug" />
 	</Target>
 
 	<Target Name="GetSource">
@@ -32,21 +31,11 @@
 	</Target>
 	
 	<Target Name="UnitTest">
-	
-		<NUnit Assemblies="@(TestAssembly)" 
-		       ToolPath="$(NUnit-ToolPath)"
-               DisableShadowCopy="true" />
-		<!--
-		<Exec Command=".\libs\NUnit\nunit-console.exe .\bin\MassTransit.ServiceBus.Tests.dll" />
-		-->
+		<NUnit Assemblies="@(TestAssembly)" />
 	</Target>
 
 	<Target Name="Zip">
-		<CreateItem Include=".\bin\*.*" >
-			<Output ItemName="ZipFiles" TaskParameter="Include"/>
-		</CreateItem>
 		<Zip Files="@(ZipFiles)" 
-		     WorkingDirectory="$(MSBuildProjectDirectory)"
-			 ZipFileName=".\MassTransit.zip" />
+			ZipFileName=".\MassTransit.zip" />
 	</Target>
 </Project>

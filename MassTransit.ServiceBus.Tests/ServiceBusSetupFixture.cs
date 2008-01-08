@@ -19,31 +19,28 @@ namespace MassTransit.ServiceBus.Tests
         protected IServiceBus _serviceBus;
         protected IServiceBus _remoteServiceBus;
 
-        protected MessageQueueEndpoint _serviceBusEndPoint;
-        protected MessageQueueEndpoint _remoteServiceBusEndPoint;
-        protected MessageQueueEndpoint _testEndPoint;
-        protected MessageQueueEndpoint _storageEndPoint;
+        protected MessageQueueEndpoint _serviceBusEndPoint = @"msmq://localhost/test_servicebus";
+        protected MessageQueueEndpoint _remoteServiceBusEndPoint = @"msmq://localhost/test_remoteservicebus";
+        protected MessageQueueEndpoint _testEndPoint = @"msmq://localhost/test_endpoint";
+        protected MessageQueueEndpoint _poisonEndpoint = @"msmq://localhost/test_servicebus_poison";
 
-        protected string _serviceBusQueueName = @".\private$\test_servicebus";
-        protected string _remoteServiceBusQueueName = @".\private$\test_remoteservicebus";
-        protected string _testEndPointQueueName = @".\private$\test_endpoint";
-        protected string _poisonQueueName = @".\private$\test_servicebus_poison";
+        protected string _serviceBusQueueName = @"msmq://localhost/test_servicebus";
+        protected string _remoteServiceBusQueueName = @"msmq://localhost/test_remoteservicebus";
+        protected string _testEndPointQueueName = @"msmq://localhost/test_endpoint";
+        protected string _poisonQueueName = @"msmq://localhost/test_servicebus_poison";
 
         [SetUp]
         public virtual void Before_Each_Test_In_The_Fixture()
         {
             log4net.Config.XmlConfigurator.Configure(new FileInfo(@".\log4net.config"));
+
             //TODO: Is this necessary still?
         	MessageQueue.EnableConnectionCache = false;
 
-            ValidateAndPurgeQueue(_serviceBusQueueName);
-            ValidateAndPurgeQueue(_remoteServiceBusQueueName);
-            ValidateAndPurgeQueue(_testEndPointQueueName);
-            ValidateAndPurgeQueue(_poisonQueueName);
-
-            _serviceBusEndPoint = @".\private$\test_servicebus";
-            _remoteServiceBusEndPoint = @".\private$\test_remoteservicebus";
-            _testEndPoint = @".\private$\test_endpoint";
+            ValidateAndPurgeQueue(_serviceBusEndPoint.QueueName);
+            ValidateAndPurgeQueue(_remoteServiceBusEndPoint.QueueName);
+            ValidateAndPurgeQueue(_testEndPoint.QueueName);
+            ValidateAndPurgeQueue(_poisonEndpoint.QueueName);
 
             ISubscriptionStorage _subscriptionCache = new LocalSubscriptionCache();
 
@@ -59,13 +56,6 @@ namespace MassTransit.ServiceBus.Tests
             _serviceBus.Dispose();
             
             _remoteServiceBus.Dispose();
-
-
-            // TODO: Are these screwing up asyncs?
-            //_serviceBusEndPoint.Dispose();
-            //_remoteServiceBusEndPoint.Dispose();
-            //_testEndPoint.Dispose();
-
 
             //TeardownQueue(_serviceBusQueueName);
             //TeardownQueue(_remoteServiceBusQueueName);

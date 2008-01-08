@@ -16,17 +16,13 @@ namespace MassTransit.ServiceBus.Tests
         [Test]
         public void A_MessageQueue_Transport_Should_Be_Usable()
         {
-            string queuePath = @".\private$\test_servicebus";
+            MessageQueueEndpoint defaultEndpoint = @"msmq://localhost/test_servicebus";
 
-            queuePath = Util.MsmqUtilities.NormalizeQueueName(new MessageQueue(queuePath));
-
-            ValidateAndPurgeQueue(queuePath);
-
-            MessageQueueEndpoint defaultEndpoint = queuePath;
+            ValidateAndPurgeQueue(defaultEndpoint.QueueName);
 
             IServiceBus serviceBus = new ServiceBus(defaultEndpoint, mocks.CreateMock<ISubscriptionStorage>());
 
-            Assert.That(serviceBus.Endpoint.Address, Is.EqualTo(queuePath));
+            Assert.That(serviceBus.Endpoint.Uri.AbsoluteUri, Is.EqualTo("msmq://localhost/test_servicebus"));
         }
     }
 }

@@ -48,7 +48,7 @@ namespace MassTransit.ServiceBus.Tests
 
         //    using(mocks.Record())
         //    {
-        //        Expect.Call(mockEnvelope.ReturnTo).Return(mockEndpoint);
+        //        Expect.Call(mockEnvelope.ReturnEndpoint).Return(mockEndpoint);
         //        Expect.Call(mockBus.Endpoint).Return(mockBusEndpoint);
         //        Expect.Call(mockEnvelope.Id).Return("");
         //        mockEndpoint.Send(null);

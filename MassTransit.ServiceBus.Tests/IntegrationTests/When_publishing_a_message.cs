@@ -66,7 +66,7 @@ namespace MassTransit.ServiceBus.Tests
 						{
 							_updateEvent.Set();
 
-							ctx.Bus.Send(ctx.Envelope.ReturnTo, new UpdateAcceptedMessage());
+							ctx.Bus.Send(ctx.Envelope.ReturnEndpoint, new UpdateAcceptedMessage());
 						};
 
 				ManualResetEvent _repliedEvent = new ManualResetEvent(false);

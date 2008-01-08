@@ -10,9 +10,9 @@ namespace MassTransit.ServiceBus
 
         private MessageQueue _queue;
 
-        public MessageQueueSender(IEndpoint endpoint)
+        public MessageQueueSender(IMessageQueueEndpoint endpoint)
         {
-            _queue = new MessageQueue(endpoint.Address, QueueAccessMode.SendAndReceive);
+            _queue = new MessageQueue(endpoint.QueueName, QueueAccessMode.SendAndReceive);
 
             MessagePropertyFilter mpf = new MessagePropertyFilter();
             mpf.SetAll();
@@ -39,7 +39,7 @@ namespace MassTransit.ServiceBus
 
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Message Sent: Id = {0}, Message Type = {1}", msg.Id,
-                                 envelope.Messages != null ? envelope.Messages[0].GetType().ToString() : "");
+                    envelope.Messages != null ? envelope.Messages[0].GetType().ToString() : "");
         }
 
         #endregion
