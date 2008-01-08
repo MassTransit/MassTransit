@@ -5,6 +5,7 @@
 	
 	<PropertyGroup>
 		<MSBuildCommunityTasksPath>$(MSBuildProjectDirectory)\libs\MSBuild.Community.Tasks\MSBuild.Community.Tasks.Targets</MSBuildCommunityTasksPath>
+		 <NUnit-ToolPath>.\libs\NUnit</NUnit-ToolPath>
     </PropertyGroup>
 	
 	<ItemGroup>
@@ -12,7 +13,7 @@
 		<TestAssembly Include=".\bin\*.Tests.dll" />
 	</ItemGroup>
 			
-	<Target Name="Go" DependsOnTargets="Build;Zip">
+	<Target Name="Go" DependsOnTargets="Build;Zip;UnitTest">
 	</Target>
 	
 	<Target Name="Build">
@@ -31,7 +32,13 @@
 	</Target>
 	
 	<Target Name="UnitTest">
-		<NUnit Assemblies="@(TestAssembly)" />
+	
+		<NUnit Assemblies="@(TestAssembly)" 
+		       ToolPath="$(NUnit-ToolPath)"
+               DisableShadowCopy="true" />
+		<!--
+		<Exec Command=".\libs\NUnit\nunit-console.exe .\bin\MassTransit.ServiceBus.Tests.dll" />
+		-->
 	</Target>
 
 	<Target Name="Zip">
