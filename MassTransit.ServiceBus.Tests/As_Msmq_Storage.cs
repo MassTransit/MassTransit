@@ -51,11 +51,6 @@ namespace MassTransit.ServiceBus.Tests
             MsmqSubscriptionStorage storage = new MsmqSubscriptionStorage(storageEndpoint, nonExistentListenEndpoint, cache);
         }
 
-        [Test, Ignore("Not Implemented, yet. ;)")]
-        public void How_Should_I_Handle_Transactions()
-        {
-        }
-
         [Test]
         public void I_Should_Work_When_Removing()
         {

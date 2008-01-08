@@ -46,6 +46,7 @@
 			<Output ItemName="ZipFiles" TaskParameter="Include"/>
 		</CreateItem>
 		<Zip Files="@(ZipFiles)" 
-			ZipFileName=".\MassTransit.zip" />
+		     WorkingDirectory="$(MSBuildProjectDirectory)"
+			 ZipFileName=".\MassTransit.zip" />
 	</Target>
 </Project>
