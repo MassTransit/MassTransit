@@ -8,7 +8,7 @@ namespace MassTransit.ServiceBus.Tests
 
     [Explicit]
     [TestFixture(Description = "Integration Test for Transaction Handling")]
-    public class A_MessageQueueEndpoint_Should_Hide_Transaction_Issues
+    public class When_working_with_Transactions
     {
         private readonly string nonTransactionalQueueName = @".\private$\test_nonTransaction";
         private readonly string transactionalQueueName = @".\private$\test_transaction";
