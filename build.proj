@@ -13,7 +13,7 @@
 		<TestAssembly Include=".\bin\*.Tests.dll" />
 	</ItemGroup>
 			
-	<Target Name="Go" DependsOnTargets="Build;Zip;UnitTest">
+	<Target Name="Go" DependsOnTargets="Build;UnitTest">
 	</Target>
 	
 	<Target Name="Build">
@@ -42,6 +42,9 @@
 	</Target>
 
 	<Target Name="Zip">
+		<CreateItem Include=".\bin\*.*" >
+			<Output ItemName="ZipFiles" TaskParameter="Include"/>
+		</CreateItem>
 		<Zip Files="@(ZipFiles)" 
 			ZipFileName=".\MassTransit.zip" />
 	</Target>
