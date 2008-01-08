@@ -15,9 +15,9 @@ namespace MassTransit.ServiceBus.Tests
         public void I_Should_Work_When_Adding()
         {
             //TODO: This is nasty
-            IEndpoint storageEndpoint = base._serviceBusEndPoint;
-            IEndpoint listenEndpoint = base._testEndPoint;
-            IEndpoint subscriberEndpoint = base._remoteServiceBusEndPoint;
+            IMessageQueueEndpoint storageEndpoint = base._serviceBusEndPoint;
+            IMessageQueueEndpoint listenEndpoint = base._testEndPoint;
+            IMessageQueueEndpoint subscriberEndpoint = base._remoteServiceBusEndPoint;
 
             ISubscriptionStorage cache = new LocalSubscriptionCache();
             MsmqSubscriptionStorage storage = new MsmqSubscriptionStorage(storageEndpoint, listenEndpoint, cache);
@@ -26,15 +26,15 @@ namespace MassTransit.ServiceBus.Tests
 
             SubscriptionMessage msg = new SubscriptionMessage(null, null, SubscriptionMessage.SubscriptionChangeType.Add);
 
-            VerifyMessageInQueue(storageEndpoint.Address, msg);
+            VerifyMessageInQueue(storageEndpoint.QueueName, msg);
         }
 
         [Test]
         [ExpectedException(typeof(MessageQueueException))]
         public void I_Should_Puke_If_My_Storage_Queue_Doesnt_Exist()
         {
-            IEndpoint nonExistentStorageEndpoint = new MessageQueueEndpoint(@".\private$\some_queue_that_doesnt_exist");
-            IEndpoint listenEndpoint = base._testEndPoint;
+            IMessageQueueEndpoint nonExistentStorageEndpoint = new MessageQueueEndpoint(@"msmq://localhost/some_queue_that_doesnt_exist");
+            IMessageQueueEndpoint listenEndpoint = base._testEndPoint;
 
             ISubscriptionStorage cache = new LocalSubscriptionCache();
             MsmqSubscriptionStorage storage = new MsmqSubscriptionStorage(nonExistentStorageEndpoint, listenEndpoint, cache);
@@ -44,20 +44,25 @@ namespace MassTransit.ServiceBus.Tests
         [ExpectedException(typeof(MessageQueueException))]
         public void I_Should_Puke_If_My_Listen_Queue_Doesnt_Exist()
         {
-            IEndpoint storageEndpoint = base._serviceBusEndPoint;
-            IEndpoint nonExistentListenEndpoint = new MessageQueueEndpoint(@".\private$\some_queue_that_doesnt_exist");
+            IMessageQueueEndpoint storageEndpoint = base._serviceBusEndPoint;
+            IMessageQueueEndpoint nonExistentListenEndpoint = new MessageQueueEndpoint(@"msmq://localhost/some_queue_that_doesnt_exist");
 
             ISubscriptionStorage cache = new LocalSubscriptionCache();
             MsmqSubscriptionStorage storage = new MsmqSubscriptionStorage(storageEndpoint, nonExistentListenEndpoint, cache);
+        }
+
+        [Test, Ignore("Not Implemented, yet. ;)")]
+        public void How_Should_I_Handle_Transactions()
+        {
         }
 
         [Test]
         public void I_Should_Work_When_Removing()
         {
             //TODO: This is nasty
-            IEndpoint storageEndpoint = base._serviceBusEndPoint;
-            IEndpoint listenEndpoint = base._testEndPoint;
-            IEndpoint subscriberEndpoint = base._remoteServiceBusEndPoint;
+            IMessageQueueEndpoint storageEndpoint = base._serviceBusEndPoint;
+            IMessageQueueEndpoint listenEndpoint = base._testEndPoint;
+            IMessageQueueEndpoint subscriberEndpoint = base._remoteServiceBusEndPoint;
 
             ISubscriptionStorage cache = new LocalSubscriptionCache();
             MsmqSubscriptionStorage storage = new MsmqSubscriptionStorage(storageEndpoint, listenEndpoint, cache);
@@ -68,7 +73,7 @@ namespace MassTransit.ServiceBus.Tests
 
             storage.Remove(typeof(PingMessage), subscriberEndpoint);
             
-            VerifyQueueIsEmpty(storageEndpoint.Address);
+            VerifyQueueIsEmpty(storageEndpoint.QueueName);
         }
 
     }

@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using System.Messaging;
 using NUnit.Framework;
@@ -21,7 +22,7 @@ namespace MassTransit.ServiceBus.Tests
 
             IEnvelopeConsumer consumer = (IEnvelopeConsumer) _serviceBus;
 
-            IEnvelope envelope = new Envelope(new PingMessage());
+            IEnvelope envelope = new Envelope(_serviceBusEndPoint, new PingMessage());
 
             Assert.That(consumer.MeetsCriteria(envelope), Is.False);
         }
@@ -35,7 +36,7 @@ namespace MassTransit.ServiceBus.Tests
 
             IEnvelopeConsumer consumer = (IEnvelopeConsumer) _serviceBus;
 
-            IEnvelope envelope = new Envelope(new PingMessage());
+            IEnvelope envelope = new Envelope(_serviceBusEndPoint, new PingMessage());
 
             Assert.That(consumer.MeetsCriteria(envelope), Is.True);
         }
@@ -53,7 +54,7 @@ namespace MassTransit.ServiceBus.Tests
 
             IEnvelopeConsumer consumer = (IEnvelopeConsumer) _serviceBus;
 
-            IEnvelope envelope = new Envelope(new PingMessage());
+            IEnvelope envelope = new Envelope(_serviceBusEndPoint, new PingMessage());
 
             Assert.That(consumer.MeetsCriteria(envelope), Is.True);
         }
@@ -71,7 +72,7 @@ namespace MassTransit.ServiceBus.Tests
 
             IEnvelopeConsumer consumer = (IEnvelopeConsumer)_serviceBus;
 
-            IEnvelope envelope = new Envelope(new PingMessage());
+            IEnvelope envelope = new Envelope(_serviceBusEndPoint, new PingMessage());
 
             Assert.That(consumer.MeetsCriteria(envelope), Is.False);
         }
@@ -80,7 +81,7 @@ namespace MassTransit.ServiceBus.Tests
         public void The_Message_Endpoint_Should_Check_If_The_Message_Will_Be_Handled()
         {
             IEndpoint mockReturnEndpoint = mocks.CreateMock<IEndpoint>();
-            MessageQueueEndpoint endpoint = new MessageQueueEndpoint(@".\private$\test_endpoint");
+            MessageQueueEndpoint endpoint = new MessageQueueEndpoint(@"msmq://localhost/test_endpoint");
 
             IEnvelopeConsumer consumer = mocks.CreateMock<IEnvelopeConsumer>();
 
@@ -92,7 +93,7 @@ namespace MassTransit.ServiceBus.Tests
 
             using(mocks.Record())
             {
-                Expect.Call(mockReturnEndpoint.Address).Return(@".\private$\test_endpoint");
+                Expect.Call(mockReturnEndpoint.Uri).Return(new Uri("msmq://localhost/test_endpoint"));
                 Expect.Call(consumer.MeetsCriteria(envelope)).Return(false).IgnoreArguments();
             }
 

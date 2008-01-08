@@ -74,6 +74,7 @@
     <Compile Include="When_Creating_An_Envelope.cs" />
     <Compile Include="When_Creating_A_GenericDeliveryAddress.cs" />
     <Compile Include="When_Publishing_A_Message.cs" />
+    <Compile Include="When_specifying_an_endpoint_address.cs" />
     <Compile Include="When_Submitting_A_Message_To_The_Message_Bus.cs" />
     <Compile Include="When_working_with_an_endpoint.cs" />
     <Compile Include="WriteOnlyMessageQueueEndpointTests.cs" />

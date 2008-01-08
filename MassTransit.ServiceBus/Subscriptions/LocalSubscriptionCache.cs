@@ -48,15 +48,15 @@ namespace MassTransit.ServiceBus.Subscriptions
         {
             InternalAdd(messageType, endpoint);
             if(_log.IsInfoEnabled)
-                _log.InfoFormat("Sending Subscription Update ({0}, {1}) to Master Repository", messageType, endpoint.Address);
-            InternalSend(new SubscriptionMessage(messageType, endpoint.Address, SubscriptionMessage.SubscriptionChangeType.Add));
+                _log.InfoFormat("Sending Subscription Update ({0}, {1}) to Master Repository", messageType, endpoint.Uri);
+            InternalSend(new SubscriptionMessage(messageType, endpoint.Uri.AbsoluteUri, SubscriptionMessage.SubscriptionChangeType.Add));
         }
         public void Remove(Type messageType, IEndpoint endpoint)
         {
             InternalRemove(messageType, endpoint);
             if (_log.IsInfoEnabled)
-                _log.InfoFormat("Sending Subscription Update ({0}, {1}) to Master Repository", messageType, endpoint.Address);
-            InternalSend(new SubscriptionMessage(messageType, endpoint.Address, SubscriptionMessage.SubscriptionChangeType.Remove));
+                _log.InfoFormat("Sending Subscription Update ({0}, {1}) to Master Repository", messageType, endpoint.Uri);
+			InternalSend(new SubscriptionMessage(messageType, endpoint.Uri.AbsoluteUri, SubscriptionMessage.SubscriptionChangeType.Remove));
         }
 
         public void Dispose()
@@ -91,7 +91,7 @@ namespace MassTransit.ServiceBus.Subscriptions
         private void InternalRemove(Type messageType, IEndpoint endpoint)
         {
             if (_log.IsDebugEnabled)
-                _log.DebugFormat("Removing Local Subscription {0} : {1}", messageType, endpoint.Address);
+                _log.DebugFormat("Removing Local Subscription {0} : {1}", messageType, endpoint.Uri);
 
             lock (this)
             {
@@ -102,7 +102,7 @@ namespace MassTransit.ServiceBus.Subscriptions
                     if (_messageTypeSubscriptions[messageType].Contains(entry))
                     {
                         if (_log.IsDebugEnabled)
-                            _log.DebugFormat("Removing local subscription entry for endpoint {0} on {1}", endpoint.Address,
+                            _log.DebugFormat("Removing local subscription entry for endpoint {0} on {1}", endpoint.Uri,
                                              GetHashCode());
                         _messageTypeSubscriptions[messageType].Remove(entry);
                     }
@@ -132,7 +132,7 @@ namespace MassTransit.ServiceBus.Subscriptions
                 if (!_messageTypeSubscriptions[messageType].Contains(entry))
                 {
                     if (_log.IsDebugEnabled)
-                        _log.DebugFormat("Adding new local subscription entry for endpoint {0} on {1}", endpoint.Address,
+                        _log.DebugFormat("Adding new local subscription entry for endpoint {0} on {1}", endpoint.Uri,
                                          GetHashCode());
                     _messageTypeSubscriptions[messageType].Add(entry);
                 }

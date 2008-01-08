@@ -160,7 +160,7 @@ namespace MassTransit.ServiceBus
             {
                 if (_poisonEndpoint == null)
                 {
-                    _poisonEndpoint = new MessageQueueEndpoint(_endpoint.Address + "_poison");
+                    _poisonEndpoint = new MessageQueueEndpoint(_endpoint.Uri + "_poison");
                 }
 
                 return _poisonEndpoint;
@@ -189,19 +189,14 @@ namespace MassTransit.ServiceBus
 
         public IServiceBusAsyncResult Request<T>(IEndpoint destinationEndpoint, params T[] messages) where T : IMessage
         {
-            return Request<T>(destinationEndpoint, null, null, messages);
-        }
-
-        public IServiceBusAsyncResult Request<T>(IEndpoint destinationEndpoint, AsyncCallback callback, object state, params T[] messages) where T : IMessage
-        {
             IEnvelope envelope = new Envelope(_endpoint, messages as IMessage[]);
 
             IMessageSender send = MessageSenderFactory.Create(destinationEndpoint);
             lock (_correlatedMessageController)
             {            
                 send.Send(envelope);
-
-                return _correlatedMessageController.Track(envelope.Id, callback, state);
+ 
+                return _correlatedMessageController.Track(envelope.Id);
             }
         }
 

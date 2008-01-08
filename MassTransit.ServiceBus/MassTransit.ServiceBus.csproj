@@ -50,6 +50,7 @@
     <Compile Include="IEnvelopeConsumer.cs" />
     <Compile Include="IMessage.cs" />
     <Compile Include="IMessageConsumer.cs" />
+    <Compile Include="IMessageQueueEndpoint.cs" />
     <Compile Include="IMessageReceiver.cs" />
     <Compile Include="IMessageSender.cs" />
     <Compile Include="INotifyMessageConsumer.cs" />

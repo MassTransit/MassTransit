@@ -1,11 +1,8 @@
 using System;
-using System.Collections.Generic;
-using System.Xml.Serialization;
 using MassTransit.ServiceBus.Util;
 
 namespace MassTransit.ServiceBus
 {
-    [Serializable]
     public class Envelope :
         IEnvelope, IEquatable<Envelope>
     {
@@ -14,15 +11,14 @@ namespace MassTransit.ServiceBus
         private MessageId _id = MessageId.Empty;
         private string _label;
         private IMessage[] _messages;
-        private List<object> _messagesObj;
         private bool _recoverable;
-        private IEndpoint _returnTo;
+        private IEndpoint _ReturnEndpoint;
         private DateTime _sentTime;
         private TimeSpan _timeToBeReceived = TimeSpan.MaxValue;
 
-        public Envelope(IEndpoint returnTo, params IMessage[] messages)
+        public Envelope(IEndpoint returnEndpoint, params IMessage[] messages)
         {
-            _returnTo = returnTo;
+            _ReturnEndpoint = returnEndpoint;
             _messages = messages;
         }
 
@@ -31,37 +27,18 @@ namespace MassTransit.ServiceBus
             _messages = messages;
         }
 
-        /// <summary>
-        /// Gets/sets the list of messages in the message bundle.
-        /// </summary>
-        public List<object> MessagesObj
-        {
-            get { return _messagesObj; }
-            set { _messagesObj = value; }
-        }
-
         #region IEnvelope Members
 
-        /// <remarks>
-        /// Since the XmlSerializer doesn't work well with interfaces,
-        /// we ask it to ignore this data and synchronize with the <see cref="_messagesObj"/> field.
-        /// </remarks>
-        [XmlIgnore]
         public IMessage[] Messages
         {
             get { return _messages; }
-            set
-            {
-                _messages = value;
-                _messagesObj = new List<object>(_messages);
-            }
+            set { _messages = value; }
         }
 
-
-        public IEndpoint ReturnTo
+        public IEndpoint ReturnEndpoint
         {
-            get { return _returnTo; }
-            set { _returnTo = value; }
+            get { return _ReturnEndpoint; }
+            set { _ReturnEndpoint = value; }
         }
 
         public MessageId Id
@@ -108,13 +85,11 @@ namespace MassTransit.ServiceBus
 
         public object Clone()
         {
-            Envelope env = new Envelope(ReturnTo, Messages);
+            Envelope env = new Envelope(ReturnEndpoint, Messages);
             env.ArrivedTime = ArrivedTime;
+            env.Id = Id;
             env.CorrelationId = CorrelationId;
-            //id?
             env.Label = Label;
-            env.Messages = Messages;
-            env.MessagesObj = MessagesObj;
             env.Recoverable = Recoverable;
             env.SentTime = SentTime;
             env.TimeToBeReceived = TimeToBeReceived;

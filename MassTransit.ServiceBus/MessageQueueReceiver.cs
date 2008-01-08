@@ -18,9 +18,9 @@ namespace MassTransit.ServiceBus
 
         private MessageQueue _queue;
 
-        public MessageQueueReceiver(IEndpoint endpoint)
+        public MessageQueueReceiver(IMessageQueueEndpoint endpoint)
         {
-            _queue = new MessageQueue(endpoint.Address, QueueAccessMode.SendAndReceive);
+            _queue = new MessageQueue(endpoint.QueueName, QueueAccessMode.SendAndReceive);
 
             MessagePropertyFilter mpf = new MessagePropertyFilter();
             mpf.SetAll();

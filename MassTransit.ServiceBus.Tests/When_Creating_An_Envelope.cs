@@ -13,11 +13,11 @@ namespace MassTransit.ServiceBus.Tests
         [Test]
         public void A_Return_Address_Should_Be_Stored_With_The_Envelope()
         {
-            MessageQueueEndpoint returnTo = @".\private$\test_endpoint";
+            MessageQueueEndpoint returnTo = @"msmq://localhost/test_endpoint";
 
             IEnvelope e = new Envelope(returnTo);
 
-            Assert.That(e.ReturnTo.Address, Is.EqualTo(Environment.MachineName + @"\private$\test_endpoint"));
+            Assert.That(e.ReturnEndpoint.Uri.AbsoluteUri, Is.EqualTo("msmq://localhost/test_endpoint"));
         }
 
         [Test]
@@ -27,7 +27,7 @@ namespace MassTransit.ServiceBus.Tests
 
             IMessage message = mocks.CreateMock<IMessage>();
 
-            MessageQueueEndpoint returnTo = @".\private$\test_endpoint";
+            MessageQueueEndpoint returnTo = @"msmq://localhost/test_endpoint";
 
             IEnvelope e = new Envelope(returnTo, message);
 
@@ -43,7 +43,7 @@ namespace MassTransit.ServiceBus.Tests
             messages[0] = mocks.CreateMock<IMessage>();
             messages[1] = mocks.CreateMock<IMessage>();
 
-            MessageQueueEndpoint returnTo = @".\private$\test_endpoint";
+            MessageQueueEndpoint returnTo = @"msmq://localhost/test_endpoint";
 
             IEnvelope e = new Envelope(returnTo, messages);
 
@@ -58,7 +58,7 @@ namespace MassTransit.ServiceBus.Tests
             IMessage message = mocks.CreateMock<IMessage>();
             IMessage message1 = mocks.CreateMock<IMessage>();
 
-            MessageQueueEndpoint returnTo = @".\private$\test_endpoint";
+            MessageQueueEndpoint returnTo = @"msmq://localhost/test_endpoint";
 
             IEnvelope e = new Envelope(returnTo, message, message1);
 

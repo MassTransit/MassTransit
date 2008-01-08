@@ -14,7 +14,7 @@ namespace MassTransit.ServiceBus.Tests
 
             Assert.That(endpoint, Is.Not.Null);
 
-            Assert.That(endpoint.Address, Is.EqualTo(_serviceBusEndPoint.Address));
+            Assert.That(endpoint.Uri, Is.EqualTo(_serviceBusEndPoint.Uri));
         }
     }
 }

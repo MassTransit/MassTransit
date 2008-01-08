@@ -51,7 +51,7 @@ namespace MassTransit.ServiceBus.SubscriptionsManager.Tests
                 Expect.Call(env.Messages).Return(new IMessage[] {new RequestCacheUpdate()});
                 Expect.Call(env.Id).Return(envId);
                 Expect.Call(sr.List()).Return(new List<Subscription>());
-                Expect.Call(env.ReturnTo).Return(returnEndpoint);
+                Expect.Call(env.ReturnEndpoint).Return(returnEndpoint);
             }
             using (mocks.Playback())
             {

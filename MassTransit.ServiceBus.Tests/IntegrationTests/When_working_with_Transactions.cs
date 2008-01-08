@@ -1,23 +1,15 @@
 using System;
 using System.Transactions;
 using NUnit.Framework;
+using Rhino.Mocks;
 
 namespace MassTransit.ServiceBus.Tests
 {
-    using Rhino.Mocks;
-
     [Explicit]
     [TestFixture(Description = "Integration Test for Transaction Handling")]
     public class When_working_with_Transactions
     {
-        private readonly string nonTransactionalQueueName = @".\private$\test_nonTransaction";
-        private readonly string transactionalQueueName = @".\private$\test_transaction";
-        private readonly string returnToQueueName = @".\private$\test_return";
-
-        private MockRepository mocks;
-        IEndpoint returnTo;
-        PingMessage msg = new PingMessage();
-        Envelope env;
+        #region Setup/Teardown
 
         [SetUp]
         public void SetUp()
@@ -27,23 +19,35 @@ namespace MassTransit.ServiceBus.Tests
             ServiceBusSetupFixture.ValidateAndPurgeQueue(returnToQueueName);
             ServiceBusSetupFixture.ValidateAndPurgeQueue(transactionalQueueName, true);
             returnTo = mocks.CreateMock<IEndpoint>();
-            
+
             env = new Envelope(returnTo, msg);
         }
+
         [TearDown]
         public void TearDown()
         {
             mocks = null;
         }
 
+        #endregion
+
+        private readonly string nonTransactionalQueueName = @"msmq://localhost/test_nonTransaction";
+        private readonly string transactionalQueueName = @"msmq://localhost/test_transaction";
+        private readonly string returnToQueueName = @"msmq://localhost/test_return";
+
+        private MockRepository mocks;
+        private IEndpoint returnTo;
+        private PingMessage msg = new PingMessage();
+        private Envelope env;
+
         [Test]
         public void When_The_Queue_Is_NonTransactional()
         {
-            using(mocks.Record())
+            using (mocks.Record())
             {
-                Expect.Call(returnTo.Address).Return(returnToQueueName);
+                Expect.Call(returnTo.Uri).Return(new Uri(returnToQueueName));
             }
-            using(mocks.Playback())
+            using (mocks.Playback())
             {
                 MessageQueueEndpoint ep = nonTransactionalQueueName;
                 MessageSenderFactory.Create(ep).Send(env);
@@ -55,9 +59,9 @@ namespace MassTransit.ServiceBus.Tests
         [Test]
         public void When_The_Queue_Is_NonTransactional_In_A_Transaction()
         {
-             using(mocks.Record())
+            using (mocks.Record())
             {
-                Expect.Call(returnTo.Address).Return(returnToQueueName);
+                Expect.Call(returnTo.Uri).Return(new Uri(returnToQueueName));
             }
             using (mocks.Playback())
             {
@@ -81,9 +85,10 @@ namespace MassTransit.ServiceBus.Tests
 
         [Test]
         public void When_The_Queue_Is_Transactional()
-        { using(mocks.Record())
+        {
+            using (mocks.Record())
             {
-                Expect.Call(returnTo.Address).Return(returnToQueueName);
+                Expect.Call(returnTo.Uri).Return(new Uri(returnToQueueName));
             }
             using (mocks.Playback())
             {
@@ -107,12 +112,12 @@ namespace MassTransit.ServiceBus.Tests
 
 
         [Test]
-        [ExpectedException(typeof(Exception))]
+        [ExpectedException(typeof (Exception))]
         public void When_The_Queue_Is_Transactional_Not_In_A_Transaction()
         {
-             using(mocks.Record())
+            using (mocks.Record())
             {
-                Expect.Call(returnTo.Address).Return(returnToQueueName);
+                Expect.Call(returnTo.Uri).Return(new Uri(returnToQueueName));
             }
             using (mocks.Playback())
             {
@@ -120,6 +125,5 @@ namespace MassTransit.ServiceBus.Tests
                 MessageSenderFactory.Create(ep).Send(env);
             }
         }
-        
     }
 }

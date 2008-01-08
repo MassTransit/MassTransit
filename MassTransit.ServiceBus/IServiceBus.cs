@@ -32,9 +32,6 @@ namespace MassTransit.ServiceBus
 		/// <returns>An IAsyncResult that can be used to wait for the response</returns>
         IServiceBusAsyncResult Request<T>(IEndpoint destinationEndpoint, params T[] messages) where T : IMessage;
 
-	    IServiceBusAsyncResult Request<T>(IEndpoint destinationEndpoint, AsyncCallback callback, object state,
-	                                      params T[] messages) where T : IMessage;
-
 		/// <summary>
 		/// Sends a list of messages to the specified destination
 		/// </summary>
