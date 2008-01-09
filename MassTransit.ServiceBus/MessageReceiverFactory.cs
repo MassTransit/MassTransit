@@ -11,7 +11,7 @@ namespace MassTransit.ServiceBus
                 return new MessageQueueReceiver(endpoint as IMessageQueueEndpoint);
             }
 
-            throw new EndpointException(endpoint, "No Message Receiver Available");
+            throw new EndpointException(endpoint, "No Message Receiver Available. The endpoint is not of type 'IMessageQueueEndpoint'");
         }
     }
 }

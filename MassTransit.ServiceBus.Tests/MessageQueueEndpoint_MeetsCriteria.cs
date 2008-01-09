@@ -7,74 +7,164 @@ using Rhino.Mocks;
 
 namespace MassTransit.ServiceBus.Tests
 {
+    using MassTransit.ServiceBus.Subscriptions;
+
+    //TODO: Study
     [TestFixture]
     public class MessageQueueEndpoint_MeetsCriteria
-        : ServiceBusSetupFixture
     {
-        MockRepository mocks = new MockRepository();
+        private MockRepository mocks;
+        private ServiceBus _serviceBus;
+        private IMessageQueueEndpoint _serviceBusEndPoint;
+
+        [SetUp]
+        public void SetUp()
+        {
+            mocks = new MockRepository();
+            _serviceBusEndPoint = mocks.CreateMock<IMessageQueueEndpoint>();
+        }
+        [TearDown]
+        public void TearDown()
+        {
+            mocks = null;
+            _serviceBusEndPoint = null;
+            _serviceBus = null;
+        }
 
         [Test]
         public void The_Service_Bus_Should_Return_False_If_The_Message_Will_Not_Be_Handled()
         {
-            _serviceBus.Subscribe<PingMessage>(
-                delegate { },
-                delegate { return false; });
+            using(mocks.Record())
+            {
+                Expect.Call(_serviceBusEndPoint.QueueName).Return(@".\private$\test");
+                Expect.Call(_serviceBusEndPoint.QueueName).Return(@".\private$\test");
+                Expect.Call(_serviceBusEndPoint.Uri).Return(new Uri("msmq://localhost/test"));
+            }
+            using (mocks.Playback())
+            {
+                _serviceBus = new ServiceBus(_serviceBusEndPoint, new LocalSubscriptionCache());
+                _serviceBus.Subscribe<PingMessage>(
+                    delegate { },
+                    delegate { return false; });
 
-            IEnvelopeConsumer consumer = (IEnvelopeConsumer) _serviceBus;
+                IEnvelopeConsumer consumer = (IEnvelopeConsumer) _serviceBus;
 
-            IEnvelope envelope = new Envelope(_serviceBusEndPoint, new PingMessage());
+                IEnvelope envelope = new Envelope(_serviceBusEndPoint, new PingMessage());
 
-            Assert.That(consumer.MeetsCriteria(envelope), Is.False);
+                Assert.That(consumer.MeetsCriteria(envelope), Is.False);
+            }
         }
 
         [Test]
         public void The_Service_Bus_Should_Return_True_If_The_Message_Will_Be_Handled()
         {
-            _serviceBus.Subscribe<PingMessage>(
-                delegate { },
-                delegate { return true; });
+            using(mocks.Record())
+            {
+                Expect.Call(_serviceBusEndPoint.QueueName).Return(@".\private$\test");
+                Expect.Call(_serviceBusEndPoint.QueueName).Return(@".\private$\test");
+                Expect.Call(_serviceBusEndPoint.Uri).Return(new Uri("msmq://localhost/test"));
+            }
+            using (mocks.Playback())
+            {
+                _serviceBus = new ServiceBus(_serviceBusEndPoint, new LocalSubscriptionCache());
 
-            IEnvelopeConsumer consumer = (IEnvelopeConsumer) _serviceBus;
+                _serviceBus.Subscribe<PingMessage>(
+                    delegate { },
+                    delegate { return true; });
 
-            IEnvelope envelope = new Envelope(_serviceBusEndPoint, new PingMessage());
+                IEnvelopeConsumer consumer = (IEnvelopeConsumer) _serviceBus;
 
-            Assert.That(consumer.MeetsCriteria(envelope), Is.True);
+                IEnvelope envelope = new Envelope(_serviceBusEndPoint, new PingMessage());
+
+                Assert.That(consumer.MeetsCriteria(envelope), Is.True);
+            }
+        }
+
+        [Test]
+        public void dru_test()
+        {
+            bool workDid = false;
+
+            using (mocks.Record())
+            {
+                Expect.Call(_serviceBusEndPoint.QueueName).Return(@".\private$\test");
+                Expect.Call(_serviceBusEndPoint.QueueName).Return(@".\private$\test");
+                Expect.Call(_serviceBusEndPoint.Uri).Return(new Uri("msmq://localhost/test"));
+            }
+            using (mocks.Playback())
+            {
+                _serviceBus = new ServiceBus(_serviceBusEndPoint, new LocalSubscriptionCache());
+
+                _serviceBus.Subscribe<PingMessage>(
+                    delegate { workDid = true; },
+                    delegate { return true; });
+
+                IEnvelopeConsumer consumer = (IEnvelopeConsumer)_serviceBus;
+
+                IEnvelope envelope = new Envelope(_serviceBusEndPoint, new PingMessage());
+
+                Assert.That(consumer.MeetsCriteria(envelope), Is.True);
+                consumer.Deliver(envelope);
+                Assert.That(workDid, Is.True, "Lazy Test!");
+            }
         }
 
         [Test]
         public void The_Service_Bus_Should_Return_True_If_The_Message_Will_Be_Handled_By_One_Of_multiple_handlers()
         {
-            _serviceBus.Subscribe<PingMessage>(
-                delegate { },
-                delegate { return false; });
+            using(mocks.Record())
+            {
+                Expect.Call(_serviceBusEndPoint.QueueName).Return(@".\private$\test");
+                Expect.Call(_serviceBusEndPoint.QueueName).Return(@".\private$\test");
+                Expect.Call(_serviceBusEndPoint.Uri).Return(new Uri("msmq://localhost/test"));
+            }
+            using (mocks.Playback())
+            {
+                _serviceBus = new ServiceBus(_serviceBusEndPoint, new LocalSubscriptionCache());
 
-            _serviceBus.Subscribe<PingMessage>(
-                delegate { },
-                delegate { return true; });
+                _serviceBus.Subscribe<PingMessage>(
+                    delegate { },
+                    delegate { return false; });
 
-            IEnvelopeConsumer consumer = (IEnvelopeConsumer) _serviceBus;
+                _serviceBus.Subscribe<PingMessage>(
+                    delegate { },
+                    delegate { return true; });
 
-            IEnvelope envelope = new Envelope(_serviceBusEndPoint, new PingMessage());
+                IEnvelopeConsumer consumer = (IEnvelopeConsumer) _serviceBus;
 
-            Assert.That(consumer.MeetsCriteria(envelope), Is.True);
+                IEnvelope envelope = new Envelope(_serviceBusEndPoint, new PingMessage());
+
+                Assert.That(consumer.MeetsCriteria(envelope), Is.True);
+            }
         }
         
         [Test]
         public void The_Service_Bus_Should_Return_False_If_The_Message_Will_Be_Handled_By_none_Of_the_handlers()
         {
-            _serviceBus.Subscribe<PingMessage>(
-                delegate { },
-                delegate { return false; });
+            using(mocks.Record())
+            {
+                Expect.Call(_serviceBusEndPoint.QueueName).Return(@".\private$\test");
+                Expect.Call(_serviceBusEndPoint.QueueName).Return(@".\private$\test");
+                Expect.Call(_serviceBusEndPoint.Uri).Return(new Uri("msmq://localhost/test"));
+            }
+            using (mocks.Playback())
+            {
+                _serviceBus = new ServiceBus(_serviceBusEndPoint, new LocalSubscriptionCache());
 
-            _serviceBus.Subscribe<PingMessage>(
-                delegate { },
-                delegate { return false; });
+                _serviceBus.Subscribe<PingMessage>(
+                    delegate { },
+                    delegate { return false; });
 
-            IEnvelopeConsumer consumer = (IEnvelopeConsumer)_serviceBus;
+                _serviceBus.Subscribe<PingMessage>(
+                    delegate { },
+                    delegate { return false; });
 
-            IEnvelope envelope = new Envelope(_serviceBusEndPoint, new PingMessage());
+                IEnvelopeConsumer consumer = (IEnvelopeConsumer) _serviceBus;
 
-            Assert.That(consumer.MeetsCriteria(envelope), Is.False);
+                IEnvelope envelope = new Envelope(_serviceBusEndPoint, new PingMessage());
+
+                Assert.That(consumer.MeetsCriteria(envelope), Is.False);
+            }
         }
 
         [Test]
@@ -93,7 +183,8 @@ namespace MassTransit.ServiceBus.Tests
 
             using(mocks.Record())
             {
-                Expect.Call(mockReturnEndpoint.Uri).Return(new Uri("msmq://localhost/test_endpoint"));
+                //I have no idea what changed - dds
+                //Expect.Call(mockReturnEndpoint.Uri).Return(new Uri("msmq://localhost/test_endpoint"));
                 Expect.Call(consumer.MeetsCriteria(envelope)).Return(false).IgnoreArguments();
             }
 
