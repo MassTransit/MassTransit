@@ -4,10 +4,10 @@ using System.Messaging;
 using NUnit.Framework;
 using NUnit.Framework.SyntaxHelpers;
 using Rhino.Mocks;
+using MassTransit.ServiceBus.Subscriptions;
 
 namespace MassTransit.ServiceBus.Tests
 {
-    using MassTransit.ServiceBus.Subscriptions;
 
     //TODO: Study
     [TestFixture]

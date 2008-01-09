@@ -1,48 +1,82 @@
 using System;
-using System.Threading;
 using NUnit.Framework;
 using NUnit.Framework.SyntaxHelpers;
+using MassTransit.ServiceBus.Subscriptions;
+using Rhino.Mocks;
 
 namespace MassTransit.ServiceBus.Tests
 {
+
     [TestFixture]
-    public class When_A_Message_Is_Received_On_The_Service_Bus :
-        ServiceBusSetupFixture
+    public class When_A_Message_Is_Received_On_The_Service_Bus
     {
+        private MockRepository mocks;
+        private ServiceBus _serviceBus;
+        private IMessageQueueEndpoint _serviceBusEndPoint;
+
+        [SetUp]
+        public void SetUp()
+        {
+            mocks = new MockRepository();
+            _serviceBusEndPoint = mocks.CreateMock<IMessageQueueEndpoint>();
+        }
+
+        [TearDown]
+        public void TearDown()
+        {
+            mocks = null;
+            _serviceBus = null;
+            _serviceBusEndPoint = null;
+        }
+
         [Test]
         public void An_Event_Handler_Should_Be_Called()
         {
-        	bool _received = false;
-        	ManualResetEvent _receivedEvent = new ManualResetEvent(false);
+            using(mocks.Record())
+            {
+                Expect.Call(_serviceBusEndPoint.QueueName).Return(@".\private$\test");
+                Expect.Call(_serviceBusEndPoint.QueueName).Return(@".\private$\test");
+                Expect.Call(_serviceBusEndPoint.Uri).Return(new Uri("msmq://localhost/test"));
+            }
+            using (mocks.Playback())
+            {
+                _serviceBus = new ServiceBus(_serviceBusEndPoint, new LocalSubscriptionCache());
 
-			MessageReceivedCallback<PingMessage> handler = delegate
-        	{
-        		_received = true;
-        		_receivedEvent.Set();
-        	};
+                bool _received = false;
 
-            _serviceBus.Subscribe(handler);
+                MessageReceivedCallback<PingMessage> handler = delegate
+                                                                   {
+                                                                       _received = true;
+                                                                   };
 
-            PingMessage pm = new PingMessage();
-            _serviceBus.Publish(pm);
+                _serviceBus.Subscribe(handler);
 
-        	Assert.That(_receivedEvent.WaitOne(TimeSpan.FromSeconds(5), true), Is.True);
+                IEnvelope envelope = new Envelope(_serviceBusEndPoint, new PingMessage());
+                _serviceBus.Deliver(envelope);
 
-        	Assert.That(_received, Is.True);
+                Assert.That(_received, Is.True);
+            }
         }
 
         [Test]
         public void What_Happens_If_No_Subscriptions()
         {
-            bool _received = false;
-            ManualResetEvent _receivedEvent = new ManualResetEvent(false);
+            using(mocks.Record())
+            {
+                Expect.Call(_serviceBusEndPoint.QueueName).Return(@".\private$\test");
+                Expect.Call(_serviceBusEndPoint.QueueName).Return(@".\private$\test");
+            }
+            using (mocks.Playback())
+            {
+                _serviceBus = new ServiceBus(_serviceBusEndPoint, new LocalSubscriptionCache());
 
-            PingMessage pm = new PingMessage();
-            _serviceBus.Publish(pm);
+                bool _received = false;
 
-            Assert.That(_receivedEvent.WaitOne(TimeSpan.FromSeconds(5), true), Is.False);
+                IEnvelope envelope = new Envelope(_serviceBusEndPoint, new PingMessage());
+                _serviceBus.Deliver(envelope);
 
-            Assert.That(_received, Is.False);
+                Assert.That(_received, Is.False);
+            }
         }
     }
 }

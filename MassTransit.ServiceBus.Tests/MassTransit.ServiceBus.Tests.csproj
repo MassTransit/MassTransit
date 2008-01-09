@@ -49,6 +49,7 @@
   <ItemGroup>
     <Compile Include="As_A_Service_With_A_Message_Endpoint.cs" />
     <Compile Include="As_Msmq_Storage.cs" />
+    <Compile Include="IntegrationTests\When_a_message_is_received.cs" />
     <Compile Include="IntegrationTests\When_working_with_Transactions.cs" />
     <Compile Include="IntegrationTests\When_filtering_messages_by_condition.cs" />
     <Compile Include="Messages\ClientMessage.cs" />
