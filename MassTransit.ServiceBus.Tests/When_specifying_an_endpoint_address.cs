@@ -28,5 +28,16 @@ namespace MassTransit.ServiceBus.Tests
 
             new Uri(address);
 		}
+
+        [Test]
+        public void A_message_queue_address_should_convert_to_a_queue_path()
+        {
+            string address = "msmq://localhost/test_endpoint";
+
+            IMessageQueueEndpoint endpoint = new MessageQueueEndpoint(address);
+
+            Assert.That(endpoint.QueueName, Is.EqualTo(Environment.MachineName + @"\private$\test_endpoint"));
+            
+        }
 	}
 }
