@@ -71,17 +71,18 @@ namespace MassTransit.ServiceBus
 
                 try
                 {
-                    bool handleMessage = false;
+                    bool foundAConsumerThatCares = false;
+
                     foreach (IEnvelopeConsumer consumer in _consumers)
                     {
                         if (consumer.MeetsCriteria(e))
                         {
-                            handleMessage = true;
+                            foundAConsumerThatCares = true;
                             break;
                         }
                     }
 
-                    if (handleMessage)
+                    if (foundAConsumerThatCares)
                     {
                         if (_log.IsDebugEnabled)
                             _log.DebugFormat("Delivering Envelope {0} by {1}", e.Id, GetHashCode());
