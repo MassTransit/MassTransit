@@ -4,7 +4,9 @@ using NUnit.Framework.SyntaxHelpers;
 
 namespace MassTransit.ServiceBus.Tests
 {
-	[TestFixture]
+    using Exceptions;
+
+    [TestFixture]
 	public class When_specifying_an_endpoint_address
 	{
 		[Test]
@@ -38,6 +40,14 @@ namespace MassTransit.ServiceBus.Tests
 
             Assert.That(endpoint.QueueName, Is.EqualTo(Environment.MachineName + @"\private$\test_endpoint"));
             
+        }
+
+        [Test, ExpectedException(typeof(EndpointException))]
+        public void An_address_cant_contain_a_path_specifier()
+        {
+            string address = "msmq://localhost/test_endpoint/error_creator";
+
+            new MessageQueueEndpoint(address);
         }
 	}
 }

@@ -3,6 +3,8 @@ using log4net;
 
 namespace MassTransit.ServiceBus
 {
+    using Exceptions;
+
     public class MessageQueueEndpoint :
         IMessageQueueEndpoint
     {
@@ -28,6 +30,11 @@ namespace MassTransit.ServiceBus
         public MessageQueueEndpoint(Uri uri)
         {
             _uri = uri;
+
+            if (_uri.AbsolutePath.IndexOf("/", 1) >= 0)
+            {
+                throw new EndpointException(this, "Queue Endpoints can't have a child folder. Good: msmq://machinename/queue_name | Bad: msmq://machinename/queue_name/bad_form");
+            }
 
             //_queue = new MessageQueue(QueueName, QueueAccessMode.Send);
         }
