@@ -8,7 +8,7 @@ namespace MassTransit.ServiceBus.Subscriptions
     public class LocalSubscriptionCache : 
         ISubscriptionStorage
     {
-        private IServiceBus _bus;
+        private IServiceBus _bus = new NullBus();
         private IEndpoint _wellKnownSubscriptionManagerEndpoint;
         private readonly Dictionary<Type, List<SubscriptionCacheEntry>> _messageTypeSubscriptions =
             new Dictionary<Type, List<SubscriptionCacheEntry>>();
@@ -30,8 +30,11 @@ namespace MassTransit.ServiceBus.Subscriptions
             _wellKnownSubscriptionManagerEndpoint = wellKnownSubscriptionManagerEndpoint;
         }
 
-        public void Initialize()
+        public void Initialize(IServiceBus bus)
         {
+            //TODO: Think about putting this behind a setter?
+            _bus = bus;
+            _bus.Subscribe<CacheUpdateResponse>(ReactToCacheUpdateResponse);
             InternalSend(new RequestCacheUpdate());
         }
 
@@ -143,16 +146,51 @@ namespace MassTransit.ServiceBus.Subscriptions
 
         private void InternalSend(params IMessage[] message)
         {
-            if (_bus != null)
-            {
-                _bus.Send(_wellKnownSubscriptionManagerEndpoint, message);
-            }
+            _bus.Send(_wellKnownSubscriptionManagerEndpoint, message);
         }
 
-        public void RegisterWithBus(IServiceBus bus)
+        private class NullBus : IServiceBus
         {
-            _bus = bus;
-            _bus.Subscribe<CacheUpdateResponse>(ReactToCacheUpdateResponse);
+            public IEndpoint Endpoint
+            {
+                get { return null; }
+            }
+
+            public IEndpoint PoisonEndpoint
+            {
+                get { return null; }
+            }
+
+            public void Subscribe<T>(MessageReceivedCallback<T> callback) where T : IMessage
+            {
+                //ignore
+            }
+
+            public void Subscribe<T>(MessageReceivedCallback<T> callback, Predicate<T> condition) where T : IMessage
+            {
+                //ignore
+            }
+
+            public void Publish<T>(params T[] messages) where T : IMessage
+            {
+                //ignore
+            }
+
+            public IServiceBusAsyncResult Request<T>(IEndpoint destinationEndpoint, params T[] messages)
+                where T : IMessage
+            {
+                return null;
+            }
+
+            public void Send<T>(IEndpoint destinationEndpoint, params T[] messages) where T : IMessage
+            {
+                //ignore
+            }
+
+            public void Dispose()
+            {
+                //ignore
+            }
         }
     }
 }

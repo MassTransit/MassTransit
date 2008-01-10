@@ -42,7 +42,7 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
             {
                 
                 LocalSubscriptionCache cache = new LocalSubscriptionCache();
-                cache.RegisterWithBus(bus);
+                cache.Initialize(bus);
             }
         }
 
@@ -80,7 +80,7 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
             using (mocks.Playback())
             {
                 
-                cache.RegisterWithBus(bus);
+                cache.Initialize(bus);
                 cache.Add(typeof(PingMessage), mockEndpoint);
             }
 
