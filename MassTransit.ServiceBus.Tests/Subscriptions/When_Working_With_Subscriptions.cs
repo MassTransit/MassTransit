@@ -1,16 +1,89 @@
 namespace MassTransit.ServiceBus.Tests.Subscriptions
 {
+    using System;
     using MassTransit.ServiceBus.Subscriptions;
+    using MassTransit.ServiceBus.Subscriptions.Messages;
     using NUnit.Framework;
+    using Rhino.Mocks;
 
     [TestFixture]
-    public class When_Working_With_Subscriptions :
-        ServiceBusSetupFixture
+    public class When_Working_With_Subscriptions
     {
+        private MockRepository mocks = new MockRepository();
+        private IServiceBus bus;
+        private IEndpoint wellKnownEndpoint;
+        string mockPath = "msmq://localhost/bob";
 
-        public void Subscriptions_Should_Collect()
+        [SetUp]
+        public void SetUp()
         {
-            //MsmqSubscriptionStorage subs = new MsmqSubscriptionStorage(base._subscriptionQueueName, null, base._subscriptionCache);
+            bus = mocks.CreateMock<IServiceBus>();
+            wellKnownEndpoint = mocks.CreateMock<IEndpoint>();
+        }
+
+        [TearDown]
+        public void TearDown()
+        {
+            bus = null;
+            mocks = null;
+            wellKnownEndpoint = null;
+        }
+        
+        [Test]
+        public void Registering_with_the_bus()
+        {
+
+            using(mocks.Record())
+            {
+                bus.Subscribe<CacheUpdateResponse>(null);
+                LastCall.IgnoreArguments();
+            }
+            using (mocks.Playback())
+            {
+                
+                LocalSubscriptionCache cache = new LocalSubscriptionCache();
+                cache.RegisterWithBus(bus);
+            }
+        }
+
+        [Test]
+        public void Add_Subscription_without_a_bus()
+        {
+            IEndpoint mockEndpoint = mocks.CreateMock<IEndpoint>();
+            LocalSubscriptionCache cache = new LocalSubscriptionCache();
+            using(mocks.Record())
+            {
+                Expect.Call(mockEndpoint.Uri).Return(new Uri(mockPath));
+            }
+            using(mocks.Playback())
+            {
+                cache.Add(typeof(PingMessage), mockEndpoint);    
+            }
+            
+        }
+
+        [Test]
+        [Ignore("Weird behavior")]
+        public void Add_Subscription_with_a_bus()
+        {
+            LocalSubscriptionCache cache = new LocalSubscriptionCache(wellKnownEndpoint);
+            IEndpoint mockEndpoint = mocks.CreateMock<IEndpoint>();
+            
+            using (mocks.Record())
+            {
+                Expect.Call(mockEndpoint.Uri).Return(new Uri(mockPath)).Repeat.Any();
+                bus.Subscribe<CacheUpdateResponse>(cache.ReactToCacheUpdateResponse);
+
+                SubscriptionMessage msg = new SubscriptionMessage(typeof(PingMessage), mockPath, SubscriptionMessage.SubscriptionChangeType.Add);
+                bus.Send(wellKnownEndpoint, msg);
+            }
+            using (mocks.Playback())
+            {
+                
+                cache.RegisterWithBus(bus);
+                cache.Add(typeof(PingMessage), mockEndpoint);
+            }
+
         }
     }
 }
