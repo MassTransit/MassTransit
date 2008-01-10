@@ -1,106 +1,125 @@
 using System;
-using log4net;
+using MassTransit.ServiceBus.Exceptions;
 
 namespace MassTransit.ServiceBus
 {
-    using Exceptions;
+	/// <summary>
+	/// A MessageQueueEndpoint is an implementation of an endpoint using the Microsoft Message Queue service.
+	/// </summary>
+	public class MessageQueueEndpoint :
+		IMessageQueueEndpoint
+	{
+		private readonly string _queuePath;
+		private readonly Uri _uri;
 
-    public class MessageQueueEndpoint :
-        IMessageQueueEndpoint
-    {
-        private static readonly ILog _log = LogManager.GetLogger(typeof (MessageQueueEndpoint));
+		//private MessageQueue _queue;
 
-        private readonly Uri _uri;
-        private string _queuePath;
+		/// <summary>
+		/// Initializes a <c ref="MessageQueueEndpoint /> instance with the specified URI string.
+		/// </summary>
+		/// <param name="uriString">The URI for the endpoint</param>
+		public MessageQueueEndpoint(string uriString)
+			: this(new Uri(uriString))
+		{
+			string hostName = _uri.Host;
+			if (string.Compare(hostName, ".") == 0 || string.Compare(hostName, "localhost", true) == 0)
+			{
+				hostName = Environment.MachineName;
+			}
 
-        //private MessageQueue _queue;
+			_queuePath = string.Format(@"{0}\private$\{1}", hostName, _uri.AbsolutePath.Substring(1));
+		}
 
-        public MessageQueueEndpoint(string uriString)
-            : this(new Uri(uriString))
-        {
-            string hostName = _uri.Host;
-            if (string.Compare(hostName, ".") == 0 || string.Compare(hostName, "localhost", true) == 0)
-            {
-                hostName = Environment.MachineName;
-            }
+		/// <summary>
+		/// Initializes a <c ref="MessageQueueEndpoint /> instance with the specified URI.
+		/// </summary>
+		/// <param name="uri">The URI for the endpoint</param>
+		public MessageQueueEndpoint(Uri uri)
+		{
+			_uri = uri;
 
-            _queuePath = string.Format(@"{0}\private$\{1}", hostName, _uri.AbsolutePath.Substring(1));
-        }
+			if (_uri.AbsolutePath.IndexOf("/", 1) >= 0)
+			{
+				throw new EndpointException(this, "Queue Endpoints can't have a child folder. Good: msmq://machinename/queue_name | Bad: msmq://machinename/queue_name/bad_form");
+			}
 
-        public MessageQueueEndpoint(Uri uri)
-        {
-            _uri = uri;
+			_queuePath = string.Format(@"{0}\private$\{1}", _uri.Host, _uri.AbsolutePath.Substring(1));
+		}
 
-            if (_uri.AbsolutePath.IndexOf("/", 1) >= 0)
-            {
-                throw new EndpointException(this, "Queue Endpoints can't have a child folder. Good: msmq://machinename/queue_name | Bad: msmq://machinename/queue_name/bad_form");
-            }
+		#region IMessageQueueEndpoint Members
 
-            //_queue = new MessageQueue(QueueName, QueueAccessMode.Send);
-        }
+		public string QueueName
+		{
+			get { return _queuePath; }
+		}
 
-        #region IMessageQueueEndpoint Members
+		public Uri Uri
+		{
+			get { return _uri; }
+		}
 
-        public string QueueName
-        {
-            get { return _queuePath; }
-        }
+		public void Dispose()
+		{
+		}
 
-        public Uri Uri
-        {
-            get { return _uri; }
-        }
+		#endregion
 
-        public void Dispose()
-        {
-            //_queue.Close();
-            //_queue.Dispose();
-            //_queue = null;
-        }
+		//private MessageQueueTransactionType GetTransactionType()
+		//{
+		//    MessageQueueTransactionType tt = MessageQueueTransactionType.None;
+		//    if (_queue.Transactional)
+		//    {
+		//        Check.RequireTransaction(
+		//            string.Format(
+		//                "The current queue {0} is transactional and this MessageQueueEndpoint is not running in a transaction.",
+		//                _uri));
 
-        #endregion
+		//        tt = MessageQueueTransactionType.Automatic;
+		//    }
+		//    return tt;
+		//}
 
-        //private MessageQueueTransactionType GetTransactionType()
-        //{
-        //    MessageQueueTransactionType tt = MessageQueueTransactionType.None;
-        //    if (_queue.Transactional)
-        //    {
-        //        Check.RequireTransaction(
-        //            string.Format(
-        //                "The current queue {0} is transactional and this MessageQueueEndpoint is not running in a transaction.",
-        //                _uri));
+		/// <summary>
+		/// Implicitly creates a <c ref="MessageQueueEndpoint" />.
+		/// </summary>
+		/// <param name="queueUri">A string identifying the URI of the message queue (ex. msmq://localhost/my_queue)</param>
+		/// <returns>An instance of the MessageQueueEndpoint class</returns>
+		public static implicit operator MessageQueueEndpoint(string queueUri)
+		{
+			return new MessageQueueEndpoint(queueUri);
+		}
 
-        //        tt = MessageQueueTransactionType.Automatic;
-        //    }
-        //    return tt;
-        //}
+		/// <summary>
+		/// Returns the URI string for the message queue endpoint.
+		/// </summary>
+		/// <param name="endpoint">The endpoint to use to generate the URI string</param>
+		/// <returns>A URI string that identifies the message queue endpoint</returns>
+		public static implicit operator string(MessageQueueEndpoint endpoint)
+		{
+			return endpoint.Uri.AbsoluteUri;
+		}
 
-        public static implicit operator MessageQueueEndpoint(string queueUri)
-        {
-            return new MessageQueueEndpoint(queueUri);
-        }
+		/// <summary>
+		/// Creates an instance of the <c ref="MessageQueueEndpoint" /> class using the specified queue path
+		/// </summary>
+		/// <param name="path">A path to a Microsoft Message Queue</param>
+		/// <returns>An instance of the <c ref="MessageQueueEndpoint" /> class for the specified queue</returns>
+		public static IMessageQueueEndpoint FromQueuePath(string path)
+		{
+			const string prefix = "FORMATNAME:DIRECT=OS:";
 
-        public static implicit operator string(MessageQueueEndpoint endpoint)
-        {
-            return endpoint.Uri.AbsoluteUri;
-        }
+			if (path.Length > prefix.Length && path.Substring(0, prefix.Length).ToUpperInvariant() == prefix)
+				path = path.Substring(prefix.Length);
 
-        public static IMessageQueueEndpoint FromQueuePath(string path)
-        {
-            const string prefix = "FORMATNAME:DIRECT=OS:";
+			string[] parts = path.Split('\\');
 
-            if (path.Length > prefix.Length && path.Substring(0, prefix.Length).ToUpperInvariant() == prefix)
-                path = path.Substring(prefix.Length);
+			if (parts.Length != 3)
+				throw new ArgumentException("Invalid Queue Path Specified");
 
-            string[] parts = path.Split('\\');
+			if (string.Compare(parts[1], "private$", true) != 0)
+				throw new ArgumentException("Invalid Queue Path Specified");
 
-            if(parts.Length != 3)
-                throw new ArgumentException("Invalid Queue Path Specified");
-
-            if(string.Compare(parts[1], "private$", true) != 0 )
-                throw new ArgumentException("Invalid Queue Path Specified");
-
-            return new MessageQueueEndpoint(string.Format("msmq://{0}/{1}", parts[0], parts[2]));
-        }
-    }
+			return new MessageQueueEndpoint(string.Format("msmq://{0}/{1}", parts[0], parts[2]));
+		}
+	}
 }
