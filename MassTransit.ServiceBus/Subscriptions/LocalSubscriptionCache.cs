@@ -20,11 +20,13 @@ namespace MassTransit.ServiceBus.Subscriptions
             
         }
 
-        // use a remote cache (msmq or db)
-        public LocalSubscriptionCache(IServiceBus bus, IEndpoint wellKnownSubscriptionManagerEndpoint)
+        /// <summary>
+        /// You must call Initialize evertime
+        /// You must call RegisterWithBus in order to get distributed subscription management
+        /// </summary>
+        /// <param name="wellKnownSubscriptionManagerEndpoint"></param>
+        public LocalSubscriptionCache(IEndpoint wellKnownSubscriptionManagerEndpoint)
         {
-            _bus = bus;
-            _bus.Subscribe<CacheUpdateResponse>(ReactToCacheUpdateResponse);
             _wellKnownSubscriptionManagerEndpoint = wellKnownSubscriptionManagerEndpoint;
         }
 
@@ -67,7 +69,7 @@ namespace MassTransit.ServiceBus.Subscriptions
             _messageTypeSubscriptions.Clear();
         }
 
-        private void ReactToCacheUpdateResponse(MessageContext<CacheUpdateResponse> cxt)
+        public void ReactToCacheUpdateResponse(MessageContext<CacheUpdateResponse> cxt)
         {
             
             cxt.Message.Subscriptions.ForEach(delegate (SubscriptionMessage msg)
@@ -139,12 +141,18 @@ namespace MassTransit.ServiceBus.Subscriptions
             }
         }
 
-        private void InternalSend(IMessage message)
+        private void InternalSend(params IMessage[] message)
         {
             if (_bus != null)
             {
                 _bus.Send(_wellKnownSubscriptionManagerEndpoint, message);
             }
+        }
+
+        public void RegisterWithBus(IServiceBus bus)
+        {
+            _bus = bus;
+            _bus.Subscribe<CacheUpdateResponse>(ReactToCacheUpdateResponse);
         }
     }
 }
