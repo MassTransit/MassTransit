@@ -22,6 +22,8 @@ namespace MassTransit.ServiceBus.SubscriptionsManager
 
         public void OnSubscriptionMessageReceived(MessageContext<SubscriptionChange> ctx)
         {
+            RegisterForUpdates(ctx.Envelope);
+
             // Add / Remove Subscription to Repository
             switch(ctx.Message.ChangeType)
             {
@@ -41,6 +43,8 @@ namespace MassTransit.ServiceBus.SubscriptionsManager
 
         public void OnRequestCacheUpdate(MessageContext<RequestCacheUpdate> ctx)
         {
+            RegisterForUpdates(ctx.Envelope);
+
             //return a complete list of SubscriptionMessages
             ctx.Reply(new CacheUpdateResponse(SubscriptionMapper.MapFrom(_repository.List())));
         }
@@ -48,8 +52,16 @@ namespace MassTransit.ServiceBus.SubscriptionsManager
 
         public void OnRequestSubscribersForMessage(MessageContext<RequestCacheUpdateForMessage> ctx)
         {
+            RegisterForUpdates(ctx.Envelope);
+
             //return a complete list of SubscriptionMessages
             ctx.Reply(new CacheUpdateResponse(SubscriptionMapper.MapFrom(_repository.List(ctx.Message.Message))));
+        }
+
+        public void RegisterForUpdates(IEnvelope env)
+        {
+            //This is basically setting anybody that talks to us up for updates
+            this._repository.Add(new Subscription(env.ReturnEndpoint.Uri.AbsolutePath, typeof(CacheUpdateResponse).FullName));
         }
     }
 }
