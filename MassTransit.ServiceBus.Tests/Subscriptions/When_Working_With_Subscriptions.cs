@@ -28,24 +28,7 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
             mocks = null;
             wellKnownEndpoint = null;
         }
-        
-        [Test]
-        [Ignore("This test is bogus based on new data")]
-        public void Registering_with_the_bus()
-        {
-
-            using(mocks.Record())
-            {
-                bus.Subscribe<CacheUpdateResponse>(null);
-                LastCall.IgnoreArguments();
-            }
-            using (mocks.Playback())
-            {
-                
-                LocalSubscriptionCache cache = new LocalSubscriptionCache();
-                cache.Initialize(bus);
-            }
-        }
+       
 
         [Test]
         [Ignore("This test is bogus based on new data")]
@@ -73,16 +56,12 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
             
             using (mocks.Record())
             {
-                Expect.Call(mockEndpoint.Uri).Return(new Uri(mockPath)).Repeat.Any();
-                bus.Subscribe<CacheUpdateResponse>(cache.ReactToCacheUpdateResponse);
-
                 SubscriptionChange msg = new SubscriptionChange(typeof(PingMessage), new Uri(mockPath), SubscriptionChange.SubscriptionChangeType.Add);
                 bus.Send(wellKnownEndpoint, msg);
             }
             using (mocks.Playback())
             {
-                
-                cache.Initialize(bus);
+
                 cache.Add(typeof(PingMessage).FullName, new Uri(mockPath));
             }
 

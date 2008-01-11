@@ -8,7 +8,6 @@ namespace MassTransit.ServiceBus.Subscriptions
     public class LocalSubscriptionCache : 
         ISubscriptionStorage
     {
-        private IServiceBus _bus = new NullBus();
         private IEndpoint _wellKnownSubscriptionManagerEndpoint;
         private readonly Dictionary<string, List<SubscriptionCacheEntry>> _messageTypeSubscriptions =
             new Dictionary<string, List<SubscriptionCacheEntry>>();
@@ -30,13 +29,7 @@ namespace MassTransit.ServiceBus.Subscriptions
             _wellKnownSubscriptionManagerEndpoint = wellKnownSubscriptionManagerEndpoint;
         }
 
-        public void Initialize(IServiceBus bus)
-        {
-            //TODO: Think about putting this behind a setter?
-            _bus = bus;
-            _bus.Subscribe<CacheUpdateResponse>(ReactToCacheUpdateResponse);
-            InternalSend(new RequestCacheUpdate());
-        }
+        public event EventHandler<SubscriptionChangedEventArgs> SubscriptionChanged;
 
         public IList<Uri> List(string messageName)
         {
@@ -68,14 +61,14 @@ namespace MassTransit.ServiceBus.Subscriptions
             InternalAdd(messageName, endpoint);
             if(_log.IsInfoEnabled)
                 _log.InfoFormat("Sending Subscription Update ({0}, {1}) to Master Repository", messageName, endpoint);
-            InternalSend(new SubscriptionChange(messageName, endpoint, SubscriptionChange.SubscriptionChangeType.Add));
+            OnChange(new SubscriptionChange(messageName, endpoint, SubscriptionChange.SubscriptionChangeType.Add));
         }
         public void Remove(string messageName, Uri endpoint)
         {
             InternalRemove(messageName, endpoint);
             if (_log.IsInfoEnabled)
                 _log.InfoFormat("Sending Subscription Update ({0}, {1}) to Master Repository", messageName, endpoint);
-			InternalSend(new SubscriptionChange(messageName, endpoint, SubscriptionChange.SubscriptionChangeType.Remove));
+			OnChange(new SubscriptionChange(messageName, endpoint, SubscriptionChange.SubscriptionChangeType.Remove));
         }
 
         public void Dispose()
@@ -158,52 +151,12 @@ namespace MassTransit.ServiceBus.Subscriptions
             }
         }
 
-        private void InternalSend(params IMessage[] message)
+        protected void OnChange(SubscriptionChange change)
         {
-            _bus.Send(_wellKnownSubscriptionManagerEndpoint, message);
-        }
-
-        private class NullBus : IServiceBus
-        {
-            public IEndpoint Endpoint
+            EventHandler<SubscriptionChangedEventArgs> handler = this.SubscriptionChanged;
+            if (handler != null)
             {
-                get { return null; }
-            }
-
-            public IEndpoint PoisonEndpoint
-            {
-                get { return null; }
-            }
-
-            public void Subscribe<T>(MessageReceivedCallback<T> callback) where T : IMessage
-            {
-                //ignore
-            }
-
-            public void Subscribe<T>(MessageReceivedCallback<T> callback, Predicate<T> condition) where T : IMessage
-            {
-                //ignore
-            }
-
-            public void Publish<T>(params T[] messages) where T : IMessage
-            {
-                //ignore
-            }
-
-            public IServiceBusAsyncResult Request<T>(IEndpoint destinationEndpoint, params T[] messages)
-                where T : IMessage
-            {
-                return null;
-            }
-
-            public void Send<T>(IEndpoint destinationEndpoint, params T[] messages) where T : IMessage
-            {
-                //ignore
-            }
-
-            public void Dispose()
-            {
-                //ignore
+                handler(this, new SubscriptionChangedEventArgs(change));
             }
         }
     }

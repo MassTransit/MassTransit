@@ -3,6 +3,7 @@ using System;
 namespace MassTransit.ServiceBus
 {
     using System.Collections.Generic;
+    using MassTransit.ServiceBus.Subscriptions.Messages;
 
     /// <summary>
     /// Defines storage for subscriptions
@@ -26,5 +27,7 @@ namespace MassTransit.ServiceBus
         /// Removes a message from the subscription store.
         /// </summary>
         void Remove(string messageName, Uri endpoint);
+
+        event EventHandler<SubscriptionChangedEventArgs> SubscriptionChanged;
     }
 }

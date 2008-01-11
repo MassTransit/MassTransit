@@ -67,6 +67,7 @@
     <Compile Include="MessageSenderFactory.cs" />
     <Compile Include="ServiceBus.cs" />
     <Compile Include="ServiceBusAsyncResult.cs" />
+    <Compile Include="SubscriptionChangedEventArgs.cs" />
     <Compile Include="Subscriptions\LocalSubscriptionCache.cs" />
     <Compile Include="Subscriptions\Messages\CacheUpdateResponse.cs" />
     <Compile Include="Subscriptions\Messages\RequestCacheUpdate.cs" />
