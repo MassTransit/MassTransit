@@ -6,16 +6,16 @@ namespace MassTransit.ServiceBus.Subscriptions.Messages
     [Serializable]
     public class CacheUpdateResponse : IMessage
     {
-        private List<SubscriptionMessage> _subscriptions;
+        private List<SubscriptionChange> _subscriptions;
 
 
-        public CacheUpdateResponse(List<SubscriptionMessage> subscriptions)
+        public CacheUpdateResponse(List<SubscriptionChange> subscriptions)
         {
             _subscriptions = subscriptions;
         }
 
 
-        public List<SubscriptionMessage> Subscriptions
+        public List<SubscriptionChange> Subscriptions
         {
             get { return _subscriptions; }
         }

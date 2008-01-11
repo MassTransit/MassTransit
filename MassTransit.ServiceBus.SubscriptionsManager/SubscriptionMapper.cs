@@ -6,19 +6,19 @@ namespace MassTransit.ServiceBus.SubscriptionsManager
 
     public class SubscriptionMapper
     {
-        public static Subscription MapFrom(SubscriptionMessage message)
+        public static Subscription MapFrom(SubscriptionChange message)
         {
             return new Subscription(message.Address.AbsolutePath, message.MessageName);
         }
 
-        public static SubscriptionMessage MapFrom(Subscription subscription)
+        public static SubscriptionChange MapFrom(Subscription subscription)
         {
-            return new SubscriptionMessage(Type.GetType(subscription.Message), new Uri(subscription.Address), SubscriptionMessage.SubscriptionChangeType.Add);
+            return new SubscriptionChange(Type.GetType(subscription.Message), new Uri(subscription.Address), SubscriptionChange.SubscriptionChangeType.Add);
         }
 
-        public static List<SubscriptionMessage> MapFrom(List<Subscription> subscriptions)
+        public static List<SubscriptionChange> MapFrom(List<Subscription> subscriptions)
         {
-            List<SubscriptionMessage> result = new List<SubscriptionMessage>();
+            List<SubscriptionChange> result = new List<SubscriptionChange>();
             subscriptions.ForEach(delegate(Subscription subscription)
                                      {
                                          result.Add(MapFrom(subscription));
