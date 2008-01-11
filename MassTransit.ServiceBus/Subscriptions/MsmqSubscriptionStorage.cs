@@ -37,6 +37,9 @@ namespace MassTransit.ServiceBus.Subscriptions
             Initialize();
         }
 
+
+        public event EventHandler<SubscriptionChangedEventArgs> SubscriptionChanged;
+
         private void Initialize()
         {
             MessagePropertyFilter mpf = new MessagePropertyFilter();
@@ -96,26 +99,16 @@ namespace MassTransit.ServiceBus.Subscriptions
             SubscriptionChange subscriptionChange =
                 new SubscriptionChange(messageName, endpoint,
                                         SubscriptionChange.SubscriptionChangeType.Add);
-
-            Send(subscriptionChange);
-
+            
             _subscriptionCache.Add(messageName, endpoint);
+            InternalSend(subscriptionChange);
+            OnChange(subscriptionChange);
+            
 
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Adding Subscription to {0} for {1}", messageName, endpoint);
         }
 
-        private void Send(IMessage message)
-        {
-            Message msg = new Message();
-
-            msg.ResponseQueue = new MessageQueue(_storageEndpoint.QueueName);
-            msg.Recoverable = true;
-
-            _formatter.Serialize(msg.BodyStream, new IMessage[] {message});
-
-            _storageQueue.Send(msg);
-        }
 
         public void Remove( string messageName, Uri endpoint)
         {
@@ -125,10 +118,32 @@ namespace MassTransit.ServiceBus.Subscriptions
                 new SubscriptionChange(messageName, endpoint,
                                         SubscriptionChange.SubscriptionChangeType.Remove);
 
-            Send(subscriptionChange);
+            InternalSend(subscriptionChange);
+            OnChange(subscriptionChange);
 
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Removing Subscription to {0} for {1}", messageName, endpoint);
+        }
+
+        protected void OnChange(SubscriptionChange change)
+        {
+            EventHandler<SubscriptionChangedEventArgs> handler = this.SubscriptionChanged;
+            if(handler != null)
+            {
+                handler(this, new SubscriptionChangedEventArgs(change));
+            }
+        }
+
+        private void InternalSend(IMessage message)
+        {
+            Message msg = new Message();
+
+            msg.ResponseQueue = new MessageQueue(_storageEndpoint.QueueName);
+            msg.Recoverable = true;
+
+            _formatter.Serialize(msg.BodyStream, new IMessage[] {message});
+
+            _storageQueue.Send(msg);
         }
 
         public void Dispose()
