@@ -16,14 +16,18 @@ namespace MassTransit.ServiceBus.Subscriptions.Messages
 
         #endregion
 
-        private string _address;
+        private Uri _address;
 
         private SubscriptionChangeType _changeType;
-        private Type _messageType;
+        private string _messageName;
 
-        public SubscriptionMessage(Type messageType, string address, SubscriptionChangeType changeType)
+        public SubscriptionMessage(Type messageType, Uri address, SubscriptionChangeType changeType) : this(messageType.FullName, address, changeType)
         {
-            _messageType = messageType;
+        }
+
+        public SubscriptionMessage(string messageName, Uri address, SubscriptionChangeType changeType)
+        {
+            _messageName = messageName;
             _address = address;
             _changeType = changeType;
         }
@@ -35,13 +39,13 @@ namespace MassTransit.ServiceBus.Subscriptions.Messages
         }
 
 
-        public Type MessageType
+        public string MessageName
         {
-            get { return _messageType; }
-            set { _messageType = value; }
+            get { return _messageName; }
+            set { _messageName = value; }
         }
 
-        public string Address
+        public Uri Address
         {
             get { return _address; }
             set { _address = value; }
@@ -53,7 +57,7 @@ namespace MassTransit.ServiceBus.Subscriptions.Messages
         {
             if (subscriptionMessage == null) return false;
             return
-                Equals(_messageType, subscriptionMessage._messageType) && Equals(_address, subscriptionMessage._address);
+                Equals(_messageName, subscriptionMessage._messageName) && Equals(_address, subscriptionMessage._address);
         }
 
         #endregion
@@ -66,7 +70,7 @@ namespace MassTransit.ServiceBus.Subscriptions.Messages
 
         public override int GetHashCode()
         {
-            return _messageType.GetHashCode() + 29*_address.GetHashCode();
+            return _messageName.GetHashCode() + 29*_address.GetHashCode();
         }
     }
 }

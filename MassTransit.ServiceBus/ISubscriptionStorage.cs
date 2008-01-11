@@ -12,19 +12,19 @@ namespace MassTransit.ServiceBus
         /// <summary>
         /// Returns a list of endpoints that are subscribed to the specified message type
         /// </summary>
-        /// <typeparam name="T">The Message Type</typeparam>
-        /// <param name="messages">Optional, can be a message to find the type on</param>
+        /// <param name="messageName">Message to find the Uri's for</param>
         /// <returns>A list of endpoints subscribed to the message type</returns>
-        IList<IEndpoint> List<T>(params T[] messages) where T : IMessage;
+        IList<Uri> List(string messageName);
+        IList<Uri> List();
 
         /// <summary>
         /// Add a message type and endpoint pair to the subscription storage
         /// </summary>
-        void Add(Type messageType, IEndpoint endpoint);
+        void Add(string messageName, Uri endpoint);
 
         /// <summary>
         /// Removes a message from the subscription store.
         /// </summary>
-        void Remove(Type messageType, IEndpoint endpoint);
+        void Remove(string messageName, Uri endpoint);
     }
 }

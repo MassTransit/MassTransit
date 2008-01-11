@@ -6,16 +6,16 @@ namespace MassTransit.ServiceBus.Subscriptions
     public class SubscriptionCacheEntry :
         IEquatable<SubscriptionCacheEntry>
     {
-        private IEndpoint _endpoint;
+        private Uri _endpoint;
 
     	private MessageId _messageId = string.Empty;
 
-        public SubscriptionCacheEntry(IEndpoint endpoint)
+        public SubscriptionCacheEntry(Uri endpoint)
         {
             _endpoint = endpoint;
         }
 
-        public IEndpoint Endpoint
+        public Uri Endpoint
         {
             get { return _endpoint; }
             set { _endpoint = value; }
@@ -34,7 +34,7 @@ namespace MassTransit.ServiceBus.Subscriptions
             if (other == null)
                 return false;
 
-			if (_endpoint.Uri != other.Endpoint.Uri)
+			if (_endpoint != other.Endpoint)
 				return false;
 
 			if (_messageId != other.MessageId)

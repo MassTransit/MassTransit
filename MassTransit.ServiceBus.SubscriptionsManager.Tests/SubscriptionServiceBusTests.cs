@@ -21,7 +21,7 @@ namespace MassTransit.ServiceBus.SubscriptionsManager.Tests
             {
                 //ep.EnvelopeReceived += delegate { };
                 LastCall.IgnoreArguments();
-                ss.Add(null, ep);
+                ss.Add(null, ep.Uri);
                 LastCall.IgnoreArguments().Repeat.Times(3);
             }
             using(mocks.Playback())
@@ -44,7 +44,7 @@ namespace MassTransit.ServiceBus.SubscriptionsManager.Tests
 
             using (mocks.Record())
             {
-                ss.Add(null, ep);
+                ss.Add(null, ep.Uri);
                 LastCall.IgnoreArguments().Repeat.Times(3);
                 Expect.Call(env.Id).Return(envId);
                 Expect.Call(env.Messages).Return(new IMessage[] {new RequestCacheUpdate()});

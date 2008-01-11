@@ -22,9 +22,9 @@ namespace MassTransit.ServiceBus.Tests
             ISubscriptionStorage cache = new LocalSubscriptionCache();
             MsmqSubscriptionStorage storage = new MsmqSubscriptionStorage(storageEndpoint, listenEndpoint, cache);
 
-            storage.Add(typeof(PingMessage), subscriberEndpoint);
+            storage.Add(typeof(PingMessage).FullName, subscriberEndpoint.Uri);
 
-            SubscriptionMessage msg = new SubscriptionMessage(null, null, SubscriptionMessage.SubscriptionChangeType.Add);
+            SubscriptionMessage msg = new SubscriptionMessage("", null, SubscriptionMessage.SubscriptionChangeType.Add);
 
             VerifyMessageInQueue(storageEndpoint.QueueName, msg);
         }
@@ -67,11 +67,11 @@ namespace MassTransit.ServiceBus.Tests
             ISubscriptionStorage cache = new LocalSubscriptionCache();
             MsmqSubscriptionStorage storage = new MsmqSubscriptionStorage(storageEndpoint, listenEndpoint, cache);
 
-            storage.Add(typeof(PingMessage), subscriberEndpoint);
+            storage.Add(typeof(PingMessage).FullName, subscriberEndpoint.Uri);
 
-            SubscriptionMessage msg = new SubscriptionMessage(null, null, SubscriptionMessage.SubscriptionChangeType.Add);
+            SubscriptionMessage msg = new SubscriptionMessage("", null, SubscriptionMessage.SubscriptionChangeType.Add);
 
-            storage.Remove(typeof(PingMessage), subscriberEndpoint);
+            storage.Remove(typeof(PingMessage).FullName, subscriberEndpoint.Uri);
             
             VerifyQueueIsEmpty(storageEndpoint.QueueName);
         }

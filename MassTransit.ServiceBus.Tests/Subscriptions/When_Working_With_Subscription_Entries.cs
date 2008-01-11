@@ -11,11 +11,8 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
 		[Test]
 		public void Comparing_Two_Entries_Should_Return_True()
 		{
-			MessageQueueEndpoint leftEndpoint = new MessageQueueEndpoint(_testEndPoint.Uri);
-			MessageQueueEndpoint rightEndpoint = new MessageQueueEndpoint(_testEndPoint.Uri);
-
-			SubscriptionCacheEntry left = new SubscriptionCacheEntry(leftEndpoint);
-			SubscriptionCacheEntry right = new SubscriptionCacheEntry(rightEndpoint);
+            SubscriptionCacheEntry left = new SubscriptionCacheEntry(_testEndPoint.Uri);
+            SubscriptionCacheEntry right = new SubscriptionCacheEntry(_testEndPoint.Uri);
 
 			Assert.That(left, Is.EqualTo(right));
 		}

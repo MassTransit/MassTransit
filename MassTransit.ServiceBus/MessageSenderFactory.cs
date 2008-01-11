@@ -2,6 +2,8 @@ using MassTransit.ServiceBus.Exceptions;
 
 namespace MassTransit.ServiceBus
 {
+    using System;
+
     public class MessageSenderFactory
     {
         public static IMessageSender Create(IEndpoint endpoint)
@@ -12,6 +14,10 @@ namespace MassTransit.ServiceBus
             }
 
             throw new EndpointException(endpoint, "No Message Sender Available");
+        }
+        public static IMessageSender Create(Uri endpoint)
+        {
+            return new MessageQueueSender(new MessageQueueEndpoint(endpoint));
         }
     }
 }
