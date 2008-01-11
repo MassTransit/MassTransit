@@ -42,8 +42,12 @@ namespace MassTransit.ServiceBus
 			{
 				throw new EndpointException(this, "Queue Endpoints can't have a child folder. Good: msmq://machinename/queue_name | Bad: msmq://machinename/queue_name/bad_form");
 			}
-
-			_queuePath = string.Format(@"{0}\private$\{1}", _uri.Host, _uri.AbsolutePath.Substring(1));
+            string hostName = _uri.Host;
+            if (string.Compare(hostName, ".") == 0 || string.Compare(hostName, "localhost", true) == 0)
+            {
+                hostName = Environment.MachineName;
+            }
+            _queuePath = string.Format(@"{0}\private$\{1}", hostName, _uri.AbsolutePath.Substring(1));
 		}
 
 		#region IMessageQueueEndpoint Members

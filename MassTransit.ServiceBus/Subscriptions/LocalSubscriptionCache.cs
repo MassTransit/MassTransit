@@ -10,8 +10,8 @@ namespace MassTransit.ServiceBus.Subscriptions
     {
         private IServiceBus _bus = new NullBus();
         private IEndpoint _wellKnownSubscriptionManagerEndpoint;
-        private readonly Dictionary<Type, List<SubscriptionCacheEntry>> _messageTypeSubscriptions =
-            new Dictionary<Type, List<SubscriptionCacheEntry>>();
+        private readonly Dictionary<string, List<SubscriptionCacheEntry>> _messageTypeSubscriptions =
+            new Dictionary<string, List<SubscriptionCacheEntry>>();
         private static readonly ILog _log = LogManager.GetLogger(typeof(LocalSubscriptionCache));
 
         // just a shared local cache
@@ -38,30 +38,44 @@ namespace MassTransit.ServiceBus.Subscriptions
             InternalSend(new RequestCacheUpdate());
         }
 
-        public IList<IEndpoint> List<T>(params T[] messages) where T : IMessage
+        public IList<Uri> List(string messageName)
         {
-            List<IEndpoint> result = new List<IEndpoint>();
-            if (_messageTypeSubscriptions.ContainsKey(typeof(T)))
+            List<Uri> result = new List<Uri>();
+            if (_messageTypeSubscriptions.ContainsKey(messageName))
             {
-                _messageTypeSubscriptions[typeof(T)].ForEach(
+                _messageTypeSubscriptions[messageName].ForEach(
                     delegate(SubscriptionCacheEntry entry) { result.Add(entry.Endpoint); });
             }
 
             return result;
         }
-        public void Add(Type messageType, IEndpoint endpoint)
+
+
+        public IList<Uri> List()
         {
-            InternalAdd(messageType, endpoint);
-            if(_log.IsInfoEnabled)
-                _log.InfoFormat("Sending Subscription Update ({0}, {1}) to Master Repository", messageType, endpoint.Uri);
-            InternalSend(new SubscriptionMessage(messageType, endpoint.Uri.AbsoluteUri, SubscriptionMessage.SubscriptionChangeType.Add));
+            List<Uri> result = new List<Uri>();
+            
+            foreach (List<SubscriptionCacheEntry> list in _messageTypeSubscriptions.Values)
+            {
+                list.ForEach(delegate(SubscriptionCacheEntry e) { result.Add(e.Endpoint);});
+            }
+
+            return result;
         }
-        public void Remove(Type messageType, IEndpoint endpoint)
+
+        public void Add(string messageName, Uri endpoint)
         {
-            InternalRemove(messageType, endpoint);
+            InternalAdd(messageName, endpoint);
+            if(_log.IsInfoEnabled)
+                _log.InfoFormat("Sending Subscription Update ({0}, {1}) to Master Repository", messageName, endpoint);
+            InternalSend(new SubscriptionMessage(messageName, endpoint, SubscriptionMessage.SubscriptionChangeType.Add));
+        }
+        public void Remove(string messageName, Uri endpoint)
+        {
+            InternalRemove(messageName, endpoint);
             if (_log.IsInfoEnabled)
-                _log.InfoFormat("Sending Subscription Update ({0}, {1}) to Master Repository", messageType, endpoint.Uri);
-			InternalSend(new SubscriptionMessage(messageType, endpoint.Uri.AbsoluteUri, SubscriptionMessage.SubscriptionChangeType.Remove));
+                _log.InfoFormat("Sending Subscription Update ({0}, {1}) to Master Repository", messageName, endpoint);
+			InternalSend(new SubscriptionMessage(messageName, endpoint, SubscriptionMessage.SubscriptionChangeType.Remove));
         }
 
         public void Dispose()
@@ -80,10 +94,10 @@ namespace MassTransit.ServiceBus.Subscriptions
                                                       switch(msg.ChangeType)
                                                       {
                                                           case SubscriptionMessage.SubscriptionChangeType.Add:
-                                                              InternalAdd(msg.MessageType, new MessageQueueEndpoint(msg.Address));
+                                                              InternalAdd(msg.MessageName, msg.Address);
                                                               break;
                                                           case SubscriptionMessage.SubscriptionChangeType.Remove:
-                                                              InternalRemove(msg.MessageType, new MessageQueueEndpoint(msg.Address));
+                                                              InternalRemove(msg.MessageName, msg.Address);
                                                               break;
                                                           default:
                                                               throw new ArgumentOutOfRangeException();
@@ -93,53 +107,53 @@ namespace MassTransit.ServiceBus.Subscriptions
                 _log.InfoFormat("Cache Update Complete");
         }
         
-        private void InternalRemove(Type messageType, IEndpoint endpoint)
+        private void InternalRemove(string messageName, Uri endpoint)
         {
             if (_log.IsDebugEnabled)
-                _log.DebugFormat("Removing Local Subscription {0} : {1}", messageType, endpoint.Uri);
+                _log.DebugFormat("Removing Local Subscription {0} : {1}", messageName, endpoint);
 
             lock (this)
             {
-                if (_messageTypeSubscriptions.ContainsKey(messageType))
+                if (_messageTypeSubscriptions.ContainsKey(messageName))
                 {
                     SubscriptionCacheEntry entry = new SubscriptionCacheEntry(endpoint);
 
-                    if (_messageTypeSubscriptions[messageType].Contains(entry))
+                    if (_messageTypeSubscriptions[messageName].Contains(entry))
                     {
                         if (_log.IsDebugEnabled)
-                            _log.DebugFormat("Removing local subscription entry for endpoint {0} on {1}", endpoint.Uri,
+                            _log.DebugFormat("Removing local subscription entry for endpoint {0} on {1}", endpoint,
                                              GetHashCode());
-                        _messageTypeSubscriptions[messageType].Remove(entry);
+                        _messageTypeSubscriptions[messageName].Remove(entry);
                     }
 
-                    if (_messageTypeSubscriptions[messageType].Count == 0)
+                    if (_messageTypeSubscriptions[messageName].Count == 0)
                     {
                         if (_log.IsDebugEnabled)
-                            _log.DebugFormat("Removing local subscription list for type {0} on {1}", messageType.ToString(), GetHashCode());
-                        _messageTypeSubscriptions.Remove(messageType);
+                            _log.DebugFormat("Removing local subscription list for type {0} on {1}", messageName, GetHashCode());
+                        _messageTypeSubscriptions.Remove(messageName);
                     }
                 }   
             }
         }
-        private void InternalAdd(Type messageType, IEndpoint endpoint)
+        private void InternalAdd(string messageName, Uri endpoint)
         {
             lock (this)
             {
-                if (!_messageTypeSubscriptions.ContainsKey(messageType))
+                if (!_messageTypeSubscriptions.ContainsKey(messageName))
                 {
                     if (_log.IsDebugEnabled)
-                        _log.DebugFormat("Adding new local subscription list for type {0} on {1}", messageType.ToString(), GetHashCode());
-                    _messageTypeSubscriptions.Add(messageType, new List<SubscriptionCacheEntry>());
+                        _log.DebugFormat("Adding new local subscription list for type {0} on {1}", messageName, GetHashCode());
+                    _messageTypeSubscriptions.Add(messageName, new List<SubscriptionCacheEntry>());
                 }
 
                 SubscriptionCacheEntry entry = new SubscriptionCacheEntry(endpoint);
 
-                if (!_messageTypeSubscriptions[messageType].Contains(entry))
+                if (!_messageTypeSubscriptions[messageName].Contains(entry))
                 {
                     if (_log.IsDebugEnabled)
-                        _log.DebugFormat("Adding new local subscription entry for endpoint {0} on {1}", endpoint.Uri,
+                        _log.DebugFormat("Adding new local subscription entry for endpoint {0} on {1}", endpoint,
                                          GetHashCode());
-                    _messageTypeSubscriptions[messageType].Add(entry);
+                    _messageTypeSubscriptions[messageName].Add(entry);
                 }
             }
         }

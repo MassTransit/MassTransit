@@ -141,12 +141,12 @@ namespace MassTransit.ServiceBus
 
         public void Publish<T>(params T[] messages) where T : IMessage
         {
-            IList<IEndpoint> subscribers = _subscriptionStorage.List<T>();
+            IList<Uri> subscribers = _subscriptionStorage.List();
             if (subscribers.Count > 0)
             {
                 IEnvelope envelope = new Envelope(_endpoint, messages as IMessage[]);
 
-                foreach (IEndpoint subscribersEndpoint in subscribers)
+                foreach (Uri subscribersEndpoint in subscribers)
                 {
                     IMessageSender send = MessageSenderFactory.Create(subscribersEndpoint);
                     send.Send(envelope);
@@ -193,7 +193,7 @@ namespace MassTransit.ServiceBus
                 if (!_consumers.ContainsKey(typeof (T)))
                 {
                     _consumers[typeof (T)] = new MessageConsumer<T>();
-                    _subscriptionStorage.Add(typeof (T), Endpoint);
+                    _subscriptionStorage.Add(typeof (T).FullName, Endpoint.Uri);
                 }
 
                 ((IMessageConsumer<T>) _consumers[typeof (T)]).Subscribe(callback, condition);
