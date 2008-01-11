@@ -68,14 +68,14 @@ namespace MassTransit.ServiceBus.Subscriptions
             InternalAdd(messageName, endpoint);
             if(_log.IsInfoEnabled)
                 _log.InfoFormat("Sending Subscription Update ({0}, {1}) to Master Repository", messageName, endpoint);
-            InternalSend(new SubscriptionMessage(messageName, endpoint, SubscriptionMessage.SubscriptionChangeType.Add));
+            InternalSend(new SubscriptionChange(messageName, endpoint, SubscriptionChange.SubscriptionChangeType.Add));
         }
         public void Remove(string messageName, Uri endpoint)
         {
             InternalRemove(messageName, endpoint);
             if (_log.IsInfoEnabled)
                 _log.InfoFormat("Sending Subscription Update ({0}, {1}) to Master Repository", messageName, endpoint);
-			InternalSend(new SubscriptionMessage(messageName, endpoint, SubscriptionMessage.SubscriptionChangeType.Remove));
+			InternalSend(new SubscriptionChange(messageName, endpoint, SubscriptionChange.SubscriptionChangeType.Remove));
         }
 
         public void Dispose()
@@ -89,14 +89,14 @@ namespace MassTransit.ServiceBus.Subscriptions
         public void ReactToCacheUpdateResponse(MessageContext<CacheUpdateResponse> cxt)
         {
             
-            cxt.Message.Subscriptions.ForEach(delegate (SubscriptionMessage msg)
+            cxt.Message.Subscriptions.ForEach(delegate (SubscriptionChange msg)
                                                   {
                                                       switch(msg.ChangeType)
                                                       {
-                                                          case SubscriptionMessage.SubscriptionChangeType.Add:
+                                                          case SubscriptionChange.SubscriptionChangeType.Add:
                                                               InternalAdd(msg.MessageName, msg.Address);
                                                               break;
-                                                          case SubscriptionMessage.SubscriptionChangeType.Remove:
+                                                          case SubscriptionChange.SubscriptionChangeType.Remove:
                                                               InternalRemove(msg.MessageName, msg.Address);
                                                               break;
                                                           default:

@@ -14,21 +14,21 @@ namespace MassTransit.ServiceBus.SubscriptionsManager
             : base(endpoint, subscriptionStorage)
         {
             _repository = repository;
-            this.Subscribe<SubscriptionMessage>(OnSubscriptionMessageReceived);
+            this.Subscribe<SubscriptionChange>(OnSubscriptionMessageReceived);
             this.Subscribe<RequestCacheUpdate>(OnRequestCacheUpdate);
             this.Subscribe<RequestCacheUpdateForMessage>(OnRequestSubscribersForMessage);
         }
 
 
-        public void OnSubscriptionMessageReceived(MessageContext<SubscriptionMessage> ctx)
+        public void OnSubscriptionMessageReceived(MessageContext<SubscriptionChange> ctx)
         {
             // Add / Remove Subscription to Repository
             switch(ctx.Message.ChangeType)
             {
-                case SubscriptionMessage.SubscriptionChangeType.Add:
+                case SubscriptionChange.SubscriptionChangeType.Add:
                     _repository.Add(SubscriptionMapper.MapFrom(ctx.Message));
                     break;
-                case SubscriptionMessage.SubscriptionChangeType.Remove:
+                case SubscriptionChange.SubscriptionChangeType.Remove:
                     _repository.Deactivate(SubscriptionMapper.MapFrom(ctx.Message));
                     break;
                 default:

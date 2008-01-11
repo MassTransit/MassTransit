@@ -3,7 +3,7 @@ using System;
 namespace MassTransit.ServiceBus.Subscriptions.Messages
 {
     [Serializable]
-    public class SubscriptionMessage : IEquatable<SubscriptionMessage>, IMessage
+    public class SubscriptionChange : IEquatable<SubscriptionChange>, IMessage
     {
         #region SubscriptionChangeType enum
 
@@ -21,11 +21,11 @@ namespace MassTransit.ServiceBus.Subscriptions.Messages
         private SubscriptionChangeType _changeType;
         private string _messageName;
 
-        public SubscriptionMessage(Type messageType, Uri address, SubscriptionChangeType changeType) : this(messageType.FullName, address, changeType)
+        public SubscriptionChange(Type messageType, Uri address, SubscriptionChangeType changeType) : this(messageType.FullName, address, changeType)
         {
         }
 
-        public SubscriptionMessage(string messageName, Uri address, SubscriptionChangeType changeType)
+        public SubscriptionChange(string messageName, Uri address, SubscriptionChangeType changeType)
         {
             _messageName = messageName;
             _address = address;
@@ -53,11 +53,11 @@ namespace MassTransit.ServiceBus.Subscriptions.Messages
 
         #region IEquatable<SubscriptionMessage> Members
 
-        public bool Equals(SubscriptionMessage subscriptionMessage)
+        public bool Equals(SubscriptionChange subscriptionChange)
         {
-            if (subscriptionMessage == null) return false;
+            if (subscriptionChange == null) return false;
             return
-                Equals(_messageName, subscriptionMessage._messageName) && Equals(_address, subscriptionMessage._address);
+                Equals(_messageName, subscriptionChange._messageName) && Equals(_address, subscriptionChange._address);
         }
 
         #endregion
@@ -65,7 +65,7 @@ namespace MassTransit.ServiceBus.Subscriptions.Messages
         public override bool Equals(object obj)
         {
             if (ReferenceEquals(this, obj)) return true;
-            return Equals(obj as SubscriptionMessage);
+            return Equals(obj as SubscriptionChange);
         }
 
         public override int GetHashCode()

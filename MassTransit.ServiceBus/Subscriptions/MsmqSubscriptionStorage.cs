@@ -66,12 +66,12 @@ namespace MassTransit.ServiceBus.Subscriptions
             IMessage[] messages = _formatter.Deserialize(msg.BodyStream) as IMessage[];
             if (messages != null)
             {
-                foreach (SubscriptionMessage subscriptionMessage in messages)
+                foreach (SubscriptionChange subscriptionMessage in messages)
                 {
                     if (_log.IsDebugEnabled)
                         _log.DebugFormat("Subscription Subscribe: {0} Message Type: {1} Mode: {2}", msg.ResponseQueue.Path, subscriptionMessage.MessageName, subscriptionMessage.ChangeType.ToString());
 
-                    if (subscriptionMessage.ChangeType == SubscriptionMessage.SubscriptionChangeType.Add) //would there ever be anything but?
+                    if (subscriptionMessage.ChangeType == SubscriptionChange.SubscriptionChangeType.Add) //would there ever be anything but?
                     {
                         _subscriptionCache.Add(subscriptionMessage.MessageName, subscriptionMessage.Address);
                     }
@@ -93,11 +93,11 @@ namespace MassTransit.ServiceBus.Subscriptions
 
         public void Add(string messageName, Uri endpoint)
         {
-            SubscriptionMessage subscriptionMessage =
-                new SubscriptionMessage(messageName, endpoint,
-                                        SubscriptionMessage.SubscriptionChangeType.Add);
+            SubscriptionChange subscriptionChange =
+                new SubscriptionChange(messageName, endpoint,
+                                        SubscriptionChange.SubscriptionChangeType.Add);
 
-            Send(subscriptionMessage);
+            Send(subscriptionChange);
 
             _subscriptionCache.Add(messageName, endpoint);
 
@@ -121,11 +121,11 @@ namespace MassTransit.ServiceBus.Subscriptions
         {
             _subscriptionCache.Remove(messageName, endpoint);
 
-            SubscriptionMessage subscriptionMessage =
-                new SubscriptionMessage(messageName, endpoint,
-                                        SubscriptionMessage.SubscriptionChangeType.Remove);
+            SubscriptionChange subscriptionChange =
+                new SubscriptionChange(messageName, endpoint,
+                                        SubscriptionChange.SubscriptionChangeType.Remove);
 
-            Send(subscriptionMessage);
+            Send(subscriptionChange);
 
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Removing Subscription to {0} for {1}", messageName, endpoint);

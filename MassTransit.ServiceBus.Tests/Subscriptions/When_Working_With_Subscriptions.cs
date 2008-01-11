@@ -76,7 +76,7 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
                 Expect.Call(mockEndpoint.Uri).Return(new Uri(mockPath)).Repeat.Any();
                 bus.Subscribe<CacheUpdateResponse>(cache.ReactToCacheUpdateResponse);
 
-                SubscriptionMessage msg = new SubscriptionMessage(typeof(PingMessage), new Uri(mockPath), SubscriptionMessage.SubscriptionChangeType.Add);
+                SubscriptionChange msg = new SubscriptionChange(typeof(PingMessage), new Uri(mockPath), SubscriptionChange.SubscriptionChangeType.Add);
                 bus.Send(wellKnownEndpoint, msg);
             }
             using (mocks.Playback())
