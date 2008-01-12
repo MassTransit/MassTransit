@@ -4,10 +4,11 @@ namespace MassTransit.ServiceBus.SubscriptionsManager.Client
     using log4net;
     using MassTransit.ServiceBus.Subscriptions.Messages;
 
+    /// <summary>
+    /// Works with the remote subscription storage to update local subscriptions with the other endpoints.
+    /// </summary>
     public class ClientProxy
     {
-        //works with the ISubscriptionStorage to send messages back and forth.
-
         private IEndpoint _wellKnownSubscriptionManagerEndpoint;
         private static readonly ILog _log = LogManager.GetLogger(typeof(ClientProxy));
         private IServiceBus _bus;
