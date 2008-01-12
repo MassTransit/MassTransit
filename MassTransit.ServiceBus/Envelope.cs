@@ -16,6 +16,9 @@ using MassTransit.ServiceBus.Util;
 
 namespace MassTransit.ServiceBus
 {
+    /// <summary>
+    /// Envelopes are abstractions that represent an exchange between an endpoint and a client and/or service
+    /// </summary>
 	public class Envelope :
 		IEnvelope, IEquatable<Envelope>
 	{
@@ -29,12 +32,21 @@ namespace MassTransit.ServiceBus
 		private DateTime _sentTime;
 		private TimeSpan _timeToBeReceived = TimeSpan.MaxValue;
 
+        /// <summary>
+        /// Initializes an envelope
+        /// </summary>
+        /// <param name="returnEndpoint">The return address for the envelope</param>
+        /// <param name="messages">The messages stored in the envelope</param>
 		public Envelope(IEndpoint returnEndpoint, params IMessage[] messages)
 		{
 			_returnEndpoint = returnEndpoint;
 			_messages = messages;
 		}
 
+        /// <summary>
+        /// Initializes an envelope
+        /// </summary>
+        /// <param name="messages">The messages stored in the envelope</param>
 		public Envelope(params IMessage[] messages)
 		{
 			_messages = messages;
@@ -42,54 +54,81 @@ namespace MassTransit.ServiceBus
 
 		#region IEnvelope Members
 
+        /// <summary>
+        /// The messages contained in the envelope
+        /// </summary>
 		public IMessage[] Messages
 		{
 			get { return _messages; }
 			set { _messages = value; }
 		}
 
+        /// <summary>
+        /// The return address for the envelope
+        /// </summary>
 		public IEndpoint ReturnEndpoint
 		{
 			get { return _returnEndpoint; }
 			set { _returnEndpoint = value; }
 		}
 
+        /// <summary>
+        /// The unique identifier of this envelope
+        /// </summary>
 		public MessageId Id
 		{
 			get { return _id; }
 			set { _id = value; }
 		}
 
+        /// <summary>
+        /// The unique identifier of the original envelope this envelope is in response to
+        /// </summary>
 		public MessageId CorrelationId
 		{
 			get { return _correlationId; }
 			set { _correlationId = value; }
 		}
 
+        /// <summary>
+        /// Indicates whether the message should be delivered in a recoverable method
+        /// </summary>
 		public bool Recoverable
 		{
 			get { return _recoverable; }
 			set { _recoverable = value; }
 		}
 
+        /// <summary>
+        /// Specifies the time before the envelope is no longer valid and should be discarded
+        /// </summary>
 		public TimeSpan TimeToBeReceived
 		{
 			get { return _timeToBeReceived; }
 			set { _timeToBeReceived = value; }
 		}
 
+        /// <summary>
+        /// The time the envelope was sent (only valid for received envelopes)
+        /// </summary>
 		public DateTime SentTime
 		{
 			get { return _sentTime; }
 			set { _sentTime = value; }
 		}
 
+        /// <summary>
+        /// The time the envelope arrived (only valid for received envelopes)
+        /// </summary>
 		public DateTime ArrivedTime
 		{
 			get { return _arrivedTime; }
 			set { _arrivedTime = value; }
 		}
 
+        /// <summary>
+        /// The label stored on the envelope
+        /// </summary>
 		public string Label
 		{
 			get { return _label; }
