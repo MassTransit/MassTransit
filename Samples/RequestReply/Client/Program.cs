@@ -1,35 +1,31 @@
+using System;
+using MassTransit.ServiceBus;
+using MassTransit.ServiceBus.Subscriptions;
+using SecurityMessages;
+
 namespace Client
 {
-    using System;
-    using System.Transactions;
-    using MassTransit.ServiceBus;
-    using MassTransit.ServiceBus.Subscriptions;
-    using SecurityMessages;
 
     class Program
     {
         static void Main(string[] args)
         {
-            IEndpoint clientEndpoint = MessageQueueEndpoint.MessageQueueEndpointFactory.Instance.Resolve(@".\private$\test_client");
-            IEndpoint subscriptionMgrEndpoint = MessageQueueEndpoint.MessageQueueEndpointFactory.Instance.Resolve(@".\private$\test_subscriptionMgr");
-            IEndpoint serverEndpoint = MessageQueueEndpoint.MessageQueueEndpointFactory.Instance.Resolve(@".\private$\test_server");
+            IEndpoint clientEndpoint = new MessageQueueEndpoint("msmq://localhost/test_client");
+            IEndpoint subscriptionMgrEndpoint = new MessageQueueEndpoint("msmq://localhost/test_subscriptionmgr");
+            IEndpoint serverEndpoint = new MessageQueueEndpoint("msmq://localhost/test_server");
 
-            ISubscriptionStorage storage = new MsmqSubscriptionStorage(@".\private$\test_subscriptions", subscriptionMgrEndpoint, new SubscriptionCache());
+            ISubscriptionStorage storage = new MsmqSubscriptionStorage(new MessageQueueEndpoint("msmq://localhost/test_subscriptions"), subscriptionMgrEndpoint, new LocalSubscriptionCache());
+
             ServiceBus bus = new ServiceBus(clientEndpoint, storage);
 
-            bus.MessageEndpoint<PasswordUpdateComplete>().Subscribe(Program_MessageReceived);
+            bus.Subscribe<PasswordUpdateComplete>(Program_MessageReceived);
 
             Console.WriteLine("New Password Client");
             Console.WriteLine("What would you like to set your new password to?");
             Console.Write("New Password:");
             string newPassword = Console.ReadLine();
-
-            using (TransactionScope tr = new TransactionScope())
-            {
-                bus.Send(serverEndpoint, new RequestPasswordUpdate(newPassword));
-
-                tr.Complete();
-            }
+           
+            bus.Send(serverEndpoint, new RequestPasswordUpdate(newPassword));
 
             Console.WriteLine("Waiting For Reply");
             Console.ReadKey(true);

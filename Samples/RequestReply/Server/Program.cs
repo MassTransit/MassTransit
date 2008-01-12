@@ -1,22 +1,22 @@
+using System;
+using MassTransit.ServiceBus;
+using MassTransit.ServiceBus.Subscriptions;
+using SecurityMessages;
+
 namespace Server
 {
-    using System;
-    using MassTransit.ServiceBus;
-    using MassTransit.ServiceBus.Subscriptions;
-    using SecurityMessages;
-
     class Program
     {
         static void Main(string[] args)
         {
-            IEndpoint subscriptionMgrEndpoint = MessageQueueEndpoint.MessageQueueEndpointFactory.Instance.Resolve(@".\private$\test_subscriptionMgr");
-            IEndpoint serverEndpoint = MessageQueueEndpoint.MessageQueueEndpointFactory.Instance.Resolve(@".\private$\test_server");
+            IEndpoint subscriptionMgrEndpoint = new MessageQueueEndpoint("msmq://localhost/test_subscriptionmgr");
+            IEndpoint serverEndpoint = new MessageQueueEndpoint("msmq://localhost/test_server");
 
-            ISubscriptionStorage storage = new MsmqSubscriptionStorage(@".\private$\test_subscriptions", subscriptionMgrEndpoint, new SubscriptionCache());
+            ISubscriptionStorage storage = new MsmqSubscriptionStorage(new MessageQueueEndpoint("msmq://localhost/test_subscriptions"), subscriptionMgrEndpoint, new LocalSubscriptionCache());
 
             ServiceBus bus = new ServiceBus(serverEndpoint, storage);
             
-            bus.MessageEndpoint<RequestPasswordUpdate>().Subscribe(Program_MessageReceived);
+            bus.Subscribe<RequestPasswordUpdate>(Program_MessageReceived);
 
             Console.WriteLine("Thank You. Press any key to exit");
             Console.ReadKey(true);
