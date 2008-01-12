@@ -50,7 +50,7 @@ namespace MassTransit.ServiceBus.Tests
             using (mocks.Playback())
             {
                 MessageQueueEndpoint ep = nonTransactionalQueueName;
-                MessageSenderFactory.Create(ep).Send(env);
+                MessageSender.Using(ep).Send(env);
             }
 
             ServiceBusSetupFixture.VerifyMessageInQueue(nonTransactionalQueueName, msg);
@@ -68,7 +68,7 @@ namespace MassTransit.ServiceBus.Tests
                 using (TransactionScope tr = new TransactionScope())
                 {
                     MessageQueueEndpoint ep = nonTransactionalQueueName;
-                    MessageSenderFactory.Create(ep).Send(env);
+                    MessageSender.Using(ep).Send(env);
 
                     tr.Complete();
                 }
@@ -95,7 +95,7 @@ namespace MassTransit.ServiceBus.Tests
                 using (TransactionScope tr = new TransactionScope())
                 {
                     MessageQueueEndpoint ep = transactionalQueueName;
-                    MessageSenderFactory.Create(ep).Send(env);
+                    MessageSender.Using(ep).Send(env);
 
                     tr.Complete();
                 }
@@ -122,7 +122,7 @@ namespace MassTransit.ServiceBus.Tests
             using (mocks.Playback())
             {
                 MessageQueueEndpoint ep = transactionalQueueName;
-                MessageSenderFactory.Create(ep).Send(env);
+                MessageSender.Using(ep).Send(env);
             }
         }
     }

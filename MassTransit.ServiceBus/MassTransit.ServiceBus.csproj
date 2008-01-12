@@ -64,8 +64,8 @@
     <Compile Include="MessageQueueReceiver.cs" />
     <Compile Include="MessageQueueSender.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="MessageReceiverFactory.cs" />
-    <Compile Include="MessageSenderFactory.cs" />
+    <Compile Include="MessageReceiver.cs" />
+    <Compile Include="MessageSender.cs" />
     <Compile Include="ServiceBus.cs" />
     <Compile Include="ServiceBusAsyncResult.cs" />
     <Compile Include="SubscriptionChangedEventArgs.cs" />

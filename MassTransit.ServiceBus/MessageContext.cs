@@ -1,18 +1,28 @@
 using System;
+using System.Collections.Generic;
+using log4net;
 
 namespace MassTransit.ServiceBus
 {
-    using System.Collections.Generic;
-    using log4net;
-
+    /// <summary>
+    /// A message context contains the participants in a message exchange that is
+    /// received on the service bus.
+    /// </summary>
+    /// <typeparam name="T">The message type</typeparam>
     public class MessageContext<T> :
         EventArgs where T : IMessage
     {
-        private readonly IEnvelope _envelope;
-        private readonly T _message;
         private readonly IServiceBus _bus;
+        private readonly IEnvelope _envelope;
         private readonly ILog _log = LogManager.GetLogger(typeof (MessageContext<T>));
+        private readonly T _message;
 
+        /// <summary>
+        /// Initializes an instance of the <c ref="MessageContext" /> class
+        /// </summary>
+        /// <param name="bus">The service bus on which the message was received</param>
+        /// <param name="envelope">The message envelope received</param>
+        /// <param name="message">The individual message from the envelope being received</param>
         public MessageContext(IServiceBus bus, IEnvelope envelope, T message)
         {
             _envelope = envelope;
@@ -20,16 +30,25 @@ namespace MassTransit.ServiceBus
             _message = message;
         }
 
+        /// <summary>
+        /// The envelope containing the message
+        /// </summary>
         public IEnvelope Envelope
         {
             get { return _envelope; }
         }
 
+        /// <summary>
+        /// The actual message being delivered
+        /// </summary>
         public T Message
         {
             get { return _message; }
         }
 
+        /// <summary>
+        /// The service bus on which the message was received
+        /// </summary>
         public IServiceBus Bus
         {
             get { return _bus; }
@@ -46,9 +65,7 @@ namespace MassTransit.ServiceBus
             IEnvelope envelope = new Envelope(Bus.Endpoint, messages);
             envelope.CorrelationId = Envelope.Id;
 
-            IMessageSender send = MessageSenderFactory.Create(replyEndpoint);
-
-            send.Send(envelope);
+            MessageSender.Using(replyEndpoint).Send(envelope);
         }
 
         /// <summary>
@@ -57,7 +74,7 @@ namespace MassTransit.ServiceBus
         /// </summary>
         public void HandleMessagesLater(params IMessage[] messages)
         {
-            Bus.Send(Bus.Endpoint, messages);
+            MessageSender.Using(Bus.Endpoint).Send(this.Envelope);
         }
 
         /// <summary>
@@ -68,7 +85,7 @@ namespace MassTransit.ServiceBus
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Envelope {0} Was Marked Poisonous", _envelope.Id);
 
-            MessageSenderFactory.Create(Bus.PoisonEndpoint).Send(_envelope);
+            MessageSender.Using(Bus.PoisonEndpoint).Send(_envelope);
         }
 
         /// <summary>
@@ -81,8 +98,8 @@ namespace MassTransit.ServiceBus
 
             IEnvelope env = (IEnvelope) Envelope.Clone(); //Should this be cloned?
             env.Messages = new IMessage[] {Message};
-            
-            MessageSenderFactory.Create(Bus.PoisonEndpoint).Send(env);
+
+            MessageSender.Using(Bus.PoisonEndpoint).Send(env);
         }
     }
 }

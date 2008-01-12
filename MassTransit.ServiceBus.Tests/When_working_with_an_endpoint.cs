@@ -13,7 +13,7 @@ namespace MassTransit.ServiceBus.Tests
         {
             using (QueueTestContext qtc = new QueueTestContext())
             {
-                IMessageSender sender = MessageSenderFactory.Create(qtc.ServiceBusEndPoint);
+                IMessageSender sender = MessageSender.Using(qtc.ServiceBusEndPoint);
 
                 Assert.That(sender, Is.Not.Null);
             }
@@ -26,7 +26,7 @@ namespace MassTransit.ServiceBus.Tests
 
             IEndpoint endpoint = mocks.CreateMock<IEndpoint>();
 
-            MessageSenderFactory.Create(endpoint);
+            MessageSender.Using(endpoint);
         }
 
         [Test]
@@ -34,7 +34,7 @@ namespace MassTransit.ServiceBus.Tests
         {
             using (QueueTestContext qtc = new QueueTestContext())
             {
-                IMessageReceiver receiver = MessageReceiverFactory.Create(qtc.ServiceBusEndPoint);
+                IMessageReceiver receiver = MessageReceiver.Using(qtc.ServiceBusEndPoint);
 
                 Assert.That(receiver, Is.Not.Null);
             }
@@ -47,7 +47,7 @@ namespace MassTransit.ServiceBus.Tests
 
             IEndpoint endpoint = mocks.CreateMock<IEndpoint>();
 
-            MessageReceiverFactory.Create(endpoint);
+            MessageReceiver.Using(endpoint);
         }
 
     }

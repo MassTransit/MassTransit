@@ -34,7 +34,7 @@ namespace MassTransit.ServiceBus.Tests
         {
             DeleteMessage msg = new DeleteMessage();
             Envelope env = new Envelope(base._testEndPoint, msg);
-            MessageSenderFactory.Create(endpoint).Send(env);
+            MessageSender.Using(endpoint).Send(env);
             VerifyMessageInQueue(endpoint.QueueName, msg);
         }
     }

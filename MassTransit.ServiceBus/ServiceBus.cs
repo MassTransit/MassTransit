@@ -49,18 +49,10 @@ namespace MassTransit.ServiceBus
             _endpoint = endpoint;
             _subscriptionStorage = subscriptionStorage;
 
-            _receiver = MessageReceiverFactory.Create(_endpoint);
-            if (_receiver != null)
-            {
-                _receiver.Subscribe(this);
-            }
+            _receiver = MessageReceiver.Using(_endpoint);
+            _receiver.Subscribe(this);
 
-            _sender = MessageSenderFactory.Create(_endpoint);
-
-
-            // TODO find this a new home in the receiver
-            //if (_log.IsDebugEnabled)
-            //    _log.DebugFormat("Added event handler for envelope to {0}", _endpoint.Address);
+            _sender = MessageSender.Using(_endpoint);
         }
 
         public ISubscriptionStorage SubscriptionStorage
@@ -171,7 +163,7 @@ namespace MassTransit.ServiceBus
 
                 foreach (Uri subscribersEndpoint in subscribers)
                 {
-                    IMessageSender send = MessageSenderFactory.Create(subscribersEndpoint);
+                    IMessageSender send = MessageSender.Using(subscribersEndpoint);
                     send.Send(envelope);
                 }
             }
@@ -186,7 +178,7 @@ namespace MassTransit.ServiceBus
         {
             IEnvelope envelope = new Envelope(_endpoint, messages as IMessage[]);
 
-            IMessageSender send = MessageSenderFactory.Create(destinationEndpoint);
+            IMessageSender send = MessageSender.Using(destinationEndpoint);
             send.Send(envelope);
         }
 
@@ -256,7 +248,7 @@ namespace MassTransit.ServiceBus
         {
             IEnvelope envelope = new Envelope(_endpoint, messages as IMessage[]);
 
-            IMessageSender send = MessageSenderFactory.Create(destinationEndpoint);
+            IMessageSender send = MessageSender.Using(destinationEndpoint);
             lock (_AsyncReplyDispatcher)
             {            
                 send.Send(envelope);
