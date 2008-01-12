@@ -10,14 +10,19 @@ namespace MassTransit.ServiceBus.SubscriptionsManager.Client
 
         private IEndpoint _wellKnownSubscriptionManagerEndpoint;
         private static readonly ILog _log = LogManager.GetLogger(typeof(ClientProxy));
+        private IServiceBus _bus;
 
         public ClientProxy(IEndpoint wellKnownSubscriptionManagerEndpoint)
         {
             _wellKnownSubscriptionManagerEndpoint = wellKnownSubscriptionManagerEndpoint;
         }
 
-        public void StartWatching(ISubscriptionStorage storage)
+        public void StartWatching(IServiceBus bus, ISubscriptionStorage storage)
         {
+            _bus = bus;
+            _bus.Subscribe<CacheUpdateResponse>(null);
+            _bus.Send(_wellKnownSubscriptionManagerEndpoint, new RequestCacheUpdate());
+
             storage.SubscriptionChanged += storage_SubscriptionChanged;
 
             foreach (Uri uri in storage.List())
@@ -35,7 +40,7 @@ namespace MassTransit.ServiceBus.SubscriptionsManager.Client
 
         public void SendUpdate(SubscriptionChange change)
         {
-            
+            _bus.Send(_wellKnownSubscriptionManagerEndpoint, change);
         }
     }
 }

@@ -37,6 +37,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.ServiceBus.Subs
 		Release.AspNetCompiler.Debug = "False"
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.ServiceBus.SubscriptionsManager.Client.Tests", "MassTransit.ServiceBus.SubscriptionsManager.Client.Tests\MassTransit.ServiceBus.SubscriptionsManager.Client.Tests.csproj", "{2E30AC6D-4498-4886-8E55-7FCDE23B9E9B}"
+	ProjectSection(WebsiteProperties) = preProject
+		Debug.AspNetCompiler.Debug = "True"
+		Release.AspNetCompiler.Debug = "False"
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -63,6 +69,10 @@ Global
 		{844D54AF-D8B9-4DBF-AC9E-B17423A5E0B2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{844D54AF-D8B9-4DBF-AC9E-B17423A5E0B2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{844D54AF-D8B9-4DBF-AC9E-B17423A5E0B2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2E30AC6D-4498-4886-8E55-7FCDE23B9E9B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2E30AC6D-4498-4886-8E55-7FCDE23B9E9B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2E30AC6D-4498-4886-8E55-7FCDE23B9E9B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2E30AC6D-4498-4886-8E55-7FCDE23B9E9B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -71,5 +81,6 @@ Global
 		{6CD7F53B-37F8-4281-B85B-9EC679CADDBB} = {56F516D7-BC3C-49E1-A639-83C5F14953F8}
 		{85A96525-9021-4CFE-A7B1-59C6F964FABB} = {56F516D7-BC3C-49E1-A639-83C5F14953F8}
 		{844D54AF-D8B9-4DBF-AC9E-B17423A5E0B2} = {56F516D7-BC3C-49E1-A639-83C5F14953F8}
+		{2E30AC6D-4498-4886-8E55-7FCDE23B9E9B} = {56F516D7-BC3C-49E1-A639-83C5F14953F8}
 	EndGlobalSection
 EndGlobal
