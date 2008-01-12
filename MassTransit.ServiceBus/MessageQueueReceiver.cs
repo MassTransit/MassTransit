@@ -6,6 +6,8 @@ using log4net;
 
 namespace MassTransit.ServiceBus
 {
+    using Exceptions;
+
     public class MessageQueueReceiver :
         IMessageReceiver
     {
@@ -27,7 +29,15 @@ namespace MassTransit.ServiceBus
 
             _queue.MessageReadPropertyFilter = mpf;
 
-            _cursor = _queue.CreateCursor();
+            try
+            {
+                _cursor = _queue.CreateCursor();
+            }
+            catch(MessageQueueException ex)
+            {
+                throw new EndpointException(endpoint, string.Format("There are issues with the queue '{0}'", endpoint.Uri), ex);
+            }
+            
         }
 
         #region IMessageReceiver Members
