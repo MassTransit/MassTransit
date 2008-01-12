@@ -6,17 +6,17 @@ using Rhino.Mocks;
 
 namespace MassTransit.ServiceBus.Tests
 {
-
     [TestFixture]
     public class When_A_Message_Is_Received_On_The_Service_Bus
     {
         private MockRepository mocks;
         private ServiceBus _serviceBus;
         private IMessageQueueEndpoint _serviceBusEndPoint;
-
+        private string queueName = @".\private$\test_servicebus";
         [SetUp]
         public void SetUp()
         {
+            ServiceBusSetupFixture.ValidateAndPurgeQueue(queueName);
             mocks = new MockRepository();
             _serviceBusEndPoint = mocks.CreateMock<IMessageQueueEndpoint>();
         }
@@ -34,9 +34,9 @@ namespace MassTransit.ServiceBus.Tests
         {
             using(mocks.Record())
             {
-                Expect.Call(_serviceBusEndPoint.QueueName).Return(@".\private$\test");
-                Expect.Call(_serviceBusEndPoint.QueueName).Return(@".\private$\test");
-                Expect.Call(_serviceBusEndPoint.Uri).Return(new Uri("msmq://localhost/test"));
+                Expect.Call(_serviceBusEndPoint.QueueName).Return(queueName);
+                Expect.Call(_serviceBusEndPoint.QueueName).Return(queueName);
+                Expect.Call(_serviceBusEndPoint.Uri).Return(new Uri("msmq://localhost/test_servicebus"));
             }
             using (mocks.Playback())
             {
@@ -63,8 +63,8 @@ namespace MassTransit.ServiceBus.Tests
         {
             using(mocks.Record())
             {
-                Expect.Call(_serviceBusEndPoint.QueueName).Return(@".\private$\test");
-                Expect.Call(_serviceBusEndPoint.QueueName).Return(@".\private$\test");
+                Expect.Call(_serviceBusEndPoint.QueueName).Return(queueName);
+                Expect.Call(_serviceBusEndPoint.QueueName).Return(queueName);
             }
             using (mocks.Playback())
             {
