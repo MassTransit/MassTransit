@@ -19,6 +19,10 @@ using MassTransit.ServiceBus.Util;
 
 namespace MassTransit.ServiceBus
 {
+    /// <summary>
+    /// A service bus is used to attach message handlers (services) to endpoints, as well as 
+    /// communicate with other service bus instances in a distributed application
+    /// </summary>
     public class ServiceBus :
         IServiceBus,
         IEnvelopeConsumer
@@ -30,7 +34,7 @@ namespace MassTransit.ServiceBus
 
         private readonly object _consumersLock = new object();
 
-        private readonly CorrelatedMessageController _correlatedMessageController = new CorrelatedMessageController();
+        private readonly AsyncReplyDispatcher _AsyncReplyDispatcher = new AsyncReplyDispatcher();
         private readonly IEndpoint _endpoint;
         private readonly IMessageReceiver _receiver;
         private readonly IMessageSender _sender;
@@ -66,7 +70,13 @@ namespace MassTransit.ServiceBus
 
         #region IEnvelopeConsumer Members
 
-        public bool MeetsCriteria(IEnvelope envelope)
+        /// <summary>
+        /// Called when a message is available from the endpoint. If the consumer returns true, the message
+        /// will be removed from the endpoint and delivered to the consumer
+        /// </summary>
+        /// <param name="envelope">The message envelope available</param>
+        /// <returns>True is the consumer will handle the message, false if it should be ignored</returns>
+        public bool IsHandled(IEnvelope envelope)
         {
             try
             {
@@ -89,7 +99,7 @@ namespace MassTransit.ServiceBus
                 }
                 else
                 {
-                    if (_correlatedMessageController.Match(envelope.CorrelationId).Found)
+                    if (_AsyncReplyDispatcher.Exists(envelope.CorrelationId))
                         return true;
                 }
             }
@@ -101,6 +111,10 @@ namespace MassTransit.ServiceBus
             return false;
         }
 
+        /// <summary>
+        /// Delivers the message envelope to the consumer
+        /// </summary>
+        /// <param name="envelope">The message envelope</param>
         public void Deliver(IEnvelope envelope)
         {
             try
@@ -108,9 +122,9 @@ namespace MassTransit.ServiceBus
                 if (_log.IsDebugEnabled)
                     _log.DebugFormat("Envelope {0} Received By {1}", envelope.Id, GetHashCode());
 
-                lock (_correlatedMessageController)
+                lock (_AsyncReplyDispatcher)
                 {
-                    if (_correlatedMessageController.Process(envelope).WasHandled)
+                    if (_AsyncReplyDispatcher.Complete(envelope))
                         return;
                 }
 
@@ -126,6 +140,10 @@ namespace MassTransit.ServiceBus
 
         #region IServiceBus Members
 
+        ///<summary>
+        ///Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+        ///</summary>
+        ///<filterpriority>2</filterpriority>
         public void Dispose()
         {
             _subscriptionStorage.Dispose();
@@ -139,6 +157,11 @@ namespace MassTransit.ServiceBus
             _endpoint.Dispose();
         }
 
+        /// <summary>
+        /// Publishes a message to all subscribed consumers for the message type
+        /// </summary>
+        /// <typeparam name="T">The type of the message</typeparam>
+        /// <param name="messages">The messages to be published</param>
         public void Publish<T>(params T[] messages) where T : IMessage
         {
             IList<Uri> subscribers = _subscriptionStorage.List();
@@ -154,6 +177,11 @@ namespace MassTransit.ServiceBus
             }
         }
 
+        /// <summary>
+        /// Sends a list of messages to the specified destination
+        /// </summary>
+        /// <param name="destinationEndpoint">The destination for the message</param>
+        /// <param name="messages">The list of messages</param>
         public void Send<T>(IEndpoint destinationEndpoint, params T[] messages) where T : IMessage
         {
             IEnvelope envelope = new Envelope(_endpoint, messages as IMessage[]);
@@ -162,11 +190,17 @@ namespace MassTransit.ServiceBus
             send.Send(envelope);
         }
 
+        /// <summary>
+        /// The endpoint associated with this instance
+        /// </summary>
         public IEndpoint Endpoint
         {
             get { return _endpoint; }
         }
 
+        /// <summary>
+        /// The poison endpoint associated with this instance where exception messages are sent
+        /// </summary>
         public IEndpoint PoisonEndpoint
         {
             get
@@ -181,11 +215,22 @@ namespace MassTransit.ServiceBus
             set { _poisonEndpoint = value; }
         }
 
+        /// <summary>
+        /// Adds a message handler to the service bus for handling a specific type of message
+        /// </summary>
+        /// <typeparam name="T">The message type to handle, often inferred from the callback specified</typeparam>
+        /// <param name="callback">The callback to invoke when messages of the specified type arrive on the service bus</param>
         public void Subscribe<T>(MessageReceivedCallback<T> callback) where T : IMessage
         {
             Subscribe(callback, null);
         }
 
+        /// <summary>
+        /// Adds a message handler to the service bus for handling a specific type of message
+        /// </summary>
+        /// <typeparam name="T">The message type to handle, often inferred from the callback specified</typeparam>
+        /// <param name="callback">The callback to invoke when messages of the specified type arrive on the service bus</param>
+        /// <param name="condition">A condition predicate to filter which messages are handled by the callback</param>
         public void Subscribe<T>(MessageReceivedCallback<T> callback, Predicate<T> condition) where T : IMessage
         {
             lock (_consumersLock)
@@ -200,16 +245,23 @@ namespace MassTransit.ServiceBus
             }
         }
 
+        /// <summary>
+        /// Submits a request message to the default destination for the message type
+        /// </summary>
+        /// <typeparam name="T">The type of message</typeparam>
+        /// <param name="destinationEndpoint">The destination for the message</param>
+        /// <param name="messages">The messages to be sent</param>
+        /// <returns>An IAsyncResult that can be used to wait for the response</returns>
         public IServiceBusAsyncResult Request<T>(IEndpoint destinationEndpoint, params T[] messages) where T : IMessage
         {
             IEnvelope envelope = new Envelope(_endpoint, messages as IMessage[]);
 
             IMessageSender send = MessageSenderFactory.Create(destinationEndpoint);
-            lock (_correlatedMessageController)
+            lock (_AsyncReplyDispatcher)
             {            
                 send.Send(envelope);
  
-                return _correlatedMessageController.Track(envelope.Id);
+                return _AsyncReplyDispatcher.Track(envelope.Id);
             }
         }
 

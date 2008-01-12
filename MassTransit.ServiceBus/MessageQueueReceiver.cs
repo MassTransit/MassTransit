@@ -8,6 +8,9 @@ namespace MassTransit.ServiceBus
 {
     using Exceptions;
 
+    /// <summary>
+    /// Receives envelopes from a message queue
+    /// </summary>
     public class MessageQueueReceiver :
         IMessageReceiver
     {
@@ -20,6 +23,10 @@ namespace MassTransit.ServiceBus
 
         private MessageQueue _queue;
 
+        /// <summary>
+        /// Initializes a MessageQueueReceiver
+        /// </summary>
+        /// <param name="endpoint">The endpoint where the receiver should be attached</param>
         public MessageQueueReceiver(IMessageQueueEndpoint endpoint)
         {
             _queue = new MessageQueue(endpoint.QueueName, QueueAccessMode.SendAndReceive);
@@ -66,6 +73,13 @@ namespace MassTransit.ServiceBus
 
         #endregion
 
+        /// <summary>
+        /// Called by the thread pool to process a message that has been seen on the queue (via Peek)
+        /// 
+        /// The message is checked to see if it will handled by a consumer and if so, the message
+        /// is received from the queue and send to the consumer(s) that will handle it.
+        /// </summary>
+        /// <param name="obj">An instance of <c ref="Message" /> that was seen on the queue</param>
         public void ProcessMessage(object obj)
         {
             Message msg = obj as Message;
@@ -85,7 +99,7 @@ namespace MassTransit.ServiceBus
 
                     foreach (IEnvelopeConsumer consumer in _consumers)
                     {
-                        if (consumer.MeetsCriteria(e))
+                        if (consumer.IsHandled(e))
                         {
                             foundAConsumerThatCares = true;
                             break;

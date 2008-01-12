@@ -40,7 +40,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CorrelatedMessageController.cs" />
+    <Compile Include="AsyncReplyDispatcher.cs" />
     <Compile Include="Envelope.cs" />
     <Compile Include="EnvelopeMessageMapper.cs" />
     <Compile Include="Exceptions\EndpointException.cs" />
@@ -78,7 +78,6 @@
     <Compile Include="Subscriptions\SubscriptionCacheEntry.cs" />
     <Compile Include="Util\Check.cs" />
     <Compile Include="Util\MessageId.cs" />
-    <Compile Include="Util\MsmqUtilities.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Interfaces.cd" />

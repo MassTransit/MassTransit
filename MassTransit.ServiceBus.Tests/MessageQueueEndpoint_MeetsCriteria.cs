@@ -51,7 +51,7 @@ namespace MassTransit.ServiceBus.Tests
 
                 IEnvelope envelope = new Envelope(_serviceBusEndPoint, new PingMessage());
 
-                Assert.That(consumer.MeetsCriteria(envelope), Is.False);
+                Assert.That(consumer.IsHandled(envelope), Is.False);
             }
         }
 
@@ -76,7 +76,7 @@ namespace MassTransit.ServiceBus.Tests
 
                 IEnvelope envelope = new Envelope(_serviceBusEndPoint, new PingMessage());
 
-                Assert.That(consumer.MeetsCriteria(envelope), Is.True);
+                Assert.That(consumer.IsHandled(envelope), Is.True);
             }
         }
 
@@ -103,7 +103,7 @@ namespace MassTransit.ServiceBus.Tests
 
                 IEnvelope envelope = new Envelope(_serviceBusEndPoint, new PingMessage());
 
-                Assert.That(consumer.MeetsCriteria(envelope), Is.True);
+                Assert.That(consumer.IsHandled(envelope), Is.True);
                 consumer.Deliver(envelope);
                 Assert.That(workDid, Is.True, "Lazy Test!");
             }
@@ -134,7 +134,7 @@ namespace MassTransit.ServiceBus.Tests
 
                 IEnvelope envelope = new Envelope(_serviceBusEndPoint, new PingMessage());
 
-                Assert.That(consumer.MeetsCriteria(envelope), Is.True);
+                Assert.That(consumer.IsHandled(envelope), Is.True);
             }
         }
         
@@ -163,7 +163,7 @@ namespace MassTransit.ServiceBus.Tests
 
                 IEnvelope envelope = new Envelope(_serviceBusEndPoint, new PingMessage());
 
-                Assert.That(consumer.MeetsCriteria(envelope), Is.False);
+                Assert.That(consumer.IsHandled(envelope), Is.False);
             }
         }
 
@@ -185,7 +185,7 @@ namespace MassTransit.ServiceBus.Tests
             {
                 //I have no idea what changed - dds
                 //Expect.Call(mockReturnEndpoint.Uri).Return(new Uri("msmq://localhost/test_endpoint"));
-                Expect.Call(consumer.MeetsCriteria(envelope)).Return(false).IgnoreArguments();
+                Expect.Call(consumer.IsHandled(envelope)).Return(false).IgnoreArguments();
             }
 
             using (mocks.Playback())

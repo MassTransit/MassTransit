@@ -9,5 +9,10 @@ namespace MassTransit.ServiceBus
         void Subscribe(MessageReceivedCallback<T> callback, Predicate<T> condition);
     }
 
+    /// <summary>
+    /// The delegate for a message consumer
+    /// </summary>
+    /// <typeparam name="T">The type of message being delivered to the consumer</typeparam>
+    /// <param name="ctx">The context of the received message</param>
     public delegate void MessageReceivedCallback<T>(MessageContext<T> ctx) where T : IMessage;
 }

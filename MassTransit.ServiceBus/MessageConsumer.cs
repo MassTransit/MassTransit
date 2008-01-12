@@ -5,6 +5,11 @@ using MassTransit.ServiceBus.Exceptions;
 
 namespace MassTransit.ServiceBus
 {
+    /// <summary>
+    /// A message consumer is created when a service subscribes to a specific type of message
+    /// on a service bus. 
+    /// </summary>
+    /// <typeparam name="T">The message type handled by this message consumer</typeparam>
     public class MessageConsumer<T> :
         IMessageConsumer<T>,
         INotifyMessageConsumer where T : IMessage
@@ -68,7 +73,7 @@ namespace MassTransit.ServiceBus
                 catch (Exception ex)
                 {
                     throw new MeetsCriteriaException<T>(item,
-                                                        "There was an exception in the MessageConsumer.MeetsCriteria",
+                                                        "There was an exception in the MessageConsumer.IsHandled",
                                                         ex);
                 }
             }
@@ -79,28 +84,47 @@ namespace MassTransit.ServiceBus
         #endregion
     }
 
+    /// <summary>
+    /// Used to track a subscription to a message type on a service bus
+    /// </summary>
+    /// <typeparam name="T1">The type of message being handled</typeparam>
     public class MessageConsumerCallbackItem<T1> where T1 : IMessage
     {
         private MessageReceivedCallback<T1> _callback;
         private Predicate<T1> _condition;
 
+        /// <summary>
+        /// Initializes an instance of a <c ref="MessageConsumerCallbackItem" />
+        /// </summary>
+        /// <param name="callback">The callback method to handle the message</param>
         public MessageConsumerCallbackItem(MessageReceivedCallback<T1> callback)
         {
             _callback = callback;
         }
 
+        /// <summary>
+        /// Initializes an instance of a <c ref="MessageConsumerCallbackItem" />
+        /// </summary>
+        /// <param name="callback">The callback method to handle the message</param>
+        /// <param name="condition">The predicate used to check if the callback will handle the message</param>
         public MessageConsumerCallbackItem(MessageReceivedCallback<T1> callback, Predicate<T1> condition)
         {
             _callback = callback;
             _condition = condition;
         }
 
+        /// <summary>
+        /// The callback method
+        /// </summary>
         public MessageReceivedCallback<T1> Callback
         {
             get { return _callback; }
             set { _callback = value; }
         }
 
+        /// <summary>
+        /// The message filter condition
+        /// </summary>
         public Predicate<T1> Condition
         {
             get { return _condition; }

@@ -3,6 +3,9 @@ using log4net;
 
 namespace MassTransit.ServiceBus
 {
+    /// <summary>
+    /// Send envelopes on a message queue
+    /// </summary>
     public class MessageQueueSender :
         IMessageSender
     {
@@ -10,6 +13,10 @@ namespace MassTransit.ServiceBus
 
         private MessageQueue _queue;
 
+        /// <summary>
+        /// Initializes an instance of the <c ref="MessageQueueSender" /> class
+        /// </summary>
+        /// <param name="endpoint">The destination endpoint for messages to be sent</param>
         public MessageQueueSender(IMessageQueueEndpoint endpoint)
         {
             _queue = new MessageQueue(endpoint.QueueName, QueueAccessMode.SendAndReceive);
