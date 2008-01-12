@@ -15,20 +15,17 @@ namespace MassTransit.ServiceBus.Subscriptions
         private BinaryFormatter _formatter;
         private Cursor _peekCursor;
         private MessageQueue _storageQueue;
-        private IMessageQueueEndpoint _storageEndpoint;
+        private readonly IMessageQueueEndpoint _storageEndpoint;
         private readonly ISubscriptionStorage _subscriptionCache;
-        private IEndpoint _endpoint;
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="storageEndpoint">the name of the queue that stores all of the subscriptions</param>
-        /// <param name="endpoint"></param>
         /// <param name="subscriptionCache">in memory cache</param>
-        public MsmqSubscriptionStorage(IMessageQueueEndpoint storageEndpoint, IEndpoint endpoint, ISubscriptionStorage subscriptionCache)
+        public MsmqSubscriptionStorage(IMessageQueueEndpoint storageEndpoint, ISubscriptionStorage subscriptionCache)
         {
 			_storageEndpoint = storageEndpoint;
-            _endpoint = endpoint;
             _subscriptionCache = subscriptionCache;
 			_storageQueue = new MessageQueue(_storageEndpoint.QueueName, QueueAccessMode.SendAndReceive);
 
@@ -127,7 +124,7 @@ namespace MassTransit.ServiceBus.Subscriptions
 
         protected void OnChange(SubscriptionChange change)
         {
-            EventHandler<SubscriptionChangedEventArgs> handler = this.SubscriptionChanged;
+            EventHandler<SubscriptionChangedEventArgs> handler = SubscriptionChanged;
             if(handler != null)
             {
                 handler(this, new SubscriptionChangedEventArgs(change));

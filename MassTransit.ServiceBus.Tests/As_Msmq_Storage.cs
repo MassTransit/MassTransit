@@ -16,11 +16,10 @@ namespace MassTransit.ServiceBus.Tests
         {
             //TODO: This is nasty
             IMessageQueueEndpoint storageEndpoint = base._serviceBusEndPoint;
-            IMessageQueueEndpoint listenEndpoint = base._testEndPoint;
             IMessageQueueEndpoint subscriberEndpoint = base._remoteServiceBusEndPoint;
 
             ISubscriptionStorage cache = new LocalSubscriptionCache();
-            MsmqSubscriptionStorage storage = new MsmqSubscriptionStorage(storageEndpoint, listenEndpoint, cache);
+            MsmqSubscriptionStorage storage = new MsmqSubscriptionStorage(storageEndpoint, cache);
 
             storage.Add(typeof(PingMessage).FullName, subscriberEndpoint.Uri);
 
@@ -34,21 +33,9 @@ namespace MassTransit.ServiceBus.Tests
         public void I_Should_Puke_If_My_Storage_Queue_Doesnt_Exist()
         {
             IMessageQueueEndpoint nonExistentStorageEndpoint = new MessageQueueEndpoint(@"msmq://localhost/some_queue_that_doesnt_exist");
-            IMessageQueueEndpoint listenEndpoint = base._testEndPoint;
 
             ISubscriptionStorage cache = new LocalSubscriptionCache();
-            MsmqSubscriptionStorage storage = new MsmqSubscriptionStorage(nonExistentStorageEndpoint, listenEndpoint, cache);
-        }
-
-        [Test]
-        [ExpectedException(typeof(MessageQueueException))]
-        public void I_Should_Puke_If_My_Listen_Queue_Doesnt_Exist()
-        {
-            IMessageQueueEndpoint storageEndpoint = base._serviceBusEndPoint;
-            IMessageQueueEndpoint nonExistentListenEndpoint = new MessageQueueEndpoint(@"msmq://localhost/some_queue_that_doesnt_exist");
-
-            ISubscriptionStorage cache = new LocalSubscriptionCache();
-            MsmqSubscriptionStorage storage = new MsmqSubscriptionStorage(storageEndpoint, nonExistentListenEndpoint, cache);
+            MsmqSubscriptionStorage storage = new MsmqSubscriptionStorage(nonExistentStorageEndpoint, cache);
         }
 
         [Test, Ignore("Not Implemented, yet. ;)")]
@@ -65,7 +52,7 @@ namespace MassTransit.ServiceBus.Tests
             IMessageQueueEndpoint subscriberEndpoint = base._remoteServiceBusEndPoint;
 
             ISubscriptionStorage cache = new LocalSubscriptionCache();
-            MsmqSubscriptionStorage storage = new MsmqSubscriptionStorage(storageEndpoint, listenEndpoint, cache);
+            MsmqSubscriptionStorage storage = new MsmqSubscriptionStorage(storageEndpoint, cache);
 
             storage.Add(typeof(PingMessage).FullName, subscriberEndpoint.Uri);
 

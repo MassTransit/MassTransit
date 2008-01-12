@@ -45,7 +45,7 @@ namespace MassTransit.ServiceBus.Tests
             {
                 if (_serviceBus == null)
                 {
-                    ISubscriptionStorage subscriptionStorage = CreateSubscriptionStorage(ServiceBusEndPoint);
+                    ISubscriptionStorage subscriptionStorage = CreateSubscriptionStorage();
 
                     _serviceBus = new ServiceBus(ServiceBusEndPoint, subscriptionStorage);
                 }
@@ -60,7 +60,7 @@ namespace MassTransit.ServiceBus.Tests
             {
                 if (_remoteServiceBus == null)
                 {
-                    ISubscriptionStorage subscriptionStorage = CreateSubscriptionStorage(ServiceBusEndPoint);
+                    ISubscriptionStorage subscriptionStorage = CreateSubscriptionStorage();
 
                     _remoteServiceBus = new ServiceBus(RemoteServiceBusEndPoint, subscriptionStorage);
                 }
@@ -100,14 +100,14 @@ namespace MassTransit.ServiceBus.Tests
 
         #endregion
 
-        private ISubscriptionStorage CreateSubscriptionStorage(IEndpoint endpoint)
+        private ISubscriptionStorage CreateSubscriptionStorage()
         {
             ISubscriptionStorage subscriptionCache;
             ISubscriptionStorage subscriptionStorage;
 
             subscriptionCache = new LocalSubscriptionCache();
             subscriptionStorage =
-                new MsmqSubscriptionStorage(SubscriptionEndpoint, endpoint, subscriptionCache);
+                new MsmqSubscriptionStorage(SubscriptionEndpoint, subscriptionCache);
 
             return subscriptionStorage;
         }
