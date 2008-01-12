@@ -71,6 +71,56 @@ namespace MassTransit.ServiceBus.SubscriptionsManager.Client.Tests
             }
         }
 
+        [Test]
+        public void When_responding_to_a_subscription_change_bus_interaction()
+        {
+            IEventRaiser eventRaiser;
+            using (mocks.Record())
+            {
+                Expect.Call(delegate { bus.Subscribe<CacheUpdateResponse>(null); }).IgnoreArguments();
+                Expect.Call(delegate { bus.Send(null, new RequestCacheUpdate()); }).IgnoreArguments();
+                Expect.Call(delegate { cache.SubscriptionChanged += null; }).IgnoreArguments();
+                
+                eventRaiser = LastCall.GetEventRaiser();
+
+                Expect.Call(delegate { bus.Send(null, new SubscriptionChange("",null,SubscriptionChange.SubscriptionChangeType.Add)); }).IgnoreArguments();               
+                Expect.Call(cache.List()).Return(new List<Uri>());
+            }
+            using (mocks.Playback())
+            {
+                ClientProxy proxy = new ClientProxy(new MessageQueueEndpoint("msmq://localhost/test"));
+                proxy.StartWatching(bus, cache);
+
+                eventRaiser.Raise(cache, new SubscriptionChangedEventArgs(new SubscriptionChange("bob", new Uri("msmq://localhost/bob"), SubscriptionChange.SubscriptionChangeType.Add)));
+            }
+        }
+
+        [Test]
+        public void Starting_to_watch_when_there_are_subscriptions_already()
+        {
+            IEventRaiser eventRaiser;
+            using (mocks.Record())
+            {
+                Expect.Call(delegate { bus.Subscribe<CacheUpdateResponse>(null); }).IgnoreArguments();
+                Expect.Call(delegate { bus.Send(null, new RequestCacheUpdate()); }).IgnoreArguments();
+                Expect.Call(delegate { cache.SubscriptionChanged += null; }).IgnoreArguments();
+
+                eventRaiser = LastCall.GetEventRaiser();
+
+                Expect.Call(delegate { bus.Send(null, new SubscriptionChange("", null, SubscriptionChange.SubscriptionChangeType.Add)); }).IgnoreArguments();
+                Expect.Call(cache.List()).Return(new List<Uri>(new Uri[] { new Uri("msmq://localhost/test") }));
+                Expect.Call(delegate { bus.Send(null, new SubscriptionChange("", null, SubscriptionChange.SubscriptionChangeType.Add)); }).IgnoreArguments();
+            }
+            using (mocks.Playback())
+            {
+                
+                ClientProxy proxy = new ClientProxy(new MessageQueueEndpoint("msmq://localhost/test"));
+                proxy.StartWatching(bus, cache);
+
+                eventRaiser.Raise(cache, new SubscriptionChangedEventArgs(new SubscriptionChange("bob", new Uri("msmq://localhost/bob"), SubscriptionChange.SubscriptionChangeType.Add)));
+            }
+        }
+
 
     }
 }
