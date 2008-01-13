@@ -23,6 +23,10 @@ namespace MassTransit.ServiceBus
         bool IsHandled(IMessage message);
     }
 
+    ///<summary>
+    /// Implemented to handle the registration of handlers for a message type
+    ///</summary>
+    ///<typeparam name="T">The message type to handle</typeparam>
     public interface IMessageConsumer<T> : IMessageConsumer where T : IMessage
     {
         /// <summary>

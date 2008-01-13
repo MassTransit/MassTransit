@@ -8,11 +8,15 @@ namespace MassTransit.ServiceBus
     /// </summary>
     public interface IEnvelope : ICloneable
     {
+        /// <summary>
+        /// The unique identifier of this envelope
+        /// </summary>
         MessageId Id { get; set; }
 
+        /// <summary>
+        /// The unique identifier of the original envelope this envelope is in response to
+        /// </summary>
         MessageId CorrelationId { get; set; }
-
-        string Label { get; set; }
 
         /// <summary>
         /// The return endpoint for the message(s) in the envelope
@@ -24,11 +28,29 @@ namespace MassTransit.ServiceBus
         /// </summary>
         IMessage[] Messages { get; set; }
 
+        /// <summary>
+        /// The label stored on the envelope
+        /// </summary>
+        string Label { get; set; }
+
+        /// <summary>
+        /// Indicates whether the message should be delivered in a recoverable method
+        /// </summary>
         bool Recoverable { get; set; }
 
-        DateTime ArrivedTime { get; set; }
+        /// <summary>
+        /// Specifies the time before the envelope is no longer valid and should be discarded
+        /// </summary>
+        TimeSpan TimeToBeReceived { get; set; }
+
+        /// <summary>
+        /// The time the envelope was sent (only valid for received envelopes)
+        /// </summary>
         DateTime SentTime { get; set; }
 
-        TimeSpan TimeToBeReceived { get; set; }
+        /// <summary>
+        /// The time the envelope arrived (only valid for received envelopes)
+        /// </summary>
+        DateTime ArrivedTime { get; set; }
     }
 }
