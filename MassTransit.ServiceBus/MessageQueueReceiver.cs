@@ -110,6 +110,9 @@ namespace MassTransit.ServiceBus
                         if (consumer.IsHandled(e))
                         {
                             foundAConsumerThatCares = true;
+
+                            //we have found someone that cares take it off the queue
+                            _queue.ReceiveById(msg.Id);
                             break;
                         }
                     }
