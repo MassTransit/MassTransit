@@ -46,25 +46,5 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
             }
             
         }
-
-        [Test]
-        [Ignore("Weird behavior")]
-        public void Add_Subscription_with_a_bus()
-        {
-            LocalSubscriptionCache cache = new LocalSubscriptionCache(wellKnownEndpoint);
-            IEndpoint mockEndpoint = mocks.CreateMock<IEndpoint>();
-            
-            using (mocks.Record())
-            {
-                SubscriptionChange msg = new SubscriptionChange(typeof(PingMessage), new Uri(mockPath), SubscriptionChange.SubscriptionChangeType.Add);
-                bus.Send(wellKnownEndpoint, msg);
-            }
-            using (mocks.Playback())
-            {
-
-                cache.Add(typeof(PingMessage).FullName, new Uri(mockPath));
-            }
-
-        }
     }
 }

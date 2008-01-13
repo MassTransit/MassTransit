@@ -8,7 +8,6 @@ namespace MassTransit.ServiceBus.Subscriptions
     public class LocalSubscriptionCache : 
         ISubscriptionStorage
     {
-        private IEndpoint _wellKnownSubscriptionManagerEndpoint;
         private readonly Dictionary<string, List<SubscriptionCacheEntry>> _messageTypeSubscriptions =
             new Dictionary<string, List<SubscriptionCacheEntry>>();
         private static readonly ILog _log = LogManager.GetLogger(typeof(LocalSubscriptionCache));
@@ -17,16 +16,6 @@ namespace MassTransit.ServiceBus.Subscriptions
         public LocalSubscriptionCache()
         {
             
-        }
-
-        /// <summary>
-        /// You must call Initialize evertime
-        /// You must call RegisterWithBus in order to get distributed subscription management
-        /// </summary>
-        /// <param name="wellKnownSubscriptionManagerEndpoint"></param>
-        public LocalSubscriptionCache(IEndpoint wellKnownSubscriptionManagerEndpoint)
-        {
-            _wellKnownSubscriptionManagerEndpoint = wellKnownSubscriptionManagerEndpoint;
         }
 
         public event EventHandler<SubscriptionChangedEventArgs> SubscriptionChanged;
@@ -73,9 +62,6 @@ namespace MassTransit.ServiceBus.Subscriptions
 
         public void Dispose()
         {
-            if(_wellKnownSubscriptionManagerEndpoint != null)
-                _wellKnownSubscriptionManagerEndpoint.Dispose();
-
             _messageTypeSubscriptions.Clear();
         }
 
