@@ -34,7 +34,7 @@ namespace MassTransit.ServiceBus
 
         private readonly object _consumersLock = new object();
 
-        private readonly AsyncReplyDispatcher _AsyncReplyDispatcher = new AsyncReplyDispatcher();
+        private readonly AsyncReplyDispatcher _asyncReplyDispatcher = new AsyncReplyDispatcher();
         private readonly IEndpoint _endpoint;
         private readonly IMessageReceiver _receiver;
         private readonly IMessageSender _sender;
@@ -79,17 +79,19 @@ namespace MassTransit.ServiceBus
                     {
                         if (_consumers.ContainsKey(message.GetType()))
                         {
-                            IMessageConsumer receivingConsumer =
-                                _consumers[message.GetType()];
+                            IMessageConsumer receivingConsumer = _consumers[message.GetType()];
 
                             if (receivingConsumer.IsHandled(message))
-                                return true;
+                            {
+                                result = true;
+                                break;
+                            }
                         }
                     }
                 }
                 else
                 {
-                    if (_AsyncReplyDispatcher.Exists(envelope.CorrelationId))
+                    if (_asyncReplyDispatcher.Exists(envelope.CorrelationId))
                         result = true;
                 }
             }
@@ -97,6 +99,8 @@ namespace MassTransit.ServiceBus
             {
                 if(_log.IsErrorEnabled)
                     _log.Error("Exception in ServiceBus.IsHandled: ", ex);
+
+                throw;
             }
 
             return result;
@@ -113,9 +117,9 @@ namespace MassTransit.ServiceBus
                 if (_log.IsDebugEnabled)
                     _log.DebugFormat("Envelope {0} Received By {1}", envelope.Id, GetHashCode());
 
-                lock (_AsyncReplyDispatcher)
+                lock (_asyncReplyDispatcher)
                 {
-                    if (_AsyncReplyDispatcher.Complete(envelope))
+                    if (_asyncReplyDispatcher.Complete(envelope))
                         return;
                 }
 
@@ -248,11 +252,11 @@ namespace MassTransit.ServiceBus
             IEnvelope envelope = new Envelope(_endpoint, messages as IMessage[]);
 
             IMessageSender send = MessageSender.Using(destinationEndpoint);
-            lock (_AsyncReplyDispatcher)
+            lock (_asyncReplyDispatcher)
             {            
                 send.Send(envelope);
  
-                return _AsyncReplyDispatcher.Track(envelope.Id);
+                return _asyncReplyDispatcher.Track(envelope.Id);
             }
         }
 
