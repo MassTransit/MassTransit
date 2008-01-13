@@ -70,37 +70,36 @@ namespace MassTransit.ServiceBus
         /// <returns>True is the consumer will handle the message, false if it should be ignored</returns>
         public bool IsHandled(IEnvelope envelope)
         {
+            bool result = false;
             try
             {
                 if (envelope.CorrelationId == MessageId.Empty)
                 {
-                    if (envelope.Messages != null)
+                    foreach (IMessage message in envelope.Messages)
                     {
-                        foreach (IMessage message in envelope.Messages)
+                        if (_consumers.ContainsKey(message.GetType()))
                         {
-                            if (_consumers.ContainsKey(message.GetType()))
-                            {
-                                IMessageConsumer receivingConsumer =
-                                    _consumers[message.GetType()];
+                            IMessageConsumer receivingConsumer =
+                                _consumers[message.GetType()];
 
-                                if (receivingConsumer.IsHandled(message))
-                                    return true;
-                            }
+                            if (receivingConsumer.IsHandled(message))
+                                return true;
                         }
                     }
                 }
                 else
                 {
                     if (_AsyncReplyDispatcher.Exists(envelope.CorrelationId))
-                        return true;
+                        result = true;
                 }
             }
             catch (Exception ex)
             {
-                _log.Error("Exception in Endpoint_EnvelopeReceived: ", ex);
+                if(_log.IsErrorEnabled)
+                    _log.Error("Exception in ServiceBus.IsHandled: ", ex);
             }
 
-            return false;
+            return result;
         }
 
         /// <summary>
