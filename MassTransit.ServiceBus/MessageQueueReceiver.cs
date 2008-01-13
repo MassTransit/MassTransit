@@ -49,6 +49,10 @@ namespace MassTransit.ServiceBus
 
         #region IMessageReceiver Members
 
+        ///<summary>
+        ///Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+        ///</summary>
+        ///<filterpriority>2</filterpriority>
         public void Dispose()
         {
             _queue.Close();
@@ -56,6 +60,10 @@ namespace MassTransit.ServiceBus
             _queue = null;
         }
 
+        /// <summary>
+        /// Adds a consumer to the message receiver
+        /// </summary>
+        /// <param name="consumer">The consumer to add</param>
         public void Subscribe(IEnvelopeConsumer consumer)
         {
             if (!_consumers.Contains(consumer))

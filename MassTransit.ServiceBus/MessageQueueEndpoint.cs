@@ -15,7 +15,7 @@ namespace MassTransit.ServiceBus
 		//private MessageQueue _queue;
 
 		/// <summary>
-		/// Initializes a <c ref="MessageQueueEndpoint /> instance with the specified URI string.
+		/// Initializes a <c ref="MessageQueueEndpoint" /> instance with the specified URI string.
 		/// </summary>
 		/// <param name="uriString">The URI for the endpoint</param>
 		public MessageQueueEndpoint(string uriString)
@@ -31,7 +31,7 @@ namespace MassTransit.ServiceBus
 		}
 
 		/// <summary>
-		/// Initializes a <c ref="MessageQueueEndpoint /> instance with the specified URI.
+		/// Initializes a <c ref="MessageQueueEndpoint" /> instance with the specified URI.
 		/// </summary>
 		/// <param name="uri">The URI for the endpoint</param>
 		public MessageQueueEndpoint(Uri uri)
@@ -52,17 +52,28 @@ namespace MassTransit.ServiceBus
 
 		#region IMessageQueueEndpoint Members
 
-		public string QueueName
+	    /// <summary>
+	    /// The path of the message queue for the endpoint. Suitable for use with <c ref="MessageQueue" />.Open
+	    /// to access a message queue.
+	    /// </summary>
+	    public string QueueName
 		{
 			get { return _queuePath; }
 		}
 
-		public Uri Uri
+	    /// <summary>
+	    /// The address of the endpoint, in URI format
+	    /// </summary>
+	    public Uri Uri
 		{
 			get { return _uri; }
 		}
 
-		public void Dispose()
+	    ///<summary>
+	    ///Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+	    ///</summary>
+	    ///<filterpriority>2</filterpriority>
+	    public void Dispose()
 		{
 		}
 
