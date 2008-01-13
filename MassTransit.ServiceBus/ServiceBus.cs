@@ -274,7 +274,8 @@ namespace MassTransit.ServiceBus
                     }
                     catch (Exception ex)
                     {
-                        _log.Error("Exception from Deliver: ", ex);
+                        if(_log.IsErrorEnabled)
+                            _log.Error("Exception from Deliver: ", ex);
                     }
                 }
             }
