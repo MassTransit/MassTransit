@@ -28,13 +28,13 @@ namespace MassTransit.ServiceBus
         IEnvelopeConsumer
     {
         private static readonly ILog _log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+        private readonly AsyncReplyDispatcher _asyncReplyDispatcher = new AsyncReplyDispatcher();
 
         private readonly Dictionary<Type, IMessageConsumer> _consumers =
             new Dictionary<Type, IMessageConsumer>();
 
         private readonly object _consumersLock = new object();
 
-        private readonly AsyncReplyDispatcher _asyncReplyDispatcher = new AsyncReplyDispatcher();
         private readonly IEndpoint _endpoint;
         private readonly IMessageReceiver _receiver;
         private readonly IMessageSender _sender;
@@ -97,7 +97,7 @@ namespace MassTransit.ServiceBus
             }
             catch (Exception ex)
             {
-                if(_log.IsErrorEnabled)
+                if (_log.IsErrorEnabled)
                     _log.Error("Exception in ServiceBus.IsHandled: ", ex);
 
                 throw;
@@ -117,13 +117,10 @@ namespace MassTransit.ServiceBus
                 if (_log.IsDebugEnabled)
                     _log.DebugFormat("Envelope {0} Received By {1}", envelope.Id, GetHashCode());
 
-                lock (_asyncReplyDispatcher)
+                if (_asyncReplyDispatcher.Complete(envelope) == false)
                 {
-                    if (_asyncReplyDispatcher.Complete(envelope))
-                        return;
+                    DeliverMessagesToConsumers(envelope);
                 }
-
-                MessageDoesntHaveCorrelationId(envelope);
             }
             catch (Exception ex)
             {
@@ -253,39 +250,31 @@ namespace MassTransit.ServiceBus
 
             IMessageSender send = MessageSender.Using(destinationEndpoint);
             lock (_asyncReplyDispatcher)
-            {            
+            {
                 send.Send(envelope);
- 
+
                 return _asyncReplyDispatcher.Track(envelope.Id);
             }
         }
 
         #endregion
 
-        private void MessageDoesntHaveCorrelationId(IEnvelope envelope)
+        private void DeliverMessagesToConsumers(IEnvelope envelope)
         {
-            if (envelope.Messages != null)
+            foreach (IMessage message in envelope.Messages)
             {
-                foreach (IMessage message in envelope.Messages)
-                {
-                    if (_log.IsDebugEnabled)
-                        _log.DebugFormat("Message Received: {0}", message.GetType());
+                if (_log.IsDebugEnabled)
+                    _log.DebugFormat("Message Received: {0}", message.GetType());
 
-                    if (_consumers.ContainsKey(message.GetType()))
+                if (_consumers.ContainsKey(message.GetType()))
+                {
+                    try
                     {
-                        IMessageConsumer receivingConsumer =
-                            _consumers[message.GetType()];
-                        if (receivingConsumer != null)
-                        {
-                            try
-                            {
-                                receivingConsumer.Deliver(this, envelope, message);
-                            }
-                            catch (Exception ex)
-                            {
-                                _log.Error("Exception from Deliver: ", ex);
-                            }
-                        }
+                        _consumers[message.GetType()].Deliver(this, envelope, message);
+                    }
+                    catch (Exception ex)
+                    {
+                        _log.Error("Exception from Deliver: ", ex);
                     }
                 }
             }

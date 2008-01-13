@@ -61,9 +61,18 @@ namespace MassTransit.ServiceBus
         /// <returns>Returns a <c ref="Result" /> that can be checked to see if the response WasHandled</returns>
         public bool Complete(IEnvelope envelope)
         {
-            if (_asyncResultDictionary.ContainsKey(envelope.CorrelationId))
+            ServiceBusAsyncResult asyncResult = null;
+            
+            lock (_asyncResultDictionary)
             {
-                ServiceBusAsyncResult asyncResult = _asyncResultDictionary[envelope.CorrelationId];
+                if (_asyncResultDictionary.ContainsKey(envelope.CorrelationId))
+                {
+                    asyncResult = _asyncResultDictionary[envelope.CorrelationId];
+                }
+            }
+
+            if (asyncResult != null)
+            {
                 _asyncResultDictionary.Remove(envelope.CorrelationId);
 
                 asyncResult.Complete(envelope.Messages);

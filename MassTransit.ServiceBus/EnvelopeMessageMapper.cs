@@ -29,10 +29,8 @@ namespace MassTransit.ServiceBus
             }
 
             IMessage[] messages = _formatter.Deserialize(msg.BodyStream) as IMessage[];
-            if (messages != null)
-            {
-                e.Messages = messages;
-            }
+            
+            e.Messages = messages ?? new IMessage[] {};
 
             return e;
         }
