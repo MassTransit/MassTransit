@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<project name="masstransit" default="build">
+	<target name="build">
+		<delete dir=".\bin" failonerror="false" />
+		<delete file=".\MassTransit.zip" failonerror="false" />
+		<msbuild project=".\MassTransit.sln">
+			<property name="Configuration" value="Debug" />
+		</msbuild>
+
+		<zip zipfile="masstransit.zip">
+			<fileset basedir=".\bin">
+				<include name="**/*" />
+			</fileset>
+		</zip>
+	</target>
+
+	<target name="test">
+		<nunit2>
+			<formatter type="Plain" />
+			<test>
+				<assemblies>
+					<includesfile name=".\bin\MassTransit.ServiceBus.Tests.dll" />
+				</assemblies>
+			</test>
+		</nunit2>
+	</target>
+
+</project>
