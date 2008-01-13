@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <project name="masstransit" default="build">
-	<target name="build">
+	<target name="build" depends="common.find-svninfo">
 		<delete dir=".\bin" failonerror="false" />
 		<delete file=".\MassTransit.zip" failonerror="false" />
 		
-		<property name="version.rev" value="0" />
+		
+		<property name="version.rev" value="${svn.revision}"  />
 		<property name="version.build" value="0" />
 		
 		<asminfo output="SolutionVersion.cs" language="CSharp">
@@ -42,6 +43,24 @@
 				</assemblies>
 			</test>
 		</nunit2>
+	</target>
+	
+	<target name="common.find-svninfo">
+		<!-- For adding SVN revision to builds -->
+		<property name="svn.revision" value="0" overwrite="false" />
+		<!-- try to update the revision -->
+		<exec
+			program="svn"
+			commandline='info "${project::get-base-directory()}" --xml'
+			output="_revision.xml"
+			failonerror="false"/>
+		<xmlpeek
+			file="_revision.xml"
+			xpath="/info/entry/@revision"
+			property="svn.revision"
+			failonerror="false"/>
+		<delete file="_revision.xml" failonerror="false" />
+		<echo message="INFO: Using Subversion revision number: ${svn.revision}"/>
 	</target>
 
 </project>
