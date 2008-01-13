@@ -29,8 +29,8 @@ namespace MassTransit.ServiceBus
     {
         private static readonly ILog _log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 
-        private readonly Dictionary<Type, INotifyMessageConsumer> _consumers =
-            new Dictionary<Type, INotifyMessageConsumer>();
+        private readonly Dictionary<Type, IMessageConsumer> _consumers =
+            new Dictionary<Type, IMessageConsumer>();
 
         private readonly object _consumersLock = new object();
 
@@ -80,10 +80,10 @@ namespace MassTransit.ServiceBus
                         {
                             if (_consumers.ContainsKey(message.GetType()))
                             {
-                                INotifyMessageConsumer receivingConsumer =
+                                IMessageConsumer receivingConsumer =
                                     _consumers[message.GetType()];
 
-                                if (receivingConsumer.MeetsCriteria(message))
+                                if (receivingConsumer.IsHandled(message))
                                     return true;
                             }
                         }
@@ -270,7 +270,7 @@ namespace MassTransit.ServiceBus
 
                     if (_consumers.ContainsKey(message.GetType()))
                     {
-                        INotifyMessageConsumer receivingConsumer =
+                        IMessageConsumer receivingConsumer =
                             _consumers[message.GetType()];
                         if (receivingConsumer != null)
                         {
