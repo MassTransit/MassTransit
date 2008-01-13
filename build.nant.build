@@ -3,6 +3,25 @@
 	<target name="build">
 		<delete dir=".\bin" failonerror="false" />
 		<delete file=".\MassTransit.zip" failonerror="false" />
+		
+		<property name="version.rev" value="0" />
+		<property name="version.build" value="0" />
+		
+		<asminfo output="SolutionVersion.cs" language="CSharp">
+			<imports>
+				<import namespace="System" />
+				<import namespace="System.Reflection" />
+				<import namespace="System.Runtime.InteropServices" />
+			</imports>
+			<attributes>
+				<attribute type="ComVisibleAttribute" value="false" />
+				<attribute type="CLSCompliantAttribute" value="true" />
+				<attribute type="AssemblyVersionAttribute" value="0.1.${version.rev}.${version.build}" />
+				<attribute type="AssemblyCopyrightAttribute" value="MassTransit Project, original author or authors" />
+				<attribute type="AssemblyCompanyAttribute" value="CFT &amp; ACM" />
+			</attributes>
+		</asminfo>
+		
 		<msbuild project=".\MassTransit.sln">
 			<property name="Configuration" value="Debug" />
 		</msbuild>
