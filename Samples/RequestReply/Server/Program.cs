@@ -9,10 +9,9 @@ namespace Server
     {
         static void Main(string[] args)
         {
-            IEndpoint subscriptionMgrEndpoint = new MessageQueueEndpoint("msmq://localhost/test_subscriptionmgr");
             IEndpoint serverEndpoint = new MessageQueueEndpoint("msmq://localhost/test_server");
 
-            ISubscriptionStorage storage = new MsmqSubscriptionStorage(new MessageQueueEndpoint("msmq://localhost/test_subscriptions"), subscriptionMgrEndpoint, new LocalSubscriptionCache());
+            ISubscriptionStorage storage = new MsmqSubscriptionStorage(new MessageQueueEndpoint("msmq://localhost/test_subscriptions"), new LocalSubscriptionCache());
 
             ServiceBus bus = new ServiceBus(serverEndpoint, storage);
             
