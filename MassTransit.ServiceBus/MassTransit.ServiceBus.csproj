@@ -54,7 +54,6 @@
     <Compile Include="IMessageQueueEndpoint.cs" />
     <Compile Include="IMessageReceiver.cs" />
     <Compile Include="IMessageSender.cs" />
-    <Compile Include="INotifyMessageConsumer.cs" />
     <Compile Include="IServiceBus.cs" />
     <Compile Include="IServiceBusAsyncResult.cs" />
     <Compile Include="ISubscriptionStorage.cs" />

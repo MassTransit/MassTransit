@@ -11,8 +11,7 @@ namespace MassTransit.ServiceBus
     /// </summary>
     /// <typeparam name="T">The message type handled by this message consumer</typeparam>
     public class MessageConsumer<T> :
-        IMessageConsumer<T>,
-        INotifyMessageConsumer where T : IMessage
+        IMessageConsumer<T> where T : IMessage
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof (MessageQueueEndpoint));
 
@@ -30,13 +29,9 @@ namespace MassTransit.ServiceBus
             _callbacks.Add(new MessageConsumerCallbackItem<T>(callback, condition));
         }
 
-        #endregion
-
-        #region INotifyMessageConsumer Members
-
-        public void Deliver(IServiceBus bus, IEnvelope envelope, IMessage message)
+        public void Deliver(IServiceBus bus, IEnvelope envelope, T message)
         {
-            MessageContext<T> context = new MessageContext<T>(bus, envelope, (T) message);
+            MessageContext<T> context = new MessageContext<T>(bus, envelope, message);
 
             foreach (MessageConsumerCallbackItem<T> item in _callbacks)
             {
@@ -58,7 +53,12 @@ namespace MassTransit.ServiceBus
             }
         }
 
-        public bool MeetsCriteria(IMessage message)
+        public void Deliver(IServiceBus bus, IEnvelope envelope, IMessage message)
+        {
+            Deliver(bus, envelope, (T) message);
+        }
+
+        public bool IsHandled(T message)
         {
             foreach (MessageConsumerCallbackItem<T> item in _callbacks)
             {
@@ -67,18 +67,23 @@ namespace MassTransit.ServiceBus
 
                 try
                 {
-                    if (item.Condition((T) message))
+                    if (item.Condition(message))
                         return true;
                 }
                 catch (Exception ex)
                 {
                     throw new MeetsCriteriaException<T>(item,
-                                                        "There was an exception in the MessageConsumer.IsHandled",
-                                                        ex);
+                        "There was an exception in the MessageConsumer.IsHandled",
+                        ex);
                 }
             }
 
             return false;
+        }
+
+        public bool IsHandled(IMessage message)
+        {
+            return IsHandled((T) message);
         }
 
         #endregion
