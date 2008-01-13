@@ -86,7 +86,7 @@ namespace MassTransit.ServiceBus
         /// </summary>
         public IMessage[] Messages
         {
-            get { return _messages; }
+            get { return _messages ?? new IMessage[0]; }
             set { _messages = value; }
         }
 
