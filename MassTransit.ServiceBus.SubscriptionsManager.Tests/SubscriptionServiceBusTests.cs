@@ -13,7 +13,6 @@ namespace MassTransit.ServiceBus.SubscriptionsManager.Tests
         public void How_does_the_ServiceBus_start_up()
         {
             MockRepository  mocks = new MockRepository();
-            ISubscriptionRepository sr = mocks.CreateMock<ISubscriptionRepository>();
             ISubscriptionStorage ss = mocks.CreateMock<ISubscriptionStorage>();
             IEndpoint ep = mocks.CreateMock<IEndpoint>();
 
@@ -26,7 +25,7 @@ namespace MassTransit.ServiceBus.SubscriptionsManager.Tests
             }
             using(mocks.Playback())
             {
-                SubscriptionServiceBus bus = new SubscriptionServiceBus(ep, ss, sr);
+                SubscriptionServiceBus bus = new SubscriptionServiceBus(ep, ss);
             }
         }
 
@@ -55,7 +54,7 @@ namespace MassTransit.ServiceBus.SubscriptionsManager.Tests
             }
             using (mocks.Playback())
             {
-                SubscriptionServiceBus bus = new SubscriptionServiceBus(ep, ss, sr);               
+                SubscriptionServiceBus bus = new SubscriptionServiceBus(ep, ss);               
             }
         }
     }

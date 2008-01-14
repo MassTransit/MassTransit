@@ -5,7 +5,7 @@ namespace MassTransit.ServiceBus.SubscriptionsManager
     using NHibernate.Expression;
     using System.Collections.Generic;
 
-    public class SubscriptionRepository : ISubscriptionRepository
+    public class SubscriptionRepository : ISubscriptionStorage
     {
         private ISessionFactory _factory;
 
@@ -84,6 +84,35 @@ namespace MassTransit.ServiceBus.SubscriptionsManager
 
                 return new List<Subscription>(crit.List<Subscription>());
             }
+        }
+
+
+        public IList<Uri> List(string messageName)
+        {
+            throw new NotImplementedException();
+        }
+
+        IList<Uri> ISubscriptionStorage.List()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Add(string messageName, Uri endpoint)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Remove(string messageName, Uri endpoint)
+        {
+            throw new NotImplementedException();
+        }
+
+        public event EventHandler<SubscriptionChangedEventArgs> SubscriptionChanged;
+
+
+        public void Dispose()
+        {
+            throw new NotImplementedException();
         }
     }
 }

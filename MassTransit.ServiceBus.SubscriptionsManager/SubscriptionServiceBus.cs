@@ -3,17 +3,11 @@ using MassTransit.ServiceBus.Subscriptions.Messages;
 
 namespace MassTransit.ServiceBus.SubscriptionsManager
 {
-    
-
     public class SubscriptionServiceBus : ServiceBus
     {
-        private ISubscriptionRepository _repository;
-
-
-        public SubscriptionServiceBus(IEndpoint endpoint, ISubscriptionStorage subscriptionStorage, ISubscriptionRepository repository)
+        public SubscriptionServiceBus(IEndpoint endpoint, ISubscriptionStorage subscriptionStorage)
             : base(endpoint, subscriptionStorage)
         {
-            _repository = repository;
             this.Subscribe<SubscriptionChange>(OnSubscriptionMessageReceived);
             this.Subscribe<RequestCacheUpdate>(OnRequestCacheUpdate);
             this.Subscribe<RequestCacheUpdateForMessage>(OnRequestSubscribersForMessage);
@@ -28,10 +22,10 @@ namespace MassTransit.ServiceBus.SubscriptionsManager
             switch(ctx.Message.ChangeType)
             {
                 case SubscriptionChange.SubscriptionChangeType.Add:
-                    _repository.Add(SubscriptionMapper.MapFrom(ctx.Message));
+                    base.SubscriptionStorage.Add(ctx.Message.MessageName, ctx.Message.Address);
                     break;
                 case SubscriptionChange.SubscriptionChangeType.Remove:
-                    _repository.Deactivate(SubscriptionMapper.MapFrom(ctx.Message));
+                    base.SubscriptionStorage.Remove(ctx.Message.MessageName, ctx.Message.Address);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -46,7 +40,7 @@ namespace MassTransit.ServiceBus.SubscriptionsManager
             RegisterForUpdates(ctx.Envelope);
 
             //return a complete list of SubscriptionMessages
-            ctx.Reply(new CacheUpdateResponse(SubscriptionMapper.MapFrom(_repository.List())));
+            //ctx.Reply(new CacheUpdateResponse(base.SubscriptionStorage.List()));
         }
 
 
@@ -55,13 +49,13 @@ namespace MassTransit.ServiceBus.SubscriptionsManager
             RegisterForUpdates(ctx.Envelope);
 
             //return a complete list of SubscriptionMessages
-            ctx.Reply(new CacheUpdateResponse(SubscriptionMapper.MapFrom(_repository.List(ctx.Message.Message))));
+            //ctx.Reply(new CacheUpdateResponse(this.SubscriptionStorage.List(ctx.Message.MessageName)));
         }
 
         public void RegisterForUpdates(IEnvelope env)
         {
             //This is basically setting anybody that talks to us up for updates
-            this._repository.Add(new Subscription(env.ReturnEndpoint.Uri.AbsolutePath, typeof(CacheUpdateResponse).FullName));
+            base.SubscriptionStorage.Add(typeof(CacheUpdateResponse).FullName, env.ReturnEndpoint.Uri);
         }
     }
 }

@@ -5,18 +5,22 @@ namespace MassTransit.ServiceBus.Subscriptions.Messages
     [Serializable]
     public class RequestCacheUpdateForMessage : IMessage
     {
-        private Type _message;
+        private string _messageName;
 
 
         public RequestCacheUpdateForMessage(Type message)
         {
-            _message = message;
+            _messageName = message.FullName;
         }
 
-
-        public Type Message
+        public RequestCacheUpdateForMessage(string messageName)
         {
-            get { return _message; }
+            _messageName = messageName;
+        }
+
+        public string MessageName
+        {
+            get { return _messageName; }
         }
     }
 }
