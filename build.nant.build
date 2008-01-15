@@ -44,7 +44,7 @@
 	<target name="common.asminfo" depends="common.find-svninfo">
 	
 		<property name="version.rev" value="${svn.revision}"  />
-		<property name="version.build" value="0" overwrite="false" />
+		<property name="version.build" value="${build.number}" />
 		
 		<asminfo output="SolutionVersion.cs" language="CSharp">
 			<imports>
