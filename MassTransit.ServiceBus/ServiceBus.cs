@@ -75,20 +75,13 @@ namespace MassTransit.ServiceBus
             bool result = false;
             try
             {
-                if (envelope.CorrelationId == MessageId.Empty)
+                if(_asyncReplyDispatcher.Exists(envelope.CorrelationId))
                 {
-                    result = IsTheBusInterested(envelope);
+                    result = true;
                 }
                 else
                 {
-                    if (_asyncReplyDispatcher.Exists(envelope.CorrelationId))
-                    {
-                        result = true;
-                    }
-                    else
-                    {
-                        result = IsTheBusInterested(envelope);
-                    }
+                    result = IsTheBusInterested(envelope);
                 }
             }
             catch (Exception ex)
