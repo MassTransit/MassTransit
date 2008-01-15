@@ -12,11 +12,6 @@ namespace MassTransit.ServiceBus.Subscriptions.Messages
         private Subscription _subscription;
         private SubscriptionChangeType _changeType;
 
-
-        public SubscriptionChange(Type messageType, Uri address, SubscriptionChangeType changeType) : this(messageType.FullName, address, changeType)
-        {
-        }
-
         public SubscriptionChange(string messageName, Uri address, SubscriptionChangeType changeType): this(new Subscription(address, messageName), changeType)
         {
         }

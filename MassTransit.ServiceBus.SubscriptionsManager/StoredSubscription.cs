@@ -1,6 +1,6 @@
 namespace MassTransit.ServiceBus.SubscriptionsManager
 {
-    public class Subscription
+    public class StoredSubscription
     {
         private int _id;
         private string _address;
@@ -10,11 +10,11 @@ namespace MassTransit.ServiceBus.SubscriptionsManager
         /// <summary>
         /// For NHibernate
         /// </summary>
-        private Subscription()
+        private StoredSubscription()
         {
         }
 
-        public Subscription(string address, string message)
+        public StoredSubscription(string address, string message)
         {
             _id = 0;
             _address = address;

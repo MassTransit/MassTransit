@@ -1,6 +1,8 @@
 namespace MassTransit.ServiceBus.SubscriptionsManager.Tests
 {
+    using System;
     using System.Data.SqlClient;
+    using MassTransit.ServiceBus.Subscriptions.Messages;
     using NHibernate;
     using NHibernate.Cfg;
     using NUnit.Framework;
@@ -11,6 +13,7 @@ namespace MassTransit.ServiceBus.SubscriptionsManager.Tests
     {
         SubscriptionRepository repo;
         private readonly string connectionString = "Server=localhost;initial catalog=test;Trusted_Connection=yes";
+        private SubscriptionServiceBus bus;
 
         [SetUp]
         public void Setup()
@@ -26,45 +29,54 @@ namespace MassTransit.ServiceBus.SubscriptionsManager.Tests
             ISessionFactory sessFactory = config.BuildSessionFactory();
 
             repo = new SubscriptionRepository(sessFactory);
+
+            bus = new SubscriptionServiceBus(new MessageQueueEndpoint("msmq://localhost/test_endpoint"), repo);
         }
 
         [TearDown]
         public void Teardown()
         {
             repo = null;
-            CleanUp();
+            bus.Dispose();
+            //CleanUp();
         }
 
         [Test]
         public void Add_Subscription_to_the_database()
         {
-            repo.Add(new Subscription("a","m"));
+            repo.Add("a", new Uri("msmq://localhost/test_client"));
             AssertSubscriptionInDatabase();
         }
 
         [Test]
         public void Remove_Subscription_From_the_Database()
         {
-            repo.Add(new Subscription("a", "m"));
+            repo.Add("a", new Uri("msmq://localhost/test_client"));
             AssertSubscriptionInDatabase();
 
-            repo.Deactivate(new Subscription("a", "m"));
+            repo.Remove("a", new Uri("msmq://localhost/test_client"));
             AssertSubscriptionInactive();
+        }
+
+        [Test]
+        public void Test_Receiving_By_Message()
+        {
+            bus.Send(new MessageQueueEndpoint("msmq://localhost/test_endpoint"), new SubscriptionChange(typeof(SubscriptionChange).FullName, new Uri("msmq://localhost/test_client"), SubscriptionChangeType.Add));
         }
 
         public void AssertSubscriptionInDatabase()
         {
-            Assert.AreEqual(1, ExecuteScalar("SELECT COUNT(*) FROM bus.Subscriptions"));
+            Assert.AreEqual(4, ExecuteScalar("SELECT COUNT(*) FROM bus.Subscriptions"), "Subscription count didn't match");
         }
 
         public void AssertSubscriptionActive()
         {
-            Assert.AreEqual(true, ExecuteScalar("SELECT IsActive FROM bus.Subscriptions"));
+            Assert.AreEqual(true, ExecuteScalar("SELECT IsActive FROM bus.Subscriptions WHERE Message='a'"), "Subscription was not active");
         }
 
         public void AssertSubscriptionInactive()
         {
-            Assert.AreEqual(false, ExecuteScalar("SELECT IsActive FROM bus.Subscriptions"));
+            Assert.AreEqual(false, ExecuteScalar("SELECT IsActive FROM bus.Subscriptions WHERE Message='a'"), "Subscription was active");
         }
 
         public void CleanUp()

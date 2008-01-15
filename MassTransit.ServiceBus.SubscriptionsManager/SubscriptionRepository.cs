@@ -4,6 +4,7 @@ namespace MassTransit.ServiceBus.SubscriptionsManager
     using NHibernate;
     using NHibernate.Expression;
     using System.Collections.Generic;
+    using Subscriptions;
 
     public class SubscriptionRepository : ISubscriptionStorage
     {
@@ -15,20 +16,21 @@ namespace MassTransit.ServiceBus.SubscriptionsManager
             _factory = factory;
         }
 
-        public void Add(Subscription subscription)
+        public void Add(string messageName, Uri endpoint)
         {
-            using(ISession sess = _factory.OpenSession())
-            using(ITransaction tr = sess.BeginTransaction())
+            using (ISession sess = _factory.OpenSession())
+            using (ITransaction tr = sess.BeginTransaction())
             {
-                ICriteria crit = sess.CreateCriteria(typeof(Subscription));
+                ICriteria crit = sess.CreateCriteria(typeof(StoredSubscription));
 
-                crit.Add(Expression.Eq("Address", subscription.Address))
-                    .Add(Expression.Eq("Message", subscription.Message));
+                crit.Add(Expression.Eq("Address", endpoint.ToString()))
+                    .Add(Expression.Eq("Message", messageName));
 
-                Subscription obj = crit.UniqueResult<Subscription>();
-                if(obj == null)
+                StoredSubscription obj = crit.UniqueResult<StoredSubscription>();
+
+                if (obj == null)
                 {
-                    obj = subscription;
+                    obj = new StoredSubscription(endpoint.ToString(), messageName);
                     sess.Save(obj);
                 }
                 else
@@ -38,81 +40,61 @@ namespace MassTransit.ServiceBus.SubscriptionsManager
                 }
 
 
-                tr.Commit();                
-            }
-        }
-
-        public void Deactivate(Subscription subscription)
-        {
-            using(ISession sess = _factory.OpenSession())
-            using(ITransaction tr = sess.BeginTransaction())
-            {
-                ICriteria crit = sess.CreateCriteria(typeof(Subscription));
-                
-                crit.Add(Expression.Eq("Address", subscription.Address))
-                    .Add(Expression.Eq("Message", subscription.Message));
-                
-                Subscription obj = crit.UniqueResult<Subscription>();
-                if(obj != null)
-                {
-                    obj.IsActive = false;
-
-                    sess.Update(obj);    
-                }
-                
                 tr.Commit();
             }
-            
-        }
-
-        public List<Subscription> List()
-        {
-            using (ISession sess = _factory.OpenSession())
-            {
-                ICriteria crit = sess.CreateCriteria(typeof (Subscription));
-
-                return new List<Subscription>(crit.List<Subscription>());
-            }
-        }
-
-        public List<Subscription> List(Type message)
-        {
-            using (ISession sess = _factory.OpenSession())
-            {
-                ICriteria crit = sess.CreateCriteria(typeof(Subscription));
-                crit.Add(Expression.Eq("Message", message.FullName));
-
-                return new List<Subscription>(crit.List<Subscription>());
-            }
-        }
-
-
-        public IList<Subscriptions.Subscription> List(string messageName)
-        {
-            throw new NotImplementedException();
-        }
-
-        IList<Subscriptions.Subscription> ISubscriptionStorage.List()
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Add(string messageName, Uri endpoint)
-        {
-            throw new NotImplementedException();
         }
 
         public void Remove(string messageName, Uri endpoint)
         {
-            throw new NotImplementedException();
+            using (ISession sess = _factory.OpenSession())
+            using (ITransaction tr = sess.BeginTransaction())
+            {
+                ICriteria crit = sess.CreateCriteria(typeof(StoredSubscription));
+
+                crit.Add(Expression.Eq("Address", endpoint.ToString()))
+                    .Add(Expression.Eq("Message", messageName));
+
+                StoredSubscription obj = crit.UniqueResult<StoredSubscription>();
+                if (obj != null)
+                {
+                    obj.IsActive = false;
+
+                    sess.Update(obj);
+                }
+
+                tr.Commit();
+            }
         }
+
+
+        public IList<Subscription> List()
+        {
+            using (ISession sess = _factory.OpenSession())
+            {
+                ICriteria crit = sess.CreateCriteria(typeof (StoredSubscription));
+
+                return SubscriptionMapper.MapFrom(crit.List<StoredSubscription>());
+            }
+        }
+
+        public IList<Subscription> List(string messageName)
+        {
+            using (ISession sess = _factory.OpenSession())
+            {
+                ICriteria crit = sess.CreateCriteria(typeof(StoredSubscription));
+                crit.Add(Expression.Eq("Message", messageName));
+
+                return SubscriptionMapper.MapFrom(crit.List<StoredSubscription>());
+            }
+        }
+
 
         public event EventHandler<SubscriptionChangedEventArgs> SubscriptionChanged;
 
 
         public void Dispose()
         {
-            throw new NotImplementedException();
+            _factory.Dispose();
         }
     }
 }

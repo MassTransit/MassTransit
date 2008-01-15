@@ -9,9 +9,17 @@ namespace MassTransit.ServiceBus.SubscriptionsManager
 
         protected override void OnStart(string[] args)
         {
+            base.OnStart(args);
+
             ISessionFactory sessionFactory = null;
             bus = new SubscriptionServiceBus(new MessageQueueEndpoint("msmq://localhost/subscriptionMgr"), new SubscriptionRepository(sessionFactory));
-            base.OnStart(args);
+            
+        }
+
+        protected override void OnStop()
+        {
+            base.OnStop();
+            bus.Dispose();
         }
     }
 }

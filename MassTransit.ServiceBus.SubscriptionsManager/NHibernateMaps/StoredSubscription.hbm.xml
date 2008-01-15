@@ -4,7 +4,7 @@
                    assembly="MassTransit.ServiceBus.SubscriptionsManager"
                    namespace="MassTransit.ServiceBus.SubscriptionsManager">
 
-  <class name="Subscription" table="Subscriptions" lazy="false">
+  <class name="StoredSubscription" table="Subscriptions" lazy="false">
     
     <id name="Id" column="SubscriptionId" type="Int32" access="field.camelcase-underscore">
       <generator class="native"/>

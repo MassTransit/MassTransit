@@ -3,26 +3,29 @@ namespace MassTransit.ServiceBus.SubscriptionsManager
     using System;
     using System.Collections.Generic;
     using MassTransit.ServiceBus.Subscriptions.Messages;
+    using Subscriptions;
 
     public class SubscriptionMapper
     {
-        public static Subscription MapFrom(SubscriptionChange message)
+        public static StoredSubscription MapFrom(SubscriptionChange message)
         {
-            return new Subscription(message.Subscription.Address.AbsolutePath, message.Subscription.MessageName);
+            return new StoredSubscription(message.Subscription.Address.ToString(), message.Subscription.MessageName);
         }
 
-        public static SubscriptionChange MapFrom(Subscription subscription)
+        public static Subscription MapFrom(StoredSubscription storedSubscription)
         {
-            return new SubscriptionChange(Type.GetType(subscription.Message), new Uri(subscription.Address), SubscriptionChangeType.Add);
+            return new Subscription(new Uri(storedSubscription.Address), storedSubscription.Message);
         }
 
-        public static List<SubscriptionChange> MapFrom(List<Subscription> subscriptions)
+        public static List<Subscription> MapFrom(IList<StoredSubscription> subscriptions)
         {
-            List<SubscriptionChange> result = new List<SubscriptionChange>();
-            subscriptions.ForEach(delegate(Subscription subscription)
-                                     {
-                                         result.Add(MapFrom(subscription));
-                                     });
+            List<Subscription> result = new List<Subscription>();
+            
+            foreach (StoredSubscription storedSubscription in subscriptions)
+            {
+                result.Add(MapFrom(storedSubscription));
+            }
+
             return result;
         }
     }
