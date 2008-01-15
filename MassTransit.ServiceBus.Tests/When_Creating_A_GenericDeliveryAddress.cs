@@ -12,7 +12,7 @@ namespace MassTransit.ServiceBus.Tests
         public void AutoCast_From_String()
         {
             MessageQueueEndpoint addr = @"msmq://localhost/test_endpoint";
-            Assert.That(addr.Uri.AbsoluteUri, Is.EqualTo("msmq://localhost/test_endpoint"));
+			Assert.That(addr.Uri.AbsoluteUri, Is.EqualTo("msmq://" + Environment.MachineName.ToLowerInvariant() + "/test_endpoint"));
         }
     }
 }

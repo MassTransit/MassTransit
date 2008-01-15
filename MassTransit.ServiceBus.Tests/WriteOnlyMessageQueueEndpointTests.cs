@@ -26,7 +26,7 @@ namespace MassTransit.ServiceBus.Tests
         [Test]
         public void Address_Is_Right()
         {
-            Assert.That(endpoint.Uri.AbsoluteUri, Is.EqualTo("msmq://localhost/test_servicebus_poison"));
+            Assert.That(endpoint.Uri.AbsoluteUri, Is.EqualTo("msmq://" + Environment.MachineName.ToLowerInvariant() + "/test_servicebus_poison"));
         }
 
         [Test]
