@@ -77,24 +77,18 @@ namespace MassTransit.ServiceBus
             {
                 if (envelope.CorrelationId == MessageId.Empty)
                 {
-                    foreach (IMessage message in envelope.Messages)
-                    {
-                        if (_consumers.ContainsKey(message.GetType()))
-                        {
-                            IMessageConsumer receivingConsumer = _consumers[message.GetType()];
-
-                            if (receivingConsumer.IsHandled(message))
-                            {
-                                result = true;
-                                break;
-                            }
-                        }
-                    }
+                    result = IsTheBusInterested(envelope);
                 }
                 else
                 {
                     if (_asyncReplyDispatcher.Exists(envelope.CorrelationId))
+                    {
                         result = true;
+                    }
+                    else
+                    {
+                        result = IsTheBusInterested(envelope);
+                    }
                 }
             }
             catch (Exception ex)
@@ -105,6 +99,26 @@ namespace MassTransit.ServiceBus
                 throw;
             }
 
+            return result;
+        }
+
+        private bool IsTheBusInterested(IEnvelope envelope)
+        {
+            bool result = false;
+
+            foreach (IMessage message in envelope.Messages)
+            {
+                if (_consumers.ContainsKey(message.GetType()))
+                {
+                    IMessageConsumer receivingConsumer = _consumers[message.GetType()];
+
+                    if (receivingConsumer.IsHandled(message))
+                    {
+                        result = true;
+                        break;
+                    }
+                }
+            }
             return result;
         }
 
