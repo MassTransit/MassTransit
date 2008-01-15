@@ -17,7 +17,7 @@ namespace MassTransit.ServiceBus.Tests
 
             IEnvelope e = new Envelope(returnTo);
 
-            Assert.That(e.ReturnEndpoint.Uri.AbsoluteUri, Is.EqualTo("msmq://localhost/test_endpoint"));
+			Assert.That(e.ReturnEndpoint.Uri.AbsoluteUri, Is.EqualTo("msmq://" + Environment.MachineName.ToLowerInvariant() + "/test_endpoint"));
         }
 
         [Test]
