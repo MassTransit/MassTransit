@@ -3,6 +3,9 @@ using MassTransit.ServiceBus.Subscriptions.Messages;
 
 namespace MassTransit.ServiceBus.SubscriptionsManager
 {
+    using System.Collections.Generic;
+    using Subscriptions;
+
     public class SubscriptionServiceBus : ServiceBus
     {
         public SubscriptionServiceBus(IEndpoint endpoint, ISubscriptionStorage subscriptionStorage)
@@ -16,7 +19,7 @@ namespace MassTransit.ServiceBus.SubscriptionsManager
 
         public void OnSubscriptionMessageReceived(MessageContext<SubscriptionChange> ctx)
         {
-            RegisterForUpdates(ctx.Envelope);
+            RegisterSenderForUpdates(ctx.Envelope);
 
             // Add / Remove Subscription to Repository
             switch(ctx.Message.ChangeType)
@@ -37,22 +40,32 @@ namespace MassTransit.ServiceBus.SubscriptionsManager
 
         public void OnRequestCacheUpdate(MessageContext<RequestCacheUpdate> ctx)
         {
-            RegisterForUpdates(ctx.Envelope);
+            RegisterSenderForUpdates(ctx.Envelope);
 
             //return a complete list of SubscriptionMessages
-            //ctx.Reply(new CacheUpdateResponse(base.SubscriptionStorage.List()));
+            List<SubscriptionChange> result = new List<SubscriptionChange>();
+            foreach (Subscription subscription in base.SubscriptionStorage.List())
+            {
+                result.Add(new SubscriptionChange(subscription, SubscriptionChangeType.Add));
+            }
+            ctx.Reply(new CacheUpdateResponse(result));
         }
 
 
         public void OnRequestSubscribersForMessage(MessageContext<RequestCacheUpdateForMessage> ctx)
         {
-            RegisterForUpdates(ctx.Envelope);
+            RegisterSenderForUpdates(ctx.Envelope);
 
             //return a complete list of SubscriptionMessages
-            //ctx.Reply(new CacheUpdateResponse(this.SubscriptionStorage.List(ctx.Message.MessageName)));
+            List<SubscriptionChange> result = new List<SubscriptionChange>();
+            foreach (Subscription subscription in base.SubscriptionStorage.List(ctx.Message.MessageName))
+            {
+                result.Add(new SubscriptionChange(subscription, SubscriptionChangeType.Add));
+            }
+            ctx.Reply(new CacheUpdateResponse(result));
         }
 
-        public void RegisterForUpdates(IEnvelope env)
+        public void RegisterSenderForUpdates(IEnvelope env)
         {
             //This is basically setting anybody that talks to us up for updates
             base.SubscriptionStorage.Add(typeof(CacheUpdateResponse).FullName, env.ReturnEndpoint.Uri);
