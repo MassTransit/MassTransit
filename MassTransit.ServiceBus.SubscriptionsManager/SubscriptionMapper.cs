@@ -8,12 +8,12 @@ namespace MassTransit.ServiceBus.SubscriptionsManager
     {
         public static Subscription MapFrom(SubscriptionChange message)
         {
-            return new Subscription(message.Address.AbsolutePath, message.MessageName);
+            return new Subscription(message.Subscription.Address.AbsolutePath, message.Subscription.MessageName);
         }
 
         public static SubscriptionChange MapFrom(Subscription subscription)
         {
-            return new SubscriptionChange(Type.GetType(subscription.Message), new Uri(subscription.Address), SubscriptionChange.SubscriptionChangeType.Add);
+            return new SubscriptionChange(Type.GetType(subscription.Message), new Uri(subscription.Address), SubscriptionChangeType.Add);
         }
 
         public static List<SubscriptionChange> MapFrom(List<Subscription> subscriptions)

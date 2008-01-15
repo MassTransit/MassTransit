@@ -53,9 +53,9 @@ namespace MassTransit.ServiceBus.Tests
             cache.SubscriptionChanged += delegate(object sender, SubscriptionChangedEventArgs e)
                                              {
                                                  wasFired = true;
-                                                 Assert.That(e.Change.Address, Is.EqualTo(sendTo));
-                                                 Assert.That(e.Change.ChangeType, Is.EqualTo(SubscriptionChange.SubscriptionChangeType.Add));
-                                                 Assert.That(e.Change.MessageName, Is.EqualTo(typeof(PingMessage).FullName));
+                                                 Assert.That(e.Change.Subscription.Address, Is.EqualTo(sendTo));
+                                                 Assert.That(e.Change.ChangeType, Is.EqualTo(SubscriptionChangeType.Add));
+                                                 Assert.That(e.Change.Subscription.MessageName, Is.EqualTo(typeof(PingMessage).FullName));
                                              };
             cache.Add(typeof(PingMessage).FullName, sendTo);
 
@@ -88,9 +88,9 @@ namespace MassTransit.ServiceBus.Tests
             cache.SubscriptionChanged += delegate(object sender, SubscriptionChangedEventArgs e)
                                              {
                                                  wasFired = true;
-                                                 Assert.That(e.Change.Address, Is.EqualTo(sendTo));
-                                                 Assert.That(e.Change.ChangeType, Is.EqualTo(SubscriptionChange.SubscriptionChangeType.Remove));
-                                                 Assert.That(e.Change.MessageName, Is.EqualTo(typeof(PingMessage).FullName));
+                                                 Assert.That(e.Change.Subscription.Address, Is.EqualTo(sendTo));
+                                                 Assert.That(e.Change.ChangeType, Is.EqualTo(SubscriptionChangeType.Remove));
+                                                 Assert.That(e.Change.Subscription.MessageName, Is.EqualTo(typeof(PingMessage).FullName));
                                              };
             cache.Remove(typeof(PingMessage).FullName, sendTo);
             

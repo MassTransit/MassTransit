@@ -8,6 +8,7 @@ namespace MassTransit.ServiceBus.Subscriptions
     public class LocalSubscriptionCache : 
         ISubscriptionStorage
     {
+        //<messageName, address>
         private readonly Dictionary<string, List<SubscriptionCacheEntry>> _messageTypeSubscriptions =
             new Dictionary<string, List<SubscriptionCacheEntry>>();
         private static readonly ILog _log = LogManager.GetLogger(typeof(LocalSubscriptionCache));
@@ -20,26 +21,26 @@ namespace MassTransit.ServiceBus.Subscriptions
 
         public event EventHandler<SubscriptionChangedEventArgs> SubscriptionChanged;
 
-        public IList<Uri> List(string messageName)
+        public IList<Subscription> List(string messageName)
         {
-            List<Uri> result = new List<Uri>();
+            List<Subscription> result = new List<Subscription>();
             if (_messageTypeSubscriptions.ContainsKey(messageName))
             {
                 _messageTypeSubscriptions[messageName].ForEach(
-                    delegate(SubscriptionCacheEntry entry) { result.Add(entry.Endpoint); });
+                    delegate(SubscriptionCacheEntry entry) { result.Add(new Subscription(entry.Endpoint, messageName)); });
             }
 
             return result;
         }
 
 
-        public IList<Uri> List()
+        public IList<Subscription> List()
         {
-            List<Uri> result = new List<Uri>();
-            
-            foreach (List<SubscriptionCacheEntry> list in _messageTypeSubscriptions.Values)
+            List<Subscription> result = new List<Subscription>();
+
+            foreach (KeyValuePair<string, List<SubscriptionCacheEntry>> pair in _messageTypeSubscriptions)
             {
-                list.ForEach(delegate(SubscriptionCacheEntry e) { result.Add(e.Endpoint);});
+                pair.Value.ForEach(delegate(SubscriptionCacheEntry e) { result.Add(new Subscription(e.Endpoint, pair.Key)); });
             }
 
             return result;
@@ -50,14 +51,14 @@ namespace MassTransit.ServiceBus.Subscriptions
             InternalAdd(messageName, endpoint);
             if(_log.IsInfoEnabled)
                 _log.InfoFormat("Sending Subscription Update ({0}, {1}) to Master Repository", messageName, endpoint);
-            OnChange(new SubscriptionChange(messageName, endpoint, SubscriptionChange.SubscriptionChangeType.Add));
+            OnChange(new SubscriptionChange(messageName, endpoint, SubscriptionChangeType.Add));
         }
         public void Remove(string messageName, Uri endpoint)
         {
             InternalRemove(messageName, endpoint);
             if (_log.IsInfoEnabled)
                 _log.InfoFormat("Sending Subscription Update ({0}, {1}) to Master Repository", messageName, endpoint);
-			OnChange(new SubscriptionChange(messageName, endpoint, SubscriptionChange.SubscriptionChangeType.Remove));
+			OnChange(new SubscriptionChange(messageName, endpoint, SubscriptionChangeType.Remove));
         }
 
         public void Dispose()
@@ -72,11 +73,11 @@ namespace MassTransit.ServiceBus.Subscriptions
                                                   {
                                                       switch(msg.ChangeType)
                                                       {
-                                                          case SubscriptionChange.SubscriptionChangeType.Add:
-                                                              InternalAdd(msg.MessageName, msg.Address);
+                                                          case SubscriptionChangeType.Add:
+                                                              InternalAdd(msg.Subscription.MessageName, msg.Subscription.Address);
                                                               break;
-                                                          case SubscriptionChange.SubscriptionChangeType.Remove:
-                                                              InternalRemove(msg.MessageName, msg.Address);
+                                                          case SubscriptionChangeType.Remove:
+                                                              InternalRemove(msg.Subscription.MessageName, msg.Subscription.Address);
                                                               break;
                                                           default:
                                                               throw new ArgumentOutOfRangeException();
