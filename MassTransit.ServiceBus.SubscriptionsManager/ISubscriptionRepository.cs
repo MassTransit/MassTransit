@@ -5,9 +5,9 @@ namespace MassTransit.ServiceBus.SubscriptionsManager
 
     public interface ISubscriptionRepository
     {
-        void Add(Subscription subscription);
-        void Deactivate(Subscription subscription);
-        List<Subscription> List();
-        List<Subscription> List(Type message);
+        void Add(StoredSubscription storedSubscription);
+        void Deactivate(StoredSubscription storedSubscription);
+        List<StoredSubscription> List();
+        List<StoredSubscription> List(Type message);
     }
 }

@@ -48,7 +48,7 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Subscription.cs" />
+    <Compile Include="StoredSubscription.cs" />
     <Compile Include="SubscriptionMapper.cs" />
     <Compile Include="SubscriptionRepository.cs" />
     <Compile Include="SubscriptionServiceBus.cs" />
@@ -63,7 +63,7 @@
     <None Include="Subscriptions.sql" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="NHibernateMaps\Subscription.hbm.xml" />
+    <EmbeddedResource Include="NHibernateMaps\StoredSubscription.hbm.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

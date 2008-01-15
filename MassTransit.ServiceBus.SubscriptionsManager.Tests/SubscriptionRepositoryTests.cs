@@ -1,5 +1,6 @@
 namespace MassTransit.ServiceBus.SubscriptionsManager.Tests
 {
+    using System;
     using NHibernate;
     using NUnit.Framework;
     using Rhino.Mocks;
@@ -32,7 +33,7 @@ namespace MassTransit.ServiceBus.SubscriptionsManager.Tests
         {
             ISession sess = mocks.CreateMock<ISession>();
             ICriteria crit = mocks.CreateMock<ICriteria>();
-            Subscription subs = new Subscription("a", "m");
+            StoredSubscription subs = new StoredSubscription("a", "m");
 
             using(mocks.Record())
             {
@@ -40,14 +41,14 @@ namespace MassTransit.ServiceBus.SubscriptionsManager.Tests
                 Expect.Call(sess.CreateCriteria(null)).Return(crit).IgnoreArguments();
                 Expect.Call(crit.Add(null)).Return(crit).IgnoreArguments();
                 Expect.Call(crit.Add(null)).Return(crit).IgnoreArguments();
-                Expect.Call(crit.UniqueResult<Subscription>()).Return(null);
+                Expect.Call(crit.UniqueResult<StoredSubscription>()).Return(null);
                 Expect.Call(sess.Save(null)).Return(subs).IgnoreArguments();
 
                 sess.Dispose();
             }
             using (mocks.Playback())
             {
-                repo.Add(new Subscription("a", "m"));
+                repo.Add("a", new Uri("msmq://localhost/test_client"));
             }
         }
 
@@ -56,21 +57,21 @@ namespace MassTransit.ServiceBus.SubscriptionsManager.Tests
         {
             ISession sess = mocks.CreateMock<ISession>();
             ICriteria crit = mocks.CreateMock<ICriteria>();
-            Subscription subs = new Subscription("a","m");
+            StoredSubscription subs = new StoredSubscription("a","m");
             using (mocks.Record())
             {
                 Expect.Call(mockSessionFactory.OpenSession()).Return(sess);
                 Expect.Call(sess.CreateCriteria(null)).Return(crit).IgnoreArguments();
                 Expect.Call(crit.Add(null)).Return(crit).IgnoreArguments();
                 Expect.Call(crit.Add(null)).Return(crit).IgnoreArguments();
-                Expect.Call(crit.UniqueResult<Subscription>()).Return(subs);
+                Expect.Call(crit.UniqueResult<StoredSubscription>()).Return(subs);
                 sess.Update(subs);
 
                 sess.Dispose();
             }
             using (mocks.Playback())
             {
-                repo.Add(subs);
+                repo.Add("a", new Uri("msmq://localhost/test_client"));
             }
         }
 
@@ -79,7 +80,7 @@ namespace MassTransit.ServiceBus.SubscriptionsManager.Tests
         {
             ISession sess = mocks.CreateMock<ISession>();
             ICriteria crit = mocks.CreateMock<ICriteria>();
-            Subscription subs = new Subscription("a", "m");
+            StoredSubscription subs = new StoredSubscription("a", "m");
 
             using (mocks.Record())
             {
@@ -87,13 +88,13 @@ namespace MassTransit.ServiceBus.SubscriptionsManager.Tests
                 Expect.Call(sess.CreateCriteria(null)).Return(crit).IgnoreArguments();
                 Expect.Call(crit.Add(null)).Return(crit).IgnoreArguments();
                 Expect.Call(crit.Add(null)).Return(crit).IgnoreArguments();
-                Expect.Call(crit.UniqueResult<Subscription>()).Return(null);
+                Expect.Call(crit.UniqueResult<StoredSubscription>()).Return(null);
 
                 sess.Dispose();
             }
             using (mocks.Playback())
             {
-                repo.Deactivate(new Subscription("a", "m"));
+                repo.Remove("a", new Uri("msmq://localhost/test_client"));
             }
         }
 
@@ -102,21 +103,21 @@ namespace MassTransit.ServiceBus.SubscriptionsManager.Tests
         {
             ISession sess = mocks.CreateMock<ISession>();
             ICriteria crit = mocks.CreateMock<ICriteria>();
-            Subscription subs = new Subscription("a", "m");
+            StoredSubscription subs = new StoredSubscription("a", "m");
             using (mocks.Record())
             {
                 Expect.Call(mockSessionFactory.OpenSession()).Return(sess);
                 Expect.Call(sess.CreateCriteria(null)).Return(crit).IgnoreArguments();
                 Expect.Call(crit.Add(null)).Return(crit).IgnoreArguments();
                 Expect.Call(crit.Add(null)).Return(crit).IgnoreArguments();
-                Expect.Call(crit.UniqueResult<Subscription>()).Return(subs);
+                Expect.Call(crit.UniqueResult<StoredSubscription>()).Return(subs);
                 sess.Update(subs);
 
                 sess.Dispose();
             }
             using (mocks.Playback())
             {
-                repo.Deactivate(subs);
+                repo.Remove("a", new Uri("msmq://localhost/test_client"));
             }
         }
     }
