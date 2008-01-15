@@ -126,7 +126,7 @@ namespace MassTransit.ServiceBus.Tests
                 if(inst.Equals(queuePath, StringComparison.InvariantCultureIgnoreCase))
                 {
                     cntr.InstanceName = inst;
-                    Assert.AreEqual(0.0f, cntr.NextValue());
+                    Assert.AreEqual(0.0f, cntr.NextValue(), "the queue should have been empty and wasn't");
                 }
             } 
         }

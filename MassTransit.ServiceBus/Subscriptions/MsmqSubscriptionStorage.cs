@@ -66,14 +66,19 @@ namespace MassTransit.ServiceBus.Subscriptions
             IMessage[] messages = _formatter.Deserialize(msg.BodyStream) as IMessage[];
             if (messages != null)
             {
-                foreach (SubscriptionChange subscriptionMessage in messages)
+                foreach (SubscriptionChange changeMsg in messages)
                 {
                     if (_log.IsDebugEnabled)
-                        _log.DebugFormat("Subscription Subscribe: {0} Message Type: {1} Mode: {2}", msg.ResponseQueue.Path, subscriptionMessage.Subscription.MessageName, subscriptionMessage.ChangeType.ToString());
+                        _log.DebugFormat("Subscription Subscribe: {0} Message Type: {1} Mode: {2}", msg.ResponseQueue.Path, changeMsg.Subscription.MessageName, changeMsg.ChangeType.ToString());
 
-                    if (subscriptionMessage.ChangeType == SubscriptionChangeType.Add) //would there ever be anything but?
+                    if (changeMsg.ChangeType == SubscriptionChangeType.Add) //would there ever be anything but?
                     {
-                        _subscriptionCache.Add(subscriptionMessage.Subscription.MessageName, subscriptionMessage.Subscription.Address);
+                        _subscriptionCache.Add(changeMsg.Subscription.MessageName, changeMsg.Subscription.Address);
+                    }
+                    else
+                    {
+                        _subscriptionCache.Remove(changeMsg.Subscription.MessageName, changeMsg.Subscription.Address);
+                        _storageQueue.ReceiveById(msg.Id); //rip out of the queue
                     }
                 }
             }

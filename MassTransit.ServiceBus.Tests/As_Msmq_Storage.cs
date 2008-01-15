@@ -1,6 +1,7 @@
 namespace MassTransit.ServiceBus.Tests
 {
     using System.Messaging;
+    using System.Threading;
     using MassTransit.ServiceBus.Subscriptions;
     using MassTransit.ServiceBus.Subscriptions.Messages;
     using NUnit.Framework;
@@ -38,15 +39,9 @@ namespace MassTransit.ServiceBus.Tests
             MsmqSubscriptionStorage storage = new MsmqSubscriptionStorage(nonExistentStorageEndpoint, cache);
         }
 
-        [Test, Ignore("Not Implemented, yet. ;)")]
-        public void How_Should_I_Handle_Transactions()
-        {
-        }
-
         [Test]
         public void I_Should_Work_When_Removing()
         {
-            //TODO: This is nasty
             IMessageQueueEndpoint storageEndpoint = base._serviceBusEndPoint;
             IMessageQueueEndpoint listenEndpoint = base._testEndPoint;
             IMessageQueueEndpoint subscriberEndpoint = base._remoteServiceBusEndPoint;
@@ -56,10 +51,10 @@ namespace MassTransit.ServiceBus.Tests
 
             storage.Add(typeof(PingMessage).FullName, subscriberEndpoint.Uri);
 
-            SubscriptionChange msg = new SubscriptionChange("", null, SubscriptionChangeType.Add);
-
+            Assert.AreEqual(1, storage.List().Count);
             storage.Remove(typeof(PingMessage).FullName, subscriberEndpoint.Uri);
-            
+            Assert.AreEqual(0, storage.List().Count);
+
             VerifyQueueIsEmpty(storageEndpoint.QueueName);
         }
 
