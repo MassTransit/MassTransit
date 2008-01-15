@@ -42,6 +42,9 @@ namespace MassTransit.ServiceBus
             }
             catch(MessageQueueException ex)
             {
+                if(_log.IsErrorEnabled)
+                    _log.Error("There is an issue with the queue " + endpoint.Uri, ex);
+
                 throw new EndpointException(endpoint, string.Format("There are issues with the queue '{0}'", endpoint.Uri), ex);
             }
             
