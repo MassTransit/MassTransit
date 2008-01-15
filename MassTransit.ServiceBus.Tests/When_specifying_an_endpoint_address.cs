@@ -38,8 +38,14 @@ namespace MassTransit.ServiceBus.Tests
 
             IMessageQueueEndpoint endpoint = new MessageQueueEndpoint(address);
 
-            Assert.That(endpoint.QueueName, Is.EqualTo(Environment.MachineName + @"\private$\test_endpoint"));
-            
+            Assert.That(endpoint.QueueName, Is.EqualTo(Environment.MachineName.ToLowerInvariant() + @"\private$\test_endpoint"));
+            Assert.That(endpoint.Uri.ToString(), Is.EqualTo("msmq://" + Environment.MachineName.ToLowerInvariant() + "/test_endpoint"));
+
+
+            IMessageQueueEndpoint endpoint2 = new MessageQueueEndpoint(new Uri(address));
+
+            Assert.That(endpoint2.QueueName, Is.EqualTo(Environment.MachineName.ToLowerInvariant() + @"\private$\test_endpoint"));
+            Assert.That(endpoint2.Uri.ToString(), Is.EqualTo("msmq://" + Environment.MachineName.ToLowerInvariant() + "/test_endpoint"));
         }
 
         [Test, ExpectedException(typeof(EndpointException))]

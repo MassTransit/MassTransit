@@ -24,7 +24,7 @@ namespace MassTransit.ServiceBus
 			string hostName = _uri.Host;
 			if (string.Compare(hostName, ".") == 0 || string.Compare(hostName, "localhost", true) == 0)
 			{
-				hostName = Environment.MachineName;
+				hostName = Environment.MachineName.ToLowerInvariant();
 			}
 
 			_queuePath = string.Format(@"{0}\private$\{1}", hostName, _uri.AbsolutePath.Substring(1));
@@ -42,10 +42,16 @@ namespace MassTransit.ServiceBus
 			{
 				throw new EndpointException(this, "Queue Endpoints can't have a child folder. Good: msmq://machinename/queue_name | Bad: msmq://machinename/queue_name/bad_form");
 			}
+
             string hostName = _uri.Host;
             if (string.Compare(hostName, ".") == 0 || string.Compare(hostName, "localhost", true) == 0)
             {
-                hostName = Environment.MachineName;
+                hostName = Environment.MachineName.ToLowerInvariant();
+            }
+            
+            if (string.Compare(_uri.Host, "localhost", true) == 0)
+            {
+                _uri = new Uri("msmq://" + Environment.MachineName + _uri.AbsolutePath);
             }
             _queuePath = string.Format(@"{0}\private$\{1}", hostName, _uri.AbsolutePath.Substring(1));
 		}

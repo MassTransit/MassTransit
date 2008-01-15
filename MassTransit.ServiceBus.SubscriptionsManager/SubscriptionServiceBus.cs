@@ -8,8 +8,8 @@ namespace MassTransit.ServiceBus.SubscriptionsManager
         public SubscriptionServiceBus(IEndpoint endpoint, ISubscriptionStorage subscriptionStorage)
             : base(endpoint, subscriptionStorage)
         {
-            this.Subscribe<SubscriptionChange>(OnSubscriptionMessageReceived);
             this.Subscribe<RequestCacheUpdate>(OnRequestCacheUpdate);
+            this.Subscribe<SubscriptionChange>(OnSubscriptionMessageReceived);
             this.Subscribe<RequestCacheUpdateForMessage>(OnRequestSubscribersForMessage);
         }
 
