@@ -1,8 +1,8 @@
 namespace MassTransit.ServiceBus.Tests
 {
-	using NUnit.Framework;
+    using System;
+    using NUnit.Framework;
     using Rhino.Mocks;
-    using Util;
 
     [TestFixture]
     public class MessageContext_Should_Help
@@ -12,7 +12,7 @@ namespace MassTransit.ServiceBus.Tests
         private IEndpoint mockBusEndpoint;
         private IEnvelope mockEnvelope;
         private IEndpoint mockPoisonEndpoint;
-        private IEndpoint mockEndpoint;
+        private IMessageQueueEndpoint mockEndpoint;
 
         private PingMessage requestMessage = new PingMessage();
         private PongMessage replyMessage = new PongMessage();
@@ -25,7 +25,7 @@ namespace MassTransit.ServiceBus.Tests
             mockBus = mocks.CreateMock<IServiceBus>();
             mockBusEndpoint = mocks.CreateMock<IEndpoint>();
             mockEnvelope = mocks.CreateMock<IEnvelope>();
-            mockEndpoint = mocks.CreateMock<IEndpoint>();
+            mockEndpoint = mocks.CreateMock<IMessageQueueEndpoint>();
             mockPoisonEndpoint = mocks.CreateMock<IEndpoint>();
         }
 
@@ -41,25 +41,26 @@ namespace MassTransit.ServiceBus.Tests
         }
         #endregion
 
-        //[Test]
-        //public void With_Replies()
-        //{
-        //    MessageContext<PingMessage> cxt = new MessageContext<PingMessage>(mockBus, mockEnvelope, requestMessage);
+        [Test]
+        [Ignore("MessageSender.Using is killing the mock test approach")]
+        public void With_Replies()
+        {
+            //TODO: this test is now hitting the machine
+            MessageContext<PingMessage> cxt = new MessageContext<PingMessage>(mockBus, mockEnvelope, requestMessage);
 
-        //    using(mocks.Record())
-        //    {
-        //        Expect.Call(mockEnvelope.ReturnEndpoint).Return(mockEndpoint);
-        //        Expect.Call(mockBus.Endpoint).Return(mockBusEndpoint);
-        //        Expect.Call(mockEnvelope.Id).Return("");
-        //        mockEndpoint.Send(null);
-        //        LastCall.IgnoreArguments();
-        //    }
+            using (mocks.Record())
+            {
+                Expect.Call(mockEnvelope.ReturnEndpoint).Return(mockEndpoint);
+                Expect.Call(mockBus.Endpoint).Return(mockBusEndpoint);
+                Expect.Call(mockEnvelope.Id).Return("");
+                Expect.Call(mockEndpoint.QueueName).Return(@".\private$\test_client");
+            }
 
-        //    using(mocks.Playback())
-        //    {
-        //        cxt.Reply(replyMessage);
-        //    }
-        //}
+            using (mocks.Playback())
+            {
+                cxt.Reply(replyMessage);
+            }
+        }
 
         [Test]
         public void With_Handling_Later()
@@ -81,46 +82,48 @@ namespace MassTransit.ServiceBus.Tests
             }
         }
 
-        //[Test]
-        //public void With_Poison_Letters()
-        //{
-        //    MessageContext<PingMessage> cxt = new MessageContext<PingMessage>(mockBus, mockEnvelope, requestMessage);
+        [Test]
+        [Ignore("MessageSender.Using is killing the mock test approach")]
+        public void With_Poison_Letters()
+        {
+            MessageContext<PingMessage> cxt = new MessageContext<PingMessage>(mockBus, mockEnvelope, requestMessage);
 
-        //    using (mocks.Record())
-        //    {
-        //        Expect.Call(mockEnvelope.Id).PropertyBehavior(); //stupid log4net
-        //        Expect.Call(mockEnvelope.Messages).PropertyBehavior(); //stupid log4net
-        //        Expect.Call(mockBus.Endpoint).Return(mockEndpoint);
-        //        Expect.Call(mockEndpoint.PoisonEndpoint).Return(mockPoisonEndpoint);
-        //        mockPoisonEndpoint.Send(mockEnvelope);
-        //    }
+            using (mocks.Record())
+            {
+                Expect.Call(mockEnvelope.Id).PropertyBehavior(); //stupid log4net
+                Expect.Call(mockEnvelope.Messages).PropertyBehavior(); //stupid log4net
+                Expect.Call(mockBus.Endpoint).Return(mockEndpoint);
+                Expect.Call(mockBus.PoisonEndpoint).Return(mockPoisonEndpoint);
+                Expect.Call(mockPoisonEndpoint.Uri).Return(new Uri("msmq://localhost/test_servicebus_poison"));
+            }
 
-        //    using (mocks.Playback())
-        //    {
-        //        cxt.MarkPoison();
-        //    }
-        //}
+            using (mocks.Playback())
+            {
+                cxt.MarkPoison();
+            }
+        }
 
-        //[Test]
-        //public void With_Poison_Letter()
-        //{
-        //    MessageContext<PingMessage> cxt = new MessageContext<PingMessage>(mockBus, mockEnvelope, requestMessage);
+        [Test]
+        [Ignore("MessageSender.Using is killing the mock test approach")]
+        public void With_Poison_Letter()
+        {
+            MessageContext<PingMessage> cxt = new MessageContext<PingMessage>(mockBus, mockEnvelope, requestMessage);
 
-        //    using (mocks.Record())
-        //    {
-        //        Expect.Call(mockEnvelope.Id).PropertyBehavior(); //stupid log4net
-        //        Expect.Call(mockEnvelope.Messages).PropertyBehavior(); //stupid log4net
-        //        Expect.Call(mockEnvelope.Clone()).Return(mockEnvelope);
-        //        mockEnvelope.Messages = new IMessage[] { requestMessage };
-        //        Expect.Call(mockBus.Endpoint).Return(mockEndpoint);
-        //        Expect.Call(mockEndpoint.PoisonEndpoint).Return(mockPoisonEndpoint);
-        //        mockPoisonEndpoint.Send(mockEnvelope);
-        //    }
+            using (mocks.Record())
+            {
+                Expect.Call(mockEnvelope.Id).PropertyBehavior(); //stupid log4net
+                Expect.Call(mockEnvelope.Messages).PropertyBehavior(); //stupid log4net
+                Expect.Call(mockEnvelope.Clone()).Return(mockEnvelope);
+                mockEnvelope.Messages = new IMessage[] { requestMessage };
+                Expect.Call(mockBus.Endpoint).Return(mockEndpoint);
+                Expect.Call(mockBus.PoisonEndpoint).Return(mockPoisonEndpoint);
+                Expect.Call(mockPoisonEndpoint.Uri).Return(new Uri("msmq://localhost/test_servicebus_poison"));
+            }
 
-        //    using (mocks.Playback())
-        //    {
-        //        cxt.MarkPoison(cxt.Message);
-        //    }
-        //}
+            using (mocks.Playback())
+            {
+                cxt.MarkPoison(cxt.Message);
+            }
+        }
     }
 }

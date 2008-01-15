@@ -20,7 +20,7 @@ namespace MassTransit.ServiceBus
                 return new MessageQueueSender(endpoint as IMessageQueueEndpoint);
             }
 
-            throw new EndpointException(endpoint, "No Message Sender Available");
+            throw new EndpointException(endpoint, "No Message Sender Available for " + endpoint.Uri);
         }
 
         /// <summary>
