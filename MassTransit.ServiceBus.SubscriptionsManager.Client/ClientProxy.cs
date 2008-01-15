@@ -3,6 +3,7 @@ namespace MassTransit.ServiceBus.SubscriptionsManager.Client
     using System;
     using log4net;
     using MassTransit.ServiceBus.Subscriptions.Messages;
+    using Subscriptions;
 
     /// <summary>
     /// Works with the remote subscription storage to update local subscriptions with the other endpoints.
@@ -26,9 +27,9 @@ namespace MassTransit.ServiceBus.SubscriptionsManager.Client
 
             storage.SubscriptionChanged += storage_SubscriptionChanged;
 
-            foreach (Uri uri in storage.List())
+            foreach (Subscription subscription in storage.List())
             {
-                SendUpdate(new SubscriptionChange("", uri, SubscriptionChange.SubscriptionChangeType.Add));
+                SendUpdate(new SubscriptionChange(subscription, SubscriptionChangeType.Add));
             }
         }
 

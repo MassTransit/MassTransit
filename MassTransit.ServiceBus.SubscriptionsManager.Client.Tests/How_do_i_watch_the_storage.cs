@@ -6,6 +6,7 @@ namespace MassTransit.ServiceBus.SubscriptionsManager.Client.Tests
     using NUnit.Framework;
     using Rhino.Mocks;
     using Rhino.Mocks.Interfaces;
+    using Subscriptions;
 
     [TestFixture]
     public class How_do_i_watch_the_storage
@@ -38,7 +39,7 @@ namespace MassTransit.ServiceBus.SubscriptionsManager.Client.Tests
                 bus = mocks.Stub<IServiceBus>();
                 cache.SubscriptionChanged += null;
                 LastCall.IgnoreArguments();
-                Expect.Call(cache.List()).Return(new List<Uri>());
+                Expect.Call(cache.List()).Return(new List<Subscription>());
             }
             using(mocks.Playback())
             {
@@ -58,7 +59,7 @@ namespace MassTransit.ServiceBus.SubscriptionsManager.Client.Tests
                 LastCall.IgnoreArguments();
                 eventRaiser = LastCall.GetEventRaiser();
 
-                Expect.Call(cache.List()).Return(new List<Uri>());
+                Expect.Call(cache.List()).Return(new List<Subscription>());
                 
                 
             }
@@ -67,7 +68,7 @@ namespace MassTransit.ServiceBus.SubscriptionsManager.Client.Tests
                 ClientProxy proxy = new ClientProxy(new MessageQueueEndpoint("msmq://localhost/test"));
                 proxy.StartWatching(bus, cache);
 
-                eventRaiser.Raise(cache, new SubscriptionChangedEventArgs(new SubscriptionChange("bob", new Uri("msmq://localhost/bob"), SubscriptionChange.SubscriptionChangeType.Add)));
+                eventRaiser.Raise(cache, new SubscriptionChangedEventArgs(new SubscriptionChange("bob", new Uri("msmq://localhost/bob"), SubscriptionChangeType.Add)));
             }
         }
 
@@ -83,15 +84,15 @@ namespace MassTransit.ServiceBus.SubscriptionsManager.Client.Tests
                 
                 eventRaiser = LastCall.GetEventRaiser();
 
-                Expect.Call(delegate { bus.Send(null, new SubscriptionChange("",null,SubscriptionChange.SubscriptionChangeType.Add)); }).IgnoreArguments();               
-                Expect.Call(cache.List()).Return(new List<Uri>());
+                Expect.Call(delegate { bus.Send(null, new SubscriptionChange("",null,SubscriptionChangeType.Add)); }).IgnoreArguments();
+                Expect.Call(cache.List()).Return(new List<Subscription>());
             }
             using (mocks.Playback())
             {
                 ClientProxy proxy = new ClientProxy(new MessageQueueEndpoint("msmq://localhost/test"));
                 proxy.StartWatching(bus, cache);
 
-                eventRaiser.Raise(cache, new SubscriptionChangedEventArgs(new SubscriptionChange("bob", new Uri("msmq://localhost/bob"), SubscriptionChange.SubscriptionChangeType.Add)));
+                eventRaiser.Raise(cache, new SubscriptionChangedEventArgs(new SubscriptionChange("bob", new Uri("msmq://localhost/bob"), SubscriptionChangeType.Add)));
             }
         }
 
@@ -107,9 +108,9 @@ namespace MassTransit.ServiceBus.SubscriptionsManager.Client.Tests
 
                 eventRaiser = LastCall.GetEventRaiser();
 
-                Expect.Call(delegate { bus.Send(null, new SubscriptionChange("", null, SubscriptionChange.SubscriptionChangeType.Add)); }).IgnoreArguments();
-                Expect.Call(cache.List()).Return(new List<Uri>(new Uri[] { new Uri("msmq://localhost/test") }));
-                Expect.Call(delegate { bus.Send(null, new SubscriptionChange("", null, SubscriptionChange.SubscriptionChangeType.Add)); }).IgnoreArguments();
+                Expect.Call(delegate { bus.Send(null, new SubscriptionChange("", null, SubscriptionChangeType.Add)); }).IgnoreArguments();
+                Expect.Call(cache.List()).Return(new List<Subscription>(new Subscription[] { new Subscription(new Uri("msmq://localhost/test"), "bob" )}));
+                Expect.Call(delegate { bus.Send(null, new SubscriptionChange("", null, SubscriptionChangeType.Add)); }).IgnoreArguments();
             }
             using (mocks.Playback())
             {
@@ -117,7 +118,7 @@ namespace MassTransit.ServiceBus.SubscriptionsManager.Client.Tests
                 ClientProxy proxy = new ClientProxy(new MessageQueueEndpoint("msmq://localhost/test"));
                 proxy.StartWatching(bus, cache);
 
-                eventRaiser.Raise(cache, new SubscriptionChangedEventArgs(new SubscriptionChange("bob", new Uri("msmq://localhost/bob"), SubscriptionChange.SubscriptionChangeType.Add)));
+                eventRaiser.Raise(cache, new SubscriptionChangedEventArgs(new SubscriptionChange("bob", new Uri("msmq://localhost/bob"), SubscriptionChangeType.Add)));
             }
         }
 

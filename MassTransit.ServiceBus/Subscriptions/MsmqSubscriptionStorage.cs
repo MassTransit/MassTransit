@@ -69,11 +69,11 @@ namespace MassTransit.ServiceBus.Subscriptions
                 foreach (SubscriptionChange subscriptionMessage in messages)
                 {
                     if (_log.IsDebugEnabled)
-                        _log.DebugFormat("Subscription Subscribe: {0} Message Type: {1} Mode: {2}", msg.ResponseQueue.Path, subscriptionMessage.MessageName, subscriptionMessage.ChangeType.ToString());
+                        _log.DebugFormat("Subscription Subscribe: {0} Message Type: {1} Mode: {2}", msg.ResponseQueue.Path, subscriptionMessage.Subscription.MessageName, subscriptionMessage.ChangeType.ToString());
 
-                    if (subscriptionMessage.ChangeType == SubscriptionChange.SubscriptionChangeType.Add) //would there ever be anything but?
+                    if (subscriptionMessage.ChangeType == SubscriptionChangeType.Add) //would there ever be anything but?
                     {
-                        _subscriptionCache.Add(subscriptionMessage.MessageName, subscriptionMessage.Address);
+                        _subscriptionCache.Add(subscriptionMessage.Subscription.MessageName, subscriptionMessage.Subscription.Address);
                     }
                 }
             }
@@ -81,12 +81,12 @@ namespace MassTransit.ServiceBus.Subscriptions
             _storageQueue.BeginPeek(TimeSpan.FromHours(24), _peekCursor, PeekAction.Next, this, QueuePeekCompleted);
         }
 
-        public IList<Uri> List(string messageName)
+        public IList<Subscription> List(string messageName)
         {
             return _subscriptionCache.List(messageName);
         }
 
-        public IList<Uri> List()
+        public IList<Subscription> List()
         {
             return _subscriptionCache.List();
         }
@@ -95,7 +95,7 @@ namespace MassTransit.ServiceBus.Subscriptions
         {
             SubscriptionChange subscriptionChange =
                 new SubscriptionChange(messageName, endpoint,
-                                        SubscriptionChange.SubscriptionChangeType.Add);
+                                        SubscriptionChangeType.Add);
             
             _subscriptionCache.Add(messageName, endpoint);
             InternalSend(subscriptionChange);
@@ -113,7 +113,7 @@ namespace MassTransit.ServiceBus.Subscriptions
 
             SubscriptionChange subscriptionChange =
                 new SubscriptionChange(messageName, endpoint,
-                                        SubscriptionChange.SubscriptionChangeType.Remove);
+                                        SubscriptionChangeType.Remove);
 
             InternalSend(subscriptionChange);
             OnChange(subscriptionChange);

@@ -19,6 +19,8 @@ using MassTransit.ServiceBus.Util;
 
 namespace MassTransit.ServiceBus
 {
+    using Subscriptions;
+
     /// <summary>
     /// A service bus is used to attach message handlers (services) to endpoints, as well as 
     /// communicate with other service bus instances in a distributed application
@@ -156,14 +158,14 @@ namespace MassTransit.ServiceBus
         /// <param name="messages">The messages to be published</param>
         public void Publish<T>(params T[] messages) where T : IMessage
         {
-            IList<Uri> subscribers = _subscriptionStorage.List();
+            IList<Subscription> subscribers = _subscriptionStorage.List();
             if (subscribers.Count > 0)
             {
                 IEnvelope envelope = new Envelope(_endpoint, messages as IMessage[]);
 
-                foreach (Uri subscribersEndpoint in subscribers)
+                foreach (Subscription subscription in subscribers)
                 {
-                    IMessageSender send = MessageSender.Using(subscribersEndpoint);
+                    IMessageSender send = MessageSender.Using(subscription.Address);
                     send.Send(envelope);
                 }
             }

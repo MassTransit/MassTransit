@@ -1,9 +1,9 @@
 using System;
+using System.Collections.Generic;
 
 namespace MassTransit.ServiceBus
 {
-    using System.Collections.Generic;
-    using MassTransit.ServiceBus.Subscriptions.Messages;
+    using Subscriptions;
 
     /// <summary>
     /// Defines storage for subscriptions
@@ -15,8 +15,8 @@ namespace MassTransit.ServiceBus
         /// </summary>
         /// <param name="messageName">Message to find the Uri's for</param>
         /// <returns>A list of endpoints subscribed to the message type</returns>
-        IList<Uri> List(string messageName);
-        IList<Uri> List();
+        IList<Subscription> List(string messageName);
+        IList<Subscription> List();
 
         /// <summary>
         /// Add a message type and endpoint pair to the subscription storage

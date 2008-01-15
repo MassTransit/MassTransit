@@ -21,11 +21,11 @@ namespace MassTransit.ServiceBus.SubscriptionsManager
             // Add / Remove Subscription to Repository
             switch(ctx.Message.ChangeType)
             {
-                case SubscriptionChange.SubscriptionChangeType.Add:
-                    base.SubscriptionStorage.Add(ctx.Message.MessageName, ctx.Message.Address);
+                case SubscriptionChangeType.Add:
+                    base.SubscriptionStorage.Add(ctx.Message.Subscription.MessageName, ctx.Message.Subscription.Address);
                     break;
-                case SubscriptionChange.SubscriptionChangeType.Remove:
-                    base.SubscriptionStorage.Remove(ctx.Message.MessageName, ctx.Message.Address);
+                case SubscriptionChangeType.Remove:
+                    base.SubscriptionStorage.Remove(ctx.Message.Subscription.MessageName, ctx.Message.Subscription.Address);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();

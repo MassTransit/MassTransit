@@ -23,7 +23,7 @@ namespace MassTransit.ServiceBus.Tests
 
             storage.Add(typeof(PingMessage).FullName, subscriberEndpoint.Uri);
 
-            SubscriptionChange msg = new SubscriptionChange("", null, SubscriptionChange.SubscriptionChangeType.Add);
+            SubscriptionChange msg = new SubscriptionChange("", null, SubscriptionChangeType.Add);
 
             VerifyMessageInQueue(storageEndpoint.QueueName, msg);
         }
@@ -56,7 +56,7 @@ namespace MassTransit.ServiceBus.Tests
 
             storage.Add(typeof(PingMessage).FullName, subscriberEndpoint.Uri);
 
-            SubscriptionChange msg = new SubscriptionChange("", null, SubscriptionChange.SubscriptionChangeType.Add);
+            SubscriptionChange msg = new SubscriptionChange("", null, SubscriptionChangeType.Add);
 
             storage.Remove(typeof(PingMessage).FullName, subscriberEndpoint.Uri);
             

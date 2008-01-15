@@ -87,12 +87,12 @@ namespace MassTransit.ServiceBus.SubscriptionsManager
         }
 
 
-        public IList<Uri> List(string messageName)
+        public IList<Subscriptions.Subscription> List(string messageName)
         {
             throw new NotImplementedException();
         }
 
-        IList<Uri> ISubscriptionStorage.List()
+        IList<Subscriptions.Subscription> ISubscriptionStorage.List()
         {
             throw new NotImplementedException();
         }
