@@ -76,9 +76,7 @@ namespace MassTransit.ServiceBus
 
             if (_peekAsyncResult == null)
             {
-                _peekAsyncResult =
-                    _queue.BeginPeek(TimeSpan.FromHours(24), _cursor, PeekAction.Current, this,
-                                     Queue_PeekCompleted);
+                _peekAsyncResult = _queue.BeginPeek(TimeSpan.FromHours(24), _cursor, PeekAction.Current, this, Queue_PeekCompleted);
             }
         }
 
@@ -132,6 +130,8 @@ namespace MassTransit.ServiceBus
                 {
                     if (_log.IsErrorEnabled)
                         _log.Error("Envelope Exception", ex);
+
+                    throw;
                 }
             }
         }
@@ -156,7 +156,7 @@ namespace MassTransit.ServiceBus
                     ex.MessageQueueErrorCode == MessageQueueErrorCode.IllegalCursorAction)
                 {
                     if (_log.IsInfoEnabled)
-                        _log.InfoFormat("The queue was closed during an asynchronous operation");
+                        _log.InfoFormat("The queue '{0}' was closed during an asynchronous operation", this._queue.QueueName);
 
                     return;
                 }
@@ -171,8 +171,7 @@ namespace MassTransit.ServiceBus
                 }
             }
 
-            _peekAsyncResult =
-                _queue.BeginPeek(TimeSpan.FromHours(24), _cursor, PeekAction.Next, this, Queue_PeekCompleted);
+            _peekAsyncResult = _queue.BeginPeek(TimeSpan.FromHours(24), _cursor, PeekAction.Next, this, Queue_PeekCompleted);
         }
     }
 }

@@ -4,11 +4,11 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>8.0.50727</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{8EBDD825-0A04-4DD8-9873-2196586EF618}</ProjectGuid>
+    <ProjectGuid>{4A3EA6B8-CA0B-4C8C-B5EF-0068B83BB686}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Client</RootNamespace>
-    <AssemblyName>Client</AssemblyName>
+    <RootNamespace>SubMgr</RootNamespace>
+    <AssemblyName>SubMgr</AssemblyName>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -29,27 +29,22 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
-    <Reference Include="System.Transactions" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.ServiceProcess" />
+    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\..\..\SolutionVersion.cs">
-      <Link>SolutionVersion.cs</Link>
-    </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\MassTransit.ServiceBus.SubscriptionsManager.Client\MassTransit.ServiceBus.SubscriptionsManager.Client.csproj">
-      <Project>{844D54AF-D8B9-4DBF-AC9E-B17423A5E0B2}</Project>
-      <Name>MassTransit.ServiceBus.SubscriptionsManager.Client</Name>
+    <ProjectReference Include="..\..\..\MassTransit.ServiceBus.SubscriptionsManager\MassTransit.ServiceBus.SubscriptionsManager.csproj">
+      <Project>{6CD7F53B-37F8-4281-B85B-9EC679CADDBB}</Project>
+      <Name>MassTransit.ServiceBus.SubscriptionsManager</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\..\MassTransit.ServiceBus\MassTransit.ServiceBus.csproj">
       <Project>{90482397-6282-465E-8B86-39865FC30127}</Project>
       <Name>MassTransit.ServiceBus</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\SecurityMessages\SecurityMessages.csproj">
-      <Project>{D43A72DD-D125-480E-9873-7075C2C5B70A}</Project>
-      <Name>SecurityMessages</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />

@@ -239,7 +239,7 @@ namespace MassTransit.ServiceBus
                 if (!_consumers.ContainsKey(typeof (T)))
                 {
                     _consumers[typeof (T)] = new MessageConsumer<T>();
-                    _subscriptionStorage.Add(typeof (T).FullName, Endpoint.Uri);
+                    _subscriptionStorage.Add(typeof(T).FullName, Endpoint.Uri);
                 }
 
                 ((IMessageConsumer<T>) _consumers[typeof (T)]).Subscribe(callback, condition);
