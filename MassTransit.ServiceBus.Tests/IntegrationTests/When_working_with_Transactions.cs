@@ -3,7 +3,7 @@ using System.Transactions;
 using NUnit.Framework;
 using Rhino.Mocks;
 
-namespace MassTransit.ServiceBus.Tests
+namespace MassTransit.ServiceBus.Tests.IntegrationTests
 {
     [Explicit]
     [TestFixture(Description = "Integration Test for Transaction Handling")]

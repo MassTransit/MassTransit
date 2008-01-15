@@ -1,12 +1,14 @@
+using System;
+using System.Threading;
+using MassTransit.ServiceBus.Subscriptions;
+using NUnit.Framework;
+using NUnit.Framework.SyntaxHelpers;
+
 namespace MassTransit.ServiceBus.Tests.IntegrationTests
 {
-    using System;
-    using System.Threading;
-    using MassTransit.ServiceBus.Subscriptions;
-    using NUnit.Framework;
-    using NUnit.Framework.SyntaxHelpers;
 
     [TestFixture]
+    [Explicit]
     public class MsmqStorage_Idempotent_Tests
     {
         [Test]

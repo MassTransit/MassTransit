@@ -5,6 +5,7 @@ using NUnit.Framework.SyntaxHelpers;
 namespace MassTransit.ServiceBus.Tests.IntegrationTests
 {
     [TestFixture]
+    [Explicit]
     public class When_sending_a_request
     {
         [Test]
