@@ -1,3 +1,4 @@
+ using System;
  using System.Messaging;
  using NUnit.Framework;
 using NUnit.Framework.SyntaxHelpers;
@@ -16,13 +17,17 @@ namespace MassTransit.ServiceBus.Tests
         [Test]
         public void A_MessageQueue_Transport_Should_Be_Usable()
         {
-            MessageQueueEndpoint defaultEndpoint = @"msmq://localhost/test_servicebus";
+        	string endpointName = @"msmq://localhost/test_servicebus";
+
+			MessageQueueEndpoint defaultEndpoint = endpointName;
 
             ValidateAndPurgeQueue(defaultEndpoint.QueueName);
 
             IServiceBus serviceBus = new ServiceBus(defaultEndpoint, mocks.CreateMock<ISubscriptionStorage>());
 
-            Assert.That(serviceBus.Endpoint.Uri.AbsoluteUri, Is.EqualTo("msmq://localhost/test_servicebus"));
+        	string machineEndpointName = endpointName.Replace("localhost", Environment.MachineName.ToLowerInvariant());
+
+            Assert.That(serviceBus.Endpoint.Uri.AbsoluteUri, Is.EqualTo(machineEndpointName));
         }
     }
 }
