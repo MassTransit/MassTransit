@@ -6,6 +6,7 @@ using NUnit.Framework.SyntaxHelpers;
 namespace MassTransit.ServiceBus.Tests.IntegrationTests
 {
     [TestFixture]
+    [Explicit]
     public class When_publishing_a_message
     {
         [Test]
