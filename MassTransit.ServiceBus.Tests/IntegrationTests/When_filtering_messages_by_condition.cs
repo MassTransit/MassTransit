@@ -17,7 +17,7 @@ namespace MassTransit.ServiceBus.Tests.IntegrationTests
                 ManualResetEvent _called = new ManualResetEvent(false);
 
                 MessageReceivedCallback<ClientMessage> handler =
-                    delegate(MessageContext<ClientMessage> context) { Assert.That(context.Message.Name, Is.EqualTo("JOHNSON"), "We should not have received this message"); };
+                    delegate(IMessageContext<ClientMessage> context) { Assert.That(context.Message.Name, Is.EqualTo("JOHNSON"), "We should not have received this message"); };
 
                 Predicate<ClientMessage> condition =
                     delegate(ClientMessage message)
@@ -54,7 +54,7 @@ namespace MassTransit.ServiceBus.Tests.IntegrationTests
                 ManualResetEvent _received = new ManualResetEvent(false);
 
                 MessageReceivedCallback<ClientMessage> handler =
-                    delegate(MessageContext<ClientMessage> context)
+                    delegate(IMessageContext<ClientMessage> context)
                         {
                             Assert.That(context.Message.Name, Is.EqualTo("JOHNSON"), "We should not have received this message");
 

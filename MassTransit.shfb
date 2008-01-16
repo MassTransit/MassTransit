@@ -56,7 +56,7 @@
     <ProjectLinkType>Local</ProjectLinkType>
     <SdkLinkType>Msdn</SdkLinkType>
     <SdkLinkTarget>Blank</SdkLinkTarget>
-    <PresentationStyle>Prototype</PresentationStyle>
+    <PresentationStyle>vs2005</PresentationStyle>
     <NamingMethod>Guid</NamingMethod>
     <SyntaxFilters>Standard</SyntaxFilters>
     <ShowFeedbackControl>False</ShowFeedbackControl>

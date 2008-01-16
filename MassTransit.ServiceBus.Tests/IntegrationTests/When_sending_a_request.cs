@@ -16,7 +16,7 @@ namespace MassTransit.ServiceBus.Tests.IntegrationTests
                 PingMessage ping = new PingMessage();
 
                 qtc.ServiceBus.Subscribe<PingMessage>(
-                    delegate(MessageContext<PingMessage> context) { context.Reply(new PongMessage()); });
+                    delegate(IMessageContext<PingMessage> context) { context.Reply(new PongMessage()); });
 
                 IServiceBusAsyncResult asyncResult = qtc.ServiceBus.Request(qtc.ServiceBus.Endpoint, ping);
 

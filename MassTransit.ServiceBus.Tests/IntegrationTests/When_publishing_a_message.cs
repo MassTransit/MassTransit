@@ -63,7 +63,7 @@ namespace MassTransit.ServiceBus.Tests.IntegrationTests
                 ManualResetEvent _updateEvent = new ManualResetEvent(false);
 
                 MessageReceivedCallback<UpdateMessage> handler =
-                    delegate(MessageContext<UpdateMessage> ctx)
+                    delegate(IMessageContext<UpdateMessage> ctx)
                         {
                             _updateEvent.Set();
 

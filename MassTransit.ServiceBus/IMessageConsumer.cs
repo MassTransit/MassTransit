@@ -63,5 +63,5 @@ namespace MassTransit.ServiceBus
     /// </summary>
     /// <typeparam name="T">The type of message being delivered to the consumer</typeparam>
     /// <param name="ctx">The context of the received message</param>
-    public delegate void MessageReceivedCallback<T>(MessageContext<T> ctx) where T : IMessage;
+    public delegate void MessageReceivedCallback<T>(IMessageContext<T> ctx) where T : IMessage;
 }

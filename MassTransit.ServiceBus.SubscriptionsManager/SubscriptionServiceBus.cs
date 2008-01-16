@@ -17,7 +17,7 @@ namespace MassTransit.ServiceBus.SubscriptionsManager
         }
 
 
-        public void OnSubscriptionMessageReceived(MessageContext<SubscriptionChange> ctx)
+        public void OnSubscriptionMessageReceived(IMessageContext<SubscriptionChange> ctx)
         {
             RegisterSenderForUpdates(ctx.Envelope);
 
@@ -38,7 +38,7 @@ namespace MassTransit.ServiceBus.SubscriptionsManager
             this.Publish(ctx.Message);
         }
 
-        public void OnRequestCacheUpdate(MessageContext<RequestCacheUpdate> ctx)
+        public void OnRequestCacheUpdate(IMessageContext<RequestCacheUpdate> ctx)
         {
             RegisterSenderForUpdates(ctx.Envelope);
 
@@ -52,7 +52,7 @@ namespace MassTransit.ServiceBus.SubscriptionsManager
         }
 
 
-        public void OnRequestSubscribersForMessage(MessageContext<RequestCacheUpdateForMessage> ctx)
+        public void OnRequestSubscribersForMessage(IMessageContext<RequestCacheUpdateForMessage> ctx)
         {
             RegisterSenderForUpdates(ctx.Envelope);
 
