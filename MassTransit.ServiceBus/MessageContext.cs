@@ -10,7 +10,7 @@ namespace MassTransit.ServiceBus
     /// </summary>
     /// <typeparam name="T">The message type</typeparam>
     public class MessageContext<T> :
-        EventArgs where T : IMessage
+        EventArgs, IMessageContext<T> where T : IMessage
     {
         private readonly IServiceBus _bus;
         private readonly IEnvelope _envelope;
