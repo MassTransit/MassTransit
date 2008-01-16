@@ -1,3 +1,4 @@
+using System;
 using NUnit.Framework;
 using Rhino.Mocks;
 
@@ -8,7 +9,7 @@ namespace MassTransit.ServiceBus.Tests
     {
         private IServiceBus _serviceBus;
         private MockRepository mocks;
-        private IEndpoint mockEndpoint;
+        private IMessageQueueEndpoint mockEndpoint;
         private ISubscriptionStorage mockSubscriptionStorage;
 
         #region Setup/Teardown
@@ -17,7 +18,7 @@ namespace MassTransit.ServiceBus.Tests
         public void SetUp()
         {
             mocks = new MockRepository();
-            mockEndpoint = mocks.CreateMock<IEndpoint>();
+            mockEndpoint = mocks.CreateMock<IMessageQueueEndpoint>();
             mockSubscriptionStorage = mocks.CreateMock<ISubscriptionStorage>();
         }
 
@@ -32,22 +33,22 @@ namespace MassTransit.ServiceBus.Tests
 
         #endregion
 
-        //[Test]
-        //public void I_Want_To_Be_Able_To_Register_An_Event_Handler_For_Messages()
-        //{
-        //    using (mocks.Record())
-        //    {
-        //        Expect.Call(mockEndpoint.Address).Return("bob").Repeat.Any(); //stupid log4net
-        //        mockEndpoint.Subscribe(null);
-        //        LastCall.IgnoreArguments();
-        //        mockSubscriptionStorage.Add(typeof (PingMessage), mockEndpoint);
-        //    }
+        [Test]
+        public void I_Want_To_Be_Able_To_Register_An_Event_Handler_For_Messages()
+        {
+            using (mocks.Record())
+            {
+                Expect.Call(mockEndpoint.QueueName).Return(@".\private$\test");
+                Expect.Call(mockEndpoint.QueueName).Return(@".\private$\test");
+                Expect.Call(mockEndpoint.Uri).Return(new Uri("msmq://localhost/test")).Repeat.Any(); //stupid log4net
+                mockSubscriptionStorage.Add(typeof(PingMessage).FullName, new Uri("msmq://localhost/test"));
+            }
 
-        //    using (mocks.Playback())
-        //    {
-        //        _serviceBus = new ServiceBus(mockEndpoint, mockSubscriptionStorage);
-        //        _serviceBus.Subscribe<PingMessage>(delegate { });
-        //    }
-        //}
+            using (mocks.Playback())
+            {
+                _serviceBus = new ServiceBus(mockEndpoint, mockSubscriptionStorage);
+                _serviceBus.Subscribe<PingMessage>(delegate { });
+            }
+        }
     }
 }
