@@ -64,7 +64,8 @@ namespace MassTransit.ServiceBus
 	    /// </summary>
 	    public string QueueName
 		{
-			get { return _queuePath; }
+            //TODO: Hack please fix
+            get { return "FormatName:DIRECT=OS:" + _queuePath; }
 		}
 
 	    /// <summary>
@@ -127,7 +128,7 @@ namespace MassTransit.ServiceBus
 		/// <returns>An instance of the <c ref="MessageQueueEndpoint" /> class for the specified queue</returns>
 		public static IMessageQueueEndpoint FromQueuePath(string path)
 		{
-			const string prefix = "FORMATNAME:DIRECT=OS:";
+			const string prefix = "FormatName:DIRECT=OS:";
 
 			if (path.Length > prefix.Length && path.Substring(0, prefix.Length).ToUpperInvariant() == prefix)
 				path = path.Substring(prefix.Length);
