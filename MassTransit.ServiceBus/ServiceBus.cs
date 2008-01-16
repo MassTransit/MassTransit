@@ -45,6 +45,7 @@ namespace MassTransit.ServiceBus
 
         public ServiceBus(IEndpoint endpoint, ISubscriptionStorage subscriptionStorage)
         {
+            //TODO: Way to much happening in here. Makes testing hard. -d
             Check.Parameter(endpoint).WithMessage("endpoint").IsNotNull();
             Check.Parameter(subscriptionStorage).WithMessage("subscriptionStorage").IsNotNull();
 
