@@ -45,16 +45,16 @@ namespace MassTransit.ServiceBus
 
         public ServiceBus(IEndpoint endpoint, ISubscriptionStorage subscriptionStorage)
         {
-            //TODO: Way to much happening in here. Makes testing hard. -d
             Check.Parameter(endpoint).WithMessage("endpoint").IsNotNull();
             Check.Parameter(subscriptionStorage).WithMessage("subscriptionStorage").IsNotNull();
 
             _endpoint = endpoint;
             _subscriptionStorage = subscriptionStorage;
 
+
+            //TODO: Can we move the below out of the constructor?
             _receiver = MessageReceiver.Using(_endpoint);
             _receiver.Subscribe(this);
-
             _sender = MessageSender.Using(_endpoint);
         }
 
