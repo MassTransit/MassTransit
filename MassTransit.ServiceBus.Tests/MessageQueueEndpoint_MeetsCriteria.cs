@@ -197,5 +197,13 @@ namespace MassTransit.ServiceBus.Tests
                 ((MessageQueueReceiver)receiver).ProcessMessage(queueMessage);
             }
         }
+
+        [Test]
+        public void NAME()
+        {
+            string input = @"FormatName:DIRECT=OS:pooh\private$\test_servicebus";
+            string output = ServiceBusSetupFixture.GetQueueName(input);
+            Assert.AreEqual(@".\private$\test_servicebus", output);
+        }
     }
 }
