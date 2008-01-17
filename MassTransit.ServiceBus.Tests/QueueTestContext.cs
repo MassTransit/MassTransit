@@ -114,7 +114,7 @@ namespace MassTransit.ServiceBus.Tests
 
         public static void VerifyMessageInQueue<T>(string queuePath, T message)
         {
-            using (MessageQueue mq = new MessageQueue(queuePath, QueueAccessMode.Receive))
+            using (MessageQueue mq = new MessageQueue(GetQueueName(queuePath), QueueAccessMode.Receive))
             {
                 Message msg = mq.Receive(TimeSpan.FromSeconds(3));
 
@@ -139,17 +139,31 @@ namespace MassTransit.ServiceBus.Tests
         {
             try
             {
-                MessageQueue.Create(queuePath, isTransactional);
+                MessageQueue.Create(GetQueueName(queuePath), isTransactional);
             }
             catch (MessageQueueException ex)
             {
+                //TODO: What is this?
                 if (ex.MessageQueueErrorCode != MessageQueueErrorCode.QueueExists)
                 {
                 }
             }
 
-            MessageQueue queue = new MessageQueue(queuePath, QueueAccessMode.ReceiveAndAdmin);
+            MessageQueue queue = new MessageQueue(GetQueueName(queuePath), QueueAccessMode.ReceiveAndAdmin);
             queue.Purge();
+        }
+
+        public static string GetQueueName(string name)
+        {
+            string result = name;
+            if (result.Contains("FormatName:DIRECT=OS:"))
+                result = result.Replace("FormatName:DIRECT=OS:", "");
+            if (result.Contains("localhost"))
+                result = result.Replace("localhost", ".");
+            if (result.Contains(Environment.MachineName.ToLowerInvariant()))
+                result = result.Replace(Environment.MachineName.ToLowerInvariant(), ".");
+
+            return result;
         }
     }
 }
