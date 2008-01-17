@@ -21,13 +21,6 @@ namespace MassTransit.ServiceBus
 		public MessageQueueEndpoint(string uriString)
 			: this(new Uri(uriString))
 		{
-			string hostName = _uri.Host;
-			if (string.Compare(hostName, ".") == 0 || string.Compare(hostName, "localhost", true) == 0)
-			{
-				hostName = Environment.MachineName.ToLowerInvariant();
-			}
-
-			_queuePath = string.Format(@"{0}\private$\{1}", hostName, _uri.AbsolutePath.Substring(1));
 		}
 
 		/// <summary>
@@ -51,9 +44,10 @@ namespace MassTransit.ServiceBus
             
             if (string.Compare(_uri.Host, "localhost", true) == 0)
             {
-                _uri = new Uri("msmq://" + Environment.MachineName + _uri.AbsolutePath);
+                _uri = new Uri("msmq://" + Environment.MachineName.ToLowerInvariant() + _uri.AbsolutePath);
             }
-            _queuePath = string.Format(@"{0}\private$\{1}", hostName, _uri.AbsolutePath.Substring(1));
+
+            _queuePath = string.Format(@"FormatName:DIRECT=OS:{0}\private$\{1}", hostName, _uri.AbsolutePath.Substring(1));
 		}
 
 		#region IMessageQueueEndpoint Members
@@ -64,8 +58,7 @@ namespace MassTransit.ServiceBus
 	    /// </summary>
 	    public string QueueName
 		{
-            //TODO: Hack please fix
-            get { return "FormatName:DIRECT=OS:" + _queuePath; }
+            get { return _queuePath; }
 		}
 
 	    /// <summary>
@@ -128,9 +121,11 @@ namespace MassTransit.ServiceBus
 		/// <returns>An instance of the <c ref="MessageQueueEndpoint" /> class for the specified queue</returns>
 		public static IMessageQueueEndpoint FromQueuePath(string path)
 		{
+            //TODO: Lots of duplicated logic here? -d
+
 			const string prefix = "FormatName:DIRECT=OS:";
 
-			if (path.Length > prefix.Length && path.Substring(0, prefix.Length).ToUpperInvariant() == prefix)
+			if (path.Length > prefix.Length && path.Substring(0, prefix.Length).ToUpperInvariant() == prefix.ToUpperInvariant())
 				path = path.Substring(prefix.Length);
 
 			string[] parts = path.Split('\\');
@@ -138,8 +133,12 @@ namespace MassTransit.ServiceBus
 			if (parts.Length != 3)
 				throw new ArgumentException("Invalid Queue Path Specified");
 
+            //Validate parts[1] = private$
 			if (string.Compare(parts[1], "private$", true) != 0)
 				throw new ArgumentException("Invalid Queue Path Specified");
+
+            if (parts[0] == ".")
+                parts[0] = Environment.MachineName.ToLowerInvariant();
 
 			return new MessageQueueEndpoint(string.Format("msmq://{0}/{1}", parts[0], parts[2]));
 		}

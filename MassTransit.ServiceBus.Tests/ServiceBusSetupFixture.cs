@@ -79,7 +79,7 @@ namespace MassTransit.ServiceBus.Tests
         {
             try
             {
-                MessageQueue.Create(queuePath, isTransactional);
+                MessageQueue.Create(GetQueueName(queuePath), isTransactional);
             }
             catch (MessageQueueException ex)
             {
@@ -129,6 +129,19 @@ namespace MassTransit.ServiceBus.Tests
                     Assert.AreEqual(0.0f, cntr.NextValue(), "the queue should have been empty and wasn't");
                 }
             } 
+        }
+
+        public static string GetQueueName(string name)
+        {
+            string result = name;
+            if (result.Contains("FormatName:DIRECT=OS:"))
+                result = result.Replace("FormatName:DIRECT=OS:", "");
+            if (result.Contains("localhost"))
+                result = result.Replace("localhost", ".");
+            if (result.Contains(Environment.MachineName.ToLowerInvariant()))
+                result = result.Replace(Environment.MachineName.ToLowerInvariant(), ".");
+
+            return result;
         }
     }
 }
