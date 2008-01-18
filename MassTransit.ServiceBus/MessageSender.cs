@@ -6,14 +6,14 @@ namespace MassTransit.ServiceBus
     /// <summary>
     /// An abstract factory to create an IMessageSender
     /// </summary>
-    public class MessageSender
+    public class MessageSender : IMessageSenderFactory
     {
         /// <summary>
         /// Using an IMessageSender using the specified endpoint
         /// </summary>
         /// <param name="endpoint">The endpoint for sending messages</param>
         /// <returns>An instance that supports IMessageSender</returns>
-        public static IMessageSender Using(IEndpoint endpoint)
+        public IMessageSender Using(IEndpoint endpoint)
         {
             if (endpoint is IMessageQueueEndpoint)
             {
@@ -28,7 +28,7 @@ namespace MassTransit.ServiceBus
         /// </summary>
         /// <param name="endpoint">The endpoint for sending messages</param>
         /// <returns>An instance that supports IMessageSender</returns>
-        public static IMessageSender Using(Uri endpoint)
+        public IMessageSender Using(Uri endpoint)
         {
             return new MessageQueueSender(new MessageQueueEndpoint(endpoint));
         }

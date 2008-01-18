@@ -12,6 +12,7 @@ namespace MassTransit.ServiceBus
     public class MessageContext<T> :
         EventArgs, IMessageContext<T> where T : IMessage
     {
+        private IMessageSenderFactory _factory;
         private readonly IServiceBus _bus;
         private readonly IEnvelope _envelope;
         private readonly ILog _log = LogManager.GetLogger(typeof (MessageContext<T>));
@@ -23,9 +24,11 @@ namespace MassTransit.ServiceBus
         /// <param name="bus">The service bus on which the message was received</param>
         /// <param name="envelope">The message envelope received</param>
         /// <param name="message">The individual message from the envelope being received</param>
-        public MessageContext(IServiceBus bus, IEnvelope envelope, T message)
+        /// <param name="factory">The message sender factory</param>
+        public MessageContext(IServiceBus bus, IEnvelope envelope, T message, IMessageSenderFactory factory)
         {
             _envelope = envelope;
+            _factory = factory;
             _bus = bus;
             _message = message;
         }
@@ -65,7 +68,7 @@ namespace MassTransit.ServiceBus
             IEnvelope envelope = new Envelope(Bus.Endpoint, messages);
             envelope.CorrelationId = Envelope.Id;
 
-            MessageSender.Using(replyEndpoint).Send(envelope);
+            _factory.Using(replyEndpoint).Send(envelope);
         }
 
         /// <summary>
@@ -74,7 +77,7 @@ namespace MassTransit.ServiceBus
         /// </summary>
         public void HandleMessagesLater(params IMessage[] messages)
         {
-            MessageSender.Using(Bus.Endpoint).Send(this.Envelope);
+            _factory.Using(Bus.Endpoint).Send(this.Envelope);
         }
 
         /// <summary>
@@ -85,7 +88,7 @@ namespace MassTransit.ServiceBus
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Envelope {0} Was Marked Poisonous", _envelope.Id);
 
-            MessageSender.Using(Bus.PoisonEndpoint).Send(_envelope);
+            _factory.Using(Bus.PoisonEndpoint).Send(_envelope);
         }
 
         /// <summary>
@@ -99,7 +102,7 @@ namespace MassTransit.ServiceBus
             IEnvelope env = (IEnvelope) Envelope.Clone(); //Should this be cloned?
             env.Messages = new IMessage[] {Message};
 
-            MessageSender.Using(Bus.PoisonEndpoint).Send(env);
+            _factory.Using(Bus.PoisonEndpoint).Send(env);
         }
     }
 }
