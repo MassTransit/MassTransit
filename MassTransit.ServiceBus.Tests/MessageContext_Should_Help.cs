@@ -14,11 +14,10 @@ namespace MassTransit.ServiceBus.Tests
         private IEnvelope mockEnvelope;
         private IEndpoint mockPoisonEndpoint;
         private IMessageQueueEndpoint mockEndpoint;
+        private IMessageSenderFactory factory;
 
         private PingMessage requestMessage = new PingMessage();
         private PongMessage replyMessage = new PongMessage();
-
-        private string queueName = "";
 
         #region SetUp / TearDown
         [SetUp]
@@ -49,7 +48,7 @@ namespace MassTransit.ServiceBus.Tests
         public void With_Replies()
         {
             //TODO: this test is now hitting the machine
-            MessageContext<PingMessage> cxt = new MessageContext<PingMessage>(mockBus, mockEnvelope, requestMessage);
+            MessageContext<PingMessage> cxt = new MessageContext<PingMessage>(mockBus, mockEnvelope, requestMessage, factory);
 
             using (mocks.Record())
             {
@@ -68,9 +67,8 @@ namespace MassTransit.ServiceBus.Tests
         [Test]
         public void With_Handling_Later()
         {
-            
-            MessageContext<PingMessage> cxt = new MessageContext<PingMessage>(mockBus, mockEnvelope, requestMessage);
-            
+
+            MessageContext<PingMessage> cxt = new MessageContext<PingMessage>(mockBus, mockEnvelope, requestMessage, factory);
             IMessage[] messages = new IMessage[1] { replyMessage };
 
             using (mocks.Record())
@@ -101,7 +99,7 @@ namespace MassTransit.ServiceBus.Tests
         [Ignore("MessageSender.Using is killing the mock test approach")]
         public void With_Poison_Letters()
         {
-            MessageContext<PingMessage> cxt = new MessageContext<PingMessage>(mockBus, mockEnvelope, requestMessage);
+            MessageContext<PingMessage> cxt = new MessageContext<PingMessage>(mockBus, mockEnvelope, requestMessage, factory);
 
             using (mocks.Record())
             {
@@ -122,7 +120,7 @@ namespace MassTransit.ServiceBus.Tests
         [Ignore("MessageSender.Using is killing the mock test approach")]
         public void With_Poison_Letter()
         {
-            MessageContext<PingMessage> cxt = new MessageContext<PingMessage>(mockBus, mockEnvelope, requestMessage);
+            MessageContext<PingMessage> cxt = new MessageContext<PingMessage>(mockBus, mockEnvelope, requestMessage, factory);
 
             using (mocks.Record())
             {

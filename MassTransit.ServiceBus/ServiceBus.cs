@@ -42,21 +42,29 @@ namespace MassTransit.ServiceBus
         private readonly IMessageSender _sender;
         private readonly ISubscriptionStorage _subscriptionStorage;
         private IEndpoint _poisonEndpoint;
+        private IMessageSenderFactory _factory;
 
-        public ServiceBus(IEndpoint endpoint, ISubscriptionStorage subscriptionStorage)
+        public ServiceBus(IEndpoint endpoint, ISubscriptionStorage subscriptionStorage) : this (endpoint, subscriptionStorage, new MessageSender())
+        {
+        }
+
+        public ServiceBus(IEndpoint endpoint, ISubscriptionStorage subscriptionStorage, IMessageSenderFactory factory)
         {
             Check.Parameter(endpoint).WithMessage("endpoint").IsNotNull();
             Check.Parameter(subscriptionStorage).WithMessage("subscriptionStorage").IsNotNull();
 
             _endpoint = endpoint;
+            _factory = factory;
             _subscriptionStorage = subscriptionStorage;
 
 
             //TODO: Can we move the below out of the constructor?
             _receiver = MessageReceiver.Using(_endpoint);
             _receiver.Subscribe(this);
-            _sender = MessageSender.Using(_endpoint);
+            _sender = _factory.Using(_endpoint);
         }
+
+
 
         public ISubscriptionStorage SubscriptionStorage
         {
@@ -173,7 +181,7 @@ namespace MassTransit.ServiceBus
 
                 foreach (Subscription subscription in subscribers)
                 {
-                    IMessageSender send = MessageSender.Using(subscription.Address);
+                    IMessageSender send = _factory.Using(subscription.Address);
                     send.Send(envelope);
                 }
             }
@@ -188,7 +196,7 @@ namespace MassTransit.ServiceBus
         {
             IEnvelope envelope = new Envelope(_endpoint, messages as IMessage[]);
 
-            IMessageSender send = MessageSender.Using(destinationEndpoint);
+            IMessageSender send = _factory.Using(destinationEndpoint);
             send.Send(envelope);
         }
 
@@ -239,7 +247,7 @@ namespace MassTransit.ServiceBus
             {
                 if (!_consumers.ContainsKey(typeof (T)))
                 {
-                    _consumers[typeof (T)] = new MessageConsumer<T>();
+                    _consumers[typeof (T)] = new MessageConsumer<T>(this._factory);
                     _subscriptionStorage.Add(typeof(T).FullName, Endpoint.Uri);
                 }
 
@@ -258,7 +266,7 @@ namespace MassTransit.ServiceBus
         {
             IEnvelope envelope = new Envelope(_endpoint, messages as IMessage[]);
 
-            IMessageSender send = MessageSender.Using(destinationEndpoint);
+            IMessageSender send = _factory.Using(destinationEndpoint);
             lock (_asyncReplyDispatcher)
             {
                 send.Send(envelope);

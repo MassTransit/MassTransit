@@ -8,12 +8,14 @@ namespace MassTransit.ServiceBus.Tests
     [TestFixture]
     public class When_working_with_an_endpoint
     {
+        private IMessageSenderFactory factory;
+
         [Test]
         public void A_message_sender_should_be_creatable_for_a_MessageQueueEndpoint()
         {
             using (QueueTestContext qtc = new QueueTestContext())
             {
-                IMessageSender sender = MessageSender.Using(qtc.ServiceBusEndPoint);
+                IMessageSender sender = factory.Using(qtc.ServiceBusEndPoint);
 
                 Assert.That(sender, Is.Not.Null);
             }
@@ -26,7 +28,7 @@ namespace MassTransit.ServiceBus.Tests
 
             IEndpoint endpoint = mocks.CreateMock<IEndpoint>();
 
-            MessageSender.Using(endpoint);
+            factory.Using(endpoint);
         }
 
         [Test]
