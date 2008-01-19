@@ -57,6 +57,7 @@
     <Compile Include="IMessageContext.cs" />
     <Compile Include="IMessageQueueEndpoint.cs" />
     <Compile Include="IMessageReceiver.cs" />
+    <Compile Include="IMessageReceiverFactory.cs" />
     <Compile Include="IMessageSender.cs" />
     <Compile Include="IMessageSenderFactory.cs" />
     <Compile Include="IServiceBus.cs" />

@@ -11,24 +11,15 @@
 /// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 /// specific language governing permissions and limitations under the License.
 
-using System;
-
 namespace MassTransit.ServiceBus
 {
-}
-
-namespace MassTransit.ServiceBus
-{
-    /// <summary>
-    /// Used to begin receiving messages on an endpoint
-    /// </summary>
-    public interface IMessageReceiver :
-        IDisposable
+    public interface IMessageReceiverFactory
     {
         /// <summary>
-        /// Adds a consumer to the message receiver
+        /// Creates an instance of an object that implements IMessageReceiver appropriate for the specified endpoint
         /// </summary>
-        /// <param name="consumer">The consumer to add</param>
-        void Subscribe(IEnvelopeConsumer consumer);
+        /// <param name="endpoint">The endpoint for receiving messages</param>
+        /// <returns>An instance supporting IMessageReceiver</returns>
+        IMessageReceiver Using(IEndpoint endpoint);
     }
 }
