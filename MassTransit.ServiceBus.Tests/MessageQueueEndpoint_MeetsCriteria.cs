@@ -159,7 +159,7 @@ namespace MassTransit.ServiceBus.Tests
                     delegate { },
                     delegate { return false; });
 
-                IEnvelopeConsumer consumer = (IEnvelopeConsumer) _serviceBus;
+                IEnvelopeConsumer consumer = _serviceBus;
 
                 IEnvelope envelope = new Envelope(_serviceBusEndPoint, new PingMessage());
 
@@ -175,7 +175,7 @@ namespace MassTransit.ServiceBus.Tests
 
             IEnvelopeConsumer consumer = mocks.CreateMock<IEnvelopeConsumer>();
 
-            IMessageReceiver receiver = MessageReceiver.Using(endpoint);
+            IMessageReceiver receiver = new MessageReceiverFactory().Using(endpoint);
             receiver.Subscribe(consumer);
 
             PingMessage ping = new PingMessage();
