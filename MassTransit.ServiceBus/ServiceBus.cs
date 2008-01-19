@@ -45,7 +45,7 @@ namespace MassTransit.ServiceBus
         private IMessageSenderFactory _senderFactory;
         private IMessageReceiverFactory _receiverFactory;
 
-        public ServiceBus(IEndpoint endpoint, ISubscriptionStorage subscriptionStorage) : this (endpoint, subscriptionStorage, new MessageSender(), new MessageReceiverFactory())
+        public ServiceBus(IEndpoint endpoint, ISubscriptionStorage subscriptionStorage) : this (endpoint, subscriptionStorage, new MessageSenderFactory(), new MessageReceiverFactory())
         {
         }
 
