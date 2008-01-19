@@ -9,13 +9,13 @@ namespace MassTransit.ServiceBus.Tests
     public class When_working_with_an_endpoint
     {
         private MockRepository mocks;
-        private IMessageSenderFactory factory;
+        private IMessageSenderFactory mockSenderFactory;
 
         [SetUp]
         public void SetUp()
         {
             mocks = new MockRepository();
-            factory = mocks.CreateMock<IMessageSenderFactory>();
+            mockSenderFactory = mocks.CreateMock<IMessageSenderFactory>();
         }
 
         [Test]
@@ -23,7 +23,7 @@ namespace MassTransit.ServiceBus.Tests
         {
             using (QueueTestContext qtc = new QueueTestContext())
             {
-                IMessageSender sender = factory.Using(qtc.ServiceBusEndPoint);
+                IMessageSender sender = mockSenderFactory.Using(qtc.ServiceBusEndPoint);
 
                 Assert.That(sender, Is.Not.Null);
             }
@@ -34,7 +34,7 @@ namespace MassTransit.ServiceBus.Tests
         {
             IEndpoint endpoint = mocks.CreateMock<IEndpoint>();
 
-            factory.Using(endpoint);
+            mockSenderFactory.Using(endpoint);
         }
 
         [Test]

@@ -3,10 +3,12 @@ using MassTransit.ServiceBus.Exceptions;
 
 namespace MassTransit.ServiceBus
 {
+    using Util;
+
     /// <summary>
     /// An abstract factory to create an IMessageSender
     /// </summary>
-    public class MessageSender : IMessageSenderFactory
+    public class MessageSenderFactory : IMessageSenderFactory
     {
         /// <summary>
         /// Using an IMessageSender using the specified endpoint
@@ -15,12 +17,11 @@ namespace MassTransit.ServiceBus
         /// <returns>An instance that supports IMessageSender</returns>
         public IMessageSender Using(IEndpoint endpoint)
         {
-            if (endpoint is IMessageQueueEndpoint)
-            {
-                return new MessageQueueSender(endpoint as IMessageQueueEndpoint);
-            }
+            Check.Require(endpoint is IMessageQueueEndpoint,
+                          string.Format("Endpoint: {0} - is not of type {1} ", endpoint.Uri,
+                                        typeof (IMessageQueueEndpoint).FullName));
 
-            throw new EndpointException(endpoint, "No Message Sender Available for " + endpoint.Uri);
+            return new MessageQueueSender(endpoint as IMessageQueueEndpoint);
         }
 
         /// <summary>
