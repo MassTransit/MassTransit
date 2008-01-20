@@ -52,6 +52,8 @@ namespace MassTransit.ServiceBus
         {
             Check.Parameter(endpoint).WithMessage("endpoint").IsNotNull();
             Check.Parameter(subscriptionStorage).WithMessage("subscriptionStorage").IsNotNull();
+            Check.Parameter(factory).WithMessage("factory").IsNotNull();
+            Check.Parameter(receiver).WithMessage("receiver").IsNotNull();
 
             _endpoint = endpoint;
             _receiver = receiver;
