@@ -14,7 +14,6 @@ namespace MassTransit.ServiceBus.Tests
 
         private string queueName = @".\private$\test";
         private Uri queueUri = new Uri("msmq://localhost/test");
-        private IMessageSenderFactory mockSenderFactory;
         private IMessageReceiver mockReceiver;
 
         #region Setup/Teardown
@@ -25,7 +24,6 @@ namespace MassTransit.ServiceBus.Tests
             mocks = new MockRepository();
             mockEndpoint = mocks.CreateMock<IMessageQueueEndpoint>();
             mockSubscriptionStorage = mocks.CreateMock<ISubscriptionStorage>();
-            mockSenderFactory = mocks.CreateMock<IMessageSenderFactory>();
             mockReceiver = mocks.CreateMock<IMessageReceiver>();
 
             ServiceBusSetupFixture.ValidateAndPurgeQueue(queueName);
@@ -47,6 +45,7 @@ namespace MassTransit.ServiceBus.Tests
         {
             using (mocks.Record())
             {
+                Expect.Call(mockEndpoint.Receiver).Return(mockReceiver);
                 Expect.Call(delegate { mockReceiver.Subscribe(null); }).IgnoreArguments();
                 Expect.Call(mockEndpoint.Uri).Return(queueUri).Repeat.Any(); //stupid log4net
                 mockSubscriptionStorage.Add(typeof(PingMessage).FullName, queueUri);
@@ -54,7 +53,7 @@ namespace MassTransit.ServiceBus.Tests
 
             using (mocks.Playback())
             {
-                _serviceBus = new ServiceBus(mockEndpoint, mockSubscriptionStorage, mockSenderFactory, mockReceiver);
+                _serviceBus = new ServiceBus(mockEndpoint, mockSubscriptionStorage);
                 _serviceBus.Subscribe<PingMessage>(delegate { });
             }
         }

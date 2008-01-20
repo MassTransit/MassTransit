@@ -11,7 +11,6 @@ namespace MassTransit.ServiceBus.Tests
         private MockRepository mocks;
 	    private IMessageQueueEndpoint mockBusEndpoint;
 	    private ISubscriptionStorage mockSubscriptionStorage;
-	    private IMessageSenderFactory mockSenderFactory;
 	    private IMessageSender mockSender;
 	    private IMessageReceiver mockReceiver;
 
@@ -26,7 +25,6 @@ namespace MassTransit.ServiceBus.Tests
 	        mockBusEndpoint = mocks.CreateMock<IMessageQueueEndpoint>();
 	        mockSubscriptionStorage = mocks.CreateMock<ISubscriptionStorage>();
 	        ServiceBusSetupFixture.ValidateAndPurgeQueue(queueName);
-	        mockSenderFactory = mocks.CreateMock<IMessageSenderFactory>();
 	        mockSender = mocks.CreateMock<IMessageSender>();
 	        mockReceiver = mocks.CreateMock<IMessageReceiver>();
 	    }
@@ -38,7 +36,6 @@ namespace MassTransit.ServiceBus.Tests
 	        mockBusEndpoint = null;
 	        mockSubscriptionStorage = null;
 	        _serviceBus = null;
-	        mockSenderFactory = null;
 	        mockReceiver = null;
 	    }
 
@@ -47,19 +44,20 @@ namespace MassTransit.ServiceBus.Tests
         {
             using(mocks.Record())
             {
+                Expect.Call(mockBusEndpoint.Receiver).Return(mockReceiver);
                 Expect.Call(delegate { mockReceiver.Subscribe(null); }).IgnoreArguments();
                 Expect.Call(mockBusEndpoint.Uri).Return(queueUri).Repeat.Any();
 
                 mockSubscriptionStorage.Add(typeof(PoisonMessage).FullName, this.queueUri);
 
-                Expect.Call(mockSenderFactory.Using(mockBusEndpoint)).IgnoreArguments().Return(mockSender);
+                //Expect.Call(mockBusEndpoint.Sender).Return(mockSender);
 
-                mockSender.Send(null);
-                LastCall.IgnoreArguments(); //because we can't control the Envelope from here?
+      //          mockSender.Send(null);
+        //        LastCall.IgnoreArguments(); //because we can't control the Envelope from here?
             }
             using (mocks.Playback())
             {
-                _serviceBus = new ServiceBus(mockBusEndpoint, mockSubscriptionStorage, mockSenderFactory, mockReceiver);
+                _serviceBus = new ServiceBus(mockBusEndpoint, mockSubscriptionStorage);
                 
                 ////this ends up in a seperate thread and I am therefore unable to figure out how to test
                 _serviceBus.Subscribe<PoisonMessage>(delegate(IMessageContext<PoisonMessage> cxt)

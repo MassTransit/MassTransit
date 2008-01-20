@@ -14,7 +14,6 @@ namespace MassTransit.ServiceBus.Tests
         private IEnvelope mockEnvelope;
         private IEndpoint mockPoisonEndpoint;
         private IMessageQueueEndpoint mockEndpoint;
-        private IMessageSenderFactory mockFactory;
 
         private PingMessage requestMessage = new PingMessage();
         private PongMessage replyMessage = new PongMessage();
@@ -30,7 +29,6 @@ namespace MassTransit.ServiceBus.Tests
             mockEnvelope = mocks.CreateMock<IEnvelope>();
             mockEndpoint = mocks.CreateMock<IMessageQueueEndpoint>();
             mockPoisonEndpoint = mocks.CreateMock<IEndpoint>();
-            mockFactory = mocks.CreateMock<IMessageSenderFactory>();
             mockMessageSender = mocks.CreateMock<IMessageSender>();
         }
 
@@ -43,7 +41,6 @@ namespace MassTransit.ServiceBus.Tests
             mockEnvelope = null;
             mockEndpoint = null;
             mockPoisonEndpoint = null;
-            mockFactory = null;
             mockMessageSender = null;
         }
         #endregion
@@ -51,14 +48,15 @@ namespace MassTransit.ServiceBus.Tests
         [Test]
         public void With_Replies()
         {
-            MessageContext<PingMessage> cxt = new MessageContext<PingMessage>(mockBus, mockEnvelope, requestMessage, mockFactory);
+            MessageContext<PingMessage> cxt = new MessageContext<PingMessage>(mockBus, mockEnvelope, requestMessage);
 
             using (mocks.Record())
             {
                 Expect.Call(mockEnvelope.ReturnEndpoint).Return(mockEndpoint);
                 Expect.Call(mockBus.Endpoint).Return(mockBusEndpoint);
                 Expect.Call(mockEnvelope.Id).Return(MessageId.Empty);
-                Expect.Call(mockFactory.Using(mockEndpoint)).Return(mockMessageSender);
+                Expect.Call(mockEndpoint.Sender).Return(mockMessageSender).Repeat.Any();
+
                 Expect.Call(delegate { mockMessageSender.Send(null); }).IgnoreArguments(); //ignoring arguments because we create a new envelope in the method
 
             }
@@ -73,12 +71,12 @@ namespace MassTransit.ServiceBus.Tests
         public void With_Handling_Later()
         {
 
-            MessageContext<PingMessage> cxt = new MessageContext<PingMessage>(mockBus, mockEnvelope, requestMessage, mockFactory);
+            MessageContext<PingMessage> cxt = new MessageContext<PingMessage>(mockBus, mockEnvelope, requestMessage);
 
             using (mocks.Record())
             {
                 Expect.Call(mockBus.Endpoint).Return(mockEndpoint);
-                Expect.Call(mockFactory.Using(mockEndpoint)).Return(mockMessageSender);
+                Expect.Call(mockEndpoint.Sender).Return(mockMessageSender);
                 Expect.Call(delegate { mockMessageSender.Send(null); }).IgnoreArguments(); //ignoring arguments because we create a new envelope in the method
             }
 
@@ -91,12 +89,12 @@ namespace MassTransit.ServiceBus.Tests
         [Test]
         public void With_Poison_Letters()
         {
-            MessageContext<PingMessage> cxt = new MessageContext<PingMessage>(mockBus, mockEnvelope, requestMessage, mockFactory);
+            MessageContext<PingMessage> cxt = new MessageContext<PingMessage>(mockBus, mockEnvelope, requestMessage);
 
             using (mocks.Record())
             {
                 Expect.Call(mockBus.PoisonEndpoint).Return(mockPoisonEndpoint);
-                Expect.Call(mockFactory.Using(mockPoisonEndpoint)).Return(mockMessageSender);
+                Expect.Call(mockPoisonEndpoint.Sender).Return(mockMessageSender);
                 Expect.Call(delegate { mockMessageSender.Send(null); }).IgnoreArguments(); //ignoring arguments because we create a new envelope in the method
             }
 
@@ -109,14 +107,14 @@ namespace MassTransit.ServiceBus.Tests
         [Test]
         public void With_Poison_Letter()
         {
-            MessageContext<PingMessage> cxt = new MessageContext<PingMessage>(mockBus, mockEnvelope, requestMessage, mockFactory);
+            MessageContext<PingMessage> cxt = new MessageContext<PingMessage>(mockBus, mockEnvelope, requestMessage);
 
             using (mocks.Record())
             {
                 Expect.Call(mockEnvelope.Clone()).Return(mockEnvelope);
                 mockEnvelope.Messages = new IMessage[] { requestMessage };
                 Expect.Call(mockBus.PoisonEndpoint).Return(mockPoisonEndpoint);
-                Expect.Call(mockFactory.Using(mockPoisonEndpoint)).Return(mockMessageSender);
+                Expect.Call(mockPoisonEndpoint.Sender).Return(mockMessageSender);
                 Expect.Call(delegate { mockMessageSender.Send(null); }).IgnoreArguments(); //ignoring arguments because we create a new envelope in the method
             }
 

@@ -35,7 +35,6 @@ namespace MassTransit.ServiceBus.Tests.IntegrationTests
         private readonly string transactionalQueueName = @"msmq://localhost/test_transaction";
         private readonly string returnToQueueName = @"msmq://localhost/test_return";
 
-        private IMessageSenderFactory factory;
         private MockRepository mocks;
         private IEndpoint returnTo;
         private PingMessage msg = new PingMessage();
@@ -51,7 +50,7 @@ namespace MassTransit.ServiceBus.Tests.IntegrationTests
             using (mocks.Playback())
             {
                 MessageQueueEndpoint ep = nonTransactionalQueueName;
-                factory.Using(ep).Send(env);
+               ep.Sender.Send(env);
             }
 
             ServiceBusSetupFixture.VerifyMessageInQueue(nonTransactionalQueueName, msg);
@@ -69,7 +68,7 @@ namespace MassTransit.ServiceBus.Tests.IntegrationTests
                 using (TransactionScope tr = new TransactionScope())
                 {
                     MessageQueueEndpoint ep = nonTransactionalQueueName;
-                    factory.Using(ep).Send(env);
+                    ep.Sender.Send(env);
 
                     tr.Complete();
                 }
@@ -96,7 +95,7 @@ namespace MassTransit.ServiceBus.Tests.IntegrationTests
                 using (TransactionScope tr = new TransactionScope())
                 {
                     MessageQueueEndpoint ep = transactionalQueueName;
-                    factory.Using(ep).Send(env);
+                    ep.Sender.Send(env);
 
                     tr.Complete();
                 }
@@ -123,7 +122,7 @@ namespace MassTransit.ServiceBus.Tests.IntegrationTests
             using (mocks.Playback())
             {
                 MessageQueueEndpoint ep = transactionalQueueName;
-                factory.Using(ep).Send(env);
+                ep.Sender.Send(env);
             }
         }
     }

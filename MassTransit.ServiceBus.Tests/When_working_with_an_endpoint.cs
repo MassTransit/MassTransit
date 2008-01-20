@@ -14,20 +14,18 @@ namespace MassTransit.ServiceBus.Tests
         public void SetUp()
         {
             mocks = new MockRepository();
-            mockSenderFactory = mocks.CreateMock<IMessageSenderFactory>();
         }
 
         #endregion
 
         private MockRepository mocks;
-        private IMessageSenderFactory mockSenderFactory;
 
         [Test]
         public void A_message_receiver_should_be_creatable_for_a_MessageQueueEndpoint()
         {
             using (QueueTestContext qtc = new QueueTestContext())
             {
-                IMessageReceiver receiver = new MessageReceiverFactory().Using(qtc.ServiceBusEndPoint);
+                IMessageReceiver receiver = qtc.ServiceBusEndPoint.Receiver;
 
                 Assert.That(receiver, Is.Not.Null);
             }
@@ -38,15 +36,12 @@ namespace MassTransit.ServiceBus.Tests
         {
             using (QueueTestContext qtc = new QueueTestContext())
             {
-                IMessageSender mockSender = mocks.CreateMock<IMessageSender>();
-
                 using (mocks.Record())
                 {
-                    Expect.Call(mockSenderFactory.Using(qtc.ServiceBusEndPoint)).Return(mockSender);
                 }
                 using (mocks.Playback())
                 {
-                    IMessageSender sender = mockSenderFactory.Using(qtc.ServiceBusEndPoint);
+                    IMessageSender sender = qtc.ServiceBusEndPoint.Sender;
 
                     Assert.That(sender, Is.Not.Null);
                 }
@@ -58,7 +53,7 @@ namespace MassTransit.ServiceBus.Tests
         {
             IEndpoint endpoint = mocks.CreateMock<IEndpoint>();
 
-            new MessageReceiverFactory().Using(endpoint);
+            IMessageReceiver receiver = endpoint.Receiver;
         }
     }
 }
