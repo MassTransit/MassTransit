@@ -79,26 +79,27 @@ namespace MassTransit.ServiceBus.Subscriptions
             _messageTypeSubscriptions.Clear();
         }
 
-        public void ReactToCacheUpdateResponse(MessageContext<CacheUpdateResponse> cxt)
-        {
+        //TODO: Slated for removal - dru - 1/20/2008
+        //public void ReactToCacheUpdateResponse(MessageContext<CacheUpdateResponse> cxt)
+        //{
             
-            cxt.Message.Subscriptions.ForEach(delegate (SubscriptionChange msg)
-                                                  {
-                                                      switch(msg.ChangeType)
-                                                      {
-                                                          case SubscriptionChangeType.Add:
-                                                              InternalAdd(msg.Subscription.MessageName, msg.Subscription.Address);
-                                                              break;
-                                                          case SubscriptionChangeType.Remove:
-                                                              InternalRemove(msg.Subscription.MessageName, msg.Subscription.Address);
-                                                              break;
-                                                          default:
-                                                              throw new ArgumentOutOfRangeException();
-                                                      }
-                                                  });
-            if (_log.IsInfoEnabled)
-                _log.InfoFormat("Cache Update Complete");
-        }
+        //    cxt.Message.Subscriptions.ForEach(delegate (SubscriptionChange msg)
+        //                                          {
+        //                                              switch(msg.ChangeType)
+        //                                              {
+        //                                                  case SubscriptionChangeType.Add:
+        //                                                      InternalAdd(msg.Subscription.MessageName, msg.Subscription.Address);
+        //                                                      break;
+        //                                                  case SubscriptionChangeType.Remove:
+        //                                                      InternalRemove(msg.Subscription.MessageName, msg.Subscription.Address);
+        //                                                      break;
+        //                                                  default:
+        //                                                      throw new ArgumentOutOfRangeException();
+        //                                              }
+        //                                          });
+        //    if (_log.IsInfoEnabled)
+        //        _log.InfoFormat("Cache Update Complete");
+        //}
         
         private void InternalRemove(string messageName, Uri endpoint)
         {
