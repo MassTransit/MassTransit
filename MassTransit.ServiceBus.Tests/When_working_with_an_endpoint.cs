@@ -8,8 +8,7 @@ namespace MassTransit.ServiceBus.Tests
     [TestFixture]
     public class When_working_with_an_endpoint
     {
-        private MockRepository mocks;
-        private IMessageSenderFactory mockSenderFactory;
+        #region Setup/Teardown
 
         [SetUp]
         public void SetUp()
@@ -18,24 +17,10 @@ namespace MassTransit.ServiceBus.Tests
             mockSenderFactory = mocks.CreateMock<IMessageSenderFactory>();
         }
 
-        [Test]
-        public void A_message_sender_should_be_creatable_for_a_MessageQueueEndpoint()
-        {
-            using (QueueTestContext qtc = new QueueTestContext())
-            {
-                IMessageSender sender = mockSenderFactory.Using(qtc.ServiceBusEndPoint);
+        #endregion
 
-                Assert.That(sender, Is.Not.Null);
-            }
-        }
-
-        [Test, ExpectedException(typeof(EndpointException))]
-        public void An_exception_should_be_thrown_when_creating_a_message_sender_for_an_unknown_endpoint_type()
-        {
-            IEndpoint endpoint = mocks.CreateMock<IEndpoint>();
-
-            mockSenderFactory.Using(endpoint);
-        }
+        private MockRepository mocks;
+        private IMessageSenderFactory mockSenderFactory;
 
         [Test]
         public void A_message_receiver_should_be_creatable_for_a_MessageQueueEndpoint()
@@ -48,7 +33,27 @@ namespace MassTransit.ServiceBus.Tests
             }
         }
 
-        [Test, ExpectedException(typeof(EndpointException))]
+        [Test]
+        public void A_message_sender_should_be_creatable_for_a_MessageQueueEndpoint()
+        {
+            using (QueueTestContext qtc = new QueueTestContext())
+            {
+                IMessageSender mockSender = mocks.CreateMock<IMessageSender>();
+
+                using (mocks.Record())
+                {
+                    Expect.Call(mockSenderFactory.Using(qtc.ServiceBusEndPoint)).Return(mockSender);
+                }
+                using (mocks.Playback())
+                {
+                    IMessageSender sender = mockSenderFactory.Using(qtc.ServiceBusEndPoint);
+
+                    Assert.That(sender, Is.Not.Null);
+                }
+            }
+        }
+
+        [Test, ExpectedException(typeof (EndpointException))]
         public void An_exception_should_be_thrown_when_creating_a_message_receiver_for_an_unknown_endpoint_type()
         {
             IEndpoint endpoint = mocks.CreateMock<IEndpoint>();
@@ -56,5 +61,12 @@ namespace MassTransit.ServiceBus.Tests
             new MessageReceiverFactory().Using(endpoint);
         }
 
+        [Test, ExpectedException(typeof (EndpointException))]
+        public void An_exception_should_be_thrown_when_creating_a_message_sender_for_an_unknown_endpoint_type()
+        {
+            IEndpoint endpoint = mocks.CreateMock<IEndpoint>();
+
+            mockSenderFactory.Using(endpoint);
+        }
     }
 }

@@ -67,8 +67,7 @@ namespace MassTransit.ServiceBus.Subscriptions
 
         private void QueuePeekCompleted(IAsyncResult asyncResult)
         {
-            //TODO: Shouldn't we check this when we are created?
-            if (_storageQueue == null)
+            if (_storageQueue == null) // handles if our queue has been closed/disposed but we are being notified afterwards
                 return;
 
             Message msg = _storageQueue.EndPeek(asyncResult);

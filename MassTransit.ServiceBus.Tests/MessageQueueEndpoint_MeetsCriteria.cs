@@ -203,7 +203,7 @@ namespace MassTransit.ServiceBus.Tests
         [Test]
         public void NAME()
         {
-            string input = @"FormatName:DIRECT=OS:pooh\private$\test_servicebus";
+            string input = @"FormatName:DIRECT=OS:" + Environment.MachineName + @"\private$\test_servicebus";
             string output = ServiceBusSetupFixture.GetQueueName(input);
             Assert.AreEqual(@".\private$\test_servicebus", output);
         }

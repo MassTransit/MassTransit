@@ -138,8 +138,8 @@ namespace MassTransit.ServiceBus.Tests
                 result = result.Replace("FormatName:DIRECT=OS:", "");
             if (result.Contains("localhost"))
                 result = result.Replace("localhost", ".");
-            if (result.Contains(Environment.MachineName.ToLowerInvariant()))
-                result = result.Replace(Environment.MachineName.ToLowerInvariant(), ".");
+            if (result.Contains(Environment.MachineName))
+                result = result.Replace(Environment.MachineName, ".");
 
             return result;
         }
