@@ -13,6 +13,7 @@
 
 namespace MassTransit.ServiceBus.SubscriptionsManager.Client
 {
+    using System;
     using log4net;
     using MassTransit.ServiceBus.Subscriptions.Messages;
     using Subscriptions;
@@ -25,6 +26,7 @@ namespace MassTransit.ServiceBus.SubscriptionsManager.Client
         private IEndpoint _wellKnownSubscriptionManagerEndpoint;
         private static readonly ILog _log = LogManager.GetLogger(typeof(ClientProxy));
         private IServiceBus _bus;
+        private ISubscriptionStorage _storage;
 
         public ClientProxy(IEndpoint wellKnownSubscriptionManagerEndpoint)
         {
@@ -33,13 +35,17 @@ namespace MassTransit.ServiceBus.SubscriptionsManager.Client
 
         public void StartWatching(IServiceBus bus, ISubscriptionStorage storage)
         {
+            if(_log.IsDebugEnabled)
+                _log.DebugFormat("Subscription Manager Client Started");
+
             _bus = bus;
-            _bus.Subscribe<CacheUpdateResponse>(null);
+            _bus.Subscribe<CacheUpdateResponse>(RespondToCacheUpdateMessage);
             _bus.Send(_wellKnownSubscriptionManagerEndpoint, new RequestCacheUpdate());
 
-            storage.SubscriptionChanged += storage_SubscriptionChanged;
+            _storage = storage;
+            _storage.SubscriptionChanged += storage_SubscriptionChanged;
 
-            foreach (Subscription subscription in storage.List())
+            foreach (Subscription subscription in _storage.List())
             {
                 SendUpdate(new SubscriptionChange(subscription, SubscriptionChangeType.Add));
             }
@@ -55,6 +61,27 @@ namespace MassTransit.ServiceBus.SubscriptionsManager.Client
         public void SendUpdate(SubscriptionChange change)
         {
             _bus.Send(_wellKnownSubscriptionManagerEndpoint, change);
+        }
+
+        public void RespondToCacheUpdateMessage(IMessageContext<CacheUpdateResponse> ctx)
+        {
+            if (_log.IsDebugEnabled)
+                _log.DebugFormat("Received Update from {0}", ctx.Envelope.ReturnEndpoint);
+
+            foreach (SubscriptionChange change in ctx.Message.Subscriptions)
+            {
+                switch(change.ChangeType)
+                {
+                    case SubscriptionChangeType.Add:
+                        _storage.Add(change.Subscription.MessageName, change.Subscription.Address);
+                        break;
+                    case SubscriptionChangeType.Remove:
+                        _storage.Remove(change.Subscription.MessageName, change.Subscription.Address);
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+            }
         }
     }
 }
