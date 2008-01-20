@@ -47,13 +47,5 @@ namespace MassTransit.ServiceBus.Tests
                 }
             }
         }
-
-        [Test, ExpectedException(typeof (EndpointException))]
-        public void An_exception_should_be_thrown_when_creating_a_message_receiver_for_an_unknown_endpoint_type()
-        {
-            IEndpoint endpoint = mocks.CreateMock<IEndpoint>();
-
-            IMessageReceiver receiver = endpoint.Receiver;
-        }
     }
 }
