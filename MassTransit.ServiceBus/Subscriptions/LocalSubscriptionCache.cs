@@ -62,16 +62,10 @@ namespace MassTransit.ServiceBus.Subscriptions
         public void Add(string messageName, Uri endpoint)
         {
             InternalAdd(messageName, endpoint);
-            if(_log.IsInfoEnabled)
-                _log.InfoFormat("Sending Subscription Update ({0}, {1}) to Master Repository", messageName, endpoint);
-            OnChange(new SubscriptionChange(messageName, endpoint, SubscriptionChangeType.Add));
         }
         public void Remove(string messageName, Uri endpoint)
         {
-            InternalRemove(messageName, endpoint);
-            if (_log.IsInfoEnabled)
-                _log.InfoFormat("Sending Subscription Update ({0}, {1}) to Master Repository", messageName, endpoint);
-			OnChange(new SubscriptionChange(messageName, endpoint, SubscriptionChangeType.Remove));
+            InternalRemove(messageName, endpoint);			
         }
 
         public void Dispose()
@@ -79,27 +73,6 @@ namespace MassTransit.ServiceBus.Subscriptions
             _messageTypeSubscriptions.Clear();
         }
 
-        //TODO: Slated for removal - dru - 1/20/2008
-        //public void ReactToCacheUpdateResponse(MessageContext<CacheUpdateResponse> cxt)
-        //{
-            
-        //    cxt.Message.Subscriptions.ForEach(delegate (SubscriptionChange msg)
-        //                                          {
-        //                                              switch(msg.ChangeType)
-        //                                              {
-        //                                                  case SubscriptionChangeType.Add:
-        //                                                      InternalAdd(msg.Subscription.MessageName, msg.Subscription.Address);
-        //                                                      break;
-        //                                                  case SubscriptionChangeType.Remove:
-        //                                                      InternalRemove(msg.Subscription.MessageName, msg.Subscription.Address);
-        //                                                      break;
-        //                                                  default:
-        //                                                      throw new ArgumentOutOfRangeException();
-        //                                              }
-        //                                          });
-        //    if (_log.IsInfoEnabled)
-        //        _log.InfoFormat("Cache Update Complete");
-        //}
         
         private void InternalRemove(string messageName, Uri endpoint)
         {
@@ -125,6 +98,8 @@ namespace MassTransit.ServiceBus.Subscriptions
                         if (_log.IsDebugEnabled)
                             _log.DebugFormat("Removing local subscription list for type {0} on {1}", messageName, GetHashCode());
                         _messageTypeSubscriptions.Remove(messageName);
+
+                        OnChange(new SubscriptionChange(messageName, endpoint, SubscriptionChangeType.Remove));
                     }
                 }   
             }
@@ -148,6 +123,8 @@ namespace MassTransit.ServiceBus.Subscriptions
                         _log.DebugFormat("Adding new local subscription entry for endpoint {0} on {1}", endpoint,
                                          GetHashCode());
                     _messageTypeSubscriptions[messageName].Add(entry);
+
+                    OnChange(new SubscriptionChange(messageName, endpoint, SubscriptionChangeType.Add));
                 }
             }
         }
