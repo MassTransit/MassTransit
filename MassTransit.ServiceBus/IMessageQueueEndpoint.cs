@@ -27,6 +27,11 @@ namespace MassTransit.ServiceBus
         /// </summary>
         string QueueName { get; }
 
+        /// <summary>
+        /// Opens a message queue
+        /// </summary>
+        /// <param name="mode">The access mode for the queue</param>
+        /// <returns>An open <c ref="MessageQueue" /> object</returns>
 	    MessageQueue Open(QueueAccessMode mode);
     }
 }

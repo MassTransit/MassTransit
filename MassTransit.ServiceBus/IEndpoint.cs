@@ -25,5 +25,15 @@ namespace MassTransit.ServiceBus
 		/// The address of the endpoint, in URI format
 		/// </summary>
 		Uri Uri { get; }
+
+        /// <summary>
+        /// Returns an interface to send messages on this endpoint
+        /// </summary>
+        IMessageSender Sender { get; }
+
+        /// <summary>
+        /// Returns an interface to receive messages on this endpoint
+        /// </summary>
+        IMessageReceiver Receiver { get; }
     }
 }

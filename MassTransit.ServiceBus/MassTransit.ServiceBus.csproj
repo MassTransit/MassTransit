@@ -57,9 +57,7 @@
     <Compile Include="IMessageContext.cs" />
     <Compile Include="IMessageQueueEndpoint.cs" />
     <Compile Include="IMessageReceiver.cs" />
-    <Compile Include="IMessageReceiverFactory.cs" />
     <Compile Include="IMessageSender.cs" />
-    <Compile Include="IMessageSenderFactory.cs" />
     <Compile Include="IServiceBus.cs" />
     <Compile Include="IServiceBusAsyncResult.cs" />
     <Compile Include="ISubscriptionStorage.cs" />
@@ -69,8 +67,6 @@
     <Compile Include="MessageQueueReceiver.cs" />
     <Compile Include="MessageQueueSender.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="MessageReceiverFactory.cs" />
-    <Compile Include="MessageSenderFactory.cs" />
     <Compile Include="ServiceBus.cs" />
     <Compile Include="ServiceBusAsyncResult.cs" />
     <Compile Include="SubscriptionChangedEventArgs.cs" />

@@ -26,16 +26,9 @@ namespace MassTransit.ServiceBus
     public class MessageConsumer<T> :
         IMessageConsumer<T> where T : IMessage
     {
-        private static readonly ILog _log = LogManager.GetLogger(typeof (MessageQueueEndpoint));
+        private static readonly ILog _log = LogManager.GetLogger(typeof(MessageConsumer<T>));
 
         private readonly List<MessageConsumerCallbackItem<T>> _callbacks = new List<MessageConsumerCallbackItem<T>>();
-        private IMessageSenderFactory _factory;
-
-
-        public MessageConsumer(IMessageSenderFactory factory)
-        {
-            this._factory = factory;
-        }
 
         #region IMessageConsumer<T> Members
 
@@ -66,7 +59,7 @@ namespace MassTransit.ServiceBus
         /// <param name="message">The message being delivered</param>
         public void Deliver(IServiceBus bus, IEnvelope envelope, T message)
         {
-            MessageContext<T> context = new MessageContext<T>(bus, envelope, message, _factory);
+            MessageContext<T> context = new MessageContext<T>(bus, envelope, message);
 
             foreach (MessageConsumerCallbackItem<T> item in _callbacks)
             {

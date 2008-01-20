@@ -38,26 +38,15 @@ namespace MassTransit.ServiceBus
 
 
         private readonly IEndpoint _endpoint;
-        private IMessageReceiver _receiver;
         private IEndpoint _poisonEndpoint;
-        private readonly IMessageSenderFactory _senderFactory;
         private readonly ISubscriptionStorage _subscriptionStorage;
 
-        public ServiceBus(IEndpoint endpoint, ISubscriptionStorage subscriptionStorage) 
-            : this (endpoint, subscriptionStorage, new MessageSenderFactory(), new MessageReceiverFactory().Using(endpoint))
-        {
-        }
-
-        public ServiceBus(IEndpoint endpoint, ISubscriptionStorage subscriptionStorage, IMessageSenderFactory factory, IMessageReceiver receiver)
+        public ServiceBus(IEndpoint endpoint, ISubscriptionStorage subscriptionStorage)
         {
             Check.Parameter(endpoint).WithMessage("endpoint").IsNotNull();
             Check.Parameter(subscriptionStorage).WithMessage("subscriptionStorage").IsNotNull();
-            Check.Parameter(factory).WithMessage("factory").IsNotNull();
-            Check.Parameter(receiver).WithMessage("receiver").IsNotNull();
 
             _endpoint = endpoint;
-            _receiver = receiver;
-            _senderFactory = factory;
             _subscriptionStorage = subscriptionStorage;
         }
 
@@ -157,9 +146,6 @@ namespace MassTransit.ServiceBus
 
             _consumers.Clear();
 
-            if(_receiver != null)
-                _receiver.Dispose();
-            
             _endpoint.Dispose();
         }
 
@@ -177,8 +163,9 @@ namespace MassTransit.ServiceBus
 
                 foreach (Subscription subscription in subscribers)
                 {
-                    IMessageSender send = _senderFactory.Using(subscription.Address);
-                    send.Send(envelope);
+                    MessageQueueEndpoint endpoint = new MessageQueueEndpoint(subscription.Address);
+
+                    endpoint.Sender.Send(envelope);
                 }
             }
         }
@@ -192,8 +179,7 @@ namespace MassTransit.ServiceBus
         {
             IEnvelope envelope = new Envelope(_endpoint, messages as IMessage[]);
 
-            IMessageSender send = _senderFactory.Using(destinationEndpoint);
-            send.Send(envelope);
+            destinationEndpoint.Sender.Send(envelope);
         }
 
         /// <summary>
@@ -243,7 +229,7 @@ namespace MassTransit.ServiceBus
             {
                 if (!_consumers.ContainsKey(typeof (T)))
                 {
-                    _consumers[typeof (T)] = new MessageConsumer<T>(_senderFactory);
+                    _consumers[typeof (T)] = new MessageConsumer<T>();
                     _subscriptionStorage.Add(typeof (T).FullName, Endpoint.Uri);
                 }
 
@@ -251,7 +237,7 @@ namespace MassTransit.ServiceBus
             }
 
 
-            _receiver.Subscribe(this);
+            _endpoint.Receiver.Subscribe(this);
         }
 
         /// <summary>
@@ -265,10 +251,9 @@ namespace MassTransit.ServiceBus
         {
             IEnvelope envelope = new Envelope(_endpoint, messages as IMessage[]);
 
-            IMessageSender send = _senderFactory.Using(destinationEndpoint);
             lock (_asyncReplyDispatcher)
             {
-                send.Send(envelope);
+                destinationEndpoint.Sender.Send(envelope);
 
                 return _asyncReplyDispatcher.Track(envelope.Id);
             }
