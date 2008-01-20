@@ -106,7 +106,12 @@ namespace MassTransit.ServiceBus.Util
 
         public static implicit operator MessageId(string id)
         {
-            return new MessageId(id);
+            MessageId result = MessageId.Empty;
+            
+            if(!string.IsNullOrEmpty(id))
+                result = new MessageId(id);
+
+            return result;
         }
 
         public static implicit operator string(MessageId id)
