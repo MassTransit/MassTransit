@@ -28,8 +28,23 @@ namespace MassTransit.ServiceBus
                 
             IEnvelope e = new Envelope(returnAddress);
 
-            e.Id = msg.Id;
-            e.CorrelationId = msg.CorrelationId;
+            if(string.IsNullOrEmpty(msg.Id))
+            {
+                e.Id = MessageId.Empty;
+            }
+            else
+            {
+                e.Id = msg.Id;
+            }
+
+            if(string.IsNullOrEmpty(msg.CorrelationId))
+            {
+                e.CorrelationId = MessageId.Empty;
+            }
+            else
+            {
+                e.CorrelationId = msg.CorrelationId;
+            }
 
             e.TimeToBeReceived = msg.TimeToBeReceived;
             e.Recoverable = msg.Recoverable;

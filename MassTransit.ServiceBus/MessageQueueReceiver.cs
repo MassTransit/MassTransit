@@ -177,8 +177,8 @@ namespace MassTransit.ServiceBus
                 if (ex.MessageQueueErrorCode != MessageQueueErrorCode.IOTimeout)
                 {
                     if (_log.IsErrorEnabled)
-                        _log.ErrorFormat("Queue_PeekCompleted Exception ({0}): {1} ", ex.Message,
-                                         ex.MessageQueueErrorCode);
+                        _log.ErrorFormat("Queue_PeekCompleted Exception ({0}) on '{1}: {2} ", ex.Message,
+                            this._queue.QueueName, ex.MessageQueueErrorCode);
 
                     return;
                 }

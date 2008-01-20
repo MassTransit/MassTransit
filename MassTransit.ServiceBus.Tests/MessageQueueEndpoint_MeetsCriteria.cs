@@ -39,6 +39,7 @@ namespace MassTransit.ServiceBus.Tests
                 Expect.Call(_serviceBusEndPoint.QueueName).Return(queueName);
                 Expect.Call(_serviceBusEndPoint.QueueName).Return(queueName);
                 Expect.Call(_serviceBusEndPoint.Uri).Return(new Uri("msmq://localhost/test_servicebus"));
+                Expect.Call(_serviceBusEndPoint.Uri).Return(new Uri("msmq://localhost/test_servicebus"));
             }
             using (mocks.Playback())
             {
@@ -47,7 +48,7 @@ namespace MassTransit.ServiceBus.Tests
                     delegate { },
                     delegate { return false; });
 
-                IEnvelopeConsumer consumer = (IEnvelopeConsumer) _serviceBus;
+                IEnvelopeConsumer consumer = _serviceBus;
 
                 IEnvelope envelope = new Envelope(_serviceBusEndPoint, new PingMessage());
 
@@ -63,6 +64,7 @@ namespace MassTransit.ServiceBus.Tests
                 Expect.Call(_serviceBusEndPoint.QueueName).Return(queueName);
                 Expect.Call(_serviceBusEndPoint.QueueName).Return(queueName);
                 Expect.Call(_serviceBusEndPoint.Uri).Return(new Uri("msmq://localhost/test_servicebus"));
+                Expect.Call(_serviceBusEndPoint.Uri).Return(new Uri("msmq://localhost/test_servicebus"));
             }
             using (mocks.Playback())
             {
@@ -72,7 +74,7 @@ namespace MassTransit.ServiceBus.Tests
                     delegate { },
                     delegate { return true; });
 
-                IEnvelopeConsumer consumer = (IEnvelopeConsumer) _serviceBus;
+                IEnvelopeConsumer consumer = _serviceBus;
 
                 IEnvelope envelope = new Envelope(_serviceBusEndPoint, new PingMessage());
 
@@ -90,6 +92,7 @@ namespace MassTransit.ServiceBus.Tests
                 Expect.Call(_serviceBusEndPoint.QueueName).Return(queueName);
                 Expect.Call(_serviceBusEndPoint.QueueName).Return(queueName);
                 Expect.Call(_serviceBusEndPoint.Uri).Return(new Uri("msmq://localhost/test_servicebus"));
+                Expect.Call(_serviceBusEndPoint.Uri).Return(new Uri("msmq://localhost/test_servicebus"));
             }
             using (mocks.Playback())
             {
@@ -99,7 +102,7 @@ namespace MassTransit.ServiceBus.Tests
                     delegate { workDid = true; },
                     delegate { return true; });
 
-                IEnvelopeConsumer consumer = (IEnvelopeConsumer)_serviceBus;
+                IEnvelopeConsumer consumer = _serviceBus;
 
                 IEnvelope envelope = new Envelope(_serviceBusEndPoint, new PingMessage());
 
@@ -117,6 +120,7 @@ namespace MassTransit.ServiceBus.Tests
                 Expect.Call(_serviceBusEndPoint.QueueName).Return(queueName);
                 Expect.Call(_serviceBusEndPoint.QueueName).Return(queueName);
                 Expect.Call(_serviceBusEndPoint.Uri).Return(new Uri("msmq://localhost/test_servicebus"));
+                Expect.Call(_serviceBusEndPoint.Uri).Return(new Uri("msmq://localhost/test_servicebus"));
             }
             using (mocks.Playback())
             {
@@ -130,7 +134,7 @@ namespace MassTransit.ServiceBus.Tests
                     delegate { },
                     delegate { return true; });
 
-                IEnvelopeConsumer consumer = (IEnvelopeConsumer) _serviceBus;
+                IEnvelopeConsumer consumer = _serviceBus;
 
                 IEnvelope envelope = new Envelope(_serviceBusEndPoint, new PingMessage());
 
@@ -145,6 +149,7 @@ namespace MassTransit.ServiceBus.Tests
             {
                 Expect.Call(_serviceBusEndPoint.QueueName).Return(queueName);
                 Expect.Call(_serviceBusEndPoint.QueueName).Return(queueName);
+                Expect.Call(_serviceBusEndPoint.Uri).Return(new Uri("msmq://localhost/test_servicebus"));
                 Expect.Call(_serviceBusEndPoint.Uri).Return(new Uri("msmq://localhost/test_servicebus"));
             }
             using (mocks.Playback())
@@ -170,28 +175,25 @@ namespace MassTransit.ServiceBus.Tests
         [Test]
         public void The_Message_Endpoint_Should_Check_If_The_Message_Will_Be_Handled()
         {
+            //TODO: Uses MSMQ??? YES!!!
             IEndpoint mockReturnEndpoint = mocks.CreateMock<IEndpoint>();
-            MessageQueueEndpoint endpoint = new MessageQueueEndpoint(@"msmq://localhost/test_endpoint");
+            IEnvelopeConsumer mockConsumer = mocks.CreateMock<IEnvelopeConsumer>();
+            IMessageQueueEndpoint mockMessageQueueEndpoint = mocks.CreateMock<IMessageQueueEndpoint>();
 
-            IEnvelopeConsumer consumer = mocks.CreateMock<IEnvelopeConsumer>();
-
-            IMessageReceiver receiver = new MessageReceiverFactory().Using(endpoint);
-            receiver.Subscribe(consumer);
-
-            PingMessage ping = new PingMessage();
-            IEnvelope envelope = new Envelope(mockReturnEndpoint, ping);
+            IEnvelope envelope = new Envelope(mockReturnEndpoint, new PingMessage());
 
             using(mocks.Record())
             {
-                //I have no idea what changed - dds
-                //Expect.Call(mockReturnEndpoint.Uri).Return(new Uri("msmq://localhost/test_endpoint"));
-                Expect.Call(consumer.IsHandled(envelope)).Return(false).IgnoreArguments();
+                Expect.Call(mockMessageQueueEndpoint.QueueName).Return(queueName);
+                Expect.Call(mockConsumer.IsHandled(envelope)).Return(false);
             }
 
             using (mocks.Playback())
             {
-                Message queueMessage = EnvelopeMessageMapper.MapFrom(envelope);
+                IMessageReceiver receiver = new MessageQueueReceiver(mockMessageQueueEndpoint);
+                receiver.Subscribe(mockConsumer);
 
+                Message queueMessage = EnvelopeMessageMapper.MapFrom(envelope);
                 queueMessage.BodyStream.Seek(0, SeekOrigin.Begin);
 
                 ((MessageQueueReceiver)receiver).ProcessMessage(queueMessage);

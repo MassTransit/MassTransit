@@ -15,10 +15,6 @@ using System;
 
 namespace MassTransit.ServiceBus
 {
-}
-
-namespace MassTransit.ServiceBus
-{
     /// <summary>
     /// Used to begin receiving messages on an endpoint
     /// </summary>

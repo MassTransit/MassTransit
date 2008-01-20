@@ -19,7 +19,7 @@ namespace MassTransit.ServiceBus.Subscriptions
     public class SubscriptionCacheEntry :
         IEquatable<SubscriptionCacheEntry>
     {
-    	private MessageId _messageId = string.Empty;
+    	private MessageId _messageId = Util.MessageId.Empty;
         private Uri _endpoint;
 
 
