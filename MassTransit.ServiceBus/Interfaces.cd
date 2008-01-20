@@ -1,95 +1,123 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <ClassDiagram MajorVersion="1" MinorVersion="1">
   <Font Name="Tahoma" Size="8.25" />
-  <Interface Name="MassTransit.ServiceBus.IEndpoint">
-    <Position X="4.5" Y="0.5" Width="1.5" />
-    <TypeIdentifier>
-      <FileName>IEndpoint.cs</FileName>
-      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAAAA=</HashCode>
-    </TypeIdentifier>
-  </Interface>
-  <Interface Name="MassTransit.ServiceBus.INotifyMessageConsumer">
-    <Position X="11" Y="1.75" Width="1.5" />
-    <TypeIdentifier>
-      <FileName>INotifyMessageConsumer.cs</FileName>
-      <HashCode>AAAAAQAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAA=</HashCode>
-    </TypeIdentifier>
-  </Interface>
-  <Interface Name="MassTransit.ServiceBus.IEnvelope">
-    <Position X="7" Y="0.5" Width="1.5" />
-    <TypeIdentifier>
-      <FileName>IEnvelope.cs</FileName>
-      <HashCode>EQACAAAAEACAAAAAAAAQAAAAABBAAAAAAAAAAQAAAAA=</HashCode>
-    </TypeIdentifier>
-  </Interface>
-  <Interface Name="MassTransit.ServiceBus.IEnvelopeConsumer">
-    <Position X="11" Y="0.5" Width="1.5" />
-    <TypeIdentifier>
-      <FileName>IEnvelopeConsumer.cs</FileName>
-      <HashCode>AAAAAQAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAA=</HashCode>
-    </TypeIdentifier>
-  </Interface>
-  <Interface Name="MassTransit.ServiceBus.IMessage">
-    <Position X="18" Y="0.5" Width="1.5" />
+  <Interface Name="MassTransit.ServiceBus.IMessage" Collapsed="true">
+    <Position X="6" Y="5.25" Width="1.5" />
     <TypeIdentifier>
       <FileName>IMessage.cs</FileName>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
     </TypeIdentifier>
   </Interface>
-  <Interface Name="MassTransit.ServiceBus.IMessageConsumer&lt;T&gt;">
-    <Position X="9" Y="0.5" Width="1.75" />
-    <TypeIdentifier>
-      <FileName>IMessageConsumer.cs</FileName>
-      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAAAAAAAAA=</HashCode>
-    </TypeIdentifier>
-  </Interface>
-  <Interface Name="MassTransit.ServiceBus.IMessageQueueEndpoint">
-    <Position X="4.5" Y="2.25" Width="1.5" />
-    <TypeIdentifier>
-      <FileName>IMessageQueueEndpoint.cs</FileName>
-      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAA=</HashCode>
-    </TypeIdentifier>
-  </Interface>
-  <Interface Name="MassTransit.ServiceBus.IMessageReceiver">
-    <Position X="9" Y="1.75" Width="1.5" />
-    <TypeIdentifier>
-      <FileName>IMessageReceiver.cs</FileName>
-      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAAAAAAAAA=</HashCode>
-    </TypeIdentifier>
-  </Interface>
-  <Interface Name="MassTransit.ServiceBus.IMessageSender">
-    <Position X="12.75" Y="0.5" Width="1.5" />
-    <TypeIdentifier>
-      <FileName>IMessageSender.cs</FileName>
-      <HashCode>AAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
-    </TypeIdentifier>
-  </Interface>
-  <Interface Name="MassTransit.ServiceBus.IServiceBus">
-    <Position X="18" Y="1.5" Width="1.5" />
+  <Interface Name="MassTransit.ServiceBus.IServiceBus" Collapsed="true">
+    <Position X="8.75" Y="1.5" Width="1.5" />
     <TypeIdentifier>
       <FileName>IServiceBus.cs</FileName>
       <HashCode>AAAAAAAAAAAAAAAAAEAIAAAAAAACgAAAAAAAAAAAAAA=</HashCode>
     </TypeIdentifier>
   </Interface>
-  <Interface Name="MassTransit.ServiceBus.ISubscriptionStorage">
-    <Position X="18" Y="4" Width="1.5" />
+  <Interface Name="MassTransit.ServiceBus.ISubscriptionStorage" Collapsed="true">
+    <Position X="13.25" Y="2.25" Width="2" />
     <TypeIdentifier>
       <FileName>ISubscriptionStorage.cs</FileName>
-      <HashCode>AAIAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAI=</HashCode>
+      <HashCode>AAIAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAACAAAAAI=</HashCode>
     </TypeIdentifier>
   </Interface>
-  <Interface Name="MassTransit.ServiceBus.IServiceBusAsyncResult">
-    <Position X="6.75" Y="4.75" Width="1.5" />
+  <Interface Name="MassTransit.ServiceBus.IServiceBusAsyncResult" Collapsed="true">
+    <Position X="10.5" Y="1.5" Width="2" />
     <TypeIdentifier>
       <FileName>IServiceBusAsyncResult.cs</FileName>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAA=</HashCode>
     </TypeIdentifier>
   </Interface>
-  <Delegate Name="MassTransit.ServiceBus.MessageReceivedCallback&lt;T&gt;">
-    <Position X="9" Y="3" Width="1.5" />
+  <Interface Name="MassTransit.ServiceBus.IMessageSenderFactory" Collapsed="true">
+    <Position X="13" Y="4.5" Width="2" />
+    <TypeIdentifier>
+      <FileName>IMessageSenderFactory.cs</FileName>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="MassTransit.ServiceBus.IAutoSubscriber">
+    <Position X="3.5" Y="4.5" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>IAutoSubscriber.cs</FileName>
+      <HashCode>AAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="MassTransit.ServiceBus.IEndpoint" Collapsed="true">
+    <Position X="0.5" Y="0.75" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>IEndpoint.cs</FileName>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="MassTransit.ServiceBus.IEnvelope" Collapsed="true">
+    <Position X="6" Y="6" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>IEnvelope.cs</FileName>
+      <HashCode>EQACAAAAEACAAAAAAAAQAAAAABBAAAAAAAAAAQAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="MassTransit.ServiceBus.IEnvelopeConsumer" Collapsed="true">
+    <Position X="0.5" Y="5.25" Width="1.75" />
+    <TypeIdentifier>
+      <FileName>IEnvelopeConsumer.cs</FileName>
+      <HashCode>AAAAAQAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="MassTransit.ServiceBus.IMessageConsumer" Collapsed="true">
+    <Position X="0.5" Y="3.25" Width="1.75" />
     <TypeIdentifier>
       <FileName>IMessageConsumer.cs</FileName>
-      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAA=</HashCode>
+      <HashCode>AAAAAQAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="MassTransit.ServiceBus.IMessageConsumer&lt;T&gt;" Collapsed="true">
+    <Position X="0.5" Y="4.5" Width="2" />
+    <TypeIdentifier>
+      <FileName>IMessageConsumer.cs</FileName>
+      <HashCode>AAAAAQAAAAAAQAAAAAAAAAAAAAACAAAAAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="MassTransit.ServiceBus.IMessageContext&lt;T&gt;" Collapsed="true">
+    <Position X="6" Y="4.5" Width="2.75" />
+    <TypeIdentifier>
+      <FileName>IMessageContext.cs</FileName>
+      <HashCode>AAIAAAAAAAAAAQCAAAAAAAAAAAAAAAAAgAAAIAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="MassTransit.ServiceBus.IMessageQueueEndpoint" Collapsed="true">
+    <Position X="0.5" Y="1.75" Width="2" />
+    <TypeIdentifier>
+      <FileName>IMessageQueueEndpoint.cs</FileName>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="MassTransit.ServiceBus.IMessageReceiver" Collapsed="true">
+    <Position X="3.5" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>IMessageReceiver.cs</FileName>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="MassTransit.ServiceBus.IMessageReceiverFactory" Collapsed="true">
+    <Position X="3.5" Y="2.25" Width="2" />
+    <TypeIdentifier>
+      <FileName>IMessageReceiverFactory.cs</FileName>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="MassTransit.ServiceBus.IMessageSender" Collapsed="true">
+    <Position X="13" Y="5" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>IMessageSender.cs</FileName>
+      <HashCode>AAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Interface>
+  <Delegate Name="MassTransit.ServiceBus.MessageReceivedCallback&lt;T&gt;" Collapsed="true">
+    <Position X="3.5" Y="3" Width="2.25" />
+    <TypeIdentifier>
+      <FileName>IMessageConsumer.cs</FileName>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAA=</HashCode>
     </TypeIdentifier>
   </Delegate>
 </ClassDiagram>
