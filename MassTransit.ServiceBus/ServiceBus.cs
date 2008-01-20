@@ -13,7 +13,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Reflection;
 using log4net;
 using MassTransit.ServiceBus.Util;
 
@@ -29,19 +28,20 @@ namespace MassTransit.ServiceBus
         IServiceBus,
         IEnvelopeConsumer
     {
-        private static readonly ILog _log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+        private static readonly ILog _log = LogManager.GetLogger(typeof(ServiceBus));
+        private readonly object _consumersLock = new object();
+
         private readonly AsyncReplyDispatcher _asyncReplyDispatcher = new AsyncReplyDispatcher();
 
         private readonly Dictionary<Type, IMessageConsumer> _consumers =
             new Dictionary<Type, IMessageConsumer>();
 
-        private readonly object _consumersLock = new object();
 
         private readonly IEndpoint _endpoint;
         private IMessageReceiver _receiver;
-        private readonly ISubscriptionStorage _subscriptionStorage;
         private IEndpoint _poisonEndpoint;
         private readonly IMessageSenderFactory _senderFactory;
+        private readonly ISubscriptionStorage _subscriptionStorage;
 
         public ServiceBus(IEndpoint endpoint, ISubscriptionStorage subscriptionStorage) 
             : this (endpoint, subscriptionStorage, new MessageSenderFactory(), new MessageReceiverFactory().Using(endpoint))
