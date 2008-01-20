@@ -20,8 +20,7 @@ namespace MassTransit.ServiceBus
 	/// <summary>
 	/// A MessageQueueEndpoint is an implementation of an endpoint using the Microsoft Message Queue service.
 	/// </summary>
-	public class MessageQueueEndpoint :
-		IMessageQueueEndpoint
+	public class MessageQueueEndpoint : IMessageQueueEndpoint
 	{
 		private readonly string _queuePath;
 		private readonly Uri _uri;
@@ -47,7 +46,7 @@ namespace MassTransit.ServiceBus
 
 			if (_uri.AbsolutePath.IndexOf("/", 1) >= 0)
 			{
-				throw new EndpointException(this, "Queue Endpoints can't have a child folder. Good: msmq://machinename/queue_name | Bad: msmq://machinename/queue_name/bad_form");
+				throw new EndpointException(this, "Queue Endpoints can't have a child folder unless it is 'public'. Good: 'msmq://machinename/queue_name' or 'msmq://machinename/public/queue_name' - Bad: msmq://machinename/queue_name/bad_form");
 			}
 
             string hostName = _uri.Host;
