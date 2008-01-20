@@ -12,6 +12,7 @@
 /// specific language governing permissions and limitations under the License.
 
 using System;
+using System.Messaging;
 using MassTransit.ServiceBus.Exceptions;
 
 namespace MassTransit.ServiceBus
@@ -73,6 +74,18 @@ namespace MassTransit.ServiceBus
 		{
             get { return _queuePath; }
 		}
+
+        public MessageQueue Open(QueueAccessMode mode)
+        {
+            MessageQueue queue = new MessageQueue(QueueName, mode);
+
+            MessagePropertyFilter mpf = new MessagePropertyFilter();
+            mpf.SetAll();
+
+            queue.MessageReadPropertyFilter = mpf;
+
+            return queue;
+        }
 
 	    /// <summary>
 	    /// The address of the endpoint, in URI format

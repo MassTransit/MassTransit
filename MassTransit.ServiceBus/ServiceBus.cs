@@ -38,12 +38,11 @@ namespace MassTransit.ServiceBus
         private readonly object _consumersLock = new object();
 
         private readonly IEndpoint _endpoint;
-        private readonly IMessageReceiver _receiver;
-        private readonly IMessageSender _sender;
+        private IMessageReceiver _receiver;
         private readonly ISubscriptionStorage _subscriptionStorage;
         private IEndpoint _poisonEndpoint;
-        private IMessageSenderFactory _senderFactory;
-        private IMessageReceiverFactory _receiverFactory;
+        private readonly IMessageSenderFactory _senderFactory;
+        private readonly IMessageReceiverFactory _receiverFactory;
 
         public ServiceBus(IEndpoint endpoint, ISubscriptionStorage subscriptionStorage) 
             : this (endpoint, subscriptionStorage, new MessageSenderFactory(), new MessageReceiverFactory())
@@ -59,11 +58,6 @@ namespace MassTransit.ServiceBus
             _receiverFactory = receiverFactory;
             _senderFactory = factory;
             _subscriptionStorage = subscriptionStorage;
-
-            //TODO: Can we move the below out of the constructor?
-            _receiver = _receiverFactory.Using(_endpoint);
-            _receiver.Subscribe(this);
-            _sender = _senderFactory.Using(_endpoint);
         }
 
 
@@ -83,7 +77,7 @@ namespace MassTransit.ServiceBus
         /// <returns>True is the consumer will handle the message, false if it should be ignored</returns>
         public bool IsHandled(IEnvelope envelope)
         {
-            bool result = false;
+            bool result;
             try
             {
                 if(_asyncReplyDispatcher.Exists(envelope.CorrelationId))
@@ -162,10 +156,9 @@ namespace MassTransit.ServiceBus
 
             _consumers.Clear();
 
-            _receiver.Dispose();
-
-            _sender.Dispose();
-
+            if(_receiver != null)
+                _receiver.Dispose();
+            
             _endpoint.Dispose();
         }
 
@@ -249,11 +242,17 @@ namespace MassTransit.ServiceBus
             {
                 if (!_consumers.ContainsKey(typeof (T)))
                 {
-                    _consumers[typeof (T)] = new MessageConsumer<T>(this._senderFactory);
+                    _consumers[typeof (T)] = new MessageConsumer<T>(_senderFactory);
                     _subscriptionStorage.Add(typeof(T).FullName, Endpoint.Uri);
                 }
 
                 ((IMessageConsumer<T>) _consumers[typeof (T)]).Subscribe(callback, condition);
+            }
+
+            if (_receiver == null)
+            {
+                _receiver = _receiverFactory.Using(_endpoint);
+                _receiver.Subscribe(this);
             }
         }
 

@@ -51,14 +51,12 @@ namespace MassTransit.ServiceBus.Tests
             using(mocks.Record())
             {
                 Expect.Call(mockReceiverFactory.Using(mockBusEndpoint)).Return(mockReceiver);
-                mockReceiver.Subscribe(_serviceBus); //TODO: Actions in SB contstructor causing this issue
-                LastCall.IgnoreArguments();
-                Expect.Call(mockSenderFactory.Using(mockBusEndpoint)).Return(mockSender);
-                Expect.Call(mockBusEndpoint.Uri).Return(queueUri);
+                Expect.Call(delegate { mockReceiver.Subscribe(null); }).IgnoreArguments();
+                Expect.Call(mockBusEndpoint.Uri).Return(queueUri).Repeat.Any();
+
                 mockSubscriptionStorage.Add(typeof(PoisonMessage).FullName, this.queueUri);
 
-                Expect.Call(mockBusEndpoint.Uri).Return(queueUri);
-                Expect.Call(mockSenderFactory.Using(new MessageQueueEndpoint(queueUri))).Return(mockSender).IgnoreArguments(); //Ignoring arguments because we should be using the poison endpoint
+                Expect.Call(mockSenderFactory.Using(mockBusEndpoint)).IgnoreArguments().Return(mockSender);
 
                 mockSender.Send(null);
                 LastCall.IgnoreArguments(); //because we can't control the Envelope from here?
