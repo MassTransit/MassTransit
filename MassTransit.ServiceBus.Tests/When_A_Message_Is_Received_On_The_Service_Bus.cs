@@ -37,6 +37,7 @@ namespace MassTransit.ServiceBus.Tests
                 Expect.Call(_serviceBusEndPoint.QueueName).Return(queueName);
                 Expect.Call(_serviceBusEndPoint.QueueName).Return(queueName);
                 Expect.Call(_serviceBusEndPoint.Uri).Return(new Uri("msmq://localhost/test_servicebus"));
+                Expect.Call(_serviceBusEndPoint.Uri).Return(new Uri("msmq://localhost/test_servicebus"));
             }
             using (mocks.Playback())
             {
@@ -65,6 +66,7 @@ namespace MassTransit.ServiceBus.Tests
             {
                 Expect.Call(_serviceBusEndPoint.QueueName).Return(queueName);
                 Expect.Call(_serviceBusEndPoint.QueueName).Return(queueName);
+                Expect.Call(_serviceBusEndPoint.Uri).Return(new Uri("msmq://localhost/test_servicebus"));
             }
             using (mocks.Playback())
             {

@@ -135,5 +135,34 @@ namespace MassTransit.ServiceBus.Tests
 
             Assert.That(e.TimeToBeReceived, Is.EqualTo(time));
         }
+
+        [Test]
+        public void Should_Equal_Itself()
+        {
+            Envelope e = new Envelope();
+            Assert.AreEqual(e, e);
+            Assert.IsTrue(e.Equals(e));
+        }
+
+        [Test]
+        [ExpectedException(typeof(Exception))]
+        public void How_to_handle_bad_ids_with_no_sequence()
+        {
+            Envelope e = new Envelope();
+            e.Id = new MessageId("5DF5FF14-DA6B-495f-8292-6FAD060FA13A");
+        }
+
+        [Test]
+        public void Should_not_equal_another_with_same_guid_diff_sequence()
+        {
+            Envelope e = new Envelope();
+            e.Id = new MessageId("5DF5FF14-DA6B-495f-8292-6FAD060FA13A\\1");
+
+            Envelope n = new Envelope();
+            n.Id = new MessageId("5DF5FF14-DA6B-495f-8292-6FAD060FA13A\\2");
+
+            Assert.AreNotEqual(e, n);
+            Assert.IsFalse(e.Equals(n));
+        }
     }
 }

@@ -3,6 +3,8 @@ using Rhino.Mocks;
 
 namespace MassTransit.ServiceBus.Tests
 {
+    using Util;
+
     [TestFixture]
     public class MessageContext_Should_Help
     {
@@ -55,7 +57,7 @@ namespace MassTransit.ServiceBus.Tests
             {
                 Expect.Call(mockEnvelope.ReturnEndpoint).Return(mockEndpoint);
                 Expect.Call(mockBus.Endpoint).Return(mockBusEndpoint);
-                Expect.Call(mockEnvelope.Id).Return("");
+                Expect.Call(mockEnvelope.Id).Return(MessageId.Empty);
                 Expect.Call(mockFactory.Using(mockEndpoint)).Return(mockMessageSender);
                 Expect.Call(delegate { mockMessageSender.Send(null); }).IgnoreArguments(); //ignoring arguments because we create a new envelope in the method
 

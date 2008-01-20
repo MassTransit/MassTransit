@@ -43,11 +43,16 @@ namespace MassTransit.ServiceBus.Util
         public MessageId(string s)
             : this()
         {
+            //TODO: Use regex?
             string[] parts = s.Split('\\');
             if (parts.Length == 2)
             {
                 _id = new Guid(parts[0]);
                 _sequence = int.Parse(parts[1]);
+            }
+            else
+            {
+                throw new Exception(string.Format("MessageId is in the wrong format. Should be like '00000000-0000-0000-0000-000000000000\\0' not '{0}'", s));
             }
         }
 
