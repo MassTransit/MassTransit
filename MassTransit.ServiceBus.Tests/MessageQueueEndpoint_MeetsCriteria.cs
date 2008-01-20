@@ -14,7 +14,6 @@ namespace MassTransit.ServiceBus.Tests
         private MockRepository mocks;
         private ServiceBus _serviceBus;
         private IMessageQueueEndpoint _serviceBusEndPoint;
-        private IMessageReceiverFactory mockReceiverFactory;
         private IMessageSenderFactory mockSenderFactory;
         private IMessageReceiver mockReceiver;
         private string queueName = @".\private$\test_servicebus";
@@ -25,7 +24,6 @@ namespace MassTransit.ServiceBus.Tests
             ServiceBusSetupFixture.ValidateAndPurgeQueue(queueName);
             mocks = new MockRepository();
             _serviceBusEndPoint = mocks.CreateMock<IMessageQueueEndpoint>();
-            mockReceiverFactory = mocks.CreateMock<IMessageReceiverFactory>();
             mockSenderFactory = mocks.CreateMock<IMessageSenderFactory>();
             mockReceiver = mocks.CreateMock<IMessageReceiver>();
         }
@@ -42,13 +40,12 @@ namespace MassTransit.ServiceBus.Tests
         {
             using(mocks.Record())
             {
-                Expect.Call(mockReceiverFactory.Using(_serviceBusEndPoint)).Return(mockReceiver);
                 Expect.Call(delegate { mockReceiver.Subscribe(null); }).IgnoreArguments();
                 Expect.Call(_serviceBusEndPoint.Uri).Return(new Uri("msmq://localhost/test_servicebus")).Repeat.Any(); //stupid log4net
             }
             using (mocks.Playback())
             {
-                _serviceBus = new ServiceBus(_serviceBusEndPoint, new LocalSubscriptionCache(), mockSenderFactory, mockReceiverFactory);
+                _serviceBus = new ServiceBus(_serviceBusEndPoint, new LocalSubscriptionCache(), mockSenderFactory, mockReceiver);
                 _serviceBus.Subscribe<PingMessage>(
                     delegate { },
                     delegate { return false; });
@@ -66,13 +63,12 @@ namespace MassTransit.ServiceBus.Tests
         {
             using(mocks.Record())
             {
-                Expect.Call(mockReceiverFactory.Using(_serviceBusEndPoint)).Return(mockReceiver);
                 Expect.Call(delegate { mockReceiver.Subscribe(null); }).IgnoreArguments();
                 Expect.Call(_serviceBusEndPoint.Uri).Return(new Uri("msmq://localhost/test_servicebus")).Repeat.Any(); //stupid log4net
             }
             using (mocks.Playback())
             {
-                _serviceBus = new ServiceBus(_serviceBusEndPoint, new LocalSubscriptionCache(), mockSenderFactory, mockReceiverFactory);
+                _serviceBus = new ServiceBus(_serviceBusEndPoint, new LocalSubscriptionCache(), mockSenderFactory, mockReceiver);
 
                 _serviceBus.Subscribe<PingMessage>(
                     delegate { },
@@ -93,13 +89,12 @@ namespace MassTransit.ServiceBus.Tests
 
             using (mocks.Record())
             {
-                Expect.Call(mockReceiverFactory.Using(_serviceBusEndPoint)).Return(mockReceiver);
                 Expect.Call(delegate { mockReceiver.Subscribe(null); }).IgnoreArguments();
                 Expect.Call(_serviceBusEndPoint.Uri).Return(new Uri("msmq://localhost/test_servicebus")).Repeat.Any(); //stupid log4net
             }
             using (mocks.Playback())
             {
-                _serviceBus = new ServiceBus(_serviceBusEndPoint, new LocalSubscriptionCache(), mockSenderFactory, mockReceiverFactory);
+                _serviceBus = new ServiceBus(_serviceBusEndPoint, new LocalSubscriptionCache(), mockSenderFactory, mockReceiver);
 
                 _serviceBus.Subscribe<PingMessage>(
                     delegate { workDid = true; },
@@ -120,13 +115,13 @@ namespace MassTransit.ServiceBus.Tests
         {
             using(mocks.Record())
             {
-                Expect.Call(mockReceiverFactory.Using(_serviceBusEndPoint)).Return(mockReceiver);
+                Expect.Call(delegate { mockReceiver.Subscribe(null); }).IgnoreArguments();
                 Expect.Call(delegate { mockReceiver.Subscribe(null); }).IgnoreArguments();
                 Expect.Call(_serviceBusEndPoint.Uri).Return(new Uri("msmq://localhost/test_servicebus")).Repeat.Any(); //stupid log4net
             }
             using (mocks.Playback())
             {
-                _serviceBus = new ServiceBus(_serviceBusEndPoint, new LocalSubscriptionCache(), mockSenderFactory, mockReceiverFactory);
+                _serviceBus = new ServiceBus(_serviceBusEndPoint, new LocalSubscriptionCache(), mockSenderFactory, mockReceiver);
 
                 _serviceBus.Subscribe<PingMessage>(
                     delegate { },
@@ -149,13 +144,13 @@ namespace MassTransit.ServiceBus.Tests
         {
             using(mocks.Record())
             {
-                Expect.Call(mockReceiverFactory.Using(_serviceBusEndPoint)).Return(mockReceiver);
+                Expect.Call(delegate { mockReceiver.Subscribe(null); }).IgnoreArguments();
                 Expect.Call(delegate { mockReceiver.Subscribe(null); }).IgnoreArguments();
                 Expect.Call(_serviceBusEndPoint.Uri).Return(new Uri("msmq://localhost/test_servicebus")).Repeat.Any(); //stupid log4net
             }
             using (mocks.Playback())
             {
-                _serviceBus = new ServiceBus(_serviceBusEndPoint, new LocalSubscriptionCache(), mockSenderFactory, mockReceiverFactory);
+                _serviceBus = new ServiceBus(_serviceBusEndPoint, new LocalSubscriptionCache(), mockSenderFactory, mockReceiver);
 
                 _serviceBus.Subscribe<PingMessage>(
                     delegate { },

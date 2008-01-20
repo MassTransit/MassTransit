@@ -13,7 +13,6 @@ namespace MassTransit.ServiceBus.Tests
 	    private ISubscriptionStorage mockSubscriptionStorage;
 	    private IMessageSenderFactory mockSenderFactory;
 	    private IMessageSender mockSender;
-	    private IMessageReceiverFactory mockReceiverFactory;
 	    private IMessageReceiver mockReceiver;
 
 	    private string queueName = @".\private$\test";
@@ -29,7 +28,6 @@ namespace MassTransit.ServiceBus.Tests
 	        ServiceBusSetupFixture.ValidateAndPurgeQueue(queueName);
 	        mockSenderFactory = mocks.CreateMock<IMessageSenderFactory>();
 	        mockSender = mocks.CreateMock<IMessageSender>();
-	        mockReceiverFactory = mocks.CreateMock<IMessageReceiverFactory>();
 	        mockReceiver = mocks.CreateMock<IMessageReceiver>();
 	    }
 
@@ -41,7 +39,6 @@ namespace MassTransit.ServiceBus.Tests
 	        mockSubscriptionStorage = null;
 	        _serviceBus = null;
 	        mockSenderFactory = null;
-	        mockReceiverFactory = null;
 	        mockReceiver = null;
 	    }
 
@@ -50,7 +47,6 @@ namespace MassTransit.ServiceBus.Tests
         {
             using(mocks.Record())
             {
-                Expect.Call(mockReceiverFactory.Using(mockBusEndpoint)).Return(mockReceiver);
                 Expect.Call(delegate { mockReceiver.Subscribe(null); }).IgnoreArguments();
                 Expect.Call(mockBusEndpoint.Uri).Return(queueUri).Repeat.Any();
 
@@ -63,7 +59,7 @@ namespace MassTransit.ServiceBus.Tests
             }
             using (mocks.Playback())
             {
-                _serviceBus = new ServiceBus(mockBusEndpoint, mockSubscriptionStorage, mockSenderFactory, mockReceiverFactory);
+                _serviceBus = new ServiceBus(mockBusEndpoint, mockSubscriptionStorage, mockSenderFactory, mockReceiver);
                 
                 ////this ends up in a seperate thread and I am therefore unable to figure out how to test
                 _serviceBus.Subscribe<PoisonMessage>(delegate(IMessageContext<PoisonMessage> cxt)
