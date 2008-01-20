@@ -35,12 +35,8 @@ namespace MassTransit.ServiceBus
         public MessageQueueSender(IMessageQueueEndpoint endpoint)
         {
             _endpoint = endpoint;
-            _queue = new MessageQueue(endpoint.QueueName, QueueAccessMode.SendAndReceive);
 
-            MessagePropertyFilter mpf = new MessagePropertyFilter();
-            mpf.SetAll();
-
-            _queue.MessageReadPropertyFilter = mpf;
+            _queue = endpoint.Open(QueueAccessMode.SendAndReceive);
         }
 
         #region IMessageSender Members

@@ -40,7 +40,7 @@ namespace MassTransit.ServiceBus.Subscriptions
         {
 			_storageEndpoint = storageEndpoint;
             _subscriptionCache = subscriptionCache;
-			_storageQueue = new MessageQueue(_storageEndpoint.QueueName, QueueAccessMode.SendAndReceive);
+			_storageQueue = storageEndpoint.Open(QueueAccessMode.SendAndReceive);
 
             //TODO: should there be a bus instance here so we can subscribe to messages and send messages?
 
@@ -52,11 +52,6 @@ namespace MassTransit.ServiceBus.Subscriptions
 
         private void Initialize()
         {
-            MessagePropertyFilter mpf = new MessagePropertyFilter();
-            mpf.SetAll();
-
-            _storageQueue.MessageReadPropertyFilter = mpf;
-
             _formatter = new BinaryFormatter();
 
             _peekCursor = _storageQueue.CreateCursor();

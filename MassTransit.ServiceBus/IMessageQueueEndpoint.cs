@@ -1,3 +1,5 @@
+using System.Messaging;
+
 /// Copyright 2007-2008 The Apache Software Foundation.
 /// 
 /// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
@@ -24,5 +26,7 @@ namespace MassTransit.ServiceBus
         /// to access a message queue.
         /// </summary>
         string QueueName { get; }
+
+	    MessageQueue Open(QueueAccessMode mode);
     }
 }

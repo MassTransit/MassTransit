@@ -42,12 +42,7 @@ namespace MassTransit.ServiceBus
         /// <param name="endpoint">The endpoint where the receiver should be attached</param>
         public MessageQueueReceiver(IMessageQueueEndpoint endpoint)
         {
-            _queue = new MessageQueue(endpoint.QueueName, QueueAccessMode.SendAndReceive);
-
-            MessagePropertyFilter mpf = new MessagePropertyFilter();
-            mpf.SetAll();
-
-            _queue.MessageReadPropertyFilter = mpf;
+            _queue = endpoint.Open(QueueAccessMode.SendAndReceive);
 
             try
             {
