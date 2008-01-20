@@ -42,20 +42,19 @@ namespace MassTransit.ServiceBus
         private readonly ISubscriptionStorage _subscriptionStorage;
         private IEndpoint _poisonEndpoint;
         private readonly IMessageSenderFactory _senderFactory;
-        private readonly IMessageReceiverFactory _receiverFactory;
 
         public ServiceBus(IEndpoint endpoint, ISubscriptionStorage subscriptionStorage) 
-            : this (endpoint, subscriptionStorage, new MessageSenderFactory(), new MessageReceiverFactory())
+            : this (endpoint, subscriptionStorage, new MessageSenderFactory(), new MessageReceiverFactory().Using(endpoint))
         {
         }
 
-        public ServiceBus(IEndpoint endpoint, ISubscriptionStorage subscriptionStorage, IMessageSenderFactory factory, IMessageReceiverFactory receiverFactory)
+        public ServiceBus(IEndpoint endpoint, ISubscriptionStorage subscriptionStorage, IMessageSenderFactory factory, IMessageReceiver receiver)
         {
             Check.Parameter(endpoint).WithMessage("endpoint").IsNotNull();
             Check.Parameter(subscriptionStorage).WithMessage("subscriptionStorage").IsNotNull();
 
             _endpoint = endpoint;
-            _receiverFactory = receiverFactory;
+            _receiver = receiver;
             _senderFactory = factory;
             _subscriptionStorage = subscriptionStorage;
         }
@@ -243,17 +242,14 @@ namespace MassTransit.ServiceBus
                 if (!_consumers.ContainsKey(typeof (T)))
                 {
                     _consumers[typeof (T)] = new MessageConsumer<T>(_senderFactory);
-                    _subscriptionStorage.Add(typeof(T).FullName, Endpoint.Uri);
+                    _subscriptionStorage.Add(typeof (T).FullName, Endpoint.Uri);
                 }
 
                 ((IMessageConsumer<T>) _consumers[typeof (T)]).Subscribe(callback, condition);
             }
 
-            if (_receiver == null)
-            {
-                _receiver = _receiverFactory.Using(_endpoint);
-                _receiver.Subscribe(this);
-            }
+
+            _receiver.Subscribe(this);
         }
 
         /// <summary>
