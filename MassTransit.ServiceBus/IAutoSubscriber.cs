@@ -21,18 +21,10 @@ namespace MassTransit.ServiceBus
 	/// </summary>
 	public interface IAutoSubscriber
 	{
-		/// <summary>
-		/// Called by the service bus to allow the class to subscribe to handled
-		/// message types
-		/// </summary>
-		/// <param name="bus">The instance of the service bus being initialized.</param>
-		void Subscribe(IServiceBus bus);
-
-		/// <summary>
-		/// Called by the service bus to unsubscribe any handlers that were previously
-		/// registered with the service bus.
-		/// </summary>
-		/// <param name="bus">The instance of the service bus being shut down.</param>
-		void Unsubscribe(IServiceBus bus);
+        /// <summary>
+        /// Used to subscribe or unsubscribe at startup
+        /// </summary>
+        /// <param name="bus">The funk bus</param>
+	    void Initialize(IServiceBus bus);
 	}
 }
