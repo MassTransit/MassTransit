@@ -32,9 +32,9 @@ namespace MassTransit.ServiceBus.Tests
 
             MessageQueue.EnableConnectionCache = false;
 
-            ValidateAndPurgeQueue(_serviceBusEndPoint.QueueName);
-            ValidateAndPurgeQueue(_remoteServiceBusEndPoint.QueueName);
-            ValidateAndPurgeQueue(_subscriptionEndpoint.QueueName);
+            ValidateAndPurgeQueue(_serviceBusEndPoint.QueuePath);
+            ValidateAndPurgeQueue(_remoteServiceBusEndPoint.QueuePath);
+            ValidateAndPurgeQueue(_subscriptionEndpoint.QueuePath);
 
             IServiceBus ignore = ServiceBus;
         }

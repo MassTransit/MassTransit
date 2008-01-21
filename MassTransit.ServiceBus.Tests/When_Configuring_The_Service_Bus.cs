@@ -29,7 +29,7 @@ namespace MassTransit.ServiceBus.Tests
 
             MessageQueueEndpoint defaultEndpoint = endpointName;
 
-            ServiceBusSetupFixture.ValidateAndPurgeQueue(defaultEndpoint.QueueName);
+            ServiceBusSetupFixture.ValidateAndPurgeQueue(defaultEndpoint.QueuePath);
 
             IServiceBus serviceBus = new ServiceBus(defaultEndpoint, mocks.CreateMock<ISubscriptionStorage>());
 

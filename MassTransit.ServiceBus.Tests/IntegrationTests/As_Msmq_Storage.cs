@@ -20,9 +20,9 @@ namespace MassTransit.ServiceBus.Tests.IntegrationTests
             subscriberEndpoint = new MessageQueueEndpoint("msmq://localhost/subscriber");
             listenEndpoint = new MessageQueueEndpoint("msmq://localhost/listen");
 
-            ServiceBusSetupFixture.ValidateAndPurgeQueue(storageEndpoint.QueueName);
-            ServiceBusSetupFixture.ValidateAndPurgeQueue(subscriberEndpoint.QueueName);
-            ServiceBusSetupFixture.ValidateAndPurgeQueue(listenEndpoint.QueueName);
+            ServiceBusSetupFixture.ValidateAndPurgeQueue(storageEndpoint.QueuePath);
+            ServiceBusSetupFixture.ValidateAndPurgeQueue(subscriberEndpoint.QueuePath);
+            ServiceBusSetupFixture.ValidateAndPurgeQueue(listenEndpoint.QueuePath);
         }
 
         [TearDown]
@@ -43,7 +43,7 @@ namespace MassTransit.ServiceBus.Tests.IntegrationTests
 
             SubscriptionChange msg = new SubscriptionChange("", null, SubscriptionChangeType.Add);
 
-            ServiceBusSetupFixture.VerifyMessageInQueue(storageEndpoint.QueueName, msg);
+            ServiceBusSetupFixture.VerifyMessageInQueue(storageEndpoint.QueuePath, msg);
         }
 
         [Test]
@@ -70,7 +70,7 @@ namespace MassTransit.ServiceBus.Tests.IntegrationTests
             storage.Remove(typeof (PingMessage).FullName, subscriberEndpoint.Uri);
             Assert.AreEqual(0, storage.List().Count);
 
-            ServiceBusSetupFixture.VerifyQueueIsEmpty(storageEndpoint.QueueName);
+            ServiceBusSetupFixture.VerifyQueueIsEmpty(storageEndpoint.QueuePath);
         }
     }
 }

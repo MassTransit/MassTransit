@@ -5,6 +5,9 @@ using Rhino.Mocks;
 
 namespace MassTransit.ServiceBus.Tests
 {
+    using System;
+    using System.Messaging;
+
     [TestFixture]
     public class When_working_with_an_endpoint
     {
@@ -46,6 +49,13 @@ namespace MassTransit.ServiceBus.Tests
                     Assert.That(sender, Is.Not.Null);
                 }
             }
+        }
+
+        [Test]
+        public void When_queue_doesnt_exist()
+        {
+            MessageQueueEndpoint q = new MessageQueueEndpoint(new Uri("msmq://localhost/not_there"));
+            q.Open(QueueAccessMode.ReceiveAndAdmin);
         }
     }
 }

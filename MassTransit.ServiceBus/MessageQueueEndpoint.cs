@@ -72,14 +72,14 @@ namespace MassTransit.ServiceBus
         /// The path of the message queue for the endpoint. Suitable for use with <c ref="MessageQueue" />.Open
         /// to access a message queue.
         /// </summary>
-        public string QueueName
+        public string QueuePath
         {
             get { return _queuePath; }
         }
 
         public MessageQueue Open(QueueAccessMode mode)
         {
-            MessageQueue queue = new MessageQueue(QueueName, mode);
+            MessageQueue queue = new MessageQueue(QueuePath, mode);
 
             MessagePropertyFilter mpf = new MessagePropertyFilter();
             mpf.SetAll();

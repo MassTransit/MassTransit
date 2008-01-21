@@ -25,7 +25,7 @@ namespace MassTransit.ServiceBus
         /// The path of the message queue for the endpoint. Suitable for use with <c ref="MessageQueue" />.Open
         /// to access a message queue.
         /// </summary>
-        string QueueName { get; }
+        string QueuePath { get; }
 
         /// <summary>
         /// Opens a message queue
