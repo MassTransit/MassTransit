@@ -12,7 +12,7 @@ namespace MassTransit.ServiceBus.SubscriptionsManager.Client.Tests
     public class How_do_i_watch_the_storage
     {
         MockRepository mocks;
-        private ISubscriptionStorage cache;
+        private ISubscriptionStorage mockCache;
         private IServiceBus mockBus;
         private IMessageQueueEndpoint mockEndpoint;
 
@@ -20,7 +20,7 @@ namespace MassTransit.ServiceBus.SubscriptionsManager.Client.Tests
         public void SetUp()
         {
             mocks = new MockRepository();
-            cache = mocks.CreateMock<ISubscriptionStorage>();
+            mockCache = mocks.CreateMock<ISubscriptionStorage>();
             mockBus = mocks.CreateMock<IServiceBus>();
             mockEndpoint = mocks.CreateMock<IMessageQueueEndpoint>();
         }
@@ -29,7 +29,7 @@ namespace MassTransit.ServiceBus.SubscriptionsManager.Client.Tests
         public void TearDown()
         {
             mocks = null;
-            cache = null;
+            mockCache = null;
             mockBus = null;
             mockEndpoint = null;
         }
@@ -44,14 +44,14 @@ namespace MassTransit.ServiceBus.SubscriptionsManager.Client.Tests
                 mockBus.Send<RequestCacheUpdate>(mockEndpoint, null);
                 LastCall.IgnoreArguments();
 
-                cache.SubscriptionChanged += null;
+                mockCache.SubscriptionChanged += null;
                 LastCall.IgnoreArguments();
-                Expect.Call(cache.List()).Return(new List<Subscription>());
+                Expect.Call(mockCache.List()).Return(new List<Subscription>());
             }
             using(mocks.Playback())
             {
                 ClientProxy proxy = new ClientProxy(mockEndpoint);
-                proxy.StartWatching(mockBus, cache);    
+                proxy.StartWatching(mockBus, mockCache);    
             }
         }
 
@@ -65,9 +65,9 @@ namespace MassTransit.ServiceBus.SubscriptionsManager.Client.Tests
                 LastCall.IgnoreArguments();
                 mockBus.Send<RequestCacheUpdate>(mockEndpoint, null);
                 LastCall.IgnoreArguments();
-                Expect.Call(delegate { cache.SubscriptionChanged += null; }).IgnoreArguments();
+                Expect.Call(delegate { mockCache.SubscriptionChanged += null; }).IgnoreArguments();
                 eventRaiser = LastCall.GetEventRaiser();
-                Expect.Call(cache.List()).Return(new List<Subscription>());
+                Expect.Call(mockCache.List()).Return(new List<Subscription>());
 
                 Expect.Call(delegate { mockBus.Send<SubscriptionChange>(mockEndpoint, null); }).IgnoreArguments();
 
@@ -75,9 +75,9 @@ namespace MassTransit.ServiceBus.SubscriptionsManager.Client.Tests
             using (mocks.Playback())
             {
                 ClientProxy proxy = new ClientProxy(mockEndpoint);
-                proxy.StartWatching(mockBus, cache);
+                proxy.StartWatching(mockBus, mockCache);
 
-                eventRaiser.Raise(cache, new SubscriptionChangedEventArgs(new SubscriptionChange("bob", new Uri("msmq://localhost/bob"), SubscriptionChangeType.Add)));
+                eventRaiser.Raise(mockCache, new SubscriptionChangedEventArgs(new SubscriptionChange("bob", new Uri("msmq://localhost/bob"), SubscriptionChangeType.Add)));
             }
         }
 
@@ -89,19 +89,19 @@ namespace MassTransit.ServiceBus.SubscriptionsManager.Client.Tests
             {
                 Expect.Call(delegate { mockBus.Subscribe<CacheUpdateResponse>(null); }).IgnoreArguments();
                 Expect.Call(delegate { mockBus.Send(null, new RequestCacheUpdate()); }).IgnoreArguments();
-                Expect.Call(delegate { cache.SubscriptionChanged += null; }).IgnoreArguments();
+                Expect.Call(delegate { mockCache.SubscriptionChanged += null; }).IgnoreArguments();
                 
                 eventRaiser = LastCall.GetEventRaiser();
 
                 Expect.Call(delegate { mockBus.Send(null, new SubscriptionChange("",null,SubscriptionChangeType.Add)); }).IgnoreArguments();
-                Expect.Call(cache.List()).Return(new List<Subscription>());
+                Expect.Call(mockCache.List()).Return(new List<Subscription>());
             }
             using (mocks.Playback())
             {
                 ClientProxy proxy = new ClientProxy(mockEndpoint);
-                proxy.StartWatching(mockBus, cache);
+                proxy.StartWatching(mockBus, mockCache);
 
-                eventRaiser.Raise(cache, new SubscriptionChangedEventArgs(new SubscriptionChange("bob", new Uri("msmq://localhost/bob"), SubscriptionChangeType.Add)));
+                eventRaiser.Raise(mockCache, new SubscriptionChangedEventArgs(new SubscriptionChange("bob", new Uri("msmq://localhost/bob"), SubscriptionChangeType.Add)));
             }
         }
 
@@ -113,21 +113,86 @@ namespace MassTransit.ServiceBus.SubscriptionsManager.Client.Tests
             {
                 Expect.Call(delegate { mockBus.Subscribe<CacheUpdateResponse>(null); }).IgnoreArguments();
                 Expect.Call(delegate { mockBus.Send(null, new RequestCacheUpdate()); }).IgnoreArguments();
-                Expect.Call(delegate { cache.SubscriptionChanged += null; }).IgnoreArguments();
+                Expect.Call(delegate { mockCache.SubscriptionChanged += null; }).IgnoreArguments();
 
                 eventRaiser = LastCall.GetEventRaiser();
 
                 Expect.Call(delegate { mockBus.Send(null, new SubscriptionChange("", null, SubscriptionChangeType.Add)); }).IgnoreArguments();
-                Expect.Call(cache.List()).Return(new List<Subscription>(new Subscription[] { new Subscription(new Uri("msmq://localhost/test"), "bob" )}));
+                Expect.Call(mockCache.List()).Return(new List<Subscription>(new Subscription[] { new Subscription(new Uri("msmq://localhost/test"), "bob" )}));
                 Expect.Call(delegate { mockBus.Send(null, new SubscriptionChange("", null, SubscriptionChangeType.Add)); }).IgnoreArguments();
             }
             using (mocks.Playback())
             {
                 
                 ClientProxy proxy = new ClientProxy(mockEndpoint);
-                proxy.StartWatching(mockBus, cache);
+                proxy.StartWatching(mockBus, mockCache);
 
-                eventRaiser.Raise(cache, new SubscriptionChangedEventArgs(new SubscriptionChange("bob", new Uri("msmq://localhost/bob"), SubscriptionChangeType.Add)));
+                eventRaiser.Raise(mockCache, new SubscriptionChangedEventArgs(new SubscriptionChange("bob", new Uri("msmq://localhost/bob"), SubscriptionChangeType.Add)));
+            }
+        }
+
+
+        [Test]
+        public void When_we_get_notified_of_a_change_add()
+        {
+            List<SubscriptionChange> changes = new List<SubscriptionChange>();
+            SubscriptionChange change = new SubscriptionChange(typeof(RequestCacheUpdate).FullName, new Uri("msmq://localhost/test"), SubscriptionChangeType.Add );
+            changes.Add(change);
+
+            List<CacheUpdateResponse> msgs = new List<CacheUpdateResponse>();
+            CacheUpdateResponse msg = new CacheUpdateResponse(changes);
+            msgs.Add(msg);
+            
+
+            using(mocks.Record())
+            {
+                Expect.Call(delegate { mockBus.Subscribe<CacheUpdateResponse>(null); }).IgnoreArguments();
+                Expect.Call(delegate { mockBus.Send(null, new RequestCacheUpdate()); }).IgnoreArguments();
+                Expect.Call(delegate { mockCache.SubscriptionChanged += null; }).IgnoreArguments();
+                Expect.Call(mockCache.List()).Return(new List<Subscription>());
+
+                //New Stuff
+                Expect.Call(delegate { mockCache.Add(typeof (RequestCacheUpdate).FullName, new Uri("msmq://localhost/test")); });
+                //TODO: does an event get fired?
+            }
+            using(mocks.Playback())
+            {
+                ClientProxy proxy = new ClientProxy(mockEndpoint);
+                proxy.StartWatching(mockBus, mockCache);
+
+                proxy.RespondToCacheUpdateMessage(new MessageContext<CacheUpdateResponse>(mockBus, new Envelope(msgs.ToArray()), msg));
+            }
+        }
+
+        [Test]
+        public void When_we_get_notified_of_a_change_remove()
+        {
+            List<SubscriptionChange> changes = new List<SubscriptionChange>();
+            SubscriptionChange change = new SubscriptionChange(typeof(RequestCacheUpdate).FullName, new Uri("msmq://localhost/test"), SubscriptionChangeType.Remove);
+            changes.Add(change);
+
+            List<CacheUpdateResponse> msgs = new List<CacheUpdateResponse>();
+            CacheUpdateResponse msg = new CacheUpdateResponse(changes);
+            msgs.Add(msg);
+
+
+            using (mocks.Record())
+            {
+                Expect.Call(delegate { mockBus.Subscribe<CacheUpdateResponse>(null); }).IgnoreArguments();
+                Expect.Call(delegate { mockBus.Send(null, new RequestCacheUpdate()); }).IgnoreArguments();
+                Expect.Call(delegate { mockCache.SubscriptionChanged += null; }).IgnoreArguments();
+                Expect.Call(mockCache.List()).Return(new List<Subscription>());
+
+                //New Stuff
+                Expect.Call(delegate { mockCache.Remove(typeof(RequestCacheUpdate).FullName, new Uri("msmq://localhost/test")); });
+                //TODO: does an event get fired?
+            }
+            using (mocks.Playback())
+            {
+                ClientProxy proxy = new ClientProxy(mockEndpoint);
+                proxy.StartWatching(mockBus, mockCache);
+
+                proxy.RespondToCacheUpdateMessage(new MessageContext<CacheUpdateResponse>(mockBus, new Envelope(msgs.ToArray()), msg));
             }
         }
 
