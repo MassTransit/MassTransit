@@ -13,14 +13,16 @@ namespace MassTransit.ServiceBus.SubscriptionsManager.Client.Tests
     {
         MockRepository mocks;
         private ISubscriptionStorage cache;
-        private IServiceBus bus;
+        private IServiceBus mockBus;
+        private IMessageQueueEndpoint mockEndpoint;
 
         [SetUp]
         public void SetUp()
         {
             mocks = new MockRepository();
             cache = mocks.CreateMock<ISubscriptionStorage>();
-            bus = mocks.CreateMock<IServiceBus>();
+            mockBus = mocks.CreateMock<IServiceBus>();
+            mockEndpoint = mocks.CreateMock<IMessageQueueEndpoint>();
         }
 
         [TearDown]
@@ -28,7 +30,8 @@ namespace MassTransit.ServiceBus.SubscriptionsManager.Client.Tests
         {
             mocks = null;
             cache = null;
-            bus = null;
+            mockBus = null;
+            mockEndpoint = null;
         }
 
         [Test]
@@ -36,15 +39,19 @@ namespace MassTransit.ServiceBus.SubscriptionsManager.Client.Tests
         {
             using(mocks.Record())
             {
-                bus = mocks.Stub<IServiceBus>();
+                mockBus.Subscribe<CacheUpdateResponse>(null);
+                LastCall.IgnoreArguments();
+                mockBus.Send<RequestCacheUpdate>(mockEndpoint, null);
+                LastCall.IgnoreArguments();
+
                 cache.SubscriptionChanged += null;
                 LastCall.IgnoreArguments();
                 Expect.Call(cache.List()).Return(new List<Subscription>());
             }
             using(mocks.Playback())
             {
-                ClientProxy proxy = new ClientProxy(new MessageQueueEndpoint("msmq://localhost/test"));
-                proxy.StartWatching(bus, cache);    
+                ClientProxy proxy = new ClientProxy(mockEndpoint);
+                proxy.StartWatching(mockBus, cache);    
             }
         }
 
@@ -54,19 +61,21 @@ namespace MassTransit.ServiceBus.SubscriptionsManager.Client.Tests
             IEventRaiser eventRaiser;
             using (mocks.Record())
             {
-                bus = mocks.Stub<IServiceBus>();
-                cache.SubscriptionChanged += null;
+                mockBus.Subscribe<CacheUpdateResponse>(null);
                 LastCall.IgnoreArguments();
+                mockBus.Send<RequestCacheUpdate>(mockEndpoint, null);
+                LastCall.IgnoreArguments();
+                Expect.Call(delegate { cache.SubscriptionChanged += null; }).IgnoreArguments();
                 eventRaiser = LastCall.GetEventRaiser();
-
                 Expect.Call(cache.List()).Return(new List<Subscription>());
-                
-                
+
+                Expect.Call(delegate { mockBus.Send<SubscriptionChange>(mockEndpoint, null); }).IgnoreArguments();
+
             }
             using (mocks.Playback())
             {
-                ClientProxy proxy = new ClientProxy(new MessageQueueEndpoint("msmq://localhost/test"));
-                proxy.StartWatching(bus, cache);
+                ClientProxy proxy = new ClientProxy(mockEndpoint);
+                proxy.StartWatching(mockBus, cache);
 
                 eventRaiser.Raise(cache, new SubscriptionChangedEventArgs(new SubscriptionChange("bob", new Uri("msmq://localhost/bob"), SubscriptionChangeType.Add)));
             }
@@ -78,19 +87,19 @@ namespace MassTransit.ServiceBus.SubscriptionsManager.Client.Tests
             IEventRaiser eventRaiser;
             using (mocks.Record())
             {
-                Expect.Call(delegate { bus.Subscribe<CacheUpdateResponse>(null); }).IgnoreArguments();
-                Expect.Call(delegate { bus.Send(null, new RequestCacheUpdate()); }).IgnoreArguments();
+                Expect.Call(delegate { mockBus.Subscribe<CacheUpdateResponse>(null); }).IgnoreArguments();
+                Expect.Call(delegate { mockBus.Send(null, new RequestCacheUpdate()); }).IgnoreArguments();
                 Expect.Call(delegate { cache.SubscriptionChanged += null; }).IgnoreArguments();
                 
                 eventRaiser = LastCall.GetEventRaiser();
 
-                Expect.Call(delegate { bus.Send(null, new SubscriptionChange("",null,SubscriptionChangeType.Add)); }).IgnoreArguments();
+                Expect.Call(delegate { mockBus.Send(null, new SubscriptionChange("",null,SubscriptionChangeType.Add)); }).IgnoreArguments();
                 Expect.Call(cache.List()).Return(new List<Subscription>());
             }
             using (mocks.Playback())
             {
-                ClientProxy proxy = new ClientProxy(new MessageQueueEndpoint("msmq://localhost/test"));
-                proxy.StartWatching(bus, cache);
+                ClientProxy proxy = new ClientProxy(mockEndpoint);
+                proxy.StartWatching(mockBus, cache);
 
                 eventRaiser.Raise(cache, new SubscriptionChangedEventArgs(new SubscriptionChange("bob", new Uri("msmq://localhost/bob"), SubscriptionChangeType.Add)));
             }
@@ -102,21 +111,21 @@ namespace MassTransit.ServiceBus.SubscriptionsManager.Client.Tests
             IEventRaiser eventRaiser;
             using (mocks.Record())
             {
-                Expect.Call(delegate { bus.Subscribe<CacheUpdateResponse>(null); }).IgnoreArguments();
-                Expect.Call(delegate { bus.Send(null, new RequestCacheUpdate()); }).IgnoreArguments();
+                Expect.Call(delegate { mockBus.Subscribe<CacheUpdateResponse>(null); }).IgnoreArguments();
+                Expect.Call(delegate { mockBus.Send(null, new RequestCacheUpdate()); }).IgnoreArguments();
                 Expect.Call(delegate { cache.SubscriptionChanged += null; }).IgnoreArguments();
 
                 eventRaiser = LastCall.GetEventRaiser();
 
-                Expect.Call(delegate { bus.Send(null, new SubscriptionChange("", null, SubscriptionChangeType.Add)); }).IgnoreArguments();
+                Expect.Call(delegate { mockBus.Send(null, new SubscriptionChange("", null, SubscriptionChangeType.Add)); }).IgnoreArguments();
                 Expect.Call(cache.List()).Return(new List<Subscription>(new Subscription[] { new Subscription(new Uri("msmq://localhost/test"), "bob" )}));
-                Expect.Call(delegate { bus.Send(null, new SubscriptionChange("", null, SubscriptionChangeType.Add)); }).IgnoreArguments();
+                Expect.Call(delegate { mockBus.Send(null, new SubscriptionChange("", null, SubscriptionChangeType.Add)); }).IgnoreArguments();
             }
             using (mocks.Playback())
             {
                 
-                ClientProxy proxy = new ClientProxy(new MessageQueueEndpoint("msmq://localhost/test"));
-                proxy.StartWatching(bus, cache);
+                ClientProxy proxy = new ClientProxy(mockEndpoint);
+                proxy.StartWatching(mockBus, cache);
 
                 eventRaiser.Raise(cache, new SubscriptionChangedEventArgs(new SubscriptionChange("bob", new Uri("msmq://localhost/bob"), SubscriptionChangeType.Add)));
             }

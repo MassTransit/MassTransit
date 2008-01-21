@@ -28,8 +28,6 @@ namespace MassTransit.ServiceBus
         private IMessageReceiver _receiver;
         private IMessageSender _sender;
 
-        //private MessageQueue _queue;
-
         /// <summary>
         /// Initializes a <c ref="MessageQueueEndpoint" /> instance with the specified URI string.
         /// </summary>
