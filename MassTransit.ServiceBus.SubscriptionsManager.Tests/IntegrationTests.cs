@@ -38,7 +38,7 @@ namespace MassTransit.ServiceBus.SubscriptionsManager.Tests
         {
             repo = null;
             bus.Dispose();
-            //CleanUp();
+            CleanUp();
         }
 
         [Test]
