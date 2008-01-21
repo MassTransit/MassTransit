@@ -15,9 +15,9 @@ namespace MassTransit.ServiceBus.Tests.IntegrationTests
         public void SetUp()
         {
             mocks = new MockRepository();
-            ServiceBusSetupFixture.ValidateAndPurgeQueue(nonTransactionalQueueName);
-            ServiceBusSetupFixture.ValidateAndPurgeQueue(returnToQueueName);
-            ServiceBusSetupFixture.ValidateAndPurgeQueue(transactionalQueueName, true);
+            ServiceBusSetupFixture.ValidateAndPurgeQueue(new MessageQueueEndpoint(nonTransactionalQueueName).QueuePath);
+            ServiceBusSetupFixture.ValidateAndPurgeQueue(new MessageQueueEndpoint(returnToQueueName).QueuePath);
+            ServiceBusSetupFixture.ValidateAndPurgeQueue(new MessageQueueEndpoint(transactionalQueueName).QueuePath, true);
             returnTo = mocks.CreateMock<IEndpoint>();
 
             env = new Envelope(returnTo, msg);
@@ -35,6 +35,7 @@ namespace MassTransit.ServiceBus.Tests.IntegrationTests
         private readonly string transactionalQueueName = @"msmq://localhost/test_transaction";
         private readonly string returnToQueueName = @"msmq://localhost/test_return";
 
+
         private MockRepository mocks;
         private IEndpoint returnTo;
         private PingMessage msg = new PingMessage();
@@ -45,15 +46,14 @@ namespace MassTransit.ServiceBus.Tests.IntegrationTests
         {
             using (mocks.Record())
             {
-                Expect.Call(returnTo.Uri).Return(new Uri(returnToQueueName));
             }
             using (mocks.Playback())
             {
                 MessageQueueEndpoint ep = nonTransactionalQueueName;
-               ep.Sender.Send(env);
-            }
+                ep.Sender.Send(env);
 
-            ServiceBusSetupFixture.VerifyMessageInQueue(nonTransactionalQueueName, msg);
+                ServiceBusSetupFixture.VerifyMessageInQueue(new MessageQueueEndpoint(nonTransactionalQueueName).QueuePath, msg);
+            }
         }
 
         [Test]
@@ -61,7 +61,6 @@ namespace MassTransit.ServiceBus.Tests.IntegrationTests
         {
             using (mocks.Record())
             {
-                Expect.Call(returnTo.Uri).Return(new Uri(returnToQueueName));
             }
             using (mocks.Playback())
             {
@@ -75,7 +74,7 @@ namespace MassTransit.ServiceBus.Tests.IntegrationTests
 
                 using (TransactionScope tr = new TransactionScope())
                 {
-                    ServiceBusSetupFixture.VerifyMessageInQueue(nonTransactionalQueueName, msg);
+                    ServiceBusSetupFixture.VerifyMessageInQueue(new MessageQueueEndpoint(nonTransactionalQueueName).QueuePath, msg);
 
                     tr.Complete();
                 }
@@ -103,7 +102,7 @@ namespace MassTransit.ServiceBus.Tests.IntegrationTests
 
                 using (TransactionScope tr = new TransactionScope())
                 {
-                    ServiceBusSetupFixture.VerifyMessageInQueue(transactionalQueueName, msg);
+                    ServiceBusSetupFixture.VerifyMessageInQueue(new MessageQueueEndpoint(transactionalQueueName).QueuePath, msg);
 
                     tr.Complete();
                 }
