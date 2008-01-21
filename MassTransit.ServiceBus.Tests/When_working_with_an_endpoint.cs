@@ -31,7 +31,7 @@ namespace MassTransit.ServiceBus.Tests
         }
 
         [Test, ExpectedException(typeof (MessageQueueException))]
-        public void When_queue_doesnt_exist()
+        public void An_exception_should_be_thrown_for_a_non_existant_queue()
         {
             MessageQueueEndpoint q = new MessageQueueEndpoint(new Uri("msmq://localhost/this_queue_does_not_exist"));
 
