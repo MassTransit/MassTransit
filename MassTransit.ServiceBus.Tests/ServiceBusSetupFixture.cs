@@ -37,10 +37,10 @@ namespace MassTransit.ServiceBus.Tests
             //TODO: Is this necessary still?
         	MessageQueue.EnableConnectionCache = false;
 
-            ValidateAndPurgeQueue(_serviceBusEndPoint.QueueName);
-            ValidateAndPurgeQueue(_remoteServiceBusEndPoint.QueueName);
-            ValidateAndPurgeQueue(_testEndPoint.QueueName);
-            ValidateAndPurgeQueue(_poisonEndpoint.QueueName);
+            ValidateAndPurgeQueue(_serviceBusEndPoint.QueuePath);
+            ValidateAndPurgeQueue(_remoteServiceBusEndPoint.QueuePath);
+            ValidateAndPurgeQueue(_testEndPoint.QueuePath);
+            ValidateAndPurgeQueue(_poisonEndpoint.QueuePath);
 
             ISubscriptionStorage _subscriptionCache = new LocalSubscriptionCache();
 

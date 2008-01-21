@@ -58,7 +58,7 @@ namespace MassTransit.ServiceBus
             }
 			catch(MessageQueueException ex)
 			{
-			    throw new EndpointException(_endpoint, "Problem with " + _endpoint.QueueName);
+			    throw new EndpointException(_endpoint, "Problem with " + _endpoint.QueuePath, ex);
 			}
 
             envelope.Id = msg.Id;

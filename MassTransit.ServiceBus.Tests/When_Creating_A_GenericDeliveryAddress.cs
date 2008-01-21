@@ -20,7 +20,7 @@ namespace MassTransit.ServiceBus.Tests
         {
             MessageQueueEndpoint q = new MessageQueueEndpoint("msmq://localhost/test_endpoint");
             Assert.That(q.Uri.AbsoluteUri, Is.EqualTo("msmq://" + Environment.MachineName.ToLowerInvariant() + "/test_endpoint"));
-            Assert.That(q.QueueName, Is.EqualTo(@"FormatName:DIRECT=OS:" + Environment.MachineName.ToLowerInvariant() + "\\private$\\test_endpoint"));
+            Assert.That(q.QueuePath, Is.EqualTo(@"FormatName:DIRECT=OS:" + Environment.MachineName.ToLowerInvariant() + "\\private$\\test_endpoint"));
         }
 
         [Test]
@@ -28,7 +28,7 @@ namespace MassTransit.ServiceBus.Tests
         {
             IMessageQueueEndpoint q = MessageQueueEndpoint.FromQueuePath("FormatName:DIRECT=OS:" + Environment.MachineName + @"\private$\test_endpoint");
             Assert.That(q.Uri.AbsoluteUri, Is.EqualTo("msmq://" + Environment.MachineName.ToLowerInvariant() + "/test_endpoint"));
-            Assert.That(q.QueueName, Is.EqualTo("FormatName:DIRECT=OS:" + Environment.MachineName.ToLowerInvariant() + "\\private$\\test_endpoint"));
+            Assert.That(q.QueuePath, Is.EqualTo("FormatName:DIRECT=OS:" + Environment.MachineName.ToLowerInvariant() + "\\private$\\test_endpoint"));
         }
 
         [Test]
@@ -36,7 +36,7 @@ namespace MassTransit.ServiceBus.Tests
         {
             IMessageQueueEndpoint q = MessageQueueEndpoint.FromQueuePath(".\\private$\\test_endpoint");
             Assert.That(q.Uri.AbsoluteUri, Is.EqualTo("msmq://" + Environment.MachineName.ToLowerInvariant() + "/test_endpoint"));
-            Assert.That(q.QueueName, Is.EqualTo("FormatName:DIRECT=OS:" + Environment.MachineName.ToLowerInvariant() + "\\private$\\test_endpoint"));
+            Assert.That(q.QueuePath, Is.EqualTo("FormatName:DIRECT=OS:" + Environment.MachineName.ToLowerInvariant() + "\\private$\\test_endpoint"));
         }
     }
 }

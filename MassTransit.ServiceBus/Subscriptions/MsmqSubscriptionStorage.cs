@@ -147,7 +147,7 @@ namespace MassTransit.ServiceBus.Subscriptions
         {
             Message msg = new Message();
 
-            msg.ResponseQueue = new MessageQueue(_storageEndpoint.QueueName);
+            msg.ResponseQueue = new MessageQueue(_storageEndpoint.QueuePath);
             msg.Recoverable = true;
 
             _formatter.Serialize(msg.BodyStream, new IMessage[] {message});

@@ -75,7 +75,7 @@ namespace MassTransit.ServiceBus
         	IMessageQueueEndpoint endpoint = envelope.ReturnEndpoint as IMessageQueueEndpoint;
 
 			if(endpoint != null)
-				msg.ResponseQueue = new MessageQueue(endpoint.QueueName);
+				msg.ResponseQueue = new MessageQueue(endpoint.QueuePath);
 
             if (envelope.TimeToBeReceived < MessageQueue.InfiniteTimeout)
                 msg.TimeToBeReceived = envelope.TimeToBeReceived;
