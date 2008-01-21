@@ -66,9 +66,12 @@ namespace MassTransit.ServiceBus
         ///<filterpriority>2</filterpriority>
         public void Dispose()
         {
-            _queue.Close();
-            _queue.Dispose();
-            _queue = null;
+            if (_queue != null)
+            {
+                _queue.Close();
+                _queue.Dispose();
+                _queue = null;
+            }
         }
 
         /// <summary>
