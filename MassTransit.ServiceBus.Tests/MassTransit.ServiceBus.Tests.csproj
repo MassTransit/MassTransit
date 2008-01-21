@@ -68,6 +68,7 @@
     <Compile Include="QueueTestContext.cs" />
     <Compile Include="ServiceBusSetupFixture.cs" />
     <Compile Include="MessageQueueEndpoint_MeetsCriteria.cs" />
+    <Compile Include="Subscriptions\When_a_handler_unsubscribes_from_the_service_bus.cs" />
     <Compile Include="Subscriptions\When_Working_With_Subscriptions.cs" />
     <Compile Include="Subscriptions\When_Working_With_Subscription_Entries.cs" />
     <Compile Include="Messages\UpdateMessage.cs" />
