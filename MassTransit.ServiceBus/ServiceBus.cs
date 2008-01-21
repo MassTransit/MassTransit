@@ -236,7 +236,6 @@ namespace MassTransit.ServiceBus
                 ((IMessageConsumer<T>) _consumers[typeof (T)]).Subscribe(callback, condition);
             }
 
-
             _endpoint.Receiver.Subscribe(this);
         }
 
