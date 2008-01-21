@@ -14,12 +14,11 @@
 using System;
 using System.Collections.Generic;
 using log4net;
+using MassTransit.ServiceBus.Subscriptions;
 using MassTransit.ServiceBus.Util;
 
 namespace MassTransit.ServiceBus
 {
-    using Subscriptions;
-
     /// <summary>
     /// A service bus is used to attach message handlers (services) to endpoints, as well as 
     /// communicate with other service bus instances in a distributed application
@@ -28,18 +27,19 @@ namespace MassTransit.ServiceBus
         IServiceBus,
         IEnvelopeConsumer
     {
-        private static readonly ILog _log = LogManager.GetLogger(typeof(ServiceBus));
-        private readonly object _consumersLock = new object();
+        private static readonly ILog _log = LogManager.GetLogger(typeof (ServiceBus));
 
         private readonly AsyncReplyDispatcher _asyncReplyDispatcher = new AsyncReplyDispatcher();
 
         private readonly Dictionary<Type, IMessageConsumer> _consumers =
             new Dictionary<Type, IMessageConsumer>();
 
+        private readonly object _consumersLock = new object();
+
 
         private readonly IEndpoint _endpoint;
-        private IEndpoint _poisonEndpoint;
         private readonly ISubscriptionStorage _subscriptionStorage;
+        private IEndpoint _poisonEndpoint;
 
         public ServiceBus(IEndpoint endpoint, ISubscriptionStorage subscriptionStorage)
         {
@@ -49,7 +49,6 @@ namespace MassTransit.ServiceBus
             _endpoint = endpoint;
             _subscriptionStorage = subscriptionStorage;
         }
-
 
 
         public ISubscriptionStorage SubscriptionStorage
@@ -70,7 +69,7 @@ namespace MassTransit.ServiceBus
             bool result;
             try
             {
-                if(_asyncReplyDispatcher.Exists(envelope.CorrelationId))
+                if (_asyncReplyDispatcher.Exists(envelope.CorrelationId))
                 {
                     result = true;
                 }
@@ -87,26 +86,6 @@ namespace MassTransit.ServiceBus
                 throw;
             }
 
-            return result;
-        }
-
-        private bool IsTheBusInterested(IEnvelope envelope)
-        {
-            bool result = false;
-
-            foreach (IMessage message in envelope.Messages)
-            {
-                if (_consumers.ContainsKey(message.GetType()))
-                {
-                    IMessageConsumer receivingConsumer = _consumers[message.GetType()];
-
-                    if (receivingConsumer.IsHandled(message))
-                    {
-                        result = true;
-                        break;
-                    }
-                }
-            }
             return result;
         }
 
@@ -239,6 +218,29 @@ namespace MassTransit.ServiceBus
             _endpoint.Receiver.Subscribe(this);
         }
 
+        public void Unsubscribe<T>(MessageReceivedCallback<T> callback) where T : IMessage
+        {
+            Unsubscribe(callback, null);
+        }
+
+        public void Unsubscribe<T>(MessageReceivedCallback<T> callback, Predicate<T> condition) where T : IMessage
+        {
+            lock (_consumersLock)
+            {
+                if (_consumers.ContainsKey(typeof (T)))
+                {
+                    IMessageConsumer<T> consumer = ((IMessageConsumer<T>) _consumers[typeof (T)]);
+
+                    consumer.Unsubscribe(callback, condition);
+                    if (consumer.Count == 0)
+                    {
+                        _consumers.Remove(typeof (T));
+                        _subscriptionStorage.Remove(typeof (T).FullName, Endpoint.Uri);
+                    }
+                }
+            }
+        }
+
         /// <summary>
         /// Submits a request message to the default destination for the message type
         /// </summary>
@@ -260,22 +262,46 @@ namespace MassTransit.ServiceBus
 
         #endregion
 
+        private bool IsTheBusInterested(IEnvelope envelope)
+        {
+            bool result = false;
+
+            foreach (IMessage message in envelope.Messages)
+            {
+                Type messageType = message.GetType();
+
+                if (_consumers.ContainsKey(messageType))
+                {
+                    IMessageConsumer receivingConsumer = _consumers[messageType];
+
+                    if (receivingConsumer.IsHandled(message))
+                    {
+                        result = true;
+                        break;
+                    }
+                }
+            }
+            return result;
+        }
+
         private void DeliverMessagesToConsumers(IEnvelope envelope)
         {
             foreach (IMessage message in envelope.Messages)
             {
+                Type messageType = message.GetType();
+                
                 if (_log.IsDebugEnabled)
-                    _log.DebugFormat("Message Received: {0}", message.GetType());
+                    _log.DebugFormat("Message Received: {0}", messageType);
 
-                if (_consumers.ContainsKey(message.GetType()))
+                if (_consumers.ContainsKey(messageType))
                 {
                     try
                     {
-                        _consumers[message.GetType()].Deliver(this, envelope, message);
+                        _consumers[messageType].Deliver(this, envelope, message);
                     }
                     catch (Exception ex)
                     {
-                        if(_log.IsErrorEnabled)
+                        if (_log.IsErrorEnabled)
                             _log.Error("Exception from Deliver: ", ex);
                     }
                 }

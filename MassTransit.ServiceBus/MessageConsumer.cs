@@ -26,7 +26,7 @@ namespace MassTransit.ServiceBus
     public class MessageConsumer<T> :
         IMessageConsumer<T> where T : IMessage
     {
-        private static readonly ILog _log = LogManager.GetLogger(typeof(MessageConsumer<T>));
+        private static readonly ILog _log = LogManager.GetLogger(typeof (MessageConsumer<T>));
 
         private readonly List<MessageConsumerCallbackItem<T>> _callbacks = new List<MessageConsumerCallbackItem<T>>();
 
@@ -36,19 +36,23 @@ namespace MassTransit.ServiceBus
         /// Adds a subscription to the message type for the specified handler
         /// </summary>
         /// <param name="callback">The function to call to handle the message</param>
-        public void Subscribe(MessageReceivedCallback<T> callback)
-        {
-            _callbacks.Add(new MessageConsumerCallbackItem<T>(callback));
-        }
-
-        /// <summary>
-        /// Adds a subscription to the message type for the specified handler
-        /// </summary>
-        /// <param name="callback">The function to call to handle the message</param>
         /// <param name="condition">The condition function to determine if a message will be handled</param>
         public void Subscribe(MessageReceivedCallback<T> callback, Predicate<T> condition)
         {
             _callbacks.Add(new MessageConsumerCallbackItem<T>(callback, condition));
+        }
+
+        public void Unsubscribe(MessageReceivedCallback<T> callback, Predicate<T> condition)
+        {
+            MessageConsumerCallbackItem<T> match = new MessageConsumerCallbackItem<T>(callback, condition);
+
+            if (_callbacks.Contains(match))
+                _callbacks.Remove(match);
+        }
+
+        public int Count
+        {
+            get { return _callbacks.Count; }
         }
 
         /// <summary>
@@ -137,7 +141,8 @@ namespace MassTransit.ServiceBus
     /// Used to track a subscription to a message type on a service bus
     /// </summary>
     /// <typeparam name="T1">The type of message being handled</typeparam>
-    public class MessageConsumerCallbackItem<T1> where T1 : IMessage
+    public class MessageConsumerCallbackItem<T1> : IEquatable<MessageConsumerCallbackItem<T1>> where T1 : IMessage
+
     {
         private MessageReceivedCallback<T1> _callback;
         private Predicate<T1> _condition;
@@ -178,6 +183,39 @@ namespace MassTransit.ServiceBus
         {
             get { return _condition; }
             set { _condition = value; }
+        }
+
+        #region IEquatable<MessageConsumerCallbackItem<T1>> Members
+
+        public bool Equals(MessageConsumerCallbackItem<T1> other)
+        {
+            if (other == null)
+                return false;
+            if (other.Callback != _callback)
+                return false;
+            if (other.Condition != _condition)
+                return false;
+
+            return true;
+        }
+
+        #endregion
+
+        public override bool Equals(object obj)
+        {
+            MessageConsumerCallbackItem<T1> other = obj as MessageConsumerCallbackItem<T1>;
+            if (other == null)
+                return false;
+
+            return Equals(other);
+        }
+
+        public override int GetHashCode()
+        {
+            if (_condition == null)
+                return _callback.GetHashCode();
+
+            return _callback.GetHashCode() + 29*_condition.GetHashCode();
         }
     }
 }
