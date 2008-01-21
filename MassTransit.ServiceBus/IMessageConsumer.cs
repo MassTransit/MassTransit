@@ -34,6 +34,7 @@ namespace MassTransit.ServiceBus
         /// <param name="message">The message to handle</param>
         /// <returns>True if the message will be handled, otherwise false.</returns>
         bool IsHandled(IMessage message);
+
     }
 
     ///<summary>
@@ -46,14 +47,20 @@ namespace MassTransit.ServiceBus
         /// Adds a subscription to the message type for the specified handler
         /// </summary>
         /// <param name="callback">The function to call to handle the message</param>
-        void Subscribe(MessageReceivedCallback<T> callback);
+        /// <param name="condition">The condition function to determine if a message will be handled</param>
+        void Subscribe(MessageReceivedCallback<T> callback, Predicate<T> condition);
 
         /// <summary>
-        /// Adds a subscription to the message type for the specified handler
+        /// Removes a subscription to the message type for the specified handler
         /// </summary>
         /// <param name="callback">The function to call to handle the message</param>
         /// <param name="condition">The condition function to determine if a message will be handled</param>
-        void Subscribe(MessageReceivedCallback<T> callback, Predicate<T> condition);
+        void Unsubscribe(MessageReceivedCallback<T> callback, Predicate<T> condition);
+
+        /// <summary>
+        /// The number of subscribers handling this message type
+        /// </summary>
+        int Count { get; }
 
         /// <summary>
         /// Deliver the message to the handler

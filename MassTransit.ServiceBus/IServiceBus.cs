@@ -47,6 +47,21 @@ namespace MassTransit.ServiceBus
         /// <param name="condition">A condition predicate to filter which messages are handled by the callback</param>
         void Subscribe<T>(MessageReceivedCallback<T> callback, Predicate<T> condition) where T : IMessage;
 
+        /// <summary>
+        /// Removes a message handler from the service bus
+        /// </summary>
+        /// <typeparam name="T">The message type handled by the handler</typeparam>
+        /// <param name="callback">The callback to remove</param>
+        void Unsubscribe<T>(MessageReceivedCallback<T> callback) where T : IMessage;
+
+        /// <summary>
+        /// Removes a message handler from the service bus
+        /// </summary>
+        /// <typeparam name="T">The message type handled by the handler</typeparam>
+        /// <param name="callback">The callback to remove</param>
+        /// <param name="condition">A condition predicate to filter which messages are handled by the callback</param>
+        void Unsubscribe<T>(MessageReceivedCallback<T> callback, Predicate<T> condition) where T : IMessage;
+
 		/// <summary>
 		/// Publishes a message to all subscribed consumers for the message type
 		/// </summary>
