@@ -55,6 +55,7 @@
   <ItemGroup>
     <Compile Include="IntegrationTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SubscriptionMapperTests.cs" />
     <Compile Include="SubscriptionRepositoryTests.cs" />
     <Compile Include="SubscriptionServiceBusTests.cs" />
   </ItemGroup>
