@@ -25,14 +25,13 @@ namespace MassTransit.ServiceBus
     public class MessageQueueReceiver :
         IMessageReceiver
     {
+        private static readonly object _locker = new object();
         private static readonly ILog _log = LogManager.GetLogger(typeof (MessageQueueReceiver));
         private readonly IMessageQueueEndpoint _endpoint;
 
         private IEnvelopeConsumer _consumer;
 
         private Cursor _cursor;
-
-        private IAsyncResult _peekAsyncResult;
 
         private MessageQueue _queue;
 
@@ -62,20 +61,18 @@ namespace MassTransit.ServiceBus
         /// <param name="consumer">The consumer to add</param>
         public void Subscribe(IEnvelopeConsumer consumer)
         {
-            if (_consumer == null)
+            lock (_locker)
             {
-                _consumer = consumer;
+                if (_consumer == null)
+                {
+                    _consumer = consumer;
 
-                Restart();
-            }
-            else if (_consumer != consumer)
-            {
-                throw new EndpointException(_endpoint, "Only one consumer can be registered for a message receiver");
-            }
-
-            if (_peekAsyncResult == null)
-            {
-                _peekAsyncResult = _queue.BeginPeek(TimeSpan.FromHours(24), _cursor, PeekAction.Current, this, Queue_PeekCompleted);
+                    Restart();
+                }
+                else if (_consumer != consumer)
+                {
+                    throw new EndpointException(_endpoint, "Only one consumer can be registered for a message receiver");
+                }
             }
         }
 
@@ -201,7 +198,7 @@ namespace MassTransit.ServiceBus
                 }
             }
 
-            _peekAsyncResult = _queue.BeginPeek(TimeSpan.FromHours(24), _cursor, PeekAction.Next, this, Queue_PeekCompleted);
+            _queue.BeginPeek(TimeSpan.FromHours(24), _cursor, PeekAction.Next, this, Queue_PeekCompleted);
         }
     }
 }
