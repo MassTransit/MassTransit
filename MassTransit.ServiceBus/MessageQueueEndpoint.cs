@@ -66,6 +66,36 @@ namespace MassTransit.ServiceBus
             _queuePath = string.Format(@"FormatName:DIRECT=OS:{0}\private$\{1}", hostName, _uri.AbsolutePath.Substring(1));
         }
 
+        /// <summary>
+        /// Creates an instance of the <c ref="MessageQueueEndpoint" /> class using the specified queue
+        /// </summary>
+        /// <param name="queue">A Microsoft Message Queue</param>
+        public MessageQueueEndpoint(MessageQueue queue)
+        {
+            string path = queue.Path;
+            const string prefix = "FormatName:DIRECT=OS:";
+
+            if (path.Length > prefix.Length && path.Substring(0, prefix.Length).ToUpperInvariant() == prefix.ToUpperInvariant())
+                path = path.Substring(prefix.Length);
+
+            string[] parts = path.Split('\\');
+
+            if (parts.Length != 3)
+                throw new ArgumentException("Invalid Queue Path Specified");
+
+            //Validate parts[1] = private$
+            if (string.Compare(parts[1], "private$", true) != 0)
+                throw new ArgumentException("Invalid Queue Path Specified");
+
+            if (parts[0] == ".")
+                parts[0] = Environment.MachineName;
+
+            parts[0] = parts[0].ToLowerInvariant();
+
+            _queuePath = string.Format("{0}{1}\\{2}\\{3}", prefix, parts[0], parts[1], parts[2]);
+            _uri = new Uri(string.Format("msmq://{0}/{1}", parts[0], parts[2]));
+        }
+
         #region IMessageQueueEndpoint Members
 
         /// <summary>
@@ -174,33 +204,5 @@ namespace MassTransit.ServiceBus
             return endpoint.Uri.AbsoluteUri;
         }
 
-        /// <summary>
-        /// Creates an instance of the <c ref="MessageQueueEndpoint" /> class using the specified queue path
-        /// </summary>
-        /// <param name="path">A path to a Microsoft Message Queue</param>
-        /// <returns>An instance of the <c ref="MessageQueueEndpoint" /> class for the specified queue</returns>
-        public static IMessageQueueEndpoint FromQueuePath(string path)
-        {
-            //TODO: Lots of duplicated logic here? -d
-
-            const string prefix = "FormatName:DIRECT=OS:";
-
-            if (path.Length > prefix.Length && path.Substring(0, prefix.Length).ToUpperInvariant() == prefix.ToUpperInvariant())
-                path = path.Substring(prefix.Length);
-
-            string[] parts = path.Split('\\');
-
-            if (parts.Length != 3)
-                throw new ArgumentException("Invalid Queue Path Specified");
-
-            //Validate parts[1] = private$
-            if (string.Compare(parts[1], "private$", true) != 0)
-                throw new ArgumentException("Invalid Queue Path Specified");
-
-            if (parts[0] == ".")
-                parts[0] = Environment.MachineName.ToLowerInvariant();
-
-            return new MessageQueueEndpoint(string.Format("msmq://{0}/{1}", parts[0], parts[2]));
-        }
     }
 }

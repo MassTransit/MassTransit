@@ -2,6 +2,7 @@ using System;
 
 namespace MassTransit.ServiceBus.Tests
 {
+    using System.Messaging;
     using NUnit.Framework;
     using NUnit.Framework.SyntaxHelpers;
 
@@ -26,7 +27,7 @@ namespace MassTransit.ServiceBus.Tests
         [Test]
         public void FromFullQueuePath()
         {
-            IMessageQueueEndpoint q = MessageQueueEndpoint.FromQueuePath("FormatName:DIRECT=OS:" + Environment.MachineName + @"\private$\test_endpoint");
+            IMessageQueueEndpoint q = new MessageQueueEndpoint(new MessageQueue("FormatName:DIRECT=OS:" + Environment.MachineName + @"\private$\test_endpoint"));
             Assert.That(q.Uri.AbsoluteUri, Is.EqualTo("msmq://" + Environment.MachineName.ToLowerInvariant() + "/test_endpoint"));
             Assert.That(q.QueuePath, Is.EqualTo("FormatName:DIRECT=OS:" + Environment.MachineName.ToLowerInvariant() + "\\private$\\test_endpoint"));
         }
@@ -34,7 +35,7 @@ namespace MassTransit.ServiceBus.Tests
         [Test]
         public void FromPartialQueuePath()
         {
-            IMessageQueueEndpoint q = MessageQueueEndpoint.FromQueuePath(".\\private$\\test_endpoint");
+            IMessageQueueEndpoint q = new MessageQueueEndpoint(new MessageQueue(".\\private$\\test_endpoint"));
             Assert.That(q.Uri.AbsoluteUri, Is.EqualTo("msmq://" + Environment.MachineName.ToLowerInvariant() + "/test_endpoint"));
             Assert.That(q.QueuePath, Is.EqualTo("FormatName:DIRECT=OS:" + Environment.MachineName.ToLowerInvariant() + "\\private$\\test_endpoint"));
         }

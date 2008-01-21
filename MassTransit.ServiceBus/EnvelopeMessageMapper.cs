@@ -24,7 +24,7 @@ namespace MassTransit.ServiceBus
 
         public static IEnvelope MapFrom(Message msg)
         {
-            IMessageQueueEndpoint returnAddress = (msg.ResponseQueue != null) ? MessageQueueEndpoint.FromQueuePath(msg.ResponseQueue.Path) : null;
+            IMessageQueueEndpoint returnAddress = (msg.ResponseQueue != null) ? new MessageQueueEndpoint(msg.ResponseQueue) : null;
                 
             IEnvelope e = new Envelope(returnAddress);
 
