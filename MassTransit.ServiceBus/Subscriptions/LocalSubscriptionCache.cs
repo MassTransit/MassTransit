@@ -23,7 +23,7 @@ namespace MassTransit.ServiceBus.Subscriptions
     {
         //<messageName, address>
         private readonly Dictionary<string, List<SubscriptionCacheEntry>> _messageTypeSubscriptions =
-            new Dictionary<string, List<SubscriptionCacheEntry>>();
+            new Dictionary<string, List<SubscriptionCacheEntry>>(StringComparer.InvariantCultureIgnoreCase);
         private static readonly ILog _log = LogManager.GetLogger(typeof(LocalSubscriptionCache));
 
         // just a shared local cache

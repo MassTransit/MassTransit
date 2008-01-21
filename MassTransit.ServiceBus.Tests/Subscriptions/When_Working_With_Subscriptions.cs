@@ -37,6 +37,21 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
         }
 
         [Test]
+        public void Add_Subscription_Idempotent()
+        {
+            int count=0;
+            LocalSubscriptionCache cache = new LocalSubscriptionCache();
+            cache.SubscriptionChanged += delegate { count++; };
+            cache.Add(typeof(PingMessage).FullName, new Uri(mockPath));
+            cache.Add(typeof(PingMessage).FullName, new Uri(mockPath));
+            cache.Add(typeof(PingMessage).FullName.ToLowerInvariant(), new Uri(mockPath));
+
+            Assert.That(cache.List().Count, Is.EqualTo(1));
+            Assert.That(count, Is.EqualTo(1));
+        }
+
+
+        [Test]
         public void Remove_subscription()
         {
             LocalSubscriptionCache cache = new LocalSubscriptionCache();
@@ -44,6 +59,19 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
             Assert.That(cache.List().Count, Is.EqualTo(1));
 
 
+            cache.Remove(typeof(PingMessage).FullName, new Uri(mockPath));
+            Assert.That(cache.List().Count, Is.EqualTo(0));
+        }
+
+        [Test]
+        public void Remove_subscription_Idempotent()
+        {
+            LocalSubscriptionCache cache = new LocalSubscriptionCache();
+            cache.Add(typeof(PingMessage).FullName, new Uri(mockPath));
+            Assert.That(cache.List().Count, Is.EqualTo(1));
+
+
+            cache.Remove(typeof(PingMessage).FullName, new Uri(mockPath));
             cache.Remove(typeof(PingMessage).FullName, new Uri(mockPath));
             Assert.That(cache.List().Count, Is.EqualTo(0));
         }
