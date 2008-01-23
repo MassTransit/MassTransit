@@ -45,8 +45,8 @@ namespace MassTransit.ServiceBus.Tests
         {
             using (mocks.Record())
             {
-                Expect.Call(mockEndpoint.Receiver).Return(mockReceiver);
-                Expect.Call(delegate { mockReceiver.Subscribe(null); }).IgnoreArguments();
+                Expect.Call(mockEndpoint.Receiver).Return(mockReceiver).Repeat.Any();
+                Expect.Call(delegate { mockReceiver.Subscribe(null); }).IgnoreArguments().Repeat.Any();
                 Expect.Call(mockEndpoint.Uri).Return(queueUri).Repeat.Any(); //stupid log4net
                 mockSubscriptionStorage.Add(typeof(PingMessage).FullName, queueUri);
             }

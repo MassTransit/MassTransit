@@ -44,9 +44,9 @@ namespace MassTransit.ServiceBus.Tests
         {
             using(mocks.Record())
             {
-                Expect.Call(mockBusEndpoint.Receiver).Return(mockReceiver);
-                Expect.Call(delegate { mockReceiver.Subscribe(null); }).IgnoreArguments();
-                Expect.Call(mockBusEndpoint.Uri).Return(queueUri).Repeat.Any();
+                Expect.Call(mockBusEndpoint.Receiver).Return(mockReceiver).Repeat.Any();
+				Expect.Call(delegate { mockReceiver.Subscribe(null); }).IgnoreArguments().Repeat.Any();
+				Expect.Call(mockBusEndpoint.Uri).Return(queueUri).Repeat.Any();
 
                 mockSubscriptionStorage.Add(typeof(PoisonMessage).FullName, this.queueUri);
 

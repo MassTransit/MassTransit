@@ -48,8 +48,9 @@ namespace MassTransit.ServiceBus
 
             _endpoint = endpoint;
             _subscriptionStorage = subscriptionStorage;
-        }
 
+        	_endpoint.Receiver.Subscribe(this);
+		}
 
         public ISubscriptionStorage SubscriptionStorage
         {

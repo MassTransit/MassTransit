@@ -37,8 +37,8 @@ namespace MassTransit.ServiceBus.Tests
             using(mocks.Record())
             {
                 Expect.Call(_serviceBusEndPoint.Receiver).Return(mockReceiver);
-                Expect.Call(delegate { mockReceiver.Subscribe(null); }).IgnoreArguments();
-                Expect.Call(_serviceBusEndPoint.Uri).Return(new Uri("msmq://localhost/test_servicebus")).Repeat.Any(); //stupid log4net
+				Expect.Call(delegate { mockReceiver.Subscribe(null); }).IgnoreArguments().Repeat.Any();
+				Expect.Call(_serviceBusEndPoint.Uri).Return(new Uri("msmq://localhost/test_servicebus")).Repeat.Any(); //stupid log4net
             }
             using (mocks.Playback())
             {
@@ -65,7 +65,9 @@ namespace MassTransit.ServiceBus.Tests
         {
             using(mocks.Record())
             {
-                Expect.Call(_serviceBusEndPoint.Uri).Return(new Uri("msmq://localhost/test_servicebus")).Repeat.Any(); //stupid log4net
+				Expect.Call(_serviceBusEndPoint.Receiver).Return(mockReceiver);
+				Expect.Call(delegate { mockReceiver.Subscribe(null); }).IgnoreArguments();
+				Expect.Call(_serviceBusEndPoint.Uri).Return(new Uri("msmq://localhost/test_servicebus")).Repeat.Any(); //stupid log4net
             }
             using (mocks.Playback())
             {
