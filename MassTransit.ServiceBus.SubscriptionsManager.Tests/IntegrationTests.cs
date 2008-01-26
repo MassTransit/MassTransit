@@ -38,13 +38,33 @@ namespace MassTransit.ServiceBus.SubscriptionsManager.Tests
         {
             repo = null;
             bus.Dispose();
-            CleanUp();
+            //CleanUp();
         }
 
         [Test]
         public void Add_Subscription_to_the_database()
         {
             repo.Add("a", new Uri("msmq://localhost/test_client"));
+            AssertSubscriptionInDatabase();
+        }
+
+        [Test]
+        public void Test_Add_Idempotency()
+        {
+            repo.Add("a", new Uri("msmq://localhost/test_client"));
+            repo.Add("a", new Uri("msmq://localhost/test_client"));
+            
+            //casing of message shouldn't matter
+            repo.Add("A", new Uri("msmq://localhost/test_client"));
+            
+            //casing of uri shouldn't matter
+            repo.Add("a", new Uri("msmq://Localhost/test_client"));
+
+            //spaces on message name should be ignored
+            repo.Add("a ", new Uri("msmq://localhost/test_client"));
+
+            //spaces on uri should be ignored
+            repo.Add("a ", new Uri("msmq://localhost/test_client "));
             AssertSubscriptionInDatabase();
         }
 
