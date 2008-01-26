@@ -11,6 +11,8 @@ namespace Client
     {
         static void Main(string[] args)
         {
+            log4net.Config.XmlConfigurator.Configure();
+
             IEndpoint clientEndpoint = new MessageQueueEndpoint("msmq://localhost/test_client");
             IEndpoint wellKnown = new MessageQueueEndpoint("msmq://localhost/test_subscriptions");
 

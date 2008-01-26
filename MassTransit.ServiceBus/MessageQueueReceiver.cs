@@ -27,6 +27,7 @@ namespace MassTransit.ServiceBus
 	{
 		private static readonly object _locker = new object();
 		private static readonly ILog _log = LogManager.GetLogger(typeof (MessageQueueReceiver));
+		private static readonly ILog _messageLog = LogManager.GetLogger("MassTransit.Messages");
 		private readonly IMessageQueueEndpoint _endpoint;
 
 		private IEnvelopeConsumer _consumer;
@@ -147,7 +148,10 @@ namespace MassTransit.ServiceBus
 					{
 						IEnvelope e = EnvelopeMessageMapper.MapFrom(msg);
 
-						if (_consumer.IsHandled(e))
+                        if(_messageLog.IsInfoEnabled)
+                            _messageLog.InfoFormat("Received message {0} from {1}", e.Messages[0].GetType(), e.ReturnEndpoint.Uri);
+						
+                        if (_consumer.IsHandled(e))
 						{
 							Message received = queue.Receive(TimeSpan.FromSeconds(3), cursor);
 
@@ -181,7 +185,7 @@ namespace MassTransit.ServiceBus
                 if(_log.IsErrorEnabled)
 				    _log.Error("An unknown exception occured", ex);
 
-                throw new EndpointException(_endpoint, "message", ex);
+                throw new EndpointException(_endpoint, ex.Message, ex);
 			}
 
 			ThreadPool.QueueUserWorkItem(MonitorQueue, obj);
