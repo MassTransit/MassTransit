@@ -166,15 +166,23 @@ namespace MassTransit.ServiceBus
 			{
 				if (ex.MessageQueueErrorCode == MessageQueueErrorCode.IOTimeout)
 				{
+                    if (_log.IsErrorEnabled)
+                        _log.Error("IO Timeout", ex);
 				}
 				else
 				{
-					_log.Error("An error occured while communicating with the queue", ex);
+                    if (_log.IsErrorEnabled)
+					    _log.Error("An error occured while communicating with the queue", ex);
 				}
+
+                throw new EndpointException(_endpoint, "message", ex);
 			}
 			catch(Exception ex)
 			{
-				_log.Error("An unknown exception occured", ex);
+                if(_log.IsErrorEnabled)
+				    _log.Error("An unknown exception occured", ex);
+
+                throw new EndpointException(_endpoint, "message", ex);
 			}
 
 			ThreadPool.QueueUserWorkItem(MonitorQueue, obj);
