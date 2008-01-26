@@ -166,8 +166,7 @@ namespace MassTransit.ServiceBus
 			{
 				if (ex.MessageQueueErrorCode == MessageQueueErrorCode.IOTimeout)
 				{
-                    if (_log.IsErrorEnabled)
-                        _log.Error("IO Timeout", ex);
+                    //we don't log this because it isn't exceptional
 				}
 				else
 				{
@@ -175,7 +174,7 @@ namespace MassTransit.ServiceBus
 					    _log.Error("An error occured while communicating with the queue", ex);
 				}
 
-                throw new EndpointException(_endpoint, "message", ex);
+                //throw new EndpointException(_endpoint, "message", ex);
 			}
 			catch(Exception ex)
 			{
