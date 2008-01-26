@@ -12,7 +12,6 @@ namespace Client
         static void Main(string[] args)
         {
             IEndpoint clientEndpoint = new MessageQueueEndpoint("msmq://localhost/test_client");
-            IEndpoint serverEndpoint = new MessageQueueEndpoint("msmq://localhost/test_server");
             IEndpoint wellKnown = new MessageQueueEndpoint("msmq://localhost/test_subscriptions");
 
             ISubscriptionStorage storage = new LocalSubscriptionCache();
@@ -28,7 +27,7 @@ namespace Client
             Console.Write("New Password:");
             string newPassword = Console.ReadLine();
            
-            bus.Send(serverEndpoint, new RequestPasswordUpdate(newPassword));
+            bus.Publish(new RequestPasswordUpdate(newPassword));
 
             Console.WriteLine("Waiting For Reply");
             Console.ReadKey(true);

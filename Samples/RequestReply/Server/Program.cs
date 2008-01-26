@@ -5,15 +5,20 @@ using SecurityMessages;
 
 namespace Server
 {
+    using MassTransit.ServiceBus.SubscriptionsManager.Client;
+
     class Program
     {
         static void Main(string[] args)
         {
             IEndpoint serverEndpoint = new MessageQueueEndpoint("msmq://localhost/test_server");
+            IEndpoint wellKnown = new MessageQueueEndpoint("msmq://localhost/test_subscriptions");
 
-            ISubscriptionStorage storage = new MsmqSubscriptionStorage(new MessageQueueEndpoint("msmq://localhost/test_subscriptions"), new LocalSubscriptionCache());
+            ISubscriptionStorage storage = new LocalSubscriptionCache();
 
             ServiceBus bus = new ServiceBus(serverEndpoint, storage);
+            ClientProxy proxy = new ClientProxy(wellKnown);
+            proxy.StartWatching(bus, bus.SubscriptionStorage);
             
             bus.Subscribe<RequestPasswordUpdate>(Program_MessageReceived);
 
