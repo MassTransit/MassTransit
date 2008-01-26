@@ -22,7 +22,7 @@ namespace Server
             
         }
 
-        static void Program_MessageReceived(MessageContext<RequestPasswordUpdate> cxt)
+        static void Program_MessageReceived(IMessageContext<RequestPasswordUpdate> cxt)
         {
             Console.WriteLine("Received Message");
             Console.WriteLine(cxt.Message.NewPassword);

@@ -34,7 +34,7 @@ namespace Client
             Console.ReadKey(true);
         }
 
-        static void Program_MessageReceived(MessageContext<PasswordUpdateComplete> cxt)
+        static void Program_MessageReceived(IMessageContext<PasswordUpdateComplete> cxt)
         {
             Console.WriteLine("Password Set");
             Console.WriteLine("Thank You. Press any key to exit");
