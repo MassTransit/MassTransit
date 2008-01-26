@@ -24,6 +24,7 @@ namespace MassTransit.ServiceBus
         IMessageSender
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof (MessageQueueSender));
+        private static readonly ILog _messageLog = LogManager.GetLogger("MassTransit.Messages");
 
         private MessageQueue _queue;
         private IMessageQueueEndpoint _endpoint;
@@ -54,6 +55,9 @@ namespace MassTransit.ServiceBus
 
             try
 			{
+                if(_messageLog.IsInfoEnabled)
+                    _messageLog.InfoFormat("Message {0} Sent To {1}", envelope.Messages[0].GetType(), _endpoint.Uri);
+
                 _queue.Send(msg);
             }
 			catch(MessageQueueException ex)

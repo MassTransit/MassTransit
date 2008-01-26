@@ -28,6 +28,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="log4net, Version=1.2.10.0, Culture=neutral, PublicKeyToken=1b44e1d426115821, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\libs\log4net.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Messaging" />
   </ItemGroup>
@@ -39,6 +43,10 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\MassTransit.ServiceBus.SubscriptionsManager.Client\MassTransit.ServiceBus.SubscriptionsManager.Client.csproj">
+      <Project>{844D54AF-D8B9-4DBF-AC9E-B17423A5E0B2}</Project>
+      <Name>MassTransit.ServiceBus.SubscriptionsManager.Client</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\..\MassTransit.ServiceBus\MassTransit.ServiceBus.csproj">
       <Project>{90482397-6282-465E-8B86-39865FC30127}</Project>
       <Name>MassTransit.ServiceBus</Name>
@@ -47,6 +55,9 @@
       <Project>{D43A72DD-D125-480E-9873-7075C2C5B70A}</Project>
       <Name>SecurityMessages</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
