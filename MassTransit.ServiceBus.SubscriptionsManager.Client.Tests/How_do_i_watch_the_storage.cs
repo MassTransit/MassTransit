@@ -105,6 +105,7 @@ namespace MassTransit.ServiceBus.SubscriptionsManager.Client.Tests
             }
         }
 
+
         [Test]
         public void Starting_to_watch_when_there_are_subscriptions_already()
         {
@@ -162,6 +163,12 @@ namespace MassTransit.ServiceBus.SubscriptionsManager.Client.Tests
 
                 proxy.RespondToCacheUpdateMessage(new MessageContext<CacheUpdateResponse>(mockBus, new Envelope(msgs.ToArray()), msg));
             }
+        }
+
+        [Test]
+        public void When_we_add_an_existing_subscription()
+        {
+            
         }
 
         [Test]

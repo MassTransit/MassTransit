@@ -59,6 +59,26 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
             Assert.That(wasFired, Is.True);
         }
 
+        [Test]
+        public void Event_should_not_fire_if_subscription_exists()
+        {
+            Uri sendTo = new Uri("msmq://localhost/test");
+            bool wasFired = false;
+            LocalSubscriptionCache cache = new LocalSubscriptionCache();
+            cache.Add(typeof(PingMessage).FullName, sendTo);
+            cache.SubscriptionChanged += delegate(object sender, SubscriptionChangedEventArgs e)
+                                             {
+                                                 wasFired = true;
+                                                 Assert.That(e.Change.Subscription.Address, Is.EqualTo(sendTo));
+                                                 Assert.That(e.Change.ChangeType, Is.EqualTo(SubscriptionChangeType.Add));
+                                                 Assert.That(e.Change.Subscription.MessageName,
+                                                             Is.EqualTo(typeof(PingMessage).FullName));
+                                             };
+            cache.Add(typeof(PingMessage).FullName, sendTo);
+
+            Assert.That(cache.List().Count, Is.EqualTo(1));
+            Assert.That(wasFired, Is.False);
+        }
 
         [Test]
         public void Removing_Subscription()
