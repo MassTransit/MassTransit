@@ -22,7 +22,7 @@ namespace MassTransit.ServiceBus.SubscriptionsManager
     public class SubscriptionRepository : ISubscriptionStorage
     {
         private ISessionFactory _factory;
-
+        private object addLock = new object();
 
         public SubscriptionRepository(ISessionFactory factory)
         {
@@ -31,29 +31,32 @@ namespace MassTransit.ServiceBus.SubscriptionsManager
 
         public void Add(string messageName, Uri endpoint)
         {
-            using (ISession sess = _factory.OpenSession())
-            using (ITransaction tr = sess.BeginTransaction())
+            lock (addLock)
             {
-                ICriteria crit = sess.CreateCriteria(typeof(StoredSubscription));
-
-                crit.Add(Expression.Eq("Address", endpoint.ToString()))
-                    .Add(Expression.Eq("Message", messageName));
-
-                StoredSubscription obj = crit.UniqueResult<StoredSubscription>();
-
-                if (obj == null)
+                using (ISession sess = _factory.OpenSession())
+                using (ITransaction tr = sess.BeginTransaction())
                 {
-                    obj = new StoredSubscription(endpoint.ToString(), messageName);
-                    sess.Save(obj);
-                }
-                else
-                {
-                    obj.IsActive = true;
-                    sess.Update(obj);
-                }
+                    ICriteria crit = sess.CreateCriteria(typeof (StoredSubscription));
+
+                    crit.Add(Expression.Eq("Address", endpoint.ToString()))
+                        .Add(Expression.Eq("Message", messageName));
+
+                    StoredSubscription obj = crit.UniqueResult<StoredSubscription>();
+
+                    if (obj == null)
+                    {
+                        obj = new StoredSubscription(endpoint.ToString(), messageName);
+                        sess.Save(obj);
+                    }
+                    else
+                    {
+                        obj.IsActive = true;
+                        sess.Update(obj);
+                    }
 
 
-                tr.Commit();
+                    tr.Commit();
+                }
             }
         }
 
