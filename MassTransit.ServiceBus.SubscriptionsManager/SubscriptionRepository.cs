@@ -14,6 +14,7 @@
 namespace MassTransit.ServiceBus.SubscriptionsManager
 {
     using System;
+    using MassTransit.ServiceBus.Subscriptions.Messages;
     using NHibernate;
     using NHibernate.Expression;
     using System.Collections.Generic;
@@ -22,40 +23,45 @@ namespace MassTransit.ServiceBus.SubscriptionsManager
     public class SubscriptionRepository : ISubscriptionStorage
     {
         private ISessionFactory _factory;
+        private readonly IMessageQueueEndpoint _theRepositorysEndpointToIgnore;
         private object addLock = new object();
 
-        public SubscriptionRepository(ISessionFactory factory)
+        public SubscriptionRepository(ISessionFactory factory, IMessageQueueEndpoint theRepositorysEndpointToIgnore)
         {
             _factory = factory;
+            _theRepositorysEndpointToIgnore = theRepositorysEndpointToIgnore;
         }
 
         public void Add(string messageName, Uri endpoint)
         {
             lock (addLock)
             {
-                using (ISession sess = _factory.OpenSession())
-                using (ITransaction tr = sess.BeginTransaction())
+                if (!IsMessageToIgnore(messageName, endpoint))
                 {
-                    ICriteria crit = sess.CreateCriteria(typeof (StoredSubscription));
-
-                    crit.Add(Expression.Eq("Address", endpoint.ToString()))
-                        .Add(Expression.Eq("Message", messageName));
-
-                    StoredSubscription obj = crit.UniqueResult<StoredSubscription>();
-
-                    if (obj == null)
+                    using (ISession sess = _factory.OpenSession())
+                    using (ITransaction tr = sess.BeginTransaction())
                     {
-                        obj = new StoredSubscription(endpoint.ToString(), messageName);
-                        sess.Save(obj);
-                    }
-                    else
-                    {
-                        obj.IsActive = true;
-                        sess.Update(obj);
-                    }
+                        ICriteria crit = sess.CreateCriteria(typeof (StoredSubscription));
+
+                        crit.Add(Expression.Eq("Address", endpoint.ToString()))
+                            .Add(Expression.Eq("Message", messageName));
+
+                        StoredSubscription obj = crit.UniqueResult<StoredSubscription>();
+
+                        if (obj == null)
+                        {
+                            obj = new StoredSubscription(endpoint.ToString(), messageName);
+                            sess.Save(obj);
+                        }
+                        else
+                        {
+                            obj.IsActive = true;
+                            sess.Update(obj);
+                        }
 
 
-                    tr.Commit();
+                        tr.Commit();
+                    }
                 }
             }
         }
@@ -82,6 +88,13 @@ namespace MassTransit.ServiceBus.SubscriptionsManager
             }
         }
 
+
+        public bool IsMessageToIgnore(string messageName, Uri endpoint)
+        {
+            return
+                typeof (CacheUpdateResponse).FullName.Equals(messageName) &&
+                _theRepositorysEndpointToIgnore.Uri.Equals(endpoint);
+        }
 
         public IList<Subscription> List()
         {

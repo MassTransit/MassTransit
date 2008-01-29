@@ -55,11 +55,13 @@ namespace MassTransit.ServiceBus.SubscriptionsManager.Client
         {
             //send stuff to the wellknown endpoint
             SendUpdate(e.Change);
-            
         }
 
         public void SendUpdate(SubscriptionChange change)
         {
+            if (_log.IsDebugEnabled)
+                _log.DebugFormat("Sending change '{0}' {1} {2} to {3}", change.ChangeType, change.Subscription.Address, change.Subscription.MessageName, this._wellKnownSubscriptionManagerEndpoint.Uri);
+
             _bus.Send(_wellKnownSubscriptionManagerEndpoint, change);
         }
 
@@ -70,16 +72,20 @@ namespace MassTransit.ServiceBus.SubscriptionsManager.Client
 
             foreach (SubscriptionChange change in ctx.Message.Subscriptions)
             {
-                switch(change.ChangeType)
+                //TODO: Add test for this
+                if (change.Subscription.Address.Equals(_bus.Endpoint.Uri))
                 {
-                    case SubscriptionChangeType.Add:
-                        _storage.Add(change.Subscription.MessageName, change.Subscription.Address);
-                        break;
-                    case SubscriptionChangeType.Remove:
-                        _storage.Remove(change.Subscription.MessageName, change.Subscription.Address);
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
+                    switch (change.ChangeType)
+                    {
+                        case SubscriptionChangeType.Add:
+                            _storage.Add(change.Subscription.MessageName, change.Subscription.Address);
+                            break;
+                        case SubscriptionChangeType.Remove:
+                            _storage.Remove(change.Subscription.MessageName, change.Subscription.Address);
+                            break;
+                        default:
+                            throw new ArgumentOutOfRangeException();
+                    }
                 }
             }
         }
