@@ -10,7 +10,6 @@
 /// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 /// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 /// specific language governing permissions and limitations under the License.
-
 namespace MassTransit.ServiceBus.Subscriptions.Messages
 {
     using System;
@@ -19,16 +18,14 @@ namespace MassTransit.ServiceBus.Subscriptions.Messages
     [Serializable]
     public class CacheUpdateResponse : IMessage
     {
-        private List<SubscriptionChange> _subscriptions;
+        private readonly List<Subscription> _subscriptions;
 
-
-        public CacheUpdateResponse(List<SubscriptionChange> subscriptions)
+        public CacheUpdateResponse(IEnumerable<Subscription> subscriptions)
         {
-            _subscriptions = subscriptions;
+            _subscriptions = new List<Subscription>(subscriptions);
         }
 
-
-        public List<SubscriptionChange> Subscriptions
+        public IList<Subscription> Subscriptions
         {
             get { return _subscriptions; }
         }

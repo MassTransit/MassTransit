@@ -43,7 +43,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ISubscriptionRepository.cs" />
     <Compile Include="Program.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -51,7 +50,7 @@
     <Compile Include="StoredSubscription.cs" />
     <Compile Include="SubscriptionMapper.cs" />
     <Compile Include="SubscriptionRepository.cs" />
-    <Compile Include="SubscriptionServiceBus.cs" />
+    <Compile Include="SubscriptionService.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\MassTransit.ServiceBus\MassTransit.ServiceBus.csproj">

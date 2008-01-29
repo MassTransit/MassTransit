@@ -40,7 +40,7 @@ namespace MassTransit.ServiceBus.SubscriptionsManager.Tests
             StoredSubscription stored = new StoredSubscription("msmq://localhost/bob", typeof(CacheUpdateResponse).FullName);
             subs.Add(stored);
 
-            List<Subscription> result = SubscriptionMapper.MapFrom(subs);
+            IList<Subscription> result = SubscriptionMapper.MapFrom(subs);
             Assert.That(result.Count, Is.EqualTo(1));
         }
     }

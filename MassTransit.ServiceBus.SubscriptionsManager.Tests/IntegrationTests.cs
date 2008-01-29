@@ -6,83 +6,55 @@ namespace MassTransit.ServiceBus.SubscriptionsManager.Tests
     using NHibernate;
     using NHibernate.Cfg;
     using NUnit.Framework;
+    using NUnit.Framework.SyntaxHelpers;
+    using Subscriptions;
 
     [TestFixture]
     [Explicit]
     public class IntegrationTests
     {
-        SubscriptionRepository repo;
-        private readonly string connectionString = "Server=localhost;initial catalog=test;Trusted_Connection=yes";
-        private SubscriptionServiceBus bus;
+        #region Setup/Teardown
 
         [SetUp]
         public void Setup()
         {
-            NHibernate.Cfg.Configuration config = new Configuration();
-            config.SetProperty("hibernate.connection.provider", "NHibernate.Connection.DriverConnectionProvider");
-            config.SetProperty("hibernate.connection.driver_class", "NHibernate.Driver.SqlClientDriver");
-            config.SetProperty("hibernate.connection.connection_string", connectionString);
-            config.SetProperty("hibernate.dialect", "NHibernate.Dialect.MsSql2005Dialect");
+            Configuration cfg = new Configuration();
 
-            config.AddAssembly("MassTransit.ServiceBus.SubscriptionsManager");
+            cfg.SetProperty("hibernate.connection.provider", "NHibernate.Connection.DriverConnectionProvider");
+            cfg.SetProperty("hibernate.connection.driver_class", "NHibernate.Driver.SqlClientDriver");
+            cfg.SetProperty("hibernate.connection.connection_string", connectionString);
+            cfg.SetProperty("hibernate.dialect", "NHibernate.Dialect.MsSql2005Dialect");
 
-            ISessionFactory sessFactory = config.BuildSessionFactory();
+            cfg.AddAssembly("MassTransit.ServiceBus.SubscriptionsManager");
 
-            repo = new SubscriptionRepository(sessFactory);
+            _sessionFactory = cfg.BuildSessionFactory();
 
-            bus = new SubscriptionServiceBus(new MessageQueueEndpoint("msmq://localhost/test_endpoint"), repo);
+            _subscriptionRepository = new SubscriptionRepository(_sessionFactory);
+
+            _subscriptionCache = new LocalSubscriptionCache();
+
+            _bus = new ServiceBus(_endpoint, _subscriptionCache);
+
+            _subscriptionService = new SubscriptionService(_bus, _subscriptionRepository);
         }
 
         [TearDown]
         public void Teardown()
         {
-            repo = null;
-            bus.Dispose();
-            //CleanUp();
-        }
-
-        [Test]
-        public void Add_Subscription_to_the_database()
-        {
-            repo.Add("a", new Uri("msmq://localhost/test_client"));
-            AssertSubscriptionInDatabase();
-        }
-
-        [Test]
-        public void Test_Add_Idempotency()
-        {
-            repo.Add("a", new Uri("msmq://localhost/test_client"));
-            repo.Add("a", new Uri("msmq://localhost/test_client"));
+            _subscriptionService.Dispose();
             
-            //casing of message shouldn't matter
-            repo.Add("A", new Uri("msmq://localhost/test_client"));
-            
-            //casing of uri shouldn't matter
-            repo.Add("a", new Uri("msmq://Localhost/test_client"));
-
-            //spaces on message name should be ignored
-            repo.Add("a ", new Uri("msmq://localhost/test_client"));
-
-            //spaces on uri should be ignored
-            repo.Add("a ", new Uri("msmq://localhost/test_client "));
-            AssertSubscriptionInDatabase();
+            CleanUp();
         }
 
-        [Test]
-        public void Remove_Subscription_From_the_Database()
-        {
-            repo.Add("a", new Uri("msmq://localhost/test_client"));
-            AssertSubscriptionInDatabase();
+        #endregion
 
-            repo.Remove("a", new Uri("msmq://localhost/test_client"));
-            AssertSubscriptionInactive();
-        }
-
-        [Test]
-        public void Test_Receiving_By_Message()
-        {
-            bus.Send(new MessageQueueEndpoint("msmq://localhost/test_endpoint"), new SubscriptionChange(typeof(SubscriptionChange).FullName, new Uri("msmq://localhost/test_client"), SubscriptionChangeType.Add));
-        }
+        private readonly string connectionString = "Server=localhost;initial catalog=test;Trusted_Connection=yes";
+        private SubscriptionService _subscriptionService;
+        private readonly IMessageQueueEndpoint _endpoint = new MessageQueueEndpoint("msmq://localhost/test_subscriptions");
+        private IServiceBus _bus;
+        private ISessionFactory _sessionFactory;
+        private ISubscriptionStorage _subscriptionCache;
+        private ISubscriptionStorage _subscriptionRepository;
 
         public void AssertSubscriptionInDatabase()
         {
@@ -106,11 +78,11 @@ namespace MassTransit.ServiceBus.SubscriptionsManager.Tests
 
         private int ExecuteCmd(string sql)
         {
-            using(SqlConnection conn = new SqlConnection(connectionString))
+            using (SqlConnection conn = new SqlConnection(connectionString))
             {
                 conn.Open();
 
-                using(SqlCommand cmd = new SqlCommand(sql, conn))
+                using (SqlCommand cmd = new SqlCommand(sql, conn))
                 {
                     return cmd.ExecuteNonQuery();
                 }
@@ -128,6 +100,54 @@ namespace MassTransit.ServiceBus.SubscriptionsManager.Tests
                     return cmd.ExecuteScalar();
                 }
             }
+        }
+
+        [Test]
+        public void Add_Subscription_to_the_database()
+        {
+            _subscriptionRepository.Add("a", new Uri("msmq://localhost/test_client"));
+
+            Assert.That(ExecuteScalar("SELECT COUNT(*) FROM bus.Subscriptions"), Is.EqualTo(1), "Subscription count didn't match");
+        }
+
+        [Test]
+        public void Remove_Subscription_From_the_Database()
+        {
+            _subscriptionRepository.Add("a", new Uri("msmq://localhost/test_client"));
+            
+            Assert.That(ExecuteScalar("SELECT COUNT(*) FROM bus.Subscriptions"), Is.EqualTo(1), "Subscription count didn't match");
+
+            _subscriptionRepository.Remove("a", new Uri("msmq://localhost/test_client"));
+
+            Assert.That(ExecuteScalar("SELECT COUNT(*) FROM bus.Subscriptions WHERE Message='a'"), Is.EqualTo(1), "The subscription did not exist");
+            Assert.That(ExecuteScalar("SELECT COUNT(*) FROM bus.Subscriptions WHERE Message='a' AND IsActive = 0"), Is.EqualTo(1), "The subscription was not marked as inactive");
+        }
+
+        [Test]
+        public void Test_Add_Idempotency()
+        {
+            _subscriptionRepository.Add("a", new Uri("msmq://localhost/test_client"));
+            _subscriptionRepository.Add("a", new Uri("msmq://localhost/test_client"));
+
+            //casing of message shouldn't matter
+            _subscriptionRepository.Add("A", new Uri("msmq://localhost/test_client"));
+
+            //casing of uri shouldn't matter
+            _subscriptionRepository.Add("a", new Uri("msmq://Localhost/test_client"));
+
+            //spaces on message name should be ignored
+            _subscriptionRepository.Add("a ", new Uri("msmq://localhost/test_client"));
+
+            //spaces on uri should be ignored
+            _subscriptionRepository.Add("a ", new Uri("msmq://localhost/test_client "));
+
+            Assert.That(ExecuteScalar("SELECT COUNT(*) FROM bus.Subscriptions"), Is.EqualTo(1), "Subscription count didn't match");
+        }
+
+        [Test]
+        public void Test_Receiving_By_Message()
+        {
+           // bus.Send(new MessageQueueEndpoint("msmq://localhost/test_endpoint"), new SubscriptionChange(typeof (SubscriptionChange).FullName, new Uri("msmq://localhost/test_client"), SubscriptionChangeType.Add));
         }
     }
 }

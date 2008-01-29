@@ -10,59 +10,60 @@
 /// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 /// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 /// specific language governing permissions and limitations under the License.
-
 namespace MassTransit.ServiceBus.SubscriptionsManager
 {
     using System;
-    using MassTransit.ServiceBus.Subscriptions.Messages;
+    using System.Collections.Generic;
+    using log4net;
     using NHibernate;
     using NHibernate.Expression;
-    using System.Collections.Generic;
     using Subscriptions;
 
     public class SubscriptionRepository : ISubscriptionStorage
     {
-        private ISessionFactory _factory;
-        private readonly IMessageQueueEndpoint _theRepositorysEndpointToIgnore;
-        private object addLock = new object();
+        private static readonly ILog _log = LogManager.GetLogger(typeof (SubscriptionService));
+        private readonly ISessionFactory _factory;
+        private readonly object _locker = new object();
 
-        public SubscriptionRepository(ISessionFactory factory, IMessageQueueEndpoint theRepositorysEndpointToIgnore)
+        public SubscriptionRepository(ISessionFactory factory)
         {
             _factory = factory;
-            _theRepositorysEndpointToIgnore = theRepositorysEndpointToIgnore;
         }
+
+        #region ISubscriptionStorage Members
 
         public void Add(string messageName, Uri endpoint)
         {
-            lock (addLock)
+            try
             {
-                if (!IsMessageToIgnore(messageName, endpoint))
+                using (ISession sess = _factory.OpenSession())
+                using (ITransaction tr = sess.BeginTransaction())
                 {
-                    using (ISession sess = _factory.OpenSession())
-                    using (ITransaction tr = sess.BeginTransaction())
+                    ICriteria crit = sess.CreateCriteria(typeof (StoredSubscription));
+
+                    crit.Add(Expression.Eq("Address", endpoint.ToString()))
+                        .Add(Expression.Eq("Message", messageName));
+
+                    StoredSubscription obj = crit.UniqueResult<StoredSubscription>();
+
+                    if (obj == null)
                     {
-                        ICriteria crit = sess.CreateCriteria(typeof (StoredSubscription));
-
-                        crit.Add(Expression.Eq("Address", endpoint.ToString()))
-                            .Add(Expression.Eq("Message", messageName));
-
-                        StoredSubscription obj = crit.UniqueResult<StoredSubscription>();
-
-                        if (obj == null)
-                        {
-                            obj = new StoredSubscription(endpoint.ToString(), messageName);
-                            sess.Save(obj);
-                        }
-                        else
-                        {
-                            obj.IsActive = true;
-                            sess.Update(obj);
-                        }
-
-
-                        tr.Commit();
+                        obj = new StoredSubscription(endpoint.ToString(), messageName);
+                        sess.Save(obj);
                     }
+                    else
+                    {
+                        obj.IsActive = true;
+                        sess.Update(obj);
+                    }
+
+                    tr.Commit();
                 }
+            }
+            catch (Exception ex)
+            {
+                _log.Error(string.Format("Error adding message {0} for address {1} to the repository", messageName, endpoint), ex);
+                throw;
             }
         }
 
@@ -71,7 +72,7 @@ namespace MassTransit.ServiceBus.SubscriptionsManager
             using (ISession sess = _factory.OpenSession())
             using (ITransaction tr = sess.BeginTransaction())
             {
-                ICriteria crit = sess.CreateCriteria(typeof(StoredSubscription));
+                ICriteria crit = sess.CreateCriteria(typeof (StoredSubscription));
 
                 crit.Add(Expression.Eq("Address", endpoint.ToString()))
                     .Add(Expression.Eq("Message", messageName));
@@ -88,19 +89,14 @@ namespace MassTransit.ServiceBus.SubscriptionsManager
             }
         }
 
-
-        public bool IsMessageToIgnore(string messageName, Uri endpoint)
-        {
-            return
-                typeof (CacheUpdateResponse).FullName.Equals(messageName) &&
-                _theRepositorysEndpointToIgnore.Uri.Equals(endpoint);
-        }
+        public event EventHandler<SubscriptionChangedEventArgs> SubscriptionChanged;
 
         public IList<Subscription> List()
         {
             using (ISession sess = _factory.OpenSession())
             {
-                ICriteria crit = sess.CreateCriteria(typeof (StoredSubscription));
+                ICriteria crit = sess.CreateCriteria(typeof (StoredSubscription))
+                    .Add(Expression.Eq("IsActive", true));
 
                 return SubscriptionMapper.MapFrom(crit.List<StoredSubscription>());
             }
@@ -110,20 +106,19 @@ namespace MassTransit.ServiceBus.SubscriptionsManager
         {
             using (ISession sess = _factory.OpenSession())
             {
-                ICriteria crit = sess.CreateCriteria(typeof(StoredSubscription));
-                crit.Add(Expression.Eq("Message", messageName));
+                ICriteria crit = sess.CreateCriteria(typeof (StoredSubscription))
+                    .Add(Expression.Eq("Message", messageName))
+                    .Add(Expression.Eq("IsActive", true));
 
                 return SubscriptionMapper.MapFrom(crit.List<StoredSubscription>());
             }
         }
 
-
-        public event EventHandler<SubscriptionChangedEventArgs> SubscriptionChanged;
-
-
         public void Dispose()
         {
             _factory.Dispose();
         }
+
+        #endregion
     }
 }
