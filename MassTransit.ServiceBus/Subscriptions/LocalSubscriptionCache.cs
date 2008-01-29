@@ -25,6 +25,9 @@ namespace MassTransit.ServiceBus.Subscriptions
         private readonly Dictionary<string, List<SubscriptionCacheEntry>> _messageTypeSubscriptions =
             new Dictionary<string, List<SubscriptionCacheEntry>>(StringComparer.InvariantCultureIgnoreCase);
         private static readonly ILog _log = LogManager.GetLogger(typeof(LocalSubscriptionCache));
+        private object addLock  = new object();
+        private object deleteLock = new object();
+
 
         // just a shared local cache
         public LocalSubscriptionCache()
@@ -61,57 +64,14 @@ namespace MassTransit.ServiceBus.Subscriptions
 
         public void Add(string messageName, Uri endpoint)
         {
-            InternalAdd(messageName, endpoint);
-        }
-        public void Remove(string messageName, Uri endpoint)
-        {
-            InternalRemove(messageName, endpoint);			
-        }
-
-        public void Dispose()
-        {
-            _messageTypeSubscriptions.Clear();
-        }
-
-        
-        private void InternalRemove(string messageName, Uri endpoint)
-        {
-            if (_log.IsDebugEnabled)
-                _log.DebugFormat("Removing Local Subscription {0} : {1}", messageName, endpoint);
-
-            lock (this)
+            lock (addLock)
             {
-                if (_messageTypeSubscriptions.ContainsKey(messageName))
-                {
-                    SubscriptionCacheEntry entry = new SubscriptionCacheEntry(endpoint);
-
-                    if (_messageTypeSubscriptions[messageName].Contains(entry))
-                    {
-                        if (_log.IsDebugEnabled)
-                            _log.DebugFormat("Removing local subscription entry for endpoint {0} on {1}", endpoint,
-                                             GetHashCode());
-                        _messageTypeSubscriptions[messageName].Remove(entry);
-                    }
-
-                    if (_messageTypeSubscriptions[messageName].Count == 0)
-                    {
-                        if (_log.IsDebugEnabled)
-                            _log.DebugFormat("Removing local subscription list for type {0} on {1}", messageName, GetHashCode());
-                        _messageTypeSubscriptions.Remove(messageName);
-
-                        OnChange(new SubscriptionChange(messageName, endpoint, SubscriptionChangeType.Remove));
-                    }
-                }   
-            }
-        }
-        private void InternalAdd(string messageName, Uri endpoint)
-        {
-            lock (this)
-            {
+                messageName = messageName.Trim();
                 if (!_messageTypeSubscriptions.ContainsKey(messageName))
                 {
                     if (_log.IsDebugEnabled)
                         _log.DebugFormat("Adding new local subscription list for type {0} on {1}", messageName, GetHashCode());
+
                     _messageTypeSubscriptions.Add(messageName, new List<SubscriptionCacheEntry>());
                 }
 
@@ -120,13 +80,49 @@ namespace MassTransit.ServiceBus.Subscriptions
                 if (!_messageTypeSubscriptions[messageName].Contains(entry))
                 {
                     if (_log.IsDebugEnabled)
-                        _log.DebugFormat("Adding new local subscription entry for endpoint {0} on {1}", endpoint,
-                                         GetHashCode());
+                        _log.DebugFormat("Adding new local subscription entry for endpoint {0} on {1}", endpoint, GetHashCode());
+
                     _messageTypeSubscriptions[messageName].Add(entry);
 
                     OnChange(new SubscriptionChange(messageName, endpoint, SubscriptionChangeType.Add));
                 }
             }
+        }
+        public void Remove(string messageName, Uri endpoint)
+        {
+            if (_log.IsDebugEnabled)
+                _log.DebugFormat("Removing Local Subscription {0} : {1}", messageName, endpoint);
+
+            lock (deleteLock)
+            {
+                if (_messageTypeSubscriptions.ContainsKey(messageName))
+                {
+                    SubscriptionCacheEntry entry = new SubscriptionCacheEntry(endpoint);
+
+                    if (_messageTypeSubscriptions[messageName].Contains(entry))
+                    {
+                        if (_log.IsDebugEnabled)
+                            _log.DebugFormat("Removing local subscription entry for endpoint {0} on {1}", endpoint, GetHashCode());
+
+                        _messageTypeSubscriptions[messageName].Remove(entry);
+                    }
+
+                    if (_messageTypeSubscriptions[messageName].Count == 0)
+                    {
+                        if (_log.IsDebugEnabled)
+                            _log.DebugFormat("Removing local subscription list for type {0} on {1}", messageName, GetHashCode());
+
+                        _messageTypeSubscriptions.Remove(messageName);
+
+                        OnChange(new SubscriptionChange(messageName, endpoint, SubscriptionChangeType.Remove));
+                    }
+                }
+            }
+        }
+
+        public void Dispose()
+        {
+            _messageTypeSubscriptions.Clear();
         }
 
         protected void OnChange(SubscriptionChange change)
