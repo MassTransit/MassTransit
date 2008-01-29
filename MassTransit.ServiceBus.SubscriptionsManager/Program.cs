@@ -10,18 +10,23 @@
 /// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 /// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 /// specific language governing permissions and limitations under the License.
-
 namespace MassTransit.ServiceBus.SubscriptionsManager
 {
     using System.ServiceProcess;
     using NHibernate;
     using NHibernate.Cfg;
+    using Subscriptions;
 
     public class Program : ServiceBase
     {
-        private SubscriptionServiceBus bus;
+        private SubscriptionService _subscriptionService;
+        private readonly IMessageQueueEndpoint _endpoint = new MessageQueueEndpoint("msmq://localhost/test_subscriptions");
+        private IServiceBus _bus;
+        private ISessionFactory _sessionFactory;
+        private ISubscriptionStorage _subscriptionCache;
+        private ISubscriptionStorage _subscriptionRepository;
 
-        public void StartItUp()
+        protected void Initialize()
         {
             string connectionString = "Server=localhost;initial catalog=test;Trusted_Connection=yes";
 
@@ -33,23 +38,33 @@ namespace MassTransit.ServiceBus.SubscriptionsManager
             cfg.SetProperty("hibernate.dialect", "NHibernate.Dialect.MsSql2005Dialect");
 
             cfg.AddAssembly("MassTransit.ServiceBus.SubscriptionsManager");
-            
-            ISessionFactory sessionFactory = cfg.BuildSessionFactory();
-            IMessageQueueEndpoint busEndpoint = new MessageQueueEndpoint("msmq://localhost/test_subscriptions");
-            bus = new SubscriptionServiceBus(busEndpoint, new SubscriptionRepository(sessionFactory, busEndpoint));
+
+            _sessionFactory = cfg.BuildSessionFactory();
+
+            _subscriptionRepository = new SubscriptionRepository(_sessionFactory);
+
+            _subscriptionCache = new LocalSubscriptionCache();
+
+            _bus = new ServiceBus(_endpoint, _subscriptionCache);
+
+            _subscriptionService = new SubscriptionService(_bus, _subscriptionRepository);
         }
+
+
         protected override void OnStart(string[] args)
         {
             base.OnStart(args);
 
-            StartItUp();
+            Initialize();
             
+            _subscriptionService.Start(args);
         }
 
         protected override void OnStop()
         {
+            _subscriptionService.Stop();
+
             base.OnStop();
-            bus.Dispose();
         }
     }
 }

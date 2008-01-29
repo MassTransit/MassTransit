@@ -6,7 +6,7 @@
 
   <class name="StoredSubscription" table="Subscriptions" lazy="false">
     
-    <id name="Id" column="SubscriptionId" type="Int32" access="field.camelcase-underscore">
+    <id name="Id" type="Int32" access="field.camelcase-underscore">
       <generator class="native"/>
     </id>
     

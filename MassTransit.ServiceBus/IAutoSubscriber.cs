@@ -21,10 +21,8 @@ namespace MassTransit.ServiceBus
 	/// </summary>
 	public interface IAutoSubscriber
 	{
-        /// <summary>
-        /// Used to subscribe or unsubscribe at startup
-        /// </summary>
-        /// <param name="bus">The funk bus</param>
-	    void Initialize(IServiceBus bus);
+	    void AddSubscriptions(IServiceBus bus);
+
+	    void RemoveSubscriptions(IServiceBus bus);
 	}
 }

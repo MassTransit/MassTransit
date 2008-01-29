@@ -30,7 +30,7 @@ namespace MassTransit.ServiceBus.SubscriptionsManager
             return new Subscription(new Uri(storedSubscription.Address), storedSubscription.Message);
         }
 
-        public static List<Subscription> MapFrom(IList<StoredSubscription> subscriptions)
+        public static IList<Subscription> MapFrom(IList<StoredSubscription> subscriptions)
         {
             List<Subscription> result = new List<Subscription>();
             

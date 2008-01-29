@@ -11,21 +11,18 @@
 /// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 /// specific language governing permissions and limitations under the License.
 
-using System;
-
 namespace MassTransit.ServiceBus.Subscriptions.Messages
 {
+    using System;
+
     [Serializable]
     public class SubscriptionChange : IMessage
     {
-        #region SubscriptionChangeType enum
+        private readonly SubscriptionChangeType _changeType;
+        private readonly Subscription _subscription;
 
-        #endregion
-
-        private Subscription _subscription;
-        private SubscriptionChangeType _changeType;
-
-        public SubscriptionChange(string messageName, Uri address, SubscriptionChangeType changeType): this(new Subscription(address, messageName), changeType)
+        public SubscriptionChange(string messageName, Uri address, SubscriptionChangeType changeType) 
+            : this(new Subscription(address, messageName), changeType)
         {
         }
 
@@ -45,6 +42,5 @@ namespace MassTransit.ServiceBus.Subscriptions.Messages
         {
             get { return _subscription; }
         }
-
     }
 }
