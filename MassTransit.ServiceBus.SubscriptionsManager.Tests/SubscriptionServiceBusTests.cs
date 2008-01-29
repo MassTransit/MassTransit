@@ -1,112 +1,125 @@
-using System;
-using System.Collections.Generic;
-using MassTransit.ServiceBus.Subscriptions.Messages;
-using NUnit.Framework;
-using Rhino.Mocks;
-
 namespace MassTransit.ServiceBus.SubscriptionsManager.Tests
 {
+    using System;
+    using System.Collections.Generic;
+    using MassTransit.ServiceBus.Subscriptions.Messages;
+    using NUnit.Framework;
+    using Rhino.Mocks;
     using Subscriptions;
-    using Util;
 
     [TestFixture]
-    public class SubscriptionServiceBusTests
+    public class When_a_CacheUpdateRequest_is_recieved
     {
-        private IMessageReceiver mockReceiver;
-        private MockRepository mocks;
-        private ISubscriptionStorage ss;
-        private Uri subsUri;
-        private IEndpoint ep;
+        #region Setup/Teardown
 
         [SetUp]
-        public void SetUp()
+        public void Setup()
         {
-            mocks = new MockRepository();
-            mockReceiver = mocks.CreateMock<IMessageReceiver>();
-            ss = mocks.CreateMock<ISubscriptionStorage>();
-            subsUri = new Uri("msmq://localhost/subs");
-            ep = mocks.CreateMock<IEndpoint>();
+            _mocks = new MockRepository();
+            _repository = _mocks.CreateMock<ISubscriptionStorage>();
+            _bus = _mocks.CreateMock<IServiceBus>();
+            _cache = _mocks.CreateMock<ISubscriptionStorage>();
+
+            _service = new SubscriptionService(_bus, _cache, _repository);
+
+            _context = _mocks.CreateMock<IMessageContext<CacheUpdateRequest>>();
         }
 
-        
+        #endregion
+
+        private MockRepository _mocks;
+        private ISubscriptionStorage _repository;
+        private ISubscriptionStorage _cache;
+        private IServiceBus _bus;
+        private SubscriptionService _service;
+        private IMessageContext<CacheUpdateRequest> _context;
 
         [Test]
-        public void How_does_the_ServiceBus_start_up()
+        public void Reply_with_a_list_of_subscriptions()
         {
-            using(mocks.Record())
+            List<Subscription> subscriptions = new List<Subscription>();
+            subscriptions.Add(new Subscription(new Uri("msmq://localhost/test"), "a"));
+
+            CacheUpdateResponse response = new CacheUpdateResponse(subscriptions);
+
+            using (_mocks.Record())
             {
-                Expect.Call(ep.Uri).Return(subsUri);
-                ss.Add(typeof(CacheUpdateRequest).FullName, subsUri);
-                Expect.Call(ep.Receiver).Return(mockReceiver);
-                mockReceiver.Subscribe(null);
-                LastCall.IgnoreArguments();
-
-                Expect.Call(ep.Uri).Return(subsUri);
-                ss.Add(typeof(SubscriptionChange).FullName, subsUri);
-                Expect.Call(ep.Receiver).Return(mockReceiver);
-                mockReceiver.Subscribe(null);
-                LastCall.IgnoreArguments();
-
-                Expect.Call(ep.Uri).Return(subsUri);
-                //ss.Add(typeof(RequestCacheUpdateForMessage).FullName, subsUri);
-                Expect.Call(ep.Receiver).Return(mockReceiver);
-                mockReceiver.Subscribe(null);
+                Expect.Call(_cache.List()).Return(subscriptions);
+                _context.Reply(response);
                 LastCall.IgnoreArguments();
             }
-            using(mocks.Playback())
+
+            using (_mocks.Playback())
             {
-                //new SubscriptionServiceBus(ep, ss);
+                _service.HandleCacheUpdateRequest(_context);
+            }
+        }
+    }
+
+    [TestFixture]
+    public class When_a_SubscriptionChange_message_is_received_by_the_SubscriptionService
+    {
+        #region Setup/Teardown
+
+        [SetUp]
+        public void Setup()
+        {
+            _mocks = new MockRepository();
+            _repository = _mocks.CreateMock<ISubscriptionStorage>();
+            _bus = _mocks.CreateMock<IServiceBus>();
+            _cache = _mocks.CreateMock<ISubscriptionStorage>();
+
+            _service = new SubscriptionService(_bus, _cache, _repository);
+
+            _context = _mocks.CreateMock<IMessageContext<SubscriptionChange>>();
+
+            _uri = new Uri("msmq://localhost/test");
+        }
+
+        #endregion
+
+        private MockRepository _mocks;
+        private ISubscriptionStorage _repository;
+        private ISubscriptionStorage _cache;
+        private IServiceBus _bus;
+        private SubscriptionService _service;
+        private IMessageContext<SubscriptionChange> _context;
+        private SubscriptionChange _message;
+        private Uri _uri;
+
+        [Test]
+        public void If_the_message_is_a_remove_update_the_repository_and_service_bus()
+        {
+            _message = new SubscriptionChange("a", _uri, SubscriptionChangeType.Remove);
+
+            using (_mocks.Record())
+            {
+                Expect.Call(_context.Message).Return(_message).Repeat.AtLeastOnce();
+                Expect.Call(delegate { _cache.Remove("a", _uri); });
+                Expect.Call(delegate { _repository.Remove("a", _uri); });
+            }
+
+            using (_mocks.Playback())
+            {
+                _service.HandleSubscriptionChange(_context);
             }
         }
 
         [Test]
-        public void What_happens_when_a_message_is_received()
+        public void If_the_message_is_an_add_update_the_repository_and_service_bus()
         {
-            ISubscriptionStorage sr = mocks.CreateMock<ISubscriptionStorage>();
-            IEndpoint returnEndpoint = mocks.CreateMock<IEndpoint>();
-            IEnvelope env = mocks.CreateMock<IEnvelope>();
-            IMessageSender mockSender = mocks.CreateMock<IMessageSender>();
+            _message = new SubscriptionChange("a", _uri, SubscriptionChangeType.Add);
 
-            string envId = Guid.NewGuid().ToString() + "\\1";
-
-            using (mocks.Record())
+            using (_mocks.Record())
             {
-                Expect.Call(ep.Uri).Return(subsUri);
-                ss.Add(typeof(CacheUpdateRequest).FullName, subsUri);
-                Expect.Call(ep.Receiver).Return(mockReceiver);
-                mockReceiver.Subscribe(null);
-                LastCall.IgnoreArguments();
-
-                Expect.Call(ep.Uri).Return(subsUri);
-                ss.Add(typeof(SubscriptionChange).FullName, subsUri);
-                Expect.Call(ep.Receiver).Return(mockReceiver);
-                mockReceiver.Subscribe(null);
-                LastCall.IgnoreArguments();
-
-                Expect.Call(ep.Uri).Return(subsUri);
-              //  ss.Add(typeof(RequestCacheUpdateForMessage).FullName, subsUri);
-                Expect.Call(ep.Receiver).Return(mockReceiver);
-                mockReceiver.Subscribe(null);
-                LastCall.IgnoreArguments();
-
-
-
-                Expect.Call(env.CorrelationId).Return(MessageId.Empty);
-                Expect.Call(env.Messages).Return(new IMessage[] {new CacheUpdateRequest()});
-                Expect.Call(env.ReturnEndpoint).Return(returnEndpoint);
-                Expect.Call(returnEndpoint.Uri).Return(new Uri("msmq://localhost/return"));
-                ss.Add(typeof(CacheUpdateResponse).FullName, new Uri("msmq://localhost/return"));
-                Expect.Call(ss.List()).Return(new List<Subscription>());
-                Expect.Call(env.ReturnEndpoint).Return(returnEndpoint);
-                Expect.Call(env.Id).Return(envId);
-                Expect.Call(returnEndpoint.Sender).Return(mockSender);
-                mockSender.Send(null);
-                LastCall.IgnoreArguments();
+                Expect.Call(_context.Message).Return(_message).Repeat.AtLeastOnce();
+                Expect.Call(delegate { _cache.Add("a", _uri); });
+                Expect.Call(delegate { _repository.Add("a", _uri); });
             }
-            using (mocks.Playback())
+
+            using (_mocks.Playback())
             {
-              //  SubscriptionServiceBus bus = new SubscriptionServiceBus(ep, ss);               
-               // bus.Deliver(env);
+                _service.HandleSubscriptionChange(_context);
             }
         }
     }

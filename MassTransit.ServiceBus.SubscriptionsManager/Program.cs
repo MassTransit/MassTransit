@@ -47,7 +47,7 @@ namespace MassTransit.ServiceBus.SubscriptionsManager
 
             _bus = new ServiceBus(_endpoint, _subscriptionCache);
 
-            _subscriptionService = new SubscriptionService(_bus, _subscriptionRepository);
+            _subscriptionService = new SubscriptionService(_bus, _subscriptionCache, _subscriptionRepository);
         }
 
 
