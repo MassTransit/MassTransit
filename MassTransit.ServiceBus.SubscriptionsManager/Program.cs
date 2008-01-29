@@ -35,7 +35,8 @@ namespace MassTransit.ServiceBus.SubscriptionsManager
             cfg.AddAssembly("MassTransit.ServiceBus.SubscriptionsManager");
             
             ISessionFactory sessionFactory = cfg.BuildSessionFactory();
-            bus = new SubscriptionServiceBus(new MessageQueueEndpoint("msmq://localhost/test_subscriptions"), new SubscriptionRepository(sessionFactory));
+            IMessageQueueEndpoint busEndpoint = new MessageQueueEndpoint("msmq://localhost/test_subscriptions");
+            bus = new SubscriptionServiceBus(busEndpoint, new SubscriptionRepository(sessionFactory, busEndpoint));
         }
         protected override void OnStart(string[] args)
         {

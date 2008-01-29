@@ -26,7 +26,6 @@ namespace MassTransit.ServiceBus.SubscriptionsManager
         {
             this.Subscribe<RequestCacheUpdate>(OnRequestCacheUpdate);
             this.Subscribe<SubscriptionChange>(OnSubscriptionMessageReceived);
-            this.Subscribe<RequestCacheUpdateForMessage>(OnRequestSubscribersForMessage);
         }
 
 
@@ -58,20 +57,6 @@ namespace MassTransit.ServiceBus.SubscriptionsManager
             //return a complete list of SubscriptionMessages
             List<SubscriptionChange> result = new List<SubscriptionChange>();
             foreach (Subscription subscription in base.SubscriptionStorage.List())
-            {
-                result.Add(new SubscriptionChange(subscription, SubscriptionChangeType.Add));
-            }
-            ctx.Reply(new CacheUpdateResponse(result));
-        }
-
-
-        public void OnRequestSubscribersForMessage(IMessageContext<RequestCacheUpdateForMessage> ctx)
-        {
-            RegisterSenderForUpdates(ctx.Envelope);
-
-            //return a complete list of SubscriptionMessages
-            List<SubscriptionChange> result = new List<SubscriptionChange>();
-            foreach (Subscription subscription in base.SubscriptionStorage.List(ctx.Message.MessageName))
             {
                 result.Add(new SubscriptionChange(subscription, SubscriptionChangeType.Add));
             }

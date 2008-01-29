@@ -73,7 +73,6 @@
     <Compile Include="Subscriptions\LocalSubscriptionCache.cs" />
     <Compile Include="Subscriptions\Messages\CacheUpdateResponse.cs" />
     <Compile Include="Subscriptions\Messages\RequestCacheUpdate.cs" />
-    <Compile Include="Subscriptions\Messages\RequestCacheUpdateForMessage.cs" />
     <Compile Include="Subscriptions\Messages\SubscriptionChange.cs" />
     <Compile Include="Subscriptions\Messages\SubscriptionChangeType.cs" />
     <Compile Include="Subscriptions\MsmqSubscriptionStorage.cs" />
