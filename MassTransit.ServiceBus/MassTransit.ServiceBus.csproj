@@ -78,6 +78,7 @@
     <Compile Include="Subscriptions\MsmqSubscriptionStorage.cs" />
     <Compile Include="Subscriptions\Subscription.cs" />
     <Compile Include="Subscriptions\SubscriptionCacheEntry.cs" />
+    <Compile Include="Subscriptions\SubscriptionManagerClient.cs" />
     <Compile Include="Util\Check.cs" />
     <Compile Include="Util\MessageId.cs" />
   </ItemGroup>

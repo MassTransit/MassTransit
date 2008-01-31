@@ -268,6 +268,19 @@ namespace MassTransit.ServiceBus
 			}
 		}
 
+  		public IServiceBusAsyncResult Request<T>(IEndpoint destinationEndpoint, AsyncCallback callback, object state, params T[] messages) where T : IMessage
+  		{
+            IEnvelope envelope = new Envelope(_endpoint, messages as IMessage[]);
+
+            lock (_asyncReplyDispatcher)
+            {
+                destinationEndpoint.Sender.Send(envelope);
+
+                return _asyncReplyDispatcher.Track(envelope.Id, callback, state);
+            }
+  		}
+
+
 		#endregion
 
 		private bool IsTheBusInterested(IEnvelope envelope)
