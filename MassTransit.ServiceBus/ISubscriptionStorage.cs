@@ -11,11 +11,10 @@
 /// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 /// specific language governing permissions and limitations under the License.
 
-using System;
-using System.Collections.Generic;
-
 namespace MassTransit.ServiceBus
 {
+    using System;
+    using System.Collections.Generic;
     using Subscriptions;
 
     /// <summary>
@@ -29,6 +28,7 @@ namespace MassTransit.ServiceBus
         /// <param name="messageName">Message to find the Uri's for</param>
         /// <returns>A list of endpoints subscribed to the message type</returns>
         IList<Subscription> List(string messageName);
+
         IList<Subscription> List();
 
         /// <summary>
