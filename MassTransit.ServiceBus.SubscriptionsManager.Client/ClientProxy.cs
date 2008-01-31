@@ -40,7 +40,7 @@ namespace MassTransit.ServiceBus.SubscriptionsManager.Client
 
             _bus = bus;
             _bus.Subscribe<CacheUpdateResponse>(RespondToCacheUpdateMessage);
-            _bus.Send(_wellKnownSubscriptionManagerEndpoint, new RequestCacheUpdate());
+            _bus.Send(_wellKnownSubscriptionManagerEndpoint, new CacheUpdateRequest());
 
             _storage = storage;
             _storage.SubscriptionChanged += storage_SubscriptionChanged;
@@ -70,22 +70,12 @@ namespace MassTransit.ServiceBus.SubscriptionsManager.Client
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Received Update from {0}", ctx.Envelope.ReturnEndpoint);
 
-            foreach (SubscriptionChange change in ctx.Message.Subscriptions)
+            foreach (Subscription subscription in ctx.Message.Subscriptions)
             {
                 //TODO: Add test for this
-                if (change.Subscription.Address.Equals(_bus.Endpoint.Uri))
+                if (subscription.Address.Equals(_bus.Endpoint.Uri))
                 {
-                    switch (change.ChangeType)
-                    {
-                        case SubscriptionChangeType.Add:
-                            _storage.Add(change.Subscription.MessageName, change.Subscription.Address);
-                            break;
-                        case SubscriptionChangeType.Remove:
-                            _storage.Remove(change.Subscription.MessageName, change.Subscription.Address);
-                            break;
-                        default:
-                            throw new ArgumentOutOfRangeException();
-                    }
+                    _storage.Add(subscription.MessageName, subscription.Address);
                 }
             }
         }

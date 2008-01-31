@@ -41,7 +41,7 @@ namespace MassTransit.ServiceBus.SubscriptionsManager.Client.Tests
             {
                 mockBus.Subscribe<CacheUpdateResponse>(null);
                 LastCall.IgnoreArguments();
-                mockBus.Send<RequestCacheUpdate>(mockEndpoint, null);
+                mockBus.Send<CacheUpdateRequest>(mockEndpoint, null);
                 LastCall.IgnoreArguments();
 
                 mockCache.SubscriptionChanged += null;
@@ -63,7 +63,7 @@ namespace MassTransit.ServiceBus.SubscriptionsManager.Client.Tests
             {
                 mockBus.Subscribe<CacheUpdateResponse>(null);
                 LastCall.IgnoreArguments();
-                mockBus.Send<RequestCacheUpdate>(mockEndpoint, null);
+                mockBus.Send<CacheUpdateRequest>(mockEndpoint, null);
                 LastCall.IgnoreArguments();
                 Expect.Call(delegate { mockCache.SubscriptionChanged += null; }).IgnoreArguments();
                 eventRaiser = LastCall.GetEventRaiser();
@@ -88,7 +88,7 @@ namespace MassTransit.ServiceBus.SubscriptionsManager.Client.Tests
             using (mocks.Record())
             {
                 Expect.Call(delegate { mockBus.Subscribe<CacheUpdateResponse>(null); }).IgnoreArguments();
-                Expect.Call(delegate { mockBus.Send(null, new RequestCacheUpdate()); }).IgnoreArguments();
+                Expect.Call(delegate { mockBus.Send(null, new CacheUpdateRequest()); }).IgnoreArguments();
                 Expect.Call(delegate { mockCache.SubscriptionChanged += null; }).IgnoreArguments();
                 
                 eventRaiser = LastCall.GetEventRaiser();
@@ -113,7 +113,7 @@ namespace MassTransit.ServiceBus.SubscriptionsManager.Client.Tests
             using (mocks.Record())
             {
                 Expect.Call(delegate { mockBus.Subscribe<CacheUpdateResponse>(null); }).IgnoreArguments();
-                Expect.Call(delegate { mockBus.Send(null, new RequestCacheUpdate()); }).IgnoreArguments();
+                Expect.Call(delegate { mockBus.Send(null, new CacheUpdateRequest()); }).IgnoreArguments();
                 Expect.Call(delegate { mockCache.SubscriptionChanged += null; }).IgnoreArguments();
 
                 eventRaiser = LastCall.GetEventRaiser();
@@ -136,8 +136,8 @@ namespace MassTransit.ServiceBus.SubscriptionsManager.Client.Tests
         [Test]
         public void When_we_get_notified_of_a_change_add()
         {
-            List<SubscriptionChange> changes = new List<SubscriptionChange>();
-            SubscriptionChange change = new SubscriptionChange(typeof(RequestCacheUpdate).FullName, new Uri("msmq://localhost/test"), SubscriptionChangeType.Add );
+            List<Subscription> changes = new List<Subscription>();
+            Subscription change = new Subscription(new Uri("msmq://localhost/test"), typeof(CacheUpdateRequest).FullName);
             changes.Add(change);
 
             List<CacheUpdateResponse> msgs = new List<CacheUpdateResponse>();
@@ -148,12 +148,12 @@ namespace MassTransit.ServiceBus.SubscriptionsManager.Client.Tests
             using(mocks.Record())
             {
                 Expect.Call(delegate { mockBus.Subscribe<CacheUpdateResponse>(null); }).IgnoreArguments();
-                Expect.Call(delegate { mockBus.Send(null, new RequestCacheUpdate()); }).IgnoreArguments();
+                Expect.Call(delegate { mockBus.Send(null, new CacheUpdateRequest()); }).IgnoreArguments();
                 Expect.Call(delegate { mockCache.SubscriptionChanged += null; }).IgnoreArguments();
                 Expect.Call(mockCache.List()).Return(new List<Subscription>());
 
                 //New Stuff
-                Expect.Call(delegate { mockCache.Add(typeof (RequestCacheUpdate).FullName, new Uri("msmq://localhost/test")); });
+                Expect.Call(delegate { mockCache.Add(typeof (CacheUpdateRequest).FullName, new Uri("msmq://localhost/test")); });
                 //TODO: does an event get fired?
             }
             using(mocks.Playback())
@@ -174,8 +174,8 @@ namespace MassTransit.ServiceBus.SubscriptionsManager.Client.Tests
         [Test]
         public void When_we_get_notified_of_a_change_remove()
         {
-            List<SubscriptionChange> changes = new List<SubscriptionChange>();
-            SubscriptionChange change = new SubscriptionChange(typeof(RequestCacheUpdate).FullName, new Uri("msmq://localhost/test"), SubscriptionChangeType.Remove);
+            List<Subscription> changes = new List<Subscription>();
+            Subscription change = new Subscription( new Uri("msmq://localhost/test"),typeof(CacheUpdateRequest).FullName);
             changes.Add(change);
 
             List<CacheUpdateResponse> msgs = new List<CacheUpdateResponse>();
@@ -186,12 +186,12 @@ namespace MassTransit.ServiceBus.SubscriptionsManager.Client.Tests
             using (mocks.Record())
             {
                 Expect.Call(delegate { mockBus.Subscribe<CacheUpdateResponse>(null); }).IgnoreArguments();
-                Expect.Call(delegate { mockBus.Send(null, new RequestCacheUpdate()); }).IgnoreArguments();
+                Expect.Call(delegate { mockBus.Send(null, new CacheUpdateRequest()); }).IgnoreArguments();
                 Expect.Call(delegate { mockCache.SubscriptionChanged += null; }).IgnoreArguments();
                 Expect.Call(mockCache.List()).Return(new List<Subscription>());
 
                 //New Stuff
-                Expect.Call(delegate { mockCache.Remove(typeof(RequestCacheUpdate).FullName, new Uri("msmq://localhost/test")); });
+                Expect.Call(delegate { mockCache.Remove(typeof(CacheUpdateRequest).FullName, new Uri("msmq://localhost/test")); });
                 //TODO: does an event get fired?
             }
             using (mocks.Playback())
