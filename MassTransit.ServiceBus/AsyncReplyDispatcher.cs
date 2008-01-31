@@ -18,6 +18,8 @@ using MassTransit.ServiceBus.Util;
 
 namespace MassTransit.ServiceBus
 {
+    using System;
+
     /// <summary>
     /// Dispatches replies to tracked MessageIds for asynchronous processing of the request/reply pattern
     /// </summary>
@@ -43,6 +45,19 @@ namespace MassTransit.ServiceBus
             _asyncResultDictionary.Add(id, asyncResult);
 
             return asyncResult;
+        }
+
+        public IServiceBusAsyncResult Track(MessageId id, AsyncCallback callback, object state)
+        {
+            if (_log.IsDebugEnabled)
+                _log.DebugFormat("Recording request correlation ID {0}", id);
+
+            ServiceBusAsyncResult asyncResult = new ServiceBusAsyncResult(callback, state);
+
+            _asyncResultDictionary.Add(id, asyncResult);
+
+            return asyncResult;
+
         }
 
         /// <summary>
@@ -95,5 +110,7 @@ namespace MassTransit.ServiceBus
 
             return false;
         }
+
+    
     }
 }
