@@ -2,7 +2,6 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
 {
     using System;
     using System.Collections.Generic;
-    using MassTransit.ServiceBus;
     using MassTransit.ServiceBus.Subscriptions;
     using MassTransit.ServiceBus.Subscriptions.Messages;
     using NUnit.Framework;
@@ -45,7 +44,7 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
 
             using (_mocks.Record())
             {
-                Expect.Call(_serviceBus.Request<CacheUpdateRequest>(_managerEndpoint, (AsyncCallback)null, (object)null, null))
+                Expect.Call(_serviceBus.Request<CacheUpdateRequest>(_managerEndpoint, (AsyncCallback) null, (object) null, null))
                     .IgnoreArguments()
                     .Constraints(Is.Equal(_managerEndpoint),
                         Is.Anything(),
@@ -55,9 +54,31 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
                     .Return(asyncResult);
             }
 
-            using(_mocks.Playback())
+            using (_mocks.Playback())
             {
                 _client.Start();
+            }
+        }
+
+        [Test]
+        public void The_client_should_update_the_cache_when_a_SubscriptionChange_message_is_received()
+        {
+            Subscription sub = new Subscription(new Uri("msmq://localhost/test"), "Ho.Pimp, Ho");
+
+            SubscriptionChange change = new SubscriptionChange(sub, SubscriptionChangeType.Add);
+
+            IMessageContext<SubscriptionChange> context = _mocks.CreateMock<IMessageContext<SubscriptionChange>>();
+
+            using (_mocks.Record())
+            {
+                Expect.Call(context.Message).Return(change).Repeat.AtLeastOnce();
+
+                _cache.Add(sub.MessageName, sub.Address);
+            }
+
+            using (_mocks.Playback())
+            {
+                _client.HandleSubscriptionChange(context);
             }
         }
 
@@ -73,7 +94,7 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
 
             using (_mocks.Record())
             {
-                Expect.Call(asyncResult.Messages).Return(new IMessage[] { cacheUpdateResponse }).Repeat.AtLeastOnce();
+                Expect.Call(asyncResult.Messages).Return(new IMessage[] {cacheUpdateResponse}).Repeat.AtLeastOnce();
 
                 _cache.Add(subscriptions[0].MessageName, subscriptions[0].Address);
             }
@@ -81,6 +102,36 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
             using (_mocks.Playback())
             {
                 _client.CacheUpdateResponse_Callback(asyncResult);
+            }
+        }
+
+        [Test]
+        public void When_a_local_service_subscribes_to_the_bus_notify_the_manager_of_the_change()
+        {
+            SubscriptionChangedEventArgs args = new SubscriptionChangedEventArgs(new SubscriptionChange("Ho.Pimp, Ho", new Uri("msmq://" + Environment.MachineName.ToLower() + "/test"), SubscriptionChangeType.Add));
+
+            using (_mocks.Record())
+            {
+                _serviceBus.Send<SubscriptionChange>(_managerEndpoint, null);
+                LastCall
+                    .IgnoreArguments()
+                    .Constraints(Is.Equal(_managerEndpoint),
+                        Is.Matching<SubscriptionChange[]>(
+                            delegate(SubscriptionChange[] obj)
+                                {
+                                    if (obj[0].Subscription.Address != args.Change.Subscription.Address)
+                                        return false;
+
+                                    if (obj[0].Subscription.MessageName != args.Change.Subscription.MessageName)
+                                        return false;
+
+                                     return true;
+                                }));
+            }
+
+            using (_mocks.Playback())
+            {
+                _client.Cache_SubscriptionChanged(_cache, args);
             }
         }
 
