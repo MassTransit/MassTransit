@@ -44,6 +44,8 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
 
             using (_mocks.Record())
             {
+                Expect.Call(delegate { _cache.SubscriptionChanged += null; }).IgnoreArguments();
+                Expect.Call(delegate { _serviceBus.Subscribe<SubscriptionChange>(null); }).IgnoreArguments();
                 Expect.Call(_serviceBus.Request<CacheUpdateRequest>(_managerEndpoint, (AsyncCallback) null, (object) null, null))
                     .IgnoreArguments()
                     .Constraints(Is.Equal(_managerEndpoint),
