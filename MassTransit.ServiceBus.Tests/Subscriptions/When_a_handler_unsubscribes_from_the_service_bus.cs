@@ -66,36 +66,40 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
         }
 
         [Test]
-        [Ignore("Order Issues")]
         public void The_service_bus_should_continue_to_handle_messages_if_at_least_one_handler_is_available()
         {
             using (_mocks.Record())
             {
-                Expect.Call(_endpoint.Uri).Return(_endpointUri).Repeat.AtLeastOnce();
+                Expect.Call(_endpoint.Receiver).Return(_receiver);
+                Expect.Call(delegate { _receiver.Subscribe(_consumer); }).IgnoreArguments();
+                Expect.Call(_endpoint.Uri).Return(_endpointUri).Repeat.Any();
                 Expect.Call(delegate { _storage.Add("", null); }).IgnoreArguments();
-                Expect.Call(_endpoint.Receiver).Return(_receiver).Repeat.AtLeastOnce();
-                Expect.Call(delegate { _receiver.Subscribe(_consumer); }).Repeat.AtLeastOnce();
+                
+                Expect.Call(_endpoint.Receiver).Return(_receiver);
+                Expect.Call(delegate { _receiver.Subscribe(_consumer); }).IgnoreArguments();
+
+                Expect.Call(_endpoint.Receiver).Return(_receiver);
+                Expect.Call(delegate { _receiver.Subscribe(_consumer); }).IgnoreArguments();
+
+                Expect.Call(_endpoint.Receiver).Return(_receiver);
+                Expect.Call(delegate { _receiver.Subscribe(_consumer); }).IgnoreArguments();
+
                 Expect.Call(delegate { _storage.Remove("", null); }).IgnoreArguments();
             }
 
             using (_mocks.Playback())
             {
                 _consumer = _bus as IEnvelopeConsumer;
-
                 _bus.Subscribe<PingMessage>(HandleAllMessages);
-
                 Assert.That(_consumer.IsHandled(_envelope), Is.True);
-
+                
                 _bus.Subscribe<PingMessage>(HandleAllMessages, HandleSomeMessagesPredicate);
-
                 Assert.That(_consumer.IsHandled(_envelope), Is.True);
 
                 _bus.Unsubscribe<PingMessage>(HandleAllMessages);
-
                 Assert.That(_consumer.IsHandled(_envelope), Is.True);
 
                 _bus.Unsubscribe<PingMessage>(HandleAllMessages, HandleSomeMessagesPredicate);
-
                 Assert.That(_consumer.IsHandled(_envelope), Is.False);
             }
         }
