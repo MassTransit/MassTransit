@@ -40,10 +40,10 @@ namespace MassTransit.ServiceBus.Tests
         {
             using(mocks.Record())
             {
-                Expect.Call(mockServiceBusEndPoint.Receiver).Return(mockReceiver);
-                Expect.Call(delegate { mockReceiver.Subscribe(null); }).IgnoreArguments().Repeat.Any();
+                
                 Expect.Call(mockServiceBusEndPoint.Uri).Return(new Uri("msmq://localhost/test_servicebus")).Repeat.Any(); //stupid log4net
                 Expect.Call(mockServiceBusEndPoint.Receiver).Return(mockReceiver);
+                Expect.Call(delegate { mockReceiver.Subscribe(null); }).IgnoreArguments().Repeat.Any();
             }
             using (mocks.Playback())
             {
