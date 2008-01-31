@@ -37,32 +37,31 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
         }
 
         [Test]
-        [Ignore("Order Issues")]
         public void The_service_bus_should_no_longer_show_the_message_type_as_handled()
         {
             using(_mocks.Record())
             {
                 Expect.Call(_endpoint.Receiver).Return(_receiver);
-                //Expect.Call(_endpoint.Uri).Return(_endpointUri).Repeat.Any();
-                //Expect.Call(delegate { _storage.Add("", null); }).IgnoreArguments();
-                //Expect.Call(_endpoint.Receiver).Return(_receiver);
-                //Expect.Call(delegate { _receiver.Subscribe(_consumer); });
-                //Expect.Call(delegate { _storage.Remove("", null); }).IgnoreArguments();
+                Expect.Call(delegate { _receiver.Subscribe(_consumer); }).IgnoreArguments();
+                Expect.Call(_endpoint.Uri).Return(_endpointUri).Repeat.Any();
+                Expect.Call(delegate { _storage.Add("", null); }).IgnoreArguments();
+                Expect.Call(_endpoint.Receiver).Return(_receiver);
+                Expect.Call(delegate { _receiver.Subscribe(_consumer); }).IgnoreArguments();
+
+                Expect.Call(delegate { _storage.Remove("", null); }).IgnoreArguments();
             }
 
             using (_mocks.Playback())
             {
+                _consumer = _bus as IEnvelopeConsumer;
 
+                _bus.Subscribe<PingMessage>(HandleAllMessages);
 
-                //_consumer = _bus as IEnvelopeConsumer;
+                Assert.That(_consumer.IsHandled(_envelope), Is.True);
 
-                //_bus.Subscribe<PingMessage>(HandleAllMessages);
+                _bus.Unsubscribe<PingMessage>(HandleAllMessages);
 
-                //Assert.That(_consumer.IsHandled(_envelope), Is.True);
-
-                //_bus.Unsubscribe<PingMessage>(HandleAllMessages);
-
-                //Assert.That(_consumer.IsHandled(_envelope), Is.False);
+                Assert.That(_consumer.IsHandled(_envelope), Is.False);
             }
         }
 
@@ -81,9 +80,6 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
 
             using (_mocks.Playback())
             {
-
-                _bus = new ServiceBus(_endpoint, _storage);
-
                 _consumer = _bus as IEnvelopeConsumer;
 
                 _bus.Subscribe<PingMessage>(HandleAllMessages);

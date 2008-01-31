@@ -15,7 +15,7 @@ namespace MassTransit.ServiceBus.Tests
     {
         private MockRepository mocks;
         private ServiceBus _serviceBus;
-        private IMessageQueueEndpoint _serviceBusEndPoint;
+        private IMessageQueueEndpoint mockServiceBusEndPoint;
         private IMessageReceiver mockReceiver;
         private string queueName = @".\private$\test_servicebus";
 
@@ -23,15 +23,16 @@ namespace MassTransit.ServiceBus.Tests
         public void SetUp()
         {
             ServiceBusSetupFixture.ValidateAndPurgeQueue(queueName);
+
             mocks = new MockRepository();
-            _serviceBusEndPoint = mocks.CreateMock<IMessageQueueEndpoint>();
+            mockServiceBusEndPoint = mocks.CreateMock<IMessageQueueEndpoint>();
             mockReceiver = mocks.CreateMock<IMessageReceiver>();
         }
         [TearDown]
         public void TearDown()
         {
             mocks = null;
-            _serviceBusEndPoint = null;
+            mockServiceBusEndPoint = null;
             _serviceBus = null;
         }
 
@@ -40,20 +41,20 @@ namespace MassTransit.ServiceBus.Tests
         {
             using(mocks.Record())
             {
-                Expect.Call(_serviceBusEndPoint.Receiver).Return(mockReceiver).Repeat.Any();
+                Expect.Call(mockServiceBusEndPoint.Receiver).Return(mockReceiver).Repeat.Any();
 				Expect.Call(delegate { mockReceiver.Subscribe(null); }).IgnoreArguments().Repeat.Any();
-				Expect.Call(_serviceBusEndPoint.Uri).Return(new Uri("msmq://localhost/test_servicebus")).Repeat.Any(); //stupid log4net
+				Expect.Call(mockServiceBusEndPoint.Uri).Return(new Uri("msmq://localhost/test_servicebus")).Repeat.Any(); //stupid log4net
             }
             using (mocks.Playback())
             {
-                _serviceBus = new ServiceBus(_serviceBusEndPoint, new LocalSubscriptionCache());
+                _serviceBus = new ServiceBus(mockServiceBusEndPoint, new LocalSubscriptionCache());
                 _serviceBus.Subscribe<PingMessage>(
                     delegate { },
                     delegate { return false; });
 
                 IEnvelopeConsumer consumer = _serviceBus;
 
-                IEnvelope envelope = new Envelope(_serviceBusEndPoint, new PingMessage());
+                IEnvelope envelope = new Envelope(mockServiceBusEndPoint, new PingMessage());
 
                 Assert.That(consumer.IsHandled(envelope), Is.False);
             }
@@ -64,13 +65,13 @@ namespace MassTransit.ServiceBus.Tests
         {
             using(mocks.Record())
             {
-                Expect.Call(_serviceBusEndPoint.Receiver).Return(mockReceiver).Repeat.Any();
+                Expect.Call(mockServiceBusEndPoint.Receiver).Return(mockReceiver).Repeat.Any();
 				Expect.Call(delegate { mockReceiver.Subscribe(null); }).IgnoreArguments().Repeat.Any();
-				Expect.Call(_serviceBusEndPoint.Uri).Return(new Uri("msmq://localhost/test_servicebus")).Repeat.Any(); //stupid log4net
+				Expect.Call(mockServiceBusEndPoint.Uri).Return(new Uri("msmq://localhost/test_servicebus")).Repeat.Any(); //stupid log4net
             }
             using (mocks.Playback())
             {
-                _serviceBus = new ServiceBus(_serviceBusEndPoint, new LocalSubscriptionCache());
+                _serviceBus = new ServiceBus(mockServiceBusEndPoint, new LocalSubscriptionCache());
 
                 _serviceBus.Subscribe<PingMessage>(
                     delegate { },
@@ -78,7 +79,7 @@ namespace MassTransit.ServiceBus.Tests
 
                 IEnvelopeConsumer consumer = _serviceBus;
 
-                IEnvelope envelope = new Envelope(_serviceBusEndPoint, new PingMessage());
+                IEnvelope envelope = new Envelope(mockServiceBusEndPoint, new PingMessage());
 
                 Assert.That(consumer.IsHandled(envelope), Is.True);
             }
@@ -91,13 +92,13 @@ namespace MassTransit.ServiceBus.Tests
 
             using (mocks.Record())
             {
-                Expect.Call(_serviceBusEndPoint.Receiver).Return(mockReceiver).Repeat.Any();
+                Expect.Call(mockServiceBusEndPoint.Receiver).Return(mockReceiver).Repeat.Any();
 				Expect.Call(delegate { mockReceiver.Subscribe(null); }).IgnoreArguments().Repeat.Any();
-				Expect.Call(_serviceBusEndPoint.Uri).Return(new Uri("msmq://localhost/test_servicebus")).Repeat.Any(); //stupid log4net
+				Expect.Call(mockServiceBusEndPoint.Uri).Return(new Uri("msmq://localhost/test_servicebus")).Repeat.Any(); //stupid log4net
             }
             using (mocks.Playback())
             {
-                _serviceBus = new ServiceBus(_serviceBusEndPoint, new LocalSubscriptionCache());
+                _serviceBus = new ServiceBus(mockServiceBusEndPoint, new LocalSubscriptionCache());
 
                 _serviceBus.Subscribe<PingMessage>(
                     delegate { workDid = true; },
@@ -105,7 +106,7 @@ namespace MassTransit.ServiceBus.Tests
 
                 IEnvelopeConsumer consumer = _serviceBus;
 
-                IEnvelope envelope = new Envelope(_serviceBusEndPoint, new PingMessage());
+                IEnvelope envelope = new Envelope(mockServiceBusEndPoint, new PingMessage());
 
                 Assert.That(consumer.IsHandled(envelope), Is.True);
                 consumer.Deliver(envelope);
@@ -118,13 +119,13 @@ namespace MassTransit.ServiceBus.Tests
         {
             using(mocks.Record())
             {
-                Expect.Call(_serviceBusEndPoint.Receiver).Return(mockReceiver).Repeat.Any();
+                Expect.Call(mockServiceBusEndPoint.Receiver).Return(mockReceiver).Repeat.Any();
 				Expect.Call(delegate { mockReceiver.Subscribe(null); }).IgnoreArguments().Repeat.Any();
-				Expect.Call(_serviceBusEndPoint.Uri).Return(new Uri("msmq://localhost/test_servicebus")).Repeat.Any(); //stupid log4net
+				Expect.Call(mockServiceBusEndPoint.Uri).Return(new Uri("msmq://localhost/test_servicebus")).Repeat.Any(); //stupid log4net
             }
             using (mocks.Playback())
             {
-                _serviceBus = new ServiceBus(_serviceBusEndPoint, new LocalSubscriptionCache());
+                _serviceBus = new ServiceBus(mockServiceBusEndPoint, new LocalSubscriptionCache());
 
                 _serviceBus.Subscribe<PingMessage>(
                     delegate { },
@@ -136,7 +137,7 @@ namespace MassTransit.ServiceBus.Tests
 
                 IEnvelopeConsumer consumer = _serviceBus;
 
-                IEnvelope envelope = new Envelope(_serviceBusEndPoint, new PingMessage());
+                IEnvelope envelope = new Envelope(mockServiceBusEndPoint, new PingMessage());
 
                 Assert.That(consumer.IsHandled(envelope), Is.True);
             }
@@ -147,13 +148,13 @@ namespace MassTransit.ServiceBus.Tests
         {
             using(mocks.Record())
             {
-                Expect.Call(_serviceBusEndPoint.Receiver).Return(mockReceiver).Repeat.Any();
+                Expect.Call(mockServiceBusEndPoint.Receiver).Return(mockReceiver).Repeat.Any();
 				Expect.Call(delegate { mockReceiver.Subscribe(null); }).IgnoreArguments().Repeat.Any();
-                Expect.Call(_serviceBusEndPoint.Uri).Return(new Uri("msmq://localhost/test_servicebus")).Repeat.Any(); //stupid log4net
+                Expect.Call(mockServiceBusEndPoint.Uri).Return(new Uri("msmq://localhost/test_servicebus")).Repeat.Any(); //stupid log4net
             }
             using (mocks.Playback())
             {
-                _serviceBus = new ServiceBus(_serviceBusEndPoint, new LocalSubscriptionCache());
+                _serviceBus = new ServiceBus(mockServiceBusEndPoint, new LocalSubscriptionCache());
 
                 _serviceBus.Subscribe<PingMessage>(
                     delegate { },
@@ -165,14 +166,14 @@ namespace MassTransit.ServiceBus.Tests
 
                 IEnvelopeConsumer consumer = _serviceBus;
 
-                IEnvelope envelope = new Envelope(_serviceBusEndPoint, new PingMessage());
+                IEnvelope envelope = new Envelope(mockServiceBusEndPoint, new PingMessage());
 
                 Assert.That(consumer.IsHandled(envelope), Is.False);
             }
         }
 
         [Test]
-        [Ignore("Uber Nastiness")]
+        [Ignore("Uber Nasty")]
         public void The_Message_Endpoint_Should_Check_If_The_Message_Will_Be_Handled()
         {
             IEndpoint mockReturnEndpoint = mocks.CreateMock<IEndpoint>();
@@ -180,15 +181,17 @@ namespace MassTransit.ServiceBus.Tests
             IMessageQueueEndpoint mockMessageQueueEndpoint = mocks.CreateMock<IMessageQueueEndpoint>();
 
             IEnvelope envelope = new Envelope(mockReturnEndpoint, new PingMessage());
-
+            Message msg = EnvelopeMessageMapper.MapFrom(envelope);
             IMsmqQueue mockQueue = mocks.CreateMock<IMsmqQueue>();
             Cursor mockCursor = null;
 
             using(mocks.Record())
             {
                 Expect.Call(mockMessageQueueEndpoint.Open(QueueAccessMode.SendAndReceive)).Return(mockQueue);
-                Expect.Call(mockQueue.CreateCursor()).Return(mockCursor);
-                Expect.Call(mockQueue.Peek(TimeSpan.FromSeconds(1), mockCursor, PeekAction.Current)).Return(null);
+
+                Expect.Call(mockQueue.CreateCursor()).Return(mockCursor).Repeat.Any();
+                Expect.Call(mockQueue.Peek(TimeSpan.FromSeconds(1), mockCursor, PeekAction.Current)).Return(msg).Repeat.Any();
+
                 //Expect.Call(mockMessageQueueEndpoint.Uri).Return(new Uri("msmq://localhost/test_servicebus")).Repeat.Any(); //stupid log4net
                 //Expect.Call(mockQueue.CreateCursor()).Return(null);
                 //Expect.Call(mockQueue.BeginPeek(TimeSpan.FromHours(24), null, PeekAction.Current, this, null)).IgnoreArguments().Return(null);
@@ -200,10 +203,10 @@ namespace MassTransit.ServiceBus.Tests
                 IMessageReceiver receiver = new MessageQueueReceiver(mockMessageQueueEndpoint);
                 receiver.Subscribe(mockConsumer);
 
-                //Message queueMessage = EnvelopeMessageMapper.MapFrom(envelope);
-                //queueMessage.BodyStream.Seek(0, SeekOrigin.Begin);
+                Message queueMessage = EnvelopeMessageMapper.MapFrom(envelope);
+                queueMessage.BodyStream.Seek(0, SeekOrigin.Begin);
 
-                //((MessageQueueReceiver)receiver).ProcessMessage(queueMessage);
+                ((MessageQueueReceiver)receiver).ProcessMessage(queueMessage);
             }
         }
 
