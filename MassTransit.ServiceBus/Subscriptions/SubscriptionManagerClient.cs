@@ -24,7 +24,42 @@ namespace MassTransit.ServiceBus.Subscriptions
 
         public void Start()
         {
-            IServiceBusAsyncResult asyncResult = _serviceBus.Request<CacheUpdateRequest>(_managerEndpoint, CacheUpdateResponse_Callback, this, new CacheUpdateRequest()); 
+            _cache.SubscriptionChanged += Cache_SubscriptionChanged;
+            _serviceBus.Subscribe<SubscriptionChange>(HandleSubscriptionChange);
+            IServiceBusAsyncResult asyncResult = _serviceBus.Request(_managerEndpoint, CacheUpdateResponse_Callback, this, new CacheUpdateRequest()); 
+
+        }
+
+        public void Cache_SubscriptionChanged(object sender, SubscriptionChangedEventArgs e)
+        {
+            if(e.Change.Subscription.Address.Host.ToLowerInvariant() == Environment.MachineName.ToLowerInvariant())
+            {
+                _serviceBus.Send(_managerEndpoint, e.Change);
+            }
+        }
+
+        public void Stop()
+        {
+            _cache.SubscriptionChanged -= Cache_SubscriptionChanged;
+            _serviceBus.Send(_managerEndpoint, new CancelSubscriptionUpdates());
+            _serviceBus.Unsubscribe<SubscriptionChange>(HandleSubscriptionChange);
+        }
+
+        public void HandleSubscriptionChange(IMessageContext<SubscriptionChange> ctx)
+        {
+            switch(ctx.Message.ChangeType)
+            {
+                case SubscriptionChangeType.Add:
+                    _cache.Add(ctx.Message.Subscription.MessageName, ctx.Message.Subscription.Address);
+                    break;
+
+                case SubscriptionChangeType.Remove:
+                    _cache.Remove(ctx.Message.Subscription.MessageName, ctx.Message.Subscription.Address);
+                    break;
+
+                default:
+                    break;
+            }
         }
 
         public void CacheUpdateResponse_Callback(IAsyncResult asyncResult)

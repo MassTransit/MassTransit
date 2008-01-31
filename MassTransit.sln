@@ -31,13 +31,25 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.ServiceBus.Subs
 		Release.AspNetCompiler.Debug = "False"
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Host", "MassTransit.Host\MassTransit.Host.csproj", "{1BB11713-C12B-4273-A530-C3BF94B7F7DC}"
+	ProjectSection(WebsiteProperties) = preProject
+		Debug.AspNetCompiler.Debug = "True"
+		Release.AspNetCompiler.Debug = "False"
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Host.Tests", "MassTransit.Host.Tests\MassTransit.Host.Tests.csproj", "{34EAECFD-D49F-465F-A4E3-DD12374A6BE8}"
+	ProjectSection(WebsiteProperties) = preProject
+		Debug.AspNetCompiler.Debug = "True"
+		Release.AspNetCompiler.Debug = "False"
+	EndProjectSection
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.ServiceBus.SubscriptionsManager.Client", "MassTransit.ServiceBus.SubscriptionsManager.Client\MassTransit.ServiceBus.SubscriptionsManager.Client.csproj", "{844D54AF-D8B9-4DBF-AC9E-B17423A5E0B2}"
 	ProjectSection(WebsiteProperties) = preProject
 		Debug.AspNetCompiler.Debug = "True"
 		Release.AspNetCompiler.Debug = "False"
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.ServiceBus.SubscriptionsManager.Client.Tests", "MassTransit.ServiceBus.SubscriptionsManager.Client.Tests\MassTransit.ServiceBus.SubscriptionsManager.Client.Tests.csproj", "{2E30AC6D-4498-4886-8E55-7FCDE23B9E9B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.ServiceBus.SubscriptionManager.Proxy", "MassTransit.ServiceBus.SubscriptionManager.Proxy\MassTransit.ServiceBus.SubscriptionManager.Proxy.csproj", "{00CC84D3-F6AA-446E-BDCA-A8C3EA65402C}"
 	ProjectSection(WebsiteProperties) = preProject
 		Debug.AspNetCompiler.Debug = "True"
 		Release.AspNetCompiler.Debug = "False"
@@ -65,14 +77,22 @@ Global
 		{85A96525-9021-4CFE-A7B1-59C6F964FABB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{85A96525-9021-4CFE-A7B1-59C6F964FABB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{85A96525-9021-4CFE-A7B1-59C6F964FABB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1BB11713-C12B-4273-A530-C3BF94B7F7DC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1BB11713-C12B-4273-A530-C3BF94B7F7DC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1BB11713-C12B-4273-A530-C3BF94B7F7DC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1BB11713-C12B-4273-A530-C3BF94B7F7DC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{34EAECFD-D49F-465F-A4E3-DD12374A6BE8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{34EAECFD-D49F-465F-A4E3-DD12374A6BE8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{34EAECFD-D49F-465F-A4E3-DD12374A6BE8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{34EAECFD-D49F-465F-A4E3-DD12374A6BE8}.Release|Any CPU.Build.0 = Release|Any CPU
 		{844D54AF-D8B9-4DBF-AC9E-B17423A5E0B2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{844D54AF-D8B9-4DBF-AC9E-B17423A5E0B2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{844D54AF-D8B9-4DBF-AC9E-B17423A5E0B2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{844D54AF-D8B9-4DBF-AC9E-B17423A5E0B2}.Release|Any CPU.Build.0 = Release|Any CPU
-		{2E30AC6D-4498-4886-8E55-7FCDE23B9E9B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{2E30AC6D-4498-4886-8E55-7FCDE23B9E9B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{2E30AC6D-4498-4886-8E55-7FCDE23B9E9B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{2E30AC6D-4498-4886-8E55-7FCDE23B9E9B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{00CC84D3-F6AA-446E-BDCA-A8C3EA65402C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{00CC84D3-F6AA-446E-BDCA-A8C3EA65402C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{00CC84D3-F6AA-446E-BDCA-A8C3EA65402C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{00CC84D3-F6AA-446E-BDCA-A8C3EA65402C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -81,6 +101,6 @@ Global
 		{6CD7F53B-37F8-4281-B85B-9EC679CADDBB} = {56F516D7-BC3C-49E1-A639-83C5F14953F8}
 		{85A96525-9021-4CFE-A7B1-59C6F964FABB} = {56F516D7-BC3C-49E1-A639-83C5F14953F8}
 		{844D54AF-D8B9-4DBF-AC9E-B17423A5E0B2} = {56F516D7-BC3C-49E1-A639-83C5F14953F8}
-		{2E30AC6D-4498-4886-8E55-7FCDE23B9E9B} = {56F516D7-BC3C-49E1-A639-83C5F14953F8}
+		{00CC84D3-F6AA-446E-BDCA-A8C3EA65402C} = {56F516D7-BC3C-49E1-A639-83C5F14953F8}
 	EndGlobalSection
 EndGlobal

@@ -217,8 +217,6 @@ namespace MassTransit.ServiceBus
 		/// <param name="condition">A condition predicate to filter which messages are handled by the callback</param>
 		public void Subscribe<T>(MessageReceivedCallback<T> callback, Predicate<T> condition) where T : IMessage
 		{
-            StartListening();
-
 			lock (_consumersLock)
 			{
 				if (!_consumers.ContainsKey(typeof (T)))
@@ -230,8 +228,8 @@ namespace MassTransit.ServiceBus
 				((IMessageConsumer<T>) _consumers[typeof (T)]).Subscribe(callback, condition);
 			}
 
-			_endpoint.Receiver.Subscribe(this);
-		}
+            StartListening();
+        }
 
 		public void Unsubscribe<T>(MessageReceivedCallback<T> callback) where T : IMessage
 		{
