@@ -15,7 +15,9 @@ using System;
 
 namespace MassTransit.ServiceBus
 {
-	/// <summary>
+    using Internal;
+
+    /// <summary>
 	/// IEndpoint is implemented by an endpoint. An endpoint is an addressable location on the network.
 	/// </summary>
     public interface IEndpoint :

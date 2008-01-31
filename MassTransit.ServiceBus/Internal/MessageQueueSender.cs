@@ -15,7 +15,7 @@ using System.Messaging;
 using log4net;
 using MassTransit.ServiceBus.Exceptions;
 
-namespace MassTransit.ServiceBus
+namespace MassTransit.ServiceBus.Internal
 {
     /// <summary>
     /// Send envelopes on a message queue
@@ -54,22 +54,22 @@ namespace MassTransit.ServiceBus
             Message msg = EnvelopeMessageMapper.MapFrom(envelope);
 
             try
-			{
+            {
                 if(_messageLog.IsInfoEnabled)
                     _messageLog.InfoFormat("Message {0} Sent To {1}", envelope.Messages[0].GetType(), _endpoint.Uri);
 
                 _queue.Send(msg);
             }
-			catch(MessageQueueException ex)
-			{
-			    throw new EndpointException(_endpoint, "Problem with " + _endpoint.QueuePath, ex);
-			}
+            catch(MessageQueueException ex)
+            {
+                throw new EndpointException(_endpoint, "Problem with " + _endpoint.QueuePath, ex);
+            }
 
             envelope.Id = msg.Id;
 
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Message Sent: Id = {0}, Message Type = {1}", msg.Id,
-                    envelope.Messages != null ? envelope.Messages[0].GetType().ToString() : "");
+                                 envelope.Messages != null ? envelope.Messages[0].GetType().ToString() : "");
         }
 
         #endregion

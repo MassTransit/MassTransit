@@ -49,6 +49,7 @@ namespace MassTransit.ServiceBus
 			_endpoint = endpoint;
 			_subscriptionStorage = subscriptionStorage;
 
+            //TODO: causing pain
 			_endpoint.Receiver.Subscribe(this);
 		}
 

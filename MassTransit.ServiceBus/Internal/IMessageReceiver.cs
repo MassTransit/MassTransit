@@ -13,7 +13,7 @@
 
 using System;
 
-namespace MassTransit.ServiceBus
+namespace MassTransit.ServiceBus.Internal
 {
     /// <summary>
     /// Used to begin receiving messages on an endpoint

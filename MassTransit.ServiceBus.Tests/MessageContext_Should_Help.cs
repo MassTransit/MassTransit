@@ -3,6 +3,7 @@ using Rhino.Mocks;
 
 namespace MassTransit.ServiceBus.Tests
 {
+    using Internal;
     using Util;
 
     [TestFixture]

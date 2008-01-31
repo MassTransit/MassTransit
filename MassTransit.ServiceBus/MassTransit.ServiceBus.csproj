@@ -56,16 +56,16 @@
     <Compile Include="IMessageConsumer.cs" />
     <Compile Include="IMessageContext.cs" />
     <Compile Include="IMessageQueueEndpoint.cs" />
-    <Compile Include="IMessageReceiver.cs" />
-    <Compile Include="IMessageSender.cs" />
+    <Compile Include="Internal\IMessageReceiver.cs" />
+    <Compile Include="Internal\IMessageSender.cs" />
     <Compile Include="IServiceBus.cs" />
     <Compile Include="IServiceBusAsyncResult.cs" />
     <Compile Include="ISubscriptionStorage.cs" />
     <Compile Include="MessageConsumer.cs" />
     <Compile Include="MessageQueueEndpoint.cs" />
     <Compile Include="MessageContext.cs" />
-    <Compile Include="MessageQueueReceiver.cs" />
-    <Compile Include="MessageQueueSender.cs" />
+    <Compile Include="Internal\MessageQueueReceiver.cs" />
+    <Compile Include="Internal\MessageQueueSender.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ServiceBus.cs" />
     <Compile Include="ServiceBusAsyncResult.cs" />
@@ -81,9 +81,6 @@
     <Compile Include="Subscriptions\SubscriptionManagerClient.cs" />
     <Compile Include="Util\Check.cs" />
     <Compile Include="Util\MessageId.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Interfaces.cd" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

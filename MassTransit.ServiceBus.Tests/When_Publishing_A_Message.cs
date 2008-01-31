@@ -4,7 +4,9 @@ using Rhino.Mocks;
 
 namespace MassTransit.ServiceBus.Tests
 {
-	[TestFixture]
+    using Internal;
+
+    [TestFixture]
 	public class When_Publishing_A_Message
 	{
 	    private ServiceBus _serviceBus;

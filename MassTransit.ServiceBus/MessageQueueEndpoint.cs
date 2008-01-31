@@ -17,6 +17,8 @@ using MassTransit.ServiceBus.Exceptions;
 
 namespace MassTransit.ServiceBus
 {
+    using Internal;
+
     /// <summary>
     /// A MessageQueueEndpoint is an implementation of an endpoint using the Microsoft Message Queue service.
     /// </summary>
