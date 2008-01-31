@@ -53,7 +53,7 @@
     <Compile Include="IEnvelope.cs" />
     <Compile Include="IEnvelopeConsumer.cs" />
     <Compile Include="IMessage.cs" />
-    <Compile Include="IMessageConsumer.cs" />
+    <Compile Include="Internal\IMessageConsumer.cs" />
     <Compile Include="IMessageContext.cs" />
     <Compile Include="IMessageQueueEndpoint.cs" />
     <Compile Include="Internal\IMessageReceiver.cs" />
@@ -61,7 +61,7 @@
     <Compile Include="IServiceBus.cs" />
     <Compile Include="IServiceBusAsyncResult.cs" />
     <Compile Include="ISubscriptionStorage.cs" />
-    <Compile Include="MessageConsumer.cs" />
+    <Compile Include="Internal\MessageConsumer.cs" />
     <Compile Include="MessageQueueEndpoint.cs" />
     <Compile Include="MessageContext.cs" />
     <Compile Include="Internal\MessageQueueReceiver.cs" />
