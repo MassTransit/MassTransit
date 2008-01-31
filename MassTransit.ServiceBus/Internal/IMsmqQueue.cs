@@ -8,7 +8,7 @@ namespace MassTransit.ServiceBus.Internal
     /// <summary>
     /// Testable Shim Infront of MSMQ
     /// </summary>
-    public interface IMsmqQueue
+    public interface IMsmqQueue : IDisposable
     {
         IAsyncResult BeginPeek();
         IAsyncResult BeginPeek(TimeSpan timeout);

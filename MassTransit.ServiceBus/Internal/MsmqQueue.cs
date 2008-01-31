@@ -22,6 +22,10 @@ namespace MassTransit.ServiceBus.Internal
         {
             _queue = new MessageQueue(path, sharedModeDenyReceive);
         }
+        public MsmqQueue(string path, QueueAccessMode accessMode)
+        {
+            _queue = new MessageQueue(path, accessMode);
+        }
         #endregion
 
         public IAsyncResult BeginPeek()
@@ -506,6 +510,12 @@ namespace MassTransit.ServiceBus.Internal
         {
             add { _queue.ReceiveCompleted += value; }
             remove { _queue.ReceiveCompleted -= value; }
+        }
+
+
+        public void Dispose()
+        {
+            this._queue.Dispose();
         }
     }
 }

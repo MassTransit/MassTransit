@@ -107,9 +107,9 @@ namespace MassTransit.ServiceBus
             get { return _queuePath; }
         }
 
-        public MessageQueue Open(QueueAccessMode mode)
+        public IMsmqQueue Open(QueueAccessMode mode)
         {
-            MessageQueue queue = new MessageQueue(QueuePath, mode);
+            IMsmqQueue queue = new MsmqQueue(QueuePath, mode);
 
             MessagePropertyFilter mpf = new MessagePropertyFilter();
             mpf.SetAll();

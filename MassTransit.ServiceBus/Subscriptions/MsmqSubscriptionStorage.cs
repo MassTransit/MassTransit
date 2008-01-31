@@ -20,6 +20,8 @@ using MassTransit.ServiceBus.Subscriptions.Messages;
 
 namespace MassTransit.ServiceBus.Subscriptions
 {
+    using Internal;
+
     public class MsmqSubscriptionStorage :
         ISubscriptionStorage
     {
@@ -27,7 +29,7 @@ namespace MassTransit.ServiceBus.Subscriptions
 
         private BinaryFormatter _formatter;
         private Cursor _peekCursor;
-        private MessageQueue _storageQueue;
+        private IMsmqQueue _storageQueue;
         private readonly IMessageQueueEndpoint _storageEndpoint;
         private readonly ISubscriptionStorage _subscriptionCache;
 
