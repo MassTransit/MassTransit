@@ -5,6 +5,8 @@ using NUnit.Framework.SyntaxHelpers;
 
 namespace MassTransit.ServiceBus.Tests.IntegrationTests
 {
+    using Internal;
+
     [TestFixture]
     [Explicit]
     public class When_filtering_messages_by_condition

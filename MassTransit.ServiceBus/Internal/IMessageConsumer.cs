@@ -13,7 +13,7 @@
 
 using System;
 
-namespace MassTransit.ServiceBus
+namespace MassTransit.ServiceBus.Internal
 {
     /// <summary>
     /// A non-generic interface for checking and delivering messages to a service bus handler

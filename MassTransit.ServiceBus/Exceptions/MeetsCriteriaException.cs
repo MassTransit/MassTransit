@@ -14,6 +14,7 @@
 namespace MassTransit.ServiceBus.Exceptions
 {
     using System;
+    using Internal;
 
     public class MeetsCriteriaException<T> 
         : Exception where T : IMessage

@@ -15,8 +15,9 @@ using System;
 
 namespace MassTransit.ServiceBus
 {
+    using Internal;
 
-	/// <summary>
+    /// <summary>
 	/// The base service bus interface
 	/// </summary>
 	public interface IServiceBus : 
