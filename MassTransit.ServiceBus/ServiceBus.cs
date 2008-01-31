@@ -50,12 +50,14 @@ namespace MassTransit.ServiceBus
 
 			_endpoint = endpoint;
 			_subscriptionStorage = subscriptionStorage;
-
-            //TODO: causing pain
-			_endpoint.Receiver.Subscribe(this);
 		}
 
-		public ISubscriptionStorage SubscriptionStorage
+        private void StartListening()
+        {
+            _endpoint.Receiver.Subscribe(this);
+        }
+
+        public ISubscriptionStorage SubscriptionStorage
 		{
 			get { return _subscriptionStorage; }
 		}
@@ -215,6 +217,8 @@ namespace MassTransit.ServiceBus
 		/// <param name="condition">A condition predicate to filter which messages are handled by the callback</param>
 		public void Subscribe<T>(MessageReceivedCallback<T> callback, Predicate<T> condition) where T : IMessage
 		{
+            StartListening();
+
 			lock (_consumersLock)
 			{
 				if (!_consumers.ContainsKey(typeof (T)))
@@ -261,18 +265,13 @@ namespace MassTransit.ServiceBus
 		/// <returns>An IAsyncResult that can be used to wait for the response</returns>
 		public IServiceBusAsyncResult Request<T>(IEndpoint destinationEndpoint, params T[] messages) where T : IMessage
 		{
-			IEnvelope envelope = new Envelope(_endpoint, messages as IMessage[]);
-
-			lock (_asyncReplyDispatcher)
-			{
-				destinationEndpoint.Sender.Send(envelope);
-
-				return _asyncReplyDispatcher.Track(envelope.Id);
-			}
+            return Request<T>(destinationEndpoint, null, null, messages);
 		}
 
   		public IServiceBusAsyncResult Request<T>(IEndpoint destinationEndpoint, AsyncCallback callback, object state, params T[] messages) where T : IMessage
   		{
+            StartListening();
+
             IEnvelope envelope = new Envelope(_endpoint, messages as IMessage[]);
 
             lock (_asyncReplyDispatcher)
