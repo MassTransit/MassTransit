@@ -58,6 +58,8 @@
     <Compile Include="IMessageQueueEndpoint.cs" />
     <Compile Include="Internal\IMessageReceiver.cs" />
     <Compile Include="Internal\IMessageSender.cs" />
+    <Compile Include="Internal\IMsmqQueue.cs" />
+    <Compile Include="Internal\MsmqQueue.cs" />
     <Compile Include="IServiceBus.cs" />
     <Compile Include="IServiceBusAsyncResult.cs" />
     <Compile Include="ISubscriptionStorage.cs" />
