@@ -5,6 +5,8 @@ using NUnit.Framework.SyntaxHelpers;
 
 namespace MassTransit.ServiceBus.Tests.IntegrationTests
 {
+    using Internal;
+
     [TestFixture]
     [Explicit]
     public class When_a_message_is_received :

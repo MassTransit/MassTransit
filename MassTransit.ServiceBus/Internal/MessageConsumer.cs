@@ -16,7 +16,7 @@ using System.Collections.Generic;
 using log4net;
 using MassTransit.ServiceBus.Exceptions;
 
-namespace MassTransit.ServiceBus
+namespace MassTransit.ServiceBus.Internal
 {
     /// <summary>
     /// A message consumer is created when a service subscribes to a specific type of message
@@ -116,8 +116,8 @@ namespace MassTransit.ServiceBus
                 catch (Exception ex)
                 {
                     throw new MeetsCriteriaException<T>(item,
-                        "There was an exception in the MessageConsumer.IsHandled",
-                        ex);
+                                                        "There was an exception in the MessageConsumer.IsHandled",
+                                                        ex);
                 }
             }
 

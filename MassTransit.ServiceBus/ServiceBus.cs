@@ -19,7 +19,9 @@ using MassTransit.ServiceBus.Util;
 
 namespace MassTransit.ServiceBus
 {
-	/// <summary>
+    using Internal;
+
+    /// <summary>
 	/// A service bus is used to attach message handlers (services) to endpoints, as well as 
 	/// communicate with other service bus instances in a distributed application
 	/// </summary>
