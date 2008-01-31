@@ -181,7 +181,7 @@ namespace MassTransit.ServiceBus.Tests
 
             IEnvelope envelope = new Envelope(mockReturnEndpoint, new PingMessage());
 
-            MessageQueue mockQueue = mocks.CreateMock<MessageQueue>();
+            IMsmqQueue mockQueue = mocks.CreateMock<IMsmqQueue>();
             Cursor mockCursor = null;
 
             using(mocks.Record())

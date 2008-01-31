@@ -15,7 +15,9 @@ using System.Messaging;
 
 namespace MassTransit.ServiceBus
 {
-	/// <summary>
+    using Internal;
+
+    /// <summary>
 	/// An extension of the IEndpoint interface for the additional support of Message Queue backed endpoints
 	/// </summary>
     public interface IMessageQueueEndpoint :
@@ -32,6 +34,6 @@ namespace MassTransit.ServiceBus
         /// </summary>
         /// <param name="mode">The access mode for the queue</param>
         /// <returns>An open <c ref="MessageQueue" /> object</returns>
-	    MessageQueue Open(QueueAccessMode mode);
+	    IMsmqQueue Open(QueueAccessMode mode);
     }
 }

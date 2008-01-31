@@ -32,7 +32,7 @@ namespace MassTransit.ServiceBus.Internal
 
         private IEnvelopeConsumer _consumer;
 
-        private MessageQueue _queue;
+        private IMsmqQueue _queue;
 
         /// <summary>
         /// Initializes a MessageQueueReceiver
@@ -129,7 +129,7 @@ namespace MassTransit.ServiceBus.Internal
 
         private void MonitorQueue(object obj)
         {
-            MessageQueue queue = _queue;
+            IMsmqQueue queue = _queue;
             if (queue == null)
                 return;
 

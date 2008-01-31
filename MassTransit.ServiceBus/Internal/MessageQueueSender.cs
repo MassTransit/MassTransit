@@ -26,7 +26,7 @@ namespace MassTransit.ServiceBus.Internal
         private static readonly ILog _log = LogManager.GetLogger(typeof (MessageQueueSender));
         private static readonly ILog _messageLog = LogManager.GetLogger("MassTransit.Messages");
 
-        private MessageQueue _queue;
+        private IMsmqQueue _queue;
         private IMessageQueueEndpoint _endpoint;
 
         /// <summary>
