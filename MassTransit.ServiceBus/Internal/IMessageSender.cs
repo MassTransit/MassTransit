@@ -13,7 +13,7 @@
 
 using System;
 
-namespace MassTransit.ServiceBus
+namespace MassTransit.ServiceBus.Internal
 {
     /// <summary>
     /// Used to send envelopes to an endpoint

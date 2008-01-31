@@ -5,6 +5,8 @@ using NUnit.Framework.SyntaxHelpers;
 
 namespace MassTransit.ServiceBus.Tests
 {
+    using Internal;
+
     [TestFixture]
     public class When_working_with_an_endpoint
     {
