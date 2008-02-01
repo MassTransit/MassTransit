@@ -135,7 +135,7 @@ namespace MassTransit.ServiceBus.Internal
 
             try
             {
-                Cursor cursor = _queue.CreateCursor();
+                Cursor cursor = queue.CreateCursor();
 
                 Message msg = queue.Peek(TimeSpan.FromSeconds(1), cursor, PeekAction.Current);
 
