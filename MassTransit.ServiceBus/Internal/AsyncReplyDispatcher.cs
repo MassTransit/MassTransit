@@ -16,7 +16,7 @@ using System.Reflection;
 using log4net;
 using MassTransit.ServiceBus.Util;
 
-namespace MassTransit.ServiceBus
+namespace MassTransit.ServiceBus.Internal
 {
     using System;
 
