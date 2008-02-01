@@ -43,7 +43,7 @@
     <Compile Include="..\SolutionVersion.cs">
       <Link>SolutionVersion.cs</Link>
     </Compile>
-    <Compile Include="AsyncReplyDispatcher.cs" />
+    <Compile Include="Internal\AsyncReplyDispatcher.cs" />
     <Compile Include="Envelope.cs" />
     <Compile Include="Internal\EnvelopeMessageMapper.cs" />
     <Compile Include="Exceptions\EndpointException.cs" />
