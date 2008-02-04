@@ -105,12 +105,16 @@ namespace MassTransit.ServiceBus.Internal
 
         public IEnumerator GetEnumerator()
         {
+#pragma warning disable 612,618
             return _queue.GetEnumerator();
+#pragma warning restore 612,618
         }
 
         public MessageEnumerator GetMessageEnumerator()
         {
+#pragma warning disable 612,618
             return _queue.GetMessageEnumerator();
+#pragma warning restore 612,618
         }
 
         public MessageEnumerator GetMessageEnumerator2()

@@ -19,6 +19,11 @@ public partial class _Default :
 		_controller = new RequestReplyController(this, _serviceBus, _serviceEndpoint);
 	}
 
+	~_Default()
+	{
+		_serviceBus.Dispose();
+	}
+
 	#region IRequestReplyView Members
 
 	public string RequestText
