@@ -10,13 +10,14 @@
     <form id="form1" runat="server">
     <div>
 		<asp:Label ID="Label1" runat="server" Text="Request:"></asp:Label>
-		<asp:TextBox ID="requestText" runat="server" OnTextChanged="requestText_TextChanged"
-			Width="361px"></asp:TextBox><br />
+		<asp:TextBox ID="requestText" runat="server" Width="361px"></asp:TextBox><br />
 		<br />
 		Response:
 		<asp:TextBox ID="responseBox" runat="server" Width="350px"></asp:TextBox><br />
 		<br />
-		<asp:Button ID="Button1" runat="server" OnClick="Button1_Click" Text="Button" /></div>
+		<asp:Button ID="Button1" runat="server" OnClick="Button1_Click" Text="Sync Request" />
+		<br />
+		<asp:Button ID="Button2" runat="server" OnClick="Button2_Click" Text="Async Request" /></div>
     </form>
 </body>
 </html>
