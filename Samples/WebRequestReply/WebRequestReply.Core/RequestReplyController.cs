@@ -35,27 +35,41 @@ namespace WebRequestReply.Core
 
 		public void SendRequest()
 		{
-			RequestMessage request = new RequestMessage();
-			request.Text = _view.RequestText;
-
-			IServiceBusAsyncResult asyncResult = _serviceBus.Request(_serviceEndpoint, request);
+			IServiceBusAsyncResult asyncResult = BeginRequest(null, null);
 
 			if(asyncResult.AsyncWaitHandle.WaitOne(TimeSpan.FromSeconds(10), true))
 			{
-				ResponseMessage rm = asyncResult.Messages[0] as ResponseMessage;
-				if(rm != null)
-				{
-					_view.ResponseText = rm.Text;
-				}
-				else
-				{
-					_view.ResponseText = "Invalid message type received";
-				}
+				EndRequest(asyncResult);
 			}
 			else
 			{
 				_view.ResponseText = "Timeout waiting for response";
 			}
+		}
+
+		public void EndRequest(IAsyncResult ar)
+		{
+			IServiceBusAsyncResult asyncResult = (IServiceBusAsyncResult)ar;
+
+			ResponseMessage rm = asyncResult.Messages[0] as ResponseMessage;
+			if (rm != null)
+			{
+				_view.ResponseText = rm.Text;
+			}
+			else
+			{
+				_view.ResponseText = "Invalid message type received";
+			}
+		}
+
+		public IServiceBusAsyncResult BeginRequest(AsyncCallback callback, object data)
+		{
+			RequestMessage request = new RequestMessage();
+			request.Text = _view.RequestText;
+
+			IServiceBusAsyncResult asyncResult = _serviceBus.Request(_serviceEndpoint, callback, data, request);
+
+			return asyncResult;
 		}
 	}
 }

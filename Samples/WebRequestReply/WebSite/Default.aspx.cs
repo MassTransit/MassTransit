@@ -45,7 +45,24 @@ public partial class _Default :
 			RequestEntered(this, new EventArgs());
 	}
 
-	protected void requestText_TextChanged(object sender, EventArgs e)
+	protected void Button2_Click(object sender, EventArgs e)
 	{
+		RegisterAsyncTask(new PageAsyncTask(beginTask, endTask, timeoutTask, this));
+
+	}
+
+	private void timeoutTask(IAsyncResult ar)
+	{
+		ResponseText = "Async Task Timeout";
+	}
+
+	private void endTask(IAsyncResult ar)
+	{
+		_controller.EndRequest(ar);
+	}
+
+	private IAsyncResult beginTask(object sender, EventArgs e, AsyncCallback cb, object extraData)
+	{
+		return _controller.BeginRequest(cb, extraData);
 	}
 }
