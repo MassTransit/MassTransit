@@ -13,15 +13,15 @@ namespace Server
         {
             log4net.Config.XmlConfigurator.Configure();
 
-            IEndpoint serverEndpoint = new MessageQueueEndpoint("msmq://localhost/test_server");
-            IEndpoint wellKnown = new MessageQueueEndpoint("msmq://localhost/test_subscriptions");
+            IMessageQueueEndpoint serverEndpoint = new MessageQueueEndpoint("msmq://localhost/test_server");
+            IMessageQueueEndpoint subscriptionManagerEndpoint = new MessageQueueEndpoint("msmq://localhost/test_subscriptions");
 
             ISubscriptionStorage storage = new LocalSubscriptionCache();
 
             ServiceBus bus = new ServiceBus(serverEndpoint, storage);
-            ClientProxy proxy = new ClientProxy(wellKnown);
-            proxy.StartWatching(bus, bus.SubscriptionStorage);
-            
+            SubscriptionManagerClient subscriptionClient = new SubscriptionManagerClient(bus, storage, subscriptionManagerEndpoint);
+            subscriptionClient.Start();
+
             bus.Subscribe<RequestPasswordUpdate>(Program_MessageReceived);
 
             Console.WriteLine("Thank You. Press any key to exit");
