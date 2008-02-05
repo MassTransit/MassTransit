@@ -149,7 +149,7 @@ namespace MassTransit.ServiceBus
         {
             IEnvelope envelope = new Envelope(_endpoint, messages as IMessage[]);
 
-            foreach (Subscription subscription in _subscriptionStorage.List())
+            foreach (Subscription subscription in _subscriptionStorage.List(typeof(T).FullName))
             {
                 MessageQueueEndpoint endpoint = new MessageQueueEndpoint(subscription.Address);
 
