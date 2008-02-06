@@ -12,6 +12,7 @@
 /// specific language governing permissions and limitations under the License.
 namespace MassTransit.ServiceBus.SubscriptionsManager
 {
+    using System;
     using System.ServiceProcess;
     using NHibernate;
     using NHibernate.Cfg;
@@ -20,42 +21,34 @@ namespace MassTransit.ServiceBus.SubscriptionsManager
     public class Program : ServiceBase
     {
         private SubscriptionService _subscriptionService;
-        private readonly IMessageQueueEndpoint _endpoint = new MessageQueueEndpoint("msmq://localhost/test_subscriptions");
-        private IServiceBus _bus;
+        private IMessageQueueEndpoint _endpoint;
         private ISessionFactory _sessionFactory;
         private ISubscriptionStorage _subscriptionCache;
-        private ISubscriptionStorage _subscriptionRepository;
 
-        protected void Initialize(string connectionString)
+        protected void Initialize(string connectionString, string wellKnownSubscriptionUri)
         {
-            
-
-            Configuration cfg = new Configuration();
-
-            cfg.SetProperty("hibernate.connection.provider", "NHibernate.Connection.DriverConnectionProvider");
-            cfg.SetProperty("hibernate.connection.driver_class", "NHibernate.Driver.SqlClientDriver");
-            cfg.SetProperty("hibernate.connection.connection_string", connectionString);
-            cfg.SetProperty("hibernate.dialect", "NHibernate.Dialect.MsSql2005Dialect");
-
-            cfg.AddAssembly("MassTransit.ServiceBus.SubscriptionsManager");
-
-            _sessionFactory = cfg.BuildSessionFactory();
-
-            _subscriptionRepository = new PersistantSubscriptionStorage(_sessionFactory);
+            _endpoint = new MessageQueueEndpoint(wellKnownSubscriptionUri);
+            _sessionFactory = GetNHibernateSessionFactory(connectionString);
 
             _subscriptionCache = new LocalSubscriptionCache();
 
-            _bus = new ServiceBus(_endpoint, _subscriptionCache);
 
-            _subscriptionService = new SubscriptionService(_bus, _subscriptionCache, _subscriptionRepository);
+            _subscriptionService = new SubscriptionService(
+                new ServiceBus(_endpoint, _subscriptionCache),
+                _subscriptionCache,
+                new PersistantSubscriptionStorage(_sessionFactory)
+);
         }
 
 
         protected override void OnStart(string[] args)
         {
+            if (args.Length != 1)
+                throw new ArgumentException("There needs to be one parameter that is a connection string");
+
             base.OnStart(args);
 
-            Initialize(args[0]);
+            Initialize(args[0], args[1]);
             
             _subscriptionService.Start(args);
         }
@@ -65,6 +58,20 @@ namespace MassTransit.ServiceBus.SubscriptionsManager
             _subscriptionService.Stop();
 
             base.OnStop();
+        }
+
+        protected ISessionFactory GetNHibernateSessionFactory(string connectionString)
+        {
+            Configuration cfg = new Configuration();
+
+            cfg.SetProperty("hibernate.connection.provider", "NHibernate.Connection.DriverConnectionProvider");
+            cfg.SetProperty("hibernate.connection.driver_class", "NHibernate.Driver.SqlClientDriver");
+            cfg.SetProperty("hibernate.connection.connection_string", connectionString);
+            cfg.SetProperty("hibernate.dialect", "NHibernate.Dialect.MsSql2005Dialect");
+
+            cfg.AddAssembly("MassTransit.ServiceBus.SubscriptionsManager");
+
+            return cfg.BuildSessionFactory();
         }
     }
 }
