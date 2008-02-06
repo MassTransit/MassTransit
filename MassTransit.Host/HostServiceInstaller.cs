@@ -1,5 +1,7 @@
 using System.Collections;
+using System.Collections.Generic;
 using System.Configuration.Install;
+using System.Reflection;
 using System.ServiceProcess;
 using log4net;
 using Microsoft.Win32;
@@ -11,6 +13,7 @@ namespace MassTransit.Host
 		Installer
 	{
 		private static readonly ILog _log = LogManager.GetLogger(typeof (HostServiceInstaller));
+		private readonly List<Assembly> _assemblies = new List<Assembly>();
 		private readonly ServiceInstaller _serviceInstaller = new ServiceInstaller();
 		private readonly ServiceProcessInstaller _serviceProcessInstaller = new ServiceProcessInstaller();
 
@@ -69,6 +72,11 @@ namespace MassTransit.Host
 			Installers.AddRange(new Installer[] {_serviceProcessInstaller, _serviceInstaller});
 		}
 
+		public void AddAssembly(Assembly assembly)
+		{
+			_assemblies.Add(assembly);
+		}
+
 		public bool IsInstalled()
 		{
 			foreach (ServiceController service in ServiceController.GetServices())
@@ -103,6 +111,14 @@ namespace MassTransit.Host
 
 				imagePath += " -service";
 				service.SetValue("ImagePath", imagePath);
+
+				using (RegistryKey assemblies = service.CreateSubKey("Assemblies"))
+				{
+					_assemblies.ForEach(delegate(Assembly assembly)
+					                    	{
+					                    		assemblies.SetValue(assembly.GetName().Name, assembly.Location);
+					                    	});
+				}
 
 				service.Close();
 				services.Close();

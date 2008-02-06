@@ -3,7 +3,7 @@ namespace nu.Utility
     public class Argument : IArgument
     {
         private readonly string _value;
-        protected readonly string _key;
+    	private readonly string _key;
 
         public Argument(string value)
         {
