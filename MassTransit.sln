@@ -31,19 +31,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.ServiceBus.Subs
 		Release.AspNetCompiler.Debug = "False"
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Host", "MassTransit.Host\MassTransit.Host.csproj", "{1BB11713-C12B-4273-A530-C3BF94B7F7DC}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Host.Tests", "MassTransit.Host.Tests\MassTransit.Host.Tests.csproj", "{34EAECFD-D49F-465F-A4E3-DD12374A6BE8}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.ServiceBus.SubscriptionsManager.Client", "MassTransit.ServiceBus.SubscriptionsManager.Client\MassTransit.ServiceBus.SubscriptionsManager.Client.csproj", "{844D54AF-D8B9-4DBF-AC9E-B17423A5E0B2}"
+	ProjectSection(WebsiteProperties) = preProject
+		Debug.AspNetCompiler.Debug = "True"
+		Release.AspNetCompiler.Debug = "False"
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Host", "MassTransit.Host\MassTransit.Host.csproj", "{51F34C86-F3C8-4F64-9C5A-120ECB9EFAE6}"
 	ProjectSection(WebsiteProperties) = preProject
 		Debug.AspNetCompiler.Debug = "True"
 		Release.AspNetCompiler.Debug = "False"
@@ -71,18 +65,14 @@ Global
 		{85A96525-9021-4CFE-A7B1-59C6F964FABB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{85A96525-9021-4CFE-A7B1-59C6F964FABB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{85A96525-9021-4CFE-A7B1-59C6F964FABB}.Release|Any CPU.Build.0 = Release|Any CPU
-		{1BB11713-C12B-4273-A530-C3BF94B7F7DC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1BB11713-C12B-4273-A530-C3BF94B7F7DC}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{1BB11713-C12B-4273-A530-C3BF94B7F7DC}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{1BB11713-C12B-4273-A530-C3BF94B7F7DC}.Release|Any CPU.Build.0 = Release|Any CPU
-		{34EAECFD-D49F-465F-A4E3-DD12374A6BE8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{34EAECFD-D49F-465F-A4E3-DD12374A6BE8}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{34EAECFD-D49F-465F-A4E3-DD12374A6BE8}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{34EAECFD-D49F-465F-A4E3-DD12374A6BE8}.Release|Any CPU.Build.0 = Release|Any CPU
 		{844D54AF-D8B9-4DBF-AC9E-B17423A5E0B2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{844D54AF-D8B9-4DBF-AC9E-B17423A5E0B2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{844D54AF-D8B9-4DBF-AC9E-B17423A5E0B2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{844D54AF-D8B9-4DBF-AC9E-B17423A5E0B2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{51F34C86-F3C8-4F64-9C5A-120ECB9EFAE6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{51F34C86-F3C8-4F64-9C5A-120ECB9EFAE6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{51F34C86-F3C8-4F64-9C5A-120ECB9EFAE6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{51F34C86-F3C8-4F64-9C5A-120ECB9EFAE6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
