@@ -9,7 +9,7 @@ namespace MassTransit.ServiceBus.SubscriptionsManager.Tests
     public class SubscriptionRepositoryTests
     {
         private MockRepository mocks;
-        private SubscriptionRepository repo;
+        private PersistantSubscriptionStorage repo;
         private ISessionFactory mockSessionFactory;
         private ISession sess;
         private ICriteria crit;
@@ -20,7 +20,7 @@ namespace MassTransit.ServiceBus.SubscriptionsManager.Tests
         {
             mocks = new MockRepository();
             mockSessionFactory = mocks.CreateMock<ISessionFactory>();
-            repo = new SubscriptionRepository(mockSessionFactory);
+            repo = new PersistantSubscriptionStorage(mockSessionFactory);
 
             sess = mocks.CreateMock<ISession>();
             crit = mocks.CreateMock<ICriteria>();
