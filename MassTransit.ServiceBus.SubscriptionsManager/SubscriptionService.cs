@@ -53,7 +53,8 @@ namespace MassTransit.ServiceBus.SubscriptionsManager
         {
             try
             {
-                // TODO RegisterSenderForUpdates(ctx.Envelope); I DON"T THINK SO
+                //TODO: RegisterSenderForUpdates(ctx.Envelope); I DON"T THINK SO
+                //TODO: Why not? -dds
 
                 switch (ctx.Message.ChangeType)
                 {
