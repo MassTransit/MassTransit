@@ -32,7 +32,7 @@ namespace SubMgr
 
             _sessionFactory = cfg.BuildSessionFactory();
 
-            _subscriptionRepository = new SubscriptionRepository(_sessionFactory);
+            _subscriptionRepository = new PersistantSubscriptionStorage(_sessionFactory);
 
             _subscriptionCache = new LocalSubscriptionCache();
 

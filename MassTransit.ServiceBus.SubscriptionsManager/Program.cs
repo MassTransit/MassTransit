@@ -26,9 +26,9 @@ namespace MassTransit.ServiceBus.SubscriptionsManager
         private ISubscriptionStorage _subscriptionCache;
         private ISubscriptionStorage _subscriptionRepository;
 
-        protected void Initialize()
+        protected void Initialize(string connectionString)
         {
-            string connectionString = "Server=localhost;initial catalog=test;Trusted_Connection=yes";
+            
 
             Configuration cfg = new Configuration();
 
@@ -41,7 +41,7 @@ namespace MassTransit.ServiceBus.SubscriptionsManager
 
             _sessionFactory = cfg.BuildSessionFactory();
 
-            _subscriptionRepository = new SubscriptionRepository(_sessionFactory);
+            _subscriptionRepository = new PersistantSubscriptionStorage(_sessionFactory);
 
             _subscriptionCache = new LocalSubscriptionCache();
 
@@ -55,7 +55,7 @@ namespace MassTransit.ServiceBus.SubscriptionsManager
         {
             base.OnStart(args);
 
-            Initialize();
+            Initialize(args[0]);
             
             _subscriptionService.Start(args);
         }
