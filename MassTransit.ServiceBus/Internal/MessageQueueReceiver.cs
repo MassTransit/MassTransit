@@ -91,25 +91,31 @@ namespace MassTransit.ServiceBus.Internal
 
 		private void Start()
 		{
-			_queue = _endpoint.Open(QueueAccessMode.SendAndReceive);
+			lock (this)
+			{
+				_queue = _endpoint.Open(QueueAccessMode.SendAndReceive);
 
-			_monitorThread = new Thread(MonitorQueue);
-			_monitorThread.Start();
+				_monitorThread = new Thread(MonitorQueue);
+				_monitorThread.Start();
+			}
 		}
 
 		private void Stop()
 		{
-			if (_queue != null)
+			lock (this)
 			{
-				_queue.Close();
-				_queue.Dispose();
-				_queue = null;
-			}
+				if (_queue != null)
+				{
+					_queue.Close();
+					_queue.Dispose();
+					_queue = null;
+				}
 
-			if (_monitorThread != null)
-			{
-				_monitorThread.Join(TimeSpan.FromSeconds(10));
-				_monitorThread = null;
+				if (_monitorThread != null)
+				{
+					_monitorThread.Join(TimeSpan.FromSeconds(10));
+					_monitorThread = null;
+				}
 			}
 		}
 
@@ -159,14 +165,14 @@ namespace MassTransit.ServiceBus.Internal
 								{
 									IEnvelope e = EnvelopeMessageMapper.MapFrom(msg);
 
-									if (_messageLog.IsInfoEnabled)
-										_messageLog.InfoFormat("Received message {0} from {1}", e.Messages[0].GetType(), e.ReturnEndpoint.Uri);
-
 									if (_consumer.IsHandled(e))
 									{
 										Message received = enumerator.RemoveCurrent(TimeSpan.FromSeconds(1));
 										if (received.Id == msg.Id)
 										{
+											if (_messageLog.IsInfoEnabled)
+												_messageLog.InfoFormat("Received message {0} from {1}", e.Messages[0].GetType(), e.ReturnEndpoint.Uri);
+
 											ThreadPool.QueueUserWorkItem(ProcessMessage, e);
 											break;
 										}
@@ -188,6 +194,20 @@ namespace MassTransit.ServiceBus.Internal
 					if (ex.MessageQueueErrorCode == MessageQueueErrorCode.IOTimeout)
 					{
 						//we don't log this because it isn't exceptional
+					}
+					else if (ex.MessageQueueErrorCode == MessageQueueErrorCode.QueueNotFound)
+					{
+						if(_log.IsErrorEnabled)
+							_log.Error("The message queue does not exist", ex);
+
+						ThreadPool.QueueUserWorkItem(delegate { Stop(); });
+					}
+					else if (ex.MessageQueueErrorCode == MessageQueueErrorCode.MessageAlreadyReceived)
+					{
+						// we are competing with another consumer, no reason to report an error since
+						// the message has already been handled.
+						if(_log.IsDebugEnabled)
+							_log.DebugFormat("Message received by another receiver before it could be retrieved");
 					}
 					else
 					{
