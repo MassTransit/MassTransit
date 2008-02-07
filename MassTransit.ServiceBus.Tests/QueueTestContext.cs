@@ -10,160 +10,171 @@ using NUnit.Framework.SyntaxHelpers;
 
 namespace MassTransit.ServiceBus.Tests
 {
-    public class QueueTestContext :
-        IDisposable
-    {
-        protected static readonly ILog _log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+	public class QueueTestContext :
+		IDisposable
+	{
+		protected static readonly ILog _log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 
-        private ServiceBus _remoteServiceBus;
-        private MessageQueueEndpoint _remoteServiceBusEndPoint = @"msmq://localhost/test_remoteservicebus";
+		private ServiceBus _remoteServiceBus;
+		private MessageQueueEndpoint _remoteServiceBusEndPoint = @"msmq://localhost/test_remoteservicebus";
 
-        private IServiceBus _serviceBus;
-        private MessageQueueEndpoint _serviceBusEndPoint = @"msmq://localhost/test_servicebus";
-        private MessageQueueEndpoint _subscriptionEndpoint = @"msmq://localhost/test_subscriptions";
+		private IServiceBus _serviceBus;
+		private MessageQueueEndpoint _serviceBusEndPoint = @"msmq://localhost/test_servicebus";
+		private MessageQueueEndpoint _subscriptionEndpoint = @"msmq://localhost/test_subscriptions";
 
-        public QueueTestContext()
-        {
-            StackTrace stackTrace = new StackTrace();
-            StackFrame stackFrame = stackTrace.GetFrame(1);
-            MethodBase methodBase = stackFrame.GetMethod();
+		public QueueTestContext(string remoteMachineName)
+		{
+			_remoteServiceBusEndPoint = "msmq://" + remoteMachineName + "/test_remoteservicebus";
+			_serviceBusEndPoint = "msmq://" + remoteMachineName + "/test_servicebus";
 
-            _log.InfoFormat("QueueTestContext Created for {0}", methodBase.Name);
+			Initialize();
+		}
 
-            MessageQueue.EnableConnectionCache = false;
+		public QueueTestContext()
+		{
+			Initialize();
+		}
 
-            ValidateAndPurgeQueue(_serviceBusEndPoint.QueuePath);
-            ValidateAndPurgeQueue(_remoteServiceBusEndPoint.QueuePath);
-            ValidateAndPurgeQueue(_subscriptionEndpoint.QueuePath);
+		public IServiceBus ServiceBus
+		{
+			get
+			{
+				if (_serviceBus == null)
+				{
+					ISubscriptionStorage subscriptionStorage = CreateSubscriptionStorage();
 
-            IServiceBus ignore = ServiceBus;
-        }
+					_serviceBus = new ServiceBus(ServiceBusEndPoint, subscriptionStorage);
+				}
 
-        public IServiceBus ServiceBus
-        {
-            get
-            {
-                if (_serviceBus == null)
-                {
-                    ISubscriptionStorage subscriptionStorage = CreateSubscriptionStorage();
+				return _serviceBus;
+			}
+		}
 
-                    _serviceBus = new ServiceBus(ServiceBusEndPoint, subscriptionStorage);
-                }
+		public IServiceBus RemoteServiceBus
+		{
+			get
+			{
+				if (_remoteServiceBus == null)
+				{
+					ISubscriptionStorage subscriptionStorage = CreateSubscriptionStorage();
 
-                return _serviceBus;
-            }
-        }
+					_remoteServiceBus = new ServiceBus(RemoteServiceBusEndPoint, subscriptionStorage);
+				}
 
-        public IServiceBus RemoteServiceBus
-        {
-            get
-            {
-                if (_remoteServiceBus == null)
-                {
-                    ISubscriptionStorage subscriptionStorage = CreateSubscriptionStorage();
+				return _remoteServiceBus;
+			}
+		}
 
-                    _remoteServiceBus = new ServiceBus(RemoteServiceBusEndPoint, subscriptionStorage);
-                }
-
-                return _remoteServiceBus;
-            }
-        }
-
-        public IMessageQueueEndpoint RemoteServiceBusEndPoint
-        {
-            get { return _remoteServiceBusEndPoint; }
-        }
+		public IMessageQueueEndpoint RemoteServiceBusEndPoint
+		{
+			get { return _remoteServiceBusEndPoint; }
+		}
 
 
-        public IMessageQueueEndpoint ServiceBusEndPoint
-        {
-            get { return _serviceBusEndPoint; }
-        }
+		public IMessageQueueEndpoint ServiceBusEndPoint
+		{
+			get { return _serviceBusEndPoint; }
+		}
 
-        public IMessageQueueEndpoint SubscriptionEndpoint
-        {
-            get { return _subscriptionEndpoint; }
-        }
+		public IMessageQueueEndpoint SubscriptionEndpoint
+		{
+			get { return _subscriptionEndpoint; }
+		}
 
-        #region IDisposable Members
+		#region IDisposable Members
 
-        public void Dispose()
-        {
-            _log.Info("QueueTestContext Disposing");
+		public void Dispose()
+		{
+			_log.Info("QueueTestContext Disposing");
 
-            if (_remoteServiceBus != null)
-                _remoteServiceBus.Dispose();
+			if (_remoteServiceBus != null)
+				_remoteServiceBus.Dispose();
 
-            if (_serviceBus != null)
-                _serviceBus.Dispose();
-        }
+			if (_serviceBus != null)
+				_serviceBus.Dispose();
+		}
 
-        #endregion
+		#endregion
 
-        private ISubscriptionStorage CreateSubscriptionStorage()
-        {
-            ISubscriptionStorage subscriptionCache;
-            ISubscriptionStorage subscriptionStorage;
+		private void Initialize()
+		{
+			StackTrace stackTrace = new StackTrace();
+			StackFrame stackFrame = stackTrace.GetFrame(1);
+			MethodBase methodBase = stackFrame.GetMethod();
 
-            subscriptionCache = new LocalSubscriptionCache();
-            subscriptionStorage =
-                new MsmqSubscriptionStorage(SubscriptionEndpoint, subscriptionCache);
+			_log.InfoFormat("QueueTestContext Created for {0}", methodBase.Name);
 
-            return subscriptionStorage;
-        }
+			MessageQueue.EnableConnectionCache = false;
 
-        public static void VerifyMessageInQueue<T>(string queuePath, T message)
-        {
-            using (MessageQueue mq = new MessageQueue(GetQueueName(queuePath), QueueAccessMode.Receive))
-            {
-                Message msg = mq.Receive(TimeSpan.FromSeconds(3));
+			ValidateAndPurgeQueue(_serviceBusEndPoint.QueuePath);
+			ValidateAndPurgeQueue(_remoteServiceBusEndPoint.QueuePath);
+			ValidateAndPurgeQueue(_subscriptionEndpoint.QueuePath);
 
-                IMessage[] messages = new BinaryFormatter().Deserialize(msg.BodyStream) as IMessage[];
+			IServiceBus ignore = ServiceBus;
+		}
 
-                Assert.That(messages, Is.Not.Null);
-                if (messages != null)
-                {
-                    Assert.That(messages.Length, Is.EqualTo(1));
+		private ISubscriptionStorage CreateSubscriptionStorage()
+		{
+			ISubscriptionStorage subscriptionCache;
+			ISubscriptionStorage subscriptionStorage;
 
-                    Assert.That(messages[0].GetType(), Is.EqualTo(typeof (T)));
-                }
-            }
-        }
+			subscriptionCache = new LocalSubscriptionCache();
+			subscriptionStorage =
+				new MsmqSubscriptionStorage(SubscriptionEndpoint, subscriptionCache);
 
-        private static void ValidateAndPurgeQueue(string queuePath)
-        {
-            ValidateAndPurgeQueue(queuePath, false);
-        }
+			return subscriptionStorage;
+		}
 
-        private static void ValidateAndPurgeQueue(string queuePath, bool isTransactional)
-        {
-            try
-            {
-                MessageQueue.Create(GetQueueName(queuePath), isTransactional);
-            }
-            catch (MessageQueueException ex)
-            {
-                //TODO: What is this?
-                if (ex.MessageQueueErrorCode != MessageQueueErrorCode.QueueExists)
-                {
-                }
-            }
+		public static void VerifyMessageInQueue<T>(string queuePath, T message)
+		{
+			using (MessageQueue mq = new MessageQueue(GetQueueName(queuePath), QueueAccessMode.Receive))
+			{
+				Message msg = mq.Receive(TimeSpan.FromSeconds(3));
 
-            MessageQueue queue = new MessageQueue(GetQueueName(queuePath), QueueAccessMode.ReceiveAndAdmin);
-            queue.Purge();
-        }
+				IMessage[] messages = new BinaryFormatter().Deserialize(msg.BodyStream) as IMessage[];
 
-        public static string GetQueueName(string name)
-        {
-            string result = name;
-            if (result.Contains("FormatName:DIRECT=OS:"))
-                result = result.Replace("FormatName:DIRECT=OS:", "");
-            if (result.Contains("localhost"))
-                result = result.Replace("localhost", ".");
-            if (result.Contains(Environment.MachineName.ToLowerInvariant()))
-                result = result.Replace(Environment.MachineName.ToLowerInvariant(), ".");
+				Assert.That(messages, Is.Not.Null);
+				if (messages != null)
+				{
+					Assert.That(messages.Length, Is.EqualTo(1));
 
-            return result;
-        }
-    }
+					Assert.That(messages[0].GetType(), Is.EqualTo(typeof (T)));
+				}
+			}
+		}
+
+		private static void ValidateAndPurgeQueue(string queuePath)
+		{
+			ValidateAndPurgeQueue(queuePath, false);
+		}
+
+		private static void ValidateAndPurgeQueue(string queuePath, bool isTransactional)
+		{
+			try
+			{
+				MessageQueue queue = new MessageQueue(GetQueueName(queuePath), QueueAccessMode.ReceiveAndAdmin);
+				queue.Purge();
+			}
+			catch (MessageQueueException ex)
+			{
+				if (ex.MessageQueueErrorCode == MessageQueueErrorCode.QueueNotFound)
+				{
+					MessageQueue.Create(GetQueueName(queuePath), isTransactional);
+				}
+			}
+		}
+
+		public static string GetQueueName(string name)
+		{
+			string result = name;
+			if (result.Contains("FormatName:DIRECT=OS:"))
+				result = result.Replace("FormatName:DIRECT=OS:", "");
+			if (result.Contains("localhost"))
+				result = result.Replace("localhost", ".");
+			if (result.Contains(Environment.MachineName.ToLowerInvariant()))
+				result = result.Replace(Environment.MachineName.ToLowerInvariant(), ".");
+
+			return result;
+		}
+	}
 }
