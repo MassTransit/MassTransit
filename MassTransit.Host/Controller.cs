@@ -1,7 +1,5 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Configuration.Install;
 using System.Reflection;
 using MassTransit.ServiceBus;
 using nu.Utility;
@@ -57,80 +55,43 @@ namespace MassTransit.Host
 			if (string.IsNullOrEmpty(_assemblyName))
 			{
 				Console.WriteLine("Usage: {0}", mapper.Usage);
-				return;
 			}
-
-			if (_installService)
+			else if (_installService)
 			{
-				RegisterService(arguments);
-				return;
+				RegisterService(arguments, true);
 			}
-
-			if (_uninstallService)
+			else if (_uninstallService)
 			{
-				UnregisterService(arguments);
-				return;
+				RegisterService(arguments, false);
 			}
+			else if (_isService)
+			{
+				Console.WriteLine("Service not working yet.");
+			}
+			else
+			{
+				Console.WriteLine("Starting up as a console application");
 
-			LoadAssembly();
+				LoadAssembly();
+			}
 		}
 
-		private void UnregisterService(IEnumerable<IArgument> arguments)
+		private void RegisterService(IEnumerable<IArgument> arguments, bool install)
 		{
 			HostServiceInstaller installer = new HostServiceInstaller("MassTransitHost", "MassTransit Message Host", "Mass Transit Host");
 
 			IArgumentMap installerMap = _argumentMapFactory.CreateMap(installer);
-			IEnumerable<IArgument> remaining = installerMap.ApplyTo(installerMap, arguments);
+			installerMap.ApplyTo(installerMap, arguments);
 
-			if (!installer.IsInstalled())
+			if (install)
 			{
-				Console.WriteLine("Service is not installed");
-				return;
+				Assembly assembly = Assembly.Load(_assemblyName);
+
+				installer.Register(new Assembly[] {assembly});
 			}
-
-			using (TransactedInstaller ti = new TransactedInstaller())
+			else
 			{
-				ti.Installers.Add(installer);
-
-				string path = string.Format("/assemblypath={0}", Assembly.GetExecutingAssembly().Location);
-				string[] commandLine = {path};
-
-				InstallContext context = new InstallContext(null, commandLine);
-				ti.Context = context;
-
-				ti.Uninstall(null);
-			}
-		}
-
-		private void RegisterService(IEnumerable<IArgument> arguments)
-		{
-			HostServiceInstaller installer = new HostServiceInstaller("MassTransitHost", "MassTransit Message Host", "Mass Transit Host");
-
-			IArgumentMap installerMap = _argumentMapFactory.CreateMap(installer);
-			IEnumerable<IArgument> remaining = installerMap.ApplyTo(installerMap, arguments);
-
-			if (installer.IsInstalled())
-			{
-				Console.WriteLine("Service is already installed");
-				return;
-			}
-
-			Assembly assembly = Assembly.Load(_assemblyName);
-			installer.AddAssembly(assembly);
-
-			using (TransactedInstaller ti = new TransactedInstaller())
-			{
-				ti.Installers.Add(installer);
-
-				string path = string.Format("/assemblypath={0}", Assembly.GetExecutingAssembly().Location);
-				string[] commandLine = {path};
-
-				InstallContext context = new InstallContext(null, commandLine);
-				ti.Context = context;
-
-				Hashtable savedState = new Hashtable();
-
-				ti.Install(savedState);
+				installer.Unregister();
 			}
 		}
 

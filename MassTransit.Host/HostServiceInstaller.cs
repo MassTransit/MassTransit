@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Configuration.Install;
@@ -124,6 +125,56 @@ namespace MassTransit.Host
 				services.Close();
 				currentControlSet.Close();
 				system.Close();
+			}
+		}
+
+		public void Unregister()
+		{
+			if (IsInstalled())
+			{
+				using (TransactedInstaller ti = new TransactedInstaller())
+				{
+					ti.Installers.Add(this);
+
+					string path = string.Format("/assemblypath={0}", Assembly.GetExecutingAssembly().Location);
+					string[] commandLine = {path};
+
+					InstallContext context = new InstallContext(null, commandLine);
+					ti.Context = context;
+
+					ti.Uninstall(null);
+				}
+			}
+			else
+			{
+				Console.WriteLine("Service is not installed");
+			}
+		}
+
+		public void Register(IEnumerable<Assembly> assemblies)
+		{
+			if (!IsInstalled())
+			{
+				_assemblies.AddRange(assemblies);
+
+				using (TransactedInstaller ti = new TransactedInstaller())
+				{
+					ti.Installers.Add(this);
+
+					string path = string.Format("/assemblypath={0}", Assembly.GetExecutingAssembly().Location);
+					string[] commandLine = {path};
+
+					InstallContext context = new InstallContext(null, commandLine);
+					ti.Context = context;
+
+					Hashtable savedState = new Hashtable();
+
+					ti.Install(savedState);
+				}
+			}
+			else
+			{
+				Console.WriteLine("Service is already installed");
 			}
 		}
 	}
