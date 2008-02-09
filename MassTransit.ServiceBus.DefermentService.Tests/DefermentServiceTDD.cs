@@ -2,17 +2,65 @@ namespace MassTransit.ServiceBus.DefermentService.Tests
 {
     using System;
     using NUnit.Framework;
+    using NUnit.Framework.SyntaxHelpers;
+    using Subscriptions;
 
     [TestFixture]
     public class DefermentServiceTDD
     {
+        TimeSpan oneSecond = new TimeSpan(0,0,1);
         [Test]
         public void Doodle()
         {
             IMessage msg = null;
             IDefermentService d = new DefermentService();
             //when deferment completes we send back to the queue as if it had just come in.
-            int defermentClaimTicket = d.Defer(msg, new TimeSpan(0, 0, 30));
+            int defermentClaimTicket = d.Defer(msg, oneSecond);
         }
+
+        [Test]
+        public void Doodle2()
+        {
+            IServiceBus bus = new ServiceBus(new MessageQueueEndpoint("msmq://localhost/test"), new LocalSubscriptionCache());
+            IDefermentService d = new DefermentService();
+
+            int defermentClaimTicket = 0;
+
+            //this should get called twice effectively
+            //once for the first deferring call
+            //once for post-deferment
+            bus.Subscribe<DelayMessage>(delegate(IMessageContext<DelayMessage> cxt)
+                {
+                    if(cxt.Message.Deferred == false)
+                    {
+                        defermentClaimTicket = d.Defer(cxt.Message, oneSecond);
+                        cxt.Message.Deferred = true;
+                    }
+                    else
+                    {
+                        Assert.That(defermentClaimTicket, Is.EqualTo(1));
+                    }
+                    
+                });
+
+            
+            
+            
+            
+
+            //my question is since this is async how can I make it wait?
+            //got any mad MultiThread ideas?
+
+        }
+
+
     }
+
+    [Serializable]
+    public class DelayMessage :
+        IMessage
+    {
+        public bool Deferred = false;
+    }
+
 }
