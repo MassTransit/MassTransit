@@ -25,7 +25,7 @@ namespace MassTransit.ServiceBus.Tests
         }
 
         [Test]
-        public void BatchingPattern33()
+        public void Getting_Them_All()
         {
             ServiceBus bus = new ServiceBus(new MessageQueueEndpoint("msmq://localhost/test"), new LocalSubscriptionCache());
             BatchManager mgr = new BatchManager();
@@ -43,6 +43,27 @@ namespace MassTransit.ServiceBus.Tests
             bus.Deliver(env2);
 
             Assert.That(mgr.BatchComplete, Is.True);
+        }
+
+        [Test]
+        public void Getting_Them_All_but_one()
+        {
+            ServiceBus bus = new ServiceBus(new MessageQueueEndpoint("msmq://localhost/test"), new LocalSubscriptionCache());
+            BatchManager mgr = new BatchManager();
+            BatchMessage msg1 = new BatchMessage(3, "dru");
+            BatchMessage msg2 = new BatchMessage(3, "dru");
+
+            IEnvelope env1 = new Envelope(msg1);
+            IEnvelope env2 = new Envelope(msg2);
+
+            bus.Subscribe<BatchMessage>(delegate(IMessageContext<BatchMessage> cxt)
+                              {
+                                  mgr.Enqueue(cxt.Message);
+                              });
+            bus.Deliver(env1);
+            bus.Deliver(env2);
+
+            Assert.That(mgr.BatchComplete, Is.False);
         }
     }
 
