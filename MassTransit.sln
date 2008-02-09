@@ -43,6 +43,24 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Host", "MassTra
 		Release.AspNetCompiler.Debug = "False"
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DefermentService", "DefermentService", "{7E21914E-BB74-40A4-A933-0B2F8DE40D79}"
+	ProjectSection(WebsiteProperties) = preProject
+		Debug.AspNetCompiler.Debug = "True"
+		Release.AspNetCompiler.Debug = "False"
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.ServiceBus.DefermentService", "MassTransit.ServiceBus.DefermentService\MassTransit.ServiceBus.DefermentService.csproj", "{EB8752B2-A94C-4BC0-AB4E-F9D5889EF708}"
+	ProjectSection(WebsiteProperties) = preProject
+		Debug.AspNetCompiler.Debug = "True"
+		Release.AspNetCompiler.Debug = "False"
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.ServiceBus.DefermentService.Tests", "MassTransit.ServiceBus.DefermentService.Tests\MassTransit.ServiceBus.DefermentService.Tests.csproj", "{AFDD3858-FA76-484A-998E-41235EE09162}"
+	ProjectSection(WebsiteProperties) = preProject
+		Debug.AspNetCompiler.Debug = "True"
+		Release.AspNetCompiler.Debug = "False"
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -73,6 +91,14 @@ Global
 		{51F34C86-F3C8-4F64-9C5A-120ECB9EFAE6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{51F34C86-F3C8-4F64-9C5A-120ECB9EFAE6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{51F34C86-F3C8-4F64-9C5A-120ECB9EFAE6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EB8752B2-A94C-4BC0-AB4E-F9D5889EF708}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EB8752B2-A94C-4BC0-AB4E-F9D5889EF708}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EB8752B2-A94C-4BC0-AB4E-F9D5889EF708}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EB8752B2-A94C-4BC0-AB4E-F9D5889EF708}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AFDD3858-FA76-484A-998E-41235EE09162}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AFDD3858-FA76-484A-998E-41235EE09162}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AFDD3858-FA76-484A-998E-41235EE09162}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AFDD3858-FA76-484A-998E-41235EE09162}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -81,5 +107,7 @@ Global
 		{6CD7F53B-37F8-4281-B85B-9EC679CADDBB} = {56F516D7-BC3C-49E1-A639-83C5F14953F8}
 		{85A96525-9021-4CFE-A7B1-59C6F964FABB} = {56F516D7-BC3C-49E1-A639-83C5F14953F8}
 		{844D54AF-D8B9-4DBF-AC9E-B17423A5E0B2} = {56F516D7-BC3C-49E1-A639-83C5F14953F8}
+		{EB8752B2-A94C-4BC0-AB4E-F9D5889EF708} = {7E21914E-BB74-40A4-A933-0B2F8DE40D79}
+		{AFDD3858-FA76-484A-998E-41235EE09162} = {7E21914E-BB74-40A4-A933-0B2F8DE40D79}
 	EndGlobalSection
 EndGlobal
