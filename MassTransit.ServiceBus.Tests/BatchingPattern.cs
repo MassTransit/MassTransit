@@ -101,6 +101,10 @@ namespace MassTransit.ServiceBus.Tests
         }
         
     }
+
+    //abstract?
+    //IBatchMessage?
+    //Batch<IMessage>?
     public class BatchMessage : IMessage
     {
         private int _batchCount;
