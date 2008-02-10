@@ -48,7 +48,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="As_A_Service_With_A_Message_Endpoint.cs" />
-    <Compile Include="BatchingPattern.cs" />
     <Compile Include="IntegrationTests\When_using_queues_on_a_remote_server.cs" />
     <Compile Include="Subscriptions\As_Local_Subscription_Storage.cs" />
     <Compile Include="IntegrationTests\As_Msmq_Storage.cs" />
@@ -77,6 +76,7 @@
     <Compile Include="Messages\UpdateMessage.cs" />
     <Compile Include="Messages\UpdateAcceptedMessage.cs" />
     <Compile Include="When_A_Message_Is_Received_On_The_Service_Bus.cs" />
+    <Compile Include="When_a_new_batch_is_received.cs" />
     <Compile Include="When_Configuring_The_Service_Bus.cs" />
     <Compile Include="When_Creating_An_Envelope.cs" />
     <Compile Include="When_Creating_A_GenericDeliveryAddress.cs" />
