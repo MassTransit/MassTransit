@@ -35,6 +35,8 @@
   <ItemGroup>
     <Compile Include="Batching\BatchManager.cs" />
     <Compile Include="Batching\BatchMessage.cs" />
+    <Compile Include="Batching\TimeoutAttribute.cs" />
+    <Compile Include="Batching\TimeoutMessage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
