@@ -1,5 +1,6 @@
 namespace MassTransit.ServiceBus.Tests
 {
+    using System;
     using System.Collections.Generic;
     using Internal;
     using MassTransit.ServiceBus.Subscriptions;
@@ -94,7 +95,8 @@ namespace MassTransit.ServiceBus.Tests
             }
         }
         
-        public void QueueComplete(Queue<BatchMessage> queue)
+        //API for user
+        public void QueueComplete(IEnumerable<BatchMessage> queue)
         {
             //do stuff
             BatchComplete = true;
@@ -105,6 +107,7 @@ namespace MassTransit.ServiceBus.Tests
     //abstract?
     //IBatchMessage?
     //Batch<IMessage>?
+    [Serializable]
     public class BatchMessage : IMessage
     {
         private int _batchCount;
