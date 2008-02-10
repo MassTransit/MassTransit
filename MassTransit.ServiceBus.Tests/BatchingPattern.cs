@@ -30,13 +30,13 @@ namespace MassTransit.ServiceBus.Tests
         {
             ServiceBus bus = new ServiceBus(new MessageQueueEndpoint("msmq://localhost/test"), new LocalSubscriptionCache());
             BatchManager mgr = new BatchManager();
-            BatchMessage msg1 = new BatchMessage(2, "dru");
-            BatchMessage msg2 = new BatchMessage(2, "dru");
+            BatchMessage<MessageToBatch> msg1 = new BatchMessage<MessageToBatch>(2, "dru", new MessageToBatch());
+            BatchMessage<MessageToBatch> msg2 = new BatchMessage<MessageToBatch>(2, "dru", new MessageToBatch());
 
             IEnvelope env1 = new Envelope(msg1);
             IEnvelope env2 = new Envelope(msg2);
 
-            bus.Subscribe<BatchMessage>(delegate(IMessageContext<BatchMessage> cxt)
+            bus.Subscribe<BatchMessage<MessageToBatch>>(delegate(IMessageContext<BatchMessage<MessageToBatch>> cxt)
                               {
                                   mgr.Enqueue(cxt.Message);
                               });
@@ -51,13 +51,13 @@ namespace MassTransit.ServiceBus.Tests
         {
             ServiceBus bus = new ServiceBus(new MessageQueueEndpoint("msmq://localhost/test"), new LocalSubscriptionCache());
             BatchManager mgr = new BatchManager();
-            BatchMessage msg1 = new BatchMessage(3, "dru");
-            BatchMessage msg2 = new BatchMessage(3, "dru");
+            BatchMessage<MessageToBatch> msg1 = new BatchMessage<MessageToBatch>(3, "dru", new MessageToBatch());
+            BatchMessage<MessageToBatch> msg2 = new BatchMessage<MessageToBatch>(3, "dru", new MessageToBatch());
 
             IEnvelope env1 = new Envelope(msg1);
             IEnvelope env2 = new Envelope(msg2);
 
-            bus.Subscribe<BatchMessage>(delegate(IMessageContext<BatchMessage> cxt)
+            bus.Subscribe<BatchMessage<MessageToBatch>>(delegate(IMessageContext<BatchMessage<MessageToBatch>> cxt)
                               {
                                   mgr.Enqueue(cxt.Message);
                               });
@@ -73,13 +73,13 @@ namespace MassTransit.ServiceBus.Tests
         //for intial test only
         public bool BatchComplete = false;
 
-        private Dictionary<object, Queue<BatchMessage>>  _queues = new Dictionary<object, Queue<BatchMessage>>();
+        private Dictionary<object, Queue<BatchMessage<MessageToBatch>>> _queues = new Dictionary<object, Queue<BatchMessage<MessageToBatch>>>();
 
-        public void Enqueue(BatchMessage msg)
+        public void Enqueue(BatchMessage<MessageToBatch> msg)
         {
             if(!_queues.ContainsKey(msg.BatchId))
             {
-                _queues.Add(msg.BatchId, new Queue<BatchMessage>());
+                _queues.Add(msg.BatchId, new Queue<BatchMessage<MessageToBatch>>());
             }
 
             _queues[msg.BatchId].Enqueue(msg);
@@ -87,7 +87,7 @@ namespace MassTransit.ServiceBus.Tests
             AddedMessage(msg, _queues[msg.BatchId]);
         }
 
-        public void AddedMessage(BatchMessage msg, Queue<BatchMessage> queue)
+        public void AddedMessage(BatchMessage<MessageToBatch> msg, Queue<BatchMessage<MessageToBatch>> queue)
         {
             if(msg.BatchCount == queue.Count)
             {
@@ -96,7 +96,7 @@ namespace MassTransit.ServiceBus.Tests
         }
         
         //API for user
-        public void QueueComplete(IEnumerable<BatchMessage> queue)
+        public void QueueComplete(IEnumerable<BatchMessage<MessageToBatch>> queue)
         {
             //do stuff
             BatchComplete = true;
@@ -108,15 +108,17 @@ namespace MassTransit.ServiceBus.Tests
     //IBatchMessage?
     //Batch<IMessage>?
     [Serializable]
-    public class BatchMessage : IMessage
+    public class BatchMessage<T> : IMessage where T: IMessage
     {
         private int _batchCount;
         private object _batchId;
+        private T _message;
 
 
-        public BatchMessage(int batchCount, object batchId)
+        public BatchMessage(int batchCount, object batchId, T message)
         {
             _batchCount = batchCount;
+            _message = message;
             _batchId = batchId;
         }
 
@@ -129,5 +131,16 @@ namespace MassTransit.ServiceBus.Tests
         {
             get { return _batchId; }
         }
+
+        public T Message
+        {
+            get { return _message; }
+        }
+    }
+
+    [Serializable]
+    public class MessageToBatch : IMessage
+    {
+        
     }
 }
