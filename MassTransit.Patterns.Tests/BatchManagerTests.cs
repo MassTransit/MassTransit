@@ -1,5 +1,7 @@
 namespace MassTransit.Patterns.Tests
 {
+    using System;
+    using System.Collections.Generic;
     using Batching;
     using MassTransit.ServiceBus.Subscriptions;
     using NUnit.Framework;
@@ -10,7 +12,7 @@ namespace MassTransit.Patterns.Tests
     [TestFixture]
     public class BatchingPattern
     {
-        private MockRepository mocks;
+        #region Setup/Teardown
 
         [SetUp]
         public void SetUp()
@@ -24,47 +26,94 @@ namespace MassTransit.Patterns.Tests
             mocks = null;
         }
 
+        #endregion
+
+        private MockRepository mocks;
+
         [Test]
         public void Getting_Them_All()
         {
             ServiceBus bus = new ServiceBus(new MessageQueueEndpoint("msmq://localhost/test"), new LocalSubscriptionCache());
-            BatchManager mgr = new BatchManager();
-            BatchMessage<MessageToBatch> msg1 = new BatchMessage<MessageToBatch>(2, "dru", new MessageToBatch());
-            BatchMessage<MessageToBatch> msg2 = new BatchMessage<MessageToBatch>(2, "dru", new MessageToBatch());
+
+            List<MessageToBatch> messages = new List<MessageToBatch>();
+
+            bool? complete = null;
+
+            BatchController<MessageToBatch, Guid> controller = new BatchController<MessageToBatch, Guid>(
+                delegate(BatchContext<MessageToBatch, Guid> context)
+                {
+                    messages.AddRange(context);
+
+                    complete = context.IsComplete;
+                }, TimeSpan.FromSeconds(3));
+
+            Guid batchId = Guid.NewGuid();
+            int batchLength = 2;
+
+            MessageToBatch msg1 = new MessageToBatch(batchId, batchLength);
+            MessageToBatch msg2 = new MessageToBatch(batchId, batchLength);
 
             IEnvelope env1 = new Envelope(msg1);
             IEnvelope env2 = new Envelope(msg2);
 
-            bus.Subscribe<BatchMessage<MessageToBatch>>(delegate(IMessageContext<BatchMessage<MessageToBatch>> cxt)
-                              {
-                                  mgr.Enqueue(cxt.Message);
-                              });
+            bus.Subscribe<MessageToBatch>(controller.HandleMessage);
+
             bus.Deliver(env1);
             bus.Deliver(env2);
 
-            Assert.That(mgr.BatchComplete, Is.True);
+            Assert.That(messages.Count, Is.EqualTo(2));
+
+            Assert.That(complete, Is.Not.Null);
+
+            Assert.That(complete.Value, Is.True);
         }
 
         [Test]
         public void Getting_Them_All_but_one()
         {
             ServiceBus bus = new ServiceBus(new MessageQueueEndpoint("msmq://localhost/test"), new LocalSubscriptionCache());
-            BatchManager mgr = new BatchManager();
-            BatchMessage<MessageToBatch> msg1 = new BatchMessage<MessageToBatch>(3, "dru", new MessageToBatch());
-            BatchMessage<MessageToBatch> msg2 = new BatchMessage<MessageToBatch>(3, "dru", new MessageToBatch());
+
+            List<MessageToBatch> messages = new List<MessageToBatch>();
+
+            bool? complete = null;
+
+            BatchController<MessageToBatch, Guid> controller = new BatchController<MessageToBatch, Guid>(
+                delegate(BatchContext<MessageToBatch, Guid> context)
+                    {
+                        messages.AddRange(context);
+
+                        complete = context.IsComplete;
+                    }, TimeSpan.FromSeconds(3));
+
+            Guid batchId = Guid.NewGuid();
+            int batchLength = 3;
+
+            MessageToBatch msg1 = new MessageToBatch(batchId, batchLength);
+            MessageToBatch msg2 = new MessageToBatch(batchId, batchLength);
 
             IEnvelope env1 = new Envelope(msg1);
             IEnvelope env2 = new Envelope(msg2);
 
-            bus.Subscribe<BatchMessage<MessageToBatch>>(delegate(IMessageContext<BatchMessage<MessageToBatch>> cxt)
-                              {
-                                  mgr.Enqueue(cxt.Message);
-                              });
+            bus.Subscribe<MessageToBatch>(controller.HandleMessage);
 
             bus.Deliver(env1);
             bus.Deliver(env2);
 
-            Assert.That(mgr.BatchComplete, Is.False);
+            Assert.That(messages.Count, Is.EqualTo(2));
+
+            Assert.That(complete, Is.Not.Null);
+
+            Assert.That(complete.Value, Is.False);
+        }
+    }
+
+    [Serializable]
+    public class MessageToBatch :
+        BatchMessage<Guid>
+    {
+        public MessageToBatch(Guid batchId, int batchLength)
+            : base(batchId, batchLength)
+        {
         }
     }
 }
