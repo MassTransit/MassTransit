@@ -76,7 +76,6 @@
     <Compile Include="Messages\UpdateMessage.cs" />
     <Compile Include="Messages\UpdateAcceptedMessage.cs" />
     <Compile Include="When_A_Message_Is_Received_On_The_Service_Bus.cs" />
-    <Compile Include="When_a_new_batch_is_received.cs" />
     <Compile Include="When_Configuring_The_Service_Bus.cs" />
     <Compile Include="When_Creating_An_Envelope.cs" />
     <Compile Include="When_Creating_A_GenericDeliveryAddress.cs" />

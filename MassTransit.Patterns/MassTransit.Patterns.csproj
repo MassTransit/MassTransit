@@ -33,7 +33,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Batching\BatchManager.cs" />
+    <Compile Include="Batching\BatchContext.cs" />
+    <Compile Include="Batching\BatchController.cs" />
     <Compile Include="Batching\BatchMessage.cs" />
     <Compile Include="Batching\TimeoutAttribute.cs" />
     <Compile Include="Batching\TimeoutMessage.cs" />
