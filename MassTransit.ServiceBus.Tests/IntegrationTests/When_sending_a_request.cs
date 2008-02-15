@@ -1,39 +1,39 @@
-using System;
-using NUnit.Framework;
-using NUnit.Framework.SyntaxHelpers;
-
-namespace MassTransit.ServiceBus.Tests
+namespace MassTransit.ServiceBus.Tests.IntegrationTests
 {
-	[TestFixture]
-	[Explicit]
-	public class When_sending_a_request
-	{
-		[Test]
-		public void A_response_should_release_the_waiting_process()
-		{
-			using (QueueTestContext qtc = new QueueTestContext())
-			{
-				PingMessage ping = new PingMessage();
+    using System;
+    using NUnit.Framework;
+    using NUnit.Framework.SyntaxHelpers;
 
-				qtc.RemoteServiceBus.Subscribe<PingMessage>(
-					delegate(IMessageContext<PingMessage> context) { context.Reply(new PongMessage()); });
+    [TestFixture]
+    [Explicit]
+    public class When_sending_a_request
+    {
+        [Test]
+        public void A_response_should_release_the_waiting_process()
+        {
+            using (QueueTestContext qtc = new QueueTestContext())
+            {
+                PingMessage ping = new PingMessage();
 
-				IServiceBusAsyncResult asyncResult = qtc.ServiceBus.Request(qtc.RemoteServiceBus.Endpoint, ping);
+                qtc.RemoteServiceBus.Subscribe<PingMessage>(
+                    delegate(IMessageContext<PingMessage> context) { context.Reply(new PongMessage()); });
 
-				Assert.That(asyncResult, Is.Not.Null);
+                IServiceBusAsyncResult asyncResult = qtc.ServiceBus.Request(qtc.RemoteServiceBus.Endpoint, ping);
 
-				Assert.That(asyncResult.AsyncWaitHandle.WaitOne(TimeSpan.FromSeconds(10), true), Is.True,
-				            "Timeout Expired Waiting For Response");
+                Assert.That(asyncResult, Is.Not.Null);
 
-				Assert.That(asyncResult.Messages, Is.Not.Null);
+                Assert.That(asyncResult.AsyncWaitHandle.WaitOne(TimeSpan.FromSeconds(10), true), Is.True,
+                            "Timeout Expired Waiting For Response");
 
-				Assert.That(asyncResult.Messages, Is.Not.Empty);
+                Assert.That(asyncResult.Messages, Is.Not.Null);
 
-                
-				PongMessage pong = asyncResult.Messages[0] as PongMessage;
+                Assert.That(asyncResult.Messages, Is.Not.Empty);
 
-				Assert.That(pong, Is.Not.Null);
-			}
-		}
-	}
+
+                PongMessage pong = asyncResult.Messages[0] as PongMessage;
+
+                Assert.That(pong, Is.Not.Null);
+            }
+        }
+    }
 }
