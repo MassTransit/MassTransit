@@ -113,5 +113,10 @@ namespace MassTransit.Host
 				Console.WriteLine("Exception Occurred: {0}", ex);
 			}
 		}
+
+		public void Configure(IConfigurator configurator)
+		{
+			
+		}
 	}
 }

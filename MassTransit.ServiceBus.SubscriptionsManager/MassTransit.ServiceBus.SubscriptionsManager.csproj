@@ -59,6 +59,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="host.config" />
     <None Include="Subscriptions.sql" />
   </ItemGroup>
   <ItemGroup>
