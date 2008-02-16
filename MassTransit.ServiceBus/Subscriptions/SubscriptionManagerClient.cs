@@ -4,7 +4,8 @@ namespace MassTransit.ServiceBus.Subscriptions
     using Messages;
 
     public class SubscriptionManagerClient :
-        IDisposable
+        IDisposable,
+		IAutoSubscriber
     {
         private readonly IServiceBus _serviceBus;
         private readonly ISubscriptionStorage _cache;
@@ -86,5 +87,15 @@ namespace MassTransit.ServiceBus.Subscriptions
                 }
             }
         }
+
+    	public void AddSubscriptions(IServiceBus bus)
+    	{
+    		
+    	}
+
+    	public void RemoveSubscriptions(IServiceBus bus)
+    	{
+    		throw new NotImplementedException();
+    	}
     }
 }
