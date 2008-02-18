@@ -46,8 +46,11 @@
     <Compile Include="..\SolutionVersion.cs">
       <Link>SolutionVersion.cs</Link>
     </Compile>
+    <Compile Include="Config\EndpointConfigurator.cs" />
+    <Compile Include="Config\HostConfigurationException.cs" />
     <Compile Include="Config\HostConfigurator.cs" />
     <Compile Include="Config\IConfigurator.cs" />
+    <Compile Include="Config\IEndpointConfigurator.cs" />
     <Compile Include="Controller.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

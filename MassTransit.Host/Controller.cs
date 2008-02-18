@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using MassTransit.Host.Config;
 using MassTransit.ServiceBus;
 using nu.Utility;
 
@@ -116,6 +117,7 @@ namespace MassTransit.Host
 
 		public void Configure(IConfigurator configurator)
 		{
+
 			
 		}
 	}

@@ -1,3 +1,5 @@
+using MassTransit.Host.Config;
+
 namespace MassTransit.Host.Tests
 {
 	using System.Collections.Generic;
