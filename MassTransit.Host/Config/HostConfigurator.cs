@@ -1,20 +1,20 @@
-namespace MassTransit.Host
-{
-	using System;
-	using System.Collections.Generic;
-	using System.Configuration;
-	using System.IO;
-	using System.Reflection;
-	using System.Xml;
-	using log4net;
-	using ServiceBus;
+using System;
+using System.Collections.Generic;
+using System.Configuration;
+using System.IO;
+using System.Reflection;
+using System.Xml;
+using log4net;
+using MassTransit.ServiceBus;
 
+namespace MassTransit.Host.Config
+{
 	public class HostConfigurator :
 		IConfigurator
 	{
 		private static readonly ILog _log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 
-		private readonly Dictionary<string, EndpointInstance> _endpoints = new Dictionary<string, EndpointInstance>();
+		private readonly Dictionary<string, EndpointConfigurator> _endpoints = new Dictionary<string, EndpointConfigurator>();
 		private FileInfo _fileInfo;
 
 		public HostConfigurator()
@@ -50,6 +50,14 @@ namespace MassTransit.Host
 				{
 					InternalConfigure(fs);
 				}
+			}
+		}
+
+		public Dictionary<string, EndpointConfigurator>.Enumerator Endpoints
+		{
+			get
+			{
+				return _endpoints.GetEnumerator();
 			}
 		}
 
@@ -98,7 +106,7 @@ namespace MassTransit.Host
 					if (_endpoints.ContainsKey(endpointName) == false)
 					{
 						_log.ErrorFormat("Invalid endpoint reference: {0}", endpointName);
-						throw new ConfigurationException("Invalid Endpoint Reference: " + endpointName);
+						throw new HostConfigurationException("Invalid Endpoint Reference: " + endpointName);
 					}
 				}
 				else if ( xmlReader.LocalName == "component")
@@ -109,7 +117,7 @@ namespace MassTransit.Host
 					if (t == null)
 					{
 						_log.ErrorFormat("Invalid component name: {0}", componentName);
-						throw new ConfigurationException("Invalid type specified: " + componentName);
+						throw new HostConfigurationException("Invalid type specified: " + componentName);
 					}
 
 					if (t.IsAssignableFrom(typeof(IAutoSubscriber)) && !t.IsAbstract)
@@ -117,7 +125,7 @@ namespace MassTransit.Host
 					else
 					{
 						_log.ErrorFormat("Type does not support auto registration: {0}", componentName);
-						throw new ConfigurationException("Unsupported type specified: " + componentName);
+						throw new HostConfigurationException("Unsupported type specified: " + componentName);
 					}
 				}
 
@@ -147,38 +155,14 @@ namespace MassTransit.Host
 				{
 					string uriString = xmlReader.ReadContentAsString();
 
-					_endpoints.Add(name, new EndpointInstance(new MessageQueueEndpoint(uriString)));
+					_endpoints.Add(name, new EndpointConfigurator(new MessageQueueEndpoint(uriString)));
 
 					_log.InfoFormat("Endpoint: {0}, URI: {1}", name, uriString);
 				}
 			}
 		}
 
-		#region Nested type: EndpointInstance
-
-		internal class EndpointInstance
-		{
-			private IEndpoint _endpoint;
-
-			private List<Type> _types = new List<Type>();
-
-			public EndpointInstance(IEndpoint endpoint)
-			{
-				_endpoint = endpoint;
-			}
-
-			public IEndpoint Endpoint
-			{
-				get { return _endpoint; }
-				set { _endpoint = value; }
-			}
-
-			public List<Type> Types
-			{
-				get { return _types; }
-				set { _types = value; }
-			}
-		}
+		#region Nested type: EndpointConfigurator
 
 		#endregion
 	}
