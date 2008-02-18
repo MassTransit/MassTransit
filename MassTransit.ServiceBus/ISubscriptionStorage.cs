@@ -22,16 +22,16 @@ namespace MassTransit.ServiceBus
     /// </summary>
     public interface ISubscriptionStorage : IDisposable
     {
-        /// <summary>
+    	IList<Subscription> List();
+
+    	/// <summary>
         /// Returns a list of endpoints that are subscribed to the specified message type
         /// </summary>
         /// <param name="messageName">Message to find the Uri's for</param>
         /// <returns>A list of endpoints subscribed to the message type</returns>
         IList<Subscription> List(string messageName);
 
-        IList<Subscription> List();
-
-        /// <summary>
+    	/// <summary>
         /// Add a message type and endpoint pair to the subscription storage
         /// </summary>
         void Add(string messageName, Uri endpoint);
