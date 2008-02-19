@@ -11,7 +11,7 @@ namespace MassTransit.Patterns.Tests
     public class As_a_BatchController
     {
         [Test]
-        public void Hmm()
+        public void The_batch_should_be_complete_when_the_last_message_is_received()
         {
             ServiceBus bus = new ServiceBus(new MessageQueueEndpoint("msmq://localhost/test"), new LocalSubscriptionCache());
 
@@ -41,7 +41,83 @@ namespace MassTransit.Patterns.Tests
 
             Assert.That(wasCalled, Is.True, "Not Called");
             Assert.That(isComplete, Is.True, "Not Complete");
-            
         }
-    }
+
+		[Test]
+		public void A_missing_message_should_leave_the_batch_incomplete()
+		{
+			ServiceBus bus = new ServiceBus(new MessageQueueEndpoint("msmq://localhost/test"), new LocalSubscriptionCache());
+
+			bool wasCalled = false;
+			bool isComplete = false;
+
+			BatchController<MessageToBatch, Guid> c = new BatchController<MessageToBatch, Guid>(
+				delegate(BatchContext<MessageToBatch, Guid> cxt)
+				{
+					foreach (MessageToBatch msg in cxt)
+					{
+						wasCalled = true;
+						isComplete = cxt.IsComplete;
+					}
+				}, TimeSpan.FromSeconds(3));
+
+			Guid batchId = Guid.NewGuid();
+			int batchLength = 2;
+
+			MessageToBatch msg1 = new MessageToBatch(batchId, batchLength);
+
+			IEnvelope env1 = new Envelope(msg1);
+
+			bus.Subscribe<MessageToBatch>(c.HandleMessage);
+
+			bus.Deliver(env1);
+
+			Assert.That(wasCalled, Is.True, "Not Called");
+			Assert.That(isComplete, Is.False, "Not Complete");
+		}
+
+		[Test]
+		public void Multiple_messages_should_be_complete_when_the_last_message_is_received()
+		{
+			ServiceBus bus = new ServiceBus(new MessageQueueEndpoint("msmq://localhost/test"), new LocalSubscriptionCache());
+
+			bool wasCalled = false;
+			bool isComplete = false;
+
+			BatchController<MessageToBatch, Guid> c = new BatchController<MessageToBatch, Guid>(
+				delegate(BatchContext<MessageToBatch, Guid> cxt)
+				{
+					foreach (MessageToBatch msg in cxt)
+					{
+						wasCalled = true;
+						isComplete = cxt.IsComplete;
+					}
+				}, TimeSpan.FromSeconds(3));
+
+			Guid batchId = Guid.NewGuid();
+			int batchLength = 1;
+
+			MessageToBatch msg1 = new MessageToBatch(batchId, batchLength);
+			MessageToBatch msg2 = new MessageToBatch(batchId, batchLength);
+			MessageToBatch msg3 = new MessageToBatch(batchId, batchLength);
+			MessageToBatch msg4 = new MessageToBatch(batchId, batchLength);
+
+			IEnvelope env1 = new Envelope(msg1);
+			IEnvelope env2 = new Envelope(msg2);
+			IEnvelope env3 = new Envelope(msg3);
+			IEnvelope env4 = new Envelope(msg4);
+
+			bus.Subscribe<MessageToBatch>(c.HandleMessage);
+
+			bus.Deliver(env1);
+			bus.Deliver(env2);
+			bus.Deliver(env3);
+			bus.Deliver(env4);
+
+			Assert.That(wasCalled, Is.True, "Not Called");
+			Assert.That(isComplete, Is.True, "Not Complete");
+		}
+
+
+	}
 }

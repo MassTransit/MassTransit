@@ -16,8 +16,9 @@ namespace MassTransit.Patterns.Batching
         private readonly Queue<T> _messages = new Queue<T>();
         private readonly IEndpoint _returnEndpoint;
         private readonly TimeSpan _timeout;
+    	private int _messageCount;
 
-        public BatchContext(IMessageContext<T> context, K batchId, TimeSpan timeout)
+    	public BatchContext(IMessageContext<T> context, K batchId, TimeSpan timeout)
         {
             _batchId = batchId;
             _timeout = timeout;
@@ -55,8 +56,16 @@ namespace MassTransit.Patterns.Batching
             int waitResult;
             while ((waitResult = WaitHandle.WaitAny(handles, _timeout, true)) != 1)
             {
-                lock (_messages)
-                    yield return _messages.Dequeue();
+				lock (_messages)
+				{
+					T message = _messages.Dequeue();
+					_messageCount++;
+
+					if(_messageCount == message.BatchLength)
+						_complete.Set();
+
+					yield return message;
+				}
             }
 
             if (waitResult == WaitHandle.WaitTimeout)
