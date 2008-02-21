@@ -34,17 +34,22 @@ namespace MassTransit.Patterns.Tests
         public void Getting_Them_All()
         {
             ServiceBus bus = new ServiceBus(new MessageQueueEndpoint("msmq://localhost/test"), new LocalSubscriptionCache());
-
+            
             List<MessageToBatch> messages = new List<MessageToBatch>();
-
-            bool? complete = null;
+            
+            int i = 0;
+            bool isComplete = false;
+            bool wasCalled = false;
 
             BatchController<MessageToBatch, Guid> controller = new BatchController<MessageToBatch, Guid>(
-                delegate(BatchContext<MessageToBatch, Guid> context)
+                delegate(BatchContext<MessageToBatch, Guid> cxt)
                 {
-                    messages.AddRange(context);
-
-                    complete = context.IsComplete;
+                    foreach (MessageToBatch msg in cxt)
+                    {
+                        wasCalled = true;
+                        isComplete = cxt.IsComplete;
+                        i++;
+                    }
                 }, TimeSpan.FromSeconds(3));
 
             Guid batchId = Guid.NewGuid();
@@ -61,11 +66,9 @@ namespace MassTransit.Patterns.Tests
             bus.Deliver(env1);
             bus.Deliver(env2);
 
-            Assert.That(messages.Count, Is.EqualTo(2));
-
-            Assert.That(complete, Is.Not.Null);
-
-            Assert.That(complete.Value, Is.True);
+            Assert.That(isComplete, Is.True, "Complete");
+            Assert.That(wasCalled, Is.True, "was called");
+            Assert.That(i, Is.EqualTo(2));
         }
 
         [Test]
