@@ -95,7 +95,7 @@ namespace MassTransit.Patterns.Tests
 				}, TimeSpan.FromSeconds(3));
 
 			Guid batchId = Guid.NewGuid();
-			int batchLength = 1;
+			int batchLength = 4;
 
 			MessageToBatch msg1 = new MessageToBatch(batchId, batchLength);
 			MessageToBatch msg2 = new MessageToBatch(batchId, batchLength);
