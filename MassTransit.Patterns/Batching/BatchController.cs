@@ -34,17 +34,19 @@ namespace MassTransit.Patterns.Batching
 
             lock (_lockContext)
             {
-                if (!_contexts.ContainsKey(batchId))
-                {
-                    batchContext = new BatchContext<T, K>(context, batchId, _timeout);
+				if (!_contexts.ContainsKey(batchId))
+				{
+					batchContext = new BatchContext<T, K>(context, batchId, _timeout);
 
-                    _contexts.Add(batchId, batchContext);
+					_contexts.Add(batchId, batchContext);
 
-                    
-                }
+					invokeHandler = true;
+				}
+				else
+				{
+					batchContext = _contexts[batchId];
+				}
 
-                batchContext = _contexts[batchId];
-                invokeHandler = true;
             }
 
             // push this message to the context, releasing the enumerator

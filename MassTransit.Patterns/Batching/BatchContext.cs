@@ -54,7 +54,7 @@ namespace MassTransit.Patterns.Batching
             WaitHandle[] handles = new WaitHandle[] {_messageReady, _complete};
 
             int waitResult;
-            while ((waitResult = WaitHandle.WaitAny(handles, _timeout, true)) != 1)
+            while ((waitResult = WaitHandle.WaitAny(handles, _timeout, true)) == 0)
             {
 				lock (_messages)
 				{
