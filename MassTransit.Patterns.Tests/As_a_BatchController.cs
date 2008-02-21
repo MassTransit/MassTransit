@@ -88,6 +88,8 @@ namespace MassTransit.Patterns.Tests
 			BatchController<MessageToBatch, Guid> c = new BatchController<MessageToBatch, Guid>(
 				delegate(BatchContext<MessageToBatch, Guid> cxt)
 				{
+				    numberCalled = 0;
+
 					foreach (MessageToBatch msg in cxt)
 					{
 						wasCalled = true;
