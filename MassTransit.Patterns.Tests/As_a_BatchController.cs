@@ -83,6 +83,7 @@ namespace MassTransit.Patterns.Tests
 
 			bool wasCalled = false;
 			bool isComplete = false;
+		    int numberCalled = 0;
 
 			BatchController<MessageToBatch, Guid> c = new BatchController<MessageToBatch, Guid>(
 				delegate(BatchContext<MessageToBatch, Guid> cxt)
@@ -91,6 +92,7 @@ namespace MassTransit.Patterns.Tests
 					{
 						wasCalled = true;
 						isComplete = cxt.IsComplete;
+					    numberCalled++;
 					}
 				}, TimeSpan.FromSeconds(3));
 
@@ -114,6 +116,7 @@ namespace MassTransit.Patterns.Tests
 			bus.Deliver(env3);
 			bus.Deliver(env4);
 
+			Assert.That(numberCalled, Is.EqualTo(4));
 			Assert.That(wasCalled, Is.True, "Not Called");
 			Assert.That(isComplete, Is.True, "Not Complete");
 		}
