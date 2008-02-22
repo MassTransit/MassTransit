@@ -1,27 +1,24 @@
-using System;
-using System.Collections.Generic;
-using System.Reflection;
-using MassTransit.Host.Config;
-using MassTransit.ServiceBus;
-using nu.Utility;
-
 namespace MassTransit.Host
 {
-	using System.Collections;
+	using System;
+	using System.Collections.Generic;
+	using System.Reflection;
+	using Config;
+	using MassTransit.Host.Config.Util.Arguments;
+	using ServiceBus;
 
 	public class Controller
 	{
 		private readonly IArgumentMapFactory _argumentMapFactory = new ArgumentMapFactory();
 		private readonly IArgumentParser _argumentParser = new ArgumentParser();
+		private IHostConfigurator _configurator;
 
 		private string _ConfiguratorName;
 		private bool _installService;
 		private bool _isService;
 		private bool _uninstallService;
-		private string _configurationFile;
-		private IHostConfigurator _configurator;
 
-		[Argument(Required = true, AllowMultiple = false, Description = "The configuration provider to use for the host")]
+		[Argument(Key = "config", Required = true, Description = "The configuration provider to use for the host")]
 		public string Configurator
 		{
 			get { return _ConfiguratorName; }
@@ -121,12 +118,12 @@ namespace MassTransit.Host
 				Type[] types = assembly.GetTypes();
 				foreach (Type t in types)
 				{
-					if (t.IsAssignableFrom(typeof(IHostConfigurator)) && !t.IsAbstract)
+					if (t.IsAssignableFrom(typeof (IHostConfigurator)) && !t.IsAbstract)
 					{
 						Console.WriteLine("Type: {0}", t.Name);
 
-						IHostConfigurator configurator = (IHostConfigurator)Activator.CreateInstance(t, new object[] {_configurationFile});
-						if(configurator != null)
+						IHostConfigurator configurator = (IHostConfigurator) Activator.CreateInstance(t);
+						if (configurator != null)
 						{
 							IArgumentMap mapper = _argumentMapFactory.CreateMap(configurator);
 

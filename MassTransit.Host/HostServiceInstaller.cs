@@ -1,15 +1,15 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Configuration.Install;
-using System.Reflection;
-using System.ServiceProcess;
-using log4net;
-using Microsoft.Win32;
-using nu.Utility;
-
 namespace MassTransit.Host
 {
+	using System;
+	using System.Collections;
+	using System.Collections.Generic;
+	using System.Configuration.Install;
+	using System.Reflection;
+	using System.ServiceProcess;
+	using log4net;
+	using MassTransit.Host.Config.Util.Arguments;
+	using Microsoft.Win32;
+
 	public class HostServiceInstaller :
 		Installer
 	{
@@ -115,10 +115,7 @@ namespace MassTransit.Host
 
 				using (RegistryKey assemblies = service.CreateSubKey("Assemblies"))
 				{
-					_assemblies.ForEach(delegate(Assembly assembly)
-					                    	{
-					                    		assemblies.SetValue(assembly.GetName().Name, assembly.Location);
-					                    	});
+					_assemblies.ForEach(delegate(Assembly assembly) { assemblies.SetValue(assembly.GetName().Name, assembly.Location); });
 				}
 
 				service.Close();

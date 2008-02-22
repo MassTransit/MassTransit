@@ -4,11 +4,11 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>8.0.50727</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{51F34C86-F3C8-4F64-9C5A-120ECB9EFAE6}</ProjectGuid>
-    <OutputType>Exe</OutputType>
+    <ProjectGuid>{F5AF6E6C-E5AF-4836-9D95-D78D30D7C994}</ProjectGuid>
+    <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>MassTransit.Host</RootNamespace>
-    <AssemblyName>host</AssemblyName>
+    <RootNamespace>MassTransit.Host.Config</RootNamespace>
+    <AssemblyName>MassTransit.Host.Config</AssemblyName>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -26,38 +26,31 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <NoWarn>1591</NoWarn>
-    <DocumentationFile>..\bin\MassTransit.Host.XML</DocumentationFile>
+    <DocumentationFile>..\bin\MassTransit.Host.Config.XML</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="log4net, Version=1.2.10.0, Culture=neutral, PublicKeyToken=1b44e1d426115821, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\libs\log4net.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
-    <Reference Include="System.Configuration.Install" />
     <Reference Include="System.Data" />
-    <Reference Include="System.Deployment" />
-    <Reference Include="System.Messaging" />
-    <Reference Include="System.ServiceProcess" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\SolutionVersion.cs">
       <Link>SolutionVersion.cs</Link>
     </Compile>
-    <Compile Include="Controller.cs" />
-    <Compile Include="Program.cs" />
+    <Compile Include="IHostConfigurator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="HostServiceInstaller.cs">
-      <SubType>Component</SubType>
-    </Compile>
+    <Compile Include="Util\Arguments\Argument.cs" />
+    <Compile Include="Util\Arguments\ArgumentAttribute.cs" />
+    <Compile Include="Util\Arguments\ArgumentMap.cs" />
+    <Compile Include="Util\Arguments\ArgumentMapFactory.cs" />
+    <Compile Include="Util\Arguments\ArgumentParser.cs" />
+    <Compile Include="Util\Arguments\ArgumentTarget.cs" />
+    <Compile Include="Util\Arguments\IArgument.cs" />
+    <Compile Include="Util\Arguments\IArgumentMap.cs" />
+    <Compile Include="Util\Arguments\IArgumentMapFactory.cs" />
+    <Compile Include="Util\Arguments\IArgumentParser.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\MassTransit.Host.Config\MassTransit.Host.Config.csproj">
-      <Project>{F5AF6E6C-E5AF-4836-9D95-D78D30D7C994}</Project>
-      <Name>MassTransit.Host.Config</Name>
-    </ProjectReference>
     <ProjectReference Include="..\MassTransit.ServiceBus\MassTransit.ServiceBus.csproj">
       <Project>{90482397-6282-465E-8B86-39865FC30127}</Project>
       <Name>MassTransit.ServiceBus</Name>
