@@ -48,7 +48,7 @@
     <Compile Include="Internal\EnvelopeMessageMapper.cs" />
     <Compile Include="Exceptions\EndpointException.cs" />
     <Compile Include="Exceptions\MeetsCriteriaException.cs" />
-    <Compile Include="IAutoSubscriber.cs" />
+    <Compile Include="IMessageService.cs" />
     <Compile Include="IEndpoint.cs" />
     <Compile Include="IEnvelope.cs" />
     <Compile Include="IEnvelopeConsumer.cs" />
