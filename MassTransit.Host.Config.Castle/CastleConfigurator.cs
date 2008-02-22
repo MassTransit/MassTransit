@@ -1,5 +1,6 @@
 namespace MassTransit.Host.Config
 {
+	using System;
 	using System.Collections.Generic;
 	using Castle.MicroKernel;
 	using Castle.Windsor;
@@ -48,5 +49,15 @@ namespace MassTransit.Host.Config
 		}
 
 		#endregion
+
+		public void Dispose()
+		{
+			foreach (IMessageService service in _services)
+			{
+				service.Dispose();
+			}
+
+			_services.Clear();
+		}
 	}
 }

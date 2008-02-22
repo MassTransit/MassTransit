@@ -12,10 +12,12 @@
 /// specific language governing permissions and limitations under the License.
 namespace MassTransit.Host.Config
 {
+	using System;
 	using System.Collections.Generic;
 	using ServiceBus;
 
-	public interface IHostConfigurator
+	public interface IHostConfigurator :
+		IDisposable
 	{
 		IEnumerable<IMessageService> Services { get; }
 		void Configure();

@@ -13,13 +13,16 @@
 
 namespace MassTransit.ServiceBus
 {
+	using System;
+
 	/// <summary>
 	/// This interface should be implemented by classes that want to automatically register
 	/// message consumers with the service bus when loaded. The service bus bootloader will
 	/// enumerate the classes in any references assemblies to determine if the interface is 
 	/// supported and call those classes to register their handlers on the service bus.
 	/// </summary>
-	public interface IMessageService
+	public interface IMessageService : 
+		IDisposable
 	{
 	    void Start();
 

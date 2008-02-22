@@ -3,7 +3,7 @@
 	<components>
 
 		<component id="serverEndpoint"
-				   lifestyle="transient"
+				   lifestyle="singleton"
 				   service="MassTransit.ServiceBus.IEndpoint, MassTransit.ServiceBus"
 				   type="MassTransit.ServiceBus.MessageQueueEndpoint, MassTransit.ServiceBus"
 				   >
@@ -14,7 +14,7 @@
 
 
 		<component id="managerEndpoint"
-				   lifestyle="transient"
+				   lifestyle="singleton"
 				   service="MassTransit.ServiceBus.IEndpoint, MassTransit.ServiceBus"
 				   type="MassTransit.ServiceBus.MessageQueueEndpoint, MassTransit.ServiceBus"
 				   >
@@ -24,13 +24,13 @@
 		</component>
 
 		<component id="serverCache"
-				   lifestyle="transient"
+				   lifestyle="singleton"
 				   service="MassTransit.ServiceBus.ISubscriptionStorage, MassTransit.ServiceBus"
 				   type="MassTransit.ServiceBus.Subscriptions.LocalSubscriptionCache, MassTransit.ServiceBus"
 				   />
 
 		<component id="serverServiceBus"
-				   lifestyle="transient"
+				   lifestyle="singleton"
 				   service="MassTransit.ServiceBus.IServiceBus, MassTransit.ServiceBus"
 				   type="MassTransit.ServiceBus.ServiceBus, MassTransit.ServiceBus"
 				   >
@@ -39,14 +39,21 @@
 			</parameters>
 		</component>
 
-		<component id="subsriptionClient"
-				   lifestyle="transient"
-				   service="MassTransit.ServiceBus.IMessageService, MassTransit.ServiceBus" 
+		<component id="AsubsriptionClient"
+				   lifestyle="singleton"
+				   service="MassTransit.ServiceBus.IMessageService, MassTransit.ServiceBus"
 				   type="MassTransit.ServiceBus.Subscriptions.SubscriptionManagerClient, MassTransit.ServiceBus"
 				   >
 			<parameters>
 				<managerEndpoint>${managerEndpoint}</managerEndpoint>
-					 </parameters>
+			</parameters>
+		</component>
+
+		<component id="mySimpleServer"
+				   lifestyle="singleton"
+				   service="MassTransit.ServiceBus.IMessageService, MassTransit.ServiceBus"
+				   type="MassTransit.Host.Tests.SimpleMessageServer, MassTransit.Host.Tests"
+				   >
 		</component>
 
 	</components>

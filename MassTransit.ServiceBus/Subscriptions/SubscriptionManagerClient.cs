@@ -4,7 +4,6 @@ namespace MassTransit.ServiceBus.Subscriptions
 	using Messages;
 
 	public class SubscriptionManagerClient :
-		IDisposable,
 		IMessageService
 	{
 		private readonly IServiceBus _serviceBus;
@@ -20,6 +19,7 @@ namespace MassTransit.ServiceBus.Subscriptions
 
 		public void Dispose()
 		{
+			_serviceBus.Dispose();
 		}
 
 		public void Cache_SubscriptionChanged(object sender, SubscriptionChangedEventArgs e)
