@@ -1,6 +1,3 @@
-using System.Collections.Generic;
-using MassTransit.ServiceBus;
-
 /// Copyright 2007-2008 The Apache Software Foundation.
 /// 
 /// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
@@ -15,10 +12,12 @@ using MassTransit.ServiceBus;
 /// specific language governing permissions and limitations under the License.
 namespace MassTransit.Host.Config
 {
+	using System.Collections.Generic;
+	using ServiceBus;
+
 	public interface IHostConfigurator
 	{
-		void Configure();
-
 		IEnumerable<IMessageService> Services { get; }
+		void Configure();
 	}
 }

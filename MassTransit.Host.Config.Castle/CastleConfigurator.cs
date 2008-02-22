@@ -4,7 +4,7 @@ namespace MassTransit.Host.Config
 	using Castle.MicroKernel;
 	using Castle.Windsor;
 	using Castle.Windsor.Configuration.Interpreters;
-	using nu.Utility;
+	using MassTransit.Host.Config.Util.Arguments;
 	using ServiceBus;
 
 	public class CastleConfigurator :
