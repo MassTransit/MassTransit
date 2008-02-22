@@ -1,0 +1,53 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<castle>
+	<components>
+
+		<component id="serverEndpoint"
+				   lifestyle="transient"
+				   service="MassTransit.ServiceBus.IEndpoint, MassTransit.ServiceBus"
+				   type="MassTransit.ServiceBus.MessageQueueEndpoint, MassTransit.ServiceBus"
+				   >
+			<parameters>
+				<uriString>msmq://localhost/test_server</uriString>
+			</parameters>
+		</component>
+
+
+		<component id="managerEndpoint"
+				   lifestyle="transient"
+				   service="MassTransit.ServiceBus.IEndpoint, MassTransit.ServiceBus"
+				   type="MassTransit.ServiceBus.MessageQueueEndpoint, MassTransit.ServiceBus"
+				   >
+			<parameters>
+				<uriString>msmq://localhost/test_subscriptions</uriString>
+			</parameters>
+		</component>
+
+		<component id="serverCache"
+				   lifestyle="transient"
+				   service="MassTransit.ServiceBus.ISubscriptionStorage, MassTransit.ServiceBus"
+				   type="MassTransit.ServiceBus.Subscriptions.LocalSubscriptionCache, MassTransit.ServiceBus"
+				   />
+
+		<component id="serverServiceBus"
+				   lifestyle="transient"
+				   service="MassTransit.ServiceBus.IServiceBus, MassTransit.ServiceBus"
+				   type="MassTransit.ServiceBus.ServiceBus, MassTransit.ServiceBus"
+				   >
+			<parameters>
+				<endpoint>${serverEndpoint}</endpoint>
+			</parameters>
+		</component>
+
+		<component id="subsriptionClient"
+				   lifestyle="transient"
+				   service="MassTransit.ServiceBus.IMessageService, MassTransit.ServiceBus" 
+				   type="MassTransit.ServiceBus.Subscriptions.SubscriptionManagerClient, MassTransit.ServiceBus"
+				   >
+			<parameters>
+				<managerEndpoint>${managerEndpoint}</managerEndpoint>
+					 </parameters>
+		</component>
+
+	</components>
+</castle>

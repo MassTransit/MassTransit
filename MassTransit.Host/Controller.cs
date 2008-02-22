@@ -7,21 +7,25 @@ using nu.Utility;
 
 namespace MassTransit.Host
 {
+	using System.Collections;
+
 	public class Controller
 	{
 		private readonly IArgumentMapFactory _argumentMapFactory = new ArgumentMapFactory();
 		private readonly IArgumentParser _argumentParser = new ArgumentParser();
 
-		private string _assemblyName;
+		private string _ConfiguratorName;
 		private bool _installService;
 		private bool _isService;
 		private bool _uninstallService;
+		private string _configurationFile;
+		private IHostConfigurator _configurator;
 
-		[DefaultArgument(Required = true, AllowMultiple = true, Description = "The assemblies to load into the host process")]
-		public string AssemblyName
+		[Argument(Required = true, AllowMultiple = false, Description = "The configuration provider to use for the host")]
+		public string Configurator
 		{
-			get { return _assemblyName; }
-			set { _assemblyName = value; }
+			get { return _ConfiguratorName; }
+			set { _ConfiguratorName = value; }
 		}
 
 		[Argument(Key = "install", Description = "Install the host service")]
@@ -51,9 +55,9 @@ namespace MassTransit.Host
 
 			IArgumentMap mapper = _argumentMapFactory.CreateMap(this);
 
-			mapper.ApplyTo(this, arguments);
+			IEnumerable<IArgument> remaining = mapper.ApplyTo(this, arguments);
 
-			if (string.IsNullOrEmpty(_assemblyName))
+			if (string.IsNullOrEmpty(_ConfiguratorName))
 			{
 				Console.WriteLine("Usage: {0}", mapper.Usage);
 			}
@@ -73,7 +77,19 @@ namespace MassTransit.Host
 			{
 				Console.WriteLine("Starting up as a console application");
 
-				LoadAssembly();
+				LoadConfiguration(remaining);
+
+				if (_configurator != null)
+				{
+					foreach (IMessageService service in _configurator.Services)
+					{
+						service.Start();
+					}
+
+					Console.WriteLine("The service is running, press Control+C to exit.");
+
+					Console.ReadKey();
+				}
 			}
 		}
 
@@ -86,7 +102,7 @@ namespace MassTransit.Host
 
 			if (install)
 			{
-				Assembly assembly = Assembly.Load(_assemblyName);
+				Assembly assembly = Assembly.Load(_ConfiguratorName);
 
 				installer.Register(new Assembly[] {assembly});
 			}
@@ -96,17 +112,30 @@ namespace MassTransit.Host
 			}
 		}
 
-		private void LoadAssembly()
+		private void LoadConfiguration(IEnumerable<IArgument> arguments)
 		{
 			try
 			{
-				Assembly assembly = Assembly.Load(_assemblyName);
+				Assembly assembly = Assembly.Load(_ConfiguratorName);
 
 				Type[] types = assembly.GetTypes();
 				foreach (Type t in types)
 				{
-					if (t.IsAssignableFrom(typeof (IAutoSubscriber)) && !t.IsAbstract)
+					if (t.IsAssignableFrom(typeof(IHostConfigurator)) && !t.IsAbstract)
+					{
 						Console.WriteLine("Type: {0}", t.Name);
+
+						IHostConfigurator configurator = (IHostConfigurator)Activator.CreateInstance(t, new object[] {_configurationFile});
+						if(configurator != null)
+						{
+							IArgumentMap mapper = _argumentMapFactory.CreateMap(configurator);
+
+							mapper.ApplyTo(configurator, arguments);
+
+							Configure(configurator);
+							return;
+						}
+					}
 				}
 			}
 			catch (Exception ex)
@@ -115,10 +144,11 @@ namespace MassTransit.Host
 			}
 		}
 
-		public void Configure(IConfigurator configurator)
+		public void Configure(IHostConfigurator hostConfigurator)
 		{
+			_configurator = hostConfigurator;
 
-			
+			_configurator.Configure();
 		}
 	}
 }

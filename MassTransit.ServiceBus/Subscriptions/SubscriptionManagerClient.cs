@@ -1,101 +1,90 @@
 namespace MassTransit.ServiceBus.Subscriptions
 {
-    using System;
-    using Messages;
+	using System;
+	using Messages;
 
-    public class SubscriptionManagerClient :
-        IDisposable,
-		IAutoSubscriber
-    {
-        private readonly IServiceBus _serviceBus;
-        private readonly ISubscriptionStorage _cache;
-        private readonly IMessageQueueEndpoint _managerEndpoint;
+	public class SubscriptionManagerClient :
+		IDisposable,
+		IMessageService
+	{
+		private readonly IServiceBus _serviceBus;
+		private readonly ISubscriptionStorage _cache;
+		private readonly IMessageQueueEndpoint _managerEndpoint;
 
-        public SubscriptionManagerClient(IServiceBus serviceBus, ISubscriptionStorage cache, IMessageQueueEndpoint managerEndpoint)
-        {
-            _serviceBus = serviceBus;
-            _cache = cache;
-            _managerEndpoint = managerEndpoint;
-        }
+		public SubscriptionManagerClient(IServiceBus serviceBus, ISubscriptionStorage cache, IMessageQueueEndpoint managerEndpoint)
+		{
+			_serviceBus = serviceBus;
+			_cache = cache;
+			_managerEndpoint = managerEndpoint;
+		}
 
-        public void Dispose()
-        {
-            
-        }
+		public void Dispose()
+		{
+		}
 
-        public void Start()
-        {
-            _cache.SubscriptionChanged += Cache_SubscriptionChanged;
-            _serviceBus.Subscribe<SubscriptionChange>(HandleSubscriptionChange);
-            IServiceBusAsyncResult asyncResult = _serviceBus.Request(_managerEndpoint, CacheUpdateResponse_Callback, this, new CacheUpdateRequest()); 
+		public void Cache_SubscriptionChanged(object sender, SubscriptionChangedEventArgs e)
+		{
+			if (e.Change.Subscription.Address.Host.ToLowerInvariant() == Environment.MachineName.ToLowerInvariant())
+			{
+				_serviceBus.Send(_managerEndpoint, e.Change);
+			}
+		}
 
-        }
+		public void HandleSubscriptionChange(IMessageContext<SubscriptionChange> ctx)
+		{
+			switch (ctx.Message.ChangeType)
+			{
+				case SubscriptionChangeType.Add:
+					_cache.Add(ctx.Message.Subscription.MessageName, ctx.Message.Subscription.Address);
+					break;
 
-        public void Cache_SubscriptionChanged(object sender, SubscriptionChangedEventArgs e)
-        {
-            if(e.Change.Subscription.Address.Host.ToLowerInvariant() == Environment.MachineName.ToLowerInvariant())
-            {
-                _serviceBus.Send(_managerEndpoint, e.Change);
-            }
-        }
+				case SubscriptionChangeType.Remove:
+					_cache.Remove(ctx.Message.Subscription.MessageName, ctx.Message.Subscription.Address);
+					break;
 
-        public void Stop()
-        {
-            _cache.SubscriptionChanged -= Cache_SubscriptionChanged;
-            _serviceBus.Send(_managerEndpoint, new CancelSubscriptionUpdates());
-            _serviceBus.Unsubscribe<SubscriptionChange>(HandleSubscriptionChange);
-        }
+				default:
+					break;
+			}
+		}
 
-        public void HandleSubscriptionChange(IMessageContext<SubscriptionChange> ctx)
-        {
-            switch(ctx.Message.ChangeType)
-            {
-                case SubscriptionChangeType.Add:
-                    _cache.Add(ctx.Message.Subscription.MessageName, ctx.Message.Subscription.Address);
-                    break;
+		public void CacheUpdateResponse_Callback(IAsyncResult asyncResult)
+		{
+			if (asyncResult == null)
+				return;
 
-                case SubscriptionChangeType.Remove:
-                    _cache.Remove(ctx.Message.Subscription.MessageName, ctx.Message.Subscription.Address);
-                    break;
+			IServiceBusAsyncResult serviceBusAsyncResult = asyncResult as IServiceBusAsyncResult;
+			if (serviceBusAsyncResult == null)
+				return;
 
-                default:
-                    break;
-            }
-        }
+			if (serviceBusAsyncResult.Messages == null)
+				return;
 
-        public void CacheUpdateResponse_Callback(IAsyncResult asyncResult)
-        {
-            if (asyncResult == null)
-                return;
+			foreach (IMessage message in serviceBusAsyncResult.Messages)
+			{
+				CacheUpdateResponse response = message as CacheUpdateResponse;
+				if (response != null)
+				{
+					foreach (Subscription sub in response.Subscriptions)
+					{
+						_cache.Add(sub.MessageName, sub.Address);
+					}
+				}
+			}
+		}
 
-            IServiceBusAsyncResult serviceBusAsyncResult = asyncResult as IServiceBusAsyncResult;
-            if (serviceBusAsyncResult == null)
-                return;
+		public void Start()
+		{
+			_cache.SubscriptionChanged += Cache_SubscriptionChanged;
+			_serviceBus.Subscribe<SubscriptionChange>(HandleSubscriptionChange);
+			IServiceBusAsyncResult asyncResult =
+				_serviceBus.Request(_managerEndpoint, CacheUpdateResponse_Callback, this, new CacheUpdateRequest());
+		}
 
-            if (serviceBusAsyncResult.Messages == null)
-                return;
-
-            foreach(IMessage message in serviceBusAsyncResult.Messages)
-            {
-                CacheUpdateResponse response = message as CacheUpdateResponse;
-                if(response != null)
-                {
-                    foreach(Subscription sub in response.Subscriptions)
-                    {
-                        _cache.Add(sub.MessageName, sub.Address);
-                    }
-                }
-            }
-        }
-
-    	public void AddSubscriptions(IServiceBus bus)
-    	{
-    		
-    	}
-
-    	public void RemoveSubscriptions(IServiceBus bus)
-    	{
-    		throw new NotImplementedException();
-    	}
-    }
+		public void Stop()
+		{
+			_cache.SubscriptionChanged -= Cache_SubscriptionChanged;
+			_serviceBus.Send(_managerEndpoint, new CancelSubscriptionUpdates());
+			_serviceBus.Unsubscribe<SubscriptionChange>(HandleSubscriptionChange);
+		}
+	}
 }
