@@ -10,7 +10,10 @@ namespace MassTransit.Host.Config.Util.Arguments
 		/// <param name="obj">The object onto which the arguments should be applied</param>
 		/// <param name="arguments">An enumerator of arguments being applied</param>
 		IEnumerable<IArgument> ApplyTo(object obj, IEnumerable<IArgument> arguments);
+		IEnumerable<IArgument> ApplyTo(object obj, IEnumerable<IArgument> arguments, ArgumentIntercepter intercepter);
 
 		string Usage { get; }
 	}
+
+	public delegate bool ArgumentIntercepter(string name, string value);
 }

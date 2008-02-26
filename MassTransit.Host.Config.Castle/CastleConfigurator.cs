@@ -1,13 +1,12 @@
-namespace MassTransit.Host.Config
-{
-	using System;
-	using System.Collections.Generic;
-	using Castle.MicroKernel;
-	using Castle.Windsor;
-	using Castle.Windsor.Configuration.Interpreters;
-	using MassTransit.Host.Config.Util.Arguments;
-	using ServiceBus;
+using System.Collections.Generic;
+using Castle.MicroKernel;
+using Castle.Windsor;
+using Castle.Windsor.Configuration.Interpreters;
+using MassTransit.Host.Config.Util.Arguments;
+using MassTransit.ServiceBus;
 
+namespace MassTransit.Host.Config.Castle
+{
 	public class CastleConfigurator :
 		IHostConfigurator
 	{

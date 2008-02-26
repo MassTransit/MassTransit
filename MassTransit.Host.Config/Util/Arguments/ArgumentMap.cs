@@ -83,8 +83,18 @@ namespace MassTransit.Host.Config.Util.Arguments
 
 		#endregion
 
-		public IEnumerable<IArgument> ApplyTo(object obj, IEnumerable<IArgument> arguments)
+		public IEnumerable<IArgument> ApplyTo(object obj, IEnumerable<IArgument> arguments, ArgumentIntercepter intercepter)
 		{
+			List<ArgumentTarget> usedTargets = new List<ArgumentTarget>();
+			foreach (KeyValuePair<string, ArgumentTarget> namedArg in _namedArgs)
+			{
+				usedTargets.Add(namedArg.Value);
+			}
+			foreach (ArgumentTarget unnamedArg in _unnamedArgs)
+			{
+				usedTargets.Add(unnamedArg);
+			}
+
 			List<IArgument> unused = new List<IArgument>();
 
 			int unnamedIndex = 0;
@@ -93,8 +103,9 @@ namespace MassTransit.Host.Config.Util.Arguments
 			{
 				if (string.IsNullOrEmpty(arg.Key))
 				{
-					if (unnamedIndex < _unnamedArgs.Count)
+					if (unnamedIndex < _unnamedArgs.Count && intercepter(_unnamedArgs[unnamedIndex++].Property.Name, arg.Value))
 					{
+						usedTargets.Remove(_unnamedArgs[unnamedIndex]);
 						ApplyValueToProperty(_unnamedArgs[unnamedIndex++].Property, obj, arg.Value);
 					}
 					else
@@ -102,8 +113,9 @@ namespace MassTransit.Host.Config.Util.Arguments
 						unused.Add(arg);
 					}
 				}
-				else if (_namedArgs.ContainsKey(arg.Key))
+				else if (_namedArgs.ContainsKey(arg.Key) && intercepter(_namedArgs[arg.Key].Property.Name, arg.Value))
 				{
+					usedTargets.Remove(_namedArgs[arg.Key]);
 					ApplyValueToProperty(_namedArgs[arg.Key].Property, obj, arg.Value);
 				}
 				else
@@ -112,7 +124,18 @@ namespace MassTransit.Host.Config.Util.Arguments
 				}
 			}
 
+			foreach (ArgumentTarget target in usedTargets)
+			{
+				if (target.Attribute.Required)
+					throw new ArgumentException("Argument " + (target.Attribute.Key ?? target.Property.Name) + " is required");
+			}
+
 			return unused;
+		}
+
+		public IEnumerable<IArgument> ApplyTo(object obj, IEnumerable<IArgument> arguments)
+		{
+			return ApplyTo(obj, arguments, delegate { return true; });
 		}
 
 		public void ApplyValueToProperty(PropertyInfo property, object obj, string argumentValue)
