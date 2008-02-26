@@ -17,6 +17,7 @@ namespace MassTransit.Host
 		private readonly List<Assembly> _assemblies = new List<Assembly>();
 		private readonly ServiceInstaller _serviceInstaller = new ServiceInstaller();
 		private readonly ServiceProcessInstaller _serviceProcessInstaller = new ServiceProcessInstaller();
+		private string _configuratorType;
 
 		public HostServiceInstaller(string serviceName, string description, string displayName)
 		{
@@ -73,11 +74,6 @@ namespace MassTransit.Host
 			Installers.AddRange(new Installer[] {_serviceProcessInstaller, _serviceInstaller});
 		}
 
-		public void AddAssembly(Assembly assembly)
-		{
-			_assemblies.Add(assembly);
-		}
-
 		public bool IsInstalled()
 		{
 			foreach (ServiceController service in ServiceController.GetServices())
@@ -113,9 +109,11 @@ namespace MassTransit.Host
 				imagePath += " -service";
 				service.SetValue("ImagePath", imagePath);
 
-				using (RegistryKey assemblies = service.CreateSubKey("Assemblies"))
+				using (RegistryKey configuration = service.CreateSubKey("Configuration"))
 				{
-					_assemblies.ForEach(delegate(Assembly assembly) { assemblies.SetValue(assembly.GetName().Name, assembly.Location); });
+					configuration.SetValue("Type", _configuratorType);
+
+					_assemblies.ForEach(delegate(Assembly assembly) { configuration.SetValue(assembly.GetName().Name, assembly.Location); });
 				}
 
 				service.Close();
@@ -148,11 +146,12 @@ namespace MassTransit.Host
 			}
 		}
 
-		public void Register(IEnumerable<Assembly> assemblies)
+		public void Register(Assembly configuratorAssembly, string configuratorType)
 		{
 			if (!IsInstalled())
 			{
-				_assemblies.AddRange(assemblies);
+				_assemblies.Add(configuratorAssembly);
+				_configuratorType = configuratorType;
 
 				using (TransactedInstaller ti = new TransactedInstaller())
 				{

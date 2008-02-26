@@ -1,13 +1,13 @@
+using System;
+using System.Collections.Generic;
+using System.Reflection;
+using log4net;
+using MassTransit.Host.Config;
+using MassTransit.Host.Config.Util.Arguments;
+using MassTransit.ServiceBus;
+
 namespace MassTransit.Host
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Reflection;
-	using Config;
-	using log4net;
-	using MassTransit.Host.Config.Util.Arguments;
-	using ServiceBus;
-
 	public class Controller
 	{
 		private static readonly ILog _log = LogManager.GetLogger(typeof (Controller));
@@ -20,6 +20,7 @@ namespace MassTransit.Host
 		private bool _installService;
 		private bool _isService;
 		private bool _uninstallService;
+		private Assembly _configuratorAssembly;
 
 		[Argument(Key = "config", Required = true, Description = "The configuration provider to use for the host")]
 		public string Configurator
@@ -124,6 +125,8 @@ namespace MassTransit.Host
 			catch (Exception ex)
 			{
 				_log.Error("Controller caught exception", ex);
+
+				Console.WriteLine("An exception occurred: {0}", ex.Message);
 			}
 		}
 
@@ -132,13 +135,13 @@ namespace MassTransit.Host
 			HostServiceInstaller installer = new HostServiceInstaller("MassTransitHost", "MassTransit Message Host", "Mass Transit Host");
 
 			IArgumentMap installerMap = _argumentMapFactory.CreateMap(installer);
-			installerMap.ApplyTo(installerMap, arguments);
+			IEnumerable<IArgument> remaining = installerMap.ApplyTo(installerMap, arguments);
 
 			if (install)
 			{
-				Assembly assembly = Assembly.Load(_configuratorName);
+				LoadConfiguration(remaining);
 
-				installer.Register(new Assembly[] {assembly});
+				installer.Register(_configuratorAssembly,  _configurator.GetType().AssemblyQualifiedName);
 			}
 			else
 			{
@@ -163,23 +166,33 @@ namespace MassTransit.Host
 				{
 					Console.WriteLine("Type: {0}", t.Name);
 
-					IHostConfigurator configurator = (IHostConfigurator) Activator.CreateInstance(t);
+					object configurator = Activator.CreateInstance(t);
 					if (configurator != null)
 					{
 						IArgumentMap mapper = _argumentMapFactory.CreateMap(configurator);
 
-						mapper.ApplyTo(configurator, arguments);
+						Dictionary<string, string> argumentsUsed = new Dictionary<string, string>();
 
-						Configure(configurator);
+						mapper.ApplyTo(configurator, arguments,
+							delegate(string name, string value)
+						{
+							argumentsUsed.Add(name, value);
+							return true;
+						});
+
+						Configure(assembly, (IHostConfigurator)configurator);
 						return;
 					}
 				}
 			}
+
+			throw new HostConfigurationException("No valid configuration provider specified.");
 		}
 
-		public void Configure(IHostConfigurator hostConfigurator)
+		public void Configure(Assembly assembly, IHostConfigurator hostConfigurator)
 		{
 			_configurator = hostConfigurator;
+			_configuratorAssembly = assembly;
 
 			_configurator.Configure();
 		}
