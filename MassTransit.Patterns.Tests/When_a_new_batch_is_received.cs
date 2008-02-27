@@ -24,11 +24,11 @@ namespace MassTransit.ServiceBus.Tests
         private IServiceBus _bus;
         private BatchController<BatchMessage, Guid> _controller;
 
-        public void HandleBatch(BatchContext<BatchMessage, Guid> context)
+        public void HandleBatch(IBatchContext<BatchMessage, Guid> context)
         {
             Guid batchId = context.BatchId;
 
-            foreach (BatchMessage<Guid> message in context)
+            foreach (BatchMessage message in context)
             {
             }
 
