@@ -278,6 +278,9 @@ namespace MassTransit.ServiceBus
 
         #endregion
 
+        public class Bobby : Attribute {}
+
+        [return: Bobby]
         private bool IsTheBusInterested(IEnvelope envelope)
         {
             bool result = false;

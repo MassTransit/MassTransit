@@ -1,8 +1,7 @@
-using System.Threading;
-using log4net;
-
 namespace MassTransit.Patterns.Tests
 {
+    using System.Threading;
+    using log4net;
 	using System;
 	using Batching;
 	using MassTransit.ServiceBus.Subscriptions;
@@ -30,7 +29,7 @@ namespace MassTransit.Patterns.Tests
 			bool isComplete = false;
 
 			BatchController<MessageToBatch, Guid> c = new BatchController<MessageToBatch, Guid>(
-				delegate(BatchContext<MessageToBatch, Guid> cxt)
+				delegate(IBatchContext<MessageToBatch, Guid> cxt)
 					{
 						foreach (MessageToBatch msg in cxt)
 						{
@@ -63,7 +62,7 @@ namespace MassTransit.Patterns.Tests
 			bool isComplete = false;
 
 			BatchController<MessageToBatch, Guid> c = new BatchController<MessageToBatch, Guid>(
-				delegate(BatchContext<MessageToBatch, Guid> cxt)
+				delegate(IBatchContext<MessageToBatch, Guid> cxt)
 					{
 						foreach (MessageToBatch msg in cxt)
 						{
@@ -97,7 +96,7 @@ namespace MassTransit.Patterns.Tests
 			int numberCalled = 0;
 
 			BatchController<MessageToBatch, Guid> c = new BatchController<MessageToBatch, Guid>(
-				delegate(BatchContext<MessageToBatch, Guid> cxt)
+                delegate(IBatchContext<MessageToBatch, Guid> cxt)
 					{
 						numberCalled = 0;
 

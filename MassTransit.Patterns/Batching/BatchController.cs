@@ -7,7 +7,7 @@ namespace MassTransit.Patterns.Batching
     public class BatchController<T, K> :
         IMessage where T : BatchMessage<K>
     {
-        private readonly Dictionary<K, BatchContext<T, K>> _contexts = new Dictionary<K, BatchContext<T, K>>();
+        private readonly Dictionary<K, IBatchContext<T, K>> _contexts = new Dictionary<K, IBatchContext<T, K>>();
         private readonly BatchControllerHandler<T, K> _handler;
         private readonly object _lockContext = new object();
         private readonly TimeSpan _timeout;
@@ -28,7 +28,7 @@ namespace MassTransit.Patterns.Batching
         {
             K batchId = context.Message.BatchId;
 
-            BatchContext<T, K> batchContext;
+            IBatchContext<T, K> batchContext;
 
             bool invokeHandler = false;
 
@@ -58,9 +58,9 @@ namespace MassTransit.Patterns.Batching
             }
         }
 
-        private BatchContext<T, K> GetBatchContext(K batchId, IMessageContext<T> context)
+        private IBatchContext<T, K> GetBatchContext(K batchId, IMessageContext<T> context)
         {
-            BatchContext<T, K> result;
+            IBatchContext<T, K> result;
 
             if (_contexts.ContainsKey(batchId))
             {
@@ -77,5 +77,5 @@ namespace MassTransit.Patterns.Batching
         }
     }
 
-    public delegate void BatchControllerHandler<T, K>(BatchContext<T, K> context) where T : BatchMessage<K>;
+    public delegate void BatchControllerHandler<T, K>(IBatchContext<T, K> context) where T : BatchMessage<K>;
 }
