@@ -58,7 +58,7 @@ namespace MassTransit.Patterns.Batching
             }
         }
 
-        private BatchContext<T, K> GetBatchContext(K batchId, IMessageContext<T> context)
+        private IBatchContext<T,K> GetBatchContext(K batchId, IMessageContext<T> context)
         {
             BatchContext<T, K> result;
 
@@ -77,5 +77,5 @@ namespace MassTransit.Patterns.Batching
         }
     }
 
-	public delegate void BatchControllerHandler<T, K>(BatchContext<T, K> context) where T : IBatchMessage;
+	public delegate void BatchControllerHandler<T, K>(IBatchContext<T,K> context) where T : IBatchMessage;
 }

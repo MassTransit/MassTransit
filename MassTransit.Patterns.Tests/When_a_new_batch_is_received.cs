@@ -1,8 +1,9 @@
-namespace MassTransit.ServiceBus.Tests
+namespace MassTransit.Patterns.Tests
 {
 	using System;
 	using System.Collections.Generic;
 	using MassTransit.Patterns.Batching;
+	using MassTransit.ServiceBus;
 	using NUnit.Framework;
 	using Rhino.Mocks;
 
@@ -24,11 +25,11 @@ namespace MassTransit.ServiceBus.Tests
 		private IServiceBus _bus;
 		private BatchController<BatchMessage<string, Guid>, Guid> _controller;
 
-		public void HandleBatch(BatchContext<BatchMessage<string, Guid>, Guid> context)
+		public void HandleBatch(IBatchContext<BatchMessage<string, Guid>, Guid> context)
 		{
 			Guid batchId = context.BatchId;
 
-			foreach (IBatchMessage message in context)
+			foreach (BatchMessage<string, Guid> message in context)
 			{
 			}
 
