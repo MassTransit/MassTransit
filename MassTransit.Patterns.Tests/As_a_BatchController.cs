@@ -45,7 +45,7 @@ namespace MassTransit.Patterns.Tests
 			bool isComplete = false;
 
 			BatchController<BatchMessage<string, Guid>, Guid> c = new BatchController<BatchMessage<string, Guid>, Guid>(
-				delegate(BatchContext<BatchMessage<string, Guid>, Guid> cxt)
+				delegate(IBatchContext<BatchMessage<string, Guid>, Guid> cxt)
 					{
 						foreach (BatchMessage<string, Guid> msg in cxt)
 						{
@@ -77,7 +77,7 @@ namespace MassTransit.Patterns.Tests
 			bool isComplete = false;
 
 			BatchController<BatchMessage<string, Guid>, Guid> c = new BatchController<BatchMessage<string, Guid>, Guid>(
-				delegate(BatchContext<BatchMessage<string, Guid>, Guid> cxt)
+				delegate(IBatchContext<BatchMessage<string, Guid>, Guid> cxt)
 					{
 						foreach (BatchMessage<string, Guid> msg in cxt)
 						{
@@ -109,7 +109,7 @@ namespace MassTransit.Patterns.Tests
 			int numberCalled = 0;
 
 			BatchController<BatchMessage<string, Guid>, Guid> c = new BatchController<BatchMessage<string, Guid>, Guid>(
-				delegate(BatchContext<BatchMessage<string, Guid>, Guid> cxt)
+				delegate(IBatchContext<BatchMessage<string, Guid>, Guid> cxt)
 					{
 						numberCalled = 0;
 
