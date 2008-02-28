@@ -10,7 +10,6 @@
 /// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 /// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 /// specific language governing permissions and limitations under the License.
-
 namespace MassTransit.ServiceBus
 {
     using System;
@@ -39,6 +38,7 @@ namespace MassTransit.ServiceBus
 
 
         private readonly IEndpoint _endpoint;
+		private readonly EndpointCache _endpointCache;
         private readonly ISubscriptionStorage _subscriptionStorage;
         private IEndpoint _poisonEndpoint;
 
@@ -49,11 +49,8 @@ namespace MassTransit.ServiceBus
 
             _endpoint = endpoint;
             _subscriptionStorage = subscriptionStorage;
-        }
 
-        private void StartListening()
-        {
-            _endpoint.Receiver.Subscribe(this);
+			_endpointCache = new EndpointCache();
         }
 
         public ISubscriptionStorage SubscriptionStorage
@@ -101,10 +98,10 @@ namespace MassTransit.ServiceBus
         /// <param name="envelope">The message envelope</param>
         public void Deliver(IEnvelope envelope)
         {
-            try
-            {
                 if (_log.IsDebugEnabled)
                     _log.DebugFormat("Envelope {0} Received By {1}", envelope.Id, GetHashCode());
+
+			_endpointCache.Add(envelope.ReturnEndpoint);
 
                 bool delivered;
                 lock (_asyncReplyDispatcher)
@@ -117,11 +114,6 @@ namespace MassTransit.ServiceBus
                     DeliverMessagesToConsumers(envelope);
                 }
             }
-            catch (Exception ex)
-            {
-                _log.Error("Exception in Endpoint_EnvelopeReceived: ", ex);
-            }
-        }
 
         #endregion
 
@@ -147,11 +139,14 @@ namespace MassTransit.ServiceBus
         /// <param name="messages">The messages to be published</param>
         public void Publish<T>(params T[] messages) where T : IMessage
         {
+			if(_endpointCache.Count == 0 )
+				_endpointCache.Add(_endpoint);
+
             IEnvelope envelope = new Envelope(_endpoint, messages as IMessage[]);
 
-            foreach (Subscription subscription in _subscriptionStorage.List(typeof(T).FullName))
+			foreach (Subscription subscription in _subscriptionStorage.List(typeof (T).FullName))
             {
-                MessageQueueEndpoint endpoint = new MessageQueueEndpoint(subscription.Address);
+				IEndpoint endpoint = _endpointCache.Resolve<IEndpoint>(subscription.Address);
 
                 endpoint.Sender.Send(envelope);
             }
@@ -164,6 +159,8 @@ namespace MassTransit.ServiceBus
         /// <param name="messages">The list of messages</param>
         public void Send<T>(IEndpoint destinationEndpoint, params T[] messages) where T : IMessage
         {
+			_endpointCache.Add(destinationEndpoint);
+
             IEnvelope envelope = new Envelope(_endpoint, messages as IMessage[]);
 
             destinationEndpoint.Sender.Send(envelope);
@@ -182,16 +179,13 @@ namespace MassTransit.ServiceBus
         /// </summary>
         public IEndpoint PoisonEndpoint
         {
-            get
+			get { return _poisonEndpoint; }
+			set
             {
-                if (_poisonEndpoint == null)
-                {
-                    _poisonEndpoint = new MessageQueueEndpoint(_endpoint.Uri + "_poison");
-                }
+				 _poisonEndpoint = value;
 
-                return _poisonEndpoint;
+				_endpointCache.Add(value);
             }
-            set { _poisonEndpoint = value; }
         }
 
         /// <summary>
@@ -264,6 +258,8 @@ namespace MassTransit.ServiceBus
         public IServiceBusAsyncResult Request<T>(IEndpoint destinationEndpoint, AsyncCallback callback, object state,
                                                  params T[] messages) where T : IMessage
         {
+			_endpointCache.Add(destinationEndpoint);
+
             StartListening();
 
             IEnvelope envelope = new Envelope(_endpoint, messages as IMessage[]);
@@ -278,9 +274,13 @@ namespace MassTransit.ServiceBus
 
         #endregion
 
-        public class Bobby : Attribute {}
+		private void StartListening()
+		{
+			_endpointCache.Add(_endpoint);
 
-        [return: Bobby]
+			_endpoint.Receiver.Subscribe(this);
+		}
+
         private bool IsTheBusInterested(IEnvelope envelope)
         {
             bool result = false;

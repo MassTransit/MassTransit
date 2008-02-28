@@ -11,7 +11,7 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
     public class When_a_handler_unsubscribes_from_the_service_bus
     {
         private MockRepository _mocks = new MockRepository();
-        private IMessageQueueEndpoint _endpoint;
+        private IEndpoint _endpoint;
         private ISubscriptionStorage _storage;
         private IServiceBus _bus;
         private IEnvelopeConsumer _consumer;
@@ -22,7 +22,7 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
         [SetUp]
         public void Setup()
         {
-            _endpoint = _mocks.CreateMock<IMessageQueueEndpoint>();
+            _endpoint = _mocks.CreateMock<IEndpoint>();
             _storage = _mocks.CreateMock<ISubscriptionStorage>();
 
 

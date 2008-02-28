@@ -6,7 +6,8 @@ namespace MassTransit.Patterns.Batching
     using System.Threading;
     using ServiceBus;
 
-    public class BatchContext<T, K> : IBatchContext<T, K> where T : BatchMessage<K>
+    public class BatchContext<T, K> :
+        IEnumerable<T> where T : IBatchMessage
     {
         private readonly K _batchId;
         private readonly IServiceBus _bus;
@@ -47,7 +48,6 @@ namespace MassTransit.Patterns.Batching
         }
 
         #region IEnumerable<T> Members
-
 
         IEnumerator<T> IEnumerable<T>.GetEnumerator()
         {

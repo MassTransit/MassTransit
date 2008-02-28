@@ -1,53 +1,70 @@
+using System.Threading;
+using log4net;
+using MassTransit.ServiceBus.Internal;
+
 namespace MassTransit.Patterns.Tests
 {
-    using System.Threading;
-    using log4net;
 	using System;
 	using Batching;
 	using MassTransit.ServiceBus.Subscriptions;
 	using NUnit.Framework;
 	using NUnit.Framework.SyntaxHelpers;
+	using Rhino.Mocks;
 	using ServiceBus;
 
 	[TestFixture]
 	public class As_a_BatchController
 	{
 		private static readonly ILog _log = LogManager.GetLogger(typeof (As_a_BatchController));
+		private MockRepository _mocks;
+		private IEndpoint _endpoint;
+		private IMessageReceiver _receiver;
+		private ServiceBus _bus;
 
 		[SetUp]
 		public void Setup()
 		{
 			_log.Info("Here we go!");
+
+			_mocks = new MockRepository();
+
+			_endpoint = _mocks.DynamicMock<IEndpoint>();
+			_receiver = _mocks.DynamicMock<IMessageReceiver>();
+
+			SetupResult.For(_endpoint.Uri).Return(new Uri("msmq://localhost/test_queue"));
+			SetupResult.For(_endpoint.Receiver).Return(_receiver);
+
+			_mocks.ReplayAll();
+			_bus = new ServiceBus(_endpoint, new LocalSubscriptionCache());
 		}
 
 		[Test]
 		public void The_batch_should_be_complete_when_the_last_message_is_received()
 		{
-			ServiceBus bus = new ServiceBus(new MessageQueueEndpoint("msmq://localhost/test"), new LocalSubscriptionCache());
-
 			bool wasCalled = false;
 			bool isComplete = false;
 
-			BatchController<MessageToBatch, Guid> c = new BatchController<MessageToBatch, Guid>(
-				delegate(IBatchContext<MessageToBatch, Guid> cxt)
+			BatchController<BatchMessage<string, Guid>, Guid> c = new BatchController<BatchMessage<string, Guid>, Guid>(
+				delegate(BatchContext<BatchMessage<string, Guid>, Guid> cxt)
 					{
-						foreach (MessageToBatch msg in cxt)
+						foreach (BatchMessage<string, Guid> msg in cxt)
 						{
 							wasCalled = true;
 							isComplete = cxt.IsComplete;
 						}
 					}, TimeSpan.FromSeconds(3));
 
+
 			Guid batchId = Guid.NewGuid();
 			int batchLength = 1;
 
-			MessageToBatch msg1 = new MessageToBatch(batchId, batchLength);
+			BatchMessage<string, Guid> msg1 = new BatchMessage<string, Guid>(batchId, batchLength, "hello");
 
 			IEnvelope env1 = new Envelope(msg1);
 
-			bus.Subscribe<MessageToBatch>(c.HandleMessage);
+			_bus.Subscribe<BatchMessage<string, Guid>>(c.HandleMessage);
 
-			bus.Deliver(env1);
+			_bus.Deliver(env1);
 
 			Assert.That(wasCalled, Is.True, "Not Called");
 			Assert.That(isComplete, Is.True, "Not Complete");
@@ -56,15 +73,13 @@ namespace MassTransit.Patterns.Tests
 		[Test]
 		public void A_missing_message_should_leave_the_batch_incomplete()
 		{
-			ServiceBus bus = new ServiceBus(new MessageQueueEndpoint("msmq://localhost/test"), new LocalSubscriptionCache());
-
 			bool wasCalled = false;
 			bool isComplete = false;
 
-			BatchController<MessageToBatch, Guid> c = new BatchController<MessageToBatch, Guid>(
-				delegate(IBatchContext<MessageToBatch, Guid> cxt)
+			BatchController<BatchMessage<string, Guid>, Guid> c = new BatchController<BatchMessage<string, Guid>, Guid>(
+				delegate(BatchContext<BatchMessage<string, Guid>, Guid> cxt)
 					{
-						foreach (MessageToBatch msg in cxt)
+						foreach (BatchMessage<string, Guid> msg in cxt)
 						{
 							wasCalled = true;
 							isComplete = cxt.IsComplete;
@@ -74,13 +89,13 @@ namespace MassTransit.Patterns.Tests
 			Guid batchId = Guid.NewGuid();
 			int batchLength = 2;
 
-			MessageToBatch msg1 = new MessageToBatch(batchId, batchLength);
+			BatchMessage<string, Guid> msg1 = new BatchMessage<string, Guid>(batchId, batchLength, "hello");
 
 			IEnvelope env1 = new Envelope(msg1);
 
-			bus.Subscribe<MessageToBatch>(c.HandleMessage);
+			_bus.Subscribe<BatchMessage<string, Guid>>(c.HandleMessage);
 
-			bus.Deliver(env1);
+			_bus.Deliver(env1);
 
 			Assert.That(wasCalled, Is.True, "Not Called");
 			Assert.That(isComplete, Is.False, "Not Complete");
@@ -89,18 +104,16 @@ namespace MassTransit.Patterns.Tests
 		[Test]
 		public void Multiple_messages_should_be_complete_when_the_last_message_is_received()
 		{
-			ServiceBus bus = new ServiceBus(new MessageQueueEndpoint("msmq://localhost/test"), new LocalSubscriptionCache());
-
 			bool wasCalled = false;
 			bool isComplete = false;
 			int numberCalled = 0;
 
-			BatchController<MessageToBatch, Guid> c = new BatchController<MessageToBatch, Guid>(
-                delegate(IBatchContext<MessageToBatch, Guid> cxt)
+			BatchController<BatchMessage<string, Guid>, Guid> c = new BatchController<BatchMessage<string, Guid>, Guid>(
+				delegate(BatchContext<BatchMessage<string, Guid>, Guid> cxt)
 					{
 						numberCalled = 0;
 
-						foreach (MessageToBatch msg in cxt)
+						foreach (BatchMessage<string, Guid> msg in cxt)
 						{
 							wasCalled = true;
 							isComplete = cxt.IsComplete;
@@ -111,34 +124,38 @@ namespace MassTransit.Patterns.Tests
 			Guid batchId = Guid.NewGuid();
 			int batchLength = 4;
 
-			MessageToBatch msg1 = new MessageToBatch(batchId, batchLength);
-			MessageToBatch msg2 = new MessageToBatch(batchId, batchLength);
-			MessageToBatch msg3 = new MessageToBatch(batchId, batchLength);
-			MessageToBatch msg4 = new MessageToBatch(batchId, batchLength);
+			BatchMessage<string, Guid> msg1 = new BatchMessage<string, Guid>(batchId, batchLength, "hello");
+			BatchMessage<string, Guid> msg2 = new BatchMessage<string, Guid>(batchId, batchLength, "hello");
+			BatchMessage<string, Guid> msg3 = new BatchMessage<string, Guid>(batchId, batchLength, "hello");
+			BatchMessage<string, Guid> msg4 = new BatchMessage<string, Guid>(batchId, batchLength, "hello");
 
 			IEnvelope env1 = new Envelope(msg1);
 			IEnvelope env2 = new Envelope(msg2);
 			IEnvelope env3 = new Envelope(msg3);
 			IEnvelope env4 = new Envelope(msg4);
 
-			bus.Subscribe<MessageToBatch>(c.HandleMessage);
+			_bus.Subscribe<BatchMessage<string, Guid>>(c.HandleMessage);
 
+			ManualResetEvent started = new ManualResetEvent(false);
 			ManualResetEvent done = new ManualResetEvent(false);
 
 			ThreadPool.QueueUserWorkItem(delegate
 			                             	{
-			                             		bus.Deliver(env1);
+			                             		started.Set();
+												_bus.Deliver(env1);
 			                             		done.Set();
 			                             	});
 
-			bus.Deliver(env2);
-			bus.Deliver(env3);
-			bus.Deliver(env4);
+			started.WaitOne(TimeSpan.FromSeconds(3), true);
+
+			_bus.Deliver(env2);
+			_bus.Deliver(env3);
+			_bus.Deliver(env4);
 
 			done.WaitOne(TimeSpan.FromSeconds(10), true);
 
-			Assert.That(numberCalled, Is.EqualTo(4));
 			Assert.That(wasCalled, Is.True, "Not Called");
+			Assert.That(numberCalled, Is.EqualTo(4));
 			Assert.That(isComplete, Is.True, "Not Complete");
 		}
 	}

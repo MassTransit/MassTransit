@@ -14,7 +14,7 @@ namespace MassTransit.ServiceBus.Tests
         private IEndpoint mockBusEndpoint;
         private IEnvelope mockEnvelope;
         private IEndpoint mockPoisonEndpoint;
-        private IMessageQueueEndpoint mockEndpoint;
+        private IEndpoint mockEndpoint;
 
         private PingMessage requestMessage = new PingMessage();
         private PongMessage replyMessage = new PongMessage();
@@ -28,7 +28,7 @@ namespace MassTransit.ServiceBus.Tests
             mockBus = mocks.CreateMock<IServiceBus>();
             mockBusEndpoint = mocks.CreateMock<IEndpoint>();
             mockEnvelope = mocks.CreateMock<IEnvelope>();
-            mockEndpoint = mocks.CreateMock<IMessageQueueEndpoint>();
+			mockEndpoint = mocks.CreateMock<IEndpoint>();
             mockPoisonEndpoint = mocks.CreateMock<IEndpoint>();
             mockMessageSender = mocks.CreateMock<IMessageSender>();
         }

@@ -4,6 +4,7 @@ namespace MassTransit.Host.Tests
 {
 	using System.IO;
 	using System.Reflection;
+	using Config;
 	using NUnit.Framework;
 	using NUnit.Framework.SyntaxHelpers;
 	using ServiceBus;

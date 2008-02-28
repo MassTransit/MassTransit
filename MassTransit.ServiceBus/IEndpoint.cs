@@ -11,31 +11,30 @@
 /// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 /// specific language governing permissions and limitations under the License.
 
-using System;
-
 namespace MassTransit.ServiceBus
 {
-    using Internal;
+	using System;
+	using Internal;
 
-    /// <summary>
+	/// <summary>
 	/// IEndpoint is implemented by an endpoint. An endpoint is an addressable location on the network.
 	/// </summary>
-    public interface IEndpoint :
-        IDisposable
-    {
+	public interface IEndpoint :
+		IDisposable
+	{
 		/// <summary>
 		/// The address of the endpoint, in URI format
 		/// </summary>
 		Uri Uri { get; }
 
-        /// <summary>
-        /// Returns an interface to send messages on this endpoint
-        /// </summary>
-        IMessageSender Sender { get; }
+		/// <summary>
+		/// Returns an interface to send messages on this endpoint
+		/// </summary>
+		IMessageSender Sender { get; }
 
-        /// <summary>
-        /// Returns an interface to receive messages on this endpoint
-        /// </summary>
-        IMessageReceiver Receiver { get; }
-    }
+		/// <summary>
+		/// Returns an interface to receive messages on this endpoint
+		/// </summary>
+		IMessageReceiver Receiver { get; }
+	}
 }

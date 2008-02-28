@@ -15,22 +15,24 @@ namespace MassTransit.ServiceBus.Tests.IntegrationTests
         [Explicit("needs items in the queue to work - dru")]
         public void Add_Should_Be_Idempotent()
         {
-            IMessageQueueEndpoint ep = new MessageQueueEndpoint("msmq://localhost/test_subscriptions");
-            ISubscriptionStorage cache = new LocalSubscriptionCache();
-            MsmqSubscriptionStorage store = new MsmqSubscriptionStorage(ep, cache);
-            Thread.Sleep(10000);
-            Assert.That(store.List().Count, Is.EqualTo(2));
+			//IEndpoint ep = new MessageQueueEndpoint("msmq://localhost/test_subscriptions");
+			//ISubscriptionStorage cache = new LocalSubscriptionCache();
+			//MsmqSubscriptionStorage store = new MsmqSubscriptionStorage(ep, cache);
+			//Thread.Sleep(10000);
+			//Assert.That(store.List().Count, Is.EqualTo(2));
         }
 
         [Test]
         public void Idempontent_Add()
         {
-            IMessageQueueEndpoint ep = new MessageQueueEndpoint("msmq://localhost/test_subscriptions");
-            ISubscriptionStorage cache = new LocalSubscriptionCache();
-            MsmqSubscriptionStorage store = new MsmqSubscriptionStorage(ep, cache);
-            store.Add(typeof(PingMessage).FullName, new Uri("msmq://localhost/test_servicebus"));
-            store.Add(typeof(PingMessage).FullName, new Uri("msmq://localhost/test_servicebus"));
-            Assert.That(store.List().Count, Is.EqualTo(1));
+			//IEndpoint ep = new MessageQueueEndpoint("msmq://localhost/test_subscriptions");
+			//ISubscriptionStorage cache = new LocalSubscriptionCache();
+			//MsmqSubscriptionStorage store = new MsmqSubscriptionStorage(ep, cache);
+			//store.Add(typeof(PingMessage).FullName, new Uri("msmq://localhost/test_servicebus"));
+			//store.Add(typeof(PingMessage).FullName, new Uri("msmq://localhost/test_servicebus"));
+			//Assert.That(store.List().Count, Is.EqualTo(1));
+
+        	throw new NotFiniteNumberException();
         }
     }
 }

@@ -1,82 +1,68 @@
-using System;
-using System.Diagnostics;
-using System.Messaging;
-using System.Reflection;
-using System.Runtime.Serialization.Formatters.Binary;
-using log4net;
-using MassTransit.ServiceBus.Subscriptions;
-using NUnit.Framework;
-using NUnit.Framework.SyntaxHelpers;
-
 namespace MassTransit.ServiceBus.Tests
 {
+	using System;
+	using System.Diagnostics;
+	using System.Reflection;
+	using Internal;
+	using log4net;
+	using MassTransit.ServiceBus.Subscriptions;
+	using Rhino.Mocks;
+
 	public class QueueTestContext :
 		IDisposable
 	{
 		protected static readonly ILog _log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 
+		private MockRepository _mocks;
+
 		private ServiceBus _remoteServiceBus;
-		private MessageQueueEndpoint _remoteServiceBusEndPoint = @"msmq://localhost/test_remoteservicebus";
+		private IEndpoint _remoteServiceBusEndPoint;
 
 		private IServiceBus _serviceBus;
-		private MessageQueueEndpoint _serviceBusEndPoint = @"msmq://localhost/test_servicebus";
-		private MessageQueueEndpoint _subscriptionEndpoint = @"msmq://localhost/test_subscriptions";
+		private IEndpoint _serviceBusEndPoint;
+		private IEndpoint _subscriptionEndpoint;
+
+		private ISubscriptionStorage _subscriptionStorage;
+		private IMessageSender _mockSender;
+		private IMessageReceiver _mockReceiver;
 
 		public QueueTestContext(string remoteMachineName)
 		{
-			_remoteServiceBusEndPoint = "msmq://" + remoteMachineName + "/test_remoteservicebus";
-			_serviceBusEndPoint = "msmq://" + remoteMachineName + "/test_servicebus";
-
 			Initialize();
+
+			SetupResult.For(_remoteServiceBusEndPoint.Uri).Return(new Uri("local://" + remoteMachineName + "/test_remoteservicebus"));
+			_mocks.ReplayAll();
 		}
 
 		public QueueTestContext()
 		{
 			Initialize();
+
+			SetupResult.For(_remoteServiceBusEndPoint.Uri).Return(new Uri("local://" + Environment.MachineName.ToLowerInvariant() + "/test_remoteservicebus"));
+			_mocks.ReplayAll();
 		}
 
 		public IServiceBus ServiceBus
 		{
-			get
-			{
-				if (_serviceBus == null)
-				{
-					ISubscriptionStorage subscriptionStorage = CreateSubscriptionStorage();
-
-					_serviceBus = new ServiceBus(ServiceBusEndPoint, subscriptionStorage);
-				}
-
-				return _serviceBus;
-			}
+			get { return _serviceBus; }
 		}
 
 		public IServiceBus RemoteServiceBus
 		{
-			get
-			{
-				if (_remoteServiceBus == null)
-				{
-					ISubscriptionStorage subscriptionStorage = CreateSubscriptionStorage();
-
-					_remoteServiceBus = new ServiceBus(RemoteServiceBusEndPoint, subscriptionStorage);
-				}
-
-				return _remoteServiceBus;
-			}
+			get { return _remoteServiceBus; }
 		}
 
-		public IMessageQueueEndpoint RemoteServiceBusEndPoint
+		public IEndpoint RemoteServiceBusEndPoint
 		{
 			get { return _remoteServiceBusEndPoint; }
 		}
 
-
-		public IMessageQueueEndpoint ServiceBusEndPoint
+		public IEndpoint ServiceBusEndPoint
 		{
 			get { return _serviceBusEndPoint; }
 		}
 
-		public IMessageQueueEndpoint SubscriptionEndpoint
+		public IEndpoint SubscriptionEndpoint
 		{
 			get { return _subscriptionEndpoint; }
 		}
@@ -104,77 +90,28 @@ namespace MassTransit.ServiceBus.Tests
 
 			_log.InfoFormat("QueueTestContext Created for {0}", methodBase.Name);
 
-			MessageQueue.EnableConnectionCache = false;
+			_mocks = new MockRepository();
 
-			ValidateAndPurgeQueue(_serviceBusEndPoint.QueuePath);
-			ValidateAndPurgeQueue(_remoteServiceBusEndPoint.QueuePath);
-			ValidateAndPurgeQueue(_subscriptionEndpoint.QueuePath);
+			_remoteServiceBusEndPoint = _mocks.DynamicMock<IEndpoint>();
+			_subscriptionEndpoint = _mocks.DynamicMock<IEndpoint>();
+			_serviceBusEndPoint = _mocks.DynamicMock<IEndpoint>();
+			_mockSender = _mocks.DynamicMock<IMessageSender>();
+			_mockReceiver = _mocks.DynamicMock<IMessageReceiver>();
 
-			IServiceBus ignore = ServiceBus;
-		}
+			_subscriptionStorage = new LocalSubscriptionCache();
 
-		private ISubscriptionStorage CreateSubscriptionStorage()
-		{
-			ISubscriptionStorage subscriptionCache;
-			ISubscriptionStorage subscriptionStorage;
+			_serviceBus = new ServiceBus(ServiceBusEndPoint, _subscriptionStorage);
+			_remoteServiceBus = new ServiceBus(RemoteServiceBusEndPoint, _subscriptionStorage);
 
-			subscriptionCache = new LocalSubscriptionCache();
-			subscriptionStorage =
-				new MsmqSubscriptionStorage(SubscriptionEndpoint, subscriptionCache);
+			SetupResult.For(_subscriptionEndpoint.Uri).Return(new Uri("local://" + Environment.MachineName.ToLowerInvariant() + "/test_subscriptions"));
+			SetupResult.For(_serviceBusEndPoint.Uri).Return(new Uri("local://" + Environment.MachineName.ToLowerInvariant() + "/test_servicebus"));
 
-			return subscriptionStorage;
-		}
+			SetupResult.For(_serviceBusEndPoint.Sender).Return(_mockSender);
+			SetupResult.For(_serviceBusEndPoint.Receiver).Return(_mockReceiver);
 
-		public static void VerifyMessageInQueue<T>(string queuePath, T message)
-		{
-			using (MessageQueue mq = new MessageQueue(GetQueueName(queuePath), QueueAccessMode.Receive))
-			{
-				Message msg = mq.Receive(TimeSpan.FromSeconds(3));
+			SetupResult.For(_remoteServiceBusEndPoint.Sender).Return(_mockSender);
+			SetupResult.For(_remoteServiceBusEndPoint.Receiver).Return(_mockReceiver);
 
-				IMessage[] messages = new BinaryFormatter().Deserialize(msg.BodyStream) as IMessage[];
-
-				Assert.That(messages, Is.Not.Null);
-				if (messages != null)
-				{
-					Assert.That(messages.Length, Is.EqualTo(1));
-
-					Assert.That(messages[0].GetType(), Is.EqualTo(typeof (T)));
-				}
-			}
-		}
-
-		private static void ValidateAndPurgeQueue(string queuePath)
-		{
-			ValidateAndPurgeQueue(queuePath, false);
-		}
-
-		private static void ValidateAndPurgeQueue(string queuePath, bool isTransactional)
-		{
-			try
-			{
-				MessageQueue queue = new MessageQueue(GetQueueName(queuePath), QueueAccessMode.ReceiveAndAdmin);
-				queue.Purge();
-			}
-			catch (MessageQueueException ex)
-			{
-				if (ex.MessageQueueErrorCode == MessageQueueErrorCode.QueueNotFound)
-				{
-					MessageQueue.Create(GetQueueName(queuePath), isTransactional);
-				}
-			}
-		}
-
-		public static string GetQueueName(string name)
-		{
-			string result = name;
-			if (result.Contains("FormatName:DIRECT=OS:"))
-				result = result.Replace("FormatName:DIRECT=OS:", "");
-			if (result.Contains("localhost"))
-				result = result.Replace("localhost", ".");
-			if (result.Contains(Environment.MachineName.ToLowerInvariant()))
-				result = result.Replace(Environment.MachineName.ToLowerInvariant(), ".");
-
-			return result;
 		}
 	}
 }

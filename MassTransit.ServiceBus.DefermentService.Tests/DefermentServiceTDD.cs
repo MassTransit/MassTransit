@@ -3,12 +3,16 @@ namespace MassTransit.ServiceBus.DefermentService.Tests
     using System;
     using NUnit.Framework;
     using NUnit.Framework.SyntaxHelpers;
+    using Rhino.Mocks;
     using Subscriptions;
 
     [TestFixture]
     public class DefermentServiceTDD
     {
         TimeSpan oneSecond = new TimeSpan(0,0,1);
+
+    	private MockRepository _mocks = new MockRepository();
+
         [Test]
         public void Doodle()
         {
@@ -21,7 +25,8 @@ namespace MassTransit.ServiceBus.DefermentService.Tests
         [Test]
         public void Doodle2()
         {
-            IServiceBus bus = new ServiceBus(new MessageQueueEndpoint("msmq://localhost/test"), new LocalSubscriptionCache());
+
+            IServiceBus bus = new ServiceBus(_mocks.CreateMock<IEndpoint>(), new LocalSubscriptionCache());
             IDefermentService d = new DefermentService();
 
             int defermentClaimTicket = 0;
