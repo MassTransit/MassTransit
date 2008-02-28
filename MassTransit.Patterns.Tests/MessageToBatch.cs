@@ -4,12 +4,7 @@ namespace MassTransit.Patterns.Tests
     using Batching;
 
     [Serializable]
-    public class MessageToBatch :
-        BatchMessage<Guid>
+    public class MessageToBatch
     {
-        public MessageToBatch(Guid batchId, int batchLength)
-            : base(batchId, batchLength)
-        {
-        }
     }
 }

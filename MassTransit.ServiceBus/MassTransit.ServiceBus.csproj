@@ -36,7 +36,6 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
-    <Reference Include="System.Messaging" />
     <Reference Include="System.Transactions" />
     <Reference Include="System.Xml" />
   </ItemGroup>
@@ -44,9 +43,9 @@
     <Compile Include="..\SolutionVersion.cs">
       <Link>SolutionVersion.cs</Link>
     </Compile>
+    <Compile Include="EndpointCache.cs" />
     <Compile Include="Internal\AsyncReplyDispatcher.cs" />
     <Compile Include="Envelope.cs" />
-    <Compile Include="Internal\EnvelopeMessageMapper.cs" />
     <Compile Include="Exceptions\EndpointException.cs" />
     <Compile Include="Exceptions\MeetsCriteriaException.cs" />
     <Compile Include="IMessageService.cs" />
@@ -56,19 +55,13 @@
     <Compile Include="IMessage.cs" />
     <Compile Include="Internal\IMessageConsumer.cs" />
     <Compile Include="IMessageContext.cs" />
-    <Compile Include="IMessageQueueEndpoint.cs" />
     <Compile Include="Internal\IMessageReceiver.cs" />
     <Compile Include="Internal\IMessageSender.cs" />
-    <Compile Include="Internal\IMsmqQueue.cs" />
-    <Compile Include="Internal\MsmqQueue.cs" />
     <Compile Include="IServiceBus.cs" />
     <Compile Include="IServiceBusAsyncResult.cs" />
     <Compile Include="ISubscriptionStorage.cs" />
     <Compile Include="Internal\MessageConsumer.cs" />
-    <Compile Include="MessageQueueEndpoint.cs" />
     <Compile Include="MessageContext.cs" />
-    <Compile Include="Internal\MessageQueueReceiver.cs" />
-    <Compile Include="Internal\MessageQueueSender.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ServiceBus.cs" />
     <Compile Include="ServiceBusAsyncResult.cs" />
@@ -79,7 +72,6 @@
     <Compile Include="Subscriptions\Messages\CancelSubscriptionUpdates.cs" />
     <Compile Include="Subscriptions\Messages\SubscriptionChange.cs" />
     <Compile Include="Subscriptions\Messages\SubscriptionChangeType.cs" />
-    <Compile Include="Subscriptions\MsmqSubscriptionStorage.cs" />
     <Compile Include="Subscriptions\Subscription.cs" />
     <Compile Include="Subscriptions\SubscriptionCacheEntry.cs" />
     <Compile Include="Subscriptions\SubscriptionManagerClient.cs" />

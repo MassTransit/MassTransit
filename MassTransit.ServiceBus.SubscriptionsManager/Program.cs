@@ -21,13 +21,14 @@ namespace MassTransit.ServiceBus.SubscriptionsManager
     public class Program : ServiceBase
     {
         private SubscriptionService _subscriptionService;
-        private IMessageQueueEndpoint _endpoint;
+        private IEndpoint _endpoint;
         private ISessionFactory _sessionFactory;
         private ISubscriptionStorage _subscriptionCache;
 
         protected void Initialize(string connectionString, string wellKnownSubscriptionUri)
         {
-            _endpoint = new MessageQueueEndpoint(wellKnownSubscriptionUri);
+			//TODO
+            //_endpoint = new MessageQueueEndpoint(wellKnownSubscriptionUri);
             _sessionFactory = GetNHibernateSessionFactory(connectionString);
 
             _subscriptionCache = new LocalSubscriptionCache();

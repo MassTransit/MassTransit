@@ -1,63 +1,60 @@
-using System;
-using NUnit.Framework;
-using Rhino.Mocks;
-
 namespace MassTransit.ServiceBus.Tests
 {
-    using Internal;
+	using System;
+	using Internal;
+	using NUnit.Framework;
+	using Rhino.Mocks;
 
-    [TestFixture]
-    public class As_A_Service_With_A_Message_Endpoint
-    {
-        private IServiceBus _serviceBus;
-        private MockRepository mocks;
-        private IMessageQueueEndpoint mockEndpoint;
-        private ISubscriptionStorage mockSubscriptionStorage;
+	[TestFixture]
+	public class As_A_Service_With_A_Message_Endpoint
+	{
+		#region Setup/Teardown
 
-        private string queueName = @".\private$\test";
-        private Uri queueUri = new Uri("msmq://localhost/test");
-        private IMessageReceiver mockReceiver;
+		[SetUp]
+		public void SetUp()
+		{
+			mocks = new MockRepository();
+			mockEndpoint = mocks.CreateMock<IEndpoint>();
+			mockSubscriptionStorage = mocks.CreateMock<ISubscriptionStorage>();
+			mockReceiver = mocks.CreateMock<IMessageReceiver>();
+		}
 
-        #region Setup/Teardown
+		[TearDown]
+		public void TearDown()
+		{
+			mocks = null;
+			_serviceBus = null;
+			mockEndpoint = null;
+			mockSubscriptionStorage = null;
+		}
 
-        [SetUp]
-        public void SetUp()
-        {
-            mocks = new MockRepository();
-            mockEndpoint = mocks.CreateMock<IMessageQueueEndpoint>();
-            mockSubscriptionStorage = mocks.CreateMock<ISubscriptionStorage>();
-            mockReceiver = mocks.CreateMock<IMessageReceiver>();
+		#endregion
 
-            ServiceBusSetupFixture.ValidateAndPurgeQueue(queueName);
-        }
+		private IServiceBus _serviceBus;
+		private MockRepository mocks;
+		private IEndpoint mockEndpoint;
+		private ISubscriptionStorage mockSubscriptionStorage;
 
-        [TearDown]
-        public void TearDown()
-        {
-            mocks = null;
-            _serviceBus = null;
-            mockEndpoint = null;
-            mockSubscriptionStorage = null;
-        }
+		private string queueName = @".\private$\test";
+		private Uri queueUri = new Uri("msmq://localhost/test");
+		private IMessageReceiver mockReceiver;
 
-        #endregion
+		[Test]
+		public void I_Want_To_Be_Able_To_Register_An_Event_Handler_For_Messages()
+		{
+			using (mocks.Record())
+			{
+				Expect.Call(mockEndpoint.Receiver).Return(mockReceiver).Repeat.Any();
+				Expect.Call(delegate { mockReceiver.Subscribe(null); }).IgnoreArguments().Repeat.Any();
+				Expect.Call(mockEndpoint.Uri).Return(queueUri).Repeat.Any(); //stupid log4net
+				mockSubscriptionStorage.Add(typeof (PingMessage).FullName, queueUri);
+			}
 
-        [Test]
-        public void I_Want_To_Be_Able_To_Register_An_Event_Handler_For_Messages()
-        {
-            using (mocks.Record())
-            {
-                Expect.Call(mockEndpoint.Receiver).Return(mockReceiver).Repeat.Any();
-                Expect.Call(delegate { mockReceiver.Subscribe(null); }).IgnoreArguments().Repeat.Any();
-                Expect.Call(mockEndpoint.Uri).Return(queueUri).Repeat.Any(); //stupid log4net
-                mockSubscriptionStorage.Add(typeof(PingMessage).FullName, queueUri);
-            }
-
-            using (mocks.Playback())
-            {
-                _serviceBus = new ServiceBus(mockEndpoint, mockSubscriptionStorage);
-                _serviceBus.Subscribe<PingMessage>(delegate { });
-            }
-        }
-    }
+			using (mocks.Playback())
+			{
+				_serviceBus = new ServiceBus(mockEndpoint, mockSubscriptionStorage);
+				_serviceBus.Subscribe<PingMessage>(delegate { });
+			}
+		}
+	}
 }

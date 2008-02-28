@@ -10,25 +10,23 @@
 /// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 /// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 /// specific language governing permissions and limitations under the License.
-
 namespace MassTransit.ServiceBus
 {
-    using System;
-    using MassTransit.ServiceBus.Subscriptions.Messages;
+	using System;
+	using MassTransit.ServiceBus.Subscriptions.Messages;
 
-    public class SubscriptionChangedEventArgs : EventArgs
-    {
-        private SubscriptionChange _change;
+	public class SubscriptionChangedEventArgs : EventArgs
+	{
+		private readonly SubscriptionChange _change;
 
+		public SubscriptionChangedEventArgs(SubscriptionChange change)
+		{
+			_change = change;
+		}
 
-        public SubscriptionChangedEventArgs(SubscriptionChange change)
-        {
-            _change = change;
-        }
-
-        public SubscriptionChange Change
-        {
-            get { return _change; }
-        }
-    }
+		public SubscriptionChange Change
+		{
+			get { return _change; }
+		}
+	}
 }

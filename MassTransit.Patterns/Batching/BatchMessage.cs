@@ -1,37 +1,39 @@
 namespace MassTransit.Patterns.Batching
 {
-    using System;
-    using ServiceBus;
+	using System;
 
-    [Serializable]
-    public abstract class BatchMessage<K> :
-        IMessage
-    {
-        private K _batchId;
-        private int _batchLength;
+	[Serializable]
+	public class BatchMessage<T, K> :
+		IBatchMessage
+	{
+		private readonly K _batchId;
+		private readonly int _batchLength;
+		private T _body;
 
-        public BatchMessage(K batchId, int batchLength)
-        {
-            _batchId = batchId;
-            _batchLength = batchLength;
-        }
+		public BatchMessage(K batchId, int batchLength, T body)
+		{
+			_body = body;
+			_batchId = batchId;
+			_batchLength = batchLength;
+		}
 
-        /// <summary>
-        /// Identifies the batch containing this message
-        /// </summary>
-        public K BatchId
-        {
-            get { return _batchId; }
-            set { _batchId = value; }
-        }
+		/// <summary>
+		/// The number of messages in the batch
+		/// </summary>
+		public int BatchLength
+		{
+			get { return _batchLength; }
+		}
 
-        /// <summary>
-        /// The number of messages in the batch
-        /// </summary>
-        public int BatchLength
-        {
-            get { return _batchLength; }
-            set { _batchLength = value; }
-        }
-    }
+		public object BatchId
+		{
+			get { return _batchId; }
+		}
+
+		public T Body
+		{
+			get { return _body; }
+			set { _body = value; }
+		}
+	}
 }

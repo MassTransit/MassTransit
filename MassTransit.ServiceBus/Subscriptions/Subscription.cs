@@ -10,33 +10,30 @@
 /// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 /// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 /// specific language governing permissions and limitations under the License.
-
 namespace MassTransit.ServiceBus.Subscriptions
 {
-    using System;
+	using System;
 
-    [Serializable]
-    public class Subscription
-    {
-        private Uri _address;
-        private string _messageName;
+	[Serializable]
+	public class Subscription
+	{
+		private readonly Uri _address;
+		private readonly string _messageName;
 
+		public Subscription(Uri address, string messageName)
+		{
+			_address = address;
+			_messageName = messageName;
+		}
 
-        public Subscription(Uri address, string messageName)
-        {
-            _address = address;
-            _messageName = messageName;
-        }
+		public Uri Address
+		{
+			get { return _address; }
+		}
 
-
-        public Uri Address
-        {
-            get { return _address; }
-        }
-
-        public string MessageName
-        {
-            get { return _messageName; }
-        }
-    }
+		public string MessageName
+		{
+			get { return _messageName; }
+		}
+	}
 }

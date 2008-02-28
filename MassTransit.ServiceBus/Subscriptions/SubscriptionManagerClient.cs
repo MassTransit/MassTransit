@@ -8,9 +8,9 @@ namespace MassTransit.ServiceBus.Subscriptions
 	{
 		private readonly IServiceBus _serviceBus;
 		private readonly ISubscriptionStorage _cache;
-		private readonly IMessageQueueEndpoint _managerEndpoint;
+		private readonly IEndpoint _managerEndpoint;
 
-		public SubscriptionManagerClient(IServiceBus serviceBus, ISubscriptionStorage cache, IMessageQueueEndpoint managerEndpoint)
+		public SubscriptionManagerClient(IServiceBus serviceBus, ISubscriptionStorage cache, IEndpoint managerEndpoint)
 		{
 			_serviceBus = serviceBus;
 			_cache = cache;
@@ -76,8 +76,8 @@ namespace MassTransit.ServiceBus.Subscriptions
 		{
 			_cache.SubscriptionChanged += Cache_SubscriptionChanged;
 			_serviceBus.Subscribe<SubscriptionChange>(HandleSubscriptionChange);
-			IServiceBusAsyncResult asyncResult =
-				_serviceBus.Request(_managerEndpoint, CacheUpdateResponse_Callback, this, new CacheUpdateRequest());
+
+			_serviceBus.Request(_managerEndpoint, CacheUpdateResponse_Callback, this, new CacheUpdateRequest());
 		}
 
 		public void Stop()

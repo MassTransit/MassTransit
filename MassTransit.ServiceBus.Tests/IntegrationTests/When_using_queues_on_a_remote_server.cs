@@ -10,9 +10,10 @@ namespace MassTransit.ServiceBus.Tests
 	[TestFixture]
 	public class When_using_queues_on_a_remote_server
 	{
-		private static ILog _log = LogManager.GetLogger(typeof (When_using_queues_on_a_remote_server));
+		private static readonly ILog _log = LogManager.GetLogger(typeof (When_using_queues_on_a_remote_server));
 
 		[Test]
+		[Explicit]
 		public void Replies_should_be_returned_properly()
 		{
 			using (QueueTestContext qtc = new QueueTestContext("dtfs.ehos.tns.ndchealth.com"))

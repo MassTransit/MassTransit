@@ -19,9 +19,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "MassTransit", "MassTransit"
 		Release.AspNetCompiler.Debug = "False"
 	EndProjectSection
 EndProject
-Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "D:\...\WebSite\", "WebSite", "{E608EB81-6B10-41F2-ADED-55E861FADD9F}"
+Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "C:\...\WebSite\", "WebSite\", "{E608EB81-6B10-41F2-ADED-55E861FADD9F}"
 	ProjectSection(WebsiteProperties) = preProject
-		ProjectReferences = "{DFCF5AE8-6820-493C-8E40-8E6CEA74EE28}|WebRequestReply.Core.dll;{90482397-6282-465E-8B86-39865FC30127}|MassTransit.ServiceBus.dll;"
+		ProjectReferences = "{DFCF5AE8-6820-493C-8E40-8E6CEA74EE28}|WebRequestReply.Core.dll;{90482397-6282-465E-8B86-39865FC30127}|MassTransit.ServiceBus.dll;{6F90867C-E092-4EDC-B3DE-600D39DF0335}|MassTransit.ServiceBus.MSMQ.dll;"
 		Debug.AspNetCompiler.VirtualPath = "/WebSite"
 		Debug.AspNetCompiler.PhysicalPath = "WebSite\"
 		Debug.AspNetCompiler.TargetPath = "PrecompiledWeb\WebSite\"
@@ -38,6 +38,12 @@ Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "D:\...\WebSite\", "WebSite"
 		Release.AspNetCompiler.Debug = "False"
 		VWDPort = "2156"
 		DefaultWebSiteLanguage = "Visual C#"
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.ServiceBus.MSMQ", "..\..\MassTransit.ServiceBus.MSMQ\MassTransit.ServiceBus.MSMQ.csproj", "{6F90867C-E092-4EDC-B3DE-600D39DF0335}"
+	ProjectSection(WebsiteProperties) = preProject
+		Debug.AspNetCompiler.Debug = "True"
+		Release.AspNetCompiler.Debug = "False"
 	EndProjectSection
 EndProject
 Global
@@ -80,11 +86,22 @@ Global
 		{E608EB81-6B10-41F2-ADED-55E861FADD9F}.Release|Any CPU.ActiveCfg = Debug|.NET
 		{E608EB81-6B10-41F2-ADED-55E861FADD9F}.Release|Mixed Platforms.ActiveCfg = Debug|.NET
 		{E608EB81-6B10-41F2-ADED-55E861FADD9F}.Release|Mixed Platforms.Build.0 = Debug|.NET
+		{6F90867C-E092-4EDC-B3DE-600D39DF0335}.Debug|.NET.ActiveCfg = Debug|Any CPU
+		{6F90867C-E092-4EDC-B3DE-600D39DF0335}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6F90867C-E092-4EDC-B3DE-600D39DF0335}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6F90867C-E092-4EDC-B3DE-600D39DF0335}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{6F90867C-E092-4EDC-B3DE-600D39DF0335}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{6F90867C-E092-4EDC-B3DE-600D39DF0335}.Release|.NET.ActiveCfg = Release|Any CPU
+		{6F90867C-E092-4EDC-B3DE-600D39DF0335}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6F90867C-E092-4EDC-B3DE-600D39DF0335}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6F90867C-E092-4EDC-B3DE-600D39DF0335}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{6F90867C-E092-4EDC-B3DE-600D39DF0335}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{90482397-6282-465E-8B86-39865FC30127} = {BB5330B4-6E11-47E6-A1D6-3531BAA5723A}
+		{6F90867C-E092-4EDC-B3DE-600D39DF0335} = {BB5330B4-6E11-47E6-A1D6-3531BAA5723A}
 	EndGlobalSection
 EndGlobal

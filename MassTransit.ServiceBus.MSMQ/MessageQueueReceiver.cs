@@ -11,15 +11,16 @@
 /// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 /// specific language governing permissions and limitations under the License.
 
-using System;
-using System.Messaging;
-using System.Runtime.Serialization;
-using System.Threading;
-using log4net;
-using MassTransit.ServiceBus.Exceptions;
-
-namespace MassTransit.ServiceBus.Internal
+namespace MassTransit.ServiceBus.MSMQ
 {
+	using System;
+	using System.Messaging;
+	using System.Runtime.Serialization;
+	using System.Threading;
+	using Exceptions;
+	using Internal;
+	using log4net;
+
 	/// <summary>
 	/// Receives envelopes from a message queue
 	/// </summary>
@@ -35,7 +36,7 @@ namespace MassTransit.ServiceBus.Internal
 		private IEnvelopeConsumer _consumer;
 
 		private Thread _monitorThread;
-		private IMsmqQueue _queue;
+		private MessageQueue _queue;
 
 		/// <summary>
 		/// Initializes a MessageQueueReceiver
@@ -45,8 +46,6 @@ namespace MassTransit.ServiceBus.Internal
 		{
 			_endpoint = endpoint;
 		}
-
-		#region IMessageReceiver Members
 
 		///<summary>
 		///Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
@@ -77,8 +76,6 @@ namespace MassTransit.ServiceBus.Internal
 				}
 			}
 		}
-
-		#endregion
 
 		private void Restart()
 		{
@@ -164,7 +161,7 @@ namespace MassTransit.ServiceBus.Internal
 							{
 								try
 								{
-									IEnvelope e = EnvelopeMessageMapper.MapFrom(msg);
+									IEnvelope e = MessageQueueEnvelopeMapper.MapFrom(msg);
 
 									if (_consumer.IsHandled(e))
 									{

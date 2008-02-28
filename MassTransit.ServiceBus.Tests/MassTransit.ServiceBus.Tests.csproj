@@ -43,7 +43,6 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
-    <Reference Include="System.Messaging" />
     <Reference Include="System.Transactions" />
     <Reference Include="System.Xml" />
   </ItemGroup>
@@ -59,7 +58,6 @@
     <Compile Include="Messages\ClientMessage.cs" />
     <Compile Include="IntegrationTests\When_sending_a_request.cs" />
     <Compile Include="Messages\DeleteMessage.cs" />
-    <Compile Include="IntegrationTests\When_publishing_a_message.cs" />
     <Compile Include="IntegrationTests\When_sending_a_message.cs" />
     <Compile Include="MessageContext_Should_Help.cs" />
     <Compile Include="MessageId_Tests.cs" />
@@ -77,12 +75,9 @@
     <Compile Include="Messages\UpdateMessage.cs" />
     <Compile Include="Messages\UpdateAcceptedMessage.cs" />
     <Compile Include="When_A_Message_Is_Received_On_The_Service_Bus.cs" />
-    <Compile Include="When_Configuring_The_Service_Bus.cs" />
     <Compile Include="When_Creating_An_Envelope.cs" />
-    <Compile Include="When_Creating_A_GenericDeliveryAddress.cs" />
     <Compile Include="When_Publishing_A_Message.cs" />
     <Compile Include="When_specifying_an_endpoint_address.cs" />
-    <Compile Include="When_working_with_an_endpoint.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\MassTransit.ServiceBus\MassTransit.ServiceBus.csproj">

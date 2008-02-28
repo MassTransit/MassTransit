@@ -1,168 +1,173 @@
-using System;
-using MassTransit.ServiceBus.Util;
-using NUnit.Framework;
-using NUnit.Framework.SyntaxHelpers;
-using Rhino.Mocks;
-
 namespace MassTransit.ServiceBus.Tests
 {
-    [TestFixture]
-    public class When_Creating_An_Envelope
-    {
-        [Test]
-        public void A_Return_Address_Should_Be_Stored_With_The_Envelope()
-        {
-            MessageQueueEndpoint returnTo = @"msmq://localhost/test_endpoint";
+	using System;
+	using NUnit.Framework;
+	using NUnit.Framework.SyntaxHelpers;
+	using Rhino.Mocks;
+	using Util;
 
-            IEnvelope e = new Envelope(returnTo);
+	[TestFixture]
+	public class When_Creating_An_Envelope
+	{
+		[Test]
+		public void A_Message_Should_Be_Stored_In_The_Envelope()
+		{
+			MockRepository mocks = new MockRepository();
 
-			Assert.That(e.ReturnEndpoint.Uri.AbsoluteUri, Is.EqualTo("msmq://" + Environment.MachineName.ToLowerInvariant() + "/test_endpoint"));
-        }
+			IMessage message = mocks.Stub<IMessage>();
 
-        [Test]
-        public void A_Message_Should_Be_Stored_In_The_Envelope()
-        {
-            MockRepository mocks = new MockRepository();
+			IEnvelope e = new Envelope(message);
 
-            IMessage message = mocks.CreateMock<IMessage>();
+			Assert.That(e.Messages.Length, Is.EqualTo(1));
+		}
 
-            MessageQueueEndpoint returnTo = @"msmq://localhost/test_endpoint";
+		[Test]
+		public void A_Return_Address_Should_Be_Stored_With_The_Envelope()
+		{
+			MockRepository mocks = new MockRepository();
 
-            IEnvelope e = new Envelope(returnTo, message);
+			string endpointUriString = "msmq://localhost/test_queue";
 
-            Assert.That(e.Messages.Length, Is.EqualTo(1));
-        }
+			IEndpoint returnEndpoint = mocks.CreateMock<IEndpoint>();
+			using (mocks.Record())
+			{
+				SetupResult.For(returnEndpoint.Uri).Return(new Uri(endpointUriString));
+			}
 
-        [Test]
-        public void An_Array_Of_Messages_Should_Be_Stored_In_The_Envelope()
-        {
-            MockRepository mocks = new MockRepository();
+			using (mocks.Playback())
+			{
+				IEnvelope e = new Envelope(returnEndpoint);
 
-            IMessage[] messages = new IMessage[2];
-            messages[0] = mocks.CreateMock<IMessage>();
-            messages[1] = mocks.CreateMock<IMessage>();
+				Assert.That(e.ReturnEndpoint.Uri.AbsoluteUri, Is.EqualTo(endpointUriString));
+			}
+		}
 
-            MessageQueueEndpoint returnTo = @"msmq://localhost/test_endpoint";
+		[Test]
+		public void An_Array_Of_Messages_Should_Be_Stored_In_The_Envelope()
+		{
+			MockRepository mocks = new MockRepository();
 
-            IEnvelope e = new Envelope(returnTo, messages);
+			IMessage[] messages = new IMessage[2];
+			messages[0] = mocks.Stub<IMessage>();
+			messages[1] = mocks.Stub<IMessage>();
 
-            Assert.That(e.Messages.Length, Is.EqualTo(2));
-        }
+			IEnvelope e = new Envelope(messages);
 
-        [Test]
-        public void An_Param_Array_Of_Messages_Should_Be_Stored_In_The_Envelope()
-        {
-            MockRepository mocks = new MockRepository();
+			Assert.That(e.Messages.Length, Is.EqualTo(2));
+		}
 
-            IMessage message = mocks.CreateMock<IMessage>();
-            IMessage message1 = mocks.CreateMock<IMessage>();
+		[Test]
+		public void An_Param_Array_Of_Messages_Should_Be_Stored_In_The_Envelope()
+		{
+			MockRepository mocks = new MockRepository();
 
-            MessageQueueEndpoint returnTo = @"msmq://localhost/test_endpoint";
+			IMessage message = mocks.Stub<IMessage>();
+			IMessage message1 = mocks.Stub<IMessage>();
 
-            IEnvelope e = new Envelope(returnTo, message, message1);
+			IEnvelope e = new Envelope(message, message1);
 
-            Assert.That(e.Messages.Length, Is.EqualTo(2));
-        }
+			Assert.That(e.Messages.Length, Is.EqualTo(2));
+		}
 
-        [Test]
-        public void The_SentTime_Should_Be_Set()
-        {
-            DateTime time = DateTime.Now;
+		[Test]
+		[ExpectedException(typeof (Exception))]
+		public void How_to_handle_bad_ids_with_no_sequence()
+		{
+			Envelope e = new Envelope();
+			e.Id = new MessageId("5DF5FF14-DA6B-495f-8292-6FAD060FA13A");
+		}
 
-            Envelope e = new Envelope();
+		[Test]
+		public void Should_Equal_Itself()
+		{
+			Envelope e = new Envelope();
+			Assert.AreEqual(e, e);
+			Assert.IsTrue(e.Equals(e));
+		}
 
-            e.SentTime = time;
+		[Test]
+		public void Should_not_equal_another_with_same_guid_diff_sequence()
+		{
+			Envelope e = new Envelope();
+			e.Id = new MessageId("5DF5FF14-DA6B-495f-8292-6FAD060FA13A\\1");
 
-            Assert.That(e.SentTime, Is.EqualTo(time));
-        }
+			Envelope n = new Envelope();
+			n.Id = new MessageId("5DF5FF14-DA6B-495f-8292-6FAD060FA13A\\2");
 
-        [Test]
-        public void The_ArrivedTime_Should_Be_Set()
-        {
-            DateTime time = DateTime.Now;
+			Assert.AreNotEqual(e, n);
+			Assert.IsFalse(e.Equals(n));
+		}
 
-            Envelope e = new Envelope();
+		[Test]
+		public void The_ArrivedTime_Should_Be_Set()
+		{
+			DateTime time = DateTime.Now;
 
-            e.ArrivedTime = time;
+			Envelope e = new Envelope();
 
-            Assert.That(e.ArrivedTime, Is.EqualTo(time));
-        }
+			e.ArrivedTime = time;
 
-        [Test]
-        public void The_Id_Should_Be_Set()
-        {
-            MessageId id = Guid.NewGuid() + "\\27";
+			Assert.That(e.ArrivedTime, Is.EqualTo(time));
+		}
 
-            Envelope e = new Envelope();
+		[Test]
+		public void The_CorrelationId_Should_Be_Set()
+		{
+			MessageId id = Guid.NewGuid() + "\\27";
 
-            e.Id = id;
+			Envelope e = new Envelope();
 
-            Assert.That(e.Id, Is.EqualTo(id));
-        }
+			e.CorrelationId = id;
 
-        [Test]
-        public void The_CorrelationId_Should_Be_Set()
-        {
-            MessageId id = Guid.NewGuid() + "\\27";
+			Assert.That(e.CorrelationId, Is.EqualTo(id));
+		}
 
-            Envelope e = new Envelope();
+		[Test]
+		public void The_Id_Should_Be_Set()
+		{
+			MessageId id = Guid.NewGuid() + "\\27";
 
-            e.CorrelationId = id;
+			Envelope e = new Envelope();
 
-            Assert.That(e.CorrelationId, Is.EqualTo(id));
-        }
+			e.Id = id;
 
-        [Test]
-        public void The_Label_Should_Be_Set()
-        {
-            string id = Guid.NewGuid().ToString();
+			Assert.That(e.Id, Is.EqualTo(id));
+		}
 
-            Envelope e = new Envelope();
+		[Test]
+		public void The_Label_Should_Be_Set()
+		{
+			string id = Guid.NewGuid().ToString();
 
-            e.Label = id;
+			Envelope e = new Envelope();
 
-            Assert.That(e.Label, Is.EqualTo(id));
-        }
+			e.Label = id;
 
-        [Test]
-        public void The_TimeToBeReceived_Should_Be_Set()
-        {
-            TimeSpan time = TimeSpan.FromMinutes(30);
+			Assert.That(e.Label, Is.EqualTo(id));
+		}
 
-            Envelope e = new Envelope();
+		[Test]
+		public void The_SentTime_Should_Be_Set()
+		{
+			DateTime time = DateTime.Now;
 
-            e.TimeToBeReceived = time;
+			Envelope e = new Envelope();
 
-            Assert.That(e.TimeToBeReceived, Is.EqualTo(time));
-        }
+			e.SentTime = time;
 
-        [Test]
-        public void Should_Equal_Itself()
-        {
-            Envelope e = new Envelope();
-            Assert.AreEqual(e, e);
-            Assert.IsTrue(e.Equals(e));
-        }
+			Assert.That(e.SentTime, Is.EqualTo(time));
+		}
 
-        [Test]
-        [ExpectedException(typeof(Exception))]
-        public void How_to_handle_bad_ids_with_no_sequence()
-        {
-            Envelope e = new Envelope();
-            e.Id = new MessageId("5DF5FF14-DA6B-495f-8292-6FAD060FA13A");
-        }
+		[Test]
+		public void The_TimeToBeReceived_Should_Be_Set()
+		{
+			TimeSpan time = TimeSpan.FromMinutes(30);
 
-        [Test]
-        public void Should_not_equal_another_with_same_guid_diff_sequence()
-        {
-            Envelope e = new Envelope();
-            e.Id = new MessageId("5DF5FF14-DA6B-495f-8292-6FAD060FA13A\\1");
+			Envelope e = new Envelope();
 
-            Envelope n = new Envelope();
-            n.Id = new MessageId("5DF5FF14-DA6B-495f-8292-6FAD060FA13A\\2");
+			e.TimeToBeReceived = time;
 
-            Assert.AreNotEqual(e, n);
-            Assert.IsFalse(e.Equals(n));
-        }
-    }
+			Assert.That(e.TimeToBeReceived, Is.EqualTo(time));
+		}
+	}
 }
