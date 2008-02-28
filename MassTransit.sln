@@ -115,6 +115,18 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Transports", "Transports", 
 		Release.AspNetCompiler.Debug = "False"
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.ServiceBus.NMS", "MassTransit.ServiceBus.NMS\MassTransit.ServiceBus.NMS.csproj", "{1DBE5A67-C8C2-4AA9-82EF-1E730273993B}"
+	ProjectSection(WebsiteProperties) = preProject
+		Debug.AspNetCompiler.Debug = "True"
+		Release.AspNetCompiler.Debug = "False"
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.ServiceBus.NMS.Tests", "MassTransit.ServiceBus.NMS.Tests\MassTransit.ServiceBus.NMS.Tests.csproj", "{5B3732C1-9FC1-4A63-80BE-FCA7A78AB007}"
+	ProjectSection(WebsiteProperties) = preProject
+		Debug.AspNetCompiler.Debug = "True"
+		Release.AspNetCompiler.Debug = "False"
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -177,6 +189,14 @@ Global
 		{AF3C3E95-BA6C-41FF-873D-7C2E8994EE9D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AF3C3E95-BA6C-41FF-873D-7C2E8994EE9D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AF3C3E95-BA6C-41FF-873D-7C2E8994EE9D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1DBE5A67-C8C2-4AA9-82EF-1E730273993B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1DBE5A67-C8C2-4AA9-82EF-1E730273993B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1DBE5A67-C8C2-4AA9-82EF-1E730273993B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1DBE5A67-C8C2-4AA9-82EF-1E730273993B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5B3732C1-9FC1-4A63-80BE-FCA7A78AB007}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5B3732C1-9FC1-4A63-80BE-FCA7A78AB007}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5B3732C1-9FC1-4A63-80BE-FCA7A78AB007}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5B3732C1-9FC1-4A63-80BE-FCA7A78AB007}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -192,7 +212,9 @@ Global
 		{AFDD3858-FA76-484A-998E-41235EE09162} = {7E21914E-BB74-40A4-A933-0B2F8DE40D79}
 		{36B423E6-5B8A-426E-A21A-D6C8C58BACD5} = {D600DDA5-406B-43DC-9FA3-B2598B65F903}
 		{04F8097E-E4D0-41C0-A5EC-77C758265486} = {D600DDA5-406B-43DC-9FA3-B2598B65F903}
-		{6F90867C-E092-4EDC-B3DE-600D39DF0335} = {0006D6BB-1382-4B32-AD32-CA037F5CD4F6}
 		{AF3C3E95-BA6C-41FF-873D-7C2E8994EE9D} = {0006D6BB-1382-4B32-AD32-CA037F5CD4F6}
+		{6F90867C-E092-4EDC-B3DE-600D39DF0335} = {0006D6BB-1382-4B32-AD32-CA037F5CD4F6}
+		{1DBE5A67-C8C2-4AA9-82EF-1E730273993B} = {0006D6BB-1382-4B32-AD32-CA037F5CD4F6}
+		{5B3732C1-9FC1-4A63-80BE-FCA7A78AB007} = {0006D6BB-1382-4B32-AD32-CA037F5CD4F6}
 	EndGlobalSection
 EndGlobal
