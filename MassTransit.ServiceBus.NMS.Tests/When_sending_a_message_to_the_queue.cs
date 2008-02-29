@@ -1,95 +1,112 @@
-using System;
-using System.Threading;
-using MassTransit.ServiceBus.Internal;
-using NUnit.Framework;
-using NUnit.Framework.SyntaxHelpers;
-
+/// Copyright 2007-2008 The Apache Software Foundation.
+/// 
+/// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
+/// this file except in compliance with the License. You may obtain a copy of the 
+/// License at 
+/// 
+///   http://www.apache.org/licenses/LICENSE-2.0 
+/// 
+/// Unless required by applicable law or agreed to in writing, software distributed 
+/// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
+/// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+/// specific language governing permissions and limitations under the License.
 namespace MassTransit.ServiceBus.NMS.Tests
 {
-	[TestFixture]
-	public class When_sending_a_message_to_the_queue
-	{
-		[Test]
-		public void The_message_should_arrive()
-		{
-			NmsEndpoint endpoint = new NmsEndpoint("activemq://localhost:61616/queue_name");
+    using System;
+    using System.Threading;
+    using Internal;
+    using NUnit.Framework;
+    using NUnit.Framework.SyntaxHelpers;
 
-			IMessageSender sender = endpoint.Sender;
+    [TestFixture]
+    public class When_sending_a_message_to_the_queue
+    {
+        [Test]
+        public void The_message_should_arrive()
+        {
+            NmsEndpoint endpoint = new NmsEndpoint("activemq://localhost:61616/queue_name");
 
-			SimpleMessage msg = new SimpleMessage();
-			msg.Name = "Chris";
+            IMessageSender sender = endpoint.Sender;
 
-			Envelope e = new Envelope(msg);
+            SimpleMessage msg = new SimpleMessage();
+            msg.Name = "Chris";
 
-			sender.Send(e);
-		}
+            Envelope e = new Envelope(msg);
 
-		[Test]
-		public void The_message_should_be_retrieved()
-		{
-			NmsEndpoint endpoint = new NmsEndpoint("activemq://localhost:61616/queue_name");
+            sender.Send(e);
+        }
 
-			IMessageReceiver receiver = endpoint.Receiver;
+        [Test]
+        public void The_message_should_be_retrieved()
+        {
+            NmsEndpoint endpoint = new NmsEndpoint("activemq://localhost:61616/queue_name");
 
-			ManualResetEvent received = new ManualResetEvent(false);
+            IMessageReceiver receiver = endpoint.Receiver;
 
-			EnvelopeConsumer consumer = new EnvelopeConsumer(
-				delegate(IEnvelope e)
-			{
-				received.Set();
-			});
+            ManualResetEvent received = new ManualResetEvent(false);
 
-			receiver.Subscribe(consumer);
+            EnvelopeConsumer consumer = new EnvelopeConsumer(
+                delegate(IEnvelope e) { received.Set(); });
 
-			IMessageSender sender = endpoint.Sender;
+            receiver.Subscribe(consumer);
 
-			SimpleMessage msg = new SimpleMessage();
-			msg.Name = "Chris";
+            IMessageSender sender = endpoint.Sender;
 
-			Envelope env = new Envelope(msg);
+            SimpleMessage msg = new SimpleMessage();
+            msg.Name = "Chris";
 
-			sender.Send(env);
+            Envelope env = new Envelope(msg);
 
-			Assert.That(received.WaitOne(TimeSpan.FromSeconds(5), true), Is.True);
+            sender.Send(env);
 
-			endpoint.Dispose();
-			
-		}
-	}
+            Assert.That(received.WaitOne(TimeSpan.FromSeconds(5), true), Is.True);
 
-	public  delegate void EnvelopeHandler(IEnvelope e);
+            endpoint.Dispose();
+        }
+    }
 
-	public class EnvelopeConsumer : 
-		IEnvelopeConsumer
-	{
-		private readonly EnvelopeHandler _eh;
+    public delegate void EnvelopeHandler(IEnvelope e);
 
-		public EnvelopeConsumer(EnvelopeHandler eh)
-		{
-			_eh = eh;
-		}
+    public class EnvelopeConsumer :
+        IEnvelopeConsumer
+    {
+        private readonly EnvelopeHandler _eh;
 
-		public bool IsHandled(IEnvelope envelope)
-		{
-			return true;
-		}
+        public EnvelopeConsumer(EnvelopeHandler eh)
+        {
+            _eh = eh;
+        }
 
-		public void Deliver(IEnvelope envelope)
-		{
-			_eh(envelope);
-		}
-	}
+        public bool IsHandled(IEnvelope envelope)
+        {
+            return true;
+        }
 
-	[Serializable]
-	public class SimpleMessage : IMessage
-	{
-		private string _name;
+        public void Deliver(IEnvelope envelope)
+        {
+            _eh(envelope);
+        }
+    }
 
-		public string Name
-		{
-			get { return _name; }
-			set { _name = value; }
-		}
+    [Serializable]
+    public class SimpleMessage : IMessage
+    {
+        private string _name;
 
-	}
+
+        public SimpleMessage()
+        {
+        }
+
+        public SimpleMessage(string name)
+        {
+            _name = name;
+        }
+
+        public string Name
+        {
+            get { return _name; }
+            set { _name = value; }
+        }
+    }
 }

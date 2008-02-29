@@ -1,140 +1,153 @@
-using System;
-using System.Runtime.Serialization;
-using System.Threading;
-using Apache.NMS;
-using MassTransit.ServiceBus.Exceptions;
-using MassTransit.ServiceBus.Internal;
-using IMessageConsumer=Apache.NMS.IMessageConsumer;
-
+/// Copyright 2007-2008 The Apache Software Foundation.
+/// 
+/// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
+/// this file except in compliance with the License. You may obtain a copy of the 
+/// License at 
+/// 
+///   http://www.apache.org/licenses/LICENSE-2.0 
+/// 
+/// Unless required by applicable law or agreed to in writing, software distributed 
+/// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
+/// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+/// specific language governing permissions and limitations under the License.
 namespace MassTransit.ServiceBus.NMS
 {
-	public class NmsMessageReceiver :
-		IMessageReceiver
-	{
-		private IEnvelopeConsumer _consumer;
-		private readonly IEndpoint _endpoint;
-		private IConnectionFactory _factory;
-		private readonly string _queueName;
-		private IConnection _connection;
-		private ISession _session;
-		private IDestination _destination;
-		private IMessageConsumer _messageConsumer;
+    using System;
+    using System.Runtime.Serialization;
+    using System.Threading;
+    using Apache.NMS;
+    using Apache.NMS.ActiveMQ;
+    using Exceptions;
+    using Internal;
+    using IMessageConsumer=Apache.NMS.IMessageConsumer;
 
-		public NmsMessageReceiver(IEndpoint endpoint)
-		{
-			_endpoint = endpoint;
+    public class NmsMessageReceiver :
+        IMessageReceiver
+    {
+        private IEnvelopeConsumer _consumer;
+        private readonly IEndpoint _endpoint;
+        private IConnectionFactory _factory;
+        private readonly string _queueName;
+        private IConnection _connection;
+        private ISession _session;
+        private IDestination _destination;
+        private IMessageConsumer _messageConsumer;
 
-			UriBuilder queueUri = new UriBuilder("tcp", endpoint.Uri.Host, endpoint.Uri.Port);
+        public NmsMessageReceiver(IEndpoint endpoint)
+        {
+            _endpoint = endpoint;
 
-			_queueName = endpoint.Uri.AbsolutePath.Substring(1);
+            UriBuilder queueUri = new UriBuilder("tcp", endpoint.Uri.Host, endpoint.Uri.Port);
 
-			_factory = new Apache.NMS.ActiveMQ.ConnectionFactory(queueUri.Uri);
-		}
+            _queueName = endpoint.Uri.AbsolutePath.Substring(1);
 
-		public void Subscribe(IEnvelopeConsumer consumer)
-		{
-			lock (this)
-			{
-				if (_consumer == null)
-				{
-					_consumer = consumer;
+            _factory = new ConnectionFactory(queueUri.Uri);
+        }
 
-					Start();
-				}
-				else if (_consumer != consumer)
-				{
-					throw new EndpointException(_endpoint, "Only one consumer can be registered for a message receiver");
-				}
-			}
-		}
+        public void Subscribe(IEnvelopeConsumer consumer)
+        {
+            lock (this)
+            {
+                if (_consumer == null)
+                {
+                    _consumer = consumer;
 
-		public void Start()
-		{
-			_connection = _factory.CreateConnection();
-			_session = _connection.CreateSession();
-			_destination = _session.GetQueue(_queueName);
-			_messageConsumer = _session.CreateConsumer(_destination);
+                    Start();
+                }
+                else if (_consumer != consumer)
+                {
+                    throw new EndpointException(_endpoint, "Only one consumer can be registered for a message receiver");
+                }
+            }
+        }
 
-			_messageConsumer.Listener += new MessageListener(MessageListener);
-		}
+        public void Start()
+        {
+            _connection = _factory.CreateConnection();
+            _session = _connection.CreateSession();
+            _destination = _session.GetQueue(_queueName);
+            _messageConsumer = _session.CreateConsumer(_destination);
 
-		void MessageListener(Apache.NMS.IMessage message)
-		{
-			try
-			{
+            _messageConsumer.Listener += new MessageListener(MessageListener);
+        }
+
+        private void MessageListener(IMessage message)
+        {
+            try
+            {
 //				if (_log.IsDebugEnabled)
 //					_log.DebugFormat("Queue: {0} Received Message Id {1}", _queue.Path, msg.Id);
 
-				if (_consumer != null)
-				{
-					try
-					{
-						IEnvelope e = NmsEnvelopeMapper.MapFrom(message);
+                if (_consumer != null)
+                {
+                    try
+                    {
+                        IEnvelope e = NmsEnvelopeMapper.MapFrom(message);
 
-						if (_consumer.IsHandled(e))
-						{
-								//if (_messageLog.IsInfoEnabled)
-						//			_messageLog.InfoFormat("Received message {0} from {1}", e.Messages[0].GetType(), e.ReturnEndpoint.Uri);
+                        if (_consumer.IsHandled(e))
+                        {
+                            //if (_messageLog.IsInfoEnabled)
+                            //			_messageLog.InfoFormat("Received message {0} from {1}", e.Messages[0].GetType(), e.ReturnEndpoint.Uri);
 
-								ThreadPool.QueueUserWorkItem(ProcessMessage, e);
-						}
-					}
-					catch (SerializationException ex)
-					{
-						//_log.Error("Discarding unknown message " + message.NMSMessageId, ex);
-						throw;
-					}
-				}
-			}
-			catch (Exception ex)
-			{
-				throw;
-			}
-		}
-		public void ProcessMessage(object obj)
-		{
-			IEnvelope e = obj as IEnvelope;
-			if (e == null)
-				return;
-			try
-			{
-				_consumer.Deliver(e);
+                            ThreadPool.QueueUserWorkItem(ProcessMessage, e);
+                        }
+                    }
+                    catch (SerializationException ex)
+                    {
+                        //_log.Error("Discarding unknown message " + message.NMSMessageId, ex);
+                        throw;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
 
-				e.ReturnEndpoint.Dispose();
-			}
-			catch (Exception ex)
-			{
-				//if (_log.IsErrorEnabled)
+        public void ProcessMessage(object obj)
+        {
+            IEnvelope e = obj as IEnvelope;
+            if (e == null)
+                return;
+            try
+            {
+                _consumer.Deliver(e);
+
+                e.ReturnEndpoint.Dispose();
+            }
+            catch (Exception ex)
+            {
+                //if (_log.IsErrorEnabled)
 //_log.Error(string.Format("An exception occured delivering envelope {0}", e.Id), ex);
+            }
+        }
 
-			}
-		}
+        public void Stop()
+        {
+            if (_messageConsumer != null)
+            {
+                _messageConsumer.Dispose();
+                _messageConsumer = null;
+            }
 
-		public void Stop()
-		{
-			if (_messageConsumer != null)
-			{
-				_messageConsumer.Dispose();
-				_messageConsumer = null;
-			}
+            _destination = null;
 
-			_destination = null;
+            if (_session != null)
+            {
+                _session.Dispose();
+                _session = null;
+            }
+            if (_connection != null)
+            {
+                _connection.Dispose();
+                _connection = null;
+            }
+        }
 
-			if (_session != null)
-			{
-				_session.Dispose();
-				_session = null;
-			}
-			if (_connection != null)
-			{
-				_connection.Dispose();
-				_connection = null;
-			}
-		}
-
-		public void Dispose()
-		{
-			Stop();
-		}
-	}
+        public void Dispose()
+        {
+            Stop();
+        }
+    }
 }
