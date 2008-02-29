@@ -2,7 +2,6 @@ using System.IO;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using Apache.NMS;
-using MassTransit.ServiceBus.Util;
 
 /// Copyright 2007-2008 The Apache Software Foundation.
 /// 
@@ -18,7 +17,10 @@ using MassTransit.ServiceBus.Util;
 /// specific language governing permissions and limitations under the License.
 namespace MassTransit.ServiceBus.NMS
 {
-	public class NmsEnvelopeMapper
+    using Apache.NMS.ActiveMQ.Commands;
+    using MessageId=MassTransit.ServiceBus.Util.MessageId;
+
+    public class NmsEnvelopeMapper
 	{
 		private static readonly IFormatter _formatter = new BinaryFormatter();
 
@@ -39,7 +41,11 @@ namespace MassTransit.ServiceBus.NMS
 			if (envelope.ReturnEndpoint != null)
 			{
 				// TODO Need queue return path
-				//	bm.NMSReplyTo = envelope.ReturnEndpoint.Uri.ToString();
+                //envelope.ReturnEndpoint.Uri.ToString()
+                //3 is a magic number that = mq queue
+                IDestination d = ActiveMQDestination.CreateDestination(3,
+                    session.GetQueue("published_queue").QueueName);
+				bm.NMSReplyTo = d;
 			}
 
 			if (envelope.TimeToBeReceived < NMSConstants.defaultTimeToLive)
