@@ -47,6 +47,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="When_publishing_a_message_to_the_queue.cs" />
     <Compile Include="When_sending_a_message_to_the_queue.cs" />
   </ItemGroup>
   <ItemGroup>
