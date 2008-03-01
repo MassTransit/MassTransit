@@ -14,9 +14,6 @@ namespace MassTransit.ServiceBus.Tests.JsonPlay
         {
             string json = JavaScriptConvert.SerializeObject(new Bob("Chris"));
 
-            
-            
-
             Bob clone = JavaScriptConvert.DeserializeObject<Bob>(json);
             Assert.That(clone.Friend, Is.EqualTo("Chris"));
         }
