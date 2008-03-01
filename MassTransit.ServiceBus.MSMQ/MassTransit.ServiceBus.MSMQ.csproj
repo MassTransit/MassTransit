@@ -43,6 +43,7 @@
     <Compile Include="..\SolutionVersion.cs">
       <Link>SolutionVersion.cs</Link>
     </Compile>
+    <Compile Include="MessageQueueBody.cs" />
     <Compile Include="MessageQueueEnvelopeMapper.cs" />
     <Compile Include="IMessageQueueEndpoint.cs" />
     <Compile Include="MessageQueueEndpoint.cs" />

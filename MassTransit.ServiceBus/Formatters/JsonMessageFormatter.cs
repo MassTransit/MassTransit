@@ -17,15 +17,14 @@ namespace MassTransit.ServiceBus.Formatters
     public class JsonMessageFormatter
         : IMessageFormatter
     {
-        public IMessageBody Serialize(IEnvelope env, IMessageBody body)
+        public void Serialize(IMessage[] messages, IFormattedBody body)
         {
-            body.Body = JavaScriptConvert.SerializeObject(env.Messages);
-            return body;
+            body.Body = JavaScriptConvert.SerializeObject(messages);
         }
 
-        public IEnvelope Deserialize(IMessageBody messageBody)
+        public IMessage[] Deserialize(IFormattedBody formattedBody)
         {
-            return new Envelope(JavaScriptConvert.DeserializeObject<IMessage>((string)messageBody.Body));
+            return JavaScriptConvert.DeserializeObject<IMessage[]>((string)formattedBody.Body);
         }
     }
 }
