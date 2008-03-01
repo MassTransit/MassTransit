@@ -26,7 +26,7 @@ namespace MassTransit.ServiceBus.MSMQ
 	{
 		private static readonly ILog _log = LogManager.GetLogger(typeof (MessageQueueSender));
 		private static readonly ILog _messageLog = LogManager.GetLogger("MassTransit.Messages");
-	    private MessageQueueEnvelopeMapper _mapper;
+	    private IEnvelopeMapper<Message> _mapper;
 
 		private readonly IMessageQueueEndpoint _endpoint;
 		private MessageQueue _queue;
@@ -54,7 +54,7 @@ namespace MassTransit.ServiceBus.MSMQ
 
 		public void Send(IEnvelope envelope)
 		{
-			Message msg = _mapper.MapFrom(envelope);
+			Message msg = _mapper.ToMessage(envelope);
 
 			try
 			{

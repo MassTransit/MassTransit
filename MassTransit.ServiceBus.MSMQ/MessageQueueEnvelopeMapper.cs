@@ -15,13 +15,15 @@ namespace MassTransit.ServiceBus.MSMQ
 	using System.Messaging;
 	using System.Runtime.Serialization;
 	using System.Runtime.Serialization.Formatters.Binary;
+	using Internal;
 	using Util;
 
-	public class MessageQueueEnvelopeMapper
+	public class MessageQueueEnvelopeMapper : 
+        IEnvelopeMapper<Message>
 	{
 		private static readonly IFormatter _formatter = new BinaryFormatter();
 
-		public IEnvelope MapFrom(Message msg)
+		public IEnvelope ToEnvelope(Message msg)
 		{
 			IMessageQueueEndpoint returnAddress = (msg.ResponseQueue != null) ? new MessageQueueEndpoint(msg.ResponseQueue) : null;
 
@@ -62,7 +64,7 @@ namespace MassTransit.ServiceBus.MSMQ
 			return e;
 		}
 
-		public Message MapFrom(IEnvelope envelope)
+		public Message ToMessage(IEnvelope envelope)
 		{
 			Message msg = new Message();
 
