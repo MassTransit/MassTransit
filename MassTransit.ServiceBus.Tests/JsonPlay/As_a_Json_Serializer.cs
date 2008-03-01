@@ -10,7 +10,7 @@ namespace MassTransit.ServiceBus.Tests.JsonPlay
     public class As_a_Json_Serializer
     {
         [Test]
-        public void NAME()
+        public void Standard_Control()
         {
             string json = JavaScriptConvert.SerializeObject(new Bob("Chris"));
 
@@ -51,6 +51,7 @@ namespace MassTransit.ServiceBus.Tests.JsonPlay
     public class Bob : IMessage
     {
         private string _friend;
+        private string _extra = "o";
 
         //for JSON
         public Bob()
@@ -66,6 +67,12 @@ namespace MassTransit.ServiceBus.Tests.JsonPlay
         {
             get { return _friend; }
             set { _friend = value; }
+        }
+
+        public string Extra
+        {
+            get { return _extra; }
+            set { _extra = value; }
         }
     }
 
