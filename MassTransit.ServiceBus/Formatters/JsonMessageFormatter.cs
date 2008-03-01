@@ -7,12 +7,12 @@ namespace MassTransit.ServiceBus.Formatters
     {
         public object Serialize(IEnvelope env)
         {
-            return JavaScriptConvert.SerializeObject(env);
+            return JavaScriptConvert.SerializeObject(env.Messages);
         }
 
         public IEnvelope Deserialize(object messageBody)
         {
-            return JavaScriptConvert.DeserializeObject<IEnvelope>((string)messageBody);
+            return new Envelope(JavaScriptConvert.DeserializeObject<IMessage>((string)messageBody));
         }
     }
 }

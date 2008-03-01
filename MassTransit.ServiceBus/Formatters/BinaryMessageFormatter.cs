@@ -10,9 +10,7 @@ namespace MassTransit.ServiceBus.Formatters
 
         public object Serialize(IEnvelope env)
         {
-            //which
             _formatter.Serialize(null, env.Messages);
-            _formatter.Serialize(null, env);
 
             return null;
         }
