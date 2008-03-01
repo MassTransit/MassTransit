@@ -5,7 +5,7 @@ namespace MassTransit.ServiceBus.NMS
 	using Apache.NMS;
 	using Formatters;
 
-	public class NmsMessageBody :
+	public class NmsFormattedBody :
 		IFormattedBody
 	{
 		private readonly ISession _session;
@@ -13,7 +13,7 @@ namespace MassTransit.ServiceBus.NMS
 		private MemoryStream _stream;
 
 
-		public NmsMessageBody(ISession sess)
+		public NmsFormattedBody(ISession sess)
 		{
 			_session = sess;
 		}

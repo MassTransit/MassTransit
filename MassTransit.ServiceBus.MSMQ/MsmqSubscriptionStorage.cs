@@ -30,7 +30,7 @@ namespace MassTransit.ServiceBus.MSMQ
 		private BinaryFormatter _formatter;
 		private Cursor _peekCursor;
 		private MessageQueue _storageQueue;
-		private readonly IMessageQueueEndpoint _storageEndpoint;
+		private readonly IMsmqEndpoint _storageEndpoint;
 		private readonly ISubscriptionStorage _subscriptionCache;
 
 		/// <summary>
@@ -38,7 +38,7 @@ namespace MassTransit.ServiceBus.MSMQ
 		/// </summary>
 		/// <param name="storageEndpoint">the name of the queue that stores all of the subscriptions</param>
 		/// <param name="subscriptionCache">in memory cache</param>
-		public MsmqSubscriptionStorage(IMessageQueueEndpoint storageEndpoint, ISubscriptionStorage subscriptionCache)
+		public MsmqSubscriptionStorage(IMsmqEndpoint storageEndpoint, ISubscriptionStorage subscriptionCache)
 		{
 			_storageEndpoint = storageEndpoint;
 			_subscriptionCache = subscriptionCache;

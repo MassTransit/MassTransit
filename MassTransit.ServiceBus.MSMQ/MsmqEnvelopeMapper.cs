@@ -18,14 +18,14 @@ namespace MassTransit.ServiceBus.MSMQ
 	using Internal;
 	using Util;
 
-	public class MessageQueueEnvelopeMapper : 
+	public class MsmqEnvelopeMapper : 
         IEnvelopeMapper<Message>
 	{
 		private static readonly IFormatter _formatter = new BinaryFormatter();
 
 		public IEnvelope ToEnvelope(Message msg)
 		{
-			IMessageQueueEndpoint returnAddress = (msg.ResponseQueue != null) ? new MessageQueueEndpoint(msg.ResponseQueue) : null;
+			IMsmqEndpoint returnAddress = (msg.ResponseQueue != null) ? new MsmqEndpoint(msg.ResponseQueue) : null;
 
 			IEnvelope e = new Envelope(returnAddress);
 
@@ -73,7 +73,7 @@ namespace MassTransit.ServiceBus.MSMQ
 				_formatter.Serialize(msg.BodyStream, envelope.Messages);
 			}
 
-			IMessageQueueEndpoint endpoint = envelope.ReturnEndpoint as IMessageQueueEndpoint;
+			IMsmqEndpoint endpoint = envelope.ReturnEndpoint as IMsmqEndpoint;
 
 			if (endpoint != null)
 				msg.ResponseQueue = new MessageQueue(endpoint.QueuePath);

@@ -53,7 +53,7 @@
     <Compile Include="INmsEndpoint.cs" />
     <Compile Include="NmsEndpoint.cs" />
     <Compile Include="NmsEnvelopeMapper.cs" />
-    <Compile Include="NmsMessageBody.cs" />
+    <Compile Include="NmsFormattedBody.cs" />
     <Compile Include="NmsMessageReceiver.cs" />
     <Compile Include="NmsMessageSender.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

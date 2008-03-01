@@ -15,10 +15,10 @@ namespace MassTransit.ServiceBus.MSMQ.Tests
 	{
 		protected static readonly ILog _log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 
-		private readonly MessageQueueEndpoint _remoteServiceBusEndPoint = @"msmq://localhost/test_remoteservicebus";
+		private readonly MsmqEndpoint _remoteServiceBusEndPoint = @"msmq://localhost/test_remoteservicebus";
 
-		private readonly MessageQueueEndpoint _serviceBusEndPoint = @"msmq://localhost/test_servicebus";
-		private readonly MessageQueueEndpoint _subscriptionEndpoint = @"msmq://localhost/test_subscriptions";
+		private readonly MsmqEndpoint _serviceBusEndPoint = @"msmq://localhost/test_servicebus";
+		private readonly MsmqEndpoint _subscriptionEndpoint = @"msmq://localhost/test_subscriptions";
 		private ServiceBus _remoteServiceBus;
 		private IServiceBus _serviceBus;
 
@@ -65,18 +65,18 @@ namespace MassTransit.ServiceBus.MSMQ.Tests
 			}
 		}
 
-		public IMessageQueueEndpoint RemoteServiceBusEndPoint
+		public IMsmqEndpoint RemoteServiceBusEndPoint
 		{
 			get { return _remoteServiceBusEndPoint; }
 		}
 
 
-		public IMessageQueueEndpoint ServiceBusEndPoint
+		public IMsmqEndpoint ServiceBusEndPoint
 		{
 			get { return _serviceBusEndPoint; }
 		}
 
-		public IMessageQueueEndpoint SubscriptionEndpoint
+		public IMsmqEndpoint SubscriptionEndpoint
 		{
 			get { return _subscriptionEndpoint; }
 		}

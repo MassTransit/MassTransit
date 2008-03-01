@@ -17,7 +17,7 @@ namespace MassTransit.ServiceBus.MSMQ
 	/// <summary>
 	/// An extension of the IEndpoint interface for the additional support of Message Queue backed endpoints
 	/// </summary>
-	public interface IMessageQueueEndpoint :
+	public interface IMsmqEndpoint :
 		IEndpoint
 	{
 		/// <summary>

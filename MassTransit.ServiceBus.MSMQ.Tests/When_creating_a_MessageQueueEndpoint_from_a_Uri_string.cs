@@ -11,7 +11,7 @@ namespace MassTransit.ServiceBus.MSMQ.Tests
 		[Test]
 		public void The_result_Uri_should_match_the_constructor_string()
 		{
-			MessageQueueEndpoint q = new MessageQueueEndpoint("msmq://localhost/test_endpoint");
+			MsmqEndpoint q = new MsmqEndpoint("msmq://localhost/test_endpoint");
 			Assert.That(q.Uri.AbsoluteUri, Is.EqualTo("msmq://" + Environment.MachineName.ToLowerInvariant() + "/test_endpoint"));
 			Assert.That(q.QueuePath, Is.EqualTo(@"FormatName:DIRECT=OS:" + Environment.MachineName.ToLowerInvariant() + "\\private$\\test_endpoint"));
 		}
@@ -19,7 +19,7 @@ namespace MassTransit.ServiceBus.MSMQ.Tests
 		[Test]
 		public void The_resulting_Uri_should_match_the_string()
 		{
-			MessageQueueEndpoint addr = @"msmq://localhost/test_endpoint";
+			MsmqEndpoint addr = @"msmq://localhost/test_endpoint";
 			Assert.That(addr.Uri.AbsoluteUri, Is.EqualTo("msmq://" + Environment.MachineName.ToLowerInvariant() + "/test_endpoint"));
 		}
 	}
@@ -30,7 +30,7 @@ namespace MassTransit.ServiceBus.MSMQ.Tests
 		[Test]
 		public void The_queue_path_should_be_correct()
 		{
-			IMessageQueueEndpoint q = new MessageQueueEndpoint(new MessageQueue("FormatName:DIRECT=OS:" + Environment.MachineName + @"\private$\test_endpoint"));
+			IMsmqEndpoint q = new MsmqEndpoint(new MessageQueue("FormatName:DIRECT=OS:" + Environment.MachineName + @"\private$\test_endpoint"));
 
 			Assert.That(q.QueuePath, Is.EqualTo("FormatName:DIRECT=OS:" + Environment.MachineName.ToLowerInvariant() + "\\private$\\test_endpoint"));
 		}
@@ -38,7 +38,7 @@ namespace MassTransit.ServiceBus.MSMQ.Tests
 		[Test]
 		public void The_queue_path_should_be_correct_for_relative_queue_names()
 		{
-			IMessageQueueEndpoint q = new MessageQueueEndpoint(new MessageQueue(".\\private$\\test_endpoint"));
+			IMsmqEndpoint q = new MsmqEndpoint(new MessageQueue(".\\private$\\test_endpoint"));
 
 			Assert.That(q.QueuePath, Is.EqualTo("FormatName:DIRECT=OS:" + Environment.MachineName.ToLowerInvariant() + "\\private$\\test_endpoint"));
 		}
@@ -46,14 +46,14 @@ namespace MassTransit.ServiceBus.MSMQ.Tests
 		[Test]
 		public void The_Uri_should_be_correct()
 		{
-			IMessageQueueEndpoint q = new MessageQueueEndpoint(new MessageQueue("FormatName:DIRECT=OS:" + Environment.MachineName + @"\private$\test_endpoint"));
+			IMsmqEndpoint q = new MsmqEndpoint(new MessageQueue("FormatName:DIRECT=OS:" + Environment.MachineName + @"\private$\test_endpoint"));
 			Assert.That(q.Uri.AbsoluteUri, Is.EqualTo("msmq://" + Environment.MachineName.ToLowerInvariant() + "/test_endpoint"));
 		}
 
 		[Test]
 		public void The_Uri_should_be_correct_for_relative_queue_names()
 		{
-			IMessageQueueEndpoint q = new MessageQueueEndpoint(new MessageQueue(".\\private$\\test_endpoint"));
+			IMsmqEndpoint q = new MsmqEndpoint(new MessageQueue(".\\private$\\test_endpoint"));
 			Assert.That(q.Uri.AbsoluteUri, Is.EqualTo("msmq://" + Environment.MachineName.ToLowerInvariant() + "/test_endpoint"));
 		}
 	}

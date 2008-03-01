@@ -4,13 +4,13 @@ namespace MassTransit.ServiceBus.MSMQ
     using System.Messaging;
     using Formatters;
 
-    public class MessageQueueBody
+    public class MsmqFormattedBody
         : IFormattedBody
     {
         private Message _wrappedMessage;
 
 
-        public MessageQueueBody(Message wrappedMessage)
+        public MsmqFormattedBody(Message wrappedMessage)
         {
             _wrappedMessage = wrappedMessage;
         }

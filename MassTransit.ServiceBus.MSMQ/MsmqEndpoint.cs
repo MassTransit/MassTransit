@@ -21,8 +21,8 @@ namespace MassTransit.ServiceBus.MSMQ
 	/// <summary>
 	/// A MessageQueueEndpoint is an implementation of an endpoint using the Microsoft Message Queue service.
 	/// </summary>
-	public class MessageQueueEndpoint :
-		IMessageQueueEndpoint
+	public class MsmqEndpoint :
+		IMsmqEndpoint
 	{
 		private readonly string _queuePath;
 		private readonly Uri _uri;
@@ -33,7 +33,7 @@ namespace MassTransit.ServiceBus.MSMQ
 		/// Initializes a <c ref="MessageQueueEndpoint" /> instance with the specified URI string.
 		/// </summary>
 		/// <param name="uriString">The URI for the endpoint</param>
-		public MessageQueueEndpoint(string uriString)
+		public MsmqEndpoint(string uriString)
 			: this(new Uri(uriString))
 		{
 		}
@@ -42,7 +42,7 @@ namespace MassTransit.ServiceBus.MSMQ
 		/// Initializes a <c ref="MessageQueueEndpoint" /> instance with the specified URI.
 		/// </summary>
 		/// <param name="uri">The URI for the endpoint</param>
-		public MessageQueueEndpoint(Uri uri)
+		public MsmqEndpoint(Uri uri)
 		{
 			_uri = uri;
 
@@ -69,7 +69,7 @@ namespace MassTransit.ServiceBus.MSMQ
 		/// Creates an instance of the <c ref="MessageQueueEndpoint" /> class using the specified queue
 		/// </summary>
 		/// <param name="queue">A Microsoft Message Queue</param>
-		public MessageQueueEndpoint(MessageQueue queue)
+		public MsmqEndpoint(MessageQueue queue)
 		{
 			string path = queue.Path;
 			const string prefix = "FormatName:DIRECT=OS:";
@@ -133,7 +133,7 @@ namespace MassTransit.ServiceBus.MSMQ
 				lock (this)
 				{
 					if (_sender == null)
-						_sender = new MessageQueueSender(this);
+						_sender = new MsmqMessageSender(this);
 				}
 				return _sender;
 			}
@@ -146,7 +146,7 @@ namespace MassTransit.ServiceBus.MSMQ
 				lock (this)
 				{
 					if (_receiver == null)
-						_receiver = new MessageQueueReceiver(this);
+						_receiver = new MsmqMessageReceiver(this);
 				}
 
 				return _receiver;
@@ -188,9 +188,9 @@ namespace MassTransit.ServiceBus.MSMQ
 		/// </summary>
 		/// <param name="queueUri">A string identifying the URI of the message queue (ex. msmq://localhost/my_queue)</param>
 		/// <returns>An instance of the MessageQueueEndpoint class</returns>
-		public static implicit operator MessageQueueEndpoint(string queueUri)
+		public static implicit operator MsmqEndpoint(string queueUri)
 		{
-			return new MessageQueueEndpoint(queueUri);
+			return new MsmqEndpoint(queueUri);
 		}
 
 		/// <summary>
@@ -198,7 +198,7 @@ namespace MassTransit.ServiceBus.MSMQ
 		/// </summary>
 		/// <param name="endpoint">The endpoint to use to generate the URI string</param>
 		/// <returns>A URI string that identifies the message queue endpoint</returns>
-		public static implicit operator string(MessageQueueEndpoint endpoint)
+		public static implicit operator string(MsmqEndpoint endpoint)
 		{
 			return endpoint.Uri.AbsoluteUri;
 		}

@@ -31,7 +31,7 @@ namespace MassTransit.ServiceBus.MSMQ.Tests
 		{
 			string endpointName = @"msmq://localhost/test_servicebus";
 
-			MessageQueueEndpoint defaultEndpoint = endpointName;
+			MsmqEndpoint defaultEndpoint = endpointName;
 
 			IServiceBus serviceBus = new ServiceBus(defaultEndpoint, _mocks.CreateMock<ISubscriptionStorage>());
 
