@@ -20,18 +20,16 @@ namespace MassTransit.ServiceBus.Formatters
     {
         private static readonly IFormatter _formatter = new BinaryFormatter();
 
-        public IMessageBody Serialize(IEnvelope env, IMessageBody body)
+        public void Serialize(IMessage[] messages, IFormattedBody body)
         {
-            _formatter.Serialize(body.BodyStream, env.Messages);
-
-            return body;
+            _formatter.Serialize(body.BodyStream, messages);
         }
 
-        public IEnvelope Deserialize(IMessageBody messageBody)
+        public IMessage[] Deserialize(IFormattedBody formattedBody)
         {
-            IMessage[] messages = _formatter.Deserialize(messageBody.BodyStream) as IMessage[];
+            IMessage[] messages = _formatter.Deserialize(formattedBody.BodyStream) as IMessage[];
 
-            return new Envelope(messages);
+            return messages;
         }
     }
 }

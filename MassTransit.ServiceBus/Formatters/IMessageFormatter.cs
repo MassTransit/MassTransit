@@ -16,11 +16,11 @@ namespace MassTransit.ServiceBus.Formatters
 
     public interface IMessageFormatter
     {
-        IMessageBody Serialize(IEnvelope env, IMessageBody body);
-        IEnvelope Deserialize(IMessageBody messageBody);
+        void Serialize(IMessage[] messages, IFormattedBody body);
+        IMessage[] Deserialize(IFormattedBody formattedBody);
     }
 
-    public interface IMessageBody
+    public interface IFormattedBody
     {
         object Body { get; set; }
         Stream BodyStream { get; set; }
