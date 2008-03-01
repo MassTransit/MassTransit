@@ -21,10 +21,11 @@ namespace MassTransit.ServiceBus.Tests.JsonPlay
         [Test]
         public void Hmmm()
         {
-            string json = JavaScriptConvert.SerializeObject(new Bob("Chris"));
+        	const string name = "Chris";
+        	string json = JavaScriptConvert.SerializeObject(new Bob(name));
 
             Bill clone = JavaScriptConvert.DeserializeObject<Bill>(json);
-            Assert.That(clone.Friend, Is.EqualTo("Chris"));
+            Assert.That(clone.Friend, Is.EqualTo(name));
         }
 
         [Test]
