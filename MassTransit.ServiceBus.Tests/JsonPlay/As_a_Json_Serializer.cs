@@ -1,5 +1,7 @@
 namespace MassTransit.ServiceBus.Tests.JsonPlay
 {
+    using System.Globalization;
+    using System.IO;
     using Newtonsoft.Json;
     using NUnit.Framework;
     using NUnit.Framework.SyntaxHelpers;
@@ -12,8 +14,29 @@ namespace MassTransit.ServiceBus.Tests.JsonPlay
         {
             string json = JavaScriptConvert.SerializeObject(new Bob("Chris"));
 
+            
+            
+
             Bob clone = JavaScriptConvert.DeserializeObject<Bob>(json);
             Assert.That(clone.Friend, Is.EqualTo("Chris"));
+        }
+
+        [Test]
+        public void More_Control()
+        {
+            object value = new Bob("dru");
+
+            StringWriter sw = new StringWriter(CultureInfo.InvariantCulture);
+            JsonSerializer jsonSerializer = new JsonSerializer();
+            
+            using (JsonWriter jsonWriter = new JsonWriter(sw))
+            {
+                jsonWriter.Formatting = Formatting.Indented;
+                jsonSerializer.Serialize(jsonWriter, value);
+            }
+
+            string json = sw.ToString();
+            int i = 0;
         }
     }
 
