@@ -21,24 +21,24 @@ namespace MassTransit.ServiceBus.MSMQ
 	/// <summary>
 	/// Send envelopes on a message queue
 	/// </summary>
-	public class MessageQueueSender :
+	public class MsmqMessageSender :
 		IMessageSender
 	{
-		private static readonly ILog _log = LogManager.GetLogger(typeof (MessageQueueSender));
+		private static readonly ILog _log = LogManager.GetLogger(typeof (MsmqMessageSender));
 		private static readonly ILog _messageLog = LogManager.GetLogger("MassTransit.Messages");
 	    private IEnvelopeMapper<Message> _mapper;
 
-		private readonly IMessageQueueEndpoint _endpoint;
+		private readonly IMsmqEndpoint _endpoint;
 		private MessageQueue _queue;
 
 		/// <summary>
 		/// Initializes an instance of the <c ref="MessageQueueSender" /> class
 		/// </summary>
 		/// <param name="endpoint">The destination endpoint for messages to be sent</param>
-		public MessageQueueSender(IMessageQueueEndpoint endpoint)
+		public MsmqMessageSender(IMsmqEndpoint endpoint)
 		{
 			_endpoint = endpoint;
-            _mapper = new MessageQueueEnvelopeMapper();
+            _mapper = new MsmqEnvelopeMapper();
 
 			_queue = endpoint.Open(QueueAccessMode.SendAndReceive);
 		}

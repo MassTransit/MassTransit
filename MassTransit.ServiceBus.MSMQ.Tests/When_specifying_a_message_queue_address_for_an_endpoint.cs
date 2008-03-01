@@ -13,13 +13,13 @@ namespace MassTransit.ServiceBus.MSMQ.Tests
 		{
 			string address = "msmq://localhost/test_endpoint";
 
-			IMessageQueueEndpoint endpoint = new MessageQueueEndpoint(address);
+			IMsmqEndpoint endpoint = new MsmqEndpoint(address);
 
 			Assert.That(endpoint.QueuePath, Is.EqualTo("FormatName:DIRECT=OS:" + Environment.MachineName.ToLowerInvariant() + @"\private$\test_endpoint"));
 			Assert.That(endpoint.Uri.ToString(), Is.EqualTo("msmq://" + Environment.MachineName.ToLowerInvariant() + "/test_endpoint"));
 
 
-			IMessageQueueEndpoint endpoint2 = new MessageQueueEndpoint(new Uri(address));
+			IMsmqEndpoint endpoint2 = new MsmqEndpoint(new Uri(address));
 
 			Assert.That(endpoint2.QueuePath, Is.EqualTo("FormatName:DIRECT=OS:" + Environment.MachineName.ToLowerInvariant() + @"\private$\test_endpoint"));
 			Assert.That(endpoint2.Uri.ToString(), Is.EqualTo("msmq://" + Environment.MachineName.ToLowerInvariant() + "/test_endpoint"));
@@ -30,7 +30,7 @@ namespace MassTransit.ServiceBus.MSMQ.Tests
 		{
 			string address = "msmq://localhost/test_endpoint/error_creator";
 
-			new MessageQueueEndpoint(address);
+			new MsmqEndpoint(address);
 		}
 	}
 }

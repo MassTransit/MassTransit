@@ -24,13 +24,13 @@ namespace MassTransit.ServiceBus.MSMQ
 	/// <summary>
 	/// Receives envelopes from a message queue
 	/// </summary>
-	public class MessageQueueReceiver :
+	public class MsmqMessageReceiver :
 		IMessageReceiver
 	{
 		private static readonly object _locker = new object();
-		private static readonly ILog _log = LogManager.GetLogger(typeof (MessageQueueReceiver));
+		private static readonly ILog _log = LogManager.GetLogger(typeof (MsmqMessageReceiver));
 		private static readonly ILog _messageLog = LogManager.GetLogger("MassTransit.Messages");
-		private readonly IMessageQueueEndpoint _endpoint;
+		private readonly IMsmqEndpoint _endpoint;
 		private readonly TimeSpan _readTimeout = TimeSpan.FromSeconds(4);
 	    private IEnvelopeMapper<Message> _mapper;
 
@@ -43,10 +43,10 @@ namespace MassTransit.ServiceBus.MSMQ
 		/// Initializes a MessageQueueReceiver
 		/// </summary>
 		/// <param name="endpoint">The endpoint where the receiver should be attached</param>
-		public MessageQueueReceiver(IMessageQueueEndpoint endpoint)
+		public MsmqMessageReceiver(IMsmqEndpoint endpoint)
 		{
 			_endpoint = endpoint;
-            _mapper = new MessageQueueEnvelopeMapper();
+            _mapper = new MsmqEnvelopeMapper();
 		}
 
 		///<summary>
