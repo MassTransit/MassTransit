@@ -19,6 +19,15 @@ namespace MassTransit.ServiceBus.Tests.JsonPlay
         }
 
         [Test]
+        public void Hmmm()
+        {
+            string json = JavaScriptConvert.SerializeObject(new Bob("Chris"));
+
+            Bill clone = JavaScriptConvert.DeserializeObject<Bill>(json);
+            Assert.That(clone.Friend, Is.EqualTo("Chris"));
+        }
+
+        [Test]
         public void More_Control()
         {
             object value = new Bob("dru");
@@ -48,6 +57,27 @@ namespace MassTransit.ServiceBus.Tests.JsonPlay
         }
 
         public Bob(string friend)
+        {
+            _friend = friend;
+        }
+
+        public string Friend
+        {
+            get { return _friend; }
+            set { _friend = value; }
+        }
+    }
+
+    public class Bill : IMessage
+    {
+        private string _friend;
+
+        //for JSON
+        public Bill()
+        {
+        }
+
+        public Bill(string friend)
         {
             _friend = friend;
         }
