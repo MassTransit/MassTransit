@@ -48,7 +48,8 @@ namespace MassTransit.ServiceBus.NMS
                 {
                     IDestination destination = session.GetQueue(_queueName);
 
-                    IBytesMessage msg = NmsEnvelopeMapper.MapFrom(session, envelope);
+
+                    IBytesMessage msg = new NmsEnvelopeMapper(session).MapFrom(session, envelope);
 
                     using (IMessageProducer producer = session.CreateProducer(destination))
                     {

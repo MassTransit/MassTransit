@@ -1,30 +1,64 @@
 namespace MassTransit.ServiceBus.NMS
 {
-    using System.IO;
-    using Apache.NMS;
-    using Formatters;
+	using System;
+	using System.IO;
+	using Apache.NMS;
+	using Formatters;
 
-    public class NmsMessageBody :
-        IFormattedBody
-    {
-        private ISession sess;
+	public class NmsMessageBody :
+		IFormattedBody
+	{
+		private readonly ISession _session;
+		private IMessage _message;
+		private MemoryStream _stream;
 
 
-        public NmsMessageBody(ISession sess)
-        {
-            this.sess = sess;
-        }
+		public NmsMessageBody(ISession sess)
+		{
+			_session = sess;
+		}
 
-        public object Body
-        {
-            get { throw new System.NotImplementedException(); }
-            set { throw new System.NotImplementedException(); }
-        }
+		#region IFormattedBody Members
 
-        public Stream BodyStream
-        {
-            get { throw new System.NotImplementedException(); }
-            set { throw new System.NotImplementedException(); }
-        }
-    }
+		public object Body
+		{
+			get { throw new NotImplementedException(); }
+			set
+			{
+				if (value is string)
+				{
+					_message = _session.CreateTextMessage((string) value);
+				}
+				else if ( value is byte[])
+				{
+					_message = _session.CreateBytesMessage((byte[]) value);
+				}
+				else
+				{
+					throw new NotImplementedException();
+				}
+			}
+		}
+
+		public Stream BodyStream
+		{
+			get
+			{
+				if(_stream == null)
+				{
+					_stream = new MemoryStream();
+				}
+
+				return _stream;
+			}
+			set { throw new NotImplementedException(); }
+		}
+
+		#endregion
+
+		public IMessage Message
+		{
+			get { return _message; }
+		}
+	}
 }

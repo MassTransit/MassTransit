@@ -86,7 +86,7 @@ namespace MassTransit.ServiceBus.NMS
                 {
                     try
                     {
-                        IEnvelope e = NmsEnvelopeMapper.MapFrom(message);
+                        IEnvelope e = new NmsEnvelopeMapper(_session).MapFrom(message);
 
                         if (_consumer.IsHandled(e))
                         {
