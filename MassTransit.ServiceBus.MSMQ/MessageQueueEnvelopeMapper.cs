@@ -21,7 +21,7 @@ namespace MassTransit.ServiceBus.MSMQ
 	{
 		private static readonly IFormatter _formatter = new BinaryFormatter();
 
-		public static IEnvelope MapFrom(Message msg)
+		public IEnvelope MapFrom(Message msg)
 		{
 			IMessageQueueEndpoint returnAddress = (msg.ResponseQueue != null) ? new MessageQueueEndpoint(msg.ResponseQueue) : null;
 
@@ -62,7 +62,7 @@ namespace MassTransit.ServiceBus.MSMQ
 			return e;
 		}
 
-		public static Message MapFrom(IEnvelope envelope)
+		public Message MapFrom(IEnvelope envelope)
 		{
 			Message msg = new Message();
 
