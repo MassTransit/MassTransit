@@ -17,13 +17,21 @@ namespace MassTransit.ServiceBus.NMS
     using System.Runtime.Serialization.Formatters.Binary;
     using Apache.NMS;
     using Apache.NMS.ActiveMQ.Commands;
+    using Internal;
     using MessageId=MassTransit.ServiceBus.Util.MessageId;
 
-    public class NmsEnvelopeMapper
+    public class NmsEnvelopeMapper :
+		IEnvelopeMapper<Apache.NMS.IMessage>
     {
         private static readonly IFormatter _formatter = new BinaryFormatter();
+    	private readonly ISession _session;
 
-        public static IBytesMessage MapFrom(ISession session, IEnvelope envelope)
+    	public NmsEnvelopeMapper(ISession session)
+    	{
+    		_session = session;
+    	}
+
+    	public IBytesMessage MapFrom(ISession session, IEnvelope envelope)
         {
             IBytesMessage bm = session.CreateBytesMessage();
 
@@ -61,7 +69,7 @@ namespace MassTransit.ServiceBus.NMS
             return bm;
         }
 
-        public static IEnvelope MapFrom(IMessage message)
+        public IEnvelope MapFrom(IMessage message)
         {
             //    IMessageQueueEndpoint returnAddress = (msg.ResponseQueue != null) ? new MessageQueueEndpoint(msg.ResponseQueue) : null;
 
@@ -112,5 +120,16 @@ namespace MassTransit.ServiceBus.NMS
 
             return e;
         }
+
+    	public IMessage ToMessage(IEnvelope envelope)
+    	{
+    		return MapFrom(_session, envelope);
+    		
+    	}
+
+    	public IEnvelope ToEnvelope(IMessage message)
+    	{
+    		return MapFrom(message);
+    	}
     }
 }
