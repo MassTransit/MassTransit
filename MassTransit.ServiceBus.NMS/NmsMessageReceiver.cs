@@ -19,6 +19,7 @@ namespace MassTransit.ServiceBus.NMS
     using Apache.NMS.ActiveMQ;
     using Exceptions;
     using Internal;
+    using log4net;
     using IMessageConsumer=Apache.NMS.IMessageConsumer;
 
     public class NmsMessageReceiver :
@@ -32,6 +33,9 @@ namespace MassTransit.ServiceBus.NMS
         private ISession _session;
         private IDestination _destination;
         private IMessageConsumer _messageConsumer;
+
+        private static readonly ILog _log = LogManager.GetLogger(typeof(NmsMessageSender));
+        private static readonly ILog _messageLog = LogManager.GetLogger("MassTransit.Messages");
 
         public NmsMessageReceiver(IEndpoint endpoint)
         {
@@ -75,8 +79,8 @@ namespace MassTransit.ServiceBus.NMS
         {
             try
             {
-//				if (_log.IsDebugEnabled)
-//					_log.DebugFormat("Queue: {0} Received Message Id {1}", _queue.Path, msg.Id);
+				if (_log.IsDebugEnabled)
+					_log.DebugFormat("Queue: {0} Received Message Id {1}", _queueName, message.NMSMessageId);
 
                 if (_consumer != null)
                 {
@@ -86,21 +90,24 @@ namespace MassTransit.ServiceBus.NMS
 
                         if (_consumer.IsHandled(e))
                         {
-                            //if (_messageLog.IsInfoEnabled)
-                            //			_messageLog.InfoFormat("Received message {0} from {1}", e.Messages[0].GetType(), e.ReturnEndpoint.Uri);
+                            if (_messageLog.IsInfoEnabled)
+                            			_messageLog.InfoFormat("Received message {0} from {1}", e.Messages[0].GetType(), e.ReturnEndpoint.Uri);
 
                             ThreadPool.QueueUserWorkItem(ProcessMessage, e);
                         }
                     }
                     catch (SerializationException ex)
                     {
-                        //_log.Error("Discarding unknown message " + message.NMSMessageId, ex);
+                        if(_log.IsErrorEnabled)
+                            _log.Error("Discarding unknown message " + message.NMSMessageId, ex);
                         throw;
                     }
                 }
             }
             catch (Exception ex)
             {
+                if (_log.IsErrorEnabled)
+                    _log.Error("Discarding unknown message " + message.NMSMessageId, ex);
                 throw;
             }
         }
@@ -118,8 +125,8 @@ namespace MassTransit.ServiceBus.NMS
             }
             catch (Exception ex)
             {
-                //if (_log.IsErrorEnabled)
-//_log.Error(string.Format("An exception occured delivering envelope {0}", e.Id), ex);
+                if (_log.IsErrorEnabled)
+                    _log.Error(string.Format("An exception occured delivering envelope {0}", e.Id), ex);
             }
         }
 
