@@ -51,7 +51,6 @@ namespace MassTransit.ServiceBus.Tests.JsonPlay
     public class Bob : IMessage
     {
         private string _friend;
-        private string _extra = "o";
 
         //for JSON
         public Bob()
@@ -67,12 +66,6 @@ namespace MassTransit.ServiceBus.Tests.JsonPlay
         {
             get { return _friend; }
             set { _friend = value; }
-        }
-
-        public string Extra
-        {
-            get { return _extra; }
-            set { _extra = value; }
         }
     }
 

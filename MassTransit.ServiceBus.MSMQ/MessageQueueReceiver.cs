@@ -32,7 +32,7 @@ namespace MassTransit.ServiceBus.MSMQ
 		private static readonly ILog _messageLog = LogManager.GetLogger("MassTransit.Messages");
 		private readonly IMessageQueueEndpoint _endpoint;
 		private readonly TimeSpan _readTimeout = TimeSpan.FromSeconds(4);
-	    private MessageQueueEnvelopeMapper _mapper;
+	    private IEnvelopeMapper<Message> _mapper;
 
 		private IEnvelopeConsumer _consumer;
 
@@ -163,7 +163,7 @@ namespace MassTransit.ServiceBus.MSMQ
 							{
 								try
 								{
-									IEnvelope e = _mapper.MapFrom(msg);
+									IEnvelope e = _mapper.ToEnvelope(msg);
 
 									if (_consumer.IsHandled(e))
 									{
