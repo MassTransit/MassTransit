@@ -12,124 +12,116 @@
 /// specific language governing permissions and limitations under the License.
 namespace MassTransit.ServiceBus.NMS
 {
-    using System.IO;
-    using System.Runtime.Serialization;
-    using System.Runtime.Serialization.Formatters.Binary;
-    using Apache.NMS;
-    using Apache.NMS.ActiveMQ.Commands;
-    using Internal;
-    using MessageId=MassTransit.ServiceBus.Util.MessageId;
+	using System.IO;
+	using System.Runtime.Serialization;
+	using System.Runtime.Serialization.Formatters.Binary;
+	using Apache.NMS;
+	using Apache.NMS.ActiveMQ.Commands;
+	using Internal;
+	using MessageId=MassTransit.ServiceBus.Util.MessageId;
 
-    public class NmsEnvelopeMapper :
-		IEnvelopeMapper<Apache.NMS.IMessage>
-    {
-        private static readonly IFormatter _formatter = new BinaryFormatter();
-    	private readonly ISession _session;
+	public class NmsEnvelopeMapper :
+		IEnvelopeMapper<IMessage>
+	{
+		private static readonly IFormatter _formatter = new BinaryFormatter();
+		private readonly ISession _session;
 
-    	public NmsEnvelopeMapper(ISession session)
-    	{
-    		_session = session;
-    	}
+		public NmsEnvelopeMapper(ISession session)
+		{
+			_session = session;
+		}
 
-    	public IBytesMessage MapFrom(ISession session, IEnvelope envelope)
-        {
-            IBytesMessage bm = session.CreateBytesMessage();
+		#region IEnvelopeMapper<IMessage> Members
 
-            if (envelope.Messages != null && envelope.Messages.Length > 0)
-            {
-                MemoryStream mem = new MemoryStream();
-                _formatter.Serialize(mem, envelope.Messages);
+		public IMessage ToMessage(IEnvelope envelope)
+		{
+			IBytesMessage bm = _session.CreateBytesMessage();
 
-                bm.Content = new byte[mem.Length];
-                mem.Seek(0, SeekOrigin.Begin);
-                mem.Read(bm.Content, 0, (int) mem.Length);
-            }
+			if (envelope.Messages != null && envelope.Messages.Length > 0)
+			{
+				MemoryStream mem = new MemoryStream();
+				_formatter.Serialize(mem, envelope.Messages);
 
-            if (envelope.ReturnEndpoint != null)
-            {
-                // TODO Need queue return path
-                //envelope.ReturnEndpoint.Uri.ToString()
-                //3 is a magic number that = mq queue
-                IDestination d = ActiveMQDestination.CreateDestination(3,
-                                                                       session.GetQueue("published_queue").QueueName);
-                bm.NMSReplyTo = d;
-            }
+				bm.Content = new byte[mem.Length];
+				mem.Seek(0, SeekOrigin.Begin);
+				mem.Read(bm.Content, 0, (int) mem.Length);
+			}
 
-            if (envelope.TimeToBeReceived < NMSConstants.defaultTimeToLive)
-                bm.NMSTimeToLive = envelope.TimeToBeReceived;
+			if (envelope.ReturnEndpoint != null)
+			{
+				// TODO Need queue return path
+				//envelope.ReturnEndpoint.Uri.ToString()
+				//3 is a magic number that = mq queue
+				IDestination d = ActiveMQDestination.CreateDestination(3, _session.GetQueue("published_queue").QueueName);
+				bm.NMSReplyTo = d;
+			}
 
-            if (!string.IsNullOrEmpty(envelope.Label))
-                bm.Properties["NMSXGroupID"] = envelope.Label;
+			if (envelope.TimeToBeReceived < NMSConstants.defaultTimeToLive)
+				bm.NMSTimeToLive = envelope.TimeToBeReceived;
 
-            bm.NMSPersistent = envelope.Recoverable;
+			if (!string.IsNullOrEmpty(envelope.Label))
+				bm.Properties["NMSXGroupID"] = envelope.Label;
 
-            if (envelope.CorrelationId != MessageId.Empty)
-                bm.NMSCorrelationID = envelope.CorrelationId;
+			bm.NMSPersistent = envelope.Recoverable;
 
-            return bm;
-        }
+			if (envelope.CorrelationId != MessageId.Empty)
+				bm.NMSCorrelationID = envelope.CorrelationId;
 
-        public IEnvelope MapFrom(IMessage message)
-        {
-            //    IMessageQueueEndpoint returnAddress = (msg.ResponseQueue != null) ? new MessageQueueEndpoint(msg.ResponseQueue) : null;
+			return bm;
+		}
 
-            IEnvelope e = new Envelope();
+		public IEnvelope ToEnvelope(IMessage message)
+		{
+			//    IMessageQueueEndpoint returnAddress = (msg.ResponseQueue != null) ? new MessageQueueEndpoint(msg.ResponseQueue) : null;
 
-            //    if (string.IsNullOrEmpty(msg.Id))
-            //    {
-            //        e.Id = MessageId.Empty;
-            //    }
-            //    else
-            //    {
-            //        e.Id = msg.Id;
-            //    }
+			IEnvelope e = new Envelope();
 
-            //    if (string.IsNullOrEmpty(msg.CorrelationId))
-            //    {
-            //        e.CorrelationId = MessageId.Empty;
-            //    }
-            //    else
-            //    {
-            //        e.CorrelationId = msg.CorrelationId;
-            //    }
+			//    if (string.IsNullOrEmpty(msg.Id))
+			//    {
+			//        e.Id = MessageId.Empty;
+			//    }
+			//    else
+			//    {
+			//        e.Id = msg.Id;
+			//    }
 
-            e.TimeToBeReceived = message.NMSTimeToLive;
-            e.Recoverable = message.NMSPersistent;
+			//    if (string.IsNullOrEmpty(msg.CorrelationId))
+			//    {
+			//        e.CorrelationId = MessageId.Empty;
+			//    }
+			//    else
+			//    {
+			//        e.CorrelationId = msg.CorrelationId;
+			//    }
 
-            if (message.Properties.Contains("NMSXGroupID"))
-                e.Label = message.Properties["NMSXGroupID"].ToString();
+			e.TimeToBeReceived = message.NMSTimeToLive;
+			e.Recoverable = message.NMSPersistent;
 
-            if (message is IBytesMessage)
-            {
-                IBytesMessage bm = (IBytesMessage) message;
+			if (message.Properties.Contains("NMSXGroupID"))
+				e.Label = message.Properties["NMSXGroupID"].ToString();
 
-                MemoryStream mem = new MemoryStream(bm.Content, false);
+			if (message is IBytesMessage)
+			{
+				IBytesMessage bm = (IBytesMessage) message;
 
-                MassTransit.ServiceBus.IMessage[] messages =
-                    _formatter.Deserialize(mem) as MassTransit.ServiceBus.IMessage[];
-                e.Messages = messages ?? new MassTransit.ServiceBus.IMessage[] {};
-            }
+				MemoryStream mem = new MemoryStream(bm.Content, false);
 
-
-            //    if (e.Id != MessageId.Empty)
-            //    {
-            //        e.SentTime = msg.SentTime;
-            //        e.ArrivedTime = msg.ArrivedTime;
-            //    }
+				MassTransit.ServiceBus.IMessage[] messages =
+					_formatter.Deserialize(mem) as MassTransit.ServiceBus.IMessage[];
+				e.Messages = messages ?? new MassTransit.ServiceBus.IMessage[] {};
+			}
 
 
-            return e;
-        }
+			//    if (e.Id != MessageId.Empty)
+			//    {
+			//        e.SentTime = msg.SentTime;
+			//        e.ArrivedTime = msg.ArrivedTime;
+			//    }
 
-    	public IMessage ToMessage(IEnvelope envelope)
-    	{
-    		return MapFrom(_session, envelope);
-    		
-    	}
 
-    	public IEnvelope ToEnvelope(IMessage message)
-    	{
-    		return MapFrom(message);
-    	}
-    }
+			return e;
+		}
+
+		#endregion
+	}
 }
