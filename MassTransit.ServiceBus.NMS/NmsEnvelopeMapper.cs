@@ -10,6 +10,7 @@
 /// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 /// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 /// specific language governing permissions and limitations under the License.
+
 namespace MassTransit.ServiceBus.NMS
 {
 	using System.IO;
@@ -23,7 +24,7 @@ namespace MassTransit.ServiceBus.NMS
 	public class NmsEnvelopeMapper :
 		IEnvelopeMapper<IMessage>
 	{
-		private static readonly IFormatter _formatter = new BinaryFormatter();
+        private static readonly IFormatter _formatter = new BinaryFormatter();
 		private readonly ISession _session;
 
 		public NmsEnvelopeMapper(ISession session)
