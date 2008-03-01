@@ -19,6 +19,9 @@ namespace MassTransit.ServiceBus
 	/// <summary>
 	/// A public interface to the envelope containing message(s)
 	/// </summary>
+	/// <remarks>
+	/// An interface on top of the underlying messaging infrastructure's 'messages'
+	/// </remarks>
 	public interface IEnvelope : ICloneable
 	{
 		/// <summary>

@@ -8,17 +8,16 @@ namespace MassTransit.ServiceBus.Formatters
     {
         private static readonly IFormatter _formatter = new BinaryFormatter();
 
-        public object Serialize(IEnvelope env)
+        public IMessageBody Serialize(IEnvelope env, IMessageBody body)
         {
-            _formatter.Serialize(null, env.Messages);
+            _formatter.Serialize(body.BodyStream, env.Messages);
 
-            return null;
+            return body;
         }
 
-        public IEnvelope Deserialize(object messageBody)
+        public IEnvelope Deserialize(IMessageBody messageBody)
         {
-            //IMessage[] messages = _formatter.Deserialize(msg.BodyStream) as IMessage[];
-            IMessage[] messages = _formatter.Deserialize(null) as IMessage[];
+            IMessage[] messages = _formatter.Deserialize(messageBody.BodyStream) as IMessage[];
 
             return new Envelope(messages);
         }
