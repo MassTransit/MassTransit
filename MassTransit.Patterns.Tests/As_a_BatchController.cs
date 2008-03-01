@@ -5,6 +5,7 @@ using MassTransit.ServiceBus.Internal;
 namespace MassTransit.Patterns.Tests
 {
 	using System;
+	using System.Collections.Generic;
 	using Batching;
 	using MassTransit.ServiceBus.Subscriptions;
 	using NUnit.Framework;
@@ -38,6 +39,17 @@ namespace MassTransit.Patterns.Tests
 			_bus = new ServiceBus(_endpoint, new LocalSubscriptionCache());
 		}
 
+
+	    [Test, Ignore("Just an idea")]
+	    public void Send_as_batch()
+	    {
+	        IList<string> msgs = new List<string>();
+            msgs.Add("chris");
+            msgs.Add("dru");
+
+            BatchMessage<string, Guid>.SendAsBatch(_bus, new Uri("msmq://localhost/test_queue"), msgs);
+            BatchMessage<string, Guid>.PublishAsBatch(_bus,  msgs);
+	    }
 		[Test]
 		public void The_batch_should_be_complete_when_the_last_message_is_received()
 		{
@@ -158,5 +170,38 @@ namespace MassTransit.Patterns.Tests
 			Assert.That(numberCalled, Is.EqualTo(4));
 			Assert.That(isComplete, Is.True, "Not Complete");
 		}
+
+        [Test]
+        public void A_timeout_should_leave_the_batch_incomplete() //should it do more?
+        {
+            bool wasCalled = false;
+            bool isComplete = false;
+
+            BatchController<BatchMessage<string, Guid>, Guid> c = new BatchController<BatchMessage<string, Guid>, Guid>(
+                delegate(IBatchContext<BatchMessage<string, Guid>, Guid> cxt)
+                {
+                    foreach (BatchMessage<string, Guid> msg in cxt)
+                    {
+                        wasCalled = true;
+                        isComplete = cxt.IsComplete;
+                    }
+                }, TimeSpan.FromSeconds(3));
+
+            Guid batchId = Guid.NewGuid();
+            int batchLength = 2;
+
+            BatchMessage<string, Guid> msg1 = new BatchMessage<string, Guid>(batchId, batchLength, "hello");
+
+            IEnvelope env1 = new Envelope(msg1);
+
+            _bus.Subscribe<BatchMessage<string, Guid>>(c.HandleMessage);
+
+            _bus.Deliver(env1);
+            Thread.Sleep(3005);
+            _bus.Deliver(env1);
+
+            Assert.That(wasCalled, Is.True, "Not Called");
+            Assert.That(isComplete, Is.False, "Not Complete");
+        }
 	}
 }
