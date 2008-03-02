@@ -13,15 +13,13 @@
 namespace MassTransit.ServiceBus.MSMQ
 {
 	using System.Messaging;
-	using System.Runtime.Serialization;
-	using System.Runtime.Serialization.Formatters.Binary;
 	using Internal;
 	using Util;
 
 	public class MsmqEnvelopeMapper : 
         IEnvelopeMapper<Message>
 	{
-		private static readonly IFormatter _formatter = new BinaryFormatter();
+        private static readonly Formatters.IMessageFormatter _formatter = new Formatters.BinaryMessageFormatter();
 
 		public IEnvelope ToEnvelope(Message msg)
 		{
@@ -56,8 +54,8 @@ namespace MassTransit.ServiceBus.MSMQ
 				e.SentTime = msg.SentTime;
 				e.ArrivedTime = msg.ArrivedTime;
 			}
-
-			IMessage[] messages = _formatter.Deserialize(msg.BodyStream) as IMessage[];
+            
+			IMessage[] messages = _formatter.Deserialize(new MsmqFormattedBody(msg));
 
 			e.Messages = messages ?? new IMessage[] {};
 
@@ -68,9 +66,9 @@ namespace MassTransit.ServiceBus.MSMQ
 		{
 			Message msg = new Message();
 
-			if (envelope.Messages != null && envelope.Messages.Length > 0)
+			if (envelope.Messages != null)
 			{
-				_formatter.Serialize(msg.BodyStream, envelope.Messages);
+				_formatter.Serialize(new MsmqFormattedBody(msg), envelope.Messages);
 			}
 
 			IMsmqEndpoint endpoint = envelope.ReturnEndpoint as IMsmqEndpoint;
