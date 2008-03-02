@@ -14,9 +14,9 @@ namespace MassTransit.ServiceBus.Formatters
 {
     using System.IO;
 
-    public interface IMessageFormatter
+    public interface IFormattedBody
     {
-        void Serialize(IFormattedBody body, params IMessage[] messages);
-        IMessage[] Deserialize(IFormattedBody formattedBody);
+        object Body { get; set; }
+        Stream BodyStream { get; set; }
     }
 }
