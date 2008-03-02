@@ -45,6 +45,7 @@
     </Compile>
     <Compile Include="EndpointCache.cs" />
     <Compile Include="Formatters\BinaryMessageFormatter.cs" />
+    <Compile Include="Formatters\IFormattedBody.cs" />
     <Compile Include="Internal\AsyncReplyDispatcher.cs" />
     <Compile Include="Envelope.cs" />
     <Compile Include="Exceptions\EndpointException.cs" />
