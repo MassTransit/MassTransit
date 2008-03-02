@@ -34,10 +34,6 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\libs\log4net.dll</HintPath>
     </Reference>
-    <Reference Include="Newtonsoft.Json, Version=1.3.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\libs\Newtonsoft.Json.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Transactions" />
@@ -49,7 +45,6 @@
     </Compile>
     <Compile Include="EndpointCache.cs" />
     <Compile Include="Formatters\BinaryMessageFormatter.cs" />
-    <Compile Include="Formatters\JsonMessageFormatter.cs" />
     <Compile Include="Internal\AsyncReplyDispatcher.cs" />
     <Compile Include="Envelope.cs" />
     <Compile Include="Exceptions\EndpointException.cs" />

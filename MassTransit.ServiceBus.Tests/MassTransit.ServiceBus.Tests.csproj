@@ -33,10 +33,6 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\libs\log4net.dll</HintPath>
     </Reference>
-    <Reference Include="Newtonsoft.Json, Version=1.3.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\libs\Newtonsoft.Json.dll</HintPath>
-    </Reference>
     <Reference Include="nunit.framework, Version=2.4.3.0, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\libs\nunit.framework.dll</HintPath>
@@ -54,7 +50,6 @@
     <Compile Include="As_A_Service_With_A_Message_Endpoint.cs" />
     <Compile Include="CommandExecutorPlay\As_a_CommandExecutor.cs" />
     <Compile Include="IntegrationTests\When_using_queues_on_a_remote_server.cs" />
-    <Compile Include="Formatters\As_a_Json_Serializer.cs" />
     <Compile Include="Subscriptions\As_Local_Subscription_Storage.cs" />
     <Compile Include="IntegrationTests\As_Msmq_Storage.cs" />
     <Compile Include="IntegrationTests\MsmqStorage_Idempotent_Tests.cs" />
@@ -95,6 +90,9 @@
     <None Include="log4net.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Formatters\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
