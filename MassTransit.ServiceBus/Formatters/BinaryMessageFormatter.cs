@@ -20,7 +20,7 @@ namespace MassTransit.ServiceBus.Formatters
     {
         private static readonly IFormatter _formatter = new BinaryFormatter();
 
-        public void Serialize(IMessage[] messages, IFormattedBody body)
+        public void Serialize(IFormattedBody body, params IMessage[] messages)
         {
             _formatter.Serialize(body.BodyStream, messages);
         }
