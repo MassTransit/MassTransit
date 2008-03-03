@@ -36,9 +36,24 @@ namespace MassTransit.Patterns.Batching
 		{
 			get { return _body; }
 			set { _body = value; }
-		}
+        }
 
 
+        #region System.Object Overrides
+        public override bool Equals(object obj)
+        {
+            BatchMessage<TMessageType, TBatchId> msg = obj as BatchMessage<TMessageType,TBatchId>;
+            return msg != null &&
+                   msg.BatchId.Equals(this.BatchId) &&
+                   msg.BatchLength.Equals(this.BatchLength) &&
+                   msg.Body.Equals(this.Body);
+        }
+
+        public override int GetHashCode()
+        {
+            return this.BatchId.GetHashCode() + this.BatchLength.GetHashCode() + this.Body.GetHashCode();
+        }
+        #endregion
 
         //just an idea at this point
         public static void SendAsBatch(IServiceBus bus, Uri endpoint, IList<TMessageType> messages)
