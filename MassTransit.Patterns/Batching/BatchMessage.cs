@@ -6,7 +6,7 @@ namespace MassTransit.Patterns.Batching
 
     [Serializable]
 	public class BatchMessage<TMessageType, TBatchId> :
-		IBatchMessage
+		IBatchMessage, IEquatable<BatchMessage<TMessageType,TBatchId>>
 	{
 		private readonly TBatchId _batchId;
 		private readonly int _batchLength;
@@ -43,10 +43,7 @@ namespace MassTransit.Patterns.Batching
         public override bool Equals(object obj)
         {
             BatchMessage<TMessageType, TBatchId> msg = obj as BatchMessage<TMessageType,TBatchId>;
-            return msg != null &&
-                   msg.BatchId.Equals(this.BatchId) &&
-                   msg.BatchLength.Equals(this.BatchLength) &&
-                   msg.Body.Equals(this.Body);
+            return Equals(msg);
         }
 
         public override int GetHashCode()
@@ -54,6 +51,14 @@ namespace MassTransit.Patterns.Batching
             return this.BatchId.GetHashCode() + this.BatchLength.GetHashCode() + this.Body.GetHashCode();
         }
         #endregion
+
+        public bool Equals(BatchMessage<TMessageType, TBatchId> other)
+        {
+            return other != null &&
+                   other.BatchId.Equals(this.BatchId) &&
+                   other.BatchLength.Equals(this.BatchLength) &&
+                   other.Body.Equals(this.Body);
+        }
 
         //just an idea at this point
         public static void SendAsBatch(IServiceBus bus, Uri endpoint, IList<TMessageType> messages)
