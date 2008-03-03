@@ -55,8 +55,6 @@ namespace MassTransit.Patterns.Batching
         public bool Equals(BatchMessage<TMessageType, TBatchId> other)
         {
             return other != null &&
-                   other.BatchId.Equals(this.BatchId) &&
-                   other.BatchLength.Equals(this.BatchLength) &&
                    other.Body.Equals(this.Body);
         }
 

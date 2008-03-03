@@ -51,6 +51,18 @@ namespace MassTransit.Patterns.Tests
             BatchMessage<string, Guid>.PublishAsBatch(_bus,  msgs);
 	    }
 
+
+	    [Test]
+	    public void BM_Equals()
+	    {
+            MessageToBatch m = new MessageToBatch();
+	        BatchMessage<MessageToBatch, Guid> bm = new BatchMessage<MessageToBatch, Guid>(Guid.NewGuid(), 2, m);
+	        BatchMessage<MessageToBatch, Guid> bm2 = new BatchMessage<MessageToBatch, Guid>(Guid.NewGuid(), 2, m);
+
+            Assert.AreEqual(bm, bm2);
+	    }
+
+
 		[Test]
 		public void The_batch_should_be_complete_when_the_last_message_is_received()
 		{
