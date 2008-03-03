@@ -50,6 +50,7 @@ namespace MassTransit.Patterns.Tests
             BatchMessage<string, Guid>.SendAsBatch(_bus, new Uri("msmq://localhost/test_queue"), msgs);
             BatchMessage<string, Guid>.PublishAsBatch(_bus,  msgs);
 	    }
+
 		[Test]
 		public void The_batch_should_be_complete_when_the_last_message_is_received()
 		{
