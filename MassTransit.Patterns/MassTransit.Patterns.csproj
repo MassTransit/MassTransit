@@ -37,6 +37,8 @@
     <Compile Include="Batching\BatchContext.cs" />
     <Compile Include="Batching\BatchController.cs" />
     <Compile Include="Batching\BatchMessage.cs" />
+    <Compile Include="Batching\BatchContext2.cs" />
+    <Compile Include="Batching\BatchController2.cs" />
     <Compile Include="Batching\IBatchContext.cs" />
     <Compile Include="Batching\IBatchMessage.cs" />
     <Compile Include="Batching\TimeoutAttribute.cs" />

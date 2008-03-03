@@ -4,21 +4,21 @@ namespace MassTransit.Patterns.Batching
     using System.Collections.Generic;
     using ServiceBus;
 
-    public class BatchController<T, K> :
+    public class BatchController2<T, K> :
         IMessage where T : IBatchMessage
     {
-        private readonly Dictionary<K, BatchContext<T, K>> _contexts = new Dictionary<K, BatchContext<T, K>>();
+        private readonly Dictionary<K, BatchContext2<T, K>> _contexts = new Dictionary<K, BatchContext2<T, K>>();
         private readonly BatchControllerHandler<T, K> _handler;
         private readonly object _lockContext = new object();
         private readonly TimeSpan _timeout;
 
-        public BatchController(BatchControllerHandler<T, K> handler)
+        public BatchController2(BatchControllerHandler<T, K> handler)
         {
             _handler = handler;
             _timeout = TimeSpan.FromMinutes(30);
         }
 
-        public BatchController(BatchControllerHandler<T, K> handler, TimeSpan timeout)
+        public BatchController2(BatchControllerHandler<T, K> handler, TimeSpan timeout)
         {
             _handler = handler;
             _timeout = timeout;
@@ -28,19 +28,16 @@ namespace MassTransit.Patterns.Batching
         {
             K batchId = (K)context.Message.BatchId;
 
-            BatchContext<T, K> batchContext;
-
-            bool invokeHandler = false;
+            BatchContext2<T, K> batchContext;
 
             lock (_lockContext)
             {
 				if (!_contexts.ContainsKey(batchId))
 				{
-					batchContext = new BatchContext<T, K>(context, batchId, _timeout);
+					batchContext = new BatchContext2<T, K>(context, batchId, _timeout);
 
 					_contexts.Add(batchId, batchContext);
 
-					invokeHandler = true;
 				}
 				else
 				{
@@ -52,12 +49,10 @@ namespace MassTransit.Patterns.Batching
             // push this message to the context, releasing the enumerator
             batchContext.Enqueue(context.Message);
 
-            if (invokeHandler)
+            if (batchContext.IsComplete)
             {
                 _handler(batchContext);
             }
         }
     }
-
-	public delegate void BatchControllerHandler<T, K>(IBatchContext<T,K> context) where T : IBatchMessage;
 }
