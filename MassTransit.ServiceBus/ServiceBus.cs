@@ -142,13 +142,11 @@ namespace MassTransit.ServiceBus
 			if(_endpointCache.Count == 0 )
 				_endpointCache.Add(_endpoint);
 
-            IEnvelope envelope = new Envelope(_endpoint, messages as IMessage[]);
 
-			foreach (Subscription subscription in _subscriptionStorage.List(typeof (T).FullName))
+            foreach (Subscription subscription in _subscriptionStorage.List(typeof(T).FullName))
             {
-				IEndpoint endpoint = _endpointCache.Resolve<IEndpoint>(subscription.Address);
-
-                endpoint.Sender.Send(envelope);
+                IEndpoint endpoint = _endpointCache.Resolve<IEndpoint>(subscription.Address);
+                Send(endpoint, messages);
             }
         }
 
@@ -161,9 +159,12 @@ namespace MassTransit.ServiceBus
         {
 			_endpointCache.Add(destinationEndpoint);
 
-            IEnvelope envelope = new Envelope(_endpoint, messages as IMessage[]);
+            foreach (T msg in messages)
+            {
+                IEnvelope envelope = new Envelope(_endpoint, msg);
 
-            destinationEndpoint.Sender.Send(envelope);
+                destinationEndpoint.Sender.Send(envelope);
+            }
         }
 
         /// <summary>

@@ -12,24 +12,21 @@ namespace MassTransit.ServiceBus
 			get { return _endpointTypes.Count; }
 		}
 
-		public void Add(IEndpoint endpoint)
-		{
-			if (endpoint != null)
-			{
-				if (endpoint.Uri != null)
-				{
-					string scheme = endpoint.Uri.Scheme;
+        public void Add(IEndpoint endpoint)
+        {
+            Util.Check.Ensure(endpoint != null, "endpoint can't be null");
+            Util.Check.Ensure(endpoint.Uri != null, "endpoint.Uri can't be null");
 
-					lock (_endpointTypes)
-					{
-						if (!_endpointTypes.ContainsKey(scheme))
-							_endpointTypes.Add(scheme, endpoint.GetType());
-					}
-				}
-			}
-		}
+            string scheme = endpoint.Uri.Scheme;
 
-		public T Resolve<T>(Uri uri)
+            lock (_endpointTypes)
+            {
+                if (!_endpointTypes.ContainsKey(scheme))
+                    _endpointTypes.Add(scheme, endpoint.GetType());
+            }
+        }
+
+	    public T Resolve<T>(Uri uri)
 		{
 			string scheme = uri.Scheme;
 			if (_endpointTypes.ContainsKey(scheme))
