@@ -1,8 +1,3 @@
-using System;
-using System.Collections.Generic;
-using log4net;
-using MassTransit.ServiceBus.Subscriptions.Messages;
-
 /// Copyright 2007-2008 The Apache Software Foundation.
 /// 
 /// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
@@ -17,118 +12,141 @@ using MassTransit.ServiceBus.Subscriptions.Messages;
 /// specific language governing permissions and limitations under the License.
 namespace MassTransit.ServiceBus.Subscriptions
 {
-	public class LocalSubscriptionCache :
-		ISubscriptionStorage
-	{
-		//<messageName, address>
-		private static readonly ILog _log = LogManager.GetLogger(typeof (LocalSubscriptionCache));
+    using System;
+    using System.Collections.Generic;
+    using log4net;
+    using Messages;
 
-		private readonly Dictionary<string, List<SubscriptionCacheEntry>> _messageTypeSubscriptions =
-			new Dictionary<string, List<SubscriptionCacheEntry>>(StringComparer.InvariantCultureIgnoreCase);
+    public class LocalSubscriptionCache :
+        ISubscriptionStorage
+    {
+        //<messageName, address>
+        private static readonly ILog _log ;
 
-		private readonly object addLock = new object();
-		private readonly object deleteLock = new object();
+        static LocalSubscriptionCache()
+        {
+            try
+            {
+                _log = LogManager.GetLogger(typeof(LocalSubscriptionCache));
+            }
+            catch(Exception ex)
+            {
+                //TODO: tell the user he is missing log4net
+                throw;
+            }
+        }
 
-		#region ISubscriptionStorage Members
+        private readonly Dictionary<string, List<SubscriptionCacheEntry>> _messageTypeSubscriptions =
+            new Dictionary<string, List<SubscriptionCacheEntry>>(StringComparer.InvariantCultureIgnoreCase);
 
-		public event EventHandler<SubscriptionChangedEventArgs> SubscriptionChanged;
+        private readonly object addLock = new object();
+        private readonly object deleteLock = new object();
 
-		public IList<Subscription> List()
-		{
-			List<Subscription> result = new List<Subscription>();
+        #region ISubscriptionStorage Members
 
-			foreach (KeyValuePair<string, List<SubscriptionCacheEntry>> pair in _messageTypeSubscriptions)
-			{
-				pair.Value.ForEach(delegate(SubscriptionCacheEntry e) { result.Add(new Subscription(e.Endpoint, pair.Key)); });
-			}
+        public event EventHandler<SubscriptionChangedEventArgs> SubscriptionChanged;
 
-			return result;
-		}
+        public IList<Subscription> List()
+        {
+            List<Subscription> result = new List<Subscription>();
 
-		public IList<Subscription> List(string messageName)
-		{
-			List<Subscription> result = new List<Subscription>();
-			if (_messageTypeSubscriptions.ContainsKey(messageName))
-			{
-				_messageTypeSubscriptions[messageName].ForEach(
-					delegate(SubscriptionCacheEntry entry) { result.Add(new Subscription(entry.Endpoint, messageName)); });
-			}
+            foreach (KeyValuePair<string, List<SubscriptionCacheEntry>> pair in _messageTypeSubscriptions)
+            {
+                pair.Value.ForEach(
+                    delegate(SubscriptionCacheEntry e) { result.Add(new Subscription(e.Endpoint, pair.Key)); });
+            }
 
-			return result;
-		}
+            return result;
+        }
 
-		public void Add(string messageName, Uri endpoint)
-		{
-			lock (addLock)
-			{
-				messageName = messageName.Trim();
-				if (!_messageTypeSubscriptions.ContainsKey(messageName))
-				{
-					if (_log.IsDebugEnabled)
-						_log.DebugFormat("Adding new local subscription list for type {0} on {1}", messageName, GetHashCode());
+        public IList<Subscription> List(string messageName)
+        {
+            List<Subscription> result = new List<Subscription>();
+            if (_messageTypeSubscriptions.ContainsKey(messageName))
+            {
+                _messageTypeSubscriptions[messageName].ForEach(
+                    delegate(SubscriptionCacheEntry entry) { result.Add(new Subscription(entry.Endpoint, messageName)); });
+            }
 
-					_messageTypeSubscriptions.Add(messageName, new List<SubscriptionCacheEntry>());
-				}
+            return result;
+        }
 
-				SubscriptionCacheEntry entry = new SubscriptionCacheEntry(endpoint);
+        public void Add(string messageName, Uri endpoint)
+        {
+            lock (addLock)
+            {
+                messageName = messageName.Trim();
+                if (!_messageTypeSubscriptions.ContainsKey(messageName))
+                {
+                    if (_log.IsDebugEnabled)
+                        _log.DebugFormat("Adding new local subscription list for type {0} on {1}", messageName,
+                                         GetHashCode());
 
-				if (!_messageTypeSubscriptions[messageName].Contains(entry))
-				{
-					if (_log.IsDebugEnabled)
-						_log.DebugFormat("Adding new local subscription entry for endpoint {0} on {1}", endpoint, GetHashCode());
+                    _messageTypeSubscriptions.Add(messageName, new List<SubscriptionCacheEntry>());
+                }
 
-					_messageTypeSubscriptions[messageName].Add(entry);
+                SubscriptionCacheEntry entry = new SubscriptionCacheEntry(endpoint);
 
-					OnChange(new SubscriptionChange(messageName, endpoint, SubscriptionChangeType.Add));
-				}
-			}
-		}
+                if (!_messageTypeSubscriptions[messageName].Contains(entry))
+                {
+                    if (_log.IsDebugEnabled)
+                        _log.DebugFormat("Adding new local subscription entry for endpoint {0} on {1}", endpoint,
+                                         GetHashCode());
 
-		public void Remove(string messageName, Uri endpoint)
-		{
-			if (_log.IsDebugEnabled)
-				_log.DebugFormat("Removing Local Subscription {0} : {1}", messageName, endpoint);
+                    _messageTypeSubscriptions[messageName].Add(entry);
 
-			lock (deleteLock)
-			{
-				if (_messageTypeSubscriptions.ContainsKey(messageName))
-				{
-					SubscriptionCacheEntry entry = new SubscriptionCacheEntry(endpoint);
+                    OnChange(new SubscriptionChange(messageName, endpoint, SubscriptionChangeType.Add));
+                }
+            }
+        }
 
-					if (_messageTypeSubscriptions[messageName].Contains(entry))
-					{
-						if (_log.IsDebugEnabled)
-							_log.DebugFormat("Removing local subscription entry for endpoint {0} on {1}", endpoint, GetHashCode());
+        public void Remove(string messageName, Uri endpoint)
+        {
+            if (_log.IsDebugEnabled)
+                _log.DebugFormat("Removing Local Subscription {0} : {1}", messageName, endpoint);
 
-						_messageTypeSubscriptions[messageName].Remove(entry);
-					}
+            lock (deleteLock)
+            {
+                if (_messageTypeSubscriptions.ContainsKey(messageName))
+                {
+                    SubscriptionCacheEntry entry = new SubscriptionCacheEntry(endpoint);
 
-					if (_messageTypeSubscriptions[messageName].Count == 0)
-					{
-						if (_log.IsDebugEnabled)
-							_log.DebugFormat("Removing local subscription list for type {0} on {1}", messageName, GetHashCode());
+                    if (_messageTypeSubscriptions[messageName].Contains(entry))
+                    {
+                        if (_log.IsDebugEnabled)
+                            _log.DebugFormat("Removing local subscription entry for endpoint {0} on {1}", endpoint,
+                                             GetHashCode());
 
-						_messageTypeSubscriptions.Remove(messageName);
+                        _messageTypeSubscriptions[messageName].Remove(entry);
+                    }
 
-						OnChange(new SubscriptionChange(messageName, endpoint, SubscriptionChangeType.Remove));
-					}
-				}
-			}
-		}
+                    if (_messageTypeSubscriptions[messageName].Count == 0)
+                    {
+                        if (_log.IsDebugEnabled)
+                            _log.DebugFormat("Removing local subscription list for type {0} on {1}", messageName,
+                                             GetHashCode());
 
-		public void Dispose()
-		{
-			_messageTypeSubscriptions.Clear();
-		}
+                        _messageTypeSubscriptions.Remove(messageName);
 
-		#endregion
+                        OnChange(new SubscriptionChange(messageName, endpoint, SubscriptionChangeType.Remove));
+                    }
+                }
+            }
+        }
 
-		protected void OnChange(SubscriptionChange change)
-		{
-			if (SubscriptionChanged != null)
-			{
-				SubscriptionChanged(this, new SubscriptionChangedEventArgs(change));
-			}
-		}
-	}
+        public void Dispose()
+        {
+            _messageTypeSubscriptions.Clear();
+        }
+
+        #endregion
+
+        protected void OnChange(SubscriptionChange change)
+        {
+            if (SubscriptionChanged != null)
+            {
+                SubscriptionChanged(this, new SubscriptionChangedEventArgs(change));
+            }
+        }
+    }
 }

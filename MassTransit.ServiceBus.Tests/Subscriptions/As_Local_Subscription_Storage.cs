@@ -1,11 +1,11 @@
-using System;
-using MassTransit.ServiceBus.Subscriptions;
-using MassTransit.ServiceBus.Subscriptions.Messages;
-using NUnit.Framework;
-using NUnit.Framework.SyntaxHelpers;
-
 namespace MassTransit.ServiceBus.Tests.Subscriptions
 {
+    using System;
+    using MassTransit.ServiceBus.Subscriptions;
+    using MassTransit.ServiceBus.Subscriptions.Messages;
+    using NUnit.Framework;
+    using NUnit.Framework.SyntaxHelpers;
+
     [TestFixture]
     public class As_Local_Subscription_Storage
     {

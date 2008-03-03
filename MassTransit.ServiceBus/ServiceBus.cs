@@ -37,17 +37,17 @@ namespace MassTransit.ServiceBus
 		private readonly object _consumersLock = new object();
 
 
-		private readonly IEndpoint _endpoint;
+		private readonly IEndpoint _endpointToListenOn;
 		private readonly ISubscriptionStorage _subscriptionStorage;
 		private IEndpoint _poisonEndpoint;
 		private readonly EndpointResolver _endpointResolver = new EndpointResolver();
 
-		public ServiceBus(IEndpoint endpoint, ISubscriptionStorage subscriptionStorage)
+		public ServiceBus(IEndpoint endpointToListenOn, ISubscriptionStorage subscriptionStorage)
 		{
-			Check.Parameter(endpoint).WithMessage("endpoint").IsNotNull();
+			Check.Parameter(endpointToListenOn).WithMessage("endpointToListenOn").IsNotNull();
 			Check.Parameter(subscriptionStorage).WithMessage("subscriptionStorage").IsNotNull();
 
-			_endpoint = endpoint;
+			_endpointToListenOn = endpointToListenOn;
 			_subscriptionStorage = subscriptionStorage;
 		}
 
@@ -125,7 +125,7 @@ namespace MassTransit.ServiceBus
 
 			_consumers.Clear();
 
-			_endpoint.Dispose();
+			_endpointToListenOn.Dispose();
 		}
 
 		/// <summary>
@@ -151,7 +151,7 @@ namespace MassTransit.ServiceBus
 		{
 			foreach (T msg in messages)
 			{
-				IEnvelope envelope = new Envelope(_endpoint, msg);
+				IEnvelope envelope = new Envelope(_endpointToListenOn, msg);
 
 				destinationEndpoint.Sender.Send(envelope);
 			}
@@ -162,7 +162,7 @@ namespace MassTransit.ServiceBus
 		/// </summary>
 		public IEndpoint Endpoint
 		{
-			get { return _endpoint; }
+			get { return _endpointToListenOn; }
 		}
 
 		/// <summary>
@@ -249,7 +249,7 @@ namespace MassTransit.ServiceBus
 		{
 			StartListening();
 
-			IEnvelope envelope = new Envelope(_endpoint, messages as IMessage[]);
+			IEnvelope envelope = new Envelope(_endpointToListenOn, messages as IMessage[]);
 
 			lock (_asyncReplyDispatcher)
 			{
@@ -263,7 +263,7 @@ namespace MassTransit.ServiceBus
 
 		private void StartListening()
 		{
-			_endpoint.Receiver.Subscribe(this);
+			_endpointToListenOn.Receiver.Subscribe(this);
 		}
 
 		private bool IsTheBusInterested(IEnvelope envelope)
