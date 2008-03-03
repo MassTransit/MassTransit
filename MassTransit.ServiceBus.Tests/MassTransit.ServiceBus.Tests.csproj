@@ -47,6 +47,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="As_a_ServiceBus.cs" />
     <Compile Include="As_A_Service_With_A_Message_Endpoint.cs" />
     <Compile Include="CommandExecutorPlay\As_a_CommandExecutor.cs" />
     <Compile Include="IntegrationTests\When_using_queues_on_a_remote_server.cs" />
