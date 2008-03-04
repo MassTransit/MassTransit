@@ -1,60 +1,48 @@
 namespace MassTransit.ServiceBus.Formatters
 {
-    using System;
-using System.IO;
-using System.Text;
-using System.Xml.Serialization;
-    using System.Collections.Generic;
-    using System.Xml;
+	using System;
+	using System.Collections.Generic;
+	using System.Xml.Serialization;
 
-    public class XmlMessageFormatter :
-        IMessageFormatter
-    {
-        private readonly Dictionary<Type, XmlSerializer> _serializers = new Dictionary<Type, XmlSerializer>();
-        
-        public XmlMessageFormatter()
-        {
-            List<Type> types = MessageFinder.AllMessageTypes();
-            foreach(Type t in types)
-            {
-                if(!_serializers.ContainsKey(t))
-                    _serializers.Add(t, new XmlSerializer(t));
-            }
-        }
+	public class XmlMessageFormatter :
+		IMessageFormatter
+	{
+		private readonly XmlSerializer _serializer;
 
+		public XmlMessageFormatter()
+		{
+			List<Type> types = MessageFinder.AllMessageTypes();
 
-        public void Serialize(IFormattedBody body, params IMessage[] messages)
-        {
-            MemoryStream mems = new MemoryStream();
-            _serializers[messages[0].GetType()].Serialize(mems, messages[0]);
+			_serializer = new XmlSerializer(typeof (object[]), types.ToArray());
+		}
 
-            byte[] buffer = new byte[mems.Length];
-            mems.Position = 0;
-            mems.Read(buffer, 0, buffer.Length);
+		#region IMessageFormatter Members
 
-            body.Body = Encoding.Default.GetString(buffer);
-        }
+		public void Serialize(IFormattedBody body, params IMessage[] messages)
+		{
+			List<object> objects = new List<object>();
+			objects.AddRange(messages);
 
-        public IMessage[] Deserialize(IFormattedBody formattedBody)
-        {
-            string body = formattedBody.Body.ToString();
+			_serializer.Serialize(body.BodyStream, objects.ToArray());
+		}
 
-            StringReader sr = new StringReader(body);
+		public IMessage[] Deserialize(IFormattedBody formattedBody)
+		{
+			object result = _serializer.Deserialize(formattedBody.BodyStream);
 
-            XmlReader xmlReader = XmlReader.Create(sr);
+			List<IMessage> messages = new List<IMessage>();
 
-            object result = null;
+			if (result is object[])
+			{
+				foreach (object o in (object[]) result)
+				{
+					messages.Add((IMessage) o);
+				}
+			}
 
-            foreach (KeyValuePair<Type, XmlSerializer> pair in _serializers)
-            {
-                if(pair.Value.CanDeserialize(xmlReader))
-                {
-                    result = pair.Value.Deserialize(xmlReader);
-                    break;
-                }
-            }
+			return messages.ToArray();
+		}
 
-            return new IMessage[] {result as IMessage};
-        }
-    }
+		#endregion
+	}
 }

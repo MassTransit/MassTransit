@@ -9,13 +9,31 @@ namespace MassTransit.ServiceBus.NMS
 		IFormattedBody
 	{
 		private readonly ISession _session;
-		private IMessage _message;
+
+		private IBytesMessage _bytesMessage;
+		private Apache.NMS.IMessage _message;
 		private MemoryStream _stream;
 
 
 		public NmsFormattedBody(ISession sess)
 		{
 			_session = sess;
+		}
+
+		public Apache.NMS.IMessage Message
+		{
+			get
+			{
+				if (_stream != null)
+				{
+					byte[] buffer = new byte[_stream.Length];
+					_stream.Position = 0;
+					_stream.Read(buffer, 0, buffer.Length);
+
+					_bytesMessage.Content = buffer;
+				}
+				return _message;
+			}
 		}
 
 		#region IFormattedBody Members
@@ -29,9 +47,9 @@ namespace MassTransit.ServiceBus.NMS
 				{
 					_message = _session.CreateTextMessage((string) value);
 				}
-				else if ( value is byte[])
+				else if (value is byte[])
 				{
-					_message = _session.CreateBytesMessage((byte[]) value);
+					_message = _bytesMessage = _session.CreateBytesMessage((byte[]) value);
 				}
 				else
 				{
@@ -44,9 +62,10 @@ namespace MassTransit.ServiceBus.NMS
 		{
 			get
 			{
-				if(_stream == null)
+				if (_stream == null)
 				{
 					_stream = new MemoryStream();
+					_message = _bytesMessage = _session.CreateBytesMessage();
 				}
 
 				return _stream;
@@ -55,10 +74,5 @@ namespace MassTransit.ServiceBus.NMS
 		}
 
 		#endregion
-
-		public IMessage Message
-		{
-			get { return _message; }
-		}
 	}
 }
