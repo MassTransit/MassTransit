@@ -19,7 +19,7 @@ namespace MassTransit.ServiceBus.Formatters
             foreach (string file in files)
             {
                 Assembly asm;
-                if (!file.Contains("NHibernate"))
+                if (!file.Contains("NHibernate")) //TODO: Hack!
                 {
                     asm = Assembly.LoadFile(file);
                     if (ReferencesMassTransit(asm))
