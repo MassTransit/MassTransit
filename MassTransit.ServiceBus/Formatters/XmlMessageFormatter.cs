@@ -1,21 +1,20 @@
-using System;
+namespace MassTransit.ServiceBus.Formatters
+{
+    using System;
 using System.IO;
 using System.Text;
 using System.Xml.Serialization;
-
-namespace MassTransit.ServiceBus.Formatters
-{
     using System.Collections.Generic;
     using System.Xml;
 
     public class XmlMessageFormatter :
         IMessageFormatter
     {
-        private Dictionary<Type, XmlSerializer> _serializers = new Dictionary<Type, XmlSerializer>();
-
+        private readonly Dictionary<Type, XmlSerializer> _serializers = new Dictionary<Type, XmlSerializer>();
+        
         public XmlMessageFormatter()
         {
-            List<Type> types = MessageFinder.FindAll();
+            List<Type> types = MessageFinder.AllMessageTypes();
             foreach(Type t in types)
             {
                 if(!_serializers.ContainsKey(t))

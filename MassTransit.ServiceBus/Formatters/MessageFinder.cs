@@ -2,64 +2,49 @@ namespace MassTransit.ServiceBus.Formatters
 {
     using System;
     using System.Collections.Generic;
-    using System.IO;
     using System.Reflection;
 
     public class MessageFinder
     {
-        private static List<Type> _results = new List<Type>();
+        private static readonly List<Type> _messageTypes = new List<Type>();
 
-        public static List<Type> FindAll()
+
+        public static void Initialize()
         {
-            
-            string loc = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-
-            string[] files = Directory.GetFiles(loc, "*.dll");
-
-            foreach (string file in files)
+            lock (_messageTypes)
             {
-                Assembly asm;
-                if (!file.Contains("NHibernate")) //TODO: Hack!
-                {
-                    asm = Assembly.LoadFile(file);
-                    if (ReferencesMassTransit(asm))
-                    {
-                        Type[] t = asm.GetTypes();
+                _messageTypes.Clear();
+               
+                Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
+                Type messageType = typeof (IMessage);
 
-                        foreach (Type tm in t)
+                foreach (Assembly assembly in assemblies)
+                {
+                    if (DoesAssemblyReferenceMassTransit(assembly))
+                    {
+                        Type[] types = assembly.GetTypes();
+
+                        foreach (Type type in types)
                         {
-                            if (IsMessage(tm))
-                            {
-                                _results.Add(tm);
-                            }
+                            if (type.IsAbstract || type.IsInterface)
+                                continue;
+
+                            if (messageType.IsAssignableFrom(type))
+                                _messageTypes.Add(type);
                         }
                     }
                 }
             }
-
-            return _results;
         }
 
-        public static bool IsMessage(Type t)
-        {
-            bool result = false;
-
-            if(!t.IsInterface && !t.IsGenericType && t.GetInterface(typeof(IMessage).FullName) != null)
-            {
-                result = true;
-            }
-
-            return result;
-        }
-
-        public static bool ReferencesMassTransit(Assembly assembly)
+        public static bool DoesAssemblyReferenceMassTransit(Assembly assembly)
         {
             bool result = false;
             AssemblyName[] names = assembly.GetReferencedAssemblies();
 
             foreach (AssemblyName name in names)
             {
-                if(name.Name.Equals("MassTransit.ServiceBus"))
+                if(name.Name.Contains("MassTransit"))
                 {
                     result = true;
                     break;
@@ -67,6 +52,11 @@ namespace MassTransit.ServiceBus.Formatters
             }
 
             return result;
+        }
+        public static List<Type> AllMessageTypes()
+        {
+            Initialize();
+            return _messageTypes;
         }
     }
 }
