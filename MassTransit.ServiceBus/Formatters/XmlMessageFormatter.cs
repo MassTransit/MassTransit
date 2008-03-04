@@ -5,28 +5,28 @@ using System.Xml.Serialization;
 
 namespace MassTransit.ServiceBus.Formatters
 {
+    using System.Collections.Generic;
     using System.Xml;
 
     public class XmlMessageFormatter :
         IMessageFormatter
     {
-        private XmlSerializer _serializer;
+        private Dictionary<Type, XmlSerializer> _serializers = new Dictionary<Type, XmlSerializer>();
 
-
-        public XmlMessageFormatter(Type type)
+        public XmlMessageFormatter()
         {
-            _serializer = new XmlSerializer(type);
-        }
-        public XmlMessageFormatter(Type type, Type[] types)
-        {
-            _serializer = new XmlSerializer(type, types);
+            List<Type> types = MessageFinder.FindAll();
+            foreach(Type t in types)
+            {
+                _serializers.Add(t, new XmlSerializer(t));
+            }
         }
 
 
         public void Serialize(IFormattedBody body, params IMessage[] messages)
         {
             MemoryStream mems = new MemoryStream();
-            _serializer.Serialize(mems, messages[0]);
+            _serializers[messages[0].GetType()].Serialize(mems, messages[0]);
 
             byte[] buffer = new byte[mems.Length];
             mems.Position = 0;
@@ -43,7 +43,7 @@ namespace MassTransit.ServiceBus.Formatters
             buffer = Encoding.Default.GetBytes(body);
             mems.Write(buffer, 0, buffer.Length);
             
-            object o = _serializer.Deserialize(mems);
+            object o = _serializers[Type.GetType("PingMessage", true, true)].Deserialize(mems);
 
             return o as IMessage[];
         }

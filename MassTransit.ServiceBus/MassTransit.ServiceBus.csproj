@@ -46,6 +46,7 @@
     <Compile Include="EndpointResolver.cs" />
     <Compile Include="Formatters\BinaryMessageFormatter.cs" />
     <Compile Include="Formatters\IFormattedBody.cs" />
+    <Compile Include="Formatters\MessageFinder.cs" />
     <Compile Include="Formatters\XmlMessageFormatter.cs" />
     <Compile Include="Internal\AsyncReplyDispatcher.cs" />
     <Compile Include="Envelope.cs" />

@@ -17,7 +17,7 @@ namespace MassTransit.ServiceBus.Tests.Formatters
         public void Serialize()
         {
             PingMessage msg = new PingMessage();
-            XmlMessageFormatter xmf = new XmlMessageFormatter(typeof(PingMessage));
+            XmlMessageFormatter xmf = new XmlMessageFormatter();
             IFormattedBody mockBody = mocks.CreateMock<IFormattedBody>();
 
             using(mocks.Record())
@@ -31,10 +31,10 @@ namespace MassTransit.ServiceBus.Tests.Formatters
         }
 
         [Test]
-        public void NAME()
+        public void Deserialize()
         {
             PingMessage msg = new PingMessage();
-            XmlMessageFormatter xmf = new XmlMessageFormatter(typeof(PingMessage));
+            XmlMessageFormatter xmf = new XmlMessageFormatter();
             IFormattedBody mockBody = mocks.CreateMock<IFormattedBody>();
 
             using (mocks.Record())
