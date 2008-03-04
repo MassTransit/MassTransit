@@ -20,6 +20,11 @@ namespace MassTransit.ServiceBus.Subscriptions.Messages
     {
         private readonly List<Subscription> _subscriptions;
 
+        //xml serialization
+        private CacheUpdateResponse()
+        {
+        }
+
         public CacheUpdateResponse(IEnumerable<Subscription> subscriptions)
         {
             _subscriptions = new List<Subscription>(subscriptions);

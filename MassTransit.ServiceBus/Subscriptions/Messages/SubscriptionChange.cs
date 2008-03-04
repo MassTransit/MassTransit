@@ -21,6 +21,11 @@ namespace MassTransit.ServiceBus.Subscriptions.Messages
         private readonly SubscriptionChangeType _changeType;
         private readonly Subscription _subscription;
 
+        //xml serialization
+        private SubscriptionChange()
+        {
+        }
+
         public SubscriptionChange(string messageName, Uri address, SubscriptionChangeType changeType) 
             : this(new Subscription(address, messageName), changeType)
         {
