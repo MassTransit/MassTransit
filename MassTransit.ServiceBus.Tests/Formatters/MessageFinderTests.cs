@@ -12,7 +12,7 @@ namespace MassTransit.ServiceBus.Tests.Formatters
         public void NAME()
         {
             List<Type> results = MessageFinder.FindAll();
-            Assert.AreEqual(17, results.Count);
+            Assert.AreEqual(9, results.Count);
         }
     }
 }

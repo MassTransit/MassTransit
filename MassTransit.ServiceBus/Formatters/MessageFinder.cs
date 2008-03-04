@@ -22,14 +22,16 @@ namespace MassTransit.ServiceBus.Formatters
                 if (!file.Contains("NHibernate"))
                 {
                     asm = Assembly.LoadFile(file);
-
-                    Type[] t = asm.GetTypes();
-
-                    foreach (Type tm in t)
+                    if (ReferencesMassTransit(asm))
                     {
-                        if (IsMessage(tm))
+                        Type[] t = asm.GetTypes();
+
+                        foreach (Type tm in t)
                         {
-                            _results.Add(tm);
+                            if (IsMessage(tm))
+                            {
+                                _results.Add(tm);
+                            }
                         }
                     }
                 }
@@ -45,6 +47,23 @@ namespace MassTransit.ServiceBus.Formatters
             if(!t.IsInterface && !t.IsGenericType && t.GetInterface(typeof(IMessage).FullName) != null)
             {
                 result = true;
+            }
+
+            return result;
+        }
+
+        public static bool ReferencesMassTransit(Assembly assembly)
+        {
+            bool result = false;
+            AssemblyName[] names = assembly.GetReferencedAssemblies();
+
+            foreach (AssemblyName name in names)
+            {
+                if(name.Name.Equals("MassTransit.ServiceBus"))
+                {
+                    result = true;
+                    break;
+                }
             }
 
             return result;

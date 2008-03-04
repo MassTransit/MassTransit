@@ -18,7 +18,8 @@ namespace MassTransit.ServiceBus.Formatters
             List<Type> types = MessageFinder.FindAll();
             foreach(Type t in types)
             {
-                _serializers.Add(t, new XmlSerializer(t));
+                if(!_serializers.ContainsKey(t))
+                    _serializers.Add(t, new XmlSerializer(t));
             }
         }
 
@@ -37,15 +38,24 @@ namespace MassTransit.ServiceBus.Formatters
 
         public IMessage[] Deserialize(IFormattedBody formattedBody)
         {
-            MemoryStream mems = new MemoryStream();
             string body = formattedBody.Body.ToString();
-            byte[] buffer = new byte[body.Length];
-            buffer = Encoding.Default.GetBytes(body);
-            mems.Write(buffer, 0, buffer.Length);
-            
-            object o = _serializers[Type.GetType("PingMessage", true, true)].Deserialize(mems);
 
-            return o as IMessage[];
+            StringReader sr = new StringReader(body);
+
+            XmlReader xmlReader = XmlReader.Create(sr);
+
+            object result = null;
+
+            foreach (KeyValuePair<Type, XmlSerializer> pair in _serializers)
+            {
+                if(pair.Value.CanDeserialize(xmlReader))
+                {
+                    result = pair.Value.Deserialize(xmlReader);
+                    break;
+                }
+            }
+
+            return new IMessage[] {result as IMessage};
         }
     }
 }
