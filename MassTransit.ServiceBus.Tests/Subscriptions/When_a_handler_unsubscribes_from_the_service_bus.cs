@@ -44,9 +44,9 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
                 Expect.Call(_endpoint.Uri).Return(_endpointUri).Repeat.Any();
                 Expect.Call(_endpoint.Receiver).Return(_receiver);
                 Expect.Call(delegate { _receiver.Subscribe(_consumer); }).IgnoreArguments();
-                Expect.Call(delegate { _storage.Add("", null); }).IgnoreArguments();
+                Expect.Call(delegate { _storage.Add(null); }).IgnoreArguments();
 
-                Expect.Call(delegate { _storage.Remove("", null); }).IgnoreArguments();
+                Expect.Call(delegate { _storage.Remove(null); }).IgnoreArguments();
             }
 
             using (_mocks.Playback())
@@ -67,14 +67,14 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
             using (_mocks.Record())
             {
                 Expect.Call(_endpoint.Uri).Return(_endpointUri).Repeat.Any();
-                Expect.Call(delegate { _storage.Add("", null); }).IgnoreArguments();
+                Expect.Call(delegate { _storage.Add(null); }).IgnoreArguments();
                 Expect.Call(_endpoint.Receiver).Return(_receiver);
                 Expect.Call(delegate { _receiver.Subscribe(_consumer); }).IgnoreArguments();
 
                 Expect.Call(_endpoint.Receiver).Return(_receiver);
                 Expect.Call(delegate { _receiver.Subscribe(_consumer); }).IgnoreArguments();
 
-                Expect.Call(delegate { _storage.Remove("", null); }).IgnoreArguments();
+                Expect.Call(delegate { _storage.Remove(null); }).IgnoreArguments();
             }
 
             using (_mocks.Playback())

@@ -71,16 +71,19 @@
     <Compile Include="Formatters\IMessageFormatter.cs" />
     <Compile Include="ServiceBus.cs" />
     <Compile Include="ServiceBusAsyncResult.cs" />
-    <Compile Include="SubscriptionChangedEventArgs.cs" />
+    <Compile Include="SubscriptionEventArgs.cs" />
+    <Compile Include="Subscriptions\ISubscriptionRepository.cs" />
     <Compile Include="Subscriptions\LocalSubscriptionCache.cs" />
+    <Compile Include="Subscriptions\Messages\AddSubscription.cs" />
     <Compile Include="Subscriptions\Messages\CacheUpdateResponse.cs" />
     <Compile Include="Subscriptions\Messages\CacheUpdateRequest.cs" />
     <Compile Include="Subscriptions\Messages\CancelSubscriptionUpdates.cs" />
+    <Compile Include="Subscriptions\Messages\RemoveSubscription.cs" />
     <Compile Include="Subscriptions\Messages\SubscriptionChange.cs" />
-    <Compile Include="Subscriptions\Messages\SubscriptionChangeType.cs" />
     <Compile Include="Subscriptions\Subscription.cs" />
     <Compile Include="Subscriptions\SubscriptionCacheEntry.cs" />
-    <Compile Include="Subscriptions\SubscriptionManagerClient.cs" />
+    <Compile Include="Subscriptions\SubscriptionClient.cs" />
+    <Compile Include="Subscriptions\SubscriptionService.cs" />
     <Compile Include="Util\Check.cs" />
     <Compile Include="Util\MessageId.cs" />
   </ItemGroup>

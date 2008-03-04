@@ -15,25 +15,51 @@ namespace MassTransit.ServiceBus.Subscriptions
 	using System;
 
 	[Serializable]
-	public class Subscription
+	public class Subscription : IEquatable<Subscription>
 	{
-		private readonly Uri _address;
+		private readonly Uri _endpointUri;
 		private readonly string _messageName;
 
-		public Subscription(Uri address, string messageName)
+		public Subscription(string messageName, Uri endpointUri)
 		{
-			_address = address;
-			_messageName = messageName;
+			_endpointUri = endpointUri;
+			_messageName = messageName.Trim();
 		}
 
-		public Uri Address
+		public Uri EndpointUri
 		{
-			get { return _address; }
+			get { return _endpointUri; }
 		}
 
 		public string MessageName
 		{
 			get { return _messageName; }
+		}
+
+		public bool Equals(Subscription other)
+		{
+			if (other == null)
+				return false;
+
+			if (!other.EndpointUri.Equals(_endpointUri))
+				return false;
+
+			if (!other.MessageName.Equals(_messageName))
+				return false;
+
+			return true;
+		}
+
+		public override bool Equals(object obj)
+		{
+			Subscription other = obj as Subscription;
+
+			return Equals(other);
+		}
+
+		public override int GetHashCode()
+		{
+			return _endpointUri.GetHashCode() + 29*_messageName.GetHashCode();
 		}
 	}
 }

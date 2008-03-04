@@ -116,13 +116,10 @@ namespace MassTransit.ServiceBus.MSMQ.Tests
 		private ISubscriptionStorage CreateSubscriptionStorage()
 		{
 			ISubscriptionStorage subscriptionCache;
-			ISubscriptionStorage subscriptionStorage;
 
 			subscriptionCache = new LocalSubscriptionCache();
-			subscriptionStorage =
-				new MsmqSubscriptionStorage(SubscriptionEndpoint, subscriptionCache);
 
-			return subscriptionStorage;
+			return subscriptionCache;
 		}
 
 		public static void VerifyMessageInQueue<T>(string queuePath, T message)

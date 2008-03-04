@@ -1,105 +1,88 @@
 namespace MassTransit.ServiceBus.Tests.Subscriptions
 {
-    using System;
-    using MassTransit.ServiceBus.Subscriptions;
-    using NUnit.Framework;
-    using NUnit.Framework.SyntaxHelpers;
-    using Rhino.Mocks;
+	using System;
+	using MassTransit.ServiceBus.Subscriptions;
+	using NUnit.Framework;
+	using NUnit.Framework.SyntaxHelpers;
+	using Rhino.Mocks;
 
-    [TestFixture]
-    public class When_Working_With_Subscriptions
-    {
-        private MockRepository mocks;
-        string mockPath = "msmq://localhost/bob";
+	[TestFixture]
+	public class When_Working_With_Subscriptions
+	{
+		private readonly string mockPath = "msmq://localhost/bob";
 
-        [SetUp]
-        public void SetUp()
-        {
-            mocks = new MockRepository();
-        }
+		[Test]
+		public void Add_Subscription()
+		{
+			LocalSubscriptionCache cache = new LocalSubscriptionCache();
 
-        [TearDown]
-        public void TearDown()
-        {
-            mocks = null;
-        }
+			cache.Add(new Subscription(typeof (PingMessage).FullName, new Uri(mockPath)));
 
+			Assert.That(cache.List().Count, Is.EqualTo(1));
+		}
 
-        [Test]
-        public void Add_Subscription()
-        {
-            LocalSubscriptionCache cache = new LocalSubscriptionCache();
+		[Test]
+		public void Add_Subscription_Idempotent()
+		{
+			int count = 0;
+			LocalSubscriptionCache cache = new LocalSubscriptionCache();
+			cache.OnAddSubscription += delegate { count++; };
 
-            cache.Add(typeof(PingMessage).FullName, new Uri(mockPath));
+			cache.Add(new Subscription(typeof (PingMessage).FullName, new Uri(mockPath)));
+			cache.Add(new Subscription(typeof (PingMessage).FullName, new Uri(mockPath)));
+			cache.Add(new Subscription(typeof (PingMessage).FullName.ToLowerInvariant(), new Uri(mockPath)));
 
-            Assert.That(cache.List().Count, Is.EqualTo(1));
-
-        }
-
-        [Test]
-        public void Add_Subscription_Idempotent()
-        {
-            int count=0;
-            LocalSubscriptionCache cache = new LocalSubscriptionCache();
-            cache.SubscriptionChanged += delegate { count++; };
-            cache.Add(typeof(PingMessage).FullName, new Uri(mockPath));
-            cache.Add(typeof(PingMessage).FullName, new Uri(mockPath));
-            cache.Add(typeof(PingMessage).FullName.ToLowerInvariant(), new Uri(mockPath));
-
-            Assert.That(cache.List().Count, Is.EqualTo(1));
-            Assert.That(count, Is.EqualTo(1));
-        }
+			Assert.That(cache.List().Count, Is.EqualTo(2));
+			Assert.That(count, Is.EqualTo(2));
+		}
 
 
-        [Test]
-        public void Remove_subscription()
-        {
-            LocalSubscriptionCache cache = new LocalSubscriptionCache();
-            cache.Add(typeof(PingMessage).FullName, new Uri(mockPath));
-            Assert.That(cache.List().Count, Is.EqualTo(1));
+		[Test]
+		public void Event_fires_on_add()
+		{
+			bool didEventFire = false;
+			LocalSubscriptionCache cache = new LocalSubscriptionCache();
+			cache.OnAddSubscription += delegate { didEventFire = true; };
 
+			cache.Add(new Subscription(typeof(PingMessage).FullName, new Uri(mockPath)));
 
-            cache.Remove(typeof(PingMessage).FullName, new Uri(mockPath));
-            Assert.That(cache.List().Count, Is.EqualTo(0));
-        }
+			Assert.IsTrue(didEventFire);
+		}
 
-        [Test]
-        public void Remove_subscription_Idempotent()
-        {
-            LocalSubscriptionCache cache = new LocalSubscriptionCache();
-            cache.Add(typeof(PingMessage).FullName, new Uri(mockPath));
-            Assert.That(cache.List().Count, Is.EqualTo(1));
+		[Test]
+		public void Event_fires_on_remove()
+		{
+			bool didEventFire = false;
+			LocalSubscriptionCache cache = new LocalSubscriptionCache();
+			cache.Add(new Subscription(typeof(PingMessage).FullName, new Uri(mockPath)));
 
+			cache.OnRemoveSubscription += delegate { didEventFire = true; };
+			cache.Remove(new Subscription(typeof(PingMessage).FullName, new Uri(mockPath)));
 
-            cache.Remove(typeof(PingMessage).FullName, new Uri(mockPath));
-            cache.Remove(typeof(PingMessage).FullName, new Uri(mockPath));
-            Assert.That(cache.List().Count, Is.EqualTo(0));
-        }
+			Assert.IsTrue(didEventFire);
+		}
 
-        [Test]
-        public void Event_fires_on_add()
-        {
-            bool didEventFire = false;
-            LocalSubscriptionCache cache = new LocalSubscriptionCache();
-            cache.SubscriptionChanged += delegate { didEventFire = true; };
+		[Test]
+		public void Remove_subscription()
+		{
+			LocalSubscriptionCache cache = new LocalSubscriptionCache();
+			cache.Add(new Subscription(typeof(PingMessage).FullName, new Uri(mockPath)));
+			Assert.That(cache.List().Count, Is.EqualTo(1));
 
-            cache.Add(typeof(PingMessage).FullName, new Uri(mockPath));
+			cache.Remove(new Subscription(typeof(PingMessage).FullName, new Uri(mockPath)));
+			Assert.That(cache.List().Count, Is.EqualTo(0));
+		}
 
-            Assert.IsTrue(didEventFire);
-        }
+		[Test]
+		public void Remove_subscription_Idempotent()
+		{
+			LocalSubscriptionCache cache = new LocalSubscriptionCache();
+			cache.Add(new Subscription(typeof(PingMessage).FullName, new Uri(mockPath)));
+			Assert.That(cache.List().Count, Is.EqualTo(1));
 
-        [Test]
-        public void Event_fires_on_remove()
-        {
-            bool didEventFire = false;
-            LocalSubscriptionCache cache = new LocalSubscriptionCache();
-            cache.Add(typeof(PingMessage).FullName, new Uri(mockPath));
-
-
-            cache.SubscriptionChanged += delegate { didEventFire = true; };
-            cache.Remove(typeof(PingMessage).FullName, new Uri(mockPath));
-
-            Assert.IsTrue(didEventFire);
-        }
-    }
+			cache.Remove(new Subscription(typeof(PingMessage).FullName, new Uri(mockPath)));
+			cache.Remove(new Subscription(typeof(PingMessage).FullName, new Uri(mockPath)));
+			Assert.That(cache.List().Count, Is.EqualTo(0));
+		}
+	}
 }

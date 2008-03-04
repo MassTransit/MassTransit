@@ -12,113 +12,99 @@
 /// specific language governing permissions and limitations under the License.
 namespace MassTransit.ServiceBus.SubscriptionsManager
 {
-    using System;
-    using System.Collections.Generic;
-    using log4net;
-    using NHibernate;
-    using NHibernate.Expression;
-    using Subscriptions;
+	using System;
+	using System.Collections.Generic;
+	using log4net;
+	using NHibernate;
+	using NHibernate.Expression;
+	using Subscriptions;
 
-    public class PersistantSubscriptionStorage : ISubscriptionStorage
-    {
-        private static readonly ILog _log = LogManager.GetLogger(typeof (SubscriptionService));
-        private readonly ISessionFactory _factory;
-        private readonly object _locker = new object();
+	public class PersistantSubscriptionStorage :
+		ISubscriptionRepository
+	{
+		private static readonly ILog _log = LogManager.GetLogger(typeof (SubscriptionService));
+		private readonly ISessionFactory _factory;
 
-        public PersistantSubscriptionStorage(ISessionFactory factory)
-        {
-            _factory = factory;
-        }
+		public PersistantSubscriptionStorage(ISessionFactory factory)
+		{
+			_factory = factory;
+		}
 
-        #region ISubscriptionStorage Members
+		#region ISubscriptionRepository Members
 
-        public void Add(string messageName, Uri endpoint)
-        {
-            try
-            {
-                using (ISession sess = _factory.OpenSession())
-                using (ITransaction tr = sess.BeginTransaction())
-                {
-                    ICriteria crit = sess.CreateCriteria(typeof (StoredSubscription));
+		public IEnumerable<Subscription> List()
+		{
+			using (ISession sess = _factory.OpenSession())
+			{
+				ICriteria crit = sess.CreateCriteria(typeof (StoredSubscription))
+					.Add(Expression.Eq("IsActive", true));
 
-                    crit.Add(Expression.Eq("Address", endpoint.ToString()))
-                        .Add(Expression.Eq("Message", messageName));
+				return SubscriptionMapper.MapFrom(crit.List<StoredSubscription>());
+			}
+		}
 
-                    StoredSubscription obj = crit.UniqueResult<StoredSubscription>();
+		public void Dispose()
+		{
+			_factory.Dispose();
+		}
 
-                    if (obj == null)
-                    {
-                        obj = new StoredSubscription(endpoint.ToString(), messageName);
-                        sess.Save(obj);
-                    }
-                    else
-                    {
-                        obj.IsActive = true;
-                        sess.Update(obj);
-                    }
+		public void Save(Subscription subscription)
+		{
+			try
+			{
+				using (ISession sess = _factory.OpenSession())
+				using (ITransaction tr = sess.BeginTransaction())
+				{
+					ICriteria crit = sess.CreateCriteria(typeof (StoredSubscription));
 
-                    tr.Commit();
-                }
-            }
-            catch (Exception ex)
-            {
-                _log.Error(string.Format("Error adding message {0} for address {1} to the repository", messageName, endpoint), ex);
-                throw;
-            }
-        }
+					crit.Add(Expression.Eq("EndpointUri", subscription.EndpointUri.ToString()))
+						.Add(Expression.Eq("Message", subscription.MessageName));
 
-        public void Remove(string messageName, Uri endpoint)
-        {
-            using (ISession sess = _factory.OpenSession())
-            using (ITransaction tr = sess.BeginTransaction())
-            {
-                ICriteria crit = sess.CreateCriteria(typeof (StoredSubscription));
+					StoredSubscription obj = crit.UniqueResult<StoredSubscription>();
 
-                crit.Add(Expression.Eq("Address", endpoint.ToString()))
-                    .Add(Expression.Eq("Message", messageName));
+					if (obj == null)
+					{
+						obj = new StoredSubscription(subscription.EndpointUri.ToString(), subscription.MessageName);
+						sess.Save(obj);
+					}
+					else
+					{
+						obj.IsActive = true;
+						sess.Update(obj);
+					}
 
-                StoredSubscription obj = crit.UniqueResult<StoredSubscription>();
-                if (obj != null)
-                {
-                    obj.IsActive = false;
+					tr.Commit();
+				}
+			}
+			catch (Exception ex)
+			{
+				_log.Error(string.Format("Error adding message {0} for address {1} to the repository", subscription.MessageName, subscription.EndpointUri), ex);
+				throw;
+			}
+		}
 
-                    sess.Update(obj);
-                }
+		public void Remove(Subscription subscription)
+		{
+			using (ISession sess = _factory.OpenSession())
+			using (ITransaction tr = sess.BeginTransaction())
+			{
+				ICriteria crit = sess.CreateCriteria(typeof (StoredSubscription));
 
-                tr.Commit();
-            }
-        }
+				crit.Add(Expression.Eq("Address", subscription.EndpointUri.ToString()))
+					.Add(Expression.Eq("Message", subscription.MessageName));
 
-        public event EventHandler<SubscriptionChangedEventArgs> SubscriptionChanged;
+				StoredSubscription obj = crit.UniqueResult<StoredSubscription>();
+				if (obj != null)
+				{
+					obj.IsActive = false;
 
-        public IList<Subscription> List()
-        {
-            using (ISession sess = _factory.OpenSession())
-            {
-                ICriteria crit = sess.CreateCriteria(typeof (StoredSubscription))
-                    .Add(Expression.Eq("IsActive", true));
+					sess.Update(obj);
+				}
 
-                return SubscriptionMapper.MapFrom(crit.List<StoredSubscription>());
-            }
-        }
+				tr.Commit();
+			}
+		}
 
-        public IList<Subscription> List(string messageName)
-        {
-            using (ISession sess = _factory.OpenSession())
-            {
-                ICriteria crit = sess.CreateCriteria(typeof (StoredSubscription))
-                    .Add(Expression.Eq("Message", messageName))
-                    .Add(Expression.Eq("IsActive", true));
-
-                return SubscriptionMapper.MapFrom(crit.List<StoredSubscription>());
-            }
-        }
-
-        public void Dispose()
-        {
-            _factory.Dispose();
-        }
-
-        #endregion
-    }
+		#endregion
+	}
 }

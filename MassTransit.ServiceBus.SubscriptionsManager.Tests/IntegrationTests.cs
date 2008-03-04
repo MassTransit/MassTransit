@@ -56,7 +56,7 @@ namespace MassTransit.ServiceBus.SubscriptionsManager.Tests
 		private IServiceBus _bus;
 		private ISessionFactory _sessionFactory;
 		private ISubscriptionStorage _subscriptionCache;
-		private ISubscriptionStorage _subscriptionRepository;
+		private ISubscriptionRepository _subscriptionRepository;
 
 		public void AssertSubscriptionInDatabase()
 		{
@@ -107,7 +107,7 @@ namespace MassTransit.ServiceBus.SubscriptionsManager.Tests
 		[Test]
 		public void Add_Subscription_to_the_database()
 		{
-			_subscriptionRepository.Add("a", new Uri("msmq://localhost/test_client"));
+			_subscriptionRepository.Save(new Subscription("a", new Uri("msmq://localhost/test_client")));
 
 			Assert.That(ExecuteScalar("SELECT COUNT(*) FROM bus.Subscriptions"), Is.EqualTo(1), "Subscription count didn't match");
 		}
@@ -115,11 +115,11 @@ namespace MassTransit.ServiceBus.SubscriptionsManager.Tests
 		[Test]
 		public void Remove_Subscription_From_the_Database()
 		{
-			_subscriptionRepository.Add("a", new Uri("msmq://localhost/test_client"));
+			_subscriptionRepository.Save(new Subscription("a", new Uri("msmq://localhost/test_client")));
 
 			Assert.That(ExecuteScalar("SELECT COUNT(*) FROM bus.Subscriptions"), Is.EqualTo(1), "Subscription count didn't match");
 
-			_subscriptionRepository.Remove("a", new Uri("msmq://localhost/test_client"));
+			_subscriptionRepository.Remove(new Subscription("a", new Uri("msmq://localhost/test_client")));
 
 			Assert.That(ExecuteScalar("SELECT COUNT(*) FROM bus.Subscriptions WHERE Message='a'"), Is.EqualTo(1), "The subscription did not exist");
 			Assert.That(ExecuteScalar("SELECT COUNT(*) FROM bus.Subscriptions WHERE Message='a' AND IsActive = 0"), Is.EqualTo(1), "The subscription was not marked as inactive");
@@ -128,20 +128,20 @@ namespace MassTransit.ServiceBus.SubscriptionsManager.Tests
 		[Test]
 		public void Test_Add_Idempotency()
 		{
-			_subscriptionRepository.Add("a", new Uri("msmq://localhost/test_client"));
-			_subscriptionRepository.Add("a", new Uri("msmq://localhost/test_client"));
+			_subscriptionRepository.Save(new Subscription("a", new Uri("msmq://localhost/test_client")));
+			_subscriptionRepository.Save(new Subscription("a", new Uri("msmq://localhost/test_client")));
 
 			//casing of message shouldn't matter
-			_subscriptionRepository.Add("A", new Uri("msmq://localhost/test_client"));
+			_subscriptionRepository.Save(new Subscription("A", new Uri("msmq://localhost/test_client")));
 
 			//casing of uri shouldn't matter
-			_subscriptionRepository.Add("a", new Uri("msmq://Localhost/test_client"));
+			_subscriptionRepository.Save(new Subscription("a", new Uri("msmq://Localhost/test_client")));
 
 			//spaces on message name should be ignored
-			_subscriptionRepository.Add("a ", new Uri("msmq://localhost/test_client"));
+			_subscriptionRepository.Save(new Subscription("a ", new Uri("msmq://localhost/test_client")));
 
 			//spaces on uri should be ignored
-			_subscriptionRepository.Add("a ", new Uri("msmq://localhost/test_client "));
+			_subscriptionRepository.Save(new Subscription("a", new Uri("msmq://localhost/test_client ")));
 
 			Assert.That(ExecuteScalar("SELECT COUNT(*) FROM bus.Subscriptions"), Is.EqualTo(1), "Subscription count didn't match");
 		}

@@ -51,7 +51,6 @@
     <Compile Include="StoredSubscription.cs" />
     <Compile Include="SubscriptionMapper.cs" />
     <Compile Include="PersistantSubscriptionStorage.cs" />
-    <Compile Include="SubscriptionService.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\MassTransit.ServiceBus\MassTransit.ServiceBus.csproj">
@@ -60,7 +59,6 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="host.config" />
     <None Include="Subscriptions.sql" />
   </ItemGroup>
   <ItemGroup>
