@@ -10,13 +10,23 @@
 /// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 /// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 /// specific language governing permissions and limitations under the License.
-
-namespace MassTransit.ServiceBus.Subscriptions.Messages
+namespace MassTransit.ServiceBus
 {
-    public enum SubscriptionChangeType
-    {
-        Add,
+	using System;
+	using Subscriptions;
 
-        Remove,
-    }
+	public class SubscriptionEventArgs : EventArgs
+	{
+		private readonly Subscription _subscription;
+
+		public SubscriptionEventArgs(Subscription subscription)
+		{
+			_subscription = subscription;
+		}
+
+		public Subscription Subscription
+		{
+			get { return _subscription; }
+		}
+	}
 }

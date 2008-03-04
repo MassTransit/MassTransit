@@ -10,23 +10,28 @@
 /// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 /// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 /// specific language governing permissions and limitations under the License.
-namespace MassTransit.ServiceBus
+namespace MassTransit.ServiceBus.Subscriptions
 {
 	using System;
-	using MassTransit.ServiceBus.Subscriptions.Messages;
+	using System.Collections.Generic;
 
-	public class SubscriptionChangedEventArgs : EventArgs
+	public interface ISubscriptionRepository :
+		IDisposable
 	{
-		private readonly SubscriptionChange _change;
+		/// <summary>
+		/// Add a new subscription to the repository for storage
+		/// </summary>
+		void Save(Subscription subscription);
 
-		public SubscriptionChangedEventArgs(SubscriptionChange change)
-		{
-			_change = change;
-		}
+		/// <summary>
+		/// Remove a subscription from the repository
+		/// </summary>
+		void Remove(Subscription subscription);
 
-		public SubscriptionChange Change
-		{
-			get { return _change; }
-		}
+		/// <summary>
+		/// Return a list of subscriptions stored in the repository
+		/// </summary>
+		/// <returns></returns>
+		IEnumerable<Subscription> List();
 	}
 }

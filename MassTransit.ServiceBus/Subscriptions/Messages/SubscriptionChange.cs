@@ -16,32 +16,25 @@ namespace MassTransit.ServiceBus.Subscriptions.Messages
     using System;
 
     [Serializable]
-    public class SubscriptionChange : IMessage
+    public abstract class SubscriptionChange :
+		IMessage
     {
-        private readonly SubscriptionChangeType _changeType;
         private readonly Subscription _subscription;
 
         //xml serialization
-        private SubscriptionChange()
+        protected SubscriptionChange()
         {
         }
 
-        public SubscriptionChange(string messageName, Uri address, SubscriptionChangeType changeType) 
-            : this(new Subscription(address, messageName), changeType)
+        public SubscriptionChange(string messageName, Uri address) 
+            : this(new Subscription(messageName, address))
         {
         }
 
-        public SubscriptionChange(Subscription subscription, SubscriptionChangeType changeType)
+        public SubscriptionChange(Subscription subscription)
         {
-            _changeType = changeType;
             _subscription = subscription;
         }
-
-        public SubscriptionChangeType ChangeType
-        {
-            get { return _changeType; }
-        }
-
 
         public Subscription Subscription
         {

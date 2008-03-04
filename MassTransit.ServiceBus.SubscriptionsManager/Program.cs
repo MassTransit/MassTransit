@@ -12,67 +12,67 @@
 /// specific language governing permissions and limitations under the License.
 namespace MassTransit.ServiceBus.SubscriptionsManager
 {
-    using System;
-    using System.ServiceProcess;
-    using NHibernate;
-    using NHibernate.Cfg;
-    using Subscriptions;
+	using System;
+	using System.ServiceProcess;
+	using NHibernate;
+	using NHibernate.Cfg;
+	using Subscriptions;
 
-    public class Program : ServiceBase
-    {
-        private SubscriptionService _subscriptionService;
-        private IEndpoint _endpoint;
-        private ISessionFactory _sessionFactory;
-        private ISubscriptionStorage _subscriptionCache;
+	public class Program : ServiceBase
+	{
+		private IEndpoint _endpoint;
+		private ISessionFactory _sessionFactory;
+		private ISubscriptionStorage _subscriptionCache;
+		private SubscriptionService _subscriptionService;
 
-        protected void Initialize(string connectionString, string wellKnownSubscriptionUri)
-        {
+		protected void Initialize(string connectionString, string wellKnownSubscriptionUri)
+		{
 			//TODO
-            //_endpoint = new MessageQueueEndpoint(wellKnownSubscriptionUri);
-            _sessionFactory = GetNHibernateSessionFactory(connectionString);
+			//_endpoint = new MessageQueueEndpoint(wellKnownSubscriptionUri);
+			_sessionFactory = GetNHibernateSessionFactory(connectionString);
 
-            _subscriptionCache = new LocalSubscriptionCache();
-
-
-            _subscriptionService = new SubscriptionService(
-                new ServiceBus(_endpoint, _subscriptionCache),
-                _subscriptionCache,
-                new PersistantSubscriptionStorage(_sessionFactory)
-);
-        }
+			_subscriptionCache = new LocalSubscriptionCache();
 
 
-        protected override void OnStart(string[] args)
-        {
-            if (args.Length != 1)
-                throw new ArgumentException("There needs to be one parameter that is a connection string");
+			_subscriptionService = new SubscriptionService(
+				new ServiceBus(_endpoint, _subscriptionCache),
+				_subscriptionCache,
+				new PersistantSubscriptionStorage(_sessionFactory)
+				);
+		}
 
-            base.OnStart(args);
 
-            Initialize(args[0], args[1]);
-            
-            _subscriptionService.Start(args);
-        }
+		protected override void OnStart(string[] args)
+		{
+			if (args.Length != 1)
+				throw new ArgumentException("There needs to be one parameter that is a connection string");
 
-        protected override void OnStop()
-        {
-            _subscriptionService.Stop();
+			base.OnStart(args);
 
-            base.OnStop();
-        }
+			Initialize(args[0], args[1]);
 
-        protected ISessionFactory GetNHibernateSessionFactory(string connectionString)
-        {
-            Configuration cfg = new Configuration();
+			_subscriptionService.Start(args);
+		}
 
-            cfg.SetProperty("hibernate.connection.provider", "NHibernate.Connection.DriverConnectionProvider");
-            cfg.SetProperty("hibernate.connection.driver_class", "NHibernate.Driver.SqlClientDriver");
-            cfg.SetProperty("hibernate.connection.connection_string", connectionString);
-            cfg.SetProperty("hibernate.dialect", "NHibernate.Dialect.MsSql2005Dialect");
+		protected override void OnStop()
+		{
+			_subscriptionService.Stop();
 
-            cfg.AddAssembly("MassTransit.ServiceBus.SubscriptionsManager");
+			base.OnStop();
+		}
 
-            return cfg.BuildSessionFactory();
-        }
-    }
+		protected static ISessionFactory GetNHibernateSessionFactory(string connectionString)
+		{
+			Configuration cfg = new Configuration();
+
+			cfg.SetProperty("hibernate.connection.provider", "NHibernate.Connection.DriverConnectionProvider");
+			cfg.SetProperty("hibernate.connection.driver_class", "NHibernate.Driver.SqlClientDriver");
+			cfg.SetProperty("hibernate.connection.connection_string", connectionString);
+			cfg.SetProperty("hibernate.dialect", "NHibernate.Dialect.MsSql2005Dialect");
+
+			cfg.AddAssembly("MassTransit.ServiceBus.SubscriptionsManager");
+
+			return cfg.BuildSessionFactory();
+		}
+	}
 }

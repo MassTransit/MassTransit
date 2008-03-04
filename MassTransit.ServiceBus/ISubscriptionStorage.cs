@@ -31,15 +31,16 @@ namespace MassTransit.ServiceBus
 		IList<Subscription> List(string messageName);
 
 		/// <summary>
-		/// Add a message type and endpoint pair to the subscription storage
+		/// Add a message type and endpointUri pair to the subscription storage
 		/// </summary>
-		void Add(string messageName, Uri endpoint);
+		void Add(Subscription subscription);
 
 		/// <summary>
 		/// Removes a message from the subscription store.
 		/// </summary>
-		void Remove(string messageName, Uri endpoint);
+		void Remove(Subscription subscription);
 
-		event EventHandler<SubscriptionChangedEventArgs> SubscriptionChanged;
+		event EventHandler<SubscriptionEventArgs> OnAddSubscription;
+		event EventHandler<SubscriptionEventArgs> OnRemoveSubscription;
 	}
 }

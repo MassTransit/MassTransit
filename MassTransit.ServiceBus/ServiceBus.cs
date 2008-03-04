@@ -14,8 +14,8 @@ namespace MassTransit.ServiceBus
 {
 	using System;
 	using System.Collections.Generic;
-	using log4net;
 	using Internal;
+	using log4net;
 	using Subscriptions;
 	using Util;
 
@@ -35,12 +35,12 @@ namespace MassTransit.ServiceBus
 			new Dictionary<Type, IMessageConsumer>();
 
 		private readonly object _consumersLock = new object();
+		private readonly EndpointResolver _endpointResolver = new EndpointResolver();
 
 
 		private readonly IEndpoint _endpointToListenOn;
 		private readonly ISubscriptionStorage _subscriptionStorage;
 		private IEndpoint _poisonEndpoint;
-		private readonly EndpointResolver _endpointResolver = new EndpointResolver();
 
 		public ServiceBus(IEndpoint endpointToListenOn, ISubscriptionStorage subscriptionStorage)
 		{
@@ -137,7 +137,7 @@ namespace MassTransit.ServiceBus
 		{
 			foreach (Subscription subscription in _subscriptionStorage.List(typeof (T).FullName))
 			{
-				IEndpoint endpoint = _endpointResolver.Resolve(subscription.Address);
+				IEndpoint endpoint = _endpointResolver.Resolve(subscription.EndpointUri);
 				Send(endpoint, messages);
 			}
 		}
@@ -171,10 +171,7 @@ namespace MassTransit.ServiceBus
 		public IEndpoint PoisonEndpoint
 		{
 			get { return _poisonEndpoint; }
-			set
-			{
-				_poisonEndpoint = value;
-			}
+			set { _poisonEndpoint = value; }
 		}
 
 		/// <summary>
@@ -200,7 +197,7 @@ namespace MassTransit.ServiceBus
 				if (!_consumers.ContainsKey(typeof (T)))
 				{
 					_consumers[typeof (T)] = new MessageConsumer<T>();
-					_subscriptionStorage.Add(typeof (T).FullName, Endpoint.Uri);
+					_subscriptionStorage.Add(new Subscription(typeof (T).FullName, Endpoint.Uri));
 				}
 
 				((IMessageConsumer<T>) _consumers[typeof (T)]).Subscribe(callback, condition);
@@ -226,7 +223,7 @@ namespace MassTransit.ServiceBus
 					if (consumer.Count == 0)
 					{
 						_consumers.Remove(typeof (T));
-						_subscriptionStorage.Remove(typeof (T).FullName, Endpoint.Uri);
+						_subscriptionStorage.Remove(new Subscription(typeof (T).FullName, Endpoint.Uri));
 					}
 				}
 			}

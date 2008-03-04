@@ -13,7 +13,7 @@ namespace MassTransit.ServiceBus.SubscriptionsManager.Tests
         [Test]
         public void From_Change_To_Persistant()
         {
-            SubscriptionChange change = new SubscriptionChange(typeof(CacheUpdateResponse).FullName, new Uri("msmq://localhost/bob"), SubscriptionChangeType.Remove );
+			RemoveSubscription change = new RemoveSubscription(typeof(CacheUpdateResponse).FullName, new Uri("msmq://localhost/bob"));
             StoredSubscription stored = SubscriptionMapper.MapFrom(change);
 
             Assert.That(stored.Address, Is.EqualTo(new Uri("msmq://localhost/bob")));
@@ -29,7 +29,7 @@ namespace MassTransit.ServiceBus.SubscriptionsManager.Tests
             Subscription sub = SubscriptionMapper.MapFrom(stored);
             
 
-            Assert.That(sub.Address, Is.EqualTo(new Uri("msmq://localhost/bob")));
+            Assert.That(sub.EndpointUri, Is.EqualTo(new Uri("msmq://localhost/bob")));
             Assert.That(sub.MessageName, Is.EqualTo(typeof(CacheUpdateResponse).FullName));
         }
 

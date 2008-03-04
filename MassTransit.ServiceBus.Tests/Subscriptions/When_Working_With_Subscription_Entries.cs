@@ -32,8 +32,8 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
 		[Test]
 		public void Comparing_Two_Entries_Should_Return_True()
 		{
-			SubscriptionCacheEntry left = new SubscriptionCacheEntry(_serviceBusEndPoint.Uri);
-			SubscriptionCacheEntry right = new SubscriptionCacheEntry(_serviceBusEndPoint.Uri);
+			SubscriptionCacheEntry left = new SubscriptionCacheEntry(new Subscription("A", _serviceBusEndPoint.Uri));
+			SubscriptionCacheEntry right = new SubscriptionCacheEntry(new Subscription("A", _serviceBusEndPoint.Uri));
 
 			Assert.That(left, Is.EqualTo(right));
 		}

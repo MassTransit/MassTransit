@@ -2,6 +2,7 @@ namespace MassTransit.ServiceBus.Tests
 {
 	using System;
 	using Internal;
+	using MassTransit.ServiceBus.Subscriptions;
 	using NUnit.Framework;
 	using Rhino.Mocks;
 
@@ -52,7 +53,7 @@ namespace MassTransit.ServiceBus.Tests
 				Expect.Call(delegate { mockReceiver.Subscribe(null); }).IgnoreArguments().Repeat.Any();
 				Expect.Call(mockBusEndpoint.Uri).Return(queueUri).Repeat.Any();
 
-				mockSubscriptionStorage.Add(typeof (PoisonMessage).FullName, queueUri);
+				mockSubscriptionStorage.Add(new Subscription(typeof (PoisonMessage).FullName, queueUri));
 
 				//Expect.Call(mockBusEndpoint.Sender).Return(mockSender);
 

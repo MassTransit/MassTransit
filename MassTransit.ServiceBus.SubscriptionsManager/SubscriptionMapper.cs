@@ -22,12 +22,12 @@ namespace MassTransit.ServiceBus.SubscriptionsManager
     {
         public static StoredSubscription MapFrom(SubscriptionChange message)
         {
-            return new StoredSubscription(message.Subscription.Address.ToString(), message.Subscription.MessageName);
+            return new StoredSubscription(message.Subscription.EndpointUri.ToString(), message.Subscription.MessageName);
         }
 
         public static Subscription MapFrom(StoredSubscription storedSubscription)
         {
-            return new Subscription(new Uri(storedSubscription.Address), storedSubscription.Message);
+            return new Subscription(storedSubscription.Message, new Uri(storedSubscription.Address));
         }
 
         public static IList<Subscription> MapFrom(IList<StoredSubscription> subscriptions)

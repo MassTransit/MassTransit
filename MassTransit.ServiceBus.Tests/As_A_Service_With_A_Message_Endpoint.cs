@@ -2,6 +2,7 @@ namespace MassTransit.ServiceBus.Tests
 {
 	using System;
 	using Internal;
+	using MassTransit.ServiceBus.Subscriptions;
 	using NUnit.Framework;
 	using Rhino.Mocks;
 
@@ -13,46 +14,45 @@ namespace MassTransit.ServiceBus.Tests
 		[SetUp]
 		public void SetUp()
 		{
-			mocks = new MockRepository();
-			mockEndpoint = mocks.CreateMock<IEndpoint>();
-			mockSubscriptionStorage = mocks.CreateMock<ISubscriptionStorage>();
-			mockReceiver = mocks.CreateMock<IMessageReceiver>();
+			_mocks = new MockRepository();
+			_mockEndpoint = _mocks.CreateMock<IEndpoint>();
+			_mockSubscriptionStorage = _mocks.CreateMock<ISubscriptionStorage>();
+			_mockReceiver = _mocks.CreateMock<IMessageReceiver>();
 		}
 
 		[TearDown]
 		public void TearDown()
 		{
-			mocks = null;
+			_mocks = null;
 			_serviceBus = null;
-			mockEndpoint = null;
-			mockSubscriptionStorage = null;
+			_mockEndpoint = null;
+			_mockSubscriptionStorage = null;
 		}
 
 		#endregion
 
 		private IServiceBus _serviceBus;
-		private MockRepository mocks;
-		private IEndpoint mockEndpoint;
-		private ISubscriptionStorage mockSubscriptionStorage;
+		private MockRepository _mocks;
+		private IEndpoint _mockEndpoint;
+		private ISubscriptionStorage _mockSubscriptionStorage;
+		private IMessageReceiver _mockReceiver;
 
-		private string queueName = @".\private$\test";
-		private Uri queueUri = new Uri("msmq://localhost/test");
-		private IMessageReceiver mockReceiver;
+		private readonly Uri queueUri = new Uri("msmq://localhost/test");
 
 		[Test]
 		public void I_Want_To_Be_Able_To_Register_An_Event_Handler_For_Messages()
 		{
-			using (mocks.Record())
+			using (_mocks.Record())
 			{
-				Expect.Call(mockEndpoint.Receiver).Return(mockReceiver).Repeat.Any();
-				Expect.Call(delegate { mockReceiver.Subscribe(null); }).IgnoreArguments().Repeat.Any();
-				Expect.Call(mockEndpoint.Uri).Return(queueUri).Repeat.Any(); //stupid log4net
-				mockSubscriptionStorage.Add(typeof (PingMessage).FullName, queueUri);
+				Expect.Call(_mockEndpoint.Receiver).Return(_mockReceiver).Repeat.Any();
+				Expect.Call(delegate { _mockReceiver.Subscribe(null); }).IgnoreArguments().Repeat.Any();
+				Expect.Call(_mockEndpoint.Uri).Return(queueUri).Repeat.Any(); //stupid log4net
+				_mockSubscriptionStorage.Add(new Subscription(typeof (PingMessage).FullName, queueUri));
 			}
 
-			using (mocks.Playback())
+			using (_mocks.Playback())
 			{
-				_serviceBus = new ServiceBus(mockEndpoint, mockSubscriptionStorage);
+				_serviceBus = new ServiceBus(_mockEndpoint, _mockSubscriptionStorage);
 				_serviceBus.Subscribe<PingMessage>(delegate { });
 			}
 		}
