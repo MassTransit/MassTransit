@@ -1,3 +1,5 @@
+using MassTransit.ServiceBus.Subscriptions;
+
 namespace MassTransit.ServiceBus.MSMQ.Tests
 {
 	using System;
@@ -42,6 +44,13 @@ namespace MassTransit.ServiceBus.MSMQ.Tests
 				            "Timeout expired waiting for message");
 			}
 		}
+
+	    [Test]
+	    public void NAME()
+	    {
+	        ServiceBus bus = new ServiceBus(new MsmqEndpoint("msmq://localhost/test"), new LocalSubscriptionCache());
+            bus.Send(new MsmqEndpoint("msmq://localhost/test_endpoint"), new VariableMessage("phil is cool"));
+	    }
 
 		[Test]
 		public void Multiple_messages_should_be_delivered_to_the_appropriate_remote_subscribers()

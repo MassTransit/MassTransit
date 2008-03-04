@@ -46,6 +46,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Messages\VariableMessage.cs" />
     <Compile Include="Messages\DeleteMessage.cs" />
     <Compile Include="Messages\UpdateAcceptedMessage.cs" />
     <Compile Include="Messages\UpdateMessage.cs" />

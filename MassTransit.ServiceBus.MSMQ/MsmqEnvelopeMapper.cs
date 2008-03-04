@@ -19,7 +19,7 @@ namespace MassTransit.ServiceBus.MSMQ
 	public class MsmqEnvelopeMapper : 
         IEnvelopeMapper<Message>
 	{
-        private static readonly Formatters.IMessageFormatter _formatter = new Formatters.BinaryMessageFormatter();
+        private static readonly Formatters.IMessageFormatter _formatter = new Formatters.XmlMessageFormatter();
 
 		public IEnvelope ToEnvelope(Message msg)
 		{
