@@ -17,7 +17,7 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
 		public void Setup()
 		{
 			_mocks = new MockRepository();
-			_cache = _mocks.CreateMock<ISubscriptionStorage>();
+			_cache = _mocks.CreateMock<ISubscriptionCache>();
 			_serviceBus = _mocks.CreateMock<IServiceBus>();
 			_managerEndpoint = _mocks.DynamicMock<IEndpoint>();
 		}
@@ -32,7 +32,7 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
 		private MockRepository _mocks;
 		private IServiceBus _serviceBus;
 		private IEndpoint _managerEndpoint;
-		private ISubscriptionStorage _cache;
+		private ISubscriptionCache _cache;
 
 		[Test]
 		public void The_client_should_request_an_update_at_startup()

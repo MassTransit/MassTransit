@@ -22,7 +22,7 @@ namespace MassTransit.ServiceBus.SubscriptionsManager
 	{
 		private IEndpoint _endpoint;
 		private ISessionFactory _sessionFactory;
-		private ISubscriptionStorage _subscriptionCache;
+		private ISubscriptionCache _subscriptionCache;
 		private SubscriptionService _subscriptionService;
 
 		protected void Initialize(string connectionString, string wellKnownSubscriptionUri)
@@ -33,7 +33,7 @@ namespace MassTransit.ServiceBus.SubscriptionsManager
 
 			_subscriptionCache = new LocalSubscriptionCache();
             ServiceBus bus = new ServiceBus(_endpoint);
-		    bus.SubscriptionStorage = _subscriptionCache;
+			bus.SubscriptionCache = _subscriptionCache;
 
 
 			_subscriptionService = new SubscriptionService(

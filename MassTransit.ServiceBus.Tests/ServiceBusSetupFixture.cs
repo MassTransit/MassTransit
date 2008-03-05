@@ -43,17 +43,17 @@ namespace MassTransit.ServiceBus.Tests
 
 			_mocks.ReplayAll();	
 
-			ISubscriptionStorage _subscriptionCache = new LocalSubscriptionCache();
+			ISubscriptionCache _subscriptionCache = new LocalSubscriptionCache();
 
 			ServiceBus bus = new ServiceBus(_serviceBusEndPoint);
-		    bus.SubscriptionStorage = _subscriptionCache;
+		    bus.SubscriptionCache = _subscriptionCache;
 
 			bus.PoisonEndpoint = _poisonEndpoint;
 			_serviceBus = bus;
 
 
 			_remoteServiceBus = new ServiceBus(_remoteServiceBusEndPoint);
-		    _remoteServiceBus.SubscriptionStorage = _subscriptionCache;
+			_remoteServiceBus.SubscriptionCache = _subscriptionCache;
 		}
 
 		[TearDown]

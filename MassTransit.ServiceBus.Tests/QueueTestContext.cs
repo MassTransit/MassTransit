@@ -22,7 +22,7 @@ namespace MassTransit.ServiceBus.Tests
 		private IEndpoint _serviceBusEndPoint;
 		private IEndpoint _subscriptionEndpoint;
 
-		private ISubscriptionStorage _subscriptionStorage;
+		private ISubscriptionCache _subscriptionCache;
 		private IMessageSender _mockSender;
 		private IMessageReceiver _mockReceiver;
 
@@ -98,12 +98,12 @@ namespace MassTransit.ServiceBus.Tests
 			_mockSender = _mocks.DynamicMock<IMessageSender>();
 			_mockReceiver = _mocks.DynamicMock<IMessageReceiver>();
 
-			_subscriptionStorage = new LocalSubscriptionCache();
+			_subscriptionCache = new LocalSubscriptionCache();
 
 			_serviceBus = new ServiceBus(ServiceBusEndPoint);
-		    _serviceBus.SubscriptionStorage = _subscriptionStorage;
+		    _serviceBus.SubscriptionCache = _subscriptionCache;
 			_remoteServiceBus = new ServiceBus(RemoteServiceBusEndPoint);
-		    _remoteServiceBus.SubscriptionStorage = _subscriptionStorage;
+		    _remoteServiceBus.SubscriptionCache = _subscriptionCache;
 
 			SetupResult.For(_subscriptionEndpoint.Uri).Return(new Uri("local://" + Environment.MachineName.ToLowerInvariant() + "/test_subscriptions"));
 			SetupResult.For(_serviceBusEndPoint.Uri).Return(new Uri("local://" + Environment.MachineName.ToLowerInvariant() + "/test_servicebus"));

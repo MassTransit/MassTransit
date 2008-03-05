@@ -18,7 +18,7 @@ namespace MassTransit.ServiceBus.SubscriptionsManager.Tests
 			_mocks = new MockRepository();
 			_repository = _mocks.CreateMock<ISubscriptionRepository>();
 			_bus = _mocks.CreateMock<IServiceBus>();
-			_cache = _mocks.CreateMock<ISubscriptionStorage>();
+			_cache = _mocks.CreateMock<ISubscriptionCache>();
 
 			_service = new SubscriptionService(_bus, _cache, _repository);
 
@@ -29,7 +29,7 @@ namespace MassTransit.ServiceBus.SubscriptionsManager.Tests
 
 		private MockRepository _mocks;
 		private ISubscriptionRepository _repository;
-		private ISubscriptionStorage _cache;
+		private ISubscriptionCache _cache;
 		private IServiceBus _bus;
 		private SubscriptionService _service;
 		private IMessageContext<CacheUpdateRequest> _context;
@@ -67,7 +67,7 @@ namespace MassTransit.ServiceBus.SubscriptionsManager.Tests
 			_mocks = new MockRepository();
 			_repository = _mocks.CreateMock<ISubscriptionRepository>();
 			_bus = _mocks.CreateMock<IServiceBus>();
-			_cache = _mocks.CreateMock<ISubscriptionStorage>();
+			_cache = _mocks.CreateMock<ISubscriptionCache>();
 
 			_service = new SubscriptionService(_bus, _cache, _repository);
 
@@ -79,7 +79,7 @@ namespace MassTransit.ServiceBus.SubscriptionsManager.Tests
 
 		private MockRepository _mocks;
 		private ISubscriptionRepository _repository;
-		private ISubscriptionStorage _cache;
+		private ISubscriptionCache _cache;
 		private IServiceBus _bus;
 		private SubscriptionService _service;
 		private Uri _uri;

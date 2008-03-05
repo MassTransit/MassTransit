@@ -4,6 +4,7 @@ namespace MassTransit.ServiceBus.MSMQ.Tests
 	using NUnit.Framework;
 	using NUnit.Framework.SyntaxHelpers;
 	using Rhino.Mocks;
+	using Subscriptions;
 
 	[TestFixture]
 	public class When_creating_the_service_bus_with_a_MessageQueueEndpoint
@@ -34,7 +35,7 @@ namespace MassTransit.ServiceBus.MSMQ.Tests
 			MsmqEndpoint defaultEndpoint = endpointName;
 
 			ServiceBus serviceBus = new ServiceBus(defaultEndpoint);
-			serviceBus.SubscriptionStorage = _mocks.CreateMock<ISubscriptionStorage>();
+			serviceBus.SubscriptionCache = _mocks.CreateMock<ISubscriptionCache>();
 
 			string machineEndpointName = endpointName.Replace("localhost", Environment.MachineName.ToLowerInvariant());
 
