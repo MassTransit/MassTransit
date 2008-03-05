@@ -1,7 +1,6 @@
 using System.IO;
 using System.Text;
 using System.Xml;
-using MassTransit.ServiceBus.Tests.Messages;
 using NUnit.Framework.SyntaxHelpers;
 
 namespace MassTransit.ServiceBus.Tests.Formatters
@@ -19,7 +18,6 @@ namespace MassTransit.ServiceBus.Tests.Formatters
         IFormattedBody mockBody;
 
 		private readonly string _serializedMessages = "<?xml version=\"1.0\"?>\r\n<ArrayOfAnyType xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">\r\n  <anyType xsi:type=\"PingMessage\" />\r\n</ArrayOfAnyType>";
-		private readonly string _serializedGenericMessages = "<?xml version=\"1.0\"?>\r\n<ArrayOfAnyType xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">\r\n  <anyType xsi:type=\"PingGenericMessageOfString\" />\r\n</ArrayOfAnyType>";
 
         [SetUp]
         public void SetUp()
@@ -64,32 +62,6 @@ namespace MassTransit.ServiceBus.Tests.Formatters
         }
 
         [Test]
-        public void Serialize_Generic()
-        {
-            PingGenericMessage<string> msg = new PingGenericMessage<string>();
-
-            MemoryStream memoryStream = new MemoryStream();
-
-            using (mocks.Record())
-            {
-                Expect.Call(mockBody.BodyStream).Return(memoryStream);
-            }
-
-            using (mocks.Playback())
-            {
-                formatter.Serialize(mockBody, msg);
-
-                byte[] buffer = new byte[memoryStream.Length];
-                memoryStream.Position = 0;
-                memoryStream.Read(buffer, 0, buffer.Length);
-
-                string s = Encoding.UTF8.GetString(buffer);
-
-                Assert.That(s, Is.EqualTo(_serializedGenericMessages));
-            }
-        }
-
-        [Test]
         public void Deserialize()
         {
 			MemoryStream memoryStream = new MemoryStream(new UTF8Encoding().GetBytes(_serializedMessages));
@@ -105,25 +77,6 @@ namespace MassTransit.ServiceBus.Tests.Formatters
                 Assert.AreEqual(1, msgs.Length);
 
             	Assert.That(msgs[0], Is.TypeOf(typeof (PingMessage)));
-            }
-        }
-
-        [Test]
-        public void Deserialize_Generic()
-        {
-            MemoryStream memoryStream = new MemoryStream(new UTF8Encoding().GetBytes(_serializedGenericMessages));
-
-            using (mocks.Record())
-            {
-                Expect.Call(mockBody.BodyStream).Return(memoryStream);
-            }
-            using (mocks.Playback())
-            {
-                IMessage[] msgs = formatter.Deserialize(mockBody);
-
-                Assert.AreEqual(1, msgs.Length);
-
-                Assert.That(msgs[0], Is.TypeOf(typeof(PingMessage)));
             }
         }
     }

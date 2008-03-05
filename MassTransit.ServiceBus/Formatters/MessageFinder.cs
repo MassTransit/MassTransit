@@ -29,6 +29,9 @@ namespace MassTransit.ServiceBus.Formatters
                             if (type.IsAbstract || type.IsInterface)
                                 continue;
 
+							if (type.ContainsGenericParameters)
+								continue;
+
                             if (messageType.IsAssignableFrom(type))
                                 _messageTypes.Add(type);
                         }

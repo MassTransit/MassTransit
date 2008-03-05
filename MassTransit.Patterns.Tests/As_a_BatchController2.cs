@@ -46,10 +46,10 @@ namespace MassTransit.Patterns.Tests
 			bool wasCalled = false;
 			bool isComplete = false;
 
-			BatchController2<BatchMessage<string, Guid>, Guid> c = new BatchController2<BatchMessage<string, Guid>, Guid>(
-				delegate(IBatchContext<BatchMessage<string, Guid>, Guid> cxt)
+			BatchController2<StringBatchMessage, Guid> c = new BatchController2<StringBatchMessage, Guid>(
+				delegate(IBatchContext<StringBatchMessage, Guid> cxt)
 					{
-						foreach (BatchMessage<string, Guid> msg in cxt)
+						foreach (StringBatchMessage msg in cxt)
 						{
 							//this shouldn't be called because we don't do anything until we get them all
 							wasCalled = true;
@@ -60,11 +60,11 @@ namespace MassTransit.Patterns.Tests
 			Guid batchId = Guid.NewGuid();
 			int batchLength = 2;
 
-			BatchMessage<string, Guid> msg1 = new BatchMessage<string, Guid>(batchId, batchLength, "hello");
+			StringBatchMessage msg1 = new StringBatchMessage(batchId, batchLength, "hello");
 
 			IEnvelope env1 = new Envelope(msg1);
 
-			_bus.Subscribe<BatchMessage<string, Guid>>(c.HandleMessage);
+			_bus.Subscribe<StringBatchMessage>(c.HandleMessage);
 
 			_bus.Deliver(env1);
 
@@ -78,10 +78,10 @@ namespace MassTransit.Patterns.Tests
 			bool wasCalled = false;
 			bool isComplete = false;
 
-			BatchController2<BatchMessage<string, Guid>, Guid> c = new BatchController2<BatchMessage<string, Guid>, Guid>(
-				delegate(IBatchContext<BatchMessage<string, Guid>, Guid> cxt)
+			BatchController2<StringBatchMessage, Guid> c = new BatchController2<StringBatchMessage, Guid>(
+				delegate(IBatchContext<StringBatchMessage, Guid> cxt)
 					{
-						foreach (BatchMessage<string, Guid> msg in cxt)
+						foreach (StringBatchMessage msg in cxt)
 						{
 							//this shouldn't be called because we don't do anything until we get them all
 							wasCalled = true;
@@ -92,11 +92,11 @@ namespace MassTransit.Patterns.Tests
 			Guid batchId = Guid.NewGuid();
 			int batchLength = 2;
 
-			BatchMessage<string, Guid> msg1 = new BatchMessage<string, Guid>(batchId, batchLength, "hello");
+			StringBatchMessage msg1 = new StringBatchMessage(batchId, batchLength, "hello");
 
 			IEnvelope env1 = new Envelope(msg1);
 
-			_bus.Subscribe<BatchMessage<string, Guid>>(c.HandleMessage);
+			_bus.Subscribe<StringBatchMessage>(c.HandleMessage);
 
 			_bus.Deliver(env1);
 			Thread.Sleep(3005);
@@ -113,12 +113,12 @@ namespace MassTransit.Patterns.Tests
 			bool isComplete = false;
 			int numberCalled = 0;
 
-			BatchController2<BatchMessage<string, Guid>, Guid> c = new BatchController2<BatchMessage<string, Guid>, Guid>(
-				delegate(IBatchContext<BatchMessage<string, Guid>, Guid> cxt)
+			BatchController2<StringBatchMessage, Guid> c = new BatchController2<StringBatchMessage, Guid>(
+				delegate(IBatchContext<StringBatchMessage, Guid> cxt)
 					{
 						numberCalled = 0;
 
-						foreach (BatchMessage<string, Guid> msg in cxt)
+						foreach (StringBatchMessage msg in cxt)
 						{
 							wasCalled = true;
 							isComplete = cxt.IsComplete;
@@ -129,17 +129,17 @@ namespace MassTransit.Patterns.Tests
 			Guid batchId = Guid.NewGuid();
 			int batchLength = 4;
 
-			BatchMessage<string, Guid> msg1 = new BatchMessage<string, Guid>(batchId, batchLength, "hello");
-			BatchMessage<string, Guid> msg2 = new BatchMessage<string, Guid>(batchId, batchLength, "hello");
-			BatchMessage<string, Guid> msg3 = new BatchMessage<string, Guid>(batchId, batchLength, "hello");
-			BatchMessage<string, Guid> msg4 = new BatchMessage<string, Guid>(batchId, batchLength, "hello");
+			StringBatchMessage msg1 = new StringBatchMessage(batchId, batchLength, "hello");
+			StringBatchMessage msg2 = new StringBatchMessage(batchId, batchLength, "hello");
+			StringBatchMessage msg3 = new StringBatchMessage(batchId, batchLength, "hello");
+			StringBatchMessage msg4 = new StringBatchMessage(batchId, batchLength, "hello");
 
 			IEnvelope env1 = new Envelope(msg1);
 			IEnvelope env2 = new Envelope(msg2);
 			IEnvelope env3 = new Envelope(msg3);
 			IEnvelope env4 = new Envelope(msg4);
 
-			_bus.Subscribe<BatchMessage<string, Guid>>(c.HandleMessage);
+			_bus.Subscribe<StringBatchMessage>(c.HandleMessage);
 
 			ManualResetEvent started = new ManualResetEvent(false);
 			ManualResetEvent done = new ManualResetEvent(false);
@@ -170,10 +170,10 @@ namespace MassTransit.Patterns.Tests
 			bool wasCalled = false;
 			bool isComplete = false;
 
-			BatchController2<BatchMessage<string, Guid>, Guid> c = new BatchController2<BatchMessage<string, Guid>, Guid>(
-				delegate(IBatchContext<BatchMessage<string, Guid>, Guid> cxt)
+			BatchController2<StringBatchMessage, Guid> c = new BatchController2<StringBatchMessage, Guid>(
+				delegate(IBatchContext<StringBatchMessage, Guid> cxt)
 					{
-						foreach (BatchMessage<string, Guid> msg in cxt)
+						foreach (StringBatchMessage msg in cxt)
 						{
 							wasCalled = true;
 							isComplete = cxt.IsComplete;
@@ -184,11 +184,11 @@ namespace MassTransit.Patterns.Tests
 			Guid batchId = Guid.NewGuid();
 			int batchLength = 1;
 
-			BatchMessage<string, Guid> msg1 = new BatchMessage<string, Guid>(batchId, batchLength, "hello");
+			StringBatchMessage msg1 = new StringBatchMessage(batchId, batchLength, "hello");
 
 			IEnvelope env1 = new Envelope(msg1);
 
-			_bus.Subscribe<BatchMessage<string, Guid>>(c.HandleMessage);
+			_bus.Subscribe<StringBatchMessage>(c.HandleMessage);
 
 			_bus.Deliver(env1);
 
