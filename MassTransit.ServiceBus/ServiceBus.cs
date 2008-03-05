@@ -27,7 +27,7 @@ namespace MassTransit.ServiceBus
 		IServiceBus,
 		IEnvelopeConsumer
 	{
-		private static readonly ILog _log = LogManager.GetLogger(typeof (ServiceBus));
+		private static readonly ILog _log;
 
 		private readonly AsyncReplyDispatcher _asyncReplyDispatcher = new AsyncReplyDispatcher();
 
@@ -39,6 +39,18 @@ namespace MassTransit.ServiceBus
 		private readonly IEndpoint _endpointToListenOn;
 		private IEndpoint _poisonEndpoint;
 		private ISubscriptionCache _subscriptionCache = new LocalSubscriptionCache();
+
+        static ServiceBus()
+        {
+            try
+            {
+                _log = LogManager.GetLogger(typeof (ServiceBus));
+            }
+            catch(Exception ex)
+            {
+                throw new Exception("log4net isn't referenced", ex);
+            }
+        }
 
 		public ServiceBus(IEndpoint endpointToListenOn)
 		{
