@@ -10,11 +10,10 @@
 /// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 /// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 /// specific language governing permissions and limitations under the License.
-
 namespace MassTransit.ServiceBus
 {
 	using System;
-	using Util;
+	using Internal;
 
 	/// <summary>
 	/// Envelopes are abstractions that represent an exchange between an endpoint and a client and/or service
@@ -23,8 +22,8 @@ namespace MassTransit.ServiceBus
 		IEnvelope, IEquatable<Envelope>
 	{
 		private DateTime _arrivedTime;
-		private MessageId _correlationId = MessageId.Empty;
-		private MessageId _id = MessageId.Empty;
+		private IMessageId _correlationId = MessageId.Default;
+		private IMessageId _id = MessageId.Default;
 		private string _label;
 		private IMessage[] _messages;
 		private bool _recoverable;
@@ -57,7 +56,7 @@ namespace MassTransit.ServiceBus
 		/// <summary>
 		/// The unique identifier of this envelope
 		/// </summary>
-		public MessageId Id
+		public IMessageId Id
 		{
 			get { return _id; }
 			set { _id = value; }
@@ -66,7 +65,7 @@ namespace MassTransit.ServiceBus
 		/// <summary>
 		/// The unique identifier of the original envelope this envelope is in response to
 		/// </summary>
-		public MessageId CorrelationId
+		public IMessageId CorrelationId
 		{
 			get { return _correlationId; }
 			set { _correlationId = value; }
@@ -203,5 +202,46 @@ namespace MassTransit.ServiceBus
 		{
 			return _id.GetHashCode();
 		}
+
+		#region Nested type: MessageId
+
+		internal class MessageId : IMessageId
+		{
+			public static MessageId Default = new MessageId();
+
+			#region IMessageId Members
+
+			public bool Equals(IMessageId obj)
+			{
+				MessageId other = obj as MessageId;
+				if (other == null)
+					return false;
+
+				return Equals(other);
+			}
+
+			public bool IsEmpty
+			{
+				get { return Default.Equals(this); }
+			}
+
+			#endregion
+
+			public override bool Equals(object obj)
+			{
+				MessageId other = obj as MessageId;
+				if (other == null)
+					return false;
+
+				return Equals(other);
+			}
+
+			public override int GetHashCode()
+			{
+				return 1;
+			}
+		}
+
+		#endregion
 	}
 }

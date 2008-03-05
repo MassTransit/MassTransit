@@ -14,12 +14,15 @@ namespace MassTransit.ServiceBus.MSMQ
 {
 	using System.Messaging;
 	using Internal;
-	using Util;
+	using IMessageFormatter=MassTransit.ServiceBus.Formatters.IMessageFormatter;
+	using XmlMessageFormatter=MassTransit.ServiceBus.Formatters.XmlMessageFormatter;
 
-	public class MsmqEnvelopeMapper : 
-        IEnvelopeMapper<Message>
+	public class MsmqEnvelopeMapper :
+		IEnvelopeMapper<Message>
 	{
-        private static readonly Formatters.IMessageFormatter _formatter = new Formatters.XmlMessageFormatter();
+		private static readonly IMessageFormatter _formatter = new XmlMessageFormatter();
+
+		#region IEnvelopeMapper<Message> Members
 
 		public IEnvelope ToEnvelope(Message msg)
 		{
@@ -29,32 +32,32 @@ namespace MassTransit.ServiceBus.MSMQ
 
 			if (string.IsNullOrEmpty(msg.Id))
 			{
-				e.Id = MessageId.Empty;
+				e.Id = MsmqMessageId.Empty;
 			}
 			else
 			{
-				e.Id = msg.Id;
+				e.Id = new MsmqMessageId(msg.Id);
 			}
 
 			if (string.IsNullOrEmpty(msg.CorrelationId))
 			{
-				e.CorrelationId = MessageId.Empty;
+				e.CorrelationId = MsmqMessageId.Empty;
 			}
 			else
 			{
-				e.CorrelationId = msg.CorrelationId;
+				e.CorrelationId = new MsmqMessageId(msg.CorrelationId);
 			}
 
 			e.TimeToBeReceived = msg.TimeToBeReceived;
 			e.Recoverable = msg.Recoverable;
 			e.Label = msg.Label;
 
-			if (e.Id != MessageId.Empty)
+			if (!e.Id.IsEmpty)
 			{
 				e.SentTime = msg.SentTime;
 				e.ArrivedTime = msg.ArrivedTime;
 			}
-            
+
 			IMessage[] messages = _formatter.Deserialize(new MsmqFormattedBody(msg));
 
 			e.Messages = messages ?? new IMessage[] {};
@@ -84,10 +87,12 @@ namespace MassTransit.ServiceBus.MSMQ
 
 			msg.Recoverable = envelope.Recoverable;
 
-			if (envelope.CorrelationId != MessageId.Empty)
-				msg.CorrelationId = envelope.CorrelationId;
+			if (!envelope.CorrelationId.IsEmpty)
+				msg.CorrelationId = new MsmqMessageId(envelope.CorrelationId);
 
 			return msg;
 		}
+
+		#endregion
 	}
 }

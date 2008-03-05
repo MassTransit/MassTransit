@@ -68,7 +68,7 @@ namespace MassTransit.ServiceBus.MSMQ
 				throw new EndpointException(_endpoint, "Problem with " + _endpoint.QueuePath, ex);
 			}
 
-			envelope.Id = msg.Id;
+			envelope.Id = new MsmqMessageId(msg.Id);
 
 			if (_log.IsDebugEnabled)
 				_log.DebugFormat("Message Sent: Id = {0}, Message Type = {1}", msg.Id,

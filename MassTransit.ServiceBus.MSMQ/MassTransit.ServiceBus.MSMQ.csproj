@@ -47,6 +47,7 @@
     <Compile Include="MsmqEnvelopeMapper.cs" />
     <Compile Include="IMsmqEndpoint.cs" />
     <Compile Include="MsmqEndpoint.cs" />
+    <Compile Include="MsmqMessageId.cs" />
     <Compile Include="MsmqMessageReceiver.cs" />
     <Compile Include="MsmqMessageSender.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
