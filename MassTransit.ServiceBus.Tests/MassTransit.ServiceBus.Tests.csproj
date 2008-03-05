@@ -53,6 +53,7 @@
     <Compile Include="Formatters\MessageFinderTests.cs" />
     <Compile Include="Formatters\XmlMessageFormatterTests.cs" />
     <Compile Include="IntegrationTests\When_using_queues_on_a_remote_server.cs" />
+    <Compile Include="Messages\PingGenericMessage.cs" />
     <Compile Include="Subscriptions\As_Local_Subscription_Storage.cs" />
     <Compile Include="IntegrationTests\As_Msmq_Storage.cs" />
     <Compile Include="IntegrationTests\MsmqStorage_Idempotent_Tests.cs" />
