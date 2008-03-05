@@ -19,7 +19,11 @@ namespace MassTransit.Patterns.Batching
 			_batchLength = batchLength;
 		}
 
-		/// <summary>
+    	protected BatchMessage()
+    	{
+    	}
+
+    	/// <summary>
 		/// The number of messages in the batch
 		/// </summary>
 		public int BatchLength

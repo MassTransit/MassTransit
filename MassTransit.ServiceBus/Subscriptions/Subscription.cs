@@ -15,15 +15,26 @@ namespace MassTransit.ServiceBus.Subscriptions
 	using System;
 
 	[Serializable]
-	public class Subscription : IEquatable<Subscription>
+	public class Subscription :
+		IEquatable<Subscription>
 	{
-		private readonly Uri _endpointUri;
-		private readonly string _messageName;
+		protected Uri _endpointUri;
+		protected string _messageName;
+
+		protected Subscription()
+		{
+		}
 
 		public Subscription(string messageName, Uri endpointUri)
 		{
 			_endpointUri = endpointUri;
 			_messageName = messageName.Trim();
+		}
+
+		public Subscription(Subscription subscription)
+		{
+			_endpointUri = subscription.EndpointUri;
+			_messageName = subscription.MessageName.Trim();
 		}
 
 		public Uri EndpointUri
@@ -35,6 +46,8 @@ namespace MassTransit.ServiceBus.Subscriptions
 		{
 			get { return _messageName; }
 		}
+
+		#region IEquatable<Subscription> Members
 
 		public bool Equals(Subscription other)
 		{
@@ -49,6 +62,8 @@ namespace MassTransit.ServiceBus.Subscriptions
 
 			return true;
 		}
+
+		#endregion
 
 		public override bool Equals(object obj)
 		{

@@ -23,25 +23,25 @@ namespace MassTransit.Patterns.Tests
 
 		private MockRepository _mocks;
 		private IServiceBus _bus;
-		private BatchController<BatchMessage<string, Guid>, Guid> _controller;
+		private BatchController<StringBatchMessage, Guid> _controller;
 
-		public void HandleBatch(IBatchContext<BatchMessage<string, Guid>, Guid> context)
+		public void HandleBatch(IBatchContext<StringBatchMessage, Guid> context)
 		{
 			Guid batchId = context.BatchId;
 
-			foreach (BatchMessage<string, Guid> message in context)
+			foreach (StringBatchMessage message in context)
 			{
 			}
 
-			List<BatchMessage<string, Guid>> messages = new List<BatchMessage<string, Guid>>(context);
+			List<StringBatchMessage> messages = new List<StringBatchMessage>(context);
 		}
 
 		[Test]
 		public void Notify_the_subscriber_with_a_batch_message()
 		{
-			_controller = new BatchController<BatchMessage<string, Guid>, Guid>(HandleBatch);
+			_controller = new BatchController<StringBatchMessage, Guid>(HandleBatch);
 
-			_bus.Subscribe<BatchMessage<string, Guid>>(_controller.HandleMessage);
+			_bus.Subscribe<StringBatchMessage>(_controller.HandleMessage);
 		}
 	}
 }
