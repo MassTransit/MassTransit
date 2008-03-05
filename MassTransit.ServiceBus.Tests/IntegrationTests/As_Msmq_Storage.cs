@@ -36,7 +36,7 @@
 //        [Test]
 //        public void I_Should_Work_When_Adding()
 //        {
-//            ISubscriptionStorage cache = new LocalSubscriptionCache();
+//            ISubscriptionCache cache = new LocalSubscriptionCache();
 //            MsmqSubscriptionStorage storage = new MsmqSubscriptionStorage(storageEndpoint, cache);
 
 //            storage.Add(typeof (PingMessage).FullName, subscriberEndpoint.Uri);

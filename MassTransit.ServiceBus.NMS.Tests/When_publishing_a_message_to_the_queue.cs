@@ -13,7 +13,7 @@ namespace MassTransit.ServiceBus.NMS.Tests
 		public void The_Message_Should_Arrive()
 		{
 			ServiceBus bus = new ServiceBus(new NmsEndpoint("activemq://localhost:61616/published_queue"));
-			bus.SubscriptionStorage.Add(new Subscription(typeof (SimpleMessage).FullName, new Uri("activemq://localhost:61616/subscribed_queue")));
+			bus.SubscriptionCache.Add(new Subscription(typeof (SimpleMessage).FullName, new Uri("activemq://localhost:61616/subscribed_queue")));
 			bus.Publish(new SimpleMessage("dru"));
 		}
 
@@ -22,8 +22,8 @@ namespace MassTransit.ServiceBus.NMS.Tests
 		{
 			ServiceBus pub_bus = new ServiceBus(new NmsEndpoint("activemq://localhost:61616/published_queue"));
 			ServiceBus sub_bus = new ServiceBus(new NmsEndpoint("activemq://localhost:61616/subscribed_queue"));
-			pub_bus.SubscriptionStorage.Add(new Subscription(typeof (SimpleMessage).FullName, new Uri("activemq://localhost:61616/subscribed_queue")));
-			sub_bus.SubscriptionStorage.Add(new Subscription(typeof (SimpleMessage).FullName, new Uri("activemq://localhost:61616/subscribed_queue")));
+			pub_bus.SubscriptionCache.Add(new Subscription(typeof (SimpleMessage).FullName, new Uri("activemq://localhost:61616/subscribed_queue")));
+			sub_bus.SubscriptionCache.Add(new Subscription(typeof (SimpleMessage).FullName, new Uri("activemq://localhost:61616/subscribed_queue")));
 
 			ManualResetEvent received = new ManualResetEvent(false);
 

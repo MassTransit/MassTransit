@@ -2,6 +2,7 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
 {
 	using System;
 	using Internal;
+	using MassTransit.ServiceBus.Subscriptions;
 	using NUnit.Framework;
 	using NUnit.Framework.SyntaxHelpers;
 	using Rhino.Mocks;
@@ -15,11 +16,11 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
 		public void Setup()
 		{
 			_endpoint = _mocks.CreateMock<IEndpoint>();
-			_storage = _mocks.CreateMock<ISubscriptionStorage>();
+			_cache = _mocks.CreateMock<ISubscriptionCache>();
 
 
 			_bus = new ServiceBus(_endpoint);
-			_bus.SubscriptionStorage = _storage;
+			_bus.SubscriptionCache = _cache;
 			_receiver = _mocks.CreateMock<IMessageReceiver>();
 		}
 
@@ -32,7 +33,7 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
 
 		private MockRepository _mocks = new MockRepository();
 		private IEndpoint _endpoint;
-		private ISubscriptionStorage _storage;
+		private ISubscriptionCache _cache;
 		private ServiceBus _bus;
 		private IEnvelopeConsumer _consumer;
 		private IEnvelope _envelope = new Envelope(new PingMessage());
@@ -55,14 +56,14 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
 			using (_mocks.Record())
 			{
 				Expect.Call(_endpoint.Uri).Return(_endpointUri).Repeat.Any();
-				Expect.Call(delegate { _storage.Add(null); }).IgnoreArguments();
+				Expect.Call(delegate { _cache.Add(null); }).IgnoreArguments();
 				Expect.Call(_endpoint.Receiver).Return(_receiver);
 				Expect.Call(delegate { _receiver.Subscribe(_consumer); }).IgnoreArguments();
 
 				Expect.Call(_endpoint.Receiver).Return(_receiver);
 				Expect.Call(delegate { _receiver.Subscribe(_consumer); }).IgnoreArguments();
 
-				Expect.Call(delegate { _storage.Remove(null); }).IgnoreArguments();
+				Expect.Call(delegate { _cache.Remove(null); }).IgnoreArguments();
 			}
 
 			using (_mocks.Playback())
@@ -90,9 +91,9 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
 				Expect.Call(_endpoint.Uri).Return(_endpointUri).Repeat.Any();
 				Expect.Call(_endpoint.Receiver).Return(_receiver);
 				Expect.Call(delegate { _receiver.Subscribe(_consumer); }).IgnoreArguments();
-				Expect.Call(delegate { _storage.Add(null); }).IgnoreArguments();
+				Expect.Call(delegate { _cache.Add(null); }).IgnoreArguments();
 
-				Expect.Call(delegate { _storage.Remove(null); }).IgnoreArguments();
+				Expect.Call(delegate { _cache.Remove(null); }).IgnoreArguments();
 			}
 
 			using (_mocks.Playback())

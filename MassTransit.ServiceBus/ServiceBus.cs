@@ -36,11 +36,9 @@ namespace MassTransit.ServiceBus
 
 		private readonly object _consumersLock = new object();
 		private readonly EndpointResolver _endpointResolver = new EndpointResolver();
-
-
 		private readonly IEndpoint _endpointToListenOn;
-		private ISubscriptionStorage _subscriptionStorage = new LocalSubscriptionCache();
 		private IEndpoint _poisonEndpoint;
+		private ISubscriptionCache _subscriptionCache = new LocalSubscriptionCache();
 
 		public ServiceBus(IEndpoint endpointToListenOn)
 		{
@@ -49,10 +47,10 @@ namespace MassTransit.ServiceBus
 			_endpointToListenOn = endpointToListenOn;
 		}
 
-		public ISubscriptionStorage SubscriptionStorage
+		public ISubscriptionCache SubscriptionCache
 		{
-			get { return _subscriptionStorage; }
-            set { _subscriptionStorage = value; }
+			get { return _subscriptionCache; }
+			set { _subscriptionCache = value; }
 		}
 
 		#region IEnvelopeConsumer Members
@@ -114,13 +112,9 @@ namespace MassTransit.ServiceBus
 
 		#region IServiceBus Members
 
-		///<summary>
-		///Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
-		///</summary>
-		///<filterpriority>2</filterpriority>
 		public void Dispose()
 		{
-			_subscriptionStorage.Dispose();
+			_subscriptionCache.Dispose();
 
 			_consumers.Clear();
 
@@ -134,7 +128,7 @@ namespace MassTransit.ServiceBus
 		/// <param name="messages">The messages to be published</param>
 		public void Publish<T>(params T[] messages) where T : IMessage
 		{
-			foreach (Subscription subscription in _subscriptionStorage.List(typeof (T).FullName))
+			foreach (Subscription subscription in _subscriptionCache.List(typeof (T).FullName))
 			{
 				IEndpoint endpoint = _endpointResolver.Resolve(subscription.EndpointUri);
 				Send(endpoint, messages);
@@ -196,7 +190,7 @@ namespace MassTransit.ServiceBus
 				if (!_consumers.ContainsKey(typeof (T)))
 				{
 					_consumers[typeof (T)] = new MessageConsumer<T>();
-					_subscriptionStorage.Add(new Subscription(typeof (T).FullName, Endpoint.Uri));
+					_subscriptionCache.Add(new Subscription(typeof (T).FullName, Endpoint.Uri));
 				}
 
 				((IMessageConsumer<T>) _consumers[typeof (T)]).Subscribe(callback, condition);
@@ -222,7 +216,7 @@ namespace MassTransit.ServiceBus
 					if (consumer.Count == 0)
 					{
 						_consumers.Remove(typeof (T));
-						_subscriptionStorage.Remove(new Subscription(typeof (T).FullName, Endpoint.Uri));
+						_subscriptionCache.Remove(new Subscription(typeof (T).FullName, Endpoint.Uri));
 					}
 				}
 			}

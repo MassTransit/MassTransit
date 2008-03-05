@@ -16,7 +16,7 @@ namespace MassTransit.ServiceBus.Tests
 		public void SetUp()
 		{
 			mocks = new MockRepository();
-			mockSubscriptionStorage = mocks.CreateMock<ISubscriptionStorage>();
+			_mockSubscriptionCache = mocks.CreateMock<ISubscriptionCache>();
 			mockEndpoint = mocks.CreateMock<IEndpoint>();
 			mockSendEndpoint = mocks.CreateMock<IEndpoint>();
 			mockSender = mocks.CreateMock<IMessageSender>();
@@ -30,14 +30,14 @@ namespace MassTransit.ServiceBus.Tests
 			mocks = null;
 			mockEndpoint = null;
 			mockSendEndpoint = null;
-			mockSubscriptionStorage = null;
+			_mockSubscriptionCache = null;
 			mockSender = null;
 		}
 
 		#endregion
 
 		private MockRepository mocks;
-		private ISubscriptionStorage mockSubscriptionStorage;
+		private ISubscriptionCache _mockSubscriptionCache;
 		private IEndpoint mockEndpoint;
 		private IEndpoint mockSendEndpoint;
 		private IMessageSender mockSender;
@@ -55,7 +55,7 @@ namespace MassTransit.ServiceBus.Tests
 				Expect.Call(mockSendEndpoint.Uri).Return(new Uri("msmq://localhost/send"));
 				Expect.Call(mockSendEndpoint.Uri).Return(new Uri("msmq://localhost/send"));
 
-				Expect.Call(mockSubscriptionStorage.List("MassTransit.ServiceBus.Tests.PingMessage")).Return(subs);
+				Expect.Call(_mockSubscriptionCache.List("MassTransit.ServiceBus.Tests.PingMessage")).Return(subs);
 
 				//Expect.Call(mockSendEndpoint.Sender).Return(mockSender);
 				//mockSender.Send(null);
@@ -64,7 +64,7 @@ namespace MassTransit.ServiceBus.Tests
 			using (mocks.Playback())
 			{
 				ServiceBus bus = new ServiceBus(mockEndpoint);
-				bus.SubscriptionStorage = mockSubscriptionStorage;
+				bus.SubscriptionCache = _mockSubscriptionCache;
 				bus.Publish(new PingMessage());
 			}
 		}
@@ -80,7 +80,7 @@ namespace MassTransit.ServiceBus.Tests
 			using (mocks.Playback())
 			{
 				ServiceBus bus = new ServiceBus(mockEndpoint);
-				bus.SubscriptionStorage = mockSubscriptionStorage;
+				bus.SubscriptionCache = _mockSubscriptionCache;
 				bus.Send(mockSendEndpoint, new PingMessage(), new PingMessage());
 			}
 		}
@@ -97,7 +97,7 @@ namespace MassTransit.ServiceBus.Tests
 			using (mocks.Playback())
 			{
 				ServiceBus bus = new ServiceBus(mockEndpoint);
-				bus.SubscriptionStorage = mockSubscriptionStorage;
+				bus.SubscriptionCache = _mockSubscriptionCache;
 				bus.Send(mockSendEndpoint, new PingMessage());
 			}
 		}

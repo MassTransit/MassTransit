@@ -107,7 +107,7 @@ namespace MassTransit.ServiceBus.Internal
 				}
 				catch (Exception ex)
 				{
-					throw new MeetsCriteriaException<T>(item,
+					throw new MessageConsumerException<T>(item,
 					                                    "There was an exception in the MessageConsumer.IsHandled",
 					                                    ex);
 				}

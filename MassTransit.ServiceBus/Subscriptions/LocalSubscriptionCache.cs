@@ -17,7 +17,7 @@ namespace MassTransit.ServiceBus.Subscriptions
 	using log4net;
 
 	public class LocalSubscriptionCache :
-		ISubscriptionStorage
+		ISubscriptionCache
 	{
 		private static readonly ILog _log = LogManager.GetLogger(typeof (LocalSubscriptionCache));
 
@@ -27,7 +27,7 @@ namespace MassTransit.ServiceBus.Subscriptions
 		private readonly object addLock = new object();
 		private readonly object deleteLock = new object();
 
-		#region ISubscriptionStorage Members
+		#region ISubscriptionCache Members
 
 		public IList<Subscription> List()
 		{

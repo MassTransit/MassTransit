@@ -19,11 +19,11 @@ namespace MassTransit.ServiceBus.Subscriptions
 	public class SubscriptionClient :
 		IMessageService
 	{
-		private readonly ISubscriptionStorage _cache;
+		private readonly ISubscriptionCache _cache;
 		private readonly IServiceBus _serviceBus;
 		private readonly IEndpoint _subscriptionServiceEndpoint;
 
-		public SubscriptionClient(IServiceBus serviceBus, ISubscriptionStorage cache, IEndpoint subscriptionServiceEndpoint)
+		public SubscriptionClient(IServiceBus serviceBus, ISubscriptionCache cache, IEndpoint subscriptionServiceEndpoint)
 		{
 			_serviceBus = serviceBus;
 			_cache = cache;

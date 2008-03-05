@@ -16,12 +16,12 @@ namespace MassTransit.ServiceBus.Exceptions
     using System;
     using Internal;
 
-    public class MeetsCriteriaException<T> 
+    public class MessageConsumerException<T> 
         : Exception where T : IMessage
     {
         private readonly MessageConsumerCallbackItem<T> _item;
 
-        public MeetsCriteriaException(MessageConsumerCallbackItem<T> item, string s, Exception ex) : base(s, ex)
+        public MessageConsumerException(MessageConsumerCallbackItem<T> item, string s, Exception ex) : base(s, ex)
         {
             _item = item;
         }

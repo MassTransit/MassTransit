@@ -4,6 +4,7 @@ namespace MassTransit.ServiceBus.DefermentService.Tests
 	using NUnit.Framework;
 	using NUnit.Framework.SyntaxHelpers;
 	using Rhino.Mocks;
+	using Subscriptions;
 
 	[TestFixture]
 	public class DefermentServiceTDD
@@ -25,7 +26,7 @@ namespace MassTransit.ServiceBus.DefermentService.Tests
 		public void Doodle2()
 		{
 			ServiceBus bus = new ServiceBus(_mocks.CreateMock<IEndpoint>());
-			bus.SubscriptionStorage = _mocks.CreateMock<ISubscriptionStorage>();
+			bus.SubscriptionCache = _mocks.CreateMock<ISubscriptionCache>();
 			IDefermentService d = new DefermentService();
 
 			int defermentClaimTicket = 0;

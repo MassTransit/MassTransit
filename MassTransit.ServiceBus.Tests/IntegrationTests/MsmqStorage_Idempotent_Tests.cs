@@ -16,7 +16,7 @@ namespace MassTransit.ServiceBus.Tests.IntegrationTests
         public void Add_Should_Be_Idempotent()
         {
 			//IEndpoint ep = new MessageQueueEndpoint("msmq://localhost/test_subscriptions");
-			//ISubscriptionStorage cache = new LocalSubscriptionCache();
+			//ISubscriptionCache cache = new LocalSubscriptionCache();
 			//MsmqSubscriptionStorage store = new MsmqSubscriptionStorage(ep, cache);
 			//Thread.Sleep(10000);
 			//Assert.That(store.List().Count, Is.EqualTo(2));

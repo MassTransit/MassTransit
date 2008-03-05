@@ -19,7 +19,7 @@ namespace MassTransit.ServiceBus.SubscriptionsManager.Tests
 		private SubscriptionService _subscriptionService;
 		private ServiceBus _bus;
 		private ISessionFactory _sessionFactory;
-		private ISubscriptionStorage _subscriptionCache;
+		private ISubscriptionCache _subscriptionCache;
 		private ISubscriptionRepository _subscriptionRepository;
 
 		#region Setup/Teardown
@@ -44,7 +44,7 @@ namespace MassTransit.ServiceBus.SubscriptionsManager.Tests
 
 
 			_bus = new ServiceBus(_mocks.CreateMock<IEndpoint>());
-		    _bus.SubscriptionStorage = _subscriptionCache;
+			_bus.SubscriptionCache = _subscriptionCache;
 
 			_subscriptionService = new SubscriptionService(_bus, _subscriptionCache, _subscriptionRepository);
 		}

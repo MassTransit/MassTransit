@@ -16,7 +16,7 @@ namespace MassTransit.ServiceBus.Tests
 		{
 			mocks = new MockRepository();
 			mockBusEndpoint = mocks.CreateMock<IEndpoint>();
-			mockSubscriptionStorage = mocks.CreateMock<ISubscriptionStorage>();
+			_mockSubscriptionCache = mocks.CreateMock<ISubscriptionCache>();
 			mockSender = mocks.CreateMock<IMessageSender>();
 			mockReceiver = mocks.CreateMock<IMessageReceiver>();
 		}
@@ -26,7 +26,7 @@ namespace MassTransit.ServiceBus.Tests
 		{
 			mocks = null;
 			mockBusEndpoint = null;
-			mockSubscriptionStorage = null;
+			_mockSubscriptionCache = null;
 			_serviceBus = null;
 			mockReceiver = null;
 		}
@@ -36,7 +36,7 @@ namespace MassTransit.ServiceBus.Tests
 		private ServiceBus _serviceBus;
 		private MockRepository mocks;
 		private IEndpoint mockBusEndpoint;
-		private ISubscriptionStorage mockSubscriptionStorage;
+		private ISubscriptionCache _mockSubscriptionCache;
 		private IMessageSender mockSender;
 		private IMessageReceiver mockReceiver;
 
@@ -53,7 +53,7 @@ namespace MassTransit.ServiceBus.Tests
 				Expect.Call(delegate { mockReceiver.Subscribe(null); }).IgnoreArguments().Repeat.Any();
 				Expect.Call(mockBusEndpoint.Uri).Return(queueUri).Repeat.Any();
 
-				mockSubscriptionStorage.Add(new Subscription(typeof (PoisonMessage).FullName, queueUri));
+				_mockSubscriptionCache.Add(new Subscription(typeof (PoisonMessage).FullName, queueUri));
 
 				//Expect.Call(mockBusEndpoint.Sender).Return(mockSender);
 
@@ -63,7 +63,7 @@ namespace MassTransit.ServiceBus.Tests
 			using (mocks.Playback())
 			{
 				_serviceBus = new ServiceBus(mockBusEndpoint);
-			    _serviceBus.SubscriptionStorage = mockSubscriptionStorage;
+			    _serviceBus.SubscriptionCache = _mockSubscriptionCache;
 
 				////this ends up in a seperate thread and I am therefore unable to figure out how to test
 				_serviceBus.Subscribe<PoisonMessage>(delegate(IMessageContext<PoisonMessage> cxt)

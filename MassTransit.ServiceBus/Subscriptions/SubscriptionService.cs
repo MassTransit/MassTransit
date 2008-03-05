@@ -22,10 +22,10 @@ namespace MassTransit.ServiceBus.Subscriptions
 	{
 		private static readonly ILog _log = LogManager.GetLogger(typeof (SubscriptionService));
 		private readonly IServiceBus _bus;
-		private readonly ISubscriptionStorage _cache;
+		private readonly ISubscriptionCache _cache;
 		private readonly ISubscriptionRepository _repository;
 
-		public SubscriptionService(IServiceBus bus, ISubscriptionStorage subscriptionCache, ISubscriptionRepository subscriptionRepository)
+		public SubscriptionService(IServiceBus bus, ISubscriptionCache subscriptionCache, ISubscriptionRepository subscriptionRepository)
 		{
 			_bus = bus;
 			_cache = subscriptionCache;
