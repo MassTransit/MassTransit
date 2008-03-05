@@ -48,7 +48,7 @@ namespace MassTransit.ServiceBus.Tests
 			}
 			using (mocks.Playback())
 			{
-				_serviceBus = new ServiceBus(mockServiceBusEndPoint, new LocalSubscriptionCache());
+				_serviceBus = new ServiceBus(mockServiceBusEndPoint);
 
 				_serviceBus.Subscribe<PingMessage>(
 					delegate { workDid = true; },
@@ -83,7 +83,7 @@ namespace MassTransit.ServiceBus.Tests
 			}
 			using (mocks.Playback())
 			{
-				_serviceBus = new ServiceBus(mockServiceBusEndPoint, new LocalSubscriptionCache());
+				_serviceBus = new ServiceBus(mockServiceBusEndPoint);
 
 				_serviceBus.Subscribe<PingMessage>(
 					delegate { },
@@ -112,7 +112,7 @@ namespace MassTransit.ServiceBus.Tests
 			}
 			using (mocks.Playback())
 			{
-				_serviceBus = new ServiceBus(mockServiceBusEndPoint, new LocalSubscriptionCache());
+				_serviceBus = new ServiceBus(mockServiceBusEndPoint);
 				_serviceBus.Subscribe<PingMessage>(
 					delegate { },
 					delegate { return false; });
@@ -136,7 +136,7 @@ namespace MassTransit.ServiceBus.Tests
 			}
 			using (mocks.Playback())
 			{
-				_serviceBus = new ServiceBus(mockServiceBusEndPoint, new LocalSubscriptionCache());
+				_serviceBus = new ServiceBus(mockServiceBusEndPoint);
 
 				_serviceBus.Subscribe<PingMessage>(
 					delegate { },
@@ -161,7 +161,7 @@ namespace MassTransit.ServiceBus.Tests
 			}
 			using (mocks.Playback())
 			{
-				_serviceBus = new ServiceBus(mockServiceBusEndPoint, new LocalSubscriptionCache());
+				_serviceBus = new ServiceBus(mockServiceBusEndPoint);
 
 				_serviceBus.Subscribe<PingMessage>(
 					delegate { },

@@ -18,7 +18,7 @@ namespace MassTransit.ServiceBus.Tests
 		private ServiceBus _remoteServiceBus;
 		private IEndpoint _remoteServiceBusEndPoint;
 
-		private IServiceBus _serviceBus;
+		private ServiceBus _serviceBus;
 		private IEndpoint _serviceBusEndPoint;
 		private IEndpoint _subscriptionEndpoint;
 
@@ -100,8 +100,10 @@ namespace MassTransit.ServiceBus.Tests
 
 			_subscriptionStorage = new LocalSubscriptionCache();
 
-			_serviceBus = new ServiceBus(ServiceBusEndPoint, _subscriptionStorage);
-			_remoteServiceBus = new ServiceBus(RemoteServiceBusEndPoint, _subscriptionStorage);
+			_serviceBus = new ServiceBus(ServiceBusEndPoint);
+		    _serviceBus.SubscriptionStorage = _subscriptionStorage;
+			_remoteServiceBus = new ServiceBus(RemoteServiceBusEndPoint);
+		    _remoteServiceBus.SubscriptionStorage = _subscriptionStorage;
 
 			SetupResult.For(_subscriptionEndpoint.Uri).Return(new Uri("local://" + Environment.MachineName.ToLowerInvariant() + "/test_subscriptions"));
 			SetupResult.For(_serviceBusEndPoint.Uri).Return(new Uri("local://" + Environment.MachineName.ToLowerInvariant() + "/test_servicebus"));

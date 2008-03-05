@@ -62,7 +62,8 @@ namespace MassTransit.ServiceBus.Tests
 			}
 			using (mocks.Playback())
 			{
-				_serviceBus = new ServiceBus(mockBusEndpoint, mockSubscriptionStorage);
+				_serviceBus = new ServiceBus(mockBusEndpoint);
+			    _serviceBus.SubscriptionStorage = mockSubscriptionStorage;
 
 				////this ends up in a seperate thread and I am therefore unable to figure out how to test
 				_serviceBus.Subscribe<PoisonMessage>(delegate(IMessageContext<PoisonMessage> cxt)

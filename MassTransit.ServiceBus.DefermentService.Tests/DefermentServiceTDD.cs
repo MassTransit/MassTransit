@@ -26,7 +26,8 @@ namespace MassTransit.ServiceBus.DefermentService.Tests
         public void Doodle2()
         {
 
-            IServiceBus bus = new ServiceBus(_mocks.CreateMock<IEndpoint>(), new LocalSubscriptionCache());
+            ServiceBus bus = new ServiceBus(_mocks.CreateMock<IEndpoint>());
+            bus.SubscriptionStorage = _mocks.CreateMock<ISubscriptionStorage>();
             IDefermentService d = new DefermentService();
 
             int defermentClaimTicket = 0;

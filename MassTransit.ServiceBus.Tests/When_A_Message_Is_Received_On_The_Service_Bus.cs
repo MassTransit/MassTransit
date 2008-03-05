@@ -18,7 +18,7 @@ namespace MassTransit.ServiceBus.Tests
 			mocks = new MockRepository();
 			mockServiceBusEndPoint = mocks.CreateMock<IEndpoint>();
 			mockReceiver = mocks.CreateMock<IMessageReceiver>();
-			_serviceBus = new ServiceBus(mockServiceBusEndPoint, new LocalSubscriptionCache());
+			_serviceBus = new ServiceBus(mockServiceBusEndPoint);
 		}
 
 		[TearDown]
@@ -69,7 +69,7 @@ namespace MassTransit.ServiceBus.Tests
 			}
 			using (mocks.Playback())
 			{
-				_serviceBus = new ServiceBus(mockServiceBusEndPoint, new LocalSubscriptionCache());
+				_serviceBus = new ServiceBus(mockServiceBusEndPoint);
 
 				bool _received = false;
 

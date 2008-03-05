@@ -13,7 +13,7 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
         private MockRepository _mocks = new MockRepository();
         private IEndpoint _endpoint;
         private ISubscriptionStorage _storage;
-        private IServiceBus _bus;
+        private ServiceBus _bus;
         private IEnvelopeConsumer _consumer;
         private IEnvelope _envelope = new Envelope(new PingMessage());
         private Uri _endpointUri = new Uri("msmq://localhost/test");
@@ -26,7 +26,8 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
             _storage = _mocks.CreateMock<ISubscriptionStorage>();
 
 
-            _bus = new ServiceBus(_endpoint, _storage);
+            _bus = new ServiceBus(_endpoint);
+            _bus.SubscriptionStorage = _storage;
             _receiver = _mocks.CreateMock<IMessageReceiver>();
         }
 

@@ -49,7 +49,8 @@ namespace MassTransit.ServiceBus.Tests
             }
             using (mocks.Playback())
             {
-                ServiceBus bus = new ServiceBus(mockEndpoint, mockSubscriptionStorage);
+                ServiceBus bus = new ServiceBus(mockEndpoint);
+                bus.SubscriptionStorage = mockSubscriptionStorage;
                 bus.Send(mockSendEndpoint, new PingMessage());
             }
         }
@@ -64,16 +65,17 @@ namespace MassTransit.ServiceBus.Tests
             }
             using (mocks.Playback())
             {
-                ServiceBus bus = new ServiceBus(mockEndpoint, mockSubscriptionStorage);
+                ServiceBus bus = new ServiceBus(mockEndpoint);
+                bus.SubscriptionStorage = mockSubscriptionStorage;
                 bus.Send(mockSendEndpoint, new PingMessage(), new PingMessage());
             }
         }
 
-        [Test, Ignore("Endpoint cache causing some pain")]
+        [Test, Ignore("endpoint resolver, need to look at - dru")]
         public void When_Publishing_a_message()
         {
             Subscription sub =
-                new Subscription("MassTransit.ServiceBus.Tests.PingMessage", new Uri("msmq://localhost/subscriber"));
+                new Subscription("MassTransit.ServiceBus.Tests.PingMessage", new Uri("msmq://localhost/test"));
             List<Subscription> subs = new List<Subscription>();
             subs.Add(sub);
 
@@ -90,7 +92,8 @@ namespace MassTransit.ServiceBus.Tests
             }
             using (mocks.Playback())
             {
-                ServiceBus bus = new ServiceBus(mockEndpoint, mockSubscriptionStorage);
+                ServiceBus bus = new ServiceBus(mockEndpoint);
+                bus.SubscriptionStorage = mockSubscriptionStorage;
                 bus.Publish(new PingMessage());
             }
         }

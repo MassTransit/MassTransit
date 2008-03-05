@@ -48,7 +48,7 @@ namespace MassTransit.ServiceBus.MSMQ.Tests
 	    [Test]
 	    public void NAME()
 	    {
-	        ServiceBus bus = new ServiceBus(new MsmqEndpoint("msmq://localhost/test"), new LocalSubscriptionCache());
+	        ServiceBus bus = new ServiceBus(new MsmqEndpoint("msmq://localhost/test"));
             bus.Send(new MsmqEndpoint("msmq://localhost/test_endpoint"), new VariableMessage("phil is cool"));
 	    }
 
