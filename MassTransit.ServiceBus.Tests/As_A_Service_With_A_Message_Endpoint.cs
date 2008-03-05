@@ -51,9 +51,9 @@ namespace MassTransit.ServiceBus.Tests
 			}
 
 			using (_mocks.Playback())
-            {
-                _serviceBus = new ServiceBus(_mockEndpoint);
-                _serviceBus.SubscriptionStorage = _mockSubscriptionStorage;
+			{
+				_serviceBus = new ServiceBus(_mockEndpoint);
+				_serviceBus.SubscriptionStorage = _mockSubscriptionStorage;
 				_serviceBus.Subscribe<PingMessage>(delegate { });
 			}
 		}

@@ -8,7 +8,6 @@ namespace MassTransit.ServiceBus.MSMQ.Tests
 	using log4net;
 	using NUnit.Framework;
 	using NUnit.Framework.SyntaxHelpers;
-	using Subscriptions;
 
 	public class QueueTestContext :
 		IDisposable
