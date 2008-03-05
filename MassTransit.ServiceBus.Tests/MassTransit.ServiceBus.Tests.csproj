@@ -64,7 +64,6 @@
     <Compile Include="Messages\DeleteMessage.cs" />
     <Compile Include="IntegrationTests\When_sending_a_message.cs" />
     <Compile Include="MessageContext_Should_Help.cs" />
-    <Compile Include="MessageId_Tests.cs" />
     <Compile Include="Messages\PingMessage.cs" />
     <Compile Include="Messages\PoisonMessage.cs" />
     <Compile Include="Messages\PongMessage.cs" />

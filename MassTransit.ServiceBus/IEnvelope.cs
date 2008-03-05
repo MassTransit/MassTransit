@@ -14,7 +14,7 @@
 namespace MassTransit.ServiceBus
 {
 	using System;
-	using Util;
+	using Internal;
 
 	/// <summary>
 	/// A public interface to the envelope containing message(s)
@@ -27,12 +27,12 @@ namespace MassTransit.ServiceBus
 		/// <summary>
 		/// The unique identifier of this envelope
 		/// </summary>
-		MessageId Id { get; set; }
+		IMessageId Id { get; set; }
 
 		/// <summary>
 		/// The unique identifier of the original envelope this envelope is in response to
 		/// </summary>
-		MessageId CorrelationId { get; set; }
+		IMessageId CorrelationId { get; set; }
 
 		/// <summary>
 		/// The return endpoint for the message(s) in the envelope

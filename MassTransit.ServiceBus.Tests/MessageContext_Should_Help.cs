@@ -55,7 +55,7 @@ namespace MassTransit.ServiceBus.Tests
             {
                 Expect.Call(mockEnvelope.ReturnEndpoint).Return(mockEndpoint);
                 Expect.Call(mockBus.Endpoint).Return(mockBusEndpoint);
-                Expect.Call(mockEnvelope.Id).Return(MessageId.Empty);
+                Expect.Call(mockEnvelope.Id).Return(null);
                 Expect.Call(mockEndpoint.Sender).Return(mockMessageSender).Repeat.Any();
 
                 Expect.Call(delegate { mockMessageSender.Send(null); }).IgnoreArguments(); //ignoring arguments because we create a new envelope in the method

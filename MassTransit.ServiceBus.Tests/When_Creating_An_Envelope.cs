@@ -4,7 +4,6 @@ namespace MassTransit.ServiceBus.Tests
 	using NUnit.Framework;
 	using NUnit.Framework.SyntaxHelpers;
 	using Rhino.Mocks;
-	using Util;
 
 	[TestFixture]
 	public class When_Creating_An_Envelope
@@ -70,32 +69,11 @@ namespace MassTransit.ServiceBus.Tests
 		}
 
 		[Test]
-		[ExpectedException(typeof (Exception))]
-		public void How_to_handle_bad_ids_with_no_sequence()
-		{
-			Envelope e = new Envelope();
-			e.Id = new MessageId("5DF5FF14-DA6B-495f-8292-6FAD060FA13A");
-		}
-
-		[Test]
 		public void Should_Equal_Itself()
 		{
 			Envelope e = new Envelope();
 			Assert.AreEqual(e, e);
 			Assert.IsTrue(e.Equals(e));
-		}
-
-		[Test]
-		public void Should_not_equal_another_with_same_guid_diff_sequence()
-		{
-			Envelope e = new Envelope();
-			e.Id = new MessageId("5DF5FF14-DA6B-495f-8292-6FAD060FA13A\\1");
-
-			Envelope n = new Envelope();
-			n.Id = new MessageId("5DF5FF14-DA6B-495f-8292-6FAD060FA13A\\2");
-
-			Assert.AreNotEqual(e, n);
-			Assert.IsFalse(e.Equals(n));
 		}
 
 		[Test]
@@ -108,30 +86,6 @@ namespace MassTransit.ServiceBus.Tests
 			e.ArrivedTime = time;
 
 			Assert.That(e.ArrivedTime, Is.EqualTo(time));
-		}
-
-		[Test]
-		public void The_CorrelationId_Should_Be_Set()
-		{
-			MessageId id = Guid.NewGuid() + "\\27";
-
-			Envelope e = new Envelope();
-
-			e.CorrelationId = id;
-
-			Assert.That(e.CorrelationId, Is.EqualTo(id));
-		}
-
-		[Test]
-		public void The_Id_Should_Be_Set()
-		{
-			MessageId id = Guid.NewGuid() + "\\27";
-
-			Envelope e = new Envelope();
-
-			e.Id = id;
-
-			Assert.That(e.Id, Is.EqualTo(id));
 		}
 
 		[Test]

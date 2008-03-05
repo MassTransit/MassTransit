@@ -19,7 +19,6 @@ namespace MassTransit.ServiceBus.NMS
 	using Apache.NMS;
 	using Apache.NMS.ActiveMQ.Commands;
 	using Internal;
-	using MessageId=MassTransit.ServiceBus.Util.MessageId;
 
 	public class NmsEnvelopeMapper :
 		IEnvelopeMapper<IMessage>
@@ -65,8 +64,8 @@ namespace MassTransit.ServiceBus.NMS
 
 			bm.NMSPersistent = envelope.Recoverable;
 
-			if (envelope.CorrelationId != MessageId.Empty)
-				bm.NMSCorrelationID = envelope.CorrelationId;
+			if (!envelope.CorrelationId.IsEmpty)
+				bm.NMSCorrelationID = new NmsMessageId(envelope.CorrelationId);
 
 			return bm;
 		}

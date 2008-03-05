@@ -85,7 +85,7 @@
     <Compile Include="Subscriptions\SubscriptionClient.cs" />
     <Compile Include="Subscriptions\SubscriptionService.cs" />
     <Compile Include="Util\Check.cs" />
-    <Compile Include="Util\MessageId.cs" />
+    <Compile Include="Internal\IMessageId.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
