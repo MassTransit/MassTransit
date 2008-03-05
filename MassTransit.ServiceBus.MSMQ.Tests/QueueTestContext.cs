@@ -41,9 +41,7 @@ namespace MassTransit.ServiceBus.MSMQ.Tests
 			{
 				if (_serviceBus == null)
 				{
-					ISubscriptionStorage subscriptionStorage = CreateSubscriptionStorage();
-
-					_serviceBus = new ServiceBus(ServiceBusEndPoint, subscriptionStorage);
+					_serviceBus = new ServiceBus(ServiceBusEndPoint);
 				}
 
 				return _serviceBus;
@@ -56,9 +54,7 @@ namespace MassTransit.ServiceBus.MSMQ.Tests
 			{
 				if (_remoteServiceBus == null)
 				{
-					ISubscriptionStorage subscriptionStorage = CreateSubscriptionStorage();
-
-					_remoteServiceBus = new ServiceBus(RemoteServiceBusEndPoint, subscriptionStorage);
+					_remoteServiceBus = new ServiceBus(RemoteServiceBusEndPoint);
 				}
 
 				return _remoteServiceBus;
@@ -111,15 +107,6 @@ namespace MassTransit.ServiceBus.MSMQ.Tests
 			ValidateAndPurgeQueue(_subscriptionEndpoint.QueuePath);
 
 			IServiceBus ignore = ServiceBus;
-		}
-
-		private ISubscriptionStorage CreateSubscriptionStorage()
-		{
-			ISubscriptionStorage subscriptionCache;
-
-			subscriptionCache = new LocalSubscriptionCache();
-
-			return subscriptionCache;
 		}
 
 		public static void VerifyMessageInQueue<T>(string queuePath, T message)

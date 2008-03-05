@@ -39,21 +39,20 @@ namespace MassTransit.ServiceBus
 
 
 		private readonly IEndpoint _endpointToListenOn;
-		private readonly ISubscriptionStorage _subscriptionStorage;
+		private ISubscriptionStorage _subscriptionStorage = new LocalSubscriptionCache();
 		private IEndpoint _poisonEndpoint;
 
-		public ServiceBus(IEndpoint endpointToListenOn, ISubscriptionStorage subscriptionStorage)
+		public ServiceBus(IEndpoint endpointToListenOn)
 		{
 			Check.Parameter(endpointToListenOn).WithMessage("endpointToListenOn").IsNotNull();
-			Check.Parameter(subscriptionStorage).WithMessage("subscriptionStorage").IsNotNull();
 
 			_endpointToListenOn = endpointToListenOn;
-			_subscriptionStorage = subscriptionStorage;
 		}
 
 		public ISubscriptionStorage SubscriptionStorage
 		{
 			get { return _subscriptionStorage; }
+            set { _subscriptionStorage = value; }
 		}
 
 		#region IEnvelopeConsumer Members

@@ -36,7 +36,7 @@ namespace MassTransit.Patterns.Tests
 			SetupResult.For(_endpoint.Receiver).Return(_receiver);
 
 			_mocks.ReplayAll();
-			_bus = new ServiceBus(_endpoint, new LocalSubscriptionCache());
+			_bus = new ServiceBus(_endpoint);
 		}
 
 

@@ -13,6 +13,15 @@ namespace MassTransit.ServiceBus.SubscriptionsManager.Tests
 	[Explicit]
 	public class IntegrationTests
 	{
+		private MockRepository _mocks = new MockRepository();
+
+		private readonly string connectionString = "Server=localhost;initial catalog=test;Trusted_Connection=yes";
+		private SubscriptionService _subscriptionService;
+		private ServiceBus _bus;
+		private ISessionFactory _sessionFactory;
+		private ISubscriptionStorage _subscriptionCache;
+		private ISubscriptionRepository _subscriptionRepository;
+
 		#region Setup/Teardown
 
 		[SetUp]
@@ -34,7 +43,8 @@ namespace MassTransit.ServiceBus.SubscriptionsManager.Tests
 			_subscriptionCache = new LocalSubscriptionCache();
 
 
-			_bus = new ServiceBus(_mocks.CreateMock<IEndpoint>(), _subscriptionCache);
+			_bus = new ServiceBus(_mocks.CreateMock<IEndpoint>());
+		    _bus.SubscriptionStorage = _subscriptionCache;
 
 			_subscriptionService = new SubscriptionService(_bus, _subscriptionCache, _subscriptionRepository);
 		}
@@ -49,14 +59,6 @@ namespace MassTransit.ServiceBus.SubscriptionsManager.Tests
 
 		#endregion
 
-		private MockRepository _mocks = new MockRepository();
-
-		private readonly string connectionString = "Server=localhost;initial catalog=test;Trusted_Connection=yes";
-		private SubscriptionService _subscriptionService;
-		private IServiceBus _bus;
-		private ISessionFactory _sessionFactory;
-		private ISubscriptionStorage _subscriptionCache;
-		private ISubscriptionRepository _subscriptionRepository;
 
 		public void AssertSubscriptionInDatabase()
 		{

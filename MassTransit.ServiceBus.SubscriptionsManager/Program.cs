@@ -32,10 +32,12 @@ namespace MassTransit.ServiceBus.SubscriptionsManager
 			_sessionFactory = GetNHibernateSessionFactory(connectionString);
 
 			_subscriptionCache = new LocalSubscriptionCache();
+            ServiceBus bus = new ServiceBus(_endpoint);
+		    bus.SubscriptionStorage = _subscriptionCache;
 
 
 			_subscriptionService = new SubscriptionService(
-				new ServiceBus(_endpoint, _subscriptionCache),
+				bus,
 				_subscriptionCache,
 				new PersistantSubscriptionStorage(_sessionFactory)
 				);

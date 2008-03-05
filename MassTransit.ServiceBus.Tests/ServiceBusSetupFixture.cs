@@ -16,11 +16,11 @@ namespace MassTransit.ServiceBus.Tests
 		protected IEndpoint _poisonEndpoint; // = @"msmq://localhost/test_servicebus_poison";
 		protected string _poisonQueueName = @"msmq://localhost/test_servicebus_poison";
 
-		protected IServiceBus _remoteServiceBus;
+		protected ServiceBus _remoteServiceBus;
 
 		protected IEndpoint _remoteServiceBusEndPoint; // = @"msmq://localhost/test_remoteservicebus";
 		protected string _remoteServiceBusQueueName = @"msmq://localhost/test_remoteservicebus";
-		protected IServiceBus _serviceBus;
+		protected ServiceBus _serviceBus;
 		protected IEndpoint _serviceBusEndPoint; // = @"msmq://localhost/test_servicebus";
 		protected string _serviceBusQueueName = @"msmq://localhost/test_servicebus";
 		protected IEndpoint _testEndPoint; // = @"msmq://localhost/test_endpoint";
@@ -45,12 +45,15 @@ namespace MassTransit.ServiceBus.Tests
 
 			ISubscriptionStorage _subscriptionCache = new LocalSubscriptionCache();
 
-			ServiceBus bus = new ServiceBus(_serviceBusEndPoint, _subscriptionCache);
+			ServiceBus bus = new ServiceBus(_serviceBusEndPoint);
+		    bus.SubscriptionStorage = _subscriptionCache;
+
 			bus.PoisonEndpoint = _poisonEndpoint;
 			_serviceBus = bus;
 
 
-			_remoteServiceBus = new ServiceBus(_remoteServiceBusEndPoint, _subscriptionCache);
+			_remoteServiceBus = new ServiceBus(_remoteServiceBusEndPoint);
+		    _remoteServiceBus.SubscriptionStorage = _subscriptionCache;
 		}
 
 		[TearDown]

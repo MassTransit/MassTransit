@@ -31,7 +31,7 @@ namespace MassTransit.ServiceBus.Tests
 
 		#endregion
 
-		private IServiceBus _serviceBus;
+		private ServiceBus _serviceBus;
 		private MockRepository _mocks;
 		private IEndpoint _mockEndpoint;
 		private ISubscriptionStorage _mockSubscriptionStorage;
@@ -51,8 +51,9 @@ namespace MassTransit.ServiceBus.Tests
 			}
 
 			using (_mocks.Playback())
-			{
-				_serviceBus = new ServiceBus(_mockEndpoint, _mockSubscriptionStorage);
+            {
+                _serviceBus = new ServiceBus(_mockEndpoint);
+                _serviceBus.SubscriptionStorage = _mockSubscriptionStorage;
 				_serviceBus.Subscribe<PingMessage>(delegate { });
 			}
 		}
