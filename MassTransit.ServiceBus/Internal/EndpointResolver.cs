@@ -5,7 +5,7 @@ using log4net;
 using MassTransit.ServiceBus.Exceptions;
 using MassTransit.ServiceBus.Util;
 
-namespace MassTransit.ServiceBus
+namespace MassTransit.ServiceBus.Internal
 {
 	public class EndpointResolver
 	{

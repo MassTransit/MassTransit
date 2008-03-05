@@ -1,5 +1,3 @@
-using MassTransit.ServiceBus.Subscriptions;
-
 namespace MassTransit.ServiceBus.MSMQ.Tests
 {
 	using System;
@@ -45,13 +43,6 @@ namespace MassTransit.ServiceBus.MSMQ.Tests
 			}
 		}
 
-	    [Test]
-	    public void NAME()
-	    {
-	        ServiceBus bus = new ServiceBus(new MsmqEndpoint("msmq://localhost/test"));
-            bus.Send(new MsmqEndpoint("msmq://localhost/test_endpoint"), new VariableMessage("phil is cool"));
-	    }
-
 		[Test]
 		public void Multiple_messages_should_be_delivered_to_the_appropriate_remote_subscribers()
 		{
@@ -83,6 +74,13 @@ namespace MassTransit.ServiceBus.MSMQ.Tests
 				Assert.That(_updateEvent.WaitOne(TimeSpan.FromSeconds(6), true), Is.True,
 				            "Timeout expired waiting for message");
 			}
+		}
+
+		[Test]
+		public void NAME()
+		{
+			ServiceBus bus = new ServiceBus(new MsmqEndpoint("msmq://localhost/test"));
+			bus.Send(new MsmqEndpoint("msmq://localhost/test_endpoint"), new VariableMessage("phil is cool"));
 		}
 
 		[Test]
