@@ -7,7 +7,6 @@ namespace MassTransit.ServiceBus.Formatters
     public class MessageFinder
     {
         private static readonly List<Type> _messageTypes = new List<Type>();
-        private static readonly List<Type> _genericMessageTypes = new List<Type>();
 
 
         public static void Initialize()
@@ -15,7 +14,6 @@ namespace MassTransit.ServiceBus.Formatters
             lock (_messageTypes)
             {
                 _messageTypes.Clear();
-                _genericMessageTypes.Clear();
                
                 Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
                 Type messageType = typeof (IMessage);
@@ -32,18 +30,7 @@ namespace MassTransit.ServiceBus.Formatters
                                 continue;
 
                             if (messageType.IsAssignableFrom(type))
-                            {
-                                if(type.IsGenericType)
-                                {
-                                    _genericMessageTypes.Add(type);
-                                }
-                                else
-                                {
-                                    _messageTypes.Add(type);
-                                }
-                            }
-                            
-                                
+                                _messageTypes.Add(type);
                         }
                     }
                 }
@@ -66,14 +53,10 @@ namespace MassTransit.ServiceBus.Formatters
 
             return result;
         }
-        public static List<Type> AllNonGenericMessageTypes()
+        public static List<Type> AllMessageTypes()
         {
+            Initialize();
             return _messageTypes;
-        }
-
-        public static List<Type> AllGenericMessageTypes()
-        {
-            return _genericMessageTypes;
         }
     }
 }
