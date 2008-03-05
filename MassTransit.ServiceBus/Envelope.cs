@@ -214,8 +214,6 @@ namespace MassTransit.ServiceBus
 			public bool Equals(IMessageId obj)
 			{
 				MessageId other = obj as MessageId;
-				if (other == null)
-					return false;
 
 				return Equals(other);
 			}
@@ -227,11 +225,17 @@ namespace MassTransit.ServiceBus
 
 			#endregion
 
+			public bool Equals(MessageId other)
+			{
+				if (other == null)
+					return false;
+
+				return true;
+			}
+
 			public override bool Equals(object obj)
 			{
 				MessageId other = obj as MessageId;
-				if (other == null)
-					return false;
 
 				return Equals(other);
 			}
