@@ -53,7 +53,7 @@ namespace MassTransit.ServiceBus.SubscriptionsManager
 
 			Initialize(args[0], args[1]);
 
-			_subscriptionService.Start(args);
+			_subscriptionService.Start();
 		}
 
 		protected override void OnStop()

@@ -19,18 +19,25 @@ namespace MassTransit.ServiceBus.Formatters
 
 				foreach (Assembly assembly in assemblies)
 				{
-					Type[] types = assembly.GetTypes();
-
-					foreach (Type type in types)
+					try
 					{
-						if (type.IsAbstract || type.IsInterface)
-							continue;
+						Type[] types = assembly.GetTypes();
 
-						if (type.ContainsGenericParameters)
-							continue;
+						foreach (Type type in types)
+						{
+							if (type.IsAbstract || type.IsInterface)
+								continue;
 
-						if (messageType.IsAssignableFrom(type))
-							_messageTypes.Add(type);
+							if (type.ContainsGenericParameters)
+								continue;
+
+							if (messageType.IsAssignableFrom(type))
+								_messageTypes.Add(type);
+						}
+					}
+					catch (Exception ex)
+					{
+						// NOTE if we have a problem, we just ignore that assembly
 					}
 				}
 			}
