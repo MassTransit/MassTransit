@@ -43,7 +43,7 @@ namespace MassTransit.ServiceBus.Subscriptions
 
 		#endregion
 
-		public void Start(string[] args)
+		public void Start(params string[] args)
 		{
 			foreach (Subscription sub in _repository.List())
 			{
