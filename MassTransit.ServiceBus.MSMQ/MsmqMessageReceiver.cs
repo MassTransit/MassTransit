@@ -172,8 +172,7 @@ namespace MassTransit.ServiceBus.MSMQ
                             {
                                 IEnvelope e = _mapper.ToEnvelope(msg);
 
-                                //TODO: Should this be 'CanHandle' or 'WantsToHandle' or 'IsInterested'
-                                if (this.Consumer.IsHandled(e))
+                                if (this.Consumer.IsInterested(e))
                                 {
                                     Message received = enumerator.RemoveCurrent(TimeSpan.FromSeconds(1));
                                     if (received.Id == msg.Id)
@@ -190,7 +189,8 @@ namespace MassTransit.ServiceBus.MSMQ
                             catch (SerializationException ex)
                             {
                                 Message discard = enumerator.RemoveCurrent(TimeSpan.FromSeconds(5));
-                                _log.Error("Discarding unknown message " + discard.Id, ex);
+                                if(_log.IsErrorEnabled)
+                                    _log.Error("Discarding unknown message " + discard.Id, ex);
                             }
                         }
 					}
@@ -199,7 +199,7 @@ namespace MassTransit.ServiceBus.MSMQ
 				}
 				catch (MessageQueueException ex)
 				{
-					HandleVariousErrorCodes(ex.MessageQueueErrorCode);
+					HandleVariousErrorCodes(ex.MessageQueueErrorCode, ex);
 				}
 				catch (ThreadAbortException ex)
 				{
@@ -214,7 +214,7 @@ namespace MassTransit.ServiceBus.MSMQ
 			}
 		}
 
-        private void HandleVariousErrorCodes(MessageQueueErrorCode code)
+        private void HandleVariousErrorCodes(MessageQueueErrorCode code, MessageQueueException ex)
         {
             switch (code)
             {

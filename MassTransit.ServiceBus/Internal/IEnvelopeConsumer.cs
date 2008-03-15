@@ -11,7 +11,7 @@ namespace MassTransit.ServiceBus.Internal
 		/// </summary>
 		/// <param name="envelope">The message envelope available</param>
 		/// <returns>True is the consumer will handle the message, false if it should be ignored</returns>
-		bool IsHandled(IEnvelope envelope);
+		bool IsInterested(IEnvelope envelope);
 
 		/// <summary>
 		/// Delivers the message envelope to the consumer

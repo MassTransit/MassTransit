@@ -70,16 +70,16 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
 			{
 				_consumer = _bus as IEnvelopeConsumer;
 				_bus.Subscribe<PingMessage>(HandleAllMessages);
-				Assert.That(_consumer.IsHandled(_envelope), Is.True);
+				Assert.That(_consumer.IsInterested(_envelope), Is.True);
 
 				_bus.Subscribe<PingMessage>(HandleAllMessages, HandleSomeMessagesPredicate);
-				Assert.That(_consumer.IsHandled(_envelope), Is.True);
+				Assert.That(_consumer.IsInterested(_envelope), Is.True);
 
 				_bus.Unsubscribe<PingMessage>(HandleAllMessages);
-				Assert.That(_consumer.IsHandled(_envelope), Is.True);
+				Assert.That(_consumer.IsInterested(_envelope), Is.True);
 
 				_bus.Unsubscribe<PingMessage>(HandleAllMessages, HandleSomeMessagesPredicate);
-				Assert.That(_consumer.IsHandled(_envelope), Is.False);
+				Assert.That(_consumer.IsInterested(_envelope), Is.False);
 			}
 		}
 
@@ -101,10 +101,10 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
 				_consumer = _bus as IEnvelopeConsumer;
 
 				_bus.Subscribe<PingMessage>(HandleAllMessages);
-				Assert.That(_consumer.IsHandled(_envelope), Is.True);
+				Assert.That(_consumer.IsInterested(_envelope), Is.True);
 
 				_bus.Unsubscribe<PingMessage>(HandleAllMessages);
-				Assert.That(_consumer.IsHandled(_envelope), Is.False);
+				Assert.That(_consumer.IsInterested(_envelope), Is.False);
 			}
 		}
 	}
