@@ -44,10 +44,10 @@
       <Link>SolutionVersion.cs</Link>
     </Compile>
     <Compile Include="Internal\EndpointResolver.cs" />
-    <Compile Include="Formatters\BinaryMessageFormatter.cs" />
+    <Compile Include="Formatters\BinaryBodyFormatter.cs" />
     <Compile Include="Formatters\IFormattedBody.cs" />
     <Compile Include="Formatters\MessageFinder.cs" />
-    <Compile Include="Formatters\XmlMessageFormatter.cs" />
+    <Compile Include="Formatters\XmlBodyFormatter.cs" />
     <Compile Include="Internal\AsyncReplyDispatcher.cs" />
     <Compile Include="Envelope.cs" />
     <Compile Include="Exceptions\EndpointException.cs" />
@@ -68,7 +68,7 @@
     <Compile Include="Internal\MessageConsumer.cs" />
     <Compile Include="Internal\MessageContext.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Formatters\IMessageFormatter.cs" />
+    <Compile Include="Formatters\IBodyFormatter.cs" />
     <Compile Include="ServiceBus.cs" />
     <Compile Include="Internal\ServiceBusAsyncResult.cs" />
     <Compile Include="SubscriptionEventArgs.cs" />

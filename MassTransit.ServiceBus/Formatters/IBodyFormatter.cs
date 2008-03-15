@@ -12,7 +12,7 @@
 /// specific language governing permissions and limitations under the License.
 namespace MassTransit.ServiceBus.Formatters
 {
-    public interface IMessageFormatter
+    public interface IBodyFormatter
     {
         void Serialize(IFormattedBody body, params IMessage[] messages);
         IMessage[] Deserialize(IFormattedBody formattedBody);

@@ -14,7 +14,7 @@ namespace MassTransit.ServiceBus.Tests.Formatters
     public class XmlMessageFormatterTests
     {
         private MockRepository mocks;
-        private XmlMessageFormatter formatter;
+        private XmlBodyFormatter formatter;
         IFormattedBody mockBody;
 
 		private readonly string _serializedMessages = "<?xml version=\"1.0\"?>\r\n<ArrayOfAnyType xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">\r\n  <anyType xsi:type=\"PingMessage\" />\r\n</ArrayOfAnyType>";
@@ -23,7 +23,7 @@ namespace MassTransit.ServiceBus.Tests.Formatters
         public void SetUp()
         {
             mocks = new MockRepository();
-            formatter = new XmlMessageFormatter();
+            formatter = new XmlBodyFormatter();
             mockBody = mocks.CreateMock<IFormattedBody>();
         }
 

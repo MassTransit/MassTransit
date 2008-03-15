@@ -21,7 +21,7 @@ namespace MassTransit.Patterns.Tests
 
 			StringBatchMessage bm = new StringBatchMessage(Guid.NewGuid(), 1, "Hello");
 
-			XmlMessageFormatter formatter = new XmlMessageFormatter();
+			XmlBodyFormatter formatter = new XmlBodyFormatter();
 
 			MemoryStream memoryStream = new MemoryStream();
 

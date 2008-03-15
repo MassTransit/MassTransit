@@ -15,8 +15,8 @@ namespace MassTransit.ServiceBus.Formatters
     using System.Runtime.Serialization;
     using System.Runtime.Serialization.Formatters.Binary;
 
-    public class BinaryMessageFormatter
-        : IMessageFormatter
+    public class BinaryBodyFormatter
+        : IBodyFormatter
     {
         private static readonly IFormatter _formatter = new BinaryFormatter();
 

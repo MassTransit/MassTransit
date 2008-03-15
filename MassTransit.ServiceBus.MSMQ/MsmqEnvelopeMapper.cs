@@ -13,14 +13,13 @@
 namespace MassTransit.ServiceBus.MSMQ
 {
 	using System.Messaging;
+	using Formatters;
 	using Internal;
-	using IMessageFormatter=MassTransit.ServiceBus.Formatters.IMessageFormatter;
-	using XmlMessageFormatter=MassTransit.ServiceBus.Formatters.XmlMessageFormatter;
 
-	public class MsmqEnvelopeMapper :
+    public class MsmqEnvelopeMapper :
 		IEnvelopeMapper<Message>
 	{
-		private static readonly IMessageFormatter _formatter = new XmlMessageFormatter();
+		private static readonly IBodyFormatter _formatter = new XmlBodyFormatter();
 
 		#region IEnvelopeMapper<Message> Members
 
