@@ -73,7 +73,7 @@ namespace MassTransit.ServiceBus
 		/// </summary>
 		/// <param name="envelope">The message envelope available</param>
 		/// <returns>True is the consumer will handle the message, false if it should be ignored</returns>
-		public bool IsHandled(IEnvelope envelope)
+		public bool IsInterested(IEnvelope envelope)
 		{
 			bool result;
 			try

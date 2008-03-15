@@ -58,7 +58,7 @@ namespace MassTransit.ServiceBus.Tests
 
 				IEnvelope envelope = new Envelope(mockServiceBusEndPoint, new PingMessage());
 
-				Assert.That(consumer.IsHandled(envelope), Is.True);
+				Assert.That(consumer.IsInterested(envelope), Is.True);
 				consumer.Deliver(envelope);
 				Assert.That(workDid, Is.True, "Lazy Test!");
 			}
@@ -97,7 +97,7 @@ namespace MassTransit.ServiceBus.Tests
 
 				IEnvelope envelope = new Envelope(mockServiceBusEndPoint, new PingMessage());
 
-				Assert.That(consumer.IsHandled(envelope), Is.False);
+				Assert.That(consumer.IsInterested(envelope), Is.False);
 			}
 		}
 
@@ -121,7 +121,7 @@ namespace MassTransit.ServiceBus.Tests
 
 				IEnvelope envelope = new Envelope(mockServiceBusEndPoint, new PingMessage());
 
-				Assert.That(consumer.IsHandled(envelope), Is.False);
+				Assert.That(consumer.IsInterested(envelope), Is.False);
 			}
 		}
 
@@ -146,7 +146,7 @@ namespace MassTransit.ServiceBus.Tests
 
 				IEnvelope envelope = new Envelope(mockServiceBusEndPoint, new PingMessage());
 
-				Assert.That(consumer.IsHandled(envelope), Is.True);
+				Assert.That(consumer.IsInterested(envelope), Is.True);
 			}
 		}
 
@@ -175,7 +175,7 @@ namespace MassTransit.ServiceBus.Tests
 
 				IEnvelope envelope = new Envelope(mockServiceBusEndPoint, new PingMessage());
 
-				Assert.That(consumer.IsHandled(envelope), Is.True);
+				Assert.That(consumer.IsInterested(envelope), Is.True);
 			}
 		}
 	}

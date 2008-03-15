@@ -88,7 +88,7 @@ namespace MassTransit.ServiceBus.NMS
                     {
                         IEnvelope e = new NmsEnvelopeMapper(_session).ToEnvelope(message);
 
-                        if (_consumer.IsHandled(e))
+                        if (_consumer.IsInterested(e))
                         {
                             if (_messageLog.IsInfoEnabled)
                             			_messageLog.InfoFormat("Received message {0} from {1}", e.Messages[0].GetType(), e.ReturnEndpoint.Uri);

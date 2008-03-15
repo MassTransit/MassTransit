@@ -77,7 +77,7 @@ namespace MassTransit.ServiceBus.NMS.Tests
             _eh = eh;
         }
 
-        public bool IsHandled(IEnvelope envelope)
+        public bool IsInterested(IEnvelope envelope)
         {
             return true;
         }
