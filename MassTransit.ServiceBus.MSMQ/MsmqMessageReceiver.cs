@@ -170,24 +170,26 @@ namespace MassTransit.ServiceBus.MSMQ
 
                             try
                             {
-                                IEnvelope e = _mapper.ToEnvelope(msg);
+                                IEnvelope env = _mapper.ToEnvelope(msg);
 
-                                if (this.Consumer.IsInterested(e))
+                                if (this.Consumer.IsInterested(env))
                                 {
                                     Message received = enumerator.RemoveCurrent(TimeSpan.FromSeconds(1));
                                     if (received.Id == msg.Id)
                                     {
                                         if (_messageLog.IsInfoEnabled)
                                             _messageLog.InfoFormat("Received message {0} from {1}",
-                                                                   e.Messages[0].GetType(), e.ReturnEndpoint.Uri);
+                                                                   env.Messages[0].GetType(), env.ReturnEndpoint.Uri);
 
-                                        ThreadPool.QueueUserWorkItem(ProcessMessage, e);
+                                        QueueMessageForProcessing(env);
                                         break;
                                     }
                                 }
                             }
                             catch (SerializationException ex)
                             {
+                                //TODO: Maybe move to the poison queue
+                                //TODO: Mayb fire an event?
                                 Message discard = enumerator.RemoveCurrent(TimeSpan.FromSeconds(5));
                                 if(_log.IsErrorEnabled)
                                     _log.Error("Discarding unknown message " + discard.Id, ex);
@@ -214,6 +216,11 @@ namespace MassTransit.ServiceBus.MSMQ
 			}
 		}
 
+        //TODO: threading plugs in here?
+        private void QueueMessageForProcessing(IEnvelope e)
+        {
+            ThreadPool.QueueUserWorkItem(ProcessMessage, e);
+        }
         private void HandleVariousErrorCodes(MessageQueueErrorCode code, MessageQueueException ex)
         {
             switch (code)
