@@ -79,6 +79,15 @@ namespace MassTransit.ServiceBus.MSMQ
 			}
 		}
 
+	    public IEnvelopeConsumer Consumer
+	    {
+            get
+            {
+                if(_consumer == null) throw new EndpointException(_endpoint, "No consumer has been registered");
+                return _consumer;
+            }
+	    }
+
 		private void Restart()
 		{
 			lock (this)
@@ -154,78 +163,43 @@ namespace MassTransit.ServiceBus.MSMQ
 					while (enumerator.MoveNext(_readTimeout))
 					{
 						Message msg = enumerator.Current;
-						if (msg != null)
-						{
-							if (_log.IsDebugEnabled)
-								_log.DebugFormat("Queue: {0} Received Message Id {1}", _queue.Path, msg.Id);
+                        if (msg != null) //TODO: will this ever happen?
+                        {
+                            if (_log.IsDebugEnabled)
+                                _log.DebugFormat("Queue: {0} Received Message Id {1}", _queue.Path, msg.Id);
 
-							if (_consumer != null)
-							{
-								try
-								{
-									IEnvelope e = _mapper.ToEnvelope(msg);
+                            try
+                            {
+                                IEnvelope e = _mapper.ToEnvelope(msg);
 
-									if (_consumer.IsHandled(e))
-									{
-										Message received = enumerator.RemoveCurrent(TimeSpan.FromSeconds(1));
-										if (received.Id == msg.Id)
-										{
-											if (_messageLog.IsInfoEnabled)
-												_messageLog.InfoFormat("Received message {0} from {1}", e.Messages[0].GetType(), e.ReturnEndpoint.Uri);
+                                //TODO: Should this be 'CanHandle' or 'WantsToHandle' or 'IsInterested'
+                                if (this.Consumer.IsHandled(e))
+                                {
+                                    Message received = enumerator.RemoveCurrent(TimeSpan.FromSeconds(1));
+                                    if (received.Id == msg.Id)
+                                    {
+                                        if (_messageLog.IsInfoEnabled)
+                                            _messageLog.InfoFormat("Received message {0} from {1}",
+                                                                   e.Messages[0].GetType(), e.ReturnEndpoint.Uri);
 
-											ThreadPool.QueueUserWorkItem(ProcessMessage, e);
-											break;
-										}
-									}
-								}
-								catch (SerializationException ex)
-								{
-									Message discard = enumerator.RemoveCurrent(TimeSpan.FromSeconds(5));
-									_log.Error("Discarding unknown message " + discard.Id, ex);
-								}
-							}
-						}
+                                        ThreadPool.QueueUserWorkItem(ProcessMessage, e);
+                                        break;
+                                    }
+                                }
+                            }
+                            catch (SerializationException ex)
+                            {
+                                Message discard = enumerator.RemoveCurrent(TimeSpan.FromSeconds(5));
+                                _log.Error("Discarding unknown message " + discard.Id, ex);
+                            }
+                        }
 					}
 
 					enumerator.Close();
 				}
 				catch (MessageQueueException ex)
 				{
-					switch (ex.MessageQueueErrorCode)
-					{
-						case MessageQueueErrorCode.IOTimeout:
-							// this is OK
-							break;
-
-						case MessageQueueErrorCode.AccessDenied:
-						case MessageQueueErrorCode.QueueNotAvailable:
-						case MessageQueueErrorCode.ServiceNotAvailable:
-						case MessageQueueErrorCode.QueueDeleted:
-							ThreadPool.QueueUserWorkItem(delegate { Stop(); });
-							if (_log.IsErrorEnabled)
-								_log.Error("There was a problem accessing the queue", ex);
-							break;
-
-						case MessageQueueErrorCode.QueueNotFound:
-						case MessageQueueErrorCode.IllegalFormatName:
-						case MessageQueueErrorCode.MachineNotFound:
-							ThreadPool.QueueUserWorkItem(delegate { Stop(); });
-							if (_log.IsErrorEnabled)
-								_log.Error("The message queue does not exist", ex);
-							break;
-
-						case MessageQueueErrorCode.MessageAlreadyReceived:
-							// we are competing with another consumer, no reason to report an error since
-							// the message has already been handled.
-							if (_log.IsDebugEnabled)
-								_log.DebugFormat("Message received by another receiver before it could be retrieved");
-							break;
-
-						default:
-							if (_log.IsErrorEnabled)
-								_log.Error("An error occured while communicating with the queue", ex);
-							break;
-					}
+					HandleVariousErrorCodes(ex.MessageQueueErrorCode);
 				}
 				catch (ThreadAbortException ex)
 				{
@@ -239,5 +213,44 @@ namespace MassTransit.ServiceBus.MSMQ
 				}
 			}
 		}
+
+        private void HandleVariousErrorCodes(MessageQueueErrorCode code)
+        {
+            switch (code)
+            {
+                case MessageQueueErrorCode.IOTimeout:
+                    // this is OK its just a normal timeout
+                    break;
+
+                case MessageQueueErrorCode.AccessDenied:
+                case MessageQueueErrorCode.QueueNotAvailable:
+                case MessageQueueErrorCode.ServiceNotAvailable:
+                case MessageQueueErrorCode.QueueDeleted:
+                    ThreadPool.QueueUserWorkItem(delegate { Stop(); });
+                    if (_log.IsErrorEnabled)
+                        _log.Error("There was a problem accessing the queue", ex);
+                    break;
+
+                case MessageQueueErrorCode.QueueNotFound:
+                case MessageQueueErrorCode.IllegalFormatName:
+                case MessageQueueErrorCode.MachineNotFound:
+                    ThreadPool.QueueUserWorkItem(delegate { Stop(); });
+                    if (_log.IsErrorEnabled)
+                        _log.Error("The message queue does not exist", ex);
+                    break;
+
+                case MessageQueueErrorCode.MessageAlreadyReceived:
+                    // we are competing with another consumer, no reason to report an error since
+                    // the message has already been handled.
+                    if (_log.IsDebugEnabled)
+                        _log.DebugFormat("Message received by another receiver before it could be retrieved");
+                    break;
+
+                default:
+                    if (_log.IsErrorEnabled)
+                        _log.Error("An error occured while communicating with the queue", ex);
+                    break;
+            }
+        }
 	}
 }

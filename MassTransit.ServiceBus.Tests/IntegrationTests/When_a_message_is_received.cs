@@ -1,14 +1,13 @@
-using System;
-using System.Threading;
-using NUnit.Framework;
-using NUnit.Framework.SyntaxHelpers;
-
 namespace MassTransit.ServiceBus.Tests.IntegrationTests
 {
+    using System;
+    using System.Threading;
     using Internal;
+    using NUnit.Framework;
+    using NUnit.Framework.SyntaxHelpers;
 
-    [TestFixture]
     [Explicit]
+    [TestFixture]
     public class When_a_message_is_received :
         ServiceBusSetupFixture
     {
