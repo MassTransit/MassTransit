@@ -4,12 +4,12 @@ namespace MassTransit.ServiceBus.Formatters
 	using System.Collections.Generic;
 	using System.Xml.Serialization;
 
-	public class XmlMessageFormatter :
-		IMessageFormatter
+	public class XmlBodyFormatter :
+		IBodyFormatter
 	{
 		private readonly XmlSerializer _serializer;
 
-		public XmlMessageFormatter()
+		public XmlBodyFormatter()
 		{
 			List<Type> types = MessageFinder.AllMessageTypes();
 
