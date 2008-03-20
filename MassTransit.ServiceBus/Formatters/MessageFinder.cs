@@ -3,9 +3,11 @@ namespace MassTransit.ServiceBus.Formatters
 	using System;
 	using System.Collections.Generic;
 	using System.Reflection;
+	using log4net;
 
-	public class MessageFinder
+    public class MessageFinder
 	{
+        private static ILog _log = LogManager.GetLogger(typeof (MessageFinder));
 		private static readonly List<Type> _messageTypes = new List<Type>();
 
 		public static void Initialize()
@@ -26,18 +28,35 @@ namespace MassTransit.ServiceBus.Formatters
 						foreach (Type type in types)
 						{
 							if (type.IsAbstract || type.IsInterface)
-								continue;
+							{
+                                if (_log.IsDebugEnabled)
+                                    _log.DebugFormat("Ignoring Message {0} it is either Abstract or an Interface", type);
+
+                                continue;
+							}
 
 							if (type.ContainsGenericParameters)
-								continue;
+							{
+                                if(_log.IsDebugEnabled)
+                                    _log.DebugFormat("Ignoring Message {0} it contains generic parameters", type);
+                                
+                                continue;
+							}
+								
 
 							if (messageType.IsAssignableFrom(type))
-								_messageTypes.Add(type);
+							{
+                                _messageTypes.Add(type);
+                                if(_log.IsInfoEnabled)
+                                    _log.InfoFormat("Found Message {0}", type);
+							}
+								
 						}
 					}
 					catch (Exception ex)
 					{
 						// NOTE if we have a problem, we just ignore that assembly
+                        _log.ErrorFormat("Encountered a problem loading messages in assembly {0}. Exception was {1}", assembly.FullName, ex.Message);
 					}
 				}
 			}
