@@ -20,8 +20,9 @@ namespace MassTransit.ServiceBus.MSMQ
 	using Exceptions;
 	using Internal;
 	using log4net;
+	using Threading;
 
-	/// <summary>
+    /// <summary>
 	/// Receives envelopes from a message queue
 	/// </summary>
 	public class MsmqMessageReceiver :
@@ -33,6 +34,7 @@ namespace MassTransit.ServiceBus.MSMQ
 		private readonly IMsmqEndpoint _endpoint;
 		private readonly TimeSpan _readTimeout = TimeSpan.FromSeconds(4);
 	    private IEnvelopeMapper<Message> _mapper;
+	    private IWorker _worker = new MultiThreadedWorker();
 
 		private IEnvelopeConsumer _consumer;
 
@@ -181,7 +183,7 @@ namespace MassTransit.ServiceBus.MSMQ
                                             _messageLog.InfoFormat("Received message {0} from {1}",
                                                                    env.Messages[0].GetType(), env.ReturnEndpoint.Uri);
 
-                                        QueueMessageForProcessing(env);
+                                        _worker.ScheduleWork(ProcessMessage, env);
                                         break;
                                     }
                                 }
@@ -216,11 +218,6 @@ namespace MassTransit.ServiceBus.MSMQ
 			}
 		}
 
-        //TODO: threading plugs in here?
-        private void QueueMessageForProcessing(IEnvelope e)
-        {
-            ThreadPool.QueueUserWorkItem(ProcessMessage, e);
-        }
         private void HandleVariousErrorCodes(MessageQueueErrorCode code, MessageQueueException ex)
         {
             switch (code)
