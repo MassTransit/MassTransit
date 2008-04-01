@@ -9,7 +9,7 @@ namespace MassTransit.ServiceBus.Tests.Formatters
     public class MessageFinderTests
     {
         [Test]
-        public void NAME()
+        public void Can_I_Find_Messages()
         {
             List<Type> results = MessageFinder.AllMessageTypes();
             Assert.AreEqual(12, results.Count);
