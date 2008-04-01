@@ -5,7 +5,7 @@
 		<component id="serverEndpoint"
 				   lifestyle="singleton"
 				   service="MassTransit.ServiceBus.IEndpoint, MassTransit.ServiceBus"
-				   type="MassTransit.ServiceBus.MessageQueueEndpoint, MassTransit.ServiceBus"
+				   type="MassTransit.ServiceBus.MSMQ.MsmqEndpoint, MassTransit.ServiceBus.MSMQ"
 				   >
 			<parameters>
 				<uriString>msmq://localhost/test_server</uriString>
@@ -16,7 +16,7 @@
 		<component id="managerEndpoint"
 				   lifestyle="singleton"
 				   service="MassTransit.ServiceBus.IEndpoint, MassTransit.ServiceBus"
-				   type="MassTransit.ServiceBus.MessageQueueEndpoint, MassTransit.ServiceBus"
+				   type="MassTransit.ServiceBus.MSMQ.MsmqEndpoint, MassTransit.ServiceBus.MSMQ"
 				   >
 			<parameters>
 				<uriString>msmq://localhost/test_subscriptions</uriString>
@@ -25,7 +25,7 @@
 
 		<component id="serverCache"
 				   lifestyle="singleton"
-				   service="MassTransit.ServiceBus.ISubscriptionStorage, MassTransit.ServiceBus"
+				   service="MassTransit.ServiceBus.Subscriptions.ISubscriptionCache, MassTransit.ServiceBus"
 				   type="MassTransit.ServiceBus.Subscriptions.LocalSubscriptionCache, MassTransit.ServiceBus"
 				   />
 
@@ -42,7 +42,7 @@
 		<component id="AsubsriptionClient"
 				   lifestyle="singleton"
 				   service="MassTransit.ServiceBus.IMessageService, MassTransit.ServiceBus"
-				   type="MassTransit.ServiceBus.Subscriptions.SubscriptionManagerClient, MassTransit.ServiceBus"
+				   type="MassTransit.ServiceBus.Subscriptions.SubscriptionClient, MassTransit.ServiceBus"
 				   >
 			<parameters>
 				<managerEndpoint>${managerEndpoint}</managerEndpoint>
