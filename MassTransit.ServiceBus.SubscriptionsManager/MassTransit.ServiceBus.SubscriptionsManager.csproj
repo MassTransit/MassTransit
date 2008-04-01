@@ -59,6 +59,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="Subscriptions_Security.sql" />
     <None Include="Subscriptions.sql" />
   </ItemGroup>
   <ItemGroup>
