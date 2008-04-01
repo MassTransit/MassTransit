@@ -77,13 +77,6 @@ namespace MassTransit.ServiceBus.MSMQ.Tests
 		}
 
 		[Test]
-		public void NAME()
-		{
-			ServiceBus bus = new ServiceBus(new MsmqEndpoint("msmq://localhost/not_gonna_be_there"));
-			bus.Send(new MsmqEndpoint("msmq://localhost/test_endpoint"), new VariableMessage("phil is cool"));
-		}
-
-		[Test]
 		public void The_message_should_be_delivered_to_a_local_subscriber()
 		{
 			using (QueueTestContext qtc = new QueueTestContext())
