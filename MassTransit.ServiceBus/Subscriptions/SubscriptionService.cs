@@ -18,7 +18,7 @@ namespace MassTransit.ServiceBus.Subscriptions
 	using Messages;
 
 	public class SubscriptionService :
-		IDisposable
+		IMessageService
 	{
 		private static readonly ILog _log = LogManager.GetLogger(typeof (SubscriptionService));
 		private readonly IServiceBus _bus;
@@ -43,7 +43,7 @@ namespace MassTransit.ServiceBus.Subscriptions
 
 		#endregion
 
-		public void Start(params string[] args)
+		public void Start()
 		{
 			foreach (Subscription sub in _repository.List())
 			{
