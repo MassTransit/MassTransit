@@ -8,8 +8,12 @@ namespace SecurityMessages
     {
         private int _errorCode;
 
+		private PasswordUpdateComplete()
+		{
+		}
 
-        public PasswordUpdateComplete(int errorCode)
+
+    	public PasswordUpdateComplete(int errorCode)
         {
             _errorCode = errorCode;
         }
