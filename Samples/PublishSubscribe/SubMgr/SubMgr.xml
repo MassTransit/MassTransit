@@ -1,0 +1,74 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<castle>
+	<components>
+
+
+
+		<component id="managerEndpoint"
+				   lifestyle="singleton"
+				   service="MassTransit.ServiceBus.IEndpoint, MassTransit.ServiceBus"
+				   type="MassTransit.ServiceBus.MSMQ.MsmqEndpoint, MassTransit.ServiceBus.MSMQ"
+				   >
+			<parameters>
+				<uriString>msmq://localhost/test_subscriptions</uriString>
+			</parameters>
+		</component>
+
+		<component id="serverCache"
+				   lifestyle="singleton"
+				   service="MassTransit.ServiceBus.Subscriptions.ISubscriptionCache, MassTransit.ServiceBus"
+				   type="MassTransit.ServiceBus.Subscriptions.LocalSubscriptionCache, MassTransit.ServiceBus"
+				   />
+
+		<component id="serverServiceBus"
+				   lifestyle="singleton"
+				   service="MassTransit.ServiceBus.IServiceBus, MassTransit.ServiceBus"
+				   type="MassTransit.ServiceBus.ServiceBus, MassTransit.ServiceBus"
+				   >
+			<parameters>
+				<endpoint>${serverEndpoint}</endpoint>
+			</parameters>
+		</component>
+
+		<component id="ASubscriptionManager"
+				   lifestyle="singleton"
+				   service="MassTransit.ServiceBus.IMessageService, MassTransit.ServiceBus"
+				   type="MassTransit.ServiceBus.Subscriptions.SubscriptionService, MassTransit.ServiceBus"
+				   >
+			<parameters>
+				<managerEndpoint>${managerEndpoint}</managerEndpoint>
+			</parameters>
+		</component>
+
+		<component id="SuscriptionRepository"
+				   service="MassTransit.ServiceBus.Subscriptions.ISubscriptionRepository, MassTransit.ServiceBus"
+				   type="MassTransit.SubscriptionStorage.NHibernateSubscriptionStorage, MassTransit.SubscriptionStorage"
+				   ></component>
+
+	</components>
+
+	<facilities>
+		<facility id="nhibernate" isWeb="false">
+			<factory id="nhibernate.factory">
+				<settings>
+					<item key="hibernate.connection.provider">
+						NHibernate.Connection.DriverConnectionProvider
+					</item>
+					<item key="hibernate.connection.driver_class">
+						NHibernate.Driver.SqlClientDriver
+					</item>
+					<item key="hibernate.connection.connection_string">
+						Database=test;Data Source=localhost;Integrated Security=SSPI
+					</item>
+					<item key="hibernate.dialect">
+						NHibernate.Dialect.MsSql2005Dialect
+					</item>
+				</settings>
+
+				<assemblies>
+					<assembly>MassTransit.SubscriptionStorage</assembly>
+				</assemblies>
+			</factory>
+		</facility>
+	</facilities>
+</castle>
