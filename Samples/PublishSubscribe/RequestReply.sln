@@ -37,6 +37,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SubMgr", "SubMgr\SubMgr.csp
 		Release.AspNetCompiler.Debug = "False"
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.SubscriptionStorage", "..\..\MassTransit.SubscriptionStorage\MassTransit.SubscriptionStorage.csproj", "{8EE6C0CB-93D1-4B92-8CD5-24C77452CBE5}"
+	ProjectSection(WebsiteProperties) = preProject
+		Debug.AspNetCompiler.Debug = "True"
+		Release.AspNetCompiler.Debug = "False"
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -63,11 +69,16 @@ Global
 		{4A3EA6B8-CA0B-4C8C-B5EF-0068B83BB686}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4A3EA6B8-CA0B-4C8C-B5EF-0068B83BB686}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4A3EA6B8-CA0B-4C8C-B5EF-0068B83BB686}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8EE6C0CB-93D1-4B92-8CD5-24C77452CBE5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8EE6C0CB-93D1-4B92-8CD5-24C77452CBE5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8EE6C0CB-93D1-4B92-8CD5-24C77452CBE5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8EE6C0CB-93D1-4B92-8CD5-24C77452CBE5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{90482397-6282-465E-8B86-39865FC30127} = {5A039536-728C-4B3C-88D0-030539735F66}
+		{8EE6C0CB-93D1-4B92-8CD5-24C77452CBE5} = {5A039536-728C-4B3C-88D0-030539735F66}
 	EndGlobalSection
 EndGlobal
