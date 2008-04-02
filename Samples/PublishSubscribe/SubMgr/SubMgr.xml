@@ -48,7 +48,7 @@
 	</components>
 
 	<facilities>
-		<facility id="nhibernate" isWeb="false">
+		<facility id="nhibernate" isWeb="false" type="Castle.Facilities.NHibernateIntegration.NHibernateFacility, Castle.Facilities.NHibernateIntegration">
 			<factory id="nhibernate.factory">
 				<settings>
 					<item key="hibernate.connection.provider">
