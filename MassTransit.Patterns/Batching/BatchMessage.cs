@@ -25,14 +25,14 @@ namespace MassTransit.Patterns.Batching
 		private readonly int _batchLength;
 		private TMessageType _body;
 
-		public BatchMessage(TBatchId batchId, int batchLength, TMessageType body)
+        public BatchMessage(TBatchId batchId, int batchLength, TMessageType body)
 		{
 			_body = body;
 			_batchId = batchId;
 			_batchLength = batchLength;
 		}
 
-    	protected BatchMessage()
+    	public BatchMessage()
     	{
     	}
 

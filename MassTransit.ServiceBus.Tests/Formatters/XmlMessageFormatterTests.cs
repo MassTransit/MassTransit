@@ -1,23 +1,24 @@
 using System.IO;
 using System.Text;
-using System.Xml;
+using MassTransit.ServiceBus.Formatters;
+using NUnit.Framework;
 using NUnit.Framework.SyntaxHelpers;
+using Rhino.Mocks;
 
 namespace MassTransit.ServiceBus.Tests.Formatters
 {
-    using System;
-    using MassTransit.ServiceBus.Formatters;
-    using NUnit.Framework;
-    using Rhino.Mocks;
-
     [TestFixture]
     public class XmlMessageFormatterTests
     {
         private MockRepository mocks;
         private XmlBodyFormatter formatter;
-        IFormattedBody mockBody;
+        private IFormattedBody mockBody;
 
-		private readonly string _serializedMessages = "<?xml version=\"1.0\"?>\r\n<ArrayOfAnyType xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">\r\n  <anyType xsi:type=\"PingMessage\" />\r\n</ArrayOfAnyType>";
+        private readonly string _serializedMessages =
+            "<?xml version=\"1.0\"?>\r\n<ArrayOfAnyType xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">\r\n  <anyType xsi:type=\"PingMessage\" />\r\n</ArrayOfAnyType>";
+
+        private readonly string _serializedMessagesWithValue =
+            "<?xml version=\"1.0\"?>\r\n<ArrayOfAnyType xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">\r\n  <anyType xsi:type=\"ClientMessage\">\r\n    <Name>test</Name>\r\n  </anyType>\r\n</ArrayOfAnyType>";
 
         [SetUp]
         public void SetUp()
@@ -40,31 +41,31 @@ namespace MassTransit.ServiceBus.Tests.Formatters
         {
             PingMessage msg = new PingMessage();
 
-			MemoryStream memoryStream = new MemoryStream();
+            MemoryStream memoryStream = new MemoryStream();
 
             using (mocks.Record())
             {
-            	Expect.Call(mockBody.BodyStream).Return(memoryStream);
+                Expect.Call(mockBody.BodyStream).Return(memoryStream);
             }
 
             using (mocks.Playback())
             {
                 formatter.Serialize(mockBody, msg);
 
-				byte[] buffer = new byte[memoryStream.Length];
-				memoryStream.Position = 0;
-				memoryStream.Read(buffer, 0, buffer.Length);
+                byte[] buffer = new byte[memoryStream.Length];
+                memoryStream.Position = 0;
+                memoryStream.Read(buffer, 0, buffer.Length);
 
-				string s = Encoding.UTF8.GetString(buffer);
+                string s = Encoding.UTF8.GetString(buffer);
 
-				Assert.That(s, Is.EqualTo(_serializedMessages));
+                Assert.That(s, Is.EqualTo(_serializedMessages));
             }
         }
 
         [Test]
         public void Deserialize()
         {
-			MemoryStream memoryStream = new MemoryStream(new UTF8Encoding().GetBytes(_serializedMessages));
+            MemoryStream memoryStream = new MemoryStream(new UTF8Encoding().GetBytes(_serializedMessages));
 
             using (mocks.Record())
             {
@@ -76,7 +77,34 @@ namespace MassTransit.ServiceBus.Tests.Formatters
 
                 Assert.AreEqual(1, msgs.Length);
 
-            	Assert.That(msgs[0], Is.TypeOf(typeof (PingMessage)));
+                Assert.That(msgs[0], Is.TypeOf(typeof (PingMessage)));
+            }
+        }
+
+        [Test]
+        public void SerializeObjectWithValues()
+        {
+            ClientMessage msg = new ClientMessage();
+            msg.Name = "test";
+
+            MemoryStream memoryStream = new MemoryStream();
+
+            using (mocks.Record())
+            {
+                Expect.Call(mockBody.BodyStream).Return(memoryStream);
+            }
+
+            using (mocks.Playback())
+            {
+                formatter.Serialize(mockBody, msg);
+
+                byte[] buffer = new byte[memoryStream.Length];
+                memoryStream.Position = 0;
+                memoryStream.Read(buffer, 0, buffer.Length);
+
+                string s = Encoding.UTF8.GetString(buffer);
+
+                Assert.That(s, Is.EqualTo(_serializedMessagesWithValue));
             }
         }
     }

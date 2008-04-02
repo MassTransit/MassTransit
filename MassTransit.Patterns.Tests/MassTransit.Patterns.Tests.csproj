@@ -49,10 +49,12 @@
   <ItemGroup>
     <Compile Include="As_a_BatchController.cs" />
     <Compile Include="As_a_BatchController2.cs" />
+    <Compile Include="BatchMessageToBatch.cs" />
     <Compile Include="MessageToBatch.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="When_a_new_batch_is_received.cs" />
     <Compile Include="When_serializing_batch_messages.cs" />
+    <Compile Include="XmlMessageFormatterTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\MassTransit.Patterns\MassTransit.Patterns.csproj">
