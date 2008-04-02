@@ -57,4 +57,36 @@
 		</component>
 
 	</components>
+  <facilities>
+    <facility id="nhibernate" isWeb="true|false" customStore="typename for a class that implements ISessionStore">
+      <factory id="nhibernate.factory">
+        <settings>
+          <item key="hibernate.connection.provider">
+            NHibernate.Connection.DriverConnectionProvider
+          </item>
+          <item key="hibernate.connection.driver_class">
+            NHibernate.Driver.SqlClientDriver
+          </item>
+          <item key="hibernate.connection.connection_string">
+            Database=masstransit;Data Source=localhost
+          </item>
+          <item key="hibernate.dialect">
+            NHibernate.Dialect.MsSql2005Dialect
+          </item>
+        </settings>
+        <!--
+        <resources>
+          <resource name="hbm.xml file location" />
+          <resource assembly="assembly name" name="hbm.xml file name" />
+        </resources>
+        -->
+        <assemblies>
+          <!--
+          <assembly>MassTransit.SubscriptionStorage</assembly>
+          -->
+          <assembly>assembly name</assembly>
+        </assemblies>
+      </factory>
+    </facility>
+  </facilities>
 </castle>
