@@ -1,0 +1,60 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<castle>
+	<components>
+
+		<component id="serverEndpoint"
+				   lifestyle="singleton"
+				   service="MassTransit.ServiceBus.IEndpoint, MassTransit.ServiceBus"
+				   type="MassTransit.ServiceBus.MSMQ.MsmqEndpoint, MassTransit.ServiceBus.MSMQ"
+				   >
+			<parameters>
+				<uriString>msmq://localhost/test_server</uriString>
+			</parameters>
+		</component>
+
+
+		<component id="managerEndpoint"
+				   lifestyle="singleton"
+				   service="MassTransit.ServiceBus.IEndpoint, MassTransit.ServiceBus"
+				   type="MassTransit.ServiceBus.MSMQ.MsmqEndpoint, MassTransit.ServiceBus.MSMQ"
+				   >
+			<parameters>
+				<uriString>msmq://localhost/test_subscriptions</uriString>
+			</parameters>
+		</component>
+
+		<component id="serverCache"
+				   lifestyle="singleton"
+				   service="MassTransit.ServiceBus.Subscriptions.ISubscriptionCache, MassTransit.ServiceBus"
+				   type="MassTransit.ServiceBus.Subscriptions.LocalSubscriptionCache, MassTransit.ServiceBus"
+				   />
+
+		<component id="serverServiceBus"
+				   lifestyle="singleton"
+				   service="MassTransit.ServiceBus.IServiceBus, MassTransit.ServiceBus"
+				   type="MassTransit.ServiceBus.ServiceBus, MassTransit.ServiceBus"
+				   >
+			<parameters>
+				<endpoint>${serverEndpoint}</endpoint>
+			</parameters>
+		</component>
+
+		<component id="ASubsriptionClient"
+				   lifestyle="singleton"
+				   service="MassTransit.ServiceBus.IMessageService, MassTransit.ServiceBus"
+				   type="MassTransit.ServiceBus.Subscriptions.SubscriptionClient, MassTransit.ServiceBus"
+				   >
+			<parameters>
+				<managerEndpoint>${managerEndpoint}</managerEndpoint>
+			</parameters>
+		</component>
+
+		<component id="mySimpleServer"
+				   lifestyle="singleton"
+				   service="MassTransit.ServiceBus.IMessageService, MassTransit.ServiceBus"
+				   type="Server.PasswordUpdateService, Server"
+				   >
+		</component>
+
+	</components>
+</castle>
