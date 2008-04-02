@@ -58,7 +58,7 @@
 
 	</components>
   <facilities>
-    <facility id="nhibernate" isWeb="true|false" customStore="typename for a class that implements ISessionStore">
+    <facility id="nhibernate" isWeb="false">
       <factory id="nhibernate.factory">
         <settings>
           <item key="hibernate.connection.provider">
