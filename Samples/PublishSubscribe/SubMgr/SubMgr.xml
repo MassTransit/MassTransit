@@ -1,9 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <castle>
 	<components>
-
-
-
 		<component id="managerEndpoint"
 				   lifestyle="singleton"
 				   service="MassTransit.ServiceBus.IEndpoint, MassTransit.ServiceBus"
@@ -25,9 +22,6 @@
 				   service="MassTransit.ServiceBus.IServiceBus, MassTransit.ServiceBus"
 				   type="MassTransit.ServiceBus.ServiceBus, MassTransit.ServiceBus"
 				   >
-			<parameters>
-				<endpoint>${serverEndpoint}</endpoint>
-			</parameters>
 		</component>
 
 		<component id="ASubscriptionManager"
@@ -35,10 +29,7 @@
 				   service="MassTransit.ServiceBus.IMessageService, MassTransit.ServiceBus"
 				   type="MassTransit.ServiceBus.Subscriptions.SubscriptionService, MassTransit.ServiceBus"
 				   >
-			<parameters>
-				<managerEndpoint>${managerEndpoint}</managerEndpoint>
-			</parameters>
-		</component>
+		</component>s
 
 		<component id="SuscriptionRepository"
 				   service="MassTransit.ServiceBus.Subscriptions.ISubscriptionRepository, MassTransit.ServiceBus"
@@ -58,7 +49,7 @@
 						NHibernate.Driver.SqlClientDriver
 					</item>
 					<item key="hibernate.connection.connection_string">
-						Database=test;Data Source=localhost;Integrated Security=SSPI
+						Database=test;Server=localhost;Integrated Security=SSPI
 					</item>
 					<item key="hibernate.dialect">
 						NHibernate.Dialect.MsSql2005Dialect
