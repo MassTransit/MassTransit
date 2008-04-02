@@ -8,8 +8,11 @@ namespace SecurityMessages
     {
         private string _newPassword;
 
+		private RequestPasswordUpdate()
+		{
+		}
 
-        public RequestPasswordUpdate(string newPassword)
+    	public RequestPasswordUpdate(string newPassword)
         {
             _newPassword = newPassword;
         }
