@@ -11,12 +11,11 @@
 			</parameters>
 		</component>
 
-		<component id="serverCache"
-				   lifestyle="singleton"
-				   service="MassTransit.ServiceBus.Subscriptions.ISubscriptionCache, MassTransit.ServiceBus"
-				   type="MassTransit.ServiceBus.Subscriptions.LocalSubscriptionCache, MassTransit.ServiceBus"
-				   />
-
+    <component id="subscriptionCache"
+               service="MassTransit.ServiceBus.Subscriptions.ISubscriptionCache, MassTransit.ServiceBus"
+               type="MassTransit.ServiceBus.Subscriptions.LocalSubscriptionCache, MassTransit.ServiceBus">
+    </component>
+    
 		<component id="serverServiceBus"
 				   lifestyle="singleton"
 				   service="MassTransit.ServiceBus.IServiceBus, MassTransit.ServiceBus"
@@ -29,12 +28,15 @@
 				   service="MassTransit.ServiceBus.IMessageService, MassTransit.ServiceBus"
 				   type="MassTransit.ServiceBus.Subscriptions.SubscriptionService, MassTransit.ServiceBus"
 				   >
-		</component>s
+		</component>
 
 		<component id="SuscriptionRepository"
 				   service="MassTransit.ServiceBus.Subscriptions.ISubscriptionRepository, MassTransit.ServiceBus"
 				   type="MassTransit.SubscriptionStorage.NHibernateSubscriptionStorage, MassTransit.SubscriptionStorage"
-				   ></component>
+				   >
+      
+    </component>
+
 
 	</components>
 
