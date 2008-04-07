@@ -23,6 +23,11 @@
 			</parameters>
 		</component>
 
+    <component id="subscriptionCache"
+               service="MassTransit.ServiceBus.Subscriptions.ISubscriptionCache, MassTransit.ServiceBus"
+               type="MassTransit.ServiceBus.Subscriptions.LocalSubscriptionCache, MassTransit.ServiceBus">
+    </component>
+    
 		<component id="serverServiceBus"
 				   lifestyle="singleton"
 				   service="MassTransit.ServiceBus.IServiceBus, MassTransit.ServiceBus"
