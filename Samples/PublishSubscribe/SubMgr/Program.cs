@@ -1,7 +1,5 @@
 namespace SubMgr
 {
-
-
     internal class Program
     {
 		//private static readonly IMessageQueueEndpoint _endpoint = new MessageQueueEndpoint("msmq://localhost/test_subscriptions");
