@@ -1,3 +1,5 @@
+using MassTransit.ServiceBus.MSMQ;
+
 namespace Client
 {
     using System;
@@ -11,14 +13,13 @@ namespace Client
         {
             log4net.Config.XmlConfigurator.Configure();
 
-            IMessageQueueEndpoint clientEndpoint = new MessageQueueEndpoint("msmq://localhost/test_client");
-            IMessageQueueEndpoint subscriptionManagerEndpoint = new MessageQueueEndpoint("msmq://localhost/test_subscriptions");
+            IEndpoint clientEndpoint = new MsmqEndpoint("msmq://localhost/test_client");
+            IEndpoint subscriptionManagerEndpoint = new MsmqEndpoint("msmq://localhost/test_subscriptions");
 
-            ISubscriptionStorage storage = new LocalSubscriptionCache();
 
-            ServiceBus bus = new ServiceBus(clientEndpoint, storage);
-            SubscriptionManagerClient subscriptionClient = new SubscriptionManagerClient(bus, storage, subscriptionManagerEndpoint);
+            ServiceBus bus = new ServiceBus(clientEndpoint);
 
+            SubscriptionClient subscriptionClient = new SubscriptionClient(bus, bus.SubscriptionCache, subscriptionManagerEndpoint);
             subscriptionClient.Start();
 
             bus.Subscribe<PasswordUpdateComplete>(Program_MessageReceived);

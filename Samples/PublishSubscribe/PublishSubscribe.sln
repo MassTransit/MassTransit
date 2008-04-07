@@ -43,6 +43,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.SubscriptionSto
 		Release.AspNetCompiler.Debug = "False"
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.ServiceBus.MSMQ", "..\..\MassTransit.ServiceBus.MSMQ\MassTransit.ServiceBus.MSMQ.csproj", "{6F90867C-E092-4EDC-B3DE-600D39DF0335}"
+	ProjectSection(WebsiteProperties) = preProject
+		Debug.AspNetCompiler.Debug = "True"
+		Release.AspNetCompiler.Debug = "False"
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -73,6 +79,10 @@ Global
 		{8EE6C0CB-93D1-4B92-8CD5-24C77452CBE5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8EE6C0CB-93D1-4B92-8CD5-24C77452CBE5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8EE6C0CB-93D1-4B92-8CD5-24C77452CBE5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6F90867C-E092-4EDC-B3DE-600D39DF0335}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6F90867C-E092-4EDC-B3DE-600D39DF0335}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6F90867C-E092-4EDC-B3DE-600D39DF0335}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6F90867C-E092-4EDC-B3DE-600D39DF0335}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -80,5 +90,6 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{90482397-6282-465E-8B86-39865FC30127} = {5A039536-728C-4B3C-88D0-030539735F66}
 		{8EE6C0CB-93D1-4B92-8CD5-24C77452CBE5} = {5A039536-728C-4B3C-88D0-030539735F66}
+		{6F90867C-E092-4EDC-B3DE-600D39DF0335} = {5A039536-728C-4B3C-88D0-030539735F66}
 	EndGlobalSection
 EndGlobal
