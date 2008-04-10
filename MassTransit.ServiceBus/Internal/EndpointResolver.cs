@@ -88,7 +88,7 @@ namespace MassTransit.ServiceBus.Internal
 
                     return endpoint;
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     if (_log.IsDebugEnabled)
                         _log.DebugFormat("The type {0} does not support the Uri scheme of {1}", type.FullName, scheme);
