@@ -107,7 +107,7 @@ namespace MassTransit.ServiceBus.Subscriptions
 			{
 				// TODO RegisterSenderForUpdates(ctx.Envelope);
 
-				IList<Subscription> subscriptions = _cache.List();
+				IList<Subscription> subscriptions = Map(_cache.List());
 
 				CacheUpdateResponse response = new CacheUpdateResponse(subscriptions);
 
@@ -118,6 +118,19 @@ namespace MassTransit.ServiceBus.Subscriptions
 				_log.Error("Exception handling cache update request", ex);
 			}
 		}
+
+        //TODO: this needs to somewhere else
+        private IList<Subscription> Map(IList<Subscription> subs)
+        {
+            IList<Subscription> result = new List<Subscription>();
+
+            foreach (Subscription sub in subs)
+            {
+                result.Add(new Subscription(sub.MessageName, sub.EndpointUri));
+            }
+
+            return result;
+        }
 
         public void HandleCancelSubscriptionUpdates(IMessageContext<CancelSubscriptionUpdates> ctx)
         {
