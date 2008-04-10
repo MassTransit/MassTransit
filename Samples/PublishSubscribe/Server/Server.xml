@@ -44,7 +44,9 @@
 				   type="MassTransit.ServiceBus.Subscriptions.SubscriptionClient, MassTransit.ServiceBus"
 				   >
 			<parameters>
-				<managerEndpoint>${managerEndpoint}</managerEndpoint>
+				<serviceBus>${serverServiceBus}</serviceBus>
+				<cache>${subscriptionCache}</cache>
+				<subscriptionServiceEndpoint>${managerEndpoint}</subscriptionServiceEndpoint>
 			</parameters>
 		</component>
 
