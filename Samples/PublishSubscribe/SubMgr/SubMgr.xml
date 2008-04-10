@@ -1,43 +1,44 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <castle>
 	<components>
-		<component id="managerEndpoint"
+		<component id="endpointToListenOn"
 				   lifestyle="singleton"
 				   service="MassTransit.ServiceBus.IEndpoint, MassTransit.ServiceBus"
-				   type="MassTransit.ServiceBus.MSMQ.MsmqEndpoint, MassTransit.ServiceBus.MSMQ"
-				   >
+				   type="MassTransit.ServiceBus.MSMQ.MsmqEndpoint, MassTransit.ServiceBus.MSMQ">
 			<parameters>
 				<uriString>msmq://localhost/test_subscriptions</uriString>
 			</parameters>
 		</component>
 
-    <component id="subscriptionCache"
-               service="MassTransit.ServiceBus.Subscriptions.ISubscriptionCache, MassTransit.ServiceBus"
-               type="MassTransit.ServiceBus.Subscriptions.LocalSubscriptionCache, MassTransit.ServiceBus">
-    </component>
-    
-		<component id="serverServiceBus"
+		
+		
+		<component id="serviceBus"
 				   lifestyle="singleton"
 				   service="MassTransit.ServiceBus.IServiceBus, MassTransit.ServiceBus"
-				   type="MassTransit.ServiceBus.ServiceBus, MassTransit.ServiceBus"
-				   >
+				   type="MassTransit.ServiceBus.ServiceBus, MassTransit.ServiceBus">
+			<parameters>
+				<endpointToListenOn>${endpointToListenOn}</endpointToListenOn>
+				<!-- Setter Injection -->
+				<SubscriptionCache>${subscriptionCache}</SubscriptionCache>
+			</parameters>
+		</component>
+		<component id="subscriptionCache"
+				   service="MassTransit.ServiceBus.Subscriptions.ISubscriptionCache, MassTransit.ServiceBus"
+				   type="MassTransit.ServiceBus.Subscriptions.LocalSubscriptionCache, MassTransit.ServiceBus">
 		</component>
 
-		<component id="ASubscriptionManager"
+
+		<component id="suscriptionRepository"
+				   service="MassTransit.ServiceBus.Subscriptions.ISubscriptionRepository, MassTransit.ServiceBus"
+				   type="MassTransit.SubscriptionStorage.NHibernateSubscriptionStorage, MassTransit.SubscriptionStorage">
+		</component>
+		
+		<!-- load all of the services here -->
+		<component id="subscriptionManager"
 				   lifestyle="singleton"
 				   service="MassTransit.ServiceBus.IMessageService, MassTransit.ServiceBus"
-				   type="MassTransit.ServiceBus.Subscriptions.SubscriptionService, MassTransit.ServiceBus"
-				   >
+				   type="MassTransit.ServiceBus.Subscriptions.SubscriptionService, MassTransit.ServiceBus">
 		</component>
-
-		<component id="SuscriptionRepository"
-				   service="MassTransit.ServiceBus.Subscriptions.ISubscriptionRepository, MassTransit.ServiceBus"
-				   type="MassTransit.SubscriptionStorage.NHibernateSubscriptionStorage, MassTransit.SubscriptionStorage"
-				   >
-      
-    </component>
-
-
 	</components>
 
 	<facilities>

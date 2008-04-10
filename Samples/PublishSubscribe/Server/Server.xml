@@ -26,7 +26,7 @@
 				   service="MassTransit.ServiceBus.IServiceBus, MassTransit.ServiceBus"
 				   type="MassTransit.ServiceBus.ServiceBus, MassTransit.ServiceBus">
 			<parameters>
-				<endpoint>${serverEndpoint}</endpoint>
+				<endpointToListenOn>${serverEndpoint}</endpointToListenOn>
 				<!-- Setter Injection -->
 				<SubscriptionCache>${subscriptionCache}</SubscriptionCache>
 			</parameters>
