@@ -27,6 +27,7 @@
 				   type="MassTransit.ServiceBus.ServiceBus, MassTransit.ServiceBus">
 			<parameters>
 				<endpoint>${serverEndpoint}</endpoint>
+				<SubscriptionCache>${subscriptionCache}</SubscriptionCache>
 			</parameters>
 		</component>
 		<component id="subscriptionCache"
