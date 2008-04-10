@@ -63,7 +63,6 @@ namespace MassTransit.ServiceBus.Subscriptions
 		{
 			_cache.Add(ctx.Message.Subscription);
 		}
-
 		public void HandleRemoveSubscription(IMessageContext<RemoveSubscription> ctx)
 		{
 			_cache.Add(ctx.Message.Subscription);
