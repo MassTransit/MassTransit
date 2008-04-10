@@ -47,9 +47,11 @@ namespace MassTransit.ServiceBus.MSMQ
 
 		public void Dispose()
 		{
-			_queue.Close();
-			_queue.Dispose();
-			_queue = null;
+            if(_queue != null)
+            {
+                _queue.Close();
+                _queue.Dispose();    
+            }
 		}
 
 		public void Send(IEnvelope envelope)
