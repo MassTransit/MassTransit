@@ -1,6 +1,11 @@
-cd ..\..
-build.bat
+rmdir .\exe /S /Q
+mkdir .\exe
 
-copy .bin\*.* .\Samples\PublishSubscribe\bin /Y
+cd ..\..
+.\libs\nant-0.85\nant.exe
+
+copy .bin\*.* .\Samples\PublishSubscribe\exe /Y
 
 cd Samples\PublishSubscribe
+msbuild PublishSubscribe.sln
+copy .\bin\*.* .\exe /Y

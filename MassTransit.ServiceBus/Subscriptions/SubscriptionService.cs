@@ -15,6 +15,7 @@ namespace MassTransit.ServiceBus.Subscriptions
 {
 	using System;
 	using System.Collections.Generic;
+	using Exceptions;
 	using log4net;
 	using Messages;
 
@@ -35,14 +36,21 @@ namespace MassTransit.ServiceBus.Subscriptions
 
 		#region IDisposable Members
 
-		public void Dispose()
-		{
-			_bus.Dispose();
-			_cache.Dispose();
-			_repository.Dispose();
-		}
+        public void Dispose()
+        {
+            try
+            {
+                _bus.Dispose();
+                _cache.Dispose();
+                _repository.Dispose();
+            }
+            catch (Exception ex)
+            {
+                throw new ShutDownException("Error in shutting down the SubscriptionService", ex);
+            }
+        }
 
-		#endregion
+	    #endregion
 
 		public void Start()
 		{
@@ -54,6 +62,7 @@ namespace MassTransit.ServiceBus.Subscriptions
 			_bus.Subscribe<CacheUpdateRequest>(HandleCacheUpdateRequest);
 			_bus.Subscribe<AddSubscription>(HandleAddSubscription);
 			_bus.Subscribe<RemoveSubscription>(HandleRemoveSubscription);
+            _bus.Subscribe<CancelSubscriptionUpdates>(HandleCancelSubscriptionUpdates);
 		}
 
 		public void Stop()
@@ -61,6 +70,7 @@ namespace MassTransit.ServiceBus.Subscriptions
 			_bus.Unsubscribe<CacheUpdateRequest>(HandleCacheUpdateRequest);
 			_bus.Unsubscribe<AddSubscription>(HandleAddSubscription);
 			_bus.Unsubscribe<RemoveSubscription>(HandleRemoveSubscription);
+            _bus.Unsubscribe<CancelSubscriptionUpdates>(HandleCancelSubscriptionUpdates);
 		}
 
 		public void HandleAddSubscription(IMessageContext<AddSubscription> ctx)
@@ -108,5 +118,10 @@ namespace MassTransit.ServiceBus.Subscriptions
 				_log.Error("Exception handling cache update request", ex);
 			}
 		}
+
+        public void HandleCancelSubscriptionUpdates(IMessageContext<CancelSubscriptionUpdates> ctx)
+        {
+            
+        }
 	}
 }

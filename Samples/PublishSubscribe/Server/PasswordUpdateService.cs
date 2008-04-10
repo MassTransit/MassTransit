@@ -30,7 +30,8 @@ namespace Server
 
 		public void Stop()
 		{
-			_serviceBus.Unsubscribe<RequestPasswordUpdate>(RequestPasswordUpdate_Received);
+			//don't unsubscribe
+            //just because I stopped doesn't mean I want to stop getting messages
 		}
 
 		#endregion
