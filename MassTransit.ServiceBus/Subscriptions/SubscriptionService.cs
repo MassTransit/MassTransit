@@ -126,7 +126,7 @@ namespace MassTransit.ServiceBus.Subscriptions
 
             foreach (Subscription sub in subs)
             {
-                result.Add(new Subscription(sub.MessageName, sub.EndpointUri));
+                result.Add(new Subscription(sub));
             }
 
             return result;
