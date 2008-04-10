@@ -121,7 +121,7 @@ namespace MassTransit.ServiceBus.Subscriptions
 
         public void HandleCancelSubscriptionUpdates(IMessageContext<CancelSubscriptionUpdates> ctx)
         {
-            
+            //um, not implemented :)
         }
 	}
 }

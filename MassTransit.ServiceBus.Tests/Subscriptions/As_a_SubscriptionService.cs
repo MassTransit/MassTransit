@@ -20,6 +20,10 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
         private IMessageContext<RemoveSubscription> msgCxtRem;
         private AddSubscription msgAdd;
         private RemoveSubscription msgRem;
+        private CacheUpdateRequest msgUpdate;
+        private IMessageContext<CacheUpdateRequest> msgCxtUpdate;
+        private CancelSubscriptionUpdates msgCancel;
+        private IMessageContext<CancelSubscriptionUpdates> msgCxtCancel;
 
         [SetUp]
         public void I_want_to()
@@ -32,9 +36,16 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
             msgCxtAdd = mocks.CreateMock<IMessageContext<AddSubscription>>();
             msgRem = new RemoveSubscription("bob", new Uri("queue:\\bob"));
             msgCxtRem = mocks.CreateMock<IMessageContext<RemoveSubscription>>();
+            msgUpdate = new CacheUpdateRequest();
+            msgCxtUpdate = mocks.CreateMock<IMessageContext<CacheUpdateRequest>>();
+            msgCancel = new CancelSubscriptionUpdates();
+            msgCxtCancel = mocks.CreateMock<IMessageContext<CancelSubscriptionUpdates>>();
 
             SetupResult.For(msgCxtAdd.Message).Return(msgAdd);
             SetupResult.For(msgCxtRem.Message).Return(msgRem);
+            SetupResult.For(msgCxtUpdate.Message).Return(msgUpdate);
+            SetupResult.For(msgCxtCancel.Message).Return(msgCancel);
+
 
             cache = new LocalSubscriptionCache();
             srv = new SubscriptionService(mockBus, cache, mockRepository);
@@ -113,6 +124,32 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
             {
                 srv.HandleRemoveSubscription(msgCxtRem);
             }
+        }
+
+        [Test]
+        public void respond_to_cache_updates()
+        {
+            using (mocks.Record())
+            {
+                Expect.Call(delegate { msgCxtUpdate.Reply(null); }).IgnoreArguments();
+            }
+            using (mocks.Playback())
+            {
+                srv.HandleCacheUpdateRequest(msgCxtUpdate);
+            }
+        }
+
+        [Test]
+        public void respond_to_update_cancel()
+        {
+            using (mocks.Record())
+            {
+                
+            }
+            using (mocks.Playback())
+            {
+                srv.HandleCancelSubscriptionUpdates(msgCxtCancel);
+            }   
         }
     }
 }
