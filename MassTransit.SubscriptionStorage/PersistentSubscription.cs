@@ -34,7 +34,7 @@ namespace MassTransit.SubscriptionStorage
 
 		public string Address
 		{
-			get { return _endpointUri.ToString(); }
+			get { return EndpointUri.ToString(); }
 			set { _endpointUri = new Uri(value); }
 		}
 	}

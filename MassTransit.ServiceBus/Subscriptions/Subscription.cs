@@ -19,7 +19,7 @@ namespace MassTransit.ServiceBus.Subscriptions
 		IEquatable<Subscription>
 	{
 		protected Uri _endpointUri;
-		protected string _messageName;
+		private string _messageName;
 
 		protected Subscription()
 		{
