@@ -8,6 +8,7 @@ namespace MassTransit.Host.Config.Castle
 {
     using System.Collections.Generic;
     using MassTransit.Host.Config.Util.Arguments;
+    using MassTransit.ServiceBus.Subscriptions;
     using ServiceBus;
 
     public class CastleConfigurator :
@@ -43,6 +44,24 @@ namespace MassTransit.Host.Config.Castle
                     }
                 }
             }
+
+            SortSubscriptionClientToTheTop();
+        }
+
+        //TODO: HACK!!!!
+        private void SortSubscriptionClientToTheTop()
+        {
+            foreach (IMessageService service in _services)
+            {
+                if(service is SubscriptionClient)
+                {
+                    _services.Remove(service);
+                    _services.Insert(0, service);
+                    
+                    break;
+                }
+            }
+            
         }
 
         public IEnumerable<IMessageService> Services
