@@ -30,9 +30,62 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Castle.Core, Version=1.0.3.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\lib\Castle.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Castle.DynamicProxy2, Version=2.0.3.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\lib\Castle.DynamicProxy2.dll</HintPath>
+    </Reference>
+    <Reference Include="Castle.Facilities.NHibernateIntegration, Version=1.0.3.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\lib\Castle.Facilities.NHibernateIntegration.dll</HintPath>
+    </Reference>
+    <Reference Include="Castle.MicroKernel, Version=1.0.3.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\lib\Castle.MicroKernel.dll</HintPath>
+    </Reference>
+    <Reference Include="Castle.Services.Transaction, Version=1.0.3.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\lib\Castle.Services.Transaction.dll</HintPath>
+    </Reference>
+    <Reference Include="Castle.Windsor, Version=1.0.3.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\lib\Castle.Windsor.dll</HintPath>
+    </Reference>
+    <Reference Include="host, Version=0.1.452.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <ExecutableExtension>.exe</ExecutableExtension>
+      <HintPath>..\lib\host.exe</HintPath>
+    </Reference>
+    <Reference Include="Iesi.Collections, Version=1.0.0.3, Culture=neutral, PublicKeyToken=aa95f207798dfdb4, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\lib\Iesi.Collections.dll</HintPath>
+    </Reference>
     <Reference Include="log4net, Version=1.2.10.0, Culture=neutral, PublicKeyToken=1b44e1d426115821, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\libs\log4net.dll</HintPath>
+    </Reference>
+    <Reference Include="MassTransit.Host.Config, Version=0.1.452.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\lib\MassTransit.Host.Config.dll</HintPath>
+    </Reference>
+    <Reference Include="MassTransit.Host.Config.Castle, Version=0.1.452.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\lib\MassTransit.Host.Config.Castle.dll</HintPath>
+    </Reference>
+    <Reference Include="MassTransit.Patterns, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\lib\MassTransit.Patterns.dll</HintPath>
+    </Reference>
+    <Reference Include="MassTransit.ServiceBus.DefermentService, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\lib\MassTransit.ServiceBus.DefermentService.dll</HintPath>
+    </Reference>
+    <Reference Include="MassTransit.ServiceBus.MSMQ, Version=0.1.452.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\lib\MassTransit.ServiceBus.MSMQ.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Messaging" />
