@@ -1,1 +1,1 @@
-..\..\bin\host.exe -config:MassTransit.Host.Config.Castle -file:..\Samples\PublishSubscribe\bin\Client.xml
+.\bin\Client.exe

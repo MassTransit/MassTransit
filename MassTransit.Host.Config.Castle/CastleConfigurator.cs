@@ -1,62 +1,65 @@
-using System.Collections.Generic;
-using Castle.MicroKernel;
-using Castle.Windsor;
-using Castle.Windsor.Configuration.Interpreters;
-using MassTransit.Host.Config.Util.Arguments;
-using MassTransit.ServiceBus;
+using CreationContext=Castle.MicroKernel.CreationContext;
+using IHandler=Castle.MicroKernel.IHandler;
+using IWindsorContainer=Castle.Windsor.IWindsorContainer;
+using WindsorContainer=Castle.Windsor.WindsorContainer;
+using XmlInterpreter=Castle.Windsor.Configuration.Interpreters.XmlInterpreter;
 
 namespace MassTransit.Host.Config.Castle
 {
-	public class CastleConfigurator :
-		IHostConfigurator
-	{
-		private string _configFile;
-		private IWindsorContainer _container;
-		private List<IMessageService> _services;
+    using System.Collections.Generic;
+    using MassTransit.Host.Config.Util.Arguments;
+    using ServiceBus;
 
-		[Argument(Required = true, Key = "file", Description = "Configuration file name")]
-		public string ConfigFile
-		{
-			get { return _configFile; }
-			set { _configFile = value; }
-		}
+    public class CastleConfigurator :
+        IHostConfigurator
+    {
+        private string _configFile;
+        private IWindsorContainer _container;
+        private List<IMessageService> _services;
 
-		#region IHostConfigurator Members
+        [Argument(Required = true, Key = "file", Description = "Configuration file name")]
+        public string ConfigFile
+        {
+            get { return _configFile; }
+            set { _configFile = value; }
+        }
 
-		public void Configure()
-		{
-			_container = new WindsorContainer(new XmlInterpreter(_configFile));
+        #region IHostConfigurator Members
 
-			_services = new List<IMessageService>();
-			IHandler[] handlers = _container.Kernel.GetAssignableHandlers(typeof (IMessageService));
-			if (handlers != null)
-			{
-				foreach (IHandler handler in handlers)
-				{
-					IMessageService service = (IMessageService) handler.Resolve(CreationContext.Empty);
-					if (service != null)
-					{
-						_services.Add(service);
-					}
-				}
-			}
-		}
+        public void Configure()
+        {
+            _container = new WindsorContainer(new XmlInterpreter(_configFile));
 
-		public IEnumerable<IMessageService> Services
-		{
-			get { return _services; }
-		}
+            _services = new List<IMessageService>();
+            IHandler[] handlers = _container.Kernel.GetAssignableHandlers(typeof (IMessageService));
+            if (handlers != null)
+            {
+                foreach (IHandler handler in handlers)
+                {
+                    IMessageService service = (IMessageService) handler.Resolve(CreationContext.Empty);
+                    if (service != null)
+                    {
+                        _services.Add(service);
+                    }
+                }
+            }
+        }
 
-		#endregion
+        public IEnumerable<IMessageService> Services
+        {
+            get { return _services; }
+        }
 
-		public void Dispose()
-		{
-			foreach (IMessageService service in _services)
-			{
-				service.Dispose();
-			}
+        #endregion
 
-			_services.Clear();
-		}
-	}
+        public void Dispose()
+        {
+            foreach (IMessageService service in _services)
+            {
+                service.Dispose();
+            }
+
+            _services.Clear();
+        }
+    }
 }

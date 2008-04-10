@@ -1,6 +1,7 @@
 namespace Server
 {
 	using System;
+	using System.IO;
 	using MassTransit.ServiceBus;
 	using SecurityMessages;
 
@@ -23,6 +24,7 @@ namespace Server
 
 		public void Start()
 		{
+            log4net.Config.XmlConfigurator.Configure(new FileInfo("server.log4net.xml"));
 			_serviceBus.Subscribe<RequestPasswordUpdate>(RequestPasswordUpdate_Received);
 		}
 

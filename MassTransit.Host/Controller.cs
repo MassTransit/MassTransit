@@ -1,200 +1,201 @@
-using System;
-using System.Collections.Generic;
-using System.Reflection;
-using log4net;
-using MassTransit.Host.Config;
-using MassTransit.Host.Config.Util.Arguments;
-using MassTransit.ServiceBus;
-
 namespace MassTransit.Host
 {
-	public class Controller
-	{
-		private static readonly ILog _log = LogManager.GetLogger(typeof (Controller));
+    using System;
+    using System.Collections.Generic;
+    using System.Reflection;
+    using Config;
+    using log4net;
+    using MassTransit.Host.Config.Util.Arguments;
+    using ServiceBus;
 
-		private readonly IArgumentMapFactory _argumentMapFactory = new ArgumentMapFactory();
-		private readonly IArgumentParser _argumentParser = new ArgumentParser();
-		private IHostConfigurator _configurator;
+    public class Controller
+    {
+        private static readonly ILog _log = LogManager.GetLogger(typeof (Controller));
 
-		private string _configuratorName;
-		private bool _installService;
-		private bool _isService;
-		private bool _uninstallService;
-		private Assembly _configuratorAssembly;
+        private readonly IArgumentMapFactory _argumentMapFactory = new ArgumentMapFactory();
+        private readonly IArgumentParser _argumentParser = new ArgumentParser();
+        private IHostConfigurator _configurator;
 
-		[Argument(Key = "config", Required = true, Description = "The configuration provider to use for the host")]
-		public string Configurator
-		{
-			get { return _configuratorName; }
-			set
-			{
-				_configuratorName = value;
-				_log.InfoFormat("Configurator Name: {0}", value);
-			}
-		}
+        private string _configuratorName;
+        private bool _installService;
+        private bool _isService;
+        private bool _uninstallService;
+        private Assembly _configuratorAssembly;
 
-		[Argument(Key = "install", Description = "Install the host service")]
-		public bool InstallService
-		{
-			get { return _installService; }
-			set
-			{
-				_installService = value;
-				_log.InfoFormat("Install: {0}", value);
-			}
-		}
+        [Argument(Key = "config", Required = true, Description = "The configuration provider to use for the host")]
+        public string Configurator
+        {
+            get { return _configuratorName; }
+            set
+            {
+                _configuratorName = value;
+                _log.InfoFormat("Configurator Name: {0}", value);
+            }
+        }
 
-		[Argument(Key = "service", Description = "Set when starting as a service")]
-		public bool IsService
-		{
-			get { return _isService; }
-			set
-			{
-				_isService = value;
-				_log.InfoFormat("Service: {0}", value);
-			}
-		}
+        [Argument(Key = "install", Description = "Install the host service")]
+        public bool InstallService
+        {
+            get { return _installService; }
+            set
+            {
+                _installService = value;
+                _log.InfoFormat("Install: {0}", value);
+            }
+        }
 
-		[Argument(Key = "uninstall", Description = "Uninstall the host service")]
-		public bool UninstallService
-		{
-			get { return _uninstallService; }
-			set
-			{
-				_uninstallService = value;
-				_log.InfoFormat("Uninstall: {0}", value);
-			}
-		}
+        [Argument(Key = "service", Description = "Set when starting as a service")]
+        public bool IsService
+        {
+            get { return _isService; }
+            set
+            {
+                _isService = value;
+                _log.InfoFormat("Service: {0}", value);
+            }
+        }
 
-		public void Start(string[] args)
-		{
-			try
-			{
-				_log.Info("Starting Host");
+        [Argument(Key = "uninstall", Description = "Uninstall the host service")]
+        public bool UninstallService
+        {
+            get { return _uninstallService; }
+            set
+            {
+                _uninstallService = value;
+                _log.InfoFormat("Uninstall: {0}", value);
+            }
+        }
 
-				IEnumerable<IArgument> arguments = _argumentParser.Parse(args);
+        public void Start(string[] args)
+        {
+            try
+            {
+                _log.Info("Starting Host");
 
-				IArgumentMap mapper = _argumentMapFactory.CreateMap(this);
+                IEnumerable<IArgument> arguments = _argumentParser.Parse(args);
 
-				IEnumerable<IArgument> remaining = mapper.ApplyTo(this, arguments);
+                IArgumentMap mapper = _argumentMapFactory.CreateMap(this);
 
-				if (string.IsNullOrEmpty(_configuratorName))
-				{
-					Console.WriteLine("Usage: {0}", mapper.Usage);
-				}
-				else if (_installService)
-				{
-					RegisterService(arguments, true);
-				}
-				else if (_uninstallService)
-				{
-					RegisterService(arguments, false);
-				}
-				else if (_isService)
-				{
-					Console.WriteLine("Service not working yet.");
-				}
-				else
-				{
-					Console.WriteLine("Starting up as a console application");
+                IEnumerable<IArgument> remaining = mapper.ApplyTo(this, arguments);
 
-					LoadConfiguration(remaining);
+                if (string.IsNullOrEmpty(_configuratorName))
+                {
+                    Console.WriteLine("Usage: {0}", mapper.Usage);
+                }
+                else if (_installService)
+                {
+                    RegisterService(arguments, true);
+                }
+                else if (_uninstallService)
+                {
+                    RegisterService(arguments, false);
+                }
+                else if (_isService)
+                {
+                    Console.WriteLine("Service not working yet.");
+                }
+                else
+                {
+                    Console.WriteLine("Starting up as a console application");
 
-					if (_configurator != null)
-					{
-						foreach (IMessageService service in _configurator.Services)
-						{
-							service.Start();
-						}
+                    LoadConfiguration(remaining);
 
-						Console.WriteLine("The service is running, press Control+C to exit.");
+                    if (_configurator != null)
+                    {
+                        foreach (IMessageService service in _configurator.Services)
+                        {
+                            service.Start();
+                        }
 
-						Console.ReadKey();
+                        Console.WriteLine("The service is running, press Control+C to exit.");
 
-						Console.WriteLine("Exiting.");
+                        Console.ReadKey();
 
-						foreach (IMessageService service in _configurator.Services)
-						{
-							service.Stop();
-						}
+                        Console.WriteLine("Exiting.");
 
-						_configurator.Dispose();
-					}
-				}
-			}
-			catch (Exception ex)
-			{
-				_log.Error("Controller caught exception", ex);
+                        foreach (IMessageService service in _configurator.Services)
+                        {
+                            service.Stop();
+                        }
 
-				Console.WriteLine("An exception occurred: {0}", ex.Message);
-			}
-		}
+                        _configurator.Dispose();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _log.Error("Controller caught exception", ex);
 
-		private void RegisterService(IEnumerable<IArgument> arguments, bool install)
-		{
-			HostServiceInstaller installer = new HostServiceInstaller("MassTransitHost", "MassTransit Message Host", "Mass Transit Host");
+                Console.WriteLine("An exception occurred: {0}", ex.Message);
+            }
+        }
 
-			IArgumentMap installerMap = _argumentMapFactory.CreateMap(installer);
-			IEnumerable<IArgument> remaining = installerMap.ApplyTo(installerMap, arguments);
+        private void RegisterService(IEnumerable<IArgument> arguments, bool install)
+        {
+            HostServiceInstaller installer =
+                new HostServiceInstaller("MassTransitHost", "MassTransit Message Host", "Mass Transit Host");
 
-			if (install)
-			{
-				LoadConfiguration(remaining);
+            IArgumentMap installerMap = _argumentMapFactory.CreateMap(installer);
+            IEnumerable<IArgument> remaining = installerMap.ApplyTo(installerMap, arguments);
 
-				installer.Register(_configuratorAssembly,  _configurator.GetType().AssemblyQualifiedName);
-			}
-			else
-			{
-				installer.Unregister();
-			}
-		}
+            if (install)
+            {
+                LoadConfiguration(remaining);
 
-		private void LoadConfiguration(IEnumerable<IArgument> arguments)
-		{
-			Assembly assembly = Assembly.Load(_configuratorName);
+                installer.Register(_configuratorAssembly, _configurator.GetType().AssemblyQualifiedName);
+            }
+            else
+            {
+                installer.Unregister();
+            }
+        }
 
-			Console.WriteLine("Loading assembly: {0}", assembly.FullName);
+        private void LoadConfiguration(IEnumerable<IArgument> arguments)
+        {
+            Assembly assembly = Assembly.Load(_configuratorName);
 
-			Type checkType = typeof (IHostConfigurator);
+            Console.WriteLine("Loading assembly: {0}", assembly.FullName);
 
-			Type[] types = assembly.GetTypes();
-			foreach (Type t in types)
-			{
-				_log.DebugFormat("Checking Type: {0}", t.FullName);
+            Type checkType = typeof (IHostConfigurator);
 
-				if (checkType.IsAssignableFrom(t) && !t.IsAbstract)
-				{
-					Console.WriteLine("Type: {0}", t.Name);
+            Type[] types = assembly.GetTypes();
+            foreach (Type t in types)
+            {
+                _log.DebugFormat("Checking Type: {0}", t.FullName);
 
-					object configurator = Activator.CreateInstance(t);
-					if (configurator != null)
-					{
-						IArgumentMap mapper = _argumentMapFactory.CreateMap(configurator);
+                if (checkType.IsAssignableFrom(t) && !t.IsAbstract)
+                {
+                    Console.WriteLine("Type: {0}", t.Name);
 
-						Dictionary<string, string> argumentsUsed = new Dictionary<string, string>();
+                    object configurator = Activator.CreateInstance(t);
+                    if (configurator != null)
+                    {
+                        IArgumentMap mapper = _argumentMapFactory.CreateMap(configurator);
 
-						mapper.ApplyTo(configurator, arguments,
-							delegate(string name, string value)
-						{
-							argumentsUsed.Add(name, value);
-							return true;
-						});
+                        Dictionary<string, string> argumentsUsed = new Dictionary<string, string>();
 
-						Configure(assembly, (IHostConfigurator)configurator);
-						return;
-					}
-				}
-			}
+                        mapper.ApplyTo(configurator, arguments,
+                                       delegate(string name, string value)
+                                           {
+                                               argumentsUsed.Add(name, value);
+                                               return true;
+                                           });
 
-			throw new HostConfigurationException("No valid configuration provider specified.");
-		}
+                        Configure(assembly, (IHostConfigurator) configurator);
+                        return;
+                    }
+                }
+            }
 
-		public void Configure(Assembly assembly, IHostConfigurator hostConfigurator)
-		{
-			_configurator = hostConfigurator;
-			_configuratorAssembly = assembly;
+            throw new HostConfigurationException("No valid configuration provider specified.");
+        }
 
-			_configurator.Configure();
-		}
-	}
+        public void Configure(Assembly assembly, IHostConfigurator hostConfigurator)
+        {
+            _configurator = hostConfigurator;
+            _configuratorAssembly = assembly;
+
+            _configurator.Configure();
+        }
+    }
 }
