@@ -111,6 +111,12 @@ namespace MassTransit.Host
                     RunAsConsoleApp(remaining);
                 }
             }
+            catch (ArgumentException ex)
+            {
+                _log.Error("Argument Error:", ex);
+
+                Console.WriteLine("Missing Argument: {0}", ex.ParamName);
+            }
             catch (Exception ex)
             {
                 _log.Error("Controller caught exception", ex);
@@ -173,36 +179,25 @@ namespace MassTransit.Host
 
             Console.WriteLine("Loading assembly: {0}", assembly.FullName);
 
-            Type checkType = typeof (IHostConfigurator);
+            IHostConfigurator configurator = FindConfigurator(assembly);
 
-            Type[] types = assembly.GetTypes();
-            foreach (Type t in types)
+            if (configurator != null)
             {
-                _log.DebugFormat("Checking Type: {0}", t.FullName);
+                IArgumentMap mapper = _argumentMapFactory.CreateMap(configurator);
 
-                if (checkType.IsAssignableFrom(t) && !t.IsAbstract)
-                {
-                    Console.WriteLine("Type: {0}", t.Name);
+                Dictionary<string, string> argumentsUsed = new Dictionary<string, string>();
 
-                    object configurator = Activator.CreateInstance(t);
-                    if (configurator != null)
-                    {
-                        IArgumentMap mapper = _argumentMapFactory.CreateMap(configurator);
+                mapper.ApplyTo(configurator, arguments,
+                               delegate(string name, string value)
+                                   {
+                                       argumentsUsed.Add(name, value);
+                                       return true;
+                                   });
 
-                        Dictionary<string, string> argumentsUsed = new Dictionary<string, string>();
-
-                        mapper.ApplyTo(configurator, arguments,
-                                       delegate(string name, string value)
-                                           {
-                                               argumentsUsed.Add(name, value);
-                                               return true;
-                                           });
-
-                        Configure(assembly, (IHostConfigurator) configurator);
-                        return;
-                    }
-                }
+                Configure(assembly, configurator);
+                return;
             }
+
 
             throw new HostConfigurationException("No valid configuration provider specified.");
         }
@@ -213,6 +208,32 @@ namespace MassTransit.Host
             _configuratorAssembly = assembly;
 
             _configurator.Configure();
+        }
+
+        public IHostConfigurator FindConfigurator(Assembly assembly)
+        {
+            IHostConfigurator result = null;
+
+            Type checkType = typeof(IHostConfigurator);
+            Type[] types = assembly.GetTypes();
+
+            foreach (Type t in types)
+            {
+                if (_log.IsDebugEnabled)
+                    _log.DebugFormat("Checking Type: {0}", t.FullName);
+
+                if (checkType.IsAssignableFrom(t) && !t.IsAbstract)
+                {
+                    Console.WriteLine("Type: {0}", t.Name);
+
+                    object configurator = Activator.CreateInstance(t);
+
+                    result = configurator as IHostConfigurator;
+                    break;
+                }
+            }
+
+            return result;
         }
     }
 }
