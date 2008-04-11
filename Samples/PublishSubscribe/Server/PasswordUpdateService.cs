@@ -38,8 +38,10 @@ namespace Server
 
 		private static void RequestPasswordUpdate_Received(IMessageContext<RequestPasswordUpdate> cxt)
 		{
+            Console.WriteLine(new string('-', 20));
 			Console.WriteLine("Received Message");
 			Console.WriteLine(cxt.Message.NewPassword);
+            Console.WriteLine(new string('-', 20));
 			cxt.Reply(new PasswordUpdateComplete(0));
 		}
 	}
