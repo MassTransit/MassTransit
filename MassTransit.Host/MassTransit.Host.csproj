@@ -52,6 +52,7 @@
     <Compile Include="HostServiceInstaller.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="WinServiceActions.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\MassTransit.Host.Config\MassTransit.Host.Config.csproj">
