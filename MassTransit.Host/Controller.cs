@@ -84,13 +84,13 @@ namespace MassTransit.Host
                 }
                 else if (_installService)
                 {
-                    RegisterService(arguments, true);
+                    RegisterService(arguments, WinServiceActions.Install);
                 }
                 else if (_uninstallService)
                 {
-                    RegisterService(arguments, false);
+                    RegisterService(arguments, WinServiceActions.Uninstall);
                 }
-                else if (_isService)
+                else if (_isService) //TODO: What is this?
                 {
                     Console.WriteLine("Service not working yet.");
                 }
@@ -130,7 +130,7 @@ namespace MassTransit.Host
             }
         }
 
-        private void RegisterService(IEnumerable<IArgument> arguments, bool install)
+        private void RegisterService(IEnumerable<IArgument> arguments, WinServiceActions install)
         {
             HostServiceInstaller installer =
                 new HostServiceInstaller("MassTransitHost", "MassTransit Message Host", "Mass Transit Host");
@@ -138,7 +138,7 @@ namespace MassTransit.Host
             IArgumentMap installerMap = _argumentMapFactory.CreateMap(installer);
             IEnumerable<IArgument> remaining = installerMap.ApplyTo(installerMap, arguments);
 
-            if (install)
+            if (install == WinServiceActions.Install)
             {
                 LoadConfiguration(remaining);
 
