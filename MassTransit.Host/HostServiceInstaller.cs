@@ -99,11 +99,13 @@ namespace MassTransit.Host
 
 		public override void Install(IDictionary stateSaver)
 		{
-			_log.InfoFormat("Installing Service {0}", _serviceInstaller.ServiceName);
+            if(_log.IsInfoEnabled)
+			    _log.InfoFormat("Installing Service {0}", _serviceInstaller.ServiceName);
 
 			base.Install(stateSaver);
 
-			_log.InfoFormat("Opening Registry");
+            if(_log.IsInfoEnabled)
+			    _log.InfoFormat("Opening Registry");
 
 			using (RegistryKey system = Registry.LocalMachine.OpenSubKey("System"))
 			using (RegistryKey currentControlSet = system.OpenSubKey("CurrentControlSet"))
@@ -155,6 +157,8 @@ namespace MassTransit.Host
 			else
 			{
 				Console.WriteLine("Service is not installed");
+                if(_log.IsInfoEnabled)
+                    _log.Info("Service is not installed");
 			}
 		}
 
@@ -183,6 +187,8 @@ namespace MassTransit.Host
 			else
 			{
 				Console.WriteLine("Service is already installed");
+                if (_log.IsInfoEnabled)
+                    _log.Info("Service is already installed");
 			}
 		}
 	}
