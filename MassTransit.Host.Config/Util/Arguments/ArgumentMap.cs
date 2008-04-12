@@ -151,7 +151,16 @@ namespace MassTransit.Host.Config.Util.Arguments
 				value = argumentValue;
 			}
 
-			property.SetValue(obj, value, BindingFlags.Default, null, null, CultureInfo.InvariantCulture);
+            try
+            {
+                property.SetValue(obj, value, BindingFlags.Default, null, null, CultureInfo.InvariantCulture);    
+            }
+            catch(Exception ex)
+            {
+                string message = string.Format("Error setting property {0} with value '{1}'", property.Name, value);
+                throw new Exception(message, ex);
+            }
+			
 		}
 	}
 }

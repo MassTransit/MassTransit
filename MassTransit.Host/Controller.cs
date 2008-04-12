@@ -28,81 +28,34 @@ namespace MassTransit.Host
         private readonly IArgumentParser _argumentParser = new ArgumentParser();
         private IHostConfigurator _configurator;
 
-        private string _configuratorName;
-        private bool _installService;
-        private bool _isService;
-        private bool _uninstallService;
         private Assembly _configuratorAssembly;
-
-        [Argument(Key = "config", Required = true, Description = "The configuration provider to use for the host")]
-        public string Configurator
-        {
-            get { return _configuratorName; }
-            set
-            {
-                _configuratorName = value;
-                _log.InfoFormat("Configurator Name: {0}", value);
-            }
-        }
-
-        [Argument(Key = "install", Description = "Install the host service")]
-        public bool InstallService
-        {
-            get { return _installService; }
-            set
-            {
-                _installService = value;
-                _log.InfoFormat("Install: {0}", value);
-            }
-        }
-
-        [Argument(Key = "service", Description = "Set when starting as a service")]
-        public bool IsService
-        {
-            get { return _isService; }
-            set
-            {
-                _isService = value;
-                _log.InfoFormat("Service: {0}", value);
-            }
-        }
-
-        [Argument(Key = "uninstall", Description = "Uninstall the host service")]
-        public bool UninstallService
-        {
-            get { return _uninstallService; }
-            set
-            {
-                _uninstallService = value;
-                _log.InfoFormat("Uninstall: {0}", value);
-            }
-        }
+        private ControllerArgs _args;
+        
 
         public void Start(string[] args)
         {
             try
             {
                 _log.Info("Starting Host");
+                _args = new ControllerArgs();
 
+                
                 IEnumerable<IArgument> arguments = _argumentParser.Parse(args);
+                IArgumentMap mapper = _argumentMapFactory.CreateMap(_args);
+                IEnumerable<IArgument> remaining = mapper.ApplyTo(_args, arguments);
 
-                IArgumentMap mapper = _argumentMapFactory.CreateMap(this);
 
-                IEnumerable<IArgument> remaining = mapper.ApplyTo(this, arguments);
+                UsageCheck(_args, mapper);
 
-                if (string.IsNullOrEmpty(_configuratorName))
-                {
-                    Console.WriteLine("Usage: {0}", mapper.Usage);
-                }
-                else if (_installService)
+                if (_args.InstallService)
                 {
                     RegisterService(arguments, WinServiceActions.Install);
                 }
-                else if (_uninstallService)
+                else if (_args.UninstallService)
                 {
                     RegisterService(arguments, WinServiceActions.Uninstall);
                 }
-                else if (_isService) //TODO: What is this?
+                else if (_args.IsService) //TODO: What is this? It doesn't seem necessary. is this run as service ?
                 {
                     Console.WriteLine("Service not working yet.");
                 }
@@ -122,6 +75,14 @@ namespace MassTransit.Host
                 _log.Error("Controller caught exception", ex);
 
                 Console.WriteLine("An exception occurred: {0}", ex.Message);
+            }
+        }
+
+        private void UsageCheck(ControllerArgs args, IArgumentMap mapper)
+        {
+            if (string.IsNullOrEmpty(_args.Configurator))
+            {
+                Console.WriteLine("Usage: {0}", mapper.Usage);
             }
         }
 
@@ -175,7 +136,7 @@ namespace MassTransit.Host
 
         private void LoadConfiguration(IEnumerable<IArgument> arguments)
         {
-            Assembly assembly = Assembly.Load(_configuratorName);
+            Assembly assembly = Assembly.Load(_args.Configurator);
 
             Console.WriteLine("Loading assembly: {0}", assembly.FullName);
 
@@ -210,30 +171,53 @@ namespace MassTransit.Host
             _configurator.Configure();
         }
 
-        public IHostConfigurator FindConfigurator(Assembly assembly)
+
+        public class ControllerArgs
         {
-            IHostConfigurator result = null;
+            private string _configuratorName;
+            private bool _installService;
+            private bool _isService;
+            private bool _uninstallService;
 
-            Type checkType = typeof(IHostConfigurator);
-            Type[] types = assembly.GetTypes();
-
-            foreach (Type t in types)
+            [Argument(Key = "config", Required = true, Description = "The configuration provider to use for the host")]
+            public string Configurator
             {
-                if (_log.IsDebugEnabled)
-                    _log.DebugFormat("Checking Type: {0}", t.FullName);
-
-                if (checkType.IsAssignableFrom(t) && !t.IsAbstract)
+                get { return _configuratorName; }
+                set
                 {
-                    Console.WriteLine("Type: {0}", t.Name);
-
-                    object configurator = Activator.CreateInstance(t);
-
-                    result = configurator as IHostConfigurator;
-                    break;
+                    _configuratorName = value;
                 }
             }
 
-            return result;
+            [Argument(Key = "install", Description = "Install the host service")]
+            public bool InstallService
+            {
+                get { return _installService; }
+                set
+                {
+                    _installService = value;
+                }
+            }
+
+            [Argument(Key = "service", Description = "Set when starting as a service")]
+            public bool IsService
+            {
+                get { return _isService; }
+                set
+                {
+                    _isService = value;
+                }
+            }
+
+            [Argument(Key = "uninstall", Description = "Uninstall the host service")]
+            public bool UninstallService
+            {
+                get { return _uninstallService; }
+                set
+                {
+                    _uninstallService = value;
+                }
+            }
         }
     }
 }
