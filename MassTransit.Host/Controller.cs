@@ -163,6 +163,31 @@ namespace MassTransit.Host
             throw new HostConfigurationException("No valid configuration provider specified.");
         }
 
+        public IHostConfigurator FindConfigurator(Assembly assembly)
+        {
+            IHostConfigurator result = null;
+
+            Type checkType = typeof(IHostConfigurator);
+            Type[] types = assembly.GetTypes();
+
+            foreach (Type t in types)
+            {
+                if (_log.IsDebugEnabled)
+                    _log.DebugFormat("Checking Type: {0}", t.FullName);
+
+                if (checkType.IsAssignableFrom(t) && !t.IsAbstract)
+                {
+                    Console.WriteLine("Type: {0}", t.Name);
+
+                    object configurator = Activator.CreateInstance(t);
+
+                    result = configurator as IHostConfigurator;
+                    break;
+                }
+            }
+
+            return result;
+        }
         public void Configure(Assembly assembly, IHostConfigurator hostConfigurator)
         {
             _configurator = hostConfigurator;
