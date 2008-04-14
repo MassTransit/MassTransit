@@ -153,7 +153,7 @@ namespace MassTransit.Host.Config.Util.Arguments
 
             try
             {
-                property.SetValue(obj, value, BindingFlags.Default, null, null, CultureInfo.InvariantCulture);    
+                property.SetValue(obj, value, BindingFlags.Public | BindingFlags.Instance, null, null, CultureInfo.InvariantCulture);    
             }
             catch(Exception ex)
             {

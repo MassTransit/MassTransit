@@ -120,7 +120,7 @@ namespace MassTransit.Host
                 new HostServiceInstaller("MassTransitHost", "MassTransit Message Host", "Mass Transit Host");
 
             IArgumentMap installerMap = _argumentMapFactory.CreateMap(installer);
-            IEnumerable<IArgument> remaining = installerMap.ApplyTo(installerMap, arguments);
+            IEnumerable<IArgument> remaining = installerMap.ApplyTo(installer, arguments);
 
             if (install == WinServiceActions.Install)
             {
