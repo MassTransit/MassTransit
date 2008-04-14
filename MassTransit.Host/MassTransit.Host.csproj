@@ -47,6 +47,8 @@
       <Link>SolutionVersion.cs</Link>
     </Compile>
     <Compile Include="Controller.cs">
+    </Compile>
+    <Compile Include="ControllerServiceWrapper.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Program.cs" />
