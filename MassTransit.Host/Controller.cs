@@ -55,8 +55,9 @@ namespace MassTransit.Host
                 {
                     RegisterService(arguments, WinServiceActions.Uninstall);
                 }
-                else if (_args.IsService) //TODO: What is this? It doesn't seem necessary. is this run as service ?
+                else if (_args.RunAsService)
                 {
+                    _log.Info("Service not working yet.");
                     Console.WriteLine("Service not working yet.");
                 }
                 else
@@ -201,7 +202,7 @@ namespace MassTransit.Host
         {
             private string _configuratorName;
             private bool _installService;
-            private bool _isService;
+            private bool _runAsService;
             private bool _uninstallService;
 
             [Argument(Key = "config", Required = true, Description = "The configuration provider to use for the host")]
@@ -225,12 +226,12 @@ namespace MassTransit.Host
             }
 
             [Argument(Key = "service", Description = "Set when starting as a service")]
-            public bool IsService
+            public bool RunAsService
             {
-                get { return _isService; }
+                get { return _runAsService; }
                 set
                 {
-                    _isService = value;
+                    _runAsService = value;
                 }
             }
 
