@@ -83,7 +83,7 @@ namespace MassTransit.Host.Config.Util.Arguments
 
 		#endregion
 
-		public IEnumerable<IArgument> ApplyTo(object obj, IEnumerable<IArgument> arguments, ArgumentIntercepter intercepter)
+		public IEnumerable<IArgument> ApplyTo(object objectToApplyTo, IEnumerable<IArgument> arguments, ArgumentIntercepter intercepter)
 		{
 			List<ArgumentTarget> usedTargets = new List<ArgumentTarget>();
 			foreach (KeyValuePair<string, ArgumentTarget> namedArg in _namedArgs)
@@ -106,7 +106,7 @@ namespace MassTransit.Host.Config.Util.Arguments
 					if (unnamedIndex < _unnamedArgs.Count && intercepter(_unnamedArgs[unnamedIndex++].Property.Name, arg.Value))
 					{
 						usedTargets.Remove(_unnamedArgs[unnamedIndex]);
-						ApplyValueToProperty(_unnamedArgs[unnamedIndex++].Property, obj, arg.Value);
+						ApplyValueToProperty(_unnamedArgs[unnamedIndex++].Property, objectToApplyTo, arg.Value);
 					}
 					else
 					{
@@ -116,7 +116,7 @@ namespace MassTransit.Host.Config.Util.Arguments
 				else if (_namedArgs.ContainsKey(arg.Key) && intercepter(_namedArgs[arg.Key].Property.Name, arg.Value))
 				{
 					usedTargets.Remove(_namedArgs[arg.Key]);
-					ApplyValueToProperty(_namedArgs[arg.Key].Property, obj, arg.Value);
+					ApplyValueToProperty(_namedArgs[arg.Key].Property, objectToApplyTo, arg.Value);
 				}
 				else
 				{
@@ -133,12 +133,12 @@ namespace MassTransit.Host.Config.Util.Arguments
 			return unused;
 		}
 
-		public IEnumerable<IArgument> ApplyTo(object obj, IEnumerable<IArgument> arguments)
+		public IEnumerable<IArgument> ApplyTo(object objectToApplyTo, IEnumerable<IArgument> arguments)
 		{
-			return ApplyTo(obj, arguments, delegate { return true; });
+			return ApplyTo(objectToApplyTo, arguments, delegate { return true; });
 		}
 
-		public void ApplyValueToProperty(PropertyInfo property, object obj, string argumentValue)
+		public void ApplyValueToProperty(PropertyInfo property, object objectToApplyTo, string argumentValue)
 		{
 			object value;
 
@@ -153,11 +153,11 @@ namespace MassTransit.Host.Config.Util.Arguments
 
             try
             {
-                property.SetValue(obj, value, BindingFlags.Public | BindingFlags.Instance, null, null, CultureInfo.InvariantCulture);    
+                property.SetValue(objectToApplyTo, value, BindingFlags.Public | BindingFlags.Instance, null, null, CultureInfo.InvariantCulture);    
             }
             catch(Exception ex)
             {
-                string message = string.Format("Error setting property {0} on object '{1}' with value '{2}'", property.Name, obj.GetType().Name, value);
+                string message = string.Format("Error setting property {0} on object '{1}' with value '{2}'", property.Name, objectToApplyTo.GetType().Name, value);
                 throw new Exception(message, ex);
             }
 			
