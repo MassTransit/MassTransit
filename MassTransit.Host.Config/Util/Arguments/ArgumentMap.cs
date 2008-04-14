@@ -157,7 +157,7 @@ namespace MassTransit.Host.Config.Util.Arguments
             }
             catch(Exception ex)
             {
-                string message = string.Format("Error setting property {0} with value '{1}'", property.Name, value);
+                string message = string.Format("Error setting property {0} on object '{1}' with value '{2}'", property.Name, obj.GetType().Name, value);
                 throw new Exception(message, ex);
             }
 			
