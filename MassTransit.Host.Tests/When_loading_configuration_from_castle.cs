@@ -23,7 +23,7 @@ namespace MassTransit.Host.Tests
 			Assert.That(configurator.Services, Is.Not.Null);
 
 			int count = 0;
-			foreach (IMessageService service in configurator.Services)
+			foreach (IHostedService service in configurator.Services)
 			{
 				count++;
 			}

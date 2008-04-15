@@ -17,7 +17,7 @@ namespace MassTransit.ServiceBus.Subscriptions
 	using Util;
 
 	public class SubscriptionClient :
-		IMessageService
+		IHostedService
 	{
 		private readonly ISubscriptionCache _cache;
 		private readonly IServiceBus _serviceBus;

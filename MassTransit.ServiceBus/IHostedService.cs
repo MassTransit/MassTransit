@@ -21,7 +21,7 @@ namespace MassTransit.ServiceBus
 	/// enumerate the classes in any references assemblies to determine if the interface is 
 	/// supported and call those classes to register their handlers on the service bus.
 	/// </summary>
-	public interface IMessageService : 
+	public interface IHostedService : 
 		IDisposable
 	{
 	    void Start();

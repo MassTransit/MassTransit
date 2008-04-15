@@ -53,7 +53,7 @@
     <Compile Include="Envelope.cs" />
     <Compile Include="Exceptions\EndpointException.cs" />
     <Compile Include="Exceptions\MessageConsumerException.cs" />
-    <Compile Include="IMessageService.cs" />
+    <Compile Include="IHostedService.cs" />
     <Compile Include="IEndpoint.cs" />
     <Compile Include="IEnvelope.cs" />
     <Compile Include="Internal\IEnvelopeConsumer.cs" />

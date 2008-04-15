@@ -19,7 +19,7 @@ namespace MassTransit.Host.Config
 	public interface IHostConfigurator :
 		IDisposable
 	{
-		IEnumerable<IMessageService> Services { get; }
+		IEnumerable<IHostedService> Services { get; }
 		void Configure();
 	}
 }
