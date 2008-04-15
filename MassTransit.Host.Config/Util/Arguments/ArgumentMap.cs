@@ -140,6 +140,8 @@ namespace MassTransit.Host.Config.Util.Arguments
 
 		public void ApplyValueToProperty(PropertyInfo property, object objectToApplyTo, string argumentValue)
 		{
+            TypeMatchCheck(property, objectToApplyTo);
+
 			object value;
 
 			if (property.PropertyType == typeof (bool))
@@ -162,5 +164,14 @@ namespace MassTransit.Host.Config.Util.Arguments
             }
 			
 		}
+
+        private void TypeMatchCheck(PropertyInfo property, object objectToApplyTo)
+        {
+            if(!property.DeclaringType.Equals(objectToApplyTo.GetType()))
+            {
+                string message = string.Format("You are trying to set the property '{0}' on the the type '{1}' but you gave the program an object of type '{2}' to set. Check the 'objectToApplyTo' parameter", property.Name, property.DeclaringType.Name, objectToApplyTo.GetType().Name);
+                throw new Exception(message);
+            }
+        }
 	}
 }
