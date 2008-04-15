@@ -29,61 +29,35 @@ namespace MassTransit.Host
 		private readonly List<Assembly> _assemblies = new List<Assembly>();
 		private readonly ServiceInstaller _serviceInstaller = new ServiceInstaller();
 		private readonly ServiceProcessInstaller _serviceProcessInstaller = new ServiceProcessInstaller();
+	    private HostServiceInstallerArgs _args;
+
 		private string _configuratorType;
+	    private string _configFile;
 
-		public HostServiceInstaller(string serviceName, string description, string displayName)
+		public HostServiceInstaller(HostServiceInstallerArgs args)
 		{
-			_serviceInstaller.ServiceName = serviceName;
-			_serviceInstaller.Description = description;
-			_serviceInstaller.DisplayName = displayName;
+		    _args = args;
 
-			Initialize();
-		}
+			_serviceInstaller.ServiceName = args.Name;
+			_serviceInstaller.Description = args.Description;
+			_serviceInstaller.DisplayName = args.DisplayName;
 
-		[Argument(Key = "name", Description = "The name for the service", Required = false)]
-		public string Name
-		{
-			set { _serviceInstaller.ServiceName = value; }
-		}
+            if (!string.IsNullOrEmpty(args.Username) && !string.IsNullOrEmpty(args.Password))
+            {
+                _serviceProcessInstaller.Username = args.Username;
+                _serviceProcessInstaller.Account = ServiceAccount.User;
+                _serviceProcessInstaller.Password = args.Password;
+            }
+            else
+            {
+                _serviceProcessInstaller.Account = ServiceAccount.LocalSystem;
+                _serviceProcessInstaller.Username = null;
+                _serviceProcessInstaller.Password = null;
+            }
 
-		[Argument(Key = "description", Description = "The description for the service", Required = false)]
-		public string Description
-		{
-			set { _serviceInstaller.Description = value; }
-		}
+		    _serviceInstaller.StartType = ServiceStartMode.Automatic;
 
-		[Argument(Key = "displayname", Description = "The name to display for the service", Required = false)]
-		public string DisplayName
-
-		{
-			set { _serviceInstaller.DisplayName = value; }
-		}
-
-		[Argument(Key = "username", Description = "Username for service account", Required = false)]
-		public string Username
-		{
-			set
-			{
-				_serviceProcessInstaller.Username = value;
-				_serviceProcessInstaller.Account = ServiceAccount.User;
-			}
-		}
-
-		[Argument(Key = "password", Description = "Password for service account", Required = false)]
-		public string Password
-		{
-			set { _serviceProcessInstaller.Password = value; }
-		}
-
-		private void Initialize()
-		{
-			_serviceProcessInstaller.Account = ServiceAccount.LocalSystem;
-			_serviceProcessInstaller.Username = null;
-			_serviceProcessInstaller.Password = null;
-
-			_serviceInstaller.StartType = ServiceStartMode.Automatic;
-
-			Installers.AddRange(new Installer[] {_serviceProcessInstaller, _serviceInstaller});
+            Installers.AddRange(new Installer[] { _serviceProcessInstaller, _serviceInstaller });
 		}
 
 		public bool IsInstalled()
@@ -164,12 +138,13 @@ namespace MassTransit.Host
 			}
 		}
 
-		public void Register(Assembly configuratorAssembly, string configuratorType)
+		public void Register(Assembly configuratorAssembly, string configuratorType, string configFile)
 		{
 			if (!IsInstalled())
 			{
 				_assemblies.Add(configuratorAssembly);
 				_configuratorType = configuratorType;
+			    _configFile = configFile;
 
 				using (TransactedInstaller ti = new TransactedInstaller())
 				{
@@ -201,6 +176,20 @@ namespace MassTransit.Host
             private string _displayName;
             private string _userName;
             private string _password;
+
+
+            public HostServiceInstallerArgs(string name, string description, string displayName) : this (name, description, displayName, null, null)
+            {
+            }
+            public HostServiceInstallerArgs(string name, string description, string displayName, string userName, string password)
+            {
+                _name = name;
+                _description = description;
+                _displayName = displayName;
+                _userName = userName;
+                _password = password;
+            }
+
 
             [Argument(Key = "name", Description = "The name for the service", Required = false)]
             public string Name
