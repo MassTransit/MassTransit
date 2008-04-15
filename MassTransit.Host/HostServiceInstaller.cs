@@ -120,7 +120,9 @@ namespace MassTransit.Host
 
 				// TODO tweak the command line to include the service argument and any other useful stuff
 
-				imagePath += " -service";
+
+                imagePath += string.Format(" -service -config:{0} -file:{1}", this._configuratorType, 2);
+
 				service.SetValue("ImagePath", imagePath);
 
 				using (RegistryKey configuration = service.CreateSubKey("Configuration"))
@@ -191,5 +193,49 @@ namespace MassTransit.Host
                     _log.Info("Service is already installed");
 			}
 		}
-	}
+	
+        public class HostServiceInstallerArgs
+        {
+            private string _name;
+            private string _description;
+            private string _displayName;
+            private string _userName;
+            private string _password;
+
+            [Argument(Key = "name", Description = "The name for the service", Required = false)]
+            public string Name
+            {
+                get { return _name; }
+                set { _name = value; }
+            }
+
+            [Argument(Key = "description", Description = "The description for the service", Required = false)]
+            public string Description
+            {
+                get { return _description; }
+                set { _description = value; }
+            }
+
+            [Argument(Key = "displayname", Description = "The name to display for the service", Required = false)]
+            public string DisplayName
+            {
+                get { return _displayName; }
+                set { _displayName = value; }
+            }
+
+            [Argument(Key = "username", Description = "Username for service account", Required = false)]
+            public string Username
+            {
+                get { return _userName; }
+                set { _userName = value; }
+            }
+
+            [Argument(Key = "password", Description = "Password for service account", Required = false)]
+            public string Password
+            {
+                get { return _password; }
+                set { _password = value; }
+            }
+        }
+    }
 }
