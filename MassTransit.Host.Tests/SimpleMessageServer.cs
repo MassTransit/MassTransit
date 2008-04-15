@@ -4,7 +4,7 @@ namespace MassTransit.Host.Tests
 	using ServiceBus;
 
 	public class SimpleMessageServer :
-		IMessageService
+		IHostedService
 	{
 		private readonly IServiceBus _serviceBus;
 		private int _hitCount;

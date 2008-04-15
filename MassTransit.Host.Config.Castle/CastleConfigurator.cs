@@ -16,7 +16,7 @@ namespace MassTransit.Host.Config.Castle
     {
         private string _configFile;
         private IWindsorContainer _container;
-        private List<IMessageService> _services;
+        private List<IHostedService> _services;
 
         [Argument(Required = true, Key = "file", Description = "Configuration file name")]
         public string ConfigFile
@@ -31,13 +31,13 @@ namespace MassTransit.Host.Config.Castle
         {
             _container = new WindsorContainer(new XmlInterpreter(_configFile));
 
-            _services = new List<IMessageService>();
-            IHandler[] handlers = _container.Kernel.GetAssignableHandlers(typeof (IMessageService));
+            _services = new List<IHostedService>();
+            IHandler[] handlers = _container.Kernel.GetAssignableHandlers(typeof (IHostedService));
             if (handlers != null)
             {
                 foreach (IHandler handler in handlers)
                 {
-                    IMessageService service = (IMessageService) handler.Resolve(CreationContext.Empty);
+                    IHostedService service = (IHostedService) handler.Resolve(CreationContext.Empty);
                     if (service != null)
                     {
                         _services.Add(service);
@@ -51,7 +51,7 @@ namespace MassTransit.Host.Config.Castle
         //TODO: HACK!!!!
         private void SortSubscriptionClientToTheTop()
         {
-            foreach (IMessageService service in _services)
+            foreach (IHostedService service in _services)
             {
                 if(service is SubscriptionClient)
                 {
@@ -64,7 +64,7 @@ namespace MassTransit.Host.Config.Castle
             
         }
 
-        public IEnumerable<IMessageService> Services
+        public IEnumerable<IHostedService> Services
         {
             get { return _services; }
         }
@@ -73,7 +73,7 @@ namespace MassTransit.Host.Config.Castle
 
         public void Dispose()
         {
-            foreach (IMessageService service in _services)
+            foreach (IHostedService service in _services)
             {
                 service.Dispose();
             }

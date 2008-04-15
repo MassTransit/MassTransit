@@ -20,7 +20,7 @@ namespace MassTransit.ServiceBus.Subscriptions
 	using Messages;
 
 	public class SubscriptionService :
-		IMessageService
+		IHostedService
 	{
 		private static readonly ILog _log = LogManager.GetLogger(typeof (SubscriptionService));
 		private readonly IServiceBus _bus;

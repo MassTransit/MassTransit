@@ -242,7 +242,7 @@ namespace MassTransit.Host
 		{
 			if (_configurator != null)
 			{
-				foreach (IMessageService service in _configurator.Services)
+				foreach (IHostedService service in _configurator.Services)
 				{
 					service.Start();
 				}
@@ -257,7 +257,7 @@ namespace MassTransit.Host
 			{
 				_log.Info("The service is stopping.");
 
-				foreach (IMessageService service in _configurator.Services)
+				foreach (IHostedService service in _configurator.Services)
 				{
 					service.Stop();
 				}
