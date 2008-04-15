@@ -54,6 +54,9 @@ namespace MassTransit.ServiceBus.Subscriptions
 
 		public void Start()
 		{
+            if (_log.IsInfoEnabled)
+                _log.Info("Subscription Service Starting");
+
 			foreach (Subscription sub in _repository.List())
 			{
 				_cache.Add(sub);
@@ -63,14 +66,23 @@ namespace MassTransit.ServiceBus.Subscriptions
 			_bus.Subscribe<AddSubscription>(HandleAddSubscription);
 			_bus.Subscribe<RemoveSubscription>(HandleRemoveSubscription);
             _bus.Subscribe<CancelSubscriptionUpdates>(HandleCancelSubscriptionUpdates);
+
+            if(_log.IsInfoEnabled)
+                _log.Info("Subscription Service Started");
 		}
 
 		public void Stop()
 		{
+            if (_log.IsInfoEnabled)
+                _log.Info("Subscription Service Stopping");
+
 			_bus.Unsubscribe<CacheUpdateRequest>(HandleCacheUpdateRequest);
 			_bus.Unsubscribe<AddSubscription>(HandleAddSubscription);
 			_bus.Unsubscribe<RemoveSubscription>(HandleRemoveSubscription);
             _bus.Unsubscribe<CancelSubscriptionUpdates>(HandleCancelSubscriptionUpdates);
+
+            if (_log.IsInfoEnabled)
+                _log.Info("Subscription Service Stopped");
 		}
 
 		public void HandleAddSubscription(IMessageContext<AddSubscription> ctx)
@@ -80,6 +92,8 @@ namespace MassTransit.ServiceBus.Subscriptions
 				_cache.Add(ctx.Message.Subscription);
 
 				_repository.Save(ctx.Message.Subscription);
+
+                //TODO: Rebroadcast this change
 			}
 			catch (Exception ex)
 			{
@@ -119,7 +133,7 @@ namespace MassTransit.ServiceBus.Subscriptions
 			}
 		}
 
-        //TODO: this needs to somewhere else
+        //TODO: this needs to be somewhere else
         private IList<Subscription> Map(IList<Subscription> subs)
         {
             IList<Subscription> result = new List<Subscription>();
