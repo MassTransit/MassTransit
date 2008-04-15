@@ -52,11 +52,11 @@ namespace MassTransit.Host
 
 				if (_args.InstallService)
 				{
-					RegisterService(arguments, WinServiceActions.Install);
+					RegisterService(arguments, WinServiceActions.Install, "on the configurator");
 				}
 				else if (_args.UninstallService)
 				{
-					RegisterService(arguments, WinServiceActions.Uninstall);
+					RegisterService(arguments, WinServiceActions.Uninstall, "On the configurator");
 				}
 				else if (_args.RunAsService)
 				{
@@ -118,27 +118,31 @@ namespace MassTransit.Host
 			}
 		}
 
-		private void RegisterService(IEnumerable<IArgument> arguments, WinServiceActions install)
-		{
-			HostServiceInstaller installer =
-				new HostServiceInstaller("MassTransitHost", "MassTransit Message Host", "Mass Transit Host");
+        private void RegisterService(IEnumerable<IArgument> arguments, WinServiceActions install, string configFile)
+        {
+            HostServiceInstaller.HostServiceInstallerArgs args =
+                new HostServiceInstaller.HostServiceInstallerArgs("MassTransitHost", "MassTransit Message Host",
+                                                                  "Mass Transit Host");
 
-			IArgumentMap installerMap = _argumentMapFactory.CreateMap(installer);
-			IEnumerable<IArgument> remaining = installerMap.ApplyTo(installer, arguments);
+            IArgumentMap installerMap = _argumentMapFactory.CreateMap(args);
+            IEnumerable<IArgument> remaining = installerMap.ApplyTo(args, arguments);
 
-			if (install == WinServiceActions.Install)
-			{
-				LoadConfiguration(remaining);
+            HostServiceInstaller installer =
+                new HostServiceInstaller(args);
 
-				installer.Register(_configuratorAssembly, _configurator.GetType().AssemblyQualifiedName);
-			}
-			else
-			{
-				installer.Unregister();
-			}
-		}
+            if (install == WinServiceActions.Install)
+            {
+                LoadConfiguration(remaining);
 
-		private void LoadConfiguration(IEnumerable<IArgument> arguments)
+                installer.Register(_configuratorAssembly, _configurator.GetType().AssemblyQualifiedName, configFile);
+            }
+            else
+            {
+                installer.Unregister();
+            }
+        }
+
+	    private void LoadConfiguration(IEnumerable<IArgument> arguments)
 		{
 			Assembly assembly = Assembly.Load(_args.Configurator);
 
