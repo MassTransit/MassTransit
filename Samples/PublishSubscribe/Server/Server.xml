@@ -37,7 +37,7 @@
 		</component>
 		<component id="subsriptionClient"
 				   lifestyle="singleton"
-				   service="MassTransit.ServiceBus.IMessageService, MassTransit.ServiceBus"
+				   service="MassTransit.ServiceBus.IHostedService, MassTransit.ServiceBus"
 				   type="MassTransit.ServiceBus.Subscriptions.SubscriptionClient, MassTransit.ServiceBus">
 			<parameters>
 				<serviceBus>${serviceBus}</serviceBus>
@@ -50,7 +50,7 @@
 		<!-- load all of the services here -->
 		<component id="mySimpleServer"
 				   lifestyle="singleton"
-				   service="MassTransit.ServiceBus.IMessageService, MassTransit.ServiceBus"
+				   service="MassTransit.ServiceBus.IHostedService, MassTransit.ServiceBus"
 				   type="Server.PasswordUpdateService, Server">
 		</component>
 

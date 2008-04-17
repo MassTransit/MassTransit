@@ -134,7 +134,7 @@ namespace MassTransit.Host
             {
                 LoadConfiguration(remaining);
 
-                installer.Register(_configuratorAssembly, _configurator.GetType().AssemblyQualifiedName, configFile);
+                installer.Register(_configuratorAssembly, _configurator);
             }
             else
             {
