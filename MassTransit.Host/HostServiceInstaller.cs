@@ -29,35 +29,31 @@ namespace MassTransit.Host
 		private readonly List<Assembly> _assemblies = new List<Assembly>();
 		private readonly ServiceInstaller _serviceInstaller = new ServiceInstaller();
 		private readonly ServiceProcessInstaller _serviceProcessInstaller = new ServiceProcessInstaller();
-	    private HostServiceInstallerArgs _args;
 
-		private string _configuratorType;
-	    private string _configFile;
+		private object _configurator;
 
 		public HostServiceInstaller(HostServiceInstallerArgs args)
 		{
-		    _args = args;
-
 			_serviceInstaller.ServiceName = args.Name;
 			_serviceInstaller.Description = args.Description;
 			_serviceInstaller.DisplayName = args.DisplayName;
 
-            if (!string.IsNullOrEmpty(args.Username) && !string.IsNullOrEmpty(args.Password))
-            {
-                _serviceProcessInstaller.Username = args.Username;
-                _serviceProcessInstaller.Account = ServiceAccount.User;
-                _serviceProcessInstaller.Password = args.Password;
-            }
-            else
-            {
-                _serviceProcessInstaller.Account = ServiceAccount.LocalSystem;
-                _serviceProcessInstaller.Username = null;
-                _serviceProcessInstaller.Password = null;
-            }
+			if (!string.IsNullOrEmpty(args.Username) && !string.IsNullOrEmpty(args.Password))
+			{
+				_serviceProcessInstaller.Username = args.Username;
+				_serviceProcessInstaller.Account = ServiceAccount.User;
+				_serviceProcessInstaller.Password = args.Password;
+			}
+			else
+			{
+				_serviceProcessInstaller.Account = ServiceAccount.LocalSystem;
+				_serviceProcessInstaller.Username = null;
+				_serviceProcessInstaller.Password = null;
+			}
 
-		    _serviceInstaller.StartType = ServiceStartMode.Automatic;
+			_serviceInstaller.StartType = ServiceStartMode.Automatic;
 
-            Installers.AddRange(new Installer[] { _serviceProcessInstaller, _serviceInstaller });
+			Installers.AddRange(new Installer[] {_serviceProcessInstaller, _serviceInstaller});
 		}
 
 		public bool IsInstalled()
@@ -73,13 +69,13 @@ namespace MassTransit.Host
 
 		public override void Install(IDictionary stateSaver)
 		{
-            if(_log.IsInfoEnabled)
-			    _log.InfoFormat("Installing Service {0}", _serviceInstaller.ServiceName);
+			if (_log.IsInfoEnabled)
+				_log.InfoFormat("Installing Service {0}", _serviceInstaller.ServiceName);
 
 			base.Install(stateSaver);
 
-            if(_log.IsInfoEnabled)
-			    _log.InfoFormat("Opening Registry");
+			if (_log.IsInfoEnabled)
+				_log.InfoFormat("Opening Registry");
 
 			using (RegistryKey system = Registry.LocalMachine.OpenSubKey("System"))
 			using (RegistryKey currentControlSet = system.OpenSubKey("CurrentControlSet"))
@@ -92,18 +88,34 @@ namespace MassTransit.Host
 
 				_log.InfoFormat("Service Path {0}", imagePath);
 
-				// TODO tweak the command line to include the service argument and any other useful stuff
-
-
-                imagePath += string.Format(" -service -config:{0} -file:{1}", this._configuratorType, 2);
-
-				service.SetValue("ImagePath", imagePath);
+				imagePath += string.Format(" -service -config:{0}", _configurator.GetType().Assembly.GetName().Name);
 
 				using (RegistryKey configuration = service.CreateSubKey("Configuration"))
 				{
-					configuration.SetValue("Type", _configuratorType);
+					string name = _configurator.GetType().AssemblyQualifiedName;
 
-					_assemblies.ForEach(delegate(Assembly assembly) { configuration.SetValue(assembly.GetName().Name, assembly.Location); });
+					_log.InfoFormat("Configuration Type {0}", name);
+					configuration.SetValue("Type", name);
+
+					PropertyInfo[] properties = _configurator.GetType().GetProperties();
+					foreach (PropertyInfo property in properties)
+					{
+						object[] attributes = property.GetCustomAttributes(typeof (ArgumentAttribute), true);
+						if (attributes != null && attributes.Length > 0)
+						{
+							ArgumentAttribute attribute = (ArgumentAttribute) attributes[0];
+
+							string value = property.GetValue(_configurator, null).ToString();
+
+							_log.InfoFormat("Configuration Value {0} = {1}", property.Name, value);
+
+							configuration.SetValue(property.Name, value);
+
+							imagePath += string.Format(" -{0}:{1}", attribute.Key, value);
+						}
+					}
+
+					service.SetValue("ImagePath", imagePath);
 				}
 
 				service.Close();
@@ -133,18 +145,17 @@ namespace MassTransit.Host
 			else
 			{
 				Console.WriteLine("Service is not installed");
-                if(_log.IsInfoEnabled)
-                    _log.Info("Service is not installed");
+				if (_log.IsInfoEnabled)
+					_log.Info("Service is not installed");
 			}
 		}
 
-		public void Register(Assembly configuratorAssembly, string configuratorType, string configFile)
+		public void Register(Assembly configuratorAssembly, object configurator)
 		{
 			if (!IsInstalled())
 			{
 				_assemblies.Add(configuratorAssembly);
-				_configuratorType = configuratorType;
-			    _configFile = configFile;
+				_configurator = configurator;
 
 				using (TransactedInstaller ti = new TransactedInstaller())
 				{
@@ -164,67 +175,69 @@ namespace MassTransit.Host
 			else
 			{
 				Console.WriteLine("Service is already installed");
-                if (_log.IsInfoEnabled)
-                    _log.Info("Service is already installed");
+				if (_log.IsInfoEnabled)
+					_log.Info("Service is already installed");
 			}
 		}
-	
-        public class HostServiceInstallerArgs
-        {
-            private string _name;
-            private string _description;
-            private string _displayName;
-            private string _userName;
-            private string _password;
+
+		public class HostServiceInstallerArgs
+		{
+			private string _name;
+			private string _description;
+			private string _displayName;
+			private string _userName;
+			private string _password;
 
 
-            public HostServiceInstallerArgs(string name, string description, string displayName) : this (name, description, displayName, null, null)
-            {
-            }
-            public HostServiceInstallerArgs(string name, string description, string displayName, string userName, string password)
-            {
-                _name = name;
-                _description = description;
-                _displayName = displayName;
-                _userName = userName;
-                _password = password;
-            }
+			public HostServiceInstallerArgs(string name, string description, string displayName) : 
+				this(name, description, displayName, null, null)
+			{
+			}
+
+			public HostServiceInstallerArgs(string name, string description, string displayName, string userName, string password)
+			{
+				_name = name ?? "MassTransitHost";
+				_description = description ?? "MassTransit Host";
+				_displayName = displayName ?? "Mass Transit Host";
+				_userName = userName;
+				_password = password;
+			}
 
 
-            [Argument(Key = "name", Description = "The name for the service", Required = false)]
-            public string Name
-            {
-                get { return _name; }
-                set { _name = value; }
-            }
+			[Argument(Key = "name", Description = "The name for the service", Required = false)]
+			public string Name
+			{
+				get { return _name; }
+				set { _name = value; }
+			}
 
-            [Argument(Key = "description", Description = "The description for the service", Required = false)]
-            public string Description
-            {
-                get { return _description; }
-                set { _description = value; }
-            }
+			[Argument(Key = "description", Description = "The description for the service", Required = false)]
+			public string Description
+			{
+				get { return _description; }
+				set { _description = value; }
+			}
 
-            [Argument(Key = "displayname", Description = "The name to display for the service", Required = false)]
-            public string DisplayName
-            {
-                get { return _displayName; }
-                set { _displayName = value; }
-            }
+			[Argument(Key = "displayname", Description = "The name to display for the service", Required = false)]
+			public string DisplayName
+			{
+				get { return _displayName; }
+				set { _displayName = value; }
+			}
 
-            [Argument(Key = "username", Description = "Username for service account", Required = false)]
-            public string Username
-            {
-                get { return _userName; }
-                set { _userName = value; }
-            }
+			[Argument(Key = "username", Description = "Username for service account", Required = false)]
+			public string Username
+			{
+				get { return _userName; }
+				set { _userName = value; }
+			}
 
-            [Argument(Key = "password", Description = "Password for service account", Required = false)]
-            public string Password
-            {
-                get { return _password; }
-                set { _password = value; }
-            }
-        }
-    }
+			[Argument(Key = "password", Description = "Password for service account", Required = false)]
+			public string Password
+			{
+				get { return _password; }
+				set { _password = value; }
+			}
+		}
+	}
 }
