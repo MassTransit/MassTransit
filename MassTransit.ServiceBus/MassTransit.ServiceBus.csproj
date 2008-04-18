@@ -44,6 +44,7 @@
       <Link>SolutionVersion.cs</Link>
     </Compile>
     <Compile Include="Exceptions\ShutDownException.cs" />
+    <Compile Include="IConsume.cs" />
     <Compile Include="Internal\EndpointResolver.cs" />
     <Compile Include="Formatters\BinaryBodyFormatter.cs" />
     <Compile Include="Formatters\IFormattedBody.cs" />
