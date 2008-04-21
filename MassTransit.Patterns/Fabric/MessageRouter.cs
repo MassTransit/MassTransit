@@ -4,8 +4,7 @@ namespace MassTransit.Patterns.Fabric
 	using ServiceBus;
 
 	public class MessageRouter<TMessage> : 
-		IConsume<TMessage>,
-		IProduce<TMessage>
+		IDispatcher<TMessage>
 		where TMessage : IMessage
 	{
 		private readonly List<IConsume<TMessage>> _consumers = new List<IConsume<TMessage>>();
@@ -18,7 +17,7 @@ namespace MassTransit.Patterns.Fabric
 		{
 			foreach (IConsume<TMessage> consumer in consumers)
 			{
-				AttachConsumer(consumer);
+				Attach(consumer);
 			}
 		}
 
@@ -30,7 +29,7 @@ namespace MassTransit.Patterns.Fabric
 			}
 		}
 
-		public void AttachConsumer(IConsume<TMessage> consumer)
+		public void Attach(IConsume<TMessage> consumer)
 		{
 			if (_consumers.Contains(consumer))
 				return;
@@ -38,7 +37,7 @@ namespace MassTransit.Patterns.Fabric
 			_consumers.Add(consumer);
 		}
 
-		public void DetachConsumer(IConsume<TMessage> consumer)
+		public void Detach(IConsume<TMessage> consumer)
 		{
 			if (_consumers.Contains(consumer))
 				_consumers.Remove(consumer);

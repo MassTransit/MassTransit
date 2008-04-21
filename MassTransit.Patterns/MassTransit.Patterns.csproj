@@ -48,7 +48,9 @@
     <Compile Include="Batching\TimeoutAttribute.cs" />
     <Compile Include="Batching\TimeoutMessage.cs" />
     <Compile Include="Fabric\IConsume.cs" />
+    <Compile Include="Fabric\IDispatcher.cs" />
     <Compile Include="Fabric\IProduce.cs" />
+    <Compile Include="Fabric\ITransformer.cs" />
     <Compile Include="Fabric\MessageRouter.cs" />
     <Compile Include="FaultDetection\HeartbeatMonitor.cs" />
     <Compile Include="FaultDetection\Investigator.cs" />
