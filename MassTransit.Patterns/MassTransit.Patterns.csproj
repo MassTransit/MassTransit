@@ -47,6 +47,9 @@
     <Compile Include="Batching\IBatchMessage.cs" />
     <Compile Include="Batching\TimeoutAttribute.cs" />
     <Compile Include="Batching\TimeoutMessage.cs" />
+    <Compile Include="Fabric\IConsume.cs" />
+    <Compile Include="Fabric\IProduce.cs" />
+    <Compile Include="Fabric\MessageRouter.cs" />
     <Compile Include="FaultDetection\HeartbeatMonitor.cs" />
     <Compile Include="FaultDetection\Investigator.cs" />
     <Compile Include="FaultDetection\Messages\DownEndpoint.cs" />
