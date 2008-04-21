@@ -7,7 +7,7 @@ namespace MassTransit.Patterns.Fabric
 		IDisposable
 		where TMessage : IMessage
 	{
-		void AttachConsumer(IConsume<TMessage> consumer);
-		void DetachConsumer(IConsume<TMessage> consumer);
+		void Attach(IConsume<TMessage> consumer);
+		void Detach(IConsume<TMessage> consumer);
 	}
 }

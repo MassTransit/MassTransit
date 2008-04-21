@@ -13,8 +13,8 @@ namespace MassTransit.Patterns.Tests.Fabric
 			using (MessagingClient client = new MessagingClient())
 			using (MessagingServer server = new MessagingServer())
 			{
-				client.AttachConsumer(server);
-				server.AttachConsumer(client);
+				client.Attach(server);
+				server.Attach(client);
 
 				client.Run();
 				
@@ -25,12 +25,12 @@ namespace MassTransit.Patterns.Tests.Fabric
 		{
 			private Patterns.Fabric.IConsume<RequestMessage> _consumer;
 
-			public void AttachConsumer(Patterns.Fabric.IConsume<RequestMessage> consumer)
+			public void Attach(Patterns.Fabric.IConsume<RequestMessage> consumer)
 			{
 				_consumer = consumer;
 			}
 
-			public void DetachConsumer(Patterns.Fabric.IConsume<RequestMessage> consumer)
+			public void Detach(Patterns.Fabric.IConsume<RequestMessage> consumer)
 			{
 				_consumer = null;
 			}
@@ -64,12 +64,12 @@ namespace MassTransit.Patterns.Tests.Fabric
 				throw new System.NotImplementedException();
 			}
 
-			public void AttachConsumer(Patterns.Fabric.IConsume<ResponseMessage> consumer)
+			public void Attach(Patterns.Fabric.IConsume<ResponseMessage> consumer)
 			{
 				throw new System.NotImplementedException();
 			}
 
-			public void DetachConsumer(Patterns.Fabric.IConsume<ResponseMessage> consumer)
+			public void Detach(Patterns.Fabric.IConsume<ResponseMessage> consumer)
 			{
 				throw new System.NotImplementedException();
 			}
