@@ -60,7 +60,8 @@ namespace MassTransit.Patterns.Tests.Fabric
 			{
 				_requestReceived = true;
 
-				_consumer.Consume(new ResponseMessage());
+				if(_consumer != null)
+					_consumer.Consume(new ResponseMessage());
 			}
 
 			public void Attach(Consumes<ResponseMessage> consumer)
@@ -100,7 +101,8 @@ namespace MassTransit.Patterns.Tests.Fabric
 		{
 			MessagingClient client = new MessagingClient();
 			MessagingServer server = new MessagingServer();
-			MessageRouter<RequestMessage> requestRouter = new MessageRouter<RequestMessage>(server);
+			MessagingServer server2 = new MessagingServer();
+			MessageRouter<RequestMessage> requestRouter = new MessageRouter<RequestMessage>(server, server2);
 
 			client.Attach(requestRouter);
 
@@ -109,6 +111,7 @@ namespace MassTransit.Patterns.Tests.Fabric
 			client.Run();
 
 			Assert.That(server.RequestReceived, Is.True, "No Request Received");
+			Assert.That(server2.RequestReceived, Is.True, "No Request Received");
 			Assert.That(client.ResponseReceived, Is.True, "No Response Received");
 			
 		}
