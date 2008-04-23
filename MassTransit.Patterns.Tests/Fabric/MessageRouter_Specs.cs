@@ -11,8 +11,8 @@ namespace MassTransit.Patterns.Tests.Fabric
 		[Test]
 		public void The_message_should_be_routed_to_all_consumers()
 		{
-			using (RoutedMessageConsumer consumer1 = new RoutedMessageConsumer())
-			using (RoutedMessageConsumer consumer2 = new RoutedMessageConsumer())
+			RoutedMessageConsumer consumer1 = new RoutedMessageConsumer();
+			RoutedMessageConsumer consumer2 = new RoutedMessageConsumer();
 			using (MessageRouter<RoutedMessage> router = new MessageRouter<RoutedMessage>(consumer1, consumer2))
 			{
 				RoutedMessage message = new RoutedMessage(427);
