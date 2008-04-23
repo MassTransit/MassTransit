@@ -52,6 +52,7 @@
     <Compile Include="Fabric\IProduce.cs" />
     <Compile Include="Fabric\ITransformer.cs" />
     <Compile Include="Fabric\MessageRouter.cs" />
+    <Compile Include="Fabric\RespondsTo.cs" />
     <Compile Include="FaultDetection\HeartbeatMonitor.cs" />
     <Compile Include="FaultDetection\Investigator.cs" />
     <Compile Include="FaultDetection\Messages\DownEndpoint.cs" />

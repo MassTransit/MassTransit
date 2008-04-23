@@ -1,10 +1,12 @@
 namespace MassTransit.Patterns.Fabric
 {
+	using System;
 	using System.Collections.Generic;
 	using ServiceBus;
 
-	public class MessageRouter<TMessage> : 
-		IDispatcher<TMessage>
+	public class MessageRouter<TMessage> :
+		IDispatcher<TMessage>,
+		IDisposable
 		where TMessage : IMessage
 	{
 		private readonly List<IConsume<TMessage>> _consumers = new List<IConsume<TMessage>>();
@@ -20,6 +22,8 @@ namespace MassTransit.Patterns.Fabric
 				Attach(consumer);
 			}
 		}
+
+		#region IDispatcher<TMessage> Members
 
 		public void Consume(TMessage message)
 		{
@@ -37,15 +41,15 @@ namespace MassTransit.Patterns.Fabric
 			_consumers.Add(consumer);
 		}
 
-		public void Detach(IConsume<TMessage> consumer)
-		{
-			if (_consumers.Contains(consumer))
-				_consumers.Remove(consumer);
-		}
+		#endregion
+
+		#region IDisposable Members
 
 		public void Dispose()
 		{
 			_consumers.Clear();
 		}
+
+		#endregion
 	}
 }

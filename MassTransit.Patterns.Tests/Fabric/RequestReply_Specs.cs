@@ -8,42 +8,27 @@ namespace MassTransit.Patterns.Tests.Fabric
 	[TestFixture]
 	public class When_a_request_is_sent
 	{
-		[Test]
-		public void A_response_should_be_properly_dispatched_to_the_originator()
-		{
-			using (MessagingClient client = new MessagingClient())
-			using (MessagingServer server = new MessagingServer())
-			{
-				client.Attach(server);
-				server.Attach(client);
-
-				client.Run();
-				
-			}
-		}
-
 		public class MessagingClient : IProduce<RequestMessage>, Patterns.Fabric.IConsume<ResponseMessage>
 		{
 			private Patterns.Fabric.IConsume<RequestMessage> _consumer;
+
+			#region IConsume<ResponseMessage> Members
+
+			public void Consume(ResponseMessage message)
+			{
+				throw new NotImplementedException();
+			}
+
+			#endregion
+
+			#region IProduce<RequestMessage> Members
 
 			public void Attach(Patterns.Fabric.IConsume<RequestMessage> consumer)
 			{
 				_consumer = consumer;
 			}
 
-			public void Detach(Patterns.Fabric.IConsume<RequestMessage> consumer)
-			{
-				_consumer = null;
-			}
-
-			public void Dispose()
-			{
-			}
-
-			public void Consume(ResponseMessage message)
-			{
-				throw new System.NotImplementedException();
-			}
+			#endregion
 
 			public void Run()
 			{
@@ -53,27 +38,21 @@ namespace MassTransit.Patterns.Tests.Fabric
 			}
 		}
 
-		public class MessagingServer : Patterns.Fabric.IConsume<RequestMessage>, IProduce<ResponseMessage>
+		public class MessagingServer : RespondsTo<RequestMessage>.With<ResponseMessage>
 		{
+			#region With<ResponseMessage> Members
+
 			public void Consume(RequestMessage message)
 			{
-				throw new System.NotImplementedException();
-			}
-
-			public void Dispose()
-			{
-				throw new System.NotImplementedException();
+				throw new NotImplementedException();
 			}
 
 			public void Attach(Patterns.Fabric.IConsume<ResponseMessage> consumer)
 			{
-				throw new System.NotImplementedException();
+				throw new NotImplementedException();
 			}
 
-			public void Detach(Patterns.Fabric.IConsume<ResponseMessage> consumer)
-			{
-				throw new System.NotImplementedException();
-			}
+			#endregion
 		}
 
 		public class RequestMessage : IMessage
@@ -83,43 +62,29 @@ namespace MassTransit.Patterns.Tests.Fabric
 		public class ResponseMessage : IMessage
 		{
 		}
-		
-		public interface IRequestReply<T, V> : 
-			Patterns.Fabric.IConsume<T>, 
-			IProduce<V> 
-			where V  : IMessage
-			where T : IMessage
-		{
 
-		}
-
-		class RespondsTo<T> where T : IMessage
+		private class Requests<T> where T : IMessage
 		{
-			public interface With<V> : Patterns.Fabric.IConsume<T>, IProduce<V> where V  : IMessage
-			{
-			}
-		}
+			#region Nested type: From
 
-		class Requests<T> where T : IMessage
-		{
 			public interface From<V> : IProduce<V>, Patterns.Fabric.IConsume<T> where V : IMessage
 			{
-				
 			}
+
+			#endregion
 		}
 
 
-		public class AbstractSomething { }
+		public class AbstractSomething
+		{
+		}
 
 
 		public class RequestHandler : RespondsTo<RequestMessage>.With<ResponseMessage>
 		{
-			public void Consume(RequestMessage message)
-			{
-				throw new NotImplementedException();
-			}
+			#region With<ResponseMessage> Members
 
-			public void Dispose()
+			public void Consume(RequestMessage message)
 			{
 				throw new NotImplementedException();
 			}
@@ -129,35 +94,38 @@ namespace MassTransit.Patterns.Tests.Fabric
 				throw new NotImplementedException();
 			}
 
-			public void Detach(Patterns.Fabric.IConsume<ResponseMessage> consumer)
-			{
-				throw new NotImplementedException();
-			}
+			#endregion
 		}
 
-		public class MyServer : IRequestReply<RequestMessage, ResponseMessage>
+		public class MyServer : RespondsTo<RequestMessage>.With<ResponseMessage>
 		{
+			#region With<ResponseMessage> Members
+
 			public void Consume(RequestMessage message)
 			{
-				throw new System.NotImplementedException();
-			}
-
-			public void Dispose()
-			{
-				throw new System.NotImplementedException();
+				throw new NotImplementedException();
 			}
 
 			public void Attach(Patterns.Fabric.IConsume<ResponseMessage> consumer)
 			{
-				throw new System.NotImplementedException();
+				throw new NotImplementedException();
 			}
 
-			public void Detach(Patterns.Fabric.IConsume<ResponseMessage> consumer)
-			{
-				throw new System.NotImplementedException();
-			}
+			#endregion
+		}
+
+		[Test]
+		public void A_response_should_be_properly_dispatched_to_the_originator()
+		{
+			MessagingClient client = new MessagingClient();
+			MessagingServer server = new MessagingServer();
+
+			client.Attach(server);
+
+			server.Attach(client);
+
+
+			client.Run();
 		}
 	}
-
-
 }
