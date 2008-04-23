@@ -7,6 +7,7 @@ namespace MassTransit.Patterns.Tests.Fabric
 	using MassTransit.Patterns.Fabric;
 	using NUnit.Framework;
 	using ServiceBus;
+	using IConsume = MassTransit.Patterns.Fabric;
 
 	[TestFixture]
 	public class When_a_message_destination_includes_a_domain_class
@@ -23,6 +24,8 @@ namespace MassTransit.Patterns.Tests.Fabric
 				_mesh = mesh;
 			}
 
+			#region IConsume<LoginUserSuccess> Members
+
 			public void Consume(LoginUserSuccess message)
 			{
 				throw new NotImplementedException();
@@ -33,6 +36,10 @@ namespace MassTransit.Patterns.Tests.Fabric
 				Detach(null);
 			}
 
+			#endregion
+
+			#region IProduce<LoginUser> Members
+
 			public void Attach(Patterns.Fabric.IConsume<LoginUser> consumer)
 			{
 				_consumer = consumer;
@@ -42,6 +49,8 @@ namespace MassTransit.Patterns.Tests.Fabric
 			{
 				_consumer = null;
 			}
+
+			#endregion
 
 			public void LoginUser(string username, string password)
 			{
@@ -55,10 +64,16 @@ namespace MassTransit.Patterns.Tests.Fabric
 			IProduce<LoginUserSuccess>,
 			Patterns.Fabric.IConsume<LoginUser>
 		{
+			#region IConsume<LoginUser> Members
+
 			public void Consume(LoginUser message)
 			{
 				throw new NotImplementedException();
 			}
+
+			#endregion
+
+			#region IProduce<LoginUserSuccess> Members
 
 			public void Attach(Patterns.Fabric.IConsume<LoginUserSuccess> consumer)
 			{
@@ -74,6 +89,8 @@ namespace MassTransit.Patterns.Tests.Fabric
 			{
 				throw new NotImplementedException();
 			}
+
+			#endregion
 		}
 
 		public interface IDomainMessage : IMessage
@@ -109,6 +126,8 @@ namespace MassTransit.Patterns.Tests.Fabric
 				get { return _password; }
 			}
 
+			#region IDomainMessage<Session,Guid> Members
+
 			public Guid To
 			{
 				get { return _to; }
@@ -118,6 +137,8 @@ namespace MassTransit.Patterns.Tests.Fabric
 			{
 				get { return typeof (Session); }
 			}
+
+			#endregion
 		}
 
 		public class LoginUserSuccess : IMessage
@@ -132,6 +153,8 @@ namespace MassTransit.Patterns.Tests.Fabric
 			{
 				_mesh = mesh;
 			}
+
+			#region ITransformer<LoginUser,LoginUserSuccess> Members
 
 			public void Consume(LoginUser message)
 			{
@@ -149,6 +172,8 @@ namespace MassTransit.Patterns.Tests.Fabric
 			public void Detach(Patterns.Fabric.IConsume<LoginUserSuccess> consumer)
 			{
 			}
+
+			#endregion
 		}
 
 
@@ -187,6 +212,8 @@ namespace MassTransit.Patterns.Tests.Fabric
 	{
 		private readonly List<Type> _componentTypes = new List<Type>();
 		private readonly Dictionary<Type, List<Type>> _route = new Dictionary<Type, List<Type>>();
+
+		#region IServiceMesh Members
 
 		public void AddComponent(object component)
 		{
@@ -264,19 +291,16 @@ namespace MassTransit.Patterns.Tests.Fabric
 
 			trace.AppendFormat("Routing {0} for {1}", typeof (TMessage).Name, typeof (TComponent).Name);
 
-			if(_route.ContainsKey(typeof(TComponent)))
+			if (_route.ContainsKey(typeof (TComponent)))
 			{
-				foreach (Type t in _route[typeof(TComponent)])
+				foreach (Type t in _route[typeof (TComponent)])
 				{
-					Type consumerType = typeof(Patterns.Fabric.IConsume<>).MakeGenericType(typeof(TMessage));
+					Type consumerType = typeof (Patterns.Fabric.IConsume<>).MakeGenericType(typeof (TMessage));
 					if (consumerType.IsAssignableFrom(t))
 					{
 						trace.AppendFormat(" to {0}", t.Name);
-
-						
 					}
 				}
-
 			}
 
 			Debug.WriteLine(trace.ToString());
@@ -289,10 +313,10 @@ namespace MassTransit.Patterns.Tests.Fabric
 
 		public void AddRoute(IComponentRoute route)
 		{
-			if(!_componentTypes.Contains(route.SourceType))
+			if (!_componentTypes.Contains(route.SourceType))
 				AddComponent(route.SourceType);
 
-			if(!_componentTypes.Contains(route.TargetType))
+			if (!_componentTypes.Contains(route.TargetType))
 				AddComponent(route.TargetType);
 
 			foreach (Type interfaceType in route.SourceType.GetInterfaces())
@@ -302,15 +326,15 @@ namespace MassTransit.Patterns.Tests.Fabric
 					Type[] genericArgs = interfaceType.GetGenericArguments();
 					if (genericArgs.Length == 1)
 					{
-						if (typeof(IMessage).IsAssignableFrom(genericArgs[0]))
+						if (typeof (IMessage).IsAssignableFrom(genericArgs[0]))
 						{
-							Type produceType = typeof(IProduce<>).MakeGenericType(genericArgs[0]);
+							Type produceType = typeof (IProduce<>).MakeGenericType(genericArgs[0]);
 							if (produceType.IsAssignableFrom(route.SourceType))
 							{
 								Type consumerType = typeof (Patterns.Fabric.IConsume<>).MakeGenericType(genericArgs[0]);
-								if(consumerType.IsAssignableFrom(route.TargetType))
+								if (consumerType.IsAssignableFrom(route.TargetType))
 								{
-									if(!_route.ContainsKey(route.SourceType))
+									if (!_route.ContainsKey(route.SourceType))
 										_route.Add(route.SourceType, new List<Type>());
 
 									_route[route.SourceType].Add(route.TargetType);
@@ -320,8 +344,9 @@ namespace MassTransit.Patterns.Tests.Fabric
 					}
 				}
 			}
-
 		}
+
+		#endregion
 	}
 
 	public class ComponentRoute<TSource> : IComponentRoute<TSource>
@@ -335,6 +360,8 @@ namespace MassTransit.Patterns.Tests.Fabric
 			_mesh = mesh;
 			_sourceType = typeof (TSource);
 		}
+
+		#region IComponentRoute<TSource> Members
 
 		public Type TargetType
 		{
@@ -357,6 +384,8 @@ namespace MassTransit.Patterns.Tests.Fabric
 		{
 			_mesh.AddRoute(this);
 		}
+
+		#endregion
 	}
 
 	public interface IComponentRoute

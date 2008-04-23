@@ -1,5 +1,6 @@
 namespace MassTransit.Patterns.Tests.Fabric
 {
+	using System;
 	using MassTransit.Patterns.Fabric;
 	using NUnit.Framework;
 	using ServiceBus;
@@ -82,5 +83,81 @@ namespace MassTransit.Patterns.Tests.Fabric
 		public class ResponseMessage : IMessage
 		{
 		}
+		
+		public interface IRequestReply<T, V> : 
+			Patterns.Fabric.IConsume<T>, 
+			IProduce<V> 
+			where V  : IMessage
+			where T : IMessage
+		{
+
+		}
+
+		class RespondsTo<T> where T : IMessage
+		{
+			public interface With<V> : Patterns.Fabric.IConsume<T>, IProduce<V> where V  : IMessage
+			{
+			}
+		}
+
+		class Requests<T> where T : IMessage
+		{
+			public interface From<V> : IProduce<V>, Patterns.Fabric.IConsume<T> where V : IMessage
+			{
+				
+			}
+		}
+
+
+		public class AbstractSomething { }
+
+
+		public class RequestHandler : RespondsTo<RequestMessage>.With<ResponseMessage>
+		{
+			public void Consume(RequestMessage message)
+			{
+				throw new NotImplementedException();
+			}
+
+			public void Dispose()
+			{
+				throw new NotImplementedException();
+			}
+
+			public void Attach(Patterns.Fabric.IConsume<ResponseMessage> consumer)
+			{
+				throw new NotImplementedException();
+			}
+
+			public void Detach(Patterns.Fabric.IConsume<ResponseMessage> consumer)
+			{
+				throw new NotImplementedException();
+			}
+		}
+
+		public class MyServer : IRequestReply<RequestMessage, ResponseMessage>
+		{
+			public void Consume(RequestMessage message)
+			{
+				throw new System.NotImplementedException();
+			}
+
+			public void Dispose()
+			{
+				throw new System.NotImplementedException();
+			}
+
+			public void Attach(Patterns.Fabric.IConsume<ResponseMessage> consumer)
+			{
+				throw new System.NotImplementedException();
+			}
+
+			public void Detach(Patterns.Fabric.IConsume<ResponseMessage> consumer)
+			{
+				throw new System.NotImplementedException();
+			}
+		}
 	}
+
+
 }
