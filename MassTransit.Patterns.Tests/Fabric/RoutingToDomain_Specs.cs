@@ -13,44 +13,44 @@ namespace MassTransit.Patterns.Tests.Fabric
 	public class When_a_message_destination_includes_a_domain_class
 	{
 		public class LoginController :
-			Patterns.Fabric.IConsume<LoginUserSuccess>,
-			IProduce<LoginUser>
+			Consumes<LoginUserSuccess>,
+			Produces<LoginUser>
 		{
 			private readonly IServiceMesh _mesh;
-			private Patterns.Fabric.IConsume<LoginUser> _consumer;
+			private Consumes<LoginUser> _consumer;
 
 			public LoginController(IServiceMesh mesh)
 			{
 				_mesh = mesh;
 			}
 
-			#region IConsume<LoginUserSuccess> Members
+			#region Consumes<LoginUserSuccess> Members
 
 			public void Consume(LoginUserSuccess message)
 			{
 				throw new NotImplementedException();
 			}
 
+			#endregion
+
+			#region Produces<LoginUser> Members
+
+			public void Attach(Consumes<LoginUser> consumer)
+			{
+				_consumer = consumer;
+			}
+
+			#endregion
+
 			public void Dispose()
 			{
 				Detach(null);
 			}
 
-			#endregion
-
-			#region IProduce<LoginUser> Members
-
-			public void Attach(Patterns.Fabric.IConsume<LoginUser> consumer)
-			{
-				_consumer = consumer;
-			}
-
-			public void Detach(Patterns.Fabric.IConsume<LoginUser> consumer)
+			public void Detach(Consumes<LoginUser> consumer)
 			{
 				_consumer = null;
 			}
-
-			#endregion
 
 			public void LoginUser(string username, string password)
 			{
@@ -61,10 +61,10 @@ namespace MassTransit.Patterns.Tests.Fabric
 		}
 
 		public class Session :
-			IProduce<LoginUserSuccess>,
-			Patterns.Fabric.IConsume<LoginUser>
+			Produces<LoginUserSuccess>,
+			Consumes<LoginUser>
 		{
-			#region IConsume<LoginUser> Members
+			#region Consumes<LoginUser> Members
 
 			public void Consume(LoginUser message)
 			{
@@ -73,14 +73,16 @@ namespace MassTransit.Patterns.Tests.Fabric
 
 			#endregion
 
-			#region IProduce<LoginUserSuccess> Members
+			#region Produces<LoginUserSuccess> Members
 
-			public void Attach(Patterns.Fabric.IConsume<LoginUserSuccess> consumer)
+			public void Attach(Consumes<LoginUserSuccess> consumer)
 			{
 				throw new NotImplementedException();
 			}
 
-			public void Detach(Patterns.Fabric.IConsume<LoginUserSuccess> consumer)
+			#endregion
+
+			public void Detach(Consumes<LoginUserSuccess> consumer)
 			{
 				throw new NotImplementedException();
 			}
@@ -89,8 +91,6 @@ namespace MassTransit.Patterns.Tests.Fabric
 			{
 				throw new NotImplementedException();
 			}
-
-			#endregion
 		}
 
 		public interface IDomainMessage : IMessage
@@ -145,7 +145,7 @@ namespace MassTransit.Patterns.Tests.Fabric
 		{
 		}
 
-		public class SimpleTransformer : ITransformer<LoginUser, LoginUserSuccess>
+		public class SimpleTransformer : Transforms<LoginUser>.Into<LoginUserSuccess>
 		{
 			private readonly IServiceMesh _mesh;
 
@@ -154,22 +154,14 @@ namespace MassTransit.Patterns.Tests.Fabric
 				_mesh = mesh;
 			}
 
-			#region ITransformer<LoginUser,LoginUserSuccess> Members
+			#region Into<LoginUserSuccess> Members
 
 			public void Consume(LoginUser message)
 			{
 				_mesh.Produce(this, new LoginUserSuccess());
 			}
 
-			public void Dispose()
-			{
-			}
-
-			public void Attach(Patterns.Fabric.IConsume<LoginUserSuccess> consumer)
-			{
-			}
-
-			public void Detach(Patterns.Fabric.IConsume<LoginUserSuccess> consumer)
+			public void Attach(Consumes<LoginUserSuccess> consumer)
 			{
 			}
 
@@ -203,7 +195,7 @@ namespace MassTransit.Patterns.Tests.Fabric
 		void AddComponent(Type componentType);
 		TComponent Resolve<TComponent>();
 
-		void Produce<TComponent, TMessage>(TComponent source, TMessage message) where TComponent : IProduce<TMessage> where TMessage : IMessage;
+		void Produce<TComponent, TMessage>(TComponent source, TMessage message) where TComponent : Produces<TMessage> where TMessage : IMessage;
 		IComponentRoute<TSource> Route<TSource>();
 		void AddRoute(IComponentRoute route);
 	}
@@ -241,7 +233,7 @@ namespace MassTransit.Patterns.Tests.Fabric
 					{
 						if (typeof (IMessage).IsAssignableFrom(genericArgs[0]) && typeof (IMessage).IsAssignableFrom(genericArgs[1]))
 						{
-							Type transformerType = typeof (ITransformer<,>).MakeGenericType(genericArgs[0], genericArgs[1]);
+							Type transformerType = typeof (Transforms<>.Into<>).MakeGenericType(genericArgs[0], genericArgs[1]);
 							if (transformerType.IsAssignableFrom(componentType))
 							{
 								componentInfo.AppendFormat(", Transforms({0} => {1})", genericArgs[0].Name, genericArgs[1].Name);
@@ -252,13 +244,13 @@ namespace MassTransit.Patterns.Tests.Fabric
 					{
 						if (typeof (IMessage).IsAssignableFrom(genericArgs[0]))
 						{
-							Type produceType = typeof (IProduce<>).MakeGenericType(genericArgs[0]);
+							Type produceType = typeof (Produces<>).MakeGenericType(genericArgs[0]);
 							if (produceType.IsAssignableFrom(componentType))
 							{
 								componentInfo.AppendFormat(", Produces({0})", genericArgs[0].Name);
 							}
 
-							Type consumeType = typeof (Patterns.Fabric.IConsume<>).MakeGenericType(genericArgs[0]);
+							Type consumeType = typeof (Consumes<>).MakeGenericType(genericArgs[0]);
 							if (consumeType.IsAssignableFrom(componentType))
 							{
 								componentInfo.AppendFormat(", Consumes({0})", genericArgs[0].Name);
@@ -284,7 +276,7 @@ namespace MassTransit.Patterns.Tests.Fabric
 		}
 
 		public void Produce<TComponent, TMessage>(TComponent source, TMessage message)
-			where TComponent : IProduce<TMessage>
+			where TComponent : Produces<TMessage>
 			where TMessage : IMessage
 		{
 			StringBuilder trace = new StringBuilder();
@@ -295,7 +287,7 @@ namespace MassTransit.Patterns.Tests.Fabric
 			{
 				foreach (Type t in _route[typeof (TComponent)])
 				{
-					Type consumerType = typeof (Patterns.Fabric.IConsume<>).MakeGenericType(typeof (TMessage));
+					Type consumerType = typeof (Consumes<>).MakeGenericType(typeof (TMessage));
 					if (consumerType.IsAssignableFrom(t))
 					{
 						trace.AppendFormat(" to {0}", t.Name);
@@ -328,10 +320,10 @@ namespace MassTransit.Patterns.Tests.Fabric
 					{
 						if (typeof (IMessage).IsAssignableFrom(genericArgs[0]))
 						{
-							Type produceType = typeof (IProduce<>).MakeGenericType(genericArgs[0]);
+							Type produceType = typeof (Produces<>).MakeGenericType(genericArgs[0]);
 							if (produceType.IsAssignableFrom(route.SourceType))
 							{
-								Type consumerType = typeof (Patterns.Fabric.IConsume<>).MakeGenericType(genericArgs[0]);
+								Type consumerType = typeof (Consumes<>).MakeGenericType(genericArgs[0]);
 								if (consumerType.IsAssignableFrom(route.TargetType))
 								{
 									if (!_route.ContainsKey(route.SourceType))

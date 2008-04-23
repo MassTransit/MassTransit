@@ -8,11 +8,11 @@ namespace MassTransit.Patterns.Tests.Fabric
 	[TestFixture]
 	public class When_a_request_is_sent
 	{
-		public class MessagingClient : IProduce<RequestMessage>, Patterns.Fabric.IConsume<ResponseMessage>
+		public class MessagingClient : Produces<RequestMessage>, Patterns.Fabric.Consumes<ResponseMessage>
 		{
-			private Patterns.Fabric.IConsume<RequestMessage> _consumer;
+			private Patterns.Fabric.Consumes<RequestMessage> _consumer;
 
-			#region IConsume<ResponseMessage> Members
+			#region Consumes<ResponseMessage> Members
 
 			public void Consume(ResponseMessage message)
 			{
@@ -21,9 +21,9 @@ namespace MassTransit.Patterns.Tests.Fabric
 
 			#endregion
 
-			#region IProduce<RequestMessage> Members
+			#region Produces<RequestMessage> Members
 
-			public void Attach(Patterns.Fabric.IConsume<RequestMessage> consumer)
+			public void Attach(Patterns.Fabric.Consumes<RequestMessage> consumer)
 			{
 				_consumer = consumer;
 			}
@@ -47,7 +47,7 @@ namespace MassTransit.Patterns.Tests.Fabric
 				throw new NotImplementedException();
 			}
 
-			public void Attach(Patterns.Fabric.IConsume<ResponseMessage> consumer)
+			public void Attach(Patterns.Fabric.Consumes<ResponseMessage> consumer)
 			{
 				throw new NotImplementedException();
 			}
@@ -67,7 +67,7 @@ namespace MassTransit.Patterns.Tests.Fabric
 		{
 			#region Nested type: From
 
-			public interface From<V> : IProduce<V>, Patterns.Fabric.IConsume<T> where V : IMessage
+			public interface From<V> : Produces<V>, Patterns.Fabric.Consumes<T> where V : IMessage
 			{
 			}
 
@@ -89,7 +89,7 @@ namespace MassTransit.Patterns.Tests.Fabric
 				throw new NotImplementedException();
 			}
 
-			public void Attach(Patterns.Fabric.IConsume<ResponseMessage> consumer)
+			public void Attach(Patterns.Fabric.Consumes<ResponseMessage> consumer)
 			{
 				throw new NotImplementedException();
 			}
@@ -106,7 +106,7 @@ namespace MassTransit.Patterns.Tests.Fabric
 				throw new NotImplementedException();
 			}
 
-			public void Attach(Patterns.Fabric.IConsume<ResponseMessage> consumer)
+			public void Attach(Patterns.Fabric.Consumes<ResponseMessage> consumer)
 			{
 				throw new NotImplementedException();
 			}

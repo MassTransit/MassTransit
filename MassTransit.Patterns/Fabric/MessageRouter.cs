@@ -2,38 +2,36 @@ namespace MassTransit.Patterns.Fabric
 {
 	using System;
 	using System.Collections.Generic;
-	using ServiceBus;
 
 	public class MessageRouter<TMessage> :
-		IDispatcher<TMessage>,
+		Dispatches<TMessage>,
 		IDisposable
-		where TMessage : IMessage
 	{
-		private readonly List<IConsume<TMessage>> _consumers = new List<IConsume<TMessage>>();
+		private readonly List<Consumes<TMessage>> _consumers = new List<Consumes<TMessage>>();
 
 		public MessageRouter()
 		{
 		}
 
-		public MessageRouter(params IConsume<TMessage>[] consumers)
+		public MessageRouter(params Consumes<TMessage>[] consumers)
 		{
-			foreach (IConsume<TMessage> consumer in consumers)
+			foreach (Consumes<TMessage> consumer in consumers)
 			{
 				Attach(consumer);
 			}
 		}
 
-		#region IDispatcher<TMessage> Members
+		#region Dispatches<TMessage> Members
 
 		public void Consume(TMessage message)
 		{
-			foreach (IConsume<TMessage> consumer in _consumers)
+			foreach (Consumes<TMessage> consumer in _consumers)
 			{
 				consumer.Consume(message);
 			}
 		}
 
-		public void Attach(IConsume<TMessage> consumer)
+		public void Attach(Consumes<TMessage> consumer)
 		{
 			if (_consumers.Contains(consumer))
 				return;

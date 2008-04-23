@@ -40,7 +40,7 @@ namespace MassTransit.Patterns.Tests.Fabric
 		}
 	}
 
-	public class RoutedMessageConsumer : Patterns.Fabric.IConsume<RoutedMessage>
+	public class RoutedMessageConsumer : Patterns.Fabric.Consumes<RoutedMessage>
 	{
 		private int _value;
 

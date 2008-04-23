@@ -1,12 +1,10 @@
 namespace MassTransit.Patterns.Fabric
 {
-	using ServiceBus;
-
-	public class RespondsTo<TRequest> where TRequest : IMessage
+	public class RespondsTo<TRequest>
 	{
 		#region Nested type: With
 
-		public interface With<TResponse> : IConsume<TRequest>, IProduce<TResponse> where TResponse : IMessage
+		public interface With<TResponse> : Consumes<TRequest>, Produces<TResponse>
 		{
 		}
 
