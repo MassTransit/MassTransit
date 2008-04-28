@@ -30,15 +30,42 @@ namespace MassTransit.ServiceBus.Tests
         }
     }
 
-    public class FakeAssEndpoint : IEndpoint
+    public class FakeSender : IMessageSender
+    {
+        public void Send(IEnvelope envelope)
+        {
+            //swallow
+        }
+
+        public void Dispose()
+        {
+            //swallow
+        }
+    }
+    public class FakeReceiver : IMessageReceiver
+    {
+        public void Subscribe(IEnvelopeConsumer consumer)
+        {
+//swallow
+        }
+
+        public void Dispose()
+        {
+//swallow
+        }
+    }
+
+    public class FakeEndpoint : IEndpoint
     {
         private Uri _uri;
         private IMessageSender _sender;
         private IMessageReceiver _receiver;
 
-        public FakeAssEndpoint(Uri uri)
+        public FakeEndpoint(Uri uri)
         {
             _uri = uri;
+            _sender = new FakeSender();
+            _receiver = new FakeReceiver();
         }
 
 
