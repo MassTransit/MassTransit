@@ -38,7 +38,7 @@ namespace MassTransit.ServiceBus
 		private readonly EndpointResolver _endpointResolver = new EndpointResolver();
 		private readonly IEndpoint _endpointToListenOn;
 		private IEndpoint _poisonEndpoint;
-		private ISubscriptionCache _subscriptionCache = new LocalSubscriptionCache();
+		private ISubscriptionCache _subscriptionCache;
 
         static ServiceBus()
         {
@@ -52,17 +52,17 @@ namespace MassTransit.ServiceBus
             }
         }
 
-		public ServiceBus(IEndpoint endpointToListenOn)
-		{
+		public ServiceBus(IEndpoint endpointToListenOn) : this(endpointToListenOn, new LocalSubscriptionCache()) {  }
+        public ServiceBus(IEndpoint endpointToListenOn, ISubscriptionCache cache)
+        {
 			Check.Parameter(endpointToListenOn).WithMessage("endpointToListenOn").IsNotNull();
-
 			_endpointToListenOn = endpointToListenOn;
-		}
+            _subscriptionCache = cache;
+        }
 
 		public ISubscriptionCache SubscriptionCache
 		{
 			get { return _subscriptionCache; }
-			set { _subscriptionCache = value; }
 		}
 
 		#region IEnvelopeConsumer Members

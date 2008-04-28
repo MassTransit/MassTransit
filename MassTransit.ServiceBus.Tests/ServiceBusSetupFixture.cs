@@ -45,15 +45,13 @@ namespace MassTransit.ServiceBus.Tests
 
 			ISubscriptionCache _subscriptionCache = new LocalSubscriptionCache();
 
-			ServiceBus bus = new ServiceBus(_serviceBusEndPoint);
-		    bus.SubscriptionCache = _subscriptionCache;
+            ServiceBus bus = new ServiceBus(_serviceBusEndPoint, _subscriptionCache);
 
 			bus.PoisonEndpoint = _poisonEndpoint;
 			_serviceBus = bus;
 
 
-			_remoteServiceBus = new ServiceBus(_remoteServiceBusEndPoint);
-			_remoteServiceBus.SubscriptionCache = _subscriptionCache;
+			_remoteServiceBus = new ServiceBus(_remoteServiceBusEndPoint, _subscriptionCache);
 		}
 
 		[TearDown]

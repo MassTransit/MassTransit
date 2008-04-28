@@ -64,6 +64,7 @@
     <Compile Include="IMessageContext.cs" />
     <Compile Include="Internal\IMessageReceiver.cs" />
     <Compile Include="Internal\IMessageSender.cs" />
+    <Compile Include="IProduce.cs" />
     <Compile Include="IServiceBus.cs" />
     <Compile Include="IServiceBusAsyncResult.cs" />
     <Compile Include="Internal\ServiceBusContext.cs" />

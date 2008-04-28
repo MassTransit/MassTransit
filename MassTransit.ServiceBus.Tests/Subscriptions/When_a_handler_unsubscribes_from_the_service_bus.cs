@@ -19,8 +19,7 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
 			_cache = _mocks.CreateMock<ISubscriptionCache>();
 
 
-			_bus = new ServiceBus(_endpoint);
-			_bus.SubscriptionCache = _cache;
+			_bus = new ServiceBus(_endpoint, _cache);
 			_receiver = _mocks.CreateMock<IMessageReceiver>();
 		}
 

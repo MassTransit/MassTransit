@@ -39,8 +39,6 @@ namespace MassTransit.ServiceBus.Tests
 		private ISubscriptionCache _mockSubscriptionCache;
 		private IMessageSender mockSender;
 		private IMessageReceiver mockReceiver;
-
-		private string queueName = @".\private$\test";
 		private Uri queueUri = new Uri("msmq://" + Environment.MachineName + "/test");
 
 
@@ -62,8 +60,7 @@ namespace MassTransit.ServiceBus.Tests
 			}
 			using (mocks.Playback())
 			{
-				_serviceBus = new ServiceBus(mockBusEndpoint);
-			    _serviceBus.SubscriptionCache = _mockSubscriptionCache;
+                _serviceBus = new ServiceBus(mockBusEndpoint, _mockSubscriptionCache);
 
 				////this ends up in a seperate thread and I am therefore unable to figure out how to test
 				_serviceBus.Subscribe<PoisonMessage>(delegate(IMessageContext<PoisonMessage> cxt)
