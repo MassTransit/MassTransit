@@ -53,11 +53,13 @@ namespace MassTransit.ServiceBus
         }
 
 		public ServiceBus(IEndpoint endpointToListenOn) : this(endpointToListenOn, new LocalSubscriptionCache()) {  }
-        public ServiceBus(IEndpoint endpointToListenOn, ISubscriptionCache cache)
+        public ServiceBus(IEndpoint endpointToListenOn, ISubscriptionCache subscriptionCache)
         {
 			Check.Parameter(endpointToListenOn).WithMessage("endpointToListenOn").IsNotNull();
+            Check.Parameter(subscriptionCache).WithMessage("subscriptionCache").IsNotNull();
+
 			_endpointToListenOn = endpointToListenOn;
-            _subscriptionCache = cache;
+            _subscriptionCache = subscriptionCache;
         }
 
 		public ISubscriptionCache SubscriptionCache
