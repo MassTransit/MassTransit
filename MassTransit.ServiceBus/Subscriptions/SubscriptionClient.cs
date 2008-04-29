@@ -30,7 +30,7 @@ namespace MassTransit.ServiceBus.Subscriptions
 			_subscriptionServiceEndpoint = subscriptionServiceEndpoint;
 		}
 
-		#region IMessageService Members
+		#region IHostedService Members
 
 		public void Dispose()
 		{
@@ -49,12 +49,12 @@ namespace MassTransit.ServiceBus.Subscriptions
 
 		public void Stop()
 		{
-			_cache.OnAddSubscription -= Cache_OnAddSubscription;
-			_cache.OnRemoveSubscription -= Cache_OnRemoveSubscription;
-
 			_serviceBus.Send(_subscriptionServiceEndpoint, new CancelSubscriptionUpdates());
 			_serviceBus.Unsubscribe<AddSubscription>(HandleAddSubscription);
 			_serviceBus.Unsubscribe<RemoveSubscription>(HandleRemoveSubscription);
+
+			_cache.OnAddSubscription -= Cache_OnAddSubscription;
+			_cache.OnRemoveSubscription -= Cache_OnRemoveSubscription;
 		}
 
 		#endregion
