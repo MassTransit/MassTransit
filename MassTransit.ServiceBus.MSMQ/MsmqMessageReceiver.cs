@@ -176,6 +176,8 @@ namespace MassTransit.ServiceBus.MSMQ
 
                                 if (this.Consumer.IsInterested(env))
                                 {
+                                    //TODO: Is this where the transaction support would go?
+                                    //TODO: Does this support transactionality?
                                     Message received = enumerator.RemoveCurrent(TimeSpan.FromSeconds(1));
                                     if (received.Id == msg.Id)
                                     {

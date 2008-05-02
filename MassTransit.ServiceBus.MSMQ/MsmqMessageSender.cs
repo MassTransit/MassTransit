@@ -14,6 +14,7 @@
 namespace MassTransit.ServiceBus.MSMQ
 {
 	using System.Messaging;
+	using System.Transactions;
 	using Exceptions;
 	using Internal;
 	using log4net;
@@ -63,7 +64,15 @@ namespace MassTransit.ServiceBus.MSMQ
 				if (_messageLog.IsInfoEnabled)
 					_messageLog.InfoFormat("Message {0} Sent To {1}", envelope.Messages[0].GetType(), _endpoint.Uri);
 
-				_queue.Send(msg);
+                if(_queue.Transactional)
+                {
+                    EnsureThereIsATransactionScope();
+                    _queue.Send(msg, MessageQueueTransactionType.Automatic);
+                }
+                else
+                {
+                    _queue.Send(msg);
+                }
 			}
 			catch (MessageQueueException ex)
 			{
@@ -77,6 +86,16 @@ namespace MassTransit.ServiceBus.MSMQ
 				                 envelope.Messages != null ? envelope.Messages[0].GetType().ToString() : "");
 		}
 
-		#endregion
+	    #endregion
+
+        
+	    private void EnsureThereIsATransactionScope()
+	    {
+	        if(Transaction.Current == null)
+	        {
+	            throw new EndpointException(_endpoint, "This is a transactional endpoint, and requires a TransactionScope to be open");
+	        }
+	    }
+
 	}
 }
