@@ -126,12 +126,12 @@ namespace MassTransit.ServiceBus.MSMQ.Tests
 			}
 		}
 
-		private static void ValidateAndPurgeQueue(string queuePath)
+		public static void ValidateAndPurgeQueue(string queuePath)
 		{
 			ValidateAndPurgeQueue(queuePath, false);
 		}
 
-		private static void ValidateAndPurgeQueue(string queuePath, bool isTransactional)
+		public static void ValidateAndPurgeQueue(string queuePath, bool isTransactional)
 		{
 			try
 			{
