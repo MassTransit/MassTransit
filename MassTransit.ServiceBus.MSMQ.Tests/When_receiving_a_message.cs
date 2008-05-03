@@ -5,10 +5,12 @@ namespace MassTransit.ServiceBus.MSMQ.Tests
     using Internal;
     using Messages;
     using NUnit.Framework;
+    using Rhino.Mocks;
 
     [TestFixture]
     public class When_receiving_a_message
     {
+        private MockRepository mocks;
         string uri = "msmq://localhost/test_transactions";
         private MsmqEndpoint ep;
         private MsmqMessageReceiver mr;
@@ -18,8 +20,9 @@ namespace MassTransit.ServiceBus.MSMQ.Tests
         [SetUp]
         public void SetUp()
         {
-            QueueTestContext.ValidateAndPurgeQueue(ep.QueuePath, true);
+            mocks = new MockRepository();
             ep = new MsmqEndpoint(uri);
+            QueueTestContext.ValidateAndPurgeQueue(ep.QueuePath, true);
             mr = new MsmqMessageReceiver(ep);
 
             msg = new DeleteMessage();
@@ -32,13 +35,15 @@ namespace MassTransit.ServiceBus.MSMQ.Tests
         [ExpectedException(typeof(EndpointException))]
         public void From_A_Transactional_Queue_Without_a_transaction()
         {
-
+            IEnvelopeConsumer mockEnvelopeConsumer = mocks.CreateMock<IEnvelopeConsumer>();
+            mr.Subscribe(mockEnvelopeConsumer);
         }
 
         [Test]
         public void From_A_Transactional_Queue_With_a_transaction()
         {
-
+            IEnvelopeConsumer mockEnvelopeConsumer = mocks.CreateMock<IEnvelopeConsumer>();
+            mr.Subscribe(mockEnvelopeConsumer);
         }
 
         private void Put_a_test_message_on_the_queue()

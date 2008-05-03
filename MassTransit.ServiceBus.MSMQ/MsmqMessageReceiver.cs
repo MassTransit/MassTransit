@@ -1,3 +1,5 @@
+using MassTransit.ServiceBus.Util;
+
 /// Copyright 2007-2008 The Apache Software Foundation.
 /// 
 /// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
@@ -28,7 +30,7 @@ namespace MassTransit.ServiceBus.MSMQ
 	public class MsmqMessageReceiver :
 		IMessageReceiver
 	{
-		private static readonly object _locker = new object();
+		private static readonly object _subscribeLocker = new object();
 		private static readonly ILog _log = LogManager.GetLogger(typeof (MsmqMessageReceiver));
 		private static readonly ILog _messageLog = LogManager.GetLogger("MassTransit.Messages");
 		private readonly IMsmqEndpoint _endpoint;
@@ -66,19 +68,19 @@ namespace MassTransit.ServiceBus.MSMQ
 		/// <param name="consumer">The consumer to add</param>
 		public void Subscribe(IEnvelopeConsumer consumer)
 		{
-			lock (_locker)
-			{
-				if (_consumer == null)
-				{
-					_consumer = consumer;
+            Check.Parameter(consumer).IsNotNull();
 
-					Restart();
-				}
-				else if (_consumer != consumer)
-				{
-					throw new EndpointException(_endpoint, "Only one consumer can be registered for a message receiver");
-				}
-			}
+            lock (_subscribeLocker)
+            {
+                if (_consumer != null)
+                {
+                    throw new EndpointException(_endpoint, "Only one consumer can be registered for a message receiver");
+                }
+
+                _consumer = consumer;
+
+                Restart();
+            }
 		}
 
 	    public IEnvelopeConsumer Consumer
