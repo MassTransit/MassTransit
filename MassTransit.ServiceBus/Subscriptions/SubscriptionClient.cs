@@ -28,13 +28,13 @@ namespace MassTransit.ServiceBus.Subscriptions
 			_serviceBus = serviceBus;
 			_cache = cache;
 			_subscriptionServiceEndpoint = subscriptionServiceEndpoint;
-		}
+        }
 
-		#region IHostedService Members
+        #region IHostedService Members
 
-		public void Dispose()
+        public void Dispose()
 		{
-			_serviceBus.Dispose();
+			_serviceBus.Dispose(); //TODO: Do we want to do this? - dds
 		}
 
 		public void Start()
