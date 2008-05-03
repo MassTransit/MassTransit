@@ -43,6 +43,7 @@
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Messaging" />
+    <Reference Include="System.Transactions" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
@@ -56,6 +57,8 @@
     <Compile Include="When_creating_a_MessageQueueEndpoint_from_a_Uri_string.cs" />
     <Compile Include="When_creating_the_service_bus_with_a_MessageQueueEndpoint.cs" />
     <Compile Include="When_publishing_a_message.cs" />
+    <Compile Include="When_receiving_a_message.cs" />
+    <Compile Include="When_sending_a_message.cs" />
     <Compile Include="When_specifying_a_message_queue_address_for_an_endpoint.cs" />
     <Compile Include="When_working_with_an_endpoint.cs" />
   </ItemGroup>
