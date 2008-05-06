@@ -1,29 +1,15 @@
 using System;
 using System.Web.UI;
-using MassTransit.ServiceBus;
-using MassTransit.ServiceBus.MSMQ;
-using MassTransit.ServiceBus.Subscriptions;
-
 using WebRequestReply.Core;
 
 public partial class _Default :
 	Page, IRequestReplyView
 {
 	private readonly RequestReplyController _controller;
-	private readonly IServiceBus _serviceBus;
-	private readonly MessageQueueEndpoint _serviceEndpoint = @"msmq://localhost/test_servicebus";
-	private readonly ISubscriptionStorage _subscriptionCache = new LocalSubscriptionCache();
 
 	public _Default()
 	{
-		_serviceBus = new ServiceBus(_serviceEndpoint, _subscriptionCache);
-
-		_controller = new RequestReplyController(this, _serviceBus, _serviceEndpoint);
-	}
-
-	~_Default()
-	{
-		_serviceBus.Dispose();
+		_controller = new RequestReplyController(this, Container.Instance.ServiceBus, Container.Instance.ServiceBus.Endpoint);
 	}
 
 	#region IRequestReplyView Members
@@ -38,7 +24,7 @@ public partial class _Default :
 		set { responseBox.Text = value; }
 	}
 
-	public event EventHandler RequestEntered;
+	public event EventHandler RequestEntered = delegate { };
 
 	#endregion
 
@@ -48,14 +34,12 @@ public partial class _Default :
 
 	protected void Button1_Click(object sender, EventArgs e)
 	{
-		if (RequestEntered != null)
-			RequestEntered(this, new EventArgs());
+		RequestEntered(this, new EventArgs());
 	}
 
 	protected void Button2_Click(object sender, EventArgs e)
 	{
 		RegisterAsyncTask(new PageAsyncTask(beginTask, endTask, timeoutTask, this));
-
 	}
 
 	private void timeoutTask(IAsyncResult ar)
