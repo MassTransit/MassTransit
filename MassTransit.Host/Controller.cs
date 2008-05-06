@@ -146,12 +146,14 @@ namespace MassTransit.Host
 		{
 			Assembly assembly = Assembly.Load(_args.Configurator);
 
-			Console.WriteLine("Loading assembly: {0}", assembly.FullName);
+			_log.DebugFormat("Loading assembly: {0}", assembly.FullName);
 
 			IHostConfigurator configurator = FindConfigurator(assembly);
 
 			if (configurator != null)
 			{
+                _log.DebugFormat("Found configurator of type: {0}", configurator.GetType());
+
 				IArgumentMap mapper = _argumentMapFactory.CreateMap(configurator);
 
 				Dictionary<string, string> argumentsUsed = new Dictionary<string, string>();
@@ -244,29 +246,43 @@ namespace MassTransit.Host
 
 		public void Start()
 		{
-			if (_configurator != null)
-			{
-				foreach (IHostedService service in _configurator.Services)
-				{
-					service.Start();
-				}
+            try
+            {
+                if (_configurator != null)
+                {
+                    foreach (IHostedService service in _configurator.Services)
+                    {
+                        service.Start();
+                    }
 
-				_log.Info("The service is running, press Control+C to exit.");
-			}
+                    _log.Info("The service is running, press Control+C to exit.");
+                }
+            }
+            catch (Exception ex)
+            {
+                _log.Error("Start Error:", ex);
+            }
 		}
 
-		public void Stop()
-		{
-			if (_configurator != null)
-			{
-				_log.Info("The service is stopping.");
+        public void Stop()
+        {
+            try
+            {
+                if (_configurator != null)
+                {
+                    _log.Info("The service is stopping.");
 
-				foreach (IHostedService service in _configurator.Services)
-				{
-					service.Stop();
-				}
-				_configurator.Dispose();
-			}
-		}
+                    foreach (IHostedService service in _configurator.Services)
+                    {
+                        service.Stop();
+                    }
+                    _configurator.Dispose();
+                }
+            }
+            catch (Exception ex)
+            {
+                _log.Error("Stop Error", ex);
+            }
+        }
 	}
 }

@@ -40,12 +40,14 @@ namespace MassTransit.Host
 
 			if (!string.IsNullOrEmpty(args.Username) && !string.IsNullOrEmpty(args.Password))
 			{
-				_serviceProcessInstaller.Username = args.Username;
+                _log.DebugFormat("Attempting to install as user {0}", args.Username);
 				_serviceProcessInstaller.Account = ServiceAccount.User;
-				_serviceProcessInstaller.Password = args.Password;
+				//_serviceProcessInstaller.Username = args.Username;
+				//_serviceProcessInstaller.Password = args.Password;
 			}
 			else
 			{
+                _log.Debug("Attempting to install as Local Service");
 				_serviceProcessInstaller.Account = ServiceAccount.LocalSystem;
 				_serviceProcessInstaller.Username = null;
 				_serviceProcessInstaller.Password = null;
