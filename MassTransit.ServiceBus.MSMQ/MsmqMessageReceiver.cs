@@ -12,7 +12,6 @@ using MassTransit.ServiceBus.Util;
 /// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 /// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 /// specific language governing permissions and limitations under the License.
-
 namespace MassTransit.ServiceBus.MSMQ
 {
 	using System;
@@ -24,7 +23,7 @@ namespace MassTransit.ServiceBus.MSMQ
 	using log4net;
 	using Threading;
 
-    /// <summary>
+	/// <summary>
 	/// Receives envelopes from a message queue
 	/// </summary>
 	public class MsmqMessageReceiver :
@@ -35,8 +34,11 @@ namespace MassTransit.ServiceBus.MSMQ
 		private static readonly ILog _messageLog = LogManager.GetLogger("MassTransit.Messages");
 		private readonly IMsmqEndpoint _endpoint;
 		private readonly TimeSpan _readTimeout = TimeSpan.FromSeconds(4);
-	    private IEnvelopeMapper<Message> _mapper;
-	    private IWorker _worker = new MultiThreadedWorker();
+		private IEnvelopeMapper<Message> _mapper;
+		private IWorker _worker = new MultiThreadedWorker();
+
+		private ManualResetEvent _killMonitor = new ManualResetEvent(false);
+		private ManualResetEvent _monitorDead = new ManualResetEvent(false);
 
 		private IEnvelopeConsumer _consumer;
 
@@ -50,7 +52,7 @@ namespace MassTransit.ServiceBus.MSMQ
 		public MsmqMessageReceiver(IMsmqEndpoint endpoint)
 		{
 			_endpoint = endpoint;
-            _mapper = new MsmqEnvelopeMapper();
+			_mapper = new MsmqEnvelopeMapper();
 		}
 
 		///<summary>
@@ -68,29 +70,29 @@ namespace MassTransit.ServiceBus.MSMQ
 		/// <param name="consumer">The consumer to add</param>
 		public void Subscribe(IEnvelopeConsumer consumer)
 		{
-            Check.Parameter(consumer).IsNotNull();
+			Check.Parameter(consumer).IsNotNull();
 
-            lock (_subscribeLocker)
-            {
-                if (_consumer != null)
-                {
-                    throw new EndpointException(_endpoint, "Only one consumer can be registered for a message receiver");
-                }
+			lock (_subscribeLocker)
+			{
+				if (_consumer != null && _consumer != consumer)
+				{
+					throw new EndpointException(_endpoint, "Only one consumer can be registered for a message receiver");
+				}
 
-                _consumer = consumer;
+				_consumer = consumer;
 
-                Restart();
-            }
+				Restart();
+			}
 		}
 
-	    public IEnvelopeConsumer Consumer
-	    {
-            get
-            {
-                if(_consumer == null) throw new EndpointException(_endpoint, "No consumer has been registered");
-                return _consumer;
-            }
-	    }
+		public IEnvelopeConsumer Consumer
+		{
+			get
+			{
+				if (_consumer == null) throw new EndpointException(_endpoint, "No consumer has been registered");
+				return _consumer;
+			}
+		}
 
 		private void Restart()
 		{
@@ -108,8 +110,14 @@ namespace MassTransit.ServiceBus.MSMQ
 			{
 				_queue = _endpoint.Open(QueueAccessMode.SendAndReceive);
 
-				_monitorThread = new Thread(MonitorQueue);
-				_monitorThread.Start();
+				if (_monitorThread == null)
+				{
+					_monitorDead.Reset();
+					_killMonitor.Reset();
+
+					_monitorThread = new Thread(MonitorQueue);
+					_monitorThread.Start();
+				}
 			}
 		}
 
@@ -126,7 +134,13 @@ namespace MassTransit.ServiceBus.MSMQ
 
 				if (_monitorThread != null)
 				{
+					_killMonitor.Set();
+
 					_monitorThread.Join(TimeSpan.FromSeconds(10));
+
+					if (_monitorDead.WaitOne(TimeSpan.FromSeconds(30), true) == false)
+						_monitorThread.Abort();
+
 					_monitorThread = null;
 				}
 			}
@@ -159,7 +173,7 @@ namespace MassTransit.ServiceBus.MSMQ
 
 		private void MonitorQueue()
 		{
-			while (_queue != null)
+			while ( _killMonitor.WaitOne(0, false) == false)
 			{
 				try
 				{
@@ -167,40 +181,40 @@ namespace MassTransit.ServiceBus.MSMQ
 					while (enumerator.MoveNext(_readTimeout))
 					{
 						Message msg = enumerator.Current;
-                        if (msg != null) //TODO: will this ever happen?
-                        {
-                            if (_log.IsDebugEnabled)
-                                _log.DebugFormat("Queue: {0} Received Message Id {1}", _queue.Path, msg.Id);
+						if (msg != null) //TODO: will this ever happen?
+						{
+							if (_log.IsDebugEnabled)
+								_log.DebugFormat("Queue: {0} Received Message Id {1}", _queue.Path, msg.Id);
 
-                            try
-                            {
-                                IEnvelope env = _mapper.ToEnvelope(msg);
+							try
+							{
+								IEnvelope env = _mapper.ToEnvelope(msg);
 
-                                if (this.Consumer.IsInterested(env))
-                                {
-                                    //TODO: Is this where the transaction support would go?
-                                    //TODO: Does this support transactionality?
-                                    Message received = enumerator.RemoveCurrent(TimeSpan.FromSeconds(1));
-                                    if (received.Id == msg.Id)
-                                    {
-                                        if (_messageLog.IsInfoEnabled)
-                                            _messageLog.InfoFormat("Received message {0} from {1}",
-                                                                   env.Messages[0].GetType(), env.ReturnEndpoint.Uri);
+								if (this.Consumer.IsInterested(env))
+								{
+									//TODO: Is this where the transaction support would go?
+									//TODO: Does this support transactionality?
+									Message received = enumerator.RemoveCurrent(TimeSpan.FromSeconds(1));
+									if (received.Id == msg.Id)
+									{
+										if (_messageLog.IsInfoEnabled)
+											_messageLog.InfoFormat("Received message {0} from {1}",
+											                       env.Messages[0].GetType(), env.ReturnEndpoint.Uri);
 
-                                        _worker.ScheduleWork(ProcessMessage, env);
-                                        break;
-                                    }
-                                }
-                            }
-                            catch (SerializationException ex)
-                            {
-                                //TODO: Maybe move to the poison queue
-                                //TODO: Mayb fire an event?
-                                Message discard = enumerator.RemoveCurrent(TimeSpan.FromSeconds(5));
-                                if(_log.IsErrorEnabled)
-                                    _log.Error("Discarding unknown message " + discard.Id, ex);
-                            }
-                        }
+										_worker.ScheduleWork(ProcessMessage, env);
+										break;
+									}
+								}
+							}
+							catch (SerializationException ex)
+							{
+								//TODO: Maybe move to the poison queue
+								//TODO: Mayb fire an event?
+								Message discard = enumerator.RemoveCurrent(TimeSpan.FromSeconds(5));
+								if (_log.IsErrorEnabled)
+									_log.Error("Discarding unknown message " + discard.Id, ex);
+							}
+						}
 					}
 
 					enumerator.Close();
@@ -220,45 +234,47 @@ namespace MassTransit.ServiceBus.MSMQ
 						_log.Error("An unknown exception occured", ex);
 				}
 			}
+
+			_monitorDead.Set();
 		}
 
-        private void HandleVariousErrorCodes(MessageQueueErrorCode code, MessageQueueException ex)
-        {
-            switch (code)
-            {
-                case MessageQueueErrorCode.IOTimeout:
-                    // this is OK its just a normal timeout
-                    break;
+		private void HandleVariousErrorCodes(MessageQueueErrorCode code, MessageQueueException ex)
+		{
+			switch (code)
+			{
+				case MessageQueueErrorCode.IOTimeout:
+					// this is OK its just a normal timeout
+					break;
 
-                case MessageQueueErrorCode.AccessDenied:
-                case MessageQueueErrorCode.QueueNotAvailable:
-                case MessageQueueErrorCode.ServiceNotAvailable:
-                case MessageQueueErrorCode.QueueDeleted:
-                    ThreadPool.QueueUserWorkItem(delegate { Stop(); });
-                    if (_log.IsErrorEnabled)
-                        _log.Error("There was a problem accessing the queue", ex);
-                    break;
+				case MessageQueueErrorCode.AccessDenied:
+				case MessageQueueErrorCode.QueueNotAvailable:
+				case MessageQueueErrorCode.ServiceNotAvailable:
+				case MessageQueueErrorCode.QueueDeleted:
+					ThreadPool.QueueUserWorkItem(delegate { Stop(); });
+					if (_log.IsErrorEnabled)
+						_log.Error("There was a problem accessing the queue", ex);
+					break;
 
-                case MessageQueueErrorCode.QueueNotFound:
-                case MessageQueueErrorCode.IllegalFormatName:
-                case MessageQueueErrorCode.MachineNotFound:
-                    ThreadPool.QueueUserWorkItem(delegate { Stop(); });
-                    if (_log.IsErrorEnabled)
-                        _log.Error("The message queue does not exist", ex);
-                    break;
+				case MessageQueueErrorCode.QueueNotFound:
+				case MessageQueueErrorCode.IllegalFormatName:
+				case MessageQueueErrorCode.MachineNotFound:
+					ThreadPool.QueueUserWorkItem(delegate { Stop(); });
+					if (_log.IsErrorEnabled)
+						_log.Error("The message queue does not exist", ex);
+					break;
 
-                case MessageQueueErrorCode.MessageAlreadyReceived:
-                    // we are competing with another consumer, no reason to report an error since
-                    // the message has already been handled.
-                    if (_log.IsDebugEnabled)
-                        _log.DebugFormat("Message received by another receiver before it could be retrieved");
-                    break;
+				case MessageQueueErrorCode.MessageAlreadyReceived:
+					// we are competing with another consumer, no reason to report an error since
+					// the message has already been handled.
+					if (_log.IsDebugEnabled)
+						_log.DebugFormat("Message received by another receiver before it could be retrieved");
+					break;
 
-                default:
-                    if (_log.IsErrorEnabled)
-                        _log.Error("An error occured while communicating with the queue", ex);
-                    break;
-            }
-        }
+				default:
+					if (_log.IsErrorEnabled)
+						_log.Error("An error occured while communicating with the queue", ex);
+					break;
+			}
+		}
 	}
 }
