@@ -73,10 +73,6 @@ namespace MassTransit.ServiceBus.Internal
 						break;
 				}
 
-				ServiceBusContext.Bus = bus;
-				ServiceBusContext.Envelope = envelope;
-				ServiceBusContext.Message = message;
-
 				item.Callback(context);
 			}
 		}

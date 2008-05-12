@@ -5,8 +5,8 @@ namespace MassTransit.Patterns.FaultDetection
     using MassTransit.ServiceBus;
     using MassTransit.Patterns.FaultDetection.Messages;
 
-    public class HeartbeatMonitor :
-        IConsume<Heartbeat>
+    public class HeartbeatMonitor /*:
+        IConsume<Heartbeat>*/
     {
         private Dictionary<IEndpoint, MonitorInfo> _monitoredEndpoints;
         private IServiceBus _bus;

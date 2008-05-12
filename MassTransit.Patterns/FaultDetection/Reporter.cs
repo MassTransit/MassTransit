@@ -5,8 +5,8 @@ namespace MassTransit.Patterns.FaultDetection
     using MassTransit.ServiceBus;
     using MassTransit.Patterns.FaultDetection.Messages;
 
-    public class Reporter :
-        IConsume<DownEndpoint>
+    public class Reporter/* :
+        IConsume<DownEndpoint>*/
     {
         private ILog _log = LogManager.GetLogger(typeof(Reporter));
 
