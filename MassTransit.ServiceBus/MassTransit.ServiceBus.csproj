@@ -44,7 +44,6 @@
       <Link>SolutionVersion.cs</Link>
     </Compile>
     <Compile Include="Exceptions\ShutDownException.cs" />
-    <Compile Include="IConsume.cs" />
     <Compile Include="Internal\EndpointResolver.cs" />
     <Compile Include="Formatters\BinaryBodyFormatter.cs" />
     <Compile Include="Formatters\IFormattedBody.cs" />
@@ -64,11 +63,8 @@
     <Compile Include="IMessageContext.cs" />
     <Compile Include="Internal\IMessageReceiver.cs" />
     <Compile Include="Internal\IMessageSender.cs" />
-    <Compile Include="IProduce.cs" />
     <Compile Include="IServiceBus.cs" />
     <Compile Include="IServiceBusAsyncResult.cs" />
-    <Compile Include="Internal\ServiceBusContext.cs" />
-    <Compile Include="Respond.cs" />
     <Compile Include="Subscriptions\ISubscriptionCache.cs" />
     <Compile Include="Internal\MessageConsumer.cs" />
     <Compile Include="Internal\MessageContext.cs" />

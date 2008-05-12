@@ -5,8 +5,8 @@ namespace MassTransit.Patterns.FaultDetection
     using MassTransit.ServiceBus;
     using MassTransit.Patterns.FaultDetection.Messages;
 
-    public class Investigator :
-        IConsume<Suspect>
+    public class Investigator/* :
+        IConsume<Suspect>*/
     {
         IServiceBus _bus;
 

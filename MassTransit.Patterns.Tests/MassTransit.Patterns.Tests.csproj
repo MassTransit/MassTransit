@@ -50,10 +50,6 @@
     <Compile Include="As_a_BatchController.cs" />
     <Compile Include="As_a_BatchController2.cs" />
     <Compile Include="BatchMessageToBatch.cs" />
-    <Compile Include="Fabric\Consumer_Specs.cs" />
-    <Compile Include="Fabric\MessageRouter_Specs.cs" />
-    <Compile Include="Fabric\RequestReply_Specs.cs" />
-    <Compile Include="Fabric\RoutingToDomain_Specs.cs" />
     <Compile Include="MessageToBatch.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="When_a_new_batch_is_received.cs" />
