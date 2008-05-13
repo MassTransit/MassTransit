@@ -81,12 +81,37 @@ namespace MassTransit.ServiceBus.NMS
 			throw new NotImplementedException();
 		}
 
+		public object Receive(TimeSpan timeout)
+		{
+			throw new NotImplementedException();
+		}
+
+		public object Receive(Predicate<object> accept)
+		{
+			throw new NotImplementedException();
+		}
+
+		public object Receive(TimeSpan timeout, Predicate<object> accept)
+		{
+			throw new NotImplementedException();
+		}
+
 		public T Receive<T>() where T : class
 		{
 			throw new NotImplementedException();
 		}
 
+		public T Receive<T>(TimeSpan timeout) where T : class
+		{
+			throw new NotImplementedException();
+		}
+
 		public T Receive<T>(Predicate<T> accept) where T : class
+		{
+			throw new NotImplementedException();
+		}
+
+		public T Receive<T>(TimeSpan timeout, Predicate<T> accept) where T : class
 		{
 			throw new NotImplementedException();
 		}

@@ -197,16 +197,7 @@ namespace MassTransit.ServiceBus.MSMQ
 
 				using (MessageQueue queue = Open(QueueAccessMode.SendAndReceive))
 				{
-					MessageQueueTransactionType tt = MessageQueueTransactionType.None;
-
-					if (queue.Transactional)
-					{
-						EnsureThereIsATransactionScope();
-
-						tt = MessageQueueTransactionType.Automatic;
-					}
-
-					queue.Send(msg, tt);
+					queue.Send(msg, GetTransactionType(queue));
 				}
 			}
 			catch (MessageQueueException ex)
@@ -220,20 +211,17 @@ namespace MassTransit.ServiceBus.MSMQ
 
 		public object Receive()
 		{
+			return Receive(MessageQueue.InfiniteTimeout);
+		}
+
+		public object Receive(TimeSpan timeout)
+		{
 			using (MessageQueue queue = Open(QueueAccessMode.ReceiveAndAdmin))
 			{
 				try
 				{
-					MessageQueueTransactionType tt = MessageQueueTransactionType.None;
+					Message msg = queue.Receive(GetTransactionType(queue));
 
-					if (queue.Transactional)
-					{
-						EnsureThereIsATransactionScope();
-
-						tt = MessageQueueTransactionType.Automatic;
-					}
-
-					Message msg = queue.Receive(tt);
 					Type messageType = Type.GetType(msg.Label);
 
 					try
@@ -255,62 +243,60 @@ namespace MassTransit.ServiceBus.MSMQ
 			}
 		}
 
-		public T Receive<T>() where T : class
+		public object Receive(Predicate<object> accept)
+		{
+			return Receive(MessageQueue.InfiniteTimeout, accept);
+		}
+
+		public object Receive(TimeSpan timeout, Predicate<object> accept)
 		{
 			using (MessageQueue queue = Open(QueueAccessMode.ReceiveAndAdmin))
 			{
 				try
 				{
-					MessageQueueTransactionType tt = MessageQueueTransactionType.None;
-
-					if (queue.Transactional)
-					{
-						EnsureThereIsATransactionScope();
-
-						tt = MessageQueueTransactionType.Automatic;
-					}
+					MessageQueueTransactionType transactionType = GetTransactionType(queue);
 
 					MessageEnumerator enumerator = queue.GetMessageEnumerator2();
-					while (enumerator.MoveNext())
+
+					while (enumerator.MoveNext(timeout))
 					{
 						Message msg = enumerator.Current;
-						Type messageType = Type.GetType(msg.Label);
 
-						if (messageType == typeof (T))
+						try
 						{
-							Message received = enumerator.RemoveCurrent(TimeSpan.FromSeconds(1), tt);
-							if (received.Id == msg.Id)
-							{
-								try
-								{
-									T obj = _formatter.Deserialize<T>(new MsmqFormattedBody(msg));
+							object obj = _formatter.Deserialize(new MsmqFormattedBody(msg));
 
+							if (accept(obj))
+							{
+								Message received = enumerator.RemoveCurrent(TimeSpan.FromSeconds(1), transactionType);
+								if (received.Id == msg.Id)
+								{
 									if (_log.IsDebugEnabled)
 										_log.DebugFormat("Queue: {0} Received Message Id {1}", queue.Path, msg.Id);
 
 									if (_messageLog.IsInfoEnabled)
-										_messageLog.InfoFormat("RECV:{0}:{1}:{3}", queue.Path, messageType, msg.Id);
+										_messageLog.InfoFormat("RECV:{0}:System.Object:{1}", queue.Path, msg.Id);
 
 									return obj;
 								}
-								catch (SerializationException ex)
+								else
 								{
-									throw new MessageException(messageType, string.Format("An error occurred serializing a message of type {0}", messageType.FullName), ex);
+									if (_log.IsDebugEnabled)
+										_log.DebugFormat("Queue: {0} Unmatched Message Id {1}", queue.Path, msg.Id);
+
+									enumerator.Close();
+									enumerator = queue.GetMessageEnumerator2();
 								}
 							}
 							else
 							{
 								if (_log.IsDebugEnabled)
-									_log.DebugFormat("Queue: {0} Unmatched Message Id {1}", queue.Path, msg.Id);
-
-								enumerator.Close();
-								enumerator = queue.GetMessageEnumerator2();
+									_log.DebugFormat("Queue: {0} Skipped Message Id {1}", queue.Path, msg.Id);
 							}
 						}
-						else
+						catch (SerializationException ex)
 						{
-							if (_log.IsDebugEnabled)
-								_log.DebugFormat("Queue: {0} Skipped Message Id {1}", queue.Path, msg.Id);
+							throw new MessageException(typeof (object), string.Format("An error occurred serializing a message of type {0}", typeof (object).FullName), ex);
 						}
 					}
 					enumerator.Close();
@@ -325,16 +311,44 @@ namespace MassTransit.ServiceBus.MSMQ
 			}
 		}
 
+		public T Receive<T>() where T : class
+		{
+			return Receive<T>(MessageQueue.InfiniteTimeout);
+		}
+
+		public T Receive<T>(TimeSpan timeout) where T : class
+		{
+			return (T) Receive(timeout, delegate(object obj)
+			                            	{
+			                            		Type messageType = obj.GetType();
+
+			                            		if (messageType != typeof (T))
+			                            			return false;
+
+			                            		return true;
+			                            	});
+		}
+
 		public T Receive<T>(Predicate<T> accept) where T : class
 		{
-			T result;
-			while ((result = Receive<T>()) != null)
-			{
-				if (accept(result))
-					return result;
-			}
+			return Receive(MessageQueue.InfiniteTimeout, accept);
+		}
 
-			return result;
+		public T Receive<T>(TimeSpan timeout, Predicate<T> accept) where T : class
+		{
+			return (T) Receive(timeout, delegate(object obj)
+			                            	{
+			                            		Type messageType = obj.GetType();
+
+			                            		if (messageType != typeof (T))
+			                            			return false;
+
+			                            		T message = obj as T;
+			                            		if (message == null)
+			                            			return false;
+
+			                            		return accept(message);
+			                            	});
 		}
 
 		public void Dispose()
@@ -344,6 +358,23 @@ namespace MassTransit.ServiceBus.MSMQ
 
 			if (_sender != null)
 				_sender.Dispose();
+		}
+
+		private MessageQueueTransactionType GetTransactionType(MessageQueue queue)
+		{
+			MessageQueueTransactionType transactionType = MessageQueueTransactionType.None;
+
+			if (queue.Transactional)
+			{
+				if (Transaction.Current == null)
+				{
+					throw new EndpointException(this, "This is a transactional endpoint that requires a TransactionScope to be open");
+				}
+
+				transactionType = MessageQueueTransactionType.Automatic;
+			}
+
+			return transactionType;
 		}
 
 		private static void HandleVariousErrorCodes(MessageQueueErrorCode code, Exception ex)
@@ -380,14 +411,6 @@ namespace MassTransit.ServiceBus.MSMQ
 					if (_log.IsErrorEnabled)
 						_log.Error("An error occured while communicating with the queue", ex);
 					break;
-			}
-		}
-
-		private void EnsureThereIsATransactionScope()
-		{
-			if (Transaction.Current == null)
-			{
-				throw new EndpointException(this, "This is a transactional endpoint, and requires a TransactionScope to be open");
 			}
 		}
 

@@ -55,8 +55,30 @@ namespace MassTransit.ServiceBus
 		/// <summary>
 		/// Receives any message from the endpoint
 		/// </summary>
-		/// <returns></returns>
+		/// <returns>The message object</returns>
 		object Receive();
+
+		/// <summary>
+		/// Receives any message from the endpoint
+		/// </summary>
+		/// <param name="timeout">The timeout to wait for the message</param>
+		/// <returns>The message object</returns>
+		object Receive(TimeSpan timeout);
+
+		/// <summary>
+		/// Receives any message from the endpoint
+		/// </summary>
+		/// <param name="accept">A predicate to see if the message is accepted by the caller</param>
+		/// <returns>The message object</returns>
+		object Receive(Predicate<object> accept);
+
+		/// <summary>
+		/// Receives any message from the endpoint
+		/// </summary>
+		/// <param name="timeout">The timeout to wait for the message</param>
+		/// <param name="accept">A predicate to see if the message is accepted by the caller</param>
+		/// <returns>The message object</returns>
+		object Receive(TimeSpan timeout, Predicate<object> accept);
 
 		/// <summary>
 		/// Receives a message from the endpoint
@@ -69,8 +91,25 @@ namespace MassTransit.ServiceBus
 		/// Receives a message from the endpoint
 		/// </summary>
 		/// <typeparam name="T">The type of message to receive</typeparam>
+		/// <param name="timeout">The timeout to wait for the message</param>
+		/// <returns>A message read from the endpoint</returns>
+		T Receive<T>(TimeSpan timeout) where T : class;
+
+		/// <summary>
+		/// Receives a message from the endpoint
+		/// </summary>
+		/// <typeparam name="T">The type of message to receive</typeparam>
 		/// <param name="accept">A predicate used to determine if the message would be accepted</param>
 		/// <returns>A message read from the endpoint</returns>
 		T Receive<T>(Predicate<T> accept) where T : class;
+
+		/// <summary>
+		/// Receives a message from the endpoint
+		/// </summary>
+		/// <typeparam name="T">The type of message to receive</typeparam>
+		/// <param name="timeout">The timeout to wait for the message</param>
+		/// <param name="accept">A predicate used to determine if the message would be accepted</param>
+		/// <returns>A message read from the endpoint</returns>
+		T Receive<T>(TimeSpan timeout, Predicate<T> accept) where T : class;
 	}
 }
