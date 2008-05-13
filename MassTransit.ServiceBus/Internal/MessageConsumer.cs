@@ -11,13 +11,14 @@
 /// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 /// specific language governing permissions and limitations under the License.
 
-using System;
-using System.Collections.Generic;
-using log4net;
-using MassTransit.ServiceBus.Exceptions;
-
 namespace MassTransit.ServiceBus.Internal
 {
+	using System;
+	using System.Collections.Generic;
+	using Exceptions;
+	using log4net;
+	using Threading;
+
 	/// <summary>
 	/// A message consumer is created when a service subscribes to a specific type of message
 	/// on a service bus. 
@@ -37,12 +38,12 @@ namespace MassTransit.ServiceBus.Internal
 		/// </summary>
 		/// <param name="callback">The function to call to handle the message</param>
 		/// <param name="condition">The condition function to determine if a message will be handled</param>
-		public void Subscribe(MessageReceivedCallback<T> callback, Predicate<T> condition)
+		public void Subscribe(Action<IMessageContext<T>> callback, Predicate<T> condition)
 		{
 			_callbacks.Add(new MessageConsumerCallbackItem<T>(callback, condition));
 		}
 
-		public void Unsubscribe(MessageReceivedCallback<T> callback, Predicate<T> condition)
+		public void Unsubscribe(Action<IMessageContext<T>> callback, Predicate<T> condition)
 		{
 			MessageConsumerCallbackItem<T> match = new MessageConsumerCallbackItem<T>(callback, condition);
 
@@ -108,8 +109,8 @@ namespace MassTransit.ServiceBus.Internal
 				catch (Exception ex)
 				{
 					throw new MessageConsumerException<T>(item,
-					                                    "There was an exception in the MessageConsumer.IsHandled",
-					                                    ex);
+					                                      "There was an exception in the MessageConsumer.IsHandled",
+					                                      ex);
 				}
 			}
 
@@ -127,6 +128,11 @@ namespace MassTransit.ServiceBus.Internal
 		}
 
 		#endregion
+
+		private void Dispatch(MessageContext<T> obj)
+		{
+			throw new NotImplementedException();
+		}
 	}
 
 	/// <summary>
@@ -136,14 +142,14 @@ namespace MassTransit.ServiceBus.Internal
 	public class MessageConsumerCallbackItem<T1> : IEquatable<MessageConsumerCallbackItem<T1>> where T1 : IMessage
 
 	{
-		private MessageReceivedCallback<T1> _callback;
+		private Action<IMessageContext<T1>> _callback;
 		private Predicate<T1> _condition;
 
 		/// <summary>
 		/// Initializes an instance of a <c ref="MessageConsumerCallbackItem" />
 		/// </summary>
 		/// <param name="callback">The callback method to handle the message</param>
-		public MessageConsumerCallbackItem(MessageReceivedCallback<T1> callback)
+		public MessageConsumerCallbackItem(Action<IMessageContext<T1>> callback)
 		{
 			_callback = callback;
 		}
@@ -153,7 +159,7 @@ namespace MassTransit.ServiceBus.Internal
 		/// </summary>
 		/// <param name="callback">The callback method to handle the message</param>
 		/// <param name="condition">The predicate used to check if the callback will handle the message</param>
-		public MessageConsumerCallbackItem(MessageReceivedCallback<T1> callback, Predicate<T1> condition)
+		public MessageConsumerCallbackItem(Action<IMessageContext<T1>> callback, Predicate<T1> condition)
 		{
 			_callback = callback;
 			_condition = condition;
@@ -162,7 +168,7 @@ namespace MassTransit.ServiceBus.Internal
 		/// <summary>
 		/// The callback method
 		/// </summary>
-		public MessageReceivedCallback<T1> Callback
+		public Action<IMessageContext<T1>> Callback
 		{
 			get { return _callback; }
 			set { _callback = value; }

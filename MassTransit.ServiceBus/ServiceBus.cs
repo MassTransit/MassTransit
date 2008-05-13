@@ -186,7 +186,7 @@ namespace MassTransit.ServiceBus
 		/// </summary>
 		/// <typeparam name="T">The message type to handle, often inferred from the callback specified</typeparam>
 		/// <param name="callback">The callback to invoke when messages of the specified type arrive on the service bus</param>
-		public void Subscribe<T>(MessageReceivedCallback<T> callback) where T : IMessage
+		public void Subscribe<T>(Action<IMessageContext<T>> callback) where T : IMessage
 		{
 			Subscribe(callback, null);
 		}
@@ -197,7 +197,7 @@ namespace MassTransit.ServiceBus
 		/// <typeparam name="T">The message type to handle, often inferred from the callback specified</typeparam>
 		/// <param name="callback">The callback to invoke when messages of the specified type arrive on the service bus</param>
 		/// <param name="condition">A condition predicate to filter which messages are handled by the callback</param>
-		public void Subscribe<T>(MessageReceivedCallback<T> callback, Predicate<T> condition) where T : IMessage
+		public void Subscribe<T>(Action<IMessageContext<T>> callback, Predicate<T> condition) where T : IMessage
 		{
 			lock (_consumersLock)
 			{
@@ -213,12 +213,12 @@ namespace MassTransit.ServiceBus
 			StartListening();
 		}
 
-		public void Unsubscribe<T>(MessageReceivedCallback<T> callback) where T : IMessage
+		public void Unsubscribe<T>(Action<IMessageContext<T>> callback) where T : IMessage
 		{
 			Unsubscribe(callback, null);
 		}
 
-		public void Unsubscribe<T>(MessageReceivedCallback<T> callback, Predicate<T> condition) where T : IMessage
+		public void Unsubscribe<T>(Action<IMessageContext<T>> callback, Predicate<T> condition) where T : IMessage
 		{
 			lock (_consumersLock)
 			{
