@@ -38,7 +38,7 @@ namespace MassTransit.ServiceBus
 		private readonly EndpointResolver _endpointResolver = new EndpointResolver();
 		private readonly IEndpoint _endpointToListenOn;
 		private IEndpoint _poisonEndpoint;
-		private ISubscriptionCache _subscriptionCache;
+		private readonly ISubscriptionCache _subscriptionCache;
 
         static ServiceBus()
         {
@@ -52,7 +52,14 @@ namespace MassTransit.ServiceBus
             }
         }
 
+        /// <summary>
+        /// Uses an in-memory subscription manager
+        /// </summary>
 		public ServiceBus(IEndpoint endpointToListenOn) : this(endpointToListenOn, new LocalSubscriptionCache()) {  }
+
+        /// <summary>
+        /// Uses the specified subscription cache
+        /// </summary>
         public ServiceBus(IEndpoint endpointToListenOn, ISubscriptionCache subscriptionCache)
         {
 			Check.Parameter(endpointToListenOn).WithMessage("endpointToListenOn").IsNotNull();
