@@ -84,7 +84,32 @@ namespace MassTransit.ServiceBus.Tests
             get { return _receiver; }
         }
 
-        public void Dispose()
+    	public void Send<T>(T message) where T : class
+    	{
+    		throw new NotImplementedException();
+    	}
+
+    	public void Send<T>(T message, TimeSpan timeToLive) where T : class
+    	{
+    		throw new NotImplementedException();
+    	}
+
+    	public object Receive()
+    	{
+    		throw new NotImplementedException();
+    	}
+
+    	public T Receive<T>() where T : class
+    	{
+    		throw new NotImplementedException();
+    	}
+
+    	public T Receive<T>(Predicate<T> accept) where T : class
+    	{
+    		throw new NotImplementedException();
+    	}
+
+    	public void Dispose()
         {
             throw new NotImplementedException();
         }

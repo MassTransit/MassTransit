@@ -12,24 +12,31 @@
 /// specific language governing permissions and limitations under the License.
 namespace MassTransit.ServiceBus.Formatters
 {
-    using System.Runtime.Serialization;
-    using System.Runtime.Serialization.Formatters.Binary;
+	using System.Runtime.Serialization;
+	using System.Runtime.Serialization.Formatters.Binary;
 
-    public class BinaryBodyFormatter
-        : IBodyFormatter
-    {
-        private static readonly IFormatter _formatter = new BinaryFormatter();
+	public class BinaryBodyFormatter
+		: IBodyFormatter
+	{
+		private static readonly IFormatter _formatter = new BinaryFormatter();
 
-        public void Serialize(IFormattedBody body, params IMessage[] messages)
-        {
-            _formatter.Serialize(body.BodyStream, messages);
-        }
+		public void Serialize(IFormattedBody body, object message)
+		{
+			_formatter.Serialize(body.BodyStream, message);
+		}
 
-        public IMessage[] Deserialize(IFormattedBody formattedBody)
-        {
-            IMessage[] messages = _formatter.Deserialize(formattedBody.BodyStream) as IMessage[];
+		public T Deserialize<T>(IFormattedBody formattedBody) where T : class
+		{
+			T messages = _formatter.Deserialize(formattedBody.BodyStream) as T;
 
-            return messages;
-        }
-    }
+			return messages;
+		}
+
+		object IBodyFormatter.Deserialize(IFormattedBody formattedBody)
+		{
+			object obj = _formatter.Deserialize(formattedBody.BodyStream);
+
+			return obj;
+		}
+	}
 }

@@ -12,69 +12,94 @@
 /// specific language governing permissions and limitations under the License.
 namespace MassTransit.ServiceBus.NMS
 {
-    using System;
-    using Internal;
+	using System;
+	using Internal;
 
-    public class NmsEndpoint :
-        INmsEndpoint
-    {
-        private IMessageReceiver _receiver;
-        private IMessageSender _sender;
-        private Uri _uri;
+	public class NmsEndpoint :
+		INmsEndpoint
+	{
+		private IMessageReceiver _receiver;
+		private IMessageSender _sender;
+		private Uri _uri;
 
-        public NmsEndpoint(Uri uri)
-        {
-            _uri = uri;
-        }
+		public NmsEndpoint(Uri uri)
+		{
+			_uri = uri;
+		}
 
-        public NmsEndpoint(string uriString)
-        {
-            _uri = new Uri(uriString);
-        }
+		public NmsEndpoint(string uriString)
+		{
+			_uri = new Uri(uriString);
+		}
 
-        #region INmsEndpoint Members
+		#region INmsEndpoint Members
 
-        public Uri Uri
-        {
-            get { return _uri; }
-        }
+		public Uri Uri
+		{
+			get { return _uri; }
+		}
 
-        public IMessageSender Sender
-        {
-            get
-            {
-                lock (this)
-                {
-                    if (_sender == null)
-                        _sender = new NmsMessageSender(this);
-                }
-                return _sender;
-            }
-        }
+		public IMessageSender Sender
+		{
+			get
+			{
+				lock (this)
+				{
+					if (_sender == null)
+						_sender = new NmsMessageSender(this);
+				}
+				return _sender;
+			}
+		}
 
-        public IMessageReceiver Receiver
-        {
-            get
-            {
-                lock (this)
-                {
-                    if (_receiver == null)
-                        _receiver = new NmsMessageReceiver(this);
-                }
+		public IMessageReceiver Receiver
+		{
+			get
+			{
+				lock (this)
+				{
+					if (_receiver == null)
+						_receiver = new NmsMessageReceiver(this);
+				}
 
-                return _receiver;
-            }
-        }
+				return _receiver;
+			}
+		}
 
-        public void Dispose()
-        {
-            if (_receiver != null)
-                _receiver.Dispose();
+		public void Send<T>(T message) where T : class
+		{
+			throw new NotImplementedException();
+		}
 
-            if (_sender != null)
-                _sender.Dispose();
-        }
+		public void Send<T>(T message, TimeSpan timeToLive) where T : class
+		{
+			throw new NotImplementedException();
+		}
 
-        #endregion
-    }
+		public object Receive()
+		{
+			throw new NotImplementedException();
+		}
+
+		public T Receive<T>() where T : class
+		{
+			throw new NotImplementedException();
+		}
+
+		public T Receive<T>(Predicate<T> accept) where T : class
+		{
+			throw new NotImplementedException();
+		}
+
+		public void Dispose()
+		{
+			if (_receiver != null)
+				_receiver.Dispose();
+
+			if (_sender != null)
+				_sender.Dispose();
+		}
+
+		#endregion
+	}
 }
