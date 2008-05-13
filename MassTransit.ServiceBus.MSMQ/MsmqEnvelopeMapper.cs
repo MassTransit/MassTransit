@@ -57,7 +57,7 @@ namespace MassTransit.ServiceBus.MSMQ
 				e.ArrivedTime = msg.ArrivedTime;
 			}
 
-			IMessage[] messages = _formatter.Deserialize(new MsmqFormattedBody(msg));
+			IMessage[] messages = _formatter.Deserialize<IMessage[]>(new MsmqFormattedBody(msg));
 
 			e.Messages = messages ?? new IMessage[] {};
 

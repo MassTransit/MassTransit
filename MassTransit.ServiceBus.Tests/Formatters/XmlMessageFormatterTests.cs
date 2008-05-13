@@ -73,7 +73,7 @@ namespace MassTransit.ServiceBus.Tests.Formatters
             }
             using (mocks.Playback())
             {
-                IMessage[] msgs = formatter.Deserialize(mockBody);
+                IMessage[] msgs = formatter.Deserialize<IMessage[]>(mockBody);
 
                 Assert.AreEqual(1, msgs.Length);
 

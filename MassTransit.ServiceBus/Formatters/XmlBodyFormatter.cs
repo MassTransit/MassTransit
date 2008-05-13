@@ -16,33 +16,26 @@ namespace MassTransit.ServiceBus.Formatters
 			_serializer = new XmlSerializer(typeof (object[]), types.ToArray());
 		}
 
-		#region IMessageFormatter Members
-
-		public void Serialize(IFormattedBody body, params IMessage[] messages)
+		public void Serialize(IFormattedBody body, object message)
 		{
-			List<object> objects = new List<object>();
-			objects.AddRange(messages);
-
-			_serializer.Serialize(body.BodyStream, objects.ToArray());
+			_serializer.Serialize(body.BodyStream, message);
 		}
 
-		public IMessage[] Deserialize(IFormattedBody formattedBody)
+		public T Deserialize<T>(IFormattedBody formattedBody) where T : class
 		{
 			object result = _serializer.Deserialize(formattedBody.BodyStream);
 
-			List<IMessage> messages = new List<IMessage>();
+			if (result.GetType() == typeof(T))
+				return (T)result;
 
-			if (result is object[])
-			{
-				foreach (object o in (object[]) result)
-				{
-					messages.Add((IMessage) o);
-				}
-			}
-
-			return messages.ToArray();
+			return default(T);
 		}
 
-		#endregion
+		object IBodyFormatter.Deserialize(IFormattedBody formattedBody)
+		{
+			object result = _serializer.Deserialize(formattedBody.BodyStream);
+
+			return result;
+		}
 	}
 }

@@ -10,13 +10,16 @@
 /// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 /// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 /// specific language governing permissions and limitations under the License.
-
 namespace MassTransit.ServiceBus.MSMQ
 {
 	using System;
 	using System.Messaging;
+	using System.Runtime.Serialization;
+	using System.Transactions;
 	using Exceptions;
+	using Formatters;
 	using Internal;
+	using log4net;
 
 	/// <summary>
 	/// A MessageQueueEndpoint is an implementation of an endpoint using the Microsoft Message Queue service.
@@ -24,9 +27,14 @@ namespace MassTransit.ServiceBus.MSMQ
 	public class MsmqEndpoint :
 		IMsmqEndpoint
 	{
+		private static readonly IBodyFormatter _formatter = new BinaryBodyFormatter();
+		private static readonly ILog _log = LogManager.GetLogger(typeof (MsmqEndpoint));
+		private static readonly ILog _messageLog = LogManager.GetLogger("MassTransit.Messages");
 		private readonly string _queuePath;
 		private readonly Uri _uri;
 		private IMessageReceiver _receiver;
+
+		private bool _reliableMessaging = true;
 		private IMessageSender _sender;
 
 		/// <summary>
@@ -97,6 +105,12 @@ namespace MassTransit.ServiceBus.MSMQ
 
 		#region IMessageQueueEndpoint Members
 
+		public bool ReliableMessaging
+		{
+			get { return _reliableMessaging; }
+			set { _reliableMessaging = value; }
+		}
+
 		/// <summary>
 		/// The path of the message queue for the endpoint. Suitable for use with <c ref="MessageQueue" />.Open
 		/// to access a message queue.
@@ -153,10 +167,176 @@ namespace MassTransit.ServiceBus.MSMQ
 			}
 		}
 
-		///<summary>
-		///Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
-		///</summary>
-		///<filterpriority>2</filterpriority>
+		public void Send<T>(T message) where T : class
+		{
+			Send(message, MessageQueue.InfiniteTimeout);
+		}
+
+		public void Send<T>(T message, TimeSpan timeToLive) where T : class
+		{
+			Type messageType = typeof (T);
+
+			if (!messageType.IsSerializable)
+				throw new MessageException(messageType, string.Format("The type {0} must be serializable", messageType.FullName));
+
+			Message msg = new Message();
+
+			_formatter.Serialize(new MsmqFormattedBody(msg), message);
+
+			if (timeToLive < MessageQueue.InfiniteTimeout)
+				msg.TimeToBeReceived = timeToLive;
+
+			msg.Label = messageType.AssemblyQualifiedName;
+
+			msg.Recoverable = _reliableMessaging;
+
+			try
+			{
+				if (_messageLog.IsInfoEnabled)
+					_messageLog.InfoFormat("Message {0} Sent To {1}", messageType, Uri);
+
+				using (MessageQueue queue = Open(QueueAccessMode.SendAndReceive))
+				{
+					MessageQueueTransactionType tt = MessageQueueTransactionType.None;
+
+					if (queue.Transactional)
+					{
+						EnsureThereIsATransactionScope();
+
+						tt = MessageQueueTransactionType.Automatic;
+					}
+
+					queue.Send(msg, tt);
+				}
+			}
+			catch (MessageQueueException ex)
+			{
+				throw new EndpointException(this, "Problem with " + QueuePath, ex);
+			}
+
+			if (_log.IsDebugEnabled)
+				_log.DebugFormat("Message Sent: Id = {0}, Message Type = {1}", msg.Id, messageType);
+		}
+
+		public object Receive()
+		{
+			using (MessageQueue queue = Open(QueueAccessMode.ReceiveAndAdmin))
+			{
+				try
+				{
+					MessageQueueTransactionType tt = MessageQueueTransactionType.None;
+
+					if (queue.Transactional)
+					{
+						EnsureThereIsATransactionScope();
+
+						tt = MessageQueueTransactionType.Automatic;
+					}
+
+					Message msg = queue.Receive(tt);
+					Type messageType = Type.GetType(msg.Label);
+
+					try
+					{
+						object obj = _formatter.Deserialize(new MsmqFormattedBody(msg));
+
+						return obj;
+					}
+					catch (SerializationException ex)
+					{
+						throw new MessageException(messageType, string.Format("An error occurred serializing a message of type {0}", messageType.FullName), ex);
+					}
+				}
+				catch (MessageQueueException ex)
+				{
+					HandleVariousErrorCodes(ex.MessageQueueErrorCode, ex);
+					throw;
+				}
+			}
+		}
+
+		public T Receive<T>() where T : class
+		{
+			using (MessageQueue queue = Open(QueueAccessMode.ReceiveAndAdmin))
+			{
+				try
+				{
+					MessageQueueTransactionType tt = MessageQueueTransactionType.None;
+
+					if (queue.Transactional)
+					{
+						EnsureThereIsATransactionScope();
+
+						tt = MessageQueueTransactionType.Automatic;
+					}
+
+					MessageEnumerator enumerator = queue.GetMessageEnumerator2();
+					while (enumerator.MoveNext())
+					{
+						Message msg = enumerator.Current;
+						Type messageType = Type.GetType(msg.Label);
+
+						if (messageType == typeof (T))
+						{
+							Message received = enumerator.RemoveCurrent(TimeSpan.FromSeconds(1), tt);
+							if (received.Id == msg.Id)
+							{
+								try
+								{
+									T obj = _formatter.Deserialize<T>(new MsmqFormattedBody(msg));
+
+									if (_log.IsDebugEnabled)
+										_log.DebugFormat("Queue: {0} Received Message Id {1}", queue.Path, msg.Id);
+
+									if (_messageLog.IsInfoEnabled)
+										_messageLog.InfoFormat("RECV:{0}:{1}:{3}", queue.Path, messageType, msg.Id);
+
+									return obj;
+								}
+								catch (SerializationException ex)
+								{
+									throw new MessageException(messageType, string.Format("An error occurred serializing a message of type {0}", messageType.FullName), ex);
+								}
+							}
+							else
+							{
+								if (_log.IsDebugEnabled)
+									_log.DebugFormat("Queue: {0} Unmatched Message Id {1}", queue.Path, msg.Id);
+
+								enumerator.Close();
+								enumerator = queue.GetMessageEnumerator2();
+							}
+						}
+						else
+						{
+							if (_log.IsDebugEnabled)
+								_log.DebugFormat("Queue: {0} Skipped Message Id {1}", queue.Path, msg.Id);
+						}
+					}
+					enumerator.Close();
+				}
+				catch (MessageQueueException ex)
+				{
+					HandleVariousErrorCodes(ex.MessageQueueErrorCode, ex);
+					throw;
+				}
+
+				return null;
+			}
+		}
+
+		public T Receive<T>(Predicate<T> accept) where T : class
+		{
+			T result;
+			while ((result = Receive<T>()) != null)
+			{
+				if (accept(result))
+					return result;
+			}
+
+			return result;
+		}
+
 		public void Dispose()
 		{
 			if (_receiver != null)
@@ -166,25 +346,55 @@ namespace MassTransit.ServiceBus.MSMQ
 				_sender.Dispose();
 		}
 
+		private static void HandleVariousErrorCodes(MessageQueueErrorCode code, Exception ex)
+		{
+			switch (code)
+			{
+				case MessageQueueErrorCode.IOTimeout:
+					// this is OK its just a normal timeout
+					break;
+
+				case MessageQueueErrorCode.AccessDenied:
+				case MessageQueueErrorCode.QueueNotAvailable:
+				case MessageQueueErrorCode.ServiceNotAvailable:
+				case MessageQueueErrorCode.QueueDeleted:
+					if (_log.IsErrorEnabled)
+						_log.Error("There was a problem accessing the queue", ex);
+					break;
+
+				case MessageQueueErrorCode.QueueNotFound:
+				case MessageQueueErrorCode.IllegalFormatName:
+				case MessageQueueErrorCode.MachineNotFound:
+					if (_log.IsErrorEnabled)
+						_log.Error("The message queue does not exist", ex);
+					break;
+
+				case MessageQueueErrorCode.MessageAlreadyReceived:
+					// we are competing with another consumer, no reason to report an error since
+					// the message has already been handled.
+					if (_log.IsDebugEnabled)
+						_log.DebugFormat("Message received by another receiver before it could be retrieved");
+					break;
+
+				default:
+					if (_log.IsErrorEnabled)
+						_log.Error("An error occured while communicating with the queue", ex);
+					break;
+			}
+		}
+
+		private void EnsureThereIsATransactionScope()
+		{
+			if (Transaction.Current == null)
+			{
+				throw new EndpointException(this, "This is a transactional endpoint, and requires a TransactionScope to be open");
+			}
+		}
+
 		#endregion
 
-		//private MessageQueueTransactionType GetTransactionType()
-		//{
-		//    MessageQueueTransactionType tt = MessageQueueTransactionType.None;
-		//    if (_queue.Transactional)
-		//    {
-		//        Check.RequireTransaction(
-		//            string.Format(
-		//                "The current queue {0} is transactional and this MessageQueueEndpoint is not running in a transaction.",
-		//                _uri));
-
-		//        tt = MessageQueueTransactionType.Automatic;
-		//    }
-		//    return tt;
-		//}
-
 		/// <summary>
-		/// Implicitly creates a <c ref="MessageQueueEndpoint" />.
+		/// Implicitly creates a <c ref="MsmqEndpoint" />.
 		/// </summary>
 		/// <param name="queueUri">A string identifying the URI of the message queue (ex. msmq://localhost/my_queue)</param>
 		/// <returns>An instance of the MessageQueueEndpoint class</returns>

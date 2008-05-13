@@ -36,5 +36,41 @@ namespace MassTransit.ServiceBus
 		/// Returns an interface to receive messages on this endpoint
 		/// </summary>
 		IMessageReceiver Receiver { get; }
+
+		/// <summary>
+		/// Sends a message to the endpoint
+		/// </summary>
+		/// <typeparam name="T">The type of the message to send</typeparam>
+		/// <param name="message">The message to send</param>
+		void Send<T>(T message) where T : class;
+
+		/// <summary>
+		/// Sends a message to the endpoint
+		/// </summary>
+		/// <typeparam name="T">The type of the message to send</typeparam>
+		/// <param name="message">The message to send</param>
+		/// <param name="timeToLive">The maximum time for the message to be received before it expires</param>
+		void Send<T>(T message, TimeSpan timeToLive) where T : class;
+
+		/// <summary>
+		/// Receives any message from the endpoint
+		/// </summary>
+		/// <returns></returns>
+		object Receive();
+
+		/// <summary>
+		/// Receives a message from the endpoint
+		/// </summary>
+		/// <typeparam name="T">The type of message to receive</typeparam>
+		/// <returns>A message read from the endpoint</returns>
+		T Receive<T>() where T : class;
+
+		/// <summary>
+		/// Receives a message from the endpoint
+		/// </summary>
+		/// <typeparam name="T">The type of message to receive</typeparam>
+		/// <param name="accept">A predicate used to determine if the message would be accepted</param>
+		/// <returns>A message read from the endpoint</returns>
+		T Receive<T>(Predicate<T> accept) where T : class;
 	}
 }
