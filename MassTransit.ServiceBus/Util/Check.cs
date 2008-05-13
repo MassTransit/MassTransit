@@ -16,7 +16,9 @@ using System.Diagnostics;
 
 namespace MassTransit.ServiceBus.Util
 {
+    using System.Reflection;
     using System.Transactions;
+    using Exceptions;
 
     /// <summary>
 	/// Check class for verifying the condition of items included in interface contracts
@@ -78,6 +80,18 @@ namespace MassTransit.ServiceBus.Util
 				Trace.Assert(assertion, "Postcondition: " + message);
 			}
 		}
+
+        public static void EnsureSerializable(IMessage message)
+        {
+            Type t = message.GetType();
+            object[] attributes = t.GetCustomAttributes(typeof (SerializableAttribute), false);
+
+            if(attributes == null || attributes.Length == 0)
+            {
+                throw new ConventionException("Messages must be marked with the 'Serializable' attribute!");
+            }
+            
+        }
 
 		#region Nested type: ObjectCheck
 

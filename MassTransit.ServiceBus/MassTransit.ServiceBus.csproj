@@ -43,6 +43,7 @@
     <Compile Include="..\SolutionVersion.cs">
       <Link>SolutionVersion.cs</Link>
     </Compile>
+    <Compile Include="Exceptions\ConventionException.cs" />
     <Compile Include="Exceptions\ShutDownException.cs" />
     <Compile Include="Internal\EndpointResolver.cs" />
     <Compile Include="Formatters\BinaryBodyFormatter.cs" />
