@@ -123,7 +123,7 @@ namespace MassTransit.ServiceBus.MSMQ.Tests
 			{
 				ManualResetEvent _updateEvent = new ManualResetEvent(false);
 
-				MessageReceivedCallback<UpdateMessage> handler =
+				Action<IMessageContext<UpdateMessage>> handler =
 					delegate(IMessageContext<UpdateMessage> ctx)
 						{
 							_updateEvent.Set();

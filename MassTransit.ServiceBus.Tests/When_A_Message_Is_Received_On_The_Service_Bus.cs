@@ -49,7 +49,7 @@ namespace MassTransit.ServiceBus.Tests
             using (mocks.Playback())
             {
 
-                MessageReceivedCallback<PingMessage> handler = delegate { _received = true; };
+                Action<IMessageContext<PingMessage>> handler = delegate { _received = true; };
                 _serviceBus.Subscribe(handler);
 
                 _serviceBus.Deliver(new Envelope(mockServiceBusEndPoint, new PingMessage()));

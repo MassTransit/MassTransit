@@ -87,6 +87,7 @@
     <Compile Include="Subscriptions\SubscriptionClient.cs" />
     <Compile Include="Subscriptions\SubscriptionService.cs" />
     <Compile Include="Threading\IWorker.cs" />
+    <Compile Include="Threading\ManagedThreadPool.cs" />
     <Compile Include="Threading\MultiThreadedWorker.cs" />
     <Compile Include="Threading\SingleThreadedWorker.cs" />
     <Compile Include="Util\Check.cs" />

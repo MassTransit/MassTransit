@@ -37,7 +37,7 @@ namespace MassTransit.ServiceBus
 		/// </summary>
 		/// <typeparam name="T">The message type to handle, often inferred from the callback specified</typeparam>
 		/// <param name="callback">The callback to invoke when messages of the specified type arrive on the service bus</param>
-		void Subscribe<T>(MessageReceivedCallback<T> callback) where T : IMessage;
+		void Subscribe<T>(Action<IMessageContext<T>> callback) where T : IMessage;
 
 		/// <summary>
 		/// Adds a message handler to the service bus for handling a specific type of message
@@ -45,14 +45,14 @@ namespace MassTransit.ServiceBus
 		/// <typeparam name="T">The message type to handle, often inferred from the callback specified</typeparam>
 		/// <param name="callback">The callback to invoke when messages of the specified type arrive on the service bus</param>
 		/// <param name="condition">A condition predicate to filter which messages are handled by the callback</param>
-		void Subscribe<T>(MessageReceivedCallback<T> callback, Predicate<T> condition) where T : IMessage;
+		void Subscribe<T>(Action<IMessageContext<T>> callback, Predicate<T> condition) where T : IMessage;
 
 		/// <summary>
 		/// Removes a message handler from the service bus
 		/// </summary>
 		/// <typeparam name="T">The message type handled by the handler</typeparam>
 		/// <param name="callback">The callback to remove</param>
-		void Unsubscribe<T>(MessageReceivedCallback<T> callback) where T : IMessage;
+		void Unsubscribe<T>(Action<IMessageContext<T>> callback) where T : IMessage;
 
 		/// <summary>
 		/// Removes a message handler from the service bus
@@ -60,7 +60,7 @@ namespace MassTransit.ServiceBus
 		/// <typeparam name="T">The message type handled by the handler</typeparam>
 		/// <param name="callback">The callback to remove</param>
 		/// <param name="condition">A condition predicate to filter which messages are handled by the callback</param>
-		void Unsubscribe<T>(MessageReceivedCallback<T> callback, Predicate<T> condition) where T : IMessage;
+		void Unsubscribe<T>(Action<IMessageContext<T>> callback, Predicate<T> condition) where T : IMessage;
 
 		/// <summary>
 		/// Publishes a message to all subscribed consumers for the message type

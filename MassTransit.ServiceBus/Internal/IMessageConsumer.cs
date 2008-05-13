@@ -48,14 +48,14 @@ namespace MassTransit.ServiceBus.Internal
         /// </summary>
         /// <param name="callback">The function to call to handle the message</param>
         /// <param name="condition">The condition function to determine if a message will be handled</param>
-        void Subscribe(MessageReceivedCallback<T> callback, Predicate<T> condition);
+        void Subscribe(Action<IMessageContext<T>> callback, Predicate<T> condition);
 
         /// <summary>
         /// Removes a subscription to the message type for the specified handler
         /// </summary>
         /// <param name="callback">The function to call to handle the message</param>
         /// <param name="condition">The condition function to determine if a message will be handled</param>
-        void Unsubscribe(MessageReceivedCallback<T> callback, Predicate<T> condition);
+        void Unsubscribe(Action<IMessageContext<T>> callback, Predicate<T> condition);
 
         /// <summary>
         /// The number of subscribers handling this message type
@@ -77,11 +77,4 @@ namespace MassTransit.ServiceBus.Internal
         /// <returns>True if the message will be handled, otherwise false.</returns>
         bool IsHandled(T message);
     }
-
-    /// <summary>
-    /// The delegate for a message consumer
-    /// </summary>
-    /// <typeparam name="T">The type of message being delivered to the consumer</typeparam>
-    /// <param name="ctx">The context of the received message</param>
-    public delegate void MessageReceivedCallback<T>(IMessageContext<T> ctx) where T : IMessage;
 }
