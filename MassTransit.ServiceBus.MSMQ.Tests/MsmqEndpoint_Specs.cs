@@ -74,7 +74,7 @@ namespace MassTransit.ServiceBus.MSMQ.Tests
 
 				endpoint.Send(message);
 
-				CustomMessage readMessage = endpoint.Receive<CustomMessage>();
+				CustomMessage readMessage = endpoint.Receive<CustomMessage>(TimeSpan.FromSeconds(5));
 
 				Assert.That(readMessage, Is.Not.Null);
 			}
@@ -92,11 +92,11 @@ namespace MassTransit.ServiceBus.MSMQ.Tests
 				endpoint.Send(new WrongMessage());
 				endpoint.Send(new CustomMessage());
 
-				CustomMessage customMessage = endpoint.Receive<CustomMessage>();
+				CustomMessage customMessage = endpoint.Receive<CustomMessage>(TimeSpan.FromSeconds(3));
 
 				Assert.That(customMessage, Is.Not.Null);
 
-				WrongMessage wrongMessage = endpoint.Receive<WrongMessage>();
+				WrongMessage wrongMessage = endpoint.Receive<WrongMessage>(TimeSpan.FromSeconds(3));
 
 				Assert.That(wrongMessage, Is.Not.Null);
 			}
@@ -121,7 +121,7 @@ namespace MassTransit.ServiceBus.MSMQ.Tests
 
 				endpoint.Send(message);
 
-				CustomMessage readMessage = endpoint.Receive<CustomMessage>(
+				CustomMessage readMessage = endpoint.Receive<CustomMessage>(TimeSpan.FromSeconds(3),
 					delegate(CustomMessage msg) { return Equals(msg.Name, name); });
 
 				Assert.That(readMessage, Is.Not.Null);
