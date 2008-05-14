@@ -4,7 +4,7 @@ namespace MassTransit.ServiceBus.Internal
 	/// A correlated message dispatcher sends a message to any attached consumers
 	/// with a matching correlation identifier
 	/// </summary>
-	public interface IExternalMessageDispatcher
+	public interface IMessageDispatcher
 	{
 		/// <summary>
 		/// Dispatches a message

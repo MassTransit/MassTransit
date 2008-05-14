@@ -7,9 +7,9 @@ namespace MassTransit.ServiceBus.Internal
 	/// Manages and dispatches messages to correlated message consumers
 	/// </summary>
 	public class CorrelatedMessageDispatcher :
-		IExternalMessageDispatcher
+		IMessageDispatcher
 	{
-		private readonly Dictionary<Type, IExternalMessageDispatcher> _dispatchers = new Dictionary<Type, IExternalMessageDispatcher>();
+		private readonly Dictionary<Type, IMessageDispatcher> _dispatchers = new Dictionary<Type, IMessageDispatcher>();
 		private readonly Dictionary<Type, Type> _messageTypeToKeyType = new Dictionary<Type, Type>();
 
 		public bool Dispatch(object message)
@@ -43,7 +43,7 @@ namespace MassTransit.ServiceBus.Internal
 
 					Type dispatcherType = typeof (CorrelationIdDispatcher<,>).MakeGenericType(arguments);
 
-					IExternalMessageDispatcher dispatcher = (IExternalMessageDispatcher) Activator.CreateInstance(dispatcherType);
+					IMessageDispatcher dispatcher = (IMessageDispatcher) Activator.CreateInstance(dispatcherType);
 
 					_messageTypeToKeyType.Add(arguments[0], arguments[1]);
 					_dispatchers.Add(arguments[1], dispatcher);
