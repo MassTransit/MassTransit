@@ -194,7 +194,18 @@ namespace MassTransit.ServiceBus.MSMQ
 								{
 									//TODO: Is this where the transaction support would go?
 									//TODO: Does this support transactionality?
-									Message received = enumerator.RemoveCurrent(TimeSpan.FromSeconds(1));
+								    Message received;
+                                    if(_queue.Transactional)
+                                    {
+                                        received =
+                                            enumerator.RemoveCurrent(TimeSpan.FromSeconds(1),
+                                                                     MessageQueueTransactionType.Automatic);
+                                    }
+                                    else
+                                    {
+                                        received = enumerator.RemoveCurrent(TimeSpan.FromSeconds(1));
+                                    }
+
 									if (received.Id == msg.Id)
 									{
 										if (_messageLog.IsInfoEnabled)
