@@ -43,9 +43,13 @@
     <Compile Include="..\SolutionVersion.cs">
       <Link>SolutionVersion.cs</Link>
     </Compile>
+    <Compile Include="CorrelatedBy.cs" />
     <Compile Include="Exceptions\ConventionException.cs" />
     <Compile Include="Exceptions\MessageException.cs" />
     <Compile Include="Exceptions\ShutDownException.cs" />
+    <Compile Include="Internal\ConsumerDispatcher.cs" />
+    <Compile Include="Internal\CorrelatedMessageDispatcher.cs" />
+    <Compile Include="Internal\CorrelationIdDispatcher.cs" />
     <Compile Include="Internal\EndpointResolver.cs" />
     <Compile Include="Formatters\BinaryBodyFormatter.cs" />
     <Compile Include="Formatters\IFormattedBody.cs" />
@@ -58,9 +62,11 @@
     <Compile Include="IHostedService.cs" />
     <Compile Include="IEndpoint.cs" />
     <Compile Include="IEnvelope.cs" />
+    <Compile Include="Internal\IConsumerDispatcher.cs" />
     <Compile Include="Internal\IEnvelopeConsumer.cs" />
     <Compile Include="IMessage.cs" />
     <Compile Include="Internal\IEnvelopeMapper.cs" />
+    <Compile Include="Internal\IExternalMessageDispatcher.cs" />
     <Compile Include="Internal\IMessageConsumer.cs" />
     <Compile Include="IMessageContext.cs" />
     <Compile Include="Internal\IMessageReceiver.cs" />
