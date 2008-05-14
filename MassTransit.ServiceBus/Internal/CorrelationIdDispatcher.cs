@@ -3,7 +3,7 @@ namespace MassTransit.ServiceBus.Internal
 	using System.Collections.Generic;
 
 	public class CorrelationIdDispatcher<T, V> :
-		IExternalMessageDispatcher
+		IMessageDispatcher
 		where T : class, CorrelatedBy<V>
 	{
 		private readonly Dictionary<V, IConsumerDispatcher<T>> _dispatchers = new Dictionary<V, IConsumerDispatcher<T>>();
