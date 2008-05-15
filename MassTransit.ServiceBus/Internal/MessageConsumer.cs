@@ -10,14 +10,12 @@
 /// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 /// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 /// specific language governing permissions and limitations under the License.
-
 namespace MassTransit.ServiceBus.Internal
 {
 	using System;
 	using System.Collections.Generic;
 	using Exceptions;
 	using log4net;
-	using Threading;
 
 	/// <summary>
 	/// A message consumer is created when a service subscribes to a specific type of message

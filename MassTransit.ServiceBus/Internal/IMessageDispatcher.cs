@@ -19,5 +19,12 @@ namespace MassTransit.ServiceBus.Internal
 		/// <typeparam name="T">The component type</typeparam>
 		/// <param name="component">The component</param>
 		void Subscribe<T>(T component) where T : class;
+
+		/// <summary>
+		/// Disconnects any consumers for the component from the message dispatcher
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="component"></param>
+		void Unsubscribe<T>(T component) where T : class;
 	}
 }

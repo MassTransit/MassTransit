@@ -4,5 +4,6 @@ namespace MassTransit.ServiceBus.Internal
 	{
 		bool Dispatch(T message);
 		void Subscribe(Consumes<T>.Any consumer);
+		void Unsubscribe(Consumes<T>.Any consumer);
 	}
 }
