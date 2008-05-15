@@ -55,7 +55,7 @@ namespace MassTransit.ServiceBus.Formatters
 					}
 					catch (Exception ex)
 					{
-						// NOTE if we have a problem, we just ignore that assembly
+						// NOTE: if we have a problem, we just ignore that assembly
                         _log.ErrorFormat("Encountered a problem loading messages in assembly {0}. Exception was {1}", assembly.FullName, ex.Message);
 					}
 				}

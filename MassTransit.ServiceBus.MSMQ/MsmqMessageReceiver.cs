@@ -194,8 +194,6 @@ namespace MassTransit.ServiceBus.MSMQ
 
 								if (this.Consumer.IsInterested(env))
 								{
-									//TODO: Is this where the transaction support would go?
-									//TODO: Does this support transactionality?
 								    Message received;
                                     if(_queue.Transactional)
                                     {
