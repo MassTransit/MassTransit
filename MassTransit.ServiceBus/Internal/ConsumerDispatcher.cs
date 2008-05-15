@@ -2,9 +2,12 @@ namespace MassTransit.ServiceBus.Internal
 {
 	using System.Collections.Generic;
 
-	public class ConsumerDispatcher<T> : IConsumerDispatcher<T> where T : class
+	public class ConsumerDispatcher<T> :
+		IConsumerDispatcher<T> where T : class
 	{
 		private readonly List<Consumes<T>.Any> _consumers = new List<Consumes<T>.Any>();
+
+		#region IConsumerDispatcher<T> Members
 
 		public bool Dispatch(T message)
 		{
@@ -21,7 +24,16 @@ namespace MassTransit.ServiceBus.Internal
 
 		public void Subscribe(Consumes<T>.Any consumer)
 		{
-			_consumers.Add(consumer);
+			if (!_consumers.Contains(consumer))
+				_consumers.Add(consumer);
 		}
+
+		public void Unsubscribe(Consumes<T>.Any consumer)
+		{
+			if (_consumers.Contains(consumer))
+				_consumers.Remove(consumer);
+		}
+
+		#endregion
 	}
 }

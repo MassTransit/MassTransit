@@ -52,5 +52,10 @@ namespace MassTransit.ServiceBus.Internal
 				}
 			}
 		}
+
+		public void Unsubscribe<T>(T component) where T : class
+		{
+			throw new NotImplementedException();
+		}
 	}
 }
