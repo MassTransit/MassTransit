@@ -9,7 +9,8 @@ namespace MassTransit.ServiceBus.Internal
 	public class MessageDispatcher :
 		IMessageDispatcher
 	{
-		private static readonly Type _consumes = typeof (Consumes<>);
+		private static readonly Type _consumes = typeof (Consumes<>.Any);
+		private static readonly Type _consumesSelected = typeof (Consumes<>.Selected);
 		private static readonly Type _consumesFor = typeof (Consumes<>.For<>);
 		private readonly Dictionary<Type, IMessageDispatcher> _correlatedDispatchers = new Dictionary<Type, IMessageDispatcher>();
 		private readonly Dictionary<Type, IMessageDispatcher> _messageDispatchers = new Dictionary<Type, IMessageDispatcher>();
@@ -17,6 +18,8 @@ namespace MassTransit.ServiceBus.Internal
 
 		public bool Dispatch(object message)
 		{
+			bool result = false;
+
 			Type messageType = message.GetType();
 
 			if (_messageTypeToKeyType.ContainsKey(messageType))
@@ -25,11 +28,16 @@ namespace MassTransit.ServiceBus.Internal
 
 				if (_correlatedDispatchers.ContainsKey(keyType))
 				{
-					return _correlatedDispatchers[keyType].Dispatch(message);
+					result = _correlatedDispatchers[keyType].Dispatch(message);
 				}
 			}
 
-			return false;
+			if (_messageDispatchers.ContainsKey(messageType))
+			{
+				result = _messageDispatchers[messageType].Dispatch(message);
+			}
+
+			return result;
 		}
 
 		public void Subscribe<T>(T component) where T : class
@@ -43,6 +51,14 @@ namespace MassTransit.ServiceBus.Internal
 					Type[] arguments = interfaceType.GetGenericArguments();
 
 					IMessageDispatcher dispatcher = GetCorrelatedDispatcher(arguments);
+
+					dispatcher.Subscribe(component);
+				}
+				else if (interfaceType.IsGenericType && interfaceType.GetGenericTypeDefinition() == _consumesSelected)
+				{
+					Type[] arguments = interfaceType.GetGenericArguments();
+
+					IMessageDispatcher dispatcher = GetMessageDispatcher(arguments[0]);
 
 					dispatcher.Subscribe(component);
 				}
@@ -73,20 +89,6 @@ namespace MassTransit.ServiceBus.Internal
 			}
 		}
 
-		private IMessageDispatcher GetMessageDispatcher(Type messageType)
-		{
-			if (_messageDispatchers.ContainsKey(messageType))
-				return _messageDispatchers[messageType];
-
-			Type dispatcherType = typeof (MessageDispatcher<>).MakeGenericType(messageType);
-
-			IMessageDispatcher dispatcher = (IMessageDispatcher) Activator.CreateInstance(dispatcherType);
-
-			_messageDispatchers.Add(messageType, dispatcher);
-
-			return dispatcher;
-		}
-
 		private IMessageDispatcher GetCorrelatedDispatcher(Type[] genericArguments)
 		{
 			if (_correlatedDispatchers.ContainsKey(genericArguments[1]))
@@ -100,6 +102,20 @@ namespace MassTransit.ServiceBus.Internal
 				_messageTypeToKeyType.Add(genericArguments[0], genericArguments[1]);
 
 			_correlatedDispatchers.Add(genericArguments[1], dispatcher);
+
+			return dispatcher;
+		}
+
+		private IMessageDispatcher GetMessageDispatcher(Type messageType)
+		{
+			if (_messageDispatchers.ContainsKey(messageType))
+				return _messageDispatchers[messageType];
+
+			Type dispatcherType = typeof (MessageDispatcher<>).MakeGenericType(messageType);
+
+			IMessageDispatcher dispatcher = (IMessageDispatcher) Activator.CreateInstance(dispatcherType);
+
+			_messageDispatchers.Add(messageType, dispatcher);
 
 			return dispatcher;
 		}
@@ -120,8 +136,20 @@ namespace MassTransit.ServiceBus.Internal
 
 			foreach (Consumes<TMessage>.Any consumer in _consumers)
 			{
-				result = true;
-				consumer.Consume(message);
+				Consumes<TMessage>.Selected selectiveConsumer = consumer as Consumes<TMessage>.Selected;
+				if (selectiveConsumer != null)
+				{
+					if (selectiveConsumer.Accept(message))
+					{
+						result = true;
+						consumer.Consume(message);
+					}
+				}
+				else
+				{
+					result = true;
+					consumer.Consume(message);
+				}
 			}
 
 			return result;
