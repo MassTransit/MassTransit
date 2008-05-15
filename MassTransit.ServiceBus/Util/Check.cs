@@ -79,7 +79,7 @@ namespace MassTransit.ServiceBus.Util
             }
         }
 
-        public static void EnsureSerializable(IMessage message)
+        public static void EnsureSerializable(object message)
         {
             Check.Parameter(message).IsNotNull();
 

@@ -176,9 +176,6 @@ namespace MassTransit.ServiceBus.MSMQ
 		{
 			Type messageType = typeof (T);
 
-			if (!messageType.IsSerializable)
-				throw new MessageException(messageType, string.Format("The type {0} must be serializable", messageType.FullName));
-
 			Message msg = new Message();
 
 			_formatter.Serialize(new MsmqFormattedBody(msg), message);

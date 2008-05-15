@@ -14,14 +14,16 @@ namespace MassTransit.ServiceBus.Formatters
 {
 	using System.Runtime.Serialization;
 	using System.Runtime.Serialization.Formatters.Binary;
+	using Util;
 
-	public class BinaryBodyFormatter
+    public class BinaryBodyFormatter
 		: IBodyFormatter
 	{
 		private static readonly IFormatter _formatter = new BinaryFormatter();
 
 		public void Serialize(IFormattedBody body, object message)
 		{
+            Check.EnsureSerializable(message);
 			_formatter.Serialize(body.BodyStream, message);
 		}
 
