@@ -110,6 +110,8 @@ namespace MassTransit.ServiceBus.MSMQ
 			{
 				_queue = _endpoint.Open(QueueAccessMode.SendAndReceive);
 
+                AssertWeCanReadFromQueue(_queue);
+
 				if (_monitorThread == null)
 				{
 					_monitorDead.Reset();
@@ -287,5 +289,25 @@ namespace MassTransit.ServiceBus.MSMQ
 					break;
 			}
 		}
+
+
+        private void AssertWeCanReadFromQueue(MessageQueue queue)
+        {
+            Check.Parameter(queue).IsNotNull();
+
+            try
+            {
+                if (!queue.CanRead)
+                {
+                    string message = string.Format("Unable to read from queue '{0}', please check your permissions for '{1}'", queue.Path, Thread.CurrentPrincipal.Identity.Name);
+                    throw new EndpointException(_endpoint, message);
+                }
+            }
+            catch (Exception ex)
+            {
+                string message = string.Format("Error attempting to read from queue '{0}'", queue.Path);
+                throw new EndpointException(_endpoint, message, ex);
+            }
+        }
 	}
 }
