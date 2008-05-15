@@ -42,6 +42,7 @@ namespace MassTransit.Host
 			{
                 _log.DebugFormat("Attempting to install as user {0}", args.Username);
 				_serviceProcessInstaller.Account = ServiceAccount.User;
+                //TODO: Fix this / add as feature. --dds
 				//_serviceProcessInstaller.Username = args.Username;
 				//_serviceProcessInstaller.Password = args.Password;
 			}
