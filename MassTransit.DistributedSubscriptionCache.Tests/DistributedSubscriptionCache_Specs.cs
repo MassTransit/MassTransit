@@ -2,6 +2,7 @@ namespace MassTransit.DistributedSubscriptionCache.Tests
 {
 	using System;
 	using System.Collections.Generic;
+	using Enyim.Caching;
 	using MassTransit.ServiceBus.Subscriptions;
 	using NUnit.Framework;
 	using NUnit.Framework.SyntaxHelpers;
@@ -9,23 +10,32 @@ namespace MassTransit.DistributedSubscriptionCache.Tests
 	[TestFixture]
 	public class When_using_a_distributed_subscription_cache
 	{
+		private readonly string _name = "CustomMessageName";
+
+		[SetUp]
+		public void Before_each()
+		{
+			MemcachedClient client = new MemcachedClient();
+
+			client.Remove("/mt/" + _name);
+		}
+
 		[Test]
 		public void The_subscriptions_should_be_synchronized_between_subscription_caches()
 		{
 			DistributedSubscriptionCache cacheA = new DistributedSubscriptionCache();
 			DistributedSubscriptionCache cacheB = new DistributedSubscriptionCache();
 
-			const string name = "CustomMessageName";
 			const string url = "http://localhost/default.html";
 
-			Subscription sample = new Subscription(name, new Uri(url));
+			Subscription sample = new Subscription(_name, new Uri(url));
 
 			cacheA.Add(sample);
 
-			IList<Subscription> subscriptions = cacheB.List(name);
+			IList<Subscription> subscriptions = cacheB.List(_name);
 
 			Assert.That(subscriptions.Count, Is.EqualTo(1));
-			Assert.That(subscriptions[0].MessageName, Is.EqualTo(name));
+			Assert.That(subscriptions[0].MessageName, Is.EqualTo(_name));
 			Assert.That(subscriptions[0].EndpointUri.ToString(), Is.EqualTo(url));
 		}
 
@@ -35,23 +45,83 @@ namespace MassTransit.DistributedSubscriptionCache.Tests
 			DistributedSubscriptionCache cacheA = new DistributedSubscriptionCache();
 			DistributedSubscriptionCache cacheB = new DistributedSubscriptionCache();
 
-			const string name = "CustomMessageName";
-
 			string urlA = "http://localhost/default.html";
-			Subscription sample = new Subscription(name, new Uri(urlA));
+			Subscription sample = new Subscription(_name, new Uri(urlA));
 			cacheA.Add(sample);
 
 			string urlB = "http://localhost/index.html";
-			sample = new Subscription(name, new Uri(urlB));
+			sample = new Subscription(_name, new Uri(urlB));
 			cacheB.Add(sample);
 
-			IList<Subscription> subscriptions = cacheA.List(name);
+			IList<Subscription> subscriptions = cacheA.List(_name);
 
 			Assert.That(subscriptions.Count, Is.EqualTo(2));
-			Assert.That(subscriptions[0].MessageName, Is.EqualTo(name));
+			Assert.That(subscriptions[0].MessageName, Is.EqualTo(_name));
 			Assert.That(subscriptions[0].EndpointUri.ToString(), Is.EqualTo(urlA));
-			Assert.That(subscriptions[1].MessageName, Is.EqualTo(name));
+			Assert.That(subscriptions[1].MessageName, Is.EqualTo(_name));
 			Assert.That(subscriptions[1].EndpointUri.ToString(), Is.EqualTo(urlB));
+		}
+
+		[Test]
+		public void Removing_a_subscription_should_mean_it_no_longer_exists()
+		{
+			DistributedSubscriptionCache cacheA = new DistributedSubscriptionCache();
+			DistributedSubscriptionCache cacheB = new DistributedSubscriptionCache();
+
+			string urlA = "http://localhost/default.html";
+			Subscription sample = new Subscription(_name, new Uri(urlA));
+			cacheA.Add(sample);
+
+			string urlB = "http://localhost/index.html";
+			Subscription sampleB = new Subscription(_name, new Uri(urlB));
+			cacheB.Add(sampleB);
+
+			IList<Subscription> subscriptions = cacheA.List(_name);
+
+			Assert.That(subscriptions.Count, Is.EqualTo(2));
+			Assert.That(subscriptions[0].MessageName, Is.EqualTo(_name));
+			Assert.That(subscriptions[0].EndpointUri.ToString(), Is.EqualTo(urlA));
+			Assert.That(subscriptions[1].MessageName, Is.EqualTo(_name));
+			Assert.That(subscriptions[1].EndpointUri.ToString(), Is.EqualTo(urlB));
+
+			cacheB.Remove(sample);
+
+			subscriptions = cacheA.List(_name);
+
+			Assert.That(subscriptions.Count, Is.EqualTo(1));
+			Assert.That(subscriptions[0].MessageName, Is.EqualTo(_name));
+			Assert.That(subscriptions[0].EndpointUri.ToString(), Is.EqualTo(urlB));
+		}
+
+		[Test]
+		public void Removing_a_subscription_should_mean_it_no_longer_exists_first()
+		{
+			DistributedSubscriptionCache cacheA = new DistributedSubscriptionCache();
+			DistributedSubscriptionCache cacheB = new DistributedSubscriptionCache();
+
+			string urlA = "http://localhost/default.html";
+			Subscription sample = new Subscription(_name, new Uri(urlA));
+			cacheA.Add(sample);
+
+			string urlB = "http://localhost/index.html";
+			Subscription sampleB = new Subscription(_name, new Uri(urlB));
+			cacheB.Add(sampleB);
+
+			IList<Subscription> subscriptions = cacheA.List(_name);
+
+			Assert.That(subscriptions.Count, Is.EqualTo(2));
+			Assert.That(subscriptions[0].MessageName, Is.EqualTo(_name));
+			Assert.That(subscriptions[0].EndpointUri.ToString(), Is.EqualTo(urlA));
+			Assert.That(subscriptions[1].MessageName, Is.EqualTo(_name));
+			Assert.That(subscriptions[1].EndpointUri.ToString(), Is.EqualTo(urlB));
+
+			cacheB.Remove(sampleB);
+
+			subscriptions = cacheA.List(_name);
+
+			Assert.That(subscriptions.Count, Is.EqualTo(1));
+			Assert.That(subscriptions[0].MessageName, Is.EqualTo(_name));
+			Assert.That(subscriptions[0].EndpointUri.ToString(), Is.EqualTo(urlA));
 		}
 		
 	}
