@@ -12,13 +12,13 @@ namespace MassTransit.ServiceBus.Tests
 		[SetUp]
 		public void Before_each()
 		{
-			_dispatcher = new ConsumerDispatcher<TestMessage>();
+			_dispatcher = new MessageDispatcher<TestMessage>();
 			_message = new TestMessage(_value);
 		}
 
 		#endregion
 
-		private ConsumerDispatcher<TestMessage> _dispatcher;
+		private MessageDispatcher<TestMessage> _dispatcher;
 		private TestMessage _message;
 		private readonly int _value = 27;
 
