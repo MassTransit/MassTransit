@@ -7,7 +7,7 @@ namespace MassTransit.ServiceBus.Internal
 		IMessageDispatcher
 		where T : class, CorrelatedBy<V>
 	{
-		private readonly Dictionary<V, IConsumerDispatcher<T>> _dispatchers = new Dictionary<V, IConsumerDispatcher<T>>();
+		private readonly Dictionary<V, IMessageDispatcher> _dispatchers = new Dictionary<V, IMessageDispatcher>();
 
 		#region IMessageDispatcher Members
 
@@ -24,7 +24,7 @@ namespace MassTransit.ServiceBus.Internal
 
 			V correlationId = consumer.CorrelationId;
 
-			IConsumerDispatcher<T> dispatcher = GetDispatcher(correlationId);
+			IMessageDispatcher dispatcher = GetDispatcher(correlationId);
 
 			dispatcher.Subscribe(consumer);
 		}
@@ -43,12 +43,12 @@ namespace MassTransit.ServiceBus.Internal
 
 		#endregion
 
-		private IConsumerDispatcher<T> GetDispatcher(V correlationId)
+		private IMessageDispatcher GetDispatcher(V correlationId)
 		{
 			if (_dispatchers.ContainsKey(correlationId))
 				return _dispatchers[correlationId];
 
-			IConsumerDispatcher<T> dispatcher = new ConsumerDispatcher<T>();
+			IMessageDispatcher dispatcher = new MessageDispatcher<T>();
 
 			_dispatchers.Add(correlationId, dispatcher);
 
@@ -59,11 +59,11 @@ namespace MassTransit.ServiceBus.Internal
 		{
 			CorrelatedBy<V> correlation = message;
 
-			V key = correlation.CorrelationId;
+			V correlationId = correlation.CorrelationId;
 
-			if (_dispatchers.ContainsKey(key))
+			if (_dispatchers.ContainsKey(correlationId))
 			{
-				return _dispatchers[key].Dispatch(message);
+				return _dispatchers[correlationId].Dispatch(message);
 			}
 
 			return false;

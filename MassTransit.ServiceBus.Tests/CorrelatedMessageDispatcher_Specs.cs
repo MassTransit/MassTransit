@@ -13,13 +13,13 @@ namespace MassTransit.ServiceBus.Tests
 		[SetUp]
 		public void Before_each()
 		{
-			_dispatcher = new CorrelatedMessageDispatcher();
+			_dispatcher = new MessageDispatcher();
 			_message = new TestMessage(_value);
 		}
 
 		#endregion
 
-		private CorrelatedMessageDispatcher _dispatcher;
+		private MessageDispatcher _dispatcher;
 		private TestMessage _message;
 		private readonly int _value = 27;
 
