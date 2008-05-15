@@ -9,6 +9,7 @@ namespace MassTransit.ServiceBus.Internal
 	public class CorrelatedMessageDispatcher :
 		IMessageDispatcher
 	{
+		private static readonly Type _consumesFor = typeof (Consumes<>.For<>);
 		private readonly Dictionary<Type, IMessageDispatcher> _dispatchers = new Dictionary<Type, IMessageDispatcher>();
 		private readonly Dictionary<Type, Type> _messageTypeToKeyType = new Dictionary<Type, Type>();
 
@@ -33,20 +34,13 @@ namespace MassTransit.ServiceBus.Internal
 		{
 			Type componentType = typeof (T);
 
-			Type correlatedType = typeof (Consumes<>.For<>);
-
 			foreach (Type interfaceType in componentType.GetInterfaces())
 			{
-				if (interfaceType.IsGenericType && interfaceType.GetGenericTypeDefinition() == correlatedType)
+				if (interfaceType.IsGenericType && interfaceType.GetGenericTypeDefinition() == _consumesFor)
 				{
 					Type[] arguments = interfaceType.GetGenericArguments();
 
-					Type dispatcherType = typeof (CorrelationIdDispatcher<,>).MakeGenericType(arguments);
-
-					IMessageDispatcher dispatcher = (IMessageDispatcher) Activator.CreateInstance(dispatcherType);
-
-					_messageTypeToKeyType.Add(arguments[0], arguments[1]);
-					_dispatchers.Add(arguments[1], dispatcher);
+					IMessageDispatcher dispatcher = GetDispatcher(arguments);
 
 					dispatcher.Subscribe(component);
 				}
@@ -55,7 +49,35 @@ namespace MassTransit.ServiceBus.Internal
 
 		public void Unsubscribe<T>(T component) where T : class
 		{
-			throw new NotImplementedException();
+			Type componentType = typeof (T);
+
+			foreach (Type interfaceType in componentType.GetInterfaces())
+			{
+				if (interfaceType.IsGenericType && interfaceType.GetGenericTypeDefinition() == _consumesFor)
+				{
+					Type[] arguments = interfaceType.GetGenericArguments();
+
+					if (_dispatchers.ContainsKey(arguments[1]))
+						_dispatchers[arguments[1]].Unsubscribe(component);
+				}
+			}
+		}
+
+		private IMessageDispatcher GetDispatcher(Type[] genericArguments)
+		{
+			if (_dispatchers.ContainsKey(genericArguments[1]))
+				return _dispatchers[genericArguments[1]];
+
+			Type dispatcherType = typeof (CorrelationIdDispatcher<,>).MakeGenericType(genericArguments);
+
+			IMessageDispatcher dispatcher = (IMessageDispatcher) Activator.CreateInstance(dispatcherType);
+
+			if (!_messageTypeToKeyType.ContainsKey(genericArguments[0]))
+				_messageTypeToKeyType.Add(genericArguments[0], genericArguments[1]);
+
+			_dispatchers.Add(genericArguments[1], dispatcher);
+
+			return dispatcher;
 		}
 	}
 }

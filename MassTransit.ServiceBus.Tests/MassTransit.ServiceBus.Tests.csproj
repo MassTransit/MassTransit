@@ -52,6 +52,7 @@
     <Compile Include="As_A_Service_With_A_Message_Endpoint.cs" />
     <Compile Include="CommandExecutorPlay\As_a_CommandExecutor.cs" />
     <Compile Include="ConsumerDispatcher_Specs.cs" />
+    <Compile Include="CorrelatedMessageDispatcher_Specs.cs" />
     <Compile Include="CorrelatedMessage_Specs.cs" />
     <Compile Include="CorrelationIdDispatcher_Specs.cs" />
     <Compile Include="Formatters\MessageFinderTests.cs" />
