@@ -127,6 +127,30 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.SubscriptionSto
 		Release.AspNetCompiler.Debug = "False"
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{9C62A0F8-BF24-494F-82C9-3FB8971E5510}"
+	ProjectSection(WebsiteProperties) = preProject
+		Debug.AspNetCompiler.Debug = "True"
+		Release.AspNetCompiler.Debug = "False"
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Build", "MassTransit.Build\MassTransit.Build.csproj", "{5809873E-7929-440B-BFA0-E110F08DD643}"
+	ProjectSection(WebsiteProperties) = preProject
+		Debug.AspNetCompiler.Debug = "True"
+		Release.AspNetCompiler.Debug = "False"
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Build.NAnt", "MassTransit.Build.NAnt\MassTransit.Build.NAnt.csproj", "{31F46B70-2D5A-4496-9FBA-7BBFD0E323E8}"
+	ProjectSection(WebsiteProperties) = preProject
+		Debug.AspNetCompiler.Debug = "True"
+		Release.AspNetCompiler.Debug = "False"
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Build.MSBuild", "MassTransit.Build.MSBuild\MassTransit.Build.MSBuild.csproj", "{3DBCEFE6-2A73-4D1B-A6E1-343AFE46E6CF}"
+	ProjectSection(WebsiteProperties) = preProject
+		Debug.AspNetCompiler.Debug = "True"
+		Release.AspNetCompiler.Debug = "False"
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -197,6 +221,18 @@ Global
 		{4B976E20-6322-40B0-A398-7D52B6F2C27E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4B976E20-6322-40B0-A398-7D52B6F2C27E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4B976E20-6322-40B0-A398-7D52B6F2C27E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5809873E-7929-440B-BFA0-E110F08DD643}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5809873E-7929-440B-BFA0-E110F08DD643}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5809873E-7929-440B-BFA0-E110F08DD643}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5809873E-7929-440B-BFA0-E110F08DD643}.Release|Any CPU.Build.0 = Release|Any CPU
+		{31F46B70-2D5A-4496-9FBA-7BBFD0E323E8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{31F46B70-2D5A-4496-9FBA-7BBFD0E323E8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{31F46B70-2D5A-4496-9FBA-7BBFD0E323E8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{31F46B70-2D5A-4496-9FBA-7BBFD0E323E8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3DBCEFE6-2A73-4D1B-A6E1-343AFE46E6CF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3DBCEFE6-2A73-4D1B-A6E1-343AFE46E6CF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3DBCEFE6-2A73-4D1B-A6E1-343AFE46E6CF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3DBCEFE6-2A73-4D1B-A6E1-343AFE46E6CF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -216,5 +252,8 @@ Global
 		{6F90867C-E092-4EDC-B3DE-600D39DF0335} = {0006D6BB-1382-4B32-AD32-CA037F5CD4F6}
 		{1DBE5A67-C8C2-4AA9-82EF-1E730273993B} = {0006D6BB-1382-4B32-AD32-CA037F5CD4F6}
 		{5B3732C1-9FC1-4A63-80BE-FCA7A78AB007} = {0006D6BB-1382-4B32-AD32-CA037F5CD4F6}
+		{5809873E-7929-440B-BFA0-E110F08DD643} = {9C62A0F8-BF24-494F-82C9-3FB8971E5510}
+		{31F46B70-2D5A-4496-9FBA-7BBFD0E323E8} = {9C62A0F8-BF24-494F-82C9-3FB8971E5510}
+		{3DBCEFE6-2A73-4D1B-A6E1-343AFE46E6CF} = {9C62A0F8-BF24-494F-82C9-3FB8971E5510}
 	EndGlobalSection
 EndGlobal
