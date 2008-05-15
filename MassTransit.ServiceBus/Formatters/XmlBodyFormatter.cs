@@ -3,8 +3,9 @@ namespace MassTransit.ServiceBus.Formatters
 	using System;
 	using System.Collections.Generic;
 	using System.Xml.Serialization;
+	using Util;
 
-	public class XmlBodyFormatter :
+    public class XmlBodyFormatter :
 		IBodyFormatter
 	{
 		private readonly XmlSerializer _serializer;
@@ -18,6 +19,7 @@ namespace MassTransit.ServiceBus.Formatters
 
 		public void Serialize(IFormattedBody body, object message)
 		{
+            Check.EnsureSerializable(message);
 			_serializer.Serialize(body.BodyStream, message);
 		}
 
