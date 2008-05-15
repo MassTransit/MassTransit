@@ -8,8 +8,6 @@ namespace MassTransit.ServiceBus.Tests
 	[TestFixture]
 	public class When_a_correlated_message_is_dispatched_through_the_message_dispatcher
 	{
-		#region Setup/Teardown
-
 		[SetUp]
 		public void Before_each()
 		{
@@ -17,13 +15,13 @@ namespace MassTransit.ServiceBus.Tests
 			_message = new TestMessage(_value);
 		}
 
-		#endregion
-
 		private MessageDispatcher _dispatcher;
 		private TestMessage _message;
-		private readonly int _value = 27;
+		private int _value = 27;
 
-		internal class InvalidConsumer { }
+		internal class InvalidConsumer
+		{
+		}
 
 		internal class TestConsumer : Consumes<TestMessage>.For<Guid>
 		{
@@ -81,39 +79,19 @@ namespace MassTransit.ServiceBus.Tests
 			#endregion
 		}
 
-		[Test]
-		public void It_should_be_dispatched_to_the_consumer()
+		internal class GeneralConsumer : Consumes<TestMessage>.Any
 		{
-			TestConsumer consumerA = new TestConsumer(_message.CorrelationId);
-			_dispatcher.Subscribe(consumerA);
+			private int _value;
 
-			_dispatcher.Dispatch(_message);
+			public int Value
+			{
+				get { return _value; }
+			}
 
-			Assert.That(consumerA.Value, Is.EqualTo(_message.Value));
-		}
-
-		[Test]
-		public void It_should_not_be_dispatched_if_the_correlation_does_not_match()
-		{
-			TestConsumer consumerA = new TestConsumer(Guid.NewGuid());
-			_dispatcher.Subscribe(consumerA);
-
-			_dispatcher.Dispatch(_message);
-
-			Assert.That(consumerA.Value, Is.EqualTo(default(int)));
-		}
-
-		[Test]
-		public void The_object_should_be_dispatched_to_the_consumer()
-		{
-			TestConsumer consumerA = new TestConsumer(_message.CorrelationId);
-			_dispatcher.Subscribe(consumerA);
-
-			object obj = _message;
-
-			_dispatcher.Dispatch(obj);
-
-			Assert.That(consumerA.Value, Is.EqualTo(_message.Value));
+			public void Consume(TestMessage message)
+			{
+				_value = message.Value;
+			}
 		}
 
 		[Test]
@@ -129,6 +107,68 @@ namespace MassTransit.ServiceBus.Tests
 
 			Assert.That(consumerA.Value, Is.EqualTo(_value));
 			Assert.That(consumerB.Value, Is.EqualTo(_value));
+		}
+
+		[Test]
+		public void It_should_be_dispatched_to_the_consumer()
+		{
+			TestConsumer consumerA = new TestConsumer(_message.CorrelationId);
+			_dispatcher.Subscribe(consumerA);
+
+			_dispatcher.Dispatch(_message);
+
+			Assert.That(consumerA.Value, Is.EqualTo(_message.Value));
+		}
+
+		[Test]
+		public void It_should_be_sent_to_general_consumers_who_are_not_correlated_consumers()
+		{
+			GeneralConsumer consumerA = new GeneralConsumer();
+			_dispatcher.Subscribe(consumerA);
+
+			_dispatcher.Dispatch(_message);
+
+			Assert.That(consumerA.Value, Is.EqualTo(_message.Value));
+		}
+
+		[Test]
+		public void It_should_be_sent_to_more_than_one_general_consumer_who_are_not_correlated_consumers()
+		{
+			GeneralConsumer consumerA = new GeneralConsumer();
+			_dispatcher.Subscribe(consumerA);
+			GeneralConsumer consumerB = new GeneralConsumer();
+			_dispatcher.Subscribe(consumerB);
+
+			_dispatcher.Dispatch(_message);
+
+			Assert.That(consumerA.Value, Is.EqualTo(_message.Value));
+			Assert.That(consumerB.Value, Is.EqualTo(_message.Value));
+		}
+
+		[Test]
+		public void It_should_not_be_dispatched_if_the_correlation_does_not_match()
+		{
+			TestConsumer consumerA = new TestConsumer(Guid.NewGuid());
+			_dispatcher.Subscribe(consumerA);
+
+			_dispatcher.Dispatch(_message);
+
+			Assert.That(consumerA.Value, Is.EqualTo(default(int)));
+		}
+
+		[Test]
+		public void It_should_not_be_sent_to_consumers_that_are_no_longer_interested()
+		{
+			TestConsumer consumerA = new TestConsumer(_message.CorrelationId);
+			_dispatcher.Subscribe(consumerA);
+
+			TestConsumer consumerB = new TestConsumer(Guid.NewGuid());
+			_dispatcher.Subscribe(consumerB);
+
+			_dispatcher.Dispatch(_message);
+
+			Assert.That(consumerA.Value, Is.EqualTo(_value));
+			Assert.That(consumerB.Value, Is.EqualTo(default(int)));
 		}
 
 		[Test]
@@ -149,21 +189,6 @@ namespace MassTransit.ServiceBus.Tests
 		}
 
 		[Test]
-		public void It_should_not_be_sent_to_consumers_that_are_no_longer_interested()
-		{
-			TestConsumer consumerA = new TestConsumer(_message.CorrelationId);
-			_dispatcher.Subscribe(consumerA);
-
-			TestConsumer consumerB = new TestConsumer(Guid.NewGuid());
-			_dispatcher.Subscribe(consumerB);
-
-			_dispatcher.Dispatch(_message);
-
-			Assert.That(consumerA.Value, Is.EqualTo(_value));
-			Assert.That(consumerB.Value, Is.EqualTo(default(int)));
-		}
-
-		[Test]
 		public void It_should_only_be_sent_to_consumers_who_are_interested_in_the_specific_correlation_id()
 		{
 			TestMessage anotherMessage = new TestMessage(42);
@@ -181,5 +206,17 @@ namespace MassTransit.ServiceBus.Tests
 			Assert.That(consumerB.Value, Is.EqualTo(42));
 		}
 
+		[Test]
+		public void The_object_should_be_dispatched_to_the_consumer()
+		{
+			TestConsumer consumerA = new TestConsumer(_message.CorrelationId);
+			_dispatcher.Subscribe(consumerA);
+
+			object obj = _message;
+
+			_dispatcher.Dispatch(obj);
+
+			Assert.That(consumerA.Value, Is.EqualTo(_message.Value));
+		}
 	}
 }
