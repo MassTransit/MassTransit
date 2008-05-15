@@ -121,7 +121,7 @@ namespace MassTransit.ServiceBus.Subscriptions
 			{
 				// TODO RegisterSenderForUpdates(ctx.Envelope);
 
-				IList<Subscription> subscriptions = Map(_cache.List());
+				IList<Subscription> subscriptions = RemoveNHibernateness(_cache.List());
 
 				CacheUpdateResponse response = new CacheUpdateResponse(subscriptions);
 
@@ -133,8 +133,10 @@ namespace MassTransit.ServiceBus.Subscriptions
 			}
 		}
 
-        //TODO: this needs to be somewhere else
-        private IList<Subscription> Map(IList<Subscription> subs)
+        /// <summary>
+        /// The NHibernate objects don't serialize, so we rip that off here.
+        /// </summary>
+        private IList<Subscription> RemoveNHibernateness(IList<Subscription> subs)
         {
             IList<Subscription> result = new List<Subscription>();
 
