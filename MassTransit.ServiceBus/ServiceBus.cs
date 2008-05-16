@@ -69,8 +69,21 @@ namespace MassTransit.ServiceBus
 			_endpointToListenOn = endpointToListenOn;
             _subscriptionCache = subscriptionCache;
 
-        	_dispatcher = new MessageDispatcher();
+        	_dispatcher = new MessageDispatcher(new ActivatorObjectBuilder());
         }
+
+		internal class ActivatorObjectBuilder : IObjectBuilder
+		{
+			public object Build(Type objectType)
+			{
+				return Activator.CreateInstance(objectType);
+			}
+
+			public T Build<T>(Type type) where T : class
+			{
+				return Build(type) as T;
+			}
+		}
 
 		public ISubscriptionCache SubscriptionCache
 		{
@@ -243,6 +256,8 @@ namespace MassTransit.ServiceBus
 		public void Subscribe<T>(T component) where T : class
 		{
 			_dispatcher.Subscribe<T>(component);
+
+			StartListening();
 		}
 
 		public void Unsubscribe<T>(Action<IMessageContext<T>> callback) where T : IMessage
@@ -276,6 +291,8 @@ namespace MassTransit.ServiceBus
 		public void AddComponent<TComponent>() where TComponent : class
 		{
 			_dispatcher.AddComponent<TComponent>();
+
+			StartListening();
 		}
 
 		public void RemoveComponent<TComponent>() where TComponent : class

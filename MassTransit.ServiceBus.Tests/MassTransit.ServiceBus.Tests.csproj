@@ -56,12 +56,14 @@
     <Compile Include="CorrelatedMessageDispatcher_Specs.cs" />
     <Compile Include="CorrelatedMessage_Specs.cs" />
     <Compile Include="CorrelationIdDispatcher_Specs.cs" />
+    <Compile Include="Dispatcher_Specs.cs" />
     <Compile Include="Formatters\MessageFinderTests.cs" />
     <Compile Include="Formatters\XmlMessageFormatterTests.cs" />
     <Compile Include="HighLevel\With_a_central_subscription_service.cs" />
     <Compile Include="HighLevel\With_a_local_subscription_service.cs" />
     <Compile Include="IntegrationTests\When_using_queues_on_a_remote_server.cs" />
     <Compile Include="ObjectDispatcher_Specs.cs" />
+    <Compile Include="Specification.cs" />
     <Compile Include="Subscriptions\As_a_SubscriptionService.cs" />
     <Compile Include="Subscriptions\As_Local_Subscription_Storage.cs" />
     <Compile Include="IntegrationTests\As_Msmq_Storage.cs" />
