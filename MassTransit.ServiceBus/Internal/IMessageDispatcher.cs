@@ -26,5 +26,7 @@ namespace MassTransit.ServiceBus.Internal
 		/// <typeparam name="T"></typeparam>
 		/// <param name="component"></param>
 		void Unsubscribe<T>(T component) where T : class;
+
+		void AddComponent<TComponent>();
 	}
 }
