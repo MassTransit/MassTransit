@@ -56,31 +56,48 @@ namespace MassTransit.ServiceBus.Internal
 		{
 			Type componentType = typeof (T);
 
+			List<Type> messageTypesMapped = new List<Type>();
+
 			foreach (Type interfaceType in componentType.GetInterfaces())
 			{
 				if (interfaceType.IsGenericType && interfaceType.GetGenericTypeDefinition() == _consumesFor)
 				{
 					Type[] arguments = interfaceType.GetGenericArguments();
 
+					if(messageTypesMapped.Contains(arguments[0]))
+						continue;
+
 					IMessageDispatcher dispatcher = GetCorrelatedDispatcher(arguments);
 
 					dispatcher.Subscribe(component);
+
+					messageTypesMapped.Add(arguments[0]);
 				}
 				else if (interfaceType.IsGenericType && interfaceType.GetGenericTypeDefinition() == _consumesSelected)
 				{
 					Type[] arguments = interfaceType.GetGenericArguments();
 
+					if (messageTypesMapped.Contains(arguments[0]))
+						continue;
+
 					IMessageDispatcher dispatcher = GetMessageDispatcher(arguments[0]);
 
 					dispatcher.Subscribe(component);
+
+					messageTypesMapped.Add(arguments[0]);
 				}
 				else if (interfaceType.IsGenericType && interfaceType.GetGenericTypeDefinition() == _consumes)
 				{
 					Type[] arguments = interfaceType.GetGenericArguments();
 
+					if (messageTypesMapped.Contains(arguments[0]))
+						continue;
+
 					IMessageDispatcher dispatcher = GetMessageDispatcher(arguments[0]);
 
 					dispatcher.Subscribe(component);
+
+					messageTypesMapped.Add(arguments[0]);
 				}
 			}
 		}

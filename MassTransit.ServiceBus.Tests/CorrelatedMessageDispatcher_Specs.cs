@@ -1,6 +1,7 @@
 namespace MassTransit.ServiceBus.Tests
 {
 	using System;
+	using System.Diagnostics;
 	using Internal;
 	using NUnit.Framework;
 	using NUnit.Framework.SyntaxHelpers;
@@ -15,85 +16,6 @@ namespace MassTransit.ServiceBus.Tests
 			_message = new TestMessage(_value);
 		}
 
-		private MessageDispatcher _dispatcher;
-		private TestMessage _message;
-		private int _value = 27;
-
-		internal class InvalidConsumer
-		{
-		}
-
-		internal class TestConsumer : Consumes<TestMessage>.For<Guid>
-		{
-			private readonly Guid _correlationId;
-			private int _value;
-
-			public TestConsumer(Guid correlationId)
-			{
-				_correlationId = correlationId;
-			}
-
-			public int Value
-			{
-				get { return _value; }
-			}
-
-			#region For<Guid> Members
-
-			public Guid CorrelationId
-			{
-				get { return _correlationId; }
-			}
-
-			public void Consume(TestMessage message)
-			{
-				_value = message.Value;
-			}
-
-			#endregion
-		}
-
-		internal class TestMessage : CorrelatedBy<Guid>
-		{
-			private readonly Guid _correlationId;
-			private readonly int _value;
-
-			public TestMessage(int value)
-			{
-				_value = value;
-				_correlationId = Guid.NewGuid();
-			}
-
-			public int Value
-			{
-				get { return _value; }
-			}
-
-			#region CorrelatedBy<Guid> Members
-
-			public Guid CorrelationId
-			{
-				get { return _correlationId; }
-			}
-
-			#endregion
-		}
-
-		internal class GeneralConsumer : Consumes<TestMessage>.Any
-		{
-			private int _value;
-
-			public int Value
-			{
-				get { return _value; }
-			}
-
-			public void Consume(TestMessage message)
-			{
-				_value = message.Value;
-			}
-		}
-
 		[Test]
 		public void It_should_be_dispatched_to_all_consumers()
 		{
@@ -104,6 +26,32 @@ namespace MassTransit.ServiceBus.Tests
 			_dispatcher.Subscribe(consumerB);
 
 			_dispatcher.Dispatch(_message);
+
+			Assert.That(consumerA.Value, Is.EqualTo(_value));
+			Assert.That(consumerB.Value, Is.EqualTo(_value));
+		}
+
+		[Test, Explicit]
+		public void Verify_the_throughput_of_the_dispatcher()
+		{
+			TestConsumer consumerA = new TestConsumer(_message.CorrelationId);
+			_dispatcher.Subscribe(consumerA);
+
+			TestConsumer consumerB = new TestConsumer(Guid.NewGuid());
+			_dispatcher.Subscribe(consumerB);
+
+			long limit = 5000000;
+
+			DateTime start = DateTime.Now;
+
+			for (long i = 0; i < limit; i++)
+			{
+				_dispatcher.Dispatch(_message);
+			}
+
+			DateTime stop = DateTime.Now;
+
+			Debug.WriteLine(string.Format("Messages per second dispatched: {0}", limit/(stop - start).TotalMilliseconds*1000));
 
 			Assert.That(consumerA.Value, Is.EqualTo(_value));
 			Assert.That(consumerB.Value, Is.EqualTo(_value));
@@ -217,6 +165,77 @@ namespace MassTransit.ServiceBus.Tests
 			_dispatcher.Dispatch(obj);
 
 			Assert.That(consumerA.Value, Is.EqualTo(_message.Value));
+		}
+
+		private MessageDispatcher _dispatcher;
+		private TestMessage _message;
+		private int _value = 27;
+
+		internal class InvalidConsumer
+		{
+		}
+
+		internal class TestConsumer : Consumes<TestMessage>.For<Guid>
+		{
+			private readonly Guid _correlationId;
+			private int _value;
+
+			public TestConsumer(Guid correlationId)
+			{
+				_correlationId = correlationId;
+			}
+
+			public int Value
+			{
+				get { return _value; }
+			}
+
+			public Guid CorrelationId
+			{
+				get { return _correlationId; }
+			}
+
+			public void Consume(TestMessage message)
+			{
+				_value = message.Value;
+			}
+		}
+
+		internal class TestMessage : CorrelatedBy<Guid>
+		{
+			private readonly Guid _correlationId;
+			private readonly int _value;
+
+			public TestMessage(int value)
+			{
+				_value = value;
+				_correlationId = Guid.NewGuid();
+			}
+
+			public int Value
+			{
+				get { return _value; }
+			}
+
+			public Guid CorrelationId
+			{
+				get { return _correlationId; }
+			}
+		}
+
+		internal class GeneralConsumer : Consumes<TestMessage>.Any
+		{
+			private int _value;
+
+			public int Value
+			{
+				get { return _value; }
+			}
+
+			public void Consume(TestMessage message)
+			{
+				_value = message.Value;
+			}
 		}
 	}
 }
