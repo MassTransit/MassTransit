@@ -41,6 +41,11 @@ namespace MassTransit.ServiceBus.Internal
 				_dispatchers[correlationId].Unsubscribe(consumer);
 		}
 
+		public void AddComponent<TComponent>()
+		{
+			throw new NotImplementedException();
+		}
+
 		#endregion
 
 		private IMessageDispatcher GetDispatcher(V correlationId)

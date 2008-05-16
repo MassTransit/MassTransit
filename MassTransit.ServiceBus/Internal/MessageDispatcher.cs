@@ -10,11 +10,23 @@ namespace MassTransit.ServiceBus.Internal
 		IMessageDispatcher
 	{
 		private static readonly Type _consumes = typeof (Consumes<>.Any);
-		private static readonly Type _consumesSelected = typeof (Consumes<>.Selected);
 		private static readonly Type _consumesFor = typeof (Consumes<>.For<>);
+		private static readonly Type _consumesSelected = typeof (Consumes<>.Selected);
+		private readonly IObjectBuilder _builder;
 		private readonly Dictionary<Type, IMessageDispatcher> _correlatedDispatchers = new Dictionary<Type, IMessageDispatcher>();
 		private readonly Dictionary<Type, IMessageDispatcher> _messageDispatchers = new Dictionary<Type, IMessageDispatcher>();
 		private readonly Dictionary<Type, Type> _messageTypeToKeyType = new Dictionary<Type, Type>();
+
+		public MessageDispatcher()
+		{
+		}
+
+		public MessageDispatcher(IObjectBuilder builder)
+		{
+			_builder = builder;
+		}
+
+		#region IMessageDispatcher Members
 
 		public bool Dispatch(object message)
 		{
@@ -89,6 +101,36 @@ namespace MassTransit.ServiceBus.Internal
 			}
 		}
 
+		public void AddComponent<TComponent>()
+		{
+			if (_builder == null)
+				throw new ArgumentException("No object builder interface is available");
+
+			Type componentType = typeof (TComponent);
+
+			foreach (Type interfaceType in componentType.GetInterfaces())
+			{
+				if (interfaceType.IsGenericType && interfaceType.GetGenericTypeDefinition() == _consumesSelected)
+				{
+					Type[] arguments = interfaceType.GetGenericArguments();
+
+					IMessageDispatcher dispatcher = GetMessageDispatcher(arguments[0]);
+
+					dispatcher.AddComponent<TComponent>();
+				}
+				else if (interfaceType.IsGenericType && interfaceType.GetGenericTypeDefinition() == _consumes)
+				{
+					Type[] arguments = interfaceType.GetGenericArguments();
+
+					IMessageDispatcher dispatcher = GetMessageDispatcher(arguments[0]);
+
+					dispatcher.AddComponent<TComponent>();
+				}
+			}
+		}
+
+		#endregion
+
 		private IMessageDispatcher GetCorrelatedDispatcher(Type[] genericArguments)
 		{
 			if (_correlatedDispatchers.ContainsKey(genericArguments[1]))
@@ -113,7 +155,7 @@ namespace MassTransit.ServiceBus.Internal
 
 			Type dispatcherType = typeof (MessageDispatcher<>).MakeGenericType(messageType);
 
-			IMessageDispatcher dispatcher = (IMessageDispatcher) Activator.CreateInstance(dispatcherType);
+			IMessageDispatcher dispatcher = (IMessageDispatcher) Activator.CreateInstance(dispatcherType, _builder);
 
 			_messageDispatchers.Add(messageType, dispatcher);
 
@@ -124,7 +166,20 @@ namespace MassTransit.ServiceBus.Internal
 	public class MessageDispatcher<TMessage> :
 		IMessageDispatcher where TMessage : class
 	{
+		private readonly IObjectBuilder _builder;
+		private readonly List<Type> _components = new List<Type>();
 		private readonly List<Consumes<TMessage>.Any> _consumers = new List<Consumes<TMessage>.Any>();
+
+		public MessageDispatcher()
+		{
+		}
+
+		public MessageDispatcher(IObjectBuilder builder)
+		{
+			_builder = builder;
+		}
+
+		#region IMessageDispatcher Members
 
 		public bool Dispatch(object obj)
 		{
@@ -136,6 +191,26 @@ namespace MassTransit.ServiceBus.Internal
 
 			foreach (Consumes<TMessage>.Any consumer in _consumers)
 			{
+				Consumes<TMessage>.Selected selectiveConsumer = consumer as Consumes<TMessage>.Selected;
+				if (selectiveConsumer != null)
+				{
+					if (selectiveConsumer.Accept(message))
+					{
+						result = true;
+						consumer.Consume(message);
+					}
+				}
+				else
+				{
+					result = true;
+					consumer.Consume(message);
+				}
+			}
+
+			foreach (Type componentType in _components)
+			{
+				Consumes<TMessage>.Any consumer = _builder.Build<Consumes<TMessage>.Any>(componentType);
+
 				Consumes<TMessage>.Selected selectiveConsumer = consumer as Consumes<TMessage>.Selected;
 				if (selectiveConsumer != null)
 				{
@@ -174,5 +249,16 @@ namespace MassTransit.ServiceBus.Internal
 			if (_consumers.Contains(consumer))
 				_consumers.Remove(consumer);
 		}
+
+		public void AddComponent<TComponent>()
+		{
+			if (_builder == null)
+				throw new ArgumentException("No builder object was registered");
+
+			if (!_components.Contains(typeof (TComponent)))
+				_components.Add(typeof (TComponent));
+		}
+
+		#endregion
 	}
 }
