@@ -115,23 +115,18 @@ namespace MassTransit.DistributedSubscriptionCache
 
 				if (!string.IsNullOrEmpty(currentValue))
 				{
-					if (currentValue.Contains(removeUri))
-					{
-						int start = currentValue.IndexOf(removeUri);
+                    if (currentValue.Contains(removeUri))
+                    {
+                        int start = currentValue.IndexOf(removeUri);
+                        if (start > 0) //Modify the start to include the '\n'
+                        {
+                            start--;
+                        }
 
-						if (start > 0)
-						{
-							string newValue = currentValue.Remove(start - 1, removeUri.Length + 1);
-							cache.Client.Store(StoreMode.Set, key.CacheKey, newValue, TimeSpan.FromDays(14));
-							OnRemoveSubscription(this, new SubscriptionEventArgs(subscription));
-						}
-						else if (start == 0)
-						{
-							string newValue = currentValue.Remove(start, removeUri.Length + 1);
-							cache.Client.Store(StoreMode.Set, key.CacheKey, newValue, TimeSpan.FromDays(14));
-							OnRemoveSubscription(this, new SubscriptionEventArgs(subscription));
-						}
-					}
+                        string newValue = currentValue.Remove(start, removeUri.Length + 1);
+                        cache.Client.Store(StoreMode.Set, key.CacheKey, newValue, TimeSpan.FromDays(14));
+                        OnRemoveSubscription(this, new SubscriptionEventArgs(subscription));
+                    }
 				}
 			}
 		}
