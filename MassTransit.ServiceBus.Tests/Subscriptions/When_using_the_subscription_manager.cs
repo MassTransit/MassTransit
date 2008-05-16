@@ -43,8 +43,10 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
 			{
 				Expect.Call(delegate { _cache.OnAddSubscription += null; }).IgnoreArguments();
 				Expect.Call(delegate { _cache.OnRemoveSubscription += null; }).IgnoreArguments();
-				Expect.Call(delegate { _serviceBus.Subscribe<AddSubscription>(null); }).IgnoreArguments();
-				Expect.Call(delegate { _serviceBus.Subscribe<RemoveSubscription>(null); }).IgnoreArguments();
+
+				Expect.Call(delegate { _serviceBus.Subscribe<AddSubscription>(delegate { }); }).IgnoreArguments();
+				Expect.Call(delegate { _serviceBus.Subscribe<RemoveSubscription>(delegate { }); }).IgnoreArguments();
+
 				Expect.Call(_serviceBus.Request<CacheUpdateRequest>(_managerEndpoint, (AsyncCallback)null, (object)null, null))
 					.IgnoreArguments()
 					.Constraints(Is.Equal(_managerEndpoint),

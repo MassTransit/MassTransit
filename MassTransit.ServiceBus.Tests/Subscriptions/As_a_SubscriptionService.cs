@@ -66,10 +66,10 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
             using(mocks.Record())
             {
                 Expect.Call(mockRepository.List()).Return(enumer);
-                Expect.Call(delegate { mockBus.Subscribe<CacheUpdateRequest>(null); }).IgnoreArguments();
-                Expect.Call(delegate { mockBus.Subscribe<AddSubscription>(null); }).IgnoreArguments();
-                Expect.Call(delegate { mockBus.Subscribe<RemoveSubscription>(null); }).IgnoreArguments();
-                Expect.Call(delegate { mockBus.Subscribe<CancelSubscriptionUpdates>(null); }).IgnoreArguments();
+				Expect.Call(delegate { mockBus.Subscribe<CacheUpdateRequest>(delegate { }); }).IgnoreArguments();
+				Expect.Call(delegate { mockBus.Subscribe<AddSubscription>(delegate { }); }).IgnoreArguments();
+				Expect.Call(delegate { mockBus.Subscribe<RemoveSubscription>(delegate { }); }).IgnoreArguments();
+				Expect.Call(delegate { mockBus.Subscribe<CancelSubscriptionUpdates>(delegate { }); }).IgnoreArguments();
             }
             using(mocks.Playback())
             {
@@ -82,10 +82,10 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
         {
             using (mocks.Record())
             {
-                Expect.Call(delegate { mockBus.Unsubscribe<CacheUpdateRequest>(null); }).IgnoreArguments();
-                Expect.Call(delegate { mockBus.Unsubscribe<AddSubscription>(null); }).IgnoreArguments();
-                Expect.Call(delegate { mockBus.Unsubscribe<RemoveSubscription>(null); }).IgnoreArguments();
-                Expect.Call(delegate { mockBus.Unsubscribe<CancelSubscriptionUpdates>(null); }).IgnoreArguments();
+				Expect.Call(delegate { mockBus.Unsubscribe<CacheUpdateRequest>(delegate { }); }).IgnoreArguments();
+				Expect.Call(delegate { mockBus.Unsubscribe<AddSubscription>(delegate { }); }).IgnoreArguments();
+				Expect.Call(delegate { mockBus.Unsubscribe<RemoveSubscription>(delegate { }); }).IgnoreArguments();
+				Expect.Call(delegate { mockBus.Unsubscribe<CancelSubscriptionUpdates>(delegate { }); }).IgnoreArguments();
 
             }
             using (mocks.Playback())

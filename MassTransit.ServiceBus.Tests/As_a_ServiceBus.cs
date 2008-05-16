@@ -96,7 +96,7 @@ namespace MassTransit.ServiceBus.Tests
 	    public void When_creating_a_bus()
 	    {
 	        LocalSubscriptionCache cache = new LocalSubscriptionCache();
-            ServiceBus bus = new ServiceBus(null, cache);
+            ServiceBus bus = new ServiceBus(mocks.DynamicMock<IEndpoint>(), cache);
 	        SubscriptionClient client = new SubscriptionClient(bus, cache, null);
 	    }
 	}
