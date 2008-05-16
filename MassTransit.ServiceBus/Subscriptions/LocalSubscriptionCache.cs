@@ -61,9 +61,8 @@ namespace MassTransit.ServiceBus.Subscriptions
 				if (!_messageTypeSubscriptions.ContainsKey(subscription.MessageName))
 				{
 					if (_log.IsDebugEnabled)
-						_log.DebugFormat("Adding new local subscription list for type {0} on {1}",
-						                 subscription.MessageName,
-						                 GetHashCode());
+						_log.DebugFormat("Adding new local subscription list for message {0}",
+						                 subscription.MessageName);
 
 					_messageTypeSubscriptions.Add(subscription.MessageName, new List<SubscriptionCacheEntry>());
 				}
@@ -73,9 +72,9 @@ namespace MassTransit.ServiceBus.Subscriptions
 				if (!_messageTypeSubscriptions[subscription.MessageName].Contains(entry))
 				{
 					if (_log.IsDebugEnabled)
-						_log.DebugFormat("Adding new local subscription entry for endpointUri {0} on {1}",
-						                 subscription.EndpointUri,
-						                 GetHashCode());
+						_log.DebugFormat("Adding new local subscription for {0} going to {1}",
+						                 subscription.MessageName,
+						                 subscription.EndpointUri);
 
 					_messageTypeSubscriptions[subscription.MessageName].Add(entry);
 
@@ -101,9 +100,9 @@ namespace MassTransit.ServiceBus.Subscriptions
 					if (_messageTypeSubscriptions[subscription.MessageName].Contains(entry))
 					{
 						if (_log.IsDebugEnabled)
-							_log.DebugFormat("Removing local subscription entry for endpointUri {0} on {1}",
-							                 subscription.EndpointUri,
-							                 GetHashCode());
+							_log.DebugFormat("Removing local subscription for {0} going to {1}",
+							                 subscription.MessageName,
+							                 subscription.EndpointUri);
 
 						_messageTypeSubscriptions[subscription.MessageName].Remove(entry);
 					}
@@ -111,9 +110,8 @@ namespace MassTransit.ServiceBus.Subscriptions
 					if (_messageTypeSubscriptions[subscription.MessageName].Count == 0)
 					{
 						if (_log.IsDebugEnabled)
-							_log.DebugFormat("Removing local subscription list for type {0} on {1}",
-							                 subscription.MessageName,
-							                 GetHashCode());
+							_log.DebugFormat("Removing local subscription list for message",
+							                 subscription.MessageName);
 
 						_messageTypeSubscriptions.Remove(subscription.MessageName);
 
