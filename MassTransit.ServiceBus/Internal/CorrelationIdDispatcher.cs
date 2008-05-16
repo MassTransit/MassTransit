@@ -11,6 +11,11 @@ namespace MassTransit.ServiceBus.Internal
 
 		#region IMessageDispatcher Members
 
+		public bool Accept(object obj)
+		{
+			return Accept((T) obj);
+		}
+
 		public bool Dispatch(object obj)
 		{
 			return Dispatch((T) obj);
@@ -33,7 +38,7 @@ namespace MassTransit.ServiceBus.Internal
 		{
 			Consumes<T>.For<V> consumer = component as Consumes<T>.For<V>;
 			if (consumer == null)
-				throw new ArgumentException(string.Format("The object does not support Consumes<{0}>.For<{1}>", typeof(T).Name, typeof(V).Name), "component");
+				throw new ArgumentException(string.Format("The object does not support Consumes<{0}>.For<{1}>", typeof (T).Name, typeof (V).Name), "component");
 
 			V correlationId = consumer.CorrelationId;
 
@@ -41,12 +46,27 @@ namespace MassTransit.ServiceBus.Internal
 				_dispatchers[correlationId].Unsubscribe(consumer);
 		}
 
-		public void AddComponent<TComponent>()
+		public void AddComponent<TComponent>() where TComponent : class
+		{
+			throw new NotImplementedException();
+		}
+
+		public void RemoveComponent<TComponent>() where TComponent : class
 		{
 			throw new NotImplementedException();
 		}
 
 		#endregion
+
+		public void Dispose()
+		{
+			foreach (KeyValuePair<V, IMessageDispatcher> dispatcher in _dispatchers)
+			{
+				dispatcher.Value.Dispose();
+			}
+
+			_dispatchers.Clear();
+		}
 
 		private IMessageDispatcher GetDispatcher(V correlationId)
 		{
@@ -69,6 +89,20 @@ namespace MassTransit.ServiceBus.Internal
 			if (_dispatchers.ContainsKey(correlationId))
 			{
 				return _dispatchers[correlationId].Dispatch(message);
+			}
+
+			return false;
+		}
+
+		public bool Accept(T message)
+		{
+			CorrelatedBy<V> correlation = message;
+
+			V correlationId = correlation.CorrelationId;
+
+			if (_dispatchers.ContainsKey(correlationId))
+			{
+				return _dispatchers[correlationId].Accept(message);
 			}
 
 			return false;

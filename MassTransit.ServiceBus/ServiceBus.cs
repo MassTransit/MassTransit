@@ -39,8 +39,9 @@ namespace MassTransit.ServiceBus
 		private readonly IEndpoint _endpointToListenOn;
 		private IEndpoint _poisonEndpoint;
 		private readonly ISubscriptionCache _subscriptionCache;
+		private IMessageDispatcher _dispatcher;
 
-        static ServiceBus()
+		static ServiceBus()
         {
             try
             {
@@ -67,6 +68,8 @@ namespace MassTransit.ServiceBus
 
 			_endpointToListenOn = endpointToListenOn;
             _subscriptionCache = subscriptionCache;
+
+        	_dispatcher = new MessageDispatcher();
         }
 
 		public ISubscriptionCache SubscriptionCache
@@ -95,6 +98,16 @@ namespace MassTransit.ServiceBus
 				if (result == false)
 				{
 					result = IsTheBusInterested(envelope);
+				}
+
+				if(result == false)
+				{
+					foreach (IMessage message in envelope.Messages)
+					{
+						result = _dispatcher.Accept(message);
+						if (result)
+							break;
+					}
 				}
 			}
 			catch (Exception ex)
@@ -126,6 +139,11 @@ namespace MassTransit.ServiceBus
 			if (delivered == false)
 			{
 				DeliverMessagesToConsumers(envelope);
+
+				foreach (IMessage message in envelope.Messages)
+				{
+					_dispatcher.Dispatch(message);
+				}
 			}
 		}
 
@@ -138,6 +156,8 @@ namespace MassTransit.ServiceBus
 			_subscriptionCache.Dispose();
 
 			_consumers.Clear();
+
+			_dispatcher.Dispose();
 
 			_endpointToListenOn.Dispose();
 		}
@@ -220,6 +240,11 @@ namespace MassTransit.ServiceBus
 			StartListening();
 		}
 
+		public void Subscribe<T>(T component) where T : class
+		{
+			_dispatcher.Subscribe<T>(component);
+		}
+
 		public void Unsubscribe<T>(Action<IMessageContext<T>> callback) where T : IMessage
 		{
 			Unsubscribe(callback, null);
@@ -241,6 +266,21 @@ namespace MassTransit.ServiceBus
 					}
 				}
 			}
+		}
+
+		public void Unsubscribe<T>(T component) where T : class
+		{
+			_dispatcher.Unsubscribe<T>(component);
+		}
+
+		public void AddComponent<TComponent>() where TComponent : class
+		{
+			_dispatcher.AddComponent<TComponent>();
+		}
+
+		public void RemoveComponent<TComponent>() where TComponent : class
+		{
+			_dispatcher.RemoveComponent<TComponent>();
 		}
 
 		/// <summary>
