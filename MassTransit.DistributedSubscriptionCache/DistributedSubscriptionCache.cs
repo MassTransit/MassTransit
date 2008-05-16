@@ -27,6 +27,7 @@ namespace MassTransit.DistributedSubscriptionCache
 		private static readonly ILog _log = LogManager.GetLogger(typeof (DistributedSubscriptionCache));
 
 		private readonly List<string> _messageTypes = new List<string>();
+	    private readonly char _newLineToken = '\n';
 
 		public IList<Subscription> List()
 		{
@@ -52,7 +53,7 @@ namespace MassTransit.DistributedSubscriptionCache
 
 			if (!string.IsNullOrEmpty(value))
 			{
-				string[] uris = value.Split('\n');
+                string[] uris = value.Split(_newLineToken);
 
 				foreach (string uri in uris)
 				{
@@ -92,7 +93,7 @@ namespace MassTransit.DistributedSubscriptionCache
 					}
 					else
 					{
-						string newValue = currentValue + "\n" + addUri;
+                        string newValue = currentValue + _newLineToken + addUri;
 						cache.Client.Store(StoreMode.Set, key.CacheKey, newValue, TimeSpan.FromDays(14));
 						OnAddSubscription(this, new SubscriptionEventArgs(subscription));
 					}
