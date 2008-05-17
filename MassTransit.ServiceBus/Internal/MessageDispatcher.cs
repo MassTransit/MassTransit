@@ -2,13 +2,15 @@ namespace MassTransit.ServiceBus.Internal
 {
 	using System;
 	using System.Collections.Generic;
+	using log4net;
 
-	/// <summary>
+    /// <summary>
 	/// Manages and dispatches messages to correlated message consumers
 	/// </summary>
 	public class MessageDispatcher :
 		IMessageDispatcher
 	{
+        private readonly ILog _log = LogManager.GetLogger(typeof (MessageDispatcher));
 		private static readonly Type _consumes = typeof (Consumes<>.Any);
 		private static readonly Type _consumesFor = typeof (Consumes<>.For<>);
 		private static readonly Type _consumesSelected = typeof (Consumes<>.Selected);
@@ -240,6 +242,7 @@ namespace MassTransit.ServiceBus.Internal
 	public class MessageDispatcher<TMessage> :
 		IMessageDispatcher where TMessage : class
 	{
+        private readonly ILog _log = LogManager.GetLogger(typeof(MessageDispatcher<TMessage>));
 		private readonly IObjectBuilder _builder;
 		private readonly List<Type> _components = new List<Type>();
 		private readonly List<Consumes<TMessage>.Any> _consumers = new List<Consumes<TMessage>.Any>();
