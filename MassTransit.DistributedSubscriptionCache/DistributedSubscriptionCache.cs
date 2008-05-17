@@ -76,25 +76,25 @@ namespace MassTransit.DistributedSubscriptionCache
 
 			using (CacheLock cache = new CacheLock(key))
 			{
-				string currentValue = cache.Client.Get<string>(key.CacheKey);
+				string currentValue = cache.GetFromClient<string>(key);
 
 				string addUri = subscription.EndpointUri.ToString();
 
 				if (currentValue == null)
 				{
-					cache.Client.Store(StoreMode.Set, key.CacheKey, addUri, TimeSpan.FromDays(14));
+					cache.StoreInClient(StoreMode.Set, key, addUri, TimeSpan.FromDays(14));
 					OnAddSubscription(this, new SubscriptionEventArgs(subscription));
 				}
 				else
 				{
 					if (currentValue.Contains(addUri))
 					{
-						cache.Client.Store(StoreMode.Set, key.CacheKey, currentValue, TimeSpan.FromDays(14));
+						cache.StoreInClient(StoreMode.Set, key, currentValue, TimeSpan.FromDays(14));
 					}
 					else
 					{
                         string newValue = currentValue + _newLineToken + addUri;
-						cache.Client.Store(StoreMode.Set, key.CacheKey, newValue, TimeSpan.FromDays(14));
+						cache.StoreInClient(StoreMode.Set, key, newValue, TimeSpan.FromDays(14));
 						OnAddSubscription(this, new SubscriptionEventArgs(subscription));
 					}
 				}
@@ -110,7 +110,7 @@ namespace MassTransit.DistributedSubscriptionCache
 
 			using (CacheLock cache = new CacheLock(key))
 			{
-				string currentValue = cache.Client.Get<string>(key.CacheKey);
+				string currentValue = cache.GetFromClient<string>(key);
 
 				string removeUri = subscription.EndpointUri.ToString();
 
@@ -125,7 +125,7 @@ namespace MassTransit.DistributedSubscriptionCache
                         }
 
                         string newValue = currentValue.Remove(start, removeUri.Length + 1);
-                        cache.Client.Store(StoreMode.Set, key.CacheKey, newValue, TimeSpan.FromDays(14));
+                        cache.StoreInClient(StoreMode.Set, key, newValue, TimeSpan.FromDays(14));
                         OnRemoveSubscription(this, new SubscriptionEventArgs(subscription));
                     }
 				}
@@ -161,6 +161,15 @@ namespace MassTransit.DistributedSubscriptionCache
 					Thread.Sleep(20);
 				}
 			}
+
+            public R GetFromClient<R>(SubscriptionKey key)
+            {
+                return _client.Get<R>(key.CacheKey);
+            }
+            public void StoreInClient(StoreMode mode, SubscriptionKey key, object value, TimeSpan validFor)
+            {
+                _client.Store(mode, key.CacheKey, value, validFor);
+            }
 
 			public MemcachedClient Client
 			{
