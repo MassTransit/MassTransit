@@ -18,22 +18,8 @@ namespace MassTransit.ServiceBus.Internal
 	/// A correlated message dispatcher sends a message to any attached consumers
 	/// with a matching correlation identifier
 	/// </summary>
-	public interface IMessageDispatcher : IDisposable
+	public interface IMessageDispatcher : IDisposable, Consumes<object>.Selected
 	{
-		/// <summary>
-		/// Checks to see if a message will be accepted by at least one handler
-		/// </summary>
-		/// <param name="message">The message to check</param>
-		/// <returns>True if the message would be handled</returns>
-		bool Accept(object message);
-
-		/// <summary>
-		/// Dispatches a message
-		/// </summary>
-		/// <param name="message">The message to dispatch</param>
-		/// <returns>True if the message was dispatched to at least one consumer</returns>
-		bool Dispatch(object message);
-
 		/// <summary>
 		/// Connects any consumers for the component to the message dispatcher
 		/// </summary>

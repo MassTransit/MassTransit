@@ -57,7 +57,7 @@ namespace MassTransit.ServiceBus.Tests
 
 			ResponseMessage response = new ResponseMessage(_request.CorrelationId);
 
-			_MessageDispatcher.Dispatch(response);
+			_MessageDispatcher.Consume(response);
 		}
 	}
 

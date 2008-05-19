@@ -64,7 +64,7 @@ namespace MassTransit.ServiceBus.Tests
 
 			_dispatcher.Unsubscribe(consumerA);
 
-			_dispatcher.Dispatch(_message);
+			_dispatcher.Consume(_message);
 
 			Assert.That(consumerA.Value, Is.EqualTo(default(int)));
 		}
@@ -80,7 +80,7 @@ namespace MassTransit.ServiceBus.Tests
 
 			_dispatcher.Unsubscribe(consumerA);
 
-			_dispatcher.Dispatch(_message);
+			_dispatcher.Consume(_message);
 
 			Assert.That(consumerA.Value, Is.EqualTo(default(int)));
 			Assert.That(consumerB.Value, Is.EqualTo(_value));
@@ -95,7 +95,7 @@ namespace MassTransit.ServiceBus.Tests
 			TestConsumer consumerB = new TestConsumer();
 			_dispatcher.Subscribe(consumerB);
 
-			_dispatcher.Dispatch(_message);
+			_dispatcher.Consume(_message);
 
 			Assert.That(consumerA.Value, Is.EqualTo(_value));
 			Assert.That(consumerB.Value, Is.EqualTo(_value));
@@ -107,7 +107,7 @@ namespace MassTransit.ServiceBus.Tests
 			TestConsumer consumerA = new TestConsumer();
 			_dispatcher.Subscribe(consumerA);
 
-			_dispatcher.Dispatch(_message);
+			_dispatcher.Consume(_message);
 
 			Assert.That(consumerA.Value, Is.EqualTo(_message.Value));
 		}

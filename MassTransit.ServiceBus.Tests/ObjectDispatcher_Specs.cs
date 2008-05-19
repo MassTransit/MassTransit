@@ -20,7 +20,7 @@ namespace MassTransit.ServiceBus.Tests
 
 			TestMessage message = new TestMessage(27);
 
-			dispatcher.Dispatch(message);
+			dispatcher.Consume(message);
 
 			Assert.That(RequestHandler.Value, Is.EqualTo(27));
 			Assert.That(SelectiveHandler.Value, Is.EqualTo(default(int)));
@@ -38,7 +38,7 @@ namespace MassTransit.ServiceBus.Tests
 
 			TestMessage message = new TestMessage(42);
 
-			dispatcher.Dispatch(message);
+			dispatcher.Consume(message);
 
 			Assert.That(RequestHandler.Value, Is.EqualTo(42));
 			Assert.That(SelectiveHandler.Value, Is.EqualTo(42));

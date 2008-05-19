@@ -55,10 +55,8 @@ namespace MassTransit.ServiceBus.Internal
 			return result;
 		}
 
-		public bool Dispatch(object message)
+		public void Consume(object message)
 		{
-			bool result = false;
-
 			Type messageType = message.GetType();
 
 			if (_messageTypeToKeyType.ContainsKey(messageType))
@@ -67,16 +65,14 @@ namespace MassTransit.ServiceBus.Internal
 
 				if (_correlatedDispatchers.ContainsKey(keyType))
 				{
-					result = _correlatedDispatchers[keyType].Dispatch(message);
+					_correlatedDispatchers[keyType].Consume(message);
 				}
 			}
 
 			if (_messageDispatchers.ContainsKey(messageType))
 			{
-				result = _messageDispatchers[messageType].Dispatch(message);
+				_messageDispatchers[messageType].Consume(message);
 			}
-
-			return result;
 		}
 
 		public void Subscribe<T>(T component) where T : class
@@ -303,10 +299,8 @@ namespace MassTransit.ServiceBus.Internal
 			return result;		
 		}
 
-		public bool Dispatch(object obj)
+		public void Consume(object obj)
 		{
-			bool result = false;
-
 			TMessage message = obj as TMessage;
 			if (message == null)
 				throw new ArgumentException("The message is not of type " + typeof (TMessage).FullName, "obj");
@@ -318,13 +312,11 @@ namespace MassTransit.ServiceBus.Internal
 				{
 					if (selectiveConsumer.Accept(message))
 					{
-						result = true;
 						consumer.Consume(message);
 					}
 				}
 				else
 				{
-					result = true;
 					consumer.Consume(message);
 				}
 			}
@@ -338,18 +330,14 @@ namespace MassTransit.ServiceBus.Internal
 				{
 					if (selectiveConsumer.Accept(message))
 					{
-						result = true;
 						consumer.Consume(message);
 					}
 				}
 				else
 				{
-					result = true;
 					consumer.Consume(message);
 				}
 			}
-
-			return result;
 		}
 
 		public void Subscribe<TComponent>(TComponent component) where TComponent : class

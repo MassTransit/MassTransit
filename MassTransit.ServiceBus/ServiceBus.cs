@@ -39,7 +39,7 @@ namespace MassTransit.ServiceBus
 		private readonly IEndpoint _endpointToListenOn;
 		private IEndpoint _poisonEndpoint;
 		private readonly ISubscriptionCache _subscriptionCache;
-		private IMessageDispatcher _dispatcher;
+		private readonly IMessageDispatcher _dispatcher;
 
 		static ServiceBus()
         {
@@ -155,7 +155,7 @@ namespace MassTransit.ServiceBus
 
 				foreach (IMessage message in envelope.Messages)
 				{
-					_dispatcher.Dispatch(message);
+					_dispatcher.Consume(message);
 				}
 			}
 		}
@@ -255,7 +255,7 @@ namespace MassTransit.ServiceBus
 
 		public void Subscribe<T>(T component) where T : class
 		{
-			_dispatcher.Subscribe<T>(component);
+			_dispatcher.Subscribe(component);
 
 			StartListening();
 		}
@@ -285,7 +285,7 @@ namespace MassTransit.ServiceBus
 
 		public void Unsubscribe<T>(T component) where T : class
 		{
-			_dispatcher.Unsubscribe<T>(component);
+			_dispatcher.Unsubscribe(component);
 		}
 
 		public void AddComponent<TComponent>() where TComponent : class

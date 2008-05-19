@@ -87,7 +87,7 @@ namespace MassTransit.ServiceBus.Tests
 			TestConsumer consumerA = new TestConsumer(_message.CorrelationId);
 			_dispatcher.Subscribe(consumerA);
 
-			_dispatcher.Dispatch(_message);
+			_dispatcher.Consume(_message);
 
 			Assert.That(consumerA.Value, Is.EqualTo(_message.Value));
 		}
@@ -98,7 +98,7 @@ namespace MassTransit.ServiceBus.Tests
 			TestConsumer consumerA = new TestConsumer(Guid.NewGuid());
 			_dispatcher.Subscribe(consumerA);
 
-			_dispatcher.Dispatch(_message);
+			_dispatcher.Consume(_message);
 
 			Assert.That(consumerA.Value, Is.EqualTo(default(int)));
 		}
@@ -111,7 +111,7 @@ namespace MassTransit.ServiceBus.Tests
 
 			object obj = _message;
 
-			_dispatcher.Dispatch(obj);
+			_dispatcher.Consume(obj);
 
 			Assert.That(consumerA.Value, Is.EqualTo(_message.Value));
 		}
@@ -141,7 +141,7 @@ namespace MassTransit.ServiceBus.Tests
 			TestConsumer consumerB = new TestConsumer(_message.CorrelationId);
 			_dispatcher.Subscribe(consumerB);
 
-			_dispatcher.Dispatch(_message);
+			_dispatcher.Consume(_message);
 
 			Assert.That(consumerA.Value, Is.EqualTo(_value));
 			Assert.That(consumerB.Value, Is.EqualTo(_value));
@@ -158,7 +158,7 @@ namespace MassTransit.ServiceBus.Tests
 
 			_dispatcher.Unsubscribe(consumerA);
 
-			_dispatcher.Dispatch(_message);
+			_dispatcher.Consume(_message);
 
 			Assert.That(consumerA.Value, Is.EqualTo(default(int)));
 			Assert.That(consumerB.Value, Is.EqualTo(_value));
@@ -173,7 +173,7 @@ namespace MassTransit.ServiceBus.Tests
 			TestConsumer consumerB = new TestConsumer(Guid.NewGuid());
 			_dispatcher.Subscribe(consumerB);
 
-			_dispatcher.Dispatch(_message);
+			_dispatcher.Consume(_message);
 
 			Assert.That(consumerA.Value, Is.EqualTo(_value));
 			Assert.That(consumerB.Value, Is.EqualTo(default(int)));
@@ -190,8 +190,8 @@ namespace MassTransit.ServiceBus.Tests
 			TestConsumer consumerB = new TestConsumer(anotherMessage.CorrelationId);
 			_dispatcher.Subscribe(consumerB);
 
-			_dispatcher.Dispatch(_message);
-			_dispatcher.Dispatch(anotherMessage);
+			_dispatcher.Consume(_message);
+			_dispatcher.Consume(anotherMessage);
 
 			Assert.That(consumerA.Value, Is.EqualTo(_value));
 			Assert.That(consumerB.Value, Is.EqualTo(42));
