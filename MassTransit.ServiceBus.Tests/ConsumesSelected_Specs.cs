@@ -26,7 +26,7 @@ namespace MassTransit.ServiceBus.Tests
 		internal class TestConsumer : Consumes<TestMessage>.Selected
 		{
 			private int _value;
-			private Predicate<TestMessage> _accept;
+			private readonly Predicate<TestMessage> _accept;
 
 			public TestConsumer(Predicate<TestMessage> accept)
 			{
@@ -95,7 +95,7 @@ namespace MassTransit.ServiceBus.Tests
 			GeneralConsumer consumerB = new GeneralConsumer();
 			_dispatcher.Subscribe(consumerB);
 
-			_dispatcher.Dispatch(_message);
+			_dispatcher.Consume(_message);
 
 			Assert.That(consumerA.Value, Is.EqualTo(default(int)));
 			Assert.That(consumerB.Value, Is.EqualTo(_value));
@@ -110,7 +110,7 @@ namespace MassTransit.ServiceBus.Tests
 			TestConsumer consumerB = new TestConsumer(delegate(TestMessage message) { return message.Value < 32; });
 			_dispatcher.Subscribe(consumerB);
 
-			_dispatcher.Dispatch(_message);
+			_dispatcher.Consume(_message);
 
 			Assert.That(consumerA.Value, Is.EqualTo(default(int)));
 			Assert.That(consumerB.Value, Is.EqualTo(_value));

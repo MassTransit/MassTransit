@@ -16,9 +16,9 @@ namespace MassTransit.ServiceBus.Internal
 			return Accept((T) obj);
 		}
 
-		public bool Dispatch(object obj)
+		public void Consume(object obj)
 		{
-			return Dispatch((T) obj);
+			Consume((T) obj);
 		}
 
 		public void Subscribe<TComponent>(TComponent component) where TComponent : class
@@ -80,7 +80,7 @@ namespace MassTransit.ServiceBus.Internal
 			return dispatcher;
 		}
 
-		public bool Dispatch(T message)
+		public void Consume(T message)
 		{
 			CorrelatedBy<V> correlation = message;
 
@@ -88,10 +88,8 @@ namespace MassTransit.ServiceBus.Internal
 
 			if (_dispatchers.ContainsKey(correlationId))
 			{
-				return _dispatchers[correlationId].Dispatch(message);
+				_dispatchers[correlationId].Consume(message);
 			}
-
-			return false;
 		}
 
 		public bool Accept(T message)
