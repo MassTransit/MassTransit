@@ -49,6 +49,7 @@
     <Compile Include="Exceptions\ConventionException.cs" />
     <Compile Include="Exceptions\MessageException.cs" />
     <Compile Include="Exceptions\ShutDownException.cs" />
+    <Compile Include="Internal\GenericComponent.cs" />
     <Compile Include="Internal\MessageDispatcher.cs" />
     <Compile Include="Internal\CorrelationIdDispatcher.cs" />
     <Compile Include="Internal\EndpointResolver.cs" />
