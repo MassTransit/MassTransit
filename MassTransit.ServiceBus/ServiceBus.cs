@@ -138,6 +138,7 @@ namespace MassTransit.ServiceBus
 
 			if (delivered == false)
 			{
+                //TODO: How can we best combine these?
 				DeliverMessagesToConsumers(envelope);
 
 				foreach (IMessage message in envelope.Messages)
@@ -237,6 +238,7 @@ namespace MassTransit.ServiceBus
 				((IMessageConsumer<T>) _consumers[typeof (T)]).Subscribe(callback, condition);
 			}
 
+            //Subscribe(new GenericComponent<T>(callback, this));
 			StartListening();
 		}
 
