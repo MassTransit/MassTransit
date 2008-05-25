@@ -138,6 +138,14 @@ namespace MassTransit.ServiceBus.Internal
 					if (_correlatedDispatchers.ContainsKey(arguments[1]))
 						_correlatedDispatchers[arguments[1]].Unsubscribe(component);
 				}
+				else if (interfaceType.IsGenericType && interfaceType.GetGenericTypeDefinition() == _consumes)
+				{
+					Type[] arguments = interfaceType.GetGenericArguments();
+
+					if (_messageDispatchers.ContainsKey(arguments[0]))
+						_messageDispatchers[arguments[0]].Unsubscribe(component);
+				}
+
 			}
 		}
 
