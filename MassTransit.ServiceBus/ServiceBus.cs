@@ -212,7 +212,7 @@ namespace MassTransit.ServiceBus
 		/// <param name="condition">A condition predicate to filter which messages are handled by the callback</param>
 		public void Subscribe<T>(Action<IMessageContext<T>> callback, Predicate<T> condition) where T : class, IMessage
 		{
-            Subscribe(new GenericComponent<T>(callback, this));
+            Subscribe(new GenericComponent<T>(callback, condition, this));
 		}
 
 		public void Subscribe<T>(T component) where T : class
@@ -230,7 +230,7 @@ namespace MassTransit.ServiceBus
 
 		public void Unsubscribe<T>(Action<IMessageContext<T>> callback, Predicate<T> condition) where T : class, IMessage
 		{
-            Unsubscribe(new GenericComponent<T>(callback, this));
+            Unsubscribe(new GenericComponent<T>(callback, condition, this));
 		}
 
 		public void Unsubscribe<T>(T component) where T : class
