@@ -2,12 +2,28 @@ namespace MassTransit.ServiceBus.Internal
 {
 	using System;
 	using System.Collections.Generic;
+	using Subscriptions;
 
 	public class CorrelationIdDispatcher<T, V> :
 		IMessageDispatcher
 		where T : class, CorrelatedBy<V>
 	{
 		private readonly Dictionary<V, IMessageDispatcher> _dispatchers = new Dictionary<V, IMessageDispatcher>();
+		private readonly IObjectBuilder _builder;
+		private readonly IServiceBus _bus;
+		private readonly ISubscriptionCache _cache;
+
+		public CorrelationIdDispatcher(IServiceBus bus, ISubscriptionCache cache, IObjectBuilder builder)
+		{
+			_builder = builder;
+			_cache = cache;
+			_bus = bus;
+		}
+
+		public CorrelationIdDispatcher()
+		{
+			
+		}
 
 		#region IMessageDispatcher Members
 
@@ -73,7 +89,7 @@ namespace MassTransit.ServiceBus.Internal
 			if (_dispatchers.ContainsKey(correlationId))
 				return _dispatchers[correlationId];
 
-			IMessageDispatcher dispatcher = new MessageDispatcher<T>();
+			IMessageDispatcher dispatcher = new MessageDispatcher<T>(_bus, _cache, _builder);
 
 			_dispatchers.Add(correlationId, dispatcher);
 

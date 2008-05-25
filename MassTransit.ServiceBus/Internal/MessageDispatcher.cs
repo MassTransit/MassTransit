@@ -3,8 +3,9 @@ namespace MassTransit.ServiceBus.Internal
 	using System;
 	using System.Collections.Generic;
 	using log4net;
+	using Subscriptions;
 
-    /// <summary>
+	/// <summary>
 	/// Manages and dispatches messages to correlated message consumers
 	/// </summary>
 	public class MessageDispatcher :
@@ -14,18 +15,21 @@ namespace MassTransit.ServiceBus.Internal
 		private static readonly Type _consumes = typeof (Consumes<>.Any);
 		private static readonly Type _consumesFor = typeof (Consumes<>.For<>);
 		private static readonly Type _consumesSelected = typeof (Consumes<>.Selected);
+		private readonly IServiceBus _bus;
+		private readonly ISubscriptionCache _cache;
 		private readonly IObjectBuilder _builder;
 		private readonly Dictionary<Type, IMessageDispatcher> _correlatedDispatchers = new Dictionary<Type, IMessageDispatcher>();
 		private readonly Dictionary<Type, IMessageDispatcher> _messageDispatchers = new Dictionary<Type, IMessageDispatcher>();
 		private readonly Dictionary<Type, Type> _messageTypeToKeyType = new Dictionary<Type, Type>();
 
-
 		public MessageDispatcher()
 		{
 		}
 
-		public MessageDispatcher(IObjectBuilder builder)
+		public MessageDispatcher(IServiceBus bus, ISubscriptionCache cache, IObjectBuilder builder)
 		{
+			_bus = bus;
+			_cache = cache;
 			_builder = builder;
 		}
 
@@ -214,7 +218,7 @@ namespace MassTransit.ServiceBus.Internal
 
 			Type dispatcherType = typeof (CorrelationIdDispatcher<,>).MakeGenericType(genericArguments);
 
-			IMessageDispatcher dispatcher = (IMessageDispatcher) Activator.CreateInstance(dispatcherType);
+			IMessageDispatcher dispatcher = (IMessageDispatcher) Activator.CreateInstance(dispatcherType, _bus, _cache, _builder);
 
 			if (!_messageTypeToKeyType.ContainsKey(genericArguments[0]))
 				_messageTypeToKeyType.Add(genericArguments[0], genericArguments[1]);
@@ -231,7 +235,7 @@ namespace MassTransit.ServiceBus.Internal
 
 			Type dispatcherType = typeof (MessageDispatcher<>).MakeGenericType(messageType);
 
-			IMessageDispatcher dispatcher = (IMessageDispatcher) Activator.CreateInstance(dispatcherType, _builder);
+			IMessageDispatcher dispatcher = (IMessageDispatcher) Activator.CreateInstance(dispatcherType, _bus, _cache, _builder);
 
 			_messageDispatchers.Add(messageType, dispatcher);
 
@@ -250,14 +254,24 @@ namespace MassTransit.ServiceBus.Internal
 		private readonly IObjectBuilder _builder;
 		private readonly List<Type> _components = new List<Type>();
 		private readonly List<Consumes<TMessage>.Any> _consumers = new List<Consumes<TMessage>.Any>();
+		private readonly ISubscriptionCache _cache;
+		private readonly IServiceBus _bus;
 
 		public MessageDispatcher()
 		{
 		}
 
-		public MessageDispatcher(IObjectBuilder builder)
+		public MessageDispatcher(IServiceBus bus, ISubscriptionCache cache)
+		{
+			_cache = cache;
+			_bus = bus;
+		}
+
+		public MessageDispatcher(IServiceBus bus, ISubscriptionCache cache, IObjectBuilder builder)
 		{
 			_builder = builder;
+			_bus = bus;
+			_cache = cache;
 		}
 
 		#region IMessageDispatcher Members
@@ -355,7 +369,11 @@ namespace MassTransit.ServiceBus.Internal
 				throw new ArgumentException("The componet does not consume " + typeof (TMessage).FullName, "component");
 
 			if (!_consumers.Contains(consumer))
+			{
 				_consumers.Add(consumer);
+				if (_cache != null)
+					_cache.Add(new Subscription(typeof(TMessage).FullName, _bus.Endpoint.Uri));
+			}
 		}
 
 		public void Unsubscribe<TComponent>(TComponent component) where TComponent : class
@@ -365,7 +383,14 @@ namespace MassTransit.ServiceBus.Internal
 				throw new ArgumentException("The componet does not consume " + typeof (TMessage).FullName, "component");
 
 			if (_consumers.Contains(consumer))
+			{
 				_consumers.Remove(consumer);
+				if (_consumers.Count == 0 && _components.Count == 0)
+				{
+					if (_cache != null)
+						_cache.Remove(new Subscription(typeof(TMessage).FullName, _bus.Endpoint.Uri));
+				}
+			}
 		}
 
 		public void AddComponent<TComponent>() where TComponent : class
@@ -373,8 +398,12 @@ namespace MassTransit.ServiceBus.Internal
 			if (_builder == null)
 				throw new ArgumentException("No builder object was registered");
 
-			if (!_components.Contains(typeof (TComponent)))
+			if (!_components.Contains(typeof(TComponent)))
+			{
 				_components.Add(typeof (TComponent));
+				if(_cache != null)
+					_cache.Add(new Subscription(typeof (TMessage).FullName, _bus.Endpoint.Uri));
+			}
 		}
 
 		public void RemoveComponent<TComponent>() where TComponent : class
@@ -383,7 +412,14 @@ namespace MassTransit.ServiceBus.Internal
 				throw new ArgumentException("No builder object was registered");
 
 			if (_components.Contains(typeof(TComponent)))
-				_components.Remove(typeof(TComponent));
+			{
+				_components.Remove(typeof (TComponent));
+				if (_consumers.Count == 0 && _components.Count == 0)
+				{
+					if (_cache != null)
+						_cache.Remove(new Subscription(typeof(TMessage).FullName, _bus.Endpoint.Uri));
+				}
+			}
 		}
 
 		#endregion
