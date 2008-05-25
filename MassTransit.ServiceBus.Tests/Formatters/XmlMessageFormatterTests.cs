@@ -15,10 +15,10 @@ namespace MassTransit.ServiceBus.Tests.Formatters
         private IFormattedBody mockBody;
 
         private readonly string _serializedMessages =
-            "<?xml version=\"1.0\"?>\r\n<ArrayOfAnyType xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">\r\n  <anyType xsi:type=\"PingMessage\" />\r\n</ArrayOfAnyType>";
+            "<?xml version=\"1.0\"?>\r\n<anyType xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xsi:type=\"PingMessage\" />";
 
         private readonly string _serializedMessagesWithValue =
-            "<?xml version=\"1.0\"?>\r\n<ArrayOfAnyType xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">\r\n  <anyType xsi:type=\"ClientMessage\">\r\n    <Name>test</Name>\r\n  </anyType>\r\n</ArrayOfAnyType>";
+            "<?xml version=\"1.0\"?>\r\n<anyType xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xsi:type=\"ClientMessage\">\r\n  <Name>test</Name>\r\n</anyType>";
 
         [SetUp]
         public void SetUp()
@@ -73,11 +73,11 @@ namespace MassTransit.ServiceBus.Tests.Formatters
             }
             using (mocks.Playback())
             {
-                IMessage[] msgs = formatter.Deserialize<IMessage[]>(mockBody);
+                IMessage msg = formatter.Deserialize<IMessage>(mockBody);
 
-                Assert.AreEqual(1, msgs.Length);
+                Assert.IsNotNull(msg);
 
-                Assert.That(msgs[0], Is.TypeOf(typeof (PingMessage)));
+                Assert.That(msg, Is.TypeOf(typeof (PingMessage)));
             }
         }
 
