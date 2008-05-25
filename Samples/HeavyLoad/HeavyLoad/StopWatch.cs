@@ -51,7 +51,7 @@ namespace HeavyLoad
 	{
 		private readonly string _description;
 		private int _operationCount = 1;
-		private DateTime _start;
+		private readonly DateTime _start;
 		private DateTime _stop;
 
 		public CheckPoint(string description)
@@ -62,11 +62,14 @@ namespace HeavyLoad
 
 		public void ToString(StringBuilder sb)
 		{
-			sb.AppendFormat("{0}: {1}", _description, (_stop - _start));
+			TimeSpan duration = _stop - _start;
+
+			sb.AppendFormat("{0}: {1}", _description, duration);
 
 			if (_operationCount > 1)
 			{
-				sb.AppendFormat(", /{0} = {1:0}ms", _operationCount, (_stop - _start).TotalMilliseconds / _operationCount);
+				sb.AppendFormat(", /{0} = {1}ms", _operationCount, duration.TotalMilliseconds / _operationCount);
+				sb.AppendFormat(", {0}/s", ( _operationCount ) / duration.TotalSeconds );
 			}
 
 			sb.AppendLine();
