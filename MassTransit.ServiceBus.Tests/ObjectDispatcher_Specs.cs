@@ -13,7 +13,7 @@ namespace MassTransit.ServiceBus.Tests
 		{
 			IObjectBuilder builder = new ActivatorObjectBuilder();
 
-			MessageDispatcher dispatcher = new MessageDispatcher(builder);
+			MessageDispatcher dispatcher = new MessageDispatcher(null, null, builder);
 
 			dispatcher.AddComponent<RequestHandler>();
 			dispatcher.AddComponent<SelectiveHandler>();
@@ -31,7 +31,7 @@ namespace MassTransit.ServiceBus.Tests
 		{
 			IObjectBuilder builder = new ActivatorObjectBuilder();
 
-			MessageDispatcher dispatcher = new MessageDispatcher(builder);
+			MessageDispatcher dispatcher = new MessageDispatcher(null, null, builder);
 
 			dispatcher.AddComponent<RequestHandler>();
 			dispatcher.AddComponent<SelectiveHandler>();

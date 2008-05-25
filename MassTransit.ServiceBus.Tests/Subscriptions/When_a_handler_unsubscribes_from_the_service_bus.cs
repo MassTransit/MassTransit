@@ -64,7 +64,7 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
                 Expect.Call(delegate { _receiver.Subscribe(_consumer); }).IgnoreArguments();
 
                 Expect.Call(delegate { _cache.Remove(null); }).IgnoreArguments();
-                Expect.Call(delegate { _cache.Remove(null); }).IgnoreArguments();
+        //        Expect.Call(delegate { _cache.Remove(null); }).IgnoreArguments();
 			}
 
 			using (_mocks.Playback())
