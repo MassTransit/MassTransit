@@ -13,7 +13,6 @@
 namespace MassTransit.ServiceBus
 {
 	using System;
-	using System.Collections.Generic;
 	using Internal;
 	using log4net;
 	using Subscriptions;
@@ -31,10 +30,6 @@ namespace MassTransit.ServiceBus
 
 		private readonly AsyncReplyDispatcher _asyncReplyDispatcher = new AsyncReplyDispatcher();
 
-		private readonly Dictionary<Type, IMessageConsumer> _consumers =
-			new Dictionary<Type, IMessageConsumer>();
-
-		private readonly object _consumersLock = new object();
 		private readonly EndpointResolver _endpointResolver = new EndpointResolver();
 		private readonly IEndpoint _endpointToListenOn;
 		private IEndpoint _poisonEndpoint;
@@ -95,11 +90,6 @@ namespace MassTransit.ServiceBus
 					result = _asyncReplyDispatcher.Exists(envelope.CorrelationId);
 				}
 
-				if (result == false)
-				{
-					result = IsTheBusInterested(envelope);
-				}
-
 				if(result == false)
 				{
 					foreach (IMessage message in envelope.Messages)
@@ -138,9 +128,6 @@ namespace MassTransit.ServiceBus
 
 			if (delivered == false)
 			{
-                //TODO: How can we best combine these?
-				DeliverMessagesToConsumers(envelope);
-
 				foreach (IMessage message in envelope.Messages)
 				{
 					_dispatcher.Consume(message);
@@ -155,8 +142,6 @@ namespace MassTransit.ServiceBus
 		public void Dispose()
 		{
 			_subscriptionCache.Dispose();
-
-			_consumers.Clear();
 
 			_dispatcher.Dispose();
 
@@ -227,24 +212,13 @@ namespace MassTransit.ServiceBus
 		/// <param name="condition">A condition predicate to filter which messages are handled by the callback</param>
 		public void Subscribe<T>(Action<IMessageContext<T>> callback, Predicate<T> condition) where T : class, IMessage
 		{
-			lock (_consumersLock)
-			{
-				if (!_consumers.ContainsKey(typeof (T)))
-				{
-					_consumers[typeof (T)] = new MessageConsumer<T>();
-					_subscriptionCache.Add(new Subscription(typeof (T).FullName, Endpoint.Uri));
-				}
-
-				((IMessageConsumer<T>) _consumers[typeof (T)]).Subscribe(callback, condition);
-			}
-
-            //Subscribe(new GenericComponent<T>(callback, this));
-			StartListening();
+            Subscribe(new GenericComponent<T>(callback, this));
 		}
 
 		public void Subscribe<T>(T component) where T : class
 		{
 			_dispatcher.Subscribe(component);
+            _subscriptionCache.Add(new Subscription(typeof (T).FullName, Endpoint.Uri));
 
 			StartListening();
 		}
@@ -256,36 +230,25 @@ namespace MassTransit.ServiceBus
 
 		public void Unsubscribe<T>(Action<IMessageContext<T>> callback, Predicate<T> condition) where T : class, IMessage
 		{
-			lock (_consumersLock)
-			{
-				if (_consumers.ContainsKey(typeof (T)))
-				{
-					IMessageConsumer<T> consumer = ((IMessageConsumer<T>) _consumers[typeof (T)]);
-
-					consumer.Unsubscribe(callback, condition);
-					if (consumer.Count == 0)
-					{
-						_consumers.Remove(typeof (T));
-						_subscriptionCache.Remove(new Subscription(typeof (T).FullName, Endpoint.Uri));
-					}
-				}
-			}
+            Unsubscribe(new GenericComponent<T>(callback, this));
 		}
 
 		public void Unsubscribe<T>(T component) where T : class
 		{
 			_dispatcher.Unsubscribe(component);
+		    _subscriptionCache.Remove(new Subscription(typeof (T).FullName, Endpoint.Uri));
 		}
 
 		public void AddComponent<TComponent>() where TComponent : class
 		{
 			_dispatcher.AddComponent<TComponent>();
-
+            //TODO: subscription client
 			StartListening();
 		}
 
 		public void RemoveComponent<TComponent>() where TComponent : class
 		{
+            //TODO: subscription client
 			_dispatcher.RemoveComponent<TComponent>();
 		}
 
@@ -306,7 +269,7 @@ namespace MassTransit.ServiceBus
 		{
 			StartListening();
 
-			IEnvelope envelope = new Envelope(_endpointToListenOn, messages as IMessage[]);
+			IEnvelope envelope = new Envelope(_endpointToListenOn, messages);
 
 			lock (_asyncReplyDispatcher)
 			{
@@ -321,52 +284,6 @@ namespace MassTransit.ServiceBus
 		private void StartListening()
 		{
 			_endpointToListenOn.Receiver.Subscribe(this);
-		}
-
-		private bool IsTheBusInterested(IEnvelope envelope)
-		{
-			bool result = false;
-
-			foreach (IMessage message in envelope.Messages)
-			{
-				Type messageType = message.GetType();
-
-				if (_consumers.ContainsKey(messageType))
-				{
-					IMessageConsumer receivingConsumer = _consumers[messageType];
-
-					if (receivingConsumer.IsHandled(message))
-					{
-						result = true;
-						break;
-					}
-				}
-			}
-			return result;
-		}
-
-		private void DeliverMessagesToConsumers(IEnvelope envelope)
-		{
-			foreach (IMessage message in envelope.Messages)
-			{
-				Type messageType = message.GetType();
-
-				if (_log.IsDebugEnabled)
-					_log.DebugFormat("Message Received: {0}", messageType);
-
-				if (_consumers.ContainsKey(messageType))
-				{
-					try
-					{
-						_consumers[messageType].Deliver(this, envelope, message);
-					}
-					catch (Exception ex)
-					{
-						if (_log.IsErrorEnabled)
-							_log.Error("Exception from Deliver: ", ex);
-					}
-				}
-			}
 		}
 	}
 }

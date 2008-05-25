@@ -14,7 +14,7 @@ namespace MassTransit.ServiceBus.Formatters
 		{
 			List<Type> types = MessageFinder.AllMessageTypes();
 
-			_serializer = new XmlSerializer(typeof (object[]), types.ToArray());
+			_serializer = new XmlSerializer(typeof (object), types.ToArray());
 		}
 
 		public void Serialize(IFormattedBody body, object message)
@@ -27,7 +27,8 @@ namespace MassTransit.ServiceBus.Formatters
 		{
 			object result = _serializer.Deserialize(formattedBody.BodyStream);
 
-			if (result.GetType() == typeof(T))
+
+            if (typeof(T).IsAssignableFrom(result.GetType()))
 				return (T)result;
 
 			return default(T);

@@ -44,10 +44,11 @@ namespace MassTransit.ServiceBus.Tests
 		{
 			using (_mocks.Record())
 			{
-				Expect.Call(_mockEndpoint.Receiver).Return(_mockReceiver).Repeat.Any();
-				Expect.Call(delegate { _mockReceiver.Subscribe(null); }).IgnoreArguments().Repeat.Any();
-				Expect.Call(_mockEndpoint.Uri).Return(queueUri).Repeat.Any(); //stupid log4net
-				_mockSubscriptionCache.Add(new Subscription(typeof (PingMessage).FullName, queueUri));
+                Expect.Call(_mockEndpoint.Uri).Return(queueUri).Repeat.Any(); //stupid log4net
+                _mockSubscriptionCache.Add(new Subscription(typeof (PingMessage).FullName, queueUri));
+			    LastCall.IgnoreArguments();
+			    Expect.Call(_mockEndpoint.Receiver).Return(_mockReceiver);
+			    Expect.Call(delegate { _mockReceiver.Subscribe(null); }).IgnoreArguments();
 			}
 
 			using (_mocks.Playback())
