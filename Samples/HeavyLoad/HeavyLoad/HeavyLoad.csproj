@@ -39,6 +39,7 @@
     <Compile Include="MsmqHelper.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SimpleResponse.cs" />
     <Compile Include="StopWatch.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -13,6 +13,8 @@ namespace HeavyLoad
 		private IServiceBus _bus;
 		private int _counter = 0;
 		private MsmqEndpoint _localEndpoint;
+		private readonly ManualResetEvent _responseEvent = new ManualResetEvent(false);
+		private int _responseCounter = 0;
 
 
 		public LocalMsmqLoadTest()
@@ -42,28 +44,56 @@ namespace HeavyLoad
 		public void Run(StopWatch stopWatch)
 		{
 			_bus.Subscribe<GeneralMessage>(Handle);
+			_bus.Subscribe<SimpleResponse>(Handler);
 
 			stopWatch.Start();
 
 			CheckPoint publishCheckpoint = stopWatch.Mark("Publishing " + _repeatCount + " messages");
 			CheckPoint receiveCheckpoint = stopWatch.Mark("Receiving " + _repeatCount + " messages");
 
-			for (int index = 0; index < _repeatCount; index++)
+			Semaphore countdown = new Semaphore(0, 100);
+
+			for (int index = 0; index < _repeatCount/1000; index++)
 			{
-				_bus.Publish(new GeneralMessage());
+				ThreadPool.QueueUserWorkItem(
+					delegate
+						{
+							for (int indexer = 0; indexer < 1000; indexer++)
+							{
+								_bus.Publish(new GeneralMessage());
+							}
+							countdown.Release();
+						});
+			}
+
+			for (int index = 0; index < _repeatCount/1000; index++)
+			{
+				countdown.WaitOne(TimeSpan.FromSeconds(30), true);
 			}
 
 			publishCheckpoint.Complete(_repeatCount);
 
 			bool completed = _completeEvent.WaitOne(TimeSpan.FromSeconds(60), true);
 
-			receiveCheckpoint.Complete(_counter);
+			bool responseCompleted = _responseEvent.WaitOne(TimeSpan.FromSeconds(60), true);
+
+			receiveCheckpoint.Complete(_counter + _responseCounter);
 
 			stopWatch.Stop();
 		}
 
+		private void Handler(IMessageContext<SimpleResponse> obj)
+		{
+			_responseCounter++;
+			if (_responseCounter == _repeatCount)
+				_responseEvent.Set();
+		
+		}
+
 		private void Handle(IMessageContext<GeneralMessage> obj)
 		{
+			_bus.Publish(new SimpleResponse());
+
 			_counter++;
 			if (_counter == _repeatCount)
 				_completeEvent.Set();
