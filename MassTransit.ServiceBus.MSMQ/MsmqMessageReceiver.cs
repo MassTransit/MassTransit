@@ -1,5 +1,3 @@
-using MassTransit.ServiceBus.Util;
-
 /// Copyright 2007-2008 The Apache Software Foundation.
 /// 
 /// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
@@ -22,6 +20,7 @@ namespace MassTransit.ServiceBus.MSMQ
 	using Internal;
 	using log4net;
 	using Threading;
+	using Util;
 
 	/// <summary>
 	/// Receives envelopes from a message queue
@@ -29,21 +28,20 @@ namespace MassTransit.ServiceBus.MSMQ
 	public class MsmqMessageReceiver :
 		IMessageReceiver
 	{
-		private static readonly object _subscribeLocker = new object();
 		private static readonly ILog _log = LogManager.GetLogger(typeof (MsmqMessageReceiver));
 		private static readonly ILog _messageLog = LogManager.GetLogger("MassTransit.Messages");
+		private static readonly object _subscribeLocker = new object();
 		private readonly IMsmqEndpoint _endpoint;
 		private readonly TimeSpan _readTimeout = TimeSpan.FromSeconds(4);
-		private IEnvelopeMapper<Message> _mapper;
-		private IWorker _worker = new MultiThreadedWorker();
+		private IEnvelopeConsumer _consumer;
 
 		private ManualResetEvent _killMonitor = new ManualResetEvent(false);
+		private IEnvelopeMapper<Message> _mapper;
 		private ManualResetEvent _monitorDead = new ManualResetEvent(false);
-
-		private IEnvelopeConsumer _consumer;
 
 		private Thread _monitorThread;
 		private MessageQueue _queue;
+		private IWorker _worker = new MultiThreadedWorker();
 
 		/// <summary>
 		/// Initializes a MessageQueueReceiver
@@ -53,6 +51,15 @@ namespace MassTransit.ServiceBus.MSMQ
 		{
 			_endpoint = endpoint;
 			_mapper = new MsmqEnvelopeMapper();
+		}
+
+		public IEnvelopeConsumer Consumer
+		{
+			get
+			{
+				if (_consumer == null) throw new EndpointException(_endpoint, "No consumer has been registered");
+				return _consumer;
+			}
 		}
 
 		///<summary>
@@ -79,18 +86,12 @@ namespace MassTransit.ServiceBus.MSMQ
 					throw new EndpointException(_endpoint, "Only one consumer can be registered for a message receiver");
 				}
 
-				_consumer = consumer;
+				if (_consumer == null)
+				{
+					_consumer = consumer;
 
-				Restart();
-			}
-		}
-
-		public IEnvelopeConsumer Consumer
-		{
-			get
-			{
-				if (_consumer == null) throw new EndpointException(_endpoint, "No consumer has been registered");
-				return _consumer;
+					Restart();
+				}
 			}
 		}
 
@@ -110,7 +111,7 @@ namespace MassTransit.ServiceBus.MSMQ
 			{
 				_queue = _endpoint.Open(QueueAccessMode.SendAndReceive);
 
-                AssertWeCanReadFromQueue(_queue);
+				AssertWeCanReadFromQueue(_queue);
 
 				if (_monitorThread == null)
 				{
@@ -175,7 +176,7 @@ namespace MassTransit.ServiceBus.MSMQ
 
 		private void MonitorQueue()
 		{
-			while ( _killMonitor.WaitOne(0, false) == false)
+			while (_killMonitor.WaitOne(0, false) == false)
 			{
 				try
 				{
@@ -192,19 +193,19 @@ namespace MassTransit.ServiceBus.MSMQ
 							{
 								IEnvelope env = _mapper.ToEnvelope(msg);
 
-								if (this.Consumer.IsInterested(env))
+								if (Consumer.IsInterested(env))
 								{
-								    Message received;
-                                    if(_queue.Transactional)
-                                    {
-                                        received =
-                                            enumerator.RemoveCurrent(TimeSpan.FromSeconds(1),
-                                                                     MessageQueueTransactionType.Automatic);
-                                    }
-                                    else
-                                    {
-                                        received = enumerator.RemoveCurrent(TimeSpan.FromSeconds(1));
-                                    }
+									Message received;
+									if (_queue.Transactional)
+									{
+										received =
+											enumerator.RemoveCurrent(TimeSpan.FromSeconds(1),
+											                         MessageQueueTransactionType.Automatic);
+									}
+									else
+									{
+										received = enumerator.RemoveCurrent(TimeSpan.FromSeconds(1));
+									}
 
 									if (received.Id == msg.Id)
 									{
@@ -289,23 +290,23 @@ namespace MassTransit.ServiceBus.MSMQ
 		}
 
 
-        private void AssertWeCanReadFromQueue(MessageQueue queue)
-        {
-            Check.Parameter(queue).IsNotNull();
+		private void AssertWeCanReadFromQueue(MessageQueue queue)
+		{
+			Check.Parameter(queue).IsNotNull();
 
-            try
-            {
-                if (!queue.CanRead)
-                {
-                    string message = string.Format("Unable to read from queue '{0}', please check your permissions for '{1}'", queue.Path, Thread.CurrentPrincipal.Identity.Name);
-                    throw new EndpointException(_endpoint, message);
-                }
-            }
-            catch (Exception ex)
-            {
-                string message = string.Format("Error attempting to read from queue '{0}'", queue.Path);
-                throw new EndpointException(_endpoint, message, ex);
-            }
-        }
+			try
+			{
+				if (!queue.CanRead)
+				{
+					string message = string.Format("Unable to read from queue '{0}', please check your permissions for '{1}'", queue.Path, Thread.CurrentPrincipal.Identity.Name);
+					throw new EndpointException(_endpoint, message);
+				}
+			}
+			catch (Exception ex)
+			{
+				string message = string.Format("Error attempting to read from queue '{0}'", queue.Path);
+				throw new EndpointException(_endpoint, message, ex);
+			}
+		}
 	}
 }

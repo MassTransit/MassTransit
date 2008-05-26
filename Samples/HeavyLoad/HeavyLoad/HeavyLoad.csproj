@@ -34,6 +34,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CorrelatedMessageTest.cs" />
     <Compile Include="GeneralMessage.cs" />
     <Compile Include="LocalMsmqLoadTest.cs" />
     <Compile Include="MsmqHelper.cs" />

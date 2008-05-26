@@ -21,6 +21,8 @@ namespace MassTransit.ServiceBus.Internal
 		private readonly Dictionary<Type, IMessageDispatcher> _correlatedDispatchers = new Dictionary<Type, IMessageDispatcher>();
 		private readonly Dictionary<Type, IMessageDispatcher> _messageDispatchers = new Dictionary<Type, IMessageDispatcher>();
 		private readonly Dictionary<Type, Type> _messageTypeToKeyType = new Dictionary<Type, Type>();
+		private readonly object _correlatedLock = new object();
+		private readonly object _messageLock = new object();
 
 		public MessageDispatcher()
 		{
@@ -213,33 +215,39 @@ namespace MassTransit.ServiceBus.Internal
 
 		private IMessageDispatcher GetCorrelatedDispatcher(Type[] genericArguments)
 		{
-			if (_correlatedDispatchers.ContainsKey(genericArguments[1]))
-				return _correlatedDispatchers[genericArguments[1]];
+			lock (_correlatedLock)
+			{
+				if (_correlatedDispatchers.ContainsKey(genericArguments[1]))
+					return _correlatedDispatchers[genericArguments[1]];
 
-			Type dispatcherType = typeof (CorrelationIdDispatcher<,>).MakeGenericType(genericArguments);
+				Type dispatcherType = typeof (CorrelationIdDispatcher<,>).MakeGenericType(genericArguments);
 
-			IMessageDispatcher dispatcher = (IMessageDispatcher) Activator.CreateInstance(dispatcherType, _bus, _cache, _builder);
+				IMessageDispatcher dispatcher = (IMessageDispatcher) Activator.CreateInstance(dispatcherType, _bus, _cache, _builder);
 
-			if (!_messageTypeToKeyType.ContainsKey(genericArguments[0]))
-				_messageTypeToKeyType.Add(genericArguments[0], genericArguments[1]);
+				if (!_messageTypeToKeyType.ContainsKey(genericArguments[0]))
+					_messageTypeToKeyType.Add(genericArguments[0], genericArguments[1]);
 
-			_correlatedDispatchers.Add(genericArguments[1], dispatcher);
+				_correlatedDispatchers.Add(genericArguments[1], dispatcher);
 
-			return dispatcher;
+				return dispatcher;
+			}
 		}
 
 		private IMessageDispatcher GetMessageDispatcher(Type messageType)
 		{
-			if (_messageDispatchers.ContainsKey(messageType))
-				return _messageDispatchers[messageType];
+			lock (_messageLock)
+			{
+				if (_messageDispatchers.ContainsKey(messageType))
+					return _messageDispatchers[messageType];
 
-			Type dispatcherType = typeof (MessageDispatcher<>).MakeGenericType(messageType);
+				Type dispatcherType = typeof (MessageDispatcher<>).MakeGenericType(messageType);
 
-			IMessageDispatcher dispatcher = (IMessageDispatcher) Activator.CreateInstance(dispatcherType, _bus, _cache, _builder);
+				IMessageDispatcher dispatcher = (IMessageDispatcher) Activator.CreateInstance(dispatcherType, _bus, _cache, _builder);
 
-			_messageDispatchers.Add(messageType, dispatcher);
+				_messageDispatchers.Add(messageType, dispatcher);
 
-			return dispatcher;
+				return dispatcher;
+			}
 		}
 
 		public void Dispose()
