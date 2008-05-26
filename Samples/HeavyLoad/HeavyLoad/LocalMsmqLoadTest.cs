@@ -7,7 +7,7 @@ namespace HeavyLoad
 
 	public class LocalMsmqLoadTest : IDisposable
 	{
-		private const int _repeatCount = 10000;
+		private const int _repeatCount = 1000;
 		private readonly ManualResetEvent _completeEvent = new ManualResetEvent(false);
 		private readonly string _queueUri = "msmq://localhost/test_servicebus";
 		private IServiceBus _bus;

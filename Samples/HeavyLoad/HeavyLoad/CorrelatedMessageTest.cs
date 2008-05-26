@@ -51,27 +51,24 @@ namespace HeavyLoad
 
 			Thread.Sleep(1000);
 
+			CheckPoint point = stopWatch.Mark("Correlated Requests");
+
 			for (int index = 0; index < 10; index++)
 			{
-				ThreadPool.QueueUserWorkItem(delegate
-				                             	{
-				                             		CheckPoint point = stopWatch.Mark("Thread " + index);
+				for (int indexer = 0; indexer < _attempts/10; indexer++)
+				{
+					CorrelatedController controller = new CorrelatedController(_bus);
 
-													for (int indexer = 0; indexer < _attempts / 10; indexer++)
-													{
-														CorrelatedController controller = new CorrelatedController(_bus);
+					controller.OnSuccess += controller_OnSuccess;
+					controller.OnTimeout += controller_OnTimeout;
+					controller.SimulateRequestResponse();
 
-														controller.OnSuccess += controller_OnSuccess;
-														controller.OnTimeout += controller_OnTimeout;
-														controller.SimulateRequestResponse();
-
-														controller.OnSuccess -= controller_OnSuccess;
-														controller.OnTimeout -= controller_OnTimeout;
-													}
-
-				                             		point.Complete(_attempts/10);
-				                             	});
+					controller.OnSuccess -= controller_OnSuccess;
+					controller.OnTimeout -= controller_OnTimeout;
+				}
 			}
+
+			point.Complete(_attempts);
 
 			_finishedEvent.WaitOne(TimeSpan.FromSeconds(60), true);
 
@@ -84,18 +81,24 @@ namespace HeavyLoad
 
 		private void controller_OnTimeout(CorrelatedController obj)
 		{
-			_timeouts++;
+			lock (_finishedEvent)
+			{
+				_timeouts++;
 
-			if (_timeouts + _successes == _attempts)
-				_finishedEvent.Set();
+				if (_timeouts + _successes == _attempts)
+					_finishedEvent.Set();
+			}
 		}
 
 		private void controller_OnSuccess(CorrelatedController obj)
 		{
-			_successes++;
+			lock (_finishedEvent)
+			{
+				_successes++;
 
-			if (_timeouts + _successes == _attempts)
-				_finishedEvent.Set();
+				if (_timeouts + _successes == _attempts)
+					_finishedEvent.Set();
+			}
 		}
 	}
 
