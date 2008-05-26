@@ -69,6 +69,20 @@ namespace MassTransit.ServiceBus.Tests
 		}
 
 		[Test]
+		public void It_should_be_dispatched_to_the_consumer_without_issues()
+		{
+			TestConsumer consumerA = new TestConsumer(_message.CorrelationId);
+			_dispatcher.Subscribe(consumerA);
+
+			TestConsumer consumerB = new TestConsumer(Guid.NewGuid());
+			_dispatcher.Subscribe(consumerB);
+
+			_dispatcher.Consume(_message);
+
+			Assert.That(consumerA.Value, Is.EqualTo(_message.Value));
+		}
+
+		[Test]
 		public void It_should_be_sent_to_general_consumers_who_are_not_correlated_consumers()
 		{
 			GeneralConsumer consumerA = new GeneralConsumer();

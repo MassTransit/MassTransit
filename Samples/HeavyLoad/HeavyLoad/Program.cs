@@ -11,10 +11,24 @@ namespace HeavyLoad
 			Console.WriteLine("HeavyLoad - MassTransit Load Generator");
 
 
-			RunLocalMsmqLoadTest();
+			// RunLocalMsmqLoadTest();
 
+			RunCorrelatedMessageTest();
 
 			Console.WriteLine("End of line.");
+		}
+
+		private static void RunCorrelatedMessageTest()
+		{
+			StopWatch stopWatch = new StopWatch();
+
+			using (CorrelatedMessageTest test = new CorrelatedMessageTest())
+			{
+				test.Run(stopWatch);
+			}
+
+			Console.WriteLine("Correlated Message Test: ");
+			Console.WriteLine(stopWatch.ToString());
 		}
 
 		private static void RunLocalMsmqLoadTest()
@@ -25,6 +39,8 @@ namespace HeavyLoad
 			{
 				test.Run(stopWatch);
 			}
+
+
 
 			Console.WriteLine("Local MSMQ Load Test: ");
 			Console.WriteLine(stopWatch.ToString());
