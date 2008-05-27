@@ -9,7 +9,7 @@ namespace MassTransit.ServiceBus.Threading
 	/// <summary>
 	/// A managed collection of threads for handling tasks
 	/// </summary>
-	public class ManagedThreadPool<T>
+	public class ManagedThreadPool<T> : IDisposable
 	{
 		private static readonly ILog _log = LogManager.GetLogger(typeof (ManagedThreadPool<T>));
 		private readonly Action<T> _handler;
@@ -23,11 +23,11 @@ namespace MassTransit.ServiceBus.Threading
 
 
 		public ManagedThreadPool(Action<T> handler)
-			: this(handler, 0, 256)
+			: this(handler, 1, 256)
 		{
 		}
 
-		private ManagedThreadPool(Action<T> handler, int minThreads, int maxThreads)
+		public ManagedThreadPool(Action<T> handler, int minThreads, int maxThreads)
 		{
 			Check.Ensure(minThreads > 0, "The minimum thread count must be greater than zero");
 			Check.Ensure(maxThreads >= minThreads, "The maximum thread count must be at least equal to the minimum thread count");
@@ -50,21 +50,57 @@ namespace MassTransit.ServiceBus.Threading
 			set { _minThreads = value; }
 		}
 
+		public int CurrentThreadCount
+		{
+			get { return _threads.Count; }
+		}
+
+		public int PendingCount
+		{
+			get { return _workItems.Count; }
+		}
+
+		public void Dispose()
+		{
+			_shutdown.Set();
+
+			foreach (Thread t in _threads)
+			{
+				if (!t.Join(TimeSpan.FromSeconds(60)))
+				{
+					// TODO log message that thread did not exit properly
+				}
+			}
+			_threads.Clear();
+		}
+
 		public void Enqueue(T item)
 		{
-			_workItems.Enqueue(item);
+			lock (_workItems)
+				_workItems.Enqueue(item);
 
 			int count = _workAvailable.Release();
 
 			// if the previous count is greater than zero, we have work waiting to be picked up
 			if (count > 0 && _threads.Count < _maxThreads)
 			{
-				Thread thread = new Thread(RunThread);
+				AddThread();
+			}
 
+			while (_threads.Count < _minThreads)
+			{
+				AddThread();
+			}
+		}
+
+		private void AddThread()
+		{
+			Thread thread = new Thread(RunThread);
+
+			lock (_threads)
 				_threads.Add(thread);
 
-				thread.Start();
-			}
+			thread.Start();
 		}
 
 		private void RunThread(object obj)
@@ -98,7 +134,7 @@ namespace MassTransit.ServiceBus.Threading
 				}
 				catch (Exception ex)
 				{
-					_log.ErrorFormat("An exception occurred processing an item of type {0}", typeof (T).Name);
+					_log.ErrorFormat("An exception occurred processing an item of type " + typeof (T).FullName, ex);
 				}
 			}
 		}
