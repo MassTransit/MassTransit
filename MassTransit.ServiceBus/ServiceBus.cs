@@ -13,6 +13,7 @@
 namespace MassTransit.ServiceBus
 {
 	using System;
+	using System.Collections.Generic;
 	using Internal;
 	using log4net;
 	using Subscriptions;
@@ -155,7 +156,12 @@ namespace MassTransit.ServiceBus
 		/// <param name="messages">The messages to be published</param>
 		public void Publish<T>(params T[] messages) where T : class, IMessage
 		{
-			foreach (Subscription subscription in _subscriptionCache.List(typeof (T).FullName))
+		    IList<Subscription> subs = _subscriptionCache.List(typeof (T).FullName);
+            
+            if(subs.Count == 0)
+                _log.WarnFormat("There are now subscriptions for the message type {0} for the bus listening on {1}", typeof(T).FullName, this._endpointToListenOn.Uri);
+
+			foreach (Subscription subscription in subs)
 			{
 				IEndpoint endpoint = _endpointResolver.Resolve(subscription.EndpointUri);
 				Send(endpoint, messages);

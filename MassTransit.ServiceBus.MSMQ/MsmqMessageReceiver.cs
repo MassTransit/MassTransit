@@ -279,7 +279,7 @@ namespace MassTransit.ServiceBus.MSMQ
 					// we are competing with another consumer, no reason to report an error since
 					// the message has already been handled.
 					if (_log.IsDebugEnabled)
-						_log.DebugFormat("Message received by another receiver before it could be retrieved");
+						_log.DebugFormat("Message received by another receiver before it could be retrieved. You may have two processes watching one queue.");
 					break;
 
 				default:
