@@ -17,6 +17,7 @@ namespace MassTransit.ServiceBus
 	using Internal;
 	using log4net;
 	using Subscriptions;
+	using Threading;
 	using Util;
 
 	/// <summary>
@@ -30,45 +31,51 @@ namespace MassTransit.ServiceBus
 		private static readonly ILog _log;
 
 		private readonly AsyncReplyDispatcher _asyncReplyDispatcher = new AsyncReplyDispatcher();
+		private readonly IMessageDispatcher _dispatcher;
 
 		private readonly EndpointResolver _endpointResolver = new EndpointResolver();
 		private readonly IEndpoint _endpointToListenOn;
-		private IEndpoint _poisonEndpoint;
 		private readonly ISubscriptionCache _subscriptionCache;
-		private readonly IMessageDispatcher _dispatcher;
+		private readonly ManagedThreadPool<object> _asyncDispatcher;
+		private IEndpoint _poisonEndpoint;
 
 		static ServiceBus()
-        {
-            try
-            {
-                _log = LogManager.GetLogger(typeof (ServiceBus));
-            }
-            catch(Exception ex)
-            {
-                throw new Exception("log4net isn't referenced", ex);
-            }
-        }
+		{
+			try
+			{
+				_log = LogManager.GetLogger(typeof (ServiceBus));
+			}
+			catch (Exception ex)
+			{
+				throw new Exception("log4net isn't referenced", ex);
+			}
+		}
 
-        /// <summary>
-        /// Uses an in-memory subscription manager
-        /// </summary>
-		public ServiceBus(IEndpoint endpointToListenOn) : this(endpointToListenOn, new LocalSubscriptionCache()) {  }
+		/// <summary>
+		/// Uses an in-memory subscription manager
+		/// </summary>
+		public ServiceBus(IEndpoint endpointToListenOn) : this(endpointToListenOn, new LocalSubscriptionCache())
+		{
+		}
 
-        /// <summary>
-        /// Uses the specified subscription cache
-        /// </summary>
-        public ServiceBus(IEndpoint endpointToListenOn, ISubscriptionCache subscriptionCache)
-        {
+		/// <summary>
+		/// Uses the specified subscription cache
+		/// </summary>
+		public ServiceBus(IEndpoint endpointToListenOn, ISubscriptionCache subscriptionCache)
+		{
 			Check.Parameter(endpointToListenOn).WithMessage("endpointToListenOn").IsNotNull();
-            Check.Parameter(subscriptionCache).WithMessage("subscriptionCache").IsNotNull();
+			Check.Parameter(subscriptionCache).WithMessage("subscriptionCache").IsNotNull();
 
 			_endpointToListenOn = endpointToListenOn;
-            _subscriptionCache = subscriptionCache;
+			_subscriptionCache = subscriptionCache;
 
-        	_dispatcher = new MessageDispatcher(this, subscriptionCache, new ActivatorObjectBuilder());
-        }
+			_dispatcher = new MessageDispatcher(this, subscriptionCache, new ActivatorObjectBuilder());
 
-	    public ISubscriptionCache SubscriptionCache
+			_asyncDispatcher = new ManagedThreadPool<object>(
+				delegate(object message) { _dispatcher.Consume(message); });
+		}
+
+		public ISubscriptionCache SubscriptionCache
 		{
 			get { return _subscriptionCache; }
 		}
@@ -91,7 +98,7 @@ namespace MassTransit.ServiceBus
 					result = _asyncReplyDispatcher.Exists(envelope.CorrelationId);
 				}
 
-				if(result == false)
+				if (result == false)
 				{
 					foreach (IMessage message in envelope.Messages)
 					{
@@ -131,7 +138,7 @@ namespace MassTransit.ServiceBus
 			{
 				foreach (IMessage message in envelope.Messages)
 				{
-					_dispatcher.Consume(message);
+					Dispatch(message);
 				}
 			}
 		}
@@ -143,6 +150,8 @@ namespace MassTransit.ServiceBus
 		public void Dispose()
 		{
 			_subscriptionCache.Dispose();
+
+			_asyncDispatcher.Dispose();
 
 			_dispatcher.Dispose();
 
@@ -156,10 +165,10 @@ namespace MassTransit.ServiceBus
 		/// <param name="messages">The messages to be published</param>
 		public void Publish<T>(params T[] messages) where T : class, IMessage
 		{
-		    IList<Subscription> subs = _subscriptionCache.List(typeof (T).FullName);
-            
-            if(subs.Count == 0)
-                _log.WarnFormat("There are now subscriptions for the message type {0} for the bus listening on {1}", typeof(T).FullName, this._endpointToListenOn.Uri);
+			IList<Subscription> subs = _subscriptionCache.List(typeof (T).FullName);
+
+			if (subs.Count == 0)
+				_log.WarnFormat("There are now subscriptions for the message type {0} for the bus listening on {1}", typeof (T).FullName, _endpointToListenOn.Uri);
 
 			foreach (Subscription subscription in subs)
 			{
@@ -218,7 +227,7 @@ namespace MassTransit.ServiceBus
 		/// <param name="condition">A condition predicate to filter which messages are handled by the callback</param>
 		public void Subscribe<T>(Action<IMessageContext<T>> callback, Predicate<T> condition) where T : class, IMessage
 		{
-            Subscribe(new GenericComponent<T>(callback, condition, this));
+			Subscribe(new GenericComponent<T>(callback, condition, this));
 		}
 
 		public void Subscribe<T>(T component) where T : class
@@ -236,7 +245,7 @@ namespace MassTransit.ServiceBus
 
 		public void Unsubscribe<T>(Action<IMessageContext<T>> callback, Predicate<T> condition) where T : class, IMessage
 		{
-            Unsubscribe(new GenericComponent<T>(callback, condition, this));
+			Unsubscribe(new GenericComponent<T>(callback, condition, this));
 		}
 
 		public void Unsubscribe<T>(T component) where T : class
@@ -248,13 +257,13 @@ namespace MassTransit.ServiceBus
 		public void AddComponent<TComponent>() where TComponent : class
 		{
 			_dispatcher.AddComponent<TComponent>();
-            //TODO: subscription client
+			//TODO: subscription client
 			StartListening();
 		}
 
 		public void RemoveComponent<TComponent>() where TComponent : class
 		{
-            //TODO: subscription client
+			//TODO: subscription client
 			_dispatcher.RemoveComponent<TComponent>();
 		}
 
@@ -291,5 +300,36 @@ namespace MassTransit.ServiceBus
 		{
 			_endpointToListenOn.Receiver.Subscribe(this);
 		}
+
+		public void Dispatch(object message)
+		{
+			Dispatch(message, DispatchMode.Synchronous);
+		}
+
+		public void Dispatch(object message, DispatchMode mode)
+		{
+			if (mode == DispatchMode.Synchronous)
+				_dispatcher.Consume(message);
+			else
+			{
+				_asyncDispatcher.Enqueue(message);
+			}
+		}
+	}
+
+	/// <summary>
+	/// The method used to dispatch the message to the service bus
+	/// </summary>
+	public enum DispatchMode
+	{
+		/// <summary>
+		/// Dispatch the message in a synchronous fashion (default)
+		/// </summary>
+		Synchronous,
+
+		/// <summary>
+		/// Dipatch the message using an asynchronous handler
+		/// </summary>
+		Asynchronous,
 	}
 }
