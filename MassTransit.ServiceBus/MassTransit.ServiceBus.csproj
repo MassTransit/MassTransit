@@ -75,6 +75,7 @@
     <Compile Include="IObjectBuilder.cs" />
     <Compile Include="IServiceBus.cs" />
     <Compile Include="IServiceBusAsyncResult.cs" />
+    <Compile Include="MessageFilter.cs" />
     <Compile Include="Subscriptions\ISubscriptionCache.cs" />
     <Compile Include="Internal\MessageConsumer.cs" />
     <Compile Include="Internal\MessageContext.cs" />
