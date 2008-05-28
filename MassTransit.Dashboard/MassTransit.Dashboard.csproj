@@ -83,12 +83,27 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Assets\Styles\blueprint\ie.css" />
+    <Content Include="Assets\Styles\blueprint\plugins\fancy-type\readme.txt" />
+    <Content Include="Assets\Styles\blueprint\plugins\fancy-type\screen.css" />
+    <Content Include="Assets\Styles\blueprint\print.css" />
+    <Content Include="Assets\Styles\blueprint\screen.css" />
+    <Content Include="Assets\Styles\blueprint\src\forms.css" />
+    <Content Include="Assets\Styles\blueprint\src\grid.css" />
+    <Content Include="Assets\Styles\blueprint\src\grid.png" />
+    <Content Include="Assets\Styles\blueprint\src\ie.css" />
+    <Content Include="Assets\Styles\blueprint\src\print.css" />
+    <Content Include="Assets\Styles\blueprint\src\reset.css" />
+    <Content Include="Assets\Styles\blueprint\src\typography.css" />
+    <Content Include="Assets\Styles\ie.css" />
+    <Content Include="Assets\Styles\print.css" />
+    <Content Include="Assets\Styles\screen.css" />
     <Content Include="Default.aspx" />
     <Content Include="Global.asax" />
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Controllers\HomeController.cs" />
+    <Compile Include="Controllers\SubscriptionsController.cs" />
     <Compile Include="DashboardApplication.cs" />
     <Compile Include="Default.aspx.cs">
       <DependentUpon>Default.aspx</DependentUpon>
@@ -111,7 +126,8 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Views\Home\view.brail" />
+    <None Include="Views\Layouts\default.brail" />
+    <None Include="Views\Subscriptions\view.brail" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v8.0\WebApplications\Microsoft.WebApplication.targets" />

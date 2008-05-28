@@ -3,11 +3,12 @@ namespace MassTransit.Dashboard.Controllers
     using Castle.MonoRail.Framework;
     using MassTransit.ServiceBus.Subscriptions;
 
-    public class HomeController : Controller
+    [Layout("default")]
+    public class SubscriptionsController : Controller
     {
         private readonly ISubscriptionCache _cache;
 
-        public HomeController(ISubscriptionCache cache)
+        public SubscriptionsController(ISubscriptionCache cache)
         {
             _cache = cache;
         }

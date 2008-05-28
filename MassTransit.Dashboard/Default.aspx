@@ -10,7 +10,7 @@
     <form id="form1" runat="server">
     <div>
     ASP.Net Works
-    <a href="./home/view.castle">view</a>
+    <a href="./subscriptions/view.castle">view</a>
     </div>
     </form>
 </body>
