@@ -307,7 +307,7 @@ namespace MassTransit.ServiceBus
 
 		private void StartListening()
 		{
-			_endpointToListenOn.Receiver.Subscribe(this);
+			_endpointToListenOn.Subscribe(this);
 		}
 
 		public void Dispatch(object message)
@@ -324,21 +324,5 @@ namespace MassTransit.ServiceBus
 				_asyncDispatcher.Enqueue(message);
 			}
 		}
-	}
-
-	/// <summary>
-	/// The method used to dispatch the message to the service bus
-	/// </summary>
-	public enum DispatchMode
-	{
-		/// <summary>
-		/// Dispatch the message in a synchronous fashion (default)
-		/// </summary>
-		Synchronous,
-
-		/// <summary>
-		/// Dipatch the message using an asynchronous handler
-		/// </summary>
-		Asynchronous,
 	}
 }
