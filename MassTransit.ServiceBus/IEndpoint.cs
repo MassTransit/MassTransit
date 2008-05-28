@@ -111,5 +111,8 @@ namespace MassTransit.ServiceBus
 		/// <param name="accept">A predicate used to determine if the message would be accepted</param>
 		/// <returns>A message read from the endpoint</returns>
 		T Receive<T>(TimeSpan timeout, Predicate<T> accept) where T : class;
+
+
+        void Subscribe(IEnvelopeConsumer consumer);
 	}
 }

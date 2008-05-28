@@ -348,7 +348,13 @@ namespace MassTransit.ServiceBus.MSMQ
 			                            	});
 		}
 
-		public void Dispose()
+
+	    public void Subscribe(IEnvelopeConsumer consumer)
+	    {
+	        Receiver.Subscribe(consumer);
+	    }
+
+	    public void Dispose()
 		{
 			if (_receiver != null)
 				_receiver.Dispose();

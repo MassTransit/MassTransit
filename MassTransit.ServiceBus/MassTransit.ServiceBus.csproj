@@ -46,6 +46,7 @@
     <Compile Include="ActivatorObjectBuilder.cs" />
     <Compile Include="Consumes.cs" />
     <Compile Include="CorrelatedBy.cs" />
+    <Compile Include="DispatchMode.cs" />
     <Compile Include="Exceptions\ConventionException.cs" />
     <Compile Include="Exceptions\MessageException.cs" />
     <Compile Include="Exceptions\ShutDownException.cs" />
