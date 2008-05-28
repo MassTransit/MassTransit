@@ -116,7 +116,13 @@ namespace MassTransit.ServiceBus.NMS
 			throw new NotImplementedException();
 		}
 
-		public void Dispose()
+
+	    public void Subscribe(IEnvelopeConsumer consumer)
+	    {
+	        Receiver.Subscribe(consumer);
+	    }
+
+	    public void Dispose()
 		{
 			if (_receiver != null)
 				_receiver.Dispose();
