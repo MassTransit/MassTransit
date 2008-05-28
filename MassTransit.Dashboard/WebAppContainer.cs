@@ -30,7 +30,7 @@ namespace MassTransit.Dashboard
 
         protected void RegisterComponents()
         {
-            AddComponent("home.controller", typeof(HomeController));
+            AddComponent("home.controller", typeof(SubscriptionsController));
         }
 
         protected void LoadMassTransit()

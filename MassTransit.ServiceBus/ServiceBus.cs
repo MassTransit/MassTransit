@@ -59,10 +59,14 @@ namespace MassTransit.ServiceBus
 
 		}
 
+        /// <summary>
+        /// Uses the default activator
+        /// </summary>
         public ServiceBus(IEndpoint endpointToListenOn, ISubscriptionCache subscriptionCache) : this(endpointToListenOn, subscriptionCache, new ActivatorObjectBuilder())
         {
             
         }
+
 		/// <summary>
 		/// Uses the specified subscription cache
 		/// </summary>
