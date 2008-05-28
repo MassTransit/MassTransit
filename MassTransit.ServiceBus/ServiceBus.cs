@@ -56,12 +56,17 @@ namespace MassTransit.ServiceBus
 		/// </summary>
 		public ServiceBus(IEndpoint endpointToListenOn) : this(endpointToListenOn, new LocalSubscriptionCache())
 		{
+
 		}
 
+        public ServiceBus(IEndpoint endpointToListenOn, ISubscriptionCache subscriptionCache) : this(endpointToListenOn, subscriptionCache, new ActivatorObjectBuilder())
+        {
+            
+        }
 		/// <summary>
 		/// Uses the specified subscription cache
 		/// </summary>
-		public ServiceBus(IEndpoint endpointToListenOn, ISubscriptionCache subscriptionCache)
+		public ServiceBus(IEndpoint endpointToListenOn, ISubscriptionCache subscriptionCache, IObjectBuilder objectBuilder)
 		{
 			Check.Parameter(endpointToListenOn).WithMessage("endpointToListenOn").IsNotNull();
 			Check.Parameter(subscriptionCache).WithMessage("subscriptionCache").IsNotNull();
@@ -69,7 +74,7 @@ namespace MassTransit.ServiceBus
 			_endpointToListenOn = endpointToListenOn;
 			_subscriptionCache = subscriptionCache;
 
-			_dispatcher = new MessageDispatcher(this, subscriptionCache, new ActivatorObjectBuilder());
+			_dispatcher = new MessageDispatcher(this, subscriptionCache, objectBuilder);
 
 			_asyncDispatcher = new ManagedThreadPool<object>(
 				delegate(object message) { _dispatcher.Consume(message); });
