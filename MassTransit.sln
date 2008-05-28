@@ -163,6 +163,18 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.DistributedSubs
 		Release.AspNetCompiler.Debug = "False"
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Dashboard", "Dashboard", "{E9473F6A-4266-4610-ADE8-0D0AC39143DD}"
+	ProjectSection(WebsiteProperties) = preProject
+		Debug.AspNetCompiler.Debug = "True"
+		Release.AspNetCompiler.Debug = "False"
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Dashboard", "MassTransit.Dashboard\MassTransit.Dashboard.csproj", "{95873436-3496-4DF7-9E1D-B6C9D3D0CCA9}"
+	ProjectSection(WebsiteProperties) = preProject
+		Debug.AspNetCompiler.Debug = "True"
+		Release.AspNetCompiler.Debug = "False"
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -253,6 +265,10 @@ Global
 		{075A818E-88AC-4936-AEEB-EEAD0EE86634}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{075A818E-88AC-4936-AEEB-EEAD0EE86634}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{075A818E-88AC-4936-AEEB-EEAD0EE86634}.Release|Any CPU.Build.0 = Release|Any CPU
+		{95873436-3496-4DF7-9E1D-B6C9D3D0CCA9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{95873436-3496-4DF7-9E1D-B6C9D3D0CCA9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{95873436-3496-4DF7-9E1D-B6C9D3D0CCA9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{95873436-3496-4DF7-9E1D-B6C9D3D0CCA9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -277,5 +293,6 @@ Global
 		{5809873E-7929-440B-BFA0-E110F08DD643} = {9C62A0F8-BF24-494F-82C9-3FB8971E5510}
 		{31F46B70-2D5A-4496-9FBA-7BBFD0E323E8} = {9C62A0F8-BF24-494F-82C9-3FB8971E5510}
 		{3DBCEFE6-2A73-4D1B-A6E1-343AFE46E6CF} = {9C62A0F8-BF24-494F-82C9-3FB8971E5510}
+		{95873436-3496-4DF7-9E1D-B6C9D3D0CCA9} = {E9473F6A-4266-4610-ADE8-0D0AC39143DD}
 	EndGlobalSection
 EndGlobal
