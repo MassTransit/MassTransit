@@ -25,7 +25,7 @@ namespace MassTransit.ServiceBus.Formatters
         public object Deserialize(IFormattedBody formattedBody)
         {
             JsonWrapper jw = JavaScriptConvert.DeserializeObject<JsonWrapper>(formattedBody.Body.ToString());
-            Type desiredType = Type.GetType(jw.Types[0]);
+            Type desiredType = Type.GetType(jw.Types[0], true, true);
             object o = JavaScriptConvert.DeserializeObject(jw.WrappedJson, desiredType);
             //search through types to find a match?
             return o;
@@ -65,7 +65,7 @@ namespace MassTransit.ServiceBus.Formatters
             Type temp = message.GetType();
             while (temp != typeof(object))
             {
-                types.Add(temp.FullName);
+                types.Add(string.Format("{0}, {1}",temp.FullName, temp.Assembly.GetName().Name));
                 temp = temp.BaseType;
             }
 
