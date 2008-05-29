@@ -2,6 +2,8 @@ namespace MassTransit.ServiceBus.Formatters
 {
     using System;
     using System.Collections.Generic;
+    using System.IO;
+    using System.Text;
     using Newtonsoft.Json;
 
     public class JsonBodyFormatter :
@@ -11,20 +13,35 @@ namespace MassTransit.ServiceBus.Formatters
         {
             JsonWrapper jw = JsonWrapper.Create(message);
             string wrappedJson = JavaScriptConvert.SerializeObject(jw);
-            body.Body = wrappedJson;
+
+			MemoryStream mstream = new MemoryStream(Encoding.UTF8.GetBytes(wrappedJson));
+
+        	mstream.WriteTo(body.BodyStream);
         }
 
         public T Deserialize<T>(IFormattedBody formattedBody) where T : class
         {
+        	string body;
+			using(StreamReader reader = new StreamReader(formattedBody.BodyStream))
+			{
+				body = reader.ReadToEnd();
+			}
 
-            JsonWrapper jw = JavaScriptConvert.DeserializeObject<JsonWrapper>(formattedBody.Body.ToString());
+            JsonWrapper jw = JavaScriptConvert.DeserializeObject<JsonWrapper>(body);
 
             return JavaScriptConvert.DeserializeObject<T>(jw.WrappedJson);
         }
 
         public object Deserialize(IFormattedBody formattedBody)
         {
-            JsonWrapper jw = JavaScriptConvert.DeserializeObject<JsonWrapper>(formattedBody.Body.ToString());
+			string body;
+			using (StreamReader reader = new StreamReader(formattedBody.BodyStream))
+			{
+				body = reader.ReadToEnd();
+			}
+
+            JsonWrapper jw = JavaScriptConvert.DeserializeObject<JsonWrapper>(body);
+
             Type desiredType = Type.GetType(jw.Types[0], true, true);
             object o = JavaScriptConvert.DeserializeObject(jw.WrappedJson, desiredType);
             //search through types to find a match?
