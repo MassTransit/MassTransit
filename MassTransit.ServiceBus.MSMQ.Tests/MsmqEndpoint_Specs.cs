@@ -18,7 +18,7 @@ namespace MassTransit.ServiceBus.MSMQ.Tests
 			{
 				queue.Purge();
 
-				CustomMessage message = new CustomMessage();
+				CustomMessage message = new CustomMessage("Valid");
 
 				endpoint.Send(message);
 
@@ -47,7 +47,7 @@ namespace MassTransit.ServiceBus.MSMQ.Tests
 			{
 				queue.Purge();
 
-				CustomMessage message = new CustomMessage();
+				CustomMessage message = new CustomMessage("Jackson");
 
 				endpoint.Send(message);
 
@@ -57,6 +57,10 @@ namespace MassTransit.ServiceBus.MSMQ.Tests
 				if (obj != null)
 				{
 					Assert.That(obj, Is.TypeOf(typeof (CustomMessage)));
+
+					CustomMessage response = (CustomMessage) obj;
+
+					Assert.That(response.Name, Is.EqualTo("Jackson"));
 				}
 			}
 		}
@@ -70,13 +74,15 @@ namespace MassTransit.ServiceBus.MSMQ.Tests
 			{
 				queue.Purge();
 
-				CustomMessage message = new CustomMessage();
+				CustomMessage message = new CustomMessage("Johnson");
 
 				endpoint.Send(message);
 
 				CustomMessage readMessage = endpoint.Receive<CustomMessage>(TimeSpan.FromSeconds(5));
 
 				Assert.That(readMessage, Is.Not.Null);
+
+				Assert.That(readMessage.Name, Is.EqualTo("Johnson"));
 			}
 		}
 
@@ -90,11 +96,12 @@ namespace MassTransit.ServiceBus.MSMQ.Tests
 				queue.Purge();
 
 				endpoint.Send(new WrongMessage());
-				endpoint.Send(new CustomMessage());
+				endpoint.Send(new CustomMessage("Johnson"));
 
 				CustomMessage customMessage = endpoint.Receive<CustomMessage>(TimeSpan.FromSeconds(3));
 
 				Assert.That(customMessage, Is.Not.Null);
+				Assert.That(customMessage.Name, Is.EqualTo("Johnson"));
 
 				WrongMessage wrongMessage = endpoint.Receive<WrongMessage>(TimeSpan.FromSeconds(3));
 
@@ -111,22 +118,20 @@ namespace MassTransit.ServiceBus.MSMQ.Tests
 			{
 				queue.Purge();
 
-				CustomMessage message = new CustomMessage();
+				CustomMessage message = new CustomMessage("Madison");
 
 				endpoint.Send(message);
 
-				const string name = "Johnson";
-
-				message.Name = name;
+				message = new CustomMessage("Jackson");
 
 				endpoint.Send(message);
 
 				CustomMessage readMessage = endpoint.Receive<CustomMessage>(TimeSpan.FromSeconds(3),
-					delegate(CustomMessage msg) { return Equals(msg.Name, name); });
+				                                                            delegate(CustomMessage msg) { return Equals(msg.Name, "Jackson"); });
 
 				Assert.That(readMessage, Is.Not.Null);
 
-				Assert.That(readMessage.Name, Is.EqualTo(name));
+				Assert.That(readMessage.Name, Is.EqualTo("Jackson"));
 			}
 		}
 	}
@@ -135,6 +140,15 @@ namespace MassTransit.ServiceBus.MSMQ.Tests
 	public class CustomMessage
 	{
 		private string _name;
+
+		public CustomMessage()
+		{
+		}
+
+		public CustomMessage(string name)
+		{
+			_name = name;
+		}
 
 		public string Name
 		{
