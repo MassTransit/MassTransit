@@ -84,7 +84,13 @@ namespace MassTransit.ServiceBus.Tests
             get { return _receiver; }
         }
 
-    	public void Send<T>(T message) where T : class
+
+        public void Subscribe(IEnvelopeConsumer consumer)
+        {
+            Receiver.Subscribe(consumer);
+        }
+
+        public void Send<T>(T message) where T : class
     	{
     		throw new NotImplementedException();
     	}

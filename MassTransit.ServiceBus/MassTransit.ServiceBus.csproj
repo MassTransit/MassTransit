@@ -34,6 +34,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\libs\log4net.dll</HintPath>
     </Reference>
+    <Reference Include="Newtonsoft.Json, Version=1.3.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\libs\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Transactions" />
@@ -50,6 +54,7 @@
     <Compile Include="Exceptions\ConventionException.cs" />
     <Compile Include="Exceptions\MessageException.cs" />
     <Compile Include="Exceptions\ShutDownException.cs" />
+    <Compile Include="Formatters\JsonBodyFormatter.cs" />
     <Compile Include="Internal\GenericComponent.cs" />
     <Compile Include="Internal\MessageDispatcher.cs" />
     <Compile Include="Internal\CorrelationIdDispatcher.cs" />

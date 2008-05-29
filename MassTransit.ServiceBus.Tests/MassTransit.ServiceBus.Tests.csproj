@@ -33,6 +33,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\libs\log4net.dll</HintPath>
     </Reference>
+    <Reference Include="Newtonsoft.Json, Version=1.3.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\libs\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="nunit.framework, Version=2.4.3.0, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\libs\nunit.framework.dll</HintPath>
@@ -57,6 +61,7 @@
     <Compile Include="CorrelatedMessage_Specs.cs" />
     <Compile Include="CorrelationIdDispatcher_Specs.cs" />
     <Compile Include="Dispatcher_Specs.cs" />
+    <Compile Include="Formatters\JsonBodyFormatterTests.cs" />
     <Compile Include="Formatters\MessageFinderTests.cs" />
     <Compile Include="Formatters\XmlMessageFormatterTests.cs" />
     <Compile Include="HighLevel\With_a_central_subscription_service.cs" />

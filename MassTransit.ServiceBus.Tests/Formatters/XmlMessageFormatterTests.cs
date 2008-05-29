@@ -1,12 +1,12 @@
-using System.IO;
-using System.Text;
-using MassTransit.ServiceBus.Formatters;
-using NUnit.Framework;
-using NUnit.Framework.SyntaxHelpers;
-using Rhino.Mocks;
-
 namespace MassTransit.ServiceBus.Tests.Formatters
 {
+    using System.IO;
+    using System.Text;
+    using MassTransit.ServiceBus.Formatters;
+    using NUnit.Framework;
+    using NUnit.Framework.SyntaxHelpers;
+    using Rhino.Mocks;
+
     [TestFixture]
     public class XmlMessageFormatterTests
     {
