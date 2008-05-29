@@ -13,10 +13,10 @@ namespace MassTransit.ServiceBus.Tests.Formatters
         private IFormattedBody mockBody;
 
         private readonly string _serializedMessages =
-            @"{""WrappedJson"":""{}"",""Types"":[""MassTransit.ServiceBus.Tests.PingMessage""]}";
+            @"{""WrappedJson"":""{}"",""Types"":[""MassTransit.ServiceBus.Tests.PingMessage, MassTransit.ServiceBus.Tests""]}";
 
         private readonly string _serializedMessagesWithValue =
-             @"{""WrappedJson"":""{\""Name\"":\""test\""}"",""Types"":[""MassTransit.ServiceBus.Tests.ClientMessage""]}";
+             @"{""WrappedJson"":""{\""Name\"":\""test\""}"",""Types"":[""MassTransit.ServiceBus.Tests.ClientMessage, MassTransit.ServiceBus.Tests""]}";
 
         [SetUp]
         public void SetUp()
@@ -60,6 +60,23 @@ namespace MassTransit.ServiceBus.Tests.Formatters
             using (mocks.Playback())
             {
                 PingMessage msg = formatter.Deserialize<PingMessage>(mockBody);
+
+                Assert.IsNotNull(msg);
+
+                Assert.That(msg, Is.TypeOf(typeof(PingMessage)));
+            }
+        }
+
+        [Test]
+        public void DeserializeWithOutGenerics()
+        {
+            using (mocks.Record())
+            {
+                Expect.Call(mockBody.Body).Return(_serializedMessages);
+            }
+            using (mocks.Playback())
+            {
+                object msg = formatter.Deserialize(mockBody);
 
                 Assert.IsNotNull(msg);
 
