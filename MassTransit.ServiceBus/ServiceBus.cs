@@ -31,12 +31,12 @@ namespace MassTransit.ServiceBus
 		private static readonly ILog _log;
 
 		private readonly AsyncReplyDispatcher _asyncReplyDispatcher = new AsyncReplyDispatcher();
-		private readonly IMessageDispatcher _dispatcher;
+		private readonly IMessageDispatcher _messageDispatcher;
+		private readonly ManagedThreadPool<object> _asyncDispatcher;
 
 		private readonly EndpointResolver _endpointResolver = new EndpointResolver();
 		private readonly IEndpoint _endpointToListenOn;
 		private readonly ISubscriptionCache _subscriptionCache;
-		private readonly ManagedThreadPool<object> _asyncDispatcher;
 		private IEndpoint _poisonEndpoint;
 
 		static ServiceBus()
@@ -52,7 +52,7 @@ namespace MassTransit.ServiceBus
 		}
 
 		/// <summary>
-		/// Uses an in-memory subscription manager
+		/// Uses an in-memory subscription manager and the default object builder
 		/// </summary>
 		public ServiceBus(IEndpoint endpointToListenOn) : this(endpointToListenOn, new LocalSubscriptionCache())
 		{
@@ -60,7 +60,7 @@ namespace MassTransit.ServiceBus
 		}
 
         /// <summary>
-        /// Uses the default activator
+        /// Uses the default object builder
         /// </summary>
         public ServiceBus(IEndpoint endpointToListenOn, ISubscriptionCache subscriptionCache) : this(endpointToListenOn, subscriptionCache, new ActivatorObjectBuilder())
         {
@@ -78,10 +78,10 @@ namespace MassTransit.ServiceBus
 			_endpointToListenOn = endpointToListenOn;
 			_subscriptionCache = subscriptionCache;
 
-			_dispatcher = new MessageDispatcher(this, subscriptionCache, objectBuilder);
+			_messageDispatcher = new MessageDispatcher(this, subscriptionCache, objectBuilder);
 
 			_asyncDispatcher = new ManagedThreadPool<object>(
-				delegate(object message) { _dispatcher.Consume(message); });
+				delegate(object message) { _messageDispatcher.Consume(message); });
 		}
 
 		public ISubscriptionCache SubscriptionCache
@@ -111,7 +111,7 @@ namespace MassTransit.ServiceBus
 				{
 					foreach (IMessage message in envelope.Messages)
 					{
-						result = _dispatcher.Accept(message);
+						result = _messageDispatcher.Accept(message);
 						if (result)
 							break;
 					}
@@ -162,7 +162,7 @@ namespace MassTransit.ServiceBus
 
 			_asyncDispatcher.Dispose();
 
-			_dispatcher.Dispose();
+			_messageDispatcher.Dispose();
 
 			_endpointToListenOn.Dispose();
 		}
@@ -241,7 +241,7 @@ namespace MassTransit.ServiceBus
 
 		public void Subscribe<T>(T component) where T : class
 		{
-			_dispatcher.Subscribe(component);
+			_messageDispatcher.Subscribe(component);
 //            _subscriptionCache.Add(new Subscription(typeof (T).FullName, Endpoint.Uri));
 
 			StartListening();
@@ -259,13 +259,13 @@ namespace MassTransit.ServiceBus
 
 		public void Unsubscribe<T>(T component) where T : class
 		{
-			_dispatcher.Unsubscribe(component);
+			_messageDispatcher.Unsubscribe(component);
 //		    _subscriptionCache.Remove(new Subscription(typeof (T).FullName, Endpoint.Uri));
 		}
 
 		public void AddComponent<TComponent>() where TComponent : class
 		{
-			_dispatcher.AddComponent<TComponent>();
+			_messageDispatcher.AddComponent<TComponent>();
 			//TODO: subscription client
 			StartListening();
 		}
@@ -273,7 +273,7 @@ namespace MassTransit.ServiceBus
 		public void RemoveComponent<TComponent>() where TComponent : class
 		{
 			//TODO: subscription client
-			_dispatcher.RemoveComponent<TComponent>();
+			_messageDispatcher.RemoveComponent<TComponent>();
 		}
 
 		/// <summary>
@@ -307,7 +307,7 @@ namespace MassTransit.ServiceBus
 
 		private void StartListening()
 		{
-			_endpointToListenOn.Subscribe(this);
+			this.Endpoint.Subscribe(this);
 		}
 
 		public void Dispatch(object message)
@@ -318,7 +318,7 @@ namespace MassTransit.ServiceBus
 		public void Dispatch(object message, DispatchMode mode)
 		{
 			if (mode == DispatchMode.Synchronous)
-				_dispatcher.Consume(message);
+				_messageDispatcher.Consume(message);
 			else
 			{
 				_asyncDispatcher.Enqueue(message);
