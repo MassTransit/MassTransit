@@ -91,6 +91,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Assets\Images\toolbar-bg.gif" />
     <Content Include="Assets\Styles\blueprint\ie.css" />
     <Content Include="Assets\Styles\blueprint\plugins\fancy-type\readme.txt" />
     <Content Include="Assets\Styles\blueprint\plugins\fancy-type\screen.css" />

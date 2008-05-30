@@ -9,9 +9,33 @@
         <link rel="stylesheet" href="/assets/styles/blueprint/screen.css" type="text/css" media="screen, projection" />
         <link rel="stylesheet" href="/assets/styles/blueprint/print.css" type="text/css" media="print" />
         <!--[if IE]><link rel="stylesheet" href="/assets/styles/blueprint/ie.css" type="text/css" media="screen, projection" /><![endif]-->
+        <style type="text/css">
+          #header
+          {
+            z-index: 6; 
+            color:#cbe4f8;
+            border-bottom:3px solid #cbe4f8;
+            height:30px;
+            padding:10px;
+            background: #2a6a9f url(/Assets/Images/toolbar-bg.gif) repeat-x bottom left;
+          }
+            #header #title
+            {
+              float:left;
+              width:20%;
+              margin-top:10px;
+              font-size:130%;
+              font-weight:bold;
+            }
+        </style>
     </head>
     
     <body>
+		<div id="header">
+			<div class="container">
+                <div id="title">Mass Transit Dashboard</div>
+            </div>
+        </div>
         <div class="container">
         ${ChildOutput}
         </div>
