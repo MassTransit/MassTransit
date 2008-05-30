@@ -11,18 +11,18 @@ namespace MassTransit.ServiceBus.Internal
 	public class MessageDispatcher :
 		IMessageDispatcher
 	{
-        private readonly ILog _log = LogManager.GetLogger(typeof (MessageDispatcher));
 		private static readonly Type _consumes = typeof (Consumes<>.Any);
 		private static readonly Type _consumesFor = typeof (Consumes<>.For<>);
 		private static readonly Type _consumesSelected = typeof (Consumes<>.Selected);
+		private readonly IObjectBuilder _builder;
 		private readonly IServiceBus _bus;
 		private readonly ISubscriptionCache _cache;
-		private readonly IObjectBuilder _builder;
 		private readonly Dictionary<Type, IMessageDispatcher> _correlatedDispatchers = new Dictionary<Type, IMessageDispatcher>();
-		private readonly Dictionary<Type, IMessageDispatcher> _messageDispatchers = new Dictionary<Type, IMessageDispatcher>();
-		private readonly Dictionary<Type, Type> _messageTypeToKeyType = new Dictionary<Type, Type>();
 		private readonly object _correlatedLock = new object();
+		private readonly ILog _log = LogManager.GetLogger(typeof (MessageDispatcher));
+		private readonly Dictionary<Type, IMessageDispatcher> _messageDispatchers = new Dictionary<Type, IMessageDispatcher>();
 		private readonly object _messageLock = new object();
+		private readonly Dictionary<Type, Type> _messageTypeToKeyType = new Dictionary<Type, Type>();
 
 		public MessageDispatcher()
 		{
@@ -93,7 +93,7 @@ namespace MassTransit.ServiceBus.Internal
 				{
 					Type[] arguments = interfaceType.GetGenericArguments();
 
-					if(messageTypesMapped.Contains(arguments[0]))
+					if (messageTypesMapped.Contains(arguments[0]))
 						continue;
 
 					IMessageDispatcher dispatcher = GetCorrelatedDispatcher(arguments);
@@ -151,7 +151,6 @@ namespace MassTransit.ServiceBus.Internal
 					if (_messageDispatchers.ContainsKey(arguments[0]))
 						_messageDispatchers[arguments[0]].Unsubscribe(component);
 				}
-
 			}
 		}
 
@@ -188,7 +187,7 @@ namespace MassTransit.ServiceBus.Internal
 			if (_builder == null)
 				throw new ArgumentException("No object builder interface is available");
 
-			Type componentType = typeof(TComponent);
+			Type componentType = typeof (TComponent);
 
 			foreach (Type interfaceType in componentType.GetInterfaces())
 			{
@@ -211,7 +210,16 @@ namespace MassTransit.ServiceBus.Internal
 			}
 		}
 
+		public bool Active
+		{
+			get { return true; }
+		}
+
 		#endregion
+
+		public void Dispose()
+		{
+		}
 
 		private IMessageDispatcher GetCorrelatedDispatcher(Type[] genericArguments)
 		{
@@ -249,21 +257,17 @@ namespace MassTransit.ServiceBus.Internal
 				return dispatcher;
 			}
 		}
-
-		public void Dispose()
-		{
-		}
 	}
 
 	public class MessageDispatcher<TMessage> :
 		IMessageDispatcher where TMessage : class
 	{
-        private readonly ILog _log = LogManager.GetLogger(typeof(MessageDispatcher<TMessage>));
 		private readonly IObjectBuilder _builder;
+		private readonly IServiceBus _bus;
+		private readonly ISubscriptionCache _cache;
 		private readonly List<Type> _components = new List<Type>();
 		private readonly List<Consumes<TMessage>.Any> _consumers = new List<Consumes<TMessage>.Any>();
-		private readonly ISubscriptionCache _cache;
-		private readonly IServiceBus _bus;
+		private readonly ILog _log = LogManager.GetLogger(typeof (MessageDispatcher<TMessage>));
 
 		public MessageDispatcher()
 		{
@@ -290,7 +294,7 @@ namespace MassTransit.ServiceBus.Internal
 
 			TMessage message = obj as TMessage;
 			if (message == null)
-				throw new ArgumentException("The message is not of type " + typeof(TMessage).FullName, "obj");
+				throw new ArgumentException("The message is not of type " + typeof (TMessage).FullName, "obj");
 
 			foreach (Consumes<TMessage>.Any consumer in _consumers)
 			{
@@ -326,7 +330,7 @@ namespace MassTransit.ServiceBus.Internal
 				}
 			}
 
-			return result;		
+			return result;
 		}
 
 		public void Consume(object obj)
@@ -380,7 +384,7 @@ namespace MassTransit.ServiceBus.Internal
 			{
 				_consumers.Add(consumer);
 				if (_cache != null)
-					_cache.Add(new Subscription(typeof(TMessage).FullName, _bus.Endpoint.Uri));
+					_cache.Add(new Subscription(typeof (TMessage).FullName, _bus.Endpoint.Uri));
 			}
 		}
 
@@ -396,7 +400,7 @@ namespace MassTransit.ServiceBus.Internal
 				if (_consumers.Count == 0 && _components.Count == 0)
 				{
 					if (_cache != null)
-						_cache.Remove(new Subscription(typeof(TMessage).FullName, _bus.Endpoint.Uri));
+						_cache.Remove(new Subscription(typeof (TMessage).FullName, _bus.Endpoint.Uri));
 				}
 			}
 		}
@@ -406,10 +410,10 @@ namespace MassTransit.ServiceBus.Internal
 			if (_builder == null)
 				throw new ArgumentException("No builder object was registered");
 
-			if (!_components.Contains(typeof(TComponent)))
+			if (!_components.Contains(typeof (TComponent)))
 			{
 				_components.Add(typeof (TComponent));
-				if(_cache != null)
+				if (_cache != null)
 					_cache.Add(new Subscription(typeof (TMessage).FullName, _bus.Endpoint.Uri));
 			}
 		}
@@ -419,14 +423,26 @@ namespace MassTransit.ServiceBus.Internal
 			if (_builder == null)
 				throw new ArgumentException("No builder object was registered");
 
-			if (_components.Contains(typeof(TComponent)))
+			if (_components.Contains(typeof (TComponent)))
 			{
 				_components.Remove(typeof (TComponent));
 				if (_consumers.Count == 0 && _components.Count == 0)
 				{
 					if (_cache != null)
-						_cache.Remove(new Subscription(typeof(TMessage).FullName, _bus.Endpoint.Uri));
+						_cache.Remove(new Subscription(typeof (TMessage).FullName, _bus.Endpoint.Uri));
 				}
+			}
+		}
+
+		public bool Active
+		{
+			get
+			{
+				if (_components.Count > 0)
+					return true;
+				if (_consumers.Count > 0)
+					return true;
+				return false;
 			}
 		}
 

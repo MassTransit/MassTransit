@@ -27,7 +27,8 @@ namespace MassTransit.DistributedSubscriptionCache
 		private static readonly ILog _log = LogManager.GetLogger(typeof (DistributedSubscriptionCache));
 
 		private readonly List<string> _messageTypes = new List<string>();
-	    private readonly char _newLineToken = '\n';
+		private readonly char _newLineToken = '\n';
+		private readonly char _valueSeparator = '\t';
 
 		public IList<Subscription> List()
 		{
@@ -47,19 +48,22 @@ namespace MassTransit.DistributedSubscriptionCache
 
 			SubscriptionKey key = new SubscriptionKey(messageName);
 
-			MemcachedClient client = new MemcachedClient();
+			QueryCache(messageName, key, result);
 
-			string value = client.Get<string>(key.CacheKey);
+			return result;
+		}
 
-			if (!string.IsNullOrEmpty(value))
-			{
-                string[] uris = value.Split(_newLineToken);
+		public IList<Subscription> List(string messageName, string correlationId)
+		{
+			List<Subscription> result = new List<Subscription>();
 
-				foreach (string uri in uris)
-				{
-					result.Add(new Subscription(messageName, new Uri(uri)));
-				}
-			}
+			SubscriptionKey key = new SubscriptionKey(messageName, correlationId);
+
+			QueryCache(messageName, key, result);
+
+			key = new SubscriptionKey(messageName);
+
+			QueryCache(messageName, key, result);
 
 			return result;
 		}
@@ -72,7 +76,7 @@ namespace MassTransit.DistributedSubscriptionCache
 			if (_messageTypes.Contains(subscription.MessageName) == false)
 				_messageTypes.Add(subscription.MessageName);
 
-			SubscriptionKey key = new SubscriptionKey(subscription.MessageName);
+			SubscriptionKey key = new SubscriptionKey(subscription.MessageName, subscription.CorrelationId);
 
 			using (CacheLock cache = new CacheLock(key))
 			{
@@ -93,7 +97,7 @@ namespace MassTransit.DistributedSubscriptionCache
 					}
 					else
 					{
-                        string newValue = currentValue + _newLineToken + addUri;
+						string newValue = currentValue + _newLineToken + addUri;
 						cache.StoreInClient(StoreMode.Set, key, newValue, TimeSpan.FromDays(14));
 						OnAddSubscription(this, new SubscriptionEventArgs(subscription));
 					}
@@ -106,7 +110,7 @@ namespace MassTransit.DistributedSubscriptionCache
 			if (_log.IsDebugEnabled)
 				_log.DebugFormat("Removing Distributed Subscription {0} : {1}", subscription.MessageName, subscription.EndpointUri);
 
-			SubscriptionKey key = new SubscriptionKey(subscription.MessageName);
+			SubscriptionKey key = new SubscriptionKey(subscription.MessageName, subscription.CorrelationId);
 
 			using (CacheLock cache = new CacheLock(key))
 			{
@@ -116,18 +120,18 @@ namespace MassTransit.DistributedSubscriptionCache
 
 				if (!string.IsNullOrEmpty(currentValue))
 				{
-                    if (currentValue.Contains(removeUri))
-                    {
-                        int start = currentValue.IndexOf(removeUri);
-                        if (start > 0) //Modify the start to include the '\n'
-                        {
-                            start--;
-                        }
+					if (currentValue.Contains(removeUri))
+					{
+						int start = currentValue.IndexOf(removeUri);
+						if (start > 0) //Modify the start to include the '\n'
+						{
+							start--;
+						}
 
-                        string newValue = currentValue.Remove(start, removeUri.Length + 1);
-                        cache.StoreInClient(StoreMode.Set, key, newValue, TimeSpan.FromDays(14));
-                        OnRemoveSubscription(this, new SubscriptionEventArgs(subscription));
-                    }
+						string newValue = currentValue.Remove(start, removeUri.Length + 1);
+						cache.StoreInClient(StoreMode.Set, key, newValue, TimeSpan.FromDays(14));
+						OnRemoveSubscription(this, new SubscriptionEventArgs(subscription));
+					}
 				}
 			}
 		}
@@ -139,6 +143,23 @@ namespace MassTransit.DistributedSubscriptionCache
 		public void Dispose()
 		{
 			_messageTypes.Clear();
+		}
+
+		private void QueryCache(string messageName, SubscriptionKey key, List<Subscription> result)
+		{
+			MemcachedClient client = new MemcachedClient();
+
+			string value = client.Get<string>(key.CacheKey);
+
+			if (!string.IsNullOrEmpty(value))
+			{
+				string[] uris = value.Split(_newLineToken);
+
+				foreach (string uri in uris)
+				{
+					result.Add(new Subscription(messageName, key.CorrelationId, new Uri(uri)));
+				}
+			}
 		}
 
 		internal class CacheLock : IDisposable
@@ -162,15 +183,6 @@ namespace MassTransit.DistributedSubscriptionCache
 				}
 			}
 
-            public R GetFromClient<R>(SubscriptionKey key)
-            {
-                return _client.Get<R>(key.CacheKey);
-            }
-            public void StoreInClient(StoreMode mode, SubscriptionKey key, object value, TimeSpan validFor)
-            {
-                _client.Store(mode, key.CacheKey, value, validFor);
-            }
-
 			public MemcachedClient Client
 			{
 				get { return _client; }
@@ -180,15 +192,36 @@ namespace MassTransit.DistributedSubscriptionCache
 			{
 				_client.Remove(_key.LockKey);
 			}
+
+			public R GetFromClient<R>(SubscriptionKey key)
+			{
+				return _client.Get<R>(key.CacheKey);
+			}
+
+			public void StoreInClient(StoreMode mode, SubscriptionKey key, object value, TimeSpan validFor)
+			{
+				_client.Store(mode, key.CacheKey, value, validFor);
+			}
 		}
 
 		internal class SubscriptionKey
 		{
+			private readonly string _baseKey;
+			private readonly string _correlationId;
 			private readonly string _messageName;
 
 			public SubscriptionKey(string messageName)
 			{
 				_messageName = messageName;
+				_baseKey = messageName;
+			}
+
+			public SubscriptionKey(string messageName, string correlationId)
+				: this(messageName)
+			{
+				_correlationId = correlationId;
+				if (!string.IsNullOrEmpty(correlationId))
+					_baseKey += "/" + correlationId;
 			}
 
 			public string MessageName
@@ -198,17 +231,22 @@ namespace MassTransit.DistributedSubscriptionCache
 
 			public virtual string CacheKey
 			{
-				get { return string.Format("/mt/{0}", _messageName); }
+				get { return string.Format("/mt/{0}", _baseKey); }
 			}
 
 			public virtual string LockKey
 			{
-				get { return string.Format("/lock/mt/{0}", _messageName); }
+				get { return string.Format("/lock/mt/{0}", _baseKey); }
+			}
+
+			public string CorrelationId
+			{
+				get { return _correlationId; }
 			}
 
 			public override string ToString()
 			{
-				return string.Format("SubscriptionKey for {0}", _messageName);
+				return string.Format("SubscriptionKey for {0}", _baseKey);
 			}
 		}
 	}

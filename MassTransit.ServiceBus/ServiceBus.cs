@@ -14,6 +14,7 @@ namespace MassTransit.ServiceBus
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Reflection;
 	using Internal;
 	using log4net;
 	using Subscriptions;
@@ -30,12 +31,12 @@ namespace MassTransit.ServiceBus
 	{
 		private static readonly ILog _log;
 
-		private readonly AsyncReplyDispatcher _asyncReplyDispatcher = new AsyncReplyDispatcher();
-		private readonly IMessageDispatcher _messageDispatcher;
 		private readonly ManagedThreadPool<object> _asyncDispatcher;
+		private readonly AsyncReplyDispatcher _asyncReplyDispatcher = new AsyncReplyDispatcher();
 
 		private readonly EndpointResolver _endpointResolver = new EndpointResolver();
 		private readonly IEndpoint _endpointToListenOn;
+		private readonly IMessageDispatcher _messageDispatcher;
 		private readonly ISubscriptionCache _subscriptionCache;
 		private IEndpoint _poisonEndpoint;
 
@@ -56,16 +57,14 @@ namespace MassTransit.ServiceBus
 		/// </summary>
 		public ServiceBus(IEndpoint endpointToListenOn) : this(endpointToListenOn, new LocalSubscriptionCache())
 		{
-
 		}
 
-        /// <summary>
-        /// Uses the default object builder
-        /// </summary>
-        public ServiceBus(IEndpoint endpointToListenOn, ISubscriptionCache subscriptionCache) : this(endpointToListenOn, subscriptionCache, new ActivatorObjectBuilder())
-        {
-            
-        }
+		/// <summary>
+		/// Uses the default object builder
+		/// </summary>
+		public ServiceBus(IEndpoint endpointToListenOn, ISubscriptionCache subscriptionCache) : this(endpointToListenOn, subscriptionCache, new ActivatorObjectBuilder())
+		{
+		}
 
 		/// <summary>
 		/// Uses the specified subscription cache
@@ -156,6 +155,8 @@ namespace MassTransit.ServiceBus
 
 		#region IServiceBus Members
 
+		private static readonly Type _correlatedBy = typeof (CorrelatedBy<>);
+
 		public void Dispose()
 		{
 			_subscriptionCache.Dispose();
@@ -174,10 +175,31 @@ namespace MassTransit.ServiceBus
 		/// <param name="messages">The messages to be published</param>
 		public void Publish<T>(params T[] messages) where T : class, IMessage
 		{
-			IList<Subscription> subs = _subscriptionCache.List(typeof (T).FullName);
+			IList<Subscription> subs = null;
+
+			Type messageType = typeof (T);
+			foreach (Type interfaceType in messageType.GetInterfaces())
+			{
+				if (interfaceType.IsGenericType && interfaceType.GetGenericTypeDefinition() == _correlatedBy)
+				{
+					Type[] arguments = interfaceType.GetGenericArguments();
+
+					Type invokeType = _correlatedBy.MakeGenericType(arguments);
+
+					object value = invokeType.InvokeMember("CorrelationId", BindingFlags.GetProperty, null, messages[0], null);
+
+					string correlationId = value.ToString();
+
+					subs = _subscriptionCache.List(messageType.FullName, correlationId);
+					break;
+				}
+			}
+
+			if (subs == null)
+				subs = _subscriptionCache.List(messageType.FullName);
 
 			if (subs.Count == 0)
-				_log.WarnFormat("There are now subscriptions for the message type {0} for the bus listening on {1}", typeof (T).FullName, _endpointToListenOn.Uri);
+				_log.WarnFormat("There are now subscriptions for the message type {0} for the bus listening on {1}", messageType.FullName, _endpointToListenOn.Uri);
 
 			foreach (Subscription subscription in subs)
 			{
@@ -307,7 +329,7 @@ namespace MassTransit.ServiceBus
 
 		private void StartListening()
 		{
-			this.Endpoint.Subscribe(this);
+			Endpoint.Subscribe(this);
 		}
 
 		public void Dispatch(object message)

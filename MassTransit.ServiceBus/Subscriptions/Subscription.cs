@@ -15,9 +15,9 @@ namespace MassTransit.ServiceBus.Subscriptions
 	using System;
 
 	[Serializable]
-	public class Subscription :
-		IEquatable<Subscription>
+	public class Subscription : IEquatable<Subscription>
 	{
+		private string _correlationId;
 		protected Uri _endpointUri;
 		private string _messageName;
 
@@ -29,6 +29,14 @@ namespace MassTransit.ServiceBus.Subscriptions
 		{
 			_endpointUri = endpointUri;
 			_messageName = messageName.Trim();
+			_correlationId = string.Empty;
+		}
+
+		public Subscription(string messageName, string correlationId, Uri endpointUri)
+		{
+			_endpointUri = endpointUri;
+			_messageName = messageName.Trim();
+			_correlationId = correlationId;
 		}
 
 		public Subscription(Subscription subscription)
@@ -47,34 +55,32 @@ namespace MassTransit.ServiceBus.Subscriptions
 			get { return _messageName; }
 		}
 
-		#region IEquatable<Subscription> Members
-
-		public bool Equals(Subscription other)
+		public string CorrelationId
 		{
-			if (other == null)
-				return false;
+			get { return _correlationId; }
+		}
 
-			if (!other.EndpointUri.Equals(_endpointUri))
-				return false;
-
-			if (!other.MessageName.Equals(_messageName))
-				return false;
-
+		public bool Equals(Subscription subscription)
+		{
+			if (subscription == null) return false;
+			if (!Equals(_endpointUri, subscription._endpointUri)) return false;
+			if (!Equals(_messageName, subscription._messageName)) return false;
+			if (!Equals(_correlationId, subscription._correlationId)) return false;
 			return true;
 		}
 
-		#endregion
-
 		public override bool Equals(object obj)
 		{
-			Subscription other = obj as Subscription;
-
-			return Equals(other);
+			if (ReferenceEquals(this, obj)) return true;
+			return Equals(obj as Subscription);
 		}
 
 		public override int GetHashCode()
 		{
-			return _endpointUri.GetHashCode() + 29*_messageName.GetHashCode();
+			int result = _endpointUri.GetHashCode();
+			result = 29*result + _messageName.GetHashCode();
+			result = 29*result + _correlationId.GetHashCode();
+			return result;
 		}
 	}
 }

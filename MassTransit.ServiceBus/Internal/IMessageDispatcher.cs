@@ -45,5 +45,7 @@ namespace MassTransit.ServiceBus.Internal
 		/// </summary>
 		/// <typeparam name="TComponent">The type of component to remove</typeparam>
 		void RemoveComponent<TComponent>() where TComponent : class;
+
+		bool Active { get; }
 	}
 }
