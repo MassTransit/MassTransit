@@ -54,6 +54,18 @@ namespace MassTransit.ServiceBus.Subscriptions
 			return result;
 		}
 
+		public IList<Subscription> List(string messageName, string correlationId)
+		{
+			List<Subscription> result = new List<Subscription>();
+			if (_messageTypeSubscriptions.ContainsKey(messageName))
+			{
+				_messageTypeSubscriptions[messageName].ForEach(
+					delegate(SubscriptionCacheEntry entry) { result.Add(entry.Subscription); });
+			}
+
+			return result;
+		}
+
 		public void Add(Subscription subscription)
 		{
 			lock (addLock)

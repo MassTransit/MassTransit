@@ -11,6 +11,7 @@ namespace MassTransit.DistributedSubscriptionCache.Tests
 	public class When_using_a_distributed_subscription_cache
 	{
 		private readonly string _name = "CustomMessageName";
+		private readonly string _correlationId = Guid.NewGuid().ToString();
 
 		[SetUp]
 		public void Before_each()
@@ -123,6 +124,47 @@ namespace MassTransit.DistributedSubscriptionCache.Tests
 			Assert.That(subscriptions[0].MessageName, Is.EqualTo(_name));
 			Assert.That(subscriptions[0].EndpointUri.ToString(), Is.EqualTo(urlA));
 		}
-		
+
+		[Test]
+		public void A_subscription_to_a_correlated_message_type_should_only_match_a_correlated_consumer()
+		{
+			DistributedSubscriptionCache cacheA = new DistributedSubscriptionCache();
+
+			const string url = "http://localhost/default.html";
+
+			Subscription sample = new Subscription(_name, _correlationId, new Uri(url));
+
+			cacheA.Add(sample);
+
+			IList<Subscription> subscriptions = cacheA.List(_name, _correlationId);
+
+			Assert.That(subscriptions.Count, Is.EqualTo(1));
+			Assert.That(subscriptions[0].MessageName, Is.EqualTo(_name));
+			Assert.That(subscriptions[0].CorrelationId, Is.EqualTo(_correlationId));
+			Assert.That(subscriptions[0].EndpointUri.ToString(), Is.EqualTo(url));
+		}
+
+		[Test]
+		public void A_subscription_to_a_correlated_message_type_should_match_a_correlated_consumer_and_a_regular_consumer()
+		{
+			DistributedSubscriptionCache cacheA = new DistributedSubscriptionCache();
+
+			const string url = "http://localhost/default.html";
+
+			Subscription sample = new Subscription(_name, _correlationId, new Uri(url));
+			cacheA.Add(sample);
+			Subscription allMessages = new Subscription(_name, new Uri(url));
+			cacheA.Add(allMessages);
+
+			IList<Subscription> subscriptions = cacheA.List(_name, _correlationId);
+
+			Assert.That(subscriptions.Count, Is.EqualTo(2));
+			Assert.That(subscriptions[0].MessageName, Is.EqualTo(_name));
+			Assert.That(subscriptions[0].CorrelationId, Is.EqualTo(_correlationId));
+			Assert.That(subscriptions[0].EndpointUri.ToString(), Is.EqualTo(url));
+			Assert.That(subscriptions[1].MessageName, Is.EqualTo(_name));
+			Assert.That(subscriptions[1].CorrelationId, Is.Null);
+			Assert.That(subscriptions[1].EndpointUri.ToString(), Is.EqualTo(url));
+		}
 	}
 }

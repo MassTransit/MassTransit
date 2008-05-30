@@ -8,10 +8,10 @@ namespace MassTransit.ServiceBus.Internal
 		IMessageDispatcher
 		where T : class, CorrelatedBy<V>
 	{
-		private readonly Dictionary<V, IMessageDispatcher> _dispatchers = new Dictionary<V, IMessageDispatcher>();
 		private readonly IObjectBuilder _builder;
 		private readonly IServiceBus _bus;
 		private readonly ISubscriptionCache _cache;
+		private readonly Dictionary<V, IMessageDispatcher> _dispatchers = new Dictionary<V, IMessageDispatcher>();
 
 		public CorrelationIdDispatcher(IServiceBus bus, ISubscriptionCache cache, IObjectBuilder builder)
 		{
@@ -22,7 +22,6 @@ namespace MassTransit.ServiceBus.Internal
 
 		public CorrelationIdDispatcher()
 		{
-			
 		}
 
 		#region IMessageDispatcher Members
@@ -59,7 +58,22 @@ namespace MassTransit.ServiceBus.Internal
 			V correlationId = consumer.CorrelationId;
 
 			if (_dispatchers.ContainsKey(correlationId))
+			{
 				_dispatchers[correlationId].Unsubscribe(consumer);
+
+				if (_dispatchers[correlationId].Active == false)
+				{
+					lock (_dispatchers)
+					{
+						if (_dispatchers.ContainsKey(correlationId))
+
+							_dispatchers.Remove(correlationId);
+
+						if (_cache != null)
+							_cache.Remove(new Subscription(typeof (T).FullName, correlationId.ToString(), _bus.Endpoint.Uri));
+					}
+				}
+			}
 		}
 
 		public void AddComponent<TComponent>() where TComponent : class
@@ -70,6 +84,11 @@ namespace MassTransit.ServiceBus.Internal
 		public void RemoveComponent<TComponent>() where TComponent : class
 		{
 			throw new NotImplementedException();
+		}
+
+		public bool Active
+		{
+			get { return _dispatchers.Count > 0; }
 		}
 
 		#endregion
@@ -89,11 +108,20 @@ namespace MassTransit.ServiceBus.Internal
 			if (_dispatchers.ContainsKey(correlationId))
 				return _dispatchers[correlationId];
 
-			IMessageDispatcher dispatcher = new MessageDispatcher<T>(_bus, _cache, _builder);
+			lock (_dispatchers)
+			{
+				if (_dispatchers.ContainsKey(correlationId))
+					return _dispatchers[correlationId];
 
-			_dispatchers.Add(correlationId, dispatcher);
+				IMessageDispatcher dispatcher = new MessageDispatcher<T>(null, null, _builder);
 
-			return dispatcher;
+				_dispatchers.Add(correlationId, dispatcher);
+
+				if (_cache != null)
+					_cache.Add(new Subscription(typeof (T).FullName, correlationId.ToString(), _bus.Endpoint.Uri));
+
+				return dispatcher;
+			}
 		}
 
 		public void Consume(T message)
