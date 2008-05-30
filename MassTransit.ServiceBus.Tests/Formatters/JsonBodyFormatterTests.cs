@@ -1,5 +1,7 @@
 namespace MassTransit.ServiceBus.Tests.Formatters
 {
+    using System.IO;
+    using System.Text;
     using MassTransit.ServiceBus.Formatters;
     using NUnit.Framework;
     using NUnit.Framework.SyntaxHelpers;
@@ -41,7 +43,7 @@ namespace MassTransit.ServiceBus.Tests.Formatters
 
             using (mocks.Record())
             {
-                mockBody.Body = _serializedMessages;
+                Expect.Call(mockBody.BodyStream).Return(new MemoryStream());
             }
 
             using (mocks.Playback())
@@ -53,9 +55,10 @@ namespace MassTransit.ServiceBus.Tests.Formatters
         [Test]
         public void Deserialize()
         {
+            MemoryStream ms = new MemoryStream(Encoding.UTF8.GetBytes(_serializedMessages));
             using (mocks.Record())
             {
-                Expect.Call(mockBody.Body).Return(_serializedMessages);
+                Expect.Call(mockBody.BodyStream).Return(ms);
             }
             using (mocks.Playback())
             {
@@ -70,9 +73,10 @@ namespace MassTransit.ServiceBus.Tests.Formatters
         [Test]
         public void DeserializeWithOutGenerics()
         {
+            MemoryStream ms = new MemoryStream(Encoding.UTF8.GetBytes(_serializedMessages));
             using (mocks.Record())
             {
-                Expect.Call(mockBody.Body).Return(_serializedMessages);
+                Expect.Call(mockBody.BodyStream).Return(ms);
             }
             using (mocks.Playback())
             {
@@ -90,10 +94,10 @@ namespace MassTransit.ServiceBus.Tests.Formatters
             ClientMessage msg = new ClientMessage();
             msg.Name = "test";
 
-
+            MemoryStream ms = new MemoryStream();
             using (mocks.Record())
             {
-                mockBody.Body = _serializedMessagesWithValue;
+                Expect.Call(mockBody.BodyStream).Return(ms);
             }
 
             using (mocks.Playback())

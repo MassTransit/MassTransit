@@ -24,7 +24,7 @@ namespace MassTransit.Dashboard
 
         protected void RegisterFacilities()
         {
-            AddFacility("rails", new RailsFacility());
+            AddFacility("rails", new MonoRailFacility());
             AddFacility("startable", new StartableFacility());
         }
 
