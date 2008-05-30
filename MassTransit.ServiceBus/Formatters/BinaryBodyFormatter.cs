@@ -34,7 +34,7 @@ namespace MassTransit.ServiceBus.Formatters
 			return messages;
 		}
 
-		object IBodyFormatter.Deserialize(IFormattedBody formattedBody)
+		public object Deserialize(IFormattedBody formattedBody)
 		{
 			object obj = _formatter.Deserialize(formattedBody.BodyStream);
 

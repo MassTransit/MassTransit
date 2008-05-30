@@ -69,7 +69,7 @@ namespace HeavyLoad
 			if (_operationCount > 1)
 			{
 				sb.AppendFormat(", /{0} = {1}ms", _operationCount, duration.TotalMilliseconds / _operationCount);
-				sb.AppendFormat(", {0}/s", ( _operationCount ) / duration.TotalSeconds );
+				sb.AppendFormat("{0}  {1}/seconds", Environment.NewLine,  _operationCount / duration.TotalSeconds );
 			}
 
 			sb.AppendLine();
