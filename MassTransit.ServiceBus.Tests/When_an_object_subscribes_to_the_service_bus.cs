@@ -133,7 +133,7 @@ namespace MassTransit.ServiceBus.Tests
 		{
 			private readonly Guid _id;
 
-			public SimpleRequestMessage(Guid id)
+		    public SimpleRequestMessage(Guid id)
 			{
 				_id = id;
 			}
@@ -149,7 +149,10 @@ namespace MassTransit.ServiceBus.Tests
 		{
 			private readonly Guid _id;
 
-			public SimpleResponseMessage(Guid id)
+            //TODO: Remove:Stupid XML Serializer
+            public SimpleResponseMessage(){}
+
+		    public SimpleResponseMessage(Guid id)
 			{
 				_id = id;
 			}

@@ -1,6 +1,7 @@
 namespace MassTransit.ServiceBus.Tests
 {
-	using NUnit.Framework;
+    using System;
+    using NUnit.Framework;
 	using Rhino.Mocks;
 
 	[TestFixture]
@@ -46,5 +47,10 @@ namespace MassTransit.ServiceBus.Tests
 		{
 			_mocks.ReplayAll();
 		}
+
+        protected IDisposable Playback()
+        {
+            return _mocks.Playback();
+        }
 	}
 }

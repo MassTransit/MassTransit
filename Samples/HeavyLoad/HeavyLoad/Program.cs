@@ -16,6 +16,7 @@ namespace HeavyLoad
 			RunCorrelatedMessageTest();
 
 			Console.WriteLine("End of line.");
+            Console.ReadLine();
 		}
 
 		private static void RunCorrelatedMessageTest()
@@ -44,6 +45,7 @@ namespace HeavyLoad
 
 			Console.WriteLine("Local MSMQ Load Test: ");
 			Console.WriteLine(stopWatch.ToString());
+		    
 		}
 	}
 }

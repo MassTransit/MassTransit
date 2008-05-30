@@ -27,10 +27,10 @@ namespace MassTransit.ServiceBus.Formatters
 
 						foreach (Type type in types)
 						{
-							if (type.IsAbstract || type.IsInterface)
+							if (type.IsAbstract || type.IsInterface || !type.IsPublic)
 							{
                                 if (_log.IsDebugEnabled)
-                                    _log.DebugFormat("Ignoring Message {0} it is either Abstract or an Interface", type);
+                                    _log.DebugFormat("Ignoring Message {0} it is either Abstract or an Interface or Not Public", type);
 
                                 continue;
 							}
