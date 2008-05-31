@@ -11,7 +11,10 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
 	[TestFixture]
 	public class When_using_the_subscription_manager
 	{
-		#region Setup/Teardown
+		private MockRepository _mocks;
+		private IServiceBus _serviceBus;
+		private IEndpoint _managerEndpoint;
+		private ISubscriptionCache _cache;
 
 		[SetUp]
 		public void Setup()
@@ -26,13 +29,6 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
 		public void Teardown()
 		{
 		}
-
-		#endregion
-
-		private MockRepository _mocks;
-		private IServiceBus _serviceBus;
-		private IEndpoint _managerEndpoint;
-		private ISubscriptionCache _cache;
 
 		[Test]
 		public void The_client_should_request_an_update_at_startup()
@@ -62,8 +58,6 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
 			using (_mocks.Record())
 			{
 				_cache.Add(sub);
-
-				_serviceBus.Dispose();
 			}
 
 			using (_mocks.Playback())
@@ -86,7 +80,6 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
 			using (_mocks.Record())
 			{
 				_cache.Add(subscriptions[0]);
-				_serviceBus.Dispose();
 			}
 
 			using (_mocks.Playback())
@@ -108,14 +101,13 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
 				_managerEndpoint.Send<AddSubscription>(null);
 				LastCall
 					.IgnoreArguments()
-					.Constraints(Is.Matching<AddSubscription[]>(
-									delegate(AddSubscription[] obj)
+					.Constraints(Is.Matching<AddSubscription>(
+					             	delegate(AddSubscription obj)
 					             		{
-					             			if (obj[0].Subscription != args.Subscription)
+					             			if (obj.Subscription != args.Subscription)
 					             				return false;
 					             			return true;
 					             		}));
-				_serviceBus.Dispose();
 			}
 
 			using (_mocks.Playback())
