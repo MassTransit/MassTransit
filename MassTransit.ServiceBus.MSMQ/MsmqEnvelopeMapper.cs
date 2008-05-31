@@ -19,7 +19,7 @@ namespace MassTransit.ServiceBus.MSMQ
     public class MsmqEnvelopeMapper :
 		IEnvelopeMapper<Message>
 	{
-		private static readonly IBodyFormatter _formatter = new JsonBodyFormatter();
+		private static readonly IBodyFormatter _formatter = new BinaryBodyFormatter();
 
 		#region IEnvelopeMapper<Message> Members
 

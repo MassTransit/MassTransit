@@ -9,7 +9,7 @@ namespace HeavyLoad
 	{
 		private readonly ManualResetEvent _finishedEvent = new ManualResetEvent(false);
 		private readonly string _queueUri = "msmq://localhost/test_servicebus";
-		private int _attempts = 100;
+		private int _attempts = 1000;
 		private IServiceBus _bus;
 		private MsmqEndpoint _localEndpoint;
 		private int _successes;
@@ -43,20 +43,14 @@ namespace HeavyLoad
 		{
 			stopWatch.Start();
 
-			ThreadPool.SetMaxThreads(256, 1000);
-
 			SimpleRequestService service = new SimpleRequestService(_bus);
 
 			_bus.Subscribe(service);
 
-			Thread.Sleep(1000);
-
 			CheckPoint point = stopWatch.Mark("Correlated Requests");
 
-			for (int index = 0; index < 10; index++)
+			for (int index = 0; index < _attempts; index++)
 			{
-				for (int indexer = 0; indexer < _attempts/10; indexer++)
-				{
 					CorrelatedController controller = new CorrelatedController(_bus);
 
 					controller.OnSuccess += controller_OnSuccess;
@@ -65,7 +59,6 @@ namespace HeavyLoad
 
 					controller.OnSuccess -= controller_OnSuccess;
 					controller.OnTimeout -= controller_OnTimeout;
-				}
 			}
 
 			point.Complete(_attempts);
@@ -83,7 +76,7 @@ namespace HeavyLoad
 		{
 			lock (_finishedEvent)
 			{
-				_timeouts++;
+				Interlocked.Increment(ref _timeouts);
 
 				if (_timeouts + _successes == _attempts)
 					_finishedEvent.Set();
@@ -94,7 +87,7 @@ namespace HeavyLoad
 		{
 			lock (_finishedEvent)
 			{
-				_successes++;
+				Interlocked.Increment(ref _successes);
 
 				if (_timeouts + _successes == _attempts)
 					_finishedEvent.Set();

@@ -7,7 +7,7 @@ namespace HeavyLoad
 
 	public class LocalMsmqLoadTest : IDisposable
 	{
-		private const int _repeatCount = 10;
+		private const int _repeatCount = 5000;
 		private readonly ManualResetEvent _completeEvent = new ManualResetEvent(false);
 		private readonly string _queueUri = "msmq://localhost/test_servicebus";
 		private IServiceBus _bus;
@@ -51,18 +51,9 @@ namespace HeavyLoad
 			CheckPoint publishCheckpoint = stopWatch.Mark("Publishing " + _repeatCount + " messages");
 			CheckPoint receiveCheckpoint = stopWatch.Mark("Receiving " + _repeatCount + " messages");
 
-			Semaphore countdown = new Semaphore(0, 100);
-
 			for (int index = 0; index < _repeatCount; index++)
 			{
 				_bus.Publish(new GeneralMessage());
-
-				countdown.Release();
-			}
-
-			for (int index = 0; index < _repeatCount/1000; index++)
-			{
-				countdown.WaitOne(TimeSpan.FromSeconds(30), true);
 			}
 
 			publishCheckpoint.Complete(_repeatCount);
@@ -78,17 +69,16 @@ namespace HeavyLoad
 
 		private void Handler(IMessageContext<SimpleResponse> obj)
 		{
-			_responseCounter++;
+			Interlocked.Increment(ref _responseCounter);
 			if (_responseCounter == _repeatCount)
 				_responseEvent.Set();
-		
 		}
 
 		private void Handle(IMessageContext<GeneralMessage> obj)
 		{
 			_bus.Publish(new SimpleResponse());
 
-			_counter++;
+			Interlocked.Increment(ref _counter);
 			if (_counter == _repeatCount)
 				_completeEvent.Set();
 		}

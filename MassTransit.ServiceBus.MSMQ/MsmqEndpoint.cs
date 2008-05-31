@@ -26,11 +26,12 @@ namespace MassTransit.ServiceBus.MSMQ
 	public class MsmqEndpoint :
 		IMsmqEndpoint
 	{
-		private static readonly IBodyFormatter _formatter = new JsonBodyFormatter();
+		private static readonly IBodyFormatter _formatter = new BinaryBodyFormatter();
 		private static readonly ILog _log = LogManager.GetLogger(typeof (MsmqEndpoint));
 		private static readonly ILog _messageLog = LogManager.GetLogger("MassTransit.Messages");
 		private readonly string _queuePath;
 		private readonly Uri _uri;
+		private MessageQueue _queue;
 		private bool _reliableMessaging = true;
 
 		/// <summary>
@@ -67,6 +68,8 @@ namespace MassTransit.ServiceBus.MSMQ
 			}
 
 			_queuePath = string.Format(@"FormatName:DIRECT=OS:{0}\private$\{1}", hostName, _uri.AbsolutePath.Substring(1));
+
+			_queue = Open(QueueAccessMode.SendAndReceive);
 		}
 
 		/// <summary>
@@ -97,6 +100,8 @@ namespace MassTransit.ServiceBus.MSMQ
 
 			_queuePath = string.Format("{0}{1}\\{2}\\{3}", prefix, parts[0], parts[1], parts[2]);
 			_uri = new Uri(string.Format("msmq://{0}/{1}", parts[0], parts[2]));
+
+			_queue = Open(QueueAccessMode.SendAndReceive);
 		}
 
 		#region IMessageQueueEndpoint Members
@@ -161,10 +166,10 @@ namespace MassTransit.ServiceBus.MSMQ
 				if (_messageLog.IsInfoEnabled)
 					_messageLog.InfoFormat("Message {0} Sent To {1}", messageType, Uri);
 
-				using (MessageQueue queue = Open(QueueAccessMode.SendAndReceive))
-				{
-					queue.Send(msg, GetTransactionType(queue));
-				}
+				//using (MessageQueue queue = Open(QueueAccessMode.SendAndReceive))
+				//{
+				_queue.Send(msg, GetTransactionType(_queue));
+				//	}
 			}
 			catch (MessageQueueException ex)
 			{
@@ -182,30 +187,27 @@ namespace MassTransit.ServiceBus.MSMQ
 
 		public object Receive(TimeSpan timeout)
 		{
-			using (MessageQueue queue = Open(QueueAccessMode.ReceiveAndAdmin))
+			try
 			{
+				Message msg = _queue.Receive(GetTransactionType(_queue));
+
+				Type messageType = Type.GetType(msg.Label);
+
 				try
 				{
-					Message msg = queue.Receive(GetTransactionType(queue));
+					object obj = _formatter.Deserialize(new MsmqFormattedBody(msg));
 
-					Type messageType = Type.GetType(msg.Label);
-
-					try
-					{
-						object obj = _formatter.Deserialize(new MsmqFormattedBody(msg));
-
-						return obj;
-					}
-					catch (SerializationException ex)
-					{
-						throw new MessageException(messageType, string.Format("An error occurred serializing a message of type {0}", messageType.FullName), ex);
-					}
+					return obj;
 				}
-				catch (MessageQueueException ex)
+				catch (SerializationException ex)
 				{
-					HandleVariousErrorCodes(ex.MessageQueueErrorCode, ex);
-					throw;
+					throw new MessageException(messageType, string.Format("An error occurred serializing a message of type {0}", messageType.FullName), ex);
 				}
+			}
+			catch (MessageQueueException ex)
+			{
+				HandleVariousErrorCodes(ex.MessageQueueErrorCode, ex);
+				throw new EndpointException(this, "Receive error occured", ex);
 			}
 		}
 
@@ -216,65 +218,61 @@ namespace MassTransit.ServiceBus.MSMQ
 
 		public object Receive(TimeSpan timeout, Predicate<object> accept)
 		{
-			using (MessageQueue queue = Open(QueueAccessMode.ReceiveAndAdmin))
+			try
 			{
-				try
+				MessageQueueTransactionType transactionType = GetTransactionType(_queue);
+
+				MessageEnumerator enumerator = _queue.GetMessageEnumerator2();
+
+				while (enumerator.MoveNext(timeout))
 				{
-					MessageQueueTransactionType transactionType = GetTransactionType(queue);
+					Message msg = enumerator.Current;
 
-					MessageEnumerator enumerator = queue.GetMessageEnumerator2();
-
-					while (enumerator.MoveNext(timeout))
+					try
 					{
-						Message msg = enumerator.Current;
+						object obj = _formatter.Deserialize(new MsmqFormattedBody(msg));
 
-						try
+						if (accept(obj))
 						{
-							object obj = _formatter.Deserialize(new MsmqFormattedBody(msg));
-
-							if (accept(obj))
+							Message received = enumerator.RemoveCurrent(TimeSpan.FromSeconds(1), transactionType);
+							if (received.Id == msg.Id)
 							{
-								Message received = enumerator.RemoveCurrent(TimeSpan.FromSeconds(1), transactionType);
-								if (received.Id == msg.Id)
-								{
-									if (_log.IsDebugEnabled)
-										_log.DebugFormat("Queue: {0} Received Message Id {1}", queue.Path, msg.Id);
+								if (_log.IsDebugEnabled)
+									_log.DebugFormat("Queue: {0} Received Message Id {1}", _queue.Path, msg.Id);
 
-									if (_messageLog.IsInfoEnabled)
-										_messageLog.InfoFormat("RECV:{0}:System.Object:{1}", queue.Path, msg.Id);
+								if (_messageLog.IsInfoEnabled)
+									_messageLog.InfoFormat("RECV:{0}:System.Object:{1}", _queue.Path, msg.Id);
 
-									return obj;
-								}
-								else
-								{
-									if (_log.IsDebugEnabled)
-										_log.DebugFormat("Queue: {0} Unmatched Message Id {1}", queue.Path, msg.Id);
-
-									enumerator.Close();
-									enumerator = queue.GetMessageEnumerator2();
-								}
+								return obj;
 							}
 							else
 							{
 								if (_log.IsDebugEnabled)
-									_log.DebugFormat("Queue: {0} Skipped Message Id {1}", queue.Path, msg.Id);
+									_log.DebugFormat("Queue: {0} Unmatched Message Id {1}", _queue.Path, msg.Id);
+
+								enumerator.Close();
+								enumerator = _queue.GetMessageEnumerator2();
 							}
 						}
-						catch (SerializationException ex)
+						else
 						{
-							throw new MessageException(typeof (object), string.Format("An error occurred serializing a message of type {0}", typeof (object).FullName), ex);
+							if (_log.IsDebugEnabled)
+								_log.DebugFormat("Queue: {0} Skipped Message Id {1}", _queue.Path, msg.Id);
 						}
 					}
-					enumerator.Close();
+					catch (SerializationException ex)
+					{
+						throw new MessageException(typeof (object), string.Format("An error occurred serializing a message of type {0}", typeof (object).FullName), ex);
+					}
 				}
-				catch (MessageQueueException ex)
-				{
-					HandleVariousErrorCodes(ex.MessageQueueErrorCode, ex);
-					throw;
-				}
-
-				return null;
+				enumerator.Close();
 			}
+			catch (MessageQueueException ex)
+			{
+				HandleVariousErrorCodes(ex.MessageQueueErrorCode, ex);
+			}
+
+			return null;
 		}
 
 		public T Receive<T>() where T : class
@@ -320,6 +318,10 @@ namespace MassTransit.ServiceBus.MSMQ
 
 		public void Dispose()
 		{
+			if (_queue != null)
+			{
+				_queue.Dispose();
+			}
 		}
 
 		private MessageQueueTransactionType GetTransactionType(MessageQueue queue)
@@ -367,6 +369,9 @@ namespace MassTransit.ServiceBus.MSMQ
 					// the message has already been handled.
 					if (_log.IsDebugEnabled)
 						_log.DebugFormat("Message received by another receiver before it could be retrieved");
+					break;
+
+				case MessageQueueErrorCode.InvalidHandle:
 					break;
 
 				default:

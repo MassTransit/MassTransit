@@ -13,10 +13,12 @@ namespace HeavyLoad
 
 			RunLocalMsmqLoadTest();
 
+			Console.WriteLine("Waiting for next test...");
+
 			RunCorrelatedMessageTest();
 
 			Console.WriteLine("End of line.");
-            Console.ReadLine();
+            //Console.ReadLine();
 		}
 
 		private static void RunCorrelatedMessageTest()
