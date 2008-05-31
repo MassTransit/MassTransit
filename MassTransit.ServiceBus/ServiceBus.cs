@@ -180,8 +180,6 @@ namespace MassTransit.ServiceBus
 		public void Subscribe<T>(T component) where T : class
 		{
 			_messageDispatcher.Subscribe(component);
-//            _subscriptionCache.Add(new Subscription(typeof (T).FullName, Endpoint.Uri));
-
 			StartListening();
 		}
 
@@ -198,19 +196,16 @@ namespace MassTransit.ServiceBus
 		public void Unsubscribe<T>(T component) where T : class
 		{
 			_messageDispatcher.Unsubscribe(component);
-//		    _subscriptionCache.Remove(new Subscription(typeof (T).FullName, Endpoint.Uri));
 		}
 
 		public void AddComponent<TComponent>() where TComponent : class
 		{
 			_messageDispatcher.AddComponent<TComponent>();
-			//TODO: subscription client
 			StartListening();
 		}
 
 		public void RemoveComponent<TComponent>() where TComponent : class
 		{
-			//TODO: subscription client
 			_messageDispatcher.RemoveComponent<TComponent>();
 		}
 
