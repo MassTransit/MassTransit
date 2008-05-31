@@ -1,10 +1,9 @@
 namespace HeavyLoad
 {
 	using System;
-	using MassTransit.ServiceBus;
 
 	[Serializable]
-	public class SimpleResponse : IMessage
+	public class SimpleResponse
 	{
 		private int[] _values;
 

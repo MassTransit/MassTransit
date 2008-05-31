@@ -45,11 +45,8 @@
       <Link>SolutionVersion.cs</Link>
     </Compile>
     <Compile Include="MsmqFormattedBody.cs" />
-    <Compile Include="MsmqEnvelopeMapper.cs" />
     <Compile Include="IMsmqEndpoint.cs" />
     <Compile Include="MsmqEndpoint.cs" />
-    <Compile Include="MsmqMessageId.cs" />
-    <Compile Include="MsmqMessageSender.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

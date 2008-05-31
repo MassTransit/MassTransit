@@ -154,7 +154,7 @@ namespace HeavyLoad
 	}
 
 	[Serializable]
-	internal class SimpleRequestMessage : CorrelatedBy<Guid>, IMessage
+	internal class SimpleRequestMessage : CorrelatedBy<Guid>
 	{
 		private Guid _id;
 
@@ -175,7 +175,7 @@ namespace HeavyLoad
 	}
 
 	[Serializable]
-	internal class SimpleResponseMessage : CorrelatedBy<Guid>, IMessage
+	internal class SimpleResponseMessage : CorrelatedBy<Guid>
 	{
 		private Guid _id;
 
