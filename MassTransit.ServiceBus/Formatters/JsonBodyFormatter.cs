@@ -4,6 +4,7 @@ namespace MassTransit.ServiceBus.Formatters
     using System.Collections.Generic;
     using System.IO;
     using System.Text;
+    using Exceptions;
     using Newtonsoft.Json;
 
     public class JsonBodyFormatter :
@@ -21,15 +22,23 @@ namespace MassTransit.ServiceBus.Formatters
 
         public T Deserialize<T>(IFormattedBody formattedBody) where T : class
         {
-        	string body;
-			using(StreamReader reader = new StreamReader(formattedBody.BodyStream))
+        		string body;
+			using (StreamReader reader = new StreamReader(formattedBody.BodyStream))
 			{
 				body = reader.ReadToEnd();
 			}
 
             JsonWrapper jw = JavaScriptConvert.DeserializeObject<JsonWrapper>(body);
 
-            return JavaScriptConvert.DeserializeObject<T>(jw.WrappedJson);
+            Type desiredType = Type.GetType(jw.Types[0], true, true);
+            object o = JavaScriptConvert.DeserializeObject(jw.WrappedJson, desiredType);
+
+            //object obj JavaScriptConvert.DeserializeObject<T>(jw.WrappedJson);
+
+			if(typeof(T).IsAssignableFrom(o.GetType()))
+				return (T) o;
+
+			throw new JsonSerializationException("Unable to convert the message to the requested type");
         }
 
         public object Deserialize(IFormattedBody formattedBody)
