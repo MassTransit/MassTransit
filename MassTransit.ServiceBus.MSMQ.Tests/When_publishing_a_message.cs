@@ -25,8 +25,6 @@ namespace MassTransit.ServiceBus.MSMQ.Tests
 				qtc.ServiceBus.Subscribe<DeleteMessage>(
 					delegate { _deleteEvent.Set(); });
 
-				Thread.Sleep(TimeSpan.FromSeconds(3));
-
 				DeleteMessage dm = new DeleteMessage();
 
 				qtc.ServiceBus.Publish(dm);
@@ -57,8 +55,6 @@ namespace MassTransit.ServiceBus.MSMQ.Tests
 
 				qtc.RemoteServiceBus.Subscribe<DeleteMessage>(
 					delegate { _deleteEvent.Set(); });
-
-				Thread.Sleep(TimeSpan.FromSeconds(3));
 
 				DeleteMessage dm = new DeleteMessage();
 
@@ -105,8 +101,6 @@ namespace MassTransit.ServiceBus.MSMQ.Tests
 				qtc.RemoteServiceBus.Subscribe<UpdateMessage>(
 					delegate { _updateEvent.Set(); });
 
-				Thread.Sleep(TimeSpan.FromSeconds(5));
-
 				UpdateMessage um = new UpdateMessage();
 
 				qtc.ServiceBus.Publish(um);
@@ -128,7 +122,7 @@ namespace MassTransit.ServiceBus.MSMQ.Tests
 						{
 							_updateEvent.Set();
 
-							//ctx.Bus.Send(ctx.Envelope.ReturnEndpoint, new UpdateAcceptedMessage());
+							qtc.RemoteServiceBus.Publish(new UpdateAcceptedMessage());
 						};
 
 				ManualResetEvent _repliedEvent = new ManualResetEvent(false);
@@ -137,8 +131,6 @@ namespace MassTransit.ServiceBus.MSMQ.Tests
 
 				qtc.ServiceBus.Subscribe<UpdateAcceptedMessage>(
 					delegate { _repliedEvent.Set(); });
-
-				Thread.Sleep(TimeSpan.FromSeconds(5));
 
 				UpdateMessage um = new UpdateMessage();
 
