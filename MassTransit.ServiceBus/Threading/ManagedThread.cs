@@ -22,7 +22,8 @@ namespace MassTransit.ServiceBus.Threading
 		public void Dispose()
 		{
 			_shutdown.Set();
-			_thread.Join(_threadExitWaitTime);
+			if(_thread.IsAlive)
+				_thread.Join(_threadExitWaitTime);
 		}
 
 		public void Start()
