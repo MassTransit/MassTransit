@@ -23,9 +23,6 @@ namespace MassTransit.ServiceBus.Internal
 			int result;
 			while ((result = WaitHandle.WaitAny(handles, 0, false)) != 0)
 			{
-				if (result == WaitHandle.WaitTimeout)
-					continue;
-
 				object message = _endpoint.Receive(_readTimeout, AcceptMessageCheck);
 
 				if (message != null)
