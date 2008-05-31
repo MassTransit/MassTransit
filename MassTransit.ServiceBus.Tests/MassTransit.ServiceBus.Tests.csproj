@@ -64,7 +64,6 @@
     <Compile Include="Formatters\BinaryBodyFormatterTests.cs" />
     <Compile Include="Formatters\JsonBodyFormatterTests.cs" />
     <Compile Include="Formatters\LoadTests.cs" />
-    <Compile Include="Formatters\MessageFinderTests.cs" />
     <Compile Include="Formatters\XmlMessageFormatterTests.cs" />
     <Compile Include="HighLevel\With_a_central_subscription_service.cs" />
     <Compile Include="HighLevel\With_a_local_subscription_service.cs" />

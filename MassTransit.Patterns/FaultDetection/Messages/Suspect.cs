@@ -4,8 +4,7 @@ namespace MassTransit.Patterns.FaultDetection.Messages
     using MassTransit.ServiceBus;
 
     [Serializable]
-    public class Suspect : 
-        IMessage
+    public class Suspect
     {
         public IEndpoint Endpoint;
     }

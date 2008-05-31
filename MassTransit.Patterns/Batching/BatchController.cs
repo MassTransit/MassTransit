@@ -17,8 +17,7 @@ namespace MassTransit.Patterns.Batching
     using System.Collections.Generic;
     using ServiceBus;
 
-    public class BatchController<T, K> :
-        IMessage where T : IBatchMessage
+    public class BatchController<T, K> where T : IBatchMessage
     {
         private readonly Dictionary<K, BatchContext<T, K>> _contexts = new Dictionary<K, BatchContext<T, K>>();
         private readonly BatchControllerHandler<T, K> _handler;

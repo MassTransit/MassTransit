@@ -1,9 +1,9 @@
-using System;
-
 namespace MassTransit.ServiceBus.Tests
 {
+	using System;
+
 	[Serializable]
-	public class UpdateAcceptedMessage : IMessage
+	public class UpdateAcceptedMessage
 	{
 	}
 }

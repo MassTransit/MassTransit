@@ -36,10 +36,9 @@ namespace MassTransit.Patterns.Tests
 
 				memoryStream.Position = 0;
 
-				IMessage[] result = formatter.Deserialize<IMessage[]>(mockBody);
+				object result = formatter.Deserialize<object>(mockBody);
 
 				Assert.That(result, Is.Not.Null);
-				Assert.That(result.Length, Is.EqualTo(1));
 			}
 		}
 	}

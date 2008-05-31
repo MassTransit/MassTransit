@@ -1,11 +1,9 @@
 namespace MassTransit.Patterns.FaultDetection.Messages
 {
-    using System;
-    using MassTransit.ServiceBus;
+	using System;
 
-    [Serializable]
-    public class Pong : 
-        IMessage
-    {
-    }
+	[Serializable]
+	public class Pong
+	{
+	}
 }

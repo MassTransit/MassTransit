@@ -12,8 +12,8 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
 		[SetUp]
 		public void Setup()
 		{
-			_endpoint = _mocks.CreateMock<IEndpoint>();
-			_cache = _mocks.CreateMock<ISubscriptionCache>();
+			_endpoint = _mocks.DynamicMock<IEndpoint>();
+			_cache = _mocks.DynamicMock<ISubscriptionCache>();
 
 
 			_bus = new ServiceBus(_endpoint, _cache);

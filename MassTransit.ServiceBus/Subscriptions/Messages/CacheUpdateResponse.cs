@@ -16,7 +16,7 @@ namespace MassTransit.ServiceBus.Subscriptions.Messages
     using System.Collections.Generic;
 
     [Serializable]
-    public class CacheUpdateResponse : IMessage
+    public class CacheUpdateResponse
     {
         private readonly List<Subscription> _subscriptions;
 

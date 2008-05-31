@@ -1,13 +1,10 @@
-using MassTransit.Patterns.Batching;
-using MassTransit.ServiceBus;
-
 namespace MassTransit.Patterns.Tests
 {
-    using System;
+	using System;
 
-    [Serializable]
-    public class MessageToBatch : IMessage
-    {
-        public string Name;
-    }
+	[Serializable]
+	public class MessageToBatch
+	{
+		public string Name;
+	}
 }

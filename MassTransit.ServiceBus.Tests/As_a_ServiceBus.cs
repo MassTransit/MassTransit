@@ -13,9 +13,9 @@ namespace MassTransit.ServiceBus.Tests
 		public void SetUp()
 		{
 			mocks = new MockRepository();
-			_mockSubscriptionCache = mocks.CreateMock<ISubscriptionCache>();
-			mockEndpoint = mocks.CreateMock<IEndpoint>();
-			mockSendEndpoint = mocks.CreateMock<IEndpoint>();
+			_mockSubscriptionCache = mocks.DynamicMock<ISubscriptionCache>();
+			mockEndpoint = mocks.DynamicMock<IEndpoint>();
+			mockSendEndpoint = mocks.DynamicMock<IEndpoint>();
 
 			SetupResult.For(mockEndpoint.Uri).Return(new Uri("msmq://localhost/test"));
 		}

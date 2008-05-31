@@ -40,8 +40,7 @@ namespace MassTransit.Host.Tests
 	}
 
 	[Serializable]
-	public class MySimpleMessage :
-		IMessage
+	public class MySimpleMessage 
 	{
 	}
 }

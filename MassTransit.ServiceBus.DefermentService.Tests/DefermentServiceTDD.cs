@@ -16,7 +16,7 @@ namespace MassTransit.ServiceBus.DefermentService.Tests
 		[Test]
 		public void Doodle()
 		{
-			IMessage msg = null;
+			object msg = null;
 			IDefermentService d = new DefermentService();
 			//when deferment completes we send back to the queue as if it had just come in.
 			int defermentClaimTicket = d.Defer(msg, oneSecond);
@@ -53,8 +53,7 @@ namespace MassTransit.ServiceBus.DefermentService.Tests
 	}
 
 	[Serializable]
-	public class DelayMessage :
-		IMessage
+	public class DelayMessage 
 	{
 		public bool Deferred = false;
 	}

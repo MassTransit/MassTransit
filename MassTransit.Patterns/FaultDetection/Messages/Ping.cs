@@ -1,11 +1,9 @@
 namespace MassTransit.Patterns.FaultDetection.Messages
 {
-    using System;
-    using MassTransit.ServiceBus;
+	using System;
 
-    [Serializable]
-    public class Ping : 
-        IMessage
-    {
-    }
+	[Serializable]
+	public class Ping
+	{
+	}
 }

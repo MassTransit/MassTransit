@@ -10,21 +10,18 @@
 /// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 /// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 /// specific language governing permissions and limitations under the License.
-
 namespace MassTransit.Patterns.Batching
 {
-    using ServiceBus;
+	public interface IBatchMessage
+	{
+		/// <summary>
+		/// The number of messages in the batch
+		/// </summary>
+		int BatchLength { get; }
 
-    public interface IBatchMessage : IMessage
-    {
-        /// <summary>
-        /// The number of messages in the batch
-        /// </summary>
-        int BatchLength { get; }
-
-        /// <summary>
-        /// Identifies the batch containing this message
-        /// </summary>
-        object BatchId { get; }
-    }
+		/// <summary>
+		/// Identifies the batch containing this message
+		/// </summary>
+		object BatchId { get; }
+	}
 }

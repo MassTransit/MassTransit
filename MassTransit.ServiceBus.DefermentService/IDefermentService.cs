@@ -4,6 +4,6 @@ namespace MassTransit.ServiceBus.DefermentService
 
     public interface IDefermentService
     {
-        int Defer(IMessage msg, TimeSpan amountOfTimeToDefer);
+        int Defer(object msg, TimeSpan amountOfTimeToDefer);
     }
 }
