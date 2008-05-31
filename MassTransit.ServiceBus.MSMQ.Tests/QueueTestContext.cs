@@ -102,20 +102,18 @@ namespace MassTransit.ServiceBus.MSMQ.Tests
 			_remoteServiceBus = new ServiceBus(RemoteServiceBusEndPoint, cache);
 		}
 
-		public static void VerifyMessageInQueue<T>(string queuePath, T message)
+		public static void VerifyMessageInQueue<T>(string queuePath, T messageItem)
 		{
 			using (MessageQueue mq = new MessageQueue(GetQueueName(queuePath), QueueAccessMode.Receive))
 			{
 				Message msg = mq.Receive(TimeSpan.FromSeconds(3));
 
-				IMessage[] messages = new BinaryFormatter().Deserialize(msg.BodyStream) as IMessage[];
+				object message = new BinaryFormatter().Deserialize(msg.BodyStream);
 
-				Assert.That(messages, Is.Not.Null);
-				if (messages != null)
+				Assert.That(message, Is.Not.Null);
+				if (message != null)
 				{
-					Assert.That(messages.Length, Is.EqualTo(1));
-
-					Assert.That(messages[0].GetType(), Is.EqualTo(typeof (T)));
+					Assert.That(message.GetType(), Is.EqualTo(typeof (T)));
 				}
 			}
 		}

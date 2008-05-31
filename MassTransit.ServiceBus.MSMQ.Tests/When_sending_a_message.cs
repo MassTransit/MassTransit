@@ -15,9 +15,8 @@ namespace MassTransit.ServiceBus.MSMQ.Tests
             string uri = "msmq://localhost/test_transactions";
             MsmqEndpoint ep = new MsmqEndpoint(uri);
             QueueTestContext.ValidateAndPurgeQueue(ep.QueuePath, true);
-            MsmqMessageSender s = new MsmqMessageSender(ep);
-            IEnvelope env = new Envelope(new DeleteMessage());
-            s.Send(env);
+
+        	ep.Send(new DeleteMessage());
         }
 
         [Test]
@@ -26,12 +25,10 @@ namespace MassTransit.ServiceBus.MSMQ.Tests
             string uri = "msmq://localhost/test_transactions";
             MsmqEndpoint ep = new MsmqEndpoint(uri);
             QueueTestContext.ValidateAndPurgeQueue(ep.QueuePath, true);
-            MsmqMessageSender s = new MsmqMessageSender(ep);
-            IEnvelope env = new Envelope(new DeleteMessage());
-
-            using(TransactionScope tr = new TransactionScope())
+         
+			using(TransactionScope tr = new TransactionScope())
             {
-                s.Send(env);
+                ep.Send(new DeleteMessage());
                 tr.Complete();
             }
 
