@@ -126,7 +126,10 @@ namespace MassTransit.ServiceBus.Threading
 					continue;
 				}
 
-				T item = _workItems.Dequeue();
+
+				T item;
+				lock (_workItems)
+					item = _workItems.Dequeue();
 
 				try
 				{
