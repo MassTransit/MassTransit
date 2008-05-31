@@ -3,17 +3,16 @@ namespace HeavyLoad
 	using System;
 	using System.Messaging;
 	using System.Runtime.Serialization.Formatters.Binary;
-	using MassTransit.ServiceBus;
 
 	public static class MsmqHelper
 	{
-		public static void VerifyMessageInQueue<T>(string queuePath, T message)
+		public static void VerifyMessageInQueue<T>(string queuePath, T messageCheck)
 		{
 			using (MessageQueue mq = new MessageQueue(GetQueueName(queuePath), QueueAccessMode.Receive))
 			{
 				Message msg = mq.Receive(TimeSpan.FromSeconds(3));
 
-				IMessage[] messages = new BinaryFormatter().Deserialize(msg.BodyStream) as IMessage[];
+				object message = new BinaryFormatter().Deserialize(msg.BodyStream);
 			}
 		}
 

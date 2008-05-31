@@ -52,7 +52,6 @@
     <Compile Include="Messages\UpdateAcceptedMessage.cs" />
     <Compile Include="Messages\UpdateMessage.cs" />
     <Compile Include="MsmqEndpoint_Specs.cs" />
-    <Compile Include="MsmqMessageId_Specs.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="QueueTestContext.cs" />
     <Compile Include="When_creating_a_MessageQueueEndpoint_from_a_Uri_string.cs" />

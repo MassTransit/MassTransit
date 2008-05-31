@@ -4,7 +4,7 @@ namespace HeavyLoad
 	using MassTransit.ServiceBus;
 
 	[Serializable]
-	public class GeneralMessage : IMessage
+	public class GeneralMessage
 	{
 		private int[] _values;
 
