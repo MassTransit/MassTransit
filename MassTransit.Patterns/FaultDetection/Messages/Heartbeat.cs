@@ -1,12 +1,10 @@
 namespace MassTransit.Patterns.FaultDetection.Messages
 {
-    using System;
-    using MassTransit.ServiceBus;
+	using System;
 
-    [Serializable]
-    public class Heartbeat :
-        IMessage
-    {
-        public int Pulse;
-    }
+	[Serializable]
+	public class Heartbeat
+	{
+		public int Pulse;
+	}
 }

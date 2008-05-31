@@ -73,7 +73,7 @@ namespace MassTransit.ServiceBus.Tests.Formatters
             }
             using (mocks.Playback())
             {
-                IMessage msg = formatter.Deserialize<IMessage>(mockBody);
+                object msg = formatter.Deserialize<object>(mockBody);
 
                 Assert.IsNotNull(msg);
 

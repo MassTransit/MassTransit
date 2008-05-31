@@ -10,35 +10,33 @@
 /// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 /// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 /// specific language governing permissions and limitations under the License.
-
 namespace MassTransit.ServiceBus.Subscriptions.Messages
 {
-    using System;
+	using System;
 
-    [Serializable]
-    public abstract class SubscriptionChange :
-		IMessage
-    {
-        private readonly Subscription _subscription;
+	[Serializable]
+	public abstract class SubscriptionChange
+	{
+		private readonly Subscription _subscription;
 
-        //xml serialization
-        protected SubscriptionChange()
-        {
-        }
+		//xml serialization
+		protected SubscriptionChange()
+		{
+		}
 
-        public SubscriptionChange(string messageName, Uri address) 
-            : this(new Subscription(messageName, address))
-        {
-        }
+		public SubscriptionChange(string messageName, Uri address)
+			: this(new Subscription(messageName, address))
+		{
+		}
 
-        public SubscriptionChange(Subscription subscription)
-        {
-            _subscription = subscription;
-        }
+		public SubscriptionChange(Subscription subscription)
+		{
+			_subscription = subscription;
+		}
 
-        public Subscription Subscription
-        {
-            get { return _subscription; }
-        }
-    }
+		public Subscription Subscription
+		{
+			get { return _subscription; }
+		}
+	}
 }

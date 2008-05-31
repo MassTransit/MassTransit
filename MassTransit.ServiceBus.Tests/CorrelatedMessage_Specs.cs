@@ -61,7 +61,7 @@ namespace MassTransit.ServiceBus.Tests
 		}
 	}
 
-	public class RequestMessage : CorrelatedBy<Guid>, IMessage
+	public class RequestMessage : CorrelatedBy<Guid>
 	{
 		private readonly Guid _correlationId = Guid.NewGuid();
 
@@ -71,7 +71,7 @@ namespace MassTransit.ServiceBus.Tests
 		}
 	}
 
-	public class ResponseMessage : CorrelatedBy<Guid>, IMessage
+	public class ResponseMessage : CorrelatedBy<Guid>
 	{
 		private readonly Guid _correlationId;
 

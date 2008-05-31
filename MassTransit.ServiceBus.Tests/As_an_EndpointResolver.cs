@@ -46,12 +46,10 @@ namespace MassTransit.ServiceBus.Tests
 
 		public void Send<T>(T message) where T : class
 		{
-			throw new NotImplementedException();
 		}
 
 		public void Send<T>(T message, TimeSpan timeToLive) where T : class
 		{
-			throw new NotImplementedException();
 		}
 
 		public object Receive()

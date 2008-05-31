@@ -77,12 +77,12 @@ namespace MassTransit.DistributedSubscriptionCache.Tests
 		}
 
 		[Serializable]
-		internal class PublishedMessage : IMessage
+		internal class PublishedMessage
 		{
 		}
 
 		[Serializable]
-		internal class CorrelatedMessage : CorrelatedBy<Guid>, IMessage
+		internal class CorrelatedMessage : CorrelatedBy<Guid>
 		{
 			private readonly Guid _correlationId;
 

@@ -1,13 +1,13 @@
-using System;
-
 namespace MassTransit.ServiceBus.Tests
 {
+	using System;
+
 	[Serializable]
-	public class PoisonMessage : IMessage
+	public class PoisonMessage
 	{
 		public string ThrowException()
 		{
-			throw new Exception("POISON"); 
+			throw new Exception("POISON");
 		}
 	}
 }

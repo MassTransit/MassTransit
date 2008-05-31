@@ -3,7 +3,7 @@ using System;
 namespace MassTransit.ServiceBus.Tests
 {
 	[Serializable]
-	public class PongMessage : IMessage
+	public class PongMessage
 	{
         
 	}

@@ -1,25 +1,21 @@
 namespace MassTransit.ServiceBus.Formatters
 {
-	using System;
-	using System.Collections.Generic;
 	using System.Xml.Serialization;
 	using Util;
 
-    public class XmlBodyFormatter :
+	public class XmlBodyFormatter :
 		IBodyFormatter
 	{
 		private readonly XmlSerializer _serializer;
 
 		public XmlBodyFormatter()
 		{
-			List<Type> types = MessageFinder.AllMessageTypes();
-
-			_serializer = new XmlSerializer(typeof (object), types.ToArray());
+			_serializer = new XmlSerializer(typeof (object));
 		}
 
 		public void Serialize(IFormattedBody body, object message)
 		{
-            Check.EnsureSerializable(message);
+			Check.EnsureSerializable(message);
 			_serializer.Serialize(body.BodyStream, message);
 		}
 
@@ -28,8 +24,8 @@ namespace MassTransit.ServiceBus.Formatters
 			object result = _serializer.Deserialize(formattedBody.BodyStream);
 
 
-            if (typeof(T).IsAssignableFrom(result.GetType()))
-				return (T)result;
+			if (typeof (T).IsAssignableFrom(result.GetType()))
+				return (T) result;
 
 			return default(T);
 		}

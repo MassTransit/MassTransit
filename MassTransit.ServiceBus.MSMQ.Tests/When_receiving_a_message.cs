@@ -48,7 +48,7 @@ namespace MassTransit.ServiceBus.MSMQ.Tests
 		[Test]
 		[ExpectedException(typeof (EndpointException))]
 		public void From_A_Transactional_Queue_Without_a_transaction()
-		{
+		{	
 			ep.Receive();
 		}
 	}

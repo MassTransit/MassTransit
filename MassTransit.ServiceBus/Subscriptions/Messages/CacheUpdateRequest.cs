@@ -15,7 +15,7 @@ namespace MassTransit.ServiceBus.Subscriptions.Messages
     using System;
 
     [Serializable]
-    public class CacheUpdateRequest : IMessage
+    public class CacheUpdateRequest
     {
     }
 }

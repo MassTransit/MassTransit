@@ -77,13 +77,11 @@ namespace MassTransit.Patterns.Tests
             }
             using (mocks.Playback())
             {
-                IMessage[] msgs = formatter.Deserialize<IMessage[]>(mockBody);
+                object msg = formatter.Deserialize<object>(mockBody);
 
-                Assert.AreEqual(1, msgs.Length);
+                Assert.That(msg, Is.TypeOf(typeof(BatchMessageToBatch)));
 
-                Assert.That(msgs[0], Is.TypeOf(typeof(BatchMessageToBatch)));
-
-                BatchMessageToBatch bm = msgs[0] as BatchMessageToBatch;
+                BatchMessageToBatch bm = msg as BatchMessageToBatch;
                 Assert.AreEqual("dru", bm.Body.Name);
                 Assert.AreEqual(1, bm.BatchLength);
                 Assert.AreEqual(_id, bm.BatchId);

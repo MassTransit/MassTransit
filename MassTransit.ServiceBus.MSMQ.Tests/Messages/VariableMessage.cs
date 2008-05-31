@@ -3,7 +3,7 @@ using System;
 namespace MassTransit.ServiceBus.MSMQ.Tests.Messages
 {
 	[Serializable]
-	public class VariableMessage : IMessage
+	public class VariableMessage
 	{
 	    private string _name;
 
