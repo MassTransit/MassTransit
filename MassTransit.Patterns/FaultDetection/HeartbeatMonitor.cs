@@ -1,30 +1,29 @@
 namespace MassTransit.Patterns.FaultDetection
 {
-    using System;
-    using System.Collections.Generic;
-    using MassTransit.ServiceBus;
-    using MassTransit.Patterns.FaultDetection.Messages;
+	using System.Collections.Generic;
+	using Messages;
+	using ServiceBus;
 
-    public class HeartbeatMonitor /*:
-        IConsume<Heartbeat>*/
-    {
-        private Dictionary<IEndpoint, MonitorInfo> _monitoredEndpoints;
-        private IServiceBus _bus;
+	public class HeartbeatMonitor :
+		Consumes<Heartbeat>.Any
+	{
+		private IServiceBus _bus;
+		private Dictionary<IEndpoint, MonitorInfo> _monitoredEndpoints;
 
-        public HeartbeatMonitor(IServiceBus bus)
-        {
-            _bus = bus;
-            _monitoredEndpoints = new Dictionary<IEndpoint, MonitorInfo>();
-        }
+		public HeartbeatMonitor(IServiceBus bus)
+		{
+			_bus = bus;
+			_monitoredEndpoints = new Dictionary<IEndpoint, MonitorInfo>();
+		}
 
-        public void Handle(IMessageContext<Heartbeat> ctx)
-        {
-            if (!_monitoredEndpoints.ContainsKey(ctx.Envelope.ReturnEndpoint))
-            {
-                _monitoredEndpoints.Add(ctx.Envelope.ReturnEndpoint, new MonitorInfo(ctx.Envelope.ReturnEndpoint, DateTime.Now));
-            }
-        }
-    }
-
-    
+		public void Consume(Heartbeat message)
+		{
+/*
+			if (!_monitoredEndpoints.ContainsKey(ctx.Message.Pulse))
+			{
+				_monitoredEndpoints.Add(ctx.Envelope.ReturnEndpoint, new MonitorInfo(ctx.Envelope.ReturnEndpoint, DateTime.Now));
+			}
+*/
+		}
+	}
 }

@@ -1,18 +1,16 @@
 namespace MassTransit.Patterns.FaultDetection
 {
-    using System;
-    using log4net;
-    using MassTransit.ServiceBus;
-    using MassTransit.Patterns.FaultDetection.Messages;
+	using log4net;
+	using Messages;
+	using ServiceBus;
 
-    public class Reporter/* :
-        IConsume<DownEndpoint>*/
-    {
-        private ILog _log = LogManager.GetLogger(typeof(Reporter));
+	public class Reporter : Consumes<DownEndpoint>.Any
+	{
+		private readonly ILog _log = LogManager.GetLogger(typeof (Reporter));
 
-        public void Handle(IMessageContext<DownEndpoint> cxt)
-        {
-            _log.ErrorFormat("Endpoint '{0}' is down", cxt.Envelope.ReturnEndpoint);
-        }
-    }
+		public void Consume(DownEndpoint message)
+		{
+			//	_log.ErrorFormat("Endpoint '{0}' is down", cxt.Envelope.ReturnEndpoint);
+		}
+	}
 }

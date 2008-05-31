@@ -22,7 +22,7 @@ namespace MassTransit.ServiceBus
 	/// <remarks>
 	/// An interface on top of the underlying messaging infrastructure's 'messages'
 	/// </remarks>
-	public interface IEnvelope : ICloneable
+	public interface IEnvelope
 	{
 		/// <summary>
 		/// The unique identifier of this envelope
@@ -42,7 +42,7 @@ namespace MassTransit.ServiceBus
 		/// <summary>
 		/// The messages contained in the envelope
 		/// </summary>
-		IMessage[] Messages { get; set; }
+		object Message { get; set; }
 
 		/// <summary>
 		/// The label stored on the envelope

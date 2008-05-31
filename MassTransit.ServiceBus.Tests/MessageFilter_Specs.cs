@@ -2,7 +2,6 @@ namespace MassTransit.ServiceBus.Tests
 {
 	using System;
 	using System.Threading;
-	using Internal;
 	using NUnit.Framework;
 	using NUnit.Framework.SyntaxHelpers;
 	using Rhino.Mocks;
@@ -15,7 +14,6 @@ namespace MassTransit.ServiceBus.Tests
 		{
 			mocks = new MockRepository();
 			mockServiceBusEndPoint = mocks.DynamicMock<IEndpoint>();
-			mockReceiver = mocks.DynamicMock<IMessageReceiver>();
 			_serviceBus = new ServiceBus(mockServiceBusEndPoint);
 
 			SetupResult.For(mockServiceBusEndPoint.Uri).Return(new Uri("msmq://localhost/test_servicebus")); //stupid log4net
@@ -32,7 +30,6 @@ namespace MassTransit.ServiceBus.Tests
 		[Test]
 		public void A_message_should_only_reach_the_consumer_if_the_filter_passes_it_forward()
 		{
-			SetupResult.For(mockServiceBusEndPoint.Receiver).Return(mockReceiver);
 			mocks.ReplayAll();
 
 			ManualResetEvent passed = new ManualResetEvent(false);
@@ -52,7 +49,6 @@ namespace MassTransit.ServiceBus.Tests
 		[Test]
 		public void A_message_should_only_reach_the_consumer_if_the_filter_passes_it_forward_success()
 		{
-			SetupResult.For(mockServiceBusEndPoint.Receiver).Return(mockReceiver);
 			mocks.ReplayAll();
 
 			ManualResetEvent passed = new ManualResetEvent(false);
@@ -73,7 +69,6 @@ namespace MassTransit.ServiceBus.Tests
 		private MockRepository mocks;
 		private ServiceBus _serviceBus;
 		private IEndpoint mockServiceBusEndPoint;
-		private IMessageReceiver mockReceiver;
 
 		internal class TestConsumer<T> : Consumes<T>.Any where T : class
 		{

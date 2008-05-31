@@ -7,7 +7,7 @@ namespace HeavyLoad
 
 	public class LocalMsmqLoadTest : IDisposable
 	{
-		private const int _repeatCount = 1000;
+		private const int _repeatCount = 10;
 		private readonly ManualResetEvent _completeEvent = new ManualResetEvent(false);
 		private readonly string _queueUri = "msmq://localhost/test_servicebus";
 		private IServiceBus _bus;
@@ -53,17 +53,11 @@ namespace HeavyLoad
 
 			Semaphore countdown = new Semaphore(0, 100);
 
-			for (int index = 0; index < _repeatCount/1000; index++)
+			for (int index = 0; index < _repeatCount; index++)
 			{
-				ThreadPool.QueueUserWorkItem(
-					delegate
-						{
-							for (int indexer = 0; indexer < 1000; indexer++)
-							{
-								_bus.Publish(new GeneralMessage());
-							}
-							countdown.Release();
-						});
+				_bus.Publish(new GeneralMessage());
+
+				countdown.Release();
 			}
 
 			for (int index = 0; index < _repeatCount/1000; index++)

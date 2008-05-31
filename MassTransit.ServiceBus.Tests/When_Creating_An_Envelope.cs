@@ -9,18 +9,6 @@ namespace MassTransit.ServiceBus.Tests
 	public class When_Creating_An_Envelope
 	{
 		[Test]
-		public void A_Message_Should_Be_Stored_In_The_Envelope()
-		{
-			MockRepository mocks = new MockRepository();
-
-			IMessage message = mocks.Stub<IMessage>();
-
-			IEnvelope e = new Envelope(message);
-
-			Assert.That(e.Messages.Length, Is.EqualTo(1));
-		}
-
-		[Test]
 		public void A_Return_Address_Should_Be_Stored_With_The_Envelope()
 		{
 			MockRepository mocks = new MockRepository();
@@ -42,36 +30,9 @@ namespace MassTransit.ServiceBus.Tests
 		}
 
 		[Test]
-		public void An_Array_Of_Messages_Should_Be_Stored_In_The_Envelope()
-		{
-			MockRepository mocks = new MockRepository();
-
-			IMessage[] messages = new IMessage[2];
-			messages[0] = mocks.Stub<IMessage>();
-			messages[1] = mocks.Stub<IMessage>();
-
-			IEnvelope e = new Envelope(messages);
-
-			Assert.That(e.Messages.Length, Is.EqualTo(2));
-		}
-
-		[Test]
-		public void An_Param_Array_Of_Messages_Should_Be_Stored_In_The_Envelope()
-		{
-			MockRepository mocks = new MockRepository();
-
-			IMessage message = mocks.Stub<IMessage>();
-			IMessage message1 = mocks.Stub<IMessage>();
-
-			IEnvelope e = new Envelope(message, message1);
-
-			Assert.That(e.Messages.Length, Is.EqualTo(2));
-		}
-
-		[Test]
 		public void Should_Equal_Itself()
 		{
-			Envelope e = new Envelope();
+			Envelope e = new Envelope(new object());
 			Assert.AreEqual(e, e);
 			Assert.IsTrue(e.Equals(e));
 		}
@@ -81,7 +42,7 @@ namespace MassTransit.ServiceBus.Tests
 		{
 			DateTime time = DateTime.Now;
 
-			Envelope e = new Envelope();
+			Envelope e = new Envelope(new object());
 
 			e.ArrivedTime = time;
 
@@ -93,7 +54,7 @@ namespace MassTransit.ServiceBus.Tests
 		{
 			string id = Guid.NewGuid().ToString();
 
-			Envelope e = new Envelope();
+			Envelope e = new Envelope(new object());
 
 			e.Label = id;
 
@@ -105,7 +66,7 @@ namespace MassTransit.ServiceBus.Tests
 		{
 			DateTime time = DateTime.Now;
 
-			Envelope e = new Envelope();
+			Envelope e = new Envelope(new object());
 
 			e.SentTime = time;
 
@@ -117,7 +78,7 @@ namespace MassTransit.ServiceBus.Tests
 		{
 			TimeSpan time = TimeSpan.FromMinutes(30);
 
-			Envelope e = new Envelope();
+			Envelope e = new Envelope(new object());
 
 			e.TimeToBeReceived = time;
 

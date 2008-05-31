@@ -26,14 +26,12 @@ namespace MassTransit.ServiceBus
 	/// communicate with other service bus instances in a distributed application
 	/// </summary>
 	public class ServiceBus :
-		IServiceBus,
-		IEnvelopeConsumer
+		IServiceBus
 	{
 		private static readonly ILog _log;
 
+		private readonly ManagedThread _receiveThread;
 		private readonly ManagedThreadPool<object> _asyncDispatcher;
-		private readonly AsyncReplyDispatcher _asyncReplyDispatcher = new AsyncReplyDispatcher();
-
 		private readonly EndpointResolver _endpointResolver = new EndpointResolver();
 		private readonly IEndpoint _endpointToListenOn;
 		private readonly IMessageDispatcher _messageDispatcher;
@@ -79,6 +77,8 @@ namespace MassTransit.ServiceBus
 
 			_messageDispatcher = new MessageDispatcher(this, subscriptionCache, objectBuilder);
 
+			_receiveThread = new ReceiveThread(this, endpointToListenOn);
+
 			_asyncDispatcher = new ManagedThreadPool<object>(
 				delegate(object message) { _messageDispatcher.Consume(message); });
 		}
@@ -88,83 +88,14 @@ namespace MassTransit.ServiceBus
 			get { return _subscriptionCache; }
 		}
 
-		#region IEnvelopeConsumer Members
-
-		/// <summary>
-		/// Called when a message is available from the endpoint. If the consumer returns true, the message
-		/// will be removed from the endpoint and delivered to the consumer
-		/// </summary>
-		/// <param name="envelope">The message envelope available</param>
-		/// <returns>True is the consumer will handle the message, false if it should be ignored</returns>
-		public bool IsInterested(IEnvelope envelope)
-		{
-			bool result;
-			try
-			{
-				lock (_asyncReplyDispatcher)
-				{
-					result = _asyncReplyDispatcher.Exists(envelope.CorrelationId);
-				}
-
-				if (result == false)
-				{
-					foreach (IMessage message in envelope.Messages)
-					{
-						result = _messageDispatcher.Accept(message);
-						if (result)
-							break;
-					}
-				}
-			}
-			catch (Exception ex)
-			{
-				if (_log.IsErrorEnabled)
-					_log.Error("Exception in ServiceBus.IsHandled: ", ex);
-
-				throw;
-			}
-
-			return result;
-		}
-
-		/// <summary>
-		/// Delivers the message envelope to the consumer
-		/// </summary>
-		/// <param name="envelope">The message envelope</param>
-		public void Deliver(IEnvelope envelope)
-		{
-			if (_log.IsDebugEnabled)
-				_log.DebugFormat("Envelope {0} Received By {1}", envelope.Id, GetHashCode());
-
-			bool delivered;
-			lock (_asyncReplyDispatcher)
-			{
-				delivered = _asyncReplyDispatcher.Complete(envelope);
-			}
-
-			if (delivered == false)
-			{
-				foreach (IMessage message in envelope.Messages)
-				{
-					Dispatch(message);
-				}
-			}
-		}
-
-		#endregion
-
-		#region IServiceBus Members
-
 		private static readonly Type _correlatedBy = typeof (CorrelatedBy<>);
 
 		public void Dispose()
 		{
-			_subscriptionCache.Dispose();
-
+			_receiveThread.Dispose();
 			_asyncDispatcher.Dispose();
-
+			_subscriptionCache.Dispose();
 			_messageDispatcher.Dispose();
-
 			_endpointToListenOn.Dispose();
 		}
 
@@ -172,8 +103,8 @@ namespace MassTransit.ServiceBus
 		/// Publishes a message to all subscribed consumers for the message type
 		/// </summary>
 		/// <typeparam name="T">The type of the message</typeparam>
-		/// <param name="messages">The messages to be published</param>
-		public void Publish<T>(params T[] messages) where T : class, IMessage
+		/// <param name="message">The messages to be published</param>
+		public void Publish<T>(T message) where T : class
 		{
 			IList<Subscription> subs = null;
 
@@ -186,7 +117,7 @@ namespace MassTransit.ServiceBus
 
 					Type invokeType = _correlatedBy.MakeGenericType(arguments);
 
-					object value = invokeType.InvokeMember("CorrelationId", BindingFlags.GetProperty, null, messages[0], null);
+					object value = invokeType.InvokeMember("CorrelationId", BindingFlags.GetProperty, null, message, null);
 
 					string correlationId = value.ToString();
 
@@ -204,22 +135,7 @@ namespace MassTransit.ServiceBus
 			foreach (Subscription subscription in subs)
 			{
 				IEndpoint endpoint = _endpointResolver.Resolve(subscription.EndpointUri);
-				Send(endpoint, messages);
-			}
-		}
-
-		/// <summary>
-		/// Sends a list of messages to the specified destination
-		/// </summary>
-		/// <param name="destinationEndpoint">The destination for the message</param>
-		/// <param name="messages">The list of messages</param>
-		public void Send<T>(IEndpoint destinationEndpoint, params T[] messages) where T : class, IMessage
-		{
-			foreach (T msg in messages)
-			{
-				IEnvelope envelope = new Envelope(_endpointToListenOn, msg);
-
-				destinationEndpoint.Sender.Send(envelope);
+				endpoint.Send(message);
 			}
 		}
 
@@ -245,7 +161,7 @@ namespace MassTransit.ServiceBus
 		/// </summary>
 		/// <typeparam name="T">The message type to handle, often inferred from the callback specified</typeparam>
 		/// <param name="callback">The callback to invoke when messages of the specified type arrive on the service bus</param>
-		public void Subscribe<T>(Action<IMessageContext<T>> callback) where T : class, IMessage
+		public void Subscribe<T>(Action<IMessageContext<T>> callback) where T : class
 		{
 			Subscribe(callback, null);
 		}
@@ -256,7 +172,7 @@ namespace MassTransit.ServiceBus
 		/// <typeparam name="T">The message type to handle, often inferred from the callback specified</typeparam>
 		/// <param name="callback">The callback to invoke when messages of the specified type arrive on the service bus</param>
 		/// <param name="condition">A condition predicate to filter which messages are handled by the callback</param>
-		public void Subscribe<T>(Action<IMessageContext<T>> callback, Predicate<T> condition) where T : class, IMessage
+		public void Subscribe<T>(Action<IMessageContext<T>> callback, Predicate<T> condition) where T : class
 		{
 			Subscribe(new GenericComponent<T>(callback, condition, this));
 		}
@@ -269,12 +185,12 @@ namespace MassTransit.ServiceBus
 			StartListening();
 		}
 
-		public void Unsubscribe<T>(Action<IMessageContext<T>> callback) where T : class, IMessage
+		public void Unsubscribe<T>(Action<IMessageContext<T>> callback) where T : class
 		{
 			Unsubscribe(callback, null);
 		}
 
-		public void Unsubscribe<T>(Action<IMessageContext<T>> callback, Predicate<T> condition) where T : class, IMessage
+		public void Unsubscribe<T>(Action<IMessageContext<T>> callback, Predicate<T> condition) where T : class
 		{
 			Unsubscribe(new GenericComponent<T>(callback, condition, this));
 		}
@@ -298,38 +214,9 @@ namespace MassTransit.ServiceBus
 			_messageDispatcher.RemoveComponent<TComponent>();
 		}
 
-		/// <summary>
-		/// Submits a request message to the default destination for the message type
-		/// </summary>
-		/// <typeparam name="T">The type of message</typeparam>
-		/// <param name="destinationEndpoint">The destination for the message</param>
-		/// <param name="messages">The messages to be sent</param>
-		/// <returns>An IAsyncResult that can be used to wait for the response</returns>
-		public IServiceBusAsyncResult Request<T>(IEndpoint destinationEndpoint, params T[] messages) where T : class, IMessage
-		{
-			return Request<T>(destinationEndpoint, null, null, messages);
-		}
-
-		public IServiceBusAsyncResult Request<T>(IEndpoint destinationEndpoint, AsyncCallback callback, object state,
-		                                         params T[] messages) where T : class, IMessage
-		{
-			StartListening();
-
-			IEnvelope envelope = new Envelope(_endpointToListenOn, messages);
-
-			lock (_asyncReplyDispatcher)
-			{
-				destinationEndpoint.Sender.Send(envelope);
-
-				return _asyncReplyDispatcher.Track(envelope.Id, callback, state);
-			}
-		}
-
-		#endregion
-
 		private void StartListening()
 		{
-			Endpoint.Subscribe(this);
+			_receiveThread.Start();
 		}
 
 		public void Dispatch(object message)
@@ -345,6 +232,11 @@ namespace MassTransit.ServiceBus
 			{
 				_asyncDispatcher.Enqueue(message);
 			}
+		}
+
+		public bool Accept(object obj)
+		{
+			return _messageDispatcher.Accept(obj);
 		}
 	}
 }

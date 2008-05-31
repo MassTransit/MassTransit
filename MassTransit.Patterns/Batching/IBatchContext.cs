@@ -21,8 +21,6 @@ namespace MassTransit.Patterns.Batching
     {
         K BatchId { get; }
 
-        IEndpoint ReturnEndpoint { get; }
-
         IServiceBus Bus { get; }
 
         bool IsComplete { get; }

@@ -23,8 +23,6 @@ namespace MassTransit.ServiceBus.Tests
 		private IEndpoint _subscriptionEndpoint;
 
 		private ISubscriptionCache _subscriptionCache;
-		private IMessageSender _mockSender;
-		private IMessageReceiver _mockReceiver;
 
 		public QueueTestContext(string remoteMachineName)
 		{
@@ -95,8 +93,6 @@ namespace MassTransit.ServiceBus.Tests
 			_remoteServiceBusEndPoint = _mocks.DynamicMock<IEndpoint>();
 			_subscriptionEndpoint = _mocks.DynamicMock<IEndpoint>();
 			_serviceBusEndPoint = _mocks.DynamicMock<IEndpoint>();
-			_mockSender = _mocks.DynamicMock<IMessageSender>();
-			_mockReceiver = _mocks.DynamicMock<IMessageReceiver>();
 
 			_subscriptionCache = new LocalSubscriptionCache();
 
@@ -105,13 +101,6 @@ namespace MassTransit.ServiceBus.Tests
 
 			SetupResult.For(_subscriptionEndpoint.Uri).Return(new Uri("local://" + Environment.MachineName.ToLowerInvariant() + "/test_subscriptions"));
 			SetupResult.For(_serviceBusEndPoint.Uri).Return(new Uri("local://" + Environment.MachineName.ToLowerInvariant() + "/test_servicebus"));
-
-			SetupResult.For(_serviceBusEndPoint.Sender).Return(_mockSender);
-			SetupResult.For(_serviceBusEndPoint.Receiver).Return(_mockReceiver);
-
-			SetupResult.For(_remoteServiceBusEndPoint.Sender).Return(_mockSender);
-			SetupResult.For(_remoteServiceBusEndPoint.Receiver).Return(_mockReceiver);
-
 		}
 	}
 }

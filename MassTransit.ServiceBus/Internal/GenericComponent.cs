@@ -3,7 +3,7 @@ namespace MassTransit.ServiceBus.Internal
 	using System;
 
 	public class GenericComponent<TMessage> :
-		Consumes<TMessage>.Selected, IEquatable<GenericComponent<TMessage>> where TMessage : class, IMessage
+		Consumes<TMessage>.Selected, IEquatable<GenericComponent<TMessage>> where TMessage : class
 	{
 		private readonly IServiceBus _bus;
 		private readonly Action<IMessageContext<TMessage>> _wrappedAction;

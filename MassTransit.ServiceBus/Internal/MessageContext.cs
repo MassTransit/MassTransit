@@ -1,7 +1,6 @@
 namespace MassTransit.ServiceBus.Internal
 {
 	using System;
-	using System.Collections.Generic;
 	using log4net;
 
 	/// <summary>
@@ -10,7 +9,7 @@ namespace MassTransit.ServiceBus.Internal
 	/// </summary>
 	/// <typeparam name="T">The message type</typeparam>
 	public class MessageContext<T> :
-		EventArgs, IMessageContext<T> where T : IMessage
+		EventArgs, IMessageContext<T> where T : class
 	{
 		private readonly IServiceBus _bus;
 		private readonly IEnvelope _envelope;
@@ -29,8 +28,6 @@ namespace MassTransit.ServiceBus.Internal
 			_bus = bus;
 			_message = message;
 		}
-
-		#region IMessageContext<T> Members
 
 		/// <summary>
 		/// The envelope containing the message
@@ -59,24 +56,19 @@ namespace MassTransit.ServiceBus.Internal
 		/// <summary>
 		/// Builds an envelope with the correlation id set to the id of the incoming envelope
 		/// </summary>
-		/// <param name="messages">The messages to include with the reply</param>
-		public void Reply(params IMessage[] messages)
+		/// <param name="message">The messages to include with the reply</param>
+		public void Reply(object message)
 		{
-			IEndpoint replyEndpoint = Envelope.ReturnEndpoint;
-
-			IEnvelope envelope = new Envelope(Bus.Endpoint, messages);
-			envelope.CorrelationId = Envelope.Id;
-
-			replyEndpoint.Sender.Send(envelope);
+			Bus.Publish(message);
 		}
 
 		/// <summary>
 		/// Moves the specified messages to the back of the list of available 
 		/// messages so they can be handled later. Could screw up message order.
 		/// </summary>
-		public void HandleMessagesLater(params IMessage[] messages)
+		public void HandleMessageLater(object message)
 		{
-			Bus.Endpoint.Sender.Send(Envelope);
+			Bus.Endpoint.Send(message);
 		}
 
 		/// <summary>
@@ -87,23 +79,20 @@ namespace MassTransit.ServiceBus.Internal
 			if (_log.IsDebugEnabled)
 				_log.DebugFormat("Envelope {0} Was Marked Poisonous", _envelope.Id);
 
-			Bus.PoisonEndpoint.Sender.Send(_envelope);
+			//Bus.PoisonEndpoint.Send(_envelope);
+			// TODO
 		}
 
 		/// <summary>
 		/// Marks a specific message as poison
 		/// </summary>
-		public void MarkPoison(IMessage msg)
+		public void MarkPoison(object message)
 		{
 			if (_log.IsDebugEnabled)
-				_log.DebugFormat("A Message (Index:{1}) in Envelope {0} Was Marked Poisonous", _envelope.Id, new List<IMessage>(Envelope.Messages).IndexOf(msg));
+				_log.DebugFormat("A Message in Envelope {0} Was Marked Poisonous", _envelope.Id);
 
-			IEnvelope env = (IEnvelope) Envelope.Clone(); //Should this be cloned?
-			env.Messages = new IMessage[] {Message};
-
-			Bus.PoisonEndpoint.Sender.Send(env);
+			//Bus.PoisonEndpoint.Send(env);
+			//TODO
 		}
-
-		#endregion
 	}
 }

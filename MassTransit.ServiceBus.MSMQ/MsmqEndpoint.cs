@@ -18,7 +18,6 @@ namespace MassTransit.ServiceBus.MSMQ
 	using System.Transactions;
 	using Exceptions;
 	using Formatters;
-	using Internal;
 	using log4net;
 
 	/// <summary>
@@ -27,15 +26,12 @@ namespace MassTransit.ServiceBus.MSMQ
 	public class MsmqEndpoint :
 		IMsmqEndpoint
 	{
-		private static readonly IBodyFormatter _formatter = new BinaryBodyFormatter();
+		private static readonly IBodyFormatter _formatter = new JsonBodyFormatter();
 		private static readonly ILog _log = LogManager.GetLogger(typeof (MsmqEndpoint));
 		private static readonly ILog _messageLog = LogManager.GetLogger("MassTransit.Messages");
 		private readonly string _queuePath;
 		private readonly Uri _uri;
-		private IMessageReceiver _receiver;
-
 		private bool _reliableMessaging = true;
-		private IMessageSender _sender;
 
 		/// <summary>
 		/// Initializes a <c ref="MessageQueueEndpoint" /> instance with the specified URI string.
@@ -138,33 +134,6 @@ namespace MassTransit.ServiceBus.MSMQ
 		public Uri Uri
 		{
 			get { return _uri; }
-		}
-
-		public IMessageSender Sender
-		{
-			get
-			{
-				lock (this)
-				{
-					if (_sender == null)
-						_sender = new MsmqMessageSender(this);
-				}
-				return _sender;
-			}
-		}
-
-		public IMessageReceiver Receiver
-		{
-			get
-			{
-				lock (this)
-				{
-					if (_receiver == null)
-						_receiver = new MsmqMessageReceiver(this);
-				}
-
-				return _receiver;
-			}
 		}
 
 		public void Send<T>(T message) where T : class
@@ -349,18 +318,8 @@ namespace MassTransit.ServiceBus.MSMQ
 		}
 
 
-	    public void Subscribe(IEnvelopeConsumer consumer)
-	    {
-	        Receiver.Subscribe(consumer);
-	    }
-
-	    public void Dispose()
+		public void Dispose()
 		{
-			if (_receiver != null)
-				_receiver.Dispose();
-
-			if (_sender != null)
-				_sender.Dispose();
 		}
 
 		private MessageQueueTransactionType GetTransactionType(MessageQueue queue)

@@ -1,22 +1,12 @@
 namespace MassTransit.ServiceBus.Tests
 {
-	using Internal;
 	using NUnit.Framework;
 	using NUnit.Framework.SyntaxHelpers;
-	using Rhino.Mocks;
 
 	[TestFixture]
 	public class When_a_message_is_delivered_to_the_service_bus :
 		Specification
 	{
-		protected override void Before_each()
-		{
-			IEndpoint endpoint = Mock<IEndpoint>();
-			SetupResult.For(endpoint.Receiver).Return(Stub<IMessageReceiver>());
-
-			_bus = new ServiceBus(endpoint);
-		}
-
 		[Test]
 		public void A_consumer_object_should_receive_the_message()
 		{
@@ -27,8 +17,8 @@ namespace MassTransit.ServiceBus.Tests
 			_bus.Subscribe(handler);
 
 			int old = PingHandler.Pinged;
-			
-			_bus.Deliver(new Envelope(new PingMessage()));
+
+			_bus.Dispatch(new PingMessage());
 
 			Assert.That(PingHandler.Pinged, Is.GreaterThan(old));
 		}
@@ -41,10 +31,17 @@ namespace MassTransit.ServiceBus.Tests
 			_bus.AddComponent<PingHandler>();
 
 			int old = PingHandler.Pinged;
-			
-			_bus.Deliver(new Envelope(new PingMessage()));
+
+			_bus.Dispatch(new PingMessage());
 
 			Assert.That(PingHandler.Pinged, Is.GreaterThan(old));
+		}
+
+		protected override void Before_each()
+		{
+			IEndpoint endpoint = Mock<IEndpoint>();
+
+			_bus = new ServiceBus(endpoint);
 		}
 
 		private ServiceBus _bus;

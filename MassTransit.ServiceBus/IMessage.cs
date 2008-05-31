@@ -13,10 +13,13 @@
 
 namespace MassTransit.ServiceBus
 {
-    /// <summary>
+	using System;
+
+	/// <summary>
     /// The base interface for messages delivered on the service bus
     /// </summary>
-    public interface IMessage
+    [Obsolete]
+	public interface IMessage
     {
         
     }

@@ -83,7 +83,7 @@ namespace MassTransit.Patterns.Batching
 
             foreach(TMessageType msg in messages)
             {
-                bus.Send(null, new BatchMessage<TMessageType, Guid>(id, count, msg));
+                //bus.Send(null, new BatchMessage<TMessageType, Guid>(id, count, msg));
             }
         }
 

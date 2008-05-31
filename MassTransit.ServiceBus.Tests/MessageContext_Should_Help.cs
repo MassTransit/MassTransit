@@ -18,7 +18,6 @@ namespace MassTransit.ServiceBus.Tests
 
         private PingMessage requestMessage = new PingMessage();
         private PongMessage replyMessage = new PongMessage();
-        private IMessageSender mockMessageSender;
 
         #region SetUp / TearDown
         [SetUp]
@@ -30,7 +29,6 @@ namespace MassTransit.ServiceBus.Tests
             mockEnvelope = mocks.CreateMock<IEnvelope>();
 			mockEndpoint = mocks.CreateMock<IEndpoint>();
             mockPoisonEndpoint = mocks.CreateMock<IEndpoint>();
-            mockMessageSender = mocks.CreateMock<IMessageSender>();
         }
 
         [TearDown]
@@ -42,7 +40,6 @@ namespace MassTransit.ServiceBus.Tests
             mockEnvelope = null;
             mockEndpoint = null;
             mockPoisonEndpoint = null;
-            mockMessageSender = null;
         }
         #endregion
 
@@ -56,10 +53,6 @@ namespace MassTransit.ServiceBus.Tests
                 Expect.Call(mockEnvelope.ReturnEndpoint).Return(mockEndpoint);
                 Expect.Call(mockBus.Endpoint).Return(mockBusEndpoint);
                 Expect.Call(mockEnvelope.Id).Return(null);
-                Expect.Call(mockEndpoint.Sender).Return(mockMessageSender).Repeat.Any();
-
-                Expect.Call(delegate { mockMessageSender.Send(null); }).IgnoreArguments(); //ignoring arguments because we create a new envelope in the method
-
             }
 
             using (mocks.Playback())
@@ -77,13 +70,11 @@ namespace MassTransit.ServiceBus.Tests
             using (mocks.Record())
             {
                 Expect.Call(mockBus.Endpoint).Return(mockEndpoint);
-                Expect.Call(mockEndpoint.Sender).Return(mockMessageSender);
-                Expect.Call(delegate { mockMessageSender.Send(null); }).IgnoreArguments(); //ignoring arguments because we create a new envelope in the method
             }
 
             using (mocks.Playback())
             {
-                cxt.HandleMessagesLater(replyMessage);
+                cxt.HandleMessageLater(replyMessage);
             }
         }
 
@@ -95,8 +86,6 @@ namespace MassTransit.ServiceBus.Tests
             using (mocks.Record())
             {
                 Expect.Call(mockBus.PoisonEndpoint).Return(mockPoisonEndpoint);
-                Expect.Call(mockPoisonEndpoint.Sender).Return(mockMessageSender);
-                Expect.Call(delegate { mockMessageSender.Send(null); }).IgnoreArguments(); //ignoring arguments because we create a new envelope in the method
             }
 
             using (mocks.Playback())
@@ -112,11 +101,7 @@ namespace MassTransit.ServiceBus.Tests
 
             using (mocks.Record())
             {
-                Expect.Call(mockEnvelope.Clone()).Return(mockEnvelope);
-                mockEnvelope.Messages = new IMessage[] { requestMessage };
                 Expect.Call(mockBus.PoisonEndpoint).Return(mockPoisonEndpoint);
-                Expect.Call(mockPoisonEndpoint.Sender).Return(mockMessageSender);
-                Expect.Call(delegate { mockMessageSender.Send(null); }).IgnoreArguments(); //ignoring arguments because we create a new envelope in the method
             }
 
             using (mocks.Playback())

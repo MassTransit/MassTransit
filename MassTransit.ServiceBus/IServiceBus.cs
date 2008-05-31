@@ -10,11 +10,9 @@
 /// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 /// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 /// specific language governing permissions and limitations under the License.
-
 namespace MassTransit.ServiceBus
 {
 	using System;
-	using Internal;
 
 	/// <summary>
 	/// The base service bus interface
@@ -37,7 +35,7 @@ namespace MassTransit.ServiceBus
 		/// </summary>
 		/// <typeparam name="T">The message type to handle, often inferred from the callback specified</typeparam>
 		/// <param name="callback">The callback to invoke when messages of the specified type arrive on the service bus</param>
-		void Subscribe<T>(Action<IMessageContext<T>> callback) where T : class, IMessage;
+		void Subscribe<T>(Action<IMessageContext<T>> callback) where T : class;
 
 		/// <summary>
 		/// Adds a message handler to the service bus for handling a specific type of message
@@ -45,7 +43,7 @@ namespace MassTransit.ServiceBus
 		/// <typeparam name="T">The message type to handle, often inferred from the callback specified</typeparam>
 		/// <param name="callback">The callback to invoke when messages of the specified type arrive on the service bus</param>
 		/// <param name="condition">A condition predicate to filter which messages are handled by the callback</param>
-		void Subscribe<T>(Action<IMessageContext<T>> callback, Predicate<T> condition) where T : class, IMessage;
+		void Subscribe<T>(Action<IMessageContext<T>> callback, Predicate<T> condition) where T : class;
 
 		/// <summary>
 		/// Connects any consumers for the component to the message dispatcher
@@ -59,7 +57,7 @@ namespace MassTransit.ServiceBus
 		/// </summary>
 		/// <typeparam name="T">The message type handled by the handler</typeparam>
 		/// <param name="callback">The callback to remove</param>
-		void Unsubscribe<T>(Action<IMessageContext<T>> callback) where T : class, IMessage;
+		void Unsubscribe<T>(Action<IMessageContext<T>> callback) where T : class;
 
 		/// <summary>
 		/// Removes a message handler from the service bus
@@ -67,7 +65,7 @@ namespace MassTransit.ServiceBus
 		/// <typeparam name="T">The message type handled by the handler</typeparam>
 		/// <param name="callback">The callback to remove</param>
 		/// <param name="condition">A condition predicate to filter which messages are handled by the callback</param>
-		void Unsubscribe<T>(Action<IMessageContext<T>> callback, Predicate<T> condition) where T : class, IMessage;
+		void Unsubscribe<T>(Action<IMessageContext<T>> callback, Predicate<T> condition) where T : class;
 
 		/// <summary>
 		/// Disconnects any consumers for the component from the message dispatcher
@@ -92,25 +90,7 @@ namespace MassTransit.ServiceBus
 		/// Publishes a message to all subscribed consumers for the message type
 		/// </summary>
 		/// <typeparam name="T">The type of the message</typeparam>
-		/// <param name="messages">The messages to be published</param>
-		void Publish<T>(params T[] messages) where T : class, IMessage;
-
-		/// <summary>
-		/// Submits a request message to the default destination for the message type
-		/// </summary>
-		/// <typeparam name="T">The type of message</typeparam>
-		/// <param name="destinationEndpoint">The destination for the message</param>
-		/// <param name="messages">The messages to be sent</param>
-		/// <returns>An IAsyncResult that can be used to wait for the response</returns>
-		IServiceBusAsyncResult Request<T>(IEndpoint destinationEndpoint, params T[] messages) where T : class, IMessage;
-
-		IServiceBusAsyncResult Request<T>(IEndpoint destinationEndpoint, AsyncCallback callback, object state, params T[] messages) where T : class, IMessage;
-
-		/// <summary>
-		/// Sends a list of messages to the specified destination
-		/// </summary>
-		/// <param name="destinationEndpoint">The destination for the message</param>
-		/// <param name="messages">The list of messages</param>
-		void Send<T>(IEndpoint destinationEndpoint, params T[] messages) where T : class, IMessage;
+		/// <param name="message">The messages to be published</param>
+		void Publish<T>(T message) where T : class;
 	}
 }
