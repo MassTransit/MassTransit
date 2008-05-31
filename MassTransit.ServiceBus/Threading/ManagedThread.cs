@@ -59,8 +59,6 @@ namespace MassTransit.ServiceBus.Threading
 			int result;
 			while ((result = WaitHandle.WaitAny(handles, TimeSpan.FromSeconds(5), true)) != 0)
 			{
-				if (result == WaitHandle.WaitTimeout)
-					continue;
 			}
 		}
 	}
