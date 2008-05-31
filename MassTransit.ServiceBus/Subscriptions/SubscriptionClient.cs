@@ -52,7 +52,9 @@ namespace MassTransit.ServiceBus.Subscriptions
 
 		public void Dispose()
 		{
-			_serviceBus.Dispose(); //TODO: Do we want to do this? - dds
+            //the bus owns the client so it shouldn't be disposed
+            //the bus owns the cache so it shouldn't be disposed
+			_subscriptionServiceEndpoint.Dispose();
 		}
 
 		public void Start()
