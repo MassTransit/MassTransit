@@ -25,7 +25,7 @@ namespace MassTransit.ServiceBus
 		private IMessageId _correlationId = MessageId.Default;
 		private IMessageId _id = MessageId.Default;
 		private string _label;
-		private IMessage[] _messages;
+		private object _message;
 		private bool _recoverable;
 		private IEndpoint _returnEndpoint;
 		private DateTime _sentTime;
@@ -35,20 +35,25 @@ namespace MassTransit.ServiceBus
 		/// Initializes an envelope
 		/// </summary>
 		/// <param name="returnEndpoint">The return address for the envelope</param>
-		/// <param name="messages">The messages stored in the envelope</param>
-		public Envelope(IEndpoint returnEndpoint, params IMessage[] messages)
+		/// <param name="message">The messages stored in the envelope</param>
+		public Envelope(IEndpoint returnEndpoint, object message)
 		{
 			_returnEndpoint = returnEndpoint;
-			_messages = messages;
+			_message = message;
 		}
 
 		/// <summary>
 		/// Initializes an envelope
 		/// </summary>
-		/// <param name="messages">The messages stored in the envelope</param>
-		public Envelope(params IMessage[] messages)
+		/// <param name="message">The messages stored in the envelope</param>
+		public Envelope(object message)
 		{
-			_messages = messages;
+			_message = message;
+		}
+
+		public Envelope()
+		{
+			
 		}
 
 		#region IEnvelope Members
@@ -83,10 +88,10 @@ namespace MassTransit.ServiceBus
 		/// <summary>
 		/// The messages contained in the envelope
 		/// </summary>
-		public IMessage[] Messages
+		public object Message
 		{
-			get { return _messages ?? new IMessage[0]; }
-			set { _messages = value; }
+			get { return _message; }
+			set { _message = value; }
 		}
 
 		/// <summary>
@@ -144,7 +149,7 @@ namespace MassTransit.ServiceBus
 		///<filterpriority>2</filterpriority>
 		public object Clone()
 		{
-			Envelope env = new Envelope(ReturnEndpoint, Messages);
+			Envelope env = new Envelope(ReturnEndpoint, Message);
 			env.ArrivedTime = ArrivedTime;
 			env.Id = Id;
 			env.CorrelationId = CorrelationId;

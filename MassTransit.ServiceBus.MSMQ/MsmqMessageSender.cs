@@ -22,15 +22,15 @@ namespace MassTransit.ServiceBus.MSMQ
 	/// <summary>
 	/// Send envelopes on a message queue
 	/// </summary>
-	public class MsmqMessageSender :
-		IMessageSender
+	public class MsmqMessageSender 
+		
 	{
 		private static readonly ILog _log = LogManager.GetLogger(typeof (MsmqMessageSender));
 		private static readonly ILog _messageLog = LogManager.GetLogger("MassTransit.Messages");
-	    private IEnvelopeMapper<Message> _mapper;
+	    private readonly IEnvelopeMapper<Message> _mapper;
 
 		private readonly IMsmqEndpoint _endpoint;
-		private MessageQueue _queue;
+		private readonly MessageQueue _queue;
 
 		/// <summary>
 		/// Initializes an instance of the <c ref="MessageQueueSender" /> class
@@ -62,7 +62,7 @@ namespace MassTransit.ServiceBus.MSMQ
 			try
 			{
 				if (_messageLog.IsInfoEnabled)
-					_messageLog.InfoFormat("Message {0} Sent To {1}", envelope.Messages[0].GetType(), _endpoint.Uri);
+					_messageLog.InfoFormat("Message {0} Sent To {1}", envelope.Message.GetType(), _endpoint.Uri);
 
                 if(_queue.Transactional)
                 {
@@ -83,7 +83,7 @@ namespace MassTransit.ServiceBus.MSMQ
 
 			if (_log.IsDebugEnabled)
 				_log.DebugFormat("Message Sent: Id = {0}, Message Type = {1}", msg.Id,
-				                 envelope.Messages != null ? envelope.Messages[0].GetType().ToString() : "");
+				                 envelope.Message != null ? envelope.Message.GetType().ToString() : "");
 		}
 
 	    #endregion

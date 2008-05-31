@@ -1,7 +1,6 @@
 namespace MassTransit.ServiceBus.Tests.Subscriptions
 {
 	using System;
-	using Internal;
 	using MassTransit.ServiceBus.Subscriptions;
 	using NUnit.Framework;
 	using NUnit.Framework.SyntaxHelpers;
@@ -10,8 +9,6 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
 	[TestFixture]
 	public class When_a_handler_unsubscribes_from_the_service_bus
 	{
-		#region Setup/Teardown
-
 		[SetUp]
 		public void Setup()
 		{
@@ -20,7 +17,6 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
 
 
 			_bus = new ServiceBus(_endpoint, _cache);
-			_receiver = _mocks.CreateMock<IMessageReceiver>();
 		}
 
 		[TearDown]
@@ -28,59 +24,33 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
 		{
 		}
 
-		#endregion
-
-		private MockRepository _mocks = new MockRepository();
-		private IEndpoint _endpoint;
-		private ISubscriptionCache _cache;
-		private ServiceBus _bus;
-		private IEnvelopeConsumer _consumer;
-		private IEnvelope _envelope = new Envelope(new PingMessage());
-		private Uri _endpointUri = new Uri("msmq://localhost/test");
-		private IMessageReceiver _receiver;
-
-
-		private static void HandleAllMessages(IMessageContext<PingMessage> ctx)
-		{
-		}
-
-		private static bool HandleSomeMessagesPredicate(PingMessage message)
-		{
-			return true;
-		}
-
 		[Test]
 		public void The_service_bus_should_continue_to_handle_messages_if_at_least_one_handler_is_available()
 		{
 			using (_mocks.Record())
 			{
-                Expect.Call(_endpoint.Uri).Return(_endpointUri).Repeat.Any();
-                Expect.Call(delegate { _cache.Add(null); }).IgnoreArguments();
-                Expect.Call(_endpoint.Receiver).Return(_receiver);
-                Expect.Call(delegate { _receiver.Subscribe(_consumer); }).IgnoreArguments();
+				Expect.Call(_endpoint.Uri).Return(_endpointUri).Repeat.Any();
+				Expect.Call(delegate { _cache.Add(null); }).IgnoreArguments();
 
-                Expect.Call(delegate { _cache.Add(null); }).IgnoreArguments();
-                Expect.Call(_endpoint.Receiver).Return(_receiver);
-                Expect.Call(delegate { _receiver.Subscribe(_consumer); }).IgnoreArguments();
+				Expect.Call(delegate { _cache.Add(null); }).IgnoreArguments();
 
-                Expect.Call(delegate { _cache.Remove(null); }).IgnoreArguments();
-        //        Expect.Call(delegate { _cache.Remove(null); }).IgnoreArguments();
+				Expect.Call(delegate { _cache.Remove(null); }).IgnoreArguments();
+				//        Expect.Call(delegate { _cache.Remove(null); }).IgnoreArguments();
 			}
 
 			using (_mocks.Playback())
 			{
-				_consumer = _bus as IEnvelopeConsumer;
 				_bus.Subscribe<PingMessage>(HandleAllMessages);
-				Assert.That(_consumer.IsInterested(_envelope), Is.True);
+				Assert.That(_bus.Accept(_message), Is.True);
 
 				_bus.Subscribe<PingMessage>(HandleAllMessages, HandleSomeMessagesPredicate);
-				Assert.That(_consumer.IsInterested(_envelope), Is.True);
+				Assert.That(_bus.Accept(_message), Is.True);
 
 				_bus.Unsubscribe<PingMessage>(HandleAllMessages);
-				Assert.That(_consumer.IsInterested(_envelope), Is.True);
+				Assert.That(_bus.Accept(_message), Is.True);
 
 				_bus.Unsubscribe<PingMessage>(HandleAllMessages, HandleSomeMessagesPredicate);
-				Assert.That(_consumer.IsInterested(_envelope), Is.False);
+				Assert.That(_bus.Accept(_message), Is.False);
 			}
 		}
 
@@ -90,8 +60,6 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
 			using (_mocks.Record())
 			{
 				Expect.Call(_endpoint.Uri).Return(_endpointUri).Repeat.Any();
-				Expect.Call(_endpoint.Receiver).Return(_receiver);
-				Expect.Call(delegate { _receiver.Subscribe(_consumer); }).IgnoreArguments();
 				Expect.Call(delegate { _cache.Add(null); }).IgnoreArguments();
 
 				Expect.Call(delegate { _cache.Remove(null); }).IgnoreArguments();
@@ -99,14 +67,29 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
 
 			using (_mocks.Playback())
 			{
-				_consumer = _bus as IEnvelopeConsumer;
-
 				_bus.Subscribe<PingMessage>(HandleAllMessages);
-				Assert.That(_consumer.IsInterested(_envelope), Is.True);
+				Assert.That(_bus.Accept(_message), Is.True);
 
 				_bus.Unsubscribe<PingMessage>(HandleAllMessages);
-				Assert.That(_consumer.IsInterested(_envelope), Is.False);
+				Assert.That(_bus.Accept(_message), Is.False);
 			}
+		}
+
+		private MockRepository _mocks = new MockRepository();
+		private IEndpoint _endpoint;
+		private ISubscriptionCache _cache;
+		private ServiceBus _bus;
+		private object _message = new PingMessage();
+		private Uri _endpointUri = new Uri("msmq://localhost/test");
+
+
+		private static void HandleAllMessages(IMessageContext<PingMessage> ctx)
+		{
+		}
+
+		private static bool HandleSomeMessagesPredicate(PingMessage message)
+		{
+			return true;
 		}
 	}
 }

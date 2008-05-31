@@ -26,7 +26,6 @@ namespace MassTransit.Patterns.Batching
 		private readonly IServiceBus _bus;
 		private readonly ManualResetEvent _complete = new ManualResetEvent(false);
 		private readonly Queue<T> _messages = new Queue<T>();
-		private readonly IEndpoint _returnEndpoint;
 		private readonly TimeSpan _timeout;
 		private int _messageCount;
 
@@ -35,7 +34,6 @@ namespace MassTransit.Patterns.Batching
 			_batchId = batchId;
 			_timeout = timeout;
 			_bus = context.Bus;
-			_returnEndpoint = context.Envelope.ReturnEndpoint;
 		    _messageCount = context.Message.BatchLength;
 		}
 
@@ -44,11 +42,6 @@ namespace MassTransit.Patterns.Batching
 		public K BatchId
 		{
 			get { return _batchId; }
-		}
-
-		public IEndpoint ReturnEndpoint
-		{
-			get { return _returnEndpoint; }
 		}
 
 		public IServiceBus Bus

@@ -21,7 +21,7 @@ namespace MassTransit.ServiceBus.NMS
 	using Internal;
 
 	public class NmsEnvelopeMapper :
-		IEnvelopeMapper<IMessage>
+		IEnvelopeMapper<IBytesMessage>
 	{
         private static readonly IFormatter _formatter = new BinaryFormatter();
 		private readonly ISession _session;
@@ -31,16 +31,14 @@ namespace MassTransit.ServiceBus.NMS
 			_session = session;
 		}
 
-		#region IEnvelopeMapper<IMessage> Members
-
-		public IMessage ToMessage(IEnvelope envelope)
+		public IBytesMessage ToMessage(IEnvelope envelope)
 		{
 			IBytesMessage bm = _session.CreateBytesMessage();
 
-			if (envelope.Messages != null && envelope.Messages.Length > 0)
+			if (envelope.Message != null )
 			{
 				MemoryStream mem = new MemoryStream();
-				_formatter.Serialize(mem, envelope.Messages);
+				_formatter.Serialize(mem, envelope.Message);
 
 				bm.Content = new byte[mem.Length];
 				mem.Seek(0, SeekOrigin.Begin);
@@ -70,11 +68,11 @@ namespace MassTransit.ServiceBus.NMS
 			return bm;
 		}
 
-		public IEnvelope ToEnvelope(IMessage message)
+		public IEnvelope ToEnvelope(IBytesMessage message)
 		{
 			//    IMessageQueueEndpoint returnAddress = (msg.ResponseQueue != null) ? new MessageQueueEndpoint(msg.ResponseQueue) : null;
 
-			IEnvelope e = new Envelope();
+			IEnvelope e = new Envelope(message);
 
 			//    if (string.IsNullOrEmpty(msg.Id))
 			//    {
@@ -100,17 +98,11 @@ namespace MassTransit.ServiceBus.NMS
 			if (message.Properties.Contains("NMSXGroupID"))
 				e.Label = message.Properties["NMSXGroupID"].ToString();
 
-			if (message is IBytesMessage)
-			{
-				IBytesMessage bm = (IBytesMessage) message;
+				MemoryStream mem = new MemoryStream(message.Content, false);
 
-				MemoryStream mem = new MemoryStream(bm.Content, false);
+				object obj = _formatter.Deserialize(mem);
 
-				MassTransit.ServiceBus.IMessage[] messages =
-					_formatter.Deserialize(mem) as MassTransit.ServiceBus.IMessage[];
-				e.Messages = messages ?? new MassTransit.ServiceBus.IMessage[] {};
-			}
-
+				e.Message = obj;
 
 			//    if (e.Id != MessageId.Empty)
 			//    {
@@ -121,7 +113,5 @@ namespace MassTransit.ServiceBus.NMS
 
 			return e;
 		}
-
-		#endregion
 	}
 }

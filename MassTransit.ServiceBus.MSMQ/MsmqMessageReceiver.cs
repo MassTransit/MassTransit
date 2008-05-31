@@ -25,23 +25,21 @@ namespace MassTransit.ServiceBus.MSMQ
 	/// <summary>
 	/// Receives envelopes from a message queue
 	/// </summary>
-	public class MsmqMessageReceiver :
-		IMessageReceiver
+	public class MsmqMessageReceiver
 	{
 		private static readonly ILog _log = LogManager.GetLogger(typeof (MsmqMessageReceiver));
 		private static readonly ILog _messageLog = LogManager.GetLogger("MassTransit.Messages");
 		private static readonly object _subscribeLocker = new object();
 		private readonly IMsmqEndpoint _endpoint;
 		private readonly TimeSpan _readTimeout = TimeSpan.FromSeconds(4);
-		private IEnvelopeConsumer _consumer;
 
-		private ManualResetEvent _killMonitor = new ManualResetEvent(false);
-		private IEnvelopeMapper<Message> _mapper;
-		private ManualResetEvent _monitorDead = new ManualResetEvent(false);
+		private readonly ManualResetEvent _killMonitor = new ManualResetEvent(false);
+		private readonly IEnvelopeMapper<Message> _mapper;
+		private readonly ManualResetEvent _monitorDead = new ManualResetEvent(false);
 
 		private Thread _monitorThread;
 		private MessageQueue _queue;
-		private IWorker _worker = new MultiThreadedWorker();
+		private readonly IWorker _worker = new MultiThreadedWorker();
 
 		/// <summary>
 		/// Initializes a MessageQueueReceiver
@@ -51,15 +49,6 @@ namespace MassTransit.ServiceBus.MSMQ
 		{
 			_endpoint = endpoint;
 			_mapper = new MsmqEnvelopeMapper();
-		}
-
-		public IEnvelopeConsumer Consumer
-		{
-			get
-			{
-				if (_consumer == null) throw new EndpointException(_endpoint, "No consumer has been registered");
-				return _consumer;
-			}
 		}
 
 		///<summary>
@@ -74,24 +63,11 @@ namespace MassTransit.ServiceBus.MSMQ
 		/// <summary>
 		/// Adds a consumer to the message receiver
 		/// </summary>
-		/// <param name="consumer">The consumer to add</param>
-		public void Subscribe(IEnvelopeConsumer consumer)
+		public void Subscribe()
 		{
-			Check.Parameter(consumer).IsNotNull();
-
 			lock (_subscribeLocker)
 			{
-				if (_consumer != null && _consumer != consumer)
-				{
-					throw new EndpointException(_endpoint, "Only one consumer can be registered for a message receiver");
-				}
-
-				if (_consumer == null)
-				{
-					_consumer = consumer;
-
 					Restart();
-				}
 			}
 		}
 
@@ -163,7 +139,7 @@ namespace MassTransit.ServiceBus.MSMQ
 				return;
 			try
 			{
-				_consumer.Deliver(e);
+				//_consumer.Deliver(e);
 
 				e.ReturnEndpoint.Dispose();
 			}
@@ -193,7 +169,7 @@ namespace MassTransit.ServiceBus.MSMQ
 							{
 								IEnvelope env = _mapper.ToEnvelope(msg);
 
-								if (Consumer.IsInterested(env))
+								if (true)//Consumer.IsInterested(env))
 								{
 									Message received;
 									if (_queue.Transactional)
@@ -211,7 +187,7 @@ namespace MassTransit.ServiceBus.MSMQ
 									{
 										if (_messageLog.IsInfoEnabled)
 											_messageLog.InfoFormat("Received message {0} from {1}",
-											                       env.Messages[0].GetType(), env.ReturnEndpoint.Uri);
+											                       env.Message.GetType(), env.ReturnEndpoint.Uri);
 
 										_worker.ScheduleWork(ProcessMessage, env);
 										break;
@@ -250,7 +226,7 @@ namespace MassTransit.ServiceBus.MSMQ
 			_monitorDead.Set();
 		}
 
-		private void HandleVariousErrorCodes(MessageQueueErrorCode code, MessageQueueException ex)
+		private void HandleVariousErrorCodes(MessageQueueErrorCode code, Exception ex)
 		{
 			switch (code)
 			{

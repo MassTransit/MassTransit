@@ -163,7 +163,11 @@ namespace HeavyLoad
 	[Serializable]
 	internal class SimpleRequestMessage : CorrelatedBy<Guid>, IMessage
 	{
-		private readonly Guid _id;
+		private Guid _id;
+
+		public SimpleRequestMessage()
+		{
+		}
 
 		public SimpleRequestMessage(Guid id)
 		{
@@ -173,13 +177,18 @@ namespace HeavyLoad
 		public Guid CorrelationId
 		{
 			get { return _id; }
+			set { _id = value; }
 		}
 	}
 
 	[Serializable]
 	internal class SimpleResponseMessage : CorrelatedBy<Guid>, IMessage
 	{
-		private readonly Guid _id;
+		private Guid _id;
+
+		public SimpleResponseMessage()
+		{
+		}
 
 		public SimpleResponseMessage(Guid id)
 		{
@@ -189,6 +198,7 @@ namespace HeavyLoad
 		public Guid CorrelationId
 		{
 			get { return _id; }
+			set { _id = value; }
 		}
 	}
 }

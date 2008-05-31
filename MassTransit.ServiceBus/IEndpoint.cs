@@ -10,11 +10,9 @@
 /// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 /// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 /// specific language governing permissions and limitations under the License.
-
 namespace MassTransit.ServiceBus
 {
 	using System;
-	using Internal;
 
 	/// <summary>
 	/// IEndpoint is implemented by an endpoint. An endpoint is an addressable location on the network.
@@ -26,16 +24,6 @@ namespace MassTransit.ServiceBus
 		/// The address of the endpoint, in URI format
 		/// </summary>
 		Uri Uri { get; }
-
-		/// <summary>
-		/// Returns an interface to send messages on this endpoint
-		/// </summary>
-		IMessageSender Sender { get; }
-
-		/// <summary>
-		/// Returns an interface to receive messages on this endpoint
-		/// </summary>
-		IMessageReceiver Receiver { get; }
 
 		/// <summary>
 		/// Sends a message to the endpoint
@@ -111,8 +99,5 @@ namespace MassTransit.ServiceBus
 		/// <param name="accept">A predicate used to determine if the message would be accepted</param>
 		/// <returns>A message read from the endpoint</returns>
 		T Receive<T>(TimeSpan timeout, Predicate<T> accept) where T : class;
-
-
-        void Subscribe(IEnvelopeConsumer consumer);
 	}
 }

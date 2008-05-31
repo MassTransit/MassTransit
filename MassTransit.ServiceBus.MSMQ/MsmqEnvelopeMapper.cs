@@ -19,7 +19,7 @@ namespace MassTransit.ServiceBus.MSMQ
     public class MsmqEnvelopeMapper :
 		IEnvelopeMapper<Message>
 	{
-		private static readonly IBodyFormatter _formatter = new BinaryBodyFormatter();
+		private static readonly IBodyFormatter _formatter = new JsonBodyFormatter();
 
 		#region IEnvelopeMapper<Message> Members
 
@@ -59,7 +59,7 @@ namespace MassTransit.ServiceBus.MSMQ
 
 			IMessage[] messages = _formatter.Deserialize<IMessage[]>(new MsmqFormattedBody(msg));
 
-			e.Messages = messages ?? new IMessage[] {};
+			e.Message = messages ?? new IMessage[] {};
 
 			return e;
 		}
@@ -68,9 +68,9 @@ namespace MassTransit.ServiceBus.MSMQ
 		{
 			Message msg = new Message();
 
-			if (envelope.Messages != null)
+			if (envelope.Message != null)
 			{
-				_formatter.Serialize(new MsmqFormattedBody(msg), envelope.Messages);
+				_formatter.Serialize(new MsmqFormattedBody(msg), envelope.Message);
 			}
 
 			IMsmqEndpoint endpoint = envelope.ReturnEndpoint as IMsmqEndpoint;

@@ -2,7 +2,6 @@ namespace MassTransit.ServiceBus.Tests
 {
 	using System;
 	using System.Collections.Generic;
-	using Internal;
 	using MassTransit.ServiceBus.Subscriptions;
 	using NUnit.Framework;
 	using Rhino.Mocks;
@@ -10,8 +9,6 @@ namespace MassTransit.ServiceBus.Tests
 	[TestFixture]
 	public class As_a_ServiceBus
 	{
-		#region Setup/Teardown
-
 		[SetUp]
 		public void SetUp()
 		{
@@ -19,7 +16,6 @@ namespace MassTransit.ServiceBus.Tests
 			_mockSubscriptionCache = mocks.CreateMock<ISubscriptionCache>();
 			mockEndpoint = mocks.CreateMock<IEndpoint>();
 			mockSendEndpoint = mocks.CreateMock<IEndpoint>();
-			mockSender = mocks.CreateMock<IMessageSender>();
 
 			SetupResult.For(mockEndpoint.Uri).Return(new Uri("msmq://localhost/test"));
 		}
@@ -31,16 +27,15 @@ namespace MassTransit.ServiceBus.Tests
 			mockEndpoint = null;
 			mockSendEndpoint = null;
 			_mockSubscriptionCache = null;
-			mockSender = null;
 		}
 
-		#endregion
-
-		private MockRepository mocks;
-		private ISubscriptionCache _mockSubscriptionCache;
-		private IEndpoint mockEndpoint;
-		private IEndpoint mockSendEndpoint;
-		private IMessageSender mockSender;
+		[Test]
+		public void When_creating_a_bus()
+		{
+			LocalSubscriptionCache cache = new LocalSubscriptionCache();
+			ServiceBus bus = new ServiceBus(mocks.DynamicMock<IEndpoint>(), cache);
+			SubscriptionClient client = new SubscriptionClient(bus, cache, null);
+		}
 
 		[Test]
 		public void When_Publishing_a_message()
@@ -56,7 +51,7 @@ namespace MassTransit.ServiceBus.Tests
 			}
 			using (mocks.Playback())
 			{
-                ServiceBus bus = new ServiceBus(mockEndpoint, _mockSubscriptionCache);
+				ServiceBus bus = new ServiceBus(mockEndpoint, _mockSubscriptionCache);
 				bus.Publish(new PingMessage());
 			}
 		}
@@ -66,13 +61,10 @@ namespace MassTransit.ServiceBus.Tests
 		{
 			using (mocks.Record())
 			{
-				Expect.Call(mockSendEndpoint.Sender).Return(mockSender).Repeat.Twice();
-				Expect.Call(delegate { mockSender.Send(null); }).IgnoreArguments().Repeat.Twice();
 			}
 			using (mocks.Playback())
 			{
-				ServiceBus bus = new ServiceBus(mockEndpoint, _mockSubscriptionCache);
-				bus.Send(mockSendEndpoint, new PingMessage(), new PingMessage());
+				mockSendEndpoint.Send(new PingMessage());
 			}
 		}
 
@@ -81,23 +73,16 @@ namespace MassTransit.ServiceBus.Tests
 		{
 			using (mocks.Record())
 			{
-				Expect.Call(mockSendEndpoint.Sender).Return(mockSender);
-				mockSender.Send(null);
-				LastCall.IgnoreArguments();
 			}
 			using (mocks.Playback())
 			{
-				ServiceBus bus = new ServiceBus(mockEndpoint, _mockSubscriptionCache);
-				bus.Send(mockSendEndpoint, new PingMessage());
+				mockSendEndpoint.Send(new PingMessage());
 			}
 		}
 
-	    [Test]
-	    public void When_creating_a_bus()
-	    {
-	        LocalSubscriptionCache cache = new LocalSubscriptionCache();
-            ServiceBus bus = new ServiceBus(mocks.DynamicMock<IEndpoint>(), cache);
-	        SubscriptionClient client = new SubscriptionClient(bus, cache, null);
-	    }
+		private MockRepository mocks;
+		private ISubscriptionCache _mockSubscriptionCache;
+		private IEndpoint mockEndpoint;
+		private IEndpoint mockSendEndpoint;
 	}
 }

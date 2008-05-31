@@ -1,8 +1,6 @@
 namespace MassTransit.ServiceBus.Tests
 {
 	using System;
-	using Internal;
-	using MassTransit.ServiceBus.Subscriptions;
 	using NUnit.Framework;
 	using NUnit.Framework.SyntaxHelpers;
 	using Rhino.Mocks;
@@ -10,14 +8,11 @@ namespace MassTransit.ServiceBus.Tests
 	[TestFixture]
 	public class MessageQueueEndpoint_MeetsCriteria
 	{
-		#region Setup/Teardown
-
 		[SetUp]
 		public void SetUp()
 		{
 			mocks = new MockRepository();
 			mockServiceBusEndPoint = mocks.CreateMock<IEndpoint>();
-			mockReceiver = mocks.CreateMock<IMessageReceiver>();
 		}
 
 		[TearDown]
@@ -28,13 +23,6 @@ namespace MassTransit.ServiceBus.Tests
 			_serviceBus = null;
 		}
 
-		#endregion
-
-		private MockRepository mocks;
-		private ServiceBus _serviceBus;
-		private IEndpoint mockServiceBusEndPoint;
-		private IMessageReceiver mockReceiver;
-
 		[Test]
 		public void dru_test()
 		{
@@ -42,8 +30,6 @@ namespace MassTransit.ServiceBus.Tests
 
 			using (mocks.Record())
 			{
-				Expect.Call(mockServiceBusEndPoint.Receiver).Return(mockReceiver).Repeat.Any();
-				Expect.Call(delegate { mockReceiver.Subscribe(null); }).IgnoreArguments().Repeat.Any();
 				Expect.Call(mockServiceBusEndPoint.Uri).Return(new Uri("msmq://localhost/test_servicebus")).Repeat.Any(); //stupid log4net
 			}
 			using (mocks.Playback())
@@ -54,12 +40,9 @@ namespace MassTransit.ServiceBus.Tests
 					delegate { workDid = true; },
 					delegate { return true; });
 
-				IEnvelopeConsumer consumer = _serviceBus;
+				Assert.That(_serviceBus.Accept(new PingMessage()), Is.True);
 
-				IEnvelope envelope = new Envelope(mockServiceBusEndPoint, new PingMessage());
-
-				Assert.That(consumer.IsInterested(envelope), Is.True);
-				consumer.Deliver(envelope);
+				_serviceBus.Dispatch(new PingMessage());
 				Assert.That(workDid, Is.True, "Lazy Test!");
 			}
 		}
@@ -77,8 +60,6 @@ namespace MassTransit.ServiceBus.Tests
 		{
 			using (mocks.Record())
 			{
-				Expect.Call(mockServiceBusEndPoint.Receiver).Return(mockReceiver).Repeat.Any();
-				Expect.Call(delegate { mockReceiver.Subscribe(null); }).IgnoreArguments().Repeat.Any();
 				Expect.Call(mockServiceBusEndPoint.Uri).Return(new Uri("msmq://localhost/test_servicebus")).Repeat.Any(); //stupid log4net
 			}
 			using (mocks.Playback())
@@ -93,11 +74,9 @@ namespace MassTransit.ServiceBus.Tests
 					delegate { },
 					delegate { return false; });
 
-				IEnvelopeConsumer consumer = _serviceBus;
+				object message = new PingMessage();
 
-				IEnvelope envelope = new Envelope(mockServiceBusEndPoint, new PingMessage());
-
-				Assert.That(consumer.IsInterested(envelope), Is.False);
+				Assert.That(_serviceBus.Accept(message), Is.False);
 			}
 		}
 
@@ -106,8 +85,6 @@ namespace MassTransit.ServiceBus.Tests
 		{
 			using (mocks.Record())
 			{
-				Expect.Call(mockServiceBusEndPoint.Receiver).Return(mockReceiver).Repeat.Any();
-				Expect.Call(delegate { mockReceiver.Subscribe(null); }).IgnoreArguments().Repeat.Any();
 				Expect.Call(mockServiceBusEndPoint.Uri).Return(new Uri("msmq://localhost/test_servicebus")).Repeat.Any(); //stupid log4net
 			}
 			using (mocks.Playback())
@@ -117,11 +94,9 @@ namespace MassTransit.ServiceBus.Tests
 					delegate { },
 					delegate { return false; });
 
-				IEnvelopeConsumer consumer = _serviceBus;
+				object message = new PingMessage();
 
-				IEnvelope envelope = new Envelope(mockServiceBusEndPoint, new PingMessage());
-
-				Assert.That(consumer.IsInterested(envelope), Is.False);
+				Assert.That(_serviceBus.Accept(message), Is.False);
 			}
 		}
 
@@ -130,8 +105,6 @@ namespace MassTransit.ServiceBus.Tests
 		{
 			using (mocks.Record())
 			{
-				Expect.Call(mockServiceBusEndPoint.Receiver).Return(mockReceiver).Repeat.Any();
-				Expect.Call(delegate { mockReceiver.Subscribe(null); }).IgnoreArguments().Repeat.Any();
 				Expect.Call(mockServiceBusEndPoint.Uri).Return(new Uri("msmq://localhost/test_servicebus")).Repeat.Any(); //stupid log4net
 			}
 			using (mocks.Playback())
@@ -142,11 +115,9 @@ namespace MassTransit.ServiceBus.Tests
 					delegate { },
 					delegate { return true; });
 
-				IEnvelopeConsumer consumer = _serviceBus;
+				object message = new PingMessage();
 
-				IEnvelope envelope = new Envelope(mockServiceBusEndPoint, new PingMessage());
-
-				Assert.That(consumer.IsInterested(envelope), Is.True);
+				Assert.That(_serviceBus.Accept(message), Is.True);
 			}
 		}
 
@@ -155,8 +126,6 @@ namespace MassTransit.ServiceBus.Tests
 		{
 			using (mocks.Record())
 			{
-				Expect.Call(mockServiceBusEndPoint.Receiver).Return(mockReceiver).Repeat.Any();
-				Expect.Call(delegate { mockReceiver.Subscribe(null); }).IgnoreArguments().Repeat.Any();
 				Expect.Call(mockServiceBusEndPoint.Uri).Return(new Uri("msmq://localhost/test_servicebus")).Repeat.Any(); //stupid log4net
 			}
 			using (mocks.Playback())
@@ -171,12 +140,14 @@ namespace MassTransit.ServiceBus.Tests
 					delegate { },
 					delegate { return true; });
 
-				IEnvelopeConsumer consumer = _serviceBus;
+				object message = new PingMessage();
 
-				IEnvelope envelope = new Envelope(mockServiceBusEndPoint, new PingMessage());
-
-				Assert.That(consumer.IsInterested(envelope), Is.True);
+				Assert.That(_serviceBus.Accept(message), Is.True);
 			}
 		}
+
+		private MockRepository mocks;
+		private ServiceBus _serviceBus;
+		private IEndpoint mockServiceBusEndPoint;
 	}
 }

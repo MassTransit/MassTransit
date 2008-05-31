@@ -4,7 +4,6 @@ namespace MassTransit.Patterns.Tests
 	using System.Threading;
 	using Batching;
 	using log4net;
-	using MassTransit.ServiceBus.Internal;
 	using NUnit.Framework;
 	using NUnit.Framework.SyntaxHelpers;
 	using Rhino.Mocks;
@@ -13,8 +12,6 @@ namespace MassTransit.Patterns.Tests
 	[TestFixture]
 	public class As_a_BatchController2
 	{
-		#region Setup/Teardown
-
 		[SetUp]
 		public void Setup()
 		{
@@ -23,22 +20,12 @@ namespace MassTransit.Patterns.Tests
 			_mocks = new MockRepository();
 
 			_endpoint = _mocks.DynamicMock<IEndpoint>();
-			_receiver = _mocks.DynamicMock<IMessageReceiver>();
 
 			SetupResult.For(_endpoint.Uri).Return(new Uri("msmq://localhost/test_queue"));
-			SetupResult.For(_endpoint.Receiver).Return(_receiver);
 
 			_mocks.ReplayAll();
 			_bus = new ServiceBus(_endpoint);
 		}
-
-		#endregion
-
-		private static readonly ILog _log = LogManager.GetLogger(typeof (As_a_BatchController2));
-		private MockRepository _mocks;
-		private IEndpoint _endpoint;
-		private IMessageReceiver _receiver;
-		private ServiceBus _bus;
 
 		[Test]
 		public void A_missing_message_should_leave_the_batch_incomplete()
@@ -62,11 +49,9 @@ namespace MassTransit.Patterns.Tests
 
 			StringBatchMessage msg1 = new StringBatchMessage(batchId, batchLength, "hello");
 
-			IEnvelope env1 = new Envelope(msg1);
-
 			_bus.Subscribe<StringBatchMessage>(c.HandleMessage);
 
-			_bus.Deliver(env1);
+			_bus.Dispatch(msg1);
 
 			Assert.That(wasCalled, Is.False, "Was Called");
 			Assert.That(isComplete, Is.False, "Not Complete");
@@ -94,13 +79,11 @@ namespace MassTransit.Patterns.Tests
 
 			StringBatchMessage msg1 = new StringBatchMessage(batchId, batchLength, "hello");
 
-			IEnvelope env1 = new Envelope(msg1);
-
 			_bus.Subscribe<StringBatchMessage>(c.HandleMessage);
 
-			_bus.Deliver(env1);
+			_bus.Dispatch(msg1);
 			Thread.Sleep(3005);
-			_bus.Deliver(env1);
+			_bus.Dispatch(msg1);
 
 			Assert.That(wasCalled, Is.False, "Was Called");
 			Assert.That(isComplete, Is.False, "Not Complete");
@@ -134,11 +117,6 @@ namespace MassTransit.Patterns.Tests
 			StringBatchMessage msg3 = new StringBatchMessage(batchId, batchLength, "hello");
 			StringBatchMessage msg4 = new StringBatchMessage(batchId, batchLength, "hello");
 
-			IEnvelope env1 = new Envelope(msg1);
-			IEnvelope env2 = new Envelope(msg2);
-			IEnvelope env3 = new Envelope(msg3);
-			IEnvelope env4 = new Envelope(msg4);
-
 			_bus.Subscribe<StringBatchMessage>(c.HandleMessage);
 
 			ManualResetEvent started = new ManualResetEvent(false);
@@ -147,15 +125,15 @@ namespace MassTransit.Patterns.Tests
 			ThreadPool.QueueUserWorkItem(delegate
 			                             	{
 			                             		started.Set();
-			                             		_bus.Deliver(env1);
+			                             		_bus.Dispatch(msg1);
 			                             		done.Set();
 			                             	});
 
 			started.WaitOne(TimeSpan.FromSeconds(3), true);
 
-			_bus.Deliver(env2);
-			_bus.Deliver(env3);
-			_bus.Deliver(env4);
+			_bus.Dispatch(msg2);
+			_bus.Dispatch(msg3);
+			_bus.Dispatch(msg4);
 
 			done.WaitOne(TimeSpan.FromSeconds(10), true);
 
@@ -186,14 +164,17 @@ namespace MassTransit.Patterns.Tests
 
 			StringBatchMessage msg1 = new StringBatchMessage(batchId, batchLength, "hello");
 
-			IEnvelope env1 = new Envelope(msg1);
-
 			_bus.Subscribe<StringBatchMessage>(c.HandleMessage);
 
-			_bus.Deliver(env1);
+			_bus.Dispatch(msg1);
 
 			Assert.That(wasCalled, Is.True, "Not Called");
 			Assert.That(isComplete, Is.True, "Not Complete");
 		}
+
+		private static readonly ILog _log = LogManager.GetLogger(typeof (As_a_BatchController2));
+		private MockRepository _mocks;
+		private IEndpoint _endpoint;
+		private ServiceBus _bus;
 	}
 }

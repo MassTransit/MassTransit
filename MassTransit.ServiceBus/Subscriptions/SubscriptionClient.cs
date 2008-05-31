@@ -14,10 +14,12 @@ namespace MassTransit.ServiceBus.Subscriptions
 {
 	using System;
 	using Messages;
-	using Util;
 
 	public class SubscriptionClient :
-		IHostedService
+		IHostedService, 
+		Consumes<AddSubscription>.Any, 
+		Consumes<RemoveSubscription>.Any, 
+		Consumes<CacheUpdateResponse>.Any
 	{
 		private readonly ISubscriptionCache _cache;
 		private readonly IServiceBus _serviceBus;
@@ -28,11 +30,27 @@ namespace MassTransit.ServiceBus.Subscriptions
 			_serviceBus = serviceBus;
 			_cache = cache;
 			_subscriptionServiceEndpoint = subscriptionServiceEndpoint;
-        }
+		}
 
-        #region IHostedService Members
+		public void Consume(AddSubscription message)
+		{
+			_cache.Add(message.Subscription);
+		}
 
-        public void Dispose()
+		public void Consume(CacheUpdateResponse message)
+		{
+			foreach (Subscription sub in message.Subscriptions)
+			{
+				_cache.Add(sub);
+			}
+		}
+
+		public void Consume(RemoveSubscription message)
+		{
+			_cache.Add(message.Subscription);
+		}
+
+		public void Dispose()
 		{
 			_serviceBus.Dispose(); //TODO: Do we want to do this? - dds
 		}
@@ -42,54 +60,19 @@ namespace MassTransit.ServiceBus.Subscriptions
 			_cache.OnAddSubscription += Cache_OnAddSubscription;
 			_cache.OnRemoveSubscription += Cache_OnRemoveSubscription;
 
-			_serviceBus.Subscribe<AddSubscription>(HandleAddSubscription);
-			_serviceBus.Subscribe<RemoveSubscription>(HandleRemoveSubscription);
-			_serviceBus.Request(_subscriptionServiceEndpoint, CacheUpdateResponse_Callback, this, new CacheUpdateRequest());
+			_serviceBus.Subscribe(this);
+
+			_subscriptionServiceEndpoint.Send(new CacheUpdateRequest());
 		}
 
 		public void Stop()
 		{
-			_serviceBus.Send(_subscriptionServiceEndpoint, new CancelSubscriptionUpdates());
-			_serviceBus.Unsubscribe<AddSubscription>(HandleAddSubscription);
-			_serviceBus.Unsubscribe<RemoveSubscription>(HandleRemoveSubscription);
+			_subscriptionServiceEndpoint.Send(new CancelSubscriptionUpdates());
+
+			_serviceBus.Unsubscribe(this);
 
 			_cache.OnAddSubscription -= Cache_OnAddSubscription;
 			_cache.OnRemoveSubscription -= Cache_OnRemoveSubscription;
-		}
-
-		#endregion
-
-		public void HandleAddSubscription(IMessageContext<AddSubscription> ctx)
-		{
-			_cache.Add(ctx.Message.Subscription);
-		}
-		public void HandleRemoveSubscription(IMessageContext<RemoveSubscription> ctx)
-		{
-			_cache.Add(ctx.Message.Subscription);
-		}
-
-		public void CacheUpdateResponse_Callback(IAsyncResult asyncResult)
-		{
-			Check.Parameter(asyncResult).IsNotNull();
-
-			IServiceBusAsyncResult serviceBusAsyncResult = asyncResult as IServiceBusAsyncResult;
-			if (serviceBusAsyncResult == null)
-				return;
-
-			if (serviceBusAsyncResult.Messages == null)
-				return;
-
-			foreach (IMessage message in serviceBusAsyncResult.Messages)
-			{
-				CacheUpdateResponse response = message as CacheUpdateResponse;
-				if (response != null)
-				{
-					foreach (Subscription sub in response.Subscriptions)
-					{
-						_cache.Add(sub);
-					}
-				}
-			}
 		}
 
 		public void Cache_OnAddSubscription(object sender, SubscriptionEventArgs e)
@@ -98,7 +81,7 @@ namespace MassTransit.ServiceBus.Subscriptions
 			{
 				AddSubscription message = new AddSubscription(e.Subscription);
 
-				_serviceBus.Send(_subscriptionServiceEndpoint, message);
+				_subscriptionServiceEndpoint.Send(message);
 			}
 		}
 
@@ -108,7 +91,7 @@ namespace MassTransit.ServiceBus.Subscriptions
 			{
 				RemoveSubscription message = new RemoveSubscription(e.Subscription);
 
-				_serviceBus.Send(_subscriptionServiceEndpoint, message);
+				_subscriptionServiceEndpoint.Send(message);
 			}
 		}
 	}

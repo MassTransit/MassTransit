@@ -13,13 +13,10 @@
 namespace MassTransit.ServiceBus.NMS
 {
 	using System;
-	using Internal;
 
 	public class NmsEndpoint :
 		INmsEndpoint
 	{
-		private IMessageReceiver _receiver;
-		private IMessageSender _sender;
 		private Uri _uri;
 
 		public NmsEndpoint(Uri uri)
@@ -32,38 +29,9 @@ namespace MassTransit.ServiceBus.NMS
 			_uri = new Uri(uriString);
 		}
 
-		#region INmsEndpoint Members
-
 		public Uri Uri
 		{
 			get { return _uri; }
-		}
-
-		public IMessageSender Sender
-		{
-			get
-			{
-				lock (this)
-				{
-					if (_sender == null)
-						_sender = new NmsMessageSender(this);
-				}
-				return _sender;
-			}
-		}
-
-		public IMessageReceiver Receiver
-		{
-			get
-			{
-				lock (this)
-				{
-					if (_receiver == null)
-						_receiver = new NmsMessageReceiver(this);
-				}
-
-				return _receiver;
-			}
 		}
 
 		public void Send<T>(T message) where T : class
@@ -117,20 +85,8 @@ namespace MassTransit.ServiceBus.NMS
 		}
 
 
-	    public void Subscribe(IEnvelopeConsumer consumer)
-	    {
-	        Receiver.Subscribe(consumer);
-	    }
-
-	    public void Dispose()
+		public void Dispose()
 		{
-			if (_receiver != null)
-				_receiver.Dispose();
-
-			if (_sender != null)
-				_sender.Dispose();
 		}
-
-		#endregion
 	}
 }

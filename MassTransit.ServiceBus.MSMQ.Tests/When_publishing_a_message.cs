@@ -128,7 +128,7 @@ namespace MassTransit.ServiceBus.MSMQ.Tests
 						{
 							_updateEvent.Set();
 
-							ctx.Bus.Send(ctx.Envelope.ReturnEndpoint, new UpdateAcceptedMessage());
+							//ctx.Bus.Send(ctx.Envelope.ReturnEndpoint, new UpdateAcceptedMessage());
 						};
 
 				ManualResetEvent _repliedEvent = new ManualResetEvent(false);

@@ -6,7 +6,7 @@ namespace HeavyLoad
 	[Serializable]
 	public class GeneralMessage : IMessage
 	{
-		private readonly int[] _values;
+		private int[] _values;
 
 		public GeneralMessage()
 		{
@@ -16,6 +16,7 @@ namespace HeavyLoad
 		public int[] Values
 		{
 			get { return _values; }
+			set { _values = value; }
 		}
 	}
 }

@@ -12,101 +12,65 @@
 /// specific language governing permissions and limitations under the License.
 namespace MassTransit.ServiceBus.NMS.Tests
 {
-    using System;
-    using System.Threading;
-    using Internal;
-    using NUnit.Framework;
-    using NUnit.Framework.SyntaxHelpers;
+	using System;
+	using Internal;
+	using NUnit.Framework;
+	using NUnit.Framework.SyntaxHelpers;
 
-    [TestFixture]
-    public class When_sending_a_message_to_the_queue
-    {
-        [Test]
-        public void The_message_should_arrive()
-        {
-            NmsEndpoint endpoint = new NmsEndpoint("activemq://localhost:61616/queue_name");
+	[TestFixture]
+	public class When_sending_a_message_to_the_queue
+	{
+		[Test]
+		public void The_message_should_arrive()
+		{
+			NmsEndpoint endpoint = new NmsEndpoint("activemq://localhost:61616/queue_name");
 
-            IMessageSender sender = endpoint.Sender;
+			SimpleMessage msg = new SimpleMessage();
+			msg.Name = "Chris";
 
-            SimpleMessage msg = new SimpleMessage();
-            msg.Name = "Chris";
+			endpoint.Send(msg);
+		}
 
-            Envelope e = new Envelope(msg);
+		[Test]
+		public void The_message_should_be_retrieved()
+		{
+			using (NmsEndpoint endpoint = new NmsEndpoint("activemq://localhost:61616/queue_name"))
+			{
+				SimpleMessage msg = new SimpleMessage();
+				msg.Name = "Chris";
 
-            sender.Send(e);
-        }
+				endpoint.Send(msg);
 
-        [Test]
-        public void The_message_should_be_retrieved()
-        {
-            NmsEndpoint endpoint = new NmsEndpoint("activemq://localhost:61616/queue_name");
+				object obj = endpoint.Receive(TimeSpan.FromSeconds(5));
 
-            IMessageReceiver receiver = endpoint.Receiver;
+				Assert.That(obj, Is.Not.Null);
 
-            ManualResetEvent received = new ManualResetEvent(false);
+				Assert.That(obj, Is.TypeOf(typeof (SimpleMessage)));
+			}
+		}
+	}
 
-            EnvelopeConsumer consumer = new EnvelopeConsumer(
-                delegate(IEnvelope e) { received.Set(); });
+	public delegate void EnvelopeHandler(IEnvelope e);
 
-            receiver.Subscribe(consumer);
-
-            IMessageSender sender = endpoint.Sender;
-
-            SimpleMessage msg = new SimpleMessage();
-            msg.Name = "Chris";
-
-            Envelope env = new Envelope(msg);
-
-            sender.Send(env);
-
-            Assert.That(received.WaitOne(TimeSpan.FromSeconds(5), true), Is.True);
-
-            endpoint.Dispose();
-        }
-    }
-
-    public delegate void EnvelopeHandler(IEnvelope e);
-
-    public class EnvelopeConsumer :
-        IEnvelopeConsumer
-    {
-        private readonly EnvelopeHandler _eh;
-
-        public EnvelopeConsumer(EnvelopeHandler eh)
-        {
-            _eh = eh;
-        }
-
-        public bool IsInterested(IEnvelope envelope)
-        {
-            return true;
-        }
-
-        public void Deliver(IEnvelope envelope)
-        {
-            _eh(envelope);
-        }
-    }
-
-    [Serializable]
-    public class SimpleMessage : IMessage
-    {
-        private string _name;
+	[Serializable]
+	public class SimpleMessage
+	{
+		private string _name;
 
 
-        public SimpleMessage()
-        {
-        }
+		public SimpleMessage()
+		{
+		}
 
-        public SimpleMessage(string name)
-        {
-            _name = name;
-        }
+		public SimpleMessage(string name)
+		{
+			_name = name;
+		}
 
-        public string Name
-        {
-            get { return _name; }
-            set { _name = value; }
-        }
-    }
+		public string Name
+		{
+			get { return _name; }
+			set { _name = value; }
+		}
+	}
 }

@@ -19,8 +19,7 @@ namespace MassTransit.ServiceBus.NMS
     using Internal;
     using log4net;
 
-    public class NmsMessageSender :
-        IMessageSender
+    public class NmsMessageSender
     {
         private IConnectionFactory _factory;
         private readonly string _queueName;
@@ -48,14 +47,14 @@ namespace MassTransit.ServiceBus.NMS
                 {
                     IDestination destination = session.GetQueue(_queueName);
 
-                    IMessage msg = new NmsEnvelopeMapper(session).ToMessage(envelope);
+                    IBytesMessage msg = new NmsEnvelopeMapper(session).ToMessage(envelope);
 
                     using (IMessageProducer producer = session.CreateProducer(destination))
                     {
                         try
                         {
                             if (_messageLog.IsInfoEnabled)
-                                _messageLog.InfoFormat("Message {0} Sent To {1}", envelope.Messages[0].GetType(),
+                                _messageLog.InfoFormat("Message {0} Sent To {1}", envelope.Message.GetType(),
                                                        _endpoint.Uri);
 
                             producer.Send(msg);
@@ -69,7 +68,7 @@ namespace MassTransit.ServiceBus.NMS
                     }
                     if (_log.IsDebugEnabled)
                         _log.DebugFormat("Message Sent: Id = {0}, Message Type = {1}", msg.NMSMessageId,
-                                         envelope.Messages != null ? envelope.Messages[0].GetType().ToString() : "");
+                                         envelope.Message != null ? envelope.Message.GetType().ToString() : "");
                 }
             }
         }

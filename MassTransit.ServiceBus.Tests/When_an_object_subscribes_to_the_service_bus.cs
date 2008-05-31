@@ -1,45 +1,35 @@
 namespace MassTransit.ServiceBus.Tests
 {
+	using System;
 	using System.Threading;
 	using NUnit.Framework;
-    using System;
-    using Internal;
-    using NUnit.Framework.SyntaxHelpers;
-    using Rhino.Mocks;
+	using Rhino.Mocks;
 
 	[TestFixture]
 	public class When_an_object_subscribes_to_the_service_bus
 	{
-        private MockRepository mocks;
-        private ServiceBus _serviceBus;
-        private IEndpoint mockServiceBusEndPoint;
-        private IMessageReceiver mockReceiver;
+		[SetUp]
+		public void SetUp()
+		{
+			mocks = new MockRepository();
+			mockServiceBusEndPoint = mocks.DynamicMock<IEndpoint>();
+			_serviceBus = new ServiceBus(mockServiceBusEndPoint);
 
-        [SetUp]
-        public void SetUp()
-        {
-            mocks = new MockRepository();
-            mockServiceBusEndPoint = mocks.DynamicMock<IEndpoint>();
-            mockReceiver = mocks.DynamicMock<IMessageReceiver>();
-            _serviceBus = new ServiceBus(mockServiceBusEndPoint);
+			SetupResult.For(mockServiceBusEndPoint.Uri).Return(new Uri("msmq://localhost/test_servicebus"));
 
-            SetupResult.For(mockServiceBusEndPoint.Uri).Return(new Uri("msmq://localhost/test_servicebus"));
-        	SetupResult.For(mockServiceBusEndPoint.Receiver).Return(mockReceiver);
+			mocks.ReplayAll();
+		}
 
-        	mocks.ReplayAll();
-        }
-
-        [TearDown]
-        public void TearDown()
-        {
-        	_serviceBus.Dispose();
+		[TearDown]
+		public void TearDown()
+		{
+			_serviceBus.Dispose();
 
 
-        	_serviceBus = null;
-        	mockServiceBusEndPoint = null;
-        	mockReceiver = null;
-        	mocks = null;
-        }
+			_serviceBus = null;
+			mockServiceBusEndPoint = null;
+			mocks = null;
+		}
 
 
 /*
@@ -81,12 +71,16 @@ namespace MassTransit.ServiceBus.Tests
         }
     }
 }*/
+
 		[Test, Explicit]
 		public void Messages_should_be_delivered_for_a_consumer()
 		{
 			CorrelatedController controller = new CorrelatedController(_serviceBus);
-			
 		}
+
+		private MockRepository mocks;
+		private ServiceBus _serviceBus;
+		private IEndpoint mockServiceBusEndPoint;
 
 		internal class CorrelatedController : Consumes<SimpleResponseMessage>.For<Guid>
 		{
@@ -129,11 +123,11 @@ namespace MassTransit.ServiceBus.Tests
 			}
 		}
 
-		internal class SimpleRequestMessage : CorrelatedBy<Guid>, IMessage
+		internal class SimpleRequestMessage : CorrelatedBy<Guid>
 		{
 			private readonly Guid _id;
 
-		    public SimpleRequestMessage(Guid id)
+			public SimpleRequestMessage(Guid id)
 			{
 				_id = id;
 			}
@@ -149,10 +143,12 @@ namespace MassTransit.ServiceBus.Tests
 		{
 			private readonly Guid _id;
 
-            //TODO: Remove:Stupid XML Serializer
-            public SimpleResponseMessage(){}
+			//TODO: Remove:Stupid XML Serializer
+			public SimpleResponseMessage()
+			{
+			}
 
-		    public SimpleResponseMessage(Guid id)
+			public SimpleResponseMessage(Guid id)
 			{
 				_id = id;
 			}
@@ -162,6 +158,5 @@ namespace MassTransit.ServiceBus.Tests
 				get { return _id; }
 			}
 		}
-		
 	}
 }
