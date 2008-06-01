@@ -8,30 +8,31 @@ namespace MassTransit.ServiceBus.HealthMonitoring
         Consumes<Pong>.For<Guid>//, Produces<DownEndpoint>
     {
         private readonly IServiceBus _bus;
-        private Guid _correlationId;
+        private readonly Guid _correlationId;
 
         public Investigator(IServiceBus bus)
         {
-            _correlationId = Guid.NewGuid();
             _bus = bus;
+            _correlationId = Guid.NewGuid();
         }
 
 
         //this starts things
         public void Consume(Suspect message)
         {
-            _bus.Publish(new Ping(Guid.NewGuid()));
+            _bus.Publish(new Ping(this._correlationId));
         }
 
         //produce<Ping>
         public void Consume(Pong message)
         {
             //if we get this we are ok. but its weird that the heartbeat is down
+        }
 
-            //on time out
+        public void OnPingTimeOut()
+        {
             //I have a confirmed dead endpoint
             //_bus.Publish<DownEndpoint>(new DownEndpoint());
-
         }
 
         public Guid CorrelationId
