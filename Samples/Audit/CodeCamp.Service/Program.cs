@@ -8,8 +8,8 @@ namespace CodeCamp.Service
 	using Messages;
 
 	internal class Program :
-		Consumes<UserPasswordSuccess>.Any,
-		Consumes<UserPasswordFailure>.Any
+		Consumes<UserPasswordSuccess>.All,
+		Consumes<UserPasswordFailure>.All
 	{
 		public void Consume(UserPasswordFailure message)
 		{
