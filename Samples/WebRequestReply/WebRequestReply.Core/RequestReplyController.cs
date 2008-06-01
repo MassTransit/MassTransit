@@ -3,19 +3,32 @@ namespace WebRequestReply.Core
 	using System;
 	using MassTransit.ServiceBus;
 
-	public class RequestReplyController
+	public class RequestReplyController :
+		Consumes<ResponseMessage>.For<Guid>,
+		IDisposable
 	{
 		private readonly IServiceBus _serviceBus;
-		private readonly IEndpoint _serviceEndpoint;
 		private readonly IRequestReplyView _view;
+		private AsyncController _asyncController;
+		private Guid _requestId;
 
-		public RequestReplyController(IRequestReplyView view, IServiceBus serviceBus, IEndpoint serviceEndpoint)
+		public RequestReplyController(IRequestReplyView view, IServiceBus serviceBus)
 		{
 			_view = view;
 			_serviceBus = serviceBus;
-			_serviceEndpoint = serviceEndpoint;
 
 			_view.RequestEntered += View_RequestEntered;
+		}
+
+		public void Consume(ResponseMessage message)
+		{
+			_view.ResponseText = message.Text;
+			_asyncController.Complete();
+		}
+
+		public Guid CorrelationId
+		{
+			get { return _requestId; }
 		}
 
 
@@ -26,7 +39,7 @@ namespace WebRequestReply.Core
 
 		public void SendRequest()
 		{
-			IServiceBusAsyncResult asyncResult = BeginRequest(null, null);
+			IAsyncResult asyncResult = BeginRequest(null, null);
 
 			if (asyncResult.AsyncWaitHandle.WaitOne(TimeSpan.FromSeconds(10), true))
 			{
@@ -40,27 +53,27 @@ namespace WebRequestReply.Core
 
 		public void EndRequest(IAsyncResult ar)
 		{
-			IServiceBusAsyncResult asyncResult = (IServiceBusAsyncResult) ar;
-
-			ResponseMessage rm = asyncResult.Messages[0] as ResponseMessage;
-			if (rm != null)
-			{
-				_view.ResponseText = rm.Text;
-			}
-			else
-			{
-				_view.ResponseText = "Invalid message type received";
-			}
+			_serviceBus.Unsubscribe(this);
 		}
 
-		public IServiceBusAsyncResult BeginRequest(AsyncCallback callback, object data)
+		public IAsyncResult BeginRequest(AsyncCallback callback, object data)
 		{
-			RequestMessage request = new RequestMessage();
-			request.Text = _view.RequestText;
+			_asyncController = new AsyncController(callback, data);
 
-			IServiceBusAsyncResult asyncResult = _serviceBus.Request(_serviceEndpoint, callback, data, request);
+			_requestId = Guid.NewGuid();
 
-			return asyncResult;
+			_serviceBus.Subscribe(this);
+
+			RequestMessage request = new RequestMessage(_requestId, _view.RequestText);
+
+			_serviceBus.Publish(request);
+
+			return _asyncController;
+		}
+
+		public void Dispose()
+		{
+			_serviceBus.Unsubscribe(this);
 		}
 	}
 }

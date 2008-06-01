@@ -1,18 +1,28 @@
-using System;
-using MassTransit.ServiceBus;
-
 namespace WebRequestReply.Core
 {
+	using System;
+	using MassTransit.ServiceBus;
+
 	[Serializable]
-	public class RequestMessage :
-		IMessage
+	public class RequestMessage : CorrelatedBy<Guid>
 	{
-		private string _text;
+		private readonly Guid _id;
+		private readonly string _text;
+
+		public RequestMessage(Guid id, string text)
+		{
+			_text = text;
+			_id = id;
+		}
 
 		public string Text
 		{
 			get { return _text; }
-			set { _text = value; }
+		}
+
+		public Guid CorrelationId
+		{
+			get { return _id; }
 		}
 	}
 }
