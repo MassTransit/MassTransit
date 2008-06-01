@@ -3,7 +3,7 @@ namespace MassTransit.Patterns.FaultDetection
 	using Messages;
 	using ServiceBus;
 
-	public class Investigator : Consumes<Suspect>.Any
+	public class Investigator : Consumes<Suspect>.All
 	{
 		private readonly IServiceBus _bus;
 

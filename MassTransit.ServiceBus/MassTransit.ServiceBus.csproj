@@ -55,6 +55,17 @@
     <Compile Include="Exceptions\MessageException.cs" />
     <Compile Include="Exceptions\ShutDownException.cs" />
     <Compile Include="Formatters\JsonBodyFormatter.cs" />
+    <Compile Include="HealthMonitoring\HealthService.cs" />
+    <Compile Include="HealthMonitoring\HeartbeatMonitor.cs" />
+    <Compile Include="HealthMonitoring\Investigator.cs" />
+    <Compile Include="HealthMonitoring\Messages\DownEndpoint.cs" />
+    <Compile Include="HealthMonitoring\Messages\Heartbeat.cs" />
+    <Compile Include="HealthMonitoring\Messages\Ping.cs" />
+    <Compile Include="HealthMonitoring\Messages\Pong.cs" />
+    <Compile Include="HealthMonitoring\Messages\Suspect.cs" />
+    <Compile Include="HealthMonitoring\MonitorInfo.cs" />
+    <Compile Include="HealthMonitoring\Reporter.cs" />
+    <Compile Include="HealthMonitoring\HealthClient.cs" />
     <Compile Include="Internal\GenericComponent.cs" />
     <Compile Include="Internal\MessageDispatcher.cs" />
     <Compile Include="Internal\CorrelationIdDispatcher.cs" />

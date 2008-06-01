@@ -17,9 +17,9 @@ namespace MassTransit.ServiceBus.Subscriptions
 
 	public class SubscriptionClient :
 		IHostedService, 
-		Consumes<AddSubscription>.Any, 
-		Consumes<RemoveSubscription>.Any, 
-		Consumes<CacheUpdateResponse>.Any
+		Consumes<AddSubscription>.All, 
+		Consumes<RemoveSubscription>.All, 
+		Consumes<CacheUpdateResponse>.All
 	{
 		private readonly ISubscriptionCache _cache;
 		private readonly IServiceBus _serviceBus;

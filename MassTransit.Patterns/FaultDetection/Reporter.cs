@@ -4,7 +4,7 @@ namespace MassTransit.Patterns.FaultDetection
 	using Messages;
 	using ServiceBus;
 
-	public class Reporter : Consumes<DownEndpoint>.Any
+	public class Reporter : Consumes<DownEndpoint>.All
 	{
 		private readonly ILog _log = LogManager.GetLogger(typeof (Reporter));
 

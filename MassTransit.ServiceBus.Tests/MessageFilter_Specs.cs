@@ -16,7 +16,7 @@ namespace MassTransit.ServiceBus.Tests
 		private readonly ManualResetEvent _passed = new ManualResetEvent(false);
 		private TestConsumer<RequestMessage> _consumer;
 
-		internal class TestConsumer<T> : Consumes<T>.Any where T : class
+		internal class TestConsumer<T> : Consumes<T>.All where T : class
 		{
 			private readonly Action<T> callback;
 

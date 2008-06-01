@@ -11,7 +11,7 @@ namespace MassTransit.ServiceBus.Internal
 	public class MessageDispatcher :
 		IMessageDispatcher
 	{
-		private static readonly Type _consumes = typeof (Consumes<>.Any);
+		private static readonly Type _consumes = typeof (Consumes<>.All);
 		private static readonly Type _consumesFor = typeof (Consumes<>.For<>);
 		private static readonly Type _consumesSelected = typeof (Consumes<>.Selected);
 		private readonly IObjectBuilder _builder;
@@ -266,7 +266,7 @@ namespace MassTransit.ServiceBus.Internal
 		private readonly IServiceBus _bus;
 		private readonly ISubscriptionCache _cache;
 		private readonly List<Type> _components = new List<Type>();
-		private readonly List<Consumes<TMessage>.Any> _consumers = new List<Consumes<TMessage>.Any>();
+		private readonly List<Consumes<TMessage>.All> _consumers = new List<Consumes<TMessage>.All>();
 		private readonly ILog _log = LogManager.GetLogger(typeof (MessageDispatcher<TMessage>));
 
 		public MessageDispatcher()
@@ -296,7 +296,7 @@ namespace MassTransit.ServiceBus.Internal
 			if (message == null)
 				throw new ArgumentException("The message is not of type " + typeof (TMessage).FullName, "obj");
 
-			foreach (Consumes<TMessage>.Any consumer in _consumers)
+			foreach (Consumes<TMessage>.All consumer in _consumers)
 			{
 				Consumes<TMessage>.Selected selectiveConsumer = consumer as Consumes<TMessage>.Selected;
 				if (selectiveConsumer != null)
@@ -314,7 +314,7 @@ namespace MassTransit.ServiceBus.Internal
 
 			foreach (Type componentType in _components)
 			{
-				Consumes<TMessage>.Any consumer = _builder.Build<Consumes<TMessage>.Any>(componentType);
+				Consumes<TMessage>.All consumer = _builder.Build<Consumes<TMessage>.All>(componentType);
 
 				Consumes<TMessage>.Selected selectiveConsumer = consumer as Consumes<TMessage>.Selected;
 				if (selectiveConsumer != null)
@@ -339,7 +339,7 @@ namespace MassTransit.ServiceBus.Internal
 			if (message == null)
 				throw new ArgumentException("The message is not of type " + typeof (TMessage).FullName, "obj");
 
-			foreach (Consumes<TMessage>.Any consumer in _consumers)
+			foreach (Consumes<TMessage>.All consumer in _consumers)
 			{
 				Consumes<TMessage>.Selected selectiveConsumer = consumer as Consumes<TMessage>.Selected;
 				if (selectiveConsumer != null)
@@ -357,7 +357,7 @@ namespace MassTransit.ServiceBus.Internal
 
 			foreach (Type componentType in _components)
 			{
-				Consumes<TMessage>.Any consumer = _builder.Build<Consumes<TMessage>.Any>(componentType);
+				Consumes<TMessage>.All consumer = _builder.Build<Consumes<TMessage>.All>(componentType);
 
 				Consumes<TMessage>.Selected selectiveConsumer = consumer as Consumes<TMessage>.Selected;
 				if (selectiveConsumer != null)
@@ -376,7 +376,7 @@ namespace MassTransit.ServiceBus.Internal
 
 		public void Subscribe<TComponent>(TComponent component) where TComponent : class
 		{
-			Consumes<TMessage>.Any consumer = component as Consumes<TMessage>.Any;
+			Consumes<TMessage>.All consumer = component as Consumes<TMessage>.All;
 			if (consumer == null)
 				throw new ArgumentException("The componet does not consume " + typeof (TMessage).FullName, "component");
 
@@ -390,7 +390,7 @@ namespace MassTransit.ServiceBus.Internal
 
 		public void Unsubscribe<TComponent>(TComponent component) where TComponent : class
 		{
-			Consumes<TMessage>.Any consumer = component as Consumes<TMessage>.Any;
+			Consumes<TMessage>.All consumer = component as Consumes<TMessage>.All;
 			if (consumer == null)
 				throw new ArgumentException("The componet does not consume " + typeof (TMessage).FullName, "component");
 
