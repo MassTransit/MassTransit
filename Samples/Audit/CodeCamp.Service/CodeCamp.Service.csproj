@@ -28,6 +28,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="MassTransit.DistributedSubscriptionCache, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\bin\MassTransit.DistributedSubscriptionCache.dll</HintPath>
+    </Reference>
     <Reference Include="MassTransit.ServiceBus, Version=0.1.525.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\bin\MassTransit.ServiceBus.dll</HintPath>
@@ -50,6 +54,9 @@
       <Project>{7C6ED57B-D1E6-4CED-89E4-58A9ABFC3F95}</Project>
       <Name>CodeCamp.Messages</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -28,6 +28,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="MassTransit.DistributedSubscriptionCache, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\bin\MassTransit.DistributedSubscriptionCache.dll</HintPath>
+    </Reference>
     <Reference Include="MassTransit.ServiceBus, Version=0.1.525.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\bin\MassTransit.ServiceBus.dll</HintPath>

@@ -123,12 +123,16 @@ namespace MassTransit.DistributedSubscriptionCache
 					if (currentValue.Contains(removeUri))
 					{
 						int start = currentValue.IndexOf(removeUri);
+						int length = removeUri.Length;
+						if (start + length < currentValue.Length) // get the ending \n if found
+							length++;
 						if (start > 0) //Modify the start to include the '\n'
 						{
 							start--;
+							length++;
 						}
 
-						string newValue = currentValue.Remove(start, removeUri.Length + 1);
+						string newValue = currentValue.Remove(start, length);
 						cache.StoreInClient(StoreMode.Set, key, newValue, TimeSpan.FromDays(14));
 						OnRemoveSubscription(this, new SubscriptionEventArgs(subscription));
 					}

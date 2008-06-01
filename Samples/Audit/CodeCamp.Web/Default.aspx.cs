@@ -1,7 +1,6 @@
 namespace CodeCamp.Web
 {
 	using System;
-	using System.Threading;
 	using System.Web.UI;
 	using Core;
 
