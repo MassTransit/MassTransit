@@ -37,6 +37,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AsyncController.cs" />
     <Compile Include="Container.cs" />
     <Compile Include="IRequestReplyView.cs" />
     <Compile Include="IView.cs" />

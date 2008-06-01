@@ -35,10 +35,9 @@ namespace WebRequestReply.Core
 
 		private static void HandleRequestMessage(IMessageContext<RequestMessage> ctx)
 		{
-			ResponseMessage response = new ResponseMessage();
-			response.Text = "Request: " + ctx.Message.Text;
+			ResponseMessage response = new ResponseMessage(ctx.Message.CorrelationId, "Request: " + ctx.Message.Text);
 
-			ctx.Reply(response);
+			Instance.ServiceBus.Publish(response);
 		}
 
 		~Container()

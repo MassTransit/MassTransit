@@ -9,7 +9,7 @@ public partial class _Default :
 
 	public _Default()
 	{
-		_controller = new RequestReplyController(this, Container.Instance.ServiceBus, Container.Instance.ServiceBus.Endpoint);
+		_controller = new RequestReplyController(this, Container.Instance.ServiceBus);
 	}
 
 	#region IRequestReplyView Members
