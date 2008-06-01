@@ -1,10 +1,9 @@
 namespace CodeCamp.Messages
 {
 	using System;
-	using MassTransit.ServiceBus;
 
 	[Serializable]
-	public class UserPasswordSuccess : IMessage
+	public class UserPasswordSuccess
 	{
 		private readonly DateTime _timeStamp;
 		private readonly string _username;

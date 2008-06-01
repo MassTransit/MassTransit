@@ -31,11 +31,11 @@ namespace CodeCamp.Core
 		{
 			if (_password == password)
 			{
-				DomainContext.ServiceBus.Publish(new UserPasswordSuccess(_username));
+				DomainContext.Publish(new UserPasswordSuccess(_username));
 				return true;
 			}
 
-			DomainContext.ServiceBus.Publish(new UserPasswordFailure(_username));
+			DomainContext.Publish(new UserPasswordFailure(_username));
 
 			return false;
 		}

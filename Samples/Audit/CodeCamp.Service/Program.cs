@@ -1,26 +1,34 @@
 namespace CodeCamp.Service
 {
 	using System;
+	using MassTransit.DistributedSubscriptionCache;
 	using MassTransit.ServiceBus;
 	using MassTransit.ServiceBus.MSMQ;
 	using MassTransit.ServiceBus.Subscriptions;
 	using Messages;
 
-	internal class Program
+	internal class Program :
+		Consumes<UserPasswordSuccess>.Any,
+		Consumes<UserPasswordFailure>.Any
 	{
-		private static void Main(string[] args)
+		public void Consume(UserPasswordFailure message)
+		{
+			Console.WriteLine("Audit: Failed user password check for user {0} at {1}", message.Username, message.TimeStamp);
+		}
+
+		public void Consume(UserPasswordSuccess message)
+		{
+			Console.WriteLine("Audit: User password succeeded password check for user {0} at {1}", message.Username, message.TimeStamp);
+		}
+
+		private static void Main()
 		{
 			IEndpoint endpoint = new MsmqEndpoint("msmq://localhost/test_server");
-			IEndpoint subscriptionsEndpoint = new MsmqEndpoint("msmq://localhost/test_subscriptions");
-			ISubscriptionCache cache = new LocalSubscriptionCache();
-			
+			ISubscriptionCache cache = new DistributedSubscriptionCache();
+
 			using (IServiceBus serviceBus = new ServiceBus(endpoint, cache))
 			{
-				SubscriptionClient client = new SubscriptionClient(serviceBus, cache, subscriptionsEndpoint);
-				client.Start();
-
-				serviceBus.Subscribe<UserPasswordFailure>(Handle);
-				serviceBus.Subscribe<UserPasswordSuccess>(Handle);
+				serviceBus.AddComponent<Program>();
 
 				Console.WriteLine("Service running...");
 
@@ -28,21 +36,10 @@ namespace CodeCamp.Service
 
 				Console.WriteLine("Service exiting...");
 
-				serviceBus.Unsubscribe<UserPasswordFailure>(Handle);
+				serviceBus.RemoveComponent<Program>();
 			}
 
 			Console.WriteLine("End of line");
-		}
-
-		private static void Handle(IMessageContext<UserPasswordSuccess> ctx)
-		{
-			Console.WriteLine("Audit: User password succeeded password check for user {0} at {1}", ctx.Message.Username, ctx.Message.TimeStamp);
-			
-		}
-
-		private static void Handle(IMessageContext<UserPasswordFailure> ctx)
-		{
-			Console.WriteLine("Audit: Failed user password check for user {0} at {1}", ctx.Message.Username, ctx.Message.TimeStamp);
 		}
 	}
 }
