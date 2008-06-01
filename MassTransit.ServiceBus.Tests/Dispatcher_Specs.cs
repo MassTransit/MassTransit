@@ -46,7 +46,7 @@ namespace MassTransit.ServiceBus.Tests
 
 		private ServiceBus _bus;
 
-		internal class PingHandler : Consumes<PingMessage>.Any
+		internal class PingHandler : Consumes<PingMessage>.All
 		{
 			private static int _pinged;
 

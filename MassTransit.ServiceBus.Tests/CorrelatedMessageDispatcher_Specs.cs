@@ -237,7 +237,7 @@ namespace MassTransit.ServiceBus.Tests
 			}
 		}
 
-		internal class GeneralConsumer : Consumes<TestMessage>.Any
+		internal class GeneralConsumer : Consumes<TestMessage>.All
 		{
 			private int _value;
 

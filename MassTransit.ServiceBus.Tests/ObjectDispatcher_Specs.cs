@@ -57,7 +57,7 @@ namespace MassTransit.ServiceBus.Tests
 			}
 		}
 
-		internal class RequestHandler : Consumes<TestMessage>.Any
+		internal class RequestHandler : Consumes<TestMessage>.All
 		{
 			private static int _value;
 

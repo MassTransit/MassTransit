@@ -15,7 +15,7 @@ namespace MassTransit.ServiceBus.Tests
 		private bool _received = false;
 		private readonly PingMessage _message = new PingMessage();
 
-		internal class TestConsumer<T> : Consumes<T>.Any where T : class
+		internal class TestConsumer<T> : Consumes<T>.All where T : class
 		{
 			private readonly Action<T> callback;
 

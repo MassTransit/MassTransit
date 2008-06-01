@@ -22,7 +22,7 @@ namespace MassTransit.ServiceBus.Tests
 		private TestMessage _message;
 		private readonly int _value = 27;
 
-		internal class TestConsumer : Consumes<TestMessage>.Any
+		internal class TestConsumer : Consumes<TestMessage>.All
 		{
 			private int _value;
 
@@ -31,7 +31,7 @@ namespace MassTransit.ServiceBus.Tests
 				get { return _value; }
 			}
 
-			#region Any Members
+			#region All Members
 
 			public void Consume(TestMessage message)
 			{
