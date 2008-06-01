@@ -95,7 +95,7 @@ namespace HeavyLoad
 		}
 	}
 
-	internal class SimpleRequestService : Consumes<SimpleRequestMessage>.Any
+	internal class SimpleRequestService : Consumes<SimpleRequestMessage>.All
 	{
 		private readonly IServiceBus _bus;
 
