@@ -1,5 +1,6 @@
 namespace WebRequestReply.UI.MonoRail.Controllers
 {
+    using System;
     using Castle.MonoRail.Framework;
     using MassTransit.ServiceBus;
 
@@ -20,9 +21,20 @@ namespace WebRequestReply.UI.MonoRail.Controllers
         }
 
 
-        public void Post(string requestText)
+        public void Sync(string requestText)
         {
-            this.RenderText("DDS:" + requestText);
+            
+        }
+
+        //http://www.ayende.com/Blog/archive/2008/03/25/Async-Actions-in-Monorail.aspx
+        public IAsyncResult BeginAsync()
+        {
+            return null;
+        }
+
+        public void EndAsync()
+        {
+            
         }
     }
 }
