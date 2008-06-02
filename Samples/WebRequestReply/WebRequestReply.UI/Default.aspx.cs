@@ -39,21 +39,21 @@ namespace WebRequestReply.UI
 
         protected void Button2_Click(object sender, EventArgs e)
         {
-            this.RegisterAsyncTask(new PageAsyncTask(beginTask, endTask, timeoutTask, this));
+            this.RegisterAsyncTask(new PageAsyncTask(beginRequest, endRequest, onTimeout, this));
         }
 
 
-        private IAsyncResult beginTask(object sender, EventArgs e, AsyncCallback cb, object extraData)
+        private IAsyncResult beginRequest(object sender, EventArgs e, AsyncCallback cb, object extraData)
         {
             return _controller.BeginRequest(cb, extraData);
         }
 
-        private void endTask(IAsyncResult ar)
+        private void endRequest(IAsyncResult ar)
         {
             _controller.EndRequest(ar);
         }
 
-        private void timeoutTask(IAsyncResult ar)
+        private void onTimeout(IAsyncResult ar)
         {
             ResponseText = "Async Task Timeout";
         }
