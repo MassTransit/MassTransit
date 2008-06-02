@@ -26,7 +26,7 @@ namespace WebRequestReply.UI
             set { responseBox.Text = value; }
         }
 
-        public event EventHandler RequestEntered;// = delegate { }; //is this delegate{}; necessary?
+        public event EventHandler RequestEntered;
 
         #endregion
 
@@ -36,12 +36,12 @@ namespace WebRequestReply.UI
 
         protected void Button1_Click(object sender, EventArgs e)
         {
-            RequestEntered(this, new EventArgs());
+            this.RequestEntered(this, new EventArgs());
         }
 
         protected void Button2_Click(object sender, EventArgs e)
         {
-            RegisterAsyncTask(new PageAsyncTask(beginTask, endTask, timeoutTask, this));
+            this.RegisterAsyncTask(new PageAsyncTask(beginTask, endTask, timeoutTask, this));
         }
 
 

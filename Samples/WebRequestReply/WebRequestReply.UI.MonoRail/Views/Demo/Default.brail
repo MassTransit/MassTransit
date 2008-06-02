@@ -1,0 +1,28 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" >
+  <head>
+    <title>Sample Request/Reply Site (MonoRail)</title>
+  </head>
+  <body>
+    <form action="${SiteRoot}/Demo/Post.castle" method="post">
+      <fieldset>
+        <label style="width:200px">Request:</label>
+        <input type="text" name="requestText" />
+        <br />
+
+        <label style="width:200px">Response:</label>
+        <input type="text" name="responseText" />
+        
+        
+      </fieldset>
+      <fieldset>
+        <input id="sync_button" value="Sync Request" type="submit" />
+        <input id="async_button" value="Async Request" type="button" />
+        
+      </fieldset>
+      
+      
+      
+    </form>
+  </body>
+</html>
