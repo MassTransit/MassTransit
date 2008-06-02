@@ -1,0 +1,990 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Newtonsoft.Json</name>
+    </assembly>
+    <members>
+        <member name="T:Newtonsoft.Json.JsonWriterException">
+            <summary>
+            The exception thrown when an error occurs while reading Json text.
+            </summary>
+        </member>
+        <member name="M:Newtonsoft.Json.JsonWriterException.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:Newtonsoft.Json.JsonWriterException"/> class.
+            </summary>
+        </member>
+        <member name="M:Newtonsoft.Json.JsonWriterException.#ctor(System.String)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Newtonsoft.Json.JsonWriterException"/> class
+            with a specified error message.
+            </summary>
+            <param name="message">The error message that explains the reason for the exception.</param>
+        </member>
+        <member name="M:Newtonsoft.Json.JsonWriterException.#ctor(System.String,System.Exception)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Newtonsoft.Json.JsonWriterException"/> class
+            with a specified error message and a reference to the inner exception that is the cause of this exception.
+            </summary>
+            <param name="message">The error message that explains the reason for the exception.</param>
+            <param name="innerException">The exception that is the cause of the current exception, or a null reference (Nothing in Visual Basic) if no inner exception is specified.</param>
+        </member>
+        <member name="T:Newtonsoft.Json.ReferenceLoopHandling">
+            <summary>
+            Specifies reference loop handling options for the <see cref="T:Newtonsoft.Json.JsonWriter"/>.
+            </summary>
+        </member>
+        <member name="F:Newtonsoft.Json.ReferenceLoopHandling.Error">
+            <summary>
+            Throw a <see cref="T:Newtonsoft.Json.JsonSerializationException"/> when a loop is encountered.
+            </summary>
+        </member>
+        <member name="F:Newtonsoft.Json.ReferenceLoopHandling.Ignore">
+            <summary>
+            Ignore loop references and do not serialize.
+            </summary>
+        </member>
+        <member name="F:Newtonsoft.Json.ReferenceLoopHandling.Serialize">
+            <summary>
+            Serialize loop references.
+            </summary>
+        </member>
+        <member name="T:Newtonsoft.Json.JsonSerializer">
+            <summary>
+            Serializes and deserializes objects into and from the Json format.
+            The <see cref="T:Newtonsoft.Json.JsonSerializer"/> enables you to control how objects are encoded into Json.
+            </summary>
+        </member>
+        <member name="M:Newtonsoft.Json.JsonSerializer.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:Newtonsoft.Json.JsonSerializer"/> class.
+            </summary>
+        </member>
+        <member name="M:Newtonsoft.Json.JsonSerializer.Deserialize(Newtonsoft.Json.JsonReader)">
+            <summary>
+            Deserializes the Json structure contained by the specified <see cref="T:Newtonsoft.Json.JsonReader"/>.
+            </summary>
+            <param name="reader">The <see cref="T:Newtonsoft.Json.JsonReader"/> that contains the Json structure to deserialize.</param>
+            <returns>The <see cref="T:System.Object"/> being deserialized.</returns>
+        </member>
+        <member name="M:Newtonsoft.Json.JsonSerializer.Deserialize(Newtonsoft.Json.JsonReader,System.Type)">
+            <summary>
+            Deserializes the Json structure contained by the specified <see cref="T:Newtonsoft.Json.JsonReader"/>
+            into an instance of the specified type.
+            </summary>
+            <param name="reader">The type of object to create.</param>
+            <param name="objectType">The <see cref="T:System.Type"/> of object being deserialized.</param>
+            <returns>The instance of <paramref name="objectType"/> being deserialized.</returns>
+        </member>
+        <member name="M:Newtonsoft.Json.JsonSerializer.Serialize(System.IO.TextWriter,System.Object)">
+            <summary>
+            Serializes the specified <see cref="T:System.Object"/> and writes the Json structure
+            to a <c>Stream</c> using the specified <see cref="T:System.IO.TextWriter"/>. 
+            </summary>
+            <param name="textWriter">The <see cref="T:System.IO.TextWriter"/> used to write the Json structure.</param>
+            <param name="value">The <see cref="T:System.Object"/> to serialize.</param>
+        </member>
+        <member name="M:Newtonsoft.Json.JsonSerializer.Serialize(Newtonsoft.Json.JsonWriter,System.Object)">
+            <summary>
+            Serializes the specified <see cref="T:System.Object"/> and writes the Json structure
+            to a <c>Stream</c> using the specified <see cref="T:Newtonsoft.Json.JsonWriter"/>. 
+            </summary>
+            <param name="jsonWriter">The <see cref="T:Newtonsoft.Json.JsonWriter"/> used to write the Json structure.</param>
+            <param name="value">The <see cref="T:System.Object"/> to serialize.</param>
+        </member>
+        <member name="P:Newtonsoft.Json.JsonSerializer.ReferenceLoopHandling">
+            <summary>
+            Get or set how reference loops (e.g. a class referencing itself) is handled.
+            </summary>
+        </member>
+        <member name="T:Newtonsoft.Json.JsonToken">
+            <summary>
+            Specifies the type of Json token.
+            </summary>
+        </member>
+        <member name="F:Newtonsoft.Json.JsonToken.None">
+            <summary>
+            This is returned by the <see cref="T:Newtonsoft.Json.JsonReader"/> if a <see cref="M:Newtonsoft.Json.JsonReader.Read"/> method has not been called. 
+            </summary>
+        </member>
+        <member name="F:Newtonsoft.Json.JsonToken.StartObject">
+            <summary>
+            An object start token.
+            </summary>
+        </member>
+        <member name="F:Newtonsoft.Json.JsonToken.StartArray">
+            <summary>
+            An array start token.
+            </summary>
+        </member>
+        <member name="F:Newtonsoft.Json.JsonToken.PropertyName">
+            <summary>
+            An object property name.
+            </summary>
+        </member>
+        <member name="F:Newtonsoft.Json.JsonToken.Comment">
+            <summary>
+            A comment.
+            </summary>
+        </member>
+        <member name="F:Newtonsoft.Json.JsonToken.Integer">
+            <summary>
+            An interger.
+            </summary>
+        </member>
+        <member name="F:Newtonsoft.Json.JsonToken.Float">
+            <summary>
+            A float.
+            </summary>
+        </member>
+        <member name="F:Newtonsoft.Json.JsonToken.String">
+            <summary>
+            A string.
+            </summary>
+        </member>
+        <member name="F:Newtonsoft.Json.JsonToken.Boolean">
+            <summary>
+            A boolean.
+            </summary>
+        </member>
+        <member name="F:Newtonsoft.Json.JsonToken.Null">
+            <summary>
+            A null token.
+            </summary>
+        </member>
+        <member name="F:Newtonsoft.Json.JsonToken.Undefined">
+            <summary>
+            An undefined token.
+            </summary>
+        </member>
+        <member name="F:Newtonsoft.Json.JsonToken.EndObject">
+            <summary>
+            An object end token.
+            </summary>
+        </member>
+        <member name="F:Newtonsoft.Json.JsonToken.EndArray">
+            <summary>
+            An array end token.
+            </summary>
+        </member>
+        <member name="F:Newtonsoft.Json.JsonToken.Constructor">
+            <summary>
+            A JavaScript object constructor.
+            </summary>
+        </member>
+        <member name="F:Newtonsoft.Json.JsonToken.Date">
+            <summary>
+            A Date.
+            </summary>
+        </member>
+        <member name="T:Newtonsoft.Json.StringBuffer">
+            <summary>
+            Builds a string. Unlike StringBuilder this class lets you reuse it's internal buffer.
+            </summary>
+        </member>
+        <member name="T:Newtonsoft.Json.JavaScriptObject">
+            <summary>
+            Represents a JavaScript object.
+            </summary>
+        </member>
+        <member name="M:Newtonsoft.Json.JavaScriptObject.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:Newtonsoft.Json.JavaScriptObject"/> class.
+            </summary>
+        </member>
+        <member name="M:Newtonsoft.Json.JavaScriptObject.#ctor(Newtonsoft.Json.JavaScriptObject)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Newtonsoft.Json.JavaScriptObject"/> class that
+            contains values copied from the specified <see cref="T:Newtonsoft.Json.JavaScriptObject"/>.
+            </summary>
+            <param name="javaScriptObject">The <see cref="T:Newtonsoft.Json.JavaScriptObject"/> whose elements are copied to the new object.</param>
+        </member>
+        <member name="T:Newtonsoft.Json.WriteState">
+            <summary>
+            Specifies the state of the <see cref="T:Newtonsoft.Json.JsonWriter"/>.
+            </summary>
+        </member>
+        <member name="F:Newtonsoft.Json.WriteState.Error">
+            <summary>
+            An exception has been thrown, which has left the <see cref="T:Newtonsoft.Json.JsonWriter"/> in an invalid state.
+            You may call the <see cref="M:Newtonsoft.Json.JsonWriter.Close"/> method to put the <see cref="T:Newtonsoft.Json.JsonWriter"/> in the <c>Closed</c> state.
+            Any other <see cref="T:Newtonsoft.Json.JsonWriter"/> method calls results in an <see cref="T:System.InvalidOperationException"/> being thrown. 
+            </summary>
+        </member>
+        <member name="F:Newtonsoft.Json.WriteState.Closed">
+            <summary>
+            The <see cref="M:Newtonsoft.Json.JsonWriter.Close"/> method has been called. 
+            </summary>
+        </member>
+        <member name="F:Newtonsoft.Json.WriteState.Object">
+            <summary>
+            An object is being written. 
+            </summary>
+        </member>
+        <member name="F:Newtonsoft.Json.WriteState.Array">
+            <summary>
+            A array is being written.
+            </summary>
+        </member>
+        <member name="F:Newtonsoft.Json.WriteState.Property">
+            <summary>
+            A property is being written.
+            </summary>
+        </member>
+        <member name="F:Newtonsoft.Json.WriteState.Start">
+            <summary>
+            A write method has not been called.
+            </summary>
+        </member>
+        <member name="T:Newtonsoft.Json.Formatting">
+            <summary>
+            Specifies formatting options for the <see cref="T:Newtonsoft.Json.JsonWriter"/>.
+            </summary>
+        </member>
+        <member name="F:Newtonsoft.Json.Formatting.None">
+            <summary>
+            No special formatting is applied. This is the default.
+            </summary>
+        </member>
+        <member name="F:Newtonsoft.Json.Formatting.Indented">
+            <summary>
+            Causes child objects to be indented according to the <see cref="P:Newtonsoft.Json.JsonWriter.Indentation"/> and <see cref="P:Newtonsoft.Json.JsonWriter.IndentChar"/> settings.
+            </summary>
+        </member>
+        <member name="T:Newtonsoft.Json.JsonWriter">
+            <summary>
+            Represents a writer that provides a fast, non-cached, forward-only way of generating Json data.
+            </summary>
+        </member>
+        <member name="M:Newtonsoft.Json.JsonWriter.#ctor(System.IO.TextWriter)">
+            <summary>
+            Creates an instance of the <c>JsonWriter</c> class using the specified <see cref="T:System.IO.TextWriter"/>. 
+            </summary>
+            <param name="textWriter">The <c>TextWriter</c> to write to.</param>
+        </member>
+        <member name="M:Newtonsoft.Json.JsonWriter.Flush">
+            <summary>
+            Flushes whatever is in the buffer to the underlying streams and also flushes the underlying stream.
+            </summary>
+        </member>
+        <member name="M:Newtonsoft.Json.JsonWriter.Close">
+            <summary>
+            Closes this stream and the underlying stream.
+            </summary>
+        </member>
+        <member name="M:Newtonsoft.Json.JsonWriter.WriteStartObject">
+            <summary>
+            Writes the beginning of a Json object.
+            </summary>
+        </member>
+        <member name="M:Newtonsoft.Json.JsonWriter.WriteEndObject">
+            <summary>
+            Writes the end of a Json object.
+            </summary>
+        </member>
+        <member name="M:Newtonsoft.Json.JsonWriter.WriteStartArray">
+            <summary>
+            Writes the beginning of a Json array.
+            </summary>
+        </member>
+        <member name="M:Newtonsoft.Json.JsonWriter.WriteEndArray">
+            <summary>
+            Writes the end of an array.
+            </summary>
+        </member>
+        <member name="M:Newtonsoft.Json.JsonWriter.WritePropertyName(System.String)">
+            <summary>
+            Writes the property name of a name/value pair on a Json object.
+            </summary>
+            <param name="name"></param>
+        </member>
+        <member name="M:Newtonsoft.Json.JsonWriter.WriteEnd">
+            <summary>
+            Writes the end of the current Json object or array.
+            </summary>
+        </member>
+        <member name="M:Newtonsoft.Json.JsonWriter.WriteNull">
+            <summary>
+            Writes a null value.
+            </summary>
+        </member>
+        <member name="M:Newtonsoft.Json.JsonWriter.WriteUndefined">
+            <summary>
+            Writes an undefined value.
+            </summary>
+        </member>
+        <member name="M:Newtonsoft.Json.JsonWriter.WriteRaw(System.String)">
+            <summary>
+            Writes raw JavaScript manually.
+            </summary>
+            <param name="javaScript">The raw JavaScript to write.</param>
+        </member>
+        <member name="M:Newtonsoft.Json.JsonWriter.WriteValue(System.String)">
+            <summary>
+            Writes a <see cref="T:System.String"/> value.
+            </summary>
+            <param name="value">The <see cref="T:System.String"/> value to write.</param>
+        </member>
+        <member name="M:Newtonsoft.Json.JsonWriter.WriteValue(System.Int32)">
+            <summary>
+            Writes a <see cref="T:System.Int32"/> value.
+            </summary>
+            <param name="value">The <see cref="T:System.Int32"/> value to write.</param>
+        </member>
+        <member name="M:Newtonsoft.Json.JsonWriter.WriteValue(System.UInt32)">
+            <summary>
+            Writes a <see cref="T:System.UInt32"/> value.
+            </summary>
+            <param name="value">The <see cref="T:System.UInt32"/> value to write.</param>
+        </member>
+        <member name="M:Newtonsoft.Json.JsonWriter.WriteValue(System.Int64)">
+            <summary>
+            Writes a <see cref="T:System.Int64"/> value.
+            </summary>
+            <param name="value">The <see cref="T:System.Int64"/> value to write.</param>
+        </member>
+        <member name="M:Newtonsoft.Json.JsonWriter.WriteValue(System.UInt64)">
+            <summary>
+            Writes a <see cref="T:System.UInt64"/> value.
+            </summary>
+            <param name="value">The <see cref="T:System.UInt64"/> value to write.</param>
+        </member>
+        <member name="M:Newtonsoft.Json.JsonWriter.WriteValue(System.Single)">
+            <summary>
+            Writes a <see cref="T:System.Single"/> value.
+            </summary>
+            <param name="value">The <see cref="T:System.Single"/> value to write.</param>
+        </member>
+        <member name="M:Newtonsoft.Json.JsonWriter.WriteValue(System.Double)">
+            <summary>
+            Writes a <see cref="T:System.Double"/> value.
+            </summary>
+            <param name="value">The <see cref="T:System.Double"/> value to write.</param>
+        </member>
+        <member name="M:Newtonsoft.Json.JsonWriter.WriteValue(System.Boolean)">
+            <summary>
+            Writes a <see cref="T:System.Boolean"/> value.
+            </summary>
+            <param name="value">The <see cref="T:System.Boolean"/> value to write.</param>
+        </member>
+        <member name="M:Newtonsoft.Json.JsonWriter.WriteValue(System.Int16)">
+            <summary>
+            Writes a <see cref="T:System.Int16"/> value.
+            </summary>
+            <param name="value">The <see cref="T:System.Int16"/> value to write.</param>
+        </member>
+        <member name="M:Newtonsoft.Json.JsonWriter.WriteValue(System.UInt16)">
+            <summary>
+            Writes a <see cref="T:System.UInt16"/> value.
+            </summary>
+            <param name="value">The <see cref="T:System.UInt16"/> value to write.</param>
+        </member>
+        <member name="M:Newtonsoft.Json.JsonWriter.WriteValue(System.Char)">
+            <summary>
+            Writes a <see cref="T:System.Char"/> value.
+            </summary>
+            <param name="value">The <see cref="T:System.Char"/> value to write.</param>
+        </member>
+        <member name="M:Newtonsoft.Json.JsonWriter.WriteValue(System.Byte)">
+            <summary>
+            Writes a <see cref="T:System.Byte"/> value.
+            </summary>
+            <param name="value">The <see cref="T:System.Byte"/> value to write.</param>
+        </member>
+        <member name="M:Newtonsoft.Json.JsonWriter.WriteValue(System.SByte)">
+            <summary>
+            Writes a <see cref="T:System.SByte"/> value.
+            </summary>
+            <param name="value">The <see cref="T:System.SByte"/> value to write.</param>
+        </member>
+        <member name="M:Newtonsoft.Json.JsonWriter.WriteValue(System.Decimal)">
+            <summary>
+            Writes a <see cref="T:System.Decimal"/> value.
+            </summary>
+            <param name="value">The <see cref="T:System.Decimal"/> value to write.</param>
+        </member>
+        <member name="M:Newtonsoft.Json.JsonWriter.WriteValue(System.DateTime)">
+            <summary>
+            Writes a <see cref="T:System.DateTime"/> value.
+            </summary>
+            <param name="value">The <see cref="T:System.DateTime"/> value to write.</param>
+        </member>
+        <member name="M:Newtonsoft.Json.JsonWriter.WriteComment(System.String)">
+            <summary>
+            Writes out a comment <code>/*...*/</code> containing the specified text. 
+            </summary>
+            <param name="text">Text to place inside the comment.</param>
+        </member>
+        <member name="M:Newtonsoft.Json.JsonWriter.WriteWhitespace(System.String)">
+            <summary>
+            Writes out the given white space.
+            </summary>
+            <param name="ws">The string of white space characters.</param>
+        </member>
+        <member name="P:Newtonsoft.Json.JsonWriter.WriteState">
+            <summary>
+            Gets the state of the writer.
+            </summary>
+        </member>
+        <member name="P:Newtonsoft.Json.JsonWriter.Formatting">
+            <summary>
+            Indicates how the output is formatted.
+            </summary>
+        </member>
+        <member name="P:Newtonsoft.Json.JsonWriter.Indentation">
+            <summary>
+            Gets or sets how many IndentChars to write for each level in the hierarchy when <paramref name="Formatting"/> is set to <c>Formatting.Indented</c>.
+            </summary>
+        </member>
+        <member name="P:Newtonsoft.Json.JsonWriter.QuoteChar">
+            <summary>
+            Gets or sets which character to use to quote attribute values.
+            </summary>
+        </member>
+        <member name="P:Newtonsoft.Json.JsonWriter.IndentChar">
+            <summary>
+            Gets or sets which character to use for indenting when <paramref name="Formatting"/> is set to <c>Formatting.Indented</c>.
+            </summary>
+        </member>
+        <member name="P:Newtonsoft.Json.JsonWriter.QuoteName">
+            <summary>
+            Gets or sets a value indicating whether object names will be surrounded with quotes.
+            </summary>
+        </member>
+        <member name="T:Newtonsoft.Json.JsonReader">
+            <summary>
+            Represents a reader that provides fast, non-cached, forward-only access to serialized Json data.
+            </summary>
+        </member>
+        <member name="M:Newtonsoft.Json.JsonReader.#ctor(System.IO.TextReader)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Newtonsoft.Json.JsonReader"/> class with the specified <see cref="T:System.IO.TextReader"/>.
+            </summary>
+            <param name="reader">The <c>TextReader</c> containing the XML data to read.</param>
+        </member>
+        <member name="M:Newtonsoft.Json.JsonReader.Read">
+            <summary>
+            Reads the next Json token from the stream.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Newtonsoft.Json.JsonReader.Close">
+            <summary>
+            Changes the <see cref="T:Newtonsoft.Json.JsonReader.State"/> to Closed. 
+            </summary>
+        </member>
+        <member name="P:Newtonsoft.Json.JsonReader.QuoteChar">
+            <summary>
+            Gets the quotation mark character used to enclose the value of a string.
+            </summary>
+        </member>
+        <member name="P:Newtonsoft.Json.JsonReader.TokenType">
+            <summary>
+            Gets the type of the current Json token. 
+            </summary>
+        </member>
+        <member name="P:Newtonsoft.Json.JsonReader.Value">
+            <summary>
+            Gets the text value of the current Json token.
+            </summary>
+        </member>
+        <member name="P:Newtonsoft.Json.JsonReader.ValueType">
+            <summary>
+            Gets The Common Language Runtime (CLR) type for the current Json token.
+            </summary>
+        </member>
+        <member name="T:Newtonsoft.Json.JavaScriptConstructor">
+            <summary>
+            Represents a JavaScript constructor.
+            </summary>
+        </member>
+        <member name="M:Newtonsoft.Json.Converters.XmlNodeConverter.IsNamespaceAttribute(System.String,System.String@)">
+            <summary>
+            Checks if the attributeName is a namespace attribute.
+            </summary>
+            <param name="attributeName">Attribute name to test.</param>
+            <param name="prefix">The attribute name prefix if it has one, otherwise an empty string.</param>
+            <returns>True if attribute name is for a namespace attribute, otherwise false.</returns>
+        </member>
+        <member name="M:Newtonsoft.Json.Utilities.ReflectionUtils.GetListItemType(System.Type)">
+            <summary>
+            Gets the type of the typed list's items.
+            </summary>
+            <param name="type">The type.</param>
+            <returns>The type of the typed list's items.</returns>
+        </member>
+        <member name="M:Newtonsoft.Json.Utilities.ReflectionUtils.ItemsUnitializedValue``1(System.Collections.Generic.IList{``0})">
+            <summary>
+            Tests whether the list's items are their unitialized value.
+            </summary>
+            <param name="list">The list.</param>
+            <returns>Whether the list's items are their unitialized value</returns>
+        </member>
+        <member name="M:Newtonsoft.Json.Utilities.ReflectionUtils.GetMemberUnderlyingType(System.Reflection.MemberInfo)">
+            <summary>
+            Gets the member's underlying type.
+            </summary>
+            <param name="member">The member.</param>
+            <returns>The underlying type of the member.</returns>
+        </member>
+        <member name="M:Newtonsoft.Json.Utilities.ReflectionUtils.IsIndexedProperty(System.Reflection.MemberInfo)">
+            <summary>
+            Determines whether the member is an indexed property.
+            </summary>
+            <param name="member">The member.</param>
+            <returns>
+            	<c>true</c> if the member is an indexed property; otherwise, <c>false</c>.
+            </returns>
+        </member>
+        <member name="M:Newtonsoft.Json.Utilities.ReflectionUtils.IsIndexedProperty(System.Reflection.PropertyInfo)">
+            <summary>
+            Determines whether the property is an indexed property.
+            </summary>
+            <param name="property">The property.</param>
+            <returns>
+            	<c>true</c> if the property is an indexed property; otherwise, <c>false</c>.
+            </returns>
+        </member>
+        <member name="M:Newtonsoft.Json.Utilities.ReflectionUtils.GetMemberValue(System.Reflection.MemberInfo,System.Object)">
+            <summary>
+            Gets the member's value on the object.
+            </summary>
+            <param name="member">The member.</param>
+            <param name="target">The target object.</param>
+            <returns>The member's value on the object.</returns>
+        </member>
+        <member name="M:Newtonsoft.Json.Utilities.ReflectionUtils.SetMemberValue(System.Reflection.MemberInfo,System.Object,System.Object)">
+            <summary>
+            Sets the member's value on the target object.
+            </summary>
+            <param name="member">The member.</param>
+            <param name="target">The target.</param>
+            <param name="value">The value.</param>
+        </member>
+        <member name="M:Newtonsoft.Json.Utilities.ReflectionUtils.CanReadMemberValue(System.Reflection.MemberInfo)">
+            <summary>
+            Determines whether the specified MemberInfo can be read.
+            </summary>
+            <param name="member">The MemberInfo to determine whether can be read.</param>
+            <returns>
+            	<c>true</c> if the specified MemberInfo can be read; otherwise, <c>false</c>.
+            </returns>
+        </member>
+        <member name="M:Newtonsoft.Json.Utilities.ReflectionUtils.CanSetMemberValue(System.Reflection.MemberInfo)">
+            <summary>
+            Determines whether the specified MemberInfo can be set.
+            </summary>
+            <param name="member">The MemberInfo to determine whether can be set.</param>
+            <returns>
+            	<c>true</c> if the specified MemberInfo can be set; otherwise, <c>false</c>.
+            </returns>
+        </member>
+        <member name="T:Newtonsoft.Json.JsonReaderException">
+            <summary>
+            The exception thrown when an error occurs while reading Json text.
+            </summary>
+        </member>
+        <member name="M:Newtonsoft.Json.JsonReaderException.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:Newtonsoft.Json.JsonReaderException"/> class.
+            </summary>
+        </member>
+        <member name="M:Newtonsoft.Json.JsonReaderException.#ctor(System.String)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Newtonsoft.Json.JsonReaderException"/> class
+            with a specified error message.
+            </summary>
+            <param name="message">The error message that explains the reason for the exception.</param>
+        </member>
+        <member name="M:Newtonsoft.Json.JsonReaderException.#ctor(System.String,System.Exception)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Newtonsoft.Json.JsonReaderException"/> class
+            with a specified error message and a reference to the inner exception that is the cause of this exception.
+            </summary>
+            <param name="message">The error message that explains the reason for the exception.</param>
+            <param name="innerException">The exception that is the cause of the current exception, or a null reference (Nothing in Visual Basic) if no inner exception is specified.</param>
+        </member>
+        <member name="T:Newtonsoft.Json.JavaScriptArray">
+            <summary>
+            Represents a JavaScript array.
+            </summary>
+        </member>
+        <member name="M:Newtonsoft.Json.JavaScriptArray.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:Newtonsoft.Json.JavaScriptObject"/> class.
+            </summary>
+        </member>
+        <member name="M:Newtonsoft.Json.JavaScriptArray.#ctor(System.Collections.Generic.IEnumerable{System.Object})">
+            <summary>
+            Initializes a new instance of the <see cref="T:Newtonsoft.Json.JavaScriptArray"/> class that
+            contains elements copied from the specified collection.
+            </summary>
+            <param name="collection">The collection whose elements are copied to the new array.</param>
+        </member>
+        <member name="M:Newtonsoft.Json.JavaScriptArray.#ctor(System.Int32)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Newtonsoft.Json.JavaScriptArray"/> class that
+            is empty and has the specified initial capacity.
+            </summary>
+            <param name="capacity">The number of elements that the new array can initially store.</param>
+        </member>
+        <member name="M:Newtonsoft.Json.Utilities.StringUtils.ContainsWhiteSpace(System.String)">
+            <summary>
+            Determines whether the string contains white space.
+            </summary>
+            <param name="s">The string to test for white space.</param>
+            <returns>
+            	<c>true</c> if the string contains white space; otherwise, <c>false</c>.
+            </returns>
+        </member>
+        <member name="M:Newtonsoft.Json.Utilities.StringUtils.IsWhiteSpace(System.String)">
+            <summary>
+            Determines whether the string is all white space. Empty string will return false.
+            </summary>
+            <param name="s">The string to test whether it is all white space.</param>
+            <returns>
+            	<c>true</c> if the string is all white space; otherwise, <c>false</c>.
+            </returns>
+        </member>
+        <member name="M:Newtonsoft.Json.Utilities.StringUtils.EnsureEndsWith(System.String,System.String)">
+            <summary>
+            Ensures the target string ends with the specified string.
+            </summary>
+            <param name="target">The target.</param>
+            <param name="value">The value.</param>
+            <returns>The target string with the value string at the end.</returns>
+        </member>
+        <member name="M:Newtonsoft.Json.Utilities.StringUtils.IsNullOrEmpty(System.Data.SqlTypes.SqlString)">
+            <summary>
+            Determines whether the SqlString is null or empty.
+            </summary>
+            <param name="s">The string.</param>
+            <returns>
+            	<c>true</c> if the SqlString is null or empty; otherwise, <c>false</c>.
+            </returns>
+        </member>
+        <member name="M:Newtonsoft.Json.Utilities.StringUtils.IfNotNullOrEmpty(System.String,System.Action{System.String})">
+            <summary>
+            Perform an action if the string is not null or empty.
+            </summary>
+            <param name="value">The value.</param>
+            <param name="action">The action to perform.</param>
+        </member>
+        <member name="M:Newtonsoft.Json.Utilities.StringUtils.Indent(System.String,System.Int32)">
+            <summary>
+            Indents the specified string.
+            </summary>
+            <param name="s">The string to indent.</param>
+            <param name="indentation">The number of characters to indent by.</param>
+            <returns></returns>
+        </member>
+        <member name="M:Newtonsoft.Json.Utilities.StringUtils.Indent(System.String,System.Int32,System.Char)">
+            <summary>
+            Indents the specified string.
+            </summary>
+            <param name="s">The string to indent.</param>
+            <param name="indentation">The number of characters to indent by.</param>
+            <param name="indentChar">The indent character.</param>
+            <returns></returns>
+        </member>
+        <member name="M:Newtonsoft.Json.Utilities.StringUtils.NumberLines(System.String)">
+            <summary>
+            Numbers the lines.
+            </summary>
+            <param name="s">The string to number.</param>
+            <returns></returns>
+        </member>
+        <member name="M:Newtonsoft.Json.Utilities.StringUtils.NullEmptyString(System.String)">
+            <summary>
+            Nulls an empty string.
+            </summary>
+            <param name="s">The string.</param>
+            <returns>Null if the string was null, otherwise the string unchanged.</returns>
+        </member>
+        <member name="M:Newtonsoft.Json.Utilities.CollectionUtils.IsNullOrEmpty(System.Collections.ICollection)">
+            <summary>
+            Determines whether the collection is null or empty.
+            </summary>
+            <param name="collection">The collection.</param>
+            <returns>
+            	<c>true</c> if the collection is null or empty; otherwise, <c>false</c>.
+            </returns>
+        </member>
+        <member name="M:Newtonsoft.Json.Utilities.CollectionUtils.IsNullOrEmpty``1(System.Collections.Generic.ICollection{``0})">
+            <summary>
+            Determines whether the collection is null or empty.
+            </summary>
+            <param name="collection">The collection.</param>
+            <returns>
+            	<c>true</c> if the collection is null or empty; otherwise, <c>false</c>.
+            </returns>
+        </member>
+        <member name="M:Newtonsoft.Json.Utilities.CollectionUtils.IsNullOrEmptyOrDefault``1(System.Collections.Generic.IList{``0})">
+            <summary>
+            Determines whether the collection is null, empty or its contents are uninitialized values.
+            </summary>
+            <param name="list">The list.</param>
+            <returns>
+            	<c>true</c> if the collection is null or empty or its contents are uninitialized values; otherwise, <c>false</c>.
+            </returns>
+        </member>
+        <member name="M:Newtonsoft.Json.Utilities.CollectionUtils.Slice``1(System.Collections.Generic.IList{``0},System.Nullable{System.Int32},System.Nullable{System.Int32})">
+            <summary>
+            Makes a slice of the specified list in between the start and end indexes.
+            </summary>
+            <param name="list">The list.</param>
+            <param name="start">The start index.</param>
+            <param name="end">The end index.</param>
+            <returns>A slice of the list.</returns>
+        </member>
+        <member name="M:Newtonsoft.Json.Utilities.CollectionUtils.Slice``1(System.Collections.Generic.IList{``0},System.Nullable{System.Int32},System.Nullable{System.Int32},System.Nullable{System.Int32})">
+            <summary>
+            Makes a slice of the specified list in between the start and end indexes,
+            getting every so many items based upon the step.
+            </summary>
+            <param name="list">The list.</param>
+            <param name="start">The start index.</param>
+            <param name="end">The end index.</param>
+            <param name="step">The step.</param>
+            <returns>A slice of the list.</returns>
+        </member>
+        <member name="M:Newtonsoft.Json.Utilities.CollectionUtils.GroupBy``2(System.Collections.Generic.ICollection{``1},Newtonsoft.Json.Utilities.Func{``1,``0})">
+            <summary>
+            Group the collection using a function which returns the key.
+            </summary>
+            <param name="source">The source collection to group.</param>
+            <param name="keySelector">The key selector.</param>
+            <returns>A Dictionary with each key relating to a list of objects in a list grouped under it.</returns>
+        </member>
+        <member name="M:Newtonsoft.Json.Utilities.CollectionUtils.AddRange``1(System.Collections.Generic.IList{``0},System.Collections.Generic.IEnumerable{``0})">
+            <summary>
+            Adds the elements of the specified collection to the specified generic IList.
+            </summary>
+            <param name="initial">The list to add to.</param>
+            <param name="collection">The collection of elements to add.</param>
+        </member>
+        <member name="T:Newtonsoft.Json.JsonSerializationException">
+            <summary>
+            The exception thrown when an error occurs during Json serialization or deserialization.
+            </summary>
+        </member>
+        <member name="M:Newtonsoft.Json.JsonSerializationException.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:Newtonsoft.Json.JsonSerializationException"/> class.
+            </summary>
+        </member>
+        <member name="M:Newtonsoft.Json.JsonSerializationException.#ctor(System.String)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Newtonsoft.Json.JsonSerializationException"/> class
+            with a specified error message.
+            </summary>
+            <param name="message">The error message that explains the reason for the exception.</param>
+        </member>
+        <member name="M:Newtonsoft.Json.JsonSerializationException.#ctor(System.String,System.Exception)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Newtonsoft.Json.JsonSerializationException"/> class
+            with a specified error message and a reference to the inner exception that is the cause of this exception.
+            </summary>
+            <param name="message">The error message that explains the reason for the exception.</param>
+            <param name="innerException">The exception that is the cause of the current exception, or a null reference (Nothing in Visual Basic) if no inner exception is specified.</param>
+        </member>
+        <member name="T:Newtonsoft.Json.JavaScriptConvert">
+            <summary>
+            Provides methods for converting between common language runtime types and JavaScript types.
+            </summary>
+        </member>
+        <member name="F:Newtonsoft.Json.JavaScriptConvert.True">
+            <summary>
+            Represents JavaScript's boolean value true as a string. This field is read-only.
+            </summary>
+        </member>
+        <member name="F:Newtonsoft.Json.JavaScriptConvert.False">
+            <summary>
+            Represents JavaScript's boolean value false as a string. This field is read-only.
+            </summary>
+        </member>
+        <member name="F:Newtonsoft.Json.JavaScriptConvert.Null">
+            <summary>
+            Represents JavaScript's null as a string. This field is read-only.
+            </summary>
+        </member>
+        <member name="F:Newtonsoft.Json.JavaScriptConvert.Undefined">
+            <summary>
+            Represents JavaScript's undefined as a string. This field is read-only.
+            </summary>
+        </member>
+        <member name="M:Newtonsoft.Json.JavaScriptConvert.ToString(System.DateTime)">
+            <summary>
+            Converts the <see cref="T:System.DateTime"/> to it's JavaScript string representation.
+            </summary>
+            <param name="value">The value to convert.</param>
+            <returns>A Json string representation of the <see cref="T:System.DateTime"/>.</returns>
+        </member>
+        <member name="M:Newtonsoft.Json.JavaScriptConvert.ToString(System.Boolean)">
+            <summary>
+            Converts the <see cref="T:System.Boolean"/> to it's JavaScript string representation.
+            </summary>
+            <param name="value">The value to convert.</param>
+            <returns>A Json string representation of the <see cref="T:System.Boolean"/>.</returns>
+        </member>
+        <member name="M:Newtonsoft.Json.JavaScriptConvert.ToString(System.Char)">
+            <summary>
+            Converts the <see cref="T:System.Char"/> to it's JavaScript string representation.
+            </summary>
+            <param name="value">The value to convert.</param>
+            <returns>A Json string representation of the <see cref="T:System.Char"/>.</returns>
+        </member>
+        <member name="M:Newtonsoft.Json.JavaScriptConvert.ToString(System.Enum)">
+            <summary>
+            Converts the <see cref="T:System.Enum"/> to it's JavaScript string representation.
+            </summary>
+            <param name="value">The value to convert.</param>
+            <returns>A Json string representation of the <see cref="T:System.Enum"/>.</returns>
+        </member>
+        <member name="M:Newtonsoft.Json.JavaScriptConvert.ToString(System.Int32)">
+            <summary>
+            Converts the <see cref="T:System.Int32"/> to it's JavaScript string representation.
+            </summary>
+            <param name="value">The value to convert.</param>
+            <returns>A Json string representation of the <see cref="T:System.Int32"/>.</returns>
+        </member>
+        <member name="M:Newtonsoft.Json.JavaScriptConvert.ToString(System.Int16)">
+            <summary>
+            Converts the <see cref="T:System.Int16"/> to it's JavaScript string representation.
+            </summary>
+            <param name="value">The value to convert.</param>
+            <returns>A Json string representation of the <see cref="T:System.Int16"/>.</returns>
+        </member>
+        <member name="M:Newtonsoft.Json.JavaScriptConvert.ToString(System.UInt16)">
+            <summary>
+            Converts the <see cref="T:System.UInt16"/> to it's JavaScript string representation.
+            </summary>
+            <param name="value">The value to convert.</param>
+            <returns>A Json string representation of the <see cref="T:System.UInt16"/>.</returns>
+        </member>
+        <member name="M:Newtonsoft.Json.JavaScriptConvert.ToString(System.UInt32)">
+            <summary>
+            Converts the <see cref="T:System.UInt32"/> to it's JavaScript string representation.
+            </summary>
+            <param name="value">The value to convert.</param>
+            <returns>A Json string representation of the <see cref="T:System.UInt32"/>.</returns>
+        </member>
+        <member name="M:Newtonsoft.Json.JavaScriptConvert.ToString(System.Int64)">
+            <summary>
+            Converts the <see cref="T:System.Int64"/>  to it's JavaScript string representation.
+            </summary>
+            <param name="value">The value to convert.</param>
+            <returns>A Json string representation of the <see cref="T:System.Int64"/>.</returns>
+        </member>
+        <member name="M:Newtonsoft.Json.JavaScriptConvert.ToString(System.UInt64)">
+            <summary>
+            Converts the <see cref="T:System.UInt64"/> to it's JavaScript string representation.
+            </summary>
+            <param name="value">The value to convert.</param>
+            <returns>A Json string representation of the <see cref="T:System.UInt64"/>.</returns>
+        </member>
+        <member name="M:Newtonsoft.Json.JavaScriptConvert.ToString(System.Single)">
+            <summary>
+            Converts the <see cref="T:System.Single"/> to it's JavaScript string representation.
+            </summary>
+            <param name="value">The value to convert.</param>
+            <returns>A Json string representation of the <see cref="T:System.Single"/>.</returns>
+        </member>
+        <member name="M:Newtonsoft.Json.JavaScriptConvert.ToString(System.Double)">
+            <summary>
+            Converts the <see cref="T:System.Double"/> to it's JavaScript string representation.
+            </summary>
+            <param name="value">The value to convert.</param>
+            <returns>A Json string representation of the <see cref="T:System.Double"/>.</returns>
+        </member>
+        <member name="M:Newtonsoft.Json.JavaScriptConvert.ToString(System.Byte)">
+            <summary>
+            Converts the <see cref="T:System.Byte"/> to it's JavaScript string representation.
+            </summary>
+            <param name="value">The value to convert.</param>
+            <returns>A Json string representation of the <see cref="T:System.Byte"/>.</returns>
+        </member>
+        <member name="M:Newtonsoft.Json.JavaScriptConvert.ToString(System.SByte)">
+            <summary>
+            Converts the <see cref="T:System.SByte"/> to it's JavaScript string representation.
+            </summary>
+            <param name="value">The value to convert.</param>
+            <returns>A Json string representation of the <see cref="T:System.SByte"/>.</returns>
+        </member>
+        <member name="M:Newtonsoft.Json.JavaScriptConvert.ToString(System.Decimal)">
+            <summary>
+            Converts the <see cref="T:System.Decimal"/> to it's JavaScript string representation.
+            </summary>
+            <param name="value">The value to convert.</param>
+            <returns>A Json string representation of the <see cref="T:System.SByte"/>.</returns>
+        </member>
+        <member name="M:Newtonsoft.Json.JavaScriptConvert.ToString(System.Guid)">
+            <summary>
+            Converts the <see cref="T:System.Guid"/> to it's JavaScript string representation.
+            </summary>
+            <param name="value">The value to convert.</param>
+            <returns>A Json string representation of the <see cref="T:System.Guid"/>.</returns>
+        </member>
+        <member name="M:Newtonsoft.Json.JavaScriptConvert.ToString(System.String)">
+            <summary>
+            Converts the <see cref="T:System.String"/> to it's JavaScript string representation.
+            </summary>
+            <param name="value">The value to convert.</param>
+            <returns>A Json string representation of the <see cref="T:System.String"/>.</returns>
+        </member>
+        <member name="M:Newtonsoft.Json.JavaScriptConvert.ToString(System.String,System.Char)">
+            <summary>
+            Converts the <see cref="T:System.String"/> to it's JavaScript string representation.
+            </summary>
+            <param name="value">The value to convert.</param>
+            <param name="delimter">The string delimiter character.</param>
+            <returns>A Json string representation of the <see cref="T:System.String"/>.</returns>
+        </member>
+        <member name="M:Newtonsoft.Json.JavaScriptConvert.ToString(System.Object)">
+            <summary>
+            Converts the <see cref="T:System.Object"/> to it's JavaScript string representation.
+            </summary>
+            <param name="value">The value to convert.</param>
+            <returns>A Json string representation of the <see cref="T:System.Object"/>.</returns>
+        </member>
+        <member name="M:Newtonsoft.Json.JavaScriptConvert.SerializeObject(System.Object)">
+            <summary>
+            Serializes the specified object to a Json object.
+            </summary>
+            <param name="value">The object to serialize.</param>
+            <returns>A Json string representation of the object.</returns>
+        </member>
+        <member name="M:Newtonsoft.Json.JavaScriptConvert.DeserializeObject(System.String)">
+            <summary>
+            Deserializes the specified object to a Json object.
+            </summary>
+            <param name="value">The object to deserialize.</param>
+            <returns>The deserialized object from the Json string.</returns>
+        </member>
+        <member name="M:Newtonsoft.Json.JavaScriptConvert.DeserializeObject(System.String,System.Type)">
+            <summary>
+            Deserializes the specified object to a Json object.
+            </summary>
+            <param name="value">The object to deserialize.</param>
+            <param name="type">The <see cref="T:System.Type"/> of object being deserialized.</param>
+            <returns>The deserialized object from the Json string.</returns>
+        </member>
+        <member name="M:Newtonsoft.Json.JavaScriptConvert.DeserializeObject``1(System.String)">
+            <summary>
+            Deserializes the specified object to a Json object.
+            </summary>
+            <typeparam name="T">The type of the object to deserialize.</typeparam>
+            <param name="value">The object to deserialize.</param>
+            <returns>The deserialized object from the Json string.</returns>
+        </member>
+        <member name="M:Newtonsoft.Json.JavaScriptConvert.DeserializeObject``1(System.String,Newtonsoft.Json.JsonConverter[])">
+            <summary>
+            Deserializes the specified object to a Json object.
+            </summary>
+            <typeparam name="T">The type of the object to deserialize.</typeparam>
+            <param name="value">The object to deserialize.</param>
+            <param name="converters">Converters to use while deserializing.</param>
+            <returns>The deserialized object from the Json string.</returns>
+        </member>
+    </members>
+</doc>
