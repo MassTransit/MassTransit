@@ -51,6 +51,11 @@ namespace WebRequestReply.Core
 			}
 		}
 
+
+        public IAsyncResult beginRequest(object sender, EventArgs e, AsyncCallback cb, object extraData)
+        {
+            return this.BeginRequest(cb, extraData);
+        }
 		public IAsyncResult BeginRequest(AsyncCallback callback, object data)
 		{
 			_asyncController = new AsyncController(callback, data);
@@ -66,11 +71,21 @@ namespace WebRequestReply.Core
 			return _asyncController;
 		}
 
+
+        public void endRequest(IAsyncResult ar)
+        {
+            this.EndRequest(ar);
+        }
 		public void EndRequest(IAsyncResult ar)
 		{
 			_serviceBus.Unsubscribe(this);
 		}
 
+
+        public void onTimeout(IAsyncResult ar)
+        {
+            this._view.ResponseText = "Async Task Timeout";
+        }
 
 		public void Dispose()
 		{
