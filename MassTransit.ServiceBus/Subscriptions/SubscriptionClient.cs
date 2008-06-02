@@ -47,7 +47,7 @@ namespace MassTransit.ServiceBus.Subscriptions
 
 		public void Consume(RemoveSubscription message)
 		{
-			_cache.Add(message.Subscription);
+			_cache.Remove(message.Subscription);
 		}
 
 		public void Dispose()
