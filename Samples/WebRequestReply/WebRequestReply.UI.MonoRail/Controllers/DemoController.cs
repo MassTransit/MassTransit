@@ -1,66 +1,71 @@
 namespace WebRequestReply.UI.MonoRail.Controllers
 {
-    using System;
-    using Castle.MonoRail.Framework;
-    using Core;
-    using MassTransit.ServiceBus;
+	using System;
+	using Castle.MonoRail.Framework;
+	using Core;
+	using MassTransit.ServiceBus;
 
-    public class DemoController :
-        SmartDispatcherController,
-        Consumes<ResponseMessage>.For<Guid>
-    {
-        private IServiceBus _bus;
-        private Guid _correlationId;
+	public class DemoController :
+		SmartDispatcherController,
+		Consumes<ResponseMessage>.For<Guid>
+	{
+		private IServiceBus _bus;
+		private Guid _correlationId;
 
-        public DemoController(IServiceBus bus)
-        {
-            _bus = bus;
-            _correlationId = Guid.NewGuid();
-        }
+		public DemoController(IServiceBus bus)
+		{
+			_bus = bus;
+			_correlationId = Guid.NewGuid();
+		}
 
-        public void Default()
-        {
-            
-        }
+		public void Default()
+		{
+		}
 
 
-        public void Sync(string requestText)
-        {
-            this.RenderText("MT: " + requestText);
-        }
+		public void Sync(string requestText)
+		{
+			RenderText("MT: " + requestText);
+		}
 
-        //http://www.ayende.com/Blog/archive/2008/03/25/Async-Actions-in-Monorail.aspx
-        public IAsyncResult BeginAsync(string requestText)
-        {
-            return AsyncRequest.From(this)
-                .Via(_bus)
-                .Send(new RequestMessage(this.CorrelationId, requestText));
-        }
+		//http://www.ayende.com/Blog/archive/2008/03/25/Async-Actions-in-Monorail.aspx
+		public IAsyncResult BeginAsync(string requestText)
+		{
+			_request = AsyncRequest.From(this)
+				.Via(_bus)
+				.WithCallback(ControllerContext.Async.Callback, ControllerContext.Async.State)
+				.Send(new RequestMessage(CorrelationId, requestText));
 
-        public void EndAsync()
-        {
-            IAsyncResult r = ControllerContext.Async.Result;
-            this.PropertyBag.Add("responseText", "dru");
-            this.RenderView("Default");
-        }
+			return _request;
+		}
 
-        #region Consumes<ResponseMessage>.All Members
+		public void EndAsync()
+		{
+			IAsyncResult r = ControllerContext.Async.Result;
+			PropertyBag.Add("responseText", "dru");
+			RenderView("Default");
+		}
 
-        private ResponseMessage msg;
-        public void Consume(ResponseMessage message)
-        {
-            msg = message;
-        }
+		#region Consumes<ResponseMessage>.All Members
 
-        #endregion
+		private ResponseMessage msg;
+		private IAsyncRequest _request;
 
-        #region CorrelatedBy<Guid> Members
+		public void Consume(ResponseMessage message)
+		{
+			msg = message;
+			_request.Complete();
+		}
 
-        public Guid CorrelationId
-        {
-            get { return _correlationId; }
-        }
+		#endregion
 
-        #endregion
-    }
+		#region CorrelatedBy<Guid> Members
+
+		public Guid CorrelationId
+		{
+			get { return _correlationId; }
+		}
+
+		#endregion
+	}
 }
