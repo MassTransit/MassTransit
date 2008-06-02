@@ -9,21 +9,19 @@ namespace WebRequestReply.Core
 	{
 		private readonly IServiceBus _serviceBus;
 		private readonly IRequestReplyView _view;
-		private AsyncController _asyncController;
+		private IAsyncRequest _request;
 		private Guid _requestId;
 
 		public RequestReplyController(IRequestReplyView view, IServiceBus serviceBus)
 		{
 			_view = view;
 			_serviceBus = serviceBus;
-
-			_view.RequestEntered += View_RequestEntered;
 		}
 
 		public void Consume(ResponseMessage message)
 		{
 			_view.ResponseText = message.Text;
-			_asyncController.Complete();
+			_request.Complete();
 		}
 
 		public Guid CorrelationId
@@ -31,19 +29,24 @@ namespace WebRequestReply.Core
 			get { return _requestId; }
 		}
 
-
-		private void View_RequestEntered(object sender, EventArgs e)
+		public void Dispose()
 		{
-			SendRequest();
+			_serviceBus.Unsubscribe(this);
 		}
 
 		public void SendRequest()
 		{
-			IAsyncResult asyncResult = BeginRequest(null, null, null, null);
+			// demonstrates a wait-for-it method of invoking a request
 
-			if (asyncResult.AsyncWaitHandle.WaitOne(TimeSpan.FromSeconds(10), true))
+			_requestId = Guid.NewGuid();
+
+			_request = AsyncRequest.From(this)
+				.Via(_serviceBus)
+				.Send(new RequestMessage(_requestId, _view.RequestText));
+
+			if (_request.AsyncWaitHandle.WaitOne(TimeSpan.FromSeconds(10), true))
 			{
-				EndRequest(asyncResult);
+				// we have happy time
 			}
 			else
 			{
@@ -51,37 +54,27 @@ namespace WebRequestReply.Core
 			}
 		}
 
-
-        public IAsyncResult BeginRequest(object sender, EventArgs e, AsyncCallback callback, object extraData)
-        {
-            _asyncController = new AsyncController(callback, extraData);
-
-            _requestId = Guid.NewGuid();
-
-            _serviceBus.Subscribe(this);
-
-            RequestMessage request = new RequestMessage(_requestId, _view.RequestText);
-
-            _serviceBus.Publish(request);
-
-            return _asyncController;
-        }
-
-
-        public void EndRequest(IAsyncResult ar)
-        {
-            _serviceBus.Unsubscribe(this);
-        }
-
-
-        public void OnTimeout(IAsyncResult ar)
-        {
-            this._view.ResponseText = "Async Task Timeout";
-        }
-
-		public void Dispose()
+		public IAsyncResult BeginRequest(object sender, EventArgs e, AsyncCallback callback, object state)
 		{
-			_serviceBus.Unsubscribe(this);
+			_requestId = Guid.NewGuid();
+
+			_request = AsyncRequest.From(this)
+				.Via(_serviceBus)
+				.WithCallback(callback, state)
+				.Send(new RequestMessage(_requestId, _view.RequestText));
+
+			return _request;
+		}
+
+		public void EndRequest(IAsyncResult ar)
+		{
+		}
+
+		public void OnTimeout(IAsyncResult ar)
+		{
+			_view.ResponseText = "Async Task Timeout";
+
+			_request.Cancel();
 		}
 	}
 }
