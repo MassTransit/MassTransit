@@ -42,7 +42,7 @@ namespace WebRequestReply.UI.MonoRail.Controllers
 		public void EndAsync()
 		{
 			IAsyncResult r = ControllerContext.Async.Result;
-			PropertyBag.Add("responseText", "dru");
+			PropertyBag.Add("responseText", msg.Text + " (and my response)");
 			RenderView("Default");
 		}
 

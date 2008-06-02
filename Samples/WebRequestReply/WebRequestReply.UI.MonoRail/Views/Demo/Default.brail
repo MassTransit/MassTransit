@@ -11,7 +11,7 @@
         <br />
 
         <label style="width:200px">Response:</label>
-        <input type="text" name="responseText" />
+        <input type="text" name="responseText" value="${?responseText}" />
         
         
       </fieldset>
