@@ -51,11 +51,6 @@ namespace WebRequestReply.Core
 			}
 		}
 
-		public void EndRequest(IAsyncResult ar)
-		{
-			_serviceBus.Unsubscribe(this);
-		}
-
 		public IAsyncResult BeginRequest(AsyncCallback callback, object data)
 		{
 			_asyncController = new AsyncController(callback, data);
@@ -70,6 +65,12 @@ namespace WebRequestReply.Core
 
 			return _asyncController;
 		}
+
+		public void EndRequest(IAsyncResult ar)
+		{
+			_serviceBus.Unsubscribe(this);
+		}
+
 
 		public void Dispose()
 		{
