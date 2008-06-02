@@ -4,7 +4,7 @@ namespace WebRequestReply.UI.MonoRail.Controllers
     using MassTransit.ServiceBus;
 
     public class DemoController :
-        Controller
+        SmartDispatcherController
     {
         private IServiceBus _bus;
 
@@ -19,9 +19,10 @@ namespace WebRequestReply.UI.MonoRail.Controllers
             
         }
 
-        public void Post(string requestText, string responseText)
+
+        public void Post(string requestText)
         {
-            this.DirectRender("DDS: " + requestText);
+            this.RenderText("DDS:" + requestText);
         }
     }
 }
