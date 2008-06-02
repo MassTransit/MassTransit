@@ -48,6 +48,7 @@
       <Link>SolutionVersion.cs</Link>
     </Compile>
     <Compile Include="ActivatorObjectBuilder.cs" />
+    <Compile Include="AsyncRequest.cs" />
     <Compile Include="Consumes.cs" />
     <Compile Include="CorrelatedBy.cs" />
     <Compile Include="DispatchMode.cs" />
@@ -66,7 +67,9 @@
     <Compile Include="HealthMonitoring\MonitorInfo.cs" />
     <Compile Include="HealthMonitoring\Reporter.cs" />
     <Compile Include="HealthMonitoring\HealthClient.cs" />
+    <Compile Include="Internal\BaseAsyncResult.cs" />
     <Compile Include="Internal\GenericComponent.cs" />
+    <Compile Include="IAsyncRequest.cs" />
     <Compile Include="Internal\MessageDispatcher.cs" />
     <Compile Include="Internal\CorrelationIdDispatcher.cs" />
     <Compile Include="Internal\EndpointResolver.cs" />
@@ -107,6 +110,7 @@
     <Compile Include="Threading\ManagedThreadPool.cs" />
     <Compile Include="Util\Check.cs" />
     <Compile Include="Internal\IMessageId.cs" />
+    <Compile Include="Util\Guard.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

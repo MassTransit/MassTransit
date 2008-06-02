@@ -8,7 +8,5 @@ namespace WebRequestReply.Core
 		string RequestText { get; }
 
 		string ResponseText { set; }
-
-		event EventHandler RequestEntered;
 	}
 }
