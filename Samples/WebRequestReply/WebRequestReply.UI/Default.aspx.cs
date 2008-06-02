@@ -33,13 +33,12 @@ namespace WebRequestReply.UI
 
         protected void Button1_Click(object sender, EventArgs e)
         {
-            //this.RequestEntered(this, new EventArgs());
             _controller.SendRequest();
         }
 
         protected void Button2_Click(object sender, EventArgs e)
         {
-            this.RegisterAsyncTask(new PageAsyncTask(_controller.beginRequest, _controller.endRequest, _controller.onTimeout, this));
+            this.RegisterAsyncTask(new PageAsyncTask(_controller.BeginRequest, _controller.EndRequest, _controller.OnTimeout, this));
         }
 
     }

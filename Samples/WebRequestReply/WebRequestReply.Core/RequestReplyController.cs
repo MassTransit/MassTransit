@@ -39,7 +39,7 @@ namespace WebRequestReply.Core
 
 		public void SendRequest()
 		{
-			IAsyncResult asyncResult = BeginRequest(null, null);
+			IAsyncResult asyncResult = BeginRequest(null, null, null, null);
 
 			if (asyncResult.AsyncWaitHandle.WaitOne(TimeSpan.FromSeconds(10), true))
 			{
@@ -52,37 +52,29 @@ namespace WebRequestReply.Core
 		}
 
 
-        public IAsyncResult beginRequest(object sender, EventArgs e, AsyncCallback cb, object extraData)
+        public IAsyncResult BeginRequest(object sender, EventArgs e, AsyncCallback callback, object extraData)
         {
-            return this.BeginRequest(cb, extraData);
+            _asyncController = new AsyncController(callback, extraData);
+
+            _requestId = Guid.NewGuid();
+
+            _serviceBus.Subscribe(this);
+
+            RequestMessage request = new RequestMessage(_requestId, _view.RequestText);
+
+            _serviceBus.Publish(request);
+
+            return _asyncController;
         }
-		public IAsyncResult BeginRequest(AsyncCallback callback, object data)
-		{
-			_asyncController = new AsyncController(callback, data);
-
-			_requestId = Guid.NewGuid();
-
-			_serviceBus.Subscribe(this);
-
-			RequestMessage request = new RequestMessage(_requestId, _view.RequestText);
-
-			_serviceBus.Publish(request);
-
-			return _asyncController;
-		}
 
 
-        public void endRequest(IAsyncResult ar)
+        public void EndRequest(IAsyncResult ar)
         {
-            this.EndRequest(ar);
+            _serviceBus.Unsubscribe(this);
         }
-		public void EndRequest(IAsyncResult ar)
-		{
-			_serviceBus.Unsubscribe(this);
-		}
 
 
-        public void onTimeout(IAsyncResult ar)
+        public void OnTimeout(IAsyncResult ar)
         {
             this._view.ResponseText = "Async Task Timeout";
         }
