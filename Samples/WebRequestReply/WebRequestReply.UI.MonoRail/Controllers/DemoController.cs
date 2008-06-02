@@ -23,18 +23,18 @@ namespace WebRequestReply.UI.MonoRail.Controllers
 
         public void Sync(string requestText)
         {
-            
+            this.RenderText("MT: " + requestText);
         }
 
         //http://www.ayende.com/Blog/archive/2008/03/25/Async-Actions-in-Monorail.aspx
-        public IAsyncResult BeginAsync()
+        public IAsyncResult BeginAsync(string requestText)
         {
-            return null;
+            return null; //return IAsyncResult
         }
 
         public void EndAsync()
         {
-            
+            this.RenderText("MT: ??");
         }
     }
 }

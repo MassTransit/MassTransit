@@ -4,7 +4,7 @@
     <title>Sample Request/Reply Site (MonoRail)</title>
   </head>
   <body>
-    <form action="${SiteRoot}/Demo/Sync.castle" method="post">
+    <form id="test_form" name="test_form" action="${SiteRoot}/Demo/Sync.castle" method="post">
       <fieldset>
         <label style="width:200px">Request:</label>
         <input type="text" name="requestText" />
@@ -19,7 +19,7 @@
         <input id="sync_button" value="Sync Request" type="submit" />
         
         <!-- need to dynamically change the form action here -->
-        <input id="async_button" value="Async Request" type="button" />
+        <input id="async_button" value="Async Request" type="button" onClick="document.test_form.action='${SiteRoot}/Demo/Async.castle';document.test_form.submit();" />
         
       </fieldset>
       
