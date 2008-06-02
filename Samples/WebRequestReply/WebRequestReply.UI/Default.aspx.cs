@@ -33,7 +33,8 @@ namespace WebRequestReply.UI
 
         protected void Button1_Click(object sender, EventArgs e)
         {
-            this.RequestEntered(this, new EventArgs());
+            //this.RequestEntered(this, new EventArgs());
+            _controller.SendRequest();
         }
 
         protected void Button2_Click(object sender, EventArgs e)
