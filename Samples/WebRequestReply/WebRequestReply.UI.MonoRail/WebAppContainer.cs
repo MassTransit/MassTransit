@@ -2,6 +2,8 @@ namespace WebRequestReply.UI.MonoRail
 {
     using Castle.Core.Resource;
     using Castle.Facilities.Startable;
+    using Castle.MicroKernel.Registration;
+    using Castle.MonoRail.Framework;
     using Castle.MonoRail.WindsorExtension;
     using Castle.Windsor;
     using Castle.Windsor.Configuration.Interpreters;
@@ -29,7 +31,10 @@ namespace WebRequestReply.UI.MonoRail
 
         protected void RegisterComponents()
         {
-            AddComponent("demo.controller", typeof(DemoController));
+            //new castle config!!
+            //http://hammett.castleproject.org/?p=286
+            this.Register(AllTypes.Of<SmartDispatcherController>()
+                .FromAssembly(typeof (DemoController).Assembly));
         }
 
         protected void LoadMassTransit()
