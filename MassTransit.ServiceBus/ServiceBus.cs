@@ -139,6 +139,11 @@ namespace MassTransit.ServiceBus
 			}
 		}
 
+		public RequestBuilder Request()
+		{
+			return new RequestBuilder(this);
+		}
+
 		/// <summary>
 		/// The endpoint associated with this instance
 		/// </summary>

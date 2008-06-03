@@ -48,7 +48,7 @@
       <Link>SolutionVersion.cs</Link>
     </Compile>
     <Compile Include="ActivatorObjectBuilder.cs" />
-    <Compile Include="AsyncRequest.cs" />
+    <Compile Include="ServiceBusRequest.cs" />
     <Compile Include="Consumes.cs" />
     <Compile Include="CorrelatedBy.cs" />
     <Compile Include="DispatchMode.cs" />
@@ -67,9 +67,8 @@
     <Compile Include="HealthMonitoring\MonitorInfo.cs" />
     <Compile Include="HealthMonitoring\Reporter.cs" />
     <Compile Include="HealthMonitoring\HealthClient.cs" />
-    <Compile Include="Internal\BaseAsyncResult.cs" />
     <Compile Include="Internal\GenericComponent.cs" />
-    <Compile Include="IAsyncRequest.cs" />
+    <Compile Include="IServiceBusRequest.cs" />
     <Compile Include="Internal\MessageDispatcher.cs" />
     <Compile Include="Internal\CorrelationIdDispatcher.cs" />
     <Compile Include="Internal\EndpointResolver.cs" />
