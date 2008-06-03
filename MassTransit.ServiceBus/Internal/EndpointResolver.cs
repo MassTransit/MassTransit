@@ -15,6 +15,7 @@ namespace MassTransit.ServiceBus.Internal
 	using System;
 	using System.Collections.Generic;
 	using System.Reflection;
+	using System.Text;
 	using Exceptions;
 	using log4net;
 	using Util;
@@ -38,22 +39,41 @@ namespace MassTransit.ServiceBus.Internal
 				Type endpointType = typeof (IEndpoint);
 
 				_assemblies = AppDomain.CurrentDomain.GetAssemblies();
-				foreach (Assembly assembly in _assemblies)
-				{
-					Type[] types = assembly.GetTypes();
-					foreach (Type type in types)
-					{
-						if (type.IsAbstract)
-							continue;
 
-						if (endpointType.IsAssignableFrom(type))
-						{
-							_endpointTypes.Add(type);
-						}
-					}
-				}
+                foreach (Assembly assembly in _assemblies)
+                {
+                    try
+                    {
+                        Type[] types = assembly.GetTypes();
+                        foreach (Type type in types)
+                        {
+                            if (type.IsAbstract)
+                                continue;
 
-				_initialized = true;
+                            if (endpointType.IsAssignableFrom(type))
+                            {
+                                _endpointTypes.Add(type);
+                            }
+                        }
+                    }
+                    catch (ReflectionTypeLoadException ex)
+                    {
+                        StringBuilder sb = new StringBuilder();
+                        int i = 0;
+                        sb.AppendLine("EndpointResolver Error");
+                        sb.AppendLine(assembly.FullName);
+                        foreach (Exception exception in ex.LoaderExceptions)
+                        {
+                            sb.AppendFormat("{0}:{1} {2}", i, exception.Message, Environment.NewLine);
+                            i++;
+                        }
+
+                        throw new EndpointException(null, sb.ToString(), ex);
+                    }
+                }
+
+
+			    _initialized = true;
 			}
 		}
 
