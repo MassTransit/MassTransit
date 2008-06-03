@@ -92,5 +92,11 @@ namespace MassTransit.ServiceBus
 		/// <typeparam name="T">The type of the message</typeparam>
 		/// <param name="message">The messages to be published</param>
 		void Publish<T>(T message) where T : class;
+
+		/// <summary>
+		/// Returns a request builder for this service bus to handle a request/response
+		/// </summary>
+		/// <returns>A request builder</returns>
+		RequestBuilder Request();
 	}
 }

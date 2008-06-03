@@ -31,8 +31,8 @@ namespace WebRequestReply.UI.MonoRail.Controllers
 		//http://www.ayende.com/Blog/archive/2008/03/25/Async-Actions-in-Monorail.aspx
 		public IAsyncResult BeginAsync(string requestText)
 		{
-			_request = AsyncRequest.From(this)
-				.Via(_bus)
+			_request = _bus.Request()
+				.From(this)
 				.WithCallback(ControllerContext.Async.Callback, ControllerContext.Async.State)
 				.Send(new RequestMessage(CorrelationId, requestText));
 
@@ -48,8 +48,8 @@ namespace WebRequestReply.UI.MonoRail.Controllers
 
 		#region Consumes<ResponseMessage>.All Members
 
+		private IServiceBusRequest _request;
 		private ResponseMessage msg;
-		private IAsyncRequest _request;
 
 		public void Consume(ResponseMessage message)
 		{
