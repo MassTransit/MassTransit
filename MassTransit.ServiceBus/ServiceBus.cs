@@ -75,11 +75,14 @@ namespace MassTransit.ServiceBus
 			_endpointToListenOn = endpointToListenOn;
 			_subscriptionCache = subscriptionCache;
 
-			_messageDispatcher = new MessageDispatcher(this, subscriptionCache, objectBuilder);
 
+
+            //TODO: Move into IObjectBuilder?
+			_messageDispatcher = new MessageDispatcher(this, subscriptionCache, objectBuilder);
 			_receiveThread = new ReceiveThread(this, endpointToListenOn);
 
-			_asyncDispatcher = new ManagedThreadPool<object>(
+            //TODO: Might also benefit from IObjectBuilder.Build<T>(IDictionary arguments);
+            _asyncDispatcher = new ManagedThreadPool<object>(
 				delegate(object message) { _messageDispatcher.Consume(message); });
 		}
 
