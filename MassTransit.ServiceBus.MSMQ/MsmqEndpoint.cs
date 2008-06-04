@@ -222,50 +222,54 @@ namespace MassTransit.ServiceBus.MSMQ
 			{
 				MessageQueueTransactionType transactionType = GetTransactionType(_queue);
 
-				MessageEnumerator enumerator = _queue.GetMessageEnumerator2();
+                using (MessageEnumerator enumerator = _queue.GetMessageEnumerator2())
+                {
+                    while (enumerator.MoveNext(timeout))
+                    {
+                        Message msg = enumerator.Current;
 
-				while (enumerator.MoveNext(timeout))
-				{
-					Message msg = enumerator.Current;
+                        try
+                        {
+                            object obj = _formatter.Deserialize(new MsmqFormattedBody(msg));
 
-					try
-					{
-						object obj = _formatter.Deserialize(new MsmqFormattedBody(msg));
+                            if (accept(obj))
+                            {
+                                Message received = enumerator.RemoveCurrent(TimeSpan.FromSeconds(1), transactionType);
+                                if (received.Id == msg.Id)
+                                {
+                                    if (_log.IsDebugEnabled)
+                                        _log.DebugFormat("Queue: {0} Received Message Id {1}", _queue.Path, msg.Id);
 
-						if (accept(obj))
-						{
-							Message received = enumerator.RemoveCurrent(TimeSpan.FromSeconds(1), transactionType);
-							if (received.Id == msg.Id)
-							{
-								if (_log.IsDebugEnabled)
-									_log.DebugFormat("Queue: {0} Received Message Id {1}", _queue.Path, msg.Id);
+                                    if (_messageLog.IsInfoEnabled)
+                                        _messageLog.InfoFormat("RECV:{0}:System.Object:{1}", _queue.Path, msg.Id);
 
-								if (_messageLog.IsInfoEnabled)
-									_messageLog.InfoFormat("RECV:{0}:System.Object:{1}", _queue.Path, msg.Id);
+                                    return obj;
+                                }
+                                else
+                                {
+                                    if (_log.IsDebugEnabled)
+                                        _log.DebugFormat("Queue: {0} Unmatched Message Id {1}", _queue.Path, msg.Id);
 
-								return obj;
-							}
-							else
-							{
-								if (_log.IsDebugEnabled)
-									_log.DebugFormat("Queue: {0} Unmatched Message Id {1}", _queue.Path, msg.Id);
-
-								enumerator.Close();
-								enumerator = _queue.GetMessageEnumerator2();
-							}
-						}
-						else
-						{
-							if (_log.IsDebugEnabled)
-								_log.DebugFormat("Queue: {0} Skipped Message Id {1}", _queue.Path, msg.Id);
-						}
-					}
-					catch (SerializationException ex)
-					{
-						throw new MessageException(typeof (object), string.Format("An error occurred serializing a message of type {0}", typeof (object).FullName), ex);
-					}
-				}
-				enumerator.Close();
+                                    enumerator.Close();
+                                    enumerator = _queue.GetMessageEnumerator2();
+                                }
+                            }
+                            else
+                            {
+                                if (_log.IsDebugEnabled)
+                                    _log.DebugFormat("Queue: {0} Skipped Message Id {1}", _queue.Path, msg.Id);
+                            }
+                        }
+                        catch (SerializationException ex)
+                        {
+                            throw new MessageException(typeof (object),
+                                                       string.Format(
+                                                           "An error occurred serializing a message of type {0}",
+                                                           typeof (object).FullName), ex);
+                        }
+                    }
+                    enumerator.Close();
+                }
 			}
 			catch (MessageQueueException ex)
 			{
