@@ -2,10 +2,12 @@ namespace MassTransit.ServiceBus.Internal
 {
 	using System;
 	using System.Threading;
+	using log4net;
 	using Threading;
 
 	public class ReceiveThread : ManagedThread
 	{
+		private static readonly ILog _log = LogManager.GetLogger(typeof(ReceiveThread));
 		private readonly ServiceBus _bus;
 		private readonly IEndpoint _endpoint;
 		private readonly TimeSpan _readTimeout = TimeSpan.FromSeconds(10);
@@ -20,14 +22,20 @@ namespace MassTransit.ServiceBus.Internal
 		{
 			WaitHandle[] handles = new WaitHandle[] {Shutdown};
 
-			int result;
-			while ((result = WaitHandle.WaitAny(handles, 0, false)) != 0)
+			while ((WaitHandle.WaitAny(handles, 0, false)) != 0)
 			{
-				object message = _endpoint.Receive(_readTimeout, AcceptMessageCheck);
-
-				if (message != null)
+				try
 				{
-					_bus.Dispatch(message, DispatchMode.Asynchronous);
+					object message = _endpoint.Receive(_readTimeout, AcceptMessageCheck);
+
+					if (message != null)
+					{
+						_bus.Dispatch(message, DispatchMode.Asynchronous);
+					}
+				}
+				catch(Exception ex)
+				{
+					_log.Error("Exception in ReceiveThread:", ex);
 				}
 			}
 		}
