@@ -218,63 +218,63 @@ namespace MassTransit.ServiceBus.MSMQ
 
 		public object Receive(TimeSpan timeout, Predicate<object> accept)
 		{
-			try
-			{
-				MessageQueueTransactionType transactionType = GetTransactionType(_queue);
+            try
+            {
+                MessageQueueTransactionType transactionType = GetTransactionType(_queue);
 
-                using (MessageEnumerator enumerator = _queue.GetMessageEnumerator2())
+                MessageEnumerator enumerator = _queue.GetMessageEnumerator2();
+
+                while (enumerator.MoveNext(timeout))
                 {
-                    while (enumerator.MoveNext(timeout))
+                    Message msg = enumerator.Current;
+
+                    try
                     {
-                        Message msg = enumerator.Current;
+                        object obj = _formatter.Deserialize(new MsmqFormattedBody(msg));
 
-                        try
+                        if (accept(obj))
                         {
-                            object obj = _formatter.Deserialize(new MsmqFormattedBody(msg));
-
-                            if (accept(obj))
+                            Message received = enumerator.RemoveCurrent(TimeSpan.FromSeconds(1), transactionType);
+                            if (received.Id == msg.Id)
                             {
-                                Message received = enumerator.RemoveCurrent(TimeSpan.FromSeconds(1), transactionType);
-                                if (received.Id == msg.Id)
-                                {
-                                    if (_log.IsDebugEnabled)
-                                        _log.DebugFormat("Queue: {0} Received Message Id {1}", _queue.Path, msg.Id);
+                                if (_log.IsDebugEnabled)
+                                    _log.DebugFormat("Queue: {0} Received Message Id {1}", _queue.Path, msg.Id);
 
-                                    if (_messageLog.IsInfoEnabled)
-                                        _messageLog.InfoFormat("RECV:{0}:System.Object:{1}", _queue.Path, msg.Id);
+                                if (_messageLog.IsInfoEnabled)
+                                    _messageLog.InfoFormat("RECV:{0}:System.Object:{1}", _queue.Path, msg.Id);
 
-                                    return obj;
-                                }
-                                else
-                                {
-                                    if (_log.IsDebugEnabled)
-                                        _log.DebugFormat("Queue: {0} Unmatched Message Id {1}", _queue.Path, msg.Id);
-
-                                    enumerator.Close();
-                                    enumerator = _queue.GetMessageEnumerator2();
-                                }
+                                return obj;
                             }
                             else
                             {
                                 if (_log.IsDebugEnabled)
-                                    _log.DebugFormat("Queue: {0} Skipped Message Id {1}", _queue.Path, msg.Id);
+                                    _log.DebugFormat("Queue: {0} Unmatched Message Id {1}", _queue.Path, msg.Id);
+
+                                enumerator.Close();
+                                //TODO: makes it not easy to use 'using'
+                                enumerator = _queue.GetMessageEnumerator2();
                             }
                         }
-                        catch (SerializationException ex)
+                        else
                         {
-                            throw new MessageException(typeof (object),
-                                                       string.Format(
-                                                           "An error occurred serializing a message of type {0}",
-                                                           typeof (object).FullName), ex);
+                            if (_log.IsDebugEnabled)
+                                _log.DebugFormat("Queue: {0} Skipped Message Id {1}", _queue.Path, msg.Id);
                         }
                     }
-                    enumerator.Close();
+                    catch (SerializationException ex)
+                    {
+                        throw new MessageException(typeof (object),
+                                                   string.Format(
+                                                       "An error occurred serializing a message of type {0}",
+                                                       typeof (object).FullName), ex);
+                    }
                 }
-			}
-			catch (MessageQueueException ex)
-			{
-				HandleVariousErrorCodes(ex.MessageQueueErrorCode, ex);
-			}
+                enumerator.Close();
+            }
+            catch (MessageQueueException ex)
+            {
+                HandleVariousErrorCodes(ex.MessageQueueErrorCode, ex);
+            }
 
 			return null;
 		}
