@@ -27,7 +27,6 @@
 				   type="MassTransit.ServiceBus.ServiceBus, MassTransit.ServiceBus">
 			<parameters>
 				<endpointToListenOn>${serverEndpoint}</endpointToListenOn>
-				<!-- Setter Injection -->
 				<SubscriptionCache>${subscriptionCache}</SubscriptionCache>
 			</parameters>
 		</component>
@@ -47,7 +46,8 @@
 		</component>
 
 
-		<!-- load all of the services here -->
+		<!-- load all of the services here : Windsore.Register(AllTypes.Of(IHostedService)-->
+    <!-- use the startable facitlity -->
 		<component id="mySimpleServer"
 				   lifestyle="singleton"
 				   service="MassTransit.ServiceBus.IHostedService, MassTransit.ServiceBus"
