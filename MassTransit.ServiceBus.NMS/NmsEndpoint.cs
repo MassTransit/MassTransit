@@ -30,6 +30,7 @@ namespace MassTransit.ServiceBus.NMS
 		private readonly IConnectionFactory _factory;
 		private readonly string _queueName;
 		private readonly Uri _uri;
+		private readonly IConnection _connection;
 
 		public NmsEndpoint(Uri uri)
 		{
@@ -40,6 +41,14 @@ namespace MassTransit.ServiceBus.NMS
 			_queueName = Uri.AbsolutePath.Substring(1);
 
 			_factory = new ConnectionFactory(queueUri.Uri);
+
+			_connection = _factory.CreateConnection();
+			_connection.ExceptionListener += ConnectionExceptionListener;
+		}
+
+		void ConnectionExceptionListener(Exception ex)
+		{
+			_log.Error("NMS threw an exception: ", ex);
 		}
 
 		public NmsEndpoint(string uriString)
@@ -54,46 +63,43 @@ namespace MassTransit.ServiceBus.NMS
 
 		public void Send<T>(T message) where T : class
 		{
-			throw new NotImplementedException();
+			Send(message, NMSConstants.defaultTimeToLive);
 		}
 
 		public void Send<T>(T message, TimeSpan timeToLive) where T : class
 		{
 			Type messageType = typeof (T);
 
-			using (IConnection connection = _factory.CreateConnection())
+			using (ISession session = _connection.CreateSession())
 			{
-				using (ISession session = connection.CreateSession())
+				IBytesMessage bm = session.CreateBytesMessage();
+
+				MemoryStream mem = new MemoryStream();
+				_formatter.Serialize(mem, message);
+
+				bm.Content = new byte[mem.Length];
+				mem.Seek(0, SeekOrigin.Begin);
+				mem.Read(bm.Content, 0, (int) mem.Length);
+
+				if (timeToLive < NMSConstants.defaultTimeToLive)
+					bm.NMSTimeToLive = timeToLive;
+
+				bm.NMSPersistent = true;
+
+				IDestination destination = session.GetQueue(_queueName);
+
+				using (IMessageProducer producer = session.CreateProducer(destination))
 				{
-					IDestination destination = session.GetQueue(_queueName);
-
-					IBytesMessage bm = session.CreateBytesMessage();
-
-					MemoryStream mem = new MemoryStream();
-					_formatter.Serialize(mem, message);
-
-					bm.Content = new byte[mem.Length];
-					mem.Seek(0, SeekOrigin.Begin);
-					mem.Read(bm.Content, 0, (int) mem.Length);
-
-					if (timeToLive < NMSConstants.defaultTimeToLive)
-						bm.NMSTimeToLive = timeToLive;
-
-					bm.NMSPersistent = true;
-
-					using (IMessageProducer producer = session.CreateProducer(destination))
+					try
 					{
-						try
-						{
-							if (_messageLog.IsInfoEnabled)
-								_messageLog.InfoFormat("Message {0} Sent To {1}", messageType, Uri);
+						producer.Send(bm);
 
-							producer.Send(bm);
-						}
-						catch (Exception ex)
-						{
-							throw new EndpointException(this, "Problem with " + Uri, ex);
-						}
+						if (_messageLog.IsInfoEnabled)
+							_messageLog.InfoFormat("Message {0} Sent To {1}", messageType, Uri);
+					}
+					catch (Exception ex)
+					{
+						throw new EndpointException(this, "Problem with " + Uri, ex);
 					}
 
 					if (_log.IsDebugEnabled)
@@ -104,47 +110,147 @@ namespace MassTransit.ServiceBus.NMS
 
 		public object Receive()
 		{
-			throw new NotImplementedException();
+			return Receive(TimeSpan.MaxValue);
 		}
 
 		public object Receive(TimeSpan timeout)
 		{
-			throw new NotImplementedException();
+			try
+			{
+				using (ISession session = _connection.CreateSession())
+				{
+					IDestination destination = session.GetQueue(_queueName);
+					using (IMessageConsumer consumer = session.CreateConsumer(destination))
+					{
+						IMessage message = consumer.Receive(timeout);
+						if (message == null)
+							return null;
+
+						IBytesMessage bm = message as IBytesMessage;
+						if (bm == null)
+							throw new MessageException(message.GetType(), "Message not a IBytesMessage");
+
+						try
+						{
+							MemoryStream mem = new MemoryStream(bm.Content, false);
+
+							object obj = _formatter.Deserialize(mem);
+
+							return obj;
+						}
+						catch (SerializationException ex)
+						{
+							throw new MessageException(message.GetType(), "An error occurred deserializing a message", ex);
+						}
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				throw new EndpointException(this, "Receive error occured", ex);
+			}
 		}
 
 		public object Receive(Predicate<object> accept)
 		{
-			throw new NotImplementedException();
+			return Receive(TimeSpan.MaxValue, accept);
 		}
 
 		public object Receive(TimeSpan timeout, Predicate<object> accept)
 		{
-			throw new NotImplementedException();
+			using (ISession session = _connection.CreateSession())
+			{
+				IDestination destination = session.GetQueue(_queueName);
+				using (IMessageConsumer consumer = session.CreateConsumer(destination))
+				{
+					IMessage message = consumer.Receive(timeout);
+					if (message == null)
+						return null;
+
+					IBytesMessage bm = message as IBytesMessage;
+					if (bm == null)
+						throw new MessageException(message.GetType(), "Message not a IBytesMessage");
+
+					try
+					{
+						MemoryStream mem = new MemoryStream(bm.Content, false);
+
+						object obj = _formatter.Deserialize(mem);
+
+						if (accept(obj))
+						{
+							if (_log.IsDebugEnabled)
+								_log.DebugFormat("Queue: {0} Received Message Id {1}", _queueName, message.NMSMessageId);
+
+							if (_messageLog.IsInfoEnabled)
+								_messageLog.InfoFormat("RECV:{0}:System.Object:{1}", _queueName, message.NMSMessageId);
+
+							return obj;
+						}
+						else
+						{
+							if (_log.IsDebugEnabled)
+								_log.DebugFormat("Queue: {0} Skipped Message Id {1}", _queueName, message.NMSMessageId);
+						}
+					}
+					catch (SerializationException ex)
+					{
+						throw new MessageException(typeof (object), "An error occurred deserializing a message", ex);
+					}
+
+					return null;
+				}
+			}
 		}
 
 		public T Receive<T>() where T : class
 		{
-			throw new NotImplementedException();
+			return Receive<T>(TimeSpan.MaxValue);
 		}
 
 		public T Receive<T>(TimeSpan timeout) where T : class
 		{
-			throw new NotImplementedException();
+			return (T) Receive(timeout, delegate(object obj)
+			                            	{
+			                            		Type messageType = obj.GetType();
+
+			                            		if (messageType != typeof (T))
+			                            			return false;
+
+			                            		return true;
+			                            	});
 		}
 
 		public T Receive<T>(Predicate<T> accept) where T : class
 		{
-			throw new NotImplementedException();
+			return Receive(TimeSpan.MaxValue, accept);
 		}
 
 		public T Receive<T>(TimeSpan timeout, Predicate<T> accept) where T : class
 		{
-			throw new NotImplementedException();
-		}
+			return (T) Receive(timeout, delegate(object obj)
+			                            	{
+			                            		Type messageType = obj.GetType();
 
+			                            		if (messageType != typeof (T))
+			                            			return false;
+
+			                            		T message = obj as T;
+			                            		if (message == null)
+			                            			return false;
+
+			                            		return accept(message);
+			                            	});
+		}
 
 		public void Dispose()
 		{
+			if (_connection != null)
+			{
+				_connection.ExceptionListener -= ConnectionExceptionListener;
+				_connection.Close();
+				_connection.Dispose();
+			}
 		}
 	}
 }

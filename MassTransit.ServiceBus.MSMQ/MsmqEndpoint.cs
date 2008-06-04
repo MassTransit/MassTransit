@@ -187,7 +187,7 @@ namespace MassTransit.ServiceBus.MSMQ
 		{
 			try
 			{
-				Message msg = _queue.Receive(GetTransactionType());
+				Message msg = _queue.Receive(timeout, GetTransactionType());
 
 				Type messageType = Type.GetType(msg.Label);
 
@@ -205,8 +205,9 @@ namespace MassTransit.ServiceBus.MSMQ
 			catch (MessageQueueException ex)
 			{
 				HandleVariousErrorCodes(ex.MessageQueueErrorCode, ex);
-				throw new EndpointException(this, "Receive error occured", ex);
 			}
+
+			return null;
 		}
 
 		public object Receive(Predicate<object> accept)

@@ -1,86 +1,26 @@
 namespace HeavyLoad
 {
-	using System;
-	using System.Threading;
-	using MassTransit.ServiceBus;
 	using MassTransit.ServiceBus.MSMQ;
+	using MassTransit.ServiceBus.NMS;
 
-	public class LocalMsmqLoadTest : IDisposable
+	public class LocalMsmqLoadTest : LocalLoadTest
 	{
-		private const int _repeatCount = 5000;
-		private readonly ManualResetEvent _completeEvent = new ManualResetEvent(false);
-		private readonly string _queueUri = "msmq://localhost/test_servicebus";
-		private IServiceBus _bus;
-		private int _counter = 0;
-		private MsmqEndpoint _localEndpoint;
-		private readonly ManualResetEvent _responseEvent = new ManualResetEvent(false);
-		private int _responseCounter = 0;
-
+		private static readonly string _queueUri = "msmq://localhost/test_servicebus";
 
 		public LocalMsmqLoadTest()
+			: base(new MsmqEndpoint(_queueUri))
 		{
-			_localEndpoint = new MsmqEndpoint(_queueUri);
-
-			MsmqHelper.ValidateAndPurgeQueue(_localEndpoint.QueuePath);
-
-			_bus = new ServiceBus(_localEndpoint);
+			MsmqHelper.ValidateAndPurgeQueue(((MsmqEndpoint) LocalEndpoint).QueuePath);
 		}
+	}
 
-		public void Dispose()
+	public class LocalActiveMqLoadTest : LocalLoadTest
+	{
+		private static readonly string _queueUri = "activemq://localhost:61616/load_test_queue";
+
+		public LocalActiveMqLoadTest()
+			: base(new NmsEndpoint(_queueUri))
 		{
-			if (_bus != null)
-			{
-				_bus.Dispose();
-				_bus = null;
-			}
-
-			if (_localEndpoint != null)
-			{
-				_localEndpoint.Dispose();
-				_localEndpoint = null;
-			}
-		}
-
-		public void Run(StopWatch stopWatch)
-		{
-			_bus.Subscribe<GeneralMessage>(Handle);
-			_bus.Subscribe<SimpleResponse>(Handler);
-
-			stopWatch.Start();
-
-			CheckPoint publishCheckpoint = stopWatch.Mark("Publishing " + _repeatCount + " messages");
-			CheckPoint receiveCheckpoint = stopWatch.Mark("Receiving " + _repeatCount + " messages");
-
-			for (int index = 0; index < _repeatCount; index++)
-			{
-				_bus.Publish(new GeneralMessage());
-			}
-
-			publishCheckpoint.Complete(_repeatCount);
-
-			bool completed = _completeEvent.WaitOne(TimeSpan.FromSeconds(60), true);
-
-			bool responseCompleted = _responseEvent.WaitOne(TimeSpan.FromSeconds(60), true);
-
-			receiveCheckpoint.Complete(_counter + _responseCounter);
-
-			stopWatch.Stop();
-		}
-
-		private void Handler(IMessageContext<SimpleResponse> obj)
-		{
-			Interlocked.Increment(ref _responseCounter);
-			if (_responseCounter == _repeatCount)
-				_responseEvent.Set();
-		}
-
-		private void Handle(IMessageContext<GeneralMessage> obj)
-		{
-			_bus.Publish(new SimpleResponse());
-
-			Interlocked.Increment(ref _counter);
-			if (_counter == _repeatCount)
-				_completeEvent.Set();
 		}
 	}
 }
