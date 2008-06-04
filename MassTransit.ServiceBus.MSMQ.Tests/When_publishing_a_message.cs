@@ -2,7 +2,6 @@ namespace MassTransit.ServiceBus.MSMQ.Tests
 {
 	using System;
 	using System.Threading;
-	using Internal;
 	using Messages;
 	using NUnit.Framework;
 	using NUnit.Framework.SyntaxHelpers;
