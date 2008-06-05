@@ -25,7 +25,7 @@ namespace WebRequestReply.UI.MonoRail.Controllers
 
 		public void Sync(string requestText)
 		{
-			RenderText("MT: " + requestText);
+
 		}
 
 		//http://www.ayende.com/Blog/archive/2008/03/25/Async-Actions-in-Monorail.aspx
