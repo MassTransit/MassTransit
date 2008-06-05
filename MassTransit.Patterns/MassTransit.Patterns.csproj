@@ -47,16 +47,6 @@
     <Compile Include="Batching\IBatchMessage.cs" />
     <Compile Include="Batching\TimeoutAttribute.cs" />
     <Compile Include="Batching\TimeoutMessage.cs" />
-    <Compile Include="FaultDetection\HeartbeatMonitor.cs" />
-    <Compile Include="FaultDetection\Investigator.cs" />
-    <Compile Include="FaultDetection\Messages\DownEndpoint.cs" />
-    <Compile Include="FaultDetection\Messages\Heartbeat.cs" />
-    <Compile Include="FaultDetection\Messages\Ping.cs" />
-    <Compile Include="FaultDetection\Messages\Pong.cs" />
-    <Compile Include="FaultDetection\Messages\Suspect.cs" />
-    <Compile Include="FaultDetection\MonitorInfo.cs" />
-    <Compile Include="FaultDetection\Reporter.cs" />
-    <Compile Include="FaultDetection\Throbber.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
