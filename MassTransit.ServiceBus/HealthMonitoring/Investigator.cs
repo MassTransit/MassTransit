@@ -20,7 +20,9 @@ namespace MassTransit.ServiceBus.HealthMonitoring
         //this starts things
         public void Consume(Suspect message)
         {
-            _bus.Publish(new Ping(this._correlationId));
+            _bus.Request()
+                .From(this)
+                .Send(new Ping(this.CorrelationId));
         }
 
         //produce<Ping>
