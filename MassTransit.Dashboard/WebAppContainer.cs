@@ -2,13 +2,13 @@ namespace MassTransit.Dashboard
 {
     using Castle.Core.Resource;
     using Castle.Facilities.Startable;
+    using Castle.MicroKernel.Registration;
     using Castle.MonoRail.WindsorExtension;
     using Castle.Windsor;
     using Castle.Windsor.Configuration.Interpreters;
     using Controllers;
     using MassTransit.ServiceBus.MSMQ;
     using MassTransit.ServiceBus.Subscriptions;
-    using MassTransit.ServiceBus.Subscriptions.Messages;
     using ServiceBus;
 
     public class WebAppContainer :
@@ -35,12 +35,31 @@ namespace MassTransit.Dashboard
 
         protected void LoadMassTransit()
         {
-            AddComponent("masstransit.bus", typeof (IServiceBus), typeof (ServiceBus));
-            AddComponent("masstransit.bus.listen", typeof (IEndpoint), typeof (MsmqEndpoint));
-
-            AddComponent("masstransit.subscription.endpoint", typeof (IEndpoint), typeof (MsmqEndpoint));
-            AddComponent("masstransit.subscription.client", typeof (IHostedService), typeof (SubscriptionClient));
-            AddComponent("masstransit.cache", typeof (ISubscriptionCache), typeof (LocalSubscriptionCache));
+            this.Register(
+                Component.For<IEndpoint>()
+                    .ImplementedBy<MsmqEndpoint>()
+                    .Named("masstransit.bus.listen")
+                    .Parameters(Parameter.ForKey("uriString").Eq("msmq://localhost/mt_dashboard")),
+                Component.For<IServiceBus>()
+                    .ImplementedBy<ServiceBus>()
+                    .Named("masstransit.bus")
+                    .Parameters(Parameter.ForKey("endpointToListenOn").Eq("${masstransit.bus.listen}")),
+                Component.For<IEndpoint>()
+                    .ImplementedBy<MsmqEndpoint>()
+                    .Named("masstransit.subscription.endpoint")
+                    .Parameters(Parameter.ForKey("uriString").Eq("msmq://localhost/mt_pubsub")),
+                Component.For<IHostedService>()
+                    .ImplementedBy<SubscriptionClient>()
+                    .Named("masstransit.subscription.client")
+                    .ExtendedProperties(
+                        Property.ForKey("startable").Eq("true"),
+                        Property.ForKey("startMethod").Eq("Start"),
+                        Property.ForKey("stopMethod").Eq("Stop"))
+                    .Parameters(Parameter.ForKey("subscriptionServiceEndpoint").Eq("${masstransit.subscription.endpoint}")),
+                Component.For<ISubscriptionCache>()
+                    .ImplementedBy<LocalSubscriptionCache>()
+                    .Named("masstransit.cache")
+                );
         }
     }
 }
