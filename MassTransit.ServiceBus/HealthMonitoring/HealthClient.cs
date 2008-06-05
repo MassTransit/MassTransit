@@ -1,19 +1,19 @@
 namespace MassTransit.ServiceBus.HealthMonitoring
 {
-    using System;
     using Messages;
 
     public class HealthClient :
-        IHostedService, 
-        IDisposable //, Publishes<Heartbeat>
+        IHostedService //, Publishes<Heartbeat>
     {
-        readonly IServiceBus _bus;
-        readonly System.Timers.Timer _timer;
+        private readonly IServiceBus _bus;
+        private readonly System.Timers.Timer _timer;
+        private readonly int _timeInSeconds = 3;
+        private readonly int _timeInMilliseconds = 3*1000;
 
         public HealthClient(IServiceBus bus)
         {
             _bus = bus;
-            _timer = new System.Timers.Timer(3000);
+            _timer = new System.Timers.Timer(_timeInMilliseconds);
             _timer.Elapsed += Beat;
         }
 
@@ -30,7 +30,7 @@ namespace MassTransit.ServiceBus.HealthMonitoring
 
         public void Beat(object sender, System.Timers.ElapsedEventArgs e)
         {
-            _bus.Publish(new Heartbeat(3, _bus.Endpoint.Uri));
+            _bus.Publish(new Heartbeat(_timeInSeconds, _bus.Endpoint.Uri));
         }
 
 
