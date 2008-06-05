@@ -1,11 +1,9 @@
 namespace MassTransit.Dashboard
 {
-    using Castle.Core.Resource;
     using Castle.Facilities.Startable;
     using Castle.MicroKernel.Registration;
     using Castle.MonoRail.WindsorExtension;
     using Castle.Windsor;
-    using Castle.Windsor.Configuration.Interpreters;
     using Controllers;
     using MassTransit.ServiceBus.MSMQ;
     using MassTransit.ServiceBus.Subscriptions;
@@ -15,7 +13,6 @@ namespace MassTransit.Dashboard
         WindsorContainer
     {
         public WebAppContainer()
-            : base(new XmlInterpreter(new ConfigResource()))
         {
             RegisterFacilities();
             LoadMassTransit();
@@ -51,10 +48,9 @@ namespace MassTransit.Dashboard
                 Component.For<IHostedService>()
                     .ImplementedBy<SubscriptionClient>()
                     .Named("masstransit.subscription.client")
-                    .ExtendedProperties(
-                        Property.ForKey("startable").Eq("true"),
-                        Property.ForKey("startMethod").Eq("Start"),
-                        Property.ForKey("stopMethod").Eq("Stop"))
+                    .AddAttributeDescriptor("startable", "true")
+                    .AddAttributeDescriptor("startMethod", "Start")
+                    .AddAttributeDescriptor("stopMethod", "Stop")
                     .Parameters(Parameter.ForKey("subscriptionServiceEndpoint").Eq("${masstransit.subscription.endpoint}")),
                 Component.For<ISubscriptionCache>()
                     .ImplementedBy<LocalSubscriptionCache>()
