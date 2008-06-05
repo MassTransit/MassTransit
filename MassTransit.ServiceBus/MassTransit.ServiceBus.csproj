@@ -48,6 +48,9 @@
       <Link>SolutionVersion.cs</Link>
     </Compile>
     <Compile Include="ActivatorObjectBuilder.cs" />
+    <Compile Include="Batch.cs" />
+    <Compile Include="BatchedBy.cs" />
+    <Compile Include="Internal\BatchDistributor.cs" />
     <Compile Include="ServiceBusRequest.cs" />
     <Compile Include="Consumes.cs" />
     <Compile Include="CorrelatedBy.cs" />
