@@ -49,6 +49,7 @@
     <Compile Include="DistributedQueueContext.cs" />
     <Compile Include="DistributedServiceBus_Specs.cs" />
     <Compile Include="DistributedSubscriptionCache_Specs.cs" />
+    <Compile Include="MultipleCacheEntry_Specs.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
