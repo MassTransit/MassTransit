@@ -126,7 +126,7 @@ namespace MassTransit.DistributedSubscriptionCache
 						int length = removeUri.Length;
 						if (start + length < currentValue.Length) // get the ending \n if found
 							length++;
-						if (start > 0) //Modify the start to include the '\n'
+						else if (start > 0) //Modify the start to include the '\n'
 						{
 							start--;
 							length++;
