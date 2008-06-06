@@ -56,6 +56,8 @@ namespace MassTransit.Dashboard
                     .ImplementedBy<LocalSubscriptionCache>()
                     .Named("masstransit.cache")
                 );
+
+            IHostedService hs = this.Resolve<IHostedService>();
         }
     }
 }

@@ -3,24 +3,28 @@ namespace MassTransit.ServiceBus.Tests.Formatters
     using System;
     using System.IO;
     using System.Text;
-    using System.Threading;
     using MassTransit.ServiceBus.Formatters;
     using NUnit.Framework;
     using Rhino.Mocks;
 
     [TestFixture]
-    public class LoadTests : 
+    public class LoadTests :
         Specification
     {
         private IFormattedBody mockBody;
-        private string _jsonBody = @"{""WrappedJson"":""{}"",""Types"":[""MassTransit.ServiceBus.Tests.PingMessage, MassTransit.ServiceBus.Tests""]}";
-        private string _xmlBody = "<?xml version=\"1.0\"?>\r\n<anyType xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xsi:type=\"PingMessage\" />";
+
+        private string _jsonBody =
+            @"{""WrappedJson"":""{}"",""Types"":[""MassTransit.ServiceBus.Tests.PingMessage, MassTransit.ServiceBus.Tests""]}";
+
+        private string _xmlBody =
+            "<?xml version=\"1.0\"?>\r\n<anyType xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xsi:type=\"PingMessage\" />";
+
         private int _iterations = 1000;
         private IBodyFormatter _formatter;
 
         protected override void Before_each()
         {
-            mockBody = this.Mock<IFormattedBody>();
+            mockBody = this.DynamicMock<IFormattedBody>();
         }
 
         [Test]
@@ -49,7 +53,7 @@ namespace MassTransit.ServiceBus.Tests.Formatters
         public void Binary()
         {
             byte[] buffer = Encoding.UTF8.GetBytes(_xmlBody);
-            Rhino.Mocks.SetupResult.For(mockBody.BodyStream).Return(new MemoryStream(buffer));
+            SetupResult.For(mockBody.BodyStream).Return(new MemoryStream(buffer));
 
             _formatter = new BinaryBodyFormatter();
 
@@ -69,7 +73,7 @@ namespace MassTransit.ServiceBus.Tests.Formatters
             _formatter = new JsonBodyFormatter();
 
             DateTime start = DateTime.Now;
-            for(int i = 0; i < _iterations; i++)
+            for (int i = 0; i < _iterations; i++)
             {
                 str = new MemoryStream(buffer);
                 str.Position = 0;
@@ -80,7 +84,7 @@ namespace MassTransit.ServiceBus.Tests.Formatters
             Console.WriteLine("{0} milliseconds", end.Subtract(start).Milliseconds);
         }
 
-        public class DumpMessageBody : 
+        public class DumpMessageBody :
             IFormattedBody
         {
             private Stream _bodyStream;

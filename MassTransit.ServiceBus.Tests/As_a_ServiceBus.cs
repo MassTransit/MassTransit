@@ -7,23 +7,21 @@ namespace MassTransit.ServiceBus.Tests
 	using Rhino.Mocks;
 
 	[TestFixture]
-	public class As_a_ServiceBus
+	public class As_a_ServiceBus :
+        Specification
 	{
-		[SetUp]
-		public void SetUp()
-		{
-			mocks = new MockRepository();
-			_mockSubscriptionCache = mocks.DynamicMock<ISubscriptionCache>();
-			mockEndpoint = mocks.DynamicMock<IEndpoint>();
-			mockSendEndpoint = mocks.DynamicMock<IEndpoint>();
+        protected override void Before_each()
+        {
+            _mockSubscriptionCache = DynamicMock<ISubscriptionCache>();
+            mockEndpoint = DynamicMock<IEndpoint>();
+            mockSendEndpoint = DynamicMock<IEndpoint>();
 
-			SetupResult.For(mockEndpoint.Uri).Return(new Uri("msmq://localhost/test"));
-		}
+            SetupResult.For(mockEndpoint.Uri).Return(new Uri("msmq://localhost/test"));
+        }
 
-		[TearDown]
-		public void TearDown()
+	    
+		protected override void  After_each()
 		{
-			mocks = null;
 			mockEndpoint = null;
 			mockSendEndpoint = null;
 			_mockSubscriptionCache = null;
@@ -33,7 +31,7 @@ namespace MassTransit.ServiceBus.Tests
 		public void When_creating_a_bus()
 		{
 			LocalSubscriptionCache cache = new LocalSubscriptionCache();
-			ServiceBus bus = new ServiceBus(mocks.DynamicMock<IEndpoint>(), cache);
+			ServiceBus bus = new ServiceBus(DynamicMock<IEndpoint>(), cache);
 			SubscriptionClient client = new SubscriptionClient(bus, cache, null);
 		}
 
@@ -45,11 +43,11 @@ namespace MassTransit.ServiceBus.Tests
 			List<Subscription> subs = new List<Subscription>();
 			subs.Add(sub);
 
-			using (mocks.Record())
+			using (Record())
 			{
 				Expect.Call(_mockSubscriptionCache.List("MassTransit.ServiceBus.Tests.PingMessage")).Return(subs);
 			}
-			using (mocks.Playback())
+			using (Playback())
 			{
 				ServiceBus bus = new ServiceBus(mockEndpoint, _mockSubscriptionCache);
 				bus.Publish(new PingMessage());
@@ -59,10 +57,10 @@ namespace MassTransit.ServiceBus.Tests
 		[Test]
 		public void When_Sending_2_messages()
 		{
-			using (mocks.Record())
+			using (Record())
 			{
 			}
-			using (mocks.Playback())
+			using (Playback())
 			{
 				mockSendEndpoint.Send(new PingMessage());
 			}
@@ -71,16 +69,15 @@ namespace MassTransit.ServiceBus.Tests
 		[Test]
 		public void When_Sending_a_message()
 		{
-			using (mocks.Record())
+			using (Record())
 			{
 			}
-			using (mocks.Playback())
+			using (Playback())
 			{
 				mockSendEndpoint.Send(new PingMessage());
 			}
 		}
 
-		private MockRepository mocks;
 		private ISubscriptionCache _mockSubscriptionCache;
 		private IEndpoint mockEndpoint;
 		private IEndpoint mockSendEndpoint;

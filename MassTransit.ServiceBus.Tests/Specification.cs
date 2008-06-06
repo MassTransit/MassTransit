@@ -23,7 +23,7 @@ namespace MassTransit.ServiceBus.Tests
 			_mocks = null;
 		}
 
-		protected MockRepository _mocks;
+		private MockRepository _mocks;
 
 		protected virtual void After_each()
 		{
@@ -33,10 +33,14 @@ namespace MassTransit.ServiceBus.Tests
 		{
 		}
 
-		protected T Mock<T>()
+		protected T DynamicMock<T>()
 		{
 			return _mocks.DynamicMock<T>();
 		}
+        protected T StaticMock<T>()
+        {
+            return _mocks.CreateMock<T>();
+        }
 
 		protected T Stub<T>()
 		{
@@ -48,6 +52,11 @@ namespace MassTransit.ServiceBus.Tests
 			_mocks.ReplayAll();
 		}
 
+
+        protected IDisposable Record()
+        {
+            return _mocks.Record();
+        }
         protected IDisposable Playback()
         {
             return _mocks.Playback();
