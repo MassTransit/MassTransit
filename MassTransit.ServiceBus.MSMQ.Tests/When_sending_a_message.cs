@@ -34,5 +34,13 @@ namespace MassTransit.ServiceBus.MSMQ.Tests
 
             QueueTestContext.VerifyMessageInQueue(ep.QueuePath, new DeleteMessage());
         }
+
+        [Test]
+        public void NAME()
+        {
+            MsmqEndpoint ep = new MsmqEndpoint("msmq://srvdev19/ddd");
+            ep.Send(new DeleteMessage());
+            
+        }
     }
 }

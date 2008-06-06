@@ -8,9 +8,9 @@ namespace MassTransit.ServiceBus.Tests.Formatters
     using Rhino.Mocks;
 
     [TestFixture]
-    public class JsonBodyFormatterTests
+    public class JsonBodyFormatterTests : 
+        Specification
     {
-        private MockRepository mocks;
         private JsonBodyFormatter formatter;
         private IFormattedBody mockBody;
 
@@ -23,15 +23,13 @@ namespace MassTransit.ServiceBus.Tests.Formatters
         [SetUp]
         public void SetUp()
         {
-            mocks = new MockRepository();
             formatter = new JsonBodyFormatter();
-            mockBody = mocks.CreateMock<IFormattedBody>();
+            mockBody = StaticMock<IFormattedBody>();
         }
 
         [TearDown]
         public void TearDown()
         {
-            mocks = null;
             formatter = null;
             mockBody = null;
         }
@@ -40,45 +38,30 @@ namespace MassTransit.ServiceBus.Tests.Formatters
         public void Serialize()
         {
             PingMessage msg = new PingMessage();
+            MemoryStream str = new MemoryStream();
 
-            using (mocks.Record())
+            using (Record())
             {
-                Expect.Call(mockBody.BodyStream).Return(new MemoryStream());
+                Expect.Call(mockBody.BodyStream).Return(str);
             }
 
-            using (mocks.Playback())
+            using (Playback())
             {
                 formatter.Serialize(mockBody, msg);
             }
-        }
 
-        [Test]
-        public void Deserialize()
-        {
-            MemoryStream ms = new MemoryStream(Encoding.UTF8.GetBytes(_serializedMessages));
-            using (mocks.Record())
-            {
-                Expect.Call(mockBody.BodyStream).Return(ms);
-            }
-            using (mocks.Playback())
-            {
-                PingMessage msg = formatter.Deserialize<PingMessage>(mockBody);
 
-                Assert.IsNotNull(msg);
-
-                Assert.That(msg, Is.TypeOf(typeof(PingMessage)));
-            }
         }
 
         [Test]
         public void DeserializeWithOutGenerics()
         {
             MemoryStream ms = new MemoryStream(Encoding.UTF8.GetBytes(_serializedMessages));
-            using (mocks.Record())
+            using (Record())
             {
                 Expect.Call(mockBody.BodyStream).Return(ms);
             }
-            using (mocks.Playback())
+            using (Playback())
             {
                 object msg = formatter.Deserialize(mockBody);
 
@@ -89,21 +72,59 @@ namespace MassTransit.ServiceBus.Tests.Formatters
         }
 
         [Test]
+        public void DeserializeWithGenerics()
+        {
+            MemoryStream ms = new MemoryStream(Encoding.UTF8.GetBytes(_serializedMessages));
+            using (Record())
+            {
+                Expect.Call(mockBody.BodyStream).Return(ms);
+            }
+            using (Playback())
+            {
+                PingMessage msg = formatter.Deserialize<PingMessage>(mockBody);
+
+                Assert.IsNotNull(msg);
+
+                Assert.That(msg, Is.TypeOf(typeof(PingMessage)));
+            }
+        }
+
+
+        [Test]
         public void SerializeObjectWithValues()
         {
             ClientMessage msg = new ClientMessage();
             msg.Name = "test";
 
             MemoryStream ms = new MemoryStream();
-            using (mocks.Record())
+            using (Record())
             {
                 Expect.Call(mockBody.BodyStream).Return(ms);
             }
 
-            using (mocks.Playback())
+            using (Playback())
             {
                 formatter.Serialize(mockBody, msg);
             }
+        }
+
+        private static byte[] Convert(Stream str)
+        {
+            byte[] buffer = new byte[str.Length];
+            str.Position = 0;
+            str.Read(buffer, 0, buffer.Length);
+            return buffer;
+        }
+        private void BytesToString(Stream str)
+        {
+            byte[] buffer = Convert(str);
+            StringBuilder sb = new StringBuilder();
+            foreach (byte b in buffer)
+            {
+                sb.AppendFormat("{0},", b);
+            }
+
+            string s = sb.ToString();
         }
     }
 }
