@@ -6,45 +6,43 @@ namespace MassTransit.ServiceBus.Tests
 	using Rhino.Mocks;
 
 	[TestFixture]
-	public class When_a_handler_subscription_is_added
+	public class When_a_handler_subscription_is_added :
+        Specification
 	{
 		private ServiceBus _serviceBus;
-		private MockRepository _mocks;
 		private IEndpoint _mockEndpoint;
 		private ISubscriptionCache _mockSubscriptionCache;
-
 		private readonly Uri queueUri = new Uri("msmq://localhost/test");
 		private Subscription _subscription;
 
-		[SetUp]
-		public void SetUp()
-		{
-			_mocks = new MockRepository();
-			_mockEndpoint = _mocks.DynamicMock<IEndpoint>();
-			_mockSubscriptionCache = _mocks.DynamicMock<ISubscriptionCache>();
+        protected override void Before_each()
+        {
+			_mockEndpoint = DynamicMock<IEndpoint>();
+			_mockSubscriptionCache = DynamicMock<ISubscriptionCache>();
 			_subscription = new Subscription(typeof (PingMessage).FullName, queueUri);
 			_serviceBus = new ServiceBus(_mockEndpoint, _mockSubscriptionCache);
-		}
+            
+        }
 
-		[TearDown]
-		public void TearDown()
-		{
-			_mocks = null;
+        protected override void After_each()
+        {
 			_serviceBus = null;
 			_mockEndpoint = null;
 			_mockSubscriptionCache = null;
-		}
+            
+        }
+
 
 		[Test]
 		public void The_bus_should_add_a_subscription_to_the_subscription_cache()
 		{
-			using (_mocks.Record())
+			using (Record())
 			{
 				Expect.Call(_mockEndpoint.Uri).Return(queueUri).Repeat.Any();
 				_mockSubscriptionCache.Add(_subscription);
 			}
 
-			using (_mocks.Playback())
+			using (Playback())
 			{
 				_serviceBus.Subscribe<PingMessage>(delegate { });
 			}

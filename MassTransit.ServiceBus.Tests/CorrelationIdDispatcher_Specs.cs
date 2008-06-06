@@ -6,12 +6,12 @@ namespace MassTransit.ServiceBus.Tests
 	using NUnit.Framework.SyntaxHelpers;
 
 	[TestFixture]
-	public class When_a_correlated_message_is_dispatched
+	public class When_a_correlated_message_is_dispatched :
+        Specification
 	{
 		#region Setup/Teardown
 
-		[SetUp]
-		public void Before_each()
+	    protected override void Before_each()
 		{
 			_dispatcher = new CorrelationIdDispatcher<TestMessage, Guid>();
 			_message = new TestMessage(_value);

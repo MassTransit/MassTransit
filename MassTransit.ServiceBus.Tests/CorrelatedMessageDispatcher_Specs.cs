@@ -7,10 +7,10 @@ namespace MassTransit.ServiceBus.Tests
 	using NUnit.Framework.SyntaxHelpers;
 
 	[TestFixture]
-	public class When_a_correlated_message_is_dispatched_through_the_message_dispatcher
+	public class When_a_correlated_message_is_dispatched_through_the_message_dispatcher :
+        Specification
 	{
-		[SetUp]
-		public void Before_each()
+	    protected override void Before_each()
 		{
 			_dispatcher = new MessageDispatcher();
 			_message = new TestMessage(_value);
