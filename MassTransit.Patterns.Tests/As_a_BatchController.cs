@@ -197,4 +197,11 @@ namespace MassTransit.Patterns.Tests
 		private IEndpoint _endpoint;
 		private ServiceBus _bus;
 	}
+
+    public class StringBatchMessage : BatchMessage<string, Guid>
+    {
+        public StringBatchMessage(Guid batchId, int batchLength, string body) : base(batchId, batchLength, body)
+        {
+        }
+    }
 }

@@ -28,28 +28,6 @@ namespace MassTransit.ServiceBus.Tests.Formatters
         }
 
         [Test]
-        public void Xml()
-        {
-            byte[] buffer = Encoding.UTF8.GetBytes(_xmlBody);
-            MemoryStream str = new MemoryStream(buffer);
-            mockBody = new DumpMessageBody(str);
-
-            _formatter = new XmlBodyFormatter();
-
-
-            DateTime start = DateTime.Now;
-            for (int i = 0; i < _iterations; i++)
-            {
-                str = new MemoryStream(buffer);
-                str.Position = 0;
-                mockBody = new DumpMessageBody(str);
-                PingMessage msg = _formatter.Deserialize<PingMessage>(mockBody);
-            }
-            DateTime end = DateTime.Now;
-            Console.WriteLine("{0} milliseconds", end.Subtract(start).Milliseconds);
-        }
-
-        [Test]
         public void Binary()
         {
             byte[] buffer = Encoding.UTF8.GetBytes(_xmlBody);
