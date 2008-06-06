@@ -97,6 +97,7 @@
     <Compile Include="Messages\UpdateAcceptedMessage.cs" />
     <Compile Include="ThreadPool_Specs.cs" />
     <Compile Include="When_an_object_subscribes_to_the_service_bus.cs" />
+    <Compile Include="When_a_batch_message_arrives.cs" />
     <Compile Include="When_A_Message_Is_Received_On_The_Service_Bus.cs" />
     <Compile Include="When_specifying_an_endpoint_address.cs" />
   </ItemGroup>
