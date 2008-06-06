@@ -33,8 +33,9 @@ namespace WebRequestReply.UI.MonoRail.Controllers
 		{
 			_request = _bus.Request()
 				.From(this)
-				.WithCallback(ControllerContext.Async.Callback, ControllerContext.Async.State)
-				.Send(new RequestMessage(CorrelationId, requestText));
+				.WithCallback(ControllerContext.Async.Callback, ControllerContext.Async.State);
+
+			_request.Send(new RequestMessage(CorrelationId, requestText));
 
 			return _request;
 		}
@@ -48,7 +49,7 @@ namespace WebRequestReply.UI.MonoRail.Controllers
 
 		#region Consumes<ResponseMessage>.All Members
 
-		private IServiceBusRequest _request;
+		private ServiceBusRequest<DemoController> _request;
 		private ResponseMessage msg;
 
 		public void Consume(ResponseMessage message)

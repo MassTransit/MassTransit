@@ -9,7 +9,7 @@ namespace WebRequestReply.Core
 	{
 		private readonly IServiceBus _serviceBus;
 		private readonly IRequestReplyView _view;
-		private IServiceBusRequest _request;
+		private ServiceBusRequest<RequestReplyController> _request;
 		private Guid _requestId;
 
 		public RequestReplyController(IRequestReplyView view, IServiceBus serviceBus)
@@ -40,9 +40,9 @@ namespace WebRequestReply.Core
 
 			_requestId = Guid.NewGuid();
 
-			_request = _serviceBus.Request()
-				.From(this)
-				.Send(new RequestMessage(_requestId, _view.RequestText));
+			_request = _serviceBus.Request().From(this);
+
+			_request.Send(new RequestMessage(_requestId, _view.RequestText));
 
 			if (_request.AsyncWaitHandle.WaitOne(TimeSpan.FromSeconds(10), true))
 			{
@@ -60,8 +60,9 @@ namespace WebRequestReply.Core
 
 			_request = _serviceBus.Request()
 				.From(this)
-				.WithCallback(callback, state)
-				.Send(new RequestMessage(_requestId, _view.RequestText));
+				.WithCallback(callback, state);
+
+			_request.Send(new RequestMessage(_requestId, _view.RequestText));
 
 			return _request;
 		}
