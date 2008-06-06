@@ -1,6 +1,5 @@
 namespace MassTransit.ServiceBus.Tests
 {
-	using System;
 	using Internal;
 	using NUnit.Framework;
 	using NUnit.Framework.SyntaxHelpers;
@@ -42,19 +41,6 @@ namespace MassTransit.ServiceBus.Tests
 
 			Assert.That(RequestHandler.Value, Is.EqualTo(42));
 			Assert.That(SelectiveHandler.Value, Is.EqualTo(42));
-		}
-
-		internal class ActivatorObjectBuilder : IObjectBuilder
-		{
-			public object Build(Type objectType)
-			{
-				return Activator.CreateInstance(objectType);
-			}
-
-			public T Build<T>(Type type) where T : class
-			{
-				return Build(type) as T;
-			}
 		}
 
 		internal class RequestHandler : Consumes<TestMessage>.All
