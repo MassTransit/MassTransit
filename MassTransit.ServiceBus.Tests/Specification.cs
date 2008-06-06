@@ -52,6 +52,15 @@ namespace MassTransit.ServiceBus.Tests
 			_mocks.ReplayAll();
 		}
 
+		protected void Verify(object o)
+		{
+			_mocks.Verify(o);
+		}
+
+		protected void VerifyAll()
+		{
+			_mocks.VerifyAll();
+		}
 
         protected IDisposable Record()
         {

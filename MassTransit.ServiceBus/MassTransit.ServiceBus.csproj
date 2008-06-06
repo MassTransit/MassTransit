@@ -50,6 +50,7 @@
     <Compile Include="ActivatorObjectBuilder.cs" />
     <Compile Include="Batch.cs" />
     <Compile Include="BatchedBy.cs" />
+    <Compile Include="BatchTimeout.cs" />
     <Compile Include="Internal\BatchDistributor.cs" />
     <Compile Include="ServiceBusRequest.cs" />
     <Compile Include="Consumes.cs" />
@@ -109,6 +110,7 @@
     <Compile Include="Subscriptions\SubscriptionService.cs" />
     <Compile Include="Threading\ManagedThread.cs" />
     <Compile Include="Threading\ManagedThreadPool.cs" />
+    <Compile Include="TimeoutAttribute.cs" />
     <Compile Include="Util\Check.cs" />
     <Compile Include="Internal\IMessageId.cs" />
     <Compile Include="Util\Guard.cs" />
