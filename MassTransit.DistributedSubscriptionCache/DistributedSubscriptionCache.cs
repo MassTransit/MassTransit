@@ -28,7 +28,6 @@ namespace MassTransit.DistributedSubscriptionCache
 
 		private readonly List<string> _messageTypes = new List<string>();
 		private readonly char _newLineToken = '\n';
-		private readonly char _valueSeparator = '\t';
 
 		public IList<Subscription> List()
 		{
@@ -166,6 +165,8 @@ namespace MassTransit.DistributedSubscriptionCache
 			}
 		}
 
+		#region Nested type: CacheLock
+
 		internal class CacheLock : IDisposable
 		{
 			private const int _lockTimeSpan = 5;
@@ -207,6 +208,10 @@ namespace MassTransit.DistributedSubscriptionCache
 				_client.Store(mode, key.CacheKey, value, validFor);
 			}
 		}
+
+		#endregion
+
+		#region Nested type: SubscriptionKey
 
 		internal class SubscriptionKey
 		{
@@ -253,5 +258,7 @@ namespace MassTransit.DistributedSubscriptionCache
 				return string.Format("SubscriptionKey for {0}", _baseKey);
 			}
 		}
+
+		#endregion
 	}
 }

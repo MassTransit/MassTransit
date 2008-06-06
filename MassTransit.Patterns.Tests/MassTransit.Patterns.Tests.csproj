@@ -51,7 +51,6 @@
     <Compile Include="BatchMessageToBatch.cs" />
     <Compile Include="MessageToBatch.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="When_a_new_batch_is_received.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\MassTransit.Patterns\MassTransit.Patterns.csproj">

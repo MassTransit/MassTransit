@@ -18,10 +18,12 @@ namespace MassTransit.ServiceBus
 		private readonly Queue<TMessage> _messages = new Queue<TMessage>();
 		private readonly TimeSpan _timeout;
 		private int _messageCount;
+		private readonly IServiceBus _bus;
 
-		public Batch(int batchLength, TBatchId batchId, TimeSpan timeout)
+		public Batch(IServiceBus bus, TBatchId batchId, int batchLength, TimeSpan timeout)
 		{
 			_batchLength = batchLength;
+			_bus = bus;
 			_batchId = batchId;
 			_timeout = timeout;
 
@@ -46,10 +48,9 @@ namespace MassTransit.ServiceBus
 		public void Consume(TMessage message)
 		{
 			lock (_messages)
-			{
 				_messages.Enqueue(message);
-				_messageReady.Release();
-			}
+
+			_messageReady.Release();
 		}
 
 		IEnumerator<TMessage> IEnumerable<TMessage>.GetEnumerator()
@@ -59,20 +60,22 @@ namespace MassTransit.ServiceBus
 			int waitResult;
 			while ((waitResult = WaitHandle.WaitAny(handles, _timeout, true)) == 0)
 			{
+				TMessage message;
 				lock (_messages)
-				{
-					TMessage message = _messages.Dequeue();
-					_messageCount++;
+					message = _messages.Dequeue();
 
-					if (_messageCount == _batchLength)
-						_complete.Set();
+				Interlocked.Increment(ref _messageCount);
 
-					yield return message;
-				}
+				if (_messageCount == _batchLength)
+					_complete.Set();
+
+				yield return message;
 			}
 
 			if (waitResult == WaitHandle.WaitTimeout)
-				throw new ApplicationException("Timeout waiting for batch to complete");
+			{
+				_bus.Publish(new BatchTimeout<TMessage, TBatchId>(_batchId));
+			}
 		}
 
 		public IEnumerator GetEnumerator()

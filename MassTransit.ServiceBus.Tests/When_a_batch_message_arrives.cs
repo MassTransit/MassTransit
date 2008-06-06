@@ -1,133 +1,160 @@
 namespace MassTransit.ServiceBus.Tests
 {
-    using System;
-    using System.Threading;
-    using MassTransit.ServiceBus.Internal;
-    using NUnit.Framework;
-    using NUnit.Framework.SyntaxHelpers;
-    using Rhino.Mocks;
+	using System;
+	using System.Threading;
+	using Internal;
+	using NUnit.Framework;
+	using NUnit.Framework.SyntaxHelpers;
+	using Rhino.Mocks;
 
-    [TestFixture]
-    public class When_a_batch_message_arrives :
-        Specification
-    {
-        protected override void  Before_each()
-        {
-            _endpoint = DynamicMock<IEndpoint>();
-            SetupResult.For(_endpoint.Uri).Return(new Uri("msmq://localhost/queue"));
+	[TestFixture]
+	public class When_a_batch_message_arrives :
+		Specification
+	{
+		protected override void Before_each()
+		{
+			_endpoint = DynamicMock<IEndpoint>();
+			SetupResult.For(_endpoint.Uri).Return(new Uri("msmq://localhost/queue"));
 
-            _bus = new ServiceBus(_endpoint);
+			_bus = new ServiceBus(_endpoint);
+		}
 
-            ReplayAll();
-        }
+		protected override void After_each()
+		{
+			_bus.Dispose();
+			_bus = null;
 
-        protected override void After_each()
-        {
-            _bus.Dispose();
-            _bus = null;
+			_endpoint.Dispose();
+			_endpoint = null;
+		}
 
-            _endpoint.Dispose();
-            _endpoint = null;
-        }
+		private void TestBatch(int length)
+		{
+			ReplayAll();
 
-        [Test]
-        public void A_large_batch_should_work_properly()
-        {
-            TestBatch(712);
-        }
+			BatchConsumer consumer = new BatchConsumer();
 
-        [Test]
-        public void The_consumer_method_should_be_called()
-        {
-            TestBatch(1);
-        }
+			BatchDistributor<IndividualMessage, Guid> distributor = new BatchDistributor<IndividualMessage, Guid>(_bus, consumer);
 
-        private void TestBatch(int length)
-        {
-            BatchConsumer consumer = new BatchConsumer();
+			_bus.Subscribe(distributor);
 
-            BatchDistributor<IndividualMessage, Guid> distributor = new BatchDistributor<IndividualMessage, Guid>(consumer);
+			Guid batchId = Guid.NewGuid();
+			for (int i = 0; i < length; i++)
+			{
+				IndividualMessage message = new IndividualMessage(batchId, length);
 
-            _bus.Subscribe(distributor);
+				Assert.That(_bus.Accept(message), Is.True, "Bus did not accept the message");
 
-            Guid batchId = Guid.NewGuid();
-            for (int i = 0; i < length; i++)
-            {
-                IndividualMessage message = new IndividualMessage(batchId, length);
+				_bus.Dispatch(message, DispatchMode.Asynchronous);
+			}
 
-                Assert.That(_bus.Accept(message), Is.True, "Bus did not accept the message");
+			Assert.That(consumer.Received.WaitOne(TimeSpan.FromSeconds(3), true), Is.True, "Timeout waiting for message");
+			Assert.That(consumer.BatchId, Is.EqualTo(batchId));
+			Assert.That(consumer.ReceivedCount, Is.EqualTo(length));
+		}
 
-                _bus.Dispatch(message, DispatchMode.Asynchronous);
-            }
+		private IEndpoint _endpoint;
+		private ServiceBus _bus;
 
-            Assert.That(consumer.Received.WaitOne(TimeSpan.FromSeconds(3), true), Is.True, "Timeout waiting for message");
-            Assert.That(consumer.BatchId, Is.EqualTo(batchId));
-            Assert.That(consumer.ReceivedCount, Is.EqualTo(length));
-        }
+		internal class BatchConsumer : Consumes<Batch<IndividualMessage, Guid>>.Selected
+		{
+			private readonly ManualResetEvent _received = new ManualResetEvent(false);
+			private Guid _batchId;
+			private int _receivedCount;
 
-        private IEndpoint _endpoint;
-        private ServiceBus _bus;
+			public int ReceivedCount
+			{
+				get { return _receivedCount; }
+			}
+
+			public ManualResetEvent Received
+			{
+				get { return _received; }
+			}
+
+			public Guid BatchId
+			{
+				get { return _batchId; }
+			}
+
+			public void Consume(Batch<IndividualMessage, Guid> batch)
+			{
+				_batchId = batch.BatchId;
+
+				foreach (IndividualMessage message in batch)
+				{
+					_receivedCount++;
+				}
+
+				if (_receivedCount == batch.BatchLength)
+					_received.Set();
+			}
+
+			public bool Accept(Batch<IndividualMessage, Guid> message)
+			{
+				return true;
+			}
+		}
+
+		[Test]
+		public void A_large_batch_should_work_properly()
+		{
+			TestBatch(712);
+		}
+
+		[Test]
+		public void The_consumer_method_should_be_called()
+		{
+			TestBatch(1);
+		}
+
+		[Test]
+		public void When_a_message_fails_to_arrive_the_batch_should_timeout()
+		{
+			ReplayAll();
+
+			BatchConsumer consumer = new BatchConsumer();
+
+			BatchDistributor<IndividualMessage, Guid> distributor = new BatchDistributor<IndividualMessage, Guid>(_bus, consumer);
+
+			Guid batchId = Guid.NewGuid();
+			IndividualMessage message = new IndividualMessage(batchId, 2);
+
+			_bus.Subscribe<BatchTimeout<IndividualMessage, Guid>>(delegate { });
+
+			_bus.Subscribe(distributor);
+
+			Assert.That(_bus.Accept(message), Is.True, "Bus did not accept the message");
+
+			_bus.Dispatch(message, DispatchMode.Asynchronous);
+
+			Assert.That(consumer.Received.WaitOne(TimeSpan.FromSeconds(5), true), Is.False, "Batch should not have completed");
+			Assert.That(consumer.BatchId, Is.EqualTo(batchId));
+			Assert.That(consumer.ReceivedCount, Is.EqualTo(1));
+		}
+	}
 
 
-        internal class BatchConsumer : Consumes<Batch<IndividualMessage, Guid>>.Selected
-        {
-            private readonly ManualResetEvent _received = new ManualResetEvent(false);
-            private Guid _batchId;
-            private int _receivedCount;
+	[Timeout(Seconds = 3)]
+	internal class IndividualMessage : BatchedBy<Guid>
+	{
+		private readonly Guid _batchId;
+		private readonly int _batchLength;
 
-            public int ReceivedCount
-            {
-                get { return _receivedCount; }
-            }
+		public IndividualMessage(Guid batchId, int batchLength)
+		{
+			_batchId = batchId;
+			_batchLength = batchLength;
+		}
 
-            public ManualResetEvent Received
-            {
-                get { return _received; }
-            }
+		public Guid BatchId
+		{
+			get { return _batchId; }
+		}
 
-            public Guid BatchId
-            {
-                get { return _batchId; }
-            }
-
-            public void Consume(Batch<IndividualMessage, Guid> batch)
-            {
-                _batchId = batch.BatchId;
-
-                foreach (IndividualMessage message in batch)
-                {
-                    _receivedCount++;
-                }
-
-                _received.Set();
-            }
-
-            public bool Accept(Batch<IndividualMessage, Guid> message)
-            {
-                return true;
-            }
-        }
-    }
-
-    internal class IndividualMessage : BatchedBy<Guid>
-    {
-        private readonly Guid _batchId;
-        private readonly int _batchLength;
-
-        public IndividualMessage(Guid batchId, int batchLength)
-        {
-            _batchId = batchId;
-            _batchLength = batchLength;
-        }
-
-        public Guid BatchId
-        {
-            get { return _batchId; }
-        }
-
-        public int BatchLength
-        {
-            get { return _batchLength; }
-        }
-    }
+		public int BatchLength
+		{
+			get { return _batchLength; }
+		}
+	}
 }

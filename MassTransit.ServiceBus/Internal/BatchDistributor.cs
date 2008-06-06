@@ -19,17 +19,14 @@ namespace MassTransit.ServiceBus.Internal
 		private readonly object _lockContext = new object();
 
 		private readonly TimeSpan _timeout;
+		private readonly IServiceBus _bus;
 
-		public BatchDistributor(Consumes<Batch<TMessage, TBatchId>>.Selected consumer)
+		public BatchDistributor(IServiceBus bus, Consumes<Batch<TMessage, TBatchId>>.Selected consumer)
 		{
 			_consumer = consumer;
-			_timeout = TimeSpan.FromMinutes(30);
-		}
+			_bus = bus;
 
-		public BatchDistributor(Consumes<Batch<TMessage, TBatchId>>.Selected consumer, TimeSpan timeout)
-		{
-			_consumer = consumer;
-			_timeout = timeout;
+			_timeout = GetMessageTimeout(TimeSpan.FromMinutes(30));
 		}
 
 		public bool Accept(TMessage message)
@@ -38,7 +35,7 @@ namespace MassTransit.ServiceBus.Internal
 				if (_batches.ContainsKey(message.BatchId))
 					return true;
 
-			Batch<TMessage, TBatchId> batch = new Batch<TMessage, TBatchId>(message.BatchLength, message.BatchId, _timeout);
+			Batch<TMessage, TBatchId> batch = new Batch<TMessage, TBatchId>(_bus, message.BatchId, message.BatchLength, _timeout);
 
 			if (_consumer.Accept(batch))
 				return true;
@@ -58,7 +55,7 @@ namespace MassTransit.ServiceBus.Internal
 			{
 				if (!_batches.ContainsKey(batchId))
 				{
-					batch = new Batch<TMessage, TBatchId>(message.BatchLength, batchId, _timeout);
+					batch = new Batch<TMessage, TBatchId>(_bus, batchId, message.BatchLength, _timeout);
 
 					_batches.Add(batchId, batch);
 
@@ -77,6 +74,19 @@ namespace MassTransit.ServiceBus.Internal
 			{
 				_consumer.Consume(batch);
 			}
+		}
+
+		private static TimeSpan GetMessageTimeout(TimeSpan defaultValue)
+		{
+			TimeSpan value = defaultValue;
+
+			object[] attributes = typeof (TMessage).GetCustomAttributes(typeof (TimeoutAttribute), true);
+			foreach (TimeoutAttribute timeout in attributes)
+			{
+				value = timeout.Timeout;
+			}
+
+			return value;
 		}
 	}
 }
