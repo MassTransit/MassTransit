@@ -29,7 +29,7 @@
 		<!-- try to update the revision -->
 		<!--<exec
 			program="svn"
-			commandline='info "${project::get-base-directory()}" --xml'
+			commandline='info "${project::get-base-directory()}" - -xml'
 			output="_revision.xml"
 			failonerror="false"/> -->
 		<exec
