@@ -51,14 +51,14 @@ namespace HeavyLoad
 
 			for (int index = 0; index < _attempts; index++)
 			{
-					CorrelatedController controller = new CorrelatedController(_bus);
+				CorrelatedController controller = new CorrelatedController(_bus);
 
-					controller.OnSuccess += controller_OnSuccess;
-					controller.OnTimeout += controller_OnTimeout;
-					controller.SimulateRequestResponse();
+				controller.OnSuccess += controller_OnSuccess;
+				controller.OnTimeout += controller_OnTimeout;
+				controller.SimulateRequestResponse();
 
-					controller.OnSuccess -= controller_OnSuccess;
-					controller.OnTimeout -= controller_OnTimeout;
+				controller.OnSuccess -= controller_OnSuccess;
+				controller.OnTimeout -= controller_OnTimeout;
 			}
 
 			point.Complete(_attempts);
@@ -114,7 +114,8 @@ namespace HeavyLoad
 	{
 		private readonly IServiceBus _bus;
 		private readonly Guid _id;
-		private readonly ManualResetEvent _responseEvent = new ManualResetEvent(false);
+		private ServiceBusRequest<CorrelatedController> _request;
+		private TimeSpan _timeout = TimeSpan.FromSeconds(60);
 
 
 		public CorrelatedController(IServiceBus bus)
@@ -126,7 +127,7 @@ namespace HeavyLoad
 
 		public void Consume(SimpleResponseMessage message)
 		{
-			_responseEvent.Set();
+			_request.Complete();
 		}
 
 		public Guid CorrelationId
@@ -139,17 +140,14 @@ namespace HeavyLoad
 
 		public void SimulateRequestResponse()
 		{
-			_bus.Subscribe(this);
+			_request = _bus.Request().From(this);
+			
+			_request.Send(new SimpleRequestMessage(_id), RequestMode.Synchronous, _timeout);
 
-			_bus.Publish(new SimpleRequestMessage(_id));
-
-			bool success = _responseEvent.WaitOne(TimeSpan.FromSeconds(60), true);
-			if (success)
+			if (_request.IsCompleted)
 				OnSuccess(this);
 			else
 				OnTimeout(this);
-
-			_bus.Unsubscribe(this);
 		}
 	}
 
