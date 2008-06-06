@@ -5,34 +5,30 @@ namespace MassTransit.ServiceBus.Tests
 	using Rhino.Mocks;
 
 	[TestFixture]
-	public class MessageQueueEndpoint_MeetsCriteria
+	public class MessageQueueEndpoint_MeetsCriteria :
+        Specification
 	{
-		private MockRepository _mocks;
 		private ServiceBus _serviceBus;
 		private IEndpoint _mockServiceBusEndPoint;
 		private readonly PingMessage _message = new PingMessage();
 
-		[SetUp]
-		public void SetUp()
-		{
-			_mocks = new MockRepository();
-			_mockServiceBusEndPoint = _mocks.DynamicMock<IEndpoint>();
+        protected override void Before_each()
+        {
+			_mockServiceBusEndPoint = DynamicMock<IEndpoint>();
 			_serviceBus = new ServiceBus(_mockServiceBusEndPoint);
-		}
+            ReplayAll();
+        }
 
-		[TearDown]
-		public void TearDown()
-		{
-			_mocks = null;
+        protected override void After_each()
+        {
 			_mockServiceBusEndPoint = null;
 			_serviceBus = null;
-		}
+        }
+
 
 		[Test]
 		public void Subscring_to_an_endpoint_should_accept_and_dispatch_messages()
 		{
-			_mocks.ReplayAll();
-
 			bool workDid = false;
 
 			_serviceBus.Subscribe<PingMessage>(
@@ -50,8 +46,6 @@ namespace MassTransit.ServiceBus.Tests
 		[Test]
 		public void The_Service_Bus_Should_Return_False_If_The_Message_Will_Be_Handled_By_none_Of_the_handlers()
 		{
-			_mocks.ReplayAll();
-
 			_serviceBus.Subscribe<PingMessage>(
 				delegate { },
 				delegate { return false; });
@@ -66,8 +60,6 @@ namespace MassTransit.ServiceBus.Tests
 		[Test]
 		public void The_Service_Bus_Should_Return_False_If_The_Message_Will_Not_Be_Handled()
 		{
-			_mocks.ReplayAll();
-
 			_serviceBus.Subscribe<PingMessage>(
 				delegate { },
 				delegate { return false; });
@@ -78,8 +70,6 @@ namespace MassTransit.ServiceBus.Tests
 		[Test]
 		public void The_Service_Bus_Should_Return_True_If_The_Message_Will_Be_Handled()
 		{
-			_mocks.ReplayAll();
-
 			_serviceBus.Subscribe<PingMessage>(
 				delegate { },
 				delegate { return true; });
@@ -90,8 +80,6 @@ namespace MassTransit.ServiceBus.Tests
 		[Test]
 		public void The_Service_Bus_Should_Return_True_If_The_Message_Will_Be_Handled_By_One_Of_multiple_handlers()
 		{
-			_mocks.ReplayAll();
-
 			_serviceBus.Subscribe<PingMessage>(
 				delegate { },
 				delegate { return false; });

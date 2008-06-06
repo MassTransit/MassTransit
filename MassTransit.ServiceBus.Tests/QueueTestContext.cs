@@ -3,7 +3,6 @@ namespace MassTransit.ServiceBus.Tests
 	using System;
 	using System.Diagnostics;
 	using System.Reflection;
-	using Internal;
 	using log4net;
 	using MassTransit.ServiceBus.Subscriptions;
 	using Rhino.Mocks;
