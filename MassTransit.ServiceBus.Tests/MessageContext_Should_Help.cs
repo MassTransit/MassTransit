@@ -1,15 +1,13 @@
-using NUnit.Framework;
-using Rhino.Mocks;
-
 namespace MassTransit.ServiceBus.Tests
 {
     using Internal;
-    using Util;
+    using NUnit.Framework;
+    using Rhino.Mocks;
 
     [TestFixture]
-    public class MessageContext_Should_Help
+    public class MessageContext_Should_Help :
+        Specification
     {
-        private MockRepository mocks;
         private IServiceBus mockBus;
         private IEndpoint mockBusEndpoint;
         private IEnvelope mockEnvelope;
@@ -20,27 +18,26 @@ namespace MassTransit.ServiceBus.Tests
         private PongMessage replyMessage = new PongMessage();
 
         #region SetUp / TearDown
-        [SetUp]
-        public void SetUp()
-        {
-            mocks = new MockRepository();
-            mockBus = mocks.DynamicMock<IServiceBus>();
-            mockBusEndpoint = mocks.DynamicMock<IEndpoint>();
-            mockEnvelope = mocks.DynamicMock<IEnvelope>();
-			mockEndpoint = mocks.DynamicMock<IEndpoint>();
-            mockPoisonEndpoint = mocks.DynamicMock<IEndpoint>();
-        }
 
-        [TearDown]
-        public void TearDown()
+        protected override void Before_each()
         {
-            mocks = null;
+            mockBus = DynamicMock<IServiceBus>();
+            mockBusEndpoint = DynamicMock<IEndpoint>();
+            mockEnvelope = DynamicMock<IEnvelope>();
+            mockEndpoint = DynamicMock<IEndpoint>();
+            mockPoisonEndpoint = DynamicMock<IEndpoint>();
+            
+        }
+        protected override void After_each()
+        {
             mockBus = null;
             mockBusEndpoint = null;
             mockEnvelope = null;
             mockEndpoint = null;
             mockPoisonEndpoint = null;
+            
         }
+        
         #endregion
 
         [Test, Ignore]
@@ -48,14 +45,14 @@ namespace MassTransit.ServiceBus.Tests
         {
             MessageContext<PingMessage> cxt = new MessageContext<PingMessage>(mockBus, mockEnvelope, requestMessage);
 
-            using (mocks.Record())
+            using (Record())
             {
                 Expect.Call(mockEnvelope.ReturnEndpoint).Return(mockEndpoint);
                 Expect.Call(mockBus.Endpoint).Return(mockBusEndpoint);
                 Expect.Call(mockEnvelope.Id).Return(null);
             }
 
-            using (mocks.Playback())
+            using (Playback())
             {
                 cxt.Reply(replyMessage);
             }
@@ -64,16 +61,14 @@ namespace MassTransit.ServiceBus.Tests
         [Test]
         public void With_Handling_Later()
         {
-
             MessageContext<PingMessage> cxt = new MessageContext<PingMessage>(mockBus, mockEnvelope, requestMessage);
 
-            using (mocks.Record())
+            using (Record())
             {
                 Expect.Call(mockBus.Endpoint).Return(mockEndpoint);
-
             }
 
-            using (mocks.Playback())
+            using (Playback())
             {
                 cxt.HandleMessageLater(replyMessage);
             }
@@ -84,12 +79,12 @@ namespace MassTransit.ServiceBus.Tests
         {
             MessageContext<PingMessage> cxt = new MessageContext<PingMessage>(mockBus, mockEnvelope, requestMessage);
 
-            using (mocks.Record())
+            using (Record())
             {
-             //   Expect.Call(mockBus.PoisonEndpoint).Return(mockPoisonEndpoint);
+                //   Expect.Call(mockBus.PoisonEndpoint).Return(mockPoisonEndpoint);
             }
 
-            using (mocks.Playback())
+            using (Playback())
             {
                 cxt.MarkPoison();
             }
@@ -100,12 +95,12 @@ namespace MassTransit.ServiceBus.Tests
         {
             MessageContext<PingMessage> cxt = new MessageContext<PingMessage>(mockBus, mockEnvelope, requestMessage);
 
-            using (mocks.Record())
+            using (Record())
             {
                 //Expect.Call(mockBus.PoisonEndpoint).Return(mockPoisonEndpoint);
             }
 
-            using (mocks.Playback())
+            using (Playback())
             {
                 cxt.MarkPoison(cxt.Message);
             }
