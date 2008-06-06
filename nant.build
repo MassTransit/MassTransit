@@ -27,9 +27,14 @@
 		<!-- For adding SVN revision to builds -->
 		<property name="svn.revision" value="0" overwrite="false" />
 		<!-- try to update the revision -->
-		<exec
+		<!--<exec
 			program="svn"
 			commandline='info "${project::get-base-directory()}" --xml'
+			output="_revision.xml"
+			failonerror="false"/> -->
+		<exec
+			program="svn"
+			commandline='info http://masstransit.googlecode.com/svn/trunk --xml'
 			output="_revision.xml"
 			failonerror="false"/>
 		<xmlpeek
