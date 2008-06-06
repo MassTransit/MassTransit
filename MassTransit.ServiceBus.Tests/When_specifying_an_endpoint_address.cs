@@ -5,7 +5,8 @@ namespace MassTransit.ServiceBus.Tests
 	using NUnit.Framework.SyntaxHelpers;
 
 	[TestFixture]
-	public class When_specifying_an_endpoint_address
+	public class When_specifying_an_endpoint_address :
+        Specification
 	{
 		[Test, ExpectedException(typeof (UriFormatException))]
 		public void An_address_in_an_invalid_format_should_throw_an_exception()

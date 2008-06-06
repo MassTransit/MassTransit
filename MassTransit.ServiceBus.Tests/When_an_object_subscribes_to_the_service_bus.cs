@@ -6,31 +6,28 @@ namespace MassTransit.ServiceBus.Tests
 	using Rhino.Mocks;
 
 	[TestFixture]
-	public class When_an_object_subscribes_to_the_service_bus
+	public class When_an_object_subscribes_to_the_service_bus :
+        Specification
 	{
-		[SetUp]
-		public void SetUp()
-		{
-			mocks = new MockRepository();
-			mockServiceBusEndPoint = mocks.DynamicMock<IEndpoint>();
-			_serviceBus = new ServiceBus(mockServiceBusEndPoint);
+        protected override void Before_each()
+        {
+            mockServiceBusEndPoint = DynamicMock<IEndpoint>();
+            _serviceBus = new ServiceBus(mockServiceBusEndPoint);
 
-			SetupResult.For(mockServiceBusEndPoint.Uri).Return(new Uri("msmq://localhost/test_servicebus"));
+            SetupResult.For(mockServiceBusEndPoint.Uri).Return(new Uri("msmq://localhost/test_servicebus"));
 
-			mocks.ReplayAll();
-		}
+            ReplayAll();
+        }
 
-		[TearDown]
-		public void TearDown()
-		{
+	    protected override void After_each()
+        {
 			_serviceBus.Dispose();
 
 
 			_serviceBus = null;
 			mockServiceBusEndPoint = null;
-			mocks = null;
-		}
-
+            
+        }
 
 /*
         [Test]
@@ -78,11 +75,12 @@ namespace MassTransit.ServiceBus.Tests
 			CorrelatedController controller = new CorrelatedController(_serviceBus);
 		}
 
-		private MockRepository mocks;
 		private ServiceBus _serviceBus;
 		private IEndpoint mockServiceBusEndPoint;
 
-		internal class CorrelatedController : Consumes<SimpleResponseMessage>.For<Guid>
+
+        
+        internal class CorrelatedController : Consumes<SimpleResponseMessage>.For<Guid>
 		{
 			private readonly IServiceBus _bus;
 			private readonly Guid _id;
@@ -122,7 +120,6 @@ namespace MassTransit.ServiceBus.Tests
 					OnTimeout(this);
 			}
 		}
-
 		internal class SimpleRequestMessage : CorrelatedBy<Guid>
 		{
 			private readonly Guid _id;
@@ -137,7 +134,6 @@ namespace MassTransit.ServiceBus.Tests
 				get { return _id; }
 			}
 		}
-
 		[Serializable]
 		internal class SimpleResponseMessage : CorrelatedBy<Guid>
 		{

@@ -7,7 +7,8 @@ namespace MassTransit.ServiceBus.Tests
 	using Threading;
 
 	[TestFixture]
-	public class When_a_item_is_scheduled_in_the_thread_pool
+	public class When_a_item_is_scheduled_in_the_thread_pool :
+        Specification
 	{
 		[Test]
 		public void It_should_be_processed_asynchronously()
@@ -36,7 +37,8 @@ namespace MassTransit.ServiceBus.Tests
 	}
 
 	[TestFixture]
-	public class When_multiple_long_running_jobs_are_queued
+	public class When_multiple_long_running_jobs_are_queued : 
+        Specification
 	{
 		private int _counter = 0;
 		[Test]
