@@ -35,7 +35,8 @@
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CreateMSMQQueue.cs" />
+    <Compile Include="MsmqAdd.cs" />
+    <Compile Include="MsmqDelete.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
