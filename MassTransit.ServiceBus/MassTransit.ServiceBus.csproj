@@ -77,7 +77,6 @@
     <Compile Include="Internal\EndpointResolver.cs" />
     <Compile Include="Formatters\BinaryBodyFormatter.cs" />
     <Compile Include="Formatters\IFormattedBody.cs" />
-    <Compile Include="Formatters\XmlBodyFormatter.cs" />
     <Compile Include="Envelope.cs" />
     <Compile Include="Exceptions\EndpointException.cs" />
     <Compile Include="IHostedService.cs" />
