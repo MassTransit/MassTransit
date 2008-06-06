@@ -5,10 +5,10 @@ namespace MassTransit.ServiceBus.HealthMonitoring.Messages
     [Serializable]
     public class DownEndpoint
     {
-        public readonly IEndpoint Endpoint;
+        public readonly Uri Endpoint;
 
 
-        public DownEndpoint(IEndpoint endpoint)
+        public DownEndpoint(Uri endpoint)
         {
             Endpoint = endpoint;
         }
