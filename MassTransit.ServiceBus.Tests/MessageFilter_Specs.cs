@@ -4,12 +4,11 @@ namespace MassTransit.ServiceBus.Tests
 	using System.Threading;
 	using NUnit.Framework;
 	using NUnit.Framework.SyntaxHelpers;
-	using Rhino.Mocks;
 
 	[TestFixture]
-	public class When_a_message_filter_is_subscribed_to_the_service_bus
+	public class When_a_message_filter_is_subscribed_to_the_service_bus :
+        Specification
 	{
-		private MockRepository _mocks;
 		private ServiceBus _serviceBus;
 		private IEndpoint _mockServiceBusEndPoint;
 		private readonly RequestMessage _message = new RequestMessage();
@@ -36,29 +35,25 @@ namespace MassTransit.ServiceBus.Tests
 			return false;
 		}
 
-		[SetUp]
-		public void SetUp()
-		{
-			_mocks = new MockRepository();
-			_mockServiceBusEndPoint = _mocks.DynamicMock<IEndpoint>();
+        protected override void Before_each()
+        {
+			_mockServiceBusEndPoint = DynamicMock<IEndpoint>();
 			_serviceBus = new ServiceBus(_mockServiceBusEndPoint);
 
 			_consumer = new TestConsumer<RequestMessage>(delegate { _passed.Set(); });
-		}
-
-		[TearDown]
-		public void TearDown()
-		{
-			_mocks = null;
+            ReplayAll();
+            
+        }
+        protected override void After_each()
+        {
 			_serviceBus = null;
 			_mockServiceBusEndPoint = null;
-		}
+            
+        }
 
 		[Test]
 		public void A_message_should_only_reach_the_consumer_if_the_filter_passes_it_forward()
 		{
-			_mocks.ReplayAll();
-
 			MessageFilter<RequestMessage> filter = new MessageFilter<RequestMessage>(delegate { return false; }, _consumer);
 
 			_serviceBus.Subscribe(filter);
@@ -71,8 +66,6 @@ namespace MassTransit.ServiceBus.Tests
 		[Test]
 		public void A_message_should_only_reach_the_consumer_if_the_filter_passes_it_forward_success()
 		{
-			_mocks.ReplayAll();
-
 			MessageFilter<RequestMessage> filter = new MessageFilter<RequestMessage>(delegate { return true; }, _consumer);
 
 			_serviceBus.Subscribe(filter);

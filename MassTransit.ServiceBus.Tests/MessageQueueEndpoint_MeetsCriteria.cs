@@ -2,7 +2,6 @@ namespace MassTransit.ServiceBus.Tests
 {
 	using NUnit.Framework;
 	using NUnit.Framework.SyntaxHelpers;
-	using Rhino.Mocks;
 
 	[TestFixture]
 	public class MessageQueueEndpoint_MeetsCriteria :
