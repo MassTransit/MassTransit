@@ -123,10 +123,10 @@ namespace MassTransit.ServiceBus
 
 	public class RequestBuilder<TComponent> where TComponent : class
 	{
-		internal IServiceBus _bus;
-		internal AsyncCallback _callback;
-		internal TComponent _component;
-		internal object _state;
+		private IServiceBus _bus;
+	    private AsyncCallback _callback;
+	    private TComponent _component;
+	    private object _state;
 
 		public RequestBuilder(TComponent component)
 		{
