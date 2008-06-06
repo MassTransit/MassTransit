@@ -97,6 +97,9 @@ namespace MassTransit.ServiceBus
 			if (mode == RequestMode.Synchronous)
 			{
 				AsyncWaitHandle.WaitOne(waitTimeout, true);
+
+				if(!IsCompleted)
+					Cancel();
 			}
 
 			return this;
@@ -150,15 +153,6 @@ namespace MassTransit.ServiceBus
 			_state = state;
 
 			return this;
-		}
-
-		public ServiceBusRequest<TComponent> Send<T>(T message) where T : class
-		{
-			ServiceBusRequest<TComponent> request = this;
-
-			request.Send(message);
-
-			return request;
 		}
 	}
 
