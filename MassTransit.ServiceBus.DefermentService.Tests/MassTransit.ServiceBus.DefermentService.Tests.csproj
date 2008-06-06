@@ -45,10 +45,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\MassTransit.ServiceBus.DefermentService\MassTransit.ServiceBus.DefermentService.csproj">
-      <Project>{EB8752B2-A94C-4BC0-AB4E-F9D5889EF708}</Project>
-      <Name>MassTransit.ServiceBus.DefermentService</Name>
-    </ProjectReference>
     <ProjectReference Include="..\MassTransit.ServiceBus\MassTransit.ServiceBus.csproj">
       <Project>{90482397-6282-465E-8B86-39865FC30127}</Project>
       <Name>MassTransit.ServiceBus</Name>
