@@ -6,7 +6,8 @@ namespace MassTransit.ServiceBus.Tests
 	using NUnit.Framework.SyntaxHelpers;
 
 	[TestFixture]
-	public class When_a_correlated_message_is_received
+	public class When_a_correlated_message_is_received :
+        Specification
 	{
 		[Test]
 		public void A_type_should_be_registered()

@@ -5,12 +5,12 @@ namespace MassTransit.ServiceBus.Tests
 	using NUnit.Framework.SyntaxHelpers;
 
 	[TestFixture]
-	public class When_a_consumer_is_registered_with_the_dispatcher
+	public class When_a_consumer_is_registered_with_the_dispatcher :
+        Specification
 	{
 		#region Setup/Teardown
 
-		[SetUp]
-		public void Before_each()
+	    protected override void Before_each()
 		{
 			_dispatcher = new MessageDispatcher<TestMessage>();
 			_message = new TestMessage(_value);

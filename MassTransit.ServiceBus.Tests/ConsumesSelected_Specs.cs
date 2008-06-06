@@ -6,10 +6,10 @@ namespace MassTransit.ServiceBus.Tests
 	using NUnit.Framework.SyntaxHelpers;
 
 	[TestFixture]
-	public class When_a_message_is_received_for_a_selective_consumer
+	public class When_a_message_is_received_for_a_selective_consumer :
+        Specification
 	{
-		[SetUp]
-		public void Before_each()
+	    protected override void Before_each()
 		{
 			_dispatcher = new MessageDispatcher();
 			_message = new TestMessage(_value);
