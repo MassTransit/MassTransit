@@ -1,12 +1,9 @@
-using System;
-using System.Transactions;
-using NUnit.Framework;
-using Rhino.Mocks;
-
 namespace MassTransit.ServiceBus.MSMQ.Tests
 {
+    using System.Transactions;
     using Exceptions;
     using Messages;
+    using NUnit.Framework;
 
     [Explicit]
     [TestFixture(Description = "Integration Test for Transaction Handling")]
@@ -25,9 +22,6 @@ namespace MassTransit.ServiceBus.MSMQ.Tests
             QueueTestContext.ValidateAndPurgeQueue(new MsmqEndpoint(returnToQueueName).QueuePath);
             QueueTestContext.ValidateAndPurgeQueue(new MsmqEndpoint(transactionalQueueName).QueuePath, true);
         }
-
-
-
 
 
         [Test]
@@ -81,7 +75,7 @@ namespace MassTransit.ServiceBus.MSMQ.Tests
 
 
         [Test]
-        [ExpectedException(typeof(EndpointException))]
+        [ExpectedException(typeof (EndpointException))]
         public void When_The_Queue_Is_Transactional_Not_In_A_Transaction()
         {
             MsmqEndpoint ep = transactionalQueueName;

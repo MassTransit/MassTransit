@@ -75,7 +75,6 @@
     <Compile Include="IntegrationTests\As_Msmq_Storage.cs" />
     <Compile Include="IntegrationTests\MsmqStorage_Idempotent_Tests.cs" />
     <Compile Include="IntegrationTests\When_a_message_is_received.cs" />
-    <Compile Include="IntegrationTests\When_working_with_Transactions.cs" />
     <Compile Include="IntegrationTests\When_filtering_messages_by_condition.cs" />
     <Compile Include="Messages\ClientMessage.cs" />
     <Compile Include="IntegrationTests\When_sending_a_request.cs" />
