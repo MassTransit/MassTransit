@@ -13,8 +13,9 @@ namespace MassTransit.ServiceBus.Tests
 		public void A_type_should_be_registered()
 		{
 			MessageTypeDispatcher messageDispatcher = new MessageTypeDispatcher();
+			SubscriptionCoordinator coordinator = new SubscriptionCoordinator(messageDispatcher, null, null, new ActivatorObjectBuilder());
 
-			CorrelatedController controller = new CorrelatedController(messageDispatcher);
+			CorrelatedController controller = new CorrelatedController(messageDispatcher, coordinator);
 
 			controller.DoWork();
 
@@ -25,14 +26,16 @@ namespace MassTransit.ServiceBus.Tests
 	internal class CorrelatedController :
 		Consumes<ResponseMessage>.For<Guid>
 	{
-		private readonly MessageTypeDispatcher _MessageDispatcher;
+		private readonly MessageTypeDispatcher _messageDispatcher;
+		private readonly SubscriptionCoordinator _coordinator;
 		private RequestMessage _request;
 
 		private bool _responseReceived = false;
 
-		public CorrelatedController(MessageTypeDispatcher messageDispatcher)
+		public CorrelatedController(MessageTypeDispatcher messageDispatcher, SubscriptionCoordinator coordinator)
 		{
-			_MessageDispatcher = messageDispatcher;
+			_messageDispatcher = messageDispatcher;
+			_coordinator = coordinator;
 		}
 
 		public bool ResponseReceived
@@ -54,11 +57,11 @@ namespace MassTransit.ServiceBus.Tests
 		{
 			_request = new RequestMessage();
 
-			_MessageDispatcher.Subscribe(this);
+			_coordinator.Resolve(this).Subscribe(this);
 
 			ResponseMessage response = new ResponseMessage(_request.CorrelationId);
 
-			_MessageDispatcher.Consume(response);
+			_messageDispatcher.Consume(response);
 		}
 	}
 

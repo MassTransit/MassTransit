@@ -104,9 +104,14 @@ namespace MassTransit.ServiceBus.Internal
 		{
 			Consumes<TMessage>.For<TKey> correlatedConsumer = consumer as Consumes<TMessage>.For<TKey>;
 			if (correlatedConsumer == null)
-				throw new ArgumentException(string.Format("The object does not support Consumes<{0}>.For<{1}>", typeof(TMessage).Name, typeof(TKey).Name), "consumer");
+				throw new ArgumentException(string.Format("The object does not support Consumes<{0}>.For<{1}>", typeof (TMessage).Name, typeof (TKey).Name), "consumer");
 
-			TKey correlationId = correlatedConsumer.CorrelationId;
+			Attach(correlatedConsumer);
+		}
+
+		public void Attach(Consumes<TMessage>.For<TKey> consumer)
+		{
+			TKey correlationId = consumer.CorrelationId;
 
 			MessageDispatcher<TMessage> dispatcher = GetDispatcher(correlationId);
 
@@ -117,9 +122,14 @@ namespace MassTransit.ServiceBus.Internal
 		{
 			Consumes<TMessage>.For<TKey> correlatedConsumer = consumer as Consumes<TMessage>.For<TKey>;
 			if (correlatedConsumer == null)
-				throw new ArgumentException(string.Format("The object does not support Consumes<{0}>.For<{1}>", typeof(TMessage).Name, typeof(TKey).Name), "consumer");
+				throw new ArgumentException(string.Format("The object does not support Consumes<{0}>.For<{1}>", typeof (TMessage).Name, typeof (TKey).Name), "consumer");
 
-			TKey correlationId = correlatedConsumer.CorrelationId;
+			Detach(correlatedConsumer);
+		}
+
+		public void Detach(Consumes<TMessage>.For<TKey> consumer)
+		{
+			TKey correlationId = consumer.CorrelationId;
 
 			MessageDispatcher<TMessage> dispatcher = GetDispatcher(correlationId);
 
@@ -136,8 +146,6 @@ namespace MassTransit.ServiceBus.Internal
 					//	_cache.Remove(new Subscription(typeof(TMessage).FullName, correlationId.ToString(), _bus.Endpoint.Uri));
 				}
 			}
-
-
 		}
 	}
 }

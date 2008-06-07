@@ -13,6 +13,7 @@ namespace MassTransit.ServiceBus.Tests
 	    protected override void Before_each()
 		{
 			_dispatcher = new MessageTypeDispatcher();
+	    	_coordinator = new SubscriptionCoordinator(_dispatcher, null, null, new ActivatorObjectBuilder());
 			_message = new TestMessage(_value);
 		}
 
@@ -20,10 +21,10 @@ namespace MassTransit.ServiceBus.Tests
 		public void It_should_be_dispatched_to_all_consumers()
 		{
 			TestConsumer consumerA = new TestConsumer(_message.CorrelationId);
-			_dispatcher.Subscribe(consumerA);
+			_coordinator.Resolve(consumerA).Subscribe(consumerA);
 
 			TestConsumer consumerB = new TestConsumer(_message.CorrelationId);
-			_dispatcher.Subscribe(consumerB);
+			_coordinator.Resolve(consumerB).Subscribe(consumerB);
 
 			_dispatcher.Consume(_message);
 
@@ -35,10 +36,10 @@ namespace MassTransit.ServiceBus.Tests
 		public void Verify_the_throughput_of_the_dispatcher()
 		{
 			TestConsumer consumerA = new TestConsumer(_message.CorrelationId);
-			_dispatcher.Subscribe(consumerA);
+			_coordinator.Resolve(consumerA).Subscribe(consumerA);
 
 			TestConsumer consumerB = new TestConsumer(Guid.NewGuid());
-			_dispatcher.Subscribe(consumerB);
+			_coordinator.Resolve(consumerB).Subscribe(consumerB);
 
 			long limit = 5000000;
 
@@ -61,7 +62,7 @@ namespace MassTransit.ServiceBus.Tests
 		public void It_should_be_dispatched_to_the_consumer()
 		{
 			TestConsumer consumerA = new TestConsumer(_message.CorrelationId);
-			_dispatcher.Subscribe(consumerA);
+			_coordinator.Resolve(consumerA).Subscribe(consumerA);
 
 			_dispatcher.Consume(_message);
 
@@ -72,10 +73,10 @@ namespace MassTransit.ServiceBus.Tests
 		public void It_should_be_dispatched_to_the_consumer_without_issues()
 		{
 			TestConsumer consumerA = new TestConsumer(_message.CorrelationId);
-			_dispatcher.Subscribe(consumerA);
+			_coordinator.Resolve(consumerA).Subscribe(consumerA);
 
 			TestConsumer consumerB = new TestConsumer(Guid.NewGuid());
-			_dispatcher.Subscribe(consumerB);
+			_coordinator.Resolve(consumerB).Subscribe(consumerB);
 
 			_dispatcher.Consume(_message);
 
@@ -86,7 +87,7 @@ namespace MassTransit.ServiceBus.Tests
 		public void It_should_be_sent_to_general_consumers_who_are_not_correlated_consumers()
 		{
 			GeneralConsumer consumerA = new GeneralConsumer();
-			_dispatcher.Subscribe(consumerA);
+			_coordinator.Resolve(consumerA).Subscribe(consumerA);
 
 			_dispatcher.Consume(_message);
 
@@ -97,9 +98,9 @@ namespace MassTransit.ServiceBus.Tests
 		public void It_should_be_sent_to_more_than_one_general_consumer_who_are_not_correlated_consumers()
 		{
 			GeneralConsumer consumerA = new GeneralConsumer();
-			_dispatcher.Subscribe(consumerA);
+			_coordinator.Resolve(consumerA).Subscribe(consumerA);
 			GeneralConsumer consumerB = new GeneralConsumer();
-			_dispatcher.Subscribe(consumerB);
+			_coordinator.Resolve(consumerB).Subscribe(consumerB);
 
 			_dispatcher.Consume(_message);
 
@@ -111,7 +112,7 @@ namespace MassTransit.ServiceBus.Tests
 		public void It_should_not_be_dispatched_if_the_correlation_does_not_match()
 		{
 			TestConsumer consumerA = new TestConsumer(Guid.NewGuid());
-			_dispatcher.Subscribe(consumerA);
+			_coordinator.Resolve(consumerA).Subscribe(consumerA);
 
 			_dispatcher.Consume(_message);
 
@@ -122,10 +123,10 @@ namespace MassTransit.ServiceBus.Tests
 		public void It_should_not_be_sent_to_consumers_that_are_no_longer_interested()
 		{
 			TestConsumer consumerA = new TestConsumer(_message.CorrelationId);
-			_dispatcher.Subscribe(consumerA);
+			_coordinator.Resolve(consumerA).Subscribe(consumerA);
 
 			TestConsumer consumerB = new TestConsumer(Guid.NewGuid());
-			_dispatcher.Subscribe(consumerB);
+			_coordinator.Resolve(consumerB).Subscribe(consumerB);
 
 			_dispatcher.Consume(_message);
 
@@ -137,12 +138,12 @@ namespace MassTransit.ServiceBus.Tests
 		public void It_should_not_be_sent_to_uninterested_consumers()
 		{
 			TestConsumer consumerA = new TestConsumer(_message.CorrelationId);
-			_dispatcher.Subscribe(consumerA);
+			_coordinator.Resolve(consumerA).Subscribe(consumerA);
 
 			TestConsumer consumerB = new TestConsumer(_message.CorrelationId);
-			_dispatcher.Subscribe(consumerB);
+			_coordinator.Resolve(consumerB).Subscribe(consumerB);
 
-			_dispatcher.Unsubscribe(consumerA);
+			_coordinator.Resolve(consumerA).Unsubscribe(consumerA);
 
 			_dispatcher.Consume(_message);
 
@@ -156,10 +157,10 @@ namespace MassTransit.ServiceBus.Tests
 			TestMessage anotherMessage = new TestMessage(42);
 
 			TestConsumer consumerA = new TestConsumer(_message.CorrelationId);
-			_dispatcher.Subscribe(consumerA);
+			_coordinator.Resolve(consumerA).Subscribe(consumerA);
 
 			TestConsumer consumerB = new TestConsumer(anotherMessage.CorrelationId);
-			_dispatcher.Subscribe(consumerB);
+			_coordinator.Resolve(consumerB).Subscribe(consumerB);
 
 			_dispatcher.Consume(_message);
 			_dispatcher.Consume(anotherMessage);
@@ -172,7 +173,7 @@ namespace MassTransit.ServiceBus.Tests
 		public void The_object_should_be_dispatched_to_the_consumer()
 		{
 			TestConsumer consumerA = new TestConsumer(_message.CorrelationId);
-			_dispatcher.Subscribe(consumerA);
+			_coordinator.Resolve(consumerA).Subscribe(consumerA);
 
 			object obj = _message;
 
@@ -184,6 +185,7 @@ namespace MassTransit.ServiceBus.Tests
 		private MessageTypeDispatcher _dispatcher;
 		private TestMessage _message;
 		private readonly int _value = 27;
+		private SubscriptionCoordinator _coordinator;
 
 		internal class InvalidConsumer
 		{

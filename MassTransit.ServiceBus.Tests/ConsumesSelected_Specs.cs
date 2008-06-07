@@ -12,12 +12,15 @@ namespace MassTransit.ServiceBus.Tests
 	    protected override void Before_each()
 		{
 			_dispatcher = new MessageTypeDispatcher();
+	    	_coordinator = new SubscriptionCoordinator(_dispatcher, null, null, _builder);
 			_message = new TestMessage(_value);
 		}
 
 		private MessageTypeDispatcher _dispatcher;
 		private TestMessage _message;
 		private readonly int _value = 27;
+		private readonly IObjectBuilder _builder = new ActivatorObjectBuilder();
+		private SubscriptionCoordinator _coordinator;
 
 		internal class InvalidConsumer
 		{
@@ -90,10 +93,11 @@ namespace MassTransit.ServiceBus.Tests
 		public void It_should_only_be_dispatched_to_interested_consumers()
 		{
 			TestConsumer consumerA = new TestConsumer(delegate(TestMessage message) { return message.Value >= 32; });
-			_dispatcher.Subscribe(consumerA);
+
+			_coordinator.Resolve(consumerA).Subscribe(consumerA);
 
 			GeneralConsumer consumerB = new GeneralConsumer();
-			_dispatcher.Subscribe(consumerB);
+			_coordinator.Resolve(consumerB).Subscribe(consumerB);
 
 			_dispatcher.Consume(_message);
 
@@ -105,10 +109,10 @@ namespace MassTransit.ServiceBus.Tests
 		public void It_should_only_be_dispatched_to_interested_consumers_again()
 		{
 			TestConsumer consumerA = new TestConsumer(delegate(TestMessage message) { return message.Value >= 32; });
-			_dispatcher.Subscribe(consumerA);
+			_coordinator.Resolve(consumerA).Subscribe(consumerA);
 
 			TestConsumer consumerB = new TestConsumer(delegate(TestMessage message) { return message.Value < 32; });
-			_dispatcher.Subscribe(consumerB);
+			_coordinator.Resolve(consumerB).Subscribe(consumerB);
 
 			_dispatcher.Consume(_message);
 

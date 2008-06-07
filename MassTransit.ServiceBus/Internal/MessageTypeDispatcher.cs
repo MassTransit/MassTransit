@@ -20,7 +20,7 @@ namespace MassTransit.ServiceBus.Internal
 	/// Manages and dispatches messages to correlated message consumers
 	/// </summary>
 	public class MessageTypeDispatcher :
-		IMessageDispatcher
+		IMessageTypeDispatcher
 	{
 		private static readonly Type _consumes = typeof (Consumes<>.All);
 		private static readonly Type _consumesSelected = typeof (Consumes<>.Selected);
@@ -72,78 +72,25 @@ namespace MassTransit.ServiceBus.Internal
 				dispatcher.Consume(message);
 		}
 
-		public void Subscribe<T>(T component) where T : class
-		{
-			Type componentType = typeof (T);
-
-			SubscriptionTypeInfo info = SubscriptionTypeInfo.Resolve(componentType, _builder);
-
-			info.Subscribe(this, component);
-		}
-
-		public void Unsubscribe<T>(T component) where T : class
-		{
-			Type componentType = typeof(T);
-
-			SubscriptionTypeInfo info = SubscriptionTypeInfo.Resolve(componentType, _builder);
-
-			info.Unsubscribe(this, component);
-		}
-
-		public void AddComponent<TComponent>() where TComponent : class
-		{
-			if (_builder == null)
-				throw new ArgumentException("No object builder interface is available");
-
-			Type componentType = typeof (TComponent);
-
-			SubscriptionTypeInfo info = SubscriptionTypeInfo.Resolve(componentType, _builder);
-
-			info.AddComponent(this);
-		}
-
-		public void RemoveComponent<TComponent>() where TComponent : class
-		{
-			if (_builder == null)
-				throw new ArgumentException("No object builder interface is available");
-
-			Type componentType = typeof (TComponent);
-
-			SubscriptionTypeInfo info = SubscriptionTypeInfo.Resolve(componentType, _builder);
-
-			info.RemoveComponent(this);
-		}
-
-		public bool Active
-		{
-			get { return true; }
-		}
-		
 		public void Dispose()
 		{
 		}
 
-//		private IMessageDispatcher GetCorrelatedDispatcher(Type[] genericArguments)
-//		{
-//			lock (_correlatedLock)
-//			{
-//				if (_correlatedDispatchers.ContainsKey(genericArguments[1]))
-//					return _correlatedDispatchers[genericArguments[1]];
-//
-//				Type dispatcherType = typeof (CorrelationIdDispatcher<,>).MakeGenericType(genericArguments);
-//
-//				IMessageDispatcher dispatcher = (IMessageDispatcher) Activator.CreateInstance(dispatcherType, _bus, _cache, _builder);
-//
-//				if (!_messageTypeToKeyType.ContainsKey(genericArguments[0]))
-//					_messageTypeToKeyType.Add(genericArguments[0], genericArguments[1]);
-//
-//				_correlatedDispatchers.Add(genericArguments[1], dispatcher);
-//
-//				return dispatcher;
-//			}
-//		}
+		public void Attach<T>(Consumes<T>.All consumer) where T : class
+		{
+			Produces<T> dispatcher = GetMessageProducer<T>();
 
-		public IMessageDispatcher<T> GetMessageProducer<T>() where T : class
+			dispatcher.Attach(consumer);
+		}
+
+		public void Detach<T>(Consumes<T>.All consumer) where T : class
+		{
+			Produces<T> dispatcher = GetMessageProducer<T>();
+
+			dispatcher.Detach(consumer);
+		}
+
+		private Produces<T> GetMessageProducer<T>() where T : class
 		{
 			Type messageType = typeof (T);
 
@@ -161,7 +108,7 @@ namespace MassTransit.ServiceBus.Internal
 
 				_messageDispatchers.Add(messageType, consumer);
 
-				return (IMessageDispatcher<T>) consumer;
+				return (Produces<T>) consumer;
 			}
 		}
 	}
