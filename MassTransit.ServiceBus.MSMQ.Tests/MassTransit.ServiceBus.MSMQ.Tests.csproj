@@ -61,6 +61,7 @@
     <Compile Include="When_sending_a_message.cs" />
     <Compile Include="When_specifying_a_message_queue_address_for_an_endpoint.cs" />
     <Compile Include="When_working_with_an_endpoint.cs" />
+    <Compile Include="When_working_with_Transactions.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\MassTransit.ServiceBus.MSMQ\MassTransit.ServiceBus.MSMQ.csproj">
