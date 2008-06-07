@@ -19,7 +19,7 @@ namespace MassTransit.ServiceBus.HealthMonitoring
 	{
 		private readonly Action<MonitorInfo> _dlg;
 		private readonly Timer _timer;
-		public Uri _endpointUri;
+		private Uri _endpointUri;
 
 		public MonitorInfo(Uri endpointUri, int timeBetweenBeatsInSeconds, Action<MonitorInfo> dlg)
 		{
@@ -34,7 +34,13 @@ namespace MassTransit.ServiceBus.HealthMonitoring
 			_timer.Start();
 		}
 
-		private void OnElapse(object sender, ElapsedEventArgs e)
+
+	    public Uri EndpointUri
+	    {
+	        get { return _endpointUri; }
+	    }
+
+	    private void OnElapse(object sender, ElapsedEventArgs e)
 		{
 			_dlg(this);
 		}

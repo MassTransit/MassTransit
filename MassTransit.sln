@@ -139,6 +139,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Dashboard", "Ma
 		Release.AspNetCompiler.Debug = "False"
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.WindsorIntegration", "MassTransit.WindsorIntegration\MassTransit.WindsorIntegration.csproj", "{98D5A59C-96FA-4A1B-A653-EA5A35C45FC9}"
+	ProjectSection(WebsiteProperties) = preProject
+		Debug.AspNetCompiler.Debug = "True"
+		Release.AspNetCompiler.Debug = "False"
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -217,6 +223,10 @@ Global
 		{95873436-3496-4DF7-9E1D-B6C9D3D0CCA9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{95873436-3496-4DF7-9E1D-B6C9D3D0CCA9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{95873436-3496-4DF7-9E1D-B6C9D3D0CCA9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{98D5A59C-96FA-4A1B-A653-EA5A35C45FC9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{98D5A59C-96FA-4A1B-A653-EA5A35C45FC9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{98D5A59C-96FA-4A1B-A653-EA5A35C45FC9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{98D5A59C-96FA-4A1B-A653-EA5A35C45FC9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -48,7 +48,8 @@ namespace MassTransit.ServiceBus.HealthMonitoring
 
         public void OnMissingHeartbeat(MonitorInfo info)
         {
-            _bus.Publish(new Suspect());
+            _bus.Publish(new Suspect(info.EndpointUri));
+
         }
     }
 }
