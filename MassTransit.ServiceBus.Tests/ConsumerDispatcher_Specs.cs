@@ -8,7 +8,6 @@ namespace MassTransit.ServiceBus.Tests
 	public class When_a_consumer_is_registered_with_the_dispatcher :
         Specification
 	{
-		#region Setup/Teardown
 
 	    protected override void Before_each()
 		{
@@ -16,7 +15,6 @@ namespace MassTransit.ServiceBus.Tests
 			_message = new TestMessage(_value);
 		}
 
-		#endregion
 
 		private MessageDispatcher<TestMessage> _dispatcher;
 		private TestMessage _message;
