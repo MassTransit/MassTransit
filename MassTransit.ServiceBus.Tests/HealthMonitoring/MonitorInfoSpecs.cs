@@ -11,13 +11,13 @@ namespace MassTransit.ServiceBus.Tests.HealthMonitoring
         [Test]
         public void NAME()
         {
-            bool _x = false;
+        	ManualResetEvent expired = new ManualResetEvent(false);
+
             Uri u = new Uri("msmq://localhost/ddd");
-            MonitorInfo m = new MonitorInfo(u, 1, delegate { _x = true; });
 
-            Thread.Sleep(1100);
+			MonitorInfo m = new MonitorInfo(u, 1, delegate { expired.Set(); });
 
-            Assert.IsTrue(_x);
+        	Assert.IsTrue(expired.WaitOne(TimeSpan.FromSeconds(2), true));
         }
     }
 }

@@ -12,37 +12,37 @@
 /// specific language governing permissions and limitations under the License.
 namespace MassTransit.ServiceBus.HealthMonitoring
 {
-    using System;
-    using System.Timers;
+	using System;
+	using System.Timers;
 
-    public class MonitorInfo
-    {
-        public Uri EndpointAddress;
-        private readonly Timer _timer;
-        private readonly int _millisecondsInASecond = 1000;
-        private readonly OnMissingHeartbeatDelegate _dlg;
+	public class MonitorInfo
+	{
+		private readonly Action<MonitorInfo> _dlg;
+		private readonly Timer _timer;
+		public Uri _endpointUri;
 
-        public MonitorInfo(Uri endpointAddress, int timeBetweenBeatsInSeconds, OnMissingHeartbeatDelegate dlg)
-        {
-            _dlg = dlg;
-            EndpointAddress = endpointAddress;
-            _timer = new Timer(timeBetweenBeatsInSeconds/_millisecondsInASecond);
-            _timer.AutoReset = false;
-            _timer.Start();
-            _timer.Elapsed += OnElapse;
-        }
+		public MonitorInfo(Uri endpointUri, int timeBetweenBeatsInSeconds, Action<MonitorInfo> dlg)
+		{
+			_dlg = dlg;
 
-        private void OnElapse(object sender, ElapsedEventArgs e)
-        {
-            _dlg(this);
-        }
+			_endpointUri = endpointUri;
 
-        public delegate void OnMissingHeartbeatDelegate(MonitorInfo info);
+			_timer = new Timer(TimeSpan.FromSeconds(timeBetweenBeatsInSeconds).TotalMilliseconds);
+			_timer.AutoReset = false;
+			_timer.Elapsed += OnElapse;
 
-        public void Reset()
-        {
-            _timer.Stop();
-            _timer.Start();
-        }
-    }
+			_timer.Start();
+		}
+
+		private void OnElapse(object sender, ElapsedEventArgs e)
+		{
+			_dlg(this);
+		}
+
+		public void Reset()
+		{
+			_timer.Stop();
+			_timer.Start();
+		}
+	}
 }
