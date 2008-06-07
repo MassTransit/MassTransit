@@ -113,31 +113,12 @@ namespace MassTransit.ServiceBus
 		/// <param name="message">The messages to be published</param>
 		public void Publish<T>(T message) where T : class
 		{
-			IList<Subscription> subs = null;
+			IPublicationTypeInfo info = _subscriptionCoordinator.Resolve<T>();
 
-			Type messageType = typeof (T);
-			foreach (Type interfaceType in messageType.GetInterfaces())
-			{
-				if (interfaceType.IsGenericType && interfaceType.GetGenericTypeDefinition() == _correlatedBy)
-				{
-					Type[] arguments = interfaceType.GetGenericArguments();
+			IList<Subscription> subs = info.GetConsumers(message);
 
-					Type invokeType = _correlatedBy.MakeGenericType(arguments);
-
-					object value = invokeType.InvokeMember("CorrelationId", BindingFlags.GetProperty, null, message, null);
-
-					string correlationId = value.ToString();
-
-					subs = _subscriptionCache.List(messageType.FullName, correlationId);
-					break;
-				}
-			}
-
-			if (subs == null)
-				subs = _subscriptionCache.List(messageType.FullName);
-
-			if (subs.Count == 0)
-				_log.WarnFormat("There are no subscriptions for the message type {0} for the bus listening on {1}", messageType.FullName, _endpointToListenOn.Uri);
+			if (_log.IsWarnEnabled && subs.Count == 0)
+				_log.WarnFormat("There are no subscriptions for the message type {0} for the bus listening on {1}", typeof(T).FullName, _endpointToListenOn.Uri);
 
 			foreach (Subscription subscription in subs)
 			{
