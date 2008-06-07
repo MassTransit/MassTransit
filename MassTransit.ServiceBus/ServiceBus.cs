@@ -133,7 +133,7 @@ namespace MassTransit.ServiceBus
 				subs = _subscriptionCache.List(messageType.FullName);
 
 			if (subs.Count == 0)
-				_log.WarnFormat("There are now subscriptions for the message type {0} for the bus listening on {1}", messageType.FullName, _endpointToListenOn.Uri);
+				_log.WarnFormat("There are no subscriptions for the message type {0} for the bus listening on {1}", messageType.FullName, _endpointToListenOn.Uri);
 
 			foreach (Subscription subscription in subs)
 			{
