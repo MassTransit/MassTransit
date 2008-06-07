@@ -14,29 +14,16 @@ namespace MassTransit.ServiceBus.Internal
 {
 	using System;
 	using System.Collections.Generic;
-	using Subscriptions;
 
 	public class MessageDispatcher<TMessage> : IMessageDispatcher<TMessage> where TMessage : class
 	{
-		private readonly IObjectBuilder _builder;
-		private readonly IServiceBus _bus;
-		private readonly ISubscriptionCache _cache;
 		private readonly List<Consumes<TMessage>.All> _consumers = new List<Consumes<TMessage>.All>();
-
-		public MessageDispatcher()
-		{
-		}
-
-		public MessageDispatcher(IServiceBus bus, ISubscriptionCache cache, IObjectBuilder builder)
-		{
-			_builder = builder;
-			_bus = bus;
-			_cache = cache;
-		}
 
 		public bool Accept(TMessage message)
 		{
-			foreach (Consumes<TMessage>.All consumer in _consumers)
+			IList<Consumes<TMessage>.All> consumers = new List<Consumes<TMessage>.All>(_consumers);
+
+			foreach (Consumes<TMessage>.All consumer in consumers)
 			{
 				Consumes<TMessage>.Selected selectiveConsumer = consumer as Consumes<TMessage>.Selected;
 				if (selectiveConsumer != null)
@@ -57,27 +44,22 @@ namespace MassTransit.ServiceBus.Internal
 
 		public void Consume(TMessage message)
 		{
-			IList<Consumes<TMessage>.All> consumers = new List<Consumes<TMessage>.All>(_consumers.Count);
+			IList<Consumes<TMessage>.All> consumers = new List<Consumes<TMessage>.All>(_consumers);
 
-			foreach (Consumes<TMessage>.All consumer in _consumers)
+			foreach (Consumes<TMessage>.All consumer in consumers)
 			{
 				Consumes<TMessage>.Selected selectiveConsumer = consumer as Consumes<TMessage>.Selected;
 				if (selectiveConsumer != null)
 				{
 					if (selectiveConsumer.Accept(message))
 					{
-						consumers.Add(consumer);
+						consumer.Consume(message);
 					}
 				}
 				else
 				{
-					consumers.Add(consumer);
+					consumer.Consume(message);
 				}
-			}
-
-			foreach (Consumes<TMessage>.All consumer in consumers)
-			{
-				consumer.Consume(message);
 			}
 		}
 
@@ -116,8 +98,6 @@ namespace MassTransit.ServiceBus.Internal
 				if (!_consumers.Contains(consumer))
 				{
 					_consumers.Add(consumer);
-					if (_cache != null)
-						_cache.Add(new Subscription(typeof (TMessage).FullName, _bus.Endpoint.Uri));
 				}
 			}
 		}
@@ -129,11 +109,6 @@ namespace MassTransit.ServiceBus.Internal
 				if (_consumers.Contains(consumer))
 				{
 					_consumers.Remove(consumer);
-					if (_consumers.Count == 0)
-					{
-						if (_cache != null)
-							_cache.Remove(new Subscription(typeof (TMessage).FullName, _bus.Endpoint.Uri));
-					}
 				}
 			}
 		}
