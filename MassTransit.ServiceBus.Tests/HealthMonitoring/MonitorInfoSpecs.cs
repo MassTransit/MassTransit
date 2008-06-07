@@ -23,6 +23,7 @@ namespace MassTransit.ServiceBus.Tests.HealthMonitoring
         }
 
         [Test]
+        [Ignore("Needs new castle object builder")]
         public void bob()
         {
             ServiceBus bus = new ServiceBus(DynamicMock<IEndpoint>(), new LocalSubscriptionCache());
