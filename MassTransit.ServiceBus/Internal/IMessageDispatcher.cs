@@ -31,10 +31,4 @@ namespace MassTransit.ServiceBus.Internal
 		where TMessage : class
 	{
 	}
-
-	public interface Produces<TMessage> where TMessage : class
-	{
-		void Attach(Consumes<TMessage>.All consumer);
-		void Detach(Consumes<TMessage>.All consumer);
-	}
 }

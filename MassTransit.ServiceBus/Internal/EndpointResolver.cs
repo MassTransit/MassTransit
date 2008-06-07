@@ -20,6 +20,7 @@ namespace MassTransit.ServiceBus.Internal
 	using log4net;
 	using Util;
 
+    //TODO: Containerize
 	public class EndpointResolver
 	{
 		private static readonly ILog _log = LogManager.GetLogger(typeof (EndpointResolver));

@@ -62,6 +62,7 @@ namespace MassTransit.ServiceBus.Subscriptions
 				_cache.Add(sub);
 			}
 
+            //TODO: Change to the new component based model?
 			_bus.Subscribe<CacheUpdateRequest>(HandleCacheUpdateRequest);
 			_bus.Subscribe<AddSubscription>(HandleAddSubscription);
 			_bus.Subscribe<RemoveSubscription>(HandleRemoveSubscription);

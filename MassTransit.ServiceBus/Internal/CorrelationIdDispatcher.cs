@@ -14,7 +14,6 @@ namespace MassTransit.ServiceBus.Internal
 {
 	using System;
 	using System.Collections.Generic;
-	using Subscriptions;
 
 	public class CorrelationIdDispatcher<TMessage, TKey> :
 		Consumes<TMessage>.Selected,
