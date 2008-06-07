@@ -9,7 +9,6 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
 	[TestFixture]
 	public class When_Working_With_Subscription_Entries
 	{
-		#region Setup/Teardown
 
 		[SetUp]
 		public virtual void Before_Each_Test_In_The_Fixture()
@@ -20,8 +19,6 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
 
 			_mocks.ReplayAll();
 		}
-
-		#endregion
 
 		protected MockRepository _mocks = new MockRepository();
 
