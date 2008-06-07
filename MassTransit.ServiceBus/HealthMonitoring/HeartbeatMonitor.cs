@@ -17,7 +17,7 @@ namespace MassTransit.ServiceBus.HealthMonitoring
     using Messages;
 
     public class HeartbeatMonitor :
-        Consumes<Heartbeat>.All //, Publishes<Suspect>
+        Consumes<Heartbeat>.All //, Produces<Suspect>
     {
         private readonly IServiceBus _bus;
         private readonly Dictionary<Uri, MonitorInfo> _monitoredEndpoints;

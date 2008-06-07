@@ -13,6 +13,7 @@
 namespace MassTransit.ServiceBus.HealthMonitoring
 {
     using System;
+    using Internal;
     using Messages;
 
     public class Investigator : 
@@ -25,10 +26,12 @@ namespace MassTransit.ServiceBus.HealthMonitoring
         private Suspect _suspectMessage;
         private readonly Ping _pingMessage;
         private Pong _pongMessage;
+        private EndpointResolver _resolver;
 
-        public Investigator(IServiceBus bus)
+        public Investigator(IServiceBus bus, EndpointResolver resolver)
         {
             _bus = bus;
+            _resolver = resolver;
             _correlationId = Guid.NewGuid();
             _pingMessage = new Ping(this.CorrelationId);
         }
@@ -39,12 +42,10 @@ namespace MassTransit.ServiceBus.HealthMonitoring
         public void Consume(Suspect msg)
         {
             _suspectMessage = msg;
-            _request = _bus.Request()
-                .From(this)
-                .WithCallback(CallbackPong, null);
 
-            //how can this go to one specific endpoint?
-            _request.Send(_pingMessage);
+            IEndpoint ep = _resolver.Resolve(msg.EndpointUri);
+
+            ep.Send(_pingMessage, new TimeSpan(0,3,0));
         }
 
 
@@ -53,10 +54,6 @@ namespace MassTransit.ServiceBus.HealthMonitoring
             //if we get this we are ok. but its weird that the heartbeat is down
             _pongMessage = msg;
             _request.Complete();
-        }
-        public void CallbackPong(IAsyncResult result)
-        {
-            //what happens here?
         }
 
         //Produce<DownEndpoint>
