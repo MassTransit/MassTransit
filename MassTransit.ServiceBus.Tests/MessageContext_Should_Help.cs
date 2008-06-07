@@ -15,8 +15,6 @@ namespace MassTransit.ServiceBus.Tests
         private PingMessage requestMessage = new PingMessage();
         private PongMessage replyMessage = new PongMessage();
 
-        #region SetUp / TearDown
-
         protected override void Before_each()
         {
             mockBus = DynamicMock<IServiceBus>();
@@ -32,8 +30,6 @@ namespace MassTransit.ServiceBus.Tests
             mockEndpoint = null;
         }
         
-        #endregion
-
         [Test, Ignore]
         public void With_Replies()
         {

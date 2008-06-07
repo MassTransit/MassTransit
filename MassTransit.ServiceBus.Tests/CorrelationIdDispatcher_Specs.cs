@@ -9,7 +9,6 @@ namespace MassTransit.ServiceBus.Tests
 	public class When_a_correlated_message_is_dispatched :
         Specification
 	{
-		#region Setup/Teardown
 
 	    protected override void Before_each()
 		{
@@ -17,7 +16,6 @@ namespace MassTransit.ServiceBus.Tests
 			_message = new TestMessage(_value);
 		}
 
-		#endregion
 
 		private CorrelationIdDispatcher<TestMessage, Guid> _dispatcher;
 		private TestMessage _message;
