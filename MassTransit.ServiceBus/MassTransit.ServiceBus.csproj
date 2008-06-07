@@ -86,12 +86,9 @@
     <Compile Include="Internal\EndpointResolver.cs" />
     <Compile Include="Formatters\BinaryBodyFormatter.cs" />
     <Compile Include="Formatters\IFormattedBody.cs" />
-    <Compile Include="Envelope.cs" />
     <Compile Include="Exceptions\EndpointException.cs" />
     <Compile Include="IHostedService.cs" />
     <Compile Include="IEndpoint.cs" />
-    <Compile Include="IEnvelope.cs" />
-    <Compile Include="Internal\IEnvelopeMapper.cs" />
     <Compile Include="Internal\IMessageDispatcher.cs" />
     <Compile Include="IMessageContext.cs" />
     <Compile Include="Internal\ReceiveThread.cs" />
@@ -120,7 +117,6 @@
     <Compile Include="Threading\ManagedThreadPool.cs" />
     <Compile Include="TimeoutAttribute.cs" />
     <Compile Include="Util\Check.cs" />
-    <Compile Include="Internal\IMessageId.cs" />
     <Compile Include="Util\Guard.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />

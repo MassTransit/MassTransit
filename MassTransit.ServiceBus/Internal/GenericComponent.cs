@@ -37,8 +37,7 @@ namespace MassTransit.ServiceBus.Internal
 
 		public void Consume(TMessage message)
 		{
-			IEnvelope notSureHowToGet = null;
-			IMessageContext<TMessage> cxt = new MessageContext<TMessage>(_bus, notSureHowToGet, message);
+			IMessageContext<TMessage> cxt = new MessageContext<TMessage>(_bus, message);
 			_wrappedAction(cxt);
 		}
 

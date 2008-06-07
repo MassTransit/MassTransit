@@ -24,7 +24,6 @@ namespace MassTransit.ServiceBus.Internal
 		EventArgs, IMessageContext<T> where T : class
 	{
 		private readonly IServiceBus _bus;
-		private readonly IEnvelope _envelope;
 		private readonly ILog _log = LogManager.GetLogger(typeof (MessageContext<T>));
 		private readonly T _message;
 
@@ -32,21 +31,11 @@ namespace MassTransit.ServiceBus.Internal
 		/// Initializes an instance of the <c ref="MessageContext" /> class
 		/// </summary>
 		/// <param name="bus">The service bus on which the message was received</param>
-		/// <param name="envelope">The message envelope received</param>
 		/// <param name="message">The individual message from the envelope being received</param>
-		public MessageContext(IServiceBus bus, IEnvelope envelope, T message)
+		public MessageContext(IServiceBus bus, T message)
 		{
-			_envelope = envelope;
 			_bus = bus;
 			_message = message;
-		}
-
-		/// <summary>
-		/// The envelope containing the message
-		/// </summary>
-		public IEnvelope Envelope
-		{
-			get { return _envelope; }
 		}
 
 		/// <summary>
@@ -88,9 +77,6 @@ namespace MassTransit.ServiceBus.Internal
 		/// </summary>
 		public void MarkPoison()
 		{
-			if (_log.IsDebugEnabled)
-				_log.DebugFormat("Envelope {0} Was Marked Poisonous", _envelope.Id);
-
 			//Bus.PoisonEndpoint.Send(_envelope);
 			// TODO
 		}
@@ -100,9 +86,6 @@ namespace MassTransit.ServiceBus.Internal
 		/// </summary>
 		public void MarkPoison(object message)
 		{
-			if (_log.IsDebugEnabled)
-				_log.DebugFormat("A Message in Envelope {0} Was Marked Poisonous", _envelope.Id);
-
 			//Bus.PoisonEndpoint.Send(env);
 			//TODO
 		}
