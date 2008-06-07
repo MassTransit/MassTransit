@@ -34,7 +34,7 @@ namespace MassTransit.ServiceBus
 		private readonly ManagedThreadPool<object> _asyncDispatcher;
 		private readonly EndpointResolver _endpointResolver = new EndpointResolver();
 		private readonly IEndpoint _endpointToListenOn;
-		private readonly IMessageDispatcher _messageDispatcher;
+		private readonly MessageTypeDispatcher _messageDispatcher;
 		private readonly ISubscriptionCache _subscriptionCache;
 		private IEndpoint _poisonEndpoint;
 
@@ -78,7 +78,7 @@ namespace MassTransit.ServiceBus
 
 
             //TODO: Move into IObjectBuilder?
-			_messageDispatcher = new MessageDispatcher(this, subscriptionCache, objectBuilder);
+			_messageDispatcher = new MessageTypeDispatcher(this, subscriptionCache, objectBuilder);
 			_receiveThread = new ReceiveThread(this, endpointToListenOn);
 
             //TODO: Might also benefit from IObjectBuilder.Build<T>(IDictionary arguments);

@@ -11,11 +11,11 @@ namespace MassTransit.ServiceBus.Tests
 	{
 	    protected override void Before_each()
 		{
-			_dispatcher = new MessageDispatcher();
+			_dispatcher = new MessageTypeDispatcher();
 			_message = new TestMessage(_value);
 		}
 
-		private MessageDispatcher _dispatcher;
+		private MessageTypeDispatcher _dispatcher;
 		private TestMessage _message;
 		private readonly int _value = 27;
 

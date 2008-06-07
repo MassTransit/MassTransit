@@ -60,9 +60,9 @@ namespace MassTransit.ServiceBus.Tests
 		public void If_a_consumer_is_no_longer_subscribed_it_should_not_be_called()
 		{
 			TestConsumer consumerA = new TestConsumer();
-			_dispatcher.Subscribe(consumerA);
+			_dispatcher.Attach(consumerA);
 
-			_dispatcher.Unsubscribe(consumerA);
+			_dispatcher.Detach(consumerA);
 
 			_dispatcher.Consume(_message);
 
@@ -73,12 +73,12 @@ namespace MassTransit.ServiceBus.Tests
 		public void If_a_consumer_is_no_longer_subscribed_only_the_remaining_consumers_should_be_called()
 		{
 			TestConsumer consumerA = new TestConsumer();
-			_dispatcher.Subscribe(consumerA);
+			_dispatcher.Attach(consumerA);
 
 			TestConsumer consumerB = new TestConsumer();
-			_dispatcher.Subscribe(consumerB);
+			_dispatcher.Attach(consumerB);
 
-			_dispatcher.Unsubscribe(consumerA);
+			_dispatcher.Detach(consumerA);
 
 			_dispatcher.Consume(_message);
 
@@ -90,10 +90,10 @@ namespace MassTransit.ServiceBus.Tests
 		public void If_multiple_consumers_are_registered_they_should_all_be_called()
 		{
 			TestConsumer consumerA = new TestConsumer();
-			_dispatcher.Subscribe(consumerA);
+			_dispatcher.Attach(consumerA);
 
 			TestConsumer consumerB = new TestConsumer();
-			_dispatcher.Subscribe(consumerB);
+			_dispatcher.Attach(consumerB);
 
 			_dispatcher.Consume(_message);
 
@@ -105,7 +105,7 @@ namespace MassTransit.ServiceBus.Tests
 		public void It_should_be_called_when_a_message_is_dispatched()
 		{
 			TestConsumer consumerA = new TestConsumer();
-			_dispatcher.Subscribe(consumerA);
+			_dispatcher.Attach(consumerA);
 
 			_dispatcher.Consume(_message);
 

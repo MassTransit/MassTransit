@@ -47,5 +47,61 @@ namespace MassTransit.ServiceBus.Tests
 				_serviceBus.Subscribe<PingMessage>(delegate { });
 			}
 		}
+
+		[Test]
+		public void A_subscription_should_be_added_for_a_consumer()
+		{
+			using (Record())
+			{
+				Expect.Call(_mockEndpoint.Uri).Return(queueUri).Repeat.Any();
+				_mockSubscriptionCache.Add(_subscription);
+			}
+
+			using (Playback())
+			{
+				ConsumesAll consumer = new ConsumesAll();
+
+				_serviceBus.Subscribe(consumer);
+			}
+		}
+
+
+		[Test]
+		public void A_subscription_should_be_added_for_a_selective_consumer()
+		{
+			using (Record())
+			{
+				Expect.Call(_mockEndpoint.Uri).Return(queueUri).Repeat.Any();
+				_mockSubscriptionCache.Add(_subscription);
+			}
+
+			using (Playback())
+			{
+				ConsumesSelected consumer = new ConsumesSelected();
+
+				_serviceBus.Subscribe(consumer);
+			}
+		}
+
+		internal class ConsumesAll : Consumes<PingMessage>.All
+		{
+			public void Consume(PingMessage message)
+			{
+				
+			}
+		}
+
+		internal class ConsumesSelected : Consumes<PingMessage>.Selected
+		{
+			public bool Accept(PingMessage message)
+			{
+				throw new NotImplementedException();
+			}
+
+			public void Consume(PingMessage message)
+			{
+				throw new NotImplementedException();
+			}
+		}
 	}
 }

@@ -21,13 +21,13 @@ namespace HeavyLoad
 			Console.WriteLine("HeavyLoad - MassTransit Load Generator");
 
 
-			RunLocalActiveMqLoadTest();
+		//	RunLocalActiveMqLoadTest();
 
-			//RunLocalMsmqLoadTest();
+			RunLocalMsmqLoadTest();
 
 			Console.WriteLine("Waiting for next test...");
 
-			//RunCorrelatedMessageTest();
+			RunCorrelatedMessageTest();
 
 			Console.WriteLine("End of line.");
 			//Console.ReadLine();
