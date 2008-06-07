@@ -28,14 +28,17 @@ namespace MassTransit.ServiceBus
 	public class ServiceBus :
 		IServiceBus
 	{
+		private static readonly Type _correlatedBy = typeof (CorrelatedBy<>);
 		private static readonly ILog _log;
 
-		private readonly ManagedThread _receiveThread;
 		private readonly ManagedThreadPool<object> _asyncDispatcher;
 		private readonly EndpointResolver _endpointResolver = new EndpointResolver();
 		private readonly IEndpoint _endpointToListenOn;
 		private readonly MessageTypeDispatcher _messageDispatcher;
+		private readonly IObjectBuilder _objectBuilder;
+		private readonly ManagedThread _receiveThread;
 		private readonly ISubscriptionCache _subscriptionCache;
+		private readonly SubscriptionCoordinator _subscriptionCoordinator;
 		private IEndpoint _poisonEndpoint;
 
 		static ServiceBus()
@@ -74,15 +77,18 @@ namespace MassTransit.ServiceBus
 
 			_endpointToListenOn = endpointToListenOn;
 			_subscriptionCache = subscriptionCache;
+			_objectBuilder = objectBuilder;
 
 
-
-            //TODO: Move into IObjectBuilder?
+			//TODO: Move into IObjectBuilder?
 			_messageDispatcher = new MessageTypeDispatcher(this, subscriptionCache, objectBuilder);
+
+			_subscriptionCoordinator = new SubscriptionCoordinator(_messageDispatcher, this, _subscriptionCache, _objectBuilder);
+
 			_receiveThread = new ReceiveThread(this, endpointToListenOn);
 
-            //TODO: Might also benefit from IObjectBuilder.Build<T>(IDictionary arguments);
-            _asyncDispatcher = new ManagedThreadPool<object>(
+			//TODO: Might also benefit from IObjectBuilder.Build<T>(IDictionary arguments);
+			_asyncDispatcher = new ManagedThreadPool<object>(
 				delegate(object message) { _messageDispatcher.Consume(message); });
 		}
 
@@ -90,8 +96,6 @@ namespace MassTransit.ServiceBus
 		{
 			get { return _subscriptionCache; }
 		}
-
-		private static readonly Type _correlatedBy = typeof (CorrelatedBy<>);
 
 		public void Dispose()
 		{
@@ -187,7 +191,9 @@ namespace MassTransit.ServiceBus
 
 		public void Subscribe<T>(T component) where T : class
 		{
-			_messageDispatcher.Subscribe(component);
+			ISubscriptionTypeInfo info = _subscriptionCoordinator.Resolve(component);
+			info.Subscribe(component);
+
 			StartListening();
 		}
 
@@ -203,18 +209,22 @@ namespace MassTransit.ServiceBus
 
 		public void Unsubscribe<T>(T component) where T : class
 		{
-			_messageDispatcher.Unsubscribe(component);
+			ISubscriptionTypeInfo info = _subscriptionCoordinator.Resolve(component);
+			info.Unsubscribe(component);
 		}
 
 		public void AddComponent<TComponent>() where TComponent : class
 		{
-			_messageDispatcher.AddComponent<TComponent>();
+			ISubscriptionTypeInfo info = _subscriptionCoordinator.Resolve<TComponent>();
+			info.AddComponent();
+
 			StartListening();
 		}
 
 		public void RemoveComponent<TComponent>() where TComponent : class
 		{
-			_messageDispatcher.RemoveComponent<TComponent>();
+			ISubscriptionTypeInfo info = _subscriptionCoordinator.Resolve<TComponent>();
+			info.RemoveComponent();
 		}
 
 		private void StartListening()

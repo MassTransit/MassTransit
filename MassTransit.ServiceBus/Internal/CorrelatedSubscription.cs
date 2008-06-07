@@ -14,71 +14,80 @@ namespace MassTransit.ServiceBus.Internal
 {
 	using System;
 	using Exceptions;
+	using Subscriptions;
 
 	public class CorrelatedSubscription<TComponent, TMessage, TKey> :
-		IMessageTypeSubscription
+		ISubscriptionTypeInfo
 		where TComponent : class, Consumes<TMessage>.All
 		where TMessage : class, CorrelatedBy<TKey>
-
 	{
-		private readonly Type _messageType;
+		private readonly IServiceBus _bus;
+		private readonly ISubscriptionCache _cache;
 		private readonly CorrelationIdDispatcher<TMessage, TKey> _componentConsumer;
+		private readonly IMessageTypeDispatcher _dispatcher;
+		private readonly Type _messageType;
 		private readonly Consumes<TMessage>.Selected _selectiveConsumer;
 
-		public CorrelatedSubscription(IObjectBuilder builder)
+		public CorrelatedSubscription(IMessageTypeDispatcher dispatcher, IServiceBus bus, ISubscriptionCache cache, IObjectBuilder builder)
 		{
-			_messageType = typeof(TMessage);
+			_dispatcher = dispatcher;
+			_bus = bus;
+			_cache = cache;
+			_messageType = typeof (TMessage);
 
 			_componentConsumer = new CorrelationIdDispatcher<TMessage, TKey>(builder);
 			_selectiveConsumer = new SelectiveComponentDispatcher<TComponent, TMessage>(builder);
 		}
 
-		public void Subscribe<T>(MessageTypeDispatcher dispatcher, T component) where T : class
+		public void Subscribe<T>(T component) where T : class
 		{
-			Consumes<TMessage>.All consumer = component as Consumes<TMessage>.All;
+			Consumes<TMessage>.For<TKey> consumer = component as Consumes<TMessage>.For<TKey>;
 			if (consumer == null)
-				throw new ConventionException(string.Format("Object of type {0} does not consume messages of type {1}", typeof(T), _messageType));
+				throw new ConventionException(string.Format("Object of type {0} does not consume messages of type {1}", typeof (T), _messageType));
 
-			Subscribe(dispatcher, consumer);
+			Subscribe(consumer);
 		}
 
-		public void Subscribe(MessageTypeDispatcher dispatcher, Consumes<TMessage>.All consumer)
+		public void Unsubscribe<T>(T component) where T : class
 		{
-			IMessageDispatcher<TMessage> messageDispatcher = dispatcher.GetMessageProducer<TMessage>();
+			Consumes<TMessage>.For<TKey> consumer = component as Consumes<TMessage>.For<TKey>;
+			if (consumer == null)
+				throw new ConventionException(string.Format("Object of type {0} does not consume messages of type {1}", typeof (T), _messageType));
 
-			messageDispatcher.Attach(_componentConsumer);
+			Unsubscribe(consumer);
+		}
+
+		public void AddComponent()
+		{
+			_dispatcher.Attach<TMessage>(_selectiveConsumer);
+		}
+
+		public void RemoveComponent()
+		{
+			_dispatcher.Detach<TMessage>(_selectiveConsumer);
+		}
+
+		public void Subscribe(Consumes<TMessage>.For<TKey> consumer)
+		{
+			_dispatcher.Attach<TMessage>(_componentConsumer);
 
 			_componentConsumer.Attach(consumer);
+
+			if (_cache != null)
+				_cache.Add(new Subscription(typeof (TMessage).FullName, consumer.CorrelationId.ToString(), _bus.Endpoint.Uri));
 		}
 
-		public void Unsubscribe<T>(MessageTypeDispatcher dispatcher, T component) where T : class
-		{
-			Consumes<TMessage>.All consumer = component as Consumes<TMessage>.All;
-			if (consumer == null)
-				throw new ConventionException(string.Format("Object of type {0} does not consume messages of type {1}", typeof(T), _messageType));
-
-			Unsubscribe(dispatcher, consumer);
-		}
-
-		public void Unsubscribe(MessageTypeDispatcher dispatcher, Consumes<TMessage>.All consumer)
+		public void Unsubscribe(Consumes<TMessage>.For<TKey> consumer)
 		{
 			_componentConsumer.Detach(consumer);
 
-			// TODO detach if no longer interested in any subscribers
-		}
+			if (_componentConsumer.Active == false)
+			{
+				if (_cache != null)
+					_cache.Remove(new Subscription(typeof (TMessage).FullName, consumer.CorrelationId.ToString(), _bus.Endpoint.Uri));
 
-		public void AddComponent(MessageTypeDispatcher dispatcher)
-		{
-			IMessageDispatcher<TMessage> messageDispatcher = dispatcher.GetMessageProducer<TMessage>();
-
-			messageDispatcher.Attach(_selectiveConsumer);
-		}
-
-		public void RemoveComponent(MessageTypeDispatcher dispatcher)
-		{
-			IMessageDispatcher<TMessage> messageDispatcher = dispatcher.GetMessageProducer<TMessage>();
-
-			messageDispatcher.Detach(_selectiveConsumer);
+				_dispatcher.Detach<TMessage>(_componentConsumer);
+			}
 		}
 	}
 }

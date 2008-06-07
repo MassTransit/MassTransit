@@ -14,18 +14,25 @@ namespace MassTransit.ServiceBus.Internal
 {
 	using System;
 	using Exceptions;
+	using Subscriptions;
 
-	public class MessageTypeSubscription<TComponent, TMessage> : 
-		IMessageTypeSubscription
+	public class MessageTypeSubscription<TComponent, TMessage> :
+		ISubscriptionTypeInfo
 		where TComponent : class, Consumes<TMessage>.All
 		where TMessage : class
 	{
-		private readonly Type _messageType;
+		private readonly IServiceBus _bus;
+		private readonly ISubscriptionCache _cache;
 		private readonly Consumes<TMessage>.Selected _componentConsumer;
+		private readonly IMessageTypeDispatcher _dispatcher;
+		private readonly Type _messageType;
 
-		public MessageTypeSubscription(SubscriptionMode mode, IObjectBuilder builder)
+		public MessageTypeSubscription(SubscriptionMode mode, IMessageTypeDispatcher dispatcher, IServiceBus bus, ISubscriptionCache cache, IObjectBuilder builder)
 		{
-			_messageType = typeof(TMessage);
+			_dispatcher = dispatcher;
+			_bus = bus;
+			_cache = cache;
+			_messageType = typeof (TMessage);
 
 			if (mode == SubscriptionMode.Selected)
 				_componentConsumer = new SelectiveComponentDispatcher<TComponent, TMessage>(builder);
@@ -33,50 +40,45 @@ namespace MassTransit.ServiceBus.Internal
 				_componentConsumer = new ComponentDispatcher<TComponent, TMessage>(builder);
 		}
 
-		public void Subscribe<T>(MessageTypeDispatcher dispatcher, T component) where T : class
+		public void Subscribe<T>(T component) where T : class
 		{
 			Consumes<TMessage>.All consumer = component as Consumes<TMessage>.All;
 			if (consumer == null)
 				throw new ConventionException(string.Format("Object of type {0} does not consume messages of type {1}", typeof (T), _messageType));
 
-			Subscribe(dispatcher, consumer);
+			Subscribe(consumer);
 		}
 
-		public void Subscribe(MessageTypeDispatcher dispatcher, Consumes<TMessage>.All consumer)
-		{
-			IMessageDispatcher<TMessage> messageDispatcher = dispatcher.GetMessageProducer<TMessage>();
-
-			messageDispatcher.Attach(consumer);
-		}
-
-		public void Unsubscribe<T>(MessageTypeDispatcher dispatcher, T component) where T : class
+		public void Unsubscribe<T>(T component) where T : class
 		{
 			Consumes<TMessage>.All consumer = component as Consumes<TMessage>.All;
 			if (consumer == null)
-				throw new ConventionException(string.Format("Object of type {0} does not consume messages of type {1}", typeof(T), _messageType));
+				throw new ConventionException(string.Format("Object of type {0} does not consume messages of type {1}", typeof (T), _messageType));
 
-			Unsubscribe(dispatcher, consumer);
+			Unsubscribe(consumer);
 		}
 
-		public void Unsubscribe(MessageTypeDispatcher dispatcher, Consumes<TMessage>.All consumer)
+		public void AddComponent()
 		{
-			IMessageDispatcher<TMessage> messageDispatcher = dispatcher.GetMessageProducer<TMessage>();
-
-			messageDispatcher.Detach(consumer);
+			_dispatcher.Attach<TMessage>(_componentConsumer);
 		}
 
-		public void AddComponent(MessageTypeDispatcher dispatcher)
+		public void RemoveComponent()
 		{
-			IMessageDispatcher<TMessage> messageDispatcher = dispatcher.GetMessageProducer<TMessage>();
-
-			messageDispatcher.Attach(_componentConsumer);
+			_dispatcher.Detach<TMessage>(_componentConsumer);
 		}
 
-		public void RemoveComponent(MessageTypeDispatcher dispatcher)
+		public void Subscribe(Consumes<TMessage>.All consumer)
 		{
-			IMessageDispatcher<TMessage> messageDispatcher = dispatcher.GetMessageProducer<TMessage>();
+			_dispatcher.Attach<TMessage>(consumer);
 
-			messageDispatcher.Detach(_componentConsumer);
+			if (_cache != null)
+				_cache.Add(new Subscription(typeof (TMessage).FullName, _bus.Endpoint.Uri));
+		}
+
+		public void Unsubscribe(Consumes<TMessage>.All consumer)
+		{
+			_dispatcher.Detach<TMessage>(consumer);
 		}
 	}
 }

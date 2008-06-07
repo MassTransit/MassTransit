@@ -13,9 +13,10 @@ namespace MassTransit.ServiceBus.Tests
 			IObjectBuilder builder = new ActivatorObjectBuilder();
 
 			MessageTypeDispatcher dispatcher = new MessageTypeDispatcher(null, null, builder);
+			SubscriptionCoordinator coordinator = new SubscriptionCoordinator(dispatcher, null, null, builder);
 
-			dispatcher.AddComponent<RequestHandler>();
-			dispatcher.AddComponent<SelectiveHandler>();
+			coordinator.Resolve<RequestHandler>().AddComponent();
+			coordinator.Resolve<SelectiveHandler>().AddComponent();
 
 			TestMessage message = new TestMessage(27);
 
@@ -31,9 +32,10 @@ namespace MassTransit.ServiceBus.Tests
 			IObjectBuilder builder = new ActivatorObjectBuilder();
 
 			MessageTypeDispatcher dispatcher = new MessageTypeDispatcher(null, null, builder);
+			SubscriptionCoordinator coordinator = new SubscriptionCoordinator(dispatcher, null, null, builder);
 
-			dispatcher.AddComponent<RequestHandler>();
-			dispatcher.AddComponent<SelectiveHandler>();
+			coordinator.Resolve<RequestHandler>().AddComponent();
+			coordinator.Resolve<SelectiveHandler>().AddComponent();
 
 			TestMessage message = new TestMessage(42);
 

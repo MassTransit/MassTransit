@@ -54,11 +54,12 @@
     <Compile Include="Internal\BatchDistributor.cs" />
     <Compile Include="Internal\ComponentDispatcher.cs" />
     <Compile Include="Internal\CorrelatedSubscription.cs" />
-    <Compile Include="Internal\IMessageTypeSubscription.cs" />
+    <Compile Include="Internal\ISubscriptionTypeInfo.cs" />
     <Compile Include="Internal\MessageTypeDispatcher.cs" />
     <Compile Include="Internal\MessageTypeSubscription.cs" />
     <Compile Include="Internal\Produces.cs" />
     <Compile Include="Internal\SelectiveComponentDispatcher.cs" />
+    <Compile Include="Internal\SubscriptionCoordinator.cs" />
     <Compile Include="Internal\SubscriptionTypeInfo.cs" />
     <Compile Include="ServiceBusRequest.cs" />
     <Compile Include="Consumes.cs" />

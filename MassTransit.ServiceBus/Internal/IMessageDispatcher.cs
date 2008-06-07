@@ -24,7 +24,13 @@ namespace MassTransit.ServiceBus.Internal
 		bool Accept(object message);
 	}
 
-	public interface IMessageDispatcher<TMessage> : 
+	public interface IMessageTypeDispatcher : IMessageDispatcher
+	{
+		void Attach<T>(Consumes<T>.All consumer) where T : class;
+		void Detach<T>(Consumes<T>.All consumer) where T : class;
+	}
+
+	public interface IMessageDispatcher<TMessage> :
 		IMessageDispatcher,
 		Consumes<TMessage>.Selected,
 		Produces<TMessage>
