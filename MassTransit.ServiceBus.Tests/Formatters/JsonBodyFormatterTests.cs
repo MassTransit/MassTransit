@@ -7,7 +7,6 @@ namespace MassTransit.ServiceBus.Tests.Formatters
     using NUnit.Framework.SyntaxHelpers;
     using Rhino.Mocks;
 
-    [TestFixture]
     public class JsonBodyFormatterTests : 
         Specification
     {
@@ -47,12 +46,14 @@ namespace MassTransit.ServiceBus.Tests.Formatters
             {
                 formatter.Serialize(mockBody, msg);
             }
-
+            
+            string output = StreamToString(str);
+            Assert.That(output, Is.EqualTo(_serializedMessages));
 
         }
 
         [Test]
-        public void DeserializeWithOutGenerics()
+        public void Deserialize()
         {
             MemoryStream ms = new MemoryStream(Encoding.UTF8.GetBytes(_serializedMessages));
             using (Record())
@@ -104,8 +105,46 @@ namespace MassTransit.ServiceBus.Tests.Formatters
             {
                 formatter.Serialize(mockBody, msg);
             }
+
+            string output = StreamToString(ms);
+            Assert.That(output, Is.EqualTo(_serializedMessagesWithValue));
         }
 
+        [Test]
+        public void DeserializeObjectWithValues()
+        {
+            MemoryStream ms = new MemoryStream(Encoding.UTF8.GetBytes(_serializedMessagesWithValue));
+            using (Record())
+            {
+                Expect.Call(mockBody.BodyStream).Return(ms);
+            }
+            using (Playback())
+            {
+                object msg = formatter.Deserialize(mockBody);
+
+                Assert.IsNotNull(msg);
+
+                Assert.That(msg, Is.TypeOf(typeof(ClientMessage)));
+            }
+        }
+
+        [Test]
+        public void DeserializeObjectWithValuesWithGenerics()
+        {
+            MemoryStream ms = new MemoryStream(Encoding.UTF8.GetBytes(_serializedMessagesWithValue));
+            using (Record())
+            {
+                Expect.Call(mockBody.BodyStream).Return(ms);
+            }
+            using (Playback())
+            {
+                ClientMessage msg = formatter.Deserialize<ClientMessage>(mockBody);
+
+                Assert.IsNotNull(msg);
+                Assert.That(msg, Is.TypeOf(typeof(ClientMessage)));
+                Assert.That(msg.Name, Is.EqualTo("test"));
+            }
+        }
         private static byte[] Convert(Stream str)
         {
             byte[] buffer = new byte[str.Length];
@@ -113,16 +152,11 @@ namespace MassTransit.ServiceBus.Tests.Formatters
             str.Read(buffer, 0, buffer.Length);
             return buffer;
         }
-        private void BytesToString(Stream str)
+        private static string StreamToString(Stream str)
         {
             byte[] buffer = Convert(str);
-            StringBuilder sb = new StringBuilder();
-            foreach (byte b in buffer)
-            {
-                sb.AppendFormat("{0},", b);
-            }
 
-            string s = sb.ToString();
+            return Encoding.UTF8.GetString(buffer);
         }
     }
 }
