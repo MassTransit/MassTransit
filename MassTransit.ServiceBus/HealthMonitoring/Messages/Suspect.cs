@@ -5,6 +5,18 @@ namespace MassTransit.ServiceBus.HealthMonitoring.Messages
     [Serializable]
     public class Suspect
     {
-        public Uri EndpointUri;
+        private Uri _endpointUri;
+
+
+        public Suspect(Uri endpointUri)
+        {
+            _endpointUri = endpointUri;
+        }
+
+
+        public Uri EndpointUri
+        {
+            get { return _endpointUri; }
+        }
     }
 }
