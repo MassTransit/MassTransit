@@ -53,9 +53,12 @@
     <Compile Include="BatchTimeout.cs" />
     <Compile Include="Internal\BatchDistributor.cs" />
     <Compile Include="Internal\ComponentDispatcher.cs" />
+    <Compile Include="Internal\CorrelatedPublication.cs" />
     <Compile Include="Internal\CorrelatedSubscription.cs" />
+    <Compile Include="Internal\IPublicationTypeInfo.cs" />
     <Compile Include="Internal\ISubscriptionTypeInfo.cs" />
     <Compile Include="Internal\MessageTypeDispatcher.cs" />
+    <Compile Include="Internal\MessageTypePublication.cs" />
     <Compile Include="Internal\MessageTypeSubscription.cs" />
     <Compile Include="Internal\Produces.cs" />
     <Compile Include="Internal\SelectiveComponentDispatcher.cs" />

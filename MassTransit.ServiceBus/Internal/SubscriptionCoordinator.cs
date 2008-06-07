@@ -20,12 +20,13 @@ namespace MassTransit.ServiceBus.Internal
 	{
 		private static readonly Type _consumerType = typeof (Consumes<>.All);
 		private static readonly Type _correlatedConsumerType = typeof (Consumes<>.For<>);
+		private static readonly Type _correlatedMessageType = typeof (CorrelatedBy<>);
 		private static readonly Type _selectiveConsumerType = typeof (Consumes<>.Selected);
-		private readonly Dictionary<Type, SubscriptionTypeInfo> _types = new Dictionary<Type, SubscriptionTypeInfo>();
 		private readonly IObjectBuilder _builder;
 		private readonly IServiceBus _bus;
 		private readonly ISubscriptionCache _cache;
 		private readonly IMessageTypeDispatcher _dispatcher;
+		private readonly Dictionary<Type, SubscriptionTypeInfo> _types = new Dictionary<Type, SubscriptionTypeInfo>();
 
 		public SubscriptionCoordinator(IMessageTypeDispatcher dispatcher, IServiceBus bus, ISubscriptionCache cache, IObjectBuilder builder)
 		{
@@ -35,17 +36,17 @@ namespace MassTransit.ServiceBus.Internal
 			_builder = builder;
 		}
 
-		public ISubscriptionTypeInfo Resolve<TComponent>()
+		public ICombinedTypeInfo Resolve<TComponent>()
 		{
 			return Resolve(typeof (TComponent));
 		}
 
-		public ISubscriptionTypeInfo Resolve<TComponent>(TComponent component)
+		public ICombinedTypeInfo Resolve<TComponent>(TComponent component)
 		{
 			return Resolve(typeof (TComponent));
 		}
 
-		public ISubscriptionTypeInfo Resolve(Type componentType)
+		public ICombinedTypeInfo Resolve(Type componentType)
 		{
 			lock (_types)
 			{
@@ -56,6 +57,7 @@ namespace MassTransit.ServiceBus.Internal
 				info = new SubscriptionTypeInfo();
 
 				List<Type> usedMessageTypes = new List<Type>();
+				int publicationCount = 0;
 
 				foreach (Type interfaceType in componentType.GetInterfaces())
 				{
@@ -104,6 +106,27 @@ namespace MassTransit.ServiceBus.Internal
 
 						usedMessageTypes.Add(arguments[0]);
 					}
+					else if (interfaceType.IsGenericType && interfaceType.GetGenericTypeDefinition() == _correlatedMessageType)
+					{
+						Type[] arguments = interfaceType.GetGenericArguments();
+
+						Type publicationType = typeof (CorrelatedPublication<,>).MakeGenericType(componentType, arguments[0]);
+
+						IPublicationTypeInfo publicationTypeInfo = (IPublicationTypeInfo) Activator.CreateInstance(publicationType, _cache);
+
+						info.SetPublicationType(publicationTypeInfo);
+
+						publicationCount++;
+					}
+				}
+
+				if (publicationCount == 0)
+				{
+					Type publicationType = typeof (MessageTypePublication<>).MakeGenericType(componentType);
+
+					IPublicationTypeInfo publicationTypeInfo = (IPublicationTypeInfo) Activator.CreateInstance(publicationType, _cache);
+
+					info.SetPublicationType(publicationTypeInfo);
 				}
 
 				_types.Add(componentType, info);
