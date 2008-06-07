@@ -50,8 +50,6 @@ namespace MassTransit.ServiceBus.NMS.Tests
 		}
 	}
 
-	public delegate void EnvelopeHandler(IEnvelope e);
-
 	[Serializable]
 	public class SimpleMessage
 	{

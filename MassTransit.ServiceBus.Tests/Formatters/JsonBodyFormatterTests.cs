@@ -20,15 +20,13 @@ namespace MassTransit.ServiceBus.Tests.Formatters
         private readonly string _serializedMessagesWithValue =
              @"{""WrappedJson"":""{\""Name\"":\""test\""}"",""Types"":[""MassTransit.ServiceBus.Tests.ClientMessage, MassTransit.ServiceBus.Tests""]}";
 
-        [SetUp]
-        public void SetUp()
+    	protected override void Before_each()
         {
             formatter = new JsonBodyFormatter();
             mockBody = StaticMock<IFormattedBody>();
         }
 
-        [TearDown]
-        public void TearDown()
+        protected override void After_each()
         {
             formatter = null;
             mockBody = null;

@@ -25,7 +25,7 @@ namespace MassTransit.ServiceBus.NMS
 		INmsEndpoint
 	{
 		private static readonly IFormatter _formatter = new BinaryFormatter();
-		private static readonly ILog _log = LogManager.GetLogger(typeof (NmsMessageSender));
+		private static readonly ILog _log = LogManager.GetLogger(typeof (NmsEndpoint));
 		private static readonly ILog _messageLog = LogManager.GetLogger("MassTransit.Messages");
 		private readonly IConnectionFactory _factory;
 		private readonly string _queueName;

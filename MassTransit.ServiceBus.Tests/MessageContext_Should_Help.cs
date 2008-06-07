@@ -10,9 +10,7 @@ namespace MassTransit.ServiceBus.Tests
     {
         private IServiceBus mockBus;
         private IEndpoint mockBusEndpoint;
-        private IEnvelope mockEnvelope;
-        private IEndpoint mockPoisonEndpoint;
-        private IEndpoint mockEndpoint;
+    	private IEndpoint mockEndpoint;
 
         private PingMessage requestMessage = new PingMessage();
         private PongMessage replyMessage = new PongMessage();
@@ -23,19 +21,15 @@ namespace MassTransit.ServiceBus.Tests
         {
             mockBus = DynamicMock<IServiceBus>();
             mockBusEndpoint = DynamicMock<IEndpoint>();
-            mockEnvelope = DynamicMock<IEnvelope>();
             mockEndpoint = DynamicMock<IEndpoint>();
-            mockPoisonEndpoint = DynamicMock<IEndpoint>();
+            DynamicMock<IEndpoint>();
             
         }
         protected override void After_each()
         {
             mockBus = null;
             mockBusEndpoint = null;
-            mockEnvelope = null;
             mockEndpoint = null;
-            mockPoisonEndpoint = null;
-            
         }
         
         #endregion
@@ -43,13 +37,11 @@ namespace MassTransit.ServiceBus.Tests
         [Test, Ignore]
         public void With_Replies()
         {
-            MessageContext<PingMessage> cxt = new MessageContext<PingMessage>(mockBus, mockEnvelope, requestMessage);
+            MessageContext<PingMessage> cxt = new MessageContext<PingMessage>(mockBus, requestMessage);
 
             using (Record())
             {
-                Expect.Call(mockEnvelope.ReturnEndpoint).Return(mockEndpoint);
                 Expect.Call(mockBus.Endpoint).Return(mockBusEndpoint);
-                Expect.Call(mockEnvelope.Id).Return(null);
             }
 
             using (Playback())
@@ -61,7 +53,7 @@ namespace MassTransit.ServiceBus.Tests
         [Test]
         public void With_Handling_Later()
         {
-            MessageContext<PingMessage> cxt = new MessageContext<PingMessage>(mockBus, mockEnvelope, requestMessage);
+            MessageContext<PingMessage> cxt = new MessageContext<PingMessage>(mockBus, requestMessage);
 
             using (Record())
             {
@@ -77,7 +69,7 @@ namespace MassTransit.ServiceBus.Tests
         [Test]
         public void With_Poison_Letters()
         {
-            MessageContext<PingMessage> cxt = new MessageContext<PingMessage>(mockBus, mockEnvelope, requestMessage);
+            MessageContext<PingMessage> cxt = new MessageContext<PingMessage>(mockBus, requestMessage);
 
             using (Record())
             {
@@ -93,7 +85,7 @@ namespace MassTransit.ServiceBus.Tests
         [Test]
         public void With_Poison_Letter()
         {
-            MessageContext<PingMessage> cxt = new MessageContext<PingMessage>(mockBus, mockEnvelope, requestMessage);
+            MessageContext<PingMessage> cxt = new MessageContext<PingMessage>(mockBus, requestMessage);
 
             using (Record())
             {
