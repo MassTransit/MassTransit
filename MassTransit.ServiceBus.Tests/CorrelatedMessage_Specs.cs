@@ -12,7 +12,7 @@ namespace MassTransit.ServiceBus.Tests
 		[Test]
 		public void A_type_should_be_registered()
 		{
-			MessageDispatcher messageDispatcher = new MessageDispatcher();
+			MessageTypeDispatcher messageDispatcher = new MessageTypeDispatcher();
 
 			CorrelatedController controller = new CorrelatedController(messageDispatcher);
 
@@ -25,12 +25,12 @@ namespace MassTransit.ServiceBus.Tests
 	internal class CorrelatedController :
 		Consumes<ResponseMessage>.For<Guid>
 	{
-		private readonly MessageDispatcher _MessageDispatcher;
+		private readonly MessageTypeDispatcher _MessageDispatcher;
 		private RequestMessage _request;
 
 		private bool _responseReceived = false;
 
-		public CorrelatedController(MessageDispatcher messageDispatcher)
+		public CorrelatedController(MessageTypeDispatcher messageDispatcher)
 		{
 			_MessageDispatcher = messageDispatcher;
 		}

@@ -1,17 +1,24 @@
 namespace MassTransit.ServiceBus
 {
-    using System;
+	using System;
 
-    public class ActivatorObjectBuilder : IObjectBuilder
-    {
-        public object Build(Type objectType)
-        {
-            return Activator.CreateInstance(objectType);
-        }
+	public class ActivatorObjectBuilder : IObjectBuilder
+	{
+		public object Build(Type objectType)
+		{
+			return Activator.CreateInstance(objectType);
+		}
 
-        public T Build<T>(Type type) where T : class
-        {
-            return Build(type) as T;
-        }
-    }
+		public T Build<T>(Type type) where T : class
+		{
+			return Build(type) as T;
+		}
+
+		public void Release<T>(T obj)
+		{
+			IDisposable disposal = obj as IDisposable;
+			if (disposal != null)
+				disposal.Dispose();
+		}
+	}
 }

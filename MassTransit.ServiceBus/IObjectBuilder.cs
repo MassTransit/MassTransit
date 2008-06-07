@@ -18,5 +18,12 @@ namespace MassTransit.ServiceBus
 		/// <param name="type"></param>
 		/// <returns></returns>
 		T Build<T>(Type type) where T : class;
+
+		/// <summary>
+		/// Releases an object back to the container
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="obj"></param>
+		void Release<T>(T obj);
 	}
 }

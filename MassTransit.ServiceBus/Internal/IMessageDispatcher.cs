@@ -18,34 +18,23 @@ namespace MassTransit.ServiceBus.Internal
 	/// A correlated message dispatcher sends a message to any attached consumers
 	/// with a matching correlation identifier
 	/// </summary>
-	public interface IMessageDispatcher : IDisposable, Consumes<object>.Selected
+	public interface IMessageDispatcher : IDisposable
 	{
-		/// <summary>
-		/// Connects any consumers for the component to the message dispatcher
-		/// </summary>
-		/// <typeparam name="T">The component type</typeparam>
-		/// <param name="component">The component</param>
-		void Subscribe<T>(T component) where T : class;
+		void Consume(object message);
+		bool Accept(object message);
+	}
 
-		/// <summary>
-		/// Disconnects any consumers for the component from the message dispatcher
-		/// </summary>
-		/// <typeparam name="T">The component type</typeparam>
-		/// <param name="component">The component</param>
-		void Unsubscribe<T>(T component) where T : class;
+	public interface IMessageDispatcher<TMessage> : 
+		IMessageDispatcher,
+		Consumes<TMessage>.Selected,
+		Produces<TMessage>
+		where TMessage : class
+	{
+	}
 
-		/// <summary>
-		/// Adds a component to the dispatcher that will be created on demand to handle messages
-		/// </summary>
-		/// <typeparam name="TComponent">The type of the component to add</typeparam>
-		void AddComponent<TComponent>() where TComponent : class;
-
-		/// <summary>
-		/// Removes a component from the dispatcher so that it will not be created on demand to handle messages
-		/// </summary>
-		/// <typeparam name="TComponent">The type of component to remove</typeparam>
-		void RemoveComponent<TComponent>() where TComponent : class;
-
-		bool Active { get; }
+	public interface Produces<TMessage> where TMessage : class
+	{
+		void Attach(Consumes<TMessage>.All consumer);
+		void Detach(Consumes<TMessage>.All consumer);
 	}
 }
