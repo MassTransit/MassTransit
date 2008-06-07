@@ -35,7 +35,7 @@ namespace MassTransit.ServiceBus.Internal
 			_cache = cache;
 			_messageType = typeof (TMessage);
 
-			_componentConsumer = new CorrelationIdDispatcher<TMessage, TKey>(builder);
+			_componentConsumer = new CorrelationIdDispatcher<TMessage, TKey>();
 			_selectiveConsumer = new SelectiveComponentDispatcher<TComponent, TMessage>(builder);
 		}
 

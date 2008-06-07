@@ -81,7 +81,7 @@ namespace MassTransit.ServiceBus
 
 
 			//TODO: Move into IObjectBuilder?
-			_messageDispatcher = new MessageTypeDispatcher(this, subscriptionCache, objectBuilder);
+			_messageDispatcher = new MessageTypeDispatcher();
 
 			_subscriptionCoordinator = new SubscriptionCoordinator(_messageDispatcher, this, _subscriptionCache, _objectBuilder);
 

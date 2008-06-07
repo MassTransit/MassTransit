@@ -14,7 +14,6 @@ namespace MassTransit.ServiceBus.Internal
 {
 	using System;
 	using System.Collections.Generic;
-	using Subscriptions;
 
 	/// <summary>
 	/// Manages and dispatches messages to correlated message consumers
@@ -22,25 +21,8 @@ namespace MassTransit.ServiceBus.Internal
 	public class MessageTypeDispatcher :
 		IMessageTypeDispatcher
 	{
-		private static readonly Type _consumes = typeof (Consumes<>.All);
-		private static readonly Type _consumesSelected = typeof (Consumes<>.Selected);
-		private readonly IObjectBuilder _builder;
-		private readonly IServiceBus _bus;
-		private readonly ISubscriptionCache _cache;
 		private readonly Dictionary<Type, IMessageDispatcher> _messageDispatchers = new Dictionary<Type, IMessageDispatcher>();
 		private readonly object _messageLock = new object();
-		private readonly Dictionary<Type, Type> _messageTypeToKeyType = new Dictionary<Type, Type>();
-
-		public MessageTypeDispatcher()
-		{
-		}
-
-		public MessageTypeDispatcher(IServiceBus bus, ISubscriptionCache cache, IObjectBuilder builder)
-		{
-			_bus = bus;
-			_cache = cache;
-			_builder = builder;
-		}
 
 		public bool Accept(object message)
 		{
@@ -78,19 +60,19 @@ namespace MassTransit.ServiceBus.Internal
 
 		public void Attach<T>(Consumes<T>.All consumer) where T : class
 		{
-			Produces<T> dispatcher = GetMessageProducer<T>();
+			Produces<T> dispatcher = GetMessageDispatcher<T>();
 
 			dispatcher.Attach(consumer);
 		}
 
 		public void Detach<T>(Consumes<T>.All consumer) where T : class
 		{
-			Produces<T> dispatcher = GetMessageProducer<T>();
+			Produces<T> dispatcher = GetMessageDispatcher<T>();
 
 			dispatcher.Detach(consumer);
 		}
 
-		private Produces<T> GetMessageProducer<T>() where T : class
+		public IMessageDispatcher<T> GetMessageDispatcher<T>() where T : class
 		{
 			Type messageType = typeof (T);
 
@@ -104,11 +86,11 @@ namespace MassTransit.ServiceBus.Internal
 
 				Type dispatcherType = typeof (MessageDispatcher<>).MakeGenericType(messageType);
 
-				consumer = (IMessageDispatcher) Activator.CreateInstance(dispatcherType, _bus, _cache, _builder);
+				consumer = (IMessageDispatcher) Activator.CreateInstance(dispatcherType);
 
 				_messageDispatchers.Add(messageType, consumer);
 
-				return (Produces<T>) consumer;
+				return (IMessageDispatcher<T>) consumer;
 			}
 		}
 	}

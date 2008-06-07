@@ -2,8 +2,10 @@ namespace MassTransit.ServiceBus.Tests
 {
 	using System;
 	using Internal;
+	using MassTransit.ServiceBus.Subscriptions;
 	using NUnit.Framework;
 	using NUnit.Framework.SyntaxHelpers;
+	using Rhino.Mocks;
 
 	[TestFixture]
 	public class When_a_correlated_message_is_received :
@@ -21,6 +23,34 @@ namespace MassTransit.ServiceBus.Tests
 
 			Assert.That(controller.ResponseReceived, Is.True);
 		}
+
+		[Test]
+		public void A_correlated_subscriber_should_not_register_a_general_subscription()
+		{
+			Uri uri = new Uri("msmq://localhost/test_servicebus");
+
+			ISubscriptionCache cache = StaticMock<ISubscriptionCache>();
+			IEndpoint endpoint = DynamicMock<IEndpoint>();
+			IServiceBus bus = DynamicMock<IServiceBus>();
+			SetupResult.For(bus.Endpoint).Return(endpoint);
+			SetupResult.For(endpoint.Uri).Return(uri);
+
+			MessageTypeDispatcher messageDispatcher = new MessageTypeDispatcher();
+			SubscriptionCoordinator coordinator = new SubscriptionCoordinator(messageDispatcher, bus, cache, new ActivatorObjectBuilder());
+			CorrelatedController controller = new CorrelatedController(messageDispatcher, coordinator);
+
+			using(Record())
+			{
+				cache.Add(new Subscription(typeof(ResponseMessage).FullName, controller.CorrelationId.ToString(), uri));
+			}
+
+			using (Playback())
+			{
+				controller.DoWork();
+
+				Assert.That(controller.ResponseReceived, Is.True);
+			}
+		}
 	}
 
 	internal class CorrelatedController :
@@ -28,7 +58,7 @@ namespace MassTransit.ServiceBus.Tests
 	{
 		private readonly MessageTypeDispatcher _messageDispatcher;
 		private readonly SubscriptionCoordinator _coordinator;
-		private RequestMessage _request;
+		private RequestMessage _request = new RequestMessage();
 
 		private bool _responseReceived = false;
 
@@ -55,7 +85,6 @@ namespace MassTransit.ServiceBus.Tests
 
 		public void DoWork()
 		{
-			_request = new RequestMessage();
 
 			_coordinator.Resolve(this).Subscribe(this);
 

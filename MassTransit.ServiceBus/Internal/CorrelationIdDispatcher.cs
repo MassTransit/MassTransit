@@ -20,58 +20,11 @@ namespace MassTransit.ServiceBus.Internal
 		Produces<TMessage>
 		where TMessage : class, CorrelatedBy<TKey>
 	{
-		private readonly IObjectBuilder _builder;
 		private readonly Dictionary<TKey, MessageDispatcher<TMessage>> _dispatchers = new Dictionary<TKey, MessageDispatcher<TMessage>>();
-
-		public CorrelationIdDispatcher(IObjectBuilder builder)
-		{
-			_builder = builder;
-		}
-
-		public CorrelationIdDispatcher()
-		{
-		}
-
-		public void Consume(object obj)
-		{
-			Consume((TMessage) obj);
-		}
 
 		public bool Active
 		{
 			get { return _dispatchers.Count > 0; }
-		}
-
-		public void Dispose()
-		{
-			foreach (MessageDispatcher<TMessage> dispatcher in _dispatchers.Values)
-			{
-				dispatcher.Dispose();
-			}
-
-			_dispatchers.Clear();
-		}
-
-		private MessageDispatcher<TMessage> GetDispatcher(TKey correlationId)
-		{
-			if (_dispatchers.ContainsKey(correlationId))
-				return _dispatchers[correlationId];
-
-			lock (_dispatchers)
-			{
-				if (_dispatchers.ContainsKey(correlationId))
-					return _dispatchers[correlationId];
-
-				MessageDispatcher<TMessage> dispatcher = new MessageDispatcher<TMessage>(null, null, _builder);
-
-				_dispatchers.Add(correlationId, dispatcher);
-
-				// TODO
-				//if (_cache != null)
-				//	_cache.Add(new Subscription(typeof (TMessage).FullName, correlationId.ToString(), _bus.Endpoint.Uri));
-
-				return dispatcher;
-			}
 		}
 
 		public void Consume(TMessage message)
@@ -109,15 +62,6 @@ namespace MassTransit.ServiceBus.Internal
 			Attach(correlatedConsumer);
 		}
 
-		public void Attach(Consumes<TMessage>.For<TKey> consumer)
-		{
-			TKey correlationId = consumer.CorrelationId;
-
-			MessageDispatcher<TMessage> dispatcher = GetDispatcher(correlationId);
-
-			dispatcher.Attach(consumer);
-		}
-
 		public void Detach(Consumes<TMessage>.All consumer)
 		{
 			Consumes<TMessage>.For<TKey> correlatedConsumer = consumer as Consumes<TMessage>.For<TKey>;
@@ -125,6 +69,52 @@ namespace MassTransit.ServiceBus.Internal
 				throw new ArgumentException(string.Format("The object does not support Consumes<{0}>.For<{1}>", typeof (TMessage).Name, typeof (TKey).Name), "consumer");
 
 			Detach(correlatedConsumer);
+		}
+
+		public void Consume(object obj)
+		{
+			Consume((TMessage) obj);
+		}
+
+		public void Dispose()
+		{
+			foreach (MessageDispatcher<TMessage> dispatcher in _dispatchers.Values)
+			{
+				dispatcher.Dispose();
+			}
+
+			_dispatchers.Clear();
+		}
+
+		private MessageDispatcher<TMessage> GetDispatcher(TKey correlationId)
+		{
+			if (_dispatchers.ContainsKey(correlationId))
+				return _dispatchers[correlationId];
+
+			lock (_dispatchers)
+			{
+				if (_dispatchers.ContainsKey(correlationId))
+					return _dispatchers[correlationId];
+
+				MessageDispatcher<TMessage> dispatcher = new MessageDispatcher<TMessage>();
+
+				_dispatchers.Add(correlationId, dispatcher);
+
+				// TODO
+				//if (_cache != null)
+				//	_cache.Add(new Subscription(typeof (TMessage).FullName, correlationId.ToString(), _bus.Endpoint.Uri));
+
+				return dispatcher;
+			}
+		}
+
+		public void Attach(Consumes<TMessage>.For<TKey> consumer)
+		{
+			TKey correlationId = consumer.CorrelationId;
+
+			MessageDispatcher<TMessage> dispatcher = GetDispatcher(correlationId);
+
+			dispatcher.Attach(consumer);
 		}
 
 		public void Detach(Consumes<TMessage>.For<TKey> consumer)
@@ -141,9 +131,6 @@ namespace MassTransit.ServiceBus.Internal
 				{
 					if (_dispatchers.ContainsKey(correlationId))
 						_dispatchers.Remove(correlationId);
-
-					//if (_cache != null)
-					//	_cache.Remove(new Subscription(typeof(TMessage).FullName, correlationId.ToString(), _bus.Endpoint.Uri));
 				}
 			}
 		}

@@ -79,6 +79,11 @@ namespace MassTransit.ServiceBus.Internal
 		public void Unsubscribe(Consumes<TMessage>.All consumer)
 		{
 			_dispatcher.Detach<TMessage>(consumer);
+			if (_dispatcher.GetMessageDispatcher<TMessage>().Active == false)
+			{
+				if (_cache != null)
+					_cache.Remove(new Subscription(typeof (TMessage).FullName, _bus.Endpoint.Uri));
+			}
 		}
 	}
 }

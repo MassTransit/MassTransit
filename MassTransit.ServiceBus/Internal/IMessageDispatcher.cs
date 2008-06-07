@@ -28,6 +28,7 @@ namespace MassTransit.ServiceBus.Internal
 	{
 		void Attach<T>(Consumes<T>.All consumer) where T : class;
 		void Detach<T>(Consumes<T>.All consumer) where T : class;
+		IMessageDispatcher<T> GetMessageDispatcher<T>() where T : class;
 	}
 
 	public interface IMessageDispatcher<TMessage> :
@@ -36,5 +37,6 @@ namespace MassTransit.ServiceBus.Internal
 		Produces<TMessage>
 		where TMessage : class
 	{
+		bool Active { get; }
 	}
 }
