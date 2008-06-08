@@ -54,6 +54,7 @@
     <Compile Include="MsmqEndpoint_Specs.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="QueueTestContext.cs" />
+    <Compile Include="ReceiveException_Specs.cs" />
     <Compile Include="When_creating_a_MessageQueueEndpoint_from_a_Uri_string.cs" />
     <Compile Include="When_creating_the_service_bus_with_a_MessageQueueEndpoint.cs" />
     <Compile Include="When_publishing_a_message.cs" />
