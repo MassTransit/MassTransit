@@ -67,6 +67,13 @@
 		</asminfo>
 	</target>
 
+	<target name="run_tests">
+		<exec
+			program="nunit-console.exe"
+			commandline='info http://masstransit.googlecode.com/svn/trunk --xml'
+			output="_revision.xml"
+			failonerror="false"/>
+	</target>
 	<target name="clean_the_bin">
 		<delete failonerror="false">
 			<fileset>
