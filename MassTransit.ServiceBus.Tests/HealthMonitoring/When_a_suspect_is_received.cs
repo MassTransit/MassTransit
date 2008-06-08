@@ -40,7 +40,7 @@ namespace MassTransit.ServiceBus.Tests.HealthMonitoring
             IServiceBus bus = DynamicMock<IServiceBus>();
             IEndpointResolver er = DynamicMock<IEndpointResolver>();
             IEndpoint ep = DynamicMock<IEndpoint>();
-            Investigator inv = new Investigator(bus, er);
+            Investigator inv = new Investigator(bus, er, 50);
             Uri u = new Uri("msmq://localhost/test");
                 ManualResetEvent evt = new ManualResetEvent(false);
 
@@ -51,13 +51,15 @@ namespace MassTransit.ServiceBus.Tests.HealthMonitoring
                                 {
                                     ep.Send(new Ping(inv.CorrelationId), new TimeSpan(0, 3, 0));
                                 });
-                Expect.Call(delegate { bus.Publish(new DownEndpoint(u)); }); //evt.Set();
+                Expect.Call(delegate { bus.Publish(new DownEndpoint(u)); }).Do(new Publish(delegate {evt.Set();}));
             }
             using (Playback())
             {
                 inv.Consume(new Suspect(new Uri("msmq://localhost/test")));
-                evt.WaitOne(50, true);
+                evt.WaitOne(500, true);
             }
         }
+
+        private delegate void Publish(DownEndpoint epp);
     }
 }

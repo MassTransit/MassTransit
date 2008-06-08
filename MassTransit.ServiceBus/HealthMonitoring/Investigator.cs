@@ -13,27 +13,36 @@
 namespace MassTransit.ServiceBus.HealthMonitoring
 {
     using System;
+    using System.Timers;
     using Internal;
+    using log4net;
     using Messages;
 
     public class Investigator : 
         Consumes<Suspect>.All,
         Consumes<Pong>.For<Guid> //, Produces<DownEndpoint>
     {
+        private ILog _log = LogManager.GetLogger(typeof (Investigator));
         private readonly IServiceBus _bus;
         private readonly Guid _correlationId;
-        private ServiceBusRequest<Investigator> _request;
         private Suspect _suspectMessage;
         private readonly Ping _pingMessage;
-        private Pong _pongMessage;
         private IEndpointResolver _resolver;
+        private Timer _timer;
+        private double _timeout;
 
-        public Investigator(IServiceBus bus, IEndpointResolver resolver)
+        public Investigator(IServiceBus bus, IEndpointResolver resolver):this(bus, resolver, (1000*60*3)+50)
+        {
+        }
+        public Investigator(IServiceBus bus, IEndpointResolver resolver, double timeout)
         {
             _bus = bus;
+            _timeout = timeout;
             _resolver = resolver;
             _correlationId = Guid.NewGuid();
             _pingMessage = new Ping(this.CorrelationId);
+            _timer = new Timer(_timeout);
+            _timer.Elapsed += OnPingTimeOut;
         }
 
 
@@ -46,21 +55,24 @@ namespace MassTransit.ServiceBus.HealthMonitoring
             IEndpoint ep = _resolver.Resolve(msg.EndpointUri);
 
             ep.Send(_pingMessage, new TimeSpan(0,3,0));
+            _timer.Start();
         }
 
 
         public void Consume(Pong msg)
         {
             //if we get this we are ok. but its weird that the heartbeat is down
-            _pongMessage = msg;
-            _request.Complete();
+            _timer.Stop();
+            _log.WarnFormat("The endpoint '{0}' is responsive, but not sending heartbeats.", msg.EndpointUri);
         }
 
         //Produce<DownEndpoint>
-        public void OnPingTimeOut()
+        public void OnPingTimeOut(object  sender, ElapsedEventArgs args)
         {
             //I have a confirmed dead endpoint
             _bus.Publish(new DownEndpoint(_suspectMessage.EndpointUri));
+            _timer.Stop();
+            _timer.Dispose();
         }
 
         public Guid CorrelationId
