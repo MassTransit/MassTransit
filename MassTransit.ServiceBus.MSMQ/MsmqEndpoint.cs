@@ -257,6 +257,20 @@ namespace MassTransit.ServiceBus.MSMQ
 							}
 							catch (SerializationException ex)
 							{
+								// if we get a message we cannot serialize, we need to do something about it or it will 
+								// hang the service bus forever
+
+								try
+								{
+									Message discard = _queue.ReceiveById(msg.Id, GetTransactionType());
+
+									_log.Error("Discarded message " + discard.Id + " due to a serialization error", ex);
+								}
+								catch (Exception ex2)
+								{
+									_log.Error("Unable to purge message id " + msg.Id, ex2);
+								}
+
 								throw new MessageException(typeof (object), "An error occurred deserializing a message", ex);
 							}
 						}
