@@ -4,7 +4,7 @@
 
   <facilities>
 
-    <facility id="masstransit" listenAt="msmq://localhost/bob" subscriptionsAt="msmq://localhost/bill">
+    <facility id="masstransit" listenAt="msmq://localhost/test_servicebus" subscriptionsAt="msmq://localhost/mt_pubsub">
       <transports>
         <transport>MassTransit.ServiceBus.MSMQ.MsmqEndpoint, MassTransit.ServiceBus.MSMQ</transport>
         <transport>MassTransit.ServiceBus.NMS.NmsEndpoint, MassTransit.ServiceBus.NMS</transport>

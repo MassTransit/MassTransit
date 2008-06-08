@@ -51,6 +51,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CorrelatedMessageTest.cs" />
+    <Compile Include="CorrelatedTestContainer.cs" />
     <Compile Include="GeneralMessage.cs" />
     <Compile Include="LocalLoadTest.cs" />
     <Compile Include="LocalMsmqLoadTest.cs" />
@@ -59,7 +60,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SimpleResponse.cs" />
     <Compile Include="StopWatch.cs" />
-    <Compile Include="TestAppContainer.cs" />
+    <Compile Include="LoadTestContainer.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\MassTransit.DistributedSubscriptionCache\MassTransit.DistributedSubscriptionCache.csproj">

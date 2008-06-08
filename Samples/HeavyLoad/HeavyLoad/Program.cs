@@ -20,10 +20,8 @@ namespace HeavyLoad
 
 			Console.WriteLine("HeavyLoad - MassTransit Load Generator");
 
-
-		//	RunLocalActiveMqLoadTest();
-
 			RunLocalMsmqLoadTest();
+            //RunLocalActiveMqLoadTest();
 
 			Console.WriteLine("Waiting for next test...");
 
@@ -31,19 +29,6 @@ namespace HeavyLoad
 
 			Console.WriteLine("End of line.");
 			//Console.ReadLine();
-		}
-
-		private static void RunCorrelatedMessageTest()
-		{
-			StopWatch stopWatch = new StopWatch();
-
-			using (CorrelatedMessageTest test = new CorrelatedMessageTest())
-			{
-				test.Run(stopWatch);
-			}
-
-			Console.WriteLine("Correlated Message Test: ");
-			Console.WriteLine(stopWatch.ToString());
 		}
 
 		private static void RunLocalMsmqLoadTest()
@@ -58,7 +43,6 @@ namespace HeavyLoad
 			Console.WriteLine("Local MSMQ Load Test: ");
 			Console.WriteLine(stopWatch.ToString());
 		}
-
 		private static void RunLocalActiveMqLoadTest()
 		{
 			StopWatch stopWatch = new StopWatch();
@@ -71,6 +55,20 @@ namespace HeavyLoad
 			Console.WriteLine("Local ActiveMQ Load Test: ");
 			Console.WriteLine(stopWatch.ToString());
 		}
+		private static void RunCorrelatedMessageTest()
+		{
+			StopWatch stopWatch = new StopWatch();
+
+			using (CorrelatedMessageTest test = new CorrelatedMessageTest())
+			{
+				test.Run(stopWatch);
+			}
+
+			Console.WriteLine("Correlated Message Test: ");
+			Console.WriteLine(stopWatch.ToString());
+		}
+
+
 
 		private static void AddConsoleAppender()
 		{

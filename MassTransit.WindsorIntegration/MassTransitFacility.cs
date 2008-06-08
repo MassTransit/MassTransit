@@ -47,7 +47,7 @@ namespace MassTransit.WindsorIntegration
                                              this.Kernel.Resolve<ISubscriptionCache>(),
                                              this.Kernel.Resolve<IEndpointResolver>());
 
-            this.Kernel.AddComponentInstance("servicebus", typeof(IServiceBus), bus);
+            this.Kernel.AddComponentInstance("masstransit.bus", typeof(IServiceBus), bus);
 
 
             //TODO: Hack
