@@ -46,6 +46,11 @@ namespace MassTransit.ServiceBus.HealthMonitoring
             }
         }
 
+        public bool AmIWatchingYou(Uri uri)
+        {
+            return _monitoredEndpoints.ContainsKey(uri);
+        }
+
         public void OnMissingHeartbeat(MonitorInfo info)
         {
             _bus.Publish(new Suspect(info.EndpointUri));

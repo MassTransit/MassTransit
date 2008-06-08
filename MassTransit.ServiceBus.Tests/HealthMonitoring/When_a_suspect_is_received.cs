@@ -100,7 +100,5 @@ namespace MassTransit.ServiceBus.Tests.HealthMonitoring
                 Assert.IsTrue(evt.WaitOne(500, true));
             }
         }
-
-        private delegate void Publish(DownEndpoint epp);
     }
 }
