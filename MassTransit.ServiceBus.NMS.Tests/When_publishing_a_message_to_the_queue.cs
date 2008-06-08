@@ -12,7 +12,7 @@ namespace MassTransit.ServiceBus.NMS.Tests
 		[Test]
 		public void The_Message_Should_Arrive()
 		{
-			ServiceBus bus = new ServiceBus(new NmsEndpoint("activemq://localhost:61616/published_queue"));
+			ServiceBus bus = new ServiceBus(new NmsEndpoint("activemq://localhost:61616/published_queue"), null);
 			bus.SubscriptionCache.Add(new Subscription(typeof (SimpleMessage).FullName, new Uri("activemq://localhost:61616/subscribed_queue")));
 			bus.Publish(new SimpleMessage("dru"));
 		}
@@ -22,7 +22,7 @@ namespace MassTransit.ServiceBus.NMS.Tests
 		public void The_message_should_be_delivered_to_a_local_subscriber()
 		{
 			using(NmsEndpoint endpoint = new NmsEndpoint("activemq://localhost:61616/local_test_queue"))
-			using(IServiceBus bus = new ServiceBus(endpoint))
+            using (IServiceBus bus = new ServiceBus(endpoint, null))
 			{
 				string name = "Johnson";
 				ManualResetEvent received = new ManualResetEvent(false);
@@ -44,8 +44,8 @@ namespace MassTransit.ServiceBus.NMS.Tests
 		[Test]
 		public void The_Message_Should_Be_Consumed()
 		{
-			ServiceBus pub_bus = new ServiceBus(new NmsEndpoint("activemq://localhost:61616/published_queue"));
-			ServiceBus sub_bus = new ServiceBus(new NmsEndpoint("activemq://localhost:61616/subscribed_queue"));
+            ServiceBus pub_bus = new ServiceBus(new NmsEndpoint("activemq://localhost:61616/published_queue"), null);
+			ServiceBus sub_bus = new ServiceBus(new NmsEndpoint("activemq://localhost:61616/subscribed_queue"), null);
 			pub_bus.SubscriptionCache.Add(new Subscription(typeof (SimpleMessage).FullName, new Uri("activemq://localhost:61616/subscribed_queue")));
 			sub_bus.SubscriptionCache.Add(new Subscription(typeof (SimpleMessage).FullName, new Uri("activemq://localhost:61616/subscribed_queue")));
 

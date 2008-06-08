@@ -83,8 +83,8 @@ namespace MassTransit.DistributedSubscriptionCache.Tests
 			ValidateAndPurgeQueue(_serviceBusEndPoint.QueuePath);
 			ValidateAndPurgeQueue(_remoteServiceBusEndPoint.QueuePath);
 
-			_serviceBus = new ServiceBus(ServiceBusEndPoint, _cache);
-			_remoteServiceBus = new ServiceBus(RemoteServiceBusEndPoint, _remoteCache);
+			_serviceBus = new ServiceBus(ServiceBusEndPoint, null, _cache);
+			_remoteServiceBus = new ServiceBus(RemoteServiceBusEndPoint, null, _remoteCache);
 		}
 
 		public static void VerifyMessageInQueue<T>(string queuePath, T messageExample)

@@ -8,7 +8,6 @@ namespace MassTransit.ServiceBus.MSMQ.Tests
 	using log4net;
 	using NUnit.Framework;
 	using NUnit.Framework.SyntaxHelpers;
-	using Subscriptions;
 
 	public class QueueTestContext :
 		IDisposable
@@ -101,10 +100,8 @@ namespace MassTransit.ServiceBus.MSMQ.Tests
 			ValidateAndPurgeQueue(_remoteServiceBusEndPoint.QueuePath);
 			ValidateAndPurgeQueue(_subscriptionEndpoint.QueuePath);
 
-			ISubscriptionCache cache = new LocalSubscriptionCache();
-
-			_serviceBus = new ServiceBus(ServiceBusEndPoint, cache, objectBuilder);
-			_remoteServiceBus = new ServiceBus(RemoteServiceBusEndPoint, cache, objectBuilder);
+			_serviceBus = new ServiceBus(ServiceBusEndPoint, objectBuilder);
+			_remoteServiceBus = new ServiceBus(RemoteServiceBusEndPoint, objectBuilder);
 		}
 
 		public static void VerifyMessageInQueue<T>(string queuePath, T messageItem)
