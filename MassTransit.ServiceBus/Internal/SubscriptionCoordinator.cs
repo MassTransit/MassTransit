@@ -16,7 +16,7 @@ namespace MassTransit.ServiceBus.Internal
 	using System.Collections.Generic;
 	using Subscriptions;
 
-	public class SubscriptionCoordinator
+	public class SubscriptionCoordinator : IDisposable
 	{
 		private static readonly Type _consumerType = typeof (Consumes<>.All);
 		private static readonly Type _correlatedConsumerType = typeof (Consumes<>.For<>);
@@ -133,6 +133,15 @@ namespace MassTransit.ServiceBus.Internal
 
 				return info;
 			}
+		}
+
+		public void Dispose()
+		{
+			foreach (SubscriptionTypeInfo info in _types.Values)
+			{
+				info.Dispose();
+			}
+			_types.Clear();
 		}
 	}
 

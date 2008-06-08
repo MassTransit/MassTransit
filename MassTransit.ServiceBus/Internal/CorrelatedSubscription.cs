@@ -89,5 +89,11 @@ namespace MassTransit.ServiceBus.Internal
 				_dispatcher.Detach<TMessage>(_componentConsumer);
 			}
 		}
+
+		public void Dispose()
+		{
+			_dispatcher.Dispose();
+			_componentConsumer.Dispose();
+		}
 	}
 }

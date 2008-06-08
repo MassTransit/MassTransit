@@ -12,7 +12,9 @@
 /// specific language governing permissions and limitations under the License.
 namespace MassTransit.ServiceBus.Internal
 {
-	public interface ISubscriptionTypeInfo
+	using System;
+
+	public interface ISubscriptionTypeInfo : IDisposable
 	{
 		void Subscribe<T>(T component) where T : class;
 		void Unsubscribe<T>(T component) where T : class;
