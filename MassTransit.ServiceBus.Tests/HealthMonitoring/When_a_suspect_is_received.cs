@@ -27,11 +27,42 @@ namespace MassTransit.ServiceBus.Tests.HealthMonitoring
                 Expect.Call(delegate
                                 {
                                     ep.Send(new Ping(inv.CorrelationId), new TimeSpan(0,3,0));
-                                });
+                                }).Constraints(Is.Matching<Ping>(delegate(Ping msg)
+                                {
+                                    return msg.CorrelationId.Equals(inv.CorrelationId);
+                                }), Is.Anything());
             }
             using(Playback())
             {
                 inv.Consume(new Suspect(new Uri("msmq://localhost/test")));
+            }
+        }
+
+        [Test]
+        public void An_investigation_should_happen_and_pong_received()
+        {
+            IServiceBus bus = StrictMock<IServiceBus>();
+            IEndpointResolver er = DynamicMock<IEndpointResolver>();
+            IEndpoint ep = DynamicMock<IEndpoint>();
+            Investigator inv = new Investigator(bus, er);
+            Uri u = new Uri("msmq://localhost/test");
+            using (Record())
+            {
+                Expect.Call(er.Resolve(u)).Return(ep);
+                Expect.Call(delegate
+                                {
+                                    ep.Send(new Ping(inv.CorrelationId), new TimeSpan(0, 3, 0));
+                                }).Constraints(Is.Matching<Ping>(delegate(Ping msg)
+                                {
+                                    return msg.CorrelationId.Equals(inv.CorrelationId);
+                                }), Is.Anything());
+            }
+            using (Playback())
+            {
+                inv.Consume(new Suspect(u));
+                Assert.IsTrue(inv.Enabled);
+                inv.Consume(new Pong(inv.CorrelationId, u));
+                Assert.IsFalse(inv.Enabled);
             }
         }
 
