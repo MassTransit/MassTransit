@@ -5,7 +5,7 @@ namespace MassTransit.ServiceBus.Tests.HealthMonitoring
     using MassTransit.ServiceBus.HealthMonitoring.Messages;
     using MassTransit.ServiceBus.Subscriptions;
     using NUnit.Framework;
-    using NUnit.Framework.SyntaxHelpers;
+    using Rhino.Mocks;
 
     [TestFixture]
     public class When_an_endpoint_goes_down :
@@ -15,13 +15,24 @@ namespace MassTransit.ServiceBus.Tests.HealthMonitoring
         public void An_Investigation_should_happen()
         {
             IEndpoint ep = StrictMock<IEndpoint>();
-            ISubscriptionCache sc = DynamicMock<ISubscriptionCache>();
+            ISubscriptionCache sc = new LocalSubscriptionCache();
             IObjectBuilder ob = StrictMock<IObjectBuilder>();
 
             ServiceBus bus = new ServiceBus(ep, sc, ob);
             HealthService hs = new HealthService(bus);
+            hs.Start();
 
-            bus.Dispatch(new Suspect(new Uri("msmq://localhost/test")));
+            using(Record())
+            {
+                Expect.Call(ep.Receive(new TimeSpan(0,0,10), delegate { return true; }))
+                    .Return(new Suspect(new Uri("msmq://localhost/test")))
+                    .IgnoreArguments();
+            }
+            using(Playback())
+            {
+                bus.Dispatch(new Suspect(new Uri("msmq://localhost/test")));
+            }
+            
             
 
         }
