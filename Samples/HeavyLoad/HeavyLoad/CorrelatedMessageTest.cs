@@ -8,17 +8,16 @@ namespace HeavyLoad
 	public class CorrelatedMessageTest : IDisposable
 	{
 		private readonly ManualResetEvent _finishedEvent = new ManualResetEvent(false);
-		private readonly string _queueUri = "msmq://localhost/test_servicebus";
 		private int _attempts = 1000;
 		private IServiceBus _bus;
 		private MsmqEndpoint _localEndpoint;
 		private int _successes;
 		private int _timeouts;
-		private readonly TestAppContainer _container;
+        private readonly CorrelatedTestContainer _container;
 
 		public CorrelatedMessageTest()
 		{
-			_container = new TestAppContainer();
+			_container = new CorrelatedTestContainer();
 
 		//	MsmqHelper.ValidateAndPurgeQueue(_localEndpoint.QueuePath);
 
