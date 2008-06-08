@@ -88,6 +88,7 @@ namespace MassTransit.ServiceBus.Internal
             dict.Add("uri", uri);
             return _objectBuilder.Build<IEndpoint>(dict);
         }
+
 		public IEndpoint Resolve2(Uri uri)
 		{
 			Check.Parameter(uri).WithMessage("Uri").IsNotNull();
