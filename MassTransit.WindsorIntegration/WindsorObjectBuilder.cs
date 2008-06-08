@@ -2,16 +2,16 @@ namespace MassTransit.WindsorIntegration
 {
     using System;
     using System.Collections;
-    using Castle.Windsor;
+    using Castle.MicroKernel;
     using ServiceBus;
 
     public class WindsorObjectBuilder :
         IObjectBuilder
     {
-        private readonly WindsorContainer _container;
+        private readonly IKernel _container;
 
 
-        public WindsorObjectBuilder(WindsorContainer container)
+        public WindsorObjectBuilder(IKernel container)
         {
             _container = container;
         }
@@ -39,7 +39,7 @@ namespace MassTransit.WindsorIntegration
 
         public void Release<T>(T obj)
         {
-            _container.Release(obj);
+            //TODO: Hmmm just the Kernel
         }
     }
 }

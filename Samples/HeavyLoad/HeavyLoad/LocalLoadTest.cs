@@ -1,11 +1,16 @@
 namespace HeavyLoad
 {
 	using System;
+	using System.Collections;
 	using System.Threading;
+	using Castle.Facilities.FactorySupport;
+	using Castle.Windsor;
 	using MassTransit.ServiceBus;
+	using MassTransit.WindsorIntegration;
 
-	public abstract class LocalLoadTest : IDisposable
+    public abstract class LocalLoadTest : IDisposable
 	{
+	    private IWindsorContainer _container;
 		private const int _repeatCount = 5000;
 		private readonly ManualResetEvent _completeEvent = new ManualResetEvent(false);
 		private readonly ManualResetEvent _responseEvent = new ManualResetEvent(false);
@@ -15,9 +20,16 @@ namespace HeavyLoad
 		private IEndpoint _localEndpoint;
 		private int _responseCounter = 0;
 
-		public LocalLoadTest(IEndpoint endpoint)
+		public LocalLoadTest(Uri listenAt)
 		{
-			_localEndpoint = endpoint;
+		    _container = new WindsorContainer("castle.xml");
+		    _container.AddFacility("factory.support", new FactorySupportFacility());
+		    _container.AddFacility("masstransit",new MassTransitFacility());
+
+		    IDictionary args = new Hashtable();
+            args.Add("endpointToListenOn", listenAt);
+
+		    _localEndpoint = _container.Resolve<IEndpoint>(args);
 			_bus = new ServiceBus(_localEndpoint);
 		}
 

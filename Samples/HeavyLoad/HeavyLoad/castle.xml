@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+
+<configuration>
+
+  <facilities>
+
+    <facility id="masstransit" listenAt="msmq://localhost/bob" subscriptionsAt="msmq://localhost/bill">
+      <transports>
+        <transport>MassTransit.ServiceBus.MSMQ.MsmqEndpoint, MassTransit.ServiceBus.MSMQ</transport>
+        <transport>MassTransit.ServiceBus.NMS.NmsEndpoint, MassTransit.ServiceBus.NMS</transport>
+      </transports>
+    </facility>
+
+  </facilities>
+
+</configuration>
