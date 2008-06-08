@@ -95,8 +95,8 @@ namespace MassTransit.ServiceBus.Tests
 
 			_subscriptionCache = new LocalSubscriptionCache();
 
-			_serviceBus = new ServiceBus(ServiceBusEndPoint, _subscriptionCache);
-			_remoteServiceBus = new ServiceBus(RemoteServiceBusEndPoint, _subscriptionCache);
+			_serviceBus = new ServiceBus(ServiceBusEndPoint, null, _subscriptionCache);
+			_remoteServiceBus = new ServiceBus(RemoteServiceBusEndPoint, null,  _subscriptionCache);
 
 			SetupResult.For(_subscriptionEndpoint.Uri).Return(new Uri("local://" + Environment.MachineName.ToLowerInvariant() + "/test_subscriptions"));
 			SetupResult.For(_serviceBusEndPoint.Uri).Return(new Uri("local://" + Environment.MachineName.ToLowerInvariant() + "/test_servicebus"));
