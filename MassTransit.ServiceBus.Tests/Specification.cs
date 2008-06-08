@@ -37,7 +37,7 @@ namespace MassTransit.ServiceBus.Tests
 		{
 			return _mocks.DynamicMock<T>();
 		}
-        protected T StaticMock<T>()
+        protected T StrictMock<T>()
         {
             return _mocks.CreateMock<T>();
         }

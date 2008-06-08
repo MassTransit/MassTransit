@@ -9,7 +9,6 @@ namespace MassTransit.ServiceBus.MSMQ.Tests
 	[TestFixture]
 	public class When_creating_the_service_bus_with_a_MessageQueueEndpoint
 	{
-		#region Setup/Teardown
 
 		[SetUp]
 		public void SetUp()
@@ -22,8 +21,6 @@ namespace MassTransit.ServiceBus.MSMQ.Tests
 		{
 			_mocks = null;
 		}
-
-		#endregion
 
 		private MockRepository _mocks;
 

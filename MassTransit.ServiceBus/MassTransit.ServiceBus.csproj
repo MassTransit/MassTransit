@@ -55,6 +55,7 @@
     <Compile Include="Internal\ComponentDispatcher.cs" />
     <Compile Include="Internal\CorrelatedPublication.cs" />
     <Compile Include="Internal\CorrelatedSubscription.cs" />
+    <Compile Include="Internal\IEndpointResolver.cs" />
     <Compile Include="Internal\IPublicationTypeInfo.cs" />
     <Compile Include="Internal\ISubscriptionTypeInfo.cs" />
     <Compile Include="Internal\MessageTypeDispatcher.cs" />

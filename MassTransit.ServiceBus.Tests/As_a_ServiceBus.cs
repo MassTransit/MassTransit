@@ -1,6 +1,7 @@
 namespace MassTransit.ServiceBus.Tests
 {
 	using System;
+	using System.Collections;
 	using System.Collections.Generic;
 	using MassTransit.ServiceBus.Subscriptions;
 	using NUnit.Framework;
@@ -43,13 +44,17 @@ namespace MassTransit.ServiceBus.Tests
 			List<Subscription> subs = new List<Subscription>();
 			subs.Add(sub);
 
+		    IObjectBuilder obj = StrictMock<IObjectBuilder>();
+		    IEndpoint dep = DynamicMock<IEndpoint>();
+            //TODO: Hacky
 			using (Record())
 			{
 				Expect.Call(_mockSubscriptionCache.List("MassTransit.ServiceBus.Tests.PingMessage")).Return(subs);
+			    Expect.Call(obj.Build<IEndpoint>(new Hashtable())).Return(dep).IgnoreArguments();
 			}
 			using (Playback())
 			{
-				ServiceBus bus = new ServiceBus(mockEndpoint, _mockSubscriptionCache);
+				ServiceBus bus = new ServiceBus(mockEndpoint, _mockSubscriptionCache, obj);
 				bus.Publish(new PingMessage());
 			}
 		}

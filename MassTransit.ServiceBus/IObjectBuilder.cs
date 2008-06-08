@@ -13,8 +13,9 @@
 namespace MassTransit.ServiceBus
 {
 	using System;
+	using System.Collections;
 
-	public interface IObjectBuilder
+    public interface IObjectBuilder
 	{
 		/// <summary>
 		/// Build an object of the specified type
@@ -27,9 +28,13 @@ namespace MassTransit.ServiceBus
 		/// Build an object of the specified type
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
-		/// <param name="type"></param>
 		/// <returns></returns>
-		T Build<T>(Type type) where T : class;
+		T Build<T>() where T : class;
+
+
+        T Build<T>(Type component) where T : class;
+
+	    T Build<T>(IDictionary arguments);
 
 		/// <summary>
 		/// Releases an object back to the container

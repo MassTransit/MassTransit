@@ -14,9 +14,9 @@ namespace MassTransit.ServiceBus.Tests.HealthMonitoring
         [Test]
         public void An_Investigation_should_happen()
         {
-            IEndpoint ep = StaticMock<IEndpoint>();
+            IEndpoint ep = StrictMock<IEndpoint>();
             ISubscriptionCache sc = DynamicMock<ISubscriptionCache>();
-            IObjectBuilder ob = StaticMock<IObjectBuilder>();
+            IObjectBuilder ob = StrictMock<IObjectBuilder>();
 
             ServiceBus bus = new ServiceBus(ep, sc, ob);
             HealthService hs = new HealthService(bus);
