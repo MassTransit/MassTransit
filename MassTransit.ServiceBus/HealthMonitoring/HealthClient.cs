@@ -16,6 +16,7 @@ namespace MassTransit.ServiceBus.HealthMonitoring
     using Messages;
 
     public class HealthClient :
+        Consumes<Ping>.All,
         IHostedService //, Publishes<Heartbeat>
     {
         private readonly IServiceBus _bus;
@@ -52,6 +53,11 @@ namespace MassTransit.ServiceBus.HealthMonitoring
             _bus.Publish(new Heartbeat(_timeInSeconds, _bus.Endpoint.Uri));
         }
 
+
+        public void Consume(Ping message)
+        {
+            _bus.Publish(new Pong(message.CorrelationId, _bus.Endpoint.Uri));
+        }
 
         public void Dispose()
         {

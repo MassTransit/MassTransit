@@ -80,5 +80,27 @@ namespace MassTransit.ServiceBus.Tests.HealthMonitoring
 
 
         }
+
+        [Test]
+        public void Should_respond_to_pings_by_publishing_pongs()
+        {
+            Guid id = Guid.NewGuid();
+            Ping message = new Ping(id);
+
+            using(Record())
+            {
+                Expect.Call(delegate { _mockBus.Publish(new Pong(id, u)); })
+                    .Constraints(Is.Matching<Pong>(delegate(Pong msg)
+                                                 {
+                                                     return msg.CorrelationId.Equals(id) &&
+                                                            msg.EndpointUri.Equals(u);
+                                                 }));
+            }
+            using(Playback())
+            {
+                HealthClient hc = new HealthClient(_mockBus);
+                hc.Consume(message);    
+            }
+        }
     }
 }
