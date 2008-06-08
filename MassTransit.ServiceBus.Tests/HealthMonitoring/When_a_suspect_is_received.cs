@@ -7,6 +7,7 @@ namespace MassTransit.ServiceBus.Tests.HealthMonitoring
     using MassTransit.ServiceBus.HealthMonitoring.Messages;
     using NUnit.Framework;
     using Rhino.Mocks;
+    using Rhino.Mocks.Constraints;
 
     [TestFixture]
     public class When_a_suspect_is_received :
@@ -50,8 +51,17 @@ namespace MassTransit.ServiceBus.Tests.HealthMonitoring
                 Expect.Call(delegate
                                 {
                                     ep.Send(new Ping(inv.CorrelationId), new TimeSpan(0, 3, 0));
-                                });
-                Expect.Call(delegate { bus.Publish(new DownEndpoint(u)); }).Do(new Publish(delegate {evt.Set();})).IgnoreArguments();
+                                }).Constraints(Is.Matching<Ping>(delegate(Ping msg)
+                                {
+                                    return msg.CorrelationId.Equals(inv.CorrelationId);
+                                }), Is.Anything());
+                Expect.Call(delegate { bus.Publish(new DownEndpoint(u)); })
+                    .Constraints(Is.Matching<DownEndpoint>(delegate(DownEndpoint msg)
+                                                               {
+                                                                   if (msg.Endpoint != u) return false;
+                                                                   evt.Set();
+                                                                   return true;
+                                                               }));
             }
             using (Playback())
             {
