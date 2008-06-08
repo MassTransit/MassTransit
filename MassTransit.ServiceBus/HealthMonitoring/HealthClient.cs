@@ -12,13 +12,14 @@
 /// specific language governing permissions and limitations under the License.
 namespace MassTransit.ServiceBus.HealthMonitoring
 {
+    using System.Timers;
     using Messages;
 
     public class HealthClient :
         IHostedService //, Publishes<Heartbeat>
     {
         private readonly IServiceBus _bus;
-        private readonly System.Timers.Timer _timer;
+        private readonly Timer _timer;
         private readonly int _timeInSeconds;
         private readonly int _timeInMilliseconds;
 
@@ -32,6 +33,7 @@ namespace MassTransit.ServiceBus.HealthMonitoring
             _timeInMilliseconds = seconds*1000;
             _timer = new System.Timers.Timer(_timeInMilliseconds);
             _timer.Elapsed += Beat;
+            _timer.AutoReset = true;
         }
 
 
@@ -55,6 +57,12 @@ namespace MassTransit.ServiceBus.HealthMonitoring
         {
             _timer.Elapsed -= Beat;
             _timer.Dispose();
+        }
+
+
+        public bool Enabled
+        {
+            get { return _timer.Enabled; }
         }
     }
 }
