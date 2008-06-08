@@ -16,6 +16,7 @@ namespace MassTransit.ServiceBus.Subscriptions
 	using System;
 	using System.Collections.Generic;
 	using Exceptions;
+	using Internal;
 	using log4net;
 	using Messages;
 
@@ -30,11 +31,16 @@ namespace MassTransit.ServiceBus.Subscriptions
 		private readonly IServiceBus _bus;
 		private readonly ISubscriptionCache _cache;
 		private readonly ISubscriptionRepository _repository;
+	    private readonly IEndpointResolver _endpointResolver;
+	    private readonly IList<Uri> _updaters;
 
-		public SubscriptionService(IServiceBus bus, ISubscriptionCache subscriptionCache, ISubscriptionRepository subscriptionRepository)
+
+		public SubscriptionService(IServiceBus bus, ISubscriptionCache subscriptionCache, ISubscriptionRepository subscriptionRepository, IEndpointResolver endpointResolver)
 		{
+		    _updaters = new List<Uri>();
 			_bus = bus;
-			_cache = subscriptionCache;
+		    _endpointResolver = endpointResolver;
+		    _cache = subscriptionCache;
 			_repository = subscriptionRepository;
 		}
 
@@ -93,7 +99,7 @@ namespace MassTransit.ServiceBus.Subscriptions
 
 				_repository.Save(message.Subscription);
 
-                //TODO: Rebroadcast this change
+			    ForwardToUpdaters(message);
 			}
 			catch (Exception ex)
 			{
@@ -109,6 +115,8 @@ namespace MassTransit.ServiceBus.Subscriptions
                 _cache.Remove(message.Subscription);
 
                 _repository.Remove(message.Subscription);
+
+                ForwardToUpdaters(message);
             }
             catch (Exception ex)
             {
@@ -116,19 +124,29 @@ namespace MassTransit.ServiceBus.Subscriptions
             }
         }
 
+        private void ForwardToUpdaters(object message)
+        {
+            IList<Uri> copy = new List<Uri>(_updaters);
+
+            foreach (Uri uri in copy)
+            {
+                IEndpoint ep = _endpointResolver.Resolve(uri);
+                ep.Send(message);
+            }
+        }
 
 	    public void Consume(CacheUpdateRequest message)
 	    {
 	        try
 			{
-				// TODO RegisterSenderForUpdates(ctx.Envelope);
+				_updaters.Add(message.RequestingUri);
 
 				IList<Subscription> subscriptions = RemoveNHibernateness(_cache.List());
 
 				CacheUpdateResponse response = new CacheUpdateResponse(subscriptions);
 
-                //TODO: Its really just one endpoint that needs it
-                _bus.Publish(response);
+			    IEndpoint ep = _endpointResolver.Resolve(message.RequestingUri);
+                ep.Send(response);
 			}
 			catch (Exception ex)
 			{
@@ -155,6 +173,7 @@ namespace MassTransit.ServiceBus.Subscriptions
 	    public void Consume(CancelSubscriptionUpdates message)
 	    {
             //um, not implemented :)
+	        _updaters.Remove(message.RequestingUri);
 	    }
 	}
 }

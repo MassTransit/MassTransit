@@ -17,5 +17,18 @@ namespace MassTransit.ServiceBus.Subscriptions.Messages
     [Serializable]
     public class CacheUpdateRequest
     {
+        private readonly Uri _RequestingUri;
+
+
+        public CacheUpdateRequest(Uri requstingUri)
+        {
+            _RequestingUri = requstingUri;
+        }
+
+
+        public Uri RequestingUri
+        {
+            get { return _RequestingUri; }
+        }
     }
 }

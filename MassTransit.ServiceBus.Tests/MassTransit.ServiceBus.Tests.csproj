@@ -74,7 +74,6 @@
     <Compile Include="ObjectDispatcher_Specs.cs" />
     <Compile Include="Specification.cs" />
     <Compile Include="Subscriptions\As_a_SubscriptionService.cs" />
-    <Compile Include="Subscriptions\As_Local_Subscription_Storage.cs" />
     <Compile Include="IntegrationTests\As_Msmq_Storage.cs" />
     <Compile Include="IntegrationTests\MsmqStorage_Idempotent_Tests.cs" />
     <Compile Include="IntegrationTests\When_a_message_is_received.cs" />
@@ -93,6 +92,8 @@
     <Compile Include="MessageQueueEndpoint_MeetsCriteria.cs" />
     <Compile Include="Subscriptions\SubscriptionCoordinator_Specs.cs" />
     <Compile Include="Subscriptions\When_a_handler_unsubscribes_from_the_service_bus.cs" />
+    <Compile Include="Subscriptions\When_managing_subscriptions_locally.cs" />
+    <Compile Include="Subscriptions\When_managing_subscriptions_remotely.cs" />
     <Compile Include="Subscriptions\When_using_the_subscription_manager.cs" />
     <Compile Include="Subscriptions\When_Working_With_Subscriptions.cs" />
     <Compile Include="Subscriptions\When_Working_With_Subscription_Entries.cs" />

@@ -37,6 +37,11 @@ namespace MassTransit.ServiceBus.Subscriptions
 			_cache.Add(message.Subscription);
 		}
 
+		public void Consume(RemoveSubscription message)
+		{
+			_cache.Remove(message.Subscription);
+		}
+
 		public void Consume(CacheUpdateResponse message)
 		{
 			foreach (Subscription sub in message.Subscriptions)
@@ -45,10 +50,6 @@ namespace MassTransit.ServiceBus.Subscriptions
 			}
 		}
 
-		public void Consume(RemoveSubscription message)
-		{
-			_cache.Remove(message.Subscription);
-		}
 
 		public void Dispose()
 		{
@@ -64,12 +65,12 @@ namespace MassTransit.ServiceBus.Subscriptions
 
 			_serviceBus.Subscribe(this);
 
-			_subscriptionServiceEndpoint.Send(new CacheUpdateRequest());
+			_subscriptionServiceEndpoint.Send(new CacheUpdateRequest(this._serviceBus.Endpoint.Uri));
 		}
 
 		public void Stop()
 		{
-			_subscriptionServiceEndpoint.Send(new CancelSubscriptionUpdates());
+			_subscriptionServiceEndpoint.Send(new CancelSubscriptionUpdates(_serviceBus.Endpoint.Uri));
 
 			_serviceBus.Unsubscribe(this);
 

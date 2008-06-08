@@ -2,50 +2,58 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
 {
 	using System;
 	using System.Collections.Generic;
+	using Internal;
 	using MassTransit.ServiceBus.Subscriptions;
 	using MassTransit.ServiceBus.Subscriptions.Messages;
 	using NUnit.Framework;
 	using Rhino.Mocks;
 
 	[TestFixture]
-	public class As_a_SubscriptionService
+	public class As_a_SubscriptionService :
+        Specification
 	{
-		private MockRepository mocks;
 		private IServiceBus mockBus;
-		private ISubscriptionCache cache;
+		private ISubscriptionCache mockCache;
 		private ISubscriptionRepository mockRepository;
 		private SubscriptionService srv;
+	    private IEndpointResolver mockEndpointResolver;
 
 		private AddSubscription msgAdd;
 		private RemoveSubscription msgRem;
 		private CacheUpdateRequest msgUpdate;
 		private CancelSubscriptionUpdates msgCancel;
 
-		[SetUp]
-		public void I_want_to()
-		{
-			mocks = new MockRepository();
-			mockBus = mocks.CreateMock<IServiceBus>();
-			mockRepository = mocks.CreateMock<ISubscriptionRepository>();
+	    private Uri uri = new Uri("queue:\\bob");
 
-			msgAdd = new AddSubscription("bob", new Uri("queue:\\bob"));
-			msgRem = new RemoveSubscription("bob", new Uri("queue:\\bob"));
-			msgUpdate = new CacheUpdateRequest();
-			msgCancel = new CancelSubscriptionUpdates();
+        protected override void Before_each()
+        {
+			mockBus = StrictMock<IServiceBus>();
+			mockRepository = StrictMock<ISubscriptionRepository>();
+            mockEndpointResolver = StrictMock<IEndpointResolver>();
+            mockCache = DynamicMock<ISubscriptionCache>();
 
+            IEndpoint mockEndpoint = DynamicMock<IEndpoint>();
+            SetupResult.For(mockBus.Endpoint).Return(mockEndpoint);
+            SetupResult.For(mockEndpoint.Uri).Return(new Uri("queue://bus"));
 
-			cache = new LocalSubscriptionCache();
-			srv = new SubscriptionService(mockBus, cache, mockRepository);
-		}
+			msgAdd = new AddSubscription("bob", uri);
+			msgRem = new RemoveSubscription("bob", uri);
+			msgUpdate = new CacheUpdateRequest(uri);
+			msgCancel = new CancelSubscriptionUpdates(uri);
+
+		
+			srv = new SubscriptionService(mockBus, mockCache, mockRepository, mockEndpointResolver);
+        }
+
 
 		[Test]
 		public void add_subscriptions_from_messages()
 		{
-			using (mocks.Record())
+			using (Record())
 			{
 				Expect.Call(delegate { mockRepository.Save(msgAdd.Subscription); });
 			}
-			using (mocks.Playback())
+			using (Playback())
 			{
 				srv.Consume(msgAdd);
 			}
@@ -63,25 +71,43 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
 		{
 			IEnumerable<Subscription> enumer = new List<Subscription>();
 
-			using (mocks.Record())
+			using (Record())
 			{
 				Expect.Call(mockRepository.List()).Return(enumer);
 				Expect.Call(delegate { mockBus.Subscribe(srv); });
 			}
-			using (mocks.Playback())
+			using (Playback())
 			{
 				srv.Start();
 			}
 		}
 
+	    [Test]
+	    public void be_startable_with_stored_subscriptions()
+	    {
+            IList<Subscription> enumer = new List<Subscription>();
+            enumer.Add(new Subscription("bob", uri));
+
+            using (Record())
+            {
+                Expect.Call(mockRepository.List()).Return(enumer);
+                Expect.Call(delegate { mockCache.Add(null); }).IgnoreArguments();
+                Expect.Call(delegate { mockBus.Subscribe(srv); });
+            }
+            using (Playback())
+            {
+                srv.Start();
+            }
+	    }
+
 		[Test]
 		public void be_stopable()
 		{
-			using (mocks.Record())
+			using (Record())
 			{
 				Expect.Call(delegate { mockBus.Unsubscribe(srv); });
 			}
-			using (mocks.Playback())
+			using (Playback())
 			{
 				srv.Stop();
 			}
@@ -90,11 +116,11 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
 		[Test]
 		public void remove_subscriptions_from_messages()
 		{
-			using (mocks.Record())
+			using (Record())
 			{
 				Expect.Call(delegate { mockRepository.Remove(msgRem.Subscription); });
 			}
-			using (mocks.Playback())
+			using (Playback())
 			{
 				srv.Consume(msgRem);
 			}
@@ -103,12 +129,17 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
 		[Test]
 		public void respond_to_cache_updates()
 		{
-			using (mocks.Record())
+		    IEndpoint ep = DynamicMock<IEndpoint>();
+
+			using (Record())
 			{
-			    Expect.Call(delegate { this.mockBus.Publish<CacheUpdateResponse>(null); }).IgnoreArguments();
+			    Expect.Call(mockCache.List()).Return(new List<Subscription>());
+
+			    Expect.Call(mockEndpointResolver.Resolve(uri)).Return(ep);
+                Expect.Call(delegate { ep.Send<CacheUpdateResponse>(null); }).IgnoreArguments();
                 
 			}
-			using (mocks.Playback())
+			using (Playback())
 			{
 				srv.Consume(msgUpdate);
 			}
@@ -117,13 +148,31 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
 		[Test]
 		public void respond_to_update_cancel()
 		{
-			using (mocks.Record())
+			using (Record())
 			{
 			}
-			using (mocks.Playback())
+			using (Playback())
 			{
 				srv.Consume(msgCancel);
 			}
 		}
+
+	    [Test]
+	    public void Calling_dispose_twice_should_be_safe()
+	    {
+            using (Record())
+            {
+                this.mockBus.Dispose();
+                this.mockRepository.Dispose();
+                this.mockBus.Dispose();
+                this.mockRepository.Dispose();
+
+            }
+            using (Playback())
+            {
+                srv.Dispose();
+                srv.Dispose();
+            }
+	    }
 	}
 }

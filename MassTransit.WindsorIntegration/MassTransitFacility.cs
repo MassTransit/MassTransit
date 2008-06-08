@@ -1,10 +1,11 @@
 namespace MassTransit.WindsorIntegration
 {
     using System;
+    using System.Collections;
     using Castle.Core.Configuration;
+    using Castle.MicroKernel;
     using Castle.MicroKernel.Facilities;
     using Castle.MicroKernel.Registration;
-    using Castle.Windsor;
     using MassTransit.ServiceBus.HealthMonitoring;
     using MassTransit.ServiceBus.Internal;
     using MassTransit.ServiceBus.Subscriptions;
@@ -13,34 +14,50 @@ namespace MassTransit.WindsorIntegration
     public class MassTransitFacility :
         AbstractFacility
     {
-        private IWindsorContainer _container;
-
         protected override void Init()
         {
             string _listenUri = this.FacilityConfig.Attributes["listenAt"];
             string _subscriptionUri = this.FacilityConfig.Attributes["subscriptionsAt"];
             ConfigurationCollection _transports = this.FacilityConfig.Children["transports"].Children;
 
-
-            _container = this.Kernel.Resolve<IWindsorContainer>();
-
-
             foreach (IConfiguration transport in _transports)
             {
                 Type t = Type.GetType(transport.Value, true, true);
-                _container.AddComponent("transport." + t.Name, typeof (IEndpoint), t);
+                this.Kernel.AddComponent("transport." + t.Name, typeof (IEndpoint), t);
             }
 
-            _container.Register(
+            this.Kernel.AddComponentInstance("kernel", typeof(IKernel), this.Kernel);
+            this.Kernel.Register(
                 Component.For<ISubscriptionCache>().ImplementedBy<LocalSubscriptionCache>(),
                 Component.For<IObjectBuilder>().ImplementedBy<WindsorObjectBuilder>(),
-                Component.For<IServiceBus>().ImplementedBy<ServiceBus>()
-                    .Parameters(Parameter.ForKey("endpointToListenOn").Eq(_listenUri)),
-                Component.For<IEndpointResolver>().ImplementedBy<EndpointResolver>(),
-                AddStartable<HealthClient>(),
-                AddStartable<SubscriptionClient>()
-                    .Parameters(Parameter.ForKey("subscriptionServiceEndpoint").Eq(_subscriptionUri))
+                Component.For<IEndpointResolver>().ImplementedBy<EndpointResolver>().Named("endpoint.factory"),
+                Component.For<IEndpoint>()
+                    .AddAttributeDescriptor("factoryId", "endpoint.factory")
+                    .AddAttributeDescriptor("factoryCreate", "Resolve"),
+                AddStartable<HealthClient>()
                 );
+
+
+            //TODO: Hack
+            IDictionary args = new Hashtable();
+            args.Add("uri", new Uri(_listenUri));
+
+            IServiceBus bus = new ServiceBus(this.Kernel.Resolve<IEndpoint>(args),
+                                             this.Kernel.Resolve<ISubscriptionCache>(),
+                                             this.Kernel.Resolve<IObjectBuilder>(),
+                                             this.Kernel.Resolve<IEndpointResolver>());
+
+            this.Kernel.AddComponentInstance("servicebus", typeof(IServiceBus), bus);
+
+
+            //TODO: Hack
+            IDictionary args2 = new Hashtable();
+            args2.Add("uri", new Uri(_subscriptionUri));
+
+            SubscriptionClient sc = new SubscriptionClient(this.Kernel.Resolve<IServiceBus>(),
+                this.Kernel.Resolve<ISubscriptionCache>(),
+                this.Kernel.Resolve<IEndpoint>(args2));
+            this.Kernel.AddComponentInstance("subscription.client", sc);
         }
 
         private static ComponentRegistration<T> AddStartable<T>()
