@@ -11,12 +11,17 @@ namespace MassTransit.ServiceBus.Tests
 	public class When_a_batch_message_arrives :
 		Specification
 	{
+	    private IObjectBuilder _builder;
+		private IEndpoint _endpoint;
+		private ServiceBus _bus;
+
 		protected override void Before_each()
 		{
+		    _builder = StrictMock<IObjectBuilder>();
 			_endpoint = DynamicMock<IEndpoint>();
 			SetupResult.For(_endpoint.Uri).Return(new Uri("msmq://localhost/queue"));
 
-			_bus = new ServiceBus(_endpoint);
+			_bus = new ServiceBus(_endpoint, _builder);
 		}
 
 		protected override void After_each()
@@ -53,8 +58,6 @@ namespace MassTransit.ServiceBus.Tests
 			Assert.That(consumer.ReceivedCount, Is.EqualTo(length));
 		}
 
-		private IEndpoint _endpoint;
-		private ServiceBus _bus;
 
 		internal class BatchConsumer : Consumes<Batch<IndividualMessage, Guid>>.Selected
 		{

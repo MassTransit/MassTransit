@@ -4,12 +4,12 @@ namespace MassTransit.ServiceBus.Tests
 	using System.Threading;
 	using NUnit.Framework;
 	using NUnit.Framework.SyntaxHelpers;
-	using Rhino.Mocks;
 
 	[TestFixture]
-	public class When_A_Message_Is_Received_On_The_Service_Bus
+	public class When_A_Message_Is_Received_On_The_Service_Bus :
+        Specification
 	{
-		private MockRepository _mocks;
+	    private IObjectBuilder _builder;
 		private ServiceBus _serviceBus;
 		private IEndpoint _mockServiceBusEndPoint;
 		private bool _received = false;
@@ -30,27 +30,24 @@ namespace MassTransit.ServiceBus.Tests
 			}
 		}
 
-		[SetUp]
-		public void SetUp()
-		{
-			_mocks = new MockRepository();
-			_mockServiceBusEndPoint = _mocks.DynamicMock<IEndpoint>();
-			_serviceBus = new ServiceBus(_mockServiceBusEndPoint);
-		}
+        protected override void Before_each()
+        {
+            _mockServiceBusEndPoint = DynamicMock<IEndpoint>();
+            _builder = DynamicMock<IObjectBuilder>();
+            _serviceBus = new ServiceBus(_mockServiceBusEndPoint, _builder);
+        }
 
-		[TearDown]
-		public void TearDown()
-		{
-			_mocks = null;
-			_serviceBus = null;
-			_mockServiceBusEndPoint = null;
-		}
+        protected override void After_each()
+        {
+            _serviceBus = null;
+            _mockServiceBusEndPoint = null;
+        }
 
 
 		[Test]
 		public void An_Event_Handler_Should_Be_Called()
 		{
-			_mocks.ReplayAll();
+			ReplayAll();
 
 			Action<IMessageContext<PingMessage>> handler = delegate { _received = true; };
 			_serviceBus.Subscribe(handler);
@@ -63,7 +60,7 @@ namespace MassTransit.ServiceBus.Tests
 		[Test]
 		public void Dispatching_a_message_asynchronously_should_Dispatch_the_message()
 		{
-			_mocks.ReplayAll();
+			ReplayAll();
 
 			ManualResetEvent received = new ManualResetEvent(false);
 
@@ -78,7 +75,7 @@ namespace MassTransit.ServiceBus.Tests
 		[Test]
 		public void Dispatching_a_message_asynchronously_to_an_object_should_Dispatch_the_message()
 		{
-			_mocks.ReplayAll();
+			ReplayAll();
 
 			ManualResetEvent received = new ManualResetEvent(false);
 
@@ -93,7 +90,7 @@ namespace MassTransit.ServiceBus.Tests
 		[Test]
 		public void If_there_are_no_subscriptions_the_message_should_be_ignored()
 		{
-			_mocks.ReplayAll();
+			ReplayAll();
 
 			_serviceBus.Dispatch(_message);
 

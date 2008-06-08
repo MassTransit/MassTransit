@@ -12,7 +12,8 @@ namespace MassTransit.ServiceBus.MSMQ.Tests
 		public void The_exception_should_not_disrupt_the_flow_of_messages()
 		{
 			MsmqEndpoint endpoint = "msmq://localhost/test_servicebus";
-			ServiceBus bus = new ServiceBus(endpoint);
+		    IObjectBuilder obj = null;
+			ServiceBus bus = new ServiceBus(endpoint, obj);
 
 			CrashingService service = new CrashingService();
 

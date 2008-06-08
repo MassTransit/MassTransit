@@ -12,7 +12,7 @@ namespace MassTransit.ServiceBus.Tests
         protected override void Before_each()
         {
             mockServiceBusEndPoint = DynamicMock<IEndpoint>();
-            _serviceBus = new ServiceBus(mockServiceBusEndPoint);
+            _serviceBus = new ServiceBus(mockServiceBusEndPoint, null);
 
             SetupResult.For(mockServiceBusEndPoint.Uri).Return(new Uri("msmq://localhost/test_servicebus"));
 
