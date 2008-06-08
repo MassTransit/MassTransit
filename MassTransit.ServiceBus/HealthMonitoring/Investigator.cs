@@ -80,5 +80,10 @@ namespace MassTransit.ServiceBus.HealthMonitoring
             get { return _correlationId; }
         }
 
+
+        public bool Enabled
+        {
+            get { return _timer.Enabled; }
+        }
     }
 }
