@@ -55,6 +55,8 @@
     <Compile Include="As_a_ServiceBus.cs" />
     <Compile Include="HealthMonitoring\MonitorInfoSpecs.cs" />
     <Compile Include="HealthMonitoring\When_a_suspect_is_received.cs" />
+    <Compile Include="HealthMonitoring\When_monitoring_health.cs" />
+    <Compile Include="HealthMonitoring\When_monitoring_heartbeats.cs" />
     <Compile Include="LocalSubscriptionCache_Specs.cs" />
     <Compile Include="ConsumerDispatcher_Specs.cs" />
     <Compile Include="ConsumesSelected_Specs.cs" />

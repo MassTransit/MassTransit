@@ -19,12 +19,17 @@ namespace MassTransit.ServiceBus.HealthMonitoring
     {
         private readonly IServiceBus _bus;
         private readonly System.Timers.Timer _timer;
-        private readonly int _timeInSeconds = 3;
-        private readonly int _timeInMilliseconds = 3*1000;
+        private readonly int _timeInSeconds;
+        private readonly int _timeInMilliseconds;
 
-        public HealthClient(IServiceBus bus)
+        public HealthClient(IServiceBus bus) : this(bus, 3)
+        {
+        }
+        public HealthClient(IServiceBus bus, int seconds)
         {
             _bus = bus;
+            _timeInSeconds = seconds;
+            _timeInMilliseconds = seconds*1000;
             _timer = new System.Timers.Timer(_timeInMilliseconds);
             _timer.Elapsed += Beat;
         }
