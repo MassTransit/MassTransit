@@ -1,11 +1,9 @@
 namespace HeavyLoad
 {
 	using System;
-	using System.IO;
+	using Correlated;
+	using Load;
 	using log4net;
-	using log4net.Appender;
-	using log4net.Layout;
-	using log4net.Repository.Hierarchy;
 
 	internal class Program
 	{
@@ -23,9 +21,9 @@ namespace HeavyLoad
 			RunLocalMsmqLoadTest();
             //RunLocalActiveMqLoadTest();
 
-			Console.WriteLine("Waiting for next test...");
+			//Console.WriteLine("Waiting for next test...");
 
-			RunCorrelatedMessageTest();
+			//RunCorrelatedMessageTest();
 
 			Console.WriteLine("End of line.");
 			//Console.ReadLine();
@@ -66,20 +64,6 @@ namespace HeavyLoad
 
 			Console.WriteLine("Correlated Message Test: ");
 			Console.WriteLine(stopWatch.ToString());
-		}
-
-
-
-		private static void AddConsoleAppender()
-		{
-			ConsoleAppender appender = new ConsoleAppender();
-
-			ILayout layout = new PatternLayout("%-5p %d{yyyy-MM-dd hh:mm:ss} %logger - %m%n");
-			
-			appender.Layout = layout;
-			appender.ActivateOptions();
-
-			((Hierarchy)LogManager.GetRepository()).Root.AddAppender(appender);
 		}
 
 	}

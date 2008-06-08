@@ -1,4 +1,4 @@
-namespace HeavyLoad
+namespace HeavyLoad.Load
 {
     using Castle.Facilities.FactorySupport;
     using Castle.Windsor;
