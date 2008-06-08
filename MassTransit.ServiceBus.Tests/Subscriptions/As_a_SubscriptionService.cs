@@ -16,14 +16,10 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
 		private ISubscriptionRepository mockRepository;
 		private SubscriptionService srv;
 
-		private IMessageContext<AddSubscription> msgCxtAdd;
-		private IMessageContext<RemoveSubscription> msgCxtRem;
 		private AddSubscription msgAdd;
 		private RemoveSubscription msgRem;
 		private CacheUpdateRequest msgUpdate;
-		private IMessageContext<CacheUpdateRequest> msgCxtUpdate;
 		private CancelSubscriptionUpdates msgCancel;
-		private IMessageContext<CancelSubscriptionUpdates> msgCxtCancel;
 
 		[SetUp]
 		public void I_want_to()
@@ -33,18 +29,9 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
 			mockRepository = mocks.CreateMock<ISubscriptionRepository>();
 
 			msgAdd = new AddSubscription("bob", new Uri("queue:\\bob"));
-			msgCxtAdd = mocks.CreateMock<IMessageContext<AddSubscription>>();
 			msgRem = new RemoveSubscription("bob", new Uri("queue:\\bob"));
-			msgCxtRem = mocks.CreateMock<IMessageContext<RemoveSubscription>>();
 			msgUpdate = new CacheUpdateRequest();
-			msgCxtUpdate = mocks.CreateMock<IMessageContext<CacheUpdateRequest>>();
 			msgCancel = new CancelSubscriptionUpdates();
-			msgCxtCancel = mocks.CreateMock<IMessageContext<CancelSubscriptionUpdates>>();
-
-			SetupResult.For(msgCxtAdd.Message).Return(msgAdd);
-			SetupResult.For(msgCxtRem.Message).Return(msgRem);
-			SetupResult.For(msgCxtUpdate.Message).Return(msgUpdate);
-			SetupResult.For(msgCxtCancel.Message).Return(msgCancel);
 
 
 			cache = new LocalSubscriptionCache();
@@ -60,7 +47,7 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
 			}
 			using (mocks.Playback())
 			{
-				srv.HandleAddSubscription(msgCxtAdd);
+				srv.Consume(msgAdd);
 			}
 		}
 
@@ -79,10 +66,7 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
 			using (mocks.Record())
 			{
 				Expect.Call(mockRepository.List()).Return(enumer);
-				Expect.Call(delegate { mockBus.Subscribe<CacheUpdateRequest>(delegate { }); }).IgnoreArguments();
-				Expect.Call(delegate { mockBus.Subscribe<AddSubscription>(delegate { }); }).IgnoreArguments();
-				Expect.Call(delegate { mockBus.Subscribe<RemoveSubscription>(delegate { }); }).IgnoreArguments();
-				Expect.Call(delegate { mockBus.Subscribe<CancelSubscriptionUpdates>(delegate { }); }).IgnoreArguments();
+				Expect.Call(delegate { mockBus.Subscribe(srv); });
 			}
 			using (mocks.Playback())
 			{
@@ -95,10 +79,7 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
 		{
 			using (mocks.Record())
 			{
-				Expect.Call(delegate { mockBus.Unsubscribe<CacheUpdateRequest>(delegate { }); }).IgnoreArguments();
-				Expect.Call(delegate { mockBus.Unsubscribe<AddSubscription>(delegate { }); }).IgnoreArguments();
-				Expect.Call(delegate { mockBus.Unsubscribe<RemoveSubscription>(delegate { }); }).IgnoreArguments();
-				Expect.Call(delegate { mockBus.Unsubscribe<CancelSubscriptionUpdates>(delegate { }); }).IgnoreArguments();
+				Expect.Call(delegate { mockBus.Unsubscribe(srv); });
 			}
 			using (mocks.Playback())
 			{
@@ -115,7 +96,7 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
 			}
 			using (mocks.Playback())
 			{
-				srv.HandleRemoveSubscription(msgCxtRem);
+				srv.Consume(msgRem);
 			}
 		}
 
@@ -124,11 +105,12 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
 		{
 			using (mocks.Record())
 			{
-				Expect.Call(delegate { msgCxtUpdate.Reply(null); }).IgnoreArguments();
+			    Expect.Call(delegate { this.mockBus.Publish<CacheUpdateResponse>(null); }).IgnoreArguments();
+                
 			}
 			using (mocks.Playback())
 			{
-				srv.HandleCacheUpdateRequest(msgCxtUpdate);
+				srv.Consume(msgUpdate);
 			}
 		}
 
@@ -140,7 +122,7 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
 			}
 			using (mocks.Playback())
 			{
-				srv.HandleCancelSubscriptionUpdates(msgCxtCancel);
+				srv.Consume(msgCancel);
 			}
 		}
 	}

@@ -26,9 +26,9 @@ namespace MassTransit.ServiceBus.HealthMonitoring
         private Suspect _suspectMessage;
         private readonly Ping _pingMessage;
         private Pong _pongMessage;
-        private EndpointResolver _resolver;
+        private IEndpointResolver _resolver;
 
-        public Investigator(IServiceBus bus, EndpointResolver resolver)
+        public Investigator(IServiceBus bus, IEndpointResolver resolver)
         {
             _bus = bus;
             _resolver = resolver;

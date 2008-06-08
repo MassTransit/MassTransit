@@ -29,7 +29,7 @@ namespace MassTransit.ServiceBus.Tests
 		{
 			Uri uri = new Uri("msmq://localhost/test_servicebus");
 
-			ISubscriptionCache cache = StaticMock<ISubscriptionCache>();
+			ISubscriptionCache cache = StrictMock<ISubscriptionCache>();
 			IEndpoint endpoint = DynamicMock<IEndpoint>();
 			IServiceBus bus = DynamicMock<IServiceBus>();
 			SetupResult.For(bus.Endpoint).Return(endpoint);

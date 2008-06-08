@@ -1,26 +1,39 @@
 namespace MassTransit.ServiceBus.Tests
 {
 	using System;
+	using System.Collections;
 	using Internal;
 	using NUnit.Framework;
+	using Rhino.Mocks;
 
-	[TestFixture]
+    [TestFixture]
 	public class As_an_EndpointResolver : 
         Specification
 	{
 		[Test]
 		public void Be_able_to_resolve_endpoints()
 		{
-			EndpointResolver res = new EndpointResolver();
+            //TODO: need a better test
+		    IObjectBuilder obj = StrictMock<IObjectBuilder>();
+			EndpointResolver res = new EndpointResolver(obj);
 			res.Initialize();
+		    IEndpoint mock = DynamicMock<IEndpoint>();
+            using(Record())
+            {
+                Expect.Call(obj.Build<IEndpoint>(new Hashtable())).Return(mock).IgnoreArguments();
+            }
+            using(Playback())
+            {
+                
 			IEndpoint ep = res.Resolve(new Uri("msmq://localhost/test"));
 			Assert.IsNotNull(ep);
+            }
 		}
 
 		[Test]
 		public void Be_intializable()
 		{
-			EndpointResolver res = new EndpointResolver();
+			EndpointResolver res = new EndpointResolver(new ActivatorObjectBuilder());
 			res.Initialize();
 		}
 	}

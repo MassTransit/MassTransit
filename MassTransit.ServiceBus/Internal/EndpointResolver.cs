@@ -13,6 +13,7 @@
 namespace MassTransit.ServiceBus.Internal
 {
 	using System;
+	using System.Collections;
 	using System.Collections.Generic;
 	using System.Reflection;
 	using System.Text;
@@ -20,18 +21,24 @@ namespace MassTransit.ServiceBus.Internal
 	using log4net;
 	using Util;
 
-    //TODO: Containerize
-	public class EndpointResolver
+	public class EndpointResolver : 
+        IEndpointResolver
 	{
 		private static readonly ILog _log = LogManager.GetLogger(typeof (EndpointResolver));
 		private readonly Dictionary<Uri, IEndpoint> _cache = new Dictionary<Uri, IEndpoint>();
 
 		private readonly List<Type> _endpointTypes = new List<Type>();
 		private readonly Dictionary<string, Type> _schemeTypes = new Dictionary<string, Type>();
+	    private readonly IObjectBuilder _objectBuilder;
 		private Assembly[] _assemblies;
-		private bool _initialized = false;
 
-		public void Initialize()
+
+	    public EndpointResolver(IObjectBuilder objectBuilder)
+	    {
+	        _objectBuilder = objectBuilder;
+	    }
+
+	    public void Initialize()
 		{
 			lock (_endpointTypes)
 			{
@@ -72,13 +79,16 @@ namespace MassTransit.ServiceBus.Internal
                         throw new EndpointException(null, sb.ToString(), ex);
                     }
                 }
-
-
-			    _initialized = true;
 			}
 		}
 
-		public IEndpoint Resolve(Uri uri)
+	    public IEndpoint Resolve(Uri uri)
+        {
+            IDictionary dict = new Hashtable();
+            dict.Add("uri", uri);
+            return _objectBuilder.Build<IEndpoint>(dict);
+        }
+		public IEndpoint Resolve2(Uri uri)
 		{
 			Check.Parameter(uri).WithMessage("Uri").IsNotNull();
 

@@ -22,7 +22,7 @@ namespace MassTransit.ServiceBus.Tests.Formatters
     	protected override void Before_each()
         {
             formatter = new JsonBodyFormatter();
-            mockBody = StaticMock<IFormattedBody>();
+            mockBody = StrictMock<IFormattedBody>();
         }
 
         protected override void After_each()

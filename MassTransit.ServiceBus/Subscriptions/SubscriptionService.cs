@@ -20,7 +20,11 @@ namespace MassTransit.ServiceBus.Subscriptions
 	using Messages;
 
 	public class SubscriptionService :
-		IHostedService
+		IHostedService,
+        Consumes<CacheUpdateRequest>.All,
+        Consumes<AddSubscription>.All,
+        Consumes<RemoveSubscription>.All,
+        Consumes<CancelSubscriptionUpdates>.All
 	{
 		private static readonly ILog _log = LogManager.GetLogger(typeof (SubscriptionService));
 		private readonly IServiceBus _bus;
@@ -63,10 +67,7 @@ namespace MassTransit.ServiceBus.Subscriptions
 			}
 
             //TODO: Change to the new component based model?
-			_bus.Subscribe<CacheUpdateRequest>(HandleCacheUpdateRequest);
-			_bus.Subscribe<AddSubscription>(HandleAddSubscription);
-			_bus.Subscribe<RemoveSubscription>(HandleRemoveSubscription);
-            _bus.Subscribe<CancelSubscriptionUpdates>(HandleCancelSubscriptionUpdates);
+            _bus.Subscribe(this);
 
             if(_log.IsInfoEnabled)
                 _log.Info("Subscription Service Started");
@@ -77,22 +78,20 @@ namespace MassTransit.ServiceBus.Subscriptions
             if (_log.IsInfoEnabled)
                 _log.Info("Subscription Service Stopping");
 
-			_bus.Unsubscribe<CacheUpdateRequest>(HandleCacheUpdateRequest);
-			_bus.Unsubscribe<AddSubscription>(HandleAddSubscription);
-			_bus.Unsubscribe<RemoveSubscription>(HandleRemoveSubscription);
-            _bus.Unsubscribe<CancelSubscriptionUpdates>(HandleCancelSubscriptionUpdates);
+            _bus.Unsubscribe(this);
 
             if (_log.IsInfoEnabled)
                 _log.Info("Subscription Service Stopped");
 		}
 
-		public void HandleAddSubscription(IMessageContext<AddSubscription> ctx)
-		{
-			try
-			{
-				_cache.Add(ctx.Message.Subscription);
 
-				_repository.Save(ctx.Message.Subscription);
+	    public void Consume(AddSubscription message)
+	    {
+	        try
+			{
+				_cache.Add(message.Subscription);
+
+				_repository.Save(message.Subscription);
 
                 //TODO: Rebroadcast this change
 			}
@@ -100,25 +99,27 @@ namespace MassTransit.ServiceBus.Subscriptions
 			{
 				_log.Error("Exception handling subscription change", ex);
 			}
-		}
+	    }
 
-		public void HandleRemoveSubscription(IMessageContext<RemoveSubscription> ctx)
-		{
-			try
-			{
-				_cache.Remove(ctx.Message.Subscription);
 
-				_repository.Remove(ctx.Message.Subscription);
-			}
-			catch (Exception ex)
-			{
-				_log.Error("Exception handling subscription change", ex);
-			}
-		}
+        public void Consume(RemoveSubscription message)
+        {
+            try
+            {
+                _cache.Remove(message.Subscription);
 
-		public void HandleCacheUpdateRequest(IMessageContext<CacheUpdateRequest> ctx)
-		{
-			try
+                _repository.Remove(message.Subscription);
+            }
+            catch (Exception ex)
+            {
+                _log.Error("Exception handling subscription change", ex);
+            }
+        }
+
+
+	    public void Consume(CacheUpdateRequest message)
+	    {
+	        try
 			{
 				// TODO RegisterSenderForUpdates(ctx.Envelope);
 
@@ -126,18 +127,19 @@ namespace MassTransit.ServiceBus.Subscriptions
 
 				CacheUpdateResponse response = new CacheUpdateResponse(subscriptions);
 
-				ctx.Reply(response);
+                //TODO: Its really just one endpoint that needs it
+                _bus.Publish(response);
 			}
 			catch (Exception ex)
 			{
 				_log.Error("Exception handling cache update request", ex);
 			}
-		}
+	    }
 
         /// <summary>
         /// The NHibernate objects don't serialize, so we rip that off here.
         /// </summary>
-        private IList<Subscription> RemoveNHibernateness(IList<Subscription> subs)
+        private static IList<Subscription> RemoveNHibernateness(IList<Subscription> subs)
         {
             IList<Subscription> result = new List<Subscription>();
 
@@ -149,9 +151,10 @@ namespace MassTransit.ServiceBus.Subscriptions
             return result;
         }
 
-        public void HandleCancelSubscriptionUpdates(IMessageContext<CancelSubscriptionUpdates> ctx)
-        {
+
+	    public void Consume(CancelSubscriptionUpdates message)
+	    {
             //um, not implemented :)
-        }
+	    }
 	}
 }

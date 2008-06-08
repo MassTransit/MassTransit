@@ -13,27 +13,26 @@ namespace MassTransit.ServiceBus.MSMQ.Tests
 	public class QueueTestContext :
 		IDisposable
 	{
-		protected static readonly ILog _log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
-
+		private static readonly ILog _log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 		private readonly MsmqEndpoint _remoteServiceBusEndPoint = @"msmq://localhost/test_remoteservicebus";
-
 		private readonly MsmqEndpoint _serviceBusEndPoint = @"msmq://localhost/test_servicebus";
 		private readonly MsmqEndpoint _subscriptionEndpoint = @"msmq://localhost/test_subscriptions";
+
 		private ServiceBus _remoteServiceBus;
 		private IServiceBus _serviceBus;
+	    private IObjectBuilder _mockObjectBuilder;
 
-		public QueueTestContext(string remoteMachineName)
+		public QueueTestContext(IObjectBuilder objectBuilder) : this(objectBuilder, "localhost")
+		{
+		}
+		public QueueTestContext(IObjectBuilder objectBuilder, string remoteMachineName)
 		{
 			_remoteServiceBusEndPoint = "msmq://" + remoteMachineName + "/test_remoteservicebus";
 			_serviceBusEndPoint = "msmq://" + remoteMachineName + "/test_servicebus";
 
-			Initialize();
+			Initialize(objectBuilder);
 		}
 
-		public QueueTestContext()
-		{
-			Initialize();
-		}
 
 		public IServiceBus ServiceBus
 		{
@@ -51,7 +50,13 @@ namespace MassTransit.ServiceBus.MSMQ.Tests
 			}
 		}
 
-		public IMsmqEndpoint RemoteServiceBusEndPoint
+
+	    public IObjectBuilder MockObjectBuilder
+	    {
+	        get { return _mockObjectBuilder; }
+	    }
+
+	    public IMsmqEndpoint RemoteServiceBusEndPoint
 		{
 			get { return _remoteServiceBusEndPoint; }
 		}
@@ -82,7 +87,7 @@ namespace MassTransit.ServiceBus.MSMQ.Tests
 
 		#endregion
 
-		private void Initialize()
+		private void Initialize(IObjectBuilder objectBuilder)
 		{
 			StackTrace stackTrace = new StackTrace();
 			StackFrame stackFrame = stackTrace.GetFrame(1);
@@ -98,8 +103,8 @@ namespace MassTransit.ServiceBus.MSMQ.Tests
 
 			ISubscriptionCache cache = new LocalSubscriptionCache();
 
-			_serviceBus = new ServiceBus(ServiceBusEndPoint, cache);
-			_remoteServiceBus = new ServiceBus(RemoteServiceBusEndPoint, cache);
+			_serviceBus = new ServiceBus(ServiceBusEndPoint, cache, objectBuilder);
+			_remoteServiceBus = new ServiceBus(RemoteServiceBusEndPoint, cache, objectBuilder);
 		}
 
 		public static void VerifyMessageInQueue<T>(string queuePath, T messageItem)

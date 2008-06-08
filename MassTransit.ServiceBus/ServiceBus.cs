@@ -14,7 +14,6 @@ namespace MassTransit.ServiceBus
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Reflection;
 	using Internal;
 	using log4net;
 	using Subscriptions;
@@ -28,11 +27,10 @@ namespace MassTransit.ServiceBus
 	public class ServiceBus :
 		IServiceBus
 	{
-		private static readonly Type _correlatedBy = typeof (CorrelatedBy<>);
 		private static readonly ILog _log;
 
 		private readonly ManagedThreadPool<object> _asyncDispatcher;
-		private readonly EndpointResolver _endpointResolver = new EndpointResolver();
+		private readonly IEndpointResolver _endpointResolver;
 		private readonly IEndpoint _endpointToListenOn;
 		private readonly MessageTypeDispatcher _messageDispatcher;
 		private readonly IObjectBuilder _objectBuilder;
@@ -63,14 +61,20 @@ namespace MassTransit.ServiceBus
 		/// <summary>
 		/// Uses the default object builder
 		/// </summary>
-		public ServiceBus(IEndpoint endpointToListenOn, ISubscriptionCache subscriptionCache) : this(endpointToListenOn, subscriptionCache, new ActivatorObjectBuilder())
+		public ServiceBus(IEndpoint endpointToListenOn, ISubscriptionCache subscriptionCache) 
+            : this(endpointToListenOn, subscriptionCache, new ActivatorObjectBuilder())
 		{
 		}
+
+	    public ServiceBus(IEndpoint endpointToListenOn, ISubscriptionCache subscriptionCache, IObjectBuilder objectBuilder)
+	        : this(endpointToListenOn, subscriptionCache, objectBuilder, new EndpointResolver(objectBuilder))
+	    {
+	    }
 
 		/// <summary>
 		/// Uses the specified subscription cache
 		/// </summary>
-		public ServiceBus(IEndpoint endpointToListenOn, ISubscriptionCache subscriptionCache, IObjectBuilder objectBuilder)
+		public ServiceBus(IEndpoint endpointToListenOn, ISubscriptionCache subscriptionCache, IObjectBuilder objectBuilder, IEndpointResolver endpointResolver)
 		{
 			Check.Parameter(endpointToListenOn).WithMessage("endpointToListenOn").IsNotNull();
 			Check.Parameter(subscriptionCache).WithMessage("subscriptionCache").IsNotNull();
@@ -78,16 +82,12 @@ namespace MassTransit.ServiceBus
 			_endpointToListenOn = endpointToListenOn;
 			_subscriptionCache = subscriptionCache;
 			_objectBuilder = objectBuilder;
-
+		    _endpointResolver = endpointResolver;
 
 			//TODO: Move into IObjectBuilder?
 			_messageDispatcher = new MessageTypeDispatcher();
-
 			_subscriptionCoordinator = new SubscriptionCoordinator(_messageDispatcher, this, _subscriptionCache, _objectBuilder);
-
 			_receiveThread = new ReceiveThread(this, endpointToListenOn);
-
-			//TODO: Might also benefit from IObjectBuilder.Build<T>(IDictionary arguments);
 			_asyncDispatcher = new ManagedThreadPool<object>(
 				delegate(object message) { _messageDispatcher.Consume(message); });
 		}
@@ -223,9 +223,7 @@ namespace MassTransit.ServiceBus
 			if (mode == DispatchMode.Synchronous)
 				_messageDispatcher.Consume(message);
 			else
-			{
 				_asyncDispatcher.Enqueue(message);
-			}
 		}
 
 		public bool Accept(object obj)
