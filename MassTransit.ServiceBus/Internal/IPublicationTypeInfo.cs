@@ -12,10 +12,11 @@
 /// specific language governing permissions and limitations under the License.
 namespace MassTransit.ServiceBus.Internal
 {
+	using System;
 	using System.Collections.Generic;
 	using Subscriptions;
 
-	public interface IPublicationTypeInfo
+	public interface IPublicationTypeInfo : IDisposable
 	{
 		IList<Subscription> GetConsumers<T>(T message) where T : class;
 	}

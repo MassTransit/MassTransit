@@ -101,9 +101,13 @@ namespace MassTransit.ServiceBus
 		{
 			_receiveThread.Dispose();
 			_asyncDispatcher.Dispose();
+			_subscriptionCoordinator.Dispose();
 			_subscriptionCache.Dispose();
 			_messageDispatcher.Dispose();
 			_endpointToListenOn.Dispose();
+
+			if(_poisonEndpoint != null)
+				_poisonEndpoint.Dispose();
 		}
 
 		/// <summary>

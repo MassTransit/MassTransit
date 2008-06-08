@@ -46,5 +46,9 @@ namespace MassTransit.ServiceBus.Internal
 
 			return _cache.List(_messageType.FullName);
 		}
+
+		public void Dispose()
+		{
+		}
 	}
 }

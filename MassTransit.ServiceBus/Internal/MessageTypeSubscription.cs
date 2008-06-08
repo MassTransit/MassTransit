@@ -85,5 +85,9 @@ namespace MassTransit.ServiceBus.Internal
 					_cache.Remove(new Subscription(typeof (TMessage).FullName, _bus.Endpoint.Uri));
 			}
 		}
+
+		public void Dispose()
+		{
+		}
 	}
 }

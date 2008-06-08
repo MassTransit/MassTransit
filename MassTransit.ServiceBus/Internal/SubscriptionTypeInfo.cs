@@ -77,5 +77,14 @@ namespace MassTransit.ServiceBus.Internal
 
 			_publicationType = publicationTypeInfo;
 		}
+
+		public void Dispose()
+		{
+			foreach (ISubscriptionTypeInfo subscriptionType in _subscriptionTypes)
+			{
+				subscriptionType.Dispose();
+			}
+			_subscriptionTypes.Clear();
+		}
 	}
 }
