@@ -38,7 +38,7 @@ namespace MassTransit.ServiceBus.Tests
         protected override void Before_each()
         {
 			_mockServiceBusEndPoint = DynamicMock<IEndpoint>();
-			_serviceBus = new ServiceBus(_mockServiceBusEndPoint);
+			_serviceBus = new ServiceBus(_mockServiceBusEndPoint, DynamicMock<IObjectBuilder>());
 
 			_consumer = new TestConsumer<RequestMessage>(delegate { _passed.Set(); });
             ReplayAll();

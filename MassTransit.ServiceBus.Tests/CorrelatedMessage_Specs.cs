@@ -11,11 +11,17 @@ namespace MassTransit.ServiceBus.Tests
 	public class When_a_correlated_message_is_received :
         Specification
 	{
+	    private IObjectBuilder obj;
+
+        protected override void Before_each()
+        {
+            obj = StrictMock<IObjectBuilder>();
+        }
 		[Test]
 		public void A_type_should_be_registered()
 		{
 			MessageTypeDispatcher messageDispatcher = new MessageTypeDispatcher();
-			SubscriptionCoordinator coordinator = new SubscriptionCoordinator(messageDispatcher, null, null, new ActivatorObjectBuilder());
+			SubscriptionCoordinator coordinator = new SubscriptionCoordinator(messageDispatcher, null, null, obj);
 
 			CorrelatedController controller = new CorrelatedController(messageDispatcher, coordinator);
 
@@ -36,7 +42,7 @@ namespace MassTransit.ServiceBus.Tests
 			SetupResult.For(endpoint.Uri).Return(uri);
 
 			MessageTypeDispatcher messageDispatcher = new MessageTypeDispatcher();
-			SubscriptionCoordinator coordinator = new SubscriptionCoordinator(messageDispatcher, bus, cache, new ActivatorObjectBuilder());
+			SubscriptionCoordinator coordinator = new SubscriptionCoordinator(messageDispatcher, bus, cache, obj);
 			CorrelatedController controller = new CorrelatedController(messageDispatcher, coordinator);
 
 			using(Record())

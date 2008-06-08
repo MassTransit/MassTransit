@@ -8,21 +8,20 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
 
 	[TestFixture]
 	public class When_a_handler_unsubscribes_from_the_service_bus
+        : Specification
 	{
-		[SetUp]
-		public void Setup()
-		{
+	    private IObjectBuilder _builder;
+
+        protected override void Before_each()
+        {
+            _builder = StrictMock<IObjectBuilder>();
 			_endpoint = _mocks.DynamicMock<IEndpoint>();
 			_cache = _mocks.DynamicMock<ISubscriptionCache>();
 
 
-			_bus = new ServiceBus(_endpoint, _cache);
-		}
+			_bus = new ServiceBus(_endpoint, _builder);
+        }
 
-		[TearDown]
-		public void Teardown()
-		{
-		}
 
 		[Test]
 		public void The_service_bus_should_continue_to_handle_messages_if_at_least_one_handler_is_available()

@@ -40,8 +40,9 @@ namespace MassTransit.ServiceBus.Tests
 		protected override void Before_each()
 		{
 			IEndpoint endpoint = DynamicMock<IEndpoint>();
+		    IObjectBuilder obj = StrictMock<IObjectBuilder>();
 
-			_bus = new ServiceBus(endpoint);
+			_bus = new ServiceBus(endpoint, obj);
 		}
 
 		private ServiceBus _bus;

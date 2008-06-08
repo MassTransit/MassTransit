@@ -5,14 +5,23 @@ namespace MassTransit.ServiceBus.Tests
 	using NUnit.Framework.SyntaxHelpers;
 
 	[TestFixture]
-	public class When_a_type_is_registered_with_the_dispatcher
+	public class When_a_type_is_registered_with_the_dispatcher :
+        Specification
 	{
+        IObjectBuilder builder;
+
+        protected override void Before_each()
+        {
+            builder = DynamicMock<IObjectBuilder>();
+        }
+
 		[Test]
 		public void A_new_object_should_be_created_to_handle_each_message()
 		{
-			IObjectBuilder builder = new ActivatorObjectBuilder();
+			
+		    
 
-			MessageTypeDispatcher dispatcher = new MessageTypeDispatcher();
+		    MessageTypeDispatcher dispatcher = new MessageTypeDispatcher();
 			SubscriptionCoordinator coordinator = new SubscriptionCoordinator(dispatcher, null, null, builder);
 
 			coordinator.Resolve<RequestHandler>().AddComponent();
@@ -29,8 +38,6 @@ namespace MassTransit.ServiceBus.Tests
 		[Test]
 		public void A_new_object_should_be_created_to_handle_each_message_including_selective_ones()
 		{
-			IObjectBuilder builder = new ActivatorObjectBuilder();
-
 			MessageTypeDispatcher dispatcher = new MessageTypeDispatcher();
 			SubscriptionCoordinator coordinator = new SubscriptionCoordinator(dispatcher, null, null, builder);
 

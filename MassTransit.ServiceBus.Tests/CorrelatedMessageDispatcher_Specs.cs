@@ -10,10 +10,17 @@ namespace MassTransit.ServiceBus.Tests
 	public class When_a_correlated_message_is_dispatched_through_the_message_dispatcher :
         Specification
 	{
+        private IObjectBuilder obj;
+        private MessageTypeDispatcher _dispatcher;
+        private TestMessage _message;
+        private readonly int _value = 27;
+        private SubscriptionCoordinator _coordinator;
+
 	    protected override void Before_each()
 		{
+	        obj = StrictMock<IObjectBuilder>();
 			_dispatcher = new MessageTypeDispatcher();
-	    	_coordinator = new SubscriptionCoordinator(_dispatcher, null, null, new ActivatorObjectBuilder());
+	    	_coordinator = new SubscriptionCoordinator(_dispatcher, null, null, obj);
 			_message = new TestMessage(_value);
 		}
 
@@ -182,10 +189,6 @@ namespace MassTransit.ServiceBus.Tests
 			Assert.That(consumerA.Value, Is.EqualTo(_message.Value));
 		}
 
-		private MessageTypeDispatcher _dispatcher;
-		private TestMessage _message;
-		private readonly int _value = 27;
-		private SubscriptionCoordinator _coordinator;
 
 		internal class InvalidConsumer
 		{

@@ -9,18 +9,21 @@ namespace MassTransit.ServiceBus.Tests
 	public class When_a_message_is_received_for_a_selective_consumer :
         Specification
 	{
+		private MessageTypeDispatcher _dispatcher;
+		private TestMessage _message;
+		private readonly int _value = 27;
+		private IObjectBuilder _builder;
+		private SubscriptionCoordinator _coordinator;
+
 	    protected override void Before_each()
 		{
+	        _builder = StrictMock<IObjectBuilder>();
+
 			_dispatcher = new MessageTypeDispatcher();
 	    	_coordinator = new SubscriptionCoordinator(_dispatcher, null, null, _builder);
 			_message = new TestMessage(_value);
 		}
 
-		private MessageTypeDispatcher _dispatcher;
-		private TestMessage _message;
-		private readonly int _value = 27;
-		private readonly IObjectBuilder _builder = new ActivatorObjectBuilder();
-		private SubscriptionCoordinator _coordinator;
 
 		internal class InvalidConsumer
 		{

@@ -26,7 +26,7 @@ namespace MassTransit.ServiceBus.Tests.HealthMonitoring
         [Ignore("Needs new castle object builder")]
         public void bob()
         {
-            ServiceBus bus = new ServiceBus(DynamicMock<IEndpoint>(), new LocalSubscriptionCache());
+            ServiceBus bus = new ServiceBus(DynamicMock<IEndpoint>(), DynamicMock<IObjectBuilder>());
             bus.AddComponent<HeartbeatMonitor>();
             bus.Dispatch(new Heartbeat(3, new Uri("msmq://localhost/ddd")));
         }
