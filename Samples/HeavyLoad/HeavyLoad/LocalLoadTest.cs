@@ -30,7 +30,7 @@ namespace HeavyLoad
             args.Add("endpointToListenOn", listenAt);
 
 		    _localEndpoint = _container.Resolve<IEndpoint>(args);
-			_bus = new ServiceBus(_localEndpoint);
+		    _bus = _container.Resolve<IServiceBus>();
 		}
 
 		public IServiceBus Bus

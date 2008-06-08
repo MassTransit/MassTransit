@@ -43,8 +43,8 @@ namespace MassTransit.WindsorIntegration
             args.Add("uri", new Uri(_listenUri));
 
             IServiceBus bus = new ServiceBus(this.Kernel.Resolve<IEndpoint>(args),
-                                             this.Kernel.Resolve<ISubscriptionCache>(),
                                              this.Kernel.Resolve<IObjectBuilder>(),
+                                             this.Kernel.Resolve<ISubscriptionCache>(),
                                              this.Kernel.Resolve<IEndpointResolver>());
 
             this.Kernel.AddComponentInstance("servicebus", typeof(IServiceBus), bus);

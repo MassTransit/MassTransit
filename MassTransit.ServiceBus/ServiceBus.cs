@@ -54,27 +54,19 @@ namespace MassTransit.ServiceBus
 		/// <summary>
 		/// Uses an in-memory subscription manager and the default object builder
 		/// </summary>
-		public ServiceBus(IEndpoint endpointToListenOn) : this(endpointToListenOn, new LocalSubscriptionCache())
+		public ServiceBus(IEndpoint endpointToListenOn, IObjectBuilder objectBuilder) : this(endpointToListenOn, objectBuilder, new LocalSubscriptionCache())
 		{
 		}
 
-		/// <summary>
-		/// Uses the default object builder
-		/// </summary>
-		public ServiceBus(IEndpoint endpointToListenOn, ISubscriptionCache subscriptionCache) 
-            : this(endpointToListenOn, subscriptionCache, new ActivatorObjectBuilder())
-		{
-		}
-
-	    public ServiceBus(IEndpoint endpointToListenOn, ISubscriptionCache subscriptionCache, IObjectBuilder objectBuilder)
-	        : this(endpointToListenOn, subscriptionCache, objectBuilder, new EndpointResolver(objectBuilder))
+		public ServiceBus(IEndpoint endpointToListenOn, IObjectBuilder objectBuilder, ISubscriptionCache subscriptionCache)
+	        : this(endpointToListenOn, objectBuilder, subscriptionCache, new EndpointResolver(objectBuilder))
 	    {
 	    }
 
 		/// <summary>
 		/// Uses the specified subscription cache
 		/// </summary>
-		public ServiceBus(IEndpoint endpointToListenOn, ISubscriptionCache subscriptionCache, IObjectBuilder objectBuilder, IEndpointResolver endpointResolver)
+		public ServiceBus(IEndpoint endpointToListenOn, IObjectBuilder objectBuilder, ISubscriptionCache subscriptionCache, IEndpointResolver endpointResolver)
 		{
 			Check.Parameter(endpointToListenOn).WithMessage("endpointToListenOn").IsNotNull();
 			Check.Parameter(subscriptionCache).WithMessage("subscriptionCache").IsNotNull();
