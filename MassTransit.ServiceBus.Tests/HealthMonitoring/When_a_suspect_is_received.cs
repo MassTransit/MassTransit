@@ -51,12 +51,12 @@ namespace MassTransit.ServiceBus.Tests.HealthMonitoring
                                 {
                                     ep.Send(new Ping(inv.CorrelationId), new TimeSpan(0, 3, 0));
                                 });
-                Expect.Call(delegate { bus.Publish(new DownEndpoint(u)); }).Do(new Publish(delegate {evt.Set();}));
+                Expect.Call(delegate { bus.Publish(new DownEndpoint(u)); }).Do(new Publish(delegate {evt.Set();})).IgnoreArguments();
             }
             using (Playback())
             {
                 inv.Consume(new Suspect(new Uri("msmq://localhost/test")));
-                evt.WaitOne(500, true);
+                Assert.IsTrue(evt.WaitOne(500, true));
             }
         }
 
