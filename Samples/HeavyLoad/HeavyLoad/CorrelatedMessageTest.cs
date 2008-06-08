@@ -14,14 +14,15 @@ namespace HeavyLoad
 		private MsmqEndpoint _localEndpoint;
 		private int _successes;
 		private int _timeouts;
+		private readonly TestAppContainer _container;
 
 		public CorrelatedMessageTest()
 		{
-			_localEndpoint = new MsmqEndpoint(_queueUri);
+			_container = new TestAppContainer();
 
-			MsmqHelper.ValidateAndPurgeQueue(_localEndpoint.QueuePath);
+		//	MsmqHelper.ValidateAndPurgeQueue(_localEndpoint.QueuePath);
 
-			_bus = new ServiceBus(_localEndpoint);
+			_bus = _container.Resolve<IServiceBus>("masstransit.bus");
 		}
 
 		public void Dispose()
