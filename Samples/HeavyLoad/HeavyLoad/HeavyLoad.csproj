@@ -50,17 +50,22 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CorrelatedMessageTest.cs" />
-    <Compile Include="CorrelatedTestContainer.cs" />
+    <Compile Include="Correlated\CorrelatedController.cs" />
+    <Compile Include="Correlated\CorrelatedMessageTest.cs" />
+    <Compile Include="Correlated\CorrelatedTestContainer.cs" />
+    <Compile Include="Correlated\SimpleRequestMessage.cs" />
+    <Compile Include="Correlated\SimpleRequestService.cs" />
+    <Compile Include="Correlated\SimpleResponseMessage.cs" />
     <Compile Include="GeneralMessage.cs" />
-    <Compile Include="LocalLoadTest.cs" />
-    <Compile Include="LocalMsmqLoadTest.cs" />
+    <Compile Include="Load\LocalActiveMqLoadTest.cs" />
+    <Compile Include="Load\LocalLoadTest.cs" />
+    <Compile Include="Load\LocalMsmqLoadTest.cs" />
     <Compile Include="MsmqHelper.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SimpleResponse.cs" />
+    <Compile Include="Load\SimpleResponse.cs" />
     <Compile Include="StopWatch.cs" />
-    <Compile Include="LoadTestContainer.cs" />
+    <Compile Include="Load\LoadTestContainer.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\MassTransit.DistributedSubscriptionCache\MassTransit.DistributedSubscriptionCache.csproj">
