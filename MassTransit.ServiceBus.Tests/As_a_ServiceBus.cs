@@ -32,7 +32,7 @@ namespace MassTransit.ServiceBus.Tests
 		public void When_creating_a_bus()
 		{
 			LocalSubscriptionCache cache = new LocalSubscriptionCache();
-			ServiceBus bus = new ServiceBus(DynamicMock<IEndpoint>(), cache);
+			ServiceBus bus = new ServiceBus(DynamicMock<IEndpoint>(), DynamicMock<IObjectBuilder>(), cache);
 			SubscriptionClient client = new SubscriptionClient(bus, cache, null);
 		}
 
@@ -54,7 +54,7 @@ namespace MassTransit.ServiceBus.Tests
 			}
 			using (Playback())
 			{
-				ServiceBus bus = new ServiceBus(mockEndpoint, _mockSubscriptionCache, obj);
+				ServiceBus bus = new ServiceBus(mockEndpoint, obj, _mockSubscriptionCache);
 				bus.Publish(new PingMessage());
 			}
 		}

@@ -33,7 +33,8 @@ namespace MassTransit.ServiceBus.Tests
 		[Test]
 		public void Be_intializable()
 		{
-			EndpointResolver res = new EndpointResolver(new ActivatorObjectBuilder());
+		    IObjectBuilder obj = StrictMock<IObjectBuilder>();
+			EndpointResolver res = new EndpointResolver(obj);
 			res.Initialize();
 		}
 	}

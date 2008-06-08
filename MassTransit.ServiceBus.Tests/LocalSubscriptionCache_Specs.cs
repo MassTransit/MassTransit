@@ -20,7 +20,7 @@ namespace MassTransit.ServiceBus.Tests
 			_mockEndpoint = DynamicMock<IEndpoint>();
 			_mockSubscriptionCache = DynamicMock<ISubscriptionCache>();
 			_subscription = new Subscription(typeof (PingMessage).FullName, queueUri);
-			_serviceBus = new ServiceBus(_mockEndpoint, _mockSubscriptionCache);
+			_serviceBus = new ServiceBus(_mockEndpoint, DynamicMock<IObjectBuilder>());
             
         }
 
