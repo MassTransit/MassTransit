@@ -13,6 +13,7 @@
 namespace MassTransit.Host2
 {
     using Castle.Windsor;
+    using ServiceBus;
 
     public abstract class HostedEnvironment
     {
@@ -30,7 +31,14 @@ namespace MassTransit.Host2
             get { return _container; }
         }
 
-        public abstract void Start();
+        public virtual void Start()
+        {
+            //move this into interceptor?
+            foreach (IHostedService hs in _container.ResolveAll<IHostedService>())
+            {
+                hs.Start();
+            }
+        }
         public abstract void Stop();
 
         public abstract string ServiceName {get;}
