@@ -38,12 +38,6 @@
     <Compile Include="RequestPasswordUpdate.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\..\MassTransit.ServiceBus\MassTransit.ServiceBus.csproj">
-      <Project>{90482397-6282-465E-8B86-39865FC30127}</Project>
-      <Name>MassTransit.ServiceBus</Name>
-    </ProjectReference>
-  </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

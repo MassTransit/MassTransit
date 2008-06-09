@@ -1,10 +1,9 @@
 namespace SecurityMessages
 {
     using System;
-    using MassTransit.ServiceBus;
 
     [Serializable]
-    public class RequestPasswordUpdate : IMessage
+    public class RequestPasswordUpdate
     {
         private string _newPassword;
 
