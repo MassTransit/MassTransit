@@ -8,7 +8,7 @@ namespace HeavyLoad.Correlated
     public class CorrelatedMessageTest : IDisposable
     {
         private readonly ManualResetEvent _finishedEvent = new ManualResetEvent(false);
-        private int _attempts = 10;
+        private int _attempts = 1500;
         private IServiceBus _bus;
         private MsmqEndpoint _localEndpoint;
         private int _successes;
