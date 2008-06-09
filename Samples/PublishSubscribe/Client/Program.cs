@@ -1,28 +1,21 @@
-using MassTransit.ServiceBus.MSMQ;
-
 namespace Client
 {
     using System;
+    using Castle.Windsor;
+    using log4net.Config;
     using MassTransit.ServiceBus;
-    using MassTransit.ServiceBus.Subscriptions;
+    using MassTransit.WindsorIntegration;
     using SecurityMessages;
 
     internal class Program
     {
         private static void Main(string[] args)
         {
-            log4net.Config.XmlConfigurator.Configure();
-
-            IEndpoint clientEndpoint = new MsmqEndpoint("msmq://localhost/test_client");
-            IEndpoint subscriptionManagerEndpoint = new MsmqEndpoint("msmq://localhost/test_subscriptions");
-
-
-            ServiceBus bus = new ServiceBus(clientEndpoint);
-
-            SubscriptionClient subscriptionClient = new SubscriptionClient(bus, bus.SubscriptionCache, subscriptionManagerEndpoint);
-            subscriptionClient.Start();
-
-            bus.Subscribe<PasswordUpdateComplete>(Program_MessageReceived);
+            XmlConfigurator.Configure();
+            IWindsorContainer container = new DefaultMassTransitContainer("castle.xml");
+            
+            IServiceBus bus = container.Resolve<IServiceBus>();
+            bus.AddComponent<PasswordUpdater>();
 
             Console.WriteLine(new string('-', 20));
             Console.WriteLine("New Password Client");
@@ -37,13 +30,18 @@ namespace Client
             Console.WriteLine(new string('-', 20));
             Console.ReadKey();
 
-            bus.Dispose();
+            container.Dispose();
         }
 
-        private static void Program_MessageReceived(IMessageContext<PasswordUpdateComplete> cxt)
+        public class PasswordUpdater :
+            Consumes<PasswordUpdateComplete>.All
         {
-            Console.WriteLine("Password Set!");
-            Console.WriteLine("Thank You. Press any key to exit");
+            public void Consume(PasswordUpdateComplete message)
+            {
+                Console.WriteLine("Password Set!");
+                Console.WriteLine("Thank You. Press any key to exit");
+            }
+
         }
     }
 }

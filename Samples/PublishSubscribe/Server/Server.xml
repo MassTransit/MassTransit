@@ -1,50 +1,17 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <castle>
+
+  <facilities>
+
+    <facility id="masstransit" listenAt="msmq://localhost/test_server" subscriptionsAt="msmq://localhost/mt_pubsub">
+      <transports>
+        <transport>MassTransit.ServiceBus.MSMQ.MsmqEndpoint, MassTransit.ServiceBus.MSMQ</transport>
+      </transports>
+    </facility>
+
+  </facilities>
+  
 	<components>
-
-		<component id="serverEndpoint"
-				   lifestyle="singleton"
-				   service="MassTransit.ServiceBus.IEndpoint, MassTransit.ServiceBus"
-				   type="MassTransit.ServiceBus.MSMQ.MsmqEndpoint, MassTransit.ServiceBus.MSMQ">
-			<parameters>
-				<uriString>msmq://localhost/test_server</uriString>
-			</parameters>
-		</component>
-		<component id="managerEndpoint"
-				   lifestyle="singleton"
-				   service="MassTransit.ServiceBus.IEndpoint, MassTransit.ServiceBus"
-				   type="MassTransit.ServiceBus.MSMQ.MsmqEndpoint, MassTransit.ServiceBus.MSMQ">
-			<parameters>
-				<uriString>msmq://localhost/test_subscriptions</uriString>
-			</parameters>
-		</component>
-
-		
-		
-		<component id="serviceBus"
-				   lifestyle="singleton"
-				   service="MassTransit.ServiceBus.IServiceBus, MassTransit.ServiceBus"
-				   type="MassTransit.ServiceBus.ServiceBus, MassTransit.ServiceBus">
-			<parameters>
-				<endpointToListenOn>${serverEndpoint}</endpointToListenOn>
-				<SubscriptionCache>${subscriptionCache}</SubscriptionCache>
-			</parameters>
-		</component>
-		<component id="subscriptionCache"
-				   service="MassTransit.ServiceBus.Subscriptions.ISubscriptionCache, MassTransit.ServiceBus"
-				   type="MassTransit.ServiceBus.Subscriptions.LocalSubscriptionCache, MassTransit.ServiceBus">
-		</component>
-		<component id="subsriptionClient"
-				   lifestyle="singleton"
-				   service="MassTransit.ServiceBus.IHostedService, MassTransit.ServiceBus"
-				   type="MassTransit.ServiceBus.Subscriptions.SubscriptionClient, MassTransit.ServiceBus">
-			<parameters>
-				<serviceBus>${serviceBus}</serviceBus>
-				<cache>${subscriptionCache}</cache>
-				<subscriptionServiceEndpoint>${managerEndpoint}</subscriptionServiceEndpoint>
-			</parameters>
-		</component>
-
 
 		<!-- load all of the services here : Windsore.Register(AllTypes.Of(IHostedService)-->
     <!-- use the startable facitlity -->

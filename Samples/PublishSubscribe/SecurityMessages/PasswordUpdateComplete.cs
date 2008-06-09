@@ -1,17 +1,15 @@
 namespace SecurityMessages
 {
     using System;
-    using MassTransit.ServiceBus;
 
     [Serializable]
-    public class PasswordUpdateComplete : IMessage
+    public class PasswordUpdateComplete
     {
         private int _errorCode;
 
 		private PasswordUpdateComplete()
 		{
 		}
-
 
     	public PasswordUpdateComplete(int errorCode)
         {

@@ -11,22 +11,21 @@ namespace MassTransit.WindsorIntegration
     using MassTransit.ServiceBus.Subscriptions;
     using ServiceBus;
 
-    public class MassTransitFacility :
+    public class MassTransitPubSubFacility :
         AbstractFacility
     {
         protected override void Init()
         {
             string _listenUri = this.FacilityConfig.Attributes["listenAt"];
             string _subscriptionUri = this.FacilityConfig.Attributes["subscriptionsAt"];
-            
             ConfigurationCollection _transports = this.FacilityConfig.Children["transports"].Children;
 
             foreach (IConfiguration transport in _transports)
             {
                 Type t = Type.GetType(transport.Value, true, true);
-                this.Kernel.AddComponent("transport." + t.Name, typeof (IEndpoint), t);
+                this.Kernel.AddComponent("transport." + t.Name, typeof(IEndpoint), t);
             }
-
+            
             this.Kernel.AddComponentInstance("kernel", typeof(IKernel), this.Kernel);
             this.Kernel.Register(
                 Component.For<ISubscriptionCache>().ImplementedBy<LocalSubscriptionCache>(),
