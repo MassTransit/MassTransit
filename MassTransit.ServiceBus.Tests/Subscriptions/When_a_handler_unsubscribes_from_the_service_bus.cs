@@ -19,7 +19,7 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
 			_cache = _mocks.DynamicMock<ISubscriptionCache>();
 
 
-			_bus = new ServiceBus(_endpoint, _builder);
+			_bus = new ServiceBus(_endpoint, _builder, _cache);
         }
 
 
