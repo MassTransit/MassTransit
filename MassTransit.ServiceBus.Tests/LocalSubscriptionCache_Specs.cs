@@ -14,13 +14,15 @@ namespace MassTransit.ServiceBus.Tests
 		private ISubscriptionCache _mockSubscriptionCache;
 		private readonly Uri queueUri = new Uri("msmq://localhost/test");
 		private Subscription _subscription;
+	    private IObjectBuilder _builder;
 
         protected override void Before_each()
         {
+            _builder = StrictMock<IObjectBuilder>();
 			_mockEndpoint = DynamicMock<IEndpoint>();
 			_mockSubscriptionCache = DynamicMock<ISubscriptionCache>();
 			_subscription = new Subscription(typeof (PingMessage).FullName, queueUri);
-			_serviceBus = new ServiceBus(_mockEndpoint, DynamicMock<IObjectBuilder>());
+			_serviceBus = new ServiceBus(_mockEndpoint, _builder, _mockSubscriptionCache);
             
         }
 

@@ -9,37 +9,37 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
 	using Rhino.Mocks.Constraints;
 
 	[TestFixture]
-	public class When_using_the_subscription_manager
+	public class When_using_the_subscription_manager : 
+        Specification
 	{
-		private MockRepository _mocks;
 		private IServiceBus _serviceBus;
 		private IEndpoint _managerEndpoint;
 		private ISubscriptionCache _cache;
+	    private IEndpoint _sbEndpoint;
 
-		[SetUp]
-		public void Setup()
-		{
-			_mocks = new MockRepository();
-			_cache = _mocks.DynamicMock<ISubscriptionCache>();
-			_serviceBus = _mocks.DynamicMock<IServiceBus>();
-			_managerEndpoint = _mocks.DynamicMock<IEndpoint>();
-		}
-
-		[TearDown]
-		public void Teardown()
-		{
-		}
+        protected override void Before_each()
+        {
+            _sbEndpoint = DynamicMock<IEndpoint>();
+			_cache = DynamicMock<ISubscriptionCache>();
+			_serviceBus = DynamicMock<IServiceBus>();
+			_managerEndpoint = DynamicMock<IEndpoint>();
+            
+        }
 
 		[Test]
 		public void The_client_should_request_an_update_at_startup()
 		{
-			using (_mocks.Record())
+			using (Record())
 			{
-				_managerEndpoint.Send<CacheUpdateRequest>(null);
-				LastCall.IgnoreArguments();
+			    Expect.Call(_serviceBus.Endpoint).Return(_sbEndpoint);
+			    Expect.Call(delegate
+			                    {
+			                        _managerEndpoint.Send<CacheUpdateRequest>(null);
+			                    }).IgnoreArguments();
+				
 			}
 
-			using (_mocks.Playback())
+			using (Playback())
 			{
 				using (SubscriptionClient client = new SubscriptionClient(_serviceBus, _cache, _managerEndpoint))
 				{
@@ -55,12 +55,12 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
 
 			AddSubscription change = new AddSubscription(sub);
 
-			using (_mocks.Record())
+			using (Record())
 			{
 				_cache.Add(sub);
 			}
 
-			using (_mocks.Playback())
+			using (Playback())
 			{
 				using (SubscriptionClient client = new SubscriptionClient(_serviceBus, _cache, _managerEndpoint))
 				{
@@ -77,12 +77,12 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
 
 			CacheUpdateResponse cacheUpdateResponse = new CacheUpdateResponse(subscriptions);
 
-			using (_mocks.Record())
+			using (Record())
 			{
 				_cache.Add(subscriptions[0]);
 			}
 
-			using (_mocks.Playback())
+			using (Playback())
 			{
 				using (SubscriptionClient client = new SubscriptionClient(_serviceBus, _cache, _managerEndpoint))
 				{
@@ -96,7 +96,7 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
 		{
 			SubscriptionEventArgs args = new SubscriptionEventArgs(new Subscription("Ho.Pimp, Ho", new Uri("msmq://" + Environment.MachineName.ToLower() + "/test")));
 
-			using (_mocks.Record())
+			using (Record())
 			{
 				_managerEndpoint.Send<AddSubscription>(null);
 				LastCall
@@ -110,7 +110,7 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
 					             		}));
 			}
 
-			using (_mocks.Playback())
+			using (Playback())
 			{
 				using (SubscriptionClient client = new SubscriptionClient(_serviceBus, _cache, _managerEndpoint))
 				{
