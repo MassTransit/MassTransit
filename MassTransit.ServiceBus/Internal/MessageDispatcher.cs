@@ -14,13 +14,18 @@ namespace MassTransit.ServiceBus.Internal
 {
 	using System;
 	using System.Collections.Generic;
+	using log4net;
 
 	public class MessageDispatcher<TMessage> : IMessageDispatcher<TMessage> where TMessage : class
 	{
+		private static readonly ILog _log = LogManager.GetLogger(typeof(MessageDispatcher<TMessage>));
 		private readonly List<Consumes<TMessage>.All> _consumers = new List<Consumes<TMessage>.All>();
 
 		public bool Accept(TMessage message)
 		{
+			if(_log.IsDebugEnabled && _consumers.Count == 0)
+				_log.DebugFormat("No consumers for message type {0}", typeof(TMessage));
+
 			IList<Consumes<TMessage>.All> consumers = new List<Consumes<TMessage>.All>(_consumers);
 
 			foreach (Consumes<TMessage>.All consumer in consumers)

@@ -50,17 +50,20 @@ namespace MassTransit.WindsorIntegration
 
             this.Kernel.AddComponentInstance("masstransit.bus", typeof(IServiceBus), bus);
 
+			// only give them one if they ask for one
+			if (!string.IsNullOrEmpty(_subscriptionUri))
+			{
+				//TODO: Hack
+				IDictionary args2 = new Hashtable();
+				args2.Add("uri", new Uri(_subscriptionUri));
 
-            //TODO: Hack
-            IDictionary args2 = new Hashtable();
-            args2.Add("uri", new Uri(_subscriptionUri));
-
-            SubscriptionClient sc = new SubscriptionClient(this.Kernel.Resolve<IServiceBus>(),
-                this.Kernel.Resolve<ISubscriptionCache>(),
-                this.Kernel.Resolve<IEndpoint>(args2));
-            this.Kernel.AddComponentInstance("subscription.client", sc);
-            sc.Start();
-            //TODO: Make Startable
+				SubscriptionClient sc = new SubscriptionClient(this.Kernel.Resolve<IServiceBus>(),
+				                                               this.Kernel.Resolve<ISubscriptionCache>(),
+				                                               this.Kernel.Resolve<IEndpoint>(args2));
+				this.Kernel.AddComponentInstance("subscription.client", sc);
+				sc.Start();
+				//TODO: Make Startable
+			}
         }
 
         private static ComponentRegistration<T> AddStartable<T>()
