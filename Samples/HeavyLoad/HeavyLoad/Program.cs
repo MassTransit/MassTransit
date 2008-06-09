@@ -18,7 +18,7 @@ namespace HeavyLoad
 
 			Console.WriteLine("HeavyLoad - MassTransit Load Generator");
 
-			//RunLocalMsmqLoadTest();
+			RunLocalMsmqLoadTest();
             //RunLocalActiveMqLoadTest();
 
 			//Console.WriteLine("Waiting for next test...");
@@ -26,7 +26,7 @@ namespace HeavyLoad
 			RunCorrelatedMessageTest();
 
 			Console.WriteLine("End of line.");
-			//Console.ReadLine();
+			Console.ReadLine();
 		}
 
 		private static void RunLocalMsmqLoadTest()
