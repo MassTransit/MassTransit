@@ -3,8 +3,9 @@ namespace MassTransit.ServiceBus.Tests
 	using Internal;
 	using NUnit.Framework;
 	using NUnit.Framework.SyntaxHelpers;
+	using Rhino.Mocks;
 
-	[TestFixture]
+    [TestFixture]
 	public class When_a_type_is_registered_with_the_dispatcher :
         Specification
 	{
@@ -12,47 +13,70 @@ namespace MassTransit.ServiceBus.Tests
 
         protected override void Before_each()
         {
-            builder = DynamicMock<IObjectBuilder>();
+            builder = StrictMock<IObjectBuilder>();
         }
 
 		[Test]
 		public void A_new_object_should_be_created_to_handle_each_message()
 		{
-			
-		    
+            RequestHandler rh = new RequestHandler();
+            SelectiveHandler sh = new SelectiveHandler();
+            using (Record())
+            {
+                Expect.Call(builder.Build<Consumes<TestMessage>.All>(typeof(RequestHandler))).Return(rh);
+                builder.Release<Consumes<TestMessage>.All>(rh);
+                Expect.Call(builder.Build<Consumes<TestMessage>.Selected>(typeof(SelectiveHandler))).Return(sh);
+                builder.Release<Consumes<TestMessage>.Selected>(sh);
+            }
+            using (Playback())
+            {
+                MessageTypeDispatcher dispatcher = new MessageTypeDispatcher();
+                SubscriptionCoordinator coordinator = new SubscriptionCoordinator(dispatcher, null, null, builder);
 
-		    MessageTypeDispatcher dispatcher = new MessageTypeDispatcher();
-			SubscriptionCoordinator coordinator = new SubscriptionCoordinator(dispatcher, null, null, builder);
+                coordinator.Resolve<RequestHandler>().AddComponent();
+                coordinator.Resolve<SelectiveHandler>().AddComponent();
 
-			coordinator.Resolve<RequestHandler>().AddComponent();
-			coordinator.Resolve<SelectiveHandler>().AddComponent();
+                TestMessage message = new TestMessage(27);
 
-			TestMessage message = new TestMessage(27);
+                dispatcher.Consume(message);
 
-			dispatcher.Consume(message);
-
-			Assert.That(RequestHandler.Value, Is.EqualTo(27));
-			Assert.That(SelectiveHandler.Value, Is.EqualTo(default(int)));
+                Assert.That(RequestHandler.Value, Is.EqualTo(27));
+                Assert.That(SelectiveHandler.Value, Is.EqualTo(default(int)));
+            }
 		}
 
-		[Test]
-		public void A_new_object_should_be_created_to_handle_each_message_including_selective_ones()
-		{
-			MessageTypeDispatcher dispatcher = new MessageTypeDispatcher();
-			SubscriptionCoordinator coordinator = new SubscriptionCoordinator(dispatcher, null, null, builder);
+        [Test]
+        public void A_new_object_should_be_created_to_handle_each_message_including_selective_ones()
+        {
+            RequestHandler rh = new RequestHandler();
+            SelectiveHandler sh = new SelectiveHandler();
+            using (Record())
+            {
+                Expect.Call(builder.Build<Consumes<TestMessage>.All>(typeof (RequestHandler))).Return(rh);
+                builder.Release<Consumes<TestMessage>.All>(rh);
+                Expect.Call(builder.Build<Consumes<TestMessage>.Selected>(typeof(SelectiveHandler))).Return(sh);
+                builder.Release<Consumes<TestMessage>.Selected>(sh);
+                Expect.Call(builder.Build<Consumes<TestMessage>.Selected>(typeof(SelectiveHandler))).Return(sh);
+                builder.Release<Consumes<TestMessage>.Selected>(sh);
+            }
+            using (Playback())
+            {
+                MessageTypeDispatcher dispatcher = new MessageTypeDispatcher();
+                SubscriptionCoordinator coordinator = new SubscriptionCoordinator(dispatcher, null, null, builder);
 
-			coordinator.Resolve<RequestHandler>().AddComponent();
-			coordinator.Resolve<SelectiveHandler>().AddComponent();
+                coordinator.Resolve<RequestHandler>().AddComponent();
+                coordinator.Resolve<SelectiveHandler>().AddComponent();
 
-			TestMessage message = new TestMessage(42);
+                TestMessage message = new TestMessage(42);
 
-			dispatcher.Consume(message);
+                dispatcher.Consume(message);
 
-			Assert.That(RequestHandler.Value, Is.EqualTo(42));
-			Assert.That(SelectiveHandler.Value, Is.EqualTo(42));
-		}
+                Assert.That(RequestHandler.Value, Is.EqualTo(42));
+                Assert.That(SelectiveHandler.Value, Is.EqualTo(42));
+            }
+        }
 
-		internal class RequestHandler : Consumes<TestMessage>.All
+        internal class RequestHandler : Consumes<TestMessage>.All
 		{
 			private static int _value;
 
