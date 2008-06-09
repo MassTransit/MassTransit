@@ -33,7 +33,7 @@ namespace MassTransit.WindsorIntegration
                 Component.For<IEndpointResolver>().ImplementedBy<EndpointResolver>().Named("endpoint.factory"),
                 Component.For<IEndpoint>()
                     .AddAttributeDescriptor("factoryId", "endpoint.factory")
-                    .AddAttributeDescriptor("factoryCreate", "Resolve"),
+                    .AddAttributeDescriptor("factoryCreate", "Resolve"), //TODO: is this transient or singleton?
                 AddStartable<HealthClient>()
                 );
 
@@ -58,6 +58,8 @@ namespace MassTransit.WindsorIntegration
                 this.Kernel.Resolve<ISubscriptionCache>(),
                 this.Kernel.Resolve<IEndpoint>(args2));
             this.Kernel.AddComponentInstance("subscription.client", sc);
+            sc.Start();
+            //TODO: Make Startable
         }
 
         private static ComponentRegistration<T> AddStartable<T>()
