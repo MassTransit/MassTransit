@@ -27,6 +27,7 @@ namespace MassTransit.ServiceBus.Internal
 		private readonly IMessageTypeDispatcher _dispatcher;
 		private readonly Type _messageType;
 		private readonly Consumes<TMessage>.Selected _selectiveConsumer;
+		private readonly object _changeLock = new object();
 
 		public CorrelatedSubscription(IMessageTypeDispatcher dispatcher, IServiceBus bus, ISubscriptionCache cache, IObjectBuilder builder)
 		{
@@ -69,24 +70,30 @@ namespace MassTransit.ServiceBus.Internal
 
 		public void Subscribe(Consumes<TMessage>.For<TKey> consumer)
 		{
-			_dispatcher.Attach<TMessage>(_componentConsumer);
+			lock (_changeLock)
+			{
+				_dispatcher.Attach<TMessage>(_componentConsumer);
 
-			_componentConsumer.Attach(consumer);
+				_componentConsumer.Attach(consumer);
 
-			if (_cache != null)
-				_cache.Add(new Subscription(typeof (TMessage).FullName, consumer.CorrelationId.ToString(), _bus.Endpoint.Uri));
+				if (_cache != null)
+					_cache.Add(new Subscription(typeof (TMessage).FullName, consumer.CorrelationId.ToString(), _bus.Endpoint.Uri));
+			}
 		}
 
 		public void Unsubscribe(Consumes<TMessage>.For<TKey> consumer)
 		{
-			_componentConsumer.Detach(consumer);
-
-			if (_componentConsumer.Active == false)
+			lock (_changeLock)
 			{
-				if (_cache != null)
-					_cache.Remove(new Subscription(typeof (TMessage).FullName, consumer.CorrelationId.ToString(), _bus.Endpoint.Uri));
+				_componentConsumer.Detach(consumer);
 
-				_dispatcher.Detach<TMessage>(_componentConsumer);
+				if (_componentConsumer.Active == false)
+				{
+					if (_cache != null)
+						_cache.Remove(new Subscription(typeof (TMessage).FullName, consumer.CorrelationId.ToString(), _bus.Endpoint.Uri));
+
+					_dispatcher.Detach<TMessage>(_componentConsumer);
+				}
 			}
 		}
 

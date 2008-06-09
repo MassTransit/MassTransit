@@ -14,12 +14,14 @@ namespace MassTransit.ServiceBus.Internal
 {
 	using System;
 	using System.Collections.Generic;
+	using log4net;
 
 	public class CorrelationIdDispatcher<TMessage, TKey> :
 		Consumes<TMessage>.Selected,
 		Produces<TMessage>
 		where TMessage : class, CorrelatedBy<TKey>
 	{
+		private static readonly ILog _log = LogManager.GetLogger(typeof(CorrelationIdDispatcher<TMessage,TKey>));
 		private readonly Dictionary<TKey, MessageDispatcher<TMessage>> _dispatchers = new Dictionary<TKey, MessageDispatcher<TMessage>>();
 
 		public bool Active
@@ -48,6 +50,11 @@ namespace MassTransit.ServiceBus.Internal
 			if (_dispatchers.ContainsKey(correlationId))
 			{
 				return _dispatchers[correlationId].Accept(message);
+			}
+			else
+			{
+				if(_log.IsDebugEnabled)
+					_log.DebugFormat("No consumers for message type {0} id {1}", typeof(TMessage), correlationId.ToString());
 			}
 
 			return false;
@@ -99,10 +106,6 @@ namespace MassTransit.ServiceBus.Internal
 				MessageDispatcher<TMessage> dispatcher = new MessageDispatcher<TMessage>();
 
 				_dispatchers.Add(correlationId, dispatcher);
-
-				// TODO
-				//if (_cache != null)
-				//	_cache.Add(new Subscription(typeof (TMessage).FullName, correlationId.ToString(), _bus.Endpoint.Uri));
 
 				return dispatcher;
 			}
