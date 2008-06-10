@@ -6,7 +6,8 @@ namespace Server
 	using SecurityMessages;
 
 	public class PasswordUpdateService :
-		IHostedService
+		IHostedService,
+        Consumes<RequestPasswordUpdate>.All
 	{
 		private readonly IServiceBus _serviceBus;
 
@@ -25,7 +26,7 @@ namespace Server
 		public void Start()
 		{
 			log4net.Config.XmlConfigurator.Configure(new FileInfo("server.log4net.xml"));
-			_serviceBus.Subscribe<RequestPasswordUpdate>(RequestPasswordUpdate_Received);
+			_serviceBus.Subscribe(this);
 		}
 
 		public void Stop()
@@ -36,13 +37,13 @@ namespace Server
 
 		#endregion
 
-		private static void RequestPasswordUpdate_Received(IMessageContext<RequestPasswordUpdate> cxt)
-		{
+	    public void Consume(RequestPasswordUpdate message)
+	    {
 			Console.WriteLine(new string('-', 20));
 			Console.WriteLine("Received Message");
-			Console.WriteLine(cxt.Message.NewPassword);
+			Console.WriteLine(message.NewPassword);
 			Console.WriteLine(new string('-', 20));
-			cxt.Reply(new PasswordUpdateComplete(0));
-		}
+			_serviceBus.Publish(new PasswordUpdateComplete(0));
+	    }
 	}
 }
