@@ -2,11 +2,11 @@
 <hibernate-mapping xmlns="urn:nhibernate-mapping-2.2"
 				   schema="bus"
 				   assembly="MassTransit.SubscriptionStorage"
-				   namespace="MassTransit.SubscriptionStorage">
+				   namespace="MassTransit.SubscriptionStorage"
+           default-lazy="false">
 
 	<class name="PersistentSubscription"
-		   table="Subscriptions"
-		   lazy="false">
+		   table="Subscriptions">
 
 		<id name="Id"
 			type="Int32"
