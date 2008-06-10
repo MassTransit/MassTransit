@@ -53,8 +53,21 @@
     <Reference Include="System.ServiceProcess" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\SolutionVersion.cs">
+      <Link>SolutionVersion.cs</Link>
+    </Compile>
     <Compile Include="Actions\RunAsConsoleAction.cs" />
     <Compile Include="Actions\RunAsServiceAction.cs" />
+    <Compile Include="ArgumentParsing\Argument.cs" />
+    <Compile Include="ArgumentParsing\ArgumentAttribute.cs" />
+    <Compile Include="ArgumentParsing\ArgumentMap.cs" />
+    <Compile Include="ArgumentParsing\ArgumentMapFactory.cs" />
+    <Compile Include="ArgumentParsing\ArgumentParser.cs" />
+    <Compile Include="ArgumentParsing\ArgumentTarget.cs" />
+    <Compile Include="ArgumentParsing\IArgument.cs" />
+    <Compile Include="ArgumentParsing\IArgumentMap.cs" />
+    <Compile Include="ArgumentParsing\IArgumentMapFactory.cs" />
+    <Compile Include="ArgumentParsing\IArgumentParser.cs" />
     <Compile Include="HostedEnvironment.cs" />
     <Compile Include="HostServiceInstaller.cs">
       <SubType>Component</SubType>
@@ -68,6 +81,12 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Actions\UninstallServiceAction.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\MassTransit.ServiceBus\MassTransit.ServiceBus.csproj">
+      <Project>{90482397-6282-465E-8B86-39865FC30127}</Project>
+      <Name>MassTransit.ServiceBus</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

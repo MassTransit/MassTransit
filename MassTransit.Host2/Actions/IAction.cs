@@ -14,6 +14,6 @@ namespace MassTransit.Host2.Actions
 {
     public interface IAction
     {
-        void Do(HostedEnvironment environment, string[] args);
+        void Do(HostedEnvironment environment);
     }
 }

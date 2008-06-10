@@ -39,7 +39,14 @@ namespace MassTransit.Host2
                 hs.Start();
             }
         }
-        public abstract void Stop();
+        public virtual void Stop()
+        {
+            //move this into interceptor?
+            foreach (IHostedService hs in _container.ResolveAll<IHostedService>())
+            {
+                hs.Stop();
+            }
+        }
 
         public abstract string ServiceName {get;}
         public abstract string DispalyName {get;}
