@@ -1,11 +1,10 @@
 namespace WebRequestReply.Core
 {
-	using Castle.Facilities.FactorySupport;
-	using Castle.Windsor;
 	using MassTransit.ServiceBus;
 	using MassTransit.WindsorIntegration;
 
-	public class Container : WindsorContainer
+	public class Container :
+		DefaultMassTransitContainer
 	{
 		private static readonly Container _container;
 
@@ -17,20 +16,12 @@ namespace WebRequestReply.Core
 		private Container()
 			: base("castle.xml")
 		{
-			LoadMassTransit();
-
 			Resolve<IServiceBus>().Subscribe<RequestMessage>(HandleRequestMessage);
 		}
 
 		public static Container Instance
 		{
 			get { return _container; }
-		}
-
-		private void LoadMassTransit()
-		{
-			AddFacility("factory.support", new FactorySupportFacility());
-			AddFacility("masstransit", new MassTransitFacility());
 		}
 
 		private static void HandleRequestMessage(IMessageContext<RequestMessage> ctx)

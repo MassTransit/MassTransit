@@ -39,7 +39,7 @@ namespace MassTransit.WindsorIntegration
 
         public void Release<T>(T obj)
         {
-            //TODO: Hmmm just the Kernel
+        	_container.ReleaseComponent(obj);
         }
     }
 }

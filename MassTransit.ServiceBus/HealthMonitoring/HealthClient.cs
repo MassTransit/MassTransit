@@ -27,11 +27,17 @@ namespace MassTransit.ServiceBus.HealthMonitoring
         public HealthClient(IServiceBus bus) : this(bus, 3)
         {
         }
-        public HealthClient(IServiceBus bus, int seconds)
+
+		/// <summary>
+		/// Constructs a new HealthClient object
+		/// </summary>
+		/// <param name="bus">The service bus to monitor</param>
+		/// <param name="heartbeatInterval">The heartbeat interval in seconds</param>
+        public HealthClient(IServiceBus bus, int heartbeatInterval)
         {
             _bus = bus;
-            _timeInSeconds = seconds;
-            _timeInMilliseconds = seconds*1000;
+            _timeInSeconds = heartbeatInterval;
+            _timeInMilliseconds = heartbeatInterval*1000;
             _timer = new System.Timers.Timer(_timeInMilliseconds);
             _timer.Elapsed += Beat;
             _timer.AutoReset = true;

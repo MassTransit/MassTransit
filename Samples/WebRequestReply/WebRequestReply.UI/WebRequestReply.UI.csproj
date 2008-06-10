@@ -75,6 +75,10 @@
       <Project>{90482397-6282-465E-8B86-39865FC30127}</Project>
       <Name>MassTransit.ServiceBus</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\..\MassTransit.WindsorIntegration\MassTransit.WindsorIntegration.csproj">
+      <Project>{98D5A59C-96FA-4A1B-A653-EA5A35C45FC9}</Project>
+      <Name>MassTransit.WindsorIntegration</Name>
+    </ProjectReference>
     <ProjectReference Include="..\WebRequestReply.Core\WebRequestReply.Core.csproj">
       <Project>{DFCF5AE8-6820-493C-8E40-8E6CEA74EE28}</Project>
       <Name>WebRequestReply.Core</Name>
