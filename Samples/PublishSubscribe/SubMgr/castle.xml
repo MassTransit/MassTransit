@@ -1,0 +1,36 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<castle>
+	<components>
+		<!-- load all of the services here -->
+		<component id="subscriptionManager"
+				   lifestyle="singleton"
+				   service="MassTransit.ServiceBus.IHostedService, MassTransit.ServiceBus"
+				   type="MassTransit.ServiceBus.Subscriptions.SubscriptionService, MassTransit.ServiceBus">
+		</component>
+	</components>
+
+	<facilities>
+		<facility id="nhibernate" isWeb="false" type="Castle.Facilities.NHibernateIntegration.NHibernateFacility, Castle.Facilities.NHibernateIntegration">
+			<factory id="nhibernate.factory">
+				<settings>
+					<item key="hibernate.connection.provider">
+						NHibernate.Connection.DriverConnectionProvider
+					</item>
+					<item key="hibernate.connection.driver_class">
+						NHibernate.Driver.SqlClientDriver
+					</item>
+					<item key="hibernate.connection.connection_string">
+						Database=test;Server=localhost;Integrated Security=SSPI
+					</item>
+					<item key="hibernate.dialect">
+						NHibernate.Dialect.MsSql2005Dialect
+					</item>
+				</settings>
+
+				<assemblies>
+					<assembly>MassTransit.SubscriptionStorage</assembly>
+				</assemblies>
+			</factory>
+		</facility>
+	</facilities>
+</castle>
