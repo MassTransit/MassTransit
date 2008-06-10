@@ -14,7 +14,6 @@ namespace MassTransit.Host2
 {
     using System;
     using System.Collections;
-    using System.Collections.Generic;
     using System.Configuration.Install;
     using System.Reflection;
     using System.ServiceProcess;
@@ -25,7 +24,6 @@ namespace MassTransit.Host2
         Installer
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof (HostServiceInstaller));
-        private readonly List<Assembly> _assemblies = new List<Assembly>();
         private readonly ServiceInstaller _serviceInstaller = new ServiceInstaller();
         private readonly ServiceProcessInstaller _serviceProcessInstaller = new ServiceProcessInstaller();
 
@@ -71,6 +69,7 @@ namespace MassTransit.Host2
             Installers.AddRange(new Installer[] {_serviceProcessInstaller, _serviceInstaller});            
         }
 
+
         public bool IsInstalled()
         {
             foreach (ServiceController service in ServiceController.GetServices())
@@ -81,47 +80,10 @@ namespace MassTransit.Host2
 
             return false;
         }
-
-        public override void Install(IDictionary stateSaver)
-        {
-            if (_log.IsInfoEnabled)
-                _log.InfoFormat("Installing Service {0}", _serviceInstaller.ServiceName);
-
-            base.Install(stateSaver);
-
-            if (_log.IsInfoEnabled)
-                _log.InfoFormat("Opening Registry");
-
-            using (RegistryKey system = Registry.LocalMachine.OpenSubKey("System"))
-            using (RegistryKey currentControlSet = system.OpenSubKey("CurrentControlSet"))
-            using (RegistryKey services = currentControlSet.OpenSubKey("Services"))
-            using (RegistryKey service = services.OpenSubKey(_serviceInstaller.ServiceName, true))
-            {
-                service.SetValue("Description", _serviceInstaller.Description);
-
-                string imagePath = (string) service.GetValue("ImagePath");
-
-                _log.InfoFormat("Service Path {0}", imagePath);
-
-                imagePath += " -service";
-
-                service.SetValue("ImagePath", imagePath);
-               
-
-                service.Close();
-                services.Close();
-                currentControlSet.Close();
-                system.Close();
-            }
-        }
-
-
-        public void Register(Assembly configuratorAssembly, object configurator)
+        public void Register()
         {
             if (!IsInstalled())
             {
-                _assemblies.Add(configuratorAssembly);
-
                 using (TransactedInstaller ti = new TransactedInstaller())
                 {
                     ti.Installers.Add(this);
@@ -166,6 +128,44 @@ namespace MassTransit.Host2
                 Console.WriteLine("Service is not installed");
                 if (_log.IsInfoEnabled)
                     _log.Info("Service is not installed");
+            }
+        }
+
+
+        /// <summary>
+        /// For the .Net service install infrastructure
+        /// </summary>
+        /// <param name="stateSaver"></param>
+        public override void Install(IDictionary stateSaver)
+        {
+            if (_log.IsInfoEnabled)
+                _log.InfoFormat("Installing Service {0}", _serviceInstaller.ServiceName);
+
+            base.Install(stateSaver);
+
+            if (_log.IsInfoEnabled)
+                _log.InfoFormat("Opening Registry");
+
+            using (RegistryKey system = Registry.LocalMachine.OpenSubKey("System"))
+            using (RegistryKey currentControlSet = system.OpenSubKey("CurrentControlSet"))
+            using (RegistryKey services = currentControlSet.OpenSubKey("Services"))
+            using (RegistryKey service = services.OpenSubKey(_serviceInstaller.ServiceName, true))
+            {
+                service.SetValue("Description", _serviceInstaller.Description);
+
+                string imagePath = (string)service.GetValue("ImagePath");
+
+                _log.InfoFormat("Service Path {0}", imagePath);
+
+                imagePath += " -service";
+
+                service.SetValue("ImagePath", imagePath);
+
+
+                service.Close();
+                services.Close();
+                currentControlSet.Close();
+                system.Close();
             }
         }
     }

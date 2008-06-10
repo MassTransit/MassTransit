@@ -15,11 +15,10 @@ namespace MassTransit.Host2.Actions
     public class InstallServiceAction :
         IAction
     {
-        public void Do(HostedEnvironment environment, string[] args)
+        public void Do(HostedEnvironment environment)
         {
             HostServiceInstaller hsi = new HostServiceInstaller(environment.ServiceName, environment.DispalyName, environment.Description);
-
-            hsi.Install(null);
+            hsi.Register();
         }
     }
 }

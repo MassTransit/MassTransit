@@ -20,14 +20,12 @@ namespace MassTransit.Host2.Actions
     {
         private ILog _log = LogManager.GetLogger(typeof(RunAsServiceAction));
 
-        public void Do(HostedEnvironment environment, string[] args)
+        public void Do(HostedEnvironment environment)
         {
             _log.Info("Received console start notification");
 
-            _log.DebugFormat("Arguments: {0}", string.Join(",", args));
-
-            ConsoleHost inConsoleHost = new ConsoleHost(environment);
-            inConsoleHost.Run(args);
+            ServiceHost inConsoleHost = new ServiceHost(environment);
+            inConsoleHost.Run();
         }
     }
 }

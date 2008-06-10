@@ -26,13 +26,13 @@ namespace MassTransit.Host2.Hosts
             _environment = environment;
         }
 
-        public void Run(string[] args)
+        public void Run()
         {
             _log.Debug("Starting up as a console application");
 
             _environment.Start();
 
-            Console.WriteLine("The service is running, press Control+C to exit.");
+            Console.WriteLine("The service is running, press any key to exit.");
             Console.ReadKey();
             Console.WriteLine("Exiting.");
 

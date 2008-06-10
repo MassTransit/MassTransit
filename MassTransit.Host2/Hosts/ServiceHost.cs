@@ -25,6 +25,7 @@ namespace MassTransit.Host2.Hosts
 
         public ServiceHost(HostedEnvironment environment)
         {
+            _installer = new HostServiceInstaller(environment.ServiceName, environment.DispalyName, environment.Description);
             _environment = environment;
         }
 

@@ -10,15 +10,36 @@
 /// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 /// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 /// specific language governing permissions and limitations under the License.
-namespace MassTransit.Host2.Actions
+namespace MassTransit.Host2.ArgumentParsing
 {
-    public class UninstallServiceAction :
-        IAction
-    {
-        public void Do(HostedEnvironment environment)
-        {
-            HostServiceInstaller hsi = new HostServiceInstaller(environment.ServiceName, environment.DispalyName, environment.Description);
-            hsi.Unregister();
-        }
-    }
+	public class Argument : IArgument
+	{
+		private readonly string _value;
+		private readonly string _key;
+
+		public Argument(string value)
+		{
+			_value = value;
+		}
+
+		public Argument(string key, string value)
+		{
+			_key = key;
+			_value = value;
+		}
+
+		#region IArgument Members
+
+		public string Value
+		{
+			get { return _value; }
+		}
+
+		public string Key
+		{
+			get { return _key; }
+		}
+
+		#endregion
+	}
 }
