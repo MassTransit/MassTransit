@@ -3,6 +3,7 @@ namespace WebRequestReply.UI
 	using System;
 	using System.Web.UI;
 	using Core;
+	using MassTransit.ServiceBus;
 
 	public partial class _Default :
 		Page, IRequestReplyView
@@ -11,7 +12,7 @@ namespace WebRequestReply.UI
 
 		public _Default()
 		{
-			_controller = new RequestReplyController(this, Container.Instance.ServiceBus);
+			_controller = new RequestReplyController(this, Container.Instance.Resolve<IServiceBus>());
 		}
 
 		public string RequestText

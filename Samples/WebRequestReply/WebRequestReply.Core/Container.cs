@@ -1,15 +1,13 @@
 namespace WebRequestReply.Core
 {
+	using Castle.Facilities.FactorySupport;
+	using Castle.Windsor;
 	using MassTransit.ServiceBus;
-	using MassTransit.ServiceBus.MSMQ;
-	using MassTransit.ServiceBus.Subscriptions;
+	using MassTransit.WindsorIntegration;
 
-	public class Container
+	public class Container : WindsorContainer
 	{
 		private static readonly Container _container;
-		private readonly IServiceBus _serviceBus;
-		private readonly MsmqEndpoint _serviceEndpoint = @"msmq://localhost/test_servicebus";
-		private readonly LocalSubscriptionCache _subscriptionCache = new LocalSubscriptionCache();
 
 		static Container()
 		{
@@ -17,10 +15,11 @@ namespace WebRequestReply.Core
 		}
 
 		private Container()
+			: base("castle.xml")
 		{
-			_serviceBus = new ServiceBus(_serviceEndpoint, _subscriptionCache);
+			LoadMassTransit();
 
-			_serviceBus.Subscribe<RequestMessage>(HandleRequestMessage);
+			Resolve<IServiceBus>().Subscribe<RequestMessage>(HandleRequestMessage);
 		}
 
 		public static Container Instance
@@ -28,21 +27,17 @@ namespace WebRequestReply.Core
 			get { return _container; }
 		}
 
-		public IServiceBus ServiceBus
+		private void LoadMassTransit()
 		{
-			get { return _serviceBus; }
+			AddFacility("factory.support", new FactorySupportFacility());
+			AddFacility("masstransit", new MassTransitFacility());
 		}
 
 		private static void HandleRequestMessage(IMessageContext<RequestMessage> ctx)
 		{
 			ResponseMessage response = new ResponseMessage(ctx.Message.CorrelationId, "Request: " + ctx.Message.Text);
 
-			Instance.ServiceBus.Publish(response);
-		}
-
-		~Container()
-		{
-			_serviceBus.Dispose();
+			Instance.Resolve<IServiceBus>().Publish(response);
 		}
 	}
 }
