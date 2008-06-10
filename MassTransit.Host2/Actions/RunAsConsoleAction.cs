@@ -22,7 +22,7 @@ namespace MassTransit.Host2.Actions
 
         public void Do(HostedEnvironment environment)
         {
-            _log.Info("Received service start notification");
+            _log.Info("Received console start notification");
 
             ConsoleHost inConsoleHost = new ConsoleHost(environment);
             inConsoleHost.Run();
