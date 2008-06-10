@@ -1,12 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <castle>
 	<components>
-		<!-- load all of the services here -->
-		<component id="subscriptionManager"
-				   lifestyle="singleton"
-				   service="MassTransit.ServiceBus.IHostedService, MassTransit.ServiceBus"
-				   type="MassTransit.ServiceBus.Subscriptions.SubscriptionService, MassTransit.ServiceBus">
-		</component>
+
 	</components>
 
 	<facilities>
