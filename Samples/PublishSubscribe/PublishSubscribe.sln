@@ -61,6 +61,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.WindsorIntegrat
 		Release.AspNetCompiler.Debug = "False"
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Host2", "..\..\MassTransit.Host2\MassTransit.Host2.csproj", "{834ED79F-BA0E-48F9-831A-789576EE516B}"
+	ProjectSection(WebsiteProperties) = preProject
+		Debug.AspNetCompiler.Debug = "True"
+		Release.AspNetCompiler.Debug = "False"
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -103,6 +109,10 @@ Global
 		{98D5A59C-96FA-4A1B-A653-EA5A35C45FC9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{98D5A59C-96FA-4A1B-A653-EA5A35C45FC9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{98D5A59C-96FA-4A1B-A653-EA5A35C45FC9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{834ED79F-BA0E-48F9-831A-789576EE516B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{834ED79F-BA0E-48F9-831A-789576EE516B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{834ED79F-BA0E-48F9-831A-789576EE516B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{834ED79F-BA0E-48F9-831A-789576EE516B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -113,5 +123,6 @@ Global
 		{6F90867C-E092-4EDC-B3DE-600D39DF0335} = {5A039536-728C-4B3C-88D0-030539735F66}
 		{51F34C86-F3C8-4F64-9C5A-120ECB9EFAE6} = {5A039536-728C-4B3C-88D0-030539735F66}
 		{98D5A59C-96FA-4A1B-A653-EA5A35C45FC9} = {5A039536-728C-4B3C-88D0-030539735F66}
+		{834ED79F-BA0E-48F9-831A-789576EE516B} = {5A039536-728C-4B3C-88D0-030539735F66}
 	EndGlobalSection
 EndGlobal
