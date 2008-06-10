@@ -13,16 +13,16 @@
 		<facility id="nhibernate" isWeb="false" type="Castle.Facilities.NHibernateIntegration.NHibernateFacility, Castle.Facilities.NHibernateIntegration">
 			<factory id="nhibernate.factory">
 				<settings>
-					<item key="hibernate.connection.provider">
+					<item key="connection.provider">
 						NHibernate.Connection.DriverConnectionProvider
 					</item>
-					<item key="hibernate.connection.driver_class">
+					<item key="connection.driver_class">
 						NHibernate.Driver.SqlClientDriver
 					</item>
-					<item key="hibernate.connection.connection_string">
+					<item key="connection.connection_string">
 						Database=test;Server=localhost;Integrated Security=SSPI
 					</item>
-					<item key="hibernate.dialect">
+					<item key="dialect">
 						NHibernate.Dialect.MsSql2005Dialect
 					</item>
 				</settings>
@@ -32,5 +32,10 @@
 				</assemblies>
 			</factory>
 		</facility>
+    <facility id="masstransit" listenAt="msmq://localhost/mt_pubsub" subscriptionsAt="">
+      <transports>
+        <transport>MassTransit.ServiceBus.MSMQ.MsmqEndpoint, MassTransit.ServiceBus.MSMQ</transport>
+      </transports>
+    </facility>
 	</facilities>
 </castle>
