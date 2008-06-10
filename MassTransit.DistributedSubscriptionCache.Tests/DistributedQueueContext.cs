@@ -1,4 +1,4 @@
-namespace MassTransit.DistributedSubscriptionCache.Tests
+namespace MassTransit.DistributedSubscriptionCacheX.Tests
 {
 	using System;
 	using System.Diagnostics;
@@ -6,15 +6,20 @@ namespace MassTransit.DistributedSubscriptionCache.Tests
 	using System.Reflection;
 	using System.Runtime.Serialization.Formatters.Binary;
 	using log4net;
+	using MassTransit.ServiceBus.Internal;
 	using MassTransit.ServiceBus.MSMQ;
+	using MassTransit.ServiceBus.Subscriptions;
 	using NUnit.Framework;
 	using NUnit.Framework.SyntaxHelpers;
+	using Rhino.Mocks;
 	using ServiceBus;
 
 	public class DistributedQueueContext : IDisposable
 	{
 		protected static readonly ILog _log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 
+		private readonly MockRepository _mocks = new MockRepository();
+		private IEndpointResolver _endpointResolver;
 		private readonly DistributedSubscriptionCache _cache = new DistributedSubscriptionCache();
 		private readonly DistributedSubscriptionCache _remoteCache = new DistributedSubscriptionCache();
 		private readonly MsmqEndpoint _remoteServiceBusEndPoint = @"msmq://localhost/test_remoteservicebus";
@@ -72,6 +77,7 @@ namespace MassTransit.DistributedSubscriptionCache.Tests
 
 		private void Initialize()
 		{
+
 			StackTrace stackTrace = new StackTrace();
 			StackFrame stackFrame = stackTrace.GetFrame(1);
 			MethodBase methodBase = stackFrame.GetMethod();
@@ -83,8 +89,16 @@ namespace MassTransit.DistributedSubscriptionCache.Tests
 			ValidateAndPurgeQueue(_serviceBusEndPoint.QueuePath);
 			ValidateAndPurgeQueue(_remoteServiceBusEndPoint.QueuePath);
 
-			_serviceBus = new ServiceBus(ServiceBusEndPoint, null, _cache);
-			_remoteServiceBus = new ServiceBus(RemoteServiceBusEndPoint, null, _remoteCache);
+			_endpointResolver = _mocks.DynamicMock<IEndpointResolver>();
+
+			_serviceBus = new ServiceBus(ServiceBusEndPoint, null, _cache, _endpointResolver);
+			_remoteServiceBus = new ServiceBus(RemoteServiceBusEndPoint, null, _remoteCache, _endpointResolver);
+
+			SetupResult.For(_endpointResolver.Resolve(RemoteServiceBusEndPoint.Uri)).Return(RemoteServiceBusEndPoint);
+			SetupResult.For(_endpointResolver.Resolve(ServiceBusEndPoint.Uri)).Return(ServiceBusEndPoint);
+
+			_mocks.ReplayAll();
+
 		}
 
 		public static void VerifyMessageInQueue<T>(string queuePath, T messageExample)

@@ -1,4 +1,4 @@
-namespace MassTransit.DistributedSubscriptionCache.Tests
+namespace MassTransit.DistributedSubscriptionCacheX.Tests
 {
 	using System;
 	using System.Collections.Generic;

@@ -68,10 +68,6 @@
     <Compile Include="Load\LoadTestContainer.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\MassTransit.DistributedSubscriptionCache\MassTransit.DistributedSubscriptionCache.csproj">
-      <Project>{856DF42C-FA82-4AFA-95D9-A84B40B833A1}</Project>
-      <Name>MassTransit.DistributedSubscriptionCache</Name>
-    </ProjectReference>
     <ProjectReference Include="..\..\..\MassTransit.ServiceBus.MSMQ\MassTransit.ServiceBus.MSMQ.csproj">
       <Project>{6F90867C-E092-4EDC-B3DE-600D39DF0335}</Project>
       <Name>MassTransit.ServiceBus.MSMQ</Name>
