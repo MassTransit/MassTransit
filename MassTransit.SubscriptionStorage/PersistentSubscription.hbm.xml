@@ -18,11 +18,13 @@
 				  not-null="true"
 				  update="false"
 				  />
-		<property name="MessageName"
+		
+    <property name="MessageName"
 				  column="Message" 
 				  not-null="true"
 				  update="false"
 				  access="field.camelcase-underscore" />
+    
 		<property name="IsActive"
 				  not-null="true"
 				  access="field.camelcase-underscore" />

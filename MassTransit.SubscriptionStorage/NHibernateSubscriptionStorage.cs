@@ -5,9 +5,9 @@ namespace MassTransit.SubscriptionStorage
 	using log4net;
 	using MassTransit.ServiceBus.Subscriptions;
 	using NHibernate;
-	using NHibernate.Expression;
+	using NHibernate.Criterion;
 
-	public class NHibernateSubscriptionStorage :
+    public class NHibernateSubscriptionStorage :
 		ISubscriptionRepository
 	{
 		private static readonly ILog _log = LogManager.GetLogger(typeof (SubscriptionService));
