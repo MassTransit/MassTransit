@@ -52,7 +52,6 @@
     </Compile>
     <Compile Include="DefaultMassTransitContainer.cs" />
     <Compile Include="MassTransitFacility.cs" />
-    <Compile Include="MassTransitPubSubFacility.cs" />
     <Compile Include="WindsorObjectBuilder.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

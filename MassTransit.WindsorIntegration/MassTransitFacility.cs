@@ -2,6 +2,7 @@ namespace MassTransit.WindsorIntegration
 {
 	using System;
 	using System.Collections;
+	using System.Collections.Generic;
 	using Castle.Core.Configuration;
 	using Castle.MicroKernel;
 	using Castle.MicroKernel.Facilities;
@@ -144,11 +145,40 @@ namespace MassTransit.WindsorIntegration
 					}
 
 				case "distributed":
-					throw new NotImplementedException("Distributed cache mode not yet implemented");
+					if(string.IsNullOrEmpty(name))
+					{
+						return new DistributedSubscriptionCache(GetDistributedCacheServerList(cacheConfig));
+					}
+					else
+					{
+						ISubscriptionCache cache = Kernel.Resolve<DistributedSubscriptionCache>(name);
+						if (cache == null)
+						{
+							cache = new DistributedSubscriptionCache(GetDistributedCacheServerList(cacheConfig));
+							Kernel.AddComponentInstance(name, cache);
+						}
+						return cache;
+					}
 
 				default:
 					throw new ConventionException(mode + " is not a valid subscriptionCache mode");
 			}
+		}
+
+		private static IEnumerable<string> GetDistributedCacheServerList(IConfiguration configuration)
+		{
+			List<string> servers = new List<string>();
+
+			IConfiguration serversConfig = configuration.Children["servers"];
+			if (serversConfig != null)
+			{
+				foreach (IConfiguration serverConfig in serversConfig.Children)
+				{
+					servers.Add("memcached://" + serverConfig.Value);
+				}
+			}
+
+			return servers;
 		}
 
 		private T ResolveEndpoint<T>(string uri)

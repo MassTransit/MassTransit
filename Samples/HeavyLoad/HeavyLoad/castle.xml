@@ -2,20 +2,21 @@
 
 <configuration>
 
-  <facilities>
+	<facilities>
 
-	  <facility id="masstransit">
+		<facility id="masstransit">
 
-		  <bus id="main"
-			   endpoint="msmq://localhost/test_servicebus">
-			  <subscriptionCache mode="local" />
-		  </bus>
+			<bus id="main"
+				 endpoint="msmq://localhost/test_servicebus">
+				<subscriptionCache mode="local">
+				</subscriptionCache>
+			</bus>
 
-		  <transports>
-			  <transport>MassTransit.ServiceBus.MSMQ.MsmqEndpoint, MassTransit.ServiceBus.MSMQ</transport>
-		  </transports>
-	  </facility>
+			<transports>
+				<transport>MassTransit.ServiceBus.MSMQ.MsmqEndpoint, MassTransit.ServiceBus.MSMQ</transport>
+			</transports>
+		</facility>
 
-  </facilities>
+	</facilities>
 
 </configuration>
