@@ -14,12 +14,18 @@ namespace MassTransit.Host2
 {
     using Castle.Windsor;
     using ServiceBus;
+    using WindsorIntegration;
 
     public abstract class HostedEnvironment
     {
         private IWindsorContainer _container;
 
 
+        protected HostedEnvironment(string xmlFile) 
+        {
+            _container = new WindsorContainer(xmlFile);
+            _container.AddFacility("masstransit", new MassTransitFacility());
+        }
         protected HostedEnvironment()
         {
             _container = new WindsorContainer();
