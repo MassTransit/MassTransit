@@ -1,7 +1,6 @@
 namespace MassTransit.WindsorIntegration
 {
 	using System;
-	using System.Collections;
 	using System.Collections.Generic;
 	using Castle.Core.Configuration;
 	using Castle.MicroKernel;
@@ -34,7 +33,16 @@ namespace MassTransit.WindsorIntegration
 			{
 				Type t = Type.GetType(transport.Value, true, true);
 
-				Kernel.AddComponent("transport." + t.Name, typeof (IEndpoint), t);
+				//Kernel.AddComponent("transport." + t.Name, typeof (IEndpoint), t);
+
+			    Kernel.Register(
+                    Component.For<IEndpoint>()
+                        .ImplementedBy(t)
+                        .AddAttributeDescriptor("factoryId", "endpoint.factory")
+                        .AddAttributeDescriptor("factoryCreate", "Resolve")
+                        .LifeStyle.Transient
+                        .Named("transport." + t.Name)
+			        );
 			}
 		}
 
@@ -45,17 +53,14 @@ namespace MassTransit.WindsorIntegration
 			Kernel.Register(
 				Component.For<ISubscriptionCache>()
 					.ImplementedBy<LocalSubscriptionCache>()
-					.LifeStyle.Transient,
+					.LifeStyle.Singleton,
 				Component.For<IObjectBuilder>()
 					.ImplementedBy<WindsorObjectBuilder>()
 					.LifeStyle.Singleton,
 				Component.For<IEndpointResolver>()
 					.ImplementedBy<EndpointResolver>()
 					.Named("endpoint.factory")
-					.LifeStyle.Singleton,
-				Component.For<IEndpoint>()
-					.AddAttributeDescriptor("factoryId", "endpoint.factory")
-					.AddAttributeDescriptor("factoryCreate", "Resolve")
+					.LifeStyle.Singleton
 				);
 		}
 
@@ -68,7 +73,7 @@ namespace MassTransit.WindsorIntegration
 					string id = child.Attributes["id"];
 					string endpointUri = child.Attributes["endpoint"];
 
-					IEndpoint endpoint = ResolveEndpoint<IEndpoint>(endpointUri);
+				    IEndpoint endpoint = this.Kernel.Resolve<IEndpointResolver>().Resolve(new Uri(endpointUri));
 
 					ISubscriptionCache cache = ResolveSubscriptionCache(child);
 
@@ -97,7 +102,7 @@ namespace MassTransit.WindsorIntegration
 				HealthClient sc = new HealthClient(bus, interval);
 
 				Kernel.AddComponentInstance(id + ".managementClient", sc);
-				sc.Start();
+				sc.Start(); //TODO: Should use startable
 			}
 		}
 
@@ -108,12 +113,13 @@ namespace MassTransit.WindsorIntegration
 			{
 				string subscriptionServiceEndpointUri = subscriptionClientConfig.Attributes["endpoint"];
 
-				IEndpoint subscriptionServiceEndpoint = ResolveEndpoint<IEndpoint>(subscriptionServiceEndpointUri);
+			    IEndpoint subscriptionServiceEndpoint =
+			        Kernel.Resolve<IEndpointResolver>().Resolve(new Uri(subscriptionServiceEndpointUri));
 
 				SubscriptionClient sc = new SubscriptionClient(bus, cache, subscriptionServiceEndpoint);
 
 				Kernel.AddComponentInstance(id + ".subscriptionClient", sc);
-				sc.Start();
+				sc.Start(); //TODO: should use the startable
 			}
 		}
 
@@ -179,14 +185,6 @@ namespace MassTransit.WindsorIntegration
 			}
 
 			return servers;
-		}
-
-		private T ResolveEndpoint<T>(string uri)
-		{
-			IDictionary arguments = new Hashtable();
-			arguments.Add("uri", new Uri(uri));
-
-			return Kernel.Resolve<T>(arguments);
 		}
 
 		private static ComponentRegistration<T> StartableComponent<T>()

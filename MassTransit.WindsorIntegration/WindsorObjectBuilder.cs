@@ -26,7 +26,6 @@ namespace MassTransit.WindsorIntegration
             return _container.Resolve<T>();
         }
 
-
         public T Build<T>(Type component) where T : class
         {
             return _container[component] as T;
