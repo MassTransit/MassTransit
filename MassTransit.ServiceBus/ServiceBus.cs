@@ -59,7 +59,7 @@ namespace MassTransit.ServiceBus
 		}
 
 		public ServiceBus(IEndpoint endpointToListenOn, IObjectBuilder objectBuilder, ISubscriptionCache subscriptionCache)
-	        : this(endpointToListenOn, objectBuilder, subscriptionCache, new EndpointResolver(objectBuilder))
+	        : this(endpointToListenOn, objectBuilder, subscriptionCache, new EndpointResolver())
 	    {
 	    }
 

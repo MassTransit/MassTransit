@@ -2,6 +2,8 @@ namespace MassTransit.WindsorIntegration
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Globalization;
+	using System.Reflection;
 	using Castle.Core.Configuration;
 	using Castle.MicroKernel;
 	using Castle.MicroKernel.Facilities;
@@ -33,16 +35,22 @@ namespace MassTransit.WindsorIntegration
 			{
 				Type t = Type.GetType(transport.Value, true, true);
 
-				//Kernel.AddComponent("transport." + t.Name, typeof (IEndpoint), t);
+				// get the scheme for each endpoint and add it to the resolver
 
-			    Kernel.Register(
-                    Component.For<IEndpoint>()
-                        .ImplementedBy(t)
-                        .AddAttributeDescriptor("factoryId", "endpoint.factory")
-                        .AddAttributeDescriptor("factoryCreate", "Resolve")
-                        .LifeStyle.Transient
-                        .Named("transport." + t.Name)
-			        );
+				PropertyInfo property = t.GetProperty("Scheme", BindingFlags.Static | BindingFlags.Public | BindingFlags.GetField | BindingFlags.NonPublic, null, typeof (string), new Type[0], null);
+
+				string value = property.GetValue(null, BindingFlags.Static | BindingFlags.Public | BindingFlags.GetField | BindingFlags.NonPublic, null, null, CultureInfo.InvariantCulture) as string;
+
+				EndpointResolver.AddTransport(value, t);
+
+				Kernel.Register(
+					Component.For(t)
+						.ImplementedBy(t)
+						.AddAttributeDescriptor("factoryId", "endpoint.factory")
+						.AddAttributeDescriptor("factoryCreate", "Resolve")
+						.LifeStyle.Transient
+						.Named("transport." + value)
+					);
 			}
 		}
 
@@ -73,7 +81,7 @@ namespace MassTransit.WindsorIntegration
 					string id = child.Attributes["id"];
 					string endpointUri = child.Attributes["endpoint"];
 
-				    IEndpoint endpoint = this.Kernel.Resolve<IEndpointResolver>().Resolve(new Uri(endpointUri));
+					IEndpoint endpoint = Kernel.Resolve<IEndpointResolver>().Resolve(new Uri(endpointUri));
 
 					ISubscriptionCache cache = ResolveSubscriptionCache(child);
 
@@ -113,8 +121,8 @@ namespace MassTransit.WindsorIntegration
 			{
 				string subscriptionServiceEndpointUri = subscriptionClientConfig.Attributes["endpoint"];
 
-			    IEndpoint subscriptionServiceEndpoint =
-			        Kernel.Resolve<IEndpointResolver>().Resolve(new Uri(subscriptionServiceEndpointUri));
+				IEndpoint subscriptionServiceEndpoint =
+					Kernel.Resolve<IEndpointResolver>().Resolve(new Uri(subscriptionServiceEndpointUri));
 
 				SubscriptionClient sc = new SubscriptionClient(bus, cache, subscriptionServiceEndpoint);
 
@@ -151,7 +159,7 @@ namespace MassTransit.WindsorIntegration
 					}
 
 				case "distributed":
-					if(string.IsNullOrEmpty(name))
+					if (string.IsNullOrEmpty(name))
 					{
 						return new DistributedSubscriptionCache(GetDistributedCacheServerList(cacheConfig));
 					}

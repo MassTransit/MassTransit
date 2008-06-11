@@ -113,6 +113,12 @@ namespace MassTransit.ServiceBus.MSMQ
 			set { _reliableMessaging = value; }
 		}
 
+		public static string Scheme
+		{
+			get { return "msmq"; }
+		}
+
+
 		/// <summary>
 		/// The path of the message queue for the endpoint. Suitable for use with <c ref="MessageQueue" />.Open
 		/// to access a message queue.
