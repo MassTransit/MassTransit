@@ -124,12 +124,16 @@ namespace MassTransit.ServiceBus.Subscriptions
             }
         }
 
-        private void ForwardToUpdaters(object message)
+        private void ForwardToUpdaters<T>(T message) where T : SubscriptionChange
         {
             IList<Uri> copy = new List<Uri>(_updaters);
 
             foreach (Uri uri in copy)
             {
+				// don't send updates to the originator, that's chatty kathy
+				if (message.Subscription.EndpointUri == uri)
+					continue;
+
                 IEndpoint ep = _endpointResolver.Resolve(uri);
                 ep.Send(message);
             }
@@ -172,7 +176,6 @@ namespace MassTransit.ServiceBus.Subscriptions
 
 	    public void Consume(CancelSubscriptionUpdates message)
 	    {
-            //um, not implemented :)
 	        _updaters.Remove(message.RequestingUri);
 	    }
 	}

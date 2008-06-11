@@ -12,9 +12,10 @@
 /// specific language governing permissions and limitations under the License.
 namespace MassTransit.Host2
 {
+	using System;
     using Castle.Facilities.FactorySupport;
     using Castle.Facilities.Startable;
-    using Castle.Windsor;
+	using Castle.Windsor;
     using ServiceBus;
     using WindsorIntegration;
 
@@ -56,11 +57,20 @@ namespace MassTransit.Host2
             {
                 hs.Stop();
             }
+
+        	foreach (IServiceBus bus in _container.ResolveAll<IServiceBus>())
+        	{
+        		bus.Dispose();
+        		_container.Release(bus);
+        	}
         }
 
         public abstract string ServiceName {get;}
         public abstract string DispalyName {get;}
         public abstract string Description {get;}
 
+    	public event Action<HostedEnvironment> Completed;
+
+    	internal delegate void Handler();
     }
 }

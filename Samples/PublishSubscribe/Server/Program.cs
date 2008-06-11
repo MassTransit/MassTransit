@@ -1,19 +1,19 @@
 namespace Server
 {
-    using System.IO;
-    using log4net.Config;
-    using MassTransit.Host2;
+	using log4net;
+	using MassTransit.Host2;
 
-    internal class Program
-    {
-        private static void Main(string[] args)
-        {
-            XmlConfigurator.Configure(new FileInfo("log4net.xml"));
+	internal class Program
+	{
+		private static readonly ILog _log = LogManager.GetLogger(typeof (Program));
 
-            HostedEnvironment env = new ServerEnvironment("castle.xml");
+		private static void Main(string[] args)
+		{
+			_log.Info("Server Loading");
 
-            Runner.Run(env, args);
-        }
-    }
-    
+			HostedEnvironment env = new ServerEnvironment("castle.xml");
+
+			Runner.Run(env, args);
+		}
+	}
 }

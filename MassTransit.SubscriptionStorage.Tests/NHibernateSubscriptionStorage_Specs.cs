@@ -10,8 +10,6 @@ namespace MassTransit.SubscriptionStorage.Tests
 	[TestFixture]
 	public class When_saving_a_subscription_to_the_database
 	{
-		#region Setup/Teardown
-
 		[SetUp]
 		public void Setup()
 		{
@@ -33,23 +31,6 @@ namespace MassTransit.SubscriptionStorage.Tests
 			_subscriptionRepository = new NHibernateSubscriptionStorage(_sessionFactory);
 		}
 
-		#endregion
-
-		private readonly string _connectionString = "Server=localhost;initial catalog=test;Trusted_Connection=yes";
-		private ISessionFactory _sessionFactory;
-		private ISubscriptionRepository _subscriptionRepository;
-		private DbQuery _dbQuery;
-
-		[Test]
-		public void The_subscription_should_exist_in_the_table()
-		{
-			Subscription subscription = new Subscription("a", new Uri("msmq://localhost/test_queue"));
-
-			_subscriptionRepository.Save(subscription);
-
-			Assert.That(_dbQuery.ExecuteScalar("SELECT COUNT(*) FROM bus.Subscriptions"), Is.EqualTo(1), "Subscription count didn't match");
-		}
-
 		[Test]
 		public void Only_one_entry_for_the_message_should_exist_in_the_table()
 		{
@@ -60,6 +41,19 @@ namespace MassTransit.SubscriptionStorage.Tests
 			_subscriptionRepository.Save(subscription);
 
 			Assert.That(_dbQuery.ExecuteScalar("SELECT COUNT(*) FROM bus.Subscriptions"), Is.EqualTo(1), "Subscription count didn't match");
+		}
+
+		[Test]
+		public void Removed_entries_should_be_marked_as_not_active()
+		{
+			_subscriptionRepository.Save(new Subscription("a", new Uri("msmq://localhost/test_client")));
+
+			Assert.That(_dbQuery.ExecuteScalar("SELECT COUNT(*) FROM bus.Subscriptions"), Is.EqualTo(1), "Subscription count didn't match");
+
+			_subscriptionRepository.Remove(new Subscription("a", new Uri("msmq://localhost/test_client")));
+
+			Assert.That(_dbQuery.ExecuteScalar("SELECT COUNT(*) FROM bus.Subscriptions WHERE Message='a'"), Is.EqualTo(1), "The subscription did not exist");
+			Assert.That(_dbQuery.ExecuteScalar("SELECT COUNT(*) FROM bus.Subscriptions WHERE Message='a' AND IsActive = 0"), Is.EqualTo(1), "The subscription was not marked as inactive");
 		}
 
 		[Test]
@@ -84,17 +78,18 @@ namespace MassTransit.SubscriptionStorage.Tests
 		}
 
 		[Test]
-		public void Removed_entries_should_be_marked_as_not_active()
+		public void The_subscription_should_exist_in_the_table()
 		{
-			_subscriptionRepository.Save(new Subscription("a", new Uri("msmq://localhost/test_client")));
+			Subscription subscription = new Subscription("a", new Uri("msmq://localhost/test_queue"));
+
+			_subscriptionRepository.Save(subscription);
 
 			Assert.That(_dbQuery.ExecuteScalar("SELECT COUNT(*) FROM bus.Subscriptions"), Is.EqualTo(1), "Subscription count didn't match");
-
-			_subscriptionRepository.Remove(new Subscription("a", new Uri("msmq://localhost/test_client")));
-
-			Assert.That(_dbQuery.ExecuteScalar("SELECT COUNT(*) FROM bus.Subscriptions WHERE Message='a'"), Is.EqualTo(1), "The subscription did not exist");
-			Assert.That(_dbQuery.ExecuteScalar("SELECT COUNT(*) FROM bus.Subscriptions WHERE Message='a' AND IsActive = 0"), Is.EqualTo(1), "The subscription was not marked as inactive");
-
 		}
+
+		private readonly string _connectionString = "Server=localhost;initial catalog=test;Trusted_Connection=yes";
+		private ISessionFactory _sessionFactory;
+		private ISubscriptionRepository _subscriptionRepository;
+		private DbQuery _dbQuery;
 	}
 }

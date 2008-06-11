@@ -1,23 +1,26 @@
 namespace SubMgr
 {
-    using System.IO;
-    using log4net.Config;
-    using MassTransit.Host2;
-    using MassTransit.ServiceBus;
-    using MassTransit.ServiceBus.Subscriptions;
-    using MassTransit.SubscriptionStorage;
+	using log4net;
+	using MassTransit.Host2;
+	using MassTransit.ServiceBus;
+	using MassTransit.ServiceBus.Subscriptions;
+	using MassTransit.SubscriptionStorage;
 
-    internal class Program
-    {
-        private static void Main(string[] args)
-        {
-            XmlConfigurator.Configure(new FileInfo("log4net.xml"));
+	internal class Program
+	{
+		private static readonly ILog _log = LogManager.GetLogger(typeof (Program));
 
-            HostedEnvironment env = new SubscriptionManagerEnvironment("castle.xml");
-            env.Container.AddComponent<IHostedService, SubscriptionService>();
-            env.Container.AddComponent<ISubscriptionRepository, NHibernateSubscriptionStorage>();
-            Runner.Run(env, args);
-        }
-    }
-    
+		private static void Main(string[] args)
+		{
+			_log.Info("SubMgr Loading");
+
+			HostedEnvironment env = new SubscriptionManagerEnvironment("castle.xml");
+
+			env.Container.AddComponent<IHostedService, SubscriptionService>();
+
+			env.Container.AddComponent<ISubscriptionRepository, NHibernateSubscriptionStorage>();
+
+			Runner.Run(env, args);
+		}
+	}
 }
