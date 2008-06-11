@@ -32,12 +32,12 @@ namespace MassTransit.ServiceBus.Subscriptions
 		private readonly ISubscriptionCache _cache;
 		private readonly ISubscriptionRepository _repository;
 	    private readonly IEndpointResolver _endpointResolver;
-	    private readonly IList<Uri> _updaters;
+	    private readonly IList<Uri> _followers;
 
 
 		public SubscriptionService(IServiceBus bus, ISubscriptionCache subscriptionCache, ISubscriptionRepository subscriptionRepository, IEndpointResolver endpointResolver)
 		{
-		    _updaters = new List<Uri>();
+		    _followers = new List<Uri>();
 			_bus = bus;
 		    _endpointResolver = endpointResolver;
 		    _cache = subscriptionCache;
@@ -72,7 +72,6 @@ namespace MassTransit.ServiceBus.Subscriptions
 				_cache.Add(sub);
 			}
 
-            //TODO: Change to the new component based model?
             _bus.Subscribe(this);
 
             if(_log.IsInfoEnabled)
@@ -99,7 +98,7 @@ namespace MassTransit.ServiceBus.Subscriptions
 
 				_repository.Save(message.Subscription);
 
-			    ForwardToUpdaters(message);
+			    NotifyFollowers(message);
 			}
 			catch (Exception ex)
 			{
@@ -116,7 +115,7 @@ namespace MassTransit.ServiceBus.Subscriptions
 
                 _repository.Remove(message.Subscription);
 
-                ForwardToUpdaters(message);
+                NotifyFollowers(message);
             }
             catch (Exception ex)
             {
@@ -124,27 +123,12 @@ namespace MassTransit.ServiceBus.Subscriptions
             }
         }
 
-        private void ForwardToUpdaters<T>(T message) where T : SubscriptionChange
-        {
-            IList<Uri> copy = new List<Uri>(_updaters);
-
-            foreach (Uri uri in copy)
-            {
-				// don't send updates to the originator, that's chatty kathy
-				if (message.Subscription.EndpointUri == uri)
-					continue;
-
-                IEndpoint ep = _endpointResolver.Resolve(uri);
-                ep.Send(message);
-            }
-        }
-
-	    public void Consume(CacheUpdateRequest message)
+		public void Consume(CacheUpdateRequest message)
 	    {
 	        try
 			{
-				_updaters.Add(message.RequestingUri);
-
+				AddFollower(message.RequestingUri);
+				
 				IList<Subscription> subscriptions = RemoveNHibernateness(_cache.List());
 
 				CacheUpdateResponse response = new CacheUpdateResponse(subscriptions);
@@ -158,10 +142,10 @@ namespace MassTransit.ServiceBus.Subscriptions
 			}
 	    }
 
-        /// <summary>
+		/// <summary>
         /// The NHibernate objects don't serialize, so we rip that off here.
         /// </summary>
-        private static IList<Subscription> RemoveNHibernateness(IList<Subscription> subs)
+        private static IList<Subscription> RemoveNHibernateness(IEnumerable<Subscription> subs)
         {
             IList<Subscription> result = new List<Subscription>();
 
@@ -174,9 +158,46 @@ namespace MassTransit.ServiceBus.Subscriptions
         }
 
 
-	    public void Consume(CancelSubscriptionUpdates message)
+		public void Consume(CancelSubscriptionUpdates message)
 	    {
-	        _updaters.Remove(message.RequestingUri);
-	    }
+			RemoveFollower(message.RequestingUri);
+		}
+
+		private void AddFollower(Uri uri)
+		{
+			lock(_followers)
+			{
+				if (_followers.Contains(uri))
+					return;
+
+				_followers.Add(uri);
+			}
+		}
+
+		private void RemoveFollower(Uri uri)
+		{
+			lock(_followers)
+			{
+				if (_followers.Contains(uri))
+					_followers.Remove(uri);
+			}
+		}
+
+		private void NotifyFollowers<T>(T message) where T : SubscriptionChange
+		{
+			IList<Uri> copy;
+			lock(_followers)
+				copy = new List<Uri>(_followers);
+
+			foreach (Uri uri in copy)
+			{
+				// don't send updates to the originator, that's chatty kathy
+				if (message.Subscription.EndpointUri == uri)
+					continue;
+
+				IEndpoint ep = _endpointResolver.Resolve(uri);
+				ep.Send(message);
+			}
+		}
 	}
 }

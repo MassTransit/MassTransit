@@ -63,15 +63,17 @@ namespace MassTransit.ServiceBus.Subscriptions
 		public bool Equals(Subscription subscription)
 		{
 			if (subscription == null) return false;
-			if (!Equals(_endpointUri, subscription._endpointUri)) return false;
-			if (!Equals(_messageName, subscription._messageName)) return false;
-			if (!Equals(_correlationId, subscription._correlationId)) return false;
+			if (!_endpointUri.Equals(subscription._endpointUri)) return false;
+			if (!string.Equals(_messageName, subscription._messageName)) return false;
+			if (!string.Equals(_correlationId, subscription._correlationId)) return false;
 			return true;
 		}
 
 		public override bool Equals(object obj)
 		{
-			if (ReferenceEquals(this, obj)) return true;
+			if (ReferenceEquals(this, obj)) 
+				return true;
+
 			return Equals(obj as Subscription);
 		}
 
