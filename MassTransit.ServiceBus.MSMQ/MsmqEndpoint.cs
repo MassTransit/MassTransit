@@ -175,7 +175,7 @@ namespace MassTransit.ServiceBus.MSMQ
 			}
 
 			if (_log.IsDebugEnabled)
-				_log.DebugFormat("Message Sent: Id = {0}, Message Type = {1}", msg.Id, messageType);
+				_log.DebugFormat("Message Sent: Id = {0}, Message Type = {1}", msg.Id, messageType.Name);
 		}
 
 		public object Receive()
@@ -245,7 +245,7 @@ namespace MassTransit.ServiceBus.MSMQ
 										_log.DebugFormat("Queue: {0} Received Message Id {1}", _queue.Path, msg.Id);
 
 									if (_messageLog.IsInfoEnabled)
-										_messageLog.InfoFormat("RECV:{0}:System.Object:{1}", _queue.Path, msg.Id);
+										_messageLog.InfoFormat("RECV:{0}:{1}:{2}", _uri, obj.GetType().Name, msg.Id);
 
 									return obj;
 								}
