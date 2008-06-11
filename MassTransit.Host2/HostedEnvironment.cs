@@ -12,6 +12,8 @@
 /// specific language governing permissions and limitations under the License.
 namespace MassTransit.Host2
 {
+    using Castle.Facilities.FactorySupport;
+    using Castle.Facilities.Startable;
     using Castle.Windsor;
     using ServiceBus;
     using WindsorIntegration;
@@ -25,6 +27,8 @@ namespace MassTransit.Host2
         {
             _container = new WindsorContainer(xmlFile);
             _container.AddFacility("masstransit", new MassTransitFacility());
+            _container.AddFacility("factory", new FactorySupportFacility());
+            _container.AddFacility("startable", new StartableFacility());
         }
         protected HostedEnvironment()
         {
