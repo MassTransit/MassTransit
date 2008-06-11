@@ -1,7 +1,6 @@
 namespace MassTransit.SubscriptionStorage.Tests
 {
 	using System;
-	using System.Data.SqlClient;
 	using MassTransit.ServiceBus.Subscriptions;
 	using NHibernate;
 	using NHibernate.Cfg;

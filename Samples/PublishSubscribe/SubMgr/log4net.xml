@@ -44,7 +44,7 @@
 		<file value="masstransit.messages.log" />
 		<appendToFile value="false" />
 		<layout type="log4net.Layout.PatternLayout">
-			<conversionPattern value="%date [%thread] %-5level %logger [%property{NDC}] - %message%newline" />
+			<conversionPattern value="%message%newline" />
 		</layout>
 	</appender>
   <appender name="MT.Messages.Console" type="log4net.Appender.ConsoleAppender">
@@ -78,4 +78,9 @@
 		<level value="DEBUG" />
 		<appender-ref ref="MT.Messages.Console" />
 	</logger>
+
+  <logger name="SubMgr">
+    <level value="DEBUG" />
+    <appender-ref ref="Console" />
+  </logger>
 </log4net>

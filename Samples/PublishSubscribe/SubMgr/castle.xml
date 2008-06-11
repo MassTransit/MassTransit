@@ -27,10 +27,16 @@
 				</assemblies>
 			</factory>
 		</facility>
-    <facility id="masstransit" listenAt="msmq://localhost/mt_pubsub" subscriptionsAt="">
+
+    <facility id="masstransit">
+
+      <bus id="local" endpoint="msmq://localhost/mt_pubsub">
+        <subscriptionCache mode="local" />
+      </bus>
+
       <transports>
         <transport>MassTransit.ServiceBus.MSMQ.MsmqEndpoint, MassTransit.ServiceBus.MSMQ</transport>
       </transports>
     </facility>
-	</facilities>
+  </facilities>
 </castle>
