@@ -13,7 +13,7 @@ namespace Client
 		public ClientEnvironment(string xmlFile) : base(xmlFile)
 		{
             Container.AddComponent<IHostedService, AskPasswordQuestion>();
-            Container.AddComponent<Consumes<PasswordUpdateComplete>.All, PasswordUpdater>();
+            Container.AddComponent<PasswordUpdater>();
 
             IServiceBus bus = Container.Resolve<IServiceBus>();
 		}

@@ -59,9 +59,9 @@ namespace MassTransit.ServiceBus
 		}
 
 		public ServiceBus(IEndpoint endpointToListenOn, IObjectBuilder objectBuilder, ISubscriptionCache subscriptionCache)
-	        : this(endpointToListenOn, objectBuilder, subscriptionCache, new EndpointResolver())
-	    {
-	    }
+			: this(endpointToListenOn, objectBuilder, subscriptionCache, new EndpointResolver())
+		{
+		}
 
 		/// <summary>
 		/// Uses the specified subscription cache
@@ -74,7 +74,7 @@ namespace MassTransit.ServiceBus
 			_endpointToListenOn = endpointToListenOn;
 			_subscriptionCache = subscriptionCache;
 			_objectBuilder = objectBuilder;
-		    _endpointResolver = endpointResolver;
+			_endpointResolver = endpointResolver;
 
 			//TODO: Move into IObjectBuilder?
 			_messageDispatcher = new MessageTypeDispatcher();
@@ -98,7 +98,7 @@ namespace MassTransit.ServiceBus
 			_messageDispatcher.Dispose();
 			_endpointToListenOn.Dispose();
 
-			if(_poisonEndpoint != null)
+			if (_poisonEndpoint != null)
 				_poisonEndpoint.Dispose();
 		}
 
@@ -114,12 +114,19 @@ namespace MassTransit.ServiceBus
 			IList<Subscription> subs = info.GetConsumers(message);
 
 			if (_log.IsWarnEnabled && subs.Count == 0)
-				_log.WarnFormat("There are no subscriptions for the message type {0} for the bus listening on {1}", typeof(T).FullName, _endpointToListenOn.Uri);
+				_log.WarnFormat("There are no subscriptions for the message type {0} for the bus listening on {1}", typeof (T).FullName, _endpointToListenOn.Uri);
+
+			List<Uri> done = new List<Uri>();
 
 			foreach (Subscription subscription in subs)
 			{
+				if (done.Contains(subscription.EndpointUri))
+					continue;
+
 				IEndpoint endpoint = _endpointResolver.Resolve(subscription.EndpointUri);
 				endpoint.Send(message);
+
+				done.Add(subscription.EndpointUri);
 			}
 		}
 
