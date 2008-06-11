@@ -39,13 +39,21 @@ namespace MassTransit.ServiceBus.Subscriptions
 			foreach (KeyValuePair<string, List<SubscriptionCacheEntry>> pair in _messageTypeSubscriptions)
 			{
 				pair.Value.ForEach(
-					delegate(SubscriptionCacheEntry e) { result.Add(e.Subscription); });
+					delegate(SubscriptionCacheEntry e)
+						{
+							if (!result.Contains(e.Subscription))
+								result.Add(e.Subscription);
+						});
 			}
 
 			foreach (KeyValuePair<string, List<SubscriptionCacheEntry>> pair in _correlatedSubscriptions)
 			{
 				pair.Value.ForEach(
-					delegate(SubscriptionCacheEntry e) { result.Add(e.Subscription); });
+					delegate(SubscriptionCacheEntry e)
+						{
+							if (!result.Contains(e.Subscription))
+								result.Add(e.Subscription);
+						});
 			}
 
 			return result;
@@ -70,7 +78,11 @@ namespace MassTransit.ServiceBus.Subscriptions
 			if (_messageTypeSubscriptions.ContainsKey(messageName))
 			{
 				_messageTypeSubscriptions[messageName].ForEach(
-					delegate(SubscriptionCacheEntry entry) { result.Add(entry.Subscription); });
+					delegate(SubscriptionCacheEntry entry)
+						{
+							if(!result.Contains(entry.Subscription))
+								result.Add(entry.Subscription);
+						});
 			}
 
 			string key = GetSubscriptionKey(messageName, correlationId);
@@ -78,7 +90,11 @@ namespace MassTransit.ServiceBus.Subscriptions
 			if (_correlatedSubscriptions.ContainsKey(key))
 			{
 				_correlatedSubscriptions[key].ForEach(
-					delegate(SubscriptionCacheEntry entry) { result.Add(entry.Subscription); });
+					delegate(SubscriptionCacheEntry entry)
+						{
+							if (!result.Contains(entry.Subscription))
+								result.Add(entry.Subscription);
+						});
 			}
 
 			return result;
@@ -157,7 +173,7 @@ namespace MassTransit.ServiceBus.Subscriptions
 			{
 				if (_log.IsDebugEnabled)
 					_log.DebugFormat("Adding new local subscription list for message {0}",
-									 key);
+					                 key);
 
 				cache.Add(key, new List<SubscriptionCacheEntry>());
 			}
@@ -168,7 +184,7 @@ namespace MassTransit.ServiceBus.Subscriptions
 			{
 				if (_log.IsDebugEnabled)
 					_log.DebugFormat("Adding new local subscription for {0} going to {1}",
-									 key,
+					                 key,
 					                 subscription.EndpointUri);
 
 				cache[key].Add(entry);
@@ -193,7 +209,7 @@ namespace MassTransit.ServiceBus.Subscriptions
 				{
 					if (_log.IsDebugEnabled)
 						_log.DebugFormat("Removing local subscription for {0} going to {1}",
-										 key,
+						                 key,
 						                 subscription.EndpointUri);
 
 					cache[key].Remove(entry);
