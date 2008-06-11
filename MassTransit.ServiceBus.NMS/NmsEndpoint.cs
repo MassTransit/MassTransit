@@ -61,6 +61,12 @@ namespace MassTransit.ServiceBus.NMS
 			get { return _uri; }
 		}
 
+		public static string Scheme
+		{
+			get { return "activemq"; }
+		}
+
+
 		public void Send<T>(T message) where T : class
 		{
 			Send(message, NMSConstants.defaultTimeToLive);

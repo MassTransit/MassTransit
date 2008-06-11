@@ -13,157 +13,52 @@
 namespace MassTransit.ServiceBus.Internal
 {
 	using System;
-	using System.Collections;
 	using System.Collections.Generic;
-	using System.Reflection;
-	using System.Text;
-	using Exceptions;
 	using log4net;
-	using Util;
 
-	public class EndpointResolver : 
-        IEndpointResolver
+	public class EndpointResolver :
+		IEndpointResolver
 	{
+		private static readonly Dictionary<Uri, IEndpoint> _cache = new Dictionary<Uri, IEndpoint>();
 		private static readonly ILog _log = LogManager.GetLogger(typeof (EndpointResolver));
-		private readonly Dictionary<Uri, IEndpoint> _cache = new Dictionary<Uri, IEndpoint>();
+		private static readonly Dictionary<string, Type> _schemes = new Dictionary<string, Type>();
 
-		private readonly List<Type> _endpointTypes = new List<Type>();
-		private readonly Dictionary<string, Type> _schemeTypes = new Dictionary<string, Type>();
-	    private readonly IObjectBuilder _objectBuilder;
-		private Assembly[] _assemblies;
+		public IEndpoint Resolve(Uri uri)
+		{
+			lock (_cache)
+			{
+				if (_cache.ContainsKey(uri))
+					return _cache[uri];
 
+				lock (_schemes)
+				{
+					if (_cache.ContainsKey(uri))
+						return _cache[uri];
 
-	    public EndpointResolver(IObjectBuilder objectBuilder)
-	    {
-	        _objectBuilder = objectBuilder;
-	    }
+					if (_schemes.ContainsKey(uri.Scheme))
+					{
+						object obj = Activator.CreateInstance(_schemes[uri.Scheme], uri);
+						if (obj == null)
+							throw new ArgumentException("Unable to create endpoint from uri: " + uri);
 
+						IEndpoint endpoint = obj as IEndpoint;
+						if (endpoint == null)
+							throw new ArgumentException("The type was not converted to an endpoint: " + _schemes[uri.Scheme]);
 
-	    public IEndpoint Resolve(Uri uri)
-        {
-            IDictionary dict = new Hashtable();
-            dict.Add("uri", uri);
-            return _objectBuilder.Build<IEndpoint>(dict);
-        }
+						_cache.Add(uri, endpoint);
 
-        #region Old
-        //public void Initialize()
-        //{
-        //    lock (_endpointTypes)
-        //    {
-        //        _endpointTypes.Clear();
+						return endpoint;
+					}
+				}
+			}
 
-        //        Type endpointType = typeof (IEndpoint);
+			throw new ArgumentException("Unable to resolve Uri " + uri + " to an endpoint");
+		}
 
-        //        _assemblies = AppDomain.CurrentDomain.GetAssemblies();
-
-        //        foreach (Assembly assembly in _assemblies)
-        //        {
-        //            try
-        //            {
-        //                Type[] types = assembly.GetTypes();
-        //                foreach (Type type in types)
-        //                {
-        //                    if (type.IsAbstract)
-        //                        continue;
-
-        //                    if (endpointType.IsAssignableFrom(type))
-        //                    {
-        //                        _endpointTypes.Add(type);
-        //                    }
-        //                }
-        //            }
-        //            catch (ReflectionTypeLoadException ex)
-        //            {
-        //                StringBuilder sb = new StringBuilder();
-        //                int i = 0;
-        //                sb.AppendLine("EndpointResolver Error");
-        //                sb.AppendLine(assembly.FullName);
-        //                foreach (Exception exception in ex.LoaderExceptions)
-        //                {
-        //                    sb.AppendFormat("{0}:{1} {2}", i, exception.Message, Environment.NewLine);
-        //                    i++;
-        //                }
-
-        //                throw new EndpointException(null, sb.ToString(), ex);
-        //            }
-        //        }
-        //    }
-        //}
-        //public IEndpoint Resolve2(Uri uri)
-        //{
-        //    Check.Parameter(uri).WithMessage("Uri").IsNotNull();
-
-        //    if (_endpointTypes.Count == 0)
-        //        Initialize();
-
-        //    if (_cache.ContainsKey(uri))
-        //        return _cache[uri];
-
-        //    IEndpoint result = null;
-
-        //    object[] args = new object[] {uri};
-
-        //    string scheme = uri.Scheme;
-
-        //    result = LookupByScheme(uri, scheme, args);
-
-        //    if (result == null)
-        //    {
-        //        result = LookupByEndpointType(scheme, args);
-        //    }
-
-        //    if (result == null)
-        //        throw new EndpointException(default(IEndpoint), "The endpoint address could not be resolved: " + uri);
-
-        //    lock (_cache)
-        //    {
-        //        if (!_cache.ContainsKey(uri))
-        //            _cache.Add(uri, result);
-        //    }
-
-        //    return result;
-        //}
-
-        //private IEndpoint LookupByScheme(Uri uri, string scheme, object[] args)
-        //{
-        //    lock (_schemeTypes)
-        //    {
-        //        if (_schemeTypes.ContainsKey(scheme))
-        //        {
-        //            IEndpoint endpoint = (IEndpoint) Activator.CreateInstance(_schemeTypes[scheme], args);
-
-        //            return endpoint;
-        //        }
-        //    }
-        //    return null;
-        //}
-
-        //private IEndpoint LookupByEndpointType(string scheme, object[] args)
-        //{
-        //    foreach (Type type in _endpointTypes)
-        //    {
-        //        try
-        //        {
-        //            IEndpoint endpoint = (IEndpoint) Activator.CreateInstance(type, args);
-
-        //            lock (_schemeTypes)
-        //            {
-        //                if (!_schemeTypes.ContainsKey(scheme))
-        //                    _schemeTypes[scheme] = type;
-        //            }
-
-        //            return endpoint;
-        //        }
-        //        catch (Exception)
-        //        {
-        //            if (_log.IsDebugEnabled)
-        //                _log.DebugFormat("The type {0} does not support the Uri scheme of {1}", type.FullName, scheme);
-        //        }
-        //    }
-
-        //    return null;
-        //}
-        #endregion
-    }
+		public static void AddTransport(string scheme, Type t)
+		{
+			lock (_schemes)
+				_schemes.Add(scheme, t);
+		}
+	}
 }
