@@ -38,49 +38,6 @@ namespace MassTransit.ServiceBus.Internal
 	        _objectBuilder = objectBuilder;
 	    }
 
-	    public void Initialize()
-		{
-			lock (_endpointTypes)
-			{
-				_endpointTypes.Clear();
-
-				Type endpointType = typeof (IEndpoint);
-
-				_assemblies = AppDomain.CurrentDomain.GetAssemblies();
-
-                foreach (Assembly assembly in _assemblies)
-                {
-                    try
-                    {
-                        Type[] types = assembly.GetTypes();
-                        foreach (Type type in types)
-                        {
-                            if (type.IsAbstract)
-                                continue;
-
-                            if (endpointType.IsAssignableFrom(type))
-                            {
-                                _endpointTypes.Add(type);
-                            }
-                        }
-                    }
-                    catch (ReflectionTypeLoadException ex)
-                    {
-                        StringBuilder sb = new StringBuilder();
-                        int i = 0;
-                        sb.AppendLine("EndpointResolver Error");
-                        sb.AppendLine(assembly.FullName);
-                        foreach (Exception exception in ex.LoaderExceptions)
-                        {
-                            sb.AppendFormat("{0}:{1} {2}", i, exception.Message, Environment.NewLine);
-                            i++;
-                        }
-
-                        throw new EndpointException(null, sb.ToString(), ex);
-                    }
-                }
-			}
-		}
 
 	    public IEndpoint Resolve(Uri uri)
         {
@@ -89,79 +46,124 @@ namespace MassTransit.ServiceBus.Internal
             return _objectBuilder.Build<IEndpoint>(dict);
         }
 
-		public IEndpoint Resolve2(Uri uri)
-		{
-			Check.Parameter(uri).WithMessage("Uri").IsNotNull();
+        #region Old
+        //public void Initialize()
+        //{
+        //    lock (_endpointTypes)
+        //    {
+        //        _endpointTypes.Clear();
 
-			if (_endpointTypes.Count == 0)
-				Initialize();
+        //        Type endpointType = typeof (IEndpoint);
 
-			if (_cache.ContainsKey(uri))
-				return _cache[uri];
+        //        _assemblies = AppDomain.CurrentDomain.GetAssemblies();
 
-			IEndpoint result = null;
+        //        foreach (Assembly assembly in _assemblies)
+        //        {
+        //            try
+        //            {
+        //                Type[] types = assembly.GetTypes();
+        //                foreach (Type type in types)
+        //                {
+        //                    if (type.IsAbstract)
+        //                        continue;
 
-			object[] args = new object[] {uri};
+        //                    if (endpointType.IsAssignableFrom(type))
+        //                    {
+        //                        _endpointTypes.Add(type);
+        //                    }
+        //                }
+        //            }
+        //            catch (ReflectionTypeLoadException ex)
+        //            {
+        //                StringBuilder sb = new StringBuilder();
+        //                int i = 0;
+        //                sb.AppendLine("EndpointResolver Error");
+        //                sb.AppendLine(assembly.FullName);
+        //                foreach (Exception exception in ex.LoaderExceptions)
+        //                {
+        //                    sb.AppendFormat("{0}:{1} {2}", i, exception.Message, Environment.NewLine);
+        //                    i++;
+        //                }
 
-			string scheme = uri.Scheme;
+        //                throw new EndpointException(null, sb.ToString(), ex);
+        //            }
+        //        }
+        //    }
+        //}
+        //public IEndpoint Resolve2(Uri uri)
+        //{
+        //    Check.Parameter(uri).WithMessage("Uri").IsNotNull();
 
-			result = LookupByScheme(uri, scheme, args);
+        //    if (_endpointTypes.Count == 0)
+        //        Initialize();
 
-			if (result == null)
-			{
-				result = LookupByEndpointType(scheme, args);
-			}
+        //    if (_cache.ContainsKey(uri))
+        //        return _cache[uri];
 
-			if (result == null)
-				throw new EndpointException(default(IEndpoint), "The endpoint address could not be resolved: " + uri);
+        //    IEndpoint result = null;
 
-			lock (_cache)
-			{
-				if (!_cache.ContainsKey(uri))
-					_cache.Add(uri, result);
-			}
+        //    object[] args = new object[] {uri};
 
-			return result;
-		}
+        //    string scheme = uri.Scheme;
 
-		private IEndpoint LookupByScheme(Uri uri, string scheme, object[] args)
-		{
-			lock (_schemeTypes)
-			{
-				if (_schemeTypes.ContainsKey(scheme))
-				{
-					IEndpoint endpoint = (IEndpoint) Activator.CreateInstance(_schemeTypes[scheme], args);
+        //    result = LookupByScheme(uri, scheme, args);
 
-					return endpoint;
-				}
-			}
-			return null;
-		}
+        //    if (result == null)
+        //    {
+        //        result = LookupByEndpointType(scheme, args);
+        //    }
 
-		private IEndpoint LookupByEndpointType(string scheme, object[] args)
-		{
-			foreach (Type type in _endpointTypes)
-			{
-				try
-				{
-					IEndpoint endpoint = (IEndpoint) Activator.CreateInstance(type, args);
+        //    if (result == null)
+        //        throw new EndpointException(default(IEndpoint), "The endpoint address could not be resolved: " + uri);
 
-					lock (_schemeTypes)
-					{
-						if (!_schemeTypes.ContainsKey(scheme))
-							_schemeTypes[scheme] = type;
-					}
+        //    lock (_cache)
+        //    {
+        //        if (!_cache.ContainsKey(uri))
+        //            _cache.Add(uri, result);
+        //    }
 
-					return endpoint;
-				}
-				catch (Exception)
-				{
-					if (_log.IsDebugEnabled)
-						_log.DebugFormat("The type {0} does not support the Uri scheme of {1}", type.FullName, scheme);
-				}
-			}
+        //    return result;
+        //}
 
-			return null;
-		}
-	}
+        //private IEndpoint LookupByScheme(Uri uri, string scheme, object[] args)
+        //{
+        //    lock (_schemeTypes)
+        //    {
+        //        if (_schemeTypes.ContainsKey(scheme))
+        //        {
+        //            IEndpoint endpoint = (IEndpoint) Activator.CreateInstance(_schemeTypes[scheme], args);
+
+        //            return endpoint;
+        //        }
+        //    }
+        //    return null;
+        //}
+
+        //private IEndpoint LookupByEndpointType(string scheme, object[] args)
+        //{
+        //    foreach (Type type in _endpointTypes)
+        //    {
+        //        try
+        //        {
+        //            IEndpoint endpoint = (IEndpoint) Activator.CreateInstance(type, args);
+
+        //            lock (_schemeTypes)
+        //            {
+        //                if (!_schemeTypes.ContainsKey(scheme))
+        //                    _schemeTypes[scheme] = type;
+        //            }
+
+        //            return endpoint;
+        //        }
+        //        catch (Exception)
+        //        {
+        //            if (_log.IsDebugEnabled)
+        //                _log.DebugFormat("The type {0} does not support the Uri scheme of {1}", type.FullName, scheme);
+        //        }
+        //    }
+
+        //    return null;
+        //}
+        #endregion
+    }
 }
