@@ -1,30 +1,28 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <castle>
-
-  <facilities>
-
-    <facility id="masstransit">
-
-      <bus id="local" endpoint="msmq://localhost/test_server">
-        <subscriptionCache mode="local" />
-        <subscriptionService endpoint ="msmq://localhost/mt_pubsub" />
-      </bus>
-
-      <transports>
-        <transport>MassTransit.ServiceBus.MSMQ.MsmqEndpoint, MassTransit.ServiceBus.MSMQ</transport>
-      </transports>
-    </facility>
-  </facilities>
-  
 	<components>
 
-		<!-- load all of the services here : Windsore.Register(AllTypes.Of(IHostedService)-->
-    <!-- use the startable facitlity -->
+		<!-- load all of the services here : Windsor.Register(AllTypes.Of(IHostedService)-->
+		<!-- use the startable facitlity -->
 		<component id="mySimpleServer"
 				   lifestyle="singleton"
 				   service="MassTransit.ServiceBus.IHostedService, MassTransit.ServiceBus"
 				   type="Server.PasswordUpdateService, Server">
 		</component>
-
 	</components>
+
+	<facilities>
+		<facility id="masstransit">
+
+			<bus id="main"
+				 endpoint="msmq://localhost/test_server">
+				<subscriptionService endpoint="msmq://localhost/mt_pubsub" />
+			</bus>
+
+			<transports>
+				<transport>MassTransit.ServiceBus.MSMQ.MsmqEndpoint, MassTransit.ServiceBus.MSMQ</transport>
+			</transports>
+		</facility>
+
+	</facilities>
 </castle>

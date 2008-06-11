@@ -1,14 +1,14 @@
 namespace Server
 {
-	using System;
-	using System.IO;
+	using log4net;
 	using MassTransit.ServiceBus;
 	using SecurityMessages;
 
 	public class PasswordUpdateService :
 		IHostedService,
-        Consumes<RequestPasswordUpdate>.All
+		Consumes<RequestPasswordUpdate>.All
 	{
+		private static readonly ILog _log = LogManager.GetLogger(typeof (PasswordUpdateService));
 		private readonly IServiceBus _serviceBus;
 
 		public PasswordUpdateService(IServiceBus serviceBus)
@@ -25,25 +25,21 @@ namespace Server
 
 		public void Start()
 		{
-			log4net.Config.XmlConfigurator.Configure(new FileInfo("server.log4net.xml"));
 			_serviceBus.Subscribe(this);
 		}
 
 		public void Stop()
 		{
-			//don't unsubscribe
-			//just because I stopped doesn't mean I want to stop getting messages
+			_serviceBus.Unsubscribe(this);
 		}
 
 		#endregion
 
-	    public void Consume(RequestPasswordUpdate message)
-	    {
-			Console.WriteLine(new string('-', 20));
-			Console.WriteLine("Received Message");
-			Console.WriteLine(message.NewPassword);
-			Console.WriteLine(new string('-', 20));
-			_serviceBus.Publish(new PasswordUpdateComplete(0));
-	    }
+		public void Consume(RequestPasswordUpdate message)
+		{
+			_log.InfoFormat("Received password update: {0} ({1})", message.NewPassword, message.CorrelationId);
+
+			_serviceBus.Publish(new PasswordUpdateComplete(message.CorrelationId, 0));
+		}
 	}
 }

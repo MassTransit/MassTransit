@@ -1,21 +1,21 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
+<castle>
+	<components>
 
-<configuration>
+	</components>
 
-  <facilities>
+	<facilities>
+		<facility id="masstransit">
 
-    <facility id="masstransit">
+			<bus id="main"
+				 endpoint="msmq://localhost/test_client">
+				<subscriptionService endpoint="msmq://localhost/mt_pubsub" />
+			</bus>
 
-      <bus id="local" endpoint="msmq://localhost/test_client">
-        <subscriptionCache mode="local" />
-        <subscriptionService endpoint ="msmq://localhost/mt_pubsub" />
-      </bus>
+			<transports>
+				<transport>MassTransit.ServiceBus.MSMQ.MsmqEndpoint, MassTransit.ServiceBus.MSMQ</transport>
+			</transports>
+		</facility>
 
-      <transports>
-        <transport>MassTransit.ServiceBus.MSMQ.MsmqEndpoint, MassTransit.ServiceBus.MSMQ</transport>
-      </transports>
-    </facility>
-
-  </facilities>
-
-</configuration>
+	</facilities>
+</castle>

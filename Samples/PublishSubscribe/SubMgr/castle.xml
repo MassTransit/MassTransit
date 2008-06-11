@@ -5,7 +5,9 @@
 	</components>
 
 	<facilities>
-		<facility id="nhibernate" isWeb="false" type="Castle.Facilities.NHibernateIntegration.NHibernateFacility, Castle.Facilities.NHibernateIntegration">
+		<facility id="nhibernate"
+				  isWeb="false"
+				  type="Castle.Facilities.NHibernateIntegration.NHibernateFacility, Castle.Facilities.NHibernateIntegration">
 			<factory id="nhibernate.factory">
 				<settings>
 					<item key="connection.provider">
@@ -28,15 +30,16 @@
 			</factory>
 		</facility>
 
-    <facility id="masstransit">
+		<facility id="masstransit">
 
-      <bus id="local" endpoint="msmq://localhost/mt_pubsub">
-        <subscriptionCache mode="local" />
-      </bus>
+			<bus id="subscriptionService"
+				 endpoint="msmq://localhost/mt_pubsub">
+			</bus>
 
-      <transports>
-        <transport>MassTransit.ServiceBus.MSMQ.MsmqEndpoint, MassTransit.ServiceBus.MSMQ</transport>
-      </transports>
-    </facility>
+			<transports>
+				<transport>MassTransit.ServiceBus.MSMQ.MsmqEndpoint, MassTransit.ServiceBus.MSMQ</transport>
+			</transports>
+		</facility>
+
   </facilities>
 </castle>

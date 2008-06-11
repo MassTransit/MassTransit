@@ -12,31 +12,55 @@
 /// specific language governing permissions and limitations under the License.
 namespace MassTransit.Host2.Hosts
 {
-    using System;
-    using log4net;
+	using System;
+	using System.Threading;
+	using log4net;
 
-    public class ConsoleHost
-    {
-        private static readonly ILog _log = LogManager.GetLogger(typeof(ConsoleHost));
-        private HostedEnvironment _environment;
+	public class ConsoleHost
+	{
+		private static readonly ILog _log = LogManager.GetLogger(typeof (ConsoleHost));
+		private readonly HostedEnvironment _environment;
 
 
-        public ConsoleHost(HostedEnvironment environment)
-        {
-            _environment = environment;
-        }
+		public ConsoleHost(HostedEnvironment environment)
+		{
+			_environment = environment;
+		}
 
-        public void Run()
-        {
-            _log.Debug("Starting up as a console application");
+		public void Run()
+		{
+			_log.Debug("Starting up as a console application");
 
-            _environment.Start();
+			ManualResetEvent serviceCompleted = new ManualResetEvent(false);
+			ManualResetEvent terminateService = new ManualResetEvent(false);
 
-            Console.WriteLine("The service is running, press any key to exit.");
-            Console.ReadKey();
-            Console.WriteLine("Exiting.");
+			WaitHandle[] waitHandles = new WaitHandle[] {serviceCompleted, terminateService};
 
-            _environment.Stop();
-        }
-    }
+			_environment.Completed += delegate { serviceCompleted.Set(); };
+
+			Console.CancelKeyPress += delegate
+			                          	{
+			                          		_log.Info("Control+C detected, exiting.");
+			                          		terminateService.Set();
+			                          	};
+
+			_environment.Start();
+
+			_log.InfoFormat("The service is running, press Control+C to exit.");
+
+			int result;
+			while ((result = WaitHandle.WaitAny(waitHandles, TimeSpan.FromSeconds(30), true)) == WaitHandle.WaitTimeout)
+			{
+			}
+
+			if (result == 0) // our service completed
+			{
+			}
+			else if (result == 1 || result == 2) // the application service exited
+			{
+				_log.Info("Stopping the service");
+				_environment.Stop();
+			}
+		}
+	}
 }

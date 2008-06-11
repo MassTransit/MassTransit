@@ -115,12 +115,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Build.MSBuild",
 		Release.AspNetCompiler.Debug = "False"
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.DistributedSubscriptionCache", "MassTransit.DistributedSubscriptionCache\MassTransit.DistributedSubscriptionCache.csproj", "{856DF42C-FA82-4AFA-95D9-A84B40B833A1}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.DistributedSubscriptionCache.Tests", "MassTransit.DistributedSubscriptionCache.Tests\MassTransit.DistributedSubscriptionCache.Tests.csproj", "{075A818E-88AC-4936-AEEB-EEAD0EE86634}"
 	ProjectSection(WebsiteProperties) = preProject
 		Debug.AspNetCompiler.Debug = "True"
@@ -217,10 +211,6 @@ Global
 		{3DBCEFE6-2A73-4D1B-A6E1-343AFE46E6CF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3DBCEFE6-2A73-4D1B-A6E1-343AFE46E6CF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3DBCEFE6-2A73-4D1B-A6E1-343AFE46E6CF}.Release|Any CPU.Build.0 = Release|Any CPU
-		{856DF42C-FA82-4AFA-95D9-A84B40B833A1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{856DF42C-FA82-4AFA-95D9-A84B40B833A1}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{856DF42C-FA82-4AFA-95D9-A84B40B833A1}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{856DF42C-FA82-4AFA-95D9-A84B40B833A1}.Release|Any CPU.Build.0 = Release|Any CPU
 		{075A818E-88AC-4936-AEEB-EEAD0EE86634}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{075A818E-88AC-4936-AEEB-EEAD0EE86634}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{075A818E-88AC-4936-AEEB-EEAD0EE86634}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -244,7 +234,6 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{8EE6C0CB-93D1-4B92-8CD5-24C77452CBE5} = {56F516D7-BC3C-49E1-A639-83C5F14953F8}
 		{4B976E20-6322-40B0-A398-7D52B6F2C27E} = {56F516D7-BC3C-49E1-A639-83C5F14953F8}
-		{856DF42C-FA82-4AFA-95D9-A84B40B833A1} = {56F516D7-BC3C-49E1-A639-83C5F14953F8}
 		{075A818E-88AC-4936-AEEB-EEAD0EE86634} = {56F516D7-BC3C-49E1-A639-83C5F14953F8}
 		{34EAECFD-D49F-465F-A4E3-DD12374A6BE8} = {B74C814D-E77C-4785-A8FF-AADBD56CB295}
 		{C7BBA81E-DCAC-4C54-A30F-A645524449DF} = {B74C814D-E77C-4785-A8FF-AADBD56CB295}

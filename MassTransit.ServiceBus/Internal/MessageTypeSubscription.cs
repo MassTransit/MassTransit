@@ -61,11 +61,17 @@ namespace MassTransit.ServiceBus.Internal
 		public void AddComponent()
 		{
 			_dispatcher.Attach<TMessage>(_componentConsumer);
+
+			if (_cache != null)
+				_cache.Add(new Subscription(typeof(TMessage).FullName, _bus.Endpoint.Uri));
 		}
 
 		public void RemoveComponent()
 		{
 			_dispatcher.Detach<TMessage>(_componentConsumer);
+
+			if (_cache != null)
+				_cache.Remove(new Subscription(typeof(TMessage).FullName, _bus.Endpoint.Uri));
 		}
 
 		public void Subscribe(Consumes<TMessage>.All consumer)

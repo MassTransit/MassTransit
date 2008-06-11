@@ -1,38 +1,36 @@
 namespace Client
 {
-    using MassTransit.Host2;
+	using MassTransit.Host2;
     using MassTransit.ServiceBus;
     using SecurityMessages;
 
-    public class ClientEnvironment : HostedEnvironment
-    {
-        public ClientEnvironment()
-        {
-        }
+	public class ClientEnvironment : HostedEnvironment
+	{
+		public ClientEnvironment()
+		{
+		}
 
-        public ClientEnvironment(string xmlFile) : base(xmlFile)
-        {
+		public ClientEnvironment(string xmlFile) : base(xmlFile)
+		{
             Container.AddComponent<IHostedService, AskPasswordQuestion>();
-            Container.AddComponent<PasswordUpdater>();
+            Container.AddComponent<Consumes<PasswordUpdateComplete>.All, PasswordUpdater>();
 
             IServiceBus bus = Container.Resolve<IServiceBus>();
-            bus.AddComponent<PasswordUpdateComplete>();
-        }
+		}
 
-        public override string Description
-        {
-            get { return "Pub Sub Client"; }
-        }
+		public override string ServiceName
+		{
+			get { return "SampleClientService"; }
+		}
 
+		public override string DispalyName
+		{
+			get { return "MassTransit Sample Client Service"; }
+		}
 
-        public override string ServiceName
-        {
-            get { return "PubSubClient"; }
-        }
-
-        public override string DispalyName
-        {
-            get { return "Pub Sub Client"; }
-        }
-    }
+		public override string Description
+		{
+			get { return "Acts as a client on the service bus"; }
+		}
+	}
 }
