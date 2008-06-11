@@ -1,5 +1,6 @@
 namespace SubMgr
 {
+    using System.IO;
     using log4net.Config;
     using MassTransit.Host2;
     using MassTransit.ServiceBus;
@@ -10,7 +11,7 @@ namespace SubMgr
     {
         private static void Main(string[] args)
         {
-            XmlConfigurator.Configure();
+            XmlConfigurator.Configure(new FileInfo("log4net.xml"));
 
             HostedEnvironment env = new SubscriptionManagerEnvironment("castle.xml");
             env.Container.AddComponent<IHostedService, SubscriptionService>();
