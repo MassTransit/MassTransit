@@ -7,8 +7,8 @@
     <ProjectGuid>{834ED79F-BA0E-48F9-831A-789576EE516B}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>MassTransit.Host2</RootNamespace>
-    <AssemblyName>MassTransit.Host2</AssemblyName>
+    <RootNamespace>MassTransit.Host</RootNamespace>
+    <AssemblyName>MassTransit.Host</AssemblyName>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
