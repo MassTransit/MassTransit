@@ -8,7 +8,7 @@ osql -S %INSTANCE% -E -i "%DIR%SQLScripts\CreateUserAccountLoginDDL.sql"
 
 echo .
 
-"%DIR%host.exe" -install
+"%DIR%PubSub.exe" -install
 
 echo .
 
