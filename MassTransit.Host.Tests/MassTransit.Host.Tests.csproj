@@ -52,18 +52,6 @@
     <Compile Include="When_loading_configuration_from_castle.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\MassTransit.Host.Config.Castle\MassTransit.Host.Config.Castle.csproj">
-      <Project>{C7BBA81E-DCAC-4C54-A30F-A645524449DF}</Project>
-      <Name>MassTransit.Host.Config.Castle</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\MassTransit.Host.Config\MassTransit.Host.Config.csproj">
-      <Project>{F5AF6E6C-E5AF-4836-9D95-D78D30D7C994}</Project>
-      <Name>MassTransit.Host.Config</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\MassTransit.Host\MassTransit.Host.csproj">
-      <Project>{1BB11713-C12B-4273-A530-C3BF94B7F7DC}</Project>
-      <Name>MassTransit.Host</Name>
-    </ProjectReference>
     <ProjectReference Include="..\MassTransit.ServiceBus\MassTransit.ServiceBus.csproj">
       <Project>{90482397-6282-465E-8B86-39865FC30127}</Project>
       <Name>MassTransit.ServiceBus</Name>
