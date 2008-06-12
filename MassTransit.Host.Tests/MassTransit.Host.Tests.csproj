@@ -52,6 +52,10 @@
     <Compile Include="When_loading_configuration_from_castle.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\MassTransit.Host\MassTransit.Host.csproj">
+      <Project>{834ED79F-BA0E-48F9-831A-789576EE516B}</Project>
+      <Name>MassTransit.Host</Name>
+    </ProjectReference>
     <ProjectReference Include="..\MassTransit.ServiceBus\MassTransit.ServiceBus.csproj">
       <Project>{90482397-6282-465E-8B86-39865FC30127}</Project>
       <Name>MassTransit.ServiceBus</Name>
