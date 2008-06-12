@@ -102,18 +102,19 @@
 			<include name="${builddir}\Castle.Facilities.NHibernateIntegration.dll" />
 			<include name="${builddir}\Castle.Services.Transaction.dll" />
 			<include name="${builddir}\Castle.Windsor.dll" />
+			<include name="${builddir}\PubSub.exe" />
 
 			<!-- bat files -->
 			<include name=".\PubSub_Install_Template\_install.cmd" />
 			<include name=".\PubSub_Install_Template\_uninstall.cmd" />
 			<include name=".\PubSub_Install_Template\_README.txt" />
+			<include name=".\PubSub_Install_Template\_createQueue.vbs" />
 			
 			<include name=".\InstallMsmq.bat" />
 			
 			<!-- configs -->
-			<!-- host.exe.config -->
-			<!-- log4net.config -->
-			<!-- castle.xml -->
+			<include name="${builddir}\pubsub.castle.config" />
+			<include name=".\PubSub\log4net.xml" />
 			</fileset>
 			
 		</copy>
