@@ -19,25 +19,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Subscriptions", "Subscripti
 		Release.AspNetCompiler.Debug = "False"
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Host", "MassTransit.Host\MassTransit.Host.csproj", "{51F34C86-F3C8-4F64-9C5A-120ECB9EFAE6}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Host.Tests", "MassTransit.Host.Tests\MassTransit.Host.Tests.csproj", "{34EAECFD-D49F-465F-A4E3-DD12374A6BE8}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Host.Config.Castle", "MassTransit.Host.Config.Castle\MassTransit.Host.Config.Castle.csproj", "{C7BBA81E-DCAC-4C54-A30F-A645524449DF}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Host.Config", "MassTransit.Host.Config\MassTransit.Host.Config.csproj", "{F5AF6E6C-E5AF-4836-9D95-D78D30D7C994}"
 	ProjectSection(WebsiteProperties) = preProject
 		Debug.AspNetCompiler.Debug = "True"
 		Release.AspNetCompiler.Debug = "False"
@@ -139,7 +121,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.WindsorIntegrat
 		Release.AspNetCompiler.Debug = "False"
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Host2", "MassTransit.Host2\MassTransit.Host2.csproj", "{834ED79F-BA0E-48F9-831A-789576EE516B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Host", "MassTransit.Host\MassTransit.Host.csproj", "{834ED79F-BA0E-48F9-831A-789576EE516B}"
 	ProjectSection(WebsiteProperties) = preProject
 		Debug.AspNetCompiler.Debug = "True"
 		Release.AspNetCompiler.Debug = "False"
@@ -159,22 +141,10 @@ Global
 		{76646B96-936B-4D31-A053-35CD630E3C68}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{76646B96-936B-4D31-A053-35CD630E3C68}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{76646B96-936B-4D31-A053-35CD630E3C68}.Release|Any CPU.Build.0 = Release|Any CPU
-		{51F34C86-F3C8-4F64-9C5A-120ECB9EFAE6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{51F34C86-F3C8-4F64-9C5A-120ECB9EFAE6}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{51F34C86-F3C8-4F64-9C5A-120ECB9EFAE6}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{51F34C86-F3C8-4F64-9C5A-120ECB9EFAE6}.Release|Any CPU.Build.0 = Release|Any CPU
 		{34EAECFD-D49F-465F-A4E3-DD12374A6BE8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{34EAECFD-D49F-465F-A4E3-DD12374A6BE8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{34EAECFD-D49F-465F-A4E3-DD12374A6BE8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{34EAECFD-D49F-465F-A4E3-DD12374A6BE8}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C7BBA81E-DCAC-4C54-A30F-A645524449DF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C7BBA81E-DCAC-4C54-A30F-A645524449DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C7BBA81E-DCAC-4C54-A30F-A645524449DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C7BBA81E-DCAC-4C54-A30F-A645524449DF}.Release|Any CPU.Build.0 = Release|Any CPU
-		{F5AF6E6C-E5AF-4836-9D95-D78D30D7C994}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F5AF6E6C-E5AF-4836-9D95-D78D30D7C994}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F5AF6E6C-E5AF-4836-9D95-D78D30D7C994}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F5AF6E6C-E5AF-4836-9D95-D78D30D7C994}.Release|Any CPU.Build.0 = Release|Any CPU
 		{6F90867C-E092-4EDC-B3DE-600D39DF0335}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{6F90867C-E092-4EDC-B3DE-600D39DF0335}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6F90867C-E092-4EDC-B3DE-600D39DF0335}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -236,9 +206,6 @@ Global
 		{4B976E20-6322-40B0-A398-7D52B6F2C27E} = {56F516D7-BC3C-49E1-A639-83C5F14953F8}
 		{075A818E-88AC-4936-AEEB-EEAD0EE86634} = {56F516D7-BC3C-49E1-A639-83C5F14953F8}
 		{34EAECFD-D49F-465F-A4E3-DD12374A6BE8} = {B74C814D-E77C-4785-A8FF-AADBD56CB295}
-		{C7BBA81E-DCAC-4C54-A30F-A645524449DF} = {B74C814D-E77C-4785-A8FF-AADBD56CB295}
-		{F5AF6E6C-E5AF-4836-9D95-D78D30D7C994} = {B74C814D-E77C-4785-A8FF-AADBD56CB295}
-		{51F34C86-F3C8-4F64-9C5A-120ECB9EFAE6} = {B74C814D-E77C-4785-A8FF-AADBD56CB295}
 		{834ED79F-BA0E-48F9-831A-789576EE516B} = {B74C814D-E77C-4785-A8FF-AADBD56CB295}
 		{AF3C3E95-BA6C-41FF-873D-7C2E8994EE9D} = {0006D6BB-1382-4B32-AD32-CA037F5CD4F6}
 		{6F90867C-E092-4EDC-B3DE-600D39DF0335} = {0006D6BB-1382-4B32-AD32-CA037F5CD4F6}
