@@ -196,7 +196,7 @@ namespace MassTransit.ServiceBus.Subscriptions
 					continue;
 
 				IEndpoint ep = _endpointResolver.Resolve(uri);
-				ep.Send(message);
+				ep.Send<T>(message);
 			}
 		}
 	}

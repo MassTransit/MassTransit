@@ -83,7 +83,7 @@
 	</logger>
 
 	<logger name="MassTransit.Messages">
-		<level value="OFF" />
+		<level value="DEBUG" />
 		<appender-ref ref="MT.Messages" />
 	</logger>
 </log4net>
