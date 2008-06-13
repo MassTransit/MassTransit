@@ -50,6 +50,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BatchLoad\BatchLoadTest.cs" />
+    <Compile Include="BatchLoad\BatchLoadTestContainer.cs" />
     <Compile Include="Correlated\CorrelatedController.cs" />
     <Compile Include="Correlated\CorrelatedMessageTest.cs" />
     <Compile Include="Correlated\CorrelatedTestContainer.cs" />
