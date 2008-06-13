@@ -92,6 +92,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="install.xml" />
     <Content Include="pubsub.castle.xml" />
     <Content Include="log4net.xml" />
   </ItemGroup>
