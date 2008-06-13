@@ -1,1 +1,0 @@
-.\bin\host.exe -config:MassTransit.Host.Config.Castle -file:.\Server.xml

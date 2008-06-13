@@ -65,9 +65,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\MassTransit.Host2\MassTransit.Host2.csproj">
+    <ProjectReference Include="..\..\..\MassTransit.Host\MassTransit.Host.csproj">
       <Project>{834ED79F-BA0E-48F9-831A-789576EE516B}</Project>
-      <Name>MassTransit.Host2</Name>
+      <Name>MassTransit.Host</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\..\MassTransit.ServiceBus.MSMQ\MassTransit.ServiceBus.MSMQ.csproj">
       <Project>{6F90867C-E092-4EDC-B3DE-600D39DF0335}</Project>
