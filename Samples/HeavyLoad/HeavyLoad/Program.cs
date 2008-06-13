@@ -1,6 +1,7 @@
 namespace HeavyLoad
 {
 	using System;
+	using BatchLoad;
 	using Correlated;
 	using Load;
 	using log4net;
@@ -23,10 +24,26 @@ namespace HeavyLoad
 
 			//Console.WriteLine("Waiting for next test...");
 
-			RunCorrelatedMessageTest();
+			//RunCorrelatedMessageTest();
+
+			RunBatchLoadTest();
 
 			Console.WriteLine("End of line.");
 			Console.ReadLine();
+		}
+
+		private static void RunBatchLoadTest()
+		{
+			StopWatch stopWatch = new StopWatch();
+
+			using (BatchLoadTest test = new BatchLoadTest())
+			{
+				test.Run(stopWatch);
+			}
+
+			Console.WriteLine("Batch Load Test: ");
+			Console.WriteLine(stopWatch.ToString());
+			
 		}
 
 		private static void RunLocalMsmqLoadTest()
