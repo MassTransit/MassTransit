@@ -39,9 +39,7 @@ namespace MassTransit.ServiceBus.Tests
 
 			BatchConsumer consumer = new BatchConsumer();
 
-			BatchDistributor<IndividualMessage, Guid> distributor = new BatchDistributor<IndividualMessage, Guid>(_bus, consumer);
-
-			_bus.Subscribe(distributor);
+			_bus.Subscribe(consumer);
 
 			Guid batchId = Guid.NewGuid();
 			for (int i = 0; i < length; i++)
@@ -118,14 +116,12 @@ namespace MassTransit.ServiceBus.Tests
 
 			BatchConsumer consumer = new BatchConsumer();
 
-			BatchDistributor<IndividualMessage, Guid> distributor = new BatchDistributor<IndividualMessage, Guid>(_bus, consumer);
+			_bus.Subscribe(consumer);
 
 			Guid batchId = Guid.NewGuid();
 			IndividualMessage message = new IndividualMessage(batchId, 2);
 
 			_bus.Subscribe<BatchTimeout<IndividualMessage, Guid>>(delegate { });
-
-			_bus.Subscribe(distributor);
 
 			Assert.That(_bus.Accept(message), Is.True, "Bus did not accept the message");
 
