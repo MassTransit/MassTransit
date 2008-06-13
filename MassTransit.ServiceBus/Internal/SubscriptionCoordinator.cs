@@ -22,6 +22,7 @@ namespace MassTransit.ServiceBus.Internal
 		private static readonly Type _correlatedConsumerType = typeof (Consumes<>.For<>);
 		private static readonly Type _correlatedMessageType = typeof (CorrelatedBy<>);
 		private static readonly Type _selectiveConsumerType = typeof (Consumes<>.Selected);
+		private static readonly Type _batchType = typeof (Batch<,>);
 		private readonly IObjectBuilder _builder;
 		private readonly IServiceBus _bus;
 		private readonly ISubscriptionCache _cache;
@@ -83,9 +84,24 @@ namespace MassTransit.ServiceBus.Internal
 						if (usedMessageTypes.Contains(arguments[0]))
 							continue;
 
-						Type subscriptionType = typeof (MessageTypeSubscription<,>).MakeGenericType(componentType, arguments[0]);
+						Type messageType = arguments[0];
 
-						ISubscriptionTypeInfo subscriptionTypeInfo = (ISubscriptionTypeInfo) Activator.CreateInstance(subscriptionType, SubscriptionMode.Selected, _dispatcher, _bus, _cache, _builder);
+						ISubscriptionTypeInfo subscriptionTypeInfo;
+
+						if (messageType.IsGenericType && messageType.GetGenericTypeDefinition() == _batchType)
+						{
+							Type[] batchArguments = messageType.GetGenericArguments();
+
+							Type subscriptionType = typeof(BatchMessageSubscription<,,>).MakeGenericType(componentType, batchArguments[0], batchArguments[1]);
+
+							subscriptionTypeInfo = (ISubscriptionTypeInfo)Activator.CreateInstance(subscriptionType, _dispatcher, _bus, _cache, _builder);
+						}
+						else
+						{
+							Type subscriptionType = typeof(MessageTypeSubscription<,>).MakeGenericType(componentType, messageType);
+
+							subscriptionTypeInfo = (ISubscriptionTypeInfo) Activator.CreateInstance(subscriptionType, SubscriptionMode.Selected, _dispatcher, _bus, _cache, _builder);
+						}
 
 						info.Add(subscriptionTypeInfo);
 

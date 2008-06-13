@@ -29,6 +29,7 @@ namespace MassTransit.ServiceBus
 		private readonly Semaphore _messageReady;
 		private readonly Queue<TMessage> _messages = new Queue<TMessage>();
 		private readonly TimeSpan _timeout;
+		private object _countLocker = new object();
 		private int _messageCount;
 		private readonly IServiceBus _bus;
 
@@ -69,6 +70,7 @@ namespace MassTransit.ServiceBus
 		{
 			WaitHandle[] handles = new WaitHandle[] {_messageReady, _complete};
 
+			// TODO This can hang on shutdown if we're waiting for a batch to finish, so we need to have a kill/cancel to shut it down
 			int waitResult;
 			while ((waitResult = WaitHandle.WaitAny(handles, _timeout, true)) == 0)
 			{
@@ -76,12 +78,15 @@ namespace MassTransit.ServiceBus
 				lock (_messages)
 					message = _messages.Dequeue();
 
-				Interlocked.Increment(ref _messageCount);
-
-				if (_messageCount == _batchLength)
-					_complete.Set();
-
 				yield return message;
+
+				lock (_countLocker)
+				{
+					_messageCount++;
+
+					if (_messageCount == _batchLength)
+						_complete.Set();
+				}
 			}
 
 			if (waitResult == WaitHandle.WaitTimeout)
