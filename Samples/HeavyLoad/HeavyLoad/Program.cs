@@ -8,25 +8,21 @@ namespace HeavyLoad
 
 	internal class Program
 	{
-		private static readonly ILog _log = LogManager.GetLogger(typeof(Program));
+		private static readonly ILog _log = LogManager.GetLogger(typeof (Program));
 
 		private static void Main(string[] args)
 		{
-			//log4net.Config.XmlConfigurator.ConfigureAndWatch(new FileInfo("log4net.config"));
-
 			_log.Info("HeavyLoad - MassTransit Load Generator");
-
 
 			Console.WriteLine("HeavyLoad - MassTransit Load Generator");
 
-			//RunLocalMsmqLoadTest();
-            //RunLocalActiveMqLoadTest();
+			RunLocalMsmqLoadTest();
 
-			//Console.WriteLine("Waiting for next test...");
-
-			//RunCorrelatedMessageTest();
+			RunCorrelatedMessageTest();
 
 			RunBatchLoadTest();
+
+			//RunLocalActiveMqLoadTest();
 
 			Console.WriteLine("End of line.");
 			Console.ReadLine();
@@ -43,7 +39,6 @@ namespace HeavyLoad
 
 			Console.WriteLine("Batch Load Test: ");
 			Console.WriteLine(stopWatch.ToString());
-			
 		}
 
 		private static void RunLocalMsmqLoadTest()
@@ -58,6 +53,7 @@ namespace HeavyLoad
 			Console.WriteLine("Local MSMQ Load Test: ");
 			Console.WriteLine(stopWatch.ToString());
 		}
+
 		private static void RunLocalActiveMqLoadTest()
 		{
 			StopWatch stopWatch = new StopWatch();
@@ -70,6 +66,7 @@ namespace HeavyLoad
 			Console.WriteLine("Local ActiveMQ Load Test: ");
 			Console.WriteLine(stopWatch.ToString());
 		}
+
 		private static void RunCorrelatedMessageTest()
 		{
 			StopWatch stopWatch = new StopWatch();
@@ -82,6 +79,5 @@ namespace HeavyLoad
 			Console.WriteLine("Correlated Message Test: ");
 			Console.WriteLine(stopWatch.ToString());
 		}
-
 	}
 }

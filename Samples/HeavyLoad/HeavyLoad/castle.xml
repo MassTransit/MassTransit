@@ -6,11 +6,7 @@
 
 		<facility id="masstransit">
 
-			<bus id="main"
-				 endpoint="msmq://localhost/test_servicebus">
-				<subscriptionCache mode="local">
-				</subscriptionCache>
-			</bus>
+			<bus id="main" endpoint="msmq://localhost/test_servicebus" />
 
 			<transports>
 				<transport>MassTransit.ServiceBus.MSMQ.MsmqEndpoint, MassTransit.ServiceBus.MSMQ</transport>

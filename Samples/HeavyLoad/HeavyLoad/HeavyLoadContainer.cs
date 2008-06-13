@@ -1,11 +1,11 @@
-namespace HeavyLoad.Correlated
+namespace HeavyLoad
 {
 	using MassTransit.WindsorIntegration;
 
-	public class CorrelatedTestContainer :
+	public class HeavyLoadContainer : 
 		DefaultMassTransitContainer
 	{
-		public CorrelatedTestContainer()
+		public HeavyLoadContainer()
 			: base("castle.xml")
 		{
 		}

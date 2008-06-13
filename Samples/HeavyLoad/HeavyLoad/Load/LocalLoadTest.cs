@@ -1,100 +1,79 @@
 namespace HeavyLoad.Load
 {
-    using System;
-    using System.Collections;
-    using System.Threading;
-    using Castle.Windsor;
-    using MassTransit.ServiceBus;
+	using System;
+	using System.Threading;
+	using Castle.Windsor;
+	using MassTransit.ServiceBus;
+	using MassTransit.ServiceBus.MSMQ;
 
-    public abstract class LocalLoadTest : IDisposable
-    {
-        private IWindsorContainer _container;
-        private const int _repeatCount = 5000;
-        private readonly ManualResetEvent _completeEvent = new ManualResetEvent(false);
-        private readonly ManualResetEvent _responseEvent = new ManualResetEvent(false);
+	public abstract class LocalLoadTest : IDisposable
+	{
+		private const int _repeatCount = 5000;
+		private readonly ManualResetEvent _completeEvent = new ManualResetEvent(false);
+		private readonly IWindsorContainer _container;
+		private readonly ManualResetEvent _responseEvent = new ManualResetEvent(false);
 
-        private IServiceBus _bus;
-        private int _counter = 0;
-        private IEndpoint _localEndpoint;
-        private int _responseCounter = 0;
+		private IServiceBus _bus;
+		private int _counter = 0;
+		private int _responseCounter = 0;
 
-        public LocalLoadTest(Uri listenAt)
-        {
-            _container = new LoadTestContainer();
+		public LocalLoadTest()
+		{
+			_container = new HeavyLoadContainer();
 
-            IDictionary args = new Hashtable();
-            args.Add("endpointToListenOn", listenAt);
+			_bus = _container.Resolve<IServiceBus>();
 
-            _localEndpoint = _container.Resolve<IEndpoint>(args);
-            _bus = _container.Resolve<IServiceBus>();
-        }
+			MsmqEndpoint endpoint = _bus.Endpoint as MsmqEndpoint;
+			if (endpoint != null)
+				MsmqHelper.ValidateAndPurgeQueue(endpoint.QueuePath);
+		}
 
-        public IServiceBus Bus
-        {
-            get { return _bus; }
-        }
+		public void Dispose()
+		{
+			_bus.Dispose();
+			_container.Dispose();
+		}
 
-        public IEndpoint LocalEndpoint
-        {
-            get { return _localEndpoint; }
-        }
+		public void Run(StopWatch stopWatch)
+		{
+			_bus.Subscribe<GeneralMessage>(Handle);
+			_bus.Subscribe<SimpleResponse>(Handler);
 
+			stopWatch.Start();
 
-        public void Run(StopWatch stopWatch)
-        {
-            _bus.Subscribe<GeneralMessage>(Handle);
-            _bus.Subscribe<SimpleResponse>(Handler);
+			CheckPoint publishCheckpoint = stopWatch.Mark("Publishing " + _repeatCount + " messages");
+			CheckPoint receiveCheckpoint = stopWatch.Mark("Receiving " + _repeatCount + " messages");
 
-            stopWatch.Start();
+			for (int index = 0; index < _repeatCount; index++)
+			{
+				_bus.Publish(new GeneralMessage());
+			}
 
-            CheckPoint publishCheckpoint = stopWatch.Mark("Publishing " + _repeatCount + " messages");
-            CheckPoint receiveCheckpoint = stopWatch.Mark("Receiving " + _repeatCount + " messages");
+			publishCheckpoint.Complete(_repeatCount);
 
-            for (int index = 0; index < _repeatCount; index++)
-            {
-                _bus.Publish(new GeneralMessage());
-            }
+			bool completed = _completeEvent.WaitOne(TimeSpan.FromSeconds(60), true);
 
-            publishCheckpoint.Complete(_repeatCount);
+			bool responseCompleted = _responseEvent.WaitOne(TimeSpan.FromSeconds(60), true);
 
-            bool completed = _completeEvent.WaitOne(TimeSpan.FromSeconds(60), true);
+			receiveCheckpoint.Complete(_counter + _responseCounter);
 
-            bool responseCompleted = _responseEvent.WaitOne(TimeSpan.FromSeconds(60), true);
+			stopWatch.Stop();
+		}
 
-            receiveCheckpoint.Complete(_counter + _responseCounter);
+		private void Handler(IMessageContext<SimpleResponse> obj)
+		{
+			Interlocked.Increment(ref _responseCounter);
+			if (_responseCounter == _repeatCount)
+				_responseEvent.Set();
+		}
 
-            stopWatch.Stop();
-        }
+		private void Handle(IMessageContext<GeneralMessage> obj)
+		{
+			_bus.Publish(new SimpleResponse());
 
-        private void Handler(IMessageContext<SimpleResponse> obj)
-        {
-            Interlocked.Increment(ref _responseCounter);
-            if (_responseCounter == _repeatCount)
-                _responseEvent.Set();
-        }
-
-        private void Handle(IMessageContext<GeneralMessage> obj)
-        {
-            _bus.Publish(new SimpleResponse());
-
-            Interlocked.Increment(ref _counter);
-            if (_counter == _repeatCount)
-                _completeEvent.Set();
-        }
-
-        public void Dispose()
-        {
-            if (_bus != null)
-            {
-                _bus.Dispose();
-                _bus = null;
-            }
-
-            if (_localEndpoint != null)
-            {
-                _localEndpoint.Dispose();
-                _localEndpoint = null;
-            }
-        }
-    }
+			Interlocked.Increment(ref _counter);
+			if (_counter == _repeatCount)
+				_completeEvent.Set();
+		}
+	}
 }

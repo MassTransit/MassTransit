@@ -58,7 +58,13 @@ namespace MassTransit.ServiceBus.Internal
 		public static void AddTransport(string scheme, Type t)
 		{
 			lock (_schemes)
+			{
+				if (_schemes.ContainsKey(scheme))
+					return;
+
 				_schemes.Add(scheme, t);
+			}
+				
 		}
 	}
 }
