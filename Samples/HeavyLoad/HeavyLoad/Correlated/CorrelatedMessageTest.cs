@@ -1,98 +1,91 @@
 namespace HeavyLoad.Correlated
 {
-    using System;
-    using System.Threading;
-    using MassTransit.ServiceBus;
-    using MassTransit.ServiceBus.MSMQ;
+	using System;
+	using System.Threading;
+	using Castle.Windsor;
+	using MassTransit.ServiceBus;
+	using MassTransit.ServiceBus.MSMQ;
 
-    public class CorrelatedMessageTest : IDisposable
-    {
-        private readonly ManualResetEvent _finishedEvent = new ManualResetEvent(false);
-        private readonly int _attempts = 1500;
-        private IServiceBus _bus;
-        private MsmqEndpoint _localEndpoint;
-        private int _successes;
-        private int _timeouts;
-        private readonly CorrelatedTestContainer _container;
+	public class CorrelatedMessageTest : IDisposable
+	{
+		private readonly int _attempts = 1500;
+		private readonly IWindsorContainer _container;
+		private readonly ManualResetEvent _finishedEvent = new ManualResetEvent(false);
+		private IServiceBus _bus;
+		private int _successes;
+		private int _timeouts;
 
-        public CorrelatedMessageTest()
-        {
-            _container = new CorrelatedTestContainer();
+		public CorrelatedMessageTest()
+		{
+			_container = new HeavyLoadContainer();
 
-            //	MsmqHelper.ValidateAndPurgeQueue(_localEndpoint.QueuePath);
+			_bus = _container.Resolve<IServiceBus>();
 
-            _bus = _container.Resolve<IServiceBus>();
-        }
+			MsmqEndpoint endpoint = _bus.Endpoint as MsmqEndpoint;
+			if (endpoint != null)
+				MsmqHelper.ValidateAndPurgeQueue(endpoint.QueuePath);
+		}
 
-		
-        public void Run(StopWatch stopWatch)
-        {
-            stopWatch.Start();
+		public void Dispose()
+		{
+			_bus.Dispose();
+			_container.Dispose();
+		}
 
-            SimpleRequestService service = new SimpleRequestService(_bus);
 
-            _bus.Subscribe(service);
+		public void Run(StopWatch stopWatch)
+		{
+			stopWatch.Start();
 
-            CheckPoint point = stopWatch.Mark("Correlated Requests");
+			SimpleRequestService service = new SimpleRequestService(_bus);
 
-            for (int index = 0; index < _attempts; index++)
-            {
-                CorrelatedController controller = new CorrelatedController(_bus);
+			_bus.Subscribe(service);
 
-                controller.OnSuccess += controller_OnSuccess;
-                controller.OnTimeout += controller_OnTimeout;
-                controller.SimulateRequestResponse();
+			CheckPoint point = stopWatch.Mark("Correlated Requests");
 
-                controller.OnSuccess -= controller_OnSuccess;
-                controller.OnTimeout -= controller_OnTimeout;
-            }
+			for (int index = 0; index < _attempts; index++)
+			{
+				CorrelatedController controller = new CorrelatedController(_bus);
 
-            point.Complete(_attempts);
+				controller.OnSuccess += controller_OnSuccess;
+				controller.OnTimeout += controller_OnTimeout;
+				controller.SimulateRequestResponse();
 
-            _finishedEvent.WaitOne(TimeSpan.FromSeconds(60), true);
+				controller.OnSuccess -= controller_OnSuccess;
+				controller.OnTimeout -= controller_OnTimeout;
+			}
 
-            _bus.Unsubscribe(service);
+			point.Complete(_attempts);
 
-            Console.WriteLine("Attempts: {0}, Succeeded: {1}, Timeouts: {2}", _attempts, _successes, _timeouts);
+			_finishedEvent.WaitOne(TimeSpan.FromSeconds(60), true);
 
-            stopWatch.Stop();
-        }
+			_bus.Unsubscribe(service);
 
-        private void controller_OnTimeout(CorrelatedController obj)
-        {
-            lock (_finishedEvent)
-            {
-                Interlocked.Increment(ref _timeouts);
+			Console.WriteLine("Attempts: {0}, Succeeded: {1}, Timeouts: {2}", _attempts, _successes, _timeouts);
 
-                if (_timeouts + _successes == _attempts)
-                    _finishedEvent.Set();
-            }
-        }
+			stopWatch.Stop();
+		}
 
-        private void controller_OnSuccess(CorrelatedController obj)
-        {
-            lock (_finishedEvent)
-            {
-                Interlocked.Increment(ref _successes);
+		private void controller_OnTimeout(CorrelatedController obj)
+		{
+			lock (_finishedEvent)
+			{
+				Interlocked.Increment(ref _timeouts);
 
-                if (_timeouts + _successes == _attempts)
-                    _finishedEvent.Set();
-            }
-        }
+				if (_timeouts + _successes == _attempts)
+					_finishedEvent.Set();
+			}
+		}
 
-        public void Dispose()
-        {
-            if (_bus != null)
-            {
-                _bus.Dispose();
-                _bus = null;
-            }
+		private void controller_OnSuccess(CorrelatedController obj)
+		{
+			lock (_finishedEvent)
+			{
+				Interlocked.Increment(ref _successes);
 
-            if (_localEndpoint != null)
-            {
-                _localEndpoint.Dispose();
-                _localEndpoint = null;
-            }
-        }
-    }
+				if (_timeouts + _successes == _attempts)
+					_finishedEvent.Set();
+			}
+		}
+	}
 }

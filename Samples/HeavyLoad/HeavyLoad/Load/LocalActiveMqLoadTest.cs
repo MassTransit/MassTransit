@@ -7,7 +7,7 @@ namespace HeavyLoad.Load
         private static readonly string _queueUri = "activemq://localhost:61616/load_test_queue";
 
         public LocalActiveMqLoadTest()
-            : base(new Uri(_queueUri))
+            : base()
         {
         }
     }
