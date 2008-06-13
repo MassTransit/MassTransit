@@ -22,23 +22,29 @@ namespace MassTransit.ServiceBus.Internal
 	/// <typeparam name="TMessage">The type of message that is being batched</typeparam>
 	/// <typeparam name="TBatchId">The type for the batch id</typeparam>
 	public class BatchDistributor<TMessage, TBatchId> :
-		Consumes<TMessage>.Selected
+		Consumes<TMessage>.Selected,
+		Produces<Batch<TMessage, TBatchId>>
 		where TMessage : class, BatchedBy<TBatchId>
 	{
 		private readonly Dictionary<TBatchId, Batch<TMessage, TBatchId>> _batches = new Dictionary<TBatchId, Batch<TMessage, TBatchId>>();
-		private readonly Consumes<Batch<TMessage, TBatchId>>.Selected _consumer;
+
+		private readonly MessageDispatcher<Batch<TMessage, TBatchId>> _messageDispatcher = new MessageDispatcher<Batch<TMessage, TBatchId>>();
 
 		private readonly object _lockContext = new object();
 
 		private readonly TimeSpan _timeout;
 		private readonly IServiceBus _bus;
 
-		public BatchDistributor(IServiceBus bus, Consumes<Batch<TMessage, TBatchId>>.Selected consumer)
+		public BatchDistributor(IServiceBus bus)
 		{
-			_consumer = consumer;
 			_bus = bus;
 
 			_timeout = GetMessageTimeout(TimeSpan.FromMinutes(30));
+		}
+
+		public bool Active
+		{
+			get { return _messageDispatcher.Active; }
 		}
 
 		public bool Accept(TMessage message)
@@ -49,7 +55,7 @@ namespace MassTransit.ServiceBus.Internal
 
 			Batch<TMessage, TBatchId> batch = new Batch<TMessage, TBatchId>(_bus, message.BatchId, message.BatchLength, _timeout);
 
-			if (_consumer.Accept(batch))
+			if (_messageDispatcher.Accept(batch))
 				return true;
 
 			return false;
@@ -84,7 +90,7 @@ namespace MassTransit.ServiceBus.Internal
 
 			if (invokeHandler)
 			{
-				_consumer.Consume(batch);
+				_messageDispatcher.Consume(batch);
 			}
 		}
 
@@ -99,6 +105,16 @@ namespace MassTransit.ServiceBus.Internal
 			}
 
 			return value;
+		}
+
+		public void Attach(Consumes<Batch<TMessage, TBatchId>>.All consumer)
+		{
+			_messageDispatcher.Attach(consumer);
+		}
+
+		public void Detach(Consumes<Batch<TMessage, TBatchId>>.All consumer)
+		{
+			_messageDispatcher.Detach(consumer);
 		}
 	}
 }

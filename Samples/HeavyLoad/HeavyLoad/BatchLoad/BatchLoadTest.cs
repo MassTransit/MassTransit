@@ -12,42 +12,45 @@ namespace HeavyLoad.BatchLoad
 		private static readonly ILog _log = LogManager.GetLogger(typeof (BatchLoadTest));
 		private IServiceBus _bus;
 		private BatchLoadTestContainer _container;
+		private ManagedThreadPool<int> _threads;
 
 		public void Dispose()
 		{
-			_container.Release(_bus);
+			_threads.Dispose();
 			_bus.Dispose();
 			_container.Dispose();
 		}
 
 		public void Run(StopWatch watch)
 		{
+			MsmqHelper.ValidateAndPurgeQueue(@".\private$\test_servicebus");
+
 			_container = new BatchLoadTestContainer();
 
 			_bus = _container.Resolve<IServiceBus>();
 
 			watch.Start();
 
-			BatchServiceComponent component = new BatchServiceComponent();
+			//BatchServiceComponent component = new BatchServiceComponent();
 
-			BatchDistributor<BasicMessage, Guid> distributor = new BatchDistributor<BasicMessage, Guid>(_bus, component);
+			//_bus.Subscribe(component);
 
-			_bus.Subscribe(distributor);
+			_container.AddComponent<BatchServiceComponent>();
 
-			//_bus.AddComponent<BatchServiceComponent>();
+			_bus.AddComponent<BatchServiceComponent>();
 
 			int batchCount = 100;
 
 			CheckPoint publishCheckpoint = watch.Mark("Publishing " + batchCount + " batches");
 
-			ManagedThreadPool<int> threads = new ManagedThreadPool<int>(delegate(int batchLength)
+			_threads = new ManagedThreadPool<int>(delegate(int batchLength)
 			                                                                  	{
 		                                                                  			SendBatch(batchLength);
 			                                                                  	}, 10, 10);
 
 			for (int i = 0; i < batchCount; i++)
 			{
-				threads.Enqueue(100);
+				_threads.Enqueue(100);
 			}
 
 			for (int i = 0; i < batchCount; i++)
@@ -60,13 +63,12 @@ namespace HeavyLoad.BatchLoad
 				}
 			}
 
-			publishCheckpoint.Complete(batchCount);
+			publishCheckpoint.Complete(batchCount * 100);
 
 			watch.Stop();
 
 			_log.Info("Test Complete");
 
-			threads.Dispose();
 		}
 
 		private void SendBatch(int batchLength)
@@ -97,11 +99,14 @@ namespace HeavyLoad.BatchLoad
 			int messageCount = 0;
 			foreach (BasicMessage basicMessage in message)
 			{
+				if(basicMessage.BatchId != message.BatchId)
+					_log.ErrorFormat("Mismatched batch id for batch {0} -- {1}", message.BatchId, basicMessage.BatchId);
+
 				messageCount++;
 			}
 
 			if (messageCount == message.BatchLength)
-				_log.Debug("Batch complete: " + message.BatchId + ", Count = " + messageCount);
+				_log.Info("Batch complete: " + message.BatchId + ", Count = " + messageCount);
 			else
 				_log.ErrorFormat("Batch not received: {0}, Expected: {1}, Received: {2}", message.BatchId, message.BatchLength, messageCount);
 

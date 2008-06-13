@@ -74,6 +74,9 @@ namespace MassTransit.ServiceBus.Threading
 
 		public void Dispose()
 		{
+			while(PendingCount > 0)
+				Thread.Sleep(10);
+
 			_shutdown.Set();
 
 			foreach (Thread t in _threads)
