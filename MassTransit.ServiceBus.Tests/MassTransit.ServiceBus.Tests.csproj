@@ -56,6 +56,8 @@
     <Compile Include="HealthMonitoring\When_a_suspect_is_received.cs" />
     <Compile Include="HealthMonitoring\When_monitoring_health.cs" />
     <Compile Include="HealthMonitoring\When_monitoring_heartbeats.cs" />
+    <Compile Include="Internal\IdempotentHashtable_Specs.cs" />
+    <Compile Include="Internal\IdempotentList_Specs.cs" />
     <Compile Include="LocalSubscriptionCache_Specs.cs" />
     <Compile Include="ConsumerDispatcher_Specs.cs" />
     <Compile Include="ConsumesSelected_Specs.cs" />

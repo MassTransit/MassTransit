@@ -55,11 +55,16 @@
     <Compile Include="Batch.cs" />
     <Compile Include="BatchedBy.cs" />
     <Compile Include="BatchTimeout.cs" />
+    <Compile Include="HealthMonitoring\HealthInformation.cs" />
+    <Compile Include="HealthMonitoring\IHealthCache.cs" />
+    <Compile Include="HealthMonitoring\LocalHealthCache.cs" />
     <Compile Include="Internal\BatchDistributor.cs" />
     <Compile Include="Internal\BatchMessageSubscription.cs" />
     <Compile Include="Internal\ComponentDispatcher.cs" />
     <Compile Include="Internal\CorrelatedPublication.cs" />
     <Compile Include="Internal\CorrelatedSubscription.cs" />
+    <Compile Include="Internal\IdempotentHashtable.cs" />
+    <Compile Include="Internal\IdempotentList.cs" />
     <Compile Include="Internal\IEndpointResolver.cs" />
     <Compile Include="Internal\IPublicationTypeInfo.cs" />
     <Compile Include="Internal\ISubscriptionTypeInfo.cs" />

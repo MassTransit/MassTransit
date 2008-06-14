@@ -1,7 +1,7 @@
 namespace MassTransit.ServiceBus.Tests
 {
 	using System;
-	using Internal;
+	using MassTransit.ServiceBus.Internal;
 	using NUnit.Framework;
 	using NUnit.Framework.SyntaxHelpers;
 

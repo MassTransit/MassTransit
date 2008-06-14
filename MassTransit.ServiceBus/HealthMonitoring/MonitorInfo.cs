@@ -19,7 +19,7 @@ namespace MassTransit.ServiceBus.HealthMonitoring
 	{
 		private readonly Action<MonitorInfo> _dlg;
 		private readonly Timer _timer;
-		private Uri _endpointUri;
+		private readonly Uri _endpointUri;
 
 		public MonitorInfo(Uri endpointUri, int timeBetweenBeatsInSeconds, Action<MonitorInfo> dlg)
 		{
