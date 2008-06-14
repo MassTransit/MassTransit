@@ -50,6 +50,11 @@ namespace MassTransit.Host2
                 hs.Start();
             }
         }
+
+        public virtual void Main()
+        {
+        }
+
         public virtual void Stop()
         {
             //move this into interceptor?
