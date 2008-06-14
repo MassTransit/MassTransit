@@ -1,21 +1,31 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <project name="masstransit" default="go">
 	
-	<property name="installdir" value=".\pubsub_install" overwrite="false" />
-	<property name="builddir" value=".\bin" overwrite="false" />
+	<property name="dirs.install" value=".\pubsub_install" overwrite="false" />
+	<property name="dirs.build" value=".\bin" overwrite="false" />
 	
-	<target name="go" depends="build, clean_the_bin, zip" />
+	<target name="go" depends="build, clean_the_bin, zip" description="Starting the build of MassTransit"/>
 	
-	<target name="build" depends="common.find-svninfo, common.asminfo">
+	<target name="build" depends="build_code, build_samples" description="Starting builds">
+	
+	</target>
+	
+	<target name="build_code" depends="common.find-svninfo, common.asminfo" description="Building Library">
 		<delete dir=".\bin" failonerror="false" />
 		<delete file=".\MassTransit.zip" failonerror="false" />
 		
 		<property name="config" value="Release" />
 		
-		<msbuild project=".\MassTransit.sln">
+		<msbuild project=".\MassTransit.sln" verbosity="quiet">
 			<property name="Configuration" value="Release" />
 		</msbuild>
 
+	</target>
+	
+	<target name="build_samples" description="Building Samples">
+		<msbuild project=".\Samples\HeavyLoad\HeavyLoad\HeavyLoad.sln" verbosity="quiet">
+			<property name="Configuration" value="Release" />
+		</msbuild>
 	</target>
 
 	<target name="zip" depends="make_pubsub_install">
@@ -24,12 +34,12 @@
 				<include name="**/*" />
 			</fileset>
 			<fileset>
-				<include name="${installdir}\*.*" />
+				<include name="${dirs.install}\*.*" />
 			</fileset>
 		</zip>
 	</target>
 	
-	<target name="common.find-svninfo">
+	<target name="common.find-svninfo" description="Gets the current svn revision number">
 		<!-- For adding SVN revision to builds -->
 		<property name="svn.revision" value="0" overwrite="false" />
 		<!-- try to update the revision -->
@@ -52,7 +62,7 @@
 		<echo message="INFO: Using Subversion revision number: ${svn.revision}"/>
 	</target>
 	
-	<target name="common.asminfo" depends="common.find-svninfo">
+	<target name="common.asminfo" depends="common.find-svninfo" description="Generate asm info">
 	
 		<property name="version.rev" value="${svn.revision}"  />
 		<property name="version.build" value="0" overwrite="false" />
@@ -83,26 +93,26 @@
 	
 	<!-- need to add a host -->
 	<target name="make_pubsub_install">
-		<delete dir="${installdir}" failonerror="false" />
-		<mkdir dir="${installdir}" />
+		<delete dir="${dirs.install}" failonerror="false" />
+		<mkdir dir="${dirs.install}" />
 		
-		<copy todir="${installdir}" flatten="true">
+		<copy todir="${dirs.install}" flatten="true">
 			<fileset>
 			<!-- dlls -->
-			<include name="${builddir}\MassTransit.ServiceBus.dll" />
-			<include name="${builddir}\MassTransit.ServiceBus.MSMQ.dll" />
-			<include name="${builddir}\MassTransit.Host.dll" />
-			<include name="${builddir}\MassTransit.SubscriptionStorage.dll" />
-			<include name="${builddir}\NHibernate.dll" />
-			<include name="${builddir}\Iesi.Collections.dll" />
-			<include name="${builddir}\log4net.dll" />
-			<include name="${builddir}\Castle.MicroKernel.dll" />
-			<include name="${builddir}\Castle.DynamicProxy2.dll" />
-			<include name="${builddir}\Castle.Core.dll" />
-			<include name="${builddir}\Castle.Facilities.NHibernateIntegration.dll" />
-			<include name="${builddir}\Castle.Services.Transaction.dll" />
-			<include name="${builddir}\Castle.Windsor.dll" />
-			<include name="${builddir}\PubSub.exe" />
+			<include name="${dirs.build}\MassTransit.ServiceBus.dll" />
+			<include name="${dirs.build}\MassTransit.ServiceBus.MSMQ.dll" />
+			<include name="${dirs.build}\MassTransit.Host.dll" />
+			<include name="${dirs.build}\MassTransit.SubscriptionStorage.dll" />
+			<include name="${dirs.build}\NHibernate.dll" />
+			<include name="${dirs.build}\Iesi.Collections.dll" />
+			<include name="${dirs.build}\log4net.dll" />
+			<include name="${dirs.build}\Castle.MicroKernel.dll" />
+			<include name="${dirs.build}\Castle.DynamicProxy2.dll" />
+			<include name="${dirs.build}\Castle.Core.dll" />
+			<include name="${dirs.build}\Castle.Facilities.NHibernateIntegration.dll" />
+			<include name="${dirs.build}\Castle.Services.Transaction.dll" />
+			<include name="${dirs.build}\Castle.Windsor.dll" />
+			<include name="${dirs.build}\PubSub.exe" />
 
 			<!-- bat files -->
 			<include name=".\PubSub_Install_Template\_install.cmd" />
@@ -113,14 +123,14 @@
 			<include name=".\InstallMsmq.bat" />
 			
 			<!-- configs -->
-			<include name="${builddir}\pubsub.castle.config" />
+			<include name="${dirs.build}\pubsub.castle.config" />
 			<include name=".\PubSub\log4net.xml" />
 			</fileset>
 			
 		</copy>
 		
-		<mkdir dir="${installdir}\SQLScripts" />
-		<copy todir="${installdir}\SQLScripts" flatten="true">
+		<mkdir dir="${dirs.install}\SQLScripts" />
+		<copy todir="${dirs.install}\SQLScripts" flatten="true">
 			<fileset>
 				<include name=".\MassTransit.SubscriptionStorage\*.sql" />
 			</fileset>
