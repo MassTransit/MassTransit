@@ -22,21 +22,25 @@ namespace MassTransit.ServiceBus.HealthMonitoring
         Consumes<Suspect>.All,
         Consumes<Pong>.For<Guid> //, Produces<DownEndpoint>
     {
-        private ILog _log = LogManager.GetLogger(typeof (Investigator));
+        private readonly ILog _log = LogManager.GetLogger(typeof (Investigator));
         private readonly IServiceBus _bus;
         private readonly Guid _correlationId;
         private Suspect _suspectMessage;
         private readonly Ping _pingMessage;
-        private IEndpointResolver _resolver;
-        private Timer _timer;
-        private double _timeout;
+        private readonly IEndpointResolver _resolver;
+        private readonly Timer _timer;
+        private readonly double _timeout;
+        private readonly IHealthCache _healthCache;
 
-        public Investigator(IServiceBus bus, IEndpointResolver resolver):this(bus, resolver, (1000*60*3)+50)
+        public Investigator(IServiceBus bus, IEndpointResolver resolver, IHealthCache healthCache):this(bus, resolver, healthCache, (1000*60*3)+50)
         {
+            _healthCache = healthCache;
         }
-        public Investigator(IServiceBus bus, IEndpointResolver resolver, double timeout)
+
+        public Investigator(IServiceBus bus, IEndpointResolver resolver, IHealthCache healthCache, double timeout)
         {
             _bus = bus;
+            _healthCache = healthCache;
             _timeout = timeout;
             _resolver = resolver;
             _correlationId = Guid.NewGuid();
@@ -71,6 +75,11 @@ namespace MassTransit.ServiceBus.HealthMonitoring
         {
             //I have a confirmed dead endpoint
             _bus.Publish(new DownEndpoint(_suspectMessage.EndpointUri));
+
+            HealthInformation information = _healthCache.Get(_suspectMessage.EndpointUri);
+            information.LastFaultDetectedAt = DateTime.Now;
+            _healthCache.Update(information);
+            
             _timer.Stop();
             _timer.Dispose();
         }

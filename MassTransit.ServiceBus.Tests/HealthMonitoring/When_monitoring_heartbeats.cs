@@ -16,12 +16,14 @@ namespace MassTransit.ServiceBus.Tests.HealthMonitoring
         private IServiceBus _bus;
         private Heartbeat message;
         private Uri u;
+        private IHealthCache _theCacheIsntInterestingHere;
 
         protected override void Before_each()
         {
             u = new Uri("msmq://localhost/test");
             _bus = StrictMock<IServiceBus>();
-            hm = new HeartbeatMonitor(_bus);
+            _theCacheIsntInterestingHere = DynamicMock<IHealthCache>();
+            hm = new HeartbeatMonitor(_bus, _theCacheIsntInterestingHere);
             message = new Heartbeat(1, u);
         }
 
@@ -29,6 +31,7 @@ namespace MassTransit.ServiceBus.Tests.HealthMonitoring
         {
             _bus = null;
             hm = null;
+            _theCacheIsntInterestingHere = null;
         }
 
         [Test]

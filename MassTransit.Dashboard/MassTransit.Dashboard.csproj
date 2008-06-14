@@ -114,13 +114,6 @@
   <ItemGroup>
     <Compile Include="Controllers\SubscriptionsController.cs" />
     <Compile Include="DashboardApplication.cs" />
-    <Compile Include="Default.aspx.cs">
-      <DependentUpon>Default.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="Default.aspx.designer.cs">
-      <DependentUpon>Default.aspx</DependentUpon>
-    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="WebAppContainer.cs" />
   </ItemGroup>

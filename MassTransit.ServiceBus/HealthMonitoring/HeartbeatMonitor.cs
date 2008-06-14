@@ -21,17 +21,21 @@ namespace MassTransit.ServiceBus.HealthMonitoring
     {
         private readonly IServiceBus _bus;
         private readonly Dictionary<Uri, MonitorInfo> _monitoredEndpoints;
+        private readonly IHealthCache _healthCache;
 
-        public HeartbeatMonitor(IServiceBus bus)
+        public HeartbeatMonitor(IServiceBus bus, IHealthCache healthCache)
         {
             _bus = bus;
+            _healthCache = healthCache;
             _monitoredEndpoints = new Dictionary<Uri, MonitorInfo>();
         }
+
+        //on start add cache?
 
         public void Consume(Heartbeat message)
         {
 			AddToWatch(message);
-
+            AddToCache(message.EndpointAddress);
             _monitoredEndpoints[message.EndpointAddress].Reset();
         }
 
@@ -46,6 +50,10 @@ namespace MassTransit.ServiceBus.HealthMonitoring
             }
         }
 
+        public void AddToCache(Uri uri)
+        {
+            _healthCache.Add(new HealthInformation(uri));
+        }
         public bool AmIWatchingYou(Uri uri)
         {
             return _monitoredEndpoints.ContainsKey(uri);
