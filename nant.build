@@ -6,9 +6,7 @@
 	
 	<target name="go" depends="build, clean_the_bin, zip" description="Starting the build of MassTransit"/>
 	
-	<target name="build" depends="build_code, build_samples" description="Starting builds">
-	
-	</target>
+	<target name="build" depends="build_code, build_samples" description="Starting builds" />
 	
 	<target name="build_code" depends="common.find-svninfo, common.asminfo" description="Building Library">
 		<delete dir=".\bin" failonerror="false" />
@@ -23,7 +21,7 @@
 	</target>
 	
 	<target name="build_samples" description="Building Samples">
-		<msbuild project=".\Samples\HeavyLoad\HeavyLoad\HeavyLoad.sln" verbosity="quiet">
+		<msbuild project=".\Samples\HeavyLoad\HeavyLoad.sln" verbosity="quiet">
 			<property name="Configuration" value="Release" />
 		</msbuild>
 	</target>
