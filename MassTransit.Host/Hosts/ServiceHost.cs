@@ -48,6 +48,7 @@ namespace MassTransit.Host2.Hosts
 
             _log.DebugFormat("Arguments: {0}", string.Join(",", args));
             _environment.Start();
+            _environment.Main();
         }
 
         protected override void OnStop()

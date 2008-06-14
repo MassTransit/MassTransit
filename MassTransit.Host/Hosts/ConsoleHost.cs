@@ -48,6 +48,8 @@ namespace MassTransit.Host2.Hosts
 
 			_log.InfoFormat("The service is running, press Control+C to exit.");
 
+            _environment.Main();
+
 			int result;
 			while ((result = WaitHandle.WaitAny(waitHandles, TimeSpan.FromSeconds(30), true)) == WaitHandle.WaitTimeout)
 			{

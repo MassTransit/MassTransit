@@ -14,6 +14,12 @@ namespace PubSub
         {
         }
 
+
+        public override void Main()
+        {
+            //do nothing
+        }
+
         public override string ServiceName
         {
             get { return "MassTransit Subscription Manager"; }

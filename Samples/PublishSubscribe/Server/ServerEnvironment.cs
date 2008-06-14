@@ -13,7 +13,13 @@ namespace Server
 		{
 		}
 
-		public override string ServiceName
+
+	    public override void Main()
+	    {
+	        //do nothing
+	    }
+
+	    public override string ServiceName
 		{
 			get { return "SampleServerService"; }
 		}

@@ -47,6 +47,7 @@
     <Compile Include="MsmqFormattedBody.cs" />
     <Compile Include="IMsmqEndpoint.cs" />
     <Compile Include="MsmqEndpoint.cs" />
+    <Compile Include="MsmqUtilities.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

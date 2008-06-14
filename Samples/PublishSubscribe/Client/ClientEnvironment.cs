@@ -1,24 +1,47 @@
 namespace Client
 {
-	using MassTransit.Host2;
+    using System;
+    using MassTransit.Host2;
     using MassTransit.ServiceBus;
     using SecurityMessages;
 
 	public class ClientEnvironment : HostedEnvironment
 	{
+	    private IServiceBus _bus;
 		public ClientEnvironment()
 		{
 		}
 
 		public ClientEnvironment(string xmlFile) : base(xmlFile)
 		{
-            Container.AddComponent<IHostedService, AskPasswordQuestion>();
+            //Container.AddComponent<IHostedService, AskPasswordQuestion>();
             Container.AddComponent<PasswordUpdater>();
 
-            IServiceBus bus = Container.Resolve<IServiceBus>();
+            _bus = Container.Resolve<IServiceBus>();
 		}
 
-		public override string ServiceName
+
+	    public override void Main()
+	    {
+            _bus.AddComponent<PasswordUpdater>();
+
+            Console.WriteLine(new string('-', 20));
+            Console.WriteLine("New Password Client");
+            Console.WriteLine("What would you like to set your new password to?");
+            Console.Write("New Password:");
+            string newPassword = Console.ReadLine();
+
+            Console.WriteLine(new string('-', 20));
+
+            RequestPasswordUpdate message = new RequestPasswordUpdate(newPassword);
+
+            _bus.Publish(message);
+
+            Console.WriteLine("Waiting For Reply");
+            Console.WriteLine(new string('-', 20));
+	    }
+
+	    public override string ServiceName
 		{
 			get { return "SampleClientService"; }
 		}
