@@ -10,11 +10,11 @@
 	    <th>Address</th>
 	    <th>Message</th>
 	</tr>
-<%
-	for subscription in subscriptions:
-		output "<tr><td>${subscription.EndpointUri}</td><td>${subscription.MessageName}</td></tr>"
-	end
-%>
+  <?brail
+	  for subscription in subscriptions:
+		  output "<tr><td>${subscription.EndpointUri}</td><td>${subscription.MessageName}</td></tr>"
+	  end
+  ?>
 </table>
 
 </div>

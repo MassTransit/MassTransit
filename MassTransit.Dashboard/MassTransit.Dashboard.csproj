@@ -112,6 +112,7 @@
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Controllers\HealthController.cs" />
     <Compile Include="Controllers\SubscriptionsController.cs" />
     <Compile Include="DashboardApplication.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -132,6 +133,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="Views\Health\view.brail" />
     <None Include="Views\Layouts\default.brail" />
     <None Include="Views\Subscriptions\view.brail" />
   </ItemGroup>

@@ -5,7 +5,8 @@ namespace MassTransit.Dashboard.Controllers
     using MassTransit.ServiceBus.Subscriptions;
 
     [Layout("default")]
-    public class SubscriptionsController : Controller
+    public class SubscriptionsController : 
+        SmartDispatcherController
     {
         private readonly ISubscriptionCache _cache;
 
@@ -21,7 +22,7 @@ namespace MassTransit.Dashboard.Controllers
                           {
                               return left.EndpointUri.ToString().CompareTo(right.EndpointUri.ToString());
                           });
-            this.PropertyBag.Add("subscriptions", subs);
+            PropertyBag.Add("subscriptions", subs);
         }
     }
 }
