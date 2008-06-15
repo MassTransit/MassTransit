@@ -1,4 +1,4 @@
-namespace PubSub
+namespace SubscriptionServiceHost
 {
     using log4net;
     using MassTransit.Host2;
