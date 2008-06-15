@@ -56,8 +56,11 @@
     <Compile Include="BatchedBy.cs" />
     <Compile Include="BatchTimeout.cs" />
     <Compile Include="HealthMonitoring\HealthInformation.cs" />
+    <Compile Include="HealthMonitoring\HealthStatusConsumer.cs" />
     <Compile Include="HealthMonitoring\IHealthCache.cs" />
     <Compile Include="HealthMonitoring\LocalHealthCache.cs" />
+    <Compile Include="HealthMonitoring\Messages\HealthStatusRequest.cs" />
+    <Compile Include="HealthMonitoring\Messages\HealthStatusResponse.cs" />
     <Compile Include="Internal\BatchDistributor.cs" />
     <Compile Include="Internal\BatchMessageSubscription.cs" />
     <Compile Include="Internal\ComponentDispatcher.cs" />

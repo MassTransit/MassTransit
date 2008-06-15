@@ -1,0 +1,21 @@
+<div class="span-24">
+    <h1>Health Information</h1>
+</div>
+
+<div class="span-24">
+
+<table>
+    <caption>A display of endpoints and their health known to Mass Transit</caption>
+	<tr>
+	    <th>Address</th>
+	    <th>First Detected At</th>
+	    <th>Last Fault Detected At</th>
+	</tr>
+  <?brail
+    for status in statuses:
+      output "<tr><td>${status.Uri}</td><td>${status.FirstDetectedAt}</td><td>${status.LastFaultDetectedAt}</td></tr>"
+    end
+  ?>
+</table>
+
+</div>
