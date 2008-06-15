@@ -1,4 +1,4 @@
-namespace PubSub
+namespace SubscriptionServiceHost
 {
     using MassTransit.Host2;
 

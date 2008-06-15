@@ -76,6 +76,8 @@
     <Content Include="install.xml" />
     <Content Include="log4net.xml" />
     <Content Include="pubsub.castle.xml" />
+    <Content Include="PubSub_Install_Template\_createQueue.vbs" />
+    <Content Include="PubSub_Install_Template\_README.txt" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\MassTransit.Host\MassTransit.Host.csproj">
@@ -90,6 +92,11 @@
       <Project>{8EE6C0CB-93D1-4B92-8CD5-24C77452CBE5}</Project>
       <Name>MassTransit.SubscriptionStorage</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="InstallMsmq.bat" />
+    <None Include="PubSub_Install_Template\_install.cmd" />
+    <None Include="PubSub_Install_Template\_uninstall.cmd" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
