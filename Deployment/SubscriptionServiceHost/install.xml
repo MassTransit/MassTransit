@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<project name="masstransit" default="install">
+
+  <property name="installdir" value=".\pubsub_install" overwrite="false" />
+  <property name="builddir" value=".\bin" overwrite="false" />
+
+  <target name="install" depends="install_db, install_msmq" />
+
+  <target name="install_db">
+    <!-- does sql server exist? -->
+  </target>
+
+  <target name="install_msmq">
+    <!-- does msmq exist? -->
+    <exec program="InstallMsmq.bat" />
+    <msmq-add path=".\private$\mt_pubsub" isTransactional="false" />
+  </target>
+  
+</project>
