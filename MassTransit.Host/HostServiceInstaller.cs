@@ -88,7 +88,7 @@ namespace MassTransit.Host
                 {
                     ti.Installers.Add(this);
 
-                    string path = string.Format("/assemblypath={0}", Assembly.GetExecutingAssembly().Location);
+                    string path = string.Format("/assemblypath={0}", Assembly.GetEntryAssembly().Location);
                     string[] commandLine = {path};
 
                     InstallContext context = new InstallContext(null, commandLine);
@@ -114,7 +114,7 @@ namespace MassTransit.Host
                 {
                     ti.Installers.Add(this);
 
-                    string path = string.Format("/assemblypath={0}", Assembly.GetExecutingAssembly().Location);
+                    string path = string.Format("/assemblypath={0}", Assembly.GetEntryAssembly().Location);
                     string[] commandLine = {path};
 
                     InstallContext context = new InstallContext(null, commandLine);
