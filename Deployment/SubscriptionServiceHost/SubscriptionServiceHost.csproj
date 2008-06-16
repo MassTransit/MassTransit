@@ -9,6 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>SubscriptionServiceHost</RootNamespace>
     <AssemblyName>SubscriptionServiceHost</AssemblyName>
+    <StartupObject>SubscriptionServiceHost.Program</StartupObject>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -52,6 +53,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\libs\Castle\Castle.Windsor.dll</HintPath>
     </Reference>
+    <Reference Include="Iesi.Collections, Version=1.0.0.3, Culture=neutral, PublicKeyToken=aa95f207798dfdb4, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\libs\Iesi.Collections.dll</HintPath>
+    </Reference>
     <Reference Include="log4net, Version=1.2.10.0, Culture=neutral, PublicKeyToken=1b44e1d426115821, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\libs\log4net.dll</HintPath>
@@ -73,9 +78,15 @@
     <Compile Include="SubscriptionManagerEnvironment.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="install.xml" />
-    <Content Include="log4net.xml" />
-    <Content Include="pubsub.castle.xml" />
+    <Content Include="install.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="log4net.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="pubsub.castle.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="PubSub_Install_Template\_createQueue.vbs" />
     <Content Include="PubSub_Install_Template\_README.txt" />
   </ItemGroup>
@@ -83,6 +94,10 @@
     <ProjectReference Include="..\..\MassTransit.Host\MassTransit.Host.csproj">
       <Project>{834ED79F-BA0E-48F9-831A-789576EE516B}</Project>
       <Name>MassTransit.Host</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\MassTransit.ServiceBus.MSMQ\MassTransit.ServiceBus.MSMQ.csproj">
+      <Project>{6F90867C-E092-4EDC-B3DE-600D39DF0335}</Project>
+      <Name>MassTransit.ServiceBus.MSMQ</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\MassTransit.ServiceBus\MassTransit.ServiceBus.csproj">
       <Project>{90482397-6282-465E-8B86-39865FC30127}</Project>
