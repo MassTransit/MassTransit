@@ -64,28 +64,28 @@ namespace MassTransit.Host
             private bool _service;
 
 
-            [Argument]
+            [Argument(Key = "install")]
             public bool Install
             {
                 get { return _install; }
                 set { _install = value; }
             }
 
-            [Argument]
+            [Argument(Key = "uninstall")]
             public bool Uninstall
             {
                 get { return _uninstall; }
                 set { _uninstall = value; }
             }
 
-            [Argument]
+            [Argument(Key = "console")]
             public bool Console
             {
                 get { return _console; }
                 set { _console = value; }
             }
 
-            [Argument]
+            [Argument(Key = "service")]
             public bool Service
             {
                 get { return _service; }
