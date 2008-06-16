@@ -10,6 +10,6 @@ osql -S %INSTANCE% -E -i "%DIR%SQLScripts\UninstallMassTransitDatabaseDDL.sql"
 
 echo .
 
-"%DIR%PubSub.exe" -uninstall
+"%DIR%SubscriptionServiceHost.exe" -uninstall
 
 PAUSE
