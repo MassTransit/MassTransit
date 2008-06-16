@@ -1,15 +1,15 @@
-namespace SubscriptionServiceHost
+namespace HealthServiceHost
 {
     using MassTransit.Host;
 
-    public class SubscriptionManagerEnvironment :
+    public class HealthManagerEnvironment :
         HostedEnvironment
     {
-        public SubscriptionManagerEnvironment()
+        public HealthManagerEnvironment()
         {
         }
 
-        public SubscriptionManagerEnvironment(string xmlFile) 
+        public HealthManagerEnvironment(string xmlFile) 
             : base(xmlFile)
         {
         }
@@ -22,17 +22,17 @@ namespace SubscriptionServiceHost
 
         public override string ServiceName
         {
-            get { return "MassTransit Subscription Manager"; }
+            get { return "MassTransit Health Manager"; }
         }
 
         public override string DispalyName
         {
-            get { return "MassTransit Subscription Manager"; }
+            get { return "MassTransit Health Manager"; }
         }
 
         public override string Description
         {
-            get { return "This service manages the subscriptions for Mass Transit"; }
+            get { return "This service manages the health for Mass Transit"; }
         }
     }
 }

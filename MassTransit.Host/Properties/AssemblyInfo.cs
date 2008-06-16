@@ -4,10 +4,10 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("MassTransit.Host2")]
+[assembly: AssemblyTitle("MassTransitHost")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyProduct("MassTransit.Host2")]
+[assembly: AssemblyProduct("MassTransitHost")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
