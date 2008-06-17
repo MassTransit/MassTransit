@@ -13,12 +13,16 @@
 namespace MassTransit.Host.Actions
 {
     using Host;
+    using log4net;
 
     public class UninstallServiceAction :
         IAction
     {
+        private static readonly ILog _log = LogManager.GetLogger(typeof(UninstallServiceAction));
+
         public void Do(HostedEnvironment environment)
         {
+            _log.Info("Received serice uninstall notification");
             HostServiceInstaller hsi = new HostServiceInstaller(environment.ServiceName, environment.DispalyName, environment.Description);
             hsi.Unregister();
         }

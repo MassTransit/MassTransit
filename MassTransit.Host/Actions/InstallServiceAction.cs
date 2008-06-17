@@ -13,12 +13,16 @@
 namespace MassTransit.Host.Actions
 {
     using Host;
+    using log4net;
 
     public class InstallServiceAction :
         IAction
     {
+        private static readonly ILog _log = LogManager.GetLogger(typeof(InstallServiceAction));
+
         public void Do(HostedEnvironment environment)
         {
+            _log.Info("Received service install notification");
             HostServiceInstaller hsi = new HostServiceInstaller(environment.ServiceName, environment.DispalyName, environment.Description);
             hsi.Register();
         }
