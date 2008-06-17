@@ -13,14 +13,15 @@
 namespace MassTransit.Host.Hosts
 {
     using System;
+    using System.Reflection;
     using System.ServiceProcess;
     using log4net;
 
     public class ServiceHost : ServiceBase
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(ServiceHost));
-        private HostedEnvironment _environment;
-        private HostServiceInstaller _installer;
+        private readonly HostedEnvironment _environment;
+        private readonly HostServiceInstaller _installer;
 
 
         public ServiceHost(HostedEnvironment environment)
@@ -33,8 +34,9 @@ namespace MassTransit.Host.Hosts
         {
             if(!_installer.IsInstalled())
             {
-                _log.Fatal("Service has not been installed yet");
-                throw new Exception("Service is not installed");
+                string message = string.Format("The {0} service has not been installed yet. Please run {1} -install.", _environment.ServiceName, Assembly.GetEntryAssembly().GetName());
+                _log.Fatal(message);
+                throw new Exception(message);
             }
 
             ServiceBase[] servicesToRun = new ServiceBase[] { this };
