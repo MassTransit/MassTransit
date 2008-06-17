@@ -19,7 +19,7 @@ namespace MassTransit.Host.Actions
     public class RunAsServiceAction :
         IAction
     {
-        private ILog _log = LogManager.GetLogger(typeof(RunAsServiceAction));
+        private static readonly ILog _log = LogManager.GetLogger(typeof(RunAsServiceAction));
 
         public void Do(HostedEnvironment environment)
         {
