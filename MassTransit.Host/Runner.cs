@@ -19,8 +19,8 @@ namespace MassTransit.Host
 
     public static class Runner
     {
-        private static ILog _log = LogManager.GetLogger(typeof (Runner));
-        private static IDictionary<string, IAction> _actions = new Dictionary<string, IAction>();
+        private static readonly ILog _log = LogManager.GetLogger(typeof (Runner));
+        private static readonly IDictionary<string, IAction> _actions = new Dictionary<string, IAction>();
 
         static Runner()
         {
