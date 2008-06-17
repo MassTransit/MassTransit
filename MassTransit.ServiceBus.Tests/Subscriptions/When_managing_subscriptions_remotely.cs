@@ -1,6 +1,7 @@
 namespace MassTransit.ServiceBus.Tests.Subscriptions
 {
     using System;
+    using Exceptions;
     using MassTransit.ServiceBus.Subscriptions;
     using MassTransit.ServiceBus.Subscriptions.Messages;
     using NUnit.Framework;
@@ -15,6 +16,7 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
         private ISubscriptionCache _mockCache;
         private IEndpoint _mockEndpoint;
         private IEndpoint _mockBusEndpoint;
+        private Uri uri = new Uri("msmq://localhost/test");
 
         protected override void Before_each()
         {
@@ -23,6 +25,8 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
             _mockEndpoint = DynamicMock<IEndpoint>();
             _mockBusEndpoint = DynamicMock<IEndpoint>();
 
+            SetupResult.For(_mockBus.Endpoint).Return(_mockBusEndpoint);
+            SetupResult.For(_mockBusEndpoint.Uri).Return(uri);
             sc = new SubscriptionClient(_mockBus, _mockCache, _mockEndpoint);
         }
 
@@ -38,14 +42,10 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
         [Test]
         public void start()
         {
-            Uri uri = new Uri("msmq://localhost/test");
             using(Record())
             {
                 _mockBus.Subscribe(sc);
-                Expect.Call(_mockBus.Endpoint).Return(_mockBusEndpoint);
-                Expect.Call(_mockBusEndpoint.Uri).Return(uri);
-                _mockEndpoint.Send(new CacheUpdateRequest(uri));
-                LastCall.IgnoreArguments();
+                Expect.Call(delegate { _mockEndpoint.Send(new CacheUpdateRequest(uri)); }).IgnoreArguments();
             }
             using (Playback())
             {
@@ -53,6 +53,21 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
             }
         }
 
+
+        [Test]
+        [ExpectedException(typeof(EndpointException))]
+        public void Test_Endpoint_Detection()
+        {
+            using (Record())
+            {
+                
+            }
+            using (Playback())
+            {
+                SubscriptionClient sc2 = new SubscriptionClient(_mockBus, _mockCache, _mockBusEndpoint);
+                sc2.Start();
+            }
+        }
         [Test]
         public void stop()
         {

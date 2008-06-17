@@ -56,6 +56,8 @@ namespace MassTransit.Host
                 bus.Dispose();
                 _container.Release(bus);
             }
+
+            _container.Dispose();
         }
 
         public abstract string ServiceName {get;}

@@ -56,7 +56,9 @@ namespace MassTransit.ServiceBus.Subscriptions
             }
             catch (Exception ex)
             {
-                throw new ShutDownException("Error in shutting down the SubscriptionService", ex);
+                string message = "Error in shutting down the SubscriptionService: " + ex.Message;
+                _log.Error(message);
+                throw new ShutDownException(message, ex);
             }
         }
 
