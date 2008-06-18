@@ -17,12 +17,20 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
 		private ISubscriptionCache _cache;
 	    private IEndpoint _sbEndpoint;
 
+	    private readonly Uri _managerUri = new Uri("msmq://localhost/mgr");
+	    private Uri _sbUri;
+
         protected override void Before_each()
         {
+            _sbUri = new Uri("msmq://" + Environment.MachineName.ToLower() + "/test");
             _sbEndpoint = DynamicMock<IEndpoint>();
-			_cache = DynamicMock<ISubscriptionCache>();
 			_serviceBus = DynamicMock<IServiceBus>();
+            SetupResult.For(_sbEndpoint.Uri).Return(_sbUri);
+            SetupResult.For(_serviceBus.Endpoint).Return(_sbEndpoint);
+
+			_cache = DynamicMock<ISubscriptionCache>();
 			_managerEndpoint = DynamicMock<IEndpoint>();
+            SetupResult.For(_managerEndpoint.Uri).Return(_managerUri);
             
         }
 
@@ -31,7 +39,6 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
 		{
 			using (Record())
 			{
-			    Expect.Call(_serviceBus.Endpoint).Return(_sbEndpoint);
 			    Expect.Call(delegate
 			                    {
 			                        _managerEndpoint.Send<CacheUpdateRequest>(null);
