@@ -1,9 +1,11 @@
 namespace MassTransit.ServiceBus.Tests
 {
-	using NUnit.Framework;
+    using System;
+    using NUnit.Framework;
 	using NUnit.Framework.SyntaxHelpers;
+    using Rhino.Mocks;
 
-	[TestFixture]
+    [TestFixture]
 	public class MessageQueueEndpoint_MeetsCriteria :
         Specification
 	{
@@ -11,9 +13,12 @@ namespace MassTransit.ServiceBus.Tests
 		private IEndpoint _mockServiceBusEndPoint;
 		private readonly PingMessage _message = new PingMessage();
 
+	    private Uri _busListenUri = new Uri("msmq://localhost/bus_listen");
+
         protected override void Before_each()
         {
 			_mockServiceBusEndPoint = DynamicMock<IEndpoint>();
+            SetupResult.For(_mockServiceBusEndPoint.Uri).Return(_busListenUri);
 			_serviceBus = new ServiceBus(_mockServiceBusEndPoint, DynamicMock<IObjectBuilder>());
             ReplayAll();
         }

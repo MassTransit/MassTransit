@@ -1,6 +1,9 @@
+using log4net.Config;
+
+[assembly: XmlConfigurator(ConfigFile = "log4net.xml", Watch = true)]
+
 namespace SubscriptionServiceHost
 {
-    using System.IO;
     using Castle.Core;
     using log4net;
     using MassTransit.Host;
@@ -8,13 +11,15 @@ namespace SubscriptionServiceHost
     using MassTransit.ServiceBus.Subscriptions;
     using MassTransit.SubscriptionStorage;
 
+    
+
     internal class Program
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof (Program));
 
+        
         private static void Main(string[] args)
         {
-            log4net.Config.XmlConfigurator.Configure(new FileInfo("log4net.xml"));
             _log.Info("SubMgr Loading");
 
             HostedEnvironment env = new SubscriptionManagerEnvironment("pubsub.castle.xml");
