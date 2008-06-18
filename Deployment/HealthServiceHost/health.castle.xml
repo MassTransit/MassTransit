@@ -9,7 +9,7 @@
 		<facility id="masstransit">
 
 			<bus id="subscriptionService"
-				 endpoint="msmq://localhost/mt_pubsub">
+				 endpoint="msmq://localhost/mt_health">
 			</bus>
 
 			<transports>
