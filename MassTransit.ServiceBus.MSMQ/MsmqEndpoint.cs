@@ -171,7 +171,7 @@ namespace MassTransit.ServiceBus.MSMQ
 			try
 			{
 				if (_messageLog.IsInfoEnabled)
-					_messageLog.InfoFormat("Message {0} Sent To {1}", messageType, Uri);
+					_messageLog.InfoFormat("SEND:{0}:{1}", Uri, messageType.Name);
 
 				_queue.Send(msg, GetTransactionType());
 			}
