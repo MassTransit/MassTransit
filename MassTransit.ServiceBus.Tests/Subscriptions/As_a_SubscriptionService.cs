@@ -32,7 +32,7 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
             SetupResult.For(mockBus.Endpoint).Return(mockEndpoint);
             SetupResult.For(mockEndpoint.Uri).Return(new Uri("queue://bus"));
 
-			srv = new SubscriptionService(mockBus, mockCache, mockRepository, mockEndpointResolver);
+			srv = new SubscriptionService(mockBus, mockCache, mockRepository);
         }
 
 

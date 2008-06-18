@@ -32,6 +32,7 @@ namespace MassTransit.ServiceBus.Internal
 				if (_schemes.ContainsKey(scheme))
 					return;
 
+                _log.InfoFormat("Registering transport '{0}' to schema '{1}'", t.Name, scheme);
 				_schemes.Add(scheme, t);
 			}
 				
@@ -87,9 +88,13 @@ namespace MassTransit.ServiceBus.Internal
 
 	    private static void GuardAgainstZeroTransports()
 	    {
-            string message = "No transports have been registered. Please use EndpointResolver.AddTransport";
-            _log.Error(message);
-            if (_schemes.Count == 0) throw new EndpointException(new NullEndpoint(), message);
+            if (_schemes.Count == 0)
+            {
+                string message = "No transports have been registered. Please use EndpointResolver.AddTransport";
+                EndpointException exp = new EndpointException(new NullEndpoint(), message);
+                _log.Error(message, exp);
+                throw exp;
+            }
 	    }
 
 	    public class NullEndpoint :

@@ -116,6 +116,10 @@
     <Compile Include="Subscriptions\AddSubscriptionHandler.cs" />
     <Compile Include="Subscriptions\CacheUpdateRequestHandler.cs" />
     <Compile Include="Subscriptions\CancelUpdatesHandler.cs" />
+    <Compile Include="Subscriptions\ClientHandlers\AddSubscriptionHandler.cs" />
+    <Compile Include="Subscriptions\ClientHandlers\CacheUpdateHandler.cs" />
+    <Compile Include="Subscriptions\ClientHandlers\RemoveSubscriptionHandler.cs" />
+    <Compile Include="Subscriptions\ClientHandlers\ClientUtil.cs" />
     <Compile Include="Subscriptions\DistributedSubscriptionCache.cs" />
     <Compile Include="Subscriptions\FollowerRepository.cs" />
     <Compile Include="Subscriptions\ISubscriptionCache.cs" />

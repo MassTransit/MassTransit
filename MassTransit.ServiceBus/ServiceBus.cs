@@ -28,6 +28,7 @@ namespace MassTransit.ServiceBus
 		IServiceBus
 	{
 		private static readonly ILog _log;
+	    private static readonly ILog _ironLog;
 
 		private readonly ManagedThreadPool<object> _asyncDispatcher;
 		private readonly IEndpointResolver _endpointResolver;
@@ -44,6 +45,7 @@ namespace MassTransit.ServiceBus
 			try
 			{
 				_log = LogManager.GetLogger(typeof (ServiceBus));
+			    _ironLog = LogManager.GetLogger("MassTransit.Iron");
 			}
 			catch (Exception ex)
 			{
@@ -80,8 +82,7 @@ namespace MassTransit.ServiceBus
 			_messageDispatcher = new MessageTypeDispatcher();
 			_subscriptionCoordinator = new SubscriptionCoordinator(_messageDispatcher, this, _subscriptionCache, _objectBuilder);
 			_receiveThread = new ReceiveThread(this, endpointToListenOn);
-			_asyncDispatcher = new ManagedThreadPool<object>(
-				delegate(object message) { _messageDispatcher.Consume(message); });
+            _asyncDispatcher = new ManagedThreadPool<object>(IronDispatcher);
 		}
 
 		public ISubscriptionCache SubscriptionCache
@@ -233,5 +234,18 @@ namespace MassTransit.ServiceBus
 		{
 			return _messageDispatcher.Accept(obj);
 		}
+
+        private void IronDispatcher(object message)
+        {
+            try
+            {
+                _messageDispatcher.Consume(message);    
+            }
+            catch(Exception ex)
+            {
+                _ironLog.Error("An error was caught in the ServiceBus.IronDispatcher", ex);
+            }
+            
+        }
 	}
 }
