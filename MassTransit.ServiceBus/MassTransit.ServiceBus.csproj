@@ -113,7 +113,11 @@
     <Compile Include="IObjectBuilder.cs" />
     <Compile Include="IServiceBus.cs" />
     <Compile Include="MessageFilter.cs" />
+    <Compile Include="Subscriptions\AddSubscriptionHandler.cs" />
+    <Compile Include="Subscriptions\CacheUpdateRequestHandler.cs" />
+    <Compile Include="Subscriptions\CancelUpdatesHandler.cs" />
     <Compile Include="Subscriptions\DistributedSubscriptionCache.cs" />
+    <Compile Include="Subscriptions\FollowerRepository.cs" />
     <Compile Include="Subscriptions\ISubscriptionCache.cs" />
     <Compile Include="Internal\MessageContext.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -128,6 +132,7 @@
     <Compile Include="Subscriptions\Messages\CancelSubscriptionUpdates.cs" />
     <Compile Include="Subscriptions\Messages\RemoveSubscription.cs" />
     <Compile Include="Subscriptions\Messages\SubscriptionChange.cs" />
+    <Compile Include="Subscriptions\RemoveSubscriptionHandler.cs" />
     <Compile Include="Subscriptions\Subscription.cs" />
     <Compile Include="Subscriptions\SubscriptionCacheEntry.cs" />
     <Compile Include="Subscriptions\SubscriptionClient.cs" />
@@ -137,6 +142,9 @@
     <Compile Include="TimeoutAttribute.cs" />
     <Compile Include="Util\Check.cs" />
     <Compile Include="Util\Guard.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Subscriptions\Handlers\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

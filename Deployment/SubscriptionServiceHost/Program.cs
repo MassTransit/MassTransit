@@ -1,6 +1,7 @@
 namespace SubscriptionServiceHost
 {
     using System.IO;
+    using Castle.Core;
     using log4net;
     using MassTransit.Host;
     using MassTransit.ServiceBus;
@@ -17,6 +18,12 @@ namespace SubscriptionServiceHost
             _log.Info("SubMgr Loading");
 
             HostedEnvironment env = new SubscriptionManagerEnvironment("pubsub.castle.xml");
+
+            env.Container.AddComponentLifeStyle("followerrepository", typeof(FollowerRepository), LifestyleType.Singleton);
+            env.Container.AddComponentLifeStyle("addsubscriptionhandler", typeof(AddSubscriptionHandler), LifestyleType.Transient);
+            env.Container.AddComponentLifeStyle("removesubscriptionhandler", typeof(RemoveSubscriptionHandler), LifestyleType.Transient);
+            env.Container.AddComponentLifeStyle("cacheupdaterequesthandler", typeof(CacheUpdateRequestHandler), LifestyleType.Transient);
+            env.Container.AddComponentLifeStyle("cancelupdaterequesthandler", typeof(CancelUpdatesHandler), LifestyleType.Transient);
 
             env.Container.AddComponent<IHostedService, SubscriptionService>();
 

@@ -152,7 +152,7 @@ namespace MassTransit.ServiceBus.Threading
 				}
 				catch (Exception ex)
 				{
-					_log.ErrorFormat("An exception occurred processing an item of type " + typeof (T).FullName, ex);
+					_log.Error("An exception occurred processing an item of type: " + typeof (T).FullName, ex);
 				}
 			}
 		}
