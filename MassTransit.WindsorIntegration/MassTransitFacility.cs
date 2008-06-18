@@ -33,19 +33,19 @@ namespace MassTransit.WindsorIntegration
 
 			foreach (IConfiguration transport in transportConfiguration.Children)
 			{
-				Type t = Type.GetType(transport.Value, true, true);
+				Type transportType = Type.GetType(transport.Value, true, true);
 
 				// get the scheme for each endpoint and add it to the resolver
 
-				PropertyInfo property = t.GetProperty("Scheme", BindingFlags.Static | BindingFlags.Public | BindingFlags.GetField | BindingFlags.NonPublic, null, typeof (string), new Type[0], null);
+				PropertyInfo property = transportType.GetProperty("Scheme", BindingFlags.Static | BindingFlags.Public | BindingFlags.GetField | BindingFlags.NonPublic, null, typeof (string), new Type[0], null);
 
 				string value = property.GetValue(null, BindingFlags.Static | BindingFlags.Public | BindingFlags.GetField | BindingFlags.NonPublic, null, null, CultureInfo.InvariantCulture) as string;
 
-				EndpointResolver.AddTransport(value, t);
+				EndpointResolver.AddTransport(value, transportType);
 
 				Kernel.Register(
-					Component.For(t)
-						.ImplementedBy(t)
+					Component.For(transportType)
+						.ImplementedBy(transportType)
 						.AddAttributeDescriptor("factoryId", "endpoint.factory")
 						.AddAttributeDescriptor("factoryCreate", "Resolve")
 						.LifeStyle.Transient

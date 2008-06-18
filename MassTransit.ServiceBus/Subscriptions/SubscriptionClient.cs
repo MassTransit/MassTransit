@@ -12,14 +12,12 @@
 /// specific language governing permissions and limitations under the License.
 namespace MassTransit.ServiceBus.Subscriptions
 {
+    using ClientHandlers;
     using Exceptions;
     using Messages;
 
 	public class SubscriptionClient :
-		IHostedService,
-		Consumes<AddSubscription>.All,
-		Consumes<RemoveSubscription>.All,
-		Consumes<CacheUpdateResponse>.All
+		IHostedService
 	{
 		private readonly ISubscriptionCache _cache;
 		private readonly IServiceBus _serviceBus;
@@ -31,28 +29,6 @@ namespace MassTransit.ServiceBus.Subscriptions
 			_cache = cache;
 			_subscriptionServiceEndpoint = subscriptionServiceEndpoint;
 		}
-
-	    public void Consume(AddSubscription message)
-		{
-			if(!IsOwnedSubscription(message.Subscription))
-				_cache.Add(message.Subscription);
-		}
-
-		public void Consume(CacheUpdateResponse message)
-		{
-			foreach (Subscription sub in message.Subscriptions)
-			{
-				if(!IsOwnedSubscription(sub))
-					_cache.Add(sub);
-			}
-		}
-
-		public void Consume(RemoveSubscription message)
-		{
-			if ( !IsOwnedSubscription(message.Subscription))
-				_cache.Remove(message.Subscription);
-		}
-
 
 		public void Dispose()
 		{
@@ -68,7 +44,9 @@ namespace MassTransit.ServiceBus.Subscriptions
 			_cache.OnAddSubscription += Cache_OnAddSubscription;
 			_cache.OnRemoveSubscription += Cache_OnRemoveSubscription;
 
-			_serviceBus.Subscribe(this);
+            _serviceBus.AddComponent<ClientHandlers.AddSubscriptionHandler>();
+            _serviceBus.AddComponent<ClientHandlers.RemoveSubscriptionHandler>();
+            _serviceBus.AddComponent<ClientHandlers.CacheUpdateHandler>();
 
 			_subscriptionServiceEndpoint.Send(new CacheUpdateRequest(_serviceBus.Endpoint.Uri));
 		}
@@ -86,7 +64,9 @@ namespace MassTransit.ServiceBus.Subscriptions
 		{
 			_subscriptionServiceEndpoint.Send(new CancelSubscriptionUpdates(_serviceBus.Endpoint.Uri));
 
-			_serviceBus.Unsubscribe(this);
+            _serviceBus.RemoveComponent<ClientHandlers.AddSubscriptionHandler>();
+            _serviceBus.RemoveComponent<ClientHandlers.RemoveSubscriptionHandler>();
+            _serviceBus.RemoveComponent<ClientHandlers.CacheUpdateHandler>();
 
 			_cache.OnAddSubscription -= Cache_OnAddSubscription;
 			_cache.OnRemoveSubscription -= Cache_OnRemoveSubscription;
@@ -94,7 +74,7 @@ namespace MassTransit.ServiceBus.Subscriptions
 
 		public void Cache_OnAddSubscription(object sender, SubscriptionEventArgs e)
 		{
-			if (IsOwnedSubscription(e.Subscription))
+			if (ClientUtil.IsOwnedSubscription(e.Subscription, _serviceBus))
 			{
 				AddSubscription message = new AddSubscription(e.Subscription);
 
@@ -102,17 +82,11 @@ namespace MassTransit.ServiceBus.Subscriptions
 			}
 		}
 
-		private bool IsOwnedSubscription(Subscription subscription)
-		{
-			if (subscription.EndpointUri == _serviceBus.Endpoint.Uri)
-				return true;
-
-			return false;
-		}
+		
 
 		public void Cache_OnRemoveSubscription(object sender, SubscriptionEventArgs e)
 		{
-			if (IsOwnedSubscription(e.Subscription))
+            if (ClientUtil.IsOwnedSubscription(e.Subscription, _serviceBus))
 			{
 				RemoveSubscription message = new RemoveSubscription(e.Subscription);
 

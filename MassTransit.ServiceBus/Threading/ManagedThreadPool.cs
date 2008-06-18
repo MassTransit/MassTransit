@@ -96,16 +96,18 @@ namespace MassTransit.ServiceBus.Threading
 
 			int count = _workAvailable.Release();
 
-			// if the previous count is greater than zero, we have work waiting to be picked up
+
+            // if the previous count is greater than zero, we have work waiting to be picked up
 			if (count > 0 && _threads.Count < _maxThreads)
 			{
 				AddThread();
 			}
 
-			while (_threads.Count < _minThreads)
-			{
-				AddThread();
-			}
+            // build the thread pool up to minimum
+            while (_threads.Count < _minThreads)
+            {
+                AddThread();
+            }
 		}
 
 		private void AddThread()

@@ -41,28 +41,35 @@ namespace MassTransit.ServiceBus.Tests
         Specification
 	{
 		private int _counter = 0;
+	    private readonly int _numberOfWorkItemsToEnqueue = 100;
+	    private readonly int _maxNumberOfThreads = 4;
+	    private readonly int _minNumberOfThreads = 1;
+
 		[Test]
 		public void The_pool_should_not_exceed_the_maximum_thread_count()
 		{
-			using (ManagedThreadPool<string> pool = new ManagedThreadPool<string>(ThreadProc, 1, 4))
+		    int expectedPendingCount = _numberOfWorkItemsToEnqueue - _maxNumberOfThreads;
+		    int expectedAmountOnCounter = _maxNumberOfThreads;
+
+			using (ManagedThreadPool<string> pool = new ManagedThreadPool<string>(TestThreadDelegate, _minNumberOfThreads, _maxNumberOfThreads))
 			{
-				for (int i = 0; i < 5; i++)
+                for (int i = 0; i < _numberOfWorkItemsToEnqueue; i++)
 				{
 					pool.Enqueue("hello");
 				}
 
-				Assert.That(pool.CurrentThreadCount, Is.EqualTo(4));
+                Assert.That(pool.CurrentThreadCount, Is.EqualTo(_maxNumberOfThreads), string.Format("Current Thread Count is {0} instead of {1}", pool.CurrentThreadCount, _maxNumberOfThreads));
 
-				Assert.That(pool.PendingCount, Is.EqualTo(1));
+                Assert.That(pool.PendingCount, Is.EqualTo(expectedPendingCount), "Pending work items was {0} instead of {1}", pool.PendingCount, expectedPendingCount);
+
+                Assert.That(_counter, Is.EqualTo(expectedAmountOnCounter), "Counter was {0} instead of {1}", _counter, expectedAmountOnCounter);
 			}
-
-			Assert.That(_counter, Is.EqualTo(4));
 		}
 
-		private void ThreadProc(string value)
+		private void TestThreadDelegate(string value)
 		{
-			Thread.Sleep(5000);
-			_counter++;
+			Thread.Sleep(2000);
+            _counter++;
 		}
 	}
 }

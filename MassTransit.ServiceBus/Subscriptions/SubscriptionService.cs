@@ -10,12 +10,10 @@
 /// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 /// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 /// specific language governing permissions and limitations under the License.
-
 namespace MassTransit.ServiceBus.Subscriptions
 {
 	using System;
 	using Exceptions;
-	using Internal;
 	using log4net;
 
 	public class SubscriptionService :
@@ -27,7 +25,7 @@ namespace MassTransit.ServiceBus.Subscriptions
 		private readonly ISubscriptionRepository _repository;
 
 
-		public SubscriptionService(IServiceBus bus, ISubscriptionCache subscriptionCache, ISubscriptionRepository subscriptionRepository, IEndpointResolver endpointResolver)
+		public SubscriptionService(IServiceBus bus, ISubscriptionCache subscriptionCache, ISubscriptionRepository subscriptionRepository)
 		{
 			_bus = bus;
 		    _cache = subscriptionCache;
@@ -47,8 +45,9 @@ namespace MassTransit.ServiceBus.Subscriptions
             catch (Exception ex)
             {
                 string message = "Error in shutting down the SubscriptionService: " + ex.Message;
-                _log.Error(message);
-                throw new ShutDownException(message, ex);
+                ShutDownException exp = new ShutDownException(message, ex);
+                _log.Error(message, exp);
+                throw exp;
             }
         }
 

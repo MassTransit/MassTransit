@@ -299,15 +299,25 @@ namespace MassTransit.ServiceBus.MSMQ
 
 		public T Receive<T>(TimeSpan timeout) where T : class
 		{
-			return (T) Receive(timeout, delegate(object obj)
-			                            	{
-			                            		Type messageType = obj.GetType();
+            try
+            {
+                return (T) Receive(timeout, delegate(object obj)
+                                                {
+                                                    Type messageType = obj.GetType();
 
-			                            		if (messageType != typeof (T))
-			                            			return false;
+                                                    if (messageType != typeof (T))
+                                                        return false;
 
-			                            		return true;
-			                            	});
+                                                    return true;
+                                                });
+            }
+            catch (Exception ex)
+            {
+                string message = string.Format("Error on receive with Receive<{0}> accept", typeof(T).Name);
+                _log.Error(message, ex);
+            }
+
+            throw new Exception("Receive<T>(TimeSpan timeout) didn't error");
 		}
 
 		public T Receive<T>(Predicate<T> accept) where T : class
@@ -317,19 +327,29 @@ namespace MassTransit.ServiceBus.MSMQ
 
 		public T Receive<T>(TimeSpan timeout, Predicate<T> accept) where T : class
 		{
-			return (T) Receive(timeout, delegate(object obj)
-			                            	{
-			                            		Type messageType = obj.GetType();
+            try
+            {
+                return (T) Receive(timeout, delegate(object obj)
+                                                {
+                                                    Type messageType = obj.GetType();
 
-			                            		if (messageType != typeof (T))
-			                            			return false;
+                                                    if (messageType != typeof (T))
+                                                        return false;
 
-			                            		T message = obj as T;
-			                            		if (message == null)
-			                            			return false;
+                                                    T message = obj as T;
+                                                    if (message == null)
+                                                        return false;
 
-			                            		return accept(message);
-			                            	});
+                                                    return accept(message);
+                                                });
+            }
+            catch (Exception ex)
+            {
+                string message = string.Format("Error on receive with Predicate<{0}> accept", typeof(T).Name);
+                _log.Error(message, ex);
+            }
+
+            throw new Exception("Receive<T>(TimeSpan timeout, Predicate<T> accept) had a weird error");
 		}
 
 
