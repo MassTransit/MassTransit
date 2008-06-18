@@ -9,7 +9,7 @@ namespace MassTransit.Host
 
     public abstract class HostedEnvironment
     {
-        private IWindsorContainer _container;
+        private readonly IWindsorContainer _container;
 
 
         protected HostedEnvironment(string xmlFile) 
@@ -63,6 +63,22 @@ namespace MassTransit.Host
         public abstract string ServiceName {get;}
         public abstract string DispalyName {get;}
         public abstract string Description {get;}
+
+        //provides a way to supply username and password at config time
+        public virtual string Username
+        {
+            get
+            {
+                return "";
+            }
+        }
+        public virtual string Password
+        {
+            get
+            {
+                return "";
+            }
+        }
 
         public event Action<HostedEnvironment> Completed;
 
