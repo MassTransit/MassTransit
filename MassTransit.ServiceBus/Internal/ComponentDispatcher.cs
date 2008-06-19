@@ -12,7 +12,7 @@
 /// specific language governing permissions and limitations under the License.
 namespace MassTransit.ServiceBus.Internal
 {
-	public class ComponentDispatcher<TComponent, TMessage> :
+    public class ComponentDispatcher<TComponent, TMessage> :
 		Consumes<TMessage>.Selected 
 		where TMessage : class
 		where TComponent : class
@@ -32,10 +32,15 @@ namespace MassTransit.ServiceBus.Internal
 		public void Consume(TMessage message)
 		{
 			Consumes<TMessage>.All consumer = _builder.Build<Consumes<TMessage>.All>(typeof (TComponent));
-
-			consumer.Consume(message);
-
-			_builder.Release(consumer);
+		    
+            try
+		    {
+                consumer.Consume(message);
+		    }
+		    finally
+		    {
+                _builder.Release(consumer);    
+		    }
 		}
 	}
 }
