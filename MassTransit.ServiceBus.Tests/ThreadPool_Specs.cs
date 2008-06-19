@@ -69,7 +69,7 @@ namespace MassTransit.ServiceBus.Tests
 
                 Assert.That(pool.CurrentThreadCount, Is.EqualTo(_maxNumberOfThreads), string.Format("Current Thread Count is {0} instead of {1}", pool.CurrentThreadCount, _maxNumberOfThreads));
 
-                Assert.That(pool.PendingCount, Is.EqualTo(expectedPendingCount), "Pending work items was {0} instead of {1}", pool.PendingCount, expectedPendingCount);
+                Assert.That(pool.QueueDepth, Is.EqualTo(expectedPendingCount), "Pending work items was {0} instead of {1}", pool.QueueDepth, expectedPendingCount);
 
 			}
 
@@ -115,6 +115,47 @@ namespace MassTransit.ServiceBus.Tests
 		{
 			Thread.Sleep(200);
             _counter++;
+		}
+	}
+
+	[TestFixture]
+	public class When_threads_are_only_used_occassionaly
+	{
+		private int _count;
+		private readonly Semaphore _updated = new Semaphore(0, int.MaxValue);
+
+		[Test]
+		public void They_should_still_pick_up_the_work()
+		{
+			using (ManagedThreadPool<string> pool = new ManagedThreadPool<string>(Worker, 0, 2))
+			{
+				Assert.That(_count, Is.EqualTo(0));
+				Assert.That(pool.CurrentThreadCount, Is.EqualTo(0));
+
+				pool.Enqueue("One");
+				Assert.That(pool.CurrentThreadCount, Is.EqualTo(1));
+
+				Assert.That(_updated.WaitOne(TimeSpan.FromSeconds(1), true), "Timeout waiting for worker to work");
+
+				// wait for thread count to drop
+				Thread.Sleep(7000);
+
+				Assert.That(pool.CurrentThreadCount, Is.EqualTo(0));
+
+				pool.Enqueue("Two");
+				pool.Enqueue("Three");
+				Assert.That(pool.CurrentThreadCount, Is.EqualTo(2));
+
+				Assert.That(_updated.WaitOne(TimeSpan.FromSeconds(1), true), "Timeout waiting for worker to work");
+				Assert.That(_updated.WaitOne(TimeSpan.FromSeconds(1), true), "Timeout waiting for worker to work");
+			}
+		}
+
+		private void Worker(string obj)
+		{
+			_count++;
+			_updated.Release();
+			Thread.Sleep(1000);
 		}
 	}
 }
