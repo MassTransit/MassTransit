@@ -24,15 +24,17 @@ namespace MassTransit.ServiceBus.Threading
 	public class ManagedThreadPool<T> : IDisposable
 	{
 		private static readonly ILog _log = LogManager.GetLogger(typeof (ManagedThreadPool<T>));
+		private readonly List<int> _die = new List<int>();
 		private readonly Action<T> _handler;
 		private readonly object _lockObj = new object();
+		private readonly int _maxQueueDepth = 256;
+		private readonly AutoResetEvent _queueActivity = new AutoResetEvent(true);
 		private readonly ManualResetEvent _shutdown = new ManualResetEvent(false);
 		private readonly List<Thread> _threads = new List<Thread>();
 		private readonly Semaphore _workAvailable = new Semaphore(0, int.MaxValue);
 		private readonly Queue<T> _workItems = new Queue<T>();
 		private int _maxThreads;
 		private int _minThreads;
-
 
 		public ManagedThreadPool(Action<T> handler)
 			: this(handler, 1, 256)
@@ -41,7 +43,7 @@ namespace MassTransit.ServiceBus.Threading
 
 		public ManagedThreadPool(Action<T> handler, int minThreads, int maxThreads)
 		{
-			Check.Ensure(minThreads > 0, "The minimum thread count must be greater than zero");
+			Check.Ensure(minThreads >= 0, "The minimum thread count must be greater than zero");
 			Check.Ensure(maxThreads >= minThreads, "The maximum thread count must be at least equal to the minimum thread count");
 			Check.Parameter(handler).WithMessage("The handler must not be null").IsNotNull();
 
@@ -50,64 +52,126 @@ namespace MassTransit.ServiceBus.Threading
 			_maxThreads = maxThreads;
 		}
 
-		public int MaxThreads
-		{
-			get { return _maxThreads; }
-			set { _maxThreads = value; }
-		}
-
-		public int MinThreads
-		{
-			get { return _minThreads; }
-			set { _minThreads = value; }
-		}
-
-		public int CurrentThreadCount
-		{
-			get { return _threads.Count; }
-		}
-
-		public int PendingCount
-		{
-			get { return _workItems.Count; }
-		}
-
 		public void Dispose()
 		{
-			while(PendingCount > 0)
-				Thread.Sleep(10);
+			// let's eat up any outstanding messages if possible
+			for (int i = 0; i < 60; i++)
+			{
+				if (QueueDepth == 0)
+					break;
+
+				Thread.Sleep(1000);
+			}
 
 			_shutdown.Set();
 
-			foreach (Thread t in _threads)
+			Thread[] remaining = _threads.ToArray();
+
+			foreach (Thread t in remaining)
 			{
 				if (!t.Join(TimeSpan.FromSeconds(60)))
 				{
 					// TODO log message that thread did not exit properly
 				}
 			}
+
 			_threads.Clear();
+		}
+
+		public int MaxQueueDepth
+		{
+			[System.Diagnostics.DebuggerStepThrough]
+			get { return _maxQueueDepth; }
+		}
+
+		public int MaxThreads
+		{
+			[System.Diagnostics.DebuggerStepThrough]
+			get { return _maxThreads; }
+			set
+			{
+				Check.Ensure(value >= _minThreads, "The maximum thread count must be at least equal to the minimum thread count");
+
+				_maxThreads = value;
+			}
+		}
+
+		public int MinThreads
+		{
+			[System.Diagnostics.DebuggerStepThrough]
+			get { return _minThreads; }
+			set
+			{
+				Check.Ensure(value >= 0, "The minimum thread count must be greater than zero");
+				Check.Ensure(_maxThreads >= value, "The maximum thread count must be at least equal to the minimum thread count");
+
+				_minThreads = value;
+			}
+		}
+
+		public int CurrentThreadCount
+		{
+			[System.Diagnostics.DebuggerStepThrough]
+			get { lock(_threads) return _threads.Count; }
+		}
+
+		public int QueueDepth
+		{
+			[System.Diagnostics.DebuggerStepThrough]
+			get { lock (_workItems) return _workItems.Count; }
 		}
 
 		public void Enqueue(T item)
 		{
+			WaitForRoomInQueue();
+
 			lock (_workItems)
 				_workItems.Enqueue(item);
+			_workAvailable.Release();
 
-			int count = _workAvailable.Release();
+			AdjustQueueCount();
+		}
 
+		private T Dequeue()
+		{
+			T item;
+			lock (_workItems)
+				item = _workItems.Dequeue();
 
-            // if the previous count is greater than zero, we have work waiting to be picked up
-			if (count > 0 && _threads.Count < _maxThreads)
+			_queueActivity.Set();
+
+			return item;
+		}
+
+		private void WaitForRoomInQueue()
+		{
+			while (QueueDepth >= MaxQueueDepth)
+			{
+				_queueActivity.WaitOne(TimeSpan.FromSeconds(10), true);
+			}
+		}
+
+		private void AdjustQueueCount()
+		{
+			int queueCount = QueueDepth;
+			int threadCount = CurrentThreadCount;
+
+			// if the previous count is greater than zero, we have work waiting to be picked up
+			if (queueCount > 0 && CurrentThreadCount < MaxThreads)
 			{
 				AddThread();
 			}
 
-            // build the thread pool up to minimum
-            while (_threads.Count < _minThreads)
-            {
-                AddThread();
-            }
+			// build the thread pool up to minimum
+			while (CurrentThreadCount < MinThreads)
+			{
+				AddThread();
+			}
+
+			if (queueCount == 0 && threadCount > MinThreads)
+			{
+				RemoveThreads(threadCount - _minThreads);
+			}
 		}
 
 		private void AddThread()
@@ -116,13 +180,29 @@ namespace MassTransit.ServiceBus.Threading
 
 			lock (_threads)
 				_threads.Add(thread);
-
+			
 			thread.Start();
+		}
+
+		private void RemoveThreads(int count)
+		{
+			lock (_threads)
+			{
+				Thread[] victims = _threads.GetRange(0, count).ToArray();
+
+				for (int index = 0; index < victims.Length; index++)
+				{
+					lock (_die)
+						_die.Add(victims[index].ManagedThreadId);
+
+					_threads.Remove(victims[index]);
+				}
+			}
 		}
 
 		private void RunThread(object obj)
 		{
-			Thread currentThread = obj as Thread;
+			int threadId = Thread.CurrentThread.ManagedThreadId;
 
 			WaitHandle[] handles = new WaitHandle[] {_shutdown, _workAvailable};
 
@@ -131,25 +211,22 @@ namespace MassTransit.ServiceBus.Threading
 			{
 				if (result == WaitHandle.WaitTimeout)
 				{
-					lock (_lockObj)
+					AdjustQueueCount();
+
+					lock (_die)
 					{
-						if (_threads.Count > _minThreads)
+						if (_die.Contains(threadId))
 						{
-							_threads.Remove(currentThread);
+							_die.Remove(threadId);
 							break;
 						}
 					}
-
-					continue;
 				}
-
-
-				T item;
-				lock (_workItems)
-					item = _workItems.Dequeue();
 
 				try
 				{
+					T item = Dequeue();
+
 					_handler(item);
 				}
 				catch (Exception ex)

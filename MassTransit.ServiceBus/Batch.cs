@@ -29,7 +29,7 @@ namespace MassTransit.ServiceBus
 		private readonly Semaphore _messageReady;
 		private readonly Queue<TMessage> _messages = new Queue<TMessage>();
 		private readonly TimeSpan _timeout;
-		private object _countLocker = new object();
+		private readonly object _countLocker = new object();
 		private int _messageCount;
 		private readonly IServiceBus _bus;
 
