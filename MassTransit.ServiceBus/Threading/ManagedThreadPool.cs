@@ -24,9 +24,7 @@ namespace MassTransit.ServiceBus.Threading
 	public class ManagedThreadPool<T> : IDisposable
 	{
 		private static readonly ILog _log = LogManager.GetLogger(typeof (ManagedThreadPool<T>));
-		private readonly List<int> _die = new List<int>();
 		private readonly Action<T> _handler;
-		private readonly object _lockObj = new object();
 		private readonly int _maxQueueDepth = 256;
 		private readonly AutoResetEvent _queueActivity = new AutoResetEvent(true);
 		private readonly ManualResetEvent _shutdown = new ManualResetEvent(false);
@@ -37,7 +35,7 @@ namespace MassTransit.ServiceBus.Threading
 		private int _minThreads;
 
 		public ManagedThreadPool(Action<T> handler)
-			: this(handler, 1, 256)
+			: this(handler, 1, 50)
 		{
 		}
 
@@ -154,7 +152,6 @@ namespace MassTransit.ServiceBus.Threading
 		private void AdjustQueueCount()
 		{
 			int queueCount = QueueDepth;
-			int threadCount = CurrentThreadCount;
 
 			// if the previous count is greater than zero, we have work waiting to be picked up
 			if (queueCount > 0 && CurrentThreadCount < MaxThreads)
@@ -167,11 +164,6 @@ namespace MassTransit.ServiceBus.Threading
 			{
 				AddThread();
 			}
-
-			if (queueCount == 0 && threadCount > MinThreads)
-			{
-				RemoveThreads(threadCount - _minThreads);
-			}
 		}
 
 		private void AddThread()
@@ -182,27 +174,17 @@ namespace MassTransit.ServiceBus.Threading
 				_threads.Add(thread);
 			
 			thread.Start();
-		}
 
-		private void RemoveThreads(int count)
-		{
-			lock (_threads)
-			{
-				Thread[] victims = _threads.GetRange(0, count).ToArray();
-
-				for (int index = 0; index < victims.Length; index++)
-				{
-					lock (_die)
-						_die.Add(victims[index].ManagedThreadId);
-
-					_threads.Remove(victims[index]);
-				}
-			}
+			if (_log.IsDebugEnabled)
+				_log.DebugFormat("Created Thread {0}, Total Threads = {1}", thread.ManagedThreadId, CurrentThreadCount);
 		}
 
 		private void RunThread(object obj)
 		{
 			int threadId = Thread.CurrentThread.ManagedThreadId;
+
+			if(_log.IsDebugEnabled)
+				_log.DebugFormat("Starting Thread {0}", threadId);
 
 			WaitHandle[] handles = new WaitHandle[] {_shutdown, _workAvailable};
 
@@ -211,16 +193,16 @@ namespace MassTransit.ServiceBus.Threading
 			{
 				if (result == WaitHandle.WaitTimeout)
 				{
-					AdjustQueueCount();
-
-					lock (_die)
+					lock(_threads)
 					{
-						if (_die.Contains(threadId))
+						if (CurrentThreadCount > MinThreads)
 						{
-							_die.Remove(threadId);
+							_threads.Remove(Thread.CurrentThread);
 							break;
 						}
 					}
+
+					continue;
 				}
 
 				try
@@ -234,6 +216,9 @@ namespace MassTransit.ServiceBus.Threading
 					_log.Error("An exception occurred processing an item of type: " + typeof (T).FullName, ex);
 				}
 			}
+
+			if (_log.IsDebugEnabled)
+				_log.DebugFormat("ExitingThread {0}", threadId);
 		}
 	}
 }
