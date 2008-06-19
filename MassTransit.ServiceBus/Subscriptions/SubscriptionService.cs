@@ -15,8 +15,9 @@ namespace MassTransit.ServiceBus.Subscriptions
 	using System;
 	using Exceptions;
 	using log4net;
+	using ServerHandlers;
 
-	public class SubscriptionService :
+    public class SubscriptionService :
 		IHostedService
 	{
 		private static readonly ILog _log = LogManager.GetLogger(typeof (SubscriptionService));

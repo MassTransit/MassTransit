@@ -4,6 +4,7 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
     using MassTransit.ServiceBus.Internal;
     using MassTransit.ServiceBus.Subscriptions;
     using MassTransit.ServiceBus.Subscriptions.Messages;
+    using MassTransit.ServiceBus.Subscriptions.ServerHandlers;
     using NUnit.Framework;
     using Rhino.Mocks;
 

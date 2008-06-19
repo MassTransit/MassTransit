@@ -45,6 +45,15 @@ namespace MassTransit.ServiceBus.Tests
 	    private readonly int _maxNumberOfThreads = 4;
 	    private readonly int _minNumberOfThreads = 1;
 
+        protected override void Before_each()
+        {
+            
+        }
+        protected override void After_each()
+        {
+            _counter = 0;
+        }
+
 		[Test]
 		public void The_pool_should_not_exceed_the_maximum_thread_count()
 		{
@@ -73,7 +82,7 @@ namespace MassTransit.ServiceBus.Tests
             using(ManagedThreadPool<string> pool = new ManagedThreadPool<string>(TestThreadDelegate, _minNumberOfThreads, 10))
             {
                 //5000 work items takes about 103 seconds
-                int numberOfWorkItems = 5000;
+                int numberOfWorkItems = 500;
                 for(int i = 0; i < numberOfWorkItems; i++)
                 {
                     pool.Enqueue("hello");

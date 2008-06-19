@@ -1,4 +1,4 @@
-namespace MassTransit.ServiceBus.Subscriptions
+namespace MassTransit.ServiceBus.Subscriptions.ServerHandlers
 {
     using System;
     using log4net;
