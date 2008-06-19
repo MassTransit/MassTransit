@@ -3,7 +3,6 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
     using System;
     using Exceptions;
     using MassTransit.ServiceBus.Subscriptions;
-    using MassTransit.ServiceBus.Subscriptions.ClientHandlers;
     using MassTransit.ServiceBus.Subscriptions.Messages;
     using NUnit.Framework;
     using Rhino.Mocks;
@@ -18,7 +17,7 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
         private ISubscriptionCache _mockCache;
         private IEndpoint _mockEndpoint;
         private IEndpoint _mockBusEndpoint;
-        private Uri uri = new Uri("msmq://localhost/test");
+        private readonly Uri uri = new Uri("msmq://localhost/test");
 
         protected override void Before_each()
         {

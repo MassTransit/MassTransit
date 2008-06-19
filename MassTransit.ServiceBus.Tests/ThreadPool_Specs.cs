@@ -79,7 +79,7 @@ namespace MassTransit.ServiceBus.Tests
 	    [Test]
 	    public void The_pool_should_complete_with_a_high_level_of_level_of_work()
 	    {
-            using(ManagedThreadPool<string> pool = new ManagedThreadPool<string>(TestThreadDelegate, _minNumberOfThreads, 10))
+            using(ManagedThreadPool<string> pool = new ManagedThreadPool<string>(FastTestThreadDelegate, _minNumberOfThreads, 10))
             {
                 //5000 work items takes about 103 seconds
                 int numberOfWorkItems = 500;
@@ -94,19 +94,23 @@ namespace MassTransit.ServiceBus.Tests
 	    [Test]
 	    public void As_a_thread_pool_I_should_be_able_to_run_out_of_work_and_start_back_up()
 	    {
-            using (ManagedThreadPool<string> pool = new ManagedThreadPool<string>(TestThreadDelegate, _minNumberOfThreads, 10))
+            using (ManagedThreadPool<string> pool = new ManagedThreadPool<string>(FastTestThreadDelegate, _minNumberOfThreads, 10))
             {
                 pool.Enqueue("dru");
-                Thread.Sleep(300);
+                Thread.Sleep(20);
                 pool.Enqueue("dru");
-                Thread.Sleep(300);
+                Thread.Sleep(20);
 
                 Assert.AreEqual(2, _counter);
 
             }
 	    }
 
-
+        private void FastTestThreadDelegate(string value)
+        {
+            Thread.Sleep(10);
+            _counter++;
+        }
 		private void TestThreadDelegate(string value)
 		{
 			Thread.Sleep(200);
