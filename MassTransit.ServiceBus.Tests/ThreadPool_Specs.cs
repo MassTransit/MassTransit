@@ -41,7 +41,7 @@ namespace MassTransit.ServiceBus.Tests
         Specification
 	{
 		private int _counter = 0;
-	    private readonly int _numberOfWorkItemsToEnqueue = 100;
+	    private readonly int _numberOfWorkItemsToEnqueue = 5;
 	    private readonly int _maxNumberOfThreads = 4;
 	    private readonly int _minNumberOfThreads = 1;
 
@@ -49,7 +49,7 @@ namespace MassTransit.ServiceBus.Tests
 		public void The_pool_should_not_exceed_the_maximum_thread_count()
 		{
 		    int expectedPendingCount = _numberOfWorkItemsToEnqueue - _maxNumberOfThreads;
-		    int expectedAmountOnCounter = _maxNumberOfThreads;
+            int expectedAmountOnCounter = _numberOfWorkItemsToEnqueue;
 
 			using (ManagedThreadPool<string> pool = new ManagedThreadPool<string>(TestThreadDelegate, _minNumberOfThreads, _maxNumberOfThreads))
 			{
@@ -62,13 +62,45 @@ namespace MassTransit.ServiceBus.Tests
 
                 Assert.That(pool.PendingCount, Is.EqualTo(expectedPendingCount), "Pending work items was {0} instead of {1}", pool.PendingCount, expectedPendingCount);
 
-                Assert.That(_counter, Is.EqualTo(expectedAmountOnCounter), "Counter was {0} instead of {1}", _counter, expectedAmountOnCounter);
 			}
+
+            Assert.That(_counter, Is.EqualTo(expectedAmountOnCounter), "Counter should be {0} instead of {1} after a dispose", expectedAmountOnCounter, _counter);
 		}
+
+	    [Test]
+	    public void The_pool_should_complete_with_a_high_level_of_level_of_work()
+	    {
+            using(ManagedThreadPool<string> pool = new ManagedThreadPool<string>(TestThreadDelegate, _minNumberOfThreads, 10))
+            {
+                //5000 work items takes about 103 seconds
+                int numberOfWorkItems = 5000;
+                for(int i = 0; i < numberOfWorkItems; i++)
+                {
+                    pool.Enqueue("hello");
+                }
+
+            }
+	    }
+
+	    [Test]
+	    public void As_a_thread_pool_I_should_be_able_to_run_out_of_work_and_start_back_up()
+	    {
+            using (ManagedThreadPool<string> pool = new ManagedThreadPool<string>(TestThreadDelegate, _minNumberOfThreads, 10))
+            {
+                pool.Enqueue("dru");
+                Thread.Sleep(300);
+                pool.Enqueue("dru");
+                Thread.Sleep(300);
+
+                Assert.AreEqual(2, _counter);
+
+            }
+	    }
+
 
 		private void TestThreadDelegate(string value)
 		{
-			Thread.Sleep(2000);
+			Thread.Sleep(200);
             _counter++;
 		}
 	}
