@@ -30,7 +30,7 @@
   <ItemGroup>
     <Reference Include="NAnt.Core, Version=0.85.2478.0, Culture=neutral">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\libs\nant-0.85\NAnt.Core.dll</HintPath>
+      <HintPath>..\..\libs\nant-0.85\NAnt.Core.dll</HintPath>
     </Reference>
     <Reference Include="System" />
   </ItemGroup>

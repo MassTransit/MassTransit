@@ -3,9 +3,11 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
     using System;
     using Exceptions;
     using MassTransit.ServiceBus.Subscriptions;
+    using MassTransit.ServiceBus.Subscriptions.ClientHandlers;
     using MassTransit.ServiceBus.Subscriptions.Messages;
     using NUnit.Framework;
     using Rhino.Mocks;
+    using c = MassTransit.ServiceBus.Subscriptions.ClientHandlers;
 
     [TestFixture]
     public class When_managing_subscriptions_remotely :
@@ -44,7 +46,10 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
         {
             using(Record())
             {
-                _mockBus.Subscribe(sc);
+                _mockBus.AddComponent<c.AddSubscriptionHandler>();
+                _mockBus.AddComponent<c.RemoveSubscriptionHandler>();
+                _mockBus.AddComponent<c.CacheUpdateHandler>();
+
                 Expect.Call(delegate { _mockEndpoint.Send(new CacheUpdateRequest(uri)); }).IgnoreArguments();
             }
             using (Playback())
