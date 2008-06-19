@@ -3,12 +3,14 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
 	using System;
 	using System.Collections.Generic;
 	using MassTransit.ServiceBus.Subscriptions;
+	using MassTransit.ServiceBus.Subscriptions.ClientHandlers;
 	using MassTransit.ServiceBus.Subscriptions.Messages;
 	using NUnit.Framework;
 	using Rhino.Mocks;
 	using Rhino.Mocks.Constraints;
+	using AddSubscriptionHandler=MassTransit.ServiceBus.Subscriptions.ClientHandlers.AddSubscriptionHandler;
 
-	[TestFixture]
+    [TestFixture]
 	public class When_using_the_subscription_manager : 
         Specification
 	{
@@ -55,48 +57,46 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
 			}
 		}
 
-		[Test]
-		public void The_client_should_update_the_cache_when_a_SubscriptionChange_message_is_received()
-		{
-			Subscription sub = new Subscription("Ho.Pimp, Ho", new Uri("msmq://localhost/test"));
+        [Test]
+        public void The_client_should_update_the_cache_when_a_SubscriptionChange_message_is_received()
+        {
+            Subscription sub = new Subscription("Ho.Pimp, Ho", new Uri("msmq://localhost/test"));
 
-			AddSubscription change = new AddSubscription(sub);
+            AddSubscription change = new AddSubscription(sub);
 
-			using (Record())
-			{
-				_cache.Add(sub);
-			}
+            MassTransit.ServiceBus.Subscriptions.ClientHandlers.AddSubscriptionHandler handler = new AddSubscriptionHandler(_cache, _serviceBus);
 
-			using (Playback())
-			{
-				using (SubscriptionClient client = new SubscriptionClient(_serviceBus, _cache, _managerEndpoint))
-				{
-					client.Consume(change);
-				}
-			}
-		}
+            using (Record())
+            {
+                _cache.Add(sub);
+            }
 
-		[Test]
-		public void The_client_should_update_the_local_subscription_cache()
-		{
-			List<Subscription> subscriptions = new List<Subscription>();
-			subscriptions.Add(new Subscription("Ho.Pimp, Ho", new Uri("msmq://localhost/test")));
+            using (Playback())
+            {
+                handler.Consume(change);
+            }
+        }
 
-			CacheUpdateResponse cacheUpdateResponse = new CacheUpdateResponse(subscriptions);
+        [Test]
+        public void The_client_should_update_the_local_subscription_cache()
+        {
+            List<Subscription> subscriptions = new List<Subscription>();
+            subscriptions.Add(new Subscription("Ho.Pimp, Ho", new Uri("msmq://localhost/test")));
 
-			using (Record())
-			{
-				_cache.Add(subscriptions[0]);
-			}
+            CacheUpdateResponse cacheUpdateResponse = new CacheUpdateResponse(subscriptions);
 
-			using (Playback())
-			{
-				using (SubscriptionClient client = new SubscriptionClient(_serviceBus, _cache, _managerEndpoint))
-				{
-					client.Consume(cacheUpdateResponse);
-				}
-			}
-		}
+            MassTransit.ServiceBus.Subscriptions.ClientHandlers.CacheUpdateHandler handler = new CacheUpdateHandler(_cache, _serviceBus);
+
+            using (Record())
+            {
+                _cache.Add(subscriptions[0]);
+            }
+
+            using (Playback())
+            {
+                handler.Consume(cacheUpdateResponse);
+            }
+        }
 
 		[Test]
 		public void When_a_local_service_subscribes_to_the_bus_notify_the_manager_of_the_change()
