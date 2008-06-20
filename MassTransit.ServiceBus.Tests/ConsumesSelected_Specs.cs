@@ -19,7 +19,7 @@ namespace MassTransit.ServiceBus.Tests
 		{
 	        _builder = StrictMock<IObjectBuilder>();
 
-			_dispatcher = new MessageTypeDispatcher();
+			_dispatcher = new MessageTypeDispatcher(null);
 	    	_coordinator = new SubscriptionCoordinator(_dispatcher, null, null, _builder);
 			_message = new TestMessage(_value);
 		}

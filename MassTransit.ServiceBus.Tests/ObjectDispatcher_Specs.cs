@@ -30,7 +30,7 @@ namespace MassTransit.ServiceBus.Tests
             }
             using (Playback())
             {
-                MessageTypeDispatcher dispatcher = new MessageTypeDispatcher();
+                MessageTypeDispatcher dispatcher = new MessageTypeDispatcher(null);
                 SubscriptionCoordinator coordinator = new SubscriptionCoordinator(dispatcher, null, null, builder);
 
                 coordinator.Resolve<RequestHandler>().AddComponent();
@@ -61,7 +61,7 @@ namespace MassTransit.ServiceBus.Tests
             }
             using (Playback())
             {
-                MessageTypeDispatcher dispatcher = new MessageTypeDispatcher();
+                MessageTypeDispatcher dispatcher = new MessageTypeDispatcher(null);
                 SubscriptionCoordinator coordinator = new SubscriptionCoordinator(dispatcher, null, null, builder);
 
                 coordinator.Resolve<RequestHandler>().AddComponent();

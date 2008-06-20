@@ -32,7 +32,7 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
 
 			ReplayAll();
 
-			_dispatcher = new MessageTypeDispatcher();
+			_dispatcher = new MessageTypeDispatcher(null);
 
 			_coordinator = new SubscriptionCoordinator(_dispatcher, _bus, _cache, _builder);
 		}

@@ -23,6 +23,12 @@ namespace MassTransit.ServiceBus.Internal
 	{
 		private static readonly ILog _log = LogManager.GetLogger(typeof(CorrelationIdDispatcher<TMessage,TKey>));
 		private readonly Dictionary<TKey, MessageDispatcher<TMessage>> _dispatchers = new Dictionary<TKey, MessageDispatcher<TMessage>>();
+		private readonly IServiceBus _bus;
+
+		public CorrelationIdDispatcher(IServiceBus bus)
+		{
+			_bus = bus;
+		}
 
 		public bool Active
 		{
@@ -103,7 +109,7 @@ namespace MassTransit.ServiceBus.Internal
 				if (_dispatchers.ContainsKey(correlationId))
 					return _dispatchers[correlationId];
 
-				MessageDispatcher<TMessage> dispatcher = new MessageDispatcher<TMessage>();
+				MessageDispatcher<TMessage> dispatcher = new MessageDispatcher<TMessage>(_bus);
 
 				_dispatchers.Add(correlationId, dispatcher);
 

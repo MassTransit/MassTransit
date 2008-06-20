@@ -16,10 +16,17 @@ namespace MassTransit.ServiceBus.Internal
 	using System.Collections.Generic;
 	using log4net;
 
-	public class MessageDispatcher<TMessage> : IMessageDispatcher<TMessage> where TMessage : class
+	public class MessageDispatcher<TMessage> : 
+		IMessageDispatcher<TMessage> where TMessage : class
 	{
 		private static readonly ILog _log = LogManager.GetLogger(typeof(MessageDispatcher<TMessage>));
 		private readonly List<Consumes<TMessage>.All> _consumers = new List<Consumes<TMessage>.All>();
+		private readonly IServiceBus _bus;
+
+		public MessageDispatcher(IServiceBus bus)
+		{
+			_bus = bus;
+		}
 
 		public bool Accept(TMessage message)
 		{
@@ -53,17 +60,33 @@ namespace MassTransit.ServiceBus.Internal
 
 			foreach (Consumes<TMessage>.All consumer in consumers)
 			{
-				Consumes<TMessage>.Selected selectiveConsumer = consumer as Consumes<TMessage>.Selected;
-				if (selectiveConsumer != null)
+				try
 				{
-					if (selectiveConsumer.Accept(message))
+					Consumes<TMessage>.Selected selectiveConsumer = consumer as Consumes<TMessage>.Selected;
+					if (selectiveConsumer != null)
+					{
+						if (selectiveConsumer.Accept(message))
+						{
+							consumer.Consume(message);
+						}
+					}
+					else
 					{
 						consumer.Consume(message);
 					}
 				}
-				else
+				catch (Exception ex)
 				{
-					consumer.Consume(message);
+					try
+					{
+						_bus.Publish(new Fault<TMessage>(ex, message));
+					}
+					catch(Exception fex)
+					{
+						_log.Error("Failed to publish Fault<" + typeof(TMessage).FullName + "> message for exception", fex);
+					}
+					
+					throw;
 				}
 			}
 		}
