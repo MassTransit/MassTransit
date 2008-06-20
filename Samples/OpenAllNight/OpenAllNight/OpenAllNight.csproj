@@ -50,6 +50,15 @@
       <Project>{90482397-6282-465E-8B86-39865FC30127}</Project>
       <Name>MassTransit.ServiceBus</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\..\MassTransit.WindsorIntegration\MassTransit.WindsorIntegration.csproj">
+      <Project>{98D5A59C-96FA-4A1B-A653-EA5A35C45FC9}</Project>
+      <Name>MassTransit.WindsorIntegration</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="castle.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

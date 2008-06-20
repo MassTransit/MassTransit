@@ -76,6 +76,7 @@
     <Compile Include="Internal\MessageTypeSubscription.cs" />
     <Compile Include="Internal\Produces.cs" />
     <Compile Include="Internal\SelectiveComponentDispatcher.cs" />
+    <Compile Include="Internal\SpecialLoggers.cs" />
     <Compile Include="Internal\SubscriptionCoordinator.cs" />
     <Compile Include="Internal\SubscriptionTypeInfo.cs" />
     <Compile Include="ServiceBusRequest.cs" />
