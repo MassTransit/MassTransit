@@ -31,8 +31,8 @@ namespace MassTransit.ServiceBus.MSMQ
 		private static readonly ILog _messageLog = LogManager.GetLogger("MassTransit.Messages");
 		private readonly string _queuePath;
 		private readonly Uri _uri;
-		private string _machineName = Environment.MachineName;
-		private MessageQueue _queue;
+		private readonly string _machineName = Environment.MachineName;
+		private readonly MessageQueue _queue;
 		private bool _reliableMessaging = true;
 
 		/// <summary>
