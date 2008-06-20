@@ -27,17 +27,16 @@ namespace MassTransit.ServiceBus.Internal
 		where TMessage : class, BatchedBy<TBatchId>
 	{
 		private readonly Dictionary<TBatchId, Batch<TMessage, TBatchId>> _batches = new Dictionary<TBatchId, Batch<TMessage, TBatchId>>();
-
-		private readonly MessageDispatcher<Batch<TMessage, TBatchId>> _messageDispatcher = new MessageDispatcher<Batch<TMessage, TBatchId>>();
-
+		private readonly MessageDispatcher<Batch<TMessage, TBatchId>> _messageDispatcher;
 		private readonly object _lockContext = new object();
-
 		private readonly TimeSpan _timeout;
 		private readonly IServiceBus _bus;
 
 		public BatchDistributor(IServiceBus bus)
 		{
 			_bus = bus;
+
+			_messageDispatcher = new MessageDispatcher<Batch<TMessage, TBatchId>>(bus);
 
 			_timeout = GetMessageTimeout(TimeSpan.FromMinutes(30));
 		}

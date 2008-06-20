@@ -118,39 +118,65 @@ namespace MassTransit.ServiceBus
 		}
 	}
 
+	/// <summary>
+	/// The first step in building a request, this class is returned by IServiceBus.Request()
+	/// and creates a specific RequestBuilder for the component making the request
+	/// </summary>
 	public class RequestBuilder
 	{
 		private readonly IServiceBus _bus;
 
+		/// <summary>
+		/// The service bus where the request originated
+		/// </summary>
+		/// <param name="bus"></param>
 		public RequestBuilder(IServiceBus bus)
 		{
 			_bus = bus;
 		}
 
+		/// <summary>
+		/// Associates a component with the request. Immediately before the request is sent
+		/// the component is subscribed on the service bus. This registered any correlated
+		/// handlers on the bus to receive messages sent in response to this request
+		/// </summary>
+		/// <typeparam name="T">The type of the component</typeparam>
+		/// <param name="component">The component to associate with the request</param>
+		/// <returns></returns>
 		public RequestBuilder<T> From<T>(T component) where T : class
 		{
 			return new RequestBuilder<T>(component, _bus);
 		}
 	}
 
-	public class RequestBuilder<TComponent> where TComponent : class
+	/// <summary>
+	/// A specialized request builder for the component making the request
+	/// </summary>
+	/// <typeparam name="TComponent">The type of component making the request</typeparam>
+	public class RequestBuilder<TComponent> 
+		where TComponent : class
 	{
-		private IServiceBus _bus;
+		private readonly IServiceBus _bus;
 	    private AsyncCallback _callback;
-	    private TComponent _component;
+	    private readonly TComponent _component;
 	    private object _state;
 
-		public RequestBuilder(TComponent component)
-		{
-			_component = component;
-		}
-
+		/// <summary>
+		/// Creates a RequestBuilder object
+		/// </summary>
+		/// <param name="component"></param>
+		/// <param name="bus">The service bus coordinating the request</param>
 		public RequestBuilder(TComponent component, IServiceBus bus)
 		{
 			_component = component;
 			_bus = bus;
 		}
 
+		/// <summary>
+		/// Converts the builder to an instance of the ServiceBusRequest class.
+		/// </summary>
+		/// <param name="builder"></param>
+		/// <returns></returns>
 		public static implicit operator ServiceBusRequest<TComponent>(RequestBuilder<TComponent> builder)
 		{
 			Guard.Against.Null(builder._component, "Source object must be specified");
@@ -159,6 +185,12 @@ namespace MassTransit.ServiceBus
 			return new ServiceBusRequest<TComponent>(builder._bus, builder._component, builder._callback, builder._state);
 		}
 
+		/// <summary>
+		/// Specifies a callback to invoke when the component signals the request/response has completed.
+		/// </summary>
+		/// <param name="callback"></param>
+		/// <param name="state"></param>
+		/// <returns></returns>
 		public RequestBuilder<TComponent> WithCallback(AsyncCallback callback, object state)
 		{
 			_callback = callback;

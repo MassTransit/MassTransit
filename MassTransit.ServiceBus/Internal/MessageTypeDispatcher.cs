@@ -14,6 +14,7 @@ namespace MassTransit.ServiceBus.Internal
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Reflection;
 
 	/// <summary>
 	/// Manages and dispatches messages to correlated message consumers
@@ -23,6 +24,12 @@ namespace MassTransit.ServiceBus.Internal
 	{
 		private readonly Dictionary<Type, IMessageDispatcher> _messageDispatchers = new Dictionary<Type, IMessageDispatcher>();
 		private readonly object _messageLock = new object();
+		private readonly IServiceBus _bus;
+
+		public MessageTypeDispatcher(IServiceBus bus)
+		{
+			_bus = bus;
+		}
 
 		public bool Accept(object message)
 		{
@@ -86,7 +93,7 @@ namespace MassTransit.ServiceBus.Internal
 
 				Type dispatcherType = typeof (MessageDispatcher<>).MakeGenericType(messageType);
 
-				consumer = (IMessageDispatcher) Activator.CreateInstance(dispatcherType);
+				consumer = (IMessageDispatcher) Activator.CreateInstance(dispatcherType, _bus);
 
 				_messageDispatchers.Add(messageType, consumer);
 

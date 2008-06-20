@@ -19,7 +19,7 @@ namespace MassTransit.ServiceBus.Tests
 	    protected override void Before_each()
 		{
 	        obj = StrictMock<IObjectBuilder>();
-			_dispatcher = new MessageTypeDispatcher();
+			_dispatcher = new MessageTypeDispatcher(null);
 	    	_coordinator = new SubscriptionCoordinator(_dispatcher, null, null, obj);
 			_message = new TestMessage(_value);
 		}

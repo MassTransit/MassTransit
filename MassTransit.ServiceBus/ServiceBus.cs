@@ -79,7 +79,7 @@ namespace MassTransit.ServiceBus
 			_endpointResolver = endpointResolver;
 
 			//TODO: Move into IObjectBuilder?
-			_messageDispatcher = new MessageTypeDispatcher();
+			_messageDispatcher = new MessageTypeDispatcher(this);
 			_subscriptionCoordinator = new SubscriptionCoordinator(_messageDispatcher, this, _subscriptionCache, _objectBuilder);
 			_receiveThread = new ReceiveThread(this, endpointToListenOn);
             _asyncDispatcher = new ManagedThreadPool<object>(IronDispatcher);

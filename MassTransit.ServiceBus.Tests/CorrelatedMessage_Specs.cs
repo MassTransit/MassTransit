@@ -20,7 +20,7 @@ namespace MassTransit.ServiceBus.Tests
 		[Test]
 		public void A_type_should_be_registered()
 		{
-			MessageTypeDispatcher messageDispatcher = new MessageTypeDispatcher();
+			MessageTypeDispatcher messageDispatcher = new MessageTypeDispatcher(null);
 			SubscriptionCoordinator coordinator = new SubscriptionCoordinator(messageDispatcher, null, null, obj);
 
 			CorrelatedController controller = new CorrelatedController(messageDispatcher, coordinator);
@@ -41,7 +41,7 @@ namespace MassTransit.ServiceBus.Tests
 			SetupResult.For(bus.Endpoint).Return(endpoint);
 			SetupResult.For(endpoint.Uri).Return(uri);
 
-			MessageTypeDispatcher messageDispatcher = new MessageTypeDispatcher();
+			MessageTypeDispatcher messageDispatcher = new MessageTypeDispatcher(null);
 			SubscriptionCoordinator coordinator = new SubscriptionCoordinator(messageDispatcher, bus, cache, obj);
 			CorrelatedController controller = new CorrelatedController(messageDispatcher, coordinator);
 

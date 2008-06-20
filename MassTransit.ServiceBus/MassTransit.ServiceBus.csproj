@@ -54,6 +54,7 @@
     <Compile Include="Batch.cs" />
     <Compile Include="BatchedBy.cs" />
     <Compile Include="BatchTimeout.cs" />
+    <Compile Include="Fault.cs" />
     <Compile Include="HealthMonitoring\HealthInformation.cs" />
     <Compile Include="HealthMonitoring\HealthStatusConsumer.cs" />
     <Compile Include="HealthMonitoring\IHealthCache.cs" />
@@ -70,6 +71,7 @@
     <Compile Include="Internal\IEndpointResolver.cs" />
     <Compile Include="Internal\IPublicationTypeInfo.cs" />
     <Compile Include="Internal\ISubscriptionTypeInfo.cs" />
+    <Compile Include="Internal\LoopbackEndpoint.cs" />
     <Compile Include="Internal\MessageTypeDispatcher.cs" />
     <Compile Include="Internal\MessageTypePublication.cs" />
     <Compile Include="Internal\MessageTypeSubscription.cs" />
