@@ -25,7 +25,6 @@ namespace MassTransit.ServiceBus.Threading
 	{
 		private static readonly ILog _log = LogManager.GetLogger(typeof (ManagedThreadPool<T>));
 		private readonly Action<T> _handler;
-		private readonly int _maxQueueDepth = 256;
 		private readonly AutoResetEvent _queueActivity = new AutoResetEvent(true);
 		private readonly ManualResetEvent _shutdown = new ManualResetEvent(false);
 		private readonly List<Thread> _threads = new List<Thread>();
@@ -76,10 +75,13 @@ namespace MassTransit.ServiceBus.Threading
 			_threads.Clear();
 		}
 
+		/// <summary>
+		/// The maximum depth of the queue
+		/// </summary>
 		public int MaxQueueDepth
 		{
 			[System.Diagnostics.DebuggerStepThrough]
-			get { return _maxQueueDepth; }
+			get { return _maxThreads * 2; }
 		}
 
 		public int MaxThreads
