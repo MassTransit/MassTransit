@@ -115,6 +115,7 @@
     <Compile Include="IObjectBuilder.cs" />
     <Compile Include="IServiceBus.cs" />
     <Compile Include="MessageFilter.cs" />
+    <Compile Include="Subscriptions\InMemorySubscriptionRepository.cs" />
     <Compile Include="Subscriptions\ServerHandlers\AddSubscriptionHandler.cs" />
     <Compile Include="Subscriptions\ServerHandlers\CacheUpdateRequestHandler.cs" />
     <Compile Include="Subscriptions\ServerHandlers\CancelUpdatesHandler.cs" />
