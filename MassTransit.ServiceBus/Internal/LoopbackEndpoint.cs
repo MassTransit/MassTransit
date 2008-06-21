@@ -147,7 +147,6 @@ namespace MassTransit.ServiceBus.Internal
 
 		public void Dispose()
 		{
-			_messageReady.Close();
 			_messages.Clear();
 		}
 

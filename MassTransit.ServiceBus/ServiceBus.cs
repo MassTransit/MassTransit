@@ -225,7 +225,7 @@ namespace MassTransit.ServiceBus
 		public void Dispatch(object message, DispatchMode mode)
 		{
 			if (mode == DispatchMode.Synchronous)
-				_messageDispatcher.Consume(message);
+				IronDispatcher(message);
 			else
 				_asyncDispatcher.Enqueue(message);
 		}
@@ -243,6 +243,10 @@ namespace MassTransit.ServiceBus
             }
             catch(Exception ex)
             {
+            	IPublicationTypeInfo info = _subscriptionCoordinator.Resolve(message.GetType());
+
+            	info.PublishFault(this, ex, message);
+
                 _ironLog.Error("An error was caught in the ServiceBus.IronDispatcher", ex);
             }
             

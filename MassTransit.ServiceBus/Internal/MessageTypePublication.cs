@@ -15,12 +15,15 @@ namespace MassTransit.ServiceBus.Internal
 	using System;
 	using System.Collections.Generic;
 	using Exceptions;
+	using log4net;
 	using Subscriptions;
 
 	public class MessageTypePublication<TMessage> :
 		IPublicationTypeInfo
 		where TMessage : class
 	{
+		private static readonly ILog _log = LogManager.GetLogger(typeof (MessageTypePublication<TMessage>));
+
 		private readonly ISubscriptionCache _cache;
 		private readonly Type _messageType;
 
@@ -39,16 +42,34 @@ namespace MassTransit.ServiceBus.Internal
 			return GetConsumers(msg);
 		}
 
+		public void PublishFault<T>(IServiceBus bus, Exception ex, T message) where T : class
+		{
+			TMessage msg = message as TMessage;
+			if (msg == null)
+				throw new ConventionException(string.Format("Object of type {0} is not of type {1}", typeof (T), _messageType));
+
+			Fault<TMessage> fault = new Fault<TMessage>(ex, msg);
+
+			try
+			{
+				bus.Publish(fault);
+			}
+			catch (Exception fex)
+			{
+				_log.Error("Failed to publish Fault<" + typeof (TMessage).Name + "> message for exception", fex);
+			}
+		}
+
+		public void Dispose()
+		{
+		}
+
 		public IList<Subscription> GetConsumers(TMessage message)
 		{
 			if (_cache == null)
 				return new List<Subscription>();
 
 			return _cache.List(_messageType.FullName);
-		}
-
-		public void Dispose()
-		{
 		}
 	}
 }

@@ -4,7 +4,7 @@ namespace MassTransit.ServiceBus
 	using System.Collections.Generic;
 
 	[Serializable]
-	public class Fault<TMessage>
+	public class Fault<TMessage> where TMessage : class
 	{
 		private readonly TMessage _failedMessage;
 		private readonly List<string> _messages;
@@ -73,6 +73,23 @@ namespace MassTransit.ServiceBus
 			}
 
 			return result;
+		}
+	}
+
+	[Serializable]
+	public class Fault<TMessage, TKey> :
+		Fault<TMessage>,
+		CorrelatedBy<TKey>
+		where TMessage : class, CorrelatedBy<TKey>
+	{
+		public Fault(Exception ex, TMessage message) :
+			base(ex, message)
+		{
+		}
+
+		public TKey CorrelationId
+		{
+			get { return FailedMessage.CorrelationId; }
 		}
 	}
 }

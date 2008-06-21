@@ -12,6 +12,7 @@
 /// specific language governing permissions and limitations under the License.
 namespace MassTransit.ServiceBus.Internal
 {
+	using System;
 	using System.Collections.Generic;
 	using Exceptions;
 	using Subscriptions;
@@ -31,6 +32,11 @@ namespace MassTransit.ServiceBus.Internal
 		public IList<Subscription> GetConsumers<T>(T message) where T : class
 		{
 			return _publicationType.GetConsumers(message);
+		}
+
+		public void PublishFault<T>(IServiceBus bus, Exception ex, T message) where T : class
+		{
+			_publicationType.PublishFault(bus, ex, message);
 		}
 
 		public void Subscribe<T>(T component) where T : class
