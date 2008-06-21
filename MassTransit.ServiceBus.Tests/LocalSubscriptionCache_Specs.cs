@@ -18,7 +18,7 @@ namespace MassTransit.ServiceBus.Tests
 
         protected override void Before_each()
         {
-            _builder = StrictMock<IObjectBuilder>();
+            _builder = DynamicMock<IObjectBuilder>();
 			_mockEndpoint = DynamicMock<IEndpoint>();
 			_mockSubscriptionCache = DynamicMock<ISubscriptionCache>();
 			_subscription = new Subscription(typeof (PingMessage).FullName, queueUri);

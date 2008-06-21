@@ -83,8 +83,6 @@ namespace MassTransit.ServiceBus
 			_subscriptionCoordinator = new SubscriptionCoordinator(_messageDispatcher, this, _subscriptionCache, _objectBuilder);
 			_receiveThread = new ReceiveThread(this, endpointToListenOn);
             _asyncDispatcher = new ManagedThreadPool<object>(IronDispatcher);
-
-            _log.DebugFormat("ServiceBus is listening on {0}", _endpointToListenOn.Uri);
 		}
 
 		public ISubscriptionCache SubscriptionCache
@@ -178,6 +176,8 @@ namespace MassTransit.ServiceBus
 
 		public void Subscribe<T>(T component) where T : class
 		{
+            _objectBuilder.Register<T>();
+
 			ISubscriptionTypeInfo info = _subscriptionCoordinator.Resolve(component);
 			info.Subscribe(component);
 
@@ -216,6 +216,7 @@ namespace MassTransit.ServiceBus
 
 		private void StartListening()
 		{
+            _log.DebugFormat("ServiceBus is listening on {0}", _endpointToListenOn.Uri);
 			_receiveThread.Start();
 		}
 

@@ -2,6 +2,7 @@ namespace MassTransit.WindsorIntegration
 {
     using System;
     using System.Collections;
+    using Castle.Core;
     using Castle.MicroKernel;
     using ServiceBus;
 
@@ -39,6 +40,14 @@ namespace MassTransit.WindsorIntegration
         public void Release<T>(T obj)
         {
         	_container.ReleaseComponent(obj);
+        }
+
+        public void Register<T>() where  T : class
+        {
+            if (!_container.HasComponent(typeof (T)))
+            {
+                _container.AddComponent(typeof(T).Name, typeof(T), LifestyleType.Transient);
+            }
         }
     }
 }
