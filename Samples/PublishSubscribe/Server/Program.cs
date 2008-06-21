@@ -1,7 +1,7 @@
 namespace Server
 {
 	using log4net;
-	using MassTransit.Host2;
+	using MassTransit.Host;
 
 	internal class Program
 	{

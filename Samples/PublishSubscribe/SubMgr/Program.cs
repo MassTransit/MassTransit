@@ -1,7 +1,7 @@
 namespace SubMgr
 {
 	using log4net;
-	using MassTransit.Host2;
+	using MassTransit.Host;
 	using MassTransit.ServiceBus;
 	using MassTransit.ServiceBus.Subscriptions;
 	using MassTransit.SubscriptionStorage;

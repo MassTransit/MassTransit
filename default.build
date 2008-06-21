@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <project name="masstransit" default="go">
 	
-	<include buildfile="properties.xml" />
+	<property name="dirs.install" value=".\pubsub_install" overwrite="false" />
+	<property name="dirs.build" value=".\bin" overwrite="false" />
 	
 	<target name="go" depends="build, clean_the_bin, zip" description="Starting the build of MassTransit"/>
 	
@@ -23,6 +24,15 @@
 		<msbuild project=".\Samples\HeavyLoad\HeavyLoad.sln" verbosity="quiet">
 			<property name="Configuration" value="Release" />
 		</msbuild>
+		<msbuild project=".\Samples\OpenAllNight\OpenAllNight.sln" verbosity="quiet">
+			<property name="Configuration" value="Release" />
+		</msbuild>
+		<msbuild project=".\Samples\PublishSubscribe\PublishSubscribe.sln" verbosity="quiet">
+			<property name="Configuration" value="Release" />
+		</msbuild>
+		<msbuild project=".\Samples\WebRequestReply\WebRequestReply.sln" verbosity="quiet">
+			<property name="Configuration" value="Release" />
+		</msbuild>
 	</target>
 
 	
@@ -41,26 +51,6 @@
 		</zip>
 	</target>
 	
-	
-	<target name="package-net-2.0">
-		<!--
-			clean is first target executed so we can get rid of
-			any old assemblies
-		-->
-		<nant buildfile="default.build" target="clean build installer">
-			<properties>
-				<property name="build.rebuild" value="true" />
-				<property name="nant.settings.currentframework" value="net-1.1" />
-				<property name="project.config" value="release" />
-				<property name="sign" value="true" />
-				<property name="vshik.installed" value="true" />
-				<property name="nunit2report.installed" value="false" />
-				<property name="build-zipfile" value="${build.dir}/Castle-${project.major}.${project.minor}.${project.build}-${framework::get-target-framework()}-${project.config}-${datetime::get-year(datetime::now())}-${datetime::get-month(datetime::now())}-${datetime::get-day(datetime::now())} (r${svn.revision}).zip" dynamic="true" />
-			</properties>
-		</nant>
-	</target>
-	
-	<!-- mono -->
 	
 	<target name="common.find-svninfo" description="Gets the current svn revision number">
 		<!-- For adding SVN revision to builds -->

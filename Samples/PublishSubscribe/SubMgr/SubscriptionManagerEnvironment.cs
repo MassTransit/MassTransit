@@ -1,6 +1,6 @@
 namespace SubMgr
 {
-	using MassTransit.Host2;
+    using MassTransit.Host;
 
 	public class SubscriptionManagerEnvironment :
 		HostedEnvironment

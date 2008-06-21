@@ -1,6 +1,6 @@
 namespace Server
 {
-	using MassTransit.Host2;
+    using MassTransit.Host;
 
 	public class ServerEnvironment :
 		HostedEnvironment
