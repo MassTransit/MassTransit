@@ -147,7 +147,8 @@ namespace MassTransit.ServiceBus.Internal
 
 		public void Dispose()
 		{
-			_messages.Clear();
+			lock(_messages)
+				_messages.Clear();
 		}
 
 		private void Enqueue<T>(T message)
@@ -155,7 +156,8 @@ namespace MassTransit.ServiceBus.Internal
 			using (MemoryStream mstream = new MemoryStream())
 			{
 				_formatter.Serialize(mstream, message);
-				_messages.Enqueue(mstream.ToArray());
+				lock(_messages)
+					_messages.Enqueue(mstream.ToArray());
 			}
 
 			_messageReady.Release();
@@ -163,7 +165,9 @@ namespace MassTransit.ServiceBus.Internal
 
 		private object Dequeue()
 		{
-			byte[] buffer = _messages.Dequeue();
+			byte[] buffer;
+			lock(_messages)
+				buffer = _messages.Dequeue();
 
 			using (MemoryStream mstream = new MemoryStream(buffer))
 			{

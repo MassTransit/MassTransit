@@ -61,6 +61,7 @@
     <Compile Include="Load\LocalActiveMqLoadTest.cs" />
     <Compile Include="Load\LocalLoadTest.cs" />
     <Compile Include="Load\LocalMsmqLoadTest.cs" />
+    <Compile Include="Load\LoopbackLoadTest.cs" />
     <Compile Include="MsmqHelper.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -92,6 +93,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="castle.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Loopback.castle.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
