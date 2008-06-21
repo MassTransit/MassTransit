@@ -1,7 +1,7 @@
 namespace Client
 {
     using System;
-    using MassTransit.Host2;
+    using MassTransit.Host;
     using MassTransit.ServiceBus;
     using SecurityMessages;
 
