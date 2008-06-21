@@ -4,8 +4,9 @@ namespace MassTransit.ServiceBus.Tests
 	using System.Threading;
 	using NUnit.Framework;
 	using NUnit.Framework.SyntaxHelpers;
+	using Rhino.Mocks;
 
-	[TestFixture]
+    [TestFixture]
 	public class When_A_Message_Is_Received_On_The_Service_Bus :
         Specification
 	{
@@ -14,6 +15,7 @@ namespace MassTransit.ServiceBus.Tests
 		private IEndpoint _mockServiceBusEndPoint;
 		private bool _received = false;
 		private readonly PingMessage _message = new PingMessage();
+        private readonly Uri _busEndpointUri = new Uri("msmq://localhost/test");
 
 		internal class TestConsumer<T> : Consumes<T>.All where T : class
 		{
@@ -33,6 +35,7 @@ namespace MassTransit.ServiceBus.Tests
         protected override void Before_each()
         {
             _mockServiceBusEndPoint = DynamicMock<IEndpoint>();
+            SetupResult.For(_mockServiceBusEndPoint.Uri).Return(_busEndpointUri);
             _builder = DynamicMock<IObjectBuilder>();
             _serviceBus = new ServiceBus(_mockServiceBusEndPoint, _builder);
         }

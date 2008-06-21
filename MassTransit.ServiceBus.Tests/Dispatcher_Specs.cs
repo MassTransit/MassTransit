@@ -5,70 +5,70 @@ namespace MassTransit.ServiceBus.Tests
 	using Rhino.Mocks;
 
     [TestFixture]
-	public class When_a_message_is_delivered_to_the_service_bus :
-		Specification
-	{
+    public class When_a_message_is_delivered_to_the_service_bus :
+        Specification
+    {
 
-		private ServiceBus _bus;
-		    IObjectBuilder obj;
+        private ServiceBus _bus;
+        private IObjectBuilder obj;
 
-		protected override void Before_each()
-		{
-			IEndpoint endpoint = DynamicMock<IEndpoint>();
-		    obj = StrictMock<IObjectBuilder>();
+        protected override void Before_each()
+        {
+            IEndpoint endpoint = DynamicMock<IEndpoint>();
+            obj = DynamicMock<IObjectBuilder>();
 
-		    _bus = new ServiceBus(endpoint, obj);
-		}
+            _bus = new ServiceBus(endpoint, obj);
+        }
 
-		[Test]
-		public void A_consumer_object_should_receive_the_message()
-		{
-			ReplayAll();
+        [Test]
+        public void A_consumer_object_should_receive_the_message()
+        {
+            ReplayAll();
 
-			PingHandler handler = new PingHandler();
+            PingHandler handler = new PingHandler();
 
-			_bus.Subscribe(handler);
+            _bus.Subscribe(handler);
 
-			int old = PingHandler.Pinged;
+            int old = PingHandler.Pinged;
 
-			_bus.Dispatch(new PingMessage());
+            _bus.Dispatch(new PingMessage());
 
-			Assert.That(PingHandler.Pinged, Is.GreaterThan(old));
-		}
+            Assert.That(PingHandler.Pinged, Is.GreaterThan(old));
+        }
 
-		[Test]
-		public void A_consumer_type_should_be_created_to_receive_the_message()
-		{
+        [Test]
+        public void A_consumer_type_should_be_created_to_receive_the_message()
+        {
             PingHandler ph = new PingHandler();
 
-		    Expect.Call(obj.Build<Consumes<PingMessage>.All>(typeof (PingHandler))).Return(ph);
+            Expect.Call(obj.Build<Consumes<PingMessage>.All>(typeof(PingHandler))).Return(ph);
             obj.Release<Consumes<PingMessage>.All>(ph);
 
-			ReplayAll();
+            ReplayAll();
 
-			_bus.AddComponent<PingHandler>();
+            _bus.AddComponent<PingHandler>();
 
-			int old = PingHandler.Pinged;
+            int old = PingHandler.Pinged;
 
-			_bus.Dispatch(new PingMessage());
+            _bus.Dispatch(new PingMessage());
 
-			Assert.That(PingHandler.Pinged, Is.GreaterThan(old));
-		}
+            Assert.That(PingHandler.Pinged, Is.GreaterThan(old));
+        }
 
 
-		internal class PingHandler : Consumes<PingMessage>.All
-		{
-			private static int _pinged;
+        internal class PingHandler : Consumes<PingMessage>.All
+        {
+            private static int _pinged;
 
-			public static int Pinged
-			{
-				get { return _pinged; }
-			}
+            public static int Pinged
+            {
+                get { return _pinged; }
+            }
 
-			public void Consume(PingMessage message)
-			{
-				_pinged++;
-			}
-		}
-	}
+            public void Consume(PingMessage message)
+            {
+                _pinged++;
+            }
+        }
+    }
 }

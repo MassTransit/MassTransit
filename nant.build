@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <project name="masstransit" default="go">
 	
-	<property name="dirs.install" value=".\pubsub_install" overwrite="false" />
-	<property name="dirs.build" value=".\bin" overwrite="false" />
+	<include buildfile="properties.xml" />
 	
 	<target name="go" depends="build, clean_the_bin, zip" description="Starting the build of MassTransit"/>
 	
-	<target name="build" depends="build_code, build_samples" description="Starting builds" />
+	<target name="build" depends="build_code, build_samples, build_deploy" description="Starting builds" />
 	
 	<target name="build_code" depends="common.find-svninfo, common.asminfo" description="Building Library">
 		<delete dir=".\bin" failonerror="false" />
@@ -26,6 +25,11 @@
 		</msbuild>
 	</target>
 
+	
+	<target name="build_deploy">
+	
+	</target>
+	
 	<target name="zip" depends="make_pubsub_install">
 		<zip zipfile="masstransit.zip">
 			<fileset basedir=".\bin">
@@ -36,6 +40,27 @@
 			</fileset>
 		</zip>
 	</target>
+	
+	
+	<target name="package-net-2.0">
+		<!--
+			clean is first target executed so we can get rid of
+			any old assemblies
+		-->
+		<nant buildfile="default.build" target="clean build installer">
+			<properties>
+				<property name="build.rebuild" value="true" />
+				<property name="nant.settings.currentframework" value="net-1.1" />
+				<property name="project.config" value="release" />
+				<property name="sign" value="true" />
+				<property name="vshik.installed" value="true" />
+				<property name="nunit2report.installed" value="false" />
+				<property name="build-zipfile" value="${build.dir}/Castle-${project.major}.${project.minor}.${project.build}-${framework::get-target-framework()}-${project.config}-${datetime::get-year(datetime::now())}-${datetime::get-month(datetime::now())}-${datetime::get-day(datetime::now())} (r${svn.revision}).zip" dynamic="true" />
+			</properties>
+		</nant>
+	</target>
+	
+	<!-- mono -->
 	
 	<target name="common.find-svninfo" description="Gets the current svn revision number">
 		<!-- For adding SVN revision to builds -->
