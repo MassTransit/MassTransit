@@ -14,6 +14,7 @@ namespace MassTransit.ServiceBus.Internal
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Reflection;
 	using System.Text;
 	using Exceptions;
 	using log4net;
@@ -37,6 +38,15 @@ namespace MassTransit.ServiceBus.Internal
 			}
 				
 		}
+
+        public static ConstructorInfo GetConstructor(Type type)
+        {
+            BindingFlags bindingFlags = BindingFlags.Instance | BindingFlags.Public;
+            CallingConventions conventions = CallingConventions.Standard | CallingConventions.HasThis;
+            Type[] parameterTypes = new Type[] { typeof(Uri) };
+
+            return type.GetConstructor(bindingFlags, null, conventions, parameterTypes, null);
+        }
 
 		public IEndpoint Resolve(Uri uri)
 		{
