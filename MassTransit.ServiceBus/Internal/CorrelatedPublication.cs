@@ -15,12 +15,14 @@ namespace MassTransit.ServiceBus.Internal
 	using System;
 	using System.Collections.Generic;
 	using Exceptions;
+	using log4net;
 	using Subscriptions;
 
 	public class CorrelatedPublication<TMessage, TKey> :
 		IPublicationTypeInfo
 		where TMessage : class, CorrelatedBy<TKey>
 	{
+		private static readonly ILog _log = LogManager.GetLogger(typeof(MessageTypePublication<TMessage>));
 		private readonly ISubscriptionCache _cache;
 		private readonly Type _keyType;
 		private readonly Type _messageType;
@@ -39,6 +41,24 @@ namespace MassTransit.ServiceBus.Internal
 				throw new ConventionException(string.Format("Object of type {0} is not correlated by type {1}", typeof (T), _keyType));
 
 			return GetConsumers(key);
+		}
+
+		public void PublishFault<T>(IServiceBus bus, Exception ex, T message) where T : class
+		{
+			TMessage msg = message as TMessage;
+			if (msg == null)
+				throw new ConventionException(string.Format("Object of type {0} is not of type {1}", typeof(T), _messageType));
+
+			Fault<TMessage,TKey> fault = new Fault<TMessage,TKey>(ex, msg);
+
+			try
+			{
+				bus.Publish(fault);
+			}
+			catch (Exception fex)
+			{
+				_log.Error("Failed to publish Fault<" + typeof(TMessage).Name + "> message for exception", fex);
+			}
 		}
 
 		public IList<Subscription> GetConsumers(CorrelatedBy<TKey> key)

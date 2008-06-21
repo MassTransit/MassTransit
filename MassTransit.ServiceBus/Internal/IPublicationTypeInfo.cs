@@ -19,5 +19,6 @@ namespace MassTransit.ServiceBus.Internal
 	public interface IPublicationTypeInfo : IDisposable
 	{
 		IList<Subscription> GetConsumers<T>(T message) where T : class;
+		void PublishFault<T>(IServiceBus bus, Exception ex, T message) where T : class;
 	}
 }

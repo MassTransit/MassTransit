@@ -16,12 +16,12 @@ namespace MassTransit.ServiceBus.Internal
 	using System.Collections.Generic;
 	using log4net;
 
-	public class MessageDispatcher<TMessage> : 
+	public class MessageDispatcher<TMessage> :
 		IMessageDispatcher<TMessage> where TMessage : class
 	{
-		private static readonly ILog _log = LogManager.GetLogger(typeof(MessageDispatcher<TMessage>));
-		private readonly List<Consumes<TMessage>.All> _consumers = new List<Consumes<TMessage>.All>();
+		private static readonly ILog _log = LogManager.GetLogger(typeof (MessageDispatcher<TMessage>));
 		private readonly IServiceBus _bus;
+		private readonly List<Consumes<TMessage>.All> _consumers = new List<Consumes<TMessage>.All>();
 
 		public MessageDispatcher(IServiceBus bus)
 		{
@@ -30,8 +30,8 @@ namespace MassTransit.ServiceBus.Internal
 
 		public bool Accept(TMessage message)
 		{
-			if(_log.IsDebugEnabled && _consumers.Count == 0)
-				_log.DebugFormat("No consumers for message type {0}", typeof(TMessage));
+			if (_log.IsDebugEnabled && _consumers.Count == 0)
+				_log.DebugFormat("No consumers for message type {0}", typeof (TMessage));
 
 			IList<Consumes<TMessage>.All> consumers = new List<Consumes<TMessage>.All>(_consumers);
 
@@ -60,33 +60,17 @@ namespace MassTransit.ServiceBus.Internal
 
 			foreach (Consumes<TMessage>.All consumer in consumers)
 			{
-				try
+				Consumes<TMessage>.Selected selectiveConsumer = consumer as Consumes<TMessage>.Selected;
+				if (selectiveConsumer != null)
 				{
-					Consumes<TMessage>.Selected selectiveConsumer = consumer as Consumes<TMessage>.Selected;
-					if (selectiveConsumer != null)
-					{
-						if (selectiveConsumer.Accept(message))
-						{
-							consumer.Consume(message);
-						}
-					}
-					else
+					if (selectiveConsumer.Accept(message))
 					{
 						consumer.Consume(message);
 					}
 				}
-				catch (Exception ex)
+				else
 				{
-					try
-					{
-						_bus.Publish(new Fault<TMessage>(ex, message));
-					}
-					catch(Exception fex)
-					{
-						_log.Error("Failed to publish Fault<" + typeof(TMessage).FullName + "> message for exception", fex);
-					}
-					
-					throw;
+					consumer.Consume(message);
 				}
 			}
 		}
