@@ -17,7 +17,7 @@ namespace MassTransit.ServiceBus.Subscriptions
 	using log4net;
 	using ServerHandlers;
 
-    public class SubscriptionService :
+	public class SubscriptionService :
 		IHostedService
 	{
 		private static readonly ILog _log = LogManager.GetLogger(typeof (SubscriptionService));
@@ -29,63 +29,58 @@ namespace MassTransit.ServiceBus.Subscriptions
 		public SubscriptionService(IServiceBus bus, ISubscriptionCache subscriptionCache, ISubscriptionRepository subscriptionRepository)
 		{
 			_bus = bus;
-		    _cache = subscriptionCache;
+			_cache = subscriptionCache;
 			_repository = subscriptionRepository;
 		}
 
-		#region IDisposable Members
-
-        public void Dispose()
-        {
-            try
-            {
-                _bus.Dispose();
-                _cache.Dispose();
-                _repository.Dispose();
-            }
-            catch (Exception ex)
-            {
-                string message = "Error in shutting down the SubscriptionService: " + ex.Message;
-                ShutDownException exp = new ShutDownException(message, ex);
-                _log.Error(message, exp);
-                throw exp;
-            }
-        }
-
-	    #endregion
+		public void Dispose()
+		{
+			try
+			{
+				_bus.Dispose();
+				_cache.Dispose();
+				_repository.Dispose();
+			}
+			catch (Exception ex)
+			{
+				string message = "Error in shutting down the SubscriptionService: " + ex.Message;
+				ShutDownException exp = new ShutDownException(message, ex);
+				_log.Error(message, exp);
+				throw exp;
+			}
+		}
 
 		public void Start()
 		{
-            _bus.AddComponent<AddSubscriptionHandler>();
-            _bus.AddComponent<RemoveSubscriptionHandler>();
-            _bus.AddComponent<CancelUpdatesHandler>();
-            _bus.AddComponent<CacheUpdateRequestHandler>();
+			_bus.AddComponent<AddSubscriptionHandler>();
+			_bus.AddComponent<RemoveSubscriptionHandler>();
+			_bus.AddComponent<CancelUpdatesHandler>();
+			_bus.AddComponent<CacheUpdateRequestHandler>();
 
-            if (_log.IsInfoEnabled)
-                _log.Info("Subscription Service Starting");
+			if (_log.IsInfoEnabled)
+				_log.Info("Subscription Service Starting");
 
 			foreach (Subscription sub in _repository.List())
 			{
 				_cache.Add(sub);
 			}
 
-            if(_log.IsInfoEnabled)
-                _log.Info("Subscription Service Started");
+			if (_log.IsInfoEnabled)
+				_log.Info("Subscription Service Started");
 		}
 
 		public void Stop()
 		{
-            if (_log.IsInfoEnabled)
-                _log.Info("Subscription Service Stopping");
+			if (_log.IsInfoEnabled)
+				_log.Info("Subscription Service Stopping");
 
+			_bus.RemoveComponent<AddSubscriptionHandler>();
+			_bus.RemoveComponent<RemoveSubscriptionHandler>();
+			_bus.RemoveComponent<CancelUpdatesHandler>();
+			_bus.RemoveComponent<CacheUpdateRequestHandler>();
 
-            _bus.RemoveComponent<AddSubscriptionHandler>();
-            _bus.RemoveComponent<RemoveSubscriptionHandler>();
-            _bus.RemoveComponent<CancelUpdatesHandler>();
-            _bus.RemoveComponent<CacheUpdateRequestHandler>();
-
-            if (_log.IsInfoEnabled)
-                _log.Info("Subscription Service Stopped");
+			if (_log.IsInfoEnabled)
+				_log.Info("Subscription Service Stopped");
 		}
 	}
 }
