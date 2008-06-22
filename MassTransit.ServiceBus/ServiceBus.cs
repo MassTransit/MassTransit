@@ -176,8 +176,6 @@ namespace MassTransit.ServiceBus
 
 		public void Subscribe<T>(T component) where T : class
 		{
-            _objectBuilder.Register<T>();
-
 			ISubscriptionTypeInfo info = _subscriptionCoordinator.Resolve(component);
 			info.Subscribe(component);
 
@@ -202,6 +200,8 @@ namespace MassTransit.ServiceBus
 
 		public void AddComponent<TComponent>() where TComponent : class
 		{
+			_objectBuilder.Register<TComponent>();
+
 			ISubscriptionTypeInfo info = _subscriptionCoordinator.Resolve<TComponent>();
 			info.AddComponent();
 

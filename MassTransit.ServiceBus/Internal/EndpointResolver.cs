@@ -52,6 +52,8 @@ namespace MassTransit.ServiceBus.Internal
 		{
             GuardAgainstZeroTransports();
 
+			// TODO this needs to be updated to a reader/writer lock since it rarely gets updated but gets read a LOT
+
 			lock (_cache)
 			{
 				if (_cache.ContainsKey(uri))

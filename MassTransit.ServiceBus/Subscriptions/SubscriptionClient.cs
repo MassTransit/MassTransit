@@ -12,9 +12,9 @@
 /// specific language governing permissions and limitations under the License.
 namespace MassTransit.ServiceBus.Subscriptions
 {
-    using ClientHandlers;
-    using Exceptions;
-    using Messages;
+	using ClientHandlers;
+	using Exceptions;
+	using Messages;
 
 	public class SubscriptionClient :
 		IHostedService
@@ -39,37 +39,37 @@ namespace MassTransit.ServiceBus.Subscriptions
 
 		public void Start()
 		{
-            ValidateThatBusAndClientAreNotOnSameEndpoint(_serviceBus, _subscriptionServiceEndpoint);
+			ValidateThatBusAndClientAreNotOnSameEndpoint(_serviceBus, _subscriptionServiceEndpoint);
 
 			_cache.OnAddSubscription += Cache_OnAddSubscription;
 			_cache.OnRemoveSubscription += Cache_OnRemoveSubscription;
 
-            _serviceBus.AddComponent<ClientHandlers.AddSubscriptionHandler>();
-            _serviceBus.AddComponent<ClientHandlers.RemoveSubscriptionHandler>();
-            _serviceBus.AddComponent<ClientHandlers.CacheUpdateHandler>();
+			_serviceBus.AddComponent<AddSubscriptionHandler>();
+			_serviceBus.AddComponent<RemoveSubscriptionHandler>();
+			_serviceBus.AddComponent<CacheUpdateHandler>();
 
 			_subscriptionServiceEndpoint.Send(new CacheUpdateRequest(_serviceBus.Endpoint.Uri));
 		}
-
-        private static void ValidateThatBusAndClientAreNotOnSameEndpoint(IServiceBus bus, IEndpoint endpoint)
-        {
-            if (bus.Endpoint.Uri.Equals(endpoint.Uri))
-            {
-                string message = string.Format("Both the service bus and subscription client are listening on the same endpoint {0}", endpoint.Uri);
-                throw new EndpointException(endpoint, message);
-            }
-        }
 
 		public void Stop()
 		{
 			_subscriptionServiceEndpoint.Send(new CancelSubscriptionUpdates(_serviceBus.Endpoint.Uri));
 
-            _serviceBus.RemoveComponent<ClientHandlers.AddSubscriptionHandler>();
-            _serviceBus.RemoveComponent<ClientHandlers.RemoveSubscriptionHandler>();
-            _serviceBus.RemoveComponent<ClientHandlers.CacheUpdateHandler>();
+			_serviceBus.RemoveComponent<AddSubscriptionHandler>();
+			_serviceBus.RemoveComponent<RemoveSubscriptionHandler>();
+			_serviceBus.RemoveComponent<CacheUpdateHandler>();
 
 			_cache.OnAddSubscription -= Cache_OnAddSubscription;
 			_cache.OnRemoveSubscription -= Cache_OnRemoveSubscription;
+		}
+
+		private static void ValidateThatBusAndClientAreNotOnSameEndpoint(IServiceBus bus, IEndpoint endpoint)
+		{
+			if (bus.Endpoint.Uri.Equals(endpoint.Uri))
+			{
+				string message = string.Format("Both the service bus and subscription client are listening on the same endpoint {0}", endpoint.Uri);
+				throw new EndpointException(endpoint, message);
+			}
 		}
 
 		public void Cache_OnAddSubscription(object sender, SubscriptionEventArgs e)
@@ -82,11 +82,10 @@ namespace MassTransit.ServiceBus.Subscriptions
 			}
 		}
 
-		
 
 		public void Cache_OnRemoveSubscription(object sender, SubscriptionEventArgs e)
 		{
-            if (ClientUtil.IsOwnedSubscription(e.Subscription, _serviceBus))
+			if (ClientUtil.IsOwnedSubscription(e.Subscription, _serviceBus))
 			{
 				RemoveSubscription message = new RemoveSubscription(e.Subscription);
 
