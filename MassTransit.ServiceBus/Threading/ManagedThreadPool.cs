@@ -34,7 +34,7 @@ namespace MassTransit.ServiceBus.Threading
 		private int _minThreads;
 
 		public ManagedThreadPool(Action<T> handler)
-			: this(handler, 1, 50)
+			: this(handler, 1, 10)
 		{
 		}
 

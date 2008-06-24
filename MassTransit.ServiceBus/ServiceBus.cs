@@ -153,6 +153,18 @@ namespace MassTransit.ServiceBus
 			set { _poisonEndpoint = value; }
 		}
 
+		public int MinThreadCount
+		{
+			get { return _asyncDispatcher.MinThreads; }
+			set { _asyncDispatcher.MinThreads = value; }
+		}
+
+		public int MaxThreadCount
+		{
+			get { return _asyncDispatcher.MaxThreads; }
+			set { _asyncDispatcher.MaxThreads = value; }
+		}
+
 		/// <summary>
 		/// Adds a message handler to the service bus for handling a specific type of message
 		/// </summary>

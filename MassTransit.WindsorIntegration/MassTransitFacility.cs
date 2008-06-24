@@ -2,6 +2,7 @@ namespace MassTransit.WindsorIntegration
 {
 	using System;
 	using System.Collections.Generic;
+	using System.ComponentModel;
 	using System.Globalization;
 	using System.Reflection;
 	using Castle.Core.Configuration;
@@ -13,6 +14,7 @@ namespace MassTransit.WindsorIntegration
 	using MassTransit.ServiceBus.Internal;
 	using MassTransit.ServiceBus.Subscriptions;
 	using ServiceBus;
+	using Component=Castle.MicroKernel.Registration.Component;
 
 	public class MassTransitFacility :
 		AbstractFacility
@@ -85,17 +87,44 @@ namespace MassTransit.WindsorIntegration
 
 					ISubscriptionCache cache = ResolveSubscriptionCache(child);
 
-					IServiceBus bus = new ServiceBus(endpoint,
-					                                 Kernel.Resolve<IObjectBuilder>(),
-					                                 cache,
-					                                 Kernel.Resolve<IEndpointResolver>());
-
-					Kernel.AddComponentInstance(id, typeof (IServiceBus), bus);
+					IServiceBus bus = BuildServiceBus(id, endpoint, cache, child);
 
 					ResolveSubscriptionClient(child, bus, id, cache);
 					ResolveManagementClient(child, bus, id);
 				}
 			}
+		}
+
+		private IServiceBus BuildServiceBus(string id, IEndpoint endpoint, ISubscriptionCache cache, IConfiguration busConfig)
+		{
+			ServiceBus bus = new ServiceBus(endpoint,
+			                                Kernel.Resolve<IObjectBuilder>(),
+			                                cache,
+			                                Kernel.Resolve<IEndpointResolver>());
+
+			IConfiguration threadConfig = busConfig.Children["dispatcher"];
+			if (threadConfig != null)
+			{
+				bus.MinThreadCount = GetConfigurationValue(threadConfig, "minThreads", 1);
+				bus.MaxThreadCount = GetConfigurationValue(threadConfig, "maxThreads", 10);
+			}
+
+			Kernel.AddComponentInstance(id, typeof (IServiceBus), bus);
+
+			return bus;
+		}
+
+		private static T GetConfigurationValue<T>(IConfiguration config, string attributeName, T defaultValue)
+		{
+			string value = config.Attributes[attributeName];
+			if (string.IsNullOrEmpty(value))
+				return defaultValue;
+
+			TypeConverter tc = TypeDescriptor.GetConverter(typeof (T));
+
+			T newValue = (T) tc.ConvertFromInvariantString(value);
+
+			return newValue;
 		}
 
 		private void ResolveManagementClient(IConfiguration child, IServiceBus bus, string id)
