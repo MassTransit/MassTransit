@@ -1,5 +1,6 @@
 namespace OpenAllNight
 {
+    using Castle.Core;
     using Castle.Windsor;
     using MassTransit.WindsorIntegration;
 
@@ -14,6 +15,8 @@ namespace OpenAllNight
         private void Initialize()
         {
             this.AddFacility("masstransit", new MassTransitFacility());
+            this.AddComponentLifeStyle("counter", typeof (Counter), LifestyleType.Singleton);
+            this.AddComponentLifeStyle("rvaoeuaoe", typeof (CacheUpdateResponseHandler), LifestyleType.Transient);
         }
     }
 }
