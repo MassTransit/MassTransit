@@ -14,6 +14,7 @@ namespace MassTransit.ServiceBus.Internal
 {
 	using System;
 	using System.Collections.Generic;
+	using Exceptions;
 
 	/// <summary>
 	/// A batch distributor is subscribed to a message type so that it can dispatch batches of messages
@@ -48,14 +49,21 @@ namespace MassTransit.ServiceBus.Internal
 
 		public bool Accept(TMessage message)
 		{
+			TBatchId batchId = message.BatchId;
+
 			lock (_lockContext)
-				if (_batches.ContainsKey(message.BatchId))
+				if (_batches.ContainsKey(batchId))
 					return true;
 
-			Batch<TMessage, TBatchId> batch = new Batch<TMessage, TBatchId>(_bus, message.BatchId, message.BatchLength, _timeout);
+			Batch<TMessage, TBatchId> batch = new Batch<TMessage, TBatchId>(_bus, message.BatchId, message.BatchLength, _timeout, _messageDispatcher);
 
 			if (_messageDispatcher.Accept(batch))
+			{
+				_batches.Add(batchId, batch);
+				batch.Start();
+
 				return true;
+			}
 
 			return false;
 		}
@@ -65,32 +73,16 @@ namespace MassTransit.ServiceBus.Internal
 			TBatchId batchId = message.BatchId;
 
 			Batch<TMessage, TBatchId> batch;
-
-			bool invokeHandler = false;
-
 			lock (_lockContext)
 			{
 				if (!_batches.ContainsKey(batchId))
-				{
-					batch = new Batch<TMessage, TBatchId>(_bus, batchId, message.BatchLength, _timeout);
-
-					_batches.Add(batchId, batch);
-
-					invokeHandler = true;
-				}
-				else
-				{
-					batch = _batches[batchId];
-				}
+					throw new MessageException(typeof (Batch<TMessage, TBatchId>), "Unexcepted batch consumed");
+					
+				batch = _batches[batchId];
 			}
 
 			// push this message to the context, releasing the enumerator
 			batch.Consume(message);
-
-			if (invokeHandler)
-			{
-				_messageDispatcher.Consume(batch);
-			}
 		}
 
 		private static TimeSpan GetMessageTimeout(TimeSpan defaultValue)

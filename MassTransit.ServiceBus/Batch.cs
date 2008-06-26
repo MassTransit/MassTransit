@@ -16,8 +16,11 @@ namespace MassTransit.ServiceBus
 	using System.Collections;
 	using System.Collections.Generic;
 	using System.Threading;
+	using log4net;
+	using Threading;
 
 	public class Batch<TMessage, TBatchId> :
+		ManagedThread,
 		Consumes<TMessage>.All,
 		BatchedBy<TBatchId>,
 		IEnumerable<TMessage>
@@ -29,16 +32,18 @@ namespace MassTransit.ServiceBus
 		private readonly Semaphore _messageReady;
 		private readonly Queue<TMessage> _messages = new Queue<TMessage>();
 		private readonly TimeSpan _timeout;
+		private readonly Consumes<Batch<TMessage, TBatchId>>.Selected _consumer;
 		private readonly object _countLocker = new object();
 		private int _messageCount;
 		private readonly IServiceBus _bus;
 
-		public Batch(IServiceBus bus, TBatchId batchId, int batchLength, TimeSpan timeout)
+		public Batch(IServiceBus bus, TBatchId batchId, int batchLength, TimeSpan timeout, Consumes<Batch<TMessage, TBatchId>>.Selected consumer)
 		{
 			_batchLength = batchLength;
 			_bus = bus;
 			_batchId = batchId;
 			_timeout = timeout;
+			_consumer = consumer;
 
 			_messageReady = new Semaphore(0, batchLength);
 		}
@@ -98,6 +103,20 @@ namespace MassTransit.ServiceBus
 		public IEnumerator GetEnumerator()
 		{
 			return ((IEnumerable<TMessage>) this).GetEnumerator();
+		}
+
+		private static readonly ILog _log = LogManager.GetLogger(typeof (Batch<TMessage, TBatchId>));
+
+		protected override void RunThread(object obj)
+		{
+			try
+			{
+				_consumer.Consume(this);
+			}
+			catch (Exception ex)
+			{
+				_log.Error("Exception in Batch " + typeof (Batch<TMessage, TBatchId>).FullName + ":" + BatchId.ToString(), ex);
+			}
 		}
 	}
 }
