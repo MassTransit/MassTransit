@@ -3,14 +3,12 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
 	using System;
 	using System.Collections.Generic;
 	using MassTransit.ServiceBus.Subscriptions;
-	using MassTransit.ServiceBus.Subscriptions.ClientHandlers;
 	using MassTransit.ServiceBus.Subscriptions.Messages;
 	using NUnit.Framework;
 	using Rhino.Mocks;
 	using Rhino.Mocks.Constraints;
-	using AddSubscriptionHandler=MassTransit.ServiceBus.Subscriptions.ClientHandlers.AddSubscriptionHandler;
 
-    [TestFixture]
+	[TestFixture]
 	public class When_using_the_subscription_manager : 
         Specification
 	{
@@ -64,8 +62,6 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
 
             AddSubscription change = new AddSubscription(sub);
 
-            MassTransit.ServiceBus.Subscriptions.ClientHandlers.AddSubscriptionHandler handler = new AddSubscriptionHandler(_cache, _serviceBus);
-
             using (Record())
             {
                 _cache.Add(sub);
@@ -73,7 +69,11 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
 
             using (Playback())
             {
-                handler.Consume(change);
+				using (SubscriptionClient client = new SubscriptionClient(_serviceBus, _cache, _managerEndpoint))
+				{
+					client.Start();
+					client.Consume(change);
+				}
             }
         }
 
@@ -85,8 +85,6 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
 
             CacheUpdateResponse cacheUpdateResponse = new CacheUpdateResponse(subscriptions);
 
-            MassTransit.ServiceBus.Subscriptions.ClientHandlers.CacheUpdateHandler handler = new CacheUpdateHandler(_cache, _serviceBus);
-
             using (Record())
             {
                 _cache.Add(subscriptions[0]);
@@ -94,8 +92,12 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
 
             using (Playback())
             {
-                handler.Consume(cacheUpdateResponse);
-            }
+				using (SubscriptionClient client = new SubscriptionClient(_serviceBus, _cache, _managerEndpoint))
+				{
+					client.Start();
+					client.Consume(cacheUpdateResponse);
+				}
+			}
         }
 
 		[Test]
