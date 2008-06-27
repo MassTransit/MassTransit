@@ -5,6 +5,7 @@ namespace MassTransit.ServiceBus.Tests
 	using MassTransit.ServiceBus.Internal;
 	using MassTransit.ServiceBus.Subscriptions;
 	using NUnit.Framework;
+	using Transports;
 
 	[TestFixture]
 	public class When_a_message_fault_occurs :
