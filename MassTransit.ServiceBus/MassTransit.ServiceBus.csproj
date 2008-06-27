@@ -44,7 +44,9 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
+    <Reference Include="System.EnterpriseServices" />
     <Reference Include="System.Transactions" />
+    <Reference Include="System.Web.Services" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
@@ -71,7 +73,8 @@
     <Compile Include="Internal\IEndpointResolver.cs" />
     <Compile Include="Internal\IPublicationTypeInfo.cs" />
     <Compile Include="Internal\ISubscriptionTypeInfo.cs" />
-    <Compile Include="Internal\LoopbackEndpoint.cs" />
+    <Compile Include="Transports\HttpEndpoint.cs" />
+    <Compile Include="Transports\LoopbackEndpoint.cs" />
     <Compile Include="Internal\MessageTypeDispatcher.cs" />
     <Compile Include="Internal\MessageTypePublication.cs" />
     <Compile Include="Internal\MessageTypeSubscription.cs" />
@@ -145,6 +148,9 @@
     <Compile Include="TimeoutAttribute.cs" />
     <Compile Include="Util\Check.cs" />
     <Compile Include="Util\Guard.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
