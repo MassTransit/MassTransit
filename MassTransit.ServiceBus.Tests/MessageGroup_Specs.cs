@@ -18,7 +18,6 @@ namespace MassTransit.ServiceBus.Tests
 		{
 			object[] items = new object[] {new PingMessage(), new PongMessage()};
 
-
 			MessageGroup group = MessageGroup.Join(items);
 
 			Assert.That(group.Count, Is.EqualTo(2));
@@ -132,23 +131,71 @@ namespace MassTransit.ServiceBus.Tests
 			_builder = DynamicMock<IObjectBuilder>();
 			_cache = new LocalSubscriptionCache();
 			_bus = new ServiceBus(_endpoint, _builder, _cache, _resolver);
-		}
+		}
 
-
-		[Test]
-		public void I_Should_be_able_to_subscribe()
+		internal class Consumer : Consumes<SpecialGroup>.All, Consumes<PingMessage>.All, Consumes<PongMessage>.All
 		{
-			Consumer c = new Consumer(_bus);
-			
-			_bus.Subscribe(c);
+			private readonly IServiceBus _bus;
 
-			SpecialGroup group = MessageGroup.Build<SpecialGroup>()
-				.Add(new PingMessage())
-				.Add(new PongMessage());
+			private readonly ManualResetEvent _gotPing = new ManualResetEvent(false);
+			private readonly ManualResetEvent _gotPong = new ManualResetEvent(false);
+			private readonly ManualResetEvent _received = new ManualResetEvent(false);
 
-			_bus.Publish(group);
+			public Consumer(IServiceBus bus)
+			{
+				_bus = bus;
+			}
 
-			Assert.That(c.Received.WaitOne(TimeSpan.FromSeconds(3), true), Is.True, "No message received by consumer");
+			public ManualResetEvent Received
+			{
+				get { return _received; }
+			}
+
+			public ManualResetEvent GotPing
+			{
+				get { return _gotPing; }
+			}
+
+			public ManualResetEvent GotPong
+			{
+				get { return _gotPong; }
+			}
+
+			public void Consume(PingMessage message)
+			{
+				_gotPing.Set();
+			}
+
+			public void Consume(PongMessage message)
+			{
+				_gotPong.Set();
+			}
+
+			public void Consume(SpecialGroup message)
+			{
+				_received.Set();
+
+				if (message.SplitOnConsume)
+					message.Split(_bus);
+			}
+		}
+
+		[Serializable]
+		[AllowMessageType(typeof (PingMessage), typeof (PongMessage))]
+		internal class SpecialGroup : MessageGroup
+		{
+			private bool _splitOnConsume = false;
+
+			public SpecialGroup(List<object> messages) :
+				base(messages)
+			{
+			}
+
+			public bool SplitOnConsume
+			{
+				get { return _splitOnConsume; }
+				set { _splitOnConsume = value; }
+			}
 		}
 
 		[Test]
@@ -171,80 +218,29 @@ namespace MassTransit.ServiceBus.Tests
 			Assert.That(c.GotPong.WaitOne(TimeSpan.FromSeconds(1), true), Is.True, "No pong received by consumer");
 		}
 
+		[Test]
+		public void I_Should_be_able_to_subscribe()
+		{
+			Consumer c = new Consumer(_bus);
 
-		[Test, ExpectedException(typeof(ArgumentException))]
+			_bus.Subscribe(c);
+
+			SpecialGroup group = MessageGroup.Build<SpecialGroup>()
+				.Add(new PingMessage())
+				.Add(new PongMessage());
+
+			_bus.Publish(group);
+
+			Assert.That(c.Received.WaitOne(TimeSpan.FromSeconds(3), true), Is.True, "No message received by consumer");
+		}
+
+		[Test, ExpectedException(typeof (ArgumentException))]
 		public void I_should_only_be_allowed_to_add_valid_message_types()
 		{
 			SpecialGroup group = MessageGroup.Build<SpecialGroup>()
 				.Add(new PingMessage())
 				.Add(new PongMessage())
 				.Add(new UpdateMessage());
-		}
-
-		internal class Consumer : Consumes<SpecialGroup>.All, Consumes<PingMessage>.All, Consumes<PongMessage>.All
-		{
-			private readonly IServiceBus _bus;
-
-			public ManualResetEvent Received
-			{
-				get { return _received; }
-			}
-
-			private readonly ManualResetEvent _received = new ManualResetEvent(false);
-
-			public ManualResetEvent GotPing
-			{
-				get { return _gotPing; }
-			}
-
-			public ManualResetEvent GotPong
-			{
-				get { return _gotPong; }
-			}
-
-			private readonly ManualResetEvent _gotPing = new ManualResetEvent(false);
-			private readonly ManualResetEvent _gotPong = new ManualResetEvent(false);
-
-			public Consumer(IServiceBus bus)
-			{
-				_bus = bus;
-			}
-
-			public void Consume(SpecialGroup message)
-			{
-				_received.Set();
-
-				if(message.SplitOnConsume)
-					message.Split(_bus);
-			}
-
-			public void Consume(PingMessage message)
-			{
-				_gotPing.Set();
-			}
-
-			public void Consume(PongMessage message)
-			{
-				_gotPong.Set();
-			}
-		}
-
-		[Serializable]
-		[AllowMessageType(typeof(PingMessage), typeof(PongMessage))]
-		internal class SpecialGroup : MessageGroup
-		{
-			private bool _splitOnConsume = false;
-
-			public SpecialGroup(List<object> messages) : 
-				base(messages)
-			{
-			}
-
-			public bool SplitOnConsume
-			{
-				get { return _splitOnConsume; }
-				set { _splitOnConsume = value; }
-			}
 		}
 	}
 }

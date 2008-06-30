@@ -59,13 +59,11 @@ namespace MassTransit.WindsorIntegration
 		private void RegisterComponents()
 		{
 			Kernel.AddComponentInstance("kernel", typeof (IKernel), Kernel);
+			Kernel.AddComponentInstance("objectBuilder", typeof(IObjectBuilder), typeof(WindsorObjectBuilder), new WindsorObjectBuilder(Kernel));
 
 			Kernel.Register(
 				Component.For<ISubscriptionCache>()
 					.ImplementedBy<LocalSubscriptionCache>()
-					.LifeStyle.Singleton,
-				Component.For<IObjectBuilder>()
-					.ImplementedBy<WindsorObjectBuilder>()
 					.LifeStyle.Singleton,
 				Component.For<IEndpointResolver>()
 					.ImplementedBy<EndpointResolver>()
