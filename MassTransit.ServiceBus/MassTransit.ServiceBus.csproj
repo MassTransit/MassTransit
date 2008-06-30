@@ -53,6 +53,7 @@
     <Compile Include="..\SolutionVersion.cs">
       <Link>SolutionVersion.cs</Link>
     </Compile>
+    <Compile Include="AllowMessageType.cs" />
     <Compile Include="Batch.cs" />
     <Compile Include="BatchedBy.cs" />
     <Compile Include="BatchTimeout.cs" />
