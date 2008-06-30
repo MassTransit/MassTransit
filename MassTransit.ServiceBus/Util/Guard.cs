@@ -12,6 +12,7 @@
 /// specific language governing permissions and limitations under the License.
 namespace MassTransit.ServiceBus.Util
 {
+	using System;
 	using System.Diagnostics;
 
 	public static class Guard
@@ -37,6 +38,12 @@ namespace MassTransit.ServiceBus.Util
 				{
 					Trace.Assert(obj != null, "Precondition: " + message);
 				}
+			}
+
+			public static void IndexOutOfRange(int index, int count)
+			{
+				if (index < 0 || index >= count)
+					throw new ArgumentException("The specified index was out of range");
 			}
 		}
 	}
