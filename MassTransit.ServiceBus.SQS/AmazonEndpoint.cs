@@ -2,9 +2,7 @@ namespace MassTransit.ServiceBus.SQS
 {
 	using System;
 	using System.IO;
-	using System.Net;
 	using System.Runtime.Serialization.Formatters.Binary;
-	using System.Threading;
 	using Amazon.SQS;
 	using Amazon.SQS.Model;
 	using Exceptions;
@@ -19,7 +17,7 @@ namespace MassTransit.ServiceBus.SQS
 		private readonly BinaryFormatter _formatter = new BinaryFormatter();
 		private readonly Uri _uri;
 		private AmazonSQS _service;
-		private string _queueName;
+		private readonly string _queueName;
 
 		public AmazonEndpoint(Uri uri)
 		{
@@ -34,6 +32,18 @@ namespace MassTransit.ServiceBus.SQS
 			string secretAccessKey = segments[1];
 
 			_service = new AmazonSQSClient(accessKeyId, secretAccessKey);
+
+			ListQueues request = new ListQueues()
+				.WithQueueNamePrefix(_queueName);
+
+			ListQueuesResponse response = _service.ListQueues(request);
+			if(response.ListQueuesResult.QueueUrl.Count == 0)
+			{
+				CreateQueue createQueue = new CreateQueue()
+					.WithQueueName(_queueName);
+
+				_service.CreateQueue(createQueue);
+			}
 		}
 
 		public static string Scheme
@@ -117,7 +127,7 @@ namespace MassTransit.ServiceBus.SQS
 								.WithQueueName(_queueName)
 								.WithReceiptHandle(message.ReceiptHandle);
 
-							DeleteMessageResponse deleteResponse = _service.DeleteMessage(deleteRequest);
+							_service.DeleteMessage(deleteRequest);
 
 							_messageLog.DebugFormat("RECV: {0} - {1}", _queueName, message.MessageId);
 
@@ -164,7 +174,7 @@ namespace MassTransit.ServiceBus.SQS
 
 		public T Receive<T>(Predicate<T> accept) where T : class
 		{
-			return Receive<T>(TimeSpan.MaxValue, accept);
+			return Receive(TimeSpan.MaxValue, accept);
 		}
 
 		public T Receive<T>(TimeSpan timeout, Predicate<T> accept) where T : class

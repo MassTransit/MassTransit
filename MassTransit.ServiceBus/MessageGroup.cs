@@ -102,14 +102,14 @@ namespace MassTransit.ServiceBus
 	public class MessageGroupBuilder<TBuilder> where TBuilder : class
 	{
 		internal readonly List<object> _messages = new List<object>();
-		internal static readonly AllowMessageType allow;
+		internal static readonly AllowMessageType _allow;
 
 		static MessageGroupBuilder()
 		{
 			object[] attributes = typeof (TBuilder).GetCustomAttributes(typeof (AllowMessageType), false);
-			if(attributes != null)
+			if(attributes != null && attributes.Length > 0)
 			{
-				allow = attributes[0] as AllowMessageType;
+				_allow = attributes[0] as AllowMessageType;
 			}
 		}
 
@@ -129,10 +129,10 @@ namespace MassTransit.ServiceBus
 
 		private static bool MessageTypeAllowed(Type t)
 		{
-			if (allow == null)
+			if (_allow == null)
 				return true;
 
-			return allow.GetUsage(t) != MessageTypeUsage.None;
+			return _allow.GetUsage(t) != MessageTypeUsage.None;
 		}
 
 		public static implicit operator TBuilder(MessageGroupBuilder<TBuilder> builder)

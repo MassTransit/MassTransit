@@ -13,7 +13,7 @@ namespace HeavyLoad.Load
 		private readonly IWindsorContainer _container;
 		private readonly ManualResetEvent _responseEvent = new ManualResetEvent(false);
 
-		private IServiceBus _bus;
+		private readonly IServiceBus _bus;
 		private int _counter = 0;
 		private int _responseCounter = 0;
 
