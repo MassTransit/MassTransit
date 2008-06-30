@@ -1,8 +1,13 @@
 namespace MassTransit.ServiceBus.Tests
 {
 	using System;
+	using System.Collections.Generic;
+	using System.Threading;
+	using MassTransit.ServiceBus.Internal;
+	using MassTransit.ServiceBus.Subscriptions;
 	using NUnit.Framework;
 	using NUnit.Framework.SyntaxHelpers;
+	using Transports;
 
 	[TestFixture]
 	public class MessageGroup_Specs :
@@ -28,7 +33,7 @@ namespace MassTransit.ServiceBus.Tests
 			PingMessage ping = new PingMessage();
 			PongMessage pong = new PongMessage();
 
-			MessageGroup group = MessageGroup.Build()
+			MessageGroup group = MessageGroup.Build<MessageGroup>()
 				.Add(ping)
 				.Add(pong);
 
@@ -41,7 +46,7 @@ namespace MassTransit.ServiceBus.Tests
 			PingMessage ping = new PingMessage();
 			PongMessage pong = new PongMessage();
 
-			MessageGroup group = MessageGroup.Build()
+			MessageGroup group = MessageGroup.Build<MessageGroup>()
 				.Add(ping)
 				.Add(pong);
 
@@ -58,7 +63,7 @@ namespace MassTransit.ServiceBus.Tests
 			PingMessage ping = new PingMessage();
 			PongMessage pong = new PongMessage();
 
-			MessageGroup group = MessageGroup.Build()
+			MessageGroup group = MessageGroup.Build<MessageGroup>()
 				.Add(ping)
 				.Add(pong);
 
@@ -80,7 +85,7 @@ namespace MassTransit.ServiceBus.Tests
 			PingMessage ping = new PingMessage();
 			PongMessage pong = new PongMessage();
 
-			MessageGroup group = MessageGroup.Build()
+			MessageGroup group = MessageGroup.Build<MessageGroup>()
 				.Add(ping)
 				.Add(pong);
 
@@ -95,7 +100,7 @@ namespace MassTransit.ServiceBus.Tests
 			PingMessage ping = new PingMessage();
 			PongMessage pong = new PongMessage();
 
-			MessageGroup group = MessageGroup.Build()
+			MessageGroup group = MessageGroup.Build<MessageGroup>()
 				.Add(ping)
 				.Add(pong);
 
@@ -105,6 +110,72 @@ namespace MassTransit.ServiceBus.Tests
 			Assert.That(group[1], Is.TypeOf(typeof (PongMessage)));
 
 			bus.Publish(group);
+		}
+	}
+
+	[TestFixture]
+	public class When_a_custom_message_group_is_defined : Specification
+	{
+		private IServiceBus _bus;
+		private IEndpoint _endpoint;
+		private IObjectBuilder _builder;
+		private ISubscriptionCache _cache;
+		private IEndpointResolver _resolver;
+
+		protected override void Before_each()
+		{
+			_resolver = new EndpointResolver();
+			EndpointResolver.AddTransport("loopback", typeof (LoopbackEndpoint));
+
+			_endpoint = _resolver.Resolve(new Uri("loopback://localhost/test"));
+
+			_builder = DynamicMock<IObjectBuilder>();
+			_cache = new LocalSubscriptionCache();
+			_bus = new ServiceBus(_endpoint, _builder, _cache, _resolver);
+		}
+
+
+		[Test]
+		public void I_Should_be_able_to_subscribe()
+		{
+			Consumer c = new Consumer();
+			
+			_bus.Subscribe(c);
+
+			SpecialGroup group = MessageGroup.Build<SpecialGroup>()
+				.Add(new PingMessage())
+				.Add(new PongMessage());
+
+			_bus.Publish(group);
+
+			Assert.That(c.Received.WaitOne(TimeSpan.FromSeconds(3), true), Is.True, "No message received by consumer");
+
+
+
+		}
+
+		internal class Consumer : Consumes<SpecialGroup>.All
+		{
+			public ManualResetEvent Received
+			{
+				get { return _received; }
+			}
+
+			private readonly ManualResetEvent _received = new ManualResetEvent(false);
+
+			public void Consume(SpecialGroup message)
+			{
+				_received.Set();
+			}
+		}
+
+		[Serializable]
+		internal class SpecialGroup : MessageGroup
+		{
+			public SpecialGroup(List<object> messages) : 
+				base(messages)
+			{
+			}
 		}
 	}
 }

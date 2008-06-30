@@ -38,9 +38,9 @@ namespace MassTransit.ServiceBus
 			get { return _messages[index]; }
 		}
 
-		public static MessageGroupBuilder Build()
+		public static MessageGroupBuilder<TGroup> Build<TGroup>() where TGroup : class
 		{
-			return new MessageGroupBuilder();
+			return new MessageGroupBuilder<TGroup>();
 		}
 
 		public static MessageGroup Join(params object[] items)
@@ -99,20 +99,20 @@ namespace MassTransit.ServiceBus
 		}
 	}
 
-	public class MessageGroupBuilder
+	public class MessageGroupBuilder<TBuilder> where TBuilder : class
 	{
 		internal readonly List<object> _messages = new List<object>();
 
-		public MessageGroupBuilder Add<T>(T message) where T : class
+		public MessageGroupBuilder<TBuilder> Add<T>(T message) where T : class
 		{
 			_messages.Add(message);
 
 			return this;
 		}
 
-		public static implicit operator MessageGroup(MessageGroupBuilder builder)
+		public static implicit operator TBuilder(MessageGroupBuilder<TBuilder> builder)
 		{
-			return new MessageGroup(builder._messages);
+			return Activator.CreateInstance(typeof (TBuilder), builder._messages) as TBuilder;
 		}
 	}
 }
