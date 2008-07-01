@@ -33,6 +33,15 @@ namespace MassTransit.ServiceBus
 			return this;
 		}
 
+		public ServiceBusBuilder ListeningOn(Uri uri)
+		{
+			Guard.Against.Null(uri, "An endpoint Uri cannot be null");
+
+			_uri = uri;
+
+			return this;
+		}
+
 		public static implicit operator ServiceBus(ServiceBusBuilder builder)
 		{
 			IObjectBuilder objectBuilder = builder.GetObjectBuilder();
@@ -76,6 +85,13 @@ namespace MassTransit.ServiceBus
 		public ServiceBusBuilder SupportingTransport<T>()
 		{
 			EndpointResolver.AddTransport(typeof (T));
+
+			return this;
+		}
+
+		public ServiceBusBuilder UsingObjectBuilder(IObjectBuilder builder)
+		{
+			_objectBuilder = builder;
 
 			return this;
 		}
