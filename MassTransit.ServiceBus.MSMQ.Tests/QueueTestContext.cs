@@ -18,7 +18,7 @@ namespace MassTransit.ServiceBus.MSMQ.Tests
 		private readonly MsmqEndpoint _subscriptionEndpoint = @"msmq://localhost/test_subscriptions";
 
 		private ServiceBus _remoteServiceBus;
-		private IServiceBus _serviceBus;
+		private ServiceBus _serviceBus;
 	    private IObjectBuilder _mockObjectBuilder;
 
 		public QueueTestContext(IObjectBuilder objectBuilder) : this(objectBuilder, "localhost")
@@ -100,8 +100,16 @@ namespace MassTransit.ServiceBus.MSMQ.Tests
 			ValidateAndPurgeQueue(_remoteServiceBusEndPoint.QueuePath);
 			ValidateAndPurgeQueue(_subscriptionEndpoint.QueuePath);
 
-			_serviceBus = new ServiceBus(ServiceBusEndPoint, objectBuilder);
-			_remoteServiceBus = new ServiceBus(RemoteServiceBusEndPoint, objectBuilder);
+
+			_serviceBus = MassTransit.ServiceBus.ServiceBus.Build()
+				.SupportingTransport<MsmqEndpoint>()
+				.ListeningOn(_serviceBusEndPoint.Uri)
+				.UsingObjectBuilder(objectBuilder);
+
+			_remoteServiceBus = MassTransit.ServiceBus.ServiceBus.Build()
+				.SupportingTransport<MsmqEndpoint>()
+				.ListeningOn(_remoteServiceBusEndPoint.Uri)
+				.UsingObjectBuilder(objectBuilder);
 		}
 
 		public static void VerifyMessageInQueue<T>(string queuePath, T messageItem)

@@ -47,7 +47,7 @@ namespace MassTransit.ServiceBus.MSMQ.Tests
 			Debug.WriteLine(string.Format("{0} Verifying transaction not yet complete", DateTime.Now));
 
 
-			Assert.That(_txCompleted.WaitOne(0, false), Is.False, "Transcation should not have completed yet.");
+			Assert.That(_txCompleted.WaitOne(0, false), Is.True, "It seems that the original thread blocks until the dependent transaction is completed.");
 		}
 
 		public void ThreadProc(object tsObject)
