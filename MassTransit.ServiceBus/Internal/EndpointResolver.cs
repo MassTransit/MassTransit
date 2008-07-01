@@ -14,6 +14,7 @@ namespace MassTransit.ServiceBus.Internal
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Globalization;
 	using System.Reflection;
 	using System.Text;
 	using Exceptions;
@@ -26,17 +27,26 @@ namespace MassTransit.ServiceBus.Internal
 		private static readonly ILog _log = LogManager.GetLogger(typeof (EndpointResolver));
 		private static readonly Dictionary<string, Type> _schemes = new Dictionary<string, Type>();
 
-		public static void AddTransport(string scheme, Type t)
+		public static string AddTransport(Type transportType)
 		{
 			lock (_schemes)
 			{
-				if (_schemes.ContainsKey(scheme))
-					return;
+				// get the scheme for each endpoint and add it to the resolver
+				const BindingFlags bindingFlags = BindingFlags.Static | BindingFlags.Public | BindingFlags.GetField | BindingFlags.NonPublic;
 
-                _log.InfoFormat("Registering transport '{0}' to schema '{1}'", t.Name, scheme);
-				_schemes.Add(scheme, t);
+				PropertyInfo property = transportType.GetProperty("Scheme", bindingFlags, null, typeof(string), new Type[0], null);
+
+				string scheme = property.GetValue(null, bindingFlags, null, null, CultureInfo.InvariantCulture) as string;
+
+				if (!_schemes.ContainsKey(scheme))
+				{
+					_log.InfoFormat("Registering transport '{0}' to schema '{1}'", transportType.Name, scheme);
+
+					_schemes.Add(scheme, transportType);
+				}
+
+				return scheme;
 			}
-				
 		}
 
         public static ConstructorInfo GetConstructor(Type type)
@@ -180,6 +190,5 @@ namespace MassTransit.ServiceBus.Internal
 
             #endregion
         }
-
 	}
 }

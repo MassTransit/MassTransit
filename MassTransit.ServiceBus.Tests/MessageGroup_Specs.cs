@@ -124,7 +124,7 @@ namespace MassTransit.ServiceBus.Tests
 		protected override void Before_each()
 		{
 			_resolver = new EndpointResolver();
-			EndpointResolver.AddTransport("loopback", typeof (LoopbackEndpoint));
+			EndpointResolver.AddTransport(typeof (LoopbackEndpoint));
 
 			_endpoint = _resolver.Resolve(new Uri("loopback://localhost/test"));
 

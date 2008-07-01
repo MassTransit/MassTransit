@@ -27,8 +27,8 @@ namespace MassTransit.ServiceBus
 	public class ServiceBus :
 		IServiceBus
 	{
+		private static readonly ILog _ironLog;
 		private static readonly ILog _log;
-	    private static readonly ILog _ironLog;
 
 		private readonly ManagedThreadPool<object> _asyncDispatcher;
 		private readonly IEndpointResolver _endpointResolver;
@@ -45,7 +45,7 @@ namespace MassTransit.ServiceBus
 			try
 			{
 				_log = LogManager.GetLogger(typeof (ServiceBus));
-			    _ironLog = LogManager.GetLogger("MassTransit.Iron");
+				_ironLog = LogManager.GetLogger("MassTransit.Iron");
 			}
 			catch (Exception ex)
 			{
@@ -82,12 +82,24 @@ namespace MassTransit.ServiceBus
 			_messageDispatcher = new MessageTypeDispatcher(this);
 			_subscriptionCoordinator = new SubscriptionCoordinator(_messageDispatcher, this, _subscriptionCache, _objectBuilder);
 			_receiveThread = new ReceiveThread(this, endpointToListenOn);
-            _asyncDispatcher = new ManagedThreadPool<object>(IronDispatcher);
+			_asyncDispatcher = new ManagedThreadPool<object>(IronDispatcher);
 		}
 
 		public ISubscriptionCache SubscriptionCache
 		{
 			get { return _subscriptionCache; }
+		}
+
+		public int MinThreadCount
+		{
+			get { return _asyncDispatcher.MinThreads; }
+			set { _asyncDispatcher.MinThreads = value; }
+		}
+
+		public int MaxThreadCount
+		{
+			get { return _asyncDispatcher.MaxThreads; }
+			set { _asyncDispatcher.MaxThreads = value; }
 		}
 
 		public void Dispose()
@@ -153,18 +165,6 @@ namespace MassTransit.ServiceBus
 			set { _poisonEndpoint = value; }
 		}
 
-		public int MinThreadCount
-		{
-			get { return _asyncDispatcher.MinThreads; }
-			set { _asyncDispatcher.MinThreads = value; }
-		}
-
-		public int MaxThreadCount
-		{
-			get { return _asyncDispatcher.MaxThreads; }
-			set { _asyncDispatcher.MaxThreads = value; }
-		}
-
 		/// <summary>
 		/// Adds a message handler to the service bus for handling a specific type of message
 		/// </summary>
@@ -228,7 +228,7 @@ namespace MassTransit.ServiceBus
 
 		private void StartListening()
 		{
-            _log.DebugFormat("ServiceBus is listening on {0}", _endpointToListenOn.Uri);
+			_log.DebugFormat("ServiceBus is listening on {0}", _endpointToListenOn.Uri);
 			_receiveThread.Start();
 		}
 
@@ -250,21 +250,25 @@ namespace MassTransit.ServiceBus
 			return _messageDispatcher.Accept(obj);
 		}
 
-        private void IronDispatcher(object message)
-        {
-            try
-            {
-                _messageDispatcher.Consume(message);    
-            }
-            catch(Exception ex)
-            {
-            	IPublicationTypeInfo info = _subscriptionCoordinator.Resolve(message.GetType());
+		private void IronDispatcher(object message)
+		{
+			try
+			{
+				_messageDispatcher.Consume(message);
+			}
+			catch (Exception ex)
+			{
+				IPublicationTypeInfo info = _subscriptionCoordinator.Resolve(message.GetType());
 
-            	info.PublishFault(this, ex, message);
+				info.PublishFault(this, ex, message);
 
-                _ironLog.Error("An error was caught in the ServiceBus.IronDispatcher", ex);
-            }
-            
-        }
+				_ironLog.Error("An error was caught in the ServiceBus.IronDispatcher", ex);
+			}
+		}
+
+		public static ServiceBusBuilder Build()
+		{
+			return new ServiceBusBuilder();
+		}
 	}
 }

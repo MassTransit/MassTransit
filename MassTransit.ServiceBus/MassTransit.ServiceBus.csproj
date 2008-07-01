@@ -75,6 +75,7 @@
     <Compile Include="Internal\IPublicationTypeInfo.cs" />
     <Compile Include="Internal\ISubscriptionTypeInfo.cs" />
     <Compile Include="MessageGroup.cs" />
+    <Compile Include="ServiceBusBuilder.cs" />
     <Compile Include="Transports\HttpEndpoint.cs" />
     <Compile Include="Transports\LoopbackEndpoint.cs" />
     <Compile Include="Internal\MessageTypeDispatcher.cs" />
