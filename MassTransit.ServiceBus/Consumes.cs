@@ -14,6 +14,18 @@ namespace MassTransit.ServiceBus
 {
 	public class Consumes<TMessage> where TMessage : class
 	{
+		private static readonly Selected _null;
+
+		static Consumes()
+		{
+			_null = new NullConsumer();
+		}
+
+		public static Selected Null
+		{
+			get { return _null; }
+		}
+
 		public interface All
 		{
 			void Consume(TMessage message);
@@ -21,6 +33,18 @@ namespace MassTransit.ServiceBus
 
 		public interface For<TCorrelationId> : All, CorrelatedBy<TCorrelationId>
 		{
+		}
+
+		public class NullConsumer : Selected
+		{
+			public bool Accept(TMessage message)
+			{
+				return true;
+			}
+
+			public void Consume(TMessage message)
+			{
+			}
 		}
 
 		public interface Selected : All

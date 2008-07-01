@@ -115,6 +115,12 @@ namespace MassTransit.ServiceBus
 				_poisonEndpoint.Dispose();
 		}
 
+		public void AttachProducers<T>(T producer) where T : class
+		{
+			IProducerTypeInfo info = _subscriptionCoordinator.Resolve<T>();
+			info.Attach(producer);
+		}
+
 		/// <summary>
 		/// Publishes a message to all subscribed consumers for the message type
 		/// </summary>

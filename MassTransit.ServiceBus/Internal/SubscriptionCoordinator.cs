@@ -19,6 +19,7 @@ namespace MassTransit.ServiceBus.Internal
 	public class SubscriptionCoordinator : IDisposable
 	{
 		private static readonly Type _consumerType = typeof (Consumes<>.All);
+		private static readonly Type _producerType = typeof (Produces<>);
 		private static readonly Type _correlatedConsumerType = typeof (Consumes<>.For<>);
 		private static readonly Type _correlatedMessageType = typeof (CorrelatedBy<>);
 		private static readonly Type _selectiveConsumerType = typeof (Consumes<>.Selected);
@@ -133,6 +134,16 @@ namespace MassTransit.ServiceBus.Internal
 						info.SetPublicationType(publicationTypeInfo);
 
 						publicationCount++;
+					}
+					else if (interfaceType.IsGenericType && interfaceType.GetGenericTypeDefinition() == _producerType)
+					{
+						Type[] arguments = interfaceType.GetGenericArguments();
+
+						Type producesType = typeof (MessagePublisher<>).MakeGenericType(arguments[0]);
+
+						IProducerTypeInfo producerTypeInfo = (IProducerTypeInfo) Activator.CreateInstance(producesType, _bus);
+
+						info.Add(producerTypeInfo);
 					}
 				}
 

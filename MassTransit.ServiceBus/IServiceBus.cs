@@ -87,6 +87,14 @@ namespace MassTransit.ServiceBus
 		void RemoveComponent<TComponent>() where TComponent : class;
 
 		/// <summary>
+		/// Binds message publishers to the all of the Produces interfaces in the component
+		/// to allow publishing directly from the component without knowledge of the IServiceBus
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="producer"></param>
+		void AttachProducers<T>(T producer) where T : class;
+
+		/// <summary>
 		/// Publishes a message to all subscribed consumers for the message type
 		/// </summary>
 		/// <typeparam name="T">The type of the message</typeparam>

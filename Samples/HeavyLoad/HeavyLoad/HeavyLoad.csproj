@@ -58,6 +58,7 @@
     <Compile Include="Correlated\SimpleResponseMessage.cs" />
     <Compile Include="GeneralMessage.cs" />
     <Compile Include="HeavyLoadContainer.cs" />
+    <Compile Include="Load\ContainerLoadTest.cs" />
     <Compile Include="Load\LocalActiveMqLoadTest.cs" />
     <Compile Include="Load\LocalLoadTest.cs" />
     <Compile Include="Load\LocalMsmqLoadTest.cs" />

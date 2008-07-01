@@ -18,6 +18,8 @@ namespace HeavyLoad
 
 			RunLocalMsmqLoadTest();
 
+			RunContainerLoadTest();
+
 			RunLoopbackLoadTest();
 
 			RunCorrelatedMessageTest();
@@ -53,6 +55,19 @@ namespace HeavyLoad
 			}
 
 			Console.WriteLine("Local MSMQ Load Test: ");
+			Console.WriteLine(stopWatch.ToString());
+		}
+
+		private static void RunContainerLoadTest()
+		{
+			StopWatch stopWatch = new StopWatch();
+
+			using (ContainerLoadTest test = new ContainerLoadTest())
+			{
+				test.Run(stopWatch);
+			}
+
+			Console.WriteLine("Container Load Test: ");
 			Console.WriteLine(stopWatch.ToString());
 		}
 

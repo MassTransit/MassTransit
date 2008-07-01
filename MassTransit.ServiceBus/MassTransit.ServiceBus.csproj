@@ -72,8 +72,11 @@
     <Compile Include="Internal\IdempotentHashtable.cs" />
     <Compile Include="Internal\IdempotentList.cs" />
     <Compile Include="Internal\IEndpointResolver.cs" />
+    <Compile Include="Internal\IProducerTypeInfo.cs" />
     <Compile Include="Internal\IPublicationTypeInfo.cs" />
     <Compile Include="Internal\ISubscriptionTypeInfo.cs" />
+    <Compile Include="Internal\MessagePublisher.cs" />
+    <Compile Include="Internal\ProducesPublisher.cs" />
     <Compile Include="MessageGroup.cs" />
     <Compile Include="ServiceBusBuilder.cs" />
     <Compile Include="Transports\HttpEndpoint.cs" />

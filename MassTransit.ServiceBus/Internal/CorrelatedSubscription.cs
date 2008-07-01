@@ -37,7 +37,7 @@ namespace MassTransit.ServiceBus.Internal
 			_messageType = typeof (TMessage);
 
 			_componentConsumer = new CorrelationIdDispatcher<TMessage, TKey>(bus);
-			_selectiveConsumer = new SelectiveComponentDispatcher<TComponent, TMessage>(builder);
+			_selectiveConsumer = new SelectiveComponentDispatcher<TComponent, TMessage>(builder, bus);
 		}
 
 		public void Subscribe<T>(T component) where T : class
