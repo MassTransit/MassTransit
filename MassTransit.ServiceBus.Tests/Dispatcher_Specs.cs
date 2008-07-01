@@ -41,8 +41,8 @@ namespace MassTransit.ServiceBus.Tests
         {
             PingHandler ph = new PingHandler();
 
-            Expect.Call(obj.Build<Consumes<PingMessage>.All>(typeof(PingHandler))).Return(ph);
-            obj.Release<Consumes<PingMessage>.All>(ph);
+            Expect.Call(obj.Build<PingHandler>()).Return(ph);
+            obj.Release(ph);
 
             ReplayAll();
 
