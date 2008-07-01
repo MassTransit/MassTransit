@@ -36,7 +36,7 @@ namespace MassTransit.ServiceBus.Internal
 			_messageType = typeof (TMessage);
 
 			_batchDispatcher = new BatchDistributor<TMessage, TBatchId>(bus);
-			_componentConsumer = new SelectiveComponentDispatcher<TComponent, Batch<TMessage, TBatchId>>(builder);
+			_componentConsumer = new SelectiveComponentDispatcher<TComponent, Batch<TMessage, TBatchId>>(builder, bus);
 		}
 
 		public void Subscribe<T>(T component) where T : class

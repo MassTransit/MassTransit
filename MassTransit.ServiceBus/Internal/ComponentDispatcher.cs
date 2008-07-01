@@ -18,28 +18,34 @@ namespace MassTransit.ServiceBus.Internal
 		where TComponent : class
 	{
 		private readonly IObjectBuilder _builder;
+    	private readonly IServiceBus _bus;
 
-		public ComponentDispatcher(IObjectBuilder builder)
-		{
-			_builder = builder;
-		}
+    	public ComponentDispatcher(IObjectBuilder builder, IServiceBus bus)
+    	{
+    		_builder = builder;
+    		_bus = bus;
+    	}
 
-		public bool Accept(TMessage message)
+    	public bool Accept(TMessage message)
 		{
 			return true;
 		}
 
 		public void Consume(TMessage message)
 		{
-			Consumes<TMessage>.All consumer = _builder.Build<Consumes<TMessage>.All>(typeof (TComponent));
+			TComponent component = _builder.Build<TComponent>();
 		    
             try
 		    {
-                consumer.Consume(message);
+				_bus.AttachProducers(component);
+
+				Consumes<TMessage>.All consumer = component as Consumes<TMessage>.All;
+				if(consumer != null)
+					consumer.Consume(message);
 		    }
 		    finally
 		    {
-                _builder.Release(consumer);    
+		    	_builder.Release(component);    
 		    }
 		}
 	}

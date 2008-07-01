@@ -19,7 +19,8 @@ namespace MassTransit.ServiceBus.Internal
 
 	public interface ICombinedTypeInfo :
 		ISubscriptionTypeInfo,
-		IPublicationTypeInfo
+		IPublicationTypeInfo,
+		IProducerTypeInfo
 	{
 	}
 
@@ -27,6 +28,7 @@ namespace MassTransit.ServiceBus.Internal
 		ICombinedTypeInfo
 	{
 		private readonly List<ISubscriptionTypeInfo> _subscriptionTypes = new List<ISubscriptionTypeInfo>();
+		private readonly List<IProducerTypeInfo> _producerTypes = new List<IProducerTypeInfo>();
 		private IPublicationTypeInfo _publicationType;
 
 		public IList<Subscription> GetConsumers<T>(T message) where T : class
@@ -76,6 +78,12 @@ namespace MassTransit.ServiceBus.Internal
 			_subscriptionTypes.Add(subscriptionTypeInfo);
 		}
 
+		public void Add(IProducerTypeInfo producerTypeInfo)
+		{
+			_producerTypes.Add(producerTypeInfo);
+			
+		}
+
 		public void SetPublicationType(IPublicationTypeInfo publicationTypeInfo)
 		{
 			if (_publicationType != null)
@@ -91,6 +99,20 @@ namespace MassTransit.ServiceBus.Internal
 				subscriptionType.Dispose();
 			}
 			_subscriptionTypes.Clear();
+
+			foreach (IProducerTypeInfo producerType in _producerTypes)
+			{
+				producerType.Dispose();
+			}
+			_producerTypes.Clear();
+		}
+
+		public void Attach<T>(T producer) where T : class
+		{
+			foreach (IProducerTypeInfo producerType in _producerTypes)
+			{
+				producerType.Attach(producer);
+			}
 		}
 	}
 }

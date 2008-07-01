@@ -18,10 +18,12 @@ namespace MassTransit.ServiceBus.Internal
 		where TComponent : class
 	{
 		private readonly IObjectBuilder _builder;
+		private readonly IServiceBus _bus;
 
-		public SelectiveComponentDispatcher(IObjectBuilder builder)
+		public SelectiveComponentDispatcher(IObjectBuilder builder, IServiceBus bus)
 		{
 			_builder = builder;
+			_bus = bus;
 		}
 
 		public bool Accept(TMessage message)
@@ -37,11 +39,20 @@ namespace MassTransit.ServiceBus.Internal
 
 		public void Consume(TMessage message)
 		{
-			Consumes<TMessage>.Selected consumer = _builder.Build<Consumes<TMessage>.Selected>(typeof (TComponent));
+			TComponent component = _builder.Build<TComponent>();
 
-			consumer.Consume(message);
+			try
+			{
+				_bus.AttachProducers(component);
 
-			_builder.Release(consumer);
+				Consumes<TMessage>.Selected consumer = component as Consumes<TMessage>.Selected;
+				if (consumer != null)
+					consumer.Consume(message);
+			}
+			finally
+			{
+				_builder.Release(component);
+			}
 		}
 	}
 }

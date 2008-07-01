@@ -35,9 +35,9 @@ namespace MassTransit.ServiceBus.Internal
 			_messageType = typeof (TMessage);
 
 			if (mode == SubscriptionMode.Selected)
-				_componentConsumer = new SelectiveComponentDispatcher<TComponent, TMessage>(builder);
+				_componentConsumer = new SelectiveComponentDispatcher<TComponent, TMessage>(builder, bus);
 			else
-				_componentConsumer = new ComponentDispatcher<TComponent, TMessage>(builder);
+				_componentConsumer = new ComponentDispatcher<TComponent, TMessage>(builder, bus);
 		}
 
 		public void Subscribe<T>(T component) where T : class
