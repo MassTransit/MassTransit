@@ -23,11 +23,11 @@ namespace MassTransit.ServiceBus.Tests
             SelectiveHandler sh = new SelectiveHandler();
             using (Record())
             {
-                Expect.Call(builder.Build<Consumes<TestMessage>.All>(typeof(RequestHandler))).Return(rh);
-                builder.Release<Consumes<TestMessage>.All>(rh);
-                Expect.Call(builder.Build<Consumes<TestMessage>.Selected>(typeof(SelectiveHandler))).Return(sh);
-                builder.Release<Consumes<TestMessage>.Selected>(sh);
-            }
+				Expect.Call(builder.Build<RequestHandler>()).Return(rh);
+				builder.Release(rh);
+				Expect.Call(builder.Build<SelectiveHandler>()).Return(sh);
+				builder.Release(sh);
+			}
             using (Playback())
             {
                 MessageTypeDispatcher dispatcher = new MessageTypeDispatcher(null);
@@ -52,12 +52,12 @@ namespace MassTransit.ServiceBus.Tests
             SelectiveHandler sh = new SelectiveHandler();
             using (Record())
             {
-                Expect.Call(builder.Build<Consumes<TestMessage>.All>(typeof (RequestHandler))).Return(rh);
-                builder.Release<Consumes<TestMessage>.All>(rh);
-                Expect.Call(builder.Build<Consumes<TestMessage>.Selected>(typeof(SelectiveHandler))).Return(sh);
-                builder.Release<Consumes<TestMessage>.Selected>(sh);
-                Expect.Call(builder.Build<Consumes<TestMessage>.Selected>(typeof(SelectiveHandler))).Return(sh);
-                builder.Release<Consumes<TestMessage>.Selected>(sh);
+                Expect.Call(builder.Build<RequestHandler>()).Return(rh);
+				builder.Release(rh);
+				Expect.Call(builder.Build<SelectiveHandler>()).Return(sh);
+				builder.Release(sh);
+                Expect.Call(builder.Build<SelectiveHandler>()).Return(sh);
+				builder.Release(sh);
             }
             using (Playback())
             {

@@ -28,13 +28,21 @@ namespace MassTransit.ServiceBus.Internal
 
 		public bool Accept(TMessage message)
 		{
-			Consumes<TMessage>.Selected consumer = _builder.Build<Consumes<TMessage>.Selected>(typeof (TComponent));
+			TComponent component = _builder.Build<TComponent>();
 
-			bool result = consumer.Accept(message);
+			try
+			{
+				Consumes<TMessage>.Selected consumer = component as Consumes<TMessage>.Selected;
 
-			_builder.Release(consumer);
+				if (consumer != null)
+					return consumer.Accept(message);
 
-			return result;
+				return false;
+			}
+			finally
+			{
+				_builder.Release(component);
+			}
 		}
 
 		public void Consume(TMessage message)
