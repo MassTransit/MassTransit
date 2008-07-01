@@ -40,6 +40,19 @@ namespace MassTransit.ServiceBus.Util
 				}
 			}
 
+			public static void NullOrEmpty(string s, string message)
+			{
+				if (UseExceptions)
+				{
+					if(string.IsNullOrEmpty(s))
+						throw new PreconditionException(message);
+				}
+				else
+				{
+					Trace.Assert(string.IsNullOrEmpty(s), "Precondition: " + message);
+				}
+			}
+
 			public static void IndexOutOfRange(int index, int count)
 			{
 				if (index < 0 || index >= count)

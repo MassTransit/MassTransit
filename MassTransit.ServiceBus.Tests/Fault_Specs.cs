@@ -33,7 +33,7 @@ namespace MassTransit.ServiceBus.Tests
 
 		static When_a_message_fault_occurs()
 		{
-			EndpointResolver.AddTransport("loopback", typeof (LoopbackEndpoint));
+			EndpointResolver.AddTransport(typeof (LoopbackEndpoint));
 		}
 
 		protected override void Before_each()
@@ -105,7 +105,7 @@ namespace MassTransit.ServiceBus.Tests
 
 		static When_a_correlated_message_fault_is_received()
 		{
-			EndpointResolver.AddTransport("loopback", typeof(LoopbackEndpoint));
+			EndpointResolver.AddTransport(typeof(LoopbackEndpoint));
 		}
 
 		protected override void Before_each()
