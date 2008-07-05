@@ -13,7 +13,7 @@
 			</bus>
 
 			<transports>
-				<transport>MassTransit.ServiceBus.Internal.LoopbackEndpoint, MassTransit.ServiceBus</transport>
+				<transport>MassTransit.ServiceBus.Transports.LoopbackEndpoint, MassTransit.ServiceBus</transport>
 			</transports>
 		</facility>
 
