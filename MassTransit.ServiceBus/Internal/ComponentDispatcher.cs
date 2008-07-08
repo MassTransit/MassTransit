@@ -37,7 +37,8 @@ namespace MassTransit.ServiceBus.Internal
 		    
             try
 		    {
-				_bus.AttachProducers(component);
+				if(_bus != null)
+					_bus.AttachProducers(component);
 
 				Consumes<TMessage>.All consumer = component as Consumes<TMessage>.All;
 				if(consumer != null)
