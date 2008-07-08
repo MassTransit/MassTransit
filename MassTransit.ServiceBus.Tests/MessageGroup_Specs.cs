@@ -231,7 +231,7 @@ namespace MassTransit.ServiceBus.Tests
 
 			_bus.Publish(group);
 
-			Assert.That(c.Received.WaitOne(TimeSpan.FromSeconds(3), true), Is.True, "No message received by consumer");
+			Assert.That(c.Received.WaitOne(TimeSpan.FromSeconds(5), true), Is.True, "No message received by consumer");
 		}
 
 		[Test, ExpectedException(typeof (ArgumentException))]

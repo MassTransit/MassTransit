@@ -51,7 +51,8 @@ namespace MassTransit.ServiceBus.Internal
 
 			try
 			{
-				_bus.AttachProducers(component);
+				if(_bus != null)
+					_bus.AttachProducers(component);
 
 				Consumes<TMessage>.Selected consumer = component as Consumes<TMessage>.Selected;
 				if (consumer != null)
