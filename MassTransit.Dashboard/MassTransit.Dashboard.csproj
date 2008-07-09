@@ -2,7 +2,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>8.0.50727</ProductVersion>
+    <ProductVersion>9.0.21022</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{95873436-3496-4DF7-9E1D-B6C9D3D0CCA9}</ProjectGuid>
     <ProjectTypeGuids>{349c5851-65df-11da-9384-00065b846f21};{fae04ec0-301f-11d3-bf4b-00c04f79efbc}</ProjectTypeGuids>
@@ -124,7 +124,7 @@
     <Compile Include="WebAppContainer.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\MassTransit.ServiceBus.MSMQ\MassTransit.ServiceBus.MSMQ.csproj">
+    <ProjectReference Include="..\Transports\MassTransit.ServiceBus.MSMQ\MassTransit.ServiceBus.MSMQ.csproj">
       <Project>{6F90867C-E092-4EDC-B3DE-600D39DF0335}</Project>
       <Name>MassTransit.ServiceBus.MSMQ</Name>
     </ProjectReference>
@@ -162,6 +162,7 @@
           <IISUrl>
           </IISUrl>
           <NTLMAuthentication>False</NTLMAuthentication>
+          <SaveServerSettingsInUserFile>False</SaveServerSettingsInUserFile>
         </WebProjectProperties>
       </FlavorProperties>
     </VisualStudio>
