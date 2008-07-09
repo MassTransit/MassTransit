@@ -31,13 +31,15 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.DistributedSubs
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Dashboard", "MassTransit.Dashboard\MassTransit.Dashboard.csproj", "{95873436-3496-4DF7-9E1D-B6C9D3D0CCA9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.WindsorIntegration", "MassTransit.WindsorIntegration\MassTransit.WindsorIntegration.csproj", "{98D5A59C-96FA-4A1B-A653-EA5A35C45FC9}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.WindsorIntegration", "Containers\MassTransit.WindsorIntegration\MassTransit.WindsorIntegration.csproj", "{98D5A59C-96FA-4A1B-A653-EA5A35C45FC9}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Host", "MassTransit.Host\MassTransit.Host.csproj", "{834ED79F-BA0E-48F9-831A-789576EE516B}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.ServiceBus.SQS", "Transports\MassTransit.ServiceBus.SQS\MassTransit.ServiceBus.SQS.csproj", "{0FCC623A-6596-4F9E-B96B-4B843947E218}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.WindsorIntegration.Rc3", "MassTransit.WindsorIntegration.Rc3\MassTransit.WindsorIntegration.Rc3.csproj", "{41A1164D-7E70-41B4-912B-E9BEF75C769F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.WindsorIntegration.Rc3", "Containers\MassTransit.WindsorIntegration.Rc3\MassTransit.WindsorIntegration.Rc3.csproj", "{41A1164D-7E70-41B4-912B-E9BEF75C769F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Containers", "Containers", "{6C61507E-FF16-45C8-8FE4-350069D9B4C1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -121,5 +123,7 @@ Global
 		{5B3732C1-9FC1-4A63-80BE-FCA7A78AB007} = {0006D6BB-1382-4B32-AD32-CA037F5CD4F6}
 		{0FCC623A-6596-4F9E-B96B-4B843947E218} = {0006D6BB-1382-4B32-AD32-CA037F5CD4F6}
 		{95873436-3496-4DF7-9E1D-B6C9D3D0CCA9} = {E9473F6A-4266-4610-ADE8-0D0AC39143DD}
+		{98D5A59C-96FA-4A1B-A653-EA5A35C45FC9} = {6C61507E-FF16-45C8-8FE4-350069D9B4C1}
+		{41A1164D-7E70-41B4-912B-E9BEF75C769F} = {6C61507E-FF16-45C8-8FE4-350069D9B4C1}
 	EndGlobalSection
 EndGlobal
