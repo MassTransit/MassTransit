@@ -19,9 +19,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.ServiceBus.MSMQ
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.ServiceBus.MSMQ.Tests", "Transports\MassTransit.ServiceBus.MSMQ.Tests\MassTransit.ServiceBus.MSMQ.Tests.csproj", "{AF3C3E95-BA6C-41FF-873D-7C2E8994EE9D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.ServiceBus.NMS", "MassTransit.ServiceBus.NMS\MassTransit.ServiceBus.NMS.csproj", "{1DBE5A67-C8C2-4AA9-82EF-1E730273993B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.ServiceBus.NMS", "Transports\MassTransit.ServiceBus.NMS\MassTransit.ServiceBus.NMS.csproj", "{1DBE5A67-C8C2-4AA9-82EF-1E730273993B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.ServiceBus.NMS.Tests", "MassTransit.ServiceBus.NMS.Tests\MassTransit.ServiceBus.NMS.Tests.csproj", "{5B3732C1-9FC1-4A63-80BE-FCA7A78AB007}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.ServiceBus.NMS.Tests", "Transports\MassTransit.ServiceBus.NMS.Tests\MassTransit.ServiceBus.NMS.Tests.csproj", "{5B3732C1-9FC1-4A63-80BE-FCA7A78AB007}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.SubscriptionStorage", "MassTransit.SubscriptionStorage\MassTransit.SubscriptionStorage.csproj", "{8EE6C0CB-93D1-4B92-8CD5-24C77452CBE5}"
 EndProject
