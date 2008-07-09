@@ -35,7 +35,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.WindsorIntegrat
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Host", "MassTransit.Host\MassTransit.Host.csproj", "{834ED79F-BA0E-48F9-831A-789576EE516B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.ServiceBus.SQS", "MassTransit.ServiceBus.SQS\MassTransit.ServiceBus.SQS.csproj", "{0FCC623A-6596-4F9E-B96B-4B843947E218}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.ServiceBus.SQS", "Transports\MassTransit.ServiceBus.SQS\MassTransit.ServiceBus.SQS.csproj", "{0FCC623A-6596-4F9E-B96B-4B843947E218}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.WindsorIntegration.Rc3", "MassTransit.WindsorIntegration.Rc3\MassTransit.WindsorIntegration.Rc3.csproj", "{41A1164D-7E70-41B4-912B-E9BEF75C769F}"
 EndProject
