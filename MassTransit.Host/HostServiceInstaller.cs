@@ -47,21 +47,20 @@ namespace MassTransit.Host
             }
             else
             {
-                if(interactive)
+                if (interactive)
                 {
                     _log.Debug("Attempting to install interactively");
                     _serviceProcessInstaller.Account = ServiceAccount.User;
                     _serviceProcessInstaller.Username = null;
                     _serviceProcessInstaller.Password = null;
-                    
+
                 }
                 else
                 {
-                _log.Debug("Attempting to install as Local Service");
-                _serviceProcessInstaller.Account = ServiceAccount.LocalSystem;
-                _serviceProcessInstaller.Username = null;
-                _serviceProcessInstaller.Password = null;
-                    
+                    _log.Debug("Attempting to install as Local Service");
+                    _serviceProcessInstaller.Account = ServiceAccount.LocalSystem;
+                    _serviceProcessInstaller.Username = null;
+                    _serviceProcessInstaller.Password = null;
                 }
             }
 
