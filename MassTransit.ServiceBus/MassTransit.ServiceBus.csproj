@@ -2,7 +2,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>8.0.50727</ProductVersion>
+    <ProductVersion>9.0.21022</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{90482397-6282-465E-8B86-39865FC30127}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -91,7 +91,7 @@
     <Compile Include="Internal\MessageTypeDispatcher.cs" />
     <Compile Include="Internal\MessageTypePublication.cs" />
     <Compile Include="Internal\MessageTypeSubscription.cs" />
-    <Compile Include="Internal\Produces.cs" />
+    <Compile Include="Produces.cs" />
     <Compile Include="Internal\SelectiveComponentDispatcher.cs" />
     <Compile Include="Internal\SpecialLoggers.cs" />
     <Compile Include="Internal\SubscriptionCoordinator.cs" />
