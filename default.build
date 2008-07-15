@@ -42,13 +42,15 @@
 	
 	<target name="zip" depends="make_pubsub_install">
 		<zip zipfile="masstransit.zip">
-			<fileset basedir=".\bin">
+			<fileset basedir="${dirs.build}">
 				<include name="**/*" />
 			</fileset>
 			<fileset>
 				<include name="${dirs.install}\*.*" />
 			</fileset>
 		</zip>
+		
+		<delete dir="${dirs.install}" failonerror="false" />
 	</target>
 	
 	
