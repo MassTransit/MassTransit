@@ -12,7 +12,9 @@
 /// specific language governing permissions and limitations under the License.
 namespace MassTransit.ServiceBus
 {
-	public class Consumes<TMessage> where TMessage : class
+    using log4net;
+
+    public class Consumes<TMessage> where TMessage : class
 	{
 		private static readonly Selected _null;
 
@@ -37,6 +39,9 @@ namespace MassTransit.ServiceBus
 
 		public class NullConsumer : Selected
 		{
+
+            private static readonly ILog _log = LogManager.GetLogger(typeof(NullConsumer));
+
 			public bool Accept(TMessage message)
 			{
 				return true;
@@ -44,6 +49,7 @@ namespace MassTransit.ServiceBus
 
 			public void Consume(TMessage message)
 			{
+                _log.Warn("NullConsumer consumed a message");
 			}
 		}
 
