@@ -9,21 +9,22 @@ namespace MassTransit.Host
 
     public abstract class HostedEnvironment
     {
-        private readonly IWindsorContainer _container;
+        private readonly string _xmlFile;
+        private IWindsorContainer _container;
 
 
-        protected HostedEnvironment(string xmlFile) 
+        protected HostedEnvironment(string xmlFile)
         {
-            _container = new WindsorContainer(xmlFile);
+            this._xmlFile = xmlFile;
+        }
+
+        protected void InitializeContainer()
+        {
+            _container = new WindsorContainer(_xmlFile);
             _container.AddFacility("masstransit", new MassTransitFacility());
             _container.AddFacility("factory", new FactorySupportFacility());
             _container.AddFacility("startable", new StartableFacility());
         }
-        protected HostedEnvironment()
-        {
-            _container = new WindsorContainer();
-        }
-
 
         public IWindsorContainer Container
         {
@@ -32,6 +33,8 @@ namespace MassTransit.Host
 
         public virtual void Start()
         {
+            this.InitializeContainer();
+
             //move this into interceptor?
             foreach (IHostedService hs in _container.ResolveAll<IHostedService>())
             {

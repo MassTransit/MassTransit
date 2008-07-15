@@ -5,9 +5,6 @@ namespace Server
 	public class ServerEnvironment :
 		HostedEnvironment
 	{
-		public ServerEnvironment()
-		{
-		}
 
 		public ServerEnvironment(string xmlFile) : base(xmlFile)
 		{

@@ -8,9 +8,6 @@ namespace Client
 	public class ClientEnvironment : HostedEnvironment
 	{
 	    private IServiceBus _bus;
-		public ClientEnvironment()
-		{
-		}
 
 		public ClientEnvironment(string xmlFile) : base(xmlFile)
 		{
