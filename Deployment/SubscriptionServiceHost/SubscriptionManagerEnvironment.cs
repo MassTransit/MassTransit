@@ -5,9 +5,6 @@ namespace SubscriptionServiceHost
     public class SubscriptionManagerEnvironment :
         HostedEnvironment
     {
-        public SubscriptionManagerEnvironment()
-        {
-        }
 
         public SubscriptionManagerEnvironment(string xmlFile) 
             : base(xmlFile)

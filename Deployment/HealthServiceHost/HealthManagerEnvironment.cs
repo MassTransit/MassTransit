@@ -5,9 +5,6 @@ namespace HealthServiceHost
     public class HealthManagerEnvironment :
         HostedEnvironment
     {
-        public HealthManagerEnvironment()
-        {
-        }
 
         public HealthManagerEnvironment(string xmlFile) 
             : base(xmlFile)
