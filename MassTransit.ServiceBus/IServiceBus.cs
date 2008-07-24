@@ -13,6 +13,7 @@
 namespace MassTransit.ServiceBus
 {
 	using System;
+	using System.Collections;
 
 	/// <summary>
 	/// The base service bus interface
@@ -93,6 +94,13 @@ namespace MassTransit.ServiceBus
 		/// <typeparam name="T"></typeparam>
 		/// <param name="producer"></param>
 		void AttachProducers<T>(T producer) where T : class;
+
+		/// <summary>
+		/// Returns a hashtable of injectable producers for the component specified
+		/// </summary>
+		/// <typeparam name="TComponent"></typeparam>
+		/// <returns></returns>
+		Hashtable GetProducers<TComponent>();
 
 		/// <summary>
 		/// Publishes a message to all subscribed consumers for the message type

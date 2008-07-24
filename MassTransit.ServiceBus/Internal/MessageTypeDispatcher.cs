@@ -67,14 +67,14 @@ namespace MassTransit.ServiceBus.Internal
 
 		public void Attach<T>(Consumes<T>.All consumer) where T : class
 		{
-			Produces<T> dispatcher = GetMessageDispatcher<T>();
+			Produces<T>.Bound dispatcher = GetMessageDispatcher<T>();
 
 			dispatcher.Attach(consumer);
 		}
 
 		public void Detach<T>(Consumes<T>.All consumer) where T : class
 		{
-			Produces<T> dispatcher = GetMessageDispatcher<T>();
+			Produces<T>.Bound dispatcher = GetMessageDispatcher<T>();
 
 			dispatcher.Detach(consumer);
 		}

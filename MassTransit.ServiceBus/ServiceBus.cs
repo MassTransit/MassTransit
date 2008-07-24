@@ -13,6 +13,7 @@
 namespace MassTransit.ServiceBus
 {
 	using System;
+	using System.Collections;
 	using System.Collections.Generic;
 	using Internal;
 	using log4net;
@@ -119,6 +120,12 @@ namespace MassTransit.ServiceBus
 		{
 			IProducerTypeInfo info = _subscriptionCoordinator.Resolve<T>();
 			info.Attach(producer);
+		}
+
+		public Hashtable GetProducers<TComponent>()
+		{
+			IProducerTypeInfo info = _subscriptionCoordinator.Resolve<TComponent>();
+			return info.GetPublishers();
 		}
 
 		/// <summary>
