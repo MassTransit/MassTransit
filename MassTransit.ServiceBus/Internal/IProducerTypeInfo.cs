@@ -13,9 +13,11 @@
 namespace MassTransit.ServiceBus.Internal
 {
 	using System;
+	using System.Collections;
 
 	public interface IProducerTypeInfo : IDisposable
 	{
 		void Attach<T>(T producer) where T : class;
+		Hashtable GetPublishers();
 	}
 }

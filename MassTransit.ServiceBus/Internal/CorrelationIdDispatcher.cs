@@ -18,7 +18,7 @@ namespace MassTransit.ServiceBus.Internal
 
 	public class CorrelationIdDispatcher<TMessage, TKey> :
 		Consumes<TMessage>.Selected,
-		Produces<TMessage>
+		Produces<TMessage>.Bound
 		where TMessage : class, CorrelatedBy<TKey>
 	{
 		private static readonly ILog _log = LogManager.GetLogger(typeof(CorrelationIdDispatcher<TMessage,TKey>));

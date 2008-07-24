@@ -34,7 +34,7 @@ namespace MassTransit.ServiceBus.Internal
 	public interface IMessageDispatcher<TMessage> :
 		IMessageDispatcher,
 		Consumes<TMessage>.Selected,
-		Produces<TMessage>
+		Produces<TMessage>.Bound
 		where TMessage : class
 	{
 		bool Active { get; }

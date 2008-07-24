@@ -12,9 +12,16 @@
 /// specific language governing permissions and limitations under the License.
 namespace MassTransit.ServiceBus
 {
-    public interface Produces<TMessage> where TMessage : class
+	public class Produces<TMessage> where TMessage : class
     {
-        void Attach(Consumes<TMessage>.All consumer);
-        void Detach(Consumes<TMessage>.All consumer);
+		public interface Injected
+		{
+		}
+
+		public interface Bound
+		{
+			void Attach(Consumes<TMessage>.All consumer);
+			void Detach(Consumes<TMessage>.All consumer);
+		}
     }
 }

@@ -4,7 +4,6 @@ namespace HeavyLoad.Load
 	using System.Threading;
 	using Castle.Windsor;
 	using MassTransit.ServiceBus;
-	using MassTransit.ServiceBus.Internal;
 	using MassTransit.ServiceBus.MSMQ;
 
 	public class ContainerLoadTest : IDisposable
@@ -71,9 +70,16 @@ namespace HeavyLoad.Load
 			}
 		}
 
-		internal class RequestConsumer : Consumes<GeneralMessage>.All, Produces<SimpleResponse>
+		internal class RequestConsumer : 
+			Consumes<GeneralMessage>.All, 
+			Produces<SimpleResponse>.Injected
 		{
-			private Consumes<SimpleResponse>.All _consumer = Consumes<SimpleResponse>.Null;
+			private readonly Consumes<SimpleResponse>.All _simpleResponseConsumer;
+
+			public RequestConsumer(Consumes<SimpleResponse>.All simpleResponseConsumer)
+			{
+				_simpleResponseConsumer = simpleResponseConsumer;
+			}
 
 			public void Consume(GeneralMessage message)
 			{
@@ -81,17 +87,7 @@ namespace HeavyLoad.Load
 				if (_counter == _repeatCount)
 					_completeEvent.Set();
 
-				_consumer.Consume(new SimpleResponse());
-			}
-
-			public void Attach(Consumes<SimpleResponse>.All consumer)
-			{
-				_consumer = consumer;
-			}
-
-			public void Detach(Consumes<SimpleResponse>.All consumer)
-			{
-				_consumer = Consumes<SimpleResponse>.Null;
+				_simpleResponseConsumer.Consume(new SimpleResponse());
 			}
 		}
 	}

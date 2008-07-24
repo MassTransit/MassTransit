@@ -19,7 +19,8 @@ namespace MassTransit.ServiceBus.Internal
 	public class SubscriptionCoordinator : IDisposable
 	{
 		private static readonly Type _consumerType = typeof (Consumes<>.All);
-		private static readonly Type _producerType = typeof (Produces<>);
+		private static readonly Type _producerType = typeof (Produces<>.Bound);
+		private static readonly Type _injectedProducerType = typeof (Produces<>.Injected);
 		private static readonly Type _correlatedConsumerType = typeof (Consumes<>.For<>);
 		private static readonly Type _correlatedMessageType = typeof (CorrelatedBy<>);
 		private static readonly Type _selectiveConsumerType = typeof (Consumes<>.Selected);
@@ -74,7 +75,7 @@ namespace MassTransit.ServiceBus.Internal
 
 						ISubscriptionTypeInfo subscriptionTypeInfo = (ISubscriptionTypeInfo) Activator.CreateInstance(subscriptionType, _dispatcher, _bus, _cache, _builder);
 
-						info.Add(subscriptionTypeInfo);
+						info.AddSubscriber(subscriptionTypeInfo);
 
 						usedMessageTypes.Add(arguments[0]);
 					}
@@ -104,7 +105,7 @@ namespace MassTransit.ServiceBus.Internal
 							subscriptionTypeInfo = (ISubscriptionTypeInfo) Activator.CreateInstance(subscriptionType, SubscriptionMode.Selected, _dispatcher, _bus, _cache, _builder);
 						}
 
-						info.Add(subscriptionTypeInfo);
+						info.AddSubscriber(subscriptionTypeInfo);
 
 						usedMessageTypes.Add(arguments[0]);
 					}
@@ -119,7 +120,7 @@ namespace MassTransit.ServiceBus.Internal
 
 						ISubscriptionTypeInfo subscriptionTypeInfo = (ISubscriptionTypeInfo) Activator.CreateInstance(subscriptionType, SubscriptionMode.All, _dispatcher, _bus, _cache, _builder);
 
-						info.Add(subscriptionTypeInfo);
+						info.AddSubscriber(subscriptionTypeInfo);
 
 						usedMessageTypes.Add(arguments[0]);
 					}
@@ -143,7 +144,17 @@ namespace MassTransit.ServiceBus.Internal
 
 						IProducerTypeInfo producerTypeInfo = (IProducerTypeInfo) Activator.CreateInstance(producesType, _bus);
 
-						info.Add(producerTypeInfo);
+						info.AddBoundProducer(producerTypeInfo);
+					}
+					else if (interfaceType.IsGenericType && interfaceType.GetGenericTypeDefinition() == _injectedProducerType)
+					{
+						Type[] arguments = interfaceType.GetGenericArguments();
+
+						Type producesType = typeof (MessagePublisher<>).MakeGenericType(arguments[0]);
+
+						IProducerTypeInfo producerTypeInfo = (IProducerTypeInfo) Activator.CreateInstance(producesType, _bus);
+
+						info.AddInjectedProducer(producerTypeInfo);
 					}
 				}
 

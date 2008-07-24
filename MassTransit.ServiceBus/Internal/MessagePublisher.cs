@@ -1,9 +1,10 @@
 namespace MassTransit.ServiceBus.Internal
 {
 	using System;
+	using System.Collections;
 	using Exceptions;
 
-	public class MessagePublisher<TMessage> : 
+	public class MessagePublisher<TMessage> :
 		IProducerTypeInfo
 		where TMessage : class
 	{
@@ -12,28 +13,40 @@ namespace MassTransit.ServiceBus.Internal
 
 		public MessagePublisher(IServiceBus bus)
 		{
-			_messageType = typeof(TMessage);
+			_messageType = typeof (TMessage);
 
 			_publisher = new ProducesPublisher<TMessage>(bus);
 		}
 
 		public void Attach<T>(T component) where T : class
 		{
-			Produces<TMessage> producer = component as Produces<TMessage>;
+			Produces<TMessage>.Bound producer = component as Produces<TMessage>.Bound;
 			if (producer == null)
-				throw new ConventionException(string.Format("Object of type {0} does not produce messages of type {1}", typeof(T), _messageType));
+				throw new ConventionException(string.Format("Object of type {0} does not produce messages of type {1}", typeof (T), _messageType));
 
 			Attach(producer);
 		}
 
-		public void Attach(Produces<TMessage> producer)
+		public Hashtable GetPublishers()
 		{
-			producer.Attach(_publisher);
+			Hashtable ht = new Hashtable();
+
+			string className = _messageType.Name;
+			string argumentName = className.Substring(0, 1).ToLowerInvariant() + className.Substring(1) + "Consumer";
+
+			ht.Add(argumentName, _publisher);
+
+			return ht;
 		}
 
 		public void Dispose()
 		{
 			_publisher = null;
+		}
+
+		public void Attach(Produces<TMessage>.Bound producer)
+		{
+			producer.Attach(_publisher);
 		}
 	}
 }

@@ -12,6 +12,8 @@
 /// specific language governing permissions and limitations under the License.
 namespace MassTransit.ServiceBus.Internal
 {
+	using System.Collections;
+
 	public class SelectiveComponentDispatcher<TComponent, TMessage> :
 		Consumes<TMessage>.Selected
 		where TMessage : class
@@ -47,7 +49,16 @@ namespace MassTransit.ServiceBus.Internal
 
 		public void Consume(TMessage message)
 		{
-			TComponent component = _builder.Build<TComponent>();
+			TComponent component;
+			if (_bus != null)
+			{
+				Hashtable arguments = _bus.GetProducers<TComponent>();
+				component = _builder.Build<TComponent>(arguments);
+			}
+			else
+			{
+				component = _builder.Build<TComponent>();
+			}
 
 			try
 			{

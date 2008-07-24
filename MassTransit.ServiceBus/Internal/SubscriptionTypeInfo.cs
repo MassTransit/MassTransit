@@ -13,6 +13,7 @@
 namespace MassTransit.ServiceBus.Internal
 {
 	using System;
+	using System.Collections;
 	using System.Collections.Generic;
 	using Exceptions;
 	using Subscriptions;
@@ -29,6 +30,7 @@ namespace MassTransit.ServiceBus.Internal
 	{
 		private readonly List<ISubscriptionTypeInfo> _subscriptionTypes = new List<ISubscriptionTypeInfo>();
 		private readonly List<IProducerTypeInfo> _producerTypes = new List<IProducerTypeInfo>();
+		private readonly List<IProducerTypeInfo> _injectedProducerTypes = new List<IProducerTypeInfo>();
 		private IPublicationTypeInfo _publicationType;
 
 		public IList<Subscription> GetConsumers<T>(T message) where T : class
@@ -73,14 +75,20 @@ namespace MassTransit.ServiceBus.Internal
 			}
 		}
 
-		public void Add(ISubscriptionTypeInfo subscriptionTypeInfo)
+		public void AddSubscriber(ISubscriptionTypeInfo subscriptionTypeInfo)
 		{
 			_subscriptionTypes.Add(subscriptionTypeInfo);
 		}
 
-		public void Add(IProducerTypeInfo producerTypeInfo)
+		public void AddBoundProducer(IProducerTypeInfo producerTypeInfo)
 		{
 			_producerTypes.Add(producerTypeInfo);
+			
+		}
+
+		public void AddInjectedProducer(IProducerTypeInfo producerTypeInfo)
+		{
+			_injectedProducerTypes.Add(producerTypeInfo);
 			
 		}
 
@@ -105,6 +113,12 @@ namespace MassTransit.ServiceBus.Internal
 				producerType.Dispose();
 			}
 			_producerTypes.Clear();
+
+			foreach (IProducerTypeInfo producerType in _injectedProducerTypes)
+			{
+				producerType.Dispose();
+			}
+			_injectedProducerTypes.Clear();
 		}
 
 		public void Attach<T>(T producer) where T : class
@@ -113,6 +127,22 @@ namespace MassTransit.ServiceBus.Internal
 			{
 				producerType.Attach(producer);
 			}
+		}
+
+		public Hashtable GetPublishers()
+		{
+			Hashtable arguments = new Hashtable();
+
+			foreach (IProducerTypeInfo producerType in _injectedProducerTypes)
+			{
+				Hashtable next = producerType.GetPublishers();
+				foreach (DictionaryEntry entry in next)
+				{
+					arguments.Add(entry.Key, entry.Value);
+				}
+			}
+
+			return arguments;
 		}
 	}
 }

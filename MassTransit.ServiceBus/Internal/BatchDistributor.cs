@@ -24,7 +24,7 @@ namespace MassTransit.ServiceBus.Internal
 	/// <typeparam name="TBatchId">The type for the batch id</typeparam>
 	public class BatchDistributor<TMessage, TBatchId> :
 		Consumes<TMessage>.Selected,
-		Produces<Batch<TMessage, TBatchId>>
+		Produces<Batch<TMessage, TBatchId>>.Bound
 		where TMessage : class, BatchedBy<TBatchId>
 	{
 		private readonly Dictionary<TBatchId, Batch<TMessage, TBatchId>> _batches = new Dictionary<TBatchId, Batch<TMessage, TBatchId>>();
