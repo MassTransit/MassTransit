@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <project name="masstransit" default="go">
-	
+	<property name="nant.settings.currentframework" value="net-3.5" />
 	<property name="dirs.install" value=".\pubsub_install" overwrite="false" />
 	<property name="dirs.build" value=".\bin" overwrite="false" />
 	
@@ -14,7 +14,7 @@
 		
 		<property name="config" value="Release" />
 		
-		<msbuild project=".\MassTransit.sln" verbosity="quiet">
+		<msbuild project=".\MassTransit-2008.sln" verbosity="quiet">
 			<property name="Configuration" value="Release" />
 		</msbuild>
 
