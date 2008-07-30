@@ -1,1 +1,1 @@
-.\libs\nant-0.85\nant.exe
+.\libs\nant-0.86-beta1\nant.exe
