@@ -23,10 +23,10 @@ namespace MassTransit.Host.Actions
 
         public void Do(HostedEnvironment environment)
         {
-            _log.Info("Received console start notification");
+            _log.Info("Received service start notification");
 
-            ServiceHost inConsoleHost = new ServiceHost(environment);
-            inConsoleHost.Run();
+            ServiceHost inServiceHost = new ServiceHost(environment);
+            inServiceHost.Run();
         }
     }
 }
