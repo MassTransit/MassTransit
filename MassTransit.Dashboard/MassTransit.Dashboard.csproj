@@ -138,9 +138,9 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Views\Health\view.brail" />
-    <None Include="Views\Layouts\default.brail" />
-    <None Include="Views\Subscriptions\view.brail" />
+    <EmbeddedResource Include="Views\Health\view.brail" />
+    <EmbeddedResource Include="Views\Layouts\default.brail" />
+    <EmbeddedResource Include="Views\Subscriptions\view.brail" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v9.0\WebApplications\Microsoft.WebApplication.targets" Condition="" />
