@@ -1,7 +1,9 @@
 namespace MassTransit.Dashboard.Controllers
 {
     using System;
+    using System.Collections.Generic;
     using Castle.MonoRail.Framework;
+    using MassTransit.ServiceBus.HealthMonitoring;
     using MassTransit.ServiceBus.HealthMonitoring.Messages;
     using ServiceBus;
 
@@ -20,20 +22,26 @@ namespace MassTransit.Dashboard.Controllers
             _bus = bus;
         }
 
-        public IAsyncResult BeginView()
-        {
-            _request = _bus.Request()
-                .From(this)
-                .WithCallback(ControllerContext.Async.Callback, ControllerContext.Async.State);
+        //public IAsyncResult BeginView()
+        //{
+        //    _request = _bus.Request()
+        //        .From(this)
+        //        .WithCallback(ControllerContext.Async.Callback, ControllerContext.Async.State);
 
-            _request.Send(new HealthStatusRequest(_bus.Endpoint.Uri, this.CorrelationId));
+        //    _request.Send(new HealthStatusRequest(_bus.Endpoint.Uri, this.CorrelationId));
 
-            return _request;
-        }
-        public void EndView()
+        //    return _request;
+        //}
+        //public void EndView()
+        //{
+        //    //IAsyncResult r = ControllerContext.Async.Result; //TODO: Do I need this?
+        //    PropertyBag.Add("statuses", _response.HealthInformation);
+        //}
+
+        public void View()
         {
-            //IAsyncResult r = ControllerContext.Async.Result; //TODO: Do I need this?
-            PropertyBag.Add("statuses", _response.HealthInformation);
+            IList<HealthInformation> infos = new List<HealthInformation>();
+            PropertyBag.Add("statuses", infos);
         }
 
         #region Implementation of All
