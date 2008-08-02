@@ -6,6 +6,8 @@
 	
 	<target name="go" depends="build, clean_the_bin, zip" description="Starting the build of MassTransit"/>
 	
+	<target name="go_tests" depends="build, run_tests, clean_the_bin, zip" description="Starting the build of MassTransit"/>
+	
 	<target name="build" depends="build_code, build_samples, build_deploy" description="Starting builds" />
 	
 	<target name="build_code" depends="common.find-svninfo, common.asminfo" description="Building Library">
@@ -100,10 +102,9 @@
 
 	<target name="run_tests">
 		<exec
-			program="nunit-console.exe"
-			commandline='info http://masstransit.googlecode.com/svn/trunk --xml'
-			output="_revision.xml"
-			failonerror="false"/>
+			program="${project::get-base-directory()}\libs\nunit\nunit-console.exe"
+			commandline='.\tests\MassTransit.ServiceBus.Tests.dll /xml=bob.xml'
+			failonerror="true"/>
 	</target>
 	
 	<!-- need to add a host -->
