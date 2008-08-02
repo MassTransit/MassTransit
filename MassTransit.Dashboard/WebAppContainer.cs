@@ -27,7 +27,8 @@ namespace MassTransit.Dashboard
 
         protected void RegisterComponents()
         {
-            AddComponent("home.controller", typeof(SubscriptionsController));
+            AddComponent("controller.subscription", typeof(SubscriptionsController));
+            AddComponent("controller.health", typeof(HealthController));
         }
     }
 }
