@@ -148,47 +148,17 @@ namespace MassTransit.ServiceBus.Internal
                 //do nothing
             }
 
-            public object Receive()
+	        public object Receive(TimeSpan timeout)
             {
                 return new object();
             }
 
-            public object Receive(TimeSpan timeout)
+	        public object Receive(TimeSpan timeout, Predicate<object> accept)
             {
                 return new object();
             }
 
-            public object Receive(Predicate<object> accept)
-            {
-                return new object();
-            }
-
-            public object Receive(TimeSpan timeout, Predicate<object> accept)
-            {
-                return new object();
-            }
-
-            public T Receive<T>() where T : class
-            {
-                throw new System.NotImplementedException();
-            }
-
-            public T Receive<T>(TimeSpan timeout) where T : class
-            {
-                throw new System.NotImplementedException();
-            }
-
-            public T Receive<T>(Predicate<T> accept) where T : class
-            {
-                throw new System.NotImplementedException();
-            }
-
-            public T Receive<T>(TimeSpan timeout, Predicate<T> accept) where T : class
-            {
-                throw new System.NotImplementedException();
-            }
-
-            #endregion
+	        #endregion
         }
 	}
 }
