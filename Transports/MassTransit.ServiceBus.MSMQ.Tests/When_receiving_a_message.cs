@@ -1,6 +1,7 @@
 namespace MassTransit.ServiceBus.MSMQ.Tests
 {
-	using System.Transactions;
+    using System;
+    using System.Transactions;
 	using Exceptions;
 	using Messages;
 	using NUnit.Framework;
@@ -40,7 +41,7 @@ namespace MassTransit.ServiceBus.MSMQ.Tests
 		{
 			using (TransactionScope tr = new TransactionScope())
 			{
-				ep.Receive();
+			    ep.Receive(TimeSpan.FromSeconds(10));
 				tr.Complete();
 			}
 		}
@@ -49,7 +50,7 @@ namespace MassTransit.ServiceBus.MSMQ.Tests
 		[ExpectedException(typeof (EndpointException))]
 		public void From_A_Transactional_Queue_Without_a_transaction()
 		{	
-			ep.Receive();
+			ep.Receive(TimeSpan.FromSeconds(10));
 		}
 	}
 }
