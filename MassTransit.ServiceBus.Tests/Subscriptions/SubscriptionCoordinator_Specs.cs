@@ -17,9 +17,10 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
 		private IServiceBus _bus;
 		private IEndpoint _endpoint;
 		private MessageTypeDispatcher _dispatcher;
-		private SubscriptionCoordinator _coordinator;
+		private TypeInfoCache _typeInfoCache;
+	    private DispatcherContext _context;
 
-		protected override void Before_each()
+	    protected override void Before_each()
 		{
 			_builder = DynamicMock<IObjectBuilder>();
 			_bus = DynamicMock<IServiceBus>();
@@ -27,14 +28,16 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
 
 			_cache = new LocalSubscriptionCache();
 
-			SetupResult.For(_endpoint.Uri).Return(new Uri("msmq://localhost/test_queue"));
-			SetupResult.For(_bus.Endpoint).Return(_endpoint);
+	        SetupResult.For(_endpoint.Uri).Return(new Uri("msmq://localhost/test_queue"));
+	        SetupResult.For(_bus.Endpoint).Return(_endpoint);
 
-			ReplayAll();
+	        ReplayAll();
 
-			_dispatcher = new MessageTypeDispatcher(null);
+	        _dispatcher = new MessageTypeDispatcher();
 
-			_coordinator = new SubscriptionCoordinator(_dispatcher, _bus, _cache, _builder);
+	        _typeInfoCache = new TypeInfoCache();
+
+	        _context = new DispatcherContext(_builder, _bus, _dispatcher, _cache, _typeInfoCache);
 		}
 
 		[Test]
@@ -51,17 +54,17 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
 
 		protected void AddAndRemoveSubscription<T>() where T : class, new()
 		{
-			ISubscriptionTypeInfo info = _coordinator.Resolve<T>();
+			ISubscriptionTypeInfo info = _typeInfoCache.GetSubscriptionTypeInfo<T>();
 
 			T c = new T();
 
-			info.Subscribe(c);
+			info.Subscribe(_context, c);
 
 			IList<Subscription> entries = _cache.List();
 
 			Assert.That(entries.Count, Is.EqualTo(1));
 
-			info.Unsubscribe(c);
+            info.Unsubscribe(_context, c);
 
 			entries = _cache.List();
 
@@ -82,21 +85,21 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
 
 		protected void AddTwoAndRemoveOneSubscription<T>() where T : class, new()
 		{
-			ISubscriptionTypeInfo info = _coordinator.Resolve<T>();
+            ISubscriptionTypeInfo info = _typeInfoCache.GetSubscriptionTypeInfo<T>();
 
 			T c = new T();
 
-			info.Subscribe(c);
+            info.Subscribe(_context, c);
 
 			T d = new T();
 
-			info.Subscribe(d);
+            info.Subscribe(_context, d);
 
 			IList<Subscription> entries = _cache.List();
 
 			Assert.That(entries.Count, Is.EqualTo(1));
 
-			info.Unsubscribe(c);
+            info.Unsubscribe(_context, c);
 
 			entries = _cache.List();
 

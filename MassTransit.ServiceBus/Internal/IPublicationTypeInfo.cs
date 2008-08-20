@@ -16,9 +16,9 @@ namespace MassTransit.ServiceBus.Internal
 	using System.Collections.Generic;
 	using Subscriptions;
 
-	public interface IPublicationTypeInfo : IDisposable
+	public interface IPublicationTypeInfo
 	{
-		IList<Subscription> GetConsumers<T>(T message) where T : class;
+        IList<Subscription> GetConsumers<T>(IDispatcherContext context, T message) where T : class;
 		void PublishFault<T>(IServiceBus bus, Exception ex, T message) where T : class;
 	}
 }

@@ -11,7 +11,7 @@ namespace MassTransit.ServiceBus.Tests
 
 	    protected override void Before_each()
 		{
-	    	_dispatcher = new MessageDispatcher<TestMessage>(null);
+	    	_dispatcher = new MessageDispatcher<TestMessage>();
 			_message = new TestMessage(_value);
 		}
 

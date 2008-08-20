@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+
+<configuration>
+
+  <facilities>
+
+    <facility id="masstransit">
+
+      <bus id="test"
+				 endpoint="loopback://localhost/test_servicebus">
+        <dispatcher minThreads="0"
+							maxThreads="4" />
+      </bus>
+
+      <transports>
+        <transport>MassTransit.ServiceBus.Transports.LoopbackEndpoint, MassTransit.ServiceBus</transport>
+      </transports>
+    </facility>
+
+  </facilities>
+
+</configuration>

@@ -11,19 +11,34 @@ namespace MassTransit.ServiceBus.Tests
 	public class When_a_correlated_message_is_received :
         Specification
 	{
-	    private IObjectBuilder obj;
+	    private DispatcherContext _context;
+	    private ISubscriptionCache cache;
+	    private Uri uri;
 
-        protected override void Before_each()
+	    protected override void Before_each()
         {
-            obj = StrictMock<IObjectBuilder>();
+	        uri = new Uri("msmq://localhost/test_servicebus");
+
+	        cache = DynamicMock<ISubscriptionCache>();
+	        IEndpoint endpoint = DynamicMock<IEndpoint>();
+            IServiceBus bus = DynamicMock<IServiceBus>();
+            SetupResult.For(bus.Endpoint).Return(endpoint);
+            SetupResult.For(endpoint.Uri).Return(uri);
+
+            MessageTypeDispatcher messageDispatcher = new MessageTypeDispatcher();
+            TypeInfoCache typeInfoCache = new TypeInfoCache();
+
+            IObjectBuilder builder = DynamicMock<IObjectBuilder>();
+
+            _context = new DispatcherContext(builder, bus, messageDispatcher, cache, typeInfoCache);
         }
+
 		[Test]
 		public void A_type_should_be_registered()
 		{
-			MessageTypeDispatcher messageDispatcher = new MessageTypeDispatcher(null);
-			SubscriptionCoordinator coordinator = new SubscriptionCoordinator(messageDispatcher, null, null, obj);
+		    ReplayAll();
 
-			CorrelatedController controller = new CorrelatedController(messageDispatcher, coordinator);
+		    CorrelatedController controller = new CorrelatedController(_context);
 
 			controller.DoWork();
 
@@ -33,19 +48,9 @@ namespace MassTransit.ServiceBus.Tests
 		[Test]
 		public void A_correlated_subscriber_should_not_register_a_general_subscription()
 		{
-			Uri uri = new Uri("msmq://localhost/test_servicebus");
+		    CorrelatedController controller = new CorrelatedController(_context);
 
-			ISubscriptionCache cache = StrictMock<ISubscriptionCache>();
-			IEndpoint endpoint = DynamicMock<IEndpoint>();
-			IServiceBus bus = DynamicMock<IServiceBus>();
-			SetupResult.For(bus.Endpoint).Return(endpoint);
-			SetupResult.For(endpoint.Uri).Return(uri);
-
-			MessageTypeDispatcher messageDispatcher = new MessageTypeDispatcher(null);
-			SubscriptionCoordinator coordinator = new SubscriptionCoordinator(messageDispatcher, bus, cache, obj);
-			CorrelatedController controller = new CorrelatedController(messageDispatcher, coordinator);
-
-			using(Record())
+		    using(Record())
 			{
 				cache.Add(new Subscription(typeof(ResponseMessage).FullName, controller.CorrelationId.ToString(), uri));
 			}
@@ -62,16 +67,14 @@ namespace MassTransit.ServiceBus.Tests
 	internal class CorrelatedController :
 		Consumes<ResponseMessage>.For<Guid>
 	{
-		private readonly MessageTypeDispatcher _messageDispatcher;
-		private readonly SubscriptionCoordinator _coordinator;
-		private RequestMessage _request = new RequestMessage();
+		private readonly RequestMessage _request = new RequestMessage();
 
-		private bool _responseReceived = false;
+		private bool _responseReceived;
+	    private readonly IDispatcherContext _context;
 
-		public CorrelatedController(MessageTypeDispatcher messageDispatcher, SubscriptionCoordinator coordinator)
+	    public CorrelatedController(IDispatcherContext context)
 		{
-			_messageDispatcher = messageDispatcher;
-			_coordinator = coordinator;
+	        _context = context;
 		}
 
 		public bool ResponseReceived
@@ -91,12 +94,11 @@ namespace MassTransit.ServiceBus.Tests
 
 		public void DoWork()
 		{
-
-			_coordinator.Resolve(this).Subscribe(this);
+			_context.GetSubscriptionTypeInfo(GetType()).Subscribe(_context, this);
 
 			ResponseMessage response = new ResponseMessage(_request.CorrelationId);
 
-			_messageDispatcher.Consume(response);
+			_context.Consume(response);
 		}
 	}
 

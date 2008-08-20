@@ -1,106 +1,119 @@
-/// Copyright 2007-2008 The Apache Software Foundation.
-/// 
-/// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
-/// this file except in compliance with the License. You may obtain a copy of the 
-/// License at 
-/// 
-///   http://www.apache.org/licenses/LICENSE-2.0 
-/// 
-/// Unless required by applicable law or agreed to in writing, software distributed 
-/// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-/// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-/// specific language governing permissions and limitations under the License.
+// Copyright 2007-2008 The Apache Software Foundation.
+//  
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
+// this file except in compliance with the License. You may obtain a copy of the 
+// License at 
+// 
+//     http://www.apache.org/licenses/LICENSE-2.0 
+// 
+// Unless required by applicable law or agreed to in writing, software distributed 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// specific language governing permissions and limitations under the License.
 namespace MassTransit.ServiceBus.Internal
 {
-	using System;
-	using Exceptions;
-	using Subscriptions;
+    using System;
+    using Exceptions;
+    using Subscriptions;
 
-	public class CorrelatedSubscription<TComponent, TMessage, TKey> :
-		ISubscriptionTypeInfo
-		where TComponent : class, Consumes<TMessage>.All
-		where TMessage : class, CorrelatedBy<TKey>
-	{
-		private readonly IServiceBus _bus;
-		private readonly ISubscriptionCache _cache;
-		private readonly CorrelationIdDispatcher<TMessage, TKey> _componentConsumer;
-		private readonly IMessageTypeDispatcher _dispatcher;
-		private readonly Type _messageType;
-		private readonly Consumes<TMessage>.Selected _selectiveConsumer;
-		private readonly object _changeLock = new object();
+    public class CorrelatedSubscription<TComponent, TMessage, TKey> :
+        ISubscriptionTypeInfo
+        where TComponent : class, Consumes<TMessage>.All
+        where TMessage : class, CorrelatedBy<TKey>
+    {
+        public void Subscribe<T>(IDispatcherContext context, T component) where T : class
+        {
+            Consumes<TMessage>.For<TKey> consumer = GetTypedConsumer(component);
 
-		public CorrelatedSubscription(IMessageTypeDispatcher dispatcher, IServiceBus bus, ISubscriptionCache cache, IObjectBuilder builder)
-		{
-			_dispatcher = dispatcher;
-			_bus = bus;
-			_cache = cache;
-			_messageType = typeof (TMessage);
+            _Subscribe(context, consumer);
+        }
 
-			_componentConsumer = new CorrelationIdDispatcher<TMessage, TKey>(bus);
-			_selectiveConsumer = new SelectiveComponentDispatcher<TComponent, TMessage>(builder, bus);
-		}
+        public void Unsubscribe<T>(IDispatcherContext context, T component) where T : class
+        {
+            Consumes<TMessage>.For<TKey> consumer = GetTypedConsumer(component);
 
-		public void Subscribe<T>(T component) where T : class
-		{
-			Consumes<TMessage>.For<TKey> consumer = component as Consumes<TMessage>.For<TKey>;
-			if (consumer == null)
-				throw new ConventionException(string.Format("Object of type {0} does not consume messages of type {1}", typeof (T), _messageType));
+            _Unsubscribe(context, consumer);
+        }
 
-			Subscribe(consumer);
-		}
+        public void AddComponent(IDispatcherContext context)
+        {
+            GetComponentDispatcher(context);
+        }
 
-		public void Unsubscribe<T>(T component) where T : class
-		{
-			Consumes<TMessage>.For<TKey> consumer = component as Consumes<TMessage>.For<TKey>;
-			if (consumer == null)
-				throw new ConventionException(string.Format("Object of type {0} does not consume messages of type {1}", typeof (T), _messageType));
+        public void RemoveComponent(IDispatcherContext context)
+        {
+            throw new NotSupportedException("We can't remove right now");
+        }
 
-			Unsubscribe(consumer);
-		}
+        public void Dispose()
+        {
+        }
 
-		public void AddComponent()
-		{
-			_dispatcher.Attach<TMessage>(_selectiveConsumer);
-		}
+        private static Consumes<TMessage>.For<TKey> GetTypedConsumer<T>(T component)
+        {
+            Consumes<TMessage>.For<TKey> consumer = component as Consumes<TMessage>.For<TKey>;
+            if (consumer == null)
+                throw new ConventionException(string.Format("Object of type {0} does not consume messages of type {1}", typeof (T), typeof (TMessage)));
 
-		public void RemoveComponent()
-		{
-			_dispatcher.Detach<TMessage>(_selectiveConsumer);
-		}
+            return consumer;
+        }
 
-		public void Subscribe(Consumes<TMessage>.For<TKey> consumer)
-		{
-			lock (_changeLock)
-			{
-				_dispatcher.Attach<TMessage>(_componentConsumer);
+        private static void _Subscribe(IDispatcherContext context, Consumes<TMessage>.For<TKey> consumer)
+        {
+            CorrelationIdDispatcher<TMessage, TKey> dispatcher = GetCorrelatedDispatcher(context, true);
 
-				_componentConsumer.Attach(consumer);
+            dispatcher.Attach(consumer);
 
-				if (_cache != null)
-					_cache.Add(new Subscription(typeof (TMessage).FullName, consumer.CorrelationId.ToString(), _bus.Endpoint.Uri));
-			}
-		}
+            context.AddSubscription(new Subscription(typeof (TMessage).FullName, consumer.CorrelationId.ToString(), context.Bus.Endpoint.Uri));
+        }
 
-		public void Unsubscribe(Consumes<TMessage>.For<TKey> consumer)
-		{
-			lock (_changeLock)
-			{
-				_componentConsumer.Detach(consumer);
+        private static void _Unsubscribe(IDispatcherContext context, Consumes<TMessage>.For<TKey> consumer)
+        {
+            CorrelationIdDispatcher<TMessage, TKey> dispatcher = GetCorrelatedDispatcher(context, false);
+            if (dispatcher == null)
+                return;
 
-				if (_componentConsumer.Active == false)
-				{
-					if (_cache != null)
-						_cache.Remove(new Subscription(typeof (TMessage).FullName, consumer.CorrelationId.ToString(), _bus.Endpoint.Uri));
+            dispatcher.Detach(consumer);
 
-					_dispatcher.Detach<TMessage>(_componentConsumer);
-				}
-			}
-		}
+            if (dispatcher.Active(consumer.CorrelationId) == false)
+            {
+                context.RemoveSubscription(new Subscription(typeof (TMessage).FullName, consumer.CorrelationId.ToString(), context.Bus.Endpoint.Uri));
 
-		public void Dispose()
-		{
-			_dispatcher.Dispose();
-			_componentConsumer.Dispose();
-		}
-	}
+                // context.Detach(dispatcher);
+            }
+        }
+
+        private static void GetComponentDispatcher(IDispatcherContext context)
+        {
+            IMessageDispatcher<TMessage> messageDispatcher = context.GetDispatcher<MessageDispatcher<TMessage>>();
+
+            Type componentDispatcherType = typeof (SelectiveComponentDispatcher<,>).MakeGenericType(typeof (TComponent), typeof (TMessage));
+
+            Consumes<TMessage>.Selected dispatcher = messageDispatcher.GetDispatcher<Consumes<TMessage>.Selected>(componentDispatcherType);
+
+            if (dispatcher == null)
+            {
+                dispatcher = (Consumes<TMessage>.Selected) Activator.CreateInstance(componentDispatcherType, context);
+
+                context.Attach(dispatcher);
+                context.AddSubscription(new Subscription(typeof (TMessage).FullName, context.Bus.Endpoint.Uri));
+            }
+        }
+
+        private static CorrelationIdDispatcher<TMessage, TKey> GetCorrelatedDispatcher(IDispatcherContext context, bool createIfNotFound)
+        {
+            IMessageDispatcher<TMessage> messageDispatcher = context.GetDispatcher<MessageDispatcher<TMessage>>();
+
+            CorrelationIdDispatcher<TMessage, TKey> dispatcher = messageDispatcher.GetDispatcher<CorrelationIdDispatcher<TMessage, TKey>>();
+
+            if (dispatcher == null && createIfNotFound)
+            {
+                dispatcher = new CorrelationIdDispatcher<TMessage, TKey>();
+
+                context.Attach(dispatcher);
+            }
+
+            return dispatcher;
+        }
+    }
 }

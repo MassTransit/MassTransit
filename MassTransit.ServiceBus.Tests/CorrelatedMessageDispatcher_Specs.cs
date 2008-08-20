@@ -3,35 +3,54 @@ namespace MassTransit.ServiceBus.Tests
 	using System;
 	using System.Diagnostics;
 	using MassTransit.ServiceBus.Internal;
+	using MassTransit.ServiceBus.Subscriptions;
 	using NUnit.Framework;
 	using NUnit.Framework.SyntaxHelpers;
+	using Rhino.Mocks;
 
-	[TestFixture]
+    [TestFixture]
 	public class When_a_correlated_message_is_dispatched_through_the_message_dispatcher :
         Specification
 	{
         private IObjectBuilder obj;
         private MessageTypeDispatcher _dispatcher;
         private TestMessage _message;
-        private readonly int _value = 27;
-        private SubscriptionCoordinator _coordinator;
+        private const int _value = 27;
+        private TypeInfoCache _typeInfoCache;
+	    private DispatcherContext _context;
+	    private IServiceBus _bus;
+	    private LocalSubscriptionCache _cache;
+        private IEndpoint _endpoint;
 
-	    protected override void Before_each()
+        protected override void Before_each()
 		{
 	        obj = StrictMock<IObjectBuilder>();
-			_dispatcher = new MessageTypeDispatcher(null);
-	    	_coordinator = new SubscriptionCoordinator(_dispatcher, null, null, obj);
+			_dispatcher = new MessageTypeDispatcher();
+	    	_typeInfoCache = new TypeInfoCache();
 			_message = new TestMessage(_value);
+
+            _endpoint = DynamicMock<IEndpoint>();
+            SetupResult.For(_endpoint.Uri).Return(new Uri("msmq://localhost/queue"));
+
+            _bus = DynamicMock<IServiceBus>();
+            SetupResult.For(_bus.Endpoint).Return(_endpoint);
+
+            _cache = new LocalSubscriptionCache();
+
+            _context = new DispatcherContext(obj, _bus, _dispatcher, _cache, _typeInfoCache);
+
+            ReplayAll();
+
 		}
 
 		[Test]
 		public void It_should_be_dispatched_to_all_consumers()
 		{
 			TestConsumer consumerA = new TestConsumer(_message.CorrelationId);
-			_coordinator.Resolve(consumerA).Subscribe(consumerA);
+            _typeInfoCache.GetSubscriptionTypeInfo(consumerA.GetType()).Subscribe(_context, consumerA);
 
 			TestConsumer consumerB = new TestConsumer(_message.CorrelationId);
-			_coordinator.Resolve(consumerB).Subscribe(consumerB);
+            _typeInfoCache.GetSubscriptionTypeInfo(consumerB.GetType()).Subscribe(_context, consumerB);
 
 			_dispatcher.Consume(_message);
 
@@ -43,12 +62,12 @@ namespace MassTransit.ServiceBus.Tests
 		public void Verify_the_throughput_of_the_dispatcher()
 		{
 			TestConsumer consumerA = new TestConsumer(_message.CorrelationId);
-			_coordinator.Resolve(consumerA).Subscribe(consumerA);
+            _typeInfoCache.GetSubscriptionTypeInfo(consumerA.GetType()).Subscribe(_context, consumerA);
 
 			TestConsumer consumerB = new TestConsumer(Guid.NewGuid());
-			_coordinator.Resolve(consumerB).Subscribe(consumerB);
+            _typeInfoCache.GetSubscriptionTypeInfo(consumerB.GetType()).Subscribe(_context, consumerB);
 
-			long limit = 5000000;
+			const long limit = 5000000;
 
 			DateTime start = DateTime.Now;
 
@@ -69,7 +88,7 @@ namespace MassTransit.ServiceBus.Tests
 		public void It_should_be_dispatched_to_the_consumer()
 		{
 			TestConsumer consumerA = new TestConsumer(_message.CorrelationId);
-			_coordinator.Resolve(consumerA).Subscribe(consumerA);
+            _typeInfoCache.GetSubscriptionTypeInfo(consumerA.GetType()).Subscribe(_context, consumerA);
 
 			_dispatcher.Consume(_message);
 
@@ -80,10 +99,10 @@ namespace MassTransit.ServiceBus.Tests
 		public void It_should_be_dispatched_to_the_consumer_without_issues()
 		{
 			TestConsumer consumerA = new TestConsumer(_message.CorrelationId);
-			_coordinator.Resolve(consumerA).Subscribe(consumerA);
+            _typeInfoCache.GetSubscriptionTypeInfo(consumerA.GetType()).Subscribe(_context, consumerA);
 
 			TestConsumer consumerB = new TestConsumer(Guid.NewGuid());
-			_coordinator.Resolve(consumerB).Subscribe(consumerB);
+            _typeInfoCache.GetSubscriptionTypeInfo(consumerB.GetType()).Subscribe(_context, consumerB);
 
 			_dispatcher.Consume(_message);
 
@@ -94,7 +113,7 @@ namespace MassTransit.ServiceBus.Tests
 		public void It_should_be_sent_to_general_consumers_who_are_not_correlated_consumers()
 		{
 			GeneralConsumer consumerA = new GeneralConsumer();
-			_coordinator.Resolve(consumerA).Subscribe(consumerA);
+            _typeInfoCache.GetSubscriptionTypeInfo(consumerA.GetType()).Subscribe(_context, consumerA);
 
 			_dispatcher.Consume(_message);
 
@@ -105,9 +124,9 @@ namespace MassTransit.ServiceBus.Tests
 		public void It_should_be_sent_to_more_than_one_general_consumer_who_are_not_correlated_consumers()
 		{
 			GeneralConsumer consumerA = new GeneralConsumer();
-			_coordinator.Resolve(consumerA).Subscribe(consumerA);
+            _typeInfoCache.GetSubscriptionTypeInfo(consumerA.GetType()).Subscribe(_context, consumerA);
 			GeneralConsumer consumerB = new GeneralConsumer();
-			_coordinator.Resolve(consumerB).Subscribe(consumerB);
+            _typeInfoCache.GetSubscriptionTypeInfo(consumerB.GetType()).Subscribe(_context, consumerB);
 
 			_dispatcher.Consume(_message);
 
@@ -119,7 +138,7 @@ namespace MassTransit.ServiceBus.Tests
 		public void It_should_not_be_dispatched_if_the_correlation_does_not_match()
 		{
 			TestConsumer consumerA = new TestConsumer(Guid.NewGuid());
-			_coordinator.Resolve(consumerA).Subscribe(consumerA);
+            _typeInfoCache.GetSubscriptionTypeInfo(consumerA.GetType()).Subscribe(_context, consumerA);
 
 			_dispatcher.Consume(_message);
 
@@ -130,10 +149,10 @@ namespace MassTransit.ServiceBus.Tests
 		public void It_should_not_be_sent_to_consumers_that_are_no_longer_interested()
 		{
 			TestConsumer consumerA = new TestConsumer(_message.CorrelationId);
-			_coordinator.Resolve(consumerA).Subscribe(consumerA);
+            _typeInfoCache.GetSubscriptionTypeInfo(consumerA.GetType()).Subscribe(_context, consumerA);
 
 			TestConsumer consumerB = new TestConsumer(Guid.NewGuid());
-			_coordinator.Resolve(consumerB).Subscribe(consumerB);
+            _typeInfoCache.GetSubscriptionTypeInfo(consumerB.GetType()).Subscribe(_context, consumerB);
 
 			_dispatcher.Consume(_message);
 
@@ -145,12 +164,12 @@ namespace MassTransit.ServiceBus.Tests
 		public void It_should_not_be_sent_to_uninterested_consumers()
 		{
 			TestConsumer consumerA = new TestConsumer(_message.CorrelationId);
-			_coordinator.Resolve(consumerA).Subscribe(consumerA);
+            _typeInfoCache.GetSubscriptionTypeInfo(consumerA.GetType()).Subscribe(_context, consumerA);
 
 			TestConsumer consumerB = new TestConsumer(_message.CorrelationId);
-			_coordinator.Resolve(consumerB).Subscribe(consumerB);
+            _typeInfoCache.GetSubscriptionTypeInfo(consumerB.GetType()).Subscribe(_context, consumerB);
 
-			_coordinator.Resolve(consumerA).Unsubscribe(consumerA);
+            _typeInfoCache.GetSubscriptionTypeInfo(consumerA.GetType()).Unsubscribe(_context, consumerA);
 
 			_dispatcher.Consume(_message);
 
@@ -164,10 +183,10 @@ namespace MassTransit.ServiceBus.Tests
 			TestMessage anotherMessage = new TestMessage(42);
 
 			TestConsumer consumerA = new TestConsumer(_message.CorrelationId);
-			_coordinator.Resolve(consumerA).Subscribe(consumerA);
+            _typeInfoCache.GetSubscriptionTypeInfo(consumerA.GetType()).Subscribe(_context, consumerA);
 
 			TestConsumer consumerB = new TestConsumer(anotherMessage.CorrelationId);
-			_coordinator.Resolve(consumerB).Subscribe(consumerB);
+            _typeInfoCache.GetSubscriptionTypeInfo(consumerB.GetType()).Subscribe(_context, consumerB);
 
 			_dispatcher.Consume(_message);
 			_dispatcher.Consume(anotherMessage);
@@ -180,11 +199,11 @@ namespace MassTransit.ServiceBus.Tests
 		public void The_object_should_be_dispatched_to_the_consumer()
 		{
 			TestConsumer consumerA = new TestConsumer(_message.CorrelationId);
-			_coordinator.Resolve(consumerA).Subscribe(consumerA);
+            _typeInfoCache.GetSubscriptionTypeInfo(consumerA.GetType()).Subscribe(_context, consumerA);
 
-			object obj = _message;
+			object message = _message;
 
-			_dispatcher.Consume(obj);
+			_dispatcher.Consume(message);
 
 			Assert.That(consumerA.Value, Is.EqualTo(_message.Value));
 		}

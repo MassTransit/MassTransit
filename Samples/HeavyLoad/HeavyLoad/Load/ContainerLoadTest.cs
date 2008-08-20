@@ -13,7 +13,7 @@ namespace HeavyLoad.Load
 		private readonly IWindsorContainer _container;
 		private static readonly ManualResetEvent _responseEvent = new ManualResetEvent(false);
 
-		private readonly IServiceBus _bus;
+		private IServiceBus _bus;
 		private static int _counter = 0;
 		private static int _responseCounter = 0;
 
@@ -71,24 +71,23 @@ namespace HeavyLoad.Load
 		}
 
 		internal class RequestConsumer : 
-			Consumes<GeneralMessage>.All, 
-			Produces<SimpleResponse>.Injected
+			Consumes<GeneralMessage>.All
 		{
-			private readonly Consumes<SimpleResponse>.All _simpleResponseConsumer;
+		    private IServiceBus _bus = ServiceBus.Null;
 
-			public RequestConsumer(Consumes<SimpleResponse>.All simpleResponseConsumer)
-			{
-				_simpleResponseConsumer = simpleResponseConsumer;
-			}
-
-			public void Consume(GeneralMessage message)
+		    public void Consume(GeneralMessage message)
 			{
 				Interlocked.Increment(ref _counter);
 				if (_counter == _repeatCount)
 					_completeEvent.Set();
 
-				_simpleResponseConsumer.Consume(new SimpleResponse());
+				_bus.Publish(new SimpleResponse());
 			}
+
+		    public IServiceBus Bus
+		    {
+                set { _bus = value; }
+		    }
 		}
 	}
 }

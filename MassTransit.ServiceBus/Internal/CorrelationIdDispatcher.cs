@@ -1,147 +1,156 @@
-/// Copyright 2007-2008 The Apache Software Foundation.
-/// 
-/// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
-/// this file except in compliance with the License. You may obtain a copy of the 
-/// License at 
-/// 
-///   http://www.apache.org/licenses/LICENSE-2.0 
-/// 
-/// Unless required by applicable law or agreed to in writing, software distributed 
-/// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-/// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-/// specific language governing permissions and limitations under the License.
+// Copyright 2007-2008 The Apache Software Foundation.
+//  
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
+// this file except in compliance with the License. You may obtain a copy of the 
+// License at 
+// 
+//     http://www.apache.org/licenses/LICENSE-2.0 
+// 
+// Unless required by applicable law or agreed to in writing, software distributed 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// specific language governing permissions and limitations under the License.
 namespace MassTransit.ServiceBus.Internal
 {
-	using System;
-	using System.Collections.Generic;
-	using log4net;
+    using System.Collections.Generic;
+    using Exceptions;
+    using log4net;
 
-	public class CorrelationIdDispatcher<TMessage, TKey> :
-		Consumes<TMessage>.Selected,
-		Produces<TMessage>.Bound
-		where TMessage : class, CorrelatedBy<TKey>
-	{
-		private static readonly ILog _log = LogManager.GetLogger(typeof(CorrelationIdDispatcher<TMessage,TKey>));
-		private readonly Dictionary<TKey, MessageDispatcher<TMessage>> _dispatchers = new Dictionary<TKey, MessageDispatcher<TMessage>>();
-		private readonly IServiceBus _bus;
+    public class CorrelationIdDispatcher<TMessage, TKey> :
+        Consumes<TMessage>.Selected,
+        Produces<TMessage>
+        where TMessage : class, CorrelatedBy<TKey>
+    {
+        private static readonly ILog _log = LogManager.GetLogger(typeof (CorrelationIdDispatcher<TMessage, TKey>));
+        private readonly Dictionary<TKey, MessageDispatcher<TMessage>> _dispatchers = new Dictionary<TKey, MessageDispatcher<TMessage>>();
 
-		public CorrelationIdDispatcher(IServiceBus bus)
-		{
-			_bus = bus;
-		}
+        public bool Active(TKey correlationId)
+        {
+            MessageDispatcher<TMessage> dispatcher;
+            bool found;
+            lock (_dispatchers)
+                found = _dispatchers.TryGetValue(correlationId, out dispatcher);
 
-		public bool Active
-		{
-			get { return _dispatchers.Count > 0; }
-		}
+            if (found)
+                return dispatcher.Active;
 
-		public void Consume(TMessage message)
-		{
-			CorrelatedBy<TKey> correlation = message;
+            return false;
+        }
 
-			TKey correlationId = correlation.CorrelationId;
+        public void Consume(TMessage message)
+        {
+            CorrelatedBy<TKey> correlation = message;
 
-			if (_dispatchers.ContainsKey(correlationId))
-			{
-				_dispatchers[correlationId].Consume(message);
-			}
-		}
+            TKey correlationId = correlation.CorrelationId;
 
-		public bool Accept(TMessage message)
-		{
-			CorrelatedBy<TKey> correlation = message;
+            MessageDispatcher<TMessage> dispatcher;
+            bool found;
+            lock (_dispatchers)
+                found = _dispatchers.TryGetValue(correlationId, out dispatcher);
 
-			TKey correlationId = correlation.CorrelationId;
+            if (found)
+                dispatcher.Consume(message);
+        }
 
-			if (_dispatchers.ContainsKey(correlationId))
-			{
-				return _dispatchers[correlationId].Accept(message);
-			}
-			else
-			{
-				if(_log.IsDebugEnabled)
-					_log.DebugFormat("No consumers for message type {0} id {1}", typeof(TMessage), correlationId.ToString());
-			}
+        public bool Accept(TMessage message)
+        {
+            CorrelatedBy<TKey> correlation = message;
 
-			return false;
-		}
+            TKey correlationId = correlation.CorrelationId;
 
-		public void Attach(Consumes<TMessage>.All consumer)
-		{
-			Consumes<TMessage>.For<TKey> correlatedConsumer = consumer as Consumes<TMessage>.For<TKey>;
-			if (correlatedConsumer == null)
-				throw new ArgumentException(string.Format("The object does not support Consumes<{0}>.For<{1}>", typeof (TMessage).Name, typeof (TKey).Name), "consumer");
+            MessageDispatcher<TMessage> dispatcher;
+            bool found;
+            lock (_dispatchers)
+                found = _dispatchers.TryGetValue(correlationId, out dispatcher);
 
-			Attach(correlatedConsumer);
-		}
+            if (found)
+                return dispatcher.Accept(message);
 
-		public void Detach(Consumes<TMessage>.All consumer)
-		{
-			Consumes<TMessage>.For<TKey> correlatedConsumer = consumer as Consumes<TMessage>.For<TKey>;
-			if (correlatedConsumer == null)
-				throw new ArgumentException(string.Format("The object does not support Consumes<{0}>.For<{1}>", typeof (TMessage).Name, typeof (TKey).Name), "consumer");
+            if (_log.IsDebugEnabled)
+                _log.DebugFormat("No consumers for message type {0} id {1}", typeof (TMessage), correlationId.ToString());
 
-			Detach(correlatedConsumer);
-		}
+            return false;
+        }
 
-		public void Consume(object obj)
-		{
-			Consume((TMessage) obj);
-		}
+        public void Attach(Consumes<TMessage>.All consumer)
+        {
+            Consumes<TMessage>.For<TKey> correlatedConsumer = GetCorrelatedConsumer(consumer);
 
-		public void Dispose()
-		{
-			foreach (MessageDispatcher<TMessage> dispatcher in _dispatchers.Values)
-			{
-				dispatcher.Dispose();
-			}
+            _Attach(correlatedConsumer);
+        }
 
-			_dispatchers.Clear();
-		}
+        public void Detach(Consumes<TMessage>.All consumer)
+        {
+            Consumes<TMessage>.For<TKey> correlatedConsumer = GetCorrelatedConsumer(consumer);
 
-		private MessageDispatcher<TMessage> GetDispatcher(TKey correlationId)
-		{
-			if (_dispatchers.ContainsKey(correlationId))
-				return _dispatchers[correlationId];
+            _Detach(correlatedConsumer);
+        }
 
-			lock (_dispatchers)
-			{
-				if (_dispatchers.ContainsKey(correlationId))
-					return _dispatchers[correlationId];
+        private static Consumes<TMessage>.For<TKey> GetCorrelatedConsumer(Consumes<TMessage>.All consumer)
+        {
+            Consumes<TMessage>.For<TKey> correlatedConsumer = consumer as Consumes<TMessage>.For<TKey>;
+            if (correlatedConsumer == null)
+                throw new ConventionException(string.Format("The object does not support Consumes<{0}>.For<{1}>", typeof (TMessage), typeof (TKey)));
 
-				MessageDispatcher<TMessage> dispatcher = new MessageDispatcher<TMessage>(_bus);
+            return correlatedConsumer;
+        }
 
-				_dispatchers.Add(correlationId, dispatcher);
+        public void Consume(object obj)
+        {
+            Consume((TMessage) obj);
+        }
 
-				return dispatcher;
-			}
-		}
+        public void Dispose()
+        {
+            foreach (MessageDispatcher<TMessage> dispatcher in _dispatchers.Values)
+            {
+                dispatcher.Dispose();
+            }
 
-		public void Attach(Consumes<TMessage>.For<TKey> consumer)
-		{
-			TKey correlationId = consumer.CorrelationId;
+            _dispatchers.Clear();
+        }
 
-			MessageDispatcher<TMessage> dispatcher = GetDispatcher(correlationId);
+        private MessageDispatcher<TMessage> GetDispatcher(TKey correlationId)
+        {
+            MessageDispatcher<TMessage> dispatcher;
+            lock (_dispatchers)
+            {
+                if (_dispatchers.TryGetValue(correlationId, out dispatcher))
+                    return dispatcher;
 
-			dispatcher.Attach(consumer);
-		}
+                dispatcher = new MessageDispatcher<TMessage>();
 
-		public void Detach(Consumes<TMessage>.For<TKey> consumer)
-		{
-			TKey correlationId = consumer.CorrelationId;
+                _dispatchers.Add(correlationId, dispatcher);
 
-			MessageDispatcher<TMessage> dispatcher = GetDispatcher(correlationId);
+                return dispatcher;
+            }
+        }
 
-			dispatcher.Detach(consumer);
+        private void _Attach(Consumes<TMessage>.For<TKey> consumer)
+        {
+            TKey correlationId = consumer.CorrelationId;
 
-			if (dispatcher.Active == false)
-			{
-				lock (_dispatchers)
-				{
-					if (_dispatchers.ContainsKey(correlationId))
-						_dispatchers.Remove(correlationId);
-				}
-			}
-		}
-	}
+            MessageDispatcher<TMessage> dispatcher = GetDispatcher(correlationId);
+
+            dispatcher.Attach(consumer);
+        }
+
+        private void _Detach(Consumes<TMessage>.For<TKey> consumer)
+        {
+            TKey correlationId = consumer.CorrelationId;
+
+            lock (_dispatchers)
+            {
+                MessageDispatcher<TMessage> dispatcher = GetDispatcher(correlationId);
+
+                dispatcher.Detach(consumer);
+
+                if (dispatcher.Active == false)
+                {
+                    _dispatchers.Remove(correlationId);
+                    dispatcher.Dispose();
+                }
+            }
+        }
+    }
 }
