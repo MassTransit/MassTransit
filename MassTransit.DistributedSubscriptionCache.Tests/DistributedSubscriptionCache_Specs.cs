@@ -1,9 +1,9 @@
-namespace MassTransit.DistributedSubscriptionCacheX.Tests
+namespace MassTransit.DistributedSubscriptionCache.Tests
 {
 	using System;
 	using System.Collections.Generic;
 	using Enyim.Caching;
-	using MassTransit.ServiceBus.Subscriptions;
+	using ServiceBus.Subscriptions;
 	using NUnit.Framework;
 	using NUnit.Framework.SyntaxHelpers;
 

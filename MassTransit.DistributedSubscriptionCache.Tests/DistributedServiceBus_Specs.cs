@@ -1,4 +1,4 @@
-namespace MassTransit.DistributedSubscriptionCacheX.Tests
+namespace MassTransit.DistributedSubscriptionCache.Tests
 {
 	using System;
 	using System.Threading;
@@ -53,7 +53,7 @@ namespace MassTransit.DistributedSubscriptionCacheX.Tests
 				            "Timeout expired waiting for message");
 
 				Assert.That(_received.WaitOne(TimeSpan.FromSeconds(6), true), Is.True,
-							"Timeout expired waiting for message");
+				            "Timeout expired waiting for message");
 			}
 		}
 
