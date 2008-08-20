@@ -15,6 +15,9 @@ namespace MassTransit.ServiceBus
 	using System;
 	using System.Collections.Generic;
 
+	/// <summary>
+	/// Specifies a message type that can be added to a MessageGroup
+	/// </summary>
 	[AttributeUsage(AttributeTargets.Class, AllowMultiple =  true, Inherited = false)]
 	public class AllowMessageType : Attribute
 	{
