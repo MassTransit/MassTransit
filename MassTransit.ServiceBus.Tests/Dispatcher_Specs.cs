@@ -1,6 +1,7 @@
 namespace MassTransit.ServiceBus.Tests
 {
-	using NUnit.Framework;
+    using System.Collections;
+    using NUnit.Framework;
 	using NUnit.Framework.SyntaxHelpers;
 	using Rhino.Mocks;
 
@@ -41,8 +42,8 @@ namespace MassTransit.ServiceBus.Tests
         {
             PingHandler ph = new PingHandler();
 
-            Expect.Call(obj.Build<PingHandler>()).Return(ph);
-            obj.Release(ph);
+            SetupResult.For(obj.Build<PingHandler>()).Return(ph);
+            SetupResult.For(obj.Build<PingHandler>(new Hashtable())).IgnoreArguments().Return(ph);
 
             ReplayAll();
 

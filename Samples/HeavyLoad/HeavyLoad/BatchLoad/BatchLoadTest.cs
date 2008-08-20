@@ -102,7 +102,7 @@ namespace HeavyLoad.BatchLoad
 			}
 
 			if (messageCount == message.BatchLength)
-				_log.Info("Batch complete: " + message.BatchId + ", Count = " + messageCount);
+				_log.Debug("Batch complete: " + message.BatchId + ", Count = " + messageCount);
 			else
 				_log.ErrorFormat("Batch not received: {0}, Expected: {1}, Received: {2}", message.BatchId, message.BatchLength, messageCount);
 

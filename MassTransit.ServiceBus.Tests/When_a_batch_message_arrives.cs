@@ -1,6 +1,7 @@
 namespace MassTransit.ServiceBus.Tests
 {
 	using System;
+	using System.Collections;
 	using System.Threading;
 	using NUnit.Framework;
 	using NUnit.Framework.SyntaxHelpers;
@@ -17,6 +18,8 @@ namespace MassTransit.ServiceBus.Tests
         protected override void Before_each()
         {
             _builder = DynamicMock<IObjectBuilder>();
+            SetupResult.For(_builder.Build<BatchConsumer>(new Hashtable())).IgnoreArguments().Return(new BatchConsumer());
+
             _endpoint = DynamicMock<IEndpoint>();
             SetupResult.For(_endpoint.Uri).Return(new Uri("msmq://localhost/queue"));
 
@@ -62,10 +65,33 @@ namespace MassTransit.ServiceBus.Tests
 
 			_bus.Dispatch(message, DispatchMode.Asynchronous);
 
-			Assert.That(consumer.Received.WaitOne(TimeSpan.FromSeconds(5), true), Is.False, "Batch should not have completed");
-			Assert.That(consumer.BatchId, Is.EqualTo(batchId));
-			Assert.That(consumer.ReceivedCount, Is.EqualTo(1));
+            Assert.That(BatchConsumer.Received.WaitOne(TimeSpan.FromSeconds(5), true), Is.False, "Batch should not have completed");
+            Assert.That(BatchConsumer.BatchId, Is.EqualTo(batchId));
+            Assert.That(BatchConsumer.ReceivedCount, Is.EqualTo(1));
 		}
+
+        [Test]
+        public void Verify_that_container_based_consumers_are_operational()
+        {
+            ReplayAll();
+
+            _bus.AddComponent<BatchConsumer>();
+
+            Guid batchId = Guid.NewGuid();
+            int length = 123;
+            for (int i = 0; i < length; i++)
+            {
+                IndividualMessage message = new IndividualMessage(batchId, length);
+
+                Assert.That(_bus.Accept(message), Is.True, "Bus did not accept the message");
+
+                _bus.Dispatch(message, DispatchMode.Asynchronous);
+            }
+
+            Assert.That(BatchConsumer.Received.WaitOne(TimeSpan.FromSeconds(3), true), Is.True, "Timeout waiting for message");
+            Assert.That(BatchConsumer.BatchId, Is.EqualTo(batchId));
+            Assert.That(BatchConsumer.ReceivedCount, Is.EqualTo(length));
+        }
 
 		
 
@@ -87,29 +113,36 @@ namespace MassTransit.ServiceBus.Tests
 				_bus.Dispatch(message, DispatchMode.Asynchronous);
 			}
 
-			Assert.That(consumer.Received.WaitOne(TimeSpan.FromSeconds(3), true), Is.True, "Timeout waiting for message");
-			Assert.That(consumer.BatchId, Is.EqualTo(batchId));
-			Assert.That(consumer.ReceivedCount, Is.EqualTo(length));
+            Assert.That(BatchConsumer.Received.WaitOne(TimeSpan.FromSeconds(3), true), Is.True, "Timeout waiting for message");
+            Assert.That(BatchConsumer.BatchId, Is.EqualTo(batchId));
+            Assert.That(BatchConsumer.ReceivedCount, Is.EqualTo(length));
 		}
 
 
-		internal class BatchConsumer : Consumes<Batch<IndividualMessage, Guid>>.Selected
+		internal class BatchConsumer : 
+            Consumes<Batch<IndividualMessage, Guid>>.Selected
 		{
-			private readonly ManualResetEvent _received = new ManualResetEvent(false);
-			private Guid _batchId;
-			private int _receivedCount;
+			private static ManualResetEvent _received;
+			private static Guid _batchId;
+			private static int _receivedCount;
 
-			public int ReceivedCount
+            public BatchConsumer()
+            {
+                _received = new ManualResetEvent(false);
+                _batchId = Guid.Empty;
+                _receivedCount = 0;
+            }
+			public static int ReceivedCount
 			{
 				get { return _receivedCount; }
 			}
 
-			public ManualResetEvent Received
+			public static ManualResetEvent Received
 			{
 				get { return _received; }
 			}
 
-			public Guid BatchId
+			public static Guid BatchId
 			{
 				get { return _batchId; }
 			}

@@ -90,7 +90,7 @@ namespace MassTransit.ServiceBus
 
 			MethodInfo inv = GetPublishMethod(objType);
 
-			inv.Invoke(bus, new object[] {message});
+			inv.Invoke(bus, new[] {message});
 		}
 
 		private static MethodInfo GetPublishMethod(Type objType)

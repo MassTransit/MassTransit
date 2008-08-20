@@ -12,7 +12,7 @@ namespace MassTransit.ServiceBus.Tests
 
 	    protected override void Before_each()
 		{
-			_dispatcher = new CorrelationIdDispatcher<TestMessage, Guid>(null);
+			_dispatcher = new CorrelationIdDispatcher<TestMessage, Guid>();
 			_message = new TestMessage(_value);
 		}
 

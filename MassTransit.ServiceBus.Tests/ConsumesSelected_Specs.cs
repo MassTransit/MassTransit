@@ -2,10 +2,12 @@ namespace MassTransit.ServiceBus.Tests
 {
 	using System;
 	using MassTransit.ServiceBus.Internal;
+	using MassTransit.ServiceBus.Subscriptions;
 	using NUnit.Framework;
 	using NUnit.Framework.SyntaxHelpers;
+	using Rhino.Mocks;
 
-	[TestFixture]
+    [TestFixture]
 	public class When_a_message_is_received_for_a_selective_consumer :
         Specification
 	{
@@ -13,15 +15,31 @@ namespace MassTransit.ServiceBus.Tests
 		private TestMessage _message;
 		private readonly int _value = 27;
 		private IObjectBuilder _builder;
-		private SubscriptionCoordinator _coordinator;
+		private TypeInfoCache _typeInfoCache;
+	    private IDispatcherContext _context;
+	    private IServiceBus _bus;
+	    private ISubscriptionCache _cache;
+        private IEndpoint _endpoint;
 
-	    protected override void Before_each()
+        protected override void Before_each()
 		{
 	        _builder = StrictMock<IObjectBuilder>();
 
-			_dispatcher = new MessageTypeDispatcher(null);
-	    	_coordinator = new SubscriptionCoordinator(_dispatcher, null, null, _builder);
+			_dispatcher = new MessageTypeDispatcher();
+	    	_typeInfoCache = new TypeInfoCache();
 			_message = new TestMessage(_value);
+
+            _endpoint = DynamicMock<IEndpoint>();
+            SetupResult.For(_endpoint.Uri).Return(new Uri("loopback://localhost/test"));
+
+            _bus = DynamicMock<IServiceBus>();
+	        SetupResult.For(_bus.Endpoint).Return(_endpoint);
+
+            _cache = new LocalSubscriptionCache();
+
+	        _context = new DispatcherContext(_builder, _bus, _dispatcher, _cache, _typeInfoCache);
+
+	        ReplayAll();
 		}
 
 
@@ -97,10 +115,10 @@ namespace MassTransit.ServiceBus.Tests
 		{
 			TestConsumer consumerA = new TestConsumer(delegate(TestMessage message) { return message.Value >= 32; });
 
-			_coordinator.Resolve(consumerA).Subscribe(consumerA);
+			_typeInfoCache.GetSubscriptionTypeInfo(consumerA.GetType()).Subscribe(_context, consumerA);
 
 			GeneralConsumer consumerB = new GeneralConsumer();
-			_coordinator.Resolve(consumerB).Subscribe(consumerB);
+            _typeInfoCache.GetSubscriptionTypeInfo(consumerB.GetType()).Subscribe(_context, consumerB);
 
 			_dispatcher.Consume(_message);
 
@@ -112,10 +130,10 @@ namespace MassTransit.ServiceBus.Tests
 		public void It_should_only_be_dispatched_to_interested_consumers_again()
 		{
 			TestConsumer consumerA = new TestConsumer(delegate(TestMessage message) { return message.Value >= 32; });
-			_coordinator.Resolve(consumerA).Subscribe(consumerA);
+            _typeInfoCache.GetSubscriptionTypeInfo(consumerA.GetType()).Subscribe(_context, consumerA);
 
 			TestConsumer consumerB = new TestConsumer(delegate(TestMessage message) { return message.Value < 32; });
-			_coordinator.Resolve(consumerB).Subscribe(consumerB);
+            _typeInfoCache.GetSubscriptionTypeInfo(consumerB.GetType()).Subscribe(_context, consumerB);
 
 			_dispatcher.Consume(_message);
 
