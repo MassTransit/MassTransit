@@ -19,7 +19,7 @@ namespace MassTransit.ServiceBus.Tests
         private TypeInfoCache _typeInfoCache;
 	    private DispatcherContext _context;
 	    private IServiceBus _bus;
-	    private LocalSubscriptionCache _cache;
+	    private ISubscriptionCache _cache;
         private IEndpoint _endpoint;
 
         protected override void Before_each()
