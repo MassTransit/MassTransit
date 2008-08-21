@@ -150,7 +150,7 @@ namespace MassTransit.ServiceBus.MSMQ
 
 		public void Send<T>(T message) where T : class
 		{
-			Send(message, MessageQueue.InfiniteTimeout);
+			Send(message, TimeSpan.MaxValue);
 		}
 
 		public void Send<T>(T message, TimeSpan timeToLive) where T : class
@@ -161,7 +161,7 @@ namespace MassTransit.ServiceBus.MSMQ
 
 			_formatter.Serialize(new MsmqFormattedBody(msg), message);
 
-			if (timeToLive < MessageQueue.InfiniteTimeout)
+			if (timeToLive < TimeSpan.MaxValue)
 				msg.TimeToBeReceived = timeToLive;
 
 			msg.Label = messageType.AssemblyQualifiedName;
