@@ -9,7 +9,7 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
     public class When_managing_subscriptions_locally :
         Specification
     {
-        private LocalSubscriptionCache cache;
+        private ISubscriptionCache cache;
         private Uri sendTo = new Uri("msmq://localhost/test");
 
         protected override void Before_each()

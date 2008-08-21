@@ -49,6 +49,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{9488
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HeavyLoad", "Samples\HeavyLoad\HeavyLoad\HeavyLoad.csproj", "{AA8820CC-5DFE-4867-8C9B-82320C9E4BE2}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Grid.Tests", "MassTransit.Grid.Tests\MassTransit.Grid.Tests.csproj", "{FEC77DEA-4F86-4889-AEAC-79FA4DD06AD4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Grid", "MassTransit.Grid\MassTransit.Grid.csproj", "{833805AB-707A-4993-A616-5050462AABAE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -127,6 +131,14 @@ Global
 		{AA8820CC-5DFE-4867-8C9B-82320C9E4BE2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AA8820CC-5DFE-4867-8C9B-82320C9E4BE2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AA8820CC-5DFE-4867-8C9B-82320C9E4BE2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FEC77DEA-4F86-4889-AEAC-79FA4DD06AD4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FEC77DEA-4F86-4889-AEAC-79FA4DD06AD4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FEC77DEA-4F86-4889-AEAC-79FA4DD06AD4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FEC77DEA-4F86-4889-AEAC-79FA4DD06AD4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{833805AB-707A-4993-A616-5050462AABAE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{833805AB-707A-4993-A616-5050462AABAE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{833805AB-707A-4993-A616-5050462AABAE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{833805AB-707A-4993-A616-5050462AABAE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
