@@ -148,7 +148,7 @@ namespace MassTransit.ServiceBus
                     continue;
 
                 IEndpoint endpoint = _endpointResolver.Resolve(subscription.EndpointUri);
-                endpoint.Send(message);
+                endpoint.Send(message, info.TimeToLive);
 
                 done.Add(subscription.EndpointUri);
             }

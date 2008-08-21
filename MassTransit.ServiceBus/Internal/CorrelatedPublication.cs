@@ -19,29 +19,31 @@ namespace MassTransit.ServiceBus.Internal
     using Subscriptions;
 
     public class CorrelatedPublication<TMessage, TKey> :
+		PublicationBase<TMessage>,
         IPublicationTypeInfo
         where TMessage : class, CorrelatedBy<TKey>
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof (MessageTypePublication<TMessage>));
         private readonly Type _keyType;
-        private readonly Type _messageType;
 
-        public CorrelatedPublication()
+    	public CorrelatedPublication()
         {
             _keyType = typeof (TKey);
-            _messageType = typeof (TMessage);
         }
 
-        public IList<Subscription> GetConsumers<T>(IDispatcherContext context, T message) where T : class
-        {
+    	public override IList<Subscription> GetConsumers<T>(IDispatcherContext context, T message)
+    	{
             CorrelatedBy<TKey> key = message as CorrelatedBy<TKey>;
             if (key == null)
                 throw new ConventionException(string.Format("Object of type {0} is not correlated by type {1}", typeof (T), _keyType));
 
-            return GetConsumers(context.SubscriptionCache, key);
+			if (context.SubscriptionCache == null)
+				return new List<Subscription>();
+
+			return context.SubscriptionCache.List(_messageType.FullName, key.CorrelationId.ToString());
         }
 
-        public void PublishFault<T>(IServiceBus bus, Exception ex, T message) where T : class
+        public override void PublishFault<T>(IServiceBus bus, Exception ex, T message)
         {
             TMessage msg = message as TMessage;
             if (msg == null)
@@ -57,14 +59,6 @@ namespace MassTransit.ServiceBus.Internal
             {
                 _log.Error("Failed to publish Fault<" + typeof (TMessage).Name + "> message for exception", fex);
             }
-        }
-
-        public IList<Subscription> GetConsumers(ISubscriptionCache cache, CorrelatedBy<TKey> key)
-        {
-            if (cache == null)
-                return new List<Subscription>();
-
-            return cache.List(_messageType.FullName, key.CorrelationId.ToString());
         }
     }
 }

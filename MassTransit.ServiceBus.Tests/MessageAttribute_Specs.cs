@@ -12,11 +12,11 @@ namespace MassTransit.ServiceBus.Tests
 		{
 			MyMessage message = new MyMessage();
 
-			object[] attributes = message.GetType().GetCustomAttributes(typeof (ExpiresIn), false);
+			object[] attributes = message.GetType().GetCustomAttributes(typeof (ExpiresInAttribute), false);
 
 			Assert.That(attributes.Length, Is.GreaterThan(0));
 
-			foreach (ExpiresIn expiresIn in attributes)
+			foreach (ExpiresInAttribute expiresIn in attributes)
 			{
 				Assert.That(expiresIn.TimeSpan, Is.EqualTo(TimeSpan.FromMinutes(5)));
 			}
