@@ -12,29 +12,21 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Grid.Tests
 {
-    using System;
+	using System;
 
-    [Serializable]
-    public class FactorLongNumber
-        : ISubTask
-    {
-        private readonly long _taskId;
-        private readonly long _value;
+	[Serializable]
+	public class FactorLongNumber
+	{
+		private readonly long _value;
 
-        public FactorLongNumber(long taskId, long value)
-        {
-            _taskId = taskId;
-            _value = value;
-        }
+		public FactorLongNumber(long value)
+		{
+			_value = value;
+		}
 
-        public long Value
-        {
-            get { return _value; }
-        }
-
-        public long TaskId
-        {
-            get { return _taskId; }
-        }
-    }
+		public long Value
+		{
+			get { return _value; }
+		}
+	}
 }

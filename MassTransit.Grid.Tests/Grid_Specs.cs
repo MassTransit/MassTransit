@@ -16,51 +16,41 @@ namespace MassTransit.Grid.Tests
     using System.Collections.Generic;
     using System.Text;
     using System.Threading;
-    using MassTransit.ServiceBus.Internal;
-    using MassTransit.ServiceBus.Tests;
     using NUnit.Framework;
     using NUnit.Framework.SyntaxHelpers;
-    using ServiceBus;
-    using WindsorIntegration;
 
-    [TestFixture]
+	[TestFixture]
     public class As_a_developer_that_needs_to_distribute_a_task_across_multiple_servers_for_parallel_processing :
-        Specification
+        GridContextSpecification
     {
-        private readonly DefaultMassTransitContainer _container = new DefaultMassTransitContainer("castle.xml");
-        private IServiceBus _bus;
-        private IObjectBuilder _builder;
-        private IEndpointResolver _endpointResolver;
-        private FactorLongNumbers _factorLongNumbers;
+		private FactorLongNumbers _factorLongNumbers;
         private ManualResetEvent _complete;
 
         protected override void Before_each()
         {
-            _bus = _container.Resolve<IServiceBus>();
-            _builder = _container.Resolve<IObjectBuilder>();
-            _endpointResolver = _container.Resolve<IEndpointResolver>();
-
-            _container.AddComponent<FactorLongNumberWorker>();
+        	base.Before_each();
 
             _factorLongNumbers = new FactorLongNumbers();
 
             Random random = new Random();
 
-            for (int i = 0; i < 29; i++)
+            for (int i = 0; i < 27; i++)
             {
-                long value = (long)(random.NextDouble() * 100000000);
+                long value = (long)(random.NextDouble() * 1000000);
 
                 _factorLongNumbers.Add(value);
             }
 
             _complete = new ManualResetEvent(false);
 
-            _factorLongNumbers.WhenComplete(x => this._complete.Set());
+            _factorLongNumbers.WhenCompleted(x => _complete.Set());
         }
 
         [Test]
         public void I_want_to_be_able_to_define_a_distributed_task_and_have_it_processed()
         {
+			_container.AddComponent<FactorLongNumberWorker>();
+
             _bus.AddComponent<SubTaskWorker<FactorLongNumberWorker, FactorLongNumber, LongNumberFactored>>();
 
             DistributedTask<FactorLongNumbers, FactorLongNumber, LongNumberFactored> distributedTask =

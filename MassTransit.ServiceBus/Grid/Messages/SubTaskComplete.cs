@@ -20,10 +20,10 @@ namespace MassTransit.Grid.Messages
     {
         private readonly Uri _address;
         private readonly TResult _result;
-        private readonly long _subTaskId;
+		private readonly int _subTaskId;
         private readonly Guid _taskId;
 
-        public SubTaskComplete(Uri address, Guid taskId, long subTaskId, TResult result)
+		public SubTaskComplete(Uri address, Guid taskId, int subTaskId, TResult result)
         {
             _address = address;
             _taskId = taskId;
@@ -46,7 +46,7 @@ namespace MassTransit.Grid.Messages
             get { return _taskId; }
         }
 
-        public long SubTaskId
+		public int SubTaskId
         {
             get { return _subTaskId; }
         }

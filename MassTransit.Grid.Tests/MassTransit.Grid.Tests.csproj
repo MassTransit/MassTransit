@@ -66,6 +66,8 @@
     <Compile Include="FactorLongNumber.cs" />
     <Compile Include="FactorLongNumbers.cs" />
     <Compile Include="FactorLongNumberWorker.cs" />
+    <Compile Include="GridContextSpecification.cs" />
+    <Compile Include="GridException_Specs.cs" />
     <Compile Include="Grid_Specs.cs" />
     <Compile Include="IntegerFactorizer.cs" />
     <Compile Include="IntegerFactorizer_Specs.cs" />
@@ -90,6 +92,11 @@
     <Content Include="castle.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="log4net.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

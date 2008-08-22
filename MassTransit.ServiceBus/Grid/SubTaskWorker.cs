@@ -19,7 +19,7 @@ namespace MassTransit.Grid
     public class SubTaskWorker<TWorker, TSubTask, TResult> :
         Consumes<ExecuteSubTask<TSubTask>>.All,
         Consumes<EnlistSubTaskWorkers<TSubTask>>.All
-        where TSubTask : class, ISubTask
+        where TSubTask : class
         where TResult : class
         where TWorker : class, ISubTaskWorker<TSubTask, TResult>
     {

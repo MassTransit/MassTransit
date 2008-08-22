@@ -12,159 +12,210 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Grid
 {
-    using System;
-    using System.Collections.Generic;
-    using MassTransit.ServiceBus.Internal;
-    using Messages;
-    using ServiceBus;
+	using System;
+	using System.Collections.Generic;
+	using log4net;
+	using MassTransit.ServiceBus.Internal;
+	using Messages;
+	using ServiceBus;
 
-    public class DistributedTask<TTask, TSubTask, TResult> :
-        Consumes<SubTaskWorkerAvailable<TSubTask>>.All,
-        Consumes<SubTaskComplete<TResult>>.All
-        where TTask : class, IDistributedTask<TSubTask, TResult>
-        where TSubTask : class, ISubTask
-        where TResult : class
-    {
-        private readonly IServiceBus _bus;
-        private readonly TTask _distributedTask;
-        private readonly IEndpointResolver _endpointResolver;
-        private readonly Guid _taskId;
-        private readonly Dictionary<Uri, Worker> _workers = new Dictionary<Uri, Worker>();
-        private IEnumerator<TSubTask> _subTaskEnumerator;
+	public class DistributedTask<TTask, TInput, TOutput> :
+		Consumes<SubTaskWorkerAvailable<TInput>>.All,
+		Consumes<SubTaskComplete<TOutput>>.All,
+		Consumes<Fault<ExecuteSubTask<TInput>>>.All
+		where TTask : class, IDistributedTask<TTask, TInput, TOutput>
+		where TInput : class
+		where TOutput : class
+	{
+		private static readonly ILog _log = LogManager.GetLogger(typeof(DistributedTask<TTask,TInput,TOutput>));
 
-        public DistributedTask(IServiceBus bus, IEndpointResolver endpointResolver, TTask distributedTask)
-        {
-            _bus = bus;
-            _endpointResolver = endpointResolver;
-            _distributedTask = distributedTask;
+		private readonly IServiceBus _bus;
+		private readonly TTask _distributedTask;
+		private readonly IEndpointResolver _endpointResolver;
+		private readonly Guid _taskId;
+		private readonly Dictionary<Uri, Worker> _workers = new Dictionary<Uri, Worker>();
+		private int _nextSubTask = 0;
 
-            _taskId = Guid.NewGuid();
-        }
+		public DistributedTask(IServiceBus bus, IEndpointResolver endpointResolver, TTask distributedTask)
+		{
+			_bus = bus;
+			_endpointResolver = endpointResolver;
+			_distributedTask = distributedTask;
 
-        public void Consume(SubTaskComplete<TResult> message)
-        {
-            try
-            {
-                // a response from another task by chance?
-                if (message.TaskId != _taskId)
-                    return;
+			_taskId = Guid.NewGuid();
+		}
 
-                // a response from a worker we don't know? not happening!
-                if (_workers.ContainsKey(message.Address) == false)
-                    return;
+		public void Consume(Fault<ExecuteSubTask<TInput>> message)
+		{
+			try
+			{
+				// a response from another task by chance?
+				if (message.FailedMessage.TaskId != _taskId)
+				{
+					_log.DebugFormat("Fault received for unknown task: {0}", message.FailedMessage.TaskId);
+					return;
+				}
 
-                lock (_workers)
-                {
-                    _workers[message.Address].ActiveTaskCount--;
-                }
+				// a response from a worker we don't know? not happening!
+				if (_workers.ContainsKey(message.FailedMessage.Address) == false)
+				{
+					_log.DebugFormat("Fault received from unknown worker: {0}/{1}", message.FailedMessage.TaskId, message.FailedMessage.Address);
+					return;
+				}
 
-                // okay deliver the result
-                _distributedTask.DeliverResult(message.SubTaskId, message.Result);
-            }
-            finally
-            {
-                DispatchSubTaskToWorkers();
-            }
-        }
+				lock (_workers)
+				{
+					_workers[message.FailedMessage.Address].ActiveTaskCount--;
+				}
 
-        public void Consume(SubTaskWorkerAvailable<TSubTask> message)
-        {
-            try
-            {
-                lock (_workers)
-                {
-                    if (!_workers.ContainsKey(message.Address))
-                        _workers.Add(message.Address, new Worker(message.Address));
+				_distributedTask.NotifySubTaskException(message.FailedMessage.SubTaskId, message.CaughtException);
 
-                    _workers[message.Address].TaskLimit = message.TaskLimit;
-                    _workers[message.Address].ActiveTaskCount = message.ActiveTaskCount;
-                }
-            }
-            finally
-            {
-                DispatchSubTaskToWorkers();
-            }
-        }
+			}
+			finally
+			{
+				DispatchSubTaskToWorkers();
+			}
+		}
 
-        public void Start()
-        {
-            _bus.Subscribe(this);
+		public void Consume(SubTaskComplete<TOutput> message)
+		{
+			try
+			{
+				// a response from another task by chance?
+				if (message.TaskId != _taskId)
+				{
+					_log.DebugFormat("Output received for unknown task: {0}", message.TaskId);
+					return;
+				}
 
-            _bus.Publish(new EnlistSubTaskWorkers<TSubTask>());
+				// a response from a worker we don't know? not happening!
+				if (_workers.ContainsKey(message.Address) == false)
+				{
+					_log.DebugFormat("Output received from unknown worker: {0}/{1}", message.TaskId, message.Address);
+					return;
+				}
 
-            IEnumerable<TSubTask> enumerable = _distributedTask;
-            if (enumerable == null)
-                throw new NullReferenceException("No valid enumerator for this distributor");
+				lock (_workers)
+				{
+					_workers[message.Address].ActiveTaskCount--;
+				}
 
-            _subTaskEnumerator = enumerable.GetEnumerator();
-        }
+				// okay deliver the result
+				_distributedTask.DeliverSubTaskOutput(message.SubTaskId, message.Result);
+			}
+			finally
+			{
+				DispatchSubTaskToWorkers();
+			}
+		}
 
-        private void DispatchSubTaskToWorkers()
-        {
-            IList<Worker> workers = GetAvailableWorkers();
+		public void Consume(SubTaskWorkerAvailable<TInput> message)
+		{
+			try
+			{
+				lock (_workers)
+				{
+					if (!_workers.ContainsKey(message.Address))
+						_workers.Add(message.Address, new Worker(message.Address));
 
-            foreach (Worker worker in workers)
-            {
-                IEndpoint endpoint = _endpointResolver.Resolve(worker.Address);
-                if (endpoint == null)
-                    continue;
+					_workers[message.Address].TaskLimit = message.TaskLimit;
+					_workers[message.Address].ActiveTaskCount = message.ActiveTaskCount;
+				}
+			}
+			finally
+			{
+				DispatchSubTaskToWorkers();
+			}
+		}
 
-                if (!_subTaskEnumerator.MoveNext())
-                    return;
+		public void Start()
+		{
+			_bus.Subscribe(this);
 
-                TSubTask subTask = _subTaskEnumerator.Current;
+			_distributedTask.WhenCompleted(CompleteDistributedTask);
 
-                ExecuteSubTask<TSubTask> executeExecuteSubTask = new ExecuteSubTask<TSubTask>(_bus.Endpoint.Uri, _taskId, subTask.TaskId, subTask);
+			_bus.Publish(new EnlistSubTaskWorkers<TInput>());
+		}
 
-                endpoint.Send(executeExecuteSubTask);
+		private void CompleteDistributedTask(TTask obj)
+		{
+			_bus.Unsubscribe(this);
 
-                worker.ActiveTaskCount++;
-            }
-        }
+		}
 
-        private IList<Worker> GetAvailableWorkers()
-        {
-            List<Worker> workers = new List<Worker>();
+		private void DispatchSubTaskToWorkers()
+		{
+			if (_nextSubTask >= _distributedTask.SubTaskCount)
+				return;
 
-            foreach (Worker worker in _workers.Values)
-            {
-                if (worker.ActiveTaskCount < worker.TaskLimit)
-                {
-                    workers.Add(worker);
-                }
-            }
+			IList<Worker> workers = GetAvailableWorkers();
 
-            return workers;
-        }
+			foreach (Worker worker in workers)
+			{
+				IEndpoint endpoint = _endpointResolver.Resolve(worker.Address);
+				if (endpoint == null)
+					continue;
+
+				ExecuteSubTask<TInput> executeExecuteSubTask;
+				lock (_workers)
+				{
+					if (_nextSubTask >= _distributedTask.SubTaskCount)
+						break;
+
+					TInput input = _distributedTask.GetSubTaskInput(_nextSubTask);
+
+					executeExecuteSubTask = new ExecuteSubTask<TInput>(_bus.Endpoint.Uri, _taskId, _nextSubTask++, input);
+
+					worker.ActiveTaskCount++;
+				}
+
+				endpoint.Send(executeExecuteSubTask);
+			}
+		}
+
+		private IList<Worker> GetAvailableWorkers()
+		{
+			List<Worker> workers = new List<Worker>();
+
+			foreach (Worker worker in _workers.Values)
+			{
+				if (worker.ActiveTaskCount < worker.TaskLimit)
+				{
+					workers.Add(worker);
+				}
+			}
+
+			return workers;
+		}
 
 
-        public class Worker
-        {
-            private readonly Uri _address;
-            private int _activeTaskCount;
-            private int _taskLimit;
+		public class Worker
+		{
+			private readonly Uri _address;
+			private int _activeTaskCount;
+			private int _taskLimit;
 
-            public Worker(Uri address)
-            {
-                _address = address;
-            }
+			public Worker(Uri address)
+			{
+				_address = address;
+			}
 
-            public Uri Address
-            {
-                get { return _address; }
-            }
+			public Uri Address
+			{
+				get { return _address; }
+			}
 
-            public int TaskLimit
-            {
-                get { return _taskLimit; }
-                set { _taskLimit = value; }
-            }
+			public int TaskLimit
+			{
+				get { return _taskLimit; }
+				set { _taskLimit = value; }
+			}
 
-            public int ActiveTaskCount
-            {
-                get { return _activeTaskCount; }
-                set { _activeTaskCount = value; }
-            }
-        }
-    }
+			public int ActiveTaskCount
+			{
+				get { return _activeTaskCount; }
+				set { _activeTaskCount = value; }
+			}
+		}
+	}
 }
