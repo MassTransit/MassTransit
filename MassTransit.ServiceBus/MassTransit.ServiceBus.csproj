@@ -64,6 +64,15 @@
     <Compile Include="BatchTimeout.cs" />
     <Compile Include="ExpiresInAttribute.cs" />
     <Compile Include="Fault.cs" />
+    <Compile Include="Grid\DistributedTask.cs" />
+    <Compile Include="Grid\IDistributedTask.cs" />
+    <Compile Include="Grid\ISubTask.cs" />
+    <Compile Include="Grid\ISubTaskWorker.cs" />
+    <Compile Include="Grid\Messages\EnlistSubTaskWorkers.cs" />
+    <Compile Include="Grid\Messages\ExecuteSubTask.cs" />
+    <Compile Include="Grid\Messages\SubTaskComplete.cs" />
+    <Compile Include="Grid\Messages\SubTaskWorkerAvailable.cs" />
+    <Compile Include="Grid\SubTaskWorker.cs" />
     <Compile Include="HealthMonitoring\HealthInformation.cs" />
     <Compile Include="HealthMonitoring\HealthStatusConsumer.cs" />
     <Compile Include="HealthMonitoring\IHealthCache.cs" />

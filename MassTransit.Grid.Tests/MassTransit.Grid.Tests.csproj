@@ -59,12 +59,6 @@
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
-    <Reference Include="System.Xml.Linq">
-      <RequiredTargetFramework>3.5</RequiredTargetFramework>
-    </Reference>
-    <Reference Include="System.Data.DataSetExtensions">
-      <RequiredTargetFramework>3.5</RequiredTargetFramework>
-    </Reference>
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
   </ItemGroup>
@@ -82,10 +76,6 @@
     <ProjectReference Include="..\Containers\MassTransit.WindsorIntegration\MassTransit.WindsorIntegration.csproj">
       <Project>{98D5A59C-96FA-4A1B-A653-EA5A35C45FC9}</Project>
       <Name>MassTransit.WindsorIntegration</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\MassTransit.Grid\MassTransit.Grid.csproj">
-      <Project>{833805AB-707A-4993-A616-5050462AABAE}</Project>
-      <Name>MassTransit.Grid</Name>
     </ProjectReference>
     <ProjectReference Include="..\MassTransit.ServiceBus.Tests\MassTransit.ServiceBus.Tests.csproj">
       <Project>{76646B96-936B-4D31-A053-35CD630E3C68}</Project>
