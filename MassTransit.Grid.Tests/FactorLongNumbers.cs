@@ -12,47 +12,64 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Grid.Tests
 {
-    using System;
-    using System.Collections;
-    using System.Collections.Generic;
+	using System;
+	using System.Collections.Generic;
+	using System.Diagnostics;
+	using MassTransit.ServiceBus.Util;
 
-    public class FactorLongNumbers :
-        IDistributedTask<FactorLongNumber, LongNumberFactored>
-    {
-        private readonly Dictionary<long, IList<long>> _results = new Dictionary<long, IList<long>>();
-        private readonly List<long> _values = new List<long>();
-        private Action<FactorLongNumbers> _completed;
+	public class FactorLongNumbers :
+		IDistributedTask<FactorLongNumbers, FactorLongNumber, LongNumberFactored>
+	{
+		private readonly Dictionary<int, IList<long>> _results = new Dictionary<int, IList<long>>();
+		private readonly List<long> _values = new List<long>();
+		private Action<FactorLongNumbers> _completed = delegate { };
+		private Action<FactorLongNumbers, long, Exception> _exceptionOccurred = delegate { };
 
-        public void DeliverResult(long taskId, LongNumberFactored result)
-        {
-            _results.Add(taskId, result.Factors);
+		public int SubTaskCount
+		{
+			[DebuggerStepThrough]
+			get { return _values.Count; }
+		}
 
-            if (_results.Count == _values.Count)
-                _completed(this);
-        }
+		public FactorLongNumber GetSubTaskInput(int subTaskId)
+		{
+			Guard.Against.IndexOutOfRange(subTaskId, SubTaskCount);
 
-        IEnumerator<FactorLongNumber> IEnumerable<FactorLongNumber>.GetEnumerator()
-        {
-            long index = 0;
-            foreach (long value in _values)
-            {
-                yield return new FactorLongNumber(index++, value);
-            }
-        }
+			return new FactorLongNumber(_values[subTaskId]);
+		}
 
-        public IEnumerator GetEnumerator()
-        {
-            return ((IEnumerable<FactorLongNumber>) this).GetEnumerator();
-        }
+		public void DeliverSubTaskOutput(int subTaskId, LongNumberFactored output)
+		{
+			lock (_results)
+			{
+				if (_results.ContainsKey(subTaskId))
+					_results[subTaskId] = output.Factors;
+				else
+					_results.Add(subTaskId, output.Factors);
+			}
 
-        public void Add(long value)
-        {
-            _values.Add(value);
-        }
+			if (_values.Count == _results.Count)
+				_completed(this);
+		}
 
-        public void WhenComplete(Action<FactorLongNumbers> action)
-        {
-            _completed = action;
-        }
-    }
+		public void NotifySubTaskException(int subTaskId, Exception ex)
+		{
+			_exceptionOccurred(this, subTaskId, ex);
+		}
+
+		public void WhenCompleted(Action<FactorLongNumbers> action)
+		{
+			_completed += action;
+		}
+
+		public void Add(long value)
+		{
+			_values.Add(value);
+		}
+
+		public void WhenExceptionOccurs(Action<FactorLongNumbers, long, Exception> action)
+		{
+			_exceptionOccurred += action;
+		}
+	}
 }

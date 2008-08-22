@@ -66,7 +66,6 @@
     <Compile Include="Fault.cs" />
     <Compile Include="Grid\DistributedTask.cs" />
     <Compile Include="Grid\IDistributedTask.cs" />
-    <Compile Include="Grid\ISubTask.cs" />
     <Compile Include="Grid\ISubTaskWorker.cs" />
     <Compile Include="Grid\Messages\EnlistSubTaskWorkers.cs" />
     <Compile Include="Grid\Messages\ExecuteSubTask.cs" />

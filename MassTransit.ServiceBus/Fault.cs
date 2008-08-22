@@ -26,6 +26,7 @@ namespace MassTransit.ServiceBus
 		private readonly List<string> _messages;
 		private readonly DateTime _occurredAt;
 		private readonly List<string> _stackTrace;
+		private Exception _caughtException;
 
 		/// <summary>
 		/// Creates a new fault message for the failed message
@@ -34,6 +35,8 @@ namespace MassTransit.ServiceBus
 		/// <param name="message">The message that was being processed when the exception was thrown</param>
 		public Fault(Exception ex, TMessage message)
 		{
+			_caughtException = ex;
+
 			_failedMessage = message;
 			_occurredAt = DateTime.UtcNow;
 
@@ -71,6 +74,11 @@ namespace MassTransit.ServiceBus
 		public TMessage FailedMessage
 		{
 			get { return _failedMessage; }
+		}
+
+		public Exception CaughtException
+		{
+			get { return _caughtException; }
 		}
 
 		private static List<string> GetStackTrace(Exception ex)
