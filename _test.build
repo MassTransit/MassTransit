@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<project name="masstransit" default="go">
+	<property name="nant.settings.currentframework" value="net-3.5" />
+	<property name="dirs.install" value=".\pubsub_install" overwrite="false" />
+	<property name="dirs.build" value=".\bin" overwrite="false" />
+	
+	<target name="go" depends="run_tests" description="Testing the build of MassTransit"/>
+
+	<target name="run_tests">
+		<exec
+			program="${project::get-base-directory()}\libs\nunit\nunit-console.exe"
+			commandline='.\tests\MassTransit.ServiceBus.Tests.dll /xml=bob.xml'
+			failonerror="true"/>
+	</target>
+
+</project>
