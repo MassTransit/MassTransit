@@ -64,7 +64,7 @@
     <Compile Include="BatchTimeout.cs" />
     <Compile Include="ExpiresInAttribute.cs" />
     <Compile Include="Fault.cs" />
-    <Compile Include="Grid\DistributedTask.cs" />
+    <Compile Include="Grid\DistributedTaskController.cs" />
     <Compile Include="Grid\IDistributedTask.cs" />
     <Compile Include="Grid\ISubTaskWorker.cs" />
     <Compile Include="Grid\Messages\EnlistSubTaskWorkers.cs" />

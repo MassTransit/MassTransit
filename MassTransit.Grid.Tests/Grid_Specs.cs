@@ -53,10 +53,10 @@ namespace MassTransit.Grid.Tests
 
             _bus.AddComponent<SubTaskWorker<FactorLongNumberWorker, FactorLongNumber, LongNumberFactored>>();
 
-            DistributedTask<FactorLongNumbers, FactorLongNumber, LongNumberFactored> distributedTask =
-                new DistributedTask<FactorLongNumbers, FactorLongNumber, LongNumberFactored>(_bus, _endpointResolver, _factorLongNumbers);
+            DistributedTaskController<FactorLongNumbers, FactorLongNumber, LongNumberFactored> distributedTaskController =
+                new DistributedTaskController<FactorLongNumbers, FactorLongNumber, LongNumberFactored>(_bus, _endpointResolver, _factorLongNumbers);
 
-            distributedTask.Start();
+            distributedTaskController.Start();
 
             Assert.That(_complete.WaitOne(TimeSpan.FromMinutes(1), true), Is.True, "Timeout waiting for distributed task to complete");
         }
