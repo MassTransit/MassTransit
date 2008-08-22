@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<project name="masstransit" default="go">
+	<property name="nant.settings.currentframework" value="net-3.5" />
+	<property name="dirs.install" value=".\pubsub_install" overwrite="false" />
+	<property name="dirs.build" value=".\bin" overwrite="false" />
+	<property name="msbuild.configuration" value="Release" overwrite="false" />
+	
+	<target name="go" depends="build_code, build_samples" description="Starting the build of MassTransit" />
+	
+	<target name="build_code" depends="common.find-svninfo, common.asminfo" description="Building Library">
+		<delete  dir=".\bin" failonerror="false" />
+		<delete file=".\MassTransit.zip" failonerror="false" />
+		
+		<msbuild project=".\MassTransit-2008.sln" verbosity="quiet">
+			<property name="Configuration" value="${msbuild.configuration}" />
+		</msbuild>
+
+	</target>
+	
+	<target name="build_samples" description="Building Samples">
+		<msbuild project=".\Samples\HeavyLoad\HeavyLoad.sln" verbosity="quiet">
+			<property name="Configuration" value="${msbuild.configuration}" />
+		</msbuild>
+		<msbuild project=".\Samples\OpenAllNight\OpenAllNight.sln" verbosity="quiet">
+			<property name="Configuration" value="${msbuild.configuration}" />
+		</msbuild>
+		<msbuild project=".\Samples\PublishSubscribe\PublishSubscribe.sln" verbosity="quiet">
+			<property name="Configuration" value="${msbuild.configuration}" />
+		</msbuild>
+		<msbuild project=".\Samples\WebRequestReply\WebRequestReply.sln" verbosity="quiet">
+			<property name="Configuration" value="${msbuild.configuration}" />
+		</msbuild>
+	</target>
+	
+	<target name="common.find-svninfo" description="Gets the current svn revision number">
+		<!-- For adding SVN revision to builds -->
+		<property name="svn.revision" value="0" overwrite="false" />
+		<!-- try to update the revision -->
+		<!--<exec
+			program="svn"
+			commandline='info "${project::get-base-directory()}" - -xml'
+			output="_revision.xml"
+			failonerror="false"/> -->
+		<exec
+			program="svn"
+			commandline='info http://masstransit.googlecode.com/svn/trunk --xml'
+			output="_revision.xml"
+			failonerror="false"/>
+		<xmlpeek
+			file="_revision.xml"
+			xpath="/info/entry/@revision"
+			property="svn.revision"
+			failonerror="false"/>
+		<delete file="_revision.xml" failonerror="false" />
+		<echo message="INFO: Using Subversion revision number: ${svn.revision}"/>
+	</target>
+	
+	<target name="common.asminfo" depends="common.find-svninfo" description="Generate asm info">
+	
+		<property name="version.rev" value="${svn.revision}"  />
+		<property name="version.build" value="0" overwrite="false" />
+		
+		<asminfo output="SolutionVersion.cs" language="CSharp">
+			<imports>
+				<import namespace="System" />
+				<import namespace="System.Reflection" />
+				<import namespace="System.Runtime.InteropServices" />
+			</imports>
+			<attributes>
+				<attribute type="ComVisibleAttribute" value="false" />
+				<attribute type="CLSCompliantAttribute" value="true" />
+				<attribute type="AssemblyVersionAttribute" value="0.2.${version.rev}.${version.build}" />
+				<attribute type="AssemblyCopyrightAttribute" value="MassTransit Project, original author or authors" />
+				<attribute type="AssemblyCompanyAttribute" value="CFT &amp; ACM" />
+			</attributes>
+		</asminfo>
+	</target>
+	
+</project>
