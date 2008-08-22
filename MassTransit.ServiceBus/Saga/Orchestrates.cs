@@ -10,32 +10,18 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Workflow
+namespace MassTransit.Saga
 {
     using System;
     using ServiceBus;
 
-    [Serializable]
-    public class UpdateWorkflowTimeout :
-        CorrelatedBy<Guid>
+    /// <summary>
+    /// Specifies that a class implementing ISaga consumes TMessage as part of the saga
+    /// </summary>
+    /// <typeparam name="TMessage">The type of message to consume</typeparam>
+    public interface Orchestrates<TMessage> :
+        Consumes<TMessage>.All
+        where TMessage : class, CorrelatedBy<Guid>
     {
-        private readonly Guid _correlationId;
-        private readonly TimeSpan _duration;
-
-        public UpdateWorkflowTimeout(Guid correlationId, TimeSpan duration)
-        {
-            _correlationId = correlationId;
-            _duration = duration;
-        }
-
-        public TimeSpan Duration
-        {
-            get { return _duration; }
-        }
-
-        public Guid CorrelationId
-        {
-            get { return _correlationId; }
-        }
     }
 }

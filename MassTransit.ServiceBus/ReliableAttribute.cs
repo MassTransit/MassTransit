@@ -14,13 +14,23 @@ namespace MassTransit.ServiceBus
 {
     using System;
 
-    /// <summary>
-    /// Specifies that a class implementing ISaga consumes TMessage as part of the saga
-    /// </summary>
-    /// <typeparam name="TMessage">The type of message to consume</typeparam>
-    public interface Orchestrates<TMessage> :
-        Consumes<TMessage>.All
-        where TMessage : class, CorrelatedBy<Guid>
+    public class ReliableAttribute : Attribute
     {
+        private readonly bool _enabled;
+
+        public ReliableAttribute()
+            : this(true)
+        {
+        }
+
+        public ReliableAttribute(bool enabled)
+        {
+            _enabled = enabled;
+        }
+
+        public bool Enabled
+        {
+            get { return _enabled; }
+        }
     }
 }

@@ -1,78 +1,86 @@
+// Copyright 2007-2008 The Apache Software Foundation.
+//  
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
+// this file except in compliance with the License. You may obtain a copy of the 
+// License at 
+// 
+//     http://www.apache.org/licenses/LICENSE-2.0 
+// 
+// Unless required by applicable law or agreed to in writing, software distributed 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// specific language governing permissions and limitations under the License.
 namespace MassTransit.ServiceBus.Tests
 {
-	using System;
-	using NUnit.Framework;
-	using NUnit.Framework.SyntaxHelpers;
+    using System;
+    using NUnit.Framework;
+    using NUnit.Framework.SyntaxHelpers;
 
-	[TestFixture]
-	public class When_a_message_should_expire_after_a_period_of_time
-	{
-		[Test]
-		public void The_message_should_use_an_expiration_attribute()
-		{
-			MyMessage message = new MyMessage();
+    [TestFixture]
+    public class When_a_message_should_expire_after_a_period_of_time
+    {
+        [ExpiresIn("00:05:00")]
+        internal class MyMessage
+        {
+        }
 
-			object[] attributes = message.GetType().GetCustomAttributes(typeof (ExpiresInAttribute), false);
+        [Test]
+        public void The_message_should_use_an_expiration_attribute()
+        {
+            MyMessage message = new MyMessage();
 
-			Assert.That(attributes.Length, Is.GreaterThan(0));
+            object[] attributes = message.GetType().GetCustomAttributes(typeof (ExpiresInAttribute), false);
 
-			foreach (ExpiresInAttribute expiresIn in attributes)
-			{
-				Assert.That(expiresIn.TimeSpan, Is.EqualTo(TimeSpan.FromMinutes(5)));
-			}
-		}
+            Assert.That(attributes.Length, Is.GreaterThan(0));
 
-		[ExpiresIn("00:05:00")]
-		internal class MyMessage
-		{
-		}
-	}
+            foreach (ExpiresInAttribute expiresIn in attributes)
+            {
+                Assert.That(expiresIn.TimeSpan, Is.EqualTo(TimeSpan.FromMinutes(5)));
+            }
+        }
+    }
 
-	[TestFixture]
-	public class When_a_message_needs_to_be_reliable
-	{
-		[Test]
-		public void The_reliable_attribute_should_be_specified()
-		{
-			MyMessage message = new MyMessage();
+    [TestFixture]
+    public class When_a_message_needs_to_be_reliable
+    {
+        [Reliable]
+        internal class MyMessage
+        {
+        }
 
-			object[] attributes = message.GetType().GetCustomAttributes(typeof(Reliable), false);
+        [Reliable(false)]
+        internal class MyOtherMessage
+        {
+        }
 
-			Assert.That(attributes.Length, Is.GreaterThan(0));
+        [Test]
+        public void The_reliable_attribute_should_be_able_to_be_false()
+        {
+            MyOtherMessage message = new MyOtherMessage();
 
-			foreach (Reliable reliable in attributes)
-			{
-				Assert.That(reliable.Enabled, Is.True);
-			}
-			
-		}
+            object[] attributes = message.GetType().GetCustomAttributes(typeof (ReliableAttribute), false);
 
-		[Test]
-		public void The_reliable_attribute_should_be_able_to_be_false()
-		{
-			MyOtherMessage message = new MyOtherMessage();
+            Assert.That(attributes.Length, Is.GreaterThan(0));
 
-			object[] attributes = message.GetType().GetCustomAttributes(typeof(Reliable), false);
+            foreach (ReliableAttribute reliable in attributes)
+            {
+                Assert.That(reliable.Enabled, Is.False);
+            }
+        }
 
-			Assert.That(attributes.Length, Is.GreaterThan(0));
+        [Test]
+        public void The_reliable_attribute_should_be_specified()
+        {
+            MyMessage message = new MyMessage();
 
-			foreach (Reliable reliable in attributes)
-			{
-				Assert.That(reliable.Enabled, Is.False);
-			}
-			
-		}
+            object[] attributes = message.GetType().GetCustomAttributes(typeof (ReliableAttribute), false);
 
-		[Reliable]
-		internal class MyMessage
-		{
-			
-		}
+            Assert.That(attributes.Length, Is.GreaterThan(0));
 
-		[Reliable(false)]
-		internal class MyOtherMessage
-		{
-			
-		}
-	}
+            foreach (ReliableAttribute reliable in attributes)
+            {
+                Assert.That(reliable.Enabled, Is.True);
+            }
+        }
+    }
 }

@@ -10,17 +10,32 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.ServiceBus
+namespace MassTransit.Saga.Messages
 {
     using System;
+    using ServiceBus;
 
-    /// <summary>
-    /// Specifies that the message type TMessage starts a new saga. 
-    /// </summary>
-    /// <typeparam name="TMessage"></typeparam>
-    public interface StartedBy<TMessage> :
-        Consumes<TMessage>.All
-        where TMessage : class, CorrelatedBy<Guid>
+    [Serializable]
+    public class UpdateWorkflowTimeout :
+        CorrelatedBy<Guid>
     {
+        private readonly Guid _correlationId;
+        private readonly TimeSpan _duration;
+
+        public UpdateWorkflowTimeout(Guid correlationId, TimeSpan duration)
+        {
+            _correlationId = correlationId;
+            _duration = duration;
+        }
+
+        public TimeSpan Duration
+        {
+            get { return _duration; }
+        }
+
+        public Guid CorrelationId
+        {
+            get { return _correlationId; }
+        }
     }
 }

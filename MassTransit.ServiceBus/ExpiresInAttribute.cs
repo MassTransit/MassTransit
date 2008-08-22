@@ -1,34 +1,46 @@
+// Copyright 2007-2008 The Apache Software Foundation.
+//  
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
+// this file except in compliance with the License. You may obtain a copy of the 
+// License at 
+// 
+//     http://www.apache.org/licenses/LICENSE-2.0 
+// 
+// Unless required by applicable law or agreed to in writing, software distributed 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// specific language governing permissions and limitations under the License.
 namespace MassTransit.ServiceBus
 {
-	using System;
+    using System;
 
-	/// <summary>
-	/// Specifies the elapsed time before a message expires. When a message expires, the content is no longer
-	/// // important and it can be automatically discarded by the message service.
-	/// </summary>
-	public class ExpiresInAttribute : Attribute
-	{
-		private readonly TimeSpan _timeSpan;
+    /// <summary>
+    /// Specifies the elapsed time before a message expires. When a message expires, the content is no longer
+    /// // important and it can be automatically discarded by the message service.
+    /// </summary>
+    public class ExpiresInAttribute : Attribute
+    {
+        private readonly TimeSpan _timeSpan;
 
-		/// <summary>
-		/// Specifies the elapsed time before the message expires.
-		/// </summary>
-		/// <param name="timeSpanValue">The duration of the time period.</param>
-		public ExpiresInAttribute(string timeSpanValue)
-		{
-			TimeSpan value;
-			if (!TimeSpan.TryParse(timeSpanValue, out value))
-				throw new ArgumentException("Unable to convert string to TimeSpan", "timeSpanValue");
+        /// <summary>
+        /// Specifies the elapsed time before the message expires.
+        /// </summary>
+        /// <param name="timeSpanValue">The duration of the time period.</param>
+        public ExpiresInAttribute(string timeSpanValue)
+        {
+            TimeSpan value;
+            if (!TimeSpan.TryParse(timeSpanValue, out value))
+                throw new ArgumentException("Unable to convert string to TimeSpan", "timeSpanValue");
 
-			_timeSpan = value;
-		}
+            _timeSpan = value;
+        }
 
-		/// <summary>
-		/// Returns the TimeSpan for the message expiration
-		/// </summary>
-		public TimeSpan TimeSpan
-		{
-			get { return _timeSpan; }
-		}
-	}
+        /// <summary>
+        /// Returns the TimeSpan for the message expiration
+        /// </summary>
+        public TimeSpan TimeSpan
+        {
+            get { return _timeSpan; }
+        }
+    }
 }

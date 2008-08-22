@@ -10,16 +10,24 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.ServiceBus
+namespace MassTransit.Saga.Messages
 {
-	using System;
+    using System;
+    using ServiceBus;
 
-	/// <summary>
-	/// Defines a component as a saga
-	/// </summary>
-	public interface ISaga :
-		CorrelatedBy<Guid>,
-		IDisposable
-	{
-	}
+    public class CompleteWorkflow :
+        CorrelatedBy<Guid>
+    {
+        private readonly Guid _correlationId;
+
+        public CompleteWorkflow(Guid correlationId)
+        {
+            _correlationId = correlationId;
+        }
+
+        public Guid CorrelationId
+        {
+            get { return _correlationId; }
+        }
+    }
 }

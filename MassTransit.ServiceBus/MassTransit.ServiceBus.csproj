@@ -58,7 +58,7 @@
     <Compile Include="..\SolutionVersion.cs">
       <Link>SolutionVersion.cs</Link>
     </Compile>
-    <Compile Include="AllowMessageType.cs" />
+    <Compile Include="AllowMessageTypeAttribute.cs" />
     <Compile Include="Batch.cs" />
     <Compile Include="BatchedBy.cs" />
     <Compile Include="BatchTimeout.cs" />
@@ -91,12 +91,14 @@
     <Compile Include="Internal\SagaDispatcherBase.cs" />
     <Compile Include="Internal\SagaSubscription.cs" />
     <Compile Include="Internal\TypeInfo.cs" />
-    <Compile Include="ISaga.cs" />
-    <Compile Include="Orchestrates.cs" />
-    <Compile Include="StartedBy.cs" />
+    <Compile Include="Saga\ISaga.cs" />
+    <Compile Include="Saga\Orchestrates.cs" />
+    <Compile Include="Saga\Messages\CompleteWorkflow.cs" />
+    <Compile Include="Saga\Messages\UpdateWorkflowTimeout.cs" />
+    <Compile Include="Saga\StartedBy.cs" />
     <Compile Include="Subscriptions\log4netRenderers\SubscriptionRenderer.cs" />
     <Compile Include="MessageGroup.cs" />
-    <Compile Include="Reliable.cs" />
+    <Compile Include="ReliableAttribute.cs" />
     <Compile Include="ServiceBusBuilder.cs" />
     <Compile Include="Transports\HttpEndpoint.cs" />
     <Compile Include="Transports\LoopbackEndpoint.cs" />

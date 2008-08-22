@@ -13,6 +13,8 @@
 namespace MassTransit.Workflow.Tests.RegisterUser
 {
     using System;
+    using MassTransit.Saga.Messages;
+    using Saga;
     using ServiceBus;
 
     /// <summary>

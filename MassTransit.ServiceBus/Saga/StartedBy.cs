@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2008 The Apache Software Foundation.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -10,15 +10,18 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-using System.Reflection;
+namespace MassTransit.Saga
+{
+    using System;
+    using ServiceBus;
 
-// General Information about an assembly is controlled through the following 
-// set of attributes. Change these attribute values to modify the information
-// associated with an assembly.
-
-[assembly : AssemblyTitle("MassTransit.Workflow")]
-[assembly : AssemblyDescription("")]
-[assembly : AssemblyConfiguration("")]
-[assembly : AssemblyProduct("MassTransit.Workflow")]
-[assembly : AssemblyTrademark("")]
-[assembly : AssemblyCulture("")]
+    /// <summary>
+    /// Specifies that the message type TMessage starts a new saga. 
+    /// </summary>
+    /// <typeparam name="TMessage"></typeparam>
+    public interface StartedBy<TMessage> :
+        Consumes<TMessage>.All
+        where TMessage : class, CorrelatedBy<Guid>
+    {
+    }
+}
