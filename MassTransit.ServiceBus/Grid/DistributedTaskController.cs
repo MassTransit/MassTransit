@@ -19,7 +19,7 @@ namespace MassTransit.Grid
 	using Messages;
 	using ServiceBus;
 
-	public class DistributedTask<TTask, TInput, TOutput> :
+	public class DistributedTaskController<TTask, TInput, TOutput> :
 		Consumes<SubTaskWorkerAvailable<TInput>>.All,
 		Consumes<SubTaskComplete<TOutput>>.All,
 		Consumes<Fault<ExecuteSubTask<TInput>>>.All
@@ -27,16 +27,16 @@ namespace MassTransit.Grid
 		where TInput : class
 		where TOutput : class
 	{
-		private static readonly ILog _log = LogManager.GetLogger(typeof(DistributedTask<TTask,TInput,TOutput>));
+		private static readonly ILog _log = LogManager.GetLogger(typeof (DistributedTaskController<TTask, TInput, TOutput>));
 
 		private readonly IServiceBus _bus;
 		private readonly TTask _distributedTask;
 		private readonly IEndpointResolver _endpointResolver;
 		private readonly Guid _taskId;
 		private readonly Dictionary<Uri, Worker> _workers = new Dictionary<Uri, Worker>();
-		private int _nextSubTask = 0;
+		private int _nextSubTask;
 
-		public DistributedTask(IServiceBus bus, IEndpointResolver endpointResolver, TTask distributedTask)
+		public DistributedTaskController(IServiceBus bus, IEndpointResolver endpointResolver, TTask distributedTask)
 		{
 			_bus = bus;
 			_endpointResolver = endpointResolver;
@@ -140,7 +140,6 @@ namespace MassTransit.Grid
 		private void CompleteDistributedTask(TTask obj)
 		{
 			_bus.Unsubscribe(this);
-
 		}
 
 		private void DispatchSubTaskToWorkers()
