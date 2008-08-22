@@ -31,6 +31,8 @@ namespace MassTransit.Grid.Tests
         private IServiceBus _bus;
         private IObjectBuilder _builder;
         private IEndpointResolver _endpointResolver;
+        private FactorLongNumbers _factorLongNumbers;
+        private ManualResetEvent _complete;
 
         protected override void Before_each()
         {
@@ -39,6 +41,21 @@ namespace MassTransit.Grid.Tests
             _endpointResolver = _container.Resolve<IEndpointResolver>();
 
             _container.AddComponent<FactorLongNumberWorker>();
+
+            _factorLongNumbers = new FactorLongNumbers();
+
+            Random random = new Random();
+
+            for (int i = 0; i < 29; i++)
+            {
+                long value = (long)(random.NextDouble() * 100000000);
+
+                _factorLongNumbers.Add(value);
+            }
+
+            _complete = new ManualResetEvent(false);
+
+            _factorLongNumbers.WhenComplete(x => this._complete.Set());
         }
 
         [Test]
@@ -46,23 +63,8 @@ namespace MassTransit.Grid.Tests
         {
             _bus.AddComponent<SubTaskWorker<FactorLongNumberWorker, FactorLongNumber, LongNumberFactored>>();
 
-            FactorLongNumbers factorLongNumbers = new FactorLongNumbers();
-
-            Random random = new Random();
-
-            for (int i = 0; i < 29; i++)
-            {
-                long value = (long) (random.NextDouble()*100000000);
-
-                factorLongNumbers.Add(value);
-            }
-
-            ManualResetEvent _complete = new ManualResetEvent(false);
-
-            factorLongNumbers.WhenComplete(x => _complete.Set());
-
             DistributedTask<FactorLongNumbers, FactorLongNumber, LongNumberFactored> distributedTask =
-                new DistributedTask<FactorLongNumbers, FactorLongNumber, LongNumberFactored>(_bus, _endpointResolver, factorLongNumbers);
+                new DistributedTask<FactorLongNumbers, FactorLongNumber, LongNumberFactored>(_bus, _endpointResolver, _factorLongNumbers);
 
             distributedTask.Start();
 
