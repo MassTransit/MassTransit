@@ -13,8 +13,9 @@
 namespace MassTransit.ServiceBus.Internal
 {
 	using System;
+	using Saga;
 
-	public class SagaDispatcher<TSaga, TMessage> :
+    public class SagaDispatcher<TSaga, TMessage> :
 		SagaDispatcherBase<TSaga, TMessage>
 		where TSaga : class, ISaga, Consumes<TMessage>.All
 		where TMessage : class, CorrelatedBy<Guid>

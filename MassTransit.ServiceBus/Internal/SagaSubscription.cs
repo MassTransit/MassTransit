@@ -13,6 +13,7 @@
 namespace MassTransit.ServiceBus.Internal
 {
 	using System;
+	using Saga;
 	using Subscriptions;
 
 	public class SagaSubscription<TSaga, TMessage> :

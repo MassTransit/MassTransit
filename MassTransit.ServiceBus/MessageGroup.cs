@@ -137,14 +137,14 @@ namespace MassTransit.ServiceBus
 	public class MessageGroupBuilder<TBuilder> where TBuilder : class
 	{
 		internal readonly List<object> _messages = new List<object>();
-		internal static readonly AllowMessageType _allow;
+		internal static readonly AllowMessageTypeAttribute _allow;
 
 		static MessageGroupBuilder()
 		{
-			object[] attributes = typeof (TBuilder).GetCustomAttributes(typeof (AllowMessageType), false);
+			object[] attributes = typeof (TBuilder).GetCustomAttributes(typeof (AllowMessageTypeAttribute), false);
 			if(attributes != null && attributes.Length > 0)
 			{
-				_allow = attributes[0] as AllowMessageType;
+				_allow = attributes[0] as AllowMessageTypeAttribute;
 			}
 		}
 

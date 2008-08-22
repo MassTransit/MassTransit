@@ -88,10 +88,6 @@
       <Project>{90482397-6282-465E-8B86-39865FC30127}</Project>
       <Name>MassTransit.ServiceBus</Name>
     </ProjectReference>
-    <ProjectReference Include="..\MassTransit.Workflow\MassTransit.Workflow.csproj">
-      <Project>{79FE0B00-8D49-44CB-AB42-C4492019A660}</Project>
-      <Name>MassTransit.Workflow</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Content Include="RegisterUser\TestContainer.xml">
