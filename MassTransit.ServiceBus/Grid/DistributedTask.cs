@@ -69,7 +69,6 @@ namespace MassTransit.Grid
 				}
 
 				_distributedTask.NotifySubTaskException(message.FailedMessage.SubTaskId, message.CaughtException);
-
 			}
 			finally
 			{
@@ -97,7 +96,8 @@ namespace MassTransit.Grid
 
 				lock (_workers)
 				{
-					_workers[message.Address].ActiveTaskCount--;
+					_workers[message.Address].ActiveTaskCount = message.ActiveTaskCount - 1;
+					_workers[message.Address].TaskLimit = message.TaskLimit;
 				}
 
 				// okay deliver the result

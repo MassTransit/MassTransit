@@ -12,43 +12,57 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Grid.Messages
 {
-    using System;
+	using System;
 
-    [Serializable]
-    public class SubTaskComplete<TResult>
-        where TResult : class
-    {
-        private readonly Uri _address;
-        private readonly TResult _result;
+	[Serializable]
+	public class SubTaskComplete<TResult>
+		where TResult : class
+	{
+		private readonly int _activeTaskCount;
+		private readonly Uri _address;
+		private readonly TResult _result;
 		private readonly int _subTaskId;
-        private readonly Guid _taskId;
+		private readonly Guid _taskId;
+		private readonly int _taskLimit;
 
-		public SubTaskComplete(Uri address, Guid taskId, int subTaskId, TResult result)
-        {
-            _address = address;
-            _taskId = taskId;
-            _subTaskId = subTaskId;
-            _result = result;
-        }
+		public SubTaskComplete(Uri address, int taskLimit, int activeTaskCount, Guid taskId, int subTaskId, TResult result)
+		{
+			_address = address;
+			_activeTaskCount = activeTaskCount;
+			_taskLimit = taskLimit;
+			_taskId = taskId;
+			_subTaskId = subTaskId;
+			_result = result;
+		}
 
-        public Uri Address
-        {
-            get { return _address; }
-        }
+		public Uri Address
+		{
+			get { return _address; }
+		}
 
-        public TResult Result
-        {
-            get { return _result; }
-        }
+		public int TaskLimit
+		{
+			get { return _taskLimit; }
+		}
 
-        public Guid TaskId
-        {
-            get { return _taskId; }
-        }
+		public int ActiveTaskCount
+		{
+			get { return _activeTaskCount; }
+		}
+
+		public TResult Result
+		{
+			get { return _result; }
+		}
+
+		public Guid TaskId
+		{
+			get { return _taskId; }
+		}
 
 		public int SubTaskId
-        {
-            get { return _subTaskId; }
-        }
-    }
+		{
+			get { return _subTaskId; }
+		}
+	}
 }
