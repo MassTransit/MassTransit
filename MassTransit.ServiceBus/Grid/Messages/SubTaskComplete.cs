@@ -15,24 +15,24 @@ namespace MassTransit.Grid.Messages
 	using System;
 
 	[Serializable]
-	public class SubTaskComplete<TResult>
-		where TResult : class
+	public class SubTaskComplete<TOutput>
+		where TOutput : class
 	{
 		private readonly int _activeTaskCount;
 		private readonly Uri _address;
-		private readonly TResult _result;
+		private readonly TOutput _output;
 		private readonly int _subTaskId;
 		private readonly Guid _taskId;
 		private readonly int _taskLimit;
 
-		public SubTaskComplete(Uri address, int taskLimit, int activeTaskCount, Guid taskId, int subTaskId, TResult result)
+		public SubTaskComplete(Uri address, int taskLimit, int activeTaskCount, Guid taskId, int subTaskId, TOutput output)
 		{
 			_address = address;
 			_activeTaskCount = activeTaskCount;
 			_taskLimit = taskLimit;
 			_taskId = taskId;
 			_subTaskId = subTaskId;
-			_result = result;
+			_output = output;
 		}
 
 		public Uri Address
@@ -50,9 +50,9 @@ namespace MassTransit.Grid.Messages
 			get { return _activeTaskCount; }
 		}
 
-		public TResult Result
+		public TOutput Output
 		{
-			get { return _result; }
+			get { return _output; }
 		}
 
 		public Guid TaskId
