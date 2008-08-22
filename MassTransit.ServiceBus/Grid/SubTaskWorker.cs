@@ -12,43 +12,49 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Grid
 {
-    using System.Threading;
-    using Messages;
-    using ServiceBus;
+	using System.Threading;
+	using Messages;
+	using ServiceBus;
 
-    public class SubTaskWorker<TWorker, TSubTask, TResult> :
-        Consumes<ExecuteSubTask<TSubTask>>.All,
-        Consumes<EnlistSubTaskWorkers<TSubTask>>.All
-        where TSubTask : class
-        where TResult : class
-        where TWorker : class, ISubTaskWorker<TSubTask, TResult>
-    {
-        private int _activeTaskCount = 0;
-        private int _taskLimit = 2;
+	public class SubTaskWorker<TWorker, TSubTask, TResult> :
+		Consumes<ExecuteSubTask<TSubTask>>.All,
+		Consumes<EnlistSubTaskWorkers<TSubTask>>.All
+		where TSubTask : class
+		where TResult : class
+		where TWorker : class, ISubTaskWorker<TSubTask, TResult>
+	{
+		private static int _activeTaskCount;
+		private static int _taskLimit = 2;
 
-        public IServiceBus Bus { get; set; }
-        public IObjectBuilder Builder { get; set; }
+		public IServiceBus Bus { get; set; }
+		public IObjectBuilder Builder { get; set; }
 
-        public void Consume(ExecuteSubTask<TSubTask> message)
-        {
-            TWorker worker = Builder.Build<TWorker>();
-            try
-            {
-                Interlocked.Increment(ref _activeTaskCount);
+		public void Consume(EnlistSubTaskWorkers<TSubTask> message)
+		{
+			Bus.Publish(new SubTaskWorkerAvailable<TSubTask>(Bus.Endpoint.Uri, _taskLimit, _activeTaskCount));
+		}
 
-                worker.ExecuteTask(message.Task, x => Bus.Publish(new SubTaskComplete<TResult>(Bus.Endpoint.Uri, message.TaskId, message.SubTaskId, x)));
-            }
-            finally
-            {
-                Builder.Release(worker);
+		public void Consume(ExecuteSubTask<TSubTask> message)
+		{
+			TWorker worker = Builder.Build<TWorker>();
+			try
+			{
+				Interlocked.Increment(ref _activeTaskCount);
 
-                Interlocked.Decrement(ref _activeTaskCount);
-            }
-        }
+				worker.ExecuteTask(message.Task,
+				                   output => Bus.Publish(new SubTaskComplete<TResult>(Bus.Endpoint.Uri,
+				                                                                 _taskLimit,
+				                                                                 _activeTaskCount,
+				                                                                 message.TaskId,
+				                                                                 message.SubTaskId, 
+																				 output)));
+			}
+			finally
+			{
+				Builder.Release(worker);
 
-        public void Consume(EnlistSubTaskWorkers<TSubTask> message)
-        {
-            Bus.Publish(new SubTaskWorkerAvailable<TSubTask>(Bus.Endpoint.Uri, _taskLimit, _activeTaskCount));
-        }
-    }
+				Interlocked.Decrement(ref _activeTaskCount);
+			}
+		}
+	}
 }
