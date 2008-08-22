@@ -17,7 +17,7 @@ namespace MassTransit.Grid.Messages
 
     [Serializable]
     [ExpiresIn("00:01:00")]
-    public class SubTaskWorkerAvailable<TSubTask>
+    public class SubTaskWorkerAvailable<TInput>
     {
         private readonly int _activeTaskCount;
         private readonly Uri _address;

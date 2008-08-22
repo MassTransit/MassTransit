@@ -34,7 +34,7 @@ namespace MassTransit.Dashboard.Controllers
         //}
         //public void EndView()
         //{
-        //    //IAsyncResult r = ControllerContext.Async.Result; //TODO: Do I need this?
+        //    //IAsyncResult r = ControllerContext.Async.Output; //TODO: Do I need this?
         //    PropertyBag.Add("statuses", _response.HealthInformation);
         //}
 

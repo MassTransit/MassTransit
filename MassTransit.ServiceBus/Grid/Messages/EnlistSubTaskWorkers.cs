@@ -17,7 +17,7 @@ namespace MassTransit.Grid.Messages
 
     [Serializable]
     [ExpiresIn("00:01:00")]
-    public class EnlistSubTaskWorkers<TSubTask>
+    public class EnlistSubTaskWorkers<TInput>
     {
     }
 }

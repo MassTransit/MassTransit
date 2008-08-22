@@ -16,12 +16,12 @@ namespace MassTransit.Grid
 	using Messages;
 	using ServiceBus;
 
-	public class SubTaskWorker<TWorker, TSubTask, TResult> :
-		Consumes<ExecuteSubTask<TSubTask>>.All,
-		Consumes<EnlistSubTaskWorkers<TSubTask>>.All
-		where TSubTask : class
-		where TResult : class
-		where TWorker : class, ISubTaskWorker<TSubTask, TResult>
+	public class SubTaskWorker<TWorker, TInput, TOutput> :
+		Consumes<ExecuteSubTask<TInput>>.All,
+		Consumes<EnlistSubTaskWorkers<TInput>>.All
+		where TInput : class
+		where TOutput : class
+		where TWorker : class, ISubTaskWorker<TInput, TOutput>
 	{
 		private static int _activeTaskCount;
 		private static int _taskLimit = 2;
@@ -29,12 +29,12 @@ namespace MassTransit.Grid
 		public IServiceBus Bus { get; set; }
 		public IObjectBuilder Builder { get; set; }
 
-		public void Consume(EnlistSubTaskWorkers<TSubTask> message)
+		public void Consume(EnlistSubTaskWorkers<TInput> message)
 		{
-			Bus.Publish(new SubTaskWorkerAvailable<TSubTask>(Bus.Endpoint.Uri, _taskLimit, _activeTaskCount));
+			Bus.Publish(new SubTaskWorkerAvailable<TInput>(Bus.Endpoint.Uri, _taskLimit, _activeTaskCount));
 		}
 
-		public void Consume(ExecuteSubTask<TSubTask> message)
+		public void Consume(ExecuteSubTask<TInput> message)
 		{
 			TWorker worker = Builder.Build<TWorker>();
 			try
@@ -42,7 +42,7 @@ namespace MassTransit.Grid
 				Interlocked.Increment(ref _activeTaskCount);
 
 				worker.ExecuteTask(message.Task,
-				                   output => Bus.Publish(new SubTaskComplete<TResult>(Bus.Endpoint.Uri,
+				                   output => Bus.Publish(new SubTaskComplete<TOutput>(Bus.Endpoint.Uri,
 				                                                                 _taskLimit,
 				                                                                 _activeTaskCount,
 				                                                                 message.TaskId,

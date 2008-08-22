@@ -14,8 +14,8 @@ namespace MassTransit.Grid
 {
     using System;
 
-    public interface ISubTaskWorker<TSubTask, TResult>
+    public interface ISubTaskWorker<TInput, TOutput>
     {
-        void ExecuteTask(TSubTask task, Action<TResult> result);
+        void ExecuteTask(TInput task, Action<TOutput> result);
     }
 }

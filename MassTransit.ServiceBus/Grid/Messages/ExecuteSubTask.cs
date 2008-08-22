@@ -15,15 +15,15 @@ namespace MassTransit.Grid.Messages
     using System;
 
     [Serializable]
-    public class ExecuteSubTask<TSubTask>
-        where TSubTask : class
+    public class ExecuteSubTask<TInput>
+        where TInput : class
     {
         private readonly Uri _address;
 		private readonly int _subTaskId;
-        private readonly TSubTask _task;
+        private readonly TInput _task;
         private readonly Guid _taskId;
 
-        public ExecuteSubTask(Uri address, Guid taskId, int subTaskId, TSubTask task)
+        public ExecuteSubTask(Uri address, Guid taskId, int subTaskId, TInput task)
         {
             _address = address;
             _taskId = taskId;
@@ -46,7 +46,7 @@ namespace MassTransit.Grid.Messages
             get { return _subTaskId; }
         }
 
-        public TSubTask Task
+        public TInput Task
         {
             get { return _task; }
         }

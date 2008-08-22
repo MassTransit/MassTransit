@@ -101,7 +101,7 @@ namespace MassTransit.Grid
 				}
 
 				// okay deliver the result
-				_distributedTask.DeliverSubTaskOutput(message.SubTaskId, message.Result);
+				_distributedTask.DeliverSubTaskOutput(message.SubTaskId, message.Output);
 			}
 			finally
 			{
