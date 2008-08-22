@@ -10,13 +10,13 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Grid.Tests
+namespace MassTransit.Grid
 {
-	using System.Collections.Generic;
+    using System.Collections.Generic;
 
-	public interface IDistributedTask<TSubTask, TResult> :
-		IEnumerable<TSubTask>
-	{
-		void DeliverResult(long subTaskId, TResult result);
-	}
+    public interface IDistributedTask<TSubTask, TResult> :
+        IEnumerable<TSubTask>
+    {
+        void DeliverResult(long subTaskId, TResult result);
+    }
 }

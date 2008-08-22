@@ -12,47 +12,47 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Grid.Tests
 {
-	using System;
-	using System.Collections;
-	using System.Collections.Generic;
+    using System;
+    using System.Collections;
+    using System.Collections.Generic;
 
-	public class FactorLongNumbers :
-		IDistributedTask<FactorLongNumber, LongNumberFactored>
-	{
-		private readonly Dictionary<long, IList<long>> _results = new Dictionary<long, IList<long>>();
-		private readonly List<long> _values = new List<long>();
-		private Action<FactorLongNumbers> _completed;
+    public class FactorLongNumbers :
+        IDistributedTask<FactorLongNumber, LongNumberFactored>
+    {
+        private readonly Dictionary<long, IList<long>> _results = new Dictionary<long, IList<long>>();
+        private readonly List<long> _values = new List<long>();
+        private Action<FactorLongNumbers> _completed;
 
-		public void DeliverResult(long taskId, LongNumberFactored result)
-		{
-			_results.Add(taskId, result.Factors);
+        public void DeliverResult(long taskId, LongNumberFactored result)
+        {
+            _results.Add(taskId, result.Factors);
 
-			if (_results.Count == _values.Count)
-				_completed(this);
-		}
+            if (_results.Count == _values.Count)
+                _completed(this);
+        }
 
-		IEnumerator<FactorLongNumber> IEnumerable<FactorLongNumber>.GetEnumerator()
-		{
-			long index = 0;
-			foreach (long value in _values)
-			{
-				yield return new FactorLongNumber(index++, value);
-			}
-		}
+        IEnumerator<FactorLongNumber> IEnumerable<FactorLongNumber>.GetEnumerator()
+        {
+            long index = 0;
+            foreach (long value in _values)
+            {
+                yield return new FactorLongNumber(index++, value);
+            }
+        }
 
-		public IEnumerator GetEnumerator()
-		{
-			return ((IEnumerable<FactorLongNumber>) this).GetEnumerator();
-		}
+        public IEnumerator GetEnumerator()
+        {
+            return ((IEnumerable<FactorLongNumber>) this).GetEnumerator();
+        }
 
-		public void Add(long value)
-		{
-			_values.Add(value);
-		}
+        public void Add(long value)
+        {
+            _values.Add(value);
+        }
 
-		public void WhenComplete(Action<FactorLongNumbers> action)
-		{
-			_completed = action;
-		}
-	}
+        public void WhenComplete(Action<FactorLongNumbers> action)
+        {
+            _completed = action;
+        }
+    }
 }
