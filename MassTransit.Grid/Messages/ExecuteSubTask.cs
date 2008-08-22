@@ -10,31 +10,45 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Grid.Tests
+namespace MassTransit.Grid.Messages
 {
     using System;
 
     [Serializable]
-    public class FactorLongNumber
-        : ISubTask
+    public class ExecuteSubTask<TSubTask>
+        where TSubTask : class
     {
-        private readonly long _taskId;
-        private readonly long _value;
+        private readonly Uri _address;
+        private readonly long _subTaskId;
+        private readonly TSubTask _task;
+        private readonly Guid _taskId;
 
-        public FactorLongNumber(long taskId, long value)
+        public ExecuteSubTask(Uri address, Guid taskId, long subTaskId, TSubTask task)
         {
+            _address = address;
             _taskId = taskId;
-            _value = value;
+            _subTaskId = subTaskId;
+            _task = task;
         }
 
-        public long Value
+        public Uri Address
         {
-            get { return _value; }
+            get { return _address; }
         }
 
-        public long TaskId
+        public Guid TaskId
         {
             get { return _taskId; }
+        }
+
+        public long SubTaskId
+        {
+            get { return _subTaskId; }
+        }
+
+        public TSubTask Task
+        {
+            get { return _task; }
         }
     }
 }

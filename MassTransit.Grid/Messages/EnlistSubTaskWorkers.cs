@@ -10,14 +10,14 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Grid.Tests
+namespace MassTransit.Grid.Messages
 {
-	using System;
-	using ServiceBus;
+    using System;
+    using ServiceBus;
 
-	[Serializable]
-	[ExpiresIn("00:01:00")]
-	public class EnlistSubTaskWorkers<TSubTask>
-	{
-	}
+    [Serializable]
+    [ExpiresIn("00:01:00")]
+    public class EnlistSubTaskWorkers<TSubTask>
+    {
+    }
 }

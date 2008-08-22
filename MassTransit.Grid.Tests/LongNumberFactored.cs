@@ -12,22 +12,22 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Grid.Tests
 {
-	using System;
-	using System.Collections.Generic;
+    using System;
+    using System.Collections.Generic;
 
-	[Serializable]
-	public class LongNumberFactored
-	{
-		private readonly List<long> _factors;
+    [Serializable]
+    public class LongNumberFactored
+    {
+        private readonly List<long> _factors;
 
-		public LongNumberFactored(IEnumerable<long> factors)
-		{
-			_factors = new List<long>(factors);
-		}
+        public LongNumberFactored(IEnumerable<long> factors)
+        {
+            _factors = new List<long>(factors);
+        }
 
-		public List<long> Factors
-		{
-			get { return _factors; }
-		}
-	}
+        public List<long> Factors
+        {
+            get { return _factors; }
+        }
+    }
 }

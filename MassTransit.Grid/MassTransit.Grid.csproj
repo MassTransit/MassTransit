@@ -45,7 +45,16 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DistributedTask.cs" />
+    <Compile Include="Messages\EnlistSubTaskWorkers.cs" />
+    <Compile Include="Messages\ExecuteSubTask.cs" />
+    <Compile Include="IDistributedTask.cs" />
+    <Compile Include="ISubTask.cs" />
+    <Compile Include="ISubTaskWorker.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Messages\SubTaskComplete.cs" />
+    <Compile Include="SubTaskWorker.cs" />
+    <Compile Include="Messages\SubTaskWorkerAvailable.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\MassTransit.ServiceBus\MassTransit.ServiceBus.csproj">

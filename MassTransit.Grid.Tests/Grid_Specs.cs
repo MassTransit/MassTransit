@@ -12,61 +12,59 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Grid.Tests
 {
-	using System;
-	using System.Threading;
-	using MassTransit.ServiceBus.Internal;
-	using MassTransit.ServiceBus.Subscriptions;
-	using MassTransit.ServiceBus.Tests;
-	using MassTransit.ServiceBus.Transports;
-	using NUnit.Framework;
-	using NUnit.Framework.SyntaxHelpers;
-	using ServiceBus;
-	using WindsorIntegration;
+    using System;
+    using System.Threading;
+    using MassTransit.ServiceBus.Internal;
+    using MassTransit.ServiceBus.Tests;
+    using NUnit.Framework;
+    using NUnit.Framework.SyntaxHelpers;
+    using ServiceBus;
+    using WindsorIntegration;
 
-	[TestFixture]
-	public class As_a_developer_that_needs_to_distribute_a_task_across_multiple_servers_for_parallel_processing :
-		Specification
-	{
-		private readonly DefaultMassTransitContainer _container = new DefaultMassTransitContainer("castle.xml");
-		private IServiceBus _bus;
-		private IObjectBuilder _builder;
-		private IEndpointResolver _endpointResolver;
+    [TestFixture]
+    public class As_a_developer_that_needs_to_distribute_a_task_across_multiple_servers_for_parallel_processing :
+        Specification
+    {
+        private readonly DefaultMassTransitContainer _container = new DefaultMassTransitContainer("castle.xml");
+        private IServiceBus _bus;
+        private IObjectBuilder _builder;
+        private IEndpointResolver _endpointResolver;
 
-		protected override void Before_each()
-		{
-			_bus = _container.Resolve<IServiceBus>();
-			_builder = _container.Resolve<IObjectBuilder>();
-			_endpointResolver = _container.Resolve<IEndpointResolver>();
+        protected override void Before_each()
+        {
+            _bus = _container.Resolve<IServiceBus>();
+            _builder = _container.Resolve<IObjectBuilder>();
+            _endpointResolver = _container.Resolve<IEndpointResolver>();
 
-			_container.AddComponent<FactorLongNumberWorker>();
-		}
+            _container.AddComponent<FactorLongNumberWorker>();
+        }
 
-		[Test]
-		public void I_want_to_be_able_to_define_a_distributed_task_and_have_it_processed()
-		{
-			_bus.AddComponent<SubTaskWorker<FactorLongNumberWorker, FactorLongNumber, LongNumberFactored>>();
+        [Test]
+        public void I_want_to_be_able_to_define_a_distributed_task_and_have_it_processed()
+        {
+            _bus.AddComponent<SubTaskWorker<FactorLongNumberWorker, FactorLongNumber, LongNumberFactored>>();
 
-			FactorLongNumbers factorLongNumbers = new FactorLongNumbers();
+            FactorLongNumbers factorLongNumbers = new FactorLongNumbers();
 
-			Random random = new Random();
+            Random random = new Random();
 
-			for (int i = 0; i < 2; i++)
-			{
-				long value = (long) (random.NextDouble()*1000000);
+            for (int i = 0; i < 2; i++)
+            {
+                long value = (long) (random.NextDouble()*1000000);
 
-				factorLongNumbers.Add(value);
-			}
+                factorLongNumbers.Add(value);
+            }
 
-			ManualResetEvent _complete = new ManualResetEvent(false);
+            ManualResetEvent _complete = new ManualResetEvent(false);
 
-			factorLongNumbers.WhenComplete(x => _complete.Set());
+            factorLongNumbers.WhenComplete(x => _complete.Set());
 
-			DistributedTask<FactorLongNumbers, FactorLongNumber, LongNumberFactored> distributedTask =
-				new DistributedTask<FactorLongNumbers, FactorLongNumber, LongNumberFactored>(_bus, _endpointResolver, factorLongNumbers);
+            DistributedTask<FactorLongNumbers, FactorLongNumber, LongNumberFactored> distributedTask =
+                new DistributedTask<FactorLongNumbers, FactorLongNumber, LongNumberFactored>(_bus, _endpointResolver, factorLongNumbers);
 
-			distributedTask.Start();
+            distributedTask.Start();
 
-			Assert.That(_complete.WaitOne(TimeSpan.FromMinutes(1), true), Is.True, "Timeout waiting for distributed task to complete");
-		}
-	}
+            Assert.That(_complete.WaitOne(TimeSpan.FromMinutes(1), true), Is.True, "Timeout waiting for distributed task to complete");
+        }
+    }
 }

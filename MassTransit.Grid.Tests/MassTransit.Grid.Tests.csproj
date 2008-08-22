@@ -69,23 +69,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DistributedTask.cs" />
-    <Compile Include="EnlistSubTaskWorkers.cs" />
     <Compile Include="FactorLongNumber.cs" />
     <Compile Include="FactorLongNumbers.cs" />
     <Compile Include="FactorLongNumberWorker.cs" />
     <Compile Include="Grid_Specs.cs" />
-    <Compile Include="IDistributedTask.cs" />
     <Compile Include="IntegerFactorizer.cs" />
     <Compile Include="IntegerFactorizer_Specs.cs" />
-    <Compile Include="ISubTask.cs" />
-    <Compile Include="ISubTaskWorker.cs" />
     <Compile Include="LongNumberFactored.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ExecuteSubTask.cs" />
-    <Compile Include="SubTaskComplete.cs" />
-    <Compile Include="SubTaskWorker.cs" />
-    <Compile Include="SubTaskWorkerAvailable.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Containers\MassTransit.WindsorIntegration\MassTransit.WindsorIntegration.csproj">
