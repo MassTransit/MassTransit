@@ -14,6 +14,7 @@ namespace MassTransit.Grid.Tests
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
 
     public class FactorLongNumberWorker :
         ISubTaskWorker<FactorLongNumber, LongNumberFactored>
@@ -23,6 +24,8 @@ namespace MassTransit.Grid.Tests
         public void ExecuteTask(FactorLongNumber task, Action<LongNumberFactored> result)
         {
             IList<long> factors = _factorizer.Factor(task.Value);
+
+            Debug.WriteLine(string.Format("Factored {0} into {1}", task.Value, factors.Join(",")));
 
             LongNumberFactored longNumberFactored = new LongNumberFactored(factors);
 

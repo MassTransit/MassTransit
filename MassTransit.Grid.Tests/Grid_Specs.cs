@@ -13,6 +13,8 @@
 namespace MassTransit.Grid.Tests
 {
     using System;
+    using System.Collections.Generic;
+    using System.Text;
     using System.Threading;
     using MassTransit.ServiceBus.Internal;
     using MassTransit.ServiceBus.Tests;
@@ -48,9 +50,9 @@ namespace MassTransit.Grid.Tests
 
             Random random = new Random();
 
-            for (int i = 0; i < 2; i++)
+            for (int i = 0; i < 29; i++)
             {
-                long value = (long) (random.NextDouble()*1000000);
+                long value = (long) (random.NextDouble()*100000000);
 
                 factorLongNumbers.Add(value);
             }
@@ -65,6 +67,25 @@ namespace MassTransit.Grid.Tests
             distributedTask.Start();
 
             Assert.That(_complete.WaitOne(TimeSpan.FromMinutes(1), true), Is.True, "Timeout waiting for distributed task to complete");
+        }
+    }
+
+    public static class ListHelpers
+    {
+        public static string Join<T>(this IList<T> items, string separator)
+        {
+            StringBuilder sb = new StringBuilder();
+
+            bool first = true;
+
+            foreach (T item in items)
+            {
+                sb.Append(first ? item.ToString() : separator + item);
+
+                first = false;
+            }
+
+            return sb.ToString();
         }
     }
 }
