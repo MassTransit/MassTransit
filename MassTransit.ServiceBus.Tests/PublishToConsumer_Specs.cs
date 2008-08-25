@@ -28,6 +28,7 @@ namespace MassTransit.ServiceBus.Tests
 			PingMessage message = new PingMessage();
 
 			LocalBus.Publish(message);
+
 		}
 
 		[Test]

@@ -1,0 +1,49 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<configuration>
+
+  <components>
+  <component id="InMemorySubscriptionRepository" 
+    service="MassTransit.ServiceBus.Subscriptions.ISubscriptionRepository, MassTransit.ServiceBus" 
+             type="MassTransit.ServiceBus.Subscriptions.InMemorySubscriptionRepository, MassTransit.ServiceBus"/>
+    
+ <component id="SubscriptionServiceCache" 
+    service="MassTransit.ServiceBus.Subscriptions.ISubscriptionCache, MassTransit.ServiceBus" 
+             type="MassTransit.ServiceBus.Subscriptions.LocalSubscriptionCache, MassTransit.ServiceBus"/>
+
+  <component id="SubscriptionService"
+    type="MassTransit.ServiceBus.Subscriptions.SubscriptionService, MassTransit.ServiceBus">
+    <parameters>
+      <bus>${subscriptions}</bus>
+      <subscriptionCache>${SubscriptionServiceCache}</subscriptionCache>
+    </parameters>
+  </component>
+  </components>
+  <facilities>
+    <facility id="masstransit">
+
+      <bus id="local"
+				 endpoint="loopback://localhost/local_sb">
+        <subscriptionCache mode="local" />
+        <subscriptionService endpoint ="loopback://localhost/pubsub_sb" />
+        <dispatcher minThreads="0"
+							maxThreads="4" />
+      </bus>
+      <bus id="remote"
+				 endpoint="loopback://localhost/remote_sb">
+        <subscriptionCache mode="local" />
+        <subscriptionService endpoint ="loopback://localhost/pubsub_sb" />
+        <dispatcher minThreads="0"
+							maxThreads="4" />
+      </bus>
+      <bus id="subscriptions"
+				 endpoint="loopback://localhost/pubsub_sb">
+        <subscriptionCache mode="local" name="SubscriptionServiceCache" />
+        <dispatcher minThreads="0"
+							maxThreads="4" />
+      </bus>
+      <transports>
+        <transport>MassTransit.ServiceBus.Transports.LoopbackEndpoint, MassTransit.ServiceBus</transport>
+      </transports>
+    </facility>
+  </facilities>
+</configuration>
