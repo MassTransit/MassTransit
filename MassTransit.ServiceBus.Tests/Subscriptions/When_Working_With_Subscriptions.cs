@@ -2,6 +2,7 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
 {
 	using System;
 	using MassTransit.ServiceBus.Subscriptions;
+	using Messages;
 	using NUnit.Framework;
 	using NUnit.Framework.SyntaxHelpers;
 

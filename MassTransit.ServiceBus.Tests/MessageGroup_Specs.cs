@@ -5,6 +5,7 @@ namespace MassTransit.ServiceBus.Tests
 	using System.Threading;
 	using MassTransit.ServiceBus.Internal;
 	using MassTransit.ServiceBus.Subscriptions;
+	using Messages;
 	using NUnit.Framework;
 	using NUnit.Framework.SyntaxHelpers;
 	using Transports;

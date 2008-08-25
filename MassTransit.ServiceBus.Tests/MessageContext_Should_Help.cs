@@ -1,6 +1,7 @@
 namespace MassTransit.ServiceBus.Tests
 {
     using MassTransit.ServiceBus.Internal;
+    using Messages;
     using NUnit.Framework;
     using Rhino.Mocks;
 

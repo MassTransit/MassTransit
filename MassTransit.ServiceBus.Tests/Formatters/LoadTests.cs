@@ -4,6 +4,7 @@ namespace MassTransit.ServiceBus.Tests.Formatters
     using System.IO;
     using System.Text;
     using MassTransit.ServiceBus.Formatters;
+    using Messages;
     using NUnit.Framework;
     using Rhino.Mocks;
 

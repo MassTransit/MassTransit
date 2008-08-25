@@ -1,5 +1,6 @@
 namespace MassTransit.ServiceBus.Tests.IntegrationTests
 {
+	using Messages;
 	using NUnit.Framework;
 	using NUnit.Framework.SyntaxHelpers;
 

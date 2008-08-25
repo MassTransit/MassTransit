@@ -7,6 +7,8 @@ using NUnit.Framework.SyntaxHelpers;
 
 namespace MassTransit.ServiceBus.Tests
 {
+	using Messages;
+
 	[TestFixture]
 	public class When_using_queues_on_a_remote_server
 	{

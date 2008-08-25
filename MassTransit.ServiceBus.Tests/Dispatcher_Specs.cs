@@ -1,6 +1,7 @@
 namespace MassTransit.ServiceBus.Tests
 {
     using System.Collections;
+    using Messages;
     using NUnit.Framework;
 	using NUnit.Framework.SyntaxHelpers;
 	using Rhino.Mocks;
