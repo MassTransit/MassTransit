@@ -98,6 +98,7 @@
     <Compile Include="PublishToConsumer_Specs.cs" />
     <Compile Include="RequestReply_Specs.cs" />
     <Compile Include="Specification.cs" />
+    <Compile Include="SubscriptionManagerContext.cs" />
     <Compile Include="Subscriptions\As_an_AddSubscriptionHandler.cs" />
     <Compile Include="Subscriptions\As_a_CacheUpdateRequestHandler.cs" />
     <Compile Include="Subscriptions\As_a_CancelUpdatesHandler.cs" />
@@ -112,7 +113,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="MessageQueueEndpoint_MeetsCriteria.cs" />
     <Compile Include="Subscriptions\As_a_RemoveSubscriptionHandler.cs" />
+    <Compile Include="Subscriptions\MonitorSubscriptionCache.cs" />
     <Compile Include="Subscriptions\SubscriptionCoordinator_Specs.cs" />
+    <Compile Include="Subscriptions\SubscriptionService_Specs.cs" />
     <Compile Include="Subscriptions\When_a_handler_unsubscribes_from_the_service_bus.cs" />
     <Compile Include="Subscriptions\When_managing_subscriptions_locally.cs" />
     <Compile Include="Subscriptions\When_managing_subscriptions_remotely.cs" />
@@ -142,6 +145,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="loopback.castle.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="subscriptions.castle.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
