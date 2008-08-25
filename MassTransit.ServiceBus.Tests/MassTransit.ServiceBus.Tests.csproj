@@ -2,7 +2,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>8.0.50727</ProductVersion>
+    <ProductVersion>9.0.21022</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{76646B96-936B-4D31-A053-35CD630E3C68}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -19,7 +19,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\bin\</OutputPath>
+    <OutputPath>..\tests\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -34,6 +34,18 @@
     <NoWarn>1587,1591</NoWarn>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Castle.Core, Version=1.0.3.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\libs\Castle\Castle.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Castle.MicroKernel, Version=1.0.3.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\libs\Castle\Castle.MicroKernel.dll</HintPath>
+    </Reference>
+    <Reference Include="Castle.Windsor, Version=1.0.3.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\libs\Castle\Castle.Windsor.dll</HintPath>
+    </Reference>
     <Reference Include="log4net, Version=1.2.10.0, Culture=neutral, PublicKeyToken=1b44e1d426115821, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\libs\log4net.dll</HintPath>
@@ -56,7 +68,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="As_a_ServiceBus.cs" />
     <Compile Include="BusBuilder_Specs.cs" />
     <Compile Include="Fault_Specs.cs" />
     <Compile Include="HealthMonitoring\MonitorInfoSpecs.cs" />
@@ -65,6 +76,7 @@
     <Compile Include="HealthMonitoring\When_monitoring_heartbeats.cs" />
     <Compile Include="Internal\IdempotentHashtable_Specs.cs" />
     <Compile Include="Internal\IdempotentList_Specs.cs" />
+    <Compile Include="LocalAndRemoteTestContext.cs" />
     <Compile Include="LocalSubscriptionCache_Specs.cs" />
     <Compile Include="ConsumerDispatcher_Specs.cs" />
     <Compile Include="ConsumesSelected_Specs.cs" />
@@ -82,6 +94,7 @@
     <Compile Include="MessageFilter_Specs.cs" />
     <Compile Include="MessageGroup_Specs.cs" />
     <Compile Include="ObjectDispatcher_Specs.cs" />
+    <Compile Include="PublishToConsumer_Specs.cs" />
     <Compile Include="Specification.cs" />
     <Compile Include="Subscriptions\As_an_AddSubscriptionHandler.cs" />
     <Compile Include="Subscriptions\As_a_CacheUpdateRequestHandler.cs" />
@@ -113,13 +126,16 @@
     <Compile Include="Subscriptions\When_Working_With_Subscription_Entries.cs" />
     <Compile Include="Messages\UpdateMessage.cs" />
     <Compile Include="Messages\UpdateAcceptedMessage.cs" />
+    <Compile Include="TestMessageConsumer.cs" />
     <Compile Include="ThreadPool_Specs.cs" />
-    <Compile Include="When_an_object_subscribes_to_the_service_bus.cs" />
     <Compile Include="When_a_batch_message_arrives.cs" />
-    <Compile Include="When_A_Message_Is_Received_On_The_Service_Bus.cs" />
     <Compile Include="When_specifying_an_endpoint_address.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Containers\MassTransit.WindsorIntegration\MassTransit.WindsorIntegration.csproj">
+      <Project>{98D5A59C-96FA-4A1B-A653-EA5A35C45FC9}</Project>
+      <Name>MassTransit.WindsorIntegration</Name>
+    </ProjectReference>
     <ProjectReference Include="..\MassTransit.ServiceBus\MassTransit.ServiceBus.csproj">
       <Project>{90482397-6282-465E-8B86-39865FC30127}</Project>
       <Name>MassTransit.ServiceBus</Name>
@@ -129,6 +145,11 @@
     <None Include="log4net.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="loopback.castle.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
