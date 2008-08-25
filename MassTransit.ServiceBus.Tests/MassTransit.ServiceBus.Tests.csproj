@@ -68,12 +68,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Batch_Specs.cs" />
     <Compile Include="BusBuilder_Specs.cs" />
     <Compile Include="Fault_Specs.cs" />
     <Compile Include="HealthMonitoring\MonitorInfoSpecs.cs" />
     <Compile Include="HealthMonitoring\When_a_suspect_is_received.cs" />
     <Compile Include="HealthMonitoring\When_monitoring_health.cs" />
     <Compile Include="HealthMonitoring\When_monitoring_heartbeats.cs" />
+    <Compile Include="Messages\IndividualBatchMessage.cs" />
     <Compile Include="Internal\IdempotentHashtable_Specs.cs" />
     <Compile Include="Internal\IdempotentList_Specs.cs" />
     <Compile Include="LocalAndRemoteTestContext.cs" />
@@ -89,32 +91,25 @@
     <Compile Include="Formatters\LoadTests.cs" />
     <Compile Include="HighLevel\With_a_central_subscription_service.cs" />
     <Compile Include="HighLevel\With_a_local_subscription_service.cs" />
-    <Compile Include="IntegrationTests\When_using_queues_on_a_remote_server.cs" />
     <Compile Include="MessageAttribute_Specs.cs" />
     <Compile Include="MessageFilter_Specs.cs" />
     <Compile Include="MessageGroup_Specs.cs" />
     <Compile Include="ObjectDispatcher_Specs.cs" />
     <Compile Include="PublishToConsumer_Specs.cs" />
+    <Compile Include="RequestReply_Specs.cs" />
     <Compile Include="Specification.cs" />
     <Compile Include="Subscriptions\As_an_AddSubscriptionHandler.cs" />
     <Compile Include="Subscriptions\As_a_CacheUpdateRequestHandler.cs" />
     <Compile Include="Subscriptions\As_a_CancelUpdatesHandler.cs" />
     <Compile Include="Subscriptions\As_a_SubscriptionService.cs" />
     <Compile Include="IntegrationTests\As_Msmq_Storage.cs" />
-    <Compile Include="IntegrationTests\MsmqStorage_Idempotent_Tests.cs" />
-    <Compile Include="IntegrationTests\When_a_message_is_received.cs" />
-    <Compile Include="IntegrationTests\When_filtering_messages_by_condition.cs" />
     <Compile Include="Messages\ClientMessage.cs" />
-    <Compile Include="IntegrationTests\When_sending_a_request.cs" />
     <Compile Include="Messages\DeleteMessage.cs" />
-    <Compile Include="IntegrationTests\When_sending_a_message.cs" />
     <Compile Include="MessageContext_Should_Help.cs" />
     <Compile Include="Messages\PingMessage.cs" />
     <Compile Include="Messages\PoisonMessage.cs" />
     <Compile Include="Messages\PongMessage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="QueueTestContext.cs" />
-    <Compile Include="ServiceBusSetupFixture.cs" />
     <Compile Include="MessageQueueEndpoint_MeetsCriteria.cs" />
     <Compile Include="Subscriptions\As_a_RemoveSubscriptionHandler.cs" />
     <Compile Include="Subscriptions\SubscriptionCoordinator_Specs.cs" />
@@ -128,7 +123,6 @@
     <Compile Include="Messages\UpdateAcceptedMessage.cs" />
     <Compile Include="TestMessageConsumer.cs" />
     <Compile Include="ThreadPool_Specs.cs" />
-    <Compile Include="When_a_batch_message_arrives.cs" />
     <Compile Include="When_specifying_an_endpoint_address.cs" />
   </ItemGroup>
   <ItemGroup>

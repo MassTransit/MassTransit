@@ -23,12 +23,20 @@ namespace MassTransit.ServiceBus.Tests
 		private static readonly TimeSpan _timeout = TimeSpan.FromSeconds(3);
 
 		[Test]
+		public void It_should_be_ignored_if_there_are_no_consumers()
+		{
+			PingMessage message = new PingMessage();
+
+			LocalBus.Publish(message);
+		}
+
+		[Test]
 		public void It_should_be_received_by_an_interested_correlated_consumer()
 		{
 			PingMessage message = new PingMessage();
 
 			TestCorrelatedConsumer<PingMessage, Guid> consumer = new TestCorrelatedConsumer<PingMessage, Guid>(message.CorrelationId);
-			LocalBus.Subscribe(consumer);
+			RemoteBus.Subscribe(consumer);
 
 			LocalBus.Publish(message);
 
@@ -39,10 +47,10 @@ namespace MassTransit.ServiceBus.Tests
 		public void It_should_be_received_by_multiple_subscribed_consumers()
 		{
 			TestMessageConsumer<PingMessage> consumer = new TestMessageConsumer<PingMessage>();
-			LocalBus.Subscribe(consumer);
+			RemoteBus.Subscribe(consumer);
 
 			TestMessageConsumer<PingMessage> messageConsumer = new TestMessageConsumer<PingMessage>();
-			LocalBus.Subscribe<PingMessage>(messageConsumer.MessageHandler);
+			RemoteBus.Subscribe<PingMessage>(messageConsumer.MessageHandler);
 
 			PingMessage message = new PingMessage();
 			LocalBus.Publish(message);
@@ -55,7 +63,7 @@ namespace MassTransit.ServiceBus.Tests
 		public void It_should_be_received_by_one_subscribed_consumer()
 		{
 			TestMessageConsumer<PingMessage> consumer = new TestMessageConsumer<PingMessage>();
-			LocalBus.Subscribe(consumer);
+			RemoteBus.Subscribe(consumer);
 
 			PingMessage message = new PingMessage();
 			LocalBus.Publish(message);
@@ -64,10 +72,21 @@ namespace MassTransit.ServiceBus.Tests
 		}
 
 		[Test]
+		public void It_should_be_received_by_a_component()
+		{
+			RemoteBus.AddComponent<TestMessageConsumer<PingMessage>>();
+
+			PingMessage message = new PingMessage();
+			LocalBus.Publish(message);
+
+			TestMessageConsumer<PingMessage>.AnyShouldHaveReceivedMessage(message, _timeout);
+		}
+
+		[Test]
 		public void It_should_be_received_by_one_subscribed_message_handler()
 		{
 			TestMessageConsumer<PingMessage> messageConsumer = new TestMessageConsumer<PingMessage>();
-			LocalBus.Subscribe<PingMessage>(messageConsumer.MessageHandler);
+			RemoteBus.Subscribe<PingMessage>(messageConsumer.MessageHandler);
 
 			PingMessage message = new PingMessage();
 			LocalBus.Publish(message);
@@ -79,10 +98,10 @@ namespace MassTransit.ServiceBus.Tests
 		public void It_should_not_be_received_by_an_uninterested_consumer()
 		{
 			TestMessageConsumer<PingMessage> messageConsumer = new TestMessageConsumer<PingMessage>();
-			LocalBus.Subscribe<PingMessage>(messageConsumer.MessageHandler, x => false);
+			RemoteBus.Subscribe<PingMessage>(messageConsumer.MessageHandler, x => false);
 
 			TestMessageConsumer<PingMessage> consumer = new TestMessageConsumer<PingMessage>();
-			LocalBus.Subscribe(consumer);
+			RemoteBus.Subscribe(consumer);
 
 			PingMessage message = new PingMessage();
 			LocalBus.Publish(message);
@@ -95,7 +114,7 @@ namespace MassTransit.ServiceBus.Tests
 		public void It_should_not_be_received_by_an_uninterested_correlated_consumer()
 		{
 			TestCorrelatedConsumer<PingMessage, Guid> consumer = new TestCorrelatedConsumer<PingMessage, Guid>(Guid.NewGuid());
-			LocalBus.Subscribe(consumer);
+			RemoteBus.Subscribe(consumer);
 
 			PingMessage message = new PingMessage();
 			LocalBus.Publish(message);

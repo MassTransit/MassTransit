@@ -35,6 +35,8 @@ namespace MassTransit.ServiceBus.Tests
 		[TearDown]
 		public void Teardown()
 		{
+			After_each();
+
 			_localBus.Dispose();
 			_container.Release(_localBus);
 
