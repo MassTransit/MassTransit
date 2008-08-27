@@ -25,10 +25,10 @@ namespace MassTransit.ServiceBus.Tests
 			Assert.IsTrue(sc.GotFault.WaitOne(TimeSpan.FromSeconds(5), true));
 		}
 
-		private LocalSubscriptionCache _cache = new LocalSubscriptionCache();
-		private IEndpoint _endpoint = new LoopbackEndpoint(new Uri("loopback://localhost/servicebus"));
-		private IEndpointResolver _resolver = new EndpointResolver();
-		private IServiceBus _bus;
+		private LocalSubscriptionCache _cache;
+	    private IEndpointResolver _resolver;
+	    private IEndpoint _endpoint;
+	    private IServiceBus _bus;
 		private IObjectBuilder _builder;
 
 		static When_a_message_fault_occurs()
@@ -39,8 +39,8 @@ namespace MassTransit.ServiceBus.Tests
 		protected override void Before_each()
 		{
 			_cache = new LocalSubscriptionCache();
-			_resolver = new EndpointResolver();
-			_endpoint = _resolver.Resolve(new Uri("loopback://localhost/servicebus"));
+		    _resolver = new EndpointResolver();
+		    _endpoint = _resolver.Resolve(new Uri("loopback://localhost/servicebus"));
 			_builder = DynamicMock<IObjectBuilder>();
 			_bus = new ServiceBus(_endpoint, _builder, _cache, _resolver);
 		}
@@ -97,25 +97,26 @@ namespace MassTransit.ServiceBus.Tests
 			Assert.IsTrue(sc.GotFault.WaitOne(TimeSpan.FromSeconds(5), true));
 		}
 
-		private LocalSubscriptionCache _cache = new LocalSubscriptionCache();
-		private IEndpoint _endpoint = new LoopbackEndpoint(new Uri("loopback://localhost/servicebus"));
-		private IEndpointResolver _resolver = new EndpointResolver();
-		private IServiceBus _bus;
+			private LocalSubscriptionCache _cache;
+	    private IEndpointResolver _resolver;
+	    private IEndpoint _endpoint;
+	    private IServiceBus _bus;
 		private IObjectBuilder _builder;
 
-		static When_a_correlated_message_fault_is_received()
+        static When_a_correlated_message_fault_is_received()
 		{
-			EndpointResolver.AddTransport(typeof(LoopbackEndpoint));
+			EndpointResolver.AddTransport(typeof (LoopbackEndpoint));
 		}
 
 		protected override void Before_each()
 		{
 			_cache = new LocalSubscriptionCache();
-			_resolver = new EndpointResolver();
-			_endpoint = _resolver.Resolve(new Uri("loopback://localhost/servicebus"));
+		    _resolver = new EndpointResolver();
+		    _endpoint = _resolver.Resolve(new Uri("loopback://localhost/servicebus"));
 			_builder = DynamicMock<IObjectBuilder>();
 			_bus = new ServiceBus(_endpoint, _builder, _cache, _resolver);
 		}
+
 
 		protected override void After_each()
 		{

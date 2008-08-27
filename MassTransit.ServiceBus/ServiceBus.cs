@@ -239,8 +239,11 @@ namespace MassTransit.ServiceBus
 
         private void StartListening()
         {
-            _log.DebugFormat("ServiceBus is listening on {0}", _endpointToListenOn.Uri);
-            _receiveThread.Start();
+            if ( _receiveThread.Start() )
+            {
+                if(_log.IsDebugEnabled)
+                    _log.DebugFormat("ServiceBus is listening on {0}", _endpointToListenOn.Uri);
+            }
         }
 
         public void Dispatch(object message)

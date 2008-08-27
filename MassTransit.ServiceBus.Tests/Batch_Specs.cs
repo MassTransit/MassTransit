@@ -23,7 +23,7 @@ namespace MassTransit.ServiceBus.Tests
 		private static readonly TimeSpan _timeout = TimeSpan.FromSeconds(3);
 		private int _batchSize;
 
-		protected override void After_each()
+		protected  void RunTest()
 		{
 			TestBatchConsumer<IndividualBatchMessage, Guid> batchConsumer = new TestBatchConsumer<IndividualBatchMessage, Guid>();
 
@@ -44,19 +44,22 @@ namespace MassTransit.ServiceBus.Tests
 		public void A_batch_with_a_lot_of_messages_should_be_received()
 		{
 			_batchSize = 1027;
+		    RunTest();
 		}
 
 		[Test]
 		public void A_batch_with_a_single_message_should_be_received()
 		{
 			_batchSize = 1;
-		}
+            RunTest();
+        }
 
 		[Test]
 		public void A_single_consumer_should_receive_the_entire_batch()
 		{
 			_batchSize = 2;
-		}
+            RunTest();
+        }
 	}
 
 	[TestFixture]
@@ -66,7 +69,7 @@ namespace MassTransit.ServiceBus.Tests
 		private static readonly TimeSpan _timeout = TimeSpan.FromSeconds(3);
 		private int _batchSize;
 
-		protected override void After_each()
+		protected  void RunTest()
 		{
 			RemoteBus.AddComponent<TestBatchConsumer<IndividualBatchMessage, Guid>>();
 
@@ -85,18 +88,21 @@ namespace MassTransit.ServiceBus.Tests
 		public void A_batch_with_a_lot_of_messages_should_be_received()
 		{
 			_batchSize = 1027;
+		    RunTest();
 		}
 
 		[Test]
 		public void A_batch_with_a_single_message_should_be_received()
 		{
 			_batchSize = 1;
+		    RunTest();
 		}
 
 		[Test]
 		public void A_single_consumer_should_receive_the_entire_batch()
 		{
 			_batchSize = 2;
+		    RunTest();
 		}
 	}
 

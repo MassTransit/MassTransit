@@ -13,7 +13,6 @@
 namespace MassTransit.ServiceBus.Internal
 {
     using System;
-    using System.Threading;
     using log4net;
     using Threading;
 
@@ -32,9 +31,7 @@ namespace MassTransit.ServiceBus.Internal
 
         protected override void RunThread(object obj)
         {
-            WaitHandle[] handles = new WaitHandle[] {Shutdown};
-
-            while ((WaitHandle.WaitAny(handles, 0, false)) != 0)
+            while (Shutdown.WaitOne(0, false) == false)
             {
                 try
                 {

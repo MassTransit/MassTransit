@@ -1,234 +1,229 @@
-/// Copyright 2007-2008 The Apache Software Foundation.
-/// 
-/// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
-/// this file except in compliance with the License. You may obtain a copy of the 
-/// License at 
-/// 
-///   http://www.apache.org/licenses/LICENSE-2.0 
-/// 
-/// Unless required by applicable law or agreed to in writing, software distributed 
-/// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-/// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-/// specific language governing permissions and limitations under the License.
+// Copyright 2007-2008 The Apache Software Foundation.
+//  
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
+// this file except in compliance with the License. You may obtain a copy of the 
+// License at 
+// 
+//     http://www.apache.org/licenses/LICENSE-2.0 
+// 
+// Unless required by applicable law or agreed to in writing, software distributed 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// specific language governing permissions and limitations under the License.
 namespace MassTransit.ServiceBus.Subscriptions
 {
-	using System;
-	using System.Collections.Generic;
-	using log4net;
+    using System;
+    using System.Collections.Generic;
+    using log4net;
 
-	public class LocalSubscriptionCache :
-		ISubscriptionCache
-	{
-		private static readonly ILog _log = LogManager.GetLogger(typeof (LocalSubscriptionCache));
+    public class LocalSubscriptionCache :
+        ISubscriptionCache
+    {
+        private static readonly ILog _log = LogManager.GetLogger(typeof (LocalSubscriptionCache));
+        private readonly object _changeLock = new object();
 
-		private readonly Dictionary<string, List<SubscriptionCacheEntry>> _correlatedSubscriptions =
-			new Dictionary<string, List<SubscriptionCacheEntry>>(StringComparer.InvariantCultureIgnoreCase);
+        private readonly Dictionary<string, List<SubscriptionCacheEntry>> _correlatedSubscriptions =
+            new Dictionary<string, List<SubscriptionCacheEntry>>(StringComparer.InvariantCultureIgnoreCase);
 
-		private readonly Dictionary<string, List<SubscriptionCacheEntry>> _messageTypeSubscriptions =
-			new Dictionary<string, List<SubscriptionCacheEntry>>(StringComparer.InvariantCultureIgnoreCase);
+        private readonly Dictionary<string, List<SubscriptionCacheEntry>> _messageTypeSubscriptions =
+            new Dictionary<string, List<SubscriptionCacheEntry>>(StringComparer.InvariantCultureIgnoreCase);
 
-		private readonly object addLock = new object();
-		private readonly object deleteLock = new object();
+        public IList<Subscription> List()
+        {
+            List<Subscription> result = new List<Subscription>();
 
-		#region ISubscriptionCache Members
+            lock (_changeLock)
+            {
+                foreach (KeyValuePair<string, List<SubscriptionCacheEntry>> pair in _messageTypeSubscriptions)
+                {
+                    pair.Value.ForEach(
+                        delegate(SubscriptionCacheEntry e)
+                            {
+                                if (!result.Contains(e.Subscription))
+                                    result.Add(e.Subscription);
+                            });
+                }
 
-		public IList<Subscription> List()
-		{
-			List<Subscription> result = new List<Subscription>();
+                foreach (KeyValuePair<string, List<SubscriptionCacheEntry>> pair in _correlatedSubscriptions)
+                {
+                    pair.Value.ForEach(
+                        delegate(SubscriptionCacheEntry e)
+                            {
+                                if (!result.Contains(e.Subscription))
+                                    result.Add(e.Subscription);
+                            });
+                }
+            }
 
-			foreach (KeyValuePair<string, List<SubscriptionCacheEntry>> pair in _messageTypeSubscriptions)
-			{
-				pair.Value.ForEach(
-					delegate(SubscriptionCacheEntry e)
-						{
-							if (!result.Contains(e.Subscription))
-								result.Add(e.Subscription);
-						});
-			}
+            return result;
+        }
 
-			foreach (KeyValuePair<string, List<SubscriptionCacheEntry>> pair in _correlatedSubscriptions)
-			{
-				pair.Value.ForEach(
-					delegate(SubscriptionCacheEntry e)
-						{
-							if (!result.Contains(e.Subscription))
-								result.Add(e.Subscription);
-						});
-			}
+        public IList<Subscription> List(string messageName)
+        {
+            lock (_changeLock)
+            {
+                List<Subscription> result = new List<Subscription>();
+                if (_messageTypeSubscriptions.ContainsKey(messageName))
+                {
+                    _messageTypeSubscriptions[messageName].ForEach(entry => result.Add(entry.Subscription));
+                }
 
-			return result;
-		}
+                return result;
+            }
+        }
 
-		public IList<Subscription> List(string messageName)
-		{
-			List<Subscription> result = new List<Subscription>();
-			if (_messageTypeSubscriptions.ContainsKey(messageName))
-			{
-				_messageTypeSubscriptions[messageName].ForEach(
-					delegate(SubscriptionCacheEntry entry) { result.Add(entry.Subscription); });
-			}
+        public IList<Subscription> List(string messageName, string correlationId)
+        {
+            List<Subscription> result = new List<Subscription>();
+            lock (_changeLock)
+            {
+                if (_messageTypeSubscriptions.ContainsKey(messageName))
+                {
+                    _messageTypeSubscriptions[messageName].ForEach(
+                        delegate(SubscriptionCacheEntry entry)
+                            {
+                                if (!result.Contains(entry.Subscription))
+                                    result.Add(entry.Subscription);
+                            });
+                }
 
-			return result;
-		}
+                string key = GetSubscriptionKey(messageName, correlationId);
 
-		public IList<Subscription> List(string messageName, string correlationId)
-		{
-			List<Subscription> result = new List<Subscription>();
+                if (_correlatedSubscriptions.ContainsKey(key))
+                {
+                    _correlatedSubscriptions[key].ForEach(
+                        delegate(SubscriptionCacheEntry entry)
+                            {
+                                if (!result.Contains(entry.Subscription))
+                                    result.Add(entry.Subscription);
+                            });
+                }
+            }
+            return result;
+        }
 
-			if (_messageTypeSubscriptions.ContainsKey(messageName))
-			{
-				_messageTypeSubscriptions[messageName].ForEach(
-					delegate(SubscriptionCacheEntry entry)
-						{
-							if(!result.Contains(entry.Subscription))
-								result.Add(entry.Subscription);
-						});
-			}
+        public void Add(Subscription subscription)
+        {
+            bool added;
+            lock (_changeLock)
+            {
+                if (string.IsNullOrEmpty(subscription.CorrelationId))
+                    added = Add(_messageTypeSubscriptions, subscription);
+                else
+                    added = Add(_correlatedSubscriptions, subscription);
+            }
 
-			string key = GetSubscriptionKey(messageName, correlationId);
+            if (added)
+            {
+                OnAddSubscription(this, new SubscriptionEventArgs(subscription));
+            }
+        }
 
-			if (_correlatedSubscriptions.ContainsKey(key))
-			{
-				_correlatedSubscriptions[key].ForEach(
-					delegate(SubscriptionCacheEntry entry)
-						{
-							if (!result.Contains(entry.Subscription))
-								result.Add(entry.Subscription);
-						});
-			}
+        public void Remove(Subscription subscription)
+        {
+            bool removed;
+            lock (_changeLock)
+            {
+                if (string.IsNullOrEmpty(subscription.CorrelationId))
+                    removed = Remove(_messageTypeSubscriptions, subscription);
+                else
+                    removed = Remove(_correlatedSubscriptions, subscription);
+            }
 
-			return result;
-		}
+            if (removed)
+            {
+                OnRemoveSubscription(this, new SubscriptionEventArgs(subscription));
+            }
+        }
 
-		public void Add(Subscription subscription)
-		{
-			lock (addLock)
-			{
-				bool added = false;
+        public event EventHandler<SubscriptionEventArgs> OnAddSubscription = delegate { };
 
-				if (string.IsNullOrEmpty(subscription.CorrelationId))
-					added = Add(_messageTypeSubscriptions, subscription);
-				else
-					added = Add(_correlatedSubscriptions, subscription);
+        public event EventHandler<SubscriptionEventArgs> OnRemoveSubscription = delegate { };
 
-				if (added)
-				{
-					OnAddSubscription(this, new SubscriptionEventArgs(subscription));
-				}
-			}
-		}
+        public void Dispose()
+        {
+            _messageTypeSubscriptions.Clear();
+            _correlatedSubscriptions.Clear();
+        }
 
-		public void Remove(Subscription subscription)
-		{
-			if (_log.IsDebugEnabled)
-				_log.DebugFormat("Removing Local Subscription {0}/{1} : {2}", subscription.MessageName, subscription.CorrelationId, subscription.EndpointUri);
+        private static string GetSubscriptionKey(Subscription subscription)
+        {
+            if (string.IsNullOrEmpty(subscription.CorrelationId))
+            
+                return subscription.MessageName;
+            return subscription.MessageName + "/" + subscription.CorrelationId;
+        }
 
-			lock (deleteLock)
-			{
-				bool removed = false;
+        private static string GetSubscriptionKey(string messageName, string correlationId)
+        {
+            if (string.IsNullOrEmpty(correlationId))
+                return messageName;
 
-				if (string.IsNullOrEmpty(subscription.CorrelationId))
-					removed = Remove(_messageTypeSubscriptions, subscription);
-				else
-					removed = Remove(_correlatedSubscriptions, subscription);
+            return messageName + "/" + correlationId;
+        }
 
-				if (removed)
-				{
-					OnRemoveSubscription(this, new SubscriptionEventArgs(subscription));
-				}
-			}
-		}
+        private static bool Add(IDictionary<string, List<SubscriptionCacheEntry>> cache, Subscription subscription)
+        {
+            string key = GetSubscriptionKey(subscription);
 
-		public event EventHandler<SubscriptionEventArgs> OnAddSubscription = delegate { };
+            if (!cache.ContainsKey(key))
+            {
+                if (_log.IsDebugEnabled)
+                    _log.DebugFormat("Adding new local subscription list for message {0}",
+                                     key);
 
-		public event EventHandler<SubscriptionEventArgs> OnRemoveSubscription = delegate { };
+                cache.Add(key, new List<SubscriptionCacheEntry>());
+            }
 
-		public void Dispose()
-		{
-			_messageTypeSubscriptions.Clear();
-			_correlatedSubscriptions.Clear();
-		}
+            SubscriptionCacheEntry entry = new SubscriptionCacheEntry(subscription);
 
-		private static string GetSubscriptionKey(Subscription subscription)
-		{
-			if (string.IsNullOrEmpty(subscription.CorrelationId))
-				return subscription.MessageName;
-			else
-				return subscription.MessageName + "/" + subscription.CorrelationId;
-		}
+            if (!cache[key].Contains(entry))
+            {
+                if (_log.IsDebugEnabled)
+                    _log.DebugFormat("Adding new local subscription for {0} going to {1}",
+                                     key,
+                                     subscription.EndpointUri);
 
-		private static string GetSubscriptionKey(string messageName, string correlationId)
-		{
-			if (string.IsNullOrEmpty(correlationId))
-				return messageName;
-			else
-				return messageName + "/" + correlationId;
-		}
+                cache[key].Add(entry);
 
-		private static bool Add(IDictionary<string, List<SubscriptionCacheEntry>> cache, Subscription subscription)
-		{
-			string key = GetSubscriptionKey(subscription);
+                return true;
+            }
 
-			if (!cache.ContainsKey(key))
-			{
-				if (_log.IsDebugEnabled)
-					_log.DebugFormat("Adding new local subscription list for message {0}",
-					                 key);
+            return false;
+        }
 
-				cache.Add(key, new List<SubscriptionCacheEntry>());
-			}
+        private static bool Remove(IDictionary<string, List<SubscriptionCacheEntry>> cache, Subscription subscription)
+        {
+            bool removed = false;
 
-			SubscriptionCacheEntry entry = new SubscriptionCacheEntry(subscription);
+            string key = GetSubscriptionKey(subscription);
 
-			if (!cache[key].Contains(entry))
-			{
-				if (_log.IsDebugEnabled)
-					_log.DebugFormat("Adding new local subscription for {0} going to {1}",
-					                 key,
-					                 subscription.EndpointUri);
+            if (cache.ContainsKey(key))
+            {
+                SubscriptionCacheEntry entry = new SubscriptionCacheEntry(subscription);
 
-				cache[key].Add(entry);
+                if (cache[key].Contains(entry))
+                {
+                    if (_log.IsDebugEnabled)
+                        _log.DebugFormat("Removing local subscription for {0} going to {1}",
+                                         key,
+                                         subscription.EndpointUri);
 
-				return true;
-			}
+                    cache[key].Remove(entry);
+                }
 
-			return false;
-		}
+                if (cache[key].Count == 0)
+                {
+                    if (_log.IsDebugEnabled)
+                        _log.DebugFormat("Removing local subscription list for message {0}", key);
 
-		private static bool Remove(IDictionary<string, List<SubscriptionCacheEntry>> cache, Subscription subscription)
-		{
-			bool removed = false;
+                    cache.Remove(key);
 
-			string key = GetSubscriptionKey(subscription);
+                    removed = true;
+                }
+            }
 
-			if (cache.ContainsKey(key))
-			{
-				SubscriptionCacheEntry entry = new SubscriptionCacheEntry(subscription);
-
-				if (cache[key].Contains(entry))
-				{
-					if (_log.IsDebugEnabled)
-						_log.DebugFormat("Removing local subscription for {0} going to {1}",
-						                 key,
-						                 subscription.EndpointUri);
-
-					cache[key].Remove(entry);
-				}
-
-				if (cache[key].Count == 0)
-				{
-					if (_log.IsDebugEnabled)
-						_log.DebugFormat("Removing local subscription list for message {0}", key);
-
-					cache.Remove(key);
-
-					removed = true;
-				}
-			}
-
-			return removed;
-		}
-
-		#endregion
-	}
+            return removed;
+        }
+    }
 }

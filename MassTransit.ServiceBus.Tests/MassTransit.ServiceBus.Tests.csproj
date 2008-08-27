@@ -70,6 +70,7 @@
   <ItemGroup>
     <Compile Include="Batch_Specs.cs" />
     <Compile Include="BusBuilder_Specs.cs" />
+    <Compile Include="ContextSetup.cs" />
     <Compile Include="Fault_Specs.cs" />
     <Compile Include="HealthMonitoring\MonitorInfoSpecs.cs" />
     <Compile Include="HealthMonitoring\When_a_suspect_is_received.cs" />
@@ -89,8 +90,6 @@
     <Compile Include="Formatters\BinaryBodyFormatterTests.cs" />
     <Compile Include="Formatters\JsonBodyFormatterTests.cs" />
     <Compile Include="Formatters\LoadTests.cs" />
-    <Compile Include="HighLevel\With_a_central_subscription_service.cs" />
-    <Compile Include="HighLevel\With_a_local_subscription_service.cs" />
     <Compile Include="MessageAttribute_Specs.cs" />
     <Compile Include="MessageFilter_Specs.cs" />
     <Compile Include="MessageGroup_Specs.cs" />
@@ -103,7 +102,6 @@
     <Compile Include="Subscriptions\As_a_CacheUpdateRequestHandler.cs" />
     <Compile Include="Subscriptions\As_a_CancelUpdatesHandler.cs" />
     <Compile Include="Subscriptions\As_a_SubscriptionService.cs" />
-    <Compile Include="IntegrationTests\As_Msmq_Storage.cs" />
     <Compile Include="Messages\ClientMessage.cs" />
     <Compile Include="Messages\DeleteMessage.cs" />
     <Compile Include="MessageContext_Should_Help.cs" />
@@ -139,9 +137,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="log4net.config">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="loopback.castle.xml">

@@ -30,7 +30,7 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
 		[Test]
 		public void A_subscription_should_be_removed_from_the_service()
 		{
-			MonitorSubscriptionCache<PingMessage> monitor = new MonitorSubscriptionCache<PingMessage>(SubscriptionCache);
+            MonitorSubscriptionCache<PingMessage> monitor = new MonitorSubscriptionCache<PingMessage>(SubscriptionCache);
 
 			TestMessageConsumer<PingMessage> consumer = new TestMessageConsumer<PingMessage>();
 			LocalBus.Subscribe(consumer);

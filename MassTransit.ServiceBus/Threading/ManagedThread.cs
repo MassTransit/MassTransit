@@ -1,78 +1,79 @@
-/// Copyright 2007-2008 The Apache Software Foundation.
-/// 
-/// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
-/// this file except in compliance with the License. You may obtain a copy of the 
-/// License at 
-/// 
-///   http://www.apache.org/licenses/LICENSE-2.0 
-/// 
-/// Unless required by applicable law or agreed to in writing, software distributed 
-/// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-/// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-/// specific language governing permissions and limitations under the License.
+// Copyright 2007-2008 The Apache Software Foundation.
+//  
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
+// this file except in compliance with the License. You may obtain a copy of the 
+// License at 
+// 
+//     http://www.apache.org/licenses/LICENSE-2.0 
+// 
+// Unless required by applicable law or agreed to in writing, software distributed 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// specific language governing permissions and limitations under the License.
 namespace MassTransit.ServiceBus.Threading
 {
-	using System;
-	using System.Threading;
+    using System;
+    using System.Threading;
 
-	public class ManagedThread : IDisposable
-	{
-		private readonly ManualResetEvent _shutdown = new ManualResetEvent(false);
-		private readonly Thread _thread;
-		private readonly TimeSpan _threadExitWaitTime = TimeSpan.FromMinutes(1);
+    public class ManagedThread : 
+        IDisposable
+    {
+        private readonly ManualResetEvent _shutdown = new ManualResetEvent(false);
+        private readonly Thread _thread;
+        private readonly TimeSpan _threadExitWaitTime = TimeSpan.FromMinutes(1);
 
-		public ManagedThread()
-		{
-			_thread = new Thread(RunThread);
-		}
+        public ManagedThread()
+        {
+            _thread = new Thread(RunThread);
+        }
 
-		protected ManualResetEvent Shutdown
-		{
-			get { return _shutdown; }
-		}
+        protected ManualResetEvent Shutdown
+        {
+            get { return _shutdown; }
+        }
 
-		public void Dispose()
-		{
-			_shutdown.Set();
-			if(_thread.IsAlive)
-				_thread.Join(_threadExitWaitTime);
-		}
+        public void Dispose()
+        {
+            Stop();
+        }
 
-		public void Start()
-		{
-			if (_thread.IsAlive)
-				return;
+        public bool Start()
+        {
+            if (_thread.IsAlive)
+                return false;
 
-			_shutdown.Reset();
-			_thread.Start();
-		}
+            _shutdown.Reset();
+            _thread.Start();
 
-		public void Start(object obj)
-		{
-			if (_thread.IsAlive)
-				return;
+            return true;
+        }
 
-			_shutdown.Reset();
-			_thread.Start(obj);
-		}
+        public void Start(object obj)
+        {
+            if (_thread.IsAlive)
+                return;
 
-		public void Stop()
-		{
-			if (_thread.IsAlive)
-			{
-				_shutdown.Set();
-				_thread.Join(_threadExitWaitTime);
-			}
-		}
+            _shutdown.Reset();
+            _thread.Start(obj);
+        }
 
-		protected virtual void RunThread(object obj)
-		{
-			WaitHandle[] handles = new WaitHandle[] {_shutdown};
+        public void Stop()
+        {
+            if (_thread.IsAlive)
+            {
+                _shutdown.Set();
+                _thread.Join(_threadExitWaitTime);
+            }
+        }
 
-			int result;
-			while ((result = WaitHandle.WaitAny(handles, TimeSpan.FromSeconds(5), true)) != 0)
-			{
-			}
-		}
-	}
+        protected virtual void RunThread(object obj)
+        {
+            WaitHandle[] handles = new WaitHandle[] {_shutdown};
+
+            int result;
+            while ((result = WaitHandle.WaitAny(handles, TimeSpan.FromSeconds(5), true)) != 0)
+            {
+            }
+        }
+    }
 }
