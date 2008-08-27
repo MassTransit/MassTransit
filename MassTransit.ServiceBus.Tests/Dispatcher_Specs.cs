@@ -1,10 +1,14 @@
 namespace MassTransit.ServiceBus.Tests
 {
+    using System;
     using System.Collections;
+    using MassTransit.ServiceBus.Internal;
+    using MassTransit.ServiceBus.Subscriptions;
     using Messages;
     using NUnit.Framework;
 	using NUnit.Framework.SyntaxHelpers;
 	using Rhino.Mocks;
+    using Transports;
 
     [TestFixture]
     public class When_a_message_is_delivered_to_the_service_bus :
@@ -13,13 +17,20 @@ namespace MassTransit.ServiceBus.Tests
 
         private ServiceBus _bus;
         private IObjectBuilder obj;
+        private EndpointResolver _endpointResolver;
+        private IEndpoint _endpoint;
+        private Uri _endpointUri = new Uri("loopback://localhost/test");
 
         protected override void Before_each()
         {
-            IEndpoint endpoint = DynamicMock<IEndpoint>();
+            _endpointResolver = new EndpointResolver();
+            EndpointResolver.AddTransport(typeof(LoopbackEndpoint));
+
+            _endpoint = _endpointResolver.Resolve(_endpointUri);
+
             obj = DynamicMock<IObjectBuilder>();
 
-            _bus = new ServiceBus(endpoint, obj);
+            _bus = new ServiceBus(_endpoint, obj, new LocalSubscriptionCache(), _endpointResolver);
         }
 
         [Test]

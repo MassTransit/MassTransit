@@ -43,6 +43,7 @@ namespace MassTransit.ServiceBus.Subscriptions
 		{
 			_endpointUri = subscription.EndpointUri;
 			_messageName = subscription.MessageName.Trim();
+		    _correlationId = subscription.CorrelationId;
 		}
 
 		public Uri EndpointUri

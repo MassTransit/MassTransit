@@ -12,8 +12,12 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.ServiceBus.Tests
 {
-	using Castle.Windsor;
-	using MassTransit.ServiceBus.Subscriptions;
+    using System.IO;
+    using System.Reflection;
+    using Castle.Core;
+    using Castle.Windsor;
+    using log4net.Config;
+    using MassTransit.ServiceBus.Subscriptions;
 	using NUnit.Framework;
 	using WindsorIntegration;
 
@@ -26,14 +30,15 @@ namespace MassTransit.ServiceBus.Tests
 		public void Setup()
 		{
 			_container = new DefaultMassTransitContainer("subscriptions.castle.xml");
+            _container.AddComponentLifeStyle("followerRepository", typeof(FollowerRepository), LifestyleType.Singleton);
+
+            _subscriptionBus = _container.Resolve<IServiceBus>("subscriptions");
+            _subscriptionService = _container.Resolve<SubscriptionService>();
+            _subscriptionService.Start();
 
 			_localBus = _container.Resolve<IServiceBus>("local");
 			_remoteBus = _container.Resolve<IServiceBus>("remote");
-			_subscriptionBus = _container.Resolve<IServiceBus>("subscriptions");
-
-			_subscriptionService = _container.Resolve<SubscriptionService>();
-			_subscriptionService.Start();
-
+			
 			_subscriptionCache = _container.Resolve<ISubscriptionCache>("SubscriptionServiceCache");
 			Before_each();
 		}
