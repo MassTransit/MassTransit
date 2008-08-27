@@ -1,3 +1,15 @@
+// Copyright 2007-2008 The Apache Software Foundation.
+//  
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
+// this file except in compliance with the License. You may obtain a copy of the 
+// License at 
+// 
+//     http://www.apache.org/licenses/LICENSE-2.0 
+// 
+// Unless required by applicable law or agreed to in writing, software distributed 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// specific language governing permissions and limitations under the License.
 namespace MassTransit.ServiceBus.Tests
 {
 	using System;
@@ -69,8 +81,8 @@ namespace MassTransit.ServiceBus.Tests
 
 			using (Record())
 			{
-				bus.Publish<PingMessage>(ping);
-				bus.Publish<PongMessage>(pong);
+				bus.Publish(ping);
+				bus.Publish(pong);
 			}
 
 			using (Playback())
@@ -129,7 +141,7 @@ namespace MassTransit.ServiceBus.Tests
 
 			_endpoint = _resolver.Resolve(new Uri("loopback://localhost/test"));
 
-			_builder = DynamicMock<IObjectBuilder>();
+			_builder = Stub<IObjectBuilder>();
 			_cache = new LocalSubscriptionCache();
 			_bus = new ServiceBus(_endpoint, _builder, _cache, _resolver);
 		}
@@ -185,7 +197,7 @@ namespace MassTransit.ServiceBus.Tests
 		[AllowMessageType(typeof (PingMessage), typeof (PongMessage))]
 		internal class SpecialGroup : MessageGroup
 		{
-			private bool _splitOnConsume = false;
+			private bool _splitOnConsume;
 
 			public SpecialGroup(List<object> messages) :
 				base(messages)

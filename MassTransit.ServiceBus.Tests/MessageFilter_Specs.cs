@@ -2,8 +2,10 @@ namespace MassTransit.ServiceBus.Tests
 {
 	using System;
 	using System.Threading;
+	using MassTransit.ServiceBus.Internal;
 	using NUnit.Framework;
 	using NUnit.Framework.SyntaxHelpers;
+	using Transports;
 
 	[TestFixture]
 	public class When_a_message_filter_is_subscribed_to_the_service_bus :
@@ -14,6 +16,7 @@ namespace MassTransit.ServiceBus.Tests
 		private readonly RequestMessage _message = new RequestMessage();
 		private readonly ManualResetEvent _passed = new ManualResetEvent(false);
 		private TestConsumer<RequestMessage> _consumer;
+		private EndpointResolver _endpointResolver;
 
 		internal class TestConsumer<T> : Consumes<T>.All where T : class
 		{
@@ -37,7 +40,11 @@ namespace MassTransit.ServiceBus.Tests
 
         protected override void Before_each()
         {
-			_mockServiceBusEndPoint = DynamicMock<IEndpoint>();
+			EndpointResolver.AddTransport(typeof(LoopbackEndpoint));
+
+			_endpointResolver = new EndpointResolver();
+        	_mockServiceBusEndPoint = _endpointResolver.Resolve(new Uri("loopback://localhost/test"));
+
 			_serviceBus = new ServiceBus(_mockServiceBusEndPoint, DynamicMock<IObjectBuilder>());
 
 			_consumer = new TestConsumer<RequestMessage>(delegate { _passed.Set(); });

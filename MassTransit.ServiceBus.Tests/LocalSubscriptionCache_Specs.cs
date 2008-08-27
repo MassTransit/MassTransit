@@ -1,68 +1,68 @@
+// Copyright 2007-2008 The Apache Software Foundation.
+//  
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
+// this file except in compliance with the License. You may obtain a copy of the 
+// License at 
+// 
+//     http://www.apache.org/licenses/LICENSE-2.0 
+// 
+// Unless required by applicable law or agreed to in writing, software distributed 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// specific language governing permissions and limitations under the License.
 namespace MassTransit.ServiceBus.Tests
 {
 	using System;
+	using MassTransit.ServiceBus.Internal;
 	using MassTransit.ServiceBus.Subscriptions;
 	using Messages;
 	using NUnit.Framework;
-	using Rhino.Mocks;
+	using Transports;
 
 	[TestFixture]
 	public class When_a_handler_subscription_is_added :
-        Specification
+		Specification
 	{
 		private ServiceBus _serviceBus;
 		private IEndpoint _mockEndpoint;
 		private ISubscriptionCache _mockSubscriptionCache;
-		private readonly Uri queueUri = new Uri("msmq://localhost/test");
+		private readonly Uri queueUri = new Uri("loopback://localhost/test");
 		private Subscription _subscription;
-	    private IObjectBuilder _builder;
+		private IObjectBuilder _builder;
+		private IEndpointResolver _endpointResolver;
 
-        protected override void Before_each()
-        {
-            _builder = DynamicMock<IObjectBuilder>();
-			_mockEndpoint = DynamicMock<IEndpoint>();
+		protected override void Before_each()
+		{
+			_builder = DynamicMock<IObjectBuilder>();
+			EndpointResolver.AddTransport(typeof (LoopbackEndpoint));
+
+			_endpointResolver = new EndpointResolver();
+			_mockEndpoint = _endpointResolver.Resolve(queueUri);
+
 			_mockSubscriptionCache = DynamicMock<ISubscriptionCache>();
 			_subscription = new Subscription(typeof (PingMessage).FullName, queueUri);
 			_serviceBus = new ServiceBus(_mockEndpoint, _builder, _mockSubscriptionCache);
-            
-        }
+		}
 
-        protected override void After_each()
-        {
+		protected override void After_each()
+		{
 			_serviceBus = null;
 			_mockEndpoint = null;
 			_mockSubscriptionCache = null;
-            
-        }
-
-
-		[Test]
-		public void The_bus_should_add_a_subscription_to_the_subscription_cache()
-		{
-			using (Record())
-			{
-				Expect.Call(_mockEndpoint.Uri).Return(queueUri).Repeat.Any();
-				_mockSubscriptionCache.Add(_subscription);
-			}
-
-			using (Playback())
-			{
-				_serviceBus.Subscribe<PingMessage>(delegate { });
-			}
 		}
+
 
 		[Test]
 		public void A_subscription_should_be_added_for_a_consumer()
 		{
 			using (Record())
 			{
-				Expect.Call(_mockEndpoint.Uri).Return(queueUri).Repeat.Any();
 				_mockSubscriptionCache.Add(_subscription);
 			}
 
 			using (Playback())
 			{
-				ConsumesAll consumer = new ConsumesAll();
+				TestMessageConsumer<PingMessage> consumer = new TestMessageConsumer<PingMessage>();
 
 				_serviceBus.Subscribe(consumer);
 			}
@@ -74,36 +74,28 @@ namespace MassTransit.ServiceBus.Tests
 		{
 			using (Record())
 			{
-				Expect.Call(_mockEndpoint.Uri).Return(queueUri).Repeat.Any();
 				_mockSubscriptionCache.Add(_subscription);
 			}
 
 			using (Playback())
 			{
-				ConsumesSelected consumer = new ConsumesSelected();
+				TestSelectiveConsumer<PingMessage> consumer = new TestSelectiveConsumer<PingMessage>();
 
 				_serviceBus.Subscribe(consumer);
 			}
 		}
 
-		internal class ConsumesAll : Consumes<PingMessage>.All
+		[Test]
+		public void The_bus_should_add_a_subscription_to_the_subscription_cache()
 		{
-			public void Consume(PingMessage message)
+			using (Record())
 			{
-				
-			}
-		}
-
-		internal class ConsumesSelected : Consumes<PingMessage>.Selected
-		{
-			public bool Accept(PingMessage message)
-			{
-				throw new NotImplementedException();
+				_mockSubscriptionCache.Add(_subscription);
 			}
 
-			public void Consume(PingMessage message)
+			using (Playback())
 			{
-				throw new NotImplementedException();
+				_serviceBus.Subscribe<PingMessage>(delegate { });
 			}
 		}
 	}

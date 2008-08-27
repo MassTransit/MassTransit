@@ -4,10 +4,12 @@ namespace MassTransit.ServiceBus.Tests.HealthMonitoring
     using System.Threading;
     using MassTransit.ServiceBus.HealthMonitoring;
     using MassTransit.ServiceBus.HealthMonitoring.Messages;
+    using MassTransit.ServiceBus.Internal;
     using MassTransit.ServiceBus.Subscriptions;
     using NUnit.Framework;
+    using Transports;
 
-    public class MonitorInfoSpecs :
+	public class MonitorInfoSpecs :
         Specification
     {
         [Test]
@@ -26,7 +28,12 @@ namespace MassTransit.ServiceBus.Tests.HealthMonitoring
         [Ignore("Needs new castle object builder")]
         public void bob()
         {
-            ServiceBus bus = new ServiceBus(DynamicMock<IEndpoint>(), DynamicMock<IObjectBuilder>());
+						EndpointResolver.AddTransport(typeof(LoopbackEndpoint));
+
+        	EndpointResolver _endpointResolver = new EndpointResolver();
+        	IEndpoint _mockServiceBusEndPoint = _endpointResolver.Resolve(new Uri("loopback://localhost/test"));
+
+			ServiceBus bus = new ServiceBus(_mockServiceBusEndPoint, DynamicMock<IObjectBuilder>());
             bus.AddComponent<HeartbeatMonitor>();
             bus.Dispatch(new Heartbeat(3, new Uri("msmq://localhost/ddd")));
         }
