@@ -1,12 +1,14 @@
 namespace MassTransit.ServiceBus.Tests
 {
     using System;
+    using MassTransit.ServiceBus.Internal;
     using Messages;
     using NUnit.Framework;
 	using NUnit.Framework.SyntaxHelpers;
     using Rhino.Mocks;
+    using Transports;
 
-    [TestFixture]
+	[TestFixture]
 	public class MessageQueueEndpoint_MeetsCriteria :
         Specification
 	{
@@ -15,11 +17,14 @@ namespace MassTransit.ServiceBus.Tests
 		private readonly PingMessage _message = new PingMessage();
 
 	    private Uri _busListenUri = new Uri("msmq://localhost/bus_listen");
+		private EndpointResolver _endpointResolver;
 
-        protected override void Before_each()
+		protected override void Before_each()
         {
-			_mockServiceBusEndPoint = DynamicMock<IEndpoint>();
-            SetupResult.For(_mockServiceBusEndPoint.Uri).Return(_busListenUri);
+			EndpointResolver.AddTransport(typeof(LoopbackEndpoint));
+
+			_endpointResolver = new EndpointResolver();
+			_mockServiceBusEndPoint = _endpointResolver.Resolve(new Uri("loopback://localhost/test"));
 			_serviceBus = new ServiceBus(_mockServiceBusEndPoint, DynamicMock<IObjectBuilder>());
             ReplayAll();
         }
