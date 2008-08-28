@@ -18,7 +18,7 @@ namespace MassTransit.ServiceBus.Internal
 
 	public class SagaSubscription<TSaga, TMessage> :
 		ISubscriptionTypeInfo
-		where TSaga : class, ISaga, Consumes<TMessage>.All
+		where TSaga : class, ISaga<TSaga>, Consumes<TMessage>.All
         where TMessage : class, CorrelatedBy<Guid>
 	{
 		public void Dispose()
@@ -65,7 +65,7 @@ namespace MassTransit.ServiceBus.Internal
     
     public class StartSagaSubscription<TSaga, TMessage> :
 		ISubscriptionTypeInfo
-		where TSaga : class, ISaga, Consumes<TMessage>.All
+		where TSaga : class, ISaga<TSaga>, Consumes<TMessage>.All
         where TMessage : class, CorrelatedBy<Guid>
 	{
 		public void Dispose()

@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Saga.Tests.RegisterUser
 {
+    using System.Diagnostics;
     using Castle.Core;
     using Messages;
     using NUnit.Framework;
@@ -26,7 +27,7 @@ namespace MassTransit.Saga.Tests.RegisterUser
             Container.Kernel.AddComponent<ISagaRepository<RegisterUserSaga>>(typeof (RegisterUserSagaRepository), LifestyleType.Transient);
 
             // this just shows that you can easily respond to the message
-            RemoteBus.Subscribe<SendUserVerificationEmail>(x => RemoteBus.Publish(new UserVerificationEmailSent(x.Message.CorrelationId)));
+            RemoteBus.Subscribe<SendUserVerificationEmail>(x => RemoteBus.Publish(new UserVerificationEmailSent(x.Message.CorrelationId, x.Message.Email)));
 
             RemoteBus.AddComponent<RegisterUserSaga>();
         }
@@ -34,11 +35,17 @@ namespace MassTransit.Saga.Tests.RegisterUser
         [Test]
         public void The_user_should_be_pending()
         {
+            Stopwatch timer = Stopwatch.StartNew();
+
             RegisterUserController controller = new RegisterUserController(LocalBus);
 
             bool complete = controller.RegisterUser("username", "password", "Display Name", "user@domain.com");
 
             Assert.That(complete, Is.False, "The user should be pending");
+
+            timer.Stop();
+
+            Debug.WriteLine(string.Format("Time to handle message: {0}ms", timer.ElapsedMilliseconds));
         }
     }
 }

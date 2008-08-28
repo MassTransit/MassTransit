@@ -17,7 +17,7 @@ namespace MassTransit.ServiceBus.Internal
 
     public class StartSagaDispatcher<TSaga, TMessage> :
         SagaDispatcherBase<TSaga, TMessage>
-        where TSaga : class, ISaga, Consumes<TMessage>.All
+        where TSaga : class, ISaga<TSaga>, Consumes<TMessage>.All
         where TMessage : class, CorrelatedBy<Guid>
     {
         private readonly IServiceBus _bus;
@@ -31,14 +31,23 @@ namespace MassTransit.ServiceBus.Internal
         public override void Consume(TMessage message)
         {
             Guid correlationId = message.CorrelationId;
+            if (correlationId == Guid.Empty)
+                correlationId = GenerateSagaId();
 
             TSaga saga = _repository.Create(correlationId);
 
-            saga.Bus = _bus;
+            try
+            {
+                saga.Bus = _bus;
+                saga.Save += (x) => _repository.Save(x);
 
-            saga.Consume(message);
+                saga.Consume(message);
 
-            _repository.Save(saga);
+                _repository.Save(saga);
+            }
+            finally
+            {
+            }
         }
     }
 }

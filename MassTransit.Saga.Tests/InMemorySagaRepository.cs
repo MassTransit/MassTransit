@@ -17,7 +17,7 @@ namespace MassTransit.Saga.Tests
 
     public class InMemorySagaRepository<TSaga> :
         ISagaRepository<TSaga>
-        where TSaga : class, ISaga
+        where TSaga : class, ISaga<TSaga>
     {
         private Dictionary<Guid, TSaga> _objects = new Dictionary<Guid, TSaga>();
 
