@@ -20,9 +20,17 @@ namespace MassTransit.Saga.Tests.RegisterUser.Messages
     public class UserVerificationEmailSent :
         CorrelatedMessage
     {
-        public UserVerificationEmailSent(Guid correlationId) :
+        private readonly string _email;
+
+        public UserVerificationEmailSent(Guid correlationId, string email) :
             base(correlationId)
         {
+            _email = email;
+        }
+
+        public string Email
+        {
+            get { return _email; }
         }
     }
 }

@@ -24,7 +24,6 @@ namespace MassTransit.ServiceBus.Internal
         private static readonly Type _startedByType = typeof(StartedBy<>);
         private static readonly Type _correlatedConsumerType = typeof (Consumes<>.For<>);
         private static readonly Type _correlatedMessageType = typeof (CorrelatedBy<>);
-        private static readonly Type _saga = typeof (ISaga);
         private static readonly Type _selectiveConsumerType = typeof (Consumes<>.Selected);
         private readonly Dictionary<Type, TypeInfo> _types = new Dictionary<Type, TypeInfo>();
 
@@ -142,12 +141,6 @@ namespace MassTransit.ServiceBus.Internal
                             info.PublicationTypeInfo = publicationTypeInfo;
 
                             publicationCount++;
-                        }
-                    }
-                    else
-                    {
-                        if (interfaceType == _saga)
-                        {
                         }
                     }
                 }

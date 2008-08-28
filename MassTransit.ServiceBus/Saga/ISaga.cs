@@ -18,10 +18,11 @@ namespace MassTransit.Saga
     /// <summary>
     /// Defines a component as a saga
     /// </summary>
-    public interface ISaga :
+    public interface ISaga<T> :
         CorrelatedBy<Guid>,
         IDisposable
     {
         IServiceBus Bus { set; }
+        Action<T> Save { get; set; }
     }
 }
