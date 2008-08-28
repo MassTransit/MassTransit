@@ -10,16 +10,30 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Saga.Tests.RegisterUser.Messages
+namespace MassTransit.ServiceBus.Internal
 {
     using System;
+    using Saga;
 
-    public class UserVerificationEmailSent :
-        CorrelatedMessage
+    public class StartSagaDispatcher<TSaga, TMessage> :
+        SagaDispatcherBase<TSaga, TMessage>
+        where TSaga : class, ISaga, Consumes<TMessage>.All
+        where TMessage : class, CorrelatedBy<Guid>
     {
-        public UserVerificationEmailSent(Guid correlationId) :
-            base(correlationId)
+        public StartSagaDispatcher(ISagaRepository<TSaga> repository) :
+            base(repository)
         {
+        }
+
+        public override void Consume(TMessage message)
+        {
+            Guid correlationId = message.CorrelationId;
+
+            TSaga saga = _repository.Create(correlationId);
+
+            saga.Consume(message);
+
+            _repository.Save(saga);
         }
     }
 }

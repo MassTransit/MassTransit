@@ -22,7 +22,7 @@ namespace MassTransit.ServiceBus.Internal
 	{
 		protected ISagaRepository<TSaga> _repository;
 
-		public SagaDispatcherBase(ISagaRepository<TSaga> repository)
+        protected SagaDispatcherBase(ISagaRepository<TSaga> repository)
 		{
 			_repository = repository;
 		}

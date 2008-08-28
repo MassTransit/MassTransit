@@ -1,0 +1,32 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<configuration>
+  <components>
+    <component
+        id="Repository.Generic"
+        service="MassTransit.Saga.Tests.IRepository`1, MassTransit.Saga.Tests"
+        type="MassTransit.Saga.Tests.GenericRepository`1, MassTransit.Saga.Tests" />
+    <component
+        id="Repository.Generic.Saga"
+        service="MassTransit.Saga.ISagaRepository`1, MassTransit.ServiceBus"
+        type="MassTransit.Saga.Tests.InMemorySagaRepository`1, MassTransit.Saga.Tests" />
+
+  </components>
+  <facilities>
+    <facility id="masstransit">
+
+      <bus id="local"
+				 endpoint="loopback://localhost/local_sb">
+        <dispatcher minThreads="0"
+							maxThreads="4" />
+      </bus>
+      <bus id="remote"
+				 endpoint="loopback://localhost/remote_sb">
+        <dispatcher minThreads="0"
+							maxThreads="4" />
+      </bus>
+      <transports>
+        <transport>MassTransit.ServiceBus.Transports.LoopbackEndpoint, MassTransit.ServiceBus</transport>
+      </transports>
+    </facility>
+  </facilities>
+</configuration>
