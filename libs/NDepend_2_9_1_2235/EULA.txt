@@ -1,0 +1,94 @@
+
+EULA – NDepend / VisualNDepend / CQL 
+SMACCHIA.COM SARL
+Copyright (C) 2004-2007 SMACCHIA.COM SARL.
+
+END-USER LICENSE AGREEMENT
+FOR ALL SOFTWARE PRODUCT(S)
+
+IMPORTANT- READ CAREFULLY: This SMACCHIA.COM SARL ("SMACCHIA.COM") End-User License Agreement ("EULA") is a legal agreement between you, a developer of software applications, ("Developer End User") and SMACCHIA.COM for all SMACCHIA.COM products, controls, source code, demos, intermediate files, media, printed materials, and "online" or electronic documentation ("SOFTWARE PRODUCT(S)") contained in this installation file. 
+
+SMACCHIA.COM grants to you as an individual, a personal, nonexclusive license to install and use the SOFTWARE PRODUCT(S) for the sole purposes of designing, developing, testing, and deploying application programs which you create. By installing, copying, or otherwise using the SOFTWARE PRODUCT(S), you agree to be bound by the terms of this EULA. If you do not agree to any part of the terms of this EULA, DO NOT INSTALL, USE, OR EVALUATE, ANY PART, FILE OR PORTION OF THE SOFTWARE PRODUCT(S). 
+
+All SOFTWARE PRODUCT(S) is licensed, not sold. If you are an individual, you must acquire an individual license for the SOFTWARE PRODUCT(S) from SMACCHIA.COM or its authorized resellers. If you are an entity, you must acquire an individual license for each Developer End User within your organization from SMACCHIA.COM or its authorized resellers.
+
+If the SOFTWARE PRODUCT(S) you have obtained is marked as a "TRIAL" or you may install one copy of the SOFTWARE PRODUCT(S) for testing purposes for a period of 15 calendar days from the date of installation ("Evaluation Period"). Upon expiration of the Evaluation Period, the SOFTWARE PRODUCT(S) must be uninstalled and all copies destroyed. You can use SOFTWARE PRODUCT(S) marked as a "TRIAL" on Open Source or Academic (Student Research) project without time limit.
+
+RIGOROUS ENFORCEMENT OF INTELLECTUAL PROPERTY RIGHTS. If the licensed right of use for this SOFTWARE PRODUCT(S) is purchased by you with any intent to reverse engineer, decompile, create derivative works, and the exploitation or unauthorized transfer of, any SMACCHIA.COM intellectual property and trade secrets, to include any exposed methods or source code where provided, no licensed right of use shall exist, and any PRODUCT(s) created as a result shall be judged illegal by definition of all applicable law. Any sale or resale of intellectual property or created derivatives so obtained will be prosecuted to the fullest extent of all local, federal and international law.
+
+1. GRANT OF LICENSE. 
+
+This EULA, if legally executed as defined herein, licenses and so grants the single individual Developer End User the following rights: 
+
+SOFTWARE PRODUCT(S) - Developer End User may install and use the SOFTWARE PRODUCT(S) on a single computer. Developer End User may also install and use the SOFTWARE PRODUCT(S) on a portable computer.
+
+2. LIMITATIONS ON REVERSE ENGINEERING, DECOMPILATION, AND DISASSEMBLY. 
+
+You may not reverse engineer, decompile, create derivative works, translate, or disassemble the SOFTWARE PRODUCT(S), and only to the extent that such activity is expressly permitted by applicable law notwithstanding this limitation. You agree to take all reasonable, legal and appropriate measures to prohibit the illegal dissemination of the SOFTWARE PRODUCT(S) or any of its constituent parts and redistributables to the fullest extent of all applicable local, US Codes and International Laws and Treaties regarding anti-circumvention, including but not limited to, the Geneva and Berne World Intellectual Property Organization (WIPO) Diplomatic Conferences. 
+
+3. SEPARATION OF COMPONENTS. 
+
+The SOFTWARE PRODUCT(S) is licensed as a single PRODUCT(s). The SOFTWARE PRODUCT(S) and its constituent parts may not be reverse engineered, decompiled, disassembled or separated for use on more than one computer, nor placed for distribution, sale, or resale as individual creations by Developer End User. The provision of source code, if included with the SOFTWARE PRODUCT(S), does not constitute transfer of any legal rights to such code, and resale or distribution of all or any portion of all source code and intellectual property will be prosecuted to the fullest extent of all applicable local, federal and international laws. 
+
+4. RENTAL. 
+
+You may not rent, lease, or lend the SOFTWARE PRODUCT(S).
+
+5. TRANSFER. 
+
+You may NOT permanently or temporarily transfer ANY of your rights under this EULA to any individual or entity without prior written approval from SMACCHIA.COM. Only you as the licensed Developer End User have the right to use the SOFTWARE PRODUCT(S) (or any portions thereof). You may not reproduce or distribute any SMACCHIA.COM documentation without SMACCHIA.COM's explicit permission.
+
+6. REDISTRIBUTION.
+
+You are not authorized to redistribute any portion of the SOFTWARE PRODUCT(S). AT NO TIME MAY DEVELOPER END USER CREATE ANY TOOL, REDISTRIBUTABLE, OR SOFTWARE PRODUCT(S) THAT DIRECTLY OR INDIRECTLY COMPETES WITH SMACCHIA.COM SOFTWARE PRODUCT(S) WHICH UTILIZES ALL OR ANY PORTION OF THE SOFTWARE PRODUCT(S) contained within this installation. 
+
+7. UPGRADES. 
+
+If the SOFTWARE PRODUCT(S) is labelled as an upgrade, you must be properly licensed to use the SOFTWARE PRODUCT(S) identified by SMACCHIA.COM as being eligible for the upgrade. A SOFTWARE PRODUCT(S) labelled as an upgrade replaces and/or supplements the SOFTWARE PRODUCT(S) that formed the basis for your eligibility for the upgrade, and together constitutes a single PRODUCT(S). You may use the resulting upgraded PRODUCT(S) only in accordance with all the terms of this EULA. 
+
+8. COPYRIGHT. 
+
+All title and copyrights in and to the SOFTWARE PRODUCT(S) (including but not limited to any copywritten images, demos, source code, intermediate files, packages, photographs, animations, video, audio, music, text, and "applets" incorporated into the SOFTWARE PRODUCT(S) the accompanying printed materials, and any copies of the SOFTWARE PRODUCT(S)) are owned by SMACCHIA.COM or its subsidiaries. The SOFTWARE PRODUCT(S) is protected by copyright laws and international treaty provisions and therefore, you must treat the SOFTWARE PRODUCT(S) like any other copyrighted material except that you may install the SOFTWARE PRODUCT(S) as described in this EULA. 
+
+9. DUAL-MEDIA SOFTWARE PRODUCT(S). 
+
+You may receive the SOFTWARE PRODUCT(S) in more than one medium. Regardless of the medium, you may use only one medium that is appropriate for your single computer. You may not loan, sell, rent, lease, or otherwise transfer in any manner the other medium to another user or entity. 
+
+10. U.S. GOVERNMENT RESTRICTED RIGHTS. 
+
+The Licensed Software is Commercial Computer Software provided with RESTRICTED RIGHTS under Federal Acquisition Regulations and agency supplements to them. Use, duplication or disclosure by the U.S. Government is subject to restrictions as set forth in subparagraph (c)(1)(ii) of the Rights in Technical Data and Computer Software clause at DFAR 255.227-7013 et. seq. or 252.211-7015, or subparagraphs (a) through (d) of the Commercial Computer Software Restricted Rights at FAR 52.227-19, as applicable, or similar clauses in the NASA FAR Supplement. Contractor-manufacturer is SMACCHIA.COM SARL Ilôt Rey Serrurier Bât D 06300 NICE FRANCE. 
+
+11. DISCLAIMER OF WARRANTY. 
+
+SMACCHIA.COM expressly disclaims any warranty for the SOFTWARE PRODUCT(S). THE SOFTWARE PRODUCT(S) AND ANY RELATED DOCUMENTATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, OR NONINFRINGEMENT. SMACCHIA.COM DOES NOT WARRANT, GUARANTEE, OR MAKE ANY REPRESENTATIONS REGARDING THE USE, OR THE RESULTS OF THE USE, OF THE SOFTWARE PRODUCT(S) IN TERMS OF CORRECTNESS, ACCURACY, RELIABILITY, OR OTHERWISE. THE ENTIRE RISK ARISING OUT OF USE OR PERFORMANCE OF THE SOFTWARE PRODUCT(S) REMAINS WITH YOU. No oral or written information or advice given by SMACCHIA.COM or its employees shall create a warranty or in any way increase the scope of this warranty. 
+
+12. LIMITATIONS ON LIABILITY. 
+
+To the maximum extent permitted by applicable law, in no event shall SMACCHIA.COM be liable for any special, incidental, indirect, or consequential damages whatsoever (including, without limitation, damages for loss of business profits, business interruption, loss of business information, or any other pecuniary loss) arising out of the use of or inability to use the SOFTWARE PRODUCT(S) or the provision of or failure to provide Support Services, even if SMACCHIA.COM has been advised of the possibility of such damages. 
+
+Developer End User understands that the SOFTWARE PRODUCT(S) may produce inaccurate results because of a failure or fault within the SOFTWARE PRODUCT(S) or failure by Developer End User to properly use and or deploy the SOFTWARE PRODUCT(S). Developer End User assumes full and sole responsibility for any use of the SOFTWARE PRODUCT(S), and bears the entire risk for failures or faults within the SOFTWARE PRODUCT(S). You agree that regardless of the cause of failure or fault or the form of any claim, YOUR SOLE REMEDY AND SMACCHIA.COM'S SOLE OBLIGATION SHALL BE GOVERNED BY THIS AGREEMENT AND IN NO EVENT SHALL SMACCHIA.COM'S LIABILITY EXCEED THE PRICE PAID TO SMACCHIA.COM FOR THE SOFTWARE PRODUCT(S). This Limited Warranty is void if failure of the SOFTWARE PRODUCT(S) has resulted from accident, abuse, alteration, unauthorized use or misapplication of the SOFTWARE PRODUCT(S). 
+
+13. SUPPORT SERVICES. 
+
+SMACCHIA.COM may provide you with support services related to the SOFTWARE PRODUCT(S) ("Support Services"). Use of Support Services is governed by SMACCHIA.COM policies and programs described in the user manual, in "on line" documentation and/or other SMACCHIA.COM provided materials. Any supplemental SOFTWARE PRODUCT(S) provided to you as part of the Support Services shall be considered part of the SOFTWARE PRODUCT(S) and subject to the terms and conditions of this EULA. With respect to technical information you provide to SMACCHIA.COM as part of the Support Services, SMACCHIA.COM may use such information for its business purposes, including for SOFTWARE PRODUCT(s) support and development. SMACCHIA.COM will not utilize such technical information in a form that personally identifies you. 
+
+14. TAX. 
+
+All prices for SOFTWARE PRODUCT(S) on the NDepend website are shown without any indirect taxes. Unless stipulated separately by this Agreement, SMACCHIA.COM SARL, shall not charge the Developer End User any taxes excluding the value added tax (V.A.T.). Where applicable, SMACCHIA.COM SARL, shall charge any Developer End User residing in the European Union (European Economic Community), the value added tax under the legislation of the France. The value added tax sum shall be added to the final invoice sum issued by SMACCHIA.COM SARL at the moment of purchase and shall be considered obligatory for any EU resident user. 
+
+Except in the above cases, the Developer End User shall independently pay all taxes and duties, including value added taxes, sales taxes, and any other taxes or duties as required by any jurisdiction or country of their residence as a result of this licence which is granted to the Developer End User to use any of the Image(s), according to this Agreement
+
+15. MISCELLANEOUS. 
+
+This EULA shall be construed, interpreted and governed by the laws of France. This EULA gives you specific legal rights; you may have others that from country to country.
+
+This EULA may only be modified in writing signed by you and an authorized officer of SMACCHIA.COM SARL. If any provision of this EULA is found void or unenforceable, the remainder will remain valid and enforceable according to its terms. If any remedy provided is determined to have failed for its essential purpose, all limitations of liability and exclusions of damages set forth in the Limited Warranty shall remain in effect. 
+
+SMACCHIA.COM reserves all rights not specifically granted in this EULA. 
+
+ACKNOWLEDGEMENTS. Developer End User acknowledges that he or she has read this Agreement, understands it, and agrees to be bound by its terms and conditions. 
+
+Should you have any questions concerning this EULA, or if you desire to contact SMACCHIA.COM for any reason, please contact us directly at: SMACCHIA.COM SARL Ilôt Rey Serrurier Bât D 06300 NICE FRANCE or at support@ndepend.com 
+  
+
+

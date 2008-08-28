@@ -1,0 +1,152 @@
+More information available at:
+http://www.NDepend.com
+http://www.ndepend.com/GettingStarted.aspx
+
+Instead of reading this tutorial, you might prefer seeing
+the 2mn Getting Started online demo available at:
+http://s3.amazonaws.com/NDependOnlineDemos/GettingStarted_viewlet_swf.html
+
+
+How do I analyse my .NET applications using NDepend?
+---------------------------------------------------------
+
+1) Run VisualNDepend.exe
+
+2) Select the option: Select assemblies to analyse
+
+3) Populate the data grid with your assemblies by using the browse button or by using drag&drop.
+
+4) Click OK. 
+   It will trigger the analysis of your assemblies and code source by NDepend.Console.exe.
+   This analysis will take a few seconds to a few minutes depending on the size of the assemblies.
+   Once done, the result is displayed in the VisualNDepend.exe UI.
+
+5) In order to make the most of the VisualNDepend UI, see online demos on page 
+   http://www.ndepend.com/GettingStarted.aspx
+
+
+
+
+What does the NDepend report tell me about my code?
+----------------------------------------------------
+
+
+Application Metric:
+   This section gives you an idea of the topology of your application.
+
+
+Assembly Metric:
+   This section gives you an idea of the size of each assembly within your
+   application in terms of #IL instructions and others metrics.
+
+
+VisualNDepend View:
+   This section illustrates the size of your assemblies, namespaces, types
+   and methods in terms of #IL instructions. You can browse this view 
+   dynamically by clicking the 'Launch Visual NDepend on this Project' icon 
+   in the NDepend.Project UI.
+
+
+Assembly Abstracness vs. Instability:
+   This section illustrate the Abstracness/Instability principle. 
+   More on this subject here http://www.NDepend.com/AsmMetrics.aspx
+
+
+Assembly Dependencies:
+   This section shows all dependencies between assemblies of your
+   application in a table.
+
+
+Assembly Dependency Diagram:
+   This section shows all dependencies between assemblies of your
+   application in a diagram
+
+
+Assembly build order:
+   This section gives you one of the possible build order for your assemblies. 
+   If a cycle exists in your assemblies dependencies graph, this section
+   will report it.
+
+
+NDepend information and warnings:
+   This sections gives you advices about your code:
+ --> It warns you on assemblies versioning issues.
+ --> It warns you when an assembly depends on a less stable assembly than itself.
+ --> It warns you when the visibility of a type or of a member is not optimal 
+     (in the context of the analysed application). 
+ --> It warns you when a type or a member is not used 
+     (in the context of the analysed application). 
+
+
+CQL Queries and Constraints:
+   This section reports default CQL constraints which have been violated.
+   More about the CQL language and CQL constraints here: http://www.NDepend.com/CQL.htm
+   You can build your own CQL constraints with VisualNDepend.exe. Click the
+   'Launch Visual NDepend on this Project' icon in the NDepend.Project UI.
+
+
+Type Metrics:
+   This section recaps type metrics in a table. A link to the documentation 
+   is provided for each metric.
+
+
+
+I want to go further to have a better control over my code:
+-----------------------------------------------------------
+
+
+See online demos quoted on http://NDepend.com home page.
+
+
+Understand metrics yielded by NDepend. Documentation is available here:
+http://www.NDepend.com/Metrics.htm
+
+
+Get a new understanding of your code by playing with the VisualNDepend
+views. Modify the view with the 'Level' and 'Metric' combo boxes.
+
+
+Tune your report thanks to the 'Output' panel in the 'NDepend.Project' UI.
+
+
+Learn CQL (Code Query Language) and create custom CQL constraints with
+VisualNDepend.
+You'll find it useful mainly to create:
+--> Naming constraints  (for example: I want the static fields of these assemblies ...
+    to be named like that).
+--> Code quality constraints  (for example: I don't want methods with more
+    than 200 IL instructions, except for generated methods which are ...).
+--> Encapsulation constraints (for example: I don't want that the constructors of
+    these classes ... are called outside this namespace).
+
+
+Integrate the NDepend report in your daily build process. Facilities are provided
+for MSBuild, NAnt and CruiseControl.NET technologies. Read the ReadMe.txt files
+contained in the '.\MSBuild\' and '.\NAnt\' folders.
+
+
+Use the FxCop tool:
+http://www.gotdotnet.com/Team/FxCop/
+FxCop is a Microsoft freeware code analysis tool that checks .NET managed
+code assemblies for conformance to the Microsoft .NET Framework Design Guidelines. 
+
+
+Use the promising NStatic tool (not released yet):
+http://nstatic.com/
+
+
+Read the book 'Practical .NET2 and C#2' to have a better knowledge of .NET2 and C#2.
+ --> http://www.PracticalDOT.NET
+ --> http://www.amazon.com/gp/product/0976613220
+ --> List of .NET2.0 new features covered by the book is available here:
+     http://www.codeproject.com/books/net2_cs2_newfeatures.asp
+ --> Sample chapters are available here:
+     http://www.practicaldot.net/en2/Sample.htm
+
+
+Read the book 'Framework Design Guidelines' to write better code:
+http://www.amazon.com/gp/product/0321246756
+
+
+
+
