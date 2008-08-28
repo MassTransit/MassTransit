@@ -18,6 +18,7 @@ namespace MassTransit.ServiceBus.Internal
     {
         private readonly ILog _diagnostics = LogManager.GetLogger("MassTransit.Diagnostics");
         private readonly ILog _messages = LogManager.GetLogger("MassTransit.Messages");
+        private readonly static ILog _ironLogger = LogManager.GetLogger("MassTransit.Iron");
 
         public ILog Messages
         {
@@ -28,5 +29,12 @@ namespace MassTransit.ServiceBus.Internal
         {
             get { return _diagnostics; }
         }
+
+        public static ILog Iron
+        {
+            get { return _ironLogger;  }
+        }
+
+
     }
 }
