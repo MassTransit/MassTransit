@@ -22,5 +22,6 @@ namespace MassTransit.Saga
         CorrelatedBy<Guid>,
         IDisposable
     {
+        IServiceBus Bus { set; }
     }
 }

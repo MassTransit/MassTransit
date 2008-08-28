@@ -55,7 +55,7 @@ namespace MassTransit.ServiceBus.Internal
 			{
 				ISagaRepository<TSaga> repository = context.Builder.Build<ISagaRepository<TSaga>>();
 
-				dispatcher = new SagaDispatcher<TSaga, TMessage>(repository);
+				dispatcher = new SagaDispatcher<TSaga, TMessage>(context.Bus, repository);
 
 				context.Attach(dispatcher);
 				context.AddSubscription(new Subscription(typeof (TMessage).FullName, context.Bus.Endpoint.Uri));
@@ -102,7 +102,7 @@ namespace MassTransit.ServiceBus.Internal
 			{
 				ISagaRepository<TSaga> repository = context.Builder.Build<ISagaRepository<TSaga>>();
 
-				dispatcher = new StartSagaDispatcher<TSaga, TMessage>(repository);
+                dispatcher = new StartSagaDispatcher<TSaga, TMessage>(context.Bus, repository);
 
 				context.Attach(dispatcher);
 				context.AddSubscription(new Subscription(typeof (TMessage).FullName, context.Bus.Endpoint.Uri));
