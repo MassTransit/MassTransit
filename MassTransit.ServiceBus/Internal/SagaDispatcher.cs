@@ -20,16 +20,21 @@ namespace MassTransit.ServiceBus.Internal
 		where TSaga : class, ISaga, Consumes<TMessage>.All
 		where TMessage : class, CorrelatedBy<Guid>
 	{
-		public SagaDispatcher(ISagaRepository<TSaga> repository) :
+        private readonly IServiceBus _bus;
+
+        public SagaDispatcher(IServiceBus bus, ISagaRepository<TSaga> repository) :
 			base(repository)
 		{
+		    _bus = bus;
 		}
 
-		public override void Consume(TMessage message)
+        public override void Consume(TMessage message)
 		{
 			Guid correlationId = message.CorrelationId;
 
 			TSaga saga = _repository.Get(correlationId);
+
+            saga.Bus = _bus;
 
 			saga.Consume(message);
 

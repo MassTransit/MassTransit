@@ -86,7 +86,7 @@ namespace MassTransit.Saga.Tests.RegisterUser
             _password = message.Password;
             _email = message.Email;
 
-            //  _sagaRepository.Save(this);
+            // _sagaRepository.Save(this);
 
             Bus.Publish(new SendUserVerificationEmail(CorrelationId, _email));
         }
