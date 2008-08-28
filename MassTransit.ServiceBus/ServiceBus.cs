@@ -27,7 +27,6 @@ namespace MassTransit.ServiceBus
     public class ServiceBus :
         IServiceBus
     {
-        private static readonly ILog _ironLog;
         private static readonly ILog _log;
         private static readonly IServiceBus _nullServiceBus;
 
@@ -40,14 +39,13 @@ namespace MassTransit.ServiceBus
         private readonly ManagedThread _receiveThread;
         private readonly ISubscriptionCache _subscriptionCache;
         private readonly TypeInfoCache _typeInfoCache;
-        private IEndpoint _poisonEndpoint;
+        private IEndpoint _poisonEndpoint = new PoisonEndpointDecorator(new NullEndpoint());
 
         static ServiceBus()
         {
             try
             {
                 _log = LogManager.GetLogger(typeof (ServiceBus));
-                _ironLog = LogManager.GetLogger("MassTransit.Iron");
 
                 _nullServiceBus = new NullServiceBus();
             }
@@ -64,7 +62,8 @@ namespace MassTransit.ServiceBus
         {
         }
 
-        public ServiceBus(IEndpoint endpointToListenOn, IObjectBuilder objectBuilder, ISubscriptionCache subscriptionCache)
+        public ServiceBus(IEndpoint endpointToListenOn, IObjectBuilder objectBuilder,
+            ISubscriptionCache subscriptionCache)
             : this(endpointToListenOn, objectBuilder, subscriptionCache, new EndpointResolver())
         {
         }
@@ -72,7 +71,8 @@ namespace MassTransit.ServiceBus
         /// <summary>
         /// Uses the specified subscription cache
         /// </summary>
-        public ServiceBus(IEndpoint endpointToListenOn, IObjectBuilder objectBuilder, ISubscriptionCache subscriptionCache, IEndpointResolver endpointResolver)
+        public ServiceBus(IEndpoint endpointToListenOn, IObjectBuilder objectBuilder, 
+            ISubscriptionCache subscriptionCache, IEndpointResolver endpointResolver)
         {
             Check.Parameter(endpointToListenOn).WithMessage("endpointToListenOn").IsNotNull();
             Check.Parameter(subscriptionCache).WithMessage("subscriptionCache").IsNotNull();
@@ -276,7 +276,9 @@ namespace MassTransit.ServiceBus
 
                 info.PublishFault(this, ex, message);
 
-                _ironLog.Error("An error was caught in the ServiceBus.IronDispatcher", ex);
+                PoisonEndpoint.Send(message, TimeSpan.Zero);
+
+                SpecialLoggers.Iron.Error("An error was caught in the ServiceBus.IronDispatcher", ex);
             }
         }
 
