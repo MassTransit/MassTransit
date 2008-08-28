@@ -94,6 +94,8 @@
     <Compile Include="Internal\ISagaRepository.cs" />
     <Compile Include="Internal\ISubscriptionTypeInfo.cs" />
     <Compile Include="Internal\ITypeInfo.cs" />
+    <Compile Include="Internal\NullEndpoint.cs" />
+    <Compile Include="Internal\PoisonEndpointDecorator.cs" />
     <Compile Include="Internal\PublicationBase.cs" />
     <Compile Include="Internal\SagaDispatcher.cs" />
     <Compile Include="Internal\SagaDispatcherBase.cs" />
