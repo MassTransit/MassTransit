@@ -20,7 +20,7 @@ namespace MassTransit.Saga
     /// </summary>
     /// <typeparam name="TMessage"></typeparam>
     public interface StartedBy<TMessage> :
-        Consumes<TMessage>.All
+        Orchestrates<TMessage>
         where TMessage : class, CorrelatedBy<Guid>
     {
     }

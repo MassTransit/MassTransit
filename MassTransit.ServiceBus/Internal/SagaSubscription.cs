@@ -62,4 +62,51 @@ namespace MassTransit.ServiceBus.Internal
 			}
 		}
 	}
+    
+    public class StartSagaSubscription<TSaga, TMessage> :
+		ISubscriptionTypeInfo
+		where TSaga : class, ISaga, Consumes<TMessage>.All
+        where TMessage : class, CorrelatedBy<Guid>
+	{
+		public void Dispose()
+		{
+		}
+
+		public void Subscribe<T>(IDispatcherContext context, T component) where T : class
+		{
+			throw new NotImplementedException();
+		}
+
+		public void Unsubscribe<T>(IDispatcherContext context, T component) where T : class
+		{
+			throw new NotImplementedException();
+		}
+
+		public void AddComponent(IDispatcherContext context)
+		{
+			GetSagaDispatcher(context);
+		}
+
+		public void RemoveComponent(IDispatcherContext context)
+		{
+			throw new NotImplementedException("Components cannot be removed");
+		}
+
+		public void GetSagaDispatcher(IDispatcherContext context)
+		{
+			IMessageDispatcher<TMessage> messageDispatcher = context.GetDispatcher<MessageDispatcher<TMessage>>();
+
+			StartSagaDispatcher<TSaga, TMessage> dispatcher = messageDispatcher.GetDispatcher<StartSagaDispatcher<TSaga, TMessage>>();
+
+			if (dispatcher == null)
+			{
+				ISagaRepository<TSaga> repository = context.Builder.Build<ISagaRepository<TSaga>>();
+
+				dispatcher = new StartSagaDispatcher<TSaga, TMessage>(repository);
+
+				context.Attach(dispatcher);
+				context.AddSubscription(new Subscription(typeof (TMessage).FullName, context.Bus.Endpoint.Uri));
+			}
+		}
+	}
 }

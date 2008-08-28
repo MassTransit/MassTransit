@@ -10,16 +10,37 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Saga.Tests.RegisterUser.Messages
+namespace MassTransit.Saga.Tests
 {
-    using System;
-
-    public class UserVerificationEmailSent :
-        CorrelatedMessage
+    public class GenericRepository<T> :
+        IRepository<T>
+        where T : class
     {
-        public UserVerificationEmailSent(Guid correlationId) :
-            base(correlationId)
+        private readonly IRepository _repository;
+
+        public GenericRepository(IRepository repository)
         {
+            _repository = repository;
+        }
+
+        public void Dispose()
+        {
+            _repository.Dispose();
+        }
+
+        public T Get(object id)
+        {
+            return _repository.Get<T>(id);
+        }
+
+        public void Save(T item)
+        {
+            _repository.Save(item);
+        }
+
+        public void Update(T item)
+        {
+            _repository.Save(item);
         }
     }
 }

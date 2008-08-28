@@ -10,11 +10,11 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Workflow.Tests.RegisterUser
+namespace MassTransit.Saga.Tests.RegisterUser
 {
     using System;
     using MassTransit.Saga.Messages;
-    using Saga;
+    using Messages;
     using ServiceBus;
 
     /// <summary>
@@ -42,6 +42,11 @@ namespace MassTransit.Workflow.Tests.RegisterUser
         private string _email;
         private string _password;
         private string _username;
+
+        public RegisterUserSaga(Guid correlationId)
+        {
+            CorrelationId = correlationId;
+        }
 
         // The bus that received the message
         public IServiceBus Bus { get; set; }

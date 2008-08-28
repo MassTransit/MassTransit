@@ -91,7 +91,8 @@
     <Compile Include="Internal\IEndpointResolver.cs" />
     <Compile Include="Internal\InitiateSagaDispatcher.cs" />
     <Compile Include="Internal\IPublicationTypeInfo.cs" />
-    <Compile Include="Internal\ISagaRepository.cs" />
+    <Compile Include="Internal\StartSagaDispatcher.cs" />
+    <Compile Include="Saga\ISagaRepository.cs" />
     <Compile Include="Internal\ISubscriptionTypeInfo.cs" />
     <Compile Include="Internal\ITypeInfo.cs" />
     <Compile Include="Internal\NullEndpoint.cs" />
