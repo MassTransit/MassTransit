@@ -33,7 +33,7 @@ namespace MassTransit.Saga.Tests.RegisterUser
     /// 
     /// </summary>
     public class RegisterUserSaga :
-        StartedBy<RegisterUser>,
+        InitiatedBy<RegisterUser>,
         Orchestrates<UserVerificationEmailSent>,
         Orchestrates<UserValidated>,
         ISaga<RegisterUserSaga>

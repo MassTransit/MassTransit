@@ -23,6 +23,8 @@ namespace MassTransit.Saga
         IDisposable
     {
         IServiceBus Bus { set; }
+        IObjectBuilder Builder { set; }
+
         Action<T> Save { get; set; }
     }
 }

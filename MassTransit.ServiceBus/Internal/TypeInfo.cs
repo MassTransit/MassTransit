@@ -97,7 +97,7 @@ namespace MassTransit.ServiceBus.Internal
 
         internal void AddStartSagaSubscription(Type componentType, Type[] types)
         {
-            Type subscriptionType = typeof (StartSagaSubscription<,>).MakeGenericType(componentType, types[0]);
+            Type subscriptionType = typeof (InitiateSagaSubscription<,>).MakeGenericType(componentType, types[0]);
 
             _subscriptionTypeInfo.AddSubscriber((ISubscriptionTypeInfo) Activator.CreateInstance(subscriptionType));
         }

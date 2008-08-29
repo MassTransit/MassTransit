@@ -62,6 +62,7 @@
     <Compile Include="Batch.cs" />
     <Compile Include="BatchedBy.cs" />
     <Compile Include="BatchTimeout.cs" />
+    <Compile Include="Exceptions\SagaException.cs" />
     <Compile Include="ExpiresInAttribute.cs" />
     <Compile Include="Fault.cs" />
     <Compile Include="Grid\DistributedTaskController.cs" />
@@ -90,8 +91,8 @@
     <Compile Include="Internal\IdempotentList.cs" />
     <Compile Include="Internal\IEndpointResolver.cs" />
     <Compile Include="Internal\InitiateSagaDispatcher.cs" />
+    <Compile Include="Internal\InitiateSagaSubscription.cs" />
     <Compile Include="Internal\IPublicationTypeInfo.cs" />
-    <Compile Include="Internal\StartSagaDispatcher.cs" />
     <Compile Include="Saga\ISagaRepository.cs" />
     <Compile Include="Internal\ISubscriptionTypeInfo.cs" />
     <Compile Include="Internal\ITypeInfo.cs" />
@@ -106,7 +107,7 @@
     <Compile Include="Saga\Orchestrates.cs" />
     <Compile Include="Saga\Messages\CompleteWorkflow.cs" />
     <Compile Include="Saga\Messages\UpdateWorkflowTimeout.cs" />
-    <Compile Include="Saga\StartedBy.cs" />
+    <Compile Include="Saga\InitiatedBy.cs" />
     <Compile Include="Subscriptions\log4netRenderers\SubscriptionRenderer.cs" />
     <Compile Include="MessageGroup.cs" />
     <Compile Include="ReliableAttribute.cs" />
@@ -185,6 +186,7 @@
     <Compile Include="Threading\ManagedThreadPool.cs" />
     <Compile Include="TimeoutAttribute.cs" />
     <Compile Include="Util\Check.cs" />
+    <Compile Include="Util\CombGuid.cs" />
     <Compile Include="Util\Guard.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />

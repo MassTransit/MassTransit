@@ -19,7 +19,7 @@ namespace MassTransit.Saga
     /// Specifies that the message type TMessage starts a new saga. 
     /// </summary>
     /// <typeparam name="TMessage"></typeparam>
-    public interface StartedBy<TMessage> :
+    public interface InitiatedBy<TMessage> :
         Orchestrates<TMessage>
         where TMessage : class, CorrelatedBy<Guid>
     {
