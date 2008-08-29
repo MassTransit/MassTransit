@@ -105,15 +105,20 @@ namespace MassTransit.WindsorIntegration
                                             Kernel.Resolve<IEndpointResolver>());
 
             IConfiguration threadConfig = busConfig.Children["dispatcher"];
+            ConfigureThreadingModel(threadConfig, bus);
+
+            Kernel.AddComponentInstance(id, typeof (IServiceBus), bus);
+
+            return bus;
+        }
+
+        private void ConfigureThreadingModel(IConfiguration threadConfig, ServiceBus bus)
+        {
             if (threadConfig != null)
             {
                 bus.MinThreadCount = GetConfigurationValue(threadConfig, "minThreads", 1);
                 bus.MaxThreadCount = GetConfigurationValue(threadConfig, "maxThreads", 10);
             }
-
-            Kernel.AddComponentInstance(id, typeof (IServiceBus), bus);
-
-            return bus;
         }
 
         private static T GetConfigurationValue<T>(IConfiguration config, string attributeName, T defaultValue)
