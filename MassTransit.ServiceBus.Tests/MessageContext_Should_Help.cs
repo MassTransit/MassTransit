@@ -30,22 +30,6 @@ namespace MassTransit.ServiceBus.Tests
             mockBusEndpoint = null;
             mockEndpoint = null;
         }
-        
-        [Test, Ignore]
-        public void With_Replies()
-        {
-            MessageContext<PingMessage> cxt = new MessageContext<PingMessage>(mockBus, requestMessage);
-
-            using (Record())
-            {
-                Expect.Call(mockBus.Endpoint).Return(mockBusEndpoint);
-            }
-
-            using (Playback())
-            {
-                cxt.Reply(replyMessage);
-            }
-        }
 
         [Test]
         public void With_Handling_Later()
