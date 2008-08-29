@@ -18,11 +18,7 @@ namespace MassTransit.ServiceBus.Internal
 
     public class TypeInfoCache : IDisposable
     {
-        #region Delegates
-
         public delegate void ActionDelegate(TypeInfo info, Type componentType, Type[] types);
-
-        #endregion
 
         private static readonly IList<ActionEntry> _consumerActions = new List<ActionEntry>();
 
@@ -31,7 +27,7 @@ namespace MassTransit.ServiceBus.Internal
         private static readonly Type _correlatedMessageType = typeof (CorrelatedBy<>);
         private static readonly Type _orchestratesType = typeof (Orchestrates<>);
         private static readonly Type _selectiveConsumerType = typeof (Consumes<>.Selected);
-        private static readonly Type _startedByType = typeof (StartedBy<>);
+        private static readonly Type _startedByType = typeof (InitiatedBy<>);
         private readonly Dictionary<Type, TypeInfo> _types = new Dictionary<Type, TypeInfo>();
 
         static TypeInfoCache()

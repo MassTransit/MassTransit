@@ -12,30 +12,29 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.ServiceBus.Internal
 {
-	using System;
-	using Saga;
+    using System;
+    using Saga;
+    using Util;
 
     public class InitiateSagaDispatcher<TSaga, TMessage> :
-		SagaDispatcherBase<TSaga, TMessage>
-		where TSaga : class, ISaga<TSaga>, Consumes<TMessage>.All, new()
-		where TMessage : class, CorrelatedBy<Guid>
-	{
-		public InitiateSagaDispatcher(ISagaRepository<TSaga> repository) :
-			base(repository)
-		{
-		}
+        SagaDispatcherBase<TSaga, TMessage>
+        where TSaga : class, ISaga<TSaga>, Consumes<TMessage>.All
+        where TMessage : class, CorrelatedBy<Guid>
+    {
+        public InitiateSagaDispatcher(IServiceBus bus, IObjectBuilder builder, ISagaRepository<TSaga> repository) :
+            base(bus, builder, repository)
+        {
+        }
 
-		public override void Consume(TMessage message)
-		{
-			Guid correlationId = message.CorrelationId;
-			if (correlationId == Guid.Empty)
-				correlationId = GenerateSagaId();
+        public override void Consume(TMessage message)
+        {
+            Guid correlationId = message.CorrelationId;
+            if (correlationId == Guid.Empty)
+                correlationId = CombGuid.NewCombGuid();
 
-			TSaga saga = (TSaga) Activator.CreateInstance(typeof (TSaga), correlationId);
+            TSaga saga = _repository.Create(correlationId);
 
-			saga.Consume(message);
-
-			_repository.Save(saga);
-		}
-	}
+            DispatchToConsumer(saga, message);
+        }
+    }
 }

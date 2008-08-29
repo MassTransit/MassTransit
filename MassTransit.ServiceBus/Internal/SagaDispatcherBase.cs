@@ -12,53 +12,39 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.ServiceBus.Internal
 {
-	using System;
-	using Saga;
+    using System;
+    using Saga;
 
     public abstract class SagaDispatcherBase<TSaga, TMessage> :
-		Consumes<TMessage>.Selected
-		where TSaga : class, ISaga<TSaga>, Consumes<TMessage>.All
-		where TMessage : class, CorrelatedBy<Guid>
-	{
-		protected ISagaRepository<TSaga> _repository;
+        Consumes<TMessage>.Selected
+        where TSaga : class, ISaga<TSaga>, Consumes<TMessage>.All
+        where TMessage : class, CorrelatedBy<Guid>
+    {
+        protected IObjectBuilder _builder;
+        protected IServiceBus _bus;
+        protected ISagaRepository<TSaga> _repository;
 
-        protected SagaDispatcherBase(ISagaRepository<TSaga> repository)
-		{
-			_repository = repository;
-		}
+        protected SagaDispatcherBase(IServiceBus bus, IObjectBuilder builder, ISagaRepository<TSaga> repository)
+        {
+            _bus = bus;
+            _builder = builder;
+            _repository = repository;
+        }
 
-		public bool Accept(TMessage message)
-		{
-			return true;
-		}
+        public bool Accept(TMessage message)
+        {
+            return true;
+        }
 
-		public abstract void Consume(TMessage message);
+        public abstract void Consume(TMessage message);
 
-		public static Guid GenerateSagaId()
-		{
-			byte[] guidArray = Guid.NewGuid().ToByteArray();
+        protected void DispatchToConsumer(TSaga saga, TMessage message)
+        {
+            saga.Builder = _builder;
+            saga.Bus = _bus;
+            saga.Save += x => _repository.Save(x);
 
-			DateTime baseDate = new DateTime(1900, 1, 1);
-			DateTime now = DateTime.Now;
-
-			// Get the days and milliseconds which will be used to build the byte string 
-			TimeSpan days = new TimeSpan(now.Ticks - baseDate.Ticks);
-			TimeSpan msecs = now.TimeOfDay;
-
-			// Convert to a byte array 
-			// Note that SQL Server is accurate to 1/300th of a millisecond so we divide by 3.333333 
-			byte[] daysArray = BitConverter.GetBytes(days.Days);
-			byte[] msecsArray = BitConverter.GetBytes((long) (msecs.TotalMilliseconds/3.333333));
-
-			// Reverse the bytes to match SQL Servers ordering 
-			Array.Reverse(daysArray);
-			Array.Reverse(msecsArray);
-
-			// Copy the bytes into the guid 
-			Array.Copy(daysArray, daysArray.Length - 2, guidArray, guidArray.Length - 6, 2);
-			Array.Copy(msecsArray, msecsArray.Length - 4, guidArray, guidArray.Length - 4, 4);
-
-			return new Guid(guidArray);
-		}
-	}
+            saga.Consume(message);
+        }
+    }
 }

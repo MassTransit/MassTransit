@@ -16,7 +16,7 @@ namespace MassTransit.ServiceBus.Internal
     using Saga;
     using Subscriptions;
 
-    public class SagaSubscription<TSaga, TMessage> :
+    public class InitiateSagaSubscription<TSaga, TMessage> :
         ISubscriptionTypeInfo
         where TSaga : class, ISaga<TSaga>, Consumes<TMessage>.All
         where TMessage : class, CorrelatedBy<Guid>
@@ -49,13 +49,13 @@ namespace MassTransit.ServiceBus.Internal
         {
             IMessageDispatcher<TMessage> messageDispatcher = context.GetDispatcher<MessageDispatcher<TMessage>>();
 
-            SagaDispatcher<TSaga, TMessage> dispatcher = messageDispatcher.GetDispatcher<SagaDispatcher<TSaga, TMessage>>();
+            InitiateSagaDispatcher<TSaga, TMessage> dispatcher = messageDispatcher.GetDispatcher<InitiateSagaDispatcher<TSaga, TMessage>>();
 
             if (dispatcher == null)
             {
                 ISagaRepository<TSaga> repository = context.Builder.Build<ISagaRepository<TSaga>>();
 
-                dispatcher = new SagaDispatcher<TSaga, TMessage>(context.Bus, context.Builder, repository);
+                dispatcher = new InitiateSagaDispatcher<TSaga, TMessage>(context.Bus, context.Builder, repository);
 
                 context.Attach(dispatcher);
                 context.AddSubscription(new Subscription(typeof (TMessage).FullName, context.Bus.Endpoint.Uri));

@@ -12,33 +12,29 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.ServiceBus.Internal
 {
-	using System;
-	using Saga;
+    using System;
+    using Exceptions;
+    using Saga;
 
     public class SagaDispatcher<TSaga, TMessage> :
-		SagaDispatcherBase<TSaga, TMessage>
-		where TSaga : class, ISaga<TSaga>, Consumes<TMessage>.All
-		where TMessage : class, CorrelatedBy<Guid>
-	{
-        private readonly IServiceBus _bus;
-
-        public SagaDispatcher(IServiceBus bus, ISagaRepository<TSaga> repository) :
-			base(repository)
-		{
-		    _bus = bus;
-		}
+        SagaDispatcherBase<TSaga, TMessage>
+        where TSaga : class, ISaga<TSaga>, Consumes<TMessage>.All
+        where TMessage : class, CorrelatedBy<Guid>
+    {
+        public SagaDispatcher(IServiceBus bus, IObjectBuilder builder, ISagaRepository<TSaga> repository) :
+            base(bus, builder, repository)
+        {
+        }
 
         public override void Consume(TMessage message)
-		{
-			Guid correlationId = message.CorrelationId;
+        {
+            Guid correlationId = message.CorrelationId;
 
-			TSaga saga = _repository.Get(correlationId);
+            TSaga saga = _repository.Get(correlationId);
+            if (saga == null)
+                throw new SagaException("The saga could not be loaded.", typeof (TSaga), typeof (TMessage), correlationId);
 
-            saga.Bus = _bus;
-
-			saga.Consume(message);
-
-			_repository.Update(saga);
-		}
-	}
+            DispatchToConsumer(saga, message);
+        }
+    }
 }
