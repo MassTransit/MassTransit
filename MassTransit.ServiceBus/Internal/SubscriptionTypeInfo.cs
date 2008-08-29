@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.ServiceBus.Internal
 {
+    using System;
     using System.Collections.Generic;
 
     public class SubscriptionTypeInfo :
@@ -64,5 +65,7 @@ namespace MassTransit.ServiceBus.Internal
         {
             _subscriptionTypes.Add(subscriptionTypeInfo);
         }
+
+
     }
 }

@@ -18,14 +18,31 @@ namespace MassTransit.ServiceBus.Internal
 
     public class TypeInfoCache : IDisposable
     {
-        private static readonly Type _batchType = typeof (Batch<,>);
+        #region Delegates
+
+        public delegate void ActionDelegate(TypeInfo info, Type componentType, Type[] types);
+
+        #endregion
+
+        private static readonly IList<ActionEntry> _consumerActions = new List<ActionEntry>();
+
         private static readonly Type _consumerType = typeof (Consumes<>.All);
-        private static readonly Type _orchestratesType = typeof(Orchestrates<>);
-        private static readonly Type _startedByType = typeof(StartedBy<>);
         private static readonly Type _correlatedConsumerType = typeof (Consumes<>.For<>);
         private static readonly Type _correlatedMessageType = typeof (CorrelatedBy<>);
+        private static readonly Type _orchestratesType = typeof (Orchestrates<>);
         private static readonly Type _selectiveConsumerType = typeof (Consumes<>.Selected);
+        private static readonly Type _startedByType = typeof (StartedBy<>);
         private readonly Dictionary<Type, TypeInfo> _types = new Dictionary<Type, TypeInfo>();
+
+        static TypeInfoCache()
+        {
+            _consumerActions.Add(new ActionEntry(_startedByType, (i, c, t) => i.AddStartSagaSubscription(c, t)));
+            _consumerActions.Add(new ActionEntry(_orchestratesType, (i, c, t) => i.AddSagaSubscription(c, t)));
+            _consumerActions.Add(new ActionEntry(_correlatedConsumerType, (i, c, t) => i.AddCorrelatedSubscription(c, t)));
+            _consumerActions.Add(new ActionEntry(_selectiveConsumerType, (i, c, t) => i.AddSelectiveSubscription(c, t)));
+            _consumerActions.Add(new ActionEntry(_consumerType, (i, c, t) => i.AddMessageSubscription(c, t)));
+            _consumerActions.Add(new ActionEntry(_correlatedMessageType, (i, c, t) => i.SetPublicationType(c, t)));
+        }
 
         public void Dispose()
         {
@@ -49,129 +66,34 @@ namespace MassTransit.ServiceBus.Internal
                 if (_types.TryGetValue(componentType, out info))
                     return info;
 
-                info = new TypeInfo();
+                info = new TypeInfo(componentType);
 
                 List<Type> usedMessageTypes = new List<Type>();
-                int publicationCount = 0;
 
                 foreach (Type interfaceType in componentType.GetInterfaces())
                 {
-                    if (interfaceType.IsGenericType)
+                    if (!interfaceType.IsGenericType) continue;
+
+                    Type genericType = interfaceType.GetGenericTypeDefinition();
+                    Type[] types = interfaceType.GetGenericArguments();
+
+                    if (usedMessageTypes.Contains(types[0])) continue; 
+
+                    foreach (ActionEntry entry in _consumerActions)
                     {
-                        if (interfaceType.GetGenericTypeDefinition() == _orchestratesType)
-                        {
-                            Type[] arguments = interfaceType.GetGenericArguments();
+                        if (entry.GenericType != genericType) continue;
 
-                            AddSagaSubscription(typeof(SagaSubscription<,>), info, usedMessageTypes, componentType, arguments[0]);
-                        }
-                        else if (interfaceType.GetGenericTypeDefinition() == _startedByType)
-                        {
-                            Type[] arguments = interfaceType.GetGenericArguments();
+                        usedMessageTypes.Add(types[0]);
 
-                            AddSagaSubscription(typeof (StartSagaSubscription<,>), info, usedMessageTypes, componentType, arguments[0]);
-                        }
-                        else if (interfaceType.GetGenericTypeDefinition() == _correlatedConsumerType)
-                        {
-                            Type[] arguments = interfaceType.GetGenericArguments();
-
-                            if (usedMessageTypes.Contains(arguments[0]))
-                                continue;
-
-                            Type subscriptionType = typeof (CorrelatedSubscription<,,>).MakeGenericType(componentType, arguments[0], arguments[1]);
-
-                            ISubscriptionTypeInfo subscriptionTypeInfo = (ISubscriptionTypeInfo) Activator.CreateInstance(subscriptionType);
-
-                            info.SubscriptionTypeInfo.AddSubscriber(subscriptionTypeInfo);
-
-                            usedMessageTypes.Add(arguments[0]);
-                        }
-                        else if (interfaceType.GetGenericTypeDefinition() == _selectiveConsumerType)
-                        {
-                            Type[] arguments = interfaceType.GetGenericArguments();
-
-                            if (usedMessageTypes.Contains(arguments[0]))
-                                continue;
-
-                            Type messageType = arguments[0];
-
-                            ISubscriptionTypeInfo subscriptionTypeInfo;
-
-                            if (messageType.IsGenericType && messageType.GetGenericTypeDefinition() == _batchType)
-                            {
-                                Type[] batchArguments = messageType.GetGenericArguments();
-
-                                Type subscriptionType = typeof (BatchMessageSubscription<,,>).MakeGenericType(componentType, batchArguments[0], batchArguments[1]);
-
-                                subscriptionTypeInfo = (ISubscriptionTypeInfo) Activator.CreateInstance(subscriptionType);
-                            }
-                            else
-                            {
-                                Type subscriptionType = typeof (MessageTypeSubscription<,>).MakeGenericType(componentType, messageType);
-
-                                subscriptionTypeInfo = (ISubscriptionTypeInfo) Activator.CreateInstance(subscriptionType, SubscriptionMode.Selected);
-                            }
-
-                            info.SubscriptionTypeInfo.AddSubscriber(subscriptionTypeInfo);
-
-                            usedMessageTypes.Add(arguments[0]);
-                        }
-                        else if (interfaceType.GetGenericTypeDefinition() == _consumerType)
-                        {
-                            Type[] arguments = interfaceType.GetGenericArguments();
-
-                            if (usedMessageTypes.Contains(arguments[0]))
-                                continue;
-
-                            Type subscriptionType = typeof (MessageTypeSubscription<,>).MakeGenericType(componentType, arguments[0]);
-
-                            ISubscriptionTypeInfo subscriptionTypeInfo = (ISubscriptionTypeInfo) Activator.CreateInstance(subscriptionType, SubscriptionMode.All);
-
-                            info.SubscriptionTypeInfo.AddSubscriber(subscriptionTypeInfo);
-
-                            usedMessageTypes.Add(arguments[0]);
-                        }
-                        else if (interfaceType.GetGenericTypeDefinition() == _correlatedMessageType)
-                        {
-                            Type[] arguments = interfaceType.GetGenericArguments();
-
-                            Type publicationType = typeof (CorrelatedPublication<,>).MakeGenericType(componentType, arguments[0]);
-
-                            IPublicationTypeInfo publicationTypeInfo = (IPublicationTypeInfo) Activator.CreateInstance(publicationType);
-
-                            info.PublicationTypeInfo = publicationTypeInfo;
-
-                            publicationCount++;
-                        }
+                        entry.AddAction(info, componentType, types);
+                        break;
                     }
-                }
-
-                if (publicationCount == 0)
-                {
-                    Type publicationType = typeof (MessageTypePublication<>).MakeGenericType(componentType);
-
-                    IPublicationTypeInfo publicationTypeInfo = (IPublicationTypeInfo) Activator.CreateInstance(publicationType);
-
-                    info.PublicationTypeInfo = publicationTypeInfo;
                 }
 
                 _types.Add(componentType, info);
 
                 return info;
             }
-        }
-
-        private static void AddSagaSubscription(Type type, TypeInfo info, List<Type> usedMessageTypes, Type componentType, Type argument)
-        {
-            if (usedMessageTypes.Contains(argument))
-                return;
-
-            Type subscriptionType = type.MakeGenericType(componentType, argument);
-
-            ISubscriptionTypeInfo subscriptionTypeInfo = (ISubscriptionTypeInfo) Activator.CreateInstance(subscriptionType);
-
-            info.SubscriptionTypeInfo.AddSubscriber(subscriptionTypeInfo);
-
-            usedMessageTypes.Add(argument);
         }
 
         public IPublicationTypeInfo GetPublicationTypeInfo<TComponent>() where TComponent : class
@@ -200,6 +122,28 @@ namespace MassTransit.ServiceBus.Internal
             ITypeInfo typeInfo = Resolve(type);
 
             return typeInfo.GetSubscriptionTypeInfo();
+        }
+
+        public class ActionEntry
+        {
+            private readonly ActionDelegate _addAction;
+            private readonly Type _genericType;
+
+            public ActionEntry(Type genericType, ActionDelegate addAction)
+            {
+                _genericType = genericType;
+                _addAction = addAction;
+            }
+
+            public Type GenericType
+            {
+                get { return _genericType; }
+            }
+
+            public ActionDelegate AddAction
+            {
+                get { return _addAction; }
+            }
         }
     }
 
