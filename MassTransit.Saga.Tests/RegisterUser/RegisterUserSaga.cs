@@ -68,6 +68,8 @@ namespace MassTransit.Saga.Tests.RegisterUser
             // at this point, the user has clicked the link in the validation e-mail
             // and we can commit the user record to the database as a verified user
 
+            Bus.Publish(new UserRegistrationComplete(CorrelationId));
+
             Complete();
         }
 
