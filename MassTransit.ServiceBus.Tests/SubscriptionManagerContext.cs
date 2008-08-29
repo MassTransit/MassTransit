@@ -12,104 +12,101 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.ServiceBus.Tests
 {
-    using System.IO;
-    using System.Reflection;
     using Castle.Core;
     using Castle.Windsor;
-    using log4net.Config;
     using MassTransit.ServiceBus.Subscriptions;
-	using NUnit.Framework;
-	using WindsorIntegration;
+    using NUnit.Framework;
+    using WindsorIntegration;
 
-	[TestFixture]
-	public class SubscriptionManagerContext
-	{
-		#region Setup/Teardown
+    [TestFixture]
+    public class SubscriptionManagerContext
+    {
+        #region Setup/Teardown
 
-		[SetUp]
-		public void Setup()
-		{
-			_container = new DefaultMassTransitContainer("subscriptions.castle.xml");
-            _container.AddComponentLifeStyle("followerRepository", typeof(FollowerRepository), LifestyleType.Singleton);
+        [SetUp]
+        public void Setup()
+        {
+            _container = new DefaultMassTransitContainer("subscriptions.castle.xml");
+            _container.AddComponentLifeStyle("followerRepository", typeof (FollowerRepository), LifestyleType.Singleton);
 
             _subscriptionBus = _container.Resolve<IServiceBus>("subscriptions");
             _subscriptionService = _container.Resolve<SubscriptionService>();
             _subscriptionService.Start();
 
-			_localBus = _container.Resolve<IServiceBus>("local");
-			_remoteBus = _container.Resolve<IServiceBus>("remote");
-			
-			_subscriptionCache = _container.Resolve<ISubscriptionCache>("SubscriptionServiceCache");
-			Before_each();
-		}
+            _localBus = _container.Resolve<IServiceBus>("local");
+            _remoteBus = _container.Resolve<IServiceBus>("remote");
 
-		[TearDown]
-		public void Teardown()
-		{
-			After_each();
+            _subscriptionCache = _container.Resolve<ISubscriptionCache>("SubscriptionServiceCache");
+            Before_each();
+        }
+
+        [TearDown]
+        public void Teardown()
+        {
+            After_each();
 
 
-			_localBus.Dispose();
-			_container.Release(_localBus);
+            _localBus.Dispose();
+            _container.Release(_localBus);
 
-			_remoteBus.Dispose();
-			_container.Release(_remoteBus);
+            _remoteBus.Dispose();
+            _container.Release(_remoteBus);
 
-			_subscriptionService.Stop();
-			_subscriptionService.Dispose();
-			_container.Release(_subscriptionService);
+            _subscriptionService.Stop();
+            _subscriptionService.Dispose();
+            _container.Release(_subscriptionService);
 
-			_subscriptionBus.Dispose();
-			_container.Release(_subscriptionBus);
+            _subscriptionBus.Dispose();
+            _container.Release(_subscriptionBus);
 
-			_container.Dispose();
-		}
+            _container.Dispose();
+        }
 
-		#endregion
+        #endregion
 
-		private IWindsorContainer _container;
-		private IServiceBus _localBus;
-		private IServiceBus _remoteBus;
-		private IServiceBus _subscriptionBus;
-		private SubscriptionService _subscriptionService;
-		private ISubscriptionCache _subscriptionCache;
+        private IWindsorContainer _container;
+        private IServiceBus _localBus;
+        private IServiceBus _remoteBus;
+        private IServiceBus _subscriptionBus;
+        private SubscriptionService _subscriptionService;
+        private ISubscriptionCache _subscriptionCache;
 
-		public SubscriptionService SubscriptionService
-		{
-			get { return _subscriptionService; }
-		}
+        public SubscriptionService SubscriptionService
+        {
+            get { return _subscriptionService; }
+        }
 
-		protected virtual void Before_each()
-		{
-		}
+        protected virtual void Before_each()
+        {
+        }
 
-		protected virtual void After_each()
-		{
-		}
+        protected virtual void After_each()
+        {
+        }
 
-		public IServiceBus LocalBus
-		{
-			get { return _localBus; }
-		}
+        public IServiceBus LocalBus
+        {
+            get { return _localBus; }
+        }
 
-		public IServiceBus RemoteBus
-		{
-			get { return _remoteBus; }
-		}
+        public IServiceBus RemoteBus
+        {
+            get { return _remoteBus; }
+        }
 
-		public IServiceBus SubscriptionBus
-		{
-			get { return _subscriptionBus; }
-		}
+        public IServiceBus SubscriptionBus
+        {
+            get { return _subscriptionBus; }
+        }
 
-		public IWindsorContainer Container
-		{
-			get { return _container; }
-		}
+        public IWindsorContainer Container
+        {
+            get { return _container; }
+        }
 
-		public ISubscriptionCache SubscriptionCache
-		{
-			get { return _subscriptionCache; }
-		}
-	}
+        public ISubscriptionCache SubscriptionCache
+        {
+            get { return _subscriptionCache; }
+        }
+    }
 }
