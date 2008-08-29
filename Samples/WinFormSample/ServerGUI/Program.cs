@@ -1,4 +1,4 @@
-﻿namespace SubscriptionManagerGUI
+﻿namespace ServerGUI
 {
     using System;
     using System.Windows.Forms;

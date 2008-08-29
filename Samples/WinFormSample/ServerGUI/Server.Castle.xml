@@ -6,15 +6,13 @@
       service="MassTransit.ServiceBus.Subscriptions.ISubscriptionRepository, MassTransit.ServiceBus"
                type="MassTransit.ServiceBus.Subscriptions.InMemorySubscriptionRepository, MassTransit.ServiceBus"/>
 
-    <component id="SubscriptionService"
-      type="MassTransit.ServiceBus.Subscriptions.SubscriptionService, MassTransit.ServiceBus">
-    </component>
   </components>
   <facilities>
     <facility id="masstransit">
 
-      <bus id="subscriptions"
-				 endpoint="msmq://localhost/mt_pubsub">
+      <bus id="server"
+				 endpoint="msmq://localhost/mt_server">
+        <subscriptionService endpoint="msmq://localhost/mt_pubsub" />
       </bus>
       <transports>
         <transport>MassTransit.ServiceBus.MSMQ.MsmqEndpoint, MassTransit.ServiceBus.MSMQ</transport>
