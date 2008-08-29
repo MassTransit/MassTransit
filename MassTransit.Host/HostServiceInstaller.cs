@@ -64,6 +64,9 @@ namespace MassTransit.Host
                 }
             }
 
+            //TODO: How can i have the children spec this?
+            //_serviceInstaller.ServicesDependedOn = new string[] {"MSMQ"};
+
             _serviceInstaller.StartType = ServiceStartMode.Automatic;
             Installers.AddRange(new Installer[] {_serviceProcessInstaller, _serviceInstaller});            
         }
