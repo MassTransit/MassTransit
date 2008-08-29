@@ -74,6 +74,32 @@ namespace MassTransit.Saga.Tests.RegisterUser
                 throw new ApplicationException("A timeout occurred while registering the user");
             }
         }
+
+        public bool ValidateUser()
+        {
+            using (Flow.Subscription(_bus, this))
+            {
+                _bus.Publish(new UserValidated(CorrelationId));
+
+                WaitHandle[] handles = new WaitHandle[] { _completed };
+
+                int result = WaitHandle.WaitAny(handles, TimeSpan.FromSeconds(10), true);
+
+                if (result == 0)
+                {
+                    // we have success!
+                    return true;
+                }
+
+                if (result == 1)
+                {
+                    // we are pending, so we need to return false but not fail
+                    return false;
+                }
+
+                throw new ApplicationException("A timeout occurred while registering the user");
+            }
+        }
     }
 
     public static class Flow

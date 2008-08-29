@@ -13,7 +13,10 @@
 namespace MassTransit.Saga.Tests.RegisterUser.Messages
 {
     using System;
+    using ServiceBus;
 
+    [Reliable]
+    [Serializable]
     public class UserValidated :
         CorrelatedMessage
     {

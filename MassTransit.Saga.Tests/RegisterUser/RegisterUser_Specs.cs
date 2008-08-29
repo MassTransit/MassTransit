@@ -46,6 +46,13 @@ namespace MassTransit.Saga.Tests.RegisterUser
             timer.Stop();
 
             Debug.WriteLine(string.Format("Time to handle message: {0}ms", timer.ElapsedMilliseconds));
+
+            complete = controller.ValidateUser();
+
+            Assert.That(complete, Is.True, "Should have been completed by now");
+
+
+
         }
     }
 }
