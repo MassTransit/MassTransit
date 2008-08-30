@@ -149,6 +149,9 @@
             {
                 if (_subscriptionBus != null)
                 {
+                    _subscriptionCache.OnAddSubscription -= SubscriptionAdded;
+                    _subscriptionCache.OnRemoveSubscription -= SubscriptionRemoved;
+
                     _subscriptionBus.Dispose();
                 }
             }
