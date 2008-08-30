@@ -11,19 +11,24 @@
     using MassTransit.ServiceBus.Subscriptions;
     using MassTransit.WindsorIntegration;
 
-    public partial class MainForm : Form
+    public partial class SubscriptionManagerForm : Form
     {
-        private static readonly ILog _log = LogManager.GetLogger(typeof (MainForm));
+        private static readonly ILog _log = LogManager.GetLogger(typeof (SubscriptionManagerForm));
 
         private IWindsorContainer _container;
         private IServiceBus _subscriptionBus;
         private ISubscriptionCache _subscriptionCache;
         private SubscriptionService _subscriptionService;
 
-        public MainForm()
+        private delegate void ThreadSafeUpdate(Subscription subscription);
+
+        public SubscriptionManagerForm()
         {
             InitializeComponent();
+        }
 
+        private void SubscriptionManagerForm_Load(object sender, EventArgs e)
+        {
             StartSubscriptionManager();
         }
 
@@ -56,6 +61,18 @@
         }
 
         private void SubscriptionAdded(object sender, SubscriptionEventArgs e)
+        {
+            ThreadSafeUpdate tsu = RefreshSubscriptions;
+            BeginInvoke(tsu, new object[] {e.Subscription});
+        }
+
+        private void SubscriptionRemoved(object sender, SubscriptionEventArgs e)
+        {
+            ThreadSafeUpdate tsu = RefreshSubscriptions;
+            BeginInvoke(tsu, new object[] { e.Subscription });
+        }
+
+        private void RefreshSubscriptions(Subscription ignored)
         {
             List<TreeNode> existingNodes = new List<TreeNode>();
             foreach (TreeNode endpointNode in _subscriptions.Nodes)
@@ -111,11 +128,6 @@
             {
                 node.Remove();
             }
-        }
-
-        private void SubscriptionRemoved(object sender, SubscriptionEventArgs e)
-        {
-            // TODO update the tree view
         }
 
         private void StopSubscriptionManager()
@@ -179,10 +191,6 @@
         private void StopButton_Click(object sender, EventArgs e)
         {
             StopSubscriptionManager();
-        }
-
-        private void MainForm_Load(object sender, EventArgs e)
-        {
         }
     }
 }

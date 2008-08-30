@@ -6,20 +6,24 @@
     using Castle.Windsor;
     using log4net;
     using MassTransit.ServiceBus;
+    using MassTransit.ServiceBus.Subscriptions;
     using MassTransit.WindsorIntegration;
-    using Messages;
 
-    public partial class MainForm : Form
+    public partial class ServerForm : Form
     {
-        private static readonly ILog _log = LogManager.GetLogger(typeof (MainForm));
+        private static readonly ILog _log = LogManager.GetLogger(typeof (ServerForm));
 
         private IServiceBus _bus;
+
         private IWindsorContainer _container;
 
-        public MainForm()
+        public ServerForm()
         {
             InitializeComponent();
+        }
 
+        private void ServerForm_Load(object sender, EventArgs e)
+        {
             StartService();
         }
 
@@ -49,7 +53,15 @@
             {
                 if (_bus != null)
                 {
-                    _bus.Dispose();
+                    SubscriptionClient client = _container.Resolve<SubscriptionClient>("server.subscriptionClient");
+                    if (client != null)
+                    {
+                        client.Stop();
+                        _container.Release(client);
+                    }
+
+                    _container.Release(_bus);
+                    _bus = null;
                 }
             }
             catch (Exception ex)

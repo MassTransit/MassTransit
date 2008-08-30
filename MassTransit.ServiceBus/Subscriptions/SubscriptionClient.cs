@@ -12,7 +12,8 @@
 /// specific language governing permissions and limitations under the License.
 namespace MassTransit.ServiceBus.Subscriptions
 {
-	using Exceptions;
+    using System.Collections.Generic;
+    using Exceptions;
 	using Messages;
 
 	public class SubscriptionClient :
@@ -55,6 +56,8 @@ namespace MassTransit.ServiceBus.Subscriptions
 
 		public void Dispose()
 		{
+		    Stop();
+
 			//the bus owns the client so it shouldn't be disposed
 			//the bus owns the cache so it shouldn't be disposed
 			_subscriptionServiceEndpoint.Dispose();
@@ -76,10 +79,19 @@ namespace MassTransit.ServiceBus.Subscriptions
 		{
 			_subscriptionServiceEndpoint.Send(new CancelSubscriptionUpdates(_serviceBus.Endpoint.Uri));
 
-			_serviceBus.Unsubscribe(this);
+            // it makes sense to unsubscribe to everything we are subscribed to, right?
 
-			_cache.OnAddSubscription -= Cache_OnAddSubscription;
-			_cache.OnRemoveSubscription -= Cache_OnRemoveSubscription;
+            _serviceBus.Unsubscribe(this);
+
+            _cache.OnAddSubscription -= Cache_OnAddSubscription;
+            _cache.OnRemoveSubscription -= Cache_OnRemoveSubscription;
+
+            IList<Subscription> subscriptions = _cache.List();
+		    foreach (Subscription subscription in subscriptions)
+		    {
+                if(IsOwnedSubscription(subscription))
+		            _subscriptionServiceEndpoint.Send(new RemoveSubscription(subscription));
+		    }
 		}
 
 		private bool IsOwnedSubscription(Subscription subscription)
