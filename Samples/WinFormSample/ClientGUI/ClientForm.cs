@@ -1,48 +1,96 @@
-﻿namespace ClientGUI
+﻿// Copyright 2007-2008 The Apache Software Foundation.
+//  
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
+// this file except in compliance with the License. You may obtain a copy of the 
+// License at 
+// 
+//     http://www.apache.org/licenses/LICENSE-2.0 
+// 
+// Unless required by applicable law or agreed to in writing, software distributed 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// specific language governing permissions and limitations under the License.
+namespace ClientGUI
 {
-    partial class Form1
+    using System;
+    using System.ComponentModel;
+    using System.Windows.Forms;
+    using Castle.Windsor;
+    using log4net;
+    using MassTransit.ServiceBus;
+    using MassTransit.WindsorIntegration;
+
+    public partial class ClientForm : Form
     {
-        /// <summary>
-        /// Required designer variable.
-        /// </summary>
-        private System.ComponentModel.IContainer components = null;
+        private static readonly ILog _log = LogManager.GetLogger(typeof (ClientForm));
 
-        /// <summary>
-        /// Clean up any resources being used.
-        /// </summary>
-        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
-        protected override void Dispose(bool disposing)
+        private IServiceBus _bus;
+
+        private IWindsorContainer _container;
+
+        public ClientForm()
         {
-            if (disposing && (components != null))
+            InitializeComponent();
+        }
+
+        private void ClientForm_Load(object sender, EventArgs e)
+        {
+            StartClient();
+        }
+
+        private void StartClient()
+        {
+            StopClient();
+
+            try
             {
-                components.Dispose();
+                _container = new DefaultMassTransitContainer("Client.Castle.xml");
+
+                _bus = _container.Resolve<IServiceBus>("client");
             }
-            base.Dispose(disposing);
+            catch (Exception ex)
+            {
+                _log.Error(ex);
+                MessageBox.Show("The client failed to start:\n\n" + ex.Message);
+            }
         }
 
-        #region Windows Form Designer generated code
-
-        /// <summary>
-        /// Required method for Designer support - do not modify
-        /// the contents of this method with the code editor.
-        /// </summary>
-        private void InitializeComponent()
+        private void StopClient()
         {
-            this.SuspendLayout();
-            // 
-            // Form1
-            // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(292, 273);
-            this.Name = "Form1";
-            this.Text = "Form1";
-            this.Load += new System.EventHandler(this.Form1_Load);
-            this.ResumeLayout(false);
+            try
+            {
+                if (_bus != null)
+                {
+                    _container.Release(_bus);
+                    _bus = null;
+                }
+            }
+            catch (Exception ex)
+            {
+                _log.Error(ex);
+            }
 
+            try
+            {
+                if (_container != null)
+                {
+                    _container.Dispose();
+                    _container = null;
+                }
+            }
+            catch (Exception ex)
+            {
+                _log.Error(ex);
+            }
         }
 
-        #endregion
+        protected override void OnClosing(CancelEventArgs e)
+        {
+            base.OnClosing(e);
+
+            StopClient();
+
+            e.Cancel = false;
+        }
     }
 }
-
