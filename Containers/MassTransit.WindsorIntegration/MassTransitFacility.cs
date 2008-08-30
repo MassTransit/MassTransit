@@ -1,3 +1,15 @@
+// Copyright 2007-2008 The Apache Software Foundation.
+//  
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
+// this file except in compliance with the License. You may obtain a copy of the 
+// License at 
+// 
+//     http://www.apache.org/licenses/LICENSE-2.0 
+// 
+// Unless required by applicable law or agreed to in writing, software distributed 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// specific language governing permissions and limitations under the License.
 namespace MassTransit.WindsorIntegration
 {
     using System;
@@ -12,7 +24,7 @@ namespace MassTransit.WindsorIntegration
     using MassTransit.ServiceBus.Internal;
     using MassTransit.ServiceBus.Subscriptions;
     using ServiceBus;
-    using Component=Castle.MicroKernel.Registration.Component;
+    using Component = Castle.MicroKernel.Registration.Component;
 
     public class MassTransitFacility :
         AbstractFacility
@@ -50,8 +62,8 @@ namespace MassTransit.WindsorIntegration
 
         private void RegisterComponents()
         {
-            Kernel.AddComponentInstance("kernel", typeof (IKernel), Kernel);
-            Kernel.AddComponentInstance("objectBuilder", typeof (IObjectBuilder), typeof (WindsorObjectBuilder), new WindsorObjectBuilder(Kernel));
+            Kernel.AddComponentInstance("kernel", typeof(IKernel), Kernel);
+            Kernel.AddComponentInstance("objectBuilder", typeof(IObjectBuilder), typeof(WindsorObjectBuilder), new WindsorObjectBuilder(Kernel));
 
             Kernel.Register(
                 Component.For<ISubscriptionCache>()
@@ -95,7 +107,7 @@ namespace MassTransit.WindsorIntegration
             IConfiguration threadConfig = busConfig.Children["dispatcher"];
             ConfigureThreadingModel(threadConfig, bus);
 
-            Kernel.AddComponentInstance(id, typeof (IServiceBus), bus);
+            Kernel.AddComponentInstance(id, typeof(IServiceBus), bus);
 
             return bus;
         }
@@ -115,9 +127,9 @@ namespace MassTransit.WindsorIntegration
             if (string.IsNullOrEmpty(value))
                 return defaultValue;
 
-            TypeConverter tc = TypeDescriptor.GetConverter(typeof (T));
+            TypeConverter tc = TypeDescriptor.GetConverter(typeof(T));
 
-            T newValue = (T) tc.ConvertFromInvariantString(value);
+            T newValue = (T)tc.ConvertFromInvariantString(value);
 
             return newValue;
         }
@@ -150,7 +162,7 @@ namespace MassTransit.WindsorIntegration
 
                 SubscriptionClient sc = new SubscriptionClient(bus, cache, subscriptionServiceEndpoint);
 
-                Kernel.AddComponentInstance(id + ".subscriptionClient", typeof (SubscriptionClient), sc);
+                Kernel.AddComponentInstance(id + ".subscriptionClient", sc);
                 sc.Start(); //TODO: should use the startable
             }
         }
@@ -165,32 +177,38 @@ namespace MassTransit.WindsorIntegration
             string name = cacheConfig.Attributes["name"];
 
             string mode = cacheConfig.Attributes["mode"];
-            ISubscriptionCache cache;
             switch (mode)
             {
                 case "local":
                     if (string.IsNullOrEmpty(name))
                         return Kernel.Resolve<ISubscriptionCache>();
+                    else
+                    {
+                        ISubscriptionCache cache = Kernel.Resolve<ISubscriptionCache>(name);
+                        if (cache == null)
+                        {
+                            cache = Kernel.Resolve<ISubscriptionCache>();
+                            Kernel.AddComponentInstance(name, cache);
+                        }
 
-                    cache = Kernel.Resolve<ISubscriptionCache>(name);
-                    if (cache != null)
                         return cache;
-
-                    cache = Kernel.Resolve<ISubscriptionCache>();
-                    Kernel.AddComponentInstance(name, cache);
-                    return cache;
+                    }
 
                 case "distributed":
                     if (string.IsNullOrEmpty(name))
+                    {
                         return new DistributedSubscriptionCache(GetDistributedCacheServerList(cacheConfig));
-
-                    cache = Kernel.Resolve<DistributedSubscriptionCache>(name);
-                    if (cache != null)
+                    }
+                    else
+                    {
+                        ISubscriptionCache cache = Kernel.Resolve<DistributedSubscriptionCache>(name);
+                        if (cache == null)
+                        {
+                            cache = new DistributedSubscriptionCache(GetDistributedCacheServerList(cacheConfig));
+                            Kernel.AddComponentInstance(name, cache);
+                        }
                         return cache;
-
-                    cache = new DistributedSubscriptionCache(GetDistributedCacheServerList(cacheConfig));
-                    Kernel.AddComponentInstance(name, cache);
-                    return cache;
+                    }
 
                 default:
                     throw new ConventionException(mode + " is not a valid subscriptionCache mode");
