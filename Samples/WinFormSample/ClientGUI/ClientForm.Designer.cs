@@ -34,14 +34,15 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(292, 273);
+            this.ClientSize = new System.Drawing.Size(484, 387);
             this.Name = "ClientForm";
-            this.Text = "ClientForm";
+            this.Text = "Client Simulator";
             this.Load += new System.EventHandler(this.ClientForm_Load);
             this.ResumeLayout(false);
 
         }
 
         #endregion
+
     }
 }

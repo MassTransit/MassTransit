@@ -53,13 +53,6 @@
             {
                 if (_bus != null)
                 {
-                    SubscriptionClient client = _container.Resolve<SubscriptionClient>("server.subscriptionClient");
-                    if (client != null)
-                    {
-                        client.Stop();
-                        _container.Release(client);
-                    }
-
                     _container.Release(_bus);
                     _bus = null;
                 }
