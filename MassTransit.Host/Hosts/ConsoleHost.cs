@@ -19,12 +19,12 @@ namespace MassTransit.Host.Hosts
 	public class ConsoleHost
 	{
 		private static readonly ILog _log = LogManager.GetLogger(typeof (ConsoleHost));
-		private readonly HostedEnvironment _environment;
+        private readonly HostedLifeCycle _lifecycle;
 
 
-		public ConsoleHost(HostedEnvironment environment)
+		public ConsoleHost(HostedLifeCycle lifecycle)
 		{
-			_environment = environment;
+			_lifecycle = lifecycle;
 		}
 
 		public void Run()
@@ -36,33 +36,24 @@ namespace MassTransit.Host.Hosts
 
 			WaitHandle[] waitHandles = new WaitHandle[] {serviceCompleted, terminateService};
 
-			_environment.Completed += delegate { serviceCompleted.Set(); };
+			_lifecycle.Completed += delegate { serviceCompleted.Set(); };
 
 			Console.CancelKeyPress += delegate
 			                          	{
 			                          		_log.Info("Control+C detected, exiting.");
-			                          		terminateService.Set();
-			                          	};
+                                            _log.Info("Stopping the service");
 
-			_environment.Start();
+			                          	    _lifecycle.Stop(); //user stop
+                                            _lifecycle.Dispose();
+                                            terminateService.Set();
+			                          	};
+            _lifecycle.Initialize();
+			_lifecycle.Start(); //user start
 
 			_log.InfoFormat("The service is running, press Control+C to exit.");
 
-            _environment.Main();
+		    WaitHandle.WaitAny(waitHandles);
 
-			int result;
-			while ((result = WaitHandle.WaitAny(waitHandles, TimeSpan.FromSeconds(30), true)) == WaitHandle.WaitTimeout)
-			{
-			}
-
-			if (result == 0) // our service completed
-			{
-			}
-			else if (result == 1 || result == 2) // the application service exited
-			{
-				_log.Info("Stopping the service");
-				_environment.Stop();
-			}
 		}
 	}
 }

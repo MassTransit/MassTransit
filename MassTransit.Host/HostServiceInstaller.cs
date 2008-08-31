@@ -27,45 +27,37 @@ namespace MassTransit.Host
         private readonly ServiceInstaller _serviceInstaller = new ServiceInstaller();
         private readonly ServiceProcessInstaller _serviceProcessInstaller = new ServiceProcessInstaller();
 
-        public HostServiceInstaller(string serviceName, string displayName, string description)
-            : this(serviceName, displayName, description, "", "", true)
+        public HostServiceInstaller(HostedEnvironment environment)
         {
-        }
+            _serviceInstaller.ServiceName = environment.ServiceName;
+            _serviceInstaller.Description = environment.Description;
+            _serviceInstaller.DisplayName = environment.DispalyName;
 
-        public HostServiceInstaller(string serviceName, string displayName, string description, string username, string password, bool interactive)
-        {
-            _serviceInstaller.ServiceName = serviceName;
-            _serviceInstaller.Description = description;
-            _serviceInstaller.DisplayName = displayName;
-
-            if (!string.IsNullOrEmpty(username) && !string.IsNullOrEmpty(password))
+            if (!string.IsNullOrEmpty(environment.Username) && !string.IsNullOrEmpty(environment.Password))
             {
-                _log.DebugFormat("Attempting to install as user {0}", username);
+                _log.DebugFormat("Attempting to install as user {0}", environment.Username);
                 _serviceProcessInstaller.Account = ServiceAccount.User;
-                _serviceProcessInstaller.Username = username;
-                _serviceProcessInstaller.Password = password;
+                _serviceProcessInstaller.Username = environment.Username;
+                _serviceProcessInstaller.Password = environment.Password;
             }
             else
             {
-                if (interactive)
+                _serviceProcessInstaller.Username = null;
+                _serviceProcessInstaller.Password = null;
+                
+                if (environment.AskForCredentialsDuringInstall)
                 {
                     _log.Debug("Attempting to install interactively");
                     _serviceProcessInstaller.Account = ServiceAccount.User;
-                    _serviceProcessInstaller.Username = null;
-                    _serviceProcessInstaller.Password = null;
-
                 }
                 else
                 {
                     _log.Debug("Attempting to install as Local Service");
                     _serviceProcessInstaller.Account = ServiceAccount.LocalSystem;
-                    _serviceProcessInstaller.Username = null;
-                    _serviceProcessInstaller.Password = null;
                 }
             }
 
-            //TODO: How can i have the children spec this?
-            //_serviceInstaller.ServicesDependedOn = new string[] {"MSMQ"};
+            _serviceInstaller.ServicesDependedOn = environment.Dependecies;
 
             _serviceInstaller.StartType = ServiceStartMode.Automatic;
             Installers.AddRange(new Installer[] {_serviceProcessInstaller, _serviceInstaller});            

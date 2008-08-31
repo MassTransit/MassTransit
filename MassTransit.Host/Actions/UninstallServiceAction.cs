@@ -23,7 +23,7 @@ namespace MassTransit.Host.Actions
         public void Do(HostedEnvironment environment)
         {
             _log.Info("Received serice uninstall notification");
-            HostServiceInstaller hsi = new HostServiceInstaller(environment.ServiceName, environment.DispalyName, environment.Description);
+            HostServiceInstaller hsi = new HostServiceInstaller(environment);
             hsi.Unregister();
         }
     }
