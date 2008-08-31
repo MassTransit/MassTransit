@@ -94,6 +94,7 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <Compile Include="TrapperKeeper.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Client.Castle.xml">
