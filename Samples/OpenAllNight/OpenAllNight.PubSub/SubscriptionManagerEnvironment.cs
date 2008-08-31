@@ -11,10 +11,9 @@ namespace OpenAllNight.PubSub
         {
         }
 
-
-        public override void Main()
+        public override HostedLifeCycle LifeCycle
         {
-            //do nothing
+            get { return new SubscriptionManagerLifeCycle(XmlFile); }
         }
 
         public override string ServiceName

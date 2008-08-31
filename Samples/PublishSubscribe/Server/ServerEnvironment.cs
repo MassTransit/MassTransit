@@ -10,12 +10,6 @@ namespace Server
 		{
 		}
 
-
-	    public override void Main()
-	    {
-	        //do nothing
-	    }
-
 	    public override string ServiceName
 		{
 			get { return "SampleServerService"; }
@@ -30,5 +24,10 @@ namespace Server
 		{
 			get { return "Acts as a server on the service bus"; }
 		}
+
+	    public override HostedLifeCycle LifeCycle
+	    {
+            get { return new ServerLifeCycle(this.XmlFile); }
+	    }
 	}
 }

@@ -2,7 +2,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>8.0.50727</ProductVersion>
+    <ProductVersion>9.0.21022</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{BA976685-ED92-4499-A42B-F642D1C34778}</ProjectGuid>
     <OutputType>Exe</OutputType>
@@ -61,6 +61,7 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SubscriptionManagerEnvironment.cs" />
+    <Compile Include="SubscriptionManagerLifeCycle.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="log4net.xml">

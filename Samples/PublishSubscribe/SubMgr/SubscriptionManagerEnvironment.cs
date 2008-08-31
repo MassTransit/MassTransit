@@ -11,12 +11,6 @@ namespace SubMgr
 		{
 		}
 
-
-	    public override void Main()
-	    {
-	        //do nothing
-	    }
-
 	    public override string ServiceName
 		{
 			get { return "SampleSubscriptionService"; }
@@ -31,5 +25,10 @@ namespace SubMgr
 		{
 			get { return "Coordinates subscriptions between multiple systems"; }
 		}
+
+	    public override HostedLifeCycle LifeCycle
+	    {
+            get { return new SubscriptionManagerLifeCycle(this.XmlFile); }
+	    }
 	}
 }
