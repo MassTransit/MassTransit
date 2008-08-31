@@ -25,7 +25,7 @@ namespace MassTransit.Host.Actions
         {
             _log.Info("Received console start notification");
 
-            ConsoleHost inConsoleHost = new ConsoleHost(environment);
+            ConsoleHost inConsoleHost = new ConsoleHost(environment.LifeCycle);
             inConsoleHost.Run();
         }
     }

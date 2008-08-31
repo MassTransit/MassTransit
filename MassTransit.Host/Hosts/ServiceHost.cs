@@ -20,13 +20,15 @@ namespace MassTransit.Host.Hosts
     public class ServiceHost : ServiceBase
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(ServiceHost));
+        private readonly HostedLifeCycle _lifecycle;
         private readonly HostedEnvironment _environment;
         private readonly HostServiceInstaller _installer;
 
 
-        public ServiceHost(HostedEnvironment environment)
+        public ServiceHost(HostedLifeCycle lifecycle, HostedEnvironment environment)
         {
-            _installer = new HostServiceInstaller(environment.ServiceName, environment.DispalyName, environment.Description);
+            _installer = new HostServiceInstaller(environment);
+            _lifecycle = lifecycle;
             _environment = environment;
         }
 
@@ -49,14 +51,15 @@ namespace MassTransit.Host.Hosts
             _log.Info("Received service start notification");
 
             _log.DebugFormat("Arguments: {0}", string.Join(",", args));
-            _environment.Start();
-            _environment.Main();
+            _lifecycle.Initialize();
+            _lifecycle.Start();
         }
 
         protected override void OnStop()
         {
             _log.Info("Received service stop notification");
-            _environment.Stop();
+            _lifecycle.Stop();
+            _lifecycle.Dispose();
         }
     }
 }

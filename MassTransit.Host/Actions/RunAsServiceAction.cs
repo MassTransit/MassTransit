@@ -25,7 +25,7 @@ namespace MassTransit.Host.Actions
         {
             _log.Info("Received service start notification");
 
-            ServiceHost inServiceHost = new ServiceHost(environment);
+            ServiceHost inServiceHost = new ServiceHost(environment.LifeCycle, environment);
             inServiceHost.Run();
         }
     }

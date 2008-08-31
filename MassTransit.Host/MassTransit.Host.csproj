@@ -89,6 +89,7 @@
     <Compile Include="ArgumentParsing\IArgumentMapFactory.cs" />
     <Compile Include="ArgumentParsing\IArgumentParser.cs" />
     <Compile Include="HostedEnvironment.cs" />
+    <Compile Include="HostedLifeCycle.cs" />
     <Compile Include="HostServiceInstaller.cs">
       <SubType>Component</SubType>
     </Compile>

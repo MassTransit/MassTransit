@@ -23,7 +23,8 @@ namespace MassTransit.Host.Actions
         public void Do(HostedEnvironment environment)
         {
             _log.Info("Received service install notification");
-            HostServiceInstaller hsi = new HostServiceInstaller(environment.ServiceName, environment.DispalyName, environment.Description);
+            HostServiceInstaller hsi = 
+                new HostServiceInstaller(environment);
             hsi.Register();
         }
     }
