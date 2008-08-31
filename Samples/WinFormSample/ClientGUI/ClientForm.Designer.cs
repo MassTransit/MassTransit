@@ -44,10 +44,20 @@
             this.label6 = new System.Windows.Forms.Label();
             this.label7 = new System.Windows.Forms.Label();
             this.client2Active = new System.Windows.Forms.CheckBox();
+            this.client3Sent = new System.Windows.Forms.Label();
+            this.label4 = new System.Windows.Forms.Label();
+            this.label8 = new System.Windows.Forms.Label();
+            this.panel3 = new System.Windows.Forms.Panel();
+            this.client3Received = new System.Windows.Forms.Label();
+            this.label10 = new System.Windows.Forms.Label();
+            this.client3WaitTime = new System.Windows.Forms.NumericUpDown();
+            this.client3Active = new System.Windows.Forms.CheckBox();
             this.panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.client1WaitTime)).BeginInit();
             this.panel2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.client2WaitTime)).BeginInit();
+            this.panel3.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.client3WaitTime)).BeginInit();
             this.SuspendLayout();
             // 
             // panel1
@@ -250,11 +260,112 @@
             this.client2Active.UseVisualStyleBackColor = false;
             this.client2Active.CheckedChanged += new System.EventHandler(this.Client2Active_CheckedChanged);
             // 
+            // client3Sent
+            // 
+            this.client3Sent.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.client3Sent.Location = new System.Drawing.Point(6, 55);
+            this.client3Sent.Name = "client3Sent";
+            this.client3Sent.Size = new System.Drawing.Size(114, 15);
+            this.client3Sent.TabIndex = 3;
+            this.client3Sent.Text = "0";
+            this.client3Sent.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label4.Location = new System.Drawing.Point(126, 72);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(58, 15);
+            this.label4.TabIndex = 6;
+            this.label4.Text = "Received";
+            // 
+            // label8
+            // 
+            this.label8.AutoSize = true;
+            this.label8.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label8.Location = new System.Drawing.Point(126, 55);
+            this.label8.Name = "label8";
+            this.label8.Size = new System.Drawing.Size(32, 15);
+            this.label8.TabIndex = 4;
+            this.label8.Text = "Sent";
+            // 
+            // panel3
+            // 
+            this.panel3.BackColor = System.Drawing.SystemColors.Window;
+            this.panel3.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+            this.panel3.Controls.Add(this.client3Received);
+            this.panel3.Controls.Add(this.client3Sent);
+            this.panel3.Controls.Add(this.label10);
+            this.panel3.Controls.Add(this.client3WaitTime);
+            this.panel3.Controls.Add(this.label4);
+            this.panel3.Controls.Add(this.label8);
+            this.panel3.Controls.Add(this.client3Active);
+            this.panel3.ForeColor = System.Drawing.SystemColors.WindowText;
+            this.panel3.Location = new System.Drawing.Point(12, 224);
+            this.panel3.Name = "panel3";
+            this.panel3.Size = new System.Drawing.Size(200, 100);
+            this.panel3.TabIndex = 2;
+            // 
+            // client3Received
+            // 
+            this.client3Received.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.client3Received.Location = new System.Drawing.Point(6, 72);
+            this.client3Received.Name = "client3Received";
+            this.client3Received.Size = new System.Drawing.Size(114, 15);
+            this.client3Received.TabIndex = 5;
+            this.client3Received.Text = "0";
+            this.client3Received.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            // 
+            // label10
+            // 
+            this.label10.AutoSize = true;
+            this.label10.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label10.Location = new System.Drawing.Point(3, 26);
+            this.label10.Name = "label10";
+            this.label10.Size = new System.Drawing.Size(94, 15);
+            this.label10.TabIndex = 1;
+            this.label10.Text = "Wait Time (ms):";
+            // 
+            // client3WaitTime
+            // 
+            this.client3WaitTime.Increment = new decimal(new int[] {
+            5,
+            0,
+            0,
+            0});
+            this.client3WaitTime.Location = new System.Drawing.Point(103, 25);
+            this.client3WaitTime.Name = "client3WaitTime";
+            this.client3WaitTime.Size = new System.Drawing.Size(49, 20);
+            this.client3WaitTime.TabIndex = 2;
+            this.client3WaitTime.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.client3WaitTime.Value = new decimal(new int[] {
+            5,
+            0,
+            0,
+            0});
+            // 
+            // client3Active
+            // 
+            this.client3Active.BackColor = System.Drawing.SystemColors.ActiveCaption;
+            this.client3Active.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.client3Active.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
+            this.client3Active.Location = new System.Drawing.Point(0, 0);
+            this.client3Active.Margin = new System.Windows.Forms.Padding(0);
+            this.client3Active.Name = "client3Active";
+            this.client3Active.Padding = new System.Windows.Forms.Padding(6, 0, 0, 0);
+            this.client3Active.Size = new System.Drawing.Size(200, 22);
+            this.client3Active.TabIndex = 0;
+            this.client3Active.Text = "Client 3";
+            this.client3Active.UseVisualStyleBackColor = false;
+            this.client3Active.CheckedChanged += new System.EventHandler(this.client3Active_CheckedChanged);
+            // 
             // ClientForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(484, 387);
+            this.Controls.Add(this.panel3);
             this.Controls.Add(this.panel2);
             this.Controls.Add(this.panel1);
             this.Name = "ClientForm";
@@ -266,6 +377,9 @@
             this.panel2.ResumeLayout(false);
             this.panel2.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.client2WaitTime)).EndInit();
+            this.panel3.ResumeLayout(false);
+            this.panel3.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.client3WaitTime)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -288,6 +402,14 @@
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.CheckBox client2Active;
+        private System.Windows.Forms.Label client3Sent;
+        private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.Label label8;
+        private System.Windows.Forms.Panel panel3;
+        private System.Windows.Forms.Label client3Received;
+        private System.Windows.Forms.Label label10;
+        private System.Windows.Forms.NumericUpDown client3WaitTime;
+        private System.Windows.Forms.CheckBox client3Active;
 
     }
 }
