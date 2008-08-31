@@ -14,6 +14,7 @@ namespace ServerGUI
 {
     using System;
     using System.ComponentModel;
+    using System.Threading;
     using System.Windows.Forms;
     using Castle.Windsor;
     using log4net;
@@ -97,18 +98,50 @@ namespace ServerGUI
 
             e.Cancel = false;
         }
+
+        private void answerQuestions_CheckedChanged(object sender, EventArgs e)
+        {
+            TheAnswerMan.Enabled = answerQuestions.Checked;
+        }
+
+        private void serverTime_ValueChanged(object sender, EventArgs e)
+        {
+            TheAnswerMan.ServerTime = Convert.ToInt32(serverTime.Value);
+        }
     }
 
     public class TheAnswerMan :
-        Consumes<SubmitQuestion>.All
+        Consumes<SubmitQuestion>.Selected
     {
+        private static bool _enabled = true;
+        public static bool Enabled
+        {
+            get { return _enabled; }
+            set { _enabled = value; }
+        }
+
+
         public IServiceBus Bus { get; set; }
+
+        private static volatile int _serverTime;
+        public static int ServerTime
+        {
+            get { return _serverTime; }
+            set { _serverTime = value; }
+        }
 
         public void Consume(SubmitQuestion message)
         {
+            Thread.Sleep(_serverTime);
+
             QuestionAnswered answer = new QuestionAnswered(message.CorrelationId);
 
             Bus.Publish(answer);
+        }
+
+        public bool Accept(SubmitQuestion message)
+        {
+            return _enabled;
         }
     }
 }
