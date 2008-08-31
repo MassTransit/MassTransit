@@ -124,7 +124,7 @@
     <Compile Include="Messages\UpdateAcceptedMessage.cs" />
     <Compile Include="TestMessageConsumer.cs" />
     <Compile Include="ThreadPool_Specs.cs" />
-    <Compile Include="When_specifying_an_endpoint_address.cs" />
+    <Compile Include="Uri_Specs.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Containers\MassTransit.WindsorIntegration\MassTransit.WindsorIntegration.csproj">
