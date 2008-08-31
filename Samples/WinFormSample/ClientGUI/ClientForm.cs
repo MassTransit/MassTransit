@@ -15,6 +15,7 @@ namespace ClientGUI
     using System;
     using System.Collections.Generic;
     using System.ComponentModel;
+    using System.Diagnostics;
     using System.Threading;
     using System.Windows.Forms;
     using Castle.Windsor;
@@ -32,9 +33,8 @@ namespace ClientGUI
 
         private IWindsorContainer _container;
 
-        private BackgroundWorker[] _workers = new BackgroundWorker[2];
-
-        private delegate void ThreadSafeUpdateMessageCount(int client, int sent, int received);
+        private BackgroundWorker[] _workers = new BackgroundWorker[3];
+        private int _target;
 
 
         public ClientForm()
@@ -48,51 +48,10 @@ namespace ClientGUI
             _workers[0].DoWork += ClientForm_DoWork;
             _workers[1] = new BackgroundWorker();
             _workers[1].DoWork += ClientForm_DoWork;
+            _workers[2] = new BackgroundWorker();
+            _workers[2].DoWork += ClientForm_DoWork;
 
             StartClient();
-        }
-
-        private class TrapperKeeper :
-            Consumes<QuestionAnswered>.Selected
-        {
-            private readonly int _target;
-            private Dictionary<Guid, SubmitQuestion> _questions = new Dictionary<Guid, SubmitQuestion>();
-            private int _answered;
-            private readonly ManualResetEvent _done = new ManualResetEvent(false);
-
-            public ManualResetEvent Done
-            {
-                get { return _done; }
-            }
-
-            public TrapperKeeper(int target)
-            {
-                _target = target;
-            }
-
-            public int Answered
-            {
-                get { return _answered; }
-            }
-
-            public void Consume(QuestionAnswered message)
-            {
-                if (Interlocked.Increment(ref _answered) == _target)
-                    _done.Set();
-
-            }
-
-            public bool Accept(QuestionAnswered message)
-            {
-                lock (_questions)
-                    return _questions.ContainsKey(message.CorrelationId);
-            }
-
-            public void Add(SubmitQuestion question)
-            {
-                lock(_questions)
-                    _questions.Add(question.CorrelationId, question);
-            }
         }
 
         private void ClientForm_DoWork(object sender, DoWorkEventArgs e)
@@ -101,52 +60,69 @@ namespace ClientGUI
             if (args == null)
                 return;
 
-            const int target = 1000;
+            _target = 5000;
 
-            TrapperKeeper tk = new TrapperKeeper(target);
+            TrapperKeeper tk = new TrapperKeeper(_target);
 
             _bus.Subscribe(tk);
 
-            for (int i = 0; i < target; i++)
+            for (int i = 0; i < _target; i++)
             {
                 SubmitQuestion question = new SubmitQuestion(CombGuid.NewCombGuid());
                 tk.Add(question);
 
-                UpdateMessageCount(args.Client, i + 1, tk.Answered);
+                if (i%10 == 0)
+                    UpdateMessageCount(args.Client, i + 1, tk.Answered, tk.ElapsedMilliseconds);
 
                 _bus.Publish(question);
 
-                if(args.WaitTime > 0)
+                if (args.WaitTime > 0)
                     Thread.Sleep(args.WaitTime);
             }
 
-            if ( tk.Done.WaitOne(TimeSpan.FromSeconds(30), true) == false)
+            for (int i = 0; i < 1000; i++)
             {
-                // bad news bears, walter mathow
+                if (tk.Done.WaitOne(TimeSpan.FromSeconds(0.3), true))
+                    break;
+
+                UpdateMessageCount(args.Client, _target, tk.Answered, tk.ElapsedMilliseconds);
             }
 
-            UpdateMessageCount(args.Client, target, tk.Answered);
+            UpdateMessageCount(args.Client, _target, tk.Answered, tk.ElapsedMilliseconds);
         }
 
-        private void UpdateMessageCount(int client, int sent, int received)
+        private void UpdateMessageCount(int client, int sent, int received, long elapsed)
         {
             if (client1Sent.InvokeRequired)
             {
                 ThreadSafeUpdateMessageCount tsu = UpdateMessageCount;
-                BeginInvoke(tsu, new object[] {client, sent, received});
+                BeginInvoke(tsu, new object[] {client, sent, received, elapsed});
             }
             else
             {
+                string sentText = string.Format("{0} ({1}/s)", sent, elapsed == 0 ? 0 : sent*1000/elapsed);
+                string recvText = string.Format("{0} ({1}/s)", received, elapsed == 0 ? 0 : received*1000/elapsed);
                 switch (client)
                 {
                     case 1:
-                        client1Sent.Text = sent.ToString();
-                        client1Received.Text = received.ToString();
+                        client1Sent.Text = sentText;
+                        client1Received.Text = recvText;
+                        if (received == _target)
+                            client1Active.Checked = false;
                         break;
 
                     case 2:
-                        client2Sent.Text = sent.ToString();
-                        client2Received.Text = received.ToString();
+                        client2Sent.Text = sentText;
+                        client2Received.Text = recvText;
+                        if (received == _target)
+                            client2Active.Checked = false;
+                        break;
+
+                    case 3:
+                        client3Sent.Text = sentText;
+                        client3Received.Text = recvText;
+                        if (received == _target)
+                            client3Active.Checked = false;
                         break;
                 }
             }
@@ -207,28 +183,6 @@ namespace ClientGUI
             e.Cancel = false;
         }
 
-        public class ClientFormWorkerArgs
-        {
-            private readonly int _client;
-            private readonly int _waitTime;
-
-            public int Client
-            {
-                get { return _client; }
-            }
-
-            public int WaitTime
-            {
-                get { return _waitTime; }
-            }
-
-            public ClientFormWorkerArgs(int client, int waitTime)
-            {
-                _client = client;
-                _waitTime = waitTime;
-            }
-        }
-
         private void Client2Active_CheckedChanged(object sender, EventArgs e)
         {
             if (_workers[1].IsBusy)
@@ -238,7 +192,6 @@ namespace ClientGUI
                 return;
 
             _workers[1].RunWorkerAsync(new ClientFormWorkerArgs(2, int.Parse(client1WaitTime.Text)));
-
         }
 
         private void Client1Active_CheckedChanged(object sender, EventArgs e)
@@ -250,7 +203,98 @@ namespace ClientGUI
                 return;
 
             _workers[0].RunWorkerAsync(new ClientFormWorkerArgs(1, int.Parse(client1WaitTime.Text)));
+        }
 
+        private void client3Active_CheckedChanged(object sender, EventArgs e)
+        {
+            if (_workers[2].IsBusy)
+                return;
+
+            if (client3Active.Checked == false)
+                return;
+
+            _workers[2].RunWorkerAsync(new ClientFormWorkerArgs(3, int.Parse(client1WaitTime.Text)));
+        }
+
+        public class ClientFormWorkerArgs
+        {
+            private readonly int _client;
+            private readonly int _waitTime;
+
+            public ClientFormWorkerArgs(int client, int waitTime)
+            {
+                _client = client;
+                _waitTime = waitTime;
+            }
+
+            public int Client
+            {
+                get { return _client; }
+            }
+
+            public int WaitTime
+            {
+                get { return _waitTime; }
+            }
+        }
+
+        private delegate void ThreadSafeUpdateMessageCount(int client, int sent, int received, long elapsed);
+
+        private class TrapperKeeper :
+            Consumes<QuestionAnswered>.Selected
+        {
+            private readonly ManualResetEvent _done = new ManualResetEvent(false);
+            private readonly Stopwatch _stopwatch;
+            private readonly int _target;
+            private int _answered;
+            private Dictionary<Guid, SubmitQuestion> _questions = new Dictionary<Guid, SubmitQuestion>();
+
+            public TrapperKeeper(int target)
+            {
+                _target = target;
+                _stopwatch = Stopwatch.StartNew();
+            }
+
+            public ManualResetEvent Done
+            {
+                get { return _done; }
+            }
+
+            public long Rate
+            {
+                get { return ElapsedMilliseconds/_target; }
+            }
+
+            public long ElapsedMilliseconds
+            {
+                get { return _stopwatch.ElapsedMilliseconds; }
+            }
+
+            public int Answered
+            {
+                get { return _answered; }
+            }
+
+            public void Consume(QuestionAnswered message)
+            {
+                if (Interlocked.Increment(ref _answered) == _target)
+                {
+                    _stopwatch.Stop();
+                    _done.Set();
+                }
+            }
+
+            public bool Accept(QuestionAnswered message)
+            {
+                lock (_questions)
+                    return _questions.ContainsKey(message.CorrelationId);
+            }
+
+            public void Add(SubmitQuestion question)
+            {
+                lock (_questions)
+                    _questions.Add(question.CorrelationId, question);
+            }
         }
     }
 }
