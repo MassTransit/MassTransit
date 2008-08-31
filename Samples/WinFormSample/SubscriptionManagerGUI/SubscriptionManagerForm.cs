@@ -153,6 +153,7 @@
                     _subscriptionCache.OnRemoveSubscription -= SubscriptionRemoved;
 
                     _subscriptionBus.Dispose();
+                    _subscriptionBus = null;
                 }
             }
             catch (Exception ex)

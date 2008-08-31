@@ -13,9 +13,7 @@
 namespace ClientGUI
 {
     using System;
-    using System.Collections.Generic;
     using System.ComponentModel;
-    using System.Diagnostics;
     using System.Threading;
     using System.Windows.Forms;
     using Castle.Windsor;
@@ -151,7 +149,7 @@ namespace ClientGUI
             {
                 if (_bus != null)
                 {
-                    _container.Release(_bus);
+                    _bus.Dispose();
                     _bus = null;
                 }
             }
@@ -216,7 +214,7 @@ namespace ClientGUI
             _workers[2].RunWorkerAsync(new ClientFormWorkerArgs(3, int.Parse(client1WaitTime.Text)));
         }
 
-        public class ClientFormWorkerArgs
+        private class ClientFormWorkerArgs
         {
             private readonly int _client;
             private readonly int _waitTime;
@@ -239,62 +237,5 @@ namespace ClientGUI
         }
 
         private delegate void ThreadSafeUpdateMessageCount(int client, int sent, int received, long elapsed);
-
-        private class TrapperKeeper :
-            Consumes<QuestionAnswered>.Selected
-        {
-            private readonly ManualResetEvent _done = new ManualResetEvent(false);
-            private readonly Stopwatch _stopwatch;
-            private readonly int _target;
-            private int _answered;
-            private Dictionary<Guid, SubmitQuestion> _questions = new Dictionary<Guid, SubmitQuestion>();
-
-            public TrapperKeeper(int target)
-            {
-                _target = target;
-                _stopwatch = Stopwatch.StartNew();
-            }
-
-            public ManualResetEvent Done
-            {
-                get { return _done; }
-            }
-
-            public long Rate
-            {
-                get { return ElapsedMilliseconds/_target; }
-            }
-
-            public long ElapsedMilliseconds
-            {
-                get { return _stopwatch.ElapsedMilliseconds; }
-            }
-
-            public int Answered
-            {
-                get { return _answered; }
-            }
-
-            public void Consume(QuestionAnswered message)
-            {
-                if (Interlocked.Increment(ref _answered) == _target)
-                {
-                    _stopwatch.Stop();
-                    _done.Set();
-                }
-            }
-
-            public bool Accept(QuestionAnswered message)
-            {
-                lock (_questions)
-                    return _questions.ContainsKey(message.CorrelationId);
-            }
-
-            public void Add(SubmitQuestion question)
-            {
-                lock (_questions)
-                    _questions.Add(question.CorrelationId, question);
-            }
-        }
     }
 }
