@@ -78,9 +78,9 @@ namespace ClientGUI
                     Thread.Sleep(args.WaitTime);
             }
 
-            for (int i = 0; i < 1000; i++)
+            for (int i = 0; i < 3000; i++)
             {
-                if (tk.Done.WaitOne(TimeSpan.FromSeconds(0.3), true))
+                if (tk.Done.WaitOne(TimeSpan.FromSeconds(0.1), true))
                     break;
 
                 UpdateMessageCount(args.Client, _target, tk.Answered, tk.ElapsedMilliseconds);
@@ -98,8 +98,8 @@ namespace ClientGUI
             }
             else
             {
-                string sentText = string.Format("{0} ({1}/s)", sent, elapsed == 0 ? 0 : sent*1000/elapsed);
-                string recvText = string.Format("{0} ({1}/s)", received, elapsed == 0 ? 0 : received*1000/elapsed);
+                string sentText = string.Format("{0}/{1} ({2}/s)", sent, _target, elapsed == 0 ? 0 : sent*1000/elapsed);
+                string recvText = string.Format("{0}/{1} ({2}/s)", received, _target, elapsed == 0 ? 0 : received*1000/elapsed);
                 switch (client)
                 {
                     case 1:
@@ -189,7 +189,7 @@ namespace ClientGUI
             if (client2Active.Checked == false)
                 return;
 
-            _workers[1].RunWorkerAsync(new ClientFormWorkerArgs(2, int.Parse(client1WaitTime.Text)));
+            _workers[1].RunWorkerAsync(new ClientFormWorkerArgs(2, int.Parse(client2WaitTime.Text)));
         }
 
         private void Client1Active_CheckedChanged(object sender, EventArgs e)
@@ -211,7 +211,7 @@ namespace ClientGUI
             if (client3Active.Checked == false)
                 return;
 
-            _workers[2].RunWorkerAsync(new ClientFormWorkerArgs(3, int.Parse(client1WaitTime.Text)));
+            _workers[2].RunWorkerAsync(new ClientFormWorkerArgs(3, int.Parse(client3WaitTime.Text)));
         }
 
         private class ClientFormWorkerArgs
