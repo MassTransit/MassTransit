@@ -8,6 +8,7 @@
     using MassTransit.ServiceBus;
     using MassTransit.ServiceBus.Subscriptions;
     using MassTransit.WindsorIntegration;
+    using Messages;
 
     public partial class ServerForm : Form
     {
@@ -38,6 +39,7 @@
                 _bus = _container.Resolve<IServiceBus>("server");
 
                 _bus.AddComponent<UserAgentSession>();
+                _bus.AddComponent<TheAnswerMan>();
             }
             catch (Exception ex)
             {
@@ -83,6 +85,19 @@
             StopService();
 
             e.Cancel = false;
+        }
+    }
+
+    public class TheAnswerMan :
+        Consumes<SubmitQuestion>.All
+    {
+        public IServiceBus Bus { get; set; }
+
+        public void Consume(SubmitQuestion message)
+        {
+            QuestionAnswered answer = new QuestionAnswered(message.CorrelationId);
+
+            Bus.Publish(answer);
         }
     }
 }
