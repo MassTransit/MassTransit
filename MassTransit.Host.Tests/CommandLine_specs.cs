@@ -8,10 +8,10 @@ namespace MassTransit.Host.Tests
     public class CommandLine_specs
     {
         MockRepository mocks;
-        readonly string[] installArgs = new[] { "/install" };
-        readonly string[] uninstallArgs = new[] { "/uninstall" };
-        readonly string[] consoleArgs = new[] { "/console" };
-        readonly string[] serviceArgs = new[] { "/service" };
+        readonly string[] installArgs = new[] { "-install" };
+        readonly string[] uninstallArgs = new[] { "-uninstall" };
+        readonly string[] consoleArgs = new[] { "-console" };
+        readonly string[] serviceArgs = new[] { "-service" };
         IInstallationConfiguration configuration;
 
         [SetUp]
@@ -34,8 +34,9 @@ namespace MassTransit.Host.Tests
 
             using (mocks.Record())
             {
-                Expect.Call(configuration.LifeCycle).Return(null);
-            }
+				Expect.Call(configuration.LifeCycle).Return(null);
+				Expect.Call(configuration.ServiceName).Return("MTUnitTest").Repeat.Any();
+			}
             using (mocks.Playback())
             {
                 Runner.Run(configuration, installArgs);
@@ -47,7 +48,7 @@ namespace MassTransit.Host.Tests
         {
             using (mocks.Record())
             {
-                Expect.Call(configuration.LifeCycle).Return(null);
+            	Expect.Call(configuration.ServiceName).Return("MTUnitTest").Repeat.Any();
             }
             using (mocks.Playback())
             {

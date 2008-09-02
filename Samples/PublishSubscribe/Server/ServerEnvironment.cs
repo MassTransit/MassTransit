@@ -19,7 +19,7 @@ namespace Server
 			get { return "SampleServerService"; }
 		}
 
-		public override string DispalyName
+		public override string DisplayName
 		{
 			get { return "MassTransit Sample Server Service"; }
 		}

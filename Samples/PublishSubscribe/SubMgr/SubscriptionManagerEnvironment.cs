@@ -19,7 +19,7 @@ namespace SubMgr
 			get { return "SampleSubscriptionService"; }
 		}
 
-		public override string DispalyName
+		public override string DisplayName
 		{
 			get { return "MassTransit Sample Subscription Service"; }
 		}

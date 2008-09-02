@@ -64,6 +64,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="SubscriptionManagerEnvironment.cs" />
     <Compile Include="SubscriptionManagerForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -85,6 +86,9 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Content Include="log4net.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -94,11 +98,16 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <Compile Include="SubscriptionManagerLifeCycle.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\Containers\MassTransit.WindsorIntegration\MassTransit.WindsorIntegration.csproj">
       <Project>{98D5A59C-96FA-4A1B-A653-EA5A35C45FC9}</Project>
       <Name>MassTransit.WindsorIntegration</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\MassTransit.Host\MassTransit.Host.csproj">
+      <Project>{834ED79F-BA0E-48F9-831A-789576EE516B}</Project>
+      <Name>MassTransit.Host</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\..\MassTransit.ServiceBus\MassTransit.ServiceBus.csproj">
       <Project>{90482397-6282-465E-8B86-39865FC30127}</Project>

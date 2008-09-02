@@ -18,7 +18,7 @@ namespace Client
             get { return "SampleClientService"; }
         }
 
-        public override string DispalyName
+        public override string DisplayName
         {
             get { return "MassTransit Sample Client Service"; }
         }
