@@ -2,6 +2,7 @@ namespace SubMgr
 {
     using log4net;
     using MassTransit.Host;
+    using MassTransit.Host.Configurations;
 
     internal class Program
     {
@@ -11,9 +12,9 @@ namespace SubMgr
         {
             _log.Info("SubMgr Loading");
 
-            HostedEnvironment env = new SubscriptionManagerEnvironment("castle.xml");
+            IInstallationConfiguration cfg = new SubscriptionManagerEnvironment("castle.xml");
 
-            Runner.Run(env, args);
+            Runner.Run(cfg, args);
         }
     }
 }

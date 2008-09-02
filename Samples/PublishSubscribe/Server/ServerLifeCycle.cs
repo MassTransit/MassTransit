@@ -1,6 +1,6 @@
 namespace Server
 {
-    using MassTransit.Host;
+    using MassTransit.Host.LifeCycles;
 
     public class ServerLifeCycle :
         HostedLifeCycle

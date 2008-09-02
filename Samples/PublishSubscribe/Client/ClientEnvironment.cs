@@ -1,11 +1,16 @@
 namespace Client
 {
-    using MassTransit.Host;
+    using MassTransit.Host.Configurations;
+    using MassTransit.Host.LifeCycles;
 
-    public class ClientEnvironment : HostedEnvironment
+    public class ClientEnvironment :
+        LocalSystemConfiguration
     {
-        public ClientEnvironment(string xmlFile) : base(xmlFile)
+        private readonly IApplicationLifeCycle _lifeCycle;
+
+        public ClientEnvironment(string xmlFile)
         {
+            _lifeCycle = new ClientLifeCycle(xmlFile);
         }
 
         public override string ServiceName
@@ -23,9 +28,9 @@ namespace Client
             get { return "Acts as a client on the service bus"; }
         }
 
-        public override HostedLifeCycle LifeCycle
+        public override IApplicationLifeCycle LifeCycle
         {
-            get { return new ClientLifeCycle(XmlFile); }
+            get { return _lifeCycle; }
         }
     }
 }

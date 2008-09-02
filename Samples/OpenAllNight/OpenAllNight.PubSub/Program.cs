@@ -6,6 +6,7 @@ namespace OpenAllNight.PubSub
 {
     using log4net;
     using MassTransit.Host;
+    using MassTransit.Host.Configurations;
 
     internal class Program
     {
@@ -15,9 +16,9 @@ namespace OpenAllNight.PubSub
         {
             _log.Info("SubMgr Loading");
 
-            HostedEnvironment env = new SubscriptionManagerEnvironment("pubsub.castle.xml");
+            IInstallationConfiguration cfg = new SubscriptionManagerEnvironment("pubsub.castle.xml");
 
-            Runner.Run(env, args);
+            Runner.Run(cfg, args);
         }
     }
 }

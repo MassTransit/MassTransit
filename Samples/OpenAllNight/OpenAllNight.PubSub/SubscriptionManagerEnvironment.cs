@@ -1,19 +1,21 @@
 namespace OpenAllNight.PubSub
 {
-    using MassTransit.Host;
+    using MassTransit.Host.Configurations;
+    using MassTransit.Host.LifeCycles;
 
     public class SubscriptionManagerEnvironment :
-        HostedEnvironment
+        LocalSystemConfiguration
     {
+        private readonly IApplicationLifeCycle _lifeCycle;
 
-        public SubscriptionManagerEnvironment(string xmlFile) 
-            : base(xmlFile)
+        public SubscriptionManagerEnvironment(string xmlFile)
         {
+            _lifeCycle = new SubscriptionManagerLifeCycle(xmlFile);
         }
 
-        public override HostedLifeCycle LifeCycle
+        public override IApplicationLifeCycle LifeCycle
         {
-            get { return new SubscriptionManagerLifeCycle(XmlFile); }
+            get { return _lifeCycle; }
         }
 
         public override string ServiceName
@@ -30,5 +32,7 @@ namespace OpenAllNight.PubSub
         {
             get { return "This service manages the subscriptions for Mass Transit"; }
         }
+
+
     }
 }

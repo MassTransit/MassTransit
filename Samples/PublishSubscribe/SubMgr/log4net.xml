@@ -63,18 +63,8 @@
 	</root>
 
 	<!-- Seeing service messages would be good here -->
-	<logger name="MassTransit.Host2">
+	<logger name="SubMgr">
 		<level value="INFO"/>
-	</logger>
-
-	<!-- Standard NHibernate Logging Settings -->
-	<logger name="NHibernate">
-		<level value="OFF" />
-	</logger>
-
-	<logger name="NHibernate.SQL">
-		<level value="OFF" />
-		<appender-ref ref="NH.SQL" />
 	</logger>
 
 	<!-- Standard MassTransit Logging Settings -->

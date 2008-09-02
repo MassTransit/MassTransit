@@ -2,8 +2,9 @@ namespace Server
 {
 	using log4net;
 	using MassTransit.Host;
+	using MassTransit.Host.Configurations;
 
-	internal class Program
+    internal class Program
 	{
 		private static readonly ILog _log = LogManager.GetLogger(typeof (Program));
 
@@ -11,9 +12,9 @@ namespace Server
 		{
 			_log.Info("Server Loading");
 
-			HostedEnvironment env = new ServerEnvironment("castle.xml");
+			IInstallationConfiguration cfg = new ServerEnvironment("castle.xml");
 
-			Runner.Run(env, args);
+			Runner.Run(cfg, args);
 		}
 	}
 }

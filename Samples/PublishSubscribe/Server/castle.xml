@@ -15,7 +15,7 @@
 		<facility id="masstransit">
 
 			<bus id="main"
-				 endpoint="msmq://localhost/test_server">
+				 endpoint="msmq://localhost/mt_server">
 				<subscriptionService endpoint="msmq://localhost/mt_pubsub" />
 			</bus>
 
