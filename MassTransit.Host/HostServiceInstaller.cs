@@ -17,6 +17,7 @@ namespace MassTransit.Host
     using System.Configuration.Install;
     using System.Reflection;
     using System.ServiceProcess;
+    using Configurations;
     using log4net;
     using Microsoft.Win32;
 
@@ -26,57 +27,23 @@ namespace MassTransit.Host
         private static readonly ILog _log = LogManager.GetLogger(typeof (HostServiceInstaller));
         private readonly ServiceInstaller _serviceInstaller = new ServiceInstaller();
         private readonly ServiceProcessInstaller _serviceProcessInstaller = new ServiceProcessInstaller();
+        private readonly IInstallationConfiguration _config;
 
-        public HostServiceInstaller(HostedEnvironment environment)
+        public HostServiceInstaller(IInstallationConfiguration configuration)
         {
-            _serviceInstaller.ServiceName = environment.ServiceName;
-            _serviceInstaller.Description = environment.Description;
-            _serviceInstaller.DisplayName = environment.DispalyName;
+            _log.DebugFormat("Attempting to install with {0} configuration", configuration);
+            _config = configuration;
 
-            if (!string.IsNullOrEmpty(environment.Username) && !string.IsNullOrEmpty(environment.Password))
-            {
-                _log.DebugFormat("Attempting to install as user {0}", environment.Username);
-                _serviceProcessInstaller.Account = ServiceAccount.User;
-                _serviceProcessInstaller.Username = environment.Username;
-                _serviceProcessInstaller.Password = environment.Password;
-            }
-            else
-            {
-                _serviceProcessInstaller.Username = null;
-                _serviceProcessInstaller.Password = null;
-                
-                if (environment.AskForCredentialsDuringInstall)
-                {
-                    _log.Debug("Attempting to install interactively");
-                    _serviceProcessInstaller.Account = ServiceAccount.User;
-                }
-                else
-                {
-                    _log.Debug("Attempting to install as Local Service");
-                    _serviceProcessInstaller.Account = ServiceAccount.LocalSystem;
-                }
-            }
+            configuration.ConfigureServiceInstaller(_serviceInstaller);
+            configuration.ConfigureServiceProcessInstaller(_serviceProcessInstaller);
 
-            _serviceInstaller.ServicesDependedOn = environment.Dependecies;
-
-            _serviceInstaller.StartType = ServiceStartMode.Automatic;
             Installers.AddRange(new Installer[] {_serviceProcessInstaller, _serviceInstaller});            
         }
 
 
-        public bool IsInstalled()
-        {
-            foreach (ServiceController service in ServiceController.GetServices())
-            {
-                if (service.ServiceName == _serviceInstaller.ServiceName)
-                    return true;
-            }
-
-            return false;
-        }
         public void Register()
         {
-            if (!IsInstalled())
+            if (!IsInstalled(_config))
             {
                 using (TransactedInstaller ti = new TransactedInstaller())
                 {
@@ -102,7 +69,7 @@ namespace MassTransit.Host
         }
         public void Unregister()
         {
-            if (IsInstalled())
+            if (IsInstalled(_config))
             {
                 using (TransactedInstaller ti = new TransactedInstaller())
                 {
@@ -123,6 +90,17 @@ namespace MassTransit.Host
                 if (_log.IsInfoEnabled)
                     _log.Info("Service is not installed");
             }
+        }
+
+        public static bool IsInstalled(IInstallationConfiguration configuration)
+        {
+            foreach (ServiceController service in ServiceController.GetServices())
+            {
+                if (service.ServiceName == configuration.ServiceName)
+                    return true;
+            }
+
+            return false;
         }
 
 

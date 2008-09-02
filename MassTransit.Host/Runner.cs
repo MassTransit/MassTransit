@@ -14,8 +14,8 @@ namespace MassTransit.Host
 {
     using System.Collections.Generic;
     using Actions;
+    using Configurations;
     using log4net;
-    using MassTransitHost.ArgumentParsing;
 
     public static class Runner
     {
@@ -30,76 +30,16 @@ namespace MassTransit.Host
             _actions.Add("service", new RunAsServiceAction());
         }
 
-        public static void Run(HostedEnvironment environment, params string[] args)
+        public static void Run(IInstallationConfiguration environment, params string[] args)
         {
             _log.Info("Starting Host");
             _log.DebugFormat("Arguments: {0}", string.Join(",", args));
 
             //TODO: Hacky
-            string action = ParseArgs(args).GetAction();
-            _log.DebugFormat("Running action: {0}", action);
+            string actionKey = Parser.ParseArgs(args).GetActionKey();
+            _log.DebugFormat("Running action: {0}", actionKey);
 
-            _actions[action].Do(environment);
-        } 
-
-        
-
-        public static RunnerArgs ParseArgs(string[] args)
-        {
-            RunnerArgs result = new RunnerArgs();
-            IArgumentMapFactory _argumentMapFactory = new ArgumentMapFactory();
-            IArgumentParser _argumentParser = new ArgumentParser();
-            IEnumerable<IArgument> arguments = _argumentParser.Parse(args);
-            IArgumentMap mapper = _argumentMapFactory.CreateMap(result);
-            IEnumerable<IArgument> remaining = mapper.ApplyTo(result, arguments);
-
-            return result;
-        }
-
-        public class RunnerArgs
-        {
-            private bool _install;
-            private bool _uninstall;
-            private bool _console;
-            private bool _service;
-
-
-            [Argument(Key = "install")]
-            public bool Install
-            {
-                get { return _install; }
-                set { _install = value; }
-            }
-
-            [Argument(Key = "uninstall")]
-            public bool Uninstall
-            {
-                get { return _uninstall; }
-                set { _uninstall = value; }
-            }
-
-            [Argument(Key = "console")]
-            public bool Console
-            {
-                get { return _console; }
-                set { _console = value; }
-            }
-
-            [Argument(Key = "service")]
-            public bool Service
-            {
-                get { return _service; }
-                set { _service = value; }
-            }
-
-
-            public string GetAction()
-            {
-                if (Install) return "install";
-                if (Uninstall) return "uninstall";
-                if (Service) return "service";
-                return "console";
-            }
+            _actions[actionKey].Do(environment);
         }
     }
 }

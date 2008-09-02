@@ -12,6 +12,7 @@
 /// specific language governing permissions and limitations under the License.
 namespace MassTransit.Host.Actions
 {
+    using Configurations;
     using Host;
     using log4net;
 
@@ -20,11 +21,19 @@ namespace MassTransit.Host.Actions
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(UninstallServiceAction));
 
-        public void Do(HostedEnvironment environment)
+        public void Do(IInstallationConfiguration configuration)
         {
+            if(!HostServiceInstaller.IsInstalled(configuration))
+            {
+                string message = string.Format("The {0} service has not been installed.", configuration.ServiceName);
+                _log.Error(message);
+
+                return;
+            }
+
             _log.Info("Received serice uninstall notification");
-            HostServiceInstaller hsi = new HostServiceInstaller(environment);
-            hsi.Unregister();
+            new HostServiceInstaller(configuration)
+                .Unregister();
         }
     }
 }
