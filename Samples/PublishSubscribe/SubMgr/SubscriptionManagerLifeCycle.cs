@@ -1,9 +1,8 @@
 namespace SubMgr
 {
-    using MassTransit.Host;
+    using MassTransit.Host.LifeCycles;
     using MassTransit.ServiceBus;
     using MassTransit.ServiceBus.Subscriptions;
-    using MassTransit.SubscriptionStorage;
 
     public class SubscriptionManagerLifeCycle :
         HostedLifeCycle
@@ -15,7 +14,7 @@ namespace SubMgr
         public override void Start()
         {
             Container.AddComponent<IHostedService, SubscriptionService>();
-            Container.AddComponent<ISubscriptionRepository, NHibernateSubscriptionStorage>();
+            Container.AddComponent<ISubscriptionRepository, InMemorySubscriptionRepository>();
         }
 
         public override void Stop()

@@ -1,13 +1,17 @@
 namespace Server
 {
     using MassTransit.Host;
+    using MassTransit.Host.Configurations;
+    using MassTransit.Host.LifeCycles;
 
-	public class ServerEnvironment :
-		HostedEnvironment
+    public class ServerEnvironment :
+		LocalSystemConfiguration
 	{
+        private IApplicationLifeCycle _lifeCycle;
 
-		public ServerEnvironment(string xmlFile) : base(xmlFile)
+		public ServerEnvironment(string xmlFile)
 		{
+		    _lifeCycle = new ServerLifeCycle(xmlFile);
 		}
 
 	    public override string ServiceName
@@ -25,9 +29,9 @@ namespace Server
 			get { return "Acts as a server on the service bus"; }
 		}
 
-	    public override HostedLifeCycle LifeCycle
+	    public override IApplicationLifeCycle LifeCycle
 	    {
-            get { return new ServerLifeCycle(this.XmlFile); }
+            get { return _lifeCycle; }
 	    }
 	}
 }

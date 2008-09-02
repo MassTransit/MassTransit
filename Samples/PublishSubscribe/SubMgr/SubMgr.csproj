@@ -95,10 +95,6 @@
       <Project>{90482397-6282-465E-8B86-39865FC30127}</Project>
       <Name>MassTransit.ServiceBus</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\MassTransit.SubscriptionStorage\MassTransit.SubscriptionStorage.csproj">
-      <Project>{8EE6C0CB-93D1-4B92-8CD5-24C77452CBE5}</Project>
-      <Name>MassTransit.SubscriptionStorage</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Content Include="castle.xml">

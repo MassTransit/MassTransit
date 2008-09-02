@@ -1,7 +1,7 @@
 namespace Client
 {
     using System;
-    using MassTransit.Host;
+    using MassTransit.Host.LifeCycles;
     using MassTransit.ServiceBus;
     using SecurityMessages;
 
@@ -30,7 +30,7 @@ namespace Client
 
             Console.WriteLine(new string('-', 20));
 
-            RequestPasswordUpdate message = new RequestPasswordUpdate(newPassword);
+            var message = new RequestPasswordUpdate(newPassword);
 
             _bus.Publish(message);
 

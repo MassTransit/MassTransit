@@ -1,7 +1,7 @@
 namespace OpenAllNight.PubSub
 {
     using Castle.Core;
-    using MassTransit.Host;
+    using MassTransit.Host.LifeCycles;
     using MassTransit.ServiceBus;
     using MassTransit.ServiceBus.Subscriptions;
     using MassTransit.ServiceBus.Subscriptions.ServerHandlers;
@@ -15,11 +15,15 @@ namespace OpenAllNight.PubSub
 
         public override void Start()
         {
-            Container.AddComponentLifeStyle("followerrepository", typeof(FollowerRepository), LifestyleType.Singleton);
-            Container.AddComponentLifeStyle("addsubscriptionhandler", typeof(AddSubscriptionHandler), LifestyleType.Transient);
-            Container.AddComponentLifeStyle("removesubscriptionhandler", typeof(RemoveSubscriptionHandler), LifestyleType.Transient);
-            Container.AddComponentLifeStyle("cacheupdaterequesthandler", typeof(CacheUpdateRequestHandler), LifestyleType.Transient);
-            Container.AddComponentLifeStyle("cancelupdaterequesthandler", typeof(CancelUpdatesHandler), LifestyleType.Transient);
+            Container.AddComponentLifeStyle("followerrepository", typeof (FollowerRepository), LifestyleType.Singleton);
+            Container.AddComponentLifeStyle("addsubscriptionhandler", typeof (AddSubscriptionHandler),
+                                            LifestyleType.Transient);
+            Container.AddComponentLifeStyle("removesubscriptionhandler", typeof (RemoveSubscriptionHandler),
+                                            LifestyleType.Transient);
+            Container.AddComponentLifeStyle("cacheupdaterequesthandler", typeof (CacheUpdateRequestHandler),
+                                            LifestyleType.Transient);
+            Container.AddComponentLifeStyle("cancelupdaterequesthandler", typeof (CancelUpdatesHandler),
+                                            LifestyleType.Transient);
 
             Container.AddComponent<IHostedService, SubscriptionService>();
 

@@ -1,14 +1,17 @@
 namespace SubMgr
 {
     using MassTransit.Host;
+    using MassTransit.Host.Configurations;
+    using MassTransit.Host.LifeCycles;
 
-	public class SubscriptionManagerEnvironment :
-		HostedEnvironment
+    public class SubscriptionManagerEnvironment :
+		LocalSystemConfiguration
 	{
+        private IApplicationLifeCycle _lifeCycle;
 
-		public SubscriptionManagerEnvironment(string xmlFile) 
-			: base(xmlFile)
+		public SubscriptionManagerEnvironment(string xmlFile)
 		{
+		    _lifeCycle = new SubscriptionManagerLifeCycle(xmlFile);
 		}
 
 	    public override string ServiceName
@@ -26,9 +29,9 @@ namespace SubMgr
 			get { return "Coordinates subscriptions between multiple systems"; }
 		}
 
-	    public override HostedLifeCycle LifeCycle
+	    public override IApplicationLifeCycle LifeCycle
 	    {
-            get { return new SubscriptionManagerLifeCycle(this.XmlFile); }
+            get { return _lifeCycle; }
 	    }
 	}
 }
