@@ -69,6 +69,7 @@
       <HintPath>..\libs\log4net.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.configuration" />
     <Reference Include="System.Configuration.Install" />
     <Reference Include="System.ServiceProcess" />
   </ItemGroup>
@@ -88,13 +89,21 @@
     <Compile Include="ArgumentParsing\IArgumentMap.cs" />
     <Compile Include="ArgumentParsing\IArgumentMapFactory.cs" />
     <Compile Include="ArgumentParsing\IArgumentParser.cs" />
-    <Compile Include="HostedEnvironment.cs" />
-    <Compile Include="HostedLifeCycle.cs" />
+    <Compile Include="Configurations\BaseWinServiceConfiguration.cs" />
+    <Compile Include="Configurations\DotNetConfiguration.cs" />
+    <Compile Include="Configurations\InteractiveConfiguration.cs" />
+    <Compile Include="Configurations\LocalSystemConfiguration.cs" />
+    <Compile Include="Configurations\Credentials.cs" />
+    <Compile Include="LifeCycles\HostedLifeCycle.cs" />
     <Compile Include="HostServiceInstaller.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Actions\IAction.cs" />
     <Compile Include="Actions\InstallServiceAction.cs" />
+    <Compile Include="Configurations\IInstallationConfiguration.cs" />
+    <Compile Include="LifeCycles\IApplicationLifeCycle.cs" />
+    <Compile Include="IHostingConfiguration.cs" />
+    <Compile Include="Parser.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Runner.cs" />
     <Compile Include="Hosts\ConsoleHost.cs" />

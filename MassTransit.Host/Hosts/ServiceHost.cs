@@ -12,52 +12,42 @@
 /// specific language governing permissions and limitations under the License.
 namespace MassTransit.Host.Hosts
 {
-    using System;
-    using System.Reflection;
     using System.ServiceProcess;
+    using LifeCycles;
     using log4net;
 
-    public class ServiceHost : ServiceBase
+    public class ServiceHost :
+        ServiceBase
     {
-        private static readonly ILog _log = LogManager.GetLogger(typeof(ServiceHost));
-        private readonly HostedLifeCycle _lifecycle;
-        private readonly HostedEnvironment _environment;
-        private readonly HostServiceInstaller _installer;
+        private static readonly ILog _log = LogManager.GetLogger(typeof (ServiceHost));
+        private readonly IApplicationLifeCycle _lifecycle;
 
 
-        public ServiceHost(HostedLifeCycle lifecycle, HostedEnvironment environment)
+        public ServiceHost(IApplicationLifeCycle lifecycle)
         {
-            _installer = new HostServiceInstaller(environment);
             _lifecycle = lifecycle;
-            _environment = environment;
         }
 
         public void Run()
         {
-            if(!_installer.IsInstalled())
-            {
-                string message = string.Format("The {0} service has not been installed yet. Please run {1} -install.", _environment.ServiceName, Assembly.GetEntryAssembly().GetName());
-                _log.Fatal(message);
-                throw new Exception(message);
-            }
+            var servicesToRun = new ServiceBase[] {this};
 
-            ServiceBase[] servicesToRun = new ServiceBase[] { this };
-
-            ServiceBase.Run(servicesToRun);
+            Run(servicesToRun);
         }
 
         protected override void OnStart(string[] args)
         {
             _log.Info("Received service start notification");
-
             _log.DebugFormat("Arguments: {0}", string.Join(",", args));
-            _lifecycle.Initialize();
+
             _lifecycle.Start();
+            _lifecycle.Initialize();
         }
 
         protected override void OnStop()
         {
             _log.Info("Received service stop notification");
+
             _lifecycle.Stop();
             _lifecycle.Dispose();
         }

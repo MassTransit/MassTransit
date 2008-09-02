@@ -12,6 +12,7 @@
 /// specific language governing permissions and limitations under the License.
 namespace MassTransit.Host.Actions
 {
+    using Configurations;
     using Host;
     using log4net;
 
@@ -20,12 +21,20 @@ namespace MassTransit.Host.Actions
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(InstallServiceAction));
 
-        public void Do(HostedEnvironment environment)
+        public void Do(IInstallationConfiguration configuration)
         {
             _log.Info("Received service install notification");
-            HostServiceInstaller hsi = 
-                new HostServiceInstaller(environment);
-            hsi.Register();
+
+            if(HostServiceInstaller.IsInstalled(configuration))
+            {
+                string message = string.Format("The {0} service has already been installed.", configuration.ServiceName);
+                _log.Error(message);
+
+                return;
+            }
+
+            new HostServiceInstaller(configuration)
+                .Register();
         }
     }
 }

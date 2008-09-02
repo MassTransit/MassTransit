@@ -12,10 +12,10 @@
 /// specific language governing permissions and limitations under the License.
 namespace MassTransit.Host.Actions
 {
-    using Host;
+    using Configurations;
 
     public interface IAction
     {
-        void Do(HostedEnvironment environment);
+        void Do(IInstallationConfiguration configuration);
     }
 }

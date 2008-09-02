@@ -1,4 +1,4 @@
-namespace MassTransit.Host
+namespace MassTransit.Host.LifeCycles
 {
     using System;
     using Castle.Facilities.FactorySupport;
@@ -7,8 +7,10 @@ namespace MassTransit.Host
     using ServiceBus;
     using WindsorIntegration;
 
+    public delegate void Work();
+
     public abstract class HostedLifeCycle :
-        IDisposable
+        IApplicationLifeCycle
     {
         private IWindsorContainer _container;
         private readonly string _xmlFile;
@@ -16,18 +18,22 @@ namespace MassTransit.Host
         protected HostedLifeCycle(string xmlFile)
         {
             _xmlFile = xmlFile;
-        }
-        
-        public void Initialize()
-        {   
             _container = new WindsorContainer(_xmlFile);
             _container.AddFacility("masstransit", new MassTransitFacility());
             _container.AddFacility("factory", new FactorySupportFacility());
             _container.AddFacility("startable", new StartableFacility());
+        }
+        
+        public void PerformWorkInAlternateThread(Work work)
+        {
+            work.BeginInvoke(delegate(IAsyncResult ar)
+                                 {
+                                     
+                                 }, null);
+        }
 
-
-
-
+        public void Initialize()
+        {   
             foreach (IHostedService hs in _container.ResolveAll<IHostedService>())
             {
                 hs.Start();
@@ -53,6 +59,12 @@ namespace MassTransit.Host
 
             _container.Dispose();
 
+
+            if(Completed != null)
+            {
+                Action<IApplicationLifeCycle> handler = Completed;
+                handler(this);
+            }
         }
 
         public IWindsorContainer Container
@@ -60,8 +72,7 @@ namespace MassTransit.Host
             get { return _container; }
         }
 
-
         //TODO: WTF is this (and I wrote it!)
-        public event Action<HostedEnvironment> Completed;
+        public event Action<IApplicationLifeCycle> Completed;
     }
 }

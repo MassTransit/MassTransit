@@ -12,21 +12,35 @@
 /// specific language governing permissions and limitations under the License.
 namespace MassTransit.Host.Actions
 {
-    using Host;
+    using System;
+    using System.Reflection;
+    using Configurations;
     using Hosts;
     using log4net;
 
     public class RunAsServiceAction :
         IAction
     {
-        private static readonly ILog _log = LogManager.GetLogger(typeof(RunAsServiceAction));
+        private static readonly ILog _log = LogManager.GetLogger(typeof (RunAsServiceAction));
 
-        public void Do(HostedEnvironment environment)
+        #region IAction Members
+
+        public void Do(IInstallationConfiguration configuration)
         {
             _log.Info("Received service start notification");
 
-            ServiceHost inServiceHost = new ServiceHost(environment.LifeCycle, environment);
+            if (!HostServiceInstaller.IsInstalled(configuration))
+            {
+                string message = string.Format("The {0} service has not been installed yet. Please run {1} -install.",
+                                               configuration.ServiceName, Assembly.GetEntryAssembly().GetName());
+                _log.Fatal(message);
+                throw new Exception(message);
+            }
+
+            var inServiceHost = new ServiceHost(configuration.LifeCycle);
             inServiceHost.Run();
         }
+
+        #endregion
     }
 }

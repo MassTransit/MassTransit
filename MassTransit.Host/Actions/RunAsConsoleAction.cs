@@ -12,6 +12,7 @@
 /// specific language governing permissions and limitations under the License.
 namespace MassTransit.Host.Actions
 {
+    using Configurations;
     using Host;
     using Hosts;
     using log4net;
@@ -21,11 +22,11 @@ namespace MassTransit.Host.Actions
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(RunAsConsoleAction));
 
-        public void Do(HostedEnvironment environment)
+        public void Do(IInstallationConfiguration configuration)
         {
             _log.Info("Received console start notification");
 
-            ConsoleHost inConsoleHost = new ConsoleHost(environment.LifeCycle);
+            ConsoleHost inConsoleHost = new ConsoleHost(configuration.LifeCycle);
             inConsoleHost.Run();
         }
     }

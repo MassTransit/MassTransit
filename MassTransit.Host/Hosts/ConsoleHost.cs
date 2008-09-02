@@ -12,48 +12,48 @@
 /// specific language governing permissions and limitations under the License.
 namespace MassTransit.Host.Hosts
 {
-	using System;
-	using System.Threading;
-	using log4net;
+    using System;
+    using System.Threading;
+    using LifeCycles;
+    using log4net;
 
-	public class ConsoleHost
-	{
-		private static readonly ILog _log = LogManager.GetLogger(typeof (ConsoleHost));
-        private readonly HostedLifeCycle _lifecycle;
+    public class ConsoleHost
+    {
+        private static readonly ILog _log = LogManager.GetLogger(typeof (ConsoleHost));
+        private readonly IApplicationLifeCycle _lifecycle;
 
 
-		public ConsoleHost(HostedLifeCycle lifecycle)
-		{
-			_lifecycle = lifecycle;
-		}
+        public ConsoleHost(IApplicationLifeCycle lifecycle)
+        {
+            _lifecycle = lifecycle;
+        }
 
-		public void Run()
-		{
-			_log.Debug("Starting up as a console application");
+        public void Run()
+        {
+            _log.Debug("Starting up as a console application");
 
-			ManualResetEvent serviceCompleted = new ManualResetEvent(false);
-			ManualResetEvent terminateService = new ManualResetEvent(false);
+            var serviceCompleted = new ManualResetEvent(false);
+            var terminateService = new ManualResetEvent(false);
 
-			WaitHandle[] waitHandles = new WaitHandle[] {serviceCompleted, terminateService};
+            var waitHandles = new WaitHandle[] {serviceCompleted, terminateService};
 
-			_lifecycle.Completed += delegate { serviceCompleted.Set(); };
+            _lifecycle.Completed += delegate { serviceCompleted.Set(); };
 
-			Console.CancelKeyPress += delegate
-			                          	{
-			                          		_log.Info("Control+C detected, exiting.");
-                                            _log.Info("Stopping the service");
+            Console.CancelKeyPress += delegate
+                                          {
+                                              _log.Info("Control+C detected, exiting.");
+                                              _log.Info("Stopping the service");
 
-			                          	    _lifecycle.Stop(); //user stop
-                                            _lifecycle.Dispose();
-                                            terminateService.Set();
-			                          	};
+                                              _lifecycle.Stop(); //user stop
+                                              _lifecycle.Dispose();
+                                              terminateService.Set();
+                                          };
+            _lifecycle.Start(); //user code starts
             _lifecycle.Initialize();
-			_lifecycle.Start(); //user start
 
-			_log.InfoFormat("The service is running, press Control+C to exit.");
+            _log.InfoFormat("The service is running, press Control+C to exit.");
 
-		    WaitHandle.WaitAny(waitHandles);
-
-		}
-	}
+            WaitHandle.WaitAny(waitHandles);
+        }
+    }
 }
