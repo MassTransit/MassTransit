@@ -1,200 +1,122 @@
-﻿namespace SubscriptionManagerGUI
+﻿// Copyright 2007-2008 The Apache Software Foundation.
+//  
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
+// this file except in compliance with the License. You may obtain a copy of the 
+// License at 
+// 
+//     http://www.apache.org/licenses/LICENSE-2.0 
+// 
+// Unless required by applicable law or agreed to in writing, software distributed 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// specific language governing permissions and limitations under the License.
+namespace SubscriptionManagerGUI
 {
-    using System;
-    using System.Collections.Generic;
-    using System.ComponentModel;
-    using System.Windows.Forms;
-    using Castle.Core;
-    using Castle.Windsor;
-    using log4net;
-    using MassTransit.ServiceBus;
-    using MassTransit.ServiceBus.Subscriptions;
-    using MassTransit.WindsorIntegration;
+	using System;
+	using System.Collections.Generic;
+	using System.ComponentModel;
+	using System.Windows.Forms;
+	using log4net;
+	using MassTransit.ServiceBus;
+	using MassTransit.ServiceBus.Subscriptions;
 
-    public partial class SubscriptionManagerForm : Form
-    {
-        private static readonly ILog _log = LogManager.GetLogger(typeof (SubscriptionManagerForm));
+	public partial class SubscriptionManagerForm : Form
+	{
+		private static readonly ILog _log = LogManager.GetLogger(typeof (SubscriptionManagerForm));
+		private readonly ISubscriptionCache _cache;
 
-        private IWindsorContainer _container;
-        private IServiceBus _subscriptionBus;
-        private ISubscriptionCache _subscriptionCache;
-        private SubscriptionService _subscriptionService;
+		public SubscriptionManagerForm(ISubscriptionCache cache)
+		{
+			_cache = cache;
 
-        private delegate void ThreadSafeUpdate(Subscription subscription);
+			InitializeComponent();
+		}
 
-        public SubscriptionManagerForm()
-        {
-            InitializeComponent();
-        }
+		private void SubscriptionManagerForm_Load(object sender, EventArgs e)
+		{
+			_cache.OnAddSubscription += SubscriptionAdded;
+			_cache.OnRemoveSubscription += SubscriptionRemoved;
 
-        private void SubscriptionManagerForm_Load(object sender, EventArgs e)
-        {
-            StartSubscriptionManager();
-        }
+			RefreshSubscriptions(null);
+		}
 
-        private void StartSubscriptionManager()
-        {
-            StopSubscriptionManager();
+		private void SubscriptionAdded(object sender, SubscriptionEventArgs e)
+		{
+			ThreadSafeUpdate tsu = RefreshSubscriptions;
+			BeginInvoke(tsu, new object[] {e.Subscription});
+		}
 
-            try
-            {
-                _startButton.Enabled = false;
-                _stopButton.Enabled = true;
+		private void SubscriptionRemoved(object sender, SubscriptionEventArgs e)
+		{
+			ThreadSafeUpdate tsu = RefreshSubscriptions;
+			BeginInvoke(tsu, new object[] {e.Subscription});
+		}
 
-                _container = new DefaultMassTransitContainer("SubscriptionManager.Castle.xml");
+		private void RefreshSubscriptions(Subscription ignored)
+		{
+			List<TreeNode> existingNodes = new List<TreeNode>();
+			foreach (TreeNode endpointNode in _subscriptions.Nodes)
+			{
+				foreach (TreeNode subscriptionNode in endpointNode.Nodes)
+				{
+					existingNodes.Add(subscriptionNode);
+				}
+			}
 
-                _subscriptionCache = _container.Resolve<ISubscriptionCache>();
-                _subscriptionCache.OnAddSubscription += SubscriptionAdded;
-                _subscriptionCache.OnRemoveSubscription += SubscriptionRemoved;
+			IList<Subscription> subscriptions = _cache.List();
 
-                _container.AddComponentLifeStyle("followerRepository", typeof (FollowerRepository), LifestyleType.Singleton);
+			foreach (Subscription subscription in subscriptions)
+			{
+				TreeNode endpointNode;
+				if (!_subscriptions.Nodes.ContainsKey(subscription.EndpointUri.ToString()))
+				{
+					endpointNode = new TreeNode(subscription.EndpointUri.ToString());
+					endpointNode.Name = subscription.EndpointUri.ToString();
 
-                _subscriptionBus = _container.Resolve<IServiceBus>("subscriptions");
-                _subscriptionService = _container.Resolve<SubscriptionService>();
-                _subscriptionService.Start();
-            }
-            catch (Exception ex)
-            {
-                _log.Error(ex);
-                MessageBox.Show("The subscription service failed to start:\n\n" + ex.Message);
-            }
-        }
+					_subscriptions.Nodes.Add(endpointNode);
+				}
+				else
+				{
+					endpointNode = _subscriptions.Nodes[subscription.EndpointUri.ToString()];
+				}
 
-        private void SubscriptionAdded(object sender, SubscriptionEventArgs e)
-        {
-            ThreadSafeUpdate tsu = RefreshSubscriptions;
-            BeginInvoke(tsu, new object[] {e.Subscription});
-        }
+				string messageName = subscription.MessageName;
+				string description = subscription.MessageName;
+				if (!string.IsNullOrEmpty(subscription.CorrelationId))
+					description += " (" + subscription.CorrelationId + ")";
 
-        private void SubscriptionRemoved(object sender, SubscriptionEventArgs e)
-        {
-            ThreadSafeUpdate tsu = RefreshSubscriptions;
-            BeginInvoke(tsu, new object[] { e.Subscription });
-        }
+				TreeNode messageNode;
+				if (!endpointNode.Nodes.ContainsKey(messageName))
+				{
+					messageNode = new TreeNode(description);
+					messageNode.Name = messageName;
 
-        private void RefreshSubscriptions(Subscription ignored)
-        {
-            List<TreeNode> existingNodes = new List<TreeNode>();
-            foreach (TreeNode endpointNode in _subscriptions.Nodes)
-            {
-                foreach (TreeNode subscriptionNode in endpointNode.Nodes)
-                {
-                    existingNodes.Add(subscriptionNode);
-                }
-            }
+					endpointNode.Nodes.Add(messageNode);
+				}
+				else
+				{
+					messageNode = endpointNode.Nodes[messageName];
+					if (messageNode.Text != description)
+						messageNode.Text = description;
+				}
 
-            IList<Subscription> subscriptions = _subscriptionCache.List();
+				if (existingNodes.Contains(messageNode))
+					existingNodes.Remove(messageNode);
+			}
 
-            foreach (Subscription subscription in subscriptions)
-            {
-                TreeNode endpointNode;
-                if (!_subscriptions.Nodes.ContainsKey(subscription.EndpointUri.ToString()))
-                {
-                    endpointNode = new TreeNode(subscription.EndpointUri.ToString());
-                    endpointNode.Name = subscription.EndpointUri.ToString();
+			foreach (TreeNode node in existingNodes)
+			{
+				node.Remove();
+			}
+		}
 
-                    _subscriptions.Nodes.Add(endpointNode);
-                }
-                else
-                {
-                    endpointNode = _subscriptions.Nodes[subscription.EndpointUri.ToString()];
-                }
+		protected override void OnClosing(CancelEventArgs e)
+		{
+			base.OnClosing(e);
 
-                string messageName = subscription.MessageName;
-                string description = subscription.MessageName;
-                if (!string.IsNullOrEmpty(subscription.CorrelationId))
-                    description += " (" + subscription.CorrelationId + ")";
+			e.Cancel = false;
+		}
 
-                TreeNode messageNode;
-                if (!endpointNode.Nodes.ContainsKey(messageName))
-                {
-                    messageNode = new TreeNode(description);
-                    messageNode.Name = messageName;
-
-                    endpointNode.Nodes.Add(messageNode);
-                }
-                else
-                {
-                    messageNode = endpointNode.Nodes[messageName];
-                    if (messageNode.Text != description)
-                        messageNode.Text = description;
-                }
-
-                if (existingNodes.Contains(messageNode))
-                    existingNodes.Remove(messageNode);
-            }
-
-            foreach (TreeNode node in existingNodes)
-            {
-                node.Remove();
-            }
-        }
-
-        private void StopSubscriptionManager()
-        {
-            try
-            {
-                if (_subscriptionService != null)
-                {
-                    _subscriptionService.Stop();
-                    _subscriptionService.Dispose();
-                }
-            }
-            catch (Exception ex)
-            {
-                _log.Error(ex);
-            }
-
-            try
-            {
-                if (_subscriptionBus != null)
-                {
-                    _subscriptionCache.OnAddSubscription -= SubscriptionAdded;
-                    _subscriptionCache.OnRemoveSubscription -= SubscriptionRemoved;
-
-                    _subscriptionBus.Dispose();
-                    _subscriptionBus = null;
-                }
-            }
-            catch (Exception ex)
-            {
-                _log.Error(ex);
-            }
-
-            try
-            {
-                if (_container != null)
-                {
-                    _container.Dispose();
-                    _container = null;
-                }
-            }
-            catch (Exception ex)
-            {
-                _log.Error(ex);
-            }
-
-            _startButton.Enabled = true;
-            _stopButton.Enabled = false;
-        }
-
-        protected override void OnClosing(CancelEventArgs e)
-        {
-            base.OnClosing(e);
-
-            StopSubscriptionManager();
-
-            e.Cancel = false;
-        }
-
-        private void StartButton_Click(object sender, EventArgs e)
-        {
-            StartSubscriptionManager();
-        }
-
-        private void StopButton_Click(object sender, EventArgs e)
-        {
-            StopSubscriptionManager();
-        }
-    }
+		private delegate void ThreadSafeUpdate(Subscription subscription);
+	}
 }

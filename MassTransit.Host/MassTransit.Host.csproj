@@ -72,6 +72,7 @@
     <Reference Include="System.configuration" />
     <Reference Include="System.Configuration.Install" />
     <Reference Include="System.ServiceProcess" />
+    <Reference Include="System.Windows.Forms" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\SolutionVersion.cs">
@@ -79,6 +80,7 @@
     </Compile>
     <Compile Include="Actions\RunAsConsoleAction.cs" />
     <Compile Include="Actions\RunAsServiceAction.cs" />
+    <Compile Include="Actions\RunAsWinFormAction.cs" />
     <Compile Include="ArgumentParsing\Argument.cs" />
     <Compile Include="ArgumentParsing\ArgumentAttribute.cs" />
     <Compile Include="ArgumentParsing\ArgumentMap.cs" />
@@ -94,6 +96,7 @@
     <Compile Include="Configurations\InteractiveConfiguration.cs" />
     <Compile Include="Configurations\LocalSystemConfiguration.cs" />
     <Compile Include="Configurations\Credentials.cs" />
+    <Compile Include="Hosts\WinFormHost.cs" />
     <Compile Include="LifeCycles\HostedLifeCycle.cs" />
     <Compile Include="HostServiceInstaller.cs">
       <SubType>Component</SubType>

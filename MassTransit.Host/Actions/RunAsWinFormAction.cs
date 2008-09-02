@@ -10,14 +10,23 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Host
+namespace MassTransit.Host.Actions
 {
 	using Configurations;
-	using LifeCycles;
+	using Hosts;
+	using log4net;
 
-	public interface IHostingConfiguration
+	public class RunAsWinFormAction :
+		IAction
 	{
-		IInstallationConfiguration HowToInstall { get; }
-		IApplicationLifeCycle HowToRun { get; }
+		private static readonly ILog _log = LogManager.GetLogger(typeof (RunAsConsoleAction));
+
+		public void Do(IInstallationConfiguration configuration)
+		{
+			_log.Info("Received winform start notification");
+
+			WinFormHost inWinFormHost = new WinFormHost(configuration.LifeCycle);
+			inWinFormHost.Run();
+		}
 	}
 }

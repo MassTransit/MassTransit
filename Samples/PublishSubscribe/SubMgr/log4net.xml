@@ -69,7 +69,7 @@
 
 	<!-- Standard MassTransit Logging Settings -->
 	<logger name="MassTransit">
-		<level value="OFF" />
+		<level value="ALL" />
 	</logger>
 
 	<logger name="MassTransit.Messages">
