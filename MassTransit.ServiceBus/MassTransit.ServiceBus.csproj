@@ -112,6 +112,12 @@
     <Compile Include="MessageGroup.cs" />
     <Compile Include="ReliableAttribute.cs" />
     <Compile Include="ServiceBusBuilder.cs" />
+    <Compile Include="Timeout\CancelTimeout.cs" />
+    <Compile Include="Timeout\ITimeoutStorage.cs" />
+    <Compile Include="Timeout\ScheduleTimeout.cs" />
+    <Compile Include="Timeout\ScheduleTimeoutConsumer.cs" />
+    <Compile Include="Timeout\TimeoutExpired.cs" />
+    <Compile Include="Timeout\TimeoutService.cs" />
     <Compile Include="Transports\HttpEndpoint.cs" />
     <Compile Include="Transports\LoopbackEndpoint.cs" />
     <Compile Include="Internal\MessageTypeDispatcher.cs" />
