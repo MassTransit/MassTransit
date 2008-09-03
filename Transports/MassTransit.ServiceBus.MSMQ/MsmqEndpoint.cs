@@ -18,6 +18,7 @@ namespace MassTransit.ServiceBus.MSMQ
 	using System.Transactions;
 	using Exceptions;
 	using Formatters;
+	using Internal;
 	using log4net;
 
 	/// <summary>
@@ -28,7 +29,6 @@ namespace MassTransit.ServiceBus.MSMQ
 	{
 		private static readonly IBodyFormatter _formatter = new BinaryBodyFormatter();
 		private static readonly ILog _log = LogManager.GetLogger(typeof (MsmqEndpoint));
-		private static readonly ILog _messageLog = LogManager.GetLogger("MassTransit.Messages");
 		private readonly string _queuePath;
 		private readonly Uri _uri;
 		private readonly string _machineName = Environment.MachineName;
@@ -170,8 +170,8 @@ namespace MassTransit.ServiceBus.MSMQ
 
 			try
 			{
-				if (_messageLog.IsInfoEnabled)
-					_messageLog.InfoFormat("SEND:{0}:{1}", Uri, messageType.Name);
+				if (SpecialLoggers.Messages.IsInfoEnabled)
+                    SpecialLoggers.Messages.InfoFormat("SEND:{0}:{1}", Uri, messageType.Name);
 
 				_queue.Send(msg, GetTransactionType());
 			}
@@ -245,8 +245,8 @@ namespace MassTransit.ServiceBus.MSMQ
 									if (_log.IsDebugEnabled)
 										_log.DebugFormat("Queue: {0} Received Message Id {1}", _queue.Path, msg.Id);
 
-									if (_messageLog.IsInfoEnabled)
-										_messageLog.InfoFormat("RECV:{0}:{1}:{2}", _uri, obj.GetType().Name, msg.Id);
+                                    if (SpecialLoggers.Messages.IsInfoEnabled)
+                                        SpecialLoggers.Messages.InfoFormat("RECV:{0}:{1}", _uri, obj.GetType().Name);
 
 									return obj;
 								}
