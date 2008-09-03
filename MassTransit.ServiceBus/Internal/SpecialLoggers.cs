@@ -16,16 +16,16 @@ namespace MassTransit.ServiceBus.Internal
 
     public class SpecialLoggers
     {
-        private readonly ILog _diagnostics = LogManager.GetLogger("MassTransit.Diagnostics");
-        private readonly ILog _messages = LogManager.GetLogger("MassTransit.Messages");
+        private readonly static ILog _diagnostics = LogManager.GetLogger("MassTransit.Diagnostics");
+        private readonly static ILog _messages = LogManager.GetLogger("MassTransit.Messages");
         private readonly static ILog _ironLogger = LogManager.GetLogger("MassTransit.Iron");
 
-        public ILog Messages
+        public static ILog Messages
         {
             get { return _messages; }
         }
 
-        public ILog Diagnostics
+        public static ILog Diagnostics
         {
             get { return _diagnostics; }
         }
