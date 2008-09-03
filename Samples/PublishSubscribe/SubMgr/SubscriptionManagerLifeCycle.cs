@@ -1,5 +1,6 @@
 namespace SubMgr
 {
+    using Castle.Core;
     using MassTransit.Host.LifeCycles;
     using MassTransit.ServiceBus;
     using MassTransit.ServiceBus.Subscriptions;
@@ -13,6 +14,7 @@ namespace SubMgr
 
         public override void Start()
         {
+            Container.AddComponentLifeStyle<FollowerRepository>(LifestyleType.Singleton);
             Container.AddComponent<IHostedService, SubscriptionService>();
             Container.AddComponent<ISubscriptionRepository, InMemorySubscriptionRepository>();
         }
