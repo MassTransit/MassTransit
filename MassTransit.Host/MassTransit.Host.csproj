@@ -97,6 +97,7 @@
     <Compile Include="Configurations\LocalSystemConfiguration.cs" />
     <Compile Include="Configurations\Credentials.cs" />
     <Compile Include="Hosts\WinFormHost.cs" />
+    <Compile Include="KnownServiceNames.cs" />
     <Compile Include="LifeCycles\HostedLifeCycle.cs" />
     <Compile Include="HostServiceInstaller.cs">
       <SubType>Component</SubType>
