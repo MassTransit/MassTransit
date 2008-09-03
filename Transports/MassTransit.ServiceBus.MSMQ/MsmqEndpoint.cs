@@ -184,12 +184,7 @@ namespace MassTransit.ServiceBus.MSMQ
 				_log.DebugFormat("Message Sent: Id = {0}, Message Type = {1}", msg.Id, messageType.Name);
 		}
 
-		public object Receive()
-		{
-			return Receive(MessageQueue.InfiniteTimeout);
-		}
-
-		public object Receive(TimeSpan timeout)
+	    public object Receive(TimeSpan timeout)
 		{
 			try
 			{
@@ -292,68 +287,8 @@ namespace MassTransit.ServiceBus.MSMQ
 			return null;
 		}
 
-		public T Receive<T>() where T : class
-		{
-			return Receive<T>(MessageQueue.InfiniteTimeout);
-		}
 
-		public T Receive<T>(TimeSpan timeout) where T : class
-		{
-            try
-            {
-                return (T) Receive(timeout, delegate(object obj)
-                                                {
-                                                    Type messageType = obj.GetType();
-
-                                                    if (messageType != typeof (T))
-                                                        return false;
-
-                                                    return true;
-                                                });
-            }
-            catch (Exception ex)
-            {
-                string message = string.Format("Error on receive with Receive<{0}> accept", typeof(T).Name);
-                _log.Error(message, ex);
-            }
-
-            throw new Exception("Receive<T>(TimeSpan timeout) didn't error");
-		}
-
-		public T Receive<T>(Predicate<T> accept) where T : class
-		{
-			return Receive(MessageQueue.InfiniteTimeout, accept);
-		}
-
-		public T Receive<T>(TimeSpan timeout, Predicate<T> accept) where T : class
-		{
-            try
-            {
-                return (T) Receive(timeout, delegate(object obj)
-                                                {
-                                                    Type messageType = obj.GetType();
-
-                                                    if (messageType != typeof (T))
-                                                        return false;
-
-                                                    T message = obj as T;
-                                                    if (message == null)
-                                                        return false;
-
-                                                    return accept(message);
-                                                });
-            }
-            catch (Exception ex)
-            {
-                string message = string.Format("Error on receive with Predicate<{0}> accept", typeof(T).Name);
-                _log.Error(message, ex);
-            }
-
-            throw new Exception("Receive<T>(TimeSpan timeout, Predicate<T> accept) had a weird error");
-		}
-
-
-		public void Dispose()
+	    public void Dispose()
 		{
 			if (_queue != null)
 				_queue.Dispose();
