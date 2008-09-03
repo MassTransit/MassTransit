@@ -23,7 +23,7 @@ namespace OpenAllNight.PubSub
             get { return "MassTransit Subscription Manager"; }
         }
 
-        public override string DispalyName
+        public override string DisplayName
         {
             get { return "MassTransit Subscription Manager"; }
         }
