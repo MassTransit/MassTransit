@@ -16,8 +16,9 @@ namespace MassTransit.ServiceBus.Timeout
 	using System.Threading;
 	using Exceptions;
 	using log4net;
+	using Messages;
 
-	public class TimeoutService :
+    public class TimeoutService :
 		IHostedService
 	{
 		private static readonly ILog _log = LogManager.GetLogger(typeof (TimeoutService));
@@ -54,6 +55,7 @@ namespace MassTransit.ServiceBus.Timeout
 			_storage.Start();
 
 			_bus.AddComponent<ScheduleTimeoutConsumer>();
+			_bus.AddComponent<CancelTimeoutConsumer>();
 
 			_watchThread = new Thread(PublishPendingTimeoutMessages);
 			_watchThread.IsBackground = true;
@@ -71,6 +73,7 @@ namespace MassTransit.ServiceBus.Timeout
 			_storage.Stop();
 
 			_bus.RemoveComponent<ScheduleTimeoutConsumer>();
+            _bus.RemoveComponent<CancelTimeoutConsumer>();
 
 			if (_log.IsInfoEnabled)
 				_log.Info("Timeout Service Stopped");

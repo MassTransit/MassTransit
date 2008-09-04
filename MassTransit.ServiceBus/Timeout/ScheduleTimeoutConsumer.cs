@@ -12,26 +12,22 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.ServiceBus.Timeout
 {
-	public class ScheduleTimeoutConsumer :
-		Consumes<ScheduleTimeout>.All,
-		Consumes<CancelTimeout>.All
-	{
-		private readonly ITimeoutStorage _storage;
+    using Messages;
 
-		public ScheduleTimeoutConsumer(ITimeoutStorage storage)
-		{
-			_storage = storage;
-		}
+    public class ScheduleTimeoutConsumer :
+        Consumes<ScheduleTimeout>.All
+    {
+        private readonly ITimeoutStorage _storage;
 
-		public void Consume(CancelTimeout message)
-		{
-			_storage.Remove(message.CorrelationId);
+        public ScheduleTimeoutConsumer(ITimeoutStorage storage)
+        {
+            _storage = storage;
+        }
 
-		}
 
-		public void Consume(ScheduleTimeout message)
-		{
-			_storage.Schedule(message.CorrelationId, message.TimeoutAt);
-		}
-	}
+        public void Consume(ScheduleTimeout message)
+        {
+            _storage.Schedule(message.CorrelationId, message.TimeoutAt);
+        }
+    }
 }
