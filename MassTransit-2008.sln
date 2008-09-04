@@ -49,6 +49,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HeavyLoad", "Samples\HeavyL
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Grid.Tests", "MassTransit.Grid.Tests\MassTransit.Grid.Tests.csproj", "{FEC77DEA-4F86-4889-AEAC-79FA4DD06AD4}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.StructureMapIntegration", "Containers\MassTransit.StructureMapIntegration\MassTransit.StructureMapIntegration.csproj", "{F5E67502-2B30-484C-88C3-97710291F5AA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -127,6 +129,10 @@ Global
 		{FEC77DEA-4F86-4889-AEAC-79FA4DD06AD4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FEC77DEA-4F86-4889-AEAC-79FA4DD06AD4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FEC77DEA-4F86-4889-AEAC-79FA4DD06AD4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F5E67502-2B30-484C-88C3-97710291F5AA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F5E67502-2B30-484C-88C3-97710291F5AA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F5E67502-2B30-484C-88C3-97710291F5AA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F5E67502-2B30-484C-88C3-97710291F5AA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -145,6 +151,7 @@ Global
 		{95873436-3496-4DF7-9E1D-B6C9D3D0CCA9} = {E9473F6A-4266-4610-ADE8-0D0AC39143DD}
 		{41A1164D-7E70-41B4-912B-E9BEF75C769F} = {6C61507E-FF16-45C8-8FE4-350069D9B4C1}
 		{98D5A59C-96FA-4A1B-A653-EA5A35C45FC9} = {6C61507E-FF16-45C8-8FE4-350069D9B4C1}
+		{F5E67502-2B30-484C-88C3-97710291F5AA} = {6C61507E-FF16-45C8-8FE4-350069D9B4C1}
 		{AA8820CC-5DFE-4867-8C9B-82320C9E4BE2} = {94889DE3-F629-4F21-ABC1-801BC915ED29}
 	EndGlobalSection
 EndGlobal
