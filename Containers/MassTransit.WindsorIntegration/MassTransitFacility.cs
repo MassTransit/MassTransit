@@ -120,20 +120,6 @@ namespace MassTransit.WindsorIntegration
                 bus.MaxThreadCount = GetConfigurationValue(threadConfig, "maxThreads", 10);
             }
         }
-
-        private static T GetConfigurationValue<T>(IConfiguration config, string attributeName, T defaultValue)
-        {
-            string value = config.Attributes[attributeName];
-            if (string.IsNullOrEmpty(value))
-                return defaultValue;
-
-            TypeConverter tc = TypeDescriptor.GetConverter(typeof(T));
-
-            T newValue = (T)tc.ConvertFromInvariantString(value);
-
-            return newValue;
-        }
-
         private void ResolveManagementClient(IConfiguration child, IServiceBus bus, string id)
         {
             IConfiguration managementClientConfig = child.Children["managementService"];
@@ -149,7 +135,6 @@ namespace MassTransit.WindsorIntegration
                 sc.Start(); //TODO: Should use startable
             }
         }
-
         private void ResolveSubscriptionClient(IConfiguration child, IServiceBus bus, string id, ISubscriptionCache cache)
         {
             IConfiguration subscriptionClientConfig = child.Children["subscriptionService"];
@@ -166,6 +151,7 @@ namespace MassTransit.WindsorIntegration
                 sc.Start(); //TODO: should use the startable
             }
         }
+
 
         private ISubscriptionCache ResolveSubscriptionCache(IConfiguration configuration)
         {
@@ -214,7 +200,6 @@ namespace MassTransit.WindsorIntegration
                     throw new ConventionException(mode + " is not a valid subscriptionCache mode");
             }
         }
-
         private static IEnumerable<string> GetDistributedCacheServerList(IConfiguration configuration)
         {
             List<string> servers = new List<string>();
@@ -231,6 +216,7 @@ namespace MassTransit.WindsorIntegration
             return servers;
         }
 
+
         private static ComponentRegistration<T> StartableComponent<T>()
         {
             return Component.For<T>()
@@ -239,5 +225,18 @@ namespace MassTransit.WindsorIntegration
                 .AddAttributeDescriptor("stopMethod", "Stop")
                 .LifeStyle.Transient;
         }
+        private static T GetConfigurationValue<T>(IConfiguration config, string attributeName, T defaultValue)
+        {
+            string value = config.Attributes[attributeName];
+            if (string.IsNullOrEmpty(value))
+                return defaultValue;
+
+            TypeConverter tc = TypeDescriptor.GetConverter(typeof(T));
+
+            T newValue = (T)tc.ConvertFromInvariantString(value);
+
+            return newValue;
+        }
+
     }
 }
