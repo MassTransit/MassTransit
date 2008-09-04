@@ -12,35 +12,21 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.ServiceBus.Timeout
 {
-	using System;
+    using Messages;
 
-	[Serializable]
-	public class ScheduleTimeout :
-		CorrelatedBy<Guid>
-	{
-		private readonly Guid _correlationId;
-		private readonly DateTime _timeoutAt;
+    public class CancelTimeoutConsumer :
+        Consumes<CancelTimeout>.All
+    {
+        private readonly ITimeoutStorage _storage;
 
-		public ScheduleTimeout(Guid correlationId, TimeSpan timeoutIn)
-		{
-			_correlationId = correlationId;
-			_timeoutAt = DateTime.UtcNow + timeoutIn;
-		}
+        public CancelTimeoutConsumer(ITimeoutStorage storage)
+        {
+            _storage = storage;
+        }
 
-		public ScheduleTimeout(Guid correlationId, DateTime timeoutAt)
-		{
-			_correlationId = correlationId;
-			_timeoutAt = timeoutAt.ToUniversalTime();
-		}
-
-		public Guid CorrelationId
-		{
-			get { return _correlationId; }
-		}
-
-		public DateTime TimeoutAt
-		{
-			get { return _timeoutAt; }
-		}
-	}
+        public void Consume(CancelTimeout message)
+        {
+            _storage.Remove(message.CorrelationId);
+        }
+    }
 }
