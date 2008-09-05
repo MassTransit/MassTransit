@@ -38,15 +38,15 @@
         {
             ISubscriptionCache cache = ResolveSubscriptionCache("name", "mode");
 
-            //IServiceBus bus = BuildServiceBus(id, endpoint, cache, child);
-            ServiceBus bus = BuildServiceBus(id, ObjectFactory.GetInstance<IEndpointResolver>().Resolve(listeningUri), cache);
+            IEndpoint busEndpoint = ObjectFactory.GetInstance<IEndpointResolver>().Resolve(listeningUri);
+            ServiceBus bus = BuildServiceBus(id, busEndpoint, cache);
 
 
             if (managementUri != null)
-                SetupManagement(3, bus, id);
+                SetupManagement(id, bus, 3);
 
             if (subscriptionAddress != null)
-                SetupSubscriptionClient(subscriptionAddress, bus, id, cache);
+                SetupSubscriptionClient(id, bus, subscriptionAddress, cache);
 
             return this;
         }
@@ -62,8 +62,7 @@
 
             SetupThreading(1,10, bus);
 
-            StructureMapConfiguration.ForRequestedType<IServiceBus>()
-                .AddInstance(bus); //how to set id?
+            StructureMapConfiguration.AddInstanceOf<IServiceBus>(bus).WithName(id);
 
             return bus;
         }
@@ -72,17 +71,13 @@
             bus.MinThreadCount = minThreads;
             bus.MaxThreadCount = maxThreads;
         }
-        private static void SetupManagement(int heartbeatInterval, IServiceBus bus, string id)
+        private static void SetupManagement(string id, IServiceBus bus, int heartbeatInterval)
         {
-
             HealthClient client = new HealthClient(bus, heartbeatInterval);
-
-            
-            var i = StructureMapConfiguration.AddInstanceOf(client);
-            i.Name = id + ".managementClient";
+            StructureMapConfiguration.AddInstanceOf<HealthClient>(client).WithName(id + ".managementClient");
             client.Start(); //TODO: Should use startable
         }
-        private static void SetupSubscriptionClient(Uri subscriptionServiceAddress, IServiceBus bus, string id, ISubscriptionCache cache)
+        private static void SetupSubscriptionClient(string id, IServiceBus bus, Uri subscriptionServiceAddress, ISubscriptionCache cache)
         {
 
             IEndpoint subscriptionServiceEndpoint =
@@ -96,50 +91,46 @@
             client.Start(); //TODO: should use the startable
         }
 
-        private ISubscriptionCache ResolveSubscriptionCache(string name, string mode)
+        private static ISubscriptionCache ResolveSubscriptionCache(string name, string mode)
         {
-            //name: makes it available to others
+            ISubscriptionCache cache = null;
 
+            //name: makes it available to others
             if (string.IsNullOrEmpty(name) && string.IsNullOrEmpty(mode))
-                return ObjectFactory.GetInstance<ISubscriptionCache>();
+                return ObjectFactory.GetNamedInstance<ISubscriptionCache>(name);
 
             switch (mode)
             {
                 case "local":
                     if (string.IsNullOrEmpty(name))
                         return ObjectFactory.GetInstance<ISubscriptionCache>();
-                    else
-                    {
-                        ISubscriptionCache cache = ObjectFactory.GetInstance<ISubscriptionCache>(); //TODO: Name
-                        if (cache == null)
-                        {
-                            cache = ObjectFactory.GetInstance<ISubscriptionCache>();
-                            StructureMapConfiguration.ForRequestedType<ISubscriptionCache>()
-                                .AddInstance(cache); //TODO: how to add name
-                        }
 
-                        return cache;
+                    cache = ObjectFactory.GetNamedInstance<ISubscriptionCache>(name);
+                    if (cache == null)
+                    {
+                        cache = ObjectFactory.GetInstance<ISubscriptionCache>();
+                        StructureMapConfiguration.AddInstanceOf(cache).WithName(name);
                     }
+
+                    return cache;
+
 
                 case "distributed":
                     IList<string> servers = new List<string>(); //TODO: not sure how to best populate it yet
 
                     if (string.IsNullOrEmpty(name))
-                    {
                         return new DistributedSubscriptionCache(GetDistributedCacheServerList(servers));
-                    }
-                    else
-                    {
-                        ISubscriptionCache cache = ObjectFactory.GetInstance<DistributedSubscriptionCache>(); //TODO: name?
-                        if (cache == null)
-                        {
-                            cache = new DistributedSubscriptionCache(GetDistributedCacheServerList(servers));
-                            StructureMapConfiguration.ForRequestedType<ISubscriptionCache>()
-                                .AddInstance(cache); //TODO: How to add name
-                        }
 
-                        return cache;
+                    cache = ObjectFactory.GetNamedInstance<DistributedSubscriptionCache>(name);
+                    //TODO: name?
+                    if (cache == null)
+                    {
+                        cache = new DistributedSubscriptionCache(GetDistributedCacheServerList(servers));
+                        StructureMapConfiguration.AddInstanceOf(cache).WithName(name);
                     }
+
+                    return cache;
+
 
                 default:
                     throw new ConventionException(mode + " is not a valid subscriptionCache mode");

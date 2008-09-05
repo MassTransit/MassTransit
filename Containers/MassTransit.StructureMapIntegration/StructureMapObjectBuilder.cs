@@ -4,7 +4,6 @@ namespace MassTransit.StructureMapIntegration
     using System.Collections;
     using ServiceBus;
     using StructureMap;
-    using StructureMap.Pipeline;
 
     public class StructureMapObjectBuilder :
         IObjectBuilder
@@ -37,7 +36,7 @@ namespace MassTransit.StructureMapIntegration
         public void Register<T>() where T : class
         {
             //TODO: Is this correct?
-            StructureMapConfiguration.ForRequestedType<T>().AddConcreteType<T>();
+            StructureMapConfiguration.ForRequestedType<T>().TheDefaultIsConcreteType<T>();
         }
     }
 }
