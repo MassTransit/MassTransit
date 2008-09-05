@@ -80,10 +80,6 @@
     <Compile Include="StopWatch.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\MassTransit.ServiceBus.WCF\MassTransit.ServiceBus.WCF.csproj">
-      <Project>{F4388D44-E814-4B17-98F7-35735CB7449E}</Project>
-      <Name>MassTransit.ServiceBus.WCF</Name>
-    </ProjectReference>
     <ProjectReference Include="..\..\..\Transports\MassTransit.ServiceBus.MSMQ\MassTransit.ServiceBus.MSMQ.csproj">
       <Project>{6F90867C-E092-4EDC-B3DE-600D39DF0335}</Project>
       <Name>MassTransit.ServiceBus.MSMQ</Name>
@@ -99,6 +95,10 @@
     <ProjectReference Include="..\..\..\Containers\MassTransit.WindsorIntegration\MassTransit.WindsorIntegration.csproj">
       <Project>{98D5A59C-96FA-4A1B-A653-EA5A35C45FC9}</Project>
       <Name>MassTransit.WindsorIntegration</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\Transports\MassTransit.ServiceBus.WCF\MassTransit.ServiceBus.WCF.csproj">
+      <Project>{F4388D44-E814-4B17-98F7-35735CB7449E}</Project>
+      <Name>MassTransit.ServiceBus.WCF</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

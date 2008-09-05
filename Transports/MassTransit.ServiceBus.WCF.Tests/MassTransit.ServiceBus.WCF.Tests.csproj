@@ -17,7 +17,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
+    <OutputPath>..\..\tests\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -25,7 +25,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
+    <OutputPath>..\..\tests\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -81,13 +81,13 @@
       <Project>{76646B96-936B-4D31-A053-35CD630E3C68}</Project>
       <Name>MassTransit.ServiceBus.Tests</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\MassTransit.ServiceBus.WCF\MassTransit.ServiceBus.WCF.csproj">
-      <Project>{F4388D44-E814-4B17-98F7-35735CB7449E}</Project>
-      <Name>MassTransit.ServiceBus.WCF</Name>
-    </ProjectReference>
     <ProjectReference Include="..\..\MassTransit.ServiceBus\MassTransit.ServiceBus.csproj">
       <Project>{90482397-6282-465E-8B86-39865FC30127}</Project>
       <Name>MassTransit.ServiceBus</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\MassTransit.ServiceBus.WCF\MassTransit.ServiceBus.WCF.csproj">
+      <Project>{F4388D44-E814-4B17-98F7-35735CB7449E}</Project>
+      <Name>MassTransit.ServiceBus.WCF</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

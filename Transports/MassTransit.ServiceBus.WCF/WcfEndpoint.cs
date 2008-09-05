@@ -24,14 +24,14 @@ namespace MassTransit.ServiceBus.WCF
 	{
 		private static readonly ILog _log = LogManager.GetLogger(typeof (WcfEndpoint));
 		private static readonly ILog _messageLog = LogManager.GetLogger("MassTransit.Messages");
+		private readonly BinaryFormatter _formatter = new BinaryFormatter();
 
 		private readonly Semaphore _messageReady = new Semaphore(0, int.MaxValue);
 		private readonly Queue<MessageEnvelope> _messages = new Queue<MessageEnvelope>();
-		private readonly Uri _uri;
 		private readonly Uri _serviceUri;
+		private readonly Uri _uri;
 		private string _configuration = "MassTransit_EndpointClient";
 		private ServiceHost _host;
-		private readonly BinaryFormatter _formatter = new BinaryFormatter();
 
 
 		public WcfEndpoint(Uri uri)
@@ -43,6 +43,7 @@ namespace MassTransit.ServiceBus.WCF
 
 			_serviceUri = builder.Uri;
 
+			_log.DebugFormat("Opening host for WCF endpoint: {0}", _serviceUri);
 			_host = new ServiceHost(new InboundMessageHandler(this), _serviceUri);
 			_host.Open();
 		}
@@ -54,6 +55,7 @@ namespace MassTransit.ServiceBus.WCF
 
 		public void Dispose()
 		{
+			_log.DebugFormat("Closing host for WCF endpoint: {0}", _serviceUri);
 			_host.Close();
 
 			lock (_messages)
