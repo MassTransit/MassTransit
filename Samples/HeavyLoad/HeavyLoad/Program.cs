@@ -22,6 +22,8 @@ namespace HeavyLoad
 
 			RunLoopbackLoadTest();
 
+			RunWcfLoadTest();
+
 			RunCorrelatedMessageTest();
 
 			RunBatchLoadTest();
@@ -81,6 +83,19 @@ namespace HeavyLoad
 			}
 
 			Console.WriteLine("Loopback Load Test: ");
+			Console.WriteLine(stopWatch.ToString());
+		}
+
+		private static void RunWcfLoadTest()
+		{
+			StopWatch stopWatch = new StopWatch();
+
+			using (WcfLoadTest test = new WcfLoadTest())
+			{
+				test.Run(stopWatch);
+			}
+
+			Console.WriteLine("WCF Load Test: ");
 			Console.WriteLine(stopWatch.ToString());
 		}
 
