@@ -70,6 +70,7 @@
   <ItemGroup>
     <Compile Include="Batch_Specs.cs" />
     <Compile Include="BusBuilder_Specs.cs" />
+    <Compile Include="Configuration\Config_spec.cs" />
     <Compile Include="ContextSetup.cs" />
     <Compile Include="Fault_Specs.cs" />
     <Compile Include="HealthMonitoring\MonitorInfoSpecs.cs" />
