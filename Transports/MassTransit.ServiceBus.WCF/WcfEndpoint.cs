@@ -12,180 +12,188 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.ServiceBus.WCF
 {
-	using System;
-	using System.Collections.Generic;
-	using System.IO;
-	using System.Runtime.Serialization.Formatters.Binary;
-	using System.ServiceModel;
-	using System.Threading;
-	using log4net;
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Runtime.Serialization.Formatters.Binary;
+    using System.ServiceModel;
+    using System.Threading;
+    using log4net;
 
-	public class WcfEndpoint : IEndpoint
-	{
-		private static readonly ILog _log = LogManager.GetLogger(typeof (WcfEndpoint));
-		private static readonly ILog _messageLog = LogManager.GetLogger("MassTransit.Messages");
-		private readonly BinaryFormatter _formatter = new BinaryFormatter();
+    public class WcfEndpoint : IEndpoint
+    {
+        private static readonly ILog _log = LogManager.GetLogger(typeof (WcfEndpoint));
+        private static readonly ILog _messageLog = LogManager.GetLogger("MassTransit.Messages");
+        private readonly BinaryFormatter _formatter = new BinaryFormatter();
 
-		private readonly Semaphore _messageReady = new Semaphore(0, int.MaxValue);
-		private readonly Queue<MessageEnvelope> _messages = new Queue<MessageEnvelope>();
-		private readonly Uri _serviceUri;
-		private readonly Uri _uri;
-		private string _configuration = "MassTransit_EndpointClient";
-		private ServiceHost _host;
+        private readonly Semaphore _messageReady = new Semaphore(0, int.MaxValue);
+        private readonly Queue<MessageEnvelope> _messages = new Queue<MessageEnvelope>();
+        private readonly Uri _serviceUri;
+        private readonly Uri _uri;
+        private string _configuration = "MassTransit_EndpointClient";
+        private ServiceHost _host;
 
+        public WcfEndpoint(Uri uri)
+        {
+            _uri = uri;
 
-		public WcfEndpoint(Uri uri)
-		{
-			_uri = uri;
+            UriBuilder builder = new UriBuilder(uri);
+            //builder.Scheme = uri.Scheme.Substring(4);
 
-			UriBuilder builder = new UriBuilder(uri);
-			//builder.Scheme = uri.Scheme.Substring(4);
+            _serviceUri = builder.Uri;
+        }
 
-			_serviceUri = builder.Uri;
+        public static string Scheme
+        {
+            get { return "net.tcp"; }
+        }
 
-			_log.DebugFormat("Opening host for WCF endpoint: {0}", _serviceUri);
-			_host = new ServiceHost(new InboundMessageHandler(this), _serviceUri);
-			_host.Open();
-		}
+        public void Dispose()
+        {
+            _log.DebugFormat("Closing host for WCF endpoint: {0}", _serviceUri);
+            _host.Close();
 
-		public static string Scheme
-		{
-			get { return "net.tcp"; }
-		}
+            lock (_messages)
+                _messages.Clear();
+        }
 
-		public void Dispose()
-		{
-			_log.DebugFormat("Closing host for WCF endpoint: {0}", _serviceUri);
-			_host.Close();
+        public Uri Uri
+        {
+            get { return _uri; }
+        }
 
-			lock (_messages)
-				_messages.Clear();
-		}
+        public void Send<T>(T message) where T : class
+        {
+            Send(message, TimeSpan.MaxValue);
+        }
 
-		public Uri Uri
-		{
-			get { return _uri; }
-		}
+        public void Send<T>(T message, TimeSpan timeToLive) where T : class
+        {
+            if (_messageLog.IsInfoEnabled)
+                _messageLog.InfoFormat("SEND:{0}:{1}", Uri, typeof (T).Name);
 
-		public void Send<T>(T message) where T : class
-		{
-			Send(message, TimeSpan.MaxValue);
-		}
+            MessageEnvelope envelope;
 
-		public void Send<T>(T message, TimeSpan timeToLive) where T : class
-		{
-			if (_messageLog.IsInfoEnabled)
-				_messageLog.InfoFormat("SEND:{0}:{1}", Uri, typeof (T).Name);
+            using (MemoryStream mstream = new MemoryStream())
+            {
+                _formatter.Serialize(mstream, message);
 
-			MessageEnvelope envelope;
+                envelope = new MessageEnvelope(mstream.ToArray());
+            }
 
-			using (MemoryStream mstream = new MemoryStream())
-			{
-				_formatter.Serialize(mstream, message);
+            ChannelFactory<IEndpointContract> channelFactory = new ChannelFactory<IEndpointContract>(_configuration);
 
-				envelope = new MessageEnvelope(mstream.ToArray());
-			}
+            channelFactory.Endpoint.Address = new EndpointAddress(_serviceUri);
 
-			ChannelFactory<IEndpointContract> channelFactory = new ChannelFactory<IEndpointContract>(_configuration);
+            IEndpointContract proxy = channelFactory.CreateChannel();
+            try
+            {
+                proxy.Send(envelope);
 
-			channelFactory.Endpoint.Address = new EndpointAddress(_serviceUri);
+                ((IClientChannel) proxy).Close();
+            }
+            catch
+            {
+                ((IClientChannel) proxy).Abort();
+                throw;
+            }
+        }
 
-			IEndpointContract proxy = channelFactory.CreateChannel();
-			try
-			{
-				proxy.Send(envelope);
+        public object Receive(TimeSpan timeout)
+        {
+            if (_host == null)
+                OpenHost();
 
-				((IClientChannel) proxy).Close();
-			}
-			catch
-			{
-				((IClientChannel) proxy).Abort();
-				throw;
-			}
-		}
+            if (_messageReady.WaitOne(timeout, true))
+            {
+                try
+                {
+                    object obj = Dequeue();
 
-		public object Receive(TimeSpan timeout)
-		{
-			if (_messageReady.WaitOne(timeout, true))
-			{
-				try
-				{
-					object obj = Dequeue();
+                    if (_messageLog.IsInfoEnabled)
+                        _messageLog.InfoFormat("RECV:{0}:{1}", _uri, obj.GetType().Name);
 
-					if (_messageLog.IsInfoEnabled)
-						_messageLog.InfoFormat("RECV:{0}:{1}", _uri, obj.GetType().Name);
+                    return obj;
+                }
+                catch (InvalidOperationException ex)
+                {
+                }
+            }
 
-					return obj;
-				}
-				catch (InvalidOperationException ex)
-				{
-				}
-			}
+            return null;
+        }
 
-			return null;
-		}
+        public object Receive(TimeSpan timeout, Predicate<object> accept)
+        {
+            if (_host == null)
+                OpenHost();
 
-		public object Receive(TimeSpan timeout, Predicate<object> accept)
-		{
-			if (_messageReady.WaitOne(timeout, true))
-			{
-				try
-				{
-					object obj = Dequeue();
+            if (_messageReady.WaitOne(timeout, true))
+            {
+                try
+                {
+                    object obj = Dequeue();
 
-					if (accept(obj))
-					{
-						if (_messageLog.IsInfoEnabled)
-							_messageLog.InfoFormat("RECV:{0}:{1}", _uri, obj.GetType().Name);
+                    if (accept(obj))
+                    {
+                        if (_messageLog.IsInfoEnabled)
+                            _messageLog.InfoFormat("RECV:{0}:{1}", _uri, obj.GetType().Name);
 
-						return obj;
-					}
-				}
-				catch (InvalidOperationException ex)
-				{
-				}
-			}
+                        return obj;
+                    }
+                }
+                catch (InvalidOperationException ex)
+                {
+                }
+            }
 
-			return null;
-		}
+            return null;
+        }
 
-		private void Enqueue(MessageEnvelope message)
-		{
-			lock (_messages)
-				_messages.Enqueue(message);
+        private void OpenHost()
+        {
+            _log.DebugFormat("Opening host for WCF endpoint: {0}", _serviceUri);
+            _host = new ServiceHost(new InboundMessageHandler(this), _serviceUri);
+            _host.Open();
+        }
 
-			_messageReady.Release();
-		}
+        private void Enqueue(MessageEnvelope message)
+        {
+            lock (_messages)
+                _messages.Enqueue(message);
 
-		private object Dequeue()
-		{
-			MessageEnvelope envelope;
-			lock (_messages)
-				envelope = _messages.Dequeue();
+            _messageReady.Release();
+        }
 
-			using (MemoryStream mstream = new MemoryStream(envelope.Message))
-			{
-				object obj = _formatter.Deserialize(mstream);
+        private object Dequeue()
+        {
+            MessageEnvelope envelope;
+            lock (_messages)
+                envelope = _messages.Dequeue();
 
-				return obj;
-			}
-		}
+            using (MemoryStream mstream = new MemoryStream(envelope.Message))
+            {
+                object obj = _formatter.Deserialize(mstream);
 
-		[ServiceBehavior(InstanceContextMode = InstanceContextMode.Single, ConfigurationName = "MassTransit.DefaultWcfService")]
-		public class InboundMessageHandler : IEndpointContract
-		{
-			private readonly WcfEndpoint _endpoint;
+                return obj;
+            }
+        }
 
-			public InboundMessageHandler(WcfEndpoint endpoint)
-			{
-				_endpoint = endpoint;
-			}
+        [ServiceBehavior(InstanceContextMode = InstanceContextMode.Single, ConfigurationName = "MassTransit.DefaultWcfService")]
+        public class InboundMessageHandler : IEndpointContract
+        {
+            private readonly WcfEndpoint _endpoint;
 
-			[OperationBehavior]
-			public void Send(MessageEnvelope message)
-			{
-				_endpoint.Enqueue(message);
-			}
-		}
-	}
+            public InboundMessageHandler(WcfEndpoint endpoint)
+            {
+                _endpoint = endpoint;
+            }
+
+            [OperationBehavior]
+            public void Send(MessageEnvelope message)
+            {
+                _endpoint.Enqueue(message);
+            }
+        }
+    }
 }
