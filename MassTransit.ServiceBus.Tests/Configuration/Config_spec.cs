@@ -1,5 +1,6 @@
 namespace MassTransit.ServiceBus.Tests.Configuration
 {
+    using System;
     using NUnit.Framework;
     using Transports;
 
@@ -78,9 +79,6 @@ namespace MassTransit.ServiceBus.Tests.Configuration
             return new SerializationOptions();
         }
     }
-    public class SerializationOptions
-    {
-    }
     public static class Via
     {
         public static SubscriptionOptions SubscriptionService(string uri)
@@ -97,6 +95,22 @@ namespace MassTransit.ServiceBus.Tests.Configuration
         {
             return new SubscriptionOptions();
         }
+    }
+
+    //state pattern?
+    public class BusOptions
+    {
+        public Uri ListensOn { get; set; }
+        public Uri CommandedOn { get; set; }
+        public bool IsACompetingConsumer { get; set; }
+        public SerializationOptions Serialization { get; set; }
+        public SubscriptionOptions Subcriptions { get; set; }
+        //transportation
+        public string Name { get; set; }
+        public object ResolvesDependenciesFrom { get; set; }
+    }
+    public class SerializationOptions
+    {
     }
     public class SubscriptionOptions
     {
