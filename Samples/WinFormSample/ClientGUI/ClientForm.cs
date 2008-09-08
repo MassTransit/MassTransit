@@ -70,57 +70,58 @@ namespace ClientGUI
                 SubmitQuestion question = new SubmitQuestion(CombGuid.NewCombGuid());
                 tk.Add(question);
 
-                if (i%10 == 0)
-                    UpdateMessageCount(args.Client, i + 1, tk.Answered, tk.ElapsedMilliseconds);
+                if (i%10 == 0) //update every ten things
+                    UpdateMessageCount(args.Client, i + 1, tk.Answered, tk.SendingElapsedMilliseconds, tk.ElapsedMilliseconds);
 
                 _bus.Publish(question);
 
                 if (args.WaitTime > 0)
                     Thread.Sleep(args.WaitTime);
             }
+            tk.SendComplete();
 
             for (int i = 0; i < 3000; i++)
             {
                 if (tk.Done.WaitOne(TimeSpan.FromSeconds(0.1), true))
                     break;
 
-                UpdateMessageCount(args.Client, _target, tk.Answered, tk.ElapsedMilliseconds);
+                UpdateMessageCount(args.Client, _target, tk.Answered, tk.SendingElapsedMilliseconds, tk.ElapsedMilliseconds);
             }
 
-            UpdateMessageCount(args.Client, _target, tk.Answered, tk.ElapsedMilliseconds);
+            UpdateMessageCount(args.Client, _target, tk.Answered, tk.SendingElapsedMilliseconds, tk.ElapsedMilliseconds);
         }
 
-        private void UpdateMessageCount(int client, int sent, int received, long elapsed)
+        private void UpdateMessageCount(int clientId, int numberOfMessagesSent, int numberOfMessagesReceived, long sentElapsedTime, long receiveElapsedTime)
         {
             if (client1Sent.InvokeRequired)
             {
                 ThreadSafeUpdateMessageCount tsu = UpdateMessageCount;
-                BeginInvoke(tsu, new object[] {client, sent, received, elapsed});
+                BeginInvoke(tsu, new object[] {clientId, numberOfMessagesSent, numberOfMessagesReceived, sentElapsedTime, receiveElapsedTime});
             }
             else
             {
-                string sentText = string.Format("{0}/{1} ({2}/s)", sent, _target, elapsed == 0 ? 0 : sent*1000/elapsed);
-                string recvText = string.Format("{0}/{1} ({2}/s)", received, _target, elapsed == 0 ? 0 : received*1000/elapsed);
-                switch (client)
+                string sentText = string.Format("{0}/{1} ({2}/s)", numberOfMessagesSent, _target, receiveElapsedTime == 0 ? 0 : numberOfMessagesSent * 1000 / sentElapsedTime);
+                string recvText = string.Format("{0}/{1} ({2}/s)", numberOfMessagesReceived, _target, receiveElapsedTime == 0 ? 0 : numberOfMessagesReceived*1000/receiveElapsedTime);
+                switch (clientId)
                 {
                     case 1:
                         client1Sent.Text = sentText;
                         client1Received.Text = recvText;
-                        if (received == _target)
+                        if (numberOfMessagesReceived == _target)
                             client1Active.Checked = false;
                         break;
 
                     case 2:
                         client2Sent.Text = sentText;
                         client2Received.Text = recvText;
-                        if (received == _target)
+                        if (numberOfMessagesReceived == _target)
                             client2Active.Checked = false;
                         break;
 
                     case 3:
                         client3Sent.Text = sentText;
                         client3Received.Text = recvText;
-                        if (received == _target)
+                        if (numberOfMessagesReceived == _target)
                             client3Active.Checked = false;
                         break;
                 }
@@ -237,7 +238,7 @@ namespace ClientGUI
             }
         }
 
-        private delegate void ThreadSafeUpdateMessageCount(int client, int sent, int received, long elapsed);
+        private delegate void ThreadSafeUpdateMessageCount(int clientId, int numberOfMessagesSent, int numberOfMessagesReceived, long sendElapsed, long receivedElapsed);
 
 		private void scheduleTimeout_Click(object sender, EventArgs e)
 		{

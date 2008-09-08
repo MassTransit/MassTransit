@@ -24,14 +24,16 @@ namespace ClientGUI
     {
         private readonly ManualResetEvent _done = new ManualResetEvent(false);
         private readonly Stopwatch _stopwatch;
+        private readonly Stopwatch _sendingStopwatch;
         private readonly int _target;
         private int _answered;
-        private Dictionary<Guid, SubmitQuestion> _questions = new Dictionary<Guid, SubmitQuestion>();
+        private readonly Dictionary<Guid, SubmitQuestion> _questions = new Dictionary<Guid, SubmitQuestion>();
 
         public TrapperKeeper(int target)
         {
             _target = target;
             _stopwatch = Stopwatch.StartNew();
+            _sendingStopwatch = Stopwatch.StartNew();
         }
 
         public ManualResetEvent Done
@@ -39,11 +41,19 @@ namespace ClientGUI
             get { return _done; }
         }
 
+        public long SendRate
+        {
+            get { return SendingElapsedMilliseconds/_target; }
+        }
         public long Rate
         {
             get { return ElapsedMilliseconds/_target; }
         }
 
+        public long SendingElapsedMilliseconds
+        {
+            get { return _sendingStopwatch.ElapsedMilliseconds; }
+        }
         public long ElapsedMilliseconds
         {
             get { return _stopwatch.ElapsedMilliseconds; }
@@ -73,6 +83,11 @@ namespace ClientGUI
         {
             lock (_questions)
                 _questions.Add(question.CorrelationId, question);
+        }
+
+        public void SendComplete()
+        {
+            _sendingStopwatch.Stop();
         }
     }
 }
