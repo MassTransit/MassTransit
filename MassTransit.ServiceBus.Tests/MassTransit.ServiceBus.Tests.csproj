@@ -125,6 +125,7 @@
     <Compile Include="Messages\UpdateAcceptedMessage.cs" />
     <Compile Include="TestMessageConsumer.cs" />
     <Compile Include="ThreadPool_Specs.cs" />
+    <Compile Include="Timeouts\DeferMessage_Specs.cs" />
     <Compile Include="Timeouts\TimeoutService_Specs.cs" />
     <Compile Include="Uri_Specs.cs" />
   </ItemGroup>

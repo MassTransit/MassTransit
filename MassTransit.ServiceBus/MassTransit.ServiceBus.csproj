@@ -108,6 +108,12 @@
     <Compile Include="Saga\Messages\CompleteWorkflow.cs" />
     <Compile Include="Saga\Messages\UpdateWorkflowTimeout.cs" />
     <Compile Include="Saga\InitiatedBy.cs" />
+    <Compile Include="Services\DeferMessageConsumer.cs" />
+    <Compile Include="Services\DeferredMessagePublisher.cs" />
+    <Compile Include="Services\IDeferredMessageRepository.cs" />
+    <Compile Include="Services\InMemoryDeferredMessageRepository.cs" />
+    <Compile Include="Services\Messages\DeferMessage.cs" />
+    <Compile Include="Services\TimeoutExpiredConsumer.cs" />
     <Compile Include="Subscriptions\log4netRenderers\SubscriptionRenderer.cs" />
     <Compile Include="MessageGroup.cs" />
     <Compile Include="ReliableAttribute.cs" />
