@@ -94,6 +94,7 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <Compile Include="TheAnswerMan.cs" />
     <Compile Include="UserAgentSession.cs" />
   </ItemGroup>
   <ItemGroup>
