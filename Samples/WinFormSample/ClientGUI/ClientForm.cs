@@ -19,6 +19,7 @@ namespace ClientGUI
     using Castle.Windsor;
     using log4net;
     using MassTransit.ServiceBus;
+    using MassTransit.ServiceBus.Timeout.Messages;
     using MassTransit.ServiceBus.Util;
     using MassTransit.WindsorIntegration;
     using Messages;
@@ -237,5 +238,10 @@ namespace ClientGUI
         }
 
         private delegate void ThreadSafeUpdateMessageCount(int client, int sent, int received, long elapsed);
+
+		private void scheduleTimeout_Click(object sender, EventArgs e)
+		{
+			_bus.Publish(new ScheduleTimeout(Guid.NewGuid(), DateTime.Now + TimeSpan.FromSeconds(30)));
+		}
     }
 }

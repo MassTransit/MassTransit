@@ -17,6 +17,7 @@ namespace SubscriptionManagerGUI
 	using MassTransit.Host.LifeCycles;
 	using MassTransit.ServiceBus;
 	using MassTransit.ServiceBus.Subscriptions;
+	using MassTransit.ServiceBus.Timeout;
 
 	public class SubscriptionManagerLifeCycle :
 		HostedLifeCycle
@@ -33,8 +34,12 @@ namespace SubscriptionManagerGUI
 		public override void Start()
 		{
 			Container.AddComponentLifeStyle("followerRepository", typeof (FollowerRepository), LifestyleType.Singleton);
-			Container.AddComponent<IHostedService, SubscriptionService>();
+
 			Container.AddComponent<ISubscriptionRepository, InMemorySubscriptionRepository>();
+			Container.AddComponent<IHostedService, SubscriptionService>();
+
+			Container.AddComponent<ITimeoutStorage, InMemoryTimeoutStorage>();
+			Container.AddComponent<IHostedService, TimeoutService>();
 
 			Container.AddComponent<Form, SubscriptionManagerForm>();
 		}

@@ -12,85 +12,123 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.ServiceBus.Timeout
 {
-    using System;
-    using System.Collections;
-    using System.Collections.Generic;
-    using System.Threading;
+	using System;
+	using System.Collections;
+	using System.Collections.Generic;
+	using System.Threading;
+	using Util;
 
-    public class InMemoryTimeoutStorage :
-        ITimeoutStorage
-    {
-        private static readonly TimeSpan _interval = TimeSpan.FromSeconds(1);
+	public class InMemoryTimeoutStorage :
+		ITimeoutStorage
+	{
+		private static readonly TimeSpan _interval = TimeSpan.FromSeconds(1);
 
-        private readonly ManualResetEvent _stopped = new ManualResetEvent(false);
-        private readonly AutoResetEvent _trigger = new AutoResetEvent(true);
-        private volatile Dictionary<Guid, DateTime> _schedule = new Dictionary<Guid, DateTime>();
+		private readonly ManualResetEvent _stopped = new ManualResetEvent(false);
+		private readonly AutoResetEvent _trigger = new AutoResetEvent(true);
+		private volatile Dictionary<Guid, DateTime> _schedule = new Dictionary<Guid, DateTime>();
 
-        IEnumerator<Guid> IEnumerable<Guid>.GetEnumerator()
-        {
-            WaitHandle[] handles = new WaitHandle[] {_trigger, _stopped};
+		IEnumerator<Guid> IEnumerable<Guid>.GetEnumerator()
+		{
+			WaitHandle[] handles = new WaitHandle[] {_trigger, _stopped};
 
-            int waitResult;
-            while ((waitResult = WaitHandle.WaitAny(handles, _interval, true)) != 1)
-            {
-                DateTime present = DateTime.UtcNow;
+			while ((WaitHandle.WaitAny(handles, _interval, true)) != 1)
+			{
+				DateTime present = DateTime.UtcNow;
 
-                Guid matched = Guid.Empty;
+				Guid matched = Guid.Empty;
 
-                lock (_schedule)
-                {
-                    foreach (KeyValuePair<Guid, DateTime> pair in _schedule)
-                    {
-                        if (pair.Value > present) continue;
+				lock (_schedule)
+				{
+					foreach (KeyValuePair<Guid, DateTime> pair in _schedule)
+					{
+						if (pair.Value > present) continue;
 
-                        matched = pair.Key;
-                        break;
-                    }
-                }
+						matched = pair.Key;
+						break;
+					}
+				}
 
-                if (matched != Guid.Empty)
-                {
-                    _schedule.Remove(matched);
-                    yield return matched;
-                }
-            }
-        }
+				if (matched != Guid.Empty)
+				{
+					Remove(matched);
+					yield return matched;
+				}
+			}
+		}
 
-        public IEnumerator GetEnumerator()
-        {
-            return ((IEnumerable<Guid>) this).GetEnumerator();
-        }
+		public IEnumerator GetEnumerator()
+		{
+			return ((IEnumerable<Guid>) this).GetEnumerator();
+		}
 
-        public void Schedule(Guid id, DateTime timeoutAt)
-        {
-            lock (_schedule)
-            {
-                if (_schedule.ContainsKey(id))
-                    _schedule[id] = timeoutAt;
-                else
-                    _schedule.Add(id, timeoutAt);
-            }
+		public void Schedule(Guid id, DateTime timeoutAt)
+		{
+			bool added = false;
+			bool updated = false;
+			lock (_schedule)
+			{
+				if (_schedule.ContainsKey(id))
+				{
+					_schedule[id] = timeoutAt;
+					updated = true;
+				}
+				else
+				{
+					_schedule.Add(id, timeoutAt);
+					added = true;
+				}
+			}
 
-            _trigger.Set();
-        }
+			_trigger.Set();
 
-        public void Remove(Guid id)
-        {
-            lock (_schedule)
-            {
-                if (_schedule.ContainsKey(id))
-                    _schedule.Remove(id);
-            }
-        }
+			if (added)
+				TimeoutAdded(id);
+			if (updated)
+				TimeoutUpdated(id);
+		}
 
-        public void Start()
-        {
-            _stopped.Reset();
-        }
+		public void Remove(Guid id)
+		{
+			bool notify = false;
+			lock (_schedule)
+			{
+				if (_schedule.ContainsKey(id))
+				{
+					_schedule.Remove(id);
+					notify = true;
+				}
+			}
 
-        public void Stop()
-        {
-            _stopped.Set();
-        }
-    }
+			if (notify)
+				TimeoutRemoved(id);
+		}
+
+		public void Start()
+		{
+			_stopped.Reset();
+		}
+
+		public void Stop()
+		{
+			_stopped.Set();
+		}
+
+		public event Action<Guid> TimeoutAdded = delegate { };
+
+		public event Action<Guid> TimeoutUpdated = delegate { };
+
+		public event Action<Guid> TimeoutRemoved = delegate { };
+
+		public IList<Tuple<Guid, DateTime>> List()
+		{
+			List<Tuple<Guid, DateTime>> result = new List<Tuple<Guid, DateTime>>();
+
+			foreach (KeyValuePair<Guid, DateTime> pair in _schedule)
+			{
+				result.Add(new Tuple<Guid, DateTime>(pair));
+			}
+
+			return result;
+		}
+	}
 }

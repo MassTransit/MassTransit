@@ -14,15 +14,21 @@ namespace MassTransit.ServiceBus.Timeout
 {
 	using System;
 	using System.Collections.Generic;
+	using Util;
 
-	public interface ITimeoutStorage : 
+	public interface ITimeoutStorage :
 		IEnumerable<Guid>
 	{
 		void Schedule(Guid id, DateTime timeoutAt);
-		
 		void Remove(Guid id);
+
+		IList<Tuple<Guid, DateTime>> List();
 
 		void Start();
 		void Stop();
+
+		event Action<Guid> TimeoutAdded;
+		event Action<Guid> TimeoutUpdated;
+		event Action<Guid> TimeoutRemoved;
 	}
 }
