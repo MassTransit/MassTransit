@@ -27,6 +27,7 @@ namespace MassTransit.ServiceBus.Tests.Configuration
                 .AsACompetingConsumer()
                 .Using(Serializers.Binary)
                 .Validate();
+            //.ActivateHeartBeat();
 
             Assert.AreEqual(listenUri, busOptions.ListensOn);
             Assert.AreEqual(commandUri, busOptions.CommandedOn);
