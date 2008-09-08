@@ -14,7 +14,8 @@ namespace MassTransit.Saga
 {
     using System;
 
-    public interface ISagaRepository<T>
+    public interface ISagaRepository<T> :
+		IDisposable
         where T : class
     {
         T Create(Guid correlationId);

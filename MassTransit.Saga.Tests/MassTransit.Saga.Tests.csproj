@@ -68,15 +68,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="GenericRepository.cs" />
     <Compile Include="IRepository.cs" />
-    <Compile Include="InMemorySagaRepository.cs" />
     <Compile Include="RegisterUser\Messages\CorrelatedMessage.cs" />
     <Compile Include="RegisterUser\Messages\RegisterUser.cs" />
-    <Compile Include="NHibernateRepository.cs" />
     <Compile Include="RegisterUser\RegisterUserController.cs" />
     <Compile Include="RegisterUser\RegisterUserSaga.cs" />
-    <Compile Include="RegisterUser\RegisterUserSagaRepository.cs" />
     <Compile Include="RegisterUser\RegisterUser_Specs.cs" />
     <Compile Include="RegisterUser\Messages\SendValidationEmail.cs" />
     <Compile Include="RegisterUser\Messages\UserRegistrationComplete.cs" />
@@ -86,14 +82,15 @@
     <Compile Include="RegisterUser\Messages\SendUserVerificationEmail.cs" />
     <Compile Include="SagaRepository.cs" />
     <Compile Include="SagaTestContext.cs" />
-    <Compile Include="SendUserWelcomeEmail.cs" />
-    <Compile Include="WorkflowCoordinator_Specs.cs" />
-    <Compile Include="Workflow_Specs.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Containers\MassTransit.WindsorIntegration\MassTransit.WindsorIntegration.csproj">
       <Project>{98D5A59C-96FA-4A1B-A653-EA5A35C45FC9}</Project>
       <Name>MassTransit.WindsorIntegration</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\MassTransit.Infrastructure\MassTransit.Infrastructure.csproj">
+      <Project>{073A90FD-9A3E-4704-B3B5-6D8A9F4B442E}</Project>
+      <Name>MassTransit.Infrastructure</Name>
     </ProjectReference>
     <ProjectReference Include="..\MassTransit.ServiceBus.Tests\MassTransit.ServiceBus.Tests.csproj">
       <Project>{76646B96-936B-4D31-A053-35CD630E3C68}</Project>

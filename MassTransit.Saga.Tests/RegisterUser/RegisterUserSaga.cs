@@ -13,6 +13,7 @@
 namespace MassTransit.Saga.Tests.RegisterUser
 {
     using System;
+    using Infrastructure;
     using MassTransit.Saga.Messages;
     using Messages;
     using ServiceBus;
@@ -36,7 +37,7 @@ namespace MassTransit.Saga.Tests.RegisterUser
         InitiatedBy<RegisterUser>,
         Orchestrates<UserVerificationEmailSent>,
         Orchestrates<UserValidated>,
-        ISaga<RegisterUserSaga>
+        ISaga<RegisterUserSaga>, IAggregateRoot<Guid>
     {
         private string _displayName;
         private string _email;
@@ -104,5 +105,10 @@ namespace MassTransit.Saga.Tests.RegisterUser
         {
             Bus.Publish(new CompleteWorkflow(CorrelationId));
         }
+
+    	public Guid Id
+    	{
+    		get { return CorrelationId; }
+    	}
     }
 }
