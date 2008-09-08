@@ -160,5 +160,17 @@ namespace MassTransit.ServiceBus.Internal
 
 	        #endregion
         }
+
+        public static void EnsureThatTransportsExist(IList<Uri> uris)
+        {
+            foreach (var uri in uris)
+                EnsureTransports(uri);
+        }
+
+	    public static void EnsureTransports(Uri uri)
+	    {
+            if(!_schemes.ContainsKey(uri.Scheme))
+                throw new EndpointException(new NullEndpoint(), "No transport for " + uri);
+	    }
 	}
 }
