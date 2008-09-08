@@ -19,15 +19,19 @@ namespace SubscriptionManagerGUI
 	using log4net;
 	using MassTransit.ServiceBus;
 	using MassTransit.ServiceBus.Subscriptions;
+	using MassTransit.ServiceBus.Timeout;
+	using MassTransit.ServiceBus.Util;
 
 	public partial class SubscriptionManagerForm : Form
 	{
 		private static readonly ILog _log = LogManager.GetLogger(typeof (SubscriptionManagerForm));
 		private readonly ISubscriptionCache _cache;
+		private ITimeoutStorage _timeoutStorage;
 
-		public SubscriptionManagerForm(ISubscriptionCache cache)
+		public SubscriptionManagerForm(ISubscriptionCache cache, ITimeoutStorage timeoutStorage)
 		{
 			_cache = cache;
+			_timeoutStorage = timeoutStorage;
 
 			InitializeComponent();
 		}
@@ -38,6 +42,10 @@ namespace SubscriptionManagerGUI
 			_cache.OnRemoveSubscription += SubscriptionRemoved;
 
 			RefreshSubscriptions(null);
+
+			_timeoutStorage.TimeoutAdded += TimeoutRefreshNeeded;
+			_timeoutStorage.TimeoutUpdated += TimeoutRefreshNeeded;
+			_timeoutStorage.TimeoutRemoved += TimeoutRefreshNeeded;
 		}
 
 		private void SubscriptionAdded(object sender, SubscriptionEventArgs e)
@@ -55,7 +63,7 @@ namespace SubscriptionManagerGUI
 		private void RefreshSubscriptions(Subscription ignored)
 		{
 			List<TreeNode> existingNodes = new List<TreeNode>();
-			foreach (TreeNode endpointNode in _subscriptions.Nodes)
+			foreach (TreeNode endpointNode in subscriptionTree.Nodes)
 			{
 				foreach (TreeNode subscriptionNode in endpointNode.Nodes)
 				{
@@ -68,16 +76,16 @@ namespace SubscriptionManagerGUI
 			foreach (Subscription subscription in subscriptions)
 			{
 				TreeNode endpointNode;
-				if (!_subscriptions.Nodes.ContainsKey(subscription.EndpointUri.ToString()))
+				if (!subscriptionTree.Nodes.ContainsKey(subscription.EndpointUri.ToString()))
 				{
 					endpointNode = new TreeNode(subscription.EndpointUri.ToString());
 					endpointNode.Name = subscription.EndpointUri.ToString();
 
-					_subscriptions.Nodes.Add(endpointNode);
+					subscriptionTree.Nodes.Add(endpointNode);
 				}
 				else
 				{
-					endpointNode = _subscriptions.Nodes[subscription.EndpointUri.ToString()];
+					endpointNode = subscriptionTree.Nodes[subscription.EndpointUri.ToString()];
 				}
 
 				string messageName = subscription.MessageName;
@@ -110,12 +118,55 @@ namespace SubscriptionManagerGUI
 			}
 		}
 
+		private void TimeoutRefreshNeeded(Guid id)
+		{
+			ThreadSafeTimeoutUpdate tsu = RefreshTimeouts;
+			BeginInvoke(tsu, new object[] {id});
+		}
+
+		private void RefreshTimeouts(Guid ignored)
+		{
+			List<ListViewItem> existing = new List<ListViewItem>();
+			foreach (ListViewItem item in timeoutList.Items)
+			{
+				existing.Add(item);
+			}
+
+			foreach (Tuple<Guid, DateTime> item in _timeoutStorage.List())
+			{
+				string key = item.Key.ToString();
+
+				if (!timeoutList.Items.ContainsKey(key))
+				{
+					ListViewItem listItem = new ListViewItem(item.Value.ToLocalTime().ToLongTimeString());
+
+					listItem.SubItems.Add(new ListViewItem.ListViewSubItem(listItem, key));
+
+					timeoutList.Items.Add(listItem);
+				}
+				else
+				{
+					ListViewItem listViewItem = timeoutList.Items[key];
+					listViewItem.SubItems[0].Text = item.Value.ToLocalTime().ToLongTimeString();
+
+					existing.Remove(listViewItem);
+				}
+			}
+
+			foreach (ListViewItem item in existing)
+			{
+				item.Remove();
+			}
+		}
+
 		protected override void OnClosing(CancelEventArgs e)
 		{
 			base.OnClosing(e);
 
 			e.Cancel = false;
 		}
+
+		private delegate void ThreadSafeTimeoutUpdate(Guid id);
 
 		private delegate void ThreadSafeUpdate(Subscription subscription);
 	}
