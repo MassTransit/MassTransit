@@ -10,19 +10,36 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Saga.Tests
+namespace MassTransit.Infrastructure
 {
-    using System;
-    using System.Collections.Generic;
+	using System;
+	using System.Linq;
+
+	public interface IRepository :
+		IDisposable
+	{
+		T Get<T>(object id);
+
+		void Save<T>(T item);
+
+		void Delete<T>(T item);
+	}
+
+	public interface IRepository<T, K> :
+		IQueryable<T>,
+		IDisposable
+		where T : IAggregateRoot<K>
+	{
+		T Get(K id);
+
+		void Save(T item);
+
+		void Delete(T item);
+	}
 
 	public interface IRepository<T> :
-        IDisposable
-        where T : class
-    {
-        T Get(object id);
-
-        void Save(T item);
-
-        void Update(T item);
-    }
+		IRepository<T, Guid>
+		where T : IAggregateRoot<Guid>
+	{
+	}
 }

@@ -10,26 +10,17 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Saga.Tests
+namespace MassTransit.Infrastructure
 {
-    using System;
-    using ServiceBus;
+	using System;
 
-    [Serializable]
-    [Reliable]
-    public class SendUserWelcomeEmail :
-        CorrelatedBy<Guid>
-    {
-        private readonly Guid _correlationId;
+	public interface IAggregateRoot<TId>
+	{
+		TId Id { get; }
+	}
 
-        public SendUserWelcomeEmail(Guid correlationId)
-        {
-            _correlationId = correlationId;
-        }
-
-        public Guid CorrelationId
-        {
-            get { return _correlationId; }
-        }
-    }
+	public interface IAggregateRoot :
+		IAggregateRoot<Guid>
+	{
+	}
 }

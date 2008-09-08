@@ -73,7 +73,7 @@ namespace MassTransit.ServiceBus.Transports
 
                     return obj;
                 }
-                catch (InvalidOperationException ex)
+                catch (InvalidOperationException)
                 {
                 }
             }
@@ -97,7 +97,7 @@ namespace MassTransit.ServiceBus.Transports
                         return obj;
                     }
                 }
-                catch (InvalidOperationException ex)
+                catch (InvalidOperationException)
                 {
                 }
             }

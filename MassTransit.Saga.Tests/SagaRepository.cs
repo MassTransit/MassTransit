@@ -12,51 +12,52 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Saga.Tests
 {
-    using System;
+	using System;
+	using Infrastructure;
 
-    public class SagaRepository<T> :
-        ISagaRepository<T>
-        where T : class
-    {
-        private readonly IRepository _repository;
+	public class SagaRepository<T> :
+		ISagaRepository<T>
+		where T : class, IAggregateRoot<Guid>
+	{
+		private readonly IRepository<T, Guid> _repository;
 
-        public SagaRepository(IRepository repository)
-        {
-            _repository = repository;
-        }
+		public SagaRepository(IRepository<T, Guid> repository)
+		{
+			_repository = repository;
+		}
 
-        public T Create(Guid correlationId)
-        {
-            T saga = (T)Activator.CreateInstance(typeof(T), correlationId);
+		public T Create(Guid correlationId)
+		{
+			T saga = (T) Activator.CreateInstance(typeof (T), correlationId);
 
-            _repository.Save(saga);
+			_repository.Save(saga);
 
-            return saga;
-        }
+			return saga;
+		}
 
-        public T Get(Guid id)
-        {
-            return _repository.Get<T>(id);
-        }
+		public T Get(Guid id)
+		{
+			return _repository.Get(id);
+		}
 
-        public void Save(T item)
-        {
-            _repository.Save(item);
-        }
+		public void Save(T item)
+		{
+			_repository.Save(item);
+		}
 
-        public void Update(T item)
-        {
-            _repository.Save(item);
-        }
+		public void Update(T item)
+		{
+			_repository.Save(item);
+		}
 
-        public void Complete(T item)
-        {
-            _repository.Save(item);
-        }
+		public void Complete(T item)
+		{
+			_repository.Save(item);
+		}
 
-        public void Dispose()
-        {
-            _repository.Dispose();
-        }
-    }
+		public void Dispose()
+		{
+			_repository.Dispose();
+		}
+	}
 }

@@ -13,6 +13,7 @@
 namespace MassTransit.Saga.Tests.RegisterUser.Messages
 {
     using System;
+    using Infrastructure;
     using ServiceBus;
 
     [Serializable]
@@ -53,5 +54,10 @@ namespace MassTransit.Saga.Tests.RegisterUser.Messages
         {
             get { return _displayName; }
         }
+
+    	public Guid Id
+    	{
+    		get { return CorrelationId; }
+    	}
     }
 }
