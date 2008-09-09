@@ -13,6 +13,7 @@
 namespace MassTransit.Host.LifeCycles
 {
 	using System;
+	using Actions;
 	using Castle.Facilities.FactorySupport;
 	using Castle.Facilities.Startable;
 	using Castle.Windsor;
@@ -48,9 +49,9 @@ namespace MassTransit.Host.LifeCycles
 
 		public abstract void Stop();
 
-		public virtual string DefaultAction
+		public virtual NamedAction DefaultAction
 		{
-			get { return "console"; }
+			get { return NamedAction.Console; }
 		}
 
 		public void Dispose()

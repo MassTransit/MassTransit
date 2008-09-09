@@ -107,6 +107,7 @@
     <Compile Include="Configurations\IInstallationConfiguration.cs" />
     <Compile Include="LifeCycles\IApplicationLifeCycle.cs" />
     <Compile Include="IHostingConfiguration.cs" />
+    <Compile Include="Actions\NamedAction.cs" />
     <Compile Include="Parser.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Runner.cs" />
@@ -115,6 +116,7 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Actions\UninstallServiceAction.cs" />
+    <Compile Include="Actions\ServiceNamedAction.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Containers\MassTransit.WindsorIntegration\MassTransit.WindsorIntegration.csproj">

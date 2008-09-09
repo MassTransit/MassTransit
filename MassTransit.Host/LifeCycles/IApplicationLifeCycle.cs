@@ -13,6 +13,7 @@
 namespace MassTransit.Host.LifeCycles
 {
 	using System;
+	using Actions;
 	using Castle.Windsor;
 
 	public interface IApplicationLifeCycle :
@@ -21,7 +22,7 @@ namespace MassTransit.Host.LifeCycles
 		/// <summary>
 		/// The default action to be used by the host (console or gui for the most part)
 		/// </summary>
-		string DefaultAction { get; }
+		NamedAction DefaultAction { get; }
 
 		IWindsorContainer Container { get; }
 

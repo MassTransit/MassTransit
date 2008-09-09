@@ -38,9 +38,9 @@ namespace MassTransit.Host.Hosts
 			_lifecycle.Start(); //user code starts
 			_lifecycle.Initialize();
 
-			Form winForm = _lifecycle.Container.Resolve<Form>();
+			Form winForm = _lifecycle.Container.Resolve<Form>(); //TODO: probably want a specific form here, could be many
 
-			_lifecycle.Completed += delegate { winForm.Close(); };
+			_lifecycle.Completed += delegate { winForm.Close(); }; //TODO: this would force the app to close
 
 			Application.Run(winForm);
 

@@ -32,12 +32,12 @@ namespace MassTransit.Host.Hosts
         {
             _log.Debug("Starting up as a console application");
 
-            var serviceCompleted = new ManualResetEvent(false);
-            var terminateService = new ManualResetEvent(false);
+            var internalallyTriggeredTermination = new ManualResetEvent(false);
+            var externalTriggeredTerminatation = new ManualResetEvent(false);
 
-            var waitHandles = new WaitHandle[] {serviceCompleted, terminateService};
+            var waitHandles = new WaitHandle[] {internalallyTriggeredTermination, externalTriggeredTerminatation};
 
-            _lifecycle.Completed += delegate { serviceCompleted.Set(); };
+            _lifecycle.Completed += delegate { internalallyTriggeredTermination.Set(); };
 
             Console.CancelKeyPress += delegate
                                           {
@@ -46,14 +46,14 @@ namespace MassTransit.Host.Hosts
 
                                               _lifecycle.Stop(); //user stop
                                               _lifecycle.Dispose();
-                                              terminateService.Set();
+                                              externalTriggeredTerminatation.Set();
                                           };
             _lifecycle.Start(); //user code starts
             _lifecycle.Initialize();
 
             _log.InfoFormat("The service is running, press Control+C to exit.");
 
-            WaitHandle.WaitAny(waitHandles);
+            WaitHandle.WaitAny(waitHandles); //will wait until a termination trigger occurs
         }
     }
 }
