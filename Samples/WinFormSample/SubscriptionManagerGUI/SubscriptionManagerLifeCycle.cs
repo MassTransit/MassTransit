@@ -14,6 +14,7 @@ namespace SubscriptionManagerGUI
 {
 	using System.Windows.Forms;
 	using Castle.Core;
+	using MassTransit.Host.Actions;
 	using MassTransit.Host.LifeCycles;
 	using MassTransit.ServiceBus;
 	using MassTransit.ServiceBus.Subscriptions;
@@ -26,9 +27,9 @@ namespace SubscriptionManagerGUI
 		{
 		}
 
-		public override string DefaultAction
+		public override NamedAction DefaultAction
 		{
-			get { return "gui"; }
+			get { return NamedAction.Gui; }
 		}
 
 		public override void Start()
