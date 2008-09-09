@@ -26,6 +26,7 @@ namespace MassTransit.ServiceBus.Internal
 		private static readonly Dictionary<Uri, IEndpoint> _cache = new Dictionary<Uri, IEndpoint>();
 		private static readonly ILog _log = LogManager.GetLogger(typeof (EndpointResolver));
 		private static readonly Dictionary<string, Type> _schemes = new Dictionary<string, Type>();
+	    private static readonly IEndpoint _null = new NullEndpoint();
 
 		public static string AddTransport(Type transportType)
 		{
@@ -119,47 +120,10 @@ namespace MassTransit.ServiceBus.Internal
             }
 	    }
 
-	    public class NullEndpoint :
-            IEndpoint
-        {
-            #region Implementation of IDisposable
-
-            public void Dispose()
-            {
-                //ignore
-            }
-
-            #endregion
-
-            #region Implementation of IEndpoint
-
-            public Uri Uri
-            {
-                get { return new Uri("none://nosuchuri"); }
-            }
-
-            public void Send<T>(T message) where T : class
-            {
-                //do nothing
-            }
-
-            public void Send<T>(T message, TimeSpan timeToLive) where T : class
-            {
-                //do nothing
-            }
-
-	        public object Receive(TimeSpan timeout)
-            {
-                return new object();
-            }
-
-	        public object Receive(TimeSpan timeout, Predicate<object> accept)
-            {
-                return new object();
-            }
-
-	        #endregion
-        }
+	    public static IEndpoint Null
+	    {
+	        get { return _null; }
+	    }
 
         public static void EnsureThatTransportsExist(IList<Uri> uris)
         {

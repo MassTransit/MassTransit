@@ -66,9 +66,7 @@
     <Compile Include="Configuration\BusOptions.cs" />
     <Compile Include="Configuration\ConfigureTheBus.cs" />
     <Compile Include="Configuration\SerializationOptions.cs" />
-    <Compile Include="Configuration\Serializers.cs" />
     <Compile Include="Configuration\SubscriptionOptions.cs" />
-    <Compile Include="Configuration\Via.cs" />
     <Compile Include="Exceptions\SagaException.cs" />
     <Compile Include="ExpiresInAttribute.cs" />
     <Compile Include="Fault.cs" />
