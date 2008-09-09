@@ -1,6 +1,7 @@
 namespace MassTransit.ServiceBus.Configuration
 {
     using System;
+    using Formatters;
     using Internal;
 
     public class BusOptions
@@ -9,7 +10,7 @@ namespace MassTransit.ServiceBus.Configuration
         {
             ListensOn = EndpointResolver.Null.Uri;
             CommandedOn = EndpointResolver.Null.Uri;
-            Serialization = Serializers.Binary;
+            Serialization = new SerializationOptions {Serializer =  typeof(BinaryBodyFormatter)};
         }
         public Uri ListensOn { get; set; }
         public Uri CommandedOn { get; set; }

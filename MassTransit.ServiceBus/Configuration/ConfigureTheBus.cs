@@ -2,6 +2,8 @@ namespace MassTransit.ServiceBus.Configuration
 {
     using System;
     using System.Collections.Generic;
+    using Formatters;
+    using Subscriptions;
 
     public class ConfigureTheBus
     {
@@ -36,14 +38,18 @@ namespace MassTransit.ServiceBus.Configuration
             return this;
         }
 
-        public ConfigureTheBus WithSharedSubscriptions(SubscriptionOptions subscriptionOptions)
+        public ConfigureTheBus WithSharedSubscriptions<T>(string uri) where T: ISubscriptionCache
         {
-            _options.Subcriptions = subscriptionOptions;
+            return WithSharedSubscriptions<T>(new Uri(uri));
+        }
+        public ConfigureTheBus WithSharedSubscriptions<T>(Uri uri) where T : ISubscriptionCache
+        {
+            _options.Subcriptions = new SubscriptionOptions {Address = uri, SubscriptionStore = typeof(T)};
             return this;
         }
-        public ConfigureTheBus Using(SerializationOptions serializer)
+        public ConfigureTheBus UsingForSerialization<T>() where T : IBodyFormatter
         {
-            _options.Serialization = serializer;
+            _options.Serialization = new SerializationOptions {Serializer = typeof(T)};
             return this;
         }
         public ConfigureTheBus AsACompetingConsumer()
