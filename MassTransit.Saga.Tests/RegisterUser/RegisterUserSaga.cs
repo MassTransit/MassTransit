@@ -12,103 +12,103 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Saga.Tests.RegisterUser
 {
-    using System;
-    using Infrastructure;
-    using MassTransit.Saga.Messages;
-    using Messages;
-    using ServiceBus;
+	using System;
+	using Magnum.Common;
+	using MassTransit.Saga.Messages;
+	using MassTransit.ServiceBus.Timeout.Messages;
+	using Messages;
+	using ServiceBus;
 
-    /// <summary>
-    /// 
-    /// So here is the deal
-    /// The saga is a class that contains the state and behavior of the saga
-    /// for messages that are saga messages. If the message is not a saga message
-    /// it doesn't need any details about the saga in order to proceed.
-    /// 
-    /// This will allow services that are not saga-specific to participate in a saga
-    /// 
-    /// So something like an e-mail sender would send an e-mail, publish the mail sent message
-    /// and that would trigger the saga to continue according to the result.
-    /// 
-    /// By doing so, the saga can then return to power after being away for a while.
-    /// 
-    /// </summary>
-    public class RegisterUserSaga :
-        InitiatedBy<RegisterUser>,
-        Orchestrates<UserVerificationEmailSent>,
-        Orchestrates<UserValidated>,
-        ISaga<RegisterUserSaga>, IAggregateRoot<Guid>
-    {
-        private string _displayName;
-        private string _email;
-        private string _password;
-        private string _username;
+	/// <summary>
+	/// 
+	/// So here is the deal
+	/// The saga is a class that contains the state and behavior of the saga
+	/// for messages that are saga messages. If the message is not a saga message
+	/// it doesn't need any details about the saga in order to proceed.
+	/// 
+	/// This will allow services that are not saga-specific to participate in a saga
+	/// 
+	/// So something like an e-mail sender would send an e-mail, publish the mail sent message
+	/// and that would trigger the saga to continue according to the result.
+	/// 
+	/// By doing so, the saga can then return to power after being away for a while.
+	/// 
+	/// </summary>
+	public class RegisterUserSaga :
+		InitiatedBy<RegisterUser>,
+		Orchestrates<UserVerificationEmailSent>,
+		Orchestrates<UserValidated>,
+		ISaga<RegisterUserSaga>, 
+		IAggregateRoot
+	{
+		private string _displayName;
+		private string _email;
+		private string _password;
+		private string _username;
 
-        public RegisterUserSaga(Guid correlationId)
-        {
-            CorrelationId = correlationId;
-        }
+		public RegisterUserSaga(Guid correlationId)
+		{
+			CorrelationId = correlationId;
+		}
+
+		public Guid Id
+		{
+			get { return CorrelationId; }
+		}
+
+		public void Consume(RegisterUser message)
+		{
+			CorrelationId = message.CorrelationId;
+			_displayName = message.DisplayName;
+			_username = message.Username;
+			_password = message.Password;
+			_email = message.Email;
+
+			Save(this);
+
+			Bus.Publish(new SendUserVerificationEmail(CorrelationId, _email));
+		}
 
 
-        public Action<RegisterUserSaga> Save { get; set; }
+		public Action<RegisterUserSaga> Save { get; set; }
 
-        // The bus that received the message
-        public IServiceBus Bus { get; set; }
+		// The bus that received the message
+		public IServiceBus Bus { get; set; }
 
-        // the object builder for the class to be able to get other things
-        public IObjectBuilder Builder { get; set; }
+		// the object builder for the class to be able to get other things
+		public IObjectBuilder Builder { get; set; }
 
-        public Guid CorrelationId { get; private set; }
+		public Guid CorrelationId { get; private set; }
 
-        public void Dispose()
-        {
-        }
+		public void Dispose()
+		{
+		}
 
-        public void Consume(UserValidated message)
-        {
-            // at this point, the user has clicked the link in the validation e-mail
-            // and we can commit the user record to the database as a verified user
+		public void Consume(UserValidated message)
+		{
+			// at this point, the user has clicked the link in the validation e-mail
+			// and we can commit the user record to the database as a verified user
 
-            Bus.Publish(new UserRegistrationComplete(CorrelationId));
+			Bus.Publish(new UserRegistrationComplete(CorrelationId));
 
-            Complete();
-        }
+			Complete();
+		}
 
-        public void Consume(UserVerificationEmailSent message)
-        {
-            // once the verification e-mail has been sent, we allow 24 hours to pass before we 
-            // remove this transaction from the registration queue
+		public void Consume(UserVerificationEmailSent message)
+		{
+			// once the verification e-mail has been sent, we allow 24 hours to pass before we 
+			// remove this transaction from the registration queue
 
-            if (_email != message.Email)
-                throw new ArgumentException("The email address was not properly loaded.");
+			if (_email != message.Email)
+				throw new ArgumentException("The email address was not properly loaded.");
 
-            Bus.Publish(new UserRegistrationPending(CorrelationId));
-            Bus.Publish(new UpdateWorkflowTimeout(CorrelationId, TimeSpan.FromHours(24)));
-        }
+			Bus.Publish(new UserRegistrationPending(CorrelationId));
+			Bus.Publish(new ScheduleTimeout(CorrelationId, 24.Hours().FromNow()));
+		}
 
-        public void Consume(RegisterUser message)
-        {
-            CorrelationId = message.CorrelationId;
-            _displayName = message.DisplayName;
-            _username = message.Username;
-            _password = message.Password;
-            _email = message.Email;
-
-            Save(this);
-
-            // _sagaRepository.Save(this);
-
-            Bus.Publish(new SendUserVerificationEmail(CorrelationId, _email));
-        }
-
-        private void Complete()
-        {
-            Bus.Publish(new CompleteWorkflow(CorrelationId));
-        }
-
-    	public Guid Id
-    	{
-    		get { return CorrelationId; }
-    	}
-    }
+		private void Complete()
+		{
+			Bus.Publish(new CancelTimeout(CorrelationId));
+		}
+	}
 }

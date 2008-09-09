@@ -13,11 +13,11 @@
 namespace MassTransit.Saga.Tests
 {
 	using System;
-	using Infrastructure;
+	using Magnum.Common;
 
 	public class SagaRepository<T> :
 		ISagaRepository<T>
-		where T : class, IAggregateRoot<Guid>
+		where T : class, IAggregateRoot
 	{
 		private readonly IRepository<T, Guid> _repository;
 
