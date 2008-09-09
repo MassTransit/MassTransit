@@ -47,6 +47,14 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\libs\log4net.dll</HintPath>
     </Reference>
+    <Reference Include="Magnum.Common, Version=0.1.12.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\libs\Magnum.Common.dll</HintPath>
+    </Reference>
+    <Reference Include="Magnum.Infrastructure, Version=0.1.12.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\libs\Magnum.Infrastructure.dll</HintPath>
+    </Reference>
     <Reference Include="NHibernate, Version=2.0.0.4000, Culture=neutral, PublicKeyToken=aa95f207798dfdb4, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\libs\NHibernate 2.0\NHibernate.dll</HintPath>
@@ -72,14 +80,7 @@
     <Compile Include="..\SolutionVersion.cs">
       <Link>SolutionVersion.cs</Link>
     </Compile>
-    <Compile Include="IAggregateRoot.cs" />
-    <Compile Include="IRepository.cs" />
-    <Compile Include="IRepositoryFactory.cs" />
-    <Compile Include="NHiberateRepository.cs" />
-    <Compile Include="NHibernateRepositoryFactory.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RepositoryBase.cs" />
-    <Compile Include="RepositoryCache.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Mapping\DeferredMessage.hbm.xml" />

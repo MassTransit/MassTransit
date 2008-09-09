@@ -13,7 +13,6 @@
 namespace MassTransit.Saga.Tests.RegisterUser.Messages
 {
     using System;
-    using Infrastructure;
     using ServiceBus;
 
     [Serializable]

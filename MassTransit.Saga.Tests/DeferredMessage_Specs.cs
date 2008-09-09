@@ -14,7 +14,7 @@ namespace MassTransit.Saga.Tests
 {
     using System;
     using System.Collections.Generic;
-    using Infrastructure;
+    using Magnum.Infrastructure;
     using NHibernate;
     using NHibernate.Cfg;
     using NHibernate.Tool.hbm2ddl;
@@ -58,7 +58,7 @@ namespace MassTransit.Saga.Tests
 
             cfg.SetProperty("dialect", "NHibernate.Dialect.MsSql2005Dialect");
 
-            cfg.AddAssembly(typeof (NHibernateRepository).Assembly);
+        	cfg.AddAssembly("MassTransit.Infrastructure");
 
             new SchemaExport(cfg, cfg.Properties).Create(true, false);
         }
@@ -73,7 +73,7 @@ namespace MassTransit.Saga.Tests
             cfg.SetProperty("connection.driver_class", "NHibernate.Driver.SqlClientDriver");
             cfg.SetProperty("connection.connection_string", _connectionString);
 
-            cfg.AddAssembly(typeof (NHibernateRepository).Assembly);
+			cfg.AddAssembly("MassTransit.Infrastructure");
 
             _sessionFactory = cfg.BuildSessionFactory();
 
