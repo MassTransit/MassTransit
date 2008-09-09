@@ -129,6 +129,7 @@
     <Compile Include="Timeout\InMemoryTimeoutStorage.cs" />
     <Compile Include="Timeout\ITimeoutStorage.cs" />
     <Compile Include="Timeout\Messages\ScheduleTimeout.cs" />
+    <Compile Include="Timeout\ScheduledTimeout.cs" />
     <Compile Include="Timeout\ScheduleTimeoutConsumer.cs" />
     <Compile Include="Timeout\Messages\TimeoutExpired.cs" />
     <Compile Include="Timeout\TimeoutService.cs" />
