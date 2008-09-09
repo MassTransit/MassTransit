@@ -62,6 +62,13 @@
     <Compile Include="Batch.cs" />
     <Compile Include="BatchedBy.cs" />
     <Compile Include="BatchTimeout.cs" />
+    <Compile Include="Configuration\BusBuilder.cs" />
+    <Compile Include="Configuration\BusOptions.cs" />
+    <Compile Include="Configuration\ConfigureTheBus.cs" />
+    <Compile Include="Configuration\SerializationOptions.cs" />
+    <Compile Include="Configuration\Serializers.cs" />
+    <Compile Include="Configuration\SubscriptionOptions.cs" />
+    <Compile Include="Configuration\Via.cs" />
     <Compile Include="Exceptions\SagaException.cs" />
     <Compile Include="ExpiresInAttribute.cs" />
     <Compile Include="Fault.cs" />
@@ -204,9 +211,6 @@
     <Compile Include="Util\CombGuid.cs" />
     <Compile Include="Util\Guard.cs" />
     <Compile Include="Util\Tuple.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Configuration\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
