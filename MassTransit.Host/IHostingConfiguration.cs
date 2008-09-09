@@ -15,6 +15,7 @@ namespace MassTransit.Host
 	using Configurations;
 	using LifeCycles;
 
+    //TODO: might be overkill
 	public interface IHostingConfiguration
 	{
 		IInstallationConfiguration HowToInstall { get; }

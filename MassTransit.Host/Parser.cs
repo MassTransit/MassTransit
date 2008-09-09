@@ -13,6 +13,7 @@
 namespace MassTransit.Host
 {
 	using System.Collections.Generic;
+	using Actions;
 	using MassTransitHost.ArgumentParsing;
 
 	public class Parser
@@ -76,14 +77,14 @@ namespace MassTransit.Host
 			}
 
 
-			public string GetActionKey()
-			{
-				if (Install) return "install";
-				if (Uninstall) return "uninstall";
-				if (Service) return "service";
-				if (Gui) return "gui";
-				return "console";
-			}
+            public NamedAction GetActionKey()
+            {
+                if (Install) return ServiceNamedAction.Install;
+                if (Uninstall) return ServiceNamedAction.Uninstall;
+                if (Service) return ServiceNamedAction.Service;
+                if (Gui) return NamedAction.Gui;
+                return NamedAction.Console;
+            }
 		}
 	}
 }

@@ -17,7 +17,7 @@ namespace MassTransit.Host.Hosts
     using log4net;
 
     public class ServiceHost :
-        ServiceBase
+        ServiceBase //TODO: Is this what you would InstallUtil?
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof (ServiceHost));
         private readonly IApplicationLifeCycle _lifecycle;

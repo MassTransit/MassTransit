@@ -12,23 +12,23 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Host
 {
-	using System.Collections.Generic;
+    using System.Collections.Generic;
 	using Actions;
 	using Configurations;
 	using log4net;
 
 	public static class Runner
 	{
-		private static readonly IDictionary<string, IAction> _actions = new Dictionary<string, IAction>();
+		private static readonly IDictionary<NamedAction, IAction> _actions = new Dictionary<NamedAction, IAction>();
 		private static readonly ILog _log = LogManager.GetLogger(typeof (Runner));
 
 		static Runner()
 		{
-			_actions.Add("install", new InstallServiceAction());
-			_actions.Add("uninstall", new UninstallServiceAction());
-			_actions.Add("console", new RunAsConsoleAction());
-			_actions.Add("gui", new RunAsWinFormAction());
-			_actions.Add("service", new RunAsServiceAction());
+			_actions.Add(ServiceNamedAction.Install, new InstallServiceAction());
+			_actions.Add(ServiceNamedAction.Uninstall, new UninstallServiceAction());
+			_actions.Add(NamedAction.Console, new RunAsConsoleAction());
+			_actions.Add(NamedAction.Gui, new RunAsWinFormAction());
+			_actions.Add(ServiceNamedAction.Service, new RunAsServiceAction());
 		}
 
 		public static void Run(IInstallationConfiguration environment, params string[] args)
@@ -36,15 +36,12 @@ namespace MassTransit.Host
 			_log.Info("Starting Host");
 			_log.DebugFormat("Arguments: {0}", string.Join(",", args));
 
-			//TODO: Hacky
-			string actionKey = Parser.ParseArgs(args).GetActionKey();
-			_log.DebugFormat("Running action: {0}", actionKey);
+			NamedAction actionKey = Parser.ParseArgs(args).GetActionKey();
+            if(args.Length == 0)
+		        actionKey = environment.LifeCycle.DefaultAction ?? NamedAction.Console;
+            
 
-			// TODO hack, we need to really make an enumeration or something for this
-			if (actionKey == "console")
-			{
-				actionKey = environment.LifeCycle.DefaultAction;
-			}
+			_log.DebugFormat("Running action: {0}", actionKey);
 
 			_actions[actionKey].Do(environment);
 		}
