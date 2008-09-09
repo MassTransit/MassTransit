@@ -4,12 +4,12 @@ namespace MassTransit.ServiceBus.Configuration
     {
         public static SerializationOptions Binary
         {
-            get { return new SerializationOptions(); }
+            get { return new SerializationOptions{Serializer = typeof(object)}; }
         }
 
         public static SerializationOptions Xml
         {
-            get { return new SerializationOptions(); }
+            get { return new SerializationOptions{Serializer = typeof(object)}; }
         }
 
         public static SerializationOptions Custom<T>()
