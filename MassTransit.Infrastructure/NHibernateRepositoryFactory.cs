@@ -32,7 +32,7 @@ namespace MassTransit.Infrastructure
 
 		public IRepository GetRepository()
 		{
-			return new NHiberateRepository(_sessionFactory);
+			return new NHibernateRepository(_sessionFactory);
 		}
 
 		public static IRepositoryFactory Build()
