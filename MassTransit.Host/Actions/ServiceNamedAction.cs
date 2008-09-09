@@ -20,13 +20,13 @@ namespace MassTransit.Host.Actions
 
         public static NamedAction Service
         {
-            get { return new NamedAction("service"); }
+            get { return new ServiceNamedAction("service"); }
         }
         public static NamedAction Install
         {
             get
             {
-                return new NamedAction("install");
+                return new ServiceNamedAction("install");
 
             }
         }
@@ -35,7 +35,7 @@ namespace MassTransit.Host.Actions
         {
             get
             {
-                return new NamedAction("uninstall");
+                return new ServiceNamedAction("uninstall");
             }
         }
 
