@@ -17,12 +17,12 @@ namespace MassTransit.Infrastructure
 	using NHibernate;
 	using NHibernate.Linq;
 
-	public class NHiberateRepository :
+	public class NHibernateRepository :
 		IRepository
 	{
 		private readonly ISession _session;
 
-		public NHiberateRepository(ISessionFactory sessionFactory)
+        public NHibernateRepository(ISessionFactory sessionFactory)
 		{
 			_session = sessionFactory.OpenSession();
 			_session.FlushMode = FlushMode.Commit;

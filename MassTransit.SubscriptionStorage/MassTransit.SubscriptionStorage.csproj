@@ -2,7 +2,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>8.0.50727</ProductVersion>
+    <ProductVersion>9.0.21022</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{8EE6C0CB-93D1-4B92-8CD5-24C77452CBE5}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -46,9 +46,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\libs\log4net.dll</HintPath>
     </Reference>
-    <Reference Include="NHibernate, Version=2.0.0.1001, Culture=neutral, PublicKeyToken=aa95f207798dfdb4, processorArchitecture=MSIL">
+    <Reference Include="NHibernate, Version=2.0.0.4000, Culture=neutral, PublicKeyToken=aa95f207798dfdb4, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\libs\Castle\NHibernate.dll</HintPath>
+      <HintPath>..\libs\NHibernate 2.0\NHibernate.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
