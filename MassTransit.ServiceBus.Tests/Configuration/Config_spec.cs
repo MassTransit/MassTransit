@@ -19,7 +19,7 @@ namespace MassTransit.ServiceBus.Tests.Configuration
 
             var busOptions = BusBuilder.WithName("funk_bus")
                 .ListensOn("msmq://localhost/bill")
-                .CommunicatesOn<LoopbackEndpoint>() //TODO: what should the default be?
+                .CommunicatesOver<LoopbackEndpoint>() //TODO: what should the default be?
                 .Validate();
 
             Assert.AreEqual(listenUri, busOptions.ListensOn);
@@ -44,14 +44,13 @@ namespace MassTransit.ServiceBus.Tests.Configuration
         public void As_a_subscriber()
         {
             Uri listenUri = new Uri("msmq://localhost/bill");
-            Uri commandUri = new Uri("activemq://localhost/bob");
             Uri subUri = new Uri("msmq://localhost/mt_pubsub");
 
             var busOptions = BusBuilder.WithName("funk_bus")
                 .ListensOn("msmq://localhost/bill")
                 .WithSharedSubscriptions<LocalSubscriptionCache>("msmq://localhost/mt_pubsub")
                 //.WithSharedSubscriptions(Via.DistributedCache("tcp://192.168.0.1"))
-                .CommunicatesOn<LoopbackEndpoint>()
+                .CommunicatesOver<LoopbackEndpoint>()
                 .UsingForSerialization<JsonBodyFormatter>()
                 .Validate();
             //.ActivateHeartBeat();
@@ -61,7 +60,6 @@ namespace MassTransit.ServiceBus.Tests.Configuration
             Assert.AreEqual(typeof(LocalSubscriptionCache), busOptions.Subcriptions.SubscriptionStore); //how to best handle this?
             Assert.AreEqual(typeof(JsonBodyFormatter), busOptions.Serialization.Serializer); //how to handle this?
             Assert.AreEqual(false, busOptions.IsACompetingConsumer);
-            //transports
         }
 
         [Test]
@@ -73,7 +71,7 @@ namespace MassTransit.ServiceBus.Tests.Configuration
             var busOptions = BusBuilder.WithName("funk_bus")
                 .ListensOn("msmq://localhost/bill")
                 .ReceivesCommandsOn(commandUri)
-                .CommunicatesOn<LoopbackEndpoint>() //TODO: what should the default be?
+                .CommunicatesOver<LoopbackEndpoint>() //TODO: what should the default be?
                 .Validate();
 
             Assert.AreEqual(listenUri, busOptions.ListensOn);

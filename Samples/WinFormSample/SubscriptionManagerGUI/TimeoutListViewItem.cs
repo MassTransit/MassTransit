@@ -10,6 +10,7 @@ namespace SubscriptionManagerGUI
         public TimeoutListViewItem(Tuple<Guid, DateTime> item)
         {
             //what is used to search
+            //now you don't have to show the GUID
             this.Name = item.Key.ToString();
             
             //time scheduled

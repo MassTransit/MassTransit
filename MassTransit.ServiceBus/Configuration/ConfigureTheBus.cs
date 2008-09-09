@@ -58,7 +58,7 @@ namespace MassTransit.ServiceBus.Configuration
             return this;
         }
 
-        public ConfigureTheBus CommunicatesOn<T>() where T : IEndpoint
+        public ConfigureTheBus CommunicatesOver<T>() where T : IEndpoint
         {
             _options.RegisterTransport<T>();
             return this;

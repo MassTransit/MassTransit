@@ -4,6 +4,7 @@
 	<property name="dirs.install" value=".\pubsub_install" overwrite="false" />
 	<property name="dirs.build" value=".\bin" overwrite="false" />
 	<property name="msbuild.configuration" value="Release" overwrite="false" />
+	<property name="svn.path" value="http://masstransit.googlecode.com/svn/trunk" overwrite="false" />
 	
 	<target name="go" depends="build_code, build_samples" description="Starting the build of MassTransit" />
 	
@@ -43,7 +44,7 @@
 			failonerror="false"/> -->
 		<exec
 			program="svn"
-			commandline='info http://masstransit.googlecode.com/svn/trunk --xml'
+			commandline='info ${svn.path} --xml'
 			output="_revision.xml"
 			failonerror="false"/>
 		<xmlpeek
