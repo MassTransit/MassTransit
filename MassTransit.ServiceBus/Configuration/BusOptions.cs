@@ -5,6 +5,12 @@ namespace MassTransit.ServiceBus.Configuration
 
     public class BusOptions
     {
+        public BusOptions()
+        {
+            ListensOn = EndpointResolver.Null.Uri;
+            CommandedOn = EndpointResolver.Null.Uri;
+            Serialization = Serializers.Binary;
+        }
         public Uri ListensOn { get; set; }
         public Uri CommandedOn { get; set; }
         public bool IsACompetingConsumer { get; private set; }
