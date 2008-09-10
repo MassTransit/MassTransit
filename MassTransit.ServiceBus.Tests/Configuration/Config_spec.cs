@@ -12,17 +12,26 @@ namespace MassTransit.ServiceBus.Tests.Configuration
     public class Config_spec :
         Specification
     {
+        readonly Uri _listenUri = new Uri("msmq://localhost/bill");
+        readonly Uri _commandUri = new Uri("activemq://localhost/bob");
+        readonly Uri _subUri = new Uri("msmq://localhost/mt_pubsub");
+
+        [SetUp]
+        public void SetUp()
+        {
+            IObjectBuilder builder = null;
+            BusBuilder.SetObjectBuilder(builder);
+        }
         [Test]
         public void Minimal_Setup()
         {
-            Uri listenUri = new Uri("msmq://localhost/bill");
 
             var busOptions = BusBuilder.WithName("funk_bus")
-                .ListensOn("msmq://localhost/bill")
+                .ListensOn(_listenUri)
                 .CommunicatesOver<LoopbackEndpoint>() //TODO: what should the default be?
                 .Validate();
 
-            Assert.AreEqual(listenUri, busOptions.ListensOn);
+            Assert.AreEqual(_listenUri, busOptions.ListensOn);
             Assert.AreEqual(EndpointResolver.Null.Uri, busOptions.CommandedOn);
             Assert.AreEqual(typeof(BinaryBodyFormatter), busOptions.Serialization.Serializer); //how to handle this?
             Assert.AreEqual(false, busOptions.IsACompetingConsumer);
@@ -43,39 +52,39 @@ namespace MassTransit.ServiceBus.Tests.Configuration
         [Test]
         public void As_a_subscriber()
         {
-            Uri listenUri = new Uri("msmq://localhost/bill");
-            Uri subUri = new Uri("msmq://localhost/mt_pubsub");
-
             var busOptions = BusBuilder.WithName("funk_bus")
-                .ListensOn("msmq://localhost/bill")
-                .WithSharedSubscriptions<LocalSubscriptionCache>("msmq://localhost/mt_pubsub")
+                .ListensOn(_listenUri)
+                .SharesSubscriptionsVia<LocalSubscriptionCache>("msmq://localhost/mt_pubsub")
                 //.WithSharedSubscriptions(Via.DistributedCache("tcp://192.168.0.1"))
                 .CommunicatesOver<LoopbackEndpoint>()
                 .UsingForSerialization<JsonBodyFormatter>()
                 .Validate();
             //.ActivateHeartBeat();
 
-            Assert.AreEqual(listenUri, busOptions.ListensOn);
-            Assert.AreEqual(subUri, busOptions.Subcriptions.Address);
+            Assert.AreEqual(_listenUri, busOptions.ListensOn);
+            Assert.AreEqual(_subUri, busOptions.Subcriptions.Address);
             Assert.AreEqual(typeof(LocalSubscriptionCache), busOptions.Subcriptions.SubscriptionStore); //how to best handle this?
             Assert.AreEqual(typeof(JsonBodyFormatter), busOptions.Serialization.Serializer); //how to handle this?
             Assert.AreEqual(false, busOptions.IsACompetingConsumer);
         }
 
         [Test]
+        public void Turn_on_heartbeat()
+        {
+            var busOptions = BusBuilder.WithName("funk_bus")
+                .ActivateHeartBeat();
+        }
+        [Test]
         public void As_a_commandee()
         {
-            Uri listenUri = new Uri("msmq://localhost/bill");
-            Uri commandUri = new Uri("activemq://localhost/bob");
-
             var busOptions = BusBuilder.WithName("funk_bus")
-                .ListensOn("msmq://localhost/bill")
-                .ReceivesCommandsOn(commandUri)
+                .ListensOn(_listenUri)
+                .ReceivesCommandsOn(_commandUri)
                 .CommunicatesOver<LoopbackEndpoint>() //TODO: what should the default be?
                 .Validate();
 
-            Assert.AreEqual(listenUri, busOptions.ListensOn);
-            Assert.AreEqual(commandUri, busOptions.CommandedOn);
+            Assert.AreEqual(_listenUri, busOptions.ListensOn);
+            Assert.AreEqual(_commandUri, busOptions.CommandedOn);
         }
     }
 }

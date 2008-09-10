@@ -6,5 +6,6 @@ namespace MassTransit.ServiceBus.Configuration
     {
         public Uri Address { get; set; }
         public Type SubscriptionStore { get; set; }
+        public Type SubscriptionClient { get; set; }
     }
 }

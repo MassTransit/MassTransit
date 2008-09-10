@@ -38,13 +38,21 @@ namespace MassTransit.ServiceBus.Configuration
             return this;
         }
 
-        public ConfigureTheBus WithSharedSubscriptions<T>(string uri) where T: ISubscriptionCache
+        public ConfigureTheBus SharesSubscriptionsVia<T>(string uri) where T: ISubscriptionCache
         {
-            return WithSharedSubscriptions<T>(new Uri(uri));
+            return SharesSubscriptionsVia<T>(new Uri(uri));
         }
-        public ConfigureTheBus WithSharedSubscriptions<T>(Uri uri) where T : ISubscriptionCache
+
+        public ConfigureTheBus StoresSubscriptionsWith<T>() where T : ISubscriptionCache
+    {
+            _options.Subcriptions.SubscriptionStore = typeof (T);
+            return this;
+    }
+        public ConfigureTheBus SharesSubscriptionsVia<T>(Uri uri) where T : ISubscriptionCache
         {
-            _options.Subcriptions = new SubscriptionOptions {Address = uri, SubscriptionStore = typeof(T)};
+            _options.Subcriptions.Address = uri;
+            _options.Subcriptions.SubscriptionClient = typeof (T);
+
             return this;
         }
         public ConfigureTheBus UsingForSerialization<T>() where T : IBodyFormatter
@@ -77,5 +85,11 @@ namespace MassTransit.ServiceBus.Configuration
             return _options;
         }
 
+        public BusOptions ActivateHeartBeat()
+        {
+            _options.TurnOnHeartBeat();
+
+            return this;
+        }
     }
 }
