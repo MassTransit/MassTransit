@@ -32,6 +32,7 @@ namespace MassTransit.ServiceBus.WCF
         private readonly Uri _uri;
         private string _configuration = "MassTransit_EndpointClient";
         private ServiceHost _host;
+        private ChannelFactory<IEndpointContract> _channelFactory;
 
         public WcfEndpoint(Uri uri)
         {
@@ -41,6 +42,9 @@ namespace MassTransit.ServiceBus.WCF
             //builder.Scheme = uri.Scheme.Substring(4);
 
             _serviceUri = builder.Uri;
+
+            _channelFactory = new ChannelFactory<IEndpointContract>(_configuration);
+            _channelFactory.Endpoint.Address = new EndpointAddress(_serviceUri);
         }
 
         public static string Scheme
@@ -81,11 +85,7 @@ namespace MassTransit.ServiceBus.WCF
                 envelope = new MessageEnvelope(mstream.ToArray());
             }
 
-            ChannelFactory<IEndpointContract> channelFactory = new ChannelFactory<IEndpointContract>(_configuration);
-
-            channelFactory.Endpoint.Address = new EndpointAddress(_serviceUri);
-
-            IEndpointContract proxy = channelFactory.CreateChannel();
+            IEndpointContract proxy = _channelFactory.CreateChannel();
             try
             {
                 proxy.Send(envelope);
@@ -179,7 +179,7 @@ namespace MassTransit.ServiceBus.WCF
             }
         }
 
-        [ServiceBehavior(InstanceContextMode = InstanceContextMode.Single, ConfigurationName = "MassTransit.DefaultWcfService")]
+        [ServiceBehavior(InstanceContextMode = InstanceContextMode.Single, ConcurrencyMode  = ConcurrencyMode.Multiple, ConfigurationName = "MassTransit.DefaultWcfService")]
         public class InboundMessageHandler : IEndpointContract
         {
             private readonly WcfEndpoint _endpoint;
