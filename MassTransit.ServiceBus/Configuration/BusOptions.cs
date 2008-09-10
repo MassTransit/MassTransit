@@ -7,11 +7,13 @@ namespace MassTransit.ServiceBus.Configuration
 
     public class BusOptions
     {
-        private readonly IObjectBuilder _objectBuilder;
+        public IObjectBuilder ResolvesDependenciesFrom { get; private set; }
+
+
 
         public BusOptions(IObjectBuilder objectBuilder)
         {
-            _objectBuilder = objectBuilder;
+            ResolvesDependenciesFrom = objectBuilder;
             ListensOn = EndpointResolver.Null.Uri;
             CommandedOn = EndpointResolver.Null.Uri;
             Serialization = new SerializationOptions {Serializer =  typeof(BinaryBodyFormatter)};
@@ -32,7 +34,6 @@ namespace MassTransit.ServiceBus.Configuration
             EndpointResolver.AddTransport(typeof(T));
         }
         public string Name { get; set; }
-        public object ResolvesDependenciesFrom { get; set; }
         public bool HasAHeartBeat { get; private set; }
         public void TurnOnHeartBeat()
         {
@@ -41,10 +42,18 @@ namespace MassTransit.ServiceBus.Configuration
 
         public IServiceBus Build()
         {
-            IEndpoint ep = _objectBuilder.Build<IEndpointResolver>().Resolve(ListensOn);
-            ISubscriptionCache cache = _objectBuilder.Build<ISubscriptionCache>(this.Subcriptions.SubscriptionStore);
+            IEndpoint endpointToListenOn = ResolvesDependenciesFrom.Build<IEndpointResolver>().Resolve(ListensOn);
+            //commanded on
+            //competing consumer
+            //serialization stuff
+            ISubscriptionCache cache = ResolvesDependenciesFrom.Build<ISubscriptionCache>(this.Subcriptions.SubscriptionStore);
+            //ResolvesDependenciesFrom.Register(this.Subcriptions.SubscriptionClient); //set the uri
+            IServiceBus bus = new ServiceBus(endpointToListenOn, ResolvesDependenciesFrom, cache);
+            //ResolvesDependenciesFrom.Register<IServiceBus>(bus, Name);
+            
+            //has a heart beat
 
-            return new ServiceBus(ep, _objectBuilder, cache);
+            return bus;
         }
 
 
