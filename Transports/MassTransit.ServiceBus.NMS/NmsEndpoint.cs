@@ -80,12 +80,12 @@ namespace MassTransit.ServiceBus.NMS
 			{
 				IBytesMessage bm = session.CreateBytesMessage();
 
-				MemoryStream mem = new MemoryStream();
-				_formatter.Serialize(mem, message);
+                using (MemoryStream mem = new MemoryStream())
+                {
+                    _formatter.Serialize(mem, message);
 
-				bm.Content = new byte[mem.Length];
-				mem.Seek(0, SeekOrigin.Begin);
-				mem.Read(bm.Content, 0, (int) mem.Length);
+                    bm.Content = mem.ToArray();
+                }
 
 				if (timeToLive < NMSConstants.defaultTimeToLive)
 					bm.NMSTimeToLive = timeToLive;
