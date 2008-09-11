@@ -85,7 +85,7 @@ namespace MassTransit.ServiceBus.Configuration
             return _options;
         }
 
-        public BusOptions ActivateHeartBeat()
+        public ConfigureTheBus ActivateHeartBeat()
         {
             _options.TurnOnHeartBeat();
 
