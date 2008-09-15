@@ -147,6 +147,15 @@ namespace MassTransit.WindsorIntegration
 
                 SubscriptionClient sc = new SubscriptionClient(bus, cache, subscriptionServiceEndpoint);
 
+            	IConfiguration localEndpointConfig = subscriptionClientConfig.Children["localEndpoint"];
+				if (localEndpointConfig != null)
+				{
+					IEndpoint localEndpoint =
+						Kernel.Resolve<IEndpointResolver>().Resolve(new Uri(localEndpointConfig.Value));
+
+					sc.AddLocalEndpoint(localEndpoint);
+				}
+
                 Kernel.AddComponentInstance(id + ".subscriptionClient", sc);
                 sc.Start(); //TODO: should use the startable
             }
@@ -162,7 +171,7 @@ namespace MassTransit.WindsorIntegration
             // naming the cache makes it available to others
             string name = cacheConfig.Attributes["name"];
 
-            string mode = cacheConfig.Attributes["mode"];
+        	string mode = cacheConfig.Attributes["mode"] ?? "local";
             switch (mode)
             {
                 case "local":

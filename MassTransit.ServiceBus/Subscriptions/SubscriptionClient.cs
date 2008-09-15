@@ -1,17 +1,19 @@
-/// Copyright 2007-2008 The Apache Software Foundation.
-/// 
-/// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
-/// this file except in compliance with the License. You may obtain a copy of the 
-/// License at 
-/// 
-///   http://www.apache.org/licenses/LICENSE-2.0 
-/// 
-/// Unless required by applicable law or agreed to in writing, software distributed 
-/// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-/// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-/// specific language governing permissions and limitations under the License.
+// Copyright 2007-2008 The Apache Software Foundation.
+//  
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
+// this file except in compliance with the License. You may obtain a copy of the 
+// License at 
+// 
+//     http://www.apache.org/licenses/LICENSE-2.0 
+// 
+// Unless required by applicable law or agreed to in writing, software distributed 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// specific language governing permissions and limitations under the License.
 namespace MassTransit.ServiceBus.Subscriptions
 {
+	using System;
+	using System.Collections.Generic;
 	using Exceptions;
 	using Messages;
 
@@ -22,6 +24,7 @@ namespace MassTransit.ServiceBus.Subscriptions
 		Consumes<RemoveSubscription>.All
 	{
 		private readonly ISubscriptionCache _cache;
+		private readonly List<Uri> _localEndpoints = new List<Uri>();
 		private readonly IServiceBus _serviceBus;
 		private readonly IEndpoint _subscriptionServiceEndpoint;
 
@@ -30,6 +33,14 @@ namespace MassTransit.ServiceBus.Subscriptions
 			_serviceBus = serviceBus;
 			_cache = cache;
 			_subscriptionServiceEndpoint = subscriptionServiceEndpoint;
+
+			_localEndpoints.Add(_serviceBus.Endpoint.Uri);
+		}
+
+		public void Consume(AddSubscription message)
+		{
+			if (!IsOwnedSubscription(message.Subscription))
+				_cache.Add(message.Subscription);
 		}
 
 		public void Consume(CacheUpdateResponse message)
@@ -39,12 +50,40 @@ namespace MassTransit.ServiceBus.Subscriptions
 				if (!IsOwnedSubscription(sub))
 					_cache.Add(sub);
 			}
+
+			// to make things good, we need to enumerate the local subscriptions 
+			// and add anything that is local in case it was missed
+			// during startup
+
+			PublishLocalCacheToServer();
 		}
 
-		public void Consume(AddSubscription message)
+		private void PublishLocalCacheToServer()
 		{
-			if (!IsOwnedSubscription(message.Subscription))
-				_cache.Add(message.Subscription);
+			IList<Subscription> subscriptions = _cache.List();
+			foreach (Subscription subscription in subscriptions)
+			{
+				if(IsOwnedSubscription(subscription))
+				{
+					AddSubscription message = new AddSubscription(subscription);
+
+					_subscriptionServiceEndpoint.Send(message);
+				}
+			}
+		}
+
+		private void RemoveLocalCacheFromServer()
+		{
+			IList<Subscription> subscriptions = _cache.List();
+			foreach (Subscription subscription in subscriptions)
+			{
+				if(IsOwnedSubscription(subscription))
+				{
+					RemoveSubscription message = new RemoveSubscription(subscription);
+
+					_subscriptionServiceEndpoint.Send(message);
+				}
+			}
 		}
 
 		public void Consume(RemoveSubscription message)
@@ -80,16 +119,14 @@ namespace MassTransit.ServiceBus.Subscriptions
 
 			_cache.OnAddSubscription -= Cache_OnAddSubscription;
 			_cache.OnRemoveSubscription -= Cache_OnRemoveSubscription;
+
+			RemoveLocalCacheFromServer();
 		}
 
 		private bool IsOwnedSubscription(Subscription subscription)
 		{
-			if (subscription.EndpointUri == _serviceBus.Endpoint.Uri)
-				return true;
-
-			return false;
+			return _localEndpoints.Contains(subscription.EndpointUri);
 		}
-
 
 		private static void ValidateThatBusAndClientAreNotOnSameEndpoint(IServiceBus bus, IEndpoint endpoint)
 		{
@@ -119,6 +156,11 @@ namespace MassTransit.ServiceBus.Subscriptions
 
 				_subscriptionServiceEndpoint.Send(message);
 			}
+		}
+
+		public void AddLocalEndpoint(IEndpoint endpoint)
+		{
+			_localEndpoints.Add(endpoint.Uri);
 		}
 	}
 }

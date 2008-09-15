@@ -137,6 +137,9 @@ namespace MassTransit.ServiceBus.MSMQ
 
 			queue.MessageReadPropertyFilter = mpf;
 
+			if (!queue.CanRead)
+				throw new EndpointException(this, "The endpoint could not be found: " + QueuePath);
+
 			return queue;
 		}
 
@@ -155,6 +158,9 @@ namespace MassTransit.ServiceBus.MSMQ
 
 		public void Send<T>(T message, TimeSpan timeToLive) where T : class
 		{
+			if (!_queue.CanWrite)
+				throw new EndpointException(this, "Not allowed to write to endpoint");
+
 			Type messageType = typeof (T);
 
 			Message msg = new Message();
@@ -218,6 +224,9 @@ namespace MassTransit.ServiceBus.MSMQ
 
 		public object Receive(TimeSpan timeout, Predicate<object> accept)
 		{
+			if (!_queue.CanRead)
+				throw new EndpointException(this, "Not allowed to read from endpoint");
+
 			try
 			{
 				MessageQueueTransactionType transactionType = GetTransactionType();
@@ -250,11 +259,9 @@ namespace MassTransit.ServiceBus.MSMQ
 
 									return obj;
 								}
-								else
-								{
-									if (_log.IsDebugEnabled)
-										_log.DebugFormat("Queue: {0} Skipped Message Id {1}", _queue.Path, msg.Id);
-								}
+
+								if (_log.IsDebugEnabled)
+									_log.DebugFormat("Queue: {0} Skipped Message Id {1}", _queue.Path, msg.Id);
 							}
 							catch (SerializationException ex)
 							{

@@ -27,6 +27,7 @@ namespace ServerGUI
 		private IServiceBus _bus;
 
 		private IWindsorContainer _container;
+		private IServiceBus _controlBus;
 
 		public ServerForm()
 		{
@@ -47,6 +48,7 @@ namespace ServerGUI
 				_container = new DefaultMassTransitContainer("Server.Castle.xml");
 
 				_bus = _container.Resolve<IServiceBus>("server");
+				_controlBus = _container.Resolve<IServiceBus>("control");
 
 				_bus.AddComponent<UserAgentSession>();
 				_bus.AddComponent<TheAnswerMan>();
@@ -65,26 +67,33 @@ namespace ServerGUI
 		{
 			messageTimer.Stop();
 
-			try
-			{
-				if (_bus != null)
-				{
-					_bus.Dispose();
-					_bus = null;
-				}
-			}
-			catch (Exception ex)
-			{
-				_log.Error(ex);
-			}
+			if (_bus != null)
+				LogException(() =>
+				             	{
+				             		_bus.Dispose();
+				             		_bus = null;
+				             	});
 
+			if (_controlBus != null)
+				LogException(() =>
+				             	{
+									_controlBus.Dispose();
+									_controlBus = null;
+				             	});
+
+			if (_container != null)
+				LogException(() =>
+				             	{
+									_container.Dispose();
+									_container = null;
+				             	});
+		}
+
+		private void LogException(Action action)
+		{
 			try
 			{
-				if (_container != null)
-				{
-					_container.Dispose();
-					_container = null;
-				}
+				action();
 			}
 			catch (Exception ex)
 			{
