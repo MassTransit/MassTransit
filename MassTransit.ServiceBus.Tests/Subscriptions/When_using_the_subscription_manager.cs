@@ -88,6 +88,7 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
             using (Record())
             {
                 _cache.Add(subscriptions[0]);
+            	Expect.Call(_cache.List()).Return(new List<Subscription>());
             }
 
             using (Playback())

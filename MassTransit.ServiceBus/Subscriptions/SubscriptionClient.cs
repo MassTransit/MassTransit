@@ -33,8 +33,6 @@ namespace MassTransit.ServiceBus.Subscriptions
 			_serviceBus = serviceBus;
 			_cache = cache;
 			_subscriptionServiceEndpoint = subscriptionServiceEndpoint;
-
-			_localEndpoints.Add(_serviceBus.Endpoint.Uri);
 		}
 
 		public void Consume(AddSubscription message)
@@ -102,6 +100,8 @@ namespace MassTransit.ServiceBus.Subscriptions
 		public void Start()
 		{
 			ValidateThatBusAndClientAreNotOnSameEndpoint(_serviceBus, _subscriptionServiceEndpoint);
+
+			_localEndpoints.Add(_serviceBus.Endpoint.Uri);
 
 			_cache.OnAddSubscription += Cache_OnAddSubscription;
 			_cache.OnRemoveSubscription += Cache_OnRemoveSubscription;
