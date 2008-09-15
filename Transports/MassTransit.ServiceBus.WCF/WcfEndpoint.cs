@@ -179,7 +179,7 @@ namespace MassTransit.ServiceBus.WCF
             }
         }
 
-        [ServiceBehavior(InstanceContextMode = InstanceContextMode.Single, ConcurrencyMode  = ConcurrencyMode.Multiple, ConfigurationName = "MassTransit.DefaultWcfService")]
+        [ServiceBehavior(InstanceContextMode = InstanceContextMode.Single, ConcurrencyMode  = ConcurrencyMode.Single, ConfigurationName = "MassTransit.DefaultWcfService")]
         public class InboundMessageHandler : IEndpointContract
         {
             private readonly WcfEndpoint _endpoint;
