@@ -44,5 +44,6 @@ namespace MassTransit.ServiceBus
 		void Release<T>(T obj);
 
         void Register<T>() where T : class;
+        //void Register<T>(Type t);
 	}
 }
