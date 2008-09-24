@@ -138,6 +138,11 @@ namespace MassTransit.ServiceBus.MSMQ.Tests
 				}
 			}
 		}
+
+	    [Test]
+	    public void What_about_event_driven_consumer()
+	    {
+	    }
 	}
 
 	public static class MessageQueueExtensions
