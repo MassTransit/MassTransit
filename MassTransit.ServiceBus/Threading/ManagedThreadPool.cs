@@ -40,7 +40,7 @@ namespace MassTransit.ServiceBus.Threading
 
 		public ManagedThreadPool(Action<T> handler, int minThreads, int maxThreads)
 		{
-			Check.Ensure(minThreads >= 0, "The minimum thread count must be greater than zero");
+			Check.Ensure(minThreads > 0, "The minimum thread count must be greater than zero");
 			Check.Ensure(maxThreads >= minThreads, "The maximum thread count must be at least equal to the minimum thread count");
 			Check.Parameter(handler).WithMessage("The handler must not be null").IsNotNull();
 

@@ -124,6 +124,7 @@
     <Compile Include="MessageGroup.cs" />
     <Compile Include="ReliableAttribute.cs" />
     <Compile Include="ServiceBusBuilder.cs" />
+    <Compile Include="Threading\ResourceThreadPool.cs" />
     <Compile Include="Timeout\Messages\CancelTimeout.cs" />
     <Compile Include="Timeout\CancelTimeoutConsumer.cs" />
     <Compile Include="Timeout\InMemoryTimeoutStorage.cs" />
