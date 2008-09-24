@@ -9,5 +9,9 @@ namespace MassTransit.ServiceBus.HealthMonitoring
         IList<HealthInformation> List();
         HealthInformation Get(Uri uri);
         void Update(HealthInformation information);
+
+        event Action<HealthInformation> NewHealthInformation;
+        event Action<HealthInformation> UpdatedHealthInformation;
+
     }
 }
