@@ -207,11 +207,7 @@ namespace MassTransit.ServiceBus.MSMQ
 				{
 					if(Transaction.Current == null)
 					{
-						using(TransactionScope scope = new TransactionScope())
-						{
-							_queue.Send(msg, _sendTransactionType);
-							scope.Complete();
-						}
+						_queue.Send(msg, MessageQueueTransactionType.Single);
 					}
 					else
 					{
