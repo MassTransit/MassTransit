@@ -34,8 +34,11 @@ namespace MassTransit.ServiceBus.MSMQ
 		private readonly string _machineName = Environment.MachineName;
 		private readonly MessageQueue _queue;
 		private bool _reliableMessaging = true;
+	    private bool _isLocal;
+	    private MessageQueueTransactionType _sendTransactionType;
+	    private MessageQueueTransactionType _receiveTransactionType;
 
-		/// <summary>
+	    /// <summary>
 		/// Initializes a <c ref="MessageQueueEndpoint" /> instance with the specified URI string.
 		/// </summary>
 		/// <param name="uriString">The URI for the endpoint</param>
@@ -57,20 +60,24 @@ namespace MassTransit.ServiceBus.MSMQ
 				throw new EndpointException(this, "Queue Endpoints can't have a child folder unless it is 'public'. Good: 'msmq://machinename/queue_name' or 'msmq://machinename/public/queue_name' - Bad: msmq://machinename/queue_name/bad_form");
 			}
 
-			string hostName = _uri.Host;
-			if (string.Compare(hostName, ".") == 0 || string.Compare(hostName, "localhost", true) == 0)
-			{
-				hostName = Environment.MachineName.ToLowerInvariant();
-			}
+            string localhost = Environment.MachineName.ToLowerInvariant();
 
-			if (string.Compare(_uri.Host, "localhost", true) == 0)
+			string hostName = _uri.Host;
+		    if (string.Compare(hostName, ".") == 0 || string.Compare(hostName, "localhost", true) == 0)
 			{
-				_uri = new Uri("msmq://" + Environment.MachineName.ToLowerInvariant() + _uri.AbsolutePath);
+			    _uri = new Uri("msmq://" + localhost + _uri.AbsolutePath);
+			    _isLocal = true;
 			}
+            else
+		    {
+		        _isLocal = string.Compare(_uri.Host, localhost, true) == 0;
+		    }
 
 			_queuePath = string.Format(@"FormatName:DIRECT=OS:{0}\private$\{1}", hostName, _uri.AbsolutePath.Substring(1));
 
 			_queue = Open(QueueAccessMode.SendAndReceive);
+
+		    Initialize();
 		}
 
 		/// <summary>
@@ -94,16 +101,33 @@ namespace MassTransit.ServiceBus.MSMQ
 			if (string.Compare(parts[1], "private$", true) != 0)
 				throw new ArgumentException("Invalid Queue Path Specified");
 
-			if (parts[0] == ".")
-				parts[0] = Environment.MachineName;
+            string localhost = Environment.MachineName.ToLowerInvariant();
 
-			parts[0] = parts[0].ToLowerInvariant();
+            if (parts[0] == "." || string.Compare("localhost", parts[0], true) == 0)
+            {
+                parts[0] = localhost;
+                _isLocal = true;
+            }
+            else
+            {
+                parts[0] = parts[0].ToLowerInvariant();
+                _isLocal = string.Compare(localhost, parts[0], true) == 0;
+            }
 
-			_queuePath = string.Format("{0}{1}\\{2}\\{3}", prefix, parts[0], parts[1], parts[2]);
+		    _queuePath = string.Format("{0}{1}\\{2}\\{3}", prefix, parts[0], parts[1], parts[2]);
 			_uri = new Uri(string.Format("msmq://{0}/{1}", parts[0], parts[2]));
 
 			_queue = Open(QueueAccessMode.SendAndReceive);
+
+		    Initialize();
 		}
+
+        private void Initialize()
+        {
+            _sendTransactionType = _isLocal && _queue.Transactional ? MessageQueueTransactionType.Automatic : MessageQueueTransactionType.None;
+
+            _receiveTransactionType = _isLocal && _queue.Transactional ? MessageQueueTransactionType.Automatic : MessageQueueTransactionType.None;
+        }
 
 		#region IMessageQueueEndpoint Members
 
@@ -179,7 +203,7 @@ namespace MassTransit.ServiceBus.MSMQ
 				if (SpecialLoggers.Messages.IsInfoEnabled)
                     SpecialLoggers.Messages.InfoFormat("SEND:{0}:{1}", Uri, messageType.Name);
 
-				_queue.Send(msg, GetTransactionType());
+			    _queue.Send(msg, _sendTransactionType);
 			}
 			catch (MessageQueueException ex)
 			{
@@ -194,7 +218,7 @@ namespace MassTransit.ServiceBus.MSMQ
 		{
 			try
 			{
-				Message msg = _queue.Receive(timeout, GetTransactionType());
+				Message msg = _queue.Receive(timeout, _receiveTransactionType);
 
 				Type messageType = Type.GetType(msg.Label);
 
@@ -229,8 +253,6 @@ namespace MassTransit.ServiceBus.MSMQ
 
 			try
 			{
-				MessageQueueTransactionType transactionType = GetTransactionType();
-
 				DateTime started = DateTime.Now;
 				while (started + timeout > DateTime.Now)
 				{
@@ -247,7 +269,7 @@ namespace MassTransit.ServiceBus.MSMQ
 
 								if (accept(obj))
 								{
-									Message received = enumerator.RemoveCurrent(TimeSpan.FromSeconds(10), transactionType);
+									Message received = enumerator.RemoveCurrent(TimeSpan.FromSeconds(10), _receiveTransactionType);
 									if (received.Id != msg.Id)
 										throw new MessageException(obj.GetType(), "The message removed does not match the original message");
 
@@ -270,7 +292,7 @@ namespace MassTransit.ServiceBus.MSMQ
 
 								try
 								{
-									Message discard = _queue.ReceiveById(msg.Id, GetTransactionType());
+									Message discard = _queue.ReceiveById(msg.Id, _receiveTransactionType);
 
 									_log.Error("Discarded message " + discard.Id + " due to a serialization error", ex);
 								}
@@ -299,22 +321,6 @@ namespace MassTransit.ServiceBus.MSMQ
 		{
 			if (_queue != null)
 				_queue.Dispose();
-		}
-
-		private MessageQueueTransactionType GetTransactionType()
-		{
-			MessageQueueTransactionType transactionType = MessageQueueTransactionType.None;
-			// a local queue should be checked to see if it supports transactions
-			if (string.Compare(Uri.Host, _machineName, true) == 0)
-				if (_queue.Transactional)
-				{
-					if (Transaction.Current == null)
-						throw new EndpointException(this, "This is a transactional endpoint that requires a TransactionScope to be open");
-
-					transactionType = MessageQueueTransactionType.Automatic;
-				}
-
-			return transactionType;
 		}
 
 		private static void HandleVariousErrorCodes(MessageQueueErrorCode code, Exception ex)

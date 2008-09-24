@@ -5,10 +5,11 @@ namespace HeavyLoad.Correlated
 	using Castle.Windsor;
 	using MassTransit.ServiceBus;
 	using MassTransit.ServiceBus.MSMQ;
+	using MassTransit.ServiceBus.Threading;
 
-	public class CorrelatedMessageTest : IDisposable
+    public class CorrelatedMessageTest : IDisposable
 	{
-		private readonly int _attempts = 1500;
+		private readonly int _attempts = 5000;
 		private readonly IWindsorContainer _container;
 		private readonly ManualResetEvent _finishedEvent = new ManualResetEvent(false);
 		private IServiceBus _bus;
@@ -42,31 +43,42 @@ namespace HeavyLoad.Correlated
 			_bus.Subscribe(service);
 
 			CheckPoint point = stopWatch.Mark("Correlated Requests");
+		    CheckPoint responsePoint = stopWatch.Mark("Correlated Responses");
 
-			for (int index = 0; index < _attempts; index++)
-			{
-				CorrelatedController controller = new CorrelatedController(_bus);
+		    ManagedThreadPool<CorrelatedController> pool = new ManagedThreadPool<CorrelatedController>(DoWorker, 10, 10);
+            try
+            {
 
-				controller.OnSuccess += controller_OnSuccess;
-				controller.OnTimeout += controller_OnTimeout;
-				controller.SimulateRequestResponse();
+                for (int index = 0; index < _attempts; index++)
+                {
+                    CorrelatedController controller = new CorrelatedController(_bus, OnSuccess, OnTimeout);
+                    pool.Enqueue(controller);
+                }
 
-				controller.OnSuccess -= controller_OnSuccess;
-				controller.OnTimeout -= controller_OnTimeout;
-			}
+                point.Complete(_attempts);
 
-			point.Complete(_attempts);
+                _finishedEvent.WaitOne(TimeSpan.FromSeconds(60), true);
 
-			_finishedEvent.WaitOne(TimeSpan.FromSeconds(60), true);
+                responsePoint.Complete(_timeouts + _successes);
+            }
+            finally
+            {
+                pool.Dispose();
+            }
 
-			_bus.Unsubscribe(service);
+		    _bus.Unsubscribe(service);
 
 			Console.WriteLine("Attempts: {0}, Succeeded: {1}, Timeouts: {2}", _attempts, _successes, _timeouts);
 
 			stopWatch.Stop();
 		}
 
-		private void controller_OnTimeout(CorrelatedController obj)
+        private void DoWorker(CorrelatedController controller)
+        {
+            controller.SimulateRequestResponse();
+        }
+
+        private void OnTimeout(CorrelatedController obj)
 		{
 			lock (_finishedEvent)
 			{
@@ -77,7 +89,7 @@ namespace HeavyLoad.Correlated
 			}
 		}
 
-		private void controller_OnSuccess(CorrelatedController obj)
+        private void OnSuccess(CorrelatedController obj)
 		{
 			lock (_finishedEvent)
 			{

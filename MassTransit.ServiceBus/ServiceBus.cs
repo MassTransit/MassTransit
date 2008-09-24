@@ -30,13 +30,12 @@ namespace MassTransit.ServiceBus
         private static readonly ILog _log;
         private static readonly IServiceBus _nullServiceBus;
 
-        private readonly ManagedThreadPool<object> _asyncDispatcher;
+        private readonly ResourceThreadPool<IEndpoint, object> _asyncDispatcher;
         private readonly DispatcherContext _dispatcherContext;
         private readonly IEndpointResolver _endpointResolver;
         private readonly IEndpoint _endpointToListenOn;
         private readonly MessageTypeDispatcher _messageDispatcher;
         private readonly IObjectBuilder _objectBuilder;
-        private readonly ManagedThread _receiveThread;
         private readonly ISubscriptionCache _subscriptionCache;
         private readonly TypeInfoCache _typeInfoCache;
         private IEndpoint _poisonEndpoint = new PoisonEndpointDecorator(new NullEndpoint());
@@ -85,10 +84,15 @@ namespace MassTransit.ServiceBus
             //TODO: Move into IObjectBuilder?
             _messageDispatcher = new MessageTypeDispatcher();
             _typeInfoCache = new TypeInfoCache();
-            _receiveThread = new ReceiveThread(this, endpointToListenOn);
-            _asyncDispatcher = new ManagedThreadPool<object>(IronDispatcher);
 
             _dispatcherContext = new DispatcherContext(_objectBuilder, this, _messageDispatcher, _subscriptionCache, _typeInfoCache);
+
+            _asyncDispatcher = new ResourceThreadPool<IEndpoint, object>(endpointToListenOn, 
+                EndpointReader, 
+                IronDispatcher, 
+                Environment.ProcessorCount, 
+                1, 
+                Environment.ProcessorCount * 8);
         }
 
         public ISubscriptionCache SubscriptionCache
@@ -115,7 +119,6 @@ namespace MassTransit.ServiceBus
 
         public void Dispose()
         {
-            _receiveThread.Dispose();
             _asyncDispatcher.Dispose();
             _typeInfoCache.Dispose();
             _subscriptionCache.Dispose();
@@ -239,24 +242,12 @@ namespace MassTransit.ServiceBus
 
         private void StartListening()
         {
-            if ( _receiveThread.Start() )
-            {
-                if(_log.IsDebugEnabled)
-                    _log.DebugFormat("ServiceBus is listening on {0}", _endpointToListenOn.Uri);
-            }
+            // TODO NUKE
         }
 
         public void Dispatch(object message)
         {
-            Dispatch(message, DispatchMode.Synchronous);
-        }
-
-        public void Dispatch(object message, DispatchMode mode)
-        {
-            if (mode == DispatchMode.Synchronous)
-                IronDispatcher(message);
-            else
-                _asyncDispatcher.Enqueue(message);
+            IronDispatcher(message);
         }
 
         public bool Accept(object obj)
@@ -264,8 +255,20 @@ namespace MassTransit.ServiceBus
             return _messageDispatcher.Accept(obj);
         }
 
+        private object EndpointReader(IEndpoint resource)
+        {
+            TimeSpan timeout = TimeSpan.FromSeconds(3);
+
+            object message = resource.Receive(timeout, Accept);
+
+            return message;
+        }
+
         private void IronDispatcher(object message)
         {
+            if (message == null)
+                return;
+
             try
             {
                 _messageDispatcher.Consume(message);

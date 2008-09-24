@@ -18,21 +18,27 @@ namespace HeavyLoad.Correlated
     internal class CorrelatedController :
         Consumes<SimpleResponseMessage>.For<Guid>
     {
+        private static readonly TimeSpan _timeout = TimeSpan.FromSeconds(6);
         private readonly IServiceBus _bus;
         private readonly Guid _id;
+        private readonly Action<CorrelatedController> _successAction;
+        private readonly Action<CorrelatedController> _timeoutAction;
         private ServiceBusRequest<CorrelatedController> _request;
-        private TimeSpan _timeout = TimeSpan.FromSeconds(6);
 
-
-        public CorrelatedController(IServiceBus bus)
+        public CorrelatedController(IServiceBus bus, Action<CorrelatedController> successAction, Action<CorrelatedController> timeoutAction)
         {
             _bus = bus;
+            _successAction = successAction;
+            _timeoutAction = timeoutAction;
 
             _id = Guid.NewGuid();
         }
 
         public void Consume(SimpleResponseMessage message)
         {
+            if (message.CorrelationId != _id)
+                throw new ArgumentException("Unknown message response received");
+
             _request.Complete();
         }
 
@@ -41,9 +47,6 @@ namespace HeavyLoad.Correlated
             get { return _id; }
         }
 
-        public event Action<CorrelatedController> OnSuccess = delegate { };
-        public event Action<CorrelatedController> OnTimeout = delegate { };
-
         public void SimulateRequestResponse()
         {
             _request = _bus.Request().From(this);
@@ -51,9 +54,9 @@ namespace HeavyLoad.Correlated
             _request.Send(new SimpleRequestMessage(_id), RequestMode.Synchronous, _timeout);
 
             if (_request.IsCompleted)
-                OnSuccess(this);
+                _successAction(this);
             else
-                OnTimeout(this);
+                _timeoutAction(this);
         }
     }
 }

@@ -124,7 +124,7 @@ namespace MassTransit.ServiceBus.Tests
 		private int _count;
 		private readonly Semaphore _updated = new Semaphore(0, int.MaxValue);
 
-		[Test]
+		[Test,Explicit]
 		public void They_should_still_pick_up_the_work()
 		{
 			using (ManagedThreadPool<string> pool = new ManagedThreadPool<string>(Worker, 0, 2))

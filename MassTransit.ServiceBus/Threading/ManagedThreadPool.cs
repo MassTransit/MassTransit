@@ -32,8 +32,9 @@ namespace MassTransit.ServiceBus.Threading
 		private readonly Queue<T> _workItems = new Queue<T>();
 		private int _maxThreads;
 		private int _minThreads;
+	    private int _maxQueueDepth = 5000;
 
-		public ManagedThreadPool(Action<T> handler)
+	    public ManagedThreadPool(Action<T> handler)
 			: this(handler, 1, 10)
 		{
 		}
@@ -81,7 +82,7 @@ namespace MassTransit.ServiceBus.Threading
 		public int MaxQueueDepth
 		{
 			[System.Diagnostics.DebuggerStepThrough]
-			get { return _maxThreads * 2; }
+			get { return _maxQueueDepth; }
 		}
 
 		public int MaxThreads
