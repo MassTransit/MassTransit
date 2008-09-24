@@ -72,6 +72,12 @@ namespace MassTransit.ServiceBus.Configuration
             return this;
         }
 
+        public ConfigureTheBus ActivateHeartbeat()
+        {
+            _options.TurnOnHeartBeat(3);
+            return this;
+        }
+
 
         //last thing you call
         public BusOptions Validate()
@@ -83,13 +89,6 @@ namespace MassTransit.ServiceBus.Configuration
             //that the IoC is not null?
             //any custom options should be checked
             return _options;
-        }
-
-        public ConfigureTheBus ActivateHeartBeat()
-        {
-            _options.TurnOnHeartBeat();
-
-            return this;
         }
     }
 }

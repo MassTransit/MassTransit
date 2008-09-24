@@ -1,7 +1,9 @@
 namespace MassTransit.ServiceBus.Configuration
 {
     using System;
+    using System.Collections;
     using Formatters;
+    using HealthMonitoring;
     using Internal;
     using Subscriptions;
 
@@ -35,8 +37,10 @@ namespace MassTransit.ServiceBus.Configuration
         }
         public string Name { get; set; }
         public bool HasAHeartBeat { get; private set; }
-        public void TurnOnHeartBeat()
+        public int HeartBeatInterval { get; private set; }
+        public void TurnOnHeartBeat(int interval)
         {
+            HeartBeatInterval = interval;
             HasAHeartBeat = true;
         }
 
@@ -51,7 +55,15 @@ namespace MassTransit.ServiceBus.Configuration
             IServiceBus bus = new ServiceBus(endpointToListenOn, ResolvesDependenciesFrom, cache);
             //ResolvesDependenciesFrom.Register<IServiceBus>(bus, Name);
             
-            //has a heart beat
+            if (this.HasAHeartBeat)
+            {
+                ResolvesDependenciesFrom.Register<HealthClient>();
+                IDictionary args = new Hashtable();
+                args.Add("bus", bus);
+                args.Add("heartBeatInterval", this.HeartBeatInterval);
+                HealthClient hc = ResolvesDependenciesFrom.Build<HealthClient>(args);
+                //hc.Start();
+            }
 
             return bus;
         }
