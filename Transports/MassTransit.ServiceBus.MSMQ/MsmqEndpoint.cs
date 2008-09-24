@@ -203,7 +203,23 @@ namespace MassTransit.ServiceBus.MSMQ
 				if (SpecialLoggers.Messages.IsInfoEnabled)
                     SpecialLoggers.Messages.InfoFormat("SEND:{0}:{1}", Uri, messageType.Name);
 
-			    _queue.Send(msg, _sendTransactionType);
+				if(_sendTransactionType == MessageQueueTransactionType.Automatic)
+				{
+					if(Transaction.Current == null)
+					{
+						using(TransactionScope scope = new TransactionScope())
+						{
+							_queue.Send(msg, _sendTransactionType);
+							scope.Complete();
+						}
+					}
+					else
+					{
+						_queue.Send(msg, _sendTransactionType);
+					}
+				}
+				else
+				    _queue.Send(msg, _sendTransactionType);
 			}
 			catch (MessageQueueException ex)
 			{

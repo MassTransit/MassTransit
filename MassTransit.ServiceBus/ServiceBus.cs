@@ -88,8 +88,8 @@ namespace MassTransit.ServiceBus
             _dispatcherContext = new DispatcherContext(_objectBuilder, this, _messageDispatcher, _subscriptionCache, _typeInfoCache);
 
             _asyncDispatcher = new ResourceThreadPool<IEndpoint, object>(endpointToListenOn, 
-                EndpointReader, 
-                IronDispatcher, 
+                EndpointReader,
+				EndpointDispatcher, 
                 Environment.ProcessorCount, 
                 1, 
                 Environment.ProcessorCount * 8);
@@ -257,12 +257,44 @@ namespace MassTransit.ServiceBus
 
         private object EndpointReader(IEndpoint resource)
         {
-            TimeSpan timeout = TimeSpan.FromSeconds(3);
+			try
+			{
+				TimeSpan timeout = TimeSpan.FromSeconds(3);
 
-            object message = resource.Receive(timeout, Accept);
+				object message = resource.Receive(timeout, Accept);
 
-            return message;
+				return message;
+			}
+			catch(Exception ex)
+			{
+				_log.Error(string.Format("An exception occurred receiving a message from {0}", _endpointToListenOn.Uri), ex);
+				throw;
+			}
         }
+
+		private void EndpointDispatcher(object message)
+		{
+			if (message == null)
+				return;
+
+			try
+			{
+				_messageDispatcher.Consume(message);
+			}
+			catch (Exception ex)
+			{
+				IPublicationTypeInfo info = _typeInfoCache.GetPublicationTypeInfo(message.GetType());
+
+				info.PublishFault(this, ex, message);
+
+				PoisonEndpoint.Send(message, TimeSpan.Zero);
+
+				SpecialLoggers.Iron.Error("An error was caught in the ServiceBus.IronDispatcher", ex);
+
+				throw;
+			}
+		}
+
 
         private void IronDispatcher(object message)
         {
