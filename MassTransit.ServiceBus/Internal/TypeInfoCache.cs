@@ -14,6 +14,7 @@ namespace MassTransit.ServiceBus.Internal
 {
     using System;
     using System.Collections.Generic;
+    using System.Threading;
     using Saga;
 
     public class TypeInfoCache : IDisposable
@@ -29,6 +30,7 @@ namespace MassTransit.ServiceBus.Internal
         private static readonly Type _selectiveConsumerType = typeof (Consumes<>.Selected);
         private static readonly Type _startedByType = typeof (InitiatedBy<>);
         private readonly Dictionary<Type, TypeInfo> _types = new Dictionary<Type, TypeInfo>();
+		private readonly ReaderWriterLock _lockContext = new ReaderWriterLock();
 
         static TypeInfoCache()
         {
@@ -54,45 +56,61 @@ namespace MassTransit.ServiceBus.Internal
             return Resolve(typeof (TComponent));
         }
 
-        public ITypeInfo Resolve(Type componentType)
-        {
-            lock (_types)
-            {
-                TypeInfo info;
-                if (_types.TryGetValue(componentType, out info))
-                    return info;
+		public ITypeInfo Resolve(Type componentType)
+		{
+			_lockContext.AcquireReaderLock(Timeout.Infinite);
+			try
+			{
+				TypeInfo info;
+				if (_types.TryGetValue(componentType, out info))
+					return info;
 
-                info = new TypeInfo(componentType);
+				LockCookie cookie = _lockContext.UpgradeToWriterLock(Timeout.Infinite);
+				try
+				{
+					if (_types.TryGetValue(componentType, out info))
+						return info;
 
-                List<Type> usedMessageTypes = new List<Type>();
+					info = new TypeInfo(componentType);
 
-                foreach (Type interfaceType in componentType.GetInterfaces())
-                {
-                    if (!interfaceType.IsGenericType) continue;
+					List<Type> usedMessageTypes = new List<Type>();
 
-                    Type genericType = interfaceType.GetGenericTypeDefinition();
-                    Type[] types = interfaceType.GetGenericArguments();
+					foreach (Type interfaceType in componentType.GetInterfaces())
+					{
+						if (!interfaceType.IsGenericType) continue;
 
-                    if (usedMessageTypes.Contains(types[0])) continue; 
+						Type genericType = interfaceType.GetGenericTypeDefinition();
+						Type[] types = interfaceType.GetGenericArguments();
 
-                    foreach (ActionEntry entry in _consumerActions)
-                    {
-                        if (entry.GenericType != genericType) continue;
+						if (usedMessageTypes.Contains(types[0])) continue;
 
-                        usedMessageTypes.Add(types[0]);
+						foreach (ActionEntry entry in _consumerActions)
+						{
+							if (entry.GenericType != genericType) continue;
 
-                        entry.AddAction(info, componentType, types);
-                        break;
-                    }
-                }
+							usedMessageTypes.Add(types[0]);
 
-                _types.Add(componentType, info);
+							entry.AddAction(info, componentType, types);
+							break;
+						}
+					}
 
-                return info;
-            }
-        }
+					_types.Add(componentType, info);
 
-        public IPublicationTypeInfo GetPublicationTypeInfo<TComponent>() where TComponent : class
+					return info;
+				}
+				finally
+				{
+					_lockContext.DowngradeFromWriterLock(ref cookie);
+				}
+			}
+			finally
+			{
+				_lockContext.ReleaseReaderLock();
+			}
+		}
+
+    	public IPublicationTypeInfo GetPublicationTypeInfo<TComponent>() where TComponent : class
         {
             ITypeInfo typeInfo = Resolve<TComponent>();
 

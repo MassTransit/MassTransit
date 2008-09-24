@@ -17,6 +17,7 @@ namespace MassTransit.ServiceBus.Internal
 	using System.Globalization;
 	using System.Reflection;
 	using System.Text;
+	using System.Threading;
 	using Exceptions;
 	using log4net;
 
@@ -27,30 +28,49 @@ namespace MassTransit.ServiceBus.Internal
 		private static readonly ILog _log = LogManager.GetLogger(typeof (EndpointResolver));
 		private static readonly Dictionary<string, Type> _schemes = new Dictionary<string, Type>();
 	    private static readonly IEndpoint _null = new NullEndpoint();
+		private static readonly ReaderWriterLock _lockContext = new ReaderWriterLock();
 
 		public static string AddTransport(Type transportType)
 		{
-			lock (_schemes)
+			_lockContext.AcquireReaderLock(Timeout.Infinite);
+			try
 			{
 				// get the scheme for each endpoint and add it to the resolver
 				const BindingFlags bindingFlags = BindingFlags.Static | BindingFlags.Public | BindingFlags.GetField | BindingFlags.NonPublic;
 
-				PropertyInfo property = transportType.GetProperty("Scheme", bindingFlags, null, typeof(string), new Type[0], null);
+				PropertyInfo property = transportType.GetProperty("Scheme", bindingFlags, null, typeof (string), new Type[0], null);
 
 				string scheme = property.GetValue(null, bindingFlags, null, null, CultureInfo.InvariantCulture) as string;
+				if (string.IsNullOrEmpty(scheme))
+					throw new ConventionException("No endpoint scheme defined for transport");
 
-				if (!_schemes.ContainsKey(scheme))
+				if (_schemes.ContainsKey(scheme))
+					return scheme;
+
+				LockCookie cookie = _lockContext.UpgradeToWriterLock(Timeout.Infinite);
+				try
 				{
+					if (_schemes.ContainsKey(scheme))
+						return scheme;
+
 					_log.InfoFormat("Registering transport '{0}' to schema '{1}'", transportType.Name, scheme);
 
 					_schemes.Add(scheme, transportType);
-				}
 
-				return scheme;
+					return scheme;
+				}
+				finally
+				{
+					_lockContext.DowngradeFromWriterLock(ref cookie);
+				}
+			}
+			finally
+			{
+				_lockContext.ReleaseReaderLock();
 			}
 		}
 
-        public static ConstructorInfo GetConstructor(Type type)
+		public static ConstructorInfo GetConstructor(Type type)
         {
             BindingFlags bindingFlags = BindingFlags.Instance | BindingFlags.Public;
             CallingConventions conventions = CallingConventions.Standard | CallingConventions.HasThis;
@@ -61,16 +81,16 @@ namespace MassTransit.ServiceBus.Internal
 
 		public IEndpoint Resolve(Uri uri)
 		{
-            GuardAgainstZeroTransports();
+			GuardAgainstZeroTransports();
 
-			// TODO this needs to be updated to a reader/writer lock since it rarely gets updated but gets read a LOT
-
-			lock (_cache)
+			_lockContext.AcquireReaderLock(Timeout.Infinite);
+			try
 			{
 				if (_cache.ContainsKey(uri))
 					return _cache[uri];
 
-				lock (_schemes)
+				LockCookie cookie = _lockContext.UpgradeToWriterLock(Timeout.Infinite);
+				try
 				{
 					if (_cache.ContainsKey(uri))
 						return _cache[uri];
@@ -90,14 +110,22 @@ namespace MassTransit.ServiceBus.Internal
 						return endpoint;
 					}
 				}
+				finally
+				{
+					_lockContext.DowngradeFromWriterLock(ref cookie);
+				}
+			}
+			finally
+			{
+				_lockContext.ReleaseReaderLock();
 			}
 
-		    string message = BuildHelpfulErrorMessage(uri);
-            _log.Error(message);
+			string message = BuildHelpfulErrorMessage(uri);
+			_log.Error(message);
 			throw new EndpointException(new NullEndpoint(), message);
 		}
 
-	    private static string BuildHelpfulErrorMessage(Uri uri)
+		private static string BuildHelpfulErrorMessage(Uri uri)
 	    {
 	        StringBuilder sb = new StringBuilder();
 	        sb.AppendLine("Unable to resolve Uri " + uri + " to an endpoint");

@@ -32,7 +32,6 @@ namespace MassTransit.ServiceBus
         private readonly IServiceBus _bus;
         private readonly ManualResetEvent _complete = new ManualResetEvent(false);
         private readonly Consumes<Batch<TMessage, TBatchId>>.Selected _consumer;
-        private readonly object _countLocker = new object();
         private readonly Semaphore _messageReady;
         private readonly Queue<TMessage> _messages = new Queue<TMessage>();
         private readonly TimeSpan _timeout;
@@ -86,13 +85,8 @@ namespace MassTransit.ServiceBus
 
                 yield return message;
 
-                lock (_countLocker)
-                {
-                    _messageCount++;
-
-                    if (_messageCount == _batchLength)
-                        _complete.Set();
-                }
+				if (Interlocked.Increment(ref _messageCount) == _batchLength)
+					_complete.Set();
             }
 
             if (waitResult == WaitHandle.WaitTimeout)
