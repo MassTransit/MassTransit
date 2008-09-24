@@ -20,29 +20,44 @@ namespace MassTransit.ServiceBus.HealthMonitoring
         IHostedService //, Publishes<Heartbeat>
     {
         private readonly IServiceBus _bus;
-        private readonly Timer _timer;
-        private readonly int _timeInSeconds;
         private readonly int _timeInMilliseconds;
+        private readonly int _timeInSeconds;
+        private readonly Timer _timer;
 
         public HealthClient(IServiceBus bus) : this(bus, 3)
         {
         }
 
-		/// <summary>
-		/// Constructs a new HealthClient object
-		/// </summary>
-		/// <param name="bus">The service bus to monitor</param>
-		/// <param name="heartbeatInterval">The heartbeat interval in seconds</param>
+        /// <summary>
+        /// Constructs a new HealthClient object
+        /// </summary>
+        /// <param name="bus">The service bus to monitor</param>
+        /// <param name="heartbeatInterval">The heartbeat interval in seconds</param>
         public HealthClient(IServiceBus bus, int heartbeatInterval)
         {
             _bus = bus;
             _timeInSeconds = heartbeatInterval;
             _timeInMilliseconds = heartbeatInterval*1000;
-            _timer = new System.Timers.Timer(_timeInMilliseconds);
+            _timer = new Timer(_timeInMilliseconds);
             _timer.Elapsed += Beat;
             _timer.AutoReset = true;
         }
 
+        public bool Enabled
+        {
+            get { return _timer.Enabled; }
+        }
+
+        #region All Members
+
+        public void Consume(Ping message)
+        {
+            _bus.Publish(new Pong(message.CorrelationId, _bus.Endpoint.Uri));
+        }
+
+        #endregion
+
+        #region IHostedService Members
 
         public void Start()
         {
@@ -54,27 +69,17 @@ namespace MassTransit.ServiceBus.HealthMonitoring
             _timer.Stop();
         }
 
-        public void Beat(object sender, System.Timers.ElapsedEventArgs e)
-        {
-            _bus.Publish(new Heartbeat(_timeInSeconds, _bus.Endpoint.Uri));
-        }
-
-
-        public void Consume(Ping message)
-        {
-            _bus.Publish(new Pong(message.CorrelationId, _bus.Endpoint.Uri));
-        }
-
         public void Dispose()
         {
             _timer.Elapsed -= Beat;
             _timer.Dispose();
         }
 
+        #endregion
 
-        public bool Enabled
+        public void Beat(object sender, ElapsedEventArgs e)
         {
-            get { return _timer.Enabled; }
+            _bus.Publish(new Heartbeat(_timeInSeconds, _bus.Endpoint.Uri));
         }
     }
 }
