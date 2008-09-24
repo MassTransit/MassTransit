@@ -2,6 +2,7 @@ namespace HeavyLoad
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Diagnostics;
 	using System.Text;
 
 	public class StopWatch
@@ -9,15 +10,18 @@ namespace HeavyLoad
 		private readonly List<CheckPoint> _marks = new List<CheckPoint>();
 		private DateTime _start;
 		private DateTime _stop;
+	    private Stopwatch _stopwatch;
 
 		public void Start()
 		{
 			_start = DateTime.Now;
+		    _stopwatch = Stopwatch.StartNew();
 		}
 
 		public void Stop()
 		{
 			_stop = DateTime.Now;
+		    _stopwatch.Stop();
 		}
 
 		public override string ToString()
@@ -32,7 +36,7 @@ namespace HeavyLoad
 			}
 
 			sb.AppendFormat("Finished at {0}\n", _stop);
-			sb.AppendFormat("Total elapsed time: {0}\n", (_stop - _start));
+			sb.AppendFormat("Total elapsed time: {0}\n", _stopwatch.Elapsed);
 
 			return sb.ToString();
 		}
@@ -51,25 +55,22 @@ namespace HeavyLoad
 	{
 		private readonly string _description;
 		private int _operationCount = 1;
-		private readonly DateTime _start;
-		private DateTime _stop;
+	    private Stopwatch _stopwatch;
 
 		public CheckPoint(string description)
 		{
 			_description = description;
-			_start = DateTime.Now;
+		    _stopwatch = Stopwatch.StartNew();
 		}
 
 		public void ToString(StringBuilder sb)
 		{
-			TimeSpan duration = _stop - _start;
-
-			sb.AppendFormat("{0}: {1}", _description, duration);
+			sb.AppendFormat("{0}: {1}", _description, _stopwatch.Elapsed);
 
 			if (_operationCount > 1)
 			{
-				sb.AppendFormat(", /{0} = {1}ms", _operationCount, duration.TotalMilliseconds / _operationCount);
-				sb.AppendFormat("{0}  {1}/seconds", Environment.NewLine,  _operationCount / duration.TotalSeconds );
+				sb.AppendFormat(", /{0} = {1}ms", _operationCount, _stopwatch.ElapsedMilliseconds / _operationCount);
+                sb.AppendFormat("{0}  {1}/seconds", Environment.NewLine, _operationCount / _stopwatch.Elapsed.TotalSeconds);
 			}
 
 			sb.AppendLine();
@@ -77,7 +78,7 @@ namespace HeavyLoad
 
 		public void Complete(int operationCount)
 		{
-			_stop = DateTime.Now;
+		    _stopwatch.Stop();
 
 			_operationCount = operationCount;
 		}

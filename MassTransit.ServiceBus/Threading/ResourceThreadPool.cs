@@ -134,6 +134,7 @@ namespace MassTransit.ServiceBus.Threading
         private void AddThread()
         {
             Thread thread = new Thread(RunThread);
+            thread.SetApartmentState(ApartmentState.MTA);
 
             lock (_threads)
                 _threads.Add(thread);

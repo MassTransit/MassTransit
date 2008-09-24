@@ -71,8 +71,8 @@ namespace MassTransit.ServiceBus.Tests.Configuration
         [Test]
         public void Turn_on_heartbeat()
         {
-            var busOptions = BusBuilder.WithName("funk_bus")
-                .ActivateHeartBeat();
+//            var busOptions = BusBuilder.WithName("funk_bus")
+//                .ActivateHeartBeat();
         }
         [Test]
         public void As_a_commandee()

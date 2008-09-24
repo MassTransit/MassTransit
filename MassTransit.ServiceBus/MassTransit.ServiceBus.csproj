@@ -147,7 +147,6 @@
     <Compile Include="ServiceBusRequest.cs" />
     <Compile Include="Consumes.cs" />
     <Compile Include="CorrelatedBy.cs" />
-    <Compile Include="DispatchMode.cs" />
     <Compile Include="Exceptions\ConventionException.cs" />
     <Compile Include="Exceptions\MessageException.cs" />
     <Compile Include="Exceptions\ShutDownException.cs" />
@@ -175,7 +174,6 @@
     <Compile Include="IEndpoint.cs" />
     <Compile Include="Internal\IMessageDispatcher.cs" />
     <Compile Include="IMessageContext.cs" />
-    <Compile Include="Internal\ReceiveThread.cs" />
     <Compile Include="IObjectBuilder.cs" />
     <Compile Include="IServiceBus.cs" />
     <Compile Include="MessageFilter.cs" />

@@ -14,6 +14,7 @@ namespace MassTransit.ServiceBus.Internal
 {
     using System;
     using System.Collections.Generic;
+    using System.Threading;
     using Exceptions;
 
     /// <summary>
@@ -29,7 +30,7 @@ namespace MassTransit.ServiceBus.Internal
     {
         private readonly Dictionary<TBatchId, Batch<TMessage, TBatchId>> _batches = new Dictionary<TBatchId, Batch<TMessage, TBatchId>>();
         private readonly IServiceBus _bus;
-        private readonly object _lockContext = new object();
+        private readonly ReaderWriterLock _lockContext = new ReaderWriterLock();
         private readonly MessageDispatcher<Batch<TMessage, TBatchId>> _messageDispatcher;
         private readonly TimeSpan _timeout;
 
@@ -51,18 +52,37 @@ namespace MassTransit.ServiceBus.Internal
         {
             TBatchId batchId = message.BatchId;
 
-            lock (_lockContext)
+            _lockContext.AcquireReaderLock(Timeout.Infinite);
+            try
+            {
                 if (_batches.ContainsKey(batchId))
                     return true;
 
-            Batch<TMessage, TBatchId> batch = new Batch<TMessage, TBatchId>(_bus, message.BatchId, message.BatchLength, _timeout, _messageDispatcher);
+                LockCookie cookie = _lockContext.UpgradeToWriterLock(Timeout.Infinite);
+                try
+                {
+                    if (_batches.ContainsKey(batchId))
+                        return true;
 
-            if (_messageDispatcher.Accept(batch))
+                    Batch<TMessage, TBatchId> batch = new Batch<TMessage, TBatchId>(_bus, 
+                        message.BatchId, message.BatchLength, _timeout, _messageDispatcher);
+
+                    if (_messageDispatcher.Accept(batch))
+                    {
+                        _batches.Add(batchId, batch);
+                        batch.Start();
+
+                        return true;
+                    }
+                }
+                finally
+                {
+                    _lockContext.DowngradeFromWriterLock(ref cookie);
+                }
+            }
+            finally
             {
-                _batches.Add(batchId, batch);
-                batch.Start();
-
-                return true;
+                _lockContext.ReleaseReaderLock();
             }
 
             return false;
@@ -73,12 +93,15 @@ namespace MassTransit.ServiceBus.Internal
             TBatchId batchId = message.BatchId;
 
             Batch<TMessage, TBatchId> batch;
-            lock (_lockContext)
+            _lockContext.AcquireReaderLock(Timeout.Infinite);
+            try
             {
-                if (!_batches.ContainsKey(batchId))
+                if(_batches.TryGetValue(batchId, out batch) == false)
                     throw new MessageException(typeof (Batch<TMessage, TBatchId>), "Unexpected batch consumed");
-
-                batch = _batches[batchId];
+            }
+            finally
+            {
+                _lockContext.ReleaseReaderLock();
             }
 
             // push this message to the context, releasing the enumerator
