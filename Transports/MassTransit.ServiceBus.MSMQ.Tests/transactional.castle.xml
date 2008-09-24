@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<configuration>
+	<facilities>
+		<facility id="masstransit">
+
+			<bus id="local"
+					 endpoint="msmq://localhost/test_servicebus_tx">
+			</bus>
+			<bus id="remote"
+					 endpoint="msmq://localhost/test_remoteservicebus_tx">
+			</bus>
+			<transports>
+				<transport>MassTransit.ServiceBus.MSMQ.MsmqEndpoint, MassTransit.ServiceBus.MSMQ</transport>
+			</transports>
+		</facility>
+	</facilities>
+</configuration>

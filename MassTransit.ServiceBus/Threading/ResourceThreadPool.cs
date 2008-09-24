@@ -16,6 +16,7 @@ namespace MassTransit.ServiceBus.Threading
     using System.Collections.Generic;
     using System.Diagnostics;
     using System.Threading;
+    using System.Transactions;
     using log4net;
     using Util;
 
@@ -173,19 +174,24 @@ namespace MassTransit.ServiceBus.Threading
 
                 try
                 {
-                    TElement element;
-                    try
-                    {
-                        AdjustQueueCount();
+					using (TransactionScope scope = new TransactionScope())
+					{
+						TElement element;
+						try
+						{
+							AdjustQueueCount();
 
-                        element = _function(_resource);
-                    }
-                    finally
-                    {
-                        _resourceGovernor.Release(1);
-                    }
+							element = _function(_resource);
+						}
+						finally
+						{
+							_resourceGovernor.Release(1);
+						}
 
-                    _action(element);
+						_action(element);
+
+						scope.Complete();
+					}
                 }
                 catch (Exception ex)
                 {
