@@ -14,15 +14,16 @@ namespace MassTransit.ServiceBus.Internal
 {
     using System;
     using System.Collections.Generic;
+    using System.Threading;
 
-    /// <summary>
+	/// <summary>
     /// Manages and dispatches messages to correlated message consumers
     /// </summary>
     public class MessageTypeDispatcher :
         IMessageTypeDispatcher
     {
         private readonly Dictionary<Type, IMessageDispatcher> _messageDispatchers = new Dictionary<Type, IMessageDispatcher>();
-        private readonly object _messageLock = new object();
+        private readonly ReaderWriterLock _messageLock = new ReaderWriterLock();
 
         public bool Accept(object message)
         {
@@ -75,21 +76,35 @@ namespace MassTransit.ServiceBus.Internal
 
         public IMessageDispatcher GetMessageDispatcher(Type messageType) 
         {
-            lock (_messageLock)
+			_messageLock.AcquireReaderLock(Timeout.Infinite);
+            try
             {
                 IMessageDispatcher consumer;
-                if (_messageDispatchers.TryGetValue(messageType, out consumer))
-                {
-                    return consumer;
-                }
+            	if (_messageDispatchers.TryGetValue(messageType, out consumer))
+            		return consumer;
 
-                Type dispatcherType = typeof (MessageDispatcher<>).MakeGenericType(messageType);
+                LockCookie cookie = _messageLock.UpgradeToWriterLock(Timeout.Infinite);
+				try
+				{
+					if (_messageDispatchers.TryGetValue(messageType, out consumer))
+						return consumer;
 
-                consumer = (IMessageDispatcher) Activator.CreateInstance(dispatcherType);
+					Type dispatcherType = typeof(MessageDispatcher<>).MakeGenericType(messageType);
 
-                _messageDispatchers.Add(messageType, consumer);
+					consumer = (IMessageDispatcher) Activator.CreateInstance(dispatcherType);
 
-                return consumer;
+					_messageDispatchers.Add(messageType, consumer);
+
+					return consumer;
+				}
+				finally
+				{
+					_messageLock.DowngradeFromWriterLock(ref cookie);
+				}
+			}
+			finally
+            {
+            	_messageLock.ReleaseReaderLock();
             }
         }
 
@@ -124,10 +139,15 @@ namespace MassTransit.ServiceBus.Internal
         {
             Type messageType = message.GetType();
 
-            bool found;
-            lock (_messageDispatchers)
-                found = _messageDispatchers.TryGetValue(messageType, out dispatcher);
-            return found;
+        	_messageLock.AcquireReaderLock(Timeout.Infinite);
+			try
+			{
+				return _messageDispatchers.TryGetValue(messageType, out dispatcher);
+			}
+			finally
+			{
+				_messageLock.ReleaseReaderLock();
+			}
         }
     }
 }

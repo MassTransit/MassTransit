@@ -14,6 +14,7 @@ namespace MassTransit.ServiceBus.Internal
 {
     using System;
     using System.Collections.Generic;
+    using System.Threading;
     using Exceptions;
     using log4net;
 
@@ -23,6 +24,7 @@ namespace MassTransit.ServiceBus.Internal
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof (MessageDispatcher<TMessage>));
         private readonly List<Consumes<TMessage>.All> _consumers = new List<Consumes<TMessage>.All>();
+    	private readonly ReaderWriterLock _consumerLock = new ReaderWriterLock();
 
         public bool Accept(TMessage message)
         {
@@ -30,8 +32,15 @@ namespace MassTransit.ServiceBus.Internal
                 _log.DebugFormat("No consumers for message type {0}", typeof (TMessage));
 
             IList<Consumes<TMessage>.All> consumers;
-            lock (_consumers)
-                consumers = new List<Consumes<TMessage>.All>(_consumers);
+        	_consumerLock.AcquireReaderLock(Timeout.Infinite);
+        	try
+        	{
+				consumers = new List<Consumes<TMessage>.All>(_consumers);
+        	}
+        	finally
+        	{
+        		_consumerLock.ReleaseReaderLock();
+        	}
 
             foreach (Consumes<TMessage>.All consumer in consumers)
             {
@@ -53,8 +62,15 @@ namespace MassTransit.ServiceBus.Internal
         public void Consume(TMessage message)
         {
             IList<Consumes<TMessage>.All> consumers;
-            lock (_consumers)
-                consumers = new List<Consumes<TMessage>.All>(_consumers);
+			_consumerLock.AcquireReaderLock(Timeout.Infinite);
+			try
+			{
+				consumers = new List<Consumes<TMessage>.All>(_consumers);
+			}
+			finally
+			{
+				_consumerLock.ReleaseReaderLock();
+			}
 
             foreach (Consumes<TMessage>.All consumer in consumers)
             {
@@ -94,28 +110,38 @@ namespace MassTransit.ServiceBus.Internal
 
         public T GetDispatcher<T>() where T : class
         {
-            lock(_consumers)
-            {
+			_consumerLock.AcquireReaderLock(Timeout.Infinite);
+			try
+			{
                 foreach (Consumes<TMessage>.All consumer in _consumers)
                 {
                     if (consumer.GetType() == typeof(T))
                         return (T)consumer;
                 }
-            }
+			}
+			finally
+			{
+				_consumerLock.ReleaseReaderLock();
+			}
 
             return default(T);
         }
 
         public T GetDispatcher<T>(Type type) where T : class
         {
-            lock (_consumers)
-            {
+			_consumerLock.AcquireReaderLock(Timeout.Infinite);
+			try
+			{
                 foreach (Consumes<TMessage>.All consumer in _consumers)
                 {
                     if (consumer.GetType() == type)
                         return (T)consumer;
                 }
-            }
+			}
+			finally
+			{
+				_consumerLock.ReleaseReaderLock();
+			}
 
             return default(T);
         }
@@ -127,24 +153,56 @@ namespace MassTransit.ServiceBus.Internal
 
         public void Attach(Consumes<TMessage>.All consumer)
         {
-            lock (_consumers)
-            {
-                if (!_consumers.Contains(consumer))
-                {
-                    _consumers.Add(consumer);
-                }
-            }
+			_consumerLock.AcquireReaderLock(Timeout.Infinite);
+			try
+			{
+				if (_consumers.Contains(consumer))
+					return;
+
+				LockCookie cookie = _consumerLock.UpgradeToWriterLock(Timeout.Infinite);
+				try
+				{
+					if (_consumers.Contains(consumer))
+						return;
+
+						_consumers.Add(consumer);
+				}
+				finally
+				{
+					_consumerLock.DowngradeFromWriterLock(ref cookie);
+				}
+			}
+			finally
+			{
+				_consumerLock.ReleaseReaderLock();
+			}
         }
 
         public void Detach(Consumes<TMessage>.All consumer)
         {
-            lock (_consumers)
-            {
-                if (_consumers.Contains(consumer))
-                {
-                    _consumers.Remove(consumer);
-                }
-            }
+			_consumerLock.AcquireReaderLock(Timeout.Infinite);
+			try
+			{
+				if (!_consumers.Contains(consumer))
+					return;
+
+				LockCookie cookie = _consumerLock.UpgradeToWriterLock(Timeout.Infinite);
+				try
+				{
+					if (!_consumers.Contains(consumer))
+						return;
+
+					_consumers.Remove(consumer);
+				}
+				finally
+				{
+					_consumerLock.DowngradeFromWriterLock(ref cookie);
+				}
+			}
+			finally
+			{
+				_consumerLock.ReleaseReaderLock();
+			}
         }
 
         private static TMessage GetTypedMessage(object obj)
