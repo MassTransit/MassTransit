@@ -14,13 +14,14 @@ namespace MassTransit.ServiceBus.Subscriptions
 {
     using System;
     using System.Collections.Generic;
+    using System.Threading;
     using log4net;
 
     public class LocalSubscriptionCache :
         ISubscriptionCache
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof (LocalSubscriptionCache));
-        private readonly object _changeLock = new object();
+    	private readonly ReaderWriterLock _lockContext = new ReaderWriterLock();
 
         private readonly Dictionary<string, List<SubscriptionCacheEntry>> _correlatedSubscriptions =
             new Dictionary<string, List<SubscriptionCacheEntry>>(StringComparer.InvariantCultureIgnoreCase);
@@ -32,7 +33,8 @@ namespace MassTransit.ServiceBus.Subscriptions
         {
             List<Subscription> result = new List<Subscription>();
 
-            lock (_changeLock)
+        	_lockContext.AcquireReaderLock(Timeout.Infinite);
+			try
             {
                 foreach (KeyValuePair<string, List<SubscriptionCacheEntry>> pair in _messageTypeSubscriptions)
                 {
@@ -54,13 +56,18 @@ namespace MassTransit.ServiceBus.Subscriptions
                             });
                 }
             }
+			finally
+			{
+				_lockContext.ReleaseReaderLock();
+			}
 
             return result;
         }
 
         public IList<Subscription> List(string messageName)
         {
-            lock (_changeLock)
+        	_lockContext.AcquireReaderLock(Timeout.Infinite);
+			try
             {
                 List<Subscription> result = new List<Subscription>();
                 if (_messageTypeSubscriptions.ContainsKey(messageName))
@@ -70,12 +77,18 @@ namespace MassTransit.ServiceBus.Subscriptions
 
                 return result;
             }
-        }
+			finally
+			{
+				_lockContext.ReleaseReaderLock();
+			}
+		}
 
         public IList<Subscription> List(string messageName, string correlationId)
         {
             List<Subscription> result = new List<Subscription>();
-            lock (_changeLock)
+        	
+			_lockContext.AcquireReaderLock(Timeout.Infinite);
+			try
             {
                 if (_messageTypeSubscriptions.ContainsKey(messageName))
                 {
@@ -99,19 +112,30 @@ namespace MassTransit.ServiceBus.Subscriptions
                             });
                 }
             }
-            return result;
+			finally
+			{
+				_lockContext.ReleaseReaderLock();
+			}
+
+			return result;
         }
 
         public void Add(Subscription subscription)
         {
             bool added;
-            lock (_changeLock)
-            {
+
+			_lockContext.AcquireWriterLock(Timeout.Infinite);
+			try
+			{
                 if (string.IsNullOrEmpty(subscription.CorrelationId))
                     added = Add(_messageTypeSubscriptions, subscription);
                 else
                     added = Add(_correlatedSubscriptions, subscription);
             }
+			finally
+			{
+				_lockContext.ReleaseWriterLock();
+			}
 
             if (added)
             {
@@ -122,13 +146,18 @@ namespace MassTransit.ServiceBus.Subscriptions
         public void Remove(Subscription subscription)
         {
             bool removed;
-            lock (_changeLock)
-            {
+			_lockContext.AcquireWriterLock(Timeout.Infinite);
+			try
+			{
                 if (string.IsNullOrEmpty(subscription.CorrelationId))
                     removed = Remove(_messageTypeSubscriptions, subscription);
                 else
                     removed = Remove(_correlatedSubscriptions, subscription);
             }
+			finally
+			{
+				_lockContext.ReleaseWriterLock();
+			}
 
             if (removed)
             {
@@ -149,8 +178,8 @@ namespace MassTransit.ServiceBus.Subscriptions
         private static string GetSubscriptionKey(Subscription subscription)
         {
             if (string.IsNullOrEmpty(subscription.CorrelationId))
-            
                 return subscription.MessageName;
+
             return subscription.MessageName + "/" + subscription.CorrelationId;
         }
 
