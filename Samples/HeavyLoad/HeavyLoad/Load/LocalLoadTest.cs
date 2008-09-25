@@ -6,7 +6,7 @@ namespace HeavyLoad.Load
 	using MassTransit.ServiceBus;
 	using MassTransit.ServiceBus.MSMQ;
 
-	public abstract class LocalLoadTest : IDisposable
+	public class LocalLoadTest : IDisposable
 	{
 		private const int _repeatCount = 5000;
 		private readonly ManualResetEvent _completeEvent = new ManualResetEvent(false);
