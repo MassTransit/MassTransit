@@ -1,10 +1,11 @@
 namespace CodeCamp.Service
 {
 	using System;
-	using MassTransit.DistributedSubscriptionCache;
+	using Castle.MicroKernel;
 	using MassTransit.ServiceBus;
 	using MassTransit.ServiceBus.MSMQ;
 	using MassTransit.ServiceBus.Subscriptions;
+	using MassTransit.WindsorIntegration;
 	using Messages;
 
 	internal class Program :
@@ -26,7 +27,9 @@ namespace CodeCamp.Service
 			IEndpoint endpoint = new MsmqEndpoint("msmq://localhost/test_server");
 			ISubscriptionCache cache = new DistributedSubscriptionCache();
 
-			using (IServiceBus serviceBus = new ServiceBus(endpoint, cache))
+		    IObjectBuilder obj = new WindsorObjectBuilder(new DefaultKernel());
+
+			using (IServiceBus serviceBus = new ServiceBus(endpoint, null, cache))
 			{
 				serviceBus.AddComponent<Program>();
 
