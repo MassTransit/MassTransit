@@ -1,11 +1,12 @@
 namespace CodeCamp.Core
 {
-	using MassTransit.DistributedSubscriptionCache;
-	using MassTransit.ServiceBus;
+    using Castle.MicroKernel;
+    using MassTransit.ServiceBus;
 	using MassTransit.ServiceBus.MSMQ;
 	using MassTransit.ServiceBus.Subscriptions;
+    using MassTransit.WindsorIntegration;
 
-	public static class DomainContext
+    public static class DomainContext
 	{
 		private static readonly IEndpoint _endpoint;
 		private static readonly IServiceBus _serviceBus;
@@ -19,7 +20,9 @@ namespace CodeCamp.Core
 
 			ISubscriptionCache cache = new DistributedSubscriptionCache();
 
-			_serviceBus = new ServiceBus(_endpoint, cache);
+            IObjectBuilder obj = new WindsorObjectBuilder(new DefaultKernel());
+
+			_serviceBus = new ServiceBus(_endpoint, obj, cache);
 		}
 
 		public static void Publish<T>(T message) where T : class
