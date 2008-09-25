@@ -20,6 +20,8 @@ namespace HeavyLoad
 
 			RunContainerLoadTest();
 
+			RunTransactionLoadTest();
+
 			RunLoopbackLoadTest();
 
 		//	RunWcfLoadTest();
@@ -51,7 +53,7 @@ namespace HeavyLoad
 		{
 			StopWatch stopWatch = new StopWatch();
 
-			using (LocalMsmqLoadTest test = new LocalMsmqLoadTest())
+            using (LocalLoadTest test = new LocalLoadTest())
 			{
 				test.Run(stopWatch);
 			}
@@ -70,6 +72,19 @@ namespace HeavyLoad
 			}
 
 			Console.WriteLine("Container Load Test: ");
+			Console.WriteLine(stopWatch.ToString());
+		}
+
+		private static void RunTransactionLoadTest()
+		{
+			StopWatch stopWatch = new StopWatch();
+
+            using (TransactionLoadTest test = new TransactionLoadTest())
+			{
+				test.Run(stopWatch);
+			}
+
+			Console.WriteLine("Transaction Load Test: ");
 			Console.WriteLine(stopWatch.ToString());
 		}
 
@@ -99,20 +114,7 @@ namespace HeavyLoad
 			Console.WriteLine(stopWatch.ToString());
 		}
 
-		private static void RunLocalActiveMqLoadTest()
-		{
-			StopWatch stopWatch = new StopWatch();
-
-			using (LocalActiveMqLoadTest test = new LocalActiveMqLoadTest())
-			{
-				test.Run(stopWatch);
-			}
-
-			Console.WriteLine("Local ActiveMQ Load Test: ");
-			Console.WriteLine(stopWatch.ToString());
-		}
-
-		private static void RunCorrelatedMessageTest()
+	    private static void RunCorrelatedMessageTest()
 		{
 			StopWatch stopWatch = new StopWatch();
 

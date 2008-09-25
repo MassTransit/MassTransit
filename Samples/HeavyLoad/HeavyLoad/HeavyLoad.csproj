@@ -68,10 +68,9 @@
     <Compile Include="GeneralMessage.cs" />
     <Compile Include="HeavyLoadContainer.cs" />
     <Compile Include="Load\ContainerLoadTest.cs" />
-    <Compile Include="Load\LocalActiveMqLoadTest.cs" />
     <Compile Include="Load\LocalLoadTest.cs" />
-    <Compile Include="Load\LocalMsmqLoadTest.cs" />
     <Compile Include="Load\LoopbackLoadTest.cs" />
+    <Compile Include="Load\TransactionLoadTest.cs" />
     <Compile Include="Load\WcfLoadTest.cs" />
     <Compile Include="MsmqHelper.cs" />
     <Compile Include="Program.cs" />
@@ -112,6 +111,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Loopback.castle.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="transaction.castle.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="wcf.castle.xml">
