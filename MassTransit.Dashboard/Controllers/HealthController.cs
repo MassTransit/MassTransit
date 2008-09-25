@@ -10,7 +10,8 @@ namespace MassTransit.Dashboard.Controllers
     [Layout("default")]
     public class HealthController :
         SmartDispatcherController,
-        Consumes<HealthStatusResponse>.For<Guid>
+        Consumes<HealthStatusResponse>.For<Guid>,
+        Consumes<Pong>.For<Guid>
     {
         private readonly IServiceBus _bus;
         private ServiceBusRequest<HealthController> _request;
@@ -44,7 +45,16 @@ namespace MassTransit.Dashboard.Controllers
             PropertyBag.Add("statuses", infos);
         }
 
-        #region Implementation of All
+        public void Ping(string uri)
+        {
+            _request = _bus.Request().From(this);
+
+            _request.Send(new Ping(_correlationId));
+
+            _request.AsyncWaitHandle.WaitOne(3000, true); //the consumes method will set the property bag
+        }
+
+        #region HealthStatusResponse
 
         public void Consume(HealthStatusResponse message)
         {
@@ -52,15 +62,20 @@ namespace MassTransit.Dashboard.Controllers
             _request.Complete();
         }
 
-        #endregion
-
-        #region Implementation of CorrelatedBy<Guid>
-
         public Guid CorrelationId
         {
             get { return _correlationId; }
         }
 
+        #endregion
+
+        #region Pong
+        public void Consume(Pong message)
+        {
+            //this.PropertyBag.Add("pong", message);
+            this.RenderText("ponged");
+            _request.Complete();
+        }
         #endregion
     }
 }
