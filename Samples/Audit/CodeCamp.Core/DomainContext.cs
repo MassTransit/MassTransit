@@ -16,7 +16,7 @@ namespace CodeCamp.Core
 		{
 			_userRepository = new Repository<User>(new User[] {new User("joe", "password"), new User("david", "password"),});
 
-			_endpoint = new MsmqEndpoint("msmq://localhost/test_servicebus");
+			_endpoint = new MsmqEndpoint("msmq://localhost/mt_client");
 
 			ISubscriptionCache cache = new DistributedSubscriptionCache();
 

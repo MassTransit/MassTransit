@@ -24,7 +24,7 @@ namespace CodeCamp.Service
 
 		private static void Main()
 		{
-			IEndpoint endpoint = new MsmqEndpoint("msmq://localhost/test_server");
+			IEndpoint endpoint = new MsmqEndpoint("msmq://localhost/mt_server");
 			ISubscriptionCache cache = new DistributedSubscriptionCache();
 
 		    IObjectBuilder obj = new WindsorObjectBuilder(new DefaultKernel());
