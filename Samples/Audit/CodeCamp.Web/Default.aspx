@@ -1,19 +1,13 @@
-<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="Default.aspx.cs" Inherits="CodeCamp.Web._Default" %>
+<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="Default.aspx.cs" Inherits="CodeCamp.Web._Default" MasterPageFile="~/Masters/TulsaTechFest.Master" %>
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
-<html xmlns="http://www.w3.org/1999/xhtml" >
-<head runat="server">
-    <title>Tulsa School of Dev Sample</title>
-</head>
-<body>
-    <form id="form1" runat="server">
-    <div>
-        <asp:Label ID="usernameLabel" runat="server">Username:</asp:Label>
-        <asp:TextBox runat="server" ID="username"></asp:TextBox>
+<asp:Content ContentPlaceHolderID="ContentPlaceHolder1" runat="server">
+    <fieldset>
+        <legend>Register</legend>
+        <label>Username:<label>
+        <asp:TextBox runat="server" ID="username" CssClass="text"></asp:TextBox>
         <br />
-        <asp:Label ID="passwordLabel" runat="server">Password:</asp:Label>
-        <asp:TextBox runat="server" ID="password"></asp:TextBox>
+        <label>Password:</label>
+        <asp:TextBox runat="server" ID="password" CssClass="text"></asp:TextBox>
         <br />
         <br />
         <asp:Label ID="resultLabel" runat="server" Text="Result"></asp:Label><br />
@@ -23,6 +17,6 @@
         <br />
         <br />
         <asp:Label ID="timerLabel" runat="server" Text="Elapsed Time:"></asp:Label></div>
-    </form>
-</body>
-</html>
+    </fieldset>
+
+</asp:Content>
