@@ -11,6 +11,6 @@
 namespace CodeCamp.Web {
     
     
-    public partial class _Default {
+    public partial class Registration {
     }
 }
