@@ -15,7 +15,7 @@ namespace MassTransit.Saga.Tests.RegisterUser
 	using System;
 	using System.Diagnostics;
 	using Castle.Core;
-	using Magnum.Common;
+	using Magnum.Common.Repository;
 	using Messages;
 	using NUnit.Framework;
 	using NUnit.Framework.SyntaxHelpers;

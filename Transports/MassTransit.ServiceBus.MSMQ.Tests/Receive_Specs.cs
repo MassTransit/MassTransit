@@ -15,7 +15,7 @@ namespace MassTransit.ServiceBus.MSMQ.Tests
 	using System;
 	using System.Messaging;
 	using System.Transactions;
-	using Magnum.Common;
+	using Magnum.Common.DateTimeExtensions;
 	using NUnit.Framework;
 
 	[TestFixture]
@@ -32,8 +32,8 @@ namespace MassTransit.ServiceBus.MSMQ.Tests
 			_queue = new MessageQueue(_queueName, false, true, QueueAccessMode.SendAndReceive);
 			_queue.Purge();
 
-			_firstMsg = new Message { Label = 0.Days().FromUtcNow().ToString() };
-			_secondMsg = new Message { Label = 1.Days().FromUtcNow().ToString() };
+			_firstMsg = new Message {Label = 0.Days().FromUtcNow().ToString()};
+			_secondMsg = new Message {Label = 1.Days().FromUtcNow().ToString()};
 
 			_queue.Send(_firstMsg, MessageQueueTransactionType.Single);
 			_queue.Send(_secondMsg, MessageQueueTransactionType.Single);
@@ -139,10 +139,10 @@ namespace MassTransit.ServiceBus.MSMQ.Tests
 			}
 		}
 
-	    [Test]
-	    public void What_about_event_driven_consumer()
-	    {
-	    }
+		[Test]
+		public void What_about_event_driven_consumer()
+		{
+		}
 	}
 
 	public static class MessageQueueExtensions
