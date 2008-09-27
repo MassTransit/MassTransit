@@ -50,7 +50,7 @@ namespace MassTransit.ServiceBus.Threading
         {
             Check.Ensure(resourceLimit > 0, "The resource limit must be greater than zero");
             Check.Ensure(minThreads > 0, "The minimum thread count must be greater than zero");
-            Check.Ensure(maxThreads >= minThreads, "The maximum thread count must be at least equal to the minimum thread count");
+            Check.Ensure(maxThreads >= minThreads, string.Format("The maximum thread count (currently={0}) must be at least equal to the minimum thread count (currently={1})", maxThreads, minThreads));
             Check.Parameter(action).WithMessage("The handler must not be null").IsNotNull();
 
             _resource = resource;
