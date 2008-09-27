@@ -1,23 +1,16 @@
-﻿using System;
-using System.Collections;
-using System.Configuration;
-using System.Data;
-using System.Linq;
-using System.Web;
-using System.Web.Security;
-using System.Web.UI;
-using System.Web.UI.HtmlControls;
-using System.Web.UI.WebControls;
-using System.Web.UI.WebControls.WebParts;
-using System.Xml.Linq;
-
-namespace CodeCamp.Web
+﻿namespace CodeCamp.Web
 {
-    public partial class EmailConfirmed : System.Web.UI.Page
+    using System;
+    using System.Web.UI;
+    using Core;
+    using Messages;
+
+    public partial class EmailConfirmed : Page
     {
         protected void Page_Load(object sender, EventArgs e)
         {
-
+            var registrationId = new Guid(Request.QueryString[0]);
+            DomainContext.Publish(new UserEmailConfirmed(registrationId));
         }
     }
 }
