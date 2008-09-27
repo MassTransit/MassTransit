@@ -20,7 +20,7 @@ namespace MassTransit.ServiceBus.HealthMonitoring
 
     public class Investigator : 
         Consumes<Suspect>.All,
-        Consumes<Pong>.For<Guid> //, Produces<DownEndpoint>
+        Consumes<Pong>.All //, Produces<DownEndpoint>
     {
         private readonly ILog _log = LogManager.GetLogger(typeof (Investigator));
         private readonly IServiceBus _bus;
