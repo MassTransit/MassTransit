@@ -5,7 +5,6 @@ namespace MassTransit.ServiceBus.Tests.HealthMonitoring
     using MassTransit.ServiceBus.HealthMonitoring;
     using MassTransit.ServiceBus.HealthMonitoring.Messages;
     using MassTransit.ServiceBus.Internal;
-    using MassTransit.ServiceBus.Subscriptions;
     using NUnit.Framework;
     using Transports;
 
@@ -28,12 +27,12 @@ namespace MassTransit.ServiceBus.Tests.HealthMonitoring
         [Ignore("Needs new castle object builder")]
         public void bob()
         {
-						EndpointResolver.AddTransport(typeof(LoopbackEndpoint));
+            EndpointResolver.AddTransport(typeof (LoopbackEndpoint));
 
-        	EndpointResolver _endpointResolver = new EndpointResolver();
-        	IEndpoint _mockServiceBusEndPoint = _endpointResolver.Resolve(new Uri("loopback://localhost/test"));
+            EndpointResolver _endpointResolver = new EndpointResolver();
+            IEndpoint _mockServiceBusEndPoint = _endpointResolver.Resolve(new Uri("loopback://localhost/test"));
 
-			ServiceBus bus = new ServiceBus(_mockServiceBusEndPoint, DynamicMock<IObjectBuilder>());
+            ServiceBus bus = new ServiceBus(_mockServiceBusEndPoint, DynamicMock<IObjectBuilder>());
             bus.AddComponent<HeartbeatMonitor>();
             bus.Dispatch(new Heartbeat(3, new Uri("msmq://localhost/ddd")));
         }
