@@ -4,6 +4,7 @@ namespace CodeCamp.Web
 	using System.Web.UI;
 	using Core;
 	using Magnum.Common;
+	using Masters;
 
     public partial class _Default : Page
 	{
@@ -14,7 +15,7 @@ namespace CodeCamp.Web
 
         protected void submitButton_Click(object sender, EventArgs e)
         {
-            using (var timer = new FunctionTimer("description", delegate(string stuff) { return; }))
+            using (var timer = new FunctionTimer("_Default submiteButton_Click", delegate(string stuff) { return; }))
             {
                 User user = DomainContext.UserRepository.Get(username.Text);
 
@@ -22,19 +23,19 @@ namespace CodeCamp.Web
                 {
                     if (user.CheckPassword(password.Text))
                     {
-                        resultLabel.Text = string.Format("User access granted.");
+                        ((TulsaTechFest)this.Master).SetNotice("user access granted");
                     }
                     else
                     {
-                        resultLabel.Text = string.Format("Invalid password specified for user {0}", username.Text);
+                        ((TulsaTechFest)this.Master).SetError(string.Format("Invalid password specified for user '{0}'", username.Text));
                     }
                 }
                 else
                 {
-                    resultLabel.Text = string.Format("User not found: {0}", username.Text);
+                    ((TulsaTechFest)this.Master).SetError(string.Format("User not found: '{0}'", username.Text));
                 }
 
-                timerLabel.Text = string.Format("Elapsed Time: {0}ms", timer);
+                timerLabel.Text = string.Format("Elapsed Time: {0}", timer.Header);
             }
         }
 	}

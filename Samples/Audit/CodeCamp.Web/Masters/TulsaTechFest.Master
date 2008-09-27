@@ -21,11 +21,12 @@
 		<h2 class="alt">Sign up today</h2> 
 		<hr> 
         <form id="form1" runat="server">
-        <div>
-            <asp:ContentPlaceHolder ID="ContentPlaceHolder1" runat="server">
-            
-            </asp:ContentPlaceHolder>
-        </div>
+        
+                <asp:Panel ID="outputNotification" CssClass="notice" runat="server" Visible="false" />
+                <asp:Panel ID="outputError" CssClass="error" runat="server" Visible="false" />
+                <asp:ContentPlaceHolder ID="ContentPlaceHolder1" runat="server">
+                
+                </asp:ContentPlaceHolder>
         </form>
     </div>
 </body>

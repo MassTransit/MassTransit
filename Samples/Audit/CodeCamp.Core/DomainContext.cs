@@ -14,7 +14,7 @@ namespace CodeCamp.Core
 
 		static DomainContext()
 		{
-			_userRepository = new Repository<User>(new User[] {new User("joe", "password"), new User("david", "password"),});
+			_userRepository = new Repository<User>(new [] {new User("joe", "password"), new User("david", "password"),});
 
 			_endpoint = new MsmqEndpoint("msmq://localhost/mt_client");
 
