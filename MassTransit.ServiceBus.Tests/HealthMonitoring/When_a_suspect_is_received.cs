@@ -11,108 +11,106 @@ namespace MassTransit.ServiceBus.Tests.HealthMonitoring
 
     [TestFixture]
     public class When_a_suspect_is_received :
-        Specification
+        LocalAndRemoteTestContext
     {
-        IServiceBus mockBus;
-        IEndpointResolver mockEndpointResolver;
-        IEndpoint mockEndpoint;
-        IHealthCache mockCache;
+        IHealthCache _mockCache;
+        private IEndpoint _mockEndpoint;
+        private IEndpointResolver _mockResolver;
+            Investigator _investigator;
 
         private HealthInformation information;
-        private Uri _testUri = new Uri("msmq://localhost/test");
 
         protected override void Before_each()
         {
-            mockBus = DynamicMock<IServiceBus>();
-            mockEndpointResolver = DynamicMock<IEndpointResolver>();
-            mockEndpoint = DynamicMock<IEndpoint>();
-            mockCache = DynamicMock<IHealthCache>();
+            _mockCache = Mock<IHealthCache>();
+            _mockEndpoint = StrictMock<IEndpoint>();
+            _mockResolver = StrictMock<IEndpointResolver>();
+            SetupResult.For(_mockResolver.Resolve(null)).Return(_mockEndpoint).IgnoreArguments();
 
-            information = new HealthInformation(_testUri);
+            information = new HealthInformation(RemoteBus.Endpoint.Uri);
+            _investigator = new Investigator(LocalBus, _mockResolver, _mockCache);
         }
         protected override void After_each()
         {
-            mockBus = null;
-            mockEndpointResolver = null;
-            mockEndpoint = null;
-            mockCache = null;
+            _mockCache = null;
+            _mockEndpoint = null;
+            _mockResolver = null;
+            _investigator = null;
         }
 
         [Test]
         public void An_Investigation_should_happen()
         {
-            Investigator inv = new Investigator(mockBus, mockEndpointResolver, mockCache);
 
-            using (Record())
+            using (Record)
             {
-                Expect.Call(mockEndpointResolver.Resolve(_testUri)).Return(mockEndpoint);
                 Expect.Call(delegate
                                 {
-                                    mockEndpoint.Send(new Ping(inv.CorrelationId), new TimeSpan(0,3,0));
+                                    _mockEndpoint.Send(new Ping(_investigator.CorrelationId), new TimeSpan(0, 3, 0));
                                 }).Constraints(Is.Matching<Ping>(delegate(Ping msg)
                                 {
-                                    return msg.CorrelationId.Equals(inv.CorrelationId);
+                                    return msg.CorrelationId.Equals(_investigator.CorrelationId);
                                 }), Is.Anything());
             }
-            using(Playback())
+            using(Playback)
             {
-                inv.Consume(new Suspect(_testUri));
+                _investigator.Consume(new Suspect(RemoteBus.Endpoint.Uri));
             }
         }
 
         [Test]
         public void An_investigation_should_happen_and_pong_received()
         {
-            Investigator inv = new Investigator(mockBus, mockEndpointResolver, mockCache);
 
-            using (Record())
+            using (Record)
             {
-                Expect.Call(mockEndpointResolver.Resolve(_testUri)).Return(mockEndpoint);
                 Expect.Call(delegate
                                 {
-                                    mockEndpoint.Send(new Ping(inv.CorrelationId), new TimeSpan(0, 3, 0));
+                                    _mockEndpoint.Send(new Ping(_investigator.CorrelationId), new TimeSpan(0, 3, 0));
                                 }).Constraints(Is.Matching<Ping>(delegate(Ping msg)
                                 {
-                                    return msg.CorrelationId.Equals(inv.CorrelationId);
+                                    return msg.CorrelationId.Equals(_investigator.CorrelationId);
                                 }), Is.Anything());
             }
-            using (Playback())
+            using (Playback)
             {
-                inv.Consume(new Suspect(_testUri));
-                Assert.IsTrue(inv.Enabled);
-                inv.Consume(new Pong(inv.CorrelationId, _testUri));
-                Assert.IsFalse(inv.Enabled);
+                _investigator.Consume(new Suspect(RemoteBus.Endpoint.Uri));
+                Assert.IsTrue(_investigator.Enabled);
+                _investigator.Consume(new Pong(_investigator.CorrelationId, RemoteBus.Endpoint.Uri));
+                Assert.IsFalse(_investigator.Enabled);
             }
         }
 
         [Test]
         public void When_a_ping_times_out()
         {
-            Investigator inv = new Investigator(mockBus, mockEndpointResolver, mockCache, 50);
             ManualResetEvent evt = new ManualResetEvent(false);
+            IServiceBus mockBus = StrictMock<IServiceBus>();
+            _investigator = new Investigator(mockBus, _mockResolver, _mockCache, 20);
 
-            using (Record())
+            using (Record)
             {
-                Expect.Call(mockEndpointResolver.Resolve(_testUri)).Return(mockEndpoint);
                 Expect.Call(delegate
                                 {
-                                    mockEndpoint.Send(new Ping(inv.CorrelationId), new TimeSpan(0, 3, 0));
-                                }).Constraints(Is.Matching<Ping>(delegate(Ping msg)
-                                {
-                                    return msg.CorrelationId.Equals(inv.CorrelationId);
-                                }), Is.Anything());
-                Expect.Call(delegate { mockBus.Publish(new DownEndpoint(_testUri)); })
-                    .Constraints(Is.Matching<DownEndpoint>(delegate(DownEndpoint msg)
+                                    _mockEndpoint.Send(new Ping(_investigator.CorrelationId), new TimeSpan(0, 3, 0));
+                                }).Constraints(Is.Matching(delegate(Ping msg)
                                                                {
-                                                                   if (msg.Endpoint != _testUri) return false;
-                                                                   evt.Set();
-                                                                   return true;
-                                                               }));
+                                                                   return
+                                                                       msg.CorrelationId.Equals(
+                                                                           _investigator.CorrelationId);
+                                                               }), Is.Anything());
+                Expect.Call(delegate { mockBus.Publish(new DownEndpoint(RemoteBus.Endpoint.Uri)); })
+                    .Constraints(Is.Matching(delegate(DownEndpoint msg)
+                                                 {
+                                                     if (msg.Endpoint != RemoteBus.Endpoint.Uri) return false;
+                                                     evt.Set();
+                                                     return true;
+                                                 }));
             }
-            using (Playback())
+            using (Playback)
             {
-                inv.Consume(new Suspect(_testUri));
-                Assert.IsTrue(evt.WaitOne(500, true));
+                _investigator.Consume(new Suspect(RemoteBus.Endpoint.Uri));
+                Assert.IsTrue(evt.WaitOne(2000, true),"event did not complete correctly");
             }
         }
     }
