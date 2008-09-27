@@ -16,22 +16,23 @@ namespace SubscriptionManagerGUI
 	using System.Collections.Generic;
 	using System.ComponentModel;
 	using System.Windows.Forms;
-	using log4net;
 	using MassTransit.ServiceBus;
+	using MassTransit.ServiceBus.HealthMonitoring;
 	using MassTransit.ServiceBus.Subscriptions;
 	using MassTransit.ServiceBus.Timeout;
 	using MassTransit.ServiceBus.Util;
 
 	public partial class SubscriptionManagerForm : Form
 	{
-		private static readonly ILog _log = LogManager.GetLogger(typeof (SubscriptionManagerForm));
 		private readonly ISubscriptionCache _cache;
-		private ITimeoutStorage _timeoutStorage;
-
-		public SubscriptionManagerForm(ISubscriptionCache cache, ITimeoutStorage timeoutStorage)
+		private readonly ITimeoutStorage _timeoutStorage;
+	    private readonly IHealthCache _healthCache;
+        
+		public SubscriptionManagerForm(ISubscriptionCache cache, ITimeoutStorage timeoutStorage, IHealthCache healthCache)
 		{
 			_cache = cache;
 			_timeoutStorage = timeoutStorage;
+		    _healthCache = healthCache;
 
 			InitializeComponent();
 		}
@@ -46,9 +47,30 @@ namespace SubscriptionManagerGUI
 			_timeoutStorage.TimeoutAdded += TimeoutRefreshNeeded;
 			_timeoutStorage.TimeoutUpdated += TimeoutRefreshNeeded;
 			_timeoutStorage.TimeoutRemoved += TimeoutRefreshNeeded;
+
+		    _healthCache.NewHealthInformation += HeartBeatRefreshNeeded;
+		    _healthCache.UpdatedHealthInformation += HeartBeatRefreshNeeded;
 		}
 
-		private void SubscriptionAdded(object sender, SubscriptionEventArgs e)
+	    private void HeartBeatRefreshNeeded(HealthInformation obj)
+	    {
+            ThreadSafeUpdate2 tsu = RefreshHealth;
+            BeginInvoke(tsu, new object[] { obj });
+	    }
+
+        private void RefreshHealth(HealthInformation ignored)
+        {
+            this.heartbeatList.Items.Clear();
+
+            foreach (HealthInformation information in _healthCache.List())
+            {
+                string[] items = new []{information.Uri.ToString(), information.FirstDetectedAt.Value.ToShortTimeString()};
+                ListViewItem lvi = new ListViewItem(items);
+                this.heartbeatList.Items.Add(lvi);
+            }
+        }
+
+	    private void SubscriptionAdded(object sender, SubscriptionEventArgs e)
 		{
 			ThreadSafeUpdate tsu = RefreshSubscriptions;
 			BeginInvoke(tsu, new object[] {e.Subscription});
@@ -169,5 +191,7 @@ namespace SubscriptionManagerGUI
 		private delegate void ThreadSafeTimeoutUpdate(Guid id);
 
 		private delegate void ThreadSafeUpdate(Subscription subscription);
+
+	    private delegate void ThreadSafeUpdate2(HealthInformation information);
 	}
 }

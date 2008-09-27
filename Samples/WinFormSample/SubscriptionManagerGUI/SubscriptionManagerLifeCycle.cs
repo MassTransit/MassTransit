@@ -17,6 +17,7 @@ namespace SubscriptionManagerGUI
 	using MassTransit.Host.Actions;
 	using MassTransit.Host.LifeCycles;
 	using MassTransit.ServiceBus;
+	using MassTransit.ServiceBus.HealthMonitoring;
 	using MassTransit.ServiceBus.Subscriptions;
 	using MassTransit.ServiceBus.Timeout;
 
@@ -38,6 +39,9 @@ namespace SubscriptionManagerGUI
 
 			Container.AddComponent<ISubscriptionRepository, InMemorySubscriptionRepository>();
 			Container.AddComponent<IHostedService, SubscriptionService>();
+
+		    Container.AddComponent<IHealthCache, LocalHealthCache>();
+            Container.AddComponent<IHostedService, HealthService>();
 
 			Container.AddComponent<ITimeoutStorage, InMemoryTimeoutStorage>();
 			Container.AddComponent<IHostedService, TimeoutService>();

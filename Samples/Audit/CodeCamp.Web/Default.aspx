@@ -17,13 +17,10 @@
         <p>
             Not a member? <a href="/registration.aspx">Register Now</a>
         </p>
-        <asp:Label ID="resultLabel" runat="server" Text="Result"></asp:Label><br />
-        <br />
         <asp:Button ID="submitButton" runat="server" OnClick="submitButton_Click" Text="Logon" />
         <br />
         <br />
-        <br />
-        <asp:Label ID="timerLabel" runat="server" Text="Elapsed Time:"></asp:Label></div>
+        <br />    
     </fieldset>
-
+    <asp:Label ID="timerLabel" runat="server" Text="Elapsed Time:"></asp:Label></div>
 </asp:Content>
