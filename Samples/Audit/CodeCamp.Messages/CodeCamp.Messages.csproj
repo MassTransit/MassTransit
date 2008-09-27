@@ -57,9 +57,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="NewUserRequest.cs" />
+    <Compile Include="RegisterUser.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="UserEmailConfirmed.cs" />
+    <Compile Include="UserVerificationEmailSent.cs" />
+    <Compile Include="UserVerifiedEmail.cs" />
     <Compile Include="UserPasswordFailure.cs" />
     <Compile Include="UserPasswordSuccess.cs" />
   </ItemGroup>

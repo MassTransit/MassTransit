@@ -64,6 +64,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\bin\Castle.Windsor.dll</HintPath>
     </Reference>
+    <Reference Include="Magnum.Common, Version=0.1.0.69, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\libs\Magnum.Common.dll</HintPath>
+    </Reference>
     <Reference Include="MassTransit.ServiceBus, Version=0.1.525.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\bin\MassTransit.ServiceBus.dll</HintPath>
@@ -84,6 +88,8 @@
   <ItemGroup>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RegisterUserOrchestration.cs" />
+    <Compile Include="RegisterUserSaga.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CodeCamp.Messages\CodeCamp.Messages.csproj">

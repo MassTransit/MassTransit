@@ -10,7 +10,7 @@
         protected void Page_Load(object sender, EventArgs e)
         {
             var registrationId = new Guid(Request.QueryString[0]);
-            DomainContext.Publish(new UserEmailConfirmed(registrationId));
+            DomainContext.Publish(new UserVerifiedEmail(registrationId));
         }
     }
 }
