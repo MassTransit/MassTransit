@@ -7,5 +7,5 @@
         <p><label>Username</label><asp:TextBox runat="server" ID="inputUsername" CssClass="text" TextMode="SingleLine"></asp:TextBox></p>
         <p><label>Password</label><asp:TextBox runat="server" ID="inputPassword" CssClass="text" TextMode="Password"></asp:TextBox></p>
     </fieldset>
-
+    <asp:Button ID="submitButton" runat="server" OnClick="submitButton_Click" Text="Submit" />
 </asp:Content>

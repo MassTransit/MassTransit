@@ -1,23 +1,28 @@
-﻿using System;
-using System.Collections;
-using System.Configuration;
-using System.Data;
-using System.Linq;
-using System.Web;
-using System.Web.Security;
-using System.Web.UI;
-using System.Web.UI.HtmlControls;
-using System.Web.UI.WebControls;
-using System.Web.UI.WebControls.WebParts;
-using System.Xml.Linq;
-
-namespace CodeCamp.Web
+﻿namespace CodeCamp.Web
 {
-    public partial class Registration : System.Web.UI.Page
+    using System;
+    using System.Web.UI;
+    using Core;
+    using Magnum.Common;
+    using Masters;
+    using Messages;
+
+    public partial class Registration : Page
     {
         protected void Page_Load(object sender, EventArgs e)
         {
+        }
 
+        protected void submitButton_Click(object sender, EventArgs e)
+        {
+            using (var timer = new FunctionTimer("Registration submiteButton_Click", delegate { return; }))
+            {
+                var msg = new NewUserRequest(inputName.Text, inputUsername.Text, inputPassword.Text);
+
+                DomainContext.Publish(msg);
+                ((TulsaTechFest) Master).SetNotice("Thanks! You should receive an email shortly.");
+                submitButton.Enabled = false;
+            }
         }
     }
 }

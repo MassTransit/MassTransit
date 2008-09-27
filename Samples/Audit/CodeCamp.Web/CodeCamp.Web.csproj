@@ -135,6 +135,10 @@
       <Project>{71322EE3-E040-475F-8EFD-4D6E22E16B2A}</Project>
       <Name>CodeCamp.Core</Name>
     </ProjectReference>
+    <ProjectReference Include="..\CodeCamp.Messages\CodeCamp.Messages.csproj">
+      <Project>{7C6ED57B-D1E6-4CED-89E4-58A9ABFC3F95}</Project>
+      <Name>CodeCamp.Messages</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Content Include="EmailConfirmed.aspx" />
