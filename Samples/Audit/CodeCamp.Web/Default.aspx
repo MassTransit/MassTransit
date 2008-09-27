@@ -2,14 +2,21 @@
 
 <asp:Content ContentPlaceHolderID="ContentPlaceHolder1" runat="server">
     <fieldset>
-        <legend>Register</legend>
-        <label>Username:</label>
-        <asp:TextBox runat="server" ID="username" CssClass="text"></asp:TextBox>
-        <br />
-        <label>Password:</label>
-        <asp:TextBox runat="server" ID="password" CssClass="text" TextMode="Password"></asp:TextBox>
-        <br />
-        <br />
+        <legend>Sign In</legend>
+        
+        <p>
+            <label>Username:</label>
+            <asp:TextBox runat="server" ID="username" CssClass="text"></asp:TextBox>
+        </p>
+        
+        <p>
+            <label>Password:</label>
+            <asp:TextBox runat="server" ID="password" CssClass="text" TextMode="Password"></asp:TextBox>
+        </p>
+        
+        <p>
+            Not a member? <a href="/registration.aspx">Register Now</a>
+        </p>
         <asp:Label ID="resultLabel" runat="server" Text="Result"></asp:Label><br />
         <br />
         <asp:Button ID="submitButton" runat="server" OnClick="submitButton_Click" Text="Logon" />
