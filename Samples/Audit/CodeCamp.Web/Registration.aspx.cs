@@ -17,7 +17,7 @@
         {
             using (var timer = new FunctionTimer("Registration submiteButton_Click", delegate { return; }))
             {
-                var msg = new NewUserRequest(inputName.Text, inputUsername.Text, inputPassword.Text);
+                var msg = new RegisterUser(inputName.Text, inputUsername.Text, inputPassword.Text, Guid.NewGuid());
 
                 DomainContext.Publish(msg);
                 ((TulsaTechFest) Master).SetNotice("Thanks! You should receive an email shortly.");
