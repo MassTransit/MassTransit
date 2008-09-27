@@ -55,6 +55,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\libs\Enyim.Caching.dll</HintPath>
     </Reference>
+    <Reference Include="Magnum.Common, Version=0.1.0.69, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\libs\Magnum.Common.dll</HintPath>
+    </Reference>
     <Reference Include="MassTransit.ServiceBus, Version=0.1.525.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\bin\MassTransit.ServiceBus.dll</HintPath>
