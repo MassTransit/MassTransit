@@ -28,8 +28,7 @@ namespace CodeCamp.Service
         //Starts things off
         public void Consume(RegisterUser message)
         {
-            var saga = new RegisterUserSaga(Guid.NewGuid());
-
+            var saga = new RegisterUserSaga(Guid.NewGuid(), message);
             _repository.Save(saga);
 
             var body = string.Format("Please verify email http://localhost/ConfirmEmail.aspx?registrationId={0}", saga.Id);
@@ -51,6 +50,8 @@ namespace CodeCamp.Service
         {
             var saga = _repository.Get<RegisterUserSaga>(message.CorrelationId);
             saga.UserHasConfirmedEmail();
+            var body = string.Format("Thank you. You are now registered");
+            _client.Send("bob", "dru", "Register Successful", body);
             _repository.Save(saga);
         }
     }
