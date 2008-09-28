@@ -59,14 +59,6 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\libs\Magnum.Common.dll</HintPath>
     </Reference>
-    <Reference Include="MassTransit.ServiceBus, Version=0.1.525.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\bin\MassTransit.ServiceBus.dll</HintPath>
-    </Reference>
-    <Reference Include="MassTransit.WindsorIntegration, Version=0.3.1107.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\bin\MassTransit.WindsorIntegration.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core, Version=3.5.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
@@ -131,6 +123,14 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\Containers\MassTransit.WindsorIntegration\MassTransit.WindsorIntegration.csproj">
+      <Project>{98D5A59C-96FA-4A1B-A653-EA5A35C45FC9}</Project>
+      <Name>MassTransit.WindsorIntegration</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\MassTransit.ServiceBus\MassTransit.ServiceBus.csproj">
+      <Project>{90482397-6282-465E-8B86-39865FC30127}</Project>
+      <Name>MassTransit.ServiceBus</Name>
+    </ProjectReference>
     <ProjectReference Include="..\CodeCamp.Core\CodeCamp.Core.csproj">
       <Project>{71322EE3-E040-475F-8EFD-4D6E22E16B2A}</Project>
       <Name>CodeCamp.Core</Name>

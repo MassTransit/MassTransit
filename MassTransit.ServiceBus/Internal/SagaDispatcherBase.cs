@@ -13,11 +13,12 @@
 namespace MassTransit.ServiceBus.Internal
 {
     using System;
+    using System.Transactions;
     using Saga;
 
     public abstract class SagaDispatcherBase<TSaga, TMessage> :
         Consumes<TMessage>.Selected
-        where TSaga : class, ISaga<TSaga>, Consumes<TMessage>.All
+        where TSaga : class, ISaga, Consumes<TMessage>.All
         where TMessage : class, CorrelatedBy<Guid>
     {
         protected IObjectBuilder _builder;
@@ -42,9 +43,24 @@ namespace MassTransit.ServiceBus.Internal
         {
             saga.Builder = _builder;
             saga.Bus = _bus;
-            saga.Save += x => _repository.Save(x);
 
             saga.Consume(message);
+        }
+
+        protected void UsingTransaction(TMessage message, Action<TMessage> action)
+        {
+            // if we are already pulling from a transactional queue, use the existing transaction
+            if(Transaction.Current != null)
+            {
+                action(message);
+                return;
+            }
+
+            using(TransactionScope scope = new TransactionScope())
+            {
+                action(message);
+                scope.Complete();
+            }
         }
     }
 }

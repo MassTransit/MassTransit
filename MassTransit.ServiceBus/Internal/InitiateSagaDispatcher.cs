@@ -18,7 +18,7 @@ namespace MassTransit.ServiceBus.Internal
 
     public class InitiateSagaDispatcher<TSaga, TMessage> :
         SagaDispatcherBase<TSaga, TMessage>
-        where TSaga : class, ISaga<TSaga>, Consumes<TMessage>.All
+        where TSaga : class, ISaga, Consumes<TMessage>.All
         where TMessage : class, CorrelatedBy<Guid>
     {
         public InitiateSagaDispatcher(IServiceBus bus, IObjectBuilder builder, ISagaRepository<TSaga> repository) :
@@ -32,9 +32,16 @@ namespace MassTransit.ServiceBus.Internal
             if (correlationId == Guid.Empty)
                 correlationId = CombGuid.NewCombGuid();
 
-            TSaga saga = _repository.Create(correlationId);
+            UsingTransaction(message, m =>
+                {
+                    TSaga saga = _repository.Create(correlationId);
 
-            DispatchToConsumer(saga, message);
+                    _repository.Save(saga);
+
+                    DispatchToConsumer(saga, message);
+
+                    _repository.Save(saga);
+                });
         }
     }
 }
