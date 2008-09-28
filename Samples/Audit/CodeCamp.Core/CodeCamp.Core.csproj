@@ -56,18 +56,6 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\bin\Castle.MicroKernel.dll</HintPath>
     </Reference>
-    <Reference Include="MassTransit.ServiceBus, Version=0.1.525.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\bin\MassTransit.ServiceBus.dll</HintPath>
-    </Reference>
-    <Reference Include="MassTransit.ServiceBus.MSMQ, Version=0.1.525.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\bin\MassTransit.ServiceBus.MSMQ.dll</HintPath>
-    </Reference>
-    <Reference Include="MassTransit.WindsorIntegration, Version=0.3.1107.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\bin\MassTransit.WindsorIntegration.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Messaging" />
@@ -81,6 +69,18 @@
     <Compile Include="User.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\Containers\MassTransit.WindsorIntegration\MassTransit.WindsorIntegration.csproj">
+      <Project>{98D5A59C-96FA-4A1B-A653-EA5A35C45FC9}</Project>
+      <Name>MassTransit.WindsorIntegration</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\MassTransit.ServiceBus\MassTransit.ServiceBus.csproj">
+      <Project>{90482397-6282-465E-8B86-39865FC30127}</Project>
+      <Name>MassTransit.ServiceBus</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\Transports\MassTransit.ServiceBus.MSMQ\MassTransit.ServiceBus.MSMQ.csproj">
+      <Project>{6F90867C-E092-4EDC-B3DE-600D39DF0335}</Project>
+      <Name>MassTransit.ServiceBus.MSMQ</Name>
+    </ProjectReference>
     <ProjectReference Include="..\CodeCamp.Messages\CodeCamp.Messages.csproj">
       <Project>{7C6ED57B-D1E6-4CED-89E4-58A9ABFC3F95}</Project>
       <Name>CodeCamp.Messages</Name>

@@ -18,7 +18,7 @@ namespace MassTransit.ServiceBus.Internal
 
     public class SagaDispatcher<TSaga, TMessage> :
         SagaDispatcherBase<TSaga, TMessage>
-        where TSaga : class, ISaga<TSaga>, Consumes<TMessage>.All
+        where TSaga : class, ISaga, Consumes<TMessage>.All
         where TMessage : class, CorrelatedBy<Guid>
     {
         public SagaDispatcher(IServiceBus bus, IObjectBuilder builder, ISagaRepository<TSaga> repository) :
@@ -30,11 +30,16 @@ namespace MassTransit.ServiceBus.Internal
         {
             Guid correlationId = message.CorrelationId;
 
-            TSaga saga = _repository.Get(correlationId);
-            if (saga == null)
-                throw new SagaException("The saga could not be loaded.", typeof (TSaga), typeof (TMessage), correlationId);
+            UsingTransaction(message, m =>
+            {
+                TSaga saga = _repository.Get(correlationId);
+                if (saga == null)
+                    throw new SagaException("The saga could not be loaded.", typeof(TSaga), typeof(TMessage), correlationId);
 
-            DispatchToConsumer(saga, message);
+                DispatchToConsumer(saga, message);
+
+                _repository.Save(saga);
+            });
         }
     }
 }
