@@ -90,6 +90,7 @@
     <Compile Include="RegisterUser\Messages\SendUserVerificationEmail.cs" />
     <Compile Include="SagaRepository.cs" />
     <Compile Include="SagaTestContext.cs" />
+    <Compile Include="SchemaGeneration_Specs.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Containers\MassTransit.WindsorIntegration\MassTransit.WindsorIntegration.csproj">
@@ -110,6 +111,10 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="nhibernate.cfg.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <EmbeddedResource Include="RegisterUser\RegisterUserSaga.hbm.xml" />
     <Content Include="saga.tests.castle.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

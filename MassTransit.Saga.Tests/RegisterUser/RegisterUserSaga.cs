@@ -40,13 +40,17 @@ namespace MassTransit.Saga.Tests.RegisterUser
 		InitiatedBy<RegisterUser>,
 		Orchestrates<UserVerificationEmailSent>,
 		Orchestrates<UserValidated>,
-		ISaga<RegisterUserSaga>, 
+		ISaga, 
 		IAggregateRoot
 	{
 		private string _displayName;
 		private string _email;
 		private string _password;
 		private string _username;
+
+        protected RegisterUserSaga()
+        {
+        }
 
 		public RegisterUserSaga(Guid correlationId)
 		{
@@ -66,13 +70,8 @@ namespace MassTransit.Saga.Tests.RegisterUser
 			_password = message.Password;
 			_email = message.Email;
 
-			Save(this);
-
 			Bus.Publish(new SendUserVerificationEmail(CorrelationId, _email));
 		}
-
-
-		public Action<RegisterUserSaga> Save { get; set; }
 
 		// The bus that received the message
 		public IServiceBus Bus { get; set; }
@@ -81,10 +80,6 @@ namespace MassTransit.Saga.Tests.RegisterUser
 		public IObjectBuilder Builder { get; set; }
 
 		public Guid CorrelationId { get; private set; }
-
-		public void Dispose()
-		{
-		}
 
 		public void Consume(UserValidated message)
 		{

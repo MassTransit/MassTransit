@@ -36,8 +36,6 @@ namespace MassTransit.ServiceBus.Internal
                 {
                     TSaga saga = _repository.Create(correlationId);
 
-                    _repository.Save(saga);
-
                     DispatchToConsumer(saga, message);
 
                     _repository.Save(saga);

@@ -12,52 +12,52 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Saga.Tests
 {
-	using System;
-	using Magnum.Common.Repository;
+    using System;
+    using Magnum.Common.Repository;
 
-	public class SagaRepository<T> :
-		ISagaRepository<T>
-		where T : class, IAggregateRoot<Guid>
-	{
-		private readonly IRepository<T, Guid> _repository;
+    public class SagaRepository<T> :
+        ISagaRepository<T>
+        where T : class, IAggregateRoot<Guid>
+    {
+        private readonly IRepositoryFactory _repositoryFactory;
 
-		public SagaRepository(IRepository<T, Guid> repository)
-		{
-			_repository = repository;
-		}
+        public SagaRepository(IRepositoryFactory repositoryFactory)
+        {
+            _repositoryFactory = repositoryFactory;
+        }
 
-		public T Create(Guid correlationId)
-		{
-			T saga = (T) Activator.CreateInstance(typeof (T), correlationId);
+        public T Create(Guid correlationId)
+        {
+            T saga = (T) Activator.CreateInstance(typeof (T), correlationId);
 
-			_repository.Save(saga);
+            WithRepository(r => r.Save(saga));
 
-			return saga;
-		}
+            return saga;
+        }
 
-		public T Get(Guid id)
-		{
-			return _repository.Get(id);
-		}
+        public T Get(Guid id)
+        {
+            using (IRepository<T, Guid> repository = _repositoryFactory.GetRepository<T, Guid>())
+            {
+                return repository.Get(id);
+            }
+        }
 
-		public void Save(T item)
-		{
-			_repository.Save(item);
-		}
+        public void Save(T item)
+        {
+            WithRepository(r => r.Update(item));
+        }
 
-		public void Update(T item)
-		{
-			_repository.Save(item);
-		}
+        public void Dispose()
+        {
+        }
 
-		public void Complete(T item)
-		{
-			_repository.Save(item);
-		}
-
-		public void Dispose()
-		{
-			_repository.Dispose();
-		}
-	}
+        private void WithRepository(Action<IRepository<T, Guid>> action)
+        {
+            using (IRepository<T, Guid> repository = _repositoryFactory.GetRepository<T, Guid>())
+            {
+                action(repository);
+            }
+        }
+    }
 }
