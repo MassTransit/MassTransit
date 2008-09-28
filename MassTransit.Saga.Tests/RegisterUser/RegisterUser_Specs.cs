@@ -16,7 +16,10 @@ namespace MassTransit.Saga.Tests.RegisterUser
 	using System.Diagnostics;
 	using Castle.Core;
 	using Magnum.Common.Repository;
+    using Magnum.Infrastructure.Repository;
 	using Messages;
+	using NHibernate;
+	using NHibernate.Cfg;
 	using NUnit.Framework;
 	using NUnit.Framework.SyntaxHelpers;
 
@@ -26,10 +29,21 @@ namespace MassTransit.Saga.Tests.RegisterUser
 	{
 		protected override void Before_each()
 		{
-			Container.AddComponentLifeStyle("sagaStorage",
-			                                typeof (IRepository<RegisterUserSaga, Guid>),
-			                                typeof (RepositoryCache<RegisterUserSaga, Guid>),
+
+            Configuration config = new Configuration();
+            config.Configure();
+
+		    Container.Kernel.AddComponentInstance<ISessionFactory>(config.BuildSessionFactory());
+
+			Container.AddComponentLifeStyle("repositoryFactory",
+			                                typeof (IRepositoryFactory),
+			                                typeof (NHibernateRepositoryFactory),
 			                                LifestyleType.Singleton);
+
+			Container.AddComponentLifeStyle("RegisterUserSagaRepository",
+			                                typeof (IRepository<RegisterUserSaga, Guid>),
+			                                typeof (NHibernateRepository<RegisterUserSaga, Guid>),
+			                                LifestyleType.Transient);
 
 			Container.AddComponent<ISagaRepository<RegisterUserSaga>, SagaRepository<RegisterUserSaga>>();
 

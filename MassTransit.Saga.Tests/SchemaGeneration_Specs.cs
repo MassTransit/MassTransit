@@ -10,18 +10,22 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Saga
+namespace MassTransit.Saga.Tests
 {
-    using System;
+    using NHibernate.Cfg;
+    using NHibernate.Tool.hbm2ddl;
+    using NUnit.Framework;
 
-    public interface ISagaRepository<T> :
-		IDisposable
-        where T : class
+    [TestFixture]
+    public class FUCKIIT
     {
-        T Create(Guid correlationId);
+        [Test]
+        public void GenerateTheSchema()
+        {
+            Configuration config = new Configuration();
+            config.Configure();
 
-        T Get(Guid id);
-
-        void Save(T item);
+            new SchemaExport(config).Create(true, true);
+        }
     }
 }
