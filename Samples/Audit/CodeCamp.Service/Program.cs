@@ -32,7 +32,6 @@ namespace CodeCamp.Service
 			using (IServiceBus serviceBus = new ServiceBus(endpoint, null, cache))
 			{
 				serviceBus.AddComponent<Program>();
-				serviceBus.AddComponent<NewUserController>();
 
 				Console.WriteLine("Service running...");
 
@@ -46,13 +45,4 @@ namespace CodeCamp.Service
 			Console.WriteLine("End of line");
 		}
 	}
-
-    public class NewUserController :
-        Consumes<RegisterUser>.All
-    {
-        public void Consume(RegisterUser message)
-        {
-            //do something
-        }
-    }
 }
