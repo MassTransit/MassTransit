@@ -13,10 +13,8 @@
 namespace MassTransit.Saga.Tests.RegisterUser
 {
 	using System;
-	using Magnum.Common;
 	using Magnum.Common.DateTimeExtensions;
 	using Magnum.Common.Repository;
-	using MassTransit.Saga.Messages;
 	using MassTransit.ServiceBus.Timeout.Messages;
 	using Messages;
 	using ServiceBus;

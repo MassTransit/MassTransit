@@ -2,6 +2,7 @@ namespace CodeCamp.Service
 {
     using System;
     using System.Net.Mail;
+    using Domain;
     using Magnum.Common.Repository;
     using MassTransit.Saga;
     using MassTransit.ServiceBus;
@@ -12,47 +13,65 @@ namespace CodeCamp.Service
     public class RegisterUserOrchestration :
         InitiatedBy<RegisterUser>,
         Orchestrates<UserVerificationEmailSent>,
-        Orchestrates<UserVerifiedEmail>
+        Orchestrates<UserVerifiedEmail>,
+        ISaga
     {
-        private readonly IServiceBus _bus;
+        private IServiceBus _bus;
         private readonly SmtpClient _client;
-        private readonly IRepository _repository;
+        private Guid _correlationId = Guid.NewGuid();
+        private IObjectBuilder _builder;
+        private User _user;
 
-        public RegisterUserOrchestration(IServiceBus bus, SmtpClient client, IRepository repository)
+        public RegisterUserOrchestration()
         {
-            _bus = bus;
-            _client = client;
-            _repository = repository;
+            _client = new SmtpClient();
         }
 
         //Starts things off
         public void Consume(RegisterUser message)
         {
-            var saga = new RegisterUserSaga(Guid.NewGuid(), message);
-            _repository.Save(saga);
+            _user = new User(message.Name, message.Username, message.Password);
 
-            var body = string.Format("Please verify email http://localhost/ConfirmEmail.aspx?registrationId={0}", saga.Id);
+            var body = string.Format("Please verify email http://localhost/ConfirmEmail.aspx?registrationId={0}", this._correlationId);
             _client.Send("bob", "dru", "Verify Email", body);
 
-            _bus.Publish(new UserVerificationEmailSent(saga.Id));
+            _bus.Publish(new UserVerificationEmailSent(this._correlationId));
         }
 
         public void Consume(UserVerificationEmailSent message)
         {
-            var saga = _repository.Get<RegisterUserSaga>(message.CorrelationId);
-            saga.SetPending();
-            _repository.Save(saga);
+            _user.SetPending();
 
             _bus.Publish(new ScheduleTimeout(message.CorrelationId, 24.Hours().FromNow()));
         }
 
         public void Consume(UserVerifiedEmail message)
         {
-            var saga = _repository.Get<RegisterUserSaga>(message.CorrelationId);
-            saga.UserHasConfirmedEmail();
+            _user.EmailHasBeenConfirmed();
             var body = string.Format("Thank you. You are now registered");
             _client.Send("bob", "dru", "Register Successful", body);
-            _repository.Save(saga);
+        }
+
+        public Guid CorrelationId
+        {
+            get { return _correlationId; }
+        }
+
+        public IServiceBus Bus
+        {
+            get { return _bus; }
+            set { _bus = value; }
+        }
+
+        public IObjectBuilder Builder
+        {
+            get { return _builder; }
+            set { _builder = value; }
+        }
+
+        public User User
+        {
+            get { return _user; }
         }
     }
 }
