@@ -17,6 +17,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.ServiceBus.MSMQ
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.WindsorIntegration", "..\..\Containers\MassTransit.WindsorIntegration\MassTransit.WindsorIntegration.csproj", "{98D5A59C-96FA-4A1B-A653-EA5A35C45FC9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PostalService", "PostalService\PostalService.csproj", "{C301CD3E-945B-4133-86AB-11165AE24346}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Host", "..\..\MassTransit.Host\MassTransit.Host.csproj", "{834ED79F-BA0E-48F9-831A-789576EE516B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -51,6 +55,14 @@ Global
 		{98D5A59C-96FA-4A1B-A653-EA5A35C45FC9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{98D5A59C-96FA-4A1B-A653-EA5A35C45FC9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{98D5A59C-96FA-4A1B-A653-EA5A35C45FC9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C301CD3E-945B-4133-86AB-11165AE24346}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C301CD3E-945B-4133-86AB-11165AE24346}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C301CD3E-945B-4133-86AB-11165AE24346}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C301CD3E-945B-4133-86AB-11165AE24346}.Release|Any CPU.Build.0 = Release|Any CPU
+		{834ED79F-BA0E-48F9-831A-789576EE516B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{834ED79F-BA0E-48F9-831A-789576EE516B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{834ED79F-BA0E-48F9-831A-789576EE516B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{834ED79F-BA0E-48F9-831A-789576EE516B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -59,5 +71,6 @@ Global
 		{90482397-6282-465E-8B86-39865FC30127} = {B015B76C-BE0A-4B17-9D3D-C84E620EFB8B}
 		{6F90867C-E092-4EDC-B3DE-600D39DF0335} = {B015B76C-BE0A-4B17-9D3D-C84E620EFB8B}
 		{98D5A59C-96FA-4A1B-A653-EA5A35C45FC9} = {B015B76C-BE0A-4B17-9D3D-C84E620EFB8B}
+		{834ED79F-BA0E-48F9-831A-789576EE516B} = {B015B76C-BE0A-4B17-9D3D-C84E620EFB8B}
 	EndGlobalSection
 EndGlobal
