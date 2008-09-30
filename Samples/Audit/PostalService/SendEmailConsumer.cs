@@ -1,5 +1,6 @@
 namespace PostalService
 {
+    using System;
     using System.Net;
     using System.Net.Mail;
     using log4net;
@@ -10,7 +11,7 @@ namespace PostalService
         Consumes<SendEmail>.All
     {
         private readonly SmtpClient _client;
-        private ILog _log = LogManager.GetLogger(typeof (SendEmailConsumer));
+        private readonly ILog _log = LogManager.GetLogger(typeof (SendEmailConsumer));
 
         public SendEmailConsumer(string host, int port, string username, string password)
         {
@@ -18,10 +19,17 @@ namespace PostalService
             _client.Credentials = new NetworkCredential(username, password);
         }
 
+        public IServiceBus Bus { get; set; }
+
         public void Consume(SendEmail message)
         {
             _log.InfoFormat("Sending email to '{0}' with subject '{2}'", message.To, message.Subject);
             _client.Send(message.From, message.To, message.Subject, message.Body);
+
+            if (message.CorrelationId != Guid.Empty)
+            {
+                Bus.Publish(new EmailSent(message.CorrelationId));
+            }
         }
     }
 }
