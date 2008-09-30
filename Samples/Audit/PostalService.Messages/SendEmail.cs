@@ -1,4 +1,4 @@
-namespace PostalService.Messages
+﻿namespace PostalService.Messages
 {
     using System;
 

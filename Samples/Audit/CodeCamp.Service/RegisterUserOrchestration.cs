@@ -9,6 +9,7 @@ namespace CodeCamp.Service
     using MassTransit.ServiceBus.Timeout.Messages;
     using Magnum.Common.DateTimeExtensions;
     using Messages;
+    using PostalService.Messages;
 
     public class RegisterUserOrchestration :
         InitiatedBy<RegisterUser>,
@@ -17,14 +18,12 @@ namespace CodeCamp.Service
         ISaga
     {
         private IServiceBus _bus;
-        private readonly SmtpClient _client;
         private Guid _correlationId = Guid.NewGuid();
         private IObjectBuilder _builder;
         private User _user;
 
         public RegisterUserOrchestration()
         {
-            _client = new SmtpClient();
         }
 
         //Starts things off
@@ -33,7 +32,7 @@ namespace CodeCamp.Service
             _user = new User(message.Name, message.Username, message.Password);
 
             var body = string.Format("Please verify email http://localhost/ConfirmEmail.aspx?registrationId={0}", this._correlationId);
-            _client.Send("bob", "dru", "Verify Email", body);
+            _bus.Publish(new SendEmail("bob","dru","verify email", body));
 
             _bus.Publish(new UserVerificationEmailSent(this._correlationId));
         }
@@ -49,7 +48,7 @@ namespace CodeCamp.Service
         {
             _user.EmailHasBeenConfirmed();
             var body = string.Format("Thank you. You are now registered");
-            _client.Send("bob", "dru", "Register Successful", body);
+            _bus.Publish(new SendEmail("bob", "dru", "Register Successful", body));
         }
 
         public Guid CorrelationId

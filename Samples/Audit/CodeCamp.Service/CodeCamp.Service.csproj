@@ -29,6 +29,7 @@
     <IsWebBootstrapper>true</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -69,6 +70,9 @@
       <HintPath>..\..\..\libs\Magnum.Common.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Core">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
     <Reference Include="System.Data" />
     <Reference Include="System.Messaging" />
     <Reference Include="System.Xml" />
@@ -95,6 +99,10 @@
     <ProjectReference Include="..\CodeCamp.Messages\CodeCamp.Messages.csproj">
       <Project>{7C6ED57B-D1E6-4CED-89E4-58A9ABFC3F95}</Project>
       <Name>CodeCamp.Messages</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\PostalService.Messages\PostalService.Messages.csproj">
+      <Project>{CA5DB66C-BEC2-4086-838B-5E7793458D88}</Project>
+      <Name>PostalService.Messages</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
