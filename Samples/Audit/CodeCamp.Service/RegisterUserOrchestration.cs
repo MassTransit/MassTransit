@@ -8,6 +8,7 @@ namespace CodeCamp.Service
     using MassTransit.ServiceBus;
     using MassTransit.ServiceBus.Timeout.Messages;
     using Magnum.Common.DateTimeExtensions;
+    using MassTransit.ServiceBus.Util;
     using Messages;
     using PostalService.Messages;
 
@@ -15,12 +16,14 @@ namespace CodeCamp.Service
         InitiatedBy<RegisterUser>,
         Orchestrates<UserVerificationEmailSent>,
         Orchestrates<UserVerifiedEmail>,
+        Orchestrates<EmailSent>,
         ISaga
     {
         private IServiceBus _bus;
-        private Guid _correlationId = Guid.NewGuid();
+        private Guid _correlationId = CombGuid.NewCombGuid();
         private IObjectBuilder _builder;
         private User _user;
+        private DateTime _lastEmailSent;
 
         public RegisterUserOrchestration()
         {
@@ -32,7 +35,7 @@ namespace CodeCamp.Service
             _user = new User(message.Name, message.Username, message.Password);
 
             var body = string.Format("Please verify email http://localhost/ConfirmEmail.aspx?registrationId={0}", this._correlationId);
-            _bus.Publish(new SendEmail("bob","dru","verify email", body));
+            _bus.Publish(new SendEmail(_correlationId, "bob","dru","verify email", body));
 
             _bus.Publish(new UserVerificationEmailSent(this._correlationId));
         }
@@ -48,7 +51,9 @@ namespace CodeCamp.Service
         {
             _user.EmailHasBeenConfirmed();
             var body = string.Format("Thank you. You are now registered");
-            _bus.Publish(new SendEmail("bob", "dru", "Register Successful", body));
+
+            // use a new guid because we don't want any more messages to this saga about e-mails
+            _bus.Publish(new SendEmail(Guid.Empty, "bob", "dru", "Register Successful", body));
         }
 
         public Guid CorrelationId
@@ -71,6 +76,12 @@ namespace CodeCamp.Service
         public User User
         {
             get { return _user; }
+        }
+
+        public void Consume(EmailSent message)
+        {
+            _lastEmailSent = message.SentAt;
+            
         }
     }
 }
