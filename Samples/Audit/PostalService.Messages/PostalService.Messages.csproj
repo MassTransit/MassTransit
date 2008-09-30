@@ -5,11 +5,11 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>9.0.21022</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{C301CD3E-945B-4133-86AB-11165AE24346}</ProjectGuid>
-    <OutputType>Exe</OutputType>
+    <ProjectGuid>{CA5DB66C-BEC2-4086-838B-5E7793458D88}</ProjectGuid>
+    <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>PostalService</RootNamespace>
-    <AssemblyName>PostalService</AssemblyName>
+    <RootNamespace>PostalService.Messages</RootNamespace>
+    <AssemblyName>PostalService.Messages</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -31,10 +31,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="log4net, Version=1.2.10.0, Culture=neutral, PublicKeyToken=1b44e1d426115821, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\libs\log4net.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
@@ -49,33 +45,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Host\PostalServiceConfiguration.cs" />
-    <Compile Include="Host\PostalServiceLifeCycle.cs" />
-    <Compile Include="Program.cs" />
+    <Compile Include="SendEmail.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SendEmailConsumer.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\..\Containers\MassTransit.WindsorIntegration\MassTransit.WindsorIntegration.csproj">
-      <Project>{98D5A59C-96FA-4A1B-A653-EA5A35C45FC9}</Project>
-      <Name>MassTransit.WindsorIntegration</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\..\MassTransit.Host\MassTransit.Host.csproj">
-      <Project>{834ED79F-BA0E-48F9-831A-789576EE516B}</Project>
-      <Name>MassTransit.Host</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\..\MassTransit.ServiceBus\MassTransit.ServiceBus.csproj">
-      <Project>{90482397-6282-465E-8B86-39865FC30127}</Project>
-      <Name>MassTransit.ServiceBus</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\..\Transports\MassTransit.ServiceBus.MSMQ\MassTransit.ServiceBus.MSMQ.csproj">
-      <Project>{6F90867C-E092-4EDC-B3DE-600D39DF0335}</Project>
-      <Name>MassTransit.ServiceBus.MSMQ</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\PostalService.Messages\PostalService.Messages.csproj">
-      <Project>{CA5DB66C-BEC2-4086-838B-5E7793458D88}</Project>
-      <Name>PostalService.Messages</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
