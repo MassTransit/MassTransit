@@ -116,6 +116,9 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="log4net.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Server.Castle.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
