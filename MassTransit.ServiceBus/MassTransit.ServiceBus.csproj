@@ -205,6 +205,7 @@
     <Compile Include="Threading\ManagedThread.cs" />
     <Compile Include="Threading\ManagedThreadPool.cs" />
     <Compile Include="TimeoutAttribute.cs" />
+    <Compile Include="Transports\MulticastUdpEndpoint.cs" />
     <Compile Include="Util\Check.cs" />
     <Compile Include="Util\CombGuid.cs" />
     <Compile Include="Util\Guard.cs" />

@@ -94,6 +94,7 @@
     <Compile Include="MessageAttribute_Specs.cs" />
     <Compile Include="MessageFilter_Specs.cs" />
     <Compile Include="MessageGroup_Specs.cs" />
+    <Compile Include="Multicast_Specs.cs" />
     <Compile Include="ObjectDispatcher_Specs.cs" />
     <Compile Include="PublishToConsumer_Specs.cs" />
     <Compile Include="RequestReply_Specs.cs" />
@@ -145,6 +146,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="loopback.castle.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="multicast.castle.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="subscriptions.castle.xml">
