@@ -22,6 +22,7 @@ namespace MassTransit.ServiceBus.Transports
 	using Exceptions;
 	using Internal;
 	using log4net;
+	using Threading;
 
 	public class MulticastUdpEndpoint :
 		IEndpoint
@@ -30,7 +31,7 @@ namespace MassTransit.ServiceBus.Transports
 		private readonly ManualResetEvent _doneReceiving = new ManualResetEvent(false);
 		private readonly BinaryFormatter _formatter = new BinaryFormatter();
 		private readonly Semaphore _messageReady = new Semaphore(0, int.MaxValue);
-		private readonly Queue<byte[]> _messages = new Queue<byte[]>();
+		private readonly LockFreeQueue<byte[]> _messages = new LockFreeQueue<byte[]>();
 		private readonly ManualResetEvent _shutdown = new ManualResetEvent(false);
 		private readonly Uri _uri;
 		private IAsyncResult _asyncResult;
@@ -211,8 +212,7 @@ namespace MassTransit.ServiceBus.Transports
 
 				if (data.Length > 0)
 				{
-					lock (_messages)
-						_messages.Enqueue(data);
+					_messages.Enqueue(data);
 
 					_messageReady.Release();
 				}
@@ -221,26 +221,35 @@ namespace MassTransit.ServiceBus.Transports
 			}
 			catch (SocketException ex)
 			{
+				_log.Error("Receive Complete encountered an exception", ex);
+
 				if (ex.SocketErrorCode == SocketError.Shutdown)
 					_doneReceiving.Set();
 			}
 			catch (ObjectDisposedException ex)
 			{
+				_log.Error("Receive Complete encountered an exception", ex);
+			}
+			catch(Exception ex)
+			{
+				_log.Error("Receive Complete encountered an exception", ex);
 			}
 		}
 
 		private object Dequeue()
 		{
 			byte[] buffer;
-			lock (_messages)
-				buffer = _messages.Dequeue();
-
-			using (MemoryStream mstream = new MemoryStream(buffer))
+			if (_messages.Dequeue(out buffer))
 			{
-				object obj = _formatter.Deserialize(mstream);
+				using (MemoryStream mstream = new MemoryStream(buffer))
+				{
+					object obj = _formatter.Deserialize(mstream);
 
-				return obj;
+					return obj;
+				}
 			}
+
+			return null;
 		}
 	}
 }
