@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<configuration>
+	<facilities>
+		<facility id="masstransit">
+
+			<bus id="local"
+					 endpoint="multicast://227.43.1.1:5309/">
+			</bus>
+			<bus id="remote"
+					 endpoint="multicast://227.43.1.1:5309/">
+			</bus>
+			<transports>
+				<transport>MassTransit.ServiceBus.Transports.MulticastUdpEndpoint, MassTransit.ServiceBus</transport>
+			</transports>
+		</facility>
+	</facilities>
+</configuration>
