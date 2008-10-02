@@ -12,60 +12,60 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.ServiceBus.Tests.Timeouts
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Diagnostics;
-    using System.Threading;
-    using Castle.Core;
-    using MassTransit.ServiceBus.Timeout.Messages;
-    using NUnit.Framework;
-    using Timeout;
-    using Util;
+	using System;
+	using System.Diagnostics;
+	using System.Threading;
+	using Castle.Core;
+	using NUnit.Framework;
+	using Timeout;
+	using Timeout.Messages;
+	using Util;
 
-    [TestFixture]
-    public class When_scheduling_a_timeout_for_a_new_id :
-        LocalAndRemoteTestContext
-    {
-        private ITimeoutStorage _storage;
-        private TimeoutService _timeoutService;
-        private Guid _correlationId;
-        private DateTime _dateTime;
+	[TestFixture]
+	public class When_scheduling_a_timeout_for_a_new_id :
+		LocalAndRemoteTestContext
+	{
+		private ITimeoutRepository _repository;
+		private TimeoutService _timeoutService;
+		private Guid _correlationId;
+		private DateTime _dateTime;
 
-        protected override void Before_each()
-        {
-            _correlationId = CombGuid.NewCombGuid();
-            _dateTime = DateTime.UtcNow + TimeSpan.FromSeconds(1);
+		protected override void Before_each()
+		{
+			_correlationId = CombGuid.NewCombGuid();
+			_dateTime = DateTime.UtcNow + TimeSpan.FromSeconds(1);
 
-            Container.AddComponentLifeStyle<ITimeoutStorage, InMemoryTimeoutStorage>(LifestyleType.Singleton);
+			Container.AddComponentLifeStyle<ITimeoutRepository, InMemoryTimeoutRepository>(LifestyleType.Singleton);
 
-            _storage = Container.Resolve<ITimeoutStorage>();
+			_repository = Container.Resolve<ITimeoutRepository>();
 
-            _timeoutService = new TimeoutService(LocalBus, _storage);
-            _timeoutService.Start();
-        }
+			_timeoutService = new TimeoutService(LocalBus, _repository);
+			_timeoutService.Start();
+		}
 
-        protected override void After_each()
-        {
-            _timeoutService.Stop();
-            _timeoutService.Dispose();
-        }
+		protected override void After_each()
+		{
+			_timeoutService.Stop();
+			_timeoutService.Dispose();
+		}
 
-        [Test]
-        public void The_timeout_should_be_added_to_the_storage()
-        {
-            ManualResetEvent _timedOut = new ManualResetEvent(false);
+		[Test]
+		public void The_timeout_should_be_added_to_the_storage()
+		{
+			ManualResetEvent _timedOut = new ManualResetEvent(false);
 
-            Stopwatch watch = Stopwatch.StartNew();
 
-            LocalBus.Subscribe<TimeoutExpired>(x => _timedOut.Set());
+			LocalBus.Subscribe<TimeoutExpired>(x => _timedOut.Set());
 
-            LocalBus.Publish(new ScheduleTimeout(_correlationId, _dateTime));
+			LocalBus.Publish(new ScheduleTimeout(_correlationId, _dateTime));
 
-            Assert.IsTrue(_timedOut.WaitOne(TimeSpan.FromSeconds(5), true));
-          
-            watch.Stop();
+			Stopwatch watch = Stopwatch.StartNew();
 
-            Debug.WriteLine(string.Format("Timeout took {0}ms", watch.ElapsedMilliseconds));
-        }
-    }
+			Assert.IsTrue(_timedOut.WaitOne(TimeSpan.FromSeconds(5), true));
+
+			watch.Stop();
+
+			Debug.WriteLine(string.Format("Timeout took {0}ms", watch.ElapsedMilliseconds));
+		}
+	}
 }

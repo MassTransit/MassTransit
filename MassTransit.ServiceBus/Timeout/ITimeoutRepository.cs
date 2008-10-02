@@ -12,31 +12,20 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.ServiceBus.Timeout
 {
-    using System;
+	using System;
+	using System.Collections.Generic;
+	using Util;
 
-    public class ScheduledTimeout
-    {
-        private readonly DateTime _expiresAt;
-        private readonly Guid _id;
+	public interface ITimeoutRepository
+	{
+		void Schedule(Guid id, DateTime timeoutAt);
+		void Remove(Guid id);
 
-        public ScheduledTimeout(Guid id, DateTime expiresAt)
-        {
-            _id = id;
-            _expiresAt = expiresAt;
-        }
+		IList<Tuple<Guid, DateTime>> List();
+		IList<Tuple<Guid, DateTime>> List(DateTime lessThan);
 
-        protected ScheduledTimeout()
-        {
-        }
-
-        public Guid Id
-        {
-            get { return _id; }
-        }
-
-        public DateTime ExpiresAt
-        {
-            get { return _expiresAt; }
-        }
-    }
+		event Action<Guid> TimeoutAdded;
+		event Action<Guid> TimeoutUpdated;
+		event Action<Guid> TimeoutRemoved;
+	}
 }

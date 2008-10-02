@@ -128,10 +128,9 @@
     <Compile Include="Threading\ResourceThreadPool.cs" />
     <Compile Include="Timeout\Messages\CancelTimeout.cs" />
     <Compile Include="Timeout\CancelTimeoutConsumer.cs" />
-    <Compile Include="Timeout\InMemoryTimeoutStorage.cs" />
-    <Compile Include="Timeout\ITimeoutStorage.cs" />
+    <Compile Include="Timeout\InMemoryTimeoutRepository.cs" />
+    <Compile Include="Timeout\ITimeoutRepository.cs" />
     <Compile Include="Timeout\Messages\ScheduleTimeout.cs" />
-    <Compile Include="Timeout\ScheduledTimeout.cs" />
     <Compile Include="Timeout\ScheduleTimeoutConsumer.cs" />
     <Compile Include="Timeout\Messages\TimeoutExpired.cs" />
     <Compile Include="Timeout\TimeoutService.cs" />

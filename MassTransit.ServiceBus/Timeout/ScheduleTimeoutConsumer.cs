@@ -17,17 +17,17 @@ namespace MassTransit.ServiceBus.Timeout
     public class ScheduleTimeoutConsumer :
         Consumes<ScheduleTimeout>.All
     {
-        private readonly ITimeoutStorage _storage;
+        private readonly ITimeoutRepository _repository;
 
-        public ScheduleTimeoutConsumer(ITimeoutStorage storage)
+        public ScheduleTimeoutConsumer(ITimeoutRepository repository)
         {
-            _storage = storage;
+            _repository = repository;
         }
 
 
         public void Consume(ScheduleTimeout message)
         {
-            _storage.Schedule(message.CorrelationId, message.TimeoutAt);
+            _repository.Schedule(message.CorrelationId, message.TimeoutAt);
         }
     }
 }

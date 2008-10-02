@@ -13,53 +13,13 @@
 namespace MassTransit.ServiceBus.Timeout
 {
 	using System;
-	using System.Collections;
 	using System.Collections.Generic;
-	using System.Threading;
 	using Util;
 
-	public class InMemoryTimeoutStorage :
-		ITimeoutStorage
+	public class InMemoryTimeoutRepository :
+		ITimeoutRepository
 	{
-		private static readonly TimeSpan _interval = TimeSpan.FromSeconds(1);
-
-		private readonly ManualResetEvent _stopped = new ManualResetEvent(false);
-		private readonly AutoResetEvent _trigger = new AutoResetEvent(true);
 		private volatile Dictionary<Guid, DateTime> _schedule = new Dictionary<Guid, DateTime>();
-
-		IEnumerator<Guid> IEnumerable<Guid>.GetEnumerator()
-		{
-			WaitHandle[] handles = new WaitHandle[] {_trigger, _stopped};
-
-			while ((WaitHandle.WaitAny(handles, _interval, true)) != 1)
-			{
-				DateTime present = DateTime.UtcNow;
-
-				Guid matched = Guid.Empty;
-
-				lock (_schedule)
-				{
-					foreach (KeyValuePair<Guid, DateTime> pair in _schedule)
-					{
-						if (pair.Value > present) continue;
-
-						matched = pair.Key;
-						break;
-					}
-				}
-
-				if (matched != Guid.Empty)
-				{
-					Remove(matched);
-					yield return matched;
-				}
-			}
-		}
-
-		public IEnumerator GetEnumerator()
-		{
-			return ((IEnumerable<Guid>) this).GetEnumerator();
-		}
 
 		public void Schedule(Guid id, DateTime timeoutAt)
 		{
@@ -78,8 +38,6 @@ namespace MassTransit.ServiceBus.Timeout
 					added = true;
 				}
 			}
-
-			_trigger.Set();
 
 			if (added)
 				TimeoutAdded(id);
@@ -103,16 +61,6 @@ namespace MassTransit.ServiceBus.Timeout
 				TimeoutRemoved(id);
 		}
 
-		public void Start()
-		{
-			_stopped.Reset();
-		}
-
-		public void Stop()
-		{
-			_stopped.Set();
-		}
-
 		public event Action<Guid> TimeoutAdded = delegate { };
 
 		public event Action<Guid> TimeoutUpdated = delegate { };
@@ -126,6 +74,19 @@ namespace MassTransit.ServiceBus.Timeout
 			foreach (KeyValuePair<Guid, DateTime> pair in _schedule)
 			{
 				result.Add(new Tuple<Guid, DateTime>(pair));
+			}
+
+			return result;
+		}
+
+		public IList<Tuple<Guid, DateTime>> List(DateTime lessThan)
+		{
+			List<Tuple<Guid, DateTime>> result = new List<Tuple<Guid, DateTime>>();
+
+			foreach (KeyValuePair<Guid, DateTime> pair in _schedule)
+			{
+				if(pair.Value <= lessThan)
+					result.Add(new Tuple<Guid, DateTime>(pair));
 			}
 
 			return result;
