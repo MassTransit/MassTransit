@@ -12,62 +12,62 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Services
 {
-    using System;
-    using System.IO;
-    using System.Runtime.Serialization.Formatters.Binary;
+	using System;
+	using System.IO;
+	using System.Runtime.Serialization.Formatters.Binary;
 
-    public class DeferredMessage
-    {
-        [ThreadStatic] private static readonly BinaryFormatter _formatter = new BinaryFormatter();
+	public class DeferredMessage
+	{
+		private static readonly BinaryFormatter _formatter = new BinaryFormatter();
 
-        private readonly DateTime _deliverAt;
-        private readonly Guid _id;
-        private readonly byte[] _messageData;
+		private readonly DateTime _deliverAt;
+		private readonly Guid _id;
+		private readonly byte[] _messageData;
 
-        public DeferredMessage(Guid id, DateTime deliverAt, object message)
-        {
-            _id = id;
-            _deliverAt = deliverAt;
-            _messageData = SerializeMessage(message);
-        }
+		public DeferredMessage(Guid id, DateTime deliverAt, object message)
+		{
+			_id = id;
+			_deliverAt = deliverAt;
+			_messageData = SerializeMessage(message);
+		}
 
-        protected DeferredMessage()
-        {
-        }
+		protected DeferredMessage()
+		{
+		}
 
 
-        public Guid Id
-        {
-            get { return _id; }
-        }
+		public Guid Id
+		{
+			get { return _id; }
+		}
 
-        public DateTime DeliverAt
-        {
-            get { return _deliverAt; }
-        }
+		public DateTime DeliverAt
+		{
+			get { return _deliverAt; }
+		}
 
-        private static byte[] SerializeMessage(object message)
-        {
-            using (MemoryStream mstream = new MemoryStream())
-            {
-                _formatter.Serialize(mstream, message);
-                return mstream.ToArray();
-            }
-        }
+		private static byte[] SerializeMessage(object message)
+		{
+			using (MemoryStream mstream = new MemoryStream())
+			{
+				_formatter.Serialize(mstream, message);
+				return mstream.ToArray();
+			}
+		}
 
-        public T GetMessage<T>() where T : class
-        {
-            return GetMessage() as T;
-        }
+		public T GetMessage<T>() where T : class
+		{
+			return GetMessage() as T;
+		}
 
-        public object GetMessage()
-        {
-            using (MemoryStream mstream = new MemoryStream(_messageData))
-            {
-                object obj = _formatter.Deserialize(mstream);
+		public object GetMessage()
+		{
+			using (MemoryStream mstream = new MemoryStream(_messageData))
+			{
+				object obj = _formatter.Deserialize(mstream);
 
-                return obj;
-            }
-        }
-    }
+				return obj;
+			}
+		}
+	}
 }

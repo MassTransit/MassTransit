@@ -115,7 +115,7 @@
     <Compile Include="Saga\InitiatedBy.cs" />
     <Compile Include="Services\DeferMessageConsumer.cs" />
     <Compile Include="Services\DeferredMessage.cs" />
-    <Compile Include="Services\DeferredMessagePublisher.cs" />
+    <Compile Include="Services\MessageDeferralService.cs" />
     <Compile Include="Services\IDeferredMessageRepository.cs" />
     <Compile Include="Services\InMemoryDeferredMessageRepository.cs" />
     <Compile Include="Services\Messages\DeferMessage.cs" />
