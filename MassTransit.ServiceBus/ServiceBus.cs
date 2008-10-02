@@ -90,7 +90,7 @@ namespace MassTransit.ServiceBus
             _asyncDispatcher = new ResourceThreadPool<IEndpoint, object>(endpointToListenOn, 
                 EndpointReader,
 				EndpointDispatcher, 
-                Environment.ProcessorCount, 
+                Environment.ProcessorCount * 2, 
                 1, 
                 Environment.ProcessorCount * 8);
         }
