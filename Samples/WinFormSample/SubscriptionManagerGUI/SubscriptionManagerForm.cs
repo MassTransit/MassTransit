@@ -25,13 +25,13 @@ namespace SubscriptionManagerGUI
 	public partial class SubscriptionManagerForm : Form
 	{
 		private readonly ISubscriptionCache _cache;
-		private readonly ITimeoutStorage _timeoutStorage;
+		private readonly ITimeoutRepository _timeoutRepository;
 	    private readonly IHealthCache _healthCache;
-        
-		public SubscriptionManagerForm(ISubscriptionCache cache, ITimeoutStorage timeoutStorage, IHealthCache healthCache)
+
+		public SubscriptionManagerForm(ISubscriptionCache cache, ITimeoutRepository timeoutStorage, IHealthCache healthCache)
 		{
 			_cache = cache;
-			_timeoutStorage = timeoutStorage;
+			_timeoutRepository = timeoutStorage;
 		    _healthCache = healthCache;
 
 			InitializeComponent();
@@ -44,9 +44,9 @@ namespace SubscriptionManagerGUI
 
 			RefreshSubscriptions(null);
 
-			_timeoutStorage.TimeoutAdded += TimeoutRefreshNeeded;
-			_timeoutStorage.TimeoutUpdated += TimeoutRefreshNeeded;
-			_timeoutStorage.TimeoutRemoved += TimeoutRefreshNeeded;
+			_timeoutRepository.TimeoutAdded += TimeoutRefreshNeeded;
+			_timeoutRepository.TimeoutUpdated += TimeoutRefreshNeeded;
+			_timeoutRepository.TimeoutRemoved += TimeoutRefreshNeeded;
 
 		    _healthCache.NewHealthInformation += HeartBeatRefreshNeeded;
 		    _healthCache.UpdatedHealthInformation += HeartBeatRefreshNeeded;
@@ -154,7 +154,7 @@ namespace SubscriptionManagerGUI
 				existing.Add(item);
 			}
 
-			foreach (Tuple<Guid, DateTime> item in _timeoutStorage.List())
+			foreach (Tuple<Guid, DateTime> item in _timeoutRepository.List())
 			{
 				string key = item.Key.ToString();
 

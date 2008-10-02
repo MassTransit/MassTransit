@@ -43,7 +43,7 @@ namespace SubscriptionManagerGUI
 		    Container.AddComponent<IHealthCache, LocalHealthCache>();
             Container.AddComponent<IHostedService, HealthService>();
 
-			Container.AddComponent<ITimeoutStorage, InMemoryTimeoutStorage>();
+			Container.AddComponent<ITimeoutRepository, InMemoryTimeoutRepository>();
 			Container.AddComponent<IHostedService, TimeoutService>();
 
 			Container.AddComponent<Form, SubscriptionManagerForm>();
