@@ -12,244 +12,189 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.ServiceBus.Transports
 {
-	using System;
-	using System.Collections.Generic;
-	using System.IO;
-	using System.Net;
-	using System.Net.Sockets;
-	using System.Runtime.Serialization.Formatters.Binary;
-	using System.Threading;
-	using Exceptions;
-	using Internal;
-	using log4net;
-	using Threading;
+    using System;
+    using System.IO;
+    using System.Net;
+    using System.Net.Sockets;
+    using System.Runtime.Serialization.Formatters.Binary;
+    using System.Threading;
+    using Exceptions;
+    using Internal;
+    using log4net;
 
-	public class MulticastUdpEndpoint :
-		IEndpoint
-	{
-		private static readonly ILog _log = LogManager.GetLogger(typeof (MulticastUdpEndpoint));
-		private readonly ManualResetEvent _doneReceiving = new ManualResetEvent(false);
-		private readonly BinaryFormatter _formatter = new BinaryFormatter();
-		private readonly Semaphore _messageReady = new Semaphore(0, int.MaxValue);
-		private readonly LockFreeQueue<byte[]> _messages = new LockFreeQueue<byte[]>();
-		private readonly ManualResetEvent _shutdown = new ManualResetEvent(false);
-		private readonly Uri _uri;
-		private IAsyncResult _asyncResult;
-		private IPAddress _groupAddress;
-		private UdpClient _receiveClient;
-		private UdpClient _sendClient;
-		private IPEndPoint _sendIPEndPoint;
+    public class MulticastUdpEndpoint :
+        IEndpoint
+    {
+        private static readonly ILog _log = LogManager.GetLogger(typeof (MulticastUdpEndpoint));
+        private readonly ManualResetEvent _doneReceiving = new ManualResetEvent(false);
+        private readonly BinaryFormatter _formatter = new BinaryFormatter();
+        private readonly ManualResetEvent _shutdown = new ManualResetEvent(false);
+        private readonly Uri _uri;
+        private IPAddress _groupAddress;
+        private UdpClient _receiveClient;
+        private UdpClient _sendClient;
+        private IPEndPoint _sendIPEndPoint;
 
-		public MulticastUdpEndpoint(Uri uri)
-		{
-			_uri = uri;
+        public MulticastUdpEndpoint(Uri uri)
+        {
+            _uri = uri;
 
-			Initialize();
-		}
+            Initialize();
+        }
 
-		public MulticastUdpEndpoint(string uriString)
-			: this(new Uri(uriString))
-		{
-		}
+        public MulticastUdpEndpoint(string uriString)
+            : this(new Uri(uriString))
+        {
+        }
 
-		public static string Scheme
-		{
-			get { return "multicast"; }
-		}
+        public static string Scheme
+        {
+            get { return "multicast"; }
+        }
 
-		public void Dispose()
-		{
-			_shutdown.Set();
+        public void Dispose()
+        {
+            _shutdown.Set();
 
-			if (_sendClient != null)
-			{
-				using (_sendClient)
-					_sendClient.Close();
-			}
+            if (_sendClient != null)
+            {
+                using (_sendClient)
+                    _sendClient.Close();
+            }
 
-			if (_receiveClient != null)
-			{
-				using (_receiveClient)
-				{
-					_receiveClient.Close();
-					_doneReceiving.WaitOne(1000, false);
-				}
-			}
-		}
+            if (_receiveClient != null)
+            {
+                using (_receiveClient)
+                {
+                    _receiveClient.Close();
+                    _doneReceiving.WaitOne(1000, false);
+                }
+            }
+        }
 
-		public Uri Uri
-		{
-			get { return _uri; }
-		}
+        public Uri Uri
+        {
+            get { return _uri; }
+        }
 
-		public void Send<T>(T message) where T : class
-		{
-			Send(message, TimeSpan.MaxValue);
-		}
+        public void Send<T>(T message) where T : class
+        {
+            Send(message, TimeSpan.MaxValue);
+        }
 
-		public void Send<T>(T message, TimeSpan timeToLive) where T : class
-		{
-			Type messageType = typeof (T);
+        public void Send<T>(T message, TimeSpan timeToLive) where T : class
+        {
+            Type messageType = typeof (T);
 
-			using (MemoryStream mstream = new MemoryStream())
-			{
-				_formatter.Serialize(mstream, message);
+            using (MemoryStream mstream = new MemoryStream())
+            {
+                _formatter.Serialize(mstream, message);
 
-				// if (timeToLive < TimeSpan.MaxValue)
+                // if (timeToLive < TimeSpan.MaxValue)
 
-				try
-				{
-					if (SpecialLoggers.Messages.IsInfoEnabled)
-						SpecialLoggers.Messages.InfoFormat("SEND:{0}:{1}", Uri, messageType.Name);
+                try
+                {
+                    if (SpecialLoggers.Messages.IsInfoEnabled)
+                        SpecialLoggers.Messages.InfoFormat("SEND:{0}:{1}", Uri, messageType.Name);
 
-					_sendClient.Send(mstream.ToArray(), (int) mstream.Length, _sendIPEndPoint);
-				}
-				catch (Exception ex)
-				{
-					throw new EndpointException(this, "Problem sending to " + _sendIPEndPoint, ex);
-				}
-			}
+                    _sendClient.Send(mstream.ToArray(), (int) mstream.Length, _sendIPEndPoint);
+                }
+                catch (Exception ex)
+                {
+                    throw new EndpointException(this, "Problem sending to " + _sendIPEndPoint, ex);
+                }
+            }
 
+            if (_log.IsDebugEnabled)
+                _log.DebugFormat("Message Sent: Type = {1}", messageType.Name);
+        }
 
-			if (_log.IsDebugEnabled)
-				_log.DebugFormat("Message Sent: Type = {1}", messageType.Name);
-		}
+        public object Receive(TimeSpan timeout)
+        {
+            return Receive(timeout, x => true);
+        }
 
-		public object Receive(TimeSpan timeout)
-		{
-			if (_messageReady.WaitOne(timeout, true))
-			{
-				try
-				{
-					object obj = Dequeue();
+        public object Receive(TimeSpan timeout, Predicate<object> accept)
+        {
+            try
+            {
+                IPEndPoint endPoint = new IPEndPoint(IPAddress.Any, _uri.Port);
 
-					if (SpecialLoggers.Messages.IsInfoEnabled)
-						SpecialLoggers.Messages.InfoFormat("RECV:{0}:{1}", _uri, obj.GetType().Name);
+                byte[] data = _receiveClient.Receive(ref endPoint);
+                if (data == null)
+                    return null;
 
-					return obj;
-				}
-				catch (InvalidOperationException)
-				{
-				}
-			}
+                if (data.Length == 0)
+                    return null;
 
-			return null;
-		}
+                object obj;
+                using (MemoryStream mstream = new MemoryStream(data))
+                {
+                    obj = _formatter.Deserialize(mstream);
+                }
 
-		public object Receive(TimeSpan timeout, Predicate<object> accept)
-		{
-			if (_messageReady.WaitOne(timeout, true))
-			{
-				try
-				{
-					object obj = Dequeue();
+                if (accept(obj))
+                {
+                    if (SpecialLoggers.Messages.IsInfoEnabled)
+                        SpecialLoggers.Messages.InfoFormat("RECV:{0}:{1}", _uri, obj.GetType().Name);
 
-					if (accept(obj))
-					{
-						if (SpecialLoggers.Messages.IsInfoEnabled)
-							SpecialLoggers.Messages.InfoFormat("RECV:{0}:{1}", _uri, obj.GetType().Name);
+                    return obj;
+                }
+            }
+            catch (SocketException ex)
+            {
+                if (ex.SocketErrorCode == SocketError.TimedOut)
+                    return null;
 
-						return obj;
-					}
-				}
-				catch (InvalidOperationException)
-				{
-				}
-			}
+                _log.Error("Receive Exception: ", ex);
+            }
+            catch (Exception ex)
+            {
+                _log.Error("Receive Exception", ex);
+            }
 
-			return null;
-		}
+            return null;
+        }
 
-		private void Initialize()
-		{
-			_groupAddress = IPAddress.Parse(_uri.Host);
-			if (_groupAddress == null)
-				throw new ArgumentException("The multicast address could not be determined from the Uri: " + _uri);
+        private void Initialize()
+        {
+            _groupAddress = IPAddress.Parse(_uri.Host);
+            if (_groupAddress == null)
+                throw new ArgumentException("The multicast address could not be determined from the Uri: " + _uri);
 
-			if (_groupAddress.AddressFamily != AddressFamily.InterNetwork)
-				throw new ArgumentException("The specified address is not a valid multicast address: " + _uri);
+            if (_groupAddress.AddressFamily != AddressFamily.InterNetwork)
+                throw new ArgumentException("The specified address is not a valid multicast address: " + _uri);
 
-			InitializeSender();
+            InitializeSender();
 
-			InitializeReceiver();
-		}
+            InitializeReceiver();
+        }
 
-		private void InitializeSender()
-		{
-			_sendIPEndPoint = new IPEndPoint(_groupAddress, _uri.Port);
+        private void InitializeSender()
+        {
+            _sendIPEndPoint = new IPEndPoint(_groupAddress, _uri.Port);
 
-			_sendClient = new UdpClient(0, AddressFamily.InterNetwork);
-			_sendClient.DontFragment = true;
-			_sendClient.Ttl = 2; // 0 = host, 1 = subnet, <32 = same company
+            _sendClient = new UdpClient(0, AddressFamily.InterNetwork);
+            _sendClient.DontFragment = true;
+            _sendClient.Client.SendBufferSize = 256*1024;
+            _sendClient.Ttl = 2; // 0 = host, 1 = subnet, <32 = same company
 
-			_sendClient.JoinMulticastGroup(_groupAddress);
-		}
+            _sendClient.JoinMulticastGroup(_groupAddress);
+        }
 
-		private void InitializeReceiver()
-		{
-			_receiveClient = new UdpClient();
+        private void InitializeReceiver()
+        {
+            _receiveClient = new UdpClient();
 
-			Socket s = _receiveClient.Client;
+            Socket s = _receiveClient.Client;
 
-			s.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, 1);
-			s.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReceiveBuffer, 100000);
+            s.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, 1);
+            s.ReceiveBufferSize = 256*1024;
+            s.ReceiveTimeout = 2000;
 
-			s.Bind(new IPEndPoint(IPAddress.Any, _uri.Port));
+            s.Bind(new IPEndPoint(IPAddress.Any, _uri.Port));
 
-			_receiveClient.JoinMulticastGroup(_groupAddress, 2);
-
-			// kick off the initial receive
-			_asyncResult = _receiveClient.BeginReceive(ReceiveComplete, this);
-		}
-
-		private void ReceiveComplete(IAsyncResult ar)
-		{
-			IPEndPoint endPoint = new IPEndPoint(IPAddress.Any, _uri.Port);
-
-			try
-			{
-				byte[] data = _receiveClient.EndReceive(_asyncResult, ref endPoint);
-
-				if (data.Length > 0)
-				{
-					_messages.Enqueue(data);
-
-					_messageReady.Release();
-				}
-
-				_asyncResult = _receiveClient.BeginReceive(ReceiveComplete, this);
-			}
-			catch (SocketException ex)
-			{
-				_log.Error("Receive Complete encountered an exception", ex);
-
-				if (ex.SocketErrorCode == SocketError.Shutdown)
-					_doneReceiving.Set();
-			}
-			catch (ObjectDisposedException ex)
-			{
-				_log.Error("Receive Complete encountered an exception", ex);
-			}
-			catch(Exception ex)
-			{
-				_log.Error("Receive Complete encountered an exception", ex);
-			}
-		}
-
-		private object Dequeue()
-		{
-			byte[] buffer;
-			if (_messages.Dequeue(out buffer))
-			{
-				using (MemoryStream mstream = new MemoryStream(buffer))
-				{
-					object obj = _formatter.Deserialize(mstream);
-
-					return obj;
-				}
-			}
-
-			return null;
-		}
-	}
+            _receiveClient.JoinMulticastGroup(_groupAddress, 2);
+        }
+    }
 }
