@@ -90,30 +90,34 @@ namespace MassTransit.ServiceBus.Internal
 					return _cache[uri];
 
 				LockCookie cookie = _lockContext.UpgradeToWriterLock(Timeout.Infinite);
-				try
-				{
-					if (_cache.ContainsKey(uri))
-						return _cache[uri];
+                try
+                {
+                    if (_cache.ContainsKey(uri))
+                        return _cache[uri];
 
-					if (_schemes.ContainsKey(uri.Scheme))
-					{
-						object obj = Activator.CreateInstance(_schemes[uri.Scheme], uri);
-						if (obj == null)
-							throw new ArgumentException("Unable to create endpoint from uri: " + uri);
+                    if (_schemes.ContainsKey(uri.Scheme))
+                    {
+                        object obj = Activator.CreateInstance(_schemes[uri.Scheme], uri);
+                        if (obj == null)
+                            throw new ArgumentException("Unable to create endpoint from uri: " + uri);
 
-						IEndpoint endpoint = obj as IEndpoint;
-						if (endpoint == null)
-							throw new ArgumentException("The type was not converted to an endpoint: " + _schemes[uri.Scheme]);
+                        IEndpoint endpoint = obj as IEndpoint;
+                        if (endpoint == null)
+                            throw new ArgumentException("The type was not converted to an endpoint: " + _schemes[uri.Scheme]);
 
-						_cache.Add(uri, endpoint);
+                        _cache.Add(uri, endpoint);
 
-						return endpoint;
-					}
-				}
-				finally
-				{
-					_lockContext.DowngradeFromWriterLock(ref cookie);
-				}
+                        return endpoint;
+                    }
+                }
+                catch (TargetInvocationException ex)
+                {
+                    throw ex.InnerException;
+                }
+                finally
+                {
+                    _lockContext.DowngradeFromWriterLock(ref cookie);
+                }
 			}
 			finally
 			{
