@@ -3,12 +3,17 @@ namespace MassTransit.Infrastructure.Repositories
     using System;
     using System.Collections;
     using System.Collections.Generic;
+    using Magnum.Infrastructure.Repository;
     using ServiceBus.Timeout;
     using ServiceBus.Util;
 
     public class PersistantTimeoutStorage :
         ITimeoutStorage
     {
+        private NHibernateRepository _repository;
+
+        #region ITimeoutStorage Members
+
         IEnumerator IEnumerable.GetEnumerator()
         {
             return GetEnumerator();
@@ -16,36 +21,39 @@ namespace MassTransit.Infrastructure.Repositories
 
         public IEnumerator<Guid> GetEnumerator()
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         public void Schedule(Guid id, DateTime timeoutAt)
         {
-            throw new System.NotImplementedException();
+            ScheduledTimeout to = new ScheduledTimeout(id, timeoutAt);
+            _repository.Save(to);
         }
 
         public void Remove(Guid id)
         {
-            throw new System.NotImplementedException();
+            _repository.Delete(_repository.Get<ScheduledTimeout>(id));
         }
 
         public IList<Tuple<Guid, DateTime>> List()
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         public void Start()
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         public void Stop()
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         public event Action<Guid> TimeoutAdded;
         public event Action<Guid> TimeoutUpdated;
         public event Action<Guid> TimeoutRemoved;
+
+        #endregion
     }
 }

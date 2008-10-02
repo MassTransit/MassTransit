@@ -22,7 +22,8 @@ namespace MassTransit.Infrastructure.Repositories
         public DeferMessage Get(Guid id)
         {
             DeferredMessage msg = _repository.Get<DeferredMessage>(id);
-            DeferMessage result = new DeferMessage(msg.Id, msg.DeliverAt, msg.GetMessage<object>());
+            //TODO: is this right?
+            DeferMessage result = new DeferMessage(msg.Id, msg.DeliverAt, msg.GetMessage());
             return result;
         }
 
@@ -33,6 +34,7 @@ namespace MassTransit.Infrastructure.Repositories
 
         public void Remove(Guid id)
         {
+            //TODO: Need a delete by Id method
             _repository.Delete(_repository.Get<DeferredMessage>(id));
         }
     }
