@@ -13,23 +13,28 @@
 namespace MassTransit.ServiceBus.Timeout
 {
 	using System;
+	using System.Collections.Generic;
 	using System.Threading;
 	using Exceptions;
 	using log4net;
 	using Messages;
+	using Util;
 
-    public class TimeoutService :
+	public class TimeoutService :
 		IHostedService
 	{
+		private static readonly TimeSpan _interval = TimeSpan.FromSeconds(1);
 		private static readonly ILog _log = LogManager.GetLogger(typeof (TimeoutService));
 		private readonly IServiceBus _bus;
-		private readonly ITimeoutStorage _storage;
+		private readonly ITimeoutRepository _repository;
+		private readonly ManualResetEvent _stopped = new ManualResetEvent(false);
+		private readonly AutoResetEvent _trigger = new AutoResetEvent(true);
 		private Thread _watchThread;
 
-		public TimeoutService(IServiceBus bus, ITimeoutStorage storage)
+		public TimeoutService(IServiceBus bus, ITimeoutRepository repository)
 		{
 			_bus = bus;
-			_storage = storage;
+			_repository = repository;
 		}
 
 		public void Dispose()
@@ -52,10 +57,10 @@ namespace MassTransit.ServiceBus.Timeout
 			if (_log.IsInfoEnabled)
 				_log.Info("Timeout Service Starting");
 
-			_storage.Start();
-
 			_bus.AddComponent<ScheduleTimeoutConsumer>();
 			_bus.AddComponent<CancelTimeoutConsumer>();
+
+			_repository.TimeoutAdded += TriggerPublisher;
 
 			_watchThread = new Thread(PublishPendingTimeoutMessages);
 			_watchThread.IsBackground = true;
@@ -65,15 +70,18 @@ namespace MassTransit.ServiceBus.Timeout
 				_log.Info("Timeout Service Started");
 		}
 
+		private void TriggerPublisher(Guid obj)
+		{
+			_trigger.Set();
+		}
+
 		public void Stop()
 		{
 			if (_log.IsInfoEnabled)
 				_log.Info("Timeout Service Stopping");
 
-			_storage.Stop();
-
 			_bus.RemoveComponent<ScheduleTimeoutConsumer>();
-            _bus.RemoveComponent<CancelTimeoutConsumer>();
+			_bus.RemoveComponent<CancelTimeoutConsumer>();
 
 			if (_log.IsInfoEnabled)
 				_log.Info("Timeout Service Stopped");
@@ -83,9 +91,19 @@ namespace MassTransit.ServiceBus.Timeout
 		{
 			try
 			{
-				foreach (Guid id in _storage)
+				WaitHandle[] handles = new WaitHandle[] {_trigger, _stopped};
+
+				while ((WaitHandle.WaitAny(handles, _interval, true)) != 1)
 				{
-					_bus.Publish(new TimeoutExpired(id));
+					DateTime lessThan = DateTime.UtcNow;
+
+					IList<Tuple<Guid, DateTime>> list = _repository.List(lessThan);
+					foreach (Tuple<Guid, DateTime> tuple in list)
+					{
+						_bus.Publish(new TimeoutExpired(tuple.Key));
+
+						_repository.Remove(tuple.Key);
+					}
 				}
 			}
 			catch (Exception ex)

@@ -29,7 +29,7 @@ namespace MassTransit.ServiceBus.Tests.Timeouts
 	public class When_a_message_is_deferred :
 		LocalAndRemoteTestContext
 	{
-		private ITimeoutStorage _storage;
+		private ITimeoutRepository _timeoutRepository;
 		private TimeoutService _timeoutService;
 		private Guid _correlationId;
 		private DateTime _dateTime;
@@ -41,11 +41,11 @@ namespace MassTransit.ServiceBus.Tests.Timeouts
 			_correlationId = CombGuid.NewCombGuid();
 			_dateTime = DateTime.UtcNow + TimeSpan.FromSeconds(1);
 
-			Container.AddComponentLifeStyle<ITimeoutStorage, InMemoryTimeoutStorage>(LifestyleType.Singleton);
+			Container.AddComponentLifeStyle<ITimeoutRepository, InMemoryTimeoutRepository>(LifestyleType.Singleton);
 
-			_storage = Container.Resolve<ITimeoutStorage>();
+			_timeoutRepository = Container.Resolve<ITimeoutRepository>();
 
-			_timeoutService = new TimeoutService(LocalBus, _storage);
+			_timeoutService = new TimeoutService(LocalBus, _timeoutRepository);
 			_timeoutService.Start();
 
 			Container.AddComponentLifeStyle<IDeferredMessageRepository, InMemoryDeferredMessageRepository>(LifestyleType.Singleton);

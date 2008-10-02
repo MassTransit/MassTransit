@@ -83,6 +83,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Repositories\PersistantDeferredMessageRepository.cs" />
     <Compile Include="Repositories\PersistantTimeoutStorage.cs" />
+    <Compile Include="ScheduledTimeout.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Mapping\DeferredMessage.hbm.xml" />

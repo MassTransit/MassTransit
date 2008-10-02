@@ -17,16 +17,16 @@ namespace MassTransit.ServiceBus.Timeout
     public class CancelTimeoutConsumer :
         Consumes<CancelTimeout>.All
     {
-        private readonly ITimeoutStorage _storage;
+        private readonly ITimeoutRepository _repository;
 
-        public CancelTimeoutConsumer(ITimeoutStorage storage)
+        public CancelTimeoutConsumer(ITimeoutRepository repository)
         {
-            _storage = storage;
+            _repository = repository;
         }
 
         public void Consume(CancelTimeout message)
         {
-            _storage.Remove(message.CorrelationId);
+            _repository.Remove(message.CorrelationId);
         }
     }
 }

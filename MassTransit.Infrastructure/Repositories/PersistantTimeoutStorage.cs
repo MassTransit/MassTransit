@@ -3,26 +3,17 @@ namespace MassTransit.Infrastructure.Repositories
     using System;
     using System.Collections;
     using System.Collections.Generic;
+    using System.Linq;
+    using Magnum.Common.Repository;
     using Magnum.Infrastructure.Repository;
     using ServiceBus.Timeout;
     using ServiceBus.Util;
 
     public class PersistantTimeoutStorage :
-        ITimeoutStorage
-    {
-        private NHibernateRepository _repository;
+        ITimeoutRepository
 
-        #region ITimeoutStorage Members
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
-
-        public IEnumerator<Guid> GetEnumerator()
-        {
-            throw new NotImplementedException();
-        }
+	{
+        private IRepository<ScheduledTimeout, Guid> _repository;
 
         public void Schedule(Guid id, DateTime timeoutAt)
         {
@@ -32,12 +23,12 @@ namespace MassTransit.Infrastructure.Repositories
 
         public void Remove(Guid id)
         {
-            _repository.Delete(_repository.Get<ScheduledTimeout>(id));
+            _repository.Delete(_repository.Get(id));
         }
 
         public IList<Tuple<Guid, DateTime>> List()
         {
-            var items = _repository.List<ScheduledTimeout>();
+            var items = _repository.List();
             IList<Tuple<Guid, DateTime>> result = new List<Tuple<Guid, DateTime>>();
             foreach (var item in items)
             {
@@ -46,20 +37,20 @@ namespace MassTransit.Infrastructure.Repositories
             return result;
         }
 
-        public void Start()
-        {
-            throw new NotImplementedException();
-        }
+    	public IList<Tuple<Guid, DateTime>> List(DateTime lessThan)
+    	{
+    		var query = from item in _repository where item.ExpiresAt <= lessThan select item;
 
-        public void Stop()
-        {
-            throw new NotImplementedException();
-        }
+			IList<Tuple<Guid, DateTime>> result = new List<Tuple<Guid, DateTime>>();
+			foreach (ScheduledTimeout item in query)
+			{
+				result.Add(new Tuple<Guid, DateTime>(item.Id, item.ExpiresAt));
+			}
+			return result;
+		}
 
         public event Action<Guid> TimeoutAdded;
         public event Action<Guid> TimeoutUpdated;
         public event Action<Guid> TimeoutRemoved;
-
-        #endregion
     }
 }
