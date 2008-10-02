@@ -13,14 +13,13 @@
 namespace MassTransit.Services
 {
 	using System;
-	using Messages;
 
 	public interface IDeferredMessageRepository :
 		IDisposable
 	{
-		void Add(Guid id, DeferMessage message);
+		void Add(DeferredMessage message);
 
-		DeferMessage Get(Guid id);
+		DeferredMessage Get(Guid id);
 
 		bool Contains(Guid id);
 

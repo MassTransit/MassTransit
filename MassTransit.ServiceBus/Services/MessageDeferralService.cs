@@ -15,13 +15,13 @@ namespace MassTransit.Services
 	using log4net;
 	using ServiceBus;
 
-	public class DeferredMessagePublisher :
+	public class MessageDeferralService :
 		IHostedService
 	{
-		private static readonly ILog _log = LogManager.GetLogger(typeof (DeferredMessagePublisher));
+		private static readonly ILog _log = LogManager.GetLogger(typeof (MessageDeferralService));
 		private readonly IServiceBus _bus;
 
-		public DeferredMessagePublisher(IServiceBus bus)
+		public MessageDeferralService(IServiceBus bus)
 		{
 			_bus = bus;
 		}
@@ -33,25 +33,25 @@ namespace MassTransit.Services
 		public void Start()
 		{
 			if (_log.IsInfoEnabled)
-				_log.Info("Deferred Message Publisher Starting");
+				_log.Info("MessageDeferralService Starting");
 
 			_bus.AddComponent<DeferMessageConsumer>();
 			_bus.AddComponent<TimeoutExpiredConsumer>();
 
 			if (_log.IsInfoEnabled)
-				_log.Info("Deferred Message Publisher Started");
+				_log.Info("MessageDeferralService Started");
 		}
 
 		public void Stop()
 		{
 			if (_log.IsInfoEnabled)
-				_log.Info("Deferred Message Publisher Stopping");
+				_log.Info("MessageDeferralService Stopping");
 
 			_bus.RemoveComponent<TimeoutExpiredConsumer>();
 			_bus.RemoveComponent<DeferMessageConsumer>();
 
 			if (_log.IsInfoEnabled)
-				_log.Info("Deferred Message Publisher Stopped");
+				_log.Info("MessageDeferralService Stopped");
 		}
 	}
 }

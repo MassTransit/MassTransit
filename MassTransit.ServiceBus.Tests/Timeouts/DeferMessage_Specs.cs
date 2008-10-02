@@ -34,7 +34,7 @@ namespace MassTransit.ServiceBus.Tests.Timeouts
 		private Guid _correlationId;
 		private DateTime _dateTime;
 		private IDeferredMessageRepository _repository;
-		private DeferredMessagePublisher _deferService;
+		private MessageDeferralService _deferService;
 
 		protected override void Before_each()
 		{
@@ -52,7 +52,7 @@ namespace MassTransit.ServiceBus.Tests.Timeouts
 
 			_repository = Container.Resolve<IDeferredMessageRepository>();
 
-			_deferService = new DeferredMessagePublisher(LocalBus);
+			_deferService = new MessageDeferralService(LocalBus);
 			_deferService.Start();
 		}
 

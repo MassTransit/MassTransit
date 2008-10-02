@@ -14,9 +14,8 @@ namespace MassTransit.Services
 {
 	using System;
 	using System.Reflection;
-	using MassTransit.ServiceBus.Timeout.Messages;
-	using Messages;
 	using ServiceBus;
+	using ServiceBus.Timeout.Messages;
 
 	public class TimeoutExpiredConsumer :
 		Consumes<TimeoutExpired>.Selected
@@ -24,26 +23,26 @@ namespace MassTransit.Services
 		private static readonly MethodInfo _publishMethodInfo = typeof (IServiceBus).GetMethod("Publish", BindingFlags.Public | BindingFlags.Instance);
 
 		private readonly IServiceBus _bus;
-		private readonly IDeferredMessageRepository _deferred;
+		private readonly IDeferredMessageRepository _repository;
 
-		public TimeoutExpiredConsumer(IServiceBus bus, IDeferredMessageRepository deferred)
+		public TimeoutExpiredConsumer(IServiceBus bus, IDeferredMessageRepository repository)
 		{
-			_deferred = deferred;
+			_repository = repository;
 			_bus = bus;
 		}
 
 		public void Consume(TimeoutExpired message)
 		{
-			DeferMessage deferredMessage = _deferred.Get(message.CorrelationId);
+			DeferredMessage deferredMessage = _repository.Get(message.CorrelationId);
 
-			RepublishMessage(deferredMessage.Message);
+			RepublishMessage(deferredMessage.GetMessage());
 
-			_deferred.Remove(message.CorrelationId);
+			_repository.Remove(message.CorrelationId);
 		}
 
 		public bool Accept(TimeoutExpired message)
 		{
-			return _deferred.Contains(message.CorrelationId);
+			return _repository.Contains(message.CorrelationId);
 		}
 
 		private void RepublishMessage(object message)
