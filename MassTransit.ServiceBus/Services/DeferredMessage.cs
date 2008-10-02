@@ -57,11 +57,16 @@ namespace MassTransit.Services
 
         public T GetMessage<T>() where T : class
         {
+            return GetMessage() as T;
+        }
+
+        public object GetMessage()
+        {
             using (MemoryStream mstream = new MemoryStream(_messageData))
             {
                 object obj = _formatter.Deserialize(mstream);
 
-                return obj as T;
+                return obj;
             }
         }
     }
