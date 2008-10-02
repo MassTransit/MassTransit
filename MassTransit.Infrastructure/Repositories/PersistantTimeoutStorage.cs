@@ -37,7 +37,13 @@ namespace MassTransit.Infrastructure.Repositories
 
         public IList<Tuple<Guid, DateTime>> List()
         {
-            throw new NotImplementedException();
+            var items = _repository.List<ScheduledTimeout>();
+            IList<Tuple<Guid, DateTime>> result = new List<Tuple<Guid, DateTime>>();
+            foreach (var item in items)
+            {
+                result.Add(new Tuple<Guid, DateTime>(item.Id, item.ExpiresAt));
+            }
+            return result;
         }
 
         public void Start()
