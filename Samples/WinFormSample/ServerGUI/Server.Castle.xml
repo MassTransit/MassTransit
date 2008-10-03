@@ -12,6 +12,7 @@
       <bus id="server"
 				 endpoint="msmq://localhost/mt_server">
 				<subscriptionCache name="subscriptioncache.shared"/>
+        <managementService heartbeatInterval="3" />
       </bus>
 			<bus id="control"
 					 endpoint="msmq://localhost/mt_server1">

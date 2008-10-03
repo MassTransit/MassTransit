@@ -64,7 +64,7 @@ namespace SubscriptionManagerGUI
 
             foreach (HealthInformation information in _healthCache.List())
             {
-                string[] items = new []{information.Uri.ToString(), information.FirstDetectedAt.Value.ToShortTimeString()};
+                string[] items = new []{information.Uri.ToString(), information.FirstDetectedAt.Value.ToString()};
                 ListViewItem lvi = new ListViewItem(items);
                 this.heartbeatList.Items.Add(lvi);
             }
