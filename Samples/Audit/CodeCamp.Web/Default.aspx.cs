@@ -1,3 +1,5 @@
+using CodeCamp.Domain;
+
 namespace CodeCamp.Web
 {
 	using System;

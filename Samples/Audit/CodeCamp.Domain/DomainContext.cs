@@ -1,3 +1,5 @@
+using CodeCamp.Domain;
+
 namespace CodeCamp.Core
 {
     using Castle.MicroKernel;
@@ -10,11 +12,11 @@ namespace CodeCamp.Core
 	{
 		private static readonly IEndpoint _endpoint;
 		private static readonly IServiceBus _serviceBus;
-		private static readonly Repository<User> _userRepository;
+		private static readonly IRepository<User> _userRepository;
 
 		static DomainContext()
 		{
-			_userRepository = new Repository<User>(new [] {new User("joe", "password"), new User("david", "password"),});
+			//_userRepository = new Repository<User>(new [] {new User("joe", "password"), new User("david", "password"),});
 
 			_endpoint = new MsmqEndpoint("msmq://localhost/mt_client");
 
