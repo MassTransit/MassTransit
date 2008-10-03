@@ -30,13 +30,15 @@
 		{
             this.subscriptionTree = new System.Windows.Forms.TreeView();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
+            this.label2 = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
             this.timeoutList = new System.Windows.Forms.ListView();
             this.timeHeader = new System.Windows.Forms.ColumnHeader();
             this.idHeader = new System.Windows.Forms.ColumnHeader();
-            this.label2 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
             this.heartbeatList = new System.Windows.Forms.ListView();
+            this.columnHeader1 = new System.Windows.Forms.ColumnHeader();
+            this.columnHeader2 = new System.Windows.Forms.ColumnHeader();
             this.tableLayoutPanel1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -70,6 +72,20 @@
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 79F));
             this.tableLayoutPanel1.Size = new System.Drawing.Size(789, 409);
             this.tableLayoutPanel1.TabIndex = 4;
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.BackColor = System.Drawing.SystemColors.ActiveCaption;
+            this.label2.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.label2.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label2.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
+            this.label2.Location = new System.Drawing.Point(397, 0);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(389, 20);
+            this.label2.TabIndex = 5;
+            this.label2.Text = "Timeouts";
+            this.label2.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // label1
             // 
@@ -108,20 +124,6 @@
             this.idHeader.Text = "Id";
             this.idHeader.Width = 120;
             // 
-            // label2
-            // 
-            this.label2.AutoSize = true;
-            this.label2.BackColor = System.Drawing.SystemColors.ActiveCaption;
-            this.label2.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label2.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label2.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
-            this.label2.Location = new System.Drawing.Point(397, 0);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(389, 20);
-            this.label2.TabIndex = 5;
-            this.label2.Text = "Timeouts";
-            this.label2.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            // 
             // label3
             // 
             this.label3.AutoSize = true;
@@ -138,6 +140,9 @@
             // 
             // heartbeatList
             // 
+            this.heartbeatList.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.columnHeader1,
+            this.columnHeader2});
             this.heartbeatList.Dock = System.Windows.Forms.DockStyle.Fill;
             this.heartbeatList.Location = new System.Drawing.Point(397, 332);
             this.heartbeatList.Name = "heartbeatList";
@@ -145,6 +150,16 @@
             this.heartbeatList.TabIndex = 8;
             this.heartbeatList.UseCompatibleStateImageBehavior = false;
             this.heartbeatList.View = System.Windows.Forms.View.Details;
+            // 
+            // columnHeader1
+            // 
+            this.columnHeader1.Text = "Address";
+            this.columnHeader1.Width = 223;
+            // 
+            // columnHeader2
+            // 
+            this.columnHeader2.Text = "First Detected On";
+            this.columnHeader2.Width = 110;
             // 
             // SubscriptionManagerForm
             // 
@@ -172,6 +187,8 @@
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.ListView heartbeatList;
+        private System.Windows.Forms.ColumnHeader columnHeader1;
+        private System.Windows.Forms.ColumnHeader columnHeader2;
 	}
 }
 
