@@ -29,6 +29,7 @@
     <IsWebBootstrapper>true</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -57,6 +58,9 @@
       <HintPath>..\..\..\bin\Castle.MicroKernel.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Core">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
     <Reference Include="System.Data" />
     <Reference Include="System.Messaging" />
     <Reference Include="System.Xml" />
@@ -77,6 +81,10 @@
     <ProjectReference Include="..\..\..\Transports\MassTransit.ServiceBus.MSMQ\MassTransit.ServiceBus.MSMQ.csproj">
       <Project>{6F90867C-E092-4EDC-B3DE-600D39DF0335}</Project>
       <Name>MassTransit.ServiceBus.MSMQ</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\CodeCamp.Domain\CodeCamp.Domain.csproj">
+      <Project>{39D588EC-0104-432F-B9D7-A1D22C93B10C}</Project>
+      <Name>CodeCamp.Domain</Name>
     </ProjectReference>
     <ProjectReference Include="..\CodeCamp.Messages\CodeCamp.Messages.csproj">
       <Project>{7C6ED57B-D1E6-4CED-89E4-58A9ABFC3F95}</Project>
