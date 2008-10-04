@@ -27,6 +27,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PostalService.Messages", "P
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CodeCamp.Domain", "CodeCamp.Domain\CodeCamp.Domain.csproj", "{39D588EC-0104-432F-B9D7-A1D22C93B10C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CodeCamp.Infrastructure", "CodeCamp.Infrastructure\CodeCamp.Infrastructure.csproj", "{3B856E45-7084-4CE6-8FB9-7CF5011FDCF0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -77,6 +79,10 @@ Global
 		{39D588EC-0104-432F-B9D7-A1D22C93B10C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{39D588EC-0104-432F-B9D7-A1D22C93B10C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{39D588EC-0104-432F-B9D7-A1D22C93B10C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3B856E45-7084-4CE6-8FB9-7CF5011FDCF0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3B856E45-7084-4CE6-8FB9-7CF5011FDCF0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3B856E45-7084-4CE6-8FB9-7CF5011FDCF0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3B856E45-7084-4CE6-8FB9-7CF5011FDCF0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
