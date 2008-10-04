@@ -9,7 +9,7 @@ using PostalService.Messages;
 
 namespace CodeCamp.Domain
 {
-    public class RegisterUserOrchestration :
+    public class RegisterUserSaga :
         InitiatedBy<RegisterUser>,
         Orchestrates<UserVerificationEmailSent>,
         Orchestrates<UserVerifiedEmail>,

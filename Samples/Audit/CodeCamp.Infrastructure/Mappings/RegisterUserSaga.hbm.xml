@@ -1,0 +1,29 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<hibernate-mapping xmlns="urn:nhibernate-mapping-2.2"
+				   schema="bus"
+				   assembly="CodeCamp.Domain"
+				   namespace="CodeCamp.Domain"
+           default-lazy="false">
+
+  <class name="RegisterUserSaga"
+		   table="RegisterUserSagas">
+
+    <id name="Id"
+			type="Int32"
+			access="field.camelcase-underscore">
+      <generator class="native"/>
+    </id>
+
+    <property name="LastEmailSent"
+				  not-null="true"
+				  update="true"
+				  />
+    
+    <many-to-one name="User"
+                 column="UserId"
+                 class="User"
+                 />
+    
+  </class>
+
+</hibernate-mapping>

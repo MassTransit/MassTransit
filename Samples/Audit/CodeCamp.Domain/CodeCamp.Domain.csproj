@@ -54,7 +54,7 @@
     <Compile Include="DomainContext.cs" />
     <Compile Include="IRepository.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RegisterUserOrchestration.cs" />
+    <Compile Include="RegisterUserSaga.cs" />
     <Compile Include="User.cs" />
   </ItemGroup>
   <ItemGroup>
