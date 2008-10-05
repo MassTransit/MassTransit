@@ -7,14 +7,16 @@ namespace CodeCamp.Messages
     public class RegisterUser :
         CorrelatedBy<Guid>
     {
-        private readonly string _name;
-        private readonly string _username;
-        private readonly string _password;
         private readonly Guid _correlationId;
+        private readonly string _email;
+        private readonly string _name;
+        private readonly string _password;
+        private readonly string _username;
 
-        public RegisterUser(string name, string username, string password, Guid correlationId)
+        public RegisterUser(Guid correlationId, string name, string username, string password, string email)
         {
             _name = name;
+            _email = email;
             _correlationId = correlationId;
             _username = username;
             _password = password;
@@ -33,6 +35,11 @@ namespace CodeCamp.Messages
         public string Password
         {
             get { return _password; }
+        }
+
+        public string Email
+        {
+            get { return _email; }
         }
 
         public Guid CorrelationId
