@@ -1,20 +1,27 @@
-using CodeCamp.Core;
-using CodeCamp.Messages;
-
 namespace CodeCamp.Domain
 {
+    using Core;
+    using Messages;
+
     public class User : IIdentifier
     {
+        private readonly string _email;
         private readonly string _name;
         private readonly string _password;
         private readonly string _username;
         private bool? _hasEmailBeenConfirmed;
 
-        public User(string name, string username, string password)
+        public User(string name, string username, string password, string email)
         {
             _name = name;
             _username = username;
             _password = password;
+            _email = email;
+        }
+
+        public string Email
+        {
+            get { return _email; }
         }
 
         public string Name

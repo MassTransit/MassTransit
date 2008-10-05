@@ -9,6 +9,8 @@ using PostalService.Messages;
 
 namespace CodeCamp.Domain
 {
+    using Microsoft.Practices.ServiceLocation;
+
     public class RegisterUserSaga :
         InitiatedBy<RegisterUser>,
         Orchestrates<UserVerificationEmailSent>,
@@ -26,24 +28,7 @@ namespace CodeCamp.Domain
             get { return _user; }
         }
 
-        //Starts things off
-
-        #region InitiatedBy<RegisterUser> Members
-
-        public void Consume(RegisterUser message)
-        {
-            _user = new User(message.Name, message.Username, message.Password);
-
-            string body = string.Format("Please verify email http://localhost/ConfirmEmail/?registrationId={0}",
-                                        _correlationId);
-            _bus.Publish(new SendEmail(_correlationId, "bob", "dru", "verify email", body));
-
-            _bus.Publish(new UserVerificationEmailSent(_correlationId));
-        }
-
-        #endregion
-
-        #region ISaga Members
+       #region ISaga Members
 
         public Guid CorrelationId
         {
@@ -56,15 +41,33 @@ namespace CodeCamp.Domain
             set { _bus = value; }
         }
 
-        public IObjectBuilder Builder { get; set; }
+        public IServiceLocator ServiceLocator { get; set; }
 
         #endregion
 
+        //Starts things off
+
+        #region InitiatedBy<RegisterUser> Members
+
+        public void Consume(RegisterUser message)
+        {
+            _user = new User(message.Name, message.Username, message.Password, message.Email);
+
+            string body = string.Format("Please verify email http://localhost/ConfirmEmail/?registrationId={0}",
+                                        _correlationId);
+            _bus.Publish(new SendEmail(_correlationId, _user.Email, "dru", "verify email", body));
+        }
+
+        #endregion
+
+ 
         #region Orchestrates<EmailSent> Members
 
         public void Consume(EmailSent message)
         {
             _lastEmailSent = message.SentAt;
+
+            _bus.Publish(new UserVerificationEmailSent(_correlationId));
         }
 
         #endregion
@@ -88,7 +91,7 @@ namespace CodeCamp.Domain
             string body = string.Format("Thank you. You are now registered");
 
             // use a new guid because we don't want any more messages to this saga about e-mails
-            _bus.Publish(new SendEmail(Guid.Empty, "bob", "dru", "Register Successful", body));
+            _bus.Publish(new SendEmail(Guid.Empty, _user.Email, "dru", "Register Successful", body));
         }
 
         #endregion

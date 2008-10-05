@@ -41,7 +41,7 @@ namespace MassTransit.ServiceBus.Internal
 
         protected void DispatchToConsumer(TSaga saga, TMessage message)
         {
-            saga.Builder = _builder;
+            saga.ServiceLocator = _builder;
             saga.Bus = _bus;
 
             saga.Consume(message);

@@ -1,11 +1,9 @@
 namespace MassTransit.Infrastructure.Repositories
 {
     using System;
-    using System.Collections;
     using System.Collections.Generic;
     using System.Linq;
     using Magnum.Common.Repository;
-    using Magnum.Infrastructure.Repository;
     using ServiceBus.Timeout;
     using ServiceBus.Util;
 
@@ -13,7 +11,12 @@ namespace MassTransit.Infrastructure.Repositories
         ITimeoutRepository
 
 	{
-        private IRepository<ScheduledTimeout, Guid> _repository;
+        private readonly IRepository<ScheduledTimeout, Guid> _repository;
+
+        public PersistantTimeoutStorage(IRepository<ScheduledTimeout, Guid> repository)
+        {
+            _repository = repository;
+        }
 
         public void Schedule(Guid id, DateTime timeoutAt)
         {
