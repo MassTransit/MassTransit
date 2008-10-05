@@ -3,8 +3,10 @@ using CodeCamp.Domain;
 namespace CodeCamp.Web
 {
 	using System;
+	using System.Linq;
 	using System.Web.UI;
 	using Magnum.Common;
+	using Magnum.Common.Repository;
 	using Masters;
 
     public partial class _Default : Page
@@ -16,9 +18,13 @@ namespace CodeCamp.Web
 
         protected void submitButton_Click(object sender, EventArgs e)
         {
-            using (var timer = new FunctionTimer("_Default submiteButton_Click", delegate(string stuff) { return; }))
+            using (var timer = new FunctionTimer("_Default submiteButton_Click", x => timerLabel.Text = x))
             {
-                User user = DomainContext.UserRepository.Get(username.Text);
+                User user;
+                using (IRepository<User, Guid> repository = DomainContext.ServiceLocator.GetInstance<IRepositoryFactory>().GetRepository<User, Guid>())
+                {
+                    user = repository.Where(u => u.Username == username.Text).FirstOrDefault();
+                }
 
                 if (user != null)
                 {
@@ -35,8 +41,6 @@ namespace CodeCamp.Web
                 {
                     ((TulsaTechFest)this.Master).SetError(string.Format("User not found: '{0}'", username.Text));
                 }
-
-                timerLabel.Text = string.Format("Elapsed Time: {0}", timer.Header);
             }
         }
 	}
