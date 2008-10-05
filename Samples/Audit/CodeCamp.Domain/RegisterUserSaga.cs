@@ -34,7 +34,7 @@ namespace CodeCamp.Domain
         {
             _user = new User(message.Name, message.Username, message.Password);
 
-            string body = string.Format("Please verify email http://localhost/ConfirmEmail.aspx?registrationId={0}",
+            string body = string.Format("Please verify email http://localhost/ConfirmEmail/?registrationId={0}",
                                         _correlationId);
             _bus.Publish(new SendEmail(_correlationId, "bob", "dru", "verify email", body));
 

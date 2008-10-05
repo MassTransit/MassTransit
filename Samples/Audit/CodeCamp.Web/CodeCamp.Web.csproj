@@ -96,12 +96,12 @@
     <Compile Include="Default.aspx.designer.cs">
       <DependentUpon>Default.aspx</DependentUpon>
     </Compile>
-    <Compile Include="EmailConfirmed.aspx.cs">
-      <DependentUpon>EmailConfirmed.aspx</DependentUpon>
+    <Compile Include="ConfirmEmail\Default.aspx.cs">
+      <DependentUpon>Default.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="EmailConfirmed.aspx.designer.cs">
-      <DependentUpon>EmailConfirmed.aspx</DependentUpon>
+    <Compile Include="ConfirmEmail\Default.aspx.designer.cs">
+      <DependentUpon>Default.aspx</DependentUpon>
     </Compile>
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
@@ -114,12 +114,12 @@
       <DependentUpon>TulsaTechFest.Master</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Registration.aspx.cs">
-      <DependentUpon>Registration.aspx</DependentUpon>
+    <Compile Include="Registration\Default.aspx.cs">
+      <DependentUpon>Default.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="Registration.aspx.designer.cs">
-      <DependentUpon>Registration.aspx</DependentUpon>
+    <Compile Include="Registration\Default.aspx.designer.cs">
+      <DependentUpon>Default.aspx</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>
@@ -145,8 +145,8 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="EmailConfirmed.aspx" />
-    <Content Include="Registration.aspx" />
+    <Content Include="ConfirmEmail\Default.aspx" />
+    <Content Include="Registration\Default.aspx" />
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>
