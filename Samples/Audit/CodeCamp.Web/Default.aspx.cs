@@ -22,7 +22,7 @@ namespace CodeCamp.Web
 
                 if (user != null)
                 {
-                    if (user.CheckPassword(password.Text))
+                    if (user.CheckPassword(password.Text) && (user.HasEmailBeenConfirmed ?? false))
                     {
                         ((TulsaTechFest)this.Master).SetNotice("user access granted");
                     }

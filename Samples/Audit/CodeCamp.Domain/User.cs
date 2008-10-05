@@ -2,6 +2,7 @@ namespace CodeCamp.Domain
 {
     using Core;
     using Messages;
+    using Magnum.Common.ObjectExtensions;
 
     public class User : IIdentifier
     {
@@ -45,6 +46,11 @@ namespace CodeCamp.Domain
 
         public bool CheckPassword(string password)
         {
+            password.MustNotBeNull();
+            password.MustNotBeEmpty();
+
+            password = password.Trim();
+
             if (_password == password)
             {
                 DomainContext.Publish(new UserPasswordSuccess(_username));
@@ -56,12 +62,17 @@ namespace CodeCamp.Domain
             return false;
         }
 
-        public void EmailHasBeenConfirmed()
+        public bool? HasEmailBeenConfirmed
+        {
+            get { return _hasEmailBeenConfirmed; }
+        }
+
+        public void ConfirmEmail()
         {
             _hasEmailBeenConfirmed = true;
         }
 
-        public void SetPending()
+        public void SetEmailPending()
         {
             _hasEmailBeenConfirmed = false;
         }

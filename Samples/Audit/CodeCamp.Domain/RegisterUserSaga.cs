@@ -76,7 +76,7 @@ namespace CodeCamp.Domain
 
         public void Consume(UserVerificationEmailSent message)
         {
-            _user.SetPending();
+            _user.SetEmailPending();
 
             _bus.Publish(new ScheduleTimeout(message.CorrelationId, 24.Hours().FromNow()));
         }
@@ -87,7 +87,7 @@ namespace CodeCamp.Domain
 
         public void Consume(UserVerifiedEmail message)
         {
-            _user.EmailHasBeenConfirmed();
+            _user.ConfirmEmail();
             string body = string.Format("Thank you. You are now registered");
 
             // use a new guid because we don't want any more messages to this saga about e-mails

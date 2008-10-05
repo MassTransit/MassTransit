@@ -18,18 +18,23 @@
 				  update="true"
 				  />
     <property name="Username"
-				  not-null="true"
-				  update="false"
-				  />
+				      not-null="true"
+				      update="false"
+				      />
     <property name="Password"
-				  not-null="true"
-				  update="true"
+				      not-null="true"
+				      update="true"
               access="field.camelcase-underscore"
-				  />
+				      />
+    <property name="Email"
+				      not-null="true"
+				      update="true"
+              access="field.camelcase-underscore"
+				      />
     <property name="HasEmailBeenConfirmed"
               update="true"
               access="field.camelcase-underscore"
-				  />
+				      />
   </class>
 
 </hibernate-mapping>
