@@ -1,26 +1,17 @@
 namespace CodeCamp.Domain
 {
     using Core;
+    using Magnum.Common.ObjectExtensions;
     using MassTransit.ServiceBus;
-    using MassTransit.ServiceBus.Configuration;
-    using MassTransit.ServiceBus.MSMQ;
-    using MassTransit.ServiceBus.Subscriptions;
 
     public static class DomainContext
     {
-        private static readonly IServiceBus _serviceBus;
-        private static readonly IRepository<User> _userRepository;
+        private static IServiceBus _serviceBus;
+        private static IRepository<User> _userRepository;
 
-        static DomainContext()
+        public static IRepository<User> UserRepository
         {
-            //_userRepository = new Repository<User>(new [] {new User("joe", "password"), new User("david", "password"),});
-
-            _serviceBus = BusBuilder.WithName("bill")
-                .ListensOn("msmq://localhost/mt_client")
-                .SharesSubscriptionsVia<DistributedSubscriptionCache>("tcpip://127.0.0.1:11211")
-                .CommunicatesOver<MsmqEndpoint>()
-                .Validate()
-                .Build();
+            get { return _userRepository; }
         }
 
         public static void Publish<T>(T message) where T : class
@@ -28,13 +19,11 @@ namespace CodeCamp.Domain
             _serviceBus.Publish(message);
         }
 
-        public static IRepository<User> UserRepository
+        public static void Initialize(IServiceBus bus)
         {
-            get { return _userRepository; }
-        }
+            bus.MustNotBeNull();
 
-        public static void Initialize()
-        {
+            _serviceBus = bus;
         }
     }
 }
