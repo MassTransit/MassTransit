@@ -164,6 +164,11 @@
     <Content Include="Assets\Styles\src\typography.css" />
     <Content Include="Masters\TulsaTechFest.Master" />
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="web-castle.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v9.0\WebApplications\Microsoft.WebApplication.targets" Condition="" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
