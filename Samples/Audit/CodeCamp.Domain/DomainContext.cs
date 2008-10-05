@@ -4,7 +4,8 @@ namespace CodeCamp.Core
 {
     using Castle.MicroKernel;
     using MassTransit.ServiceBus;
-	using MassTransit.ServiceBus.MSMQ;
+    using MassTransit.ServiceBus.Configuration;
+    using MassTransit.ServiceBus.MSMQ;
 	using MassTransit.ServiceBus.Subscriptions;
     using MassTransit.WindsorIntegration;
 
@@ -18,13 +19,13 @@ namespace CodeCamp.Core
 		{
 			//_userRepository = new Repository<User>(new [] {new User("joe", "password"), new User("david", "password"),});
 
-			_endpoint = new MsmqEndpoint("msmq://localhost/mt_client");
-
-			ISubscriptionCache cache = new DistributedSubscriptionCache();
-
-            IObjectBuilder obj = new WindsorObjectBuilder(new DefaultKernel());
-
-			_serviceBus = new ServiceBus(_endpoint, obj, cache);
+		    BusBuilder.SetObjectBuilder(new WindsorObjectBuilder(new DefaultKernel()));
+            _serviceBus = BusBuilder.WithName("bill")
+		        .ListensOn("msmq://localhost/mt_client")
+                .SharesSubscriptionsVia<DistributedSubscriptionCache>("tcpip://127.0.0.1:11211")
+		        .CommunicatesOver<MsmqEndpoint>()
+		        .Validate()
+		        .Build();
 		}
 
 		public static void Publish<T>(T message) where T : class
