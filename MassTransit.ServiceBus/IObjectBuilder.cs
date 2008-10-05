@@ -14,8 +14,10 @@ namespace MassTransit.ServiceBus
 {
 	using System;
 	using System.Collections;
+	using Microsoft.Practices.ServiceLocation;
 
-    public interface IObjectBuilder
+    public interface IObjectBuilder :
+        IServiceLocator
 	{
 		/// <summary>
 		/// Build an object of the specified type
