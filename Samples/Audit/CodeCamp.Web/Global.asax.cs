@@ -2,12 +2,16 @@ namespace CodeCamp.Web
 {
 	using System;
 	using System.Web;
-	using Core;
+	using Castle.MicroKernel;
+	using Domain;
+	using MassTransit.ServiceBus.Configuration;
+	using MassTransit.WindsorIntegration;
 
-	public class Global : HttpApplication
+    public class Global : HttpApplication
 	{
 		protected void Application_Start(object sender, EventArgs e)
 		{
+            BusBuilder.SetObjectBuilder(new WindsorObjectBuilder(new DefaultKernel()));
 			DomainContext.Initialize();
 		}
 

@@ -2,7 +2,7 @@
 {
     using System;
     using System.Web.UI;
-    using Core;
+    using Domain;
     using Messages;
 
     public partial class EmailConfirmed : Page

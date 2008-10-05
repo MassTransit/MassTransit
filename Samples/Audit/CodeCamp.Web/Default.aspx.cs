@@ -4,7 +4,6 @@ namespace CodeCamp.Web
 {
 	using System;
 	using System.Web.UI;
-	using Core;
 	using Magnum.Common;
 	using Masters;
 

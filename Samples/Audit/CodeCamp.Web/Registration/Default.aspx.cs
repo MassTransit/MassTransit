@@ -2,7 +2,7 @@
 {
     using System;
     using System.Web.UI;
-    using Core;
+    using Domain;
     using Magnum.Common;
     using Masters;
     using Messages;
