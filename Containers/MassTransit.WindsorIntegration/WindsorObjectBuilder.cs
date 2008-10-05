@@ -14,6 +14,7 @@ namespace MassTransit.WindsorIntegration
 {
     using System;
     using System.Collections;
+    using System.Collections.Generic;
     using Castle.Core;
     using Castle.MicroKernel;
     using ServiceBus;
@@ -60,6 +61,47 @@ namespace MassTransit.WindsorIntegration
             {
                 _container.AddComponent(typeof (T).Name, typeof (T), LifestyleType.Transient);
             }
+        }
+
+        public object GetService(Type serviceType)
+        {
+            return _container.Resolve(serviceType);
+        }
+
+        public object GetInstance(Type serviceType)
+        {
+            return _container.Resolve(serviceType);
+        }
+
+        public object GetInstance(Type serviceType, string key)
+        {
+            return _container.Resolve(key, serviceType);
+        }
+
+        public IEnumerable<object> GetAllInstances(Type serviceType)
+        {
+            var x = _container.ResolveAll(serviceType, new {});
+            ArrayList result = new ArrayList();
+            foreach (var o in x)
+            {
+                result.Add(o);
+            }
+            return result.ToArray();
+        }
+
+        public TService GetInstance<TService>()
+        {
+            return _container.Resolve<TService>();
+        }
+
+        public TService GetInstance<TService>(string key)
+        {
+            return _container.Resolve<TService>(key);
+        }
+
+        public IEnumerable<TService> GetAllInstances<TService>()
+        {
+            return _container.ResolveAll<TService>();
         }
     }
 }
