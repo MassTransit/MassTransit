@@ -7,23 +7,23 @@
   <class name="RegisterUserSaga"
 		   table="RegisterUserSagas">
 
-    <id name="Id"
-			type="Int32"
+    <id name="CorrelationId" column="Id"
+			type="Guid"
 			access="field.camelcase-underscore">
-      <generator class="native"/>
+      <generator class="assigned"/>
     </id>
 
     <property name="LastEmailSent"
 				  not-null="true"
 				  update="true"
-			access="field.camelcase-underscore"
+			    access="field.camelcase-underscore"
 				  />
-    
+
     <many-to-one name="User"
                  column="UserId"
                  class="User"
                  />
-    
+
   </class>
 
 </hibernate-mapping>

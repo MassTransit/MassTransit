@@ -1,17 +1,17 @@
 namespace CodeCamp.Domain
 {
-    using Core;
     using Magnum.Common.ObjectExtensions;
     using MassTransit.ServiceBus;
+    using Microsoft.Practices.ServiceLocation;
 
     public static class DomainContext
     {
         private static IServiceBus _serviceBus;
-        private static IRepository<User> _userRepository;
+        private static IServiceLocator _serviceLocator;
 
-        public static IRepository<User> UserRepository
+        public static IServiceLocator ServiceLocator
         {
-            get { return _userRepository; }
+            get { return _serviceLocator; }
         }
 
         public static void Publish<T>(T message) where T : class
@@ -19,11 +19,13 @@ namespace CodeCamp.Domain
             _serviceBus.Publish(message);
         }
 
-        public static void Initialize(IServiceBus bus)
+        public static void Initialize(IServiceBus bus, IServiceLocator serviceLocator)
         {
             bus.MustNotBeNull();
+            serviceLocator.MustNotBeNull();
 
             _serviceBus = bus;
+            _serviceLocator = serviceLocator;
         }
     }
 }

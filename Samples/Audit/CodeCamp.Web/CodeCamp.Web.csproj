@@ -55,13 +55,29 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\libs\Enyim.Caching.dll</HintPath>
     </Reference>
+    <Reference Include="log4net, Version=1.2.10.0, Culture=neutral, PublicKeyToken=1b44e1d426115821, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\libs\log4net.dll</HintPath>
+    </Reference>
     <Reference Include="Magnum.Common, Version=0.1.0.69, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\libs\Magnum.Common.dll</HintPath>
     </Reference>
+    <Reference Include="Magnum.Infrastructure, Version=0.1.0.72, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\libs\Magnum.Infrastructure.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.Practices.ServiceLocation, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\libs\Microsoft.Practices.ServiceLocation.dll</HintPath>
+    </Reference>
+    <Reference Include="NHibernate, Version=2.0.0.4000, Culture=neutral, PublicKeyToken=aa95f207798dfdb4, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\libs\NHibernate 2.0\NHibernate.dll</HintPath>
+    </Reference>
+    <Reference Include="NHibernate.Linq, Version=1.0.0.0, Culture=neutral, PublicKeyToken=444cf6a87fdab271, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\libs\NHibernate 2.0\NHibernate.Linq.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core, Version=3.5.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
@@ -147,6 +163,10 @@
       <Project>{39D588EC-0104-432F-B9D7-A1D22C93B10C}</Project>
       <Name>CodeCamp.Domain</Name>
     </ProjectReference>
+    <ProjectReference Include="..\CodeCamp.Infrastructure\CodeCamp.Infrastructure.csproj">
+      <Project>{3B856E45-7084-4CE6-8FB9-7CF5011FDCF0}</Project>
+      <Name>CodeCamp.Infrastructure</Name>
+    </ProjectReference>
     <ProjectReference Include="..\CodeCamp.Messages\CodeCamp.Messages.csproj">
       <Project>{7C6ED57B-D1E6-4CED-89E4-58A9ABFC3F95}</Project>
       <Name>CodeCamp.Messages</Name>
@@ -173,6 +193,9 @@
     <Content Include="Masters\TulsaTechFest.Master" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="NHibernate.Cfg.Xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="web-castle.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

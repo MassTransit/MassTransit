@@ -32,6 +32,15 @@ namespace CodeCamp.Web {
         protected global::System.Web.UI.WebControls.TextBox inputUsername;
         
         /// <summary>
+        /// inputEmail control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox inputEmail;
+        
+        /// <summary>
         /// inputPassword control.
         /// </summary>
         /// <remarks>
@@ -48,5 +57,14 @@ namespace CodeCamp.Web {
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Button submitButton;
+        
+        /// <summary>
+        /// timerLabel control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label timerLabel;
     }
 }

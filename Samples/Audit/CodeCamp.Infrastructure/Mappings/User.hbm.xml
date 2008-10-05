@@ -8,9 +8,9 @@
 		   table="Users">
 
     <id name="Id"
-			type="Int32"
+			type="Guid"
 			access="field.camelcase-underscore">
-      <generator class="native"/>
+      <generator class="assigned"/>
     </id>
 
     <property name="Name"

@@ -1,16 +1,19 @@
 namespace CodeCamp.Domain
 {
-    using Core;
+    using System;
+    using Magnum.Common.Repository;
     using Messages;
     using Magnum.Common.ObjectExtensions;
 
-    public class User : IIdentifier
+    public class User : 
+        IAggregateRoot<Guid>
     {
         private readonly string _email;
         private readonly string _name;
         private readonly string _password;
         private readonly string _username;
         private bool? _hasEmailBeenConfirmed;
+        private Guid _id;
 
         public User(string name, string username, string password, string email)
         {
@@ -34,15 +37,6 @@ namespace CodeCamp.Domain
         {
             get { return _username; }
         }
-
-        #region IIdentifier Members
-
-        public object Key
-        {
-            get { return _username; }
-        }
-
-        #endregion
 
         public bool CheckPassword(string password)
         {
@@ -75,6 +69,11 @@ namespace CodeCamp.Domain
         public void SetEmailPending()
         {
             _hasEmailBeenConfirmed = false;
+        }
+
+        public Guid Id
+        {
+            get { return _id; }
         }
     }
 }
