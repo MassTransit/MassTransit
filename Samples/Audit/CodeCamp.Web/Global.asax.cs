@@ -1,22 +1,24 @@
 namespace CodeCamp.Web
 {
-	using System;
-	using System.Web;
-	using Castle.MicroKernel;
-	using Domain;
-	using MassTransit.ServiceBus.Configuration;
-	using MassTransit.WindsorIntegration;
+    using System;
+    using System.Web;
+    using Domain;
+    using MassTransit.ServiceBus;
+    using MassTransit.WindsorIntegration;
 
     public class Global : HttpApplication
-	{
-		protected void Application_Start(object sender, EventArgs e)
-		{
-            BusBuilder.SetObjectBuilder(new WindsorObjectBuilder(new DefaultKernel()));
-			DomainContext.Initialize();
-		}
+    {
+        private DefaultMassTransitContainer _container;
 
-		protected void Application_End(object sender, EventArgs e)
-		{
-		}
-	}
+        protected void Application_Start(object sender, EventArgs e)
+        {
+            _container = new DefaultMassTransitContainer(Server.MapPath("web-castle.config"));
+
+            DomainContext.Initialize(_container.Resolve<IServiceBus>("client"));
+        }
+
+        protected void Application_End(object sender, EventArgs e)
+        {
+        }
+    }
 }
