@@ -8,7 +8,7 @@
     {
         static void Main(string[] args)
         {
-            IInstallationConfiguration cfg = new PostalServiceConfiguration("castle.xml");
+            IInstallationConfiguration cfg = new PostalServiceConfiguration("postal-castle.xml");
 
             Runner.Run(cfg, args);
         }
