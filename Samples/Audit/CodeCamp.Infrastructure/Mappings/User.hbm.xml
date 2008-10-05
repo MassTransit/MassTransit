@@ -4,7 +4,7 @@
 				   namespace="CodeCamp.Domain"
            default-lazy="false">
 
-  <class name="User"
+  <class name="CodeCamp.Domain.User, CodeCamp.Domain"
 		   table="Users">
 
     <id name="Id"

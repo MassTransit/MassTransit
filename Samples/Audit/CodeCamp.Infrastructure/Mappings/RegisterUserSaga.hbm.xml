@@ -4,7 +4,7 @@
 				   namespace="CodeCamp.Domain"
            default-lazy="false">
 
-  <class name="RegisterUserSaga"
+  <class name="CodeCamp.Domain.RegisterUserSaga, CodeCamp.Domain"
 		   table="RegisterUserSagas">
 
     <id name="CorrelationId" column="Id"
@@ -21,7 +21,7 @@
 
     <many-to-one name="User"
                  column="UserId"
-                 class="User"
+                 class="CodeCamp.Domain.User, CodeCamp.Domain"
                  />
 
   </class>
