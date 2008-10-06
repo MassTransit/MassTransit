@@ -26,7 +26,7 @@ namespace SubscriptionServiceHost
             XmlConfigurator.ConfigureAndWatch(new FileInfo("log4net.xml"));
             _log.Info("SubMgr Loading");
 
-            var env = new SubscriptionManagerConfiguration("pubsub.castle.xml");
+            var env = new SubscriptionServiceConfiguration("pubsub.castle.xml");
 
 
             Runner.Run(env, args);

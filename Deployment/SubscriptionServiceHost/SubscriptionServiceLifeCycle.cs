@@ -18,10 +18,10 @@ namespace SubscriptionServiceHost
     using MassTransit.ServiceBus.Subscriptions;
     using MassTransit.SubscriptionStorage;
 
-    public class SubscriptionLifeCycle :
+    public class SubscriptionServiceLifeCycle :
         HostedLifeCycle
     {
-        public SubscriptionLifeCycle(string xmlFile) : base(xmlFile)
+        public SubscriptionServiceLifeCycle(string xmlFile) : base(xmlFile)
         {
         }
 
