@@ -57,6 +57,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\..\SolutionVersion.cs">
+      <Link>SolutionVersion.cs</Link>
+    </Compile>
     <Compile Include="DeferredMessageConfiguration.cs" />
     <Compile Include="DeferredMessageLifeCycle.cs" />
     <Compile Include="Program.cs" />
