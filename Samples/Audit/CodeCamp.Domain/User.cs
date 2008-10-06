@@ -8,10 +8,10 @@ namespace CodeCamp.Domain
     public class User : 
         IAggregateRoot<Guid>
     {
-        private readonly string _email;
-        private readonly string _name;
-        private readonly string _password;
-        private readonly string _username;
+        private string _email;
+        private string _name;
+        private string _password;
+        private string _username;
         private bool? _hasEmailBeenConfirmed;
         private Guid _id;
 
@@ -21,6 +21,10 @@ namespace CodeCamp.Domain
             _username = username;
             _password = password;
             _email = email;
+        }
+
+        protected User()
+        {
         }
 
         public string Email

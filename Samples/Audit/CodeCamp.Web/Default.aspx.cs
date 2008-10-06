@@ -20,7 +20,7 @@ namespace CodeCamp.Web
         {
             using (var timer = new FunctionTimer("_Default submiteButton_Click", x => timerLabel.Text = x))
             {
-                CodeCamp.Domain.User user;
+                User user;
                 using (IRepository<User, Guid> repository = DomainContext.ServiceLocator.GetInstance<IRepositoryFactory>().GetRepository<User, Guid>())
                 {
                     user = repository.Where(u => u.Username == username.Text).FirstOrDefault();
