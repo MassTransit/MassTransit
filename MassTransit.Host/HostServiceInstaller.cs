@@ -37,6 +37,9 @@ namespace MassTransit.Host
             configuration.ConfigureServiceInstaller(_serviceInstaller);
             configuration.ConfigureServiceProcessInstaller(_serviceProcessInstaller);
 
+            
+            _serviceInstaller.ServicesDependedOn = new string[] {"MSMQ"}; //we depend on MSMQ //this should be in the MSMQ dll
+
             Installers.AddRange(new Installer[] {_serviceProcessInstaller, _serviceInstaller});            
         }
 
