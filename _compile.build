@@ -70,7 +70,7 @@
 			<attributes>
 				<attribute type="ComVisibleAttribute" value="false" />
 				<attribute type="CLSCompliantAttribute" value="true" />
-				<attribute type="AssemblyVersionAttribute" value="0.2.${version.build}.${version.rev}" />
+				<attribute type="AssemblyVersionAttribute" value="0.4.${version.build}.${version.rev}" />
 				<attribute type="AssemblyCopyrightAttribute" value="MassTransit Project, original author or authors" />
 				<attribute type="AssemblyCompanyAttribute" value="CFT &amp; ACM" />
 				<attribute type="AssemblyConfiguration" value="${svn.path}" />

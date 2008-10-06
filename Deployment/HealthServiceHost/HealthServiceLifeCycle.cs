@@ -10,28 +10,23 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace SubscriptionServiceHost
+namespace HealthServiceHost
 {
-    using Castle.Core;
     using MassTransit.Host.LifeCycles;
     using MassTransit.ServiceBus;
-    using MassTransit.ServiceBus.Subscriptions;
-    using MassTransit.SubscriptionStorage;
+    using MassTransit.ServiceBus.HealthMonitoring;
 
-    public class SubscriptionLifeCycle :
+    public class HealthServiceLifeCycle :
         HostedLifeCycle
     {
-        public SubscriptionLifeCycle(string xmlFile) : base(xmlFile)
+        public HealthServiceLifeCycle(string xmlFile) : base(xmlFile)
         {
         }
 
         public override void Start()
         {
-            Container.AddComponentLifeStyle("followerrepository", typeof(FollowerRepository), LifestyleType.Singleton);
-
-            Container.AddComponent<IHostedService, SubscriptionService>();
-
-            Container.AddComponent<ISubscriptionRepository, NHibernateSubscriptionStorage>();   
+            Container.AddComponent<IHostedService, HealthService>();
+            Container.AddComponent<IHealthCache, LocalHealthCache>();
         }
 
         public override void Stop()

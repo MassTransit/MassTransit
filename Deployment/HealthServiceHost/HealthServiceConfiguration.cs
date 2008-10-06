@@ -10,44 +10,45 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace DeferredMessageServiceHost
+namespace HealthServiceHost
 {
     using MassTransit.Host.Configurations;
     using MassTransit.Host.LifeCycles;
 
-    public class DeferredMessageConfiguration :
+    public class HealthServiceConfiguration :
         InteractiveConfiguration
     {
-        private IApplicationLifeCycle _lifeCycle;
 
-        public DeferredMessageConfiguration(string xmlFile)
+        private IApplicationLifeCycle _lifecycle;
+
+        public HealthServiceConfiguration(string xmlFile) 
         {
-            _lifeCycle = new DeferredMessageLifeCycle(xmlFile);
+            _lifecycle = new HealthServiceLifeCycle(xmlFile);
+        }
+
+        public override IApplicationLifeCycle LifeCycle
+        {
+            get { return _lifecycle; }
         }
 
         public override string ServiceName
         {
-            get { return "MT-DEFERRED"; }
+            get { return "MassTransit Health Manager"; }
         }
 
         public override string DisplayName
         {
-            get { return "Mass Transit Deferred Message Service"; }
+            get { return "MassTransit Health Manager"; }
         }
 
         public override string Description
         {
-            get { return "Think 'Hold This'"; }
+            get { return "This service manages the health for Mass Transit"; }
         }
 
         public override string[] Dependencies
         {
             get { return new string[] {"MSMQ"}; }
-        }
-
-        public override IApplicationLifeCycle LifeCycle
-        {
-            get { return _lifeCycle; }
         }
     }
 }
