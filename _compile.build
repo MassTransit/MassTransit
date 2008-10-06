@@ -39,7 +39,7 @@
 		<!-- try to update the revision -->
 		<!--<exec
 			program="svn"
-			commandline='info "${project::get-base-directory()}" - -xml'
+			commandline='info "${project::get-base-directory()}" --xml'
 			output="_revision.xml"
 			failonerror="false"/> -->
 		<exec
@@ -70,9 +70,10 @@
 			<attributes>
 				<attribute type="ComVisibleAttribute" value="false" />
 				<attribute type="CLSCompliantAttribute" value="true" />
-				<attribute type="AssemblyVersionAttribute" value="0.2.${version.rev}.${version.build}" />
+				<attribute type="AssemblyVersionAttribute" value="0.2.${version.build}.${version.rev}" />
 				<attribute type="AssemblyCopyrightAttribute" value="MassTransit Project, original author or authors" />
 				<attribute type="AssemblyCompanyAttribute" value="CFT &amp; ACM" />
+				<attribute type="AssemblyConfiguration" value="${svn.path}" />
 			</attributes>
 		</asminfo>
 	</target>
