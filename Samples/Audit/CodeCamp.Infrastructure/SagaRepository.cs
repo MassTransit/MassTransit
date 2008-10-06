@@ -2,12 +2,12 @@ namespace CodeCamp.Infrastructure
 {
     using System;
     using Magnum.Common.Repository;
-    using Magnum.Common.Serialization;
     using MassTransit.Saga;
+    using MassTransit.ServiceBus;
 
     public class SagaRepository<T> :
         ISagaRepository<T>
-        where T : class, new()
+        where T : class, CorrelatedBy<Guid>
     {
         private readonly IRepositoryFactory _repositoryFactory;
 
@@ -18,7 +18,7 @@ namespace CodeCamp.Infrastructure
 
         public T Create(Guid correlationId)
         {
-            T saga = SerializationUtil<T>.New();
+           T saga = (T) Activator.CreateInstance(typeof (T), correlationId);
 
             WithRepository(r => r.Save(saga));
 

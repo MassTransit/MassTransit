@@ -9,12 +9,12 @@
 
     <id name="CorrelationId" column="Id"
 			type="Guid"
-			access="field.camelcase-underscore">
+			access="field.camelcase-underscore"
+      unsaved-value="00000000-0000-0000-0000-000000000000">
       <generator class="assigned"/>
     </id>
 
     <property name="LastEmailSent"
-				  not-null="true"
 				  update="true"
 			    access="field.camelcase-underscore"
 				  />
@@ -22,7 +22,7 @@
     <many-to-one name="User"
                  column="UserId"
                  class="CodeCamp.Domain.User, CodeCamp.Domain"
-			    access="field.camelcase-underscore"
+			           access="field.camelcase-underscore"
                  />
 
   </class>

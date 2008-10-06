@@ -10,7 +10,7 @@
     <id name="Id"
 			type="Guid"
 			access="field.camelcase-underscore">
-      <generator class="assigned"/>
+      <generator class="guid.comb"/>
     </id>
 
     <property name="Name"

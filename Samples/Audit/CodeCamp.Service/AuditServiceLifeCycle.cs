@@ -3,6 +3,8 @@ namespace CodeCamp.Service
     using System;
     using Domain;
     using Infrastructure;
+    using Magnum.Common.Repository;
+    using Magnum.Infrastructure.Repository;
     using MassTransit.Host.LifeCycles;
     using MassTransit.Saga;
     using MassTransit.ServiceBus;
@@ -18,6 +20,10 @@ namespace CodeCamp.Service
 
         public override void Start()
         {
+            Container.Kernel.AddComponentInstance<IRepositoryFactory>(NHibernateRepositoryFactory.Build());
+
+            Container.AddComponent("repository", typeof (IRepository<,>), typeof (NHibernateRepository<,>));
+
             Container.AddComponent<ISagaRepository<RegisterUserSaga>, SagaRepository<RegisterUserSaga>>();
 
             Container.AddComponent<Responder>();
@@ -26,6 +32,7 @@ namespace CodeCamp.Service
             _bus = Container.Resolve<IServiceBus>("server");
 
             _bus.AddComponent<Responder>();
+            _bus.AddComponent<RegisterUserSaga>();
 
             Console.WriteLine("Service running...");
         }
