@@ -71,6 +71,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\libs\Microsoft.Practices.ServiceLocation.dll</HintPath>
     </Reference>
+    <Reference Include="Mono.Security, Version=2.0.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\libs\npgsql\Mono.Security.dll</HintPath>
+    </Reference>
     <Reference Include="NHibernate, Version=2.0.0.4000, Culture=neutral, PublicKeyToken=aa95f207798dfdb4, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\libs\NHibernate 2.0\NHibernate.dll</HintPath>
@@ -78,6 +82,10 @@
     <Reference Include="NHibernate.Linq, Version=1.0.0.0, Culture=neutral, PublicKeyToken=444cf6a87fdab271, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\libs\NHibernate 2.0\NHibernate.Linq.dll</HintPath>
+    </Reference>
+    <Reference Include="Npgsql, Version=1.99.2.0, Culture=neutral, PublicKeyToken=5d8b90d52f46fda7, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\libs\npgsql\Npgsql.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core, Version=3.5.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
@@ -189,9 +197,7 @@
     <Content Include="Masters\TulsaTechFest.Master" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Hibernate.Cfg.Xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
+    <Content Include="Hibernate.Cfg.Xml" />
     <Content Include="web-castle.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
