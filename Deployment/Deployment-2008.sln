@@ -27,7 +27,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.WindsorIntegrat
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TimeoutServiceHost", "TimeoutServiceHost\TimeoutServiceHost.csproj", "{1992FBD8-99AA-4884-8DAC-D7B0718D56D8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DeferredMessageServiceHost", "DeferrmentServiceHost\DeferredMessageServiceHost.csproj", "{6F5367EE-52B6-4CC4-8F5E-11D17373CF94}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DeferredMessageServiceHost", "DeferredMessageServiceHost\DeferredMessageServiceHost.csproj", "{6F5367EE-52B6-4CC4-8F5E-11D17373CF94}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
