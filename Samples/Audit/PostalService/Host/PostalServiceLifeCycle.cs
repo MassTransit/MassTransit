@@ -1,22 +1,33 @@
 namespace PostalService.Host
 {
-    using MassTransit.Host.LifeCycles;
+	using System;
+	using MassTransit.Host.LifeCycles;
+    using MassTransit.ServiceBus;
 
-    public class PostalServiceLifeCycle :
+	public class PostalServiceLifeCycle :
         HostedLifeCycle
     {
         public PostalServiceLifeCycle(string xmlFile) : base(xmlFile)
         {
         }
+     private IServiceBus _bus;
 
         public override void Start()
         {
-            //do nothing
+			Container.AddComponent<SendEmailConsumer>();
+
+            _bus = Container.Resolve<IServiceBus>("server");
+
+			_bus.AddComponent<SendEmailConsumer>();
+
+            Console.WriteLine("Service running...");
         }
 
         public override void Stop()
         {
-            //do nothing
+            Console.WriteLine("Service exiting...");
+
+            _bus.Dispose();
         }
     }
 }
