@@ -12,45 +12,17 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Host.Configurations
 {
-	using System;
 	using System.ServiceProcess;
-	using LifeCycles;
 
-	public class InteractiveConfiguration :
+	public abstract class InteractiveConfiguration :
 		BaseWinServiceConfiguration
 	{
-		public override IApplicationLifeCycle LifeCycle
-		{
-			get { throw new NotImplementedException(); }
-		}
+	    public override Credentials Credentials
+	    {
+            get { return Credentials.Interactive; }
+	    }
 
-		public override Credentials Credentials
-		{
-			get { throw new NotImplementedException(); }
-		}
-
-		public override string ServiceName
-		{
-			get { throw new NotImplementedException(); }
-		}
-
-		public override string DisplayName
-		{
-			get { throw new NotImplementedException(); }
-		}
-
-		public override string Description
-		{
-			get { throw new NotImplementedException(); }
-		}
-
-		public override string[] Dependencies
-		{
-			get { throw new NotImplementedException(); }
-		}
-
-
-		public override void ConfigureServiceProcessInstaller(ServiceProcessInstaller installer)
+	    public override void ConfigureServiceProcessInstaller(ServiceProcessInstaller installer)
 		{
 			installer.Username = null;
 			installer.Password = null;

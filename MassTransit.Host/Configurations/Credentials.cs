@@ -31,6 +31,14 @@ namespace MassTransit.Host.Configurations
             }
         }
 
+        public static Credentials Interactive
+        {
+            get
+            {
+                return new Credentials(null,null);
+            }
+        }
+
         #region System.String Overrides
 
         public bool Equals(Credentials obj)

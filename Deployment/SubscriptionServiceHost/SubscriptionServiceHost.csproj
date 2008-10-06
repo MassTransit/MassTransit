@@ -108,8 +108,6 @@
     <Content Include="pubsub.castle.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="PubSub_Install_Template\_createQueue.vbs" />
-    <Content Include="PubSub_Install_Template\_README.txt" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Containers\MassTransit.WindsorIntegration\MassTransit.WindsorIntegration.csproj">
@@ -135,8 +133,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="InstallMsmq.bat" />
-    <None Include="PubSub_Install_Template\_install.cmd" />
-    <None Include="PubSub_Install_Template\_uninstall.cmd" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Framework.2.0">
