@@ -25,6 +25,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.ServiceBus.MSMQ
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.WindsorIntegration", "..\Containers\MassTransit.WindsorIntegration\MassTransit.WindsorIntegration.csproj", "{98D5A59C-96FA-4A1B-A653-EA5A35C45FC9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TimeoutServiceHost", "TimeoutServiceHost\TimeoutServiceHost.csproj", "{1992FBD8-99AA-4884-8DAC-D7B0718D56D8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -71,6 +73,10 @@ Global
 		{98D5A59C-96FA-4A1B-A653-EA5A35C45FC9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{98D5A59C-96FA-4A1B-A653-EA5A35C45FC9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{98D5A59C-96FA-4A1B-A653-EA5A35C45FC9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1992FBD8-99AA-4884-8DAC-D7B0718D56D8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1992FBD8-99AA-4884-8DAC-D7B0718D56D8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1992FBD8-99AA-4884-8DAC-D7B0718D56D8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1992FBD8-99AA-4884-8DAC-D7B0718D56D8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -83,5 +89,6 @@ Global
 		{98D5A59C-96FA-4A1B-A653-EA5A35C45FC9} = {12A2E13A-D405-49EC-89EB-15D089F2A824}
 		{4669EFE9-2076-4635-A57B-BC2BE7C9CFDB} = {82671CE1-CB09-4365-B1C6-896D8B665550}
 		{EB9A5807-308C-4A58-84F2-FF5A7E8D83CF} = {82671CE1-CB09-4365-B1C6-896D8B665550}
+		{1992FBD8-99AA-4884-8DAC-D7B0718D56D8} = {82671CE1-CB09-4365-B1C6-896D8B665550}
 	EndGlobalSection
 EndGlobal

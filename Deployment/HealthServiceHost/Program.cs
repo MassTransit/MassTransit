@@ -3,8 +3,6 @@ namespace HealthServiceHost
     using System.IO;
     using log4net;
     using MassTransit.Host;
-    using MassTransit.ServiceBus;
-    using MassTransit.ServiceBus.HealthMonitoring;
 
     internal class Program
     {
@@ -15,13 +13,9 @@ namespace HealthServiceHost
             log4net.Config.XmlConfigurator.Configure(new FileInfo("log4net.xml"));
             _log.Info("Health Server Loading");
 
-            HostedEnvironment env = new HealthManagerEnvironment("health.castle.xml");
+            HealthManagerConfiguration cfg = new HealthManagerConfiguration("health.castle.xml");
 
-            env.Container.AddComponent<IHostedService, HealthService>();
-
-            env.Container.AddComponent<IHealthCache, LocalHealthCache>();
-
-            Runner.Run(env, args);
+            Runner.Run(cfg, args);
         }
     }
 }
