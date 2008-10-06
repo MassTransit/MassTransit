@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<castle>
+	<components>
+
+	</components>
+
+	<facilities>
+		<facility id="masstransit">
+
+			<bus id="subscriptionService"
+				 endpoint="msmq://localhost/mt_deferred">
+			</bus>
+
+			<transports>
+				<transport>MassTransit.ServiceBus.MSMQ.MsmqEndpoint, MassTransit.ServiceBus.MSMQ</transport>
+			</transports>
+		</facility>
+
+  </facilities>
+</castle>
