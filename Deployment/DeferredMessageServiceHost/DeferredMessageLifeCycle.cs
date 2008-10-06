@@ -13,6 +13,8 @@
 namespace DeferredMessageServiceHost
 {
     using MassTransit.Host.LifeCycles;
+    using MassTransit.ServiceBus;
+    using MassTransit.Services;
 
     public class DeferredMessageLifeCycle :
         HostedLifeCycle
@@ -23,7 +25,8 @@ namespace DeferredMessageServiceHost
 
         public override void Start()
         {
-            
+            Container.AddComponent<IHostedService, MessageDeferralService>();
+            Container.AddComponent<IDeferredMessageRepository, InMemoryDeferredMessageRepository>();
         }
 
         public override void Stop()
