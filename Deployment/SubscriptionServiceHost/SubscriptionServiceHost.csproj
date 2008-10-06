@@ -95,7 +95,8 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SubscriptionManagerEnvironment.cs" />
+    <Compile Include="SubscriptionLifeCycle.cs" />
+    <Compile Include="SubscriptionManagerConfiguration.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="install.xml">
