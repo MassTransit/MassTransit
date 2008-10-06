@@ -84,7 +84,9 @@
     <Compile Include="..\SolutionVersion.cs">
       <Link>SolutionVersion.cs</Link>
     </Compile>
+    <Compile Include="PersistentSubscription.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Repositories\NHibernateSubscriptionStorage.cs" />
     <Compile Include="Repositories\PersistantDeferredMessageRepository.cs" />
     <Compile Include="Repositories\PersistantTimeoutStorage.cs" />
     <Compile Include="ScheduledTimeout.cs" />
@@ -100,6 +102,9 @@
       <Project>{90482397-6282-465E-8B86-39865FC30127}</Project>
       <Name>MassTransit.ServiceBus</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Mapping\PersistentSubscription.hbm.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
