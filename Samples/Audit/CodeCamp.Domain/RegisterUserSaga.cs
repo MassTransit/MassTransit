@@ -2,6 +2,7 @@ namespace CodeCamp.Domain
 {
     using System;
     using Magnum.Common.DateTimeExtensions;
+    using Magnum.Common.Repository;
     using MassTransit.Saga;
     using MassTransit.ServiceBus;
     using MassTransit.ServiceBus.Timeout.Messages;
@@ -17,9 +18,18 @@ namespace CodeCamp.Domain
         Orchestrates<EmailSent>,
         ISaga
     {
-        private readonly Guid _correlationId = CombGuid.NewCombGuid();
-        private DateTime _lastEmailSent;
+        private readonly Guid _correlationId;
+        private DateTime? _lastEmailSent;
         private User _user;
+
+        public RegisterUserSaga(Guid correlationId)
+        {
+            _correlationId = correlationId;
+        }
+
+        protected RegisterUserSaga()
+        {
+        }
 
         public User User
         {
@@ -44,6 +54,11 @@ namespace CodeCamp.Domain
         public void Consume(RegisterUser message)
         {
             _user = new User(message.Name, message.Username, message.Password, message.Email);
+
+            using(IRepository<User, Guid> repository = ServiceLocator.GetInstance<IRepositoryFactory>().GetRepository<User,Guid>())
+            {
+                repository.Save(_user);
+            }
 
             string body = string.Format("Please verify email http://localhost/ConfirmEmail/?registrationId={0}",
                                         _correlationId);
