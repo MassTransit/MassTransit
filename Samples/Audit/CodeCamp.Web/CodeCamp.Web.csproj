@@ -193,7 +193,7 @@
     <Content Include="Masters\TulsaTechFest.Master" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="NHibernate.Cfg.Xml">
+    <Content Include="Hibernate.Cfg.Xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="web-castle.config">

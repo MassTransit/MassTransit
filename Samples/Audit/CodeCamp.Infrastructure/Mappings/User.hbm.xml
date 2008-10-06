@@ -16,11 +16,13 @@
     <property name="Name"
 				  not-null="true"
 				  update="true"
+              access="field.camelcase-underscore"
 				  />
     <property name="Username"
 				      not-null="true"
 				      update="false"
-				      />
+	              access="field.camelcase-underscore"
+			      />
     <property name="Password"
 				      not-null="true"
 				      update="true"
