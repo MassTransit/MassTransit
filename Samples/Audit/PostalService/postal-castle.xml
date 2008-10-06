@@ -1,17 +1,27 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <castle>
-  <components>
+	<components>
+		<component id="subscriptioncache.shared"
+							 service="MassTransit.ServiceBus.Subscriptions.ISubscriptionCache, MassTransit.ServiceBus"
+							 type="MassTransit.ServiceBus.Subscriptions.LocalSubscriptionCache, MassTransit.ServiceBus"/>
 
-  </components>
+	</components>
 
-  <facilities>
+	<facilities>
     <facility id="masstransit">
 
-      <bus id="subscriptionService"
-				 endpoint="msmq://localhost/mt_postal">
-      </bus>
-
-      <transports>
+			<bus id="server"
+					 endpoint="msmq://localhost/mt_postal">
+				<subscriptionCache name="subscriptioncache.shared"/>
+				<managementService heartbeatInterval="3" />
+			</bus>
+			<bus id="control"
+					 endpoint="msmq://localhost/mt_postal_control">
+				<subscriptionCache name="subscriptioncache.shared"/>
+				<subscriptionService endpoint="msmq://localhost/mt_pubsub">
+					<localEndpoint>msmq://localhost/mt_postal</localEndpoint>
+				</subscriptionService>
+			</bus>      <transports>
         <transport>MassTransit.ServiceBus.MSMQ.MsmqEndpoint, MassTransit.ServiceBus.MSMQ</transport>
       </transports>
     </facility>
