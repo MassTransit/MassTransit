@@ -1,8 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 10.00
 # Visual Studio 2008
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CodeCamp.Core", "CodeCamp.Core\CodeCamp.Core.csproj", "{71322EE3-E040-475F-8EFD-4D6E22E16B2A}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CodeCamp.Messages", "CodeCamp.Messages\CodeCamp.Messages.csproj", "{7C6ED57B-D1E6-4CED-89E4-58A9ABFC3F95}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CodeCamp.Service", "CodeCamp.Service\CodeCamp.Service.csproj", "{A7D910F6-A662-4B10-A006-2494852A2134}"
@@ -37,10 +35,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{71322EE3-E040-475F-8EFD-4D6E22E16B2A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{71322EE3-E040-475F-8EFD-4D6E22E16B2A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{71322EE3-E040-475F-8EFD-4D6E22E16B2A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{71322EE3-E040-475F-8EFD-4D6E22E16B2A}.Release|Any CPU.Build.0 = Release|Any CPU
 		{7C6ED57B-D1E6-4CED-89E4-58A9ABFC3F95}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{7C6ED57B-D1E6-4CED-89E4-58A9ABFC3F95}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7C6ED57B-D1E6-4CED-89E4-58A9ABFC3F95}.Release|Any CPU.ActiveCfg = Release|Any CPU

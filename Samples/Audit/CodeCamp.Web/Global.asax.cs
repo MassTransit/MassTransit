@@ -1,14 +1,15 @@
 namespace CodeCamp.Web
 {
     using System;
-    using System.IO;
     using System.Web;
     using Domain;
+    using Infrastructure;
+    using log4net.Config;
     using Magnum.Common.Repository;
     using Magnum.Infrastructure.Repository;
+    using MassTransit.Saga;
     using MassTransit.ServiceBus;
     using MassTransit.WindsorIntegration;
-    using Microsoft.Practices.ServiceLocation;
 
     public class Global : HttpApplication
     {
@@ -21,9 +22,9 @@ namespace CodeCamp.Web
 
         protected void Application_Start(object sender, EventArgs e)
         {
-            log4net.Config.XmlConfigurator.Configure();
+            XmlConfigurator.Configure();
 
-            _container = new DefaultMassTransitContainer(Server.MapPath("web-castle.config"));
+            _container = new DefaultMassTransitContainer(Server.MapPath("/web-castle.config"));
 
             _container.Kernel.AddComponentInstance<IRepositoryFactory>(NHibernateRepositoryFactory.Build());
 
