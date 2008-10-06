@@ -55,7 +55,7 @@ namespace CodeCamp.Domain
         {
             _user = new User(message.Name, message.Username, message.Password, message.Email);
 
-            using(IRepository<User, Guid> repository = ServiceLocator.GetInstance<IRepositoryFactory>().GetRepository<User,Guid>())
+            using (IRepository<User, Guid> repository = ServiceLocator.GetInstance<IRepositoryFactory>().GetRepository<User, Guid>())
             {
                 repository.Save(_user);
             }
@@ -94,6 +94,12 @@ namespace CodeCamp.Domain
         public void Consume(UserVerifiedEmail message)
         {
             _user.ConfirmEmail();
+
+            using (IRepository<User, Guid> repository = ServiceLocator.GetInstance<IRepositoryFactory>().GetRepository<User, Guid>())
+            {
+                repository.Update(_user);
+            }
+
             string body = string.Format("Thank you. You are now registered");
 
             // use a new guid because we don't want any more messages to this saga about e-mails
