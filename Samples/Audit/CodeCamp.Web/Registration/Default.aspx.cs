@@ -4,6 +4,7 @@
     using System.Web.UI;
     using Domain;
     using Magnum.Common;
+    using MassTransit.ServiceBus.Util;
     using Masters;
     using Messages;
 
@@ -17,7 +18,7 @@
         {
             using (var timer = new FunctionTimer("Registration submiteButton_Click", x => timerLabel.Text = x))
             {
-                var msg = new RegisterUser(Guid.NewGuid(), inputName.Text, inputUsername.Text, inputPassword.Text, inputEmail.Text);
+                var msg = new RegisterUser(CombGuid.NewCombGuid(), inputName.Text, inputUsername.Text, inputPassword.Text, inputEmail.Text);
 
                 DomainContext.Publish(msg);
                 ((TulsaTechFest) Master).SetNotice("Thanks! You should receive an email shortly.");

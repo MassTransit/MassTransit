@@ -155,10 +155,6 @@
       <Project>{6F90867C-E092-4EDC-B3DE-600D39DF0335}</Project>
       <Name>MassTransit.ServiceBus.MSMQ</Name>
     </ProjectReference>
-    <ProjectReference Include="..\CodeCamp.Core\CodeCamp.Core.csproj">
-      <Project>{71322EE3-E040-475F-8EFD-4D6E22E16B2A}</Project>
-      <Name>CodeCamp.Core</Name>
-    </ProjectReference>
     <ProjectReference Include="..\CodeCamp.Domain\CodeCamp.Domain.csproj">
       <Project>{39D588EC-0104-432F-B9D7-A1D22C93B10C}</Project>
       <Name>CodeCamp.Domain</Name>
