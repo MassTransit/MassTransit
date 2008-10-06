@@ -5,35 +5,10 @@
 	</components>
 
 	<facilities>
-		<facility id="nhibernate"
-				  isWeb="false"
-				  type="Castle.Facilities.NHibernateIntegration.NHibernateFacility, Castle.Facilities.NHibernateIntegration">
-			<factory id="nhibernate.factory">
-				<settings>
-					<item key="connection.provider">
-						NHibernate.Connection.DriverConnectionProvider
-					</item>
-					<item key="connection.driver_class">
-						NHibernate.Driver.SqlClientDriver
-					</item>
-					<item key="connection.connection_string">
-						Database=test;Server=localhost;Integrated Security=SSPI
-					</item>
-					<item key="dialect">
-						NHibernate.Dialect.MsSql2005Dialect
-					</item>
-				</settings>
-
-				<assemblies>
-					<assembly>MassTransit.SubscriptionStorage</assembly>
-				</assemblies>
-			</factory>
-		</facility>
-
 		<facility id="masstransit">
 
 			<bus id="subscriptionService"
-				 endpoint="msmq://localhost/mt_pubsub">
+				 endpoint="msmq://localhost/mt_timeout">
 			</bus>
 
 			<transports>
