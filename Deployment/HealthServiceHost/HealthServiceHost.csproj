@@ -76,10 +76,10 @@
     <Compile Include="..\..\SolutionVersion.cs">
       <Link>SolutionVersion.cs</Link>
     </Compile>
-    <Compile Include="HealthLifeCycle.cs" />
+    <Compile Include="HealthServiceLifeCycle.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="HealthManagerConfiguration.cs" />
+    <Compile Include="HealthServiceConfiguration.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\MassTransit.Host\MassTransit.Host.csproj">
