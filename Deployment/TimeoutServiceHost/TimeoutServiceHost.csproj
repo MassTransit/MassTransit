@@ -39,6 +39,34 @@
   <ItemGroup>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TimeoutServiceConfiguration.cs" />
+    <Compile Include="TimeoutServiceLifeCycle.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Containers\MassTransit.WindsorIntegration\MassTransit.WindsorIntegration.csproj">
+      <Project>{98D5A59C-96FA-4A1B-A653-EA5A35C45FC9}</Project>
+      <Name>MassTransit.WindsorIntegration</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\MassTransit.Host\MassTransit.Host.csproj">
+      <Project>{834ED79F-BA0E-48F9-831A-789576EE516B}</Project>
+      <Name>MassTransit.Host</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\MassTransit.ServiceBus\MassTransit.ServiceBus.csproj">
+      <Project>{90482397-6282-465E-8B86-39865FC30127}</Project>
+      <Name>MassTransit.ServiceBus</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Transports\MassTransit.ServiceBus.MSMQ\MassTransit.ServiceBus.MSMQ.csproj">
+      <Project>{6F90867C-E092-4EDC-B3DE-600D39DF0335}</Project>
+      <Name>MassTransit.ServiceBus.MSMQ</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="log4net.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="timeout.castle.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
