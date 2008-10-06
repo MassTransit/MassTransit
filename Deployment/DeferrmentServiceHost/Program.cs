@@ -1,4 +1,4 @@
-﻿namespace DeferrmentServiceHost
+﻿namespace DeferredMessageServiceHost
 {
     class Program
     {

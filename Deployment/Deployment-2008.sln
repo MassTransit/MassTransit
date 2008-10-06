@@ -27,6 +27,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.WindsorIntegrat
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TimeoutServiceHost", "TimeoutServiceHost\TimeoutServiceHost.csproj", "{1992FBD8-99AA-4884-8DAC-D7B0718D56D8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DeferredMessageServiceHost", "DeferrmentServiceHost\DeferredMessageServiceHost.csproj", "{6F5367EE-52B6-4CC4-8F5E-11D17373CF94}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -77,6 +79,10 @@ Global
 		{1992FBD8-99AA-4884-8DAC-D7B0718D56D8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1992FBD8-99AA-4884-8DAC-D7B0718D56D8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1992FBD8-99AA-4884-8DAC-D7B0718D56D8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6F5367EE-52B6-4CC4-8F5E-11D17373CF94}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6F5367EE-52B6-4CC4-8F5E-11D17373CF94}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6F5367EE-52B6-4CC4-8F5E-11D17373CF94}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6F5367EE-52B6-4CC4-8F5E-11D17373CF94}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -90,5 +96,6 @@ Global
 		{4669EFE9-2076-4635-A57B-BC2BE7C9CFDB} = {82671CE1-CB09-4365-B1C6-896D8B665550}
 		{EB9A5807-308C-4A58-84F2-FF5A7E8D83CF} = {82671CE1-CB09-4365-B1C6-896D8B665550}
 		{1992FBD8-99AA-4884-8DAC-D7B0718D56D8} = {82671CE1-CB09-4365-B1C6-896D8B665550}
+		{6F5367EE-52B6-4CC4-8F5E-11D17373CF94} = {82671CE1-CB09-4365-B1C6-896D8B665550}
 	EndGlobalSection
 EndGlobal
