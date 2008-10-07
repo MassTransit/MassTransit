@@ -31,6 +31,8 @@ namespace MassTransit.WindsorIntegration
     {
         protected override void Init()
         {
+            Kernel.AddComponentInstance("objectBuilder", typeof(IObjectBuilder), typeof(WindsorObjectBuilder), new WindsorObjectBuilder(Kernel));
+
             LoadTransports();
             RegisterComponents();
 
@@ -63,7 +65,6 @@ namespace MassTransit.WindsorIntegration
         private void RegisterComponents()
         {
             Kernel.AddComponentInstance("kernel", typeof(IKernel), Kernel);
-            Kernel.AddComponentInstance("objectBuilder", typeof(IObjectBuilder), typeof(WindsorObjectBuilder), new WindsorObjectBuilder(Kernel));
 
             Kernel.Register(
                 Component.For<ISubscriptionCache>()
@@ -130,6 +131,7 @@ namespace MassTransit.WindsorIntegration
                 int interval = string.IsNullOrEmpty(heartbeatInterval) ? 3 : int.Parse(heartbeatInterval);
 
                 HealthClient sc = new HealthClient(bus, interval);
+                bus.Subscribe(sc);
 
                 Kernel.AddComponentInstance(id + ".managementClient", sc);
                 sc.Start(); //TODO: Should use startable
