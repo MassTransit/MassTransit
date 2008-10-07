@@ -3,11 +3,9 @@ namespace CodeCamp.Web
     using System;
     using System.Web;
     using Domain;
-    using Infrastructure;
     using log4net.Config;
     using Magnum.Common.Repository;
     using Magnum.Infrastructure.Repository;
-    using MassTransit.Saga;
     using MassTransit.ServiceBus;
     using MassTransit.WindsorIntegration;
 

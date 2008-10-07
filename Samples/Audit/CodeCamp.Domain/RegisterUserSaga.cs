@@ -62,7 +62,7 @@ namespace CodeCamp.Domain
 
             string body = string.Format("Please verify email http://localhost/ConfirmEmail/?registrationId={0}",
                                         _correlationId);
-            Bus.Publish(new SendEmail(CorrelationId, _user.Email, "dru", "verify email", body));
+            Bus.Publish(new SendEmail(CorrelationId, _user.Email, "dru@drusellers.com", "verify email", body));
         }
 
         #endregion
@@ -103,7 +103,7 @@ namespace CodeCamp.Domain
             string body = string.Format("Thank you. You are now registered");
 
             // use a new guid because we don't want any more messages to this saga about e-mails
-            Bus.Publish(new SendEmail(Guid.Empty, _user.Email, "dru", "Register Successful", body));
+            Bus.Publish(new SendEmail(Guid.Empty, _user.Email, "dru@drusellers.com", "Register Successful", body));
         }
 
         #endregion
