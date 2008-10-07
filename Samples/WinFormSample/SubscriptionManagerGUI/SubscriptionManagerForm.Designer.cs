@@ -39,6 +39,7 @@
             this.heartbeatList = new System.Windows.Forms.ListView();
             this.columnHeader1 = new System.Windows.Forms.ColumnHeader();
             this.columnHeader2 = new System.Windows.Forms.ColumnHeader();
+            this.columnHeader3 = new System.Windows.Forms.ColumnHeader();
             this.tableLayoutPanel1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -142,7 +143,8 @@
             // 
             this.heartbeatList.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.columnHeader1,
-            this.columnHeader2});
+            this.columnHeader2,
+            this.columnHeader3});
             this.heartbeatList.Dock = System.Windows.Forms.DockStyle.Fill;
             this.heartbeatList.Location = new System.Drawing.Point(397, 332);
             this.heartbeatList.Name = "heartbeatList";
@@ -160,6 +162,10 @@
             // 
             this.columnHeader2.Text = "First Detected On";
             this.columnHeader2.Width = 110;
+            // 
+            // columnHeader3
+            // 
+            this.columnHeader3.Text = "Last Detected At";
             // 
             // SubscriptionManagerForm
             // 
@@ -189,6 +195,7 @@
         private System.Windows.Forms.ListView heartbeatList;
         private System.Windows.Forms.ColumnHeader columnHeader1;
         private System.Windows.Forms.ColumnHeader columnHeader2;
+        private System.Windows.Forms.ColumnHeader columnHeader3;
 	}
 }
 

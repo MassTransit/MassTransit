@@ -41,6 +41,7 @@ namespace SubscriptionManagerGUI
 			Container.AddComponent<IHostedService, SubscriptionService>();
 
 		    Container.AddComponent<IHealthCache, LocalHealthCache>();
+		    Container.AddComponent<IHeartbeatTimer, InMemoryHeartbeatTimer>();
             Container.AddComponent<IHostedService, HealthService>();
 
 			Container.AddComponent<ITimeoutRepository, InMemoryTimeoutRepository>();
