@@ -12,6 +12,5 @@ namespace MassTransit.ServiceBus.HealthMonitoring
 
         event Action<HealthInformation> NewHealthInformation;
         event Action<HealthInformation> UpdatedHealthInformation;
-
     }
 }

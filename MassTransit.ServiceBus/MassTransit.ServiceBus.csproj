@@ -85,6 +85,8 @@
     <Compile Include="HealthMonitoring\HealthInformation.cs" />
     <Compile Include="HealthMonitoring\HealthStatusConsumer.cs" />
     <Compile Include="HealthMonitoring\IHealthCache.cs" />
+    <Compile Include="HealthMonitoring\IHeartbeatTimer.cs" />
+    <Compile Include="HealthMonitoring\InMemoryHeartbeatTimer.cs" />
     <Compile Include="HealthMonitoring\LocalHealthCache.cs" />
     <Compile Include="HealthMonitoring\Messages\HealthStatusRequest.cs" />
     <Compile Include="HealthMonitoring\Messages\HealthStatusResponse.cs" />

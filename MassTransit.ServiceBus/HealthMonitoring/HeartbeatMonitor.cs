@@ -12,57 +12,25 @@
 /// specific language governing permissions and limitations under the License.
 namespace MassTransit.ServiceBus.HealthMonitoring
 {
-    using System;
-    using System.Collections.Generic;
     using Messages;
 
     public class HeartbeatMonitor :
         Consumes<Heartbeat>.All //, Produces<Suspect>
     {
-        private readonly IServiceBus _bus;
-        private readonly Dictionary<Uri, MonitorInfo> _monitoredEndpoints;
         private readonly IHealthCache _healthCache;
+        private readonly IHeartbeatTimer _timers;
 
-        public HeartbeatMonitor(IServiceBus bus, IHealthCache healthCache)
+        public HeartbeatMonitor(IServiceBus bus, IHealthCache healthCache, IHeartbeatTimer timers)
         {
-            _bus = bus;
+            _timers = timers;
             _healthCache = healthCache;
-            _monitoredEndpoints = new Dictionary<Uri, MonitorInfo>();
         }
-
-        //on start add cache?
 
         public void Consume(Heartbeat message)
         {
-			AddToWatch(message);
-            AddToCache(message.EndpointAddress);
-            _monitoredEndpoints[message.EndpointAddress].Reset();
+            _healthCache.Add(new HealthInformation(message.EndpointAddress, message.TimeBetweenBeatsInSeconds));
+            _timers.Add(message);
         }
 
-        public void AddToWatch(Heartbeat message)
-        {
-            if (!_monitoredEndpoints.ContainsKey(message.EndpointAddress))
-            {
-                MonitorInfo info = new MonitorInfo(message.EndpointAddress,
-                    message.TimeBetweenBeatsInSeconds, OnMissingHeartbeat);
-
-                _monitoredEndpoints.Add(message.EndpointAddress, info);
-            }
-        }
-
-        public void AddToCache(Uri uri)
-        {
-            _healthCache.Add(new HealthInformation(uri));
-        }
-        public bool AmIWatchingYou(Uri uri)
-        {
-            return _monitoredEndpoints.ContainsKey(uri);
-        }
-
-        public void OnMissingHeartbeat(MonitorInfo info)
-        {
-            _bus.Publish(new Suspect(info.EndpointUri));
-
-        }
     }
 }
