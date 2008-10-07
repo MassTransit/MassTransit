@@ -27,7 +27,7 @@ namespace MassTransit.ServiceBus.Tests.HealthMonitoring
             _mockResolver = StrictMock<IEndpointResolver>();
             SetupResult.For(_mockResolver.Resolve(null)).Return(_mockEndpoint).IgnoreArguments();
 
-            information = new HealthInformation(RemoteBus.Endpoint.Uri);
+        	information = new HealthInformation(RemoteBus.Endpoint.Uri, 3);
             _investigator = new Investigator(LocalBus, _mockResolver, _mockCache);
         }
         protected override void After_each()
