@@ -7,10 +7,10 @@
 
     <component id="sec">
       <parameters>
-        <host>mail.google.com</host>
-        <port>23</port>
-        <username>bob</username>
-        <password>bob</password>
+        <host>smtp.gmail.com</host>
+        <port>587</port>
+        <username>tulsatechfest@drusellers.com</username>
+        <password>opensource</password>
       </parameters>
     </component>
 
