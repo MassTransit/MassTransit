@@ -14,7 +14,7 @@ namespace PostalService.Host
 
         public override void Start()
         {
-			Container.AddComponent<SendEmailConsumer>();
+			Container.AddComponent<SendEmailConsumer>("sec");
 
             _bus = Container.Resolve<IServiceBus>("server");
 
