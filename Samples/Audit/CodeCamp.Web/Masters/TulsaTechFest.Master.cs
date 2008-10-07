@@ -8,7 +8,8 @@ namespace CodeCamp.Web.Masters
     {
         protected void Page_Load(object sender, EventArgs e)
         {
-
+            this.outputNotification.Visible = false;
+            this.outputError.Visible = false;
         }
 
         public void SetNotice(string message)

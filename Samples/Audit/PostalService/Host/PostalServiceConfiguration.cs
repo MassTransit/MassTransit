@@ -6,7 +6,7 @@ namespace PostalService.Host
     public class PostalServiceConfiguration :
         LocalSystemConfiguration
     {
-        private IApplicationLifeCycle _lifeCycle;
+        private readonly IApplicationLifeCycle _lifeCycle;
 
         public PostalServiceConfiguration(string xmlFile)
 		{
