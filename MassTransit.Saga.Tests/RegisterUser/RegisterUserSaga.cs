@@ -17,6 +17,7 @@ namespace MassTransit.Saga.Tests.RegisterUser
 	using Magnum.Common.Repository;
 	using MassTransit.ServiceBus.Timeout.Messages;
 	using Messages;
+	using Microsoft.Practices.ServiceLocation;
 	using ServiceBus;
 
 	/// <summary>
@@ -73,9 +74,7 @@ namespace MassTransit.Saga.Tests.RegisterUser
 
 		// The bus that received the message
 		public IServiceBus Bus { get; set; }
-
-		// the object builder for the class to be able to get other things
-		public IObjectBuilder Builder { get; set; }
+		public IServiceLocator ServiceLocator{ get; set; }
 
 		public Guid CorrelationId { get; private set; }
 
