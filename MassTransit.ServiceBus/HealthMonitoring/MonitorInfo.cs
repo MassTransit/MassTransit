@@ -50,5 +50,10 @@ namespace MassTransit.ServiceBus.HealthMonitoring
 			_timer.Stop();
 			_timer.Start();
 		}
+
+	    public void Stop()
+	    {
+	        _timer.Stop();
+	    }
 	}
 }

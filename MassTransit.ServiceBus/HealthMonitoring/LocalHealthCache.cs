@@ -18,6 +18,7 @@ namespace MassTransit.ServiceBus.HealthMonitoring
         public void Add(HealthInformation information)
         {
             _cache.Add(information.Uri, information);
+            _cache[information.Uri].LastDetectedAt = DateTime.Now;
             OnNewHealthInformation(information);
         }
 
