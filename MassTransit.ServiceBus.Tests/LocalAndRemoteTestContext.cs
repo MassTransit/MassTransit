@@ -83,14 +83,14 @@ namespace MassTransit.ServiceBus.Tests
 			get { return _container; }
 		}
 
-		protected T Mock<T>()
+		protected T Mock<T>() where T: class
 		{
 			return _mocks.DynamicMock<T>();
 		}
 
 		protected T StrictMock<T>()
 		{
-			return _mocks.CreateMock<T>();
+			return _mocks.StrictMock<T>();
 		}
 
 		protected T Stub<T>()

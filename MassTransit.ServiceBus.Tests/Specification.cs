@@ -33,13 +33,13 @@ namespace MassTransit.ServiceBus.Tests
 		{
 		}
 
-		protected T DynamicMock<T>()
+		protected T DynamicMock<T>() where T : class 
 		{
 			return _mocks.DynamicMock<T>();
 		}
         protected T StrictMock<T>()
         {
-            return _mocks.CreateMock<T>();
+            return _mocks.StrictMock<T>();
         }
 
 		protected T Stub<T>()
@@ -62,7 +62,12 @@ namespace MassTransit.ServiceBus.Tests
 			_mocks.VerifyAll();
 		}
 
-        protected IDisposable Record()
+	    public MockRepository Mocks
+	    {
+	        get { return _mocks; }
+	    }
+
+	    protected IDisposable Record()
         {
             return _mocks.Record();
         }

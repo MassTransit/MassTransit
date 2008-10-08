@@ -17,13 +17,15 @@ namespace MassTransit.ServiceBus.Tests.HealthMonitoring
         private Heartbeat message;
         private Uri u;
         private IHealthCache _theCacheIsntInterestingHere;
+        private IHeartbeatTimer _timer;
 
         protected override void Before_each()
         {
             u = new Uri("msmq://localhost/test");
             _bus = StrictMock<IServiceBus>();
             _theCacheIsntInterestingHere = DynamicMock<IHealthCache>();
-            hm = new HeartbeatMonitor(_bus, _theCacheIsntInterestingHere);
+            _timer = DynamicMock<IHeartbeatTimer>();
+            hm = new HeartbeatMonitor(_bus, _theCacheIsntInterestingHere, _timer);
             message = new Heartbeat(1, u);
         }
 
@@ -32,14 +34,19 @@ namespace MassTransit.ServiceBus.Tests.HealthMonitoring
             _bus = null;
             hm = null;
             _theCacheIsntInterestingHere = null;
+            _timer = null;
         }
 
         [Test]
         public void When_a_heartbeat_comes_in_for_the_first_time()
         {
-            Assert.IsFalse(hm.AmIWatchingYou(u));
+            //Assert.IsFalse(hm.AmIWatchingYou(u));
+            var timer = MockRepository.GenerateStub<IHeartbeatTimer>();
+            hm = new HeartbeatMonitor(_bus, _theCacheIsntInterestingHere, timer);
             hm.Consume(message);
-            Assert.IsTrue(hm.AmIWatchingYou(u));
+
+            timer.AssertWasCalled(x => x.Add(null), o=>o.IgnoreArguments());
+            //Assert.IsTrue(hm.AmIWatchingYou(u));
         }
 
         [Test]
