@@ -32,7 +32,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <NoWarn>1591,1587</NoWarn>
-    <DocumentationFile>..\bin\MassTransit.ServiceBus.MSMQ.XML</DocumentationFile>
+    <DocumentationFile>..\..\bin\MassTransit.ServiceBus.MSMQ.XML</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="log4net, Version=1.2.10.0, Culture=neutral, PublicKeyToken=1b44e1d426115821, processorArchitecture=MSIL">
