@@ -14,6 +14,7 @@ namespace DeferredMessageServiceHost
 {
     using MassTransit.Host.LifeCycles;
     using MassTransit.ServiceBus;
+    using MassTransit.ServiceBus.Services.MessageDeferral;
     using MassTransit.Services;
 
     public class DeferredMessageLifeCycle :

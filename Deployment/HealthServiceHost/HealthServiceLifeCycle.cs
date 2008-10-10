@@ -14,7 +14,7 @@ namespace HealthServiceHost
 {
     using MassTransit.Host.LifeCycles;
     using MassTransit.ServiceBus;
-    using MassTransit.ServiceBus.HealthMonitoring;
+    using MassTransit.ServiceBus.Services.HealthMonitoring;
 
     public class HealthServiceLifeCycle :
         HostedLifeCycle
