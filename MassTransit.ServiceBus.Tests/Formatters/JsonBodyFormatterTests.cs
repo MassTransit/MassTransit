@@ -15,7 +15,7 @@ namespace MassTransit.ServiceBus.Tests.Formatters
         private IFormattedBody mockBody;
 
         private readonly string _serializedMessages =
-            @"{""WrappedJson"":""{}"",""Types"":[""MassTransit.ServiceBus.Tests.PingMessage, MassTransit.ServiceBus.Tests""]}";
+            @"{""WrappedJson"":""{\""CorrelationId\"":\""d62c9b1c-8e31-4d54-add7-c624d56085a4\""}"",""Types"":[""MassTransit.ServiceBus.Tests.Messages.PingMessage, MassTransit.ServiceBus.Tests""]}";
 
         private readonly string _serializedMessagesWithValue =
              @"{""WrappedJson"":""{\""Name\"":\""test\""}"",""Types"":[""MassTransit.ServiceBus.Tests.ClientMessage, MassTransit.ServiceBus.Tests""]}";
@@ -32,7 +32,7 @@ namespace MassTransit.ServiceBus.Tests.Formatters
             mockBody = null;
         }
 
-		[Test, Ignore]
+		[Test]
         public void Serialize()
         {
             PingMessage msg = new PingMessage();
@@ -53,7 +53,7 @@ namespace MassTransit.ServiceBus.Tests.Formatters
 
         }
 
-		[Test, Ignore]
+		[Test]
         public void Deserialize()
         {
             MemoryStream ms = new MemoryStream(Encoding.UTF8.GetBytes(_serializedMessages));
@@ -71,7 +71,7 @@ namespace MassTransit.ServiceBus.Tests.Formatters
             }
         }
 
-		[Test, Ignore]
+		[Test]
         public void DeserializeWithGenerics()
         {
             MemoryStream ms = new MemoryStream(Encoding.UTF8.GetBytes(_serializedMessages));
