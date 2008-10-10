@@ -19,7 +19,7 @@ namespace ClientGUI
     using Castle.Windsor;
     using log4net;
     using MassTransit.ServiceBus;
-    using MassTransit.ServiceBus.Timeout.Messages;
+    using MassTransit.ServiceBus.Services.Timeout.Messages;
     using MassTransit.ServiceBus.Util;
     using MassTransit.WindsorIntegration;
     using Messages;
@@ -27,12 +27,12 @@ namespace ClientGUI
     public partial class ClientForm : Form
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof (ClientForm));
+        private readonly BackgroundWorker[] _workers = new BackgroundWorker[3];
 
         private IServiceBus _bus;
 
         private IWindsorContainer _container;
 
-        private BackgroundWorker[] _workers = new BackgroundWorker[3];
         private int _target;
 
 
@@ -55,23 +55,24 @@ namespace ClientGUI
 
         private void ClientForm_DoWork(object sender, DoWorkEventArgs e)
         {
-            ClientFormWorkerArgs args = e.Argument as ClientFormWorkerArgs;
+            var args = e.Argument as ClientFormWorkerArgs;
             if (args == null)
                 return;
 
             _target = 5000;
 
-            TrapperKeeper tk = new TrapperKeeper(_target);
+            var tk = new TrapperKeeper(_target);
 
             _bus.Subscribe(tk);
 
             for (int i = 0; i < _target; i++)
             {
-                SubmitQuestion question = new SubmitQuestion(CombGuid.NewCombGuid());
+                var question = new SubmitQuestion(CombGuid.NewCombGuid());
                 tk.Add(question);
 
                 if (i%10 == 0) //update every ten things
-                    UpdateMessageCount(args.Client, i + 1, tk.Answered, tk.SendingElapsedMilliseconds, tk.ElapsedMilliseconds);
+                    UpdateMessageCount(args.Client, i + 1, tk.Answered, tk.SendingElapsedMilliseconds,
+                                       tk.ElapsedMilliseconds);
 
                 _bus.Publish(question);
 
@@ -85,23 +86,34 @@ namespace ClientGUI
                 if (tk.Done.WaitOne(TimeSpan.FromSeconds(0.1), true))
                     break;
 
-                UpdateMessageCount(args.Client, _target, tk.Answered, tk.SendingElapsedMilliseconds, tk.ElapsedMilliseconds);
+                UpdateMessageCount(args.Client, _target, tk.Answered, tk.SendingElapsedMilliseconds,
+                                   tk.ElapsedMilliseconds);
             }
 
             UpdateMessageCount(args.Client, _target, tk.Answered, tk.SendingElapsedMilliseconds, tk.ElapsedMilliseconds);
         }
 
-        private void UpdateMessageCount(int clientId, int numberOfMessagesSent, int numberOfMessagesReceived, long sentElapsedTime, long receiveElapsedTime)
+        private void UpdateMessageCount(int clientId, int numberOfMessagesSent, int numberOfMessagesReceived,
+                                        long sentElapsedTime, long receiveElapsedTime)
         {
             if (client1Sent.InvokeRequired)
             {
                 ThreadSafeUpdateMessageCount tsu = UpdateMessageCount;
-                BeginInvoke(tsu, new object[] {clientId, numberOfMessagesSent, numberOfMessagesReceived, sentElapsedTime, receiveElapsedTime});
+                BeginInvoke(tsu,
+                            new object[]
+                                {
+                                    clientId, numberOfMessagesSent, numberOfMessagesReceived, sentElapsedTime,
+                                    receiveElapsedTime
+                                });
             }
             else
             {
-                string sentText = string.Format("{0}/{1} ({2}/s)", numberOfMessagesSent, _target, receiveElapsedTime == 0 ? 0 : numberOfMessagesSent * 1000 / sentElapsedTime);
-                string recvText = string.Format("{0}/{1} ({2}/s)", numberOfMessagesReceived, _target, receiveElapsedTime == 0 ? 0 : numberOfMessagesReceived*1000/receiveElapsedTime);
+                string sentText = string.Format("{0}/{1} ({2}/s)", numberOfMessagesSent, _target,
+                                                receiveElapsedTime == 0 ? 0 : numberOfMessagesSent*1000/sentElapsedTime);
+                string recvText = string.Format("{0}/{1} ({2}/s)", numberOfMessagesReceived, _target,
+                                                receiveElapsedTime == 0
+                                                    ? 0
+                                                    : numberOfMessagesReceived*1000/receiveElapsedTime);
                 switch (clientId)
                 {
                     case 1:
@@ -217,6 +229,13 @@ namespace ClientGUI
             _workers[2].RunWorkerAsync(new ClientFormWorkerArgs(3, int.Parse(client3WaitTime.Text)));
         }
 
+        private void scheduleTimeout_Click(object sender, EventArgs e)
+        {
+            _bus.Publish(new ScheduleTimeout(Guid.NewGuid(), DateTime.Now + TimeSpan.FromSeconds(30)));
+        }
+
+        #region Nested type: ClientFormWorkerArgs
+
         private class ClientFormWorkerArgs
         {
             private readonly int _client;
@@ -239,11 +258,14 @@ namespace ClientGUI
             }
         }
 
-        private delegate void ThreadSafeUpdateMessageCount(int clientId, int numberOfMessagesSent, int numberOfMessagesReceived, long sendElapsed, long receivedElapsed);
+        #endregion
 
-		private void scheduleTimeout_Click(object sender, EventArgs e)
-		{
-			_bus.Publish(new ScheduleTimeout(Guid.NewGuid(), DateTime.Now + TimeSpan.FromSeconds(30)));
-		}
+        #region Nested type: ThreadSafeUpdateMessageCount
+
+        private delegate void ThreadSafeUpdateMessageCount(
+            int clientId, int numberOfMessagesSent, int numberOfMessagesReceived, long sendElapsed, long receivedElapsed
+            );
+
+        #endregion
     }
 }

@@ -16,20 +16,18 @@ namespace ClientGUI
     using System.Collections.Generic;
     using System.Diagnostics;
     using System.Threading;
-    using System.Windows.Forms;
     using MassTransit.ServiceBus;
-    using MassTransit.ServiceBus.Timeout.Messages;
     using Messages;
 
     public class TrapperKeeper :
         Consumes<QuestionAnswered>.Selected
     {
         private readonly ManualResetEvent _done = new ManualResetEvent(false);
-        private readonly Stopwatch _stopwatch;
+        private readonly Dictionary<Guid, SubmitQuestion> _questions = new Dictionary<Guid, SubmitQuestion>();
         private readonly Stopwatch _sendingStopwatch;
+        private readonly Stopwatch _stopwatch;
         private readonly int _target;
         private int _answered;
-        private readonly Dictionary<Guid, SubmitQuestion> _questions = new Dictionary<Guid, SubmitQuestion>();
 
         public TrapperKeeper(int target)
         {
@@ -47,6 +45,7 @@ namespace ClientGUI
         {
             get { return SendingElapsedMilliseconds/_target; }
         }
+
         public long Rate
         {
             get { return ElapsedMilliseconds/_target; }
@@ -56,6 +55,7 @@ namespace ClientGUI
         {
             get { return _sendingStopwatch.ElapsedMilliseconds; }
         }
+
         public long ElapsedMilliseconds
         {
             get { return _stopwatch.ElapsedMilliseconds; }
@@ -65,6 +65,8 @@ namespace ClientGUI
         {
             get { return _answered; }
         }
+
+        #region Selected Members
 
         public void Consume(QuestionAnswered message)
         {
@@ -81,6 +83,8 @@ namespace ClientGUI
                 return _questions.ContainsKey(message.CorrelationId);
         }
 
+        #endregion
+
         public void Add(SubmitQuestion question)
         {
             lock (_questions)
@@ -91,7 +95,5 @@ namespace ClientGUI
         {
             _sendingStopwatch.Stop();
         }
-
-        
     }
 }
