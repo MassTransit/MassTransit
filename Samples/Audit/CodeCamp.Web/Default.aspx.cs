@@ -1,20 +1,19 @@
-using CodeCamp.Domain;
-
 namespace CodeCamp.Web
 {
-	using System;
-	using System.Linq;
-	using System.Web.UI;
-	using Magnum.Common;
-	using Magnum.Common.Repository;
-	using Masters;
+    using System;
+    using System.Linq;
+    using System.Web.UI;
+    using Domain;
+    using Magnum.Common;
+    using Magnum.Common.Repository;
+    using Masters;
 
     public partial class _Default : Page
-	{
-		protected void Page_Load(object sender, EventArgs e)
-		{
-			username.Focus();
-		}
+    {
+        protected void Page_Load(object sender, EventArgs e)
+        {
+            username.Focus();
+        }
 
         protected void submitButton_Click(object sender, EventArgs e)
         {
@@ -28,20 +27,27 @@ namespace CodeCamp.Web
 
                 if (user != null)
                 {
-                    if (user.CheckPassword(password.Text) && (user.HasEmailBeenConfirmed ?? false))
+                    if (user.CheckPassword(password.Text))
                     {
-                        ((TulsaTechFest)this.Master).SetNotice("user access granted");
+                        if ((user.HasEmailBeenConfirmed ?? false))
+                        {
+                            ((TulsaTechFest) this.Master).SetNotice("user access granted");
+                        }
+                        else
+                        {
+                            ((TulsaTechFest) this.Master).SetError("e-mail not yet confirmed");
+                        }
                     }
                     else
                     {
-                        ((TulsaTechFest)this.Master).SetError(string.Format("Invalid password specified for user '{0}'", username.Text));
+                        ((TulsaTechFest) this.Master).SetError(string.Format("Invalid password specified for user '{0}'", username.Text));
                     }
                 }
                 else
                 {
-                    ((TulsaTechFest)this.Master).SetError(string.Format("User not found: '{0}'", username.Text));
+                    ((TulsaTechFest) this.Master).SetError(string.Format("User not found: '{0}'", username.Text));
                 }
             }
         }
-	}
+    }
 }
