@@ -14,6 +14,7 @@
     <OldToolsVersion>2.0</OldToolsVersion>
     <UpgradeBackupLocation>
     </UpgradeBackupLocation>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -67,6 +68,9 @@
       <HintPath>..\libs\Rhino.Mocks.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Core">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
     <Reference Include="System.Data" />
     <Reference Include="System.Transactions" />
     <Reference Include="System.Xml" />
@@ -78,6 +82,15 @@
     <Compile Include="ContextSetup.cs" />
     <Compile Include="Fault_Specs.cs" />
     <Compile Include="Formatters\XmlBodyFormatterTests.cs" />
+    <Compile Include="Grid\FactorLongNumber.cs" />
+    <Compile Include="Grid\FactorLongNumbers.cs" />
+    <Compile Include="Grid\FactorLongNumberWorker.cs" />
+    <Compile Include="Grid\GridContextSpecification.cs" />
+    <Compile Include="Grid\GridException_Specs.cs" />
+    <Compile Include="Grid\Grid_Specs.cs" />
+    <Compile Include="Grid\IntegerFactorizer.cs" />
+    <Compile Include="Grid\IntegerFactorizer_Specs.cs" />
+    <Compile Include="Grid\LongNumberFactored.cs" />
     <Compile Include="HealthMonitoring\MonitorInfoSpecs.cs" />
     <Compile Include="HealthMonitoring\When_a_suspect_is_received.cs" />
     <Compile Include="HealthMonitoring\When_monitoring_health.cs" />
@@ -148,8 +161,14 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="Grid\grid.log4net.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Grid\grid.castle.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="loopback.castle.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
