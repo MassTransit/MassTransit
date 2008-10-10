@@ -12,46 +12,46 @@
 // specific language governing permissions and limitations under the License.
 namespace SubscriptionManagerGUI
 {
-	using System.Windows.Forms;
-	using Castle.Core;
-	using MassTransit.Host.Actions;
-	using MassTransit.Host.LifeCycles;
-	using MassTransit.ServiceBus;
-	using MassTransit.ServiceBus.HealthMonitoring;
-	using MassTransit.ServiceBus.Subscriptions;
-	using MassTransit.ServiceBus.Timeout;
+    using System.Windows.Forms;
+    using Castle.Core;
+    using MassTransit.Host.Actions;
+    using MassTransit.Host.LifeCycles;
+    using MassTransit.ServiceBus;
+    using MassTransit.ServiceBus.Services.HealthMonitoring;
+    using MassTransit.ServiceBus.Services.Timeout;
+    using MassTransit.ServiceBus.Subscriptions;
 
-	public class SubscriptionManagerLifeCycle :
-		HostedLifeCycle
-	{
-		public SubscriptionManagerLifeCycle(string xmlFile) : base(xmlFile)
-		{
-		}
+    public class SubscriptionManagerLifeCycle :
+        HostedLifeCycle
+    {
+        public SubscriptionManagerLifeCycle(string xmlFile) : base(xmlFile)
+        {
+        }
 
-		public override NamedAction DefaultAction
-		{
-			get { return NamedAction.Gui; }
-		}
+        public override NamedAction DefaultAction
+        {
+            get { return NamedAction.Gui; }
+        }
 
-		public override void Start()
-		{
-			Container.AddComponentLifeStyle("followerRepository", typeof (FollowerRepository), LifestyleType.Singleton);
+        public override void Start()
+        {
+            Container.AddComponentLifeStyle("followerRepository", typeof (FollowerRepository), LifestyleType.Singleton);
 
-			Container.AddComponent<ISubscriptionRepository, InMemorySubscriptionRepository>();
-			Container.AddComponent<IHostedService, SubscriptionService>();
+            Container.AddComponent<ISubscriptionRepository, InMemorySubscriptionRepository>();
+            Container.AddComponent<IHostedService, SubscriptionService>();
 
-		    Container.AddComponent<IHealthCache, LocalHealthCache>();
-		    Container.AddComponent<IHeartbeatTimer, InMemoryHeartbeatTimer>();
+            Container.AddComponent<IHealthCache, LocalHealthCache>();
+            Container.AddComponent<IHeartbeatTimer, InMemoryHeartbeatTimer>();
             Container.AddComponent<IHostedService, HealthService>();
 
-			Container.AddComponent<ITimeoutRepository, InMemoryTimeoutRepository>();
-			Container.AddComponent<IHostedService, TimeoutService>();
+            Container.AddComponent<ITimeoutRepository, InMemoryTimeoutRepository>();
+            Container.AddComponent<IHostedService, TimeoutService>();
 
-			Container.AddComponent<Form, SubscriptionManagerForm>();
-		}
+            Container.AddComponent<Form, SubscriptionManagerForm>();
+        }
 
-		public override void Stop()
-		{
-		}
-	}
+        public override void Stop()
+        {
+        }
+    }
 }
