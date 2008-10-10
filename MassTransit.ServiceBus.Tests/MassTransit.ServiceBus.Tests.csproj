@@ -77,6 +77,7 @@
     <Compile Include="Configuration\Config_spec.cs" />
     <Compile Include="ContextSetup.cs" />
     <Compile Include="Fault_Specs.cs" />
+    <Compile Include="Formatters\XmlBodyFormatterTests.cs" />
     <Compile Include="HealthMonitoring\MonitorInfoSpecs.cs" />
     <Compile Include="HealthMonitoring\When_a_suspect_is_received.cs" />
     <Compile Include="HealthMonitoring\When_monitoring_health.cs" />

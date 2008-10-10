@@ -10,53 +10,53 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Services.Messages
+namespace MassTransit.ServiceBus.Services.MessageDeferral.Messages
 {
-	using System;
-	using MassTransit.ServiceBus.Util;
+    using System;
+    using Util;
 
-	[Serializable]
-	public class DeferMessage
-	{
-		private readonly Guid _correlationId;
-		private readonly DateTime _deliverAt;
-		private readonly object _message;
-		private readonly string _messageType;
+    [Serializable]
+    public class DeferMessage
+    {
+        private readonly Guid _correlationId;
+        private readonly DateTime _deliverAt;
+        private readonly object _message;
+        private readonly string _messageType;
 
-		public DeferMessage(Guid correlationId, TimeSpan deliverIn, object message)
-			: this(correlationId, DateTime.UtcNow + deliverIn, message)
-		{
-		}
+        public DeferMessage(Guid correlationId, TimeSpan deliverIn, object message)
+            : this(correlationId, DateTime.UtcNow + deliverIn, message)
+        {
+        }
 
-		public DeferMessage(Guid correlationId, DateTime deliverAt, object message)
-		{
-			Guard.Against.Null(message, "Message must not be null");
+        public DeferMessage(Guid correlationId, DateTime deliverAt, object message)
+        {
+            Guard.Against.Null(message, "Message must not be null");
 
-			_correlationId = correlationId;
-			_message = message;
-			_deliverAt = deliverAt.ToUniversalTime();
+            _correlationId = correlationId;
+            _message = message;
+            _deliverAt = deliverAt.ToUniversalTime();
 
-			_messageType = message.GetType().AssemblyQualifiedName;
-		}
+            _messageType = message.GetType().AssemblyQualifiedName;
+        }
 
-		public Guid CorrelationId
-		{
-			get { return _correlationId; }
-		}
+        public Guid CorrelationId
+        {
+            get { return _correlationId; }
+        }
 
-		public DateTime DeliverAt
-		{
-			get { return _deliverAt; }
-		}
+        public DateTime DeliverAt
+        {
+            get { return _deliverAt; }
+        }
 
-		public object Message
-		{
-			get { return _message; }
-		}
+        public object Message
+        {
+            get { return _message; }
+        }
 
-		public string MessageType
-		{
-			get { return _messageType; }
-		}
-	}
+        public string MessageType
+        {
+            get { return _messageType; }
+        }
+    }
 }

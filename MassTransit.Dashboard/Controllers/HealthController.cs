@@ -3,9 +3,9 @@ namespace MassTransit.Dashboard.Controllers
     using System;
     using System.Collections.Generic;
     using Castle.MonoRail.Framework;
-    using MassTransit.ServiceBus.HealthMonitoring;
-    using MassTransit.ServiceBus.HealthMonitoring.Messages;
     using ServiceBus;
+    using ServiceBus.Services.HealthMonitoring;
+    using ServiceBus.Services.HealthMonitoring.Messages;
 
     [Layout("default")]
     public class HealthController :

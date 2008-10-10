@@ -12,75 +12,75 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.ServiceBus.Tests.Timeouts
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Diagnostics;
-	using System.Threading;
-	using Castle.Core;
-	using MassTransit.ServiceBus.Timeout.Messages;
-	using MassTransit.Services.Messages;
-	using Messages;
-	using NUnit.Framework;
-	using Services;
-	using Timeout;
-	using Util;
+    using System;
+    using System.Diagnostics;
+    using System.Threading;
+    using Castle.Core;
+    using MassTransit.Services;
+    using Messages;
+    using NUnit.Framework;
+    using Services.MessageDeferral;
+    using Services.MessageDeferral.Messages;
+    using Services.Timeout;
+    using Util;
 
-	[TestFixture]
-	public class When_a_message_is_deferred :
-		LocalAndRemoteTestContext
-	{
-		private ITimeoutRepository _timeoutRepository;
-		private TimeoutService _timeoutService;
-		private Guid _correlationId;
-		private DateTime _dateTime;
-		private IDeferredMessageRepository _repository;
-		private MessageDeferralService _deferService;
+    [TestFixture]
+    public class When_a_message_is_deferred :
+        LocalAndRemoteTestContext
+    {
+        private ITimeoutRepository _timeoutRepository;
+        private TimeoutService _timeoutService;
+        private Guid _correlationId;
+        private DateTime _dateTime;
+        private IDeferredMessageRepository _repository;
+        private MessageDeferralService _deferService;
 
-		protected override void Before_each()
-		{
-			_correlationId = CombGuid.NewCombGuid();
-			_dateTime = DateTime.UtcNow + TimeSpan.FromSeconds(1);
+        protected override void Before_each()
+        {
+            _correlationId = CombGuid.NewCombGuid();
+            _dateTime = DateTime.UtcNow + TimeSpan.FromSeconds(1);
 
-			Container.AddComponentLifeStyle<ITimeoutRepository, InMemoryTimeoutRepository>(LifestyleType.Singleton);
+            Container.AddComponentLifeStyle<ITimeoutRepository, InMemoryTimeoutRepository>(LifestyleType.Singleton);
 
-			_timeoutRepository = Container.Resolve<ITimeoutRepository>();
+            _timeoutRepository = Container.Resolve<ITimeoutRepository>();
 
-			_timeoutService = new TimeoutService(LocalBus, _timeoutRepository);
-			_timeoutService.Start();
+            _timeoutService = new TimeoutService(LocalBus, _timeoutRepository);
+            _timeoutService.Start();
 
-			Container.AddComponentLifeStyle<IDeferredMessageRepository, InMemoryDeferredMessageRepository>(LifestyleType.Singleton);
+            Container.AddComponentLifeStyle<IDeferredMessageRepository, InMemoryDeferredMessageRepository>(
+                LifestyleType.Singleton);
 
-			_repository = Container.Resolve<IDeferredMessageRepository>();
+            _repository = Container.Resolve<IDeferredMessageRepository>();
 
-			_deferService = new MessageDeferralService(LocalBus);
-			_deferService.Start();
-		}
+            _deferService = new MessageDeferralService(LocalBus);
+            _deferService.Start();
+        }
 
-		protected override void After_each()
-		{
-			_deferService.Stop();
-			_deferService.Dispose();
-			
-			_timeoutService.Stop();
-			_timeoutService.Dispose();
-		}
+        protected override void After_each()
+        {
+            _deferService.Stop();
+            _deferService.Dispose();
 
-		[Test]
-		public void It_should_be_received_after_the_deferral_period_elapses()
-		{
-			ManualResetEvent _timedOut = new ManualResetEvent(false);
+            _timeoutService.Stop();
+            _timeoutService.Dispose();
+        }
 
-			Stopwatch watch = Stopwatch.StartNew();
+        [Test]
+        public void It_should_be_received_after_the_deferral_period_elapses()
+        {
+            var _timedOut = new ManualResetEvent(false);
 
-			LocalBus.Subscribe<PingMessage>(x => _timedOut.Set());
+            Stopwatch watch = Stopwatch.StartNew();
 
-			LocalBus.Publish(new DeferMessage(_correlationId, TimeSpan.FromSeconds(3), new PingMessage()));
+            LocalBus.Subscribe<PingMessage>(x => _timedOut.Set());
 
-			Assert.IsTrue(_timedOut.WaitOne(TimeSpan.FromSeconds(10), true));
+            LocalBus.Publish(new DeferMessage(_correlationId, TimeSpan.FromSeconds(3), new PingMessage()));
 
-			watch.Stop();
+            Assert.IsTrue(_timedOut.WaitOne(TimeSpan.FromSeconds(10), true));
 
-			Debug.WriteLine(string.Format("Timeout took {0}ms", watch.ElapsedMilliseconds));
-		}
-	}
+            watch.Stop();
+
+            Debug.WriteLine(string.Format("Timeout took {0}ms", watch.ElapsedMilliseconds));
+        }
+    }
 }

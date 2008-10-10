@@ -17,8 +17,8 @@ namespace MassTransit.ServiceBus.Tests.Timeouts
 	using System.Threading;
 	using Castle.Core;
 	using NUnit.Framework;
-	using Timeout;
-	using Timeout.Messages;
+	using Services.Timeout;
+	using Services.Timeout.Messages;
 	using Util;
 
 	[TestFixture]

@@ -2,10 +2,10 @@ namespace MassTransit.ServiceBus.Tests.HealthMonitoring
 {
     using System;
     using System.Threading;
-    using MassTransit.ServiceBus.HealthMonitoring;
-    using MassTransit.ServiceBus.HealthMonitoring.Messages;
     using MassTransit.ServiceBus.Internal;
     using NUnit.Framework;
+    using Services.HealthMonitoring;
+    using Services.HealthMonitoring.Messages;
     using Transports;
 
 	public class MonitorInfoSpecs :

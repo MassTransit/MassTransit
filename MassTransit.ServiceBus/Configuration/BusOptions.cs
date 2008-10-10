@@ -3,8 +3,8 @@ namespace MassTransit.ServiceBus.Configuration
     using System;
     using System.Collections;
     using Formatters;
-    using HealthMonitoring;
     using Internal;
+    using Services.HealthMonitoring;
     using Subscriptions;
 
     public class BusOptions

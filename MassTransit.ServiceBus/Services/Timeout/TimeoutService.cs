@@ -10,106 +10,106 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.ServiceBus.Timeout
+namespace MassTransit.ServiceBus.Services.Timeout
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Threading;
-	using Exceptions;
-	using log4net;
-	using Messages;
-	using Util;
+    using System;
+    using System.Collections.Generic;
+    using System.Threading;
+    using Exceptions;
+    using log4net;
+    using Messages;
+    using Util;
 
-	public class TimeoutService :
-		IHostedService
-	{
-		private static readonly TimeSpan _interval = TimeSpan.FromSeconds(1);
-		private static readonly ILog _log = LogManager.GetLogger(typeof (TimeoutService));
-		private readonly IServiceBus _bus;
-		private readonly ITimeoutRepository _repository;
-		private readonly ManualResetEvent _stopped = new ManualResetEvent(false);
-		private readonly AutoResetEvent _trigger = new AutoResetEvent(true);
-		private Thread _watchThread;
+    public class TimeoutService :
+        IHostedService
+    {
+        private static readonly TimeSpan _interval = TimeSpan.FromSeconds(1);
+        private static readonly ILog _log = LogManager.GetLogger(typeof (TimeoutService));
+        private readonly IServiceBus _bus;
+        private readonly ITimeoutRepository _repository;
+        private readonly ManualResetEvent _stopped = new ManualResetEvent(false);
+        private readonly AutoResetEvent _trigger = new AutoResetEvent(true);
+        private Thread _watchThread;
 
-		public TimeoutService(IServiceBus bus, ITimeoutRepository repository)
-		{
-			_bus = bus;
-			_repository = repository;
-		}
+        public TimeoutService(IServiceBus bus, ITimeoutRepository repository)
+        {
+            _bus = bus;
+            _repository = repository;
+        }
 
-		public void Dispose()
-		{
-			try
-			{
-				_bus.Dispose();
-			}
-			catch (Exception ex)
-			{
-				string message = "Error in shutting down the TimeoutService: " + ex.Message;
-				ShutDownException exp = new ShutDownException(message, ex);
-				_log.Error(message, exp);
-				throw exp;
-			}
-		}
+        public void Dispose()
+        {
+            try
+            {
+                _bus.Dispose();
+            }
+            catch (Exception ex)
+            {
+                string message = "Error in shutting down the TimeoutService: " + ex.Message;
+                ShutDownException exp = new ShutDownException(message, ex);
+                _log.Error(message, exp);
+                throw exp;
+            }
+        }
 
-		public void Start()
-		{
-			if (_log.IsInfoEnabled)
-				_log.Info("Timeout Service Starting");
+        public void Start()
+        {
+            if (_log.IsInfoEnabled)
+                _log.Info("Timeout Service Starting");
 
-			_bus.AddComponent<ScheduleTimeoutConsumer>();
-			_bus.AddComponent<CancelTimeoutConsumer>();
+            _bus.AddComponent<ScheduleTimeoutConsumer>();
+            _bus.AddComponent<CancelTimeoutConsumer>();
 
-			_repository.TimeoutAdded += TriggerPublisher;
+            _repository.TimeoutAdded += TriggerPublisher;
 
-			_watchThread = new Thread(PublishPendingTimeoutMessages);
-			_watchThread.IsBackground = true;
-			_watchThread.Start();
+            _watchThread = new Thread(PublishPendingTimeoutMessages);
+            _watchThread.IsBackground = true;
+            _watchThread.Start();
 
-			if (_log.IsInfoEnabled)
-				_log.Info("Timeout Service Started");
-		}
+            if (_log.IsInfoEnabled)
+                _log.Info("Timeout Service Started");
+        }
 
-		private void TriggerPublisher(Guid obj)
-		{
-			_trigger.Set();
-		}
+        private void TriggerPublisher(Guid obj)
+        {
+            _trigger.Set();
+        }
 
-		public void Stop()
-		{
-			if (_log.IsInfoEnabled)
-				_log.Info("Timeout Service Stopping");
+        public void Stop()
+        {
+            if (_log.IsInfoEnabled)
+                _log.Info("Timeout Service Stopping");
 
-			_bus.RemoveComponent<ScheduleTimeoutConsumer>();
-			_bus.RemoveComponent<CancelTimeoutConsumer>();
+            _bus.RemoveComponent<ScheduleTimeoutConsumer>();
+            _bus.RemoveComponent<CancelTimeoutConsumer>();
 
-			if (_log.IsInfoEnabled)
-				_log.Info("Timeout Service Stopped");
-		}
+            if (_log.IsInfoEnabled)
+                _log.Info("Timeout Service Stopped");
+        }
 
-		private void PublishPendingTimeoutMessages()
-		{
-			try
-			{
-				WaitHandle[] handles = new WaitHandle[] {_trigger, _stopped};
+        private void PublishPendingTimeoutMessages()
+        {
+            try
+            {
+                WaitHandle[] handles = new WaitHandle[] {_trigger, _stopped};
 
-				while ((WaitHandle.WaitAny(handles, _interval, true)) != 1)
-				{
-					DateTime lessThan = DateTime.UtcNow;
+                while ((WaitHandle.WaitAny(handles, _interval, true)) != 1)
+                {
+                    DateTime lessThan = DateTime.UtcNow;
 
-					IList<Tuple<Guid, DateTime>> list = _repository.List(lessThan);
-					foreach (Tuple<Guid, DateTime> tuple in list)
-					{
-						_bus.Publish(new TimeoutExpired(tuple.Key));
+                    IList<Tuple<Guid, DateTime>> list = _repository.List(lessThan);
+                    foreach (Tuple<Guid, DateTime> tuple in list)
+                    {
+                        _bus.Publish(new TimeoutExpired(tuple.Key));
 
-						_repository.Remove(tuple.Key);
-					}
-				}
-			}
-			catch (Exception ex)
-			{
-				_log.Error("Unable to publish timeout message", ex);
-			}
-		}
-	}
+                        _repository.Remove(tuple.Key);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _log.Error("Unable to publish timeout message", ex);
+            }
+        }
+    }
 }

@@ -10,33 +10,32 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Services
+namespace MassTransit.ServiceBus.Services.MessageDeferral
 {
-	using System;
-	using Messages;
-	using ServiceBus;
-	using ServiceBus.Timeout.Messages;
-	using ServiceBus.Util;
+    using System;
+    using Messages;
+    using Timeout.Messages;
+    using Util;
 
-	public class DeferMessageConsumer :
-		Consumes<DeferMessage>.All
-	{
-		private readonly IServiceBus _bus;
-		private readonly IDeferredMessageRepository _repository;
+    public class DeferMessageConsumer :
+        Consumes<DeferMessage>.All
+    {
+        private readonly IServiceBus _bus;
+        private readonly IDeferredMessageRepository _repository;
 
-		public DeferMessageConsumer(IServiceBus bus, IDeferredMessageRepository repository)
-		{
-			_repository = repository;
-			_bus = bus;
-		}
+        public DeferMessageConsumer(IServiceBus bus, IDeferredMessageRepository repository)
+        {
+            _repository = repository;
+            _bus = bus;
+        }
 
-		public void Consume(DeferMessage message)
-		{
-			Guid id = CombGuid.NewCombGuid();
+        public void Consume(DeferMessage message)
+        {
+            Guid id = CombGuid.NewCombGuid();
 
-			_repository.Add(new DeferredMessage(id, message.DeliverAt, message.Message));
+            _repository.Add(new DeferredMessage(id, message.DeliverAt, message.Message));
 
-			_bus.Publish(new ScheduleTimeout(id, message.DeliverAt));
-		}
-	}
+            _bus.Publish(new ScheduleTimeout(id, message.DeliverAt));
+        }
+    }
 }

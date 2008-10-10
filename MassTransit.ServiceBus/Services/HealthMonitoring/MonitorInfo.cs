@@ -1,59 +1,59 @@
-/// Copyright 2007-2008 The Apache Software Foundation.
-/// 
-/// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
-/// this file except in compliance with the License. You may obtain a copy of the 
-/// License at 
-/// 
-///   http://www.apache.org/licenses/LICENSE-2.0 
-/// 
-/// Unless required by applicable law or agreed to in writing, software distributed 
-/// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-/// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-/// specific language governing permissions and limitations under the License.
-namespace MassTransit.ServiceBus.HealthMonitoring
+// Copyright 2007-2008 The Apache Software Foundation.
+// 
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
+// this file except in compliance with the License. You may obtain a copy of the 
+// License at 
+// 
+//   http://www.apache.org/licenses/LICENSE-2.0 
+// 
+// Unless required by applicable law or agreed to in writing, software distributed 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// specific language governing permissions and limitations under the License.
+namespace MassTransit.ServiceBus.Services.HealthMonitoring
 {
-	using System;
-	using System.Timers;
+    using System;
+    using System.Timers;
 
-	public class MonitorInfo
-	{
-		private readonly Action<MonitorInfo> _dlg;
-		private readonly Timer _timer;
-		private readonly Uri _endpointUri;
+    public class MonitorInfo
+    {
+        private readonly Action<MonitorInfo> _dlg;
+        private readonly Timer _timer;
+        private readonly Uri _endpointUri;
 
-		public MonitorInfo(Uri endpointUri, int timeBetweenBeatsInSeconds, Action<MonitorInfo> dlg)
-		{
-			_dlg = dlg;
+        public MonitorInfo(Uri endpointUri, int timeBetweenBeatsInSeconds, Action<MonitorInfo> dlg)
+        {
+            _dlg = dlg;
 
-			_endpointUri = endpointUri;
+            _endpointUri = endpointUri;
 
-			_timer = new Timer(TimeSpan.FromSeconds(timeBetweenBeatsInSeconds).TotalMilliseconds);
-			_timer.AutoReset = false;
-			_timer.Elapsed += OnElapse;
+            _timer = new Timer(TimeSpan.FromSeconds(timeBetweenBeatsInSeconds).TotalMilliseconds);
+            _timer.AutoReset = false;
+            _timer.Elapsed += OnElapse;
 
-			_timer.Start();
-		}
+            _timer.Start();
+        }
 
 
-	    public Uri EndpointUri
-	    {
-	        get { return _endpointUri; }
-	    }
+        public Uri EndpointUri
+        {
+            get { return _endpointUri; }
+        }
 
-	    private void OnElapse(object sender, ElapsedEventArgs e)
-		{
-			_dlg(this);
-		}
+        private void OnElapse(object sender, ElapsedEventArgs e)
+        {
+            _dlg(this);
+        }
 
-		public void Reset()
-		{
-			_timer.Stop();
-			_timer.Start();
-		}
+        public void Reset()
+        {
+            _timer.Stop();
+            _timer.Start();
+        }
 
-	    public void Stop()
-	    {
-	        _timer.Stop();
-	    }
-	}
+        public void Stop()
+        {
+            _timer.Stop();
+        }
+    }
 }

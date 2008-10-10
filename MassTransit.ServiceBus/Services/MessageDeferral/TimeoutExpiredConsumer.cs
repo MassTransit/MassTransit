@@ -15,9 +15,10 @@ namespace MassTransit.Services
 	using System;
 	using System.Reflection;
 	using ServiceBus;
-	using ServiceBus.Timeout.Messages;
+	using ServiceBus.Services.MessageDeferral;
+	using ServiceBus.Services.Timeout.Messages;
 
-	public class TimeoutExpiredConsumer :
+    public class TimeoutExpiredConsumer :
 		Consumes<TimeoutExpired>.Selected
 	{
 		private static readonly MethodInfo _publishMethodInfo = typeof (IServiceBus).GetMethod("Publish", BindingFlags.Public | BindingFlags.Instance);

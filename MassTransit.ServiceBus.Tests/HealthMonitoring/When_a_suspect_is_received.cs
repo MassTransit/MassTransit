@@ -2,12 +2,12 @@ namespace MassTransit.ServiceBus.Tests.HealthMonitoring
 {
     using System;
     using System.Threading;
-    using MassTransit.ServiceBus.HealthMonitoring;
-    using MassTransit.ServiceBus.HealthMonitoring.Messages;
     using MassTransit.ServiceBus.Internal;
     using NUnit.Framework;
     using Rhino.Mocks;
     using Rhino.Mocks.Constraints;
+    using Services.HealthMonitoring;
+    using Services.HealthMonitoring.Messages;
 
     [TestFixture]
     public class When_a_suspect_is_received :

@@ -16,6 +16,7 @@ namespace MassTransit.Infrastructure.Repositories
     using System.Collections.Generic;
     using System.Linq;
     using Magnum.Common.Repository;
+    using ServiceBus.Services.Timeout;
     using ServiceBus.Timeout;
     using ServiceBus.Util;
 

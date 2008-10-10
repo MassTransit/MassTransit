@@ -14,9 +14,9 @@ namespace MassTransit.Infrastructure.Repositories
 {
 	using System;
 	using Magnum.Infrastructure.Repository;
-	using Services;
+	using ServiceBus.Services.MessageDeferral;
 
-	public class PersistantDeferredMessageRepository :
+    public class PersistantDeferredMessageRepository :
 		IDeferredMessageRepository
 	{
 		private NHibernateRepository _repository;
