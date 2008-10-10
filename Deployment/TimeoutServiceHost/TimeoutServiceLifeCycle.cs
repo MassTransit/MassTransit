@@ -14,7 +14,7 @@ namespace TimeoutServiceHost
 {
     using MassTransit.Host.LifeCycles;
     using MassTransit.ServiceBus;
-    using MassTransit.ServiceBus.Timeout;
+    using MassTransit.ServiceBus.Services.Timeout;
 
     public class TimeoutServiceLifeCycle : 
         HostedLifeCycle
