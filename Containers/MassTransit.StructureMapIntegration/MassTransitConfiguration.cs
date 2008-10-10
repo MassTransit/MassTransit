@@ -3,10 +3,10 @@
     using System;
     using System.Collections.Generic;
     using MassTransit.ServiceBus.Exceptions;
-    using MassTransit.ServiceBus.HealthMonitoring;
     using MassTransit.ServiceBus.Internal;
     using MassTransit.ServiceBus.Subscriptions;
     using ServiceBus;
+    using ServiceBus.Services.HealthMonitoring;
     using StructureMap;
 
     public class MassTransitConfiguration :

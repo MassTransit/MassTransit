@@ -74,6 +74,7 @@
     <Compile Include="Exceptions\SagaException.cs" />
     <Compile Include="ExpiresInAttribute.cs" />
     <Compile Include="Fault.cs" />
+    <Compile Include="Formatters\XmlBodyFormatter.cs" />
     <Compile Include="Grid\DistributedTaskController.cs" />
     <Compile Include="Grid\IDistributedTask.cs" />
     <Compile Include="Grid\ISubTaskWorker.cs" />

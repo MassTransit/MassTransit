@@ -15,12 +15,12 @@ namespace MassTransit.Saga.Tests.RegisterUser
 	using System;
 	using Magnum.Common.DateTimeExtensions;
 	using Magnum.Common.Repository;
-	using MassTransit.ServiceBus.Timeout.Messages;
 	using Messages;
 	using Microsoft.Practices.ServiceLocation;
 	using ServiceBus;
+	using ServiceBus.Services.Timeout.Messages;
 
-	/// <summary>
+    /// <summary>
 	/// 
 	/// So here is the deal
 	/// The saga is a class that contains the state and behavior of the saga

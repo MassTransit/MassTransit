@@ -19,7 +19,7 @@ namespace MassTransit.Saga.Tests
     using NHibernate.Cfg;
     using NHibernate.Tool.hbm2ddl;
     using NUnit.Framework;
-    using Services;
+    using ServiceBus.Services.MessageDeferral;
 
     [TestFixture]
     public class DeferredMessage_Specs

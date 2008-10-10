@@ -209,7 +209,7 @@ hr.space {background:#fff;color:#fff;}
 .clear {clear:both;}
 
 /* forms.css */
-label {font-weight:bold;}
+label {font-weight:bold;display:block;}
 fieldset {padding:1.4em;margin:0 0 1.5em 0;border:1px solid #ccc;}
 legend {font-weight:bold;font-size:1.2em;}
 input.text, input.title, textarea, select {margin:0.5em 0;border:1px solid #bbb;}

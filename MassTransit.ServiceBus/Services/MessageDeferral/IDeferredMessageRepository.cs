@@ -10,19 +10,19 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Services
+namespace MassTransit.ServiceBus.Services.MessageDeferral
 {
-	using System;
+    using System;
 
-	public interface IDeferredMessageRepository :
-		IDisposable
-	{
-		void Add(DeferredMessage message);
+    public interface IDeferredMessageRepository :
+        IDisposable
+    {
+        void Add(DeferredMessage message);
 
-		DeferredMessage Get(Guid id);
+        DeferredMessage Get(Guid id);
 
-		bool Contains(Guid id);
+        bool Contains(Guid id);
 
-		void Remove(Guid id);
-	}
+        void Remove(Guid id);
+    }
 }
