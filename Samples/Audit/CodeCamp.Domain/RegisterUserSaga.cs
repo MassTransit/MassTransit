@@ -5,8 +5,7 @@ namespace CodeCamp.Domain
     using Magnum.Common.Repository;
     using MassTransit.Saga;
     using MassTransit.ServiceBus;
-    using MassTransit.ServiceBus.Timeout.Messages;
-    using MassTransit.ServiceBus.Util;
+    using MassTransit.ServiceBus.Services.Timeout.Messages;
     using Messages;
     using Microsoft.Practices.ServiceLocation;
     using PostalService.Messages;
@@ -36,6 +35,26 @@ namespace CodeCamp.Domain
             get { return _user; }
         }
 
+        #region InitiatedBy<RegisterUser> Members
+
+        public void Consume(RegisterUser message)
+        {
+            _user = new User(message.Name, message.Username, message.Password, message.Email);
+
+            using (
+                IRepository<User, Guid> repository =
+                    ServiceLocator.GetInstance<IRepositoryFactory>().GetRepository<User, Guid>())
+            {
+                repository.Save(_user);
+            }
+
+            string body = string.Format("Please verify email http://localhost/ConfirmEmail/?registrationId={0}",
+                                        _correlationId);
+            Bus.Publish(new SendEmail(CorrelationId, _user.Email, "dru@drusellers.com", "verify email", body));
+        }
+
+        #endregion
+
         #region ISaga Members
 
         public Guid CorrelationId
@@ -46,24 +65,6 @@ namespace CodeCamp.Domain
         public IServiceBus Bus { get; set; }
 
         public IServiceLocator ServiceLocator { get; set; }
-
-        #endregion
-
-        #region InitiatedBy<RegisterUser> Members
-
-        public void Consume(RegisterUser message)
-        {
-            _user = new User(message.Name, message.Username, message.Password, message.Email);
-
-            using (IRepository<User, Guid> repository = ServiceLocator.GetInstance<IRepositoryFactory>().GetRepository<User, Guid>())
-            {
-                repository.Save(_user);
-            }
-
-            string body = string.Format("Please verify email http://localhost/ConfirmEmail/?registrationId={0}",
-                                        _correlationId);
-            Bus.Publish(new SendEmail(CorrelationId, _user.Email, "dru@drusellers.com", "verify email", body));
-        }
 
         #endregion
 
@@ -95,7 +96,9 @@ namespace CodeCamp.Domain
         {
             _user.ConfirmEmail();
 
-            using (IRepository<User, Guid> repository = ServiceLocator.GetInstance<IRepositoryFactory>().GetRepository<User, Guid>())
+            using (
+                IRepository<User, Guid> repository =
+                    ServiceLocator.GetInstance<IRepositoryFactory>().GetRepository<User, Guid>())
             {
                 repository.Update(_user);
             }
