@@ -24,7 +24,7 @@ namespace MassTransit.ServiceBus
     /// A service bus is used to attach message handlers (services) to endpoints, as well as 
     /// communicate with other service bus instances in a distributed application
     /// </summary>
-    public class ServiceBus :
+    public partial class ServiceBus :
         IServiceBus
     {
         private static readonly ILog _log;
@@ -204,8 +204,6 @@ namespace MassTransit.ServiceBus
         {
             ISubscriptionTypeInfo info = _typeInfoCache.GetSubscriptionTypeInfo<T>();
             info.Subscribe(_dispatcherContext, component);
-
-            StartListening();
         }
 
         public void Unsubscribe<T>(Action<IMessageContext<T>> callback) where T : class
@@ -230,19 +228,12 @@ namespace MassTransit.ServiceBus
 
             ISubscriptionTypeInfo info = _typeInfoCache.GetSubscriptionTypeInfo<TComponent>();
             info.AddComponent(_dispatcherContext);
-
-            StartListening();
         }
 
         public void RemoveComponent<TComponent>() where TComponent : class
         {
             ISubscriptionTypeInfo info = _typeInfoCache.GetSubscriptionTypeInfo<TComponent>();
             info.RemoveComponent(_dispatcherContext);
-        }
-
-        private void StartListening()
-        {
-            // TODO NUKE
         }
 
         public void Dispatch(object message)
@@ -320,64 +311,6 @@ namespace MassTransit.ServiceBus
         public static ServiceBusBuilder Build()
         {
             return new ServiceBusBuilder();
-        }
-
-        private class NullServiceBus : IServiceBus
-        {
-            public void Dispose()
-            {
-            }
-
-            public IEndpoint Endpoint
-            {
-                get { return null; }
-            }
-
-            public IEndpoint PoisonEndpoint
-            {
-                get { return null; }
-            }
-
-            public void Subscribe<T>(Action<IMessageContext<T>> callback) where T : class
-            {
-            }
-
-            public void Subscribe<T>(Action<IMessageContext<T>> callback, Predicate<T> condition) where T : class
-            {
-            }
-
-            public void Subscribe<T>(T component) where T : class
-            {
-            }
-
-            public void Unsubscribe<T>(Action<IMessageContext<T>> callback) where T : class
-            {
-            }
-
-            public void Unsubscribe<T>(Action<IMessageContext<T>> callback, Predicate<T> condition) where T : class
-            {
-            }
-
-            public void Unsubscribe<T>(T component) where T : class
-            {
-            }
-
-            public void AddComponent<TComponent>() where TComponent : class
-            {
-            }
-
-            public void RemoveComponent<TComponent>() where TComponent : class
-            {
-            }
-
-            public void Publish<T>(T message) where T : class
-            {
-            }
-
-            public RequestBuilder Request()
-            {
-                throw new NotImplementedException();
-            }
         }
     }
 }
