@@ -91,10 +91,10 @@
     <Compile Include="Services\HealthMonitoring\LocalHealthCache.cs" />
     <Compile Include="Services\HealthMonitoring\Messages\HealthStatusRequest.cs" />
     <Compile Include="Services\HealthMonitoring\Messages\HealthStatusResponse.cs" />
-    <Compile Include="Internal\BatchDispatcher.cs" />
+    <Compile Include="Internal\Dispatchers\BatchDispatcher.cs" />
     <Compile Include="Internal\BatchMessageSubscription.cs" />
-    <Compile Include="Internal\ComponentDispatcher.cs" />
-    <Compile Include="Internal\ComponentDispatcherBase.cs" />
+    <Compile Include="Internal\Dispatchers\ComponentDispatcher.cs" />
+    <Compile Include="Internal\Dispatchers\ComponentDispatcherBase.cs" />
     <Compile Include="Internal\CorrelatedPublication.cs" />
     <Compile Include="Internal\CorrelatedSubscription.cs" />
     <Compile Include="Internal\DispatcherContext.cs" />
@@ -102,7 +102,7 @@
     <Compile Include="Internal\IdempotentHashtable.cs" />
     <Compile Include="Internal\IdempotentList.cs" />
     <Compile Include="Internal\IEndpointResolver.cs" />
-    <Compile Include="Internal\InitiateSagaDispatcher.cs" />
+    <Compile Include="Internal\Dispatchers\InitiateSagaDispatcher.cs" />
     <Compile Include="Internal\InitiateSagaSubscription.cs" />
     <Compile Include="Internal\IPublicationTypeInfo.cs" />
     <Compile Include="Saga\ISagaRepository.cs" />
@@ -111,8 +111,8 @@
     <Compile Include="Internal\NullEndpoint.cs" />
     <Compile Include="Internal\PoisonEndpointDecorator.cs" />
     <Compile Include="Internal\PublicationBase.cs" />
-    <Compile Include="Internal\SagaDispatcher.cs" />
-    <Compile Include="Internal\SagaDispatcherBase.cs" />
+    <Compile Include="Internal\Dispatchers\SagaDispatcher.cs" />
+    <Compile Include="Internal\Dispatchers\SagaDispatcherBase.cs" />
     <Compile Include="Internal\SagaSubscription.cs" />
     <Compile Include="Internal\TypeInfo.cs" />
     <Compile Include="Saga\ISaga.cs" />
@@ -143,11 +143,11 @@
     <Compile Include="Services\Timeout\TimeoutService.cs" />
     <Compile Include="Transports\HttpEndpoint.cs" />
     <Compile Include="Transports\LoopbackEndpoint.cs" />
-    <Compile Include="Internal\MessageTypeDispatcher.cs" />
+    <Compile Include="Internal\Dispatchers\MessageTypeDispatcher.cs" />
     <Compile Include="Internal\MessageTypePublication.cs" />
     <Compile Include="Internal\MessageTypeSubscription.cs" />
     <Compile Include="Internal\Produces.cs" />
-    <Compile Include="Internal\SelectiveComponentDispatcher.cs" />
+    <Compile Include="Internal\Dispatchers\SelectiveComponentDispatcher.cs" />
     <Compile Include="Internal\SpecialLoggers.cs" />
     <Compile Include="Internal\TypeInfoCache.cs" />
     <Compile Include="Internal\SubscriptionTypeInfo.cs" />
@@ -171,15 +171,15 @@
     <Compile Include="Services\HealthMonitoring\HealthClient.cs" />
     <Compile Include="Internal\GenericComponent.cs" />
     <Compile Include="IServiceBusRequest.cs" />
-    <Compile Include="Internal\MessageDispatcher.cs" />
-    <Compile Include="Internal\CorrelationIdDispatcher.cs" />
+    <Compile Include="Internal\Dispatchers\MessageDispatcher.cs" />
+    <Compile Include="Internal\Dispatchers\CorrelationIdDispatcher.cs" />
     <Compile Include="Internal\EndpointResolver.cs" />
     <Compile Include="Formatters\BinaryBodyFormatter.cs" />
     <Compile Include="Formatters\IFormattedBody.cs" />
     <Compile Include="Exceptions\EndpointException.cs" />
     <Compile Include="IHostedService.cs" />
     <Compile Include="IEndpoint.cs" />
-    <Compile Include="Internal\IMessageDispatcher.cs" />
+    <Compile Include="Internal\Dispatchers\IMessageDispatcher.cs" />
     <Compile Include="IMessageContext.cs" />
     <Compile Include="IObjectBuilder.cs" />
     <Compile Include="IServiceBus.cs" />
@@ -217,6 +217,9 @@
     <Compile Include="Util\CombGuid.cs" />
     <Compile Include="Util\Guard.cs" />
     <Compile Include="Util\Tuple.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="ServiceBus.NullServiceBus.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
