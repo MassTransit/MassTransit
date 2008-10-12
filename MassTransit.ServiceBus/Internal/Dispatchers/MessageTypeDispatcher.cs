@@ -110,15 +110,7 @@ namespace MassTransit.ServiceBus.Internal
 
         public T GetDispatcher<T>() where T : class
         {
-            Type typeOfT = typeof (T);
-
-            if (!typeOfT.IsGenericType)
-                return null;
-
-            if (typeOfT.GetGenericTypeDefinition() != typeof(MessageDispatcher<>))
-                return null;
-
-            return (T) GetMessageDispatcher(typeOfT.GetGenericArguments()[0]);
+            return GetDispatcher<T>(typeof (T));
         }
 
         public T GetDispatcher<T>(Type type) where T : class
