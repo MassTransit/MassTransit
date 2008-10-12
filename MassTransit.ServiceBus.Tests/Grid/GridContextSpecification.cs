@@ -19,14 +19,14 @@ namespace MassTransit.ServiceBus.Tests.Grid
     public abstract class GridContextSpecification :
         Specification
     {
-        protected readonly DefaultMassTransitContainer _container = new DefaultMassTransitContainer("castle.xml");
+        protected readonly DefaultMassTransitContainer _container = new DefaultMassTransitContainer(@"grid\grid.castle.xml");
         protected IServiceBus _bus;
         protected IObjectBuilder _builder;
         protected IEndpointResolver _endpointResolver;
 
         static GridContextSpecification()
         {
-            log4net.Config.XmlConfigurator.ConfigureAndWatch(new FileInfo("log4net.config"));
+            log4net.Config.XmlConfigurator.ConfigureAndWatch(new FileInfo(@"grid\grid.log4net.config"));
         }
 
         protected override void Before_each()
