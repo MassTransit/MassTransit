@@ -55,10 +55,10 @@ namespace MassTransit.ServiceBus.Tests
 
             Hashtable t = new Hashtable();
 
-            SetupResult.For(builder.Build<RequestHandler>()).IgnoreArguments().Return(rh);
-            SetupResult.For(builder.Build<RequestHandler>(t)).IgnoreArguments().Return(rh);
-            SetupResult.For(builder.Build<SelectiveHandler>()).IgnoreArguments().Return(sh);
-            SetupResult.For(builder.Build<SelectiveHandler>(t)).IgnoreArguments().Return(sh);
+            SetupResult.For(builder.GetInstance<RequestHandler>()).IgnoreArguments().Return(rh);
+            SetupResult.For(builder.GetInstance<RequestHandler>(t)).IgnoreArguments().Return(rh);
+            SetupResult.For(builder.GetInstance<SelectiveHandler>()).IgnoreArguments().Return(sh);
+            SetupResult.For(builder.GetInstance<SelectiveHandler>(t)).IgnoreArguments().Return(sh);
 
             ReplayAll();
         }

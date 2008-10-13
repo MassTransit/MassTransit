@@ -46,22 +46,21 @@ namespace MassTransit.ServiceBus.Configuration
 
         public IServiceBus Build()
         {
-            IEndpoint endpointToListenOn = ResolvesDependenciesFrom.Build<IEndpointResolver>().Resolve(ListensOn);
+            IEndpoint endpointToListenOn = ResolvesDependenciesFrom.GetInstance<IEndpointResolver>().Resolve(ListensOn);
             //commanded on
             //competing consumer
             //serialization stuff
-            ISubscriptionCache cache = ResolvesDependenciesFrom.Build<ISubscriptionCache>(this.Subcriptions.SubscriptionStore);
+            var cache = (ISubscriptionCache)ResolvesDependenciesFrom.GetInstance(this.Subcriptions.SubscriptionStore);
             //ResolvesDependenciesFrom.Register(this.Subcriptions.SubscriptionClient); //set the uri
             IServiceBus bus = new ServiceBus(endpointToListenOn, ResolvesDependenciesFrom, cache);
             //ResolvesDependenciesFrom.Register<IServiceBus>(bus, Name);
             
             if (this.HasAHeartBeat)
             {
-                ResolvesDependenciesFrom.Register<HealthClient>();
                 IDictionary args = new Hashtable();
                 args.Add("bus", bus);
                 args.Add("heartBeatInterval", this.HeartBeatInterval);
-                HealthClient hc = ResolvesDependenciesFrom.Build<HealthClient>(args);
+                var hc = ResolvesDependenciesFrom.GetInstance<HealthClient>(args);
                 //hc.Start();
             }
 

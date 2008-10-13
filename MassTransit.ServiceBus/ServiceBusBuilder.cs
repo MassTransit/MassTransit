@@ -58,7 +58,7 @@ namespace MassTransit.ServiceBus
 				if (_objectBuilder == null)
 					_endpointResolver = new EndpointResolver();
 				else
-					_endpointResolver = _objectBuilder.Build<IEndpointResolver>();
+                    _endpointResolver = _objectBuilder.GetInstance<IEndpointResolver>();
 			}
 
 			return _endpointResolver;
@@ -71,7 +71,7 @@ namespace MassTransit.ServiceBus
 				if (_objectBuilder == null)
 					_cache = new LocalSubscriptionCache();
 				else
-					_cache = _objectBuilder.Build<ISubscriptionCache>();
+                    _cache = _objectBuilder.GetInstance<ISubscriptionCache>();
 			}
 
 			return _cache;

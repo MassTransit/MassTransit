@@ -51,6 +51,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\libs\log4net.dll</HintPath>
     </Reference>
+    <Reference Include="Magnum.Common, Version=0.1.0.75, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\libs\Magnum.Common.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.Practices.ServiceLocation, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\libs\Microsoft.Practices.ServiceLocation.dll</HintPath>
@@ -117,6 +121,18 @@
     <Compile Include="PublishToConsumer_Specs.cs" />
     <Compile Include="RequestReply_Specs.cs" />
     <Compile Include="ResourceThreadPool_Specs.cs" />
+    <Compile Include="Saga\RegisterUser\Messages\CorrelatedMessage.cs" />
+    <Compile Include="Saga\RegisterUser\Messages\RegisterUser.cs" />
+    <Compile Include="Saga\RegisterUser\Messages\SendUserVerificationEmail.cs" />
+    <Compile Include="Saga\RegisterUser\Messages\SendValidationEmail.cs" />
+    <Compile Include="Saga\RegisterUser\Messages\UserRegistrationComplete.cs" />
+    <Compile Include="Saga\RegisterUser\Messages\UserRegistrationPending.cs" />
+    <Compile Include="Saga\RegisterUser\Messages\UserValidated.cs" />
+    <Compile Include="Saga\RegisterUser\Messages\UserVerificationEmailSent.cs" />
+    <Compile Include="Saga\RegisterUser\RegisterUserController.cs" />
+    <Compile Include="Saga\RegisterUser\RegisterUserSaga.cs" />
+    <Compile Include="Saga\RegisterUser\RegisterUser_Specs.cs" />
+    <Compile Include="Saga\SagaTestContext.cs" />
     <Compile Include="Specification.cs" />
     <Compile Include="SubscriptionManagerContext.cs" />
     <Compile Include="Subscriptions\As_an_AddSubscriptionHandler.cs" />
@@ -164,6 +180,7 @@
     <None Include="Grid\grid.log4net.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Include="Saga\App.config" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Grid\grid.castle.xml">
@@ -173,6 +190,13 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="multicast.castle.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <EmbeddedResource Include="Saga\RegisterUser\RegisterUserSaga.hbm.xml" />
+    <Content Include="Saga\saga.nhibernate.cfg.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Saga\saga.tests.castle.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="subscriptions.castle.xml">

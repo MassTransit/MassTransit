@@ -12,31 +12,13 @@
 /// specific language governing permissions and limitations under the License.
 namespace MassTransit.ServiceBus
 {
-	using System;
 	using System.Collections;
 	using Microsoft.Practices.ServiceLocation;
 
     public interface IObjectBuilder :
         IServiceLocator
 	{
-		/// <summary>
-		/// Build an object of the specified type
-		/// </summary>
-		/// <param name="objectType">The type of object to build</param>
-		/// <returns>The object that was built</returns>
-		object Build(Type objectType);
-
-		/// <summary>
-		/// Build an object of the specified type
-		/// </summary>
-		/// <typeparam name="T"></typeparam>
-		/// <returns></returns>
-		T Build<T>() where T : class;
-
-
-        T Build<T>(Type component) where T : class;
-
-	    T Build<T>(IDictionary arguments);
+        T GetInstance<T>(IDictionary arguments);
 
 		/// <summary>
 		/// Releases an object back to the container
@@ -44,8 +26,5 @@ namespace MassTransit.ServiceBus
 		/// <typeparam name="T"></typeparam>
 		/// <param name="obj"></param>
 		void Release<T>(T obj);
-
-        void Register<T>() where T : class;
-        //void Register<T>(Type t);
 	}
 }
