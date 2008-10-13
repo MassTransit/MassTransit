@@ -13,13 +13,14 @@
 namespace MassTransit.ServiceBus.Tests.Grid
 {
     using System.IO;
+    using MassTransit.Grid;
     using MassTransit.ServiceBus.Internal;
     using WindsorIntegration;
 
     public abstract class GridContextSpecification :
         Specification
     {
-        protected readonly DefaultMassTransitContainer _container = new DefaultMassTransitContainer(@"grid\grid.castle.xml");
+        protected DefaultMassTransitContainer _container;
         protected IServiceBus _bus;
         protected IObjectBuilder _builder;
         protected IEndpointResolver _endpointResolver;
@@ -31,9 +32,21 @@ namespace MassTransit.ServiceBus.Tests.Grid
 
         protected override void Before_each()
         {
+            _container = new DefaultMassTransitContainer(@"grid\grid.castle.xml");
+            _container.AddComponent<ExceptionalWorker>();
+            _container.AddComponent<FactorLongNumbersTask>();
+            _container.AddComponent<SubTaskWorker<ExceptionalWorker, FactorLongNumber,  LongNumberFactored>>();
+            _container.AddComponent<SubTaskWorker<FactorLongNumberWorker, FactorLongNumber,  LongNumberFactored>>();
+
             _bus = _container.Resolve<IServiceBus>();
             _builder = _container.Resolve<IObjectBuilder>();
             _endpointResolver = _container.Resolve<IEndpointResolver>();
+        }
+
+        protected override void After_each()
+        {
+            _container.Dispose();
+            _container = null;
         }
     }
 }
