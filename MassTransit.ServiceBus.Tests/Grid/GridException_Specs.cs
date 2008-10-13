@@ -17,7 +17,6 @@ namespace MassTransit.ServiceBus.Tests.Grid
     using log4net;
     using MassTransit.Grid;
     using NUnit.Framework;
-    using NUnit.Framework.SyntaxHelpers;
 
     [TestFixture]
     public class When_a_worker_throws_an_exception :
@@ -25,7 +24,7 @@ namespace MassTransit.ServiceBus.Tests.Grid
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(When_a_worker_throws_an_exception));
 
-        private FactorLongNumbers _factorLongNumbers;
+        private FactorLongNumbersTask _factorLongNumbers;
         private ManualResetEvent _complete;
         private ManualResetEvent _fault;
 
@@ -33,7 +32,7 @@ namespace MassTransit.ServiceBus.Tests.Grid
         {
             base.Before_each();
 
-            _factorLongNumbers = new FactorLongNumbers();
+            _factorLongNumbers = new FactorLongNumbersTask();
 
             _factorLongNumbers.Add(27);
 
@@ -54,8 +53,8 @@ namespace MassTransit.ServiceBus.Tests.Grid
             _container.AddComponent<ExceptionalWorker>();
             _bus.AddComponent<SubTaskWorker<ExceptionalWorker, FactorLongNumber, LongNumberFactored>>();
 
-            DistributedTaskController<FactorLongNumbers, FactorLongNumber, LongNumberFactored> distributedTaskController =
-                new DistributedTaskController<FactorLongNumbers, FactorLongNumber, LongNumberFactored>(_bus, _endpointResolver, _factorLongNumbers);
+            DistributedTaskController<FactorLongNumbersTask, FactorLongNumber, LongNumberFactored> distributedTaskController =
+                new DistributedTaskController<FactorLongNumbersTask, FactorLongNumber, LongNumberFactored>(_bus, _endpointResolver, _factorLongNumbers);
 
             distributedTaskController.Start();
 

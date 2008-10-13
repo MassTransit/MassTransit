@@ -24,14 +24,14 @@ namespace MassTransit.ServiceBus.Tests.Grid
     public class As_a_developer_that_needs_to_distribute_a_task_across_multiple_servers_for_parallel_processing :
         GridContextSpecification
     {
-        private FactorLongNumbers _factorLongNumbers;
+        private FactorLongNumbersTask _factorLongNumbers;
         private ManualResetEvent _complete;
 
         protected override void Before_each()
         {
             base.Before_each();
 
-            _factorLongNumbers = new FactorLongNumbers();
+            _factorLongNumbers = new FactorLongNumbersTask();
 
             Random random = new Random();
 
@@ -54,8 +54,8 @@ namespace MassTransit.ServiceBus.Tests.Grid
 
             _bus.AddComponent<SubTaskWorker<FactorLongNumberWorker, FactorLongNumber, LongNumberFactored>>();
 
-            DistributedTaskController<FactorLongNumbers, FactorLongNumber, LongNumberFactored> distributedTaskController =
-                new DistributedTaskController<FactorLongNumbers, FactorLongNumber, LongNumberFactored>(_bus, _endpointResolver, _factorLongNumbers);
+            DistributedTaskController<FactorLongNumbersTask, FactorLongNumber, LongNumberFactored> distributedTaskController =
+                new DistributedTaskController<FactorLongNumbersTask, FactorLongNumber, LongNumberFactored>(_bus, _endpointResolver, _factorLongNumbers);
 
             distributedTaskController.Start();
 

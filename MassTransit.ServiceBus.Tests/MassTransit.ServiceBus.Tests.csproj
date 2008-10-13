@@ -87,7 +87,7 @@
     <Compile Include="Fault_Specs.cs" />
     <Compile Include="Formatters\XmlBodyFormatterTests.cs" />
     <Compile Include="Grid\FactorLongNumber.cs" />
-    <Compile Include="Grid\FactorLongNumbers.cs" />
+    <Compile Include="Grid\FactorLongNumbersTask.cs" />
     <Compile Include="Grid\FactorLongNumberWorker.cs" />
     <Compile Include="Grid\GridContextSpecification.cs" />
     <Compile Include="Grid\GridException_Specs.cs" />
