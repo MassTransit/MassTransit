@@ -17,6 +17,7 @@ namespace MassTransit.ServiceBus.Tests.Grid
     using log4net;
     using MassTransit.Grid;
     using NUnit.Framework;
+    using NUnit.Framework.SyntaxHelpers;
 
     [TestFixture]
     public class When_a_worker_throws_an_exception :
@@ -50,25 +51,15 @@ namespace MassTransit.ServiceBus.Tests.Grid
         [Test]
         public void I_want_to_be_able_to_define_a_distributed_task_and_have_it_processed()
         {
-            _container.AddComponent<ExceptionalWorker>();
             _bus.AddComponent<SubTaskWorker<ExceptionalWorker, FactorLongNumber, LongNumberFactored>>();
 
-            DistributedTaskController<FactorLongNumbersTask, FactorLongNumber, LongNumberFactored> distributedTaskController =
+            var distributedTaskController =
                 new DistributedTaskController<FactorLongNumbersTask, FactorLongNumber, LongNumberFactored>(_bus, _endpointResolver, _factorLongNumbers);
 
             distributedTaskController.Start();
 
             Assert.That(_fault.WaitOne(TimeSpan.FromSeconds(10), true), Is.True, "Timeout waiting for distributed task to fail");
             Assert.That(_complete.WaitOne(TimeSpan.Zero, false), Is.False, "Task should not have completed");
-        }
-    }
-
-    public class ExceptionalWorker :
-        ISubTaskWorker<FactorLongNumber, LongNumberFactored>
-    {
-        public void ExecuteTask(FactorLongNumber task, Action<LongNumberFactored> result)
-        {
-            throw new System.NotImplementedException();
         }
     }
 }
