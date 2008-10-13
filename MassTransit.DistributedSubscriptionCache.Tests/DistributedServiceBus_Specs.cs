@@ -5,75 +5,72 @@ namespace MassTransit.DistributedSubscriptionCache.Tests
 	using NUnit.Framework;
 	using NUnit.Framework.SyntaxHelpers;
 	using ServiceBus;
+	using ServiceBus.Tests;
 
-	[TestFixture]
-	public class When_multiple_service_bus_instances_share_a_distributed_subscription_cache
+    [TestFixture]
+	public class When_multiple_service_bus_instances_share_a_distributed_subscription_cache :
+        LocalAndRemoteTestContext
 	{
 		[Test]
 		public void Correlated_messages_should_be_delivered()
 		{
-			using (DistributedQueueContext dqc = new DistributedQueueContext())
-			{
-				Guid correlationId = Guid.NewGuid();
+            Guid correlationId = Guid.NewGuid();
+            CorrelatedConsumer consumer = new CorrelatedConsumer(correlationId);
 
-				CorrelatedConsumer consumer = new CorrelatedConsumer(correlationId);
+            RemoteBus.Subscribe(consumer);
 
-				dqc.RemoteServiceBus.Subscribe(consumer);
+            var dm = new CorrelatedMessage(correlationId);
 
-				CorrelatedMessage dm = new CorrelatedMessage(correlationId);
+            LocalBus.Publish(dm);
 
-				dqc.ServiceBus.Publish(dm);
-
-				Assert.That(consumer.Received.WaitOne(TimeSpan.FromSeconds(6), true), Is.True,
+			Assert.That(consumer.Received.WaitOne(TimeSpan.FromSeconds(6), true), Is.True,
 				            "Timeout expired waiting for message");
-			}
+
 		}
 
 		[Test]
 		public void Correlated_messages_should_be_delivered_to_both_correlated_and_regular_consumers()
 		{
-			using (DistributedQueueContext dqc = new DistributedQueueContext())
-			{
+
 				ManualResetEvent _received = new ManualResetEvent(false);
 
-				dqc.RemoteServiceBus.Subscribe<CorrelatedMessage>(
+				RemoteBus.Subscribe<CorrelatedMessage>(
 					delegate { _received.Set(); });
 
 				Guid correlationId = Guid.NewGuid();
 
 				CorrelatedConsumer consumer = new CorrelatedConsumer(correlationId);
 
-				dqc.RemoteServiceBus.Subscribe(consumer);
+				RemoteBus.Subscribe(consumer);
 
 				CorrelatedMessage dm = new CorrelatedMessage(correlationId);
 
-				dqc.ServiceBus.Publish(dm);
+				LocalBus.Publish(dm);
 
 				Assert.That(consumer.Received.WaitOne(TimeSpan.FromSeconds(6), true), Is.True,
 				            "Timeout expired waiting for message");
 
 				Assert.That(_received.WaitOne(TimeSpan.FromSeconds(6), true), Is.True,
 				            "Timeout expired waiting for message");
-			}
+			
 		}
 
 		[Test]
 		public void Regular_messages_should_be_delivered()
 		{
-			using (DistributedQueueContext dqc = new DistributedQueueContext())
-			{
+			
 				ManualResetEvent _received = new ManualResetEvent(false);
 
-				dqc.RemoteServiceBus.Subscribe<PublishedMessage>(
+				RemoteBus.Subscribe<PublishedMessage>(
 					delegate { _received.Set(); });
 
 				PublishedMessage dm = new PublishedMessage();
 
-				dqc.ServiceBus.Publish(dm);
+				LocalBus.Publish(dm);
 
 				Assert.That(_received.WaitOne(TimeSpan.FromSeconds(6), true), Is.True,
 				            "Timeout expired waiting for message");
-			}
+			
 		}
 
 		[Serializable]
