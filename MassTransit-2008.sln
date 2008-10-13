@@ -41,13 +41,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.WindsorIntegrat
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Containers", "Containers", "{6C61507E-FF16-45C8-8FE4-350069D9B4C1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Saga.Tests", "MassTransit.Saga.Tests\MassTransit.Saga.Tests.csproj", "{80263B2F-CDCC-4D40-9CF6-1578B7FA0E45}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{94889DE3-F629-4F21-ABC1-801BC915ED29}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HeavyLoad", "Samples\HeavyLoad\HeavyLoad\HeavyLoad.csproj", "{AA8820CC-5DFE-4867-8C9B-82320C9E4BE2}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Grid.Tests", "MassTransit.Grid.Tests\MassTransit.Grid.Tests.csproj", "{FEC77DEA-4F86-4889-AEAC-79FA4DD06AD4}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.StructureMapIntegration", "Containers\MassTransit.StructureMapIntegration\MassTransit.StructureMapIntegration.csproj", "{F5E67502-2B30-484C-88C3-97710291F5AA}"
 EndProject
@@ -123,18 +119,10 @@ Global
 		{41A1164D-7E70-41B4-912B-E9BEF75C769F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{41A1164D-7E70-41B4-912B-E9BEF75C769F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{41A1164D-7E70-41B4-912B-E9BEF75C769F}.Release|Any CPU.Build.0 = Release|Any CPU
-		{80263B2F-CDCC-4D40-9CF6-1578B7FA0E45}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{80263B2F-CDCC-4D40-9CF6-1578B7FA0E45}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{80263B2F-CDCC-4D40-9CF6-1578B7FA0E45}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{80263B2F-CDCC-4D40-9CF6-1578B7FA0E45}.Release|Any CPU.Build.0 = Release|Any CPU
 		{AA8820CC-5DFE-4867-8C9B-82320C9E4BE2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{AA8820CC-5DFE-4867-8C9B-82320C9E4BE2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AA8820CC-5DFE-4867-8C9B-82320C9E4BE2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AA8820CC-5DFE-4867-8C9B-82320C9E4BE2}.Release|Any CPU.Build.0 = Release|Any CPU
-		{FEC77DEA-4F86-4889-AEAC-79FA4DD06AD4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{FEC77DEA-4F86-4889-AEAC-79FA4DD06AD4}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{FEC77DEA-4F86-4889-AEAC-79FA4DD06AD4}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{FEC77DEA-4F86-4889-AEAC-79FA4DD06AD4}.Release|Any CPU.Build.0 = Release|Any CPU
 		{F5E67502-2B30-484C-88C3-97710291F5AA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{F5E67502-2B30-484C-88C3-97710291F5AA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F5E67502-2B30-484C-88C3-97710291F5AA}.Release|Any CPU.ActiveCfg = Release|Any CPU
