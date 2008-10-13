@@ -123,7 +123,7 @@ namespace MassTransit.ServiceBus.MSMQ.Tests
 		public void The_message_should_be_delivered_to_a_remote_subscriber_with_a_reply()
 		{
 		    IObjectBuilder obj = _mocks.DynamicMock<IObjectBuilder>();
-		    SetupResult.For(obj.Build<IEndpoint>(new Hashtable())).Return(_mocks.DynamicMock<IEndpoint>());
+		    SetupResult.For(obj.GetInstance<IEndpoint>(new Hashtable())).Return(_mocks.DynamicMock<IEndpoint>());
             _mocks.ReplayAll();
 
 			using (QueueTestContext qtc = new QueueTestContext(obj))

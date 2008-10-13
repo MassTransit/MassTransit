@@ -10,26 +10,24 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.ServiceBus.Internal
+namespace MassTransit.ServiceBus.Tests.Saga.RegisterUser.Messages
 {
-    using System.Collections;
+    using System;
 
-    public class ComponentDispatcherBase<TComponent> where TComponent : class
+    [Serializable]
+    public class CorrelatedMessage :
+        CorrelatedBy<Guid>
     {
-        protected readonly IDispatcherContext _context;
-        private readonly Hashtable _arguments;
+        private readonly Guid _correlationId;
 
-        public ComponentDispatcherBase(IDispatcherContext context)
+        public CorrelatedMessage(Guid correlationId)
         {
-            _context = context;
-            _arguments = new Hashtable {{"Bus", _context.Bus}};
+            _correlationId = correlationId;
         }
 
-        protected TComponent BuildComponent()
+        public Guid CorrelationId
         {
-            TComponent component = _context.Builder.GetInstance<TComponent>(_arguments);
-
-            return component;
+            get { return _correlationId; }
         }
     }
 }

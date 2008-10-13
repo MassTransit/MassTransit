@@ -18,22 +18,7 @@ namespace MassTransit.WindsorIntegration
             _container = container;
         }
 
-        public object Build(Type objectType)
-        {
-            return _container.Resolve(objectType);
-        }
-
-        public T Build<T>() where T : class
-        {
-            return _container.Resolve<T>();
-        }
-
-        public T Build<T>(Type component) where T : class
-        {
-        	return _container.Resolve(component) as T;
-        }
-
-        public T Build<T>(IDictionary arguments)
+        public T GetInstance<T>(IDictionary arguments)
         {
             return _container.Resolve<T>(arguments);
         }
@@ -43,13 +28,6 @@ namespace MassTransit.WindsorIntegration
         	_container.ReleaseComponent(obj);
         }
 
-        public void Register<T>() where  T : class
-        {
-            if (!_container.HasComponent(typeof (T)))
-            {
-                _container.AddComponent(typeof(T).Name, typeof(T), LifestyleType.Transient);
-            }
-        }
         public object GetService(Type serviceType)
         {
             return _container.Resolve(serviceType);

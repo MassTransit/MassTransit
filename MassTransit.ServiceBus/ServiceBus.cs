@@ -224,8 +224,6 @@ namespace MassTransit.ServiceBus
 
         public void AddComponent<TComponent>() where TComponent : class
         {
-            _objectBuilder.Register<TComponent>();
-
             ISubscriptionTypeInfo info = _typeInfoCache.GetSubscriptionTypeInfo<TComponent>();
             info.AddComponent(_dispatcherContext);
         }

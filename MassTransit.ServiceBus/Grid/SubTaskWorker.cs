@@ -36,7 +36,7 @@ namespace MassTransit.Grid
 
 		public void Consume(ExecuteSubTask<TInput> message)
 		{
-			TWorker worker = Builder.Build<TWorker>();
+            TWorker worker = Builder.GetInstance<TWorker>();
 			try
 			{
 				Interlocked.Increment(ref _activeTaskCount);

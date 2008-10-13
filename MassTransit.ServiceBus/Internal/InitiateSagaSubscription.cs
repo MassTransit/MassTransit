@@ -53,7 +53,7 @@ namespace MassTransit.ServiceBus.Internal
 
             if (dispatcher == null)
             {
-                ISagaRepository<TSaga> repository = context.Builder.Build<ISagaRepository<TSaga>>();
+                ISagaRepository<TSaga> repository = context.Builder.GetInstance<ISagaRepository<TSaga>>();
 
                 dispatcher = new InitiateSagaDispatcher<TSaga, TMessage>(context.Bus, context.Builder, repository);
 

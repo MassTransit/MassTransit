@@ -54,8 +54,8 @@ namespace MassTransit.ServiceBus.Tests
         {
             PingHandler ph = new PingHandler();
 
-            SetupResult.For(obj.Build<PingHandler>()).Return(ph);
-            SetupResult.For(obj.Build<PingHandler>(new Hashtable())).IgnoreArguments().Return(ph);
+            SetupResult.For(obj.GetInstance<PingHandler>()).Return(ph);
+            SetupResult.For(obj.GetInstance<PingHandler>(new Hashtable())).IgnoreArguments().Return(ph);
 
             ReplayAll();
 
