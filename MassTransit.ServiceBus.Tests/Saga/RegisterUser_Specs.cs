@@ -18,14 +18,24 @@ namespace MassTransit.ServiceBus.Tests.Saga.RegisterUser
 
     [TestFixture]
     public class When_a_unknown_user_registers :
-        SagaTestContext
+        LocalAndRemoteTestContext
     {
+        protected override void Before_each()
+        {
+            
+        }
+
+        protected override void After_each()
+        {
+            
+        }
+
         [Test]
         public void The_user_should_be_pending()
         {
-            Stopwatch timer = Stopwatch.StartNew();
+            var timer = Stopwatch.StartNew();
 
-            RegisterUserController controller = new RegisterUserController(LocalBus);
+            var controller = new RegisterUserController(LocalBus);
 
             bool complete = controller.RegisterUser("username", "password", "Display Name", "user@domain.com");
 
