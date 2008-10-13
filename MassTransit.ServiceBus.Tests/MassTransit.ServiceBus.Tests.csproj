@@ -180,7 +180,6 @@
     <None Include="Grid\grid.log4net.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="Saga\App.config" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Grid\grid.castle.xml">
