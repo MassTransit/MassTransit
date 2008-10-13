@@ -14,6 +14,7 @@ namespace MassTransit.ServiceBus.Tests.Grid
 {
     using System;
 
+    //TODO: Is this a message
     [Serializable]
     public class FactorLongNumber
     {

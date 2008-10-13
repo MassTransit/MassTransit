@@ -18,13 +18,13 @@ namespace MassTransit.ServiceBus.Tests.Grid
     using MassTransit.Grid;
     using Util;
 
-    public class FactorLongNumbers :
-        IDistributedTask<FactorLongNumbers, FactorLongNumber, LongNumberFactored>
+    public class FactorLongNumbersTask :
+        IDistributedTask<FactorLongNumbersTask, FactorLongNumber, LongNumberFactored>
     {
         private readonly Dictionary<int, IList<long>> _results = new Dictionary<int, IList<long>>();
         private readonly List<long> _values = new List<long>();
-        private Action<FactorLongNumbers> _completed = delegate { };
-        private Action<FactorLongNumbers, long, Exception> _exceptionOccurred = delegate { };
+        private Action<FactorLongNumbersTask> _completed = delegate { };
+        private Action<FactorLongNumbersTask, long, Exception> _exceptionOccurred = delegate { };
 
         public int SubTaskCount
         {
@@ -58,7 +58,7 @@ namespace MassTransit.ServiceBus.Tests.Grid
             _exceptionOccurred(this, subTaskId, ex);
         }
 
-        public void WhenCompleted(Action<FactorLongNumbers> action)
+        public void WhenCompleted(Action<FactorLongNumbersTask> action)
         {
             _completed += action;
         }
@@ -68,7 +68,7 @@ namespace MassTransit.ServiceBus.Tests.Grid
             _values.Add(value);
         }
 
-        public void WhenExceptionOccurs(Action<FactorLongNumbers, long, Exception> action)
+        public void WhenExceptionOccurs(Action<FactorLongNumbersTask, long, Exception> action)
         {
             _exceptionOccurred += action;
         }

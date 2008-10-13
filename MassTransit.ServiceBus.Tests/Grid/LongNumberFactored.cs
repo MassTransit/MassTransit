@@ -15,6 +15,7 @@ namespace MassTransit.ServiceBus.Tests.Grid
     using System;
     using System.Collections.Generic;
 
+    //TODO: Is this a message?
     [Serializable]
     public class LongNumberFactored
     {
