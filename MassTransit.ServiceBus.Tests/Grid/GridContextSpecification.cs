@@ -14,39 +14,30 @@ namespace MassTransit.ServiceBus.Tests.Grid
 {
     using System.IO;
     using MassTransit.Grid;
-    using MassTransit.ServiceBus.Internal;
-    using WindsorIntegration;
 
     public abstract class GridContextSpecification :
-        Specification
+        LocalAndRemoteTestContext
     {
-        protected DefaultMassTransitContainer _container;
-        protected IServiceBus _bus;
-        protected IObjectBuilder _builder;
-        protected IEndpointResolver _endpointResolver;
-
         static GridContextSpecification()
         {
             log4net.Config.XmlConfigurator.ConfigureAndWatch(new FileInfo(@"grid\grid.log4net.config"));
         }
 
+        protected override string GetCastleConfigurationFile()
+        {
+            return @"grid\grid.castle.xml";
+        }
         protected override void Before_each()
         {
-            _container = new DefaultMassTransitContainer(@"grid\grid.castle.xml");
-            _container.AddComponent<ExceptionalWorker>();
-            _container.AddComponent<FactorLongNumbersTask>();
-            _container.AddComponent<SubTaskWorker<ExceptionalWorker, FactorLongNumber,  LongNumberFactored>>();
-            _container.AddComponent<SubTaskWorker<FactorLongNumberWorker, FactorLongNumber,  LongNumberFactored>>();
-
-            _bus = _container.Resolve<IServiceBus>();
-            _builder = _container.Resolve<IObjectBuilder>();
-            _endpointResolver = _container.Resolve<IEndpointResolver>();
+            Container.AddComponent<ExceptionalWorker>();
+            Container.AddComponent<FactorLongNumbersTask>();
+            Container.AddComponent<SubTaskWorker<ExceptionalWorker, FactorLongNumber,  LongNumberFactored>>();
+            Container.AddComponent<SubTaskWorker<FactorLongNumberWorker, FactorLongNumber,  LongNumberFactored>>();
         }
 
         protected override void After_each()
         {
-            _container.Dispose();
-            _container = null;
+            
         }
     }
 }
