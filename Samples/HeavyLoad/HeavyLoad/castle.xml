@@ -6,7 +6,7 @@
 
 		<facility id="masstransit">
 
-			<bus id="main" endpoint="msmq://localhost/test_servicebus" />
+			<bus id="main" endpoint="msmq://localhost/mt_client" />
 
 			<transports>
 				<transport>MassTransit.ServiceBus.MSMQ.MsmqEndpoint, MassTransit.ServiceBus.MSMQ</transport>
