@@ -52,6 +52,19 @@ namespace SubscriptionManagerGUI
             _healthCache.UpdatedHealthInformation += HeartBeatRefreshNeeded;
         }
 
+        private void RemoveEvents()
+        {
+            _cache.OnAddSubscription -= SubscriptionAdded;
+            _cache.OnRemoveSubscription -= SubscriptionRemoved;
+
+            _timeoutRepository.TimeoutAdded -= TimeoutRefreshNeeded;
+            _timeoutRepository.TimeoutUpdated -= TimeoutRefreshNeeded;
+            _timeoutRepository.TimeoutRemoved -= TimeoutRefreshNeeded;
+
+            _healthCache.NewHealthInformation -= HeartBeatRefreshNeeded;
+            _healthCache.UpdatedHealthInformation -= HeartBeatRefreshNeeded;
+        }
+
         private void HeartBeatRefreshNeeded(HealthInformation obj)
         {
             ThreadSafeUpdate2 tsu = RefreshHealth;
@@ -191,6 +204,8 @@ namespace SubscriptionManagerGUI
             base.OnClosing(e);
 
             e.Cancel = false;
+
+            RemoveEvents();
         }
 
         #region Nested type: ThreadSafeTimeoutUpdate
