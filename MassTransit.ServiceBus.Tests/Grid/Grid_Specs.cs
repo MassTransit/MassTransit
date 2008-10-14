@@ -17,6 +17,7 @@ namespace MassTransit.ServiceBus.Tests.Grid
     using System.Text;
     using System.Threading;
     using MassTransit.Grid;
+    using MassTransit.ServiceBus.Internal;
     using NUnit.Framework;
     using NUnit.Framework.SyntaxHelpers;
 
@@ -50,12 +51,12 @@ namespace MassTransit.ServiceBus.Tests.Grid
         [Test]
         public void I_want_to_be_able_to_define_a_distributed_task_and_have_it_processed()
         {
-            _container.AddComponent<FactorLongNumberWorker>();
+            Container.AddComponent<FactorLongNumberWorker>();
 
-            _bus.AddComponent<SubTaskWorker<FactorLongNumberWorker, FactorLongNumber, LongNumberFactored>>();
+            RemoteBus.AddComponent<SubTaskWorker<FactorLongNumberWorker, FactorLongNumber, LongNumberFactored>>();
 
-            DistributedTaskController<FactorLongNumbersTask, FactorLongNumber, LongNumberFactored> distributedTaskController =
-                new DistributedTaskController<FactorLongNumbersTask, FactorLongNumber, LongNumberFactored>(_bus, _endpointResolver, _factorLongNumbers);
+            var distributedTaskController =
+                new DistributedTaskController<FactorLongNumbersTask, FactorLongNumber, LongNumberFactored>(RemoteBus, Container.Resolve<IEndpointResolver>(), _factorLongNumbers);
 
             distributedTaskController.Start();
 
