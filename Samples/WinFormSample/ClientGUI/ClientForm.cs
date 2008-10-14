@@ -149,6 +149,8 @@ namespace ClientGUI
                 _container = new DefaultMassTransitContainer("Client.Castle.xml");
 
                 _bus = _container.Resolve<IServiceBus>("client");
+
+                _container.AddComponent<TimeoutWatcher>();
                 _bus.AddComponent<TimeoutWatcher>();
             }
             catch (Exception ex)
