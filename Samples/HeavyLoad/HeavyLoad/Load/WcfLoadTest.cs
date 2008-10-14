@@ -36,6 +36,9 @@ namespace HeavyLoad.Load
 
 		public void Run(StopWatch stopWatch)
 		{
+		    _container.AddComponent<RequestConsumer>();
+		    _container.AddComponent<ResponseConsumer>();
+
 			_remoteBus.AddComponent<RequestConsumer>();
 			_localBus.AddComponent<ResponseConsumer>();
 
