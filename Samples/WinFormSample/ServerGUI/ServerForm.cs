@@ -50,6 +50,9 @@ namespace ServerGUI
 				_bus = _container.Resolve<IServiceBus>("server");
 				_controlBus = _container.Resolve<IServiceBus>("control");
 
+			    _container.AddComponent<UserAgentSession>();
+			    _container.AddComponent<TheAnswerMan>();
+
 				_bus.AddComponent<UserAgentSession>();
 				_bus.AddComponent<TheAnswerMan>();
 
