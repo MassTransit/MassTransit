@@ -20,6 +20,7 @@ namespace SubscriptionManagerGUI
     using MassTransit.ServiceBus.Services.HealthMonitoring;
     using MassTransit.ServiceBus.Services.Timeout;
     using MassTransit.ServiceBus.Subscriptions;
+    using MassTransit.ServiceBus.Subscriptions.ServerHandlers;
 
     public class SubscriptionManagerLifeCycle :
         HostedLifeCycle
@@ -39,15 +40,25 @@ namespace SubscriptionManagerGUI
 
             Container.AddComponent<ISubscriptionRepository, InMemorySubscriptionRepository>();
             Container.AddComponent<IHostedService, SubscriptionService>();
+            Container.AddComponent<AddSubscriptionHandler>();
+            Container.AddComponent<RemoveSubscriptionHandler>();
+            Container.AddComponent<CancelUpdatesHandler>();
+            Container.AddComponent<CacheUpdateRequestHandler>();
+
 
             Container.AddComponent<IHealthCache, LocalHealthCache>();
             Container.AddComponent<IHeartbeatTimer, InMemoryHeartbeatTimer>();
             Container.AddComponent<IHostedService, HealthService>();
+            Container.AddComponent<HeartbeatMonitor>();
+            Container.AddComponent<Investigator>();
+            Container.AddComponent<Reporter>();
 
             Container.AddComponent<ITimeoutRepository, InMemoryTimeoutRepository>();
             Container.AddComponent<IHostedService, TimeoutService>();
+            Container.AddComponent<ScheduleTimeoutConsumer>();
+            Container.AddComponent<CancelTimeoutConsumer>();
 
-            Container.AddComponent<Form, SubscriptionManagerForm>();
+            Container.AddComponent<Form, SubscriptionManagerForm>();            
         }
 
         public override void Stop()
