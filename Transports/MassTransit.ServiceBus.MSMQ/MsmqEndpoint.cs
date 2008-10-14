@@ -15,6 +15,7 @@ namespace MassTransit.ServiceBus.MSMQ
 	using System;
 	using System.Messaging;
 	using System.Runtime.Serialization;
+	using System.Threading;
 	using System.Transactions;
 	using Exceptions;
 	using Formatters;
@@ -32,7 +33,7 @@ namespace MassTransit.ServiceBus.MSMQ
 		private readonly string _queuePath;
 		private readonly Uri _uri;
 		private readonly string _machineName = Environment.MachineName;
-		private readonly MessageQueue _queue;
+		private MessageQueue _queue;
 		private bool _reliableMessaging = true;
 	    private bool _isLocal;
 	    private MessageQueueTransactionType _sendTransactionType;
@@ -335,7 +336,7 @@ namespace MassTransit.ServiceBus.MSMQ
 				_queue.Dispose();
 		}
 
-		private static void HandleVariousErrorCodes(MessageQueueErrorCode code, Exception ex)
+		private void HandleVariousErrorCodes(MessageQueueErrorCode code, Exception ex)
 		{
 			switch (code)
 			{
@@ -349,6 +350,13 @@ namespace MassTransit.ServiceBus.MSMQ
 				case MessageQueueErrorCode.QueueDeleted:
 					if (_log.IsErrorEnabled)
 						_log.Error("There was a problem accessing the queue", ex);
+
+
+                    // reopen the queue in case for some reason it disappeared
+                    _queue = Open(QueueAccessMode.SendAndReceive);
+
+                    // we don't want to spin the CPU completely
+                    Thread.Sleep(2000);
 					break;
 
 				case MessageQueueErrorCode.QueueNotFound:
@@ -356,6 +364,9 @@ namespace MassTransit.ServiceBus.MSMQ
 				case MessageQueueErrorCode.MachineNotFound:
 					if (_log.IsErrorEnabled)
 						_log.Error("The message queue does not exist", ex);
+
+                    // we don't want to spin the CPU completely
+			        Thread.Sleep(2000);
 					break;
 
 				case MessageQueueErrorCode.MessageAlreadyReceived:
@@ -366,7 +377,12 @@ namespace MassTransit.ServiceBus.MSMQ
 					break;
 
 				case MessageQueueErrorCode.InvalidHandle:
-					break;
+                    // reopen the queue in case for some reason it is lost (maybe msmq was restarted)
+                    _queue = Open(QueueAccessMode.SendAndReceive);
+
+                    // we don't want to spin the CPU completely
+                    Thread.Sleep(1000);
+                    break;
 
 				default:
 					if (_log.IsErrorEnabled)
