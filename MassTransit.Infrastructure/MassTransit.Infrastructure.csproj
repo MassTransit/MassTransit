@@ -88,16 +88,16 @@
     </Compile>
     <Compile Include="PersistentSubscription.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Repositories\PersistantSubscriptionStorage.cs" />
-    <Compile Include="Repositories\PersistantDeferredMessageRepository.cs" />
-    <Compile Include="Repositories\PersistantTimeoutStorage.cs" />
-    <Compile Include="ScheduledTimeout.cs" />
+    <Compile Include="Subscription\PersistantSubscriptionStorage.cs" />
+    <Compile Include="MessageDeferral\PersistantDeferredMessageRepository.cs" />
+    <Compile Include="Timeout\PersistantTimeoutStorage.cs" />
+    <Compile Include="Timeout\ScheduledTimeout.cs" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Mapping\DeferredMessage.hbm.xml" />
+    <EmbeddedResource Include="MessageDeferral\DeferredMessage.hbm.xml" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Mapping\ScheduledTimeout.hbm.xml" />
+    <EmbeddedResource Include="Timeout\ScheduledTimeout.hbm.xml" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\MassTransit.ServiceBus\MassTransit.ServiceBus.csproj">
@@ -106,7 +106,11 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Mapping\PersistentSubscription.hbm.xml" />
+    <EmbeddedResource Include="Subscription\PersistentSubscription.hbm.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Mapping\" />
+    <Folder Include="Repositories\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
