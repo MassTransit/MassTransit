@@ -114,11 +114,6 @@ namespace MassTransit.ServiceBus.NMS
 			}
 		}
 
-		public object Receive()
-		{
-			return Receive(TimeSpan.MaxValue);
-		}
-
 		public object Receive(TimeSpan timeout)
 		{
 			try
@@ -155,11 +150,6 @@ namespace MassTransit.ServiceBus.NMS
 			{
 				throw new EndpointException(this, "Receive error occured", ex);
 			}
-		}
-
-		public object Receive(Predicate<object> accept)
-		{
-			return Receive(TimeSpan.MaxValue, accept);
 		}
 
 		public object Receive(TimeSpan timeout, Predicate<object> accept)
@@ -207,46 +197,6 @@ namespace MassTransit.ServiceBus.NMS
 					return null;
 				}
 			}
-		}
-
-		public T Receive<T>() where T : class
-		{
-			return Receive<T>(TimeSpan.MaxValue);
-		}
-
-		public T Receive<T>(TimeSpan timeout) where T : class
-		{
-			return (T) Receive(timeout, delegate(object obj)
-			                            	{
-			                            		Type messageType = obj.GetType();
-
-			                            		if (messageType != typeof (T))
-			                            			return false;
-
-			                            		return true;
-			                            	});
-		}
-
-		public T Receive<T>(Predicate<T> accept) where T : class
-		{
-			return Receive(TimeSpan.MaxValue, accept);
-		}
-
-		public T Receive<T>(TimeSpan timeout, Predicate<T> accept) where T : class
-		{
-			return (T) Receive(timeout, delegate(object obj)
-			                            	{
-			                            		Type messageType = obj.GetType();
-
-			                            		if (messageType != typeof (T))
-			                            			return false;
-
-			                            		T message = obj as T;
-			                            		if (message == null)
-			                            			return false;
-
-			                            		return accept(message);
-			                            	});
 		}
 
 		public void Dispose()

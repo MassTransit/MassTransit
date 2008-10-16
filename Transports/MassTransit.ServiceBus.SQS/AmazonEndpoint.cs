@@ -6,13 +6,14 @@ namespace MassTransit.ServiceBus.SQS
 	using Amazon.SQS;
 	using Amazon.SQS.Model;
 	using Exceptions;
+	using Internal;
 	using log4net;
 
 	public class AmazonEndpoint :
 		IEndpoint
 	{
 		private static readonly ILog _log = LogManager.GetLogger(typeof (AmazonEndpoint));
-		private static readonly ILog _messageLog = LogManager.GetLogger("MassTransit.Messages");
+		private static readonly ILog _messageLog = SpecialLoggers.Messages;
 
 		private readonly BinaryFormatter _formatter = new BinaryFormatter();
 		private readonly Uri _uri;
@@ -88,19 +89,9 @@ namespace MassTransit.ServiceBus.SQS
 			}
 		}
 
-		public object Receive()
-		{
-			return Receive(TimeSpan.MaxValue);
-		}
-
 		public object Receive(TimeSpan timeout)
 		{
 			return Receive(timeout, delegate { return true; });
-		}
-
-		public object Receive(Predicate<object> accept)
-		{
-			return Receive(TimeSpan.FromSeconds(1), accept);
 		}
 
 		public object Receive(TimeSpan timeout, Predicate<object> accept)
@@ -142,66 +133,6 @@ namespace MassTransit.ServiceBus.SQS
 			{
 				throw new EndpointException(this, "Error receiving message from " + _queueName, ex);
 			}
-		}
-
-		public T Receive<T>() where T : class
-		{
-			return Receive<T>(TimeSpan.MaxValue);
-		}
-
-		public T Receive<T>(TimeSpan timeout) where T : class
-		{
-			try
-			{
-				return (T) Receive(timeout, delegate(object obj)
-				                            	{
-				                            		Type messageType = obj.GetType();
-
-				                            		if (messageType != typeof (T))
-				                            			return false;
-
-				                            		return true;
-				                            	});
-			}
-			catch (Exception ex)
-			{
-				string message = string.Format("Error on receive with Receive<{0}> accept", typeof (T).Name);
-				_log.Error(message, ex);
-			}
-
-			throw new Exception("Receive<T>(TimeSpan timeout) didn't error");
-		}
-
-		public T Receive<T>(Predicate<T> accept) where T : class
-		{
-			return Receive(TimeSpan.MaxValue, accept);
-		}
-
-		public T Receive<T>(TimeSpan timeout, Predicate<T> accept) where T : class
-		{
-			try
-			{
-				return (T) Receive(timeout, delegate(object obj)
-				                            	{
-				                            		Type messageType = obj.GetType();
-
-				                            		if (messageType != typeof (T))
-				                            			return false;
-
-				                            		T message = obj as T;
-				                            		if (message == null)
-				                            			return false;
-
-				                            		return accept(message);
-				                            	});
-			}
-			catch (Exception ex)
-			{
-				string message = string.Format("Error on receive with Predicate<{0}> accept", typeof (T).Name);
-				_log.Error(message, ex);
-			}
-
-			throw new Exception("Receive<T>(TimeSpan timeout, Predicate<T> accept) had a weird error");
 		}
 
 		public void Dispose()
