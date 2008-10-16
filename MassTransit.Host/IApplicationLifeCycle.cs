@@ -10,12 +10,15 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Host.LifeCycles
+namespace MassTransit.Host
 {
 	using System;
 	using Actions;
 	using Castle.Windsor;
 
+    /// <summary>
+    /// This interface represesnts an application's lifecycle
+    /// </summary>
 	public interface IApplicationLifeCycle :
 		IDisposable
 	{

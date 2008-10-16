@@ -12,21 +12,20 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Host.Actions
 {
-	using Configurations;
-	using Hosts;
-	using log4net;
+    using Hosts;
+    using log4net;
 
-	public class RunAsWinFormAction :
-		IAction
-	{
-		private static readonly ILog _log = LogManager.GetLogger(typeof (RunAsConsoleAction));
+    public class RunAsWinFormAction :
+        IAction
+    {
+        private static readonly ILog _log = LogManager.GetLogger(typeof (RunAsConsoleAction));
 
-		public void Do(IInstallationConfiguration configuration)
-		{
-			_log.Info("Received winform start notification");
+        public void Do(IInstallationConfiguration configuration)
+        {
+            _log.Info("Received winform start notification");
 
-			WinFormHost inWinFormHost = new WinFormHost(configuration.LifeCycle);
-			inWinFormHost.Run();
-		}
-	}
+            var inWinFormHost = new WinFormHost(configuration.LifeCycle);
+            inWinFormHost.Run();
+        }
+    }
 }

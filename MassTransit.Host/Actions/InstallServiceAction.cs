@@ -12,9 +12,11 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Host.Actions
 {
-	using Configurations;
 	using log4net;
 
+    /// <summary>
+    /// Install the host as a windows service
+    /// </summary>
 	public class InstallServiceAction :
 		IAction
 	{

@@ -14,7 +14,6 @@ namespace MassTransit.Host
 {
     using System.Collections.Generic;
 	using Actions;
-	using Configurations;
 	using log4net;
 
 	public static class Runner

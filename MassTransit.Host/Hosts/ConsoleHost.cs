@@ -14,7 +14,6 @@ namespace MassTransit.Host.Hosts
 {
     using System;
     using System.Threading;
-    using LifeCycles;
     using log4net;
 
     public class ConsoleHost

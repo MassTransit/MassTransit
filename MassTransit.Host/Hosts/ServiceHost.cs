@@ -13,7 +13,6 @@
 namespace MassTransit.Host.Hosts
 {
     using System.ServiceProcess;
-    using LifeCycles;
     using log4net;
 
     public class ServiceHost :
