@@ -1,5 +1,6 @@
 namespace CodeCamp.Service
 {
+    using MassTransit.Host;
     using MassTransit.Host.Configurations;
     using MassTransit.Host.LifeCycles;
 
