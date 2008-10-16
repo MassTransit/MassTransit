@@ -16,7 +16,7 @@ namespace MassTransit.StructureMapIntegration
 
         public void Release<T>(T obj)
         {
-            //what to do
+            //structure map doesn't have this concept.
         }
 
         public object GetService(Type serviceType)
