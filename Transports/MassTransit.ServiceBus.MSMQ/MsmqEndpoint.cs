@@ -254,12 +254,7 @@ namespace MassTransit.ServiceBus.MSMQ
 			return null;
 		}
 
-		public object Receive(Predicate<object> accept)
-		{
-			return Receive(MessageQueue.InfiniteTimeout, accept);
-		}
-
-		public object Receive(TimeSpan timeout, Predicate<object> accept)
+	    public object Receive(TimeSpan timeout, Predicate<object> accept)
 		{
 			if (!_queue.CanRead)
 				throw new EndpointException(this, "Not allowed to read from endpoint");
@@ -328,7 +323,6 @@ namespace MassTransit.ServiceBus.MSMQ
 
 			return null;
 		}
-
 
 	    public void Dispose()
 		{
