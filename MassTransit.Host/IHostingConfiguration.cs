@@ -12,9 +12,6 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Host
 {
-	using Configurations;
-	using LifeCycles;
-
     //TODO: might be overkill
 	public interface IHostingConfiguration
 	{

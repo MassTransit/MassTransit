@@ -12,48 +12,47 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Host.Configurations
 {
-	using System;
-	using System.ServiceProcess;
-	using LifeCycles;
+    using System;
+    using System.ServiceProcess;
 
-	public class LocalSystemConfiguration :
-		BaseWinServiceConfiguration
-	{
-		public override IApplicationLifeCycle LifeCycle
-		{
-			get { throw new NotImplementedException(); }
-		}
+    public class LocalSystemConfiguration :
+        BaseWinServiceConfiguration
+    {
+        public override IApplicationLifeCycle LifeCycle
+        {
+            get { throw new NotImplementedException(); }
+        }
 
-		public override Credentials Credentials
-		{
-			get { throw new NotImplementedException(); }
-		}
+        public override Credentials Credentials
+        {
+            get { throw new NotImplementedException(); }
+        }
 
-		public override string ServiceName
-		{
-			get { throw new NotImplementedException(); }
-		}
+        public override string ServiceName
+        {
+            get { throw new NotImplementedException(); }
+        }
 
-		public override string DisplayName
-		{
-			get { throw new NotImplementedException(); }
-		}
+        public override string DisplayName
+        {
+            get { throw new NotImplementedException(); }
+        }
 
-		public override string Description
-		{
-			get { throw new NotImplementedException(); }
-		}
+        public override string Description
+        {
+            get { throw new NotImplementedException(); }
+        }
 
-		public override string[] Dependencies
-		{
-			get { throw new NotImplementedException(); }
-		}
+        public override string[] Dependencies
+        {
+            get { throw new NotImplementedException(); }
+        }
 
-		public override void ConfigureServiceProcessInstaller(ServiceProcessInstaller installer)
-		{
-			installer.Username = null;
-			installer.Password = null;
-			installer.Account = ServiceAccount.LocalSystem;
-		}
-	}
+        public override void ConfigureServiceProcessInstaller(ServiceProcessInstaller installer)
+        {
+            installer.Username = null;
+            installer.Password = null;
+            installer.Account = ServiceAccount.LocalSystem;
+        }
+    }
 }

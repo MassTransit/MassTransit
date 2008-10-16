@@ -12,10 +12,12 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Host.Actions
 {
-	using Configurations;
 	using Hosts;
 	using log4net;
 
+    /// <summary>
+    /// Runs the host as a console
+    /// </summary>
 	public class RunAsConsoleAction :
 		IAction
 	{

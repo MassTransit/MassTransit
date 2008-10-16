@@ -12,29 +12,28 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Host.Configurations
 {
-	using System.ServiceProcess;
-	using LifeCycles;
+    using System.ServiceProcess;
 
-	public abstract class BaseWinServiceConfiguration :
-		IInstallationConfiguration
-	{
-		public abstract Credentials Credentials { get; }
-		public abstract string ServiceName { get; }
-		public abstract string DisplayName { get; }
-		public abstract string Description { get; }
-		public abstract string[] Dependencies { get; }
+    public abstract class BaseWinServiceConfiguration :
+        IInstallationConfiguration
+    {
+        public abstract Credentials Credentials { get; }
+        public abstract string ServiceName { get; }
+        public abstract string DisplayName { get; }
+        public abstract string Description { get; }
+        public abstract string[] Dependencies { get; }
 
-		public abstract IApplicationLifeCycle LifeCycle { get; }
+        public abstract IApplicationLifeCycle LifeCycle { get; }
 
-		public virtual void ConfigureServiceInstaller(ServiceInstaller installer)
-		{
-			installer.ServiceName = this.ServiceName;
-			installer.Description = this.Description;
-			installer.DisplayName = this.DisplayName;
-			installer.ServicesDependedOn = this.Dependencies;
-			installer.StartType = ServiceStartMode.Automatic;
-		}
+        public virtual void ConfigureServiceInstaller(ServiceInstaller installer)
+        {
+            installer.ServiceName = ServiceName;
+            installer.Description = Description;
+            installer.DisplayName = DisplayName;
+            installer.ServicesDependedOn = Dependencies;
+            installer.StartType = ServiceStartMode.Automatic;
+        }
 
-		public abstract void ConfigureServiceProcessInstaller(ServiceProcessInstaller installer);
-	}
+        public abstract void ConfigureServiceProcessInstaller(ServiceProcessInstaller installer);
+    }
 }

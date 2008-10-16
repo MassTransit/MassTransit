@@ -100,17 +100,17 @@
     <Compile Include="Configurations\DotNetConfiguration.cs" />
     <Compile Include="Configurations\InteractiveConfiguration.cs" />
     <Compile Include="Configurations\LocalSystemConfiguration.cs" />
-    <Compile Include="Configurations\Credentials.cs" />
+    <Compile Include="Credentials.cs" />
     <Compile Include="Hosts\WinFormHost.cs" />
     <Compile Include="KnownServiceNames.cs" />
     <Compile Include="LifeCycles\HostedLifeCycle.cs" />
     <Compile Include="HostServiceInstaller.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Actions\IAction.cs" />
+    <Compile Include="IAction.cs" />
     <Compile Include="Actions\InstallServiceAction.cs" />
-    <Compile Include="Configurations\IInstallationConfiguration.cs" />
-    <Compile Include="LifeCycles\IApplicationLifeCycle.cs" />
+    <Compile Include="IInstallationConfiguration.cs" />
+    <Compile Include="IApplicationLifeCycle.cs" />
     <Compile Include="IHostingConfiguration.cs" />
     <Compile Include="Actions\NamedAction.cs" />
     <Compile Include="Parser.cs" />

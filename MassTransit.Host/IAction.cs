@@ -10,12 +10,17 @@
 /// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 /// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 /// specific language governing permissions and limitations under the License.
-namespace MassTransit.Host.Actions
+namespace MassTransit.Host
 {
-    using Configurations;
-
+    /// <summary>
+    /// A host action
+    /// </summary>
     public interface IAction
     {
+        /// <summary>
+        /// The action to be taken
+        /// </summary>
+        /// <param name="configuration"></param>
         void Do(IInstallationConfiguration configuration);
     }
 }

@@ -14,7 +14,6 @@ namespace MassTransit.Host.Hosts
 {
 	using System;
 	using System.Windows.Forms;
-	using LifeCycles;
 	using log4net;
 
 	public class WinFormHost
