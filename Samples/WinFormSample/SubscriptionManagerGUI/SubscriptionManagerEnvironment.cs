@@ -12,7 +12,8 @@
 // specific language governing permissions and limitations under the License.
 namespace SubscriptionManagerGUI
 {
-	using MassTransit.Host.Configurations;
+    using MassTransit.Host;
+    using MassTransit.Host.Configurations;
 	using MassTransit.Host.LifeCycles;
 
 	public class SubscriptionManagerEnvironment :
