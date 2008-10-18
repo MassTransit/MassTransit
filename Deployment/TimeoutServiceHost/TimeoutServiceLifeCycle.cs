@@ -29,6 +29,8 @@ namespace TimeoutServiceHost
         {
             Container.AddComponent<ITimeoutRepository, InMemoryTimeoutRepository>();
             Container.AddComponent<IHostedService, TimeoutService>();
+
+            //TODO: Add db persistance here
         }
 
         public override void Stop()

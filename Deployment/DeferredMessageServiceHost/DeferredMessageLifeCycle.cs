@@ -28,6 +28,7 @@ namespace DeferredMessageServiceHost
         {
             Container.AddComponent<IHostedService, MessageDeferralService>();
             Container.AddComponent<IDeferredMessageRepository, InMemoryDeferredMessageRepository>();
+            //TODO: Put the Database Repository here too
         }
 
         public override void Stop()
