@@ -12,13 +12,13 @@
 // specific language governing permissions and limitations under the License.
 namespace DeferredMessageServiceHost
 {
+    using MassTransit.Host;
     using MassTransit.Host.Configurations;
-    using MassTransit.Host.LifeCycles;
 
     public class DeferredMessageConfiguration :
         InteractiveConfiguration
     {
-        private IApplicationLifeCycle _lifeCycle;
+        private readonly IApplicationLifeCycle _lifeCycle;
 
         public DeferredMessageConfiguration(string xmlFile)
         {
@@ -42,7 +42,7 @@ namespace DeferredMessageServiceHost
 
         public override string[] Dependencies
         {
-            get { return new string[] {"MSMQ"}; }
+            get { return new[] {"MSMQ"}; }
         }
 
         public override IApplicationLifeCycle LifeCycle

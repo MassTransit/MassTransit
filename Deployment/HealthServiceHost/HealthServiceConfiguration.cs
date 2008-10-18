@@ -12,16 +12,15 @@
 // specific language governing permissions and limitations under the License.
 namespace HealthServiceHost
 {
+    using MassTransit.Host;
     using MassTransit.Host.Configurations;
-    using MassTransit.Host.LifeCycles;
 
     public class HealthServiceConfiguration :
         InteractiveConfiguration
     {
+        private readonly IApplicationLifeCycle _lifecycle;
 
-        private IApplicationLifeCycle _lifecycle;
-
-        public HealthServiceConfiguration(string xmlFile) 
+        public HealthServiceConfiguration(string xmlFile)
         {
             _lifecycle = new HealthServiceLifeCycle(xmlFile);
         }
@@ -48,7 +47,7 @@ namespace HealthServiceHost
 
         public override string[] Dependencies
         {
-            get { return new string[] {"MSMQ"}; }
+            get { return new[] {"MSMQ"}; }
         }
     }
 }
