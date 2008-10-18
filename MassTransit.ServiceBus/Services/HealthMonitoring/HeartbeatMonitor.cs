@@ -15,12 +15,12 @@ namespace MassTransit.ServiceBus.Services.HealthMonitoring
     using Messages;
 
     public class HeartbeatMonitor :
-        Consumes<Heartbeat>.All //, Produces<Suspect>
+        Consumes<Heartbeat>.All
     {
         private readonly IHealthCache _healthCache;
         private readonly IHeartbeatTimer _timers;
 
-        public HeartbeatMonitor(IServiceBus bus, IHealthCache healthCache, IHeartbeatTimer timers)
+        public HeartbeatMonitor(IHealthCache healthCache, IHeartbeatTimer timers)
         {
             _timers = timers;
             _healthCache = healthCache;

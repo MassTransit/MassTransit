@@ -20,7 +20,7 @@ namespace MassTransit.ServiceBus.Services.HealthMonitoring
 
     public class Investigator : 
         Consumes<Suspect>.All,
-        Consumes<Pong>.All //, Produces<DownEndpoint>
+        Consumes<Pong>.All
     {
         private readonly ILog _log = LogManager.GetLogger(typeof (Investigator));
         private readonly IServiceBus _bus;
@@ -51,7 +51,6 @@ namespace MassTransit.ServiceBus.Services.HealthMonitoring
 
 
         //this starts things
-        //produce<Ping>
         public void Consume(Suspect msg)
         {
             _suspectMessage = msg;
@@ -70,7 +69,6 @@ namespace MassTransit.ServiceBus.Services.HealthMonitoring
             _log.WarnFormat("The endpoint '{0}' is responsive, but not sending heartbeats.", msg.EndpointUri);
         }
 
-        //Produce<DownEndpoint>
         public void OnPingTimeOut(object  sender, ElapsedEventArgs args)
         {
             //I have a confirmed dead endpoint
