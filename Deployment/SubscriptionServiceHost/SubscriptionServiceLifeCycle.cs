@@ -30,8 +30,10 @@ namespace SubscriptionServiceHost
             Container.AddComponentLifeStyle("followerrepository", typeof(FollowerRepository), LifestyleType.Singleton);
 
             Container.AddComponent<IHostedService, SubscriptionService>();
-
-            Container.AddComponent<ISubscriptionRepository, NHibernateSubscriptionStorage>();   
+            Container.AddComponent<ISubscriptionRepository, InMemorySubscriptionRepository>();
+            
+            //TODO: Polish this DB configuration option
+            //Container.AddComponent<ISubscriptionRepository, NHibernateSubscriptionStorage>();   
         }
 
         public override void Stop()

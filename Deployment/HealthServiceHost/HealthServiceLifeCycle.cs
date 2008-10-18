@@ -27,6 +27,8 @@ namespace HealthServiceHost
         {
             Container.AddComponent<IHostedService, HealthService>();
             Container.AddComponent<IHealthCache, LocalHealthCache>();
+            Container.AddComponent<IHeartbeatTimer, InMemoryHeartbeatTimer>();
+            //TODO: Put database persittance here too
         }
 
         public override void Stop()
