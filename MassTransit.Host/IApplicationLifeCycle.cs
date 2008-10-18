@@ -27,11 +27,35 @@ namespace MassTransit.Host
 		/// </summary>
 		NamedAction DefaultAction { get; }
 
+        /// <summary>
+        /// IoC Container. Will soon be replaced with ServiceLocator
+        /// </summary>
 		IWindsorContainer Container { get; }
 
+        /// <summary>
+        /// A method to setup your IoC container
+        /// </summary>
+        //void ContainerSetup();
+
+        /// <summary>
+        /// Called after ContainerSetup is used 'start' things before calling user code.
+        /// </summary>
 		void Initialize();
+
+        /// <summary>
+        /// User code that should run at the start of the application
+        /// </summary>
 		void Start();
+
+        /// <summary>
+        /// User code that should run at the end of the applicaiton
+        /// </summary>
 		void Stop();
+
+        /// <summary>
+        /// System code that runs after Stop to cleanup system code
+        /// </summary>
+        //void Cleanup();
 
 		//To be fired after disose is complete
 		event Action<IApplicationLifeCycle> Completed;
