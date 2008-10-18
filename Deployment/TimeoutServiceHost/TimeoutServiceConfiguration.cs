@@ -12,8 +12,8 @@
 // specific language governing permissions and limitations under the License.
 namespace TimeoutServiceHost
 {
+    using MassTransit.Host;
     using MassTransit.Host.Configurations;
-    using MassTransit.Host.LifeCycles;
 
     public class TimeoutServiceConfiguration :
         InteractiveConfiguration
@@ -47,7 +47,7 @@ namespace TimeoutServiceHost
 
         public override string[] Dependencies
         {
-            get { return new string[] {"MSMQ"}; }
+            get { return new[] {"MSMQ"}; }
         }
     }
 }

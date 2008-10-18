@@ -12,8 +12,8 @@
 // specific language governing permissions and limitations under the License.
 namespace SubscriptionServiceHost
 {
+    using MassTransit.Host;
     using MassTransit.Host.Configurations;
-    using MassTransit.Host.LifeCycles;
 
     public class SubscriptionServiceConfiguration :
         InteractiveConfiguration
