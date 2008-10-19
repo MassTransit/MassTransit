@@ -25,7 +25,7 @@ namespace MassTransit.ServiceBus.Tests.HealthMonitoring
             _bus = StrictMock<IServiceBus>();
             _theCacheIsntInterestingHere = DynamicMock<IHealthCache>();
             _timer = DynamicMock<IHeartbeatTimer>();
-            hm = new HeartbeatMonitor(_bus, _theCacheIsntInterestingHere, _timer);
+            hm = new HeartbeatMonitor(_theCacheIsntInterestingHere, _timer);
             message = new Heartbeat(1, u);
         }
 
@@ -42,7 +42,7 @@ namespace MassTransit.ServiceBus.Tests.HealthMonitoring
         {
             //Assert.IsFalse(hm.AmIWatchingYou(u));
             var timer = MockRepository.GenerateStub<IHeartbeatTimer>();
-            hm = new HeartbeatMonitor(_bus, _theCacheIsntInterestingHere, timer);
+            hm = new HeartbeatMonitor(_theCacheIsntInterestingHere, timer);
             hm.Consume(message);
 
             timer.AssertWasCalled(x => x.Add(null), o=>o.IgnoreArguments());

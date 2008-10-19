@@ -19,13 +19,13 @@ namespace MassTransit.Infrastructure.Repositories
     using NHibernate.Criterion;
     using ServiceBus.Subscriptions;
 
-    public class PersistantSubscriptionStorage :
+    public class PersistantSubscriptionRepository :
         ISubscriptionRepository
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof (SubscriptionService));
         private readonly ISessionFactory _factory;
 
-        public PersistantSubscriptionStorage(ISessionFactory factory)
+        public PersistantSubscriptionRepository(ISessionFactory factory)
         {
             _factory = factory;
         }

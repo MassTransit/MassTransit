@@ -41,6 +41,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\libs\NHibernate 2.0\Castle.DynamicProxy2.dll</HintPath>
     </Reference>
+    <Reference Include="Enyim.Caching, Version=1.2.0.0, Culture=neutral, PublicKeyToken=cec98615db04012e, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\libs\Enyim.Caching.dll</HintPath>
+    </Reference>
     <Reference Include="Iesi.Collections, Version=1.0.0.3, Culture=neutral, PublicKeyToken=aa95f207798dfdb4, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\libs\NHibernate 2.0\Iesi.Collections.dll</HintPath>
@@ -86,11 +90,12 @@
     <Compile Include="..\SolutionVersion.cs">
       <Link>SolutionVersion.cs</Link>
     </Compile>
-    <Compile Include="PersistentSubscription.cs" />
+    <Compile Include="Subscription\DistributedSubscriptionCache.cs" />
+    <Compile Include="Subscription\PersistentSubscription.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Subscription\PersistantSubscriptionStorage.cs" />
+    <Compile Include="Subscription\PersistantSubscriptionRepository.cs" />
     <Compile Include="MessageDeferral\PersistantDeferredMessageRepository.cs" />
-    <Compile Include="Timeout\PersistantTimeoutStorage.cs" />
+    <Compile Include="Timeout\PersistantTimeoutRepository.cs" />
     <Compile Include="Timeout\ScheduledTimeout.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -107,10 +112,6 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Subscription\PersistentSubscription.hbm.xml" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Mapping\" />
-    <Folder Include="Repositories\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
