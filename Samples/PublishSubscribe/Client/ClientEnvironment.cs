@@ -1,7 +1,7 @@
 namespace Client
 {
+    using MassTransit.Host;
     using MassTransit.Host.Configurations;
-    using MassTransit.Host.LifeCycles;
 
     public class ClientEnvironment :
         LocalSystemConfiguration
