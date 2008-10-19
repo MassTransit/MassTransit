@@ -12,7 +12,6 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.WindsorIntegration
 {
-    using Castle.Facilities.FactorySupport;
     using Castle.Facilities.Startable;
     using Castle.Windsor;
     using Castle.Windsor.Configuration;
@@ -40,7 +39,6 @@ namespace MassTransit.WindsorIntegration
         public void Initialize()
         {
             AddFacility("startable", new StartableFacility());
-            AddFacility("factory", new FactorySupportFacility());
             AddFacility("masstransit", new MassTransitFacility());
         }
     }
