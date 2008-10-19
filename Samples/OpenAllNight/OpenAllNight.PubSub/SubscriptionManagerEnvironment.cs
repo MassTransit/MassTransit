@@ -1,7 +1,7 @@
 namespace OpenAllNight.PubSub
 {
+    using MassTransit.Host;
     using MassTransit.Host.Configurations;
-    using MassTransit.Host.LifeCycles;
 
     public class SubscriptionManagerEnvironment :
         LocalSystemConfiguration
@@ -32,7 +32,5 @@ namespace OpenAllNight.PubSub
         {
             get { return "This service manages the subscriptions for Mass Transit"; }
         }
-
-
     }
 }
