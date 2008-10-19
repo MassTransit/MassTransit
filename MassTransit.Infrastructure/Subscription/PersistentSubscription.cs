@@ -18,9 +18,7 @@ namespace MassTransit.Infrastructure
     public class PersistentSubscription :
         Subscription
     {
-#pragma warning disable 649
         private int _id;
-#pragma warning restore 649
         private bool _isActive;
 
         protected PersistentSubscription()

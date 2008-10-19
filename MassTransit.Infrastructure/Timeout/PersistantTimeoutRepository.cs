@@ -20,13 +20,13 @@ namespace MassTransit.Infrastructure.Repositories
     using ServiceBus.Timeout;
     using ServiceBus.Util;
 
-    public class PersistantTimeoutStorage :
+    public class PersistantTimeoutRepository :
         ITimeoutRepository
 
 	{
         private readonly IRepository<ScheduledTimeout, Guid> _repository;
 
-        public PersistantTimeoutStorage(IRepository<ScheduledTimeout, Guid> repository)
+        public PersistantTimeoutRepository(IRepository<ScheduledTimeout, Guid> repository)
         {
             _repository = repository;
         }
