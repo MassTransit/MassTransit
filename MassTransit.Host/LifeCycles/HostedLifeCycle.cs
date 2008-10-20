@@ -14,7 +14,6 @@ namespace MassTransit.Host.LifeCycles
 {
 	using System;
 	using Actions;
-	using Castle.Facilities.FactorySupport;
 	using Castle.Facilities.Startable;
 	using Castle.Windsor;
 	using ServiceBus;
@@ -26,14 +25,13 @@ namespace MassTransit.Host.LifeCycles
 		IApplicationLifeCycle
 	{
 		private readonly string _xmlFile;
-		private IWindsorContainer _container;
+		private readonly IWindsorContainer _container;
 
 		protected HostedLifeCycle(string xmlFile)
 		{
 			_xmlFile = xmlFile;
 			_container = new WindsorContainer(_xmlFile);
 			_container.AddFacility("masstransit", new MassTransitFacility());
-			_container.AddFacility("factory", new FactorySupportFacility());
 			_container.AddFacility("startable", new StartableFacility());
 		}
 
