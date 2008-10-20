@@ -17,7 +17,7 @@ namespace MassTransit.ServiceBus.Services.HealthMonitoring.Messages
     [Serializable]
     public class Suspect
     {
-        private Uri _endpointUri;
+        private readonly Uri _endpointUri;
 
 
         public Suspect(Uri endpointUri)

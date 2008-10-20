@@ -19,7 +19,7 @@ namespace MassTransit.Services
     public class InMemoryDeferredMessageRepository :
 		IDeferredMessageRepository
 	{
-		private Dictionary<Guid, DeferredMessage> _messages = new Dictionary<Guid, DeferredMessage>();
+		private readonly Dictionary<Guid, DeferredMessage> _messages = new Dictionary<Guid, DeferredMessage>();
 
 		public void Add(DeferredMessage message)
 		{
