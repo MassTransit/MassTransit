@@ -26,7 +26,7 @@ namespace MassTransit.ServiceBus
 		private readonly List<string> _messages;
 		private readonly DateTime _occurredAt;
 		private readonly List<string> _stackTrace;
-		private Exception _caughtException;
+		private readonly Exception _caughtException;
 
 		/// <summary>
 		/// Creates a new fault message for the failed message

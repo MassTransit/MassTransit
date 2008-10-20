@@ -6,7 +6,7 @@ namespace MassTransit.ServiceBus.Subscriptions
     public class InMemorySubscriptionRepository :
         ISubscriptionRepository
     {
-        private ILog _log = LogManager.GetLogger(typeof (InMemorySubscriptionRepository));
+        private static readonly ILog _log = LogManager.GetLogger(typeof (InMemorySubscriptionRepository));
         readonly IList<Subscription> _subscriptions = new List<Subscription>();
 
         public void Dispose()
