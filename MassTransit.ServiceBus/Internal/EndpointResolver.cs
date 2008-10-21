@@ -28,11 +28,11 @@ namespace MassTransit.ServiceBus.Internal
 		private static readonly ILog _log = LogManager.GetLogger(typeof (EndpointResolver));
 		private static readonly Dictionary<string, Type> _schemes = new Dictionary<string, Type>();
 	    private static readonly IEndpoint _null = new NullEndpoint();
-		private static readonly ReaderWriterLock _lockContext = new ReaderWriterLock();
+		private static readonly ReaderWriterLockSlim _lockContext = new ReaderWriterLockSlim();
 
 		public static string AddTransport(Type transportType)
 		{
-			_lockContext.AcquireReaderLock(Timeout.Infinite);
+		    _lockContext.EnterUpgradeableReadLock();
 			try
 			{
 				// get the scheme for each endpoint and add it to the resolver
@@ -47,7 +47,7 @@ namespace MassTransit.ServiceBus.Internal
 				if (_schemes.ContainsKey(scheme))
 					return scheme;
 
-				LockCookie cookie = _lockContext.UpgradeToWriterLock(Timeout.Infinite);
+			    _lockContext.EnterWriteLock();
 				try
 				{
 					if (_schemes.ContainsKey(scheme))
@@ -61,20 +61,20 @@ namespace MassTransit.ServiceBus.Internal
 				}
 				finally
 				{
-					_lockContext.DowngradeFromWriterLock(ref cookie);
+				    _lockContext.ExitWriteLock();
 				}
 			}
 			finally
 			{
-				_lockContext.ReleaseReaderLock();
+			    _lockContext.ExitUpgradeableReadLock();
 			}
 		}
 
 		public static ConstructorInfo GetConstructor(Type type)
         {
-            BindingFlags bindingFlags = BindingFlags.Instance | BindingFlags.Public;
-            CallingConventions conventions = CallingConventions.Standard | CallingConventions.HasThis;
-            Type[] parameterTypes = new Type[] { typeof(Uri) };
+            const BindingFlags bindingFlags = BindingFlags.Instance | BindingFlags.Public;
+            const CallingConventions conventions = CallingConventions.Standard | CallingConventions.HasThis;
+            Type[] parameterTypes = new[] { typeof(Uri) };
 
             return type.GetConstructor(bindingFlags, null, conventions, parameterTypes, null);
         }
@@ -83,13 +83,13 @@ namespace MassTransit.ServiceBus.Internal
 		{
 			GuardAgainstZeroTransports();
 
-			_lockContext.AcquireReaderLock(Timeout.Infinite);
+		    _lockContext.EnterUpgradeableReadLock();
 			try
 			{
 				if (_cache.ContainsKey(uri))
 					return _cache[uri];
 
-				LockCookie cookie = _lockContext.UpgradeToWriterLock(Timeout.Infinite);
+			    _lockContext.EnterWriteLock();
                 try
                 {
                     if (_cache.ContainsKey(uri))
@@ -116,12 +116,12 @@ namespace MassTransit.ServiceBus.Internal
                 }
                 finally
                 {
-                    _lockContext.DowngradeFromWriterLock(ref cookie);
+                    _lockContext.ExitWriteLock();
                 }
 			}
 			finally
 			{
-				_lockContext.ReleaseReaderLock();
+			    _lockContext.ExitUpgradeableReadLock();
 			}
 
 			string message = BuildHelpfulErrorMessage(uri);
@@ -145,7 +145,7 @@ namespace MassTransit.ServiceBus.Internal
 	    {
             if (_schemes.Count == 0)
             {
-                string message = "No transports have been registered. Please use EndpointResolver.AddTransport";
+                const string message = "No transports have been registered. Please use EndpointResolver.AddTransport";
                 EndpointException exp = new EndpointException(new NullEndpoint(), message);
                 _log.Error(message, exp);
                 throw exp;

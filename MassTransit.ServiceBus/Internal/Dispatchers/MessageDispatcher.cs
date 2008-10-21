@@ -24,7 +24,7 @@ namespace MassTransit.ServiceBus.Internal
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof (MessageDispatcher<TMessage>));
         private readonly List<Consumes<TMessage>.All> _consumers = new List<Consumes<TMessage>.All>();
-    	private readonly ReaderWriterLock _consumerLock = new ReaderWriterLock();
+    	private readonly ReaderWriterLockSlim _consumerLock = new ReaderWriterLockSlim();
 
         public bool Accept(TMessage message)
         {
@@ -32,14 +32,14 @@ namespace MassTransit.ServiceBus.Internal
                 _log.DebugFormat("No consumers for message type {0}", typeof (TMessage));
 
             IList<Consumes<TMessage>.All> consumers;
-        	_consumerLock.AcquireReaderLock(Timeout.Infinite);
+        	_consumerLock.EnterReadLock();
         	try
         	{
 				consumers = new List<Consumes<TMessage>.All>(_consumers);
         	}
         	finally
         	{
-        		_consumerLock.ReleaseReaderLock();
+        		_consumerLock.ExitReadLock();
         	}
 
             foreach (Consumes<TMessage>.All consumer in consumers)
@@ -62,14 +62,14 @@ namespace MassTransit.ServiceBus.Internal
         public void Consume(TMessage message)
         {
             IList<Consumes<TMessage>.All> consumers;
-			_consumerLock.AcquireReaderLock(Timeout.Infinite);
+            _consumerLock.EnterReadLock();
 			try
 			{
 				consumers = new List<Consumes<TMessage>.All>(_consumers);
 			}
 			finally
 			{
-				_consumerLock.ReleaseReaderLock();
+			    _consumerLock.ExitReadLock();
 			}
 
             foreach (Consumes<TMessage>.All consumer in consumers)
@@ -110,7 +110,7 @@ namespace MassTransit.ServiceBus.Internal
 
         public T GetDispatcher<T>() where T : class
         {
-			_consumerLock.AcquireReaderLock(Timeout.Infinite);
+            _consumerLock.EnterReadLock();
 			try
 			{
                 foreach (Consumes<TMessage>.All consumer in _consumers)
@@ -121,7 +121,7 @@ namespace MassTransit.ServiceBus.Internal
 			}
 			finally
 			{
-				_consumerLock.ReleaseReaderLock();
+			    _consumerLock.ExitReadLock();
 			}
 
             return default(T);
@@ -129,7 +129,7 @@ namespace MassTransit.ServiceBus.Internal
 
         public T GetDispatcher<T>(Type type) where T : class
         {
-			_consumerLock.AcquireReaderLock(Timeout.Infinite);
+            _consumerLock.EnterReadLock();
 			try
 			{
                 foreach (Consumes<TMessage>.All consumer in _consumers)
@@ -140,7 +140,7 @@ namespace MassTransit.ServiceBus.Internal
 			}
 			finally
 			{
-				_consumerLock.ReleaseReaderLock();
+			    _consumerLock.ExitReadLock();
 			}
 
             return default(T);
@@ -153,13 +153,13 @@ namespace MassTransit.ServiceBus.Internal
 
         public void Attach(Consumes<TMessage>.All consumer)
         {
-			_consumerLock.AcquireReaderLock(Timeout.Infinite);
+			_consumerLock.EnterUpgradeableReadLock();
 			try
 			{
 				if (_consumers.Contains(consumer))
 					return;
 
-				LockCookie cookie = _consumerLock.UpgradeToWriterLock(Timeout.Infinite);
+				_consumerLock.EnterWriteLock();
 				try
 				{
 					if (_consumers.Contains(consumer))
@@ -169,24 +169,24 @@ namespace MassTransit.ServiceBus.Internal
 				}
 				finally
 				{
-					_consumerLock.DowngradeFromWriterLock(ref cookie);
+				    _consumerLock.ExitWriteLock();
 				}
 			}
 			finally
 			{
-				_consumerLock.ReleaseReaderLock();
+				_consumerLock.ExitUpgradeableReadLock();
 			}
         }
 
         public void Detach(Consumes<TMessage>.All consumer)
         {
-			_consumerLock.AcquireReaderLock(Timeout.Infinite);
+            _consumerLock.EnterUpgradeableReadLock();
 			try
 			{
 				if (!_consumers.Contains(consumer))
 					return;
 
-				LockCookie cookie = _consumerLock.UpgradeToWriterLock(Timeout.Infinite);
+			    _consumerLock.EnterWriteLock();
 				try
 				{
 					if (!_consumers.Contains(consumer))
@@ -196,12 +196,12 @@ namespace MassTransit.ServiceBus.Internal
 				}
 				finally
 				{
-					_consumerLock.DowngradeFromWriterLock(ref cookie);
+				    _consumerLock.ExitWriteLock();
 				}
 			}
 			finally
 			{
-				_consumerLock.ReleaseReaderLock();
+			    _consumerLock.ExitUpgradeableReadLock();
 			}
         }
 
