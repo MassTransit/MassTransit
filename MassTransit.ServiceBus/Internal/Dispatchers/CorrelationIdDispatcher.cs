@@ -24,13 +24,13 @@ namespace MassTransit.ServiceBus.Internal
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof (CorrelationIdDispatcher<TMessage, TKey>));
         private readonly Dictionary<TKey, MessageDispatcher<TMessage>> _dispatchers = new Dictionary<TKey, MessageDispatcher<TMessage>>();
-		private readonly ReaderWriterLock _lockContext = new ReaderWriterLock();
+		private readonly ReaderWriterLockSlim _lockContext = new ReaderWriterLockSlim();
 
 		public bool Active(TKey correlationId)
 		{
 			MessageDispatcher<TMessage> dispatcher;
 
-			_lockContext.AcquireReaderLock(Timeout.Infinite);
+		    _lockContext.EnterReadLock();
 			try
 			{
 				bool found = _dispatchers.TryGetValue(correlationId, out dispatcher);
@@ -39,7 +39,7 @@ namespace MassTransit.ServiceBus.Internal
 			}
 			finally
 			{
-				_lockContext.ReleaseReaderLock();
+			    _lockContext.ExitReadLock();
 			}
 
 			return dispatcher.Active;
@@ -53,7 +53,7 @@ namespace MassTransit.ServiceBus.Internal
 
 			MessageDispatcher<TMessage> dispatcher;
 
-			_lockContext.AcquireReaderLock(Timeout.Infinite);
+    	    _lockContext.EnterReadLock();
 			try
 			{
 				if(_dispatchers.TryGetValue(correlationId, out dispatcher) == false)
@@ -61,7 +61,7 @@ namespace MassTransit.ServiceBus.Internal
 			}
 			finally
 			{
-				_lockContext.ReleaseReaderLock();
+			    _lockContext.ExitReadLock();
 			}
 
 			dispatcher.Consume(message);
@@ -75,7 +75,7 @@ namespace MassTransit.ServiceBus.Internal
 
 			MessageDispatcher<TMessage> dispatcher;
 
-			_lockContext.AcquireReaderLock(Timeout.Infinite);
+            _lockContext.EnterReadLock();
 			try
 			{
 				if (_dispatchers.TryGetValue(correlationId, out dispatcher) == false)
@@ -88,7 +88,7 @@ namespace MassTransit.ServiceBus.Internal
 			}
 			finally
 			{
-				_lockContext.ReleaseReaderLock();
+			    _lockContext.ExitReadLock();
 			}
 
             return dispatcher.Accept(message);
@@ -134,14 +134,14 @@ namespace MassTransit.ServiceBus.Internal
 
         private MessageDispatcher<TMessage> GetDispatcher(TKey correlationId)
         {
-            MessageDispatcher<TMessage> dispatcher;
-			_lockContext.AcquireReaderLock(Timeout.Infinite);
+            _lockContext.EnterUpgradeableReadLock();
 			try
 			{
-				if (_dispatchers.TryGetValue(correlationId, out dispatcher))
+			    MessageDispatcher<TMessage> dispatcher;
+			    if (_dispatchers.TryGetValue(correlationId, out dispatcher))
 					return dispatcher;
 
-				LockCookie cookie = _lockContext.UpgradeToWriterLock(Timeout.Infinite);
+			    _lockContext.EnterWriteLock();
 				try
 				{
 					if (_dispatchers.TryGetValue(correlationId, out dispatcher))
@@ -155,12 +155,12 @@ namespace MassTransit.ServiceBus.Internal
 				}
 				finally
 				{
-					_lockContext.DowngradeFromWriterLock(ref cookie);
+				    _lockContext.ExitWriteLock();
 				}
 			}
 			finally
 			{
-				_lockContext.ReleaseReaderLock();
+			    _lockContext.ExitUpgradeableReadLock();
 			}
         }
 
@@ -177,17 +177,19 @@ namespace MassTransit.ServiceBus.Internal
 		{
 			TKey correlationId = consumer.CorrelationId;
 
-			_lockContext.AcquireReaderLock(Timeout.Infinite);
+		    _lockContext.EnterUpgradeableReadLock();
 			try
 			{
-				MessageDispatcher<TMessage> dispatcher = GetDispatcher(correlationId);
+				MessageDispatcher<TMessage> dispatcher;
+				if (_dispatchers.TryGetValue(correlationId, out dispatcher) == false)
+				    return;
 
 				dispatcher.Detach(consumer);
 
 				if (dispatcher.Active)
 					return;
 
-				LockCookie cookie = _lockContext.UpgradeToWriterLock(Timeout.Infinite);
+			    _lockContext.EnterWriteLock();
 				try
 				{
 					if (dispatcher.Active)
@@ -198,12 +200,12 @@ namespace MassTransit.ServiceBus.Internal
 				}
 				finally
 				{
-					_lockContext.DowngradeFromWriterLock(ref cookie);
+				    _lockContext.ExitWriteLock();
 				}
 			}
 			finally
 			{
-				_lockContext.ReleaseReaderLock();
+			    _lockContext.ExitUpgradeableReadLock();
 			}
 		}
     }

@@ -23,7 +23,7 @@ namespace MassTransit.ServiceBus.Internal
         IMessageTypeDispatcher
     {
         private readonly Dictionary<Type, IMessageDispatcher> _messageDispatchers = new Dictionary<Type, IMessageDispatcher>();
-        private readonly ReaderWriterLock _messageLock = new ReaderWriterLock();
+        private readonly ReaderWriterLockSlim _messageLock = new ReaderWriterLockSlim();
 
         public bool Accept(object message)
         {
@@ -76,14 +76,14 @@ namespace MassTransit.ServiceBus.Internal
 
         public IMessageDispatcher GetMessageDispatcher(Type messageType) 
         {
-			_messageLock.AcquireReaderLock(Timeout.Infinite);
+            _messageLock.EnterUpgradeableReadLock();
             try
             {
                 IMessageDispatcher consumer;
             	if (_messageDispatchers.TryGetValue(messageType, out consumer))
             		return consumer;
 
-                LockCookie cookie = _messageLock.UpgradeToWriterLock(Timeout.Infinite);
+                _messageLock.EnterWriteLock();
 				try
 				{
 					if (_messageDispatchers.TryGetValue(messageType, out consumer))
@@ -99,12 +99,12 @@ namespace MassTransit.ServiceBus.Internal
 				}
 				finally
 				{
-					_messageLock.DowngradeFromWriterLock(ref cookie);
+				    _messageLock.ExitWriteLock();
 				}
 			}
 			finally
             {
-            	_messageLock.ReleaseReaderLock();
+                _messageLock.ExitUpgradeableReadLock();
             }
         }
 
@@ -131,14 +131,14 @@ namespace MassTransit.ServiceBus.Internal
         {
             Type messageType = message.GetType();
 
-        	_messageLock.AcquireReaderLock(Timeout.Infinite);
+            _messageLock.EnterReadLock();
 			try
 			{
 				return _messageDispatchers.TryGetValue(messageType, out dispatcher);
 			}
 			finally
 			{
-				_messageLock.ReleaseReaderLock();
+			    _messageLock.ExitReadLock();
 			}
         }
     }

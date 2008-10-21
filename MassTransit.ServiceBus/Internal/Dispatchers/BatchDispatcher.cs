@@ -30,7 +30,7 @@ namespace MassTransit.ServiceBus.Internal
     {
         private readonly Dictionary<TBatchId, Batch<TMessage, TBatchId>> _batches = new Dictionary<TBatchId, Batch<TMessage, TBatchId>>();
         private readonly IServiceBus _bus;
-        private readonly ReaderWriterLock _lockContext = new ReaderWriterLock();
+        private readonly ReaderWriterLockSlim _lockContext = new ReaderWriterLockSlim();
         private readonly MessageDispatcher<Batch<TMessage, TBatchId>> _messageDispatcher;
         private readonly TimeSpan _timeout;
 
@@ -52,13 +52,13 @@ namespace MassTransit.ServiceBus.Internal
         {
             TBatchId batchId = message.BatchId;
 
-            _lockContext.AcquireReaderLock(Timeout.Infinite);
+            _lockContext.EnterUpgradeableReadLock();
             try
             {
                 if (_batches.ContainsKey(batchId))
                     return true;
 
-                LockCookie cookie = _lockContext.UpgradeToWriterLock(Timeout.Infinite);
+                _lockContext.EnterWriteLock();
                 try
                 {
                     if (_batches.ContainsKey(batchId))
@@ -77,12 +77,12 @@ namespace MassTransit.ServiceBus.Internal
                 }
                 finally
                 {
-                    _lockContext.DowngradeFromWriterLock(ref cookie);
+                    _lockContext.ExitWriteLock();
                 }
             }
             finally
             {
-                _lockContext.ReleaseReaderLock();
+                _lockContext.ExitUpgradeableReadLock();
             }
 
             return false;
@@ -93,7 +93,7 @@ namespace MassTransit.ServiceBus.Internal
             TBatchId batchId = message.BatchId;
 
             Batch<TMessage, TBatchId> batch;
-            _lockContext.AcquireReaderLock(Timeout.Infinite);
+            _lockContext.EnterReadLock();
             try
             {
                 if(_batches.TryGetValue(batchId, out batch) == false)
@@ -101,7 +101,7 @@ namespace MassTransit.ServiceBus.Internal
             }
             finally
             {
-                _lockContext.ReleaseReaderLock();
+                _lockContext.ExitReadLock();
             }
 
             // push this message to the context, releasing the enumerator

@@ -30,7 +30,7 @@ namespace MassTransit.ServiceBus.Internal
         private static readonly Type _selectiveConsumerType = typeof (Consumes<>.Selected);
         private static readonly Type _startedByType = typeof (InitiatedBy<>);
         private readonly Dictionary<Type, TypeInfo> _types = new Dictionary<Type, TypeInfo>();
-		private readonly ReaderWriterLock _lockContext = new ReaderWriterLock();
+		private readonly ReaderWriterLockSlim _lockContext = new ReaderWriterLockSlim();
 
         static TypeInfoCache()
         {
@@ -58,14 +58,14 @@ namespace MassTransit.ServiceBus.Internal
 
 		public ITypeInfo Resolve(Type componentType)
 		{
-			_lockContext.AcquireReaderLock(Timeout.Infinite);
+		    _lockContext.EnterUpgradeableReadLock();
 			try
 			{
 				TypeInfo info;
 				if (_types.TryGetValue(componentType, out info))
 					return info;
 
-				LockCookie cookie = _lockContext.UpgradeToWriterLock(Timeout.Infinite);
+			    _lockContext.EnterWriteLock();
 				try
 				{
 					if (_types.TryGetValue(componentType, out info))
@@ -101,12 +101,12 @@ namespace MassTransit.ServiceBus.Internal
 				}
 				finally
 				{
-					_lockContext.DowngradeFromWriterLock(ref cookie);
+				    _lockContext.ExitWriteLock();
 				}
 			}
 			finally
 			{
-				_lockContext.ReleaseReaderLock();
+			    _lockContext.ExitUpgradeableReadLock();
 			}
 		}
 

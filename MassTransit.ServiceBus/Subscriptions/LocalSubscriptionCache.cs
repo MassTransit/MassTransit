@@ -21,7 +21,7 @@ namespace MassTransit.ServiceBus.Subscriptions
         ISubscriptionCache
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof (LocalSubscriptionCache));
-    	private readonly ReaderWriterLock _lockContext = new ReaderWriterLock();
+    	private readonly ReaderWriterLockSlim _lockContext = new ReaderWriterLockSlim();
 
         private readonly Dictionary<string, List<SubscriptionCacheEntry>> _correlatedSubscriptions =
             new Dictionary<string, List<SubscriptionCacheEntry>>(StringComparer.InvariantCultureIgnoreCase);
@@ -33,7 +33,7 @@ namespace MassTransit.ServiceBus.Subscriptions
         {
             List<Subscription> result = new List<Subscription>();
 
-        	_lockContext.AcquireReaderLock(Timeout.Infinite);
+            _lockContext.EnterReadLock();
 			try
             {
                 foreach (KeyValuePair<string, List<SubscriptionCacheEntry>> pair in _messageTypeSubscriptions)
@@ -58,7 +58,7 @@ namespace MassTransit.ServiceBus.Subscriptions
             }
 			finally
 			{
-				_lockContext.ReleaseReaderLock();
+			    _lockContext.ExitReadLock();
 			}
 
             return result;
@@ -66,7 +66,7 @@ namespace MassTransit.ServiceBus.Subscriptions
 
         public IList<Subscription> List(string messageName)
         {
-        	_lockContext.AcquireReaderLock(Timeout.Infinite);
+            _lockContext.EnterReadLock();
 			try
             {
                 List<Subscription> result = new List<Subscription>();
@@ -79,15 +79,15 @@ namespace MassTransit.ServiceBus.Subscriptions
             }
 			finally
 			{
-				_lockContext.ReleaseReaderLock();
+			    _lockContext.ExitReadLock();
 			}
 		}
 
         public IList<Subscription> List(string messageName, string correlationId)
         {
             List<Subscription> result = new List<Subscription>();
-        	
-			_lockContext.AcquireReaderLock(Timeout.Infinite);
+
+            _lockContext.EnterReadLock();
 			try
             {
                 if (_messageTypeSubscriptions.ContainsKey(messageName))
@@ -114,7 +114,7 @@ namespace MassTransit.ServiceBus.Subscriptions
             }
 			finally
 			{
-				_lockContext.ReleaseReaderLock();
+			    _lockContext.ExitReadLock();
 			}
 
 			return result;
@@ -124,7 +124,7 @@ namespace MassTransit.ServiceBus.Subscriptions
         {
             bool added;
 
-			_lockContext.AcquireWriterLock(Timeout.Infinite);
+            _lockContext.EnterWriteLock();
 			try
 			{
                 if (string.IsNullOrEmpty(subscription.CorrelationId))
@@ -134,7 +134,7 @@ namespace MassTransit.ServiceBus.Subscriptions
             }
 			finally
 			{
-				_lockContext.ReleaseWriterLock();
+			    _lockContext.ExitWriteLock();
 			}
 
             if (added)
@@ -146,7 +146,7 @@ namespace MassTransit.ServiceBus.Subscriptions
         public void Remove(Subscription subscription)
         {
             bool removed;
-			_lockContext.AcquireWriterLock(Timeout.Infinite);
+            _lockContext.EnterWriteLock();
 			try
 			{
                 if (string.IsNullOrEmpty(subscription.CorrelationId))
@@ -156,7 +156,7 @@ namespace MassTransit.ServiceBus.Subscriptions
             }
 			finally
 			{
-				_lockContext.ReleaseWriterLock();
+			    _lockContext.ExitWriteLock();
 			}
 
             if (removed)
