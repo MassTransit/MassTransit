@@ -17,10 +17,12 @@ namespace MassTransit.Dashboard.Controllers
         private ServiceBusRequest<HealthController> _request;
         private readonly Guid _correlationId = Guid.NewGuid();
         private HealthStatusResponse _response;
+        private IHealthCache _cache;
 
-        public HealthController(IServiceBus bus)
+        public HealthController(IServiceBus bus, IHealthCache cache)
         {
             _bus = bus;
+            _cache = cache;
         }
 
         //public IAsyncResult BeginView()
@@ -41,6 +43,7 @@ namespace MassTransit.Dashboard.Controllers
 
         public void View()
         {
+            //IList<HealthInformation> infos = _cache.List();
             IList<HealthInformation> infos = new List<HealthInformation>();
             PropertyBag.Add("statuses", infos);
         }
