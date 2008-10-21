@@ -2,7 +2,7 @@
 <log4net>
 	<appender name="RollingFile"
 						type="log4net.Appender.RollingFileAppender">
-		<file value="ServerGUI.log" />
+		<file value="..\..\..\..\..\logs\sample.winform.server_gui.log" />
 		<appendToFile value="true" />
 		<rollingStyle value="Date" />
 		<datePattern value="yyyyMMdd" />
