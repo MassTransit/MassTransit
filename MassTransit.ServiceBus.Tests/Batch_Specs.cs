@@ -71,6 +71,7 @@ namespace MassTransit.ServiceBus.Tests
 
 		protected  void RunTest()
 		{
+			Container.AddComponent<TestBatchConsumer<IndividualBatchMessage, Guid>>();
 			RemoteBus.AddComponent<TestBatchConsumer<IndividualBatchMessage, Guid>>();
 
 			Guid batchId = Guid.NewGuid();
