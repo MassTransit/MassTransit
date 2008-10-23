@@ -1,0 +1,28 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<configuration>
+
+  <components>
+		<component id="subscriptioncache.shared"
+							 service="MassTransit.ServiceBus.Subscriptions.ISubscriptionCache, MassTransit.ServiceBus"
+							 type="MassTransit.ServiceBus.Subscriptions.LocalSubscriptionCache, MassTransit.ServiceBus"/>
+
+  </components>
+  <facilities>
+    <facility id="masstransit">
+      <bus id="server"
+				 endpoint="msmq://localhost/mt_server">
+				<subscriptionCache name="subscriptioncache.shared"/>
+      </bus>
+			<bus id="control"
+					 endpoint="msmq://localhost/mt_server1">
+				<subscriptionCache name="subscriptioncache.shared"/>
+				<subscriptionService endpoint="msmq://localhost/mt_pubsub">
+					<localEndpoint>msmq://localhost/mt_server</localEndpoint>
+				</subscriptionService>
+			</bus>
+			<transports>
+        <transport>MassTransit.ServiceBus.MSMQ.MsmqEndpoint, MassTransit.ServiceBus.MSMQ</transport>
+      </transports>
+    </facility>
+  </facilities>
+</configuration>
