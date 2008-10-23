@@ -44,6 +44,9 @@ namespace MassTransit.ServiceBus.Tests.Timeouts
 
             _timeoutRepository = Container.Resolve<ITimeoutRepository>();
 
+			Container.AddComponent<ScheduleTimeoutConsumer>();
+			Container.AddComponent<CancelTimeoutConsumer>();
+
             _timeoutService = new TimeoutService(LocalBus, _timeoutRepository);
             _timeoutService.Start();
 
@@ -51,6 +54,9 @@ namespace MassTransit.ServiceBus.Tests.Timeouts
                 LifestyleType.Singleton);
 
             _repository = Container.Resolve<IDeferredMessageRepository>();
+
+			Container.AddComponent<DeferMessageConsumer>();
+			Container.AddComponent<TimeoutExpiredConsumer>();
 
             _deferService = new MessageDeferralService(LocalBus);
             _deferService.Start();
