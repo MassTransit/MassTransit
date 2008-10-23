@@ -12,33 +12,22 @@
 // specific language governing permissions and limitations under the License.
 namespace SubscriptionServiceHost
 {
-    using Castle.Core;
     using MassTransit.Host.LifeCycles;
-    using MassTransit.ServiceBus;
-    using MassTransit.ServiceBus.Subscriptions;
-    using MassTransit.SubscriptionStorage;
+    using Microsoft.Practices.ServiceLocation;
 
     public class SubscriptionServiceLifeCycle :
         HostedLifeCycle
     {
-        public SubscriptionServiceLifeCycle(string xmlFile) : base(xmlFile)
+        public SubscriptionServiceLifeCycle(IServiceLocator serviceLocator) : base(serviceLocator)
         {
         }
 
         public override void Start()
         {
-            Container.AddComponentLifeStyle("followerrepository", typeof(FollowerRepository), LifestyleType.Singleton);
-
-            Container.AddComponent<IHostedService, SubscriptionService>();
-            Container.AddComponent<ISubscriptionRepository, InMemorySubscriptionRepository>();
-            
-            //TODO: Polish this DB configuration option
-            //Container.AddComponent<ISubscriptionRepository, NHibernateSubscriptionStorage>();   
         }
 
         public override void Stop()
         {
-            
         }
     }
 }

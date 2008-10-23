@@ -14,17 +14,21 @@ namespace MassTransit.Host.Actions
 {
     using Hosts;
     using log4net;
+    using Microsoft.Practices.ServiceLocation;
 
+    /// <summary>
+    /// Action to run the host as a win form
+    /// </summary>
     public class RunAsWinFormAction :
         IAction
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof (RunAsConsoleAction));
 
-        public void Do(IInstallationConfiguration configuration)
+        public void Do(IInstallationConfiguration configuration, IServiceLocator serviceLocator)
         {
             _log.Info("Received winform start notification");
 
-            var inWinFormHost = new WinFormHost(configuration.LifeCycle);
+            var inWinFormHost = new WinFormHost(configuration.LifeCycle, serviceLocator);
             inWinFormHost.Run();
         }
     }

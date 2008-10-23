@@ -16,6 +16,11 @@ namespace DeferredMessageServiceHost
     using log4net;
     using log4net.Config;
     using MassTransit.Host;
+    using MassTransit.ServiceBus;
+    using MassTransit.ServiceBus.Services.MessageDeferral;
+    using MassTransit.Services;
+    using MassTransit.WindsorIntegration;
+    using Microsoft.Practices.ServiceLocation;
 
     class Program
     {
@@ -25,7 +30,14 @@ namespace DeferredMessageServiceHost
             XmlConfigurator.ConfigureAndWatch(new FileInfo("log4net.xml"));
             _log.Info("Deferred Message Service Loading");
 
-            var env = new DeferredMessageConfiguration("deferred.castle.xml");
+            var container = new DefaultMassTransitContainer("deferred.castle.xml");
+            container.AddComponent<IHostedService, MessageDeferralService>();
+            container.AddComponent<IDeferredMessageRepository, InMemoryDeferredMessageRepository>();
+            //TODO: Put the Database Repository here too
+
+            var wob = new WindsorObjectBuilder(container.Kernel);
+            ServiceLocator.SetLocatorProvider(()=>wob);
+            var env = new DeferredMessageConfiguration(ServiceLocator.Current);
 
 
             Runner.Run(env, args);

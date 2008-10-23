@@ -14,7 +14,6 @@ namespace MassTransit.Host
 {
 	using System;
 	using Actions;
-	using Castle.Windsor;
 
     /// <summary>
     /// This interface represesnts an application's lifecycle
@@ -26,11 +25,6 @@ namespace MassTransit.Host
 		/// The default action to be used by the host (console or gui for the most part)
 		/// </summary>
 		NamedAction DefaultAction { get; }
-
-        /// <summary>
-        /// IoC Container. Will soon be replaced with ServiceLocator
-        /// </summary>
-		IWindsorContainer Container { get; }
 
         /// <summary>
         /// A method to setup your IoC container

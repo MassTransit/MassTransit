@@ -14,15 +14,16 @@ namespace SubscriptionServiceHost
 {
     using MassTransit.Host;
     using MassTransit.Host.Configurations;
+    using Microsoft.Practices.ServiceLocation;
 
     public class SubscriptionServiceConfiguration :
         InteractiveConfiguration
     {
         private readonly IApplicationLifeCycle _lifecycle;
 
-        public SubscriptionServiceConfiguration(string xmlFile) 
+        public SubscriptionServiceConfiguration(IServiceLocator serviceLocator) 
         {
-            _lifecycle = new SubscriptionServiceLifeCycle(xmlFile);
+            _lifecycle = new SubscriptionServiceLifeCycle(serviceLocator);
         }
 
         public override IApplicationLifeCycle LifeCycle

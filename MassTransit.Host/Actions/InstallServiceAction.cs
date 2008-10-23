@@ -13,6 +13,7 @@
 namespace MassTransit.Host.Actions
 {
 	using log4net;
+	using Microsoft.Practices.ServiceLocation;
 
     /// <summary>
     /// Install the host as a windows service
@@ -22,7 +23,7 @@ namespace MassTransit.Host.Actions
 	{
 		private static readonly ILog _log = LogManager.GetLogger(typeof (InstallServiceAction));
 
-		public void Do(IInstallationConfiguration configuration)
+		public void Do(IInstallationConfiguration configuration, IServiceLocator serviceLocator)
 		{
 			_log.Info("Received service install notification");
 

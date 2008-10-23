@@ -3,14 +3,15 @@ namespace InternalInventoryService
     using MassTransit.Host.Actions;
     using MassTransit.Host.LifeCycles;
     using MassTransit.ServiceBus;
+    using Microsoft.Practices.ServiceLocation;
 
     public class InternalInventoryServiceLifeCycle :
         HostedLifeCycle
     {
         private IServiceBus _bus;
 
-        public InternalInventoryServiceLifeCycle(string xmlFile)
-            : base(xmlFile)
+        public InternalInventoryServiceLifeCycle(IServiceLocator serviceLocator)
+            : base(serviceLocator)
         {
         }
 
@@ -21,17 +22,13 @@ namespace InternalInventoryService
 
         public override void Start()
         {
-            Container.AddComponent<InventoryLevelService>();
-
-            _bus = Container.Resolve<IServiceBus>("server");
+            _bus = this.ServiceLocator.GetInstance<IServiceBus>("server");
 
             _bus.AddComponent<InventoryLevelService>();
         }
 
         public override void Stop()
         {
-            _bus.Dispose();
-            Container.Release(_bus);
         }
     }
 }

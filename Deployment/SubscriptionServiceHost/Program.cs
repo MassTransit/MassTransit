@@ -13,9 +13,14 @@
 namespace SubscriptionServiceHost
 {
     using System.IO;
+    using Castle.Core;
     using log4net;
     using log4net.Config;
     using MassTransit.Host;
+    using MassTransit.ServiceBus;
+    using MassTransit.ServiceBus.Subscriptions;
+    using MassTransit.WindsorIntegration;
+    using Microsoft.Practices.ServiceLocation;
 
     internal class Program
     {
@@ -26,7 +31,18 @@ namespace SubscriptionServiceHost
             XmlConfigurator.ConfigureAndWatch(new FileInfo("log4net.xml"));
             _log.Info("SubMgr Loading");
 
-            var env = new SubscriptionServiceConfiguration("pubsub.castle.xml");
+            var container = new DefaultMassTransitContainer("pubsub.castle.xml");
+            container.AddComponentLifeStyle("followerrepository", typeof(FollowerRepository), LifestyleType.Singleton);
+
+            container.AddComponent<IHostedService, SubscriptionService>();
+            container.AddComponent<ISubscriptionRepository, InMemorySubscriptionRepository>();
+
+            //TODO: Polish this DB configuration option
+            //Container.AddComponent<ISubscriptionRepository, NHibernateSubscriptionStorage>();   
+
+            var wob = new WindsorObjectBuilder(container.Kernel);
+            ServiceLocator.SetLocatorProvider(() => wob);
+            var env = new SubscriptionServiceConfiguration(ServiceLocator.Current);
 
 
             Runner.Run(env, args);

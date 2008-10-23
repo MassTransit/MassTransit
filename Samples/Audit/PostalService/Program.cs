@@ -2,16 +2,25 @@
 {
     using System.IO;
     using Host;
+    using log4net.Config;
     using MassTransit.Host;
-    using MassTransit.Host.Configurations;
+    using MassTransit.WindsorIntegration;
+    using Microsoft.Practices.ServiceLocation;
 
-    class Program
+    internal class Program
     {
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
-            //log4net.Config.XmlConfigurator.ConfigureAndWatch(new FileInfo("log4net.xml"));
-            log4net.Config.BasicConfigurator.Configure();
-            IInstallationConfiguration cfg = new PostalServiceConfiguration("postal-castle.xml");
+            XmlConfigurator.ConfigureAndWatch(new FileInfo("log4net.xml"));
+
+
+            var container = new DefaultMassTransitContainer("postal-castle.xml");
+            container.AddComponent<SendEmailConsumer>("sec");
+
+
+            var wob = new WindsorObjectBuilder(container.Kernel);
+            ServiceLocator.SetLocatorProvider(() => wob);
+            IInstallationConfiguration cfg = new PostalServiceConfiguration(ServiceLocator.Current);
 
             Runner.Run(cfg, args);
         }

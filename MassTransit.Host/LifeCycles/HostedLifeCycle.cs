@@ -14,30 +14,25 @@ namespace MassTransit.Host.LifeCycles
 {
 	using System;
 	using Actions;
-	using Castle.Facilities.Startable;
-	using Castle.Windsor;
+	using Microsoft.Practices.ServiceLocation;
 	using ServiceBus;
-	using WindsorIntegration;
 
-	public delegate void Work();
-
+    /// <summary>
+    /// Base class to handle the host lifecycle common junk
+    /// </summary>
 	public abstract class HostedLifeCycle :
 		IApplicationLifeCycle
 	{
-		private readonly string _xmlFile;
-		private readonly IWindsorContainer _container;
+	    private readonly IServiceLocator _serviceLocator;
 
-		protected HostedLifeCycle(string xmlFile)
+		protected HostedLifeCycle(IServiceLocator serviceLocator)
 		{
-			_xmlFile = xmlFile;
-			_container = new WindsorContainer(_xmlFile);
-			_container.AddFacility("masstransit", new MassTransitFacility());
-			_container.AddFacility("startable", new StartableFacility());
+		    _serviceLocator = serviceLocator;
 		}
 
-		public void Initialize()
+	    public void Initialize()
 		{
-			foreach (IHostedService hs in _container.ResolveAll<IHostedService>())
+			foreach (IHostedService hs in _serviceLocator.GetAllInstances<IHostedService>())
 			{
 				hs.Start();
 			}
@@ -54,19 +49,15 @@ namespace MassTransit.Host.LifeCycles
 
 		public void Dispose()
 		{
-			foreach (IHostedService hs in _container.ResolveAll<IHostedService>())
+            foreach (IHostedService hs in _serviceLocator.GetAllInstances<IHostedService>())
 			{
 				hs.Stop();
 			}
 
-			foreach (IServiceBus bus in _container.ResolveAll<IServiceBus>())
+			foreach (IServiceBus bus in _serviceLocator.GetAllInstances<IServiceBus>())
 			{
 				bus.Dispose();
-				_container.Release(bus);
 			}
-
-			_container.Dispose();
-
 
 			if (Completed != null)
 			{
@@ -75,17 +66,12 @@ namespace MassTransit.Host.LifeCycles
 			}
 		}
 
-		public IWindsorContainer Container
-		{
-			get { return _container; }
-		}
+        public IServiceLocator ServiceLocator
+        {
+            get { return _serviceLocator; }
+        }
 
-		//TODO: WTF is this (and I wrote it!)
+        //TODO: WTF is this (and I wrote it!)
 		public event Action<IApplicationLifeCycle> Completed;
-
-		public void PerformWorkInAlternateThread(Work work)
-		{
-			work.BeginInvoke(delegate { }, null);
-		}
 	}
 }

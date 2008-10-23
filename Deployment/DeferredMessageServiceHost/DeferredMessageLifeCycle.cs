@@ -13,27 +13,21 @@
 namespace DeferredMessageServiceHost
 {
     using MassTransit.Host.LifeCycles;
-    using MassTransit.ServiceBus;
-    using MassTransit.ServiceBus.Services.MessageDeferral;
-    using MassTransit.Services;
+    using Microsoft.Practices.ServiceLocation;
 
     public class DeferredMessageLifeCycle :
         HostedLifeCycle
     {
-        public DeferredMessageLifeCycle(string xmlFile) : base(xmlFile)
+        public DeferredMessageLifeCycle(IServiceLocator serviceLocator) : base(serviceLocator)
         {
         }
 
         public override void Start()
         {
-            Container.AddComponent<IHostedService, MessageDeferralService>();
-            Container.AddComponent<IDeferredMessageRepository, InMemoryDeferredMessageRepository>();
-            //TODO: Put the Database Repository here too
         }
 
         public override void Stop()
         {
-            
         }
     }
 }

@@ -14,13 +14,18 @@ namespace MassTransit.Host.Actions
 {
     using Host;
     using log4net;
+    using Microsoft.Practices.ServiceLocation;
 
+
+    /// <summary>
+    /// Uninstalls the host as a win service
+    /// </summary>
     public class UninstallServiceAction :
         IAction
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(UninstallServiceAction));
 
-        public void Do(IInstallationConfiguration configuration)
+        public void Do(IInstallationConfiguration configuration, IServiceLocator serviceLocator)
         {
             if(!HostServiceInstaller.IsInstalled(configuration))
             {

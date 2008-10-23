@@ -14,15 +14,16 @@ namespace HealthServiceHost
 {
     using MassTransit.Host;
     using MassTransit.Host.Configurations;
+    using Microsoft.Practices.ServiceLocation;
 
     public class HealthServiceConfiguration :
         InteractiveConfiguration
     {
         private readonly IApplicationLifeCycle _lifecycle;
 
-        public HealthServiceConfiguration(string xmlFile)
+        public HealthServiceConfiguration(IServiceLocator serviceLocator)
         {
-            _lifecycle = new HealthServiceLifeCycle(xmlFile);
+            _lifecycle = new HealthServiceLifeCycle(serviceLocator);
         }
 
         public override IApplicationLifeCycle LifeCycle

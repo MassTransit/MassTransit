@@ -16,6 +16,10 @@ namespace TimeoutServiceHost
     using log4net;
     using log4net.Config;
     using MassTransit.Host;
+    using MassTransit.ServiceBus;
+    using MassTransit.ServiceBus.Services.Timeout;
+    using MassTransit.WindsorIntegration;
+    using Microsoft.Practices.ServiceLocation;
 
     class Program
     {
@@ -26,7 +30,13 @@ namespace TimeoutServiceHost
             XmlConfigurator.ConfigureAndWatch(new FileInfo("log4net.xml"));
             _log.Info("Timeout Service Loading");
 
-            var env = new TimeoutServiceConfiguration("timeout.castle.xml");
+            var container = new DefaultMassTransitContainer("timeout.castle.xml");
+            container.AddComponent<ITimeoutRepository, InMemoryTimeoutRepository>();
+            container.AddComponent<IHostedService, TimeoutService>();
+
+            var wob = new WindsorObjectBuilder(container.Kernel);
+            ServiceLocator.SetLocatorProvider(() => wob);
+            var env = new TimeoutServiceConfiguration(ServiceLocator.Current);
 
 
             Runner.Run(env, args);
