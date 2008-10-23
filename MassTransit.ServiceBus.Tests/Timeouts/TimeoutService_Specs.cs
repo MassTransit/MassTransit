@@ -39,6 +39,9 @@ namespace MassTransit.ServiceBus.Tests.Timeouts
 
 			_repository = Container.Resolve<ITimeoutRepository>();
 
+			Container.AddComponent<ScheduleTimeoutConsumer>();
+			Container.AddComponent<CancelTimeoutConsumer>();
+
 			_timeoutService = new TimeoutService(LocalBus, _repository);
 			_timeoutService.Start();
 		}
