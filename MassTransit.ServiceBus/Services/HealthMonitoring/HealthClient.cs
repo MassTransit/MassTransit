@@ -17,7 +17,7 @@ namespace MassTransit.ServiceBus.Services.HealthMonitoring
 
     public class HealthClient :
         Consumes<Ping>.All,
-        IHostedService //, Publishes<Heartbeat>
+        IHostedService
     {
         private readonly IServiceBus _bus;
         private readonly int _timeInMilliseconds;
@@ -48,16 +48,10 @@ namespace MassTransit.ServiceBus.Services.HealthMonitoring
             get { return _timer.Enabled; }
         }
 
-        #region All Members
-
         public void Consume(Ping message)
         {
             _bus.Publish(new Pong(message.CorrelationId, _bus.Endpoint.Uri));
         }
-
-        #endregion
-
-        #region IHostedService Members
 
         public void Start()
         {
@@ -74,8 +68,6 @@ namespace MassTransit.ServiceBus.Services.HealthMonitoring
             _timer.Elapsed -= Beat;
             _timer.Dispose();
         }
-
-        #endregion
 
         public void Beat(object sender, ElapsedEventArgs e)
         {
