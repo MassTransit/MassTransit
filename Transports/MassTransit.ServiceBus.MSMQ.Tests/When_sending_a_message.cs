@@ -12,7 +12,7 @@ namespace MassTransit.ServiceBus.MSMQ.Tests
         [ExpectedException(typeof(EndpointException))]
         public void To_A_Transactional_Queue_Without_a_transaction()
         {
-            string uri = "msmq://localhost/test_transactions";
+            string uri = "msmq://localhost/mt_client_tx";
             MsmqEndpoint ep = new MsmqEndpoint(uri);
             QueueTestContext.ValidateAndPurgeQueue(ep.QueuePath, true);
 
@@ -22,7 +22,7 @@ namespace MassTransit.ServiceBus.MSMQ.Tests
         [Test]
         public void To_A_Transactional_Queue_With_a_transaction()
         {
-            string uri = "msmq://localhost/test_transactions";
+            string uri = "msmq://localhost/mt_client_tx";
             MsmqEndpoint ep = new MsmqEndpoint(uri);
             QueueTestContext.ValidateAndPurgeQueue(ep.QueuePath, true);
          

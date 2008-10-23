@@ -11,18 +11,18 @@ namespace MassTransit.ServiceBus.MSMQ.Tests
 		[Test]
 		public void A_message_queue_address_should_convert_to_a_queue_path()
 		{
-			string address = "msmq://localhost/test_endpoint";
+			string address = "msmq://localhost/mt_client";
 
 			IMsmqEndpoint endpoint = new MsmqEndpoint(address);
 
-			Assert.That(endpoint.QueuePath, Is.EqualTo("FormatName:DIRECT=OS:" + Environment.MachineName.ToLowerInvariant() + @"\private$\test_endpoint"));
-			Assert.That(endpoint.Uri.ToString(), Is.EqualTo("msmq://" + Environment.MachineName.ToLowerInvariant() + "/test_endpoint"));
+            Assert.That(endpoint.QueuePath, Is.EqualTo("FormatName:DIRECT=OS:" + Environment.MachineName.ToLowerInvariant() + @"\private$\mt_client"));
+            Assert.That(endpoint.Uri.ToString(), Is.EqualTo("msmq://" + Environment.MachineName.ToLowerInvariant() + "/mt_client"));
 
 
 			IMsmqEndpoint endpoint2 = new MsmqEndpoint(new Uri(address));
 
-			Assert.That(endpoint2.QueuePath, Is.EqualTo("FormatName:DIRECT=OS:" + Environment.MachineName.ToLowerInvariant() + @"\private$\test_endpoint"));
-			Assert.That(endpoint2.Uri.ToString(), Is.EqualTo("msmq://" + Environment.MachineName.ToLowerInvariant() + "/test_endpoint"));
+            Assert.That(endpoint2.QueuePath, Is.EqualTo("FormatName:DIRECT=OS:" + Environment.MachineName.ToLowerInvariant() + @"\private$\mt_client"));
+            Assert.That(endpoint2.Uri.ToString(), Is.EqualTo("msmq://" + Environment.MachineName.ToLowerInvariant() + "/mt_client"));
 		}
 
 		[Test, ExpectedException(typeof (EndpointException))]
