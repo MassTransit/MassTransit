@@ -11,7 +11,6 @@
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.ServiceBus.MSMQ.Tests
-
 {
     using System;
     using MassTransit.ServiceBus.Tests;

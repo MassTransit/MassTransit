@@ -4,10 +4,10 @@
 		<facility id="masstransit">
 
 			<bus id="local"
-					 endpoint="msmq://localhost/test_servicebus_tx">
+					 endpoint="msmq://localhost/mt_client_tx">
 			</bus>
 			<bus id="remote"
-					 endpoint="msmq://localhost/test_remoteservicebus_tx">
+					 endpoint="msmq://localhost/mt_server_tx">
 			</bus>
 			<transports>
 				<transport>MassTransit.ServiceBus.MSMQ.MsmqEndpoint, MassTransit.ServiceBus.MSMQ</transport>
