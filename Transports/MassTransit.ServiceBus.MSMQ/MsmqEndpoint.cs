@@ -74,7 +74,7 @@ namespace MassTransit.ServiceBus.MSMQ
 		        _isLocal = string.Compare(_uri.Host, localhost, true) == 0;
 		    }
 
-			_queuePath = string.Format(@"FormatName:DIRECT=OS:{0}\private$\{1}", hostName, _uri.AbsolutePath.Substring(1));
+			_queuePath = string.Format(@"FormatName:DIRECT=OS:{0}\private$\{1}", localhost, _uri.AbsolutePath.Substring(1));
 
 			_queue = Open(QueueAccessMode.SendAndReceive);
 
@@ -184,20 +184,11 @@ namespace MassTransit.ServiceBus.MSMQ
 		public void Send<T>(T message, TimeSpan timeToLive) where T : class
 		{
 			if (!_queue.CanWrite)
-				throw new EndpointException(this, "Not allowed to write to endpoint");
+				throw new EndpointException(this, "Not allowed to write to endpoint " + _uri);
 
 			Type messageType = typeof (T);
 
-			Message msg = new Message();
-
-			_formatter.Serialize(new MsmqFormattedBody(msg), message);
-
-			if (timeToLive < TimeSpan.MaxValue)
-				msg.TimeToBeReceived = timeToLive;
-
-			msg.Label = messageType.AssemblyQualifiedName;
-
-			msg.Recoverable = _reliableMessaging;
+		    Message msg = BuildMessage(timeToLive, messageType, message);
 
 			try
 			{
@@ -216,7 +207,10 @@ namespace MassTransit.ServiceBus.MSMQ
 					}
 				}
 				else
-				    _queue.Send(msg, _sendTransactionType);
+				{
+                    _queue.Send(msg, _sendTransactionType);
+				}
+				    
 			}
 			catch (MessageQueueException ex)
 			{
@@ -226,6 +220,22 @@ namespace MassTransit.ServiceBus.MSMQ
 			if (_log.IsDebugEnabled)
 				_log.DebugFormat("Message Sent: Id = {0}, Message Type = {1}", msg.Id, messageType.Name);
 		}
+
+	    private Message BuildMessage(TimeSpan timeToLive, Type messageType, object message)
+	    {
+            var msg = new Message();
+
+            _formatter.Serialize(new MsmqFormattedBody(msg), message);
+
+            if (timeToLive < TimeSpan.MaxValue)
+                msg.TimeToBeReceived = timeToLive;
+
+            msg.Label = messageType.AssemblyQualifiedName;
+
+            msg.Recoverable = _reliableMessaging;
+
+	        return msg;
+	    }
 
 	    public object Receive(TimeSpan timeout)
 		{
