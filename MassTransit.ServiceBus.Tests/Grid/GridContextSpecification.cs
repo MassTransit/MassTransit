@@ -23,10 +23,6 @@ namespace MassTransit.ServiceBus.Tests.Grid
             log4net.Config.XmlConfigurator.ConfigureAndWatch(new FileInfo(@"grid\grid.log4net.config"));
         }
 
-        protected override string GetCastleConfigurationFile()
-        {
-            return @"grid\grid.castle.xml";
-        }
         protected override void Before_each()
         {
             Container.AddComponent<ExceptionalWorker>();

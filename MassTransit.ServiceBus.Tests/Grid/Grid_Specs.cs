@@ -53,10 +53,10 @@ namespace MassTransit.ServiceBus.Tests.Grid
         {
             Container.AddComponent<FactorLongNumberWorker>();
 
-            RemoteBus.AddComponent<SubTaskWorker<FactorLongNumberWorker, FactorLongNumber, LongNumberFactored>>();
+            LocalBus.AddComponent<SubTaskWorker<FactorLongNumberWorker, FactorLongNumber, LongNumberFactored>>();
 
             var distributedTaskController =
-                new DistributedTaskController<FactorLongNumbersTask, FactorLongNumber, LongNumberFactored>(RemoteBus, Container.Resolve<IEndpointResolver>(), _factorLongNumbers);
+				new DistributedTaskController<FactorLongNumbersTask, FactorLongNumber, LongNumberFactored>(LocalBus, Container.Resolve<IEndpointResolver>(), _factorLongNumbers);
 
             distributedTaskController.Start();
 

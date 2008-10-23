@@ -182,9 +182,6 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Grid\grid.castle.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
     <Content Include="loopback.castle.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
