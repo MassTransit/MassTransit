@@ -1,5 +1,6 @@
 namespace InternalInventoryService
 {
+    using System;
     using Inventory.Messages;
     using MassTransit.ServiceBus;
 
@@ -10,7 +11,7 @@ namespace InternalInventoryService
 
         public void Consume(QueryInventoryLevel message)
         {
-            PartInventoryLevelStatus status = new PartInventoryLevelStatus(message.PartNumber, 10, 50);
+            PartInventoryLevelStatus status = new PartInventoryLevelStatus(message.PartNumber, DateTime.Now.Minute, DateTime.Now.Second);
 
             Bus.Publish(status);
         }

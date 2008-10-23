@@ -43,6 +43,11 @@
             _bus = IoC.Container.Resolve<IServiceBus>("client");
         }
 
+        ~InventoryService()
+        {
+            IoC.Container.Release(_bus);
+        }
+
         [WebMethod]
         public IAsyncResult BeginCheckInventory(string partNumber, AsyncCallback callback, object state)
         {

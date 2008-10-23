@@ -21,6 +21,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Infrastructure"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Inventory.Messages", "Inventory.Messages\Inventory.Messages.csproj", "{09300024-D736-4CA9-8636-0FA444CD6CD9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VendorWebClient", "VendorWebClient\VendorWebClient.csproj", "{3239513D-24A6-4F47-B69A-7F7FF31E4162}"
+	ProjectSection(ProjectDependencies) = postProject
+		{02D01B5E-D74D-4A2C-9D7A-17323FB83C64} = {02D01B5E-D74D-4A2C-9D7A-17323FB83C64}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -63,6 +68,10 @@ Global
 		{09300024-D736-4CA9-8636-0FA444CD6CD9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{09300024-D736-4CA9-8636-0FA444CD6CD9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{09300024-D736-4CA9-8636-0FA444CD6CD9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3239513D-24A6-4F47-B69A-7F7FF31E4162}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3239513D-24A6-4F47-B69A-7F7FF31E4162}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3239513D-24A6-4F47-B69A-7F7FF31E4162}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3239513D-24A6-4F47-B69A-7F7FF31E4162}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
