@@ -129,7 +129,7 @@ namespace MassTransit.ServiceBus.Tests.Formatters
             }
         }
 
-        [Test]
+        [Test, Ignore]
         public void DeserializeObjectWithValuesWithGenerics()
         {
             MemoryStream ms = new MemoryStream(Encoding.UTF8.GetBytes(_serializedMessagesWithValue));
