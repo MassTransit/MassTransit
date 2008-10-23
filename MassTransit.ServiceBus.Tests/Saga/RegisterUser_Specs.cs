@@ -12,8 +12,13 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.ServiceBus.Tests.Saga.RegisterUser
 {
-    using System.Diagnostics;
-    using NUnit.Framework;
+	using System;
+	using System.Diagnostics;
+    using Castle.Core;
+    using Magnum.Common.Repository;
+	using MassTransit.Saga;
+	using Messages;
+	using NUnit.Framework;
     using NUnit.Framework.SyntaxHelpers;
 
     [TestFixture]
@@ -22,20 +27,18 @@ namespace MassTransit.ServiceBus.Tests.Saga.RegisterUser
     {
         protected override void Before_each()
         {
+			// this just shows that you can easily respond to the message
+			RemoteBus.Subscribe<SendUserVerificationEmail>(x => RemoteBus.Publish(new UserVerificationEmailSent(x.Message.CorrelationId, x.Message.Email)));
             
-        }
-
-        protected override void After_each()
-        {
-            
+			RemoteBus.AddComponent<RegisterUserSaga>();
         }
 
         [Test]
         public void The_user_should_be_pending()
         {
-            var timer = Stopwatch.StartNew();
+			Stopwatch timer = Stopwatch.StartNew();
 
-            var controller = new RegisterUserController(LocalBus);
+			RegisterUserController controller = new RegisterUserController(LocalBus);
 
             bool complete = controller.RegisterUser("username", "password", "Display Name", "user@domain.com");
 
