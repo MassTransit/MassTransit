@@ -11,7 +11,7 @@ namespace InternalInventoryService
 
         public void Consume(QueryInventoryLevel message)
         {
-            PartInventoryLevelStatus status = new PartInventoryLevelStatus(message.PartNumber, DateTime.Now.Minute, DateTime.Now.Second);
+            var status = new PartInventoryLevelStatus(message.PartNumber, DateTime.Now.Minute, DateTime.Now.Second);
 
             Bus.Publish(status);
         }

@@ -12,6 +12,8 @@
 /// specific language governing permissions and limitations under the License.
 namespace MassTransit.Host
 {
+    using Microsoft.Practices.ServiceLocation;
+
     /// <summary>
     /// A host action
     /// </summary>
@@ -21,6 +23,7 @@ namespace MassTransit.Host
         /// The action to be taken
         /// </summary>
         /// <param name="configuration"></param>
-        void Do(IInstallationConfiguration configuration);
+        /// <param name="serviceLocator"></param>
+        void Do(IInstallationConfiguration configuration, IServiceLocator serviceLocator);
     }
 }

@@ -16,6 +16,7 @@ namespace MassTransit.Host.Actions
     using System.Reflection;
     using Hosts;
     using log4net;
+    using Microsoft.Practices.ServiceLocation;
 
     /// <summary>
     /// Runs the host as a service (must be installed first)
@@ -27,7 +28,7 @@ namespace MassTransit.Host.Actions
 
         #region IAction Members
 
-        public void Do(IInstallationConfiguration configuration)
+        public void Do(IInstallationConfiguration configuration, IServiceLocator serviceLocator)
         {
             _log.Info("Received service start notification");
 

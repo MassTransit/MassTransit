@@ -15,7 +15,11 @@ namespace MassTransit.Host
     using System.Collections.Generic;
 	using Actions;
 	using log4net;
+    using Microsoft.Practices.ServiceLocation;
 
+    /// <summary>
+    /// Entry point into the Host infrastructure
+    /// </summary>
 	public static class Runner
 	{
 		private static readonly IDictionary<NamedAction, IAction> _actions = new Dictionary<NamedAction, IAction>();
@@ -30,6 +34,11 @@ namespace MassTransit.Host
 			_actions.Add(ServiceNamedAction.Service, new RunAsServiceAction());
 		}
 
+        /// <summary>
+        /// Go go gadget
+        /// </summary>
+        /// <param name="environment"></param>
+        /// <param name="args"></param>
 		public static void Run(IInstallationConfiguration environment, params string[] args)
 		{
 			_log.Info("Starting Host");
@@ -42,7 +51,7 @@ namespace MassTransit.Host
 
 			_log.DebugFormat("Running action: {0}", actionKey);
 
-			_actions[actionKey].Do(environment);
+			_actions[actionKey].Do(environment, ServiceLocator.Current);
 		}
 	}
 }

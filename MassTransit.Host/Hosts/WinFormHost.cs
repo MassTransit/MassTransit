@@ -15,18 +15,24 @@ namespace MassTransit.Host.Hosts
 	using System;
 	using System.Windows.Forms;
 	using log4net;
+	using Microsoft.Practices.ServiceLocation;
 
-	public class WinFormHost
+    /// <summary>
+    /// The actual win form host code
+    /// </summary>
+    public class WinFormHost
 	{
 		private static readonly ILog _log = LogManager.GetLogger(typeof (ConsoleHost));
 		private readonly IApplicationLifeCycle _lifecycle;
+        private readonly IServiceLocator _serviceLocator;
 
-		public WinFormHost(IApplicationLifeCycle lifecycle)
+        public WinFormHost(IApplicationLifeCycle lifecycle, IServiceLocator serviceLocator)
 		{
-			_lifecycle = lifecycle;
+		    _lifecycle = lifecycle;
+		    _serviceLocator = serviceLocator;
 		}
 
-		[STAThread]
+        [STAThread]
 		public void Run()
 		{
 			_log.Debug("Starting up as a winform application");
@@ -37,7 +43,7 @@ namespace MassTransit.Host.Hosts
 			_lifecycle.Start(); //user code starts
 			_lifecycle.Initialize();
 
-			Form winForm = _lifecycle.Container.Resolve<Form>(); //TODO: probably want a specific form here, could be many
+			Form winForm = _serviceLocator.GetInstance<Form>(); //TODO: probably want a specific form here, could be many
 
 			_lifecycle.Completed += delegate { winForm.Close(); }; //TODO: this would force the app to close
 

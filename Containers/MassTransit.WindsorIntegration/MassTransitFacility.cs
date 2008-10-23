@@ -26,6 +26,9 @@ namespace MassTransit.WindsorIntegration
     using ServiceBus.Services.HealthMonitoring;
     using Component = Castle.MicroKernel.Registration.Component;
 
+    /// <summary>
+    /// Facility to simplify the use of MT
+    /// </summary>
     public class MassTransitFacility :
         AbstractFacility
     {
@@ -174,49 +177,45 @@ namespace MassTransit.WindsorIntegration
             string name = cacheConfig.Attributes["name"];
 
         	string mode = cacheConfig.Attributes["mode"] ?? "local";
+            ISubscriptionCache cache;
             switch (mode)
             {
                 case "local":
                     if (string.IsNullOrEmpty(name))
                         return Kernel.Resolve<ISubscriptionCache>();
-                    else
+                    
+                    cache = Kernel.Resolve<ISubscriptionCache>(name);
+                    if (cache == null)
                     {
-                        ISubscriptionCache cache = Kernel.Resolve<ISubscriptionCache>(name);
-                        if (cache == null)
-                        {
-                            cache = Kernel.Resolve<ISubscriptionCache>();
-                            Kernel.AddComponentInstance(name, cache);
-                        }
-
-                        return cache;
+                        cache = Kernel.Resolve<ISubscriptionCache>();
+                        Kernel.AddComponentInstance(name, cache);
                     }
+
+                    return cache;
 
                 case "distributed":
                     if (string.IsNullOrEmpty(name))
-                    {
                         return new DistributedSubscriptionCache(GetDistributedCacheServerList(cacheConfig));
-                    }
-                    else
+                    
+                    cache = Kernel.Resolve<DistributedSubscriptionCache>(name);
+                    if (cache == null)
                     {
-                        ISubscriptionCache cache = Kernel.Resolve<DistributedSubscriptionCache>(name);
-                        if (cache == null)
-                        {
-                            cache = new DistributedSubscriptionCache(GetDistributedCacheServerList(cacheConfig));
-                            Kernel.AddComponentInstance(name, cache);
-                        }
-                        return cache;
+                        cache = new DistributedSubscriptionCache(GetDistributedCacheServerList(cacheConfig));
+                        Kernel.AddComponentInstance(name, cache);
                     }
+                    return cache;
 
                 default:
                     throw new ConventionException(mode + " is not a valid subscriptionCache mode");
             }
         }
+
         private static IEnumerable<string> GetDistributedCacheServerList(IConfiguration configuration)
         {
-            List<string> servers = new List<string>();
+            var servers = new List<string>();
 
             IConfiguration serversConfig = configuration.Children["servers"];
-            if (serversConfig != null)
+            if (serversConfig != null) //TODO: If this is null shouldn't we throw?
             {
                 foreach (IConfiguration serverConfig in serversConfig.Children)
                 {
@@ -236,6 +235,7 @@ namespace MassTransit.WindsorIntegration
                 .AddAttributeDescriptor("stopMethod", "Stop")
                 .LifeStyle.Transient;
         }
+
         private static T GetConfigurationValue<T>(IConfiguration config, string attributeName, T defaultValue)
         {
             string value = config.Attributes[attributeName];

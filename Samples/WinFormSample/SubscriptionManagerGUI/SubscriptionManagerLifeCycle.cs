@@ -12,20 +12,14 @@
 // specific language governing permissions and limitations under the License.
 namespace SubscriptionManagerGUI
 {
-    using System.Windows.Forms;
-    using Castle.Core;
     using MassTransit.Host.Actions;
     using MassTransit.Host.LifeCycles;
-    using MassTransit.ServiceBus;
-    using MassTransit.ServiceBus.Services.HealthMonitoring;
-    using MassTransit.ServiceBus.Services.Timeout;
-    using MassTransit.ServiceBus.Subscriptions;
-    using MassTransit.ServiceBus.Subscriptions.ServerHandlers;
+    using Microsoft.Practices.ServiceLocation;
 
     public class SubscriptionManagerLifeCycle :
         HostedLifeCycle
     {
-        public SubscriptionManagerLifeCycle(string xmlFile) : base(xmlFile)
+        public SubscriptionManagerLifeCycle(IServiceLocator serviceLocator) : base(serviceLocator)
         {
         }
 
@@ -36,29 +30,6 @@ namespace SubscriptionManagerGUI
 
         public override void Start()
         {
-            Container.AddComponentLifeStyle("followerRepository", typeof (FollowerRepository), LifestyleType.Singleton);
-
-            Container.AddComponent<ISubscriptionRepository, InMemorySubscriptionRepository>();
-            Container.AddComponent<IHostedService, SubscriptionService>();
-            Container.AddComponent<AddSubscriptionHandler>();
-            Container.AddComponent<RemoveSubscriptionHandler>();
-            Container.AddComponent<CancelUpdatesHandler>();
-            Container.AddComponent<CacheUpdateRequestHandler>();
-
-
-            Container.AddComponent<IHealthCache, LocalHealthCache>();
-            Container.AddComponent<IHeartbeatTimer, InMemoryHeartbeatTimer>();
-            Container.AddComponent<IHostedService, HealthService>();
-            Container.AddComponent<HeartbeatMonitor>();
-            Container.AddComponent<Investigator>();
-            Container.AddComponent<Reporter>();
-
-            Container.AddComponent<ITimeoutRepository, InMemoryTimeoutRepository>();
-            Container.AddComponent<IHostedService, TimeoutService>();
-            Container.AddComponent<ScheduleTimeoutConsumer>();
-            Container.AddComponent<CancelTimeoutConsumer>();
-
-            Container.AddComponent<Form, SubscriptionManagerForm>();            
         }
 
         public override void Stop()

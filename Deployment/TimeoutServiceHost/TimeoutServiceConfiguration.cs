@@ -14,15 +14,16 @@ namespace TimeoutServiceHost
 {
     using MassTransit.Host;
     using MassTransit.Host.Configurations;
+    using Microsoft.Practices.ServiceLocation;
 
     public class TimeoutServiceConfiguration :
         InteractiveConfiguration
     {
         private readonly IApplicationLifeCycle _lifecycle;
 
-        public TimeoutServiceConfiguration(string xmlFile)
+        public TimeoutServiceConfiguration(IServiceLocator serviceLocator)
         {
-            _lifecycle = new TimeoutServiceLifeCycle(xmlFile);
+            _lifecycle = new TimeoutServiceLifeCycle(serviceLocator);
         }
 
         public override IApplicationLifeCycle LifeCycle

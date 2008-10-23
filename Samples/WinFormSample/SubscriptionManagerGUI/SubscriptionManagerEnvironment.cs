@@ -14,16 +14,16 @@ namespace SubscriptionManagerGUI
 {
     using MassTransit.Host;
     using MassTransit.Host.Configurations;
-	using MassTransit.Host.LifeCycles;
+    using Microsoft.Practices.ServiceLocation;
 
-	public class SubscriptionManagerEnvironment :
+    public class SubscriptionManagerEnvironment :
 		LocalSystemConfiguration
 	{
 		private readonly IApplicationLifeCycle _lifeCycle;
 
-		public SubscriptionManagerEnvironment(string xmlFile)
+		public SubscriptionManagerEnvironment(IServiceLocator serviceLocator)
 		{
-			_lifeCycle = new SubscriptionManagerLifeCycle(xmlFile);
+			_lifeCycle = new SubscriptionManagerLifeCycle(serviceLocator);
 		}
 
 		public override string ServiceName

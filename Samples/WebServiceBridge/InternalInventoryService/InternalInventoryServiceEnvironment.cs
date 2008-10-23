@@ -2,15 +2,16 @@ namespace InternalInventoryService
 {
     using MassTransit.Host;
     using MassTransit.Host.Configurations;
+    using Microsoft.Practices.ServiceLocation;
 
     public class InternalInventoryServiceEnvironment :
         LocalSystemConfiguration
     {
         private readonly IApplicationLifeCycle _lifeCycle;
 
-        public InternalInventoryServiceEnvironment(string xmlFile)
+        public InternalInventoryServiceEnvironment(IServiceLocator serviceLocator)
         {
-            _lifeCycle = new InternalInventoryServiceLifeCycle(xmlFile);
+            _lifeCycle = new InternalInventoryServiceLifeCycle(serviceLocator);
         }
 
         public override string ServiceName

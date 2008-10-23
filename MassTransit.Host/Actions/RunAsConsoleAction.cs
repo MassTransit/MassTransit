@@ -14,6 +14,7 @@ namespace MassTransit.Host.Actions
 {
 	using Hosts;
 	using log4net;
+	using Microsoft.Practices.ServiceLocation;
 
     /// <summary>
     /// Runs the host as a console
@@ -23,7 +24,7 @@ namespace MassTransit.Host.Actions
 	{
 		private static readonly ILog _log = LogManager.GetLogger(typeof (RunAsConsoleAction));
 
-		public void Do(IInstallationConfiguration configuration)
+		public void Do(IInstallationConfiguration configuration, IServiceLocator serviceLocator)
 		{
 			_log.Info("Received console start notification");
 

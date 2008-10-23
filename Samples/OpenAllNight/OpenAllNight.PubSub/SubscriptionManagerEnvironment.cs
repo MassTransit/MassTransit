@@ -2,15 +2,16 @@ namespace OpenAllNight.PubSub
 {
     using MassTransit.Host;
     using MassTransit.Host.Configurations;
+    using Microsoft.Practices.ServiceLocation;
 
     public class SubscriptionManagerEnvironment :
         LocalSystemConfiguration
     {
         private readonly IApplicationLifeCycle _lifeCycle;
 
-        public SubscriptionManagerEnvironment(string xmlFile)
+        public SubscriptionManagerEnvironment(IServiceLocator serviceLocator)
         {
-            _lifeCycle = new SubscriptionManagerLifeCycle(xmlFile);
+            _lifeCycle = new SubscriptionManagerLifeCycle(serviceLocator);
         }
 
         public override IApplicationLifeCycle LifeCycle

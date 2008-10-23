@@ -15,20 +15,17 @@ namespace HealthServiceHost
     using MassTransit.Host.LifeCycles;
     using MassTransit.ServiceBus;
     using MassTransit.ServiceBus.Services.HealthMonitoring;
+    using Microsoft.Practices.ServiceLocation;
 
     public class HealthServiceLifeCycle :
         HostedLifeCycle
     {
-        public HealthServiceLifeCycle(string xmlFile) : base(xmlFile)
+        public HealthServiceLifeCycle(IServiceLocator serviceLocator) : base(serviceLocator)
         {
         }
 
         public override void Start()
         {
-            Container.AddComponent<IHostedService, HealthService>();
-            Container.AddComponent<IHealthCache, LocalHealthCache>();
-            Container.AddComponent<IHeartbeatTimer, InMemoryHeartbeatTimer>();
-            //TODO: Put database persittance here too
         }
 
         public override void Stop()

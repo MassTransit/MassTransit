@@ -14,15 +14,16 @@ namespace DeferredMessageServiceHost
 {
     using MassTransit.Host;
     using MassTransit.Host.Configurations;
+    using Microsoft.Practices.ServiceLocation;
 
     public class DeferredMessageConfiguration :
         InteractiveConfiguration
     {
         private readonly IApplicationLifeCycle _lifeCycle;
 
-        public DeferredMessageConfiguration(string xmlFile)
+        public DeferredMessageConfiguration(IServiceLocator serviceLocator)
         {
-            _lifeCycle = new DeferredMessageLifeCycle(xmlFile);
+            _lifeCycle = new DeferredMessageLifeCycle(serviceLocator);
         }
 
         public override string ServiceName

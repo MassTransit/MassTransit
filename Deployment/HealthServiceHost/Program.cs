@@ -15,6 +15,10 @@ namespace HealthServiceHost
     using System.IO;
     using log4net;
     using MassTransit.Host;
+    using MassTransit.ServiceBus;
+    using MassTransit.ServiceBus.Services.HealthMonitoring;
+    using MassTransit.WindsorIntegration;
+    using Microsoft.Practices.ServiceLocation;
 
     internal class Program
     {
@@ -25,7 +29,18 @@ namespace HealthServiceHost
             log4net.Config.XmlConfigurator.Configure(new FileInfo("log4net.xml"));
             _log.Info("Health Server Loading");
 
-            HealthServiceConfiguration cfg = new HealthServiceConfiguration("health.castle.xml");
+            var container = new DefaultMassTransitContainer("health.castle.xml");
+
+            
+            container.AddComponent<IHostedService, HealthService>();
+            container.AddComponent<IHealthCache, LocalHealthCache>();
+            container.AddComponent<IHeartbeatTimer, InMemoryHeartbeatTimer>();
+            //TODO: Put database persittance here too
+
+
+            var wob = new WindsorObjectBuilder(container.Kernel);
+            ServiceLocator.SetLocatorProvider(() => wob);
+            HealthServiceConfiguration cfg = new HealthServiceConfiguration(ServiceLocator.Current);
 
             Runner.Run(cfg, args);
         }

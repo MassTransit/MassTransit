@@ -3,22 +3,22 @@ namespace PostalService.Host
 	using System;
 	using MassTransit.Host.LifeCycles;
     using MassTransit.ServiceBus;
+	using Microsoft.Practices.ServiceLocation;
 
     public class PostalServiceLifeCycle :
         HostedLifeCycle
     {
         private IServiceBus _bus;
 
-        public PostalServiceLifeCycle(string xmlFile)
-            : base(xmlFile)
+        public PostalServiceLifeCycle(IServiceLocator serviceLocator):base(serviceLocator)
         {
         }
 
         public override void Start()
         {
-            Container.AddComponent<SendEmailConsumer>("sec");
+            
 
-            _bus = Container.Resolve<IServiceBus>("server");
+            _bus = base.ServiceLocator.GetInstance<IServiceBus>("server");
 
             _bus.AddComponent<SendEmailConsumer>();
 

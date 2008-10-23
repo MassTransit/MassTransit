@@ -2,6 +2,8 @@
 {
     using log4net;
     using MassTransit.Host;
+    using MassTransit.WindsorIntegration;
+    using Microsoft.Practices.ServiceLocation;
 
     internal static class Program
     {
@@ -11,7 +13,13 @@
         {
             _log.Info("InternalInventoryService Loading...");
 
-            IInstallationConfiguration cfg = new InternalInventoryServiceEnvironment("InternalInventoryService.Castle.xml");
+            var container = new DefaultMassTransitContainer("InternalInventoryService.Castle.xml");
+            container.AddComponent<InventoryLevelService>();
+
+            var wob = new WindsorObjectBuilder(container.Kernel);
+            ServiceLocator.SetLocatorProvider(()=>wob);
+
+            IInstallationConfiguration cfg = new InternalInventoryServiceEnvironment(ServiceLocator.Current);
 
             Runner.Run(cfg, args);
         }

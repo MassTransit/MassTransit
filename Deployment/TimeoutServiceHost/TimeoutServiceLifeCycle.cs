@@ -13,29 +13,22 @@
 namespace TimeoutServiceHost
 {
     using MassTransit.Host.LifeCycles;
-    using MassTransit.ServiceBus;
-    using MassTransit.ServiceBus.Services.Timeout;
+    using Microsoft.Practices.ServiceLocation;
 
-    public class TimeoutServiceLifeCycle : 
+    public class TimeoutServiceLifeCycle :
         HostedLifeCycle
 
     {
-        public TimeoutServiceLifeCycle(string xmlFile) : base(xmlFile)
+        public TimeoutServiceLifeCycle(IServiceLocator serviceLocator) : base(serviceLocator)
         {
-            
         }
 
         public override void Start()
         {
-            Container.AddComponent<ITimeoutRepository, InMemoryTimeoutRepository>();
-            Container.AddComponent<IHostedService, TimeoutService>();
-
-            //TODO: Add db persistance here
         }
 
         public override void Stop()
         {
-            
         }
     }
 }
