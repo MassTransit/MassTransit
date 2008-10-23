@@ -1,7 +1,9 @@
 namespace Inventory.Messages
 {
+    using System;
     using MassTransit.ServiceBus;
 
+    [Serializable]
     public class PartInventoryLevelStatus :
         CorrelatedBy<string>
     {
