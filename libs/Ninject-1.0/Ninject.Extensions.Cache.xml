@@ -1,0 +1,230 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Ninject.Extensions.Cache</name>
+    </assembly>
+    <members>
+        <member name="T:Ninject.Extensions.Cache.Infrastructure.CacheBase">
+            <summary>
+            An abstract implementation of a cache.
+            </summary>
+        </member>
+        <member name="T:Ninject.Extensions.Cache.Infrastructure.ICache">
+            <summary>
+            Stores results of message calls.
+            </summary>
+        </member>
+        <member name="M:Ninject.Extensions.Cache.Infrastructure.ICache.Get(Ninject.Core.Interception.IRequest,System.Nullable{System.TimeSpan})">
+            <summary>
+            Gets the stored value for the specified request.
+            </summary>
+            <param name="request">The request.</param>
+            <param name="timeout">The maximum age of a valid cache entry, or <see langword="null"/> if infinite.</param>
+            <returns>The stored value, or <see langword="null"/> if there is no value cached.</returns>
+        </member>
+        <member name="M:Ninject.Extensions.Cache.Infrastructure.ICache.Set(Ninject.Core.Interception.IRequest,System.Object)">
+            <summary>
+            Stores the specified value as the cached value for the specified request.
+            </summary>
+            <param name="request">The request.</param>
+            <param name="value">The value to store.</param>
+        </member>
+        <member name="M:Ninject.Extensions.Cache.Infrastructure.ICache.Clear">
+            <summary>
+            Clears all stored values from the cache.
+            </summary>
+        </member>
+        <member name="M:Ninject.Extensions.Cache.Infrastructure.CacheBase.Get(Ninject.Core.Interception.IRequest,System.Nullable{System.TimeSpan})">
+            <summary>
+            Gets the stored value for the specified request.
+            </summary>
+            <param name="request">The request.</param>
+            <param name="timeout">The maximum age of a valid cache entry, or <see langword="null"/> if infinite.</param>
+            <returns>The stored value, or <see langword="null"/> if there is no value cached.</returns>
+        </member>
+        <member name="M:Ninject.Extensions.Cache.Infrastructure.CacheBase.Set(Ninject.Core.Interception.IRequest,System.Object)">
+            <summary>
+            Stores the specified value as the cached value for the specified request.
+            </summary>
+            <param name="request">The request.</param>
+            <param name="value">The value to store.</param>
+        </member>
+        <member name="M:Ninject.Extensions.Cache.Infrastructure.CacheBase.Clear">
+            <summary>
+            Clears all stored values from the cache.
+            </summary>
+        </member>
+        <member name="M:Ninject.Extensions.Cache.Infrastructure.CacheBase.GetValue(System.Object,System.Nullable{System.TimeSpan})">
+            <summary>
+            Gets the value with the specified key.
+            </summary>
+            <param name="key">The key.</param>
+            <param name="timeout">The maximum age of a valid cache entry, or <see langword="null"/> if infinite.</param>
+            <returns>The associated value, or <see langword="null"/> if there is no value stored with the specified key.</returns>
+        </member>
+        <member name="M:Ninject.Extensions.Cache.Infrastructure.CacheBase.SetValue(System.Object,System.Object)">
+            <summary>
+            Sets the value for the specified key.
+            </summary>
+            <param name="key">The key.</param>
+            <param name="value">The value to store.</param>
+        </member>
+        <member name="P:Ninject.Extensions.Cache.Infrastructure.CacheBase.KeyGenerator">
+            <summary>
+            The key generator that will create keys for cached requests.
+            </summary>
+        </member>
+        <member name="T:Ninject.Extensions.Cache.Infrastructure.CacheEntry">
+            <summary>
+            Holds a result from a cached method call.
+            </summary>
+        </member>
+        <member name="M:Ninject.Extensions.Cache.Infrastructure.CacheEntry.#ctor(System.DateTime,System.Object)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Ninject.Extensions.Cache.Infrastructure.CacheEntry"/> class.
+            </summary>
+            <param name="timestamp">The timestamp.</param>
+            <param name="value">The value.</param>
+        </member>
+        <member name="M:Ninject.Extensions.Cache.Infrastructure.CacheEntry.HasExpired(System.TimeSpan)">
+            <summary>
+            Determines whether the entry has expired.
+            </summary>
+            <param name="timeout">The maximumm amount of time entries are allowed to remain in the cache.</param>
+            <returns><see langword="True"/> if the specified timeout has expired, otherwise <see langword="false"/>.</returns>
+        </member>
+        <member name="P:Ninject.Extensions.Cache.Infrastructure.CacheEntry.Timestamp">
+            <summary>
+            Gets or sets the time the method was originally invoked.
+            </summary>
+        </member>
+        <member name="P:Ninject.Extensions.Cache.Infrastructure.CacheEntry.Value">
+            <summary>
+            Gets or sets the value.
+            </summary>
+        </member>
+        <member name="T:Ninject.Extensions.Cache.Infrastructure.CacheInterceptor">
+            <summary>
+            An interceptor that blocks invocation of a method if there is a cached value.
+            </summary>
+        </member>
+        <member name="M:Ninject.Extensions.Cache.Infrastructure.CacheInterceptor.#ctor(Ninject.Extensions.Cache.Infrastructure.ICache)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Ninject.Extensions.Cache.Infrastructure.CacheInterceptor"/> class.
+            </summary>
+            <param name="cache">The cache.</param>
+        </member>
+        <member name="M:Ninject.Extensions.Cache.Infrastructure.CacheInterceptor.Intercept(Ninject.Core.Interception.IInvocation)">
+            <summary>
+            Intercepts the specified invocation.
+            </summary>
+            <param name="invocation">The invocation to intercept.</param>
+        </member>
+        <member name="P:Ninject.Extensions.Cache.Infrastructure.CacheInterceptor.Cache">
+            <summary>
+            The cache to store values in.
+            </summary>
+        </member>
+        <member name="P:Ninject.Extensions.Cache.Infrastructure.CacheInterceptor.Timeout">
+            <summary>
+            Gets or sets the maximum amount of time that values will be cached.
+            </summary>
+        </member>
+        <member name="T:Ninject.Extensions.Cache.Infrastructure.IKeyGenerator">
+            <summary>
+            Generates cache keys for requests.
+            </summary>
+        </member>
+        <member name="M:Ninject.Extensions.Cache.Infrastructure.IKeyGenerator.Generate(Ninject.Core.Interception.IRequest)">
+            <summary>
+            Generates a key for the specified request.
+            </summary>
+            <param name="request">The request.</param>
+            <returns>The generated key.</returns>
+        </member>
+        <member name="T:Ninject.Extensions.Cache.Infrastructure.MemoryCache">
+            <summary>
+            A simple cache that stores values in memory in a dictionary.
+            </summary>
+        </member>
+        <member name="M:Ninject.Extensions.Cache.Infrastructure.MemoryCache.Clear">
+            <summary>
+            Clears all stored values from the cache.
+            </summary>
+        </member>
+        <member name="M:Ninject.Extensions.Cache.Infrastructure.MemoryCache.GetValue(System.Object,System.Nullable{System.TimeSpan})">
+            <summary>
+            Gets the value with the specified key.
+            </summary>
+            <param name="key">The key.</param>
+            <param name="timeout">The maximum age of a valid cache entry, or <see langword="null"/> if infinite.</param>
+            <returns>The associated value, or <see langword="null"/> if there is no value stored with the specified key.</returns>
+        </member>
+        <member name="M:Ninject.Extensions.Cache.Infrastructure.MemoryCache.SetValue(System.Object,System.Object)">
+            <summary>
+            Sets the value for the specified key.
+            </summary>
+            <param name="key">The key.</param>
+            <param name="value">The value to store.</param>
+        </member>
+        <member name="T:Ninject.Extensions.Cache.Infrastructure.StandardKeyGenerator">
+            <summary>
+            A simple key generator that creates a unique key using the hash codes and metadata tokens
+            from the request.
+            </summary>
+        </member>
+        <member name="M:Ninject.Extensions.Cache.Infrastructure.StandardKeyGenerator.Generate(Ninject.Core.Interception.IRequest)">
+            <summary>
+            Generates a key for the specified request.
+            </summary>
+            <param name="request">The request.</param>
+            <returns>The generated key.</returns>
+        </member>
+        <member name="T:Ninject.Extensions.Cache.CacheAttribute">
+            <summary>
+            Indicates that the decorated method's return value should be cached. Or, if added to
+            a class, indicates that all of its methods should be cached.
+            </summary>
+        </member>
+        <member name="M:Ninject.Extensions.Cache.CacheAttribute.CreateInterceptor(Ninject.Core.Interception.IRequest)">
+            <summary>
+            Creates the interceptor.
+            </summary>
+            <param name="request">The request that is being intercepted.</param>
+            <returns></returns>
+        </member>
+        <member name="P:Ninject.Extensions.Cache.CacheAttribute.TimeoutMs">
+            <summary>
+            Gets or sets the maximum amount of time values will be cached, in milliseconds.
+            </summary>
+        </member>
+        <member name="T:Ninject.Extensions.Cache.CacheModule">
+            <summary>
+            Adds functionality to the kernel to support caching message requests.
+            </summary>
+        </member>
+        <member name="M:Ninject.Extensions.Cache.CacheModule.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:Ninject.Extensions.Cache.CacheModule"/> class.
+            </summary>
+        </member>
+        <member name="M:Ninject.Extensions.Cache.CacheModule.#ctor(System.Type)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Ninject.Extensions.Cache.CacheModule"/> class.
+            </summary>
+            <param name="cacheType">The type of the cache to use.</param>
+        </member>
+        <member name="M:Ninject.Extensions.Cache.CacheModule.#ctor(System.Type,System.Type)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Ninject.Extensions.Cache.CacheModule"/> class.
+            </summary>
+            <param name="cacheType">The type of the cache to use.</param>
+            <param name="keyGeneratorType">The type of key generator to use.</param>
+        </member>
+        <member name="M:Ninject.Extensions.Cache.CacheModule.Load">
+            <summary>
+            Loads the module into the kernel.
+            </summary>
+        </member>
+    </members>
+</doc>

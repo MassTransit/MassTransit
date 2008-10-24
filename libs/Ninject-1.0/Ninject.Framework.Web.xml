@@ -1,0 +1,142 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Ninject.Framework.Web</name>
+    </assembly>
+    <members>
+        <member name="T:Ninject.Framework.Web.HttpHandlerBase">
+            <summary>
+            A <see cref="T:System.Web.IHttpHandler"/> that supports injections.
+            </summary>
+        </member>
+        <member name="M:Ninject.Framework.Web.HttpHandlerBase.ProcessRequest(System.Web.HttpContext)">
+            <summary>
+            Enables processing of HTTP Web requests by a custom HttpHandler that implements the <see cref="T:System.Web.IHttpHandler"></see> interface.
+            </summary>
+            <param name="context">An <see cref="T:System.Web.HttpContext"></see> object that provides references to the intrinsic server objects (for example, Request, Response, Session, and Server) used to service HTTP requests.</param>
+        </member>
+        <member name="M:Ninject.Framework.Web.HttpHandlerBase.DoProcessRequest(System.Web.HttpContext)">
+            <summary>
+            Enables processing of HTTP Web requests by a custom HttpHandler that implements the <see cref="T:System.Web.IHttpHandler"></see> interface.
+            </summary>
+            <param name="context">An <see cref="T:System.Web.HttpContext"></see> object that provides references to the intrinsic server objects (for example, Request, Response, Session, and Server) used to service HTTP requests.</param>
+        </member>
+        <member name="P:Ninject.Framework.Web.HttpHandlerBase.Logger">
+            <summary>
+            Gets or sets the logger associated with the object.
+            </summary>
+        </member>
+        <member name="P:Ninject.Framework.Web.HttpHandlerBase.IsReusable">
+            <summary>
+            Gets a value indicating whether another request can use the <see cref="T:System.Web.IHttpHandler"></see> instance.
+            </summary>
+            <value></value>
+            <returns>true if the <see cref="T:System.Web.IHttpHandler"></see> instance is reusable; otherwise, false.</returns>
+        </member>
+        <member name="T:Ninject.Framework.Web.KernelContainer">
+            <summary>
+            A static container for the <see cref="T:Ninject.Framework.Web.NinjectHttpApplication"/>'s kernel.
+            </summary>
+        </member>
+        <member name="M:Ninject.Framework.Web.KernelContainer.Inject(System.Object)">
+            <summary>
+            Injects the specified instance by using the container's kernel.
+            </summary>
+            <param name="instance">The instance to inject.</param>
+        </member>
+        <member name="P:Ninject.Framework.Web.KernelContainer.Kernel">
+            <summary>
+            Gets or sets the kernel that is used in the application.
+            </summary>
+        </member>
+        <member name="T:Ninject.Framework.Web.MasterPageBase">
+            <summary>
+            A <see cref="T:System.Web.UI.MasterPage"/> that supports injections.
+            </summary>
+        </member>
+        <member name="M:Ninject.Framework.Web.MasterPageBase.OnInit(System.EventArgs)">
+            <summary>
+            Raises the <see cref="E:System.Web.UI.Control.Init"></see> event to initialize the page.
+            </summary>
+            <param name="e">An <see cref="T:System.EventArgs"></see> that contains the event data.</param>
+        </member>
+        <member name="P:Ninject.Framework.Web.MasterPageBase.Logger">
+            <summary>
+            Gets or sets the logger associated with the object.
+            </summary>
+        </member>
+        <member name="T:Ninject.Framework.Web.NinjectHttpApplication">
+            <summary>
+            A <see cref="T:System.Web.HttpApplication"/> that creates a <see cref="T:Ninject.Core.IKernel"/> for use throughout
+            the application.
+            </summary>
+        </member>
+        <member name="M:Ninject.Framework.Web.NinjectHttpApplication.Application_Start">
+            <summary>
+            Initializes the application.
+            </summary>
+        </member>
+        <member name="M:Ninject.Framework.Web.NinjectHttpApplication.Application_End">
+            <summary>
+            Finalizes the application.
+            </summary>
+        </member>
+        <member name="M:Ninject.Framework.Web.NinjectHttpApplication.OnApplicationStarted">
+            <summary>
+            Called when the application starts.
+            </summary>
+        </member>
+        <member name="M:Ninject.Framework.Web.NinjectHttpApplication.OnApplicationEnded">
+            <summary>
+            Called when the application ends.
+            </summary>
+        </member>
+        <member name="M:Ninject.Framework.Web.NinjectHttpApplication.CreateKernel">
+            <summary>
+            Creates a Ninject kernel that will be used to inject objects.
+            </summary>
+            <returns>The created kernel.</returns>
+        </member>
+        <member name="P:Ninject.Framework.Web.NinjectHttpApplication.Logger">
+            <summary>
+            Gets or sets the logger associated with the object.
+            </summary>
+        </member>
+        <member name="T:Ninject.Framework.Web.PageBase">
+            <summary>
+            A <see cref="T:System.Web.UI.Page"/> that supports injections.
+            </summary>
+        </member>
+        <member name="M:Ninject.Framework.Web.PageBase.OnInit(System.EventArgs)">
+            <summary>
+            Raises the <see cref="E:System.Web.UI.Control.Init"></see> event to initialize the page.
+            </summary>
+            <param name="e">An <see cref="T:System.EventArgs"></see> that contains the event data.</param>
+        </member>
+        <member name="M:Ninject.Framework.Web.PageBase.RequestActivation">
+            <summary>
+            Asks the kernel to inject this instance.
+            </summary>
+        </member>
+        <member name="P:Ninject.Framework.Web.PageBase.Logger">
+            <summary>
+            Gets or sets the logger associated with the object.
+            </summary>
+        </member>
+        <member name="T:Ninject.Framework.Web.WebServiceBase">
+            <summary>
+            A <see cref="T:System.Web.Services.WebService"/> that supports injections.
+            </summary>
+        </member>
+        <member name="M:Ninject.Framework.Web.WebServiceBase.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:Ninject.Framework.Web.WebServiceBase"/> class.
+            </summary>
+        </member>
+        <member name="P:Ninject.Framework.Web.WebServiceBase.Logger">
+            <summary>
+            Gets or sets the logger associated with the object.
+            </summary>
+        </member>
+    </members>
+</doc>

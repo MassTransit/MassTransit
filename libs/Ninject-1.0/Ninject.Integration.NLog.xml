@@ -1,0 +1,147 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Ninject.Integration.NLog</name>
+    </assembly>
+    <members>
+        <member name="T:Ninject.Integration.NLog.Infrastructure.NLogLogger">
+            <summary>
+            A logger that integrates with nlog, passing all messages to a <see cref="T:NLog.Logger"/>.
+            </summary>
+        </member>
+        <member name="M:Ninject.Integration.NLog.Infrastructure.NLogLogger.#ctor(System.Type)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Ninject.Integration.NLog.Infrastructure.NLogLogger"/> class.
+            </summary>
+            <param name="type">The type to associate with the logger.</param>
+        </member>
+        <member name="M:Ninject.Integration.NLog.Infrastructure.NLogLogger.Debug(System.Exception,System.String,System.Object[])">
+            <summary>
+            Logs the specified exception with Debug severity.
+            </summary>
+            <param name="exception">The exception to log.</param>
+            <param name="format">The message or format template.</param>
+            <param name="args">Any arguments required for the format template.</param>
+        </member>
+        <member name="M:Ninject.Integration.NLog.Infrastructure.NLogLogger.Debug(System.String,System.Object[])">
+            <summary>
+            Logs the specified message with Debug severity.
+            </summary>
+            <param name="format">The message or format template.</param>
+            <param name="args">Any arguments required for the format template.</param>
+        </member>
+        <member name="M:Ninject.Integration.NLog.Infrastructure.NLogLogger.Error(System.Exception,System.String,System.Object[])">
+            <summary>
+            Logs the specified exception with Error severity.
+            </summary>
+            <param name="exception">The exception to log.</param>
+            <param name="format">The message or format template.</param>
+            <param name="args">Any arguments required for the format template.</param>
+        </member>
+        <member name="M:Ninject.Integration.NLog.Infrastructure.NLogLogger.Error(System.String,System.Object[])">
+            <summary>
+            Logs the specified message with Error severity.
+            </summary>
+            <param name="format">The message or format template.</param>
+            <param name="args">Any arguments required for the format template.</param>
+        </member>
+        <member name="M:Ninject.Integration.NLog.Infrastructure.NLogLogger.Fatal(System.String,System.Object[])">
+            <summary>
+            Logs the specified message with Fatal severity.
+            </summary>
+            <param name="format">The message or format template.</param>
+            <param name="args">Any arguments required for the format template.</param>
+        </member>
+        <member name="M:Ninject.Integration.NLog.Infrastructure.NLogLogger.Fatal(System.Exception,System.String,System.Object[])">
+            <summary>
+            Logs the specified exception with Fatal severity.
+            </summary>
+            <param name="exception">The exception to log.</param>
+            <param name="format">The message or format template.</param>
+            <param name="args">Any arguments required for the format template.</param>
+        </member>
+        <member name="M:Ninject.Integration.NLog.Infrastructure.NLogLogger.Info(System.String,System.Object[])">
+            <summary>
+            Logs the specified message with Info severity.
+            </summary>
+            <param name="format">The message or format template.</param>
+            <param name="args">Any arguments required for the format template.</param>
+        </member>
+        <member name="M:Ninject.Integration.NLog.Infrastructure.NLogLogger.Info(System.Exception,System.String,System.Object[])">
+            <summary>
+            Logs the specified exception with Info severity.
+            </summary>
+            <param name="exception">The exception to log.</param>
+            <param name="format">The message or format template.</param>
+            <param name="args">Any arguments required for the format template.</param>
+        </member>
+        <member name="M:Ninject.Integration.NLog.Infrastructure.NLogLogger.Warn(System.String,System.Object[])">
+            <summary>
+            Logs the specified message with Warn severity.
+            </summary>
+            <param name="format">The message or format template.</param>
+            <param name="args">Any arguments required for the format template.</param>
+        </member>
+        <member name="M:Ninject.Integration.NLog.Infrastructure.NLogLogger.Warn(System.Exception,System.String,System.Object[])">
+            <summary>
+            Logs the specified exception with Warn severity.
+            </summary>
+            <param name="exception">The exception to log.</param>
+            <param name="format">The message or format template.</param>
+            <param name="args">Any arguments required for the format template.</param>
+        </member>
+        <member name="P:Ninject.Integration.NLog.Infrastructure.NLogLogger.IsDebugEnabled">
+            <summary>
+            Gets a value indicating whether messages with Debug severity should be logged.
+            </summary>
+        </member>
+        <member name="P:Ninject.Integration.NLog.Infrastructure.NLogLogger.IsInfoEnabled">
+            <summary>
+            Gets a value indicating whether messages with Info severity should be logged.
+            </summary>
+        </member>
+        <member name="P:Ninject.Integration.NLog.Infrastructure.NLogLogger.IsWarnEnabled">
+            <summary>
+            Gets a value indicating whether messages with Warn severity should be logged.
+            </summary>
+        </member>
+        <member name="P:Ninject.Integration.NLog.Infrastructure.NLogLogger.IsErrorEnabled">
+            <summary>
+            Gets a value indicating whether messages with Error severity should be logged.
+            </summary>
+        </member>
+        <member name="P:Ninject.Integration.NLog.Infrastructure.NLogLogger.IsFatalEnabled">
+            <summary>
+            Gets a value indicating whether messages with Fatal severity should be logged.
+            </summary>
+        </member>
+        <member name="T:Ninject.Integration.NLog.Infrastructure.NLogLoggerFactory">
+            <summary>
+            An implementation of a logger factory that creates <see cref="T:Ninject.Integration.NLog.Infrastructure.NLogLogger"/>s.
+            </summary>
+        </member>
+        <member name="M:Ninject.Integration.NLog.Infrastructure.NLogLoggerFactory.CreateLogger(System.Type)">
+            <summary>
+            Creates a logger for the specified type.
+            </summary>
+            <param name="type">The type to create the logger for.</param>
+            <returns>The newly-created logger.</returns>
+        </member>
+        <member name="T:Ninject.Integration.NLog.NLogModule">
+            <summary>
+            Extends the functionality of the kernel, providing integration between the Ninject
+            logging infrastructure and nlog.
+            </summary>
+        </member>
+        <member name="M:Ninject.Integration.NLog.NLogModule.BeforeLoad">
+            <summary>
+            Prepares the module for being loaded. Can be used to connect component dependencies.
+            </summary>
+        </member>
+        <member name="M:Ninject.Integration.NLog.NLogModule.Load">
+            <summary>
+            Loads the module into the kernel.
+            </summary>
+        </member>
+    </members>
+</doc>

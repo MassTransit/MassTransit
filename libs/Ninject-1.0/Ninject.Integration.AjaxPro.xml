@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Ninject.Integration.AjaxPro</name>
+    </assembly>
+    <members>
+        <member name="T:Ninject.Integration.AjaxPro.AjaxPageBase">
+            <summary>
+            A <see cref="T:System.Web.UI.Page"/> that is injected not only when loaded in a browser, but also
+            during AJAX calls.
+            </summary>
+        </member>
+        <member name="M:Ninject.Integration.AjaxPro.AjaxPageBase.InitializeContext(System.Web.HttpContext)">
+            <summary>
+            Initializes the page with the specified context during an AJAX call.
+            </summary>
+            <param name="context">The context in which the AJAX call is occurring.</param>
+        </member>
+        <member name="P:Ninject.Integration.AjaxPro.AjaxPageBase.IsAjaxCall">
+            <summary>
+            Gets a value indicating whether the code is executing within the context of an AJAX call.
+            </summary>
+        </member>
+        <member name="P:Ninject.Integration.AjaxPro.AjaxPageBase.Context">
+            <summary>
+            Gets the <see cref="T:System.Web.HttpContext"></see> object associated with the page.
+            </summary>
+            <value></value>
+            <returns>An <see cref="T:System.Web.HttpContext"></see> object that contains information associated with the current page.</returns>
+        </member>
+    </members>
+</doc>

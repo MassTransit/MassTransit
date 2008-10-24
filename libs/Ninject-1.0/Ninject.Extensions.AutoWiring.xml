@@ -1,0 +1,84 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Ninject.Extensions.AutoWiring</name>
+    </assembly>
+    <members>
+        <member name="T:Ninject.Extensions.AutoWiring.Infrastructure.AutoWiringConstructorHeuristic">
+            <summary>
+            Selects a constructor to call during activation by finding the candidate constructor
+            whose arguments have the most bindings defined.
+            </summary>
+        </member>
+        <member name="M:Ninject.Extensions.AutoWiring.Infrastructure.AutoWiringConstructorHeuristic.Select(Ninject.Core.Binding.IBinding,System.Type,Ninject.Core.Planning.IActivationPlan,System.Collections.Generic.IList{System.Reflection.ConstructorInfo})">
+            <summary>
+            Selects the member that should be injected.
+            </summary>
+            <param name="binding">The binding that points at the type whose activation plan being manipulated.</param>
+            <param name="type">The type whose activation plan is being manipulated.</param>
+            <param name="plan">The activation plan that is being manipulated.</param>
+            <param name="candidates">A collection of potential members.</param>
+            <returns>The member that should be injected.</returns>
+        </member>
+        <member name="T:Ninject.Extensions.AutoWiring.Infrastructure.AutoWiringFieldHeuristic">
+            <summary>
+            Selects fields to inject by determining whether their types have bindings registered.
+            </summary>
+        </member>
+        <member name="M:Ninject.Extensions.AutoWiring.Infrastructure.AutoWiringFieldHeuristic.ShouldInject(Ninject.Core.Binding.IBinding,System.Type,Ninject.Core.Planning.IActivationPlan,System.Reflection.FieldInfo)">
+            <summary>
+            Returns a value indicating whether the specified member should be injected during activation.
+            </summary>
+            <param name="binding">The binding that points at the type whose activation plan being manipulated.</param>
+            <param name="type">The type whose activation plan is being manipulated.</param>
+            <param name="plan">The activation plan that is being manipulated.</param>
+            <param name="candidate">The member in question.</param>
+            <returns><see langword="True"/> if the member should be injected, otherwise <see langword="false"/>.</returns>
+        </member>
+        <member name="T:Ninject.Extensions.AutoWiring.Infrastructure.AutoWiringMethodHeuristic">
+            <summary>
+            Selects methods to inject by determining whether their types have bindings registered.
+            </summary>
+        </member>
+        <member name="M:Ninject.Extensions.AutoWiring.Infrastructure.AutoWiringMethodHeuristic.ShouldInject(Ninject.Core.Binding.IBinding,System.Type,Ninject.Core.Planning.IActivationPlan,System.Reflection.MethodInfo)">
+            <summary>
+            Returns a value indicating whether the specified member should be injected during activation.
+            </summary>
+            <param name="binding">The binding that points at the type whose activation plan being manipulated.</param>
+            <param name="type">The type whose activation plan is being manipulated.</param>
+            <param name="plan">The activation plan that is being manipulated.</param>
+            <param name="candidate">The member in question.</param>
+            <returns><see langword="True"/> if the member should be injected, otherwise <see langword="false"/>.</returns>
+        </member>
+        <member name="T:Ninject.Extensions.AutoWiring.Infrastructure.AutoWiringPropertyHeuristic">
+            <summary>
+            Selects properties to inject by determining whether their types have bindings registered.
+            </summary>
+        </member>
+        <member name="M:Ninject.Extensions.AutoWiring.Infrastructure.AutoWiringPropertyHeuristic.ShouldInject(Ninject.Core.Binding.IBinding,System.Type,Ninject.Core.Planning.IActivationPlan,System.Reflection.PropertyInfo)">
+            <summary>
+            Returns a value indicating whether the specified member should be injected during activation.
+            </summary>
+            <param name="binding">The binding that points at the type whose activation plan being manipulated.</param>
+            <param name="type">The type whose activation plan is being manipulated.</param>
+            <param name="plan">The activation plan that is being manipulated.</param>
+            <param name="candidate">The member in question.</param>
+            <returns><see langword="True"/> if the member should be injected, otherwise <see langword="false"/>.</returns>
+        </member>
+        <member name="T:Ninject.Extensions.AutoWiring.AutoWiringModule">
+            <summary>
+            Adds functionality to the kernel to support auto-wiring of dependencies.
+            </summary>
+        </member>
+        <member name="M:Ninject.Extensions.AutoWiring.AutoWiringModule.BeforeLoad">
+            <summary>
+            Prepares the module for being loaded. Can be used to connect component dependencies.
+            </summary>
+        </member>
+        <member name="M:Ninject.Extensions.AutoWiring.AutoWiringModule.Load">
+            <summary>
+            Loads the module into the kernel.
+            </summary>
+        </member>
+    </members>
+</doc>
