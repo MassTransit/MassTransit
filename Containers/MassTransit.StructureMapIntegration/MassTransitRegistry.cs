@@ -24,12 +24,12 @@
             ForRequestedType<IServiceBus>().AddInstances(o =>
                                                              {
                                                                  o.OfConcreteType<ServiceBus>().WithName("data-bus")
-                                                                     .WithCtorArg("endpointListenOn").EqualTo("msmq://localhost/address")
+                                                                     .WithCtorArg("endpointListenOn").EqualToAppSetting("listenOn")
                                                                      .SetProperty(x=>x.MinThreadCount = 1)
                                                                      .SetProperty(x=>x.MaxThreadCount = 10);
 
                                                                  o.OfConcreteType<ServiceBus>().WithName("control-bus")
-                                                                     .WithCtorArg("endpointToListenOn").EqualTo("msmq://localhost/address_control")
+                                                                     .WithCtorArg("endpointToListenOn").EqualToAppSetting("controlledOn")
                                                                      .SetProperty(x=>x.MinThreadCount = 1)
                                                                      .SetProperty(x=>x.MaxThreadCount = 10);
                                                              });
@@ -41,7 +41,7 @@
 
             ForConcreteType<SubscriptionClient>().Configure
                 .CtorDependency<IServiceBus>().IsTheDefault().WithName("data-bus")
-                .WithCtorArg("subscriptionServiceEndpoint").EqualTo("msmq://localhost/mt_pubsub")
+                .WithCtorArg("subscriptionServiceEndpoint").EqualToAppSetting("subscribedTo")
                 .OnCreation(o => o.Start());
         }
     }
