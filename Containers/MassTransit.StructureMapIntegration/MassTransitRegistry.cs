@@ -1,47 +1,71 @@
 ﻿namespace MassTransit.StructureMapIntegration
 {
+    using System;
     using MassTransit.ServiceBus.Internal;
     using MassTransit.ServiceBus.Subscriptions;
     using ServiceBus;
     using ServiceBus.Services.HealthMonitoring;
     using StructureMap.Configuration.DSL;
 
+    /// <summary>
+    /// This is an extension of the StrutureMap registry exposing methods to make it easy to get Mass
+    /// Transit set up.
+    /// </summary>
     public class MassTransitRegistry : Registry
     {
-        protected override void configure()
+        public MassTransitRegistry()
         {
             ForRequestedType<IObjectBuilder>().AddConcreteType<StructureMapObjectBuilder>().AsSingletons();
             ForRequestedType<ISubscriptionCache>().AddConcreteType<LocalSubscriptionCache>().AsSingletons();
             ForRequestedType<IEndpointResolver>().AddConcreteType<EndpointResolver>().AsSingletons();
+            ForRequestedType<IServiceBus>().AddConcreteType<ServiceBus>();
+        }
 
-            CreateProfile("distributed")
-                .For<ISubscriptionCache>().UseConcreteType<DistributedSubscriptionCache>();
+        //this at least once
+        public void AddTransport<T>() where T : IEndpoint
+        {
+            EndpointResolver.AddTransport(typeof (T));
+        }
 
-            CreateProfile("local")
-                .For<ISubscriptionCache>().UseConcreteType<LocalSubscriptionCache>();
+        //at least one of these
+        public void AddBus(string id, Uri endpointToListenOn)
+        {
+            ForRequestedType<IServiceBus>().AddInstances(o => o.OfConcreteType<ServiceBus>().WithName(id)
+                                                                  .WithCtorArg("endpointListenOn").EqualTo(endpointToListenOn)
+                                                                  .SetProperty(x => x.MinThreadCount = 1)
+                                                                  .SetProperty(x => x.MaxThreadCount = 10));
+        }
 
 
-            ForRequestedType<IServiceBus>().AddInstances(o =>
-                                                             {
-                                                                 o.OfConcreteType<ServiceBus>().WithName("data-bus")
-                                                                     .WithCtorArg("endpointListenOn").EqualToAppSetting("listenOn")
-                                                                     .SetProperty(x=>x.MinThreadCount = 1)
-                                                                     .SetProperty(x=>x.MaxThreadCount = 10);
+        //TODO: this is an either/or choice
+        public void UseALocalSubscriptionCache()
+        {
+            ForRequestedType<ISubscriptionCache>().AddConcreteType<LocalSubscriptionCache>();
+        }
+        public void UseADistributedSubscriptionCache(string[] servers)
+        {
+            ForRequestedType<ISubscriptionCache>().AddConcreteType<DistributedSubscriptionCache>();
+            ForConcreteType<DistributedSubscriptionCache>().Configure.WithCtorArg("servers").EqualTo(servers);
+        }
 
-                                                                 o.OfConcreteType<ServiceBus>().WithName("control-bus")
-                                                                     .WithCtorArg("endpointToListenOn").EqualToAppSetting("controlledOn")
-                                                                     .SetProperty(x=>x.MinThreadCount = 1)
-                                                                     .SetProperty(x=>x.MaxThreadCount = 10);
-                                                             });
 
-            ForConcreteType<HealthClient>().Configure.WithName("health_client")
-                .CtorDependency<IServiceBus>().IsTheDefault().WithName("data-bus")
-                .WithCtorArg("heartbeatInterval").EqualTo(3)
-                .OnCreation(o=>o.Start());
-
+        //optional
+        public void TurnOnHealthClient(string busId, int heartbeatInterval)
+        {
+            ForConcreteType<HealthClient>().Configure
+                .WithName("health_client")
+                .CtorDependency<IServiceBus>().IsTheDefault().WithName(busId)
+                .WithCtorArg("heartbeatInterval").EqualTo(heartbeatInterval)
+                .OnCreation(o => o.Start());
+        }
+        //optional
+        public void TurnOnSubscriptionClient(string busId, Uri subscribedVia)
+        {
+            IEndpoint ep = null;
             ForConcreteType<SubscriptionClient>().Configure
-                .CtorDependency<IServiceBus>().IsTheDefault().WithName("data-bus")
-                .WithCtorArg("subscriptionServiceEndpoint").EqualToAppSetting("subscribedTo")
+                .WithName("subscription_client")
+                .CtorDependency<IServiceBus>().IsTheDefault().WithName(busId)
+                .WithCtorArg("subscriptionServiceEndpoint").EqualTo(ep)
                 .OnCreation(o => o.Start());
         }
     }
