@@ -5,6 +5,7 @@
     using MassTransit.ServiceBus.Subscriptions;
     using ServiceBus;
     using ServiceBus.Services.HealthMonitoring;
+    using StructureMap;
     using StructureMap.Configuration.DSL;
 
     /// <summary>
@@ -30,8 +31,9 @@
         //at least one of these
         public void AddBus(string id, Uri endpointToListenOn)
         {
+            IEndpoint ep = ObjectFactory.GetInstance<IEndpointResolver>().Resolve(endpointToListenOn);
             ForRequestedType<IServiceBus>().AddInstances(o => o.OfConcreteType<ServiceBus>().WithName(id)
-                                                                  .WithCtorArg("endpointListenOn").EqualTo(endpointToListenOn)
+                                                                  .WithCtorArg("endpointListenOn").EqualTo(ep)
                                                                   .SetProperty(x => x.MinThreadCount = 1)
                                                                   .SetProperty(x => x.MaxThreadCount = 10));
         }
@@ -61,7 +63,7 @@
         //optional
         public void TurnOnSubscriptionClient(string busId, Uri subscribedVia)
         {
-            IEndpoint ep = null;
+            IEndpoint ep = ObjectFactory.GetInstance<IEndpointResolver>().Resolve(subscribedVia);
             ForConcreteType<SubscriptionClient>().Configure
                 .WithName("subscription_client")
                 .CtorDependency<IServiceBus>().IsTheDefault().WithName(busId)
