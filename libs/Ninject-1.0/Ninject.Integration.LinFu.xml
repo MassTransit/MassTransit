@@ -1,0 +1,66 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Ninject.Integration.LinFu</name>
+    </assembly>
+    <members>
+        <member name="T:Ninject.Integration.LinFu.Infrastructure.LinFuProxyFactory">
+            <summary>
+            An implementation of a proxy factory that uses a LinFu <see cref="T:LinFu.DynamicProxy.ProxyFactory"/> and
+            <see cref="T:Ninject.Integration.LinFu.Infrastructure.LinFuWrapper"/>s to create wrapped instances.
+            </summary>
+        </member>
+        <member name="M:Ninject.Integration.LinFu.Infrastructure.LinFuProxyFactory.Dispose(System.Boolean)">
+            <summary>
+            Releases all resources held by the object.
+            </summary>
+            <param name="disposing"><see langword="True"/> if managed objects should be disposed, otherwise <see langword="false"/>.</param>
+        </member>
+        <member name="M:Ninject.Integration.LinFu.Infrastructure.LinFuProxyFactory.Wrap(Ninject.Core.Activation.IContext,System.Object)">
+            <summary>
+            Wraps the specified instance in a proxy.
+            </summary>
+            <param name="context">The context in which the instance was activated.</param>
+            <param name="instance">The instance to wrap.</param>
+            <returns>A proxy that wraps the instance.</returns>
+        </member>
+        <member name="M:Ninject.Integration.LinFu.Infrastructure.LinFuProxyFactory.Unwrap(Ninject.Core.Activation.IContext,System.Object)">
+            <summary>
+            Unwraps the specified proxied instance.
+            </summary>
+            <param name="context">The context in which the instance was activated.</param>
+            <param name="proxy">The proxied instance to unwrap.</param>
+            <returns>The unwrapped instance.</returns>
+        </member>
+        <member name="T:Ninject.Integration.LinFu.Infrastructure.LinFuWrapper">
+            <summary>
+            Defines an interception wrapper that can convert a LinFu <see cref="T:LinFu.DynamicProxy.InvocationInfo"/>
+            into a Ninject <see cref="T:Ninject.Core.Interception.IRequest"/> for interception.
+            </summary>
+        </member>
+        <member name="M:Ninject.Integration.LinFu.Infrastructure.LinFuWrapper.#ctor(Ninject.Core.IKernel,Ninject.Core.Activation.IContext,System.Object)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Ninject.Integration.LinFu.Infrastructure.LinFuWrapper"/> class.
+            </summary>
+            <param name="kernel">The kernel associated with the wrapper.</param>
+            <param name="context">The context in which the instance was activated.</param>
+            <param name="instance">The wrapped instance.</param>
+        </member>
+        <member name="T:Ninject.Integration.LinFu.LinFuModule">
+            <summary>
+            Extends the functionality of the kernel, providing a proxy factory that uses LinFu
+            to generate dynamic proxies.
+            </summary>
+        </member>
+        <member name="M:Ninject.Integration.LinFu.LinFuModule.BeforeLoad">
+            <summary>
+            Prepares the module for being loaded. Can be used to connect component dependencies.
+            </summary>
+        </member>
+        <member name="M:Ninject.Integration.LinFu.LinFuModule.Load">
+            <summary>
+            Loads the module into the kernel.
+            </summary>
+        </member>
+    </members>
+</doc>

@@ -1,0 +1,208 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Ninject.Integration.MonoRail</name>
+    </assembly>
+    <members>
+        <member name="T:Ninject.Integration.MonoRail.Infrastructure.NinjectAccessorStrategy">
+            <summary>
+            Provides access to the <see cref="T:Ninject.Integration.MonoRail.NinjectHttpApplication"/>.
+            </summary>
+        </member>
+        <member name="M:Ninject.Integration.MonoRail.Infrastructure.NinjectAccessorStrategy.LocateProvider">
+            <summary>
+            Returns a reference to the <see cref="T:Ninject.Integration.MonoRail.NinjectHttpApplication"/>.
+            </summary>
+        </member>
+        <member name="T:Ninject.Integration.MonoRail.Infrastructure.NinjectControllerFactory">
+            <summary>
+            Creates Monorail <see cref="T:Castle.MonoRail.Framework.IController"/>s by activating them via the Ninject <see cref="T:Ninject.Core.IKernel"/>.
+            </summary>
+        </member>
+        <member name="M:Ninject.Integration.MonoRail.Infrastructure.NinjectControllerFactory.Initialize">
+            <summary>
+            Initializes the controller factory by searching the configured assemblies for defined controllers.
+            </summary>
+        </member>
+        <member name="M:Ninject.Integration.MonoRail.Infrastructure.NinjectControllerFactory.Inspect(System.String)">
+            <summary>
+            Searches the assembly with the specified name for controllers and adds them to the
+            controller tree.
+            </summary>
+            <param name="assemblyName">The name of the assembly to search.</param>
+        </member>
+        <member name="M:Ninject.Integration.MonoRail.Infrastructure.NinjectControllerFactory.Inspect(System.Reflection.Assembly)">
+            <summary>
+            Searches the specified assembly for controllers and adds them to the controller tree.
+            </summary>
+            <param name="assembly">The assembly to search.</param>
+        </member>
+        <member name="M:Ninject.Integration.MonoRail.Infrastructure.NinjectControllerFactory.CreateController(System.String,System.String)">
+            <summary>
+            Creates a controller for the specified area and name.
+            </summary>
+            <param name="area">The controller's area.</param>
+            <param name="controller">The name of the controller.</param>
+            <returns>The controller, or <see langword="null"/> if one was not found.</returns>
+        </member>
+        <member name="M:Ninject.Integration.MonoRail.Infrastructure.NinjectControllerFactory.CreateController(System.Type)">
+            <summary>
+            Activates the controller with the specified type via the kernel.
+            </summary>
+            <param name="controllerType">The type of the controller.</param>
+            <returns>The activated controller.</returns>
+        </member>
+        <member name="M:Ninject.Integration.MonoRail.Infrastructure.NinjectControllerFactory.Release(Castle.MonoRail.Framework.IController)">
+            <summary>
+            Releases the specified controller via the kernel.
+            </summary>
+            <param name="controller">The controller to release.</param>
+        </member>
+        <member name="P:Ninject.Integration.MonoRail.Infrastructure.NinjectControllerFactory.Kernel">
+            <summary>
+            The kernel to use to activate the controllers.
+            </summary>
+        </member>
+        <member name="P:Ninject.Integration.MonoRail.Infrastructure.NinjectControllerFactory.Tree">
+            <summary>
+            The MonoRail controller tree.
+            </summary>
+        </member>
+        <member name="T:Ninject.Integration.MonoRail.Infrastructure.NinjectFilterFactory">
+            <summary>
+            Creates MonoRail <see cref="T:Castle.MonoRail.Framework.IFilter"/>s by activating them via the Ninject <see cref="T:Ninject.Core.IKernel"/>.
+            </summary>
+        </member>
+        <member name="M:Ninject.Integration.MonoRail.Infrastructure.NinjectFilterFactory.Create(System.Type)">
+            <summary>
+            Activates the filer with the specified type.
+            </summary>
+            <param name="filterType">The type of filter to create.</param>
+            <returns>The activated filter.</returns>
+        </member>
+        <member name="M:Ninject.Integration.MonoRail.Infrastructure.NinjectFilterFactory.Release(Castle.MonoRail.Framework.IFilter)">
+            <summary>
+            Releases the specified filter via the kernel.
+            </summary>
+            <param name="filter">The filter to release.</param>
+        </member>
+        <member name="P:Ninject.Integration.MonoRail.Infrastructure.NinjectFilterFactory.Kernel">
+            <summary>
+            The kernel that will be used to activate the filters.
+            </summary>
+        </member>
+        <member name="T:Ninject.Integration.MonoRail.Infrastructure.NinjectHelperFactory">
+            <summary>
+            Creates MonoRail controller helpers by activating them via the Ninject <see cref="T:Ninject.Core.IKernel"/>.
+            </summary>
+        </member>
+        <member name="M:Ninject.Integration.MonoRail.Infrastructure.NinjectHelperFactory.Create(System.Type,Castle.MonoRail.Framework.IEngineContext,System.Boolean@)">
+            <summary>
+            Creates a helper with the specified type.
+            </summary>
+            <param name="helperType">The type of helper to create.</param>
+            <param name="engineContext">The context in which the helper was requested.</param>
+            <param name="initialized">A value indicating whether the helper is initialized.</param>
+            <returns>The created helper.</returns>
+        </member>
+        <member name="P:Ninject.Integration.MonoRail.Infrastructure.NinjectHelperFactory.Kernel">
+            <summary>
+            The kernel that will be used to activate the filters.
+            </summary>
+        </member>
+        <member name="T:Ninject.Integration.MonoRail.Infrastructure.NinjectViewComponentFactory">
+            <summary>
+            Creates Monorail <see cref="T:Castle.MonoRail.Framework.ViewComponent"/>s by activating them via the Ninject <see cref="T:Ninject.Core.IKernel"/>.
+            </summary>
+        </member>
+        <member name="M:Ninject.Integration.MonoRail.Infrastructure.NinjectViewComponentFactory.Create(System.String)">
+            <summary>
+            Activates an instance of the requested view component.
+            </summary>
+            <param name="name">The name of the view component to create.</param>
+            <returns>The instance of the requested view component.</returns>
+        </member>
+        <member name="M:Ninject.Integration.MonoRail.Infrastructure.NinjectViewComponentFactory.GetViewComponentRegistry">
+            <summary>
+            Gets the view component registry.
+            </summary>
+        </member>
+        <member name="P:Ninject.Integration.MonoRail.Infrastructure.NinjectViewComponentFactory.Kernel">
+            <summary>
+            The kernel to use to activate the controllers.
+            </summary>
+        </member>
+        <member name="P:Ninject.Integration.MonoRail.Infrastructure.NinjectViewComponentFactory.ViewComponentRegistry">
+            <summary>
+            The MonoRail view component registry.
+            </summary>
+        </member>
+        <member name="P:Ninject.Integration.MonoRail.Infrastructure.NinjectViewComponentFactory.ViewEngine">
+            <summary>
+            The MonoRail view engine.
+            </summary>
+        </member>
+        <member name="T:Ninject.Integration.MonoRail.MonoRailModule">
+            <summary>
+            An internal module that will be loaded into the <see cref="T:Ninject.Core.IKernel"/> when it is created
+            by a <see cref="T:Ninject.Integration.MonoRail.NinjectHttpApplication"/>. Contains bindings for MonoRail internals.
+            </summary>
+        </member>
+        <member name="M:Ninject.Integration.MonoRail.MonoRailModule.Load">
+            <summary>
+            Loads the module into the kernel.
+            </summary>
+        </member>
+        <member name="T:Ninject.Integration.MonoRail.NinjectHttpApplication">
+            <summary>
+            A <see cref="T:System.Web.HttpApplication"/> that creates and maintains a Ninject <see cref="T:Ninject.Core.IKernel"/>.
+            </summary>
+        </member>
+        <member name="M:Ninject.Integration.MonoRail.NinjectHttpApplication.Application_OnStart">
+            <summary>
+            Executed when the application's AppDomain is loaded. Creates the <see cref="T:Ninject.Core.IKernel"/>
+            and requests injections for the application itself.
+            </summary>
+        </member>
+        <member name="M:Ninject.Integration.MonoRail.NinjectHttpApplication.Application_OnEnd">
+            <summary>
+            Executed when the application's AppDomain is unloaded. Disposes of the kernel.
+            </summary>
+        </member>
+        <member name="M:Ninject.Integration.MonoRail.NinjectHttpApplication.GetService``1">
+            <summary>
+            Activates an instance of the service with the specified type.
+            </summary>
+            <typeparam name="T">The type of service to create.</typeparam>
+            <returns>An instance of the specified service, or <see langword="null"/> if none have been registered.</returns>
+        </member>
+        <member name="M:Ninject.Integration.MonoRail.NinjectHttpApplication.GetService(System.Type)">
+            <summary>
+            Activates an instance of the service with the specified type.
+            </summary>
+            <param name="serviceType">The type of service to create.</param>
+            <returns>An instance of the specified service, or <see langword="null"/> if none have been registered.</returns>
+        </member>
+        <member name="M:Ninject.Integration.MonoRail.NinjectHttpApplication.CreateKernel">
+            <summary>
+            Creates the kernel for the application.
+            </summary>
+            <returns>The kernel.</returns>
+        </member>
+        <member name="M:Ninject.Integration.MonoRail.NinjectHttpApplication.OnApplicationStarted">
+            <summary>
+            Executed when the application's AppDomain is loaded, after creating the kernel.
+            </summary>
+        </member>
+        <member name="M:Ninject.Integration.MonoRail.NinjectHttpApplication.OnApplicationEnded">
+            <summary>
+            Executed when the application's AppDomain is unloaded, before disposing of the kernel.
+            </summary>
+        </member>
+        <member name="P:Ninject.Integration.MonoRail.NinjectHttpApplication.Kernel">
+            <summary>
+            Gets or sets the kernel associated with the application.
+            </summary>
+        </member>
+    </members>
+</doc>
