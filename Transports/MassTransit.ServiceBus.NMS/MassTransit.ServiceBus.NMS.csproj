@@ -59,7 +59,6 @@
     <Compile Include="..\..\SolutionVersion.cs">
       <Link>SolutionVersion.cs</Link>
     </Compile>
-    <Compile Include="INmsEndpoint.cs" />
     <Compile Include="NmsEndpoint.cs" />
     <Compile Include="NmsFormattedBody.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

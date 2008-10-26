@@ -26,13 +26,14 @@ namespace MassTransit.ServiceBus.MSMQ
 	/// A MessageQueueEndpoint is an implementation of an endpoint using the Microsoft Message Queue service.
 	/// </summary>
 	public class MsmqEndpoint :
-		IMsmqEndpoint
+		IEndpoint
 	{
 		private static readonly IBodyFormatter _formatter = new BinaryBodyFormatter();
 		private static readonly ILog _log = LogManager.GetLogger(typeof (MsmqEndpoint));
 		private readonly string _queuePath;
 		private readonly Uri _uri;
 		private readonly string _machineName = Environment.MachineName;
+	    private static readonly string _locolhost = "localhost";
 		private MessageQueue _queue;
 		private bool _reliableMessaging = true;
 	    private bool _isLocal;
@@ -64,7 +65,7 @@ namespace MassTransit.ServiceBus.MSMQ
             string localhost = Environment.MachineName.ToLowerInvariant();
 
 			string hostName = _uri.Host;
-		    if (string.Compare(hostName, ".") == 0 || string.Compare(hostName, "localhost", true) == 0)
+		    if (string.Compare(hostName, ".") == 0 || string.Compare(hostName, _locolhost, true) == 0)
 			{
 			    _uri = new Uri("msmq://" + localhost + _uri.AbsolutePath);
 			    _isLocal = true;
@@ -153,6 +154,11 @@ namespace MassTransit.ServiceBus.MSMQ
 			get { return _queuePath; }
 		}
 
+        /// <summary>
+        /// Opens a message queue
+        /// </summary>
+        /// <param name="mode">The access mode for the queue</param>
+        /// <returns>An open <c ref="MessageQueue" /> object</returns>
 		public MessageQueue Open(QueueAccessMode mode)
 		{
 			MessageQueue queue = new MessageQueue(QueuePath, mode);

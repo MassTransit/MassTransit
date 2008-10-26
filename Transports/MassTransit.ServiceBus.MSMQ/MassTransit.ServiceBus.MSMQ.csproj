@@ -54,7 +54,6 @@
       <Link>SolutionVersion.cs</Link>
     </Compile>
     <Compile Include="MsmqFormattedBody.cs" />
-    <Compile Include="IMsmqEndpoint.cs" />
     <Compile Include="MsmqEndpoint.cs" />
     <Compile Include="MsmqUtilities.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

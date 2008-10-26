@@ -32,10 +32,10 @@ namespace MassTransit.ServiceBus.MSMQ.Tests
         [Test]
         public void It_should_be_received_by_one_subscribed_consumer()
         {
-            TestMessageConsumer<PingMessage> consumer = new TestMessageConsumer<PingMessage>();
+            var consumer = new TestMessageConsumer<PingMessage>();
             RemoteBus.Subscribe(consumer);
 
-            PingMessage message = new PingMessage();
+            var message = new PingMessage();
             LocalBus.Publish(message);
 
             consumer.ShouldHaveReceivedMessage(message, _timeout);
@@ -46,18 +46,18 @@ namespace MassTransit.ServiceBus.MSMQ.Tests
         {
             RemoteBus.Subscribe<PingMessage>(m => { throw new ApplicationException("Boing!"); });
 
-            PingMessage message = new PingMessage();
+            var message = new PingMessage();
             LocalBus.Publish(message);
         }
 
         [Test]
         public void It_should_rollback_a_send_if_an_exception_is_thrown()
         {
-            TestMessageConsumer<PongMessage> consumer = new TestMessageConsumer<PongMessage>();
+            var consumer = new TestMessageConsumer<PongMessage>();
             LocalBus.Subscribe(consumer);
 
-            PingMessage message = new PingMessage();
-            PongMessage response = new PongMessage(message.CorrelationId);
+            var message = new PingMessage();
+            var response = new PongMessage(message.CorrelationId);
 
             RemoteBus.Subscribe<PingMessage>(m =>
                 {
