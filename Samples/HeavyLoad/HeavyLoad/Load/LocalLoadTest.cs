@@ -25,7 +25,7 @@ namespace HeavyLoad.Load
 
 			MsmqEndpoint endpoint = _bus.Endpoint as MsmqEndpoint;
 			if (endpoint != null)
-				MsmqHelper.ValidateAndPurgeQueue(endpoint.QueuePath);
+                MsmqUtilities.ValidateAndPurgeQueue(endpoint.QueuePath);
 		}
 
 		public void Dispose()

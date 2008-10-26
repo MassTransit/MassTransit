@@ -5,6 +5,7 @@ namespace HeavyLoad.BatchLoad
 	using Castle.Windsor;
 	using log4net;
 	using MassTransit.ServiceBus;
+	using MassTransit.ServiceBus.MSMQ;
 	using MassTransit.ServiceBus.Threading;
 
 	public class BatchLoadTest : IDisposable
@@ -23,7 +24,7 @@ namespace HeavyLoad.BatchLoad
 
 		public void Run(StopWatch watch)
 		{
-			MsmqHelper.ValidateAndPurgeQueue(@".\private$\test_servicebus");
+            MsmqUtilities.ValidateAndPurgeQueue(@".\private$\test_servicebus");
 
 			_container = new HeavyLoadContainer();
 
