@@ -16,20 +16,18 @@
             </summary>
             <param name="disposing"><see langword="True"/> if managed objects should be disposed, otherwise <see langword="false"/>.</param>
         </member>
-        <member name="M:Ninject.Integration.DynamicProxy2.Infrastructure.DynamicProxy2ProxyFactory.Wrap(Ninject.Core.Activation.IContext,System.Object)">
+        <member name="M:Ninject.Integration.DynamicProxy2.Infrastructure.DynamicProxy2ProxyFactory.Wrap(Ninject.Core.Activation.IContext)">
             <summary>
             Wraps the specified instance in a proxy.
             </summary>
             <param name="context">The context in which the instance was activated.</param>
-            <param name="instance">The instance to wrap.</param>
             <returns>A proxy that wraps the instance.</returns>
         </member>
-        <member name="M:Ninject.Integration.DynamicProxy2.Infrastructure.DynamicProxy2ProxyFactory.Unwrap(Ninject.Core.Activation.IContext,System.Object)">
+        <member name="M:Ninject.Integration.DynamicProxy2.Infrastructure.DynamicProxy2ProxyFactory.Unwrap(Ninject.Core.Activation.IContext)">
             <summary>
             Unwraps the specified proxied instance.
             </summary>
             <param name="context">The context in which the instance was activated.</param>
-            <param name="proxy">The proxied instance to unwrap.</param>
             <returns>The unwrapped instance.</returns>
         </member>
         <member name="T:Ninject.Integration.DynamicProxy2.Infrastructure.DynamicProxy2Wrapper">
@@ -57,11 +55,6 @@
             <summary>
             Extends the functionality of the kernel, providing a proxy factory that uses LinFu
             to generate dynamic proxies.
-            </summary>
-        </member>
-        <member name="M:Ninject.Integration.DynamicProxy2.DynamicProxy2Module.BeforeLoad">
-            <summary>
-            Prepares the module for being loaded. Can be used to connect component dependencies.
             </summary>
         </member>
         <member name="M:Ninject.Integration.DynamicProxy2.DynamicProxy2Module.Load">

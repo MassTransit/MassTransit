@@ -98,13 +98,6 @@
             <param name="evt">The event that is being published to the channel.</param>
             <returns><see langword="true"/> if the publication was removed, or <see langword="false"/> if no such publication exists.</returns>
         </member>
-        <member name="M:Ninject.Extensions.MessageBroker.Infrastructure.IMessageChannel.AddSubscription(System.Object,Ninject.Core.Injection.IMethodInjector)">
-            <summary>
-            Adds a subscription to the channel.
-            </summary>
-            <param name="subscriber">The object that will subscribe to events.</param>
-            <param name="injector">The injector that will be triggered when an event occurs.</param>
-        </member>
         <member name="M:Ninject.Extensions.MessageBroker.Infrastructure.IMessageChannel.AddSubscription(System.Object,Ninject.Core.Injection.IMethodInjector,Ninject.Extensions.MessageBroker.DeliveryThread)">
             <summary>
             Adds a subscription to the channel.
@@ -230,13 +223,6 @@
             <param name="publisher">The object that is publishing events.</param>
             <param name="evt">The event that is being published to the channel.</param>
             <returns><see langword="true"/> if the publication was removed, or <see langword="false"/> if no such publication exists.</returns>
-        </member>
-        <member name="M:Ninject.Extensions.MessageBroker.Infrastructure.StandardMessageChannel.AddSubscription(System.Object,Ninject.Core.Injection.IMethodInjector)">
-            <summary>
-            Adds a subscription to the channel.
-            </summary>
-            <param name="subscriber">The object that will subscribe to events.</param>
-            <param name="injector">The injector that will be triggered when an event occurs.</param>
         </member>
         <member name="M:Ninject.Extensions.MessageBroker.Infrastructure.StandardMessageChannel.AddSubscription(System.Object,Ninject.Core.Injection.IMethodInjector,Ninject.Extensions.MessageBroker.DeliveryThread)">
             <summary>
@@ -506,25 +492,19 @@
             and unbinds them before they are destroyed.
             </summary>
         </member>
-        <member name="M:Ninject.Extensions.MessageBroker.Infrastructure.EventBindingStrategy.AfterInitialize(Ninject.Core.Activation.IContext,System.Object@)">
+        <member name="M:Ninject.Extensions.MessageBroker.Infrastructure.EventBindingStrategy.AfterInitialize(Ninject.Core.Activation.IContext)">
             <summary>
             Executed after the instance is initialized.
             </summary>
-            <param name="context">The context in which the activation is occurring.</param>
-            <param name="instance">The instance being activated.</param>
-            <returns>
-            A value indicating whether to proceed or stop the execution of the strategy chain.
-            </returns>
+            <param name="context">The activation context.</param>
+            <returns>A value indicating whether to proceed or stop the execution of the strategy chain.</returns>
         </member>
-        <member name="M:Ninject.Extensions.MessageBroker.Infrastructure.EventBindingStrategy.BeforeDestroy(Ninject.Core.Activation.IContext,System.Object@)">
+        <member name="M:Ninject.Extensions.MessageBroker.Infrastructure.EventBindingStrategy.BeforeDestroy(Ninject.Core.Activation.IContext)">
             <summary>
             Executed before the instance is destroyed.
             </summary>
-            <param name="context">The context in which the activation is occurring.</param>
-            <param name="instance">The instance being activated.</param>
-            <returns>
-            A value indicating whether to proceed or stop the execution of the strategy chain.
-            </returns>
+            <param name="context">The activation context.</param>
+            <returns>A value indicating whether to proceed or stop the execution of the strategy chain.</returns>
         </member>
         <member name="T:Ninject.Extensions.MessageBroker.Infrastructure.EventReflectionStrategy">
             <summary>
@@ -668,14 +648,14 @@
             Adds functionality to the kernel to support channel-based pub/sub messaging.
             </summary>
         </member>
-        <member name="M:Ninject.Extensions.MessageBroker.MessageBrokerModule.BeforeLoad">
-            <summary>
-            Prepares the module for being loaded. Can be used to connect component dependencies.
-            </summary>
-        </member>
         <member name="M:Ninject.Extensions.MessageBroker.MessageBrokerModule.Load">
             <summary>
             Loads the module into the kernel.
+            </summary>
+        </member>
+        <member name="M:Ninject.Extensions.MessageBroker.MessageBrokerModule.Unload">
+            <summary>
+            Unloads the module from the kernel.
             </summary>
         </member>
         <member name="P:Ninject.Extensions.MessageBroker.MessageBrokerModule.MessageBroker">

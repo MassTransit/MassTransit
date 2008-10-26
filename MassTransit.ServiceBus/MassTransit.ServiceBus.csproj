@@ -40,6 +40,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\libs\log4net.dll</HintPath>
     </Reference>
+    <Reference Include="Magnum.Common, Version=0.1.0.44, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\libs\Magnum.Common.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.Practices.ServiceLocation, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\libs\Microsoft.Practices.ServiceLocation.dll</HintPath>
@@ -219,6 +223,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ServiceBus.NullServiceBus.cs" />
+    <Compile Include="Services\MessageDeferral\RemoteMessageDeferralViewer.cs" />
+    <Compile Include="Services\MessageDeferral\Messages\DeferedMessageRepublished.cs" />
+    <Compile Include="Services\MessageDeferral\Messages\NewDeferMessageReceived.cs" />
+    <Compile Include="Services\Timeout\RemoteTimeoutViewer.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

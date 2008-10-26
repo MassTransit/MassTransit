@@ -1,0 +1,18 @@
+<table>
+    <caption>A display of messages that have been deferred</caption>
+    <tr>
+        <th>Message Name</th>
+        <th>Republish At</th>
+    </tr>
+  <% for message in messages: %>
+      <tr>
+          <td>${message.MessageType}</td>
+          <td>${message.DeliverAt}</td>
+      </tr>
+  <% end %>
+</table>
+
+
+<% component capturefor, { @id : "title" }: %>
+<h2>Message Deferral</h2>
+<% end %> 

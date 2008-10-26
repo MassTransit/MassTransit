@@ -15,8 +15,9 @@ namespace MassTransit.ServiceBus.Tests
 	using System;
 	using Messages;
 	using NUnit.Framework;
+	using TestConsumers;
 
-	[TestFixture]
+    [TestFixture]
 	public class When_a_request_message_is_published :
 		LocalAndRemoteTestContext
 	{

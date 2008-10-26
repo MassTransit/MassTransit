@@ -45,13 +45,13 @@
             <param name="root">The root object that begins the chain.</param>
             <returns>The subject that this builder is interested in.</returns>
         </member>
-        <member name="M:Ninject.Conditions.Builders.ConditionBuilderBase`3.#ctor(System.Converter{`0,`2})">
+        <member name="M:Ninject.Conditions.Builders.ConditionBuilderBase`3.#ctor(System.Func{`0,`2})">
             <summary>
             Creates a new ConditionBuilderBase.
             </summary>
             <param name="converter">A converter delegate that directly translates from the root of the condition chain to this builder's subject.</param>
         </member>
-        <member name="M:Ninject.Conditions.Builders.ConditionBuilderBase`3.#ctor(Ninject.Conditions.Builders.IConditionBuilder{`0,`1},System.Converter{`1,`2})">
+        <member name="M:Ninject.Conditions.Builders.ConditionBuilderBase`3.#ctor(Ninject.Conditions.Builders.IConditionBuilder{`0,`1},System.Func{`1,`2})">
             <summary>
             Creates a new ConditionBuilderBase.
             </summary>
@@ -70,6 +70,18 @@
             Creates a hash code for the object.
             </summary>
             <returns>A hash code for the object.</returns>
+        </member>
+        <member name="M:Ninject.Conditions.Builders.ConditionBuilderBase`3.ToString">
+            <summary>
+            Returns a string that represents the object.
+            </summary>
+            <returns>A string that represents the object.</returns>
+        </member>
+        <member name="M:Ninject.Conditions.Builders.ConditionBuilderBase`3.GetType">
+            <summary>
+            Gets the type of the object.
+            </summary>
+            <returns>The object's type.</returns>
         </member>
         <member name="M:Ninject.Conditions.Builders.ConditionBuilderBase`3.Ninject#Conditions#Builders#IConditionBuilder{TRoot@TSubject}#ResolveSubject(`0)">
             <summary>
@@ -103,13 +115,13 @@
             <param name="value">The value to compare to.</param>
             <returns>A terminating condition.</returns>
         </member>
-        <member name="M:Ninject.Conditions.Builders.SimpleConditionBuilder`3.#ctor(System.Converter{`0,`2})">
+        <member name="M:Ninject.Conditions.Builders.SimpleConditionBuilder`3.#ctor(System.Func{`0,`2})">
             <summary>
             Creates a new SimpleConditionBuilder.
             </summary>
             <param name="converter">A converter delegate that directly translates from the root of the condition chain to this builder's subject.</param>
         </member>
-        <member name="M:Ninject.Conditions.Builders.SimpleConditionBuilder`3.#ctor(Ninject.Conditions.Builders.IConditionBuilder{`0,`1},System.Converter{`1,`2})">
+        <member name="M:Ninject.Conditions.Builders.SimpleConditionBuilder`3.#ctor(Ninject.Conditions.Builders.IConditionBuilder{`0,`1},System.Func{`1,`2})">
             <summary>
             Creates a new SimpleConditionBuilder.
             </summary>
@@ -140,7 +152,13 @@
             instance as the specified object.
             </summary>
         </member>
-        <member name="M:Ninject.Conditions.Builders.SimpleConditionBuilder`3.InstanceOf(System.Type)">
+        <member name="M:Ninject.Conditions.Builders.SimpleConditionBuilder`3.IsInstanceOf(System.Type)">
+            <summary>
+            Creates a terminating condition that determines whether the subject is an instance
+            of the specified type.
+            </summary>
+        </member>
+        <member name="M:Ninject.Conditions.Builders.SimpleConditionBuilder`3.IsInstanceOf``1">
             <summary>
             Creates a terminating condition that determines whether the subject is an instance
             of the specified type.
@@ -172,13 +190,13 @@
             Creates a terminating condition that determines whether the subject is null.
             </summary>
         </member>
-        <member name="M:Ninject.Conditions.Builders.AttributeConditionBuilder`3.#ctor(System.Converter{`0,`2})">
+        <member name="M:Ninject.Conditions.Builders.AttributeConditionBuilder`3.#ctor(System.Func{`0,`2})">
             <summary>
             Creates a new AttributeConditionBuilder.
             </summary>
             <param name="converter">A converter delegate that directly translates from the root of the condition chain to this builder's subject.</param>
         </member>
-        <member name="M:Ninject.Conditions.Builders.AttributeConditionBuilder`3.#ctor(Ninject.Conditions.Builders.IConditionBuilder{`0,`1},System.Converter{`1,`2})">
+        <member name="M:Ninject.Conditions.Builders.AttributeConditionBuilder`3.#ctor(Ninject.Conditions.Builders.IConditionBuilder{`0,`1},System.Func{`1,`2})">
             <summary>
             Creates a new AttributeConditionBuilder.
             </summary>
@@ -216,45 +234,6 @@
             <see cref="T:Ninject.Core.TagAttribute"/>.
             </summary>
         </member>
-        <member name="T:Ninject.Conditions.Builders.CollectionConditionBuilder`4">
-            <summary>
-            A condition builder that can examine collections. This class supports Ninject's EDSL and
-            should generally not be used directly.
-            </summary>
-            <typeparam name="TRoot">The root type of the conversion chain.</typeparam>
-            <typeparam name="TPrevious">The subject type of that the previous link in the condition chain.</typeparam>
-            <typeparam name="TSubject">The type of collection that this condition builder deals with.</typeparam>
-            <typeparam name="TItem">The type of object stored in the collection that this condition builder deals with.</typeparam>
-        </member>
-        <member name="M:Ninject.Conditions.Builders.CollectionConditionBuilder`4.#ctor(System.Converter{`0,`2})">
-            <summary>
-            Creates a new CollectionConditionBuilder.
-            </summary>
-            <param name="converter">A converter delegate that directly translates from the root of the condition chain to this builder's subject.</param>
-        </member>
-        <member name="M:Ninject.Conditions.Builders.CollectionConditionBuilder`4.#ctor(Ninject.Conditions.Builders.IConditionBuilder{`0,`1},System.Converter{`1,`2})">
-            <summary>
-            Creates a new CollectionConditionBuilder.
-            </summary>
-            <param name="last">The previous builder in the conditional chain.</param>
-            <param name="converter">A step converter delegate that translates from the previous step's output to this builder's subject.</param>
-        </member>
-        <member name="M:Ninject.Conditions.Builders.CollectionConditionBuilder`4.Contains(`3)">
-            <summary>
-            Creates a terminating condition that determines whether the collection contains
-            the specified item.
-            </summary>
-        </member>
-        <member name="P:Ninject.Conditions.Builders.CollectionConditionBuilder`4.Count">
-            <summary>
-            Continues the condition chain, evaluating the number of items in the collection.
-            </summary>
-        </member>
-        <member name="P:Ninject.Conditions.Builders.CollectionConditionBuilder`4.IsEmpty">
-            <summary>
-            Creates a terminating condition that determines whether the collection is empty.
-            </summary>
-        </member>
         <member name="T:Ninject.Conditions.Builders.ComparableConditionBuilder`3">
             <summary>
             A condition builder that deals with <see cref="T:System.IComparable"/> objects. This class
@@ -264,13 +243,13 @@
             <typeparam name="TPrevious">The subject type of that the previous link in the condition chain.</typeparam>
             <typeparam name="TSubject">The type of object that this condition builder deals with.</typeparam>
         </member>
-        <member name="M:Ninject.Conditions.Builders.ComparableConditionBuilder`3.#ctor(System.Converter{`0,`2})">
+        <member name="M:Ninject.Conditions.Builders.ComparableConditionBuilder`3.#ctor(System.Func{`0,`2})">
             <summary>
             Creates a new ComparableConditionBuilder.
             </summary>
             <param name="converter">A converter delegate that directly translates from the root of the condition chain to this builder's subject.</param>
         </member>
-        <member name="M:Ninject.Conditions.Builders.ComparableConditionBuilder`3.#ctor(Ninject.Conditions.Builders.IConditionBuilder{`0,`1},System.Converter{`1,`2})">
+        <member name="M:Ninject.Conditions.Builders.ComparableConditionBuilder`3.#ctor(Ninject.Conditions.Builders.IConditionBuilder{`0,`1},System.Func{`1,`2})">
             <summary>
             Creates a new ComparableConditionBuilder.
             </summary>
@@ -345,139 +324,227 @@
             <param name="value">The value to compare with.</param>
             <returns>A condition that terminates the chain.</returns>
         </member>
-        <member name="T:Ninject.Conditions.Builders.ListConditionBuilder`4">
+        <member name="T:Ninject.Conditions.Builders.CollectionConditionBuilder`4">
+            <summary>
+            A condition builder that can examine collections. This class supports Ninject's EDSL and
+            should generally not be used directly.
+            </summary>
+            <typeparam name="TRoot">The root type of the conversion chain.</typeparam>
+            <typeparam name="TPrevious">The subject type of that the previous link in the condition chain.</typeparam>
+            <typeparam name="TCollection">The type of collection that this condition builder deals with.</typeparam>
+            <typeparam name="TItem">The type of object stored in the collection that this condition builder deals with.</typeparam>
+        </member>
+        <member name="T:Ninject.Conditions.Builders.EnumerableConditionBuilder`4">
+            <summary>
+            A condition builder that can examine <see cref="T:System.Collections.Generic.IEnumerable`1"/> objects. This class
+            supports Ninject's EDSL and should generally not be used directly.
+            </summary>
+            <typeparam name="TRoot">The root type of the conversion chain.</typeparam>
+            <typeparam name="TPrevious">The subject type of that the previous link in the condition chain.</typeparam>
+            <typeparam name="TSubject">The type of collection that this condition builder deals with.</typeparam>
+            <typeparam name="TItem">The type of object stored in the collection that this condition builder deals with.</typeparam>
+        </member>
+        <member name="M:Ninject.Conditions.Builders.EnumerableConditionBuilder`4.#ctor(System.Func{`0,`2})">
+            <summary>
+            Creates a new EnumerableConditionBuilder.
+            </summary>
+            <param name="converter">A converter delegate that directly translates from the root of the condition chain to this builder's subject.</param>
+        </member>
+        <member name="M:Ninject.Conditions.Builders.EnumerableConditionBuilder`4.#ctor(Ninject.Conditions.Builders.IConditionBuilder{`0,`1},System.Func{`1,`2})">
+            <summary>
+            Creates a new EnumerableConditionBuilder.
+            </summary>
+            <param name="last">The previous builder in the conditional chain.</param>
+            <param name="converter">A step converter delegate that translates from the previous step's output to this builder's subject.</param>
+        </member>
+        <member name="M:Ninject.Conditions.Builders.EnumerableConditionBuilder`4.Convert``1(System.Func{`3,``0})">
+            <summary>
+            Continues the conditional chain, converting all items in the input series.
+            </summary>
+            <typeparam name="TOutput">The type of item to convert to.</typeparam>
+            <param name="converter">The converter callback to execute.</param>
+        </member>
+        <member name="M:Ninject.Conditions.Builders.EnumerableConditionBuilder`4.Where(System.Predicate{`3})">
+            <summary>
+            Continues the conditional chain, examining only items in the series that match the specified predicate.
+            </summary>
+            <param name="predicate">The predicate to execute.</param>
+        </member>
+        <member name="M:Ninject.Conditions.Builders.EnumerableConditionBuilder`4.CountMatches(System.Predicate{`3})">
+            <summary>
+            Continues the conditional chain by counting the number of items in the collection that match
+            the specified predicate.
+            </summary>
+            <param name="predicate">The predicate to execute.</param>
+        </member>
+        <member name="M:Ninject.Conditions.Builders.EnumerableConditionBuilder`4.All(System.Predicate{`3})">
+            <summary>
+            Creates a terminating condition that determines whether all items in the series match the predicate.
+            </summary>
+            <param name="predicate">The predicate to execute.</param>
+        </member>
+        <member name="M:Ninject.Conditions.Builders.EnumerableConditionBuilder`4.Has(System.Predicate{`3})">
+            <summary>
+            Creates a terminating condition that determines whether any items in the series match the predicate.
+            </summary>
+            <param name="predicate">The predicate to execute.</param>
+        </member>
+        <member name="M:Ninject.Conditions.Builders.CollectionConditionBuilder`4.#ctor(System.Func{`0,`2})">
+            <summary>
+            Creates a new CollectionConditionBuilder.
+            </summary>
+            <param name="converter">A converter delegate that directly translates from the root of the condition chain to this builder's subject.</param>
+        </member>
+        <member name="M:Ninject.Conditions.Builders.CollectionConditionBuilder`4.#ctor(Ninject.Conditions.Builders.IConditionBuilder{`0,`1},System.Func{`1,`2})">
+            <summary>
+            Creates a new CollectionConditionBuilder.
+            </summary>
+            <param name="last">The previous builder in the conditional chain.</param>
+            <param name="converter">A step converter delegate that translates from the previous step's output to this builder's subject.</param>
+        </member>
+        <member name="M:Ninject.Conditions.Builders.CollectionConditionBuilder`4.Contains(`3)">
+            <summary>
+            Creates a terminating condition that determines whether the collection contains
+            the specified item.
+            </summary>
+        </member>
+        <member name="P:Ninject.Conditions.Builders.CollectionConditionBuilder`4.Count">
+            <summary>
+            Continues the condition chain, evaluating the number of items in the collection.
+            </summary>
+        </member>
+        <member name="P:Ninject.Conditions.Builders.CollectionConditionBuilder`4.IsEmpty">
+            <summary>
+            Creates a terminating condition that determines whether the collection is empty.
+            </summary>
+        </member>
+        <member name="T:Ninject.Conditions.Builders.ListConditionBuilder`5">
             <summary>
             A condition builder that can examine lists. This class supports Ninject's EDSL and
             should generally not be used directly.
             </summary>
             <typeparam name="TRoot">The root type of the conversion chain.</typeparam>
             <typeparam name="TPrevious">The subject type of that the previous link in the condition chain.</typeparam>
-            <typeparam name="TSubject">The type of list that this condition builder deals with.</typeparam>
+            <typeparam name="TList">The type of list that this condition builder deals with.</typeparam>
             <typeparam name="TItem">The type of object stored in the list that this condition builder deals with.</typeparam>
+            <typeparam name="TItemBuilder">The type of builder to return for items in the list.</typeparam>
         </member>
-        <member name="M:Ninject.Conditions.Builders.ListConditionBuilder`4.#ctor(System.Converter{`0,`2})">
+        <member name="M:Ninject.Conditions.Builders.ListConditionBuilder`5.#ctor(System.Func{`0,`2})">
             <summary>
             Creates a new ListConditionBuilder.
             </summary>
             <param name="converter">A converter delegate that directly translates from the root of the condition chain to this builder's subject.</param>
         </member>
-        <member name="M:Ninject.Conditions.Builders.ListConditionBuilder`4.#ctor(Ninject.Conditions.Builders.IConditionBuilder{`0,`1},System.Converter{`1,`2})">
+        <member name="M:Ninject.Conditions.Builders.ListConditionBuilder`5.#ctor(Ninject.Conditions.Builders.IConditionBuilder{`0,`1},System.Func{`1,`2})">
             <summary>
             Creates a new ListConditionBuilder.
             </summary>
             <param name="last">The previous builder in the conditional chain.</param>
             <param name="converter">A step converter delegate that translates from the previous step's output to this builder's subject.</param>
         </member>
-        <member name="M:Ninject.Conditions.Builders.ListConditionBuilder`4.IndexOf(`3)">
+        <member name="M:Ninject.Conditions.Builders.ListConditionBuilder`5.IndexOf(`3)">
             <summary>
             Continues the condition chain, evaluating the index of the specified item.
             </summary>
         </member>
-        <member name="P:Ninject.Conditions.Builders.ListConditionBuilder`4.Item(System.Int32)">
+        <member name="M:Ninject.Conditions.Builders.ListConditionBuilder`5.CreateBuilderForItem(System.Func{`2,`3})">
+            <summary>
+            Creates a condition builder for an item in the list.
+            </summary>
+            <param name="converter">The converter that reads the item from the list.</param>
+            <returns>The created condition builder.</returns>
+        </member>
+        <member name="P:Ninject.Conditions.Builders.ListConditionBuilder`5.Item(System.Int32)">
             <summary>
             Continues the condition chain, evaluating the item at the specified index.
             </summary>
         </member>
-        <member name="T:Ninject.Conditions.Builders.MemberConditionBuilder`3">
+        <member name="T:Ninject.Conditions.Builders.ObjectListConditionBuilder`3">
             <summary>
-            A condition builder that deals with <see cref="T:System.Reflection.MemberInfo"/> objects. This class
+            A condition builder that deals with lists of <see cref="T:System.Object"/>s. This class
             supports Ninject's EDSL and should generally not be used directly.
             </summary>
             <typeparam name="TRoot">The root type of the conversion chain.</typeparam>
             <typeparam name="TPrevious">The subject type of that the previous link in the condition chain.</typeparam>
-            <typeparam name="TSubject">The type of object that this condition builder deals with.</typeparam>
+            <typeparam name="TList">The type of list the condition builder deals with.</typeparam>
         </member>
-        <member name="M:Ninject.Conditions.Builders.MemberConditionBuilder`3.#ctor(System.Converter{`0,`2})">
+        <member name="M:Ninject.Conditions.Builders.ObjectListConditionBuilder`3.#ctor(System.Func{`0,`2})">
             <summary>
-            Creates a new MemberConditionBuilder.
+            Creates a new ObjectListConditionBuilder.
             </summary>
             <param name="converter">A converter delegate that directly translates from the root of the condition chain to this builder's subject.</param>
         </member>
-        <member name="M:Ninject.Conditions.Builders.MemberConditionBuilder`3.#ctor(Ninject.Conditions.Builders.IConditionBuilder{`0,`1},System.Converter{`1,`2})">
+        <member name="M:Ninject.Conditions.Builders.ObjectListConditionBuilder`3.#ctor(Ninject.Conditions.Builders.IConditionBuilder{`0,`1},System.Func{`1,`2})">
             <summary>
-            Creates a new MemberConditionBuilder.
+            Creates a new ObjectListConditionBuilder.
             </summary>
             <param name="last">The previous builder in the conditional chain.</param>
             <param name="converter">A step converter delegate that translates from the previous step's output to this builder's subject.</param>
         </member>
-        <member name="P:Ninject.Conditions.Builders.MemberConditionBuilder`3.DeclaringType">
+        <member name="M:Ninject.Conditions.Builders.ObjectListConditionBuilder`3.CreateBuilderForItem(System.Func{`2,System.Object})">
             <summary>
-            Continues the condition chain by examining the member's declaring type.
+            Creates a condition builder for an item in the list.
             </summary>
+            <param name="converter">The converter that reads the item from the list.</param>
+            <returns>The created condition builder.</returns>
         </member>
-        <member name="P:Ninject.Conditions.Builders.MemberConditionBuilder`3.Name">
+        <member name="T:Ninject.Conditions.Builders.ParameterListConditionBuilder`3">
             <summary>
-            Continues the condition chain by examining the member's name.
-            </summary>
-        </member>
-        <member name="T:Ninject.Conditions.Builders.AssemblyConditionBuilder`2">
-            <summary>
-            A condition builder that deals with <see cref="T:System.Reflection.Assembly"/> objects. This class supports Ninject's
-            EDSL and should generally not be used directly.
+            A condition builder that deals with lists of <see cref="T:System.Reflection.ParameterInfo"/> objects. This class
+            supports Ninject's EDSL and should generally not be used directly.
             </summary>
             <typeparam name="TRoot">The root type of the conversion chain.</typeparam>
             <typeparam name="TPrevious">The subject type of that the previous link in the condition chain.</typeparam>
+            <typeparam name="TList">The type of list the condition builder deals with.</typeparam>
         </member>
-        <member name="M:Ninject.Conditions.Builders.AssemblyConditionBuilder`2.#ctor(System.Converter{`0,System.Reflection.Assembly})">
+        <member name="M:Ninject.Conditions.Builders.ParameterListConditionBuilder`3.#ctor(System.Func{`0,`2})">
             <summary>
-            Creates a new AssemblyConditionBuilder.
+            Creates a new ParameterConditionBuilder.
             </summary>
             <param name="converter">A converter delegate that directly translates from the root of the condition chain to this builder's subject.</param>
         </member>
-        <member name="M:Ninject.Conditions.Builders.AssemblyConditionBuilder`2.#ctor(Ninject.Conditions.Builders.IConditionBuilder{`0,`1},System.Converter{`1,System.Reflection.Assembly})">
+        <member name="M:Ninject.Conditions.Builders.ParameterListConditionBuilder`3.#ctor(Ninject.Conditions.Builders.IConditionBuilder{`0,`1},System.Func{`1,`2})">
             <summary>
-            Creates a new AssemblyConditionBuilder.
+            Creates a new ParameterConditionBuilder.
             </summary>
             <param name="last">The previous builder in the conditional chain.</param>
             <param name="converter">A step converter delegate that translates from the previous step's output to this builder's subject.</param>
         </member>
-        <member name="P:Ninject.Conditions.Builders.AssemblyConditionBuilder`2.FullName">
+        <member name="M:Ninject.Conditions.Builders.ParameterListConditionBuilder`3.CreateBuilderForItem(System.Func{`2,System.Reflection.ParameterInfo})">
             <summary>
-            Continues the condition chain by examining the assembly's name.
+            Creates a condition builder for an item in the list.
             </summary>
+            <param name="converter">The converter that reads the item from the list.</param>
+            <returns>The created condition builder.</returns>
         </member>
-        <member name="P:Ninject.Conditions.Builders.AssemblyConditionBuilder`2.LoadedFromGAC">
+        <member name="T:Ninject.Conditions.Builders.TypeListConditionBuilder`3">
             <summary>
-            Creates a terminating condition that determines whether the assembly was loaded from
-            the GAC.
-            </summary>
-        </member>
-        <member name="P:Ninject.Conditions.Builders.AssemblyConditionBuilder`2.IsReflectionOnly">
-            <summary>
-            Creates a terminating condition that determines whether the assembly was loaded in
-            reflection-only context.
-            </summary>
-        </member>
-        <member name="P:Ninject.Conditions.Builders.AssemblyConditionBuilder`2.Location">
-            <summary>
-            Continues the condition chain by examining the assembly's location.
-            </summary>
-        </member>
-        <member name="T:Ninject.Conditions.Builders.AssemblyNameConditionBuilder`2">
-            <summary>
-            A condition builder that deals with <see cref="T:System.Reflection.AssemblyName"/> objects. This class supports Ninject's
-            EDSL and should generally not be used directly.
+            A condition builder that deals with lists of <see cref="T:System.Type"/> objects. This class
+            supports Ninject's EDSL and should generally not be used directly.
             </summary>
             <typeparam name="TRoot">The root type of the conversion chain.</typeparam>
             <typeparam name="TPrevious">The subject type of that the previous link in the condition chain.</typeparam>
+            <typeparam name="TList">The type of list the condition builder deals with.</typeparam>
         </member>
-        <member name="M:Ninject.Conditions.Builders.AssemblyNameConditionBuilder`2.#ctor(System.Converter{`0,System.Reflection.AssemblyName})">
+        <member name="M:Ninject.Conditions.Builders.TypeListConditionBuilder`3.#ctor(System.Func{`0,`2})">
             <summary>
-            Creates a new AssemblyNameConditionBuilder.
+            Creates a new TypeListConditionBuilder.
             </summary>
             <param name="converter">A converter delegate that directly translates from the root of the condition chain to this builder's subject.</param>
         </member>
-        <member name="M:Ninject.Conditions.Builders.AssemblyNameConditionBuilder`2.#ctor(Ninject.Conditions.Builders.IConditionBuilder{`0,`1},System.Converter{`1,System.Reflection.AssemblyName})">
+        <member name="M:Ninject.Conditions.Builders.TypeListConditionBuilder`3.#ctor(Ninject.Conditions.Builders.IConditionBuilder{`0,`1},System.Func{`1,`2})">
             <summary>
-            Creates a new AssemblyNameConditionBuilder.
+            Creates a new TypeListConditionBuilder.
             </summary>
             <param name="last">The previous builder in the conditional chain.</param>
             <param name="converter">A step converter delegate that translates from the previous step's output to this builder's subject.</param>
         </member>
-        <member name="P:Ninject.Conditions.Builders.AssemblyNameConditionBuilder`2.Version">
+        <member name="M:Ninject.Conditions.Builders.TypeListConditionBuilder`3.CreateBuilderForItem(System.Func{`2,System.Type})">
             <summary>
-            Continues the condition chain by examining the assembly's version.
+            Creates a condition builder for an item in the list.
             </summary>
+            <param name="converter">The converter that reads the item from the list.</param>
+            <returns>The created condition builder.</returns>
         </member>
         <member name="T:Ninject.Conditions.Builders.BehaviorConditionBuilder`2">
             <summary>
@@ -487,13 +554,13 @@
             <typeparam name="TRoot">The root type of the conversion chain.</typeparam>
             <typeparam name="TPrevious">The subject type of that the previous link in the condition chain.</typeparam>
         </member>
-        <member name="M:Ninject.Conditions.Builders.BehaviorConditionBuilder`2.#ctor(System.Converter{`0,Ninject.Core.Behavior.IBehavior})">
+        <member name="M:Ninject.Conditions.Builders.BehaviorConditionBuilder`2.#ctor(System.Func{`0,Ninject.Core.Behavior.IBehavior})">
             <summary>
             Creates a new BehaviorConditionBuilder.
             </summary>
             <param name="converter">A converter delegate that directly translates from the root of the condition chain to this builder's subject.</param>
         </member>
-        <member name="M:Ninject.Conditions.Builders.BehaviorConditionBuilder`2.#ctor(Ninject.Conditions.Builders.IConditionBuilder{`0,`1},System.Converter{`1,Ninject.Core.Behavior.IBehavior})">
+        <member name="M:Ninject.Conditions.Builders.BehaviorConditionBuilder`2.#ctor(Ninject.Conditions.Builders.IConditionBuilder{`0,`1},System.Func{`1,Ninject.Core.Behavior.IBehavior})">
             <summary>
             Creates a new BehaviorConditionBuilder.
             </summary>
@@ -513,13 +580,13 @@
             <typeparam name="TRoot">The root type of the conversion chain.</typeparam>
             <typeparam name="TPrevious">The subject type of that the previous link in the condition chain.</typeparam>
         </member>
-        <member name="M:Ninject.Conditions.Builders.BindingConditionBuilder`2.#ctor(System.Converter{`0,Ninject.Core.Binding.IBinding})">
+        <member name="M:Ninject.Conditions.Builders.BindingConditionBuilder`2.#ctor(System.Func{`0,Ninject.Core.Binding.IBinding})">
             <summary>
             Creates a new BindingConditionBuilder.
             </summary>
             <param name="converter">A converter delegate that directly translates from the root of the condition chain to this builder's subject.</param>
         </member>
-        <member name="M:Ninject.Conditions.Builders.BindingConditionBuilder`2.#ctor(Ninject.Conditions.Builders.IConditionBuilder{`0,`1},System.Converter{`1,Ninject.Core.Binding.IBinding})">
+        <member name="M:Ninject.Conditions.Builders.BindingConditionBuilder`2.#ctor(Ninject.Conditions.Builders.IConditionBuilder{`0,`1},System.Func{`1,Ninject.Core.Binding.IBinding})">
             <summary>
             Creates a new ContextConditionBuilder.
             </summary>
@@ -559,13 +626,13 @@
             <typeparam name="TRoot">The root type of the conversion chain.</typeparam>
             <typeparam name="TPrevious">The subject type of that the previous link in the condition chain.</typeparam>
         </member>
-        <member name="M:Ninject.Conditions.Builders.ContextConditionBuilder`2.#ctor(System.Converter{`0,Ninject.Core.Activation.IContext})">
+        <member name="M:Ninject.Conditions.Builders.ContextConditionBuilder`2.#ctor(System.Func{`0,Ninject.Core.Activation.IContext})">
             <summary>
             Creates a new ContextConditionBuilder.
             </summary>
             <param name="converter">A converter delegate that directly translates from the root of the condition chain to this builder's subject.</param>
         </member>
-        <member name="M:Ninject.Conditions.Builders.ContextConditionBuilder`2.#ctor(Ninject.Conditions.Builders.IConditionBuilder{`0,`1},System.Converter{`1,Ninject.Core.Activation.IContext})">
+        <member name="M:Ninject.Conditions.Builders.ContextConditionBuilder`2.#ctor(Ninject.Conditions.Builders.IConditionBuilder{`0,`1},System.Func{`1,Ninject.Core.Activation.IContext})">
             <summary>
             Creates a new ContextConditionBuilder.
             </summary>
@@ -577,14 +644,14 @@
             Continues the conditional chain, examining the value of the specified context variable.
             </summary>
         </member>
-        <member name="M:Ninject.Conditions.Builders.ContextConditionBuilder`2.Parameter``1(System.String)">
-            <summary>
-            Continues the conditional chain, examining the value of the specified parameter.
-            </summary>
-        </member>
         <member name="M:Ninject.Conditions.Builders.ContextConditionBuilder`2.HasVariable(System.String)">
             <summary>
             Creates a terminating condition that determines whether the specified variable is defined.
+            </summary>
+        </member>
+        <member name="M:Ninject.Conditions.Builders.ContextConditionBuilder`2.Parameter``1(System.String)">
+            <summary>
+            Continues the conditional chain, examining the value of the specified parameter.
             </summary>
         </member>
         <member name="M:Ninject.Conditions.Builders.ContextConditionBuilder`2.HasParameter``1(System.String)">
@@ -610,6 +677,12 @@
             the context.
             </summary>
         </member>
+        <member name="P:Ninject.Conditions.Builders.ContextConditionBuilder`2.Implementation">
+            <summary>
+            Continues the conditional chain, examining the implementation type currently being
+            activated within the context.
+            </summary>
+        </member>
         <member name="P:Ninject.Conditions.Builders.ContextConditionBuilder`2.Member">
             <summary>
             Continues the conditional chain, examining the member that will be injected with the value
@@ -625,6 +698,11 @@
         <member name="P:Ninject.Conditions.Builders.ContextConditionBuilder`2.Level">
             <summary>
             Continues the conditional chain, examining the nesting level of the context.
+            </summary>
+        </member>
+        <member name="P:Ninject.Conditions.Builders.ContextConditionBuilder`2.GenericArguments">
+            <summary>
+            Continues the conditional chain, examining the generic arguments of the context.
             </summary>
         </member>
         <member name="P:Ninject.Conditions.Builders.ContextConditionBuilder`2.Parent">
@@ -643,6 +721,141 @@
             injection request.
             </summary>
         </member>
+        <member name="T:Ninject.Conditions.Builders.KernelConditionBuilder`2">
+            <summary>
+            A condition builder that deals with <see cref="T:Ninject.Core.IKernel"/> objects. This class
+            supports Ninject's EDSL and should generally not be used directly.
+            </summary>
+            <typeparam name="TRoot">The root type of the conversion chain.</typeparam>
+            <typeparam name="TPrevious">The subject type of that the previous link in the condition chain.</typeparam>
+        </member>
+        <member name="M:Ninject.Conditions.Builders.KernelConditionBuilder`2.#ctor(System.Func{`0,Ninject.Core.IKernel})">
+            <summary>
+            Creates a new KernelConditionBuilder.
+            </summary>
+            <param name="converter">A converter delegate that directly translates from the root of the condition chain to this builder's subject.</param>
+        </member>
+        <member name="M:Ninject.Conditions.Builders.KernelConditionBuilder`2.#ctor(Ninject.Conditions.Builders.IConditionBuilder{`0,`1},System.Func{`1,Ninject.Core.IKernel})">
+            <summary>
+            Creates a new KernelConditionBuilder.
+            </summary>
+            <param name="last">The previous builder in the conditional chain.</param>
+            <param name="converter">A step converter delegate that translates from the previous step's output to this builder's subject.</param>
+        </member>
+        <member name="P:Ninject.Conditions.Builders.KernelConditionBuilder`2.Configuration">
+            <summary>
+            Continues the condition chain by examining the kernel's configuration name.
+            </summary>
+        </member>
+        <member name="T:Ninject.Conditions.Builders.ProviderConditionBuilder`2">
+            <summary>
+            A condition builder that deals with <see cref="T:Ninject.Core.Creation.IProvider"/> objects. This class supports Ninject's
+            EDSL and should generally not be used directly.
+            </summary>
+            <typeparam name="TRoot">The root type of the conversion chain.</typeparam>
+            <typeparam name="TPrevious">The subject type of that the previous link in the condition chain.</typeparam>
+        </member>
+        <member name="M:Ninject.Conditions.Builders.ProviderConditionBuilder`2.#ctor(System.Func{`0,Ninject.Core.Creation.IProvider})">
+            <summary>
+            Creates a new ProviderConditionBuilder.
+            </summary>
+            <param name="converter">A converter delegate that directly translates from the root of the condition chain to this builder's subject.</param>
+        </member>
+        <member name="M:Ninject.Conditions.Builders.ProviderConditionBuilder`2.#ctor(Ninject.Conditions.Builders.IConditionBuilder{`0,`1},System.Func{`1,Ninject.Core.Creation.IProvider})">
+            <summary>
+            Creates a new ProviderConditionBuilder.
+            </summary>
+            <param name="last">The previous builder in the conditional chain.</param>
+            <param name="converter">A step converter delegate that translates from the previous step's output to this builder's subject.</param>
+        </member>
+        <member name="P:Ninject.Conditions.Builders.ProviderConditionBuilder`2.Prototype">
+            <summary>
+            Continues the conditional chain by examining the provider's prototype.
+            </summary>
+        </member>
+        <member name="T:Ninject.Conditions.Builders.RequestConditionBuilder`2">
+            <summary>
+            A condition builder that deals with <see cref="T:Ninject.Core.Interception.IRequest"/> objects. This class supports Ninject's
+            EDSL and should generally not be used directly.
+            </summary>
+            <typeparam name="TRoot">The root type of the conversion chain.</typeparam>
+            <typeparam name="TPrevious">The subject type of that the previous link in the condition chain.</typeparam>
+        </member>
+        <member name="M:Ninject.Conditions.Builders.RequestConditionBuilder`2.#ctor(System.Func{`0,Ninject.Core.Interception.IRequest})">
+            <summary>
+            Creates a new RequestConditionBuilder.
+            </summary>
+            <param name="converter">A converter delegate that directly translates from the root of the condition chain to this builder's subject.</param>
+        </member>
+        <member name="M:Ninject.Conditions.Builders.RequestConditionBuilder`2.#ctor(Ninject.Conditions.Builders.IConditionBuilder{`0,`1},System.Func{`1,Ninject.Core.Interception.IRequest})">
+            <summary>
+            Creates a new RequestConditionBuilder.
+            </summary>
+            <param name="last">The previous builder in the conditional chain.</param>
+            <param name="converter">A step converter delegate that translates from the previous step's output to this builder's subject.</param>
+        </member>
+        <member name="P:Ninject.Conditions.Builders.RequestConditionBuilder`2.Context">
+            <summary>
+            Continues the conditional chain, examining the context in which the target instance
+            was activated.
+            </summary>
+        </member>
+        <member name="P:Ninject.Conditions.Builders.RequestConditionBuilder`2.Target">
+            <summary>
+            Continues the conditional chain, examining the target instance.
+            </summary>
+        </member>
+        <member name="P:Ninject.Conditions.Builders.RequestConditionBuilder`2.Method">
+            <summary>
+            Continues the conditional chain, examining the method that is being called.
+            </summary>
+        </member>
+        <member name="P:Ninject.Conditions.Builders.RequestConditionBuilder`2.Arguments">
+            <summary>
+            Continues the conditional chain, examining the list of arguments.
+            </summary>
+        </member>
+        <member name="P:Ninject.Conditions.Builders.RequestConditionBuilder`2.GenericArguments">
+            <summary>
+            Continues the conditional chain, examining the list of generic type arguments.
+            </summary>
+        </member>
+        <member name="P:Ninject.Conditions.Builders.RequestConditionBuilder`2.HasGenericArguments">
+            <summary>
+            Continues the conditional chain, examining the method that is being called.
+            </summary>
+        </member>
+        <member name="T:Ninject.Conditions.Builders.TargetConditionBuilder`2">
+            <summary>
+            A condition builder that deals with <see cref="T:Ninject.Core.Planning.Targets.ITarget"/> objects. This class
+            supports Ninject's EDSL and should generally not be used directly.
+            </summary>
+            <typeparam name="TRoot">The root type of the conversion chain.</typeparam>
+            <typeparam name="TPrevious">The subject type of that the previous link in the condition chain.</typeparam>
+        </member>
+        <member name="M:Ninject.Conditions.Builders.TargetConditionBuilder`2.#ctor(System.Func{`0,Ninject.Core.Planning.Targets.ITarget})">
+            <summary>
+            Creates a new TargetConditionBuilder.
+            </summary>
+            <param name="converter">A converter delegate that directly translates from the root of the condition chain to this builder's subject.</param>
+        </member>
+        <member name="M:Ninject.Conditions.Builders.TargetConditionBuilder`2.#ctor(Ninject.Conditions.Builders.IConditionBuilder{`0,`1},System.Func{`1,Ninject.Core.Planning.Targets.ITarget})">
+            <summary>
+            Creates a new TargetConditionBuilder.
+            </summary>
+            <param name="last">The previous builder in the conditional chain.</param>
+            <param name="converter">A step converter delegate that translates from the previous step's output to this builder's subject.</param>
+        </member>
+        <member name="P:Ninject.Conditions.Builders.TargetConditionBuilder`2.Name">
+            <summary>
+            Continues the condition chain, examining the injection point's name.
+            </summary>
+        </member>
+        <member name="P:Ninject.Conditions.Builders.TargetConditionBuilder`2.TargetType">
+            <summary>
+            Continues the condition chain, examining the injection point's type.
+            </summary>
+        </member>
         <member name="T:Ninject.Conditions.Builders.DateTimeConditionBuilder`2">
             <summary>
             A condition builder that deals with <see cref="T:System.DateTime"/> objects. This class
@@ -651,13 +864,13 @@
             <typeparam name="TRoot">The root type of the conversion chain.</typeparam>
             <typeparam name="TPrevious">The subject type of that the previous link in the condition chain.</typeparam>
         </member>
-        <member name="M:Ninject.Conditions.Builders.DateTimeConditionBuilder`2.#ctor(System.Converter{`0,System.DateTime})">
+        <member name="M:Ninject.Conditions.Builders.DateTimeConditionBuilder`2.#ctor(System.Func{`0,System.DateTime})">
             <summary>
             Creates a new DateTimeConditionBuilder.
             </summary>
             <param name="converter">A converter delegate that directly translates from the root of the condition chain to this builder's subject.</param>
         </member>
-        <member name="M:Ninject.Conditions.Builders.DateTimeConditionBuilder`2.#ctor(Ninject.Conditions.Builders.IConditionBuilder{`0,`1},System.Converter{`1,System.DateTime})">
+        <member name="M:Ninject.Conditions.Builders.DateTimeConditionBuilder`2.#ctor(Ninject.Conditions.Builders.IConditionBuilder{`0,`1},System.Func{`1,System.DateTime})">
             <summary>
             Creates a new DateTimeConditionBuilder.
             </summary>
@@ -748,163 +961,18 @@
             <typeparam name="TRoot">The root type of the conversion chain.</typeparam>
             <typeparam name="TPrevious">The subject type of that the previous link in the condition chain.</typeparam>
         </member>
-        <member name="M:Ninject.Conditions.Builders.Int32ConditionBuilder`2.#ctor(System.Converter{`0,System.Int32})">
+        <member name="M:Ninject.Conditions.Builders.Int32ConditionBuilder`2.#ctor(System.Func{`0,System.Int32})">
             <summary>
             Creates a new Int32ConditionBuilder.
             </summary>
             <param name="converter">A converter delegate that directly translates from the root of the condition chain to this builder's subject.</param>
         </member>
-        <member name="M:Ninject.Conditions.Builders.Int32ConditionBuilder`2.#ctor(Ninject.Conditions.Builders.IConditionBuilder{`0,`1},System.Converter{`1,System.Int32})">
+        <member name="M:Ninject.Conditions.Builders.Int32ConditionBuilder`2.#ctor(Ninject.Conditions.Builders.IConditionBuilder{`0,`1},System.Func{`1,System.Int32})">
             <summary>
             Creates a new Int32ConditionBuilder.
             </summary>
             <param name="last">The previous builder in the conditional chain.</param>
             <param name="converter">A step converter delegate that translates from the previous step's output to this builder's subject.</param>
-        </member>
-        <member name="T:Ninject.Conditions.Builders.KernelConditionBuilder`2">
-            <summary>
-            A condition builder that deals with <see cref="T:Ninject.Core.IKernel"/> objects. This class
-            supports Ninject's EDSL and should generally not be used directly.
-            </summary>
-            <typeparam name="TRoot">The root type of the conversion chain.</typeparam>
-            <typeparam name="TPrevious">The subject type of that the previous link in the condition chain.</typeparam>
-        </member>
-        <member name="M:Ninject.Conditions.Builders.KernelConditionBuilder`2.#ctor(System.Converter{`0,Ninject.Core.IKernel})">
-            <summary>
-            Creates a new KernelConditionBuilder.
-            </summary>
-            <param name="converter">A converter delegate that directly translates from the root of the condition chain to this builder's subject.</param>
-        </member>
-        <member name="M:Ninject.Conditions.Builders.KernelConditionBuilder`2.#ctor(Ninject.Conditions.Builders.IConditionBuilder{`0,`1},System.Converter{`1,Ninject.Core.IKernel})">
-            <summary>
-            Creates a new KernelConditionBuilder.
-            </summary>
-            <param name="last">The previous builder in the conditional chain.</param>
-            <param name="converter">A step converter delegate that translates from the previous step's output to this builder's subject.</param>
-        </member>
-        <member name="P:Ninject.Conditions.Builders.KernelConditionBuilder`2.Configuration">
-            <summary>
-            Continues the condition chain by examining the kernel's configuration name.
-            </summary>
-        </member>
-        <member name="T:Ninject.Conditions.Builders.MethodConditionBuilder`2">
-            <summary>
-            A condition builder that deals with <see cref="T:System.Reflection.MethodInfo"/> objects. This class
-            supports Ninject's EDSL and should generally not be used directly.
-            </summary>
-            <typeparam name="TRoot">The root type of the conversion chain.</typeparam>
-            <typeparam name="TPrevious">The subject type of that the previous link in the condition chain.</typeparam>
-        </member>
-        <member name="M:Ninject.Conditions.Builders.MethodConditionBuilder`2.#ctor(System.Converter{`0,System.Reflection.MethodInfo})">
-            <summary>
-            Creates a new MethodConditionBuilder.
-            </summary>
-            <param name="converter">A converter delegate that directly translates from the root of the condition chain to this builder's subject.</param>
-        </member>
-        <member name="M:Ninject.Conditions.Builders.MethodConditionBuilder`2.#ctor(Ninject.Conditions.Builders.IConditionBuilder{`0,`1},System.Converter{`1,System.Reflection.MethodInfo})">
-            <summary>
-            Creates a new MethodConditionBuilder.
-            </summary>
-            <param name="last">The previous builder in the conditional chain.</param>
-            <param name="converter">A step converter delegate that translates from the previous step's output to this builder's subject.</param>
-        </member>
-        <member name="P:Ninject.Conditions.Builders.MethodConditionBuilder`2.ReturnType">
-            <summary>
-            Continues the conditional chain, examining the return type of the method.
-            </summary>
-        </member>
-        <member name="P:Ninject.Conditions.Builders.MethodConditionBuilder`2.GenericTypeDefinition">
-            <summary>
-            Continues the conditional chain, examining the method's generic type definition.
-            </summary>
-        </member>
-        <member name="P:Ninject.Conditions.Builders.MethodConditionBuilder`2.IsAbstract">
-            <summary>
-            Creates a terminating condition that evaluates whether the method is abstract.
-            </summary>
-        </member>
-        <member name="P:Ninject.Conditions.Builders.MethodConditionBuilder`2.IsGenericMethod">
-            <summary>
-            Creates a terminating condition that evaluates whether the method is a generic method.
-            </summary>
-        </member>
-        <member name="T:Ninject.Conditions.Builders.ProviderConditionBuilder`2">
-            <summary>
-            A condition builder that deals with <see cref="T:Ninject.Core.Creation.IProvider"/> objects. This class supports Ninject's
-            EDSL and should generally not be used directly.
-            </summary>
-            <typeparam name="TRoot">The root type of the conversion chain.</typeparam>
-            <typeparam name="TPrevious">The subject type of that the previous link in the condition chain.</typeparam>
-        </member>
-        <member name="M:Ninject.Conditions.Builders.ProviderConditionBuilder`2.#ctor(System.Converter{`0,Ninject.Core.Creation.IProvider})">
-            <summary>
-            Creates a new ProviderConditionBuilder.
-            </summary>
-            <param name="converter">A converter delegate that directly translates from the root of the condition chain to this builder's subject.</param>
-        </member>
-        <member name="M:Ninject.Conditions.Builders.ProviderConditionBuilder`2.#ctor(Ninject.Conditions.Builders.IConditionBuilder{`0,`1},System.Converter{`1,Ninject.Core.Creation.IProvider})">
-            <summary>
-            Creates a new ProviderConditionBuilder.
-            </summary>
-            <param name="last">The previous builder in the conditional chain.</param>
-            <param name="converter">A step converter delegate that translates from the previous step's output to this builder's subject.</param>
-        </member>
-        <member name="P:Ninject.Conditions.Builders.ProviderConditionBuilder`2.Prototype">
-            <summary>
-            Continues the conditional chain by examining the provider's prototype.
-            </summary>
-        </member>
-        <member name="T:Ninject.Conditions.Builders.RequestConditionBuilder`2">
-            <summary>
-            A condition builder that deals with <see cref="T:Ninject.Core.Interception.IRequest"/> objects. This class supports Ninject's
-            EDSL and should generally not be used directly.
-            </summary>
-            <typeparam name="TRoot">The root type of the conversion chain.</typeparam>
-            <typeparam name="TPrevious">The subject type of that the previous link in the condition chain.</typeparam>
-        </member>
-        <member name="M:Ninject.Conditions.Builders.RequestConditionBuilder`2.#ctor(System.Converter{`0,Ninject.Core.Interception.IRequest})">
-            <summary>
-            Creates a new RequestConditionBuilder.
-            </summary>
-            <param name="converter">A converter delegate that directly translates from the root of the condition chain to this builder's subject.</param>
-        </member>
-        <member name="M:Ninject.Conditions.Builders.RequestConditionBuilder`2.#ctor(Ninject.Conditions.Builders.IConditionBuilder{`0,`1},System.Converter{`1,Ninject.Core.Interception.IRequest})">
-            <summary>
-            Creates a new RequestConditionBuilder.
-            </summary>
-            <param name="last">The previous builder in the conditional chain.</param>
-            <param name="converter">A step converter delegate that translates from the previous step's output to this builder's subject.</param>
-        </member>
-        <member name="P:Ninject.Conditions.Builders.RequestConditionBuilder`2.Context">
-            <summary>
-            Continues the conditional chain, examining the context in which the target instance
-            was activated.
-            </summary>
-        </member>
-        <member name="P:Ninject.Conditions.Builders.RequestConditionBuilder`2.Target">
-            <summary>
-            Continues the conditional chain, examining the target instance.
-            </summary>
-        </member>
-        <member name="P:Ninject.Conditions.Builders.RequestConditionBuilder`2.Method">
-            <summary>
-            Continues the conditional chain, examining the method that is being called.
-            </summary>
-        </member>
-        <member name="P:Ninject.Conditions.Builders.RequestConditionBuilder`2.Arguments">
-            <summary>
-            Continues the conditional chain, examining the list of arguments.
-            </summary>
-        </member>
-        <member name="P:Ninject.Conditions.Builders.RequestConditionBuilder`2.GenericArguments">
-            <summary>
-            Continues the conditional chain, examining the list of generic type arguments.
-            </summary>
-        </member>
-        <member name="P:Ninject.Conditions.Builders.RequestConditionBuilder`2.HasGenericArguments">
-            <summary>
-            Continues the conditional chain, examining the method that is being called.
-            </summary>
         </member>
         <member name="T:Ninject.Conditions.Builders.StringConditionBuilder`2">
             <summary>
@@ -914,13 +982,13 @@
             <typeparam name="TRoot">The root type of the conversion chain.</typeparam>
             <typeparam name="TPrevious">The subject type of that the previous link in the condition chain.</typeparam>
         </member>
-        <member name="M:Ninject.Conditions.Builders.StringConditionBuilder`2.#ctor(System.Converter{`0,System.String})">
+        <member name="M:Ninject.Conditions.Builders.StringConditionBuilder`2.#ctor(System.Func{`0,System.String})">
             <summary>
             Creates a new StringConditionBuilder.
             </summary>
             <param name="converter">A converter delegate that directly translates from the root of the condition chain to this builder's subject.</param>
         </member>
-        <member name="M:Ninject.Conditions.Builders.StringConditionBuilder`2.#ctor(Ninject.Conditions.Builders.IConditionBuilder{`0,`1},System.Converter{`1,System.String})">
+        <member name="M:Ninject.Conditions.Builders.StringConditionBuilder`2.#ctor(Ninject.Conditions.Builders.IConditionBuilder{`0,`1},System.Func{`1,System.String})">
             <summary>
             Creates a new StringConditionBuilder.
             </summary>
@@ -962,35 +1030,307 @@
             Continues the condition chain by examining the string's length.
             </summary>
         </member>
-        <member name="T:Ninject.Conditions.Builders.TargetConditionBuilder`2">
+        <member name="T:Ninject.Conditions.Builders.AssemblyConditionBuilder`2">
             <summary>
-            A condition builder that deals with <see cref="T:Ninject.Core.Planning.Targets.ITarget"/> objects. This class
+            A condition builder that deals with <see cref="T:System.Reflection.Assembly"/> objects. This class supports Ninject's
+            EDSL and should generally not be used directly.
+            </summary>
+            <typeparam name="TRoot">The root type of the conversion chain.</typeparam>
+            <typeparam name="TPrevious">The subject type of that the previous link in the condition chain.</typeparam>
+        </member>
+        <member name="M:Ninject.Conditions.Builders.AssemblyConditionBuilder`2.#ctor(System.Func{`0,System.Reflection.Assembly})">
+            <summary>
+            Creates a new AssemblyConditionBuilder.
+            </summary>
+            <param name="converter">A converter delegate that directly translates from the root of the condition chain to this builder's subject.</param>
+        </member>
+        <member name="M:Ninject.Conditions.Builders.AssemblyConditionBuilder`2.#ctor(Ninject.Conditions.Builders.IConditionBuilder{`0,`1},System.Func{`1,System.Reflection.Assembly})">
+            <summary>
+            Creates a new AssemblyConditionBuilder.
+            </summary>
+            <param name="last">The previous builder in the conditional chain.</param>
+            <param name="converter">A step converter delegate that translates from the previous step's output to this builder's subject.</param>
+        </member>
+        <member name="P:Ninject.Conditions.Builders.AssemblyConditionBuilder`2.FullName">
+            <summary>
+            Continues the condition chain by examining the assembly's name.
+            </summary>
+        </member>
+        <member name="P:Ninject.Conditions.Builders.AssemblyConditionBuilder`2.LoadedFromGAC">
+            <summary>
+            Creates a terminating condition that determines whether the assembly was loaded from
+            the GAC.
+            </summary>
+        </member>
+        <member name="P:Ninject.Conditions.Builders.AssemblyConditionBuilder`2.IsReflectionOnly">
+            <summary>
+            Creates a terminating condition that determines whether the assembly was loaded in
+            reflection-only context.
+            </summary>
+        </member>
+        <member name="P:Ninject.Conditions.Builders.AssemblyConditionBuilder`2.Location">
+            <summary>
+            Continues the condition chain by examining the assembly's location.
+            </summary>
+        </member>
+        <member name="T:Ninject.Conditions.Builders.AssemblyNameConditionBuilder`2">
+            <summary>
+            A condition builder that deals with <see cref="T:System.Reflection.AssemblyName"/> objects. This class supports Ninject's
+            EDSL and should generally not be used directly.
+            </summary>
+            <typeparam name="TRoot">The root type of the conversion chain.</typeparam>
+            <typeparam name="TPrevious">The subject type of that the previous link in the condition chain.</typeparam>
+        </member>
+        <member name="M:Ninject.Conditions.Builders.AssemblyNameConditionBuilder`2.#ctor(System.Func{`0,System.Reflection.AssemblyName})">
+            <summary>
+            Creates a new AssemblyNameConditionBuilder.
+            </summary>
+            <param name="converter">A converter delegate that directly translates from the root of the condition chain to this builder's subject.</param>
+        </member>
+        <member name="M:Ninject.Conditions.Builders.AssemblyNameConditionBuilder`2.#ctor(Ninject.Conditions.Builders.IConditionBuilder{`0,`1},System.Func{`1,System.Reflection.AssemblyName})">
+            <summary>
+            Creates a new AssemblyNameConditionBuilder.
+            </summary>
+            <param name="last">The previous builder in the conditional chain.</param>
+            <param name="converter">A step converter delegate that translates from the previous step's output to this builder's subject.</param>
+        </member>
+        <member name="P:Ninject.Conditions.Builders.AssemblyNameConditionBuilder`2.Version">
+            <summary>
+            Continues the condition chain by examining the assembly's version.
+            </summary>
+        </member>
+        <member name="T:Ninject.Conditions.Builders.ConstructorConditionBuilder`2">
+            <summary>
+            A condition builder that deals with <see cref="T:System.Reflection.MethodInfo"/> objects. This class
             supports Ninject's EDSL and should generally not be used directly.
             </summary>
             <typeparam name="TRoot">The root type of the conversion chain.</typeparam>
             <typeparam name="TPrevious">The subject type of that the previous link in the condition chain.</typeparam>
         </member>
-        <member name="M:Ninject.Conditions.Builders.TargetConditionBuilder`2.#ctor(System.Converter{`0,Ninject.Core.Planning.Targets.ITarget})">
+        <member name="T:Ninject.Conditions.Builders.MethodBaseConditionBuilder`3">
             <summary>
-            Creates a new TargetConditionBuilder.
+            A condition builder that deals with <see cref="T:System.Reflection.MethodBase"/> objects. This class
+            supports Ninject's EDSL and should generally not be used directly.
+            </summary>
+            <typeparam name="TRoot">The root type of the conversion chain.</typeparam>
+            <typeparam name="TPrevious">The subject type of that the previous link in the condition chain.</typeparam>
+            <typeparam name="TMethod">The type of method the condition examines.</typeparam>
+        </member>
+        <member name="T:Ninject.Conditions.Builders.MemberConditionBuilder`3">
+            <summary>
+            A condition builder that deals with <see cref="T:System.Reflection.MemberInfo"/> objects. This class
+            supports Ninject's EDSL and should generally not be used directly.
+            </summary>
+            <typeparam name="TRoot">The root type of the conversion chain.</typeparam>
+            <typeparam name="TPrevious">The subject type of that the previous link in the condition chain.</typeparam>
+            <typeparam name="TSubject">The type of object that this condition builder deals with.</typeparam>
+        </member>
+        <member name="M:Ninject.Conditions.Builders.MemberConditionBuilder`3.#ctor(System.Func{`0,`2})">
+            <summary>
+            Creates a new MemberConditionBuilder.
             </summary>
             <param name="converter">A converter delegate that directly translates from the root of the condition chain to this builder's subject.</param>
         </member>
-        <member name="M:Ninject.Conditions.Builders.TargetConditionBuilder`2.#ctor(Ninject.Conditions.Builders.IConditionBuilder{`0,`1},System.Converter{`1,Ninject.Core.Planning.Targets.ITarget})">
+        <member name="M:Ninject.Conditions.Builders.MemberConditionBuilder`3.#ctor(Ninject.Conditions.Builders.IConditionBuilder{`0,`1},System.Func{`1,`2})">
             <summary>
-            Creates a new TargetConditionBuilder.
+            Creates a new MemberConditionBuilder.
             </summary>
             <param name="last">The previous builder in the conditional chain.</param>
             <param name="converter">A step converter delegate that translates from the previous step's output to this builder's subject.</param>
         </member>
-        <member name="P:Ninject.Conditions.Builders.TargetConditionBuilder`2.Name">
+        <member name="P:Ninject.Conditions.Builders.MemberConditionBuilder`3.DeclaringType">
             <summary>
-            Continues the condition chain, examining the injection point's name.
+            Continues the condition chain by examining the member's declaring type.
             </summary>
         </member>
-        <member name="P:Ninject.Conditions.Builders.TargetConditionBuilder`2.TargetType">
+        <member name="P:Ninject.Conditions.Builders.MemberConditionBuilder`3.Name">
             <summary>
-            Continues the condition chain, examining the injection point's type.
+            Continues the condition chain by examining the member's name.
+            </summary>
+        </member>
+        <member name="M:Ninject.Conditions.Builders.MethodBaseConditionBuilder`3.#ctor(System.Func{`0,`2})">
+            <summary>
+            Creates a new MethodBaseConditionBuilder.
+            </summary>
+            <param name="converter">A converter delegate that directly translates from the root of the condition chain to this builder's subject.</param>
+        </member>
+        <member name="M:Ninject.Conditions.Builders.MethodBaseConditionBuilder`3.#ctor(Ninject.Conditions.Builders.IConditionBuilder{`0,`1},System.Func{`1,`2})">
+            <summary>
+            Creates a new MethodBaseConditionBuilder.
+            </summary>
+            <param name="last">The previous builder in the conditional chain.</param>
+            <param name="converter">A step converter delegate that translates from the previous step's output to this builder's subject.</param>
+        </member>
+        <member name="P:Ninject.Conditions.Builders.MethodBaseConditionBuilder`3.Parameters">
+            <summary>
+            Continues the conditional chain, examining the method's parameters.
+            </summary>
+        </member>
+        <member name="P:Ninject.Conditions.Builders.MethodBaseConditionBuilder`3.ParameterTypes">
+            <summary>
+            Continues the conditional chain, examining the method's parameters.
+            </summary>
+        </member>
+        <member name="P:Ninject.Conditions.Builders.MethodBaseConditionBuilder`3.IsAbstract">
+            <summary>
+            Creates a terminating condition that evaluates whether the method is abstract.
+            </summary>
+        </member>
+        <member name="P:Ninject.Conditions.Builders.MethodBaseConditionBuilder`3.IsGenericMethod">
+            <summary>
+            Creates a terminating condition that evaluates whether the method is a generic method.
+            </summary>
+        </member>
+        <member name="P:Ninject.Conditions.Builders.MethodBaseConditionBuilder`3.ContainsGenericParameters">
+            <summary>
+            Creates a terminating condition that evaluates whether the method contains generic parameters.
+            </summary>
+        </member>
+        <member name="M:Ninject.Conditions.Builders.ConstructorConditionBuilder`2.#ctor(System.Func{`0,System.Reflection.ConstructorInfo})">
+            <summary>
+            Creates a new ConstructorConditionBuilder.
+            </summary>
+            <param name="converter">A converter delegate that directly translates from the root of the condition chain to this builder's subject.</param>
+        </member>
+        <member name="M:Ninject.Conditions.Builders.ConstructorConditionBuilder`2.#ctor(Ninject.Conditions.Builders.IConditionBuilder{`0,`1},System.Func{`1,System.Reflection.ConstructorInfo})">
+            <summary>
+            Creates a new ConstructorConditionBuilder.
+            </summary>
+            <param name="last">The previous builder in the conditional chain.</param>
+            <param name="converter">A step converter delegate that translates from the previous step's output to this builder's subject.</param>
+        </member>
+        <member name="T:Ninject.Conditions.Builders.FieldConditionBuilder`2">
+            <summary>
+            A condition builder that deals with <see cref="T:System.Reflection.FieldInfo"/> objects. This class supports
+            Ninject's EDSL and should generally not be used directly.
+            </summary>
+            <typeparam name="TRoot">The root type of the conversion chain.</typeparam>
+            <typeparam name="TPrevious">The subject type of that the previous link in the condition chain.</typeparam>
+        </member>
+        <member name="M:Ninject.Conditions.Builders.FieldConditionBuilder`2.#ctor(System.Func{`0,System.Reflection.FieldInfo})">
+            <summary>
+            Creates a new FieldConditionBuilder.
+            </summary>
+            <param name="converter">A converter delegate that directly translates from the root of the condition chain to this builder's subject.</param>
+        </member>
+        <member name="M:Ninject.Conditions.Builders.FieldConditionBuilder`2.#ctor(Ninject.Conditions.Builders.IConditionBuilder{`0,`1},System.Func{`1,System.Reflection.FieldInfo})">
+            <summary>
+            Creates a new FieldConditionBuilder.
+            </summary>
+            <param name="last">The previous builder in the conditional chain.</param>
+            <param name="converter">A step converter delegate that translates from the previous step's output to this builder's subject.</param>
+        </member>
+        <member name="P:Ninject.Conditions.Builders.FieldConditionBuilder`2.FieldType">
+            <summary>
+            Continues the condition chain, evaluating the type of the field.
+            </summary>
+        </member>
+        <member name="T:Ninject.Conditions.Builders.MethodConditionBuilder`2">
+            <summary>
+            A condition builder that deals with <see cref="T:System.Reflection.MethodInfo"/> objects. This class
+            supports Ninject's EDSL and should generally not be used directly.
+            </summary>
+            <typeparam name="TRoot">The root type of the conversion chain.</typeparam>
+            <typeparam name="TPrevious">The subject type of that the previous link in the condition chain.</typeparam>
+        </member>
+        <member name="M:Ninject.Conditions.Builders.MethodConditionBuilder`2.#ctor(System.Func{`0,System.Reflection.MethodInfo})">
+            <summary>
+            Creates a new MethodConditionBuilder.
+            </summary>
+            <param name="converter">A converter delegate that directly translates from the root of the condition chain to this builder's subject.</param>
+        </member>
+        <member name="M:Ninject.Conditions.Builders.MethodConditionBuilder`2.#ctor(Ninject.Conditions.Builders.IConditionBuilder{`0,`1},System.Func{`1,System.Reflection.MethodInfo})">
+            <summary>
+            Creates a new MethodConditionBuilder.
+            </summary>
+            <param name="last">The previous builder in the conditional chain.</param>
+            <param name="converter">A step converter delegate that translates from the previous step's output to this builder's subject.</param>
+        </member>
+        <member name="P:Ninject.Conditions.Builders.MethodConditionBuilder`2.ReturnType">
+            <summary>
+            Continues the conditional chain, examining the return type of the method.
+            </summary>
+        </member>
+        <member name="P:Ninject.Conditions.Builders.MethodConditionBuilder`2.GenericTypeDefinition">
+            <summary>
+            Continues the conditional chain, examining the method's generic type definition.
+            </summary>
+        </member>
+        <member name="T:Ninject.Conditions.Builders.ParameterConditionBuilder`2">
+            <summary>
+            A condition builder that deals with <see cref="T:System.Reflection.PropertyInfo"/> objects. This class
+            supports Ninject's EDSL and should generally not be used directly.
+            </summary>
+            <typeparam name="TRoot">The root type of the conversion chain.</typeparam>
+            <typeparam name="TPrevious">The subject type of that the previous link in the condition chain.</typeparam>
+        </member>
+        <member name="M:Ninject.Conditions.Builders.ParameterConditionBuilder`2.#ctor(System.Func{`0,System.Reflection.ParameterInfo})">
+            <summary>
+            Creates a new ParameterConditionBuilder.
+            </summary>
+            <param name="converter">A converter delegate that directly translates from the root of the condition chain to this builder's subject.</param>
+        </member>
+        <member name="M:Ninject.Conditions.Builders.ParameterConditionBuilder`2.#ctor(Ninject.Conditions.Builders.IConditionBuilder{`0,`1},System.Func{`1,System.Reflection.ParameterInfo})">
+            <summary>
+            Creates a new ParameterConditionBuilder.
+            </summary>
+            <param name="last">The previous builder in the conditional chain.</param>
+            <param name="converter">A step converter delegate that translates from the previous step's output to this builder's subject.</param>
+        </member>
+        <member name="P:Ninject.Conditions.Builders.ParameterConditionBuilder`2.Name">
+            <summary>
+            Continues the condition chain by examining the parameter's name.
+            </summary>
+        </member>
+        <member name="P:Ninject.Conditions.Builders.ParameterConditionBuilder`2.ParameterType">
+            <summary>
+            Continues the condition chain by examining the type of the parameter.
+            </summary>
+        </member>
+        <member name="T:Ninject.Conditions.Builders.PropertyConditionBuilder`2">
+            <summary>
+            A condition builder that deals with <see cref="T:System.Reflection.PropertyInfo"/> objects. This class
+            supports Ninject's EDSL and should generally not be used directly.
+            </summary>
+            <typeparam name="TRoot">The root type of the conversion chain.</typeparam>
+            <typeparam name="TPrevious">The subject type of that the previous link in the condition chain.</typeparam>
+        </member>
+        <member name="M:Ninject.Conditions.Builders.PropertyConditionBuilder`2.#ctor(System.Func{`0,System.Reflection.PropertyInfo})">
+            <summary>
+            Creates a new PropertyConditionBuilder.
+            </summary>
+            <param name="converter">A converter delegate that directly translates from the root of the condition chain to this builder's subject.</param>
+        </member>
+        <member name="M:Ninject.Conditions.Builders.PropertyConditionBuilder`2.#ctor(Ninject.Conditions.Builders.IConditionBuilder{`0,`1},System.Func{`1,System.Reflection.PropertyInfo})">
+            <summary>
+            Creates a new PropertyConditionBuilder.
+            </summary>
+            <param name="last">The previous builder in the conditional chain.</param>
+            <param name="converter">A step converter delegate that translates from the previous step's output to this builder's subject.</param>
+        </member>
+        <member name="P:Ninject.Conditions.Builders.PropertyConditionBuilder`2.GetMethod">
+            <summary>
+            Continues the condition chain, evaluating the property's getter.
+            </summary>
+        </member>
+        <member name="P:Ninject.Conditions.Builders.PropertyConditionBuilder`2.SetMethod">
+            <summary>
+            Continues the condition chain, evaluating the property's getter.
+            </summary>
+        </member>
+        <member name="P:Ninject.Conditions.Builders.PropertyConditionBuilder`2.PropertyType">
+            <summary>
+            Continues the condition chain, evaluating the type of the property.
+            </summary>
+        </member>
+        <member name="P:Ninject.Conditions.Builders.PropertyConditionBuilder`2.CanRead">
+            <summary>
+            Creates a terminating condition that evaluates whether the property can be read.
+            </summary>
+        </member>
+        <member name="P:Ninject.Conditions.Builders.PropertyConditionBuilder`2.CanWrite">
+            <summary>
+            Creates a terminating condition that evaluates whether the property can be written.
             </summary>
         </member>
         <member name="T:Ninject.Conditions.Builders.TypeConditionBuilder`2">
@@ -1001,13 +1341,13 @@
             <typeparam name="TRoot">The root type of the conversion chain.</typeparam>
             <typeparam name="TPrevious">The subject type of that the previous link in the condition chain.</typeparam>
         </member>
-        <member name="M:Ninject.Conditions.Builders.TypeConditionBuilder`2.#ctor(System.Converter{`0,System.Type})">
+        <member name="M:Ninject.Conditions.Builders.TypeConditionBuilder`2.#ctor(System.Func{`0,System.Type})">
             <summary>
             Creates a new TypeConditionBuilder.
             </summary>
             <param name="converter">A converter delegate that directly translates from the root of the condition chain to this builder's subject.</param>
         </member>
-        <member name="M:Ninject.Conditions.Builders.TypeConditionBuilder`2.#ctor(Ninject.Conditions.Builders.IConditionBuilder{`0,`1},System.Converter{`1,System.Type})">
+        <member name="M:Ninject.Conditions.Builders.TypeConditionBuilder`2.#ctor(Ninject.Conditions.Builders.IConditionBuilder{`0,`1},System.Func{`1,System.Type})">
             <summary>
             Creates a new TypeConditionBuilder.
             </summary>
@@ -1069,13 +1409,13 @@
             <typeparam name="TRoot">The root type of the conversion chain.</typeparam>
             <typeparam name="TPrevious">The subject type of that the previous link in the condition chain.</typeparam>
         </member>
-        <member name="M:Ninject.Conditions.Builders.VersionConditionBuilder`2.#ctor(System.Converter{`0,System.Version})">
+        <member name="M:Ninject.Conditions.Builders.VersionConditionBuilder`2.#ctor(System.Func{`0,System.Version})">
             <summary>
             Creates a new VersionConditionBuilder.
             </summary>
             <param name="converter">A converter delegate that directly translates from the root of the condition chain to this builder's subject.</param>
         </member>
-        <member name="M:Ninject.Conditions.Builders.VersionConditionBuilder`2.#ctor(Ninject.Conditions.Builders.IConditionBuilder{`0,`1},System.Converter{`1,System.Version})">
+        <member name="M:Ninject.Conditions.Builders.VersionConditionBuilder`2.#ctor(Ninject.Conditions.Builders.IConditionBuilder{`0,`1},System.Func{`1,System.Version})">
             <summary>
             Creates a new VersionConditionBuilder.
             </summary>
@@ -1286,6 +1626,26 @@
         <member name="P:Ninject.Conditions.When.Request">
             <summary>
             Begins a conditional chain that examines an intercepted message call.
+            </summary>
+        </member>
+        <member name="P:Ninject.Conditions.When.Constructor">
+            <summary>
+            Begins a conditional chain that examines a constructor injection candidate.
+            </summary>
+        </member>
+        <member name="P:Ninject.Conditions.When.Method">
+            <summary>
+            Begins a conditional chain that examines a method injection candidate.
+            </summary>
+        </member>
+        <member name="P:Ninject.Conditions.When.Property">
+            <summary>
+            Begins a conditional chain that examines a property injection candidate.
+            </summary>
+        </member>
+        <member name="P:Ninject.Conditions.When.Field">
+            <summary>
+            Begins a conditional chain that examines a field injection candidate.
             </summary>
         </member>
     </members>

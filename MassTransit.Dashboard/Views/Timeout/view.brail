@@ -1,0 +1,15 @@
+<table>
+    <caption>A display of the scheduled timeouts</caption>
+	<tr>
+	    <th>Timeout At</th>
+	</tr>
+  <% for timeout in timeouts: %>
+      <tr>
+          <td>${timeout.TimeoutAt}</td>
+      </tr>
+  <% end %>
+</table>
+
+<% component capturefor, { @id : "title" }: %>
+<h2>Scheduled Timeouts</h2>
+<% end %> 

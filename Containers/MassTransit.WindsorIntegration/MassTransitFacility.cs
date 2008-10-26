@@ -44,7 +44,7 @@ namespace MassTransit.WindsorIntegration
 
         private void LoadTransports()
         {
-            IConfiguration transportConfiguration = FacilityConfig.Children["transports"];
+            var transportConfiguration = FacilityConfig.Children["transports"];
             if (transportConfiguration == null)
                 throw new ConventionException("At least one transport must be defined in the facility configuration.");
 

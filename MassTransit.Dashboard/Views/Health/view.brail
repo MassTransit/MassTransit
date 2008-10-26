@@ -1,9 +1,3 @@
-<div class="span-24">
-    <h1>Health Information</h1>
-</div>
-
-<div class="span-24">
-
 <table>
     <caption>A display of endpoints and their health known to Mass Transit</caption>
 	<tr>
@@ -12,14 +6,16 @@
 	    <th>Last Fault Detected At</th>
 	    <th>-</th>
 	</tr>
-  <?brail for status in statuses: ?>
+  <% for status in statuses: %>
       <tr>
           <td>${status.Uri}</td>
           <td>${status.FirstDetectedAt}</td>
           <td>${status.LastFaultDetectedAt}</td>
           <td><a href="${SiteRoot}\Health\Ping.castle?uri=${status.Uri}">Ping</a></td>
       </tr>
-  <?brail end ?>
+  <% end %>
 </table>
 
-</div>
+<% component capturefor, { @id : "title" }: %>
+<h2>Health Information</h2>
+<% end %> 

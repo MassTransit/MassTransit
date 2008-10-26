@@ -10,49 +10,47 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Services
+namespace MassTransit.ServiceBus.Services.MessageDeferral
 {
-	using log4net;
-	using ServiceBus;
-	using ServiceBus.Services.MessageDeferral;
+    using log4net;
 
     public class MessageDeferralService :
-		IHostedService
-	{
-		private static readonly ILog _log = LogManager.GetLogger(typeof (MessageDeferralService));
-		private readonly IServiceBus _bus;
+        IHostedService
+    {
+        private static readonly ILog _log = LogManager.GetLogger(typeof (MessageDeferralService));
+        private readonly IServiceBus _bus;
 
-		public MessageDeferralService(IServiceBus bus)
-		{
-			_bus = bus;
-		}
+        public MessageDeferralService(IServiceBus bus)
+        {
+            _bus = bus;
+        }
 
-		public void Dispose()
-		{
-		}
+        public void Dispose()
+        {
+        }
 
-		public void Start()
-		{
-			if (_log.IsInfoEnabled)
-				_log.Info("MessageDeferralService Starting");
+        public void Start()
+        {
+            if (_log.IsInfoEnabled)
+                _log.Info("MessageDeferralService Starting");
 
-			_bus.AddComponent<DeferMessageConsumer>();
-			_bus.AddComponent<TimeoutExpiredConsumer>();
+            _bus.AddComponent<DeferMessageConsumer>();
+            _bus.AddComponent<TimeoutExpiredConsumer>();
 
-			if (_log.IsInfoEnabled)
-				_log.Info("MessageDeferralService Started");
-		}
+            if (_log.IsInfoEnabled)
+                _log.Info("MessageDeferralService Started");
+        }
 
-		public void Stop()
-		{
-			if (_log.IsInfoEnabled)
-				_log.Info("MessageDeferralService Stopping");
+        public void Stop()
+        {
+            if (_log.IsInfoEnabled)
+                _log.Info("MessageDeferralService Stopping");
 
-			_bus.RemoveComponent<TimeoutExpiredConsumer>();
-			_bus.RemoveComponent<DeferMessageConsumer>();
+            _bus.RemoveComponent<TimeoutExpiredConsumer>();
+            _bus.RemoveComponent<DeferMessageConsumer>();
 
-			if (_log.IsInfoEnabled)
-				_log.Info("MessageDeferralService Stopped");
-		}
-	}
+            if (_log.IsInfoEnabled)
+                _log.Info("MessageDeferralService Stopped");
+        }
+    }
 }
