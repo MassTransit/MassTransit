@@ -304,6 +304,9 @@ SELECT TYPES WHERE FullNameLike "Messages" AND !HasAttribute "OPTIONAL:System.Se
       <CQLQuery Active="True" DisplayList="True" DisplayStat="True" DisplaySelectionView="False">// &lt;Name&gt;Only Ifrastructure Assemblies should reference System.Data&lt;/Name&gt;
 WARN IF Count &gt; 0 IN 
 SELECT ASSEMBLIES WHERE IsUsing "OPTIONAL:System.Data" AND !NameLike "Infrastructure"</CQLQuery>
+      <CQLQuery Active="True" DisplayList="True" DisplayStat="True" DisplaySelectionView="False">// &lt;Name&gt;Classes that implement IEndpoint should have a static readonly Scheme property&lt;/Name&gt;
+WARN IF Count &gt; 0 IN
+SELECT METHODS OUT OF TYPES "MassTransit.ServiceBus.IEndpoint" WHERE NameIs "get_Scheme()" AND !IsStatic AND NameLike "MassTransit"</CQLQuery>
     </CQLGroup>
   </CQLQueries>
   <WarnFilter>

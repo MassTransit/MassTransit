@@ -36,6 +36,7 @@ namespace MassTransit.ServiceBus.Services.MessageDeferral
             _repository.Add(new DeferredMessage(id, message.DeliverAt, message.Message));
 
             _bus.Publish(new ScheduleTimeout(id, message.DeliverAt));
+            _bus.Publish(new NewDeferMessageReceived(id, message.DeliverAt, message.MessageType));
         }
     }
 }

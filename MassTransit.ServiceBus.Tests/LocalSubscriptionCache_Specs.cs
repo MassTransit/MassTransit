@@ -17,6 +17,7 @@ namespace MassTransit.ServiceBus.Tests
 	using MassTransit.ServiceBus.Subscriptions;
 	using Messages;
 	using NUnit.Framework;
+	using TestConsumers;
 	using Transports;
 
 	[TestFixture]

@@ -133,11 +133,6 @@
             logging infrastructure and log4net.
             </summary>
         </member>
-        <member name="M:Ninject.Integration.Log4net.Log4netModule.BeforeLoad">
-            <summary>
-            Prepares the module for being loaded. Can be used to connect component dependencies.
-            </summary>
-        </member>
         <member name="M:Ninject.Integration.Log4net.Log4netModule.Load">
             <summary>
             Loads the module into the kernel.

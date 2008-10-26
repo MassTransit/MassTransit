@@ -159,7 +159,12 @@
     <Compile Include="Subscriptions\When_Working_With_Subscription_Entries.cs" />
     <Compile Include="Messages\UpdateMessage.cs" />
     <Compile Include="Messages\UpdateAcceptedMessage.cs" />
-    <Compile Include="TestMessageConsumer.cs" />
+    <Compile Include="TestConsumers\TestBatchConsumer.cs" />
+    <Compile Include="TestConsumers\TestConsumerBase.cs" />
+    <Compile Include="TestConsumers\TestCorrelatedConsumer.cs" />
+    <Compile Include="TestConsumers\TestMessageConsumer.cs" />
+    <Compile Include="TestConsumers\TestReplyService.cs" />
+    <Compile Include="TestConsumers\TestSelectiveConsumer.cs" />
     <Compile Include="ThreadPool_Specs.cs" />
     <Compile Include="Timeouts\DeferMessage_Specs.cs" />
     <Compile Include="Timeouts\TimeoutService_Specs.cs" />

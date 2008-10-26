@@ -133,11 +133,6 @@
             logging infrastructure and nlog.
             </summary>
         </member>
-        <member name="M:Ninject.Integration.NLog.NLogModule.BeforeLoad">
-            <summary>
-            Prepares the module for being loaded. Can be used to connect component dependencies.
-            </summary>
-        </member>
         <member name="M:Ninject.Integration.NLog.NLogModule.Load">
             <summary>
             Loads the module into the kernel.

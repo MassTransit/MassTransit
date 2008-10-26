@@ -1,20 +1,14 @@
-<div class="span-24">
-    <h1>Subscriptions</h1>
-</div>
-
-<div class="span-24">
-
 <table>
     <caption>A list of subscriptions managed by MassTransit</caption>
 	<tr>
 	    <th>Address</th>
 	    <th>Message</th>
 	</tr>
-  <?brail
-	  for subscription in subscriptions:
-		  output "<tr><td>${subscription.EndpointUri}</td><td>${subscription.MessageName}</td></tr>"
-	  end
-  ?>
+  <% for subscription in subscriptions: %>
+	<tr><td>${subscription.EndpointUri}</td><td>${subscription.MessageName}</td></tr>
+  <% end %>
 </table>
 
-</div>
+<% component capturefor, { @id : "title" }: %>
+<h1>Subscriptions</h1>
+<% end %> 

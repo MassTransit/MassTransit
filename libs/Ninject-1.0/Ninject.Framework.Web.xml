@@ -102,6 +102,32 @@
             Gets or sets the logger associated with the object.
             </summary>
         </member>
+        <member name="T:Ninject.Framework.Web.NinjectHttpModule">
+            <summary>
+            An <see cref="T:System.Web.IHttpModule"/> that injects dependencies into pages and usercontrols.
+            </summary>
+        </member>
+        <member name="M:Ninject.Framework.Web.NinjectHttpModule.Init(System.Web.HttpApplication)">
+            <summary>
+            Initializes a module and prepares it to handle requests.
+            </summary>
+            <param name="context">A <see cref="T:System.Web.HttpApplication"/> that provides access to the methods, properties, and events common to all application objects within an ASP.NET application</param>
+        </member>
+        <member name="M:Ninject.Framework.Web.NinjectHttpModule.OnPreRequestHandlerExecute(System.Object,System.EventArgs)">
+            <summary>
+            Injects dependencies into web pages and subscribes to their InitComplete
+            Event to inject usercontrols with their dependencies.
+            </summary>
+            <param name="sender">The sender.</param>
+            <param name="e">The <see cref="T:System.EventArgs"/> instance containing the event data.</param>
+        </member>
+        <member name="M:Ninject.Framework.Web.NinjectHttpModule.InjectUserControls(System.Web.UI.Control)">
+            <summary>
+            Search for usercontrols within the parent control
+            and inject their dependencies using KernelContainer.
+            </summary>
+            <param name="parent">The parent control.</param>
+        </member>
         <member name="T:Ninject.Framework.Web.PageBase">
             <summary>
             A <see cref="T:System.Web.UI.Page"/> that supports injections.

@@ -87,6 +87,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\libs\Castle\Castle.Windsor.dll</HintPath>
     </Reference>
+    <Reference Include="Magnum.Common, Version=0.1.0.75, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\libs\Magnum.Common.dll</HintPath>
+    </Reference>
     <Reference Include="Newtonsoft.Json, Version=1.3.2.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\libs\Newtonsoft.Json.dll</HintPath>
@@ -114,19 +118,10 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Assets\Images\toolbar-bg.gif" />
-    <Content Include="Assets\Styles\blueprint\ie.css" />
-    <Content Include="Assets\Styles\blueprint\plugins\fancy-type\readme.txt" />
-    <Content Include="Assets\Styles\blueprint\plugins\fancy-type\screen.css" />
-    <Content Include="Assets\Styles\blueprint\print.css" />
-    <Content Include="Assets\Styles\blueprint\screen.css" />
-    <Content Include="Assets\Styles\blueprint\src\forms.css" />
-    <Content Include="Assets\Styles\blueprint\src\grid.css" />
-    <Content Include="Assets\Styles\blueprint\src\grid.png" />
-    <Content Include="Assets\Styles\blueprint\src\ie.css" />
-    <Content Include="Assets\Styles\blueprint\src\print.css" />
-    <Content Include="Assets\Styles\blueprint\src\reset.css" />
-    <Content Include="Assets\Styles\blueprint\src\typography.css" />
+    <Content Include="Assets\Scripts\jquery-1.2.6.js" />
     <Content Include="Assets\Styles\ie.css" />
+    <Content Include="Assets\Styles\plugins\fancy-type\readme.txt" />
+    <Content Include="Assets\Styles\plugins\fancy-type\screen.css" />
     <Content Include="Assets\Styles\print.css" />
     <Content Include="Assets\Styles\screen.css" />
     <Content Include="Default.aspx" />
@@ -134,9 +129,12 @@
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Controllers\Dashboard.cs" />
     <Compile Include="Controllers\HealthController.cs" />
+    <Compile Include="Controllers\MessageDeferralController.cs" />
     <Compile Include="Controllers\MetadataController.cs" />
     <Compile Include="Controllers\SubscriptionsController.cs" />
+    <Compile Include="Controllers\TimeoutController.cs" />
     <Compile Include="DashboardApplication.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="WebAppContainer.cs" />
@@ -162,6 +160,15 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Views\Metadata\view.brail" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Views\MessageDeferral\view.brail" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Views\Dashboard\summary.brail" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Views\Timeout\view.brail" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v9.0\WebApplications\Microsoft.WebApplication.targets" Condition="" />

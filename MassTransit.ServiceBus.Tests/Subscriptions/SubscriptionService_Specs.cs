@@ -4,8 +4,9 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
 	using Messages;
 	using NUnit.Framework;
 	using NUnit.Framework.SyntaxHelpers;
+	using TestConsumers;
 
-	[TestFixture]
+    [TestFixture]
 	public class When_using_the_subscription_service : 
 		SubscriptionManagerContext
 	{

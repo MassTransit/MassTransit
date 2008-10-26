@@ -20,54 +20,45 @@ namespace MassTransit.ServiceBus.Internal
 	using System.Threading;
 	using Exceptions;
 	using log4net;
+	using Magnum.Common.Threading;
 
-	public class EndpointResolver :
+    public class EndpointResolver :
 		IEndpointResolver
 	{
 		private static readonly Dictionary<Uri, IEndpoint> _cache = new Dictionary<Uri, IEndpoint>();
 		private static readonly ILog _log = LogManager.GetLogger(typeof (EndpointResolver));
 		private static readonly Dictionary<string, Type> _schemes = new Dictionary<string, Type>();
 	    private static readonly IEndpoint _null = new NullEndpoint();
-		private static readonly ReaderWriterLockSlim _lockContext = new ReaderWriterLockSlim();
+        private static readonly UpgradeableLock _lockContext = new UpgradeableLock();
 
 		public static string AddTransport(Type transportType)
 		{
-		    _lockContext.EnterUpgradeableReadLock();
-			try
-			{
-				// get the scheme for each endpoint and add it to the resolver
-				const BindingFlags bindingFlags = BindingFlags.Static | BindingFlags.Public | BindingFlags.GetField | BindingFlags.NonPublic;
+            using (var token = _lockContext.EnterUpgradableRead())
+            {
+                // get the scheme for each endpoint and add it to the resolver
+                const BindingFlags bindingFlags = BindingFlags.Static | BindingFlags.Public | BindingFlags.GetField | BindingFlags.NonPublic;
 
-				PropertyInfo property = transportType.GetProperty("Scheme", bindingFlags, null, typeof (string), new Type[0], null);
+                PropertyInfo property = transportType.GetProperty("Scheme", bindingFlags, null, typeof (string), new Type[0], null);
 
-				string scheme = property.GetValue(null, bindingFlags, null, null, CultureInfo.InvariantCulture) as string;
-				if (string.IsNullOrEmpty(scheme))
-					throw new ConventionException("No endpoint scheme defined for transport");
+                string scheme = property.GetValue(null, bindingFlags, null, null, CultureInfo.InvariantCulture) as string;
+                if (string.IsNullOrEmpty(scheme))
+                    throw new ConventionException("No endpoint scheme defined for transport");
 
-				if (_schemes.ContainsKey(scheme))
-					return scheme;
+                if (_schemes.ContainsKey(scheme))
+                    return scheme;
 
-			    _lockContext.EnterWriteLock();
-				try
-				{
-					if (_schemes.ContainsKey(scheme))
-						return scheme;
+                using(token.Upgrade())
+                {
+                    if (_schemes.ContainsKey(scheme))
+                        return scheme;
 
-					_log.InfoFormat("Registering transport '{0}' to schema '{1}'", transportType.Name, scheme);
+                    _log.InfoFormat("Registering transport '{0}' to schema '{1}'", transportType.Name, scheme);
 
-					_schemes.Add(scheme, transportType);
+                    _schemes.Add(scheme, transportType);
 
-					return scheme;
-				}
-				finally
-				{
-				    _lockContext.ExitWriteLock();
-				}
-			}
-			finally
-			{
-			    _lockContext.ExitUpgradeableReadLock();
-			}
+                    return scheme;
+                }
+            }
 		}
 
 		public static ConstructorInfo GetConstructor(Type type)
@@ -83,53 +74,53 @@ namespace MassTransit.ServiceBus.Internal
 		{
 			GuardAgainstZeroTransports();
 
-		    _lockContext.EnterUpgradeableReadLock();
-			try
-			{
-				if (_cache.ContainsKey(uri))
+		    using(var token = _lockContext.EnterUpgradableRead())
+		    {
+		        if (_cache.ContainsKey(uri))
 					return _cache[uri];
 
-			    _lockContext.EnterWriteLock();
-                try
+                using(token.Upgrade())
                 {
                     if (_cache.ContainsKey(uri))
                         return _cache[uri];
 
                     if (_schemes.ContainsKey(uri.Scheme))
                     {
-                        object obj = Activator.CreateInstance(_schemes[uri.Scheme], uri);
-                        if (obj == null)
-                            throw new ArgumentException("Unable to create endpoint from uri: " + uri);
-
-                        IEndpoint endpoint = obj as IEndpoint;
-                        if (endpoint == null)
-                            throw new ArgumentException("The type was not converted to an endpoint: " + _schemes[uri.Scheme]);
-
+                        IEndpoint endpoint = GetEndpoint(uri);
+                        
                         _cache.Add(uri, endpoint);
 
                         return endpoint;
                     }
                 }
-                catch (TargetInvocationException ex)
-                {
-                    throw ex.InnerException;
-                }
-                finally
-                {
-                    _lockContext.ExitWriteLock();
-                }
-			}
-			finally
-			{
-			    _lockContext.ExitUpgradeableReadLock();
-			}
+		    }
 
 			string message = BuildHelpfulErrorMessage(uri);
 			_log.Error(message);
 			throw new EndpointException(new NullEndpoint(), message);
 		}
 
-		private static string BuildHelpfulErrorMessage(Uri uri)
+        private IEndpoint GetEndpoint(Uri uri)
+        {
+            try
+            {
+                object obj = Activator.CreateInstance(_schemes[uri.Scheme], uri);
+                if (obj == null)
+                    throw new ArgumentException("Unable to create endpoint from uri: " + uri);
+
+                var endpoint = obj as IEndpoint;
+                if (endpoint == null)
+                    throw new ArgumentException("The type was not converted to an endpoint: " + _schemes[uri.Scheme]);
+
+                return endpoint;
+            }
+            catch (TargetInvocationException ex)
+            {
+                throw ex.InnerException;
+            }
+        }
+
+        private static string BuildHelpfulErrorMessage(Uri uri)
 	    {
 	        StringBuilder sb = new StringBuilder();
 	        sb.AppendLine("Unable to resolve Uri " + uri + " to an endpoint");

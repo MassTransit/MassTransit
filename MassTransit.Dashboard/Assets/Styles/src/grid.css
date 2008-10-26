@@ -21,14 +21,10 @@
 }
 
 /* Use this class on any div.span / container to see the grid. */
-.showgrid { 
-  background: url(src/grid.png); 
-}
+.showgrid { background: url(src/grid.png);  }
 
-/* Body margin for a sensile default look. */
-body {
-  margin:1.5em 0;	
-}
+/* Body margin for a sensible default look. */
+body { margin:1.5em 0; }
 
 
 /* Columns

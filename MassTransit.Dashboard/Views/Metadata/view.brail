@@ -1,9 +1,5 @@
-<div class="span-24">
-    <h1>Metadata</h1>
-</div>
+meta data
 
-<div class="span-24">
-
-    
-
-</div>
+<% component capturefor, { @id : "title" }: %>
+<h1>Metadata</h1>
+<% end %> 

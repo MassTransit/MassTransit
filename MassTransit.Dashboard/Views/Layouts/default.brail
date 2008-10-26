@@ -6,38 +6,28 @@
         <title>MassTransit.Authority</title>
     
         <!-- Framework CSS -->
-        <link rel="stylesheet" href="/assets/styles/blueprint/screen.css" type="text/css" media="screen, projection" />
-        <link rel="stylesheet" href="/assets/styles/blueprint/print.css" type="text/css" media="print" />
-        <!--[if IE]><link rel="stylesheet" href="/assets/styles/blueprint/ie.css" type="text/css" media="screen, projection" /><![endif]-->
-        <style type="text/css">
-          #header
-          {
-            z-index: 6; 
-            color:#cbe4f8;
-            border-bottom:3px solid #cbe4f8;
-            height:30px;
-            padding:10px;
-            background: #2a6a9f url(/Assets/Images/toolbar-bg.gif) repeat-x bottom left;
-          }
-            #header #title
-            {
-              float:left;
-              width:20%;
-              margin-top:10px;
-              font-size:130%;
-              font-weight:bold;
-            }
-        </style>
+        <link rel="stylesheet" href="/assets/styles/screen.css" type="text/css" media="screen, projection" />
+        <link rel="stylesheet" href="/assets/styles/print.css" type="text/css" media="print" />
+        <link rel="stylesheet" href="/assets/styles/plugins/fancy-type/screen.css" type="text/css" media="print" />
+        <!--[if IE]><link rel="stylesheet" href="/assets/styles/ie.css" type="text/css" media="screen, projection" /><![endif]-->
     </head>
     
     <body>
-		<div id="header">
-			<div class="container">
-                <div id="title">Mass Transit Dashboard</div>
+        <div class="container showgrid">
+            <div class="span-24">
+                <h1>Mass Transit Dashboard</h1>
             </div>
-        </div>
-        <div class="container">
-        ${ChildOutput}
+            <div class="span-24">
+                <h2>${title}</h2>
+                <a href="${SiteRoot}/Health/View.Castle">Health</a>
+                <a href="${SiteRoot}/MessageDeferral/View.Castle">Message Deferral</a>
+                <a href="${SiteRoot}/Metadata/View.Castle">Metadata</a>
+                <a href="${SiteRoot}/Subscriptions/View.Castle">Subscriptions</a>
+                <a href="${SiteRoot}/Timeout/View.Castle">Timeouts</a>
+            </div>
+            <div class="span-24">
+                ${ChildOutput}
+            </div>
         </div>
     </body>
 
