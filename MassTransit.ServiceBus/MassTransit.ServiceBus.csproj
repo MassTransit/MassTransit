@@ -222,6 +222,7 @@
     <Compile Include="Util\Tuple.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Exceptions\ConfigurationException.cs" />
     <Compile Include="ServiceBus.NullServiceBus.cs" />
     <Compile Include="Services\MessageDeferral\RemoteMessageDeferralViewer.cs" />
     <Compile Include="Services\MessageDeferral\Messages\DeferedMessageRepublished.cs" />
