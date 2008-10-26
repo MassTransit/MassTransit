@@ -14,6 +14,7 @@ namespace MassTransit.ServiceBus
 {
     using System;
     using System.Collections.Generic;
+    using Exceptions;
     using Internal;
     using log4net;
     using Subscriptions;
@@ -50,7 +51,7 @@ namespace MassTransit.ServiceBus
             }
             catch (Exception ex)
             {
-                throw new Exception("log4net isn't referenced", ex);
+                throw new ConfigurationException("log4net isn't referenced", ex);
             }
         }
 

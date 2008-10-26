@@ -14,6 +14,7 @@ namespace MassTransit.ServiceBus
 {
     using System;
 
+    [AttributeUsage(AttributeTargets.Class)]
     public class ReliableAttribute : Attribute
     {
         private readonly bool _enabled;

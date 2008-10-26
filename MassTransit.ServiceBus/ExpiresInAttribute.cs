@@ -18,6 +18,7 @@ namespace MassTransit.ServiceBus
     /// Specifies the elapsed time before a message expires. When a message expires, the content is no longer
     /// // important and it can be automatically discarded by the message service.
     /// </summary>
+    [AttributeUsage(AttributeTargets.Class)]
     public class ExpiresInAttribute : Attribute
     {
         private readonly TimeSpan _timeSpan;

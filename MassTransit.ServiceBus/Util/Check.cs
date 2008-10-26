@@ -61,12 +61,6 @@ namespace MassTransit.ServiceBus.Util
             }
         }
 
-        public static void RequireTransaction(string message)
-        {
-            if (Transaction.Current == null)
-                throw new Exception("Transaction Required: " + message);
-        }
-
         public static void Ensure(bool assertion, string message)
         {
             if (UseExceptions)
@@ -149,7 +143,7 @@ namespace MassTransit.ServiceBus.Util
         #endregion
     }
 
-    public class CheckException : ApplicationException
+    public class CheckException : Exception
     {
         protected CheckException()
         {
