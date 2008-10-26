@@ -12,15 +12,26 @@
 /// specific language governing permissions and limitations under the License.
 namespace MassTransit.Host.ArgumentParsing
 {
-    public class ArgumentMapFactory : IArgumentMapFactory
-    {
-        #region IArgumentMapFactory Members
+    using System;
+    using System.Runtime.Serialization;
 
-        public IArgumentMap CreateMap(object obj)
+    public class ArgumentParsingException :
+        Exception
+    {
+        public ArgumentParsingException()
         {
-            return new ArgumentMap(obj.GetType());
         }
 
-        #endregion
+        public ArgumentParsingException(string message) : base(message)
+        {
+        }
+
+        public ArgumentParsingException(string message, Exception innerException) : base(message, innerException)
+        {
+        }
+
+        protected ArgumentParsingException(SerializationInfo info, StreamingContext context) : base(info, context)
+        {
+        }
     }
 }

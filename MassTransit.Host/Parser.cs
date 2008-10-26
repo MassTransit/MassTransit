@@ -14,9 +14,9 @@ namespace MassTransit.Host
 {
 	using System.Collections.Generic;
 	using Actions;
-	using MassTransitHost.ArgumentParsing;
+	using ArgumentParsing;
 
-	public class Parser
+    public class Parser
 	{
 		public static Args ParseArgs(string[] args)
 		{
