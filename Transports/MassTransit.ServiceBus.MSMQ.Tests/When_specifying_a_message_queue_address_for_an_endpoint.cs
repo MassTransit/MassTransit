@@ -13,13 +13,13 @@ namespace MassTransit.ServiceBus.MSMQ.Tests
 		{
 			string address = "msmq://localhost/mt_client";
 
-			IMsmqEndpoint endpoint = new MsmqEndpoint(address);
+			MsmqEndpoint endpoint = new MsmqEndpoint(address);
 
             Assert.That(endpoint.QueuePath, Is.EqualTo("FormatName:DIRECT=OS:" + Environment.MachineName.ToLowerInvariant() + @"\private$\mt_client"));
             Assert.That(endpoint.Uri.ToString(), Is.EqualTo("msmq://" + Environment.MachineName.ToLowerInvariant() + "/mt_client"));
 
 
-			IMsmqEndpoint endpoint2 = new MsmqEndpoint(new Uri(address));
+			MsmqEndpoint endpoint2 = new MsmqEndpoint(new Uri(address));
 
             Assert.That(endpoint2.QueuePath, Is.EqualTo("FormatName:DIRECT=OS:" + Environment.MachineName.ToLowerInvariant() + @"\private$\mt_client"));
             Assert.That(endpoint2.Uri.ToString(), Is.EqualTo("msmq://" + Environment.MachineName.ToLowerInvariant() + "/mt_client"));

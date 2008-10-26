@@ -22,7 +22,7 @@ namespace MassTransit.ServiceBus.NMS
 	using log4net;
 
 	public class NmsEndpoint :
-		INmsEndpoint
+		IEndpoint
 	{
 		private static readonly IFormatter _formatter = new BinaryFormatter();
 		private static readonly ILog _log = LogManager.GetLogger(typeof (NmsEndpoint));

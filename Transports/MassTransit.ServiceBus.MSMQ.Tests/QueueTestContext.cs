@@ -55,18 +55,18 @@ namespace MassTransit.ServiceBus.MSMQ.Tests
 	        get { return _mockObjectBuilder; }
 	    }
 
-	    public IMsmqEndpoint RemoteServiceBusEndPoint
+	    public IEndpoint RemoteServiceBusEndPoint
 		{
 			get { return _remoteServiceBusEndPoint; }
 		}
 
 
-		public IMsmqEndpoint ServiceBusEndPoint
+		public IEndpoint ServiceBusEndPoint
 		{
 			get { return _serviceBusEndPoint; }
 		}
 
-		public IMsmqEndpoint SubscriptionEndpoint
+		public IEndpoint SubscriptionEndpoint
 		{
 			get { return _subscriptionEndpoint; }
 		}
