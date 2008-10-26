@@ -10,37 +10,37 @@
 /// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 /// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 /// specific language governing permissions and limitations under the License.
-namespace MassTransitHost.ArgumentParsing
+namespace MassTransit.Host.ArgumentParsing
 {
-	using System.Reflection;
+    using System.Reflection;
 
-	public class ArgumentTarget
-	{
-		private readonly ArgumentAttribute _attribute;
-		private readonly PropertyInfo _property;
+    public class ArgumentTarget
+    {
+        private readonly ArgumentAttribute _attribute;
+        private readonly PropertyInfo _property;
 
-		public ArgumentTarget(ArgumentAttribute attribute, PropertyInfo property)
-		{
-			_attribute = attribute;
-			_property = property;
-		}
+        public ArgumentTarget(ArgumentAttribute attribute, PropertyInfo property)
+        {
+            _attribute = attribute;
+            _property = property;
+        }
 
-		public PropertyInfo Property
-		{
-			get { return _property; }
-		}
+        public PropertyInfo Property
+        {
+            get { return _property; }
+        }
 
-		public ArgumentAttribute Attribute
-		{
-			get { return _attribute; }
-		}
-	}
+        public ArgumentAttribute Attribute
+        {
+            get { return _attribute; }
+        }
+    }
 
-	public class DefaultArgumentTarget : ArgumentTarget
-	{
-		public DefaultArgumentTarget(ArgumentAttribute attribute, PropertyInfo property)
-			: base(attribute, property)
-		{
-		}
-	}
+    public class DefaultArgumentTarget : ArgumentTarget
+    {
+        public DefaultArgumentTarget(ArgumentAttribute attribute, PropertyInfo property)
+            : base(attribute, property)
+        {
+        }
+    }
 }

@@ -79,6 +79,7 @@
     <Compile Include="ArgumentParsing\ArgumentMap.cs" />
     <Compile Include="ArgumentParsing\ArgumentMapFactory.cs" />
     <Compile Include="ArgumentParsing\ArgumentParser.cs" />
+    <Compile Include="ArgumentParsing\ArgumentParsingException.cs" />
     <Compile Include="ArgumentParsing\ArgumentTarget.cs" />
     <Compile Include="ArgumentParsing\IArgument.cs" />
     <Compile Include="ArgumentParsing\IArgumentMap.cs" />

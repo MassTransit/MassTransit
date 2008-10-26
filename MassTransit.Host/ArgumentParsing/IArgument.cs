@@ -10,18 +10,18 @@
 /// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 /// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 /// specific language governing permissions and limitations under the License.
-namespace MassTransitHost.ArgumentParsing
+namespace MassTransit.Host.ArgumentParsing
 {
-	/// <summary>
-	/// Base interface for an individual argument
-	/// </summary>
-	public interface IArgument
-	{
-		string Key { get; }
+    /// <summary>
+    /// Base interface for an individual argument
+    /// </summary>
+    public interface IArgument
+    {
+        string Key { get; }
 
-		/// <summary>
-		/// The value of the argument
-		/// </summary>
-		string Value { get; }
-	}
+        /// <summary>
+        /// The value of the argument
+        /// </summary>
+        string Value { get; }
+    }
 }

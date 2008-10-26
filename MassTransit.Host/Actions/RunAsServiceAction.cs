@@ -12,11 +12,11 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Host.Actions
 {
-    using System;
     using System.Reflection;
     using Hosts;
     using log4net;
     using Microsoft.Practices.ServiceLocation;
+    using ServiceBus.Exceptions;
 
     /// <summary>
     /// Runs the host as a service (must be installed first)
@@ -37,7 +37,7 @@ namespace MassTransit.Host.Actions
                 string message = string.Format("The {0} service has not been installed yet. Please run {1} -install.",
                                                configuration.ServiceName, Assembly.GetEntryAssembly().GetName());
                 _log.Fatal(message);
-                throw new Exception(message);
+                throw new ConfigurationException(message);
             }
 
             var inServiceHost = new ServiceHost(configuration.LifeCycle);
