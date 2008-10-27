@@ -30,7 +30,7 @@ namespace MassTransit.ServiceBus.Tests
 
             obj = DynamicMock<IObjectBuilder>();
 
-            _bus = new ServiceBus(_endpoint, obj, new LocalSubscriptionCache(), _endpointResolver);
+            _bus = new ServiceBus(_endpoint, obj, new LocalSubscriptionCache(), _endpointResolver, new TypeInfoCache());
         }
 
         [Test]

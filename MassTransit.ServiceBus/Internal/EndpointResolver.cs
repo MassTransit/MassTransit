@@ -123,13 +123,21 @@ namespace MassTransit.ServiceBus.Internal
         private static string BuildHelpfulErrorMessage(Uri uri)
 	    {
 	        StringBuilder sb = new StringBuilder();
-	        sb.AppendLine("Unable to resolve Uri " + uri + " to an endpoint");
-            sb.AppendFormat("We could not match your uri's schema '{0}' with a registered transport. Available schemas are: {1}", uri.Scheme, Environment.NewLine);
-	        foreach (KeyValuePair<string, Type> pair in _schemes)
-	        {
-	            sb.AppendLine(pair.Key);
-	        }
-	        return sb.ToString();
+
+            sb.Append("Unable to resolve Uri ")
+                .Append(uri)
+                .Append(" to an endpoint")
+                .AppendLine()
+                .Append("We could not match a scheme to your URI: ")
+                .Append(uri.Scheme)
+                .AppendLine()
+                .Append("Available schemas include:")
+                .AppendLine();
+
+            foreach (KeyValuePair<string, Type> pair in _schemes)
+                sb.AppendLine(pair.Key);
+
+            return sb.ToString();
 	    }
 
 	    private static void GuardAgainstZeroTransports()

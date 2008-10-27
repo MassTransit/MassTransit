@@ -38,7 +38,7 @@ namespace MassTransit.ServiceBus
         private readonly MessageTypeDispatcher _messageDispatcher;
         private readonly IObjectBuilder _objectBuilder;
         private readonly ISubscriptionCache _subscriptionCache;
-        private readonly TypeInfoCache _typeInfoCache;
+        private readonly ITypeInfoCache _typeInfoCache;
         private IEndpoint _poisonEndpoint = new PoisonEndpointDecorator(new NullEndpoint());
 
         static ServiceBus()
@@ -64,7 +64,7 @@ namespace MassTransit.ServiceBus
 
         public ServiceBus(IEndpoint endpointToListenOn, IObjectBuilder objectBuilder,
             ISubscriptionCache subscriptionCache)
-            : this(endpointToListenOn, objectBuilder, subscriptionCache, new EndpointResolver())
+            : this(endpointToListenOn, objectBuilder, subscriptionCache, new EndpointResolver(), new TypeInfoCache())
         {
         }
 
@@ -72,7 +72,7 @@ namespace MassTransit.ServiceBus
         /// Uses the specified subscription cache
         /// </summary>
         public ServiceBus(IEndpoint endpointToListenOn, IObjectBuilder objectBuilder, 
-            ISubscriptionCache subscriptionCache, IEndpointResolver endpointResolver)
+            ISubscriptionCache subscriptionCache, IEndpointResolver endpointResolver, ITypeInfoCache typeInfoCache)
         {
             Check.Parameter(endpointToListenOn).WithMessage("endpointToListenOn").IsNotNull();
             Check.Parameter(subscriptionCache).WithMessage("subscriptionCache").IsNotNull();
@@ -84,7 +84,7 @@ namespace MassTransit.ServiceBus
 
             //TODO: Move into IObjectBuilder?
             _messageDispatcher = new MessageTypeDispatcher();
-            _typeInfoCache = new TypeInfoCache();
+            _typeInfoCache = typeInfoCache;
 
             _dispatcherContext = new DispatcherContext(_objectBuilder, this, _messageDispatcher, _subscriptionCache, _typeInfoCache);
 

@@ -42,7 +42,7 @@ namespace MassTransit.ServiceBus.Tests
 		    _resolver = new EndpointResolver();
 		    _endpoint = _resolver.Resolve(new Uri("loopback://localhost/servicebus"));
 			_builder = DynamicMock<IObjectBuilder>();
-			_bus = new ServiceBus(_endpoint, _builder, _cache, _resolver);
+			_bus = new ServiceBus(_endpoint, _builder, _cache, _resolver, new TypeInfoCache());
 		}
 
 		protected override void After_each()
@@ -114,7 +114,7 @@ namespace MassTransit.ServiceBus.Tests
 		    _resolver = new EndpointResolver();
 		    _endpoint = _resolver.Resolve(new Uri("loopback://localhost/servicebus"));
 			_builder = DynamicMock<IObjectBuilder>();
-			_bus = new ServiceBus(_endpoint, _builder, _cache, _resolver);
+			_bus = new ServiceBus(_endpoint, _builder, _cache, _resolver, new TypeInfoCache());
 		}
 
 

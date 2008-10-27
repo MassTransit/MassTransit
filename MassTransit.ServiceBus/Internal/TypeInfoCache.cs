@@ -14,13 +14,21 @@ namespace MassTransit.ServiceBus.Internal
 {
     using System;
     using System.Collections.Generic;
-    using System.Threading;
+    using Magnum.Common.Threading;
     using Saga;
 
-    public class TypeInfoCache : IDisposable
+    public interface ITypeInfoCache : IDisposable
     {
-        public delegate void ActionDelegate(TypeInfo info, Type componentType, Type[] types);
+        ITypeInfo Resolve<TComponent>();
+        ITypeInfo Resolve(Type componentType);
+        IPublicationTypeInfo GetPublicationTypeInfo<TComponent>() where TComponent : class;
+        IPublicationTypeInfo GetPublicationTypeInfo(Type type);
+        ISubscriptionTypeInfo GetSubscriptionTypeInfo<TComponent>() where TComponent : class;
+        ISubscriptionTypeInfo GetSubscriptionTypeInfo(Type type);
+    }
 
+    public class TypeInfoCache : ITypeInfoCache
+    {
         private static readonly IList<ActionEntry> _consumerActions = new List<ActionEntry>();
 
         private static readonly Type _consumerType = typeof (Consumes<>.All);
@@ -29,8 +37,8 @@ namespace MassTransit.ServiceBus.Internal
         private static readonly Type _orchestratesType = typeof (Orchestrates<>);
         private static readonly Type _selectiveConsumerType = typeof (Consumes<>.Selected);
         private static readonly Type _startedByType = typeof (InitiatedBy<>);
+        private readonly UpgradeableLock _lockContext = new UpgradeableLock();
         private readonly Dictionary<Type, TypeInfo> _types = new Dictionary<Type, TypeInfo>();
-		private readonly ReaderWriterLockSlim _lockContext = new ReaderWriterLockSlim();
 
         static TypeInfoCache()
         {
@@ -56,61 +64,51 @@ namespace MassTransit.ServiceBus.Internal
             return Resolve(typeof (TComponent));
         }
 
-		public ITypeInfo Resolve(Type componentType)
-		{
-		    _lockContext.EnterUpgradeableReadLock();
-			try
-			{
-				TypeInfo info;
-				if (_types.TryGetValue(componentType, out info))
-					return info;
+        public ITypeInfo Resolve(Type componentType)
+        {
+            using (var readerLock = _lockContext.EnterUpgradableRead())
+            {
+                TypeInfo info;
+                if (_types.TryGetValue(componentType, out info))
+                    return info;
 
-			    _lockContext.EnterWriteLock();
-				try
-				{
-					if (_types.TryGetValue(componentType, out info))
-						return info;
+                using (readerLock.Upgrade())
+                {
+                    if (_types.TryGetValue(componentType, out info))
+                        return info;
 
-					info = new TypeInfo(componentType);
+                    info = new TypeInfo(componentType);
 
-					List<Type> usedMessageTypes = new List<Type>();
+                    List<Type> usedMessageTypes = new List<Type>();
 
-					foreach (Type interfaceType in componentType.GetInterfaces())
-					{
-						if (!interfaceType.IsGenericType) continue;
+                    foreach (Type interfaceType in componentType.GetInterfaces())
+                    {
+                        if (!interfaceType.IsGenericType) continue;
 
-						Type genericType = interfaceType.GetGenericTypeDefinition();
-						Type[] types = interfaceType.GetGenericArguments();
+                        Type genericType = interfaceType.GetGenericTypeDefinition();
+                        Type[] types = interfaceType.GetGenericArguments();
 
-						if (usedMessageTypes.Contains(types[0])) continue;
+                        if (usedMessageTypes.Contains(types[0])) continue;
 
-						foreach (ActionEntry entry in _consumerActions)
-						{
-							if (entry.GenericType != genericType) continue;
+                        foreach (ActionEntry entry in _consumerActions)
+                        {
+                            if (entry.GenericType != genericType) continue;
 
-							usedMessageTypes.Add(types[0]);
+                            usedMessageTypes.Add(types[0]);
 
-							entry.AddAction(info, componentType, types);
-							break;
-						}
-					}
+                            entry.AddAction(info, componentType, types);
+                            break;
+                        }
+                    }
 
-					_types.Add(componentType, info);
+                    _types.Add(componentType, info);
 
-					return info;
-				}
-				finally
-				{
-				    _lockContext.ExitWriteLock();
-				}
-			}
-			finally
-			{
-			    _lockContext.ExitUpgradeableReadLock();
-			}
-		}
+                    return info;
+                }
+            }
+        }
 
-    	public IPublicationTypeInfo GetPublicationTypeInfo<TComponent>() where TComponent : class
+        public IPublicationTypeInfo GetPublicationTypeInfo<TComponent>() where TComponent : class
         {
             ITypeInfo typeInfo = Resolve<TComponent>();
 
@@ -140,10 +138,10 @@ namespace MassTransit.ServiceBus.Internal
 
         public class ActionEntry
         {
-            private readonly ActionDelegate _addAction;
+            private readonly Action<TypeInfo, Type, Type[]> _addAction;
             private readonly Type _genericType;
 
-            public ActionEntry(Type genericType, ActionDelegate addAction)
+            public ActionEntry(Type genericType, Action<TypeInfo, Type, Type[]> addAction)
             {
                 _genericType = genericType;
                 _addAction = addAction;
@@ -154,7 +152,7 @@ namespace MassTransit.ServiceBus.Internal
                 get { return _genericType; }
             }
 
-            public ActionDelegate AddAction
+            public Action<TypeInfo, Type, Type[]> AddAction
             {
                 get { return _addAction; }
             }
