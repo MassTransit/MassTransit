@@ -121,8 +121,6 @@
     <Compile Include="Internal\TypeInfo.cs" />
     <Compile Include="Saga\ISaga.cs" />
     <Compile Include="Saga\Orchestrates.cs" />
-    <Compile Include="Saga\Messages\CompleteWorkflow.cs" />
-    <Compile Include="Saga\Messages\UpdateWorkflowTimeout.cs" />
     <Compile Include="Saga\InitiatedBy.cs" />
     <Compile Include="Services\MessageDeferral\DeferMessageConsumer.cs" />
     <Compile Include="Services\MessageDeferral\DeferredMessage.cs" />
