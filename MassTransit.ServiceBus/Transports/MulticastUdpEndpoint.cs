@@ -16,18 +16,18 @@ namespace MassTransit.ServiceBus.Transports
     using System.IO;
     using System.Net;
     using System.Net.Sockets;
-    using System.Runtime.Serialization.Formatters.Binary;
     using System.Threading;
     using Exceptions;
     using Internal;
     using log4net;
+    using Serialization;
 
     public class MulticastUdpEndpoint :
         IEndpoint
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof (MulticastUdpEndpoint));
         private readonly ManualResetEvent _doneReceiving = new ManualResetEvent(false);
-        private readonly BinaryFormatter _formatter = new BinaryFormatter();
+        private readonly IMessageSerializer _serializer = new BinaryMessageSerializer();
         private readonly ManualResetEvent _shutdown = new ManualResetEvent(false);
         private readonly Uri _uri;
         private IPAddress _groupAddress;
@@ -88,7 +88,7 @@ namespace MassTransit.ServiceBus.Transports
 
             using (MemoryStream mstream = new MemoryStream())
             {
-                _formatter.Serialize(mstream, message);
+                _serializer.Serialize(mstream, message);
 
                 // if (timeToLive < TimeSpan.MaxValue)
 
@@ -130,7 +130,7 @@ namespace MassTransit.ServiceBus.Transports
                 object obj;
                 using (MemoryStream mstream = new MemoryStream(data))
                 {
-                    obj = _formatter.Deserialize(mstream);
+                    obj = _serializer.Deserialize(mstream);
                 }
 
                 if (accept(obj))
