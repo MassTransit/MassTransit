@@ -117,6 +117,7 @@
     <Compile Include="MessageAttribute_Specs.cs" />
     <Compile Include="MessageFilter_Specs.cs" />
     <Compile Include="MessageGroup_Specs.cs" />
+    <Compile Include="Messages\SerializationTestMessage.cs" />
     <Compile Include="Multicast_Specs.cs" />
     <Compile Include="ObjectDispatcher_Specs.cs" />
     <Compile Include="PublishToConsumer_Specs.cs" />
@@ -133,6 +134,7 @@
     <Compile Include="Saga\RegisterUserSaga\RegisterUserController.cs" />
     <Compile Include="Saga\RegisterUserSaga\RegisterUserSaga.cs" />
     <Compile Include="Saga\RegisterUser_Specs.cs" />
+    <Compile Include="Serialization\MessageSerialization_Specs.cs" />
     <Compile Include="Specification.cs" />
     <Compile Include="SubscriptionManagerContext.cs" />
     <Compile Include="Subscriptions\As_an_AddSubscriptionHandler.cs" />

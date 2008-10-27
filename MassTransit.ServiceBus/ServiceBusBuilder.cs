@@ -48,7 +48,8 @@ namespace MassTransit.ServiceBus
 			IEndpointResolver endpointResolver = builder.GetResolver();
 			ISubscriptionCache cache = builder.GetCache();
 			IEndpoint endpoint = endpointResolver.Resolve(builder._uri);
-			return new ServiceBus(endpoint, objectBuilder, cache, endpointResolver);
+		    ITypeInfoCache typeInfoCache = new TypeInfoCache();
+			return new ServiceBus(endpoint, objectBuilder, cache, endpointResolver, typeInfoCache);
 		}
 
 		private IEndpointResolver GetResolver()

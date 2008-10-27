@@ -143,7 +143,7 @@ namespace MassTransit.ServiceBus.Tests
 
 			_builder = Stub<IObjectBuilder>();
 			_cache = new LocalSubscriptionCache();
-			_bus = new ServiceBus(_endpoint, _builder, _cache, _resolver);
+			_bus = new ServiceBus(_endpoint, _builder, _cache, _resolver, new TypeInfoCache());
 		}
 
 		internal class Consumer : Consumes<SpecialGroup>.All, Consumes<PingMessage>.All, Consumes<PongMessage>.All

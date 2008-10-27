@@ -76,6 +76,10 @@ namespace MassTransit.WindsorIntegration
                 Component.For<IEndpointResolver>()
                     .ImplementedBy<EndpointResolver>()
                     .Named("endpoint.factory")
+                    .LifeStyle.Singleton,
+                Component.For<ITypeInfoCache>()
+                    .ImplementedBy<TypeInfoCache>()
+                    .Named("typeinfocache")
                     .LifeStyle.Singleton
                 );
         }
@@ -106,7 +110,8 @@ namespace MassTransit.WindsorIntegration
             ServiceBus bus = new ServiceBus(endpoint,
                                             Kernel.Resolve<IObjectBuilder>(),
                                             cache,
-                                            Kernel.Resolve<IEndpointResolver>());
+                                            Kernel.Resolve<IEndpointResolver>(),
+                                            Kernel.Resolve<ITypeInfoCache>());
 
             IConfiguration threadConfig = busConfig.Children["dispatcher"];
             ConfigureThreadingModel(threadConfig, bus);
@@ -126,7 +131,7 @@ namespace MassTransit.WindsorIntegration
         }
         private void ResolveManagementClient(IConfiguration child, IServiceBus bus, string id)
         {
-            IConfiguration managementClientConfig = child.Children["managementService"];
+            var managementClientConfig = child.Children["managementService"];
             if (managementClientConfig != null)
             {
                 string heartbeatInterval = managementClientConfig.Attributes["heartbeatInterval"];
@@ -142,7 +147,7 @@ namespace MassTransit.WindsorIntegration
         }
         private void ResolveSubscriptionClient(IConfiguration child, IServiceBus bus, string id, ISubscriptionCache cache)
         {
-            IConfiguration subscriptionClientConfig = child.Children["subscriptionService"];
+            var subscriptionClientConfig = child.Children["subscriptionService"];
             if (subscriptionClientConfig != null)
             {
                 string subscriptionServiceEndpointUri = subscriptionClientConfig.Attributes["endpoint"];
@@ -169,7 +174,7 @@ namespace MassTransit.WindsorIntegration
 
         private ISubscriptionCache ResolveSubscriptionCache(IConfiguration configuration)
         {
-            IConfiguration cacheConfig = configuration.Children["subscriptionCache"];
+            var cacheConfig = configuration.Children["subscriptionCache"];
             if (cacheConfig == null)
                 return Kernel.Resolve<ISubscriptionCache>();
 
@@ -214,7 +219,7 @@ namespace MassTransit.WindsorIntegration
         {
             var servers = new List<string>();
 
-            IConfiguration serversConfig = configuration.Children["servers"];
+            var serversConfig = configuration.Children["servers"];
             if (serversConfig != null) //TODO: If this is null shouldn't we throw?
             {
                 foreach (IConfiguration serverConfig in serversConfig.Children)

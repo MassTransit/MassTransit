@@ -21,10 +21,10 @@ namespace MassTransit.ServiceBus.Internal
         private readonly IObjectBuilder _builder;
         private readonly IServiceBus _bus;
         private readonly ISubscriptionCache _cache;
-        private readonly TypeInfoCache _typeInfoCache;
+        private readonly ITypeInfoCache _typeInfoCache;
         private readonly IMessageTypeDispatcher _dispatcher;
 
-        public DispatcherContext(IObjectBuilder builder, IServiceBus bus, IMessageTypeDispatcher dispatcher, ISubscriptionCache cache, TypeInfoCache typeInfoCache)
+        public DispatcherContext(IObjectBuilder builder, IServiceBus bus, IMessageTypeDispatcher dispatcher, ISubscriptionCache cache, ITypeInfoCache typeInfoCache)
         {
             _builder = builder;
             _typeInfoCache = typeInfoCache;

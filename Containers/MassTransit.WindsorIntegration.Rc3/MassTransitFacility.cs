@@ -26,7 +26,7 @@ namespace MassTransit.WindsorIntegration.Rc3
 
         private void LoadTransports()
         {
-            IConfiguration transportConfiguration = FacilityConfig.Children["transports"];
+            var transportConfiguration = FacilityConfig.Children["transports"];
             if (transportConfiguration == null)
                 throw new ConventionException("At least one transport must be defined in the facility configuration.");
 
@@ -49,6 +49,7 @@ namespace MassTransit.WindsorIntegration.Rc3
 
             Kernel.AddComponent("localsubscription", typeof(ISubscriptionCache), typeof(LocalSubscriptionCache), LifestyleType.Singleton);
             Kernel.AddComponent("endpoint.factory", typeof(IEndpointResolver), typeof(EndpointResolver), LifestyleType.Singleton);
+            Kernel.AddComponent("typeinfocache", typeof(ITypeInfoCache), typeof(TypeInfoCache), LifestyleType.Singleton);
         }
 
         private void LoadServiceBuses()
@@ -78,7 +79,8 @@ namespace MassTransit.WindsorIntegration.Rc3
             var bus = new ServiceBus(endpoint,
                                      Kernel.Resolve<IObjectBuilder>(),
                                      cache,
-                                     Kernel.Resolve<IEndpointResolver>());
+                                     Kernel.Resolve<IEndpointResolver>(),
+                                     Kernel.Resolve<ITypeInfoCache>());
 
             IConfiguration threadConfig = busConfig.Children["dispatcher"];
             if (threadConfig != null)
@@ -107,7 +109,7 @@ namespace MassTransit.WindsorIntegration.Rc3
 
         private void ResolveManagementClient(IConfiguration child, IServiceBus bus, string id)
         {
-            IConfiguration managementClientConfig = child.Children["managementService"];
+            var managementClientConfig = child.Children["managementService"];
             if (managementClientConfig != null)
             {
                 string heartbeatInterval = managementClientConfig.Attributes["heartbeatInterval"];
@@ -124,7 +126,7 @@ namespace MassTransit.WindsorIntegration.Rc3
         private void ResolveSubscriptionClient(IConfiguration child, IServiceBus bus, string id,
                                                ISubscriptionCache cache)
         {
-            IConfiguration subscriptionClientConfig = child.Children["subscriptionService"];
+            var subscriptionClientConfig = child.Children["subscriptionService"];
             if (subscriptionClientConfig != null)
             {
                 string subscriptionServiceEndpointUri = subscriptionClientConfig.Attributes["endpoint"];
@@ -141,7 +143,7 @@ namespace MassTransit.WindsorIntegration.Rc3
 
         private ISubscriptionCache ResolveSubscriptionCache(IConfiguration configuration)
         {
-            IConfiguration cacheConfig = configuration.Children["subscriptionCache"];
+            var cacheConfig = configuration.Children["subscriptionCache"];
             if (cacheConfig == null)
                 return Kernel.Resolve<ISubscriptionCache>();
 
@@ -191,7 +193,7 @@ namespace MassTransit.WindsorIntegration.Rc3
         {
             var servers = new List<string>();
 
-            IConfiguration serversConfig = configuration.Children["servers"];
+            var serversConfig = configuration.Children["servers"];
             if (serversConfig != null)
             {
                 foreach (IConfiguration serverConfig in serversConfig.Children)
