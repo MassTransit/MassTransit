@@ -52,6 +52,7 @@ namespace MassTransit.ServiceBus.Configuration
         {
             _options.Subcriptions.Address = uri;
             _options.Subcriptions.SubscriptionClient = typeof (T);
+            _options.Subcriptions.SubscriptionStore = typeof (T);
 
             return this;
         }

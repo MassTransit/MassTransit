@@ -22,6 +22,7 @@ namespace MassTransit.ServiceBus.Tests.Configuration
             IObjectBuilder builder = null;
             BusBuilder.SetObjectBuilder(builder);
         }
+
         [Test]
         public void Minimal_Setup()
         {
@@ -35,7 +36,7 @@ namespace MassTransit.ServiceBus.Tests.Configuration
             Assert.AreEqual(EndpointResolver.Null.Uri, busOptions.CommandedOn);
             Assert.AreEqual(typeof(BinaryBodyFormatter), busOptions.Serialization.Serializer); //how to handle this?
             Assert.AreEqual(false, busOptions.IsACompetingConsumer);
-            Assert.IsNull(busOptions.Subcriptions);
+            Assert.IsNotNull(busOptions.Subcriptions);
             //transports
         }
 
@@ -55,11 +56,9 @@ namespace MassTransit.ServiceBus.Tests.Configuration
             var busOptions = BusBuilder.WithName("funk_bus")
                 .ListensOn(_listenUri)
                 .SharesSubscriptionsVia<LocalSubscriptionCache>("msmq://localhost/mt_pubsub")
-                //.WithSharedSubscriptions(Via.DistributedCache("tcp://192.168.0.1"))
                 .CommunicatesOver<LoopbackEndpoint>()
                 .UsingForSerialization<JsonBodyFormatter>()
                 .Validate();
-            //.ActivateHeartBeat();
 
             Assert.AreEqual(_listenUri, busOptions.ListensOn);
             Assert.AreEqual(_subUri, busOptions.Subcriptions.Address);
