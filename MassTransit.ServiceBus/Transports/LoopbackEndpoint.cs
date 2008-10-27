@@ -15,16 +15,16 @@ namespace MassTransit.ServiceBus.Transports
     using System;
     using System.Collections.Generic;
     using System.IO;
-    using System.Runtime.Serialization.Formatters.Binary;
     using System.Threading;
     using log4net;
+    using Serialization;
 
     public class LoopbackEndpoint : IEndpoint
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof (LoopbackEndpoint));
         private static readonly ILog _messageLog = LogManager.GetLogger("MassTransit.Messages");
 
-        private readonly BinaryFormatter _formatter = new BinaryFormatter();
+        private readonly IMessageSerializer _serializer = new BinaryMessageSerializer();
         private readonly Semaphore _messageReady = new Semaphore(0, int.MaxValue);
         private readonly Queue<byte[]> _messages = new Queue<byte[]>();
         private readonly Uri _uri;
@@ -115,7 +115,7 @@ namespace MassTransit.ServiceBus.Transports
         {
             using (MemoryStream mstream = new MemoryStream())
             {
-                _formatter.Serialize(mstream, message);
+                _serializer.Serialize(mstream, message);
                 lock (_messages)
                     _messages.Enqueue(mstream.ToArray());
             }
@@ -131,7 +131,7 @@ namespace MassTransit.ServiceBus.Transports
 
             using (MemoryStream mstream = new MemoryStream(buffer))
             {
-                object obj = _formatter.Deserialize(mstream);
+                object obj = _serializer.Deserialize(mstream);
 
                 return obj;
             }

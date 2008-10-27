@@ -18,25 +18,24 @@ namespace MassTransit.ServiceBus.MSMQ
 	using System.Threading;
 	using System.Transactions;
 	using Exceptions;
-	using Formatters;
 	using Internal;
 	using log4net;
+	using Serialization;
 
-	/// <summary>
+    /// <summary>
 	/// A MessageQueueEndpoint is an implementation of an endpoint using the Microsoft Message Queue service.
 	/// </summary>
 	public class MsmqEndpoint :
 		IEndpoint
 	{
-		private static readonly IBodyFormatter _formatter = new BinaryBodyFormatter();
+	    private static readonly IMessageSerializer _serializer = new BinaryMessageSerializer();
 		private static readonly ILog _log = LogManager.GetLogger(typeof (MsmqEndpoint));
 		private readonly string _queuePath;
 		private readonly Uri _uri;
-		private readonly string _machineName = Environment.MachineName;
-	    private static readonly string _locolhost = "localhost";
+        private const string _localhost = "localhost";
 		private MessageQueue _queue;
 		private bool _reliableMessaging = true;
-	    private bool _isLocal;
+	    private readonly bool _isLocal;
 	    private MessageQueueTransactionType _sendTransactionType;
 	    private MessageQueueTransactionType _receiveTransactionType;
 
@@ -65,7 +64,7 @@ namespace MassTransit.ServiceBus.MSMQ
             string localhost = Environment.MachineName.ToLowerInvariant();
 
 			string hostName = _uri.Host;
-		    if (string.Compare(hostName, ".") == 0 || string.Compare(hostName, _locolhost, true) == 0)
+		    if (string.Compare(hostName, ".") == 0 || string.Compare(hostName, _localhost, true) == 0)
 			{
 			    _uri = new Uri("msmq://" + localhost + _uri.AbsolutePath);
 			    _isLocal = true;
@@ -130,8 +129,6 @@ namespace MassTransit.ServiceBus.MSMQ
 
             _receiveTransactionType = _isLocal && _queue.Transactional ? MessageQueueTransactionType.Automatic : MessageQueueTransactionType.None;
         }
-
-		#region IMessageQueueEndpoint Members
 
 		public bool ReliableMessaging
 		{
@@ -231,7 +228,7 @@ namespace MassTransit.ServiceBus.MSMQ
 	    {
             var msg = new Message();
 
-            _formatter.Serialize(new MsmqFormattedBody(msg), message);
+	        _serializer.Serialize(msg.BodyStream, message);
 
             if (timeToLive < TimeSpan.MaxValue)
                 msg.TimeToBeReceived = timeToLive;
@@ -253,7 +250,7 @@ namespace MassTransit.ServiceBus.MSMQ
 
 				try
 				{
-					object obj = _formatter.Deserialize(new MsmqFormattedBody(msg));
+				    object obj = _serializer.Deserialize(msg.BodyStream);
 
 					return obj;
 				}
@@ -289,7 +286,7 @@ namespace MassTransit.ServiceBus.MSMQ
 
 							try
 							{
-								object obj = _formatter.Deserialize(new MsmqFormattedBody(msg));
+							    object obj = _serializer.Deserialize(msg.BodyStream);
 
 								if (accept(obj))
 								{
@@ -400,8 +397,6 @@ namespace MassTransit.ServiceBus.MSMQ
 					break;
 			}
 		}
-
-		#endregion
 
 		/// <summary>
 		/// Implicitly creates a <c ref="MsmqEndpoint" />.

@@ -15,20 +15,18 @@ namespace MassTransit.ServiceBus.Tests.Serialization
     using System;
     using System.Diagnostics;
     using System.IO;
-    using System.Runtime.Serialization;
     using System.Text;
-    using System.Xml;
-    using System.Xml.Serialization;
+    using MassTransit.ServiceBus.Serialization;
     using Messages;
     using NUnit.Framework;
 
     [TestFixture]
     public class MessageSerialization_Specs
     {
-        [Test]
-        public void FIRST_TEST_NAME()
+        [SetUp]
+        public void SetupContext()
         {
-            SerializationTestMessage message = new SerializationTestMessage
+            _message = new SerializationTestMessage
                 {
                     Amount = 123.45m,
                     BigCount = 098123213,
@@ -38,13 +36,20 @@ namespace MassTransit.ServiceBus.Tests.Serialization
                     Name = "Chris",
                     Radians = 1823.172,
                 };
+        }
 
+        private SerializationTestMessage _message;
+
+        [Test]
+        public void FIRST_TEST_NAME()
+        {
             byte[] serializedMessageData;
 
+            IMessageSerializer serializer = new XmlMessageSerializer();
+
             using (MemoryStream output = new MemoryStream())
-            using (IMessageSerializer serializer = new XmlMessageSerializer())
             {
-                serializer.Serialize(output, message);
+                serializer.Serialize(output, _message);
 
                 serializedMessageData = output.ToArray();
 
@@ -53,101 +58,32 @@ namespace MassTransit.ServiceBus.Tests.Serialization
 
             using (MemoryStream input = new MemoryStream(serializedMessageData))
             {
-                using (IMessageSerializer serializer = new XmlMessageSerializer())
-                {
-                    SerializationTestMessage receivedMessage = serializer.Deserialize<SerializationTestMessage>(input);
+                SerializationTestMessage receivedMessage = serializer.Deserialize(input) as SerializationTestMessage;
 
-                    Assert.AreEqual(message, receivedMessage);
-                }
+                Assert.AreEqual(_message, receivedMessage);
             }
         }
-    }
 
-    public class XmlMessageSerializer :
-        IMessageSerializer
-    {
-        public void Dispose()
+        [Test]
+        public void The_binary_formatter_should_make_mouths_happy()
         {
-        }
+            byte[] serializedMessageData;
 
-        public void Serialize<T>(Stream output, T message)
-        {
-            XmlMessageEnvelope envelope = new XmlMessageEnvelope(message);
+            IMessageSerializer serializer = new BinaryMessageSerializer();
 
-            XmlSerializerNamespaces ns = new XmlSerializerNamespaces();
-            ns.Add("", ""); 
-
-            XmlSerializer _serializer = new XmlSerializer(typeof (XmlMessageEnvelope), new[] {typeof (T)});
-
-            _serializer.Serialize(output, envelope);
-        }
-
-        public T Deserialize<T>(Stream input)
-        {
-            XmlSerializer _serializer = new XmlSerializer(typeof (XmlReceiveMessageEnvelope));
-
-            object obj = _serializer.Deserialize(input);
-
-            if (obj.GetType() != typeof(XmlReceiveMessageEnvelope))
-                throw new SerializationException("An unknown message type was received");
-
-            XmlReceiveMessageEnvelope envelope = (XmlReceiveMessageEnvelope) obj;
-
-            Type t = Type.GetType(envelope.MessageType, true, true);
-            if (typeof(T) != t)
-                throw new SerializationException("An unexpected message type was received");
-
-            XmlAttributes attributes = new XmlAttributes();
-            attributes.XmlRoot= new XmlRootAttribute("Message");
-
-            XmlAttributeOverrides overrides = new XmlAttributeOverrides();
-            overrides.Add(t, attributes);
-
-            XmlSerializer messageSerializer = new XmlSerializer(t, overrides);
-
-            using(var reader = new XmlNodeReader(envelope.Message))
+            using (MemoryStream output = new MemoryStream())
             {
-                obj = messageSerializer.Deserialize(reader);    
+                serializer.Serialize(output, _message);
+
+                serializedMessageData = output.ToArray();
             }
 
-            if (obj.GetType() != typeof(T))
-                throw new SerializationException("Invalid type");
+            using (MemoryStream input = new MemoryStream(serializedMessageData))
+            {
+                SerializationTestMessage receivedMessage = serializer.Deserialize(input) as SerializationTestMessage;
 
-            return (T) obj;
+                Assert.AreEqual(_message, receivedMessage);
+            }
         }
-    }
-
-    [XmlRoot(ElementName = "MessageEnvelope")]
-    public class XmlMessageEnvelope
-    {
-        protected XmlMessageEnvelope()
-        {
-        }
-
-        public XmlMessageEnvelope(object message)
-        {
-            Message = message;
-            MessageType = message.GetType().FullName;
-        }
-
-        public string MessageType { get; set; }
-
-        public object Message { get; set; }
-    }
-
-    [XmlRoot(ElementName = "MessageEnvelope")]
-    public class XmlReceiveMessageEnvelope
-    {
-        public string MessageType { get; set; }
-
-        [XmlAnyElement]
-        public XmlNode Message { get; set; }
-    }
-
-
-    public interface IMessageSerializer : IDisposable
-    {
-        void Serialize<T>(Stream output, T message);
-        T Deserialize<T>(Stream input);
     }
 }
