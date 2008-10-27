@@ -127,27 +127,28 @@ namespace MassTransit.ServiceBus.Tests
 		[Test,Explicit]
 		public void They_should_still_pick_up_the_work()
 		{
-			using (ManagedThreadPool<string> pool = new ManagedThreadPool<string>(Worker, 0, 2))
+			using (var pool = new ManagedThreadPool<string>(Worker, 1, 2))
 			{
 				Assert.That(_count, Is.EqualTo(0));
 				Assert.That(pool.CurrentThreadCount, Is.EqualTo(0));
 
-				pool.Enqueue("One");
-				Assert.That(pool.CurrentThreadCount, Is.EqualTo(1));
+                pool.Enqueue("One");
+                Assert.That(pool.CurrentThreadCount, Is.EqualTo(1));
 
-				Assert.That(_updated.WaitOne(TimeSpan.FromSeconds(1), true), "Timeout waiting for worker to work");
+                Assert.That(_updated.WaitOne(TimeSpan.FromSeconds(1), true), "Timeout waiting for worker to work");
 
-				// wait for thread count to drop
-				Thread.Sleep(7000);
+                // wait for thread count to drop
+                Thread.Sleep(2000);
 
-				Assert.That(pool.CurrentThreadCount, Is.EqualTo(0));
+                //won't go back down to zero since its min is 1
+                Assert.That(pool.CurrentThreadCount, Is.EqualTo(1));
 
-				pool.Enqueue("Two");
-				pool.Enqueue("Three");
-				Assert.That(pool.CurrentThreadCount, Is.EqualTo(2));
+                pool.Enqueue("Two");
+                pool.Enqueue("Three");
+                Assert.That(pool.CurrentThreadCount, Is.EqualTo(2));
 
-				Assert.That(_updated.WaitOne(TimeSpan.FromSeconds(1), true), "Timeout waiting for worker to work");
-				Assert.That(_updated.WaitOne(TimeSpan.FromSeconds(1), true), "Timeout waiting for worker to work");
+                Assert.That(_updated.WaitOne(TimeSpan.FromSeconds(1), true), "Timeout waiting for worker to work");
+                Assert.That(_updated.WaitOne(TimeSpan.FromSeconds(1), true), "Timeout waiting for worker to work");
 			}
 		}
 
