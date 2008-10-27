@@ -28,7 +28,7 @@ namespace MassTransit.ServiceBus.Serialization
         public XmlMessageEnvelope(object message)
         {
             Message = message;
-            MessageType = message.GetType().FullName;
+            MessageType = message.GetType().AssemblyQualifiedName;
         }
 
         public object Message { get; set; }
