@@ -18,8 +18,12 @@ namespace MassTransit.ServiceBus.Services.Timeout.Messages
     public class ScheduleTimeout :
         CorrelatedBy<Guid>
     {
-        private readonly Guid _correlationId;
-        private readonly DateTime _timeoutAt;
+        private Guid _correlationId;
+        private DateTime _timeoutAt;
+
+        protected ScheduleTimeout()
+        {
+        }
 
         public ScheduleTimeout(Guid correlationId, TimeSpan timeoutIn)
         {
@@ -33,14 +37,16 @@ namespace MassTransit.ServiceBus.Services.Timeout.Messages
             _timeoutAt = timeoutAt.ToUniversalTime();
         }
 
-        public Guid CorrelationId
-        {
-            get { return _correlationId; }
-        }
-
         public DateTime TimeoutAt
         {
             get { return _timeoutAt; }
+            set { _timeoutAt = value; }
+        }
+
+        public Guid CorrelationId
+        {
+            get { return _correlationId; }
+            set { _correlationId = value; }
         }
     }
 }

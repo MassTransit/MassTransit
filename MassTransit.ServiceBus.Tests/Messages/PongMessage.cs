@@ -19,7 +19,7 @@ namespace MassTransit.ServiceBus.Tests.Messages
 		IEquatable<PongMessage>,
 		CorrelatedBy<Guid>
 	{
-		private readonly Guid _id;
+		private Guid _id;
 
 		public PongMessage()
 		{
@@ -34,6 +34,7 @@ namespace MassTransit.ServiceBus.Tests.Messages
 		public Guid CorrelationId
 		{
 			get { return _id; }
+            set { _id = value; }
 		}
 
 		public bool Equals(PongMessage obj)

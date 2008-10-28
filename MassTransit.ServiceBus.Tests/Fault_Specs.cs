@@ -148,11 +148,16 @@ namespace MassTransit.ServiceBus.Tests
 		}
 
 		[Serializable]
-		public class Hello : CorrelatedBy<Guid>
+		public class Hello : 
+            CorrelatedBy<Guid>
 		{
-			private readonly Guid _id;
+			private Guid _id;
 
-			public Hello(Guid id)
+            protected Hello()
+            {
+            }
+
+		    public Hello(Guid id)
 			{
 				_id = id;
 			}
@@ -160,6 +165,7 @@ namespace MassTransit.ServiceBus.Tests
 			public Guid CorrelationId
 			{
 				get { return _id; }
+                set { _id = value; }
 			}
 		}
 

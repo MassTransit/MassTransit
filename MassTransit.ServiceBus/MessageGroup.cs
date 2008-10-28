@@ -25,7 +25,7 @@ namespace MassTransit.ServiceBus
 	public class MessageGroup
 	{
 		private static readonly MethodInfo _publishMethodInfo = typeof (IServiceBus).GetMethod("Publish", BindingFlags.Public | BindingFlags.Instance);
-		private readonly List<object> _messages;
+		private List<object> _messages;
 
 		/// <summary>
 		/// Creates a message group with the specified list of messages. This class is normally built by the <c>MessageGroupBuilder</c>
@@ -36,7 +36,11 @@ namespace MassTransit.ServiceBus
 			_messages = messages;
 		}
 
-		/// <summary>
+	    protected MessageGroup()
+	    {
+	    }
+
+	    /// <summary>
 		/// The number of messages in the message group.
 		/// </summary>
 		public int Count
