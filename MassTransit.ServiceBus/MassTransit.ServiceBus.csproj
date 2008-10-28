@@ -223,6 +223,8 @@
     <Compile Include="Serialization\BaseMessageEnvelope.cs" />
     <Compile Include="Serialization\BinaryMessageSerializer.cs" />
     <Compile Include="Serialization\IMessageSerializer.cs" />
+    <Compile Include="Serialization\JsonMessageEnvelope.cs" />
+    <Compile Include="Serialization\JsonMessageSerializer.cs" />
     <Compile Include="Serialization\XmlMessageEnvelope.cs" />
     <Compile Include="Serialization\XmlMessageSerializer.cs" />
     <Compile Include="Serialization\XmlReceiveMessageEnvelope.cs" />
