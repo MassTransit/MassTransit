@@ -18,7 +18,11 @@ namespace MassTransit.ServiceBus.Services.Timeout.Messages
     public class TimeoutExpired :
         CorrelatedBy<Guid>
     {
-        private readonly Guid _correlationId;
+        private Guid _correlationId;
+
+        protected TimeoutExpired()
+        {
+        }
 
         public TimeoutExpired(Guid correlationId)
         {
@@ -28,6 +32,7 @@ namespace MassTransit.ServiceBus.Services.Timeout.Messages
         public Guid CorrelationId
         {
             get { return _correlationId; }
+            set { _correlationId = value; }
         }
     }
 }

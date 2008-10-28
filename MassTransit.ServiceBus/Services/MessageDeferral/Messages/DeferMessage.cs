@@ -18,10 +18,14 @@ namespace MassTransit.ServiceBus.Services.MessageDeferral.Messages
     [Serializable]
     public class DeferMessage
     {
-        private readonly Guid _correlationId;
-        private readonly DateTime _deliverAt;
-        private readonly object _message;
-        private readonly string _messageType;
+        private Guid _correlationId;
+        private DateTime _deliverAt;
+        private object _message;
+        private string _messageType;
+
+        protected DeferMessage()
+        {
+        }
 
         public DeferMessage(Guid correlationId, TimeSpan deliverIn, object message)
             : this(correlationId, DateTime.UtcNow + deliverIn, message)
@@ -42,21 +46,25 @@ namespace MassTransit.ServiceBus.Services.MessageDeferral.Messages
         public Guid CorrelationId
         {
             get { return _correlationId; }
+            set { _correlationId = value; }
         }
 
         public DateTime DeliverAt
         {
             get { return _deliverAt; }
+            set { _deliverAt = value; }
         }
 
         public object Message
         {
             get { return _message; }
+            set { _message = value; }
         }
 
         public string MessageType
         {
             get { return _messageType; }
+            set { _messageType = value; }
         }
     }
 }

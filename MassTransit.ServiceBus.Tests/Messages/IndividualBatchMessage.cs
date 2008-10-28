@@ -19,8 +19,12 @@ namespace MassTransit.ServiceBus.Tests.Messages
 	public class IndividualBatchMessage :
 		BatchedBy<Guid>
 	{
-		private readonly Guid _batchId;
-		private readonly int _batchLength;
+		private Guid _batchId;
+		private int _batchLength;
+
+        protected IndividualBatchMessage()
+        {
+        }
 
 		public IndividualBatchMessage(Guid batchId, int batchLength)
 		{
@@ -31,11 +35,13 @@ namespace MassTransit.ServiceBus.Tests.Messages
 		public Guid BatchId
 		{
 			get { return _batchId; }
+            set { _batchId = value; }
 		}
 
 		public int BatchLength
 		{
 			get { return _batchLength; }
+            set { _batchLength = value; }
 		}
 	}
 }
