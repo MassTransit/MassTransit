@@ -31,7 +31,7 @@ namespace MassTransit.ServiceBus.Tests.Serialization
                     Amount = 123.45m,
                     BigCount = 098123213,
                     Count = 123,
-                    Created = DateTime.Now,
+                    Created = new DateTime(2008,9,8,7,6,5,4),
                     Id = Guid.NewGuid(),
                     Name = "Chris",
                     Radians = 1823.172,
@@ -41,7 +41,7 @@ namespace MassTransit.ServiceBus.Tests.Serialization
         private SerializationTestMessage _message;
 
         [Test]
-        public void FIRST_TEST_NAME()
+        public void The_xml_serializer_should_be_awesome()
         {
             byte[] serializedMessageData;
 
@@ -82,6 +82,28 @@ namespace MassTransit.ServiceBus.Tests.Serialization
             {
                 SerializationTestMessage receivedMessage = serializer.Deserialize(input) as SerializationTestMessage;
 
+                Assert.AreEqual(_message, receivedMessage);
+            }
+        }
+
+        [Test]
+        public void Choosey_moms_choose_JSON()
+        {
+            byte[] serializedMessageData;
+
+            IMessageSerializer serializer = new JsonMessageSerializer();
+
+            using (var output = new MemoryStream())
+            {
+                serializer.Serialize(output, _message);
+
+                serializedMessageData = output.ToArray();
+                Trace.WriteLine(Encoding.UTF8.GetString(serializedMessageData));
+            }
+
+            using (var input = new MemoryStream(serializedMessageData))
+            {
+                var receivedMessage = serializer.Deserialize(input) as SerializationTestMessage;
                 Assert.AreEqual(_message, receivedMessage);
             }
         }
