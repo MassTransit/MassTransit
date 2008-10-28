@@ -19,6 +19,7 @@ namespace MassTransit.ServiceBus.Serialization
     using System.Xml;
     using System.Xml.Serialization;
     using Magnum.Common.Threading;
+    using Util;
 
     /// <summary>
     /// Serializes messages using the .NET Xml Serializer
@@ -54,6 +55,7 @@ namespace MassTransit.ServiceBus.Serialization
 
         public void Serialize<T>(Stream output, T message)
         {
+            Check.EnsureSerializable(message);
             XmlMessageEnvelope envelope = new XmlMessageEnvelope(message);
 
             GetSerializerFor<T>().Serialize(output, envelope);

@@ -15,6 +15,7 @@ namespace MassTransit.ServiceBus.Serialization
     using System.IO;
     using System.Runtime.Serialization;
     using System.Runtime.Serialization.Formatters.Binary;
+    using Util;
 
     /// <summary>
     /// The binary message serializer used the .NET BinaryFormatter to serialize
@@ -27,6 +28,7 @@ namespace MassTransit.ServiceBus.Serialization
 
         public void Serialize<T>(Stream output, T message)
         {
+            Check.EnsureSerializable(message);
             _formatter.Serialize(output, message);
         }
 
