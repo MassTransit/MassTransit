@@ -14,7 +14,9 @@ namespace MassTransit.ServiceBus
 {
 	using System;
 
-	public interface IServiceBusRequest : IAsyncResult, IDisposable
+	public interface IServiceBusRequest : 
+		IAsyncResult, 
+		IDisposable
 	{
 		/// <summary>
 		/// Called by the consumer class to indicate that the operation is complete

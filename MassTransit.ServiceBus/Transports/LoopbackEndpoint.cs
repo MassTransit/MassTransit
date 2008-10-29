@@ -12,129 +12,143 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.ServiceBus.Transports
 {
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-    using System.Threading;
-    using log4net;
-    using Serialization;
+	using System;
+	using System.Collections.Generic;
+	using System.IO;
+	using System.Threading;
+	using log4net;
+	using Magnum.Common.Threading;
+	using Serialization;
 
-    public class LoopbackEndpoint : IEndpoint
-    {
-        private static readonly ILog _log = LogManager.GetLogger(typeof (LoopbackEndpoint));
-        private static readonly ILog _messageLog = LogManager.GetLogger("MassTransit.Messages");
+	public class LoopbackEndpoint : IEndpoint
+	{
+		private static readonly ILog _log = LogManager.GetLogger(typeof (LoopbackEndpoint));
+		private static readonly ILog _messageLog = LogManager.GetLogger("MassTransit.Messages");
+		private readonly UpgradeableLock _lockContext = new UpgradeableLock();
 
-        private readonly IMessageSerializer _serializer = new BinaryMessageSerializer();
-        private readonly Semaphore _messageReady = new Semaphore(0, int.MaxValue);
-        private readonly Queue<byte[]> _messages = new Queue<byte[]>();
-        private readonly Uri _uri;
+		private readonly Semaphore _messageReady = new Semaphore(0, int.MaxValue);
+		private readonly Queue<byte[]> _messages = new Queue<byte[]>();
+		private readonly IMessageSerializer _serializer = new BinaryMessageSerializer();
+		private readonly Uri _uri;
+		private bool _disposed;
 
-        public LoopbackEndpoint(Uri uri)
-        {
-            _uri = uri;
-        }
+		public LoopbackEndpoint(Uri uri)
+		{
+			_uri = uri;
+		}
 
-        public static string Scheme
-        {
-            get { return "loopback"; }
-        }
+		public static string Scheme
+		{
+			get { return "loopback"; }
+		}
 
-        public Uri Uri
-        {
-            get { return _uri; }
-        }
+		public Uri Uri
+		{
+			get { return _uri; }
+		}
 
-        public void Send<T>(T message) where T : class
-        {
-            if (_messageLog.IsInfoEnabled)
-                _messageLog.InfoFormat("SEND:{0}:{1}", Uri, typeof (T).Name);
+		public void Send<T>(T message) where T : class
+		{
+			if (_messageLog.IsInfoEnabled)
+				_messageLog.InfoFormat("SEND:{0}:{1}", Uri, typeof (T).Name);
 
-            Enqueue(message);
-        }
+			Enqueue(message);
+		}
 
-        public void Send<T>(T message, TimeSpan timeToLive) where T : class
-        {
-            if (_messageLog.IsInfoEnabled)
-                _messageLog.InfoFormat("SEND:{0}:{1}", Uri, typeof (T).Name);
+		public void Send<T>(T message, TimeSpan timeToLive) where T : class
+		{
+			if (_messageLog.IsInfoEnabled)
+				_messageLog.InfoFormat("SEND:{0}:{1}", Uri, typeof (T).Name);
 
-            Enqueue(message);
-        }
+			Enqueue(message);
+		}
 
-        public object Receive(TimeSpan timeout)
-        {
-            if (_messageReady.WaitOne(timeout, true))
-            {
-                try
-                {
-                    object obj = Dequeue();
+		public object Receive(TimeSpan timeout)
+		{
+			if (_messageReady.WaitOne(timeout, true))
+			{
+				try
+				{
+					object obj = Dequeue();
 
-                    if (_messageLog.IsInfoEnabled)
-                        _messageLog.InfoFormat("RECV:{0}:{1}", _uri, obj.GetType().Name);
+					if (_messageLog.IsInfoEnabled)
+						_messageLog.InfoFormat("RECV:{0}:{1}", _uri, obj.GetType().Name);
 
-                    return obj;
-                }
-                catch (InvalidOperationException)
-                {
-                }
-            }
+					return obj;
+				}
+				catch (InvalidOperationException)
+				{
+				}
+			}
 
-            return null;
-        }
+			return null;
+		}
 
-        public object Receive(TimeSpan timeout, Predicate<object> accept)
-        {
-            if (_messageReady.WaitOne(timeout, true))
-            {
-                try
-                {
-                    object obj = Dequeue();
+		public object Receive(TimeSpan timeout, Predicate<object> accept)
+		{
+			if (_messageReady.WaitOne(timeout, true))
+			{
+				try
+				{
+					object obj = Dequeue();
 
-                    if (accept(obj))
-                    {
-                        if (_messageLog.IsInfoEnabled)
-                            _messageLog.InfoFormat("RECV:{0}:{1}", _uri, obj.GetType().Name);
+					if (accept(obj))
+					{
+						if (_messageLog.IsInfoEnabled)
+							_messageLog.InfoFormat("RECV:{0}:{1}", _uri, obj.GetType().Name);
 
-                        return obj;
-                    }
-                }
-                catch (InvalidOperationException)
-                {
-                }
-            }
+						return obj;
+					}
+				}
+				catch (InvalidOperationException)
+				{
+				}
+			}
 
-            return null;
-        }
+			return null;
+		}
 
-        public void Dispose()
-        {
-            lock (_messages)
-                _messages.Clear();
-        }
+		public void Dispose()
+		{
+			Dispose(true);
+			GC.SuppressFinalize(this);
+		}
 
-        private void Enqueue<T>(T message)
-        {
-            using (MemoryStream mstream = new MemoryStream())
-            {
-                _serializer.Serialize(mstream, message);
-                lock (_messages)
-                    _messages.Enqueue(mstream.ToArray());
-            }
+		protected virtual void Dispose(bool disposing)
+		{
+			if (_disposed) return;
+			if (disposing)
+			{
+				using (_lockContext.EnterWriteLock())
+					_messages.Clear();
+			}
+			_disposed = true;
+		}
 
-            _messageReady.Release();
-        }
+		private void Enqueue<T>(T message)
+		{
+			using (MemoryStream mstream = new MemoryStream())
+			{
+				_serializer.Serialize(mstream, message);
+				using (_lockContext.EnterWriteLock())
+					_messages.Enqueue(mstream.ToArray());
+			}
 
-        private object Dequeue()
-        {
-            byte[] buffer;
-            lock (_messages)
-                buffer = _messages.Dequeue();
+			_messageReady.Release();
+		}
 
-            using (MemoryStream mstream = new MemoryStream(buffer))
-            {
-                object obj = _serializer.Deserialize(mstream);
+		private object Dequeue()
+		{
+			byte[] buffer;
+			using (_lockContext.EnterWriteLock())
+				buffer = _messages.Dequeue();
 
-                return obj;
-            }
-        }
-    }
+			using (MemoryStream mstream = new MemoryStream(buffer))
+			{
+				object obj = _serializer.Deserialize(mstream);
+
+				return obj;
+			}
+		}
+	}
 }
