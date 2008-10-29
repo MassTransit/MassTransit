@@ -21,12 +21,13 @@ namespace MassTransit.ServiceBus
 		where TComponent : class
 	{
 		private readonly ManualResetEvent _asyncWaitHandle;
-		private readonly IServiceBus _bus;
-		private readonly AsyncCallback _callback;
-		private readonly TComponent _component;
-		private readonly object _state;
+		private  IServiceBus _bus;
+		private  AsyncCallback _callback;
+		private  TComponent _component;
+		private  object _state;
 		private volatile bool _completedSynchronously;
 		private volatile bool _isComplete = false;
+		private bool _disposed;
 
 		public ServiceBusRequest(IServiceBus bus, TComponent component, AsyncCallback callback, object state)
 		{
@@ -72,8 +73,24 @@ namespace MassTransit.ServiceBus
 
 		public void Dispose()
 		{
-			if (_bus != null && _component != null)
-				_bus.Unsubscribe(_component);
+			Dispose(true);
+			GC.SuppressFinalize(this);
+		}
+
+		protected virtual void Dispose(bool disposing)
+		{
+			if (_disposed) return;
+			if (disposing)
+			{
+				if (_bus != null && _component != null)
+					_bus.Unsubscribe(_component);
+
+				_bus = null;
+				_component = null;
+				_callback = null;
+				_state = null;
+			}
+			_disposed = true;
 		}
 
 		public void Complete(bool synchronously)

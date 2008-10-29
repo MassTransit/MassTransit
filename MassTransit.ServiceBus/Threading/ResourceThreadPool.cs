@@ -35,8 +35,9 @@ namespace MassTransit.ServiceBus.Threading
         private readonly List<Thread> _threads = new List<Thread>();
         private int _maxThreads;
         private int _minThreads;
+    	private bool _disposed;
 
-        public ResourceThreadPool(TResource resource, Function<TResource, TElement> function, Action<TElement> action)
+    	public ResourceThreadPool(TResource resource, Function<TResource, TElement> function, Action<TElement> action)
             : this(resource, function, action, 1, 1, 10)
         {
         }
@@ -93,23 +94,34 @@ namespace MassTransit.ServiceBus.Threading
             [DebuggerStepThrough]
             get { lock (_threads) return _threads.Count; }
         }
+		
+		public void Dispose()
+		{
+			Dispose(true);
+			GC.SuppressFinalize(this);
+		}
 
-        public void Dispose()
-        {
-            _shutdown.Set();
+		protected virtual void Dispose(bool disposing)
+		{
+			if (_disposed) return;
+			if (disposing)
+			{
+				_shutdown.Set();
 
-            Thread[] remaining = _threads.ToArray();
+				Thread[] remaining = _threads.ToArray();
 
-            foreach (Thread t in remaining)
-            {
-                if (!t.Join(TimeSpan.FromSeconds(60)))
-                {
-                    // TODO log message that thread did not exit properly
-                }
-            }
+				foreach (Thread t in remaining)
+				{
+					if (!t.Join(TimeSpan.FromSeconds(60)))
+					{
+						// TODO log message that thread did not exit properly
+					}
+				}
 
-            _threads.Clear();
-        }
+				_threads.Clear();
+			}
+			_disposed = true;
+		}
 
         private void AdjustQueueCount()
         {
