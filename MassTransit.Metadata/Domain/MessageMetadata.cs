@@ -9,5 +9,10 @@ namespace MassTransit.Metadata.Domain
         public string Notes { get; set; }
         public string Owner { get; set; }
         public IList<MemberMetadata> Members { get; set; }
+
+        public MessageMetadata()
+        {
+            Members =  new List<MemberMetadata>();
+        }
     }
 }

@@ -17,13 +17,18 @@ namespace MassTransit.Metadata
 
             foreach (PropertyInfo info in messageType.GetProperties())
             {
-                var member = new MemberMetadata();
-                member.Name = info.Name;
-                member.ValueType = info.PropertyType.Name;
-                member.Notes = "";
+                var member = new MemberMetadata
+                                 {
+                                     Name = info.Name,
+                                     ValueType = info.PropertyType.Name,
+                                     Notes = ""
+                                 };
+
+                //TODO: Needs to walk the entire object graph not just one level deep
 
                 result.Members.Add(member);
             }
+
             return result;
         }
     }
