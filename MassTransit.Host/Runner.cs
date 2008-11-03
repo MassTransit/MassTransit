@@ -14,7 +14,8 @@ namespace MassTransit.Host
 {
     using System.Collections.Generic;
 	using Actions;
-	using log4net;
+    using Configurations;
+    using log4net;
     using Microsoft.Practices.ServiceLocation;
 
     /// <summary>
@@ -37,12 +38,12 @@ namespace MassTransit.Host
         /// <summary>
         /// Go go gadget
         /// </summary>
-        /// <param name="configuration"></param>
-        /// <param name="args"></param>
-        public static void Run(IInstallationConfiguration configuration, params string[] args)
+        public static void Run(Credentials credentials, WinServiceSettings settings, IApplicationLifecycle lifecycle, params string[] args)
         {
             _log.Info("Starting Host");
             _log.DebugFormat("Arguments: {0}", string.Join(",", args));
+
+            var configuration = new WinServiceConfiguration(credentials, settings, lifecycle);
 
             NamedAction actionKey;
             var arguments = Parser.ParseArgs(args);
