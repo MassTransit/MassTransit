@@ -13,7 +13,10 @@ namespace Server
         private static void Main(string[] args)
         {
             _log.Info("Server Loading");
-            var Container = new DefaultMassTransitContainer("castle.xml");
+            var container = new DefaultMassTransitContainer("castle.xml");
+
+            var wob = new WindsorObjectBuilder(container.Kernel);
+            ServiceLocator.SetLocatorProvider(() => wob);
 
             IInstallationConfiguration cfg = new WinServiceConfiguration(
                 Credentials.LocalSystem,

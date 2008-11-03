@@ -18,19 +18,22 @@ namespace SubMgr
         private static void Main(string[] args)
         {
             _log.Info("SubMgr Loading");
-            IWindsorContainer Container = new DefaultMassTransitContainer("castle.xml");
+            IWindsorContainer container = new DefaultMassTransitContainer("castle.xml");
 
-            Container.AddComponentLifeStyle<FollowerRepository>(LifestyleType.Singleton);
-
-
-            Container.AddComponent<AddSubscriptionHandler>();
-            Container.AddComponent<RemoveSubscriptionHandler>();
-            Container.AddComponent<CancelUpdatesHandler>();
-            Container.AddComponent<CacheUpdateRequestHandler>();
-            Container.AddComponent<IHostedService, SubscriptionService>();
+            container.AddComponentLifeStyle<FollowerRepository>(LifestyleType.Singleton);
 
 
-            Container.AddComponent<ISubscriptionRepository, InMemorySubscriptionRepository>();
+            container.AddComponent<AddSubscriptionHandler>();
+            container.AddComponent<RemoveSubscriptionHandler>();
+            container.AddComponent<CancelUpdatesHandler>();
+            container.AddComponent<CacheUpdateRequestHandler>();
+            container.AddComponent<IHostedService, SubscriptionService>();
+
+
+            container.AddComponent<ISubscriptionRepository, InMemorySubscriptionRepository>();
+
+            var wob = new WindsorObjectBuilder(container.Kernel);
+            ServiceLocator.SetLocatorProvider(()=>wob);
 
             IInstallationConfiguration cfg = new WinServiceConfiguration(
                 Credentials.LocalSystem,
