@@ -14,6 +14,15 @@ namespace MassTransit.ServiceBus
 {
     using log4net;
 
+    /// <summary>
+    /// Marker interface used to assist identification in IoC containers.
+    /// Not to be used directly.
+    /// </summary>
+    /// <remarks>
+    /// Not to be used directly by application code. Is an internal artifact only.
+    /// </remarks>
+    public interface IConsumer {}
+
     public class Consumes<TMessage> where TMessage : class
 	{
 		private static readonly Selected _null;
@@ -23,20 +32,25 @@ namespace MassTransit.ServiceBus
 			_null = new NullConsumer();
 		}
 
-		public static Selected Null
-		{
-			get { return _null; }
-		}
-
-		public interface All
+		public interface All : IConsumer
 		{
 			void Consume(TMessage message);
+		}
+
+		public interface Selected : All
+		{
+			bool Accept(TMessage message);
 		}
 
 		public interface For<TCorrelationId> : All, CorrelatedBy<TCorrelationId>
 		{
 		}
 
+
+		public static Selected Null
+		{
+			get { return _null; }
+		}
 		public class NullConsumer : Selected
 		{
 
@@ -53,9 +67,5 @@ namespace MassTransit.ServiceBus
 			}
 		}
 
-		public interface Selected : All
-		{
-			bool Accept(TMessage message);
-		}
 	}
 }
