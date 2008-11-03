@@ -18,16 +18,15 @@ namespace Server
             var wob = new WindsorObjectBuilder(container.Kernel);
             ServiceLocator.SetLocatorProvider(() => wob);
 
-            IInstallationConfiguration cfg = new WinServiceConfiguration(
-                Credentials.LocalSystem,
-                WinServiceSettings.Custom(
-                    "SampleService",
-                    "Sample Service",
-                    "Something",
-                    KnownServiceNames.Msmq),
-                new ServerLifeCycle(ServiceLocator.Current));
+            var credentials = Credentials.LocalSystem;
+            var settings = WinServiceSettings.Custom(
+                "SampleService",
+                "Sample Service",
+                "Something",
+                KnownServiceNames.Msmq);
+            var lifecycle = new ServerLifeCycle(ServiceLocator.Current);
 
-            Runner.Run(cfg, args);
+            Runner.Run(credentials, settings, lifecycle, args);
         }
     }
 }

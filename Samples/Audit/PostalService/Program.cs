@@ -21,16 +21,16 @@
 
             var wob = new WindsorObjectBuilder(container.Kernel);
             ServiceLocator.SetLocatorProvider(() => wob);
-            IInstallationConfiguration cfg = new WinServiceConfiguration(
-                Credentials.LocalSystem,
-                WinServiceSettings.Custom(
-                    "PostalService",
-                    "Sample Email Service",
-                    "We goin' postal",
-                    KnownServiceNames.Msmq),
-                new PostalServiceLifeCycle(ServiceLocator.Current));
 
-            Runner.Run(cfg, args);
+            var credentials = Credentials.LocalSystem;
+            var settings = WinServiceSettings.Custom(
+                "PostalService",
+                "Sample Email Service",
+                "We goin' postal",
+                KnownServiceNames.Msmq);
+            var lifecycle = new PostalServiceLifeCycle(ServiceLocator.Current);
+
+            Runner.Run(credentials,settings,lifecycle, args);
         }
     }
 }

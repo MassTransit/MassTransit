@@ -28,14 +28,15 @@ namespace CodeCamp.Service
 
             var wob = new WindsorObjectBuilder(container.Kernel);
             ServiceLocator.SetLocatorProvider(() => wob);
-            var cfg = new WinServiceConfiguration(
-                Credentials.LocalSystem,
-                WinServiceSettings.Custom(
-                    "Audit",
-                    "Audit",
-                    "Audit"),
-                new AuditServiceLifeCycle(ServiceLocator.Current));
-            Runner.Run(cfg, args);
+
+            var credentials = Credentials.LocalSystem;
+            var settings = WinServiceSettings.Custom(
+                "Audit",
+                "Audit",
+                "Audit");
+            var lifecycle = new AuditServiceLifeCycle(ServiceLocator.Current);
+
+            Runner.Run(credentials, settings, lifecycle, args);
         }
     }
 }

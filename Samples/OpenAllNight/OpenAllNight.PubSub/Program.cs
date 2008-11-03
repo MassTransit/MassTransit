@@ -40,12 +40,16 @@ namespace OpenAllNight.PubSub
 
             var wob = new WindsorObjectBuilder(container.Kernel);
             ServiceLocator.SetLocatorProvider(() => wob);
-            IInstallationConfiguration cfg = new WinServiceConfiguration(
-                Credentials.LocalSystem,
-                WinServiceSettings.Custom("MTPUBSUB","MassTransit PubSub", "Subscription Service", KnownServiceNames.Msmq),
-                new SubscriptionManagerLifeCycle(ServiceLocator.Current));
 
-            Runner.Run(cfg, args);
+            var credentials = Credentials.LocalSystem;
+            var settings = WinServiceSettings.Custom(
+                "MTPUBSUB",
+                "MassTransit PubSub",
+                "Subscription Service",
+                KnownServiceNames.Msmq);
+            var lifecycle = new SubscriptionManagerLifeCycle(ServiceLocator.Current);
+
+            Runner.Run(credentials, settings, lifecycle, args);
         }
     }
 }

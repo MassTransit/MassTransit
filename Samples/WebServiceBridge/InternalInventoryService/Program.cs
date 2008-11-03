@@ -20,15 +20,15 @@
             var wob = new WindsorObjectBuilder(container.Kernel);
             ServiceLocator.SetLocatorProvider(()=>wob);
 
-            IInstallationConfiguration cfg = new WinServiceConfiguration(
-                Credentials.LocalSystem,
-                WinServiceSettings.Custom("InternalInventoryService",
+            var credentials = Credentials.LocalSystem;
+            var settings = WinServiceSettings.Custom(
+                "InternalInventoryService",
                 "Internal Inventory Service",
                 "Handles inventory for internal systems",
-                KnownServiceNames.Msmq),
-            new InternalInventoryServiceLifeCycle(ServiceLocator.Current));
+                KnownServiceNames.Msmq);
+            var lifecycle = new InternalInventoryServiceLifeCycle(ServiceLocator.Current);
 
-            Runner.Run(cfg, args);
+            Runner.Run(credentials, settings, lifecycle, args);
         }
     }
 }
