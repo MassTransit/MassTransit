@@ -29,7 +29,7 @@ namespace MassTransit.Host.Actions
 
 			if (HostServiceInstaller.IsInstalled(configuration))
 			{
-				string message = string.Format("The {0} service has already been installed.", configuration.ServiceName);
+				string message = string.Format("The {0} service has already been installed.", configuration.Settings.ServiceName);
 				_log.Error(message);
 
 				return;

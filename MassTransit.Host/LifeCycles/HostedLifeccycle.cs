@@ -20,12 +20,12 @@ namespace MassTransit.Host.LifeCycles
     /// <summary>
     /// Base class to handle the host lifecycle common junk
     /// </summary>
-	public abstract class HostedLifeCycle :
-		IApplicationLifeCycle
+	public abstract class HostedLifecycle :
+		IApplicationLifecycle
 	{
 	    private readonly IServiceLocator _serviceLocator;
 
-		protected HostedLifeCycle(IServiceLocator serviceLocator)
+		protected HostedLifecycle(IServiceLocator serviceLocator)
 		{
 		    _serviceLocator = serviceLocator;
 		}
@@ -61,7 +61,7 @@ namespace MassTransit.Host.LifeCycles
 
 			if (Completed != null)
 			{
-				Action<IApplicationLifeCycle> handler = Completed;
+				Action<IApplicationLifecycle> handler = Completed;
 				handler(this);
 			}
 		}
@@ -72,6 +72,6 @@ namespace MassTransit.Host.LifeCycles
         }
 
         //TODO: WTF is this (and I wrote it!)
-		public event Action<IApplicationLifeCycle> Completed;
+		public event Action<IApplicationLifecycle> Completed;
 	}
 }

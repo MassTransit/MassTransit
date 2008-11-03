@@ -19,10 +19,10 @@ namespace MassTransit.Host.Hosts
         ServiceBase //TODO: Is this what you would InstallUtil?
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof (ServiceHost));
-        private readonly IApplicationLifeCycle _lifecycle;
+        private readonly IApplicationLifecycle _lifecycle;
 
 
-        public ServiceHost(IApplicationLifeCycle lifecycle)
+        public ServiceHost(IApplicationLifecycle lifecycle)
         {
             _lifecycle = lifecycle;
         }

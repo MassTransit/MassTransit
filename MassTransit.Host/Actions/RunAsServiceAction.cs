@@ -35,12 +35,12 @@ namespace MassTransit.Host.Actions
             if (!HostServiceInstaller.IsInstalled(configuration))
             {
                 string message = string.Format("The {0} service has not been installed yet. Please run {1} -install.",
-                                               configuration.ServiceName, Assembly.GetEntryAssembly().GetName());
+                                               configuration.Settings.ServiceName, Assembly.GetEntryAssembly().GetName());
                 _log.Fatal(message);
                 throw new ConfigurationException(message);
             }
 
-            var inServiceHost = new ServiceHost(configuration.LifeCycle);
+            var inServiceHost = new ServiceHost(configuration.Lifecycle);
             inServiceHost.Run();
         }
 

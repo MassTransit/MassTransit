@@ -13,15 +13,19 @@
 namespace MassTransit.Host
 {
     using System;
+    using System.Configuration;
+    using System.ServiceProcess;
 
     public class Credentials : IEquatable<Credentials>
     {
         private readonly string _username;
         private readonly string _password;
+        private readonly ServiceAccount _accountType;
 
-        public Credentials(string username, string password)
+        public Credentials(string username, string password, ServiceAccount accountType)
         {
             _username = username;
+            _accountType = accountType;
             _password = password;
         }
 
@@ -35,11 +39,16 @@ namespace MassTransit.Host
             get { return _password; }
         }
 
-        public static Credentials NetworkService
+        public ServiceAccount AccountType
+        {
+            get { return _accountType; }
+        }
+
+        public static Credentials LocalSystem
         {
             get
             {
-                return new Credentials("","");
+                return new Credentials("","", ServiceAccount.LocalSystem);
             }
         }
 
@@ -47,7 +56,17 @@ namespace MassTransit.Host
         {
             get
             {
-                return new Credentials(null,null);
+                return new Credentials(null,null,ServiceAccount.User);
+            }
+        }
+
+        public static Credentials DotNetConfig
+        {
+            get
+            {
+                return new Credentials(ConfigurationManager.AppSettings["username"],
+                                       ConfigurationManager.AppSettings["password"],
+                                       ServiceAccount.User);
             }
         }
 

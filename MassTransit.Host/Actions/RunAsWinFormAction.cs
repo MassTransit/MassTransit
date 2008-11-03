@@ -28,7 +28,7 @@ namespace MassTransit.Host.Actions
         {
             _log.Info("Received winform start notification");
 
-            var inWinFormHost = new WinFormHost(configuration.LifeCycle, serviceLocator);
+            var inWinFormHost = new WinFormHost(configuration.Lifecycle, serviceLocator);
             inWinFormHost.Run();
         }
     }
