@@ -15,6 +15,8 @@ namespace MassTransit.WindsorIntegration
     using Castle.Facilities.Startable;
     using Castle.Windsor;
     using Castle.Windsor.Configuration;
+    using Microsoft.Practices.ServiceLocation;
+    using ServiceBus;
 
     public class DefaultMassTransitContainer :
         WindsorContainer
@@ -38,6 +40,10 @@ namespace MassTransit.WindsorIntegration
 
         public void Initialize()
         {
+            var wob = new WindsorObjectBuilder(this.Kernel);
+            ServiceLocator.SetLocatorProvider(()=>wob);
+            this.Kernel.AddComponentInstance("objectBuilder", typeof(IObjectBuilder), wob);
+
             AddFacility("startable", new StartableFacility());
             AddFacility("masstransit", new MassTransitFacility());
         }

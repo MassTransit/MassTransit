@@ -26,9 +26,6 @@ namespace CodeCamp.Service
             container.AddComponent<Responder>();
             container.AddComponent<RegisterUserSaga>();
 
-            var wob = new WindsorObjectBuilder(container.Kernel);
-            ServiceLocator.SetLocatorProvider(() => wob);
-
             var credentials = Credentials.LocalSystem;
             var settings = WinServiceSettings.Custom(
                 "Audit",
