@@ -4,6 +4,7 @@
     using Host;
     using log4net.Config;
     using MassTransit.Host;
+    using MassTransit.Host.Configurations;
     using MassTransit.WindsorIntegration;
     using Microsoft.Practices.ServiceLocation;
 
@@ -20,7 +21,14 @@
 
             var wob = new WindsorObjectBuilder(container.Kernel);
             ServiceLocator.SetLocatorProvider(() => wob);
-            IInstallationConfiguration cfg = new PostalServiceConfiguration(ServiceLocator.Current);
+            IInstallationConfiguration cfg = new WinServiceConfiguration(
+                Credentials.LocalSystem,
+                WinServiceSettings.Custom(
+                    "PostalService",
+                    "Sample Email Service",
+                    "We goin' postal",
+                    KnownServiceNames.Msmq),
+                new PostalServiceLifeCycle(ServiceLocator.Current));
 
             Runner.Run(cfg, args);
         }

@@ -72,7 +72,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="SubscriptionManagerEnvironment.cs" />
     <Compile Include="SubscriptionManagerForm.cs">
       <SubType>Form</SubType>
     </Compile>

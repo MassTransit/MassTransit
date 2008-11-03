@@ -17,7 +17,7 @@ namespace SubscriptionManagerGUI
     using Microsoft.Practices.ServiceLocation;
 
     public class SubscriptionManagerLifeCycle :
-        HostedLifeCycle
+        HostedLifecycle
     {
         public SubscriptionManagerLifeCycle(IServiceLocator serviceLocator) : base(serviceLocator)
         {

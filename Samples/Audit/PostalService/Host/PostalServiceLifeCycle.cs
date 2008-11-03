@@ -6,7 +6,7 @@ namespace PostalService.Host
 	using Microsoft.Practices.ServiceLocation;
 
     public class PostalServiceLifeCycle :
-        HostedLifeCycle
+        HostedLifecycle
     {
         private IServiceBus _bus;
 

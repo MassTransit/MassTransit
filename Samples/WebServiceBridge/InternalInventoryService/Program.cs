@@ -2,6 +2,7 @@
 {
     using log4net;
     using MassTransit.Host;
+    using MassTransit.Host.Configurations;
     using MassTransit.WindsorIntegration;
     using Microsoft.Practices.ServiceLocation;
 
@@ -19,7 +20,13 @@
             var wob = new WindsorObjectBuilder(container.Kernel);
             ServiceLocator.SetLocatorProvider(()=>wob);
 
-            IInstallationConfiguration cfg = new InternalInventoryServiceEnvironment(ServiceLocator.Current);
+            IInstallationConfiguration cfg = new WinServiceConfiguration(
+                Credentials.LocalSystem,
+                WinServiceSettings.Custom("InternalInventoryService",
+                "Internal Inventory Service",
+                "Handles inventory for internal systems",
+                KnownServiceNames.Msmq),
+            new InternalInventoryServiceLifeCycle(ServiceLocator.Current));
 
             Runner.Run(cfg, args);
         }

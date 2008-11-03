@@ -64,7 +64,6 @@
   <ItemGroup>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SubscriptionManagerEnvironment.cs" />
     <Compile Include="SubscriptionManagerLifeCycle.cs" />
   </ItemGroup>
   <ItemGroup>

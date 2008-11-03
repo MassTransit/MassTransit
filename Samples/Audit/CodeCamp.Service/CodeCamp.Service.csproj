@@ -97,7 +97,6 @@
     <Reference Include="System.Messaging" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AuditServiceConfiguration.cs" />
     <Compile Include="AuditServiceLifeCycle.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -16,6 +16,7 @@ namespace SubscriptionManagerGUI
     using Castle.Core;
     using log4net;
 	using MassTransit.Host;
+    using MassTransit.Host.Configurations;
     using MassTransit.ServiceBus;
     using MassTransit.ServiceBus.Services.HealthMonitoring;
     using MassTransit.ServiceBus.Services.Timeout;
@@ -61,7 +62,13 @@ namespace SubscriptionManagerGUI
             var wob = new WindsorObjectBuilder(container.Kernel);
             ServiceLocator.SetLocatorProvider(() => wob);
 
-			IInstallationConfiguration cfg = new SubscriptionManagerEnvironment(ServiceLocator.Current);
+			IInstallationConfiguration cfg = new WinServiceConfiguration(Credentials.LocalSystem,
+                WinServiceSettings.Custom(
+                    "SubscriptionManagerGUI",
+                    "Sample GUI Subscription Service",
+                    "Coordinates subscriptions between multiple systems",
+                    KnownServiceNames.Msmq),
+                new SubscriptionManagerLifeCycle(ServiceLocator.Current));
 
 			Runner.Run(cfg, args);
 		}

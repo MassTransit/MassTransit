@@ -7,7 +7,7 @@ namespace CodeCamp.Service
     using Microsoft.Practices.ServiceLocation;
 
     public class AuditServiceLifeCycle :
-        HostedLifeCycle
+        HostedLifecycle
     {
         private IServiceBus _bus;
 

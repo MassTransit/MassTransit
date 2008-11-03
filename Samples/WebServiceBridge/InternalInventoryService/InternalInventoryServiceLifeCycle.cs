@@ -6,7 +6,7 @@ namespace InternalInventoryService
     using Microsoft.Practices.ServiceLocation;
 
     public class InternalInventoryServiceLifeCycle :
-        HostedLifeCycle
+        HostedLifecycle
     {
         private IServiceBus _bus;
 
