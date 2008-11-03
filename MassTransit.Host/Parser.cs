@@ -18,9 +18,15 @@ namespace MassTransit.Host
 
     public class Parser
 	{
-		public static Args ParseArgs(string[] args)
+        private static bool _isDefault;
+
+        public static Args ParseArgs(string[] args)
 		{
-			if (args == null) args = new string[0];
+			if (args == null)
+                
+            {args = new string[0];
+                _isDefault = true;
+            }
 
 			Args result = new Args();
 			IArgumentMapFactory _argumentMapFactory = new ArgumentMapFactory();
@@ -76,8 +82,13 @@ namespace MassTransit.Host
 				set { _service = value; }
 			}
 
+		    public bool IsDefault
+		    {
+		        get { return _isDefault; }
+		    }
 
-            public NamedAction GetActionKey()
+
+		    public NamedAction GetActionKey()
             {
                 if (Install) return ServiceNamedAction.Install;
                 if (Uninstall) return ServiceNamedAction.Uninstall;

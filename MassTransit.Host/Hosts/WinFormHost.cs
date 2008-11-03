@@ -23,10 +23,10 @@ namespace MassTransit.Host.Hosts
     public class WinFormHost
 	{
 		private static readonly ILog _log = LogManager.GetLogger(typeof (ConsoleHost));
-		private readonly IApplicationLifeCycle _lifecycle;
+		private readonly IApplicationLifecycle _lifecycle;
         private readonly IServiceLocator _serviceLocator;
 
-        public WinFormHost(IApplicationLifeCycle lifecycle, IServiceLocator serviceLocator)
+        public WinFormHost(IApplicationLifecycle lifecycle, IServiceLocator serviceLocator)
 		{
 		    _lifecycle = lifecycle;
 		    _serviceLocator = serviceLocator;

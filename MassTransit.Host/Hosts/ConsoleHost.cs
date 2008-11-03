@@ -19,10 +19,10 @@ namespace MassTransit.Host.Hosts
     public class ConsoleHost
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof (ConsoleHost));
-        private readonly IApplicationLifeCycle _lifecycle;
+        private readonly IApplicationLifecycle _lifecycle;
 
 
-        public ConsoleHost(IApplicationLifeCycle lifecycle)
+        public ConsoleHost(IApplicationLifecycle lifecycle)
         {
             _lifecycle = lifecycle;
         }

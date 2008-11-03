@@ -99,7 +99,7 @@ namespace MassTransit.Host
         {
             foreach (ServiceController service in ServiceController.GetServices())
             {
-                if (service.ServiceName == configuration.ServiceName)
+                if (service.ServiceName == configuration.Settings.ServiceName)
                     return true;
             }
 

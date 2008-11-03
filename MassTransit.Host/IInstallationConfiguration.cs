@@ -19,13 +19,12 @@ namespace MassTransit.Host
 		Credentials Credentials { get; }
 
 		//life cycle
-		IApplicationLifeCycle LifeCycle { get; }
+		IApplicationLifecycle Lifecycle { get; }
 
 		//winservice stuff
-		string ServiceName { get; }
-		string DisplayName { get; }
-		string Description { get; }
-		string[] Dependencies { get; }
+        WinServiceSettings Settings { get; }
+
+
 		void ConfigureServiceInstaller(ServiceInstaller installer);
 		void ConfigureServiceProcessInstaller(ServiceProcessInstaller installer);
 	}

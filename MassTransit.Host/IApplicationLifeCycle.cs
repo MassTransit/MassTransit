@@ -18,18 +18,13 @@ namespace MassTransit.Host
     /// <summary>
     /// This interface represesnts an application's lifecycle
     /// </summary>
-	public interface IApplicationLifeCycle :
+	public interface IApplicationLifecycle :
 		IDisposable
 	{
 		/// <summary>
 		/// The default action to be used by the host (console or gui for the most part)
 		/// </summary>
 		NamedAction DefaultAction { get; }
-
-        /// <summary>
-        /// A method to setup your IoC container
-        /// </summary>
-        //void ContainerSetup();
 
         /// <summary>
         /// Called after ContainerSetup is used 'start' things before calling user code.
@@ -46,12 +41,7 @@ namespace MassTransit.Host
         /// </summary>
 		void Stop();
 
-        /// <summary>
-        /// System code that runs after Stop to cleanup system code
-        /// </summary>
-        //void Cleanup();
-
 		//To be fired after disose is complete
-		event Action<IApplicationLifeCycle> Completed;
+		event Action<IApplicationLifecycle> Completed;
 	}
 }

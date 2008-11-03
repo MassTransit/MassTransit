@@ -37,21 +37,28 @@ namespace MassTransit.Host
         /// <summary>
         /// Go go gadget
         /// </summary>
-        /// <param name="environment"></param>
+        /// <param name="configuration"></param>
         /// <param name="args"></param>
-		public static void Run(IInstallationConfiguration environment, params string[] args)
-		{
-			_log.Info("Starting Host");
-			_log.DebugFormat("Arguments: {0}", string.Join(",", args));
+        public static void Run(IInstallationConfiguration configuration, params string[] args)
+        {
+            _log.Info("Starting Host");
+            _log.DebugFormat("Arguments: {0}", string.Join(",", args));
 
-			NamedAction actionKey = Parser.ParseArgs(args).GetActionKey();
-            if(args.Length == 0)
-		        actionKey = environment.LifeCycle.DefaultAction ?? NamedAction.Console;
-            
+            NamedAction actionKey;
+            var arguments = Parser.ParseArgs(args);
 
-			_log.DebugFormat("Running action: {0}", actionKey);
+            if (arguments.IsDefault)
+            {
+                actionKey = configuration.Lifecycle.DefaultAction;
+            }
+            else
+            {
+                actionKey = arguments.GetActionKey();
+            }
 
-			_actions[actionKey].Do(environment, ServiceLocator.Current);
-		}
+            IAction action = _actions[actionKey];
+            _log.DebugFormat("Running action: {0}", action);
+            action.Do(configuration, ServiceLocator.Current);
+        }
 	}
 }

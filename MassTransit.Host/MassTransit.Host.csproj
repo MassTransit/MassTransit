@@ -85,14 +85,11 @@
     <Compile Include="ArgumentParsing\IArgumentMap.cs" />
     <Compile Include="ArgumentParsing\IArgumentMapFactory.cs" />
     <Compile Include="ArgumentParsing\IArgumentParser.cs" />
-    <Compile Include="Configurations\BaseWinServiceConfiguration.cs" />
-    <Compile Include="Configurations\DotNetConfiguration.cs" />
-    <Compile Include="Configurations\InteractiveConfiguration.cs" />
-    <Compile Include="Configurations\LocalSystemConfiguration.cs" />
+    <Compile Include="Configurations\WinServiceConfiguration.cs" />
     <Compile Include="Credentials.cs" />
     <Compile Include="Hosts\WinFormHost.cs" />
     <Compile Include="KnownServiceNames.cs" />
-    <Compile Include="LifeCycles\HostedLifeCycle.cs" />
+    <Compile Include="LifeCycles\HostedLifeccycle.cs" />
     <Compile Include="HostServiceInstaller.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -100,7 +97,6 @@
     <Compile Include="Actions\InstallServiceAction.cs" />
     <Compile Include="IInstallationConfiguration.cs" />
     <Compile Include="IApplicationLifeCycle.cs" />
-    <Compile Include="IHostingConfiguration.cs" />
     <Compile Include="Actions\NamedAction.cs" />
     <Compile Include="Parser.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -111,6 +107,7 @@
     </Compile>
     <Compile Include="Actions\UninstallServiceAction.cs" />
     <Compile Include="Actions\ServiceNamedAction.cs" />
+    <Compile Include="WinServiceSettings.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\MassTransit.ServiceBus\MassTransit.ServiceBus.csproj">

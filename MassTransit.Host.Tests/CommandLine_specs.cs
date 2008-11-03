@@ -34,8 +34,8 @@ namespace MassTransit.Host.Tests
 
             using (mocks.Record())
             {
-				Expect.Call(configuration.LifeCycle).Return(null);
-				Expect.Call(configuration.ServiceName).Return("MTUnitTest").Repeat.Any();
+				Expect.Call(configuration.Lifecycle).Return(null);
+				Expect.Call(configuration.Settings.ServiceName).Return("MTUnitTest").Repeat.Any();
 			}
             using (mocks.Playback())
             {
@@ -48,7 +48,7 @@ namespace MassTransit.Host.Tests
         {
             using (mocks.Record())
             {
-            	Expect.Call(configuration.ServiceName).Return("MTUnitTest").Repeat.Any();
+            	Expect.Call(configuration.Settings.ServiceName).Return("MTUnitTest").Repeat.Any();
             }
             using (mocks.Playback())
             {
