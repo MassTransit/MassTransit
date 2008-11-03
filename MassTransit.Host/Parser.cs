@@ -22,13 +22,12 @@ namespace MassTransit.Host
 
         public static Args ParseArgs(string[] args)
 		{
-			if (args == null)
-                
-            {args = new string[0];
+            if (args == null) args = new string[0];
+            if(args.Length == 0)
                 _isDefault = true;
-            }
+            
 
-			Args result = new Args();
+            Args result = new Args();
 			IArgumentMapFactory _argumentMapFactory = new ArgumentMapFactory();
 			IArgumentParser _argumentParser = new ArgumentParser();
 			IEnumerable<IArgument> arguments = _argumentParser.Parse(args);
