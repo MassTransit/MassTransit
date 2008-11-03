@@ -33,6 +33,11 @@ namespace MassTransit.ServiceBus.Tests
 		{
 		}
 
+        public T GenerateStub<T>() where T : class
+        {
+            return MockRepository.GenerateStub<T>();
+        }
+
 		protected T DynamicMock<T>() where T : class 
 		{
 			return _mocks.DynamicMock<T>();
