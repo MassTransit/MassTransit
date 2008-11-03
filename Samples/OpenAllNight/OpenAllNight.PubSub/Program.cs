@@ -38,9 +38,6 @@ namespace OpenAllNight.PubSub
 
             container.AddComponent<ISubscriptionRepository, InMemorySubscriptionRepository>();
 
-            var wob = new WindsorObjectBuilder(container.Kernel);
-            ServiceLocator.SetLocatorProvider(() => wob);
-
             var credentials = Credentials.LocalSystem;
             var settings = WinServiceSettings.Custom(
                 "MTPUBSUB",

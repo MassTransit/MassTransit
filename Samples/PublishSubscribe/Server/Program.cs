@@ -2,7 +2,6 @@ namespace Server
 {
     using log4net;
     using MassTransit.Host;
-    using MassTransit.Host.Configurations;
     using MassTransit.WindsorIntegration;
     using Microsoft.Practices.ServiceLocation;
 

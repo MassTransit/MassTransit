@@ -3,6 +3,7 @@ namespace OpenAllNight
 	using System;
 	using System.IO;
 	using System.Threading;
+	using Castle.Core;
 	using Castle.Windsor;
 	using log4net.Config;
 	using MassTransit.ServiceBus;
@@ -19,10 +20,10 @@ namespace OpenAllNight
 		private static void Main()
 		{
 			XmlConfigurator.ConfigureAndWatch(new FileInfo("log4net.xml"));
-			WindsorContainer c = new OpenAllNightContainer("castle.xml");
 
-		    var wob = new WindsorObjectBuilder(c.Kernel);
-            ServiceLocator.SetLocatorProvider(()=>wob);
+            WindsorContainer c = new DefaultMassTransitContainer("castle.xml");
+            c.AddComponentLifeStyle("counter", typeof(Counter), LifestyleType.Singleton);
+            c.AddComponentLifeStyle("rvaoeuaoe", typeof(CacheUpdateResponseHandler), LifestyleType.Transient);
 
 			IServiceBus bus = c.Resolve<IServiceBus>();
 			bus.AddComponent<CacheUpdateResponseHandler>();

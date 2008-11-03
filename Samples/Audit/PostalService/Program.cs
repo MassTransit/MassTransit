@@ -4,7 +4,6 @@
     using Host;
     using log4net.Config;
     using MassTransit.Host;
-    using MassTransit.Host.Configurations;
     using MassTransit.WindsorIntegration;
     using Microsoft.Practices.ServiceLocation;
 
@@ -17,10 +16,6 @@
 
             var container = new DefaultMassTransitContainer("postal-castle.xml");
             container.AddComponent<SendEmailConsumer>("sec");
-
-
-            var wob = new WindsorObjectBuilder(container.Kernel);
-            ServiceLocator.SetLocatorProvider(() => wob);
 
             var credentials = Credentials.LocalSystem;
             var settings = WinServiceSettings.Custom(

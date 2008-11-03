@@ -2,7 +2,6 @@ namespace Client
 {
 	using log4net;
 	using MassTransit.Host;
-	using MassTransit.Host.Configurations;
 	using MassTransit.WindsorIntegration;
 	using Microsoft.Practices.ServiceLocation;
 
@@ -15,10 +14,9 @@ namespace Client
 			_log.Info("Server Loading");
 
 		    var container = new DefaultMassTransitContainer("castle.xml");
+
             container.AddComponent<PasswordUpdater>();
             
-            var wob = new WindsorObjectBuilder(container.Kernel);
-            ServiceLocator.SetLocatorProvider(() => wob);
 
 		    var credentials = Credentials.LocalSystem;
 		    var settings = WinServiceSettings.Custom(

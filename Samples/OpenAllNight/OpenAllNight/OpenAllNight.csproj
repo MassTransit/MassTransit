@@ -76,7 +76,6 @@
   <ItemGroup>
     <Compile Include="CacheUpdateResponseHandler.cs" />
     <Compile Include="Counter.cs" />
-    <Compile Include="OpenAllNightContainer.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

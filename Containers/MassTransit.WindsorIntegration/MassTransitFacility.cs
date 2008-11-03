@@ -15,13 +15,16 @@ namespace MassTransit.WindsorIntegration
     using System;
     using System.Collections.Generic;
     using System.ComponentModel;
+    using Castle.Core;
     using Castle.Core.Configuration;
+    using Castle.Facilities.Startable;
     using Castle.MicroKernel;
     using Castle.MicroKernel.Facilities;
     using Castle.MicroKernel.Registration;
     using MassTransit.ServiceBus.Exceptions;
     using MassTransit.ServiceBus.Internal;
     using MassTransit.ServiceBus.Subscriptions;
+    using Microsoft.Practices.ServiceLocation;
     using ServiceBus;
     using ServiceBus.Services.HealthMonitoring;
     using Component = Castle.MicroKernel.Registration.Component;
@@ -34,12 +37,43 @@ namespace MassTransit.WindsorIntegration
     {
         protected override void Init()
         {
-            Kernel.AddComponentInstance("objectBuilder", typeof(IObjectBuilder), typeof(WindsorObjectBuilder), new WindsorObjectBuilder(Kernel));
+            //Kernel.Resolver.AddSubResolver(new ServiceLocatorResolver());
+            //SetupAutoRegister();
 
             LoadTransports();
             RegisterComponents();
 
             LoadServiceBuses();
+
+            //AddStartableFacility();
+        }
+
+        public void AddStartableFacility()
+        {
+            foreach (IFacility facility in Kernel.GetFacilities())
+            {
+                if (facility.GetType().Equals(typeof (StartableFacility)))
+                {
+                    return;
+                }
+            }
+        }
+        private void SetupAutoRegister()
+        {
+            if (Convert.ToBoolean(FacilityConfig.Attributes["auto-register"]))
+            {
+                Kernel.ComponentRegistered += OnComponentRegistered;
+            }
+        }
+        private void OnComponentRegistered(string key, IHandler handler)
+        {
+            //TODO: Could throw
+            var bus = this.Kernel.Resolve<IServiceBus>();
+            Type consumerType = typeof (IConsumer);
+            if(consumerType.IsAssignableFrom(handler.ComponentModel.Implementation))
+            {
+                bus.AddComponent(handler.ComponentModel.Implementation);
+            }
         }
 
         private void LoadTransports()
@@ -254,5 +288,21 @@ namespace MassTransit.WindsorIntegration
             return newValue;
         }
 
+    }
+
+    internal class ServiceLocatorResolver 
+        : ISubDependencyResolver
+    {
+        private static Type serviceLocatorType = typeof (IServiceLocator);
+
+        public object Resolve(CreationContext context, ISubDependencyResolver parentResolver, ComponentModel model, DependencyModel dependency)
+        {
+            return ServiceLocator.Current;
+        }
+
+        public bool CanResolve(CreationContext context, ISubDependencyResolver parentResolver, ComponentModel model, DependencyModel dependency)
+        {
+            return serviceLocatorType.IsAssignableFrom(model.Service);
+        }
     }
 }
