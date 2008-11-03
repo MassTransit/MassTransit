@@ -1,11 +1,12 @@
 namespace MassTransit.Host.Tests
 {
-    using Configurations;
     using NUnit.Framework;
     using Rhino.Mocks;
+    using ServiceBus.Tests;
 
     [TestFixture]
-    public class CommandLine_specs
+    public class CommandLine_specs :
+        Specification
     {
         MockRepository mocks;
         readonly string[] installArgs = new[] { "-install" };
@@ -31,29 +32,15 @@ namespace MassTransit.Host.Tests
         [Test]
         public void When_it_gets_install_should_install()
         {
-
-            using (mocks.Record())
-            {
-				Expect.Call(configuration.Lifecycle).Return(null);
-				Expect.Call(configuration.Settings.ServiceName).Return("MTUnitTest").Repeat.Any();
-			}
-            using (mocks.Playback())
-            {
-                Runner.Run(configuration, installArgs);
-            }
+            var mocklife = GenerateStub<IApplicationLifecycle>();
+            Runner.Run(Credentials.LocalSystem, WinServiceSettings.Custom("TEST", "TEST","TEST"), mocklife, installArgs);
         }
 
         [Test]
         public void When_it_gets_uninstall_should_uninstall()
         {
-            using (mocks.Record())
-            {
-            	Expect.Call(configuration.Settings.ServiceName).Return("MTUnitTest").Repeat.Any();
-            }
-            using (mocks.Playback())
-            {
-                Runner.Run(configuration, uninstallArgs);
-            }
+            var mocklife = GenerateStub<IApplicationLifecycle>();
+            Runner.Run(Credentials.LocalSystem, WinServiceSettings.Custom("TEST", "TEST", "TEST"), mocklife, uninstallArgs);
         }
 
         [Test]
