@@ -14,8 +14,11 @@ namespace Client
 		{
 			_log.Info("Server Loading");
 
-		    var Container = new DefaultMassTransitContainer("castle.xml");
-            Container.AddComponent<PasswordUpdater>();
+		    var container = new DefaultMassTransitContainer("castle.xml");
+            container.AddComponent<PasswordUpdater>();
+            
+            var wob = new WindsorObjectBuilder(container.Kernel);
+            ServiceLocator.SetLocatorProvider(() => wob);
 
 		    IInstallationConfiguration cfg = new WinServiceConfiguration(
 		        Credentials.LocalSystem,
