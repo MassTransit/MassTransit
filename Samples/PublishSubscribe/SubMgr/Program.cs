@@ -35,15 +35,15 @@ namespace SubMgr
             var wob = new WindsorObjectBuilder(container.Kernel);
             ServiceLocator.SetLocatorProvider(()=>wob);
 
-            IInstallationConfiguration cfg = new WinServiceConfiguration(
-                Credentials.LocalSystem,
-                WinServiceSettings.Custom(
-                    "SampleSubscriptionService",
-                    "MassTransit Sample Subscription Service",
-                    "Coordinates subscriptions between multiple systems", KnownServiceNames.Msmq),
-                new SubscriptionManagerLifeCycle(ServiceLocator.Current));
+            var credentials = Credentials.LocalSystem;
+            var settings = WinServiceSettings.Custom(
+                "SampleSubscriptionService",
+                "MassTransit Sample Subscription Service",
+                "Coordinates subscriptions between multiple systems",
+                KnownServiceNames.Msmq);
+            var lifecycle = new SubscriptionManagerLifeCycle(ServiceLocator.Current);
 
-            Runner.Run(cfg, args);
+            Runner.Run(credentials, settings, lifecycle, args);
         }
     }
 }

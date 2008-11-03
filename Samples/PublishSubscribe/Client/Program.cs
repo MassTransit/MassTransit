@@ -20,16 +20,16 @@ namespace Client
             var wob = new WindsorObjectBuilder(container.Kernel);
             ServiceLocator.SetLocatorProvider(() => wob);
 
-		    IInstallationConfiguration cfg = new WinServiceConfiguration(
-		        Credentials.LocalSystem,
-		        WinServiceSettings.Custom(
-                    "SampleClientService",
-                    "SampleClientService",
-                    "SampleClientService",
-		            KnownServiceNames.Msmq),
-		        new ClientLifeCycle(ServiceLocator.Current));
+		    var credentials = Credentials.LocalSystem;
+		    var settings = WinServiceSettings.Custom(
+		        "SampleClientService",
+		        "SampleClientService",
+		        "SampleClientService",
+		        KnownServiceNames.Msmq);
+		    var lifecycle = new ClientLifeCycle(ServiceLocator.Current);
 
-			Runner.Run(cfg, args);
+		    
+			Runner.Run(credentials, settings, lifecycle, args);
 		}
 	}
 }
