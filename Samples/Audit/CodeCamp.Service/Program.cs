@@ -5,6 +5,7 @@ namespace CodeCamp.Service
     using Magnum.Common.Repository;
     using Magnum.Infrastructure.Repository;
     using MassTransit.Host;
+    using MassTransit.Host.Configurations;
     using MassTransit.Saga;
     using MassTransit.WindsorIntegration;
     using Microsoft.Practices.ServiceLocation;
@@ -27,7 +28,13 @@ namespace CodeCamp.Service
 
             var wob = new WindsorObjectBuilder(container.Kernel);
             ServiceLocator.SetLocatorProvider(() => wob);
-            var cfg = new AuditServiceConfiguration(ServiceLocator.Current);
+            var cfg = new WinServiceConfiguration(
+                Credentials.LocalSystem,
+                WinServiceSettings.Custom(
+                    "Audit",
+                    "Audit",
+                    "Audit"),
+                new AuditServiceLifeCycle(ServiceLocator.Current));
             Runner.Run(cfg, args);
         }
     }

@@ -3,6 +3,8 @@ namespace Client
 	using log4net;
 	using MassTransit.Host;
 	using MassTransit.Host.Configurations;
+	using MassTransit.WindsorIntegration;
+	using Microsoft.Practices.ServiceLocation;
 
     internal class Program
 	{
@@ -12,7 +14,17 @@ namespace Client
 		{
 			_log.Info("Server Loading");
 
-			IInstallationConfiguration cfg = new ClientEnvironment("castle.xml");
+		    var Container = new DefaultMassTransitContainer("castle.xml");
+            Container.AddComponent<PasswordUpdater>();
+
+		    IInstallationConfiguration cfg = new WinServiceConfiguration(
+		        Credentials.LocalSystem,
+		        WinServiceSettings.Custom(
+                    "SampleClientService",
+                    "SampleClientService",
+                    "SampleClientService",
+		            KnownServiceNames.Msmq),
+		        new ClientLifeCycle(ServiceLocator.Current));
 
 			Runner.Run(cfg, args);
 		}

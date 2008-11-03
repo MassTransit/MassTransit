@@ -3,22 +3,21 @@ namespace Client
     using System;
     using MassTransit.Host.LifeCycles;
     using MassTransit.ServiceBus;
+    using Microsoft.Practices.ServiceLocation;
     using SecurityMessages;
 
     public class ClientLifeCycle :
-        HostedLifeCycle
+        HostedLifecycle
     {
         private IServiceBus _bus;
 
-        public ClientLifeCycle(string xmlFile) : base(xmlFile)
+        public ClientLifeCycle(IServiceLocator serviceLocator) : base(serviceLocator)
         {
         }
 
         public override void Start()
         {
-            Container.AddComponent<PasswordUpdater>();
-
-            _bus = Container.Resolve<IServiceBus>();
+            _bus = base.ServiceLocator.GetInstance<IServiceBus>();
 
             _bus.AddComponent<PasswordUpdater>();
 

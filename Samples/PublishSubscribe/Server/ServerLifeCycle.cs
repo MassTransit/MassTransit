@@ -1,11 +1,12 @@
 namespace Server
 {
     using MassTransit.Host.LifeCycles;
+    using Microsoft.Practices.ServiceLocation;
 
     public class ServerLifeCycle :
-        HostedLifeCycle
+        HostedLifecycle
     {
-        public ServerLifeCycle(string xmlFile) : base(xmlFile)
+        public ServerLifeCycle(IServiceLocator serviceLocator) : base(serviceLocator)
         {
         }
 

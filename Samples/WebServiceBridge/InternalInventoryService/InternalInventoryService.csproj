@@ -56,7 +56,6 @@
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="InternalInventoryServiceEnvironment.cs" />
     <Compile Include="InternalInventoryServiceLifeCycle.cs" />
     <Compile Include="InventoryLevelService.cs" />
     <Compile Include="Program.cs" />
