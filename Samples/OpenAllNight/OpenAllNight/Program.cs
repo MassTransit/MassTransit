@@ -8,8 +8,10 @@ namespace OpenAllNight
 	using MassTransit.ServiceBus;
 	using MassTransit.ServiceBus.Internal;
 	using MassTransit.ServiceBus.Subscriptions.Messages;
+	using MassTransit.WindsorIntegration;
+	using Microsoft.Practices.ServiceLocation;
 
-	internal class Program
+    internal class Program
 	{
 		private static readonly DateTime _startedAt = DateTime.Now;
 		private static DateTime lastPrint = DateTime.Now;
@@ -18,6 +20,9 @@ namespace OpenAllNight
 		{
 			XmlConfigurator.ConfigureAndWatch(new FileInfo("log4net.xml"));
 			WindsorContainer c = new OpenAllNightContainer("castle.xml");
+
+		    var wob = new WindsorObjectBuilder(c.Kernel);
+            ServiceLocator.SetLocatorProvider(()=>wob);
 
 			IServiceBus bus = c.Resolve<IServiceBus>();
 			bus.AddComponent<CacheUpdateResponseHandler>();
