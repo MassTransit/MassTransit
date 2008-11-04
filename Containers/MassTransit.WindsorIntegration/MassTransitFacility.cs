@@ -72,7 +72,7 @@ namespace MassTransit.WindsorIntegration
             Type consumerType = typeof (IConsumer);
             if(consumerType.IsAssignableFrom(handler.ComponentModel.Implementation))
             {
-                bus.AddComponent(handler.ComponentModel.Implementation);
+                bus.Subscribe(handler.ComponentModel.Implementation);
             }
         }
 

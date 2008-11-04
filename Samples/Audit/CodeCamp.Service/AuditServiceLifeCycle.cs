@@ -19,8 +19,8 @@ namespace CodeCamp.Service
         {
             _bus = ServiceLocator.GetInstance<IServiceBus>("server");
 
-            _bus.AddComponent<Responder>();
-            _bus.AddComponent<RegisterUserSaga>();
+            _bus.Subscribe<Responder>();
+            _bus.Subscribe<RegisterUserSaga>();
 
             Console.WriteLine("Service running...");
         }

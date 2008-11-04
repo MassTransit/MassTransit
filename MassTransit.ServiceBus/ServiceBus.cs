@@ -197,10 +197,10 @@ namespace MassTransit.ServiceBus
 			Subscribe(new GenericComponent<T>(callback, condition, this));
 		}
 
-		public void Subscribe<T>(T component) where T : class
+		public void Subscribe<T>(T consumer) where T : class
 		{
 			ISubscriptionTypeInfo info = _typeInfoCache.GetSubscriptionTypeInfo<T>();
-			info.Subscribe(_dispatcherContext, component);
+			info.Subscribe(_dispatcherContext, consumer);
 		}
 
 		public void Unsubscribe<T>(Action<T> callback) where T : class
@@ -213,25 +213,31 @@ namespace MassTransit.ServiceBus
 			Unsubscribe(new GenericComponent<T>(callback, condition, this));
 		}
 
-		public void Unsubscribe<T>(T component) where T : class
+		public void Unsubscribe<T>(T consumer) where T : class
 		{
 			ISubscriptionTypeInfo info = _typeInfoCache.GetSubscriptionTypeInfo<T>();
-			info.Unsubscribe(_dispatcherContext, component);
+			info.Unsubscribe(_dispatcherContext, consumer);
 		}
 
-		public void AddComponent<TComponent>() where TComponent : class
+		public void Subscribe<TComponent>() where TComponent : class
 		{
 			ISubscriptionTypeInfo info = _typeInfoCache.GetSubscriptionTypeInfo<TComponent>();
 			info.AddComponent(_dispatcherContext);
 		}
 
-        public void AddComponent(Type componentType)
+        public void Subscribe(Type consumerType)
         {
-            ISubscriptionTypeInfo info = _typeInfoCache.GetSubscriptionTypeInfo(componentType);
+            ISubscriptionTypeInfo info = _typeInfoCache.GetSubscriptionTypeInfo(consumerType);
             info.AddComponent(_dispatcherContext);
         }
 
-		public void RemoveComponent<TComponent>() where TComponent : class
+	    public void Unsubscribe(Type consumerType)
+	    {
+            ISubscriptionTypeInfo info = _typeInfoCache.GetSubscriptionTypeInfo(consumerType);
+            info.RemoveComponent(_dispatcherContext);
+	    }
+
+	    public void Unsubscribe<TComponent>() where TComponent : class
 		{
 			ISubscriptionTypeInfo info = _typeInfoCache.GetSubscriptionTypeInfo<TComponent>();
 			info.RemoveComponent(_dispatcherContext);

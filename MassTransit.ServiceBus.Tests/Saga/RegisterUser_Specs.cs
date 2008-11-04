@@ -27,7 +27,7 @@ namespace MassTransit.ServiceBus.Tests.Saga.RegisterUser
             RemoteBus.Subscribe<SendUserVerificationEmail>(
                 x => RemoteBus.Publish(new UserVerificationEmailSent(x.CorrelationId, x.Email)));
 
-            RemoteBus.AddComponent<RegisterUserSaga>();
+            RemoteBus.Subscribe<RegisterUserSaga>();
         }
 
         [Test]

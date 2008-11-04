@@ -26,7 +26,7 @@ namespace OpenAllNight
             c.AddComponentLifeStyle("rvaoeuaoe", typeof(CacheUpdateResponseHandler), LifestyleType.Transient);
 
 			IServiceBus bus = c.Resolve<IServiceBus>();
-			bus.AddComponent<CacheUpdateResponseHandler>();
+			bus.Subscribe<CacheUpdateResponseHandler>();
 
 			SimpleMessageHandler handler = new SimpleMessageHandler();
 

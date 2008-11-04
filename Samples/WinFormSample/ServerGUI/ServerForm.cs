@@ -53,8 +53,8 @@ namespace ServerGUI
 			    _container.AddComponent<UserAgentSession>();
 			    _container.AddComponent<TheAnswerMan>();
 
-				_bus.AddComponent<UserAgentSession>();
-				_bus.AddComponent<TheAnswerMan>();
+				_bus.Subscribe<UserAgentSession>();
+				_bus.Subscribe<TheAnswerMan>();
 
 				messageTimer.Start();
 			}

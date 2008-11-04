@@ -28,7 +28,7 @@ namespace MassTransit.ServiceBus.Tests
 		{
 			// Arrange
 			Container.AddComponent<TestReplyService<PingMessage, Guid, PongMessage>>();
-			RemoteBus.AddComponent<TestReplyService<PingMessage, Guid, PongMessage>>();
+			RemoteBus.Subscribe<TestReplyService<PingMessage, Guid, PongMessage>>();
 
 			PingMessage message = new PingMessage();
 

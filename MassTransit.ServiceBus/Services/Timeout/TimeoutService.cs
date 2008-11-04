@@ -57,8 +57,8 @@ namespace MassTransit.ServiceBus.Services.Timeout
             if (_log.IsInfoEnabled)
                 _log.Info("Timeout Service Starting");
 
-            _bus.AddComponent<ScheduleTimeoutConsumer>();
-            _bus.AddComponent<CancelTimeoutConsumer>();
+            _bus.Subscribe<ScheduleTimeoutConsumer>();
+            _bus.Subscribe<CancelTimeoutConsumer>();
 
             _repository.TimeoutAdded += TriggerPublisher;
 
@@ -80,8 +80,8 @@ namespace MassTransit.ServiceBus.Services.Timeout
             if (_log.IsInfoEnabled)
                 _log.Info("Timeout Service Stopping");
 
-            _bus.RemoveComponent<ScheduleTimeoutConsumer>();
-            _bus.RemoveComponent<CancelTimeoutConsumer>();
+            _bus.Unsubscribe<ScheduleTimeoutConsumer>();
+            _bus.Unsubscribe<CancelTimeoutConsumer>();
 
             if (_log.IsInfoEnabled)
                 _log.Info("Timeout Service Stopped");

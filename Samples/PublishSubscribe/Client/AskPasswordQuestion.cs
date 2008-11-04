@@ -30,7 +30,7 @@ namespace Client
 
     	public void Start()
         {
-    		_bus.AddComponent<PasswordUpdater>();
+    		_bus.Subscribe<PasswordUpdater>();
 
             Console.WriteLine(new string('-', 20));
             Console.WriteLine("New Password Client");

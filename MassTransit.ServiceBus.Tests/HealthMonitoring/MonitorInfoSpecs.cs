@@ -33,7 +33,7 @@ namespace MassTransit.ServiceBus.Tests.HealthMonitoring
             IEndpoint _mockServiceBusEndPoint = _endpointResolver.Resolve(new Uri("loopback://localhost/test"));
 
             ServiceBus bus = new ServiceBus(_mockServiceBusEndPoint, DynamicMock<IObjectBuilder>());
-            bus.AddComponent<HeartbeatMonitor>();
+            bus.Subscribe<HeartbeatMonitor>();
             bus.Dispatch(new Heartbeat(3, new Uri("msmq://localhost/ddd")));
         }
     }

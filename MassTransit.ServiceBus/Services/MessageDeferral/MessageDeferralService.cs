@@ -34,8 +34,8 @@ namespace MassTransit.ServiceBus.Services.MessageDeferral
             if (_log.IsInfoEnabled)
                 _log.Info("MessageDeferralService Starting");
 
-            _bus.AddComponent<DeferMessageConsumer>();
-            _bus.AddComponent<TimeoutExpiredConsumer>();
+            _bus.Subscribe<DeferMessageConsumer>();
+            _bus.Subscribe<TimeoutExpiredConsumer>();
 
             if (_log.IsInfoEnabled)
                 _log.Info("MessageDeferralService Started");
@@ -46,8 +46,8 @@ namespace MassTransit.ServiceBus.Services.MessageDeferral
             if (_log.IsInfoEnabled)
                 _log.Info("MessageDeferralService Stopping");
 
-            _bus.RemoveComponent<TimeoutExpiredConsumer>();
-            _bus.RemoveComponent<DeferMessageConsumer>();
+            _bus.Unsubscribe<TimeoutExpiredConsumer>();
+            _bus.Unsubscribe<DeferMessageConsumer>();
 
             if (_log.IsInfoEnabled)
                 _log.Info("MessageDeferralService Stopped");

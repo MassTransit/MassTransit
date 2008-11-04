@@ -39,8 +39,8 @@ namespace HeavyLoad.Load
 		    _container.AddComponent<RequestConsumer>();
 		    _container.AddComponent<ResponseConsumer>();
 
-			_remoteBus.AddComponent<RequestConsumer>();
-			_localBus.AddComponent<ResponseConsumer>();
+			_remoteBus.Subscribe<RequestConsumer>();
+			_localBus.Subscribe<ResponseConsumer>();
 
 			stopWatch.Start();
 

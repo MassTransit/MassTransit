@@ -52,10 +52,10 @@ namespace MassTransit.ServiceBus.Subscriptions
 
 		public void Start()
 		{
-			_bus.AddComponent<AddSubscriptionHandler>();
-			_bus.AddComponent<RemoveSubscriptionHandler>();
-			_bus.AddComponent<CancelUpdatesHandler>();
-			_bus.AddComponent<CacheUpdateRequestHandler>();
+			_bus.Subscribe<AddSubscriptionHandler>();
+			_bus.Subscribe<RemoveSubscriptionHandler>();
+			_bus.Subscribe<CancelUpdatesHandler>();
+			_bus.Subscribe<CacheUpdateRequestHandler>();
 
 			if (_log.IsInfoEnabled)
 				_log.Info("Subscription Service Starting");
@@ -74,10 +74,10 @@ namespace MassTransit.ServiceBus.Subscriptions
 			if (_log.IsInfoEnabled)
 				_log.Info("Subscription Service Stopping");
 
-			_bus.RemoveComponent<AddSubscriptionHandler>();
-			_bus.RemoveComponent<RemoveSubscriptionHandler>();
-			_bus.RemoveComponent<CancelUpdatesHandler>();
-			_bus.RemoveComponent<CacheUpdateRequestHandler>();
+			_bus.Unsubscribe<AddSubscriptionHandler>();
+			_bus.Unsubscribe<RemoveSubscriptionHandler>();
+			_bus.Unsubscribe<CancelUpdatesHandler>();
+			_bus.Unsubscribe<CacheUpdateRequestHandler>();
 
 			if (_log.IsInfoEnabled)
 				_log.Info("Subscription Service Stopped");
