@@ -60,14 +60,14 @@ namespace HeavyLoad.Load
 			stopWatch.Stop();
 		}
 
-		private void Handler(IMessageContext<SimpleResponse> obj)
+		private void Handler(SimpleResponse obj)
 		{
 			Interlocked.Increment(ref _responseCounter);
 			if (_responseCounter == _repeatCount)
 				_responseEvent.Set();
 		}
 
-		private void Handle(IMessageContext<GeneralMessage> obj)
+		private void Handle(GeneralMessage obj)
 		{
 			_bus.Publish(new SimpleResponse());
 

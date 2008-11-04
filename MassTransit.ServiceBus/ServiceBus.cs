@@ -181,7 +181,7 @@ namespace MassTransit.ServiceBus
 		/// </summary>
 		/// <typeparam name="T">The message type to handle, often inferred from the callback specified</typeparam>
 		/// <param name="callback">The callback to invoke when messages of the specified type arrive on the service bus</param>
-		public void Subscribe<T>(Action<IMessageContext<T>> callback) where T : class
+		public void Subscribe<T>(Action<T> callback) where T : class
 		{
 			Subscribe(callback, null);
 		}
@@ -192,7 +192,7 @@ namespace MassTransit.ServiceBus
 		/// <typeparam name="T">The message type to handle, often inferred from the callback specified</typeparam>
 		/// <param name="callback">The callback to invoke when messages of the specified type arrive on the service bus</param>
 		/// <param name="condition">A condition predicate to filter which messages are handled by the callback</param>
-		public void Subscribe<T>(Action<IMessageContext<T>> callback, Predicate<T> condition) where T : class
+		public void Subscribe<T>(Action<T> callback, Predicate<T> condition) where T : class
 		{
 			Subscribe(new GenericComponent<T>(callback, condition, this));
 		}
@@ -203,12 +203,12 @@ namespace MassTransit.ServiceBus
 			info.Subscribe(_dispatcherContext, component);
 		}
 
-		public void Unsubscribe<T>(Action<IMessageContext<T>> callback) where T : class
+		public void Unsubscribe<T>(Action<T> callback) where T : class
 		{
 			Unsubscribe(callback, null);
 		}
 
-		public void Unsubscribe<T>(Action<IMessageContext<T>> callback, Predicate<T> condition) where T : class
+		public void Unsubscribe<T>(Action<T> callback, Predicate<T> condition) where T : class
 		{
 			Unsubscribe(new GenericComponent<T>(callback, condition, this));
 		}
@@ -224,6 +224,12 @@ namespace MassTransit.ServiceBus
 			ISubscriptionTypeInfo info = _typeInfoCache.GetSubscriptionTypeInfo<TComponent>();
 			info.AddComponent(_dispatcherContext);
 		}
+
+        public void AddComponent(Type componentType)
+        {
+            ISubscriptionTypeInfo info = _typeInfoCache.GetSubscriptionTypeInfo(componentType);
+            info.AddComponent(_dispatcherContext);
+        }
 
 		public void RemoveComponent<TComponent>() where TComponent : class
 		{

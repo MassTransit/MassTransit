@@ -33,7 +33,7 @@ namespace MassTransit.Host.Tests
 
 		#endregion
 
-		private void HandleMySimpleMessage(IMessageContext<MySimpleMessage> ctx)
+		private void HandleMySimpleMessage(MySimpleMessage message)
 		{
 			_hitCount++;
 		}

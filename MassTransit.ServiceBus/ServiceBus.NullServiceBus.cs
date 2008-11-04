@@ -20,11 +20,11 @@ namespace MassTransit.ServiceBus
                 get { return null; }
             }
 
-            public void Subscribe<T>(Action<IMessageContext<T>> callback) where T : class
+            public void Subscribe<T>(Action<T> callback) where T : class
             {
             }
 
-            public void Subscribe<T>(Action<IMessageContext<T>> callback, Predicate<T> condition) where T : class
+            public void Subscribe<T>(Action<T> callback, Predicate<T> condition) where T : class
             {
             }
 
@@ -32,11 +32,11 @@ namespace MassTransit.ServiceBus
             {
             }
 
-            public void Unsubscribe<T>(Action<IMessageContext<T>> callback) where T : class
+            public void Unsubscribe<T>(Action<T> callback) where T : class
             {
             }
 
-            public void Unsubscribe<T>(Action<IMessageContext<T>> callback, Predicate<T> condition) where T : class
+            public void Unsubscribe<T>(Action<T> callback, Predicate<T> condition) where T : class
             {
             }
 
@@ -45,6 +45,10 @@ namespace MassTransit.ServiceBus
             }
 
             public void AddComponent<TComponent>() where TComponent : class
+            {
+            }
+
+            public void AddComponent(Type componentType)
             {
             }
 
