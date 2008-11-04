@@ -23,9 +23,9 @@ namespace MassTransit.ServiceBus.Tests.TestConsumers
             _allReceived.Release();
         }
 
-        public void MessageHandler(IMessageContext<TMessage> handler)
+        public void MessageHandler(TMessage message)
         {
-            _messages.Add(handler.Message);
+            _messages.Add(message);
             _received.Release();
         }
 

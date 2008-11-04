@@ -50,7 +50,7 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
         private EndpointResolver _endpointResolver;
 
 
-        private static void HandleAllMessages(IMessageContext<PingMessage> ctx)
+        private static void HandleAllMessages(PingMessage ctx)
         {
         }
 

@@ -22,9 +22,9 @@ namespace WebRequestReply.UI.MonoRail
             container.Dispose();
         }
 
-        private static void HandleRequestMessage(IMessageContext<RequestMessage> ctx)
+        private static void HandleRequestMessage(RequestMessage message)
         {
-            ResponseMessage response = new ResponseMessage(ctx.Message.CorrelationId, "Request: " + ctx.Message.Text);
+            ResponseMessage response = new ResponseMessage(message.CorrelationId, "Request: " + message.Text);
 
             container.Resolve<IServiceBus>().Publish(response);
         }

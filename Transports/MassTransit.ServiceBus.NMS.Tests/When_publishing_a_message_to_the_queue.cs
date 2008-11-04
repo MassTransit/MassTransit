@@ -27,9 +27,9 @@ namespace MassTransit.ServiceBus.NMS.Tests
 				string name = "Johnson";
 				ManualResetEvent received = new ManualResetEvent(false);
 
-				bus.Subscribe<SimpleMessage>(delegate(IMessageContext<SimpleMessage> context)
+				bus.Subscribe<SimpleMessage>(delegate(SimpleMessage message)
 				                             	{
-				                             		Assert.That(context.Message.Name, Is.EqualTo(name));
+				                             		Assert.That(message.Name, Is.EqualTo(name));
 				                             		received.Set();
 				                             	});
 

@@ -18,17 +18,17 @@ namespace MassTransit.ServiceBus.Internal
 		Consumes<TMessage>.Selected, IEquatable<GenericComponent<TMessage>> where TMessage : class
 	{
 		private readonly IServiceBus _bus;
-		private readonly Action<IMessageContext<TMessage>> _wrappedAction;
+		private readonly Action<TMessage> _wrappedAction;
 		private readonly Predicate<TMessage> _wrappedCondition;
 
-		public GenericComponent(Action<IMessageContext<TMessage>> wrappedAction, IServiceBus bus)
+		public GenericComponent(Action<TMessage> wrappedAction, IServiceBus bus)
 		{
 			_wrappedAction = wrappedAction;
 			_wrappedCondition = null;
 			_bus = bus;
 		}
 
-		public GenericComponent(Action<IMessageContext<TMessage>> wrappedAction, Predicate<TMessage> condition, IServiceBus bus)
+		public GenericComponent(Action<TMessage> wrappedAction, Predicate<TMessage> condition, IServiceBus bus)
 		{
 			_wrappedAction = wrappedAction;
 			_wrappedCondition = condition;
@@ -37,8 +37,7 @@ namespace MassTransit.ServiceBus.Internal
 
 		public void Consume(TMessage message)
 		{
-			IMessageContext<TMessage> cxt = new MessageContext<TMessage>(_bus, message);
-			_wrappedAction(cxt);
+			_wrappedAction(message);
 		}
 
 		public bool Accept(TMessage message)
