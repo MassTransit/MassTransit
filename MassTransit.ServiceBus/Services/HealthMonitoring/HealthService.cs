@@ -25,16 +25,16 @@ namespace MassTransit.ServiceBus.Services.HealthMonitoring
 
         public void Start()
         {
-            _bus.AddComponent<HeartbeatMonitor>();
-            _bus.AddComponent<Investigator>();
-            _bus.AddComponent<Reporter>();
+            _bus.Subscribe<HeartbeatMonitor>();
+            _bus.Subscribe<Investigator>();
+            _bus.Subscribe<Reporter>();
         }
 
         public void Stop()
         {
-            _bus.RemoveComponent<Reporter>();
-            _bus.RemoveComponent<Investigator>();
-            _bus.RemoveComponent<HeartbeatMonitor>();
+            _bus.Unsubscribe<Reporter>();
+            _bus.Unsubscribe<Investigator>();
+            _bus.Unsubscribe<HeartbeatMonitor>();
         }
 
         public void Dispose()

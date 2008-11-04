@@ -19,7 +19,7 @@ namespace Client
         {
             _bus = base.ServiceLocator.GetInstance<IServiceBus>();
 
-            _bus.AddComponent<PasswordUpdater>();
+            _bus.Subscribe<PasswordUpdater>();
 
             Console.WriteLine(new string('-', 20));
             Console.WriteLine("New Password Client");

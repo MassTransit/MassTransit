@@ -52,7 +52,7 @@ namespace MassTransit.ServiceBus.Tests.Grid
         [Test]
         public void I_want_to_be_able_to_define_a_distributed_task_and_have_it_processed()
         {
-            RemoteBus.AddComponent<SubTaskWorker<ExceptionalWorker, FactorLongNumber, LongNumberFactored>>();
+            RemoteBus.Subscribe<SubTaskWorker<ExceptionalWorker, FactorLongNumber, LongNumberFactored>>();
 
             var distributedTaskController =
                 new DistributedTaskController<FactorLongNumbersTask, FactorLongNumber, LongNumberFactored>(RemoteBus, Container.Resolve<IEndpointResolver>(), _factorLongNumbers);

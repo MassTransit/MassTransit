@@ -51,10 +51,10 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
 			using (Record())
 			{
                 Expect.Call(mockRepository.List()).Return(enumer);
-                Expect.Call(delegate { mockBus.AddComponent<AddSubscriptionHandler>(); });
-                Expect.Call(delegate { mockBus.AddComponent<RemoveSubscriptionHandler>(); });
-                Expect.Call(delegate { mockBus.AddComponent<CacheUpdateRequestHandler>(); });
-                Expect.Call(delegate { mockBus.AddComponent<CancelUpdatesHandler>(); });
+                Expect.Call(delegate { mockBus.Subscribe<AddSubscriptionHandler>(); });
+                Expect.Call(delegate { mockBus.Subscribe<RemoveSubscriptionHandler>(); });
+                Expect.Call(delegate { mockBus.Subscribe<CacheUpdateRequestHandler>(); });
+                Expect.Call(delegate { mockBus.Subscribe<CancelUpdatesHandler>(); });
 			}
 			using (Playback())
 			{
@@ -76,10 +76,10 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
                 Expect.Call(mockRepository.List()).Return(enumer);
                 Expect.Call(delegate { mockCache.Add(null); }).IgnoreArguments();
 
-                Expect.Call(delegate { mockBus.AddComponent<AddSubscriptionHandler>(); });
-                Expect.Call(delegate { mockBus.AddComponent<RemoveSubscriptionHandler>(); });
-                Expect.Call(delegate { mockBus.AddComponent<CacheUpdateRequestHandler>(); });
-                Expect.Call(delegate { mockBus.AddComponent<CancelUpdatesHandler>(); });
+                Expect.Call(delegate { mockBus.Subscribe<AddSubscriptionHandler>(); });
+                Expect.Call(delegate { mockBus.Subscribe<RemoveSubscriptionHandler>(); });
+                Expect.Call(delegate { mockBus.Subscribe<CacheUpdateRequestHandler>(); });
+                Expect.Call(delegate { mockBus.Subscribe<CancelUpdatesHandler>(); });
             }
             using (Playback())
             {
@@ -92,10 +92,10 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
 		{
 			using (Record())
 			{
-				Expect.Call(delegate { mockBus.RemoveComponent<AddSubscriptionHandler>(); });
-				Expect.Call(delegate { mockBus.RemoveComponent<RemoveSubscriptionHandler>(); });
-				Expect.Call(delegate { mockBus.RemoveComponent<CacheUpdateRequestHandler>(); });
-				Expect.Call(delegate { mockBus.RemoveComponent<CancelUpdatesHandler>(); });
+				Expect.Call(delegate { mockBus.Unsubscribe<AddSubscriptionHandler>(); });
+				Expect.Call(delegate { mockBus.Unsubscribe<RemoveSubscriptionHandler>(); });
+				Expect.Call(delegate { mockBus.Unsubscribe<CacheUpdateRequestHandler>(); });
+				Expect.Call(delegate { mockBus.Unsubscribe<CancelUpdatesHandler>(); });
 			}
 			using (Playback())
 			{

@@ -28,7 +28,15 @@ namespace MassTransit.ServiceBus
             {
             }
 
-            public void Subscribe<T>(T component) where T : class
+            public void Subscribe<T>(T consumer) where T : class
+            {
+            }
+
+            public void Subscribe<TComponent>() where TComponent : class
+            {
+            }
+
+            public void Subscribe(Type consumerType)
             {
             }
 
@@ -40,19 +48,15 @@ namespace MassTransit.ServiceBus
             {
             }
 
-            public void Unsubscribe<T>(T component) where T : class
+            public void Unsubscribe<T>(T consumer) where T : class
             {
             }
 
-            public void AddComponent<TComponent>() where TComponent : class
+            public void Unsubscribe(Type consumerType)
             {
             }
 
-            public void AddComponent(Type componentType)
-            {
-            }
-
-            public void RemoveComponent<TComponent>() where TComponent : class
+            public void Unsubscribe<TComponent>() where TComponent : class
             {
             }
 

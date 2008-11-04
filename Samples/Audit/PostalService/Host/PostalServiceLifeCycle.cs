@@ -20,7 +20,7 @@ namespace PostalService.Host
 
             _bus = base.ServiceLocator.GetInstance<IServiceBus>("server");
 
-            _bus.AddComponent<SendEmailConsumer>();
+            _bus.Subscribe<SendEmailConsumer>();
 
             Console.WriteLine("Service running...");
         }

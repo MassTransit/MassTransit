@@ -38,7 +38,7 @@ namespace HeavyLoad.BatchLoad
 
 			_container.AddComponent<BatchServiceComponent>();
 
-			_bus.AddComponent<BatchServiceComponent>();
+			_bus.Subscribe<BatchServiceComponent>();
 
 			int batchCount = 100;
 

@@ -24,7 +24,7 @@ namespace InternalInventoryService
         {
             _bus = this.ServiceLocator.GetInstance<IServiceBus>("server");
 
-            _bus.AddComponent<InventoryLevelService>();
+            _bus.Subscribe<InventoryLevelService>();
         }
 
         public override void Stop()

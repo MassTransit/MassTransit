@@ -59,7 +59,7 @@ namespace MassTransit.ServiceBus.Tests
 
             ReplayAll();
 
-            _bus.AddComponent<PingHandler>();
+            _bus.Subscribe<PingHandler>();
 
             int old = PingHandler.Pinged;
 

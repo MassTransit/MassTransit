@@ -48,9 +48,9 @@ namespace MassTransit.ServiceBus
         /// <summary>
         /// Connects any consumers for the component to the message dispatcher
         /// </summary>
-        /// <typeparam name="T">The component type</typeparam>
-        /// <param name="component">The component</param>
-        void Subscribe<T>(T component) where T : class;
+        /// <typeparam name="T">The consumer type</typeparam>
+        /// <param name="consumer">The component</param>
+        void Subscribe<T>(T consumer) where T : class;
 
         /// <summary>
         /// Removes a message handler from the service bus
@@ -70,23 +70,29 @@ namespace MassTransit.ServiceBus
         /// <summary>
         /// Disconnects any consumers for the component from the message dispatcher
         /// </summary>
-        /// <typeparam name="T">The component type</typeparam>
-        /// <param name="component">The component</param>
-        void Unsubscribe<T>(T component) where T : class;
+        /// <typeparam name="T">The consumer type</typeparam>
+        /// <param name="consumer">The component</param>
+        void Unsubscribe<T>(T consumer) where T : class;
 
         /// <summary>
         /// Adds a component to the dispatcher that will be created on demand to handle messages
         /// </summary>
-        /// <typeparam name="TComponent">The type of the component to add</typeparam>
-        void AddComponent<TComponent>() where TComponent : class;
-
-        void AddComponent(Type componentType);
+        /// <typeparam name="TConsumer">The type of the component to add</typeparam>
+        void Subscribe<TConsumer>() where TConsumer : class;
 
         /// <summary>
         /// Adds a component to the dispatcher that will be created on demand to handle messages
         /// </summary>
-        /// <typeparam name="TComponent">The type of the component to add</typeparam>
-        void RemoveComponent<TComponent>() where TComponent : class;
+        /// <param name="consumerType">The type of component to add</param>
+        void Subscribe(Type consumerType);
+
+        /// <summary>
+        /// Adds a component to the dispatcher that will be created on demand to handle messages
+        /// </summary>
+        /// <typeparam name="TConsumer">The type of the component to add</typeparam>
+        void Unsubscribe<TConsumer>() where TConsumer : class;
+
+        void Unsubscribe(Type consumerType);
 
         /// <summary>
         /// Publishes a message to all subscribed consumers for the message type

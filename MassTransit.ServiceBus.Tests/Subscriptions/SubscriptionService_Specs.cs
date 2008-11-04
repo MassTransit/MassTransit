@@ -23,7 +23,7 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
 		{
 			MonitorSubscriptionCache<PingMessage> monitor = new MonitorSubscriptionCache<PingMessage>(SubscriptionCache);
 
-			LocalBus.AddComponent<TestMessageConsumer<PingMessage>>();
+			LocalBus.Subscribe<TestMessageConsumer<PingMessage>>();
 
 			monitor.ShouldHaveBeenAdded(_timeout);
 		}

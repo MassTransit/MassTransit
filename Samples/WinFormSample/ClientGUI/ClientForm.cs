@@ -151,7 +151,7 @@ namespace ClientGUI
                 _bus = _container.Resolve<IServiceBus>("client");
 
                 _container.AddComponent<TimeoutWatcher>();
-                _bus.AddComponent<TimeoutWatcher>();
+                _bus.Subscribe<TimeoutWatcher>();
             }
             catch (Exception ex)
             {
