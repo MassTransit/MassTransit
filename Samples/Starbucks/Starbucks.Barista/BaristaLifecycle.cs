@@ -4,7 +4,7 @@ using Microsoft.Practices.ServiceLocation;
 
 namespace Starbucks.Barista
 {
-    public class BaristaLifecycle : HostedLifeCycle
+    public class BaristaLifecycle : HostedLifecycle
     {
         public BaristaLifecycle(IServiceLocator serviceLocator)
             : base(serviceLocator)
@@ -14,7 +14,7 @@ namespace Starbucks.Barista
         public override void Start()
         {
             IServiceBus bus = ServiceLocator.GetInstance<IServiceBus>();
-            bus.AddComponent<DrinkPreparationSaga>();            
+            bus.Subscribe<DrinkPreparationSaga>();            
         }
 
         public override void Stop()

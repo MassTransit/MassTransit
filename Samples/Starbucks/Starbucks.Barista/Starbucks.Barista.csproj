@@ -55,26 +55,6 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\lib\Magnum.Common.dll</HintPath>
     </Reference>
-    <Reference Include="MassTransit.Host, Version=0.4.0.1322, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\lib\MassTransit.Host.dll</HintPath>
-    </Reference>
-    <Reference Include="MassTransit.Infrastructure, Version=0.4.0.1322, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\lib\MassTransit.Infrastructure.dll</HintPath>
-    </Reference>
-    <Reference Include="MassTransit.ServiceBus, Version=0.4.0.1322, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\lib\MassTransit.ServiceBus.dll</HintPath>
-    </Reference>
-    <Reference Include="MassTransit.ServiceBus.MSMQ, Version=0.4.0.1322, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\lib\MassTransit.ServiceBus.MSMQ.dll</HintPath>
-    </Reference>
-    <Reference Include="MassTransit.WindsorIntegration, Version=0.4.0.1322, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\lib\MassTransit.WindsorIntegration.dll</HintPath>
-    </Reference>
     <Reference Include="Microsoft.Practices.ServiceLocation, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\libs\Microsoft.Practices.ServiceLocation.dll</HintPath>
@@ -110,6 +90,26 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\Containers\MassTransit.WindsorIntegration\MassTransit.WindsorIntegration.csproj">
+      <Project>{98D5A59C-96FA-4A1B-A653-EA5A35C45FC9}</Project>
+      <Name>MassTransit.WindsorIntegration</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\MassTransit.Host\MassTransit.Host.csproj">
+      <Project>{834ED79F-BA0E-48F9-831A-789576EE516B}</Project>
+      <Name>MassTransit.Host</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\MassTransit.Infrastructure\MassTransit.Infrastructure.csproj">
+      <Project>{073A90FD-9A3E-4704-B3B5-6D8A9F4B442E}</Project>
+      <Name>MassTransit.Infrastructure</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\MassTransit.ServiceBus\MassTransit.ServiceBus.csproj">
+      <Project>{90482397-6282-465E-8B86-39865FC30127}</Project>
+      <Name>MassTransit.ServiceBus</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\Transports\MassTransit.ServiceBus.MSMQ\MassTransit.ServiceBus.MSMQ.csproj">
+      <Project>{6F90867C-E092-4EDC-B3DE-600D39DF0335}</Project>
+      <Name>MassTransit.ServiceBus.MSMQ</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Starbucks.Messages\Starbucks.Messages.csproj">
       <Project>{D9486A62-4F12-4018-802B-517DD11DE66A}</Project>
       <Name>Starbucks.Messages</Name>
