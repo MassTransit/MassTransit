@@ -77,7 +77,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CashierConfiguration.cs" />
     <Compile Include="CashierLifecycle.cs" />
     <Compile Include="EmoCollegeDropout.cs" />
     <Compile Include="Program.cs" />
