@@ -7,6 +7,8 @@ using Microsoft.Practices.ServiceLocation;
 
 namespace Starbucks.Barista
 {
+    using MassTransit.Host.Configurations;
+
     static class Program
     {
         /// <summary>
@@ -22,8 +24,15 @@ namespace Starbucks.Barista
             container.AddComponent<DrinkPreparationSaga>();
             container.AddComponent<ISagaRepository<DrinkPreparationSaga>, DrinkPreparationSagaRepository>();
 
-            IInstallationConfiguration config = new BaristaConfiguration(ServiceLocator.Current);
-            Runner.Run(config, args);
+            var credentials = Credentials.Interactive;
+            var settings = WinServiceSettings.Custom(
+                "StarbucksBarista",
+                "Starbucks Barista",
+                "a Mass Transit sample service for making orders of coffee.",
+                KnownServiceNames.Msmq);
+            var lifecycle = new BaristaLifecycle(ServiceLocator.Current);
+
+            Runner.Run(credentials, settings, lifecycle, args);
         }
     }
 }
