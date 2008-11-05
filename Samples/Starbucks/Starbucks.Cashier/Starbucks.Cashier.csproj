@@ -78,7 +78,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CashierLifecycle.cs" />
-    <Compile Include="EmoCollegeDropout.cs" />
+    <Compile Include="FriendlyCashier.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
