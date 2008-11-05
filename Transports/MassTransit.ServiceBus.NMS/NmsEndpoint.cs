@@ -19,14 +19,16 @@ namespace MassTransit.ServiceBus.NMS
 	using Apache.NMS;
 	using Apache.NMS.ActiveMQ;
 	using Exceptions;
+	using Internal;
 	using log4net;
+	using Serialization;
 
 	public class NmsEndpoint :
 		IEndpoint
 	{
-		private static readonly IFormatter _formatter = new BinaryFormatter();
+
 		private static readonly ILog _log = LogManager.GetLogger(typeof (NmsEndpoint));
-		private static readonly ILog _messageLog = LogManager.GetLogger("MassTransit.Messages");
+		private static readonly IMessageSerializer _serializer = new BinaryMessageSerializer();
 		private readonly IConnectionFactory _factory;
 		private readonly string _queueName;
 		private readonly Uri _uri;
@@ -82,7 +84,7 @@ namespace MassTransit.ServiceBus.NMS
 
                 using (MemoryStream mem = new MemoryStream())
                 {
-                    _formatter.Serialize(mem, message);
+                    _serializer.Serialize(mem, message);
 
                     bm.Content = mem.ToArray();
                 }
@@ -100,8 +102,8 @@ namespace MassTransit.ServiceBus.NMS
 					{
 						producer.Send(bm);
 
-						if (_messageLog.IsInfoEnabled)
-							_messageLog.InfoFormat("Message {0} Sent To {1}", messageType, Uri);
+						if (SpecialLoggers.Messages.IsInfoEnabled)
+							SpecialLoggers.Messages.InfoFormat("Message {0} Sent To {1}", messageType, Uri);
 					}
 					catch (Exception ex)
 					{
@@ -135,7 +137,7 @@ namespace MassTransit.ServiceBus.NMS
 						{
 							MemoryStream mem = new MemoryStream(bm.Content, false);
 
-							object obj = _formatter.Deserialize(mem);
+							object obj = _serializer.Deserialize(mem);
 
 							return obj;
 						}
@@ -171,15 +173,15 @@ namespace MassTransit.ServiceBus.NMS
 					{
 						MemoryStream mem = new MemoryStream(bm.Content, false);
 
-						object obj = _formatter.Deserialize(mem);
+						object obj = _serializer.Deserialize(mem);
 
 						if (accept(obj))
 						{
 							if (_log.IsDebugEnabled)
 								_log.DebugFormat("Queue: {0} Received Message Id {1}", _queueName, message.NMSMessageId);
 
-							if (_messageLog.IsInfoEnabled)
-								_messageLog.InfoFormat("RECV:{0}:System.Object:{1}", _queueName, message.NMSMessageId);
+							if (SpecialLoggers.Messages.IsInfoEnabled)
+								SpecialLoggers.Messages.InfoFormat("RECV:{0}:System.Object:{1}", _queueName, message.NMSMessageId);
 
 							return obj;
 						}
