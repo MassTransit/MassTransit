@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<configuration>
+  <facilities>
+    <facility id="masstransit">
+
+      <bus id="cashier"
+				 endpoint="msmq://localhost/mt_server">
+        <subscriptionService endpoint="msmq://localhost/mt_pubsub" />
+      </bus>
+      <transports>
+        <transport>MassTransit.ServiceBus.MSMQ.MsmqEndpoint, MassTransit.ServiceBus.MSMQ</transport>
+      </transports>
+    </facility>
+  </facilities>
+</configuration>
