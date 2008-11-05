@@ -76,6 +76,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CustomerLifecycle.cs" />
     <Compile Include="OrderDrinkForm.cs">
       <SubType>Form</SubType>
     </Compile>
