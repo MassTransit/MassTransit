@@ -42,6 +42,26 @@ namespace MassTransit.ServiceBus.Tibco.Tests
 		}
 
 		[Test]
+		public void Echo_reply_should_work()
+		{
+			var echoConsumer = new TestMessageConsumer<PingMessage>();
+			RemoteBus.Subscribe(echoConsumer);
+
+			var replyConsumer = new TestMessageConsumer<PongMessage>();
+			LocalBus.Subscribe(replyConsumer);
+
+			var echoMessage = new PingMessage();
+			LocalBus.Publish(echoMessage);
+
+			echoConsumer.ShouldHaveReceivedMessage(echoMessage, _timeout);
+
+			PongMessage replyMessage = new PongMessage(echoMessage.CorrelationId);
+			RemoteBus.Publish(replyMessage);
+
+			replyConsumer.ShouldHaveReceivedMessage(replyMessage, _timeout);
+		}
+
+		[Test]
 		public void It_should_leave_the_message_in_the_queue_if_an_exception_is_thrown()
 		{
 			var consumer = new TestSelectiveConsumer<PingMessage>(x => false);
