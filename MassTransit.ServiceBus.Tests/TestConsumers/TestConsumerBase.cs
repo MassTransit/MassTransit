@@ -16,6 +16,8 @@ namespace MassTransit.ServiceBus.Tests.TestConsumers
 
         public virtual void Consume(TMessage message)
         {
+			Interlocked.Increment(ref _receivedMessageCount);
+
             _messages.Add(message);
             _received.Release();
 
@@ -40,7 +42,14 @@ namespace MassTransit.ServiceBus.Tests.TestConsumers
             return true;
         }
 
-        public void ShouldHaveReceivedMessage(TMessage message, TimeSpan timeout)
+    	private int _receivedMessageCount;
+    	public int ReceivedMessageCount
+    	{
+    		get { return _receivedMessageCount; }
+    		protected set { _receivedMessageCount = value; }
+    	}
+
+    	public void ShouldHaveReceivedMessage(TMessage message, TimeSpan timeout)
         {
             Assert.That(ReceivedMessage(message, timeout), Is.True, "Message should have been received");
         }
