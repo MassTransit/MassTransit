@@ -4,7 +4,7 @@ using Microsoft.Practices.ServiceLocation;
 
 namespace Starbucks.Cashier
 {
-    public class CashierLifecycle : HostedLifeCycle
+    public class CashierLifecycle : HostedLifecycle
     {
         public CashierLifecycle(IServiceLocator serviceLocator)
             : base(serviceLocator)
@@ -14,7 +14,7 @@ namespace Starbucks.Cashier
         public override void Start()
         {
             IServiceBus bus = ServiceLocator.GetInstance<IServiceBus>();            
-            bus.AddComponent<EmoCollegeDropout>();
+            bus.Subscribe<EmoCollegeDropout>();
         }
 
         public override void Stop()

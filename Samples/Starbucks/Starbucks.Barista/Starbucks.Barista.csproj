@@ -78,7 +78,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DrinkPreparationSaga.cs" />
-    <Compile Include="BaristaConfiguration.cs" />
     <Compile Include="BaristaLifecycle.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
