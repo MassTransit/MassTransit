@@ -18,7 +18,7 @@ namespace Starbucks.Cashier
             var builder = new WindsorObjectBuilder(container.Kernel);
             ServiceLocator.SetLocatorProvider(() => builder);
 
-            container.AddComponent<EmoCollegeDropout>();
+            container.AddComponent<FriendlyCashier>();
 
             var credentials = Credentials.LocalSystem;
             var settings = WinServiceSettings.Custom(

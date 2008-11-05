@@ -14,7 +14,7 @@ namespace Starbucks.Cashier
         public override void Start()
         {
             IServiceBus bus = ServiceLocator.GetInstance<IServiceBus>();            
-            bus.Subscribe<EmoCollegeDropout>();
+            bus.Subscribe<FriendlyCashier>();
         }
 
         public override void Stop()

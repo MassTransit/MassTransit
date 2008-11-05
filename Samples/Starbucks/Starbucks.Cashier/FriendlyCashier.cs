@@ -6,7 +6,7 @@ using Starbucks.Messages;
 
 namespace Starbucks.Cashier
 {
-    public class EmoCollegeDropout 
+    public class FriendlyCashier 
         :Consumes<NewOrderMessage>.All,
         Consumes<SubmitPaymentMessage>.All
     {
