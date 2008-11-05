@@ -29,7 +29,6 @@ namespace MassTransit.ServiceBus.Tibco
 		private static readonly IMessageSerializer _serializer = new BinaryMessageSerializer();
 
 		private readonly Uri _uri;
-		private Connection _connection;
 		private int _deliveryMode = DeliveryMode.RELIABLE_DELIVERY;
 		private bool _disposed;
 		private ConnectionFactory _factory;
@@ -49,8 +48,6 @@ namespace MassTransit.ServiceBus.Tibco
 			string url = _uri.Host + ":" + _uri.Port;
 
 			_factory = new ConnectionFactory(url);
-
-			OpenConnection();
 		}
 
 		public static string Scheme
@@ -80,10 +77,9 @@ namespace MassTransit.ServiceBus.Tibco
 
 			try
 			{
-				if (_connection.IsClosed)
-					OpenConnection();
+				Connection connection = OpenConnection();
 
-				Session session = _connection.CreateSession(false, SessionMode.ExplicitClientAcknowledge);
+				Session session = connection.CreateSession(false, SessionMode.AutoAcknowledge);
 
 				BytesMessage bm = session.CreateBytesMessage();
 
@@ -117,23 +113,24 @@ namespace MassTransit.ServiceBus.Tibco
 			}
 		}
 
-		private void OpenConnection()
+		private Connection OpenConnection()
 		{
-			_connection = _factory.CreateConnection();
+			Connection connection = _factory.CreateConnection();
 
-			_connection.ExceptionListener = this;
+			connection.ExceptionListener = this;
 
-			_connection.Start();
+			connection.Start();
+
+			return connection;
 		}
 
 		public object Receive(TimeSpan timeout)
 		{
 			try
 			{
-				if (_connection.IsClosed)
-					OpenConnection();
+				Connection connection = OpenConnection();
 
-				Session session = _connection.CreateSession(false, SessionMode.ExplicitClientAcknowledge);
+				Session session = connection.CreateSession(false, SessionMode.NoAcknowledge);
 
 				Destination destination = session.CreateQueue(_queueName);
 
@@ -156,8 +153,6 @@ namespace MassTransit.ServiceBus.Tibco
 					{
 						object obj = _serializer.Deserialize(mem);
 
-						message.Acknowledge();
-
 						return obj;
 					}
 				}
@@ -176,10 +171,9 @@ namespace MassTransit.ServiceBus.Tibco
 		{
 			try
 			{
-				if (_connection.IsClosed)
-					OpenConnection();
+				Connection connection = OpenConnection();
 
-				Session session = _connection.CreateSession(false, SessionMode.ExplicitClientAcknowledge);
+				Session session = connection.CreateSession(false, SessionMode.NoAcknowledge);
 
 				Destination destination = session.CreateQueue(_queueName);
 
@@ -204,8 +198,6 @@ namespace MassTransit.ServiceBus.Tibco
 
 						if (accept(obj))
 						{
-							message.Acknowledge();
-
 							if (_log.IsDebugEnabled)
 								_log.DebugFormat("Queue: {0} Received Message Id {1}", _queueName, message.MessageID);
 
@@ -258,8 +250,6 @@ namespace MassTransit.ServiceBus.Tibco
 			if (_disposed) return;
 			if (disposing)
 			{
-				if (_connection != null)
-					_connection.Close();
 			}
 			_disposed = true;
 		}
