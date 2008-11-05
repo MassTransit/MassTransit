@@ -39,7 +39,12 @@ namespace Starbucks.Barista
 
         public void Consume(NewOrderMessage message)
         {
+
             string drink = string.Format("{0} {1}", message.Size, message.Item);
+
+        	Drink = drink;
+        	Name = message.Name;
+
             Console.WriteLine(string.Format("{0} for {1}, got it!", drink, message.Name));
 
             for (int i = 0; i < 10; i++)
