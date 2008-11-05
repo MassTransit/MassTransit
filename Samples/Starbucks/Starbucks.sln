@@ -9,7 +9,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Starbucks.Barista", "Starbu
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Starbucks.Customer", "Starbucks.Customer\Starbucks.Customer.csproj", "{6E544992-6DE1-4AA0-A055-6E1381992B79}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SubscriptionManagerGUI", "..\..\..\..\..\..\dev\tools\masstransit\Samples\WinFormSample\SubscriptionManagerGUI\SubscriptionManagerGUI.csproj", "{F43E14B8-4AE2-4A09-94C0-8871D0BA5C5C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SubscriptionManagerGUI", "..\WinFormSample\SubscriptionManagerGUI\SubscriptionManagerGUI.csproj", "{F43E14B8-4AE2-4A09-94C0-8871D0BA5C5C}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "References", "References", "{1FEFCD44-83A0-4240-B321-A73A53C6DC9E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
