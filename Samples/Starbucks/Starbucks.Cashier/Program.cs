@@ -19,9 +19,16 @@ namespace Starbucks.Cashier
             ServiceLocator.SetLocatorProvider(() => builder);
 
             container.AddComponent<EmoCollegeDropout>();
+
+            var credentials = Credentials.LocalSystem;
+            var settings = WinServiceSettings.Custom(
+                "StarbucksCashier",
+                "Starbucks Cashier",
+                "a Mass Transit sample service for handling orders of coffee.",
+                KnownServiceNames.Msmq);
+            var lifecycle = new CashierLifecycle(ServiceLocator.Current);
             
-            IInstallationConfiguration config = new CashierConfiguration(ServiceLocator.Current);
-            Runner.Run(config, args);
+            Runner.Run(credentials, settings, lifecycle, args);
         }
     }
 }
