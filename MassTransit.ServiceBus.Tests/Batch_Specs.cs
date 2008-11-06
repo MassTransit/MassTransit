@@ -148,7 +148,7 @@ namespace MassTransit.ServiceBus.Tests
         private int _batchSize;
 
         [Test, Ignore("Not sure how to test, but this is right")]
-        [ExpectedException(typeof(SemaphoreFullException))] //TODO: Bad Exception
+//        [ExpectedException(typeof(SemaphoreFullException))] //TODO: Bad Exception
         public void The_batch_should_throw_an_error()
         {
             _batchSize = 1;
