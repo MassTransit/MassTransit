@@ -45,7 +45,7 @@ namespace MassTransit.ServiceBus
             _timeout = timeout;
             _consumer = consumer;
 
-            _messageReady = new Semaphore(0, batchLength);
+            _messageReady = new Semaphore(0, int.MaxValue);
         }
 
         public bool IsComplete

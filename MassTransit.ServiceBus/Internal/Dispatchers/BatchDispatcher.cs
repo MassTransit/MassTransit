@@ -16,8 +16,9 @@ namespace MassTransit.ServiceBus.Internal
     using System.Collections.Generic;
     using System.Threading;
     using Exceptions;
+    using Magnum.Common.ObjectExtensions;
 
-    /// <summary>
+	/// <summary>
     /// A batch distributor is subscribed to a message type so that it can dispatch batches of messages
     /// to new consumers for each batch
     /// </summary>
@@ -122,11 +123,9 @@ namespace MassTransit.ServiceBus.Internal
         {
             TimeSpan value = defaultValue;
 
-            object[] attributes = typeof (TMessage).GetCustomAttributes(typeof (TimeoutAttribute), true);
-            foreach (TimeoutAttribute timeout in attributes)
-            {
-                value = timeout.Timeout;
-            }
+        	TimeoutAttribute timeout = typeof (TMessage).GetAttribute<TimeoutAttribute>();
+			if (timeout != null)
+				value = timeout.Timeout;
 
             return value;
         }
