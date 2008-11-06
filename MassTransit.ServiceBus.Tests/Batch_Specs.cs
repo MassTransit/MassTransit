@@ -13,6 +13,7 @@
 namespace MassTransit.ServiceBus.Tests
 {
 	using System;
+	using System.Threading;
 	using Messages;
 	using NUnit.Framework;
 	using TestConsumers;
@@ -108,6 +109,8 @@ namespace MassTransit.ServiceBus.Tests
 		}
 	}
 
+
+
 	[TestFixture]
 	public class When_an_incomplete_batch_is_published :
 		LocalAndRemoteTestContext
@@ -137,4 +140,32 @@ namespace MassTransit.ServiceBus.Tests
 			batchConsumer.ShouldNotHaveCompletedBatch(TimeSpan.Zero);
 		}
 	}
+
+    [TestFixture]
+    public class When_more_messages_are_sent_than_expected :
+        LocalAndRemoteTestContext
+    {
+        private int _batchSize;
+
+        [Test, Ignore("Not sure how to test, but this is right")]
+        [ExpectedException(typeof(SemaphoreFullException))] //TODO: Bad Exception
+        public void The_batch_should_throw_an_error()
+        {
+            _batchSize = 1;
+
+            TestMessageConsumer<BatchTimeout<IndividualBatchMessage, Guid>> timeoutConsumer = new TestMessageConsumer<BatchTimeout<IndividualBatchMessage, Guid>>();
+            RemoteBus.Subscribe(timeoutConsumer);
+
+            TestBatchConsumer<IndividualBatchMessage, Guid> batchConsumer = new TestBatchConsumer<IndividualBatchMessage, Guid>();
+            RemoteBus.Subscribe(batchConsumer);
+
+            Guid batchId = Guid.NewGuid();
+            IndividualBatchMessage message = new IndividualBatchMessage(batchId, _batchSize);
+
+            LocalBus.Publish(message);
+            LocalBus.Publish(message);
+
+            
+        }
+    }
 }
