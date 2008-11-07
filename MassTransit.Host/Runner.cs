@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Host
 {
+    using System;
     using System.Collections.Generic;
 	using Actions;
     using Configurations;
@@ -28,12 +29,19 @@ namespace MassTransit.Host
 
 		static Runner()
 		{
+		    AppDomain.CurrentDomain.UnhandledException += UnhandledException;
+
 			_actions.Add(ServiceNamedAction.Install, new InstallServiceAction());
 			_actions.Add(ServiceNamedAction.Uninstall, new UninstallServiceAction());
 			_actions.Add(NamedAction.Console, new RunAsConsoleAction());
 			_actions.Add(NamedAction.Gui, new RunAsWinFormAction());
 			_actions.Add(ServiceNamedAction.Service, new RunAsServiceAction());
 		}
+
+        private static void UnhandledException(object sender, UnhandledExceptionEventArgs e)
+        {
+            _log.Fatal("Host encountered an unhandled exception on the AppDomain", (Exception)e.ExceptionObject);
+        }
 
         /// <summary>
         /// Go go gadget
