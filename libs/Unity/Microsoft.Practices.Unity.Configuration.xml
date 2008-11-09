@@ -1,0 +1,1272 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Microsoft.Practices.Unity.Configuration</name>
+    </assembly>
+    <members>
+        <member name="T:Microsoft.Practices.Unity.Configuration.UnityContainerElementCollection">
+            <summary>
+            A <see cref="T:System.Configuration.ConfigurationElementCollection"/> that holds the collection of
+            container elements specified in the config file.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Practices.Unity.Configuration.TypeResolvingConfigurationElementCollection">
+            <summary>
+            A configuration element collection base class that makes sure
+            that it's provided elements have a type resolver associated with them.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Practices.Unity.Configuration.IResolvesTypeAliases">
+            <summary>
+            Interface defining the contract for classes that
+            use a <see cref="T:Microsoft.Practices.Unity.Configuration.UnityTypeResolver"/> to resolve
+            type aliases.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Practices.Unity.Configuration.IResolvesTypeAliases.TypeResolver">
+            <summary>
+            Get or set the type resolver.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Practices.Unity.Configuration.TypeResolvingConfigurationElementCollection.Get(System.Int32)">
+            <summary>
+            Gets the configuration element at the specified index location.
+            </summary>
+            <param name="index">The index location of the <see cref="T:System.Configuration.ConfigurationElement"/> to return.</param>
+            <returns>The <see cref="T:System.Configuration.ConfigurationElement"/> at the specified index.</returns>
+            <exception cref="T:System.Configuration.ConfigurationErrorsException">index is less than 0.
+            - or -There is no <see cref="T:System.Configuration.ConfigurationElement"/> at the specified index.</exception>
+        </member>
+        <member name="M:Microsoft.Practices.Unity.Configuration.TypeResolvingConfigurationElementCollection.Get(System.Object)">
+            <summary>
+            Returns the configuration element with the specified key.
+            </summary>
+            <param name="key">The key of the element to return.</param>
+            <returns>The <see cref="T:System.Configuration.ConfigurationElement"/> with the specified key; otherwise, null.</returns>
+        </member>
+        <member name="M:Microsoft.Practices.Unity.Configuration.TypeResolvingConfigurationElementCollection.GetEnumerator">
+            <summary>
+            Returns an enumerator that iterates through a collection.
+            </summary>
+            
+            <returns>
+            An <see cref="T:System.Collections.IEnumerator"></see> object that can be used to iterate through the collection.
+            </returns>
+            <filterpriority>2</filterpriority>
+        </member>
+        <member name="M:Microsoft.Practices.Unity.Configuration.TypeResolvingConfigurationElementCollection.System#Collections#IEnumerable#GetEnumerator">
+            <summary>
+            Returns an enumerator that iterates through a collection.
+            </summary>
+            
+            <returns>
+            An <see cref="T:System.Collections.IEnumerator"></see> object that can be used to iterate through the collection.
+            </returns>
+            <filterpriority>2</filterpriority>
+        </member>
+        <member name="P:Microsoft.Practices.Unity.Configuration.TypeResolvingConfigurationElementCollection.TypeResolver">
+            <summary>
+            Get or set the type resolver.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Practices.Unity.Configuration.UnityContainerElementCollection.CreateNewElement">
+            <summary>
+            When overridden in a derived class, creates a new <see cref="T:System.Configuration.ConfigurationElement"></see>.
+            </summary>
+            
+            <returns>
+            A new <see cref="T:System.Configuration.ConfigurationElement"></see>.
+            </returns>
+            
+        </member>
+        <member name="M:Microsoft.Practices.Unity.Configuration.UnityContainerElementCollection.GetElementKey(System.Configuration.ConfigurationElement)">
+            <summary>
+            Gets the element key for a specified configuration element when overridden in a derived class.
+            </summary>
+            
+            <returns>
+            An <see cref="T:System.Object"></see> that acts as the key for the specified <see cref="T:System.Configuration.ConfigurationElement"></see>.
+            </returns>
+            
+            <param name="element">The <see cref="T:System.Configuration.ConfigurationElement"></see> to return the key for. </param>
+        </member>
+        <member name="P:Microsoft.Practices.Unity.Configuration.UnityContainerElementCollection.Item(System.String)">
+            <summary>
+            Resolve a <see cref="T:Microsoft.Practices.Unity.Configuration.UnityContainerElement"/> by name.
+            </summary>
+            <param name="name">name to look up.</param>
+            <returns>The element.</returns>
+        </member>
+        <member name="P:Microsoft.Practices.Unity.Configuration.UnityContainerElementCollection.Item(System.Int32)">
+            <summary>
+            Get or set a <see cref="T:Microsoft.Practices.Unity.Configuration.UnityContainerElement"/> by index.
+            </summary>
+            <param name="index">Index to get or set at.</param>
+            <returns>The element.</returns>
+        </member>
+        <member name="P:Microsoft.Practices.Unity.Configuration.UnityContainerElementCollection.Default">
+            <summary>
+            Get the default (unnamed) container element.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Practices.Unity.Configuration.UnityContainerExtensionConfigurationElementCollection">
+            <summary>
+            Collection of <see cref="T:Microsoft.Practices.Unity.Configuration.UnityContainerExtensionConfigurationElement"/> elements
+            from the configuration file. This collection can contain derived classes of
+            <see cref="T:Microsoft.Practices.Unity.Configuration.UnityContainerExtensionConfigurationElement"/>.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Practices.Unity.Configuration.UnityContainerExtensionConfigurationElementCollection.OnDeserializeUnrecognizedElement(System.String,System.Xml.XmlReader)">
+            <summary>
+             Figure out the concrete type to create given the type attribute on the given
+             xml reader. If not present, throws an exception.
+            </summary>
+            
+            <returns>
+            true if the unrecognized element was deserialized successfully; otherwise, false. The default is false.
+            </returns>
+            
+            <param name="reader">An input stream that reads XML from the configuration file. </param>
+            <param name="elementName">The name of the unrecognized element. </param>
+            <exception cref="T:System.ArgumentException">elementName starts with the reserved prefix "config" or "lock".</exception>
+            <exception cref="T:System.Configuration.ConfigurationErrorsException">The element specified in elementName is the &lt;clear&gt; element.</exception>
+        </member>
+        <member name="M:Microsoft.Practices.Unity.Configuration.UnityContainerExtensionConfigurationElementCollection.CreateNewElement">
+            <summary>
+            When overridden in a derived class, creates a new <see cref="T:System.Configuration.ConfigurationElement"></see>.
+            </summary>
+            
+            <returns>
+            A new <see cref="T:System.Configuration.ConfigurationElement"></see>.
+            </returns>
+            
+        </member>
+        <member name="M:Microsoft.Practices.Unity.Configuration.UnityContainerExtensionConfigurationElementCollection.GetElementKey(System.Configuration.ConfigurationElement)">
+            <summary>
+            Gets the element key for a specified configuration element when overridden in a derived class.
+            </summary>
+            
+            <returns>
+            An <see cref="T:System.Object"></see> that acts as the key for the specified <see cref="T:System.Configuration.ConfigurationElement"></see>.
+            </returns>
+            
+            <param name="element">The <see cref="T:System.Configuration.ConfigurationElement"></see> to return the key for. </param>
+        </member>
+        <member name="P:Microsoft.Practices.Unity.Configuration.UnityContainerExtensionConfigurationElementCollection.Item(System.String)">
+            <summary>
+            Resolve the given element by key.
+            </summary>
+            <param name="key">Name of element to find.</param>
+            <returns>Element at the given key.</returns>
+        </member>
+        <member name="T:Microsoft.Practices.Unity.Configuration.MethodParameterElementCollection">
+            <summary>
+            A configuration collection of parameters for a method or constructor.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Practices.Unity.Configuration.MethodParameterElementCollection.CreateNewElement">
+            <summary>
+            When overridden in a derived class, creates a new <see cref="T:System.Configuration.ConfigurationElement"></see>.
+            </summary>
+            
+            <returns>
+            A new <see cref="T:System.Configuration.ConfigurationElement"></see>.
+            </returns>
+            
+        </member>
+        <member name="M:Microsoft.Practices.Unity.Configuration.MethodParameterElementCollection.GetElementKey(System.Configuration.ConfigurationElement)">
+            <summary>
+            Gets the element key for a specified configuration element when overridden in a derived class.
+            </summary>
+            
+            <returns>
+            An <see cref="T:System.Object"></see> that acts as the key for the specified <see cref="T:System.Configuration.ConfigurationElement"></see>.
+            </returns>
+            
+            <param name="element">The <see cref="T:System.Configuration.ConfigurationElement"></see> to return the key for. </param>
+        </member>
+        <member name="P:Microsoft.Practices.Unity.Configuration.MethodParameterElementCollection.Item(System.Int32)">
+            <summary>
+            Get the element at the given index.
+            </summary>
+            <param name="index">Index</param>
+            <returns>Element at index.</returns>
+        </member>
+        <member name="P:Microsoft.Practices.Unity.Configuration.MethodParameterElementCollection.Item(System.String)">
+            <summary>
+            Get the element with the given key.
+            </summary>
+            <param name="name">Key to look up</param>
+            <returns>Element at that key.</returns>
+        </member>
+        <member name="T:Microsoft.Practices.Unity.Configuration.InjectionPropertyElement">
+            <summary>
+            Configuration element for configuring injection properties.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Practices.Unity.Configuration.InjectionMemberElement">
+            <summary>
+            Base class for elements that control which members are injected.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Practices.Unity.Configuration.TypeResolvingConfigurationElement">
+            <summary>
+            Base class for configuration elements that use a <see cref="T:Microsoft.Practices.Unity.Configuration.UnityTypeResolver"/>.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Practices.Unity.Configuration.TypeResolvingConfigurationElement.TypeResolver">
+            <summary>
+            Get/set the Type Resolver
+            </summary>
+        </member>
+        <member name="M:Microsoft.Practices.Unity.Configuration.InjectionMemberElement.DeserializeElement(System.Xml.XmlReader)">
+            <summary>
+            Read the contents of the element from the given XmlReader.
+            </summary>
+            <param name="reader"></param>
+        </member>
+        <member name="M:Microsoft.Practices.Unity.Configuration.InjectionMemberElement.CreateInjectionMember">
+            <summary>
+            Return the InjectionMember object represented by this configuration
+            element.
+            </summary>
+            <returns>The injection member object.</returns>
+        </member>
+        <member name="M:Microsoft.Practices.Unity.Configuration.InjectionMemberElement.GetElementKey">
+            <summary>
+            Return the key that represents this configuration element in a collection.
+            </summary>
+            <returns>The key.</returns>
+        </member>
+        <member name="P:Microsoft.Practices.Unity.Configuration.InjectionMemberElement.Name">
+            <summary>
+            Name of the element.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Practices.Unity.Configuration.InjectionMemberElement.ElementName">
+            <summary>
+            Name of this element - used when calculating the collection key.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Practices.Unity.Configuration.InjectionPropertyElement.CreateInjectionMember">
+            <summary>
+            Return the InjectionMember object represented by this configuration
+            element.
+            </summary>
+            <returns>The injection member object.</returns>
+        </member>
+        <member name="M:Microsoft.Practices.Unity.Configuration.InjectionPropertyElement.OnDeserializeUnrecognizedElement(System.String,System.Xml.XmlReader)">
+            <summary>
+            Gets a value indicating whether an unknown element is encountered during deserialization.
+            </summary>
+            
+            <returns>
+            true when an unknown element is encountered while deserializing; otherwise, false.
+            </returns>
+            
+            <param name="reader">The <see cref="T:System.Xml.XmlReader"></see> being used for deserialization.</param>
+            <param name="elementName">The name of the unknown subelement.</param>
+            <exception cref="T:System.Configuration.ConfigurationErrorsException">The element identified by elementName is locked.- or -One or more of the element's attributes is locked.- or -elementName is unrecognized, or the element has an unrecognized attribute.- or -The element has a Boolean attribute with an invalid value.- or -An attempt was made to deserialize a property more than once.- or -An attempt was made to deserialize a property that is not a valid member of the element.- or -The element cannot contain a CDATA or text element.</exception>
+        </member>
+        <member name="M:Microsoft.Practices.Unity.Configuration.InjectionPropertyElement.DeserializeElement(System.Xml.XmlReader,System.Boolean)">
+            <summary>
+            Reads XML from the configuration file.
+            </summary>
+            <param name="reader">The <see cref="T:System.Xml.XmlReader"/> that reads from the configuration file.</param>
+            <param name="serializeCollectionKey"><see langword="true"/> to serialize only the collectionkey properties; 
+            otherwise, <see langword="false"/>.</param>
+        </member>
+        <member name="P:Microsoft.Practices.Unity.Configuration.InjectionPropertyElement.ElementName">
+            <summary>
+            Name of this element - used when calculating the collection key.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Practices.Unity.Configuration.InjectionPropertyElement.PropertyTypeName">
+            <summary>
+            Type of this property.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Practices.Unity.Configuration.InjectionPropertyElement.GenericParameterName">
+            <summary>
+            Generic parameter name of this property.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Practices.Unity.Configuration.UnityTypeElement">
+            <summary>
+            A <see cref="T:System.Configuration.ConfigurationElement"/> class used to manage the contents
+            of a &lt;type&gt; node in the configuration file.
+            </summary>
+            <remarks>
+            Using the Type element in configuration can result in both type mappings
+            and singletons being registered. If a name is specified, it is used
+            for both the type mapping and singleton setting.</remarks>
+        </member>
+        <member name="T:Microsoft.Practices.Unity.Configuration.IContainerConfigurationCommand">
+            <summary>
+            Interface for objects that will execute methods
+            on the given container. Typically used for configuration
+            of the container.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Practices.Unity.Configuration.IContainerConfigurationCommand.Configure(Microsoft.Practices.Unity.IUnityContainer)">
+            <summary>
+            Execute this command against the given container.
+            </summary>
+            <remarks>
+            Interface implementors will implement this method to
+            apply configuration changes to the container.</remarks>
+            <param name="container">The <see cref="T:Microsoft.Practices.Unity.IUnityContainer"/> to configure.</param>
+        </member>
+        <member name="M:Microsoft.Practices.Unity.Configuration.UnityTypeElement.Configure(Microsoft.Practices.Unity.IUnityContainer)">
+            <summary>
+            Execute this command against the given container.
+            </summary>
+            <remarks>
+            Interface implementors will implement this method to
+            apply configuration changes to the container.</remarks>
+            <param name="container">The <see cref="T:Microsoft.Practices.Unity.IUnityContainer"/> to configure.</param>
+        </member>
+        <member name="P:Microsoft.Practices.Unity.Configuration.UnityTypeElement.Name">
+            <summary>
+            Name to use when registering this type. 
+            </summary>
+        </member>
+        <member name="P:Microsoft.Practices.Unity.Configuration.UnityTypeElement.TypeName">
+            <summary>
+            Source type to configure in the container.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Practices.Unity.Configuration.UnityTypeElement.Type">
+            <summary>
+            The actual <see cref="T:System.Type"/> object for the 
+            type this element is registering.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Practices.Unity.Configuration.UnityTypeElement.MapToName">
+            <summary>
+            Destination type for type mapping.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Practices.Unity.Configuration.UnityTypeElement.MapTo">
+            <summary>
+            The actual <see cref="P:Microsoft.Practices.Unity.Configuration.UnityTypeElement.Type"/> object for the mapTo element in
+            the configuration file.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Practices.Unity.Configuration.UnityTypeElement.Lifetime">
+            <summary>
+            Sets the lifetime for the given type and name. Transient means 
+            to create a new instance every type and is the default.
+            Singleton means to return the same instance on every request.
+            </summary>
+            <remarks>
+            When configuring a singleton, if both the type and mapTo attributes
+            are specified, the SetSingleton call will be done on the type
+            specified in the mapTo attribute. Otherwise it'll be done on the
+            type specified in the Type attribute.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Practices.Unity.Configuration.UnityTypeElement.TypeConfig">
+            <summary>
+            The collection of type configuration elements that are used to add
+            arbitrary new types to the configuration file.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Practices.Unity.Configuration.TypeInjectionElement">
+            <summary>
+            Parent element used to configure member injection for a type.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Practices.Unity.Configuration.UnityContainerTypeConfigurationElement">
+            <summary>
+            This class provides a base class for configuration
+            of a Unity container using user-installed container
+            types.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Practices.Unity.Configuration.UnityContainerTypeConfigurationElement.DeserializeElement(System.Xml.XmlReader)">
+            <summary>
+            Read in the contents of this element from the <paramref name="reader"/>.
+            </summary>
+            <param name="reader"><see cref="T:System.Xml.XmlReader"/> containing contents of element.</param>
+        </member>
+        <member name="M:Microsoft.Practices.Unity.Configuration.UnityContainerTypeConfigurationElement.Configure(Microsoft.Practices.Unity.IUnityContainer)">
+            <summary>
+            Execute this command against the given container.
+            </summary>
+            <remarks>
+            Interface implementors will implement this method to
+            apply configuration changes to the container.</remarks>
+            <param name="container">The <see cref="T:Microsoft.Practices.Unity.IUnityContainer"/> to configure.</param>
+        </member>
+        <member name="P:Microsoft.Practices.Unity.Configuration.UnityContainerTypeConfigurationElement.ParentElement">
+            <summary>
+            The <see cref="T:Microsoft.Practices.Unity.Configuration.UnityTypeElement"/> that contains this element
+            in the config file.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Practices.Unity.Configuration.UnityContainerTypeConfigurationElement.ExtensionType">
+            <summary>
+            Concrete type name for this configuration element.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Practices.Unity.Configuration.TypeInjectionElement.Configure(Microsoft.Practices.Unity.IUnityContainer)">
+            <summary>
+            Execute this command against the given container.
+            </summary>
+            <remarks>
+            Interface implementors will implement this method to
+            apply configuration changes to the container.</remarks>
+            <param name="container">The <see cref="T:Microsoft.Practices.Unity.IUnityContainer"/> to configure.</param>
+        </member>
+        <member name="P:Microsoft.Practices.Unity.Configuration.TypeInjectionElement.InjectionMembers">
+            <summary>
+            This element is just a collection of <see cref="T:Microsoft.Practices.Unity.Configuration.InjectionMemberElement"/>s. This
+            property controls that collection.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Practices.Unity.Configuration.DependencyValueElement">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:Microsoft.Practices.Unity.Configuration.InjectionParameterValueElement">
+            <summary>
+            Base class for config elements that specify how to
+            create values for a constructor or method to be
+            injected.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Practices.Unity.Configuration.InjectionParameterValueElement.DeserializeElement(System.Xml.XmlReader)">
+            <summary>
+            Read the contents of this element from the given <paramref name="reader"/>.
+            </summary>
+            <param name="reader">Source of XML to read from.</param>
+        </member>
+        <member name="M:Microsoft.Practices.Unity.Configuration.InjectionParameterValueElement.CreateParameterValue(System.Type)">
+            <summary>
+            Return an instance of <see cref="T:Microsoft.Practices.Unity.InjectionParameterValue"/> based
+            on the contents of this 
+            </summary>
+            <param name="targetType">Type of the parameter we are creating the value for.</param>
+            <returns>The created InjectionParameterValue, ready to pass to the container config API.</returns>
+        </member>
+        <member name="P:Microsoft.Practices.Unity.Configuration.InjectionParameterValueElement.ElementType">
+            <summary>
+            The concrete type of this element.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Practices.Unity.Configuration.DependencyValueElement.CreateParameterValue(System.Type)">
+            <summary>
+            Return an instance of <see cref="T:Microsoft.Practices.Unity.InjectionParameterValue"/> based
+            on the contents of this 
+            </summary>
+            <param name="targetType">Type of the containing parameter.</param>
+            <returns>The created InjectionParameterValue, ready to pass to the container config API.</returns>
+        </member>
+        <member name="P:Microsoft.Practices.Unity.Configuration.DependencyValueElement.Name">
+            <summary>
+            Name of the dependency to resolve.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Practices.Unity.Configuration.DependencyValueElement.TypeName">
+            <summary>
+            Type of the dependency to resolve.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Practices.Unity.Configuration.ArrayValueElement">
+            <summary>
+            A configuration element that represents an array to be resolved.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Practices.Unity.Configuration.ArrayValueElement.CreateParameterValue(System.Type)">
+            <summary>
+            Return an instance of <see cref="T:Microsoft.Practices.Unity.InjectionParameterValue"/> based
+            on the contents of this element.
+            </summary>
+            <param name="targetType">Type of parent parameter. Ignored by this implementation.</param>
+            <returns>The created InjectionParameterValue, ready to pass to the container config API.</returns>
+            <seealso cref="T:Microsoft.Practices.Unity.ResolvedArrayParameter"/>
+        </member>
+        <member name="M:Microsoft.Practices.Unity.Configuration.ArrayValueElement.OnDeserializeUnrecognizedElement(System.String,System.Xml.XmlReader)">
+            <summary>
+            Gets a value indicating whether an unknown element is encountered during deserialization.
+            </summary>
+            
+            <returns>
+            true when an unknown element is encountered while deserializing; otherwise, false.
+            </returns>
+            
+            <param name="reader">The <see cref="T:System.Xml.XmlReader"></see> being used for deserialization.</param>
+            <param name="elementName">The name of the unknown subelement.</param>
+            <exception cref="T:System.Configuration.ConfigurationErrorsException">The element identified by elementName is locked.- or -One or more of the element's attributes is locked.- or -elementName is unrecognized, or the element has an unrecognized attribute.- or -The element has a Boolean attribute with an invalid value.- or -An attempt was made to deserialize a property more than once.- or -An attempt was made to deserialize a property that is not a valid member of the element.- or -The element cannot contain a CDATA or text element.</exception>
+        </member>
+        <member name="T:Microsoft.Practices.Unity.Configuration.InstanceDescriptionConfigurationElement">
+            <summary>
+            Base class for configuration elements which describe objects.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Practices.Unity.Configuration.InstanceDescriptionConfigurationElement.CreateInstance``1">
+            <summary>
+            Create the object represented in this section.
+            </summary>
+            <returns>The represented object.</returns>
+        </member>
+        <member name="P:Microsoft.Practices.Unity.Configuration.InstanceDescriptionConfigurationElement.TypeName">
+            <summary>
+            Returns the string name of the type of the represented object.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Practices.Unity.Configuration.InstanceDescriptionConfigurationElement.Value">
+            <summary>
+            Optional value used when creating the represented object.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Practices.Unity.Configuration.InstanceDescriptionConfigurationElement.TypeConverterName">
+            <summary>
+            Type name of the type converter used to create the represented object..
+            If not specified, the default type converter (if any) is used.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Practices.Unity.Configuration.InstanceDescriptionConfigurationElement.TypeConverter">
+            <summary>
+            The type converter to use to convert the value into
+            the represented object, or null if no typeconverter is
+            required.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Practices.Unity.Configuration.InstanceDescriptionConfigurationElement.Type">
+            <summary>
+            The underlying type of the represented object.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Practices.Unity.Configuration.InstanceDescriptionConfigurationElement.HasData">
+            <summary>
+            Indicates whether the configuration element has information.
+            </summary>
+            <value>
+            <see langword="true"/> if the configuration element has information, 
+            otherwise <see langword="false"/>.
+            </value>
+        </member>
+        <member name="T:Microsoft.Practices.Unity.Configuration.UnityContainerExtensionConfigurationElement">
+            <summary>
+            This class provides a base class for configuration
+            of a Unity container using user-installed container
+            extensions.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Practices.Unity.Configuration.UnityContainerExtensionConfigurationElement.DeserializeElement(System.Xml.XmlReader)">
+            <summary>
+            Read in the contents of this element from the <paramref name="reader"/>.
+            </summary>
+            <param name="reader"><see cref="T:System.Xml.XmlReader"/> containing contents of element.</param>
+        </member>
+        <member name="M:Microsoft.Practices.Unity.Configuration.UnityContainerExtensionConfigurationElement.Configure(Microsoft.Practices.Unity.IUnityContainer)">
+            <summary>
+            Execute this command against the given container.
+            </summary>
+            <remarks>
+            Interface implementors will implement this method to
+            apply configuration changes to the container.</remarks>
+            <param name="container">The <see cref="T:Microsoft.Practices.Unity.IUnityContainer"/> to configure.</param>
+        </member>
+        <member name="P:Microsoft.Practices.Unity.Configuration.UnityContainerExtensionConfigurationElement.Name">
+            <summary>
+            Name of this configuration element. Names must be unique.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Practices.Unity.Configuration.UnityContainerExtensionConfigurationElement.Type">
+            <summary>
+            Concrete type name for this configuration element.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Practices.Unity.Configuration.UnityContainerExtensionElementCollection">
+            <summary>
+            A <see cref="T:System.Configuration.ConfigurationElementCollection"/> that holds the collection of
+            extension elements specified in the config file.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Practices.Unity.Configuration.UnityContainerExtensionElementCollection.CreateNewElement">
+            <summary>
+            When overridden in a derived class, creates a new <see cref="T:System.Configuration.ConfigurationElement"></see>.
+            </summary>
+            
+            <returns>
+            A new <see cref="T:System.Configuration.ConfigurationElement"></see>.
+            </returns>
+            
+        </member>
+        <member name="M:Microsoft.Practices.Unity.Configuration.UnityContainerExtensionElementCollection.GetElementKey(System.Configuration.ConfigurationElement)">
+            <summary>
+            Gets the element key for a specified configuration element when overridden in a derived class.
+            </summary>
+            
+            <returns>
+            An <see cref="T:System.Object"></see> that acts as the key for the specified <see cref="T:System.Configuration.ConfigurationElement"></see>.
+            </returns>
+            
+            <param name="element">The <see cref="T:System.Configuration.ConfigurationElement"></see> to return the key for. </param>
+        </member>
+        <member name="P:Microsoft.Practices.Unity.Configuration.UnityContainerExtensionElementCollection.Item(System.Int32)">
+            <summary>
+            Resolve or set the extension element stored at the given index.
+            </summary>
+            <param name="index">Index to get or set the element at.</param>
+            <returns>The extension element.</returns>
+        </member>
+        <member name="T:Microsoft.Practices.Unity.Configuration.UnityContainerTypeConfigurationElementCollection">
+            <summary>
+            Collection of <see cref="T:Microsoft.Practices.Unity.Configuration.UnityContainerExtensionConfigurationElement"/> elements
+            from the configuration file. This collection can contain derived classes of
+            <see cref="T:Microsoft.Practices.Unity.Configuration.UnityContainerExtensionConfigurationElement"/>.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Practices.Unity.Configuration.UnityContainerTypeConfigurationElementCollection.OnDeserializeUnrecognizedElement(System.String,System.Xml.XmlReader)">
+            <summary>
+             Figure out the concrete type to create given the type attribute on the given
+             xml reader. If not present, throws an exception.
+            </summary>
+            
+            <returns>
+            true if the unrecognized element was deserialized successfully; otherwise, false. The default is false.
+            </returns>
+            
+            <param name="reader">An input stream that reads XML from the configuration file. </param>
+            <param name="elementName">The name of the unrecognized element. </param>
+            <exception cref="T:System.ArgumentException">elementName starts with the reserved prefix "config" or "lock".</exception>
+            <exception cref="T:System.Configuration.ConfigurationErrorsException">The element specified in elementName is the &lt;clear&gt; element.</exception>
+        </member>
+        <member name="M:Microsoft.Practices.Unity.Configuration.UnityContainerTypeConfigurationElementCollection.CreateNewElement">
+            <summary>
+            When overridden in a derived class, creates a new <see cref="T:System.Configuration.ConfigurationElement"></see>.
+            </summary>
+            
+            <returns>
+            A new <see cref="T:System.Configuration.ConfigurationElement"></see>.
+            </returns>
+            
+        </member>
+        <member name="M:Microsoft.Practices.Unity.Configuration.UnityContainerTypeConfigurationElementCollection.GetElementKey(System.Configuration.ConfigurationElement)">
+            <summary>
+            Gets the element key for a specified configuration element when overridden in a derived class.
+            </summary>
+            
+            <returns>
+            An <see cref="T:System.Object"></see> that acts as the key for the specified <see cref="T:System.Configuration.ConfigurationElement"></see>.
+            </returns>
+            
+            <param name="element">The <see cref="T:System.Configuration.ConfigurationElement"></see> to return the key for. </param>
+        </member>
+        <member name="P:Microsoft.Practices.Unity.Configuration.UnityContainerTypeConfigurationElementCollection.Item(System.String)">
+            <summary>
+            Resolve the given element by key.
+            </summary>
+            <param name="key">Name of element to find.</param>
+            <returns>Element at the given key.</returns>
+        </member>
+        <member name="T:Microsoft.Practices.Unity.Configuration.UnityTypeElementCollection">
+            <summary>
+            A <see cref="T:System.Configuration.ConfigurationElementCollection"/> that stores the set of
+            type elements in the config file.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Practices.Unity.Configuration.UnityTypeElementCollection.CreateNewElement">
+            <summary>
+            When overridden in a derived class, creates a new <see cref="T:System.Configuration.ConfigurationElement"></see>.
+            </summary>
+            
+            <returns>
+            A new <see cref="T:System.Configuration.ConfigurationElement"></see>.
+            </returns>
+            
+        </member>
+        <member name="M:Microsoft.Practices.Unity.Configuration.UnityTypeElementCollection.GetElementKey(System.Configuration.ConfigurationElement)">
+            <summary>
+            Gets the element key for a specified configuration element when overridden in a derived class.
+            </summary>
+            
+            <returns>
+            An <see cref="T:System.Object"></see> that acts as the key for the specified <see cref="T:System.Configuration.ConfigurationElement"></see>.
+            </returns>
+            
+            <param name="element">The <see cref="T:System.Configuration.ConfigurationElement"></see> to return the key for. </param>
+        </member>
+        <member name="P:Microsoft.Practices.Unity.Configuration.UnityTypeElementCollection.Item(System.String)">
+            <summary>
+            Resolve access to a type element by name
+            </summary>
+            <param name="name">Name to look up by. This is not just the name element, it's of the form
+            &lt;name&gt;:&lt;fully qualified type name&gt;.</param>
+            <returns>The given element, or null if not in the collection.</returns>
+        </member>
+        <member name="P:Microsoft.Practices.Unity.Configuration.UnityTypeElementCollection.Item(System.Int32)">
+            <summary>
+            Gets access to a type element to look up.
+            </summary>
+            <param name="index">The index to retrieve the element from.</param>
+            <returns>The element.</returns>
+        </member>
+        <member name="T:Microsoft.Practices.Unity.Configuration.InjectionMethodElement">
+            <summary>
+            Configuration element for configuring method injection.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Practices.Unity.Configuration.InjectionMethodElement.CreateInjectionMember">
+            <summary>
+            Return the InjectionMember object represented by this configuration
+            element.
+            </summary>
+            <returns>The injection member object.</returns>
+        </member>
+        <member name="M:Microsoft.Practices.Unity.Configuration.InjectionMethodElement.GetElementKey">
+            <summary>
+            Return the key that represents this configuration element in a collection.
+            </summary>
+            <returns>The key.</returns>
+        </member>
+        <member name="P:Microsoft.Practices.Unity.Configuration.InjectionMethodElement.ElementName">
+            <summary>
+            Name of this element - used when calculating the collection key.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Practices.Unity.Configuration.InjectionMethodElement.Key">
+            <summary>
+            Key of the element.
+            </summary>
+            <remarks>
+            This property is used to allow configuration for multiple calls on the same method.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Practices.Unity.Configuration.InjectionMethodElement.Parameters">
+            <summary>
+            The collection of <see cref="T:Microsoft.Practices.Unity.Configuration.InjectionParameterValueElement"/> elements
+            that are children of this node.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Practices.Unity.Configuration.UnityConfigurationSection">
+            <summary>
+            A <see cref="T:System.Configuration.ConfigurationSection"/> that contains the configuration
+            for one or more <see cref="T:Microsoft.Practices.Unity.UnityContainer"/>s.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Practices.Unity.Configuration.UnityConfigurationSection.Containers">
+            <summary>
+            Provides access to the container information in the section.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Practices.Unity.Configuration.UnityConfigurationSection.TypeAliases">
+            <summary>
+            Provides access to the type alias information in the section.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Practices.Unity.Configuration.UnityLifetimeElement">
+            <summary>
+            Configuration element class wrapping the lifetime element
+            inside a type element.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Practices.Unity.Configuration.UnityLifetimeElement.CreateLifetimeManager">
+            <summary>
+            Create the lifetime manager instance configured in this section.
+            </summary>
+            <returns>The lifetime manager configured.</returns>
+        </member>
+        <member name="T:Microsoft.Practices.Unity.Configuration.UnityTypeResolver">
+            <summary>
+            Provides logic to resolve a type alias or type fullname to a concrete type
+            </summary>
+        </member>
+        <member name="M:Microsoft.Practices.Unity.Configuration.UnityTypeResolver.#ctor(Microsoft.Practices.Unity.Configuration.UnityTypeAliasCollection)">
+            <summary>
+            Create a new <see cref="T:Microsoft.Practices.Unity.Configuration.UnityTypeResolver"/> which will use the
+            given <paramref name="typeAliases"/> section to resolve.
+            </summary>
+            <param name="typeAliases">The configuration element that stores
+            our mapping of aliases to type names.</param>
+        </member>
+        <member name="M:Microsoft.Practices.Unity.Configuration.UnityTypeResolver.ResolveType(System.String)">
+            <summary>
+            Resolves a type alias or type fullname to a concrete type
+            </summary>
+            <param name="typeName">Type alias or type fullname</param>
+            <returns>The concrete Type</returns>
+        </member>
+        <member name="M:Microsoft.Practices.Unity.Configuration.UnityTypeResolver.ResolveWithDefault(System.String,System.Type)">
+            <summary>
+            Resolve a type alias or type full name to a concrete type.
+            If <paramref name="typeName"/> is null or empty, return the
+            given <paramref name="defaultValue"/> instead.
+            </summary>
+            <param name="typeName">Type alias or full name to resolve.</param>
+            <param name="defaultValue">Value to return if typeName is null or empty.</param>
+            <returns>The concrete <see cref="T:System.Type"/>.</returns>
+        </member>
+        <member name="T:Microsoft.Practices.Unity.Configuration.AssemblyQualifiedTypeNameConverter">
+            <summary>
+            A <see cref="T:System.ComponentModel.TypeConverter"/> that converts types
+            to and from fully qualified type names.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Practices.Unity.Configuration.AssemblyQualifiedTypeNameConverter.CanConvertTo(System.ComponentModel.ITypeDescriptorContext,System.Type)">
+            <summary>
+            Determines whether the conversion is allowed.
+            </summary>
+            
+            <returns>
+            true if the conversion is allowed; otherwise, false. 
+            </returns>
+            
+            <param name="type">The type to convert to.</param>
+            <param name="ctx">The <see cref="T:System.ComponentModel.ITypeDescriptorContext"></see> object used for type conversion.</param>
+        </member>
+        <member name="M:Microsoft.Practices.Unity.Configuration.AssemblyQualifiedTypeNameConverter.CanConvertFrom(System.ComponentModel.ITypeDescriptorContext,System.Type)">
+            <summary>
+            Determines whether the conversion is allowed.
+            </summary>
+            
+            <returns>
+            true if the conversion is allowed; otherwise, false.
+            </returns>
+            
+            <param name="type">The <see cref="T:System.Type"></see> to convert from.</param>
+            <param name="ctx">The <see cref="T:System.ComponentModel.ITypeDescriptorContext"></see> object used for type conversions.</param>
+        </member>
+        <member name="M:Microsoft.Practices.Unity.Configuration.AssemblyQualifiedTypeNameConverter.ConvertFrom(System.ComponentModel.ITypeDescriptorContext,System.Globalization.CultureInfo,System.Object)">
+            <summary>
+            Converts the given object to the type of this converter, using the specified context and culture information.
+            </summary>
+            
+            <returns>
+            An <see cref="T:System.Object"></see> that represents the converted value.
+            </returns>
+            
+            <param name="culture">The <see cref="T:System.Globalization.CultureInfo"></see> to use as the current culture. </param>
+            <param name="context">An <see cref="T:System.ComponentModel.ITypeDescriptorContext"></see> that provides a format context. </param>
+            <param name="value">The <see cref="T:System.Object"></see> to convert. </param>
+            <exception cref="T:System.NotSupportedException">The conversion cannot be performed. </exception>
+        </member>
+        <member name="M:Microsoft.Practices.Unity.Configuration.AssemblyQualifiedTypeNameConverter.ConvertTo(System.ComponentModel.ITypeDescriptorContext,System.Globalization.CultureInfo,System.Object,System.Type)">
+            <summary>
+            Converts the given value object to the specified type, using the specified context and culture information.
+            </summary>
+            
+            <returns>
+            An <see cref="T:System.Object"></see> that represents the converted value.
+            </returns>
+            
+            <param name="culture">A <see cref="T:System.Globalization.CultureInfo"></see>. If null is passed, the current culture is assumed. </param>
+            <param name="context">An <see cref="T:System.ComponentModel.ITypeDescriptorContext"></see> that provides a format context. </param>
+            <param name="destinationType">The <see cref="T:System.Type"></see> to convert the value parameter to. </param>
+            <param name="value">The <see cref="T:System.Object"></see> to convert. </param>
+            <exception cref="T:System.NotSupportedException">The conversion cannot be performed. </exception>
+            <exception cref="T:System.ArgumentNullException">The destinationType parameter is null. </exception>
+        </member>
+        <member name="T:Microsoft.Practices.Unity.Configuration.UnityContainerExtensionElement">
+            <summary>
+            A <see cref="T:System.Configuration.ConfigurationElement"/> that holds the information from
+            the configuration file about which extensions to add to the container.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Practices.Unity.Configuration.UnityContainerExtensionElement.Configure(Microsoft.Practices.Unity.IUnityContainer)">
+            <summary>
+            Execute this command against the given container.
+            </summary>
+            <remarks>
+            Interface implementors will implement this method to
+            apply configuration changes to the container.</remarks>
+            <param name="container">The <see cref="T:Microsoft.Practices.Unity.IUnityContainer"/> to configure.</param>
+        </member>
+        <member name="P:Microsoft.Practices.Unity.Configuration.UnityContainerExtensionElement.TypeName">
+            <summary>
+            The type or alias for the extension to add to the container.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Practices.Unity.Configuration.UnityContainerExtensionElement.Type">
+            <summary>
+            The type of extension to add to the container.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Practices.Unity.Configuration.UnityContainerElement">
+            <summary>
+            A <see cref="T:System.Configuration.ConfigurationElement"/> that stores the configuration information
+            for a single <see cref="T:Microsoft.Practices.Unity.IUnityContainer"/>.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Practices.Unity.Configuration.UnityContainerElement.Configure(Microsoft.Practices.Unity.IUnityContainer)">
+            <summary>
+            Execute this command against the given container.
+            </summary>
+            <remarks>
+            Interface implementors will implement this method to
+            apply configuration changes to the container.</remarks>
+            <param name="container">The <see cref="T:Microsoft.Practices.Unity.IUnityContainer"/> to configure.</param>
+        </member>
+        <member name="P:Microsoft.Practices.Unity.Configuration.UnityContainerElement.Name">
+            <summary>
+            Name of this container configuration. The config may be retrieved by name.
+            </summary>
+            <remarks>This name is only used for lookup from the config file. If not 
+            specified, this is the default container configuration.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Practices.Unity.Configuration.UnityContainerElement.Types">
+            <summary>
+            The collection of &lt;type&gt; elements that contain the actual configuration entries.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Practices.Unity.Configuration.UnityContainerElement.Extensions">
+            <summary>
+            The collection of &lt;extension&gt; elements that specify which extensions to add to the container.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Practices.Unity.Configuration.UnityContainerElement.Instances">
+            <summary>
+            The collection of &lt;instance&gt; element that specify which instances to add to the container.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Practices.Unity.Configuration.UnityContainerElement.ExtensionConfig">
+            <summary>
+            The collection of extension configuration elements that are used to add
+            arbitrary new extensions to the configuration file.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Practices.Unity.Configuration.UnityInstanceElementCollection">
+            <summary>
+            A <see cref="T:System.Configuration.ConfigurationElementCollection"/> that stores the
+            collection of <see cref="T:Microsoft.Practices.Unity.Configuration.UnityInstanceElement"/> objects specified
+            in the current configuration file.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Practices.Unity.Configuration.UnityInstanceElementCollection.CreateNewElement">
+            <summary>
+            When overridden in a derived class, creates a new <see cref="T:System.Configuration.ConfigurationElement"></see>.
+            </summary>
+            
+            <returns>
+            A new <see cref="T:System.Configuration.ConfigurationElement"></see>.
+            </returns>
+            
+        </member>
+        <member name="M:Microsoft.Practices.Unity.Configuration.UnityInstanceElementCollection.GetElementKey(System.Configuration.ConfigurationElement)">
+            <summary>
+            Gets the element key for a specified configuration element when overridden in a derived class.
+            </summary>
+            
+            <returns>
+            An <see cref="T:System.Object"></see> that acts as the key for the specified <see cref="T:System.Configuration.ConfigurationElement"></see>.
+            </returns>
+            
+            <param name="element">The <see cref="T:System.Configuration.ConfigurationElement"></see> to return the key for. </param>
+        </member>
+        <member name="T:Microsoft.Practices.Unity.Configuration.InjectionMemberElementCollection">
+            <summary>
+            Configuration collection of the information used to configure member injection.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Practices.Unity.Configuration.InjectionMemberElementCollection.OnDeserializeUnrecognizedElement(System.String,System.Xml.XmlReader)">
+            <summary>
+            Causes the configuration system to throw an exception.
+            </summary>
+            
+            <returns>
+            true if the unrecognized element was deserialized successfully; otherwise, false. The default is false.
+            </returns>
+            
+            <param name="reader">An input stream that reads XML from the configuration file. </param>
+            <param name="elementName">The name of the unrecognized element. </param>
+            <exception cref="T:System.ArgumentException">elementName starts with the reserved prefix "config" or "lock".</exception>
+            <exception cref="T:System.Configuration.ConfigurationErrorsException">The element specified in elementName is the &lt;clear&gt; element.</exception>
+        </member>
+        <member name="M:Microsoft.Practices.Unity.Configuration.InjectionMemberElementCollection.CreateNewElement">
+            <summary>
+            When overridden in a derived class, creates a new <see cref="T:System.Configuration.ConfigurationElement"></see>.
+            </summary>
+            
+            <returns>
+            A new <see cref="T:System.Configuration.ConfigurationElement"></see>.
+            </returns>
+            
+        </member>
+        <member name="M:Microsoft.Practices.Unity.Configuration.InjectionMemberElementCollection.GetElementKey(System.Configuration.ConfigurationElement)">
+            <summary>
+            Gets the element key for a specified configuration element when overridden in a derived class.
+            </summary>
+            
+            <returns>
+            An <see cref="T:System.Object"></see> that acts as the key for the specified <see cref="T:System.Configuration.ConfigurationElement"></see>.
+            </returns>
+            
+            <param name="element">The <see cref="T:System.Configuration.ConfigurationElement"></see> to return the key for. </param>
+        </member>
+        <member name="T:Microsoft.Practices.Unity.Configuration.InjectionConstructorElement">
+            <summary>
+            Configuration element for configuring constructor injection.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Practices.Unity.Configuration.InjectionConstructorElement.CreateInjectionMember">
+            <summary>
+            Return the InjectionMember object represented by this configuration
+            element.
+            </summary>
+            <returns>The injection member object.</returns>
+        </member>
+        <member name="P:Microsoft.Practices.Unity.Configuration.InjectionConstructorElement.Name">
+            <summary>
+            Name of the element.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Practices.Unity.Configuration.InjectionConstructorElement.ElementName">
+            <summary>
+            Name of this element - used when calculating the collection key.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Practices.Unity.Configuration.InjectionConstructorElement.Parameters">
+            <summary>
+            The collection of <see cref="T:Microsoft.Practices.Unity.Configuration.InjectionParameterValueElement"/> elements
+            that are children of this node.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Practices.Unity.Configuration.UnityTypeAlias">
+            <summary>
+            A <see cref="T:System.Configuration.ConfigurationElement"/> class used to manage the contents
+            of a &lt;typeAlias&gt; node in the configuration file.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Practices.Unity.Configuration.UnityTypeAlias.Alias">
+            <summary>
+            Alias to use. 
+            </summary>
+        </member>
+        <member name="P:Microsoft.Practices.Unity.Configuration.UnityTypeAlias.Type">
+            <summary>
+            Source type.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Practices.Unity.Configuration.UnityTypeAliasCollection">
+            <summary>
+            A <see cref="T:System.Configuration.ConfigurationElementCollection"/> that stores the set of
+            type elements in the config file.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Practices.Unity.Configuration.UnityTypeAliasCollection.CreateNewElement">
+            <summary>
+            When overridden in a derived class, creates a new <see cref="T:System.Configuration.ConfigurationElement"></see>.
+            </summary>
+            
+            <returns>
+            A new <see cref="T:System.Configuration.ConfigurationElement"></see>.
+            </returns>
+            
+        </member>
+        <member name="M:Microsoft.Practices.Unity.Configuration.UnityTypeAliasCollection.GetElementKey(System.Configuration.ConfigurationElement)">
+            <summary>
+            Gets the element key for a specified configuration element when overridden in a derived class.
+            </summary>
+            
+            <returns>
+            An <see cref="T:System.Object"></see> that acts as the key for the specified <see cref="T:System.Configuration.ConfigurationElement"></see>.
+            </returns>
+            
+            <param name="element">The <see cref="T:System.Configuration.ConfigurationElement"></see> to return the key for. </param>
+        </member>
+        <member name="P:Microsoft.Practices.Unity.Configuration.UnityTypeAliasCollection.Item(System.String)">
+            <summary>
+            Resolve access to a typeAlias element by alias
+            </summary>
+            <param name="alias">Name to look up by. This is not just the name element.</param>
+            <returns>The given element, or null if not in the collection.</returns>
+        </member>
+        <member name="P:Microsoft.Practices.Unity.Configuration.UnityTypeAliasCollection.Item(System.Int32)">
+            <summary>
+            Gets access to a type element to look up.
+            </summary>
+            <param name="index">The index to retrieve the element from.</param>
+            <returns>The element.</returns>
+        </member>
+        <member name="T:Microsoft.Practices.Unity.Configuration.InstanceValueElement">
+            <summary>
+            A configuration element that gives a value for an instance.
+            It lets you specify the type, value, and type converter to
+            use to create the instance.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Practices.Unity.Configuration.InstanceValueElement.CreateInstance">
+            <summary>
+            Create an instance as specified by this element's configuration.
+            </summary>
+            <returns>The created instance</returns>
+        </member>
+        <member name="M:Microsoft.Practices.Unity.Configuration.InstanceValueElement.CreateParameterValue(System.Type)">
+            <summary>
+            Return an instance of <see cref="T:Microsoft.Practices.Unity.InjectionParameterValue"/> based
+            on the contents of this 
+            </summary>
+            <param name="targetType">Type of parent parameter. Ignored by this implementation.</param>
+            <returns>The created InjectionParameterValue, ready to pass to the container config API.</returns>
+        </member>
+        <member name="P:Microsoft.Practices.Unity.Configuration.InstanceValueElement.TypeName">
+            <summary>
+            Type of the instance to create. If not specified, defaults to string
+            </summary>
+        </member>
+        <member name="P:Microsoft.Practices.Unity.Configuration.InstanceValueElement.Value">
+            <summary>
+            Value to use to initialize the instance.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Practices.Unity.Configuration.InstanceValueElement.TypeConverterName">
+            <summary>
+            The type converter to use to convert the Value into the instance.
+            If not specified, we use the default converter for the type.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Practices.Unity.Configuration.InstanceValueElement.TypeToCreate">
+            <summary>
+            The <see cref="T:System.Type"/> instance after resolution of type aliases.
+            </summary>
+            <remarks>If <see cref="P:Microsoft.Practices.Unity.Configuration.InstanceValueElement.TypeName"/> property is empty, this returns typeof(string).</remarks>
+        </member>
+        <member name="T:Microsoft.Practices.Unity.Configuration.MethodParameterElement">
+            <summary>
+            Configuration element for storing the values of method / constructor parameters.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Practices.Unity.Configuration.MethodParameterElement.CreateInjectionParameterValue">
+            <summary>
+            Get the <see cref="T:Microsoft.Practices.Unity.InjectionParameterValue"/> object for this parameter
+            to feed to the container configuration API.
+            </summary>
+            <returns>The created <see cref="T:Microsoft.Practices.Unity.InjectionParameterValue"/> object.</returns>
+        </member>
+        <member name="M:Microsoft.Practices.Unity.Configuration.MethodParameterElement.OnDeserializeUnrecognizedElement(System.String,System.Xml.XmlReader)">
+            <summary>
+            Gets a value indicating whether an unknown element is encountered during deserialization.
+            </summary>
+            
+            <returns>
+            true when an unknown element is encountered while deserializing; otherwise, false.
+            </returns>
+            
+            <param name="reader">The <see cref="T:System.Xml.XmlReader"></see> being used for deserialization.</param>
+            <param name="elementName">The name of the unknown subelement.</param>
+            <exception cref="T:System.Configuration.ConfigurationErrorsException">The element identified by elementName is locked.- or -One or more of the element's attributes is locked.- or -elementName is unrecognized, or the element has an unrecognized attribute.- or -The element has a Boolean attribute with an invalid value.- or -An attempt was made to deserialize a property more than once.- or -An attempt was made to deserialize a property that is not a valid member of the element.- or -The element cannot contain a CDATA or text element.</exception>
+        </member>
+        <member name="M:Microsoft.Practices.Unity.Configuration.MethodParameterElement.DeserializeElement(System.Xml.XmlReader,System.Boolean)">
+            <summary>
+            Reads XML from the configuration file.
+            </summary>
+            <param name="reader">The <see cref="T:System.Xml.XmlReader"/> that reads from the configuration file.</param>
+            <param name="serializeCollectionKey"><see langword="true"/> to serialize only the collectionkey properties; 
+            otherwise, <see langword="false"/>.</param>
+        </member>
+        <member name="P:Microsoft.Practices.Unity.Configuration.MethodParameterElement.Name">
+            <summary>
+            Name of this parameter. Doesn't have to match the actual
+            parameter name in the method or constructor, it's just
+            required for uniqueness.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Practices.Unity.Configuration.MethodParameterElement.ParameterTypeName">
+            <summary>
+            Type of this parameter.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Practices.Unity.Configuration.MethodParameterElement.GenericParameterName">
+            <summary>
+            Generic parameter name of this parameter.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Practices.Unity.Configuration.UnityInstanceElement">
+            <summary>
+            A <see cref="T:System.Configuration.ConfigurationElement"/> that holds the information
+            about instances to be placed in the container.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Practices.Unity.Configuration.UnityInstanceElement.Configure(Microsoft.Practices.Unity.IUnityContainer)">
+            <summary>
+            Execute this command against the given container.
+            </summary>
+            <remarks>
+            Interface implementors will implement this method to
+            apply configuration changes to the container.</remarks>
+            <param name="container">The <see cref="T:Microsoft.Practices.Unity.IUnityContainer"/> to configure.</param>
+        </member>
+        <member name="P:Microsoft.Practices.Unity.Configuration.UnityInstanceElement.Name">
+            <summary>
+            Name to use when registering this instance. Optional.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Practices.Unity.Configuration.Properties.Resources">
+            <summary>
+              A strongly-typed resource class, for looking up localized strings, etc.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Practices.Unity.Configuration.Properties.Resources.ResourceManager">
+            <summary>
+              Returns the cached ResourceManager instance used by this class.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Practices.Unity.Configuration.Properties.Resources.Culture">
+            <summary>
+              Overrides the current thread's CurrentUICulture property for all
+              resource lookups using this strongly typed resource class.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Practices.Unity.Configuration.Properties.Resources.ConversionNotSupported">
+            <summary>
+              Looks up a localized string similar to Can only convert to and from strings, not type {0}.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Practices.Unity.Configuration.Properties.Resources.GenericParameterArrayNotSupported">
+            <summary>
+              Looks up a localized string similar to The value element named &lt;{1}&gt; is not available with generic arrays in the property or parameter named &quot;{0}&quot;..
+            </summary>
+        </member>
+        <member name="P:Microsoft.Practices.Unity.Configuration.Properties.Resources.GenericParameterNotSupported">
+            <summary>
+              Looks up a localized string similar to The value element named &lt;{1}&gt; is not available with generic parameters in the property or parameter named &quot;{0}&quot;..
+            </summary>
+        </member>
+        <member name="P:Microsoft.Practices.Unity.Configuration.Properties.Resources.InvalidConfiguration">
+            <summary>
+              Looks up a localized string similar to The configuration that leads to the current state is invalid and should have been checked during deserialization..
+            </summary>
+        </member>
+        <member name="P:Microsoft.Practices.Unity.Configuration.Properties.Resources.MustGiveValueOrDependency">
+            <summary>
+              Looks up a localized string similar to The configuration file does not specify a &lt;value&gt; or &lt;dependency&gt; element for the property or parameter named &quot;{0}&quot;. You must specify one of them but not both..
+            </summary>
+        </member>
+        <member name="P:Microsoft.Practices.Unity.Configuration.Properties.Resources.MustHaveOnlyOneOfValueOrDependency">
+            <summary>
+              Looks up a localized string similar to The configuration file specifies both a &lt;value&gt; and a &lt;dependency&gt;element for the property or parameter named &quot;{0}&quot;. You must specify only one of these..
+            </summary>
+        </member>
+        <member name="P:Microsoft.Practices.Unity.Configuration.Properties.Resources.MustNotProvideATypeForDependencyIfBelongsToGeneric">
+            <summary>
+              Looks up a localized string similar to The configuration file includes a &lt;dependency&gt; element that specifies a type for the generic parameter &quot;{0}&quot;..
+            </summary>
+        </member>
+        <member name="P:Microsoft.Practices.Unity.Configuration.Properties.Resources.NeitherParameterTypeNorGenericParameterNameSpecified">
+            <summary>
+              Looks up a localized string similar to The configuration file must include a value for one of &quot;parameterType&quot; and &quot;genericParameterName&quot; for the property or parameter named &quot;{0}&quot;..
+            </summary>
+        </member>
+        <member name="P:Microsoft.Practices.Unity.Configuration.Properties.Resources.OnlyOneOfParameterTypeAndGenericParameterNameAllowed">
+            <summary>
+              Looks up a localized string similar to The configuration file includes values for more than one of &quot;parameterType&quot; and &quot;genericParameterName&quot; for the property or parameter named &quot;{0}&quot;. You must specify only one of these..
+            </summary>
+        </member>
+        <member name="P:Microsoft.Practices.Unity.Configuration.Properties.Resources.OnlyOneValueElementAllowed">
+            <summary>
+              Looks up a localized string similar to The configuration file includes more than one value element for the property or parameter named &quot;{0}&quot;..
+            </summary>
+        </member>
+        <member name="P:Microsoft.Practices.Unity.Configuration.Properties.Resources.ParameterTypeIsNotArray">
+            <summary>
+              Looks up a localized string similar to The configuration file includes a property or parameter which is configured with an array value but has type {0} which is not an array type. ({1} line {2}).
+            </summary>
+        </member>
+    </members>
+</doc>
