@@ -14,16 +14,16 @@ namespace MassTransit.ServiceBus.Internal
 {
     using System;
     using System.Collections.Generic;
-    using System.Threading;
+    using Magnum.Common.Threading;
 
-	/// <summary>
+    /// <summary>
     /// Manages and dispatches messages to correlated message consumers
     /// </summary>
     public class MessageTypeDispatcher :
         IMessageTypeDispatcher
     {
         private readonly Dictionary<Type, IMessageDispatcher> _messageDispatchers = new Dictionary<Type, IMessageDispatcher>();
-        private readonly ReaderWriterLockSlim _messageLock = new ReaderWriterLockSlim();
+        private readonly UpgradeableLock _messageLock = new UpgradeableLock();
 
         public bool Accept(object message)
         {
@@ -76,35 +76,25 @@ namespace MassTransit.ServiceBus.Internal
 
         public IMessageDispatcher GetMessageDispatcher(Type messageType) 
         {
-            _messageLock.EnterUpgradeableReadLock();
-            try
+            using (var token = _messageLock.EnterUpgradableRead())
             {
                 IMessageDispatcher consumer;
-            	if (_messageDispatchers.TryGetValue(messageType, out consumer))
-            		return consumer;
+                if (_messageDispatchers.TryGetValue(messageType, out consumer))
+                    return consumer;
 
-                _messageLock.EnterWriteLock();
-				try
-				{
-					if (_messageDispatchers.TryGetValue(messageType, out consumer))
-						return consumer;
+                using(token.Upgrade())
+                {
+                    if (_messageDispatchers.TryGetValue(messageType, out consumer))
+                        return consumer;
 
-					Type dispatcherType = typeof(MessageDispatcher<>).MakeGenericType(messageType);
+                    Type dispatcherType = typeof (MessageDispatcher<>).MakeGenericType(messageType);
 
-					consumer = (IMessageDispatcher) Activator.CreateInstance(dispatcherType);
+                    consumer = (IMessageDispatcher) Activator.CreateInstance(dispatcherType);
 
-					_messageDispatchers.Add(messageType, consumer);
+                    _messageDispatchers.Add(messageType, consumer);
 
-					return consumer;
-				}
-				finally
-				{
-				    _messageLock.ExitWriteLock();
-				}
-			}
-			finally
-            {
-                _messageLock.ExitUpgradeableReadLock();
+                    return consumer;
+                }
             }
         }
 
@@ -131,15 +121,10 @@ namespace MassTransit.ServiceBus.Internal
         {
             Type messageType = message.GetType();
 
-            _messageLock.EnterReadLock();
-			try
-			{
-				return _messageDispatchers.TryGetValue(messageType, out dispatcher);
-			}
-			finally
-			{
-			    _messageLock.ExitReadLock();
-			}
+            using(_messageLock.EnterReadOnlyLock())
+            {
+                return _messageDispatchers.TryGetValue(messageType, out dispatcher);
+            }
         }
     }
 }

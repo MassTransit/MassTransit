@@ -70,11 +70,6 @@
     <Compile Include="Batch.cs" />
     <Compile Include="BatchedBy.cs" />
     <Compile Include="BatchTimeout.cs" />
-    <Compile Include="Configuration\BusBuilder.cs" />
-    <Compile Include="Configuration\BusOptions.cs" />
-    <Compile Include="Configuration\ConfigureTheBus.cs" />
-    <Compile Include="Configuration\SerializationOptions.cs" />
-    <Compile Include="Configuration\SubscriptionOptions.cs" />
     <Compile Include="Exceptions\SagaException.cs" />
     <Compile Include="ExpiresInAttribute.cs" />
     <Compile Include="Fault.cs" />
