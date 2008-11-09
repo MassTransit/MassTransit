@@ -1,0 +1,78 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Microsoft.Practices.Unity.StaticFactory</name>
+    </assembly>
+    <members>
+        <member name="M:Microsoft.Practices.Unity.StaticFactory.FactoryDelegateBuildPlanPolicy.BuildUp(Microsoft.Practices.ObjectBuilder2.IBuilderContext)">
+            <summary>
+            Creates an instance of this build plan's type, or fills
+            in the existing type if passed in.
+            </summary>
+            <param name="context">Context used to build up the object.</param>
+        </member>
+        <member name="T:Microsoft.Practices.Unity.StaticFactory.FactoryDelegate">
+            <summary>
+            A delegate type used by the static factory extension.
+            </summary>
+            <returns>The created object.</returns>
+        </member>
+        <member name="T:Microsoft.Practices.Unity.StaticFactory.IStaticFactoryConfiguration">
+            <summary>
+            Interface defining the configuration interface exposed by the
+            Static Factory extension.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Practices.Unity.StaticFactory.IStaticFactoryConfiguration.RegisterFactory``1(Microsoft.Practices.Unity.StaticFactory.FactoryDelegate)">
+            <summary>
+            Register the given factory delegate to be called when the container is
+            asked to resolve <typeparamref name="=TTypeToBuild"/>.
+            </summary>
+            <typeparam name="TTypeToBuild">Type that will be requested from the container.</typeparam>
+            <param name="factoryMethod">Delegate to invoke to create the instance.</param>
+            <returns>The container extension object this method was invoked on.</returns>
+        </member>
+        <member name="M:Microsoft.Practices.Unity.StaticFactory.IStaticFactoryConfiguration.RegisterFactory``1(System.String,Microsoft.Practices.Unity.StaticFactory.FactoryDelegate)">
+            <summary>
+            Register the given factory delegate to be called when the container is
+            asked to resolve <typeparamref name="=TTypeToBuild"/> and <paramref name="name"/>.
+            </summary>
+            <typeparam name="TTypeToBuild">Type that will be requested from the container.</typeparam>
+            <param name="name">The name that will be used when requesting to resolve this type.</param>
+            <param name="factoryMethod">Delegate to invoke to create the instance.</param>
+            <returns>The container extension object this method was invoked on.</returns>
+        </member>
+        <member name="T:Microsoft.Practices.Unity.StaticFactory.StaticFactoryExtension">
+            <summary>
+            A <see cref="T:Microsoft.Practices.Unity.UnityContainerExtension"/> that lets you register a
+            delegate with the container to create an object, rather than calling
+            the object's constructor.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Practices.Unity.StaticFactory.StaticFactoryExtension.Initialize">
+            <summary>
+            Initialize this extension. This particular extension requires no
+            initialization work.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Practices.Unity.StaticFactory.StaticFactoryExtension.RegisterFactory``1(System.String,Microsoft.Practices.Unity.StaticFactory.FactoryDelegate)">
+            <summary>
+            Register the given factory delegate to be called when the container is
+            asked to resolve <typeparamref name="=TTypeToBuild"/> and <paramref name="name"/>.
+            </summary>
+            <typeparam name="TTypeToBuild">Type that will be requested from the container.</typeparam>
+            <param name="name">The name that will be used when requesting to resolve this type.</param>
+            <param name="factoryMethod">Delegate to invoke to create the instance.</param>
+            <returns>The container extension object this method was invoked on.</returns>
+        </member>
+        <member name="M:Microsoft.Practices.Unity.StaticFactory.StaticFactoryExtension.RegisterFactory``1(Microsoft.Practices.Unity.StaticFactory.FactoryDelegate)">
+            <summary>
+            Register the given factory delegate to be called when the container is
+            asked to resolve <typeparamref name="=TTypeToBuild"/>.
+            </summary>
+            <typeparam name="TTypeToBuild">Type that will be requested from the container.</typeparam>
+            <param name="factoryMethod">Delegate to invoke to create the instance.</param>
+            <returns>The container extension object this method was invoked on.</returns>
+        </member>
+    </members>
+</doc>

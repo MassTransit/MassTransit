@@ -1,0 +1,425 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Microsoft.Practices.Unity.Interception.Configuration</name>
+    </assembly>
+    <members>
+        <member name="T:Microsoft.Practices.Unity.InterceptionExtension.Configuration.InterceptorTargetConfigurationElementCollection">
+            <summary>
+            Collection of <see cref="T:Microsoft.Practices.Unity.InterceptionExtension.Configuration.InterceptorTargetConfigurationElementBase"/> elements
+            from the configuration file.
+            </summary>
+            <seealso cref="T:Microsoft.Practices.Unity.InterceptionExtension.Configuration.InterceptorTargetConfigurationElementBase"/>
+            <seealso cref="T:Microsoft.Practices.Unity.InterceptionExtension.Configuration.KeyInterceptorTargetConfigurationElement"/>
+            <seealso cref="T:Microsoft.Practices.Unity.InterceptionExtension.Configuration.DefaultInterceptorTargetConfigurationElement"/>
+        </member>
+        <member name="M:Microsoft.Practices.Unity.InterceptionExtension.Configuration.InterceptorTargetConfigurationElementCollection.CreateNewElement">
+            <summary>
+            When overridden in a derived class, creates a new <see cref="T:System.Configuration.ConfigurationElement"></see>.
+            </summary>
+            <returns>
+            A new <see cref="T:System.Configuration.ConfigurationElement"></see>.
+            </returns>
+        </member>
+        <member name="M:Microsoft.Practices.Unity.InterceptionExtension.Configuration.InterceptorTargetConfigurationElementCollection.GetElementKey(System.Configuration.ConfigurationElement)">
+            <summary>
+            Gets the element key for a specified configuration element when overridden in a derived class.
+            </summary>
+            
+            <returns>
+            An <see cref="T:System.Object"></see> that acts as the key for the specified <see cref="T:System.Configuration.ConfigurationElement"></see>.
+            </returns>
+            
+            <param name="element">The <see cref="T:System.Configuration.ConfigurationElement"></see> to return the key for. </param>
+        </member>
+        <member name="M:Microsoft.Practices.Unity.InterceptionExtension.Configuration.InterceptorTargetConfigurationElementCollection.OnDeserializeUnrecognizedElement(System.String,System.Xml.XmlReader)">
+            <summary>
+             Figure out the concrete type to create given the type attribute on the given
+             xml reader. If not present, throws an exception.
+            </summary>
+            
+            <returns>
+            true if the unrecognized element was deserialized successfully; otherwise, false. The default is false.
+            </returns>
+            
+            <param name="reader">An input stream that reads XML from the configuration file. </param>
+            <param name="elementName">The name of the unrecognized element. </param>
+            <exception cref="T:System.ArgumentException">elementName starts with the reserved prefix "config" or "lock".</exception>
+            <exception cref="T:System.Configuration.ConfigurationErrorsException">The element specified in elementName is the &lt;clear&gt; element.</exception>
+        </member>
+        <member name="T:Microsoft.Practices.Unity.InterceptionExtension.Configuration.InterceptionPolicyConfigurationElement">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:Microsoft.Practices.Unity.InterceptionExtension.Configuration.InterceptionPolicyConfigurationElement.Configure(Microsoft.Practices.Unity.IUnityContainer)">
+            <summary>
+            
+            </summary>
+            <param name="container"></param>
+        </member>
+        <member name="P:Microsoft.Practices.Unity.InterceptionExtension.Configuration.InterceptionPolicyConfigurationElement.Name">
+            <summary>
+            Returns name of the element.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Practices.Unity.InterceptionExtension.Configuration.InterceptionPolicyConfigurationElement.CallHandlers">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:Microsoft.Practices.Unity.InterceptionExtension.Configuration.InterceptionPolicyConfigurationElement.MatchingRules">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:Microsoft.Practices.Unity.InterceptionExtension.Configuration.MatchingRuleConfigurationElementCollection">
+            <summary>
+            Collection of <see cref="T:Microsoft.Practices.Unity.InterceptionExtension.Configuration.MatchingRuleConfigurationElement"/> elements
+            from the configuration file.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Practices.Unity.InterceptionExtension.Configuration.MatchingRuleConfigurationElementCollection.CreateNewElement">
+            <summary>
+            When overridden in a derived class, creates a new <see cref="T:System.Configuration.ConfigurationElement"></see>.
+            </summary>
+            
+            <returns>
+            A new <see cref="T:System.Configuration.ConfigurationElement"></see>.
+            </returns>
+            
+        </member>
+        <member name="M:Microsoft.Practices.Unity.InterceptionExtension.Configuration.MatchingRuleConfigurationElementCollection.GetElementKey(System.Configuration.ConfigurationElement)">
+            <summary>
+            Gets the element key for a specified configuration element when overridden in a derived class.
+            </summary>
+            
+            <returns>
+            An <see cref="T:System.Object"></see> that acts as the key for the specified <see cref="T:System.Configuration.ConfigurationElement"></see>.
+            </returns>
+            
+            <param name="element">The <see cref="T:System.Configuration.ConfigurationElement"></see> to return the key for. </param>
+        </member>
+        <member name="P:Microsoft.Practices.Unity.InterceptionExtension.Configuration.MatchingRuleConfigurationElementCollection.Item(System.String)">
+            <summary>
+            Resolve the given element by key.
+            </summary>
+            <param name="key">Name of element to find.</param>
+            <returns>Element at the given key.</returns>
+        </member>
+        <member name="T:Microsoft.Practices.Unity.InterceptionExtension.Configuration.KeyInterceptorTargetConfigurationElement">
+            <summary>
+            A <see cref="T:System.Configuration.ConfigurationElement"/> class used to manage the contents
+            of a &lt;injector&gt; node in the configuration file for the interception extension's section.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Practices.Unity.InterceptionExtension.Configuration.InterceptorTargetConfigurationElementBase">
+            <summary>
+            Base class for elements in the &lt;transparentProxyInjection&gt; list for the
+            interception extension configuration.
+            </summary>
+            <seealso cref="T:Microsoft.Practices.Unity.InterceptionExtension.Configuration.KeyInterceptorTargetConfigurationElement"/>
+            <seealso cref="T:Microsoft.Practices.Unity.InterceptionExtension.Configuration.DefaultInterceptorTargetConfigurationElement"/>
+        </member>
+        <member name="P:Microsoft.Practices.Unity.InterceptionExtension.Configuration.KeyInterceptorTargetConfigurationElement.Name">
+            <summary>
+            Name part of the key to which the injector must be registered.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Practices.Unity.InterceptionExtension.Configuration.KeyInterceptorTargetConfigurationElement.TypeName">
+            <summary>
+            Type part of the key to which the injector must be registered.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Practices.Unity.InterceptionExtension.Configuration.KeyInterceptorTargetConfigurationElement.Type">
+            <summary>
+            The actual <see cref="T:System.Type"/> object for the 
+            type this element is registering.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Practices.Unity.InterceptionExtension.Configuration.Properties.Resources">
+            <summary>
+              A strongly-typed resource class, for looking up localized strings, etc.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Practices.Unity.InterceptionExtension.Configuration.Properties.Resources.ResourceManager">
+            <summary>
+              Returns the cached ResourceManager instance used by this class.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Practices.Unity.InterceptionExtension.Configuration.Properties.Resources.Culture">
+            <summary>
+              Overrides the current thread's CurrentUICulture property for all
+              resource lookups using this strongly typed resource class.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Practices.Unity.InterceptionExtension.Configuration.Properties.Resources.CannotHaveInjectionWithoutTypeName">
+            <summary>
+              Looks up a localized string similar to The &lt;injection/&gt; element is not allowed on element named &apos;{0}&apos; because it doesn&apos;t have a type attribute..
+            </summary>
+        </member>
+        <member name="P:Microsoft.Practices.Unity.InterceptionExtension.Configuration.Properties.Resources.CannotHaveLifetimeWithoutTypeName">
+            <summary>
+              Looks up a localized string similar to The &lt;lifetime/&gt; element is not allowed on element named &apos;{0}&apos; because it doesn&apos;t have a type attribute..
+            </summary>
+        </member>
+        <member name="T:Microsoft.Practices.Unity.InterceptionExtension.Configuration.InterceptionPolicyConfigurationElementCollection">
+            <summary>
+            Collection of <see cref="T:Microsoft.Practices.Unity.InterceptionExtension.Configuration.InterceptionPolicyConfigurationElement"/> elements
+            from the configuration file.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Practices.Unity.InterceptionExtension.Configuration.InterceptionPolicyConfigurationElementCollection.CreateNewElement">
+            <summary>
+            When overridden in a derived class, creates a new <see cref="T:System.Configuration.ConfigurationElement"></see>.
+            </summary>
+            
+            <returns>
+            A new <see cref="T:System.Configuration.ConfigurationElement"></see>.
+            </returns>
+            
+        </member>
+        <member name="M:Microsoft.Practices.Unity.InterceptionExtension.Configuration.InterceptionPolicyConfigurationElementCollection.GetElementKey(System.Configuration.ConfigurationElement)">
+            <summary>
+            Gets the element key for a specified configuration element when overridden in a derived class.
+            </summary>
+            
+            <returns>
+            An <see cref="T:System.Object"></see> that acts as the key for the specified <see cref="T:System.Configuration.ConfigurationElement"></see>.
+            </returns>
+            
+            <param name="element">The <see cref="T:System.Configuration.ConfigurationElement"></see> to return the key for. </param>
+        </member>
+        <member name="P:Microsoft.Practices.Unity.InterceptionExtension.Configuration.InterceptionPolicyConfigurationElementCollection.Item(System.String)">
+            <summary>
+            Resolve the given element by key.
+            </summary>
+            <param name="key">Name of element to find.</param>
+            <returns>Element at the given key.</returns>
+        </member>
+        <member name="T:Microsoft.Practices.Unity.InterceptionExtension.Configuration.CallHandlerConfigurationElementCollection">
+            <summary>
+            Collection of <see cref="T:Microsoft.Practices.Unity.InterceptionExtension.Configuration.CallHandlerConfigurationElement"/> elements
+            from the configuration file.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Practices.Unity.InterceptionExtension.Configuration.CallHandlerConfigurationElementCollection.CreateNewElement">
+            <summary>
+            When overridden in a derived class, creates a new <see cref="T:System.Configuration.ConfigurationElement"></see>.
+            </summary>
+            
+            <returns>
+            A new <see cref="T:System.Configuration.ConfigurationElement"></see>.
+            </returns>
+            
+        </member>
+        <member name="M:Microsoft.Practices.Unity.InterceptionExtension.Configuration.CallHandlerConfigurationElementCollection.GetElementKey(System.Configuration.ConfigurationElement)">
+            <summary>
+            Gets the element key for a specified configuration element when overridden in a derived class.
+            </summary>
+            
+            <returns>
+            An <see cref="T:System.Object"></see> that acts as the key for the specified <see cref="T:System.Configuration.ConfigurationElement"></see>.
+            </returns>
+            
+            <param name="element">The <see cref="T:System.Configuration.ConfigurationElement"></see> to return the key for. </param>
+        </member>
+        <member name="P:Microsoft.Practices.Unity.InterceptionExtension.Configuration.CallHandlerConfigurationElementCollection.Item(System.String)">
+            <summary>
+            Resolve the given element by key.
+            </summary>
+            <param name="key">Name of element to find.</param>
+            <returns>Element at the given key.</returns>
+        </member>
+        <member name="T:Microsoft.Practices.Unity.InterceptionExtension.Configuration.DefaultInterceptorTargetConfigurationElement">
+            <summary>
+            A <see cref="T:System.Configuration.ConfigurationElement"/> class used to manage the contents
+            of a &lt;defaultInjector&gt; node in the configuration file for the interception extension's section.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Practices.Unity.InterceptionExtension.Configuration.DefaultInterceptorTargetConfigurationElement.TypeName">
+            <summary>
+            Type to which the injector applies.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Practices.Unity.InterceptionExtension.Configuration.DefaultInterceptorTargetConfigurationElement.Type">
+            <summary>
+            The actual <see cref="T:System.Type"/> object for the 
+            type this element is registering.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Practices.Unity.InterceptionExtension.Configuration.InterceptionConfigurationElement">
+            <summary>
+            Configuration element for the <see cref="T:Microsoft.Practices.Unity.InterceptionExtension.Interception"/> container extension.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Practices.Unity.InterceptionExtension.Configuration.InterceptionConfigurationElement.Configure(Microsoft.Practices.Unity.IUnityContainer)">
+            <summary>
+            Configures policies and injectors using the <see cref="T:Microsoft.Practices.Unity.InterceptionExtension.Interception"/> container extension.
+            </summary>
+            <param name="container">The <see cref="T:Microsoft.Practices.Unity.IUnityContainer"/> to configure.</param>
+        </member>
+        <member name="P:Microsoft.Practices.Unity.InterceptionExtension.Configuration.InterceptionConfigurationElement.Policies">
+            <summary>
+            Collection of policies.
+            </summary>
+            <remarks>
+            Defining policies in this section is equivalent to defining them in using the general purpose
+            injection configuration, only more convenient.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Practices.Unity.InterceptionExtension.Configuration.InterceptionConfigurationElement.Interceptors">
+            <summary>
+            Collection of configuration elements indicating types and keys for which transparent-proxy-based
+            interception should be performed.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Practices.Unity.InterceptionExtension.Configuration.InterceptorConfigurationElement">
+            <summary>
+            Configuration element class describing an interceptor and the keys to which it applies.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Practices.Unity.InterceptionExtension.Configuration.InterceptorConfigurationElement.Name">
+            <summary>
+            Name to use when registering this instance. Optional.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Practices.Unity.InterceptionExtension.Configuration.InterceptorConfigurationElement.Targets">
+            <summary>
+            Collection of configuration elements indicating types and keys for which the represented 
+            interceptor should be configured.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Practices.Unity.InterceptionExtension.Configuration.RuleDrivenPolicyElementConfigurationElement">
+            <summary>
+            Implements shared structure and behavior for the configuration elements representing call handlers
+            and matching rules in the configuration file.
+            </summary>
+            <remarks>
+            <para>
+            These configuration elements have a required "name" attribute, an optional "type" attribute, and 
+            optional child elements &lt;lifetime&gt; and &lt;injection&gt;
+            </para>
+            <para>
+            Elements without a value for the type attribute can only have a value for the name attribute, and 
+            indicate that the represented handler or rule is configured elsewhere and that a reference to 
+            the given name must be added to the policy to be resolved, while elements with a value for the type
+            attribute indicate how the represented handler or rule should be built and can optionally specify
+            lifetime management and injection configuration.
+            </para>
+            <para>
+            This element is similar to the <see cref="T:Microsoft.Practices.Unity.Configuration.UnityTypeElement"/>, except that it does not provide 
+            an extension point for arbitrary configuration like the type element's &lt;typeConfig&gt; child.
+            </para>
+            </remarks>
+            <seealso cref="T:Microsoft.Practices.Unity.InterceptionExtension.Configuration.CallHandlerConfigurationElement"/>
+            <seealso cref="T:Microsoft.Practices.Unity.InterceptionExtension.Configuration.MatchingRuleConfigurationElement"/>
+            <seealso cref="T:Microsoft.Practices.Unity.Configuration.UnityTypeElement"/>
+        </member>
+        <member name="M:Microsoft.Practices.Unity.InterceptionExtension.Configuration.RuleDrivenPolicyElementConfigurationElement.DeserializeElement(System.Xml.XmlReader,System.Boolean)">
+            <summary>
+            Reads XML from the configuration file.
+            </summary>
+            <param name="reader">The <see cref="T:System.Xml.XmlReader"/> that reads from the configuration file.</param>
+            <param name="serializeCollectionKey"><see langword="true"/> to serialize only the collectionkey properties; 
+            otherwise, <see langword="false"/>.</param>
+        </member>
+        <member name="P:Microsoft.Practices.Unity.InterceptionExtension.Configuration.RuleDrivenPolicyElementConfigurationElement.Name">
+            <summary>
+            Returns name of the element.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Practices.Unity.InterceptionExtension.Configuration.RuleDrivenPolicyElementConfigurationElement.TypeName">
+            <summary>
+            The type for the represented element.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Practices.Unity.InterceptionExtension.Configuration.RuleDrivenPolicyElementConfigurationElement.Injection">
+            <summary>
+            Sets the injection configuration for the given type and name.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Practices.Unity.InterceptionExtension.Configuration.RuleDrivenPolicyElementConfigurationElement.Lifetime">
+            <summary>
+            Sets the lifetime for the given type and name. Transient means 
+            to create a new instance every type and is the default.
+            Singleton means to return the same instance on every request.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Practices.Unity.InterceptionExtension.Configuration.RuleDrivenPolicyElementConfigurationElement.Type">
+            <summary>
+            The actual <see cref="T:System.Type"/> object for the 
+            type this element is registering.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Practices.Unity.InterceptionExtension.Configuration.CallHandlerConfigurationElement">
+            <summary>
+            A <see cref="T:System.Configuration.ConfigurationElement"/> class used to manage the contents
+            of a &lt;callHandler&gt; node in the configuration file for the interception extension's section.
+            </summary>
+            <remarks>
+            This node contains the information necessary to describe a <see cref="T:Microsoft.Practices.Unity.InterceptionExtension.ICallHandler"/>
+            and can configure a <see cref="T:Microsoft.Practices.Unity.InterceptionExtension.RuleDrivenPolicy"/> to include the it.
+            </remarks>
+            <seealso cref="T:Microsoft.Practices.Unity.InterceptionExtension.Configuration.RuleDrivenPolicyElementConfigurationElement"/>
+        </member>
+        <member name="T:Microsoft.Practices.Unity.InterceptionExtension.Configuration.MatchingRuleConfigurationElement">
+            <summary>
+            A <see cref="T:System.Configuration.ConfigurationElement"/> class used to manage the contents
+            of a &lt;matchingRule&gt; node in the configuration file for the interception extension's section.
+            </summary>
+            <remarks>
+            This node contains the information necessary to describe a <see cref="T:Microsoft.Practices.Unity.InterceptionExtension.IMatchingRule"/>
+            and can configure a <see cref="T:Microsoft.Practices.Unity.InterceptionExtension.RuleDrivenPolicy"/> to include the it.
+            </remarks>
+            <seealso cref="T:Microsoft.Practices.Unity.InterceptionExtension.Configuration.RuleDrivenPolicyElementConfigurationElement"/>
+        </member>
+        <member name="T:Microsoft.Practices.Unity.InterceptionExtension.Configuration.InterceptorConfigurationElementCollection">
+            <summary>
+            Collection of <see cref="T:Microsoft.Practices.Unity.InterceptionExtension.Configuration.InterceptorConfigurationElement"/> elements
+            from the configuration file.
+            </summary>
+            <seealso cref="T:Microsoft.Practices.Unity.InterceptionExtension.Configuration.InterceptorConfigurationElement"/>
+        </member>
+        <member name="M:Microsoft.Practices.Unity.InterceptionExtension.Configuration.InterceptorConfigurationElementCollection.CreateNewElement">
+            <summary>
+            When overridden in a derived class, creates a new <see cref="T:System.Configuration.ConfigurationElement"></see>.
+            </summary>
+            <returns>
+            A new <see cref="T:System.Configuration.ConfigurationElement"></see>.
+            </returns>
+        </member>
+        <member name="M:Microsoft.Practices.Unity.InterceptionExtension.Configuration.InterceptorConfigurationElementCollection.GetElementKey(System.Configuration.ConfigurationElement)">
+            <summary>
+            Gets the element key for a specified configuration element when overridden in a derived class.
+            </summary>
+            
+            <returns>
+            An <see cref="T:System.Object"></see> that acts as the key for the specified <see cref="T:System.Configuration.ConfigurationElement"></see>.
+            </returns>
+            
+            <param name="element">The <see cref="T:System.Configuration.ConfigurationElement"></see> to return the key for. </param>
+        </member>
+        <member name="T:Microsoft.Practices.Unity.InterceptionExtension.Configuration.PolicyElementConfigurationElement">
+            <summary>
+            Base class for elements representing parts of a <see cref="T:Microsoft.Practices.Unity.InterceptionExtension.RuleDrivenPolicy"/> in a
+            &lt;policy&gt; node in the configuration file.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Practices.Unity.InterceptionExtension.Configuration.PolicyElementConfigurationElement.InjectionMembers">
+            <summary>
+            This element is just a collection of <see cref="T:Microsoft.Practices.Unity.Configuration.InjectionMemberElement"/>s. This
+            property controls that collection.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Practices.Unity.InterceptionExtension.Configuration.PolicyElementConfigurationElement.HasData">
+            <summary>
+            Indicates whether the configuration element has information.
+            </summary>
+            <value>
+            <see langword="true"/> if the configuration element has information, 
+            otherwise <see langword="false"/>.
+            </value>
+        </member>
+    </members>
+</doc>

@@ -1,0 +1,3182 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Microsoft.Practices.ObjectBuilder2</name>
+    </assembly>
+    <members>
+        <member name="T:Microsoft.Practices.ObjectBuilder2.LifetimeContainer">
+            <summary>
+            Represents a lifetime container.
+            </summary>
+            <remarks>
+            A lifetime container tracks the lifetime of an object, and implements
+            IDisposable. When the container is disposed, any objects in the
+            container which implement IDisposable are also disposed.
+            </remarks>
+        </member>
+        <member name="T:Microsoft.Practices.ObjectBuilder2.ILifetimeContainer">
+            <summary>
+            Represents a lifetime container.
+            </summary>
+            <remarks>
+            A lifetime container tracks the lifetime of an object, and implements
+            IDisposable. When the container is disposed, any objects in the
+            container which implement IDisposable are also disposed.
+            </remarks>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.ILifetimeContainer.Add(System.Object)">
+            <summary>
+            Adds an object to the lifetime container.
+            </summary>
+            <param name="item">The item to be added to the lifetime container.</param>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.ILifetimeContainer.Contains(System.Object)">
+            <summary>
+            Determine if a given object is in the lifetime container.
+            </summary>
+            <param name="item">
+            The item to locate in the lifetime container.
+            </param>
+            <returns>
+            Returns true if the object is contained in the lifetime
+            container; returns false otherwise.
+            </returns>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.ILifetimeContainer.Remove(System.Object)">
+            <summary>
+            Removes an item from the lifetime container. The item is
+            not disposed.
+            </summary>
+            <param name="item">The item to be removed.</param>
+        </member>
+        <member name="P:Microsoft.Practices.ObjectBuilder2.ILifetimeContainer.Count">
+            <summary>
+            Gets the number of references in the lifetime container
+            </summary>
+            <value>
+            The number of references in the lifetime container
+            </value>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.LifetimeContainer.Add(System.Object)">
+            <summary>
+            Adds an object to the lifetime container.
+            </summary>
+            <param name="item">The item to be added to the lifetime container.</param>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.LifetimeContainer.Contains(System.Object)">
+            <summary>
+            Determine if a given object is in the lifetime container.
+            </summary>
+            <param name="item">
+            The item to locate in the lifetime container.
+            </param>
+            <returns>
+            Returns true if the object is contained in the lifetime
+            container; returns false otherwise.
+            </returns>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.LifetimeContainer.Dispose">
+            <summary>
+            Releases the resources used by the <see cref="T:Microsoft.Practices.ObjectBuilder2.LifetimeContainer"/>. 
+            </summary>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.LifetimeContainer.Dispose(System.Boolean)">
+            <summary>
+            Releases the managed resources used by the DbDataReader and optionally releases the unmanaged resources. 
+            </summary>
+            <param name="disposing">
+            true to release managed and unmanaged resources; false to release only unmanaged resources.
+            </param>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.LifetimeContainer.GetEnumerator">
+            <summary>
+            Returns an enumerator that iterates through the lifetime container.
+            </summary>
+            <returns>
+            An <see cref="T:System.Collections.IEnumerator"/> object that can be used to iterate through the life time container. 
+            </returns>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.LifetimeContainer.System#Collections#IEnumerable#GetEnumerator">
+            <summary>
+            Returns an enumerator that iterates through the lifetime container.
+            </summary>
+            <returns>
+            An <see cref="T:System.Collections.IEnumerator"/> object that can be used to iterate through the life time container. 
+            </returns>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.LifetimeContainer.Remove(System.Object)">
+            <summary>
+            Removes an item from the lifetime container. The item is
+            not disposed.
+            </summary>
+            <param name="item">The item to be removed.</param>
+        </member>
+        <member name="P:Microsoft.Practices.ObjectBuilder2.LifetimeContainer.Count">
+            <summary>
+            Gets the number of references in the lifetime container
+            </summary>
+            <value>
+            The number of references in the lifetime container
+            </value>
+        </member>
+        <member name="T:Microsoft.Practices.ObjectBuilder2.IBuilderStrategy">
+            <summary>
+            Represents a strategy in the <see cref="T:Microsoft.Practices.ObjectBuilder2.IBuilder"/>'s chain of responsibility.
+            Strategies are required to support both BuildUp and TearDown. Although you
+            can implement this interface directly, you may also choose to use
+            <see cref="T:Microsoft.Practices.ObjectBuilder2.BuilderStrategy"/> as the base class for your strategies, as
+            this class provides useful helper methods and makes support BuildUp and TearDown
+            optional.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.IBuilderStrategy.PreBuildUp(Microsoft.Practices.ObjectBuilder2.IBuilderContext)">
+            <summary>
+            Called during the chain of responsibility for a build operation. The
+            PreBuildUp method is called when the chain is being executed in the
+            forward direction.
+            </summary>
+            <param name="context">Context of the build operation.</param>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.IBuilderStrategy.PostBuildUp(Microsoft.Practices.ObjectBuilder2.IBuilderContext)">
+            <summary>
+            Called during the chain of responsibility for a build operation. The
+            PostBuildUp method is called when the chain has finished the PreBuildUp
+            phase and executes in reverse order from the PreBuildUp calls.
+            </summary>
+            <param name="context">Context of the build operation.</param>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.IBuilderStrategy.PreTearDown(Microsoft.Practices.ObjectBuilder2.IBuilderContext)">
+            <summary>
+            Called during the chain of responsibility for a teardown operation. The
+            PreTearDown method is called when the chain is being executed in the
+            forward direction.
+            </summary>
+            <param name="context">Context of the teardown operation.</param>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.IBuilderStrategy.PostTearDown(Microsoft.Practices.ObjectBuilder2.IBuilderContext)">
+            <summary>
+            Called during the chain of responsibility for a teardown operation. The
+            PostTearDown method is called when the chain has finished the PreTearDown
+            phase and executes in reverse order from the PreTearDown calls.
+            </summary>
+            <param name="context"></param>
+        </member>
+        <member name="T:Microsoft.Practices.ObjectBuilder2.PropertySelectorPolicy`1">
+            <summary>
+            An implementation of <see cref="T:Microsoft.Practices.ObjectBuilder2.IPropertySelectorPolicy"/> that looks
+            for properties marked with the <typeparamref name="TResolutionAttribute"/>
+            attribute that are also settable and not indexers.
+            </summary>
+            <typeparam name="TResolutionAttribute"></typeparam>
+        </member>
+        <member name="T:Microsoft.Practices.ObjectBuilder2.PropertySelectorBase`1">
+            <summary>
+            Base class that provides an implementation of <see cref="T:Microsoft.Practices.ObjectBuilder2.IPropertySelectorPolicy"/>
+            which lets you override how the parameter resolvers are created.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Practices.ObjectBuilder2.IPropertySelectorPolicy">
+            <summary>
+            An <see cref="T:Microsoft.Practices.ObjectBuilder2.IBuilderPolicy"/> that returns a sequence
+            of properties that should be injected for the given type.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Practices.ObjectBuilder2.IBuilderPolicy">
+            <summary>
+            Represents a builder policy interface. Since there are no fixed requirements
+            for policies, it acts as a marker interface from which to derive all other
+            policy interfaces.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.IPropertySelectorPolicy.SelectProperties(Microsoft.Practices.ObjectBuilder2.IBuilderContext)">
+            <summary>
+            Returns sequence of properties on the given type that
+            should be set as part of building that object.
+            </summary>
+            <param name="context">Current build context.</param>
+            <returns>Sequence of <see cref="T:System.Reflection.PropertyInfo"/> objects
+            that contain the properties to set.</returns>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.PropertySelectorBase`1.SelectProperties(Microsoft.Practices.ObjectBuilder2.IBuilderContext)">
+            <summary>
+            Returns sequence of properties on the given type that
+            should be set as part of building that object.
+            </summary>
+            <param name="context">current build context.</param>
+            <returns>Sequence of <see cref="T:System.Reflection.PropertyInfo"/> objects
+            that contain the properties to set.</returns>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.PropertySelectorBase`1.CreateResolver(System.Reflection.PropertyInfo)">
+            <summary>
+            Create a <see cref="T:Microsoft.Practices.ObjectBuilder2.IDependencyResolverPolicy"/> for the given
+            property.
+            </summary>
+            <param name="property">Property to create resolver for.</param>
+            <returns>The resolver object.</returns>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.PropertySelectorPolicy`1.CreateResolver(System.Reflection.PropertyInfo)">
+            <summary>
+            Create a <see cref="T:Microsoft.Practices.ObjectBuilder2.IDependencyResolverPolicy"/> for the given
+            property.
+            </summary>
+            <param name="property">Property to create resolver for.</param>
+            <returns>The resolver object.</returns>
+        </member>
+        <member name="T:Microsoft.Practices.ObjectBuilder2.IMethodSelectorPolicy">
+            <summary>
+            An <see cref="T:Microsoft.Practices.ObjectBuilder2.IBuilderPolicy"/> that will examine the given
+            types and return a sequence of <see cref="T:System.Reflection.MethodInfo"/> objects
+            that should be called as part of building the object.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.IMethodSelectorPolicy.SelectMethods(Microsoft.Practices.ObjectBuilder2.IBuilderContext)">
+            <summary>
+            Return the sequence of methods to call while building the target object.
+            </summary>
+            <param name="context">Current build context.</param>
+            <returns>Sequence of methods to call.</returns>
+        </member>
+        <member name="T:Microsoft.Practices.ObjectBuilder2.DynamicMethodPropertySetterStrategy">
+            <summary>
+            A <see cref="T:Microsoft.Practices.ObjectBuilder2.BuilderStrategy"/> that generates IL to resolve properties
+            on an object being built.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Practices.ObjectBuilder2.BuilderStrategy">
+            <summary>
+            Represents a strategy in the <see cref="T:Microsoft.Practices.ObjectBuilder2.IBuilder"/>'s chain of responsibility.
+            Strategies are required to support both BuildUp and TearDown.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.BuilderStrategy.PreBuildUp(Microsoft.Practices.ObjectBuilder2.IBuilderContext)">
+            <summary>
+            Called during the chain of responsibility for a build operation. The
+            PreBuildUp method is called when the chain is being executed in the
+            forward direction.
+            </summary>
+            <param name="context">Context of the build operation.</param>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.BuilderStrategy.PostBuildUp(Microsoft.Practices.ObjectBuilder2.IBuilderContext)">
+            <summary>
+            Called during the chain of responsibility for a build operation. The
+            PostBuildUp method is called when the chain has finished the PreBuildUp
+            phase and executes in reverse order from the PreBuildUp calls.
+            </summary>
+            <param name="context">Context of the build operation.</param>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.BuilderStrategy.PreTearDown(Microsoft.Practices.ObjectBuilder2.IBuilderContext)">
+            <summary>
+            Called during the chain of responsibility for a teardown operation. The
+            PreTearDown method is called when the chain is being executed in the
+            forward direction.
+            </summary>
+            <param name="context">Context of the teardown operation.</param>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.BuilderStrategy.PostTearDown(Microsoft.Practices.ObjectBuilder2.IBuilderContext)">
+            <summary>
+            Called during the chain of responsibility for a teardown operation. The
+            PostTearDown method is called when the chain has finished the PreTearDown
+            phase and executes in reverse order from the PreTearDown calls.
+            </summary>
+            <param name="context"></param>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.DynamicMethodPropertySetterStrategy.PreBuildUp(Microsoft.Practices.ObjectBuilder2.IBuilderContext)">
+            <summary>
+            Called during the chain of responsibility for a build operation.
+            </summary>
+            <param name="context">The context for the operation.</param>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.DynamicMethodPropertySetterStrategy.ThrowOnFailedPropertyValueResolution(System.Exception,System.String)">
+            <summary>
+            A helper method called by the generated IL to throw an exception if a property's
+            value cannot be resolved.
+            </summary>
+            <param name="inner">The actual exception that caused the resolution to fail.</param>
+            <param name="propertyName">Name of the property that didn't resolve.</param>
+        </member>
+        <member name="T:Microsoft.Practices.ObjectBuilder2.Sequence">
+            <summary>
+            A series of helper methods to deal with sequences -
+            objects that implement <see cref="T:System.Collections.Generic.IEnumerable`1"/>.
+            </summary>
+            <remarks>LINQ in C# 3.0 does pretty much the same stuff,
+            but we're keeping C# 2.0 compatibility here.</remarks>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.Sequence.ToList``1(System.Collections.Generic.IEnumerable{``0})">
+            <summary>
+            Given an <see cref="T:System.Collections.Generic.IEnumerable`1"/>, return a
+            new <see cref="T:System.Collections.Generic.List`1"/> containing the same contents.
+            </summary>
+            <typeparam name="T">Type of item store in the sequence.</typeparam>
+            <param name="seq">Sequence to create list from.</param>
+            <returns>The new <see cref="T:System.Collections.Generic.List`1"/></returns>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.Sequence.OfType``1(System.Collections.IEnumerable)">
+            <summary>
+            Given an <see cref="T:System.Collections.IEnumerable"/> return a new
+            <see cref="T:System.Collections.Generic.IEnumerable`1"/> that contains
+            all the objects in <paramref name="source"/> that
+            are castable to <typeparamref name="TResult"/>.
+            </summary>
+            <typeparam name="TResult">Desired type for objects.</typeparam>
+            <param name="source">Input sequence.</param>
+            <returns>New output sequence.</returns>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.Sequence.Collect``1(``0[])">
+            <summary>
+            A function that turns an arbitrary parameter list into an
+            <see cref="T:System.Collections.Generic.IEnumerable`1"/>.
+            </summary>
+            <typeparam name="T">Type of arguments.</typeparam>
+            <param name="arguments">The items to put into the collection.</param>
+            <returns>An array that contains the values of the <paramref name="arguments"/>.</returns>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.Sequence.ToArray``1(System.Collections.Generic.IEnumerable{``0})">
+            <summary>
+            Create an array containing the elements of the given sequence.
+            </summary>
+            <typeparam name="T">Type of sequence and array.</typeparam>
+            <param name="sequence">Input sequence.</param>
+            <returns>The resulting array.</returns>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.Sequence.Where``1(System.Collections.Generic.IEnumerable{``0},System.Predicate{``0})">
+            <summary>
+            Given a sequence of <typeparamref name="T"/>, returns a sequence
+            containing those elements that satisfy the given predicate <paramref name="pred"/>.
+            </summary>
+            <typeparam name="T">Type of items in the sequence.</typeparam>
+            <param name="sequence">Source sequence.</param>
+            <param name="pred">Predicate used to test which items match.</param>
+            <returns>The sequence of items that satify <paramref name="pred"/>. This
+            sequence may be empty.</returns>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.Sequence.Exists``1(System.Collections.Generic.IEnumerable{``0},System.Predicate{``0})">
+            <summary>
+            Tests the given <paramref name="sequence"/>, returning true if any
+            element in <paramref name="sequence"/> satisfies the given predicate.
+            </summary>
+            <typeparam name="T">Type of elements in sequence.</typeparam>
+            <param name="sequence">Sequence to test.</param>
+            <param name="pred">Predicate to use to test for existence.</param>
+            <returns>true if any elements satify pred, false if not.</returns>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.Sequence.ForAll``1(System.Collections.Generic.IEnumerable{``0},System.Predicate{``0})">
+            <summary>
+            Tests the given <paramref name="sequence"/>, returning true only if all
+            elements in <paramref name="sequence"/> satisfies the given predicate.
+            </summary>
+            <typeparam name="T">Type of elements in sequence.</typeparam>
+            <param name="sequence">Sequence to test.</param>
+            <param name="pred">Predicate to use to test.</param>
+            <returns>true if all elements satify pred, false if not.</returns>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.Sequence.Map``2(System.Collections.Generic.IEnumerable{``0},System.Converter{``0,``1})">
+            <summary>
+            Given a sequence of <typeparamref name="TIn"/>, returns a sequence of
+            <typeparamref name="TOut"/> created by running the items in <paramref name="input"/>
+            through <paramref name="converter"/>.
+            </summary>
+            <typeparam name="TIn">Type of items in input.</typeparam>
+            <typeparam name="TOut">Type of items in output.</typeparam>
+            <param name="input">Input sequence.</param>
+            <param name="converter">Mapping function.</param>
+            <returns>The converted output sequence.</returns>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.Sequence.Reduce``2(System.Collections.Generic.IEnumerable{``0},``1,Microsoft.Practices.ObjectBuilder2.Sequence.Reducer{``0,``1})">
+            <summary>
+            Run a functional Reduce operation. See other methods for examples.
+            </summary>
+            <typeparam name="TSource">Type of inputs.</typeparam>
+            <typeparam name="TDest">Type of final output.</typeparam>
+            <param name="sequence">Sequence of input items.</param>
+            <param name="initialValue">Initial value for accumulator.</param>
+            <param name="reducer">Reduce function.</param>
+            <returns></returns>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.Sequence.ToString``1(System.Collections.Generic.IEnumerable{``0},System.String,System.Converter{``0,System.String})">
+            <summary>
+            Convert the given sequence to a single string. The items in the string are
+            separated by the given separator, and each object is converted to a string
+            using the <paramref name="converter"/> method given.
+            </summary>
+            <typeparam name="T">Type of input sequence.</typeparam>
+            <param name="sequence">Input sequence.</param>
+            <param name="separator">Separator string.</param>
+            <param name="converter">Function to convert <typeparamref name="T"/> instances to
+            strings.</param>
+            <returns>The collected string.</returns>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.Sequence.ToString``1(System.Collections.Generic.IEnumerable{``0},System.String)">
+            <summary>
+            Convert the given sequence to a single string. The items in the string are separated
+            by the given separator, and each object is converted to a string by calling its
+            <see cref="M:System.Object.ToString"/>  method.
+            </summary>
+            <typeparam name="T">Type of input sequence.</typeparam>
+            <param name="sequence">Input sequence.</param>
+            <param name="separator">Separator string.</param>
+            <returns>The collected string.</returns>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.Sequence.First``1(System.Collections.Generic.IEnumerable{``0})">
+            <summary>
+            Return the first item in the given sequence.
+            </summary>
+            <exception cref="T:System.InvalidOperationException">Thrown if the sequence is empty.</exception>
+            <typeparam name="T">Type of items in the sequence.</typeparam>
+            <param name="sequence">The sequence.</param>
+            <returns>First item in the sequence.</returns>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.Sequence.ForEach``1(System.Collections.Generic.IEnumerable{``0},System.Action{``0})">
+            <summary>
+            Execute the given action delegate for each item in the sequence.
+            </summary>
+            <typeparam name="TItem">Type of item in the sequence.</typeparam>
+            <param name="sequence">The sequence of items.</param>
+            <param name="action">Action to perform on each item.</param>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.Sequence.Concat``1(System.Collections.Generic.IEnumerable{``0}[])">
+            <summary>
+            Concatenate multiple sequences into a single one.
+            </summary>
+            <typeparam name="TItem">Type of sequences in the sequence.</typeparam>
+            <param name="sequences">The sequences to combine.</param>
+            <returns>The combined sequence.</returns>
+        </member>
+        <member name="T:Microsoft.Practices.ObjectBuilder2.Sequence.Reducer`2">
+            <summary>
+            A delegate that defines the function passed to the <see cref="M:Microsoft.Practices.ObjectBuilder2.Sequence.Reduce``2(System.Collections.Generic.IEnumerable{``0},``1,Microsoft.Practices.ObjectBuilder2.Sequence.Reducer{``0,``1})"/> methods.
+            </summary>
+            <typeparam name="TSource">Type of item being reduced.</typeparam>
+            <typeparam name="TDest">Type of the accumulator object.</typeparam>
+            <param name="currentItem">Current item to process.</param>
+            <param name="accumulator">Current value of the accumulator.</param>
+            <returns></returns>
+        </member>
+        <member name="T:Microsoft.Practices.ObjectBuilder2.Seq">
+            <summary>
+            Static class containing constructor methods for
+            instances of <see cref="T:Microsoft.Practices.ObjectBuilder2.Seq`1"/>, so that we
+            get type inference.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.Seq.Make``1(System.Collections.Generic.IEnumerable{``0})">
+            <summary>
+            Make a new instance of <see cref="T:Microsoft.Practices.ObjectBuilder2.Seq`1"/> that wraps
+            the given items.
+            </summary>
+            <typeparam name="T">Type of items in the sequence.</typeparam>
+            <param name="items">Items in the sequence.</param>
+            <returns>The sequence.</returns>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.Seq.Collect``1(``0[])">
+            <summary>
+            Make a new instance of <see cref="T:Microsoft.Practices.ObjectBuilder2.Seq`1"/> that wraps
+            the given items.
+            </summary>
+            <typeparam name="T">Type of items in the sequence.</typeparam>
+            <param name="items">Items in the sequence.</param>
+            <returns>The sequence.</returns>
+        </member>
+        <member name="T:Microsoft.Practices.ObjectBuilder2.Seq`1">
+            <summary>
+            And another helper class that makes it possible to chain sequence operations together.
+            </summary>
+            <typeparam name="T">Type of item contained in the sequence.</typeparam>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.Seq`1.#ctor(System.Collections.Generic.IEnumerable{`0})">
+            <summary>
+            Create a new <see cref="T:Microsoft.Practices.ObjectBuilder2.Seq`1"/> instance wrapping the given IEnumerable.
+            </summary>
+            <param name="items">The sequence to wrap.</param>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.Seq`1.System#Collections#IEnumerable#GetEnumerator">
+            <summary>
+                                Returns an enumerator that iterates through a collection.
+            </summary>
+            <returns>
+                                An <see cref="T:System.Collections.IEnumerator" /> object that can be used to iterate through the collection.
+            </returns>
+            <filterpriority>2</filterpriority>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.Seq`1.GetEnumerator">
+            <summary>
+                                Returns an enumerator that iterates through the collection.
+            </summary>
+            <returns>
+                                A <see cref="T:System.Collections.Generic.IEnumerator`1" /> that can be used to iterate through the collection.
+            </returns>
+            <filterpriority>1</filterpriority>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.Seq`1.ToList">
+            <summary>
+            Given a sequence object, return a list containing those items.
+            </summary>
+            <returns>The materialized list.</returns>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.Seq`1.ToArray">
+            <summary>
+            Return an array with the same contents as this sequence.
+            </summary>
+            <returns>The materialized array.</returns>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.Seq`1.Where(System.Predicate{`0})">
+            <summary>
+            Returns new sequence containing only the items for which the predicate is true.
+            </summary>
+            <param name="predicate">Test to indicate sequence inclusion</param>
+            <returns>New sequence.</returns>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.Seq`1.Exists(System.Predicate{`0})">
+            <summary>
+            Tests the sequence, returning true if any
+            element satisfies the given predicate.
+            </summary>
+            <param name="predicate">Predicate to use to test for existence.</param>
+            <returns>true if any elements satify pred, false if not.</returns>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.Seq`1.ForAll(System.Predicate{`0})">
+            <summary>
+            Tests the sequence, returning true only if all
+            elements satisfy the given predicate.
+            </summary>
+            <param name="predicate">Predicate to use to test.</param>
+            <returns>true if all elements satify pred, false if not.</returns>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.Seq`1.Map``1(System.Converter{`0,``0})">
+            <summary>
+            Return a new sequence consisting of the result of running each element through
+            the given <paramref name="converter"/>.
+            </summary>
+            <typeparam name="TOut">Desired output type.</typeparam>
+            <param name="converter">Converter delegate.</param>
+            <returns>New Sequence</returns>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.Seq`1.Reduce``1(``0,Microsoft.Practices.ObjectBuilder2.Sequence.Reducer{`0,``0})">
+            <summary>
+            Run a functional Reduce operation. See other methods for examples.
+            </summary>
+            <typeparam name="TDest">Type of final output.</typeparam>
+            <param name="initialValue">Initial value for accumulator.</param>
+            <param name="reducer">Reduce function.</param>
+            <returns></returns>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.Seq`1.ToString(System.String,System.Converter{`0,System.String})">
+            <summary>
+            Convert the given sequence to a single string. The items in the string are
+            separated by the given separator, and each object is converted to a string
+            using the <paramref name="converter"/> method given.
+            </summary>
+            <param name="separator">Separator string.</param>
+            <param name="converter">Function to convert <typeparamref name="T"/> instances to
+            strings.</param>
+            <returns>The collected string.</returns>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.Seq`1.ToString(System.String)">
+            <summary>
+            Convert the given sequence to a single string. The items in the string are separated
+            by the given separator, and each object is converted to a string by calling its
+            <see cref="M:System.Object.ToString"/>  method.
+            </summary>
+            <param name="separator">Separator string.</param>
+            <returns>The collected string.</returns>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.Seq`1.First">
+            <summary>
+            Return the first item in the given sequence.
+            </summary>
+            <exception cref="T:System.InvalidOperationException">Thrown if the sequence is empty.</exception>
+            <returns>First item in the sequence.</returns>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.Seq`1.ForEach(System.Action{`0})">
+            <summary>
+            Execute the given action delegate for each item in the sequence.
+            </summary>
+            <param name="action">Action to perform on each item.</param>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.Seq`1.Concat(System.Collections.Generic.IEnumerable{`0}[])">
+            <summary>
+            Concatenate multiple sequences with this one to return a single
+            sequence containing all items.
+            </summary>
+            <param name="sequences">Sequences to combine.</param>
+            <returns>The combined sequence.</returns>
+        </member>
+        <member name="T:Microsoft.Practices.ObjectBuilder2.Guard">
+            <summary>
+            Represents a simple class for validating parameters and throwing exceptions.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.Guard.ArgumentNotNull(System.Object,System.String)">
+            <summary>
+            Validates <paramref name="argumentValue"/> is not null and throws <see cref="T:System.ArgumentNullException"/> if it is null.
+            </summary>
+            <param name="argumentValue">The value to validate.</param>
+            <param name="argumentName">The name of <paramref name="argumentValue"/>.</param>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.Guard.ArgumentNotNullOrEmpty(System.String,System.String)">
+            <summary>
+            Validates <paramref name="argumentValue"/> is not null or an empty string and throws <see cref="T:System.ArgumentNullException"/> if it is null or an empty string .
+            </summary>
+            <param name="argumentValue">The value to validate.</param>
+            <param name="argumentName">The name of <paramref name="argumentValue"/>.</param>
+        </member>
+        <member name="T:Microsoft.Practices.ObjectBuilder2.ILifetimeFactoryPolicy">
+            <summary>
+            A builder policy used to create lifetime policy instances.
+            Used by the LifetimeStrategy when instantiating open
+            generic types.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.ILifetimeFactoryPolicy.CreateLifetimePolicy">
+            <summary>
+            Create a new instance of <see cref="T:Microsoft.Practices.ObjectBuilder2.ILifetimePolicy"/>.
+            </summary>
+            <returns>The new instance.</returns>
+        </member>
+        <member name="T:Microsoft.Practices.ObjectBuilder2.IStrategyChain">
+            <summary>
+            Represents a chain of responsibility for builder strategies.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.IStrategyChain.Reverse">
+            <summary>
+            Reverse the order of the strategy chain.
+            </summary>
+            <returns>The reversed strategy chain.</returns>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.IStrategyChain.ExecuteBuildUp(Microsoft.Practices.ObjectBuilder2.IBuilderContext)">
+            <summary>
+            Execute this strategy chain against the given context,
+            calling the Buildup methods on the strategies.
+            </summary>
+            <param name="context">Context for the build process.</param>
+            <returns>The build up object</returns>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.IStrategyChain.ExecuteTearDown(Microsoft.Practices.ObjectBuilder2.IBuilderContext)">
+            <summary>
+            Execute this strategy chain against the given context,
+            calling the TearDown methods on the strategies.
+            </summary>
+            <param name="context">Context for the teardown process.</param>
+        </member>
+        <member name="T:Microsoft.Practices.ObjectBuilder2.DynamicMethodCallStrategy">
+            <summary>
+            A <see cref="T:Microsoft.Practices.ObjectBuilder2.BuilderStrategy"/> that generates IL to call
+            chosen methods (as specified by the current <see cref="T:Microsoft.Practices.ObjectBuilder2.IMethodSelectorPolicy"/>)
+            as part of object build up.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.DynamicMethodCallStrategy.PreBuildUp(Microsoft.Practices.ObjectBuilder2.IBuilderContext)">
+            <summary>
+            Called during the chain of responsibility for a build operation. The
+            PreBuildUp method is called when the chain is being executed in the
+            forward direction.
+            </summary>
+            <param name="context">Context of the build operation.</param>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.DynamicMethodCallStrategy.ThrowOnParameterResolveFailed(System.Exception,System.String,System.String)">
+            <summary>
+            A helper method used by the generated IL to throw an exception
+            when an injection method parameter could not be resolved.
+            </summary>
+            <param name="inner">Exception that provides the failure info.</param>
+            <param name="methodName">Name of the method that was going to be called.</param>
+            <param name="parameterName">Parameter that failed to resolve.</param>
+        </member>
+        <member name="T:Microsoft.Practices.ObjectBuilder2.DynamicBuildPlanGenerationContext">
+            <summary>
+            This object tracks the current state of the build plan generation,
+            accumulates the IL, provides the preamble &amp; postamble for the dynamic
+            method, and tracks things like local variables in the generated IL
+            so that they can be reused across IL generation strategies.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.DynamicBuildPlanGenerationContext.#ctor(System.Type,Microsoft.Practices.ObjectBuilder2.IDynamicBuilderMethodCreatorPolicy)">
+            <summary>
+            Create a <see cref="T:Microsoft.Practices.ObjectBuilder2.DynamicBuildPlanGenerationContext"/> that is initialized
+            to handle creation of a dynamic method to build the given type.
+            </summary>
+            <param name="typeToBuild">Type that we're trying to create a build plan for.</param>
+            <param name="builderMethodCreator">An <see cref="T:Microsoft.Practices.ObjectBuilder2.IDynamicBuilderMethodCreatorPolicy"/> object that actually
+            creates our <see cref="T:System.Reflection.Emit.DynamicMethod"/> object.</param>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.DynamicBuildPlanGenerationContext.GetBuildMethod">
+            <summary>
+            Completes generation of the dynamic method and returns the
+            generated dynamic method delegate.
+            </summary>
+            <returns>The created <see cref="T:Microsoft.Practices.ObjectBuilder2.DynamicBuildPlanMethod"/></returns>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.DynamicBuildPlanGenerationContext.EmitLoadContext">
+            <summary>
+            Emit the IL to put the build context on top of the IL stack.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.DynamicBuildPlanGenerationContext.EmitLoadBuildKey">
+            <summary>
+            Emit the IL to put the current build key on top of the IL stack.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.DynamicBuildPlanGenerationContext.EmitLoadExisting">
+            <summary>
+            Emit the IL to put the current "existing" object on the top of the IL stack.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.DynamicBuildPlanGenerationContext.EmitStoreExisting">
+            <summary>
+            Emit the IL to make the top of the IL stack our current "existing" object.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.DynamicBuildPlanGenerationContext.EmitLoadTypeOnStack(System.Type)">
+            <summary>
+            Emit the IL to load the given <see cref="T:System.Type"/> object onto the top of the IL stack.
+            </summary>
+            <param name="t">Type to load on the stack.</param>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.DynamicBuildPlanGenerationContext.EmitResolveDependency(System.Type,System.String)">
+            <summary>
+            Emit the IL needed to look up an <see cref="T:Microsoft.Practices.ObjectBuilder2.IDependencyResolverPolicy"/> and
+            call it to get a value.
+            </summary>
+            <param name="dependencyType">Type of the dependency to resolve.</param>
+            <param name="key">Key to look up the policy by.</param>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.DynamicBuildPlanGenerationContext.GetPropertyGetter``2(System.String)">
+            <summary>
+            A reflection helper method to make it easier to grab a property getter
+            <see cref="T:System.Reflection.MethodInfo"/> for the given property.
+            </summary>
+            <typeparam name="TImplementor">Type that implements the property we want.</typeparam>
+            <typeparam name="TProperty">Type of the property.</typeparam>
+            <param name="name">Name of the property.</param>
+            <returns>The property getter's <see cref="T:System.Reflection.MethodInfo"/>.</returns>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.DynamicBuildPlanGenerationContext.GetMethodInfo``1(System.String,System.Type[])">
+            <summary>
+            A reflection helper method that makes it easier to grab a <see cref="T:System.Reflection.MethodInfo"/>
+            for a method.
+            </summary>
+            <typeparam name="TImplementor">Type that implements the method we want.</typeparam>
+            <param name="name">Name of the method.</param>
+            <param name="argumentTypes">Types of arguments to the method.</param>
+            <returns>The method's <see cref="T:System.Reflection.MethodInfo"/>.</returns>
+        </member>
+        <member name="P:Microsoft.Practices.ObjectBuilder2.DynamicBuildPlanGenerationContext.IL">
+            <summary>
+            The underlying <see cref="T:System.Reflection.Emit.ILGenerator"/> that can be used to
+            emit IL into the generated dynamic method.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Practices.ObjectBuilder2.DynamicBuildPlanGenerationContext.TypeToBuild">
+            <summary>
+            The type we're currently creating the method to build.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Practices.ObjectBuilder2.GenericTypeBuildKeyMappingPolicy">
+            <summary>
+            An implementation of <see cref="T:Microsoft.Practices.ObjectBuilder2.IBuildKeyMappingPolicy"/> that can map
+            generic types.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Practices.ObjectBuilder2.IBuildKeyMappingPolicy">
+            <summary>
+            Represents a builder policy for mapping build keys.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.IBuildKeyMappingPolicy.Map(System.Object)">
+            <summary>
+            Maps the build key.
+            </summary>
+            <param name="buildKey">The build key to map.</param>
+            <returns>The new build key.</returns>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.GenericTypeBuildKeyMappingPolicy.#ctor(System.Object)">
+            <summary>
+            Create a new <see cref="T:Microsoft.Practices.ObjectBuilder2.GenericTypeBuildKeyMappingPolicy"/> instance
+            that will map generic types.
+            </summary>
+            <param name="destinationKey">Build key to map to. This must be or contain an open generic type.</param>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.GenericTypeBuildKeyMappingPolicy.Map(System.Object)">
+            <summary>
+            Maps the build key.
+            </summary>
+            <param name="buildKey">The build key to map.</param>
+            <returns>The new build key.</returns>
+        </member>
+        <member name="T:Microsoft.Practices.ObjectBuilder2.BuildFailedException">
+            <summary>
+            The exception that gets thrown if a build or teardown operation fails.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.BuildFailedException.#ctor(System.Runtime.Serialization.SerializationInfo,System.Runtime.Serialization.StreamingContext)">
+            <summary>
+            Create a new <see cref="T:Microsoft.Practices.ObjectBuilder2.BuildFailedException"/> from the serialized information.
+            </summary>
+            <param name="info">Serialization info.</param>
+            <param name="context">Streaming context.</param>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.BuildFailedException.GetObjectData(System.Runtime.Serialization.SerializationInfo,System.Runtime.Serialization.StreamingContext)">
+            <summary>
+            When overridden in a derived class, sets the <see cref="T:System.Runtime.Serialization.SerializationInfo"></see> with information about the exception.
+            </summary>
+            
+            <param name="context">The <see cref="T:System.Runtime.Serialization.StreamingContext"></see> that contains contextual information about the source or destination. </param>
+            <param name="info">The <see cref="T:System.Runtime.Serialization.SerializationInfo"></see> that holds the serialized object data about the exception being thrown. </param>
+            <exception cref="T:System.ArgumentNullException">The info parameter is a null reference (Nothing in Visual Basic). </exception><filterpriority>2</filterpriority><PermissionSet><IPermission class="System.Security.Permissions.FileIOPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Read="*AllFiles*" PathDiscovery="*AllFiles*" /><IPermission class="System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Flags="SerializationFormatter" /></PermissionSet>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.BuildFailedException.#ctor(Microsoft.Practices.ObjectBuilder2.IBuilderStrategy,System.Int32,System.Object,System.Exception)">
+            <summary>
+            Create a new <see cref="T:Microsoft.Practices.ObjectBuilder2.BuildFailedException"/> instance containing
+            the information about the currently executing strategy that caused
+            the exception.
+            </summary>
+            <param name="executingStrategy">The <see cref="T:Microsoft.Practices.ObjectBuilder2.IBuilderStrategy"/> that was
+            executing at the time the exception was thrown.</param>
+            <param name="executingStrategyIndex">The index of the current strategy in its
+            strategy chain.</param>
+            <param name="buildKey">The build key being built up.</param>
+            <param name="innerException">Underlying exception.</param>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.BuildFailedException.#ctor">
+            <summary>
+            Create a new <see cref="T:Microsoft.Practices.ObjectBuilder2.BuildFailedException"/>. Do not use this constructor, it
+            does not take any of the data that makes this type useful.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.BuildFailedException.#ctor(System.String)">
+            <summary>
+            Create a new <see cref="T:Microsoft.Practices.ObjectBuilder2.BuildFailedException"/>. Do not use this constructor, it
+            does not take any of the data that makes this type useful.
+            </summary>
+            <param name="message">Error message, ignored.</param>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.BuildFailedException.#ctor(System.String,System.Exception)">
+            <summary>
+            Create a new <see cref="T:Microsoft.Practices.ObjectBuilder2.BuildFailedException"/>. Do not use this constructor, it
+            does not take any of the data that makes this type useful.
+            </summary>
+            <param name="message">Error message, ignored.</param>
+            <param name="innerException">Inner exception.</param>
+        </member>
+        <member name="P:Microsoft.Practices.ObjectBuilder2.BuildFailedException.ExecutingStrategyTypeName">
+            <summary>
+            The strategy that was executing when the exception occurred.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Practices.ObjectBuilder2.BuildFailedException.ExecutingStrategyIndex">
+            <summary>
+            The index of the currently executing strategy in the build chain.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Practices.ObjectBuilder2.BuildFailedException.BuildKey">
+            <summary>
+            The build key that was being built at the time of the exception.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Practices.ObjectBuilder2.BuildFailedException.Message">
+            <summary>
+            Gets a message that describes the current exception.
+            </summary>
+            
+            <returns>
+            The error message that explains the reason for the exception, or an empty string("").
+            </returns>
+            <filterpriority>1</filterpriority>
+        </member>
+        <member name="T:Microsoft.Practices.ObjectBuilder2.IBuildPlanPolicy">
+            <summary>
+            A build plan is an object that, when invoked, will create a new object
+            or fill in a given existing one. It encapsulates all the information
+            gathered by the strategies to construct a particular object.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.IBuildPlanPolicy.BuildUp(Microsoft.Practices.ObjectBuilder2.IBuilderContext)">
+            <summary>
+            Creates an instance of this build plan's type, or fills
+            in the existing type if passed in.
+            </summary>
+            <param name="context">Context used to build up the object.</param>
+        </member>
+        <member name="T:Microsoft.Practices.ObjectBuilder2.BuildPlanStrategy">
+            <summary>
+            A <see cref="T:Microsoft.Practices.ObjectBuilder2.BuilderStrategy"/> that will look for a build plan
+            in the current context. If it exists, it invokes it, otherwise
+            it creates one and stores it for later, and invokes it.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.BuildPlanStrategy.PreBuildUp(Microsoft.Practices.ObjectBuilder2.IBuilderContext)">
+            <summary>
+            Called during the chain of responsibility for a build operation.
+            </summary>
+            <param name="context">The context for the operation.</param>
+        </member>
+        <member name="T:Microsoft.Practices.ObjectBuilder2.DependencyMissingException">
+            <summary>
+            Represents that a dependency could not be resolved.
+            </summary>
+            <summary>
+            Represents that a dependency could not be resolved.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.DependencyMissingException.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Practices.ObjectBuilder2.DependencyMissingException"/> class with no extra information.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.DependencyMissingException.#ctor(System.String)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Practices.ObjectBuilder2.DependencyMissingException"/> class with the given message.
+            </summary>
+            <param name="message">Some random message.</param>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.DependencyMissingException.#ctor(System.String,System.Exception)">
+            <summary>
+            Initialize a new instance of the <see cref="T:Microsoft.Practices.ObjectBuilder2.DependencyMissingException"/> class with the given
+            message and inner exception.
+            </summary>
+            <param name="message">Some random message</param>
+            <param name="innerException">Inner exception.</param>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.DependencyMissingException.#ctor(System.Object)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Practices.ObjectBuilder2.DependencyMissingException"/> class with the build key of the object begin built.
+            </summary>
+            <param name="buildKey">The build key of the object begin built.</param>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.DependencyMissingException.#ctor(System.Runtime.Serialization.SerializationInfo,System.Runtime.Serialization.StreamingContext)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Practices.ObjectBuilder2.DependencyMissingException"/> class with serialized data.
+            </summary>
+            <param name="info">The <see cref="T:System.Runtime.Serialization.SerializationInfo"/> that holds the serialized object data about the exception being thrown.</param>
+            <param name="context">The <see cref="T:System.Runtime.Serialization.StreamingContext"/> that contains contextual information about the source or destination. </param>
+        </member>
+        <member name="T:Microsoft.Practices.ObjectBuilder2.TransientLifetimePolicy">
+            <summary>
+            An implementation of <see cref="T:Microsoft.Practices.ObjectBuilder2.ILifetimePolicy"/> that does nothing,
+            ensuring that a new object gets created every time.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Practices.ObjectBuilder2.ILifetimePolicy">
+            <summary>
+            A <see cref="T:Microsoft.Practices.ObjectBuilder2.IBuilderPolicy"/> that controls how instances are
+            persisted and recovered from an external store. Used to implement
+            things like singletons and per-http-request lifetime.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.ILifetimePolicy.GetValue">
+            <summary>
+            Retrieve a value from the backing store associated with this Lifetime policy.
+            </summary>
+            <returns>the object desired, or null if no such object is currently stored.</returns>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.ILifetimePolicy.SetValue(System.Object)">
+            <summary>
+            Stores the given value into backing store for retrieval later.
+            </summary>
+            <param name="newValue">The object to store.</param>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.ILifetimePolicy.RemoveValue">
+            <summary>
+            Remove the value this lifetime policy is managing from backing store.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.TransientLifetimePolicy.GetValue">
+            <summary>
+            Retrieve a value from the backing store associated with this Lifetime policy.
+            </summary>
+            <returns>the object desired, or null if no such object is currently stored.</returns>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.TransientLifetimePolicy.SetValue(System.Object)">
+            <summary>
+            Stores the given value into backing store for retrieval later.
+            </summary>
+            <param name="newValue">The object being stored.</param>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.TransientLifetimePolicy.RemoveValue">
+            <summary>
+            Remove the given object from backing store.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Practices.ObjectBuilder2.IBuildPlanCreatorPolicy">
+            <summary>
+            A <see cref="T:Microsoft.Practices.ObjectBuilder2.IBuilderPolicy"/> that can create and return an <see cref="T:Microsoft.Practices.ObjectBuilder2.IBuildPlanPolicy"/>
+            for the given build key.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.IBuildPlanCreatorPolicy.CreatePlan(Microsoft.Practices.ObjectBuilder2.IBuilderContext,System.Object)">
+            <summary>
+            Create a build plan using the given context and build key.
+            </summary>
+            <param name="context">Current build context.</param>
+            <param name="buildKey">Current build key.</param>
+            <returns>The build plan.</returns>
+        </member>
+        <member name="T:Microsoft.Practices.ObjectBuilder2.Properties.Resources">
+            <summary>
+              A strongly-typed resource class, for looking up localized strings, etc.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Practices.ObjectBuilder2.Properties.Resources.ResourceManager">
+            <summary>
+              Returns the cached ResourceManager instance used by this class.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Practices.ObjectBuilder2.Properties.Resources.Culture">
+            <summary>
+              Overrides the current thread's CurrentUICulture property for all
+              resource lookups using this strongly typed resource class.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Practices.ObjectBuilder2.Properties.Resources.AmbiguousInjectionConstructor">
+            <summary>
+              Looks up a localized string similar to The type {0} has multiple constructors of length {1}. Unable to disambiguate..
+            </summary>
+        </member>
+        <member name="P:Microsoft.Practices.ObjectBuilder2.Properties.Resources.BuildFailedException">
+            <summary>
+              Looks up a localized string similar to The current build operation (build key {2}) failed: {3} (Strategy type {0}, index {1}).
+            </summary>
+        </member>
+        <member name="P:Microsoft.Practices.ObjectBuilder2.Properties.Resources.CannotConstructInterface">
+            <summary>
+              Looks up a localized string similar to The current type, {0}, is an interface and cannot be constructed. Are you missing a type mapping?.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Practices.ObjectBuilder2.Properties.Resources.CannotExtractTypeFromBuildKey">
+            <summary>
+              Looks up a localized string similar to Cannot extract type from build key {0}..
+            </summary>
+        </member>
+        <member name="P:Microsoft.Practices.ObjectBuilder2.Properties.Resources.CannotInjectMethodWithOutParam">
+            <summary>
+              Looks up a localized string similar to The method {1} on type {0} has an out parameter. Injection cannot be performed..
+            </summary>
+        </member>
+        <member name="P:Microsoft.Practices.ObjectBuilder2.Properties.Resources.CannotInjectOpenGenericMethod">
+            <summary>
+              Looks up a localized string similar to The method {1} on type {0} is marked for injection, but it is an open generic method. Injection cannot be performed..
+            </summary>
+        </member>
+        <member name="P:Microsoft.Practices.ObjectBuilder2.Properties.Resources.ConstructorParameterResolutionFailed">
+            <summary>
+              Looks up a localized string similar to The parameter {0} could not be resolved when attempting to call constructor {1}..
+            </summary>
+        </member>
+        <member name="P:Microsoft.Practices.ObjectBuilder2.Properties.Resources.KeyAlreadyPresent">
+            <summary>
+              Looks up a localized string similar to An item with the given key is already present in the dictionary..
+            </summary>
+        </member>
+        <member name="P:Microsoft.Practices.ObjectBuilder2.Properties.Resources.MethodParameterResolutionFailed">
+            <summary>
+              Looks up a localized string similar to The value for parameter &quot;{1}&quot; of method {0} could not be resolved. .
+            </summary>
+        </member>
+        <member name="P:Microsoft.Practices.ObjectBuilder2.Properties.Resources.MissingDependency">
+            <summary>
+              Looks up a localized string similar to Could not resolve dependency for build key {0}..
+            </summary>
+        </member>
+        <member name="P:Microsoft.Practices.ObjectBuilder2.Properties.Resources.MultipleInjectionConstructors">
+            <summary>
+              Looks up a localized string similar to The type {0} has multiple constructors marked with the InjectionConstructor attribute. Unable to disambiguate..
+            </summary>
+        </member>
+        <member name="P:Microsoft.Practices.ObjectBuilder2.Properties.Resources.MustHaveOpenGenericType">
+            <summary>
+              Looks up a localized string similar to The supplied type {0} must be an open generic type..
+            </summary>
+        </member>
+        <member name="P:Microsoft.Practices.ObjectBuilder2.Properties.Resources.MustHaveSameNumberOfGenericArguments">
+            <summary>
+              Looks up a localized string similar to The supplied type {0} does not have the same number of generic arguments as the target type {1}..
+            </summary>
+        </member>
+        <member name="P:Microsoft.Practices.ObjectBuilder2.Properties.Resources.NoConstructorFound">
+            <summary>
+              Looks up a localized string similar to The type {0} does not have an accessible constructor..
+            </summary>
+        </member>
+        <member name="P:Microsoft.Practices.ObjectBuilder2.Properties.Resources.PropertyValueResolutionFailed">
+            <summary>
+              Looks up a localized string similar to The value for the property &quot;{0}&quot; could not be resolved..
+            </summary>
+        </member>
+        <member name="P:Microsoft.Practices.ObjectBuilder2.Properties.Resources.ProvidedStringArgMustNotBeEmpty">
+            <summary>
+              Looks up a localized string similar to The provided string argument must not be empty..
+            </summary>
+        </member>
+        <member name="T:Microsoft.Practices.ObjectBuilder2.IRequiresRecovery">
+            <summary>
+            This interface provides a hook for the builder context to
+            implement error recovery when a builder strategy throws
+            an exception. Since we can't get try/finally blocks onto
+            the call stack for later stages in the chain, we instead
+            add these objects to the context. If there's an exception,
+            all the current IRequiresRecovery instances will have
+            their Recover methods called.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.IRequiresRecovery.Recover">
+            <summary>
+            A method that does whatever is needed to clean up
+            as part of cleaning up after an exception.
+            </summary>
+            <remarks>
+            Don't do anything that could throw in this method,
+            it will cause later recover operations to get skipped
+            and play real havok with the stack trace.
+            </remarks>
+        </member>
+        <member name="T:Microsoft.Practices.ObjectBuilder2.MethodSelectorPolicy`1">
+            <summary>
+            An implementation of <see cref="T:Microsoft.Practices.ObjectBuilder2.IMethodSelectorPolicy"/> that selects
+            methods by looking for the given <typeparamref name="TMarkerAttribute"/>
+            attribute on those methods.
+            </summary>
+            <typeparam name="TMarkerAttribute">Type of attribute used to mark methods
+            to inject.</typeparam>
+        </member>
+        <member name="T:Microsoft.Practices.ObjectBuilder2.MethodSelectorPolicyBase`1">
+            <summary>
+            Base class that provides an implementation of <see cref="T:Microsoft.Practices.ObjectBuilder2.IMethodSelectorPolicy"/>
+            which lets you override how the parameter resolvers are created.
+            </summary>
+            <typeparam name="TMarkerAttribute">Attribute that marks methods that should
+            be called.</typeparam>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.MethodSelectorPolicyBase`1.SelectMethods(Microsoft.Practices.ObjectBuilder2.IBuilderContext)">
+            <summary>
+            Return the sequence of methods to call while building the target object.
+            </summary>
+            <param name="context">Current build context.</param>
+            <returns>Sequence of methods to call.</returns>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.MethodSelectorPolicyBase`1.CreateResolver(System.Reflection.ParameterInfo)">
+            <summary>
+            Create a <see cref="T:Microsoft.Practices.ObjectBuilder2.IDependencyResolverPolicy"/> instance for the given
+            <see cref="T:System.Reflection.ParameterInfo"/>.
+            </summary>
+            <param name="parameter">Parameter to create the resolver for.</param>
+            <returns>The resolver object.</returns>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.MethodSelectorPolicy`1.CreateResolver(System.Reflection.ParameterInfo)">
+            <summary>
+            Create a <see cref="T:Microsoft.Practices.ObjectBuilder2.IDependencyResolverPolicy"/> instance for the given
+            <see cref="T:System.Reflection.ParameterInfo"/>.
+            </summary>
+            <param name="parameter">Parameter to create the resolver for.</param>
+            <returns>The resolver object.</returns>
+        </member>
+        <member name="T:Microsoft.Practices.ObjectBuilder2.SelectedConstructor">
+            <summary>
+            Objects of this type are the return value from <see cref="M:Microsoft.Practices.ObjectBuilder2.IConstructorSelectorPolicy.SelectConstructor(Microsoft.Practices.ObjectBuilder2.IBuilderContext)"/>.
+            It encapsulates the desired <see cref="T:System.Reflection.ConstructorInfo"/> with the string keys
+            needed to look up the <see cref="T:Microsoft.Practices.ObjectBuilder2.IDependencyResolverPolicy"/> for each
+            parameter.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Practices.ObjectBuilder2.SelectedMemberWithParameters`1">
+            <summary>
+            Base class for return values from selector policies that
+            return a memberinfo of some sort plus a list of parameter
+            keys to look up the parameter resolvers.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Practices.ObjectBuilder2.SelectedMemberWithParameters">
+            <summary>
+            Base class for return of selector policies that need
+            to keep track of a set of parameter keys.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.SelectedMemberWithParameters.AddParameterKey(System.String)">
+            <summary>
+            Add a new parameter key to this object. Keys are assumed
+            to be in the order of the parameters to the constructor.
+            </summary>
+            <param name="newKey">Key for the next parameter to look up.</param>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.SelectedMemberWithParameters.GetParameterKeys">
+            <summary>
+            The set of keys for the constructor parameters.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.SelectedMemberWithParameters`1.#ctor(`0)">
+            <summary>
+            Construct a new <see cref="T:Microsoft.Practices.ObjectBuilder2.SelectedMemberWithParameters`1"/>, storing
+            the given member info.
+            </summary>
+            <param name="memberInfo">Member info to store.</param>
+        </member>
+        <member name="P:Microsoft.Practices.ObjectBuilder2.SelectedMemberWithParameters`1.MemberInfo">
+            <summary>
+            The member info stored.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.SelectedConstructor.#ctor(System.Reflection.ConstructorInfo)">
+            <summary>
+            Create a new <see cref="T:Microsoft.Practices.ObjectBuilder2.SelectedConstructor"/> instance which
+            contains the given constructor.
+            </summary>
+            <param name="constructor"></param>
+        </member>
+        <member name="P:Microsoft.Practices.ObjectBuilder2.SelectedConstructor.Constructor">
+            <summary>
+            The constructor this object wraps.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Practices.ObjectBuilder2.BuilderAwareStrategy">
+            <summary>
+            Implementation of <see cref="T:Microsoft.Practices.ObjectBuilder2.IBuilderStrategy"/> which will notify an object about
+            the completion of a <see cref="M:Microsoft.Practices.ObjectBuilder2.IBuilder.BuildUp(Microsoft.Practices.ObjectBuilder2.IReadWriteLocator,Microsoft.Practices.ObjectBuilder2.ILifetimeContainer,Microsoft.Practices.ObjectBuilder2.IPolicyList,Microsoft.Practices.ObjectBuilder2.IStrategyChain,System.Object,System.Object)"/> operation, or start of a
+            <see cref="M:Microsoft.Practices.ObjectBuilder2.IBuilder.TearDown``1(Microsoft.Practices.ObjectBuilder2.IReadWriteLocator,Microsoft.Practices.ObjectBuilder2.ILifetimeContainer,Microsoft.Practices.ObjectBuilder2.IPolicyList,Microsoft.Practices.ObjectBuilder2.IStrategyChain,``0)"/> operation.
+            </summary>
+            <remarks>
+            This strategy checks the object that is passing through the builder chain to see if it
+            implements IBuilderAware and if it does, it will call <see cref="M:Microsoft.Practices.ObjectBuilder2.IBuilderAware.OnBuiltUp(System.Object)"/>
+            and <see cref="M:Microsoft.Practices.ObjectBuilder2.IBuilderAware.OnTearingDown"/>. This strategy is meant to be used from the
+            <see cref="F:Microsoft.Practices.ObjectBuilder2.BuilderStage.PostInitialization"/> stage.
+            </remarks>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.BuilderAwareStrategy.PreBuildUp(Microsoft.Practices.ObjectBuilder2.IBuilderContext)">
+            <summary>
+            Called during the chain of responsibility for a build operation. The
+            PreBuildUp method is called when the chain is being executed in the
+            forward direction.
+            </summary>
+            <param name="context">Context of the build operation.</param>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.BuilderAwareStrategy.PreTearDown(Microsoft.Practices.ObjectBuilder2.IBuilderContext)">
+            <summary>
+            Called during the chain of responsibility for a teardown operation. The
+            PreTearDown method is called when the chain is being executed in the
+            forward direction.
+            </summary>
+            <param name="context">Context of the teardown operation.</param>
+        </member>
+        <member name="T:Microsoft.Practices.ObjectBuilder2.RecoveryStack">
+            <summary>
+            An implementation of <see cref="T:Microsoft.Practices.ObjectBuilder2.IRecoveryStack"/>.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Practices.ObjectBuilder2.IRecoveryStack">
+            <summary>
+            Data structure that stores the set of <see cref="T:Microsoft.Practices.ObjectBuilder2.IRequiresRecovery"/>
+            objects and executes them when requested.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.IRecoveryStack.Add(Microsoft.Practices.ObjectBuilder2.IRequiresRecovery)">
+            <summary>
+            Add a new <see cref="T:Microsoft.Practices.ObjectBuilder2.IRequiresRecovery"/> object to this
+            list.
+            </summary>
+            <param name="recovery">Object to add.</param>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.IRecoveryStack.ExecuteRecovery">
+            <summary>
+            Execute the <see cref="M:Microsoft.Practices.ObjectBuilder2.IRequiresRecovery.Recover"/> method
+            of everything in the recovery list. Recoveries will execute
+            in the opposite order of add - it's a stack.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Practices.ObjectBuilder2.IRecoveryStack.Count">
+            <summary>
+            Return the number of recovery objects currently in the stack.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.RecoveryStack.Add(Microsoft.Practices.ObjectBuilder2.IRequiresRecovery)">
+            <summary>
+            Add a new <see cref="T:Microsoft.Practices.ObjectBuilder2.IRequiresRecovery"/> object to this
+            list.
+            </summary>
+            <param name="recovery">Object to add.</param>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.RecoveryStack.ExecuteRecovery">
+            <summary>
+            Execute the <see cref="M:Microsoft.Practices.ObjectBuilder2.IRequiresRecovery.Recover"/> method
+            of everything in the recovery list. Recoveries will execute
+            in the opposite order of add - it's a stack.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Practices.ObjectBuilder2.RecoveryStack.Count">
+            <summary>
+            Return the number of recovery objects currently in the stack.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Practices.ObjectBuilder2.PolicyList">
+            <summary>
+            A custom collection wrapper over <see cref="T:Microsoft.Practices.ObjectBuilder2.IBuilderPolicy"/> objects.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Practices.ObjectBuilder2.IPolicyList">
+            <summary>
+            A custom collection over <see cref="T:Microsoft.Practices.ObjectBuilder2.IBuilderPolicy"/> objects.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.IPolicyList.Clear``1(System.Object)">
+            <summary>
+            Removes an individual policy type for a build key.
+            </summary>
+            <typeparam name="TPolicyInterface">The type the policy was registered as.</typeparam>
+            <param name="buildKey">The key the policy applies.</param>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.IPolicyList.Clear(System.Type,System.Object)">
+            <summary>
+            Removes an individual policy type for a build key.
+            </summary>
+            <param name="policyInterface">The type of policy to remove.</param>
+            <param name="buildKey">The key the policy applies.</param>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.IPolicyList.ClearAll">
+            <summary>
+            Removes all policies from the list.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.IPolicyList.ClearDefault``1">
+            <summary>
+            Removes a default policy.
+            </summary>
+            <typeparam name="TPolicyInterface">The type the policy was registered as.</typeparam>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.IPolicyList.ClearDefault(System.Type)">
+            <summary>
+            Removes a default policy.
+            </summary>
+            <param name="policyInterface">The type the policy was registered as.</param>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.IPolicyList.Get``1(System.Object)">
+            <summary>
+            Gets an individual policy.
+            </summary>
+            <typeparam name="TPolicyInterface">The interface the policy is registered under.</typeparam>
+            <param name="buildKey">The key the policy applies.</param>
+            <returns>The policy in the list, if present; returns null otherwise.</returns>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.IPolicyList.Get(System.Type,System.Object)">
+            <summary>
+            Gets an individual policy.
+            </summary>
+            <param name="policyInterface">The interface the policy is registered under.</param>
+            <param name="buildKey">The key the policy applies.</param>
+            <returns>The policy in the list, if present; returns null otherwise.</returns>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.IPolicyList.Get``1(System.Object,System.Boolean)">
+            <summary>
+            Gets an individual policy.
+            </summary>
+            <typeparam name="TPolicyInterface">The interface the policy is registered under.</typeparam>
+            <param name="buildKey">The key the policy applies.</param>
+            <param name="localOnly">true if the policy searches local only; otherwise false to seach up the parent chain.</param>
+            <returns>The policy in the list, if present; returns null otherwise.</returns>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.IPolicyList.Get(System.Type,System.Object,System.Boolean)">
+            <summary>
+            Gets an individual policy.
+            </summary>
+            <param name="policyInterface">The interface the policy is registered under.</param>
+            <param name="buildKey">The key the policy applies.</param>
+            <param name="localOnly">true if the policy searches local only; otherwise false to seach up the parent chain.</param>
+            <returns>The policy in the list, if present; returns null otherwise.</returns>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.IPolicyList.GetNoDefault``1(System.Object,System.Boolean)">
+            <summary>
+            Get the non default policy.
+            </summary>
+            <typeparam name="TPolicyInterface">The interface the policy is registered under.</typeparam>
+            <param name="buildKey">The key the policy applies.</param>
+            <param name="localOnly">true if the policy searches local only; otherwise false to seach up the parent chain.</param>
+            <returns>The policy in the list, if present; returns null otherwise.</returns>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.IPolicyList.GetNoDefault(System.Type,System.Object,System.Boolean)">
+            <summary>
+            Get the non default policy.
+            </summary>
+            <param name="policyInterface">The interface the policy is registered under.</param>
+            <param name="buildKey">The key the policy applies.</param>
+            <param name="localOnly">true if the policy searches local only; otherwise false to seach up the parent chain.</param>
+            <returns>The policy in the list, if present; returns null otherwise.</returns>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.IPolicyList.Set``1(``0,System.Object)">
+            <summary>
+            Sets an individual policy.
+            </summary>
+            <typeparam name="TPolicyInterface">The interface the policy is registered under.</typeparam>
+            <param name="policy">The policy to be registered.</param>
+            <param name="buildKey">The key the policy applies.</param>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.IPolicyList.Set(System.Type,Microsoft.Practices.ObjectBuilder2.IBuilderPolicy,System.Object)">
+            <summary>
+            Sets an individual policy.
+            </summary>
+            <param name="policyInterface">The <see cref="T:System.Type"/> of the policy.</param>
+            <param name="policy">The policy to be registered.</param>
+            <param name="buildKey">The key the policy applies.</param>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.IPolicyList.SetDefault``1(``0)">
+            <summary>
+            Sets a default policy. When checking for a policy, if no specific individual policy
+            is available, the default will be used.
+            </summary>
+            <typeparam name="TPolicyInterface">The interface to register the policy under.</typeparam>
+            <param name="policy">The default policy to be registered.</param>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.IPolicyList.SetDefault(System.Type,Microsoft.Practices.ObjectBuilder2.IBuilderPolicy)">
+            <summary>
+            Sets a default policy. When checking for a policy, if no specific individual policy
+            is available, the default will be used.
+            </summary>
+            <param name="policyInterface">The interface to register the policy under.</param>
+            <param name="policy">The default policy to be registered.</param>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.PolicyList.#ctor">
+            <summary>
+            Initialize a new instance of a <see cref="T:Microsoft.Practices.ObjectBuilder2.PolicyList"/> class.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.PolicyList.#ctor(Microsoft.Practices.ObjectBuilder2.IPolicyList)">
+            <summary>
+            Initialize a new instance of a <see cref="T:Microsoft.Practices.ObjectBuilder2.PolicyList"/> class with another policy list.
+            </summary>
+            <param name="innerPolicyList">An inner policy list to search.</param>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.PolicyList.Clear``1(System.Object)">
+            <summary>
+            Removes an individual policy type for a build key.
+            </summary>
+            <typeparam name="TPolicyInterface">The type the policy was registered as.</typeparam>
+            <param name="buildKey">The key the policy applies.</param>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.PolicyList.Clear(System.Type,System.Object)">
+            <summary>
+            Removes an individual policy type for a build key.
+            </summary>
+            <param name="policyInterface">The type of policy to remove.</param>
+            <param name="buildKey">The key the policy applies.</param>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.PolicyList.ClearAll">
+            <summary>
+            Removes all policies from the list.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.PolicyList.ClearDefault``1">
+            <summary>
+            Removes a default policy.
+            </summary>
+            <typeparam name="TPolicyInterface">The type the policy was registered as.</typeparam>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.PolicyList.ClearDefault(System.Type)">
+            <summary>
+            Removes a default policy.
+            </summary>
+            <param name="policyInterface">The type the policy was registered as.</param>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.PolicyList.Get``1(System.Object)">
+            <summary>
+            Gets an individual policy.
+            </summary>
+            <typeparam name="TPolicyInterface">The interface the policy is registered under.</typeparam>
+            <param name="buildKey">The key the policy applies.</param>
+            <returns>The policy in the list, if present; returns null otherwise.</returns>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.PolicyList.Get(System.Type,System.Object)">
+            <summary>
+            Gets an individual policy.
+            </summary>
+            <param name="policyInterface">The interface the policy is registered under.</param>
+            <param name="buildKey">The key the policy applies.</param>
+            <returns>The policy in the list, if present; returns null otherwise.</returns>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.PolicyList.Get``1(System.Object,System.Boolean)">
+            <summary>
+            Gets an individual policy.
+            </summary>
+            <typeparam name="TPolicyInterface">The interface the policy is registered under.</typeparam>
+            <param name="buildKey">The key the policy applies.</param>
+            <param name="localOnly">true if the policy searches local only; otherwise false to seach up the parent chain.</param>
+            <returns>The policy in the list, if present; returns null otherwise.</returns>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.PolicyList.Get(System.Type,System.Object,System.Boolean)">
+            <summary>
+            Gets an individual policy.
+            </summary>
+            <param name="policyInterface">The interface the policy is registered under.</param>
+            <param name="buildKey">The key the policy applies.</param>
+            <param name="localOnly">true if the policy searches local only; otherwise false to seach up the parent chain.</param>
+            <returns>The policy in the list, if present; returns null otherwise.</returns>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.PolicyList.GetNoDefault``1(System.Object,System.Boolean)">
+            <summary>
+            Get the non default policy.
+            </summary>
+            <typeparam name="TPolicyInterface">The interface the policy is registered under.</typeparam>
+            <param name="buildKey">The key the policy applies.</param>
+            <param name="localOnly">true if the policy searches local only; otherwise false to seach up the parent chain.</param>
+            <returns>The policy in the list, if present; returns null otherwise.</returns>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.PolicyList.GetNoDefault(System.Type,System.Object,System.Boolean)">
+            <summary>
+            Get the non default policy.
+            </summary>
+            <param name="policyInterface">The interface the policy is registered under.</param>
+            <param name="buildKey">The key the policy applies.</param>
+            <param name="localOnly">true if the policy searches local only; otherwise false to seach up the parent chain.</param>
+            <returns>The policy in the list, if present; returns null otherwise.</returns>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.PolicyList.Set``1(``0,System.Object)">
+            <summary>
+            Sets an individual policy.
+            </summary>
+            <typeparam name="TPolicyInterface">The interface the policy is registered under.</typeparam>
+            <param name="policy">The policy to be registered.</param>
+            <param name="buildKey">The key the policy applies.</param>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.PolicyList.Set(System.Type,Microsoft.Practices.ObjectBuilder2.IBuilderPolicy,System.Object)">
+            <summary>
+            Sets an individual policy.
+            </summary>
+            <param name="policyInterface">The <see cref="T:System.Type"/> of the policy.</param>
+            <param name="policy">The policy to be registered.</param>
+            <param name="buildKey">The key the policy applies.</param>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.PolicyList.SetDefault``1(``0)">
+            <summary>
+            Sets a default policy. When checking for a policy, if no specific individual policy
+            is available, the default will be used.
+            </summary>
+            <typeparam name="TPolicyInterface">The interface to register the policy under.</typeparam>
+            <param name="policy">The default policy to be registered.</param>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.PolicyList.SetDefault(System.Type,Microsoft.Practices.ObjectBuilder2.IBuilderPolicy)">
+            <summary>
+            Sets a default policy. When checking for a policy, if no specific individual policy
+            is available, the default will be used.
+            </summary>
+            <param name="policyInterface">The interface to register the policy under.</param>
+            <param name="policy">The default policy to be registered.</param>
+        </member>
+        <member name="P:Microsoft.Practices.ObjectBuilder2.PolicyList.Count">
+            <summary>
+            Gets the number of items in the locator.
+            </summary>
+            <value>
+            The number of items in the locator.
+            </value>
+        </member>
+        <member name="T:Microsoft.Practices.ObjectBuilder2.DynamicBuildPlanMethod">
+            <summary>
+            A delegate type that defines the signature of the
+            dynamic method created by the build plans.
+            </summary>
+            <param name="context"><see cref="T:Microsoft.Practices.ObjectBuilder2.IBuilderContext"/> used to build up the object.</param>
+        </member>
+        <member name="T:Microsoft.Practices.ObjectBuilder2.DynamicMethodBuildPlan">
+            <summary>
+            An implementation of <see cref="T:Microsoft.Practices.ObjectBuilder2.IBuildPlanPolicy"/> that runs the
+            given delegate to execute the plan.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Practices.ObjectBuilder2.ConstructorSelectorPolicy`1">
+            <summary>
+            An implementation of <see cref="T:Microsoft.Practices.ObjectBuilder2.IConstructorSelectorPolicy"/> that chooses
+            constructors based on these criteria: first, pick a constructor marked with the
+            <typeparamref name="TInjectionConstructorMarkerAttribute"/> attribute. If there
+            isn't one, then choose the constructor with the longest parameter list. If that is ambiguous,
+            then throw.
+            </summary>
+            <exception cref="T:System.InvalidOperationException">Thrown when the constructor to choose is ambiguous.</exception>
+            <typeparam name="TInjectionConstructorMarkerAttribute">Attribute used to mark the constructor to call.</typeparam>
+        </member>
+        <member name="T:Microsoft.Practices.ObjectBuilder2.ConstructorSelectorPolicyBase`1">
+            <summary>
+            Base class that provides an implementation of <see cref="T:Microsoft.Practices.ObjectBuilder2.IConstructorSelectorPolicy"/>
+            which lets you override how the parameter resolvers are created.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Practices.ObjectBuilder2.IConstructorSelectorPolicy">
+            <summary>
+            A <see cref="T:Microsoft.Practices.ObjectBuilder2.IBuilderPolicy"/> that, when implemented,
+            will determine which constructor to call from the build plan.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.IConstructorSelectorPolicy.SelectConstructor(Microsoft.Practices.ObjectBuilder2.IBuilderContext)">
+            <summary>
+            Choose the constructor to call for the given type.
+            </summary>
+            <param name="context">Current build context</param>
+            <returns>The chosen constructor.</returns>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.ConstructorSelectorPolicyBase`1.SelectConstructor(Microsoft.Practices.ObjectBuilder2.IBuilderContext)">
+             <summary>
+             Choose the constructor to call for the given type.
+             </summary>
+             <param name="context">Current build context.</param>
+             <returns>The chosen constructor.</returns>
+            <exception cref="T:System.InvalidOperationException">Thrown when the constructor to choose is ambiguous.</exception>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.ConstructorSelectorPolicyBase`1.CreateResolver(System.Reflection.ParameterInfo)">
+            <summary>
+            Create a <see cref="T:Microsoft.Practices.ObjectBuilder2.IDependencyResolverPolicy"/> instance for the given
+            <see cref="T:System.Reflection.ParameterInfo"/>.
+            </summary>
+            <param name="param">Parameter to create the resolver for.</param>
+            <returns>The resolver object.</returns>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.ConstructorSelectorPolicyBase`1.ConstructorLengthComparer.Compare(System.Reflection.ConstructorInfo,System.Reflection.ConstructorInfo)">
+            <summary>
+            Compares two objects and returns a value indicating whether one is less than, equal to, or greater than the other.
+            </summary>
+            
+            <returns>
+            Value Condition Less than zerox is less than y.Zerox equals y.Greater than zerox is greater than y.
+            </returns>
+            
+            <param name="y">The second object to compare.</param>
+            <param name="x">The first object to compare.</param>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.ConstructorSelectorPolicy`1.CreateResolver(System.Reflection.ParameterInfo)">
+            <summary>
+            Create a <see cref="T:Microsoft.Practices.ObjectBuilder2.IDependencyResolverPolicy"/> instance for the given
+            <see cref="T:System.Reflection.ParameterInfo"/>.
+            </summary>
+            <param name="param">Parameter to create the resolver for.</param>
+            <returns>The resolver object.</returns>
+        </member>
+        <member name="T:Microsoft.Practices.ObjectBuilder2.WeakRefDictionary`2">
+            <summary>
+            Represents a dictionary which stores the values as weak references instead of strong
+            references. Null values are supported.
+            </summary>
+            <typeparam name="TKey">The key type</typeparam>
+            <typeparam name="TValue">The value type</typeparam>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.WeakRefDictionary`2.Add(`0,`1)">
+            <summary>
+            Gets the count of the number of items in the dictionary.
+            </summary>
+            <value>
+            The count of the number of items in the dictionary.
+            </value>
+            <remarks>
+            Since the items in the dictionary are held by weak reference, the count value
+            cannot be relied upon to guarantee the number of objects that would be discovered via
+            enumeration. Treat the Count as an estimate only.
+            </remarks>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.WeakRefDictionary`2.ContainsKey(`0)">
+            <summary>
+            Determines if the dictionary contains a value for the key.
+            </summary>
+            <param name="key">The key to look for.</param>
+            <returns>true if the key is contained in the dictionary; otherwise, false.</returns>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.WeakRefDictionary`2.GetEnumerator">
+            <summary>
+            Returns an enumerator that iterates through the dictionary.
+            </summary>
+            <returns>
+            An <see cref="T:System.Collections.IEnumerator"/> object that can be used to iterate through the dictionary. 
+            </returns>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.WeakRefDictionary`2.Remove(`0)">
+            <summary>
+            Removes an item from the dictionary.
+            </summary>
+            <param name="key">The key of the item to be removed.</param>
+            <returns>Returns true if the key was in the dictionary; return false otherwise.</returns>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.WeakRefDictionary`2.TryGet(`0,`1@)">
+            <summary>
+            Attempts to get a value from the dictionary.
+            </summary>
+            <param name="key">The key</param>
+            <param name="value">The value</param>
+            <returns>Returns true if the value was present; false otherwise.</returns>
+        </member>
+        <member name="P:Microsoft.Practices.ObjectBuilder2.WeakRefDictionary`2.Count">
+            <summary>
+            Returns a count of the number of items in the dictionary.
+            </summary>
+            <remarks>
+            Since the items in the dictionary are held by weak reference, the count value
+            cannot be relied upon to guarantee the number of objects that would be discovered via
+            enumeration. Treat the Count as an estimate only.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Practices.ObjectBuilder2.WeakRefDictionary`2.Item(`0)">
+            <summary>
+            Retrieves a value from the dictionary.
+            </summary>
+            <param name="key">The key to look for.</param>
+            <returns>The value in the dictionary.</returns>
+            <exception cref="T:System.Collections.Generic.KeyNotFoundException">Thrown when the key does exist in the dictionary.
+            Since the dictionary contains weak references, the key may have been removed by the
+            garbage collection of the object.</exception>
+        </member>
+        <member name="T:Microsoft.Practices.ObjectBuilder2.StrategyChain">
+            <summary>
+            Represents a chain of responsibility for builder strategies.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.StrategyChain.#ctor">
+            <summary>
+            Initialzie a new instance of the <see cref="T:Microsoft.Practices.ObjectBuilder2.StrategyChain"/> class.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.StrategyChain.#ctor(System.Collections.IEnumerable)">
+            <summary>
+            Initialzie a new instance of the <see cref="T:Microsoft.Practices.ObjectBuilder2.StrategyChain"/> class with a colleciton of strategies.
+            </summary>
+            <param name="strategies">A collection of strategies to initialize the chain.</param>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.StrategyChain.Add(Microsoft.Practices.ObjectBuilder2.IBuilderStrategy)">
+            <summary>
+            Adds a strategy to the chain.
+            </summary>
+            <param name="strategy">The strategy to add to the chain.</param>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.StrategyChain.AddRange(System.Collections.IEnumerable)">
+            <summary>
+            Adds strategies to the chain.
+            </summary>
+            <param name="strategyEnumerable">The strategies to add to the chain.</param>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.StrategyChain.Reverse">
+            <summary>
+            Reverse the order of the strategy chain.
+            </summary>
+            <returns>The reversed strategy chain.</returns>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.StrategyChain.ExecuteBuildUp(Microsoft.Practices.ObjectBuilder2.IBuilderContext)">
+            <summary>
+            Execute this strategy chain against the given context to build up.
+            </summary>
+            <param name="context">Context for the build processes.</param>
+            <returns>The build up object</returns>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.StrategyChain.ExecuteTearDown(Microsoft.Practices.ObjectBuilder2.IBuilderContext)">
+            <summary>
+            Execute this strategy chain against the given context,
+            calling the TearDown methods on the strategies.
+            </summary>
+            <param name="context">Context for the teardown process.</param>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.StrategyChain.System#Collections#Generic#IEnumerable{Microsoft#Practices#ObjectBuilder2#IBuilderStrategy}#GetEnumerator">
+            <summary>
+            Returns an enumerator that iterates through the collection.
+            </summary>
+            
+            <returns>
+            A <see cref="T:System.Collections.Generic.IEnumerator`1"></see> that can be used to iterate through the collection.
+            </returns>
+            <filterpriority>1</filterpriority>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.StrategyChain.GetEnumerator">
+            <summary>
+            Returns an enumerator that iterates through a collection.
+            </summary>
+            
+            <returns>
+            An <see cref="T:System.Collections.IEnumerator"></see> object that can be used to iterate through the collection.
+            </returns>
+            <filterpriority>2</filterpriority>
+        </member>
+        <member name="T:Microsoft.Practices.ObjectBuilder2.ReadableLocator">
+            <summary>
+            Represents an abstract implementation of <see cref="T:Microsoft.Practices.ObjectBuilder2.IReadableLocator"/>.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Practices.ObjectBuilder2.IReadableLocator">
+            <summary>
+            Represents a locator that can be read from.
+            </summary>
+            <remarks>
+            <para>A locator is a dictionary of keys to values, but it keeps the values with
+            weak references, so that locating an object does not keep it alive. If you
+            want to keep the object alive too, you should consider using an
+            <see cref="T:Microsoft.Practices.ObjectBuilder2.ILifetimeContainer"/>.</para>
+            <para>Locators have a built-in concept of hierarchy, so you can ask questions
+            of a locator and tell it whether to return results from the current locator
+            only, or whether to ask the parent locator when local lookups fail.</para>
+            </remarks>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.IReadableLocator.Contains(System.Object)">
+            <summary>
+            Determine if the locator contains an object for the given key.
+            </summary>
+            <param name="key">The key to check.</param>
+            <returns>
+            true if the locator contains an object for the key; returns
+            false otherwise.
+            </returns>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.IReadableLocator.FindBy(System.Predicate{System.Collections.Generic.KeyValuePair{System.Object,System.Object}})">
+            <summary>
+            Finds objects in the locator using the predicate, and returns a temporary locator
+            filled with the found objects.
+            </summary>
+            <param name="predicate">The predicate to test whether to include an object.</param>
+            <returns>The new locator</returns>
+            <exception cref="T:System.ArgumentNullException">Predicate is null.</exception>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.IReadableLocator.Get``1">
+            <summary>
+            Gets an object from the locator, registered with the key of typeof(T).
+            </summary>
+            <typeparam name="TItem">The type of the object to find.</typeparam>
+            <returns>The object, if found; null otherwise.</returns>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.IReadableLocator.Get``1(System.Object)">
+            <summary>
+            Gets an object from the locator, registered with the given key.
+            </summary>
+            <typeparam name="TItem">The type of the object to find.</typeparam>
+            <param name="key">The key that the object is registered with.</param>
+            <returns>The object, if found; null otherwise.</returns>
+            <exception cref="T:System.ArgumentNullException">Key is null.</exception>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.IReadableLocator.Get(System.Object)">
+            <summary>
+            Gets an object from the locator, registered with the given key.
+            </summary>
+            <param name="key">The key that the object is registered with.</param>
+            <returns>The object, if found; null otherwise.</returns>
+            <exception cref="T:System.ArgumentNullException">Key is null.</exception>
+        </member>
+        <member name="P:Microsoft.Practices.ObjectBuilder2.IReadableLocator.Count">
+            <summary>
+            Gets the number of items in the locator.
+            </summary>
+            <value>
+            The number of items in the locator.
+            </value>
+        </member>
+        <member name="P:Microsoft.Practices.ObjectBuilder2.IReadableLocator.ParentLocator">
+            <summary>
+            Gets the parent locator.
+            </summary>
+            <value>
+            The parent locator.
+            </value>
+        </member>
+        <member name="P:Microsoft.Practices.ObjectBuilder2.IReadableLocator.ReadOnly">
+            <summary>
+            Determines if the locator is read-only.
+            </summary>
+            <value>
+            true if the locator is read-only; otherwise, false.
+            </value>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.ReadableLocator.#ctor">
+            <summary>
+            Initialize a new instance of the <see cref="T:Microsoft.Practices.ObjectBuilder2.ReadableLocator"/> class.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.ReadableLocator.#ctor(Microsoft.Practices.ObjectBuilder2.IReadableLocator)">
+            <summary>
+            Initialize a new instance of the <see cref="T:Microsoft.Practices.ObjectBuilder2.ReadableLocator"/> class with a parent <see cref="T:Microsoft.Practices.ObjectBuilder2.IReadableLocator"/>.
+            </summary>
+            <param name="parentLocator">A parent <see cref="T:Microsoft.Practices.ObjectBuilder2.IReadableLocator"/>.</param>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.ReadableLocator.Contains(System.Object)">
+            <summary>
+            Determine if the locator contains an object for the given key.
+            </summary>
+            <param name="key">The key to check.</param>
+            <returns>
+            true if the locator contains an object for the key; returns
+            false otherwise.
+            </returns>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.ReadableLocator.FindBy(System.Predicate{System.Collections.Generic.KeyValuePair{System.Object,System.Object}})">
+            <summary>
+            Finds objects in the locator using the predicate, and returns a temporary locator
+            filled with the found objects.
+            </summary>
+            <param name="predicate">The predicate to test whether to include an object.</param>
+            <returns>The new locator</returns>
+            <exception cref="T:System.ArgumentNullException">Predicate is null.</exception>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.ReadableLocator.Get``1">
+            <summary>
+            Gets an object from the locator, registered with the key of typeof(T).
+            </summary>
+            <typeparam name="TItem">The type of the object to find.</typeparam>
+            <returns>The object, if found; null otherwise.</returns>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.ReadableLocator.Get``1(System.Object)">
+            <summary>
+            Gets an object from the locator, registered with the given key.
+            </summary>
+            <typeparam name="TItem">The type of the object to find.</typeparam>
+            <param name="key">The key that the object is registered with.</param>
+            <returns>The object, if found; null otherwise.</returns>
+            <exception cref="T:System.ArgumentNullException"><paramref name="key"/> is null.</exception>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.ReadableLocator.Get(System.Object)">
+            <summary>
+            Gets an object from the locator, registered with the given key.
+            </summary>
+            <param name="key">The key that the object is registered with.</param>
+            <returns>The object, if found; null otherwise.</returns>
+            <exception cref="T:System.ArgumentNullException">Key is null.</exception>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.ReadableLocator.GetEnumerator">
+            <summary>
+            Returns an enumerator that iterates through the locator.
+            </summary>
+            <returns>
+            An <see cref="T:System.Collections.IEnumerator"/> object that can be used to iterate through the locator. 
+            </returns>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.ReadableLocator.System#Collections#IEnumerable#GetEnumerator">
+            <summary>
+            Returns an enumerator that iterates through the locator.
+            </summary>
+            <returns>
+            An <see cref="T:System.Collections.IEnumerator"/> object that can be used to iterate through the locator. 
+            </returns>
+        </member>
+        <member name="P:Microsoft.Practices.ObjectBuilder2.ReadableLocator.Count">
+            <summary>
+            Gets the number of items in the locator.
+            </summary>
+            <value>
+            The number of items in the locator.
+            </value>
+        </member>
+        <member name="P:Microsoft.Practices.ObjectBuilder2.ReadableLocator.ParentLocator">
+            <summary>
+            Gets the parent locator.
+            </summary>
+            <value>
+            The parent locator.
+            </value>
+        </member>
+        <member name="P:Microsoft.Practices.ObjectBuilder2.ReadableLocator.ReadOnly">
+            <summary>
+            Determines if the locator is read-only.
+            </summary>
+            <value>
+            true if the locator is read-only; otherwise, false.
+            </value>
+        </member>
+        <member name="T:Microsoft.Practices.ObjectBuilder2.IDependencyResolverPolicy">
+            <summary>
+            A <see cref="T:Microsoft.Practices.ObjectBuilder2.IBuilderPolicy"/> that is used at build plan execution time
+            to resolve a dependent value.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.IDependencyResolverPolicy.Resolve(Microsoft.Practices.ObjectBuilder2.IBuilderContext)">
+            <summary>
+            Get the value for a dependency.
+            </summary>
+            <param name="context">Current build context.</param>
+            <returns>The value for the dependency.</returns>
+        </member>
+        <member name="T:Microsoft.Practices.ObjectBuilder2.ReadWriteLocator">
+            <summary>
+            Represents an abstract implementation of <see cref="T:Microsoft.Practices.ObjectBuilder2.IReadWriteLocator"/>.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Practices.ObjectBuilder2.IReadWriteLocator">
+            <summary>
+            Represents a locator that can be read from and written to.
+            </summary>
+            <remarks>
+            <para>
+            A locator is dictionary of keys to values, but it keeps the values with
+            weak references, so that locating an object does not keep it alive. If you
+            want to keep the object alive too, you should consider using an
+            <see cref="T:Microsoft.Practices.ObjectBuilder2.ILifetimeContainer"/>.
+            </para>
+            <para>
+            Locators have a built-in concept of hierarchy, so you can ask questions
+            of a locator and tell it whether to return results from the current locator
+            only, or whether to ask the parent locator when local lookups fail.</para>
+            </remarks>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.IReadWriteLocator.Add(System.Object,System.Object)">
+            <summary>
+            Adds an object to the locator, with the given key.
+            </summary>
+            <param name="key">The key to register the object with.</param>
+            <param name="value">The object to be registered.</param>
+            <exception cref="T:System.ArgumentNullException"><paramref name="key"/> or value are null.</exception>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.IReadWriteLocator.Remove(System.Object)">
+            <summary>
+            Removes an object from the locator.
+            </summary>
+            <param name="key">The key under which the object was registered.</param>
+            <returns>
+            Returns true if the object was found in the locator; returns
+            false otherwise.
+            </returns>
+            <exception cref="T:System.ArgumentNullException"><paramref name="key"/> is null.</exception>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.ReadWriteLocator.#ctor">
+            <summary>
+            Initialize a new instance of the <see cref="T:Microsoft.Practices.ObjectBuilder2.ReadWriteLocator"/> class.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.ReadWriteLocator.#ctor(Microsoft.Practices.ObjectBuilder2.IReadableLocator)">
+            <summary>
+            Initialize a new instance of the <see cref="T:Microsoft.Practices.ObjectBuilder2.ReadWriteLocator"/> class with a parent <see cref="T:Microsoft.Practices.ObjectBuilder2.IReadableLocator"/>.
+            </summary>
+            <param name="parentLocator">A parent <see cref="T:Microsoft.Practices.ObjectBuilder2.IReadableLocator"/>.</param>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.ReadWriteLocator.Add(System.Object,System.Object)">
+            <summary>
+            Adds an object to the locator, with the given key.
+            </summary>
+            <param name="key">The key to register the object with.</param>
+            <param name="value">The object to be registered.</param>
+            <exception cref="T:System.ArgumentNullException"><paramref name="key"/> or value are null.</exception>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.ReadWriteLocator.Remove(System.Object)">
+            <summary>
+            Removes an object from the locator.
+            </summary>
+            <param name="key">The key under which the object was registered.</param>
+            <returns>
+            Returns true if the object was found in the locator; returns
+            false otherwise.
+            </returns>
+            <exception cref="T:System.ArgumentNullException"><paramref name="key"/> is null.</exception>
+        </member>
+        <member name="P:Microsoft.Practices.ObjectBuilder2.ReadWriteLocator.ReadOnly">
+            <summary>
+            Determines if the locator is read-only.
+            </summary>
+            <value>
+            true if the locator is read-only; otherwise, false.
+            </value>
+        </member>
+        <member name="T:Microsoft.Practices.ObjectBuilder2.IStagedStrategyChain">
+            <summary>
+            This interface defines a standard method to convert any 
+            <see cref="T:Microsoft.Practices.ObjectBuilder2.StagedStrategyChain`1"/> regardless
+            of the stage enum into a regular, flat strategy chain.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.IStagedStrategyChain.MakeStrategyChain">
+            <summary>
+            Convert this <see cref="T:Microsoft.Practices.ObjectBuilder2.StagedStrategyChain`1"/> into
+            a flat <see cref="T:Microsoft.Practices.ObjectBuilder2.IStrategyChain"/>.
+            </summary>
+            <returns>The flattened <see cref="T:Microsoft.Practices.ObjectBuilder2.IStrategyChain"/>.</returns>
+        </member>
+        <member name="T:Microsoft.Practices.ObjectBuilder2.BuildKeyMappingPolicy">
+            <summary>
+            Represents a builder policy for mapping build keys.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.BuildKeyMappingPolicy.#ctor(System.Object)">
+            <summary>
+            Initialize a new instance of the <see cref="T:Microsoft.Practices.ObjectBuilder2.BuildKeyMappingPolicy"/> with the new build key.
+            </summary>
+            <param name="newBuildKey"></param>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.BuildKeyMappingPolicy.Map(System.Object)">
+            <summary>
+            Map the <paramref name="buildKey"/> to a new build key.
+            </summary>
+            <param name="buildKey">The build key to mapl</param>
+            <returns>The new build key.</returns>
+        </member>
+        <member name="T:Microsoft.Practices.ObjectBuilder2.IBuilderAware">
+            <summary>
+            Implemented on a class when it wants to receive notifications
+            about the build process.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.IBuilderAware.OnBuiltUp(System.Object)">
+            <summary>
+            Called by the <see cref="T:Microsoft.Practices.ObjectBuilder2.BuilderAwareStrategy"/> when the object is being built up.
+            </summary>
+            <param name="buildKey">The key of the object that was just built up.</param>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.IBuilderAware.OnTearingDown">
+            <summary>
+            Called by the <see cref="T:Microsoft.Practices.ObjectBuilder2.BuilderAwareStrategy"/> when the object is being torn down.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Practices.ObjectBuilder2.NamedTypeBuildKey">
+            <summary>
+            Build key used to combine a type object with a string name. Used by
+            ObjectBuilder to indicate exactly what is being built.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Practices.ObjectBuilder2.IBuildKey">
+            <summary>
+            Represents a build key based on type.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.IBuildKey.ReplaceType(System.Type)">
+            <summary>
+            Construct a new build key object with the current type
+            replaced with the specified <paramref name="newType"/>.
+            </summary>
+            <remarks>This method creates a new build key object, the original is unchanged.</remarks>
+            <param name="newType">New type to place in the build key.</param>
+            <returns>The new build key.</returns>
+        </member>
+        <member name="P:Microsoft.Practices.ObjectBuilder2.IBuildKey.Type">
+            <summary>
+            Gets the <see cref="P:Microsoft.Practices.ObjectBuilder2.IBuildKey.Type"/> that represents the key.
+            </summary>
+            <value>
+            The <see cref="P:Microsoft.Practices.ObjectBuilder2.IBuildKey.Type"/> that represents the key.
+            </value>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.NamedTypeBuildKey.#ctor(System.Type,System.String)">
+            <summary>
+            Create a new <see cref="T:Microsoft.Practices.ObjectBuilder2.NamedTypeBuildKey"/> instance with the given
+            type and name.
+            </summary>
+            <param name="type"><see cref="P:Microsoft.Practices.ObjectBuilder2.NamedTypeBuildKey.Type"/> to build.</param>
+            <param name="name">Key to use to look up type mappings and singletons.</param>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.NamedTypeBuildKey.#ctor(System.Type)">
+            <summary>
+            Create a new <see cref="T:Microsoft.Practices.ObjectBuilder2.NamedTypeBuildKey"/> instance for the default
+            buildup of the given type.
+            </summary>
+            <param name="type"><see cref="P:Microsoft.Practices.ObjectBuilder2.NamedTypeBuildKey.Type"/> to build.</param>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.NamedTypeBuildKey.Make``1">
+            <summary>
+            This helper method creates a new <see cref="T:Microsoft.Practices.ObjectBuilder2.NamedTypeBuildKey"/> instance. It is
+            initialized for the default key for the given type.
+            </summary>
+            <typeparam name="T">Type to build.</typeparam>
+            <returns>A new <see cref="T:Microsoft.Practices.ObjectBuilder2.NamedTypeBuildKey"/> instance.</returns>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.NamedTypeBuildKey.Make``1(System.String)">
+            <summary>
+            This helper method creates a new <see cref="T:Microsoft.Practices.ObjectBuilder2.NamedTypeBuildKey"/> instance for
+            the given type and key.
+            </summary>
+            <typeparam name="T">Type to build</typeparam>
+            <param name="name">Key to use to look up type mappings and singletons.</param>
+            <returns>A new <see cref="T:Microsoft.Practices.ObjectBuilder2.NamedTypeBuildKey"/> instance initialized with the given type and name.</returns>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.NamedTypeBuildKey.ReplaceType(System.Type)">
+            <summary>
+            Construct a new build key object with the current type
+            replaced with the specified <paramref name="newType"/>.
+            </summary>
+            <remarks>This method creates a new build key object, the original is unchanged.</remarks>
+            <param name="newType">New type to place in the build key.</param>
+            <returns>The new build key.</returns>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.NamedTypeBuildKey.Equals(System.Object)">
+            <summary>
+            Compare two <see cref="T:Microsoft.Practices.ObjectBuilder2.NamedTypeBuildKey"/> instances.
+            </summary>
+            <remarks>Two <see cref="T:Microsoft.Practices.ObjectBuilder2.NamedTypeBuildKey"/> instances compare equal
+            if they contain the same name and the same type. Also, comparing
+            against a different type will also return false.</remarks>
+            <param name="obj">Object to compare to.</param>
+            <returns>True if the two keys are equal, false if not.</returns>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.NamedTypeBuildKey.GetHashCode">
+            <summary>
+            Calculate a hash code for this instance.
+            </summary>
+            <returns>A hash code.</returns>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.NamedTypeBuildKey.op_Equality(Microsoft.Practices.ObjectBuilder2.NamedTypeBuildKey,Microsoft.Practices.ObjectBuilder2.NamedTypeBuildKey)">
+            <summary>
+            Compare two <see cref="T:Microsoft.Practices.ObjectBuilder2.NamedTypeBuildKey"/> instances for equality.
+            </summary>
+            <remarks>Two <see cref="T:Microsoft.Practices.ObjectBuilder2.NamedTypeBuildKey"/> instances compare equal
+            if they contain the same name and the same type.</remarks>
+            <param name="left">First of the two keys to compare.</param>
+            <param name="right">Second of the two keys to compare.</param>
+            <returns>True if the values of the keys are the same, else false.</returns>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.NamedTypeBuildKey.op_Inequality(Microsoft.Practices.ObjectBuilder2.NamedTypeBuildKey,Microsoft.Practices.ObjectBuilder2.NamedTypeBuildKey)">
+            <summary>
+            Compare two <see cref="T:Microsoft.Practices.ObjectBuilder2.NamedTypeBuildKey"/> instances for inequality.
+            </summary>
+            <remarks>Two <see cref="T:Microsoft.Practices.ObjectBuilder2.NamedTypeBuildKey"/> instances compare equal
+            if they contain the same name and the same type. If either field differs
+            the keys are not equal.</remarks>
+            <param name="left">First of the two keys to compare.</param>
+            <param name="right">Second of the two keys to compare.</param>
+            <returns>false if the values of the keys are the same, else true.</returns>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.NamedTypeBuildKey.ToString">
+            <summary>
+            Formats the build key as a string (primarily for debugging).
+            </summary>
+            <returns>A readable string representation of the build key.</returns>
+        </member>
+        <member name="P:Microsoft.Practices.ObjectBuilder2.NamedTypeBuildKey.Type">
+            <summary>
+            Return the <see cref="P:Microsoft.Practices.ObjectBuilder2.NamedTypeBuildKey.Type"/> stored in this build key.
+            </summary>
+            <value>The type to build.</value>
+        </member>
+        <member name="P:Microsoft.Practices.ObjectBuilder2.NamedTypeBuildKey.Name">
+            <summary>
+            Returns the name stored in this build key.
+            </summary>
+            <remarks>The name to use when building.</remarks>
+        </member>
+        <member name="T:Microsoft.Practices.ObjectBuilder2.SingletonLifetimePolicy">
+            <summary>
+            A <see cref="T:Microsoft.Practices.ObjectBuilder2.ILifetimePolicy"/> that stores objects in the locator and
+            lifetime container provided by the context.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.SingletonLifetimePolicy.GetValue">
+            <summary>
+            Retrieve a value from the backing store associated with this Lifetime policy.
+            </summary>
+            <returns>the object desired, or null if no such object is currently stored.</returns>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.SingletonLifetimePolicy.SetValue(System.Object)">
+            <summary>
+            Stores the given value into backing store for retrieval later.
+            </summary>
+            <param name="newValue">The object being stored.</param>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.SingletonLifetimePolicy.RemoveValue">
+            <summary>
+            Remove the given object from backing store.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.SingletonLifetimePolicy.Recover">
+            <summary>
+            A method that does whatever is needed to clean up
+            as part of cleaning up after an exception.
+            </summary>
+            <remarks>
+            Don't do anything that could throw in this method,
+            it will cause later recover operations to get skipped
+            and play real havok with the stack trace.
+            </remarks>
+        </member>
+        <member name="T:Microsoft.Practices.ObjectBuilder2.Locator">
+            <summary>
+            An implementation of <see cref="T:Microsoft.Practices.ObjectBuilder2.IReadableLocator"/> and <see cref="T:Microsoft.Practices.ObjectBuilder2.IReadWriteLocator"/>.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.Locator.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Practices.ObjectBuilder2.Locator"/> class. 
+            </summary>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.Locator.#ctor(Microsoft.Practices.ObjectBuilder2.IReadableLocator)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Practices.ObjectBuilder2.Locator"/> class as a child of the <paramref name="parentLocator"/>. 
+            </summary>
+            <param name="parentLocator">The parent locator.</param>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.Locator.Add(System.Object,System.Object)">
+            <summary>
+            Adds an object to the locator, with the given key.
+            </summary>
+            <param name="key">The key to register the object with.</param>
+            <param name="value">The object to be registered.</param>
+            <exception cref="T:System.ArgumentNullException">Key or value are null.</exception>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.Locator.Contains(System.Object)">
+            <summary>
+            Determine if the locator contains an object for the given key.
+            </summary>
+            <param name="key">The key to check.</param>
+            <returns>
+            true if the locator contains an object for the key; returns
+            false otherwise.
+            </returns>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.Locator.Get(System.Object)">
+            <summary>
+            Gets an object from the locator, registered with the given key.
+            </summary>
+            <param name="key">The key that the object is registered with.</param>
+            <returns>The object, if found; null otherwise.</returns>
+            <exception cref="T:System.ArgumentNullException">Key is null.</exception>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.Locator.GetEnumerator">
+            <summary>
+            Returns an enumerator that iterates through a locator.
+            </summary>
+            <returns>
+            An <see cref="T:System.Collections.Generic.IEnumerator`1"/> object that can be used to iterate through the locator. 
+            </returns>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.Locator.Remove(System.Object)">
+            <summary>
+            Removes an object from the locator.
+            </summary>
+            <param name="key">The key under which the object was registered.</param>
+            <returns>
+            Returns true if the object was found in the locator; returns
+            false otherwise.
+            </returns>
+            <exception cref="T:System.ArgumentNullException">Key is null.</exception>
+        </member>
+        <member name="P:Microsoft.Practices.ObjectBuilder2.Locator.Count">
+            <summary>
+            Gets the number of items in the locator.
+            </summary>
+            <value>
+            The number of items in the locator.
+            </value>
+        </member>
+        <member name="T:Microsoft.Practices.ObjectBuilder2.BuilderContext">
+            <summary>
+            Represents the context in which a build-up or tear-down operation runs.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Practices.ObjectBuilder2.IBuilderContext">
+            <summary>
+            Represents the context in which a build-up or tear-down operation runs.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.IBuilderContext.CloneForNewBuild(System.Object,System.Object)">
+            <summary>
+            Create a new IBuilderContext which has the same strategies, locator, policies, and lifetime
+            but a new build key and existing object. Used to execute recursive calls when
+            building up dependencies.
+            </summary>
+            <param name="newBuildKey">Build key for new buildup.</param>
+            <param name="newExistingObject">New exsting object for buildup.</param>
+            <returns>The new context.</returns>
+        </member>
+        <member name="P:Microsoft.Practices.ObjectBuilder2.IBuilderContext.Strategies">
+            <summary>
+            Gets the head of the strategy chain.
+            </summary>
+            <returns>
+            The strategy that's first in the chain; returns null if there are no
+            strategies in the chain.
+            </returns>
+        </member>
+        <member name="P:Microsoft.Practices.ObjectBuilder2.IBuilderContext.Lifetime">
+            <summary>
+            Gets the <see cref="T:Microsoft.Practices.ObjectBuilder2.ILifetimeContainer"/> associated with the build.
+            </summary>
+            <value>
+            The <see cref="T:Microsoft.Practices.ObjectBuilder2.ILifetimeContainer"/> associated with the build.
+            </value>
+        </member>
+        <member name="P:Microsoft.Practices.ObjectBuilder2.IBuilderContext.Locator">
+            <summary>
+            Gets the locator available to the strategies.
+            </summary>
+            <value>
+            The locator available to the strategies.
+            </value>
+        </member>
+        <member name="P:Microsoft.Practices.ObjectBuilder2.IBuilderContext.OriginalBuildKey">
+            <summary>
+            Gets the original build key for the build operation.
+            </summary>
+            <value>
+            The original build key for the build operation.
+            </value>
+        </member>
+        <member name="P:Microsoft.Practices.ObjectBuilder2.IBuilderContext.PersistentPolicies">
+            <summary>
+            The set of policies that were passed into this context.
+            </summary>
+            <remarks>This returns the policies passed into the context.
+            Policies added here will remain after buildup completes.</remarks>
+            <value>The persistent policies for the current context.</value>
+        </member>
+        <member name="P:Microsoft.Practices.ObjectBuilder2.IBuilderContext.Policies">
+            <summary>
+            Gets the policies for the current context. 
+            </summary>
+            <remarks>Any policies added to this object are transient
+            and will be erased at the end of the buildup.</remarks>
+            <value>
+            The policies for the current context.
+            </value>
+        </member>
+        <member name="P:Microsoft.Practices.ObjectBuilder2.IBuilderContext.RecoveryStack">
+            <summary>
+            Gets the collection of <see cref="T:Microsoft.Practices.ObjectBuilder2.IRequiresRecovery"/> objects
+            that need to execute in event of an exception.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Practices.ObjectBuilder2.IBuilderContext.BuildKey">
+            <summary>
+            Get the current build key for the current build operation.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Practices.ObjectBuilder2.IBuilderContext.Existing">
+            <summary>
+            The current object being built up or torn down.
+            </summary>
+            <value>
+            The current object being manipulated by the build operation. May
+            be null if the object hasn't been created yet.</value>
+        </member>
+        <member name="P:Microsoft.Practices.ObjectBuilder2.IBuilderContext.BuildComplete">
+            <summary>
+            Flag indicating if the build operation should continue.
+            </summary>
+            <value>true means that building should not call any more
+            strategies, false means continue to the next strategy.</value>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.BuilderContext.#ctor">
+            <summary>
+            Initialize a new instance of the <see cref="T:Microsoft.Practices.ObjectBuilder2.BuilderContext"/> class.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.BuilderContext.#ctor(Microsoft.Practices.ObjectBuilder2.IStrategyChain,Microsoft.Practices.ObjectBuilder2.IReadWriteLocator,Microsoft.Practices.ObjectBuilder2.ILifetimeContainer,Microsoft.Practices.ObjectBuilder2.IPolicyList,System.Object,System.Object)">
+            <summary>
+            Initialize a new instance of the <see cref="T:Microsoft.Practices.ObjectBuilder2.BuilderContext"/> class with a <see cref="T:Microsoft.Practices.ObjectBuilder2.IStrategyChain"/>, 
+            <see cref="T:Microsoft.Practices.ObjectBuilder2.IReadWriteLocator"/>, <see cref="T:Microsoft.Practices.ObjectBuilder2.ILifetimeContainer"/>, <see cref="T:Microsoft.Practices.ObjectBuilder2.IPolicyList"/> and the 
+            build key used to start this build operation. 
+            </summary>
+            <param name="chain">The <see cref="T:Microsoft.Practices.ObjectBuilder2.IStrategyChain"/> to use for this context.</param>
+            <param name="locator">The <see cref="T:Microsoft.Practices.ObjectBuilder2.IReadWriteLocator"/> to use for this context.</param>
+            <param name="lifetime">The <see cref="T:Microsoft.Practices.ObjectBuilder2.ILifetimeContainer"/> to use for this context.</param>
+            <param name="policies">The <see cref="T:Microsoft.Practices.ObjectBuilder2.IPolicyList"/> to use for this context.</param>
+            <param name="originalBuildKey">Build key to start building.</param>
+            <param name="existing">The existing object to build up.</param>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.BuilderContext.#ctor(Microsoft.Practices.ObjectBuilder2.IStrategyChain,Microsoft.Practices.ObjectBuilder2.IReadWriteLocator,Microsoft.Practices.ObjectBuilder2.ILifetimeContainer,Microsoft.Practices.ObjectBuilder2.IPolicyList,Microsoft.Practices.ObjectBuilder2.IPolicyList,System.Object,System.Object)">
+            <summary>
+            Create a new <see cref="T:Microsoft.Practices.ObjectBuilder2.BuilderContext"/> using the explicitly provided
+            values.
+            </summary>
+            <param name="chain">The <see cref="T:Microsoft.Practices.ObjectBuilder2.IStrategyChain"/> to use for this context.</param>
+            <param name="locator">The <see cref="T:Microsoft.Practices.ObjectBuilder2.IReadWriteLocator"/> to use for this context.</param>
+            <param name="lifetime">The <see cref="T:Microsoft.Practices.ObjectBuilder2.ILifetimeContainer"/> to use for this context.</param>
+            <param name="persistentPolicies">The set of persistent policies to use for this context.</param>
+            <param name="transientPolicies">The set of transient policies to use for this context. It is
+            the caller's responsibility to ensure that the transient and persistent policies are properly
+            combined.</param>
+            <param name="buildKey">Build key for this context.</param>
+            <param name="existing">Existing object to build up.</param>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.BuilderContext.CloneForNewBuild(System.Object,System.Object)">
+            <summary>
+            Create a new IBuilderContext which has the same strategies, locator, policies, and lifetime
+            but a new build key and existing object. Used to execute recursive calls when
+            building up dependencies.
+            </summary>
+            <param name="newBuildKey">Build key for new buildup.</param>
+            <param name="newExistingObject">New exsting object for buildup.</param>
+            <returns>The new context.</returns>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.BuilderContext.NewBuildUp``1(Microsoft.Practices.ObjectBuilder2.IBuilderContext)">
+            <summary>
+            A convenience method to do a new buildup operation on an existing context.
+            </summary>
+            <remarks>This helper is specific to NamedTypeBuildKey.</remarks>
+            <typeparam name="T">Type to return from the buildup.</typeparam>
+            <param name="context">Existing context.</param>
+            <returns>The built up object.</returns>
+        </member>
+        <member name="P:Microsoft.Practices.ObjectBuilder2.BuilderContext.Strategies">
+            <summary>
+            Gets the head of the strategy chain.
+            </summary>
+            <returns>
+            The strategy that's first in the chain; returns null if there are no
+            strategies in the chain.
+            </returns>
+        </member>
+        <member name="P:Microsoft.Practices.ObjectBuilder2.BuilderContext.BuildKey">
+            <summary>
+            Get the current build key for the current build operation.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Practices.ObjectBuilder2.BuilderContext.Existing">
+            <summary>
+            The current object being built up or torn down.
+            </summary>
+            <value>
+            The current object being manipulated by the build operation. May
+            be null if the object hasn't been created yet.</value>
+        </member>
+        <member name="P:Microsoft.Practices.ObjectBuilder2.BuilderContext.Lifetime">
+            <summary>
+            Gets the <see cref="T:Microsoft.Practices.ObjectBuilder2.ILifetimeContainer"/> associated with the build.
+            </summary>
+            <value>
+            The <see cref="T:Microsoft.Practices.ObjectBuilder2.ILifetimeContainer"/> associated with the build.
+            </value>
+        </member>
+        <member name="P:Microsoft.Practices.ObjectBuilder2.BuilderContext.Locator">
+            <summary>
+            Gets the locator available to the strategies.
+            </summary>
+            <value>
+            The locator available to the strategies.
+            </value>
+        </member>
+        <member name="P:Microsoft.Practices.ObjectBuilder2.BuilderContext.OriginalBuildKey">
+            <summary>
+            Gets the original build key for the build operation.
+            </summary>
+            <value>
+            The original build key for the build operation.
+            </value>
+        </member>
+        <member name="P:Microsoft.Practices.ObjectBuilder2.BuilderContext.PersistentPolicies">
+            <summary>
+            The set of policies that were passed into this context.
+            </summary>
+            <remarks>This returns the policies passed into the context.
+            Policies added here will remain after buildup completes.</remarks>
+            <value>The persistent policies for the current context.</value>
+        </member>
+        <member name="P:Microsoft.Practices.ObjectBuilder2.BuilderContext.Policies">
+            <summary>
+            Gets the policies for the current context. 
+            </summary>
+            <remarks>
+            Any modifications will be transient (meaning, they will be forgotten when 
+            the outer BuildUp for this context is finished executing).
+            </remarks>
+            <value>
+            The policies for the current context.
+            </value>
+        </member>
+        <member name="P:Microsoft.Practices.ObjectBuilder2.BuilderContext.RecoveryStack">
+            <summary>
+            Gets the collection of <see cref="T:Microsoft.Practices.ObjectBuilder2.IRequiresRecovery"/> objects
+            that need to execute in event of an exception.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Practices.ObjectBuilder2.BuilderContext.BuildComplete">
+            <summary>
+            Flag indicating if the build operation should continue.
+            </summary>
+            <value>true means that building should not call any more
+            strategies, false means continue to the next strategy.</value>
+        </member>
+        <member name="T:Microsoft.Practices.ObjectBuilder2.ReadOnlyLocator">
+            <summary>
+            An implementation of <see cref="T:Microsoft.Practices.ObjectBuilder2.IReadableLocator"/> that wraps an existing locator
+            to ensure items are not written into the locator.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.ReadOnlyLocator.#ctor(Microsoft.Practices.ObjectBuilder2.IReadableLocator)">
+            <summary>
+            Initialize a new instance of the <see cref="T:Microsoft.Practices.ObjectBuilder2.ReadableLocator"/> class with an <see cref="T:Microsoft.Practices.ObjectBuilder2.IReadableLocator"/> to wrap.
+            </summary>
+            <param name="innerLocator">The inner locator to be wrapped.</param>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.ReadOnlyLocator.Contains(System.Object)">
+            <summary>
+            Determine if the locator contains an object for the given key.
+            </summary>
+            <param name="key">The key to check.</param>
+            <returns>
+            true if the locator contains an object for the key; returns
+            false otherwise.
+            </returns>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.ReadOnlyLocator.Get(System.Object)">
+            <summary>
+            Gets an object from the locator, registered with the given key.
+            </summary>
+            <param name="key">The key that the object is registered with.</param>
+            <returns>The object, if found; null otherwise.</returns>
+            <exception cref="T:System.ArgumentNullException">Key is null.</exception>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.ReadOnlyLocator.GetEnumerator">
+            <summary>
+            Returns an enumerator that iterates through the locator.
+            </summary>
+            <returns>
+            An <see cref="T:System.Collections.IEnumerator"/> object that can be used to iterate through the locator. 
+            </returns>
+        </member>
+        <member name="P:Microsoft.Practices.ObjectBuilder2.ReadOnlyLocator.Count">
+            <summary>
+            Gets the number of items in the locator.
+            </summary>
+            <value>
+            The number of items in the locator.
+            </value>
+        </member>
+        <member name="P:Microsoft.Practices.ObjectBuilder2.ReadOnlyLocator.ParentLocator">
+            <summary>
+            Gets the parent locator.
+            </summary>
+            <value>
+            The parent locator.
+            </value>
+        </member>
+        <member name="P:Microsoft.Practices.ObjectBuilder2.ReadOnlyLocator.ReadOnly">
+            <summary>
+            Determines if the locator is read-only.
+            </summary>
+            <value>
+            true if the locator is read-only; otherwise, false.
+            </value>
+        </member>
+        <member name="T:Microsoft.Practices.ObjectBuilder2.IllegalInjectionMethodException">
+            <summary>
+            The exception thrown when injection is attempted on a method
+            that is an open generic or has out or ref params.
+            </summary>
+            <summary>
+            The exception thrown when injection is attempted on a method
+            that is an open generic or has out or ref params.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.IllegalInjectionMethodException.#ctor">
+            <summary>
+            Construct a new <see cref="T:Microsoft.Practices.ObjectBuilder2.IllegalInjectionMethodException"/> with no
+            message.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.IllegalInjectionMethodException.#ctor(System.String)">
+            <summary>
+            Construct a <see cref="T:Microsoft.Practices.ObjectBuilder2.IllegalInjectionMethodException"/> with the given message
+            </summary>
+            <param name="message">Message to return.</param>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.IllegalInjectionMethodException.#ctor(System.String,System.Exception)">
+            <summary>
+            Construct a <see cref="T:Microsoft.Practices.ObjectBuilder2.IllegalInjectionMethodException"/> with the given message
+            and inner exception.
+            </summary>
+            <param name="message">Message to return.</param>
+            <param name="innerException">Inner exception</param>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.IllegalInjectionMethodException.#ctor(System.Runtime.Serialization.SerializationInfo,System.Runtime.Serialization.StreamingContext)">
+            <summary>
+            Used for serialization.
+            </summary>
+            <param name="info">Serialization info.</param>
+            <param name="context">Serialization context.</param>
+        </member>
+        <member name="T:Microsoft.Practices.ObjectBuilder2.IDependencyResolverTrackerPolicy">
+            <summary>
+            A builder policy that lets you keep track of the current
+            resolvers and will remove them from the given policy set.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.IDependencyResolverTrackerPolicy.AddResolverKey(System.Object)">
+            <summary>
+            Add a new resolver to track by key.
+            </summary>
+            <param name="key">Key that was used to add the resolver to the policy set.</param>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.IDependencyResolverTrackerPolicy.RemoveResolvers(Microsoft.Practices.ObjectBuilder2.IPolicyList)">
+            <summary>
+            Remove the currently tracked resolvers from the given policy list.
+            </summary>
+            <param name="policies">Policy list to remove the resolvers from.</param>
+        </member>
+        <member name="T:Microsoft.Practices.ObjectBuilder2.DynamicMethodBuildPlanCreatorPolicy">
+            <summary>
+            An <see cref="T:Microsoft.Practices.ObjectBuilder2.IBuildPlanCreatorPolicy"/> implementation
+            that constructs a build plan via dynamic IL emission.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.DynamicMethodBuildPlanCreatorPolicy.#ctor(Microsoft.Practices.ObjectBuilder2.IStagedStrategyChain)">
+            <summary>
+            Construct a <see cref="T:Microsoft.Practices.ObjectBuilder2.DynamicMethodBuildPlanCreatorPolicy"/> that
+            uses the given strategy chain to construct the build plan.
+            </summary>
+            <param name="strategies"></param>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.DynamicMethodBuildPlanCreatorPolicy.CreatePlan(Microsoft.Practices.ObjectBuilder2.IBuilderContext,System.Object)">
+            <summary>
+            Construct a build plan.
+            </summary>
+            <param name="context">The current build context.</param>
+            <param name="buildKey">The current build key.</param>
+            <returns>The created build plan.</returns>
+        </member>
+        <member name="T:Microsoft.Practices.ObjectBuilder2.FixedTypeResolverPolicy">
+            <summary>
+            An implementation of <see cref="T:Microsoft.Practices.ObjectBuilder2.IDependencyResolverPolicy"/> that
+            calls back into the build chain to build up the dependency, passing
+            a type given at compile time as its build key.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.FixedTypeResolverPolicy.#ctor(System.Type)">
+            <summary>
+            Create a new instance storing the given type.
+            </summary>
+            <param name="typeToBuild">Type to resolve.</param>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.FixedTypeResolverPolicy.Resolve(Microsoft.Practices.ObjectBuilder2.IBuilderContext)">
+            <summary>
+            Get the value for a dependency.
+            </summary>
+            <param name="context">Current build context.</param>
+            <returns>The value for the dependency.</returns>
+        </member>
+        <member name="T:Microsoft.Practices.ObjectBuilder2.BuilderStage">
+            <summary>
+            Enumeration to represent the object builder stages.
+            </summary>
+            <remarks>
+            The order of the values in the enumeration is the order in which the stages are run.
+            </remarks>
+        </member>
+        <member name="F:Microsoft.Practices.ObjectBuilder2.BuilderStage.PreCreation">
+            <summary>
+            Strategies in this stage run before creation. Typical work done in this stage might
+            include strategies that use reflection to set policies into the context that other
+            strategies would later use.
+            </summary>
+        </member>
+        <member name="F:Microsoft.Practices.ObjectBuilder2.BuilderStage.Creation">
+            <summary>
+            Strategies in this stage create objects. Typically you will only have a single policy-driven
+            creation strategy in this stage.
+            </summary>
+        </member>
+        <member name="F:Microsoft.Practices.ObjectBuilder2.BuilderStage.Initialization">
+            <summary>
+            Strategies in this stage work on created objects. Typical work done in this stage might
+            include setter injection and method calls.
+            </summary>
+        </member>
+        <member name="F:Microsoft.Practices.ObjectBuilder2.BuilderStage.PostInitialization">
+            <summary>
+            Strategies in this stage work on objects that are already initialized. Typical work done in
+            this stage might include looking to see if the object implements some notification interface
+            to discover when its initialization stage has been completed.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Practices.ObjectBuilder2.BuildKey">
+            <summary>
+            Utility methods for dealing with arbitrary build key objects.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.BuildKey.GetType(System.Object)">
+            <summary>
+            Gets the <see cref="T:System.Type"/> of object to build from the build key.
+            </summary>
+            <param name="buildKey">The build key to get the <see cref="T:System.Type"/>.</param>
+            <returns>The <see cref="T:System.Type"/> of object to build from the key.</returns>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.BuildKey.TryGetType(System.Object,System.Type@)">
+            <summary>
+            Tries to get the <see cref="T:System.Type"/> from <paramref name="buildKey"/>.
+            </summary>
+            <param name="buildKey">The build key to get the <see cref="T:System.Type"/>.</param>
+            <param name="type"></param>
+            <returns>true if the <see cref="T:System.Type"/> was found; otherwise, false.</returns>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.BuildKey.ReplaceType(System.Object,System.Type)">
+            <summary>
+            Given a <paramref name="buildKey"/>, return a new build key
+            which is the same as the original, except that the type has
+            been replaced with <paramref name="newType"/>.
+            </summary>
+            <param name="buildKey">original build key</param>
+            <param name="newType">New type to put in new build key.</param>
+            <returns>The new build key.</returns>
+        </member>
+        <member name="T:Microsoft.Practices.ObjectBuilder2.DynamicMethodConstructorStrategy">
+            <summary>
+            A <see cref="T:Microsoft.Practices.ObjectBuilder2.BuilderStrategy"/> that emits IL to call constructors
+            as part of creating a build plan.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.DynamicMethodConstructorStrategy.PreBuildUp(Microsoft.Practices.ObjectBuilder2.IBuilderContext)">
+            <summary>
+            Called during the chain of responsibility for a build operation.
+            </summary>
+            <remarks>Existing object is an instance of <see cref="T:Microsoft.Practices.ObjectBuilder2.DynamicBuildPlanGenerationContext"/>.</remarks>
+            <param name="context">The context for the operation.</param>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.DynamicMethodConstructorStrategy.ThrowForNullExistingObject(Microsoft.Practices.ObjectBuilder2.IBuilderContext)">
+            <summary>
+            A helper method used by the generated IL to throw an exception if
+            a dependency cannot be resolved.
+            </summary>
+            <param name="context">The <see cref="T:Microsoft.Practices.ObjectBuilder2.IBuilderContext"/> currently being
+            used for the build of this object.</param>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.DynamicMethodConstructorStrategy.ThrowForResolutionFailed(System.Exception,System.String,System.String,Microsoft.Practices.ObjectBuilder2.IBuilderContext)">
+            <summary>
+            A helper method used by the generated IL to throw an exception if a parameter
+            fails to resolve.
+            </summary>
+            <param name="inner">Inner exception to throw.</param>
+            <param name="parameterName">Name of the parameter that was attempted to be resolved.</param>
+            <param name="constructorSignature">String describing which constructor we were calling.</param>
+            <param name="context">Current build context.</param>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.DynamicMethodConstructorStrategy.ThrowForAttemptingToConstructInterface(Microsoft.Practices.ObjectBuilder2.IBuilderContext)">
+            <summary>
+            A helper method used by the generated IL to throw an exception if
+            no existing object is present, but the user is attempting to build
+            an interface (usually due to the lack of a type mapping).
+            </summary>
+            <param name="context"></param>
+        </member>
+        <member name="T:Microsoft.Practices.ObjectBuilder2.BuildKeyMappingStrategy">
+            <summary>
+            Represents a strategy for mapping build keys in the build up operation.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.BuildKeyMappingStrategy.PreBuildUp(Microsoft.Practices.ObjectBuilder2.IBuilderContext)">
+            <summary>
+            Called during the chain of responsibility for a build operation.  Looks for the <see cref="T:Microsoft.Practices.ObjectBuilder2.IBuildKeyMappingPolicy"/>
+            and if found maps the build key for the current operation.
+            </summary>
+            <param name="context">The context for the operation.</param>
+        </member>
+        <member name="T:Microsoft.Practices.ObjectBuilder2.IBuilder">
+            <summary>
+            Represents the main interface for an object builder.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.IBuilder.BuildUp(Microsoft.Practices.ObjectBuilder2.IReadWriteLocator,Microsoft.Practices.ObjectBuilder2.ILifetimeContainer,Microsoft.Practices.ObjectBuilder2.IPolicyList,Microsoft.Practices.ObjectBuilder2.IStrategyChain,System.Object,System.Object)">
+            <summary>
+            Performs a build operation.
+            </summary>
+            <remarks>
+            This operation uses the strategies and permanent policies already configured
+            into the builder, combined with the optional transient policies, and starts a build
+            operation. Transient policies override any built-in policies, when present.
+            </remarks>
+            <param name="locator">The locator to be used for this build operation.</param>
+            <param name="lifetime">The <see cref="T:Microsoft.Practices.ObjectBuilder2.ILifetimeContainer"/> to use for this build operation.</param>
+            <param name="policies">
+            The transient policies to apply to this build. These
+            policies take precedence over any permanent policies built into the builder.
+            </param>
+            <param name="strategies">
+            The <see cref="T:Microsoft.Practices.ObjectBuilder2.IStrategyChain"/> to use for this build operation.
+            </param>
+            <param name="buildKey">The key of the object to build.</param>
+            <param name="existing">
+            The existing object to run the build chain on, if one exists.
+            If null is passed, a new object instance will typically be created by some strategy
+            in the chain.
+            </param>
+            <returns>The built object.</returns>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.IBuilder.BuildUp``1(Microsoft.Practices.ObjectBuilder2.IReadWriteLocator,Microsoft.Practices.ObjectBuilder2.ILifetimeContainer,Microsoft.Practices.ObjectBuilder2.IPolicyList,Microsoft.Practices.ObjectBuilder2.IStrategyChain,System.Object,System.Object)">
+            <summary>
+            Performs a build operation.
+            </summary>
+            <remarks>
+            This operation uses the strategies and permanent policies already configured
+            into the builder, combined with the optional transient policies, and starts a build
+            operation. Transient policies override any built-in policies, when present.
+            </remarks>
+            <typeparam name="TTypeToBuild">The type to build.</typeparam>
+            <param name="locator">The locator to be used for this build operation.</param>
+            <param name="lifetime">The <see cref="T:Microsoft.Practices.ObjectBuilder2.ILifetimeContainer"/> to use for this build operation.</param>
+            <param name="policies">
+            The transient policies to apply to this build. These
+            policies take precedence over any permanent policies built into the builder.
+            </param>
+            <param name="strategies">
+            The <see cref="T:Microsoft.Practices.ObjectBuilder2.IStrategyChain"/> to use for this build operation.
+            </param>
+            <param name="buildKey">The key of the object to build.</param>
+            <param name="existing">
+            The existing object to run the build chain on, if one exists.
+            If null is passed, a new object instance will typically be created by some strategy
+            in the chain.
+            </param>
+            <returns>The built object.</returns>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.IBuilder.TearDown``1(Microsoft.Practices.ObjectBuilder2.IReadWriteLocator,Microsoft.Practices.ObjectBuilder2.ILifetimeContainer,Microsoft.Practices.ObjectBuilder2.IPolicyList,Microsoft.Practices.ObjectBuilder2.IStrategyChain,``0)">
+            <summary>
+            Performs an unbuild operation.
+            </summary>
+            <typeparam name="TItem">The type to unbuild. If not provided, it will be inferred from the
+            type of item.
+            </typeparam>
+            <param name="locator">The locator to be used for this build operation.</param>
+            <param name="lifetime">The <see cref="T:Microsoft.Practices.ObjectBuilder2.ILifetimeContainer"/> to use for this build operation.</param>
+            <param name="policies">
+            The transient policies to apply to this build. These
+            policies take precedence over any permanent policies built into the builder.
+            </param>
+            <param name="strategies">
+            The <see cref="T:Microsoft.Practices.ObjectBuilder2.IStrategyChain"/> to use for this build operation.
+            </param>
+            <param name="item">The item to tear down.</param>
+            <returns>The torn down item.</returns>
+        </member>
+        <member name="T:Microsoft.Practices.ObjectBuilder2.DependencyResolverTrackerPolicy">
+            <summary>
+            Implementation of <see cref="T:Microsoft.Practices.ObjectBuilder2.IDependencyResolverTrackerPolicy"/>.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.DependencyResolverTrackerPolicy.AddResolverKey(System.Object)">
+            <summary>
+            Add a new resolver to track by key.
+            </summary>
+            <param name="key">Key that was used to add the resolver to the policy set.</param>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.DependencyResolverTrackerPolicy.RemoveResolvers(Microsoft.Practices.ObjectBuilder2.IPolicyList)">
+            <summary>
+            Remove the currently tracked resolvers from the given policy list.
+            </summary>
+            <param name="policies">Policy list to remove the resolvers from.</param>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.DependencyResolverTrackerPolicy.GetTracker(Microsoft.Practices.ObjectBuilder2.IPolicyList,System.Object)">
+            <summary>
+            Get an instance that implements <see cref="T:Microsoft.Practices.ObjectBuilder2.IDependencyResolverTrackerPolicy"/>,
+            either the current one in the policy set or creating a new one if it doesn't
+            exist.
+            </summary>
+            <param name="policies">Policy list to look up from.</param>
+            <param name="buildKey">Build key to track.</param>
+            <returns>The resolver tracker.</returns>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.DependencyResolverTrackerPolicy.TrackKey(Microsoft.Practices.ObjectBuilder2.IPolicyList,System.Object,System.Object)">
+            <summary>
+            Add a key to be tracked to the current tracker.
+            </summary>
+            <param name="policies">Policy list containing the resolvers and trackers.</param>
+            <param name="buildKey">Build key for the resolvers being tracked.</param>
+            <param name="resolverKey">Key for the resolver.</param>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.DependencyResolverTrackerPolicy.RemoveResolvers(Microsoft.Practices.ObjectBuilder2.IPolicyList,System.Object)">
+            <summary>
+            Remove the resolvers for the given build key.
+            </summary>
+            <param name="policies">Policy list containing the build key.</param>
+            <param name="buildKey">Build key.</param>
+        </member>
+        <member name="T:Microsoft.Practices.ObjectBuilder2.SelectedProperty">
+            <summary>
+            Objects of this type are returned from
+            <see cref="M:Microsoft.Practices.ObjectBuilder2.IPropertySelectorPolicy.SelectProperties(Microsoft.Practices.ObjectBuilder2.IBuilderContext)"/>.
+            This class combines the <see cref="T:System.Reflection.PropertyInfo"/> about
+            the property with the string key used to look up the resolver
+            for this property's value.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.SelectedProperty.#ctor(System.Reflection.PropertyInfo,System.String)">
+            <summary>
+            Create an instance of <see cref="T:Microsoft.Practices.ObjectBuilder2.SelectedProperty"/>
+            with the given <see cref="T:System.Reflection.PropertyInfo"/> and key.
+            </summary>
+            <param name="property">The property.</param>
+            <param name="key">Key to use to look up the resolver.</param>
+        </member>
+        <member name="P:Microsoft.Practices.ObjectBuilder2.SelectedProperty.Property">
+            <summary>
+            PropertyInfo for this property.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Practices.ObjectBuilder2.SelectedProperty.Key">
+            <summary>
+            Key to look up this property's resolver.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Practices.ObjectBuilder2.DefaultDynamicBuilderMethodCreatorPolicy">
+            <summary>
+            An implementation of <see cref="T:Microsoft.Practices.ObjectBuilder2.IDynamicBuilderMethodCreatorPolicy"/> that will
+            check for full trust and if we're building a class or an interface. If in full
+            trust, attach to the class or module of the interface respectively. If in partial
+            trust, attach to the OB2 module instead.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Practices.ObjectBuilder2.IDynamicBuilderMethodCreatorPolicy">
+            <summary>
+            This interface defines a policy that manages creation of the dynamic methods
+            used by the ObjectBuilder code generation. This way, we can replace the details
+            of how the dynamic method is created to handle differences in CLR (like Silverlight
+            vs desktop) or security policies.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.IDynamicBuilderMethodCreatorPolicy.CreateBuilderMethod(System.Type,System.String)">
+            <summary>
+            Create a builder method for the given type, using the given name.
+            </summary>
+            <param name="typeToBuild">Type that will be built by the generated method.</param>
+            <param name="methodName">Name to give to the method.</param>
+            <returns>A <see cref="T:System.Reflection.Emit.DynamicMethod"/> object with the proper signature to use
+            as part of a build plan.</returns>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.DefaultDynamicBuilderMethodCreatorPolicy.CreateBuilderMethod(System.Type,System.String)">
+            <summary>
+            Create a builder method for the given type, using the given name.
+            </summary>
+            <param name="typeToBuild">Type that will be built by the generated method.</param>
+            <param name="methodName">Name to give to the method.</param>
+            <returns>A <see cref="T:System.Reflection.Emit.DynamicMethod"/> object with the proper signature to use
+            as part of a build plan.</returns>
+        </member>
+        <member name="T:Microsoft.Practices.ObjectBuilder2.StagedStrategyChain`1">
+            <summary>
+            Represents a chain of responsibility for builder strategies partitioned by stages.
+            </summary>
+            <typeparam name="TStageEnum">The stage enumeration to partition the strategies.</typeparam>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.StagedStrategyChain`1.#ctor">
+            <summary>
+            Initialize a new instance of the <see cref="T:Microsoft.Practices.ObjectBuilder2.StagedStrategyChain`1"/> class.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.StagedStrategyChain`1.#ctor(Microsoft.Practices.ObjectBuilder2.StagedStrategyChain{`0})">
+            <summary>
+            Initialize a new instance of the <see cref="T:Microsoft.Practices.ObjectBuilder2.StagedStrategyChain`1"/> class with an inner strategy chain to use when building.
+            </summary>
+            <param name="innerChain">The inner strategy chain to use first when finding strategies in the build operation.</param>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.StagedStrategyChain`1.Add(Microsoft.Practices.ObjectBuilder2.IBuilderStrategy,`0)">
+            <summary>
+            Adds a strategy to the chain at a particular stage.
+            </summary>
+            <param name="strategy">The strategy to add to the chain.</param>
+            <param name="stage">The stage to add the strategy.</param>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.StagedStrategyChain`1.AddNew``1(`0)">
+            <summary>
+            Add a new strategy for the <paramref name="stage"/>.
+            </summary>
+            <typeparam name="TStrategy">The <see cref="T:System.Type"/> of <see cref="T:Microsoft.Practices.ObjectBuilder2.IBuilderStrategy"/></typeparam>
+            <param name="stage">The stage to add the strategy.</param>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.StagedStrategyChain`1.Clear">
+            <summary>
+            Clear the current strategy chain list.
+            </summary>
+            <remarks>
+            This will not clear the inner strategy chain if this instane was created with one.
+            </remarks>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.StagedStrategyChain`1.MakeStrategyChain">
+            <summary>
+            Makes a strategy chain based on this instance.
+            </summary>
+            <returns>A new <see cref="T:Microsoft.Practices.ObjectBuilder2.StrategyChain"/>.</returns>
+        </member>
+        <member name="T:Microsoft.Practices.ObjectBuilder2.LifetimeStrategy">
+            <summary>
+            An <see cref="T:Microsoft.Practices.ObjectBuilder2.IBuilderStrategy"/> implementation that uses
+            a <see cref="T:Microsoft.Practices.ObjectBuilder2.ILifetimePolicy"/> to figure out if an object
+            has already been created and to update or remove that
+            object from some backing store.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.LifetimeStrategy.PreBuildUp(Microsoft.Practices.ObjectBuilder2.IBuilderContext)">
+            <summary>
+            Called during the chain of responsibility for a build operation. The
+            PreBuildUp method is called when the chain is being executed in the
+            forward direction.
+            </summary>
+            <param name="context">Context of the build operation.</param>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.LifetimeStrategy.PostBuildUp(Microsoft.Practices.ObjectBuilder2.IBuilderContext)">
+            <summary>
+            Called during the chain of responsibility for a build operation. The
+            PostBuildUp method is called when the chain has finished the PreBuildUp
+            phase and executes in reverse order from the PreBuildUp calls.
+            </summary>
+            <param name="context">Context of the build operation.</param>
+        </member>
+        <member name="T:Microsoft.Practices.ObjectBuilder2.SelectedMethod">
+            <summary>
+            Objects of this type are the return value from <see cref="M:Microsoft.Practices.ObjectBuilder2.IMethodSelectorPolicy.SelectMethods(Microsoft.Practices.ObjectBuilder2.IBuilderContext)"/>.
+            It encapsulates the desired <see cref="T:System.Reflection.MethodInfo"/> with the string keys
+            needed to look up the <see cref="T:Microsoft.Practices.ObjectBuilder2.IDependencyResolverPolicy"/> for each
+            parameter.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.SelectedMethod.#ctor(System.Reflection.MethodInfo)">
+            <summary>
+            Create a new <see cref="T:Microsoft.Practices.ObjectBuilder2.SelectedMethod"/> instance which
+            contains the given method.
+            </summary>
+            <param name="method">The method</param>
+        </member>
+        <member name="P:Microsoft.Practices.ObjectBuilder2.SelectedMethod.Method">
+            <summary>
+            The constructor this object wraps.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Practices.ObjectBuilder2.Builder">
+            <summary>
+            An implementation of <see cref="T:Microsoft.Practices.ObjectBuilder2.IBuilder"/>. It contains all the default strategies shipped
+            with ObjectBuilder.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.Builder.BuildUp(Microsoft.Practices.ObjectBuilder2.IReadWriteLocator,Microsoft.Practices.ObjectBuilder2.ILifetimeContainer,Microsoft.Practices.ObjectBuilder2.IPolicyList,Microsoft.Practices.ObjectBuilder2.IStrategyChain,System.Object,System.Object)">
+            <summary>
+            Performs a build operation.
+            </summary>
+            <remarks>
+            This operation uses the strategies and permanent policies already configured
+            into the builder, combined with the optional transient policies, and starts a build
+            operation. Transient policies override any built-in policies, when present.
+            </remarks>
+            <param name="locator">The locator to be used for this build operation.</param>
+            <param name="lifetime">The <see cref="T:Microsoft.Practices.ObjectBuilder2.ILifetimeContainer"/> to use for this build operation.</param>
+            <param name="policies">
+            The transient policies to apply to this build. These
+            policies take precedence over any permanent policies built into the builder.
+            </param>
+            <param name="strategies">
+            The <see cref="T:Microsoft.Practices.ObjectBuilder2.IStrategyChain"/> to use for this build operation.
+            </param>
+            <param name="buildKey">The key of the object to build.</param>
+            <param name="existing">
+            The existing object to run the build chain on, if one exists.
+            If null is passed, a new object instance will typically be created by some strategy
+            in the chain.
+            </param>
+            <returns>The built object.</returns>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.Builder.BuildUp``1(Microsoft.Practices.ObjectBuilder2.IReadWriteLocator,Microsoft.Practices.ObjectBuilder2.ILifetimeContainer,Microsoft.Practices.ObjectBuilder2.IPolicyList,Microsoft.Practices.ObjectBuilder2.IStrategyChain,System.Object,System.Object)">
+            <summary>
+            Performs a build operation.
+            </summary>
+            <remarks>
+            This operation uses the strategies and permanent policies already configured
+            into the builder, combined with the optional transient policies, and starts a build
+            operation. Transient policies override any built-in policies, when present.
+            </remarks>
+            <typeparam name="TTypeToBuild">The type to build.</typeparam>
+            <param name="locator">The locator to be used for this build operation.</param>
+            <param name="lifetime">The <see cref="T:Microsoft.Practices.ObjectBuilder2.ILifetimeContainer"/> to use for this build operation.</param>
+            <param name="policies">
+            The transient policies to apply to this build. These
+            policies take precedence over any permanent policies built into the builder.
+            </param>
+            <param name="strategies">
+            The <see cref="T:Microsoft.Practices.ObjectBuilder2.IStrategyChain"/> to use for this build operation.
+            </param>
+            <param name="buildKey">The key of the object to build.</param>
+            <param name="existing">
+            The existing object to run the build chain on, if one exists.
+            If null is passed, a new object instance will typically be created by some strategy
+            in the chain.
+            </param>
+            <returns>The built object.</returns>
+        </member>
+        <member name="M:Microsoft.Practices.ObjectBuilder2.Builder.TearDown``1(Microsoft.Practices.ObjectBuilder2.IReadWriteLocator,Microsoft.Practices.ObjectBuilder2.ILifetimeContainer,Microsoft.Practices.ObjectBuilder2.IPolicyList,Microsoft.Practices.ObjectBuilder2.IStrategyChain,``0)">
+            <summary>
+            Performs an unbuild operation.
+            </summary>
+            <typeparam name="TItem">The type to unbuild. If not provided, it will be inferred from the
+            type of item.
+            </typeparam>
+            <param name="locator">The locator to be used for this build operation.</param>
+            <param name="lifetime">The <see cref="T:Microsoft.Practices.ObjectBuilder2.ILifetimeContainer"/> to use for this build operation.</param>
+            <param name="policies">
+            The transient policies to apply to this build. These
+            policies take precedence over any permanent policies built into the builder.
+            </param>
+            <param name="strategies">
+            The <see cref="T:Microsoft.Practices.ObjectBuilder2.IStrategyChain"/> to use for this build operation.
+            </param>
+            <param name="item">The item to tear down.</param>
+            <returns>The torn down item.</returns>
+        </member>
+    </members>
+</doc>
