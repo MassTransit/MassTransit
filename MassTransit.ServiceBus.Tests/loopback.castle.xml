@@ -5,12 +5,12 @@
 
       <bus id="local"
 				 endpoint="loopback://localhost/local_sb">
-        <dispatcher minThreads="0"
+        <dispatcher minThreads="1"
 							maxThreads="20" />
       </bus>
       <bus id="remote"
 				 endpoint="loopback://localhost/remote_sb">
-        <dispatcher minThreads="0"
+        <dispatcher minThreads="1"
 							maxThreads="20" />
       </bus>
       <transports>
