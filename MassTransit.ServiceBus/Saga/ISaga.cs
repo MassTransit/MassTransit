@@ -13,7 +13,6 @@
 namespace MassTransit.Saga
 {
     using System;
-    using Microsoft.Practices.ServiceLocation;
     using ServiceBus;
 
     /// <summary>
@@ -23,6 +22,5 @@ namespace MassTransit.Saga
         CorrelatedBy<Guid>
     {
         IServiceBus Bus { set; }
-        IServiceLocator ServiceLocator { set; }
     }
 }
