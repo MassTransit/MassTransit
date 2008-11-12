@@ -32,11 +32,6 @@ namespace Starbucks.Barista
             get; set;
         }
 
-        public IServiceLocator ServiceLocator
-        {
-            get; set;
-        }
-
         public void Consume(NewOrderMessage message)
         {
 

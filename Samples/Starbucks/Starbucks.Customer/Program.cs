@@ -2,8 +2,6 @@
 using System.Windows.Forms;
 using Castle.Windsor;
 using MassTransit.Host;
-using MassTransit.Host.Configurations;
-using MassTransit.Host.LifeCycles;
 using MassTransit.WindsorIntegration;
 using Microsoft.Practices.ServiceLocation;
 
