@@ -79,6 +79,7 @@
 				<attribute type="AssemblyVersionAttribute" value="0.4.${version.build}.${version.rev}" />
 				<attribute type="AssemblyCopyrightAttribute" value="MassTransit Project, original author or authors" />
 				<attribute type="AssemblyCompanyAttribute" value="CFT &amp; ACM" />
+				<attribute type="AssemblyInformationalVersionAttribute" value="${svn.path}" />
 			</attributes>
 		</asminfo>
 	</target>
