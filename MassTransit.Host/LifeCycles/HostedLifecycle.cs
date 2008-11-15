@@ -59,9 +59,9 @@ namespace MassTransit.Host.LifeCycles
 				bus.Dispose();
 			}
 
-			if (Completed != null)
+            Action<IApplicationLifecycle> handler = Completed;
+			if (handler != null)
 			{
-				Action<IApplicationLifecycle> handler = Completed;
 				handler(this);
 			}
 		}

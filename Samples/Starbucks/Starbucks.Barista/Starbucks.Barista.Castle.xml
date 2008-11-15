@@ -6,6 +6,7 @@
       <bus id="barista"
 				 endpoint="msmq://localhost/mt_server1">
         <subscriptionService endpoint="msmq://localhost/mt_pubsub" />
+        <managementService heartbeatInterval="3" />
       </bus>
       <transports>
         <transport>MassTransit.ServiceBus.MSMQ.MsmqEndpoint, MassTransit.ServiceBus.MSMQ</transport>

@@ -89,7 +89,7 @@
     <Compile Include="Credentials.cs" />
     <Compile Include="Hosts\WinFormHost.cs" />
     <Compile Include="KnownServiceNames.cs" />
-    <Compile Include="LifeCycles\HostedLifeccycle.cs" />
+    <Compile Include="LifeCycles\HostedLifecycle.cs" />
     <Compile Include="HostServiceInstaller.cs">
       <SubType>Component</SubType>
     </Compile>
