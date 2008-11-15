@@ -41,7 +41,9 @@ namespace MassTransit.Host
         /// </summary>
 		void Stop();
 
-		//To be fired after disose is complete
+        /// <summary>
+        /// Gets fired when the ifecycle has stoped all services and disposed of stuff
+        /// </summary>
 		event Action<IApplicationLifecycle> Completed;
 	}
 }

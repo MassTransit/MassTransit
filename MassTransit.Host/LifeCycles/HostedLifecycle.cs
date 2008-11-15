@@ -71,7 +71,9 @@ namespace MassTransit.Host.LifeCycles
             get { return _serviceLocator; }
         }
 
-        //TODO: WTF is this (and I wrote it!)
+        /// <summary>
+        /// Gets fired when the hosted lifecycle has stoped all services and disposed of stuff
+        /// </summary>
 		public event Action<IApplicationLifecycle> Completed;
 	}
 }
