@@ -16,12 +16,12 @@ namespace MassTransit.ServiceBus.Tests.StateMachine
     {
         static OrderState()
         {
-            Idle = Idle.Define("Idle");
-            Active = Active.Define("Active");
-            OrderPaid = OrderPaid.Define("OrderPaid");
+            Define(() => Idle);
+            Define(() => Active);
+            Define(() => OrderPaid);
 
-            OrderReceived = OrderReceived.Define();
-            PaymentReceived = PaymentReceived.Define();
+            Define(() => OrderReceived);
+            Define(() => PaymentReceived);
 
             Initial = Idle;
 
@@ -35,12 +35,12 @@ namespace MassTransit.ServiceBus.Tests.StateMachine
                 ;
         }
 
-        public static State<OrderState> Idle { get; private set; }
-        public static State<OrderState> Active { get; private set; }
-        public static State<OrderState> OrderPaid { get; private set; }
+        public static State<OrderState> Idle { get; set; }
+        public static State<OrderState> Active { get; set; }
+        public static State<OrderState> OrderPaid { get; set; }
 
-        public static StateEvent<OrderState> OrderReceived { get; private set; }
-        public static StateEvent<OrderState> PaymentReceived { get; private set; }
+        public static StateEvent<OrderState> OrderReceived { get; set; }
+        public static StateEvent<OrderState> PaymentReceived { get; set; }
 
         public bool Called { get; set; }
     }

@@ -12,18 +12,28 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.ServiceBus.Tests.StateMachine
 {
-    public class StateEvent<T>
+    using NUnit.Framework;
+
+    [TestFixture]
+    public class LambdaStateName_Specs
     {
-        private readonly string _name;
-
-        public StateEvent(string name)
+        [Test]
+        public void I_want_a_state_to_build_itself_properly()
         {
-            _name = name;
+            Assert.IsNotNull(SuperSimpleState.Crazy);
+            Assert.AreEqual("Crazy", SuperSimpleState.Crazy.Name);
+        }
+    }
+
+    internal class SuperSimpleState : StateMachineBase<SuperSimpleState>
+    {
+        static SuperSimpleState()
+        {
+            Define(() => Crazy);
+            Define(() => Boom);
         }
 
-        public string Name
-        {
-            get { return _name; }
-        }
+        public static State<SuperSimpleState> Crazy { get; set; }
+        public static StateEvent<SuperSimpleState> Boom { get; set; }
     }
 }
