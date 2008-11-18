@@ -23,13 +23,19 @@ namespace MassTransit.ServiceBus.Tests.StateMachine
             Assert.IsNotNull(SuperSimpleState.Crazy);
             Assert.AreEqual("Crazy", SuperSimpleState.Crazy.Name);
         }
+
+        [Test]
+        public void The_initial_state_should_be_set_via_the_builder()
+        {
+            Assert.AreEqual(SuperSimpleState.Crazy, SuperSimpleState.Initial);
+        }
     }
 
     internal class SuperSimpleState : StateMachineBase<SuperSimpleState>
     {
         static SuperSimpleState()
         {
-            Define(() => Crazy);
+            Define(() => Crazy).Initial();
             Define(() => Boom);
         }
 

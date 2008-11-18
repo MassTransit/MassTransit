@@ -23,7 +23,7 @@ namespace MassTransit.ServiceBus.Tests.StateMachine
             Current = Initial;
         }
 
-        public static State<T> Initial { get; protected set; }
+        public static State<T> Initial { get; set; }
 
         public State<T> Current { get; private set; }
 
@@ -40,9 +40,11 @@ namespace MassTransit.ServiceBus.Tests.StateMachine
             Current.Enter((T)this);
         }
 
-        public static State<T> Define(Expression<Func<State<T>>> func)
+        public static StateBuilder<T> Define(Expression<Func<State<T>>> func)
         {
-            return SetProperty<State<T>>(func, x => new State<T>(x.Name));
+            State<T> state = SetProperty<State<T>>(func, x => new State<T>(x.Name));
+
+            return new StateBuilder<T>(state);
         }
 
         public static StateEvent<T> Define(Expression<Func<StateEvent<T>>> func)
