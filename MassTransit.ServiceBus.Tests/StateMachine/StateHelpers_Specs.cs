@@ -89,5 +89,15 @@ namespace MassTransit.ServiceBus.Tests.StateMachine
 
             Assert.AreEqual(OrderState.Active, state.Current);
         }
+
+        [Test]
+        public void The_state_should_be_fancy_to_exeute_without_scope()
+        {
+            OrderState state = new OrderState();
+
+            state.Handle(OrderState.OrderReceived);
+
+            Assert.IsTrue(state.Called);
+        }
     }
 }

@@ -50,16 +50,16 @@ namespace MassTransit.ServiceBus.Tests.StateMachine
             }
         }
 
-        public State<T> WhenEntering(Action<T> action)
+        public State<T> WhenEntering(params Action<T>[] actions)
         {
-            _enterActions.Add(action);
+            _enterActions.AddRange(actions);
 
             return this;
         }
 
-        public State<T> WhenLeaving(Action<T> action)
+        public State<T> WhenLeaving(params Action<T>[] actions)
         {
-            _leaveActions.Add(action);
+            _leaveActions.AddRange(actions);
 
             return this;
         }
