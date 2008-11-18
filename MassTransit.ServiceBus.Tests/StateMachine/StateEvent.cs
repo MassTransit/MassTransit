@@ -12,6 +12,9 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.ServiceBus.Tests.StateMachine
 {
+    using System;
+    using System.Linq.Expressions;
+
     public class StateEvent<T>
     {
     }
@@ -23,5 +26,9 @@ namespace MassTransit.ServiceBus.Tests.StateMachine
             return new StateEvent<T>();
         }
 
+        public static StateEvent<T> Define<T>(this StateEvent<T> stateEvent, Expression<Func<T>> func)
+        {
+            return new StateEvent<T>();
+        }
     }
 }

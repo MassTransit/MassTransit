@@ -23,5 +23,10 @@ namespace MassTransit.ServiceBus.Tests.StateMachine
         {
             return new State<T>();
         }
+
+        public static State<T> Define<T>(this State<T> state, string name)
+        {
+            return new State<T>(name);
+        }
     }
 }

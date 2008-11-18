@@ -17,9 +17,24 @@ namespace MassTransit.ServiceBus.Tests.StateMachine
 
     public class State<T>
     {
+        private readonly string _name;
         private readonly Dictionary<StateEvent<T>, StateTransition<T>> _transitions = new Dictionary<StateEvent<T>, StateTransition<T>>();
         private readonly List<Action<T>> _enterActions = new List<Action<T>>();
         private readonly List<Action<T>> _leaveActions = new List<Action<T>>();
+
+        public State()
+        {
+        }
+
+        public State(string name)
+        {
+            _name = name;
+        }
+
+        public string Name
+        {
+            get { return _name; }
+        }
 
         public int TransitionCount
         {
