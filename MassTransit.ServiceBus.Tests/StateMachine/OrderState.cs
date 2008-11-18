@@ -16,14 +16,12 @@ namespace MassTransit.ServiceBus.Tests.StateMachine
     {
         static OrderState()
         {
-            Define(() => Idle);
+            Define(() => Idle).Initial();
             Define(() => Active);
             Define(() => OrderPaid);
 
             Define(() => OrderReceived);
             Define(() => PaymentReceived);
-
-            Initial = Idle;
 
             Idle
                 .When(OrderReceived).TransitionTo(Active)
