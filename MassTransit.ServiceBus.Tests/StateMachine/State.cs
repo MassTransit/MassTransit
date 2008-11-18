@@ -12,11 +12,13 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.ServiceBus.Tests.StateMachine
 {
+    using System;
     using System.Collections.Generic;
 
     public class State
     {
         private readonly Dictionary<StateEvent, StateTransition> _transitions = new Dictionary<StateEvent, StateTransition>();
+        private readonly List<Action<State>> _commands = new List<Action<State>>();
 
         public int TransitionCount
         {
@@ -42,6 +44,19 @@ namespace MassTransit.ServiceBus.Tests.StateMachine
             }
 
             throw new StateException("Unhandled event in this state: " + stateEvent);
+        }
+
+        public void AddCommand(Action<State> action)
+        {
+            _commands.Add(action);
+        }
+
+        public void Execute(State state)
+        {
+            foreach (Action<State> command in _commands)
+            {
+                command(state);
+            }
         }
     }
 }
