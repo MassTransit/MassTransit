@@ -14,7 +14,7 @@ namespace MassTransit.ServiceBus.Tests.StateMachine
 {
     public static class StateExtensions
     {
-        public static StateEventBuilder<T> On<T>(this State<T> state, StateEvent<T> stateEvent)
+        public static StateEventBuilder<T> When<T>(this State<T> state, StateEvent<T> stateEvent)
         {
             return new StateEventBuilder<T>(state, stateEvent);
         }
