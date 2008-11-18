@@ -140,6 +140,16 @@
     <Compile Include="Saga\RegisterUser_Specs.cs" />
     <Compile Include="Serialization\MessageSerialization_Specs.cs" />
     <Compile Include="Specification.cs" />
+    <Compile Include="StateMachine\StateMachineBase.cs" />
+    <Compile Include="StateMachine\OrderState.cs" />
+    <Compile Include="StateMachine\State.cs" />
+    <Compile Include="StateMachine\StateBuilder.cs" />
+    <Compile Include="StateMachine\StateEvent.cs" />
+    <Compile Include="StateMachine\StateEventBuilder.cs" />
+    <Compile Include="StateMachine\StateException.cs" />
+    <Compile Include="StateMachine\StateExtensions.cs" />
+    <Compile Include="StateMachine\StateHelpers_Specs.cs" />
+    <Compile Include="StateMachine\StateTransition.cs" />
     <Compile Include="SubscriptionManagerContext.cs" />
     <Compile Include="Subscriptions\As_an_AddSubscriptionHandler.cs" />
     <Compile Include="Subscriptions\As_a_CacheUpdateRequestHandler.cs" />
