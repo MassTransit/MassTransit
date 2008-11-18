@@ -26,6 +26,8 @@ namespace MassTransit.ServiceBus.Tests.StateMachine
         public void Handle(StateEvent stateEvent)
         {
             Current = Current.Handle(stateEvent);
+
+            Current.Execute(Current);
         }
     }
 }

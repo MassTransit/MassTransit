@@ -17,12 +17,28 @@ namespace MassTransit.ServiceBus.Tests.StateMachine
     [TestFixture]
     public class StateHelpers_Specs
     {
-        [Test]
-        public void The_initial_state_should_be_idle()
+        [Test, ExpectedException(typeof (StateException))]
+        public void An_unexptected_change_should_throw()
         {
             OrderState state = new OrderState();
 
-            Assert.AreEqual(OrderState.Idle, state.Current);
+            state.Handle(OrderState.PaymentReceived);
+
+            Assert.Fail("We should have thrown an exception");
+        }
+
+        [Test]
+        public void Commands_should_be_allowed_on_states()
+        {
+            OrderState state = new OrderState();
+
+            bool invoked = false;
+
+            OrderState.Active.AddCommand(x => { invoked = true; });
+
+            state.Handle(OrderState.OrderReceived);
+
+            Assert.AreEqual(true, invoked);
         }
 
         [Test]
@@ -32,13 +48,11 @@ namespace MassTransit.ServiceBus.Tests.StateMachine
         }
 
         [Test]
-        public void The_state_should_change_when_an_event_occurs()
+        public void The_initial_state_should_be_idle()
         {
             OrderState state = new OrderState();
 
-            state.Handle(OrderState.OrderReceived);
-
-            Assert.AreEqual(OrderState.Active, state.Current);
+            Assert.AreEqual(OrderState.Idle, state.Current);
         }
 
         [Test]
@@ -52,14 +66,14 @@ namespace MassTransit.ServiceBus.Tests.StateMachine
             Assert.AreEqual(OrderState.OrderPaid, state.Current);
         }
 
-        [Test, ExpectedException(typeof(StateException))]
-        public void An_unexptected_change_should_throw()
+        [Test]
+        public void The_state_should_change_when_an_event_occurs()
         {
             OrderState state = new OrderState();
 
-            state.Handle(OrderState.PaymentReceived);
+            state.Handle(OrderState.OrderReceived);
 
-            Assert.Fail("We should have thrown an exception");
+            Assert.AreEqual(OrderState.Active, state.Current);
         }
     }
 }
