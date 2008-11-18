@@ -34,7 +34,21 @@ namespace MassTransit.ServiceBus.Tests.StateMachine
 
             bool invoked = false;
 
-            OrderState.Active.AddCommand(x => { invoked = true; });
+            OrderState.Active.WhenEntering(x => { invoked = true; });
+
+            state.Handle(OrderState.OrderReceived);
+
+            Assert.AreEqual(true, invoked);
+        }
+
+        [Test]
+        public void Commands_should_be_allowed_when_a_state_is_left()
+        {
+            OrderState state = new OrderState();
+
+            bool invoked = false;
+
+            OrderState.Idle.WhenLeaving(x => { invoked = true; });
 
             state.Handle(OrderState.OrderReceived);
 

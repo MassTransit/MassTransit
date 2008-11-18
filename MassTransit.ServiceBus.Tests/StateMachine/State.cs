@@ -18,7 +18,8 @@ namespace MassTransit.ServiceBus.Tests.StateMachine
     public class State
     {
         private readonly Dictionary<StateEvent, StateTransition> _transitions = new Dictionary<StateEvent, StateTransition>();
-        private readonly List<Action<State>> _commands = new List<Action<State>>();
+        private readonly List<Action<State>> _enterActions = new List<Action<State>>();
+        private readonly List<Action<State>> _leaveActions = new List<Action<State>>();
 
         public int TransitionCount
         {
@@ -46,16 +47,33 @@ namespace MassTransit.ServiceBus.Tests.StateMachine
             throw new StateException("Unhandled event in this state: " + stateEvent);
         }
 
-        public void AddCommand(Action<State> action)
+        public void Enter(State state)
         {
-            _commands.Add(action);
+            foreach (Action<State> action in _enterActions)
+            {
+                action(state);
+            }
         }
 
-        public void Execute(State state)
+        public State WhenEntering(Action<State> action)
         {
-            foreach (Action<State> command in _commands)
+            _enterActions.Add(action);
+
+            return this;
+        }
+
+        public State WhenLeaving(Action<State> action)
+        {
+            _leaveActions.Add(action);
+
+            return this;
+        }
+
+        public void Leave(State state)
+        {
+            foreach (Action<State> action in _leaveActions)
             {
-                command(state);
+                action(state);
             }
         }
     }
