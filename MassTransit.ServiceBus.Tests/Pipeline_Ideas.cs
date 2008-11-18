@@ -20,14 +20,14 @@ namespace MassTransit.ServiceBus.Tests
 
             ConsumerDispatcher<PingMessage> dispatcher = new ConsumerDispatcher<PingMessage>();
 
-            dispatcher.Add(message => positiveConsumer.Accept(message) ? positiveConsumer : null);
-            dispatcher.Add(message => negativeConsumer.Accept(message) ? negativeConsumer : null);
+            dispatcher.Add(message => positiveConsumer.Accept(message) ? positiveConsumer : Consumes<PingMessage>.Null);
+            dispatcher.Add(message => negativeConsumer.Accept(message) ? negativeConsumer : Consumes<PingMessage>.Null);
             dispatcher.Add(message => indiscriminantConsumer);
 
-            foreach (Consumes<PingMessage>.All item in dispatcher.GetConsumers(msg))
-            {
-                item.Consume(msg);
-            }
+            for (int i = 0; i < 100000; i++)
+                foreach (Consumes<PingMessage>.All item in dispatcher.GetConsumers(msg))
+                    item.Consume(msg);
+            
 
             Assert.AreEqual(positiveConsumer.Consumed, msg);
             Assert.AreEqual(positiveConsumer.Consumed, msg);
