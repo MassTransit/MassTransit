@@ -12,24 +12,21 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.ServiceBus.Tests.StateMachine
 {
-    public class StateEventBuilder<T>
+    using System;
+    using MassTransit.Saga;
+
+    public class OrderSaga :
+        OrderState,
+        ISaga,
+        InitiatedBy<CreateOrder>
     {
-        private readonly State<T> _state;
-        private readonly StateEvent<T> _stateEvent;
+        public Guid CorrelationId { get; set; }
 
-        public StateEventBuilder(State<T> state, StateEvent<T> stateEvent)
+        public IServiceBus Bus { get; set; }
+
+        public void Consume(CreateOrder message)
         {
-            _state = state;
-            _stateEvent = stateEvent;
-        }
-
-        public State<T> TransitionTo(State<T> state)
-        {
-            StateTransition<T> transition = new StateTransition<T>(state);
-
-            _state.AddTransition(_stateEvent, transition);
-
-            return _state;
+            Handle(OrderReceived);
         }
     }
 }

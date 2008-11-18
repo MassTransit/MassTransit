@@ -140,6 +140,8 @@
     <Compile Include="Saga\RegisterUser_Specs.cs" />
     <Compile Include="Serialization\MessageSerialization_Specs.cs" />
     <Compile Include="Specification.cs" />
+    <Compile Include="StateMachine\OrderSaga.cs" />
+    <Compile Include="StateMachine\OrderSaga_Specs.cs" />
     <Compile Include="StateMachine\StateMachineBase.cs" />
     <Compile Include="StateMachine\OrderState.cs" />
     <Compile Include="StateMachine\State.cs" />

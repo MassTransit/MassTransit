@@ -27,7 +27,8 @@ namespace MassTransit.ServiceBus.Tests.StateMachine
 
             Idle
                 .On(OrderReceived).TransitionTo(Active)
-                ;
+                .WhenLeaving(x => x.Called = true);
+            ;
 
             Active
                 .On(PaymentReceived).TransitionTo(OrderPaid)
@@ -40,5 +41,7 @@ namespace MassTransit.ServiceBus.Tests.StateMachine
 
         public static StateEvent<OrderState> OrderReceived { get; private set; }
         public static StateEvent<OrderState> PaymentReceived { get; private set; }
+
+        public bool Called { get; set; }
     }
 }
