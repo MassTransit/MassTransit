@@ -24,7 +24,7 @@ namespace MassTransit.ServiceBus.Tests
             dispatcher.Add(message => negativeConsumer.Accept(message) ? negativeConsumer : Consumes<PingMessage>.Null);
             dispatcher.Add(message => indiscriminantConsumer);
 
-            for (int i = 0; i < 100000; i++)
+            //for (int i = 0; i < 100000; i++)
                 foreach (Consumes<PingMessage>.All item in dispatcher.GetConsumers(msg))
                     item.Consume(msg);
             
@@ -69,7 +69,7 @@ namespace MassTransit.ServiceBus.Tests
         {
             var consumer = _acceptor(message);
 
-            if(consumer != null)
+            //if(consumer != Consumes<TMessage>.Null)
                 yield return consumer;
         }
     }
