@@ -15,30 +15,25 @@ namespace MassTransit.ServiceBus.Tests.StateMachine
     using System;
     using System.Collections.Generic;
 
-    public class State
+    public class State<T>
     {
-        private readonly Dictionary<StateEvent, StateTransition> _transitions = new Dictionary<StateEvent, StateTransition>();
-        private readonly List<Action<State>> _enterActions = new List<Action<State>>();
-        private readonly List<Action<State>> _leaveActions = new List<Action<State>>();
+        private readonly Dictionary<StateEvent<T>, StateTransition<T>> _transitions = new Dictionary<StateEvent<T>, StateTransition<T>>();
+        private readonly List<Action<T>> _enterActions = new List<Action<T>>();
+        private readonly List<Action<T>> _leaveActions = new List<Action<T>>();
 
         public int TransitionCount
         {
             get { return _transitions.Count; }
         }
 
-        public static StateBuilder Define()
-        {
-            return new StateBuilder();
-        }
-
-        public void AddTransition(StateEvent stateEvent, StateTransition transition)
+        public void AddTransition(StateEvent<T> stateEvent, StateTransition<T> transition)
         {
             _transitions.Add(stateEvent, transition);
         }
 
-        public State Handle(StateEvent stateEvent)
+        public State<T> Handle(StateEvent<T> stateEvent)
         {
-            StateTransition transition;
+            StateTransition<T> transition;
             if (_transitions.TryGetValue(stateEvent, out transition))
             {
                 return transition.Execute(stateEvent);
@@ -47,31 +42,31 @@ namespace MassTransit.ServiceBus.Tests.StateMachine
             throw new StateException("Unhandled event in this state: " + stateEvent);
         }
 
-        public void Enter(State state)
+        public void Enter(T state)
         {
-            foreach (Action<State> action in _enterActions)
+            foreach (Action<T> action in _enterActions)
             {
                 action(state);
             }
         }
 
-        public State WhenEntering(Action<State> action)
+        public State<T> WhenEntering(Action<T> action)
         {
             _enterActions.Add(action);
 
             return this;
         }
 
-        public State WhenLeaving(Action<State> action)
+        public State<T> WhenLeaving(Action<T> action)
         {
             _leaveActions.Add(action);
 
             return this;
         }
 
-        public void Leave(State state)
+        public void Leave(T state)
         {
-            foreach (Action<State> action in _leaveActions)
+            foreach (Action<T> action in _leaveActions)
             {
                 action(state);
             }

@@ -12,11 +12,11 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.ServiceBus.Tests.StateMachine
 {
-    public class StateBuilder
+    public class StateBuilder<T>
     {
-        public static implicit operator State(StateBuilder builder)
+        public static implicit operator State<T>(StateBuilder<T> builder)
         {
-            return new State();
+            return new State<T>();
         }
     }
 }

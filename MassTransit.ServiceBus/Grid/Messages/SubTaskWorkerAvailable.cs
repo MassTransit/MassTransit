@@ -19,30 +19,37 @@ namespace MassTransit.Grid.Messages
     [ExpiresIn("00:01:00")]
     public class SubTaskWorkerAvailable<TInput>
     {
-        private readonly int _activeTaskCount;
-        private readonly Uri _address;
-        private readonly int _taskLimit;
+        private int _activeTaskCount;
+        private string _address;
+        private int _taskLimit;
 
-        public SubTaskWorkerAvailable(Uri address, int taskLimit, int activeTaskCount)
+        protected SubTaskWorkerAvailable()
+        {
+        }
+
+        public SubTaskWorkerAvailable(string address, int taskLimit, int activeTaskCount)
         {
             _address = address;
             _activeTaskCount = activeTaskCount;
             _taskLimit = taskLimit;
         }
 
-        public Uri Address
+        public string Address
         {
             get { return _address; }
+            set { _address = value; }
         }
 
         public int TaskLimit
         {
             get { return _taskLimit; }
+            set { _taskLimit = value; }
         }
 
         public int ActiveTaskCount
         {
             get { return _activeTaskCount; }
+            set { _activeTaskCount = value; }
         }
     }
 }

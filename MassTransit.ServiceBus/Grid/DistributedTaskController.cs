@@ -33,7 +33,7 @@ namespace MassTransit.Grid
 		private readonly TTask _distributedTask;
 		private readonly IEndpointResolver _endpointResolver;
 		private readonly Guid _taskId;
-		private readonly Dictionary<Uri, Worker> _workers = new Dictionary<Uri, Worker>();
+		private readonly Dictionary<string, Worker> _workers = new Dictionary<string, Worker>();
 		private int _nextSubTask;
 
 		public DistributedTaskController(IServiceBus bus, IEndpointResolver endpointResolver, TTask distributedTask)
@@ -151,7 +151,7 @@ namespace MassTransit.Grid
 
 			foreach (Worker worker in workers)
 			{
-				IEndpoint endpoint = _endpointResolver.Resolve(worker.Address);
+				IEndpoint endpoint = _endpointResolver.Resolve(new Uri(worker.Address));
 				if (endpoint == null)
 					continue;
 
@@ -163,7 +163,7 @@ namespace MassTransit.Grid
 
 					TInput input = _distributedTask.GetSubTaskInput(_nextSubTask);
 
-					executeExecuteSubTask = new ExecuteSubTask<TInput>(_bus.Endpoint.Uri, _taskId, _nextSubTask++, input);
+					executeExecuteSubTask = new ExecuteSubTask<TInput>(_bus.Endpoint.Uri.ToString(), _taskId, _nextSubTask++, input);
 
 					worker.ActiveTaskCount++;
 				}
@@ -190,16 +190,16 @@ namespace MassTransit.Grid
 
 		public class Worker
 		{
-			private readonly Uri _address;
+			private readonly string _address;
 			private int _activeTaskCount;
 			private int _taskLimit;
 
-			public Worker(Uri address)
+			public Worker(string address)
 			{
 				_address = address;
 			}
 
-			public Uri Address
+			public string Address
 			{
 				get { return _address; }
 			}

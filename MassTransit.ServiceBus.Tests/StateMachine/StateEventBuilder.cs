@@ -12,20 +12,20 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.ServiceBus.Tests.StateMachine
 {
-    public class StateEventBuilder
+    public class StateEventBuilder<T>
     {
-        private readonly State _state;
-        private readonly StateEvent _stateEvent;
+        private readonly State<T> _state;
+        private readonly StateEvent<T> _stateEvent;
 
-        public StateEventBuilder(State state, StateEvent stateEvent)
+        public StateEventBuilder(State<T> state, StateEvent<T> stateEvent)
         {
             _state = state;
             _stateEvent = stateEvent;
         }
 
-        public void TransitionTo(State state)
+        public void TransitionTo(State<T> state)
         {
-            StateTransition transition = new StateTransition(state);
+            StateTransition<T> transition = new StateTransition<T>(state);
 
             _state.AddTransition(_stateEvent, transition);
         }

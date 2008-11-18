@@ -18,12 +18,16 @@ namespace MassTransit.Grid.Messages
     public class ExecuteSubTask<TInput>
         where TInput : class
     {
-        private readonly Uri _address;
-		private readonly int _subTaskId;
-        private readonly TInput _task;
-        private readonly Guid _taskId;
+        private string _address;
+        private int _subTaskId;
+        private TInput _task;
+        private Guid _taskId;
 
-        public ExecuteSubTask(Uri address, Guid taskId, int subTaskId, TInput task)
+        protected ExecuteSubTask()
+        {
+        }
+
+        public ExecuteSubTask(string address, Guid taskId, int subTaskId, TInput task)
         {
             _address = address;
             _taskId = taskId;
@@ -31,24 +35,28 @@ namespace MassTransit.Grid.Messages
             _task = task;
         }
 
-        public Uri Address
+        public string Address
         {
             get { return _address; }
+            set { _address = value; }
         }
 
         public Guid TaskId
         {
             get { return _taskId; }
+            set { _taskId = value; }
         }
 
-		public int SubTaskId
+        public int SubTaskId
         {
             get { return _subTaskId; }
+            set { _subTaskId = value; }
         }
 
         public TInput Task
         {
             get { return _task; }
+            set { _task = value; }
         }
     }
 }

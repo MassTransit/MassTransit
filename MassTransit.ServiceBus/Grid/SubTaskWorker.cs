@@ -31,7 +31,7 @@ namespace MassTransit.Grid
 
 		public void Consume(EnlistSubTaskWorkers<TInput> message)
 		{
-			Bus.Publish(new SubTaskWorkerAvailable<TInput>(Bus.Endpoint.Uri, _taskLimit, _activeTaskCount));
+			Bus.Publish(new SubTaskWorkerAvailable<TInput>(Bus.Endpoint.Uri.ToString(), _taskLimit, _activeTaskCount));
 		}
 
 		public void Consume(ExecuteSubTask<TInput> message)
@@ -42,7 +42,7 @@ namespace MassTransit.Grid
 				Interlocked.Increment(ref _activeTaskCount);
 
 				worker.ExecuteTask(message.Task,
-				                   output => Bus.Publish(new SubTaskComplete<TOutput>(Bus.Endpoint.Uri,
+				                   output => Bus.Publish(new SubTaskComplete<TOutput>(Bus.Endpoint.Uri.ToString(),
 				                                                                 _taskLimit,
 				                                                                 _activeTaskCount,
 				                                                                 message.TaskId,

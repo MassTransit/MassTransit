@@ -12,28 +12,28 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.ServiceBus.Tests.StateMachine
 {
-    public class StateMachineBase
+    public class StateMachineBase<T> where T : StateMachineBase<T>
     {
         public StateMachineBase()
         {
             Current = Initial;
         }
 
-        public static State Initial { get; protected set; }
+        public static State<T> Initial { get; protected set; }
 
-        public State Current { get; private set; }
+        public State<T> Current { get; private set; }
 
-        public void Handle(StateEvent stateEvent)
+        public void Handle(StateEvent<T> stateEvent)
         {
-            State newState = Current.Handle(stateEvent);
-            if(newState != Current)
-            {
-                Current.Leave(Current);
+            State<T> newState = Current.Handle(stateEvent);
+            if (newState == Current)
+                return;
+            
+            Current.Leave((T)this);
 
-                Current = newState;
+            Current = newState;
 
-                Current.Enter(Current);
-            }
+            Current.Enter((T)this);
         }
     }
 }
