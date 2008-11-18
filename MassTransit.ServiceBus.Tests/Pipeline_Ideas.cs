@@ -1,41 +1,30 @@
 namespace MassTransit.ServiceBus.Tests
 {
     using System;
-    using System.Collections;
     using System.Collections.Generic;
     using Messages;
     using NUnit.Framework;
 
     [TestFixture]
-    public class Pipeline_Ideas :
-        LocalAndRemoteTestContext
+    public class Pipeline_Ideas 
     {
         [Test]
         public void FIRST_TEST_NAME()
         {
-            Container.AddComponent<ParticularConsumer>();
-
-            //LocalBus.Subscribe<ParticularConsumer>();
-
-
             //pull message out endpoint
             PingMessage msg = new PingMessage();
 
             ParticularConsumer positiveConsumer = new ParticularConsumer(true);
             ParticularConsumer negativeConsumer = new ParticularConsumer(false);
             IndiscriminantConsumer indiscriminantConsumer = new IndiscriminantConsumer();
-            
-            EnumerableDispatcher<PingMessage> dispatcher = new EnumerableDispatcher<PingMessage>(msg)
-                {
-                    (message) => positiveConsumer.Accept(message) ? positiveConsumer : null,
-                    (message) => negativeConsumer.Accept(message) ? negativeConsumer : null,
-                    (message) => indiscriminantConsumer,
-                    //Add
-                };
 
-            IEnumerable<Consumes<PingMessage>.All> consumers = dispatcher;
+            ConsumerDispatcher<PingMessage> dispatcher = new ConsumerDispatcher<PingMessage>();
 
-            foreach (Consumes<PingMessage>.All item in consumers)
+            dispatcher.Add(message => positiveConsumer.Accept(message) ? positiveConsumer : null);
+            dispatcher.Add(message => negativeConsumer.Accept(message) ? negativeConsumer : null);
+            dispatcher.Add(message => indiscriminantConsumer);
+
+            foreach (Consumes<PingMessage>.All item in dispatcher.GetConsumers(msg))
             {
                 item.Consume(msg);
             }
@@ -46,36 +35,24 @@ namespace MassTransit.ServiceBus.Tests
         }
     }
 
-    public class EnumerableDispatcher<TMessage> : IEnumerable<Consumes<TMessage>.All> where TMessage : class
+    public class ConsumerDispatcher<TMessage> where TMessage : class
     {
-        private readonly TMessage _message;
         private readonly List<AcceptorEnumerator<TMessage>> _messageAcceptors = new List<AcceptorEnumerator<TMessage>>();
-
-
-        public EnumerableDispatcher(TMessage message)
-        {
-            _message = message;
-        }
 
         public void Add(Func<TMessage, Consumes<TMessage>.All> acceptor)
         {
             _messageAcceptors.Add(new AcceptorEnumerator<TMessage>(acceptor));
         }
 
-        public IEnumerator<Consumes<TMessage>.All> GetEnumerator()
+        public IEnumerable<Consumes<TMessage>.All> GetConsumers(TMessage message)
         {
             foreach (AcceptorEnumerator<TMessage> acceptor in _messageAcceptors)
             {
-                foreach (Consumes<TMessage>.All consumer in acceptor.GetConsumers(_message))
+                foreach (Consumes<TMessage>.All consumer in acceptor.GetConsumers(message))
                 {
                     yield return consumer;
                 }
             }
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
         }
     }
 
