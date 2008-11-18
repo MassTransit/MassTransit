@@ -12,11 +12,16 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.ServiceBus.Tests.StateMachine
 {
-    public class StateEvent
+    public class StateEvent<T>
     {
-        public static StateEvent Define()
+    }
+
+    public static class StateEventExtensions
+    {
+        public static StateEvent<T> Define<T>(this StateEvent<T> stateEvent)
         {
-            return new StateEvent();
+            return new StateEvent<T>();
         }
+
     }
 }

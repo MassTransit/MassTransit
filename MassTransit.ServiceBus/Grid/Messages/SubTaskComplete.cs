@@ -12,57 +12,67 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Grid.Messages
 {
-	using System;
+    using System;
 
-	[Serializable]
-	public class SubTaskComplete<TOutput>
-		where TOutput : class
-	{
-		private readonly int _activeTaskCount;
-		private readonly Uri _address;
-		private readonly TOutput _output;
-		private readonly int _subTaskId;
-		private readonly Guid _taskId;
-		private readonly int _taskLimit;
+    [Serializable]
+    public class SubTaskComplete<TOutput>
+        where TOutput : class
+    {
+        private int _activeTaskCount;
+        private string _address;
+        private TOutput _output;
+        private int _subTaskId;
+        private Guid _taskId;
+        private int _taskLimit;
 
-		public SubTaskComplete(Uri address, int taskLimit, int activeTaskCount, Guid taskId, int subTaskId, TOutput output)
-		{
-			_address = address;
-			_activeTaskCount = activeTaskCount;
-			_taskLimit = taskLimit;
-			_taskId = taskId;
-			_subTaskId = subTaskId;
-			_output = output;
-		}
+        protected SubTaskComplete()
+        {
+        }
 
-		public Uri Address
-		{
-			get { return _address; }
-		}
+        public SubTaskComplete(string address, int taskLimit, int activeTaskCount, Guid taskId, int subTaskId, TOutput output)
+        {
+            _address = address;
+            _activeTaskCount = activeTaskCount;
+            _taskLimit = taskLimit;
+            _taskId = taskId;
+            _subTaskId = subTaskId;
+            _output = output;
+        }
 
-		public int TaskLimit
-		{
-			get { return _taskLimit; }
-		}
+        public string Address
+        {
+            get { return _address; }
+            set { _address = value; }
+        }
 
-		public int ActiveTaskCount
-		{
-			get { return _activeTaskCount; }
-		}
+        public int TaskLimit
+        {
+            get { return _taskLimit; }
+            set { _taskLimit = value; }
+        }
 
-		public TOutput Output
-		{
-			get { return _output; }
-		}
+        public int ActiveTaskCount
+        {
+            get { return _activeTaskCount; }
+            set { _activeTaskCount = value; }
+        }
 
-		public Guid TaskId
-		{
-			get { return _taskId; }
-		}
+        public TOutput Output
+        {
+            get { return _output; }
+            set { _output = value; }
+        }
 
-		public int SubTaskId
-		{
-			get { return _subTaskId; }
-		}
-	}
+        public Guid TaskId
+        {
+            get { return _taskId; }
+            set { _taskId = value; }
+        }
+
+        public int SubTaskId
+        {
+            get { return _subTaskId; }
+            set { _subTaskId = value; }
+        }
+    }
 }

@@ -62,9 +62,16 @@ namespace MassTransit.ServiceBus.Internal
 
         internal void AddMessageSubscription(Type componentType, Type[] types)
         {
-            Type subscriptionType = typeof (MessageTypeSubscription<,>).MakeGenericType(componentType, types[0]);
+            Type messageType = types[0];
 
-            _subscriptionTypeInfo.AddSubscriber((ISubscriptionTypeInfo) Activator.CreateInstance(subscriptionType, SubscriptionMode.All));
+            if (messageType.IsGenericType && messageType.GetGenericTypeDefinition() == _batchType)
+            {
+                AddBatchMessageSubscription(componentType, messageType);
+            }
+            else
+            {
+                AddMessageSubscription(componentType, messageType, SubscriptionMode.All);
+            }
         }
 
         internal void AddSelectiveSubscription(Type componentType, Type[] types)
@@ -77,7 +84,7 @@ namespace MassTransit.ServiceBus.Internal
             }
             else
             {
-                AddMessageSubscription(componentType, messageType);
+                AddMessageSubscription(componentType, messageType, SubscriptionMode.Selected);
             }
         }
 
@@ -102,11 +109,11 @@ namespace MassTransit.ServiceBus.Internal
             _subscriptionTypeInfo.AddSubscriber((ISubscriptionTypeInfo) Activator.CreateInstance(subscriptionType));
         }
 
-        private void AddMessageSubscription(Type componentType, Type messageType)
+        private void AddMessageSubscription(Type componentType, Type messageType, SubscriptionMode subscriptionMode)
         {
             Type subscriptionType = typeof (MessageTypeSubscription<,>).MakeGenericType(componentType, messageType);
 
-            _subscriptionTypeInfo.AddSubscriber((ISubscriptionTypeInfo) Activator.CreateInstance(subscriptionType, SubscriptionMode.Selected));
+            _subscriptionTypeInfo.AddSubscriber((ISubscriptionTypeInfo) Activator.CreateInstance(subscriptionType, subscriptionMode));
         }
 
         private void AddBatchMessageSubscription(Type componentType, Type messageType)

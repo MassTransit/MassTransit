@@ -12,16 +12,16 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.ServiceBus.Tests.StateMachine
 {
-    public class OrderState : StateMachineBase
+    public class OrderState : StateMachineBase<OrderState>
     {
         static OrderState()
         {
-            Idle = State.Define();
-            Active = State.Define();
-            OrderPaid = State.Define();
+            Idle = Idle.Define();
+            Active = Active.Define();
+            OrderPaid = OrderPaid.Define();
 
-            OrderReceived = StateEvent.Define();
-            PaymentReceived = StateEvent.Define();
+            OrderReceived = OrderReceived.Define();
+            PaymentReceived = PaymentReceived.Define();
 
             Initial = Idle;
 
@@ -34,11 +34,11 @@ namespace MassTransit.ServiceBus.Tests.StateMachine
                 ;
         }
 
-        public static State Idle { get; private set; }
-        public static State Active { get; private set; }
-        public static State OrderPaid { get; private set; }
+        public static State<OrderState> Idle { get; private set; }
+        public static State<OrderState> Active { get; private set; }
+        public static State<OrderState> OrderPaid { get; private set; }
 
-        public static StateEvent OrderReceived { get; private set; }
-        public static StateEvent PaymentReceived { get; private set; }
+        public static StateEvent<OrderState> OrderReceived { get; private set; }
+        public static StateEvent<OrderState> PaymentReceived { get; private set; }
     }
 }
