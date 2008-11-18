@@ -26,12 +26,12 @@ namespace MassTransit.ServiceBus.Tests.StateMachine
             Initial = Idle;
 
             Idle
-                .On(OrderReceived).TransitionTo(Active)
+                .When(OrderReceived).TransitionTo(Active)
                 .WhenLeaving(x => x.Called = true);
             ;
 
             Active
-                .On(PaymentReceived).TransitionTo(OrderPaid)
+                .When(PaymentReceived).TransitionTo(OrderPaid)
                 ;
         }
 
