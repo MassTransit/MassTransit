@@ -12,6 +12,10 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.ServiceBus.Tests.StateMachine
 {
+    using System;
+    using System.Linq.Expressions;
+    using System.Reflection;
+
     public class StateMachineBase<T> where T : StateMachineBase<T>
     {
         public StateMachineBase()
@@ -35,5 +39,33 @@ namespace MassTransit.ServiceBus.Tests.StateMachine
 
             Current.Enter((T)this);
         }
+
+        public static State<T> Define(Expression<Func<State<T>>> func)
+        {
+            return SetProperty<State<T>>(func, x => new State<T>(x.Name));
+        }
+
+        public static StateEvent<T> Define(Expression<Func<StateEvent<T>>> func)
+        {
+            return SetProperty<StateEvent<T>>(func, x => new StateEvent<T>(x.Name));
+        }
+
+        public static TValue SetProperty<TValue>(Expression<Func<TValue>> func, Func<PropertyInfo, TValue> getInstance)
+        {
+            MemberExpression mex = func.Body as MemberExpression;
+            if (mex == null)
+                throw new ArgumentException("The function must be a property lambda");
+
+            PropertyInfo property = ((PropertyInfo)mex.Member);
+
+            var value = Expression.Parameter(typeof(TValue), "value");
+            var action = Expression.Lambda<Action<TValue>>(Expression.Call(property.GetSetMethod(), value), new[] { value }).Compile();
+
+            TValue propertyValue = getInstance(property);
+            action(propertyValue);
+
+            return propertyValue;
+        }
+
     }
 }
