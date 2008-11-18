@@ -16,9 +16,9 @@ namespace MassTransit.ServiceBus.Tests.StateMachine
     {
         static OrderState()
         {
-            Idle = Idle.Define();
-            Active = Active.Define();
-            OrderPaid = OrderPaid.Define();
+            Idle = Idle.Define("Idle");
+            Active = Active.Define("Active");
+            OrderPaid = OrderPaid.Define("OrderPaid");
 
             OrderReceived = OrderReceived.Define();
             PaymentReceived = PaymentReceived.Define();
