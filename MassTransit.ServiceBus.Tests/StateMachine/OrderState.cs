@@ -16,7 +16,7 @@ namespace MassTransit.ServiceBus.Tests.StateMachine
     {
         static OrderState()
         {
-            Define(() => Idle).Initial();
+            Define(() => Idle).AsInitial();
             Define(() => Active);
             Define(() => OrderPaid);
 
