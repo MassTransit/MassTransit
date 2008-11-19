@@ -26,7 +26,7 @@ namespace MassTransit.ServiceBus.Tests.StateMachine
             return builder._state;
         }
 
-        public void Initial()
+        public void AsInitial()
         {
             StateMachineBase<T>.Initial = _state;
         }

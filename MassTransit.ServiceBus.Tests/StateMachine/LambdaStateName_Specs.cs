@@ -35,7 +35,7 @@ namespace MassTransit.ServiceBus.Tests.StateMachine
     {
         static SuperSimpleState()
         {
-            Define(() => Crazy).Initial();
+            Define(() => Crazy).AsInitial();
             Define(() => Boom);
         }
 
