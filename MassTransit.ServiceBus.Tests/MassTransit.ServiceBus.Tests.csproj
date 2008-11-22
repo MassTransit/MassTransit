@@ -123,7 +123,15 @@
     <Compile Include="Messages\SerializationTestMessage.cs" />
     <Compile Include="Multicast_Specs.cs" />
     <Compile Include="ObjectDispatcher_Specs.cs" />
-    <Compile Include="Pipeline_Ideas.cs" />
+    <Compile Include="Pipeline\IMessageSink.cs" />
+    <Compile Include="Pipeline\MessagePipeline.cs" />
+    <Compile Include="Pipeline\MessageRouter.cs" />
+    <Compile Include="Pipeline\MessageRouterExtensions.cs" />
+    <Compile Include="Pipeline\MessageSink.cs" />
+    <Compile Include="Pipeline\MessageTranslator.cs" />
+    <Compile Include="Pipeline\ParticularConsumer.cs" />
+    <Compile Include="Pipeline\PipelineDispatcher_Specs.cs" />
+    <Compile Include="Pipeline\IndiscriminantConsumer.cs" />
     <Compile Include="PublishToConsumer_Specs.cs" />
     <Compile Include="RequestReply_Specs.cs" />
     <Compile Include="ResourceThreadPool_Specs.cs" />
@@ -153,6 +161,7 @@
     <Compile Include="StateMachine\StateExtensions.cs" />
     <Compile Include="StateMachine\StateHelpers_Specs.cs" />
     <Compile Include="StateMachine\StateTransition.cs" />
+    <Compile Include="StateMachine\Transition_Specs.cs" />
     <Compile Include="SubscriptionManagerContext.cs" />
     <Compile Include="Subscriptions\As_an_AddSubscriptionHandler.cs" />
     <Compile Include="Subscriptions\As_a_CacheUpdateRequestHandler.cs" />
