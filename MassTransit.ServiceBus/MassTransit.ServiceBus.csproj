@@ -215,6 +215,22 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Exceptions\ConfigurationException.cs" />
+    <Compile Include="Pipeline\ConsumerFor.cs" />
+    <Compile Include="Pipeline\IInterceptorList.cs" />
+    <Compile Include="Pipeline\IMessageSink.cs" />
+    <Compile Include="Pipeline\IPipelineInspector.cs" />
+    <Compile Include="Pipeline\IPipelineModel.cs" />
+    <Compile Include="Pipeline\IPublishInterceptor.cs" />
+    <Compile Include="Pipeline\ISubscribeContext.cs" />
+    <Compile Include="Pipeline\ISubscribeInterceptor.cs" />
+    <Compile Include="Pipeline\InterceptorList.cs" />
+    <Compile Include="Pipeline\MessagePipeline.cs" />
+    <Compile Include="Pipeline\MessageRouter.cs" />
+    <Compile Include="Pipeline\MessageRouterExtensions.cs" />
+    <Compile Include="Pipeline\MessageSink.cs" />
+    <Compile Include="Pipeline\MessageTranslator.cs" />
+    <Compile Include="Pipeline\PipelineModel.cs" />
+    <Compile Include="Pipeline\TranslateTo.cs" />
     <Compile Include="Serialization\BaseMessageEnvelope.cs" />
     <Compile Include="Serialization\BinaryMessageSerializer.cs" />
     <Compile Include="Serialization\IMessageSerializer.cs" />

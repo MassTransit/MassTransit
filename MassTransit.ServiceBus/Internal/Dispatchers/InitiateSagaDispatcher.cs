@@ -34,11 +34,11 @@ namespace MassTransit.ServiceBus.Internal
 
             UsingTransaction(message, m =>
                 {
-                    TSaga saga = _repository.Create(correlationId);
+                    TSaga saga = Repository.Create(correlationId);
 
                     DispatchToConsumer(saga, message);
 
-                    _repository.Save(saga);
+                    Repository.Save(saga);
                 });
         }
     }

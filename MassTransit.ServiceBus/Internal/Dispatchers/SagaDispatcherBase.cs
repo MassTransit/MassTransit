@@ -21,11 +21,26 @@ namespace MassTransit.ServiceBus.Internal
         where TSaga : class, ISaga, Consumes<TMessage>.All
         where TMessage : class, CorrelatedBy<Guid>
     {
-        protected IObjectBuilder _builder;
-        protected IServiceBus _bus;
-        protected ISagaRepository<TSaga> _repository;
+    	private readonly IObjectBuilder _builder;
+    	private readonly IServiceBus _bus;
+    	private readonly ISagaRepository<TSaga> _repository;
 
-        protected SagaDispatcherBase(IServiceBus bus, IObjectBuilder builder, ISagaRepository<TSaga> repository)
+    	protected IObjectBuilder Builder
+    	{
+    		get { return _builder; }
+    	}
+
+    	protected IServiceBus Bus
+    	{
+    		get { return _bus; }
+    	}
+
+    	protected ISagaRepository<TSaga> Repository
+    	{
+    		get { return _repository; }
+    	}
+
+    	protected SagaDispatcherBase(IServiceBus bus, IObjectBuilder builder, ISagaRepository<TSaga> repository)
         {
             _bus = bus;
             _builder = builder;
