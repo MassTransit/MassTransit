@@ -10,28 +10,15 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.ServiceBus.Tests
+namespace MassTransit.ServiceBus.Pipeline
 {
-	using System;
 	using System.Collections.Generic;
 
-	public class MessageSink<TMessage> :
-		IMessageSink<TMessage>
+	public interface IMessageSink<TMessage>
 		where TMessage : class
 	{
-		private readonly Func<TMessage, Consumes<TMessage>.All> _acceptor;
-
-		public MessageSink(Func<TMessage, Consumes<TMessage>.All> acceptor)
-		{
-			_acceptor = acceptor;
-		}
-
-		public IEnumerable<Consumes<TMessage>.All> Enumerate(TMessage message)
-		{
-			var consumer = _acceptor(message);
-
-			if (consumer != Consumes<TMessage>.Null)
-				yield return consumer;
-		}
+		IEnumerable<Consumes<TMessage>.All> Enumerate(TMessage message);
+		
+		bool Inspect(IPipelineInspector inspector);
 	}
 }

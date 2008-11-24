@@ -123,15 +123,11 @@
     <Compile Include="Messages\SerializationTestMessage.cs" />
     <Compile Include="Multicast_Specs.cs" />
     <Compile Include="ObjectDispatcher_Specs.cs" />
-    <Compile Include="Pipeline\IMessageSink.cs" />
-    <Compile Include="Pipeline\MessagePipeline.cs" />
-    <Compile Include="Pipeline\MessageRouter.cs" />
-    <Compile Include="Pipeline\MessageRouterExtensions.cs" />
-    <Compile Include="Pipeline\MessageSink.cs" />
-    <Compile Include="Pipeline\MessageTranslator.cs" />
     <Compile Include="Pipeline\ParticularConsumer.cs" />
+    <Compile Include="Pipeline\PipelineBuilder_Specs.cs" />
     <Compile Include="Pipeline\PipelineDispatcher_Specs.cs" />
     <Compile Include="Pipeline\IndiscriminantConsumer.cs" />
+    <Compile Include="Pipeline\PipelineInspectorBase.cs" />
     <Compile Include="PublishToConsumer_Specs.cs" />
     <Compile Include="RequestReply_Specs.cs" />
     <Compile Include="ResourceThreadPool_Specs.cs" />

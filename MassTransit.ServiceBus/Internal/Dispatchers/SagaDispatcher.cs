@@ -32,13 +32,13 @@ namespace MassTransit.ServiceBus.Internal
 
             UsingTransaction(message, m =>
             {
-                TSaga saga = _repository.Get(correlationId);
+                TSaga saga = Repository.Get(correlationId);
                 if (saga == null)
                     throw new SagaException("The saga could not be loaded.", typeof(TSaga), typeof(TMessage), correlationId);
 
                 DispatchToConsumer(saga, message);
 
-                _repository.Save(saga);
+                Repository.Save(saga);
             });
         }
     }

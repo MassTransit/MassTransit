@@ -15,6 +15,7 @@ namespace MassTransit.ServiceBus.Tests
 	using System;
 	using Messages;
 	using NUnit.Framework;
+	using Pipeline;
 
 	[TestFixture]
 	public class When_subscription_a_component_to_the_pipeline
@@ -54,8 +55,8 @@ namespace MassTransit.ServiceBus.Tests
 			MessageTranslator<object, PongMessage> pongTranslator = new MessageTranslator<object, PongMessage>(pongRouter);
 
 			MessageRouter<object> objectRouter = new MessageRouter<object>();
-			objectRouter.Add(pingTranslator);
-			objectRouter.Add(pongTranslator);
+			objectRouter.Connect(pingTranslator);
+			objectRouter.Connect(pongTranslator);
 
 			MessagePipeline<object> pipeline = new MessagePipeline<object>(objectRouter);
 
