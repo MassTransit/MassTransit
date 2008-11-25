@@ -7,8 +7,8 @@
     <ProjectGuid>{AF3C3E95-BA6C-41FF-873D-7C2E8994EE9D}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>MassTransit.ServiceBus.MSMQ.Tests</RootNamespace>
-    <AssemblyName>MassTransit.ServiceBus.MSMQ.Tests</AssemblyName>
+    <RootNamespace>MassTransit.Transports.Msmq.Tests</RootNamespace>
+    <AssemblyName>MassTransit.Transports.Msmq.Tests</AssemblyName>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
     <OldToolsVersion>2.0</OldToolsVersion>
@@ -93,9 +93,9 @@
       <Project>{76646B96-936B-4D31-A053-35CD630E3C68}</Project>
       <Name>MassTransit.Tests</Name>
     </ProjectReference>
-    <ProjectReference Include="..\MassTransit.ServiceBus.MSMQ\MassTransit.ServiceBus.MSMQ.csproj">
+    <ProjectReference Include="..\MassTransit.ServiceBus.MSMQ\MassTransit.Transports.Msmq.csproj">
       <Project>{6F90867C-E092-4EDC-B3DE-600D39DF0335}</Project>
-      <Name>MassTransit.ServiceBus.MSMQ</Name>
+      <Name>MassTransit.Transports.Msmq</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\MassTransit.ServiceBus\MassTransit.csproj">
       <Project>{90482397-6282-465E-8B86-39865FC30127}</Project>

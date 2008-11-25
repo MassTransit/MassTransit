@@ -15,13 +15,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Tests", "MassTr
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Host.Tests", "MassTransit.Host.Tests\MassTransit.Host.Tests.csproj", "{34EAECFD-D49F-465F-A4E3-DD12374A6BE8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.ServiceBus.MSMQ", "Transports\MassTransit.ServiceBus.MSMQ\MassTransit.ServiceBus.MSMQ.csproj", "{6F90867C-E092-4EDC-B3DE-600D39DF0335}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Transports.Msmq", "Transports\MassTransit.ServiceBus.MSMQ\MassTransit.Transports.Msmq.csproj", "{6F90867C-E092-4EDC-B3DE-600D39DF0335}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.ServiceBus.MSMQ.Tests", "Transports\MassTransit.ServiceBus.MSMQ.Tests\MassTransit.ServiceBus.MSMQ.Tests.csproj", "{AF3C3E95-BA6C-41FF-873D-7C2E8994EE9D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Transports.Msmq.Tests", "Transports\MassTransit.ServiceBus.MSMQ.Tests\MassTransit.Transports.Msmq.Tests.csproj", "{AF3C3E95-BA6C-41FF-873D-7C2E8994EE9D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.ServiceBus.NMS", "Transports\MassTransit.ServiceBus.NMS\MassTransit.ServiceBus.NMS.csproj", "{1DBE5A67-C8C2-4AA9-82EF-1E730273993B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Transports.Nms", "Transports\MassTransit.ServiceBus.NMS\MassTransit.Transports.Nms.csproj", "{1DBE5A67-C8C2-4AA9-82EF-1E730273993B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.ServiceBus.NMS.Tests", "Transports\MassTransit.ServiceBus.NMS.Tests\MassTransit.ServiceBus.NMS.Tests.csproj", "{5B3732C1-9FC1-4A63-80BE-FCA7A78AB007}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Transports.Nms.Tests", "Transports\MassTransit.ServiceBus.NMS.Tests\MassTransit.Transports.Nms.Tests.csproj", "{5B3732C1-9FC1-4A63-80BE-FCA7A78AB007}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Dashboard", "MassTransit.Dashboard\MassTransit.Dashboard.csproj", "{95873436-3496-4DF7-9E1D-B6C9D3D0CCA9}"
 EndProject
@@ -29,7 +29,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.WindsorIntegrat
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Host", "MassTransit.Host\MassTransit.Host.csproj", "{834ED79F-BA0E-48F9-831A-789576EE516B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.ServiceBus.SQS", "Transports\MassTransit.ServiceBus.SQS\MassTransit.ServiceBus.SQS.csproj", "{0FCC623A-6596-4F9E-B96B-4B843947E218}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Transports.Sqs", "Transports\MassTransit.ServiceBus.SQS\MassTransit.Transports.Sqs.csproj", "{0FCC623A-6596-4F9E-B96B-4B843947E218}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Containers", "Containers", "{6C61507E-FF16-45C8-8FE4-350069D9B4C1}"
 EndProject
@@ -39,9 +39,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HeavyLoad", "Samples\HeavyL
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.StructureMapIntegration", "Containers\MassTransit.StructureMapIntegration\MassTransit.StructureMapIntegration.csproj", "{F5E67502-2B30-484C-88C3-97710291F5AA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.ServiceBus.WCF.Tests", "Transports\MassTransit.ServiceBus.WCF.Tests\MassTransit.ServiceBus.WCF.Tests.csproj", "{A1A2D6EB-B459-46D8-B836-614A5D5EC99B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Transports.Wcf.Tests", "Transports\MassTransit.ServiceBus.WCF.Tests\MassTransit.Transports.Wcf.Tests.csproj", "{A1A2D6EB-B459-46D8-B836-614A5D5EC99B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.ServiceBus.WCF", "Transports\MassTransit.ServiceBus.WCF\MassTransit.ServiceBus.WCF.csproj", "{F4388D44-E814-4B17-98F7-35735CB7449E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Transports.Wcf", "Transports\MassTransit.ServiceBus.WCF\MassTransit.Transports.Wcf.csproj", "{F4388D44-E814-4B17-98F7-35735CB7449E}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Infrastructure", "MassTransit.Infrastructure\MassTransit.Infrastructure.csproj", "{073A90FD-9A3E-4704-B3B5-6D8A9F4B442E}"
 EndProject

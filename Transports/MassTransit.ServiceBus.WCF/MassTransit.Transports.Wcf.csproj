@@ -8,8 +8,8 @@
     <ProjectGuid>{F4388D44-E814-4B17-98F7-35735CB7449E}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>MassTransit.ServiceBus.WCF</RootNamespace>
-    <AssemblyName>MassTransit.ServiceBus.WCF</AssemblyName>
+    <RootNamespace>MassTransit.Transports.Wcf</RootNamespace>
+    <AssemblyName>MassTransit.Transports.Wcf</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -29,7 +29,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DocumentationFile>..\..\bin\MassTransit.ServiceBus.WCF.XML</DocumentationFile>
+    <DocumentationFile>..\..\bin\MassTransit.Transports.Wcf.xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="log4net, Version=1.2.10.0, Culture=neutral, PublicKeyToken=1b44e1d426115821, processorArchitecture=MSIL">

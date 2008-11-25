@@ -8,8 +8,8 @@
     <ProjectGuid>{A1A2D6EB-B459-46D8-B836-614A5D5EC99B}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>MassTransit.ServiceBus.WCF.Tests</RootNamespace>
-    <AssemblyName>MassTransit.ServiceBus.WCF.Tests</AssemblyName>
+    <RootNamespace>MassTransit.Transports.Wcf.Tests</RootNamespace>
+    <AssemblyName>MassTransit.Transports.Wcf.Tests</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -89,9 +89,9 @@
       <Project>{90482397-6282-465E-8B86-39865FC30127}</Project>
       <Name>MassTransit</Name>
     </ProjectReference>
-    <ProjectReference Include="..\MassTransit.ServiceBus.WCF\MassTransit.ServiceBus.WCF.csproj">
+    <ProjectReference Include="..\MassTransit.ServiceBus.WCF\MassTransit.Transports.Wcf.csproj">
       <Project>{F4388D44-E814-4B17-98F7-35735CB7449E}</Project>
-      <Name>MassTransit.ServiceBus.WCF</Name>
+      <Name>MassTransit.Transports.Wcf</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
