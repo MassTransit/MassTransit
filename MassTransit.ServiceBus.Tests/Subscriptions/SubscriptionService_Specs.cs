@@ -3,9 +3,9 @@ namespace MassTransit.Tests.Subscriptions
     using System;
     using NUnit.Framework;
     using NUnit.Framework.SyntaxHelpers;
-    using ServiceBus.Tests.Messages;
-    using ServiceBus.Tests.Subscriptions;
-    using ServiceBus.Tests.TestConsumers;
+    using Tests.Messages;
+    using Tests.Subscriptions;
+    using Tests.TestConsumers;
 
     [TestFixture]
     public class When_using_the_subscription_service : 

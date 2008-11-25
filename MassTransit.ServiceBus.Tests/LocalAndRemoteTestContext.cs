@@ -16,7 +16,7 @@ namespace MassTransit.Tests
     using Castle.Windsor;
     using NUnit.Framework;
     using Rhino.Mocks;
-    using ServiceBus;
+    
     using WindsorIntegration;
 
     [TestFixture]

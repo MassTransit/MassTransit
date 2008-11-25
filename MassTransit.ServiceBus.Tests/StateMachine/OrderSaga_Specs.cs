@@ -1,4 +1,4 @@
-namespace MassTransit.ServiceBus.Tests.StateMachine
+namespace MassTransit.Tests.StateMachine
 {
     using System;
     using NUnit.Framework;

@@ -7,11 +7,11 @@ namespace MassTransit.WindsorIntegration.Rc3
     using Castle.Core.Configuration;
     using Castle.MicroKernel;
     using Castle.MicroKernel.Facilities;
-    using MassTransit.ServiceBus.Exceptions;
-    using MassTransit.ServiceBus.Internal;
-    using MassTransit.ServiceBus.Subscriptions;
-    using ServiceBus;
-    using ServiceBus.Services.HealthMonitoring;
+    using MassTransit.Exceptions;
+    using MassTransit.Internal;
+    using MassTransit.Subscriptions;
+    
+    using Services.HealthMonitoring;
 
     public class MassTransitFacility :
         AbstractFacility

@@ -1,12 +1,11 @@
 namespace MassTransit.Tests
 {
     using System;
+    using MassTransit.Internal;
+    using MassTransit.Subscriptions;
     using NUnit.Framework;
     using NUnit.Framework.SyntaxHelpers;
     using Rhino.Mocks;
-    using ServiceBus;
-    using ServiceBus.Internal;
-    using ServiceBus.Subscriptions;
 
     [TestFixture]
     public class When_a_correlated_message_is_received :

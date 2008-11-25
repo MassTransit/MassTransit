@@ -15,9 +15,9 @@ namespace MassTransit.Grid
 	using System;
 	using System.Collections.Generic;
 	using log4net;
-	using MassTransit.ServiceBus.Internal;
+	using MassTransit.Internal;
 	using Messages;
-	using ServiceBus;
+	
 
 	public class DistributedTaskController<TTask, TInput, TOutput> :
 		Consumes<SubTaskWorkerAvailable<TInput>>.All,

@@ -14,10 +14,10 @@ namespace MassTransit.Tests
 {
     using System;
     using NUnit.Framework;
-    using ServiceBus;
-    using ServiceBus.Tests;
-    using ServiceBus.Tests.Messages;
-    using ServiceBus.Tests.TestConsumers;
+    
+    using Tests;
+    using Tests.Messages;
+    using Tests.TestConsumers;
 
     [TestFixture]
     public class When_a_batch_of_messages_is_published :

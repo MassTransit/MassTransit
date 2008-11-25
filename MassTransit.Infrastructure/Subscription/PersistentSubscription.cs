@@ -13,7 +13,8 @@
 namespace MassTransit.Infrastructure
 {
     using System;
-    using ServiceBus.Subscriptions;
+    using Subscriptions;
+    using Subscriptions;
 
     public class PersistentSubscription :
         Subscription

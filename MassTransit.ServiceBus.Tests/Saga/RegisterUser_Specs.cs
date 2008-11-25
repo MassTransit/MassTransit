@@ -15,8 +15,8 @@ namespace MassTransit.Tests.Saga
     using System.Diagnostics;
     using NUnit.Framework;
     using NUnit.Framework.SyntaxHelpers;
-    using ServiceBus.Tests.Saga.RegisterUser;
-    using ServiceBus.Tests.Saga.RegisterUser.Messages;
+    using Tests.Saga.RegisterUser;
+    using Tests.Saga.RegisterUser.Messages;
 
     [TestFixture]
     public class When_a_unknown_user_registers :

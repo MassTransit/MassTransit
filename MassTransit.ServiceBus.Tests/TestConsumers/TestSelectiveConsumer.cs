@@ -1,4 +1,4 @@
-namespace MassTransit.ServiceBus.Tests.TestConsumers
+namespace MassTransit.Tests.TestConsumers
 {
     using System;
 

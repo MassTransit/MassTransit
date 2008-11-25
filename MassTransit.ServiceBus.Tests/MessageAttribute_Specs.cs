@@ -15,7 +15,7 @@ namespace MassTransit.Tests
     using System;
     using NUnit.Framework;
     using NUnit.Framework.SyntaxHelpers;
-    using ServiceBus;
+    
 
     [TestFixture]
     public class When_a_message_should_expire_after_a_period_of_time

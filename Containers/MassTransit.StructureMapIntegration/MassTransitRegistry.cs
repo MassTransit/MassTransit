@@ -1,10 +1,10 @@
 ﻿namespace MassTransit.StructureMapIntegration
 {
     using System;
-    using MassTransit.ServiceBus.Internal;
-    using MassTransit.ServiceBus.Subscriptions;
-    using ServiceBus;
-    using ServiceBus.Services.HealthMonitoring;
+    using MassTransit.Internal;
+    using MassTransit.Subscriptions;
+    
+    using Services.HealthMonitoring;
     using StructureMap;
     using StructureMap.Configuration.DSL;
 

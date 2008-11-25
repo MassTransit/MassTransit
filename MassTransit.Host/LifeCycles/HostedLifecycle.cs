@@ -15,7 +15,7 @@ namespace MassTransit.Host.LifeCycles
 	using System;
 	using Actions;
 	using Microsoft.Practices.ServiceLocation;
-	using ServiceBus;
+	
 
     /// <summary>
     /// Base class to handle the host lifecycle common junk

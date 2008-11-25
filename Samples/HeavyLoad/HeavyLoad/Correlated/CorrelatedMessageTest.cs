@@ -3,9 +3,9 @@ namespace HeavyLoad.Correlated
 	using System;
 	using System.Threading;
 	using Castle.Windsor;
-	using MassTransit.ServiceBus;
-	using MassTransit.ServiceBus.MSMQ;
-	using MassTransit.ServiceBus.Threading;
+	using MassTransit;
+	using MassTransit.MSMQ;
+	using MassTransit.Threading;
 
     public class CorrelatedMessageTest : IDisposable
 	{

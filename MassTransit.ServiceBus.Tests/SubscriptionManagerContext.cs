@@ -14,10 +14,13 @@ namespace MassTransit.Tests
 {
     using Castle.Core;
     using Castle.Windsor;
+    using MassTransit.Subscriptions;
     using NUnit.Framework;
-    using ServiceBus;
-    using ServiceBus.Subscriptions;
+    
     using WindsorIntegration;
+    using FollowerRepository=MassTransit.Subscriptions.FollowerRepository;
+    using ISubscriptionCache=MassTransit.Subscriptions.ISubscriptionCache;
+
 
     [TestFixture]
     public class SubscriptionManagerContext
@@ -69,10 +72,10 @@ namespace MassTransit.Tests
         private IServiceBus _localBus;
         private IServiceBus _remoteBus;
         private IServiceBus _subscriptionBus;
-        private SubscriptionService _subscriptionService;
+        private MassTransit.Subscriptions.SubscriptionService _subscriptionService;
         private ISubscriptionCache _subscriptionCache;
 
-        public SubscriptionService SubscriptionService
+        public MassTransit.Subscriptions.SubscriptionService SubscriptionService
         {
             get { return _subscriptionService; }
         }

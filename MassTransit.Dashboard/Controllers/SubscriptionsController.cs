@@ -14,7 +14,7 @@ namespace MassTransit.Dashboard.Controllers
 {
     using System.Collections.Generic;
     using Castle.MonoRail.Framework;
-    using MassTransit.ServiceBus.Subscriptions;
+    using MassTransit.Subscriptions;
 
     [Layout("default")]
     public class SubscriptionsController : 

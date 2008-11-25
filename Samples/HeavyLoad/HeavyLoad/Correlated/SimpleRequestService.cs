@@ -12,7 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace HeavyLoad.Correlated
 {
-    using MassTransit.ServiceBus;
+    using MassTransit;
 
     internal class SimpleRequestService :
         Consumes<SimpleRequestMessage>.All

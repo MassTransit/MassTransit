@@ -1,4 +1,4 @@
-namespace MassTransit.ServiceBus
+namespace MassTransit
 {
     using System;
 

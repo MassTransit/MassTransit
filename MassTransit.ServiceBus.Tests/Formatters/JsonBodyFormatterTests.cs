@@ -2,12 +2,12 @@ namespace MassTransit.Tests.Formatters
 {
     using System.IO;
     using System.Text;
+    using MassTransit.Formatters;
     using NUnit.Framework;
     using NUnit.Framework.SyntaxHelpers;
     using Rhino.Mocks;
-    using ServiceBus.Formatters;
-    using ServiceBus.Tests;
-    using ServiceBus.Tests.Messages;
+    using Tests;
+    using Tests.Messages;
 
     public class JsonBodyFormatterTests : 
         Specification

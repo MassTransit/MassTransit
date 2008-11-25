@@ -17,11 +17,11 @@ namespace MassTransit.Tests.Timeouts
     using System.Threading;
     using Castle.Core;
     using NUnit.Framework;
-    using ServiceBus.Services.MessageDeferral;
-    using ServiceBus.Services.MessageDeferral.Messages;
-    using ServiceBus.Services.Timeout;
-    using ServiceBus.Tests.Messages;
-    using ServiceBus.Util;
+    using Services.MessageDeferral;
+    using Services.MessageDeferral.Messages;
+    using Services.Timeout;
+    using Tests.Messages;
+    using Util;
 
     [TestFixture]
     public class When_a_message_is_deferred :

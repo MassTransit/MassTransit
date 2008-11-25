@@ -2,12 +2,11 @@ namespace MassTransit.Tests.Subscriptions
 {
     using System;
     using System.Collections.Generic;
+    using MassTransit.Internal;
+    using MassTransit.Subscriptions;
     using NUnit.Framework;
     using NUnit.Framework.SyntaxHelpers;
     using Rhino.Mocks;
-    using ServiceBus;
-    using ServiceBus.Internal;
-    using ServiceBus.Subscriptions;
 
     [TestFixture]
     public class When_the_SubscriptionCoordinator_is_interacting_with_the_SubscriptionCache :

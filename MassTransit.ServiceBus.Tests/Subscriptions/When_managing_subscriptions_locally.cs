@@ -1,11 +1,11 @@
 namespace MassTransit.Tests.Subscriptions
 {
     using System;
+    using MassTransit.Subscriptions;
     using NUnit.Framework;
     using NUnit.Framework.SyntaxHelpers;
-    using ServiceBus;
-    using ServiceBus.Subscriptions;
-    using ServiceBus.Tests.Messages;
+    
+    using Tests.Messages;
 
     [TestFixture]
     public class When_managing_subscriptions_locally :

@@ -17,7 +17,7 @@ namespace MassTransit.Infrastructure.Tests
     using MassTransit.Tests;
     using NUnit.Framework;
     using NUnit.Framework.SyntaxHelpers;
-    using ServiceBus;
+    
 
     [TestFixture]
     public class When_multiple_service_bus_instances_share_a_distributed_subscription_cache :

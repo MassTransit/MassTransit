@@ -18,7 +18,7 @@ namespace MassTransit.Infrastructure.Tests
     using NUnit.Framework;
     using NUnit.Framework.SyntaxHelpers;
     using Repositories;
-    using ServiceBus.Subscriptions;
+    using Subscriptions;
 
     [TestFixture]
     public class When_saving_a_subscription_to_the_database

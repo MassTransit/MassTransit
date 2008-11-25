@@ -17,10 +17,9 @@ namespace MassTransit.Tests.Grid
     using System.Text;
     using System.Threading;
     using MassTransit.Grid;
+    using MassTransit.Internal;
     using NUnit.Framework;
     using NUnit.Framework.SyntaxHelpers;
-    using ServiceBus.Internal;
-    using ServiceBus.Tests.Grid;
 
     [TestFixture]
     public class As_a_developer_that_needs_to_distribute_a_task_across_multiple_servers_for_parallel_processing :

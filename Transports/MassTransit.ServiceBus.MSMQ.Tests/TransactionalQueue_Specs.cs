@@ -1,4 +1,4 @@
-namespace MassTransit.ServiceBus.MSMQ.Tests
+namespace MassTransit.MSMQ.Tests
 {
 	using System;
 	using System.Diagnostics;

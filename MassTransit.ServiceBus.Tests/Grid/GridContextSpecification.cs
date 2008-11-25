@@ -14,7 +14,7 @@ namespace MassTransit.Tests.Grid
 {
     using System.IO;
     using MassTransit.Grid;
-    using ServiceBus.Tests.Grid;
+    using Tests.Grid;
 
     public abstract class GridContextSpecification :
         LocalAndRemoteTestContext

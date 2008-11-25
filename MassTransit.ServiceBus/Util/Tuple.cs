@@ -1,4 +1,4 @@
-namespace MassTransit.ServiceBus.Util
+namespace MassTransit.Util
 {
 	using System.Collections.Generic;
 

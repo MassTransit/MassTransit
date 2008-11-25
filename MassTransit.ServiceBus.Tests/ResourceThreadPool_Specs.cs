@@ -15,7 +15,7 @@ namespace MassTransit.Tests
     using System;
     using System.Threading;
     using NUnit.Framework;
-    using ServiceBus.Threading;
+    using Threading;
 
     [TestFixture]
     public class When_accessing_a_constrained_resource

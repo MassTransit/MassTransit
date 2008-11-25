@@ -1,11 +1,11 @@
 namespace MassTransit.Tests.Subscriptions
 {
     using System;
+    using MassTransit.Internal;
+    using MassTransit.Subscriptions;
+    using MassTransit.Subscriptions.Messages;
+    using MassTransit.Subscriptions.ServerHandlers;
     using NUnit.Framework;
-    using ServiceBus.Internal;
-    using ServiceBus.Subscriptions;
-    using ServiceBus.Subscriptions.Messages;
-    using ServiceBus.Subscriptions.ServerHandlers;
 
     [TestFixture]
     public class As_a_CancelUpdatesHandler

@@ -14,7 +14,7 @@ namespace MassTransit.Grid
 {
 	using System.Threading;
 	using Messages;
-	using ServiceBus;
+	
 
 	public class SubTaskWorker<TWorker, TInput, TOutput> :
 		Consumes<ExecuteSubTask<TInput>>.All,

@@ -21,12 +21,12 @@ namespace MassTransit.WindsorIntegration
     using Castle.MicroKernel;
     using Castle.MicroKernel.Facilities;
     using Castle.MicroKernel.Registration;
-    using MassTransit.ServiceBus.Exceptions;
-    using MassTransit.ServiceBus.Internal;
-    using MassTransit.ServiceBus.Subscriptions;
+    using MassTransit.Exceptions;
+    using MassTransit.Internal;
+    using MassTransit.Subscriptions;
     using Microsoft.Practices.ServiceLocation;
-    using ServiceBus;
-    using ServiceBus.Services.HealthMonitoring;
+    
+    using Services.HealthMonitoring;
     using Component = Castle.MicroKernel.Registration.Component;
 
     /// <summary>

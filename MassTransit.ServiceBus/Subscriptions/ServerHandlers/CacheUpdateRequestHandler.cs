@@ -1,4 +1,4 @@
-namespace MassTransit.ServiceBus.Subscriptions.ServerHandlers
+namespace MassTransit.Subscriptions.ServerHandlers
 {
     using System;
     using System.Collections.Generic;

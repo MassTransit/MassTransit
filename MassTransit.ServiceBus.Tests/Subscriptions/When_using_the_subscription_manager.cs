@@ -2,13 +2,12 @@ namespace MassTransit.Tests.Subscriptions
 {
     using System;
     using System.Collections.Generic;
+    using MassTransit.Subscriptions;
+    using MassTransit.Subscriptions.Messages;
     using NUnit.Framework;
     using Rhino.Mocks;
     using Rhino.Mocks.Constraints;
-    using ServiceBus;
-    using ServiceBus.Subscriptions;
-    using ServiceBus.Subscriptions.Messages;
-
+    
     [TestFixture]
     public class When_using_the_subscription_manager : 
         Specification

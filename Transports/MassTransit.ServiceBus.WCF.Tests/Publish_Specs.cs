@@ -1,8 +1,8 @@
-namespace MassTransit.ServiceBus.WCF.Tests
+namespace MassTransit.WCF.Tests
 {
 	using System;
-	using MassTransit.ServiceBus.Tests.Messages;
-	using MassTransit.ServiceBus.Tests.TestConsumers;
+	using MassTransit.Tests.Messages;
+	using MassTransit.Tests.TestConsumers;
 	using MassTransit.Tests;
 	using NUnit.Framework;
 

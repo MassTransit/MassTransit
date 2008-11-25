@@ -16,7 +16,7 @@ namespace MassTransit.WindsorIntegration
     using Castle.Windsor;
     using Castle.Windsor.Configuration;
     using Microsoft.Practices.ServiceLocation;
-    using ServiceBus;
+    
 
     public class DefaultMassTransitContainer :
         WindsorContainer

@@ -1,7 +1,7 @@
-namespace MassTransit.ServiceBus.Tests.Subscriptions
+namespace MassTransit.Tests.Subscriptions
 {
 	using System;
-	using MassTransit.ServiceBus.Subscriptions;
+	using MassTransit.Subscriptions;
 	using Messages;
 	using NUnit.Framework;
 	using NUnit.Framework.SyntaxHelpers;

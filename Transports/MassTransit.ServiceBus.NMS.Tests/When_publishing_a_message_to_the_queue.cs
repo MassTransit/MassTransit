@@ -1,4 +1,4 @@
-namespace MassTransit.ServiceBus.NMS.Tests
+namespace MassTransit.NMS.Tests
 {
 	using System;
 	using System.Threading;
@@ -66,7 +66,7 @@ namespace MassTransit.ServiceBus.NMS.Tests
 
 
 		/*
-		 * namespace MassTransit.ServiceBus.MSMQ.Tests
+		 * namespace MassTransit.MSMQ.Tests
 {
 	using System;
 	using System.Threading;

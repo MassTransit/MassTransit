@@ -14,8 +14,8 @@ namespace MassTransit.Tests
 {
     using System;
     using NUnit.Framework;
-    using ServiceBus.Tests.Messages;
-    using ServiceBus.Tests.TestConsumers;
+    using Tests.Messages;
+    using Tests.TestConsumers;
 
     [TestFixture]
     public class When_a_request_message_is_published :

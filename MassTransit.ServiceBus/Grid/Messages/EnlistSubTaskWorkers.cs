@@ -13,7 +13,7 @@
 namespace MassTransit.Grid.Messages
 {
     using System;
-    using ServiceBus;
+    
 
     [Serializable]
     [ExpiresIn("00:01:00")]

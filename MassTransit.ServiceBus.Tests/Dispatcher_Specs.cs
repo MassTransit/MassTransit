@@ -2,14 +2,14 @@ namespace MassTransit.Tests
 {
     using System;
     using System.Collections;
+    using MassTransit.Internal;
+    using MassTransit.Subscriptions;
     using NUnit.Framework;
     using NUnit.Framework.SyntaxHelpers;
     using Rhino.Mocks;
-    using ServiceBus;
-    using ServiceBus.Internal;
-    using ServiceBus.Subscriptions;
-    using ServiceBus.Tests.Messages;
-    using ServiceBus.Transports;
+    
+    using Tests.Messages;
+    using Transports;
 
     [TestFixture]
     public class When_a_message_is_delivered_to_the_service_bus :

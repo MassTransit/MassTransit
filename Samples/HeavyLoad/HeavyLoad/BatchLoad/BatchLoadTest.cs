@@ -4,9 +4,9 @@ namespace HeavyLoad.BatchLoad
 	using System.Threading;
 	using Castle.Windsor;
 	using log4net;
-	using MassTransit.ServiceBus;
-	using MassTransit.ServiceBus.MSMQ;
-	using MassTransit.ServiceBus.Threading;
+	using MassTransit;
+	using MassTransit.MSMQ;
+	using MassTransit.Threading;
 
 	public class BatchLoadTest : IDisposable
 	{

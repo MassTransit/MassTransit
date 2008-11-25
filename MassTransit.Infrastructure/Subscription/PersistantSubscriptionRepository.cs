@@ -17,7 +17,7 @@ namespace MassTransit.Infrastructure.Repositories
     using log4net;
     using NHibernate;
     using NHibernate.Criterion;
-    using ServiceBus.Subscriptions;
+    using Subscriptions;
 
     public class PersistantSubscriptionRepository :
         ISubscriptionRepository

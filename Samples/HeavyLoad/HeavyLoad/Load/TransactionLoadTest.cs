@@ -3,8 +3,8 @@ namespace HeavyLoad.Load
     using System;
     using System.Threading;
     using Castle.Windsor;
-    using MassTransit.ServiceBus;
-    using MassTransit.ServiceBus.MSMQ;
+    using MassTransit;
+    using MassTransit.MSMQ;
     using MassTransit.WindsorIntegration;
 
     public class TransactionLoadTest : IDisposable

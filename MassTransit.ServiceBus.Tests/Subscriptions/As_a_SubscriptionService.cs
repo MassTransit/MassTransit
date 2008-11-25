@@ -2,12 +2,11 @@ namespace MassTransit.Tests.Subscriptions
 {
     using System;
     using System.Collections.Generic;
+    using MassTransit.Internal;
+    using MassTransit.Subscriptions;
+    using MassTransit.Subscriptions.ServerHandlers;
     using NUnit.Framework;
     using Rhino.Mocks;
-    using ServiceBus;
-    using ServiceBus.Internal;
-    using ServiceBus.Subscriptions;
-    using ServiceBus.Subscriptions.ServerHandlers;
 
     [TestFixture]
     public class As_a_SubscriptionService :

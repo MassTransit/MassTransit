@@ -13,7 +13,7 @@
 namespace HeavyLoad.Correlated
 {
     using System;
-    using MassTransit.ServiceBus;
+    using MassTransit;
 
     internal class CorrelatedController :
         Consumes<SimpleResponseMessage>.For<Guid>
