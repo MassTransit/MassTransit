@@ -5,7 +5,7 @@ namespace MassTransit.WindsorIntegration
     using System.Collections.Generic;
     using Castle.Core;
     using Castle.MicroKernel;
-    using ServiceBus;
+    
 
     public class WindsorObjectBuilder :
         IObjectBuilder

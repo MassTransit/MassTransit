@@ -1,4 +1,4 @@
-namespace MassTransit.ServiceBus.Tests.Grid
+namespace MassTransit.Tests.Grid
 {
     using System;
     using MassTransit.Grid;

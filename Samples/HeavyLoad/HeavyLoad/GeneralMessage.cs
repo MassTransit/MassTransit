@@ -1,7 +1,6 @@
 namespace HeavyLoad
 {
 	using System;
-	using MassTransit.ServiceBus;
 
 	[Serializable]
 	public class GeneralMessage

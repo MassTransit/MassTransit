@@ -15,9 +15,9 @@ namespace MassTransit.Dashboard.Controllers
     using System;
     using Castle.MonoRail.Framework;
     using Magnum.Common.DateTimeExtensions;
-    using ServiceBus;
-    using ServiceBus.Services.MessageDeferral;
-    using ServiceBus.Services.MessageDeferral.Messages;
+    
+    using Services.MessageDeferral;
+    using Services.MessageDeferral.Messages;
 
     [Layout("default")]
     public class MessageDeferralController :

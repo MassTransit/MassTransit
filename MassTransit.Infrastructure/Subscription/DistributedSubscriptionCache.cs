@@ -1,4 +1,4 @@
-namespace MassTransit.ServiceBus.Subscriptions
+namespace MassTransit.Subscriptions
 {
 	using System;
 	using System.Collections.Generic;

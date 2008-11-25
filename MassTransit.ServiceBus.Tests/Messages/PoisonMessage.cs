@@ -1,4 +1,4 @@
-namespace MassTransit.ServiceBus.Tests
+namespace MassTransit.Tests
 {
 	using System;
 

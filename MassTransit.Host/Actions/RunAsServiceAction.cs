@@ -16,7 +16,7 @@ namespace MassTransit.Host.Actions
     using Hosts;
     using log4net;
     using Microsoft.Practices.ServiceLocation;
-    using ServiceBus.Exceptions;
+    using Exceptions;
 
     /// <summary>
     /// Runs the host as a service (must be installed first)

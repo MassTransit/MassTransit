@@ -1,12 +1,12 @@
 namespace MassTransit.Tests.Subscriptions
 {
     using System;
+    using MassTransit.Subscriptions;
+    using MassTransit.Subscriptions.Messages;
     using NUnit.Framework;
     using Rhino.Mocks;
-    using ServiceBus;
-    using ServiceBus.Exceptions;
-    using ServiceBus.Subscriptions;
-    using ServiceBus.Subscriptions.Messages;
+    
+    using Exceptions;
 
     [TestFixture]
     public class When_managing_subscriptions_remotely :

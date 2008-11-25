@@ -4,7 +4,7 @@ namespace MassTransit.UnityIntegration
     using System.Collections;
     using System.Collections.Generic;
     using Microsoft.Practices.Unity;
-    using ServiceBus;
+    
 
     public class UnityObjectBuilder :
         IObjectBuilder

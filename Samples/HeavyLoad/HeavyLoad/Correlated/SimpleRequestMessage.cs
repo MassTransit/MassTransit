@@ -1,7 +1,7 @@
 namespace HeavyLoad.Correlated
 {
     using System;
-    using MassTransit.ServiceBus;
+    using MassTransit;
 
     [Serializable]
     internal class SimpleRequestMessage : 

@@ -1,8 +1,8 @@
 namespace MassTransit.Tests.Internal
 {
     using System;
+    using MassTransit.Internal;
     using NUnit.Framework;
-    using ServiceBus.Internal;
 
     public class IdempotentHashtable_Specs : 
         Specification

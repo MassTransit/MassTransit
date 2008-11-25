@@ -2,11 +2,10 @@ namespace MassTransit.Tests
 {
     using System;
     using System.Threading;
+    using MassTransit.Internal;
+    using MassTransit.Subscriptions;
     using NUnit.Framework;
-    using ServiceBus;
-    using ServiceBus.Internal;
-    using ServiceBus.Subscriptions;
-    using ServiceBus.Transports;
+    using Transports;
 
     [TestFixture]
     public class When_a_message_fault_occurs :

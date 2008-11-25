@@ -1,4 +1,4 @@
-namespace MassTransit.ServiceBus.Exceptions
+namespace MassTransit.Exceptions
 {
     using System;
     using System.Runtime.Serialization;

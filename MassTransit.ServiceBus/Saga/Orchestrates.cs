@@ -13,7 +13,7 @@
 namespace MassTransit.Saga
 {
     using System;
-    using ServiceBus;
+    
 
     /// <summary>
     /// Specifies that a class implementing ISaga consumes TMessage as part of the saga

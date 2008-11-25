@@ -16,10 +16,11 @@ namespace MassTransit.Tests.Grid
     using System.Threading;
     using log4net;
     using MassTransit.Grid;
+    using MassTransit.Internal;
     using NUnit.Framework;
     using NUnit.Framework.SyntaxHelpers;
-    using ServiceBus.Internal;
-    using ServiceBus.Tests.Grid;
+    using Internal;
+    using Tests.Grid;
 
     [TestFixture]
     public class When_a_worker_throws_an_exception :

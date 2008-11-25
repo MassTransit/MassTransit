@@ -15,14 +15,13 @@ namespace MassTransit.Tests
     using System;
     using System.Collections.Generic;
     using System.Threading;
+    using MassTransit.Internal;
+    using MassTransit.Subscriptions;
     using NUnit.Framework;
     using NUnit.Framework.SyntaxHelpers;
-    using ServiceBus;
-    using ServiceBus.Internal;
-    using ServiceBus.Subscriptions;
-    using ServiceBus.Tests;
-    using ServiceBus.Tests.Messages;
-    using ServiceBus.Transports;
+    
+    using Tests.Messages;
+    using Transports;
 
     [TestFixture]
     public class MessageGroup_Specs :

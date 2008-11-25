@@ -17,9 +17,9 @@ namespace MassTransit.Tests.Timeouts
     using System.Threading;
     using Castle.Core;
     using NUnit.Framework;
-    using ServiceBus.Services.Timeout;
-    using ServiceBus.Services.Timeout.Messages;
-    using ServiceBus.Util;
+    using Services.Timeout;
+    using Services.Timeout.Messages;
+    using Util;
 
     [TestFixture]
     public class When_scheduling_a_timeout_for_a_new_id :

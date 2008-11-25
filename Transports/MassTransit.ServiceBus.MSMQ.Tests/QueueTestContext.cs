@@ -1,4 +1,4 @@
-namespace MassTransit.ServiceBus.MSMQ.Tests
+namespace MassTransit.MSMQ.Tests
 {
 	using System;
 	using System.Diagnostics;
@@ -101,12 +101,12 @@ namespace MassTransit.ServiceBus.MSMQ.Tests
 			ValidateAndPurgeQueue(_subscriptionEndpoint.QueuePath);
 
 
-			_serviceBus = MassTransit.ServiceBus.ServiceBus.Build()
+			_serviceBus = MassTransit.ServiceBus.Build()
 				.SupportingTransport<MsmqEndpoint>()
 				.ListeningOn(_serviceBusEndPoint.Uri)
 				.UsingObjectBuilder(objectBuilder);
 
-			_remoteServiceBus = MassTransit.ServiceBus.ServiceBus.Build()
+			_remoteServiceBus = MassTransit.ServiceBus.Build()
 				.SupportingTransport<MsmqEndpoint>()
 				.ListeningOn(_remoteServiceBusEndPoint.Uri)
 				.UsingObjectBuilder(objectBuilder);

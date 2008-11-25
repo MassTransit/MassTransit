@@ -1,10 +1,9 @@
 namespace MassTransit.Tests
 {
     using System;
+    using MassTransit.Internal;
     using NUnit.Framework;
     using NUnit.Framework.SyntaxHelpers;
-    using ServiceBus;
-    using ServiceBus.Internal;
 
     [TestFixture]
     public class When_a_correlated_message_is_dispatched :

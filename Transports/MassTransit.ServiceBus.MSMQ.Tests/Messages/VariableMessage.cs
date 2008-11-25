@@ -1,6 +1,6 @@
 using System;
 
-namespace MassTransit.ServiceBus.MSMQ.Tests.Messages
+namespace MassTransit.MSMQ.Tests.Messages
 {
 	[Serializable]
 	public class VariableMessage

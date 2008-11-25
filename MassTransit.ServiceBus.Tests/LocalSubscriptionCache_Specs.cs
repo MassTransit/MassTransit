@@ -13,13 +13,12 @@
 namespace MassTransit.Tests
 {
     using System;
+    using MassTransit.Internal;
+    using MassTransit.Subscriptions;
+    using Messages;
     using NUnit.Framework;
-    using ServiceBus;
-    using ServiceBus.Internal;
-    using ServiceBus.Subscriptions;
-    using ServiceBus.Tests.Messages;
-    using ServiceBus.Tests.TestConsumers;
-    using ServiceBus.Transports;
+    using TestConsumers;
+    using Transports;
 
     [TestFixture]
     public class When_a_handler_subscription_is_added :
@@ -64,7 +63,7 @@ namespace MassTransit.Tests
 
             using (Playback())
             {
-                TestMessageConsumer<PingMessage> consumer = new TestMessageConsumer<PingMessage>();
+                var consumer = new TestMessageConsumer<PingMessage>();
 
                 _serviceBus.Subscribe(consumer);
             }
@@ -81,7 +80,7 @@ namespace MassTransit.Tests
 
             using (Playback())
             {
-                TestSelectiveConsumer<PingMessage> consumer = new TestSelectiveConsumer<PingMessage>();
+                var consumer = new TestSelectiveConsumer<PingMessage>();
 
                 _serviceBus.Subscribe(consumer);
             }

@@ -1,4 +1,4 @@
-namespace MassTransit.ServiceBus.Services.Timeout
+namespace MassTransit.Services.Timeout
 {
     using System;
     using System.Collections.Generic;

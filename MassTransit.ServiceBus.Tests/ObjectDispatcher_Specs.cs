@@ -14,12 +14,11 @@ namespace MassTransit.Tests
 {
     using System;
     using System.Collections;
+    using MassTransit.Internal;
+    using MassTransit.Subscriptions;
     using NUnit.Framework;
     using NUnit.Framework.SyntaxHelpers;
     using Rhino.Mocks;
-    using ServiceBus;
-    using ServiceBus.Internal;
-    using ServiceBus.Subscriptions;
 
     [TestFixture]
     public class When_a_type_is_registered_with_the_dispatcher :

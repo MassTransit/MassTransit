@@ -2,8 +2,8 @@ namespace MassTransit.Tests
 {
     using NUnit.Framework;
     using NUnit.Framework.SyntaxHelpers;
-    using ServiceBus;
-    using ServiceBus.Transports;
+    
+    using Transports;
 
     [TestFixture]
     public class When_creating_a_service_bus

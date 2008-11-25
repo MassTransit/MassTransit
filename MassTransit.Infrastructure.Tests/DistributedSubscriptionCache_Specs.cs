@@ -17,7 +17,7 @@ namespace MassTransit.Infrastructure.Tests
     using Enyim.Caching;
     using NUnit.Framework;
     using NUnit.Framework.SyntaxHelpers;
-    using ServiceBus.Subscriptions;
+    using Subscriptions;
 
     [TestFixture]
     public class When_using_a_distributed_subscription_cache

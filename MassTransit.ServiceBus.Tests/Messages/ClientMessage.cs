@@ -1,6 +1,6 @@
 using System;
 
-namespace MassTransit.ServiceBus.Tests
+namespace MassTransit.Tests
 {
 	[Serializable]
 	public class ClientMessage

@@ -1,10 +1,9 @@
 namespace MassTransit.Tests
 {
+    using MassTransit.Internal;
     using NUnit.Framework;
     using NUnit.Framework.SyntaxHelpers;
-    using ServiceBus;
-    using ServiceBus.Internal;
-
+    
     [TestFixture]
     public class When_a_consumer_is_registered_with_the_dispatcher :
         Specification

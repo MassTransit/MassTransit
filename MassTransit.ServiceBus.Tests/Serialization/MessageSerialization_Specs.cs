@@ -10,13 +10,13 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.ServiceBus.Tests.Serialization
+namespace MassTransit.Tests.Serialization
 {
     using System;
     using System.Diagnostics;
     using System.IO;
     using System.Text;
-    using MassTransit.ServiceBus.Serialization;
+    using MassTransit.Serialization;
     using Messages;
     using NUnit.Framework;
 

@@ -1,7 +1,7 @@
 namespace MassTransit.Host.Tests
 {
 	using System;
-	using ServiceBus;
+	
 
 	public class SimpleMessageServer :
 		IHostedService

@@ -4,7 +4,7 @@ namespace MassTransit.Tests
     using System.Threading;
     using NUnit.Framework;
     using NUnit.Framework.SyntaxHelpers;
-    using ServiceBus.Threading;
+    using Threading;
 
     [TestFixture]
     public class When_a_item_is_scheduled_in_the_thread_pool :

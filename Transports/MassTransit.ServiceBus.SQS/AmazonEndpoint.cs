@@ -1,4 +1,4 @@
-namespace MassTransit.ServiceBus.SQS
+namespace MassTransit.SQS
 {
 	using System;
 	using System.IO;

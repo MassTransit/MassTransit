@@ -1,12 +1,11 @@
 namespace MassTransit.Tests
 {
     using System;
+    using MassTransit.Internal;
+    using Messages;
     using NUnit.Framework;
     using NUnit.Framework.SyntaxHelpers;
-    using ServiceBus;
-    using ServiceBus.Internal;
-    using ServiceBus.Tests.Messages;
-    using ServiceBus.Transports;
+    using Transports;
 
     [TestFixture]
     public class MessageQueueEndpoint_MeetsCriteria :

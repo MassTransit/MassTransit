@@ -10,42 +10,42 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Infrastructure.Repositories
+namespace MassTransit.Infrastructure.MessageDeferral
 {
-	using System;
-	using Magnum.Infrastructure.Repository;
-	using ServiceBus.Services.MessageDeferral;
+    using System;
+    using Magnum.Infrastructure.Repository;
+    using Services.MessageDeferral;
 
     public class PersistantDeferredMessageRepository :
-		IDeferredMessageRepository
-	{
-		private NHibernateRepository _repository;
+        IDeferredMessageRepository
+    {
+        private NHibernateRepository _repository;
 
-		public void Dispose()
-		{
-			_repository.Dispose();
-		}
+        public void Dispose()
+        {
+            _repository.Dispose();
+        }
 
-		public void Add(DeferredMessage message)
-		{
-			_repository.Save(message);
-		}
+        public void Add(DeferredMessage message)
+        {
+            _repository.Save(message);
+        }
 
-		public DeferredMessage Get(Guid id)
-		{
-			DeferredMessage msg = _repository.Get<DeferredMessage>(id);
-			return msg;
-		}
+        public DeferredMessage Get(Guid id)
+        {
+            DeferredMessage msg = _repository.Get<DeferredMessage>(id);
+            return msg;
+        }
 
-		public bool Contains(Guid id)
-		{
-			return _repository.Get<DeferredMessage>(id) != null;
-		}
+        public bool Contains(Guid id)
+        {
+            return _repository.Get<DeferredMessage>(id) != null;
+        }
 
-		public void Remove(Guid id)
-		{
-			//TODO: Need a delete by Id method
-			_repository.Delete(_repository.Get<DeferredMessage>(id));
-		}
-	}
+        public void Remove(Guid id)
+        {
+            //TODO: Need a delete by Id method
+            _repository.Delete(_repository.Get<DeferredMessage>(id));
+        }
+    }
 }

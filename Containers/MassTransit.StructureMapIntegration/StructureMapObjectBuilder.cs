@@ -3,7 +3,7 @@ namespace MassTransit.StructureMapIntegration
     using System;
     using System.Collections;
     using System.Collections.Generic;
-    using ServiceBus;
+    
     using StructureMap;
 
     public class StructureMapObjectBuilder :

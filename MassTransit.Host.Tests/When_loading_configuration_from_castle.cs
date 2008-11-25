@@ -4,7 +4,7 @@ namespace MassTransit.Host.Tests
 	using System.Reflection;
 	using NUnit.Framework;
 	using NUnit.Framework.SyntaxHelpers;
-	using ServiceBus;
+	
 
 	[TestFixture]
 	public class When_loading_configuration_from_castle

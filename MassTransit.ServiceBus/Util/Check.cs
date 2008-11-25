@@ -11,7 +11,7 @@
 /// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 /// specific language governing permissions and limitations under the License.
 
-namespace MassTransit.ServiceBus.Util
+namespace MassTransit.Util
 {
     using System;
     using System.Diagnostics;

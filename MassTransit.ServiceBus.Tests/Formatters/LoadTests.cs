@@ -3,10 +3,10 @@ namespace MassTransit.Tests.Formatters
     using System;
     using System.IO;
     using System.Text;
+    using MassTransit.Formatters;
     using NUnit.Framework;
     using Rhino.Mocks;
-    using ServiceBus.Formatters;
-    using ServiceBus.Tests.Messages;
+    using Tests.Messages;
 
     [TestFixture]
     public class LoadTests :

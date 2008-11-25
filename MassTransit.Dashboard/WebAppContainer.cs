@@ -18,8 +18,8 @@ namespace MassTransit.Dashboard
     using Castle.MonoRail.WindsorExtension;
     using Castle.Windsor;
     using Castle.Windsor.Configuration.Interpreters;
-    using ServiceBus.Services.MessageDeferral;
-    using ServiceBus.Services.Timeout;
+    using Services.MessageDeferral;
+    using Services.Timeout;
     using WindsorIntegration;
 
     public class WebAppContainer :

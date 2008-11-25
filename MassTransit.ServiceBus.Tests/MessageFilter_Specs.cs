@@ -2,11 +2,11 @@ namespace MassTransit.Tests
 {
     using System;
     using System.Threading;
+    using MassTransit.Internal;
     using NUnit.Framework;
     using NUnit.Framework.SyntaxHelpers;
-    using ServiceBus;
-    using ServiceBus.Internal;
-    using ServiceBus.Transports;
+    
+    using Transports;
 
     [TestFixture]
     public class When_a_message_filter_is_subscribed_to_the_service_bus :

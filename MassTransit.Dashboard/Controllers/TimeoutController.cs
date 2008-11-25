@@ -1,7 +1,7 @@
 namespace MassTransit.Dashboard.Controllers
 {
     using Castle.MonoRail.Framework;
-    using ServiceBus.Services.Timeout;
+    using Services.Timeout;
 
     [Layout("default")]
     public class TimeoutController :

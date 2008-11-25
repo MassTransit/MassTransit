@@ -1,10 +1,10 @@
 namespace MassTransit.Tests
 {
+    using MassTransit.Internal;
     using NUnit.Framework;
     using Rhino.Mocks;
-    using ServiceBus;
-    using ServiceBus.Internal;
-    using ServiceBus.Tests.Messages;
+    
+    using Tests.Messages;
 
     [TestFixture]
     public class MessageContext_Should_Help :

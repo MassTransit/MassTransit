@@ -17,7 +17,7 @@ namespace MassTransit.Infrastructure.Tests
     using Enyim.Caching;
     using NUnit.Framework;
     using NUnit.Framework.SyntaxHelpers;
-    using ServiceBus.Subscriptions;
+    using Subscriptions;
 
     [TestFixture]
     public class Given_a_message_name_that_has_three_subscriptions

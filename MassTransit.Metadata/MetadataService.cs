@@ -1,7 +1,7 @@
 namespace MassTransit.Metadata
 {
     using Messages;
-    using ServiceBus;
+    
 
     public class MetadataService :
         Consumes<MetadataMessage>.All

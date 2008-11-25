@@ -1,4 +1,4 @@
-namespace MassTransit.ServiceBus.Serialization
+namespace MassTransit.Serialization
 {
     using System;
     using System.IO;
