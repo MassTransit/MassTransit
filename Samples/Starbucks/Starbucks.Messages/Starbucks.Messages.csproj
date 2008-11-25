@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.30729</ProductVersion>
+    <ProductVersion>9.0.21022</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{D9486A62-4F12-4018-802B-517DD11DE66A}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -31,10 +31,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="MassTransit.ServiceBus, Version=0.4.0.1322, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\lib\MassTransit.ServiceBus.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
@@ -56,6 +52,12 @@
     <Compile Include="PaymentType.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SubmitPaymentMessage.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\MassTransit.ServiceBus\MassTransit.csproj">
+      <Project>{6EFD69FC-CBCC-4F85-AEE0-EFBA73F4D273}</Project>
+      <Name>MassTransit</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

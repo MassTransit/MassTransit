@@ -1,9 +1,10 @@
 ﻿using System;
-using MassTransit.ServiceBus;
-using MassTransit.ServiceBus.Util;
 
 namespace Starbucks.Messages
 {
+    using MassTransit;
+    using MassTransit.Util;
+
     [Serializable]
     public class NewOrderMessage : CorrelatedBy<Guid>
     {

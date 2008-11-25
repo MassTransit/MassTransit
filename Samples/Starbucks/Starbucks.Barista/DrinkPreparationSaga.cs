@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Threading;
 using MassTransit.Saga;
-using MassTransit.ServiceBus;
-using Microsoft.Practices.ServiceLocation;
 using Starbucks.Messages;
 
 namespace Starbucks.Barista
 {
+    using MassTransit;
+
     public class DrinkPreparationSaga
         : InitiatedBy<NewOrderMessage>,
           Orchestrates<PaymentCompleteMessage>, ISaga

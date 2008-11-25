@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Windows.Forms;
-using MassTransit.ServiceBus;
 using Microsoft.Practices.ServiceLocation;
 using Starbucks.Messages;
 
 namespace Starbucks.Customer
 {
+    using MassTransit;
+
     public partial class OrderDrinkForm : Form,
                                           Consumes<PaymentDueMessage>.For<string>,
                                           Consumes<DrinkReadyMessage>.For<string>
