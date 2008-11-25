@@ -6,11 +6,10 @@ namespace OpenAllNight
 	using Castle.Core;
 	using Castle.Windsor;
 	using log4net.Config;
-	using MassTransit.ServiceBus;
-	using MassTransit.ServiceBus.Internal;
-	using MassTransit.ServiceBus.Subscriptions.Messages;
+	using MassTransit;
+	using MassTransit.Internal;
+	using MassTransit.Subscriptions.Messages;
 	using MassTransit.WindsorIntegration;
-	using Microsoft.Practices.ServiceLocation;
 
     internal class Program
 	{

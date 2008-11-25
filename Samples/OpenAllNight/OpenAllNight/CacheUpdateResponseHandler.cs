@@ -1,9 +1,8 @@
 namespace OpenAllNight
 {
-    using System;
     using log4net;
-    using MassTransit.ServiceBus;
-    using MassTransit.ServiceBus.Subscriptions.Messages;
+    using MassTransit;
+    using MassTransit.Subscriptions.Messages;
 
     public class CacheUpdateResponseHandler : 
         Consumes<CacheUpdateResponse>.All
