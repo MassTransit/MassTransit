@@ -1,12 +1,12 @@
-namespace MassTransit.ServiceBus.Tests.Formatters
+namespace MassTransit.Tests.Formatters
 {
     using System;
     using System.IO;
     using System.Text;
-    using MassTransit.ServiceBus.Formatters;
-    using Messages;
     using NUnit.Framework;
     using Rhino.Mocks;
+    using ServiceBus.Formatters;
+    using ServiceBus.Tests.Messages;
 
     [TestFixture]
     public class LoadTests :

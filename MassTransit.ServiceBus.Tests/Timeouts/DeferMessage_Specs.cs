@@ -10,18 +10,18 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.ServiceBus.Tests.Timeouts
+namespace MassTransit.Tests.Timeouts
 {
     using System;
     using System.Diagnostics;
     using System.Threading;
     using Castle.Core;
-    using Messages;
     using NUnit.Framework;
-    using Services.MessageDeferral;
-    using Services.MessageDeferral.Messages;
-    using Services.Timeout;
-    using Util;
+    using ServiceBus.Services.MessageDeferral;
+    using ServiceBus.Services.MessageDeferral.Messages;
+    using ServiceBus.Services.Timeout;
+    using ServiceBus.Tests.Messages;
+    using ServiceBus.Util;
 
     [TestFixture]
     public class When_a_message_is_deferred :
@@ -43,8 +43,8 @@ namespace MassTransit.ServiceBus.Tests.Timeouts
 
             _timeoutRepository = Container.Resolve<ITimeoutRepository>();
 
-			Container.AddComponent<ScheduleTimeoutConsumer>();
-			Container.AddComponent<CancelTimeoutConsumer>();
+            Container.AddComponent<ScheduleTimeoutConsumer>();
+            Container.AddComponent<CancelTimeoutConsumer>();
 
             _timeoutService = new TimeoutService(LocalBus, _timeoutRepository);
             _timeoutService.Start();
@@ -54,8 +54,8 @@ namespace MassTransit.ServiceBus.Tests.Timeouts
 
             _repository = Container.Resolve<IDeferredMessageRepository>();
 
-			Container.AddComponent<DeferMessageConsumer>();
-			Container.AddComponent<TimeoutExpiredConsumer>();
+            Container.AddComponent<DeferMessageConsumer>();
+            Container.AddComponent<TimeoutExpiredConsumer>();
 
             _deferService = new MessageDeferralService(LocalBus);
             _deferService.Start();

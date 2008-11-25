@@ -1,8 +1,8 @@
 namespace MassTransit.Host.Tests
 {
+    using MassTransit.Tests;
     using NUnit.Framework;
     using Rhino.Mocks;
-    using ServiceBus.Tests;
 
     [TestFixture]
     public class CommandLine_specs :

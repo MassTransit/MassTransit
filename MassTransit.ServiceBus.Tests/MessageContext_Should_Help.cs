@@ -1,9 +1,10 @@
-namespace MassTransit.ServiceBus.Tests
+namespace MassTransit.Tests
 {
-    using MassTransit.ServiceBus.Internal;
-    using Messages;
     using NUnit.Framework;
     using Rhino.Mocks;
+    using ServiceBus;
+    using ServiceBus.Internal;
+    using ServiceBus.Tests.Messages;
 
     [TestFixture]
     public class MessageContext_Should_Help :
@@ -11,7 +12,7 @@ namespace MassTransit.ServiceBus.Tests
     {
         private IServiceBus mockBus;
         private IEndpoint mockBusEndpoint;
-    	private IEndpoint mockEndpoint;
+        private IEndpoint mockEndpoint;
 
         private PingMessage requestMessage = new PingMessage();
         private PongMessage replyMessage = new PongMessage();

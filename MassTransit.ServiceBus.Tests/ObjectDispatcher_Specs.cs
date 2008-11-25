@@ -10,15 +10,16 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.ServiceBus.Tests
+namespace MassTransit.Tests
 {
     using System;
     using System.Collections;
-    using MassTransit.ServiceBus.Internal;
-    using MassTransit.ServiceBus.Subscriptions;
     using NUnit.Framework;
     using NUnit.Framework.SyntaxHelpers;
     using Rhino.Mocks;
+    using ServiceBus;
+    using ServiceBus.Internal;
+    using ServiceBus.Subscriptions;
 
     [TestFixture]
     public class When_a_type_is_registered_with_the_dispatcher :

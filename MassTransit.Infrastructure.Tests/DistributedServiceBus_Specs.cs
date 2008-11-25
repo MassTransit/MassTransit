@@ -14,10 +14,10 @@ namespace MassTransit.Infrastructure.Tests
 {
     using System;
     using System.Threading;
+    using MassTransit.Tests;
     using NUnit.Framework;
     using NUnit.Framework.SyntaxHelpers;
     using ServiceBus;
-    using ServiceBus.Tests;
 
     [TestFixture]
     public class When_multiple_service_bus_instances_share_a_distributed_subscription_cache :

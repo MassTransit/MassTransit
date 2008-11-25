@@ -10,38 +10,38 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.ServiceBus.Tests
+namespace MassTransit.Tests
 {
-	using System;
-	using Messages;
-	using NUnit.Framework;
-	using TestConsumers;
+    using System;
+    using NUnit.Framework;
+    using ServiceBus.Tests.Messages;
+    using ServiceBus.Tests.TestConsumers;
 
     [TestFixture]
-	public class When_a_request_message_is_published :
-		LocalAndRemoteTestContext
-	{
-		private static readonly TimeSpan _timeout = TimeSpan.FromSeconds(3);
+    public class When_a_request_message_is_published :
+        LocalAndRemoteTestContext
+    {
+        private static readonly TimeSpan _timeout = TimeSpan.FromSeconds(3);
 
-		[Test]
-		public void A_reply_should_be_received_by_the_requestor()
-		{
-			// Arrange
-			Container.AddComponent<TestReplyService<PingMessage, Guid, PongMessage>>();
-			RemoteBus.Subscribe<TestReplyService<PingMessage, Guid, PongMessage>>();
+        [Test]
+        public void A_reply_should_be_received_by_the_requestor()
+        {
+            // Arrange
+            Container.AddComponent<TestReplyService<PingMessage, Guid, PongMessage>>();
+            RemoteBus.Subscribe<TestReplyService<PingMessage, Guid, PongMessage>>();
 
-			PingMessage message = new PingMessage();
+            PingMessage message = new PingMessage();
 
-			TestCorrelatedConsumer<PongMessage, Guid> consumer = new TestCorrelatedConsumer<PongMessage, Guid>(message.CorrelationId);
-			LocalBus.Subscribe(consumer);
+            TestCorrelatedConsumer<PongMessage, Guid> consumer = new TestCorrelatedConsumer<PongMessage, Guid>(message.CorrelationId);
+            LocalBus.Subscribe(consumer);
 
-			// Act
-			LocalBus.Publish(message);
+            // Act
+            LocalBus.Publish(message);
 
-			// Assert
-			TestConsumerBase<PingMessage>.AnyShouldHaveReceivedMessage(message, _timeout);
+            // Assert
+            TestConsumerBase<PingMessage>.AnyShouldHaveReceivedMessage(message, _timeout);
 
-			consumer.ShouldHaveReceivedMessage(new PongMessage(message.CorrelationId), _timeout);
-		}
-	}
+            consumer.ShouldHaveReceivedMessage(new PongMessage(message.CorrelationId), _timeout);
+        }
+    }
 }

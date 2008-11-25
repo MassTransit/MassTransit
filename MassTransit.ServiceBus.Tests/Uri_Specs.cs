@@ -1,33 +1,33 @@
-namespace MassTransit.ServiceBus.Tests
+namespace MassTransit.Tests
 {
-	using System;
-	using NUnit.Framework;
-	using NUnit.Framework.SyntaxHelpers;
+    using System;
+    using NUnit.Framework;
+    using NUnit.Framework.SyntaxHelpers;
 
-	[TestFixture]
-	public class What_does_the_uri_do :
+    [TestFixture]
+    public class What_does_the_uri_do :
         Specification
-	{
-		[Test, ExpectedException(typeof (UriFormatException))]
-		public void An_address_in_an_invalid_format_should_throw_an_exception()
-		{
-			string address = @".\private$\bogus";
+    {
+        [Test, ExpectedException(typeof (UriFormatException))]
+        public void An_address_in_an_invalid_format_should_throw_an_exception()
+        {
+            string address = @".\private$\bogus";
 
-			new Uri(address);
-		}
+            new Uri(address);
+        }
 
-		[Test]
-		public void The_address_should_be_entered_in_a_URI_style_format()
-		{
-			string address = "local://localhost/test_endpoint";
+        [Test]
+        public void The_address_should_be_entered_in_a_URI_style_format()
+        {
+            string address = "local://localhost/test_endpoint";
 
-			Uri endpointUri = new Uri(address);
+            Uri endpointUri = new Uri(address);
 
-			Assert.That(endpointUri.Scheme, Is.EqualTo("local"));
+            Assert.That(endpointUri.Scheme, Is.EqualTo("local"));
 
-			Assert.That(endpointUri.Host, Is.EqualTo("localhost"));
+            Assert.That(endpointUri.Host, Is.EqualTo("localhost"));
 
-			Assert.That(endpointUri.AbsolutePath, Is.EqualTo("/test_endpoint"));
-		}
-	}
+            Assert.That(endpointUri.AbsolutePath, Is.EqualTo("/test_endpoint"));
+        }
+    }
 }

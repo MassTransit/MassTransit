@@ -1,8 +1,8 @@
-namespace MassTransit.ServiceBus.Tests.Internal
+namespace MassTransit.Tests.Internal
 {
     using System;
-    using MassTransit.ServiceBus.Internal;
     using NUnit.Framework;
+    using ServiceBus.Internal;
 
     public class IdempotentList_Specs :
         Specification

@@ -1,13 +1,14 @@
-namespace MassTransit.ServiceBus.Tests.HealthMonitoring
+namespace MassTransit.Tests.HealthMonitoring
 {
     using System;
     using System.Threading;
-    using MassTransit.ServiceBus.Internal;
     using NUnit.Framework;
     using Rhino.Mocks;
     using Rhino.Mocks.Constraints;
-    using Services.HealthMonitoring;
-    using Services.HealthMonitoring.Messages;
+    using ServiceBus;
+    using ServiceBus.Internal;
+    using ServiceBus.Services.HealthMonitoring;
+    using ServiceBus.Services.HealthMonitoring.Messages;
 
     [TestFixture]
     public class When_a_suspect_is_received :
@@ -16,7 +17,7 @@ namespace MassTransit.ServiceBus.Tests.HealthMonitoring
         IHealthCache _mockCache;
         private IEndpoint _mockEndpoint;
         private IEndpointResolver _mockResolver;
-            Investigator _investigator;
+        Investigator _investigator;
 
         private HealthInformation information;
 
@@ -27,7 +28,7 @@ namespace MassTransit.ServiceBus.Tests.HealthMonitoring
             _mockResolver = StrictMock<IEndpointResolver>();
             SetupResult.For(_mockResolver.Resolve(null)).Return(_mockEndpoint).IgnoreArguments();
 
-        	information = new HealthInformation(RemoteBus.Endpoint.Uri, 3);
+            information = new HealthInformation(RemoteBus.Endpoint.Uri, 3);
             _investigator = new Investigator(LocalBus, _mockResolver, _mockCache);
         }
         protected override void After_each()
@@ -48,9 +49,9 @@ namespace MassTransit.ServiceBus.Tests.HealthMonitoring
                                 {
                                     _mockEndpoint.Send(new Ping(_investigator.CorrelationId), new TimeSpan(0, 3, 0));
                                 }).Constraints(Is.Matching<Ping>(delegate(Ping msg)
-                                {
-                                    return msg.CorrelationId.Equals(_investigator.CorrelationId);
-                                }), Is.Anything());
+                                                                     {
+                                                                         return msg.CorrelationId.Equals(_investigator.CorrelationId);
+                                                                     }), Is.Anything());
             }
             using(Playback)
             {
@@ -68,9 +69,9 @@ namespace MassTransit.ServiceBus.Tests.HealthMonitoring
                                 {
                                     _mockEndpoint.Send(new Ping(_investigator.CorrelationId), new TimeSpan(0, 3, 0));
                                 }).Constraints(Is.Matching<Ping>(delegate(Ping msg)
-                                {
-                                    return msg.CorrelationId.Equals(_investigator.CorrelationId);
-                                }), Is.Anything());
+                                                                     {
+                                                                         return msg.CorrelationId.Equals(_investigator.CorrelationId);
+                                                                     }), Is.Anything());
             }
             using (Playback)
             {

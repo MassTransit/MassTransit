@@ -1,12 +1,13 @@
-namespace MassTransit.ServiceBus.Tests.Formatters
+namespace MassTransit.Tests.Formatters
 {
     using System.IO;
     using System.Text;
-    using MassTransit.ServiceBus.Formatters;
-    using Messages;
     using NUnit.Framework;
     using NUnit.Framework.SyntaxHelpers;
     using Rhino.Mocks;
+    using ServiceBus.Formatters;
+    using ServiceBus.Tests;
+    using ServiceBus.Tests.Messages;
 
     public class XmlBodyFormatterTests :
         Specification
@@ -18,7 +19,7 @@ namespace MassTransit.ServiceBus.Tests.Formatters
             @"{""WrappedJson"":""{}"",""Types"":[""MassTransit.ServiceBus.Tests.PingMessage, MassTransit.ServiceBus.Tests""]}";
 
         private readonly string _serializedMessagesWithValue =
-             @"{""WrappedJson"":""{\""Name\"":\""test\""}"",""Types"":[""MassTransit.ServiceBus.Tests.ClientMessage, MassTransit.ServiceBus.Tests""]}";
+            @"{""WrappedJson"":""{\""Name\"":\""test\""}"",""Types"":[""MassTransit.ServiceBus.Tests.ClientMessage, MassTransit.ServiceBus.Tests""]}";
 
         protected override void Before_each()
         {
