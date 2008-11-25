@@ -7,8 +7,8 @@
     <ProjectGuid>{76646B96-936B-4D31-A053-35CD630E3C68}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>MassTransit.ServiceBus.Tests</RootNamespace>
-    <AssemblyName>MassTransit.ServiceBus.Tests</AssemblyName>
+    <RootNamespace>MassTransit.Tests</RootNamespace>
+    <AssemblyName>MassTransit.Tests</AssemblyName>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
     <OldToolsVersion>2.0</OldToolsVersion>
@@ -199,9 +199,9 @@
       <Project>{98D5A59C-96FA-4A1B-A653-EA5A35C45FC9}</Project>
       <Name>MassTransit.WindsorIntegration</Name>
     </ProjectReference>
-    <ProjectReference Include="..\MassTransit.ServiceBus\MassTransit.ServiceBus.csproj">
+    <ProjectReference Include="..\MassTransit.ServiceBus\MassTransit.csproj">
       <Project>{90482397-6282-465E-8B86-39865FC30127}</Project>
-      <Name>MassTransit.ServiceBus</Name>
+      <Name>MassTransit</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

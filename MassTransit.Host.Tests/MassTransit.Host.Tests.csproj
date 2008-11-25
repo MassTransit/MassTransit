@@ -66,13 +66,13 @@
       <Project>{834ED79F-BA0E-48F9-831A-789576EE516B}</Project>
       <Name>MassTransit.Host</Name>
     </ProjectReference>
-    <ProjectReference Include="..\MassTransit.ServiceBus.Tests\MassTransit.ServiceBus.Tests.csproj">
+    <ProjectReference Include="..\MassTransit.ServiceBus.Tests\MassTransit.Tests.csproj">
       <Project>{76646B96-936B-4D31-A053-35CD630E3C68}</Project>
-      <Name>MassTransit.ServiceBus.Tests</Name>
+      <Name>MassTransit.Tests</Name>
     </ProjectReference>
-    <ProjectReference Include="..\MassTransit.ServiceBus\MassTransit.ServiceBus.csproj">
+    <ProjectReference Include="..\MassTransit.ServiceBus\MassTransit.csproj">
       <Project>{90482397-6282-465E-8B86-39865FC30127}</Project>
-      <Name>MassTransit.ServiceBus</Name>
+      <Name>MassTransit</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
