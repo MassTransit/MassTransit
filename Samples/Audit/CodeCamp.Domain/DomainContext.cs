@@ -1,7 +1,7 @@
 namespace CodeCamp.Domain
 {
     using Magnum.Common.ObjectExtensions;
-    using MassTransit.ServiceBus;
+    using MassTransit;
     using Microsoft.Practices.ServiceLocation;
 
     public static class DomainContext

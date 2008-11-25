@@ -1,7 +1,7 @@
 namespace CodeCamp.Service
 {
     using System;
-    using MassTransit.ServiceBus;
+    using MassTransit;
     using Messages;
 
     public class Responder :

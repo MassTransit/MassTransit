@@ -16,10 +16,10 @@ namespace SubscriptionManagerGUI
     using System.Collections.Generic;
     using System.ComponentModel;
     using System.Windows.Forms;
-    using MassTransit.ServiceBus;
-    using MassTransit.ServiceBus.Services.HealthMonitoring;
-    using MassTransit.ServiceBus.Services.Timeout;
-    using MassTransit.ServiceBus.Subscriptions;
+    using MassTransit;
+    using MassTransit.Services.HealthMonitoring;
+    using MassTransit.Services.Timeout;
+    using MassTransit.Subscriptions;
 
     public partial class SubscriptionManagerForm : Form
     {

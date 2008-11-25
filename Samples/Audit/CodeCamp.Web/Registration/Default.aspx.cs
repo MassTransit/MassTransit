@@ -4,7 +4,7 @@
     using System.Web.UI;
     using Domain;
     using Magnum.Common;
-    using MassTransit.ServiceBus.Util;
+    using MassTransit.Util;
     using Masters;
     using Messages;
 
