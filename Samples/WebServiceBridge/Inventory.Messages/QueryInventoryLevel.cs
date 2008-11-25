@@ -1,8 +1,8 @@
 namespace Inventory.Messages
 {
     using System;
-    using MassTransit.ServiceBus;
-    using MassTransit.ServiceBus.Util;
+    using MassTransit;
+    using MassTransit.Util;
 
     [Serializable]
     public class QueryInventoryLevel :
