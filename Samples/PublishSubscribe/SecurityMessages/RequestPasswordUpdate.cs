@@ -1,7 +1,7 @@
 namespace SecurityMessages
 {
     using System;
-    using MassTransit.ServiceBus;
+    using MassTransit;
 
 	[Serializable]
     public class RequestPasswordUpdate : CorrelatedBy<Guid>

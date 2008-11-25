@@ -1,8 +1,8 @@
 namespace Client
 {
     using System;
+    using MassTransit;
     using MassTransit.Host.LifeCycles;
-    using MassTransit.ServiceBus;
     using Microsoft.Practices.ServiceLocation;
     using SecurityMessages;
 

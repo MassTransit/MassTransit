@@ -1,7 +1,7 @@
 namespace Server
 {
 	using log4net;
-	using MassTransit.ServiceBus;
+	using MassTransit;
 	using SecurityMessages;
 
 	public class PasswordUpdateService :
