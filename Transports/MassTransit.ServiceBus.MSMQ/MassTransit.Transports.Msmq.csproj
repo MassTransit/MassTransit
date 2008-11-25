@@ -7,13 +7,14 @@
     <ProjectGuid>{6F90867C-E092-4EDC-B3DE-600D39DF0335}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>MassTransit.ServiceBus.MSMQ</RootNamespace>
-    <AssemblyName>MassTransit.ServiceBus.MSMQ</AssemblyName>
+    <RootNamespace>MassTransit.Transports.Msmq</RootNamespace>
+    <AssemblyName>MassTransit.Transports.Msmq</AssemblyName>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
     <OldToolsVersion>2.0</OldToolsVersion>
     <UpgradeBackupLocation>
     </UpgradeBackupLocation>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -32,7 +33,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <NoWarn>1591,1587</NoWarn>
-    <DocumentationFile>..\..\bin\MassTransit.ServiceBus.MSMQ.XML</DocumentationFile>
+    <DocumentationFile>..\..\bin\MassTransit.Transports.Msmq.xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="log4net, Version=1.2.10.0, Culture=neutral, PublicKeyToken=1b44e1d426115821, processorArchitecture=MSIL">
@@ -44,6 +45,9 @@
       <HintPath>..\..\libs\Microsoft.Practices.ServiceLocation.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Core">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
     <Reference Include="System.Data" />
     <Reference Include="System.Messaging" />
     <Reference Include="System.Transactions" />
