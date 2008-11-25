@@ -3,9 +3,9 @@ namespace WebRequestReply.UI
 	using System;
 	using System.Web.UI;
 	using Core;
-	using MassTransit.ServiceBus;
+	using MassTransit;
 
-	public partial class _Default :
+    public partial class _Default :
 		Page, IRequestReplyView
 	{
 		private readonly RequestReplyController _controller;

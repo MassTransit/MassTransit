@@ -3,7 +3,7 @@ namespace WebRequestReply.UI.MonoRail
     using System.Web;
     using Castle.Windsor;
     using Core;
-    using MassTransit.ServiceBus;
+    using MassTransit;
 
     public class DashboardApplication :
         HttpApplication, IContainerAccessor

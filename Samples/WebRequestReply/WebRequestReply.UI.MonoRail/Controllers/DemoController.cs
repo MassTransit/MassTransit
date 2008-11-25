@@ -3,7 +3,7 @@ namespace WebRequestReply.UI.MonoRail.Controllers
 	using System;
 	using Castle.MonoRail.Framework;
 	using Core;
-	using MassTransit.ServiceBus;
+	using MassTransit;
 
 	public class DemoController :
 		SmartDispatcherController,

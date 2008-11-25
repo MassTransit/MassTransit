@@ -1,6 +1,6 @@
 namespace WebRequestReply.Core
 {
-	using MassTransit.ServiceBus;
+    using MassTransit;
 	using MassTransit.WindsorIntegration;
 
 	public class Container :

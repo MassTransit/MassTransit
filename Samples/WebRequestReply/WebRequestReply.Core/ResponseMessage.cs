@@ -1,10 +1,11 @@
 namespace WebRequestReply.Core
 {
 	using System;
-	using MassTransit.ServiceBus;
+	using MassTransit;
 
 	[Serializable]
-	public class ResponseMessage : CorrelatedBy<Guid>
+	public class ResponseMessage :
+        CorrelatedBy<Guid>
 	{
 		private readonly Guid _id;
 		private readonly string _text;
