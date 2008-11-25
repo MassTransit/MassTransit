@@ -2,14 +2,13 @@
 {
     using System;
     using System.ComponentModel;
-    using System.Net;
     using System.Web.Services;
     using Inventory.Messages;
     using Magnum.Common;
     using Magnum.Common.DateTimeExtensions;
-    using MassTransit.ServiceBus;
-    using MassTransit.ServiceBus.Services.Timeout.Messages;
-    using MassTransit.ServiceBus.Util;
+    using MassTransit;
+    using MassTransit.Services.Timeout.Messages;
+    using MassTransit.Util;
 
     /// <summary>
     /// Summary description for InventoryService

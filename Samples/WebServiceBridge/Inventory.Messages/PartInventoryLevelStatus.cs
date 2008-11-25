@@ -1,7 +1,7 @@
 namespace Inventory.Messages
 {
     using System;
-    using MassTransit.ServiceBus;
+    using MassTransit;
 
     [Serializable]
     public class PartInventoryLevelStatus :

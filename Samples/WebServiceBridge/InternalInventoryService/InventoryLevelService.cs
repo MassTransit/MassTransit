@@ -2,7 +2,7 @@ namespace InternalInventoryService
 {
     using System;
     using Inventory.Messages;
-    using MassTransit.ServiceBus;
+    using MassTransit;
 
     public class InventoryLevelService :
         Consumes<QueryInventoryLevel>.All

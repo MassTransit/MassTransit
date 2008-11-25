@@ -1,8 +1,8 @@
 namespace InternalInventoryService
 {
+    using MassTransit;
     using MassTransit.Host.Actions;
     using MassTransit.Host.LifeCycles;
-    using MassTransit.ServiceBus;
     using Microsoft.Practices.ServiceLocation;
 
     public class InternalInventoryServiceLifeCycle :
