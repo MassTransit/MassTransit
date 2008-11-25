@@ -1,10 +1,12 @@
 using System;
-using MassTransit.ServiceBus;
 
 namespace Starbucks.Messages
 {
+    using MassTransit;
+
     [Serializable]
-    public class DrinkReadyMessage : CorrelatedBy<string>
+    public class DrinkReadyMessage :
+        CorrelatedBy<string>
     {
         public DrinkReadyMessage(string name, string drink)
         {

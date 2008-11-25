@@ -1,10 +1,12 @@
 using System;
-using MassTransit.ServiceBus;
 
 namespace Starbucks.Messages
 {
+    using MassTransit;
+
     [Serializable]
-    public class PaymentDueMessage : CorrelatedBy<string>
+    public class PaymentDueMessage :
+        CorrelatedBy<string>
     {
         public PaymentDueMessage(Guid starbucksTransactionId, string name, decimal amount)
         {

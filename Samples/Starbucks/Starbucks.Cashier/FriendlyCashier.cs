@@ -1,11 +1,12 @@
 using System;
 using System.Threading;
-using MassTransit.ServiceBus;
 using Microsoft.Practices.ServiceLocation;
 using Starbucks.Messages;
 
 namespace Starbucks.Cashier
 {
+    using MassTransit;
+
     public class FriendlyCashier 
         :Consumes<NewOrderMessage>.All,
         Consumes<SubmitPaymentMessage>.All

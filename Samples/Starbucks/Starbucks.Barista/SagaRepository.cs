@@ -4,7 +4,8 @@ using MassTransit.Saga;
 
 namespace Starbucks.Barista
 {
-    public class DrinkPreparationSagaRepository : ISagaRepository<DrinkPreparationSaga>
+    public class DrinkPreparationSagaRepository : 
+        ISagaRepository<DrinkPreparationSaga>
     {
         //this could go in a database
         private IDictionary<Guid, DrinkPreparationSaga> _sagas = new Dictionary<Guid, DrinkPreparationSaga>();        

@@ -1,9 +1,10 @@
 using MassTransit.Host.LifeCycles;
-using MassTransit.ServiceBus;
 using Microsoft.Practices.ServiceLocation;
 
 namespace Starbucks.Barista
 {
+    using MassTransit;
+
     public class BaristaLifecycle : HostedLifecycle
     {
         public BaristaLifecycle(IServiceLocator serviceLocator)

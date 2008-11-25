@@ -1,10 +1,12 @@
 using System;
-using MassTransit.ServiceBus;
 
 namespace Starbucks.Messages
 {
+    using MassTransit;
+
     [Serializable]
-    public class SubmitPaymentMessage : CorrelatedBy<Guid>
+    public class SubmitPaymentMessage : 
+        CorrelatedBy<Guid>
     {
         public Guid CorrelationId { get; private set; }
         public PaymentType PaymentType { get; private set; }
