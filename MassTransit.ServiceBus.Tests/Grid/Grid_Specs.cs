@@ -10,16 +10,17 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.ServiceBus.Tests.Grid
+namespace MassTransit.Tests.Grid
 {
     using System;
     using System.Collections.Generic;
     using System.Text;
     using System.Threading;
     using MassTransit.Grid;
-    using MassTransit.ServiceBus.Internal;
     using NUnit.Framework;
     using NUnit.Framework.SyntaxHelpers;
+    using ServiceBus.Internal;
+    using ServiceBus.Tests.Grid;
 
     [TestFixture]
     public class As_a_developer_that_needs_to_distribute_a_task_across_multiple_servers_for_parallel_processing :
@@ -56,7 +57,7 @@ namespace MassTransit.ServiceBus.Tests.Grid
             LocalBus.Subscribe<SubTaskWorker<FactorLongNumberWorker, FactorLongNumber, LongNumberFactored>>();
 
             var distributedTaskController =
-				new DistributedTaskController<FactorLongNumbersTask, FactorLongNumber, LongNumberFactored>(LocalBus, Container.Resolve<IEndpointResolver>(), _factorLongNumbers);
+                new DistributedTaskController<FactorLongNumbersTask, FactorLongNumber, LongNumberFactored>(LocalBus, Container.Resolve<IEndpointResolver>(), _factorLongNumbers);
 
             distributedTaskController.Start();
 

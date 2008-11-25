@@ -1,177 +1,178 @@
-namespace MassTransit.ServiceBus.Tests
+namespace MassTransit.Tests
 {
-	using System;
-	using System.Threading;
-	using MassTransit.ServiceBus.Internal;
-	using MassTransit.ServiceBus.Subscriptions;
-	using NUnit.Framework;
-	using Transports;
+    using System;
+    using System.Threading;
+    using NUnit.Framework;
+    using ServiceBus;
+    using ServiceBus.Internal;
+    using ServiceBus.Subscriptions;
+    using ServiceBus.Transports;
 
-	[TestFixture]
-	public class When_a_message_fault_occurs :
-		Specification
-	{
-		[Test]
-		public void I_should_receive_a_fault_message()
-		{
-			SmartConsumer sc = new SmartConsumer();
+    [TestFixture]
+    public class When_a_message_fault_occurs :
+        Specification
+    {
+        [Test]
+        public void I_should_receive_a_fault_message()
+        {
+            SmartConsumer sc = new SmartConsumer();
 
-			_bus.Subscribe<Hello>(delegate { throw new AccessViolationException("Crap!"); });
+            _bus.Subscribe<Hello>(delegate { throw new AccessViolationException("Crap!"); });
 
-			_bus.Subscribe(sc);
+            _bus.Subscribe(sc);
 
-			_bus.Publish(new Hello());
+            _bus.Publish(new Hello());
 
-			Assert.IsTrue(sc.GotFault.WaitOne(TimeSpan.FromSeconds(5), true));
-		}
+            Assert.IsTrue(sc.GotFault.WaitOne(TimeSpan.FromSeconds(5), true));
+        }
 
-		private LocalSubscriptionCache _cache;
-	    private IEndpointResolver _resolver;
-	    private IEndpoint _endpoint;
-	    private IServiceBus _bus;
-		private IObjectBuilder _builder;
+        private LocalSubscriptionCache _cache;
+        private IEndpointResolver _resolver;
+        private IEndpoint _endpoint;
+        private IServiceBus _bus;
+        private IObjectBuilder _builder;
 
-		static When_a_message_fault_occurs()
-		{
-			EndpointResolver.AddTransport(typeof (LoopbackEndpoint));
-		}
+        static When_a_message_fault_occurs()
+        {
+            EndpointResolver.AddTransport(typeof (LoopbackEndpoint));
+        }
 
-		protected override void Before_each()
-		{
-			_cache = new LocalSubscriptionCache();
-		    _resolver = new EndpointResolver();
-		    _endpoint = _resolver.Resolve(new Uri("loopback://localhost/servicebus"));
-			_builder = DynamicMock<IObjectBuilder>();
-			_bus = new ServiceBus(_endpoint, _builder, _cache, _resolver, new TypeInfoCache());
-		}
+        protected override void Before_each()
+        {
+            _cache = new LocalSubscriptionCache();
+            _resolver = new EndpointResolver();
+            _endpoint = _resolver.Resolve(new Uri("loopback://localhost/servicebus"));
+            _builder = DynamicMock<IObjectBuilder>();
+            _bus = new ServiceBus(_endpoint, _builder, _cache, _resolver, new TypeInfoCache());
+        }
 
-		protected override void After_each()
-		{
-			_bus.Dispose();
-			_endpoint.Dispose();
-			_cache.Dispose();
-		}
+        protected override void After_each()
+        {
+            _bus.Dispose();
+            _endpoint.Dispose();
+            _cache.Dispose();
+        }
 
-		public class SmartConsumer :
-			Consumes<Fault<Hello>>.All
-		{
-			private readonly ManualResetEvent _gotFault = new ManualResetEvent(false);
+        public class SmartConsumer :
+            Consumes<Fault<Hello>>.All
+        {
+            private readonly ManualResetEvent _gotFault = new ManualResetEvent(false);
 
-			public ManualResetEvent GotFault
-			{
-				get { return _gotFault; }
-			}
+            public ManualResetEvent GotFault
+            {
+                get { return _gotFault; }
+            }
 
-			public void Consume(Fault<Hello> message)
-			{
-				_gotFault.Set();
-			}
-		}
+            public void Consume(Fault<Hello> message)
+            {
+                _gotFault.Set();
+            }
+        }
 
-		[Serializable]
-		public class Hello
-		{
-		}
+        [Serializable]
+        public class Hello
+        {
+        }
 
-		[Serializable]
-		public class Hi
-		{
-		}
-	}
+        [Serializable]
+        public class Hi
+        {
+        }
+    }
 
-	[TestFixture]
-	public class When_a_correlated_message_fault_is_received :
-		Specification
-	{
-		[Test]
-		public void I_should_receive_a_fault_message()
-		{
-			SmartConsumer sc = new SmartConsumer();
+    [TestFixture]
+    public class When_a_correlated_message_fault_is_received :
+        Specification
+    {
+        [Test]
+        public void I_should_receive_a_fault_message()
+        {
+            SmartConsumer sc = new SmartConsumer();
 
-			_bus.Subscribe<Hello>(delegate { throw new AccessViolationException("Crap!"); });
+            _bus.Subscribe<Hello>(delegate { throw new AccessViolationException("Crap!"); });
 
-			_bus.Subscribe(sc);
+            _bus.Subscribe(sc);
 
-			_bus.Publish(new Hello(sc.CorrelationId));
+            _bus.Publish(new Hello(sc.CorrelationId));
 
-			Assert.IsTrue(sc.GotFault.WaitOne(TimeSpan.FromSeconds(5), true));
-		}
+            Assert.IsTrue(sc.GotFault.WaitOne(TimeSpan.FromSeconds(5), true));
+        }
 
-			private LocalSubscriptionCache _cache;
-	    private IEndpointResolver _resolver;
-	    private IEndpoint _endpoint;
-	    private IServiceBus _bus;
-		private IObjectBuilder _builder;
+        private LocalSubscriptionCache _cache;
+        private IEndpointResolver _resolver;
+        private IEndpoint _endpoint;
+        private IServiceBus _bus;
+        private IObjectBuilder _builder;
 
         static When_a_correlated_message_fault_is_received()
-		{
-			EndpointResolver.AddTransport(typeof (LoopbackEndpoint));
-		}
+        {
+            EndpointResolver.AddTransport(typeof (LoopbackEndpoint));
+        }
 
-		protected override void Before_each()
-		{
-			_cache = new LocalSubscriptionCache();
-		    _resolver = new EndpointResolver();
-		    _endpoint = _resolver.Resolve(new Uri("loopback://localhost/servicebus"));
-			_builder = DynamicMock<IObjectBuilder>();
-			_bus = new ServiceBus(_endpoint, _builder, _cache, _resolver, new TypeInfoCache());
-		}
+        protected override void Before_each()
+        {
+            _cache = new LocalSubscriptionCache();
+            _resolver = new EndpointResolver();
+            _endpoint = _resolver.Resolve(new Uri("loopback://localhost/servicebus"));
+            _builder = DynamicMock<IObjectBuilder>();
+            _bus = new ServiceBus(_endpoint, _builder, _cache, _resolver, new TypeInfoCache());
+        }
 
 
-		protected override void After_each()
-		{
-			_bus.Dispose();
-			_endpoint.Dispose();
-			_cache.Dispose();
-		}
+        protected override void After_each()
+        {
+            _bus.Dispose();
+            _endpoint.Dispose();
+            _cache.Dispose();
+        }
 
-		public class SmartConsumer :
-			Consumes<Fault<Hello, Guid>>.For<Guid>
-		{
-			private readonly ManualResetEvent _gotFault = new ManualResetEvent(false);
-			private readonly Guid _id = Guid.NewGuid();
+        public class SmartConsumer :
+            Consumes<Fault<Hello, Guid>>.For<Guid>
+        {
+            private readonly ManualResetEvent _gotFault = new ManualResetEvent(false);
+            private readonly Guid _id = Guid.NewGuid();
 
-			public ManualResetEvent GotFault
-			{
-				get { return _gotFault; }
-			}
+            public ManualResetEvent GotFault
+            {
+                get { return _gotFault; }
+            }
 
-			public void Consume(Fault<Hello, Guid> message)
-			{
-				_gotFault.Set();
-			}
+            public void Consume(Fault<Hello, Guid> message)
+            {
+                _gotFault.Set();
+            }
 
-			public Guid CorrelationId
-			{
-				get { return _id; }
-			}
-		}
+            public Guid CorrelationId
+            {
+                get { return _id; }
+            }
+        }
 
-		[Serializable]
-		public class Hello : 
+        [Serializable]
+        public class Hello : 
             CorrelatedBy<Guid>
-		{
-			private Guid _id;
+        {
+            private Guid _id;
 
             protected Hello()
             {
             }
 
-		    public Hello(Guid id)
-			{
-				_id = id;
-			}
+            public Hello(Guid id)
+            {
+                _id = id;
+            }
 
-			public Guid CorrelationId
-			{
-				get { return _id; }
+            public Guid CorrelationId
+            {
+                get { return _id; }
                 set { _id = value; }
-			}
-		}
+            }
+        }
 
-		[Serializable]
-		public class Hi
-		{
-		}
-	}
+        [Serializable]
+        public class Hi
+        {
+        }
+    }
 }

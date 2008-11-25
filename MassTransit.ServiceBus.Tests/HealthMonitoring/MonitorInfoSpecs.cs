@@ -1,26 +1,27 @@
-namespace MassTransit.ServiceBus.Tests.HealthMonitoring
+namespace MassTransit.Tests.HealthMonitoring
 {
     using System;
     using System.Threading;
-    using MassTransit.ServiceBus.Internal;
     using NUnit.Framework;
-    using Services.HealthMonitoring;
-    using Services.HealthMonitoring.Messages;
-    using Transports;
+    using ServiceBus;
+    using ServiceBus.Internal;
+    using ServiceBus.Services.HealthMonitoring;
+    using ServiceBus.Services.HealthMonitoring.Messages;
+    using ServiceBus.Transports;
 
-	public class MonitorInfoSpecs :
+    public class MonitorInfoSpecs :
         Specification
     {
         [Test]
         public void MonitorInfoTimer()
         {
-        	ManualResetEvent expired = new ManualResetEvent(false);
+            ManualResetEvent expired = new ManualResetEvent(false);
 
             Uri u = new Uri("msmq://localhost/ddd");
 
-			MonitorInfo m = new MonitorInfo(u, 1, delegate { expired.Set(); });
+            MonitorInfo m = new MonitorInfo(u, 1, delegate { expired.Set(); });
 
-        	Assert.IsTrue(expired.WaitOne(TimeSpan.FromSeconds(2), true));
+            Assert.IsTrue(expired.WaitOne(TimeSpan.FromSeconds(2), true));
         }
 
         [Test]

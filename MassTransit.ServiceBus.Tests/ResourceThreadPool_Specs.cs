@@ -10,12 +10,12 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.ServiceBus.Tests
+namespace MassTransit.Tests
 {
     using System;
     using System.Threading;
     using NUnit.Framework;
-    using Threading;
+    using ServiceBus.Threading;
 
     [TestFixture]
     public class When_accessing_a_constrained_resource

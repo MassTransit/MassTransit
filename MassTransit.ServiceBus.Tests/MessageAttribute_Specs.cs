@@ -10,11 +10,12 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.ServiceBus.Tests
+namespace MassTransit.Tests
 {
     using System;
     using NUnit.Framework;
     using NUnit.Framework.SyntaxHelpers;
+    using ServiceBus;
 
     [TestFixture]
     public class When_a_message_should_expire_after_a_period_of_time

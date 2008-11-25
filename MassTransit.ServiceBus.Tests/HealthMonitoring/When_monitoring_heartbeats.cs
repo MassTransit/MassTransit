@@ -1,12 +1,13 @@
-namespace MassTransit.ServiceBus.Tests.HealthMonitoring
+namespace MassTransit.Tests.HealthMonitoring
 {
     using System;
     using System.Threading;
     using NUnit.Framework;
     using Rhino.Mocks;
     using Rhino.Mocks.Constraints;
-    using Services.HealthMonitoring;
-    using Services.HealthMonitoring.Messages;
+    using ServiceBus;
+    using ServiceBus.Services.HealthMonitoring;
+    using ServiceBus.Services.HealthMonitoring.Messages;
 
     [TestFixture]
     public class When_monitoring_heartbeats :

@@ -1,12 +1,13 @@
-namespace MassTransit.ServiceBus.Tests.Formatters
+namespace MassTransit.Tests.Formatters
 {
     using System.IO;
     using System.Text;
-    using MassTransit.ServiceBus.Formatters;
-    using Messages;
     using NUnit.Framework;
     using NUnit.Framework.SyntaxHelpers;
     using Rhino.Mocks;
+    using ServiceBus.Formatters;
+    using ServiceBus.Tests;
+    using ServiceBus.Tests.Messages;
 
     public class JsonBodyFormatterTests : 
         Specification
@@ -18,9 +19,9 @@ namespace MassTransit.ServiceBus.Tests.Formatters
             @"{""WrappedJson"":""{\""CorrelationId\"":\""d62c9b1c-8e31-4d54-add7-c624d56085a4\""}"",""Types"":[""MassTransit.ServiceBus.Tests.Messages.PingMessage, MassTransit.ServiceBus.Tests""]}";
 
         private readonly string _serializedMessagesWithValue =
-             @"{""WrappedJson"":""{\""Name\"":\""test\""}"",""Types"":[""MassTransit.ServiceBus.Tests.ClientMessage, MassTransit.ServiceBus.Tests""]}";
+            @"{""WrappedJson"":""{\""Name\"":\""test\""}"",""Types"":[""MassTransit.ServiceBus.Tests.ClientMessage, MassTransit.ServiceBus.Tests""]}";
 
-    	protected override void Before_each()
+        protected override void Before_each()
         {
             formatter = new JsonBodyFormatter();
             mockBody = StrictMock<IFormattedBody>();
@@ -32,7 +33,7 @@ namespace MassTransit.ServiceBus.Tests.Formatters
             mockBody = null;
         }
 
-		[Test]
+        [Test]
         public void Serialize()
         {
             PingMessage msg = new PingMessage();
@@ -53,7 +54,7 @@ namespace MassTransit.ServiceBus.Tests.Formatters
 
         }
 
-		[Test]
+        [Test]
         public void Deserialize()
         {
             MemoryStream ms = new MemoryStream(Encoding.UTF8.GetBytes(_serializedMessages));
@@ -71,7 +72,7 @@ namespace MassTransit.ServiceBus.Tests.Formatters
             }
         }
 
-		[Test]
+        [Test]
         public void DeserializeWithGenerics()
         {
             MemoryStream ms = new MemoryStream(Encoding.UTF8.GetBytes(_serializedMessages));

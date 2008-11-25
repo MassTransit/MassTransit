@@ -1,13 +1,14 @@
-namespace MassTransit.ServiceBus.Tests.Subscriptions
+namespace MassTransit.Tests.Subscriptions
 {
     using System;
     using System.Collections.Generic;
-    using MassTransit.ServiceBus.Internal;
-    using MassTransit.ServiceBus.Subscriptions;
-    using MassTransit.ServiceBus.Subscriptions.Messages;
-    using MassTransit.ServiceBus.Subscriptions.ServerHandlers;
     using NUnit.Framework;
     using Rhino.Mocks;
+    using ServiceBus;
+    using ServiceBus.Internal;
+    using ServiceBus.Subscriptions;
+    using ServiceBus.Subscriptions.Messages;
+    using ServiceBus.Subscriptions.ServerHandlers;
 
     [TestFixture]
     public class As_a_CacheUpdateRequestHandler

@@ -13,9 +13,9 @@
 namespace MassTransit.ServiceBus.MSMQ.Tests
 {
     using System;
-    using MassTransit.ServiceBus.Tests;
     using MassTransit.ServiceBus.Tests.Messages;
     using MassTransit.ServiceBus.Tests.TestConsumers;
+    using MassTransit.Tests;
     using NUnit.Framework;
 
     [TestFixture]

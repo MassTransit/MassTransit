@@ -10,122 +10,123 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.ServiceBus.Tests
+namespace MassTransit.Tests
 {
-	using System;
-	using Castle.Windsor;
-	using NUnit.Framework;
-	using Rhino.Mocks;
-	using WindsorIntegration;
+    using System;
+    using Castle.Windsor;
+    using NUnit.Framework;
+    using Rhino.Mocks;
+    using ServiceBus;
+    using WindsorIntegration;
 
-	[TestFixture]
-	public class LocalAndRemoteTestContext
-	{
-		#region Setup/Teardown
+    [TestFixture]
+    public class LocalAndRemoteTestContext
+    {
+        #region Setup/Teardown
 
-		[SetUp]
-		public void Setup()
-		{
-			_mocks = new MockRepository();
+        [SetUp]
+        public void Setup()
+        {
+            _mocks = new MockRepository();
 
-			_container = new DefaultMassTransitContainer(GetCastleConfigurationFile());
+            _container = new DefaultMassTransitContainer(GetCastleConfigurationFile());
 
-			_localBus = _container.Resolve<IServiceBus>("local");
-			_remoteBus = _container.Resolve<IServiceBus>("remote");
+            _localBus = _container.Resolve<IServiceBus>("local");
+            _remoteBus = _container.Resolve<IServiceBus>("remote");
 
-			Before_each();
-		}
+            Before_each();
+        }
 
-		[TearDown]
-		public void Teardown()
-		{
-			After_each();
+        [TearDown]
+        public void Teardown()
+        {
+            After_each();
 
-			_localBus.Dispose();
-			_container.Release(_localBus);
+            _localBus.Dispose();
+            _container.Release(_localBus);
 
-			_remoteBus.Dispose();
-			_container.Release(_remoteBus);
+            _remoteBus.Dispose();
+            _container.Release(_remoteBus);
 
-			_container.Dispose();
+            _container.Dispose();
 
-			_mocks = null;
-		}
+            _mocks = null;
+        }
 
-		#endregion
+        #endregion
 
-		private MockRepository _mocks;
+        private MockRepository _mocks;
 
-		private IWindsorContainer _container;
-		private IServiceBus _localBus;
-		private IServiceBus _remoteBus;
+        private IWindsorContainer _container;
+        private IServiceBus _localBus;
+        private IServiceBus _remoteBus;
 
-		protected virtual void Before_each()
-		{
-		}
+        protected virtual void Before_each()
+        {
+        }
 
-		protected virtual void After_each()
-		{
-		}
+        protected virtual void After_each()
+        {
+        }
 
-		public IServiceBus LocalBus
-		{
-			get { return _localBus; }
-		}
+        public IServiceBus LocalBus
+        {
+            get { return _localBus; }
+        }
 
-		public IServiceBus RemoteBus
-		{
-			get { return _remoteBus; }
-		}
+        public IServiceBus RemoteBus
+        {
+            get { return _remoteBus; }
+        }
 
-		public IWindsorContainer Container
-		{
-			get { return _container; }
-		}
+        public IWindsorContainer Container
+        {
+            get { return _container; }
+        }
 
-		protected T Mock<T>() where T: class
-		{
-			return _mocks.DynamicMock<T>();
-		}
+        protected T Mock<T>() where T: class
+        {
+            return _mocks.DynamicMock<T>();
+        }
 
-		protected T StrictMock<T>()
-		{
-			return _mocks.StrictMock<T>();
-		}
+        protected T StrictMock<T>()
+        {
+            return _mocks.StrictMock<T>();
+        }
 
-		protected T Stub<T>()
-		{
-			return _mocks.Stub<T>();
-		}
+        protected T Stub<T>()
+        {
+            return _mocks.Stub<T>();
+        }
 
-		protected void ReplayAll()
-		{
-			_mocks.ReplayAll();
-		}
+        protected void ReplayAll()
+        {
+            _mocks.ReplayAll();
+        }
 
-		protected void Verify(object o)
-		{
-			_mocks.Verify(o);
-		}
+        protected void Verify(object o)
+        {
+            _mocks.Verify(o);
+        }
 
-		protected void VerifyAll()
-		{
-			_mocks.VerifyAll();
-		}
+        protected void VerifyAll()
+        {
+            _mocks.VerifyAll();
+        }
 
-		protected IDisposable Record
-		{
-			get { return _mocks.Record(); }
-		}
+        protected IDisposable Record
+        {
+            get { return _mocks.Record(); }
+        }
 
-		protected IDisposable Playback
-		{
-			get { return _mocks.Playback(); }
-		}
+        protected IDisposable Playback
+        {
+            get { return _mocks.Playback(); }
+        }
 
-		protected virtual string GetCastleConfigurationFile()
-		{
-			return "loopback.castle.xml";
-		}
-	}
+        protected virtual string GetCastleConfigurationFile()
+        {
+            return "loopback.castle.xml";
+        }
+    }
 }

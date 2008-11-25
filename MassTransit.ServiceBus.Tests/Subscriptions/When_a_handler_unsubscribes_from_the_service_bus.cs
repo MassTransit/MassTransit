@@ -10,16 +10,17 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.ServiceBus.Tests.Subscriptions
+namespace MassTransit.Tests.Subscriptions
 {
     using System;
-    using MassTransit.ServiceBus.Internal;
-    using MassTransit.ServiceBus.Subscriptions;
-    using Messages;
     using NUnit.Framework;
     using NUnit.Framework.SyntaxHelpers;
     using Rhino.Mocks;
-    using Transports;
+    using ServiceBus;
+    using ServiceBus.Internal;
+    using ServiceBus.Subscriptions;
+    using ServiceBus.Tests.Messages;
+    using ServiceBus.Transports;
 
     [TestFixture]
     public class When_a_handler_unsubscribes_from_the_service_bus

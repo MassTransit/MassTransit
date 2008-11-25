@@ -1,12 +1,13 @@
-namespace MassTransit.ServiceBus.Tests.HealthMonitoring
+namespace MassTransit.Tests.HealthMonitoring
 {
     using System;
     using System.Threading;
     using NUnit.Framework;
     using Rhino.Mocks;
     using Rhino.Mocks.Constraints;
-    using Services.HealthMonitoring;
-    using Services.HealthMonitoring.Messages;
+    using ServiceBus;
+    using ServiceBus.Services.HealthMonitoring;
+    using ServiceBus.Services.HealthMonitoring.Messages;
 
     [TestFixture]
     public class When_monitoring_health :
@@ -91,10 +92,10 @@ namespace MassTransit.ServiceBus.Tests.HealthMonitoring
             {
                 Expect.Call(delegate { _mockBus.Publish(new Pong(id, u)); })
                     .Constraints(Is.Matching<Pong>(delegate(Pong msg)
-                                                 {
-                                                     return msg.CorrelationId.Equals(id) &&
-                                                            msg.EndpointUri.Equals(u);
-                                                 }));
+                                                       {
+                                                           return msg.CorrelationId.Equals(id) &&
+                                                                  msg.EndpointUri.Equals(u);
+                                                       }));
             }
             using(Playback())
             {

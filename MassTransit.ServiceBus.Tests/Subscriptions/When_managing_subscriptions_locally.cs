@@ -1,10 +1,11 @@
-namespace MassTransit.ServiceBus.Tests.Subscriptions
+namespace MassTransit.Tests.Subscriptions
 {
     using System;
-    using MassTransit.ServiceBus.Subscriptions;
-    using Messages;
     using NUnit.Framework;
     using NUnit.Framework.SyntaxHelpers;
+    using ServiceBus;
+    using ServiceBus.Subscriptions;
+    using ServiceBus.Tests.Messages;
 
     [TestFixture]
     public class When_managing_subscriptions_locally :
@@ -28,12 +29,12 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
         {
             bool wasFired = false;
             cache.OnAddSubscription += delegate(object sender, SubscriptionEventArgs e)
-                                        {
-                                            wasFired = true;
-                                            Assert.That(e.Subscription.EndpointUri, Is.EqualTo(sendTo));
-                                            Assert.That(e.Subscription.MessageName,
-                                                        Is.EqualTo(typeof(PingMessage).FullName));
-                                        };
+                                           {
+                                               wasFired = true;
+                                               Assert.That(e.Subscription.EndpointUri, Is.EqualTo(sendTo));
+                                               Assert.That(e.Subscription.MessageName,
+                                                           Is.EqualTo(typeof(PingMessage).FullName));
+                                           };
 
             cache.Add(new Subscription(typeof(PingMessage).FullName, sendTo));
 
@@ -47,12 +48,12 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
             bool wasFired = false;
             cache.Add(new Subscription(typeof(PingMessage).FullName, sendTo));
             cache.OnAddSubscription += delegate(object sender, SubscriptionEventArgs e)
-                                        {
-                                            wasFired = true;
-                                            Assert.That(e.Subscription.EndpointUri, Is.EqualTo(sendTo));
-                                            Assert.That(e.Subscription.MessageName,
-                                                        Is.EqualTo(typeof(PingMessage).FullName));
-                                        };
+                                           {
+                                               wasFired = true;
+                                               Assert.That(e.Subscription.EndpointUri, Is.EqualTo(sendTo));
+                                               Assert.That(e.Subscription.MessageName,
+                                                           Is.EqualTo(typeof(PingMessage).FullName));
+                                           };
 
             cache.Add(new Subscription(typeof(PingMessage).FullName, sendTo));
 
@@ -78,12 +79,12 @@ namespace MassTransit.ServiceBus.Tests.Subscriptions
             Assert.That(cache.List().Count, Is.EqualTo(1));
 
             cache.OnRemoveSubscription += delegate(object sender, SubscriptionEventArgs e)
-                                            {
-                                                wasFired = true;
-                                                Assert.That(e.Subscription.EndpointUri, Is.EqualTo(sendTo));
-                                                Assert.That(e.Subscription.MessageName,
-                                                            Is.EqualTo(typeof(PingMessage).FullName));
-                                            };
+                                              {
+                                                  wasFired = true;
+                                                  Assert.That(e.Subscription.EndpointUri, Is.EqualTo(sendTo));
+                                                  Assert.That(e.Subscription.MessageName,
+                                                              Is.EqualTo(typeof(PingMessage).FullName));
+                                              };
             cache.Remove(new Subscription(typeof(PingMessage).FullName, sendTo));
 
             Assert.That(wasFired, Is.True);
