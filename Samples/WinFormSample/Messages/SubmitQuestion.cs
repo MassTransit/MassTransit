@@ -13,7 +13,7 @@
 namespace Messages
 {
     using System;
-    using MassTransit.ServiceBus;
+    using MassTransit;
 
     [Serializable]
     public class SubmitQuestion :

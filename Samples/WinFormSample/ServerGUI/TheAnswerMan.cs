@@ -13,7 +13,7 @@
 namespace ServerGUI
 {
 	using System.Threading;
-	using MassTransit.ServiceBus;
+	using MassTransit;
 	using Messages;
 
 	public class TheAnswerMan :
