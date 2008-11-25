@@ -1,10 +1,11 @@
 namespace SecurityMessages
 {
 	using System;
-	using MassTransit.ServiceBus;
+	using MassTransit;
 
-	[Serializable]
-	public class PasswordUpdateComplete : CorrelatedBy<Guid>
+    [Serializable]
+	public class PasswordUpdateComplete : 
+        CorrelatedBy<Guid>
 	{
 		private readonly Guid _correlationId;
 		private readonly int _errorCode;

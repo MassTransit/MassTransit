@@ -3,10 +3,10 @@ namespace SubMgr
     using Castle.Core;
     using Castle.Windsor;
     using log4net;
+    using MassTransit;
     using MassTransit.Host;
-    using MassTransit.ServiceBus;
-    using MassTransit.ServiceBus.Subscriptions;
-    using MassTransit.ServiceBus.Subscriptions.ServerHandlers;
+    using MassTransit.Subscriptions;
+    using MassTransit.Subscriptions.ServerHandlers;
     using MassTransit.WindsorIntegration;
     using Microsoft.Practices.ServiceLocation;
 

@@ -2,7 +2,7 @@ namespace Client
 {
     using System;
     using log4net;
-    using MassTransit.ServiceBus;
+    using MassTransit;
     using SecurityMessages;
 
     public class AskPasswordQuestion :
