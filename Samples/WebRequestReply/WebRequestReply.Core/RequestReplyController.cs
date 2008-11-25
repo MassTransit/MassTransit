@@ -1,7 +1,7 @@
 namespace WebRequestReply.Core
 {
 	using System;
-	using MassTransit.ServiceBus;
+	using MassTransit;
 
 	public class RequestReplyController :
 		Consumes<ResponseMessage>.For<Guid>,
