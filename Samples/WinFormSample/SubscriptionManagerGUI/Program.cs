@@ -15,13 +15,12 @@ namespace SubscriptionManagerGUI
     using System.Windows.Forms;
     using Castle.Core;
     using log4net;
-	using MassTransit.Host;
-    using MassTransit.Host.Configurations;
-    using MassTransit.ServiceBus;
-    using MassTransit.ServiceBus.Services.HealthMonitoring;
-    using MassTransit.ServiceBus.Services.Timeout;
-    using MassTransit.ServiceBus.Subscriptions;
-    using MassTransit.ServiceBus.Subscriptions.ServerHandlers;
+    using MassTransit;
+    using MassTransit.Host;
+    using MassTransit.Services.HealthMonitoring;
+    using MassTransit.Services.Timeout;
+    using MassTransit.Subscriptions;
+    using MassTransit.Subscriptions.ServerHandlers;
     using MassTransit.WindsorIntegration;
 	using Microsoft.Practices.ServiceLocation;
 

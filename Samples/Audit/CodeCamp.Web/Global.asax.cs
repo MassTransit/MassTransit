@@ -6,7 +6,7 @@ namespace CodeCamp.Web
     using log4net.Config;
     using Magnum.Common.Repository;
     using Magnum.Infrastructure.Repository;
-    using MassTransit.ServiceBus;
+    using MassTransit;
     using MassTransit.WindsorIntegration;
 
     public class Global : HttpApplication

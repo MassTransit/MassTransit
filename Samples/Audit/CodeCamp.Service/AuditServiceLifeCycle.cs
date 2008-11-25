@@ -2,8 +2,8 @@ namespace CodeCamp.Service
 {
     using System;
     using Domain;
+    using MassTransit;
     using MassTransit.Host.LifeCycles;
-    using MassTransit.ServiceBus;
     using Microsoft.Practices.ServiceLocation;
 
     public class AuditServiceLifeCycle :

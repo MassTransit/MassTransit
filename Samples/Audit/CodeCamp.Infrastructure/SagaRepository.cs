@@ -2,8 +2,8 @@ namespace CodeCamp.Infrastructure
 {
     using System;
     using Magnum.Common.Repository;
+    using MassTransit;
     using MassTransit.Saga;
-    using MassTransit.ServiceBus;
 
     public class SagaRepository<T> :
         ISagaRepository<T>

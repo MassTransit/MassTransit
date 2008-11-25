@@ -3,9 +3,9 @@ namespace CodeCamp.Domain
     using System;
     using Magnum.Common.DateTimeExtensions;
     using Magnum.Common.Repository;
+    using MassTransit;
     using MassTransit.Saga;
-    using MassTransit.ServiceBus;
-    using MassTransit.ServiceBus.Services.Timeout.Messages;
+    using MassTransit.Services.Timeout.Messages;
     using Messages;
     using Microsoft.Practices.ServiceLocation;
     using PostalService.Messages;

@@ -2,7 +2,7 @@ namespace SubscriptionManagerGUI
 {
     using System;
     using System.Windows.Forms;
-    using MassTransit.ServiceBus.Util;
+    using MassTransit.Util;
 
     public class TimeoutListViewItem :
         ListViewItem
