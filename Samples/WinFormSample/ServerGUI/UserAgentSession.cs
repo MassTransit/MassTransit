@@ -1,7 +1,7 @@
 namespace ServerGUI
 {
     using log4net;
-    using MassTransit.ServiceBus;
+    using MassTransit;
     using Messages;
 
     public class UserAgentSession : 

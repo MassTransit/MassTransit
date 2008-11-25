@@ -1,8 +1,8 @@
 namespace ClientGUI
 {
     using System.Windows.Forms;
-    using MassTransit.ServiceBus;
-    using MassTransit.ServiceBus.Services.Timeout.Messages;
+    using MassTransit;
+    using MassTransit.Services.Timeout.Messages;
 
     public class TimeoutWatcher :
         Consumes<TimeoutExpired>.All

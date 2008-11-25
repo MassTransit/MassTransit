@@ -17,7 +17,7 @@ namespace ServerGUI
 	using System.Windows.Forms;
 	using Castle.Windsor;
 	using log4net;
-	using MassTransit.ServiceBus;
+	using MassTransit;
 	using MassTransit.WindsorIntegration;
 
 	public partial class ServerForm : Form

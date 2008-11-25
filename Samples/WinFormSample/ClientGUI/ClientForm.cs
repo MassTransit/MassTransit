@@ -18,9 +18,9 @@ namespace ClientGUI
     using System.Windows.Forms;
     using Castle.Windsor;
     using log4net;
-    using MassTransit.ServiceBus;
-    using MassTransit.ServiceBus.Services.Timeout.Messages;
-    using MassTransit.ServiceBus.Util;
+    using MassTransit;
+    using MassTransit.Services.Timeout.Messages;
+    using MassTransit.Util;
     using MassTransit.WindsorIntegration;
     using Messages;
 
