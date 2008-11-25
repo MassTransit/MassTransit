@@ -7,8 +7,8 @@
     <ProjectGuid>{90482397-6282-465E-8B86-39865FC30127}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>MassTransit.ServiceBus</RootNamespace>
-    <AssemblyName>MassTransit.ServiceBus</AssemblyName>
+    <RootNamespace>MassTransit</RootNamespace>
+    <AssemblyName>MassTransit</AssemblyName>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
     <OldToolsVersion>2.0</OldToolsVersion>
@@ -32,7 +32,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DocumentationFile>..\bin\MassTransit.ServiceBus.XML</DocumentationFile>
+    <DocumentationFile>..\bin\MassTransit.xml</DocumentationFile>
     <NoWarn>1587,1591</NoWarn>
   </PropertyGroup>
   <ItemGroup>

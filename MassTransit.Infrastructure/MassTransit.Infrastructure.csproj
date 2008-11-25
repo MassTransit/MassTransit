@@ -99,9 +99,9 @@
     <EmbeddedResource Include="Timeout\ScheduledTimeout.hbm.xml" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\MassTransit.ServiceBus\MassTransit.ServiceBus.csproj">
+    <ProjectReference Include="..\MassTransit.ServiceBus\MassTransit.csproj">
       <Project>{90482397-6282-465E-8B86-39865FC30127}</Project>
-      <Name>MassTransit.ServiceBus</Name>
+      <Name>MassTransit</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

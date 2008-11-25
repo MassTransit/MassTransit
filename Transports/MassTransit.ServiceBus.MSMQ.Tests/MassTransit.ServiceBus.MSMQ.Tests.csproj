@@ -89,17 +89,17 @@
     <Compile Include="When_working_with_Transactions.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\MassTransit.ServiceBus.Tests\MassTransit.ServiceBus.Tests.csproj">
+    <ProjectReference Include="..\..\MassTransit.ServiceBus.Tests\MassTransit.Tests.csproj">
       <Project>{76646B96-936B-4D31-A053-35CD630E3C68}</Project>
-      <Name>MassTransit.ServiceBus.Tests</Name>
+      <Name>MassTransit.Tests</Name>
     </ProjectReference>
     <ProjectReference Include="..\MassTransit.ServiceBus.MSMQ\MassTransit.ServiceBus.MSMQ.csproj">
       <Project>{6F90867C-E092-4EDC-B3DE-600D39DF0335}</Project>
       <Name>MassTransit.ServiceBus.MSMQ</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\MassTransit.ServiceBus\MassTransit.ServiceBus.csproj">
+    <ProjectReference Include="..\..\MassTransit.ServiceBus\MassTransit.csproj">
       <Project>{90482397-6282-465E-8B86-39865FC30127}</Project>
-      <Name>MassTransit.ServiceBus</Name>
+      <Name>MassTransit</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

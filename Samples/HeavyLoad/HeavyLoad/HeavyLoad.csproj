@@ -94,9 +94,9 @@
       <Project>{1DBE5A67-C8C2-4AA9-82EF-1E730273993B}</Project>
       <Name>MassTransit.ServiceBus.NMS</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\MassTransit.ServiceBus\MassTransit.ServiceBus.csproj">
+    <ProjectReference Include="..\..\..\MassTransit.ServiceBus\MassTransit.csproj">
       <Project>{90482397-6282-465E-8B86-39865FC30127}</Project>
-      <Name>MassTransit.ServiceBus</Name>
+      <Name>MassTransit</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\..\Containers\MassTransit.WindsorIntegration\MassTransit.WindsorIntegration.csproj">
       <Project>{98D5A59C-96FA-4A1B-A653-EA5A35C45FC9}</Project>
