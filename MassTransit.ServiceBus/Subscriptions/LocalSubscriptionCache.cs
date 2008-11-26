@@ -239,6 +239,8 @@ namespace MassTransit.Subscriptions
                                          subscription.EndpointUri);
 
                     cache[key].Remove(entry);
+
+                    removed = true;
                 }
 
                 if (cache[key].Count == 0)
@@ -248,7 +250,6 @@ namespace MassTransit.Subscriptions
 
                     cache.Remove(key);
 
-                    removed = true;
                 }
             }
 
