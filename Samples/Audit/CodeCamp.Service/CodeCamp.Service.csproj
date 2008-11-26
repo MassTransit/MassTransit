@@ -115,7 +115,7 @@
       <Project>{90482397-6282-465E-8B86-39865FC30127}</Project>
       <Name>MassTransit.ServiceBus</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\Transports\MassTransit.ServiceBus.MSMQ\MassTransit.ServiceBus.MSMQ.csproj">
+    <ProjectReference Include="..\..\..\Transports\MassTransit.ServiceBus.MSMQ\MassTransit.Transports.Msmq.csproj">
       <Project>{6F90867C-E092-4EDC-B3DE-600D39DF0335}</Project>
       <Name>MassTransit.ServiceBus.MSMQ</Name>
     </ProjectReference>

@@ -7,7 +7,7 @@
 				 endpoint="msmq://localhost/mt_pubsub">
       </bus>
       <transports>
-        <transport>MassTransit.ServiceBus.MSMQ.MsmqEndpoint, MassTransit.ServiceBus.MSMQ</transport>
+        <transport>MassTransit.Transports.Msmq.MsmqEndpoint, MassTransit.Transports.Msmq</transport>
       </transports>
     </facility>
   </facilities>
