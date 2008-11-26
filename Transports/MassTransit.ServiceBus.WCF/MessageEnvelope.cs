@@ -10,23 +10,23 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.WCF
+namespace MassTransit.Transports.Wcf
 {
-	using System;
+    using System;
 
-	[Serializable]
-	public class MessageEnvelope
-	{
-		private readonly byte[] _message;
+    [Serializable]
+    public class MessageEnvelope
+    {
+        private readonly byte[] _message;
 
-		public MessageEnvelope(byte[] message)
-		{
-			_message = message;
-		}
+        public MessageEnvelope(byte[] message)
+        {
+            _message = message;
+        }
 
-		public byte[] Message
-		{
-			get { return _message; }
-		}
-	}
+        public byte[] Message
+        {
+            get { return _message; }
+        }
+    }
 }

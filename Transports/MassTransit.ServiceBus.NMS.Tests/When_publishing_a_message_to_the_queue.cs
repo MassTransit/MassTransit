@@ -1,71 +1,83 @@
-namespace MassTransit.NMS.Tests
+// Copyright 2007-2008 The Apache Software Foundation.
+//  
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
+// this file except in compliance with the License. You may obtain a copy of the 
+// License at 
+// 
+//     http://www.apache.org/licenses/LICENSE-2.0 
+// 
+// Unless required by applicable law or agreed to in writing, software distributed 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// specific language governing permissions and limitations under the License.
+namespace MassTransit.Transports.Nms.Tests
 {
-	using System;
-	using System.Threading;
-	using NUnit.Framework;
-	using NUnit.Framework.SyntaxHelpers;
-	using Subscriptions;
+    using System;
+    using System.Threading;
+    using NUnit.Framework;
+    using NUnit.Framework.SyntaxHelpers;
+    using Subscriptions;
 
-	[TestFixture]
-	public class When_publishing_a_message_to_the_queue
-	{
-		[Test]
-		public void The_Message_Should_Arrive()
-		{
-			ServiceBus bus = new ServiceBus(new NmsEndpoint("activemq://localhost:61616/published_queue"), null);
-			bus.SubscriptionCache.Add(new Subscription(typeof (SimpleMessage).FullName, new Uri("activemq://localhost:61616/subscribed_queue")));
-			bus.Publish(new SimpleMessage("dru"));
-		}
+    [TestFixture]
+    public class When_publishing_a_message_to_the_queue
+    {
+        [Test]
+        public void The_Message_Should_Arrive()
+        {
+            ServiceBus bus = new ServiceBus(new NmsEndpoint("activemq://localhost:61616/published_queue"), null);
+            bus.SubscriptionCache.Add(new Subscription(typeof (SimpleMessage).FullName, new Uri("activemq://localhost:61616/subscribed_queue")));
+            bus.Publish(new SimpleMessage("dru"));
+        }
 
 
-		[Test]
-		public void The_message_should_be_delivered_to_a_local_subscriber()
-		{
-			using(NmsEndpoint endpoint = new NmsEndpoint("activemq://localhost:61616/local_test_queue"))
+        [Test]
+        public void The_message_should_be_delivered_to_a_local_subscriber()
+        {
+            using(NmsEndpoint endpoint = new NmsEndpoint("activemq://localhost:61616/local_test_queue"))
             using (IServiceBus bus = new ServiceBus(endpoint, null))
-			{
-				string name = "Johnson";
-				ManualResetEvent received = new ManualResetEvent(false);
+            {
+                string name = "Johnson";
+                ManualResetEvent received = new ManualResetEvent(false);
 
-				bus.Subscribe<SimpleMessage>(delegate(SimpleMessage message)
-				                             	{
-				                             		Assert.That(message.Name, Is.EqualTo(name));
-				                             		received.Set();
-				                             	});
+                bus.Subscribe<SimpleMessage>(delegate(SimpleMessage message)
+                                                 {
+                                                     Assert.That(message.Name, Is.EqualTo(name));
+                                                     received.Set();
+                                                 });
 
-				bus.Publish(new SimpleMessage(name));
+                bus.Publish(new SimpleMessage(name));
 
-				Assert.That(received.WaitOne(TimeSpan.FromSeconds(5), true), Is.True);
-			}
-		}
+                Assert.That(received.WaitOne(TimeSpan.FromSeconds(5), true), Is.True);
+            }
+        }
 
 
 
-		[Test]
-		public void The_Message_Should_Be_Consumed()
-		{
+        [Test]
+        public void The_Message_Should_Be_Consumed()
+        {
             ServiceBus pub_bus = new ServiceBus(new NmsEndpoint("activemq://localhost:61616/published_queue"), null);
-			ServiceBus sub_bus = new ServiceBus(new NmsEndpoint("activemq://localhost:61616/subscribed_queue"), null);
-			pub_bus.SubscriptionCache.Add(new Subscription(typeof (SimpleMessage).FullName, new Uri("activemq://localhost:61616/subscribed_queue")));
-			sub_bus.SubscriptionCache.Add(new Subscription(typeof (SimpleMessage).FullName, new Uri("activemq://localhost:61616/subscribed_queue")));
+            ServiceBus sub_bus = new ServiceBus(new NmsEndpoint("activemq://localhost:61616/subscribed_queue"), null);
+            pub_bus.SubscriptionCache.Add(new Subscription(typeof (SimpleMessage).FullName, new Uri("activemq://localhost:61616/subscribed_queue")));
+            sub_bus.SubscriptionCache.Add(new Subscription(typeof (SimpleMessage).FullName, new Uri("activemq://localhost:61616/subscribed_queue")));
 
-			ManualResetEvent received = new ManualResetEvent(false);
+            ManualResetEvent received = new ManualResetEvent(false);
 
-			bool wasCalled = false;
-			sub_bus.Subscribe<SimpleMessage>(delegate
-			                                 	{
-			                                 		wasCalled = true;
-			                                 		received.Set();
-			                                 	});
+            bool wasCalled = false;
+            sub_bus.Subscribe<SimpleMessage>(delegate
+                                                 {
+                                                     wasCalled = true;
+                                                     received.Set();
+                                                 });
 
-			pub_bus.Publish(new SimpleMessage("dru"));
+            pub_bus.Publish(new SimpleMessage("dru"));
 
-			Assert.That(received.WaitOne(TimeSpan.FromSeconds(5), true), Is.True);
-			Assert.IsTrue(wasCalled);
-		}
+            Assert.That(received.WaitOne(TimeSpan.FromSeconds(5), true), Is.True);
+            Assert.IsTrue(wasCalled);
+        }
 
 
-		/*
+        /*
 		 * namespace MassTransit.MSMQ.Tests
 {
 	using System;
@@ -211,5 +223,5 @@ namespace MassTransit.NMS.Tests
 		}
 	}
 }*/
-	}
+    }
 }
