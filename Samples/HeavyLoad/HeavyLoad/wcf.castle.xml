@@ -14,7 +14,7 @@
 										maxThreads="20" />
 			</bus>
 			<transports>
-				<transport>MassTransit.ServiceBus.WCF.WcfEndpoint, MassTransit.ServiceBus.WCF</transport>
+				<transport>MassTransit.Transports.Wcf.WcfEndpoint, MassTransit.Transports.Wcf</transport>
 			</transports>
 		</facility>
 	</facilities>
