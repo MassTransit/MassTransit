@@ -42,7 +42,9 @@ namespace MassTransit.Transports.Msmq.Tests
             Assert.That(CrashingService.LegitReceived.WaitOne(TimeSpan.FromSeconds(5), true), Is.True, "No message received");
         }
 
-        internal class CrashingService : Consumes<BogusMessage>.All, Consumes<LegitMessage>.All
+        internal class CrashingService : 
+            Consumes<BogusMessage>.All,
+            Consumes<LegitMessage>.All
         {
             public static ManualResetEvent Received
             {
