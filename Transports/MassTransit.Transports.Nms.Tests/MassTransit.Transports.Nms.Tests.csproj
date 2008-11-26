@@ -64,13 +64,13 @@
     <Compile Include="When_sending_a_message_to_the_queue.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\MassTransit.ServiceBus.NMS\MassTransit.Transports.Nms.csproj">
+    <ProjectReference Include="..\..\MassTransit\MassTransit.csproj">
+      <Project>{6EFD69FC-CBCC-4F85-AEE0-EFBA73F4D273}</Project>
+      <Name>MassTransit</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\MassTransit.Transports.Nms\MassTransit.Transports.Nms.csproj">
       <Project>{1DBE5A67-C8C2-4AA9-82EF-1E730273993B}</Project>
       <Name>MassTransit.Transports.Nms</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\MassTransit.ServiceBus\MassTransit.csproj">
-      <Project>{90482397-6282-465E-8B86-39865FC30127}</Project>
-      <Name>MassTransit</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />

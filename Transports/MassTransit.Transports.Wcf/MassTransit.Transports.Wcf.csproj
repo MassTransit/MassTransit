@@ -60,8 +60,8 @@
     <Compile Include="WcfEndpoint.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\MassTransit.ServiceBus\MassTransit.csproj">
-      <Project>{90482397-6282-465E-8B86-39865FC30127}</Project>
+    <ProjectReference Include="..\..\MassTransit\MassTransit.csproj">
+      <Project>{6EFD69FC-CBCC-4F85-AEE0-EFBA73F4D273}</Project>
       <Name>MassTransit</Name>
     </ProjectReference>
   </ItemGroup>

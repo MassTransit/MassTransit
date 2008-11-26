@@ -86,11 +86,11 @@
     <Compile Include="StopWatch.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\Transports\MassTransit.ServiceBus.MSMQ\MassTransit.Transports.Msmq.csproj">
+    <ProjectReference Include="..\..\..\Transports\MassTransit.Transports.Msmq\MassTransit.Transports.Msmq.csproj">
       <Project>{6F90867C-E092-4EDC-B3DE-600D39DF0335}</Project>
       <Name>MassTransit.Transports.Msmq</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\Transports\MassTransit.ServiceBus.NMS\MassTransit.Transports.Nms.csproj">
+    <ProjectReference Include="..\..\..\Transports\MassTransit.Transports.Nms\MassTransit.Transports.Nms.csproj">
       <Project>{1DBE5A67-C8C2-4AA9-82EF-1E730273993B}</Project>
       <Name>MassTransit.Transports.Nms</Name>
     </ProjectReference>
@@ -102,7 +102,7 @@
       <Project>{98D5A59C-96FA-4A1B-A653-EA5A35C45FC9}</Project>
       <Name>MassTransit.WindsorIntegration</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\Transports\MassTransit.ServiceBus.WCF\MassTransit.Transports.Wcf.csproj">
+    <ProjectReference Include="..\..\..\Transports\MassTransit.Transports.Wcf\MassTransit.Transports.Wcf.csproj">
       <Project>{F4388D44-E814-4B17-98F7-35735CB7449E}</Project>
       <Name>MassTransit.Transports.Wcf</Name>
     </ProjectReference>
