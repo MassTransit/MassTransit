@@ -10,164 +10,164 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.MSMQ.Tests
+namespace MassTransit.Transports.Msmq.Tests
 {
-	using System;
-	using System.Messaging;
-	using System.Transactions;
-	using Magnum.Common.DateTimeExtensions;
-	using NUnit.Framework;
+    using System;
+    using System.Messaging;
+    using System.Transactions;
+    using Magnum.Common.DateTimeExtensions;
+    using NUnit.Framework;
 
-	[TestFixture]
-	public class When_receiving_from_a_transactional_queue
-	{
-		#region Setup/Teardown
+    [TestFixture]
+    public class When_receiving_from_a_transactional_queue
+    {
+        #region Setup/Teardown
 
-		[SetUp]
-		public void Setup()
-		{
-			if (!MessageQueue.Exists(_queueName))
-				MessageQueue.Create(_queueName, true);
+        [SetUp]
+        public void Setup()
+        {
+            if (!MessageQueue.Exists(_queueName))
+                MessageQueue.Create(_queueName, true);
 
-			_queue = new MessageQueue(_queueName, false, true, QueueAccessMode.SendAndReceive);
-			_queue.Purge();
+            _queue = new MessageQueue(_queueName, false, true, QueueAccessMode.SendAndReceive);
+            _queue.Purge();
 
-			_firstMsg = new Message {Label = 0.Days().FromUtcNow().ToString()};
-			_secondMsg = new Message {Label = 1.Days().FromUtcNow().ToString()};
+            _firstMsg = new Message {Label = 0.Days().FromUtcNow().ToString()};
+            _secondMsg = new Message {Label = 1.Days().FromUtcNow().ToString()};
 
-			_queue.Send(_firstMsg, MessageQueueTransactionType.Single);
-			_queue.Send(_secondMsg, MessageQueueTransactionType.Single);
-		}
+            _queue.Send(_firstMsg, MessageQueueTransactionType.Single);
+            _queue.Send(_secondMsg, MessageQueueTransactionType.Single);
+        }
 
-		[TearDown]
-		public void Teardown()
-		{
-			try
-			{
-				_queue.Close();
-			}
-			finally
-			{
-				_queue.Dispose();
-				_queue = null;
-			}
-		}
+        [TearDown]
+        public void Teardown()
+        {
+            try
+            {
+                _queue.Close();
+            }
+            finally
+            {
+                _queue.Dispose();
+                _queue = null;
+            }
+        }
 
-		#endregion
+        #endregion
 
-		private MessageQueue _queue;
-		private Message _firstMsg;
-		private Message _secondMsg;
-		private const string _queueName = @".\private$\test_transactionalqueue";
+        private MessageQueue _queue;
+        private Message _firstMsg;
+        private Message _secondMsg;
+        private const string _queueName = @".\private$\test_transactionalqueue";
 
-		[Test]
-		public void A_transaction_in_progress_should_not_block_the_queue()
-		{
-			try
-			{
-				_queue.WithinTransaction((q, t) =>
-					{
-						Message received = q.Receive(t);
+        [Test]
+        public void A_transaction_in_progress_should_not_block_the_queue()
+        {
+            try
+            {
+                _queue.WithinTransaction((q, t) =>
+                                             {
+                                                 Message received = q.Receive(t);
 
-						Assert.IsNotNull(received);
+                                                 Assert.IsNotNull(received);
 
-						Assert.AreEqual(received.Label, _firstMsg.Label);
+                                                 Assert.AreEqual(received.Label, _firstMsg.Label);
 
-						_queue.WithinTransaction((q2, t2) =>
-							{
-								Message second = q2.Receive(t);
+                                                 _queue.WithinTransaction((q2, t2) =>
+                                                                              {
+                                                                                  Message second = q2.Receive(t);
 
-								Assert.IsNotNull(second);
+                                                                                  Assert.IsNotNull(second);
 
-								Assert.AreEqual(second.Label, _secondMsg.Label);
-							});
+                                                                                  Assert.AreEqual(second.Label, _secondMsg.Label);
+                                                                              });
 
-						throw new AssertionException("Expect this");
-					});
-			}
-			catch
-			{
-			}
+                                                 throw new AssertionException("Expect this");
+                                             });
+            }
+            catch
+            {
+            }
 
-			_queue.WithinTransaction((q, t) =>
-				{
-					Message received = q.Receive(t);
+            _queue.WithinTransaction((q, t) =>
+                                         {
+                                             Message received = q.Receive(t);
 
-					Assert.IsNotNull(received);
+                                             Assert.IsNotNull(received);
 
-					Assert.AreEqual(received.Label, _firstMsg.Label);
-				});
-		}
+                                             Assert.AreEqual(received.Label, _firstMsg.Label);
+                                         });
+        }
 
-		[Test]
-		public void The_enumerator_should_skip_over_messages_that_are_being_processed()
-		{
-			TimeSpan timeout = 10.Seconds();
+        [Test]
+        public void The_enumerator_should_skip_over_messages_that_are_being_processed()
+        {
+            TimeSpan timeout = 10.Seconds();
 
-			using (MessageEnumerator enumerator = _queue.GetMessageEnumerator2())
-			{
-				while (enumerator.MoveNext(timeout))
-				{
-					using (TransactionScope scope = new TransactionScope())
-					{
-						Message received = enumerator.RemoveCurrent(timeout, MessageQueueTransactionType.Automatic);
+            using (MessageEnumerator enumerator = _queue.GetMessageEnumerator2())
+            {
+                while (enumerator.MoveNext(timeout))
+                {
+                    using (TransactionScope scope = new TransactionScope())
+                    {
+                        Message received = enumerator.RemoveCurrent(timeout, MessageQueueTransactionType.Automatic);
 
-						Assert.IsNotNull(received);
+                        Assert.IsNotNull(received);
 
-						Assert.AreEqual(received.Label, _firstMsg.Label);
+                        Assert.AreEqual(received.Label, _firstMsg.Label);
 
-						using (MessageEnumerator enumerator2 = _queue.GetMessageEnumerator2())
-						{
-							while (enumerator2.MoveNext(timeout))
-							{
-								using (TransactionScope scope2 = new TransactionScope(TransactionScopeOption.RequiresNew))
-								{
-									Message received2 = enumerator2.RemoveCurrent(timeout, MessageQueueTransactionType.Automatic);
+                        using (MessageEnumerator enumerator2 = _queue.GetMessageEnumerator2())
+                        {
+                            while (enumerator2.MoveNext(timeout))
+                            {
+                                using (TransactionScope scope2 = new TransactionScope(TransactionScopeOption.RequiresNew))
+                                {
+                                    Message received2 = enumerator2.RemoveCurrent(timeout, MessageQueueTransactionType.Automatic);
 
-									Assert.IsNotNull(received2);
+                                    Assert.IsNotNull(received2);
 
-									Assert.AreEqual(received2.Label, _secondMsg.Label);
+                                    Assert.AreEqual(received2.Label, _secondMsg.Label);
 
-									scope2.Complete();
-								}
-							}
-						}
+                                    scope2.Complete();
+                                }
+                            }
+                        }
 
-						scope.Complete();
-					}
-				}
-			}
-		}
+                        scope.Complete();
+                    }
+                }
+            }
+        }
 
-		[Test]
-		public void What_about_event_driven_consumer()
-		{
-		}
-	}
+        [Test]
+        public void What_about_event_driven_consumer()
+        {
+        }
+    }
 
-	public static class MessageQueueExtensions
-	{
-		public static void WithinTransaction(this MessageQueue queue, Action<MessageQueue, MessageQueueTransactionType> action)
-		{
-			if (queue.Transactional)
-			{
-				MessageQueueTransactionType tt = MessageQueueTransactionType.Automatic;
+    public static class MessageQueueExtensions
+    {
+        public static void WithinTransaction(this MessageQueue queue, Action<MessageQueue, MessageQueueTransactionType> action)
+        {
+            if (queue.Transactional)
+            {
+                MessageQueueTransactionType tt = MessageQueueTransactionType.Automatic;
 
-				TransactionScope transaction = new TransactionScope();
-				try
-				{
-					action(queue, tt);
-					transaction.Complete();
-				}
-				finally
-				{
-					transaction.Dispose();
-				}
-			}
-			else
-			{
-				action(queue, MessageQueueTransactionType.None);
-			}
-		}
-	}
+                TransactionScope transaction = new TransactionScope();
+                try
+                {
+                    action(queue, tt);
+                    transaction.Complete();
+                }
+                finally
+                {
+                    transaction.Dispose();
+                }
+            }
+            else
+            {
+                action(queue, MessageQueueTransactionType.None);
+            }
+        }
+    }
 }

@@ -15,7 +15,7 @@ namespace MassTransit.Transports.Msmq.Tests
     using System.Transactions;
     using Exceptions;
     using Magnum.Common.DateTimeExtensions;
-    using MSMQ.Tests.Messages;
+    using Messages;
     using NUnit.Framework;
     using Rhino.Mocks;
 

@@ -10,12 +10,12 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.MSMQ.Tests
+namespace MassTransit.Transports.Msmq.Tests
 {
     using System;
+    using MassTransit.Tests;
     using MassTransit.Tests.Messages;
     using MassTransit.Tests.TestConsumers;
-    using MassTransit.Tests;
     using NUnit.Framework;
 
     [TestFixture]
@@ -60,10 +60,10 @@ namespace MassTransit.MSMQ.Tests
             var response = new PongMessage(message.CorrelationId);
 
             RemoteBus.Subscribe<PingMessage>(m =>
-                {
-                    RemoteBus.Publish(response);
-                    throw new ApplicationException("Boing!");
-                });
+                                                 {
+                                                     RemoteBus.Publish(response);
+                                                     throw new ApplicationException("Boing!");
+                                                 });
 
             LocalBus.Publish(message);
 
