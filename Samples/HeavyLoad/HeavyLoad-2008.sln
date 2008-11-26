@@ -5,11 +5,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "MassTransit", "MassTransit"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HeavyLoad", "HeavyLoad\HeavyLoad.csproj", "{AA8820CC-5DFE-4867-8C9B-82320C9E4BE2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.ServiceBus", "..\..\MassTransit.ServiceBus\MassTransit.ServiceBus.csproj", "{90482397-6282-465E-8B86-39865FC30127}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit", "..\..\MassTransit.ServiceBus\MassTransit.csproj", "{6EFD69FC-CBCC-4F85-AEE0-EFBA73F4D273}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.ServiceBus.MSMQ", "..\..\Transports\MassTransit.ServiceBus.MSMQ\MassTransit.ServiceBus.MSMQ.csproj", "{6F90867C-E092-4EDC-B3DE-600D39DF0335}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Transports.Msmq", "..\..\Transports\MassTransit.ServiceBus.MSMQ\MassTransit.Transports.Msmq.csproj", "{6F90867C-E092-4EDC-B3DE-600D39DF0335}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.ServiceBus.NMS", "..\..\Transports\MassTransit.ServiceBus.NMS\MassTransit.ServiceBus.NMS.csproj", "{1DBE5A67-C8C2-4AA9-82EF-1E730273993B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Transports.Nms", "..\..\Transports\MassTransit.ServiceBus.NMS\MassTransit.Transports.Nms.csproj", "{1DBE5A67-C8C2-4AA9-82EF-1E730273993B}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.WindsorIntegration", "..\..\Containers\MassTransit.WindsorIntegration\MassTransit.WindsorIntegration.csproj", "{98D5A59C-96FA-4A1B-A653-EA5A35C45FC9}"
 EndProject
@@ -23,10 +23,10 @@ Global
 		{AA8820CC-5DFE-4867-8C9B-82320C9E4BE2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AA8820CC-5DFE-4867-8C9B-82320C9E4BE2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AA8820CC-5DFE-4867-8C9B-82320C9E4BE2}.Release|Any CPU.Build.0 = Release|Any CPU
-		{90482397-6282-465E-8B86-39865FC30127}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{90482397-6282-465E-8B86-39865FC30127}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{90482397-6282-465E-8B86-39865FC30127}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{90482397-6282-465E-8B86-39865FC30127}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6EFD69FC-CBCC-4F85-AEE0-EFBA73F4D273}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6EFD69FC-CBCC-4F85-AEE0-EFBA73F4D273}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6EFD69FC-CBCC-4F85-AEE0-EFBA73F4D273}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6EFD69FC-CBCC-4F85-AEE0-EFBA73F4D273}.Release|Any CPU.Build.0 = Release|Any CPU
 		{6F90867C-E092-4EDC-B3DE-600D39DF0335}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{6F90867C-E092-4EDC-B3DE-600D39DF0335}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6F90867C-E092-4EDC-B3DE-600D39DF0335}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -44,7 +44,7 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{90482397-6282-465E-8B86-39865FC30127} = {825EF0A3-C810-42FB-9D73-24BAE6DF0571}
+		{6EFD69FC-CBCC-4F85-AEE0-EFBA73F4D273} = {825EF0A3-C810-42FB-9D73-24BAE6DF0571}
 		{6F90867C-E092-4EDC-B3DE-600D39DF0335} = {825EF0A3-C810-42FB-9D73-24BAE6DF0571}
 		{1DBE5A67-C8C2-4AA9-82EF-1E730273993B} = {825EF0A3-C810-42FB-9D73-24BAE6DF0571}
 		{98D5A59C-96FA-4A1B-A653-EA5A35C45FC9} = {825EF0A3-C810-42FB-9D73-24BAE6DF0571}
