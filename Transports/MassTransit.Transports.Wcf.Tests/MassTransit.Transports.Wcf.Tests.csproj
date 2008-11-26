@@ -81,15 +81,15 @@
       <Project>{98D5A59C-96FA-4A1B-A653-EA5A35C45FC9}</Project>
       <Name>MassTransit.WindsorIntegration</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\MassTransit.ServiceBus.Tests\MassTransit.Tests.csproj">
+    <ProjectReference Include="..\..\MassTransit.Tests\MassTransit.Tests.csproj">
       <Project>{76646B96-936B-4D31-A053-35CD630E3C68}</Project>
       <Name>MassTransit.Tests</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\MassTransit.ServiceBus\MassTransit.csproj">
-      <Project>{90482397-6282-465E-8B86-39865FC30127}</Project>
+    <ProjectReference Include="..\..\MassTransit\MassTransit.csproj">
+      <Project>{6EFD69FC-CBCC-4F85-AEE0-EFBA73F4D273}</Project>
       <Name>MassTransit</Name>
     </ProjectReference>
-    <ProjectReference Include="..\MassTransit.ServiceBus.WCF\MassTransit.Transports.Wcf.csproj">
+    <ProjectReference Include="..\MassTransit.Transports.Wcf\MassTransit.Transports.Wcf.csproj">
       <Project>{F4388D44-E814-4B17-98F7-35735CB7449E}</Project>
       <Name>MassTransit.Transports.Wcf</Name>
     </ProjectReference>

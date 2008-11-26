@@ -140,7 +140,7 @@
     <Compile Include="WebAppContainer.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Transports\MassTransit.ServiceBus.MSMQ\MassTransit.Transports.Msmq.csproj">
+    <ProjectReference Include="..\Transports\MassTransit.Transports.Msmq\MassTransit.Transports.Msmq.csproj">
       <Project>{6F90867C-E092-4EDC-B3DE-600D39DF0335}</Project>
       <Name>MassTransit.Transports.Msmq</Name>
     </ProjectReference>
