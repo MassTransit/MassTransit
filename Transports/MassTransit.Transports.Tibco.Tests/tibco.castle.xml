@@ -10,7 +10,7 @@
 					 endpoint="tibco://localhost:7222/mt_server">
 			</bus>
 			<transports>
-				<transport>MassTransit.ServiceBus.Tibco.TibcoEndpoint, MassTransit.ServiceBus.Tibco</transport>
+				<transport>MassTransit.Transports.Tibco.TibcoEndpoint, MassTransit.Transports.Tibco</transport>
 			</transports>
 		</facility>
 	</facilities>

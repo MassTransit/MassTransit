@@ -10,12 +10,12 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.ServiceBus.Tibco.Tests
+namespace MassTransit.Transports.Tibco.Tests
 {
 	using System;
-	using MassTransit.ServiceBus.Tests;
-	using MassTransit.ServiceBus.Tests.Messages;
-	using MassTransit.ServiceBus.Tests.TestConsumers;
+	using MassTransit.Tests;
+	using MassTransit.Tests.Messages;
+	using MassTransit.Tests.TestConsumers;
 	using NUnit.Framework;
 
 	[TestFixture]
