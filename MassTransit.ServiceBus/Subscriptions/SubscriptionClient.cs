@@ -120,7 +120,8 @@ namespace MassTransit.Subscriptions
 			_cache.OnAddSubscription -= Cache_OnAddSubscription;
 			_cache.OnRemoveSubscription -= Cache_OnRemoveSubscription;
 
-			RemoveLocalCacheFromServer();
+            //This drops all subscriptions.
+			//RemoveLocalCacheFromServer();
 		}
 
 		private bool IsOwnedSubscription(Subscription subscription)
