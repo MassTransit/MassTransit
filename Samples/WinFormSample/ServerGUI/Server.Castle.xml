@@ -3,8 +3,8 @@
 
   <components>
 		<component id="subscriptioncache.shared"
-							 service="MassTransit.ServiceBus.Subscriptions.ISubscriptionCache, MassTransit.ServiceBus"
-							 type="MassTransit.ServiceBus.Subscriptions.LocalSubscriptionCache, MassTransit.ServiceBus"/>
+							 service="MassTransit.Subscriptions.ISubscriptionCache, MassTransit"
+							 type="MassTransit.Subscriptions.LocalSubscriptionCache, MassTransit"/>
 
   </components>
   <facilities>
@@ -22,7 +22,7 @@
 				</subscriptionService>
 			</bus>
 			<transports>
-        <transport>MassTransit.ServiceBus.MSMQ.MsmqEndpoint, MassTransit.ServiceBus.MSMQ</transport>
+        <transport>MassTransit.Transports.Msmq.MsmqEndpoint, MassTransit.Transports.Msmq</transport>
       </transports>
     </facility>
   </facilities>
