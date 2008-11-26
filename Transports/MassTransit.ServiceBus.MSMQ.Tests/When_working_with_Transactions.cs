@@ -14,7 +14,7 @@ namespace MassTransit.Transports.Msmq.Tests
 {
     using System.Transactions;
     using Exceptions;
-    using MSMQ.Tests.Messages;
+    using Messages;
     using NUnit.Framework;
 
     [Explicit]
