@@ -6,7 +6,7 @@
 		<!-- use the startable facitlity -->
 		<component id="mySimpleServer"
 				   lifestyle="singleton"
-				   service="MassTransit.ServiceBus.IHostedService, MassTransit.ServiceBus"
+				   service="MassTransit.IHostedService, MassTransit"
 				   type="Server.PasswordUpdateService, Server">
 		</component>
 	</components>
@@ -20,7 +20,7 @@
 			</bus>
 
 			<transports>
-				<transport>MassTransit.ServiceBus.MSMQ.MsmqEndpoint, MassTransit.ServiceBus.MSMQ</transport>
+				<transport>MassTransit.Transports.Msmq.MsmqEndpoint, MassTransit.Transports.Msmq</transport>
 			</transports>
 		</facility>
 
