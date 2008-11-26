@@ -9,9 +9,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Transports", "Transports", 
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Dashboard", "Dashboard", "{E9473F6A-4266-4610-ADE8-0D0AC39143DD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit", "MassTransit.ServiceBus\MassTransit.csproj", "{6EFD69FC-CBCC-4F85-AEE0-EFBA73F4D273}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit", "MassTransit\MassTransit.csproj", "{6EFD69FC-CBCC-4F85-AEE0-EFBA73F4D273}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Tests", "MassTransit.ServiceBus.Tests\MassTransit.Tests.csproj", "{76646B96-936B-4D31-A053-35CD630E3C68}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Tests", "MassTransit.Tests\MassTransit.Tests.csproj", "{76646B96-936B-4D31-A053-35CD630E3C68}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Host.Tests", "MassTransit.Host.Tests\MassTransit.Host.Tests.csproj", "{34EAECFD-D49F-465F-A4E3-DD12374A6BE8}"
 EndProject
