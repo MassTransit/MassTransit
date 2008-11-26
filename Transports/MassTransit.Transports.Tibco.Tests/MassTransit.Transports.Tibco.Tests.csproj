@@ -8,8 +8,8 @@
     <ProjectGuid>{3DA78B54-57EC-40F2-8002-2DB4CEB0AC91}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>MassTransit.ServiceBus.Tibco.Tests</RootNamespace>
-    <AssemblyName>MassTransit.ServiceBus.Tibco.Tests</AssemblyName>
+    <RootNamespace>MassTransit.Transports.Tibco.Tests</RootNamespace>
+    <AssemblyName>MassTransit.Transports.Tibco.Tests</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
