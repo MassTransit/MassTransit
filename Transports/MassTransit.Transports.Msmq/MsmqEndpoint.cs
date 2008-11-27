@@ -74,7 +74,7 @@ namespace MassTransit.Transports.Msmq
                 _isLocal = string.Compare(_uri.Host, localhost, true) == 0;
             }
 
-            _queuePath = string.Format(@"FormatName:DIRECT=OS:{0}\private$\{1}", localhost, _uri.AbsolutePath.Substring(1));
+            _queuePath = string.Format(@"FormatName:DIRECT=OS:{0}\private$\{1}", hostName, _uri.AbsolutePath.Substring(1));
 
             _queue = Open(QueueAccessMode.SendAndReceive);
 
