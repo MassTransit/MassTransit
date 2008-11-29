@@ -159,8 +159,9 @@ namespace MassTransit.WindsorIntegration
         {
             if (threadConfig != null)
             {
-                bus.MinThreadCount = GetConfigurationValue(threadConfig, "minThreads", 1);
-                bus.MaxThreadCount = GetConfigurationValue(threadConfig, "maxThreads", 10);
+                bus.MinThreadCount = GetConfigurationValue(threadConfig, "minThreads", bus.MinThreadCount);
+                bus.MaxThreadCount = GetConfigurationValue(threadConfig, "maxThreads", bus.MaxThreadCount);
+                bus.ReadThreadCount = GetConfigurationValue(threadConfig, "readThreads", bus.ReadThreadCount);
             }
         }
         private void ResolveManagementClient(IConfiguration child, IServiceBus bus, string id)

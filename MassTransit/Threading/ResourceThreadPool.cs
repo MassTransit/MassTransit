@@ -36,6 +36,7 @@ namespace MassTransit.Threading
         private int _maxThreads;
         private int _minThreads;
     	private bool _disposed;
+    	private int _resourceLimit;
 
     	public ResourceThreadPool(TResource resource, Function<TResource, TElement> function, Action<TElement> action)
             : this(resource, function, action, 1, 1, 10)
@@ -60,8 +61,7 @@ namespace MassTransit.Threading
             _resourceGovernor = new Semaphore(resourceLimit, resourceLimit);
             _minThreads = minThreads;
             _maxThreads = maxThreads;
-
-            AdjustQueueCount();
+        	_resourceLimit = resourceLimit;
         }
 
         public int MaxThreads
@@ -82,7 +82,7 @@ namespace MassTransit.Threading
             get { return _minThreads; }
             set
             {
-                Check.Ensure(value >= 0, "The minimum thread count must be greater than zero");
+                Check.Ensure(value > 0, "The minimum thread count must be greater than zero");
                 Check.Ensure(_maxThreads >= value, "The maximum thread count must be at least equal to the minimum thread count");
 
                 _minThreads = value;
@@ -94,8 +94,20 @@ namespace MassTransit.Threading
             [DebuggerStepThrough]
             get { lock (_threads) return _threads.Count; }
         }
-		
-		public void Dispose()
+
+    	public int ResourceLimit
+    	{
+			[DebuggerStepThrough]
+			get { return _resourceLimit; }
+    		set
+    		{
+    			Check.Ensure(value > 0, "The resource limit must be greather than zero");
+				Check.Ensure(_maxThreads >= value, "The resource limit must be less than or equal to the number of threads");
+    			_resourceLimit = value;
+    		}
+    	}
+
+    	public void Dispose()
 		{
 			Dispose(true);
 			GC.SuppressFinalize(this);
@@ -170,45 +182,53 @@ namespace MassTransit.Threading
             int result;
             while ((result = WaitHandle.WaitAny(handles, TimeSpan.FromSeconds(5), true)) != 0)
             {
-                if (result == WaitHandle.WaitTimeout)
-                {
-                    lock (_threads)
-                    {
-                        if (CurrentThreadCount > MinThreads)
-                        {
-                            _threads.Remove(Thread.CurrentThread);
-                            break;
-                        }
-                    }
+            	if (result == WaitHandle.WaitTimeout)
+            	{
+            		lock (_threads)
+            		{
+            			if (CurrentThreadCount > MinThreads)
+            			{
+            				_threads.Remove(Thread.CurrentThread);
+            				break;
+            			}
+            		}
 
-                    continue;
-                }
+            		continue;
+            	}
 
-                try
-                {
-					using (TransactionScope scope = new TransactionScope())
-					{
-						TElement element;
-						try
-						{
-							AdjustQueueCount();
+            	bool released = false;
 
-							element = _function(_resource);
-						}
-						finally
-						{
-							_resourceGovernor.Release(1);
-						}
+            	try
+            	{
+            		using (TransactionScope scope = new TransactionScope())
+            		{
+            			TElement element;
+            			try
+            			{
+            				AdjustQueueCount();
 
-						_action(element);
+            				element = _function(_resource);
+            			}
+            			finally
+            			{
+            				_resourceGovernor.Release(1);
+            				released = true;
+            			}
 
-						scope.Complete();
-					}
-                }
-                catch (Exception ex)
-                {
-                    _log.Error("An exception occurred processing an item of type: " + typeof (TResource).FullName, ex);
-                }
+            			_action(element);
+
+            			scope.Complete();
+            		}
+            	}
+            	catch (Exception ex)
+            	{
+            		_log.Error("An exception occurred processing an item of type: " + typeof (TResource).FullName, ex);
+            	}
+            	finally
+            	{
+            		if (!released)
+            			_resourceGovernor.Release(1);
+            	}
             }
 
             AdjustQueueCount();
@@ -216,5 +236,10 @@ namespace MassTransit.Threading
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("ExitingThread {0}", threadId);
         }
+
+    	public void WakeUp()
+    	{
+			AdjustQueueCount();
+		}
     }
 }
