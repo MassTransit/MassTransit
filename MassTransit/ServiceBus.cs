@@ -41,6 +41,7 @@ namespace MassTransit
 		private IEndpoint _poisonEndpoint = new PoisonEndpointDecorator(new NullEndpoint());
 		private ISubscriptionCache _subscriptionCache;
 		private ITypeInfoCache _typeInfoCache;
+		private int _readThreadCount;
 
 		static ServiceBus()
 		{
@@ -92,7 +93,7 @@ namespace MassTransit
 			_asyncDispatcher = new ResourceThreadPool<IEndpoint, object>(endpointToListenOn,
 			                                                             EndpointReader,
 			                                                             EndpointDispatcher,
-			                                                             Environment.ProcessorCount*2,
+			                                                             1,
 			                                                             1,
 			                                                             Environment.ProcessorCount*8);
 		}
@@ -112,6 +113,12 @@ namespace MassTransit
 		{
 			get { return _asyncDispatcher.MaxThreads; }
 			set { _asyncDispatcher.MaxThreads = value; }
+		}
+
+		public int ReadThreadCount
+		{
+			get { return _asyncDispatcher.ResourceLimit; }
+			set { _asyncDispatcher.ResourceLimit = value; }
 		}
 
 		public static IServiceBus Null
@@ -184,6 +191,8 @@ namespace MassTransit
 		public void Subscribe<T>(Action<T> callback) where T : class
 		{
 			Subscribe(callback, null);
+
+			_asyncDispatcher.WakeUp();
 		}
 
 		/// <summary>
@@ -195,12 +204,16 @@ namespace MassTransit
 		public void Subscribe<T>(Action<T> callback, Predicate<T> condition) where T : class
 		{
 			Subscribe(new GenericComponent<T>(callback, condition, this));
+
+			_asyncDispatcher.WakeUp();
 		}
 
 		public void Subscribe<T>(T consumer) where T : class
 		{
 			ISubscriptionTypeInfo info = _typeInfoCache.GetSubscriptionTypeInfo<T>();
 			info.Subscribe(_dispatcherContext, consumer);
+		
+			_asyncDispatcher.WakeUp();
 		}
 
 		public void Unsubscribe<T>(Action<T> callback) where T : class
@@ -223,13 +236,17 @@ namespace MassTransit
 		{
 			ISubscriptionTypeInfo info = _typeInfoCache.GetSubscriptionTypeInfo<TComponent>();
 			info.AddComponent(_dispatcherContext);
+
+			_asyncDispatcher.WakeUp();
 		}
 
         public void Subscribe(Type consumerType)
         {
             ISubscriptionTypeInfo info = _typeInfoCache.GetSubscriptionTypeInfo(consumerType);
             info.AddComponent(_dispatcherContext);
-        }
+		
+			_asyncDispatcher.WakeUp();
+		}
 
 	    public void Unsubscribe(Type consumerType)
 	    {
