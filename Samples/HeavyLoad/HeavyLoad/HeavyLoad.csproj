@@ -75,6 +75,7 @@
     <Compile Include="Correlated\SimpleResponseMessage.cs" />
     <Compile Include="GeneralMessage.cs" />
     <Compile Include="HeavyLoadContainer.cs" />
+    <Compile Include="Load\ActiveMQLoadTest.cs" />
     <Compile Include="Load\ContainerLoadTest.cs" />
     <Compile Include="Load\LocalLoadTest.cs" />
     <Compile Include="Load\LoopbackLoadTest.cs" />
@@ -114,6 +115,9 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="activemq.castle.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="castle.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
