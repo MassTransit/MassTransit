@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<configuration>
+  <facilities>
+    <facility id="masstransit">
+
+      <bus id="local"
+					 endpoint="activemq://localhost:61616/mt_client">
+      </bus>
+      <bus id="remote"
+					 endpoint="activemq://localhost:61616/mt_server">
+      </bus>
+      <transports>
+        <transport>MassTransit.Transports.Nms.NmsEndpoint, MassTransit.Transports.Nms</transport>
+      </transports>
+    </facility>
+  </facilities>
+</configuration>

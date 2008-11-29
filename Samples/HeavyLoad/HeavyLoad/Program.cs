@@ -16,24 +16,37 @@ namespace HeavyLoad
 
 			Console.WriteLine("HeavyLoad - MassTransit Load Generator");
 
-			RunLocalMsmqLoadTest();
+		//	RunLocalMsmqLoadTest();
 
 			RunContainerLoadTest();
 
-			RunTransactionLoadTest();
+		//	RunTransactionLoadTest();
 
-			RunLoopbackLoadTest();
+		//	RunLoopbackLoadTest();
 
 		//	RunWcfLoadTest();
 
-			RunCorrelatedMessageTest();
+		//	RunCorrelatedMessageTest();
 
-			RunBatchLoadTest();
+		//	RunBatchLoadTest();
 
-			//RunLocalActiveMqLoadTest();
+			RunLocalActiveMqLoadTest();
 
 			Console.WriteLine("End of line.");
 			Console.ReadLine();
+		}
+
+		private static void RunLocalActiveMqLoadTest()
+		{
+			StopWatch stopWatch = new StopWatch();
+
+			using (ActiveMQLoadTest test = new ActiveMQLoadTest())
+			{
+				test.Run(stopWatch);
+			}
+
+			Console.WriteLine("ActiveMQ Load Test: ");
+			Console.WriteLine(stopWatch.ToString());
 		}
 
 		private static void RunBatchLoadTest()
