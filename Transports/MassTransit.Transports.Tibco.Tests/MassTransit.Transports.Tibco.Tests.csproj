@@ -17,7 +17,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
+    <OutputPath>..\..\tests\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -63,23 +63,23 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\MassTransit.ServiceBus.Tests\MassTransit.ServiceBus.Tests.csproj">
-      <Project>{76646B96-936B-4D31-A053-35CD630E3C68}</Project>
-      <Name>MassTransit.ServiceBus.Tests</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\MassTransit.ServiceBus\MassTransit.ServiceBus.csproj">
-      <Project>{90482397-6282-465E-8B86-39865FC30127}</Project>
-      <Name>MassTransit.ServiceBus</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\MassTransit.ServiceBus.Tibco\MassTransit.ServiceBus.Tibco.csproj">
-      <Project>{52B5CD23-BDA8-4020-B5A4-21F877A9FBAE}</Project>
-      <Name>MassTransit.ServiceBus.Tibco</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <Content Include="tibco.castle.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\MassTransit.Tests\MassTransit.Tests.csproj">
+      <Project>{76646B96-936B-4D31-A053-35CD630E3C68}</Project>
+      <Name>MassTransit.Tests</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\MassTransit\MassTransit.csproj">
+      <Project>{6EFD69FC-CBCC-4F85-AEE0-EFBA73F4D273}</Project>
+      <Name>MassTransit</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\MassTransit.Transports.Tibco\MassTransit.Transports.Tibco.csproj">
+      <Project>{52B5CD23-BDA8-4020-B5A4-21F877A9FBAE}</Project>
+      <Name>MassTransit.Transports.Tibco</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
