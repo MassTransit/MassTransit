@@ -20,22 +20,15 @@ namespace MassTransit.Transports.Nms.Tests
 	using NUnit.Framework;
 
 	[TestFixture]
-	public class PublishMessageBase : 
+	public class When_publishing_a_message :
 		LocalAndRemoteTestContext
 	{
-		private readonly TimeSpan _timeout = 10.Seconds();
-
-		[Test]
-		public void It_should_be_received_by_one_subscribed_consumer()
+		protected override string GetCastleConfigurationFile()
 		{
-			var consumer = new TestMessageConsumer<PingMessage>();
-			RemoteBus.Subscribe(consumer);
-
-			var message = new PingMessage();
-			LocalBus.Publish(message);
-
-			consumer.ShouldHaveReceivedMessage(message, _timeout);
+			return "activemq.castle.xml";
 		}
+
+		private readonly TimeSpan _timeout = 10.Seconds();
 
 		[Test]
 		public void It_should_be_received_by_multiple_subscribed_consumers()
@@ -52,15 +45,19 @@ namespace MassTransit.Transports.Nms.Tests
 			localConsumer.ShouldHaveReceivedMessage(message, _timeout);
 			remoteConsumer.ShouldHaveReceivedMessage(message, _timeout);
 		}
-	}
 
-	[TestFixture]
-	public class When_publishing_a_message :
-		PublishMessageBase
-	{
-		protected override string GetCastleConfigurationFile()
+		[Test]
+		public void It_should_be_received_by_one_subscribed_consumer()
 		{
-			return "activemq.castle.xml";
+			log4net.Config.BasicConfigurator.Configure();
+
+			var consumer = new TestMessageConsumer<PingMessage>();
+			RemoteBus.Subscribe(consumer);
+
+			var message = new PingMessage();
+			LocalBus.Publish(message);
+
+			consumer.ShouldHaveReceivedMessage(message, _timeout);
 		}
 	}
 }
