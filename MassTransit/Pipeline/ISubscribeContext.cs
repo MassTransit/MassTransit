@@ -21,10 +21,11 @@ namespace MassTransit.Pipeline
 		/// </summary>
 		/// <param name="messageType"></param>
 		/// <returns>True if the message type has already been subscribed to the pipeline</returns>
-		bool HasAlreadyBeenDefined(Type messageType);
+		bool HasMessageTypeBeenDefined(Type messageType);
 
-		object Find(Type type);
 
-		void Accept(IPipelineInspector inspector);
+		Func<bool> Connect<TMessage>(IMessageSink<TMessage> sink) where TMessage : class;
+
+		void MessageTypeWasDefined(Type messageType);
 	}
 }

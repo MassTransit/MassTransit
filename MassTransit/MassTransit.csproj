@@ -215,6 +215,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Exceptions\ConfigurationException.cs" />
+    <Compile Include="Pipeline\ConsumesAllPipelineSubscriber.cs" />
+    <Compile Include="Pipeline\ConfigureComponent.cs" />
     <Compile Include="Pipeline\ConfigureMessageRouter.cs" />
     <Compile Include="Pipeline\ConsumerFor.cs" />
     <Compile Include="Pipeline\IInterceptorList.cs" />
