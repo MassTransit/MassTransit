@@ -14,6 +14,7 @@ namespace MassTransit.Pipeline
 {
 	using System;
 	using System.Collections.Generic;
+	using Magnum.Common.Threading;
 
 	/// <summary>
 	/// Routes a message to all of the connected message sinks without modification
@@ -23,11 +24,16 @@ namespace MassTransit.Pipeline
 		IMessageSink<TMessage>
 		where TMessage : class
 	{
-		private readonly List<IMessageSink<TMessage>> _sinks = new List<IMessageSink<TMessage>>();
+		private readonly ReaderWriterLockedObject<List<IMessageSink<TMessage>>> _sinks;
+
+		public MessageRouter()
+		{
+			_sinks = new ReaderWriterLockedObject<List<IMessageSink<TMessage>>>(new List<IMessageSink<TMessage>>());
+		}
 
 		public IEnumerable<Consumes<TMessage>.All> Enumerate(TMessage message)
 		{
-			foreach (IMessageSink<TMessage> sink in _sinks)
+			foreach (var sink in _sinks.ReadLock(x => x.ToArray()))
 			{
 				foreach (Consumes<TMessage>.All consumer in sink.Enumerate(message))
 				{
@@ -40,7 +46,7 @@ namespace MassTransit.Pipeline
 		{
 			inspector.Inspect(this);
 
-			foreach (IMessageSink<TMessage> sink in _sinks)
+			foreach (IMessageSink<TMessage> sink in _sinks.ReadLock(x => x.ToArray()))
 			{
 				if (sink.Inspect(inspector) == false)
 					return false;
@@ -56,9 +62,9 @@ namespace MassTransit.Pipeline
 		/// <returns>A function to disconnect the sink from the router</returns>
 		public Func<bool> Connect(IMessageSink<TMessage> sink)
 		{
-			_sinks.Add(sink);
+			_sinks.WriteLock(sinks => sinks.Add(sink));
 
-			return () => _sinks.Remove(sink);
+			return () => _sinks.WriteLock(sinks => sinks.Remove(sink));
 		}
 	}
 }

@@ -14,6 +14,10 @@ namespace MassTransit.Pipeline
 {
 	using Exceptions;
 
+	/// <summary>
+	/// Translate from one type to another safely. Throws an exception if the type cannot be converted.
+	/// </summary>
+	/// <typeparam name="V"></typeparam>
 	public static class TranslateTo<V> where V : class
 	{
 		public static V From<T>(T t) where T : class
