@@ -14,6 +14,8 @@ namespace MassTransit.Tests.Pipeline
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Diagnostics;
+	using System.Reflection;
 	using Magnum.Common.DateTimeExtensions;
 	using MassTransit.Pipeline;
 	using Messages;
@@ -23,6 +25,49 @@ namespace MassTransit.Tests.Pipeline
 	[TestFixture]
 	public class When_building_a_pipeline
 	{
+		private Func<bool> Connect<T>(Consumes<T>.All consumer) where T : class
+		{
+			return () => true;
+		}
+
+		[Test]
+		public void A_indiscriminate_consumer_should_get_added()
+		{
+			IndiscriminantConsumer<PingMessage> consumer = new IndiscriminantConsumer<PingMessage>();
+
+			ISubscribeContext context = MockRepository.GenerateMock<ISubscribeContext>();
+			context.Expect(x => x.HasMessageTypeBeenDefined(typeof (PingMessage))).Return(false);
+
+			PipelineModel model = new PipelineModel();
+			model.RegisterSubscribeInterceptor(new ConsumesAllPipelineSubscriber());
+
+			model.Subscribe(context, consumer);
+
+
+			context.AssertWasCalled(x => x.HasMessageTypeBeenDefined(typeof (PingMessage)));
+		}
+
+		[Test]
+		public void Another_reflection_test()
+		{
+			Type messageType = typeof (PingMessage);
+
+			Type myT = GetType();
+
+			IndiscriminantConsumer<PingMessage> consumer = new IndiscriminantConsumer<PingMessage>();
+
+			MethodInfo mi = myT.GetMethod("Connect", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+			MethodInfo genericMethod = mi.MakeGenericMethod(typeof(ISubscribeContext), messageType);
+
+			Func<bool> result = null;
+			if (genericMethod != null)
+			{
+				result = (Func<bool>)genericMethod.Invoke(this, new object[] { consumer });
+			}
+
+			Assert.IsNotNull(result);
+		}
+
 		[Test]
 		public void Batch_composition_should_work()
 		{
@@ -44,6 +89,17 @@ namespace MassTransit.Tests.Pipeline
 			TimeSpan _timeout = 5.Seconds();
 
 			batchConsumer.ShouldHaveReceivedBatch(_timeout);
+		}
+
+		[Test]
+		public void Reflection_test()
+		{
+			Type t = typeof (ParticularConsumer);
+
+			foreach (Type interfaceType in t.GetInterfaces())
+			{
+				Trace.WriteLine(interfaceType.FullName);
+			}
 		}
 
 		[Test]
@@ -77,79 +133,6 @@ namespace MassTransit.Tests.Pipeline
 
 			interceptor.AssertWasCalled(x => x.Subscribe(context, consumer));
 		}
-
-		[Test]
-		public void A_indiscriminate_consumer_should_get_added()
-		{
-
-			IndiscriminantConsumer<PingMessage> consumer = new IndiscriminantConsumer<PingMessage>();
-
-			ISubscribeContext context = MockRepository.GenerateMock<ISubscribeContext>();
-			context.Expect(x => x.HasAlreadyBeenDefined(typeof (PingMessage))).Return(false);
-
-			PipelineModel model = new PipelineModel();
-			model.RegisterSubscribeInterceptor(new ConsumesAllHandler());
-
-			model.Subscribe(context, consumer);
-
-
-			context.AssertWasCalled(x => x.HasAlreadyBeenDefined(typeof(PingMessage)));
-		}
-	}
-
-	public class ConsumesAllHandler : 
-		ISubscribeInterceptor
-	{
-		public IEnumerable<Func<bool>> Subscribe<TComponent>(ISubscribeContext context, TComponent instance)
-		{
-			Type consumerType = typeof(Consumes<>.All);
-
-			Type componentType = typeof (TComponent);
-
-			foreach (Type interfaceType in componentType.GetInterfaces())
-			{
-				if (!interfaceType.IsGenericType) 
-					continue;
-
-				Type genericType = interfaceType.GetGenericTypeDefinition();
-
-				if (genericType != consumerType) 
-					continue;
-
-				Type[] types = interfaceType.GetGenericArguments();
-
-				Type messageType = types[0];
-
-				if (context.HasAlreadyBeenDefined(messageType))
-					continue;
-
-				// TODO if we have a generic type, we need to look for a generic message handler
-				if (messageType.IsGenericType)
-				{
-				}
-
-				Type inspectorType = typeof (ConfigureMessageRouter<>).MakeGenericType(messageType);
-
-				Func<bool> token = null;
-				Action<Func<bool>> handler = x => token = x;
-
-				IPipelineInspector inspector = (IPipelineInspector) Activator.CreateInstance(inspectorType, instance, handler);
-				context.Accept(inspector);
-
-				if (token != null)
-					yield return token;
-			}
-
-			yield break;
-		}
-	}
-
-	public class ConsumerInstanceSubscriber : ISubscribeInterceptor
-	{
-		public IEnumerable<Func<bool>> Subscribe<TComponent>(ISubscribeContext context, TComponent instance)
-		{
-			yield break;
-		}
 	}
 
 	public class MessagePipelineBuilder
@@ -157,10 +140,6 @@ namespace MassTransit.Tests.Pipeline
 		private readonly MessagePipeline _pipeline;
 		private readonly MessageRouter<object> _router;
 		private readonly Dictionary<Type, IMessageTypeRouterBuilder> _typeBuilders = new Dictionary<Type, IMessageTypeRouterBuilder>();
-
-		public MessagePipelineBuilder()
-		{
-		}
 
 		public MessagePipeline Pipeline
 		{
@@ -200,7 +179,7 @@ namespace MassTransit.Tests.Pipeline
 
 		public Func<bool> Subscribe<T>(Consumes<T>.All consumer) where T : class
 		{
-			Func<bool> token = _router.Connect(new MessageSink<TMessage>(message => (Consumes<TMessage>.All)consumer));
+			Func<bool> token = _router.Connect(new MessageSink<TMessage>(message => (Consumes<TMessage>.All) consumer));
 
 			return token;
 		}

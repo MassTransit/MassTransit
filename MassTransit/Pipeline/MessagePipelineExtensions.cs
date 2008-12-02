@@ -45,5 +45,10 @@ namespace MassTransit.Pipeline
 					return ConfigureMessageRouter<TMessage>.Connect(x, sink);
 				});
 		}
+
+		public static Func<bool> Subscribe<TComponent>(this MessagePipeline pipeline)
+		{
+			return pipeline.Configure(x => ConfigureComponent<TComponent>.Subscribe(x));
+		}
 	}
 }
