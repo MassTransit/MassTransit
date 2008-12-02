@@ -15,33 +15,46 @@ namespace MassTransit.Pipeline
 	using System;
 	using System.Collections.Generic;
 
-	public class MessagePipeline<TMessage> :
-		IMessageSink<TMessage>
-		where TMessage : class
+	public class MessagePipeline :
+		MessageSinkBase<object, object>
 	{
-		private readonly IMessageSink<TMessage> _outputSink;
-
-		public MessagePipeline(IMessageSink<TMessage> outputSink)
+		private MessagePipeline(IMessageSink<object> outputSink) :
+			base(outputSink)
 		{
-			_outputSink = outputSink;
 		}
 
-		public IEnumerable<Consumes<TMessage>.All> Enumerate(TMessage message)
+		public override IEnumerable<Consumes<object>.All> Enumerate(object message)
 		{
-			foreach (Consumes<TMessage>.All consumer in _outputSink.Enumerate(message))
+			foreach (Consumes<object>.All consumer in _outputSink.ReadLock(x => x.Enumerate(message)))
 			{
 				yield return consumer;
 			}
 		}
 
-		public void Dispatch(TMessage message)
+		public override bool Inspect(IPipelineInspector inspector)
+		{
+			inspector.Inspect(this);
+
+			return _outputSink.ReadLock(x => x.Inspect(inspector));
+		}
+
+		public V Configure<V>(Func<MessagePipeline, V> action)
+		{
+			V result = default(V);
+
+			_outputSink.WriteLock(x => { result = action(this); });
+
+			return result;
+		}
+
+		public void Dispatch(object message)
 		{
 			Dispatch(message, x => true);
 		}
 
-		public void Dispatch(TMessage message, Func<TMessage, bool> accept)
+		public void Dispatch(object message, Func<object, bool> accept)
 		{
-			foreach (Consumes<TMessage>.All consumer in Enumerate(message))
+			foreach (Consumes<object>.All consumer in Enumerate(message))
 			{
 				if (!accept(message))
 					break;
@@ -52,11 +65,13 @@ namespace MassTransit.Pipeline
 			}
 		}
 
-		public bool Inspect(IPipelineInspector inspector)
+		public static MessagePipeline CreateDefaultPipeline()
 		{
-			inspector.Inspect(this);
+			MessageRouter<object> router = new MessageRouter<object>();
 
-			return _outputSink.Inspect(inspector);
+			MessagePipeline pipeline = new MessagePipeline(router);
+
+			return pipeline;
 		}
 	}
 }

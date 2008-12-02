@@ -12,13 +12,29 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Pipeline
 {
-	public interface IPipelineInspector
-	{
-		bool Inspect(MessagePipeline element);
-		bool Inspect<TMessage>(MessageRouter<TMessage> element) where TMessage : class;
-		bool Inspect<TMessage>(MessageSink<TMessage> sink) where TMessage : class;
-		bool Inspect<TInput, TOutput>(MessageTranslator<TInput, TOutput> translator) where TInput : class where TOutput : class, TInput;
+	using System;
+	using System.Runtime.Serialization;
 
-		bool Inspect<TMessage>(IMessageSink<TMessage> element) where TMessage : class;
+	public class PipelineException :
+		Exception
+	{
+		public PipelineException()
+		{
+		}
+
+		public PipelineException(string message)
+			: base(message)
+		{
+		}
+
+		public PipelineException(string message, Exception innerException) :
+			base(message, innerException)
+		{
+		}
+
+		protected PipelineException(SerializationInfo info, StreamingContext context) :
+			base(info, context)
+		{
+		}
 	}
 }

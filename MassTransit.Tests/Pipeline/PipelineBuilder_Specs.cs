@@ -10,14 +10,14 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Tests
+namespace MassTransit.Tests.Pipeline
 {
 	using System;
 	using System.Collections.Generic;
 	using Magnum.Common.DateTimeExtensions;
+	using MassTransit.Pipeline;
 	using Messages;
 	using NUnit.Framework;
-	using Pipeline;
 	using Rhino.Mocks;
 
 	[TestFixture]
@@ -28,10 +28,9 @@ namespace MassTransit.Tests
 		{
 			TestBatchConsumer<IndividualBatchMessage, Guid> batchConsumer = new TestBatchConsumer<IndividualBatchMessage, Guid>();
 
-			MessagePipelineBuilder builder = new MessagePipelineBuilder();
+			MessagePipeline pipeline = MessagePipeline.CreateDefaultPipeline();
 
-			builder.Subscribe(batchConsumer);
-
+			pipeline.Subscribe(batchConsumer);
 
 			Guid batchId = Guid.NewGuid();
 			const int _batchSize = 1;
@@ -39,7 +38,7 @@ namespace MassTransit.Tests
 			{
 				IndividualBatchMessage message = new IndividualBatchMessage(batchId, _batchSize);
 
-				builder.Pipeline.Dispatch(message);
+				pipeline.Dispatch(message);
 			}
 
 			TimeSpan _timeout = 5.Seconds();
@@ -52,11 +51,9 @@ namespace MassTransit.Tests
 		{
 			IndiscriminantConsumer<PingMessage> consumer = new IndiscriminantConsumer<PingMessage>();
 
-			MessagePipelineBuilder builder = new MessagePipelineBuilder();
+			MessagePipeline pipeline = MessagePipeline.CreateDefaultPipeline();
 
-			builder.Subscribe(consumer);
-
-			MessagePipeline<object> pipeline = builder.Pipeline;
+			pipeline.Subscribe(consumer);
 
 			pipeline.Dispatch(new PingMessage());
 
@@ -131,7 +128,7 @@ namespace MassTransit.Tests
 				{
 				}
 
-				Type inspectorType = typeof (MessageTypeSubscriber<>).MakeGenericType(messageType);
+				Type inspectorType = typeof (ConfigureMessageRouter<>).MakeGenericType(messageType);
 
 				Func<bool> token = null;
 				Action<Func<bool>> handler = x => token = x;
@@ -145,42 +142,6 @@ namespace MassTransit.Tests
 
 			yield break;
 		}
-
-/*
-		public Func<bool> Subscribe<T>(Consumes<T>.All consumer) where T : class
-		{
-			Func<bool> token = consumer.SubscribeTo(_router);
-
-			return token;
-		}
-*/
-
-	}
-
-	public class MessageTypeSubscriber<T> : 
-		PipelineInspectorBase<T>
-		where T : class
-	{
-		private readonly Consumes<T>.All _consumer;
-		private readonly Action<Func<bool>> _action;
-
-		public override bool Inspect<TMessage>(MessageRouter<TMessage> element)
-		{
-			if (_consumer != null)
-			{
-				Func<bool> token = _consumer.SubscribeTo(TranslateTo<MessageRouter<T>>.From(element));
-				_action(token);
-				return false;
-			}
-
-			return true;
-		}
-
-		public MessageTypeSubscriber(Consumes<T>.All consumer, Action<Func<bool>> action)
-		{
-			_consumer = consumer;
-			_action = action;
-		}
 	}
 
 	public class ConsumerInstanceSubscriber : ISubscribeInterceptor
@@ -193,17 +154,15 @@ namespace MassTransit.Tests
 
 	public class MessagePipelineBuilder
 	{
-		private readonly MessagePipeline<object> _pipeline;
+		private readonly MessagePipeline _pipeline;
 		private readonly MessageRouter<object> _router;
 		private readonly Dictionary<Type, IMessageTypeRouterBuilder> _typeBuilders = new Dictionary<Type, IMessageTypeRouterBuilder>();
 
 		public MessagePipelineBuilder()
 		{
-			_router = new MessageRouter<object>();
-			_pipeline = new MessagePipeline<object>(_router);
 		}
 
-		public MessagePipeline<object> Pipeline
+		public MessagePipeline Pipeline
 		{
 			get { return _pipeline; }
 		}
@@ -241,7 +200,7 @@ namespace MassTransit.Tests
 
 		public Func<bool> Subscribe<T>(Consumes<T>.All consumer) where T : class
 		{
-			Func<bool> token = ((Consumes<TMessage>.All) consumer).SubscribeTo(_router);
+			Func<bool> token = _router.Connect(new MessageSink<TMessage>(message => (Consumes<TMessage>.All)consumer));
 
 			return token;
 		}

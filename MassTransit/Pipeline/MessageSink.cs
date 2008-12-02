@@ -41,5 +41,9 @@ namespace MassTransit.Pipeline
 			// since this is the end of the line, we don't visit this one I suppose
 			return true;
 		}
+
+		public void Dispose()
+		{
+		}
 	}
 }
