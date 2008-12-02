@@ -12,202 +12,281 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports.Nms
 {
-    using System;
-    using System.IO;
-    using System.Runtime.Serialization;
-    using Apache.NMS;
-    using Apache.NMS.ActiveMQ;
-    using Exceptions;
-    using Internal;
-    using log4net;
-    using Serialization;
+	using System;
+	using System.IO;
+	using System.Runtime.Serialization;
+	using Apache.NMS;
+	using Apache.NMS.ActiveMQ;
+	using Exceptions;
+	using Internal;
+	using log4net;
+	using Serialization;
 
-    public class NmsEndpoint :
-        IEndpoint
-    {
+	public class NmsEndpoint :
+		IEndpoint
+	{
+		private static readonly ILog _log = LogManager.GetLogger(typeof (NmsEndpoint));
+		private static readonly IMessageSerializer _serializer = new BinaryMessageSerializer();
+		private readonly IConnectionFactory _factory;
+		private readonly string _queueName;
+		private readonly Uri _uri;
+		private bool _disposed;
+		private IConnection _connection;
 
-        private static readonly ILog _log = LogManager.GetLogger(typeof (NmsEndpoint));
-        private static readonly IMessageSerializer _serializer = new BinaryMessageSerializer();
-        private readonly IConnectionFactory _factory;
-        private readonly string _queueName;
-        private readonly Uri _uri;
-        private readonly IConnection _connection;
+		public NmsEndpoint(Uri uri)
+		{
+			_uri = uri;
 
-        public NmsEndpoint(Uri uri)
-        {
-            _uri = uri;
+			UriBuilder queueUri = new UriBuilder("tcp", Uri.Host, Uri.Port);
 
-            UriBuilder queueUri = new UriBuilder("tcp", Uri.Host, Uri.Port);
+			_queueName = Uri.AbsolutePath.Substring(1);
 
-            _queueName = Uri.AbsolutePath.Substring(1);
+			_factory = new ConnectionFactory(queueUri.Uri);
 
-            _factory = new ConnectionFactory(queueUri.Uri);
+			_connection = _factory.CreateConnection();
+			_connection.ExceptionListener += ConnectionExceptionListener;
 
-            _connection = _factory.CreateConnection();
-            _connection.ExceptionListener += ConnectionExceptionListener;
-        }
+			_connection.Start();
+		}
 
-        void ConnectionExceptionListener(Exception ex)
-        {
-            _log.Error("NMS threw an exception: ", ex);
-        }
+		public NmsEndpoint(string uriString)
+			: this(new Uri(uriString))
+		{
+		}
 
-        public NmsEndpoint(string uriString)
-            : this(new Uri(uriString))
-        {
-        }
+		public static string Scheme
+		{
+			get { return "activemq"; }
+		}
 
-        public Uri Uri
-        {
-            get { return _uri; }
-        }
+		public Uri Uri
+		{
+			get { return _uri; }
+		}
 
-        public static string Scheme
-        {
-            get { return "activemq"; }
-        }
+		public void Send<T>(T message) where T : class
+		{
+			Send(message, TimeSpan.MaxValue);
+		}
 
+		public void Send<T>(T message, TimeSpan timeToLive) where T : class
+		{
+			WithinProducerContext((session, producer) =>
+			{
+				Type messageType = typeof(T);
 
-        public void Send<T>(T message) where T : class
-        {
-            Send(message, NMSConstants.defaultTimeToLive);
-        }
+				IBytesMessage bm = session.CreateBytesMessage();
 
-        public void Send<T>(T message, TimeSpan timeToLive) where T : class
-        {
-            Type messageType = typeof (T);
+				using (MemoryStream mem = new MemoryStream())
+				{
+					_serializer.Serialize(mem, message);
 
-            using (ISession session = _connection.CreateSession())
-            {
-                IBytesMessage bm = session.CreateBytesMessage();
+					bm.Content = mem.ToArray();
+				}
 
-                using (MemoryStream mem = new MemoryStream())
-                {
-                    _serializer.Serialize(mem, message);
+				if (timeToLive < NMSConstants.defaultTimeToLive)
+					producer.TimeToLive = timeToLive;
 
-                    bm.Content = mem.ToArray();
-                }
+				producer.Persistent = true;
 
-                if (timeToLive < NMSConstants.defaultTimeToLive)
-                    bm.NMSTimeToLive = timeToLive;
+				producer.Send(bm);
 
-                bm.NMSPersistent = true;
+				if (SpecialLoggers.Messages.IsInfoEnabled)
+					SpecialLoggers.Messages.InfoFormat("SEND {0} {1} {2}", messageType, Uri, bm.NMSMessageId);
 
-                IDestination destination = session.GetQueue(_queueName);
+				if (_log.IsDebugEnabled)
+					_log.DebugFormat("Message Sent: Id = {0}, Message Type = {1}", bm.NMSMessageId, messageType);
+			});
+		}
 
-                using (IMessageProducer producer = session.CreateProducer(destination))
-                {
-                    try
-                    {
-                        producer.Send(bm);
+		public object Receive(TimeSpan timeout)
+		{
+			return Receive(timeout, x => true);
+		}
 
-                        if (SpecialLoggers.Messages.IsInfoEnabled)
-                            SpecialLoggers.Messages.InfoFormat("Message {0} Sent To {1}", messageType, Uri);
-                    }
-                    catch (Exception ex)
-                    {
-                        throw new EndpointException(this, "Problem with " + Uri, ex);
-                    }
+		public object Receive(TimeSpan timeout, Predicate<object> accept)
+		{
+			return WithinConsumerContext(consumer =>
+			{
+				IMessage message = consumer.Receive(timeout);
+				if (message == null)
+					return null;
 
-                    if (_log.IsDebugEnabled)
-                        _log.DebugFormat("Message Sent: Id = {0}, Message Type = {1}", bm.NMSMessageId, messageType);
-                }
-            }
-        }
+				IBytesMessage bm = message as IBytesMessage;
+				if (bm == null)
+					throw new MessageException(message.GetType(), "Message not a IBytesMessage");
 
-        public object Receive(TimeSpan timeout)
-        {
-            try
-            {
-                using (ISession session = _connection.CreateSession())
-                {
-                    IDestination destination = session.GetQueue(_queueName);
-                    using (IMessageConsumer consumer = session.CreateConsumer(destination))
-                    {
-                        IMessage message = consumer.Receive(timeout);
-                        if (message == null)
-                            return null;
+				try
+				{
+					using (MemoryStream mem = new MemoryStream(bm.Content, false))
+					{
+						object obj = _serializer.Deserialize(mem);
 
-                        IBytesMessage bm = message as IBytesMessage;
-                        if (bm == null)
-                            throw new MessageException(message.GetType(), "Message not a IBytesMessage");
+						if (accept(obj))
+						{
+							if (_log.IsDebugEnabled)
+								_log.DebugFormat("Queue: {0} Received Message Id {1}", _queueName, message.NMSMessageId);
 
-                        try
-                        {
-                            MemoryStream mem = new MemoryStream(bm.Content, false);
+							if (SpecialLoggers.Messages.IsInfoEnabled)
+								SpecialLoggers.Messages.InfoFormat("RECV {0} {1} {2}", obj.GetType().FullName, Uri, bm.NMSMessageId);
 
-                            object obj = _serializer.Deserialize(mem);
+							return obj;
+						}
 
-                            return obj;
-                        }
-                        catch (SerializationException ex)
-                        {
-                            throw new MessageException(message.GetType(), "An error occurred deserializing a message", ex);
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                throw new EndpointException(this, "Receive error occured", ex);
-            }
-        }
+						if (_log.IsDebugEnabled)
+							_log.DebugFormat("Queue: {0} Skipped Message Id {1}", _queueName, message.NMSMessageId);
 
-        public object Receive(TimeSpan timeout, Predicate<object> accept)
-        {
-            using (ISession session = _connection.CreateSession())
-            {
-                IDestination destination = session.GetQueue(_queueName);
-                using (IMessageConsumer consumer = session.CreateConsumer(destination))
-                {
-                    IMessage message = consumer.Receive(timeout);
-                    if (message == null)
-                        return null;
+						return null;
+					}
+				}
+				catch (SerializationException ex)
+				{
+					try
+					{
+						_log.Error("Discarded message " + message.NMSMessageId + " due to a serialization error", ex);
+					}
+					catch (Exception ex2)
+					{
+						_log.Error("Unable to purge message id " + message.NMSMessageId, ex2);
+					}
 
-                    IBytesMessage bm = message as IBytesMessage;
-                    if (bm == null)
-                        throw new MessageException(message.GetType(), "Message not a IBytesMessage");
+					throw new MessageException(typeof(object), "An error occurred deserializing a message", ex);
+				}
+			});
+		}
 
-                    try
-                    {
-                        MemoryStream mem = new MemoryStream(bm.Content, false);
+		private V WithinConsumerContext<V>(Func<IMessageConsumer, V> consumerAction)
+		{
+			return WithinSessionContext<V>(session =>
+			{
+				IMessageConsumer consumer = null;
+				try
+				{
+					IDestination destination = session.GetQueue(_queueName);
 
-                        object obj = _serializer.Deserialize(mem);
+					consumer = session.CreateConsumer(destination);
 
-                        if (accept(obj))
-                        {
-                            if (_log.IsDebugEnabled)
-                                _log.DebugFormat("Queue: {0} Received Message Id {1}", _queueName, message.NMSMessageId);
+					V result = consumerAction(consumer);
 
-                            if (SpecialLoggers.Messages.IsInfoEnabled)
-                                SpecialLoggers.Messages.InfoFormat("RECV:{0}:System.Object:{1}", _queueName, message.NMSMessageId);
+					return result;
+				}
+				finally
+				{
+					if (consumer != null)
+					{
+						consumer.Close();
+						consumer.Dispose();
+					}
+				}
+			});
+		}
 
-                            return obj;
-                        }
-                        else
-                        {
-                            if (_log.IsDebugEnabled)
-                                _log.DebugFormat("Queue: {0} Skipped Message Id {1}", _queueName, message.NMSMessageId);
-                        }
-                    }
-                    catch (SerializationException ex)
-                    {
-                        throw new MessageException(typeof (object), "An error occurred deserializing a message", ex);
-                    }
+		private void WithinProducerContext(Action<ISession, IMessageProducer> producerAction)
+		{
+			WithinSessionContext(session =>
+			{
+				IMessageProducer producer = null;
+				try
+				{
+					IDestination destination = session.GetQueue(_queueName);
 
-                    return null;
-                }
-            }
-        }
+					producer = session.CreateProducer(destination);
 
-        public void Dispose()
-        {
-            if (_connection != null)
-            {
-                _connection.ExceptionListener -= ConnectionExceptionListener;
-                _connection.Close();
-                _connection.Dispose();
-            }
-        }
-    }
+					producerAction(session, producer);
+				}
+				finally
+				{
+					if (producer != null)
+					{
+						producer.Close();
+					}
+				}
+			});
+		}
+
+		private V WithinSessionContext<V>(Func<ISession, V> sessionAction)
+		{
+			ISession session = null;
+			try
+			{
+				session = _connection.CreateSession(AcknowledgementMode.Transactional);
+
+				V result = sessionAction(session);
+
+				session.Commit();
+
+				return result;
+			}
+			catch (Exception ex)
+			{
+				throw new EndpointException(this, "Error consuming message", ex);
+			}
+			finally
+			{
+				if (session != null)
+				{
+					session.Close();
+					session.Dispose();
+				}
+			}
+		}
+
+		private void WithinSessionContext(Action<ISession> sessionAction)
+		{
+			ISession session = null;
+			try
+			{
+				session = _connection.CreateSession(AcknowledgementMode.Transactional);
+
+				sessionAction(session);
+
+				session.Commit();
+			}
+			catch (Exception ex)
+			{
+				throw new EndpointException(this, "Error consuming message", ex);
+			}
+			finally
+			{
+				if (session != null)
+				{
+					session.Close();
+					session.Dispose();
+				}
+			}
+		}
+
+		public void Dispose()
+		{
+			Dispose(true);
+			GC.SuppressFinalize(this);
+		}
+
+		private void ConnectionExceptionListener(Exception ex)
+		{
+			_log.Error("An exception occurred on the endpoint. Uri = " + _uri, ex);
+		}
+
+		~NmsEndpoint()
+		{
+			Dispose(false);
+		}
+
+		protected virtual void Dispose(bool disposing)
+		{
+			if (_disposed) return;
+			if (disposing)
+			{
+				if (_connection != null)
+				{
+					_connection.Stop();
+					_connection.ExceptionListener -= ConnectionExceptionListener;
+					_connection.Close();
+					_connection.Dispose();
+					_connection = null;
+				}
+			}
+			_disposed = true;
+		}
+	}
 }
