@@ -10,12 +10,12 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Tests
+namespace MassTransit.Tests.Pipeline
 {
 	using System;
+	using MassTransit.Pipeline;
 	using Messages;
 	using NUnit.Framework;
-	using Pipeline;
 
 	[TestFixture]
 	public class When_subscription_a_component_to_the_pipeline
@@ -25,10 +25,8 @@ namespace MassTransit.Tests
 		{
 			IndiscriminantConsumer<PingMessage> consumer = new IndiscriminantConsumer<PingMessage>();
 
-			MessageRouter<PingMessage> router = new MessageRouter<PingMessage>();
-			MessagePipeline<PingMessage> pipeline = new MessagePipeline<PingMessage>(router);
-
-			consumer.SubscribeTo(router);
+			MessagePipeline pipeline = MessagePipeline.CreateDefaultPipeline();
+			pipeline.Subscribe(consumer);
 
 			PingMessage message = new PingMessage();
 
@@ -45,20 +43,12 @@ namespace MassTransit.Tests
 			IndiscriminantConsumer<PingMessage> pingConsumer = new IndiscriminantConsumer<PingMessage>();
 			IndiscriminantConsumer<PongMessage> pongConsumer = new IndiscriminantConsumer<PongMessage>();
 
-			MessageRouter<PingMessage> pingRouter = new MessageRouter<PingMessage>();
-			MessageRouter<PongMessage> pongRouter = new MessageRouter<PongMessage>();
+			MessagePipeline pipeline = MessagePipeline.CreateDefaultPipeline();
 
-			Func<bool> pingToken = pingConsumer.SubscribeTo(pingRouter);
-			Func<bool> pongToken = pongConsumer.SubscribeTo(pongRouter);
+			Func<bool> pingToken = pipeline.Subscribe(pingConsumer);
+			Func<bool> pongToken = pipeline.Subscribe(pongConsumer);
 
-			MessageTranslator<object, PingMessage> pingTranslator = new MessageTranslator<object, PingMessage>(pingRouter);
-			MessageTranslator<object, PongMessage> pongTranslator = new MessageTranslator<object, PongMessage>(pongRouter);
-
-			MessageRouter<object> objectRouter = new MessageRouter<object>();
-			objectRouter.Connect(pingTranslator);
-			objectRouter.Connect(pongTranslator);
-
-			MessagePipeline<object> pipeline = new MessagePipeline<object>(objectRouter);
+			PipelineViewer.Trace(pipeline);
 
 			PingMessage pingMessage = new PingMessage();
 			PongMessage pongMessage = new PongMessage();
@@ -71,6 +61,8 @@ namespace MassTransit.Tests
 
 			pingToken();
 			pongToken();
+
+			PipelineViewer.Trace(pipeline);
 		}
 
 		[Test]
@@ -78,11 +70,9 @@ namespace MassTransit.Tests
 		{
 			IndiscriminantConsumer<PingMessage> consumer = new IndiscriminantConsumer<PingMessage>();
 
-			MessageRouter<PingMessage> router = new MessageRouter<PingMessage>();
+			MessagePipeline pipeline = MessagePipeline.CreateDefaultPipeline();
 
-			MessagePipeline<PingMessage> pipeline = new MessagePipeline<PingMessage>(router);
-
-			consumer.SubscribeTo(router);
+			pipeline.Subscribe(consumer);
 
 			PingMessage message = new PingMessage();
 
@@ -94,13 +84,11 @@ namespace MassTransit.Tests
 		[Test]
 		public void When_nobody_wants_the_message_it_should_not_be_accepted()
 		{
-			MessageRouter<PingMessage> router = new MessageRouter<PingMessage>();
-
 			PingMessage message = new PingMessage();
 
 			bool accepted = false;
 
-			MessagePipeline<PingMessage> pipeline = new MessagePipeline<PingMessage>(router);
+			MessagePipeline pipeline = MessagePipeline.CreateDefaultPipeline();
 
 			pipeline.Dispatch(message, x => accepted = true);
 
@@ -110,18 +98,14 @@ namespace MassTransit.Tests
 		[Test]
 		public void When_somebody_gets_the_message_it_should_be_accepted()
 		{
-			MessageRouter<PingMessage> router = new MessageRouter<PingMessage>();
-
 			IndiscriminantConsumer<PingMessage> consumer = new IndiscriminantConsumer<PingMessage>();
 
-			consumer.SubscribeTo(router);
+			MessagePipeline pipeline = MessagePipeline.CreateDefaultPipeline();
+			pipeline.Subscribe(consumer);
 
 			PingMessage message = new PingMessage();
 
 			bool accepted = false;
-
-			MessagePipeline<PingMessage> pipeline = new MessagePipeline<PingMessage>(router);
-
 			pipeline.Dispatch(message, x => accepted = true);
 
 			Assert.IsTrue(accepted);

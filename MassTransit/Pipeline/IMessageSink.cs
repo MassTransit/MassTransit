@@ -12,9 +12,11 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Pipeline
 {
+	using System;
 	using System.Collections.Generic;
 
-	public interface IMessageSink<TMessage>
+	public interface IMessageSink<TMessage> :
+		IDisposable
 		where TMessage : class
 	{
 		IEnumerable<Consumes<TMessage>.All> Enumerate(TMessage message);

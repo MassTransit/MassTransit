@@ -66,5 +66,10 @@ namespace MassTransit.Pipeline
 
 			return () => _sinks.WriteLock(sinks => sinks.Remove(sink));
 		}
+
+		public void Dispose()
+		{
+			_sinks.Dispose();
+		}
 	}
 }

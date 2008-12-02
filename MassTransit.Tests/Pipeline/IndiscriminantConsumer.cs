@@ -10,21 +10,16 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Tests
+namespace MassTransit.Tests.Pipeline
 {
 	public class IndiscriminantConsumer<TMessage> :
 		Consumes<TMessage>.All where TMessage : class
 	{
-		private TMessage _consumed;
-
-		public TMessage Consumed
-		{
-			get { return _consumed; }
-		}
+		public TMessage Consumed { get; private set; }
 
 		public void Consume(TMessage message)
 		{
-			_consumed = message;
+			Consumed = message;
 		}
 	}
 }

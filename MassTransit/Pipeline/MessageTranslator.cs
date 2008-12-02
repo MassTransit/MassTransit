@@ -15,32 +15,32 @@ namespace MassTransit.Pipeline
 	using System.Collections.Generic;
 
 	public class MessageTranslator<TInput, TOutput> :
-		IMessageSink<TInput>
+		MessageSinkBase<TInput, TOutput>
 		where TOutput : class, TInput
 		where TInput : class
 	{
-		private readonly IMessageSink<TOutput> _outputSink;
-
 		public MessageTranslator(IMessageSink<TOutput> outputSink)
+			: base(outputSink)
 		{
-			_outputSink = outputSink;
 		}
 
-		public IEnumerable<Consumes<TInput>.All> Enumerate(TInput message)
+		public override IEnumerable<Consumes<TInput>.All> Enumerate(TInput message)
 		{
-			TOutput output = TranslateTo<TOutput>.From(message);
+			TOutput output = message as TOutput;
+			if (output == null)
+				yield break;
 
-			foreach (Consumes<TOutput>.All consumer in _outputSink.Enumerate(output))
+			foreach (Consumes<TOutput>.All consumer in _outputSink.ReadLock(x => x.Enumerate(output)))
 			{
 				yield return Consumes<TInput>.WidenTo<TOutput>.For(consumer);
 			}
 		}
 
-		public bool Inspect(IPipelineInspector inspector)
+		public override bool Inspect(IPipelineInspector inspector)
 		{
 			inspector.Inspect(this);
 
-			return _outputSink.Inspect(inspector);
+			return _outputSink.ReadLock(x => x.Inspect(inspector));
 		}
 	}
 }
