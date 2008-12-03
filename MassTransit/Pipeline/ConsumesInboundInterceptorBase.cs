@@ -16,8 +16,8 @@ namespace MassTransit.Pipeline
 	using System.Collections.Generic;
 	using System.Reflection;
 
-	public abstract class ConsumesPipelineSubscriberBase :
-		PipelineSubscriberBase
+	public abstract class ConsumesInboundInterceptorBase :
+		InboundInterceptorBase
 	{
 		protected abstract Type InterfaceType { get; }
 

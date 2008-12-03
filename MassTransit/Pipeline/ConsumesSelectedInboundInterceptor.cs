@@ -14,24 +14,25 @@ namespace MassTransit.Pipeline
 {
 	using System;
 
-	public class ConsumesAllPipelineSubscriber :
-		ConsumesPipelineSubscriberBase
+	public class ConsumesSelectedInboundInterceptor :
+		ConsumesInboundInterceptorBase
 	{
 		protected override Type InterfaceType
 		{
-			get { return typeof (Consumes<>.All); }
+			get { return typeof (Consumes<>.Selected); }
 		}
 
-		protected virtual Func<bool> Connect<TMessage>(IInboundContext context, Consumes<TMessage>.All consumer) where TMessage : class
+		protected virtual Func<bool> Connect<TMessage>(IInboundContext context, Consumes<TMessage>.Selected consumer) where TMessage : class
 		{
-			var sink = new MessageSink<TMessage>(message => consumer);
+			var sink = new MessageSink<TMessage>(message =>
+			                                     	consumer.Accept(message) ? consumer : Consumes<TMessage>.Null);
 
 			return context.Connect(sink);
 		}
 
 		protected virtual Func<bool> Connect<TComponent, TMessage>(IInboundContext context)
 			where TMessage : class
-			where TComponent : class, Consumes<TMessage>.All
+			where TComponent : class, Consumes<TMessage>.Selected
 		{
 			var sink = new ComponentMessageSink<TComponent, TMessage>(context);
 

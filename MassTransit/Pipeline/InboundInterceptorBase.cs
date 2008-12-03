@@ -16,7 +16,7 @@ namespace MassTransit.Pipeline
 	using System.Collections.Generic;
 	using System.Reflection;
 
-	public abstract class PipelineSubscriberBase : 
+	public abstract class InboundInterceptorBase : 
 		IInboundInterceptor
 	{
 		public abstract IEnumerable<Func<bool>> Subscribe<TComponent>(IInboundContext context);
