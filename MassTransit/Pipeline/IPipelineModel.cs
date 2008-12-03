@@ -13,6 +13,8 @@
 namespace MassTransit.Pipeline
 {
 	using System;
+	using Interceptors.Inbound;
+	using Interceptors.Outbound;
 
 	public interface IPipelineModel : IDisposable
 	{

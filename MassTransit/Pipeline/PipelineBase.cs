@@ -13,6 +13,7 @@
 namespace MassTransit.Pipeline
 {
 	using System;
+	using Interceptors;
 
 	public class PipelineBase<TInterceptor>
 	{

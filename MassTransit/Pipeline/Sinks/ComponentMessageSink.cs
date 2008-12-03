@@ -13,6 +13,7 @@
 namespace MassTransit.Pipeline
 {
 	using System.Collections.Generic;
+	using Interceptors.Inbound;
 
 	/// <summary>
 	/// Routes messages to instances of subscribed components. A new instance of the component

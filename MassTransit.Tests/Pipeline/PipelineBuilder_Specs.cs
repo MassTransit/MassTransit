@@ -18,6 +18,7 @@ namespace MassTransit.Tests.Pipeline
 	using System.Reflection;
 	using Magnum.Common.DateTimeExtensions;
 	using MassTransit.Pipeline;
+	using MassTransit.Pipeline.Interceptors.Inbound;
 	using Messages;
 	using NUnit.Framework;
 	using Rhino.Mocks;

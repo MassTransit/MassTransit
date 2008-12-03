@@ -10,30 +10,14 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Pipeline
+namespace MassTransit.Pipeline.Interceptors.Inbound
 {
+	using System;
 	using System.Collections.Generic;
 
-	public class OutboundContext :
-		IOutboundContext
+	public interface IInboundInterceptor
 	{
-		private readonly HashSet<IEndpoint> _endpoints = new HashSet<IEndpoint>();
-		private readonly MessagePipeline _pipeline;
-
-		public OutboundContext(MessagePipeline pipeline)
-		{
-			_pipeline = pipeline;
-		}
-
-		public void AddEndpointToPublish(IEndpoint endpoint)
-		{
-			if (!_endpoints.Contains(endpoint))
-				_endpoints.Add(endpoint);
-		}
-
-		public IEnumerable<IEndpoint> GetEndpoints()
-		{
-			return _endpoints;
-		}
+		IEnumerable<Func<bool>> Subscribe<TComponent>(IInboundContext context);
+		IEnumerable<Func<bool>> Subscribe<TComponent>(IInboundContext context, TComponent instance);
 	}
 }

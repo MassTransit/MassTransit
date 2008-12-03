@@ -10,40 +10,30 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Pipeline
+namespace MassTransit.Pipeline.Interceptors.Outbound
 {
-	using System;
 	using System.Collections.Generic;
 
-	public class InboundContext :
-		IInboundContext
+	public class OutboundContext :
+		IOutboundContext
 	{
-		private readonly InboundPipeline _pipeline;
-		private readonly HashSet<Type> _used = new HashSet<Type>();
+		private readonly HashSet<IEndpoint> _endpoints = new HashSet<IEndpoint>();
+		private readonly MessagePipeline _pipeline;
 
-		public InboundContext(InboundPipeline pipeline)
+		public OutboundContext(MessagePipeline pipeline)
 		{
 			_pipeline = pipeline;
 		}
 
-		public bool HasMessageTypeBeenDefined(Type messageType)
+		public void AddEndpointToPublish(IEndpoint endpoint)
 		{
-			return _used.Contains(messageType);
+			if (!_endpoints.Contains(endpoint))
+				_endpoints.Add(endpoint);
 		}
 
-		public Func<bool> Connect<TMessage>(IMessageSink<TMessage> sink) where TMessage : class
+		public IEnumerable<IEndpoint> GetEndpoints()
 		{
-			return _pipeline.Configure(x => ConfigureMessageRouter<TMessage>.Connect(_pipeline, sink));
-		}
-
-		public void MessageTypeWasDefined(Type messageType)
-		{
-			_used.Add(messageType);
-		}
-
-		public IObjectBuilder Builder
-		{
-			get { return _pipeline.Builder; }
+			return _endpoints;
 		}
 	}
 }

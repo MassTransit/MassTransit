@@ -13,6 +13,7 @@
 namespace MassTransit.Pipeline
 {
 	using System.Collections.Generic;
+	using Interceptors.Outbound;
 
 	public class OutboundPipeline :
 		PipelineBase<IOutboundInterceptor>

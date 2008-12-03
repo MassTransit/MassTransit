@@ -14,6 +14,7 @@ namespace MassTransit.Pipeline
 {
 	using System;
 	using System.Collections.Generic;
+	using Interceptors.Inbound;
 
 	public class InboundPipeline :
 		PipelineBase<IInboundInterceptor>,

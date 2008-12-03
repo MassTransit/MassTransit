@@ -10,9 +10,12 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Pipeline
+namespace MassTransit.Pipeline.Interceptors.Outbound
 {
-	public interface IOutboundContext
+	using System.Collections.Generic;
+
+	public interface IOutboundInterceptor
 	{
+		IEnumerable<IEndpoint> Publish<TMessage>(IOutboundContext context, TMessage message);
 	}
 }
