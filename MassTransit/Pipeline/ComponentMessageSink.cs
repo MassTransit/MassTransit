@@ -14,10 +14,16 @@ namespace MassTransit.Pipeline
 {
 	using System.Collections.Generic;
 
+	/// <summary>
+	/// Routes messages to instances of subscribed components. A new instance of the component
+	/// is created from the container for each message received.
+	/// </summary>
+	/// <typeparam name="TComponent">The component type to handle the message</typeparam>
+	/// <typeparam name="TMessage">The message to handle</typeparam>
 	public class ComponentMessageSink<TComponent, TMessage> :
 		IMessageSink<TMessage>
 		where TMessage : class
-		where TComponent : class
+		where TComponent : class, Consumes<TMessage>.All
 	{
 		private readonly IObjectBuilder _builder;
 

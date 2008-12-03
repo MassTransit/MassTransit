@@ -15,15 +15,48 @@ namespace MassTransit.Pipeline
 	using System;
 	using System.Collections.Generic;
 	using System.Reflection;
-	using Microsoft.Practices.ServiceLocation;
 
 	public class ConsumesAllPipelineSubscriber :
 		ISubscribeInterceptor
 	{
 		public IEnumerable<Func<bool>> Subscribe<TComponent>(ISubscribeContext context)
 		{
-			Type consumerType = typeof (Consumes<>.All);
+			foreach (Type messageType in GetInterfaces<TComponent>(context, typeof (Consumes<>.All)))
+			{
+				MethodInfo genericMethod = FindMethod(GetType(), "Connect", new Type[] { typeof(TComponent), messageType }, new Type[] { typeof(ISubscribeContext)});
 
+				if (genericMethod == null)
+					throw new PipelineException(string.Format("Unable to subscribe for type: {0} ({1})",
+					                                          typeof (TComponent).FullName, messageType.FullName));
+
+				Func<bool> result = (Func<bool>) genericMethod.Invoke(this, new object[] {context});
+
+				context.MessageTypeWasDefined(messageType);
+
+				yield return result;
+			}
+		}
+
+		public IEnumerable<Func<bool>> Subscribe<TComponent>(ISubscribeContext context, TComponent instance)
+		{
+			foreach (Type messageType in GetInterfaces<TComponent>(context, typeof (Consumes<>.All)))
+			{
+				MethodInfo genericMethod = FindMethod(GetType(), "Connect", new Type[] {messageType}, new Type[] {typeof (ISubscribeContext), typeof (TComponent)});
+
+				if (genericMethod == null)
+					throw new PipelineException(string.Format("Unable to subscribe for type: {0} ({1})",
+					                                          typeof (TComponent).FullName, messageType.FullName));
+
+				Func<bool> result = (Func<bool>) genericMethod.Invoke(this, new object[] {context, instance});
+
+				context.MessageTypeWasDefined(messageType);
+
+				yield return result;
+			}
+		}
+
+		private static IEnumerable<Type> GetInterfaces<TComponent>(ISubscribeContext context, Type consumerType)
+		{
 			Type componentType = typeof (TComponent);
 
 			foreach (Type interfaceType in componentType.GetInterfaces())
@@ -47,53 +80,66 @@ namespace MassTransit.Pipeline
 				if (messageType.IsGenericType)
 				{
 				}
-			}
 
-			yield break;
+				yield return messageType;
+			}
 		}
 
-		public IEnumerable<Func<bool>> Subscribe<TComponent>(ISubscribeContext context, TComponent instance)
+		private static MethodInfo FindMethod(Type type,
+		                               string methodName,
+		                               Type[] typeArguments,
+		                               Type[] parameterTypes)
 		{
-			Type consumerType = typeof(Consumes<>.All);
+			MethodInfo methodInfo = null;
 
-			Type componentType = typeof(TComponent);
-
-			foreach (Type interfaceType in componentType.GetInterfaces())
+			if (null == parameterTypes)
 			{
-				if (!interfaceType.IsGenericType)
-					continue;
-
-				Type genericType = interfaceType.GetGenericTypeDefinition();
-
-				if (genericType != consumerType)
-					continue;
-
-				Type[] types = interfaceType.GetGenericArguments();
-
-				Type messageType = types[0];
-
-				if (context.HasMessageTypeBeenDefined(messageType))
-					continue;
-
-				// TODO if we have a generic type, we need to look for a generic message handler
-				if (messageType.IsGenericType)
+				methodInfo = type.GetMethod(methodName, BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance);
+				methodInfo = methodInfo.MakeGenericMethod(typeArguments);
+			}
+			else
+			{
+				// Method is probably overloaded. As far as I know there's no other way 
+				// to get the MethodInfo instance, we have to
+				// search for it in all the type methods
+				MethodInfo[] methods = type.GetMethods(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance);
+				foreach (MethodInfo method in methods)
 				{
+					if (method.Name == methodName)
+					{
+						// create the generic method
+						if (method.GetGenericArguments().Length == typeArguments.Length)
+						{
+							MethodInfo genericMethod = method.MakeGenericMethod(typeArguments);
+							ParameterInfo[] parameters = genericMethod.GetParameters();
+
+							// compare the method parameters
+							if (parameters.Length == parameterTypes.Length)
+							{
+								for (int i = 0; i < parameters.Length; i++)
+								{
+									if (parameters[i].ParameterType != parameterTypes[i])
+									{
+										continue; // this is not the method we're looking for
+									}
+								}
+
+								// if we're here, we got the right method
+								methodInfo = genericMethod;
+								break;
+							}
+						}
+					}
 				}
 
-				MethodInfo mi = GetType().GetMethod("Connect", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
-				MethodInfo genericMethod = mi.MakeGenericMethod(messageType);
-
-				if (genericMethod != null)
+				if (null == methodInfo)
 				{
-					Func<bool> result = (Func<bool>)genericMethod.Invoke(this, new object[] { context, instance });
-
-					context.MessageTypeWasDefined(messageType);
-
-					yield return result;
+					throw new InvalidOperationException("Method not found");
 				}
+
 			}
 
-			yield break;
+			return methodInfo;
 		}
 
 		private Func<bool> Connect<TMessage>(ISubscribeContext context, Consumes<TMessage>.All consumer) where TMessage : class
@@ -103,9 +149,9 @@ namespace MassTransit.Pipeline
 			return context.Connect(sink);
 		}
 
-		private Func<bool> Connect<TComponent, TMessage>(ISubscribeContext context) 
-			where TMessage : class 
-			where TComponent : class
+		private Func<bool> Connect<TComponent, TMessage>(ISubscribeContext context)
+			where TMessage : class
+			where TComponent : class, Consumes<TMessage>.All
 		{
 			var sink = new ComponentMessageSink<TComponent, TMessage>(context);
 
