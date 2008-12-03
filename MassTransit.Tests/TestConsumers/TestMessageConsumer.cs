@@ -12,10 +12,40 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests.TestConsumers
 {
-    public class TestMessageConsumer<TMessage> :
-        TestConsumerBase<TMessage>,
-        Consumes<TMessage>.All
-        where TMessage : class
-    {
-    }
+	using Messages;
+
+	public class TestMessageConsumer<TMessage> :
+		TestConsumerBase<TMessage>,
+		Consumes<TMessage>.All
+		where TMessage : class
+	{
+	}
+
+	public class PingPongConsumer :
+		Consumes<PingMessage>.All,
+		Consumes<PongMessage>.All
+	{
+		private readonly TestMessageConsumer<PingMessage> _ping = new TestMessageConsumer<PingMessage>();
+		private readonly TestMessageConsumer<PongMessage> _pong = new TestMessageConsumer<PongMessage>();
+
+		public TestMessageConsumer<PingMessage> Ping
+		{
+			get { return _ping; }
+		}
+
+		public TestMessageConsumer<PongMessage> Pong
+		{
+			get { return _pong; }
+		}
+
+		public virtual void Consume(PingMessage message)
+		{
+			_ping.Consume(message);
+		}
+
+		public virtual void Consume(PongMessage message)
+		{
+			_pong.Consume(message);
+		}
+	}
 }
