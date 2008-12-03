@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Pipeline.Sinks
 {
+	using System;
 	using System.Collections.Generic;
 	using Magnum.Common.Threading;
 
@@ -62,6 +63,33 @@ namespace MassTransit.Pipeline.Sinks
 			}
 
 			return true;
+		}
+
+		public Func<bool> Connect(TKey correlationId, IMessageSink<TMessage> sink)
+		{
+			IMessageSink<TMessage> keySink = null;
+
+			if (_sinks.ReadLock(x => x.TryGetValue(correlationId, out keySink)) == false)
+			{
+				// we need to add the sink if it doesn't exist
+				_sinks.WriteLock(x =>
+					{
+						if (x.TryGetValue(correlationId, out keySink) == false)
+						{
+							MessageRouter<TMessage> keyRouter = new MessageRouter<TMessage>();
+
+							x.Add(correlationId, keyRouter);
+
+							keySink = keyRouter;
+						}
+					});
+			}
+
+			MessageRouterConfigurator configurator = MessageRouterConfigurator.For(keySink);
+
+			var router = configurator.FindOrCreate<TMessage>();
+
+			return router.Connect(sink);
 		}
 
 		public void Dispose()

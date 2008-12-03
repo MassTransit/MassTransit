@@ -66,29 +66,4 @@ namespace MassTransit.Pipeline
 			return new MessageRouterConfigurator(TranslateTo<IMessageSink<object>>.From(sink));
 		}
 	}
-
-	public class MessageRouterConfiguratorScope<TMessage> :
-		PipelineInspectorBase
-		where TMessage : class
-	{
-		public MessageRouter<object> ObjectRouter { get; private set; }
-		public MessageRouter<TMessage> Router { get; private set; }
-
-		public override bool Inspect<TRoutedMessage>(MessageRouter<TRoutedMessage> element)
-		{
-			if (typeof (TRoutedMessage) == typeof (TMessage))
-			{
-				Router = TranslateTo<MessageRouter<TMessage>>.From(element);
-
-				return false;
-			}
-
-			if (typeof (TRoutedMessage) == typeof (object))
-			{
-				ObjectRouter = TranslateTo<MessageRouter<object>>.From(element);
-			}
-
-			return true;
-		}
-	}
 }

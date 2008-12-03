@@ -26,9 +26,9 @@ namespace MassTransit.Pipeline.Interceptors.Inbound
 		protected virtual Func<bool> Connect<TMessage, TKey>(IInboundContext context, Consumes<TMessage>.For<TKey> consumer)
 			where TMessage : class, CorrelatedBy<TKey>
 		{
-			MessageRouterConfigurator routerConfigurator = MessageRouterConfigurator.For(context.Pipeline);
+			var correlatedConfigurator = CorrelatedMessageRouterConfigurator.For(context.Pipeline);
 
-			return routerConfigurator.FindOrCreate<TMessage>().Connect(new MessageSink<TMessage>(message => consumer));
+			return correlatedConfigurator.FindOrCreate<TMessage, TKey>().Connect(consumer.CorrelationId, new MessageSink<TMessage>(message => consumer));
 		}
 
 		public override IEnumerable<Func<bool>> Subscribe<TComponent>(IInboundContext context)
