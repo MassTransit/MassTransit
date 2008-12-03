@@ -17,16 +17,16 @@ namespace MassTransit.Pipeline
 		public class Narrows<T> : Consumes<V>.All
 			where T : class
 		{
-			private readonly Consumes<T>.All m_Consumer;
+			private readonly Consumes<T>.All _consumer;
 
 			private Narrows(Consumes<T>.All _Consumer)
 			{
-				m_Consumer = _Consumer;
+				this._consumer = _Consumer;
 			}
 
 			public void Consume(V _Message)
 			{
-				m_Consumer.Consume(TranslateTo<T>.From(_Message));
+				_consumer.Consume(TranslateTo<T>.From(_Message));
 			}
 
 			public static Consumes<V>.All Wrap(Consumes<T>.All _Consumer)
@@ -38,16 +38,16 @@ namespace MassTransit.Pipeline
 		public class Widens<T> : Consumes<V>.All
 			where T : class, V
 		{
-			private readonly Consumes<T>.All m_Consumer;
+			private readonly Consumes<T>.All _consumer;
 
 			private Widens(Consumes<T>.All _Consumer)
 			{
-				m_Consumer = _Consumer;
+				_consumer = _Consumer;
 			}
 
 			public void Consume(V _Message)
 			{
-				m_Consumer.Consume(TranslateTo<T>.From(_Message));
+				_consumer.Consume(TranslateTo<T>.From(_Message));
 			}
 
 			public static Consumes<V>.All Wrap(Consumes<T>.All _Consumer)

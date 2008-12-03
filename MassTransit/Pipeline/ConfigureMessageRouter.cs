@@ -39,25 +39,25 @@ namespace MassTransit.Pipeline
 			return _found;
 		}
 
-		private void AddRouter()
+        private void AddRouter()
+        {
+            if (_objectRouter == null)
+                return;
+
+            MessageRouter<TMessage> router = new MessageRouter<TMessage>();
+
+            MessageTranslator<object, TMessage> translator = new MessageTranslator<object, TMessage>(router);
+
+            _objectRouter.Connect(translator);
+
+            _router = router;
+
+            _found = true;
+        }
+
+	    public override bool Inspect<TRoutedMessage>(MessageRouter<TRoutedMessage> element)
 		{
-			if (_objectRouter == null)
-				return;
-
-			MessageRouter<TMessage> router = new MessageRouter<TMessage>();
-
-			MessageTranslator<object, TMessage> translator = new MessageTranslator<object, TMessage>(router);
-
-			_objectRouter.Connect(translator);
-
-			_router = router;
-
-			_found = true;
-		}
-
-		public override bool Inspect<TRouter>(MessageRouter<TRouter> element)
-		{
-			if (typeof (TRouter) == typeof (TMessage))
+			if (typeof (TRoutedMessage) == typeof (TMessage))
 			{
 				_router = TranslateTo<MessageRouter<TMessage>>.From(element);
 
@@ -66,7 +66,7 @@ namespace MassTransit.Pipeline
 				return false;
 			}
 
-			if (typeof (TRouter) == typeof (object))
+			if (typeof (TRoutedMessage) == typeof (object))
 			{
 				_objectRouter = TranslateTo<MessageRouter<object>>.From(element);
 			}
