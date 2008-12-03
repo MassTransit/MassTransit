@@ -25,11 +25,6 @@ namespace MassTransit.Tests.Pipeline
 	[TestFixture]
 	public class When_building_a_pipeline
 	{
-		private Func<bool> Connect<T>(Consumes<T>.All consumer) where T : class
-		{
-			return () => true;
-		}
-
 		[Test]
 		public void A_indiscriminate_consumer_should_get_added()
 		{
@@ -38,6 +33,8 @@ namespace MassTransit.Tests.Pipeline
 			ISubscribeContext context = MockRepository.GenerateMock<ISubscribeContext>();
 			context.Expect(x => x.HasMessageTypeBeenDefined(typeof (PingMessage))).Return(false);
 
+
+
 			PipelineModel model = new PipelineModel();
 			model.RegisterSubscribeInterceptor(new ConsumesAllPipelineSubscriber());
 
@@ -45,27 +42,6 @@ namespace MassTransit.Tests.Pipeline
 
 
 			context.AssertWasCalled(x => x.HasMessageTypeBeenDefined(typeof (PingMessage)));
-		}
-
-		[Test]
-		public void Another_reflection_test()
-		{
-			Type messageType = typeof (PingMessage);
-
-			Type myT = GetType();
-
-			IndiscriminantConsumer<PingMessage> consumer = new IndiscriminantConsumer<PingMessage>();
-
-			MethodInfo mi = myT.GetMethod("Connect", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
-			MethodInfo genericMethod = mi.MakeGenericMethod(typeof(ISubscribeContext), messageType);
-
-			Func<bool> result = null;
-			if (genericMethod != null)
-			{
-				result = (Func<bool>)genericMethod.Invoke(this, new object[] { consumer });
-			}
-
-			Assert.IsNotNull(result);
 		}
 
 		[Test]

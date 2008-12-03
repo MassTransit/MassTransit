@@ -15,67 +15,81 @@ namespace MassTransit.Pipeline
 	using System;
 	using System.Collections.Generic;
 
-	public class ConfigureComponent<TComponent>
+	/// <summary>
+	/// Handles the configuration of components into the MessagePipeline and provides
+	/// an extensible model for adding new configuration types without modifying the 
+	/// base support.
+	/// </summary>
+	public class ConfigureComponent :
+		IDisposable
 	{
-		private static List<ISubscribeInterceptor> _subscribers;
+		private readonly MessagePipeline _pipeline;
+		private volatile bool _disposed;
+		private InterceptorList<ISubscribeInterceptor> _subscribers;
 
-		static ConfigureComponent()
+		public ConfigureComponent(MessagePipeline pipeline)
 		{
-			_subscribers = new List<ISubscribeInterceptor>();
+			_pipeline = pipeline;
 
-			_subscribers.Add(new ConsumesAllPipelineSubscriber());
+			_subscribers = new InterceptorList<ISubscribeInterceptor>();
+
+			_subscribers.Register(new ConsumesSelectedPipelineSubscriber());
+			_subscribers.Register(new ConsumesAllPipelineSubscriber());
 		}
 
-		public static Func<bool> Subscribe(MessagePipeline pipeline)
+		public void Dispose()
 		{
-			var context = new ConfigureComponentContext(pipeline);
+			Dispose(true);
+			GC.SuppressFinalize(this);
+		}
+
+		public Func<bool> Subscribe<TComponent>()
+			where TComponent : class
+		{
+			return Subscribe((context, interceptor) => interceptor.Subscribe<TComponent>(context));
+		}
+
+		public Func<bool> Subscribe<TComponent>(TComponent instance)
+			where TComponent : class
+		{
+			return Subscribe((context, interceptor) => interceptor.Subscribe(context, instance));
+		}
+
+		private Func<bool> Subscribe(Func<ISubscribeContext, ISubscribeInterceptor, IEnumerable<Func<bool>>> subscriber)
+		{
+			var context = new ConfigureComponentContext(_pipeline);
 
 			Func<bool> result = null;
 
-			foreach (ISubscribeInterceptor interceptor in _subscribers)
-			{
-				foreach (Func<bool> token in interceptor.Subscribe<TComponent>(context))
+			_subscribers.ForEach(interceptor =>
 				{
-					if (result == null)
-						result = token;
-					else
-						result += token;
-				}
-			}
+					foreach (Func<bool> token in subscriber(context, interceptor))
+					{
+						if (result == null)
+							result = token;
+						else
+							result += token;
+					}
+				});
 
 			return result;
 		}
-	}
 
-	public class ConfigureComponentContext :
-		ISubscribeContext
-	{
-		private readonly MessagePipeline _pipeline;
-		private readonly HashSet<Type> _used = new HashSet<Type>();
-
-		public ConfigureComponentContext(MessagePipeline pipeline)
+		protected virtual void Dispose(bool disposing)
 		{
-			_pipeline = pipeline;
+			if (_disposed) return;
+			if (disposing)
+			{
+				_subscribers.Dispose();
+				_subscribers = null;
+			}
+
+			_disposed = true;
 		}
 
-		public bool HasMessageTypeBeenDefined(Type messageType)
+		~ConfigureComponent()
 		{
-			return _used.Contains(messageType);
-		}
-
-		public Func<bool> Connect<TMessage>(IMessageSink<TMessage> sink) where TMessage : class
-		{
-			return _pipeline.Configure(x => ConfigureMessageRouter<TMessage>.Connect(x, sink));
-		}
-
-		public void MessageTypeWasDefined(Type messageType)
-		{
-			_used.Add(messageType);
-		}
-
-		public IObjectBuilder Builder
-		{
-			get { return _pipeline.Builder; }
+			Dispose(false);
 		}
 	}
 }

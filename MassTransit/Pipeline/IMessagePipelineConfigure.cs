@@ -10,16 +10,13 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Tests.Pipeline
+namespace MassTransit.Pipeline
 {
-	public class IndiscriminantConsumer<TMessage> :
-		Consumes<TMessage>.All where TMessage : class
-	{
-		public TMessage Consumed { get; private set; }
+	using System;
 
-		public virtual void Consume(TMessage message)
-		{
-			Consumed = message;
-		}
+	public interface IMessagePipelineConfigure
+	{
+		ConfigureComponent Component { get; }
+		V Configure<V>(Func<IMessagePipelineConfigure, V> action);
 	}
 }
