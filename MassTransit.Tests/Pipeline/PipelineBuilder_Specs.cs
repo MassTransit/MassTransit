@@ -25,6 +25,14 @@ namespace MassTransit.Tests.Pipeline
 	[TestFixture]
 	public class When_building_a_pipeline
 	{
+		[SetUp]
+		public void Setup()
+		{
+			_builder = MockRepository.GenerateMock<IObjectBuilder>();
+		}
+
+		private IObjectBuilder _builder;
+
 		[Test]
 		public void A_indiscriminate_consumer_should_get_added()
 		{
@@ -33,13 +41,9 @@ namespace MassTransit.Tests.Pipeline
 			ISubscribeContext context = MockRepository.GenerateMock<ISubscribeContext>();
 			context.Expect(x => x.HasMessageTypeBeenDefined(typeof (PingMessage))).Return(false);
 
+			SubscribePipeline model = new SubscribePipeline(_builder);
 
-
-			PipelineModel model = new PipelineModel();
-			model.RegisterSubscribeInterceptor(new ConsumesAllPipelineSubscriber());
-
-			model.Subscribe(context, consumer);
-
+			model.Subscribe(consumer);
 
 			context.AssertWasCalled(x => x.HasMessageTypeBeenDefined(typeof (PingMessage)));
 		}
@@ -49,7 +53,7 @@ namespace MassTransit.Tests.Pipeline
 		{
 			TestBatchConsumer<IndividualBatchMessage, Guid> batchConsumer = new TestBatchConsumer<IndividualBatchMessage, Guid>();
 
-			MessagePipeline pipeline = MessagePipeline.CreateDefaultPipeline(MockRepository.GenerateMock<IObjectBuilder>());
+			SubscribePipeline pipeline = new SubscribePipeline(MockRepository.GenerateMock<IObjectBuilder>());
 
 			pipeline.Subscribe(batchConsumer);
 
@@ -83,7 +87,7 @@ namespace MassTransit.Tests.Pipeline
 		{
 			IndiscriminantConsumer<PingMessage> consumer = new IndiscriminantConsumer<PingMessage>();
 
-			MessagePipeline pipeline = MessagePipeline.CreateDefaultPipeline(MockRepository.GenerateMock<IObjectBuilder>());
+			SubscribePipeline pipeline = new SubscribePipeline(MockRepository.GenerateMock<IObjectBuilder>());
 
 			pipeline.Subscribe(consumer);
 
@@ -101,11 +105,6 @@ namespace MassTransit.Tests.Pipeline
 			ISubscribeInterceptor interceptor = MockRepository.GenerateMock<ISubscribeInterceptor>();
 			interceptor.Expect(x => x.Subscribe(context, consumer)).Return(new List<Func<bool>>());
 
-			PipelineModel model = new PipelineModel();
-
-			model.RegisterSubscribeInterceptor(interceptor);
-
-			model.Subscribe(context, consumer);
 
 			interceptor.AssertWasCalled(x => x.Subscribe(context, consumer));
 		}

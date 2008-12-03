@@ -16,6 +16,6 @@ namespace MassTransit.Pipeline
 
 	public interface IPublishInterceptor
 	{
-		IEnumerable<IEndpoint> Publish<TMessage>(TMessage message);
+		IEnumerable<IEndpoint> Publish<TMessage>(IPublishContext context, TMessage message);
 	}
 }

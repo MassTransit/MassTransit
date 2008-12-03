@@ -12,22 +12,28 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Pipeline
 {
-	using System;
+	using System.Collections.Generic;
 
-	public interface IMessagePipelineConfigure
+	public class PublishContext :
+		IPublishContext
 	{
-		/// <summary>
-		/// Configure the MessagePipeline
-		/// </summary>
-		/// <typeparam name="V"></typeparam>
-		/// <param name="action"></param>
-		/// <returns></returns>
-		V Configure<V>(Func<IMessagePipelineConfigure, V> action);
+		private readonly HashSet<IEndpoint> _endpoints = new HashSet<IEndpoint>();
+		private readonly MessagePipeline _pipeline;
 
-		Func<bool> Subscribe<TComponent>()
-			where TComponent : class;
+		public PublishContext(MessagePipeline pipeline)
+		{
+			_pipeline = pipeline;
+		}
 
-		Func<bool> Subscribe<TComponent>(TComponent instance)
-			where TComponent : class;
+		public void AddEndpointToPublish(IEndpoint endpoint)
+		{
+			if (!_endpoints.Contains(endpoint))
+				_endpoints.Add(endpoint);
+		}
+
+		public IEnumerable<IEndpoint> GetEndpoints()
+		{
+			return _endpoints;
+		}
 	}
 }

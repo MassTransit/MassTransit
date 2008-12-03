@@ -13,10 +13,11 @@
 namespace MassTransit.Pipeline
 {
 	using System;
-	using Microsoft.Practices.ServiceLocation;
 
 	public interface ISubscribeContext
 	{
+		IObjectBuilder Builder { get; }
+
 		/// <summary>
 		/// 
 		/// </summary>
@@ -28,7 +29,5 @@ namespace MassTransit.Pipeline
 		Func<bool> Connect<TMessage>(IMessageSink<TMessage> sink) where TMessage : class;
 
 		void MessageTypeWasDefined(Type messageType);
-
-		IObjectBuilder Builder { get; }
 	}
 }
