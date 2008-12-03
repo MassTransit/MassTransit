@@ -12,7 +12,6 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests.Pipeline
 {
-	using Magnum.Common.DateTimeExtensions;
 	using MassTransit.Pipeline;
 	using Messages;
 	using NUnit.Framework;
@@ -26,7 +25,6 @@ namespace MassTransit.Tests.Pipeline
 		public void Setup()
 		{
 			_builder = MockRepository.GenerateMock<IObjectBuilder>();
-
 		}
 
 		private IObjectBuilder _builder;
@@ -68,19 +66,46 @@ namespace MassTransit.Tests.Pipeline
 		{
 			TestMessageConsumer<PingMessage> consumer = MockRepository.GenerateMock<TestMessageConsumer<PingMessage>>();
 
-			_builder.Expect(x => x.GetInstance<TestMessageConsumer<PingMessage>>()).Return(consumer);
+			_builder.Expect(x => x.GetInstance<TestMessageConsumer<PingMessage>>()).Return(consumer).Repeat.Once();
 
 			MessagePipeline pipeline = MessagePipeline.CreateDefaultPipeline(_builder);
 
 			pipeline.Subscribe<TestMessageConsumer<PingMessage>>();
 
+			PipelineViewer.Trace(pipeline);
+
 			PingMessage message = new PingMessage();
+			consumer.Expect(x => x.Consume(message));
 
 			pipeline.Dispatch(message);
 
-			consumer.AssertWasCalled(x => x.Consume(message));
+			consumer.VerifyAllExpectations();
+			_builder.VerifyAllExpectations();
+		}
+
+		[Test]
+		public void A_component_should_be_subscribed_to_multiple_messages_on_the_pipeline()
+		{
+			PingPongConsumer consumer = MockRepository.GenerateMock<PingPongConsumer>();
+
+			_builder.Expect(x => x.GetInstance<PingPongConsumer>()).Return(consumer).Repeat.Twice();
+
+			MessagePipeline pipeline = MessagePipeline.CreateDefaultPipeline(_builder);
+
+			pipeline.Subscribe<PingPongConsumer>();
 
 			PipelineViewer.Trace(pipeline);
+
+			PingMessage ping = new PingMessage();
+			consumer.Expect(x => x.Consume(ping));
+			pipeline.Dispatch(ping);
+
+			PongMessage pong = new PongMessage(ping.CorrelationId);
+			consumer.Expect(x => x.Consume(pong));
+			pipeline.Dispatch(pong);
+
+			_builder.VerifyAllExpectations();
+			consumer.VerifyAllExpectations();
 		}
 
 		[Test]
