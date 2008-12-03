@@ -176,7 +176,6 @@
     <Compile Include="IHostedService.cs" />
     <Compile Include="IEndpoint.cs" />
     <Compile Include="Internal\Dispatchers\IMessageDispatcher.cs" />
-    <Compile Include="IMessageContext.cs" />
     <Compile Include="IObjectBuilder.cs" />
     <Compile Include="IServiceBus.cs" />
     <Compile Include="MessageFilter.cs" />
