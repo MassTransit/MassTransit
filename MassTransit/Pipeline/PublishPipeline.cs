@@ -12,22 +12,29 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Pipeline
 {
-	using System;
+	using System.Collections.Generic;
 
-	public interface IMessagePipelineConfigure
+	public class PublishPipeline :
+		PipelineBase<IPublishInterceptor>
 	{
-		/// <summary>
-		/// Configure the MessagePipeline
-		/// </summary>
-		/// <typeparam name="V"></typeparam>
-		/// <param name="action"></param>
-		/// <returns></returns>
-		V Configure<V>(Func<IMessagePipelineConfigure, V> action);
+		public PublishPipeline(IObjectBuilder builder)
+			: base(builder)
+		{
+		}
 
-		Func<bool> Subscribe<TComponent>()
-			where TComponent : class;
+		public IEnumerable<IEndpoint> Publish<TMessage>(TMessage message) where TMessage : class
+		{
+			var context = new PublishContext(Pipeline);
 
-		Func<bool> Subscribe<TComponent>(TComponent instance)
-			where TComponent : class;
+			_interceptors.ForEach(interceptor =>
+				{
+					foreach (IEndpoint endpoint in interceptor.Publish(context, message))
+					{
+						context.AddEndpointToPublish(endpoint);
+					}
+				});
+
+			return context.GetEndpoints();
+		}
 	}
 }

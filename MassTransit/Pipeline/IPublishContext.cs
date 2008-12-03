@@ -12,22 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Pipeline
 {
-	using System;
-
-	public interface IMessagePipelineConfigure
+	public interface IPublishContext
 	{
-		/// <summary>
-		/// Configure the MessagePipeline
-		/// </summary>
-		/// <typeparam name="V"></typeparam>
-		/// <param name="action"></param>
-		/// <returns></returns>
-		V Configure<V>(Func<IMessagePipelineConfigure, V> action);
-
-		Func<bool> Subscribe<TComponent>()
-			where TComponent : class;
-
-		Func<bool> Subscribe<TComponent>(TComponent instance)
-			where TComponent : class;
 	}
 }

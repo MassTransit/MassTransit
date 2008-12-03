@@ -15,32 +15,24 @@ namespace MassTransit.Pipeline
 	using System;
 	using System.Collections.Generic;
 
-	/// <summary>
-	/// Handles the configuration of components into the MessagePipeline and provides
-	/// an extensible model for adding new configuration types without modifying the 
-	/// base support.
-	/// </summary>
-	public class ConfigureComponent :
-		IDisposable
+	public class SubscribePipeline :
+		PipelineBase<ISubscribeInterceptor>,
+		IMessagePipelineConfigure
 	{
-		private readonly MessagePipeline _pipeline;
-		private volatile bool _disposed;
-		private InterceptorList<ISubscribeInterceptor> _subscribers;
+		private readonly Func<bool> _emptyToken = () => false;
 
-		public ConfigureComponent(MessagePipeline pipeline)
+		public SubscribePipeline(IObjectBuilder builder) :
+			base(builder)
 		{
-			_pipeline = pipeline;
-
-			_subscribers = new InterceptorList<ISubscribeInterceptor>();
-
-			_subscribers.Register(new ConsumesSelectedPipelineSubscriber());
-			_subscribers.Register(new ConsumesAllPipelineSubscriber());
+			_interceptors.Register(new ConsumesSelectedPipelineSubscriber());
+			_interceptors.Register(new ConsumesAllPipelineSubscriber());
 		}
 
-		public void Dispose()
+		public V Configure<V>(Func<IMessagePipelineConfigure, V> action)
 		{
-			Dispose(true);
-			GC.SuppressFinalize(this);
+			V result = action(this);
+
+			return result;
 		}
 
 		public Func<bool> Subscribe<TComponent>()
@@ -57,11 +49,11 @@ namespace MassTransit.Pipeline
 
 		private Func<bool> Subscribe(Func<ISubscribeContext, ISubscribeInterceptor, IEnumerable<Func<bool>>> subscriber)
 		{
-			var context = new ConfigureComponentContext(_pipeline);
+			var context = new SubscribeContext(this);
 
 			Func<bool> result = null;
 
-			_subscribers.ForEach(interceptor =>
+			_interceptors.ForEach(interceptor =>
 				{
 					foreach (Func<bool> token in subscriber(context, interceptor))
 					{
@@ -72,24 +64,7 @@ namespace MassTransit.Pipeline
 					}
 				});
 
-			return result;
-		}
-
-		protected virtual void Dispose(bool disposing)
-		{
-			if (_disposed) return;
-			if (disposing)
-			{
-				_subscribers.Dispose();
-				_subscribers = null;
-			}
-
-			_disposed = true;
-		}
-
-		~ConfigureComponent()
-		{
-			Dispose(false);
+			return result ?? _emptyToken;
 		}
 	}
 }

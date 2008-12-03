@@ -15,13 +15,13 @@ namespace MassTransit.Pipeline
 	using System;
 	using System.Collections.Generic;
 
-	public class ConfigureComponentContext :
+	public class SubscribeContext :
 		ISubscribeContext
 	{
-		private readonly MessagePipeline _pipeline;
+		private readonly SubscribePipeline _pipeline;
 		private readonly HashSet<Type> _used = new HashSet<Type>();
 
-		public ConfigureComponentContext(MessagePipeline pipeline)
+		public SubscribeContext(SubscribePipeline pipeline)
 		{
 			_pipeline = pipeline;
 		}

@@ -82,7 +82,7 @@ namespace MassTransit.Pipeline
 			_text.AppendFormat(text).AppendLine();
 		}
 
-		public static void Trace<T>(IMessageSink<T> pipeline) where T : class
+		public static void Trace(MessagePipeline pipeline)
 		{
 			PipelineViewer viewer = new PipelineViewer();
 
