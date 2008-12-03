@@ -28,7 +28,7 @@ namespace MassTransit.Pipeline
 
 		public static Func<bool> Subscribe(MessagePipeline pipeline)
 		{
-			var context = new ConfigureComponentContext<TComponent>(pipeline);
+			var context = new ConfigureComponentContext(pipeline);
 
 			Func<bool> result = null;
 
@@ -47,7 +47,7 @@ namespace MassTransit.Pipeline
 		}
 	}
 
-	public class ConfigureComponentContext<TComponent> :
+	public class ConfigureComponentContext :
 		ISubscribeContext
 	{
 		private readonly MessagePipeline _pipeline;

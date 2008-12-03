@@ -22,10 +22,19 @@ namespace MassTransit.Tests.Pipeline
 	[TestFixture]
 	public class When_subscribing_a_consumer_to_the_pipeline
 	{
+		[SetUp]
+		public void Setup()
+		{
+			_builder = MockRepository.GenerateMock<IObjectBuilder>();
+
+		}
+
+		private IObjectBuilder _builder;
+
 		[Test]
 		public void A_bunch_of_mixed_subscriber_types_should_work()
 		{
-			MessagePipeline pipeline = MessagePipeline.CreateDefaultPipeline(MockRepository.GenerateMock<IObjectBuilder>());
+			MessagePipeline pipeline = MessagePipeline.CreateDefaultPipeline(_builder);
 
 			IndiscriminantConsumer<PingMessage> consumer = new IndiscriminantConsumer<PingMessage>();
 			ParticularConsumer consumerYes = new ParticularConsumer(true);
@@ -57,21 +66,29 @@ namespace MassTransit.Tests.Pipeline
 		[Test]
 		public void A_component_should_be_subscribed_to_the_pipeline()
 		{
-			MessagePipeline pipeline = MessagePipeline.CreateDefaultPipeline(MockRepository.GenerateMock<IObjectBuilder>());
+			TestMessageConsumer<PingMessage> consumer = MockRepository.GenerateMock<TestMessageConsumer<PingMessage>>();
+
+			_builder.Expect(x => x.GetInstance<TestMessageConsumer<PingMessage>>()).Return(consumer);
+
+			MessagePipeline pipeline = MessagePipeline.CreateDefaultPipeline(_builder);
 
 			pipeline.Subscribe<TestMessageConsumer<PingMessage>>();
 
 			PingMessage message = new PingMessage();
 
+			consumer.Expect(x => x.Consume(message));
+
 			pipeline.Dispatch(message);
 
-			TestConsumerBase<PingMessage>.AnyShouldHaveReceivedMessage(message, 5.Seconds());
+			consumer.AssertWasCalled(x => x.Consume(message));
+
+			//TestConsumerBase<PingMessage>.AnyShouldHaveReceivedMessage(message, 5.Seconds());
 		}
 
 		[Test]
 		public void The_subscription_should_be_added()
 		{
-			MessagePipeline pipeline = MessagePipeline.CreateDefaultPipeline(MockRepository.GenerateMock<IObjectBuilder>());
+			MessagePipeline pipeline = MessagePipeline.CreateDefaultPipeline(_builder);
 
 			IndiscriminantConsumer<PingMessage> consumer = new IndiscriminantConsumer<PingMessage>();
 
@@ -87,7 +104,7 @@ namespace MassTransit.Tests.Pipeline
 		[Test]
 		public void The_subscription_should_be_added_for_selective_consumers()
 		{
-			MessagePipeline pipeline = MessagePipeline.CreateDefaultPipeline(MockRepository.GenerateMock<IObjectBuilder>());
+			MessagePipeline pipeline = MessagePipeline.CreateDefaultPipeline(_builder);
 
 			ParticularConsumer consumer = new ParticularConsumer(false);
 
@@ -103,7 +120,7 @@ namespace MassTransit.Tests.Pipeline
 		[Test]
 		public void The_subscription_should_be_added_for_selective_consumers_that_are_interested()
 		{
-			MessagePipeline pipeline = MessagePipeline.CreateDefaultPipeline(MockRepository.GenerateMock<IObjectBuilder>());
+			MessagePipeline pipeline = MessagePipeline.CreateDefaultPipeline(_builder);
 
 			ParticularConsumer consumer = new ParticularConsumer(true);
 
@@ -119,7 +136,7 @@ namespace MassTransit.Tests.Pipeline
 		[Test]
 		public void The_wrong_type_of_message_should_not_blow_up_the_test()
 		{
-			MessagePipeline pipeline = MessagePipeline.CreateDefaultPipeline(MockRepository.GenerateMock<IObjectBuilder>());
+			MessagePipeline pipeline = MessagePipeline.CreateDefaultPipeline(_builder);
 
 			IndiscriminantConsumer<PingMessage> consumer = new IndiscriminantConsumer<PingMessage>();
 
