@@ -76,11 +76,11 @@ namespace MassTransit.Tests.Pipeline
 
 			PingMessage message = new PingMessage();
 
-			consumer.Expect(x => x.Consume(message));
-
 			pipeline.Dispatch(message);
 
-            consumer.VerifyAllExpectations();
+			consumer.AssertWasCalled(x => x.Consume(message));
+
+			PipelineViewer.Trace(pipeline);
 		}
 
 		[Test]
