@@ -15,31 +15,25 @@ namespace HeavyLoad.Load
 	using System;
 	using System.Threading;
 	using Castle.Windsor;
-	using Magnum.Common.ObjectExtensions;
 	using MassTransit;
-	using MassTransit.Transports.Msmq;
-	using MassTransit.Transports.Nms;
 	using MassTransit.WindsorIntegration;
 
 	public class ActiveMQLoadTest : IDisposable
 	{
-		private const int _repeatCount = 5000;
+		private const int _repeatCount = 3000;
 		private static readonly ManualResetEvent _completeEvent = new ManualResetEvent(false);
-		private readonly IWindsorContainer _container;
 		private static readonly ManualResetEvent _responseEvent = new ManualResetEvent(false);
 
+		private static int _counter;
+		private static int _responseCounter;
+		private readonly IWindsorContainer _container;
 		private IServiceBus _bus;
-		private static int _counter = 0;
-		private static int _responseCounter = 0;
 
 		public ActiveMQLoadTest()
 		{
 			_container = new DefaultMassTransitContainer("activemq.castle.xml");
 
 			_bus = _container.Resolve<IServiceBus>();
-
-			NmsEndpoint endpoint = _bus.Endpoint as NmsEndpoint;
-			endpoint.MustNotBeNull();
 		}
 
 		public void Dispose()
@@ -77,20 +71,15 @@ namespace HeavyLoad.Load
 			stopWatch.Stop();
 		}
 
-		internal class ResponseConsumer : Consumes<SimpleResponse>.All
-		{
-			public void Consume(SimpleResponse message)
-			{
-				Interlocked.Increment(ref _responseCounter);
-				if (_responseCounter == _repeatCount)
-					_responseEvent.Set();
-			}
-		}
-
 		internal class RequestConsumer :
 			Consumes<GeneralMessage>.All
 		{
 			private IServiceBus _bus = ServiceBus.Null;
+
+			public IServiceBus Bus
+			{
+				set { _bus = value; }
+			}
 
 			public void Consume(GeneralMessage message)
 			{
@@ -100,10 +89,15 @@ namespace HeavyLoad.Load
 
 				_bus.Publish(new SimpleResponse());
 			}
+		}
 
-			public IServiceBus Bus
+		internal class ResponseConsumer : Consumes<SimpleResponse>.All
+		{
+			public void Consume(SimpleResponse message)
 			{
-				set { _bus = value; }
+				Interlocked.Increment(ref _responseCounter);
+				if (_responseCounter == _repeatCount)
+					_responseEvent.Set();
 			}
 		}
 	}
