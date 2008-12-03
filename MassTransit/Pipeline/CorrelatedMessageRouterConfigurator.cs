@@ -12,79 +12,51 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Pipeline
 {
-	using System;
+	using Exceptions;
 	using Inspectors;
 	using Sinks;
 
-	/// <summary>
-	/// Performs the pipeline configuration for the CorrelatedMessageRouter
-	/// </summary>
-	/// <typeparam name="TMessage"></typeparam>
-	public class CorrelatedMessageRouterConfigurator<TMessage, TKey> :
+	public class CorrelatedMessageRouterConfigurator :
 		PipelineInspectorBase
-		where TMessage : class, CorrelatedBy<TKey>
 	{
-		private bool _found;
-		private MessageRouter<object> _objectRouter;
-		private MessageRouter<TMessage> _router;
+		private readonly IMessageSink<object> _sink;
 
-		private MessageRouter<TMessage> Router
+		private CorrelatedMessageRouterConfigurator(IMessageSink<object> sink)
 		{
-			get { return _router; }
+			_sink = sink;
 		}
 
-		private bool Find(IMessageSink<object> pipeline, bool addIfNotFound)
+		public CorrelatedMessageRouter<TMessage, TKey> FindOrCreate<TMessage, TKey>()
+			where TMessage : class, CorrelatedBy<TKey>
 		{
-			pipeline.Inspect(this);
+			MessageRouterConfigurator configurator = MessageRouterConfigurator.For(_sink);
 
-			if (_found == false && addIfNotFound)
-			{
-				AddRouter();
-			}
+			var router = configurator.FindOrCreate<TMessage>();
 
-			return _found;
+			var scope = new CorrelatedMessageRouterConfiguratorScope<TMessage, TKey>();
+
+			router.Inspect(scope);
+
+			return scope.Router ?? ConfigureRouter<TMessage, TKey>(router);
 		}
 
-		private void AddRouter()
+		private static CorrelatedMessageRouter<TMessage, TKey> ConfigureRouter<TMessage, TKey>(MessageRouter<TMessage> messageRouter)
+			where TMessage : class, CorrelatedBy<TKey>
 		{
-			if (_objectRouter == null)
-				return;
+			if (messageRouter == null)
+				throw new PipelineException("The base object router was not found");
 
-			MessageRouter<TMessage> router = new MessageRouter<TMessage>();
+			CorrelatedMessageRouter<TMessage, TKey> router = new CorrelatedMessageRouter<TMessage, TKey>();
 
-			MessageTranslator<object, TMessage> translator = new MessageTranslator<object, TMessage>(router);
+			messageRouter.Connect(router);
 
-			_objectRouter.Connect(translator);
-
-			_router = router;
-
-			_found = true;
+			return router;
 		}
 
-		public override bool Inspect<TRoutedMessage>(MessageRouter<TRoutedMessage> element)
+		public static CorrelatedMessageRouterConfigurator For<TMessage>(IMessageSink<TMessage> sink)
+			where TMessage : class
 		{
-			if (typeof (TRoutedMessage) == typeof (TMessage))
-			{
-				_router = TranslateTo<MessageRouter<TMessage>>.From(element);
-
-				_found = true;
-
-				return false;
-			}
-
-			if (typeof (TRoutedMessage) == typeof (object))
-			{
-				_objectRouter = TranslateTo<MessageRouter<object>>.From(element);
-			}
-
-			return true;
-		}
-
-		public static Func<bool> Connect(MessagePipeline pipeline, IMessageSink<TMessage> sink)
-		{
-			MessageRouterConfigurator routerConfigurator = MessageRouterConfigurator.For(pipeline);
-
-			return routerConfigurator.FindOrCreate<TMessage>().Connect(sink);
+			return new CorrelatedMessageRouterConfigurator(TranslateTo<IMessageSink<object>>.From(sink));
 		}
 	}
 }
