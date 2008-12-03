@@ -222,7 +222,7 @@
     <Compile Include="Pipeline\ConsumesPipelineSubscriberBase.cs" />
     <Compile Include="Pipeline\ConsumesSelectedPipelineSubscriber.cs" />
     <Compile Include="Pipeline\IInterceptorList.cs" />
-    <Compile Include="Pipeline\IMessagePipelineConfigure.cs" />
+    <Compile Include="Pipeline\IConfigureSubscribePipeline.cs" />
     <Compile Include="Pipeline\IMessageSink.cs" />
     <Compile Include="Pipeline\IPipelineInspector.cs" />
     <Compile Include="Pipeline\IPipelineModel.cs" />

@@ -17,7 +17,7 @@ namespace MassTransit.Pipeline
 
 	public class SubscribePipeline :
 		PipelineBase<ISubscribeInterceptor>,
-		IMessagePipelineConfigure
+		IConfigureSubscribePipeline
 	{
 		private readonly Func<bool> _emptyToken = () => false;
 
@@ -30,7 +30,7 @@ namespace MassTransit.Pipeline
 			_interceptors.Register(new ConsumesSelectedPipelineSubscriber());
 		}
 
-		public V Configure<V>(Func<IMessagePipelineConfigure, V> action)
+		public V Configure<V>(Func<IConfigureSubscribePipeline, V> action)
 		{
 			V result = action(this);
 

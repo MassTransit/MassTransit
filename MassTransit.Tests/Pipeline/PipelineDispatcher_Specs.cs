@@ -89,7 +89,7 @@ namespace MassTransit.Tests.Pipeline
 
 			bool accepted = false;
 
-			MessagePipeline pipeline = MessagePipeline.CreateDefaultPipeline(MockRepository.GenerateMock<IObjectBuilder>());
+			MessagePipeline pipeline = MessagePipeline.CreateDefaultPipeline();
 
 			pipeline.Dispatch(message, x => accepted = true);
 

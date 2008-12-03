@@ -24,7 +24,7 @@ namespace MassTransit.Pipeline
 		{
 			Builder = builder;
 
-			Pipeline = MessagePipeline.CreateDefaultPipeline(builder);
+			Pipeline = MessagePipeline.CreateDefaultPipeline();
 		}
 
 		public IObjectBuilder Builder { get; private set; }
