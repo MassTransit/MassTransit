@@ -75,19 +75,9 @@ namespace MassTransit.Internal
 		/// <summary>
 		/// Marks the whole context as poison
 		/// </summary>
-		public void MarkPoison()
+		public void MarkPoisonous()
 		{
-			//Bus.PoisonEndpoint.Send(_envelope);
-			// TODO
-		}
-
-		/// <summary>
-		/// Marks a specific message as poison
-		/// </summary>
-		public void MarkPoison(object message)
-		{
-			//Bus.PoisonEndpoint.Send(env);
-			//TODO
+			Bus.PoisonEndpoint.Send<T>(Message);
 		}
 	}
 }
