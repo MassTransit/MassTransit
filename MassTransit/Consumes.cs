@@ -25,7 +25,6 @@
 namespace MassTransit
 {
 	using log4net;
-	using Pipeline;
 
 	/// <summary>
 	/// Marker interface used to assist identification in IoC containers.

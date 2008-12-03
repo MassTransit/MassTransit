@@ -10,7 +10,7 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Pipeline
+namespace MassTransit
 {
 	using Exceptions;
 
@@ -24,7 +24,7 @@ namespace MassTransit.Pipeline
 		{
 			V result = t as V;
 			if (result == null)
-				throw new MessageException(typeof (T), "Unable to convert to type: " + typeof (V).FullName);
+				throw new ConventionException(string.Format("Unable to convert from {0} to {1}", typeof (T).FullName, typeof (V).FullName));
 
 			return result;
 		}
