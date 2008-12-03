@@ -18,15 +18,9 @@ namespace MassTransit.Pipeline.Interceptors.Inbound
 	{
 		IObjectBuilder Builder { get; }
 
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="messageType"></param>
-		/// <returns>True if the message type has already been subscribed to the pipeline</returns>
+		MessagePipeline Pipeline { get; }
+
 		bool HasMessageTypeBeenDefined(Type messageType);
-
-
-		Func<bool> Connect<TMessage>(IMessageSink<TMessage> sink) where TMessage : class;
 
 		void MessageTypeWasDefined(Type messageType);
 	}

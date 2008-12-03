@@ -29,6 +29,7 @@ namespace MassTransit.Pipeline
 
 			_interceptors.Register(new ConsumesAllInboundInterceptor());
 			_interceptors.Register(new ConsumesSelectedInboundInterceptor());
+			_interceptors.Register(new ConsumesForInboundInterceptor());
 		}
 
 		public V Configure<V>(Func<IConfigureInboundPipeline, V> action)

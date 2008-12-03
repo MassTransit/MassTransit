@@ -26,14 +26,14 @@ namespace MassTransit.Pipeline.Interceptors.Inbound
 			_pipeline = pipeline;
 		}
 
+		public MessagePipeline Pipeline
+		{
+			get { return _pipeline; }
+		}
+
 		public bool HasMessageTypeBeenDefined(Type messageType)
 		{
 			return _used.Contains(messageType);
-		}
-
-		public Func<bool> Connect<TMessage>(IMessageSink<TMessage> sink) where TMessage : class
-		{
-			return _pipeline.Configure(x => ConfigureMessageRouter<TMessage>.Connect(_pipeline, sink));
 		}
 
 		public void MessageTypeWasDefined(Type messageType)

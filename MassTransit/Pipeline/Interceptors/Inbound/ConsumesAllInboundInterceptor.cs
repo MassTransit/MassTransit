@@ -13,6 +13,7 @@
 namespace MassTransit.Pipeline.Interceptors.Inbound
 {
 	using System;
+	using Sinks;
 
 	public class ConsumesAllInboundInterceptor :
 		ConsumesInboundInterceptorBase
@@ -24,18 +25,18 @@ namespace MassTransit.Pipeline.Interceptors.Inbound
 
 		protected virtual Func<bool> Connect<TMessage>(IInboundContext context, Consumes<TMessage>.All consumer) where TMessage : class
 		{
-			var sink = new MessageSink<TMessage>(message => consumer);
+			MessageRouterConfigurator routerConfigurator = MessageRouterConfigurator.For(context.Pipeline);
 
-			return context.Connect(sink);
+			return routerConfigurator.FindOrCreate<TMessage>().Connect(new MessageSink<TMessage>(message => consumer));
 		}
 
 		protected virtual Func<bool> Connect<TComponent, TMessage>(IInboundContext context)
 			where TMessage : class
 			where TComponent : class, Consumes<TMessage>.All
 		{
-			var sink = new ComponentMessageSink<TComponent, TMessage>(context);
+			MessageRouterConfigurator routerConfigurator = MessageRouterConfigurator.For(context.Pipeline);
 
-			return context.Connect(sink);
+			return routerConfigurator.FindOrCreate<TMessage>().Connect(new ComponentMessageSink<TComponent, TMessage>(context));
 		}
 	}
 }

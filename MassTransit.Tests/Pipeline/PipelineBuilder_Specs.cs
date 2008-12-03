@@ -15,7 +15,6 @@ namespace MassTransit.Tests.Pipeline
 	using System;
 	using System.Collections.Generic;
 	using System.Diagnostics;
-	using System.Reflection;
 	using Magnum.Common.DateTimeExtensions;
 	using MassTransit.Pipeline;
 	using MassTransit.Pipeline.Interceptors.Inbound;
@@ -26,11 +25,15 @@ namespace MassTransit.Tests.Pipeline
 	[TestFixture]
 	public class When_building_a_pipeline
 	{
+		#region Setup/Teardown
+
 		[SetUp]
 		public void Setup()
 		{
 			_builder = MockRepository.GenerateMock<IObjectBuilder>();
 		}
+
+		#endregion
 
 		private IObjectBuilder _builder;
 
@@ -39,7 +42,7 @@ namespace MassTransit.Tests.Pipeline
 		{
 			TestBatchConsumer<IndividualBatchMessage, Guid> batchConsumer = new TestBatchConsumer<IndividualBatchMessage, Guid>();
 
-			InboundPipeline pipeline = new InboundPipeline(MockRepository.GenerateMock<IObjectBuilder>());
+			InboundPipeline pipeline = new InboundPipeline(_builder);
 
 			pipeline.Subscribe(batchConsumer);
 
@@ -58,22 +61,11 @@ namespace MassTransit.Tests.Pipeline
 		}
 
 		[Test]
-		public void Reflection_test()
-		{
-			Type t = typeof (ParticularConsumer);
-
-			foreach (Type interfaceType in t.GetInterfaces())
-			{
-				Trace.WriteLine(interfaceType.FullName);
-			}
-		}
-
-		[Test]
 		public void The_pipeline_should_be_happy()
 		{
 			IndiscriminantConsumer<PingMessage> consumer = new IndiscriminantConsumer<PingMessage>();
 
-			InboundPipeline pipeline = new InboundPipeline(MockRepository.GenerateMock<IObjectBuilder>());
+			InboundPipeline pipeline = new InboundPipeline(_builder);
 
 			pipeline.Subscribe(consumer);
 
@@ -81,73 +73,5 @@ namespace MassTransit.Tests.Pipeline
 
 			Assert.IsNotNull(consumer.Consumed);
 		}
-
-		[Test]
-		public void When_subscription_using_the_builder_intercepters_should_be_called()
-		{
-			IndiscriminantConsumer<PingMessage> consumer = new IndiscriminantConsumer<PingMessage>();
-
-			IInboundContext context = MockRepository.GenerateMock<IInboundContext>();
-			IInboundInterceptor interceptor = MockRepository.GenerateMock<IInboundInterceptor>();
-			interceptor.Expect(x => x.Subscribe(context, consumer)).Return(new List<Func<bool>>());
-
-
-			interceptor.AssertWasCalled(x => x.Subscribe(context, consumer));
-		}
-	}
-
-	public class MessagePipelineBuilder
-	{
-		private readonly MessagePipeline _pipeline;
-		private readonly MessageRouter<object> _router;
-		private readonly Dictionary<Type, IMessageTypeRouterBuilder> _typeBuilders = new Dictionary<Type, IMessageTypeRouterBuilder>();
-
-		public MessagePipeline Pipeline
-		{
-			get { return _pipeline; }
-		}
-
-		public Func<bool> Subscribe<TMessage>(Consumes<TMessage>.All consumer)
-			where TMessage : class
-		{
-			IMessageTypeRouterBuilder builder;
-			if (_typeBuilders.TryGetValue(typeof (TMessage), out builder) == false)
-			{
-				builder = new MessageTypeRouterBuilder<TMessage>(_router);
-
-				_typeBuilders.Add(typeof (TMessage), builder);
-			}
-
-			return builder.Subscribe(consumer);
-		}
-	}
-
-	public class MessageTypeRouterBuilder<TMessage> :
-		IMessageTypeRouterBuilder
-		where TMessage : class
-	{
-		private readonly MessageRouter<TMessage> _router;
-		private readonly MessageTranslator<object, TMessage> _translator;
-
-		public MessageTypeRouterBuilder(MessageRouter<object> objectRouter)
-		{
-			_router = new MessageRouter<TMessage>();
-
-			_translator = new MessageTranslator<object, TMessage>(_router);
-
-			objectRouter.Connect(_translator);
-		}
-
-		public Func<bool> Subscribe<T>(Consumes<T>.All consumer) where T : class
-		{
-			Func<bool> token = _router.Connect(new MessageSink<TMessage>(message => (Consumes<TMessage>.All) consumer));
-
-			return token;
-		}
-	}
-
-	public interface IMessageTypeRouterBuilder
-	{
-		Func<bool> Subscribe<TMessage>(Consumes<TMessage>.All consumer) where TMessage : class;
 	}
 }

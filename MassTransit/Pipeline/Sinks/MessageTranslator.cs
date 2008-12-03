@@ -10,7 +10,7 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Pipeline
+namespace MassTransit.Pipeline.Sinks
 {
 	using System.Collections.Generic;
 
@@ -26,6 +26,7 @@ namespace MassTransit.Pipeline
 
 		public override IEnumerable<Consumes<TInput>.All> Enumerate(TInput message)
 		{
+			// If the message cannot be safely cast to the output type, we have nothing to return
 			TOutput output = message as TOutput;
 			if (output == null)
 				yield break;
