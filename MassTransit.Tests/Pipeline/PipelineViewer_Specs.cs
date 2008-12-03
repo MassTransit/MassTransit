@@ -13,6 +13,7 @@
 namespace MassTransit.Tests.Pipeline
 {
 	using MassTransit.Pipeline;
+	using MassTransit.Pipeline.Inspectors;
 	using NUnit.Framework;
 	using Rhino.Mocks;
 

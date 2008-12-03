@@ -14,6 +14,7 @@ namespace MassTransit.Pipeline
 {
 	using System;
 	using System.Collections.Generic;
+	using Sinks;
 
 	public class MessagePipeline :
 		MessageSinkBase<object, object>

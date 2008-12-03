@@ -12,33 +12,42 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Pipeline.Sinks
 {
-	using System;
 	using System.Collections.Generic;
 	using Magnum.Common.Threading;
 
 	/// <summary>
-	/// Routes a message to all of the connected message sinks without modification
+	/// Splits a message path based on the correlation information in the message
 	/// </summary>
 	/// <typeparam name="TMessage">The type of the message to be routed</typeparam>
-	public class MessageRouter<TMessage> :
+	/// <typeparam name="TKey">They key type for the message</typeparam>
+	public class CorrelatedMessageRouter<TMessage, TKey> :
 		IMessageSink<TMessage>
-		where TMessage : class
+		where TMessage : class, CorrelatedBy<TKey>
 	{
-		private readonly ReaderWriterLockedObject<List<IMessageSink<TMessage>>> _sinks;
+		private readonly ReaderWriterLockedObject<Dictionary<TKey, IMessageSink<TMessage>>> _sinks;
 
-		public MessageRouter()
+		public CorrelatedMessageRouter()
 		{
-			_sinks = new ReaderWriterLockedObject<List<IMessageSink<TMessage>>>(new List<IMessageSink<TMessage>>());
+			_sinks = new ReaderWriterLockedObject<Dictionary<TKey, IMessageSink<TMessage>>>(new Dictionary<TKey, IMessageSink<TMessage>>());
 		}
 
 		public IEnumerable<Consumes<TMessage>.All> Enumerate(TMessage message)
 		{
-			foreach (var sink in _sinks.ReadLock(x => x.ToArray()))
+			CorrelatedBy<TKey> correlation = message;
+
+			TKey correlationId = correlation.CorrelationId;
+
+			IMessageSink<TMessage> sink = null;
+
+			if (_sinks.ReadLock(x => x.TryGetValue(correlationId, out sink)) == false)
+				yield break;
+
+			if (sink == null)
+				yield break;
+
+			foreach (Consumes<TMessage>.All consumer in sink.Enumerate(message))
 			{
-				foreach (Consumes<TMessage>.All consumer in sink.Enumerate(message))
-				{
-					yield return consumer;
-				}
+				yield return consumer;
 			}
 		}
 
@@ -46,25 +55,13 @@ namespace MassTransit.Pipeline.Sinks
 		{
 			inspector.Inspect(this);
 
-			foreach (IMessageSink<TMessage> sink in _sinks.ReadLock(x => x.ToArray()))
+			foreach (IMessageSink<TMessage> sink in _sinks.ReadLock(x => x.Values))
 			{
 				if (sink.Inspect(inspector) == false)
 					return false;
 			}
 
 			return true;
-		}
-
-		/// <summary>
-		/// Connects a message sink to the router
-		/// </summary>
-		/// <param name="sink">The sink to be connected</param>
-		/// <returns>A function to disconnect the sink from the router</returns>
-		public Func<bool> Connect(IMessageSink<TMessage> sink)
-		{
-			_sinks.WriteLock(sinks => sinks.Add(sink));
-
-			return () => _sinks.WriteLock(sinks => sinks.Remove(sink));
 		}
 
 		public void Dispose()

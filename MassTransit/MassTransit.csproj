@@ -214,10 +214,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Exceptions\ConfigurationException.cs" />
+    <Compile Include="Pipeline\CorrelatedMessageRouterConfigurator.cs" />
+    <Compile Include="Pipeline\Interceptors\Inbound\ConsumesForInboundInterceptor.cs" />
     <Compile Include="Pipeline\Sinks\ComponentMessageSink.cs" />
     <Compile Include="Pipeline\Interceptors\Inbound\InboundContext.cs" />
     <Compile Include="Pipeline\Interceptors\Inbound\ConsumesAllInboundInterceptor.cs" />
-    <Compile Include="Pipeline\ConfigureMessageRouter.cs" />
+    <Compile Include="Pipeline\MessageRouterConfigurator.cs" />
     <Compile Include="Pipeline\ConsumerFor.cs" />
     <Compile Include="Pipeline\Interceptors\Inbound\ConsumesInboundInterceptorBase.cs" />
     <Compile Include="Pipeline\Interceptors\Inbound\ConsumesSelectedInboundInterceptor.cs" />
@@ -233,17 +235,18 @@
     <Compile Include="Pipeline\Interceptors\InterceptorList.cs" />
     <Compile Include="Pipeline\MessagePipeline.cs" />
     <Compile Include="Pipeline\MessagePipelineExtensions.cs" />
+    <Compile Include="Pipeline\Sinks\CorrelatedMessageRouter.cs" />
     <Compile Include="Pipeline\Sinks\MessageRouter.cs" />
     <Compile Include="Pipeline\Sinks\MessageSink.cs" />
     <Compile Include="Pipeline\Sinks\MessageSinkBase.cs" />
     <Compile Include="Pipeline\Sinks\MessageTranslator.cs" />
     <Compile Include="Pipeline\PipelineBase.cs" />
-    <Compile Include="Pipeline\PipelineException.cs" />
-    <Compile Include="Pipeline\PipelineInspectorBase.cs" />
+    <Compile Include="Exceptions\PipelineException.cs" />
+    <Compile Include="Pipeline\Inspectors\PipelineInspectorBase.cs" />
     <Compile Include="Pipeline\Interceptors\Outbound\OutboundContext.cs" />
     <Compile Include="Pipeline\OutboundPipeline.cs" />
     <Compile Include="Pipeline\Interceptors\Inbound\InboundInterceptorBase.cs" />
-    <Compile Include="Pipeline\PipelineViewer.cs" />
+    <Compile Include="Pipeline\Inspectors\PipelineViewer.cs" />
     <Compile Include="Pipeline\InboundPipeline.cs" />
     <Compile Include="Pipeline\TranslateTo.cs" />
     <Compile Include="Serialization\BaseMessageEnvelope.cs" />

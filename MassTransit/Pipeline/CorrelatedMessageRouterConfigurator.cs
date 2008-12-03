@@ -13,10 +13,16 @@
 namespace MassTransit.Pipeline
 {
 	using System;
+	using Inspectors;
+	using Sinks;
 
-	public class ConfigureMessageRouter<TMessage> :
+	/// <summary>
+	/// Performs the pipeline configuration for the CorrelatedMessageRouter
+	/// </summary>
+	/// <typeparam name="TMessage"></typeparam>
+	public class CorrelatedMessageRouterConfigurator<TMessage, TKey> :
 		PipelineInspectorBase
-		where TMessage : class
+		where TMessage : class, CorrelatedBy<TKey>
 	{
 		private bool _found;
 		private MessageRouter<object> _objectRouter;
@@ -39,23 +45,23 @@ namespace MassTransit.Pipeline
 			return _found;
 		}
 
-        private void AddRouter()
-        {
-            if (_objectRouter == null)
-                return;
+		private void AddRouter()
+		{
+			if (_objectRouter == null)
+				return;
 
-            MessageRouter<TMessage> router = new MessageRouter<TMessage>();
+			MessageRouter<TMessage> router = new MessageRouter<TMessage>();
 
-            MessageTranslator<object, TMessage> translator = new MessageTranslator<object, TMessage>(router);
+			MessageTranslator<object, TMessage> translator = new MessageTranslator<object, TMessage>(router);
 
-            _objectRouter.Connect(translator);
+			_objectRouter.Connect(translator);
 
-            _router = router;
+			_router = router;
 
-            _found = true;
-        }
+			_found = true;
+		}
 
-	    public override bool Inspect<TRoutedMessage>(MessageRouter<TRoutedMessage> element)
+		public override bool Inspect<TRoutedMessage>(MessageRouter<TRoutedMessage> element)
 		{
 			if (typeof (TRoutedMessage) == typeof (TMessage))
 			{
@@ -76,14 +82,9 @@ namespace MassTransit.Pipeline
 
 		public static Func<bool> Connect(MessagePipeline pipeline, IMessageSink<TMessage> sink)
 		{
-			ConfigureMessageRouter<TMessage> walker = new ConfigureMessageRouter<TMessage>();
+			MessageRouterConfigurator routerConfigurator = MessageRouterConfigurator.For(pipeline);
 
-			if (walker.Find(pipeline, true))
-			{
-				return walker.Router.Connect(sink);
-			}
-
-			throw new PipelineException("Unable to connect sink to pipeline: " + typeof (TMessage).FullName);
+			return routerConfigurator.FindOrCreate<TMessage>().Connect(sink);
 		}
 	}
 }
