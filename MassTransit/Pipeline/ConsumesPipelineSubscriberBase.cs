@@ -21,11 +21,11 @@ namespace MassTransit.Pipeline
 	{
 		protected abstract Type InterfaceType { get; }
 
-		public override IEnumerable<Func<bool>> Subscribe<TComponent>(ISubscribeContext context)
+		public override IEnumerable<Func<bool>> Subscribe<TComponent>(IInboundContext context)
 		{
 			foreach (Type messageType in GetInterfaces<TComponent>(context, InterfaceType))
 			{
-				MethodInfo genericMethod = FindMethod(GetType(), "Connect", new[] {typeof (TComponent), messageType}, new[] {typeof (ISubscribeContext)});
+				MethodInfo genericMethod = FindMethod(GetType(), "Connect", new[] {typeof (TComponent), messageType}, new[] {typeof (IInboundContext)});
 
 				if (genericMethod == null)
 					throw new PipelineException(string.Format("Unable to subscribe for type: {0} ({1})",
@@ -39,11 +39,11 @@ namespace MassTransit.Pipeline
 			}
 		}
 
-		public override IEnumerable<Func<bool>> Subscribe<TComponent>(ISubscribeContext context, TComponent instance)
+		public override IEnumerable<Func<bool>> Subscribe<TComponent>(IInboundContext context, TComponent instance)
 		{
 			foreach (Type messageType in GetInterfaces<TComponent>(context, InterfaceType))
 			{
-				MethodInfo genericMethod = FindMethod(GetType(), "Connect", new[] {messageType}, new[] {typeof (ISubscribeContext), typeof (TComponent)});
+				MethodInfo genericMethod = FindMethod(GetType(), "Connect", new[] {messageType}, new[] {typeof (IInboundContext), typeof (TComponent)});
 
 				if (genericMethod == null)
 					throw new PipelineException(string.Format("Unable to subscribe for type: {0} ({1})",

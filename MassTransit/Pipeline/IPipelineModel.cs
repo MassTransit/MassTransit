@@ -16,7 +16,7 @@ namespace MassTransit.Pipeline
 
 	public interface IPipelineModel : IDisposable
 	{
-		Func<bool> RegisterSubscribeInterceptor(ISubscribeInterceptor interceptor);
-		Func<bool> RegisterPublishInterceptor(IPublishInterceptor interceptor);
+		Func<bool> RegisterSubscribeInterceptor(IInboundInterceptor interceptor);
+		Func<bool> RegisterPublishInterceptor(IOutboundInterceptor interceptor);
 	}
 }

@@ -12,10 +12,12 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Pipeline
 {
+	using System;
 	using System.Collections.Generic;
 
-	public interface IPublishInterceptor
+	public interface IInboundInterceptor
 	{
-		IEnumerable<IEndpoint> Publish<TMessage>(IPublishContext context, TMessage message);
+		IEnumerable<Func<bool>> Subscribe<TComponent>(IInboundContext context);
+		IEnumerable<Func<bool>> Subscribe<TComponent>(IInboundContext context, TComponent instance);
 	}
 }

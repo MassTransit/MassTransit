@@ -15,13 +15,13 @@ namespace MassTransit.Pipeline
 	using System;
 	using System.Collections.Generic;
 
-	public class SubscribeContext :
-		ISubscribeContext
+	public class InboundContext :
+		IInboundContext
 	{
-		private readonly SubscribePipeline _pipeline;
+		private readonly InboundPipeline _pipeline;
 		private readonly HashSet<Type> _used = new HashSet<Type>();
 
-		public SubscribeContext(SubscribePipeline pipeline)
+		public InboundContext(InboundPipeline pipeline)
 		{
 			_pipeline = pipeline;
 		}

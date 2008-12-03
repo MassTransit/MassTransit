@@ -16,10 +16,11 @@ namespace MassTransit.Pipeline
 	using System.Collections.Generic;
 	using System.Reflection;
 
-	public abstract class PipelineSubscriberBase : ISubscribeInterceptor
+	public abstract class PipelineSubscriberBase : 
+		IInboundInterceptor
 	{
-		public abstract IEnumerable<Func<bool>> Subscribe<TComponent>(ISubscribeContext context);
-		public abstract IEnumerable<Func<bool>> Subscribe<TComponent>(ISubscribeContext context, TComponent instance);
+		public abstract IEnumerable<Func<bool>> Subscribe<TComponent>(IInboundContext context);
+		public abstract IEnumerable<Func<bool>> Subscribe<TComponent>(IInboundContext context, TComponent instance);
 
 		/// <summary>
 		/// Enumerates the interfaces for the component and returns only ones which have not yet been processed
@@ -28,7 +29,7 @@ namespace MassTransit.Pipeline
 		/// <param name="context"></param>
 		/// <param name="consumerType"></param>
 		/// <returns></returns>
-		protected static IEnumerable<Type> GetInterfaces<TComponent>(ISubscribeContext context, Type consumerType)
+		protected static IEnumerable<Type> GetInterfaces<TComponent>(IInboundContext context, Type consumerType)
 		{
 			Type componentType = typeof (TComponent);
 

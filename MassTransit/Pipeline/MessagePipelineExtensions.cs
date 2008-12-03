@@ -22,7 +22,7 @@ namespace MassTransit.Pipeline
 		/// <typeparam name="TComponent"></typeparam>
 		/// <param name="pipeline">The pipeline to configure</param>
 		/// <returns></returns>
-		public static Func<bool> Subscribe<TComponent>(this SubscribePipeline pipeline) where TComponent : class
+		public static Func<bool> Subscribe<TComponent>(this InboundPipeline pipeline) where TComponent : class
 		{
 			return pipeline.Configure(x => x.Subscribe<TComponent>());
 		}
@@ -34,7 +34,7 @@ namespace MassTransit.Pipeline
 		/// <param name="pipeline">The pipeline to configure</param>
 		/// <param name="instance">The instance that will handle the messages</param>
 		/// <returns></returns>
-		public static Func<bool> Subscribe<TComponent>(this SubscribePipeline pipeline, TComponent instance)
+		public static Func<bool> Subscribe<TComponent>(this InboundPipeline pipeline, TComponent instance)
 			where TComponent : class
 		{
 			return pipeline.Configure(x => x.Subscribe(instance));

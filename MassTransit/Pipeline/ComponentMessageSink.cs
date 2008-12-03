@@ -27,7 +27,7 @@ namespace MassTransit.Pipeline
 	{
 		private readonly IObjectBuilder _builder;
 
-		public ComponentMessageSink(ISubscribeContext context)
+		public ComponentMessageSink(IInboundContext context)
 		{
 			_builder = context.Builder;
 		}
