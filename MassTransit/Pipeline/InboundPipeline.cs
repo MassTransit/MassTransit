@@ -26,8 +26,8 @@ namespace MassTransit.Pipeline
 		{
 			// interceptors are inserted at the front of the list, so do them from least to most specific
 
-			_interceptors.Register(new ConsumesAllPipelineSubscriber());
-			_interceptors.Register(new ConsumesSelectedPipelineSubscriber());
+			_interceptors.Register(new ConsumesAllInboundInterceptor());
+			_interceptors.Register(new ConsumesSelectedInboundInterceptor());
 		}
 
 		public V Configure<V>(Func<IConfigureInboundPipeline, V> action)
