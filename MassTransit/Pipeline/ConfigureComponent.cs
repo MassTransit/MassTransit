@@ -72,5 +72,10 @@ namespace MassTransit.Pipeline
 		{
 			_used.Add(messageType);
 		}
+
+		public IObjectBuilder Builder
+		{
+			get { return _pipeline.Builder; }
+		}
 	}
 }

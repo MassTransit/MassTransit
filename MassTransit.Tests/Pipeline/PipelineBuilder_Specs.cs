@@ -73,7 +73,7 @@ namespace MassTransit.Tests.Pipeline
 		{
 			TestBatchConsumer<IndividualBatchMessage, Guid> batchConsumer = new TestBatchConsumer<IndividualBatchMessage, Guid>();
 
-			MessagePipeline pipeline = MessagePipeline.CreateDefaultPipeline();
+			MessagePipeline pipeline = MessagePipeline.CreateDefaultPipeline(MockRepository.GenerateMock<IObjectBuilder>());
 
 			pipeline.Subscribe(batchConsumer);
 
@@ -107,7 +107,7 @@ namespace MassTransit.Tests.Pipeline
 		{
 			IndiscriminantConsumer<PingMessage> consumer = new IndiscriminantConsumer<PingMessage>();
 
-			MessagePipeline pipeline = MessagePipeline.CreateDefaultPipeline();
+			MessagePipeline pipeline = MessagePipeline.CreateDefaultPipeline(MockRepository.GenerateMock<IObjectBuilder>());
 
 			pipeline.Subscribe(consumer);
 
