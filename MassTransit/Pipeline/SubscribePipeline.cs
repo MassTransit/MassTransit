@@ -24,8 +24,10 @@ namespace MassTransit.Pipeline
 		public SubscribePipeline(IObjectBuilder builder) :
 			base(builder)
 		{
-			_interceptors.Register(new ConsumesSelectedPipelineSubscriber());
+			// interceptors are inserted at the front of the list, so do them from least to most specific
+
 			_interceptors.Register(new ConsumesAllPipelineSubscriber());
+			_interceptors.Register(new ConsumesSelectedPipelineSubscriber());
 		}
 
 		public V Configure<V>(Func<IMessagePipelineConfigure, V> action)

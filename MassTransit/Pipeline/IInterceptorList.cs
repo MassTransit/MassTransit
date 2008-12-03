@@ -14,11 +14,22 @@ namespace MassTransit.Pipeline
 {
 	using System;
 
-	public interface IInterceptorList<T> : 
+	public interface IInterceptorList<T> :
 		IDisposable
 	{
+		/// <summary>
+		/// Register a new interceptor at the front of the list. New intercepters are always
+		/// inserted at the start of the list, so they should be added from least to most specific 
+		/// order to avoid improper handling of message.
+		/// </summary>
+		/// <param name="interceptor">The intercept to insert in the list</param>
+		/// <returns>The unregister function, which should be called to remove the interceptor</returns>
 		Func<bool> Register(T interceptor);
-		void Unregister(T interceptor);
+
+		/// <summary>
+		/// Enumerate the interceptors
+		/// </summary>
+		/// <param name="action"></param>
 		void ForEach(Action<T> action);
 	}
 }

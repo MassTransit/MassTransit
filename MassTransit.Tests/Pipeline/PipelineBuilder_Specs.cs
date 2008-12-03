@@ -34,21 +34,6 @@ namespace MassTransit.Tests.Pipeline
 		private IObjectBuilder _builder;
 
 		[Test]
-		public void A_indiscriminate_consumer_should_get_added()
-		{
-			IndiscriminantConsumer<PingMessage> consumer = new IndiscriminantConsumer<PingMessage>();
-
-			ISubscribeContext context = MockRepository.GenerateMock<ISubscribeContext>();
-			context.Expect(x => x.HasMessageTypeBeenDefined(typeof (PingMessage))).Return(false);
-
-			SubscribePipeline model = new SubscribePipeline(_builder);
-
-			model.Subscribe(consumer);
-
-			context.AssertWasCalled(x => x.HasMessageTypeBeenDefined(typeof (PingMessage)));
-		}
-
-		[Test]
 		public void Batch_composition_should_work()
 		{
 			TestBatchConsumer<IndividualBatchMessage, Guid> batchConsumer = new TestBatchConsumer<IndividualBatchMessage, Guid>();
