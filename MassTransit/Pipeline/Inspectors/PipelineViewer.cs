@@ -63,7 +63,7 @@ namespace MassTransit.Pipeline.Inspectors
 
 		public bool Inspect<TMessage>(IMessageSink<TMessage> element) where TMessage : class
 		{
-			Append(string.Format("IMessageSink ({0})", typeof (TMessage).FullName));
+			Append(string.Format("{1} ({0})", typeof (TMessage).FullName, element.GetType().Name));
 
 			return true;
 		}
