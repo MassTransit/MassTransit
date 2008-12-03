@@ -22,7 +22,7 @@ namespace MassTransit.Tests.Pipeline
 		[Test]
 		public void I_want_to_display_the_entire_flow_through_the_pipeline()
 		{
-			MessagePipeline pipeline = MessagePipeline.CreateDefaultPipeline(MockRepository.GenerateMock<IObjectBuilder>());
+			MessagePipeline pipeline = MessagePipeline.CreateDefaultPipeline();
 
 			PipelineViewer.Trace(pipeline);
 		}
