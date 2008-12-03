@@ -18,9 +18,17 @@ namespace MassTransit.Pipeline
 	public class MessagePipeline :
 		MessageSinkBase<object, object>
 	{
-		private MessagePipeline(IMessageSink<object> outputSink) :
+		private IObjectBuilder _builder;
+
+		private MessagePipeline(IMessageSink<object> outputSink, IObjectBuilder builder) :
 			base(outputSink)
 		{
+			_builder = builder;
+		}
+
+		public IObjectBuilder Builder
+		{
+			get { return _builder; }
 		}
 
 		public override IEnumerable<Consumes<object>.All> Enumerate(object message)
@@ -65,11 +73,11 @@ namespace MassTransit.Pipeline
 			}
 		}
 
-		public static MessagePipeline CreateDefaultPipeline()
+		public static MessagePipeline CreateDefaultPipeline(IObjectBuilder builder)
 		{
 			MessageRouter<object> router = new MessageRouter<object>();
 
-			MessagePipeline pipeline = new MessagePipeline(router);
+			MessagePipeline pipeline = new MessagePipeline(router, builder);
 
 			return pipeline;
 		}

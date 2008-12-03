@@ -15,6 +15,7 @@ namespace MassTransit.Pipeline
 	using System;
 	using System.Collections.Generic;
 	using System.Reflection;
+	using Microsoft.Practices.ServiceLocation;
 
 	public class ConsumesAllPipelineSubscriber :
 		ISubscribeInterceptor
@@ -100,7 +101,15 @@ namespace MassTransit.Pipeline
 			var sink = new MessageSink<TMessage>(message => consumer);
 
 			return context.Connect(sink);
+		}
 
+		private Func<bool> Connect<TComponent, TMessage>(ISubscribeContext context) 
+			where TMessage : class 
+			where TComponent : class
+		{
+			var sink = new ComponentMessageSink<TComponent, TMessage>(context);
+
+			return context.Connect(sink);
 		}
 	}
 }

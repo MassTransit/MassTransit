@@ -16,6 +16,7 @@ namespace MassTransit.Tests.Pipeline
 	using MassTransit.Pipeline;
 	using Messages;
 	using NUnit.Framework;
+	using Rhino.Mocks;
 
 	[TestFixture]
 	public class When_subscription_a_component_to_the_pipeline
@@ -25,7 +26,7 @@ namespace MassTransit.Tests.Pipeline
 		{
 			IndiscriminantConsumer<PingMessage> consumer = new IndiscriminantConsumer<PingMessage>();
 
-			MessagePipeline pipeline = MessagePipeline.CreateDefaultPipeline();
+			MessagePipeline pipeline = MessagePipeline.CreateDefaultPipeline(MockRepository.GenerateMock<IObjectBuilder>());
 			pipeline.Subscribe(consumer);
 
 			PingMessage message = new PingMessage();
@@ -43,7 +44,7 @@ namespace MassTransit.Tests.Pipeline
 			IndiscriminantConsumer<PingMessage> pingConsumer = new IndiscriminantConsumer<PingMessage>();
 			IndiscriminantConsumer<PongMessage> pongConsumer = new IndiscriminantConsumer<PongMessage>();
 
-			MessagePipeline pipeline = MessagePipeline.CreateDefaultPipeline();
+			MessagePipeline pipeline = MessagePipeline.CreateDefaultPipeline(MockRepository.GenerateMock<IObjectBuilder>());
 
 			Func<bool> pingToken = pipeline.Subscribe(pingConsumer);
 			Func<bool> pongToken = pipeline.Subscribe(pongConsumer);
@@ -70,7 +71,7 @@ namespace MassTransit.Tests.Pipeline
 		{
 			IndiscriminantConsumer<PingMessage> consumer = new IndiscriminantConsumer<PingMessage>();
 
-			MessagePipeline pipeline = MessagePipeline.CreateDefaultPipeline();
+			MessagePipeline pipeline = MessagePipeline.CreateDefaultPipeline(MockRepository.GenerateMock<IObjectBuilder>());
 
 			pipeline.Subscribe(consumer);
 
@@ -88,7 +89,7 @@ namespace MassTransit.Tests.Pipeline
 
 			bool accepted = false;
 
-			MessagePipeline pipeline = MessagePipeline.CreateDefaultPipeline();
+			MessagePipeline pipeline = MessagePipeline.CreateDefaultPipeline(MockRepository.GenerateMock<IObjectBuilder>());
 
 			pipeline.Dispatch(message, x => accepted = true);
 
@@ -100,7 +101,7 @@ namespace MassTransit.Tests.Pipeline
 		{
 			IndiscriminantConsumer<PingMessage> consumer = new IndiscriminantConsumer<PingMessage>();
 
-			MessagePipeline pipeline = MessagePipeline.CreateDefaultPipeline();
+			MessagePipeline pipeline = MessagePipeline.CreateDefaultPipeline(MockRepository.GenerateMock<IObjectBuilder>());
 			pipeline.Subscribe(consumer);
 
 			PingMessage message = new PingMessage();
