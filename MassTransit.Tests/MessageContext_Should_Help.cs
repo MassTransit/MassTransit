@@ -51,33 +51,20 @@ namespace MassTransit.Tests
         [Test]
         public void With_Poison_Letters()
         {
-            MessageContext<PingMessage> cxt = new MessageContext<PingMessage>(mockBus, requestMessage);
+            IServiceBus bs = MockRepository.GenerateMock<IServiceBus>();
+            IEndpoint pep = MockRepository.GenerateMock<IEndpoint>();
+            MessageContext<PingMessage> cxt = new MessageContext<PingMessage>(bs, requestMessage);
 
-            using (Record())
-            {
-                //   Expect.Call(mockBus.PoisonEndpoint).Return(mockPoisonEndpoint);
-            }
+            bs.Expect(x => x.PoisonEndpoint).Return(pep);
+            pep.Expect(x => x.Send(requestMessage));
 
-            using (Playback())
-            {
-                cxt.MarkPoison();
-            }
+
+            cxt.MarkPoisonous();
+
+            bs.VerifyAllExpectations();
+            pep.VerifyAllExpectations();
+
         }
 
-        [Test]
-        public void With_Poison_Letter()
-        {
-            MessageContext<PingMessage> cxt = new MessageContext<PingMessage>(mockBus, requestMessage);
-
-            using (Record())
-            {
-                //Expect.Call(mockBus.PoisonEndpoint).Return(mockPoisonEndpoint);
-            }
-
-            using (Playback())
-            {
-                cxt.MarkPoison(cxt.Message);
-            }
-        }
     }
 }

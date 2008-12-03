@@ -80,9 +80,7 @@ namespace MassTransit.Tests.Pipeline
 
 			pipeline.Dispatch(message);
 
-			consumer.AssertWasCalled(x => x.Consume(message));
-
-			//TestConsumerBase<PingMessage>.AnyShouldHaveReceivedMessage(message, 5.Seconds());
+            consumer.VerifyAllExpectations();
 		}
 
 		[Test]
