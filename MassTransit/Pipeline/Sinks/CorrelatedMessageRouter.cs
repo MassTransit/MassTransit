@@ -14,6 +14,7 @@ namespace MassTransit.Pipeline.Sinks
 {
 	using System;
 	using System.Collections.Generic;
+	using Configuration;
 	using Magnum.Common.Threading;
 
 	/// <summary>

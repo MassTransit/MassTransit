@@ -13,6 +13,7 @@
 namespace MassTransit.Pipeline.Interceptors.Inbound
 {
 	using System;
+	using Configuration;
 	using Sinks;
 
 	public class ConsumesSelectedInboundInterceptor :
