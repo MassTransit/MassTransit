@@ -142,8 +142,8 @@ namespace MassTransit.Transports.Msmq.Tests
             {
                 ManualResetEvent _updateEvent = new ManualResetEvent(false);
 
-                Action<IMessageContext<UpdateMessage>> handler =
-                    delegate(IMessageContext<UpdateMessage> ctx)
+                Action<UpdateMessage> handler =
+                    delegate(UpdateMessage msg)
                         {
                             _updateEvent.Set();
 

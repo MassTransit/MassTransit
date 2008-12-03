@@ -21,7 +21,7 @@ namespace MassTransit.Internal
 	/// </summary>
 	/// <typeparam name="T">The message type</typeparam>
 	public class MessageContext<T> :
-		EventArgs, IMessageContext<T> where T : class
+		EventArgs where T : class
 	{
 		private readonly IServiceBus _bus;
 		private readonly ILog _log = LogManager.GetLogger(typeof (MessageContext<T>));
