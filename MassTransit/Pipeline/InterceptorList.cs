@@ -30,7 +30,8 @@ namespace MassTransit.Pipeline
 
 		public Func<bool> Register(T interceptor)
 		{
-			_interceptors.WriteLock(x => x.Add(interceptor));
+			// we always insert new interceptors before the built-in ones
+			_interceptors.WriteLock(x => x.Insert(0, interceptor));
 
 			return () =>
 				{
@@ -40,11 +41,6 @@ namespace MassTransit.Pipeline
 
 					return removed;
 				};
-		}
-
-		public void Unregister(T interceptor)
-		{
-			_interceptors.WriteLock(x => x.Remove(interceptor));
 		}
 
 		public void ForEach(Action<T> action)
