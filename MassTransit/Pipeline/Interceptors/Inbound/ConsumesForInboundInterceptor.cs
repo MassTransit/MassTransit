@@ -15,6 +15,7 @@ namespace MassTransit.Pipeline.Interceptors.Inbound
 	using System;
 	using System.Collections.Generic;
 	using System.Reflection;
+	using Configuration;
 	using Exceptions;
 	using Sinks;
 

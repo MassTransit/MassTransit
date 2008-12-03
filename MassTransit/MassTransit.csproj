@@ -214,14 +214,14 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Exceptions\ConfigurationException.cs" />
-    <Compile Include="Pipeline\CorrelatedMessageRouterConfigurator.cs" />
-    <Compile Include="Pipeline\CorrelatedMessageRouterConfiguratorScope.cs" />
+    <Compile Include="Pipeline\Configuration\CorrelatedMessageRouterConfigurator.cs" />
+    <Compile Include="Pipeline\Configuration\CorrelatedMessageRouterConfiguratorScope.cs" />
     <Compile Include="Pipeline\Interceptors\Inbound\ConsumesForInboundInterceptor.cs" />
-    <Compile Include="Pipeline\MessageRouterConfiguratorScope.cs" />
+    <Compile Include="Pipeline\Configuration\MessageRouterConfiguratorScope.cs" />
     <Compile Include="Pipeline\Sinks\ComponentMessageSink.cs" />
     <Compile Include="Pipeline\Interceptors\Inbound\InboundContext.cs" />
     <Compile Include="Pipeline\Interceptors\Inbound\ConsumesAllInboundInterceptor.cs" />
-    <Compile Include="Pipeline\MessageRouterConfigurator.cs" />
+    <Compile Include="Pipeline\Configuration\MessageRouterConfigurator.cs" />
     <Compile Include="Pipeline\ConsumerFor.cs" />
     <Compile Include="Pipeline\Interceptors\Inbound\ConsumesInboundInterceptorBase.cs" />
     <Compile Include="Pipeline\Interceptors\Inbound\ConsumesSelectedInboundInterceptor.cs" />

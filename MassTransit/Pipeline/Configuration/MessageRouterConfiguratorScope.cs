@@ -10,26 +10,30 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Pipeline
+namespace MassTransit.Pipeline.Configuration
 {
 	using Inspectors;
 	using Sinks;
 
-	public class CorrelatedMessageRouterConfiguratorScope<TMessage, TKey> :
+	public class MessageRouterConfiguratorScope<TMessage> :
 		PipelineInspectorBase
-		where TMessage : class, CorrelatedBy<TKey>
+		where TMessage : class
 	{
 		public MessageRouter<object> ObjectRouter { get; private set; }
-		public CorrelatedMessageRouter<TMessage, TKey> Router { get; private set; }
+		public MessageRouter<TMessage> Router { get; private set; }
 
-		public bool Inspect<TRoutedMessage, TRoutedKey>(CorrelatedMessageRouter<TRoutedMessage, TRoutedKey> element)
-			where TRoutedMessage : class, CorrelatedBy<TRoutedKey>
+		public override bool Inspect<TRoutedMessage>(MessageRouter<TRoutedMessage> element)
 		{
 			if (typeof (TRoutedMessage) == typeof (TMessage))
 			{
-				Router = TranslateTo<CorrelatedMessageRouter<TMessage, TKey>>.From(element);
+				Router = TranslateTo<MessageRouter<TMessage>>.From(element);
 
 				return false;
+			}
+
+			if (typeof (TRoutedMessage) == typeof (object))
+			{
+				ObjectRouter = TranslateTo<MessageRouter<object>>.From(element);
 			}
 
 			return true;
