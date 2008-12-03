@@ -19,6 +19,11 @@ namespace MassTransit.Tests.Pipeline
 	{
 		private readonly bool _accept;
 
+		protected ParticularConsumer()
+		{
+			
+		}
+
 		public ParticularConsumer(bool accept)
 		{
 			_accept = accept;

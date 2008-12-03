@@ -20,6 +20,7 @@ namespace MassTransit.Pipeline
 	public class MessageRouterConfigurator :
 		PipelineInspectorBase
 	{
+		private readonly object _typedSink;
 		private readonly IMessageSink<object> _sink;
 
 		private MessageRouterConfigurator(IMessageSink<object> sink)
@@ -27,12 +28,20 @@ namespace MassTransit.Pipeline
 			_sink = sink;
 		}
 
+		private MessageRouterConfigurator(object typedSink)
+		{
+			_typedSink = typedSink;
+		}
+
 		public MessageRouter<TMessage> FindOrCreate<TMessage>()
 			where TMessage : class
 		{
 			var scope = new MessageRouterConfiguratorScope<TMessage>();
 
-			_sink.Inspect(scope);
+			if (_sink != null)
+				_sink.Inspect(scope);
+			else if (_typedSink != null)
+				TranslateTo<IMessageSink<TMessage>>.From(_typedSink).Inspect(scope);
 
 			return scope.Router ?? ConfigureRouter<TMessage>(scope.ObjectRouter);
 		}
@@ -60,10 +69,15 @@ namespace MassTransit.Pipeline
 			return routerConfigurator.FindOrCreate<TMessage>().Connect(sink);
 		}
 
+		public static MessageRouterConfigurator For(IMessageSink<object> sink)
+		{
+			return new MessageRouterConfigurator(sink);
+		}
+
 		public static MessageRouterConfigurator For<TMessage>(IMessageSink<TMessage> sink)
 			where TMessage : class
 		{
-			return new MessageRouterConfigurator(TranslateTo<IMessageSink<object>>.From(sink));
+			return new MessageRouterConfigurator(sink);
 		}
 	}
 }

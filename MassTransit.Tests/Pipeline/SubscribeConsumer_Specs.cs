@@ -12,6 +12,8 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests.Pipeline
 {
+	using System;
+	using Magnum.Common.DateTimeExtensions;
 	using MassTransit.Pipeline;
 	using MassTransit.Pipeline.Inspectors;
 	using Messages;
@@ -85,6 +87,29 @@ namespace MassTransit.Tests.Pipeline
 		}
 
 		[Test]
+		public void A_selective_component_should_properly_handle_the_love()
+		{
+			ParticularConsumer consumer = MockRepository.GenerateMock<ParticularConsumer>();
+
+			_builder.Expect(x => x.GetInstance<ParticularConsumer>()).Return(consumer).Repeat.Once();
+
+			InboundPipeline pipeline = new InboundPipeline(_builder);
+
+			pipeline.Subscribe<ParticularConsumer>();
+
+			PipelineViewer.Trace(pipeline);
+
+			PingMessage message = new PingMessage();
+			consumer.Expect(x => x.Accept(message)).Return(true);
+			consumer.Expect(x => x.Consume(message));
+
+			pipeline.Dispatch(message);
+
+			consumer.VerifyAllExpectations();
+			_builder.VerifyAllExpectations();
+		}
+
+		[Test]
 		public void A_component_should_be_subscribed_to_multiple_messages_on_the_pipeline()
 		{
 			PingPongConsumer consumer = MockRepository.GenerateMock<PingPongConsumer>();
@@ -124,6 +149,28 @@ namespace MassTransit.Tests.Pipeline
 
 			Assert.AreEqual(message, consumer.Consumed);
 		}
+
+		[Test]
+		public void Correlated_subscriptions_should_make_happy_sounds()
+		{
+			InboundPipeline pipeline = new InboundPipeline(_builder);
+
+			PingMessage message = new PingMessage();
+
+			TestCorrelatedConsumer<PingMessage, Guid> consumer = new TestCorrelatedConsumer<PingMessage, Guid>(message.CorrelationId);
+			TestCorrelatedConsumer<PingMessage, Guid> negativeConsumer = new TestCorrelatedConsumer<PingMessage, Guid>(Guid.Empty);
+
+			pipeline.Subscribe(consumer);
+			pipeline.Subscribe(negativeConsumer);
+
+			PipelineViewer.Trace(pipeline);
+
+			pipeline.Dispatch(message);
+
+			consumer.ShouldHaveReceivedMessage(message, 0.Seconds());
+			negativeConsumer.ShouldNotHaveReceivedMessage(message, 0.Seconds());
+		}
+
 
 		[Test]
 		public void The_subscription_should_be_added_for_selective_consumers()
