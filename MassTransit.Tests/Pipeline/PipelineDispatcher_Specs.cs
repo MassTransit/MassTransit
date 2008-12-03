@@ -26,7 +26,7 @@ namespace MassTransit.Tests.Pipeline
 		{
 			IndiscriminantConsumer<PingMessage> consumer = new IndiscriminantConsumer<PingMessage>();
 
-			SubscribePipeline pipeline = new SubscribePipeline(MockRepository.GenerateMock<IObjectBuilder>());
+			InboundPipeline pipeline = new InboundPipeline(MockRepository.GenerateMock<IObjectBuilder>());
 			pipeline.Subscribe(consumer);
 
 			PingMessage message = new PingMessage();
@@ -44,7 +44,7 @@ namespace MassTransit.Tests.Pipeline
 			IndiscriminantConsumer<PingMessage> pingConsumer = new IndiscriminantConsumer<PingMessage>();
 			IndiscriminantConsumer<PongMessage> pongConsumer = new IndiscriminantConsumer<PongMessage>();
 
-			SubscribePipeline pipeline = new SubscribePipeline(MockRepository.GenerateMock<IObjectBuilder>());
+			InboundPipeline pipeline = new InboundPipeline(MockRepository.GenerateMock<IObjectBuilder>());
 
 			Func<bool> pingToken = pipeline.Subscribe(pingConsumer);
 			Func<bool> pongToken = pipeline.Subscribe(pongConsumer);
@@ -71,7 +71,7 @@ namespace MassTransit.Tests.Pipeline
 		{
 			IndiscriminantConsumer<PingMessage> consumer = new IndiscriminantConsumer<PingMessage>();
 
-			SubscribePipeline pipeline = new SubscribePipeline(MockRepository.GenerateMock<IObjectBuilder>());
+			InboundPipeline pipeline = new InboundPipeline(MockRepository.GenerateMock<IObjectBuilder>());
 
 			pipeline.Subscribe(consumer);
 
@@ -101,7 +101,7 @@ namespace MassTransit.Tests.Pipeline
 		{
 			IndiscriminantConsumer<PingMessage> consumer = new IndiscriminantConsumer<PingMessage>();
 
-			SubscribePipeline pipeline = new SubscribePipeline(MockRepository.GenerateMock<IObjectBuilder>());
+			InboundPipeline pipeline = new InboundPipeline(MockRepository.GenerateMock<IObjectBuilder>());
 			pipeline.Subscribe(consumer);
 
 			PingMessage message = new PingMessage();

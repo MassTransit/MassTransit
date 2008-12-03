@@ -12,7 +12,22 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Pipeline
 {
-	public interface IPublishContext
+	using System;
+
+	public interface IInboundContext
 	{
+		IObjectBuilder Builder { get; }
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="messageType"></param>
+		/// <returns>True if the message type has already been subscribed to the pipeline</returns>
+		bool HasMessageTypeBeenDefined(Type messageType);
+
+
+		Func<bool> Connect<TMessage>(IMessageSink<TMessage> sink) where TMessage : class;
+
+		void MessageTypeWasDefined(Type messageType);
 	}
 }

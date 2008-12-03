@@ -22,14 +22,14 @@ namespace MassTransit.Pipeline
 			get { return typeof (Consumes<>.All); }
 		}
 
-		protected virtual Func<bool> Connect<TMessage>(ISubscribeContext context, Consumes<TMessage>.All consumer) where TMessage : class
+		protected virtual Func<bool> Connect<TMessage>(IInboundContext context, Consumes<TMessage>.All consumer) where TMessage : class
 		{
 			var sink = new MessageSink<TMessage>(message => consumer);
 
 			return context.Connect(sink);
 		}
 
-		protected virtual Func<bool> Connect<TComponent, TMessage>(ISubscribeContext context)
+		protected virtual Func<bool> Connect<TComponent, TMessage>(IInboundContext context)
 			where TMessage : class
 			where TComponent : class, Consumes<TMessage>.All
 		{

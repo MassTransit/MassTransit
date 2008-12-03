@@ -14,13 +14,13 @@ namespace MassTransit.Pipeline
 {
 	using System.Collections.Generic;
 
-	public class PublishContext :
-		IPublishContext
+	public class OutboundContext :
+		IOutboundContext
 	{
 		private readonly HashSet<IEndpoint> _endpoints = new HashSet<IEndpoint>();
 		private readonly MessagePipeline _pipeline;
 
-		public PublishContext(MessagePipeline pipeline)
+		public OutboundContext(MessagePipeline pipeline)
 		{
 			_pipeline = pipeline;
 		}

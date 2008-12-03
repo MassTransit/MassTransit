@@ -12,22 +12,29 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Pipeline
 {
-	using System;
+	using System.Collections.Generic;
 
-	public interface ISubscribeContext
+	public class OutboundPipeline :
+		PipelineBase<IOutboundInterceptor>
 	{
-		IObjectBuilder Builder { get; }
+		public OutboundPipeline(IObjectBuilder builder)
+			: base(builder)
+		{
+		}
 
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="messageType"></param>
-		/// <returns>True if the message type has already been subscribed to the pipeline</returns>
-		bool HasMessageTypeBeenDefined(Type messageType);
+		public IEnumerable<IEndpoint> Publish<TMessage>(TMessage message) where TMessage : class
+		{
+			var context = new OutboundContext(Pipeline);
 
+			_interceptors.ForEach(interceptor =>
+				{
+					foreach (IEndpoint endpoint in interceptor.Publish(context, message))
+					{
+						context.AddEndpointToPublish(endpoint);
+					}
+				});
 
-		Func<bool> Connect<TMessage>(IMessageSink<TMessage> sink) where TMessage : class;
-
-		void MessageTypeWasDefined(Type messageType);
+			return context.GetEndpoints();
+		}
 	}
 }

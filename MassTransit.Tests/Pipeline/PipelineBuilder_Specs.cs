@@ -38,7 +38,7 @@ namespace MassTransit.Tests.Pipeline
 		{
 			TestBatchConsumer<IndividualBatchMessage, Guid> batchConsumer = new TestBatchConsumer<IndividualBatchMessage, Guid>();
 
-			SubscribePipeline pipeline = new SubscribePipeline(MockRepository.GenerateMock<IObjectBuilder>());
+			InboundPipeline pipeline = new InboundPipeline(MockRepository.GenerateMock<IObjectBuilder>());
 
 			pipeline.Subscribe(batchConsumer);
 
@@ -72,7 +72,7 @@ namespace MassTransit.Tests.Pipeline
 		{
 			IndiscriminantConsumer<PingMessage> consumer = new IndiscriminantConsumer<PingMessage>();
 
-			SubscribePipeline pipeline = new SubscribePipeline(MockRepository.GenerateMock<IObjectBuilder>());
+			InboundPipeline pipeline = new InboundPipeline(MockRepository.GenerateMock<IObjectBuilder>());
 
 			pipeline.Subscribe(consumer);
 
@@ -86,8 +86,8 @@ namespace MassTransit.Tests.Pipeline
 		{
 			IndiscriminantConsumer<PingMessage> consumer = new IndiscriminantConsumer<PingMessage>();
 
-			ISubscribeContext context = MockRepository.GenerateMock<ISubscribeContext>();
-			ISubscribeInterceptor interceptor = MockRepository.GenerateMock<ISubscribeInterceptor>();
+			IInboundContext context = MockRepository.GenerateMock<IInboundContext>();
+			IInboundInterceptor interceptor = MockRepository.GenerateMock<IInboundInterceptor>();
 			interceptor.Expect(x => x.Subscribe(context, consumer)).Return(new List<Func<bool>>());
 
 

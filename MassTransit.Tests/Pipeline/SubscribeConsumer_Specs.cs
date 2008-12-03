@@ -32,7 +32,7 @@ namespace MassTransit.Tests.Pipeline
 		[Test]
 		public void A_bunch_of_mixed_subscriber_types_should_work()
 		{
-			SubscribePipeline pipeline = new SubscribePipeline(_builder);
+			InboundPipeline pipeline = new InboundPipeline(_builder);
 
 			IndiscriminantConsumer<PingMessage> consumer = new IndiscriminantConsumer<PingMessage>();
 			ParticularConsumer consumerYes = new ParticularConsumer(true);
@@ -68,7 +68,7 @@ namespace MassTransit.Tests.Pipeline
 
 			_builder.Expect(x => x.GetInstance<TestMessageConsumer<PingMessage>>()).Return(consumer).Repeat.Once();
 
-			SubscribePipeline pipeline = new SubscribePipeline(_builder);
+			InboundPipeline pipeline = new InboundPipeline(_builder);
 
 			pipeline.Subscribe<TestMessageConsumer<PingMessage>>();
 
@@ -90,7 +90,7 @@ namespace MassTransit.Tests.Pipeline
 
 			_builder.Expect(x => x.GetInstance<PingPongConsumer>()).Return(consumer).Repeat.Twice();
 
-			SubscribePipeline pipeline = new SubscribePipeline(_builder);
+			InboundPipeline pipeline = new InboundPipeline(_builder);
 
 			pipeline.Subscribe<PingPongConsumer>();
 
@@ -111,7 +111,7 @@ namespace MassTransit.Tests.Pipeline
 		[Test]
 		public void The_subscription_should_be_added()
 		{
-			SubscribePipeline pipeline = new SubscribePipeline(_builder);
+			InboundPipeline pipeline = new InboundPipeline(_builder);
 
 			IndiscriminantConsumer<PingMessage> consumer = new IndiscriminantConsumer<PingMessage>();
 
@@ -127,7 +127,7 @@ namespace MassTransit.Tests.Pipeline
 		[Test]
 		public void The_subscription_should_be_added_for_selective_consumers()
 		{
-			SubscribePipeline pipeline = new SubscribePipeline(_builder);
+			InboundPipeline pipeline = new InboundPipeline(_builder);
 
 			ParticularConsumer consumer = new ParticularConsumer(false);
 
@@ -143,7 +143,7 @@ namespace MassTransit.Tests.Pipeline
 		[Test]
 		public void The_subscription_should_be_added_for_selective_consumers_that_are_interested()
 		{
-			SubscribePipeline pipeline = new SubscribePipeline(_builder);
+			InboundPipeline pipeline = new InboundPipeline(_builder);
 
 			ParticularConsumer consumer = new ParticularConsumer(true);
 
@@ -159,7 +159,7 @@ namespace MassTransit.Tests.Pipeline
 		[Test]
 		public void The_wrong_type_of_message_should_not_blow_up_the_test()
 		{
-			SubscribePipeline pipeline = new SubscribePipeline(_builder);
+			InboundPipeline pipeline = new InboundPipeline(_builder);
 
 			IndiscriminantConsumer<PingMessage> consumer = new IndiscriminantConsumer<PingMessage>();
 

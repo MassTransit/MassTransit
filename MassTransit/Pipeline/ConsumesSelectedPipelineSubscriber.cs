@@ -22,7 +22,7 @@ namespace MassTransit.Pipeline
 			get { return typeof (Consumes<>.Selected); }
 		}
 
-		protected virtual Func<bool> Connect<TMessage>(ISubscribeContext context, Consumes<TMessage>.Selected consumer) where TMessage : class
+		protected virtual Func<bool> Connect<TMessage>(IInboundContext context, Consumes<TMessage>.Selected consumer) where TMessage : class
 		{
 			var sink = new MessageSink<TMessage>(message =>
 			                                     	consumer.Accept(message) ? consumer : Consumes<TMessage>.Null);
@@ -30,7 +30,7 @@ namespace MassTransit.Pipeline
 			return context.Connect(sink);
 		}
 
-		protected virtual Func<bool> Connect<TComponent, TMessage>(ISubscribeContext context)
+		protected virtual Func<bool> Connect<TComponent, TMessage>(IInboundContext context)
 			where TMessage : class
 			where TComponent : class, Consumes<TMessage>.Selected
 		{

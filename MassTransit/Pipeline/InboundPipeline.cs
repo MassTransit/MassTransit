@@ -15,13 +15,13 @@ namespace MassTransit.Pipeline
 	using System;
 	using System.Collections.Generic;
 
-	public class SubscribePipeline :
-		PipelineBase<ISubscribeInterceptor>,
-		IConfigureSubscribePipeline
+	public class InboundPipeline :
+		PipelineBase<IInboundInterceptor>,
+		IConfigureInboundPipeline
 	{
 		private readonly Func<bool> _emptyToken = () => false;
 
-		public SubscribePipeline(IObjectBuilder builder) :
+		public InboundPipeline(IObjectBuilder builder) :
 			base(builder)
 		{
 			// interceptors are inserted at the front of the list, so do them from least to most specific
@@ -30,7 +30,7 @@ namespace MassTransit.Pipeline
 			_interceptors.Register(new ConsumesSelectedPipelineSubscriber());
 		}
 
-		public V Configure<V>(Func<IConfigureSubscribePipeline, V> action)
+		public V Configure<V>(Func<IConfigureInboundPipeline, V> action)
 		{
 			V result = action(this);
 
@@ -49,9 +49,9 @@ namespace MassTransit.Pipeline
 			return Subscribe((context, interceptor) => interceptor.Subscribe(context, instance));
 		}
 
-		private Func<bool> Subscribe(Func<ISubscribeContext, ISubscribeInterceptor, IEnumerable<Func<bool>>> subscriber)
+		private Func<bool> Subscribe(Func<IInboundContext, IInboundInterceptor, IEnumerable<Func<bool>>> subscriber)
 		{
-			var context = new SubscribeContext(this);
+			var context = new InboundContext(this);
 
 			Func<bool> result = null;
 
