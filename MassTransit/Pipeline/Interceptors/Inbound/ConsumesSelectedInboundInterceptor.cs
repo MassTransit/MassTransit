@@ -37,7 +37,7 @@ namespace MassTransit.Pipeline.Interceptors.Inbound
 		{
 			MessageRouterConfigurator routerConfigurator = MessageRouterConfigurator.For(context.Pipeline);
 
-			return routerConfigurator.FindOrCreate<TMessage>().Connect(new ComponentMessageSink<TComponent, TMessage>(context));
+			return routerConfigurator.FindOrCreate<TMessage>().Connect(new SelectedComponentMessageSink<TComponent, TMessage>(context));
 		}
 	}
 }
