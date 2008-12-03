@@ -160,8 +160,8 @@ namespace MassTransit.Tests.Pipeline
 			TestCorrelatedConsumer<PingMessage, Guid> consumer = new TestCorrelatedConsumer<PingMessage, Guid>(message.CorrelationId);
 			TestCorrelatedConsumer<PingMessage, Guid> negativeConsumer = new TestCorrelatedConsumer<PingMessage, Guid>(Guid.Empty);
 
-			pipeline.Subscribe(consumer);
-			pipeline.Subscribe(negativeConsumer);
+			Func<bool> token = pipeline.Subscribe(consumer);
+			token += pipeline.Subscribe(negativeConsumer);
 
 			PipelineViewer.Trace(pipeline);
 
@@ -169,6 +169,10 @@ namespace MassTransit.Tests.Pipeline
 
 			consumer.ShouldHaveReceivedMessage(message, 0.Seconds());
 			negativeConsumer.ShouldNotHaveReceivedMessage(message, 0.Seconds());
+
+			token();
+
+			PipelineViewer.Trace(pipeline);
 		}
 
 
