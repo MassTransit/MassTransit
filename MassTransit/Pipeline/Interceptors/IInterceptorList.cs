@@ -10,24 +10,26 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Pipeline
+namespace MassTransit.Pipeline.Interceptors
 {
 	using System;
 
-	public interface IInboundContext
+	public interface IInterceptorList<T> :
+		IDisposable
 	{
-		IObjectBuilder Builder { get; }
+		/// <summary>
+		/// Register a new interceptor at the front of the list. New intercepters are always
+		/// inserted at the start of the list, so they should be added from least to most specific 
+		/// order to avoid improper handling of message.
+		/// </summary>
+		/// <param name="interceptor">The intercept to insert in the list</param>
+		/// <returns>The unregister function, which should be called to remove the interceptor</returns>
+		Func<bool> Register(T interceptor);
 
 		/// <summary>
-		/// 
+		/// Enumerate the interceptors
 		/// </summary>
-		/// <param name="messageType"></param>
-		/// <returns>True if the message type has already been subscribed to the pipeline</returns>
-		bool HasMessageTypeBeenDefined(Type messageType);
-
-
-		Func<bool> Connect<TMessage>(IMessageSink<TMessage> sink) where TMessage : class;
-
-		void MessageTypeWasDefined(Type messageType);
+		/// <param name="action"></param>
+		void ForEach(Action<T> action);
 	}
 }

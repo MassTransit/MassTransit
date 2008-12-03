@@ -10,12 +10,24 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Pipeline
+namespace MassTransit.Pipeline.Interceptors.Inbound
 {
-	using System.Collections.Generic;
+	using System;
 
-	public interface IOutboundInterceptor
+	public interface IInboundContext
 	{
-		IEnumerable<IEndpoint> Publish<TMessage>(IOutboundContext context, TMessage message);
+		IObjectBuilder Builder { get; }
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="messageType"></param>
+		/// <returns>True if the message type has already been subscribed to the pipeline</returns>
+		bool HasMessageTypeBeenDefined(Type messageType);
+
+
+		Func<bool> Connect<TMessage>(IMessageSink<TMessage> sink) where TMessage : class;
+
+		void MessageTypeWasDefined(Type messageType);
 	}
 }

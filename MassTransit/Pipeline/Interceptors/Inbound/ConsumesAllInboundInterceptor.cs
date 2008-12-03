@@ -10,29 +10,28 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Pipeline
+namespace MassTransit.Pipeline.Interceptors.Inbound
 {
 	using System;
 
-	public class ConsumesSelectedInboundInterceptor :
+	public class ConsumesAllInboundInterceptor :
 		ConsumesInboundInterceptorBase
 	{
 		protected override Type InterfaceType
 		{
-			get { return typeof (Consumes<>.Selected); }
+			get { return typeof (Consumes<>.All); }
 		}
 
-		protected virtual Func<bool> Connect<TMessage>(IInboundContext context, Consumes<TMessage>.Selected consumer) where TMessage : class
+		protected virtual Func<bool> Connect<TMessage>(IInboundContext context, Consumes<TMessage>.All consumer) where TMessage : class
 		{
-			var sink = new MessageSink<TMessage>(message =>
-			                                     	consumer.Accept(message) ? consumer : Consumes<TMessage>.Null);
+			var sink = new MessageSink<TMessage>(message => consumer);
 
 			return context.Connect(sink);
 		}
 
 		protected virtual Func<bool> Connect<TComponent, TMessage>(IInboundContext context)
 			where TMessage : class
-			where TComponent : class, Consumes<TMessage>.Selected
+			where TComponent : class, Consumes<TMessage>.All
 		{
 			var sink = new ComponentMessageSink<TComponent, TMessage>(context);
 
