@@ -17,38 +17,27 @@ namespace MassTransit.Pipeline
 	public static class MessagePipelineExtensions
 	{
 		/// <summary>
-		/// Subscribe an indiscriminant consumer to the pipeline
+		/// Subscribe a component type to the pipeline that is resolved from the container for each message
 		/// </summary>
-		/// <typeparam name="TMessage"></typeparam>
-		/// <param name="pipeline">The pipeline instance</param>
-		/// <param name="consumer">The consumer for the message</param>
-		/// <returns>Function to unsubscribe when complete</returns>
-		public static Func<bool> Subscribe<TMessage>(this MessagePipeline pipeline, Consumes<TMessage>.All consumer)
-			where TMessage : class
+		/// <typeparam name="TComponent"></typeparam>
+		/// <param name="pipeline">The pipeline to configure</param>
+		/// <returns></returns>
+		public static Func<bool> Subscribe<TComponent>(this MessagePipeline pipeline) where TComponent : class
 		{
-			return pipeline.Configure(x =>
-				{
-					var sink = new MessageSink<TMessage>(message => consumer);
-
-					return ConfigureMessageRouter<TMessage>.Connect(x, sink);
-				});
+			return pipeline.Configure(x => x.Component.Subscribe<TComponent>());
 		}
 
-		public static Func<bool> Subscribe<TMessage>(this MessagePipeline pipeline, Consumes<TMessage>.Selected consumer)
-			where TMessage : class
+		/// <summary>
+		/// Subscribe a component to the pipeline that handles every message
+		/// </summary>
+		/// <typeparam name="TComponent"></typeparam>
+		/// <param name="pipeline">The pipeline to configure</param>
+		/// <param name="instance">The instance that will handle the messages</param>
+		/// <returns></returns>
+		public static Func<bool> Subscribe<TComponent>(this MessagePipeline pipeline, TComponent instance)
+			where TComponent : class
 		{
-			return pipeline.Configure(x =>
-				{
-					var sink = new MessageSink<TMessage>(message =>
-					                                     consumer.Accept(message) ? consumer : Consumes<TMessage>.Null);
-
-					return ConfigureMessageRouter<TMessage>.Connect(x, sink);
-				});
-		}
-
-		public static Func<bool> Subscribe<TComponent>(this MessagePipeline pipeline)
-		{
-			return pipeline.Configure(x => ConfigureComponent<TComponent>.Subscribe(x));
+			return pipeline.Configure(x => x.Component.Subscribe(instance));
 		}
 	}
 }

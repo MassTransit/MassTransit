@@ -16,19 +16,28 @@ namespace MassTransit.Pipeline
 	using System.Collections.Generic;
 
 	public class MessagePipeline :
-		MessageSinkBase<object, object>
+		MessageSinkBase<object, object>,
+		IMessagePipelineConfigure
 	{
-		private IObjectBuilder _builder;
-
 		private MessagePipeline(IMessageSink<object> outputSink, IObjectBuilder builder) :
 			base(outputSink)
 		{
-			_builder = builder;
+			Builder = builder;
+
+			Component = new ConfigureComponent(this);
 		}
 
-		public IObjectBuilder Builder
+		public IObjectBuilder Builder { get; private set; }
+
+		public ConfigureComponent Component { get; private set; }
+
+		public V Configure<V>(Func<IMessagePipelineConfigure, V> action)
 		{
-			get { return _builder; }
+			V result = default(V);
+
+			_outputSink.WriteLock(x => { result = action(this); });
+
+			return result;
 		}
 
 		public override IEnumerable<Consumes<object>.All> Enumerate(object message)
@@ -44,15 +53,6 @@ namespace MassTransit.Pipeline
 			inspector.Inspect(this);
 
 			return _outputSink.ReadLock(x => x.Inspect(inspector));
-		}
-
-		public V Configure<V>(Func<MessagePipeline, V> action)
-		{
-			V result = default(V);
-
-			_outputSink.WriteLock(x => { result = action(this); });
-
-			return result;
 		}
 
 		public void Dispatch(object message)

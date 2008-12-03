@@ -26,12 +26,12 @@ namespace MassTransit.Tests.Pipeline
 
 		public PingMessage Consumed { get; private set; }
 
-		public void Consume(PingMessage message)
+		public virtual void Consume(PingMessage message)
 		{
 			Consumed = message;
 		}
 
-		public bool Accept(PingMessage message)
+		public virtual bool Accept(PingMessage message)
 		{
 			return _accept;
 		}
