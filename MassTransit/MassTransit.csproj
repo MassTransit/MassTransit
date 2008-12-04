@@ -221,6 +221,7 @@
     <Compile Include="Pipeline\Inspectors\PipelineInspectorBase.cs" />
     <Compile Include="Pipeline\Interceptors\Inbound\ConsumesForInboundInterceptor.cs" />
     <Compile Include="Pipeline\Configuration\MessageRouterConfiguratorScope.cs" />
+    <Compile Include="Pipeline\Interceptors\Inbound\EndpointInterceptor.cs" />
     <Compile Include="Pipeline\Sinks\ComponentMessageSink.cs" />
     <Compile Include="Pipeline\Interceptors\Inbound\InboundContext.cs" />
     <Compile Include="Pipeline\Interceptors\Inbound\ConsumesAllInboundInterceptor.cs" />
@@ -241,6 +242,7 @@
     <Compile Include="Pipeline\MessagePipeline.cs" />
     <Compile Include="Pipeline\MessagePipelineExtensions.cs" />
     <Compile Include="Pipeline\Sinks\CorrelatedMessageRouter.cs" />
+    <Compile Include="Pipeline\Sinks\EndpointMessageSink.cs" />
     <Compile Include="Pipeline\Sinks\MessageFilter.cs" />
     <Compile Include="Pipeline\Sinks\MessageRouter.cs" />
     <Compile Include="Pipeline\Sinks\InstanceMessageSink.cs" />
