@@ -28,28 +28,15 @@ namespace MassTransit.Pipeline.Configuration
 		public MessageFilter<TMessage> Create<TMessage>(Func<TMessage, bool> allow)
 			where TMessage : class
 		{
-			// we pull the router just to make sure it exists
-			MessageRouterConfigurator routerConfigurator = MessageRouterConfigurator.For(_sink);
-
-			var router = routerConfigurator.FindOrCreate<TMessage>();
-
-			var scope = new MessageFilterConfiguratorScope<TMessage>();
-
-			_sink.Inspect(scope);
-
-			return ConfigureFilter("", scope.InsertAfter, allow);
+			return Create<TMessage>("", allow);
 		}
 
         public MessageFilter<TMessage> Create<TMessage>(string description, Func<TMessage, bool> allow)
             where TMessage : class
         {
-            // we pull the router just to make sure it exists
-            MessageRouterConfigurator routerConfigurator = MessageRouterConfigurator.For(_sink);
-
-            var router = routerConfigurator.FindOrCreate<TMessage>();
+            EnsureRouterExists<TMessage>(_sink);
 
             var scope = new MessageFilterConfiguratorScope<TMessage>();
-
             _sink.Inspect(scope);
 
             return ConfigureFilter(description, scope.InsertAfter, allow);
@@ -65,6 +52,12 @@ namespace MassTransit.Pipeline.Configuration
             MessageFilter<TMessage> filter = new MessageFilter<TMessage>(description, insertAfter, allow);
 
             return filter;
+        }
+
+        private void EnsureRouterExists<TMessage>(IMessageSink<object> sink) where TMessage : class
+        {
+            MessageRouterConfigurator routerConfigurator = MessageRouterConfigurator.For(sink);
+            var ignored = routerConfigurator.FindOrCreate<TMessage>();
         }
 
 		public static MessageFilterConfigurator For(MessagePipeline sink)
