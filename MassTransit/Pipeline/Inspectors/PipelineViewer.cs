@@ -57,11 +57,28 @@ namespace MassTransit.Pipeline.Inspectors
 			return true;
 		}
 
+		public bool Inspect<TMessage, TKey>(CorrelatedMessageRouter<TMessage, TKey> sink)
+			where TMessage : class, CorrelatedBy<TKey>
+		{
+			Append(string.Format("Correlated Message Router {0}({1})", typeof (TMessage).FullName, typeof (TKey).Name));
+
+			return true;
+		}
+
 		public bool Inspect<TComponent, TMessage>(ComponentMessageSink<TComponent, TMessage> sink)
 			where TMessage : class
 			where TComponent : class, Consumes<TMessage>.All
 		{
 			Append(string.Format("Component Message Sink {0}({1})", typeof (TComponent).FullName, typeof (TMessage).FullName));
+
+			return true;
+		}
+
+		public bool Inspect<TComponent, TMessage>(SelectedComponentMessageSink<TComponent, TMessage> sink)
+			where TMessage : class
+			where TComponent : class, Consumes<TMessage>.Selected
+		{
+			Append(string.Format("Selected Component Message Sink {0}({1})", typeof (TComponent).FullName, typeof (TMessage).FullName));
 
 			return true;
 		}
