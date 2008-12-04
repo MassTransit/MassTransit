@@ -22,7 +22,7 @@ namespace MassTransit.Pipeline.Sinks
         public string Description { get; private set; }
 
 		public MessageFilter(Func<IMessageSink<TMessage>, IMessageSink<TMessage>> insertAfter, Func<TMessage, bool> allow) :
-			this("undescribed", insertAfter, allow)
+			this("", insertAfter, allow)
 		{
 
 		}
