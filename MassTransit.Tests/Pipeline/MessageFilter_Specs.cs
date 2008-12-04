@@ -66,5 +66,25 @@ namespace MassTransit.Tests.Pipeline
 
 			PipelineViewer.Trace(pipeline);
 		}
+
+        [Test]
+        public void A_filter_should_be_nameable()
+        {
+            InboundPipeline pipeline = new InboundPipeline(_builder);
+
+            TestMessageConsumer<PingMessage> consumer = new TestMessageConsumer<PingMessage>();
+
+            pipeline.Filter<PingMessage>("cock blocker", x => false);
+
+            pipeline.Subscribe(consumer);
+
+            PingMessage message = new PingMessage();
+
+            pipeline.Dispatch(message);
+
+            consumer.ShouldNotHaveReceivedMessage(message, 0.Seconds());
+
+            PipelineViewer.Trace(pipeline);
+        }
 	}
 }

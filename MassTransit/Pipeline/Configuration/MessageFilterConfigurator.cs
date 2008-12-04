@@ -37,7 +37,7 @@ namespace MassTransit.Pipeline.Configuration
 
 			_sink.Inspect(scope);
 
-			return ConfigureFilter(scope.InsertAfter, allow);
+			return ConfigureFilter("", scope.InsertAfter, allow);
 		}
 
         public MessageFilter<TMessage> Create<TMessage>(string description, Func<TMessage, bool> allow)
@@ -54,14 +54,6 @@ namespace MassTransit.Pipeline.Configuration
 
             return ConfigureFilter(description, scope.InsertAfter, allow);
         }
-
-		private static MessageFilter<TMessage> ConfigureFilter<TMessage>(Func<IMessageSink<TMessage>, IMessageSink<TMessage>> insertAfter,
-		                                                                 Func<TMessage, bool> allow)
-			where TMessage : class
-		{
-			
-			return ConfigureFilter<TMessage>("", insertAfter, allow);
-		}
 
         private static MessageFilter<TMessage> ConfigureFilter<TMessage>(string description, Func<IMessageSink<TMessage>, IMessageSink<TMessage>> insertAfter,
                                                                          Func<TMessage, bool> allow)
