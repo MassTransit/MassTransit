@@ -28,37 +28,39 @@ namespace MassTransit.Pipeline.Configuration
 		public MessageFilter<TMessage> Create<TMessage>(Func<TMessage, bool> allow)
 			where TMessage : class
 		{
-			return Create<TMessage>("", allow);
+			return Create(string.Empty, allow);
 		}
 
-        public MessageFilter<TMessage> Create<TMessage>(string description, Func<TMessage, bool> allow)
-            where TMessage : class
-        {
-            EnsureRouterExists<TMessage>(_sink);
+		public MessageFilter<TMessage> Create<TMessage>(string description, Func<TMessage, bool> allow)
+			where TMessage : class
+		{
+			EnsureRouterExists<TMessage>(_sink);
 
-            var scope = new MessageFilterConfiguratorScope<TMessage>();
-            _sink.Inspect(scope);
+			var scope = new MessageFilterConfiguratorScope<TMessage>();
+			_sink.Inspect(scope);
 
-            return ConfigureFilter(description, scope.InsertAfter, allow);
-        }
+			return ConfigureFilter(description, scope.InsertAfter, allow);
+		}
 
-        private static MessageFilter<TMessage> ConfigureFilter<TMessage>(string description, Func<IMessageSink<TMessage>, IMessageSink<TMessage>> insertAfter,
-                                                                         Func<TMessage, bool> allow)
-            where TMessage : class
-        {
-            if (insertAfter == null)
-                throw new PipelineException("Unable to insert filter into pipeline for message type " + typeof(TMessage).FullName);
+		private static MessageFilter<TMessage> ConfigureFilter<TMessage>(string description,
+		                                                                 Func<IMessageSink<TMessage>, IMessageSink<TMessage>> insertAfter,
+		                                                                 Func<TMessage, bool> allow)
+			where TMessage : class
+		{
+			if (insertAfter == null)
+				throw new PipelineException("Unable to insert filter into pipeline for message type " + typeof (TMessage).FullName);
 
-            MessageFilter<TMessage> filter = new MessageFilter<TMessage>(description, insertAfter, allow);
+			MessageFilter<TMessage> filter = new MessageFilter<TMessage>(description, insertAfter, allow);
 
-            return filter;
-        }
+			return filter;
+		}
 
-        private void EnsureRouterExists<TMessage>(IMessageSink<object> sink) where TMessage : class
-        {
-            MessageRouterConfigurator routerConfigurator = MessageRouterConfigurator.For(sink);
-            var ignored = routerConfigurator.FindOrCreate<TMessage>();
-        }
+		private static void EnsureRouterExists<TMessage>(IMessageSink<object> sink) where TMessage : class
+		{
+			MessageRouterConfigurator routerConfigurator = MessageRouterConfigurator.For(sink);
+
+			routerConfigurator.FindOrCreate<TMessage>();
+		}
 
 		public static MessageFilterConfigurator For(MessagePipeline sink)
 		{
