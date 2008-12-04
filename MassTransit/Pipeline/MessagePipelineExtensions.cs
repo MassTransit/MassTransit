@@ -13,6 +13,7 @@
 namespace MassTransit.Pipeline
 {
 	using System;
+	using Configuration;
 
 	public static class MessagePipelineExtensions
 	{
@@ -22,7 +23,7 @@ namespace MassTransit.Pipeline
 		/// <typeparam name="TComponent"></typeparam>
 		/// <param name="pipeline">The pipeline to configure</param>
 		/// <returns></returns>
-		public static Func<bool> Subscribe<TComponent>(this InboundPipeline pipeline) where TComponent : class
+		public static Func<bool> Subscribe<TComponent>(this IConfigureInboundPipeline pipeline) where TComponent : class
 		{
 			return pipeline.Configure(x => x.Subscribe<TComponent>());
 		}
@@ -34,10 +35,25 @@ namespace MassTransit.Pipeline
 		/// <param name="pipeline">The pipeline to configure</param>
 		/// <param name="instance">The instance that will handle the messages</param>
 		/// <returns></returns>
-		public static Func<bool> Subscribe<TComponent>(this InboundPipeline pipeline, TComponent instance)
+		public static Func<bool> Subscribe<TComponent>(this IConfigureInboundPipeline pipeline, TComponent instance)
 			where TComponent : class
 		{
 			return pipeline.Configure(x => x.Subscribe(instance));
+		}
+
+		public static Func<bool> Filter<TMessage>(this InboundPipeline pipeline, Func<TMessage, bool> allow) 
+			where TMessage : class
+		{
+			return pipeline.Configure(x =>
+				{
+					MessageFilterConfigurator configurator = MessageFilterConfigurator.For(pipeline);
+
+					var filter = configurator.Create(allow);
+
+					Func<bool> result = () => false;
+
+					return result;
+				});
 		}
 	}
 }

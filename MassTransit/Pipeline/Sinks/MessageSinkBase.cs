@@ -33,6 +33,24 @@ namespace MassTransit.Pipeline.Sinks
 		public abstract IEnumerable<Consumes<TInput>.All> Enumerate(TInput message);
 		public abstract bool Inspect(IPipelineInspector inspector);
 
+		public IMessageSink<TOutput> ReplaceOutputSink(IMessageSink<TOutput> sink)
+		{
+			IMessageSink<TOutput> result = null;
+
+			var original = _outputSink;
+			using(original)
+			{
+				original.WriteLock(x =>
+					{
+						result = x;
+
+						_outputSink = new ReaderWriterLockedObject<IMessageSink<TOutput>>(sink, LockRecursionPolicy.SupportsRecursion);
+					});
+			}
+
+			return result;
+		}
+
 		public void Dispose()
 		{
 			Dispose(true);
