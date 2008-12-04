@@ -68,6 +68,26 @@ namespace MassTransit.Tests.Pipeline
 		}
 
         [Test]
+        public void A_message_should_fall_throuh_happy_filters()
+        {
+            InboundPipeline pipeline = new InboundPipeline(_builder);
+
+            TestMessageConsumer<PingMessage> consumer = new TestMessageConsumer<PingMessage>();
+
+            pipeline.Filter<PingMessage>(x => true);
+
+            pipeline.Subscribe(consumer);
+
+            PingMessage message = new PingMessage();
+
+            pipeline.Dispatch(message);
+
+            consumer.ShouldHaveReceivedMessage(message, 0.Seconds());
+
+            PipelineViewer.Trace(pipeline);
+        }
+
+        [Test]
         public void A_filter_should_be_nameable()
         {
             InboundPipeline pipeline = new InboundPipeline(_builder);
@@ -85,6 +105,25 @@ namespace MassTransit.Tests.Pipeline
             consumer.ShouldNotHaveReceivedMessage(message, 0.Seconds());
 
             PipelineViewer.Trace(pipeline);
+        }
+
+        [Test]
+        [Ignore("doesn't work yet")]
+        public void A_filter_should_be_removable()
+        {
+            InboundPipeline pipeline = new InboundPipeline(_builder);
+
+            TestMessageConsumer<PingMessage> consumer = new TestMessageConsumer<PingMessage>();
+
+            var f = pipeline.Filter<PingMessage>(x => true);
+
+            PipelineViewer.Trace(pipeline);
+
+            f();
+
+            PipelineViewer.Trace(pipeline);
+
+            Assert.Fail("doesn't work currently");
         }
 	}
 }
