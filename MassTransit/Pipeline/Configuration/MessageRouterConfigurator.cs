@@ -17,8 +17,7 @@ namespace MassTransit.Pipeline.Configuration
 	using Inspectors;
 	using Sinks;
 
-	public class MessageRouterConfigurator :
-		PipelineInspectorBase
+	public class MessageRouterConfigurator 
 	{
 		private readonly object _typedSink;
 		private readonly IMessageSink<object> _sink;

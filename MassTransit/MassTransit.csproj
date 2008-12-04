@@ -216,6 +216,7 @@
     <Compile Include="Exceptions\ConfigurationException.cs" />
     <Compile Include="Pipeline\Configuration\CorrelatedMessageRouterConfigurator.cs" />
     <Compile Include="Pipeline\Configuration\CorrelatedMessageRouterConfiguratorScope.cs" />
+    <Compile Include="Pipeline\Inspectors\PipelineInspectorBase.cs" />
     <Compile Include="Pipeline\Interceptors\Inbound\ConsumesForInboundInterceptor.cs" />
     <Compile Include="Pipeline\Configuration\MessageRouterConfiguratorScope.cs" />
     <Compile Include="Pipeline\Sinks\ComponentMessageSink.cs" />
@@ -244,7 +245,6 @@
     <Compile Include="Pipeline\Sinks\MessageTranslator.cs" />
     <Compile Include="Pipeline\PipelineBase.cs" />
     <Compile Include="Exceptions\PipelineException.cs" />
-    <Compile Include="Pipeline\Inspectors\PipelineInspectorBase.cs" />
     <Compile Include="Pipeline\Interceptors\Outbound\OutboundContext.cs" />
     <Compile Include="Pipeline\OutboundPipeline.cs" />
     <Compile Include="Pipeline\Interceptors\Inbound\InboundInterceptorBase.cs" />
@@ -265,6 +265,7 @@
     <Compile Include="Services\MessageDeferral\Messages\DeferedMessageRepublished.cs" />
     <Compile Include="Services\MessageDeferral\Messages\NewDeferMessageReceived.cs" />
     <Compile Include="Services\Timeout\RemoteTimeoutViewer.cs" />
+    <Compile Include="Util\ReflectiveVisitorBase.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

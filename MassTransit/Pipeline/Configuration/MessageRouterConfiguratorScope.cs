@@ -22,7 +22,8 @@ namespace MassTransit.Pipeline.Configuration
 		public MessageRouter<object> ObjectRouter { get; private set; }
 		public MessageRouter<TMessage> Router { get; private set; }
 
-		public override bool Inspect<TRoutedMessage>(MessageRouter<TRoutedMessage> element)
+		protected bool Inspect<TRoutedMessage>(MessageRouter<TRoutedMessage> element)
+			where TRoutedMessage : class
 		{
 			if (typeof (TRoutedMessage) == typeof (TMessage))
 			{

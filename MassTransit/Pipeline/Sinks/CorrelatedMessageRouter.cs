@@ -55,15 +55,17 @@ namespace MassTransit.Pipeline.Sinks
 
 		public bool Inspect(IPipelineInspector inspector)
 		{
-			inspector.Inspect(this);
+			return inspector.Inspect(this, () =>
+				{
 
-			foreach (IMessageSink<TMessage> sink in _sinks.ReadLock(x => x.Values))
-			{
-				if (sink.Inspect(inspector) == false)
-					return false;
-			}
+					foreach (IMessageSink<TMessage> sink in _sinks.ReadLock(x => x.Values))
+					{
+						if (sink.Inspect(inspector) == false)
+							return false;
+					}
 
-			return true;
+					return true;
+				});
 		}
 
 		public Func<bool> Connect(TKey correlationId, IMessageSink<TMessage> sink)

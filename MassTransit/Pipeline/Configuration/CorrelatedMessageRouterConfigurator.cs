@@ -13,11 +13,9 @@
 namespace MassTransit.Pipeline.Configuration
 {
 	using Exceptions;
-	using Inspectors;
 	using Sinks;
 
-	public class CorrelatedMessageRouterConfigurator :
-		PipelineInspectorBase
+	public class CorrelatedMessageRouterConfigurator
 	{
 		private readonly IMessageSink<object> _sink;
 
