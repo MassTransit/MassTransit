@@ -108,22 +108,28 @@ namespace MassTransit.Tests.Pipeline
         }
 
         [Test]
-        [Ignore("doesn't work yet")]
+        [Ignore("This is a planned feature, but is not yet functional.")]
         public void A_filter_should_be_removable()
         {
             InboundPipeline pipeline = new InboundPipeline(_builder);
 
             TestMessageConsumer<PingMessage> consumer = new TestMessageConsumer<PingMessage>();
 
-            var f = pipeline.Filter<PingMessage>(x => true);
-
+            var f = pipeline.Filter<PingMessage>(x => false);
             PipelineViewer.Trace(pipeline);
+
+			PingMessage message = new PingMessage();
+			pipeline.Dispatch(message);
+
+			consumer.ShouldNotHaveReceivedMessage(message, 0.Seconds());
 
             f();
-
             PipelineViewer.Trace(pipeline);
 
-            Assert.Fail("doesn't work currently");
+			message = new PingMessage();
+			pipeline.Dispatch(message);
+
+			consumer.ShouldHaveReceivedMessage(message, 0.Seconds());
         }
 	}
 }
