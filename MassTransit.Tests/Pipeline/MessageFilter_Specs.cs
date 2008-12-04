@@ -32,7 +32,7 @@ namespace MassTransit.Tests.Pipeline
 		private IObjectBuilder _builder;
 
 		[Test]
-		public void An_unfilter_message_should_be_received()
+		public void An_unfiltered_message_should_be_received()
 		{
 			InboundPipeline pipeline = new InboundPipeline(_builder);
 
