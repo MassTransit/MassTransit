@@ -14,33 +14,10 @@ namespace MassTransit.Pipeline
 {
 	using System;
 	using Configuration;
+	using Sinks;
 
 	public static class MessagePipelineExtensions
 	{
-		/// <summary>
-		/// Subscribe a component type to the pipeline that is resolved from the container for each message
-		/// </summary>
-		/// <typeparam name="TComponent"></typeparam>
-		/// <param name="pipeline">The pipeline to configure</param>
-		/// <returns></returns>
-		public static Func<bool> Subscribe<TComponent>(this IConfigureInboundPipeline pipeline) where TComponent : class
-		{
-			return pipeline.Configure(x => x.Subscribe<TComponent>());
-		}
-
-		/// <summary>
-		/// Subscribe a component to the pipeline that handles every message
-		/// </summary>
-		/// <typeparam name="TComponent"></typeparam>
-		/// <param name="pipeline">The pipeline to configure</param>
-		/// <param name="instance">The instance that will handle the messages</param>
-		/// <returns></returns>
-		public static Func<bool> Subscribe<TComponent>(this IConfigureInboundPipeline pipeline, TComponent instance)
-			where TComponent : class
-		{
-			return pipeline.Configure(x => x.Subscribe(instance));
-		}
-
 		public static Func<bool> Filter<TMessage>(this InboundPipeline pipeline, Func<TMessage, bool> allow) 
 			where TMessage : class
 		{
@@ -61,5 +38,17 @@ namespace MassTransit.Pipeline
                 return result;
             });
         }
+
+		public static Func<bool> SubscribeEndpoint<TMessage>(this InboundPipeline pipeline, IEndpoint endpoint) where TMessage : class
+		{
+			MessagePipeline messagePipeline = pipeline;
+
+			return pipeline.Configure(x =>
+				{
+					MessageRouterConfigurator routerConfigurator = MessageRouterConfigurator.For(messagePipeline);
+
+					return routerConfigurator.FindOrCreate<TMessage>().Connect(new EndpointMessageSink<TMessage>(endpoint));
+				});
+		}
 	}
 }

@@ -65,6 +65,13 @@ namespace MassTransit.Pipeline.Inspectors
 			return true;
 		}
 
+		public bool Inspect<TMessage>(EndpointMessageSink<TMessage> sink) where TMessage : class
+		{
+			Append(string.Format("Send {0} to Endpoint {1}", typeof (TMessage).Name, sink.Address));
+
+			return true;
+		}
+
 		public bool Inspect<TMessage, TKey>(CorrelatedMessageRouter<TMessage, TKey> sink)
 			where TMessage : class, CorrelatedBy<TKey>
 		{
