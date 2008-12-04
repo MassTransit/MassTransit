@@ -44,16 +44,22 @@ namespace MassTransit.Pipeline
 		public static Func<bool> Filter<TMessage>(this InboundPipeline pipeline, Func<TMessage, bool> allow) 
 			where TMessage : class
 		{
-			return pipeline.Configure(x =>
-				{
-					MessageFilterConfigurator configurator = MessageFilterConfigurator.For(pipeline);
-
-					var filter = configurator.Create(allow);
-
-					Func<bool> result = () => false;
-
-					return result;
-				});
+		    return Filter<TMessage>(pipeline, "", allow);
 		}
+
+        public static Func<bool> Filter<TMessage>(this InboundPipeline pipeline, string description, Func<TMessage, bool> allow)
+            where TMessage : class
+        {
+            return pipeline.Configure(x =>
+            {
+                MessageFilterConfigurator configurator = MessageFilterConfigurator.For(pipeline);
+
+                var filter = configurator.Create(description, allow);
+
+                Func<bool> result = () => false;
+
+                return result;
+            });
+        }
 	}
 }

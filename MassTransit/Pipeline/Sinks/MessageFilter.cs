@@ -19,14 +19,22 @@ namespace MassTransit.Pipeline.Sinks
 		MessageSinkBase<TMessage, TMessage> where TMessage : class
 	{
 		private readonly Func<TMessage, bool> _allow;
+        public string Description { get; private set; }
 
 		public MessageFilter(Func<IMessageSink<TMessage>, IMessageSink<TMessage>> insertAfter, Func<TMessage, bool> allow) :
-			base(null)
+			this("undescribed", insertAfter, allow)
 		{
-			_allow = allow;
 
-			ReplaceOutputSink(insertAfter(this));
 		}
+
+        public MessageFilter(string description, Func<IMessageSink<TMessage>, IMessageSink<TMessage>> insertAfter, Func<TMessage, bool> allow) :
+            base(null)
+        {
+            Description = string.IsNullOrEmpty(description) ? "undescribed" : description;
+            _allow = allow;
+
+            ReplaceOutputSink(insertAfter(this));
+        }
 
 		public override IEnumerable<Consumes<TMessage>.All> Enumerate(TMessage message)
 		{
