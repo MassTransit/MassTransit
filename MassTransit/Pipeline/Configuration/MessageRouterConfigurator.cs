@@ -14,13 +14,12 @@ namespace MassTransit.Pipeline.Configuration
 {
 	using System;
 	using Exceptions;
-	using Inspectors;
 	using Sinks;
 
-	public class MessageRouterConfigurator 
+	public class MessageRouterConfigurator
 	{
-		private readonly object _typedSink;
 		private readonly IMessageSink<object> _sink;
+		private readonly object _typedSink;
 
 		private MessageRouterConfigurator(IMessageSink<object> sink)
 		{
