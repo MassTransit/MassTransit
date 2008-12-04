@@ -28,7 +28,7 @@ namespace MassTransit.Pipeline.Interceptors.Inbound
 		{
 			MessageRouterConfigurator routerConfigurator = MessageRouterConfigurator.For(context.Pipeline);
 
-			return routerConfigurator.FindOrCreate<TMessage>().Connect(new MessageSink<TMessage>(message =>
+			return routerConfigurator.FindOrCreate<TMessage>().Connect(new InstanceMessageSink<TMessage>(message =>
 												 consumer.Accept(message) ? consumer : Consumes<TMessage>.Null));
 		}
 

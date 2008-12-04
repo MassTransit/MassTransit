@@ -15,13 +15,13 @@ namespace MassTransit.Pipeline.Sinks
 	using System;
 	using System.Collections.Generic;
 
-	public class MessageSink<TMessage> :
+	public class InstanceMessageSink<TMessage> :
 		IMessageSink<TMessage>
 		where TMessage : class
 	{
 		private readonly Func<TMessage, Consumes<TMessage>.All> _acceptor;
 
-		public MessageSink(Func<TMessage, Consumes<TMessage>.All> acceptor)
+		public InstanceMessageSink(Func<TMessage, Consumes<TMessage>.All> acceptor)
 		{
 			_acceptor = acceptor;
 		}

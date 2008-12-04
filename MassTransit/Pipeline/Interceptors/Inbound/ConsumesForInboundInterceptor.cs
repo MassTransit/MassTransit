@@ -29,7 +29,7 @@ namespace MassTransit.Pipeline.Interceptors.Inbound
 		{
 			var correlatedConfigurator = CorrelatedMessageRouterConfigurator.For(context.Pipeline);
 
-			return correlatedConfigurator.FindOrCreate<TMessage, TKey>().Connect(consumer.CorrelationId, new MessageSink<TMessage>(message => consumer));
+			return correlatedConfigurator.FindOrCreate<TMessage, TKey>().Connect(consumer.CorrelationId, new InstanceMessageSink<TMessage>(message => consumer));
 		}
 
 		public override IEnumerable<Func<bool>> Subscribe<TComponent>(IInboundContext context)
