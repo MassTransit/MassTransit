@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Pipeline.Inspectors
 {
+	using System;
 	using System.Text;
 	using Sinks;
 
@@ -45,14 +46,14 @@ namespace MassTransit.Pipeline.Inspectors
 
 		public bool Inspect<TMessage>(MessageRouter<TMessage> element) where TMessage : class
 		{
-			Append(string.Format("Router ({0})", typeof (TMessage).FullName));
+			Append(string.Format("Routed ({0})", typeof (TMessage).Name));
 
 			return true;
 		}
 
-		public bool Inspect<TMessage>(MessageSink<TMessage> sink) where TMessage : class
+		public bool Inspect<TMessage>(InstanceMessageSink<TMessage> sink) where TMessage : class
 		{
-			Append(string.Format("Message Sink ({0})", typeof (TMessage).FullName));
+			Append(string.Format("Consumed by Instance ({0})", typeof (TMessage).Name));
 
 			return true;
 		}
@@ -60,7 +61,7 @@ namespace MassTransit.Pipeline.Inspectors
 		public bool Inspect<TMessage, TKey>(CorrelatedMessageRouter<TMessage, TKey> sink)
 			where TMessage : class, CorrelatedBy<TKey>
 		{
-			Append(string.Format("Correlated Message Router {0}({1})", typeof (TMessage).FullName, typeof (TKey).Name));
+			Append(string.Format("Correlated by {1} ({0})", typeof (TMessage).Name, typeof (TKey).Name));
 
 			return true;
 		}
@@ -69,7 +70,11 @@ namespace MassTransit.Pipeline.Inspectors
 			where TMessage : class
 			where TComponent : class, Consumes<TMessage>.All
 		{
-			Append(string.Format("Component Message Sink {0}({1})", typeof (TComponent).FullName, typeof (TMessage).FullName));
+			Type componentType = typeof (TComponent);
+
+			string componentName = componentType.IsGenericType ? componentType.GetGenericTypeDefinition().FullName : componentType.FullName;
+
+			Append(string.Format("Consumed by Component {0} ({1})", componentName, typeof(TMessage).Name));
 
 			return true;
 		}
@@ -78,21 +83,14 @@ namespace MassTransit.Pipeline.Inspectors
 			where TMessage : class
 			where TComponent : class, Consumes<TMessage>.Selected
 		{
-			Append(string.Format("Selected Component Message Sink {0}({1})", typeof (TComponent).FullName, typeof (TMessage).FullName));
+			Append(string.Format("Conditionally Consumed by Component {0} ({1})", typeof (TComponent).FullName, typeof (TMessage).Name));
 
 			return true;
 		}
 
 		public bool Inspect<TInput, TOutput>(MessageTranslator<TInput, TOutput> translator) where TInput : class where TOutput : class, TInput
 		{
-			Append(string.Format("Message Translator ({0} to {1})", typeof (TInput).FullName, typeof (TOutput).FullName));
-
-			return true;
-		}
-
-		public bool Inspect<TMessage>(IMessageSink<TMessage> element) where TMessage : class
-		{
-			Append(string.Format("{1} ({0})", typeof (TMessage).FullName, element.GetType().Name));
+			Append(string.Format("Translated from {0} to {1}", typeof (TInput).FullName, typeof (TOutput).FullName));
 
 			return true;
 		}
