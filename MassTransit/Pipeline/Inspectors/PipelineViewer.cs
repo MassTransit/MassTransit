@@ -16,7 +16,7 @@ namespace MassTransit.Pipeline.Inspectors
 	using Sinks;
 
 	public class PipelineViewer :
-		IPipelineInspector
+		PipelineInspectorBase
 	{
 		private readonly StringBuilder _text = new StringBuilder();
 		private int _depth;
@@ -26,11 +26,19 @@ namespace MassTransit.Pipeline.Inspectors
 			get { return _text.ToString(); }
 		}
 
+		protected override void IncreaseDepth()
+		{
+			_depth++;
+		}
+
+		protected override void DecreaseDepth()
+		{
+			_depth--;
+		}
+
 		public bool Inspect(MessagePipeline element)
 		{
 			Append("Pipeline");
-
-			_depth = 1;
 
 			return true;
 		}
@@ -38,8 +46,6 @@ namespace MassTransit.Pipeline.Inspectors
 		public bool Inspect<TMessage>(MessageRouter<TMessage> element) where TMessage : class
 		{
 			Append(string.Format("Router ({0})", typeof (TMessage).FullName));
-
-			_depth++;
 
 			return true;
 		}
@@ -51,12 +57,18 @@ namespace MassTransit.Pipeline.Inspectors
 			return true;
 		}
 
+		public bool Inspect<TComponent, TMessage>(ComponentMessageSink<TComponent, TMessage> sink)
+			where TMessage : class
+			where TComponent : class, Consumes<TMessage>.All
+		{
+			Append(string.Format("Component Message Sink {0}({1})", typeof (TComponent).FullName, typeof (TMessage).FullName));
+
+			return true;
+		}
+
 		public bool Inspect<TInput, TOutput>(MessageTranslator<TInput, TOutput> translator) where TInput : class where TOutput : class, TInput
 		{
-			if (typeof(TInput) == typeof(object))
-				_depth = 2;
-
-			Append(string.Format("Message Translator ({0} to {1})", typeof(TInput).FullName, typeof(TOutput).FullName));
+			Append(string.Format("Message Translator ({0} to {1})", typeof (TInput).FullName, typeof (TOutput).FullName));
 
 			return true;
 		}
@@ -70,10 +82,7 @@ namespace MassTransit.Pipeline.Inspectors
 
 		private void Pad()
 		{
-			for (int i = 0; i < _depth; i++)
-			{
-				_text.Append('\t');
-			}
+			_text.Append(new string('\t', _depth));
 		}
 
 		private void Append(string text)

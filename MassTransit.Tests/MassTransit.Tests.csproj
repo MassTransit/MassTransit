@@ -128,6 +128,7 @@
     <Compile Include="Pipeline\PipelineDispatcher_Specs.cs" />
     <Compile Include="Pipeline\IndiscriminantConsumer.cs" />
     <Compile Include="Pipeline\PipelineViewer_Specs.cs" />
+    <Compile Include="Pipeline\ReflectiveVisitor_Specs.cs" />
     <Compile Include="Pipeline\SubscribeConsumer_Specs.cs" />
     <Compile Include="PublishToConsumer_Specs.cs" />
     <Compile Include="RequestReply_Specs.cs" />

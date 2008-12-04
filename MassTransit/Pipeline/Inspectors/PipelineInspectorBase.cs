@@ -12,61 +12,29 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Pipeline.Inspectors
 {
-	using Sinks;
+	using System;
+	using Util;
 
 	/// <summary>
 	/// Base class for pipeline inspectors
 	/// </summary>
 	public class PipelineInspectorBase :
+		ReflectiveVisitorBase,
 		IPipelineInspector
 	{
-		public virtual bool Inspect(MessagePipeline element)
+		public PipelineInspectorBase()
+			: base("Inspect")
 		{
-			return true;
 		}
 
-		public virtual bool Inspect<TMessage>(MessageRouter<TMessage> element) where TMessage : class
+		public bool Inspect(object obj)
 		{
-			return true;
+			return Visit(obj);
 		}
 
-		public virtual bool Inspect<TMessage>(MessageSink<TMessage> sink) where TMessage : class
+		public bool Inspect(object obj, Func<bool> action)
 		{
-			return true;
+			return Visit(obj, action);
 		}
-
-		public virtual bool Inspect<TInput, TOutput>(MessageTranslator<TInput, TOutput> translator)
-			where TInput : class
-			where TOutput : class, TInput
-		{
-			return true;
-		}
-
-		public virtual bool Inspect<TMessage>(IMessageSink<TMessage> element) where TMessage : class
-		{
-			return true;
-		}
-
-//		public bool Inspect(object obj)
-//		{
-//			Type t = obj.GetType();
-//
-//			Type myT = GetType();
-//
-//			MethodInfo mi = myT.GetMethod("Inspect", new Type[] { t });
-//			if (mi != null)
-//			{
-//				mi.Invoke(this, new object[] { obj });
-//				return;
-//			}
-//
-//			if (t.IsAssignableFrom(typeof(ISegment)))
-//			{
-//				Inspect((ISegment) obj);
-//				return;
-//			}
-//
-//			throw new ArgumentException("Don't know how to format object " + obj);
-//		}
 	}
 }

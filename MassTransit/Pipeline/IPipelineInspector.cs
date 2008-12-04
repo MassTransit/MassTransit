@@ -12,15 +12,11 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Pipeline
 {
-	using Sinks;
+	using System;
 
 	public interface IPipelineInspector
 	{
-		bool Inspect(MessagePipeline element);
-		bool Inspect<TMessage>(MessageRouter<TMessage> element) where TMessage : class;
-		bool Inspect<TMessage>(MessageSink<TMessage> sink) where TMessage : class;
-		bool Inspect<TInput, TOutput>(MessageTranslator<TInput, TOutput> translator) where TInput : class where TOutput : class, TInput;
-
-		bool Inspect<TMessage>(IMessageSink<TMessage> element) where TMessage : class;
+		bool Inspect(object obj);
+		bool Inspect(object obj, Func<bool> action);
 	}
 }

@@ -15,7 +15,7 @@ namespace MassTransit.Pipeline.Configuration
 	using Inspectors;
 	using Sinks;
 
-	public class CorrelatedMessageRouterConfiguratorScope<TMessage, TKey> :
+	public class CorrelatedMessageRouterConfiguratorScope<TMessage, TKey> : 
 		PipelineInspectorBase
 		where TMessage : class, CorrelatedBy<TKey>
 	{

@@ -39,9 +39,7 @@ namespace MassTransit.Pipeline.Sinks
 
 		public override bool Inspect(IPipelineInspector inspector)
 		{
-			inspector.Inspect(this);
-
-			return _outputSink.ReadLock(x => x.Inspect(inspector));
+			return inspector.Inspect(this, () => _outputSink.ReadLock(x => x.Inspect(inspector)));
 		}
 	}
 }
