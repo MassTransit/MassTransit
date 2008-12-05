@@ -245,11 +245,11 @@
     <Compile Include="Pipeline\Sinks\InstanceMessageSink.cs" />
     <Compile Include="Pipeline\Sinks\MessageSinkBase.cs" />
     <Compile Include="Pipeline\Sinks\MessageTranslator.cs" />
-    <Compile Include="Pipeline\MessagePipelineConfiguratorBase.cs" />
+    <Compile Include="Pipeline\Configuration\MessagePipelineConfiguratorBase.cs" />
     <Compile Include="Exceptions\PipelineException.cs" />
     <Compile Include="Pipeline\Interceptors\PipelineInterceptorBase.cs" />
     <Compile Include="Pipeline\Inspectors\PipelineViewer.cs" />
-    <Compile Include="Pipeline\MessagePipelineConfigurator.cs" />
+    <Compile Include="Pipeline\Configuration\MessagePipelineConfigurator.cs" />
     <Compile Include="Pipeline\Sinks\SelectedComponentMessageSink.cs" />
     <Compile Include="TranslateTo.cs" />
     <Compile Include="Serialization\BaseMessageEnvelope.cs" />

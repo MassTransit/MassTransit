@@ -15,6 +15,7 @@ namespace MassTransit.Tests.Pipeline
 	using System;
 	using Magnum.Common.DateTimeExtensions;
 	using MassTransit.Pipeline;
+	using MassTransit.Pipeline.Configuration;
 	using MassTransit.Pipeline.Inspectors;
 	using Messages;
 	using NUnit.Framework;
