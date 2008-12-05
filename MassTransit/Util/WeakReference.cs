@@ -10,19 +10,34 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Pipeline
+namespace MassTransit.Util
 {
 	using System;
-	using Interceptors;
+	using System.Runtime.Serialization;
 
-	public interface IConfigurePipeline
+	[Serializable]
+	public class WeakReference<T> : WeakReference
+		where T : class
 	{
-		Func<bool> Subscribe<TComponent>()
-			where TComponent : class;
+		public WeakReference(T target)
+			: base(target)
+		{
+		}
 
-		Func<bool> Subscribe<TComponent>(TComponent instance)
-			where TComponent : class;
+		public WeakReference(T target, bool trackResurrection)
+			: base(target, trackResurrection)
+		{
+		}
 
-		Func<bool> Register(IPipelineInterceptor interceptor);
+		protected WeakReference(SerializationInfo info, StreamingContext context)
+			: base(info, context)
+		{
+		}
+
+		public new T Target
+		{
+			get { return (T) base.Target; }
+			set { base.Target = value; }
+		}
 	}
 }

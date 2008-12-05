@@ -266,6 +266,7 @@
     <Compile Include="Services\MessageDeferral\Messages\NewDeferMessageReceived.cs" />
     <Compile Include="Services\Timeout\RemoteTimeoutViewer.cs" />
     <Compile Include="Util\ReflectiveVisitorBase.cs" />
+    <Compile Include="Util\WeakReference.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

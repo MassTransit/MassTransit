@@ -12,19 +12,20 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Pipeline
 {
+	using System;
 	using System.Collections.Generic;
 	using Sinks;
 
 	public class MessagePipeline :
 		MessageSinkBase<object, object>
 	{
-		public MessagePipeline(IMessageSink<object> outputSink, IObjectBuilder builder) :
+		private readonly IConfigurePipeline _configurator;
+
+		public MessagePipeline(IMessageSink<object> outputSink, IConfigurePipeline configurator) :
 			base(outputSink)
 		{
-			Builder = builder;
+			_configurator = configurator;
 		}
-
-		public IObjectBuilder Builder { get; private set; }
 
 		public override IEnumerable<Consumes<object>.All> Enumerate(object message)
 		{
@@ -37,6 +38,16 @@ namespace MassTransit.Pipeline
 		public override bool Inspect(IPipelineInspector inspector)
 		{
 			return inspector.Inspect(this, () => _outputSink.ReadLock(x => x.Inspect(inspector)));
+		}
+
+		public void Configure(Action<IConfigurePipeline> action)
+		{
+			action(_configurator);
+		}
+
+		public V Configure<V>(Func<IConfigurePipeline, V> action)
+		{
+			return action(_configurator);
 		}
 	}
 }

@@ -14,6 +14,7 @@ namespace MassTransit.Pipeline
 {
 	using System;
 	using Configuration;
+	using Interceptors;
 	using Sinks;
 
 	public static class MessagePipelineExtensions
@@ -56,7 +57,7 @@ namespace MassTransit.Pipeline
 		/// <returns></returns>
 		public static Func<bool> Subscribe<TComponent>(this MessagePipeline pipeline) where TComponent : class
 		{
-			return MessagePipelineConfigurator.For(pipeline).Configure(x => x.Subscribe<TComponent>());
+			return pipeline.Configure(x => x.Subscribe<TComponent>());
 		}
 
 		/// <summary>
@@ -69,7 +70,7 @@ namespace MassTransit.Pipeline
 		public static Func<bool> Subscribe<TComponent>(this MessagePipeline pipeline, TComponent instance)
 			where TComponent : class
 		{
-			return MessagePipelineConfigurator.For(pipeline).Configure(x => x.Subscribe(instance));
+			return pipeline.Configure(x => x.Subscribe(instance));
 		}
 
 		public static Func<bool> Subscribe<TMessage>(this MessagePipeline pipeline, IEndpoint endpoint) where TMessage : class
@@ -95,6 +96,11 @@ namespace MassTransit.Pipeline
 			Func<bool> result = () => { throw new NotSupportedException("Removal of filters not yet supported"); };
 
 			return result;
+		}
+
+		public static Func<bool> Register(this IConfigurePipeline context, IPipelineInterceptor interceptor)
+		{
+			return context.Register(interceptor);
 		}
 	}
 }
