@@ -14,6 +14,7 @@ namespace MassTransit.Tests.Pipeline
 {
 	using MassTransit.Pipeline;
 	using MassTransit.Pipeline.Configuration;
+	using MassTransit.Pipeline.Interceptors;
 	using Messages;
 	using NUnit.Framework;
 	using Rhino.Mocks;
@@ -45,6 +46,19 @@ namespace MassTransit.Tests.Pipeline
 			pipeline.Dispatch(new PingMessage());
 
 			Assert.IsNotNull(consumer.Consumed);
+		}
+
+		[Test]
+		public void The_builder_should_stay_with_the_pipeline()
+		{
+			MessagePipeline pipeline = MessagePipelineConfigurator.CreateDefault(_builder);
+
+			var interceptor = MockRepository.GenerateMock<IPipelineInterceptor>();
+
+			pipeline.Configure(x =>
+				{
+					x.Register(interceptor);
+				});
 		}
 	}
 }

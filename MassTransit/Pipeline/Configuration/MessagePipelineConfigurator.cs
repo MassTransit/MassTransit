@@ -16,22 +16,36 @@ namespace MassTransit.Pipeline.Configuration
 	using System.Collections.Generic;
 	using Interceptors;
 	using Sinks;
+	using Util;
 
 	public class MessagePipelineConfigurator :
-		MessagePipelineConfiguratorBase,
-		IConfigurePipeline
+		IConfigurePipeline,
+		IDisposable
 	{
+		private readonly IObjectBuilder _builder;
 		private readonly Func<bool> _emptyToken = () => false;
-		private readonly MessagePipeline _pipeline;
+		private MessagePipeline _pipeline;
+		private volatile bool _disposed;
 
-		public MessagePipelineConfigurator(MessagePipeline pipeline)
+		protected InterceptorList<IPipelineInterceptor> _interceptors = new InterceptorList<IPipelineInterceptor>();
+
+		public MessagePipelineConfigurator(IObjectBuilder builder)
 		{
-			_pipeline = pipeline;
+			_builder = builder;
+
+			MessageRouter<object> router = new MessageRouter<object>();
+
+			_pipeline = new MessagePipeline(router, this);
 
 			// interceptors are inserted at the front of the list, so do them from least to most specific
 			_interceptors.Register(new ConsumesAllInterceptor());
 			_interceptors.Register(new ConsumesSelectedInterceptor());
 			_interceptors.Register(new ConsumesForInterceptor());
+		}
+
+		public Func<bool> Register(IPipelineInterceptor interceptor)
+		{
+			return _interceptors.Register(interceptor);
 		}
 
 		public Func<bool> Subscribe<TComponent>()
@@ -46,6 +60,30 @@ namespace MassTransit.Pipeline.Configuration
 			return Subscribe((context, interceptor) => interceptor.Subscribe(context, instance));
 		}
 
+		public void Dispose()
+		{
+			Dispose(true);
+			GC.SuppressFinalize(this);
+		}
+
+		protected virtual void Dispose(bool disposing)
+		{
+			if (!disposing || _disposed) return;
+
+			if (_interceptors != null)
+				_interceptors.Dispose();
+
+			_pipeline = null;
+			_interceptors = null;
+
+			_disposed = true;
+		}
+
+		~MessagePipelineConfigurator()
+		{
+			Dispose(false);
+		}
+
 		public V Configure<V>(Func<IConfigurePipeline, V> action)
 		{
 			V result = action(this);
@@ -55,7 +93,7 @@ namespace MassTransit.Pipeline.Configuration
 
 		private Func<bool> Subscribe(Func<IInterceptorContext, IPipelineInterceptor, IEnumerable<Func<bool>>> subscriber)
 		{
-			var context = new InterceptorContext(_pipeline, _pipeline.Builder);
+			var context = new InterceptorContext(_pipeline, _builder);
 
 			Func<bool> result = null;
 
@@ -80,16 +118,7 @@ namespace MassTransit.Pipeline.Configuration
 
 		public static MessagePipelineConfigurator CreateDefault(IObjectBuilder builder)
 		{
-			MessageRouter<object> router = new MessageRouter<object>();
-
-			MessagePipeline pipeline = new MessagePipeline(router, builder);
-
-			return new MessagePipelineConfigurator(pipeline);
-		}
-
-		public static MessagePipelineConfigurator For(MessagePipeline pipeline)
-		{
-			return new MessagePipelineConfigurator(pipeline);
+			return new MessagePipelineConfigurator(builder);
 		}
 	}
 }
