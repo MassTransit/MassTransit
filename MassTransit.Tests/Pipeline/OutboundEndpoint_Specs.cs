@@ -38,7 +38,7 @@ namespace MassTransit.Tests.Pipeline
 			IEndpoint endpoint = MockRepository.GenerateMock<IEndpoint>();
 			endpoint.Stub(x => x.Uri).Return(new Uri("msmq://localhost/queue_name"));
 
-			pipeline.SubscribeEndpoint<PingMessage>(endpoint);
+			pipeline.Subscribe<PingMessage>(endpoint);
 
 			PipelineViewer.Trace(pipeline);
 

@@ -72,7 +72,7 @@ namespace MassTransit.Pipeline
 			return MessagePipelineConfigurator.For(pipeline).Configure(x => x.Subscribe(instance));
 		}
 
-		public static Func<bool> SubscribeEndpoint<TMessage>(this MessagePipeline pipeline, IEndpoint endpoint) where TMessage : class
+		public static Func<bool> Subscribe<TMessage>(this MessagePipeline pipeline, IEndpoint endpoint) where TMessage : class
 		{
 			MessageRouterConfigurator routerConfigurator = MessageRouterConfigurator.For(pipeline);
 
