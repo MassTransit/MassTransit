@@ -33,7 +33,7 @@ namespace MassTransit.Tests.Pipeline
 		[Test]
 		public void A_filter_should_be_nameable()
 		{
-			InboundPipeline pipeline = new InboundPipeline(_builder);
+			MessagePipeline pipeline = MessagePipelineConfigurator.CreateDefault(_builder);
 
 			TestMessageConsumer<PingMessage> consumer = new TestMessageConsumer<PingMessage>();
 
@@ -54,7 +54,7 @@ namespace MassTransit.Tests.Pipeline
 		[Ignore("This is a planned feature, but is not yet functional.")]
 		public void A_filter_should_be_removable()
 		{
-			InboundPipeline pipeline = new InboundPipeline(_builder);
+			MessagePipeline pipeline = MessagePipelineConfigurator.CreateDefault(_builder);
 
 			TestMessageConsumer<PingMessage> consumer = new TestMessageConsumer<PingMessage>();
 
@@ -78,7 +78,7 @@ namespace MassTransit.Tests.Pipeline
 		[Test]
 		public void A_filtered_message_should_not_be_received()
 		{
-			InboundPipeline pipeline = new InboundPipeline(_builder);
+			MessagePipeline pipeline = MessagePipelineConfigurator.CreateDefault(_builder);
 
 			TestMessageConsumer<PingMessage> consumer = new TestMessageConsumer<PingMessage>();
 
@@ -98,7 +98,7 @@ namespace MassTransit.Tests.Pipeline
 		[Test]
 		public void A_message_should_fall_throuh_happy_filters()
 		{
-			InboundPipeline pipeline = new InboundPipeline(_builder);
+			MessagePipeline pipeline = MessagePipelineConfigurator.CreateDefault(_builder);
 
 			TestMessageConsumer<PingMessage> consumer = new TestMessageConsumer<PingMessage>();
 
@@ -118,7 +118,7 @@ namespace MassTransit.Tests.Pipeline
 		[Test]
 		public void An_unfiltered_message_should_be_received()
 		{
-			InboundPipeline pipeline = new InboundPipeline(_builder);
+			MessagePipeline pipeline = MessagePipelineConfigurator.CreateDefault(_builder);
 
 			TestMessageConsumer<PingMessage> consumer = new TestMessageConsumer<PingMessage>();
 

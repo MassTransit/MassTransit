@@ -12,17 +12,19 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Pipeline
 {
-	using System;
 	using System.Collections.Generic;
 	using Sinks;
 
 	public class MessagePipeline :
 		MessageSinkBase<object, object>
 	{
-		private MessagePipeline(IMessageSink<object> outputSink) :
+		public MessagePipeline(IMessageSink<object> outputSink, IObjectBuilder builder) :
 			base(outputSink)
 		{
+			Builder = builder;
 		}
+
+		public IObjectBuilder Builder { get; private set; }
 
 		public override IEnumerable<Consumes<object>.All> Enumerate(object message)
 		{
@@ -35,33 +37,6 @@ namespace MassTransit.Pipeline
 		public override bool Inspect(IPipelineInspector inspector)
 		{
 			return inspector.Inspect(this, () => _outputSink.ReadLock(x => x.Inspect(inspector)));
-		}
-
-		public void Dispatch(object message)
-		{
-			Dispatch(message, x => true);
-		}
-
-		public void Dispatch(object message, Func<object, bool> accept)
-		{
-			foreach (Consumes<object>.All consumer in Enumerate(message))
-			{
-				if (!accept(message))
-					break;
-
-				accept = x => true;
-
-				consumer.Consume(message);
-			}
-		}
-
-		public static MessagePipeline CreateDefaultPipeline()
-		{
-			MessageRouter<object> router = new MessageRouter<object>();
-
-			MessagePipeline pipeline = new MessagePipeline(router);
-
-			return pipeline;
 		}
 	}
 }

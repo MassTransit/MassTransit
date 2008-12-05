@@ -20,10 +20,22 @@ namespace MassTransit.Tests.Pipeline
 	[TestFixture]
 	public class When_working_with_an_existing_pipeline
 	{
+		#region Setup/Teardown
+
+		[SetUp]
+		public void Setup()
+		{
+			_builder = MockRepository.GenerateMock<IObjectBuilder>();
+		}
+
+		#endregion
+
+		private IObjectBuilder _builder;
+
 		[Test]
 		public void I_want_to_display_the_entire_flow_through_the_pipeline()
 		{
-			MessagePipeline pipeline = MessagePipeline.CreateDefaultPipeline();
+			MessagePipeline pipeline = MessagePipelineConfigurator.CreateDefault(_builder);
 
 			PipelineViewer.Trace(pipeline);
 		}

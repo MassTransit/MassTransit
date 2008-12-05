@@ -12,10 +12,6 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests.Pipeline
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Diagnostics;
-	using Magnum.Common.DateTimeExtensions;
 	using MassTransit.Pipeline;
 	using Messages;
 	using NUnit.Framework;
@@ -37,34 +33,11 @@ namespace MassTransit.Tests.Pipeline
 		private IObjectBuilder _builder;
 
 		[Test]
-		public void Batch_composition_should_work()
-		{
-			TestBatchConsumer<IndividualBatchMessage, Guid> batchConsumer = new TestBatchConsumer<IndividualBatchMessage, Guid>();
-
-			InboundPipeline pipeline = new InboundPipeline(_builder);
-
-			pipeline.Subscribe(batchConsumer);
-
-			Guid batchId = Guid.NewGuid();
-			const int _batchSize = 1;
-			for (int i = 0; i < _batchSize; i++)
-			{
-				IndividualBatchMessage message = new IndividualBatchMessage(batchId, _batchSize);
-
-				pipeline.Dispatch(message);
-			}
-
-			TimeSpan _timeout = 5.Seconds();
-
-			batchConsumer.ShouldHaveReceivedBatch(_timeout);
-		}
-
-		[Test]
 		public void The_pipeline_should_be_happy()
 		{
 			IndiscriminantConsumer<PingMessage> consumer = new IndiscriminantConsumer<PingMessage>();
 
-			InboundPipeline pipeline = new InboundPipeline(_builder);
+			MessagePipeline pipeline = MessagePipelineConfigurator.CreateDefault(_builder);
 
 			pipeline.Subscribe(consumer);
 

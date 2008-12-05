@@ -18,18 +18,17 @@ namespace MassTransit.Pipeline.Interceptors
 	public class InterceptorContext :
 		IInterceptorContext
 	{
-		private readonly InboundPipeline _pipeline;
 		private readonly HashSet<Type> _used = new HashSet<Type>();
 
-		public InterceptorContext(InboundPipeline pipeline)
+		public InterceptorContext(MessagePipeline pipeline, IObjectBuilder builder)
 		{
-			_pipeline = pipeline;
+			Pipeline = pipeline;
+			Builder = builder;
 		}
 
-		public MessagePipeline Pipeline
-		{
-			get { return _pipeline; }
-		}
+		public IObjectBuilder Builder { get; private set; }
+
+		public MessagePipeline Pipeline { get; private set; }
 
 		public bool HasMessageTypeBeenDefined(Type messageType)
 		{
@@ -39,11 +38,6 @@ namespace MassTransit.Pipeline.Interceptors
 		public void MessageTypeWasDefined(Type messageType)
 		{
 			_used.Add(messageType);
-		}
-
-		public IObjectBuilder Builder
-		{
-			get { return _pipeline.Builder; }
 		}
 	}
 }
