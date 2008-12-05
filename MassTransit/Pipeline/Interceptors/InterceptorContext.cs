@@ -10,18 +10,18 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Pipeline.Interceptors.Inbound
+namespace MassTransit.Pipeline.Interceptors
 {
 	using System;
 	using System.Collections.Generic;
 
-	public class InboundContext :
-		IInboundContext
+	public class InterceptorContext :
+		IInterceptorContext
 	{
 		private readonly InboundPipeline _pipeline;
 		private readonly HashSet<Type> _used = new HashSet<Type>();
 
-		public InboundContext(InboundPipeline pipeline)
+		public InterceptorContext(InboundPipeline pipeline)
 		{
 			_pipeline = pipeline;
 		}

@@ -10,35 +10,34 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Pipeline.Interceptors.Inbound
+namespace MassTransit.Pipeline.Interceptors
 {
 	using System;
 	using Configuration;
 	using Sinks;
 
-	public class ConsumesSelectedInboundInterceptor :
-		ConsumesInboundInterceptorBase
+	public class ConsumesAllInterceptor :
+		ConsumesInterceptorBase
 	{
 		protected override Type InterfaceType
 		{
-			get { return typeof (Consumes<>.Selected); }
+			get { return typeof (Consumes<>.All); }
 		}
 
-		protected virtual Func<bool> Connect<TMessage>(IInboundContext context, Consumes<TMessage>.Selected consumer) where TMessage : class
+		protected virtual Func<bool> Connect<TMessage>(IInterceptorContext context, Consumes<TMessage>.All consumer) where TMessage : class
 		{
 			MessageRouterConfigurator routerConfigurator = MessageRouterConfigurator.For(context.Pipeline);
 
-			return routerConfigurator.FindOrCreate<TMessage>().Connect(new InstanceMessageSink<TMessage>(message =>
-												 consumer.Accept(message) ? consumer : Consumes<TMessage>.Null));
+			return routerConfigurator.FindOrCreate<TMessage>().Connect(new InstanceMessageSink<TMessage>(message => consumer));
 		}
 
-		protected virtual Func<bool> Connect<TComponent, TMessage>(IInboundContext context)
+		protected virtual Func<bool> Connect<TComponent, TMessage>(IInterceptorContext context)
 			where TMessage : class
-			where TComponent : class, Consumes<TMessage>.Selected
+			where TComponent : class, Consumes<TMessage>.All
 		{
 			MessageRouterConfigurator routerConfigurator = MessageRouterConfigurator.For(context.Pipeline);
 
-			return routerConfigurator.FindOrCreate<TMessage>().Connect(new SelectedComponentMessageSink<TComponent, TMessage>(context));
+			return routerConfigurator.FindOrCreate<TMessage>().Connect(new ComponentMessageSink<TComponent, TMessage>(context));
 		}
 	}
 }

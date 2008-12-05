@@ -10,7 +10,7 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Pipeline.Interceptors.Inbound
+namespace MassTransit.Pipeline.Interceptors
 {
 	using System;
 	using System.Collections.Generic;
@@ -19,12 +19,12 @@ namespace MassTransit.Pipeline.Interceptors.Inbound
 	using Exceptions;
 	using Sinks;
 
-	public class ConsumesForInboundInterceptor :
-		InboundInterceptorBase
+	public class ConsumesForInterceptor :
+		PipelineInterceptorBase
 	{
 		private static readonly Type _interfaceType = typeof (Consumes<>.For<>);
 
-		protected virtual Func<bool> Connect<TMessage, TKey>(IInboundContext context, Consumes<TMessage>.For<TKey> consumer)
+		protected virtual Func<bool> Connect<TMessage, TKey>(IInterceptorContext context, Consumes<TMessage>.For<TKey> consumer)
 			where TMessage : class, CorrelatedBy<TKey>
 		{
 			var correlatedConfigurator = CorrelatedMessageRouterConfigurator.For(context.Pipeline);
@@ -32,16 +32,16 @@ namespace MassTransit.Pipeline.Interceptors.Inbound
 			return correlatedConfigurator.FindOrCreate<TMessage, TKey>().Connect(consumer.CorrelationId, new InstanceMessageSink<TMessage>(message => consumer));
 		}
 
-		public override IEnumerable<Func<bool>> Subscribe<TComponent>(IInboundContext context)
+		public override IEnumerable<Func<bool>> Subscribe<TComponent>(IInterceptorContext context)
 		{
 			yield break;
 		}
 
-		public override IEnumerable<Func<bool>> Subscribe<TComponent>(IInboundContext context, TComponent instance)
+		public override IEnumerable<Func<bool>> Subscribe<TComponent>(IInterceptorContext context, TComponent instance)
 		{
 			foreach (KeyValuePair<Type, Type> match in GetInterfaces<TComponent>(context))
 			{
-				MethodInfo genericMethod = FindMethod(GetType(), "Connect", new[] {match.Key, match.Value}, new[] {typeof (IInboundContext), typeof (TComponent)});
+				MethodInfo genericMethod = FindMethod(GetType(), "Connect", new[] {match.Key, match.Value}, new[] {typeof (IInterceptorContext), typeof (TComponent)});
 
 				if (genericMethod == null)
 					throw new PipelineException(string.Format("Unable to subscribe for type: {0} ({1})",
@@ -55,7 +55,7 @@ namespace MassTransit.Pipeline.Interceptors.Inbound
 			}
 		}
 
-		protected static IEnumerable<KeyValuePair<Type, Type>> GetInterfaces<TComponent>(IInboundContext context)
+		protected static IEnumerable<KeyValuePair<Type, Type>> GetInterfaces<TComponent>(IInterceptorContext context)
 		{
 			Type componentType = typeof (TComponent);
 
