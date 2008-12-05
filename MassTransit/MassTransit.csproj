@@ -233,9 +233,6 @@
     <Compile Include="Pipeline\IConfigureInboundPipeline.cs" />
     <Compile Include="Pipeline\IMessageSink.cs" />
     <Compile Include="Pipeline\IPipelineInspector.cs" />
-    <Compile Include="Pipeline\IPipelineModel.cs" />
-    <Compile Include="Pipeline\Interceptors\Outbound\IOutboundContext.cs" />
-    <Compile Include="Pipeline\Interceptors\Outbound\IOutboundInterceptor.cs" />
     <Compile Include="Pipeline\Interceptors\Inbound\IInboundContext.cs" />
     <Compile Include="Pipeline\Interceptors\Inbound\IInboundInterceptor.cs" />
     <Compile Include="Pipeline\Interceptors\InterceptorList.cs" />
@@ -250,8 +247,6 @@
     <Compile Include="Pipeline\Sinks\MessageTranslator.cs" />
     <Compile Include="Pipeline\PipelineBase.cs" />
     <Compile Include="Exceptions\PipelineException.cs" />
-    <Compile Include="Pipeline\Interceptors\Outbound\OutboundContext.cs" />
-    <Compile Include="Pipeline\OutboundPipeline.cs" />
     <Compile Include="Pipeline\Interceptors\Inbound\InboundInterceptorBase.cs" />
     <Compile Include="Pipeline\Inspectors\PipelineViewer.cs" />
     <Compile Include="Pipeline\InboundPipeline.cs" />
