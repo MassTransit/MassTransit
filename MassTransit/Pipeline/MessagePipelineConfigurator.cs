@@ -15,28 +15,23 @@ namespace MassTransit.Pipeline
 	using System;
 	using System.Collections.Generic;
 	using Interceptors;
+	using Sinks;
 
-	public class InboundPipeline :
-		PipelineBase<IPipelineInterceptor>,
-		IConfigureInboundPipeline
+	public class MessagePipelineConfigurator :
+		MessagePipelineConfiguratorBase,
+		IConfigurePipeline
 	{
 		private readonly Func<bool> _emptyToken = () => false;
+		private readonly MessagePipeline _pipeline;
 
-		public InboundPipeline(IObjectBuilder builder) :
-			base(builder)
+		public MessagePipelineConfigurator(MessagePipeline pipeline)
 		{
-			// interceptors are inserted at the front of the list, so do them from least to most specific
+			_pipeline = pipeline;
 
+			// interceptors are inserted at the front of the list, so do them from least to most specific
 			_interceptors.Register(new ConsumesAllInterceptor());
 			_interceptors.Register(new ConsumesSelectedInterceptor());
 			_interceptors.Register(new ConsumesForInterceptor());
-		}
-
-		public V Configure<V>(Func<IConfigureInboundPipeline, V> action)
-		{
-			V result = action(this);
-
-			return result;
 		}
 
 		public Func<bool> Subscribe<TComponent>()
@@ -51,9 +46,16 @@ namespace MassTransit.Pipeline
 			return Subscribe((context, interceptor) => interceptor.Subscribe(context, instance));
 		}
 
+		public V Configure<V>(Func<IConfigurePipeline, V> action)
+		{
+			V result = action(this);
+
+			return result;
+		}
+
 		private Func<bool> Subscribe(Func<IInterceptorContext, IPipelineInterceptor, IEnumerable<Func<bool>>> subscriber)
 		{
-			var context = new InterceptorContext(this);
+			var context = new InterceptorContext(_pipeline, _pipeline.Builder);
 
 			Func<bool> result = null;
 
@@ -69,6 +71,25 @@ namespace MassTransit.Pipeline
 				});
 
 			return result ?? _emptyToken;
+		}
+
+		public static implicit operator MessagePipeline(MessagePipelineConfigurator configurator)
+		{
+			return configurator._pipeline;
+		}
+
+		public static MessagePipelineConfigurator CreateDefault(IObjectBuilder builder)
+		{
+			MessageRouter<object> router = new MessageRouter<object>();
+
+			MessagePipeline pipeline = new MessagePipeline(router, builder);
+
+			return new MessagePipelineConfigurator(pipeline);
+		}
+
+		public static MessagePipelineConfigurator For(MessagePipeline pipeline)
+		{
+			return new MessagePipelineConfigurator(pipeline);
 		}
 	}
 }

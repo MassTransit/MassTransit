@@ -123,6 +123,7 @@
     <Compile Include="Messages\SerializationTestMessage.cs" />
     <Compile Include="Multicast_Specs.cs" />
     <Compile Include="ObjectDispatcher_Specs.cs" />
+    <Compile Include="Pipeline\BatchConsumer_Specs.cs" />
     <Compile Include="Pipeline\MessageFilter_Specs.cs" />
     <Compile Include="Pipeline\OutboundEndpoint_Specs.cs" />
     <Compile Include="Pipeline\ParticularConsumer.cs" />

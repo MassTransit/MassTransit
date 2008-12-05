@@ -14,16 +14,8 @@ namespace MassTransit.Pipeline
 {
 	using System;
 
-	public interface IConfigureInboundPipeline
+	public interface IConfigurePipeline
 	{
-		/// <summary>
-		/// Configure the MessagePipeline
-		/// </summary>
-		/// <typeparam name="V"></typeparam>
-		/// <param name="action"></param>
-		/// <returns></returns>
-		V Configure<V>(Func<IConfigureInboundPipeline, V> action);
-
 		Func<bool> Subscribe<TComponent>()
 			where TComponent : class;
 

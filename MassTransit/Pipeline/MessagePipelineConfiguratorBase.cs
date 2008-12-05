@@ -15,22 +15,12 @@ namespace MassTransit.Pipeline
 	using System;
 	using Interceptors;
 
-	public class PipelineBase<TInterceptor>
+	public class MessagePipelineConfiguratorBase :
+		IDisposable
 	{
 		private volatile bool _disposed;
 
-		protected InterceptorList<TInterceptor> _interceptors = new InterceptorList<TInterceptor>();
-
-		public PipelineBase(IObjectBuilder builder)
-		{
-			Builder = builder;
-
-			Pipeline = MessagePipeline.CreateDefaultPipeline();
-		}
-
-		public IObjectBuilder Builder { get; private set; }
-
-		protected MessagePipeline Pipeline { get; private set; }
+		protected InterceptorList<IPipelineInterceptor> _interceptors = new InterceptorList<IPipelineInterceptor>();
 
 		public void Dispose()
 		{
@@ -38,17 +28,7 @@ namespace MassTransit.Pipeline
 			GC.SuppressFinalize(this);
 		}
 
-		public void Dispatch(object message)
-		{
-			Pipeline.Dispatch(message);
-		}
-
-		public void Dispatch(object message, Func<object, bool> accept)
-		{
-			Pipeline.Dispatch(message, accept);
-		}
-
-		public Func<bool> RegisterInterceptor(TInterceptor interceptor)
+		public Func<bool> RegisterInterceptor(IPipelineInterceptor interceptor)
 		{
 			return _interceptors.Register(interceptor);
 		}
@@ -57,12 +37,6 @@ namespace MassTransit.Pipeline
 		{
 			if (!disposing || _disposed) return;
 
-			if (Pipeline != null)
-			{
-				Pipeline.Dispose();
-				Pipeline = null;
-			}
-
 			if (_interceptors != null)
 				_interceptors.Dispose();
 
@@ -70,14 +44,9 @@ namespace MassTransit.Pipeline
 			_disposed = true;
 		}
 
-		~PipelineBase()
+		~MessagePipelineConfiguratorBase()
 		{
 			Dispose(false);
-		}
-
-		public static implicit operator MessagePipeline(PipelineBase<TInterceptor> pipeline)
-		{
-			return pipeline.Pipeline;
 		}
 	}
 }

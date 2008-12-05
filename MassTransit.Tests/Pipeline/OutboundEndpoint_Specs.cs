@@ -33,7 +33,7 @@ namespace MassTransit.Tests.Pipeline
 		[Test]
 		public void The_endpoint_consumer_should_be_returned()
 		{
-			InboundPipeline pipeline = new InboundPipeline(_builder);
+			MessagePipeline pipeline = MessagePipelineConfigurator.CreateDefault(_builder);
 
 			IEndpoint endpoint = MockRepository.GenerateMock<IEndpoint>();
 			endpoint.Stub(x => x.Uri).Return(new Uri("msmq://localhost/queue_name"));
