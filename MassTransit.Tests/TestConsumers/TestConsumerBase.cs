@@ -3,6 +3,7 @@ namespace MassTransit.Tests.TestConsumers
     using System;
     using System.Collections.Generic;
     using System.Threading;
+    using Magnum.Common.DateTimeExtensions;
     using NUnit.Framework;
     using NUnit.Framework.SyntaxHelpers;
 
@@ -49,9 +50,19 @@ namespace MassTransit.Tests.TestConsumers
     		protected set { _receivedMessageCount = value; }
     	}
 
+		public void ShouldHaveReceivedMessage(TMessage message)
+		{
+			ShouldHaveReceivedMessage(message, 0.Seconds());
+		}
+
     	public void ShouldHaveReceivedMessage(TMessage message, TimeSpan timeout)
         {
             Assert.That(ReceivedMessage(message, timeout), Is.True, "Message should have been received");
+        }
+
+        public void ShouldNotHaveReceivedMessage(TMessage message)
+        {
+            Assert.That(ReceivedMessage(message, 0.Seconds()), Is.False, "Message should not have been received");
         }
 
         public void ShouldNotHaveReceivedMessage(TMessage message, TimeSpan timeout)

@@ -12,7 +12,6 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests.Pipeline
 {
-	using Magnum.Common.DateTimeExtensions;
 	using MassTransit.Pipeline;
 	using MassTransit.Pipeline.Inspectors;
 	using Messages;
@@ -32,11 +31,13 @@ namespace MassTransit.Tests.Pipeline
 		private IObjectBuilder _builder;
 
 		[Test]
-		public void An_unfiltered_message_should_be_received()
+		public void A_filter_should_be_nameable()
 		{
 			InboundPipeline pipeline = new InboundPipeline(_builder);
 
 			TestMessageConsumer<PingMessage> consumer = new TestMessageConsumer<PingMessage>();
+
+			pipeline.Filter<PingMessage>("cock blocker", x => false);
 
 			pipeline.Subscribe(consumer);
 
@@ -44,7 +45,34 @@ namespace MassTransit.Tests.Pipeline
 
 			pipeline.Dispatch(message);
 
-			consumer.ShouldHaveReceivedMessage(message, 0.Seconds());
+			consumer.ShouldNotHaveReceivedMessage(message);
+
+			PipelineViewer.Trace(pipeline);
+		}
+
+		[Test]
+		[Ignore("This is a planned feature, but is not yet functional.")]
+		public void A_filter_should_be_removable()
+		{
+			InboundPipeline pipeline = new InboundPipeline(_builder);
+
+			TestMessageConsumer<PingMessage> consumer = new TestMessageConsumer<PingMessage>();
+
+			var f = pipeline.Filter<PingMessage>(x => false);
+			PipelineViewer.Trace(pipeline);
+
+			PingMessage message = new PingMessage();
+			pipeline.Dispatch(message);
+
+			consumer.ShouldNotHaveReceivedMessage(message);
+
+			f();
+			PipelineViewer.Trace(pipeline);
+
+			message = new PingMessage();
+			pipeline.Dispatch(message);
+
+			consumer.ShouldHaveReceivedMessage(message);
 		}
 
 		[Test]
@@ -62,74 +90,45 @@ namespace MassTransit.Tests.Pipeline
 
 			pipeline.Dispatch(message);
 
-			consumer.ShouldNotHaveReceivedMessage(message, 0.Seconds());
+			consumer.ShouldNotHaveReceivedMessage(message);
 
 			PipelineViewer.Trace(pipeline);
 		}
 
-        [Test]
-        public void A_message_should_fall_throuh_happy_filters()
-        {
-            InboundPipeline pipeline = new InboundPipeline(_builder);
+		[Test]
+		public void A_message_should_fall_throuh_happy_filters()
+		{
+			InboundPipeline pipeline = new InboundPipeline(_builder);
 
-            TestMessageConsumer<PingMessage> consumer = new TestMessageConsumer<PingMessage>();
+			TestMessageConsumer<PingMessage> consumer = new TestMessageConsumer<PingMessage>();
 
-            pipeline.Filter<PingMessage>(x => true);
+			pipeline.Filter<PingMessage>(x => true);
 
-            pipeline.Subscribe(consumer);
-
-            PingMessage message = new PingMessage();
-
-            pipeline.Dispatch(message);
-
-            consumer.ShouldHaveReceivedMessage(message, 0.Seconds());
-
-            PipelineViewer.Trace(pipeline);
-        }
-
-        [Test]
-        public void A_filter_should_be_nameable()
-        {
-            InboundPipeline pipeline = new InboundPipeline(_builder);
-
-            TestMessageConsumer<PingMessage> consumer = new TestMessageConsumer<PingMessage>();
-
-            pipeline.Filter<PingMessage>("cock blocker", x => false);
-
-            pipeline.Subscribe(consumer);
-
-            PingMessage message = new PingMessage();
-
-            pipeline.Dispatch(message);
-
-            consumer.ShouldNotHaveReceivedMessage(message, 0.Seconds());
-
-            PipelineViewer.Trace(pipeline);
-        }
-
-        [Test]
-        [Ignore("This is a planned feature, but is not yet functional.")]
-        public void A_filter_should_be_removable()
-        {
-            InboundPipeline pipeline = new InboundPipeline(_builder);
-
-            TestMessageConsumer<PingMessage> consumer = new TestMessageConsumer<PingMessage>();
-
-            var f = pipeline.Filter<PingMessage>(x => false);
-            PipelineViewer.Trace(pipeline);
+			pipeline.Subscribe(consumer);
 
 			PingMessage message = new PingMessage();
+
 			pipeline.Dispatch(message);
 
-			consumer.ShouldNotHaveReceivedMessage(message, 0.Seconds());
+			consumer.ShouldHaveReceivedMessage(message);
 
-            f();
-            PipelineViewer.Trace(pipeline);
+			PipelineViewer.Trace(pipeline);
+		}
 
-			message = new PingMessage();
+		[Test]
+		public void An_unfiltered_message_should_be_received()
+		{
+			InboundPipeline pipeline = new InboundPipeline(_builder);
+
+			TestMessageConsumer<PingMessage> consumer = new TestMessageConsumer<PingMessage>();
+
+			pipeline.Subscribe(consumer);
+
+			PingMessage message = new PingMessage();
+
 			pipeline.Dispatch(message);
 
-			consumer.ShouldHaveReceivedMessage(message, 0.Seconds());
-        }
+			consumer.ShouldHaveReceivedMessage(message);
+		}
 	}
 }
