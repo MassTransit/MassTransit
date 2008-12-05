@@ -10,23 +10,23 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Pipeline.Interceptors.Inbound
+namespace MassTransit.Pipeline.Interceptors
 {
 	using System;
 	using System.Collections.Generic;
 	using System.Reflection;
 	using Exceptions;
 
-	public abstract class ConsumesInboundInterceptorBase :
-		InboundInterceptorBase
+	public abstract class ConsumesInterceptorBase :
+		PipelineInterceptorBase
 	{
 		protected abstract Type InterfaceType { get; }
 
-		public override IEnumerable<Func<bool>> Subscribe<TComponent>(IInboundContext context)
+		public override IEnumerable<Func<bool>> Subscribe<TComponent>(IInterceptorContext context)
 		{
 			foreach (Type messageType in GetInterfaces<TComponent>(context, InterfaceType))
 			{
-				MethodInfo genericMethod = FindMethod(GetType(), "Connect", new[] {typeof (TComponent), messageType}, new[] {typeof (IInboundContext)});
+				MethodInfo genericMethod = FindMethod(GetType(), "Connect", new[] {typeof (TComponent), messageType}, new[] {typeof (IInterceptorContext)});
 
 				if (genericMethod == null)
 					throw new PipelineException(string.Format("Unable to subscribe for type: {0} ({1})",
@@ -40,11 +40,11 @@ namespace MassTransit.Pipeline.Interceptors.Inbound
 			}
 		}
 
-		public override IEnumerable<Func<bool>> Subscribe<TComponent>(IInboundContext context, TComponent instance)
+		public override IEnumerable<Func<bool>> Subscribe<TComponent>(IInterceptorContext context, TComponent instance)
 		{
 			foreach (Type messageType in GetInterfaces<TComponent>(context, InterfaceType))
 			{
-				MethodInfo genericMethod = FindMethod(GetType(), "Connect", new[] {messageType}, new[] {typeof (IInboundContext), typeof (TComponent)});
+				MethodInfo genericMethod = FindMethod(GetType(), "Connect", new[] {messageType}, new[] {typeof (IInterceptorContext), typeof (TComponent)});
 
 				if (genericMethod == null)
 					throw new PipelineException(string.Format("Unable to subscribe for type: {0} ({1})",

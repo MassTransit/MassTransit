@@ -10,34 +10,25 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Pipeline.Interceptors.Inbound
+namespace MassTransit.Pipeline.Interceptors
 {
 	using System;
 	using Configuration;
 	using Sinks;
 
-	public class ConsumesAllInboundInterceptor :
-		ConsumesInboundInterceptorBase
+	public class EndpointInterceptor :
+		ConsumesInterceptorBase
 	{
 		protected override Type InterfaceType
 		{
 			get { return typeof (Consumes<>.All); }
 		}
 
-		protected virtual Func<bool> Connect<TMessage>(IInboundContext context, Consumes<TMessage>.All consumer) where TMessage : class
+		protected virtual Func<bool> Connect<TMessage>(IInterceptorContext context, IEndpoint endpoint) where TMessage : class
 		{
 			MessageRouterConfigurator routerConfigurator = MessageRouterConfigurator.For(context.Pipeline);
 
-			return routerConfigurator.FindOrCreate<TMessage>().Connect(new InstanceMessageSink<TMessage>(message => consumer));
-		}
-
-		protected virtual Func<bool> Connect<TComponent, TMessage>(IInboundContext context)
-			where TMessage : class
-			where TComponent : class, Consumes<TMessage>.All
-		{
-			MessageRouterConfigurator routerConfigurator = MessageRouterConfigurator.For(context.Pipeline);
-
-			return routerConfigurator.FindOrCreate<TMessage>().Connect(new ComponentMessageSink<TComponent, TMessage>(context));
+			return routerConfigurator.FindOrCreate<TMessage>().Connect(new EndpointMessageSink<TMessage>(endpoint));
 		}
 	}
 }

@@ -10,17 +10,17 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Pipeline.Interceptors.Inbound
+namespace MassTransit.Pipeline.Interceptors
 {
 	using System;
 	using System.Collections.Generic;
 	using System.Reflection;
 
-	public abstract class InboundInterceptorBase : 
-		IInboundInterceptor
+	public abstract class PipelineInterceptorBase : 
+		IPipelineInterceptor
 	{
-		public abstract IEnumerable<Func<bool>> Subscribe<TComponent>(IInboundContext context);
-		public abstract IEnumerable<Func<bool>> Subscribe<TComponent>(IInboundContext context, TComponent instance);
+		public abstract IEnumerable<Func<bool>> Subscribe<TComponent>(IInterceptorContext context);
+		public abstract IEnumerable<Func<bool>> Subscribe<TComponent>(IInterceptorContext context, TComponent instance);
 
 		/// <summary>
 		/// Enumerates the interfaces for the component and returns only ones which have not yet been processed
@@ -29,7 +29,7 @@ namespace MassTransit.Pipeline.Interceptors.Inbound
 		/// <param name="context"></param>
 		/// <param name="consumerType"></param>
 		/// <returns></returns>
-		protected static IEnumerable<Type> GetInterfaces<TComponent>(IInboundContext context, Type consumerType)
+		protected static IEnumerable<Type> GetInterfaces<TComponent>(IInterceptorContext context, Type consumerType)
 		{
 			Type componentType = typeof (TComponent);
 
