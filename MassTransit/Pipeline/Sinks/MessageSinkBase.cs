@@ -33,12 +33,18 @@ namespace MassTransit.Pipeline.Sinks
 		public abstract IEnumerable<Consumes<TInput>.All> Enumerate(TInput message);
 		public abstract bool Inspect(IPipelineInspector inspector);
 
+		public void Dispose()
+		{
+			Dispose(true);
+			GC.SuppressFinalize(this);
+		}
+
 		public IMessageSink<TOutput> ReplaceOutputSink(IMessageSink<TOutput> sink)
 		{
 			IMessageSink<TOutput> result = null;
 
 			var original = _outputSink;
-			using(original)
+			using (original)
 			{
 				original.WriteLock(x =>
 					{
@@ -49,12 +55,6 @@ namespace MassTransit.Pipeline.Sinks
 			}
 
 			return result;
-		}
-
-		public void Dispose()
-		{
-			Dispose(true);
-			GC.SuppressFinalize(this);
 		}
 
 		protected virtual void Dispose(bool disposing)

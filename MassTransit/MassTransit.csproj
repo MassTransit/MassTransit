@@ -214,14 +214,20 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Exceptions\ConfigurationException.cs" />
+    <Compile Include="Pipeline\BatchMessage.cs" />
+    <Compile Include="Pipeline\Configuration\BatchMessageRouterConfigurator.cs" />
+    <Compile Include="Pipeline\Configuration\BatchMessageRouterConfiguratorScope.cs" />
     <Compile Include="Pipeline\Configuration\CorrelatedMessageRouterConfigurator.cs" />
     <Compile Include="Pipeline\Configuration\CorrelatedMessageRouterConfiguratorScope.cs" />
     <Compile Include="Pipeline\Configuration\MessageFilterConfigurator.cs" />
     <Compile Include="Pipeline\Configuration\MessageFilterConfiguratorScope.cs" />
     <Compile Include="Pipeline\Inspectors\PipelineInspectorBase.cs" />
+    <Compile Include="Pipeline\Interceptors\BatchInterceptor.cs" />
     <Compile Include="Pipeline\Interceptors\ConsumesForInterceptor.cs" />
     <Compile Include="Pipeline\Configuration\MessageRouterConfiguratorScope.cs" />
     <Compile Include="Pipeline\Interceptors\EndpointInterceptor.cs" />
+    <Compile Include="Pipeline\Sinks\BatchCombiner.cs" />
+    <Compile Include="Pipeline\Sinks\BatchMessageRouter.cs" />
     <Compile Include="Pipeline\Sinks\ComponentMessageSink.cs" />
     <Compile Include="Pipeline\Interceptors\InterceptorContext.cs" />
     <Compile Include="Pipeline\Interceptors\ConsumesAllInterceptor.cs" />
@@ -243,6 +249,7 @@
     <Compile Include="Pipeline\Sinks\MessageFilter.cs" />
     <Compile Include="Pipeline\Sinks\MessageRouter.cs" />
     <Compile Include="Pipeline\Sinks\InstanceMessageSink.cs" />
+    <Compile Include="Pipeline\Sinks\MessageRouterBase.cs" />
     <Compile Include="Pipeline\Sinks\MessageSinkBase.cs" />
     <Compile Include="Pipeline\Sinks\MessageTranslator.cs" />
     <Compile Include="Pipeline\Configuration\MessagePipelineConfiguratorBase.cs" />

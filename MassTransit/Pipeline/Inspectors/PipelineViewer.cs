@@ -51,6 +51,22 @@ namespace MassTransit.Pipeline.Inspectors
 			return true;
 		}
 
+		public bool Inspect<TMessage, TBatchId>(BatchMessageRouter<TMessage,TBatchId> element) 
+			where TMessage : class, BatchedBy<TBatchId>
+		{
+			Append(string.Format("Batch Routed ({0})", typeof (TMessage).Name));
+
+			return true;
+		}
+
+		public bool Inspect<TMessage, TBatchId>(BatchCombiner<TMessage,TBatchId> element) 
+			where TMessage : class, BatchedBy<TBatchId>
+		{
+			Append(string.Format("Batch Combiner ({0}) [{1}]", typeof (TMessage).Name, element.BatchId));
+
+			return true;
+		}
+
 		public bool Inspect<TMessage>(MessageFilter<TMessage> element) where TMessage : class
 		{
 			Append(string.Format("Filtered '{0}' ({1})", element.Description,typeof (TMessage).Name));
