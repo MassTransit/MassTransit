@@ -8,7 +8,7 @@
 
 			<bus id="main"
 				 endpoint="loopback://localhost/mt_client">
-				<dispatcher minThreads="0"
+				<dispatcher minThreads="1"
 							maxThreads="4" />
 			</bus>
 
