@@ -12,68 +12,91 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Threading
 {
-    using System;
-    using System.Threading;
+	using System;
+	using System.Threading;
 
-    public class ManagedThread : 
-        IDisposable
-    {
-        private readonly ManualResetEvent _shutdown = new ManualResetEvent(false);
-        private readonly Thread _thread;
-        private readonly TimeSpan _threadExitWaitTime = TimeSpan.FromMinutes(1);
+	public class ManagedThread :
+		IDisposable
+	{
+		private readonly TimeSpan _threadExitWaitTime = TimeSpan.FromMinutes(1);
+		private volatile bool _disposed;
+		private ManualResetEvent _shutdown = new ManualResetEvent(false);
+		private Thread _thread;
 
-        public ManagedThread()
-        {
-            _thread = new Thread(RunThread);
-        }
+		public ManagedThread()
+		{
+			_thread = new Thread(RunThread);
+		}
 
-        protected ManualResetEvent Shutdown
-        {
-            get { return _shutdown; }
-        }
+		protected ManualResetEvent Shutdown
+		{
+			get { return _shutdown; }
+		}
 
-        public void Dispose()
-        {
-            Stop();
-        }
+		public void Dispose()
+		{
+			Dispose(true);
+			GC.SuppressFinalize(this);
+		}
 
-        public bool Start()
-        {
-            if (_thread.IsAlive)
-                return false;
+		protected virtual void Dispose(bool disposing)
+		{
+			if (_disposed) return;
+			if (disposing)
+			{
+				Stop();
 
-            _shutdown.Reset();
-            _thread.Start();
+				_thread = null;
 
-            return true;
-        }
+				_shutdown.Close();
+				_shutdown = null;
+			}
 
-        public void Start(object obj)
-        {
-            if (_thread.IsAlive)
-                return;
+			_disposed = true;
+		}
 
-            _shutdown.Reset();
-            _thread.Start(obj);
-        }
+		~ManagedThread()
+		{
+			Dispose(false);
+		}
 
-        public void Stop()
-        {
-            if (_thread.IsAlive)
-            {
-                _shutdown.Set();
-                _thread.Join(_threadExitWaitTime);
-            }
-        }
+		public bool Start()
+		{
+			if (_thread.IsAlive)
+				return false;
 
-        protected virtual void RunThread(object obj)
-        {
-            WaitHandle[] handles = new WaitHandle[] {_shutdown};
+			_shutdown.Reset();
+			_thread.Start();
 
-            int result;
-            while ((result = WaitHandle.WaitAny(handles, TimeSpan.FromSeconds(5), true)) != 0)
-            {
-            }
-        }
-    }
+			return true;
+		}
+
+		public void Start(object obj)
+		{
+			if (_thread.IsAlive)
+				return;
+
+			_shutdown.Reset();
+			_thread.Start(obj);
+		}
+
+		public void Stop()
+		{
+			if (_thread.IsAlive)
+			{
+				_shutdown.Set();
+				_thread.Join(_threadExitWaitTime);
+			}
+		}
+
+		protected virtual void RunThread(object obj)
+		{
+			WaitHandle[] handles = new WaitHandle[] {_shutdown};
+
+			int result;
+			while ((result = WaitHandle.WaitAny(handles, TimeSpan.FromSeconds(5), true)) != 0)
+			{
+			}
+		}
+	}
 }

@@ -16,7 +16,6 @@ namespace MassTransit.Pipeline.Configuration
 	using System.Collections.Generic;
 	using Interceptors;
 	using Sinks;
-	using Util;
 
 	public class MessagePipelineConfigurator :
 		IConfigurePipeline,
@@ -24,10 +23,10 @@ namespace MassTransit.Pipeline.Configuration
 	{
 		private readonly IObjectBuilder _builder;
 		private readonly Func<bool> _emptyToken = () => false;
-		private MessagePipeline _pipeline;
 		private volatile bool _disposed;
 
 		protected InterceptorList<IPipelineInterceptor> _interceptors = new InterceptorList<IPipelineInterceptor>();
+		private MessagePipeline _pipeline;
 
 		public MessagePipelineConfigurator(IObjectBuilder builder)
 		{
@@ -41,6 +40,7 @@ namespace MassTransit.Pipeline.Configuration
 			_interceptors.Register(new ConsumesAllInterceptor());
 			_interceptors.Register(new ConsumesSelectedInterceptor());
 			_interceptors.Register(new ConsumesForInterceptor());
+			_interceptors.Register(new BatchInterceptor());
 		}
 
 		public Func<bool> Register(IPipelineInterceptor interceptor)

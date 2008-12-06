@@ -15,7 +15,6 @@ namespace MassTransit.Pipeline.Sinks
 	using System;
 	using System.Collections.Generic;
 	using Configuration;
-	using Magnum.Common.Threading;
 
 	/// <summary>
 	/// Splits a message path based on the correlation information in the message
@@ -23,49 +22,12 @@ namespace MassTransit.Pipeline.Sinks
 	/// <typeparam name="TMessage">The type of the message to be routed</typeparam>
 	/// <typeparam name="TKey">They key type for the message</typeparam>
 	public class CorrelatedMessageRouter<TMessage, TKey> :
-		IMessageSink<TMessage>
+		MessageRouterBase<TMessage, TKey>
 		where TMessage : class, CorrelatedBy<TKey>
 	{
-		private readonly ReaderWriterLockedObject<Dictionary<TKey, IMessageSink<TMessage>>> _sinks;
-
-		public CorrelatedMessageRouter()
+		public override IEnumerable<Consumes<TMessage>.All> Enumerate(TMessage message)
 		{
-			_sinks = new ReaderWriterLockedObject<Dictionary<TKey, IMessageSink<TMessage>>>(new Dictionary<TKey, IMessageSink<TMessage>>());
-		}
-
-		public IEnumerable<Consumes<TMessage>.All> Enumerate(TMessage message)
-		{
-			CorrelatedBy<TKey> correlation = message;
-
-			TKey correlationId = correlation.CorrelationId;
-
-			IMessageSink<TMessage> sink = null;
-
-			if (_sinks.ReadLock(x => x.TryGetValue(correlationId, out sink)) == false)
-				yield break;
-
-			if (sink == null)
-				yield break;
-
-			foreach (Consumes<TMessage>.All consumer in sink.Enumerate(message))
-			{
-				yield return consumer;
-			}
-		}
-
-		public bool Inspect(IPipelineInspector inspector)
-		{
-			return inspector.Inspect(this, () =>
-				{
-
-					foreach (IMessageSink<TMessage> sink in _sinks.ReadLock(x => x.Values))
-					{
-						if (sink.Inspect(inspector) == false)
-							return false;
-					}
-
-					return true;
-				});
+			return EnumerateSinks(message, message.CorrelationId);
 		}
 
 		public Func<bool> Connect(TKey correlationId, IMessageSink<TMessage> sink)
@@ -93,11 +55,6 @@ namespace MassTransit.Pipeline.Sinks
 			var router = configurator.FindOrCreate<TMessage>();
 
 			return router.Connect(sink);
-		}
-
-		public void Dispose()
-		{
-			_sinks.Dispose();
 		}
 	}
 }

@@ -46,7 +46,6 @@ namespace MassTransit.Pipeline.Sinks
 		{
 			return inspector.Inspect(this, () =>
 				{
-
 					foreach (IMessageSink<TMessage> sink in _sinks.ReadLock(x => x.ToArray()))
 					{
 						if (sink.Inspect(inspector) == false)
