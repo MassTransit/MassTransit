@@ -28,79 +28,100 @@
 		/// </summary>
 		private void InitializeComponent()
 		{
+            this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.subscriptionTree = new System.Windows.Forms.TreeView();
-            this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
-            this.label2 = new System.Windows.Forms.Label();
-            this.label1 = new System.Windows.Forms.Label();
+            this.lblSubscriptions = new System.Windows.Forms.Label();
+            this.splitContainer2 = new System.Windows.Forms.SplitContainer();
+            this.lblTimeouts = new System.Windows.Forms.Label();
             this.timeoutList = new System.Windows.Forms.ListView();
             this.timeHeader = new System.Windows.Forms.ColumnHeader();
             this.idHeader = new System.Windows.Forms.ColumnHeader();
-            this.label3 = new System.Windows.Forms.Label();
-            this.heartbeatList = new System.Windows.Forms.ListView();
+            this.lblHeartbeats = new System.Windows.Forms.Label();
             this.columnHeader1 = new System.Windows.Forms.ColumnHeader();
             this.columnHeader2 = new System.Windows.Forms.ColumnHeader();
             this.columnHeader3 = new System.Windows.Forms.ColumnHeader();
-            this.tableLayoutPanel1.SuspendLayout();
+            this.heartbeatList = new System.Windows.Forms.ListView();
+            this.splitContainer1.Panel1.SuspendLayout();
+            this.splitContainer1.Panel2.SuspendLayout();
+            this.splitContainer1.SuspendLayout();
+            this.splitContainer2.Panel1.SuspendLayout();
+            this.splitContainer2.Panel2.SuspendLayout();
+            this.splitContainer2.SuspendLayout();
             this.SuspendLayout();
+            // 
+            // splitContainer1
+            // 
+            this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.splitContainer1.Location = new System.Drawing.Point(0, 0);
+            this.splitContainer1.Name = "splitContainer1";
+            // 
+            // splitContainer1.Panel1
+            // 
+            this.splitContainer1.Panel1.Controls.Add(this.subscriptionTree);
+            this.splitContainer1.Panel1.Controls.Add(this.lblSubscriptions);
+            // 
+            // splitContainer1.Panel2
+            // 
+            this.splitContainer1.Panel2.Controls.Add(this.splitContainer2);
+            this.splitContainer1.Size = new System.Drawing.Size(789, 409);
+            this.splitContainer1.SplitterDistance = 263;
+            this.splitContainer1.TabIndex = 0;
             // 
             // subscriptionTree
             // 
             this.subscriptionTree.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.subscriptionTree.Location = new System.Drawing.Point(3, 23);
+            this.subscriptionTree.Location = new System.Drawing.Point(0, 15);
             this.subscriptionTree.Name = "subscriptionTree";
-            this.subscriptionTree.Size = new System.Drawing.Size(388, 282);
-            this.subscriptionTree.TabIndex = 3;
+            this.subscriptionTree.Size = new System.Drawing.Size(263, 394);
+            this.subscriptionTree.TabIndex = 6;
             // 
-            // tableLayoutPanel1
+            // lblSubscriptions
             // 
-            this.tableLayoutPanel1.ColumnCount = 2;
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-            this.tableLayoutPanel1.Controls.Add(this.label2, 1, 0);
-            this.tableLayoutPanel1.Controls.Add(this.subscriptionTree, 0, 1);
-            this.tableLayoutPanel1.Controls.Add(this.label1, 0, 0);
-            this.tableLayoutPanel1.Controls.Add(this.timeoutList, 2, 1);
-            this.tableLayoutPanel1.Controls.Add(this.label3, 1, 2);
-            this.tableLayoutPanel1.Controls.Add(this.heartbeatList, 1, 3);
-            this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 0);
-            this.tableLayoutPanel1.Name = "tableLayoutPanel1";
-            this.tableLayoutPanel1.RowCount = 4;
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 6.5625F));
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 93.4375F));
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 21F));
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 79F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(789, 409);
-            this.tableLayoutPanel1.TabIndex = 4;
+            this.lblSubscriptions.AutoSize = true;
+            this.lblSubscriptions.BackColor = System.Drawing.SystemColors.ActiveCaption;
+            this.lblSubscriptions.Dock = System.Windows.Forms.DockStyle.Top;
+            this.lblSubscriptions.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblSubscriptions.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
+            this.lblSubscriptions.Location = new System.Drawing.Point(0, 0);
+            this.lblSubscriptions.Name = "lblSubscriptions";
+            this.lblSubscriptions.Size = new System.Drawing.Size(83, 15);
+            this.lblSubscriptions.TabIndex = 5;
+            this.lblSubscriptions.Text = "Subscriptions";
+            this.lblSubscriptions.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
-            // label2
+            // splitContainer2
             // 
-            this.label2.AutoSize = true;
-            this.label2.BackColor = System.Drawing.SystemColors.ActiveCaption;
-            this.label2.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label2.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label2.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
-            this.label2.Location = new System.Drawing.Point(397, 0);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(389, 20);
-            this.label2.TabIndex = 5;
-            this.label2.Text = "Timeouts";
-            this.label2.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.splitContainer2.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.splitContainer2.Location = new System.Drawing.Point(0, 0);
+            this.splitContainer2.Name = "splitContainer2";
+            this.splitContainer2.Orientation = System.Windows.Forms.Orientation.Horizontal;
             // 
-            // label1
+            // splitContainer2.Panel1
             // 
-            this.label1.AutoSize = true;
-            this.label1.BackColor = System.Drawing.SystemColors.ActiveCaption;
-            this.label1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label1.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label1.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
-            this.label1.Location = new System.Drawing.Point(3, 0);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(388, 20);
-            this.label1.TabIndex = 4;
-            this.label1.Text = "Subscriptions";
-            this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.splitContainer2.Panel1.Controls.Add(this.timeoutList);
+            this.splitContainer2.Panel1.Controls.Add(this.lblTimeouts);
+            // 
+            // splitContainer2.Panel2
+            // 
+            this.splitContainer2.Panel2.Controls.Add(this.heartbeatList);
+            this.splitContainer2.Panel2.Controls.Add(this.lblHeartbeats);
+            this.splitContainer2.Size = new System.Drawing.Size(522, 409);
+            this.splitContainer2.SplitterDistance = 174;
+            this.splitContainer2.TabIndex = 0;
+            // 
+            // lblTimeouts
+            // 
+            this.lblTimeouts.AutoSize = true;
+            this.lblTimeouts.BackColor = System.Drawing.SystemColors.ActiveCaption;
+            this.lblTimeouts.Dock = System.Windows.Forms.DockStyle.Top;
+            this.lblTimeouts.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblTimeouts.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
+            this.lblTimeouts.Location = new System.Drawing.Point(0, 0);
+            this.lblTimeouts.Name = "lblTimeouts";
+            this.lblTimeouts.Size = new System.Drawing.Size(59, 15);
+            this.lblTimeouts.TabIndex = 6;
+            this.lblTimeouts.Text = "Timeouts";
+            this.lblTimeouts.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // timeoutList
             // 
@@ -108,10 +129,10 @@
             this.timeHeader,
             this.idHeader});
             this.timeoutList.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.timeoutList.Location = new System.Drawing.Point(397, 23);
+            this.timeoutList.Location = new System.Drawing.Point(0, 15);
             this.timeoutList.Name = "timeoutList";
-            this.timeoutList.Size = new System.Drawing.Size(389, 282);
-            this.timeoutList.TabIndex = 6;
+            this.timeoutList.Size = new System.Drawing.Size(522, 159);
+            this.timeoutList.TabIndex = 7;
             this.timeoutList.UseCompatibleStateImageBehavior = false;
             this.timeoutList.View = System.Windows.Forms.View.Details;
             // 
@@ -125,33 +146,18 @@
             this.idHeader.Text = "Id";
             this.idHeader.Width = 120;
             // 
-            // label3
+            // lblHeartbeats
             // 
-            this.label3.AutoSize = true;
-            this.label3.BackColor = System.Drawing.SystemColors.ActiveCaption;
-            this.label3.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label3.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label3.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
-            this.label3.Location = new System.Drawing.Point(397, 308);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(389, 21);
-            this.label3.TabIndex = 7;
-            this.label3.Text = "Heartbeats";
-            this.label3.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            // 
-            // heartbeatList
-            // 
-            this.heartbeatList.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
-            this.columnHeader1,
-            this.columnHeader2,
-            this.columnHeader3});
-            this.heartbeatList.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.heartbeatList.Location = new System.Drawing.Point(397, 332);
-            this.heartbeatList.Name = "heartbeatList";
-            this.heartbeatList.Size = new System.Drawing.Size(389, 74);
-            this.heartbeatList.TabIndex = 8;
-            this.heartbeatList.UseCompatibleStateImageBehavior = false;
-            this.heartbeatList.View = System.Windows.Forms.View.Details;
+            this.lblHeartbeats.AutoSize = true;
+            this.lblHeartbeats.BackColor = System.Drawing.SystemColors.ActiveCaption;
+            this.lblHeartbeats.Dock = System.Windows.Forms.DockStyle.Top;
+            this.lblHeartbeats.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblHeartbeats.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
+            this.lblHeartbeats.Location = new System.Drawing.Point(0, 0);
+            this.lblHeartbeats.Name = "lblHeartbeats";
+            this.lblHeartbeats.Size = new System.Drawing.Size(68, 15);
+            this.lblHeartbeats.TabIndex = 0;
+            this.lblHeartbeats.Text = "Heartbeats";
             // 
             // columnHeader1
             // 
@@ -167,35 +173,58 @@
             // 
             this.columnHeader3.Text = "Last Detected At";
             // 
+            // heartbeatList
+            // 
+            this.heartbeatList.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.columnHeader1,
+            this.columnHeader2,
+            this.columnHeader3});
+            this.heartbeatList.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.heartbeatList.Location = new System.Drawing.Point(0, 15);
+            this.heartbeatList.Name = "heartbeatList";
+            this.heartbeatList.Size = new System.Drawing.Size(522, 216);
+            this.heartbeatList.TabIndex = 10;
+            this.heartbeatList.UseCompatibleStateImageBehavior = false;
+            this.heartbeatList.View = System.Windows.Forms.View.Details;
+            // 
             // SubscriptionManagerForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(789, 409);
-            this.Controls.Add(this.tableLayoutPanel1);
+            this.Controls.Add(this.splitContainer1);
             this.Name = "SubscriptionManagerForm";
-            this.Text = "Subscription Manager";
+            this.Text = "MassTransit System View";
             this.Load += new System.EventHandler(this.SubscriptionManagerForm_Load);
-            this.tableLayoutPanel1.ResumeLayout(false);
-            this.tableLayoutPanel1.PerformLayout();
+            this.splitContainer1.Panel1.ResumeLayout(false);
+            this.splitContainer1.Panel1.PerformLayout();
+            this.splitContainer1.Panel2.ResumeLayout(false);
+            this.splitContainer1.ResumeLayout(false);
+            this.splitContainer2.Panel1.ResumeLayout(false);
+            this.splitContainer2.Panel1.PerformLayout();
+            this.splitContainer2.Panel2.ResumeLayout(false);
+            this.splitContainer2.Panel2.PerformLayout();
+            this.splitContainer2.ResumeLayout(false);
             this.ResumeLayout(false);
 
 		}
 
 		#endregion
 
-		private System.Windows.Forms.TreeView subscriptionTree;
-		private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
-        private System.Windows.Forms.Label label1;
-		private System.Windows.Forms.ListView timeoutList;
-		private System.Windows.Forms.ColumnHeader timeHeader;
-		private System.Windows.Forms.ColumnHeader idHeader;
-        private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.SplitContainer splitContainer1;
+        private System.Windows.Forms.TreeView subscriptionTree;
+        private System.Windows.Forms.Label lblSubscriptions;
+        private System.Windows.Forms.SplitContainer splitContainer2;
+        private System.Windows.Forms.ListView timeoutList;
+        private System.Windows.Forms.ColumnHeader timeHeader;
+        private System.Windows.Forms.ColumnHeader idHeader;
+        private System.Windows.Forms.Label lblTimeouts;
+        private System.Windows.Forms.Label lblHeartbeats;
         private System.Windows.Forms.ListView heartbeatList;
         private System.Windows.Forms.ColumnHeader columnHeader1;
         private System.Windows.Forms.ColumnHeader columnHeader2;
         private System.Windows.Forms.ColumnHeader columnHeader3;
-	}
+
+    }
 }
 

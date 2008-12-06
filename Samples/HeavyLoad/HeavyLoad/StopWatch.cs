@@ -55,7 +55,7 @@ namespace HeavyLoad
 	{
 		private readonly string _description;
 		private int _operationCount = 1;
-	    private Stopwatch _stopwatch;
+	    private readonly Stopwatch _stopwatch;
 
 		public CheckPoint(string description)
 		{
@@ -65,12 +65,12 @@ namespace HeavyLoad
 
 		public void ToString(StringBuilder sb)
 		{
-			sb.AppendFormat("{0}: {1}", _description, _stopwatch.Elapsed);
+			sb.AppendFormat("  {0}{1}", _description, Environment.NewLine);
 
 			if (_operationCount > 1)
 			{
-				sb.AppendFormat(", /{0} = {1}ms", _operationCount, _stopwatch.ElapsedMilliseconds / _operationCount);
-                sb.AppendFormat("{0}  {1}/seconds", Environment.NewLine, _operationCount / _stopwatch.Elapsed.TotalSeconds);
+				sb.AppendFormat("    {0} messages in {1:#.##} seconds{2}", _operationCount, _stopwatch.Elapsed.TotalSeconds, Environment.NewLine);
+                sb.AppendFormat("      {0:#,###.##} messages/second", _operationCount / _stopwatch.Elapsed.TotalSeconds);
 			}
 
 			sb.AppendLine();

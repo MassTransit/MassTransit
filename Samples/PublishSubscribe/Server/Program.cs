@@ -25,6 +25,7 @@ namespace Server
                 KnownServiceNames.Msmq);
             var lifecycle = new ServerLifeCycle(ServiceLocator.Current);
 
+            _log.Info("Server Loaded");
             Runner.Run(credentials, settings, lifecycle, args);
         }
     }

@@ -5,7 +5,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Mass Transit", "Mass Transi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenAllNight", "OpenAllNight\OpenAllNight.csproj", "{EB825C40-FE8F-4F56-8397-A158F7482970}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Transports.Msmq", "..\..\Transports\MassTransit.ServiceBus.MSMQ\MassTransit.Transports.Msmq.csproj", "{6F90867C-E092-4EDC-B3DE-600D39DF0335}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Transports.Msmq", "..\..\Transports\MassTransit.Transports.Msmq\MassTransit.Transports.Msmq.csproj", "{6F90867C-E092-4EDC-B3DE-600D39DF0335}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.WindsorIntegration", "..\..\Containers\MassTransit.WindsorIntegration\MassTransit.WindsorIntegration.csproj", "{98D5A59C-96FA-4A1B-A653-EA5A35C45FC9}"
 EndProject
@@ -13,7 +13,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Host", "..\..\M
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SubscriptionManagerGUI", "..\WinFormSample\SubscriptionManagerGUI\SubscriptionManagerGUI.csproj", "{F43E14B8-4AE2-4A09-94C0-8871D0BA5C5C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit", "..\..\MassTransit.ServiceBus\MassTransit.csproj", "{6EFD69FC-CBCC-4F85-AEE0-EFBA73F4D273}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit", "..\..\MassTransit\MassTransit.csproj", "{6EFD69FC-CBCC-4F85-AEE0-EFBA73F4D273}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Infrastructure", "..\..\MassTransit.Infrastructure\MassTransit.Infrastructure.csproj", "{073A90FD-9A3E-4704-B3B5-6D8A9F4B442E}"
 EndProject

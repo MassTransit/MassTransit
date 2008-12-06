@@ -24,7 +24,7 @@ namespace HeavyLoad.Correlated
 		private readonly int _attempts = 5000;
 		private readonly IWindsorContainer _container;
 		private readonly ManualResetEvent _finishedEvent = new ManualResetEvent(false);
-		private IServiceBus _bus;
+		private readonly IServiceBus _bus;
 		private int _successes;
 		private int _timeouts;
 

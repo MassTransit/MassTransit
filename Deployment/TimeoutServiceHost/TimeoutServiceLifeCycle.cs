@@ -16,7 +16,7 @@ namespace TimeoutServiceHost
     using Microsoft.Practices.ServiceLocation;
 
     public class TimeoutServiceLifeCycle :
-        HostedLifeCycle
+        HostedLifecycle
 
     {
         public TimeoutServiceLifeCycle(IServiceLocator serviceLocator) : base(serviceLocator)

@@ -64,7 +64,6 @@
     <Compile Include="..\..\SolutionVersion.cs">
       <Link>SolutionVersion.cs</Link>
     </Compile>
-    <Compile Include="DeferredMessageConfiguration.cs" />
     <Compile Include="DeferredMessageLifeCycle.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -78,13 +77,13 @@
       <Project>{834ED79F-BA0E-48F9-831A-789576EE516B}</Project>
       <Name>MassTransit.Host</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\MassTransit.ServiceBus\MassTransit.ServiceBus.csproj">
-      <Project>{90482397-6282-465E-8B86-39865FC30127}</Project>
-      <Name>MassTransit.ServiceBus</Name>
+    <ProjectReference Include="..\..\MassTransit\MassTransit.csproj">
+      <Project>{6EFD69FC-CBCC-4F85-AEE0-EFBA73F4D273}</Project>
+      <Name>MassTransit</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\Transports\MassTransit.ServiceBus.MSMQ\MassTransit.ServiceBus.MSMQ.csproj">
+    <ProjectReference Include="..\..\Transports\MassTransit.Transports.Msmq\MassTransit.Transports.Msmq.csproj">
       <Project>{6F90867C-E092-4EDC-B3DE-600D39DF0335}</Project>
-      <Name>MassTransit.ServiceBus.MSMQ</Name>
+      <Name>MassTransit.Transports.Msmq</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

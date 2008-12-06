@@ -17,16 +17,16 @@ namespace SubscriptionServiceHost
     using Microsoft.Practices.ServiceLocation;
 
     public class SubscriptionServiceConfiguration :
-        InteractiveConfiguration
+        WinServiceConfiguration
     {
-        private readonly IApplicationLifeCycle _lifecycle;
+        private readonly IApplicationLifecycle _lifecycle;
 
         public SubscriptionServiceConfiguration(IServiceLocator serviceLocator) 
         {
             _lifecycle = new SubscriptionServiceLifeCycle(serviceLocator);
         }
 
-        public override IApplicationLifeCycle LifeCycle
+        public override IApplicationLifecycle LifeCycle
         {
             get { return _lifecycle; }
         }

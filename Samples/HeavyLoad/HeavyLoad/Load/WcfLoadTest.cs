@@ -6,7 +6,8 @@ namespace HeavyLoad.Load
 	using MassTransit;
 	using MassTransit.WindsorIntegration;
 
-	public class WcfLoadTest : IDisposable
+	public class WcfLoadTest : 
+        IDisposable
 	{
 		private const int _repeatCount = 3000;
 		private static readonly ManualResetEvent _completeEvent = new ManualResetEvent(false);

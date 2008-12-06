@@ -78,7 +78,7 @@ namespace OpenAllNight
 			TimeSpan ts = DateTime.Now.Subtract(lastPrint);
 			if (ts.Minutes >= 1)
 			{
-				Console.WriteLine("Elapsed Time: {0} mins, Sent: {1}, Received: {2}, Published: {3}, Received: {4}",
+				Console.WriteLine("Elapsed Time: {0} mins, So far I have - Sent: {1}, Received: {2}, Published: {3}, Received: {4}",
 				                  (int)((DateTime.Now - _startedAt).TotalMinutes), counter.MessagesSent, counter.MessagesReceived, counter.PublishCount, SimpleMessageHandler.MessageCount);
 
 				lastPrint = DateTime.Now;

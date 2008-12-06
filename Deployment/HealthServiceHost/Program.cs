@@ -15,8 +15,8 @@ namespace HealthServiceHost
     using System.IO;
     using log4net;
     using MassTransit.Host;
-    using MassTransit.ServiceBus;
-    using MassTransit.ServiceBus.Services.HealthMonitoring;
+    using MassTransit;
+    using MassTransit.Services.HealthMonitoring;
     using MassTransit.WindsorIntegration;
     using Microsoft.Practices.ServiceLocation;
 
@@ -40,9 +40,17 @@ namespace HealthServiceHost
 
             var wob = new WindsorObjectBuilder(container.Kernel);
             ServiceLocator.SetLocatorProvider(() => wob);
-            HealthServiceConfiguration cfg = new HealthServiceConfiguration(ServiceLocator.Current);
 
-            Runner.Run(cfg, args);
+            var lifecycle = new HealthServiceLifeCycle(ServiceLocator.Current);
+            var settings = WinServiceSettings.Custom("MT-HEALTH",
+                                                     "MassTransit Health Manager",
+                                                     "Think Life Monitor",
+                                                     KnownServiceNames.Msmq);
+
+            Runner.Run(Credentials.Interactive,
+                settings,
+                lifecycle,
+                args);
         }
     }
 }

@@ -11,11 +11,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SubscriptionServiceHost", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HealthServiceHost", "HealthServiceHost\HealthServiceHost.csproj", "{EB9A5807-308C-4A58-84F2-FF5A7E8D83CF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.ServiceBus", "..\MassTransit.ServiceBus\MassTransit.ServiceBus.csproj", "{90482397-6282-465E-8B86-39865FC30127}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit", "..\MassTransit\MassTransit.csproj", "{6EFD69FC-CBCC-4F85-AEE0-EFBA73F4D273}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Host", "..\MassTransit.Host\MassTransit.Host.csproj", "{834ED79F-BA0E-48F9-831A-789576EE516B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.ServiceBus.MSMQ", "..\Transports\MassTransit.ServiceBus.MSMQ\MassTransit.ServiceBus.MSMQ.csproj", "{6F90867C-E092-4EDC-B3DE-600D39DF0335}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Transports.Msmq", "..\Transports\MassTransit.Transports.Msmq\MassTransit.Transports.Msmq.csproj", "{6F90867C-E092-4EDC-B3DE-600D39DF0335}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.WindsorIntegration", "..\Containers\MassTransit.WindsorIntegration\MassTransit.WindsorIntegration.csproj", "{98D5A59C-96FA-4A1B-A653-EA5A35C45FC9}"
 EndProject
@@ -43,10 +43,10 @@ Global
 		{EB9A5807-308C-4A58-84F2-FF5A7E8D83CF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EB9A5807-308C-4A58-84F2-FF5A7E8D83CF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EB9A5807-308C-4A58-84F2-FF5A7E8D83CF}.Release|Any CPU.Build.0 = Release|Any CPU
-		{90482397-6282-465E-8B86-39865FC30127}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{90482397-6282-465E-8B86-39865FC30127}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{90482397-6282-465E-8B86-39865FC30127}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{90482397-6282-465E-8B86-39865FC30127}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6EFD69FC-CBCC-4F85-AEE0-EFBA73F4D273}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6EFD69FC-CBCC-4F85-AEE0-EFBA73F4D273}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6EFD69FC-CBCC-4F85-AEE0-EFBA73F4D273}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6EFD69FC-CBCC-4F85-AEE0-EFBA73F4D273}.Release|Any CPU.Build.0 = Release|Any CPU
 		{834ED79F-BA0E-48F9-831A-789576EE516B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{834ED79F-BA0E-48F9-831A-789576EE516B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{834ED79F-BA0E-48F9-831A-789576EE516B}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -76,7 +76,7 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{90482397-6282-465E-8B86-39865FC30127} = {12A2E13A-D405-49EC-89EB-15D089F2A824}
+		{6EFD69FC-CBCC-4F85-AEE0-EFBA73F4D273} = {12A2E13A-D405-49EC-89EB-15D089F2A824}
 		{834ED79F-BA0E-48F9-831A-789576EE516B} = {12A2E13A-D405-49EC-89EB-15D089F2A824}
 		{6F90867C-E092-4EDC-B3DE-600D39DF0335} = {12A2E13A-D405-49EC-89EB-15D089F2A824}
 		{98D5A59C-96FA-4A1B-A653-EA5A35C45FC9} = {12A2E13A-D405-49EC-89EB-15D089F2A824}

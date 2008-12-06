@@ -16,9 +16,8 @@ namespace DeferredMessageServiceHost
     using log4net;
     using log4net.Config;
     using MassTransit.Host;
-    using MassTransit.ServiceBus;
-    using MassTransit.ServiceBus.Services.MessageDeferral;
-    using MassTransit.Services;
+    using MassTransit;
+    using MassTransit.Services.MessageDeferral;
     using MassTransit.WindsorIntegration;
     using Microsoft.Practices.ServiceLocation;
 
@@ -37,10 +36,19 @@ namespace DeferredMessageServiceHost
 
             var wob = new WindsorObjectBuilder(container.Kernel);
             ServiceLocator.SetLocatorProvider(()=>wob);
-            var env = new DeferredMessageConfiguration(ServiceLocator.Current);
+
+            var lifecycle = new DeferredMessageLifeCycle(ServiceLocator.Current);
+            var settings = WinServiceSettings.Custom("MT-Deferred",
+                "Mass Transit Deferred Message Service",
+                "Think (Hold this)",
+                KnownServiceNames.Msmq);
 
 
-            Runner.Run(env, args);
+
+            Runner.Run(Credentials.Interactive,
+                settings,
+                lifecycle,
+                KnownServiceNames.Msmq);
         }
     }
 }

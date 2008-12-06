@@ -31,7 +31,7 @@
 
 	<!-- Set root logger level to DEBUG and its only appender to Console -->
 	<root>
-		<level value="INFO" />
+		<level value="ERROR" />
 		<appender-ref ref="root" />
 	</root>
 
@@ -46,7 +46,7 @@
 	</logger>
 
 	<logger name="MassTransit.Messages">
-		<level value="ALL" />
+		<level value="OFF" />
 		<appender-ref ref="MT.Messages" />
 	</logger>
 </log4net>
