@@ -16,7 +16,7 @@ namespace DeferredMessageServiceHost
     using Microsoft.Practices.ServiceLocation;
 
     public class DeferredMessageLifeCycle :
-        HostedLifeCycle
+        HostedLifecycle
     {
         public DeferredMessageLifeCycle(IServiceLocator serviceLocator) : base(serviceLocator)
         {

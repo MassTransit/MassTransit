@@ -16,7 +16,7 @@ namespace SubscriptionServiceHost
     using Microsoft.Practices.ServiceLocation;
 
     public class SubscriptionServiceLifeCycle :
-        HostedLifeCycle
+        HostedLifecycle
     {
         public SubscriptionServiceLifeCycle(IServiceLocator serviceLocator) : base(serviceLocator)
         {

@@ -14,6 +14,7 @@ namespace MassTransit
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Transactions;
 	using Exceptions;
 	using Internal;
 	using log4net;
@@ -351,13 +352,16 @@ namespace MassTransit
 			}
 			catch (Exception ex)
 			{
+				SpecialLoggers.Iron.Error("An error was caught in the ServiceBus.IronDispatcher", ex);
+
 				IPublicationTypeInfo info = _typeInfoCache.GetPublicationTypeInfo(message.GetType());
 
 				info.PublishFault(this, ex, message);
 
 				PoisonEndpoint.Send(message, TimeSpan.Zero);
 
-				SpecialLoggers.Iron.Error("An error was caught in the ServiceBus.IronDispatcher", ex);
+			    //Transaction.Current.Commit(); why isn't this here?
+
 			}
 		}
 

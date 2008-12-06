@@ -26,7 +26,7 @@ namespace HeavyLoad.Load
 		private readonly ManualResetEvent _responseEvent = new ManualResetEvent(false);
 
 		private readonly IServiceBus _bus;
-		private int _counter = 0;
+		private int _requestCounter = 0;
 		private int _responseCounter = 0;
 
 		public LocalLoadTest()
@@ -53,8 +53,8 @@ namespace HeavyLoad.Load
 
 			stopWatch.Start();
 
-			CheckPoint publishCheckpoint = stopWatch.Mark("Publishing " + _repeatCount + " messages");
-			CheckPoint receiveCheckpoint = stopWatch.Mark("Receiving " + _repeatCount + " messages");
+			CheckPoint publishCheckpoint = stopWatch.Mark("Sending " + _repeatCount + " messages");
+			CheckPoint receiveCheckpoint = stopWatch.Mark("Request/Response " + _repeatCount + " messages");
 
 			for (int index = 0; index < _repeatCount; index++)
 			{
@@ -67,7 +67,7 @@ namespace HeavyLoad.Load
 
 			bool responseCompleted = _responseEvent.WaitOne(TimeSpan.FromSeconds(60), true);
 
-			receiveCheckpoint.Complete(_counter + _responseCounter);
+			receiveCheckpoint.Complete(_requestCounter + _responseCounter);
 
 			stopWatch.Stop();
 		}
@@ -83,8 +83,8 @@ namespace HeavyLoad.Load
 		{
 			_bus.Publish(new SimpleResponse());
 
-			Interlocked.Increment(ref _counter);
-			if (_counter == _repeatCount)
+			Interlocked.Increment(ref _requestCounter);
+			if (_requestCounter == _repeatCount)
 				_completeEvent.Set();
 		}
 	}

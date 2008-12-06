@@ -17,8 +17,8 @@ namespace SubscriptionServiceHost
     using log4net;
     using log4net.Config;
     using MassTransit.Host;
-    using MassTransit.ServiceBus;
-    using MassTransit.ServiceBus.Subscriptions;
+    using MassTransit;
+    using MassTransit.Subscriptions;
     using MassTransit.WindsorIntegration;
     using Microsoft.Practices.ServiceLocation;
 
@@ -42,10 +42,16 @@ namespace SubscriptionServiceHost
 
             var wob = new WindsorObjectBuilder(container.Kernel);
             ServiceLocator.SetLocatorProvider(() => wob);
-            var env = new SubscriptionServiceConfiguration(ServiceLocator.Current);
 
-
-            Runner.Run(env, args);
+            var settings = WinServiceSettings.Custom("",
+                                                     "",
+                                                     "",
+                                                     KnownServiceNames.Msmq);
+            var lifecycle = new SubscriptionServiceLifeCycle(ServiceLocator.Current);
+            Runner.Run(Credentials.Interactive,
+                settings,
+                lifecycle,
+                args);
         }
     }
 }

@@ -58,8 +58,12 @@ namespace MassTransit.Transports.Msmq
 
             if (_uri.AbsolutePath.IndexOf("/", 1) >= 0)
             {
-                throw new EndpointException(this, "Queue Endpoints can't have a child folder unless it is 'public'. Good: 'msmq://machinename/queue_name' or 'msmq://machinename/public/queue_name' - Bad: msmq://machinename/queue_name/bad_form");
+                if(uri.AbsolutePath.IndexOf("public") >= 0)
+                    throw new NotSupportedException(string.Format("public queues are not supported (please submit a patch): {0}", uri));
+
+                throw new EndpointException(this, "Queue Endpoints can't have a child folder unless it is 'public' (not supported yet, please submit patch). Good: 'msmq://machinename/queue_name' or 'msmq://machinename/public/queue_name' - Bad: msmq://machinename/round_file/queue_name");
             }
+                
 
             string localhost = Environment.MachineName.ToLowerInvariant();
 
@@ -233,7 +237,7 @@ namespace MassTransit.Transports.Msmq
             if (timeToLive < TimeSpan.MaxValue)
                 msg.TimeToBeReceived = timeToLive;
 
-            msg.Label = messageType.AssemblyQualifiedName;
+            msg.Label = messageType.Name;
 
             msg.Recoverable = _reliableMessaging;
 
@@ -246,17 +250,17 @@ namespace MassTransit.Transports.Msmq
             {
                 Message msg = _queue.Receive(timeout, _receiveTransactionType);
 
-                Type messageType = Type.GetType(msg.Label);
-
                 try
                 {
+                    //TODO: What do we want to do if the message body stream is null?
+
                     object obj = _serializer.Deserialize(msg.BodyStream);
 
                     return obj;
                 }
                 catch (SerializationException ex)
                 {
-                    throw new MessageException(messageType, string.Format("An error occurred serializing a message of type {0}", messageType.FullName), ex);
+                    throw new MessageException(typeof(Object), string.Format("An error occurred serializing a message of type {0}", msg.Label), ex);
                 }
             }
             catch (MessageQueueException ex)
@@ -270,7 +274,7 @@ namespace MassTransit.Transports.Msmq
         public object Receive(TimeSpan timeout, Predicate<object> accept)
         {
             if (!_queue.CanRead)
-                throw new EndpointException(this, "Not allowed to read from endpoint");
+                throw new EndpointException(this, string.Format("Not allowed to read from endpoint: '{0}'", _uri));
 
             try
             {

@@ -7,8 +7,8 @@ namespace Starbucks.Cashier
 {
     using MassTransit;
 
-    public class FriendlyCashier 
-        :Consumes<NewOrderMessage>.All,
+    public class FriendlyCashier :
+        Consumes<NewOrderMessage>.All,
         Consumes<SubmitPaymentMessage>.All
     {
         private IServiceBus _bus;

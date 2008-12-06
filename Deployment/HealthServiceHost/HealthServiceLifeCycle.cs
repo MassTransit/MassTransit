@@ -13,12 +13,10 @@
 namespace HealthServiceHost
 {
     using MassTransit.Host.LifeCycles;
-    using MassTransit.ServiceBus;
-    using MassTransit.ServiceBus.Services.HealthMonitoring;
     using Microsoft.Practices.ServiceLocation;
 
     public class HealthServiceLifeCycle :
-        HostedLifeCycle
+        HostedLifecycle
     {
         public HealthServiceLifeCycle(IServiceLocator serviceLocator) : base(serviceLocator)
         {

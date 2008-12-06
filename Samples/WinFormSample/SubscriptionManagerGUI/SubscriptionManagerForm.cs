@@ -15,6 +15,7 @@ namespace SubscriptionManagerGUI
     using System;
     using System.Collections.Generic;
     using System.ComponentModel;
+    using System.Drawing;
     using System.Windows.Forms;
     using MassTransit;
     using MassTransit.Services.HealthMonitoring;
@@ -80,8 +81,8 @@ namespace SubscriptionManagerGUI
                 var items = new[]
                                 {
                                     information.Uri.ToString(),
-                                    information.FirstDetectedAt.Value.ToString(),
-                                    information.LastDetectedAt.Value.ToLongTimeString()
+                                    information.FirstDetectedAt.Value.ToString("hh:mm:ss"),
+                                    information.LastDetectedAt.Value.ToString("hh:mm:ss")
                                 };
                 var lvi = new ListViewItem(items);
                 heartbeatList.Items.Add(lvi);
@@ -129,7 +130,10 @@ namespace SubscriptionManagerGUI
                 }
 
                 string messageName = subscription.MessageName;
-                string description = subscription.MessageName;
+                var d = subscription.MessageName;
+                var dd = d.Split('.');
+
+                string description = dd[dd.Length -1];
                 if (!string.IsNullOrEmpty(subscription.CorrelationId))
                     description += " (" + subscription.CorrelationId + ")";
 
@@ -137,6 +141,10 @@ namespace SubscriptionManagerGUI
                 if (!endpointNode.Nodes.ContainsKey(messageName))
                 {
                     messageNode = new TreeNode(description);
+
+                    if (messageName.StartsWith("MassTransit"))
+                        messageNode.ForeColor = Color.DimGray;
+
                     messageNode.Name = messageName;
 
                     endpointNode.Nodes.Add(messageNode);

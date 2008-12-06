@@ -40,6 +40,8 @@ namespace Server
 			_log.InfoFormat("Received password update: {0} ({1})", message.NewPassword, message.CorrelationId);
 
 			_serviceBus.Publish(new PasswordUpdateComplete(message.CorrelationId, 0));
+
+            _log.InfoFormat("Published password update complete message");
 		}
 	}
 }

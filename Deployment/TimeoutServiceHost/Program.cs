@@ -16,8 +16,8 @@ namespace TimeoutServiceHost
     using log4net;
     using log4net.Config;
     using MassTransit.Host;
-    using MassTransit.ServiceBus;
-    using MassTransit.ServiceBus.Services.Timeout;
+    using MassTransit;
+    using MassTransit.Services.Timeout;
     using MassTransit.WindsorIntegration;
     using Microsoft.Practices.ServiceLocation;
 
@@ -36,10 +36,17 @@ namespace TimeoutServiceHost
 
             var wob = new WindsorObjectBuilder(container.Kernel);
             ServiceLocator.SetLocatorProvider(() => wob);
-            var env = new TimeoutServiceConfiguration(ServiceLocator.Current);
 
+            var lifecycle = new TimeoutServiceLifeCycle(ServiceLocator.Current);
+            var settings = WinServiceSettings.Custom("MT-TIMEOUT",
+                                                     "Mass Transit Timeout Service",
+                                                     "Think Egg Timer",
+                                                     KnownServiceNames.Msmq);
 
-            Runner.Run(env, args);
+            Runner.Run(Credentials.Interactive,
+                settings, 
+                lifecycle,
+                args);
         }
     }
 }
