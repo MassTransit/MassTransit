@@ -14,9 +14,9 @@ namespace MassTransit.Tests
             Assert.IsFalse(value);
         }
 
-        public static void ShouldEqual(this string actual, string expected)
-        {
-            Assert.AreEqual(expected, actual);
-        }
+		public static void ShouldEqual(this object obj, object expected)
+		{
+			Assert.AreEqual(expected, obj);
+		}
     }
 }
