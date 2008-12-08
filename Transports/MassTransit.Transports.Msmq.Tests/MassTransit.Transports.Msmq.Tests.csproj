@@ -70,10 +70,12 @@
   <ItemGroup>
     <Compile Include="As_a_nontransactional_endpoint.cs" />
     <Compile Include="As_a_transactional_endpoint.cs" />
+    <Compile Include="MessageQueue_Extensions.cs" />
     <Compile Include="Messages\VariableMessage.cs" />
     <Compile Include="Messages\DeleteMessage.cs" />
     <Compile Include="Messages\UpdateAcceptedMessage.cs" />
     <Compile Include="Messages\UpdateMessage.cs" />
+    <Compile Include="MsmqEndpoint_Extensions.cs" />
     <Compile Include="MsmqEndpoint_Specs.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="QueueTestContext.cs" />

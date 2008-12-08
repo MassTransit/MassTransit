@@ -23,5 +23,14 @@ namespace MassTransit.Tests
         {
             Assert.AreEqual(expected, actual);
         }
+
+        public static void ShouldNotBeNull(this object actual)
+        {
+            Assert.IsNotNull(actual);
+        }
+        public static void ShouldBeSameType<T>(this object actual)
+        {
+            Assert.AreEqual(typeof(T), actual.GetType());
+        }
     }
 }
