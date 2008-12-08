@@ -85,6 +85,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Batch_Specs.cs" />
+    <Compile Include="BddExtensions.cs" />
     <Compile Include="BusBuilder_Specs.cs" />
     <Compile Include="ContextSetup.cs" />
     <Compile Include="Fault_Specs.cs" />
