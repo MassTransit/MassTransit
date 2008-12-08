@@ -13,10 +13,9 @@
 namespace MassTransit.Transports.Msmq.Tests
 {
     using System;
-    using System.Messaging;
-    using System.Runtime.Serialization.Formatters.Binary;
+    using MassTransit.Tests;
+    using Messages;
     using NUnit.Framework;
-    using NUnit.Framework.SyntaxHelpers;
 
     [TestFixture]
     public class When_sending_directly_to_an_endpoint
@@ -25,25 +24,13 @@ namespace MassTransit.Transports.Msmq.Tests
         public void The_message_should_be_added_to_the_queue()
         {
             MsmqEndpoint endpoint = new MsmqEndpoint("msmq://localhost/test_servicebus");
+            endpoint.Purge();
 
-            using (MessageQueue queue = endpoint.Open(QueueAccessMode.ReceiveAndAdmin))
-            {
-                queue.Purge();
+            VariableMessage message = new VariableMessage("Valid");
 
-                CustomMessage message = new CustomMessage("Valid");
+            endpoint.Send(message);
 
-                endpoint.Send(message);
-
-                Message msg = queue.Receive(TimeSpan.FromSeconds(3));
-
-                object obj = new BinaryFormatter().Deserialize(msg.BodyStream);
-
-                Assert.That(obj, Is.Not.Null);
-                if (obj != null)
-                {
-                    Assert.That(obj, Is.TypeOf(typeof (CustomMessage)));
-                }
-            }
+            endpoint.VerifyMessageInQueue<VariableMessage>();
         }
     }
 
@@ -54,53 +41,17 @@ namespace MassTransit.Transports.Msmq.Tests
         public void The_message_should_be_read_from_the_queue()
         {
             MsmqEndpoint endpoint = new MsmqEndpoint("msmq://localhost/test_servicebus");
+            endpoint.Purge();
 
-            using (MessageQueue queue = endpoint.Open(QueueAccessMode.ReceiveAndAdmin))
-            {
-                queue.Purge();
+            VariableMessage message = new VariableMessage("Jackson");
 
-                CustomMessage message = new CustomMessage("Jackson");
+            endpoint.Send(message);
 
-                endpoint.Send(message);
+            object obj = endpoint.Receive(TimeSpan.FromSeconds(30));
 
-                object obj = endpoint.Receive(TimeSpan.FromSeconds(30));
+            obj.ShouldNotBeNull();
+            obj.ShouldBeSameType<VariableMessage>();
 
-                Assert.That(obj, Is.Not.Null);
-                if (obj != null)
-                {
-                    Assert.That(obj, Is.TypeOf(typeof (CustomMessage)));
-
-                    CustomMessage response = (CustomMessage) obj;
-
-                    Assert.That(response.Name, Is.EqualTo("Jackson"));
-                }
-            }
         }
-    }
-
-    [Serializable]
-    public class CustomMessage
-    {
-        private string _name;
-
-        public CustomMessage()
-        {
-        }
-
-        public CustomMessage(string name)
-        {
-            _name = name;
-        }
-
-        public string Name
-        {
-            get { return _name; }
-            set { _name = value; }
-        }
-    }
-
-    [Serializable]
-    public class WrongMessage
-    {
     }
 }
