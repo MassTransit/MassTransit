@@ -45,14 +45,14 @@ namespace MassTransit.Transports.Msmq.Tests
         }
 
         [Test]
-        public void A_nonlocal_queue_address_should_convert_to_a_queue_path()
+        public void When_using_the_machine_name_should_convert_to_localhost()
         {
             MsmqEndpoint endpoint = new MsmqEndpoint(_address);
 
             endpoint.QueuePath
                 .ShouldEqual(@"FormatName:DIRECT=OS:chris-0295c34e6\private$\mt_client");
             endpoint.Uri.ToString()
-                .ShouldEqual(@"msmq://chris-0295c34e6/mt_client");
+                .ShouldEqual(@"msmq://localhost/mt_client");
 
 
 
@@ -61,7 +61,7 @@ namespace MassTransit.Transports.Msmq.Tests
             endpoint2.QueuePath
                 .ShouldEqual(@"FormatName:DIRECT=OS:chris-0295c34e6\private$\mt_client");
             endpoint2.Uri.ToString()
-                .ShouldEqual("msmq://chris-0295c34e6/mt_client");
+                .ShouldEqual("msmq://localhost/mt_client");
         }
 
         [Test, ExpectedException(typeof (EndpointException))]

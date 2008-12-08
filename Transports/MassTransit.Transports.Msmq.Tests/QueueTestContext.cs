@@ -140,6 +140,38 @@ namespace MassTransit.Transports.Msmq.Tests
             }
         }
 
+        public static void VerifyMessageInQueue<T>(MsmqEndpoint ep, T messageItem)
+        {
+            using (MessageQueue mq = new MessageQueue(ep.QueuePath, QueueAccessMode.Receive))
+            {
+                Message msg = mq.Receive(TimeSpan.FromSeconds(3));
+
+                object message = new BinaryFormatter().Deserialize(msg.BodyStream);
+
+                Assert.That(message, Is.Not.Null);
+                if (message != null)
+                {
+                    Assert.That(message.GetType(), Is.EqualTo(typeof(T)));
+                }
+            }
+        }
+
+        public static void VerifyMessageNotInQueue(MsmqEndpoint ep)
+        {
+            using (MessageQueue mq = new MessageQueue(ep.QueuePath, QueueAccessMode.Receive))
+            {
+                try
+                {
+                    Message msg = mq.Receive(TimeSpan.FromSeconds(0.1));
+                    Assert.IsNull(msg);
+                }
+                catch (System.Messaging.MessageQueueException ex)
+                {
+                    Assert.AreEqual("Timeout for the requested operation has expired.", ex.Message);
+                }
+            }
+        }
+
         public static void ValidateAndPurgeQueue(string queuePath)
         {
             ValidateAndPurgeQueue(queuePath, false);
