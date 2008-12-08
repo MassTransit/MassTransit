@@ -23,6 +23,7 @@ namespace MassTransit.Transports.Msmq.Tests
             [TearDown]
             public void TearDown()
             {
+            	_ep.Dispose();
                 _ep = null;
             }
 
@@ -72,6 +73,7 @@ namespace MassTransit.Transports.Msmq.Tests
             [TearDown]
             public void TearDown()
             {
+				_ep.Dispose();
                 _ep = null;
             }
 
