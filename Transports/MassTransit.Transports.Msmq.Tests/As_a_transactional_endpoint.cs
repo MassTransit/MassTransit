@@ -7,7 +7,6 @@ namespace MassTransit.Transports.Msmq.Tests
     [TestFixture]
     public class As_a_transactional_endpoint
     {
-
         [TestFixture]
         public class When_in_a_transaction
         {
@@ -23,6 +22,7 @@ namespace MassTransit.Transports.Msmq.Tests
             [TearDown]
             public void TearDown()
             {
+				_ep.Dispose();
                 _ep = null;
             }
 
@@ -69,7 +69,8 @@ namespace MassTransit.Transports.Msmq.Tests
             [TearDown]
             public void TearDown()
             {
-                _ep = null;
+				_ep.Dispose();
+				_ep = null;
             }
 
 
