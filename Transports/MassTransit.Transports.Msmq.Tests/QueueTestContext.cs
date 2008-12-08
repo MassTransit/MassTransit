@@ -17,6 +17,7 @@ namespace MassTransit.Transports.Msmq.Tests
     using System.Messaging;
     using System.Reflection;
     using System.Runtime.Serialization.Formatters.Binary;
+    using System.Transactions;
     using log4net;
     using NUnit.Framework;
     using NUnit.Framework.SyntaxHelpers;
@@ -155,7 +156,23 @@ namespace MassTransit.Transports.Msmq.Tests
                 }
             }
         }
+        public static void VerifyMessageInTransactionalQueue<T>(MsmqEndpoint ep, T messageItem)
+        {
+            using(TransactionScope trx = new TransactionScope())
+            {
+                VerifyMessageInQueue(ep, messageItem);
+                trx.Complete();
+            }
+        }
 
+        public static void VerifyMessageNotInTransactionalQueue(MsmqEndpoint ep)
+        {
+            using(TransactionScope trx = new TransactionScope())
+            {
+                VerifyMessageNotInQueue(ep);
+                trx.Complete();
+            }
+        }
         public static void VerifyMessageNotInQueue(MsmqEndpoint ep)
         {
             using (MessageQueue mq = new MessageQueue(ep.QueuePath, QueueAccessMode.Receive))

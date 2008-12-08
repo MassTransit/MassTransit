@@ -13,17 +13,14 @@
 namespace MassTransit.Transports.Msmq.Tests
 {
     using System.Transactions;
-    using Exceptions;
     using Magnum.Common.DateTimeExtensions;
     using Messages;
     using NUnit.Framework;
-    using Rhino.Mocks;
 
     [TestFixture]
     public class When_receiving_a_message
     {
-        private MockRepository mocks;
-        private string uri = "msmq://localhost/mt_client_tx";
+        private readonly string uri = "msmq://localhost/mt_client_tx";
         private MsmqEndpoint ep;
         private DeleteMessage msg;
 
@@ -39,7 +36,6 @@ namespace MassTransit.Transports.Msmq.Tests
         [SetUp]
         public void SetUp()
         {
-            mocks = new MockRepository();
             ep = new MsmqEndpoint(uri);
             QueueTestContext.ValidateAndPurgeQueue(ep.QueuePath, true);
 
@@ -59,10 +55,10 @@ namespace MassTransit.Transports.Msmq.Tests
         }
 
         [Test]
-        [ExpectedException(typeof (EndpointException))]
-        public void From_A_Transactional_Queue_Without_a_transaction()
+        public void From_A_Transactional_Queue_Without_a_transaction_should_auto_enlist()
         {
-            ep.Receive(5.Hours());
+            object o = ep.Receive(5.Milliseconds());
+            Assert.IsNotNull(o);
         }
     }
 }

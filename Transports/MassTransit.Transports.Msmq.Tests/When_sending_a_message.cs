@@ -21,14 +21,15 @@ namespace MassTransit.Transports.Msmq.Tests
     public class When_sending_a_message
     {
         [Test]
-        [ExpectedException(typeof(EndpointException))]
-        public void To_A_Transactional_Queue_Without_a_transaction()
+        public void To_A_Transactional_Queue_Without_a_transaction_should_auto_enlist()
         {
             string uri = "msmq://localhost/mt_client_tx";
             MsmqEndpoint ep = new MsmqEndpoint(uri);
             QueueTestContext.ValidateAndPurgeQueue(ep.QueuePath, true);
 
             ep.Send(new DeleteMessage());
+
+            QueueTestContext.VerifyMessageInQueue(ep, new DeleteMessage());
         }
 
         [Test]

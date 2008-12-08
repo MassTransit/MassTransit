@@ -5,7 +5,7 @@ namespace MassTransit.Transports.Msmq.Tests
     using NUnit.Framework;
 
     [TestFixture]
-    public class As_a_transactional_endpoint
+    public class As_a_nontransactional_endpoint
     {
 
         [TestFixture]
@@ -16,8 +16,8 @@ namespace MassTransit.Transports.Msmq.Tests
             [SetUp]
             public void SetUp()
             {
-                QueueTestContext.ValidateAndPurgeQueue(".\\private$\\mt_client_tx", true);
-                _ep = new MsmqEndpoint("msmq://localhost/mt_client_tx");
+                QueueTestContext.ValidateAndPurgeQueue(".\\private$\\mt_client", true);
+                _ep = new MsmqEndpoint("msmq://localhost/mt_client");
             }
 
             [TearDown]
@@ -36,12 +36,15 @@ namespace MassTransit.Transports.Msmq.Tests
                     trx.Complete();
                 }
 
-
-                QueueTestContext.VerifyMessageInTransactionalQueue(_ep, new DeleteMessage());
+                using (TransactionScope trx = new TransactionScope())
+                {
+                    QueueTestContext.VerifyMessageInQueue(_ep, new DeleteMessage());
+                    trx.Complete();
+                }
             }
 
             [Test]
-            public void While_writing_it_should_not_perisist_on_failure()
+            public void While_writing_it_should_perisist_even_on_failure()
             {
                 using (TransactionScope trx = new TransactionScope())
                 {
@@ -50,7 +53,7 @@ namespace MassTransit.Transports.Msmq.Tests
                 }
 
 
-                QueueTestContext.VerifyMessageNotInTransactionalQueue(_ep);
+                QueueTestContext.VerifyMessageInQueue(_ep, new DeleteMessage());
             }
         }
 
@@ -62,8 +65,8 @@ namespace MassTransit.Transports.Msmq.Tests
             [SetUp]
             public void SetUp()
             {
-                QueueTestContext.ValidateAndPurgeQueue(".\\private$\\mt_client_tx", true);
-                _ep = new MsmqEndpoint("msmq://localhost/mt_client_tx");
+                QueueTestContext.ValidateAndPurgeQueue(".\\private$\\mt_client", true);
+                _ep = new MsmqEndpoint("msmq://localhost/mt_client");
             }
 
             [TearDown]
@@ -74,14 +77,14 @@ namespace MassTransit.Transports.Msmq.Tests
 
 
             [Test]
-            public void It_should_auto_enlist_a_transaction_and_persist()
+            public void It_should_persist()
             {
                 _ep.Send(new DeleteMessage());
 
-                QueueTestContext.VerifyMessageInTransactionalQueue(_ep, new DeleteMessage());
+                QueueTestContext.VerifyMessageInQueue(_ep, new DeleteMessage());
             }
 
         }
-        
+
     }
 }
