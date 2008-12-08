@@ -41,6 +41,8 @@ namespace MassTransit.Pipeline.Configuration
 			_interceptors.Register(new ConsumesSelectedInterceptor());
 			_interceptors.Register(new ConsumesForInterceptor());
 			_interceptors.Register(new BatchInterceptor());
+			_interceptors.Register(new OrchestratesInterceptor());
+			_interceptors.Register(new InitiatesInterceptor());
 		}
 
 		public Func<bool> Register(IPipelineInterceptor interceptor)

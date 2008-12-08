@@ -12,36 +12,49 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Exceptions
 {
-    using System;
+	using System;
 
-    public class SagaException : 
-        Exception
-    {
-        private readonly Guid _correlationId;
-        private readonly Type _messageType;
-        private readonly Type _sagaType;
+	public class SagaException :
+		Exception
+	{
+		private readonly Guid _correlationId;
+		private readonly Type _messageType;
+		private readonly Type _sagaType;
 
-        public SagaException(string message, Type sagaType, Type messageType, Guid correlationId)
-            : base(string.Format("{0}({1}) - Unable to load saga on receipt of {2}: {3}", sagaType.FullName, correlationId, messageType.FullName, message))
-        {
-            _sagaType = sagaType;
-            _messageType = messageType;
-            _correlationId = correlationId;
-        }
+		public SagaException(string message, Type sagaType, Type messageType, Guid correlationId)
+			: base(FormatMessage(sagaType, correlationId, messageType, message))
+		{
+			_sagaType = sagaType;
+			_messageType = messageType;
+			_correlationId = correlationId;
+		}
 
-        public Type SagaType
-        {
-            get { return _sagaType; }
-        }
+		public SagaException(string message, Type sagaType, Type messageType, Guid correlationId, Exception innerException)
+			: base(FormatMessage(sagaType, correlationId, messageType, message), innerException)
+		{
+			_sagaType = sagaType;
+			_messageType = messageType;
+			_correlationId = correlationId;
+		}
 
-        public Type MessageType
-        {
-            get { return _messageType; }
-        }
+		public Type SagaType
+		{
+			get { return _sagaType; }
+		}
 
-        public Guid CorrelationId
-        {
-            get { return _correlationId; }
-        }
-    }
+		public Type MessageType
+		{
+			get { return _messageType; }
+		}
+
+		public Guid CorrelationId
+		{
+			get { return _correlationId; }
+		}
+
+		private static string FormatMessage(Type sagaType, Guid correlationId, Type messageType, string message)
+		{
+			return string.Format("{0}({1}) Saga exception on receipt of {2}: {3}", sagaType.FullName, correlationId, messageType.FullName, message);
+		}
+	}
 }

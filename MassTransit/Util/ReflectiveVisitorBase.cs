@@ -57,21 +57,39 @@ namespace MassTransit.Util
 
 		protected bool DispatchVisit(object obj)
 		{
-			bool result;
-			if (SimpleDispatch(obj, out result))
-				return result;
+			Type objectType = obj.GetType();
 
-			if (GenericDispatch(obj, out result))
-				return result;
+			while (objectType != typeof(object))
+			{
+				bool result;
+				if (SimpleDispatch(obj, objectType, out result))
+					return result;
+
+				if (GenericDispatch(obj, objectType, out result))
+					return result;
+
+				objectType = objectType.BaseType;
+			}
+
+			// if we are here, we need to think about maybe doing interfaces
+			foreach (Type interfaceType in obj.GetType().GetInterfaces())
+			{
+				bool result;
+				if (SimpleDispatch(obj, interfaceType, out result))
+					return result;
+
+				if (GenericDispatch(obj, interfaceType, out result))
+					return result;
+			}
 
 			return true;
 		}
 
-		private bool SimpleDispatch(object obj, out bool result)
+		private bool SimpleDispatch(object obj, Type objectType, out bool result)
 		{
 			result = true;
 
-			Type[] argumentTypes = new[] {obj.GetType()};
+			Type[] argumentTypes = new[] {objectType};
 
 			MethodInfo mi = GetType().GetMethod(_methodName, _bindingFlags, null, argumentTypes, null);
 			if (mi == null)
@@ -85,11 +103,9 @@ namespace MassTransit.Util
 			return true;
 		}
 
-		private bool GenericDispatch(object obj, out bool result)
+		private bool GenericDispatch(object obj, Type objectType, out bool result)
 		{
 			result = true;
-
-			Type objectType = obj.GetType();
 
 			if (!objectType.IsGenericType)
 				return false;
