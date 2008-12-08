@@ -55,6 +55,20 @@ namespace MassTransit.Transports.Msmq.Tests
 				.ShouldEqual(_expectedUri);
 		}
 
+		[Test, Ignore("Endpoints verify the queue exists, so this will fail if the remote machine does not exist")]
+		public void A_remote_server_should_keep_the_remote_server_name()
+		{
+			const string uriString = "msmq://remote_server/queue_name";
+
+			MsmqEndpoint endpoint = new MsmqEndpoint(uriString);
+
+			endpoint.QueuePath
+				.ShouldEqual(@"FormatName:DIRECT=OS:remote_server\private$\queue_name");
+			endpoint.Uri
+				.ShouldEqual(uriString);
+			
+		}
+
 
 		[Test, ExpectedException(typeof (EndpointException))]
 		public void An_address_cant_contain_a_path_specifier()
