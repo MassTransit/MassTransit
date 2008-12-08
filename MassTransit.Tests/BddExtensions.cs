@@ -1,5 +1,6 @@
 namespace MassTransit.Tests
 {
+    using System;
     using NUnit.Framework;
 
     public static class BddExtensions
@@ -18,5 +19,9 @@ namespace MassTransit.Tests
 		{
 			Assert.AreEqual(expected, obj);
 		}
+        public static void ShouldEqual(this Uri actual, Uri expected)
+        {
+            Assert.AreEqual(expected, actual);
+        }
     }
 }

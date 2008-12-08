@@ -14,7 +14,6 @@ namespace MassTransit
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Transactions;
 	using Exceptions;
 	using Internal;
 	using log4net;
@@ -91,12 +90,16 @@ namespace MassTransit
 
 			_dispatcherContext = new DispatcherContext(_objectBuilder, this, _messageDispatcher, _subscriptionCache, _typeInfoCache);
 
+            var resourceLimit = 1;
+            var minThreads = 1;
+		    var maxThreads = Environment.ProcessorCount*8;
+		    
 			_asyncDispatcher = new ResourceThreadPool<IEndpoint, object>(endpointToListenOn,
 			                                                             EndpointReader,
 			                                                             EndpointDispatcher,
-			                                                             1,
-			                                                             1,
-			                                                             Environment.ProcessorCount*8);
+			                                                             resourceLimit,
+			                                                             minThreads,
+			                                                             maxThreads);
 		}
 
 		public ISubscriptionCache SubscriptionCache
@@ -328,13 +331,13 @@ namespace MassTransit
 			}
 			catch (Exception ex)
 			{
-				IPublicationTypeInfo info = _typeInfoCache.GetPublicationTypeInfo(message.GetType());
+				SpecialLoggers.Iron.Error("An error was caught in the ServiceBus.IronDispatcher", ex);
 
+				IPublicationTypeInfo info = _typeInfoCache.GetPublicationTypeInfo(message.GetType());
 				info.PublishFault(this, ex, message);
 
 				PoisonEndpoint.Send(message, TimeSpan.Zero);
 
-				SpecialLoggers.Iron.Error("An error was caught in the ServiceBus.IronDispatcher", ex);
 
 				throw;
 			}
@@ -355,13 +358,10 @@ namespace MassTransit
 				SpecialLoggers.Iron.Error("An error was caught in the ServiceBus.IronDispatcher", ex);
 
 				IPublicationTypeInfo info = _typeInfoCache.GetPublicationTypeInfo(message.GetType());
-
 				info.PublishFault(this, ex, message);
 
-				PoisonEndpoint.Send(message, TimeSpan.Zero);
 
-			    //Transaction.Current.Commit(); why isn't this here?
-
+                PoisonEndpoint.Send(message, TimeSpan.Zero);
 			}
 		}
 
