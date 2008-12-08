@@ -14,27 +14,54 @@ namespace MassTransit.Transports.Msmq.Tests
 {
     using System;
     using Exceptions;
+    using MassTransit.Tests;
     using NUnit.Framework;
-    using NUnit.Framework.SyntaxHelpers;
 
     [TestFixture]
     public class When_specifying_a_message_queue_address_for_an_endpoint
     {
+        private static string _address = "msmq://localhost/mt_client";
+        private static Uri _uriAddress = new Uri("msmq://localhost/mt_client");
+
         [Test]
         public void A_message_queue_address_should_convert_to_a_queue_path()
         {
-            string address = "msmq://localhost/mt_client";
 
-            MsmqEndpoint endpoint = new MsmqEndpoint(address);
+            MsmqEndpoint endpoint = new MsmqEndpoint(_address);
 
-            Assert.That(endpoint.QueuePath, Is.EqualTo("FormatName:DIRECT=OS:" + Environment.MachineName.ToLowerInvariant() + @"\private$\mt_client"));
-            Assert.That(endpoint.Uri.ToString(), Is.EqualTo("msmq://" + Environment.MachineName.ToLowerInvariant() + "/mt_client"));
+            endpoint.QueuePath
+                .ShouldEqual(@"FormatName:DIRECT=OS:localhost\private$\mt_client");
+            endpoint.Uri.ToString()
+                .ShouldEqual("msmq://localhost/mt_client");
 
 
-            MsmqEndpoint endpoint2 = new MsmqEndpoint(new Uri(address));
 
-            Assert.That(endpoint2.QueuePath, Is.EqualTo("FormatName:DIRECT=OS:" + Environment.MachineName.ToLowerInvariant() + @"\private$\mt_client"));
-            Assert.That(endpoint2.Uri.ToString(), Is.EqualTo("msmq://" + Environment.MachineName.ToLowerInvariant() + "/mt_client"));
+            MsmqEndpoint endpoint2 = new MsmqEndpoint(_uriAddress);
+
+            endpoint2.QueuePath
+                .ShouldEqual(@"FormatName:DIRECT=OS:localhost\private$\mt_client");
+            endpoint2.Uri.ToString()
+                .ShouldEqual("msmq://localhost/mt_client");
+        }
+
+        [Test]
+        public void A_nonlocal_queue_address_should_convert_to_a_queue_path()
+        {
+            MsmqEndpoint endpoint = new MsmqEndpoint(_address);
+
+            endpoint.QueuePath
+                .ShouldEqual(@"FormatName:DIRECT=OS:chris-0295c34e6\private$\mt_client");
+            endpoint.Uri.ToString()
+                .ShouldEqual(@"msmq://chris-0295c34e6/mt_client");
+
+
+
+            MsmqEndpoint endpoint2 = new MsmqEndpoint(_uriAddress);
+
+            endpoint2.QueuePath
+                .ShouldEqual(@"FormatName:DIRECT=OS:chris-0295c34e6\private$\mt_client");
+            endpoint2.Uri.ToString()
+                .ShouldEqual("msmq://chris-0295c34e6/mt_client");
         }
 
         [Test, ExpectedException(typeof (EndpointException))]
