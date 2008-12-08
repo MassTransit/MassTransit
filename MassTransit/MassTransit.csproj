@@ -226,6 +226,8 @@
     <Compile Include="Pipeline\Interceptors\ConsumesForInterceptor.cs" />
     <Compile Include="Pipeline\Configuration\MessageRouterConfiguratorScope.cs" />
     <Compile Include="Pipeline\Interceptors\EndpointInterceptor.cs" />
+    <Compile Include="Pipeline\Interceptors\InitiatesInterceptor.cs" />
+    <Compile Include="Pipeline\Interceptors\OrchestratesInterceptor.cs" />
     <Compile Include="Pipeline\Sinks\BatchCombiner.cs" />
     <Compile Include="Pipeline\Sinks\BatchMessageRouter.cs" />
     <Compile Include="Pipeline\Sinks\ComponentMessageSink.cs" />
@@ -246,6 +248,8 @@
     <Compile Include="Pipeline\MessagePipelineExtensions.cs" />
     <Compile Include="Pipeline\Sinks\CorrelatedMessageRouter.cs" />
     <Compile Include="Pipeline\Sinks\EndpointMessageSink.cs" />
+    <Compile Include="Pipeline\Sinks\OrchestrateSagaMessageSink.cs" />
+    <Compile Include="Pipeline\Sinks\InitiateSagaMessageSink.cs" />
     <Compile Include="Pipeline\Sinks\MessageFilter.cs" />
     <Compile Include="Pipeline\Sinks\MessageRouter.cs" />
     <Compile Include="Pipeline\Sinks\InstanceMessageSink.cs" />
@@ -257,6 +261,7 @@
     <Compile Include="Pipeline\Interceptors\PipelineInterceptorBase.cs" />
     <Compile Include="Pipeline\Inspectors\PipelineViewer.cs" />
     <Compile Include="Pipeline\Configuration\MessagePipelineConfigurator.cs" />
+    <Compile Include="Pipeline\Sinks\SagaMessageSinkBase.cs" />
     <Compile Include="Pipeline\Sinks\SelectedComponentMessageSink.cs" />
     <Compile Include="TranslateTo.cs" />
     <Compile Include="Serialization\BaseMessageEnvelope.cs" />

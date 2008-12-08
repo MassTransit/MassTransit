@@ -14,6 +14,7 @@ namespace MassTransit.Pipeline.Inspectors
 {
 	using System;
 	using System.Text;
+	using Saga;
 	using Sinks;
 
 	public class PipelineViewer :
@@ -88,6 +89,13 @@ namespace MassTransit.Pipeline.Inspectors
 			return true;
 		}
 
+		public bool Inspect<TMessage>(IMessageSink<TMessage> sink) where TMessage : class
+		{
+			Append(string.Format("Unknown Message Sink {0} ({1})", sink.GetType(), typeof (TMessage).Name));
+
+			return true;
+		}
+
 		public bool Inspect<TMessage, TKey>(CorrelatedMessageRouter<TMessage, TKey> sink)
 			where TMessage : class, CorrelatedBy<TKey>
 		{
@@ -105,6 +113,32 @@ namespace MassTransit.Pipeline.Inspectors
 			string componentName = componentType.IsGenericType ? componentType.GetGenericTypeDefinition().FullName : componentType.FullName;
 
 			Append(string.Format("Consumed by Component {0} ({1})", componentName, typeof(TMessage).Name));
+
+			return true;
+		}	
+		
+		public bool Inspect<TComponent, TMessage>(InitiateSagaMessageSink<TComponent, TMessage> sink)
+			where TMessage : class, CorrelatedBy<Guid>
+			where TComponent : class, Orchestrates<TMessage>, ISaga
+		{
+			Type componentType = typeof (TComponent);
+
+			string componentName = componentType.IsGenericType ? componentType.GetGenericTypeDefinition().FullName : componentType.FullName;
+
+			Append(string.Format("Initiates Saga {0} ({1})", componentName, typeof(TMessage).Name));
+
+			return true;
+		}
+
+		public bool Inspect<TComponent, TMessage>(OrchestrateSagaMessageSink<TComponent, TMessage> sink)
+			where TMessage : class, CorrelatedBy<Guid>
+			where TComponent : class, Orchestrates<TMessage>, ISaga
+		{
+			Type componentType = typeof (TComponent);
+
+			string componentName = componentType.IsGenericType ? componentType.GetGenericTypeDefinition().FullName : componentType.FullName;
+
+			Append(string.Format("Orchestrates Saga {0} ({1})", componentName, typeof(TMessage).Name));
 
 			return true;
 		}
