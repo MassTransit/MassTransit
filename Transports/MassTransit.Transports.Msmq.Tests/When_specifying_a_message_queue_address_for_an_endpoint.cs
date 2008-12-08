@@ -20,8 +20,15 @@ namespace MassTransit.Transports.Msmq.Tests
     [TestFixture]
     public class When_specifying_a_message_queue_address_for_an_endpoint
     {
-        private static string _address = "msmq://localhost/mt_client";
-        private static Uri _uriAddress = new Uri("msmq://localhost/mt_client");
+        private static string _address;
+        private static Uri _uriAddress;
+
+        [SetUp]
+        public void SetUp()
+        {
+            _address = string.Format("msmq://{0}/mt_client", Environment.MachineName);
+            _uriAddress = new Uri(_address);
+        }
 
         [Test]
         public void A_message_queue_address_should_convert_to_a_queue_path()
@@ -31,8 +38,8 @@ namespace MassTransit.Transports.Msmq.Tests
 
             endpoint.QueuePath
                 .ShouldEqual(@"FormatName:DIRECT=OS:localhost\private$\mt_client");
-            endpoint.Uri.ToString()
-                .ShouldEqual("msmq://localhost/mt_client");
+            endpoint.Uri
+                .ShouldEqual(_uriAddress);
 
 
 
@@ -40,29 +47,10 @@ namespace MassTransit.Transports.Msmq.Tests
 
             endpoint2.QueuePath
                 .ShouldEqual(@"FormatName:DIRECT=OS:localhost\private$\mt_client");
-            endpoint2.Uri.ToString()
-                .ShouldEqual("msmq://localhost/mt_client");
+            endpoint2.Uri
+                .ShouldEqual(_uriAddress);
         }
 
-        [Test]
-        public void When_using_the_machine_name_should_convert_to_localhost()
-        {
-            MsmqEndpoint endpoint = new MsmqEndpoint(_address);
-
-            endpoint.QueuePath
-                .ShouldEqual(@"FormatName:DIRECT=OS:chris-0295c34e6\private$\mt_client");
-            endpoint.Uri.ToString()
-                .ShouldEqual(@"msmq://localhost/mt_client");
-
-
-
-            MsmqEndpoint endpoint2 = new MsmqEndpoint(_uriAddress);
-
-            endpoint2.QueuePath
-                .ShouldEqual(@"FormatName:DIRECT=OS:chris-0295c34e6\private$\mt_client");
-            endpoint2.Uri.ToString()
-                .ShouldEqual("msmq://localhost/mt_client");
-        }
 
         [Test, ExpectedException(typeof (EndpointException))]
         public void An_address_cant_contain_a_path_specifier()
