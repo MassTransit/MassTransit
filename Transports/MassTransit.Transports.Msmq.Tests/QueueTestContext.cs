@@ -25,9 +25,9 @@ namespace MassTransit.Transports.Msmq.Tests
         IDisposable
     {
         private static readonly ILog _log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
-        private readonly MsmqEndpoint _remoteServiceBusEndPoint = @"msmq://localhost/test_remoteservicebus";
-        private readonly MsmqEndpoint _serviceBusEndPoint = @"msmq://localhost/test_servicebus";
-        private readonly MsmqEndpoint _subscriptionEndpoint = @"msmq://localhost/test_subscriptions";
+        private readonly MsmqEndpoint _remoteServiceBusEndPoint = new MsmqEndpoint(@"msmq://localhost/test_remoteservicebus");
+        private readonly MsmqEndpoint _serviceBusEndPoint = new MsmqEndpoint(@"msmq://localhost/test_servicebus");
+        private readonly MsmqEndpoint _subscriptionEndpoint = new MsmqEndpoint(@"msmq://localhost/test_subscriptions");
 
         private ServiceBus _remoteServiceBus;
         private ServiceBus _serviceBus;
@@ -38,8 +38,8 @@ namespace MassTransit.Transports.Msmq.Tests
         }
         public QueueTestContext(IObjectBuilder objectBuilder, string remoteMachineName)
         {
-            _remoteServiceBusEndPoint = "msmq://" + remoteMachineName + "/test_remoteservicebus";
-            _serviceBusEndPoint = "msmq://" + remoteMachineName + "/test_servicebus";
+            _remoteServiceBusEndPoint = new MsmqEndpoint("msmq://" + remoteMachineName + "/test_remoteservicebus");
+            _serviceBusEndPoint = new MsmqEndpoint("msmq://" + remoteMachineName + "/test_servicebus");
 
             Initialize(objectBuilder);
         }

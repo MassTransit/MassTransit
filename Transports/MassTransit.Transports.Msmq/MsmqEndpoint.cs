@@ -401,25 +401,5 @@ namespace MassTransit.Transports.Msmq
                     break;
             }
         }
-
-        /// <summary>
-        /// Implicitly creates a <c ref="MsmqEndpoint" />.
-        /// </summary>
-        /// <param name="queueUri">A string identifying the URI of the message queue (ex. msmq://localhost/my_queue)</param>
-        /// <returns>An instance of the MessageQueueEndpoint class</returns>
-        public static implicit operator MsmqEndpoint(string queueUri)
-        {
-            return new MsmqEndpoint(queueUri);
-        }
-
-        /// <summary>
-        /// Returns the URI string for the message queue endpoint.
-        /// </summary>
-        /// <param name="endpoint">The endpoint to use to generate the URI string</param>
-        /// <returns>A URI string that identifies the message queue endpoint</returns>
-        public static implicit operator string(MsmqEndpoint endpoint)
-        {
-            return endpoint.Uri.AbsoluteUri;
-        }
     }
 }

@@ -39,7 +39,7 @@ namespace MassTransit.Transports.Msmq.Tests
         [Test]
         public void When_The_Queue_Is_NonTransactional()
         {
-            MsmqEndpoint ep = nonTransactionalQueueName;
+            MsmqEndpoint ep = new MsmqEndpoint(nonTransactionalQueueName);
             ep.Send(msg);
 
             QueueTestContext.VerifyMessageInQueue(new MsmqEndpoint(nonTransactionalQueueName).QueuePath, msg);
@@ -50,7 +50,7 @@ namespace MassTransit.Transports.Msmq.Tests
         {
             using (TransactionScope tr = new TransactionScope())
             {
-                MsmqEndpoint ep = nonTransactionalQueueName;
+                MsmqEndpoint ep = new MsmqEndpoint(nonTransactionalQueueName);
                 ep.Send(msg);
 
                 tr.Complete();
@@ -70,7 +70,7 @@ namespace MassTransit.Transports.Msmq.Tests
         {
             using (TransactionScope tr = new TransactionScope())
             {
-                MsmqEndpoint ep = transactionalQueueName;
+                MsmqEndpoint ep = new MsmqEndpoint(transactionalQueueName);
                 ep.Send(msg);
 
                 tr.Complete();
@@ -90,7 +90,7 @@ namespace MassTransit.Transports.Msmq.Tests
         [ExpectedException(typeof (EndpointException))]
         public void When_The_Queue_Is_Transactional_Not_In_A_Transaction()
         {
-            MsmqEndpoint ep = transactionalQueueName;
+            MsmqEndpoint ep = new MsmqEndpoint(transactionalQueueName);
             ep.Send(msg);
         }
     }
