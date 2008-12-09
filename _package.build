@@ -1,60 +1,112 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <project name="masstransit" default="go">
 	<property name="nant.settings.currentframework" value="net-3.5" />
-	<property name="dirs.install" value=".\pubsub_install" overwrite="false" />
+	<property name="dirs.deployment.build" value=".\Deployment\bin" overwrite="false" />
 	<property name="dirs.build" value=".\bin" overwrite="false" />
+	<property name="version.rev" value="222" overwrite="false" />
 	
-	<target name="go" depends="zip" description="Starting the build of MassTransit"/>
+	<target name="go" depends="package_subscription,package_timeout,package_deferrel,package_health,zip" description="Starting the build of MassTransit"/>
 
 
+	<target name="package_subscription">
+		<copy todir="${dirs.build}\subscription_service" flatten="true">
+			<fileset>
+				<!-- dlls -->
+				<include name="${dirs.build}\MassTransit.dll" />
+				<include name="${dirs.build}\MassTransit.Transports.Msmq.dll" />
+				<include name="${dirs.build}\MassTransit.Host.dll" />
+				<include name="${dirs.build}\MassTransit.SubscriptionStorage.dll" />
+				<include name="${dirs.build}\NHibernate.dll" />
+				<include name="${dirs.build}\Iesi.Collections.dll" />
+				<include name="${dirs.build}\log4net.dll" />
+				<include name="${dirs.build}\Castle.MicroKernel.dll" />
+				<include name="${dirs.build}\Castle.DynamicProxy2.dll" />
+				<include name="${dirs.build}\Castle.Core.dll" />
+				<include name="${dirs.build}\Castle.Facilities.NHibernateIntegration.dll" />
+				<include name="${dirs.build}\Castle.Services.Transaction.dll" />
+				<include name="${dirs.build}\Castle.Windsor.dll" />
+				<include name="${dirs.build}\SubscriptionServiceHost.exe" />
+				
+				<!-- bat files -->
+				<include name=".\Deployment\PubSub_Install_Template\_install.cmd" />
+				<include name=".\Deployment\PubSub_Install_Template\_uninstall.cmd" />
+				<include name=".\Deployment\PubSub_Install_Template\_README.txt" />
+				<include name=".\Deployment\PubSub_Install_Template\_createQueue.vbs" />
+				
+				<include name=".\Deployment\SubscriptionServiceHost\InstallMsmq.bat" />
+				
+				<!-- configs -->
+				<include name="${dirs.build}\pubsub.castle.config" />
+				<include name="${dirs.build}\log4net.xml" />
+			</fileset>
+		</copy>
+	</target>
 	
-	<target name="zip" depends="make_pubsub_install">
-		<zip zipfile="masstransit.zip">
+	<target name="package_timeout">
+		<copy todir="${dirs.build}\timeout_service" flatten="true">
+			<fileset>
+				<include name="${dirs.build}\MassTransit.dll" />
+			</fileset>
+		</copy>
+	</target>
+	
+	<target name="package_deferrel">
+		<copy todir="${dirs.build}\deferrel_service" flatten="true">
+			<fileset>
+				<include name="${dirs.build}\MassTransit.dll" />
+			</fileset>
+		</copy>
+	</target>
+	
+	<target name="package_health">
+		<copy todir="${dirs.build}\health_service" flatten="true">
+			<fileset>
+				<include name="${dirs.build}\MassTransit.dll" />
+			</fileset>
+		</copy>
+	</target>
+	
+	<target name="zip">
+		<zip zipfile="masstransit-r${version.rev}.zip">
 			<fileset basedir="${dirs.build}">
 				<include name="**/*" />
 			</fileset>
-			<fileset>
-				<include name="${dirs.install}\*.*" />
-			</fileset>
 		</zip>
-		
-		<delete dir="${dirs.install}" failonerror="false" />
 	</target>
 	
-	<!-- need to add a host -->
 	<target name="make_pubsub_install">
 		<delete dir="${dirs.install}" failonerror="false" />
 		<mkdir dir="${dirs.install}" />
 		
 		<copy todir="${dirs.install}" flatten="true">
 			<fileset>
-			<!-- dlls -->
-			<include name="${dirs.build}\MassTransit.ServiceBus.dll" />
-			<include name="${dirs.build}\MassTransit.ServiceBus.MSMQ.dll" />
-			<include name="${dirs.build}\MassTransit.Host.dll" />
-			<include name="${dirs.build}\MassTransit.SubscriptionStorage.dll" />
-			<include name="${dirs.build}\NHibernate.dll" />
-			<include name="${dirs.build}\Iesi.Collections.dll" />
-			<include name="${dirs.build}\log4net.dll" />
-			<include name="${dirs.build}\Castle.MicroKernel.dll" />
-			<include name="${dirs.build}\Castle.DynamicProxy2.dll" />
-			<include name="${dirs.build}\Castle.Core.dll" />
-			<include name="${dirs.build}\Castle.Facilities.NHibernateIntegration.dll" />
-			<include name="${dirs.build}\Castle.Services.Transaction.dll" />
-			<include name="${dirs.build}\Castle.Windsor.dll" />
-			<include name="${dirs.build}\PubSub.exe" />
+				<!-- dlls -->
+				<include name="${dirs.build}\MassTransit.dll" />
+				<include name="${dirs.build}\MassTransit.Transports.Msmq.dll" />
+				<include name="${dirs.build}\MassTransit.Host.dll" />
+				<include name="${dirs.build}\MassTransit.SubscriptionStorage.dll" />
+				<include name="${dirs.build}\NHibernate.dll" />
+				<include name="${dirs.build}\Iesi.Collections.dll" />
+				<include name="${dirs.build}\log4net.dll" />
+				<include name="${dirs.build}\Castle.MicroKernel.dll" />
+				<include name="${dirs.build}\Castle.DynamicProxy2.dll" />
+				<include name="${dirs.build}\Castle.Core.dll" />
+				<include name="${dirs.build}\Castle.Facilities.NHibernateIntegration.dll" />
+				<include name="${dirs.build}\Castle.Services.Transaction.dll" />
+				<include name="${dirs.build}\Castle.Windsor.dll" />
+				<include name="${dirs.build}\PubSub.exe" />
 
-			<!-- bat files -->
-			<include name=".\PubSub_Install_Template\_install.cmd" />
-			<include name=".\PubSub_Install_Template\_uninstall.cmd" />
-			<include name=".\PubSub_Install_Template\_README.txt" />
-			<include name=".\PubSub_Install_Template\_createQueue.vbs" />
-			
-			<include name=".\InstallMsmq.bat" />
-			
-			<!-- configs -->
-			<include name="${dirs.build}\pubsub.castle.config" />
-			<include name=".\PubSub\log4net.xml" />
+				<!-- bat files -->
+				<include name=".\PubSub_Install_Template\_install.cmd" />
+				<include name=".\PubSub_Install_Template\_uninstall.cmd" />
+				<include name=".\PubSub_Install_Template\_README.txt" />
+				<include name=".\PubSub_Install_Template\_createQueue.vbs" />
+				
+				<include name=".\InstallMsmq.bat" />
+				
+				<!-- configs -->
+				<include name="${dirs.build}\pubsub.castle.config" />
+				<include name=".\PubSub\log4net.xml" />
 			</fileset>
 			
 		</copy>
