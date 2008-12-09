@@ -89,7 +89,6 @@
     <Compile Include="BusBuilder_Specs.cs" />
     <Compile Include="ContextSetup.cs" />
     <Compile Include="Fault_Specs.cs" />
-    <Compile Include="Formatters\XmlBodyFormatterTests.cs" />
     <Compile Include="Grid\Workers\ExceptionalWorker.cs" />
     <Compile Include="Grid\Messages\FactorLongNumber.cs" />
     <Compile Include="Grid\Tasks\FactorLongNumbersTask.cs" />
@@ -115,9 +114,6 @@
     <Compile Include="CorrelatedMessage_Specs.cs" />
     <Compile Include="CorrelationIdDispatcher_Specs.cs" />
     <Compile Include="Dispatcher_Specs.cs" />
-    <Compile Include="Formatters\BinaryBodyFormatterTests.cs" />
-    <Compile Include="Formatters\JsonBodyFormatterTests.cs" />
-    <Compile Include="Formatters\LoadTests.cs" />
     <Compile Include="MessageAttribute_Specs.cs" />
     <Compile Include="MessageFilter_Specs.cs" />
     <Compile Include="MessageGroup_Specs.cs" />
@@ -231,6 +227,9 @@
     <Content Include="subscriptions.castle.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Formatters\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
