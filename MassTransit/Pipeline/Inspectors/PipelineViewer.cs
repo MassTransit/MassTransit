@@ -104,6 +104,15 @@ namespace MassTransit.Pipeline.Inspectors
 			return true;
 		}
 
+		public bool Inspect<TMessage, TKey>(CorrelatedMessageSinkRouter<TMessage, TKey> sink)
+	where TMessage : class, CorrelatedBy<TKey>
+		{
+			Append(string.Format("Routed for Correlation Id {1} ({0})", typeof(TMessage).Name, sink.CorrelationId));
+
+			return true;
+		}
+
+
 		public bool Inspect<TComponent, TMessage>(ComponentMessageSink<TComponent, TMessage> sink)
 			where TMessage : class
 			where TComponent : class, Consumes<TMessage>.All

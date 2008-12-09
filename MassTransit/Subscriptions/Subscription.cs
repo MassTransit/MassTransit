@@ -29,13 +29,27 @@ namespace MassTransit.Subscriptions
 		{
 			_endpointUri = endpointUri;
 			_messageName = messageName.Trim();
-			_correlationId = string.Empty;
+			_correlationId = String.Empty;
+		}
+
+		public Subscription(Type messageType, Uri endpointUri)
+		{
+			_endpointUri = endpointUri;
+			_messageName = BuildMessageName(messageType);
+			_correlationId = String.Empty;
 		}
 
 		public Subscription(string messageName, string correlationId, Uri endpointUri)
 		{
 			_endpointUri = endpointUri;
 			_messageName = messageName.Trim();
+			_correlationId = correlationId;
+		}
+
+		public Subscription(Type messageType, string correlationId, Uri endpointUri)
+		{
+			_endpointUri = endpointUri;
+			_messageName = BuildMessageName(messageType);
 			_correlationId = correlationId;
 		}
 
@@ -65,8 +79,8 @@ namespace MassTransit.Subscriptions
 		{
 			if (subscription == null) return false;
 			if (!_endpointUri.Equals(subscription._endpointUri)) return false;
-			if (!string.Equals(_messageName, subscription._messageName)) return false;
-			if (!string.Equals(_correlationId, subscription._correlationId)) return false;
+			if (!String.Equals(_messageName, subscription._messageName)) return false;
+			if (!String.Equals(_correlationId, subscription._correlationId)) return false;
 			return true;
 		}
 
@@ -84,6 +98,11 @@ namespace MassTransit.Subscriptions
 			result = 29*result + _messageName.GetHashCode();
 			result = 29*result + _correlationId.GetHashCode();
 			return result;
+		}
+
+		public static string BuildMessageName(Type t)
+		{
+			return String.Format("{0}, {1}", t.FullName, t.Assembly.FullName);
 		}
 	}
 }

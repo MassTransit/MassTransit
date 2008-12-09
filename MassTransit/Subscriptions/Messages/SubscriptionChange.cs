@@ -38,5 +38,25 @@ namespace MassTransit.Subscriptions.Messages
             get { return _subscription; }
             set { _subscription = value; }
         }
+
+    	public bool Equals(SubscriptionChange obj)
+    	{
+    		if (ReferenceEquals(null, obj)) return false;
+    		if (ReferenceEquals(this, obj)) return true;
+    		return Equals(obj._subscription, _subscription);
+    	}
+
+    	public override bool Equals(object obj)
+    	{
+    		if (ReferenceEquals(null, obj)) return false;
+    		if (ReferenceEquals(this, obj)) return true;
+    		if (obj.GetType() != typeof (SubscriptionChange)) return false;
+    		return Equals((SubscriptionChange) obj);
+    	}
+
+    	public override int GetHashCode()
+    	{
+    		return (_subscription != null ? _subscription.GetHashCode() : 0);
+    	}
     }
 }

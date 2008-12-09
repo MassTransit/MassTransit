@@ -31,5 +31,22 @@ namespace MassTransit.Subscriptions.Messages
             : base(subscription)
         {
         }
+
+    	public bool Equals(AddSubscription obj)
+    	{
+    		return base.Equals(obj);
+    	}
+
+    	public override bool Equals(object obj)
+    	{
+    		if (ReferenceEquals(null, obj)) return false;
+    		if (ReferenceEquals(this, obj)) return true;
+    		return Equals(obj as AddSubscription);
+    	}
+
+    	public override int GetHashCode()
+    	{
+    		return base.GetHashCode();
+    	}
     }
 }

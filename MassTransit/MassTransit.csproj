@@ -217,6 +217,8 @@
     <Compile Include="Pipeline\Configuration\MessageFilterConfigurator.cs" />
     <Compile Include="Pipeline\Configuration\MessageFilterConfiguratorScope.cs" />
     <Compile Include="Pipeline\Inspectors\PipelineInspectorBase.cs" />
+    <Compile Include="Pipeline\Sinks\CorrelatedMessageSinkRouter.cs" />
+    <Compile Include="Subscriptions\SubscriptionCollector.cs" />
     <Compile Include="Pipeline\Interceptors\BatchInterceptor.cs" />
     <Compile Include="Pipeline\Interceptors\ConsumesForInterceptor.cs" />
     <Compile Include="Pipeline\Configuration\MessageRouterConfiguratorScope.cs" />
@@ -258,6 +260,8 @@
     <Compile Include="Pipeline\Configuration\MessagePipelineConfigurator.cs" />
     <Compile Include="Pipeline\Sinks\SagaMessageSinkBase.cs" />
     <Compile Include="Pipeline\Sinks\SelectedComponentMessageSink.cs" />
+    <Compile Include="Subscriptions\SubscriptionPublisher.cs" />
+    <Compile Include="Subscriptions\SubscriptionSnapshot.cs" />
     <Compile Include="TranslateTo.cs" />
     <Compile Include="Serialization\BaseMessageEnvelope.cs" />
     <Compile Include="Serialization\BinaryMessageSerializer.cs" />

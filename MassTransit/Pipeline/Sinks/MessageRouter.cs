@@ -56,6 +56,11 @@ namespace MassTransit.Pipeline.Sinks
 				});
 		}
 
+		public int SinkCount
+		{
+			get { return _sinks.ReadLock(x => x.Count); }
+		}
+
 		/// <summary>
 		/// Connects a message sink to the router
 		/// </summary>
