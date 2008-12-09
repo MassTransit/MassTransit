@@ -9,6 +9,10 @@ namespace MassTransit.Tests
         {
             Assert.IsTrue(value);
         }
+        public static void ShouldBeTrue(this bool actual, string message)
+        {
+            Assert.IsTrue(actual, message);
+        }
 
         public static void ShouldBeFalse(this bool value)
         {
