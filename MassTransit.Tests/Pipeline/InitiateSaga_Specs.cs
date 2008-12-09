@@ -19,6 +19,8 @@ namespace MassTransit.Tests.Pipeline
 	using MassTransit.Pipeline.Interceptors;
 	using MassTransit.Pipeline.Sinks;
 	using MassTransit.Saga;
+	using MassTransit.Subscriptions;
+	using MassTransit.Subscriptions.Messages;
 	using NUnit.Framework;
 	using Rhino.Mocks;
 
@@ -34,9 +36,13 @@ namespace MassTransit.Tests.Pipeline
 
 			_builder = MockRepository.GenerateMock<IObjectBuilder>();
 
+			_endpoint = MockRepository.GenerateMock<IEndpoint>();
+			_endpoint.Stub(x => x.Uri).Return(_uri);
+
 			_repository = MockRepository.GenerateMock<ISagaRepository<SimpleSaga>>();
 
 			_bus = MockRepository.GenerateMock<IServiceBus>();
+			_bus.Stub(x => x.Endpoint).Return(_endpoint);
 
 			_context = MockRepository.GenerateMock<IInterceptorContext>();
 			_context.Stub(x => x.Builder).Return(_builder);
@@ -56,6 +62,9 @@ namespace MassTransit.Tests.Pipeline
 
 		#endregion
 
+		private readonly Uri _uri = new Uri("msmq://localhost/mt_client");
+		private IEndpoint _endpoint;
+
 		private IObjectBuilder _builder;
 		private OrchestrateSagaMessageSink<SimpleSaga, CompleteSimpleSaga> _completeSink;
 		private ISagaRepository<SimpleSaga> _repository;
@@ -66,6 +75,21 @@ namespace MassTransit.Tests.Pipeline
 		private Guid _sagaId;
 		private SimpleSaga _saga;
 		private MessagePipeline _pipeline;
+
+		[Test]
+		public void Should_publish_subscriptions_for_saga_subscriptions()
+		{
+			AddSubscription add = new AddSubscription(Subscription.BuildMessageName(typeof (InitiateSimpleSaga)), _uri);
+			_bus.Expect(x => x.Publish(add));
+
+			AddSubscription add2 = new AddSubscription(Subscription.BuildMessageName(typeof (CompleteSimpleSaga)), _uri);
+			_bus.Expect(x => x.Publish(add2));
+
+			var publisher = new SubscriptionPublisher(_bus);
+			publisher.Refresh(_pipeline);
+
+			_bus.VerifyAllExpectations();
+		}
 
 		[Test]
 		public void The_saga_should_be_created_when_an_initiating_message_is_received()

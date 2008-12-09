@@ -131,6 +131,7 @@
     <Compile Include="Pipeline\PipelineViewer_Specs.cs" />
     <Compile Include="Pipeline\ReflectiveVisitor_Specs.cs" />
     <Compile Include="Pipeline\SubscribeConsumer_Specs.cs" />
+    <Compile Include="Pipeline\SubscriptionEvent_Specs.cs" />
     <Compile Include="PublishToConsumer_Specs.cs" />
     <Compile Include="RequestReply_Specs.cs" />
     <Compile Include="ResourceThreadPool_Specs.cs" />

@@ -41,7 +41,7 @@ namespace MassTransit.Pipeline.Sinks
 					{
 						if (x.TryGetValue(correlationId, out keySink) == false)
 						{
-							MessageRouter<TMessage> keyRouter = new MessageRouter<TMessage>();
+							MessageRouter<TMessage> keyRouter = new CorrelatedMessageSinkRouter<TMessage, TKey>(correlationId);
 
 							x.Add(correlationId, keyRouter);
 
@@ -54,7 +54,30 @@ namespace MassTransit.Pipeline.Sinks
 
 			var router = configurator.FindOrCreate<TMessage>();
 
-			return router.Connect(sink);
+			Func<bool> remove = router.Connect(sink);
+
+			return () => { return remove() && _sinks.WriteLock(x => DisconnectIfEmpty(x, correlationId)); };
+		}
+
+		private static bool DisconnectIfEmpty(IDictionary<TKey, IMessageSink<TMessage>> sinks, TKey correlationId)
+		{
+			IMessageSink<TMessage> keySink = null;
+
+			if (!sinks.TryGetValue(correlationId, out keySink))
+				return false;
+
+			CorrelatedMessageSinkRouter<TMessage, TKey> router = keySink as CorrelatedMessageSinkRouter<TMessage, TKey>;
+			if (router == null)
+				return false;
+
+			if (router.SinkCount != 0)
+				return false;
+
+			sinks.Remove(correlationId);
+
+			router.Dispose();
+
+			return sinks.Count == 0;
 		}
 	}
 }
