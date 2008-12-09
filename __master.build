@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<project name="masstransit" default="go">
+	<property name="nant.settings.currentframework" value="net-3.5" />
+	<property name="version.rev" value="0" overwrite="false" />
+	<property name="version.build" value="0" overwrite="false" />
+	<property name="svn.path" value="http://masstransit.googlecode.com/svn/trunk" overwrite="false" />
+	
+	<target name="go" depends="build" description="Starting the build of MassTransit" />
+	
+	<target name="build" depends="common.asminfo">
+		<nant buildfile=".\_compile.build" inheritall="true" />
+		<!-- <nant buildfile=".\_test.build" /> -->
+		<nant buildfile=".\_package.build" inheritall="true" />
+	</target>
+	
+	<target name="common.find-svninfo" description="Gets the current svn revision number">
+		<!-- For adding SVN revision to builds -->
+		<property name="svn.revision" value="0" overwrite="false" />
+		<!-- try to update the revision -->
+		<!--<exec
+			program="svn"
+			commandline='info "${project::get-base-directory()}" - -xml'
+			output="_revision.xml"
+			failonerror="false"/> -->
+		<exec
+			program="svn"
+			commandline='info ${svn.path} --xml'
+			output="_revision.xml"
+			failonerror="false"/>
+		<xmlpeek
+			file="_revision.xml"
+			xpath="/info/entry/@revision"
+			property="svn.revision"
+			failonerror="false"/>
+		<delete file="_revision.xml" failonerror="false" />
+		<echo message="INFO: Using Subversion revision number: ${svn.revision}"/>
+	</target>
+	
+	<target name="common.asminfo" depends="common.find-svninfo" description="Generate asm info">
+	
+		<property name="version.rev" value="${svn.revision}" overwrite="true" />
+		
+		<asminfo output="SolutionVersion.cs" language="CSharp">
+			<imports>
+				<import namespace="System" />
+				<import namespace="System.Reflection" />
+				<import namespace="System.Runtime.InteropServices" />
+			</imports>
+			<attributes>
+				<attribute type="ComVisibleAttribute" value="false" />
+				<attribute type="CLSCompliantAttribute" value="true" />
+				<attribute type="AssemblyVersionAttribute" value="0.4.${version.build}.${version.rev}" />
+				<attribute type="AssemblyCopyrightAttribute" value="MassTransit Project, original author or authors" />
+				<attribute type="AssemblyCompanyAttribute" value="CFT &amp; ACM" />
+				<attribute type="AssemblyInformationalVersionAttribute" value="${svn.path}" />
+			</attributes>
+		</asminfo>
+	</target>
+</project>
