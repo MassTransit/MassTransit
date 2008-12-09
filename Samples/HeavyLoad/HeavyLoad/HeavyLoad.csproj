@@ -103,10 +103,6 @@
       <Project>{98D5A59C-96FA-4A1B-A653-EA5A35C45FC9}</Project>
       <Name>MassTransit.WindsorIntegration</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\Transports\MassTransit.Transports.Wcf\MassTransit.Transports.Wcf.csproj">
-      <Project>{F4388D44-E814-4B17-98F7-35735CB7449E}</Project>
-      <Name>MassTransit.Transports.Wcf</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
