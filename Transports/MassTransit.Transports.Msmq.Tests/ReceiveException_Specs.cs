@@ -14,8 +14,9 @@ namespace MassTransit.Transports.Msmq.Tests
 {
     using System;
     using System.Threading;
+    using Magnum.Common.DateTimeExtensions;
+    using MassTransit.Tests;
     using NUnit.Framework;
-    using NUnit.Framework.SyntaxHelpers;
 
     [TestFixture]
     public class When_an_accept_method_throws_an_exception
@@ -33,13 +34,13 @@ namespace MassTransit.Transports.Msmq.Tests
 
             endpoint.Send(new BogusMessage());
 
-            Assert.That(CrashingService.Received.WaitOne(TimeSpan.FromSeconds(5), true), Is.True, "No message received");
+            CrashingService.Received.WaitOne(5.Seconds(), true).ShouldBeTrue("No message received");
 
             CrashingService.Received.Reset();
 
             endpoint.Send(new LegitMessage());
 
-            Assert.That(CrashingService.LegitReceived.WaitOne(TimeSpan.FromSeconds(5), true), Is.True, "No message received");
+            CrashingService.LegitReceived.WaitOne(5.Seconds(), true).ShouldBeTrue("No message received");
         }
 
         internal class CrashingService : 
