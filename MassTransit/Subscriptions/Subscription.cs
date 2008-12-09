@@ -102,7 +102,13 @@ namespace MassTransit.Subscriptions
 
 		public static string BuildMessageName(Type t)
 		{
-			return String.Format("{0}, {1}", t.FullName, t.Assembly.FullName);
+			string assembly = t.Assembly.FullName;
+			
+			int comma = assembly.IndexOf(',');
+			if (comma >= 0)
+				assembly = assembly.Substring(0, comma);
+
+			return String.Format("{0}, {1}", t.FullName, assembly);
 		}
 	}
 }

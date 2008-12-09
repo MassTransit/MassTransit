@@ -55,7 +55,7 @@ namespace MassTransit.Tests.Pipeline
 
 			_pipeline = MessagePipelineConfigurator.CreateDefault(_builder);
 
-			_pipeline.Subscribe<SimpleSaga>();
+			_remove = _pipeline.Subscribe<SimpleSaga>();
 
 			PipelineViewer.Trace(_pipeline);
 		}
@@ -75,6 +75,7 @@ namespace MassTransit.Tests.Pipeline
 		private Guid _sagaId;
 		private SimpleSaga _saga;
 		private MessagePipeline _pipeline;
+		private Func<bool> _remove;
 
 		[Test]
 		public void Should_publish_subscriptions_for_saga_subscriptions()
@@ -86,6 +87,24 @@ namespace MassTransit.Tests.Pipeline
 			_bus.Expect(x => x.Publish(add2));
 
 			var publisher = new SubscriptionPublisher(_bus);
+			publisher.Refresh(_pipeline);
+
+			_bus.VerifyAllExpectations();
+		}	
+		
+		[Test]
+		public void Should_remove_subscriptions_for_saga_subscriptions()
+		{
+			var add = new RemoveSubscription(Subscription.BuildMessageName(typeof (InitiateSimpleSaga)), _uri);
+			_bus.Expect(x => x.Publish(add));
+
+			var add2 = new RemoveSubscription(Subscription.BuildMessageName(typeof(CompleteSimpleSaga)), _uri);
+			_bus.Expect(x => x.Publish(add2));
+
+			var publisher = new SubscriptionPublisher(_bus);
+			publisher.Refresh(_pipeline);
+
+			_remove();
 			publisher.Refresh(_pipeline);
 
 			_bus.VerifyAllExpectations();
