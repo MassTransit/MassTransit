@@ -28,10 +28,10 @@ namespace SubscriptionServiceHost
 
         private static void Main(string[] args)
         {
-            XmlConfigurator.ConfigureAndWatch(new FileInfo("log4net.xml"));
+            XmlConfigurator.ConfigureAndWatch(new FileInfo("subscriptionService.log4net.xml"));
             _log.Info("SubMgr Loading");
 
-            var container = new DefaultMassTransitContainer("pubsub.castle.xml");
+            var container = new DefaultMassTransitContainer("subscriptionService.castle.xml");
             container.AddComponentLifeStyle("followerrepository", typeof(FollowerRepository), LifestyleType.Singleton);
 
             container.AddComponent<IHostedService, SubscriptionService>();
