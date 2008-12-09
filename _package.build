@@ -36,8 +36,8 @@
 				<include name=".\Deployment\SubscriptionServiceHost\InstallMsmq.bat" />
 				
 				<!-- configs -->
-				<include name="${dirs.build}\pubsub.castle.config" />
-				<include name="${dirs.build}\log4net.xml" />
+				<include name="${dirs.deployment.build}\subscriptionService.castle.xml" />
+				<include name="${dirs.deployment.build}\subscriptionService.log4net.xml" />
 			</fileset>
 		</copy>
 	</target>

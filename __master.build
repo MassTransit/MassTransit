@@ -4,6 +4,7 @@
 	<property name="version.rev" value="0" overwrite="false" />
 	<property name="version.build" value="0" overwrite="false" />
 	<property name="svn.path" value="http://masstransit.googlecode.com/svn/trunk" overwrite="false" />
+	<property name="msbuild.configuration" value="Release" overwrite="false" />
 	
 	<target name="go" depends="build" description="Starting the build of MassTransit" />
 	
@@ -49,10 +50,10 @@
 			<attributes>
 				<attribute type="ComVisibleAttribute" value="false" />
 				<attribute type="CLSCompliantAttribute" value="true" />
-				<attribute type="AssemblyVersionAttribute" value="0.4.${version.build}.${version.rev}" />
+				<attribute type="AssemblyVersionAttribute" value="0.5.${version.build}.${version.rev}" />
 				<attribute type="AssemblyCopyrightAttribute" value="MassTransit Project, original author or authors" />
 				<attribute type="AssemblyCompanyAttribute" value="CFT &amp; ACM" />
-				<attribute type="AssemblyInformationalVersionAttribute" value="${svn.path}" />
+				<!-- <attribute type="AssemblyConfiguration" value="${msbuild.configuration}, ${svn.path}" /> -->
 			</attributes>
 		</asminfo>
 	</target>

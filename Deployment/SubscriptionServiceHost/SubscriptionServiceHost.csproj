@@ -106,13 +106,10 @@
     <Compile Include="SubscriptionServiceLifeCycle.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="install.xml">
+    <Content Include="subscriptionService.log4net.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="log4net.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="pubsub.castle.xml">
+    <Content Include="subscriptionService.castle.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
