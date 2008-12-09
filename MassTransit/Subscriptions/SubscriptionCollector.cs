@@ -41,10 +41,12 @@ namespace MassTransit.Subscriptions
 			_snapshot.Add(messageType, correlationId);
 		}
 
-		public bool Inspect<TMessage, TBatchId>(BatchMessageRouter<TMessage, TBatchId> element)
+		public bool Inspect<TMessage, TBatchId>(BatchMessageRouter<TMessage, TBatchId> sink)
 			where TMessage : class, BatchedBy<TBatchId>
 		{
-			Add(typeof (TMessage));
+			if(sink.SinkCount > 0)
+				Add(typeof (TMessage));
+
 			return true;
 		}
 

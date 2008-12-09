@@ -14,7 +14,6 @@ namespace MassTransit.Pipeline.Sinks
 {
 	using System;
 	using System.Collections.Generic;
-	using Magnum.Common.DateTimeExtensions;
 	using Magnum.Common.Threading;
 
 	/// <summary>
@@ -87,6 +86,11 @@ namespace MassTransit.Pipeline.Sinks
 			_consumerSinks.WriteLock(sinks => sinks.Add(sink));
 
 			return () => _consumerSinks.WriteLock(sinks => sinks.Remove(sink));
+		}
+
+		public int SinkCount
+		{
+			get { return _consumerSinks.ReadLock(x => x.Count); }
 		}
 
 		protected override void Dispose(bool disposing)
