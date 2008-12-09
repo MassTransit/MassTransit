@@ -13,7 +13,7 @@ namespace MassTransit.Tests.Subscriptions
 		[SetUp]
 		public virtual void Before_Each_Test_In_The_Fixture()
 		{
-			_serviceBusEndPoint = _mocks.CreateMock<IEndpoint>();
+			_serviceBusEndPoint = _mocks.StrictMock<IEndpoint>();
 
 			SetupResult.For(_serviceBusEndPoint.Uri).Return(new Uri(_serviceBusQueueName));
 

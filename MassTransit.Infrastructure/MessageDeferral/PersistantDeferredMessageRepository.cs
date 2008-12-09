@@ -12,40 +12,45 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Infrastructure.MessageDeferral
 {
-    using System;
-    using Magnum.Infrastructure.Repository;
-    using Services.MessageDeferral;
+	using System;
+	using Magnum.Infrastructure.Repository;
+	using Services.MessageDeferral;
 
-    public class PersistantDeferredMessageRepository :
-        IDeferredMessageRepository
-    {
-        private NHibernateRepository _repository;
+	public class PersistantDeferredMessageRepository :
+		IDeferredMessageRepository
+	{
+		private readonly NHibernateRepository _repository;
 
-        public void Dispose()
-        {
-            _repository.Dispose();
-        }
+		public PersistantDeferredMessageRepository(NHibernateRepository repository)
+		{
+			_repository = repository;
+		}
 
-        public void Add(DeferredMessage message)
-        {
-            _repository.Save(message);
-        }
+		public void Dispose()
+		{
+			_repository.Dispose();
+		}
 
-        public DeferredMessage Get(Guid id)
-        {
-            DeferredMessage msg = _repository.Get<DeferredMessage>(id);
-            return msg;
-        }
+		public void Add(DeferredMessage message)
+		{
+			_repository.Save(message);
+		}
 
-        public bool Contains(Guid id)
-        {
-            return _repository.Get<DeferredMessage>(id) != null;
-        }
+		public DeferredMessage Get(Guid id)
+		{
+			DeferredMessage msg = _repository.Get<DeferredMessage>(id);
+			return msg;
+		}
 
-        public void Remove(Guid id)
-        {
-            //TODO: Need a delete by Id method
-            _repository.Delete(_repository.Get<DeferredMessage>(id));
-        }
-    }
+		public bool Contains(Guid id)
+		{
+			return _repository.Get<DeferredMessage>(id) != null;
+		}
+
+		public void Remove(Guid id)
+		{
+			//TODO: Need a delete by Id method
+			_repository.Delete(_repository.Get<DeferredMessage>(id));
+		}
+	}
 }

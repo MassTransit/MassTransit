@@ -41,7 +41,6 @@ namespace MassTransit
 		private IEndpoint _poisonEndpoint = new PoisonEndpointDecorator(new NullEndpoint());
 		private ISubscriptionCache _subscriptionCache;
 		private ITypeInfoCache _typeInfoCache;
-		private int _readThreadCount;
 
 		static ServiceBus()
 		{

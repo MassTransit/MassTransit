@@ -42,7 +42,7 @@ namespace MassTransit.Transports.Msmq.Tests
 
             MsmqEndpoint defaultEndpoint = new MsmqEndpoint(endpointName);
 
-            ServiceBus serviceBus = new ServiceBus(defaultEndpoint, _mocks.CreateMock<IObjectBuilder>());
+			ServiceBus serviceBus = new ServiceBus(defaultEndpoint, _mocks.StrictMock<IObjectBuilder>());
 
             string machineEndpointName = endpointName.Replace("localhost", Environment.MachineName.ToLowerInvariant());
 
