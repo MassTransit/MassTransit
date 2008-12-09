@@ -19,7 +19,7 @@ namespace MassTransit.Host.Tests
         public void SetUp()
         {
             mocks = new MockRepository();
-            configuration = mocks.CreateMock<IInstallationConfiguration>();
+			configuration = mocks.StrictMock<IInstallationConfiguration>();
         }
 
         [TearDown]

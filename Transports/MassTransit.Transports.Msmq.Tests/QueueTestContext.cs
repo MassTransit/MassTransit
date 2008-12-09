@@ -32,9 +32,8 @@ namespace MassTransit.Transports.Msmq.Tests
 
         private ServiceBus _remoteServiceBus;
         private ServiceBus _serviceBus;
-        private IObjectBuilder _mockObjectBuilder;
 
-        public QueueTestContext(IObjectBuilder objectBuilder) : this(objectBuilder, "localhost")
+    	public QueueTestContext(IObjectBuilder objectBuilder) : this(objectBuilder, "localhost")
         {
         }
         public QueueTestContext(IObjectBuilder objectBuilder, string remoteMachineName)
@@ -63,12 +62,7 @@ namespace MassTransit.Transports.Msmq.Tests
         }
 
 
-        public IObjectBuilder MockObjectBuilder
-        {
-            get { return _mockObjectBuilder; }
-        }
-
-        public IEndpoint RemoteServiceBusEndPoint
+    	public IEndpoint RemoteServiceBusEndPoint
         {
             get { return _remoteServiceBusEndPoint; }
         }
@@ -182,7 +176,7 @@ namespace MassTransit.Transports.Msmq.Tests
                     Message msg = mq.Receive(TimeSpan.FromSeconds(0.1));
                     Assert.IsNull(msg);
                 }
-                catch (System.Messaging.MessageQueueException ex)
+                catch (MessageQueueException ex)
                 {
                     Assert.AreEqual("Timeout for the requested operation has expired.", ex.Message);
                 }

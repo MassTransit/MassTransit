@@ -115,7 +115,7 @@ namespace MassTransit.Transports.Wcf
 
                     return obj;
                 }
-                catch (InvalidOperationException ex)
+                catch (InvalidOperationException )
                 {
                 }
             }
@@ -142,7 +142,7 @@ namespace MassTransit.Transports.Wcf
                         return obj;
                     }
                 }
-                catch (InvalidOperationException ex)
+                catch (InvalidOperationException )
                 {
                 }
             }
