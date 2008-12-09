@@ -10,7 +10,7 @@
 					 endpoint="multicast://227.43.1.1:5309/">
 			</bus>
 			<transports>
-				<transport>MassTransit.ServiceBus.Transports.MulticastUdpEndpoint, MassTransit.ServiceBus</transport>
+				<transport>MassTransit.Transports.MulticastUdpEndpoint, MassTransit</transport>
 			</transports>
 		</facility>
 	</facilities>
