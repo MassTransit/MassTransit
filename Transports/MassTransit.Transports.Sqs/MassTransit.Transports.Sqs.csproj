@@ -33,6 +33,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <DocumentationFile>..\..\bin\MassTransit.Transports.Sqs.xml</DocumentationFile>
+    <NoWarn>1591,1587</NoWarn>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Amazon.SQS, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
