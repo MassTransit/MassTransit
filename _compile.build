@@ -19,16 +19,19 @@
 	</target>
 	
 	<target name="build_samples" description="Building Samples">
-		<msbuild project=".\Samples\HeavyLoad\HeavyLoad.sln" verbosity="quiet">
+		<msbuild project=".\Samples\HeavyLoad\HeavyLoad-2008.sln" verbosity="quiet">
 			<property name="Configuration" value="${msbuild.configuration}" />
 		</msbuild>
-		<msbuild project=".\Samples\OpenAllNight\OpenAllNight.sln" verbosity="quiet">
+		<msbuild project=".\Samples\OpenAllNight\OpenAllNight-2008.sln" verbosity="quiet">
 			<property name="Configuration" value="${msbuild.configuration}" />
 		</msbuild>
-		<msbuild project=".\Samples\PublishSubscribe\PublishSubscribe.sln" verbosity="quiet">
+		<msbuild project=".\Samples\Starbucks\Starbucks.sln" verbosity="quiet">
 			<property name="Configuration" value="${msbuild.configuration}" />
 		</msbuild>
-		<msbuild project=".\Samples\WebRequestReply\WebRequestReply.sln" verbosity="quiet">
+		<msbuild project=".\Samples\PublishSubscribe\PublishSubscribe-2008.sln" verbosity="quiet">
+			<property name="Configuration" value="${msbuild.configuration}" />
+		</msbuild>
+		<msbuild project=".\Samples\WebRequestReply\WebRequestReply-2008.sln" verbosity="quiet">
 			<property name="Configuration" value="${msbuild.configuration}" />
 		</msbuild>
 	</target>

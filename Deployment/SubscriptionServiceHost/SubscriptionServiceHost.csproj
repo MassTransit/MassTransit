@@ -104,7 +104,6 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SubscriptionServiceLifeCycle.cs" />
-    <Compile Include="SubscriptionServiceConfiguration.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="install.xml">
