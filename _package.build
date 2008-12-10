@@ -87,7 +87,7 @@
 				<include name="${dirs.deployment.build}\deferredMessageService.castle.xml" />
 				<include name="${dirs.deployment.build}\deferredMessageService.log4net.xml" />
 				
-				<include name="${dirs.deployment.build}\create_deferrel_queue.vbs" />
+				<include name="${dirs.deployment.build}\create_deferred_queue.vbs" />
 			</fileset>
 		</copy>
 	</target>
@@ -131,20 +131,7 @@
 	</target>
 	
 	<target name="make_pubsub_install">
-		
-		<copy todir="${dirs.install}" flatten="true">
-			<fileset>
-				<!-- bat files -->
-				<include name=".\PubSub_Install_Template\_install.cmd" />
-				<include name=".\PubSub_Install_Template\_uninstall.cmd" />
-				<include name=".\PubSub_Install_Template\_README.txt" />
-				<include name=".\PubSub_Install_Template\_createQueue.vbs" />
 				
-				<include name=".\InstallMsmq.bat" />
-			</fileset>
-			
-		</copy>
-		
 		<mkdir dir="${dirs.install}\SQLScripts" />
 		<copy todir="${dirs.install}\SQLScripts" flatten="true">
 			<fileset>
