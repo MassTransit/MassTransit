@@ -12,7 +12,7 @@
 			</bus>
 
 			<transports>
-				<transport>MassTransit.ServiceBus.MSMQ.MsmqEndpoint, MassTransit.ServiceBus.MSMQ</transport>
+				<transport>MassTransit.Transports.MSMQ.MsmqEndpoint, MassTransit.ServiceBus.MSMQ</transport>
 			</transports>
 		</facility>
 
