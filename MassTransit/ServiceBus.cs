@@ -330,6 +330,7 @@ namespace MassTransit
 			}
 			catch (Exception ex)
 			{
+                //retry
 				SpecialLoggers.Iron.Error("An error was caught in the ServiceBus.IronDispatcher", ex);
 
 				IPublicationTypeInfo info = _typeInfoCache.GetPublicationTypeInfo(message.GetType());
@@ -354,6 +355,7 @@ namespace MassTransit
 			}
 			catch (Exception ex)
 			{
+                //retry
 				SpecialLoggers.Iron.Error("An error was caught in the ServiceBus.IronDispatcher", ex);
 
 				IPublicationTypeInfo info = _typeInfoCache.GetPublicationTypeInfo(message.GetType());
