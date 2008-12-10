@@ -61,7 +61,22 @@
 	<target name="package_health">
 		<copy todir="${dirs.build}\health_service" flatten="true">
 			<fileset>
+				<!-- dlls -->
+				<include name="${dirs.build}\Castle.Core.dll" />
+				<include name="${dirs.build}\Castle.DynamicProxy2.dll" />
+				<include name="${dirs.build}\Castle.MicroKernel.dll" />
+				<include name="${dirs.build}\Castle.Windsor.dll" />
+				<include name="${dirs.build}\log4net.dll" />
 				<include name="${dirs.build}\MassTransit.dll" />
+				<include name="${dirs.build}\MassTransit.Host.dll" />
+				<include name="${dirs.build}\MassTransit.Transports.Msmq.dll" />
+				<include name="${dirs.build}\MassTransit.WindsorIntegration.dll" />
+				<include name="${dirs.build}\Microsoft.Practices.ServiceLocation.dll" />
+				<include name="${dirs.build}\HealthServiceHost.exe" />
+				
+				<!-- configs -->
+				<include name="${dirs.deployment.build}\healthService.castle.xml" />
+				<include name="${dirs.deployment.build}\healthService.log4net.xml" />
 			</fileset>
 		</copy>
 	</target>
