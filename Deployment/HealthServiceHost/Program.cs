@@ -26,10 +26,10 @@ namespace HealthServiceHost
 
         private static void Main(string[] args)
         {
-            log4net.Config.XmlConfigurator.Configure(new FileInfo("log4net.xml"));
+            log4net.Config.XmlConfigurator.Configure(new FileInfo("healthService.log4net.xml"));
             _log.Info("Health Server Loading");
 
-            var container = new DefaultMassTransitContainer("health.castle.xml");
+            var container = new DefaultMassTransitContainer("healthService.castle.xml");
 
             
             container.AddComponent<IHostedService, HealthService>();
