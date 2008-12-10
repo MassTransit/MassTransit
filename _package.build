@@ -25,15 +25,9 @@
 				<include name="${dirs.build}\Castle.Facilities.NHibernateIntegration.dll" />
 				<include name="${dirs.build}\Castle.Services.Transaction.dll" />
 				<include name="${dirs.build}\Castle.Windsor.dll" />
-				<include name="${dirs.build}\SubscriptionServiceHost.exe" />
 				
-				<!-- bat files -->
-				<include name=".\Deployment\PubSub_Install_Template\_install.cmd" />
-				<include name=".\Deployment\PubSub_Install_Template\_uninstall.cmd" />
-				<include name=".\Deployment\PubSub_Install_Template\_README.txt" />
-				<include name=".\Deployment\PubSub_Install_Template\_createQueue.vbs" />
-				
-				<include name=".\Deployment\SubscriptionServiceHost\InstallMsmq.bat" />
+				<!--application-->
+				<include name="${dirs.deployment.build}\SubscriptionServiceHost.exe" />
 				
 				<!-- configs -->
 				<include name="${dirs.deployment.build}\subscriptionService.castle.xml" />
@@ -45,7 +39,24 @@
 	<target name="package_timeout">
 		<copy todir="${dirs.build}\timeout_service" flatten="true">
 			<fileset>
+				<!-- dlls -->
+				<include name="${dirs.build}\Castle.Core.dll" />
+				<include name="${dirs.build}\Castle.DynamicProxy2.dll" />
+				<include name="${dirs.build}\Castle.MicroKernel.dll" />
+				<include name="${dirs.build}\Castle.Windsor.dll" />
+				<include name="${dirs.build}\log4net.dll" />
 				<include name="${dirs.build}\MassTransit.dll" />
+				<include name="${dirs.build}\MassTransit.Host.dll" />
+				<include name="${dirs.build}\MassTransit.Transports.Msmq.dll" />
+				<include name="${dirs.build}\MassTransit.WindsorIntegration.dll" />
+				<include name="${dirs.build}\Microsoft.Practices.ServiceLocation.dll" />
+				
+				<!-- application -->
+				<include name="${dirs.deployment.build}\TimeoutServiceHost.exe" />
+				
+				<!-- configs -->
+				<include name="${dirs.deployment.build}\timeoutService.castle.xml" />
+				<include name="${dirs.deployment.build}\timeoutService.log4net.xml" />
 			</fileset>
 		</copy>
 	</target>
@@ -53,7 +64,24 @@
 	<target name="package_deferrel">
 		<copy todir="${dirs.build}\deferrel_service" flatten="true">
 			<fileset>
+				<!-- dlls -->
+				<include name="${dirs.build}\Castle.Core.dll" />
+				<include name="${dirs.build}\Castle.DynamicProxy2.dll" />
+				<include name="${dirs.build}\Castle.MicroKernel.dll" />
+				<include name="${dirs.build}\Castle.Windsor.dll" />
+				<include name="${dirs.build}\log4net.dll" />
 				<include name="${dirs.build}\MassTransit.dll" />
+				<include name="${dirs.build}\MassTransit.Host.dll" />
+				<include name="${dirs.build}\MassTransit.Transports.Msmq.dll" />
+				<include name="${dirs.build}\MassTransit.WindsorIntegration.dll" />
+				<include name="${dirs.build}\Microsoft.Practices.ServiceLocation.dll" />
+				
+				<!-- application -->
+				<include name="${dirs.deployment.build}\DeferredMessageServiceHost.exe" />
+				
+				<!-- configs -->
+				<include name="${dirs.deployment.build}\deferredMessageService.castle.xml" />
+				<include name="${dirs.deployment.build}\deferredMessageService.log4net.xml" />
 			</fileset>
 		</copy>
 	</target>
@@ -90,27 +118,9 @@
 	</target>
 	
 	<target name="make_pubsub_install">
-		<delete dir="${dirs.install}" failonerror="false" />
-		<mkdir dir="${dirs.install}" />
 		
 		<copy todir="${dirs.install}" flatten="true">
 			<fileset>
-				<!-- dlls -->
-				<include name="${dirs.build}\MassTransit.dll" />
-				<include name="${dirs.build}\MassTransit.Transports.Msmq.dll" />
-				<include name="${dirs.build}\MassTransit.Host.dll" />
-				<include name="${dirs.build}\MassTransit.SubscriptionStorage.dll" />
-				<include name="${dirs.build}\NHibernate.dll" />
-				<include name="${dirs.build}\Iesi.Collections.dll" />
-				<include name="${dirs.build}\log4net.dll" />
-				<include name="${dirs.build}\Castle.MicroKernel.dll" />
-				<include name="${dirs.build}\Castle.DynamicProxy2.dll" />
-				<include name="${dirs.build}\Castle.Core.dll" />
-				<include name="${dirs.build}\Castle.Facilities.NHibernateIntegration.dll" />
-				<include name="${dirs.build}\Castle.Services.Transaction.dll" />
-				<include name="${dirs.build}\Castle.Windsor.dll" />
-				<include name="${dirs.build}\PubSub.exe" />
-
 				<!-- bat files -->
 				<include name=".\PubSub_Install_Template\_install.cmd" />
 				<include name=".\PubSub_Install_Template\_uninstall.cmd" />
@@ -118,10 +128,6 @@
 				<include name=".\PubSub_Install_Template\_createQueue.vbs" />
 				
 				<include name=".\InstallMsmq.bat" />
-				
-				<!-- configs -->
-				<include name="${dirs.build}\pubsub.castle.config" />
-				<include name=".\PubSub\log4net.xml" />
 			</fileset>
 			
 		</copy>
