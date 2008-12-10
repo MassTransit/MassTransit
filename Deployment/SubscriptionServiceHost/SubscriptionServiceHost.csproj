@@ -106,6 +106,9 @@
     <Compile Include="SubscriptionServiceLifeCycle.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="create_subscription_queue.vbs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="subscriptionService.log4net.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

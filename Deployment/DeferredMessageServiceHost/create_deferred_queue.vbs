@@ -1,8 +1,8 @@
-Const MQ_ERROR_QUEUE_EXISTS = -1072824317
+﻿Const MQ_ERROR_QUEUE_EXISTS = -1072824317
 
 set qinfo = CreateObject("MSMQ.MSMQQueueInfo")
 
-CreateQueue ".\private$\mt_subscription"
+CreateQueue ".\private$\mt_deferred"
 
 
 Sub DeleteQueue(queueName)

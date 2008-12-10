@@ -107,6 +107,9 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="create_health_queue.vbs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="healthService.castle.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
