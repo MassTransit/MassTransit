@@ -87,10 +87,10 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="log4net.xml">
+    <Content Include="timeoutService.log4net.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="timeout.castle.xml">
+    <Content Include="timeoutService.castle.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

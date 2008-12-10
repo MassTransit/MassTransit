@@ -26,10 +26,10 @@ namespace DeferredMessageServiceHost
         private static readonly ILog _log = LogManager.GetLogger(typeof (Program));
         static void Main(string[] args)
         {
-            XmlConfigurator.ConfigureAndWatch(new FileInfo("log4net.xml"));
+            XmlConfigurator.ConfigureAndWatch(new FileInfo("deferredMessageService.log4net.xml"));
             _log.Info("Deferred Message Service Loading");
 
-            var container = new DefaultMassTransitContainer("deferred.castle.xml");
+            var container = new DefaultMassTransitContainer("deferredMessageService.castle.xml");
             container.AddComponent<IHostedService, MessageDeferralService>();
             container.AddComponent<IDeferredMessageRepository, InMemoryDeferredMessageRepository>();
             //TODO: Put the Database Repository here too

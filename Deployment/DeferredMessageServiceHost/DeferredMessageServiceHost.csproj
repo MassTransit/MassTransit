@@ -87,10 +87,10 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="log4net.xml">
+    <Content Include="deferredMessageService.log4net.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="deferred.castle.xml">
+    <Content Include="deferredMessageService.castle.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
