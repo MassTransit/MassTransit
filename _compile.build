@@ -9,7 +9,7 @@
 	
 	<target name="build_code" description="Building Library">
 		<delete  dir=".\bin" failonerror="false" />
-		<delete file=".\MassTransit.zip" failonerror="false" />
+		
 		
 		<msbuild project=".\MassTransit-2008.sln" verbosity="quiet">
 			<property name="Configuration" value="${msbuild.configuration}" />

@@ -110,6 +110,11 @@
 	</target>
 	
 	<target name="zip">
+	    <delete failonerror="false">
+			<fileset>
+				<include name="*.zip" />
+			</fileset>
+		</delete>
 		<zip zipfile="masstransit-r${version.rev}.zip">
 			<fileset basedir="${dirs.build}">
 				<include name="**/*" />
