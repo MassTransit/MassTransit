@@ -27,10 +27,10 @@ namespace TimeoutServiceHost
 
         static void Main(string[] args)
         {
-            XmlConfigurator.ConfigureAndWatch(new FileInfo("log4net.xml"));
+            XmlConfigurator.ConfigureAndWatch(new FileInfo("timeoutService.log4net.xml"));
             _log.Info("Timeout Service Loading");
 
-            var container = new DefaultMassTransitContainer("timeout.castle.xml");
+            var container = new DefaultMassTransitContainer("timeoutService.castle.xml");
             container.AddComponent<ITimeoutRepository, InMemoryTimeoutRepository>();
             container.AddComponent<IHostedService, TimeoutService>();
 
