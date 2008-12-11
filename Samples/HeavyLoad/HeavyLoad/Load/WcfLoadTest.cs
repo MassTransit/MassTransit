@@ -46,7 +46,7 @@ namespace HeavyLoad.Load
 			stopWatch.Start();
 
 			CheckPoint publishCheckpoint = stopWatch.Mark("Publishing " + _repeatCount + " messages");
-			CheckPoint receiveCheckpoint = stopWatch.Mark("Receiving " + _repeatCount + " messages");
+			CheckPoint receiveCheckpoint = stopWatch.Mark("Request/Response " + _repeatCount + " messages");
 
 			for (int index = 0; index < _repeatCount; index++)
 			{
