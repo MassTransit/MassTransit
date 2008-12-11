@@ -18,12 +18,13 @@ namespace MassTransit.Transports.Wcf
     using System.Runtime.Serialization.Formatters.Binary;
     using System.ServiceModel;
     using System.Threading;
+    using Internal;
     using log4net;
 
     public class WcfEndpoint : IEndpoint
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof (WcfEndpoint));
-        private static readonly ILog _messageLog = LogManager.GetLogger("MassTransit.Messages");
+        private static readonly ILog _messageLog = SpecialLoggers.Messages;
         private readonly BinaryFormatter _formatter = new BinaryFormatter();
 
         private readonly Semaphore _messageReady = new Semaphore(0, int.MaxValue);
