@@ -96,7 +96,7 @@ namespace MassTransit.Internal
                 dispatcher = (Consumes<TMessage>.Selected) Activator.CreateInstance(componentDispatcherType, context);
 
                 context.Attach(dispatcher);
-                context.AddSubscription(new Subscription(typeof (TMessage).FullName, context.Bus.Endpoint.Uri));
+                context.AddSubscription(new Subscription(typeof (TMessage), context.Bus.Endpoint.Uri));
             }
         }
 

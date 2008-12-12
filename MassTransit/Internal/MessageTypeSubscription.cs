@@ -68,7 +68,7 @@ namespace MassTransit.Internal
                 dispatcher = (Consumes<TMessage>.Selected) Activator.CreateInstance(componentDispatcherType, context);
 
                 context.Attach(dispatcher);
-                context.AddSubscription(new Subscription(typeof (TMessage).FullName, context.Bus.Endpoint.Uri));
+                context.AddSubscription(new Subscription(typeof (TMessage), context.Bus.Endpoint.Uri));
             }
         }
 
@@ -84,7 +84,7 @@ namespace MassTransit.Internal
         private static void _Subscribe(IDispatcherContext context, Consumes<TMessage>.All consumer)
         {
             context.Attach(consumer);
-            context.AddSubscription(new Subscription(typeof (TMessage).FullName, context.Bus.Endpoint.Uri));
+            context.AddSubscription(new Subscription(typeof (TMessage), context.Bus.Endpoint.Uri));
         }
 
         private static void _Unsubscribe(IDispatcherContext context, Consumes<TMessage>.All consumer)
@@ -93,7 +93,7 @@ namespace MassTransit.Internal
 
             if (context.GetDispatcher<MessageDispatcher<TMessage>>().Active == false)
             {
-                context.RemoveSubscription(new Subscription(typeof (TMessage).FullName, context.Bus.Endpoint.Uri));
+                context.RemoveSubscription(new Subscription(typeof (TMessage), context.Bus.Endpoint.Uri));
             }
         }
     }

@@ -76,7 +76,7 @@ namespace MassTransit.Tests.Pipeline
 
 			PipelineViewer.Trace(_pipeline);
 
-			var add = new AddSubscription(new Subscription(Subscription.BuildMessageName(typeof(IndividualBatchMessage)), _uri));
+			var add = new AddSubscription(new Subscription(typeof(IndividualBatchMessage), _uri));
 			_bus.Expect(x => x.Publish(add));
 
 			var publisher = new SubscriptionPublisher(_bus);
@@ -204,7 +204,7 @@ namespace MassTransit.Tests.Pipeline
 
 			PipelineViewer.Trace(_pipeline);
 
-			var remove = new RemoveSubscription(new Subscription(Subscription.BuildMessageName(typeof(IndividualBatchMessage)), _uri));
+			var remove = new RemoveSubscription(new Subscription(typeof(IndividualBatchMessage), _uri));
 			_bus.Expect(x => x.Publish(remove));
 
 			var publisher = new SubscriptionPublisher(_bus);

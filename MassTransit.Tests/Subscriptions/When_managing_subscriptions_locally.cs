@@ -36,7 +36,7 @@ namespace MassTransit.Tests.Subscriptions
                                                            Is.EqualTo(typeof(PingMessage).FullName));
                                            };
 
-            cache.Add(new Subscription(typeof(PingMessage).FullName, sendTo));
+            cache.Add(new Subscription(typeof(PingMessage), sendTo));
 
             Assert.That(cache.List().Count, Is.EqualTo(1));
             Assert.That(wasFired, Is.True);
@@ -46,7 +46,7 @@ namespace MassTransit.Tests.Subscriptions
         public void Event_should_not_fire_if_subscription_exists()
         {
             bool wasFired = false;
-            cache.Add(new Subscription(typeof(PingMessage).FullName, sendTo));
+            cache.Add(new Subscription(typeof(PingMessage), sendTo));
             cache.OnAddSubscription += delegate(object sender, SubscriptionEventArgs e)
                                            {
                                                wasFired = true;
@@ -55,7 +55,7 @@ namespace MassTransit.Tests.Subscriptions
                                                            Is.EqualTo(typeof(PingMessage).FullName));
                                            };
 
-            cache.Add(new Subscription(typeof(PingMessage).FullName, sendTo));
+            cache.Add(new Subscription(typeof(PingMessage), sendTo));
 
             Assert.That(cache.List().Count, Is.EqualTo(1));
             Assert.That(wasFired, Is.False);
@@ -64,8 +64,8 @@ namespace MassTransit.Tests.Subscriptions
         [Test]
         public void Listing_Subscriptions_By_Name()
         {
-            cache.Add(new Subscription(typeof(PingMessage).FullName, new Uri("msmq://localhost/test")));
-            cache.Add(new Subscription(typeof(PongMessage).FullName, new Uri("msmq://localhost/test")));
+            cache.Add(new Subscription(typeof(PingMessage), new Uri("msmq://localhost/test")));
+            cache.Add(new Subscription(typeof(PongMessage), new Uri("msmq://localhost/test")));
 
             Assert.That(cache.List(typeof(PingMessage).FullName).Count, Is.EqualTo(1));
             Assert.That(cache.List(typeof(PongMessage).FullName).Count, Is.EqualTo(1));
@@ -75,7 +75,7 @@ namespace MassTransit.Tests.Subscriptions
         public void Remove_With_Event()
         {
             bool wasFired = false;
-            cache.Add(new Subscription(typeof(PingMessage).FullName, sendTo));
+            cache.Add(new Subscription(typeof(PingMessage), sendTo));
             Assert.That(cache.List().Count, Is.EqualTo(1));
 
             cache.OnRemoveSubscription += delegate(object sender, SubscriptionEventArgs e)
@@ -85,7 +85,7 @@ namespace MassTransit.Tests.Subscriptions
                                                   Assert.That(e.Subscription.MessageName,
                                                               Is.EqualTo(typeof(PingMessage).FullName));
                                               };
-            cache.Remove(new Subscription(typeof(PingMessage).FullName, sendTo));
+            cache.Remove(new Subscription(typeof(PingMessage), sendTo));
 
             Assert.That(wasFired, Is.True);
         }

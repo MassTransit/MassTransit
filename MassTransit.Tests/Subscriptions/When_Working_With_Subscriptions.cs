@@ -16,7 +16,7 @@ namespace MassTransit.Tests.Subscriptions
 		{
 			ISubscriptionCache cache = new LocalSubscriptionCache();
 
-			cache.Add(new Subscription(typeof (PingMessage).FullName, new Uri(mockPath)));
+			cache.Add(new Subscription(typeof (PingMessage), new Uri(mockPath)));
 
 			Assert.That(cache.List().Count, Is.EqualTo(1));
 		}
@@ -28,9 +28,9 @@ namespace MassTransit.Tests.Subscriptions
 			ISubscriptionCache cache = new LocalSubscriptionCache();
 			cache.OnAddSubscription += delegate { count++; };
 
-			cache.Add(new Subscription(typeof (PingMessage).FullName, new Uri(mockPath)));
-			cache.Add(new Subscription(typeof (PingMessage).FullName, new Uri(mockPath)));
-			cache.Add(new Subscription(typeof (PingMessage).FullName.ToLowerInvariant(), new Uri(mockPath)));
+			cache.Add(new Subscription(typeof (PingMessage), new Uri(mockPath)));
+			cache.Add(new Subscription(typeof (PingMessage), new Uri(mockPath)));
+			cache.Add(new Subscription(typeof (PingMessage), new Uri(mockPath)));
 
 			Assert.That(cache.List().Count, Is.EqualTo(2));
 			Assert.That(count, Is.EqualTo(2));
@@ -44,7 +44,7 @@ namespace MassTransit.Tests.Subscriptions
 			ISubscriptionCache cache = new LocalSubscriptionCache();
 			cache.OnAddSubscription += delegate { didEventFire = true; };
 
-			cache.Add(new Subscription(typeof (PingMessage).FullName, new Uri(mockPath)));
+			cache.Add(new Subscription(typeof (PingMessage), new Uri(mockPath)));
 
 			Assert.IsTrue(didEventFire);
 		}
@@ -54,10 +54,10 @@ namespace MassTransit.Tests.Subscriptions
 		{
 			bool didEventFire = false;
 			ISubscriptionCache cache = new LocalSubscriptionCache();
-			cache.Add(new Subscription(typeof (PingMessage).FullName, new Uri(mockPath)));
+			cache.Add(new Subscription(typeof (PingMessage), new Uri(mockPath)));
 
 			cache.OnRemoveSubscription += delegate { didEventFire = true; };
-			cache.Remove(new Subscription(typeof (PingMessage).FullName, new Uri(mockPath)));
+			cache.Remove(new Subscription(typeof (PingMessage), new Uri(mockPath)));
 
 			Assert.IsTrue(didEventFire);
 		}
@@ -66,10 +66,10 @@ namespace MassTransit.Tests.Subscriptions
 		public void Remove_subscription()
 		{
 			ISubscriptionCache cache = new LocalSubscriptionCache();
-			cache.Add(new Subscription(typeof (PingMessage).FullName, new Uri(mockPath)));
+			cache.Add(new Subscription(typeof (PingMessage), new Uri(mockPath)));
 			Assert.That(cache.List().Count, Is.EqualTo(1));
 
-			cache.Remove(new Subscription(typeof (PingMessage).FullName, new Uri(mockPath)));
+			cache.Remove(new Subscription(typeof (PingMessage), new Uri(mockPath)));
 			Assert.That(cache.List().Count, Is.EqualTo(0));
 		}
 
@@ -77,11 +77,11 @@ namespace MassTransit.Tests.Subscriptions
 		public void Remove_subscription_Idempotent()
 		{
 			ISubscriptionCache cache = new LocalSubscriptionCache();
-			cache.Add(new Subscription(typeof (PingMessage).FullName, new Uri(mockPath)));
+			cache.Add(new Subscription(typeof (PingMessage), new Uri(mockPath)));
 			Assert.That(cache.List().Count, Is.EqualTo(1));
 
-			cache.Remove(new Subscription(typeof (PingMessage).FullName, new Uri(mockPath)));
-			cache.Remove(new Subscription(typeof (PingMessage).FullName, new Uri(mockPath)));
+			cache.Remove(new Subscription(typeof (PingMessage), new Uri(mockPath)));
+			cache.Remove(new Subscription(typeof (PingMessage), new Uri(mockPath)));
 			Assert.That(cache.List().Count, Is.EqualTo(0));
 		}
 	}
