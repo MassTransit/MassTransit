@@ -14,6 +14,7 @@ namespace MassTransit.Exceptions
 {
 	using System;
 
+    [Serializable]
 	public class SagaException :
 		Exception
 	{

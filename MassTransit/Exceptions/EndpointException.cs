@@ -13,28 +13,30 @@
 namespace MassTransit.Exceptions
 {
     using System;
+    using System.Runtime.Serialization;
 
+    [Serializable]
     public class EndpointException :
         Exception
     {
-        private IEndpoint _endpoint;
+        
 
         public EndpointException(IEndpoint endpoint, string message)
             : base(message)
         {
-            _endpoint = endpoint;
+            Endpoint = endpoint.Uri;
         }
 
         public EndpointException(IEndpoint endpoint, string message, Exception innerException)
             : base(message, innerException)
         {
-            _endpoint = endpoint;
+            Endpoint = endpoint.Uri;
         }
 
-        public IEndpoint Endpoint
+        protected EndpointException(SerializationInfo info, StreamingContext context) : base(info, context)
         {
-            get { return _endpoint; }
-            set { _endpoint = value; }
         }
+
+        public Uri Endpoint { get; set; }
     }
 }
