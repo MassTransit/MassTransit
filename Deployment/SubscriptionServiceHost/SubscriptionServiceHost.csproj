@@ -135,7 +135,9 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="InstallMsmq.bat" />
+    <None Include="How To Installation.url">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Framework.2.0">

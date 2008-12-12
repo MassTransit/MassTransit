@@ -33,6 +33,7 @@
 				<include name="${dirs.deployment.build}\subscriptionService.castle.xml" />
 				<include name="${dirs.deployment.build}\subscriptionService.log4net.xml" />
 				
+				<include name="${dirs.deployment.build}\How To Installation.url" />
 				<include name="${dirs.deployment.build}\create_subscription_queue.vbs" />
 				<include name="${dirs.build}\install_msmq.bat" />
 			</fileset>
@@ -61,6 +62,7 @@
 				<include name="${dirs.deployment.build}\timeoutService.castle.xml" />
 				<include name="${dirs.deployment.build}\timeoutService.log4net.xml" />
 				
+				<include name="${dirs.deployment.build}\How To Installation.url" />
 				<include name="${dirs.deployment.build}\create_timeout_queue.vbs" />
 				<include name="${dirs.build}\install_msmq.bat" />
 			</fileset>
@@ -89,6 +91,7 @@
 				<include name="${dirs.deployment.build}\deferredMessageService.castle.xml" />
 				<include name="${dirs.deployment.build}\deferredMessageService.log4net.xml" />
 				
+				<include name="${dirs.deployment.build}\How To Installation.url" />
 				<include name="${dirs.deployment.build}\create_deferred_queue.vbs" />
 				<include name="${dirs.build}\install_msmq.bat" />
 			</fileset>
@@ -117,6 +120,7 @@
 				<include name="${dirs.deployment.build}\healthService.castle.xml" />
 				<include name="${dirs.deployment.build}\healthService.log4net.xml" />
 				
+				<include name="${dirs.deployment.build}\How To Installation.url" />
 				<include name="${dirs.deployment.build}\create_health_queue.vbs" />
 				<include name="${dirs.build}\install_msmq.bat" />
 			</fileset>

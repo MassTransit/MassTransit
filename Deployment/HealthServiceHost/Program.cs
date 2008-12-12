@@ -35,7 +35,7 @@ namespace HealthServiceHost
             container.AddComponent<IHostedService, HealthService>();
             container.AddComponent<IHealthCache, LocalHealthCache>();
             container.AddComponent<IHeartbeatTimer, InMemoryHeartbeatTimer>();
-            //TODO: Put database persittance here too
+            //TODO: Put database persitance here too
 
 
             var wob = new WindsorObjectBuilder(container.Kernel);
