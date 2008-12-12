@@ -43,9 +43,9 @@ namespace SubscriptionServiceHost
             var wob = new WindsorObjectBuilder(container.Kernel);
             ServiceLocator.SetLocatorProvider(() => wob);
 
-            var settings = WinServiceSettings.Custom("",
-                                                     "",
-                                                     "",
+            var settings = WinServiceSettings.Custom("MT-SUBSCRIPTIONS",
+                                                     "MassTransit Subscriptions",
+                                                     "Service to maintain message subscriptions",
                                                      KnownServiceNames.Msmq);
             var lifecycle = new SubscriptionServiceLifeCycle(ServiceLocator.Current);
             Runner.Run(Credentials.Interactive,
