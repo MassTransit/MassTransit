@@ -4,7 +4,6 @@ namespace MassTransit.Transports.Msmq.Tests
     using MassTransit.Tests;
     using NUnit.Framework;
 
-    [TestFixture]
     public class As_a_transactional_endpoint
     {
         [TestFixture]
