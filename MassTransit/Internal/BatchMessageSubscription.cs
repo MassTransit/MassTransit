@@ -82,7 +82,7 @@ namespace MassTransit.Internal
                 batchDispatcher = new BatchDispatcher<TMessage, TBatchId>(context);
 
                 context.Attach(batchDispatcher);
-                context.AddSubscription(new Subscription(typeof (TMessage).FullName, context.Bus.Endpoint.Uri));
+                context.AddSubscription(new Subscription(typeof (TMessage), context.Bus.Endpoint.Uri));
             }
 
             return batchDispatcher;
@@ -107,7 +107,7 @@ namespace MassTransit.Internal
 
                 if (context.GetDispatcher<MessageDispatcher<TMessage>>().Active == false)
                 {
-                    context.RemoveSubscription(new Subscription(typeof (TMessage).FullName, context.Bus.Endpoint.Uri));
+                    context.RemoveSubscription(new Subscription(typeof (TMessage), context.Bus.Endpoint.Uri));
                 }
             }
         }

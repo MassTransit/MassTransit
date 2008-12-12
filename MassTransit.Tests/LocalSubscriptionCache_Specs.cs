@@ -41,7 +41,7 @@ namespace MassTransit.Tests
             _mockEndpoint = _endpointResolver.Resolve(queueUri);
 
             _mockSubscriptionCache = DynamicMock<ISubscriptionCache>();
-            _subscription = new Subscription(typeof (PingMessage).FullName, queueUri);
+            _subscription = new Subscription(typeof (PingMessage), queueUri);
             _serviceBus = new ServiceBus(_mockEndpoint, _builder, _mockSubscriptionCache);
         }
 

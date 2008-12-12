@@ -58,7 +58,7 @@ namespace MassTransit.Internal
                 dispatcher = new InitiateSagaDispatcher<TSaga, TMessage>(context.Bus, context.Builder, repository);
 
                 context.Attach(dispatcher);
-                context.AddSubscription(new Subscription(typeof (TMessage).FullName, context.Bus.Endpoint.Uri));
+                context.AddSubscription(new Subscription(typeof (TMessage), context.Bus.Endpoint.Uri));
             }
         }
     }
