@@ -15,6 +15,7 @@ namespace MassTransit.Exceptions
 	using System;
 	using System.Runtime.Serialization;
 
+    [Serializable]
 	public class PipelineException :
 		Exception
 	{
