@@ -2,6 +2,7 @@
 {
     using System;
 
+
     public class JournalEntry
     {
         public Uri From { get; set; }
