@@ -55,5 +55,12 @@ namespace MassTransit.Metadata
 
             _bus.Publish(new MetadataMessage(metadata));
         }
+
+        public void NoteAndPublish(object message)
+        {
+            var metadata = new TransmissionModel(){From = null, To = null, Message = message.GetType().Name, OccuredAt = DateTime.Now};
+
+            _bus.Publish(metadata);
+        }
     }
 }
