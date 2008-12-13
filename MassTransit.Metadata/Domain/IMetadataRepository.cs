@@ -1,12 +1,14 @@
-namespace MassTransit.Metadata
+namespace MassTransit.Metadata.Domain
 {
     using System.Collections.Generic;
-    using Domain;
+    using Messages;
 
     public interface IMetadataRepository
     {
+        void Register(MessageModel data);
+
         IList<MessageMetadata> List();
-        void Register(MessageMetadata data);
         MessageMetadata Get(object id);
+        void Update(MessageMetadata data);
     }
 }

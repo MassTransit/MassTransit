@@ -1,5 +1,6 @@
 namespace MassTransit.Metadata
 {
+    using Domain;
     using Messages;
     
 
