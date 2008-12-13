@@ -31,35 +31,43 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Magnum.Common, Version=0.1.0.197, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\libs\Magnum.Common.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Client\MessageModelFilter.cs" />
+    <Compile Include="Client\TransmissionFilter.cs" />
     <Compile Include="Domain\EndpointMetadata.cs" />
     <Compile Include="Domain\IMetadataRepository.cs" />
-    <Compile Include="Domain\JournalEntry.cs" />
+    <Compile Include="Domain\TransmissionMetadata.cs" />
     <Compile Include="Domain\MemberMetadata.cs" />
     <Compile Include="Domain\MessageMetadata.cs" />
     <Compile Include="Messages\EndpointModel.cs" />
     <Compile Include="Messages\MemberModel.cs" />
     <Compile Include="Messages\MessageModel.cs" />
     <Compile Include="Messages\MetadataMessage.cs" />
+    <Compile Include="Messages\TransmissionModel.cs" />
     <Compile Include="MetadataClient.cs" />
     <Compile Include="MetadataExtracter.cs" />
     <Compile Include="MetadataService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Server\EndpointConsumer.cs" />
+    <Compile Include="Server\MessageConsumer.cs" />
     <Compile Include="Server\MetadataIndexer.cs" />
+    <Compile Include="Server\TransmissionConsumer.cs" />
+    <Compile Include="WireTap.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\MassTransit\MassTransit.csproj">
       <Project>{6EFD69FC-CBCC-4F85-AEE0-EFBA73F4D273}</Project>
       <Name>MassTransit</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Client\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -1,21 +1,23 @@
 namespace MassTransit.Metadata
 {
-    using Messages;
-
     public class MetadataClient :
-        Consumes<object>.All
+        IHostedService
     {
-        //hooks into the pipeline to get shiz done
-        private readonly MetadataExtracter _extractor;
 
-        public MetadataClient(MetadataExtracter extractor)
+        public void Start()
         {
-            _extractor = extractor;
+            //attach to pipeline
         }
 
-        public void Consume(object message)
+        public void Stop()
         {
-            _extractor.ExtractAndPublish(message);
+            //detach from pipeline
+        }
+
+
+        public void Dispose()
+        {
+
         }
     }
 }

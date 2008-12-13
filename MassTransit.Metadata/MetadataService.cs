@@ -1,22 +1,35 @@
 namespace MassTransit.Metadata
 {
-    using Domain;
-    using Messages;
+    using Server;
     
-
     public class MetadataService :
-        Consumes<MetadataMessage>.All
+        IHostedService
     {
-        private readonly IMetadataRepository _repository;
 
-        public MetadataService(IMetadataRepository repository)
+        private readonly IServiceBus _bus;
+
+        public MetadataService(IServiceBus bus)
         {
-            _repository = repository;
+            _bus = bus;
         }
 
-        public void Consume(MetadataMessage message)
+        public void Start()
         {
-            _repository.Register(message.Metadata);
+            _bus.Subscribe<MessageConsumer>();
+            _bus.Subscribe<EndpointConsumer>();
+            _bus.Subscribe<TransmissionConsumer>();
+        }
+
+        public void Stop()
+        {
+            _bus.Unsubscribe<EndpointConsumer>();
+            _bus.Unsubscribe<MessageConsumer>();
+            _bus.Unsubscribe<TransmissionConsumer>();
+        }
+
+        public void Dispose()
+        {
+
         }
     }
 }
