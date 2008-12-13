@@ -1,13 +1,13 @@
-﻿namespace MassTransit.Metadata.Domain
+namespace MassTransit.Metadata.Messages
 {
     using System;
 
-
-    public class JournalEntry
+    [Serializable]
+    public class TransmissionModel
     {
         public Uri From { get; set; }
         public Uri To { get; set; }
         public string Message { get; set; }
-        public DateTime SentOn { get; set; }
+        public DateTime OccuredAt { get; set; }
     }
 }
