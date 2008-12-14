@@ -16,15 +16,11 @@ namespace MassTransit.Metadata
         public void Start()
         {
             _bus.Subscribe<MessageConsumer>();
-            _bus.Subscribe<EndpointConsumer>();
-            _bus.Subscribe<TransmissionConsumer>();
         }
 
         public void Stop()
         {
-            _bus.Unsubscribe<EndpointConsumer>();
             _bus.Unsubscribe<MessageConsumer>();
-            _bus.Unsubscribe<TransmissionConsumer>();
         }
 
         public void Dispose()

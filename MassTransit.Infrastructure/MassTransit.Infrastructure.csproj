@@ -53,6 +53,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\libs\log4net.dll</HintPath>
     </Reference>
+    <Reference Include="Lucene.Net, Version=2.0.0.4, Culture=neutral">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\libs\Lucene.Net\Lucene.Net.dll</HintPath>
+    </Reference>
     <Reference Include="Magnum.Common, Version=0.1.12.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\libs\Magnum.Common.dll</HintPath>
@@ -84,6 +88,9 @@
     <Compile Include="..\SolutionVersion.cs">
       <Link>SolutionVersion.cs</Link>
     </Compile>
+    <Compile Include="Metadata\InMemoryMetadataRepository.cs" />
+    <Compile Include="Metadata\LuceneMetadataRepository.cs" />
+    <Compile Include="Metadata\PersistantMetadataRepository.cs" />
     <Compile Include="Subscription\DistributedSubscriptionCache.cs" />
     <Compile Include="Subscription\PersistentSubscription.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

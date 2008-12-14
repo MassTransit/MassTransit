@@ -3,9 +3,9 @@ namespace MassTransit.Metadata.Server
     using Messages;
 
     public class MessageConsumer :
-        Consumes<MetadataMessage>.All
+        Consumes<Metadata>.All
     {
-        public void Consume(MetadataMessage message)
+        public void Consume(Metadata message)
         {
             
         }
