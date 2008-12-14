@@ -42,25 +42,17 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Client\MessageModelFilter.cs" />
-    <Compile Include="Client\TransmissionFilter.cs" />
-    <Compile Include="Domain\EndpointMetadata.cs" />
     <Compile Include="Domain\IMetadataRepository.cs" />
-    <Compile Include="Domain\TransmissionMetadata.cs" />
-    <Compile Include="Domain\MemberMetadata.cs" />
-    <Compile Include="Domain\MessageMetadata.cs" />
-    <Compile Include="Messages\EndpointModel.cs" />
+    <Compile Include="Domain\TheMeta.cs" />
     <Compile Include="Messages\MemberModel.cs" />
     <Compile Include="Messages\MessageModel.cs" />
-    <Compile Include="Messages\MetadataMessage.cs" />
-    <Compile Include="Messages\TransmissionModel.cs" />
+    <Compile Include="Messages\Metadata.cs" />
+    <Compile Include="Messages\MetadataSearchResult.cs" />
     <Compile Include="MetadataClient.cs" />
     <Compile Include="MetadataExtracter.cs" />
     <Compile Include="MetadataService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Server\EndpointConsumer.cs" />
     <Compile Include="Server\MessageConsumer.cs" />
-    <Compile Include="Server\MetadataIndexer.cs" />
-    <Compile Include="Server\TransmissionConsumer.cs" />
     <Compile Include="WireTap.cs" />
   </ItemGroup>
   <ItemGroup>
