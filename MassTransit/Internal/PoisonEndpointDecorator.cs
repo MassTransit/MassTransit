@@ -12,54 +12,49 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Internal
 {
-    using System;
-    using log4net;
+	using System;
+	using log4net;
 
-    public class PoisonEndpointDecorator :
-        IEndpoint
-    {
-        private readonly IEndpoint _wrappedEndpoint;
-        private readonly ILog _log = LogManager.GetLogger(typeof (PoisonEndpointDecorator));
+	public class PoisonEndpointDecorator :
+		IEndpoint
+	{
+		private readonly ILog _log = LogManager.GetLogger(typeof (PoisonEndpointDecorator));
+		private readonly IEndpoint _wrappedEndpoint;
 
-        public PoisonEndpointDecorator(IEndpoint wrappedEndpoint)
-        {
-            _wrappedEndpoint = wrappedEndpoint;
-        }
+		public PoisonEndpointDecorator(IEndpoint wrappedEndpoint)
+		{
+			_wrappedEndpoint = wrappedEndpoint;
+		}
 
-        public void Dispose()
-        {
-            _wrappedEndpoint.Dispose();
-        }
+		public void Dispose()
+		{
+			_wrappedEndpoint.Dispose();
+		}
 
-        public Uri Uri
-        {
-            get { return _wrappedEndpoint.Uri; }
-        }
+		public Uri Uri
+		{
+			get { return _wrappedEndpoint.Uri; }
+		}
 
-        public void Send<T>(T message) where T : class
-        {
-            if(_log.IsWarnEnabled)
-                _log.WarnFormat("Saving Poison Message {0}", message.GetType());
+		public void Send<T>(T message) where T : class
+		{
+			if (_log.IsWarnEnabled)
+				_log.WarnFormat("Saving Poison Message {0}", message.GetType());
 
-            _wrappedEndpoint.Send(message);
-        }
+			_wrappedEndpoint.Send(message);
+		}
 
-        public void Send<T>(T message, TimeSpan timeToLive) where T : class
-        {
-            if (_log.IsWarnEnabled)
-                _log.WarnFormat("Saving Poison Message {0}", message.GetType());
+		public void Send<T>(T message, TimeSpan timeToLive) where T : class
+		{
+			if (_log.IsWarnEnabled)
+				_log.WarnFormat("Saving Poison Message {0}", message.GetType());
 
-            _wrappedEndpoint.Send(message, timeToLive);
-        }
+			_wrappedEndpoint.Send(message, timeToLive);
+		}
 
-        public object Receive(TimeSpan timeout)
-        {
-            return _wrappedEndpoint.Receive(timeout);
-        }
-
-        public object Receive(TimeSpan timeout, Predicate<object> accept)
-        {
-            return _wrappedEndpoint.Receive(timeout, accept);
-        }
-    }
+		public void Receive(TimeSpan timeout, Func<object, Func<object, bool>, bool> receiver)
+		{
+			_wrappedEndpoint.Receive(timeout, receiver);
+		}
+	}
 }

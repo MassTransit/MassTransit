@@ -14,6 +14,7 @@ namespace MassTransit.Pipeline.Sinks
 {
 	using System;
 	using System.Collections.Generic;
+	using log4net;
 	using Magnum.Common.Threading;
 
 	/// <summary>
@@ -25,12 +26,19 @@ namespace MassTransit.Pipeline.Sinks
 		MessageRouterBase<TMessage, TBatchId>
 		where TMessage : class, BatchedBy<TBatchId>
 	{
+		private static readonly ILog _log = LogManager.GetLogger(typeof (BatchMessageRouter<TMessage, TBatchId>));
+
 		private ReaderWriterLockedObject<List<IMessageSink<BatchMessage<TMessage, TBatchId>>>> _consumerSinks;
 		private bool _disposed;
 
 		public BatchMessageRouter()
 		{
 			_consumerSinks = new ReaderWriterLockedObject<List<IMessageSink<BatchMessage<TMessage, TBatchId>>>>(new List<IMessageSink<BatchMessage<TMessage, TBatchId>>>());
+		}
+
+		public int SinkCount
+		{
+			get { return _consumerSinks.ReadLock(x => x.Count); }
 		}
 
 		public override IEnumerable<Consumes<TMessage>.All> Enumerate(TMessage message)
@@ -45,6 +53,7 @@ namespace MassTransit.Pipeline.Sinks
 							{
 								if (x.TryGetValue(message.BatchId, out sink) == false)
 								{
+									_log.Debug("Adding a new message router for batchId " + message.BatchId);
 									var batchMessage = new BatchMessage<TMessage, TBatchId>(message.BatchId, message.BatchLength, null);
 
 									// we need to create a sink for this batch and get it wired up
@@ -68,17 +77,10 @@ namespace MassTransit.Pipeline.Sinks
 			if (sink == null)
 				yield break;
 
-			int consumerCount = 0;
 			foreach (Consumes<TMessage>.All consumer in sink.Enumerate(message))
 			{
 				yield return consumer;
-				consumerCount++;
 			}
-
-//			if(consumerCount == 0)
-//			{
-//				_sinks.WriteLock(x => x.Remove(message.BatchId));
-//			}
 		}
 
 		public Func<bool> Connect(IMessageSink<BatchMessage<TMessage, TBatchId>> sink)
@@ -86,11 +88,6 @@ namespace MassTransit.Pipeline.Sinks
 			_consumerSinks.WriteLock(sinks => sinks.Add(sink));
 
 			return () => _consumerSinks.WriteLock(sinks => sinks.Remove(sink));
-		}
-
-		public int SinkCount
-		{
-			get { return _consumerSinks.ReadLock(x => x.Count); }
 		}
 
 		protected override void Dispose(bool disposing)

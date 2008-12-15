@@ -86,6 +86,7 @@
     <Compile Include="When_creating_the_service_bus_with_a_MessageQueueEndpoint.cs" />
     <Compile Include="When_publishing_a_message.cs" />
     <Compile Include="When_receiving_a_message.cs" />
+    <Compile Include="When_receiving_messages_slowly.cs" />
     <Compile Include="When_sending_a_message.cs" />
     <Compile Include="When_specifying_a_message_queue_address_for_an_endpoint.cs" />
     <Compile Include="When_working_with_an_endpoint.cs" />
@@ -106,6 +107,9 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="msmq.castle.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="transactional.castle.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

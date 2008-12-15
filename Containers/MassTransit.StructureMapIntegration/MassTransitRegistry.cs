@@ -1,6 +1,7 @@
 ﻿namespace MassTransit.StructureMapIntegration
 {
     using System;
+    using Infrastructure.Subscriptions;
     using MassTransit.Internal;
     using MassTransit.Subscriptions;
     

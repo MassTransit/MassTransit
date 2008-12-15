@@ -103,7 +103,7 @@ namespace MassTransit.Transports.Sqs
 
         public object Receive(TimeSpan timeout)
         {
-            return Receive(timeout, delegate { return true; });
+        	throw new NotSupportedException();
         }
 
         public object Receive(TimeSpan timeout, Predicate<object> accept)
@@ -147,7 +147,12 @@ namespace MassTransit.Transports.Sqs
             }
         }
 
-        public void Dispose()
+    	public void Receive(TimeSpan timeout, Func<object, Func<object, bool>, bool> receiver)
+    	{
+    		throw new System.NotImplementedException();
+    	}
+
+    	public void Dispose()
         {
             _service = null;
         }

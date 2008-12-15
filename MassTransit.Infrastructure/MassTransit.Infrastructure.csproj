@@ -88,13 +88,12 @@
     <Compile Include="..\SolutionVersion.cs">
       <Link>SolutionVersion.cs</Link>
     </Compile>
+    <Compile Include="Subscriptions\DistributedSubscriptionCache.cs" />
+    <Compile Include="Subscriptions\PersistentSubscription.cs" />
     <Compile Include="Metadata\InMemoryMetadataRepository.cs" />
-    <Compile Include="Metadata\LuceneMetadataRepository.cs" />
     <Compile Include="Metadata\PersistantMetadataRepository.cs" />
-    <Compile Include="Subscription\DistributedSubscriptionCache.cs" />
-    <Compile Include="Subscription\PersistentSubscription.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Subscription\PersistantSubscriptionRepository.cs" />
+    <Compile Include="Subscriptions\PersistantSubscriptionRepository.cs" />
     <Compile Include="MessageDeferral\PersistantDeferredMessageRepository.cs" />
     <Compile Include="Timeout\PersistantTimeoutRepository.cs" />
     <Compile Include="Timeout\ScheduledTimeout.cs" />
@@ -106,7 +105,7 @@
     <EmbeddedResource Include="Timeout\ScheduledTimeout.hbm.xml" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Subscription\PersistentSubscription.hbm.xml" />
+    <EmbeddedResource Include="Subscriptions\PersistentSubscription.hbm.xml" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\MassTransit\MassTransit.csproj">

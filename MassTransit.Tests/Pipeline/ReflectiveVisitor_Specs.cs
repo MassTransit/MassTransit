@@ -52,7 +52,7 @@ namespace MassTransit.Tests.Pipeline
 	}
 
 	public class MyVisitor :
-		ReflectiveVisitorBase,
+		ReflectiveVisitorBase<MyVisitor>,
 		IVisitor
 	{
 		public bool Visit(IndiscriminantConsumer<PingMessage> obj)

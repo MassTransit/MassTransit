@@ -17,7 +17,7 @@ namespace MassTransit.Pipeline.Interceptors
 	using Sinks;
 
 	public class EndpointInterceptor :
-		ConsumesInterceptorBase
+		ConsumesInterceptorBase<EndpointInterceptor>
 	{
 		protected override Type InterfaceType
 		{

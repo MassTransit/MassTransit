@@ -15,7 +15,8 @@ namespace MassTransit.Subscriptions
 	using System;
 
 	[Serializable]
-	public class Subscription : IEquatable<Subscription>
+	public class Subscription : 
+		IEquatable<Subscription>
 	{
 		private string _correlationId;
 		protected Uri _endpointUri;

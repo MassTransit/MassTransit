@@ -27,51 +27,51 @@ namespace MassTransit.Tests.Pipeline
 		public void Setup()
 		{
 			_builder = MockRepository.GenerateMock<IObjectBuilder>();
+			_subscriptionEvent = MockRepository.GenerateMock<ISubscriptionEvent>();
+			_pipeline = MessagePipelineConfigurator.CreateDefault(_builder, _subscriptionEvent);
 		}
 
 		private IObjectBuilder _builder;
+		private ISubscriptionEvent _subscriptionEvent;
+		private MessagePipeline _pipeline;
 
 		[Test]
 		public void A_filter_should_be_nameable()
 		{
-			MessagePipeline pipeline = MessagePipelineConfigurator.CreateDefault(_builder);
-
 			TestMessageConsumer<PingMessage> consumer = new TestMessageConsumer<PingMessage>();
 
-			pipeline.Filter<PingMessage>("cock blocker", x => false);
+			_pipeline.Filter<PingMessage>("cock blocker", x => false);
 
-			pipeline.Subscribe(consumer);
+			_pipeline.Subscribe(consumer);
 
 			PingMessage message = new PingMessage();
 
-			pipeline.Dispatch(message);
+			_pipeline.Dispatch(message);
 
 			consumer.ShouldNotHaveReceivedMessage(message);
 
-			PipelineViewer.Trace(pipeline);
+			PipelineViewer.Trace(_pipeline);
 		}
 
 		[Test]
 		[Ignore("This is a planned feature, but is not yet functional.")]
 		public void A_filter_should_be_removable()
 		{
-			MessagePipeline pipeline = MessagePipelineConfigurator.CreateDefault(_builder);
-
 			TestMessageConsumer<PingMessage> consumer = new TestMessageConsumer<PingMessage>();
 
-			var f = pipeline.Filter<PingMessage>(x => false);
-			PipelineViewer.Trace(pipeline);
+			var f = _pipeline.Filter<PingMessage>(x => false);
+			PipelineViewer.Trace(_pipeline);
 
 			PingMessage message = new PingMessage();
-			pipeline.Dispatch(message);
+			_pipeline.Dispatch(message);
 
 			consumer.ShouldNotHaveReceivedMessage(message);
 
 			f();
-			PipelineViewer.Trace(pipeline);
+			PipelineViewer.Trace(_pipeline);
 
 			message = new PingMessage();
-			pipeline.Dispatch(message);
+			_pipeline.Dispatch(message);
 
 			consumer.ShouldHaveReceivedMessage(message);
 		}
@@ -79,55 +79,49 @@ namespace MassTransit.Tests.Pipeline
 		[Test]
 		public void A_filtered_message_should_not_be_received()
 		{
-			MessagePipeline pipeline = MessagePipelineConfigurator.CreateDefault(_builder);
-
 			TestMessageConsumer<PingMessage> consumer = new TestMessageConsumer<PingMessage>();
 
-			pipeline.Filter<PingMessage>(x => false);
+			_pipeline.Filter<PingMessage>(x => false);
 
-			pipeline.Subscribe(consumer);
+			_pipeline.Subscribe(consumer);
 
 			PingMessage message = new PingMessage();
 
-			pipeline.Dispatch(message);
+			_pipeline.Dispatch(message);
 
 			consumer.ShouldNotHaveReceivedMessage(message);
 
-			PipelineViewer.Trace(pipeline);
+			PipelineViewer.Trace(_pipeline);
 		}
 
 		[Test]
 		public void A_message_should_fall_throuh_happy_filters()
 		{
-			MessagePipeline pipeline = MessagePipelineConfigurator.CreateDefault(_builder);
-
 			TestMessageConsumer<PingMessage> consumer = new TestMessageConsumer<PingMessage>();
 
-			pipeline.Filter<PingMessage>(x => true);
+			_pipeline.Filter<PingMessage>(x => true);
 
-			pipeline.Subscribe(consumer);
+			_pipeline.Subscribe(consumer);
 
 			PingMessage message = new PingMessage();
 
-			pipeline.Dispatch(message);
+			_pipeline.Dispatch(message);
 
 			consumer.ShouldHaveReceivedMessage(message);
 
-			PipelineViewer.Trace(pipeline);
+			PipelineViewer.Trace(_pipeline);
 		}
 
 		[Test]
 		public void An_unfiltered_message_should_be_received()
 		{
-			MessagePipeline pipeline = MessagePipelineConfigurator.CreateDefault(_builder);
-
 			TestMessageConsumer<PingMessage> consumer = new TestMessageConsumer<PingMessage>();
 
-			pipeline.Subscribe(consumer);
+			_pipeline.Subscribe(consumer);
 
 			PingMessage message = new PingMessage();
 
-			pipeline.Dispatch(message);
+			_pipeline.Dispatch(message);
 
 			consumer.ShouldHaveReceivedMessage(message);
 		}

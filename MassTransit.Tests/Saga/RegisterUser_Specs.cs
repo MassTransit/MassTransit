@@ -13,6 +13,8 @@
 namespace MassTransit.Tests.Saga
 {
     using System.Diagnostics;
+    using Castle.Core;
+    using MassTransit.Saga;
     using NUnit.Framework;
     using NUnit.Framework.SyntaxHelpers;
     using Tests.Saga.RegisterUser;
@@ -28,6 +30,9 @@ namespace MassTransit.Tests.Saga
             RemoteBus.Subscribe<SendUserVerificationEmail>(
                 x => RemoteBus.Publish(new UserVerificationEmailSent(x.CorrelationId, x.Email)));
 
+			Container.Kernel.AddComponent("sagaRepository", typeof(ISagaRepository<RegisterUserSaga>), typeof(InMemorySagaRepository<RegisterUserSaga>), LifestyleType.Singleton);
+
+        	Container.AddComponent<RegisterUserSaga>();
             RemoteBus.Subscribe<RegisterUserSaga>();
         }
 

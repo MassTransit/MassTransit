@@ -5,7 +5,7 @@
 				   namespace="MassTransit.Infrastructure"
            default-lazy="false">
 
-	<class name="PersistentSubscription"
+	<class name="MassTransit.Infrastructure.Subscriptions.PersistentSubscription, MassTransit.Infrastructure"
 		   table="Subscriptions">
 
 		<id name="Id"

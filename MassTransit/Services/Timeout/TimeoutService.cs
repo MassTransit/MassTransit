@@ -100,6 +100,8 @@ namespace MassTransit.Services.Timeout
                     IList<Tuple<Guid, DateTime>> list = _repository.List(lessThan);
                     foreach (Tuple<Guid, DateTime> tuple in list)
                     {
+                    	_log.InfoFormat("Publishing timeout message for {0}", tuple.Key);
+
                         _bus.Publish(new TimeoutExpired(tuple.Key));
 
                         _repository.Remove(tuple.Key);

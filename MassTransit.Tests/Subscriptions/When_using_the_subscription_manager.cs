@@ -2,6 +2,7 @@ namespace MassTransit.Tests.Subscriptions
 {
     using System;
     using System.Collections.Generic;
+    using MassTransit.Internal;
     using MassTransit.Subscriptions;
     using MassTransit.Subscriptions.Messages;
     using NUnit.Framework;
@@ -12,69 +13,55 @@ namespace MassTransit.Tests.Subscriptions
     public class When_using_the_subscription_manager : 
         Specification
     {
-        private IServiceBus _serviceBus;
-        private IEndpoint _managerEndpoint;
+        private IServiceBus _bus;
+        private IEndpoint _subscriptionServiceEndpoint;
         private ISubscriptionCache _cache;
-        private IEndpoint _sbEndpoint;
+        private IEndpoint _endpoint;
 
-        private readonly Uri _managerUri = new Uri("msmq://localhost/mgr");
-        private Uri _sbUri;
+        private readonly Uri _subscriptionServiceUri = new Uri("msmq://localhost/mgr");
+		private readonly Uri _uri = new Uri("msmq://" + Environment.MachineName.ToLower() + "/test");
 
-        protected override void Before_each()
+    	protected override void Before_each()
         {
-            _sbUri = new Uri("msmq://" + Environment.MachineName.ToLower() + "/test");
-            _sbEndpoint = DynamicMock<IEndpoint>();
-            _serviceBus = DynamicMock<IServiceBus>();
-            SetupResult.For(_sbEndpoint.Uri).Return(_sbUri);
-            SetupResult.For(_serviceBus.Endpoint).Return(_sbEndpoint);
+			_bus = MockRepository.GenerateMock<IServiceBus>();
+			_cache = MockRepository.GenerateMock<ISubscriptionCache>();
 
-            _cache = DynamicMock<ISubscriptionCache>();
-            _managerEndpoint = DynamicMock<IEndpoint>();
-            SetupResult.For(_managerEndpoint.Uri).Return(_managerUri);
-            
+			_endpoint = MockRepository.GenerateMock<IEndpoint>();
+			_endpoint.Stub(x => x.Uri).Return(_uri);
+			_bus.Stub(x => x.Endpoint).Return(_endpoint);
+
+			_subscriptionServiceEndpoint = MockRepository.GenerateMock<IEndpoint>();
+    		_subscriptionServiceEndpoint.Stub(x => x.Uri).Return(_subscriptionServiceUri);
         }
 
         [Test]
         public void The_client_should_request_an_update_at_startup()
         {
-            using (Record())
-            {
-                Expect.Call(delegate
-                                {
-                                    _managerEndpoint.Send<CacheUpdateRequest>(null);
-                                }).IgnoreArguments();
-				
-            }
+        	_subscriptionServiceEndpoint.Expect(x => x.Send<CacheUpdateRequest>(null)).IgnoreArguments();
 
-            using (Playback())
-            {
-                using (SubscriptionClient client = new SubscriptionClient(_serviceBus, _cache, _managerEndpoint))
+                using (SubscriptionClient client = new SubscriptionClient(_bus, _cache, _subscriptionServiceEndpoint))
                 {
                     client.Start();
                 }
-            }
+
+        	_subscriptionServiceEndpoint.VerifyAllExpectations();
         }
 
         [Test]
         public void The_client_should_update_the_cache_when_a_SubscriptionChange_message_is_received()
         {
             Subscription sub = new Subscription("Ho.Pimp, Ho", new Uri("msmq://localhost/test"));
-
             AddSubscription change = new AddSubscription(sub);
 
-            using (Record())
+        	_cache.Expect(x => x.Add(sub));
+
+            using (SubscriptionClient client = new SubscriptionClient(_bus, _cache, _subscriptionServiceEndpoint))
             {
-                _cache.Add(sub);
+                client.Start();
+                client.Consume(change);
             }
 
-            using (Playback())
-            {
-                using (SubscriptionClient client = new SubscriptionClient(_serviceBus, _cache, _managerEndpoint))
-                {
-                    client.Start();
-                    client.Consume(change);
-                }
-            }
+        	_cache.VerifyAllExpectations();
         }
 
         [Test]
@@ -85,48 +72,35 @@ namespace MassTransit.Tests.Subscriptions
 
             CacheUpdateResponse cacheUpdateResponse = new CacheUpdateResponse(subscriptions);
 
-            using (Record())
-            {
-                _cache.Add(subscriptions[0]);
-                Expect.Call(_cache.List()).Return(new List<Subscription>());
-            }
+        	_cache.Expect(x => x.Add(subscriptions[0]));
+        	_cache.Expect(x => x.List()).Return(new List<Subscription>());
 
-            using (Playback())
-            {
-                using (SubscriptionClient client = new SubscriptionClient(_serviceBus, _cache, _managerEndpoint))
+                using (SubscriptionClient client = new SubscriptionClient(_bus, _cache, _subscriptionServiceEndpoint))
                 {
                     client.Start();
                     client.Consume(cacheUpdateResponse);
                 }
-            }
+
+			_cache.VerifyAllExpectations();
         }
 
         [Test]
         public void When_a_local_service_subscribes_to_the_bus_notify_the_manager_of_the_change()
         {
-            SubscriptionEventArgs args = new SubscriptionEventArgs(new Subscription("Ho.Pimp, Ho", new Uri("msmq://" + Environment.MachineName.ToLower() + "/test")));
+        	Subscription subscription = new Subscription("Ho.Pimp, Ho", _uri);
+        	SubscriptionEventArgs args = new SubscriptionEventArgs(subscription);
 
-            using (Record())
-            {
-                _managerEndpoint.Send<AddSubscription>(null);
-                LastCall
-                    .IgnoreArguments()
-                    .Constraints(Is.Matching<AddSubscription>(
-                                     delegate(AddSubscription obj)
-                                         {
-                                             if (obj.Subscription != args.Subscription)
-                                                 return false;
-                                             return true;
-                                         }));
-            }
+        	_subscriptionServiceEndpoint.Expect(x => x.Send<AddSubscription>(null))
+        		.IgnoreArguments()
+        		.Constraints(Is.Matching<AddSubscription>(y => y.Subscription == subscription));
 
-            using (Playback())
-            {
-                using (SubscriptionClient client = new SubscriptionClient(_serviceBus, _cache, _managerEndpoint))
+                using (SubscriptionClient client = new SubscriptionClient(_bus, _cache, _subscriptionServiceEndpoint))
                 {
+                	client.Start();
                     client.Cache_OnAddSubscription(_cache, args);
                 }
-            }
+
+        	_subscriptionServiceEndpoint.VerifyAllExpectations();
         }
     }
 }

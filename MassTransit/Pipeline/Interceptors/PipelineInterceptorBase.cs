@@ -23,43 +23,6 @@ namespace MassTransit.Pipeline.Interceptors
 		public abstract IEnumerable<Func<bool>> Subscribe<TComponent>(IInterceptorContext context, TComponent instance);
 
 		/// <summary>
-		/// Enumerates the interfaces for the component and returns only ones which have not yet been processed
-		/// </summary>
-		/// <typeparam name="TComponent"></typeparam>
-		/// <param name="context"></param>
-		/// <param name="consumerType"></param>
-		/// <returns></returns>
-		protected static IEnumerable<Type> GetInterfaces<TComponent>(IInterceptorContext context, Type consumerType)
-		{
-			Type componentType = typeof (TComponent);
-
-			foreach (Type interfaceType in componentType.GetInterfaces())
-			{
-				if (!interfaceType.IsGenericType)
-					continue;
-
-				Type genericType = interfaceType.GetGenericTypeDefinition();
-
-				if (genericType != consumerType)
-					continue;
-
-				Type[] types = interfaceType.GetGenericArguments();
-
-				Type messageType = types[0];
-
-				if (context.HasMessageTypeBeenDefined(messageType))
-					continue;
-
-				// TODO if we have a generic type, we need to look for a generic message handler
-				if (messageType.IsGenericType)
-				{
-				}
-
-				yield return messageType;
-			}
-		}
-
-		/// <summary>
 		/// Returns the method information for the requested type and arguments
 		/// </summary>
 		/// <param name="type"></param>

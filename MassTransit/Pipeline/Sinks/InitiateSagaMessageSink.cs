@@ -20,7 +20,8 @@ namespace MassTransit.Pipeline.Sinks
 	using Saga;
 	using Util;
 
-	public class InitiateSagaMessageSink<TComponent, TMessage> : SagaMessageSinkBase<TComponent, TMessage>
+	public class InitiateSagaMessageSink<TComponent, TMessage> : 
+		SagaMessageSinkBase<TComponent, TMessage>
 		where TMessage : class, CorrelatedBy<Guid>
 		where TComponent : class, Orchestrates<TMessage>, ISaga
 	{

@@ -15,7 +15,7 @@ namespace MassTransit.Services.MessageDeferral
     using System;
     using System.Collections.Generic;
 
-    public class InMemoryDeferredMessageRepository :
+	public class InMemoryDeferredMessageRepository :
         IDeferredMessageRepository
     {
         private readonly Dictionary<Guid, DeferredMessage> _messages = new Dictionary<Guid, DeferredMessage>();

@@ -12,157 +12,117 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Internal
 {
-    using System;
-    using System.Collections.Generic;
-    using Magnum.Common.Threading;
-    using Saga;
+	using System;
+	using System.Collections.Generic;
+	using Util;
 
-    public interface ITypeInfoCache : IDisposable
-    {
-        ITypeInfo Resolve<TComponent>();
-        ITypeInfo Resolve(Type componentType);
-        IPublicationTypeInfo GetPublicationTypeInfo<TComponent>() where TComponent : class;
-        IPublicationTypeInfo GetPublicationTypeInfo(Type type);
-        ISubscriptionTypeInfo GetSubscriptionTypeInfo<TComponent>() where TComponent : class;
-        ISubscriptionTypeInfo GetSubscriptionTypeInfo(Type type);
-    }
+	public interface ITypeInfoCache : IDisposable
+	{
+		ITypeInfo Resolve<TComponent>();
+		ITypeInfo Resolve(Type componentType);
+		IPublicationTypeInfo GetPublicationTypeInfo<TComponent>() where TComponent : class;
+		IPublicationTypeInfo GetPublicationTypeInfo(Type type);
+	}
 
-    public class TypeInfoCache : ITypeInfoCache
-    {
-        private static readonly IList<ActionEntry> _consumerActions = new List<ActionEntry>();
+	public class TypeInfoCache : ITypeInfoCache
+	{
+		private static readonly IList<ActionEntry> _consumerActions = new List<ActionEntry>();
 
-        private static readonly Type _consumerType = typeof (Consumes<>.All);
-        private static readonly Type _correlatedConsumerType = typeof (Consumes<>.For<>);
-        private static readonly Type _correlatedMessageType = typeof (CorrelatedBy<>);
-        private static readonly Type _orchestratesType = typeof (Orchestrates<>);
-        private static readonly Type _selectiveConsumerType = typeof (Consumes<>.Selected);
-        private static readonly Type _startedByType = typeof (InitiatedBy<>);
-        private readonly UpgradeableLock _lockContext = new UpgradeableLock();
-        private readonly Dictionary<Type, TypeInfo> _types = new Dictionary<Type, TypeInfo>();
+		private static readonly Type _correlatedMessageType = typeof (CorrelatedBy<>);
+		private readonly ReaderWriterLockedDictionary<Type, TypeInfo> _types = new ReaderWriterLockedDictionary<Type, TypeInfo>();
 
-        static TypeInfoCache()
-        {
-            _consumerActions.Add(new ActionEntry(_startedByType, (i, c, t) => i.AddStartSagaSubscription(c, t)));
-            _consumerActions.Add(new ActionEntry(_orchestratesType, (i, c, t) => i.AddSagaSubscription(c, t)));
-            _consumerActions.Add(new ActionEntry(_correlatedConsumerType, (i, c, t) => i.AddCorrelatedSubscription(c, t)));
-            _consumerActions.Add(new ActionEntry(_selectiveConsumerType, (i, c, t) => i.AddSelectiveSubscription(c, t)));
-            _consumerActions.Add(new ActionEntry(_consumerType, (i, c, t) => i.AddMessageSubscription(c, t)));
-            _consumerActions.Add(new ActionEntry(_correlatedMessageType, (i, c, t) => i.SetPublicationType(c, t)));
-        }
+		static TypeInfoCache()
+		{
+			_consumerActions.Add(new ActionEntry(_correlatedMessageType, (i, c, t) => i.SetPublicationType(c, t)));
+		}
 
-        public void Dispose()
-        {
-            foreach (ITypeInfo info in _types.Values)
-            {
-                info.Dispose();
-            }
-            _types.Clear();
-        }
+		public void Dispose()
+		{
+			foreach (ITypeInfo info in _types.Values)
+			{
+				info.Dispose();
+			}
+			_types.Clear();
+		}
 
-        public ITypeInfo Resolve<TComponent>()
-        {
-            return Resolve(typeof (TComponent));
-        }
+		public ITypeInfo Resolve<TComponent>()
+		{
+			return Resolve(typeof (TComponent));
+		}
 
-        public ITypeInfo Resolve(Type componentType)
-        {
-            using (var readerLock = _lockContext.EnterUpgradableRead())
-            {
-                TypeInfo info;
-                if (_types.TryGetValue(componentType, out info))
-                    return info;
+		public ITypeInfo Resolve(Type componentType)
+		{
+			return _types.Retrieve(componentType, () =>
+				{
+					TypeInfo info = new TypeInfo(componentType);
 
-                using (readerLock.Upgrade())
-                {
-                    if (_types.TryGetValue(componentType, out info))
-                        return info;
+					List<Type> usedMessageTypes = new List<Type>();
 
-                    info = new TypeInfo(componentType);
+					foreach (Type interfaceType in componentType.GetInterfaces())
+					{
+						if (!interfaceType.IsGenericType) continue;
 
-                    List<Type> usedMessageTypes = new List<Type>();
+						Type genericType = interfaceType.GetGenericTypeDefinition();
+						Type[] types = interfaceType.GetGenericArguments();
 
-                    foreach (Type interfaceType in componentType.GetInterfaces())
-                    {
-                        if (!interfaceType.IsGenericType) continue;
+						if (usedMessageTypes.Contains(types[0])) continue;
 
-                        Type genericType = interfaceType.GetGenericTypeDefinition();
-                        Type[] types = interfaceType.GetGenericArguments();
+						foreach (ActionEntry entry in _consumerActions)
+						{
+							if (entry.GenericType != genericType) continue;
 
-                        if (usedMessageTypes.Contains(types[0])) continue;
+							usedMessageTypes.Add(types[0]);
 
-                        foreach (ActionEntry entry in _consumerActions)
-                        {
-                            if (entry.GenericType != genericType) continue;
+							entry.AddAction(info, componentType, types);
+							break;
+						}
+					}
 
-                            usedMessageTypes.Add(types[0]);
+					return info;
+				});
+		}
 
-                            entry.AddAction(info, componentType, types);
-                            break;
-                        }
-                    }
+		public IPublicationTypeInfo GetPublicationTypeInfo<TComponent>() where TComponent : class
+		{
+			ITypeInfo typeInfo = Resolve<TComponent>();
 
-                    _types.Add(componentType, info);
+			return typeInfo.GetPublicationTypeInfo();
+		}
 
-                    return info;
-                }
-            }
-        }
+		public IPublicationTypeInfo GetPublicationTypeInfo(Type type)
+		{
+			ITypeInfo typeInfo = Resolve(type);
 
-        public IPublicationTypeInfo GetPublicationTypeInfo<TComponent>() where TComponent : class
-        {
-            ITypeInfo typeInfo = Resolve<TComponent>();
+			return typeInfo.GetPublicationTypeInfo();
+		}
 
-            return typeInfo.GetPublicationTypeInfo();
-        }
+		public class ActionEntry
+		{
+			private readonly Action<TypeInfo, Type, Type[]> _addAction;
+			private readonly Type _genericType;
 
-        public IPublicationTypeInfo GetPublicationTypeInfo(Type type)
-        {
-            ITypeInfo typeInfo = Resolve(type);
+			public ActionEntry(Type genericType, Action<TypeInfo, Type, Type[]> addAction)
+			{
+				_genericType = genericType;
+				_addAction = addAction;
+			}
 
-            return typeInfo.GetPublicationTypeInfo();
-        }
+			public Type GenericType
+			{
+				get { return _genericType; }
+			}
 
-        public ISubscriptionTypeInfo GetSubscriptionTypeInfo<TComponent>() where TComponent : class
-        {
-            ITypeInfo typeInfo = Resolve<TComponent>();
+			public Action<TypeInfo, Type, Type[]> AddAction
+			{
+				get { return _addAction; }
+			}
+		}
+	}
 
-            return typeInfo.GetSubscriptionTypeInfo();
-        }
-
-        public ISubscriptionTypeInfo GetSubscriptionTypeInfo(Type type)
-        {
-            ITypeInfo typeInfo = Resolve(type);
-
-            return typeInfo.GetSubscriptionTypeInfo();
-        }
-
-        public class ActionEntry
-        {
-            private readonly Action<TypeInfo, Type, Type[]> _addAction;
-            private readonly Type _genericType;
-
-            public ActionEntry(Type genericType, Action<TypeInfo, Type, Type[]> addAction)
-            {
-                _genericType = genericType;
-                _addAction = addAction;
-            }
-
-            public Type GenericType
-            {
-                get { return _genericType; }
-            }
-
-            public Action<TypeInfo, Type, Type[]> AddAction
-            {
-                get { return _addAction; }
-            }
-        }
-    }
-
-    public enum SubscriptionMode
-    {
-        All,
-        Selected,
-        Correlated,
-    }
+	public enum SubscriptionMode
+	{
+		All,
+		Selected,
+		Correlated,
+	}
 }

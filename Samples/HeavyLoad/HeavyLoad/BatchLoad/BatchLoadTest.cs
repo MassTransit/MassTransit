@@ -17,10 +17,12 @@ namespace HeavyLoad.BatchLoad
 	using Castle.Windsor;
 	using log4net;
 	using MassTransit;
+	using MassTransit.Pipeline;
 	using MassTransit.Threading;
 	using MassTransit.Transports.Msmq;
 
-    public class BatchLoadTest : IDisposable
+    public class BatchLoadTest :
+		IDisposable
 	{
 		private static readonly ILog _log = LogManager.GetLogger(typeof (BatchLoadTest));
 		private IServiceBus _bus;
@@ -91,7 +93,8 @@ namespace HeavyLoad.BatchLoad
 		}
 	}
 
-	public class BatchServiceComponent : Consumes<Batch<BasicMessage, Guid>>.Selected
+	public class BatchServiceComponent : 
+		Consumes<BatchMessage<BasicMessage, Guid>>.All
 	{
 		private static readonly ILog _log = LogManager.GetLogger(typeof (BatchServiceComponent));
 		private static readonly Semaphore _received = new Semaphore(0, 1000);
@@ -101,7 +104,7 @@ namespace HeavyLoad.BatchLoad
 			get { return _received; }
 		}
 
-		public void Consume(Batch<BasicMessage, Guid> message)
+		public void Consume(BatchMessage<BasicMessage, Guid> message)
 		{
 			_log.Debug("Receiving batch: " + message.BatchId);
 
@@ -120,11 +123,6 @@ namespace HeavyLoad.BatchLoad
 				_log.ErrorFormat("Batch not received: {0}, Expected: {1}, Received: {2}", message.BatchId, message.BatchLength, messageCount);
 
 			_received.Release();
-		}
-
-		public bool Accept(Batch<BasicMessage, Guid> message)
-		{
-			return true;
 		}
 	}
 

@@ -16,6 +16,7 @@ namespace MassTransit.Tests.Pipeline
 	using MassTransit.Pipeline;
 	using MassTransit.Pipeline.Configuration;
 	using MassTransit.Pipeline.Inspectors;
+	using MassTransit.Subscriptions;
 	using Messages;
 	using NUnit.Framework;
 	using Rhino.Mocks;
@@ -23,30 +24,31 @@ namespace MassTransit.Tests.Pipeline
 	[TestFixture]
 	public class When_subscription_a_component_to_the_pipeline
 	{
-		#region Setup/Teardown
-
 		[SetUp]
 		public void Setup()
 		{
 			_builder = MockRepository.GenerateMock<IObjectBuilder>();
+			_subscriptionEvent = MockRepository.GenerateMock<ISubscriptionEvent>();
+			_subscriptionEvent.Expect(x => x.SubscribedTo(null)).IgnoreArguments().Repeat.Any().Return(() => true);
+
+			_pipeline = MessagePipelineConfigurator.CreateDefault(_builder, _subscriptionEvent);
 		}
 
-		#endregion
-
 		private IObjectBuilder _builder;
+		private MessagePipeline _pipeline;
+		private ISubscriptionCache _cache;
+		private ISubscriptionEvent _subscriptionEvent;
 
 		[Test]
 		public void The_appropriate_handler_should_be_added()
 		{
 			IndiscriminantConsumer<PingMessage> consumer = new IndiscriminantConsumer<PingMessage>();
 
-			MessagePipeline pipeline = MessagePipelineConfigurator.CreateDefault(_builder);
-
-			pipeline.Subscribe(consumer);
+			_pipeline.Subscribe(consumer);
 
 			PingMessage message = new PingMessage();
 
-			pipeline.Dispatch(message, x => true);
+			_pipeline.Dispatch(message, x => true);
 
 			Assert.AreEqual(message, consumer.Consumed);
 		}
@@ -59,18 +61,16 @@ namespace MassTransit.Tests.Pipeline
 			IndiscriminantConsumer<PingMessage> pingConsumer = new IndiscriminantConsumer<PingMessage>();
 			IndiscriminantConsumer<PongMessage> pongConsumer = new IndiscriminantConsumer<PongMessage>();
 
-			MessagePipeline pipeline = MessagePipelineConfigurator.CreateDefault(_builder);
+			Func<bool> pingToken = _pipeline.Subscribe(pingConsumer);
+			Func<bool> pongToken = _pipeline.Subscribe(pongConsumer);
 
-			Func<bool> pingToken = pipeline.Subscribe(pingConsumer);
-			Func<bool> pongToken = pipeline.Subscribe(pongConsumer);
-
-			PipelineViewer.Trace(pipeline);
+			PipelineViewer.Trace(_pipeline);
 
 			PingMessage pingMessage = new PingMessage();
 			PongMessage pongMessage = new PongMessage();
 
-			pipeline.Dispatch(pingMessage, accept => true);
-			pipeline.Dispatch(pongMessage, accept => true);
+			_pipeline.Dispatch(pingMessage, accept => true);
+			_pipeline.Dispatch(pongMessage, accept => true);
 
 			Assert.AreEqual(pingMessage, pingConsumer.Consumed);
 			Assert.AreEqual(pongMessage, pongConsumer.Consumed);
@@ -78,7 +78,7 @@ namespace MassTransit.Tests.Pipeline
 			pingToken();
 			pongToken();
 
-			PipelineViewer.Trace(pipeline);
+			PipelineViewer.Trace(_pipeline);
 		}
 
 		[Test]
@@ -86,13 +86,11 @@ namespace MassTransit.Tests.Pipeline
 		{
 			IndiscriminantConsumer<PingMessage> consumer = new IndiscriminantConsumer<PingMessage>();
 
-			MessagePipeline pipeline = MessagePipelineConfigurator.CreateDefault(_builder);
-
-			pipeline.Subscribe(consumer);
+			_pipeline.Subscribe(consumer);
 
 			PingMessage message = new PingMessage();
 
-			pipeline.Dispatch(message, x => true);
+			_pipeline.Dispatch(message, x => true);
 
 			Assert.AreEqual(message, consumer.Consumed);
 		}
@@ -104,9 +102,7 @@ namespace MassTransit.Tests.Pipeline
 
 			bool accepted = false;
 
-			MessagePipeline pipeline = MessagePipelineConfigurator.CreateDefault(_builder);
-
-			pipeline.Dispatch(message, x => accepted = true);
+			_pipeline.Dispatch(message, x => accepted = true);
 
 			Assert.IsFalse(accepted);
 		}
@@ -116,13 +112,12 @@ namespace MassTransit.Tests.Pipeline
 		{
 			IndiscriminantConsumer<PingMessage> consumer = new IndiscriminantConsumer<PingMessage>();
 
-			MessagePipeline pipeline = MessagePipelineConfigurator.CreateDefault(_builder);
-			pipeline.Subscribe(consumer);
+			_pipeline.Subscribe(consumer);
 
 			PingMessage message = new PingMessage();
 
 			bool accepted = false;
-			pipeline.Dispatch(message, x => accepted = true);
+			_pipeline.Dispatch(message, x => accepted = true);
 
 			Assert.IsTrue(accepted);
 		}

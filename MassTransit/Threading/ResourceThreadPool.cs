@@ -25,8 +25,7 @@ namespace MassTransit.Threading
 	{
 		private static readonly ILog _log = LogManager.GetLogger(typeof (ResourceThreadPool<TResource, TElement>));
 
-		private readonly Action<TElement> _action;
-		private readonly Func<TResource, TElement> _function;
+		private readonly Action<TResource> _action;
 		private readonly TResource _resource;
 		private readonly ManualResetEvent _shutdown = new ManualResetEvent(false);
 		private readonly List<Thread> _threads = new List<Thread>();
@@ -37,8 +36,7 @@ namespace MassTransit.Threading
 		private int _resourceLimit;
 
 		public ResourceThreadPool(TResource resource,
-		                          Func<TResource, TElement> function,
-		                          Action<TElement> action,
+		                          Action<TResource> action,
 		                          int resourceLimit,
 		                          int minThreads,
 		                          int maxThreads)
@@ -49,7 +47,6 @@ namespace MassTransit.Threading
 			Check.Parameter(action).WithMessage("The handler must not be null").IsNotNull();
 
 			_resource = resource;
-			_function = function;
 			_action = action;
 			_minThreads = minThreads;
 			_maxThreads = maxThreads;
@@ -193,38 +190,13 @@ namespace MassTransit.Threading
 					continue;
 				}
 
-				bool released = false;
-
 				try
 				{
-					using (TransactionScope scope = new TransactionScope())
-					{
-						TElement element;
-						try
-						{
-							AdjustQueueCount();
-
-							element = _function(_resource);
-						}
-						finally
-						{
-							_resourceGovernor.Release(1);
-							released = true;
-						}
-
-						_action(element);
-
-						scope.Complete();
-					}
+					_action(_resource);
 				}
 				catch (Exception ex)
 				{
 					_log.Error("An exception occurred processing an item of type: " + typeof (TResource).FullName, ex);
-				}
-				finally
-				{
-					if (!released)
-						_resourceGovernor.Release(1);
 				}
 			}
 
@@ -240,6 +212,13 @@ namespace MassTransit.Threading
 			{
 				_resourceGovernor = new Semaphore(_resourceLimit, _resourceLimit);
 			}
+
+			AdjustQueueCount();
+		}
+
+		public void ReleaseResource(int releaseCount)
+		{
+			_resourceGovernor.Release(releaseCount);
 
 			AdjustQueueCount();
 		}

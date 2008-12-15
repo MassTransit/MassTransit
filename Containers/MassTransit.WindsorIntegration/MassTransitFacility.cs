@@ -21,10 +21,12 @@ namespace MassTransit.WindsorIntegration
     using Castle.MicroKernel;
     using Castle.MicroKernel.Facilities;
     using Castle.MicroKernel.Registration;
+    using Infrastructure.Subscriptions;
     using MassTransit.Exceptions;
     using MassTransit.Internal;
     using MassTransit.Subscriptions;
     using Microsoft.Practices.ServiceLocation;
+	using MassTransit.Pipeline.Sinks;
     
     using Services.HealthMonitoring;
     using Component = Castle.MicroKernel.Registration.Component;
@@ -72,6 +74,8 @@ namespace MassTransit.WindsorIntegration
             Type consumerType = typeof (IConsumer);
             if(consumerType.IsAssignableFrom(handler.ComponentModel.Implementation))
             {
+				// TODO this is broken and needs to use something better to invoke the generic method on IServiceBus
+
                 bus.Subscribe(handler.ComponentModel.Implementation);
             }
         }
@@ -116,6 +120,9 @@ namespace MassTransit.WindsorIntegration
                     .Named("typeinfocache")
                     .LifeStyle.Singleton
                 );
+
+        	Kernel.AddComponent("initiateSagaMessageSink", typeof (InitiateSagaMessageSink<,>), LifestyleType.Transient);
+        	Kernel.AddComponent("orchestrateSagaMessageSink", typeof (OrchestrateSagaMessageSink<,>), LifestyleType.Transient);
         }
 
         private void LoadServiceBuses()

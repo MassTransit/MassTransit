@@ -18,10 +18,13 @@ namespace MassTransit.Pipeline.Interceptors
 	public class InterceptorContext :
 		IInterceptorContext
 	{
+		private readonly ISubscriptionEvent _subscriptionEvent;
 		private readonly HashSet<Type> _used = new HashSet<Type>();
 
-		public InterceptorContext(MessagePipeline pipeline, IObjectBuilder builder)
+		public InterceptorContext(MessagePipeline pipeline, IObjectBuilder builder, ISubscriptionEvent subscriptionEvent)
 		{
+			_subscriptionEvent = subscriptionEvent;
+
 			Pipeline = pipeline;
 			Builder = builder;
 		}
@@ -38,6 +41,26 @@ namespace MassTransit.Pipeline.Interceptors
 		public void MessageTypeWasDefined(Type messageType)
 		{
 			_used.Add(messageType);
+		}
+
+		public Func<bool> SubscribedTo(Type messageType)
+		{
+			return _subscriptionEvent.SubscribedTo(messageType);
+		}
+
+		public Func<bool> SubscribedTo(Type messageType, string correlationId)
+		{
+			return _subscriptionEvent.SubscribedTo(messageType, correlationId);
+		}
+
+		public void UnsubscribedFrom(Type messageType)
+		{
+			_subscriptionEvent.UnsubscribedFrom(messageType);
+		}
+
+		public void UnsubscribedFrom(Type messageType, string correlationId)
+		{
+			_subscriptionEvent.UnsubscribedFrom(messageType, correlationId);
 		}
 	}
 }

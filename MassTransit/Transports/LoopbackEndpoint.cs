@@ -20,7 +20,8 @@ namespace MassTransit.Transports
 	using Magnum.Common.Threading;
 	using Serialization;
 
-	public class LoopbackEndpoint : IEndpoint
+	public class LoopbackEndpoint : 
+		IEndpoint
 	{
 		private static readonly ILog _log = LogManager.GetLogger(typeof (LoopbackEndpoint));
 		private static readonly ILog _messageLog = LogManager.GetLogger("MassTransit.Messages");
@@ -49,6 +50,8 @@ namespace MassTransit.Transports
 
 		public void Send<T>(T message) where T : class
 		{
+			if (_disposed) throw new ObjectDisposedException("The object has been disposed");
+
 			if (_messageLog.IsInfoEnabled)
 				_messageLog.InfoFormat("SEND:{0}:{1}", Uri, typeof (T).Name);
 
@@ -57,55 +60,40 @@ namespace MassTransit.Transports
 
 		public void Send<T>(T message, TimeSpan timeToLive) where T : class
 		{
+			if (_disposed) throw new ObjectDisposedException("The object has been disposed");
+
 			if (_messageLog.IsInfoEnabled)
 				_messageLog.InfoFormat("SEND:{0}:{1}", Uri, typeof (T).Name);
 
 			Enqueue(message);
 		}
 
-		public object Receive(TimeSpan timeout)
+		public void Receive(TimeSpan timeout, Func<object, Func<object, bool>, bool> receiver)
 		{
-			if (_messageReady.WaitOne(timeout, true))
+			if (_disposed) throw new ObjectDisposedException("The object has been disposed");
+
+			if (!_messageReady.WaitOne(timeout, true))
+				return;
+
+			try
 			{
-				try
-				{
-					object obj = Dequeue();
+				object obj = Dequeue();
 
-					if (_messageLog.IsInfoEnabled)
-						_messageLog.InfoFormat("RECV:{0}:{1}", _uri, obj.GetType().Name);
-
-					return obj;
-				}
-				catch (InvalidOperationException)
-				{
-				}
-			}
-
-			return null;
-		}
-
-		public object Receive(TimeSpan timeout, Predicate<object> accept)
-		{
-			if (_messageReady.WaitOne(timeout, true))
-			{
-				try
-				{
-					object obj = Dequeue();
-
-					if (accept(obj))
+				if (receiver(obj, x =>
 					{
 						if (_messageLog.IsInfoEnabled)
 							_messageLog.InfoFormat("RECV:{0}:{1}", _uri, obj.GetType().Name);
 
-						return obj;
-					}
-				}
-				catch (InvalidOperationException)
-				{
-				}
-			}
+						return true;
+					}))
+					return;
 
-			return null;
+				if (_messageLog.IsInfoEnabled)
+					_messageLog.InfoFormat("SKIP:{0}:{1}", _uri, obj.GetType().Name);
+			}
+			catch (InvalidOperationException)
+			{
+			}
 		}
 
 		public void Dispose()

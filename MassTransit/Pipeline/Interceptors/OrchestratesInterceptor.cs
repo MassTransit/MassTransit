@@ -13,6 +13,7 @@
 namespace MassTransit.Pipeline.Interceptors
 {
 	using System;
+	using System.Collections;
 	using System.Collections.Generic;
 	using Configuration;
 	using Exceptions;
@@ -20,7 +21,7 @@ namespace MassTransit.Pipeline.Interceptors
 	using Sinks;
 
 	public class OrchestratesInterceptor :
-		ConsumesInterceptorBase
+		ConsumesInterceptorBase<OrchestratesInterceptor>
 	{
 		protected override Type InterfaceType
 		{
@@ -33,11 +34,17 @@ namespace MassTransit.Pipeline.Interceptors
 		{
 			MessageRouterConfigurator routerConfigurator = MessageRouterConfigurator.For(context.Pipeline);
 
-			var sink = context.Builder.GetInstance<OrchestrateSagaMessageSink<TComponent, TMessage>>();
+			var router = routerConfigurator.FindOrCreate<TMessage>();
+
+			var sink = context.Builder.GetInstance<OrchestrateSagaMessageSink<TComponent, TMessage>>(new Hashtable {{"context", context}});
 			if (sink == null)
 				throw new ConfigurationException("Could not build the message sink for " + typeof (TComponent).FullName);
 
-			return routerConfigurator.FindOrCreate<TMessage>().Connect(sink);
+			var result = router.Connect(sink);
+
+			Func<bool> remove = context.SubscribedTo(typeof(TMessage));
+
+			return () => result() && (router.SinkCount == 0) && remove();
 		}
 
 		public override IEnumerable<Func<bool>> Subscribe<TComponent>(IInterceptorContext context, TComponent instance)

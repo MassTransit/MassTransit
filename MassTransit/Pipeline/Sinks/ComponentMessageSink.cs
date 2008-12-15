@@ -13,6 +13,7 @@
 namespace MassTransit.Pipeline.Sinks
 {
 	using System.Collections.Generic;
+	using Exceptions;
 	using Interceptors;
 
 	/// <summary>
@@ -64,6 +65,8 @@ namespace MassTransit.Pipeline.Sinks
 		private Consumes<TMessage>.All BuildConsumer()
 		{
 			TComponent component = _builder.GetInstance<TComponent>();
+			if (component == null)
+				throw new ConfigurationException("Unable to resolve type from container: " + typeof (TComponent));
 
 			Consumes<TMessage>.All consumer = TranslateTo<Consumes<TMessage>.All>.From(component);
 

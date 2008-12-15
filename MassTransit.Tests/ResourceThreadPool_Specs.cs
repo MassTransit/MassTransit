@@ -20,15 +20,11 @@ namespace MassTransit.Tests
     [TestFixture]
     public class When_accessing_a_constrained_resource
     {
-        private object Reader(SharedResource resource)
+        private void Reader(SharedResource resource)
         {
-            return resource.DoSomething();
+            resource.DoSomething();
         }
 
-        private void Writer(object obj)
-        {
-            Thread.Sleep(500);
-        }
 
         [Test]
         public void The_thread_pool_should_not_exceed_the_specified_limits()
@@ -38,7 +34,7 @@ namespace MassTransit.Tests
 
             const int concurrentLimit = 5;
             const int maxThreads = 20;
-            ResourceThreadPool<SharedResource, object> pool = new ResourceThreadPool<SharedResource, object>(resource, Reader, Writer, concurrentLimit, 1, maxThreads);
+            ResourceThreadPool<SharedResource, object> pool = new ResourceThreadPool<SharedResource, object>(resource, Reader, concurrentLimit, 1, maxThreads);
             try
             {
                 resource.Completed.WaitOne(TimeSpan.FromSeconds(60), true);
@@ -79,7 +75,7 @@ namespace MassTransit.Tests
             get { return _maxConcurrent; }
         }
 
-        public object DoSomething()
+        public void DoSomething()
         {
             lock (_locker)
             {
@@ -93,8 +89,6 @@ namespace MassTransit.Tests
                 _concurrent--;
             if (Interlocked.Decrement(ref _availableItems) == 0)
                 _completed.Set();
-
-            return new object();
         }
     }
 }

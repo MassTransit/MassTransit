@@ -7,9 +7,10 @@
 		<facility id="masstransit">
 
 			<bus id="main"
-				 endpoint="loopback://localhost/mt_client">
+					 endpoint="loopback://localhost/mt_client">
 				<dispatcher minThreads="1"
-							maxThreads="4" />
+										maxThreads="2"
+										readThreads="2" />
 			</bus>
 
 			<transports>

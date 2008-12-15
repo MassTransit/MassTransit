@@ -17,7 +17,7 @@ namespace MassTransit.Pipeline.Interceptors
 	using Sinks;
 
 	public class ConsumesAllInterceptor :
-		ConsumesInterceptorBase
+		ConsumesInterceptorBase<ConsumesAllInterceptor>
 	{
 		protected override Type InterfaceType
 		{
@@ -28,7 +28,13 @@ namespace MassTransit.Pipeline.Interceptors
 		{
 			MessageRouterConfigurator routerConfigurator = MessageRouterConfigurator.For(context.Pipeline);
 
-			return routerConfigurator.FindOrCreate<TMessage>().Connect(new InstanceMessageSink<TMessage>(message => consumer));
+			var router = routerConfigurator.FindOrCreate<TMessage>();
+
+			Func<bool> result = router.Connect(new InstanceMessageSink<TMessage>(message => consumer));
+
+			Func<bool> remove = context.SubscribedTo(typeof(TMessage));
+
+			return () => result() && ( router.SinkCount == 0 ) && remove();
 		}
 
 		protected virtual Func<bool> Connect<TComponent, TMessage>(IInterceptorContext context)
@@ -37,7 +43,13 @@ namespace MassTransit.Pipeline.Interceptors
 		{
 			MessageRouterConfigurator routerConfigurator = MessageRouterConfigurator.For(context.Pipeline);
 
-			return routerConfigurator.FindOrCreate<TMessage>().Connect(new ComponentMessageSink<TComponent, TMessage>(context));
+			var router = routerConfigurator.FindOrCreate<TMessage>();
+
+			Func<bool> result = router.Connect(new ComponentMessageSink<TComponent, TMessage>(context));
+
+			Func<bool> remove = context.SubscribedTo(typeof(TMessage));
+
+			return () => result() && (router.SinkCount == 0) && remove();
 		}
 	}
 }

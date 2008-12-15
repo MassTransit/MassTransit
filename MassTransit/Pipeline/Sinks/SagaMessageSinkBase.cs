@@ -53,7 +53,6 @@ namespace MassTransit.Pipeline.Sinks
 			if (_disposed) return;
 			if (disposing)
 			{
-				Repository.Dispose();
 				Repository = null;
 			}
 

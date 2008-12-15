@@ -151,7 +151,12 @@ namespace MassTransit.Transports.Wcf
             return null;
         }
 
-        private void OpenHost()
+    	public void Receive(TimeSpan timeout, Func<object, Func<object, bool>, bool> receiver)
+    	{
+    		throw new System.NotImplementedException();
+    	}
+
+    	private void OpenHost()
         {
             _log.DebugFormat("Opening host for WCF endpoint: {0}", _serviceUri);
             _host = new ServiceHost(new InboundMessageHandler(this), _serviceUri);

@@ -24,9 +24,9 @@ namespace MassTransit.Pipeline
 		/// </summary>
 		/// <param name="pipeline">The pipeline instance</param>
 		/// <param name="message">The message to dispatch</param>
-		public static void Dispatch(this MessagePipeline pipeline, object message)
+		public static bool Dispatch(this MessagePipeline pipeline, object message)
 		{
-			pipeline.Dispatch(message, x => true);
+			return pipeline.Dispatch(message, x => true);
 		}
 
 		/// <summary>
@@ -36,17 +36,24 @@ namespace MassTransit.Pipeline
 		/// <param name="pipeline">The pipeline instance</param>
 		/// <param name="message">The message to dispatch</param>
 		/// <param name="acknowledge">The function to call if the message will be consumed by the pipeline</param>
-		public static void Dispatch(this MessagePipeline pipeline, object message, Func<object, bool> acknowledge)
+		public static bool Dispatch(this MessagePipeline pipeline, object message, Func<object, bool> acknowledge)
 		{
+			bool consumed = false;
+
 			foreach (Consumes<object>.All consumer in pipeline.Enumerate(message))
 			{
 				if (!acknowledge(message))
-					break;
+					return false;
 
 				acknowledge = x => true;
 
+				consumed = true;
+
 				consumer.Consume(message);
+
 			}
+
+			return consumed;
 		}
 
 		/// <summary>

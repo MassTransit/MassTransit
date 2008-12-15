@@ -13,12 +13,16 @@
 namespace MassTransit.Util
 {
 	using System;
+	using System.Linq.Expressions;
 	using System.Reflection;
 
-	public abstract class ReflectiveVisitorBase
+	public abstract class ReflectiveVisitorBase<TVisitor> 
+		where TVisitor : class
 	{
 		private readonly string _methodName;
 		private const BindingFlags _bindingFlags = BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance;
+
+		private static readonly ReaderWriterLockedDictionary<Type, Func<TVisitor, object, bool>> _types = new ReaderWriterLockedDictionary<Type, Func<TVisitor, object, bool>>();
 
 		protected ReflectiveVisitorBase()
 		{
@@ -59,56 +63,69 @@ namespace MassTransit.Util
 		{
 			Type objectType = obj.GetType();
 
-			while (objectType != typeof(object))
-			{
-				bool result;
-				if (SimpleDispatch(obj, objectType, out result))
-					return result;
+			Func<TVisitor, object,bool> method = _types.Retrieve(objectType, () =>
+				{
+					while (objectType != typeof (object))
+					{
+						Func<TVisitor, object, bool> result = SimpleDispatch(obj, objectType);
+						if(result != null)
+							return result;
 
-				if (GenericDispatch(obj, objectType, out result))
-					return result;
+						result = GenericDispatch(obj, objectType);
+						if(result != null)
+							return result;
 
-				objectType = objectType.BaseType;
-			}
+						objectType = objectType.BaseType;
+					}
 
-			// if we are here, we need to think about maybe doing interfaces
-			foreach (Type interfaceType in obj.GetType().GetInterfaces())
-			{
-				bool result;
-				if (SimpleDispatch(obj, interfaceType, out result))
-					return result;
+					// if we are here, we need to think about maybe doing interfaces
+					foreach (Type interfaceType in obj.GetType().GetInterfaces())
+					{
+						Func<TVisitor, object, bool> result = SimpleDispatch(obj, interfaceType);
+						if(result != null)
+							return result;
 
-				if (GenericDispatch(obj, interfaceType, out result))
-					return result;
-			}
+						result = GenericDispatch(obj, interfaceType);
+						if(result != null)
+							return result;
+					}
 
-			return true;
+					return null;
+				});
+
+			return method == null || method(this as TVisitor, obj);
 		}
 
-		private bool SimpleDispatch(object obj, Type objectType, out bool result)
+		private Func<TVisitor, object, bool> SimpleDispatch(object obj, Type objectType)
 		{
-			result = true;
-
 			Type[] argumentTypes = new[] {objectType};
 
 			MethodInfo mi = GetType().GetMethod(_methodName, _bindingFlags, null, argumentTypes, null);
 			if (mi == null)
-				return false;
+				return null;
 
 			if (mi.GetParameters()[0].ParameterType == typeof (object))
-				return false;
+				return null;
 
-			result = (bool) mi.Invoke(this, new[] {obj});
-
-			return true;
+			return GenerateLambda(objectType, mi);
 		}
 
-		private bool GenericDispatch(object obj, Type objectType, out bool result)
+		private Func<TVisitor, object, bool> GenerateLambda(Type objectType, MethodInfo mi)
 		{
-			result = true;
+			var instance = Expression.Parameter(typeof(TVisitor), "visitor");
+			var value = Expression.Parameter(typeof(object), "value");
 
+			UnaryExpression valueCast = Expression.TypeAs(value, objectType);
+
+			var del = Expression.Lambda<Func<TVisitor, object, bool>>(Expression.Call(instance, mi, valueCast), new[] { instance, value }).Compile();
+
+			return del;
+		}
+
+		private Func<TVisitor, object, bool> GenericDispatch(object obj, Type objectType)
+		{
 			if (!objectType.IsGenericType)
-				return false;
+				return null;
 
 			Type[] genericArguments = objectType.GetGenericArguments();
 
@@ -152,11 +169,9 @@ namespace MassTransit.Util
 			}
 
 			if (match == null)
-				return false;
+				return null;
 
-			result = (bool) match.Invoke(this, new[] {obj});
-
-			return true;
+			return GenerateLambda(objectType, match);
 		}
 	}
 }

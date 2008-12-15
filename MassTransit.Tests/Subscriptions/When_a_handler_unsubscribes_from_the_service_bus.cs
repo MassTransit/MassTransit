@@ -59,54 +59,5 @@ namespace MassTransit.Tests.Subscriptions
         {
             return true;
         }
-
-        [Test]
-        public void The_service_bus_should_continue_to_handle_messages_if_at_least_one_handler_is_available()
-        {
-            using (_mocks.Record())
-            {
-                Expect.Call(delegate { _cache.Add(null); }).IgnoreArguments();
-
-                Expect.Call(delegate { _cache.Add(null); }).IgnoreArguments();
-
-                Expect.Call(delegate { _cache.Remove(null); }).IgnoreArguments();
-                //        Expect.Call(delegate { _cache.Remove(null); }).IgnoreArguments();
-            }
-
-            using (_mocks.Playback())
-            {
-                _bus.Subscribe<PingMessage>(HandleAllMessages);
-                Assert.That(_bus.Accept(_message), Is.True);
-
-                _bus.Subscribe<PingMessage>(HandleAllMessages, HandleSomeMessagesPredicate);
-                Assert.That(_bus.Accept(_message), Is.True);
-
-                _bus.Unsubscribe<PingMessage>(HandleAllMessages);
-                Assert.That(_bus.Accept(_message), Is.True);
-
-                _bus.Unsubscribe<PingMessage>(HandleAllMessages, HandleSomeMessagesPredicate);
-                Assert.That(_bus.Accept(_message), Is.False);
-            }
-        }
-
-        [Test]
-        public void The_service_bus_should_no_longer_show_the_message_type_as_handled()
-        {
-            using (_mocks.Record())
-            {
-                Expect.Call(delegate { _cache.Add(null); }).IgnoreArguments();
-
-                Expect.Call(delegate { _cache.Remove(null); }).IgnoreArguments();
-            }
-
-            using (_mocks.Playback())
-            {
-                _bus.Subscribe<PingMessage>(HandleAllMessages);
-                Assert.That(_bus.Accept(_message), Is.True);
-
-                _bus.Unsubscribe<PingMessage>(HandleAllMessages);
-                Assert.That(_bus.Accept(_message), Is.False);
-            }
-        }
     }
 }

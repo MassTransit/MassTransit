@@ -18,7 +18,7 @@ namespace MassTransit.Pipeline.Inspectors
 	using Sinks;
 
 	public class PipelineViewer :
-		PipelineInspectorBase
+		PipelineInspectorBase<PipelineViewer>
 	{
 		private readonly StringBuilder _text = new StringBuilder();
 		private int _depth;

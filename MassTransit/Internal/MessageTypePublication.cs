@@ -57,7 +57,7 @@ namespace MassTransit.Internal
             if (cache == null)
                 return new List<Subscription>();
 
-            return cache.List(_messageType.FullName);
+			return cache.List(Subscription.BuildMessageName(_messageType));
         }
     }
 }

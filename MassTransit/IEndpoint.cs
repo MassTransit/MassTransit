@@ -40,19 +40,11 @@ namespace MassTransit
         /// <param name="timeToLive">The maximum time for the message to be received before it expires</param>
         void Send<T>(T message, TimeSpan timeToLive) where T : class;
 
-        /// <summary>
-        /// Receives any message from the endpoint
-        /// </summary>
-        /// <param name="timeout">The timeout to wait for the message</param>
-        /// <returns>The message object</returns>
-        object Receive(TimeSpan timeout);
-
-        /// <summary>
-        /// Receives any message from the endpoint
-        /// </summary>
-        /// <param name="timeout">The timeout to wait for the message</param>
-        /// <param name="accept">A predicate to see if the message is accepted by the caller</param>
-        /// <returns>The message object</returns>
-        object Receive(TimeSpan timeout, Predicate<object> accept);
+		/// <summary>
+		/// Receive a message from an endpoint and dispatch it to the consumer pipeline
+		/// </summary>
+		/// <param name="timeout"></param>
+		/// <param name="receiver"></param>
+		void Receive(TimeSpan timeout, Func<object, Func<object, bool>, bool> receiver);
     }
 }

@@ -17,6 +17,7 @@ namespace MassTransit.Tests.Pipeline
 	using MassTransit.Pipeline;
 	using MassTransit.Pipeline.Configuration;
 	using MassTransit.Pipeline.Inspectors;
+	using MassTransit.Subscriptions;
 	using Messages;
 	using NUnit.Framework;
 	using Rhino.Mocks;
@@ -28,51 +29,73 @@ namespace MassTransit.Tests.Pipeline
 		public void Setup()
 		{
 			_builder = MockRepository.GenerateMock<IObjectBuilder>();
+			_subscriptionEvent = MockRepository.GenerateMock<ISubscriptionEvent>();
+			_subscriptionEvent.Expect(x => x.SubscribedTo(typeof(IndividualBatchMessage))).Repeat.Any().Return(() =>
+			{
+				_subscriptionEvent.UnsubscribedFrom(typeof(IndividualBatchMessage));
+				return true;
+			});
+
+			_pipeline = MessagePipelineConfigurator.CreateDefault(_builder, _subscriptionEvent);
 		}
 
 		private IObjectBuilder _builder;
+		private ISubscriptionCache _cache;
+		private static Guid _batchId;
+		private MessagePipeline _pipeline;
+		private ISubscriptionEvent _subscriptionEvent;
 
-		private static void PublishBatch(MessagePipeline pipeline, int _batchSize)
+		private static void PublishBatch(MessagePipeline _pipeline, int _batchSize)
 		{
-			Guid batchId = Guid.NewGuid();
+			_batchId = Guid.NewGuid();
 			for (int i = 0; i < _batchSize; i++)
 			{
-				IndividualBatchMessage message = new IndividualBatchMessage(batchId, _batchSize);
+				IndividualBatchMessage message = new IndividualBatchMessage(_batchId, _batchSize);
 
-				pipeline.Dispatch(message);
+				_pipeline.Dispatch(message);
 			}
 		}
 
 		[Test]
 		public void A_batch_consumer_should_be_delivered_messages()
 		{
-			MessagePipeline pipeline = MessagePipelineConfigurator.CreateDefault(_builder);
+			var batchConsumer = new TestBatchMessageConsumer<IndividualBatchMessage, Guid>(x => PipelineViewer.Trace(_pipeline));
+			_pipeline.Subscribe(batchConsumer);
 
-			var batchConsumer = new TestBatchMessageConsumer<IndividualBatchMessage, Guid>(x => PipelineViewer.Trace(pipeline));
-
-			pipeline.Subscribe(batchConsumer);
-
-			PipelineViewer.Trace(pipeline);
-
-			PublishBatch(pipeline, 1);
+			PublishBatch(_pipeline, 1);
 
 			TimeSpan _timeout = 5.Seconds();
 
 			batchConsumer.ShouldHaveReceivedBatch(_timeout);
 		}
+	
+		[Test]
+		public void A_batch_component_should_be_delivered_messages()
+		{
+			var consumer = new TestBatchMessageConsumer<IndividualBatchMessage, Guid>();
+
+			_builder.Stub(x => x.GetInstance<TestBatchMessageConsumer<IndividualBatchMessage, Guid>>()).Return(consumer);
+
+			_pipeline.Subscribe<TestBatchMessageConsumer<IndividualBatchMessage, Guid>>();
+			PipelineViewer.Trace(_pipeline);
+
+			PublishBatch(_pipeline, 1);
+
+			TimeSpan _timeout = 5.Seconds();
+
+			TestBatchMessageConsumer<IndividualBatchMessage, Guid>.AnyShouldHaveReceivedBatch(_batchId, _timeout);
+		}
 
 		[Test]
 		public void A_batch_consumer_should_be_delivered_a_lot_of_messages()
 		{
-			MessagePipeline pipeline = MessagePipelineConfigurator.CreateDefault(_builder);
+			var batchConsumer = new TestBatchMessageConsumer<IndividualBatchMessage, Guid>(x => PipelineViewer.Trace(_pipeline));
 
-			var batchConsumer = new TestBatchMessageConsumer<IndividualBatchMessage, Guid>(x => PipelineViewer.Trace(pipeline));
+			var removeSubscription = _pipeline.Subscribe(batchConsumer);
 
-			var removeSubscription = pipeline.Subscribe(batchConsumer);
+			PipelineViewer.Trace(_pipeline);
 
-			PipelineViewer.Trace(pipeline);
-
-			PublishBatch(pipeline, 100);
+			PublishBatch(_pipeline, 100);
 
 			TimeSpan _timeout = 5.Seconds();
 
@@ -80,7 +103,7 @@ namespace MassTransit.Tests.Pipeline
 
 			removeSubscription();
 
-			PipelineViewer.Trace(pipeline);
+			PipelineViewer.Trace(_pipeline);
 		}
 	}
 }

@@ -15,9 +15,6 @@ namespace MassTransit.Tests.Pipeline
 	using System;
 	using MassTransit.Pipeline;
 	using MassTransit.Pipeline.Configuration;
-	using MassTransit.Pipeline.Inspectors;
-	using MassTransit.Subscriptions;
-	using MassTransit.Subscriptions.Messages;
 	using Messages;
 	using NUnit.Framework;
 	using Rhino.Mocks;
@@ -26,8 +23,6 @@ namespace MassTransit.Tests.Pipeline
 	[TestFixture]
 	public class The_SubscriptionPublisher_should_add_subscriptions
 	{
-		#region Setup/Teardown
-
 		[SetUp]
 		public void Setup()
 		{
@@ -39,10 +34,9 @@ namespace MassTransit.Tests.Pipeline
 			_bus = MockRepository.GenerateMock<IServiceBus>();
 			_bus.Stub(x => x.Endpoint).Return(_endpoint);
 
-			_pipeline = MessagePipelineConfigurator.CreateDefault(_builder);
+			_subscriptionEvent = MockRepository.GenerateMock<ISubscriptionEvent>();
+			_pipeline = MessagePipelineConfigurator.CreateDefault(_builder, _subscriptionEvent);
 		}
-
-		#endregion
 
 		private IObjectBuilder _builder;
 		private IServiceBus _bus;
@@ -50,105 +44,116 @@ namespace MassTransit.Tests.Pipeline
 		private readonly Uri _uri = new Uri("msmq://localhost/mt_client");
 		private IEndpoint _endpoint;
 		private MessagePipeline _pipeline;
+		private ISubscriptionEvent _subscriptionEvent;
+
+		[Test]
+		public void for_batch_component_subscriptions()
+		{
+			_subscriptionEvent.Expect(x => x.SubscribedTo(typeof (IndividualBatchMessage))).Return(() =>
+				{
+					_subscriptionEvent.UnsubscribedFrom(typeof (IndividualBatchMessage));
+					return true;
+				});
+
+			_pipeline.Subscribe<TestBatchMessageConsumer<IndividualBatchMessage, Guid>>();
+
+			_subscriptionEvent.VerifyAllExpectations();
+		}
+
+		[Test]
+		public void for_batch_subscriptions()
+		{
+			_subscriptionEvent.Expect(x => x.SubscribedTo(typeof (IndividualBatchMessage))).Return(() =>
+				{
+					_subscriptionEvent.UnsubscribedFrom(typeof (IndividualBatchMessage));
+					return true;
+				});
+
+			var consumer = new TestBatchMessageConsumer<IndividualBatchMessage, Guid>(x => { });
+			_pipeline.Subscribe(consumer);
+
+			_subscriptionEvent.VerifyAllExpectations();
+		}
+
+		[Test]
+		public void for_component_subscriptions()
+		{
+			_subscriptionEvent.Expect(x => x.SubscribedTo(typeof (PingMessage))).Return(() =>
+				{
+					_subscriptionEvent.UnsubscribedFrom(typeof (PingMessage));
+					return true;
+				});
+
+			_pipeline.Subscribe<TestMessageConsumer<PingMessage>>();
+
+			_subscriptionEvent.VerifyAllExpectations();
+		}
 
 		[Test]
 		public void for_correlated_subscriptions()
 		{
 			Guid pongGuid = Guid.NewGuid();
 
+			_subscriptionEvent.Expect(x => x.SubscribedTo(typeof (PongMessage), pongGuid.ToString())).Return(() =>
+				{
+					_subscriptionEvent.UnsubscribedFrom(typeof (PongMessage), pongGuid.ToString());
+					return true;
+				});
+
 			var consumer = new TestCorrelatedConsumer<PongMessage, Guid>(pongGuid);
 			_pipeline.Subscribe(consumer);
 
-			var add = new AddSubscription(new Subscription(Subscription.BuildMessageName(typeof(PongMessage)), pongGuid.ToString(), _uri));
-			_bus.Expect(x => x.Publish(add));
-
-			var publisher = new SubscriptionPublisher(_bus);
-			publisher.Refresh(_pipeline);
-
-			_bus.VerifyAllExpectations();
-		}
-
-		[Test]
-		public void for_batch_subscriptions()
-		{
-			var consumer = new TestBatchMessageConsumer<IndividualBatchMessage, Guid>(x => { });
-			_pipeline.Subscribe(consumer);
-
-			PipelineViewer.Trace(_pipeline);
-
-			var add = new AddSubscription(new Subscription(typeof(IndividualBatchMessage), _uri));
-			_bus.Expect(x => x.Publish(add));
-
-			var publisher = new SubscriptionPublisher(_bus);
-			publisher.Refresh(_pipeline);
-
-			_bus.VerifyAllExpectations();
+			_subscriptionEvent.VerifyAllExpectations();
 		}
 
 		[Test]
 		public void for_regular_subscriptions()
 		{
+			_subscriptionEvent.Expect(x => x.SubscribedTo(typeof (PingMessage))).Return(() =>
+				{
+					_subscriptionEvent.UnsubscribedFrom(typeof (PingMessage));
+					return true;
+				});
+
 			var consumer = new TestMessageConsumer<PingMessage>();
 			_pipeline.Subscribe(consumer);
 
-			AddSubscription add = new AddSubscription(Subscription.BuildMessageName(typeof (PingMessage)), _uri);
-			_bus.Expect(x => x.Publish(add));
-
-			var publisher = new SubscriptionPublisher(_bus);
-			publisher.Refresh(_pipeline);
-
-			_bus.VerifyAllExpectations();
-		}
-
-		[Test]
-		public void for_component_subscriptions()
-		{
-			_pipeline.Subscribe<TestMessageConsumer<PingMessage>>();
-
-			AddSubscription add = new AddSubscription(Subscription.BuildMessageName(typeof (PingMessage)), _uri);
-			_bus.Expect(x => x.Publish(add));
-
-			var publisher = new SubscriptionPublisher(_bus);
-			publisher.Refresh(_pipeline);
-
-			_bus.VerifyAllExpectations();
+			_subscriptionEvent.VerifyAllExpectations();
 		}
 
 		[Test]
 		public void for_selective_component_subscriptions()
 		{
+			_subscriptionEvent.Expect(x => x.SubscribedTo(typeof (PingMessage))).Return(() =>
+				{
+					_subscriptionEvent.UnsubscribedFrom(typeof (PingMessage));
+					return true;
+				});
+
 			_pipeline.Subscribe<TestSelectiveConsumer<PingMessage>>();
 
-			AddSubscription add = new AddSubscription(Subscription.BuildMessageName(typeof (PingMessage)), _uri);
-			_bus.Expect(x => x.Publish(add));
-
-			var publisher = new SubscriptionPublisher(_bus);
-			publisher.Refresh(_pipeline);
-
-			_bus.VerifyAllExpectations();
+			_subscriptionEvent.VerifyAllExpectations();
 		}
 
 		[Test]
 		public void for_selective_subscriptions()
 		{
+			_subscriptionEvent.Expect(x => x.SubscribedTo(typeof (PingMessage))).Return(() =>
+				{
+					_subscriptionEvent.UnsubscribedFrom(typeof (PingMessage));
+					return true;
+				});
+
 			var consumer = new TestSelectiveConsumer<PingMessage>();
 			_pipeline.Subscribe(consumer);
 
-			AddSubscription add = new AddSubscription(Subscription.BuildMessageName(typeof (PingMessage)), _uri);
-			_bus.Expect(x => x.Publish(add));
-
-			var publisher = new SubscriptionPublisher(_bus);
-			publisher.Refresh(_pipeline);
-
-			_bus.VerifyAllExpectations();
+			_subscriptionEvent.VerifyAllExpectations();
 		}
 	}
 
 	[TestFixture]
 	public class The_SubscriptionPublisher_should_remove_subscriptions
 	{
-		#region Setup/Teardown
-
 		[SetUp]
 		public void Setup()
 		{
@@ -160,10 +165,9 @@ namespace MassTransit.Tests.Pipeline
 			_bus = MockRepository.GenerateMock<IServiceBus>();
 			_bus.Stub(x => x.Endpoint).Return(_endpoint);
 
-			_pipeline = MessagePipelineConfigurator.CreateDefault(_builder);
+			_subscriptionEvent = MockRepository.GenerateMock<ISubscriptionEvent>();
+			_pipeline = MessagePipelineConfigurator.CreateDefault(_builder, _subscriptionEvent);
 		}
-
-		#endregion
 
 		private IObjectBuilder _builder;
 		private IServiceBus _bus;
@@ -171,119 +175,164 @@ namespace MassTransit.Tests.Pipeline
 		private readonly Uri _uri = new Uri("msmq://localhost/mt_client");
 		private IEndpoint _endpoint;
 		private MessagePipeline _pipeline;
+		private ISubscriptionEvent _subscriptionEvent;
+
+		[Test]
+		public void for_batch_subscriptions()
+		{
+			_subscriptionEvent.Expect(x => x.SubscribedTo(typeof (IndividualBatchMessage))).Return(() =>
+				{
+					_subscriptionEvent.UnsubscribedFrom(typeof (IndividualBatchMessage));
+					return true;
+				});
+			_subscriptionEvent.Expect(x => x.UnsubscribedFrom(typeof (IndividualBatchMessage))).Repeat.Once();
+
+			var consumer = new TestBatchMessageConsumer<IndividualBatchMessage, Guid>();
+			var token = _pipeline.Subscribe(consumer);
+
+			token();
+
+			_subscriptionEvent.VerifyAllExpectations();
+		}
+
+		[Test]
+		public void for_batch_subscriptions_but_not_when_another_exists()
+		{
+			_subscriptionEvent.Expect(x => x.SubscribedTo(typeof (IndividualBatchMessage))).Repeat.Twice().Return(() =>
+				{
+					_subscriptionEvent.UnsubscribedFrom(typeof (IndividualBatchMessage));
+					return true;
+				});
+			_subscriptionEvent.Expect(x => x.UnsubscribedFrom(typeof (IndividualBatchMessage))).Repeat.Never();
+
+			var consumer = new TestBatchMessageConsumer<IndividualBatchMessage, Guid>();
+			var token = _pipeline.Subscribe(consumer);
+
+			var consumerB = new TestBatchMessageConsumer<IndividualBatchMessage, Guid>();
+			var tokenB = _pipeline.Subscribe(consumerB);
+
+			token();
+
+			_subscriptionEvent.VerifyAllExpectations();
+		}
+
+		[Test]
+		public void for_component_subscriptions()
+		{
+			_subscriptionEvent.Expect(x => x.SubscribedTo(typeof (PingMessage))).Return(() =>
+				{
+					_subscriptionEvent.UnsubscribedFrom(typeof (PingMessage));
+					return true;
+				});
+			_subscriptionEvent.Expect(x => x.UnsubscribedFrom(typeof (PingMessage))).Repeat.Once();
+
+			var token = _pipeline.Subscribe<TestMessageConsumer<PingMessage>>();
+
+			token();
+
+			_subscriptionEvent.VerifyAllExpectations();
+		}
 
 		[Test]
 		public void for_correlated_subscriptions()
 		{
 			Guid pongGuid = Guid.NewGuid();
 
+			_subscriptionEvent.Expect(x => x.SubscribedTo(typeof (PongMessage), pongGuid.ToString())).Return(() =>
+				{
+					_subscriptionEvent.UnsubscribedFrom(typeof (PongMessage), pongGuid.ToString());
+					return true;
+				});
+			_subscriptionEvent.Expect(x => x.UnsubscribedFrom(typeof (PongMessage), pongGuid.ToString()));
+
 			var consumer = new TestCorrelatedConsumer<PongMessage, Guid>(pongGuid);
-			var token = _pipeline.Subscribe(consumer);
+			var remove = _pipeline.Subscribe(consumer);
 
-			var remove = new RemoveSubscription(new Subscription(Subscription.BuildMessageName(typeof(PongMessage)), pongGuid.ToString(), _uri));
-			_bus.Expect(x => x.Publish(remove));
+			remove();
 
-			var publisher = new SubscriptionPublisher(_bus);
-			publisher.Refresh(_pipeline);
-
-			PipelineViewer.Trace(_pipeline);
-
-			token();
-			publisher.Refresh(_pipeline);
-
-			PipelineViewer.Trace(_pipeline);
-
-			_bus.VerifyAllExpectations();
+			_subscriptionEvent.VerifyAllExpectations();
 		}
 
 		[Test]
-		public void for_batch_subscriptions()
+		public void for_correlated_subscriptions_but_not_when_another_exists()
 		{
-			var consumer = new TestBatchMessageConsumer<IndividualBatchMessage, Guid>(x => { });
-			var token = _pipeline.Subscribe(consumer);
+			Guid pongGuid = Guid.NewGuid();
 
-			PipelineViewer.Trace(_pipeline);
+			_subscriptionEvent.Expect(x => x.SubscribedTo(typeof (PongMessage), pongGuid.ToString())).Repeat.Twice().Return(() =>
+				{
+					_subscriptionEvent.UnsubscribedFrom(typeof (PongMessage), pongGuid.ToString());
+					return true;
+				});
+			_subscriptionEvent.Expect(x => x.UnsubscribedFrom(typeof (PongMessage), pongGuid.ToString())).Repeat.Never();
 
-			var remove = new RemoveSubscription(new Subscription(typeof(IndividualBatchMessage), _uri));
-			_bus.Expect(x => x.Publish(remove));
+			var consumer = new TestCorrelatedConsumer<PongMessage, Guid>(pongGuid);
+			var otherConsumer = new TestCorrelatedConsumer<PongMessage, Guid>(pongGuid);
+			var remove = _pipeline.Subscribe(consumer);
+			var removeOther = _pipeline.Subscribe(otherConsumer);
 
-			var publisher = new SubscriptionPublisher(_bus);
-			publisher.Refresh(_pipeline);
-			
-			token();
-			publisher.Refresh(_pipeline);
+			remove();
+			_subscriptionEvent.VerifyAllExpectations();
 
-			_bus.VerifyAllExpectations();
+
+			_subscriptionEvent.BackToRecord();
+			_subscriptionEvent.Expect(x => x.UnsubscribedFrom(typeof (PongMessage), pongGuid.ToString())).Repeat.Once();
+			_subscriptionEvent.Replay();
+
+			removeOther();
+			_subscriptionEvent.VerifyAllExpectations();
 		}
 
 		[Test]
 		public void for_regular_subscriptions()
 		{
+			_subscriptionEvent.Expect(x => x.SubscribedTo(typeof (PingMessage))).Return(() =>
+				{
+					_subscriptionEvent.UnsubscribedFrom(typeof (PingMessage));
+					return true;
+				});
+			_subscriptionEvent.Expect(x => x.UnsubscribedFrom(typeof (PingMessage))).Repeat.Once();
+
 			var consumer = new TestMessageConsumer<PingMessage>();
 			var token = _pipeline.Subscribe(consumer);
 
-			var remove = new RemoveSubscription(Subscription.BuildMessageName(typeof(PingMessage)), _uri);
-			_bus.Expect(x => x.Publish(remove));
-
-			var publisher = new SubscriptionPublisher(_bus);
-			publisher.Refresh(_pipeline);
-
 			token();
-			publisher.Refresh(_pipeline);
 
-			_bus.VerifyAllExpectations();
-		}
-
-		[Test]
-		public void for_component_subscriptions()
-		{
-			var token = _pipeline.Subscribe<TestMessageConsumer<PingMessage>>();
-
-			var remove = new RemoveSubscription(Subscription.BuildMessageName(typeof(PingMessage)), _uri);
-			_bus.Expect(x => x.Publish(remove));
-
-			var publisher = new SubscriptionPublisher(_bus);
-			publisher.Refresh(_pipeline);
-
-			token();
-			publisher.Refresh(_pipeline);
-
-			_bus.VerifyAllExpectations();
+			_subscriptionEvent.VerifyAllExpectations();
 		}
 
 		[Test]
 		public void for_selective_component_subscriptions()
 		{
+			_subscriptionEvent.Expect(x => x.SubscribedTo(typeof (PingMessage))).Return(() =>
+				{
+					_subscriptionEvent.UnsubscribedFrom(typeof (PingMessage));
+					return true;
+				});
+			_subscriptionEvent.Expect(x => x.UnsubscribedFrom(typeof (PingMessage))).Repeat.Once();
+
 			var token = _pipeline.Subscribe<TestSelectiveConsumer<PingMessage>>();
 
-			var remove = new RemoveSubscription(Subscription.BuildMessageName(typeof(PingMessage)), _uri);
-			_bus.Expect(x => x.Publish(remove));
-
-			var publisher = new SubscriptionPublisher(_bus);
-			publisher.Refresh(_pipeline);
-
 			token();
-			publisher.Refresh(_pipeline);
 
-			_bus.VerifyAllExpectations();
+			_subscriptionEvent.VerifyAllExpectations();
 		}
 
 		[Test]
 		public void for_selective_subscriptions()
 		{
+			_subscriptionEvent.Expect(x => x.SubscribedTo(typeof (PingMessage))).Return(() =>
+				{
+					_subscriptionEvent.UnsubscribedFrom(typeof (PingMessage));
+					return true;
+				});
+			_subscriptionEvent.Expect(x => x.UnsubscribedFrom(typeof (PingMessage))).Repeat.Once();
+
 			var consumer = new TestSelectiveConsumer<PingMessage>();
 			var token = _pipeline.Subscribe(consumer);
 
-			var remove = new RemoveSubscription(Subscription.BuildMessageName(typeof(PingMessage)), _uri);
-			_bus.Expect(x => x.Publish(remove));
-
-			var publisher = new SubscriptionPublisher(_bus);
-			publisher.Refresh(_pipeline);
-
 			token();
-			publisher.Refresh(_pipeline);
 
-			_bus.VerifyAllExpectations();
+			_subscriptionEvent.VerifyAllExpectations();
 		}
 	}
 }

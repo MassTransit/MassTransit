@@ -155,6 +155,11 @@ namespace MassTransit.Transports.Nms
 			});
 		}
 
+		public void Receive(TimeSpan timeout, Func<object, Func<object, bool>, bool> receiver)
+		{
+			throw new System.NotImplementedException();
+		}
+
 		private V WithinConsumerContext<V>(Func<IMessageConsumer, V> consumerAction)
 		{
 			return WithinSessionContext<V>(session =>

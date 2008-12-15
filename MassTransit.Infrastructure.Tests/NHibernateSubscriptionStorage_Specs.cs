@@ -13,11 +13,11 @@
 namespace MassTransit.Infrastructure.Tests
 {
     using System;
+    using MassTransit.Subscriptions;
     using NHibernate;
     using NHibernate.Cfg;
     using NUnit.Framework;
     using NUnit.Framework.SyntaxHelpers;
-    using Repositories;
     using Subscriptions;
 
     [TestFixture]
@@ -100,7 +100,7 @@ namespace MassTransit.Infrastructure.Tests
             Assert.That(_dbQuery.ExecuteScalar("SELECT COUNT(*) FROM bus.Subscriptions"), Is.EqualTo(1), "Subscription count didn't match");
         }
 
-        private readonly string _connectionString = "Server=localhost;initial catalog=test;Trusted_Connection=yes";
+        private const string _connectionString = "Server=localhost;initial catalog=test;Trusted_Connection=yes";
         private ISessionFactory _sessionFactory;
         private ISubscriptionRepository _subscriptionRepository;
         private DbQuery _dbQuery;
