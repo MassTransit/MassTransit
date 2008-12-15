@@ -89,6 +89,7 @@
     <Compile Include="BusBuilder_Specs.cs" />
     <Compile Include="ContextSetup.cs" />
     <Compile Include="Fault_Specs.cs" />
+    <Compile Include="FutureMessage.cs" />
     <Compile Include="Grid\Workers\ExceptionalWorker.cs" />
     <Compile Include="Grid\Messages\FactorLongNumber.cs" />
     <Compile Include="Grid\Tasks\FactorLongNumbersTask.cs" />
@@ -130,6 +131,7 @@
     <Compile Include="Pipeline\SubscriptionEvent_Specs.cs" />
     <Compile Include="PublishToConsumer_Specs.cs" />
     <Compile Include="RequestReply_Specs.cs" />
+    <Compile Include="RequestResponseScope_Specs.cs" />
     <Compile Include="ResourceThreadPool_Specs.cs" />
     <Compile Include="Saga\RegisterUserSaga\Messages\CorrelatedMessage.cs" />
     <Compile Include="Saga\RegisterUserSaga\Messages\RegisterUser.cs" />
