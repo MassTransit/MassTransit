@@ -190,6 +190,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Exceptions\ConfigurationException.cs" />
+    <Compile Include="Internal\RequestResponse\CorrelatedResponseAction.cs" />
+    <Compile Include="Internal\RequestResponse\CorrelatedResponseActionBuilder.cs" />
+    <Compile Include="Internal\RequestResponse\IResponseAction.cs" />
+    <Compile Include="Internal\RequestResponse\RequestResponseScope.cs" />
+    <Compile Include="Internal\RequestResponse\ResponseAction.cs" />
+    <Compile Include="Internal\RequestResponse\ResponseActionBuilder.cs" />
     <Compile Include="Pipeline\BatchMessage.cs" />
     <Compile Include="Pipeline\Configuration\BatchMessageRouterConfigurator.cs" />
     <Compile Include="Pipeline\Configuration\BatchMessageRouterConfiguratorScope.cs" />
@@ -198,6 +204,7 @@
     <Compile Include="Pipeline\Configuration\MessageFilterConfigurator.cs" />
     <Compile Include="Pipeline\Configuration\MessageFilterConfiguratorScope.cs" />
     <Compile Include="Pipeline\Inspectors\PipelineInspectorBase.cs" />
+    <Compile Include="ServiceBusExtensions.cs" />
     <Compile Include="Util\ReaderWriterLockedDictionary.cs" />
     <Compile Include="Pipeline\ISubscriptionEvent.cs" />
     <Compile Include="Pipeline\Sinks\CorrelatedMessageSinkRouter.cs" />

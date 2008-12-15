@@ -20,14 +20,14 @@ namespace MassTransit.Tests.Pipeline
 	using MassTransit.Pipeline.Interceptors;
 	using MassTransit.Pipeline.Sinks;
 	using MassTransit.Saga;
-	using MassTransit.Subscriptions;
-	using MassTransit.Subscriptions.Messages;
 	using NUnit.Framework;
 	using Rhino.Mocks;
 
 	[TestFixture]
 	public class When_an_initiating_message_for_a_saga_arrives
 	{
+		#region Setup/Teardown
+
 		[SetUp]
 		public void Setup()
 		{
@@ -55,16 +55,16 @@ namespace MassTransit.Tests.Pipeline
 			_builder.Stub(x => x.GetInstance<InitiateSagaMessageSink<SimpleSaga, InitiateSimpleSaga>>(empty)).Return(_initiateSink).IgnoreArguments();
 
 			_subscriptionEvent = MockRepository.GenerateMock<ISubscriptionEvent>();
-			_subscriptionEvent.Expect(x => x.SubscribedTo(typeof(InitiateSimpleSaga))).Repeat.Any().Return(() =>
-			{
-				_subscriptionEvent.UnsubscribedFrom(typeof(InitiateSimpleSaga));
-				return true;
-			});
-			_subscriptionEvent.Expect(x => x.SubscribedTo(typeof(CompleteSimpleSaga))).Repeat.Any().Return(() =>
-			{
-				_subscriptionEvent.UnsubscribedFrom(typeof(CompleteSimpleSaga));
-				return true;
-			});
+			_subscriptionEvent.Expect(x => x.SubscribedTo(typeof (InitiateSimpleSaga))).Repeat.Any().Return(() =>
+				{
+					_subscriptionEvent.UnsubscribedFrom(typeof (InitiateSimpleSaga));
+					return true;
+				});
+			_subscriptionEvent.Expect(x => x.SubscribedTo(typeof (CompleteSimpleSaga))).Repeat.Any().Return(() =>
+				{
+					_subscriptionEvent.UnsubscribedFrom(typeof (CompleteSimpleSaga));
+					return true;
+				});
 
 			_pipeline = MessagePipelineConfigurator.CreateDefault(_builder, _subscriptionEvent);
 
@@ -72,6 +72,8 @@ namespace MassTransit.Tests.Pipeline
 
 			PipelineViewer.Trace(_pipeline);
 		}
+
+		#endregion
 
 		private readonly Uri _uri = new Uri("msmq://localhost/mt_client");
 		private IEndpoint _endpoint;
@@ -93,13 +95,13 @@ namespace MassTransit.Tests.Pipeline
 		public void Should_publish_subscriptions_for_saga_subscriptions()
 		{
 			_subscriptionEvent.VerifyAllExpectations();
-		}	
-		
+		}
+
 		[Test]
 		public void Should_remove_subscriptions_for_saga_subscriptions()
 		{
-			_subscriptionEvent.Expect(x => x.UnsubscribedFrom(typeof(InitiateSimpleSaga)));
-			_subscriptionEvent.Expect(x => x.UnsubscribedFrom(typeof(CompleteSimpleSaga)));
+			_subscriptionEvent.Expect(x => x.UnsubscribedFrom(typeof (InitiateSimpleSaga)));
+			_subscriptionEvent.Expect(x => x.UnsubscribedFrom(typeof (CompleteSimpleSaga)));
 
 			_remove();
 
