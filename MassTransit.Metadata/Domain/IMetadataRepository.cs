@@ -7,8 +7,8 @@ namespace MassTransit.Metadata.Domain
     {
         void Register(MessageModel data);
 
-        IList<TheMeta> List();
-        TheMeta Get(object id);
-        void Update(TheMeta data);
+        IList<MessageMetadata> List();
+        MessageMetadata Get(object id);
+        void Update(MessageMetadata data);
     }
 }

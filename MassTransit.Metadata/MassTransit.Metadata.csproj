@@ -43,7 +43,7 @@
   <ItemGroup>
     <Compile Include="Client\MessageModelFilter.cs" />
     <Compile Include="Domain\IMetadataRepository.cs" />
-    <Compile Include="Domain\TheMeta.cs" />
+    <Compile Include="Domain\MessageMetadata.cs" />
     <Compile Include="Messages\MemberModel.cs" />
     <Compile Include="Messages\MessageModel.cs" />
     <Compile Include="Messages\Metadata.cs" />
