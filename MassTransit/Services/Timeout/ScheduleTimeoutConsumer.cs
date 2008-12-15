@@ -12,11 +12,14 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Services.Timeout
 {
-    using Messages;
+	using log4net;
+	using Messages;
 
     public class ScheduleTimeoutConsumer :
         Consumes<ScheduleTimeout>.All
     {
+    	private static readonly ILog _log = LogManager.GetLogger(typeof (ScheduleTimeoutConsumer));
+
         private readonly ITimeoutRepository _repository;
 
         public ScheduleTimeoutConsumer(ITimeoutRepository repository)
@@ -27,6 +30,8 @@ namespace MassTransit.Services.Timeout
 
         public void Consume(ScheduleTimeout message)
         {
+        	_log.InfoFormat("Scheduling timeout for {0} at {1}", message.CorrelationId, message.TimeoutAt);
+
             _repository.Schedule(message.CorrelationId, message.TimeoutAt);
         }
     }

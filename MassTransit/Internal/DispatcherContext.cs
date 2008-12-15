@@ -12,25 +12,20 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Internal
 {
-    using System;
-    using Subscriptions;
+	using Subscriptions;
 
     public class DispatcherContext :
         IDispatcherContext
     {
         private readonly IObjectBuilder _builder;
         private readonly IServiceBus _bus;
-        private readonly ISubscriptionCache _cache;
-        private readonly ITypeInfoCache _typeInfoCache;
-        private readonly IMessageTypeDispatcher _dispatcher;
+    	private readonly ISubscriptionCache _cache;
 
-        public DispatcherContext(IObjectBuilder builder, IServiceBus bus, IMessageTypeDispatcher dispatcher, ISubscriptionCache cache, ITypeInfoCache typeInfoCache)
+    	public DispatcherContext(IObjectBuilder builder, IServiceBus bus, ISubscriptionCache cache)
         {
             _builder = builder;
-            _typeInfoCache = typeInfoCache;
-            _cache = cache;
-            _dispatcher = dispatcher;
-            _bus = bus;
+    		_cache = cache;
+    		_bus = bus;
         }
 
         public IObjectBuilder Builder
@@ -46,46 +41,6 @@ namespace MassTransit.Internal
         public ISubscriptionCache SubscriptionCache
         {
             get { return _cache; }
-        }
-
-        public ISubscriptionTypeInfo GetSubscriptionTypeInfo(Type type)
-        {
-            return _typeInfoCache.GetSubscriptionTypeInfo(type);
-        }
-
-        public void Attach<TMessage>(Consumes<TMessage>.All consumer) where TMessage : class
-        {
-            _dispatcher.Attach(consumer);
-        }
-
-        public void Detach<TMessage>(Consumes<TMessage>.All consumer) where TMessage : class
-        {
-            _dispatcher.Detach(consumer);
-        }
-
-        public void Consume(object message)
-        {
-            _dispatcher.Consume(message);
-        }
-
-        public T GetDispatcher<T>() where T : class
-        {
-            return _dispatcher.GetDispatcher<T>();
-        }
-
-        public T GetDispatcher<T>(Type type) where T : class
-        {
-            return _dispatcher.GetDispatcher<T>(type);
-        }
-
-        public void AddSubscription(Subscription subscription)
-        {
-            _cache.Add(subscription);
-        }
-
-        public void RemoveSubscription(Subscription subscription)
-        {
-            _cache.Remove(subscription);
         }
     }
 }

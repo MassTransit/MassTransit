@@ -17,7 +17,7 @@ namespace MassTransit.Pipeline.Configuration
 	using Sinks;
 
 	public class MessageFilterConfiguratorScope<TMessage> :
-		PipelineInspectorBase
+		PipelineInspectorBase<MessageFilterConfiguratorScope<TMessage>>
 		where TMessage : class
 	{
 		private Func<IMessageSink<TMessage>, IMessageSink<TMessage>> _insertAfter;

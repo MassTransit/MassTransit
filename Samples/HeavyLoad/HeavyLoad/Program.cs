@@ -29,7 +29,7 @@ namespace HeavyLoad
          
 			RunLoopbackLoadTest();
 
-			RunWcfLoadTest();
+//			RunWcfLoadTest();
 
 			RunCorrelatedMessageTest();
 
@@ -38,7 +38,6 @@ namespace HeavyLoad
 			//RunLocalActiveMqLoadTest();
 
 			Console.WriteLine("End of line.");
-			Console.ReadLine();
 		}
 
 		private static void RunLocalActiveMqLoadTest()

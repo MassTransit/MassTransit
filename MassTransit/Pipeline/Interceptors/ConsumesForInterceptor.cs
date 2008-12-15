@@ -14,22 +14,37 @@ namespace MassTransit.Pipeline.Interceptors
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Linq.Expressions;
 	using System.Reflection;
 	using Configuration;
 	using Exceptions;
 	using Sinks;
+	using Util;
 
 	public class ConsumesForInterceptor :
 		PipelineInterceptorBase
 	{
 		private static readonly Type _interfaceType = typeof (Consumes<>.For<>);
 
+		private readonly ReaderWriterLockedDictionary<Type, Func<ConsumesForInterceptor, IInterceptorContext, object, Func<bool>>> _instances;
+
+		public ConsumesForInterceptor()
+		{
+			_instances = new ReaderWriterLockedDictionary<Type, Func<ConsumesForInterceptor, IInterceptorContext, object, Func<bool>>>();
+		}
+
 		protected virtual Func<bool> Connect<TMessage, TKey>(IInterceptorContext context, Consumes<TMessage>.For<TKey> consumer)
 			where TMessage : class, CorrelatedBy<TKey>
 		{
 			var correlatedConfigurator = CorrelatedMessageRouterConfigurator.For(context.Pipeline);
 
-			return correlatedConfigurator.FindOrCreate<TMessage, TKey>().Connect(consumer.CorrelationId, new InstanceMessageSink<TMessage>(message => consumer));
+			var router = correlatedConfigurator.FindOrCreate<TMessage, TKey>();
+
+			Func<bool> result = router.Connect(consumer.CorrelationId, new InstanceMessageSink<TMessage>(message => consumer));
+
+			Func<bool> remove = context.SubscribedTo(typeof (TMessage), consumer.CorrelationId.ToString());
+
+			return () => result() && remove();
 		}
 
 		public override IEnumerable<Func<bool>> Subscribe<TComponent>(IInterceptorContext context)
@@ -39,52 +54,82 @@ namespace MassTransit.Pipeline.Interceptors
 
 		public override IEnumerable<Func<bool>> Subscribe<TComponent>(IInterceptorContext context, TComponent instance)
 		{
-			foreach (KeyValuePair<Type, Type> match in GetInterfaces<TComponent>(context))
-			{
-				MethodInfo genericMethod = FindMethod(GetType(), "Connect", new[] {match.Key, match.Value}, new[] {typeof (IInterceptorContext), typeof (TComponent)});
+			Func<ConsumesForInterceptor, IInterceptorContext, object, Func<bool>> invoker = GetInvokerForInstance<TComponent>();
+			if (invoker == null)
+				yield break;
 
-				if (genericMethod == null)
-					throw new PipelineException(string.Format("Unable to subscribe for type: {0} ({1})",
-					                                          typeof (TComponent).FullName, match.Key.FullName));
-
-				Func<bool> result = (Func<bool>) genericMethod.Invoke(this, new object[] {context, instance});
-
-				context.MessageTypeWasDefined(match.Key);
-
-				yield return result;
-			}
+			yield return invoker(this, context, instance);
 		}
 
-		protected static IEnumerable<KeyValuePair<Type, Type>> GetInterfaces<TComponent>(IInterceptorContext context)
+		private Func<ConsumesForInterceptor, IInterceptorContext, object, Func<bool>> GetInvokerForInstance<TComponent>()
 		{
 			Type componentType = typeof (TComponent);
 
-			foreach (Type interfaceType in componentType.GetInterfaces())
-			{
-				if (!interfaceType.IsGenericType)
-					continue;
-
-				Type genericType = interfaceType.GetGenericTypeDefinition();
-
-				if (genericType != _interfaceType)
-					continue;
-
-				Type[] types = interfaceType.GetGenericArguments();
-
-				Type messageType = types[0];
-
-				if (context.HasMessageTypeBeenDefined(messageType))
-					continue;
-
-				Type keyType = types[1];
-
-				// TODO if we have a generic type, we need to look for a generic message handler
-				if (messageType.IsGenericType)
+			return _instances.Retrieve(componentType, () =>
 				{
-				}
+					Func<ConsumesForInterceptor, IInterceptorContext, object, Func<bool>> invoker = null;
 
-				yield return new KeyValuePair<Type, Type>(messageType, keyType);
-			}
+					// since we don't have it, we're going to build it
+
+					foreach (Type interfaceType in componentType.GetInterfaces())
+					{
+						if (!interfaceType.IsGenericType)
+							continue;
+
+						Type genericType = interfaceType.GetGenericTypeDefinition();
+
+						if (genericType != _interfaceType)
+							continue;
+
+						Type[] types = interfaceType.GetGenericArguments();
+
+						Type messageType = types[0];
+
+						Type keyType = types[1];
+
+						MethodInfo genericMethod = FindMethod(GetType(), "Connect", new[] {messageType, keyType}, new[] {typeof (IInterceptorContext), typeof (TComponent)});
+						if (genericMethod == null)
+							throw new PipelineException(string.Format("Unable to subscribe for type: {0} ({1})",
+							                                          typeof (TComponent).FullName, messageType.FullName));
+
+						var interceptorParameter = Expression.Parameter(typeof (ConsumesForInterceptor), "interceptor");
+						var contextParameter = Expression.Parameter(typeof (IInterceptorContext), "context");
+						var instanceParameter = Expression.Parameter(typeof (object), "instance");
+
+						var instanceCast = Expression.Convert(instanceParameter, typeof (TComponent));
+
+						var call = Expression.Call(interceptorParameter, genericMethod, contextParameter, instanceCast);
+
+						var connector = Expression.Lambda<Func<ConsumesForInterceptor, IInterceptorContext, object, Func<bool>>>(call, new[] {interceptorParameter, contextParameter, instanceParameter}).Compile();
+
+						if (invoker == null)
+						{
+							invoker = (interceptor, context, obj) =>
+								{
+									if (context.HasMessageTypeBeenDefined(messageType))
+										return () => false;
+
+									context.MessageTypeWasDefined(messageType);
+
+									return connector(interceptor, context, obj);
+								};
+						}
+						else
+						{
+							invoker += (interceptor, context, obj) =>
+								{
+									if (context.HasMessageTypeBeenDefined(messageType))
+										return () => false;
+
+									context.MessageTypeWasDefined(messageType);
+
+									return connector(interceptor, context, obj);
+								};
+						}
+					}
+
+					return invoker;
+				});
 		}
 	}
 }

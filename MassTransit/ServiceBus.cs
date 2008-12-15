@@ -14,9 +14,12 @@ namespace MassTransit
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Transactions;
 	using Exceptions;
 	using Internal;
 	using log4net;
+	using Pipeline;
+	using Pipeline.Configuration;
 	using Subscriptions;
 	using Threading;
 	using Util;
@@ -34,10 +37,13 @@ namespace MassTransit
 		private readonly DispatcherContext _dispatcherContext;
 		private readonly IEndpointResolver _endpointResolver;
 		private readonly IObjectBuilder _objectBuilder;
+		private readonly TimeSpan _readerTimeout = TimeSpan.FromSeconds(3);
 		private ResourceThreadPool<IEndpoint, object> _asyncDispatcher;
 		private bool _disposed;
 		private IEndpoint _endpointToListenOn;
-		private MessageTypeDispatcher _messageDispatcher;
+		private MessagePipeline _inbound;
+		private ISubscriptionEvent _inboundSubscriptionEvent;
+		private MessagePipeline _outbound;
 		private IEndpoint _poisonEndpoint = new PoisonEndpointDecorator(new NullEndpoint());
 		private ISubscriptionCache _subscriptionCache;
 		private ITypeInfoCache _typeInfoCache;
@@ -83,19 +89,22 @@ namespace MassTransit
 			_objectBuilder = objectBuilder;
 			_endpointResolver = endpointResolver;
 
-			//TODO: Move into IObjectBuilder?
-			_messageDispatcher = new MessageTypeDispatcher();
 			_typeInfoCache = typeInfoCache;
 
-			_dispatcherContext = new DispatcherContext(_objectBuilder, this, _messageDispatcher, _subscriptionCache, _typeInfoCache);
+			_inboundSubscriptionEvent = new SubscriptionCacheEventConnector(_subscriptionCache, _endpointToListenOn);
 
-            var resourceLimit = 1;
-            var minThreads = 1;
-		    var maxThreads = Environment.ProcessorCount*8;
-		    
+			_inbound = MessagePipelineConfigurator.CreateDefault(_objectBuilder, _inboundSubscriptionEvent);
+
+			_outbound = MessagePipelineConfigurator.CreateDefault(_objectBuilder, null);
+
+			_dispatcherContext = new DispatcherContext(_objectBuilder, this, _subscriptionCache);
+
+			var resourceLimit = 1;
+			var minThreads = 1;
+			var maxThreads = Environment.ProcessorCount*8;
+
 			_asyncDispatcher = new ResourceThreadPool<IEndpoint, object>(endpointToListenOn,
 			                                                             EndpointReader,
-			                                                             EndpointDispatcher,
 			                                                             resourceLimit,
 			                                                             minThreads,
 			                                                             maxThreads);
@@ -191,11 +200,9 @@ namespace MassTransit
 		/// </summary>
 		/// <typeparam name="T">The message type to handle, often inferred from the callback specified</typeparam>
 		/// <param name="callback">The callback to invoke when messages of the specified type arrive on the service bus</param>
-		public void Subscribe<T>(Action<T> callback) where T : class
+		public Func<bool> Subscribe<T>(Action<T> callback) where T : class
 		{
-			Subscribe(callback, null);
-
-			_asyncDispatcher.WakeUp();
+			return Subscribe(callback, null);
 		}
 
 		/// <summary>
@@ -204,63 +211,60 @@ namespace MassTransit
 		/// <typeparam name="T">The message type to handle, often inferred from the callback specified</typeparam>
 		/// <param name="callback">The callback to invoke when messages of the specified type arrive on the service bus</param>
 		/// <param name="condition">A condition predicate to filter which messages are handled by the callback</param>
-		public void Subscribe<T>(Action<T> callback, Predicate<T> condition) where T : class
+		public Func<bool> Subscribe<T>(Action<T> callback, Predicate<T> condition) where T : class
 		{
-			Subscribe(new GenericComponent<T>(callback, condition, this));
+			var result = _inbound.Subscribe(new GenericComponent<T>(callback, condition, this));
 
 			_asyncDispatcher.WakeUp();
+			return result;
 		}
 
-		public void Subscribe<T>(T consumer) where T : class
+		public Func<bool> Subscribe<T>(T consumer) where T : class
 		{
-			ISubscriptionTypeInfo info = _typeInfoCache.GetSubscriptionTypeInfo<T>();
-			info.Subscribe(_dispatcherContext, consumer);
-		
+			var result = _inbound.Subscribe(consumer);
+
 			_asyncDispatcher.WakeUp();
+
+			return (result);
 		}
 
 		public void Unsubscribe<T>(Action<T> callback) where T : class
 		{
-			Unsubscribe(callback, null);
+			// TODO silentry return for now but this is going away
 		}
 
 		public void Unsubscribe<T>(Action<T> callback, Predicate<T> condition) where T : class
 		{
-			Unsubscribe(new GenericComponent<T>(callback, condition, this));
+			// TODO silentry return for now but this is going away
 		}
 
 		public void Unsubscribe<T>(T consumer) where T : class
 		{
-			ISubscriptionTypeInfo info = _typeInfoCache.GetSubscriptionTypeInfo<T>();
-			info.Unsubscribe(_dispatcherContext, consumer);
+			// TODO silentry return for now but this is going away
 		}
 
-		public void Subscribe<TComponent>() where TComponent : class
+		public Func<bool> Subscribe<TComponent>() where TComponent : class
 		{
-			ISubscriptionTypeInfo info = _typeInfoCache.GetSubscriptionTypeInfo<TComponent>();
-			info.AddComponent(_dispatcherContext);
+			Func<bool> result = _inbound.Subscribe<TComponent>();
 
 			_asyncDispatcher.WakeUp();
+
+			return (result);
 		}
 
-        public void Subscribe(Type consumerType)
-        {
-            ISubscriptionTypeInfo info = _typeInfoCache.GetSubscriptionTypeInfo(consumerType);
-            info.AddComponent(_dispatcherContext);
-		
-			_asyncDispatcher.WakeUp();
-		}
-
-	    public void Unsubscribe(Type consumerType)
-	    {
-            ISubscriptionTypeInfo info = _typeInfoCache.GetSubscriptionTypeInfo(consumerType);
-            info.RemoveComponent(_dispatcherContext);
-	    }
-
-	    public void Unsubscribe<TComponent>() where TComponent : class
+		public Func<bool> Subscribe(Type consumerType)
 		{
-			ISubscriptionTypeInfo info = _typeInfoCache.GetSubscriptionTypeInfo<TComponent>();
-			info.RemoveComponent(_dispatcherContext);
+			throw new NotSupportedException("This needs fixed");
+		}
+
+		public void Unsubscribe(Type consumerType)
+		{
+			// TODO silentry return for now but this is going away
+		}
+
+		public void Unsubscribe<TComponent>() where TComponent : class
+		{
+			// TODO silentry return for now but this is going away
 		}
 
 		protected virtual void Dispose(bool disposing)
@@ -277,8 +281,11 @@ namespace MassTransit
 				_subscriptionCache.Dispose();
 				_subscriptionCache = null;
 
-				_messageDispatcher.Dispose();
-				_messageDispatcher = null;
+				_inbound.Dispose();
+				_inbound = null;
+
+				_outbound.Dispose();
+				_outbound = null;
 
 				_endpointToListenOn.Dispose();
 				_endpointToListenOn = null;
@@ -299,18 +306,55 @@ namespace MassTransit
 
 		public bool Accept(object obj)
 		{
-			return _messageDispatcher.Accept(obj);
+			// TODO this is evil!
+			return true;
 		}
 
-		private object EndpointReader(IEndpoint resource)
+		private void EndpointReader(IEndpoint resource)
 		{
 			try
 			{
-				TimeSpan timeout = TimeSpan.FromSeconds(3);
+				using (TransactionScope scope = new TransactionScope())
+				{
+					bool released = false;
+					try
+					{
+						resource.Receive(_readerTimeout, (message, acceptor) =>
+							{
+								try
+								{
+									return _inbound.Dispatch(message, accepted =>
+										{
+											bool result = acceptor(message);
 
-				object message = resource.Receive(timeout, Accept);
+											_asyncDispatcher.ReleaseResource(1);
+											released = true;
 
-				return message;
+											return result;
+										});
+								}
+								catch (Exception ex)
+								{
+									//retry
+									SpecialLoggers.Iron.Error("An error was caught in the ServiceBus.IronDispatcher", ex);
+
+									IPublicationTypeInfo info = _typeInfoCache.GetPublicationTypeInfo(message.GetType());
+									info.PublishFault(this, ex, message);
+
+									PoisonEndpoint.Send(message, TimeSpan.Zero);
+								}
+
+								return false;
+							});
+					}
+					finally
+					{
+						if (!released)
+							_asyncDispatcher.ReleaseResource(1);
+					}
+
+					scope.Complete();
+				}
 			}
 			catch (Exception ex)
 			{
@@ -319,31 +363,6 @@ namespace MassTransit
 			}
 		}
 
-		private void EndpointDispatcher(object message)
-		{
-			if (message == null)
-				return;
-
-			try
-			{
-				_messageDispatcher.Consume(message);
-			}
-			catch (Exception ex)
-			{
-                //retry
-				SpecialLoggers.Iron.Error("An error was caught in the ServiceBus.IronDispatcher", ex);
-
-				IPublicationTypeInfo info = _typeInfoCache.GetPublicationTypeInfo(message.GetType());
-				info.PublishFault(this, ex, message);
-
-				PoisonEndpoint.Send(message, TimeSpan.Zero);
-
-
-				throw;
-			}
-		}
-
-
 		private void IronDispatcher(object message)
 		{
 			if (message == null)
@@ -351,7 +370,7 @@ namespace MassTransit
 
 			try
 			{
-				_messageDispatcher.Consume(message);
+				_inbound.Dispatch(message);
 			}
 			catch (Exception ex)
 			{
@@ -362,13 +381,66 @@ namespace MassTransit
 				info.PublishFault(this, ex, message);
 
 
-                PoisonEndpoint.Send(message, TimeSpan.Zero);
+				PoisonEndpoint.Send(message, TimeSpan.Zero);
 			}
 		}
 
 		public static ServiceBusBuilder Build()
 		{
 			return new ServiceBusBuilder();
+		}
+	}
+
+	public class SubscriptionCacheEventConnector :
+		ISubscriptionEvent
+	{
+		private readonly ISubscriptionCache _cache;
+		private readonly IEndpoint _endpoint;
+
+		public SubscriptionCacheEventConnector(ISubscriptionCache cache, IEndpoint endpoint)
+		{
+			_cache = cache;
+			_endpoint = endpoint;
+		}
+
+		public Func<bool> SubscribedTo(Type messageType)
+		{
+			Subscription subscription = new Subscription(messageType, _endpoint.Uri);
+
+			_cache.Add(subscription);
+
+			return () =>
+				{
+					_cache.Remove(subscription);
+					return true;
+				};
+		}
+
+		public Func<bool> SubscribedTo(Type messageType, string correlationId)
+		{
+			Subscription subscription = new Subscription(messageType, correlationId, _endpoint.Uri);
+
+			_cache.Add(subscription);
+
+			return () =>
+				{
+					_cache.Remove(subscription);
+					return true;
+				};
+		}
+
+		public void UnsubscribedFrom(Type messageType)
+		{
+			Subscription subscription = new Subscription(messageType, _endpoint.Uri);
+
+			_cache.Remove(subscription);
+		}
+
+		public void UnsubscribedFrom(Type messageType, string correlationId)
+		{
+			Subscription subscription = new Subscription(messageType, correlationId, _endpoint.Uri);
+
+			_cache.Remove(subscription);
 		}
 	}
 }

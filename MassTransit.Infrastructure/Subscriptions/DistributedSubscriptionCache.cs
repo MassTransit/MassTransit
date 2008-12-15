@@ -1,4 +1,4 @@
-namespace MassTransit.Subscriptions
+namespace MassTransit.Infrastructure.Subscriptions
 {
 	using System;
 	using System.Collections.Generic;
@@ -9,6 +9,7 @@ namespace MassTransit.Subscriptions
 	using Enyim.Caching.Memcached;
 	using Exceptions;
 	using log4net;
+	using MassTransit.Subscriptions;
 
 	public class DistributedSubscriptionCache :
 		ISubscriptionCache

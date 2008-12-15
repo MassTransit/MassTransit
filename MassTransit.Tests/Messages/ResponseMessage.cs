@@ -10,11 +10,28 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Internal
+namespace MassTransit.Tests.Messages
 {
-    public interface Produces<TMessage> where TMessage : class
-    {
-        void Attach(Consumes<TMessage>.All consumer);
-        void Detach(Consumes<TMessage>.All consumer);
-    }
+	using System;
+
+	public class ResponseMessage :
+		CorrelatedBy<Guid>
+	{
+		private readonly Guid _correlationId;
+
+		//xml serializer
+		public ResponseMessage()
+		{
+		}
+
+		public ResponseMessage(Guid correlationId)
+		{
+			_correlationId = correlationId;
+		}
+
+		public Guid CorrelationId
+		{
+			get { return _correlationId; }
+		}
+	}
 }

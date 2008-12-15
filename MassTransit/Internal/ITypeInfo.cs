@@ -17,6 +17,5 @@ namespace MassTransit.Internal
     public interface ITypeInfo : IDisposable
     {
         IPublicationTypeInfo GetPublicationTypeInfo();
-        ISubscriptionTypeInfo GetSubscriptionTypeInfo();
     }
 }

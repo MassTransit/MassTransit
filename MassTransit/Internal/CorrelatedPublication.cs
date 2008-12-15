@@ -40,7 +40,7 @@ namespace MassTransit.Internal
 			if (context.SubscriptionCache == null)
 				return new List<Subscription>();
 
-			return context.SubscriptionCache.List(_messageType.FullName, key.CorrelationId.ToString());
+			return context.SubscriptionCache.List(Subscription.BuildMessageName(_messageType), key.CorrelationId.ToString());
         }
 
         public override void PublishFault<T>(IServiceBus bus, Exception ex, T message)

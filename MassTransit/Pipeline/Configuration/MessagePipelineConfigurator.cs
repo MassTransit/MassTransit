@@ -16,6 +16,7 @@ namespace MassTransit.Pipeline.Configuration
 	using System.Collections.Generic;
 	using Interceptors;
 	using Sinks;
+	using Subscriptions;
 
 	public class MessagePipelineConfigurator :
 		IConfigurePipeline,
@@ -27,10 +28,12 @@ namespace MassTransit.Pipeline.Configuration
 
 		protected InterceptorList<IPipelineInterceptor> _interceptors = new InterceptorList<IPipelineInterceptor>();
 		private MessagePipeline _pipeline;
+		private ISubscriptionEvent _subscriptionEvent;
 
-		public MessagePipelineConfigurator(IObjectBuilder builder)
+		public MessagePipelineConfigurator(IObjectBuilder builder, ISubscriptionEvent subscriptionEvent)
 		{
 			_builder = builder;
+			_subscriptionEvent = subscriptionEvent;
 
 			MessageRouter<object> router = new MessageRouter<object>();
 
@@ -95,7 +98,7 @@ namespace MassTransit.Pipeline.Configuration
 
 		private Func<bool> Subscribe(Func<IInterceptorContext, IPipelineInterceptor, IEnumerable<Func<bool>>> subscriber)
 		{
-			var context = new InterceptorContext(_pipeline, _builder);
+			var context = new InterceptorContext(_pipeline, _builder, _subscriptionEvent);
 
 			Func<bool> result = null;
 
@@ -118,9 +121,9 @@ namespace MassTransit.Pipeline.Configuration
 			return configurator._pipeline;
 		}
 
-		public static MessagePipelineConfigurator CreateDefault(IObjectBuilder builder)
+		public static MessagePipelineConfigurator CreateDefault(IObjectBuilder builder, ISubscriptionEvent subscriptionEvent)
 		{
-			return new MessagePipelineConfigurator(builder);
+			return new MessagePipelineConfigurator(builder, subscriptionEvent);
 		}
 	}
 }

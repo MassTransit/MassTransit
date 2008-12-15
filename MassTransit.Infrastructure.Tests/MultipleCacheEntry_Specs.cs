@@ -15,6 +15,7 @@ namespace MassTransit.Infrastructure.Tests
     using System;
     using System.Collections.Generic;
     using Enyim.Caching;
+    using MassTransit.Subscriptions;
     using NUnit.Framework;
     using NUnit.Framework.SyntaxHelpers;
     using Subscriptions;

@@ -13,6 +13,7 @@
 namespace MassTransit.Tests.Pipeline
 {
 	using System;
+	using System.Diagnostics;
 	using Magnum.Common.DateTimeExtensions;
 	using MassTransit.Pipeline;
 	using MassTransit.Pipeline.Configuration;
@@ -29,28 +30,40 @@ namespace MassTransit.Tests.Pipeline
 		public void Setup()
 		{
 			_builder = MockRepository.GenerateMock<IObjectBuilder>();
+			_subscriptionEvent = MockRepository.GenerateMock<ISubscriptionEvent>();
+			_subscriptionEvent.Expect(x => x.SubscribedTo(null)).IgnoreArguments().Repeat.Any().Return(() => true);
+			_subscriptionEvent.Expect(x => x.SubscribedTo(null,null)).IgnoreArguments().Repeat.Any().Return(() => true);
+			_pipeline = MessagePipelineConfigurator.CreateDefault(_builder, _subscriptionEvent);
 		}
 
 		private IObjectBuilder _builder;
+		private MessagePipeline _pipeline;
+		private ISubscriptionEvent _subscriptionEvent;
 
 		[Test]
 		public void A_bunch_of_mixed_subscriber_types_should_work()
 		{
-			MessagePipeline pipeline = MessagePipelineConfigurator.CreateDefault(_builder);
-
 			IndiscriminantConsumer<PingMessage> consumer = new IndiscriminantConsumer<PingMessage>();
 			ParticularConsumer consumerYes = new ParticularConsumer(true);
 			ParticularConsumer consumerNo = new ParticularConsumer(false);
 
-			var unsubscribeToken = pipeline.Subscribe(consumer);
-			unsubscribeToken += pipeline.Subscribe(consumerYes);
-			unsubscribeToken += pipeline.Subscribe(consumerNo);
+			Stopwatch firstTime = Stopwatch.StartNew();
+			var unsubscribeToken = _pipeline.Subscribe(consumer);
+			firstTime.Stop();
 
-			PipelineViewer.Trace(pipeline);
+			Stopwatch secondTime = Stopwatch.StartNew();
+			unsubscribeToken += _pipeline.Subscribe(consumerYes);
+			secondTime.Stop();
+
+			unsubscribeToken += _pipeline.Subscribe(consumerNo);
+
+			Trace.WriteLine(string.Format("First time: {0}, Second Time: {1}", firstTime.Elapsed, secondTime.Elapsed));
+
+			PipelineViewer.Trace(_pipeline);
 
 			PingMessage message = new PingMessage();
 
-			pipeline.Dispatch(message);
+			_pipeline.Dispatch(message);
 
 			Assert.AreEqual(message, consumer.Consumed);
 			Assert.AreEqual(message, consumerYes.Consumed);
@@ -59,7 +72,7 @@ namespace MassTransit.Tests.Pipeline
 			unsubscribeToken();
 
 			PingMessage nextMessage = new PingMessage();
-			pipeline.Dispatch(nextMessage);
+			_pipeline.Dispatch(nextMessage);
 
 			Assert.AreEqual(message, consumer.Consumed);
 			Assert.AreEqual(message, consumerYes.Consumed);
@@ -72,16 +85,14 @@ namespace MassTransit.Tests.Pipeline
 
 			_builder.Expect(x => x.GetInstance<TestMessageConsumer<PingMessage>>()).Return(consumer).Repeat.Once();
 
-			MessagePipeline pipeline = MessagePipelineConfigurator.CreateDefault(_builder);
+			_pipeline.Subscribe<TestMessageConsumer<PingMessage>>();
 
-			pipeline.Subscribe<TestMessageConsumer<PingMessage>>();
-
-			PipelineViewer.Trace(pipeline);
+			PipelineViewer.Trace(_pipeline);
 
 			PingMessage message = new PingMessage();
 			consumer.Expect(x => x.Consume(message));
 
-			pipeline.Dispatch(message);
+			_pipeline.Dispatch(message);
 
 			consumer.VerifyAllExpectations();
 			_builder.VerifyAllExpectations();
@@ -94,17 +105,15 @@ namespace MassTransit.Tests.Pipeline
 
 			_builder.Expect(x => x.GetInstance<ParticularConsumer>()).Return(consumer).Repeat.Once();
 
-			MessagePipeline pipeline = MessagePipelineConfigurator.CreateDefault(_builder);
+			_pipeline.Subscribe<ParticularConsumer>();
 
-			pipeline.Subscribe<ParticularConsumer>();
-
-			PipelineViewer.Trace(pipeline);
+			PipelineViewer.Trace(_pipeline);
 
 			PingMessage message = new PingMessage();
 			consumer.Expect(x => x.Accept(message)).Return(true);
 			consumer.Expect(x => x.Consume(message));
 
-			pipeline.Dispatch(message);
+			_pipeline.Dispatch(message);
 
 			consumer.VerifyAllExpectations();
 			_builder.VerifyAllExpectations();
@@ -117,19 +126,17 @@ namespace MassTransit.Tests.Pipeline
 
 			_builder.Expect(x => x.GetInstance<PingPongConsumer>()).Return(consumer).Repeat.Twice();
 
-			MessagePipeline pipeline = MessagePipelineConfigurator.CreateDefault(_builder);
+			_pipeline.Subscribe<PingPongConsumer>();
 
-			pipeline.Subscribe<PingPongConsumer>();
-
-			PipelineViewer.Trace(pipeline);
+			PipelineViewer.Trace(_pipeline);
 
 			PingMessage ping = new PingMessage();
 			consumer.Expect(x => x.Consume(ping));
-			pipeline.Dispatch(ping);
+			_pipeline.Dispatch(ping);
 
 			PongMessage pong = new PongMessage(ping.CorrelationId);
 			consumer.Expect(x => x.Consume(pong));
-			pipeline.Dispatch(pong);
+			_pipeline.Dispatch(pong);
 
 			_builder.VerifyAllExpectations();
 			consumer.VerifyAllExpectations();
@@ -138,15 +145,16 @@ namespace MassTransit.Tests.Pipeline
 		[Test]
 		public void The_subscription_should_be_added()
 		{
-			MessagePipeline pipeline = MessagePipelineConfigurator.CreateDefault(_builder);
-
 			IndiscriminantConsumer<PingMessage> consumer = new IndiscriminantConsumer<PingMessage>();
 
-			pipeline.Subscribe(consumer);
+			Stopwatch firstTime = Stopwatch.StartNew();
+			_pipeline.Subscribe(consumer);
+			firstTime.Stop();
+
 
 			PingMessage message = new PingMessage();
 
-			pipeline.Dispatch(message);
+			_pipeline.Dispatch(message);
 
 			Assert.AreEqual(message, consumer.Consumed);
 		}
@@ -154,41 +162,56 @@ namespace MassTransit.Tests.Pipeline
 		[Test]
 		public void Correlated_subscriptions_should_make_happy_sounds()
 		{
-			MessagePipeline pipeline = MessagePipelineConfigurator.CreateDefault(_builder);
-
 			PingMessage message = new PingMessage();
 
 			TestCorrelatedConsumer<PingMessage, Guid> consumer = new TestCorrelatedConsumer<PingMessage, Guid>(message.CorrelationId);
 			TestCorrelatedConsumer<PingMessage, Guid> negativeConsumer = new TestCorrelatedConsumer<PingMessage, Guid>(Guid.Empty);
 
-			Func<bool> token = pipeline.Subscribe(consumer);
-			token += pipeline.Subscribe(negativeConsumer);
+			Func<bool> token = _pipeline.Subscribe(consumer);
+			token += _pipeline.Subscribe(negativeConsumer);
 
-			PipelineViewer.Trace(pipeline);
+			PipelineViewer.Trace(_pipeline);
 
-			pipeline.Dispatch(message);
+			_pipeline.Dispatch(message);
 
 			consumer.ShouldHaveReceivedMessage(message, 0.Seconds());
 			negativeConsumer.ShouldNotHaveReceivedMessage(message, 0.Seconds());
 
 			token();
 
-			PipelineViewer.Trace(pipeline);
+			PipelineViewer.Trace(_pipeline);
 		}
+
+		[Test, Explicit]
+		public void Correlated_subscription_benchmark()
+		{
+			TestCorrelatedConsumer<PingMessage, Guid> consumer = new TestCorrelatedConsumer<PingMessage, Guid>(Guid.NewGuid());
+
+			Func<bool> token = _pipeline.Subscribe(consumer);
+			token();
+
+			Stopwatch overall = Stopwatch.StartNew();
+			for (int i = 0; i < 10000; i++)
+			{
+				token = _pipeline.Subscribe(consumer);
+				token();
+			}
+			overall.Stop();
+
+			Trace.WriteLine("Elapsed Time: " + overall.Elapsed);
+            }
 
 
 		[Test]
 		public void The_subscription_should_be_added_for_selective_consumers()
 		{
-			MessagePipeline pipeline = MessagePipelineConfigurator.CreateDefault(_builder);
-
 			ParticularConsumer consumer = new ParticularConsumer(false);
 
-			pipeline.Subscribe(consumer);
+			_pipeline.Subscribe(consumer);
 
 			PingMessage message = new PingMessage();
 
-			pipeline.Dispatch(message);
+			_pipeline.Dispatch(message);
 
 			Assert.AreEqual(null, consumer.Consumed);
 		}
@@ -196,15 +219,13 @@ namespace MassTransit.Tests.Pipeline
 		[Test]
 		public void The_subscription_should_be_added_for_selective_consumers_that_are_interested()
 		{
-			MessagePipeline pipeline = MessagePipelineConfigurator.CreateDefault(_builder);
-
 			ParticularConsumer consumer = new ParticularConsumer(true);
 
-			pipeline.Subscribe(consumer);
+			_pipeline.Subscribe(consumer);
 
 			PingMessage message = new PingMessage();
 
-			pipeline.Dispatch(message);
+			_pipeline.Dispatch(message);
 
 			Assert.AreEqual(message, consumer.Consumed);
 		}
@@ -212,15 +233,13 @@ namespace MassTransit.Tests.Pipeline
 		[Test]
 		public void The_wrong_type_of_message_should_not_blow_up_the_test()
 		{
-			MessagePipeline pipeline = MessagePipelineConfigurator.CreateDefault(_builder);
-
 			IndiscriminantConsumer<PingMessage> consumer = new IndiscriminantConsumer<PingMessage>();
 
-			pipeline.Subscribe(consumer);
+			_pipeline.Subscribe(consumer);
 
 			PongMessage message = new PongMessage();
 
-			pipeline.Dispatch(message);
+			_pipeline.Dispatch(message);
 
 			Assert.AreEqual(null, consumer.Consumed);
 		}

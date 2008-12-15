@@ -16,7 +16,7 @@ namespace MassTransit.Pipeline.Configuration
 	using Sinks;
 
 	public class MessageRouterConfiguratorScope<TMessage> :
-		PipelineInspectorBase
+		PipelineInspectorBase<MessageRouterConfiguratorScope<TMessage>>
 		where TMessage : class
 	{
 		public MessageRouter<object> ObjectRouter { get; private set; }

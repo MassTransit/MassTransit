@@ -5,7 +5,7 @@
                    default-access="field.camelcase-underscore"
                    default-lazy="false"
                    default-cascade="none" >
-  <class name="MassTransit.ServiceBus.Timeout.ScheduledTimeout, MassTransit.ServiceBus">
+  <class name="MassTransit.Infrastructure.Timeout.ScheduledTimeout, MassTransit.Infrastructure">
     <id name="Id">
       <generator class="assigned" />
     </id>

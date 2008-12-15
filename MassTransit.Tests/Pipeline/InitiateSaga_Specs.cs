@@ -13,6 +13,7 @@
 namespace MassTransit.Tests.Pipeline
 {
 	using System;
+	using System.Collections;
 	using MassTransit.Pipeline;
 	using MassTransit.Pipeline.Configuration;
 	using MassTransit.Pipeline.Inspectors;
@@ -27,8 +28,6 @@ namespace MassTransit.Tests.Pipeline
 	[TestFixture]
 	public class When_an_initiating_message_for_a_saga_arrives
 	{
-		#region Setup/Teardown
-
 		[SetUp]
 		public void Setup()
 		{
@@ -47,20 +46,32 @@ namespace MassTransit.Tests.Pipeline
 			_context = MockRepository.GenerateMock<IInterceptorContext>();
 			_context.Stub(x => x.Builder).Return(_builder);
 
+			Hashtable empty = new Hashtable();
+
 			_completeSink = new OrchestrateSagaMessageSink<SimpleSaga, CompleteSimpleSaga>(_context, _bus, _repository);
-			_builder.Stub(x => x.GetInstance<OrchestrateSagaMessageSink<SimpleSaga, CompleteSimpleSaga>>()).Return(_completeSink);
+			_builder.Stub(x => x.GetInstance<OrchestrateSagaMessageSink<SimpleSaga, CompleteSimpleSaga>>(empty)).Return(_completeSink).IgnoreArguments();
 
 			_initiateSink = new InitiateSagaMessageSink<SimpleSaga, InitiateSimpleSaga>(_context, _bus, _repository);
-			_builder.Stub(x => x.GetInstance<InitiateSagaMessageSink<SimpleSaga, InitiateSimpleSaga>>()).Return(_initiateSink);
+			_builder.Stub(x => x.GetInstance<InitiateSagaMessageSink<SimpleSaga, InitiateSimpleSaga>>(empty)).Return(_initiateSink).IgnoreArguments();
 
-			_pipeline = MessagePipelineConfigurator.CreateDefault(_builder);
+			_subscriptionEvent = MockRepository.GenerateMock<ISubscriptionEvent>();
+			_subscriptionEvent.Expect(x => x.SubscribedTo(typeof(InitiateSimpleSaga))).Repeat.Any().Return(() =>
+			{
+				_subscriptionEvent.UnsubscribedFrom(typeof(InitiateSimpleSaga));
+				return true;
+			});
+			_subscriptionEvent.Expect(x => x.SubscribedTo(typeof(CompleteSimpleSaga))).Repeat.Any().Return(() =>
+			{
+				_subscriptionEvent.UnsubscribedFrom(typeof(CompleteSimpleSaga));
+				return true;
+			});
+
+			_pipeline = MessagePipelineConfigurator.CreateDefault(_builder, _subscriptionEvent);
 
 			_remove = _pipeline.Subscribe<SimpleSaga>();
 
 			PipelineViewer.Trace(_pipeline);
 		}
-
-		#endregion
 
 		private readonly Uri _uri = new Uri("msmq://localhost/mt_client");
 		private IEndpoint _endpoint;
@@ -76,38 +87,23 @@ namespace MassTransit.Tests.Pipeline
 		private SimpleSaga _saga;
 		private MessagePipeline _pipeline;
 		private Func<bool> _remove;
+		private ISubscriptionEvent _subscriptionEvent;
 
 		[Test]
 		public void Should_publish_subscriptions_for_saga_subscriptions()
 		{
-			AddSubscription add = new AddSubscription(Subscription.BuildMessageName(typeof (InitiateSimpleSaga)), _uri);
-			_bus.Expect(x => x.Publish(add));
-
-			AddSubscription add2 = new AddSubscription(Subscription.BuildMessageName(typeof (CompleteSimpleSaga)), _uri);
-			_bus.Expect(x => x.Publish(add2));
-
-			var publisher = new SubscriptionPublisher(_bus);
-			publisher.Refresh(_pipeline);
-
-			_bus.VerifyAllExpectations();
+			_subscriptionEvent.VerifyAllExpectations();
 		}	
 		
 		[Test]
 		public void Should_remove_subscriptions_for_saga_subscriptions()
 		{
-			var add = new RemoveSubscription(Subscription.BuildMessageName(typeof (InitiateSimpleSaga)), _uri);
-			_bus.Expect(x => x.Publish(add));
-
-			var add2 = new RemoveSubscription(Subscription.BuildMessageName(typeof(CompleteSimpleSaga)), _uri);
-			_bus.Expect(x => x.Publish(add2));
-
-			var publisher = new SubscriptionPublisher(_bus);
-			publisher.Refresh(_pipeline);
+			_subscriptionEvent.Expect(x => x.UnsubscribedFrom(typeof(InitiateSimpleSaga)));
+			_subscriptionEvent.Expect(x => x.UnsubscribedFrom(typeof(CompleteSimpleSaga)));
 
 			_remove();
-			publisher.Refresh(_pipeline);
 
-			_bus.VerifyAllExpectations();
+			_subscriptionEvent.VerifyAllExpectations();
 		}
 
 		[Test]

@@ -16,6 +16,7 @@ namespace MassTransit.Tests.Pipeline
 	using MassTransit.Pipeline;
 	using MassTransit.Pipeline.Configuration;
 	using MassTransit.Pipeline.Inspectors;
+	using MassTransit.Subscriptions;
 	using Messages;
 	using NUnit.Framework;
 	using Rhino.Mocks;
@@ -27,27 +28,29 @@ namespace MassTransit.Tests.Pipeline
 		public void Setup()
 		{
 			_builder = MockRepository.GenerateMock<IObjectBuilder>();
+			_subscriptionEvent = MockRepository.GenerateMock<ISubscriptionEvent>();
+			_pipeline = MessagePipelineConfigurator.CreateDefault(_builder, _subscriptionEvent);
 		}
 
 		private IObjectBuilder _builder;
+		private MessagePipeline _pipeline;
+		private ISubscriptionEvent _subscriptionEvent;
 
 		[Test]
 		public void The_endpoint_consumer_should_be_returned()
 		{
-			MessagePipeline pipeline = MessagePipelineConfigurator.CreateDefault(_builder);
-
 			IEndpoint endpoint = MockRepository.GenerateMock<IEndpoint>();
 			endpoint.Stub(x => x.Uri).Return(new Uri("msmq://localhost/queue_name"));
 
-			pipeline.Subscribe<PingMessage>(endpoint);
+			_pipeline.Subscribe<PingMessage>(endpoint);
 
-			PipelineViewer.Trace(pipeline);
+			PipelineViewer.Trace(_pipeline);
 
 			PingMessage message = new PingMessage();
 
 			endpoint.Expect(x => x.Send(message));
 
-			pipeline.Dispatch(message);
+			_pipeline.Dispatch(message);
 
 			endpoint.VerifyAllExpectations();
 		}

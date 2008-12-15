@@ -16,7 +16,7 @@ namespace MassTransit.Pipeline.Configuration
 	using Sinks;
 
 	public class BatchMessageRouterConfiguratorScope<TMessage, TKey> :
-		PipelineInspectorBase
+		PipelineInspectorBase<BatchMessageRouterConfiguratorScope<TMessage, TKey>>
 		where TMessage : class, BatchedBy<TKey>
 	{
 		public BatchMessageRouter<TMessage, TKey> Router { get; private set; }

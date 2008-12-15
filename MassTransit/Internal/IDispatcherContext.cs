@@ -12,26 +12,12 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Internal
 {
-    using System;
-    using Subscriptions;
+	using Subscriptions;
 
     public interface IDispatcherContext
     {
         IObjectBuilder Builder { get; }
         IServiceBus Bus { get; }
         ISubscriptionCache SubscriptionCache { get; }
-
-        ISubscriptionTypeInfo GetSubscriptionTypeInfo(Type type);
-
-        void Attach<TMessage>(Consumes<TMessage>.All consumer) where TMessage : class;
-        void Detach<TMessage>(Consumes<TMessage>.All consumer) where TMessage : class;
-
-        void Consume(object message);
-
-        T GetDispatcher<T>() where T : class;
-        T GetDispatcher<T>(Type type) where T : class;
-
-        void AddSubscription(Subscription subscription);
-        void RemoveSubscription(Subscription subscription);
     }
 }

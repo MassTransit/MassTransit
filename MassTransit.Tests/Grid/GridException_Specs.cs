@@ -12,57 +12,55 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests.Grid
 {
-    using System;
-    using System.Threading;
-    using log4net;
-    using MassTransit.Grid;
-    using MassTransit.Internal;
-    using NUnit.Framework;
-    using NUnit.Framework.SyntaxHelpers;
-    using Internal;
-    using Tests.Grid;
+	using System;
+	using System.Threading;
+	using log4net;
+	using MassTransit.Grid;
+	using MassTransit.Internal;
+	using NUnit.Framework;
+	using NUnit.Framework.SyntaxHelpers;
 
-    [TestFixture]
-    public class When_a_worker_throws_an_exception :
-        GridContextSpecification
-    {
-        private static readonly ILog _log = LogManager.GetLogger(typeof(When_a_worker_throws_an_exception));
+	[TestFixture]
+	public class When_a_worker_throws_an_exception :
+		GridContextSpecification
+	{
+		private static readonly ILog _log = LogManager.GetLogger(typeof (When_a_worker_throws_an_exception));
 
-        private FactorLongNumbersTask _factorLongNumbers;
-        private ManualResetEvent _complete;
-        private ManualResetEvent _fault;
+		private FactorLongNumbersTask _factorLongNumbers;
+		private ManualResetEvent _complete;
+		private ManualResetEvent _fault;
 
-        protected override void Before_each()
-        {
-            base.Before_each();
+		protected override void Before_each()
+		{
+			base.Before_each();
 
-            _factorLongNumbers = new FactorLongNumbersTask();
+			_factorLongNumbers = new FactorLongNumbersTask();
 
-            _factorLongNumbers.Add(27);
+			_factorLongNumbers.Add(27);
 
-            _complete = new ManualResetEvent(false);
-            _fault = new ManualResetEvent(false);
+			_complete = new ManualResetEvent(false);
+			_fault = new ManualResetEvent(false);
 
-            _factorLongNumbers.WhenCompleted(x => _complete.Set());
-            _factorLongNumbers.WhenExceptionOccurs((t, s, e) =>
-                                                       {
-                                                           _log.Error("Worker Failed: ", e);
-                                                           _fault.Set();
-                                                       });
-        }
+			_factorLongNumbers.WhenCompleted(x => _complete.Set());
+			_factorLongNumbers.WhenExceptionOccurs((t, s, e) =>
+				{
+					_log.Error("Worker Failed: ", e);
+					_fault.Set();
+				});
+		}
 
-        [Test]
-        public void I_want_to_be_able_to_define_a_distributed_task_and_have_it_processed()
-        {
-            RemoteBus.Subscribe<SubTaskWorker<ExceptionalWorker, FactorLongNumber, LongNumberFactored>>();
+		[Test]
+		public void I_want_to_be_able_to_define_a_distributed_task_and_have_it_processed()
+		{
+			RemoteBus.Subscribe<SubTaskWorker<ExceptionalWorker, FactorLongNumber, LongNumberFactored>>();
 
-            var distributedTaskController =
-                new DistributedTaskController<FactorLongNumbersTask, FactorLongNumber, LongNumberFactored>(RemoteBus, Container.Resolve<IEndpointResolver>(), _factorLongNumbers);
+			var distributedTaskController =
+				new DistributedTaskController<FactorLongNumbersTask, FactorLongNumber, LongNumberFactored>(RemoteBus, Container.Resolve<IEndpointResolver>(), _factorLongNumbers);
 
-            distributedTaskController.Start();
+			distributedTaskController.Start();
 
-            Assert.That(_fault.WaitOne(TimeSpan.FromSeconds(10), true), Is.True, "Timeout waiting for distributed task to fail");
-            Assert.That(_complete.WaitOne(TimeSpan.Zero, false), Is.False, "Task should not have completed");
-        }
-    }
+			Assert.That(_fault.WaitOne(TimeSpan.FromSeconds(10), true), Is.True, "Timeout waiting for distributed task to fail");
+			Assert.That(_complete.WaitOne(TimeSpan.Zero, false), Is.False, "Task should not have completed");
+		}
+	}
 }

@@ -30,7 +30,7 @@ namespace MassTransit.Tests.Subscriptions
 
 			cache.Add(new Subscription(typeof (PingMessage), new Uri(mockPath)));
 			cache.Add(new Subscription(typeof (PingMessage), new Uri(mockPath)));
-			cache.Add(new Subscription(typeof (PingMessage), new Uri(mockPath)));
+			cache.Add(new Subscription(typeof (PongMessage), new Uri(mockPath)));
 
 			Assert.That(cache.List().Count, Is.EqualTo(2));
 			Assert.That(count, Is.EqualTo(2));

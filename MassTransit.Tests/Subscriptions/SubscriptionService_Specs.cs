@@ -35,11 +35,11 @@ namespace MassTransit.Tests.Subscriptions
             MonitorSubscriptionCache<PingMessage> monitor = new MonitorSubscriptionCache<PingMessage>(SubscriptionCache);
 
             TestMessageConsumer<PingMessage> consumer = new TestMessageConsumer<PingMessage>();
-            LocalBus.Subscribe(consumer);
+            var token = LocalBus.Subscribe(consumer);
 
             monitor.ShouldHaveBeenAdded(_timeout);
 
-            LocalBus.Unsubscribe(consumer);
+        	token();
 
             monitor.ShouldHaveBeenRemoved(_timeout);
         }

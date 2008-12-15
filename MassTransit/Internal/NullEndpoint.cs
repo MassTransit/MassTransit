@@ -28,12 +28,17 @@ namespace MassTransit.Internal
 
         public object Receive(TimeSpan timeout)
         {
-            return Receive(TimeSpan.Zero, null);
-        }
+			throw new EndpointException(this, "NullEndpoints have no messages");
+		}
 
         public object Receive(TimeSpan timeout, Predicate<object> accept)
         {
             throw new EndpointException(this, "NullEndpoints have no messages");
         }
+
+    	public void Receive(TimeSpan timeout, Func<object, Func<object, bool>, bool> receiver)
+    	{
+			throw new EndpointException(this, "NullEndpoints have no messages");
+		}
     }
 }

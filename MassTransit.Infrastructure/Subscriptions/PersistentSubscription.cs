@@ -10,32 +10,44 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Pipeline.Inspectors
+namespace MassTransit.Infrastructure.Subscriptions
 {
 	using System;
-	using Util;
+	using MassTransit.Subscriptions;
 
-	/// <summary>
-	/// Base class for pipeline inspectors
-	/// </summary>
-	public class PipelineInspectorBase<TVisitor> :
-		ReflectiveVisitorBase<TVisitor>,
-		IPipelineInspector 
-		where TVisitor : class
+	public class PersistentSubscription :
+		Subscription
 	{
-		public PipelineInspectorBase()
-			: base("Inspect")
+#pragma warning disable 649
+		private int _id;
+#pragma warning restore 649
+		private bool _isActive;
+
+		protected PersistentSubscription()
 		{
 		}
 
-		public bool Inspect(object obj)
+		public PersistentSubscription(Subscription subscription)
+			: base(subscription)
 		{
-			return Visit(obj);
+			_isActive = true;
 		}
 
-		public bool Inspect(object obj, Func<bool> action)
+		public int Id
 		{
-			return Visit(obj, action);
+			get { return _id; }
+		}
+
+		public bool IsActive
+		{
+			get { return _isActive; }
+			set { _isActive = value; }
+		}
+
+		public string Address
+		{
+			get { return EndpointUri.ToString(); }
+			set { _endpointUri = new Uri(value); }
 		}
 	}
 }

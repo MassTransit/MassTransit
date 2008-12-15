@@ -14,8 +14,6 @@ namespace MassTransit.Tests
 {
     using System;
     using NUnit.Framework;
-    
-    using Tests;
     using Tests.Messages;
     using Tests.TestConsumers;
 
@@ -28,7 +26,7 @@ namespace MassTransit.Tests
 
         protected  void RunTest()
         {
-            TestBatchConsumer<IndividualBatchMessage, Guid> batchConsumer = new TestBatchConsumer<IndividualBatchMessage, Guid>();
+			var batchConsumer = new TestBatchMessageConsumer<IndividualBatchMessage, Guid>();
 
             RemoteBus.Subscribe(batchConsumer);
 
@@ -74,8 +72,8 @@ namespace MassTransit.Tests
 
         protected  void RunTest()
         {
-            Container.AddComponent<TestBatchConsumer<IndividualBatchMessage, Guid>>();
-            RemoteBus.Subscribe<TestBatchConsumer<IndividualBatchMessage, Guid>>();
+            Container.AddComponent<TestBatchMessageConsumer<IndividualBatchMessage, Guid>>();
+			RemoteBus.Subscribe<TestBatchMessageConsumer<IndividualBatchMessage, Guid>>();
 
             Guid batchId = Guid.NewGuid();
             for (int i = 0; i < _batchSize; i++)
@@ -85,7 +83,7 @@ namespace MassTransit.Tests
                 LocalBus.Publish(message);
             }
 
-            TestBatchConsumer<IndividualBatchMessage, Guid>.AnyShouldHaveReceivedBatch(batchId, _timeout);
+			TestBatchMessageConsumer<IndividualBatchMessage, Guid>.AnyShouldHaveReceivedBatch(batchId, _timeout);
         }
 
         [Test]
@@ -122,10 +120,10 @@ namespace MassTransit.Tests
         {
             _batchSize = 2;
 
-            TestMessageConsumer<BatchTimeout<IndividualBatchMessage, Guid>> timeoutConsumer = new TestMessageConsumer<BatchTimeout<IndividualBatchMessage, Guid>>();
+            var timeoutConsumer = new TestMessageConsumer<BatchTimeout<IndividualBatchMessage, Guid>>();
             RemoteBus.Subscribe(timeoutConsumer);
 
-            TestBatchConsumer<IndividualBatchMessage, Guid> batchConsumer = new TestBatchConsumer<IndividualBatchMessage, Guid>();
+			var batchConsumer = new TestBatchMessageConsumer<IndividualBatchMessage, Guid>();
 
             RemoteBus.Subscribe(batchConsumer);
 
@@ -152,10 +150,10 @@ namespace MassTransit.Tests
         {
             _batchSize = 1;
 
-            TestMessageConsumer<BatchTimeout<IndividualBatchMessage, Guid>> timeoutConsumer = new TestMessageConsumer<BatchTimeout<IndividualBatchMessage, Guid>>();
+            var timeoutConsumer = new TestMessageConsumer<BatchTimeout<IndividualBatchMessage, Guid>>();
             RemoteBus.Subscribe(timeoutConsumer);
 
-            TestBatchConsumer<IndividualBatchMessage, Guid> batchConsumer = new TestBatchConsumer<IndividualBatchMessage, Guid>();
+			var batchConsumer = new TestBatchMessageConsumer<IndividualBatchMessage, Guid>();
             RemoteBus.Subscribe(batchConsumer);
 
             Guid batchId = Guid.NewGuid();

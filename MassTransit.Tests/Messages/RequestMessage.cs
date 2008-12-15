@@ -10,22 +10,18 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Pipeline.Interceptors
+namespace MassTransit.Tests.Messages
 {
 	using System;
 
-	public interface IInterceptorContext
+	public class RequestMessage :
+		CorrelatedBy<Guid>
 	{
-		IObjectBuilder Builder { get; }
-		MessagePipeline Pipeline { get; }
+		private readonly Guid _correlationId = Guid.NewGuid();
 
-		bool HasMessageTypeBeenDefined(Type messageType);
-		void MessageTypeWasDefined(Type messageType);
-
-		Func<bool> SubscribedTo(Type messageType);
-		Func<bool> SubscribedTo(Type messageType, string correlationId);
-
-		void UnsubscribedFrom(Type messageType);
-		void UnsubscribedFrom(Type messageType, string correlationId);
+		public Guid CorrelationId
+		{
+			get { return _correlationId; }
+		}
 	}
 }

@@ -89,6 +89,11 @@ namespace MassTransit.Tests
 			_action = action;
 		}
 
+		public TestBatchMessageConsumer()
+		{
+			_action = null;
+		}
+
 		public override void Consume(BatchMessage<TMessage, TBatchId> batch)
 		{
 			base.Consume(batch);

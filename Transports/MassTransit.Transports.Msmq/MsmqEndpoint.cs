@@ -13,6 +13,7 @@
 namespace MassTransit.Transports.Msmq
 {
     using System;
+    using System.IO;
     using System.Messaging;
     using System.Runtime.Serialization;
     using System.Threading;
@@ -339,6 +340,86 @@ namespace MassTransit.Transports.Msmq
             }
 
             return null;
+        }
+
+
+		private object DeserializeMessage(Message msg)
+		{
+			try
+			{
+				object obj = _serializer.Deserialize(msg.BodyStream);
+
+				return obj;
+			}
+			catch (SerializationException ex)
+			{
+				// if we get a message we cannot serialize, we need to do something about it or it will 
+				// hang the service bus forever
+
+				try
+				{
+					Message discard = _queue.ReceiveById(msg.Id, _receiveTransactionType);
+
+					_log.Error("Discarded message " + discard.Id + " due to a serialization error", ex);
+				}
+				catch (Exception ex2)
+				{
+					_log.Error("Unable to purge message id " + msg.Id, ex2);
+				}
+
+				throw new MessageException(typeof (object), "An error occurred deserializing a message", ex);
+			}
+		}
+
+    	public void Receive(TimeSpan timeout, Func<object, Func<object, bool>, bool> receiver)
+        {
+            if (!_queue.CanRead)
+                throw new EndpointException(this, string.Format("Not allowed to read from endpoint: '{0}'", _uri));
+
+            try
+            {
+				using (MessageEnumerator enumerator = _queue.GetMessageEnumerator2())
+				{
+					while (enumerator.MoveNext(timeout))
+					{
+						Message msg = enumerator.Current;
+						if (msg == null)
+							continue;
+
+						object obj = DeserializeMessage(msg);
+						if (obj == null)
+							continue;
+
+						if (receiver(obj, x =>
+							{
+								Message received = enumerator.RemoveCurrent(timeout, _receiveTransactionType);
+								if (received == null)
+									throw new MessageException(obj.GetType(), "The message could not be removed from the queue");
+
+								if (received.Id != msg.Id)
+									throw new MessageException(obj.GetType(), "The message removed does not match the original message");
+
+								if (_log.IsDebugEnabled)
+									_log.DebugFormat("Queue: {0} Received Message Id {1}", _queue.Path, msg.Id);
+
+								if (SpecialLoggers.Messages.IsInfoEnabled)
+									SpecialLoggers.Messages.InfoFormat("RECV:{0}:{1}", _uri, obj.GetType().Name);
+
+								return true;
+							}))
+							return;
+
+						if (_log.IsDebugEnabled)
+							_log.DebugFormat("Queue: {0} Skipped Message Id {1}", _queue.Path, msg.Id);
+
+					}
+					enumerator.Close();
+				}
+            }
+            catch (MessageQueueException ex)
+            {
+                HandleVariousErrorCodes(ex.MessageQueueErrorCode, ex);
+            }
         }
 
         public void Dispose()

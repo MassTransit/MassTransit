@@ -16,7 +16,6 @@ namespace MassTransit.Infrastructure.Timeout
     using System.Collections.Generic;
     using System.Linq;
     using Magnum.Common.Repository;
-    using MassTransit.Timeout;
     using Services.Timeout;
     using Util;
 

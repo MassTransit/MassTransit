@@ -26,6 +26,7 @@ namespace MassTransit.Transports
 		IEndpoint
 	{
 		private static readonly ILog _log = LogManager.GetLogger(typeof (MulticastUdpEndpoint));
+		private static readonly ILog _messageLog = LogManager.GetLogger("MassTransit.Messages");
 		private readonly ManualResetEvent _doneReceiving = new ManualResetEvent(false);
 		private readonly IMessageSerializer _serializer = new BinaryMessageSerializer();
 		private readonly ManualResetEvent _shutdown = new ManualResetEvent(false);
@@ -71,6 +72,8 @@ namespace MassTransit.Transports
 
 		public void Send<T>(T message, TimeSpan timeToLive) where T : class
 		{
+			if (_disposed) throw new ObjectDisposedException("The object has been disposed");
+
 			Type messageType = typeof (T);
 
 			using (MemoryStream mstream = new MemoryStream())
@@ -96,23 +99,19 @@ namespace MassTransit.Transports
 				_log.DebugFormat("Message Sent: Type = {1}", messageType.Name);
 		}
 
-		public object Receive(TimeSpan timeout)
+		public void Receive(TimeSpan timeout, Func<object, Func<object, bool>, bool> receiver)
 		{
-			return Receive(timeout, x => true);
-		}
-
-		public object Receive(TimeSpan timeout, Predicate<object> accept)
-		{
+			if (_disposed) throw new ObjectDisposedException("The object has been disposed");
 			try
 			{
 				IPEndPoint endPoint = new IPEndPoint(IPAddress.Any, _uri.Port);
 
 				byte[] data = _receiveClient.Receive(ref endPoint);
 				if (data == null)
-					return null;
+					return;
 
 				if (data.Length == 0)
-					return null;
+					return;
 
 				object obj;
 				using (MemoryStream mstream = new MemoryStream(data))
@@ -120,27 +119,29 @@ namespace MassTransit.Transports
 					obj = _serializer.Deserialize(mstream);
 				}
 
-				if (accept(obj))
-				{
-					if (SpecialLoggers.Messages.IsInfoEnabled)
-						SpecialLoggers.Messages.InfoFormat("RECV:{0}:{1}", _uri, obj.GetType().Name);
+				if (receiver(obj, x =>
+					{
+						if (_messageLog.IsInfoEnabled)
+							_messageLog.InfoFormat("RECV:{0}:{1}", _uri, obj.GetType().Name);
 
-					return obj;
-				}
+						return true;
+					}))
+					return;
+
+				if (_messageLog.IsInfoEnabled)
+					_messageLog.InfoFormat("SKIP:{0}:{1}", _uri, obj.GetType().Name);
 			}
 			catch (SocketException ex)
 			{
 				if (ex.SocketErrorCode == SocketError.TimedOut)
-					return null;
+					return;
 
-				_log.Error("Receive Exception: ", ex);
+				_log.Error("Receive Exception: " + _uri, ex);
 			}
 			catch (Exception ex)
 			{
-				_log.Error("Receive Exception", ex);
+				_log.Error("Receive Exception: " + _uri, ex);
 			}
-
-			return null;
 		}
 
 		protected virtual void Dispose(bool disposing)

@@ -35,7 +35,7 @@ namespace MassTransit
         /// </summary>
         /// <typeparam name="T">The message type to handle, often inferred from the callback specified</typeparam>
         /// <param name="callback">The callback to invoke when messages of the specified type arrive on the service bus</param>
-        void Subscribe<T>(Action<T> callback) where T : class;
+		Func<bool> Subscribe<T>(Action<T> callback) where T : class;
 
         /// <summary>
         /// Adds a message handler to the service bus for handling a specific type of message
@@ -43,14 +43,14 @@ namespace MassTransit
         /// <typeparam name="T">The message type to handle, often inferred from the callback specified</typeparam>
         /// <param name="callback">The callback to invoke when messages of the specified type arrive on the service bus</param>
         /// <param name="condition">A condition predicate to filter which messages are handled by the callback</param>
-        void Subscribe<T>(Action<T> callback, Predicate<T> condition) where T : class;
+		Func<bool> Subscribe<T>(Action<T> callback, Predicate<T> condition) where T : class;
 
         /// <summary>
         /// Connects any consumers for the component to the message dispatcher
         /// </summary>
         /// <typeparam name="T">The consumer type</typeparam>
         /// <param name="consumer">The component</param>
-        void Subscribe<T>(T consumer) where T : class;
+		Func<bool> Subscribe<T>(T consumer) where T : class;
 
         /// <summary>
         /// Removes a message handler from the service bus
@@ -78,13 +78,13 @@ namespace MassTransit
         /// Adds a component to the dispatcher that will be created on demand to handle messages
         /// </summary>
         /// <typeparam name="TConsumer">The type of the component to add</typeparam>
-        void Subscribe<TConsumer>() where TConsumer : class;
+        Func<bool> Subscribe<TConsumer>() where TConsumer : class;
 
         /// <summary>
         /// Adds a component to the dispatcher that will be created on demand to handle messages
         /// </summary>
         /// <param name="consumerType">The type of component to add</param>
-        void Subscribe(Type consumerType);
+        Func<bool> Subscribe(Type consumerType);
 
         /// <summary>
         /// Adds a component to the dispatcher that will be created on demand to handle messages
