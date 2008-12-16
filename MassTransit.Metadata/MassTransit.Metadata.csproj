@@ -42,12 +42,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Client\MessageModelFilter.cs" />
-    <Compile Include="Domain\IMetadataRepository.cs" />
-    <Compile Include="Domain\MessageMetadata.cs" />
-    <Compile Include="Messages\MessageDefinition.cs" />
-    <Compile Include="Messages\MetadataSearchResult.cs" />
     <Compile Include="MetadataClient.cs" />
-    <Compile Include="MetadataExtracter.cs" />
     <Compile Include="MetadataService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Server\MessageConsumer.cs" />

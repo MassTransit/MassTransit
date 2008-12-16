@@ -1,7 +1,7 @@
-namespace MassTransit.Metadata.Domain
+namespace MassTransit.Services.Metadata.Domain
 {
     using System.Collections.Generic;
-    using Services.Metadata.Messages;
+    using Messages;
 
     public interface IMetadataRepository
     {
