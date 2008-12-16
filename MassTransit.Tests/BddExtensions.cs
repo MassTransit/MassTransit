@@ -1,6 +1,8 @@
 namespace MassTransit.Tests
 {
     using System;
+    using System.Collections;
+    using System.Collections.Generic;
     using NUnit.Framework;
 
     public static class BddExtensions
@@ -28,6 +30,10 @@ namespace MassTransit.Tests
             Assert.AreEqual(expected, actual);
         }
 
+        public static void ShouldBeNull(this object actual)
+        {
+            Assert.IsNull(actual);
+        }
         public static void ShouldNotBeNull(this object actual)
         {
             Assert.IsNotNull(actual);
@@ -35,6 +41,25 @@ namespace MassTransit.Tests
         public static void ShouldBeSameType<T>(this object actual)
         {
             Assert.AreEqual(typeof(T), actual.GetType());
+        }
+
+
+        public static void ShouldBeEmpty<T>(this ICollection<T> collection)
+        {
+            Assert.AreEqual(0, collection.Count);
+        }
+        public static void ShouldNotBeEmpty<T>(this ICollection<T> collection)
+        {
+            Assert.AreNotEqual(0, collection.Count);
+        }
+        public static void ShouldBeEmpty(this ICollection collection)
+        {
+            Assert.IsEmpty(collection);
+        }
+
+        public static void ShouldNotBeEmpty(this ICollection collection)
+        {
+            Assert.IsNotEmpty(collection);
         }
     }
 }

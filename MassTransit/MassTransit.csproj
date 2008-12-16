@@ -205,6 +205,9 @@
     <Compile Include="Pipeline\Configuration\MessageFilterConfiguratorScope.cs" />
     <Compile Include="Pipeline\Inspectors\PipelineInspectorBase.cs" />
     <Compile Include="ServiceBusExtensions.cs" />
+    <Compile Include="Services\Metadata\Messages\MessageDefinition.cs" />
+    <Compile Include="Services\Metadata\Messages\MetadataSearch.cs" />
+    <Compile Include="Services\Metadata\Messages\MetadataSearchResult.cs" />
     <Compile Include="Util\ReaderWriterLockedDictionary.cs" />
     <Compile Include="Pipeline\ISubscriptionEvent.cs" />
     <Compile Include="Pipeline\Sinks\CorrelatedMessageSinkRouter.cs" />
@@ -268,7 +271,7 @@
     <Compile Include="Util\WeakReference.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Services\Metadata\" />
+    <Folder Include="Services\Metadata\Domain\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

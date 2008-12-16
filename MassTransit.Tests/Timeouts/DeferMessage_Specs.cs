@@ -16,10 +16,10 @@ namespace MassTransit.Tests.Timeouts
     using System.Diagnostics;
     using System.Threading;
     using Castle.Core;
+    using MassTransit.Services.MessageDeferral;
+    using MassTransit.Services.MessageDeferral.Messages;
+    using MassTransit.Services.Timeout;
     using NUnit.Framework;
-    using Services.MessageDeferral;
-    using Services.MessageDeferral.Messages;
-    using Services.Timeout;
     using Tests.Messages;
     using Util;
 

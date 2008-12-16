@@ -1,59 +1,45 @@
 namespace MassTransit.Metadata
 {
-    using System;
     using System.Collections.Generic;
     using System.Reflection;
     using Messages;
 
     public class MetadataExtracter
     {
-        private readonly Dictionary<Type, MessageModel> _messageHashes;
-        private readonly IServiceBus _bus;
-
-        public MetadataExtracter(IServiceBus bus)
+        public class MetadataExtractor
         {
-            _messageHashes = new Dictionary<Type, MessageModel>();
-            _bus = bus;
-        }
-
-        private MessageModel Extract(object message)
-        {
-            Type messageType = message.GetType();
-
-            var result = new MessageModel
-                             {
-                                 Name = messageType.Name,
-                                 Assembly = messageType.Assembly.GetName().FullName
-                             };
-
-            foreach (PropertyInfo info in messageType.GetProperties())
+            public Metadata Extract<T>()
             {
-                var member = new MemberModel
-                                 {
-                                     Name = info.Name,
-                                     ValueType = info.PropertyType.Name,
-                                 };
+                var result = new Metadata();
+                var name = typeof(T).FullName;
+                var dotNetType = typeof(T).FullName;
+                var children = new List<Metadata>();
 
-                //TODO: Needs to walk the entire object graph not just one level deep
+                foreach (PropertyInfo info in typeof(T).GetProperties())
+                {
+                    var member = new Metadata()
+                    {
+                        Name = info.Name,
+                        DotNetType = info.PropertyType.Name,
+                        Owner = "",
+                        Notes = "",
+                        Parent = result,
+                        Children = new List<Metadata>()
+                    };
 
-                result.Members.Add(member);
+                    //TODO: Needs to walk the entire object graph not just one level deep
+
+                    children.Add(member);
+                }
+
+                result.Name = name;
+                result.DotNetType = dotNetType;
+                result.Children = children;
+                result.Owner = "";
+                result.Notes = "";
+
+                return result;
             }
-
-
-            return result;
-        }
-
-        public void ExtractAndPublish(object message)
-        {
-            var messageType = message.GetType();
-            if (_messageHashes.ContainsKey(messageType))
-                return;
-
-            var metadata = Extract(message);
-
-            _messageHashes.Add(messageType, metadata);
-
-            _bus.Publish(new Metadata(metadata));
         }
     }
 }

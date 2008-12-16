@@ -44,9 +44,7 @@
     <Compile Include="Client\MessageModelFilter.cs" />
     <Compile Include="Domain\IMetadataRepository.cs" />
     <Compile Include="Domain\MessageMetadata.cs" />
-    <Compile Include="Messages\MemberModel.cs" />
-    <Compile Include="Messages\MessageModel.cs" />
-    <Compile Include="Messages\Metadata.cs" />
+    <Compile Include="Messages\MessageDefinition.cs" />
     <Compile Include="Messages\MetadataSearchResult.cs" />
     <Compile Include="MetadataClient.cs" />
     <Compile Include="MetadataExtracter.cs" />

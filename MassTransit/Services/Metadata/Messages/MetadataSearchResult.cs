@@ -1,4 +1,4 @@
-namespace MassTransit.Metadata.Messages
+namespace MassTransit.Services.Metadata.Messages
 {
     using System;
     using System.Collections.Generic;
