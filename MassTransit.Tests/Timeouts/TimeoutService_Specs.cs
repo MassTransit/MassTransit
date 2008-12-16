@@ -16,9 +16,9 @@ namespace MassTransit.Tests.Timeouts
     using System.Diagnostics;
     using System.Threading;
     using Castle.Core;
+    using MassTransit.Services.Timeout;
+    using MassTransit.Services.Timeout.Messages;
     using NUnit.Framework;
-    using Services.Timeout;
-    using Services.Timeout.Messages;
     using Util;
 
     [TestFixture]
@@ -55,7 +55,7 @@ namespace MassTransit.Tests.Timeouts
         [Test]
         public void The_timeout_should_be_added_to_the_storage()
         {
-            ManualResetEvent _timedOut = new ManualResetEvent(false);
+            var _timedOut = new ManualResetEvent(false);
 
 
             LocalBus.Subscribe<TimeoutExpired>(x => _timedOut.Set());

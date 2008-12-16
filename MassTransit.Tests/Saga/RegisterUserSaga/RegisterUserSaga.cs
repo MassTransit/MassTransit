@@ -15,9 +15,9 @@ namespace MassTransit.Tests.Saga.RegisterUser
     using System;
     using Magnum.Common.DateTimeExtensions;
     using MassTransit.Saga;
+    using MassTransit.Services.Timeout.Messages;
     using Messages;
     using Microsoft.Practices.ServiceLocation;
-    using Services.Timeout.Messages;
 
     /// <summary>
     /// 
