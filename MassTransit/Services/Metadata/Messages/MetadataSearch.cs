@@ -5,6 +5,6 @@ namespace MassTransit.Services.Metadata.Messages
     [Serializable]
     public class MetadataSearch
     {
-        
+        public string SearchString { get; set; }
     }
 }

@@ -214,7 +214,8 @@
     <Compile Include="Services\Metadata\MetadataClient.cs" />
     <Compile Include="Services\Metadata\MetadataExtracter.cs" />
     <Compile Include="Services\Metadata\MetadataService.cs" />
-    <Compile Include="Services\Metadata\Server\MessageConsumer.cs" />
+    <Compile Include="Services\Metadata\Server\MessageDefinitionConsumer.cs" />
+    <Compile Include="Services\Metadata\Server\MetadataSearchConsumer.cs" />
     <Compile Include="Services\Metadata\WireTap.cs" />
     <Compile Include="Util\ReaderWriterLockedDictionary.cs" />
     <Compile Include="Pipeline\ISubscriptionEvent.cs" />

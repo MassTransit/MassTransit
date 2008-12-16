@@ -3,6 +3,7 @@ namespace MassTransit.Services.Metadata.Domain
     using System.Collections.Generic;
     using Messages;
 
+    //hides the persistance and indexing
     public interface IMetadataRepository
     {
         void Register(MessageDefinition data);
@@ -10,5 +11,7 @@ namespace MassTransit.Services.Metadata.Domain
         IList<MessageMetadata> List();
         MessageMetadata Get(object id);
         void Update(MessageMetadata data);
+
+        IList<MessageMetadata> Search(string searchString);
     }
 }
