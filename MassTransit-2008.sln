@@ -47,8 +47,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Infrastructure"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Infrastructure.Tests", "MassTransit.Infrastructure.Tests\MassTransit.Infrastructure.Tests.csproj", "{44E6D06D-B60E-434B-981D-D8139062A6EC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Metadata", "MassTransit.Metadata\MassTransit.Metadata.csproj", "{A344B0DE-3A43-47B4-B388-51BEFE8F8EDB}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.UnityIntegration", "Containers\MassTransit.UnityIntegration\MassTransit.UnityIntegration.csproj", "{8AB71E2F-3210-45AF-982F-FC782D9C06B7}"
 EndProject
 Global
@@ -125,10 +123,6 @@ Global
 		{44E6D06D-B60E-434B-981D-D8139062A6EC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{44E6D06D-B60E-434B-981D-D8139062A6EC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{44E6D06D-B60E-434B-981D-D8139062A6EC}.Release|Any CPU.Build.0 = Release|Any CPU
-		{A344B0DE-3A43-47B4-B388-51BEFE8F8EDB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A344B0DE-3A43-47B4-B388-51BEFE8F8EDB}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A344B0DE-3A43-47B4-B388-51BEFE8F8EDB}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A344B0DE-3A43-47B4-B388-51BEFE8F8EDB}.Release|Any CPU.Build.0 = Release|Any CPU
 		{8AB71E2F-3210-45AF-982F-FC782D9C06B7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{8AB71E2F-3210-45AF-982F-FC782D9C06B7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8AB71E2F-3210-45AF-982F-FC782D9C06B7}.Release|Any CPU.ActiveCfg = Release|Any CPU
