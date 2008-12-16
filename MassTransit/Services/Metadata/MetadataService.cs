@@ -1,7 +1,7 @@
-namespace MassTransit.Metadata
+namespace MassTransit.Services.Metadata
 {
     using Server;
-    
+
     public class MetadataService :
         IHostedService
     {

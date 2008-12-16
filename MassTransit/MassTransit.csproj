@@ -205,12 +205,17 @@
     <Compile Include="Pipeline\Configuration\MessageFilterConfiguratorScope.cs" />
     <Compile Include="Pipeline\Inspectors\PipelineInspectorBase.cs" />
     <Compile Include="ServiceBusExtensions.cs" />
+    <Compile Include="Services\Metadata\Client\MessageModelFilter.cs" />
     <Compile Include="Services\Metadata\Domain\IMetadataRepository.cs" />
     <Compile Include="Services\Metadata\Domain\MessageMetadata.cs" />
     <Compile Include="Services\Metadata\Messages\MessageDefinition.cs" />
     <Compile Include="Services\Metadata\Messages\MetadataSearch.cs" />
     <Compile Include="Services\Metadata\Messages\MetadataSearchResult.cs" />
+    <Compile Include="Services\Metadata\MetadataClient.cs" />
     <Compile Include="Services\Metadata\MetadataExtracter.cs" />
+    <Compile Include="Services\Metadata\MetadataService.cs" />
+    <Compile Include="Services\Metadata\Server\MessageConsumer.cs" />
+    <Compile Include="Services\Metadata\WireTap.cs" />
     <Compile Include="Util\ReaderWriterLockedDictionary.cs" />
     <Compile Include="Pipeline\ISubscriptionEvent.cs" />
     <Compile Include="Pipeline\Sinks\CorrelatedMessageSinkRouter.cs" />
