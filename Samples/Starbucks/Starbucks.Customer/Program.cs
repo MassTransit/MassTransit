@@ -16,8 +16,6 @@ namespace Starbucks.Customer
         static void Main(string[] args)
         {
             IWindsorContainer container = new DefaultMassTransitContainer("Starbucks.Customer.Castle.xml");
-            var builder = new WindsorObjectBuilder(container.Kernel);
-            ServiceLocator.SetLocatorProvider(() => builder);
 
             container.AddComponent<Form, OrderDrinkForm>();
 
