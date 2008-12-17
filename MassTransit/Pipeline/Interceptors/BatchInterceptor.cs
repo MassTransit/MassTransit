@@ -16,6 +16,7 @@ namespace MassTransit.Pipeline.Interceptors
 	using System.Collections.Generic;
 	using System.Linq.Expressions;
 	using System.Reflection;
+	using Batch;
 	using Configuration;
 	using Exceptions;
 	using Sinks;
@@ -24,7 +25,7 @@ namespace MassTransit.Pipeline.Interceptors
 	public class BatchInterceptor :
 		PipelineInterceptorBase
 	{
-		private static readonly Type _batchType = typeof (BatchMessage<,>);
+		private static readonly Type _batchType = typeof (Batch<,>);
 		private static readonly Type _interfaceType = typeof (Consumes<>.All);
 
 		private readonly ReaderWriterLockedDictionary<Type, Func<BatchInterceptor, IInterceptorContext, Func<bool>>> _components;
@@ -36,14 +37,14 @@ namespace MassTransit.Pipeline.Interceptors
 			_components = new ReaderWriterLockedDictionary<Type, Func<BatchInterceptor, IInterceptorContext, Func<bool>>>();
 		}
 
-		protected virtual Func<bool> Connect<TMessage, TBatchId>(IInterceptorContext context, Consumes<BatchMessage<TMessage, TBatchId>>.All consumer)
+		protected virtual Func<bool> Connect<TMessage, TBatchId>(IInterceptorContext context, Consumes<Batch<TMessage, TBatchId>>.All consumer)
 			where TMessage : class, BatchedBy<TBatchId>
 		{
 			var configurator = BatchMessageRouterConfigurator.For(context.Pipeline);
 
 			var router = configurator.FindOrCreate<TMessage, TBatchId>();
 
-			var result = router.Connect(new InstanceMessageSink<BatchMessage<TMessage, TBatchId>>(message => consumer));
+			var result = router.Connect(new InstanceMessageSink<Batch<TMessage, TBatchId>>(message => consumer));
 
 			Func<bool> remove = context.SubscribedTo(typeof (TMessage));
 
@@ -52,13 +53,13 @@ namespace MassTransit.Pipeline.Interceptors
 
 		protected virtual Func<bool> Connect<TComponent, TMessage, TBatchId>(IInterceptorContext context)
 			where TMessage : class, BatchedBy<TBatchId>
-			where TComponent : class, Consumes<BatchMessage<TMessage, TBatchId>>.All
+			where TComponent : class, Consumes<Batch<TMessage, TBatchId>>.All
 		{
 			var configurator = BatchMessageRouterConfigurator.For(context.Pipeline);
 
 			var router = configurator.FindOrCreate<TMessage, TBatchId>();
 
-			var result = router.Connect(new ComponentMessageSink<TComponent, BatchMessage<TMessage, TBatchId>>(context));
+			var result = router.Connect(new ComponentMessageSink<TComponent, Batch<TMessage, TBatchId>>(context));
 
 			Func<bool> remove = context.SubscribedTo(typeof (TMessage));
 

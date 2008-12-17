@@ -13,6 +13,7 @@
 namespace MassTransit.Tests
 {
     using System;
+    using Batch;
     using NUnit.Framework;
     using Tests.Messages;
     using Tests.TestConsumers;

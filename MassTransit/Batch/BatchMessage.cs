@@ -10,27 +10,25 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Pipeline
+namespace MassTransit.Batch
 {
 	using System.Collections;
 	using System.Collections.Generic;
-	using System.Threading;
 	using log4net;
-	using Sinks;
 
-	public class BatchMessage<TMessage, TBatchId> :
+	public class Batch<TMessage, TBatchId> :
 		Consumes<TMessage>.All,
 		BatchedBy<TBatchId>,
 		IEnumerable<TMessage>
 		where TMessage : class, BatchedBy<TBatchId>
 	{
-		private static readonly ILog _log = LogManager.GetLogger(typeof(BatchMessage<TMessage, TBatchId>));
+		private static readonly ILog _log = LogManager.GetLogger(typeof(Batch<TMessage, TBatchId>));
 
 		private readonly TBatchId _batchId;
 		private readonly int _batchLength;
 		private readonly IEnumerable<TMessage> _enumerable;
 
-		public BatchMessage(TBatchId batchId, int batchLength, IEnumerable<TMessage> enumerable)
+		public Batch(TBatchId batchId, int batchLength, IEnumerable<TMessage> enumerable)
 		{
 			_batchId = batchId;
 			_batchLength = batchLength;

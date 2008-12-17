@@ -17,7 +17,7 @@ namespace HeavyLoad.BatchLoad
 	using Castle.Windsor;
 	using log4net;
 	using MassTransit;
-	using MassTransit.Pipeline;
+	using MassTransit.Batch;
 	using MassTransit.Threading;
 	using MassTransit.Transports.Msmq;
 
@@ -94,7 +94,7 @@ namespace HeavyLoad.BatchLoad
 	}
 
 	public class BatchServiceComponent : 
-		Consumes<BatchMessage<BasicMessage, Guid>>.All
+		Consumes<Batch<BasicMessage, Guid>>.All
 	{
 		private static readonly ILog _log = LogManager.GetLogger(typeof (BatchServiceComponent));
 		private static readonly Semaphore _received = new Semaphore(0, 1000);
@@ -104,7 +104,7 @@ namespace HeavyLoad.BatchLoad
 			get { return _received; }
 		}
 
-		public void Consume(BatchMessage<BasicMessage, Guid> message)
+		public void Consume(Batch<BasicMessage, Guid> message)
 		{
 			_log.Debug("Receiving batch: " + message.BatchId);
 

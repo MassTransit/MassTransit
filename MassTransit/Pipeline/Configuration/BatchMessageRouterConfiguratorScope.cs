@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Pipeline.Configuration
 {
+	using Batch;
 	using Inspectors;
 	using Sinks;
 

@@ -15,7 +15,7 @@ namespace MassTransit.Tests
 	using System;
 	using System.Collections.Generic;
 	using System.Threading;
-	using MassTransit.Pipeline;
+	using Batch;
 	using Messages;
 	using NUnit.Framework;
 	using NUnit.Framework.SyntaxHelpers;
@@ -74,8 +74,8 @@ namespace MassTransit.Tests
 	}
 
 	public class TestBatchMessageConsumer<TMessage, TBatchId> :
-		TestConsumerBase<BatchMessage<TMessage, TBatchId>>,
-		Consumes<BatchMessage<TMessage, TBatchId>>.All
+		TestConsumerBase<Batch<TMessage, TBatchId>>,
+		Consumes<Batch<TMessage, TBatchId>>.All
 		where TMessage : class, BatchedBy<TBatchId>
 	{
 		private static readonly List<TBatchId> _batchesReceived = new List<TBatchId>();
@@ -94,7 +94,7 @@ namespace MassTransit.Tests
 			_action = null;
 		}
 
-		public override void Consume(BatchMessage<TMessage, TBatchId> batch)
+		public override void Consume(Batch<TMessage, TBatchId> batch)
 		{
 			base.Consume(batch);
 
