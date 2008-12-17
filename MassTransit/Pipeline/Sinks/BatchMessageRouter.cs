@@ -14,6 +14,7 @@ namespace MassTransit.Pipeline.Sinks
 {
 	using System;
 	using System.Collections.Generic;
+	using Batch;
 	using log4net;
 	using Magnum.Common.Threading;
 
@@ -28,12 +29,12 @@ namespace MassTransit.Pipeline.Sinks
 	{
 		private static readonly ILog _log = LogManager.GetLogger(typeof (BatchMessageRouter<TMessage, TBatchId>));
 
-		private ReaderWriterLockedObject<List<IMessageSink<BatchMessage<TMessage, TBatchId>>>> _consumerSinks;
+		private ReaderWriterLockedObject<List<IMessageSink<Batch<TMessage, TBatchId>>>> _consumerSinks;
 		private bool _disposed;
 
 		public BatchMessageRouter()
 		{
-			_consumerSinks = new ReaderWriterLockedObject<List<IMessageSink<BatchMessage<TMessage, TBatchId>>>>(new List<IMessageSink<BatchMessage<TMessage, TBatchId>>>());
+			_consumerSinks = new ReaderWriterLockedObject<List<IMessageSink<Batch<TMessage, TBatchId>>>>(new List<IMessageSink<Batch<TMessage, TBatchId>>>());
 		}
 
 		public int SinkCount
@@ -54,7 +55,7 @@ namespace MassTransit.Pipeline.Sinks
 								if (x.TryGetValue(message.BatchId, out sink) == false)
 								{
 									_log.Debug("Adding a new message router for batchId " + message.BatchId);
-									var batchMessage = new BatchMessage<TMessage, TBatchId>(message.BatchId, message.BatchLength, null);
+									var batchMessage = new Batch<TMessage, TBatchId>(message.BatchId, message.BatchLength, null);
 
 									// we need to create a sink for this batch and get it wired up
 									MessageRouter<TMessage> router = new MessageRouter<TMessage>();
@@ -83,7 +84,7 @@ namespace MassTransit.Pipeline.Sinks
 			}
 		}
 
-		public Func<bool> Connect(IMessageSink<BatchMessage<TMessage, TBatchId>> sink)
+		public Func<bool> Connect(IMessageSink<Batch<TMessage, TBatchId>> sink)
 		{
 			_consumerSinks.WriteLock(sinks => sinks.Add(sink));
 

@@ -16,6 +16,7 @@ namespace MassTransit.Pipeline.Sinks
 	using System.Collections;
 	using System.Collections.Generic;
 	using System.Threading;
+	using Batch;
 	using log4net;
 	using Magnum.Common.DateTimeExtensions;
 	using Magnum.Common.Threading;
@@ -32,8 +33,8 @@ namespace MassTransit.Pipeline.Sinks
 
 		private readonly TBatchId _batchId;
 		private readonly int _batchLength;
-		private readonly BatchMessage<TMessage, TBatchId> _batchMessage;
-		private readonly Consumes<BatchMessage<TMessage, TBatchId>>.All _consumer;
+		private readonly Batch<TMessage, TBatchId> _batchMessage;
+		private readonly Consumes<Batch<TMessage, TBatchId>>.All _consumer;
 		private readonly TimeSpan _timeout = 30.Seconds();
 		private ManualResetEvent _complete = new ManualResetEvent(false);
 		private volatile bool _disposed;
@@ -43,13 +44,13 @@ namespace MassTransit.Pipeline.Sinks
 		private Semaphore _messageWaiting = new Semaphore(0, 1);
 
 
-		public BatchCombiner(TBatchId batchId, int batchLength, Consumes<BatchMessage<TMessage, TBatchId>>.All consumer)
+		public BatchCombiner(TBatchId batchId, int batchLength, Consumes<Batch<TMessage, TBatchId>>.All consumer)
 		{
 			_batchId = batchId;
 			_batchLength = batchLength;
 			_consumer = consumer;
 
-			_batchMessage = new BatchMessage<TMessage, TBatchId>(batchId, batchLength, this);
+			_batchMessage = new Batch<TMessage, TBatchId>(batchId, batchLength, this);
 			Start();
 		}
 

@@ -13,6 +13,7 @@
 namespace MassTransit.Tests.Messages
 {
 	using System;
+	using Batch;
 
 	[Timeout(Seconds = 3)]
 	[Serializable]

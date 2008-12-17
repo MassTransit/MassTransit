@@ -67,9 +67,8 @@
       <Link>SolutionVersion.cs</Link>
     </Compile>
     <Compile Include="AllowMessageTypeAttribute.cs" />
-    <Compile Include="Batch.cs" />
-    <Compile Include="BatchedBy.cs" />
-    <Compile Include="BatchTimeout.cs" />
+    <Compile Include="Batch\BatchedBy.cs" />
+    <Compile Include="Batch\BatchTimeout.cs" />
     <Compile Include="Exceptions\SagaException.cs" />
     <Compile Include="ExpiresInAttribute.cs" />
     <Compile Include="Fault.cs" />
@@ -196,7 +195,7 @@
     <Compile Include="Internal\RequestResponse\RequestResponseScope.cs" />
     <Compile Include="Internal\RequestResponse\ResponseAction.cs" />
     <Compile Include="Internal\RequestResponse\ResponseActionBuilder.cs" />
-    <Compile Include="Pipeline\BatchMessage.cs" />
+    <Compile Include="Batch\BatchMessage.cs" />
     <Compile Include="Pipeline\Configuration\BatchMessageRouterConfigurator.cs" />
     <Compile Include="Pipeline\Configuration\BatchMessageRouterConfiguratorScope.cs" />
     <Compile Include="Pipeline\Configuration\CorrelatedMessageRouterConfigurator.cs" />

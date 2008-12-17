@@ -14,6 +14,7 @@ namespace MassTransit.Pipeline.Inspectors
 {
 	using System;
 	using System.Text;
+	using Batch;
 	using Saga;
 	using Sinks;
 
