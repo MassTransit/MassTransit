@@ -40,9 +40,10 @@ namespace MassTransit.WindsorIntegration
 
         public void Initialize()
         {
-            var wob = new WindsorObjectBuilder(this.Kernel);
+            var wob = new WindsorObjectBuilder(Kernel);
             ServiceLocator.SetLocatorProvider(()=>wob);
-            this.Kernel.AddComponentInstance("objectBuilder", typeof(IObjectBuilder), wob);
+            
+			Kernel.AddComponentInstance("objectBuilder", typeof(IObjectBuilder), wob);
 
             AddFacility("startable", new StartableFacility());
             AddFacility("masstransit", new MassTransitFacility());
