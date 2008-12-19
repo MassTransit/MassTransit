@@ -111,7 +111,6 @@
     <Compile Include="Services\MessageDeferral\InMemoryDeferredMessageRepository.cs" />
     <Compile Include="Services\MessageDeferral\Messages\DeferMessage.cs" />
     <Compile Include="Services\MessageDeferral\TimeoutExpiredConsumer.cs" />
-    <Compile Include="Subscriptions\log4netRenderers\SubscriptionRenderer.cs" />
     <Compile Include="MessageGroup.cs" />
     <Compile Include="ReliableAttribute.cs" />
     <Compile Include="ServiceBusBuilder.cs" />
