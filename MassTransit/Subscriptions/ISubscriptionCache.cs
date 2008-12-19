@@ -18,7 +18,8 @@ namespace MassTransit.Subscriptions
 	/// <summary>
 	/// Defines storage for subscriptions
 	/// </summary>
-	public interface ISubscriptionCache : IDisposable
+	public interface ISubscriptionCache :
+        IDisposable
 	{
 		IList<Subscription> List();
 
