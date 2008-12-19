@@ -156,9 +156,9 @@
     <Compile Include="IServiceBus.cs" />
     <Compile Include="MessageFilter.cs" />
     <Compile Include="Subscriptions\InMemorySubscriptionRepository.cs" />
-    <Compile Include="Subscriptions\ServerHandlers\AddSubscriptionHandler.cs" />
-    <Compile Include="Subscriptions\ServerHandlers\CacheUpdateRequestHandler.cs" />
-    <Compile Include="Subscriptions\ServerHandlers\CancelUpdatesHandler.cs" />
+    <Compile Include="Services\Subscriptions\Server\AddSubscriptionHandler.cs" />
+    <Compile Include="Services\Subscriptions\Server\CacheUpdateRequestHandler.cs" />
+    <Compile Include="Services\Subscriptions\Server\CancelUpdatesHandler.cs" />
     <Compile Include="Subscriptions\FollowerRepository.cs" />
     <Compile Include="Subscriptions\ISubscriptionCache.cs" />
     <Compile Include="Internal\MessageContext.cs" />
@@ -167,13 +167,13 @@
     <Compile Include="SubscriptionEventArgs.cs" />
     <Compile Include="Subscriptions\ISubscriptionRepository.cs" />
     <Compile Include="Subscriptions\LocalSubscriptionCache.cs" />
-    <Compile Include="Subscriptions\Messages\AddSubscription.cs" />
-    <Compile Include="Subscriptions\Messages\CacheUpdateResponse.cs" />
-    <Compile Include="Subscriptions\Messages\CacheUpdateRequest.cs" />
-    <Compile Include="Subscriptions\Messages\CancelSubscriptionUpdates.cs" />
-    <Compile Include="Subscriptions\Messages\RemoveSubscription.cs" />
-    <Compile Include="Subscriptions\Messages\SubscriptionChange.cs" />
-    <Compile Include="Subscriptions\ServerHandlers\RemoveSubscriptionHandler.cs" />
+    <Compile Include="Services\Subscriptions\Messages\AddSubscription.cs" />
+    <Compile Include="Services\Subscriptions\Messages\CacheUpdateResponse.cs" />
+    <Compile Include="Services\Subscriptions\Messages\CacheUpdateRequest.cs" />
+    <Compile Include="Services\Subscriptions\Messages\CancelSubscriptionUpdates.cs" />
+    <Compile Include="Services\Subscriptions\Messages\RemoveSubscription.cs" />
+    <Compile Include="Services\Subscriptions\Messages\SubscriptionChange.cs" />
+    <Compile Include="Services\Subscriptions\Server\RemoveSubscriptionHandler.cs" />
     <Compile Include="Subscriptions\Subscription.cs" />
     <Compile Include="Subscriptions\SubscriptionCacheEntry.cs" />
     <Compile Include="Subscriptions\SubscriptionClient.cs" />
@@ -277,6 +277,11 @@
     <Compile Include="Services\Timeout\RemoteTimeoutViewer.cs" />
     <Compile Include="Util\ReflectiveVisitorBase.cs" />
     <Compile Include="Util\WeakReference.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Services\Subscriptions\Client\" />
+    <Folder Include="Subscriptions\Messages\" />
+    <Folder Include="Subscriptions\ServerHandlers\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

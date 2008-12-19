@@ -162,10 +162,10 @@
     <Compile Include="StateMachine\StateTransition.cs" />
     <Compile Include="StateMachine\Transition_Specs.cs" />
     <Compile Include="SubscriptionManagerContext.cs" />
-    <Compile Include="Subscriptions\As_an_AddSubscriptionHandler.cs" />
-    <Compile Include="Subscriptions\As_a_CacheUpdateRequestHandler.cs" />
-    <Compile Include="Subscriptions\As_a_CancelUpdatesHandler.cs" />
-    <Compile Include="Subscriptions\As_a_SubscriptionService.cs" />
+    <Compile Include="Services\Subscriptions\As_an_AddSubscriptionHandler.cs" />
+    <Compile Include="Services\Subscriptions\As_a_CacheUpdateRequestHandler.cs" />
+    <Compile Include="Services\Subscriptions\As_a_CancelUpdatesHandler.cs" />
+    <Compile Include="Services\Subscriptions\As_a_SubscriptionService.cs" />
     <Compile Include="Messages\ClientMessage.cs" />
     <Compile Include="Messages\DeleteMessage.cs" />
     <Compile Include="MessageContext_Should_Help.cs" />
@@ -174,15 +174,15 @@
     <Compile Include="Messages\PongMessage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="MessageQueueEndpoint_MeetsCriteria.cs" />
-    <Compile Include="Subscriptions\As_a_RemoveSubscriptionHandler.cs" />
-    <Compile Include="Subscriptions\MonitorSubscriptionCache.cs" />
-    <Compile Include="Subscriptions\SubscriptionService_Specs.cs" />
-    <Compile Include="Subscriptions\When_a_handler_unsubscribes_from_the_service_bus.cs" />
-    <Compile Include="Subscriptions\When_managing_subscriptions_locally.cs" />
-    <Compile Include="Subscriptions\When_managing_subscriptions_remotely.cs" />
-    <Compile Include="Subscriptions\When_using_the_subscription_manager.cs" />
-    <Compile Include="Subscriptions\When_Working_With_Subscriptions.cs" />
-    <Compile Include="Subscriptions\When_Working_With_Subscription_Entries.cs" />
+    <Compile Include="Services\Subscriptions\As_a_RemoveSubscriptionHandler.cs" />
+    <Compile Include="Services\Subscriptions\MonitorSubscriptionCache.cs" />
+    <Compile Include="Services\Subscriptions\SubscriptionService_Specs.cs" />
+    <Compile Include="Services\Subscriptions\When_a_handler_unsubscribes_from_the_service_bus.cs" />
+    <Compile Include="Services\Subscriptions\When_managing_subscriptions_locally.cs" />
+    <Compile Include="Services\Subscriptions\When_managing_subscriptions_remotely.cs" />
+    <Compile Include="Services\Subscriptions\When_using_the_subscription_manager.cs" />
+    <Compile Include="Services\Subscriptions\When_Working_With_Subscriptions.cs" />
+    <Compile Include="Services\Subscriptions\When_Working_With_Subscription_Entries.cs" />
     <Compile Include="Messages\UpdateMessage.cs" />
     <Compile Include="Messages\UpdateAcceptedMessage.cs" />
     <Compile Include="TestConsumers\TestBatchConsumer.cs" />
@@ -229,6 +229,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Formatters\" />
+    <Folder Include="Subscriptions\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

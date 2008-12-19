@@ -27,7 +27,7 @@ namespace MassTransit.WindsorIntegration
     using MassTransit.Subscriptions;
     using Microsoft.Practices.ServiceLocation;
 	using MassTransit.Pipeline.Sinks;
-    
+    using Saga.Pipeline;
     using Services.HealthMonitoring;
     using Component = Castle.MicroKernel.Registration.Component;
 
