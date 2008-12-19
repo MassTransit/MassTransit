@@ -15,8 +15,9 @@ namespace MassTransit.Services.Metadata.Server
 
         public void Consume(MessageDefinition message)
         {
-            //transform here first?
-            _repo.Register(message);
+            MessageMetadata data = MessageMetadata.FromDefinition(message);
+
+            _repo.Add(data);
         }
     }
 }

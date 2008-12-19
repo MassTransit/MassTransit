@@ -14,6 +14,7 @@ namespace MassTransit.Pipeline.Configuration
 {
 	using System;
 	using System.Collections.Generic;
+	using Batch.Pipeline;
 	using Interceptors;
 	using Sinks;
 	using Subscriptions;

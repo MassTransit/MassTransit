@@ -17,7 +17,7 @@ namespace MassTransit.Services.Metadata.Server
 
         public void Consume(MetadataSearch message)
         {
-            _repo.Search(message.SearchString);
+            //_repo.Search(message.SearchString);
             _bus.Publish(new MetadataSearchResult());
         }
     }
