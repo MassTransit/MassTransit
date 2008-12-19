@@ -1,6 +1,7 @@
 namespace MassTransit.Services.Metadata.Domain
 {
     using System.Collections.Generic;
+    using Messages;
 
     public class MessageMetadata
     {
@@ -16,5 +17,10 @@ namespace MassTransit.Services.Metadata.Domain
 
         public MessageMetadata Parent { get; set; }
         public IList<MessageMetadata> Children { get; set; }
+
+        public static MessageMetadata FromDefinition(MessageDefinition message)
+        {
+            return new MessageMetadata();
+        }
     }
 }

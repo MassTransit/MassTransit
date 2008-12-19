@@ -1,4 +1,4 @@
-namespace MassTransit.Metadata
+namespace MassTransit.Services.Metadata
 {
     public class MetadataClient :
         IHostedService
