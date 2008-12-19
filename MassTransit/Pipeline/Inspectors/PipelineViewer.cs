@@ -17,6 +17,7 @@ namespace MassTransit.Pipeline.Inspectors
 	using Batch;
 	using Batch.Pipeline;
 	using Saga;
+	using Saga.Pipeline;
 	using Sinks;
 
 	public class PipelineViewer :

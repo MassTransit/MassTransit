@@ -18,25 +18,29 @@ namespace MassTransit.Pipeline.Sinks
 	using Exceptions;
 	using Interceptors;
 	using Saga;
+	using Saga.Pipeline;
+	using Util;
 
-	public class OrchestrateSagaMessageSink<TComponent, TMessage> :
+	public class InitiateSagaMessageSink<TComponent, TMessage> : 
 		SagaMessageSinkBase<TComponent, TMessage>
 		where TMessage : class, CorrelatedBy<Guid>
 		where TComponent : class, Orchestrates<TMessage>, ISaga
 	{
-		public OrchestrateSagaMessageSink(IInterceptorContext context, IServiceBus bus, ISagaRepository<TComponent> repository)
-			: base(context, bus, repository)
+		public InitiateSagaMessageSink(IInterceptorContext context, IServiceBus bus, ISagaRepository<TComponent> repository) : 
+			base(context, bus, repository)
 		{
 		}
 
 		public override IEnumerable<Consumes<TMessage>.All> Enumerate(TMessage message)
 		{
 			Guid correlationId = message.CorrelationId;
+			if (correlationId == Guid.Empty)
+				correlationId = CombGuid.NewCombGuid();
 
 			// if we are already pulling from a transactional queue, use the existing transaction
 			if (Transaction.Current != null)
 			{
-				TComponent saga = GetSaga(correlationId);
+				TComponent saga = CreateSaga(correlationId);
 
 				yield return saga;
 
@@ -46,7 +50,7 @@ namespace MassTransit.Pipeline.Sinks
 			{
 				using (TransactionScope scope = new TransactionScope())
 				{
-					TComponent saga = GetSaga(correlationId);
+					TComponent saga = CreateSaga(correlationId);
 
 					yield return saga;
 
@@ -57,15 +61,19 @@ namespace MassTransit.Pipeline.Sinks
 			}
 		}
 
-		private TComponent GetSaga(Guid correlationId)
+		private TComponent CreateSaga(Guid correlationId)
 		{
-			TComponent saga = Repository.Get(correlationId);
-			if (saga == null)
-				throw new SagaException("The saga could not be loaded.", typeof (TComponent), typeof (TMessage), correlationId);
+			try
+			{
+				TComponent saga = Repository.Create(correlationId);
+				saga.Bus = Bus;
 
-			saga.Bus = Bus;
-
-			return saga;
+				return saga;
+			}
+			catch(Exception ex)
+			{
+				throw new SagaException("The saga could not be created.", typeof (TComponent), typeof (TMessage), correlationId, ex);
+			}
 		}
 	}
 }
