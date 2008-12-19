@@ -154,17 +154,17 @@
     <Compile Include="IObjectBuilder.cs" />
     <Compile Include="IServiceBus.cs" />
     <Compile Include="MessageFilter.cs" />
-    <Compile Include="Subscriptions\InMemorySubscriptionRepository.cs" />
+    <Compile Include="Services\Subscriptions\Server\InMemorySubscriptionRepository.cs" />
     <Compile Include="Services\Subscriptions\Server\AddSubscriptionHandler.cs" />
     <Compile Include="Services\Subscriptions\Server\CacheUpdateRequestHandler.cs" />
     <Compile Include="Services\Subscriptions\Server\CancelUpdatesHandler.cs" />
-    <Compile Include="Subscriptions\FollowerRepository.cs" />
+    <Compile Include="Services\Subscriptions\Server\FollowerRepository.cs" />
     <Compile Include="Subscriptions\ISubscriptionCache.cs" />
     <Compile Include="Internal\MessageContext.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ServiceBus.cs" />
     <Compile Include="SubscriptionEventArgs.cs" />
-    <Compile Include="Subscriptions\ISubscriptionRepository.cs" />
+    <Compile Include="Services\Subscriptions\Server\ISubscriptionRepository.cs" />
     <Compile Include="Subscriptions\LocalSubscriptionCache.cs" />
     <Compile Include="Services\Subscriptions\Messages\AddSubscription.cs" />
     <Compile Include="Services\Subscriptions\Messages\CacheUpdateResponse.cs" />
@@ -175,8 +175,8 @@
     <Compile Include="Services\Subscriptions\Server\RemoveSubscriptionHandler.cs" />
     <Compile Include="Subscriptions\Subscription.cs" />
     <Compile Include="Subscriptions\SubscriptionCacheEntry.cs" />
-    <Compile Include="Subscriptions\SubscriptionClient.cs" />
-    <Compile Include="Subscriptions\SubscriptionService.cs" />
+    <Compile Include="Services\Subscriptions\SubscriptionClient.cs" />
+    <Compile Include="Services\Subscriptions\SubscriptionService.cs" />
     <Compile Include="Threading\ManagedThread.cs" />
     <Compile Include="Threading\ManagedThreadPool.cs" />
     <Compile Include="TimeoutAttribute.cs" />
@@ -279,8 +279,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Services\Subscriptions\Client\" />
-    <Folder Include="Subscriptions\Messages\" />
-    <Folder Include="Subscriptions\ServerHandlers\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
