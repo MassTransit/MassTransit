@@ -20,6 +20,7 @@ namespace MassTransit.Tests.Pipeline
 	using MassTransit.Pipeline.Interceptors;
 	using MassTransit.Pipeline.Sinks;
 	using MassTransit.Saga;
+	using MassTransit.Saga.Pipeline;
 	using NUnit.Framework;
 	using Rhino.Mocks;
 
