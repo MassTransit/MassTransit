@@ -1,10 +1,14 @@
 namespace MassTransit.Tests.Services.Metadata
 {
     using System;
+    using MassTransit.Pipeline;
+    using MassTransit.Pipeline.Configuration;
+    using MassTransit.Pipeline.Inspectors;
     using MassTransit.Services.Metadata;
     using MassTransit.Services.Metadata.Messages;
     using Messages;
     using NUnit.Framework;
+    using Rhino.Mocks;
 
     [TestFixture]
     public class MessageMetadataExtraction_spec
@@ -12,8 +16,8 @@ namespace MassTransit.Tests.Services.Metadata
         [Test]
         public void I_need_to_extract_metadata_from_objects()
         {
-            var metadataExtracter = new MetadataExtracter.MetadataExtractor();
-            MessageDefinition metadata = metadataExtracter.Extract<PingMessage>();
+            var metadataExtracter = new MetadataExtracter();
+            MessageDefinition metadata = metadataExtracter.Extract(typeof(PingMessage));
 
             metadata.Name
                 .ShouldEqual(typeof (PingMessage).FullName);
@@ -28,6 +32,45 @@ namespace MassTransit.Tests.Services.Metadata
                 .ShouldEqual("CorrelationId");
             metadata.Children[0].DotNetType
                 .ShouldEqual(typeof (Guid).Name);
+        }
+
+        [Test]
+        public void PipelineBuilding()
+        {
+
+            var builder = MockRepository.GenerateMock<IObjectBuilder>();
+            var subscriptionEvent = MockRepository.GenerateMock<ISubscriptionEvent>();
+            MessagePipeline pipeline = MessagePipelineConfigurator.CreateDefault(builder, subscriptionEvent);
+
+            pipeline.Subscribe<MetadataConsumer>();
+            pipeline.Subscribe<MetadataPConsumer>();
+
+            PipelineViewer.Trace(pipeline);
+        }
+
+        public bool ExtractMetadata(object message)
+        {
+            MetadataExtracter e = new MetadataExtracter();
+            e.Extract(message.GetType());
+            return true;
+        }
+
+        public class MetadataConsumer :
+            Consumes<object>.All
+        {
+            public void Consume(object message)
+            {
+                throw new System.NotImplementedException();
+            }
+        }
+
+        public class MetadataPConsumer :
+            Consumes<PingMessage>.All
+        {
+            public void Consume(PingMessage message)
+            {
+                throw new System.NotImplementedException();
+            }
         }
     }
 }
