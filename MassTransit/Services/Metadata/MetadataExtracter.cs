@@ -1,20 +1,20 @@
 namespace MassTransit.Services.Metadata
 {
+    using System;
     using System.Collections.Generic;
     using System.Reflection;
     using Messages;
 
     public class MetadataExtracter
     {
-        public class MetadataExtractor
-        {
-            public MessageDefinition Extract<T>()
+        
+            public MessageDefinition Extract(Type type)
             {
                 var result = new MessageDefinition();
-                var name = typeof(T).FullName;
-                var dotNetType = typeof(T).FullName;
+                var name = type.FullName;
+                var dotNetType = type.FullName;
 
-                foreach (PropertyInfo info in typeof(T).GetProperties())
+                foreach (PropertyInfo info in type.GetProperties())
                 {
                     var member = new MessageDefinition()
                                      {
@@ -34,6 +34,6 @@ namespace MassTransit.Services.Metadata
 
                 return result;
             }
-        }
+        
     }
 }
