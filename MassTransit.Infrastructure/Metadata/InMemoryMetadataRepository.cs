@@ -1,7 +1,13 @@
 namespace MassTransit.Infrastructure.Metadata
 {
-    public class InMemoryMetadataRepository
+    using Services.Metadata.Domain;
+
+    public class InMemoryMetadataRepository :
+        IMetadataRepository
     {
-        
+        public void Add(MessageMetadata metadata)
+        {
+            
+        }
     }
 }
