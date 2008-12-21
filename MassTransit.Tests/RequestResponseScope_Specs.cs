@@ -15,10 +15,11 @@ namespace MassTransit.Tests
 	using Magnum.Common.DateTimeExtensions;
 	using Messages;
 	using NUnit.Framework;
+	using TextFixtures;
 
 	[TestFixture]
 	public class When_creating_a_simple_request_response_handler :
-		LocalAndRemoteTestContext
+		LoopbackLocalAndRemoteTestFixture
 	{
 		[Test]
 		public void A_clean_method_of_a_request_reply_should_be_possible()
