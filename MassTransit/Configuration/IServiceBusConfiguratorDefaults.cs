@@ -16,6 +16,10 @@ namespace MassTransit.Configuration
 
 	public interface IServiceBusConfiguratorDefaults
 	{
+		/// <summary>
+		/// Set the default object builder for all service buses created
+		/// </summary>
+		/// <param name="objectBuilder"></param>
 		void SetObjectBuilder(IObjectBuilder objectBuilder);
 
 		/// <summary>
@@ -24,5 +28,20 @@ namespace MassTransit.Configuration
 		/// </summary>
 		/// <param name="receiveTimeout"></param>
 		void SetReceiveTimeout(TimeSpan receiveTimeout);
+
+		/// <summary>
+		/// Set the maximum number of concurrent consumers that can be active at any time. For consumers
+		/// performing high-latency, low-CPU operations, settings this number higher may increase throughput.
+		/// </summary>
+		/// <param name="threadLimit"></param>
+		void SetThreadLimit(int threadLimit);
+
+		/// <summary>
+		/// Set the maximum number of concurrent threads that are receiving messages from the endpoint.
+		/// In most cases, this can be left at the default value of 1, but can be increased when using
+		/// transactional queues.
+		/// </summary>
+		/// <param name="receiveThreadLimit"></param>
+		void SetReceiveThreadLimit(int receiveThreadLimit);
 	}
 }

@@ -18,22 +18,42 @@ namespace MassTransit.Configuration
 	public class ServiceBusConfiguratorDefaults :
 		IServiceBusConfiguratorDefaults
 	{
+		private IObjectBuilder _objectBuilder;
+		private TimeSpan _receiveTimeout;
+		private int _receiveThreadLimit;
+		private int _threadLimit;
+
 		public ServiceBusConfiguratorDefaults()
 		{
-			ReceiveTimeout = 3.Seconds();
+			_receiveTimeout = 3.Seconds();
 		}
-
-		public IObjectBuilder ObjectBuilder { get; private set; }
-		public TimeSpan ReceiveTimeout { get; private set; }
 
 		public void SetObjectBuilder(IObjectBuilder objectBuilder)
 		{
-			ObjectBuilder = objectBuilder;
+			_objectBuilder = objectBuilder;
 		}
 
 		public void SetReceiveTimeout(TimeSpan receiveTimeout)
 		{
-			ReceiveTimeout = receiveTimeout;
+			_receiveTimeout = receiveTimeout;
+		}
+
+		public void SetThreadLimit(int threadLimit)
+		{
+			_threadLimit = threadLimit;
+		}
+
+		public void SetReceiveThreadLimit(int receiveThreadLimit)
+		{
+			_receiveThreadLimit = receiveThreadLimit;
+		}
+
+		public void ApplyTo(IServiceBusConfigurator configurator)
+		{
+			configurator.SetObjectBuilder(_objectBuilder);
+			configurator.SetReceiveTimeout(_receiveTimeout);
+			configurator.SetThreadLimit(_threadLimit);
+			configurator.SetReceiveThreadLimit(_receiveThreadLimit);
 		}
 	}
 }
