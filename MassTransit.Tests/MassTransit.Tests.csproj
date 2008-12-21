@@ -86,6 +86,7 @@
   <ItemGroup>
     <Compile Include="Batch_Specs.cs" />
     <Compile Include="BddExtensions.cs" />
+    <Compile Include="Configuration_Specs.cs" />
     <Compile Include="ContextSetup.cs" />
     <Compile Include="Fault_Specs.cs" />
     <Compile Include="FutureMessage.cs" />
