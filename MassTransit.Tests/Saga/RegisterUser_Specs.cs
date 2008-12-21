@@ -12,48 +12,87 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests.Saga
 {
-    using System.Diagnostics;
-    using Castle.Core;
-    using MassTransit.Saga;
-    using NUnit.Framework;
-    using NUnit.Framework.SyntaxHelpers;
-    using Tests.Saga.RegisterUser;
-    using Tests.Saga.RegisterUser.Messages;
+	using System.Collections;
+	using System.Diagnostics;
+	using MassTransit.Pipeline.Interceptors;
+	using MassTransit.Pipeline.Sinks;
+	using MassTransit.Saga;
+	using MassTransit.Saga.Pipeline;
+	using NUnit.Framework;
+	using NUnit.Framework.SyntaxHelpers;
+	using RegisterUser;
+	using RegisterUser.Messages;
+	using Rhino.Mocks;
+	using TextFixtures;
 
-    [TestFixture]
-    public class When_a_unknown_user_registers :
-        LocalAndRemoteTestContext
-    {
-        protected override void Before_each()
-        {
-            // this just shows that you can easily respond to the message
-            RemoteBus.Subscribe<SendUserVerificationEmail>(
-                x => RemoteBus.Publish(new UserVerificationEmailSent(x.CorrelationId, x.Email)));
+	[TestFixture]
+	public class When_a_unknown_user_registers :
+		LoopbackLocalAndRemoteTestFixture
+	{
+		protected override void EstablishContext()
+		{
+			base.EstablishContext();
 
-			Container.Kernel.AddComponent("sagaRepository", typeof(ISagaRepository<RegisterUserSaga>), typeof(InMemorySagaRepository<RegisterUserSaga>), LifestyleType.Singleton);
+			var sagaRepository = new InMemorySagaRepository<RegisterUserSaga>();
 
-        	Container.AddComponent<RegisterUserSaga>();
-            RemoteBus.Subscribe<RegisterUserSaga>();
-        }
+			ObjectBuilder.Stub(x => x.GetInstance<ISagaRepository<RegisterUserSaga>>())
+				.Return(sagaRepository);
 
-        [Test]
-        public void The_user_should_be_pending()
-        {
-            Stopwatch timer = Stopwatch.StartNew();
+			ObjectBuilder.Stub(x => x.GetInstance<InitiateSagaMessageSink<RegisterUserSaga, RegisterUser.Messages.RegisterUser>>(new Hashtable()))
+				.IgnoreArguments()
+				.Return(null)
+				.WhenCalled(invocation => 
+					invocation.ReturnValue = 
+					new InitiateSagaMessageSink<RegisterUserSaga, RegisterUser.Messages.RegisterUser>(
+						((Hashtable)invocation.Arguments[0])["context"] as IInterceptorContext,
+						RemoteBus, 
+						sagaRepository));
 
-            var controller = new RegisterUserController(LocalBus);
+			ObjectBuilder.Stub(x => x.GetInstance<OrchestrateSagaMessageSink<RegisterUserSaga, UserVerificationEmailSent>>(new Hashtable()))
+				.IgnoreArguments()
+				.Return(null)
+				.WhenCalled(invocation =>
+					invocation.ReturnValue = 
+					new OrchestrateSagaMessageSink<RegisterUserSaga, UserVerificationEmailSent>(
+						((Hashtable)invocation.Arguments[0])["context"] as IInterceptorContext,
+						RemoteBus,
+						sagaRepository));
 
-            bool complete = controller.RegisterUser("username", "password", "Display Name", "user@domain.com");
+			ObjectBuilder.Stub(x => x.GetInstance<OrchestrateSagaMessageSink<RegisterUserSaga, UserValidated>>(new Hashtable()))
+				.IgnoreArguments()
+				.Return(null)
+				.WhenCalled(invocation =>
+					invocation.ReturnValue =
+					new OrchestrateSagaMessageSink<RegisterUserSaga, UserValidated>(
+						((Hashtable)invocation.Arguments[0])["context"] as IInterceptorContext,
+						RemoteBus,
+						sagaRepository));
 
-            Assert.That(complete, Is.False, "The user should be pending");
+			// this just shows that you can easily respond to the message
+			RemoteBus.Subscribe<SendUserVerificationEmail>(
+				x => RemoteBus.Publish(new UserVerificationEmailSent(x.CorrelationId, x.Email)));
 
-            timer.Stop();
+			RemoteBus.Subscribe<RegisterUserSaga>();
+		}
 
-            Debug.WriteLine(string.Format("Time to handle message: {0}ms", timer.ElapsedMilliseconds));
+		[Test]
+		public void The_user_should_be_pending()
+		{
+			Stopwatch timer = Stopwatch.StartNew();
 
-            complete = controller.ValidateUser();
+			var controller = new RegisterUserController(LocalBus);
 
-            Assert.That(complete, Is.True, "Should have been completed by now");
-        }
-    }
+			bool complete = controller.RegisterUser("username", "password", "Display Name", "user@domain.com");
+
+			Assert.That(complete, Is.False, "The user should be pending");
+
+			timer.Stop();
+
+			Debug.WriteLine(string.Format("Time to handle message: {0}ms", timer.ElapsedMilliseconds));
+
+			complete = controller.ValidateUser();
+
+			Assert.That(complete, Is.True, "Should have been completed by now");
+		}
+	}
 }
