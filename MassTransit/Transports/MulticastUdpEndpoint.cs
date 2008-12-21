@@ -17,6 +17,7 @@ namespace MassTransit.Transports
 	using System.Net;
 	using System.Net.Sockets;
 	using System.Threading;
+	using Configuration;
 	using Exceptions;
 	using Internal;
 	using log4net;
@@ -28,7 +29,7 @@ namespace MassTransit.Transports
 		private static readonly ILog _log = LogManager.GetLogger(typeof (MulticastUdpEndpoint));
 		private static readonly ILog _messageLog = LogManager.GetLogger("MassTransit.Messages");
 		private readonly ManualResetEvent _doneReceiving = new ManualResetEvent(false);
-		private readonly IMessageSerializer _serializer = new BinaryMessageSerializer();
+		private readonly IMessageSerializer _serializer;
 		private readonly ManualResetEvent _shutdown = new ManualResetEvent(false);
 		private readonly Uri _uri;
 		private bool _disposed;
@@ -37,15 +38,16 @@ namespace MassTransit.Transports
 		private UdpClient _sendClient;
 		private IPEndPoint _sendIPEndPoint;
 
-		public MulticastUdpEndpoint(Uri uri)
+		public MulticastUdpEndpoint(Uri uri, IMessageSerializer serializer)
 		{
 			_uri = uri;
+			_serializer = serializer;
 
 			Initialize();
 		}
 
-		public MulticastUdpEndpoint(string uriString)
-			: this(new Uri(uriString))
+		public MulticastUdpEndpoint(string uriString, IMessageSerializer serializer)
+			: this(new Uri(uriString), serializer)
 		{
 		}
 
@@ -53,6 +55,7 @@ namespace MassTransit.Transports
 		{
 			get { return "multicast"; }
 		}
+
 
 		public void Dispose()
 		{
@@ -142,6 +145,23 @@ namespace MassTransit.Transports
 			{
 				_log.Error("Receive Exception: " + _uri, ex);
 			}
+		}
+
+		public static IEndpoint ConfigureEndpoint(Uri uri, Action<IEndpointConfigurator> configurator)
+		{
+			if (uri.Scheme.ToLowerInvariant() == "multicast")
+			{
+				IEndpoint endpoint = MulticastUdpEndpointConfigurator.New(x =>
+					{
+						x.SetUri(uri);
+
+						configurator(x);
+					});
+
+				return endpoint;
+			}
+
+			return null;
 		}
 
 		protected virtual void Dispose(bool disposing)

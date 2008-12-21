@@ -108,15 +108,17 @@ namespace MassTransit.Transports.Msmq.Tests
             ValidateAndPurgeQueue(_subscriptionEndpoint.QueuePath);
 
 
-            _serviceBus = MassTransit.ServiceBus.Build()
-                .SupportingTransport<MsmqEndpoint>()
-                .ListeningOn(_serviceBusEndPoint.Uri)
-                .UsingObjectBuilder(objectBuilder);
 
-            _remoteServiceBus = MassTransit.ServiceBus.Build()
-                .SupportingTransport<MsmqEndpoint>()
-                .ListeningOn(_remoteServiceBusEndPoint.Uri)
-                .UsingObjectBuilder(objectBuilder);
+
+//            _serviceBus = MassTransit.ServiceBus.Build()
+//                .SupportingTransport<MsmqEndpoint>()
+//                .ListeningOn(_serviceBusEndPoint.Uri)
+//                .UsingObjectBuilder(objectBuilder);
+//
+//            _remoteServiceBus = MassTransit.ServiceBus.Build()
+//                .SupportingTransport<MsmqEndpoint>()
+//                .ListeningOn(_remoteServiceBusEndPoint.Uri)
+//                .UsingObjectBuilder(objectBuilder);
         }
 
         public static void VerifyMessageInQueue<T>(string queuePath, T messageItem)

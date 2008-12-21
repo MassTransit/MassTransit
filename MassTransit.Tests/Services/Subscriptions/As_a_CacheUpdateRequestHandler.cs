@@ -16,7 +16,7 @@ namespace MassTransit.Tests.Subscriptions
         private CacheUpdateRequestHandler handle;
         private ISubscriptionCache _mockCache;
         private FollowerRepository _mockFollower;
-        private IEndpointResolver _mockEndpointResolver;
+        private IEndpointFactory _mockEndpointResolver;
 
         private CacheUpdateRequest msgUpdate;
         private Uri uri = new Uri("queue:\\bob");
@@ -27,7 +27,7 @@ namespace MassTransit.Tests.Subscriptions
             msgUpdate = new CacheUpdateRequest(uri);
 
 
-            _mockEndpointResolver = StrictMock<IEndpointResolver>();
+            _mockEndpointResolver = StrictMock<IEndpointFactory>();
             _mockCache = StrictMock<ISubscriptionCache>();
             _mockFollower = new FollowerRepository(_mockEndpointResolver);
 
@@ -44,7 +44,7 @@ namespace MassTransit.Tests.Subscriptions
             {
                 Expect.Call(_mockCache.List()).Return(new List<Subscription>());
 
-                Expect.Call(_mockEndpointResolver.Resolve(uri)).Return(ep);
+                Expect.Call(_mockEndpointResolver.GetEndpoint(uri)).Return(ep);
                 Expect.Call(delegate { ep.Send<CacheUpdateResponse>(null); }).IgnoreArguments();
 
             }

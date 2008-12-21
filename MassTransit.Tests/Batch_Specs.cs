@@ -12,158 +12,160 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests
 {
-    using System;
-    using Batch;
-    using NUnit.Framework;
-    using Tests.Messages;
-    using Tests.TestConsumers;
+	using System;
+	using Batch;
+	using Messages;
+	using NUnit.Framework;
+	using Rhino.Mocks;
+	using TestConsumers;
+	using TextFixtures;
 
-    [TestFixture]
-    public class When_a_batch_of_messages_is_published :
-        LocalAndRemoteTestContext
-    {
-        private static readonly TimeSpan _timeout = TimeSpan.FromSeconds(3);
-        private int _batchSize;
+	[TestFixture]
+	public class When_a_batch_of_messages_is_published :
+		LoopbackLocalAndRemoteTestFixture
+	{
+		private static readonly TimeSpan _timeout = TimeSpan.FromSeconds(3);
+		private int _batchSize;
 
-        protected  void RunTest()
-        {
+		protected void RunTest()
+		{
 			var batchConsumer = new TestBatchMessageConsumer<IndividualBatchMessage, Guid>();
 
-            RemoteBus.Subscribe(batchConsumer);
+			RemoteBus.Subscribe(batchConsumer);
 
-            Guid batchId = Guid.NewGuid();
-            for (int i = 0; i < _batchSize; i++)
-            {
-                IndividualBatchMessage message = new IndividualBatchMessage(batchId, _batchSize);
+			Guid batchId = Guid.NewGuid();
+			for (int i = 0; i < _batchSize; i++)
+			{
+				IndividualBatchMessage message = new IndividualBatchMessage(batchId, _batchSize);
 
-                LocalBus.Publish(message);
-            }
+				LocalBus.Publish(message);
+			}
 
-            batchConsumer.ShouldHaveReceivedBatch(_timeout);
-        }
+			batchConsumer.ShouldHaveReceivedBatch(_timeout);
+		}
 
-        [Test]
-        public void A_batch_with_a_lot_of_messages_should_be_received()
-        {
-            _batchSize = 1027;
-            RunTest();
-        }
+		[Test]
+		public void A_batch_with_a_lot_of_messages_should_be_received()
+		{
+			_batchSize = 1027;
+			RunTest();
+		}
 
-        [Test]
-        public void A_batch_with_a_single_message_should_be_received()
-        {
-            _batchSize = 1;
-            RunTest();
-        }
+		[Test]
+		public void A_batch_with_a_single_message_should_be_received()
+		{
+			_batchSize = 1;
+			RunTest();
+		}
 
-        [Test]
-        public void A_single_consumer_should_receive_the_entire_batch()
-        {
-            _batchSize = 2;
-            RunTest();
-        }
-    }
+		[Test]
+		public void A_single_consumer_should_receive_the_entire_batch()
+		{
+			_batchSize = 2;
+			RunTest();
+		}
+	}
 
-    [TestFixture]
-    public class When_a_batch_of_message_is_published_to_a_container_based_consumer :
-        LocalAndRemoteTestContext
-    {
-        private static readonly TimeSpan _timeout = TimeSpan.FromSeconds(3);
-        private int _batchSize;
+	[TestFixture]
+	public class When_a_batch_of_message_is_published_to_a_container_based_consumer :
+		LoopbackLocalAndRemoteTestFixture
+	{
+		private static readonly TimeSpan _timeout = TimeSpan.FromSeconds(3);
+		private int _batchSize;
 
-        protected  void RunTest()
-        {
-            Container.AddComponent<TestBatchMessageConsumer<IndividualBatchMessage, Guid>>();
+		protected void RunTest()
+		{
+			ObjectBuilder.Stub(x => x.GetInstance<TestBatchMessageConsumer<IndividualBatchMessage, Guid>>())
+				.Return(new TestBatchMessageConsumer<IndividualBatchMessage, Guid>());
+			
 			RemoteBus.Subscribe<TestBatchMessageConsumer<IndividualBatchMessage, Guid>>();
 
-            Guid batchId = Guid.NewGuid();
-            for (int i = 0; i < _batchSize; i++)
-            {
-                IndividualBatchMessage message = new IndividualBatchMessage(batchId, _batchSize);
+			Guid batchId = Guid.NewGuid();
+			for (int i = 0; i < _batchSize; i++)
+			{
+				IndividualBatchMessage message = new IndividualBatchMessage(batchId, _batchSize);
 
-                LocalBus.Publish(message);
-            }
+				LocalBus.Publish(message);
+			}
 
 			TestBatchMessageConsumer<IndividualBatchMessage, Guid>.AnyShouldHaveReceivedBatch(batchId, _timeout);
-        }
+		}
 
-        [Test]
-        public void A_batch_with_a_lot_of_messages_should_be_received()
-        {
-            _batchSize = 1027;
-            RunTest();
-        }
+		[Test]
+		public void A_batch_with_a_lot_of_messages_should_be_received()
+		{
+			_batchSize = 1027;
+			RunTest();
+		}
 
-        [Test]
-        public void A_batch_with_a_single_message_should_be_received()
-        {
-            _batchSize = 1;
-            RunTest();
-        }
+		[Test]
+		public void A_batch_with_a_single_message_should_be_received()
+		{
+			_batchSize = 1;
+			RunTest();
+		}
 
-        [Test]
-        public void A_single_consumer_should_receive_the_entire_batch()
-        {
-            _batchSize = 2;
-            RunTest();
-        }
-    }
+		[Test]
+		public void A_single_consumer_should_receive_the_entire_batch()
+		{
+			_batchSize = 2;
+			RunTest();
+		}
+	}
 
-    [TestFixture]
-    public class When_an_incomplete_batch_is_published :
-        LocalAndRemoteTestContext
-    {
-        private static readonly TimeSpan _timeout = TimeSpan.FromSeconds(5);
-        private int _batchSize;
+	[TestFixture]
+	public class When_an_incomplete_batch_is_published :
+		LoopbackLocalAndRemoteTestFixture
+	{
+		private static readonly TimeSpan _timeout = TimeSpan.FromSeconds(5);
+		private int _batchSize;
 
-        [Test]
-        public void The_batch_should_throw_an_exception_that_the_timeout_occurred()
-        {
-            _batchSize = 2;
+		[Test]
+		public void The_batch_should_throw_an_exception_that_the_timeout_occurred()
+		{
+			_batchSize = 2;
 
-            var timeoutConsumer = new TestMessageConsumer<BatchTimeout<IndividualBatchMessage, Guid>>();
-            RemoteBus.Subscribe(timeoutConsumer);
+			var timeoutConsumer = new TestMessageConsumer<BatchTimeout<IndividualBatchMessage, Guid>>();
+			RemoteBus.Subscribe(timeoutConsumer);
 
 			var batchConsumer = new TestBatchMessageConsumer<IndividualBatchMessage, Guid>();
 
-            RemoteBus.Subscribe(batchConsumer);
+			RemoteBus.Subscribe(batchConsumer);
 
-            Guid batchId = Guid.NewGuid();
-            IndividualBatchMessage message = new IndividualBatchMessage(batchId, _batchSize);
+			Guid batchId = Guid.NewGuid();
+			IndividualBatchMessage message = new IndividualBatchMessage(batchId, _batchSize);
 
-            LocalBus.Publish(message);
+			LocalBus.Publish(message);
 
-            timeoutConsumer.ShouldHaveReceivedMessage(new BatchTimeout<IndividualBatchMessage, Guid>(batchId), _timeout);
+			timeoutConsumer.ShouldHaveReceivedMessage(new BatchTimeout<IndividualBatchMessage, Guid>(batchId), _timeout);
 
-            batchConsumer.ShouldNotHaveCompletedBatch(TimeSpan.Zero);
-        }
-    }
+			batchConsumer.ShouldNotHaveCompletedBatch(TimeSpan.Zero);
+		}
+	}
 
-    [TestFixture]
-    public class When_more_messages_are_sent_than_expected :
-        LocalAndRemoteTestContext
-    {
-        private int _batchSize;
+	[TestFixture]
+	public class When_more_messages_are_sent_than_expected :
+		LoopbackLocalAndRemoteTestFixture
+	{
+		private int _batchSize;
 
-        [Test, Ignore("Not sure how to test, but this is right")]
+		[Test, Ignore("Not sure how to test, but this is right")]
 //        [ExpectedException(typeof(SemaphoreFullException))] //TODO: Bad Exception
-        public void The_batch_should_throw_an_error()
-        {
-            _batchSize = 1;
+		public void The_batch_should_throw_an_error()
+		{
+			_batchSize = 1;
 
-            var timeoutConsumer = new TestMessageConsumer<BatchTimeout<IndividualBatchMessage, Guid>>();
-            RemoteBus.Subscribe(timeoutConsumer);
+			var timeoutConsumer = new TestMessageConsumer<BatchTimeout<IndividualBatchMessage, Guid>>();
+			RemoteBus.Subscribe(timeoutConsumer);
 
 			var batchConsumer = new TestBatchMessageConsumer<IndividualBatchMessage, Guid>();
-            RemoteBus.Subscribe(batchConsumer);
+			RemoteBus.Subscribe(batchConsumer);
 
-            Guid batchId = Guid.NewGuid();
-            IndividualBatchMessage message = new IndividualBatchMessage(batchId, _batchSize);
+			Guid batchId = Guid.NewGuid();
+			IndividualBatchMessage message = new IndividualBatchMessage(batchId, _batchSize);
 
-            LocalBus.Publish(message);
-            LocalBus.Publish(message);
-
-            
-        }
-    }
+			LocalBus.Publish(message);
+			LocalBus.Publish(message);
+		}
+	}
 }

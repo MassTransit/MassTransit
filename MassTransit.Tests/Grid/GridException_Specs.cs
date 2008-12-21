@@ -30,9 +30,9 @@ namespace MassTransit.Tests.Grid
 		private ManualResetEvent _complete;
 		private ManualResetEvent _fault;
 
-		protected override void Before_each()
+		protected override void EstablishContext()
 		{
-			base.Before_each();
+			base.EstablishContext();
 
 			_factorLongNumbers = new FactorLongNumbersTask();
 
@@ -55,7 +55,7 @@ namespace MassTransit.Tests.Grid
 			RemoteBus.Subscribe<SubTaskWorker<ExceptionalWorker, FactorLongNumber, LongNumberFactored>>();
 
 			var distributedTaskController =
-				new DistributedTaskController<FactorLongNumbersTask, FactorLongNumber, LongNumberFactored>(RemoteBus, Container.Resolve<IEndpointResolver>(), _factorLongNumbers);
+				new DistributedTaskController<FactorLongNumbersTask, FactorLongNumber, LongNumberFactored>(RemoteBus, ObjectBuilder.GetInstance<IEndpointFactory>(), _factorLongNumbers);
 
 			distributedTaskController.Start();
 

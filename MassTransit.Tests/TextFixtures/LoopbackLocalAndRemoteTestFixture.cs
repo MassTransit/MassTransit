@@ -10,23 +10,32 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Transports.Msmq.Tests
+namespace MassTransit.Tests.TextFixtures
 {
-    using System;
-    using System.Messaging;
-    using Exceptions;
-    using NUnit.Framework;
-    using Serialization;
+	using Configuration;
+	using NUnit.Framework;
 
 	[TestFixture]
-    public class When_working_with_an_endpoint
-    {
-        [Test, ExpectedException(typeof(EndpointException))]
-        public void An_exception_should_be_thrown_for_a_non_existant_queue()
-        {
-			MsmqEndpoint q = new MsmqEndpoint(new Uri("msmq://localhost/this_queue_does_not_exist"), new BinaryMessageSerializer());
+	public class LoopbackLocalAndRemoteTestFixture :
+		LoopbackTestFixture
+	{
+		public IServiceBus RemoteBus { get; private set; }
 
-            q.Open(QueueAccessMode.ReceiveAndAdmin).GetAllMessages();
-        }
-    }
+		protected override void EstablishContext()
+		{
+			base.EstablishContext();
+
+			ServiceBusConfigurator.Defaults(x => { x.SetObjectBuilder(ObjectBuilder); });
+
+			RemoteBus = ServiceBusConfigurator.New(x => { x.ReceiveFrom("loopback://localhost/mt_server"); });
+		}
+
+		protected override void TeardownContext()
+		{
+			RemoteBus.Dispose();
+			RemoteBus = null;
+
+			base.TeardownContext();
+		}
+	}
 }

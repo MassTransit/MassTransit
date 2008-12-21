@@ -15,9 +15,7 @@ namespace MassTransit.Grid
 	using System;
 	using System.Collections.Generic;
 	using log4net;
-	using MassTransit.Internal;
 	using Messages;
-	
 
 	public class DistributedTaskController<TTask, TInput, TOutput> :
 		Consumes<SubTaskWorkerAvailable<TInput>>.All,
@@ -31,15 +29,15 @@ namespace MassTransit.Grid
 
 		private readonly IServiceBus _bus;
 		private readonly TTask _distributedTask;
-		private readonly IEndpointResolver _endpointResolver;
+		private readonly IEndpointFactory _endpointFactory;
 		private readonly Guid _taskId;
 		private readonly Dictionary<string, Worker> _workers = new Dictionary<string, Worker>();
 		private int _nextSubTask;
 
-		public DistributedTaskController(IServiceBus bus, IEndpointResolver endpointResolver, TTask distributedTask)
+		public DistributedTaskController(IServiceBus bus, IEndpointFactory endpointFactory, TTask distributedTask)
 		{
 			_bus = bus;
-			_endpointResolver = endpointResolver;
+			_endpointFactory = endpointFactory;
 			_distributedTask = distributedTask;
 
 			_taskId = Guid.NewGuid();
@@ -151,7 +149,7 @@ namespace MassTransit.Grid
 
 			foreach (Worker worker in workers)
 			{
-				IEndpoint endpoint = _endpointResolver.Resolve(new Uri(worker.Address));
+				IEndpoint endpoint = _endpointFactory.GetEndpoint(new Uri(worker.Address));
 				if (endpoint == null)
 					continue;
 

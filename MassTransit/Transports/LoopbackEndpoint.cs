@@ -16,11 +16,12 @@ namespace MassTransit.Transports
 	using System.Collections.Generic;
 	using System.IO;
 	using System.Threading;
+	using Configuration;
 	using log4net;
 	using Magnum.Common.Threading;
 	using Serialization;
 
-	public class LoopbackEndpoint : 
+	public class LoopbackEndpoint :
 		IEndpoint
 	{
 		private static readonly ILog _log = LogManager.GetLogger(typeof (LoopbackEndpoint));
@@ -29,13 +30,20 @@ namespace MassTransit.Transports
 
 		private readonly Semaphore _messageReady = new Semaphore(0, int.MaxValue);
 		private readonly Queue<byte[]> _messages = new Queue<byte[]>();
-		private readonly IMessageSerializer _serializer = new BinaryMessageSerializer();
+		private readonly IMessageSerializer _serializer;
 		private readonly Uri _uri;
 		private bool _disposed;
 
 		public LoopbackEndpoint(Uri uri)
 		{
 			_uri = uri;
+			_serializer = new BinaryMessageSerializer();
+		}
+
+		public LoopbackEndpoint(Uri uri, IMessageSerializer serializer)
+		{
+			_uri = uri;
+			_serializer = serializer;
 		}
 
 		public static string Scheme
@@ -100,6 +108,23 @@ namespace MassTransit.Transports
 		{
 			Dispose(true);
 			GC.SuppressFinalize(this);
+		}
+
+		public static IEndpoint ConfigureEndpoint(Uri uri, Action<IEndpointConfigurator> configurator)
+		{
+			if (uri.Scheme.ToLowerInvariant() == "loopback")
+			{
+				IEndpoint endpoint = LoopbackEndpointConfigurator.New(x =>
+					{
+						x.SetUri(uri);
+
+						configurator(x);
+					});
+
+				return endpoint;
+			}
+
+			return null;
 		}
 
 		protected virtual void Dispose(bool disposing)

@@ -12,57 +12,56 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Subscriptions
 {
-    using System;
-    using System.Collections.Generic;
-    using Internal;
-    using Messages;
+	using System;
+	using System.Collections.Generic;
+	using Messages;
 
-    public class FollowerRepository
-    {
-        private readonly IEndpointResolver _endpointResolver;
-        private readonly IList<Uri> _followers;
+	public class FollowerRepository
+	{
+		private readonly IEndpointFactory _endpointFactory;
+		private readonly IList<Uri> _followers;
 
-        public FollowerRepository(IEndpointResolver endpointResolver)
-        {
-            _followers = new List<Uri>();
-            _endpointResolver = endpointResolver;
-        }
+		public FollowerRepository(IEndpointFactory endpointFactory)
+		{
+			_followers = new List<Uri>();
+			_endpointFactory = endpointFactory;
+		}
 
-        public void AddFollower(Uri uri)
-        {
-            lock (_followers)
-            {
-                if (_followers.Contains(uri))
-                    return;
+		public void AddFollower(Uri uri)
+		{
+			lock (_followers)
+			{
+				if (_followers.Contains(uri))
+					return;
 
-                _followers.Add(uri);
-            }
-        }
+				_followers.Add(uri);
+			}
+		}
 
-        public void RemoveFollower(Uri uri)
-        {
-            lock (_followers)
-            {
-                if (_followers.Contains(uri))
-                    _followers.Remove(uri);
-            }
-        }
+		public void RemoveFollower(Uri uri)
+		{
+			lock (_followers)
+			{
+				if (_followers.Contains(uri))
+					_followers.Remove(uri);
+			}
+		}
 
-        public void NotifyFollowers<T>(T message) where T : SubscriptionChange
-        {
-            IList<Uri> copy;
-            lock (_followers)
-                copy = new List<Uri>(_followers);
+		public void NotifyFollowers<T>(T message) where T : SubscriptionChange
+		{
+			IList<Uri> copy;
+			lock (_followers)
+				copy = new List<Uri>(_followers);
 
-            foreach (Uri uri in copy)
-            {
-                // don't send updates to the originator, that's chatty kathy
-                if (message.Subscription.EndpointUri == uri)
-                    continue;
+			foreach (Uri uri in copy)
+			{
+				// don't send updates to the originator, that's chatty kathy
+				if (message.Subscription.EndpointUri == uri)
+					continue;
 
-                IEndpoint ep = _endpointResolver.Resolve(uri);
-                ep.Send(message);
-            }
-        }
-    }
+				IEndpoint ep = _endpointFactory.GetEndpoint(uri);
+				ep.Send(message);
+			}
+		}
+	}
 }

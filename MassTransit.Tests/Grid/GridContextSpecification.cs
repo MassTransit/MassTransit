@@ -12,29 +12,27 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests.Grid
 {
-    using System.IO;
-    using MassTransit.Grid;
-    using Tests.Grid;
+	using System.IO;
+	using log4net.Config;
+	using MassTransit.Grid;
+	using Rhino.Mocks;
+	using TextFixtures;
 
-    public abstract class GridContextSpecification :
-        LocalAndRemoteTestContext
-    {
-        static GridContextSpecification()
-        {
-            log4net.Config.XmlConfigurator.ConfigureAndWatch(new FileInfo(@"grid\grid.log4net.config"));
-        }
+	public abstract class GridContextSpecification :
+		LoopbackLocalAndRemoteTestFixture
+	{
+		protected override void EstablishContext()
+		{
+			base.EstablishContext();
 
-        protected override void Before_each()
-        {
-            Container.AddComponent<ExceptionalWorker>();
-            Container.AddComponent<FactorLongNumbersTask>();
-            Container.AddComponent<SubTaskWorker<ExceptionalWorker, FactorLongNumber,  LongNumberFactored>>();
-            Container.AddComponent<SubTaskWorker<FactorLongNumberWorker, FactorLongNumber,  LongNumberFactored>>();
-        }
+			XmlConfigurator.ConfigureAndWatch(new FileInfo(@"grid\grid.log4net.config"));
 
-        protected override void After_each()
-        {
-            
-        }
-    }
+			ObjectBuilder.Stub(x => x.GetInstance<ExceptionalWorker>()).Return(new ExceptionalWorker());
+			ObjectBuilder.Stub(x => x.GetInstance<FactorLongNumbersTask>()).Return(new FactorLongNumbersTask());
+			ObjectBuilder.Stub(x => x.GetInstance<SubTaskWorker<ExceptionalWorker, FactorLongNumber, LongNumberFactored>>())
+				.Return(new SubTaskWorker<ExceptionalWorker, FactorLongNumber, LongNumberFactored> { Bus = RemoteBus });
+			ObjectBuilder.Stub(x => x.GetInstance<SubTaskWorker<FactorLongNumberWorker, FactorLongNumber, LongNumberFactored>>())
+				.Return(new SubTaskWorker<FactorLongNumberWorker, FactorLongNumber, LongNumberFactored> { Bus = RemoteBus });
+		}
+	}
 }

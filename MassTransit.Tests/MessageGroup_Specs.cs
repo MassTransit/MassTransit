@@ -15,7 +15,9 @@ namespace MassTransit.Tests
     using System;
     using System.Collections.Generic;
     using System.Threading;
+    using Configuration;
     using MassTransit.Internal;
+    using MassTransit.Serialization;
     using MassTransit.Subscriptions;
     using NUnit.Framework;
     using NUnit.Framework.SyntaxHelpers;
@@ -133,16 +135,19 @@ namespace MassTransit.Tests
         private IEndpoint _endpoint;
         private IObjectBuilder _builder;
         private ISubscriptionCache _cache;
-        private IEndpointResolver _resolver;
+        private IEndpointFactory _resolver;
 
         protected override void Before_each()
         {
-            _resolver = new EndpointResolver();
-            EndpointResolver.AddTransport(typeof (LoopbackEndpoint));
-
-            _endpoint = _resolver.Resolve(new Uri("loopback://localhost/test"));
-
             _builder = Stub<IObjectBuilder>();
+			_resolver = EndpointFactoryConfigurator.New(x =>
+			{
+				x.SetObjectBuilder(_builder);
+				x.SetDefaultSerializer<BinaryMessageSerializer>();
+				x.RegisterTransport<LoopbackEndpoint>();
+			});
+
+            _endpoint = _resolver.GetEndpoint(new Uri("loopback://localhost/test"));
             _cache = new LocalSubscriptionCache();
             _bus = new ServiceBus(_endpoint, _builder, _cache, _resolver, new TypeInfoCache());
         }

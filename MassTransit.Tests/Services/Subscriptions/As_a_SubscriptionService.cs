@@ -28,7 +28,7 @@ namespace MassTransit.Tests.Subscriptions
 		private ISubscriptionCache _cache;
 		private ISubscriptionRepository _repository;
 		private SubscriptionService srv;
-		private IEndpointResolver _endpointResolver;
+		private IEndpointFactory _endpointResolver;
 
 
 		private readonly Uri uri = new Uri("queue:\\bob");
@@ -38,7 +38,7 @@ namespace MassTransit.Tests.Subscriptions
 		{
 			_bus = MockRepository.GenerateMock<IServiceBus>();
 			_repository = MockRepository.GenerateMock<ISubscriptionRepository>();
-			_endpointResolver = MockRepository.GenerateMock<IEndpointResolver>();
+			_endpointResolver = MockRepository.GenerateMock<IEndpointFactory>();
 			_cache = MockRepository.GenerateMock<ISubscriptionCache>();
 
 			_endpoint = DynamicMock<IEndpoint>();

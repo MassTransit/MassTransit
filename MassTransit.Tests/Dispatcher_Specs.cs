@@ -2,7 +2,9 @@ namespace MassTransit.Tests
 {
     using System;
     using System.Collections;
+    using Configuration;
     using MassTransit.Internal;
+    using MassTransit.Serialization;
     using MassTransit.Subscriptions;
     using NUnit.Framework;
     using NUnit.Framework.SyntaxHelpers;
@@ -17,21 +19,27 @@ namespace MassTransit.Tests
     {
 
         private ServiceBus _bus;
-        private IObjectBuilder obj;
-        private EndpointResolver _endpointResolver;
+        private IObjectBuilder _builder;
+        private IEndpointFactory _endpointFactory;
         private IEndpoint _endpoint;
         private Uri _endpointUri = new Uri("loopback://localhost/test");
 
         protected override void Before_each()
         {
-            _endpointResolver = new EndpointResolver();
-            EndpointResolver.AddTransport(typeof(LoopbackEndpoint));
+			_builder = MockRepository.GenerateMock<IObjectBuilder>();
+			_builder.Stub(x => x.GetInstance<BinaryMessageSerializer>()).Return(new BinaryMessageSerializer());
 
-            _endpoint = _endpointResolver.Resolve(_endpointUri);
+			_endpointFactory = EndpointFactoryConfigurator.New(x =>
+			{
+				x.SetObjectBuilder(_builder);
+				x.SetDefaultSerializer<BinaryMessageSerializer>();
+				x.RegisterTransport<LoopbackEndpoint>();
+			});
 
-            obj = DynamicMock<IObjectBuilder>();
+            _endpoint = _endpointFactory.GetEndpoint(_endpointUri);
 
-            _bus = new ServiceBus(_endpoint, obj, new LocalSubscriptionCache(), _endpointResolver, new TypeInfoCache());
+
+            _bus = new ServiceBus(_endpoint, _builder, new LocalSubscriptionCache(), _endpointFactory, new TypeInfoCache());
         }
 
         [Test]
@@ -55,8 +63,8 @@ namespace MassTransit.Tests
         {
             PingHandler ph = new PingHandler();
 
-            SetupResult.For(obj.GetInstance<PingHandler>()).Return(ph);
-            SetupResult.For(obj.GetInstance<PingHandler>(new Hashtable())).IgnoreArguments().Return(ph);
+        	_builder.Stub(x => x.GetInstance<PingHandler>()).Return(ph);
+			_builder.Stub(x => x.GetInstance<PingHandler>(new Hashtable())).IgnoreArguments().Return(ph);
 
             ReplayAll();
 

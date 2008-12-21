@@ -10,23 +10,30 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Transports.Msmq.Tests
+namespace MassTransit.Configuration
 {
-    using System;
-    using System.Messaging;
-    using Exceptions;
-    using NUnit.Framework;
-    using Serialization;
+	using System;
+	using Magnum.Common.DateTimeExtensions;
 
-	[TestFixture]
-    public class When_working_with_an_endpoint
-    {
-        [Test, ExpectedException(typeof(EndpointException))]
-        public void An_exception_should_be_thrown_for_a_non_existant_queue()
-        {
-			MsmqEndpoint q = new MsmqEndpoint(new Uri("msmq://localhost/this_queue_does_not_exist"), new BinaryMessageSerializer());
+	public class ServiceBusConfiguratorDefaults :
+		IServiceBusConfiguratorDefaults
+	{
+		public ServiceBusConfiguratorDefaults()
+		{
+			ReceiveTimeout = 3.Seconds();
+		}
 
-            q.Open(QueueAccessMode.ReceiveAndAdmin).GetAllMessages();
-        }
-    }
+		public IObjectBuilder ObjectBuilder { get; private set; }
+		public TimeSpan ReceiveTimeout { get; private set; }
+
+		public void SetObjectBuilder(IObjectBuilder objectBuilder)
+		{
+			ObjectBuilder = objectBuilder;
+		}
+
+		public void SetReceiveTimeout(TimeSpan receiveTimeout)
+		{
+			ReceiveTimeout = receiveTimeout;
+		}
+	}
 }
