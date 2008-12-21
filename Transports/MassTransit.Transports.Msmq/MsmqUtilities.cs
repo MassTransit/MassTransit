@@ -16,14 +16,15 @@ namespace MassTransit.Transports.Msmq
     using System.Diagnostics;
     using System.Messaging;
     using System.Runtime.Serialization.Formatters.Binary;
+    using Serialization;
 
-    public class MsmqUtilities
+	public class MsmqUtilities
     {
         public int NumberOfMessages(Uri uri)
         {
             int i = 0;
-            
-            MessageQueue q = new MessageQueue(new MsmqEndpoint(uri).QueuePath);
+
+			MessageQueue q = new MessageQueue(new MsmqEndpoint(uri, new BinaryMessageSerializer()).QueuePath);
             using (MessageEnumerator e = q.GetMessageEnumerator2())
             {
                 while (e.MoveNext(new TimeSpan(0)))
@@ -37,7 +38,7 @@ namespace MassTransit.Transports.Msmq
 
         public void PurgeQueue(Uri uri)
         {
-            MessageQueue q = new MessageQueue(new MsmqEndpoint(uri).QueuePath);
+			MessageQueue q = new MessageQueue(new MsmqEndpoint(uri, new BinaryMessageSerializer()).QueuePath);
             q.Purge();
         }
 

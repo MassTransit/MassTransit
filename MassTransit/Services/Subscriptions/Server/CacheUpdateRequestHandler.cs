@@ -11,14 +11,14 @@ namespace MassTransit.Subscriptions.ServerHandlers
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(CacheUpdateRequestHandler));
         private readonly FollowerRepository _followers;
-        private readonly IEndpointResolver _endpointResolver;
+        private readonly IEndpointFactory _endpointFactory;
         private readonly ISubscriptionCache _cache;
 
 
-        public CacheUpdateRequestHandler(FollowerRepository followers, IEndpointResolver endpointResolver, ISubscriptionCache cache)
+        public CacheUpdateRequestHandler(FollowerRepository followers, IEndpointFactory endpointFactory, ISubscriptionCache cache)
         {
             _followers = followers;
-            _endpointResolver = endpointResolver;
+            _endpointFactory = endpointFactory;
             _cache = cache;
         }
 
@@ -32,7 +32,7 @@ namespace MassTransit.Subscriptions.ServerHandlers
 
                 CacheUpdateResponse response = new CacheUpdateResponse(subscriptions);
 
-                IEndpoint ep = _endpointResolver.Resolve(message.RequestingUri);
+                IEndpoint ep = _endpointFactory.GetEndpoint(message.RequestingUri);
                 ep.Send(response);
             }
             catch (Exception ex)

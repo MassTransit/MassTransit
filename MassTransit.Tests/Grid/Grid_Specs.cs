@@ -12,74 +12,74 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests.Grid
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Text;
-    using System.Threading;
-    using MassTransit.Grid;
-    using MassTransit.Internal;
-    using NUnit.Framework;
-    using NUnit.Framework.SyntaxHelpers;
+	using System;
+	using System.Collections.Generic;
+	using System.Text;
+	using System.Threading;
+	using MassTransit.Grid;
+	using NUnit.Framework;
+	using NUnit.Framework.SyntaxHelpers;
+	using Rhino.Mocks;
 
-    [TestFixture]
-    public class As_a_developer_that_needs_to_distribute_a_task_across_multiple_servers_for_parallel_processing :
-        GridContextSpecification
-    {
-        private FactorLongNumbersTask _factorLongNumbers;
-        private ManualResetEvent _complete;
+	[TestFixture]
+	public class As_a_developer_that_needs_to_distribute_a_task_across_multiple_servers_for_parallel_processing :
+		GridContextSpecification
+	{
+		private FactorLongNumbersTask _factorLongNumbers;
+		private ManualResetEvent _complete;
 
-        protected override void Before_each()
-        {
-            base.Before_each();
+		protected override void EstablishContext()
+		{
+			base.EstablishContext();
 
-            _factorLongNumbers = new FactorLongNumbersTask();
+			_factorLongNumbers = new FactorLongNumbersTask();
 
-            Random random = new Random();
+			Random random = new Random();
 
-            for (int i = 0; i < 27; i++)
-            {
-                long value = (long)(random.NextDouble() * 1000000);
+			for (int i = 0; i < 27; i++)
+			{
+				long value = (long) (random.NextDouble()*1000000);
 
-                _factorLongNumbers.Add(value);
-            }
+				_factorLongNumbers.Add(value);
+			}
 
-            _complete = new ManualResetEvent(false);
+			_complete = new ManualResetEvent(false);
 
-            _factorLongNumbers.WhenCompleted(x => _complete.Set());
-        }
+			_factorLongNumbers.WhenCompleted(x => _complete.Set());
+		}
 
-        [Test]
-        public void I_want_to_be_able_to_define_a_distributed_task_and_have_it_processed()
-        {
-            Container.AddComponent<FactorLongNumberWorker>();
+		[Test]
+		public void I_want_to_be_able_to_define_a_distributed_task_and_have_it_processed()
+		{
+			ObjectBuilder.Stub(x => x.GetInstance<FactorLongNumberWorker>()).Return(new FactorLongNumberWorker());
 
-            LocalBus.Subscribe<SubTaskWorker<FactorLongNumberWorker, FactorLongNumber, LongNumberFactored>>();
+			LocalBus.Subscribe<SubTaskWorker<FactorLongNumberWorker, FactorLongNumber, LongNumberFactored>>();
 
-            var distributedTaskController =
-                new DistributedTaskController<FactorLongNumbersTask, FactorLongNumber, LongNumberFactored>(LocalBus, Container.Resolve<IEndpointResolver>(), _factorLongNumbers);
+			var distributedTaskController =
+				new DistributedTaskController<FactorLongNumbersTask, FactorLongNumber, LongNumberFactored>(LocalBus, ObjectBuilder.GetInstance<IEndpointFactory>(), _factorLongNumbers);
 
-            distributedTaskController.Start();
+			distributedTaskController.Start();
 
-            Assert.That(_complete.WaitOne(TimeSpan.FromMinutes(1), true), Is.True, "Timeout waiting for distributed task to complete");
-        }
-    }
+			Assert.That(_complete.WaitOne(TimeSpan.FromMinutes(1), true), Is.True, "Timeout waiting for distributed task to complete");
+		}
+	}
 
-    public static class ListHelpers
-    {
-        public static string Join<T>(this IList<T> items, string separator)
-        {
-            StringBuilder sb = new StringBuilder();
+	public static class ListHelpers
+	{
+		public static string Join<T>(this IList<T> items, string separator)
+		{
+			StringBuilder sb = new StringBuilder();
 
-            bool first = true;
+			bool first = true;
 
-            foreach (T item in items)
-            {
-                sb.Append(first ? item.ToString() : separator + item);
+			foreach (T item in items)
+			{
+				sb.Append(first ? item.ToString() : separator + item);
 
-                first = false;
-            }
+				first = false;
+			}
 
-            return sb.ToString();
-        }
-    }
+			return sb.ToString();
+		}
+	}
 }

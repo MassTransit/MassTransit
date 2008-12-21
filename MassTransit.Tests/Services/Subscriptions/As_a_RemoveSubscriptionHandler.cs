@@ -16,7 +16,7 @@ namespace MassTransit.Tests.Subscriptions
         private ISubscriptionCache _mockCache;
         private ISubscriptionRepository _mockRepository;
         private FollowerRepository _mockFollower;
-        private IEndpointResolver _mockEndpointResolver;
+        private IEndpointFactory _mockEndpointResolver;
 
 
         private RemoveSubscription msgRem;
@@ -24,7 +24,7 @@ namespace MassTransit.Tests.Subscriptions
 
         protected override void Before_each()
         {
-            _mockEndpointResolver = StrictMock<IEndpointResolver>();
+            _mockEndpointResolver = StrictMock<IEndpointFactory>();
             _mockCache = StrictMock<ISubscriptionCache>();
             _mockRepository = StrictMock<ISubscriptionRepository>();
             _mockFollower = new FollowerRepository(_mockEndpointResolver);

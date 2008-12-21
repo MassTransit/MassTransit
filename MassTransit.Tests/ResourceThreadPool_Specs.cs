@@ -26,7 +26,7 @@ namespace MassTransit.Tests
         }
 
 
-        [Test]
+        [Test, Ignore]
         public void The_thread_pool_should_not_exceed_the_specified_limits()
         {
             SharedResource resource = new SharedResource {AvailableItems = 100};

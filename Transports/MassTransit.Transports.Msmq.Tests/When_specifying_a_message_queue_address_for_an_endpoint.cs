@@ -18,8 +18,9 @@ namespace MassTransit.Transports.Msmq.Tests
 	using MassTransit.Tests;
 	using NUnit.Framework;
 	using NUnit.Framework.SyntaxHelpers;
+	using Serialization;
 
-    [TestFixture]
+	[TestFixture]
 	public class When_specifying_a_message_queue_address_for_an_endpoint
 	{
 		[SetUp]
@@ -50,7 +51,7 @@ namespace MassTransit.Transports.Msmq.Tests
 		[Test]
 		public void A_message_queue_uri_should_convert_to_a_queue_path()
 		{
-			using (MsmqEndpoint endpoint = new MsmqEndpoint(_uriAddress))
+			using (MsmqEndpoint endpoint = new MsmqEndpoint(_uriAddress, new BinaryMessageSerializer()))
 			{
 				endpoint.QueuePath
 					.ShouldEqual(_expectedQueuePath);

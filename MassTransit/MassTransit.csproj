@@ -113,7 +113,6 @@
     <Compile Include="Services\MessageDeferral\TimeoutExpiredConsumer.cs" />
     <Compile Include="MessageGroup.cs" />
     <Compile Include="ReliableAttribute.cs" />
-    <Compile Include="ServiceBusBuilder.cs" />
     <Compile Include="Threading\LockFreeQueue.cs" />
     <Compile Include="Threading\ResourceThreadPool.cs" />
     <Compile Include="Services\Timeout\Messages\CancelTimeout.cs" />
@@ -187,7 +186,19 @@
     <Compile Include="Util\Tuple.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Configuration\EndpointFactoryConfigurator.cs" />
+    <Compile Include="Configuration\IBusService.cs" />
+    <Compile Include="Configuration\IEndpointConfigurator.cs" />
+    <Compile Include="IEndpointFactory.cs" />
+    <Compile Include="Configuration\IEndpointFactoryConfigurator.cs" />
+    <Compile Include="Configuration\IServiceBusConfigurator.cs" />
+    <Compile Include="Configuration\IServiceBusConfiguratorDefaults.cs" />
+    <Compile Include="Configuration\IServiceConfigurator.cs" />
+    <Compile Include="Configuration\ServiceBusConfigurator.cs" />
+    <Compile Include="Configuration\ServiceBusConfiguratorDefaults.cs" />
+    <Compile Include="Configuration\SubscriptionClientConfigurator.cs" />
     <Compile Include="Exceptions\ConfigurationException.cs" />
+    <Compile Include="Internal\EndpointFactory.cs" />
     <Compile Include="Internal\RequestResponse\CorrelatedResponseAction.cs" />
     <Compile Include="Internal\RequestResponse\CorrelatedResponseActionBuilder.cs" />
     <Compile Include="Internal\RequestResponse\IResponseAction.cs" />
@@ -215,6 +226,9 @@
     <Compile Include="Services\Metadata\Server\MessageDefinitionConsumer.cs" />
     <Compile Include="Services\Metadata\Server\MetadataSearchConsumer.cs" />
     <Compile Include="Services\Metadata\WireTap.cs" />
+    <Compile Include="Transports\EndpointConfiguratorBase.cs" />
+    <Compile Include="Transports\LoopbackEndpointConfigurator.cs" />
+    <Compile Include="Transports\MulticastUdpEndpointConfigurator.cs" />
     <Compile Include="Util\ReaderWriterLockedDictionary.cs" />
     <Compile Include="Pipeline\ISubscriptionEvent.cs" />
     <Compile Include="Pipeline\Sinks\CorrelatedMessageSinkRouter.cs" />

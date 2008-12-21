@@ -2,7 +2,9 @@ namespace MassTransit.Tests
 {
     using System;
     using System.Threading;
+    using Configuration;
     using MassTransit.Internal;
+    using MassTransit.Serialization;
     using MassTransit.Subscriptions;
     using NUnit.Framework;
     using Transports;
@@ -26,7 +28,7 @@ namespace MassTransit.Tests
         }
 
         private LocalSubscriptionCache _cache;
-        private IEndpointResolver _resolver;
+        private IEndpointFactory _resolver;
         private IEndpoint _endpoint;
         private IServiceBus _bus;
         private IObjectBuilder _builder;
@@ -39,9 +41,14 @@ namespace MassTransit.Tests
         protected override void Before_each()
         {
             _cache = new LocalSubscriptionCache();
-            _resolver = new EndpointResolver();
-            _endpoint = _resolver.Resolve(new Uri("loopback://localhost/servicebus"));
-            _builder = DynamicMock<IObjectBuilder>();
+			_builder = DynamicMock<IObjectBuilder>();
+			_resolver = EndpointFactoryConfigurator.New(x =>
+			{
+				x.SetObjectBuilder(_builder);
+				x.SetDefaultSerializer<BinaryMessageSerializer>();
+				x.RegisterTransport<LoopbackEndpoint>();
+			});
+			_endpoint = _resolver.GetEndpoint(new Uri("loopback://localhost/servicebus"));
             _bus = new ServiceBus(_endpoint, _builder, _cache, _resolver, new TypeInfoCache());
         }
 
@@ -49,6 +56,7 @@ namespace MassTransit.Tests
         {
             _bus.Dispose();
             _endpoint.Dispose();
+        	_resolver.Dispose();
             _cache.Dispose();
         }
 
@@ -98,7 +106,7 @@ namespace MassTransit.Tests
         }
 
         private LocalSubscriptionCache _cache;
-        private IEndpointResolver _resolver;
+        private IEndpointFactory _resolver;
         private IEndpoint _endpoint;
         private IServiceBus _bus;
         private IObjectBuilder _builder;
@@ -111,10 +119,15 @@ namespace MassTransit.Tests
         protected override void Before_each()
         {
             _cache = new LocalSubscriptionCache();
-            _resolver = new EndpointResolver();
-            _endpoint = _resolver.Resolve(new Uri("loopback://localhost/servicebus"));
-            _builder = DynamicMock<IObjectBuilder>();
-            _bus = new ServiceBus(_endpoint, _builder, _cache, _resolver, new TypeInfoCache());
+        	_builder = DynamicMock<IObjectBuilder>();
+        	_resolver = EndpointFactoryConfigurator.New(x =>
+			{
+				x.SetObjectBuilder(_builder);
+				x.SetDefaultSerializer<BinaryMessageSerializer>();
+				x.RegisterTransport<LoopbackEndpoint>();
+			});
+        	_endpoint = _resolver.GetEndpoint(new Uri("loopback://localhost/servicebus"));
+        	_bus = new ServiceBus(_endpoint, _builder, _cache, _resolver, new TypeInfoCache());
         }
 
 

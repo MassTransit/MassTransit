@@ -13,10 +13,13 @@
 namespace MassTransit.Tests
 {
     using System;
+    using Configuration;
     using MassTransit.Internal;
+    using MassTransit.Serialization;
     using MassTransit.Subscriptions;
     using Messages;
     using NUnit.Framework;
+    using Rhino.Mocks;
     using TestConsumers;
     using Transports;
 
@@ -30,15 +33,19 @@ namespace MassTransit.Tests
         private readonly Uri queueUri = new Uri("loopback://localhost/test");
         private Subscription _subscription;
         private IObjectBuilder _builder;
-        private IEndpointResolver _endpointResolver;
+        private IEndpointFactory _endpointResolver;
 
         protected override void Before_each()
         {
-            _builder = DynamicMock<IObjectBuilder>();
-            EndpointResolver.AddTransport(typeof (LoopbackEndpoint));
+            _builder = MockRepository.GenerateMock<IObjectBuilder>();
+        	_builder.Stub(x => x.GetInstance<BinaryMessageSerializer>()).Return(new BinaryMessageSerializer());
+			_endpointResolver = EndpointFactoryConfigurator.New(x =>
+			{
+				x.SetObjectBuilder(_builder);
+				x.RegisterTransport<LoopbackEndpoint>();
+			});
 
-            _endpointResolver = new EndpointResolver();
-            _mockEndpoint = _endpointResolver.Resolve(queueUri);
+            _mockEndpoint = _endpointResolver.GetEndpoint(queueUri);
 
             _mockSubscriptionCache = DynamicMock<ISubscriptionCache>();
             _subscription = new Subscription(typeof (PingMessage), queueUri);

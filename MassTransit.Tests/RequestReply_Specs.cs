@@ -16,18 +16,21 @@ namespace MassTransit.Tests
 	using Messages;
 	using NUnit.Framework;
 	using TestConsumers;
+	using TextFixtures;
+	using Rhino.Mocks;
 
 	[TestFixture]
 	public class When_a_request_message_is_published :
-		LocalAndRemoteTestContext
+		LoopbackLocalAndRemoteTestFixture
 	{
 		private static readonly TimeSpan _timeout = TimeSpan.FromSeconds(3);
 
 		[Test]
 		public void A_reply_should_be_received_by_the_requestor()
 		{
-			// Arrange
-			Container.AddComponent<TestReplyService<PingMessage, Guid, PongMessage>>();
+			ObjectBuilder.Stub(x => x.GetInstance<TestReplyService<PingMessage, Guid, PongMessage>>())
+				.Return(new TestReplyService<PingMessage, Guid, PongMessage> {Bus = RemoteBus});
+
 			RemoteBus.Subscribe<TestReplyService<PingMessage, Guid, PongMessage>>();
 
 			PingMessage message = new PingMessage();
@@ -35,10 +38,8 @@ namespace MassTransit.Tests
 			TestCorrelatedConsumer<PongMessage, Guid> consumer = new TestCorrelatedConsumer<PongMessage, Guid>(message.CorrelationId);
 			LocalBus.Subscribe(consumer);
 
-			// Act
 			LocalBus.Publish(message);
 
-			// Assert
 			TestConsumerBase<PingMessage>.AnyShouldHaveReceivedMessage(message, _timeout);
 
 			consumer.ShouldHaveReceivedMessage(new PongMessage(message.CorrelationId), _timeout);

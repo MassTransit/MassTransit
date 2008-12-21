@@ -15,6 +15,7 @@ namespace MassTransit
 	using System;
 	using System.Collections.Generic;
 	using System.Transactions;
+	using Configuration;
 	using Exceptions;
 	using Internal;
 	using log4net;
@@ -35,9 +36,8 @@ namespace MassTransit
 		private static readonly IServiceBus _nullServiceBus;
 
 		private readonly DispatcherContext _dispatcherContext;
-		private readonly IEndpointResolver _endpointResolver;
+		private readonly IEndpointFactory _endpointFactory;
 		private readonly IObjectBuilder _objectBuilder;
-		private readonly TimeSpan _readerTimeout = TimeSpan.FromSeconds(3);
 		private ResourceThreadPool<IEndpoint, object> _asyncDispatcher;
 		private bool _disposed;
 		private IEndpoint _endpointToListenOn;
@@ -47,6 +47,7 @@ namespace MassTransit
 		private IEndpoint _poisonEndpoint = new PoisonEndpointDecorator(new NullEndpoint());
 		private ISubscriptionCache _subscriptionCache;
 		private ITypeInfoCache _typeInfoCache;
+		private TimeSpan _receiveTimeout;
 
 		static ServiceBus()
 		{
@@ -71,15 +72,18 @@ namespace MassTransit
 
 		public ServiceBus(IEndpoint endpointToListenOn, IObjectBuilder objectBuilder,
 		                  ISubscriptionCache subscriptionCache)
-			: this(endpointToListenOn, objectBuilder, subscriptionCache, new EndpointResolver(), new TypeInfoCache())
+			: this(endpointToListenOn, objectBuilder, subscriptionCache, EndpointFactoryConfigurator.New(x => x.SetObjectBuilder(objectBuilder)), new TypeInfoCache())
 		{
 		}
 
 		/// <summary>
 		/// Uses the specified subscription cache
 		/// </summary>
-		public ServiceBus(IEndpoint endpointToListenOn, IObjectBuilder objectBuilder,
-		                  ISubscriptionCache subscriptionCache, IEndpointResolver endpointResolver, ITypeInfoCache typeInfoCache)
+		public ServiceBus(IEndpoint endpointToListenOn,
+		                  IObjectBuilder objectBuilder,
+		                  ISubscriptionCache subscriptionCache,
+		                  IEndpointFactory endpointFactory,
+		                  ITypeInfoCache typeInfoCache)
 		{
 			Check.Parameter(endpointToListenOn).WithMessage("endpointToListenOn").IsNotNull();
 			Check.Parameter(subscriptionCache).WithMessage("subscriptionCache").IsNotNull();
@@ -87,7 +91,7 @@ namespace MassTransit
 			_endpointToListenOn = endpointToListenOn;
 			_subscriptionCache = subscriptionCache;
 			_objectBuilder = objectBuilder;
-			_endpointResolver = endpointResolver;
+			_endpointFactory = endpointFactory;
 
 			_typeInfoCache = typeInfoCache;
 
@@ -166,7 +170,7 @@ namespace MassTransit
 				if (done.Contains(subscription.EndpointUri))
 					continue;
 
-				IEndpoint endpoint = _endpointResolver.Resolve(subscription.EndpointUri);
+				IEndpoint endpoint = _endpointFactory.GetEndpoint(subscription.EndpointUri);
 				endpoint.Send(message, info.TimeToLive);
 
 				done.Add(subscription.EndpointUri);
@@ -193,6 +197,12 @@ namespace MassTransit
 		{
 			get { return _poisonEndpoint; }
 			set { _poisonEndpoint = value; }
+		}
+
+		public TimeSpan ReceiveTimeout
+		{
+			get { return _receiveTimeout; }
+			set { _receiveTimeout = value; }
 		}
 
 		/// <summary>
@@ -319,7 +329,7 @@ namespace MassTransit
 					bool released = false;
 					try
 					{
-						resource.Receive(_readerTimeout, (message, acceptor) =>
+						resource.Receive(_receiveTimeout, (message, acceptor) =>
 							{
 								try
 								{
@@ -374,7 +384,7 @@ namespace MassTransit
 			}
 			catch (Exception ex)
 			{
-                //retry
+				//retry
 				SpecialLoggers.Iron.Error("An error was caught in the ServiceBus.IronDispatcher", ex);
 
 				IPublicationTypeInfo info = _typeInfoCache.GetPublicationTypeInfo(message.GetType());
@@ -385,9 +395,9 @@ namespace MassTransit
 			}
 		}
 
-		public static ServiceBusBuilder Build()
+		public void Start()
 		{
-			return new ServiceBusBuilder();
+			_asyncDispatcher.WakeUp();
 		}
 	}
 

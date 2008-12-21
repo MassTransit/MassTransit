@@ -10,23 +10,28 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Transports.Msmq.Tests
+namespace MassTransit.Tests
 {
-    using System;
-    using System.Messaging;
-    using Exceptions;
-    using NUnit.Framework;
-    using Serialization;
+	using Magnum.Common.DateTimeExtensions;
+	using Messages;
+	using NUnit.Framework;
+	using TestConsumers;
+	using TextFixtures;
 
 	[TestFixture]
-    public class When_working_with_an_endpoint
-    {
-        [Test, ExpectedException(typeof(EndpointException))]
-        public void An_exception_should_be_thrown_for_a_non_existant_queue()
-        {
-			MsmqEndpoint q = new MsmqEndpoint(new Uri("msmq://localhost/this_queue_does_not_exist"), new BinaryMessageSerializer());
+	public class PublishSubscribe_Specs :
+		LoopbackTestFixture
+	{
+		[Test]
+		public void A_simple_bus_should_be_able_to_subscribe_and_publish()
+		{
+			TestMessageConsumer<PingMessage> consumer = new TestMessageConsumer<PingMessage>();
+			LocalBus.Subscribe(consumer);
 
-            q.Open(QueueAccessMode.ReceiveAndAdmin).GetAllMessages();
-        }
-    }
+			PingMessage message = new PingMessage();
+			LocalBus.Publish(message);
+
+			consumer.ShouldHaveReceivedMessage(message, 500.Milliseconds());
+		}
+	}
 }

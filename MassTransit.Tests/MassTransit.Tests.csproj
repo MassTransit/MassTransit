@@ -86,7 +86,6 @@
   <ItemGroup>
     <Compile Include="Batch_Specs.cs" />
     <Compile Include="BddExtensions.cs" />
-    <Compile Include="BusBuilder_Specs.cs" />
     <Compile Include="ContextSetup.cs" />
     <Compile Include="Fault_Specs.cs" />
     <Compile Include="FutureMessage.cs" />
@@ -129,6 +128,7 @@
     <Compile Include="Pipeline\ReflectiveVisitor_Specs.cs" />
     <Compile Include="Pipeline\SubscribeConsumer_Specs.cs" />
     <Compile Include="Pipeline\SubscriptionEvent_Specs.cs" />
+    <Compile Include="PublishSubscribe_Specs.cs" />
     <Compile Include="PublishToConsumer_Specs.cs" />
     <Compile Include="RequestReply_Specs.cs" />
     <Compile Include="RequestResponseScope_Specs.cs" />
@@ -191,6 +191,9 @@
     <Compile Include="TestConsumers\TestMessageConsumer.cs" />
     <Compile Include="TestConsumers\TestReplyService.cs" />
     <Compile Include="TestConsumers\TestSelectiveConsumer.cs" />
+    <Compile Include="TextFixtures\EndpointTestFixture.cs" />
+    <Compile Include="TextFixtures\LoopbackLocalAndRemoteTestFixture.cs" />
+    <Compile Include="TextFixtures\LoopbackTestFixture.cs" />
     <Compile Include="ThreadPool_Specs.cs" />
     <Compile Include="Timeouts\DeferMessage_Specs.cs" />
     <Compile Include="Timeouts\TimeoutService_Specs.cs" />

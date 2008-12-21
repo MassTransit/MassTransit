@@ -15,7 +15,7 @@ namespace MassTransit.Tests.HealthMonitoring
     {
         IHealthCache _mockCache;
         private IEndpoint _mockEndpoint;
-        private IEndpointResolver _mockResolver;
+        private IEndpointFactory _mockResolver;
         Investigator _investigator;
 
         private HealthInformation information;
@@ -24,8 +24,8 @@ namespace MassTransit.Tests.HealthMonitoring
         {
             _mockCache = Mock<IHealthCache>();
             _mockEndpoint = StrictMock<IEndpoint>();
-            _mockResolver = StrictMock<IEndpointResolver>();
-            SetupResult.For(_mockResolver.Resolve(null)).Return(_mockEndpoint).IgnoreArguments();
+            _mockResolver = StrictMock<IEndpointFactory>();
+            SetupResult.For(_mockResolver.GetEndpoint((Uri)null)).Return(_mockEndpoint).IgnoreArguments();
 
             information = new HealthInformation(RemoteBus.Endpoint.Uri, 3);
             _investigator = new Investigator(LocalBus, _mockResolver, _mockCache);

@@ -25,8 +25,6 @@ namespace MassTransit.Tests
     [TestFixture]
     public class SubscriptionManagerContext
     {
-        #region Setup/Teardown
-
         [SetUp]
         public void Setup()
         {
@@ -65,8 +63,6 @@ namespace MassTransit.Tests
 
             _container.Dispose();
         }
-
-        #endregion
 
         private IWindsorContainer _container;
         private IServiceBus _localBus;
