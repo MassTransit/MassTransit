@@ -6,6 +6,7 @@
     using MassTransit.Subscriptions;
     
     using Services.HealthMonitoring;
+    using Services.Subscriptions;
     using StructureMap;
     using StructureMap.Configuration.DSL;
 

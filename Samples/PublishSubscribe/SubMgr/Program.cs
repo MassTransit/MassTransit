@@ -5,8 +5,8 @@ namespace SubMgr
     using log4net;
     using MassTransit;
     using MassTransit.Host;
-    using MassTransit.Subscriptions;
-    using MassTransit.Subscriptions.ServerHandlers;
+    using MassTransit.Services.Subscriptions;
+    using MassTransit.Services.Subscriptions.Server;
     using MassTransit.WindsorIntegration;
     using Microsoft.Practices.ServiceLocation;
 
@@ -22,10 +22,7 @@ namespace SubMgr
             container.AddComponentLifeStyle<FollowerRepository>(LifestyleType.Singleton);
 
 
-            container.AddComponent<AddSubscriptionHandler>();
-            container.AddComponent<RemoveSubscriptionHandler>();
-            container.AddComponent<CancelUpdatesHandler>();
-            container.AddComponent<CacheUpdateRequestHandler>();
+            container.AddComponent<RemoteEndpointCoordinator>();
             container.AddComponent<IHostedService, SubscriptionService>();
 
 

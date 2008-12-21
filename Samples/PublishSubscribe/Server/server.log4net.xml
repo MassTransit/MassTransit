@@ -31,7 +31,7 @@
 
 	<!-- Set root logger level to DEBUG and its only appender to Console -->
 	<root>
-		<level value="ERROR" />
+		<level value="ALL" />
 		<appender-ref ref="root" />
 	</root>
 

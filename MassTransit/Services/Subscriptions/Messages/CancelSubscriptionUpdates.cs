@@ -10,29 +10,23 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Subscriptions.Messages
+namespace MassTransit.Services.Subscriptions.Messages
 {
     using System;
 
     [Serializable]
     public class CancelSubscriptionUpdates
     {
-        private Uri _RequestingUri;
-
         protected CancelSubscriptionUpdates()
         {
         }
 
         public CancelSubscriptionUpdates(Uri requstingUri)
         {
-            _RequestingUri = requstingUri;
+            RequestingUri = requstingUri;
         }
 
 
-        public Uri RequestingUri
-        {
-            get { return _RequestingUri; }
-            set { _RequestingUri = value; }
-        }
+        public Uri RequestingUri { get; set; }
     }
 }

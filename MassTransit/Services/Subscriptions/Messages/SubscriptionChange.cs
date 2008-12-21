@@ -10,53 +10,53 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Subscriptions.Messages
+namespace MassTransit.Services.Subscriptions.Messages
 {
     using System;
 
     [Serializable]
     public abstract class SubscriptionChange
     {
-        private Subscription _subscription;
+        private SubscriptionInformation _subscription;
 
         protected SubscriptionChange()
         {
         }
 
         protected SubscriptionChange(string messageName, Uri address)
-            : this(new Subscription(messageName, address))
+            : this(new SubscriptionInformation(messageName, address))
         {
         }
 
-        protected SubscriptionChange(Subscription subscription)
+        protected SubscriptionChange(SubscriptionInformation subscription)
         {
             _subscription = subscription;
         }
 
-        public Subscription Subscription
+        public SubscriptionInformation Subscription
         {
             get { return _subscription; }
             set { _subscription = value; }
         }
 
-    	public bool Equals(SubscriptionChange obj)
-    	{
-    		if (ReferenceEquals(null, obj)) return false;
-    		if (ReferenceEquals(this, obj)) return true;
-    		return Equals(obj._subscription, _subscription);
-    	}
+        public bool Equals(SubscriptionChange obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            return Equals(obj._subscription, _subscription);
+        }
 
-    	public override bool Equals(object obj)
-    	{
-    		if (ReferenceEquals(null, obj)) return false;
-    		if (ReferenceEquals(this, obj)) return true;
-    		if (obj.GetType() != typeof (SubscriptionChange)) return false;
-    		return Equals((SubscriptionChange) obj);
-    	}
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != typeof (SubscriptionChange)) return false;
+            return Equals((SubscriptionChange) obj);
+        }
 
-    	public override int GetHashCode()
-    	{
-    		return (_subscription != null ? _subscription.GetHashCode() : 0);
-    	}
+        public override int GetHashCode()
+        {
+            return (_subscription != null ? _subscription.GetHashCode() : 0);
+        }
     }
 }

@@ -18,9 +18,9 @@ namespace SubscriptionManagerGUI
     using MassTransit;
     using MassTransit.Host;
     using MassTransit.Services.HealthMonitoring;
+    using MassTransit.Services.Subscriptions;
+    using MassTransit.Services.Subscriptions.Server;
     using MassTransit.Services.Timeout;
-    using MassTransit.Subscriptions;
-    using MassTransit.Subscriptions.ServerHandlers;
     using MassTransit.WindsorIntegration;
 	using Microsoft.Practices.ServiceLocation;
 
@@ -36,12 +36,8 @@ namespace SubscriptionManagerGUI
             container.AddComponentLifeStyle("followerRepository", typeof(FollowerRepository), LifestyleType.Singleton);
 
             container.AddComponent<ISubscriptionRepository, InMemorySubscriptionRepository>();
-            
+            container.AddComponent<RemoteEndpointCoordinator>();
             container.AddComponent<IHostedService, SubscriptionService>();
-            container.AddComponent<AddSubscriptionHandler>();
-            container.AddComponent<RemoveSubscriptionHandler>();
-            container.AddComponent<CancelUpdatesHandler>();
-            container.AddComponent<CacheUpdateRequestHandler>();
 
 
             container.AddComponent<IHealthCache, LocalHealthCache>();

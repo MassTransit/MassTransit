@@ -162,10 +162,6 @@
     <Compile Include="StateMachine\StateHelpers_Specs.cs" />
     <Compile Include="StateMachine\StateTransition.cs" />
     <Compile Include="StateMachine\Transition_Specs.cs" />
-    <Compile Include="SubscriptionManagerContext.cs" />
-    <Compile Include="Services\Subscriptions\As_an_AddSubscriptionHandler.cs" />
-    <Compile Include="Services\Subscriptions\As_a_CacheUpdateRequestHandler.cs" />
-    <Compile Include="Services\Subscriptions\As_a_CancelUpdatesHandler.cs" />
     <Compile Include="Services\Subscriptions\As_a_SubscriptionService.cs" />
     <Compile Include="Messages\ClientMessage.cs" />
     <Compile Include="Messages\DeleteMessage.cs" />
@@ -174,10 +170,8 @@
     <Compile Include="Messages\PongMessage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="MessageQueueEndpoint_MeetsCriteria.cs" />
-    <Compile Include="Services\Subscriptions\As_a_RemoveSubscriptionHandler.cs" />
     <Compile Include="Services\Subscriptions\MonitorSubscriptionCache.cs" />
     <Compile Include="Services\Subscriptions\SubscriptionService_Specs.cs" />
-    <Compile Include="Services\Subscriptions\When_a_handler_unsubscribes_from_the_service_bus.cs" />
     <Compile Include="Services\Subscriptions\When_managing_subscriptions_locally.cs" />
     <Compile Include="Services\Subscriptions\When_managing_subscriptions_remotely.cs" />
     <Compile Include="Services\Subscriptions\When_using_the_subscription_manager.cs" />

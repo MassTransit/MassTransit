@@ -18,7 +18,8 @@ namespace SubscriptionServiceHost
     using log4net.Config;
     using MassTransit.Host;
     using MassTransit;
-    using MassTransit.Subscriptions;
+    using MassTransit.Services.Subscriptions;
+    using MassTransit.Services.Subscriptions.Server;
     using MassTransit.WindsorIntegration;
     using Microsoft.Practices.ServiceLocation;
 
@@ -34,6 +35,7 @@ namespace SubscriptionServiceHost
             var container = new DefaultMassTransitContainer("subscriptionService.castle.xml");
             container.AddComponentLifeStyle("followerrepository", typeof(FollowerRepository), LifestyleType.Singleton);
 
+            container.AddComponent<RemoteEndpointCoordinator>();
             container.AddComponent<IHostedService, SubscriptionService>();
             container.AddComponent<ISubscriptionRepository, InMemorySubscriptionRepository>();
 

@@ -8,7 +8,7 @@ namespace OpenAllNight
 	using log4net.Config;
 	using MassTransit;
 	using MassTransit.Internal;
-	using MassTransit.Subscriptions.Messages;
+	using MassTransit.Services.Subscriptions.Messages;
 	using MassTransit.WindsorIntegration;
 
     internal class Program
@@ -30,7 +30,7 @@ namespace OpenAllNight
 			SimpleMessageHandler handler = new SimpleMessageHandler();
 
 
-			IEndpoint ep = c.Resolve<IEndpointResolver>().Resolve(new Uri("msmq://localhost/mt_pubsub"));
+			IEndpoint ep = c.Resolve<IEndpointFactory>().GetEndpoint(new Uri("msmq://localhost/mt_pubsub"));
 			Counter counter = c.Resolve<Counter>();
 			Console.WriteLine("Please enter the number of hours you would like this test to run for?");
 			string input = Console.ReadLine();

@@ -12,8 +12,8 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.WindsorIntegration
 {
-	using System;
-	using Configuration;
+    using System;
+    using Configuration;
 	using Serialization;
 	using Transports;
 
