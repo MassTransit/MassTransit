@@ -30,6 +30,8 @@ namespace MassTransit.WindsorIntegration
 	using Saga.Pipeline;
 	using Serialization;
 	using Services.HealthMonitoring;
+	using Services.Subscriptions;
+	using Services.Subscriptions.Client;
 	using Subscriptions;
 	using Component=Castle.MicroKernel.Registration.Component;
 
@@ -235,12 +237,21 @@ namespace MassTransit.WindsorIntegration
 			var subscriptionClientConfig = child.Children["subscriptionService"];
 			if (subscriptionClientConfig != null)
 			{
+                Kernel.AddComponent<LocalEndpointHandler>();
+                Kernel.AddComponent<RemoteSubscriptionCoordinator>();
+                
+
 				string subscriptionServiceEndpointUri = subscriptionClientConfig.Attributes["endpoint"];
 
 				IEndpoint subscriptionServiceEndpoint =
 					Kernel.Resolve<IEndpointFactory>().GetEndpoint(new Uri(subscriptionServiceEndpointUri));
 
-				SubscriptionClient sc = new SubscriptionClient(bus, cache, subscriptionServiceEndpoint);
+
+                var leh = Kernel.Resolve<LocalEndpointHandler>();			    
+                var lec = new LocalSubscriptionCoordinator(cache, subscriptionServiceEndpoint, leh);
+                Kernel.AddComponentInstance("localsubscriptioncoordinator", lec);
+
+				SubscriptionClient sc = new SubscriptionClient(bus, subscriptionServiceEndpoint, leh);
 
 				IConfiguration localEndpointConfig = subscriptionClientConfig.Children["localEndpoint"];
 				if (localEndpointConfig != null)
@@ -248,7 +259,7 @@ namespace MassTransit.WindsorIntegration
 					IEndpoint localEndpoint =
 						Kernel.Resolve<IEndpointFactory>().GetEndpoint(new Uri(localEndpointConfig.Value));
 
-					sc.AddLocalEndpoint(localEndpoint);
+					leh.AddLocalEndpoint(localEndpoint);
 				}
 
 				Kernel.AddComponentInstance(id + ".subscriptionClient", sc);

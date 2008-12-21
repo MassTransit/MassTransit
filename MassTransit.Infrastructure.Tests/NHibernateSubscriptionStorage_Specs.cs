@@ -18,6 +18,7 @@ namespace MassTransit.Infrastructure.Tests
     using NHibernate.Cfg;
     using NUnit.Framework;
     using NUnit.Framework.SyntaxHelpers;
+    using Services.Subscriptions.Server;
     using Subscriptions;
 
     [TestFixture]

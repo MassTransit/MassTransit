@@ -154,9 +154,6 @@
     <Compile Include="IServiceBus.cs" />
     <Compile Include="MessageFilter.cs" />
     <Compile Include="Services\Subscriptions\Server\InMemorySubscriptionRepository.cs" />
-    <Compile Include="Services\Subscriptions\Server\AddSubscriptionHandler.cs" />
-    <Compile Include="Services\Subscriptions\Server\CacheUpdateRequestHandler.cs" />
-    <Compile Include="Services\Subscriptions\Server\CancelUpdatesHandler.cs" />
     <Compile Include="Services\Subscriptions\Server\FollowerRepository.cs" />
     <Compile Include="Subscriptions\ISubscriptionCache.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -170,7 +167,6 @@
     <Compile Include="Services\Subscriptions\Messages\CancelSubscriptionUpdates.cs" />
     <Compile Include="Services\Subscriptions\Messages\RemoveSubscription.cs" />
     <Compile Include="Services\Subscriptions\Messages\SubscriptionChange.cs" />
-    <Compile Include="Services\Subscriptions\Server\RemoveSubscriptionHandler.cs" />
     <Compile Include="Subscriptions\Subscription.cs" />
     <Compile Include="Subscriptions\SubscriptionCacheEntry.cs" />
     <Compile Include="Services\Subscriptions\SubscriptionClient.cs" />
@@ -225,6 +221,11 @@
     <Compile Include="Services\Metadata\Server\MessageDefinitionConsumer.cs" />
     <Compile Include="Services\Metadata\Server\MetadataSearchConsumer.cs" />
     <Compile Include="Services\Metadata\WireTap.cs" />
+    <Compile Include="Services\Subscriptions\Client\LocalEndpointHandler.cs" />
+    <Compile Include="Services\Subscriptions\Client\LocalSubscriptionCoordinator.cs" />
+    <Compile Include="Services\Subscriptions\Client\RemoteSubscriptionCoordinator.cs" />
+    <Compile Include="Services\Subscriptions\Messages\SubscriptionInformation.cs" />
+    <Compile Include="Services\Subscriptions\Server\RemoteEndpointCoordinator.cs" />
     <Compile Include="Transports\EndpointConfiguratorBase.cs" />
     <Compile Include="Transports\LoopbackEndpointConfigurator.cs" />
     <Compile Include="Transports\MulticastUdpEndpointConfigurator.cs" />
@@ -289,9 +290,6 @@
     <Compile Include="Services\Timeout\RemoteTimeoutViewer.cs" />
     <Compile Include="Util\ReflectiveVisitorBase.cs" />
     <Compile Include="Util\WeakReference.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Services\Subscriptions\Client\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

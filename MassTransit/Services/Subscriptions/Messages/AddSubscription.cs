@@ -10,7 +10,7 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Subscriptions.Messages
+namespace MassTransit.Services.Subscriptions.Messages
 {
     using System;
 
@@ -27,26 +27,26 @@ namespace MassTransit.Subscriptions.Messages
         {
         }
 
-        public AddSubscription(Subscription subscription)
+        public AddSubscription(SubscriptionInformation subscription)
             : base(subscription)
         {
         }
 
-    	public bool Equals(AddSubscription obj)
-    	{
-    		return base.Equals(obj);
-    	}
+        public bool Equals(AddSubscription obj)
+        {
+            return base.Equals(obj);
+        }
 
-    	public override bool Equals(object obj)
-    	{
-    		if (ReferenceEquals(null, obj)) return false;
-    		if (ReferenceEquals(this, obj)) return true;
-    		return Equals(obj as AddSubscription);
-    	}
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            return Equals(obj as AddSubscription);
+        }
 
-    	public override int GetHashCode()
-    	{
-    		return base.GetHashCode();
-    	}
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
     }
 }

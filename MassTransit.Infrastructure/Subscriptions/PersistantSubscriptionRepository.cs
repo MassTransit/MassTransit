@@ -18,8 +18,10 @@ namespace MassTransit.Infrastructure.Subscriptions
 	using MassTransit.Subscriptions;
 	using NHibernate;
 	using NHibernate.Criterion;
+	using Services.Subscriptions;
+	using Services.Subscriptions.Server;
 
-	public class PersistantSubscriptionRepository :
+    public class PersistantSubscriptionRepository :
 		ISubscriptionRepository
 	{
 		private static readonly ILog _log = LogManager.GetLogger(typeof (SubscriptionService));
