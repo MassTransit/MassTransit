@@ -194,6 +194,7 @@
     <Compile Include="TextFixtures\EndpointTestFixture.cs" />
     <Compile Include="TextFixtures\LoopbackLocalAndRemoteTestFixture.cs" />
     <Compile Include="TextFixtures\LoopbackTestFixture.cs" />
+    <Compile Include="TextFixtures\MulticastUdpTestFixture.cs" />
     <Compile Include="ThreadPool_Specs.cs" />
     <Compile Include="Timeouts\DeferMessage_Specs.cs" />
     <Compile Include="Timeouts\TimeoutService_Specs.cs" />
