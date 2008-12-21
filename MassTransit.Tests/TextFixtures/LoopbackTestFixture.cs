@@ -26,8 +26,6 @@ namespace MassTransit.Tests.TextFixtures
 		{
 			base.EstablishContext();
 
-			ServiceBusConfigurator.Defaults(x => { x.SetObjectBuilder(ObjectBuilder); });
-
 			LocalBus = ServiceBusConfigurator.New(x => { x.ReceiveFrom("loopback://localhost/mt_client"); });
 		}
 
