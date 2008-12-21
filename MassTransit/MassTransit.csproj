@@ -159,7 +159,6 @@
     <Compile Include="Services\Subscriptions\Server\CancelUpdatesHandler.cs" />
     <Compile Include="Services\Subscriptions\Server\FollowerRepository.cs" />
     <Compile Include="Subscriptions\ISubscriptionCache.cs" />
-    <Compile Include="Internal\MessageContext.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ServiceBus.cs" />
     <Compile Include="SubscriptionEventArgs.cs" />

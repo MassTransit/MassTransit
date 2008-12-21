@@ -168,7 +168,6 @@
     <Compile Include="Services\Subscriptions\As_a_SubscriptionService.cs" />
     <Compile Include="Messages\ClientMessage.cs" />
     <Compile Include="Messages\DeleteMessage.cs" />
-    <Compile Include="MessageContext_Should_Help.cs" />
     <Compile Include="Messages\PingMessage.cs" />
     <Compile Include="Messages\PoisonMessage.cs" />
     <Compile Include="Messages\PongMessage.cs" />
