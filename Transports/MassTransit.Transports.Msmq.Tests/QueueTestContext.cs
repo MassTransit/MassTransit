@@ -19,6 +19,7 @@ namespace MassTransit.Transports.Msmq.Tests
     using System.Runtime.Serialization.Formatters.Binary;
     using System.Transactions;
     using log4net;
+    using MassTransit.Tests;
     using NUnit.Framework;
     using NUnit.Framework.SyntaxHelpers;
 
@@ -106,19 +107,6 @@ namespace MassTransit.Transports.Msmq.Tests
             ValidateAndPurgeQueue(_serviceBusEndPoint.QueuePath);
             ValidateAndPurgeQueue(_remoteServiceBusEndPoint.QueuePath);
             ValidateAndPurgeQueue(_subscriptionEndpoint.QueuePath);
-
-
-
-
-//            _serviceBus = MassTransit.ServiceBus.Build()
-//                .SupportingTransport<MsmqEndpoint>()
-//                .ListeningOn(_serviceBusEndPoint.Uri)
-//                .UsingObjectBuilder(objectBuilder);
-//
-//            _remoteServiceBus = MassTransit.ServiceBus.Build()
-//                .SupportingTransport<MsmqEndpoint>()
-//                .ListeningOn(_remoteServiceBusEndPoint.Uri)
-//                .UsingObjectBuilder(objectBuilder);
         }
 
         public static void VerifyMessageInQueue<T>(string queuePath, T messageItem)
@@ -145,10 +133,11 @@ namespace MassTransit.Transports.Msmq.Tests
 
                 object message = new BinaryFormatter().Deserialize(msg.BodyStream);
 
-                Assert.That(message, Is.Not.Null);
+                message.ShouldNotBeNull();
                 if (message != null)
                 {
-                    Assert.That(message.GetType(), Is.EqualTo(typeof(T)));
+                    message.GetType().Equals(typeof(T))
+                        .ShouldBeTrue();
                 }
             }
         }
