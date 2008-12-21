@@ -1,6 +1,7 @@
 namespace MassTransit.Transports.Msmq.Tests
 {
     using System.Transactions;
+    using Exceptions;
     using MassTransit.Tests;
     using NUnit.Framework;
 
@@ -27,7 +28,7 @@ namespace MassTransit.Transports.Msmq.Tests
 
 
             [Test]
-            public void While_writing_it_should_perisist_on_success()
+            public void While_writing_it_should_perisist_on_complete()
             {
                 using (TransactionScope trx = new TransactionScope())
                 {
@@ -40,7 +41,7 @@ namespace MassTransit.Transports.Msmq.Tests
             }
 
             [Test]
-            public void While_writing_it_should_not_perisist_on_failure()
+            public void While_writing_it_should_not_perisist_on_rollback()
             {
                 using (TransactionScope trx = new TransactionScope())
                 {
@@ -81,6 +82,17 @@ namespace MassTransit.Transports.Msmq.Tests
                 QueueTestContext.VerifyMessageInTransactionalQueue(_ep, new DeleteMessage());
             }
 
+        }
+
+        [TestFixture]
+        public class When_endpoint_doesnt_exist
+        {
+            [Test]
+            [ExpectedException(typeof(EndpointException))]
+            public void Should_throw_an_endpoint_exception()
+            {
+                new MsmqEndpoint("msmq://localhost/idontexist_tx");
+            }
         }
         
     }

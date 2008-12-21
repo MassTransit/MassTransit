@@ -18,6 +18,7 @@ namespace MassTransit.Transports.Msmq.Tests
     using Magnum.Common.DateTimeExtensions;
     using NUnit.Framework;
 
+    //TODO: Remove?
     [TestFixture]
     public class When_receiving_from_a_transactional_queue
     {

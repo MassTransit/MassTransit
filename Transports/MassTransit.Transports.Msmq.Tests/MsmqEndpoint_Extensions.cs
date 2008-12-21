@@ -9,15 +9,8 @@ namespace MassTransit.Transports.Msmq.Tests
     {
         public static void Purge(this MsmqEndpoint ep)
         {
-            try
-            {
-                MessageQueue queue = new MessageQueue(ep.QueuePath, QueueAccessMode.ReceiveAndAdmin);
-                queue.Purge();
-            }
-            catch (Exception)
-            {
-                //ignore?
-            }
+            MessageQueue queue = new MessageQueue(ep.QueuePath, QueueAccessMode.ReceiveAndAdmin);
+            queue.Purge();
         }
 
 
