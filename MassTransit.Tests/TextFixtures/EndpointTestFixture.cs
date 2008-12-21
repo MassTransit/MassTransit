@@ -41,7 +41,11 @@ namespace MassTransit.Tests.TextFixtures
 				});
 			ObjectBuilder.Stub(x => x.GetInstance<IEndpointFactory>()).Return(EndpointFactory);
 
-			ServiceBusConfigurator.Defaults(x => { x.SetReceiveTimeout(50.Milliseconds()); });
+			ServiceBusConfigurator.Defaults(x => 
+			{
+				x.SetObjectBuilder(ObjectBuilder);
+				x.SetReceiveTimeout(50.Milliseconds());
+			});
 
 			EstablishContext();
 		}
