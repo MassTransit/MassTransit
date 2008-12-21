@@ -50,7 +50,8 @@ namespace MassTransit.Configuration
 		void SendErrorsTo(Uri uri);
 
 		/// <summary>
-		/// Set the maximum number of threads that can be used to consume messages on the bus
+		/// Set the maximum number of concurrent consumers that can be active at any time. For consumers
+		/// performing high-latency, low-CPU operations, settings this number higher may increase throughput.
 		/// </summary>
 		/// <param name="threadLimit"></param>
 		void SetThreadLimit(int threadLimit);
@@ -71,5 +72,19 @@ namespace MassTransit.Configuration
 		/// <typeparam name="TServiceConfigurator"></typeparam>
 		/// <param name="action"></param>
 		void ConfigureService<TServiceConfigurator>(Action<TServiceConfigurator> action) where TServiceConfigurator : IServiceConfigurator;
+
+		/// <summary>
+		/// Set the receive timeout to use before recycling the receive thread
+		/// </summary>
+		/// <param name="timeout"></param>
+		void SetReceiveTimeout(TimeSpan timeout);
+
+		/// <summary>
+		/// Set the maximum number of concurrent threads that are receiving messages from the endpoint.
+		/// In most cases, this can be left at the default value of 1, but can be increased when using
+		/// transactional queues.
+		/// </summary>
+		/// <param name="receiveThreadLimit"></param>
+		void SetReceiveThreadLimit(int receiveThreadLimit);
 	}
 }

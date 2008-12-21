@@ -26,13 +26,13 @@ namespace MassTransit.Configuration
 		private Uri _errorUri;
 		private Uri _listenToUri;
 		private IObjectBuilder _objectBuilder;
-		private int _threadLimit;
 		private TimeSpan _receiveTimeout;
+		private int _threadLimit;
+		private int _receiveThreadLimit;
 
 		private ServiceBusConfigurator()
 		{
-			_objectBuilder = _defaults.ObjectBuilder;
-			_receiveTimeout = _defaults.ReceiveTimeout;
+			_defaults.ApplyTo(this);
 		}
 
 		public void SetObjectBuilder(IObjectBuilder builder)
@@ -94,6 +94,16 @@ namespace MassTransit.Configuration
 			throw new NotImplementedException();
 		}
 
+		public void SetReceiveTimeout(TimeSpan timeout)
+		{
+			_receiveTimeout = timeout;
+		}
+
+		public void SetReceiveThreadLimit(int receiveThreadLimit)
+		{
+			_receiveThreadLimit = receiveThreadLimit;
+		}
+
 		public static IServiceBus New(Action<IServiceBusConfigurator> action)
 		{
 			ServiceBusConfigurator configurator = new ServiceBusConfigurator();
@@ -123,6 +133,9 @@ namespace MassTransit.Configuration
 
 			if (_threadLimit > 0)
 				bus.MaxThreadCount = _threadLimit;
+
+			if(_receiveThreadLimit > 0)
+				bus.ReadThreadCount = _receiveThreadLimit;
 
 			bus.ReceiveTimeout = _receiveTimeout;
 
