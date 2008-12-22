@@ -13,9 +13,9 @@ namespace MassTransit.Transports.Msmq.TestFixtures
         {
             base.EstablishContext();
 
-            LocalBus = ServiceBusConfigurator.New(x => { x.ReceiveFrom("msmq://localhost/mt_client/"); });
+            LocalBus = ServiceBusConfigurator.New(x => { x.ReceiveFrom("msmq://localhost/mt_client"); });
 
-            RemoteBus = ServiceBusConfigurator.New(x => { x.ReceiveFrom("msmq://localhost/mt_server/"); });
+            RemoteBus = ServiceBusConfigurator.New(x => { x.ReceiveFrom("msmq://localhost/mt_server"); });
         }
 
         protected override void TeardownContext()

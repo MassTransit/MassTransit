@@ -134,112 +134,101 @@ namespace MassTransit.Transports.Msmq.Tests
         }
 
         [Test]
-        [Ignore]
         public void Multiple_messages_should_be_delivered_to_the_appropriate_remote_subscribers()
         {
-            using (QueueTestContext qtc = new QueueTestContext(MockRepository.GenerateMock<IObjectBuilder>()))
-            {
-                ManualResetEvent _updateEvent = new ManualResetEvent(false);
 
-                qtc.RemoteServiceBus.Subscribe<UpdateMessage>(
-                    delegate { _updateEvent.Set(); });
 
-                ManualResetEvent _deleteEvent = new ManualResetEvent(false);
+            ManualResetEvent _updateEvent = new ManualResetEvent(false);
 
-                qtc.RemoteServiceBus.Subscribe<DeleteMessage>(
-                    delegate { _deleteEvent.Set(); });
+            RemoteBus.Subscribe<UpdateMessage>(
+                delegate { _updateEvent.Set(); });
 
-                DeleteMessage dm = new DeleteMessage();
+            ManualResetEvent _deleteEvent = new ManualResetEvent(false);
 
-                qtc.ServiceBus.Publish(dm);
+            RemoteBus.Subscribe<DeleteMessage>(
+                delegate { _deleteEvent.Set(); });
 
-                UpdateMessage um = new UpdateMessage();
+            DeleteMessage dm = new DeleteMessage();
 
-                qtc.ServiceBus.Publish(um);
+            LocalBus.Publish(dm);
 
-                Assert.That(_deleteEvent.WaitOne(TimeSpan.FromSeconds(6), true), Is.True,
-                            "Timeout expired waiting for message");
+            UpdateMessage um = new UpdateMessage();
 
-                Assert.That(_updateEvent.WaitOne(TimeSpan.FromSeconds(6), true), Is.True,
-                            "Timeout expired waiting for message");
-            }
+            LocalBus.Publish(um);
+
+            Assert.That(_deleteEvent.WaitOne(TimeSpan.FromSeconds(6), true), Is.True,
+                        "Timeout expired waiting for message");
+
+            Assert.That(_updateEvent.WaitOne(TimeSpan.FromSeconds(6), true), Is.True,
+                        "Timeout expired waiting for message");
+
         }
 
         [Test]
-        [Ignore]
         public void The_message_should_be_delivered_to_a_local_subscriber()
         {
-            using (QueueTestContext qtc = new QueueTestContext(MockRepository.GenerateMock<IObjectBuilder>()))
-            {
-                ManualResetEvent _updateEvent = new ManualResetEvent(false);
 
-                qtc.ServiceBus.Subscribe<UpdateMessage>(
-                    delegate { _updateEvent.Set(); });
+            ManualResetEvent _updateEvent = new ManualResetEvent(false);
 
-                UpdateMessage um = new UpdateMessage();
+            LocalBus.Subscribe<UpdateMessage>(
+                delegate { _updateEvent.Set(); });
 
-                qtc.ServiceBus.Publish(um);
+            UpdateMessage um = new UpdateMessage();
 
-                Assert.That(_updateEvent.WaitOne(TimeSpan.FromSeconds(3), true), Is.True,
-                            "Timeout expired waiting for message");
-            }
+            LocalBus.Publish(um);
+
+            Assert.That(_updateEvent.WaitOne(TimeSpan.FromSeconds(3), true), Is.True,
+                        "Timeout expired waiting for message");
+
         }
 
         [Test]
-        [Ignore]
         public void The_message_should_be_delivered_to_a_remote_subscriber()
         {
-            using (QueueTestContext qtc = new QueueTestContext(MockRepository.GenerateMock<IObjectBuilder>()))
-            {
+           
                 ManualResetEvent _updateEvent = new ManualResetEvent(false);
 
-                qtc.RemoteServiceBus.Subscribe<UpdateMessage>(
+                RemoteBus.Subscribe<UpdateMessage>(
                     delegate { _updateEvent.Set(); });
 
                 UpdateMessage um = new UpdateMessage();
 
-                qtc.ServiceBus.Publish(um);
+                LocalBus.Publish(um);
 
                 Assert.That(_updateEvent.WaitOne(TimeSpan.FromSeconds(3), true), Is.True,
                             "Timeout expired waiting for message");
-            }
+            
         }
 
         [Test]
-        [Ignore]
         public void The_message_should_be_delivered_to_a_remote_subscriber_with_a_reply()
         {
-            IObjectBuilder obj = MockRepository.GenerateMock<IObjectBuilder>();
-            SetupResult.For(obj.GetInstance<IEndpoint>(new Hashtable())).Return(MockRepository.GenerateMock<IEndpoint>());
+            ManualResetEvent _updateEvent = new ManualResetEvent(false);
 
-            using (QueueTestContext qtc = new QueueTestContext(obj))
-            {
-                ManualResetEvent _updateEvent = new ManualResetEvent(false);
-
-                Action<UpdateMessage> handler =
-                    msg =>
+            Action<UpdateMessage> handler =
+                msg =>
                     {
                         _updateEvent.Set();
 
-                        qtc.RemoteServiceBus.Publish(new UpdateAcceptedMessage());
+                        RemoteBus.Publish(new UpdateAcceptedMessage());
                     };
 
-                ManualResetEvent _repliedEvent = new ManualResetEvent(false);
+            ManualResetEvent _repliedEvent = new ManualResetEvent(false);
 
-                qtc.RemoteServiceBus.Subscribe(handler);
+            RemoteBus.Subscribe(handler);
 
-                qtc.ServiceBus.Subscribe<UpdateAcceptedMessage>(
-                    delegate { _repliedEvent.Set(); });
+            LocalBus.Subscribe<UpdateAcceptedMessage>(
+                delegate { _repliedEvent.Set(); });
 
-                UpdateMessage um = new UpdateMessage();
+            UpdateMessage um = new UpdateMessage();
 
-                qtc.ServiceBus.Publish(um);
+            LocalBus.Publish(um);
 
-                Assert.That(_updateEvent.WaitOne(TimeSpan.FromSeconds(3), true), Is.True,
-                            "Timeout expired waiting for message");
+            Assert.That(_updateEvent.WaitOne(TimeSpan.FromSeconds(3), true), Is.True,
+                        "Timeout expired waiting for message");
 
-                Assert.That(_repliedEvent.WaitOne(TimeSpan.FromSeconds(3), true), Is.True, "NO response message received");
-            }
+            Assert.That(_repliedEvent.WaitOne(TimeSpan.FromSeconds(3), true), Is.True, "NO response message received");
+
         }
     }
 

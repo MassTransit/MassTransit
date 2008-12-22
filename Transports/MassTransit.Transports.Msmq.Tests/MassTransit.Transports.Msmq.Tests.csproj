@@ -78,7 +78,6 @@
     <Compile Include="Messages\UpdateMessage.cs" />
     <Compile Include="MsmqEndpoint_Extensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="QueueTestContext.cs" />
     <Compile Include="Learning\Receive_Specs.cs" />
     <Compile Include="Learning\TransactionalQueue_Specs.cs" />
     <Compile Include="TestFixtures\MsmqEndpointTestFixture.cs" />
