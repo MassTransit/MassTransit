@@ -29,7 +29,7 @@ namespace HeavyLoad
          
 			RunLoopbackLoadTest();
 
-//			RunWcfLoadTest();
+			//RunWcfLoadTest();
 
 			RunCorrelatedMessageTest();
 

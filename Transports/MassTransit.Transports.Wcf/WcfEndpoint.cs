@@ -28,6 +28,7 @@ namespace MassTransit.Transports.Wcf
         private static readonly ILog _log = LogManager.GetLogger(typeof (WcfEndpoint));
         private static readonly ILog _messageLog = SpecialLoggers.Messages;
         private readonly BinaryFormatter _formatter = new BinaryFormatter();
+        private readonly IMessageSerializer _serializer;
 
         private readonly Semaphore _messageReady = new Semaphore(0, int.MaxValue);
         private readonly Queue<MessageEnvelope> _messages = new Queue<MessageEnvelope>();
@@ -40,6 +41,7 @@ namespace MassTransit.Transports.Wcf
         public WcfEndpoint(Uri uri, IMessageSerializer serializer)
         {
             _uri = uri;
+            _serializer = serializer;
 
             UriBuilder builder = new UriBuilder(uri);
             //builder.Scheme = uri.Scheme.Substring(4);
