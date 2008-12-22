@@ -107,7 +107,6 @@
     <Compile Include="Messages\IndividualBatchMessage.cs" />
     <Compile Include="Internal\IdempotentHashtable_Specs.cs" />
     <Compile Include="Internal\IdempotentList_Specs.cs" />
-    <Compile Include="LocalAndRemoteTestContext.cs" />
     <Compile Include="LocalSubscriptionCache_Specs.cs" />
     <Compile Include="Messages\ResponseMessage.cs" />
     <Compile Include="Dispatcher_Specs.cs" />
