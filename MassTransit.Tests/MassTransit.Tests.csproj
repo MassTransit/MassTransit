@@ -205,7 +205,9 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config" />
+    <Content Include="test.log4net.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <None Include="Grid\grid.log4net.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
