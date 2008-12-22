@@ -15,13 +15,14 @@ namespace MassTransit.Infrastructure.Tests
     using System;
     using System.Threading;
     using MassTransit.Tests;
+    using MassTransit.Tests.TextFixtures;
     using NUnit.Framework;
     using NUnit.Framework.SyntaxHelpers;
     
 
     [TestFixture]
     public class When_multiple_service_bus_instances_share_a_distributed_subscription_cache :
-        LocalAndRemoteTestContext
+        LoopbackLocalAndRemoteTestFixture
     {
         [Test]
         public void Correlated_messages_should_be_delivered()

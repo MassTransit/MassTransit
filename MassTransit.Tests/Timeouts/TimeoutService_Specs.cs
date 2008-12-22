@@ -16,38 +16,42 @@ namespace MassTransit.Tests.Timeouts
     using System.Diagnostics;
     using System.Threading;
     using Castle.Core;
+    using Magnum.Common.DateTimeExtensions;
     using MassTransit.Services.Timeout;
     using MassTransit.Services.Timeout.Messages;
     using NUnit.Framework;
+    using Rhino.Mocks;
+    using TextFixtures;
     using Util;
 
     [TestFixture]
     public class When_scheduling_a_timeout_for_a_new_id :
-        LocalAndRemoteTestContext
+        LoopbackLocalAndRemoteTestFixture
     {
         private ITimeoutRepository _repository;
         private TimeoutService _timeoutService;
         private Guid _correlationId;
-        private DateTime _dateTime;
 
-        protected override void Before_each()
+        protected override void EstablishContext()
         {
+            base.EstablishContext();
+
             _correlationId = CombGuid.NewCombGuid();
-            _dateTime = DateTime.UtcNow + TimeSpan.FromSeconds(1);
 
-            Container.AddComponentLifeStyle<ITimeoutRepository, InMemoryTimeoutRepository>(LifestyleType.Singleton);
+            _repository = new InMemoryTimeoutRepository();
+            ObjectBuilder.Stub(x => x.GetInstance<ITimeoutRepository>()).Return(_repository);
 
-            _repository = Container.Resolve<ITimeoutRepository>();
-
-            Container.AddComponent<ScheduleTimeoutConsumer>();
-            Container.AddComponent<CancelTimeoutConsumer>();
-
+            ObjectBuilder.Stub(x => x.GetInstance<ScheduleTimeoutConsumer>()).Return(new ScheduleTimeoutConsumer(_repository));
+            ObjectBuilder.Stub(x => x.GetInstance<CancelTimeoutConsumer>()).Return(new CancelTimeoutConsumer(_repository));
+            
             _timeoutService = new TimeoutService(LocalBus, _repository);
             _timeoutService.Start();
         }
 
-        protected override void After_each()
+        protected override void TeardownContext()
         {
+            base.TeardownContext();
+
             _timeoutService.Stop();
             _timeoutService.Dispose();
         }
@@ -60,7 +64,7 @@ namespace MassTransit.Tests.Timeouts
 
             LocalBus.Subscribe<TimeoutExpired>(x => _timedOut.Set());
 
-            LocalBus.Publish(new ScheduleTimeout(_correlationId, _dateTime));
+            LocalBus.Publish(new ScheduleTimeout(_correlationId, 1.Seconds()));
 
             Stopwatch watch = Stopwatch.StartNew();
 

@@ -45,15 +45,11 @@ namespace MassTransit.Transports.Msmq.Tests
             
         }
     }
+    
     [TestFixture]
     public class When_a_message_is_published_to_a_transactional_queue :
-        LocalAndRemoteTestContext
+        MsmqTransactionalEndpointTestFixture
     {
-        protected override string GetCastleConfigurationFile()
-        {
-            return "transactional.castle.xml";
-        }
-
         private readonly TimeSpan _timeout = TimeSpan.FromSeconds(10);
 
         [Test]
@@ -78,7 +74,7 @@ namespace MassTransit.Transports.Msmq.Tests
         }
 
         [Test]
-        public void It_should_rollback_a_send_if_an_exception_is_thrown()
+        public void It_should_not_rollback_a_send_if_an_exception_is_thrown()
         {
             var consumer = new TestMessageConsumer<PongMessage>();
             LocalBus.Subscribe(consumer);
@@ -94,7 +90,7 @@ namespace MassTransit.Transports.Msmq.Tests
 
             LocalBus.Publish(message);
 
-            consumer.ShouldNotHaveReceivedMessage(response, _timeout);
+            consumer.ShouldHaveReceivedMessage(response, _timeout);
         }
     }
 
@@ -233,18 +229,17 @@ namespace MassTransit.Transports.Msmq.Tests
     }
 
     [TestFixture]
-    public class When_an_accept_method_throws_an_exception
+    public class When_an_accept_method_throws_an_exception :
+        MsmqEndpointTestFixture
     {
         [Test]
         public void The_exception_should_not_disrupt_the_flow_of_messages()
         {
-            MsmqEndpoint endpoint = new MsmqEndpoint("msmq://localhost/test_servicebus");
-            IObjectBuilder obj = null;
-            ServiceBus bus = new ServiceBus(endpoint, obj);
+            MsmqEndpoint endpoint = new MsmqEndpoint("msmq://localhost/mt_client");
 
             CrashingService service = new CrashingService();
 
-            bus.Subscribe(service);
+            LocalBus.Subscribe(service);
 
             endpoint.Send(new BogusMessage());
 
@@ -301,13 +296,8 @@ namespace MassTransit.Transports.Msmq.Tests
 
     [TestFixture]
     public class When_receiving_messages_slowly :
-        LocalAndRemoteTestContext
+        MsmqEndpointTestFixture
     {
-        protected override string GetCastleConfigurationFile()
-        {
-            return "msmq.castle.xml";
-        }
-
         private readonly TimeSpan _timeout = TimeSpan.FromSeconds(10);
 
         [Test]
