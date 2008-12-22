@@ -10,7 +10,7 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Transports.Msmq.Tests
+namespace MassTransit.Transports.Msmq.Tests.Learning
 {
     using System;
     using System.Diagnostics;
@@ -82,24 +82,3 @@ namespace MassTransit.Transports.Msmq.Tests
         }
     }
 }
-
-//
-//        static void Main(string[] args)
-//        {
-//            DependentTransaction dtx;
-//            Thread newThread = new Thread (new ParameterizedThreadStart(Program.ThreadProc));
-//
-//            using (TransactionScope s = new TransactionScope())
-//            {
-//                dtx = Transaction.Current.DependentClone(DependentCloneOption.BlockCommitUntilComplete);
-//                newThread.Start(dtx);
-//                Console.WriteLine("About to complete the main thread");
-//                s.Complete();
-//            }
-//
-//            Console.WriteLine("Transaction Completed");
-//        }
-//    }
-//}
-//
-//When you run it you get the following output:

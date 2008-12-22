@@ -20,6 +20,7 @@ namespace MassTransit.Tests
     using WindsorIntegration;
 
     [TestFixture]
+    [Obsolete("Please use LoopbackLocalAndRemote")]
     public class LocalAndRemoteTestContext
     {
         #region Setup/Teardown

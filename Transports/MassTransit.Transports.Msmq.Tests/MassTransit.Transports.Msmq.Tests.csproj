@@ -69,6 +69,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="As_a_nontransactional_endpoint.cs" />
+    <Compile Include="As_a_ServiceBus_working_with_an_endpoint.cs" />
     <Compile Include="As_a_transactional_endpoint.cs" />
     <Compile Include="MessageQueue_Extensions.cs" />
     <Compile Include="Messages\VariableMessage.cs" />
@@ -80,12 +81,8 @@
     <Compile Include="QueueTestContext.cs" />
     <Compile Include="ReceiveException_Specs.cs" />
     <Compile Include="Receive_Specs.cs" />
-    <Compile Include="TransactionalQueue_Specs.cs" />
-    <Compile Include="TransactionalReceive_Specs.cs" />
-    <Compile Include="When_creating_the_service_bus_with_a_MessageQueueEndpoint.cs" />
-    <Compile Include="When_publishing_a_message.cs" />
+    <Compile Include="Learning\TransactionalQueue_Specs.cs" />
     <Compile Include="When_receiving_messages_slowly.cs" />
-    <Compile Include="When_sending_a_message.cs" />
     <Compile Include="When_specifying_a_message_queue_address_for_an_endpoint.cs" />
   </ItemGroup>
   <ItemGroup>
