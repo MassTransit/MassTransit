@@ -16,53 +16,56 @@ namespace MassTransit.Tests.Timeouts
     using System.Diagnostics;
     using System.Threading;
     using Castle.Core;
+    using Magnum.Common.DateTimeExtensions;
     using MassTransit.Services.MessageDeferral;
     using MassTransit.Services.MessageDeferral.Messages;
     using MassTransit.Services.Timeout;
     using NUnit.Framework;
+    using Rhino.Mocks;
     using Tests.Messages;
+    using TextFixtures;
     using Util;
 
     [TestFixture]
     public class When_a_message_is_deferred :
-        LocalAndRemoteTestContext
+        LoopbackLocalAndRemoteTestFixture
     {
         private ITimeoutRepository _timeoutRepository;
         private TimeoutService _timeoutService;
         private Guid _correlationId;
-        private DateTime _dateTime;
         private IDeferredMessageRepository _repository;
         private MessageDeferralService _deferService;
 
-        protected override void Before_each()
+        protected override void EstablishContext()
         {
+            base.EstablishContext();
+
             _correlationId = CombGuid.NewCombGuid();
-            _dateTime = DateTime.UtcNow + TimeSpan.FromSeconds(1);
 
-            Container.AddComponentLifeStyle<ITimeoutRepository, InMemoryTimeoutRepository>(LifestyleType.Singleton);
+            _timeoutRepository = new InMemoryTimeoutRepository();
+            base.ObjectBuilder.Stub(x => x.GetInstance<ITimeoutRepository>()).Return(_timeoutRepository);
 
-            _timeoutRepository = Container.Resolve<ITimeoutRepository>();
 
-            Container.AddComponent<ScheduleTimeoutConsumer>();
-            Container.AddComponent<CancelTimeoutConsumer>();
+            base.ObjectBuilder.Stub(x => x.GetInstance<ScheduleTimeoutConsumer>()).Return(new ScheduleTimeoutConsumer(_timeoutRepository));
+            base.ObjectBuilder.Stub(x => x.GetInstance<CancelTimeoutConsumer>()).Return(new CancelTimeoutConsumer(_timeoutRepository));
 
-            _timeoutService = new TimeoutService(LocalBus, _timeoutRepository);
+
+            _timeoutService = new TimeoutService(RemoteBus, _timeoutRepository);
             _timeoutService.Start();
 
-            Container.AddComponentLifeStyle<IDeferredMessageRepository, InMemoryDeferredMessageRepository>(
-                LifestyleType.Singleton);
 
-            _repository = Container.Resolve<IDeferredMessageRepository>();
+            _repository = new InMemoryDeferredMessageRepository();
+            base.ObjectBuilder.Stub(x => x.GetInstance<IDeferredMessageRepository>()).Return(_repository);
+            base.ObjectBuilder.Stub(x => x.GetInstance<DeferMessageConsumer>()).Return(new DeferMessageConsumer(RemoteBus, _repository));
 
-            Container.AddComponent<DeferMessageConsumer>();
-            Container.AddComponent<TimeoutExpiredConsumer>();
-
-            _deferService = new MessageDeferralService(LocalBus);
+            _deferService = new MessageDeferralService(RemoteBus);
             _deferService.Start();
         }
-
-        protected override void After_each()
+        
+        protected override void TeardownContext()
         {
+            base.TeardownContext();
+
             _deferService.Stop();
             _deferService.Dispose();
 
@@ -79,9 +82,9 @@ namespace MassTransit.Tests.Timeouts
 
             LocalBus.Subscribe<PingMessage>(x => _timedOut.Set());
 
-            LocalBus.Publish(new DeferMessage(_correlationId, TimeSpan.FromSeconds(3), new PingMessage()));
+            LocalBus.Publish(new DeferMessage(_correlationId, 1.Seconds(), new PingMessage()));
 
-            Assert.IsTrue(_timedOut.WaitOne(TimeSpan.FromSeconds(10), true));
+            Assert.IsTrue(_timedOut.WaitOne(3.Seconds(), true));
 
             watch.Stop();
 

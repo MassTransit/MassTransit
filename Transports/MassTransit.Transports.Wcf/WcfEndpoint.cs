@@ -18,8 +18,10 @@ namespace MassTransit.Transports.Wcf
     using System.Runtime.Serialization.Formatters.Binary;
     using System.ServiceModel;
     using System.Threading;
+    using Configuration;
     using Internal;
     using log4net;
+    using Serialization;
 
     public class WcfEndpoint : IEndpoint
     {
@@ -35,7 +37,7 @@ namespace MassTransit.Transports.Wcf
         private ServiceHost _host;
         private ChannelFactory<IEndpointContract> _channelFactory;
 
-        public WcfEndpoint(Uri uri)
+        public WcfEndpoint(Uri uri, IMessageSerializer serializer)
         {
             _uri = uri;
 
@@ -200,6 +202,23 @@ namespace MassTransit.Transports.Wcf
             {
                 _endpoint.Enqueue(message);
             }
+        }
+
+        public static IEndpoint ConfigureEndpoint(Uri uri, Action<IEndpointConfigurator> configurator)
+        {
+            if (uri.Scheme.ToLowerInvariant() == "net.tcp")
+            {
+                IEndpoint endpoint = WcfEndpointConfigurator.New(x =>
+                {
+                    x.SetUri(uri);
+
+                    configurator(x);
+                });
+
+                return endpoint;
+            }
+
+            return null;
         }
     }
 }

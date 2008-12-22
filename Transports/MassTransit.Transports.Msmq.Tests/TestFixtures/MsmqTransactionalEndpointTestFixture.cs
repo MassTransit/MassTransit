@@ -3,7 +3,7 @@ namespace MassTransit.Transports.Msmq.Tests.TestFixtures
     using Configuration;
     using MassTransit.Tests.TextFixtures;
 
-    public class MsmqEndpointTestFixture :
+    public class MsmqTransactionalEndpointTestFixture :
         EndpointTestFixture<MsmqEndpoint>
     {
         public IServiceBus LocalBus { get; private set; }
@@ -13,9 +13,9 @@ namespace MassTransit.Transports.Msmq.Tests.TestFixtures
         {
             base.EstablishContext();
 
-            LocalBus = ServiceBusConfigurator.New(x => { x.ReceiveFrom("msmq://localhost/mt_client"); });
+            LocalBus = ServiceBusConfigurator.New(x => { x.ReceiveFrom("msmq://localhost/mt_client_tx"); });
 
-            RemoteBus = ServiceBusConfigurator.New(x => { x.ReceiveFrom("msmq://localhost/mt_server"); });
+            RemoteBus = ServiceBusConfigurator.New(x => { x.ReceiveFrom("msmq://localhost/mt_server_tx"); });
         }
 
         protected override void TeardownContext()

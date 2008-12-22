@@ -1,10 +1,10 @@
-namespace MassTransit.Transports.Msmq.Tests.TestFixtures
+namespace MassTransit.Transports.Wcf.Tests.TestFixtures
 {
     using Configuration;
     using MassTransit.Tests.TextFixtures;
 
-    public class MsmqEndpointTestFixture :
-        EndpointTestFixture<MsmqEndpoint>
+    public class WcfEndpointTestFixture :
+        EndpointTestFixture<WcfEndpoint>
     {
         public IServiceBus LocalBus { get; private set; }
         public IServiceBus RemoteBus { get; private set; }
@@ -13,9 +13,9 @@ namespace MassTransit.Transports.Msmq.Tests.TestFixtures
         {
             base.EstablishContext();
 
-            LocalBus = ServiceBusConfigurator.New(x => { x.ReceiveFrom("msmq://localhost/mt_client"); });
+            LocalBus = ServiceBusConfigurator.New(x => { x.ReceiveFrom("net.tcp://localhost:8061/local_sb"); });
 
-            RemoteBus = ServiceBusConfigurator.New(x => { x.ReceiveFrom("msmq://localhost/mt_server"); });
+            RemoteBus = ServiceBusConfigurator.New(x => { x.ReceiveFrom("net.tcp://localhost:8061/remote_sb"); });
         }
 
         protected override void TeardownContext()
