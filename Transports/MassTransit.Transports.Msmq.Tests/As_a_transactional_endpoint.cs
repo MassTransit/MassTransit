@@ -96,34 +96,5 @@ namespace MassTransit.Transports.Msmq.Tests
             }
 
         }
-
-        [TestFixture]
-        public class When_endpoint_doesnt_exist
-        {
-            [Test]
-            [ExpectedException(typeof(EndpointException))]
-            public void Should_throw_an_endpoint_exception()
-            {
-                new MsmqEndpoint("msmq://localhost/idontexist_tx");
-            }
-        }
-
-        [TestFixture]
-        public class When_instantiated_endpoints
-        {
-            [Test]
-            public void The_uri_should_get_conveted_into_a_fully_qualified_name()
-            {
-                string endpointName = @"msmq://localhost/mt_client_tx";
-
-                MsmqEndpoint defaultEndpoint = new MsmqEndpoint(endpointName);
-
-                string machineEndpointName = endpointName.Replace("localhost", Environment.MachineName.ToLowerInvariant());
-
-                defaultEndpoint.Uri.Equals(machineEndpointName)
-                    .ShouldBeTrue();
-            }
-        }
-        
     }
 }

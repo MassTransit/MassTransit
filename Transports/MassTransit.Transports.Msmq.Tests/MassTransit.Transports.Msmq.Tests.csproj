@@ -68,6 +68,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="As_an_endpoint.cs" />
     <Compile Include="As_a_nontransactional_endpoint.cs" />
     <Compile Include="As_a_ServiceBus_working_with_an_endpoint.cs" />
     <Compile Include="As_a_transactional_endpoint.cs" />
@@ -82,7 +83,7 @@
     <Compile Include="Learning\TransactionalQueue_Specs.cs" />
     <Compile Include="TestFixtures\MsmqEndpointTestFixture.cs" />
     <Compile Include="TestFixtures\MsmqTransactionalEndpointTestFixture.cs" />
-    <Compile Include="When_specifying_a_message_queue_address_for_an_endpoint.cs" />
+    <Compile Include="As_a_queue_address.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\MassTransit.Tests\MassTransit.Tests.csproj">
