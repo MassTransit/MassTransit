@@ -7,8 +7,9 @@ namespace MassTransit.Tests.StateMachine
     public class Transition_Specs
     {
         [Test]
-        public void FIRST_TEST_NAME()
+        public void The_name_of_the_state_should_match_the_name_of_the_variable()
         {
+        	Assert.AreEqual("Idle", MoreFluentState.Idle.Name);
 
             
 
@@ -18,7 +19,7 @@ namespace MassTransit.Tests.StateMachine
 
     public class MoreFluentState : StateMachineBase<MoreFluentState>
     {
-        public MoreFluentState()
+        static MoreFluentState()
         {
             Define(() => Idle).AsInitial();
             Define(() => Active);
@@ -35,8 +36,8 @@ namespace MassTransit.Tests.StateMachine
                     });
         */}
 
-        public State<MoreFluentState> Idle { get; set; }
-        public State<MoreFluentState> Active
+        public static State<MoreFluentState> Idle { get; set; }
+        public static State<MoreFluentState> Active
         {
             get;
             set;
