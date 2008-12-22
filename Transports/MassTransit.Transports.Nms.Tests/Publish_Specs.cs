@@ -14,20 +14,15 @@ namespace MassTransit.Transports.Nms.Tests
 {
 	using System;
 	using Magnum.Common.DateTimeExtensions;
-	using MassTransit.Tests;
 	using MassTransit.Tests.Messages;
 	using MassTransit.Tests.TestConsumers;
 	using NUnit.Framework;
+	using TestFixtures;
 
-	[TestFixture]
+    [TestFixture]
 	public class When_publishing_a_message :
-		LocalAndRemoteTestContext
+		NmsEndpointTestFixture
 	{
-		protected override string GetCastleConfigurationFile()
-		{
-			return "activemq.castle.xml";
-		}
-
 		private readonly TimeSpan _timeout = 10.Seconds();
 
 		[Test]

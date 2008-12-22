@@ -17,6 +17,7 @@ namespace MassTransit.Transports.Nms
 	using System.Runtime.Serialization;
 	using Apache.NMS;
 	using Apache.NMS.ActiveMQ;
+	using Configuration;
 	using Exceptions;
 	using Internal;
 	using log4net;
@@ -26,17 +27,17 @@ namespace MassTransit.Transports.Nms
 		IEndpoint
 	{
 		private static readonly ILog _log = LogManager.GetLogger(typeof (NmsEndpoint));
-		private static readonly IMessageSerializer _serializer = new BinaryMessageSerializer();
+		private readonly IMessageSerializer _serializer;
 		private readonly IConnectionFactory _factory;
 		private readonly string _queueName;
 		private readonly Uri _uri;
 		private bool _disposed;
 		private IConnection _connection;
 
-		public NmsEndpoint(Uri uri)
+		public NmsEndpoint(Uri uri, IMessageSerializer serializer)
 		{
 			_uri = uri;
-
+		    _serializer = serializer;
 			UriBuilder queueUri = new UriBuilder("tcp", Uri.Host, Uri.Port);
 
 			_queueName = Uri.AbsolutePath.Substring(1);
@@ -49,8 +50,8 @@ namespace MassTransit.Transports.Nms
 			_connection.Start();
 		}
 
-		public NmsEndpoint(string uriString)
-			: this(new Uri(uriString))
+		public NmsEndpoint(string uriString, IMessageSerializer serializer)
+			: this(new Uri(uriString), serializer)
 		{
 		}
 
@@ -293,5 +294,21 @@ namespace MassTransit.Transports.Nms
 			}
 			_disposed = true;
 		}
+        public static IEndpoint ConfigureEndpoint(Uri uri, Action<IEndpointConfigurator> configurator)
+        {
+            if (uri.Scheme.ToLowerInvariant() == Scheme)
+            {
+                IEndpoint endpoint = NmsEndpointConfigurator.New(x =>
+                {
+                    x.SetUri(uri);
+
+                    configurator(x);
+                });
+
+                return endpoint;
+            }
+
+            return null;
+        }
 	}
 }

@@ -206,7 +206,7 @@ namespace MassTransit.Transports.Wcf
 
         public static IEndpoint ConfigureEndpoint(Uri uri, Action<IEndpointConfigurator> configurator)
         {
-            if (uri.Scheme.ToLowerInvariant() == "net.tcp")
+            if (uri.Scheme.ToLowerInvariant() == Scheme)
             {
                 IEndpoint endpoint = WcfEndpointConfigurator.New(x =>
                 {
