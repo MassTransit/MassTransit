@@ -12,7 +12,9 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests.StateMachine
 {
-    public class StateEvent<T>
+	using System;
+
+	public class StateEvent<T>
     {
         private readonly string _name;
 
@@ -25,5 +27,16 @@ namespace MassTransit.Tests.StateMachine
         {
             get { return _name; }
         }
+
+		public StateEvent<T> When(State<T> state, Action<T> action)
+		{
+			return this;
+			
+		}
+
+		public void Otherwise(Action<T> action)
+		{
+			
+		}
     }
 }

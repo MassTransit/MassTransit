@@ -52,6 +52,22 @@ namespace MassTransit.Tests.StateMachine
             return SetProperty<StateEvent<T>>(func, x => new StateEvent<T>(x.Name));
         }
 
+		private static StateEvent<T> Define(Expression<Func<StateEvent<T>>> func, Action<StateEvent<T>> action)
+		{
+			var stateEvent = SetProperty<StateEvent<T>>(func, x => new StateEvent<T>(x.Name));
+
+			action(stateEvent);
+
+			return stateEvent;
+		}
+
+
+    	public void TransitionTo(State<T> state)
+		{
+    		Current = state;
+		}
+
+
         public static TValue SetProperty<TValue>(Expression<Func<TValue>> func, Func<PropertyInfo, TValue> getInstance)
         {
             MemberExpression mex = func.Body as MemberExpression;
@@ -70,4 +86,8 @@ namespace MassTransit.Tests.StateMachine
         }
 
     }
+
+	public class StateEventConfigurator<T>
+	{
+	}
 }
