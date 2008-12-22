@@ -56,33 +56,11 @@ namespace MassTransit.Transports.Msmq
 		/// <param name="serializer">The serializer to use for the endpoint</param>
 		public MsmqEndpoint(Uri uri, IMessageSerializer serializer)
 		{
-			_uri = uri;
 			_serializer = serializer;
-
-			if (_uri.AbsolutePath.IndexOf("/", 1) >= 0)
-			{
-				if (uri.AbsolutePath.IndexOf("public") >= 0)
-					throw new NotSupportedException(string.Format("public queues are not supported (please submit a patch): {0}", uri));
-
-				throw new EndpointException(this, "Queue Endpoints can't have a child folder unless it is 'public' (not supported yet, please submit patch). Good: 'msmq://machinename/queue_name' or 'msmq://machinename/public/queue_name' - Bad: msmq://machinename/round_file/queue_name");
-			}
-
-
-			string localhost = Environment.MachineName.ToLowerInvariant();
-
-			string hostName = _uri.Host;
-			if (string.Compare(hostName, ".") == 0 || string.Compare(hostName, _localhost, true) == 0)
-			{
-				_uri = new Uri("msmq://" + localhost + _uri.AbsolutePath);
-				_isLocal = true;
-			}
-			else
-			{
-				_isLocal = string.Compare(_uri.Host, localhost, true) == 0;
-			}
-
-			_queuePath = string.Format(@"FormatName:DIRECT=OS:{0}\private$\{1}", hostName, _uri.AbsolutePath.Substring(1));
-
+		    var result = MsmqUriParser.Convert(uri);
+		    _isLocal = result.IsLocal;
+		    _queuePath = result.QueuePath;
+		    _uri = result.FullyQualifiedUri;
 			_queue = Open(QueueAccessMode.SendAndReceive);
 
 			Initialize();
@@ -94,36 +72,10 @@ namespace MassTransit.Transports.Msmq
 		/// <param name="queue">A Microsoft Message Queue</param>
 		public MsmqEndpoint(MessageQueue queue)
 		{
-			string path = queue.Path;
-			const string prefix = "FormatName:DIRECT=OS:";
-
-			if (path.Length > prefix.Length && path.Substring(0, prefix.Length).ToUpperInvariant() == prefix.ToUpperInvariant())
-				path = path.Substring(prefix.Length);
-
-			string[] parts = path.Split('\\');
-
-			if (parts.Length != 3)
-				throw new ArgumentException("Invalid Queue Path Specified");
-
-			//Validate parts[1] = private$
-			if (string.Compare(parts[1], "private$", true) != 0)
-				throw new ArgumentException("Invalid Queue Path Specified");
-
-			string localhost = Environment.MachineName.ToLowerInvariant();
-
-			if (parts[0] == "." || string.Compare("localhost", parts[0], true) == 0)
-			{
-				parts[0] = localhost;
-				_isLocal = true;
-			}
-			else
-			{
-				parts[0] = parts[0].ToLowerInvariant();
-				_isLocal = string.Compare(localhost, parts[0], true) == 0;
-			}
-
-			_queuePath = string.Format("{0}{1}\\{2}\\{3}", prefix, parts[0], parts[1], parts[2]);
-			_uri = new Uri(string.Format("msmq://{0}/{1}", parts[0], parts[2]));
+		    var result = MsmqUriParser.Convert(queue);
+		    _queuePath = result.QueuePath;
+		    _isLocal = result.IsLocal;
+		    _uri = result.FullyQualifiedUri;
 
 			_queue = Open(QueueAccessMode.SendAndReceive);
 

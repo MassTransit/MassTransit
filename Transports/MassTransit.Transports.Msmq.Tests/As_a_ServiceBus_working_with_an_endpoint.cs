@@ -15,22 +15,96 @@ namespace MassTransit.Transports.Msmq.Tests
     using System;
     using System.Collections;
     using System.Threading;
-    using Messages;
+    using MassTransit.Tests;
+    using MassTransit.Tests.Messages;
+    using MassTransit.Tests.TestConsumers;
     using NUnit.Framework;
     using NUnit.Framework.SyntaxHelpers;
     using Rhino.Mocks;
 
     [TestFixture]
+    public class As_a_ServiceBus_working_with_an_endpoint
+    {
+        [Test]
+        public void When_an_error_is_thrown_on_publish_the_bus_will_not_rollback_any_messages()
+        {
+            //publish ignores transactional semantics
+        }
+
+        [Test]
+        public void When_an_error_is_encountered_while_publishing_only_the_errorendpoint_is_skipped()
+        {
+            
+        }
+
+        [Test]
+        public void When_an_error_is_encountered_on_read_only_the_errorconsumers_get_skipped()
+        {
+            
+        }
+    }
+    [TestFixture]
+    public class When_a_message_is_published_to_a_transactional_queue :
+        LocalAndRemoteTestContext
+    {
+        protected override string GetCastleConfigurationFile()
+        {
+            return "transactional.castle.xml";
+        }
+
+        private readonly TimeSpan _timeout = TimeSpan.FromSeconds(10);
+
+        [Test]
+        public void It_should_be_received_by_one_subscribed_consumer()
+        {
+            var consumer = new TestMessageConsumer<PingMessage>();
+            RemoteBus.Subscribe(consumer);
+
+            var message = new PingMessage();
+            LocalBus.Publish(message);
+
+            consumer.ShouldHaveReceivedMessage(message, _timeout);
+        }
+
+        [Test]
+        public void It_should_leave_the_message_in_the_queue_if_an_exception_is_thrown()
+        {
+            RemoteBus.Subscribe<PingMessage>(m => { throw new ApplicationException("Boing!"); });
+
+            var message = new PingMessage();
+            LocalBus.Publish(message);
+        }
+
+        [Test]
+        public void It_should_rollback_a_send_if_an_exception_is_thrown()
+        {
+            var consumer = new TestMessageConsumer<PongMessage>();
+            LocalBus.Subscribe(consumer);
+
+            var message = new PingMessage();
+            var response = new PongMessage(message.CorrelationId);
+
+            RemoteBus.Subscribe<PingMessage>(m =>
+            {
+                RemoteBus.Publish(response);
+                throw new ApplicationException("Boing!");
+            });
+
+            LocalBus.Publish(message);
+
+            consumer.ShouldNotHaveReceivedMessage(response, _timeout);
+        }
+    }
+
+    [TestFixture]
     public class When_publishing_a_message
     {
-
-        MockRepository _mocks = new MockRepository();
 
         [Test]
         [Ignore]
         public void Multiple_Local_Services_Should_Be_Available()
         {
-            using (QueueTestContext qtc = new QueueTestContext(_mocks.DynamicMock<IObjectBuilder>()))
+            using (QueueTestContext qtc = new QueueTestContext(MockRepository.GenerateMock<IObjectBuilder>()))
             {
                 ManualResetEvent _updateEvent = new ManualResetEvent(false);
 
@@ -62,7 +136,7 @@ namespace MassTransit.Transports.Msmq.Tests
         [Ignore]
         public void Multiple_messages_should_be_delivered_to_the_appropriate_remote_subscribers()
         {
-            using (QueueTestContext qtc = new QueueTestContext(_mocks.DynamicMock<IObjectBuilder>()))
+            using (QueueTestContext qtc = new QueueTestContext(MockRepository.GenerateMock<IObjectBuilder>()))
             {
                 ManualResetEvent _updateEvent = new ManualResetEvent(false);
 
@@ -94,7 +168,7 @@ namespace MassTransit.Transports.Msmq.Tests
         [Ignore]
         public void The_message_should_be_delivered_to_a_local_subscriber()
         {
-            using (QueueTestContext qtc = new QueueTestContext(_mocks.DynamicMock<IObjectBuilder>()))
+            using (QueueTestContext qtc = new QueueTestContext(MockRepository.GenerateMock<IObjectBuilder>()))
             {
                 ManualResetEvent _updateEvent = new ManualResetEvent(false);
 
@@ -114,7 +188,7 @@ namespace MassTransit.Transports.Msmq.Tests
         [Ignore]
         public void The_message_should_be_delivered_to_a_remote_subscriber()
         {
-            using (QueueTestContext qtc = new QueueTestContext(_mocks.DynamicMock<IObjectBuilder>()))
+            using (QueueTestContext qtc = new QueueTestContext(MockRepository.GenerateMock<IObjectBuilder>()))
             {
                 ManualResetEvent _updateEvent = new ManualResetEvent(false);
 
@@ -134,21 +208,20 @@ namespace MassTransit.Transports.Msmq.Tests
         [Ignore]
         public void The_message_should_be_delivered_to_a_remote_subscriber_with_a_reply()
         {
-            IObjectBuilder obj = _mocks.DynamicMock<IObjectBuilder>();
-            SetupResult.For(obj.GetInstance<IEndpoint>(new Hashtable())).Return(_mocks.DynamicMock<IEndpoint>());
-            _mocks.ReplayAll();
+            IObjectBuilder obj = MockRepository.GenerateMock<IObjectBuilder>();
+            SetupResult.For(obj.GetInstance<IEndpoint>(new Hashtable())).Return(MockRepository.GenerateMock<IEndpoint>());
 
             using (QueueTestContext qtc = new QueueTestContext(obj))
             {
                 ManualResetEvent _updateEvent = new ManualResetEvent(false);
 
                 Action<UpdateMessage> handler =
-                    delegate(UpdateMessage msg)
-                        {
-                            _updateEvent.Set();
+                    msg =>
+                    {
+                        _updateEvent.Set();
 
-                            qtc.RemoteServiceBus.Publish(new UpdateAcceptedMessage());
-                        };
+                        qtc.RemoteServiceBus.Publish(new UpdateAcceptedMessage());
+                    };
 
                 ManualResetEvent _repliedEvent = new ManualResetEvent(false);
 

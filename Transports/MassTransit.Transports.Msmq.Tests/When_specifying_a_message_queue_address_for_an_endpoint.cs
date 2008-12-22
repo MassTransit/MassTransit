@@ -39,51 +39,53 @@ namespace MassTransit.Transports.Msmq.Tests
 		[Test]
 		public void A_message_queue_address_should_convert_to_a_queue_path()
 		{
-			using (MsmqEndpoint endpoint = new MsmqEndpoint(_address))
-			{
-				endpoint.QueuePath
-					.ShouldEqual(_expectedQueuePath);
-				endpoint.Uri
-					.ShouldEqual(_expectedUri);
-			}
+		    ParsingResult result = MsmqUriParser.Convert(_address);
+            result.QueuePath
+                .ShouldEqual(_expectedQueuePath);
+            result.FullyQualifiedUri
+                .ShouldEqual(_expectedUri);
+			
 		}
 
 		[Test]
 		public void A_message_queue_uri_should_convert_to_a_queue_path()
 		{
-			using (MsmqEndpoint endpoint = new MsmqEndpoint(_uriAddress, new BinaryMessageSerializer()))
-			{
-				endpoint.QueuePath
-					.ShouldEqual(_expectedQueuePath);
-				endpoint.Uri
-					.ShouldEqual(_expectedUri);
-			}
+            ParsingResult result = MsmqUriParser.Convert(_uriAddress);
+            result.QueuePath
+                .ShouldEqual(_expectedQueuePath);
+            result.FullyQualifiedUri
+                .ShouldEqual(_expectedUri);
+
 		}
 
-		[Test, Ignore("Endpoints verify the queue exists, so this will fail if the remote machine does not exist")]
+		[Test]
 		public void A_remote_server_should_keep_the_remote_server_name()
 		{
-			const string uriString = "msmq://remote_server/queue_name";
+			Uri remoteUri = new Uri("msmq://remote_server/queue_name");
+            string remoteQueuePath = @"FormatName:DIRECT=OS:remote_server\private$\queue_name";
 
-			using (MsmqEndpoint endpoint = new MsmqEndpoint(uriString))
-			{
-				endpoint.QueuePath
-					.ShouldEqual(@"FormatName:DIRECT=OS:remote_server\private$\queue_name");
-				endpoint.Uri
-					.ShouldEqual(uriString);
-			}
+            ParsingResult result = MsmqUriParser.Convert(remoteUri);
+            
+            result.QueuePath
+                .ShouldEqual(remoteQueuePath);
+            result.FullyQualifiedUri
+                .ShouldEqual(remoteUri);
 		}
 
 
-		[Test, ExpectedException(typeof (EndpointException))]
+		[Test, ExpectedException(typeof (ParsingException))]
 		public void An_address_cant_contain_a_path_specifier()
 		{
 			const string address = "msmq://localhost/test_endpoint/error_creator";
-
-			using (MsmqEndpoint endpoint = new MsmqEndpoint(address))
-			{
-			}
+            ParsingResult result = MsmqUriParser.Convert(address);
 		}
+
+        [Test, ExpectedException(typeof(NotSupportedException))]
+        public void Public_queues_are_not_supported()
+        {
+            const string address = "msmq://localhost/public/bob";
+            ParsingResult result = MsmqUriParser.Convert(address);
+        }
 	}
 
     [TestFixture]
