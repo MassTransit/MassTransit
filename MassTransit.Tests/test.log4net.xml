@@ -3,9 +3,9 @@
   <configSections>
     <section name="log4net" type="log4net.Config.Log4NetConfigurationSectionHandler,log4net" />
   </configSections>
-  <log4net debug="false">
+  <log4net>
     <root>
-      <level value="ERROR" />
+      <level value="ALL" />
       <appender-ref ref="LogFileAppender" />
       <appender-ref ref="console" />
     </root>
