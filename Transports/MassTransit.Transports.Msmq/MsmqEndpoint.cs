@@ -29,12 +29,9 @@ namespace MassTransit.Transports.Msmq
 	public class MsmqEndpoint :
 		IEndpoint
 	{
-		private const string _localhost = "localhost";
 		private static readonly ILog _log = LogManager.GetLogger(typeof (MsmqEndpoint));
-		private readonly bool _isLocal;
-		private readonly string _queuePath;
+		private readonly QueueAddress _queueAddress;
 		private readonly IMessageSerializer _serializer;
-		private readonly Uri _uri;
 		private MessageQueue _queue;
 		private MessageQueueTransactionType _receiveTransactionType;
 		private bool _reliableMessaging = true;
@@ -57,10 +54,9 @@ namespace MassTransit.Transports.Msmq
 		public MsmqEndpoint(Uri uri, IMessageSerializer serializer)
 		{
 			_serializer = serializer;
-		    var result = MsmqUriParser.Convert(uri);
-		    _isLocal = result.IsLocal;
-		    _queuePath = result.QueuePath;
-		    _uri = result.FullyQualifiedUri;
+
+			_queueAddress = new QueueAddress(uri);
+
 			_queue = Open(QueueAccessMode.SendAndReceive);
 
 			Initialize();
@@ -72,10 +68,7 @@ namespace MassTransit.Transports.Msmq
 		/// <param name="queue">A Microsoft Message Queue</param>
 		public MsmqEndpoint(MessageQueue queue)
 		{
-		    var result = MsmqUriParser.Convert(queue);
-		    _queuePath = result.QueuePath;
-		    _isLocal = result.IsLocal;
-		    _uri = result.FullyQualifiedUri;
+			_queueAddress = new QueueAddress(queue);
 
 			_queue = Open(QueueAccessMode.SendAndReceive);
 
@@ -100,7 +93,7 @@ namespace MassTransit.Transports.Msmq
 		/// </summary>
 		public string QueuePath
 		{
-			get { return _queuePath; }
+			get { return _queueAddress.FormatName; }
 		}
 
 		/// <summary>
@@ -108,7 +101,7 @@ namespace MassTransit.Transports.Msmq
 		/// </summary>
 		public Uri Uri
 		{
-			get { return _uri; }
+			get { return _queueAddress.ActualUri; }
 		}
 
 		public void Send<T>(T message) where T : class
@@ -119,7 +112,7 @@ namespace MassTransit.Transports.Msmq
 		public void Send<T>(T message, TimeSpan timeToLive) where T : class
 		{
 			if (!_queue.CanWrite)
-				throw new EndpointException(this, "Not allowed to write to endpoint " + _uri);
+				throw new EndpointException(this, "Not allowed to write to endpoint " + _queueAddress.ActualUri);
 
 			Type messageType = typeof (T);
 
@@ -158,7 +151,7 @@ namespace MassTransit.Transports.Msmq
 		public void Receive(TimeSpan timeout, Func<object, Func<object, bool>, bool> receiver)
 		{
 			if (!_queue.CanRead)
-				throw new EndpointException(this, string.Format("Not allowed to read from endpoint: '{0}'", _uri));
+				throw new EndpointException(this, string.Format("Not allowed to read from endpoint: '{0}'", _queueAddress.ActualUri));
 
 			try
 			{
@@ -187,7 +180,7 @@ namespace MassTransit.Transports.Msmq
 									_log.DebugFormat("Queue: {0} Received Message Id {1}", _queue.Path, msg.Id);
 
 								if (SpecialLoggers.Messages.IsInfoEnabled)
-									SpecialLoggers.Messages.InfoFormat("RECV:{0}:{1}", _uri, obj.GetType().Name);
+									SpecialLoggers.Messages.InfoFormat("RECV:{0}:{1}", _queueAddress.ActualUri, obj.GetType().Name);
 
 								return true;
 							}))
@@ -213,9 +206,9 @@ namespace MassTransit.Transports.Msmq
 
 		private void Initialize()
 		{
-			_sendTransactionType = _isLocal && _queue.Transactional ? MessageQueueTransactionType.Automatic : MessageQueueTransactionType.None;
+			_sendTransactionType = _queueAddress.IsLocal && _queue.Transactional ? MessageQueueTransactionType.Automatic : MessageQueueTransactionType.None;
 
-			_receiveTransactionType = _isLocal && _queue.Transactional ? MessageQueueTransactionType.Automatic : MessageQueueTransactionType.None;
+			_receiveTransactionType = _queueAddress.IsLocal && _queue.Transactional ? MessageQueueTransactionType.Automatic : MessageQueueTransactionType.None;
 		}
 
 		public static IEndpoint ConfigureEndpoint(Uri uri, Action<IEndpointConfigurator> configurator)
@@ -301,7 +294,7 @@ namespace MassTransit.Transports.Msmq
 		public object Receive(TimeSpan timeout, Predicate<object> accept)
 		{
 			if (!_queue.CanRead)
-				throw new EndpointException(this, string.Format("Not allowed to read from endpoint: '{0}'", _uri));
+				throw new EndpointException(this, string.Format("Not allowed to read from endpoint: '{0}'", _queueAddress.ActualUri));
 
 			try
 			{
@@ -329,7 +322,7 @@ namespace MassTransit.Transports.Msmq
 										_log.DebugFormat("Queue: {0} Received Message Id {1}", _queue.Path, msg.Id);
 
 									if (SpecialLoggers.Messages.IsInfoEnabled)
-										SpecialLoggers.Messages.InfoFormat("RECV:{0}:{1}", _uri, obj.GetType().Name);
+										SpecialLoggers.Messages.InfoFormat("RECV:{0}:{1}", _queueAddress.ActualUri, obj.GetType().Name);
 
 									return obj;
 								}

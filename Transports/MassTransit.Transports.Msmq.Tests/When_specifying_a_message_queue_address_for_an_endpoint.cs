@@ -14,11 +14,9 @@ namespace MassTransit.Transports.Msmq.Tests
 {
 	using System;
 	using System.Messaging;
-	using Exceptions;
 	using MassTransit.Tests;
 	using NUnit.Framework;
 	using NUnit.Framework.SyntaxHelpers;
-	using Serialization;
 
 	[TestFixture]
 	public class When_specifying_a_message_queue_address_for_an_endpoint
@@ -39,115 +37,120 @@ namespace MassTransit.Transports.Msmq.Tests
 		[Test]
 		public void A_message_queue_address_should_convert_to_a_queue_path()
 		{
-		    ParsingResult result = MsmqUriParser.Convert(_address);
-            result.QueuePath
-                .ShouldEqual(_expectedQueuePath);
-            result.FullyQualifiedUri
-                .ShouldEqual(_expectedUri);
-			
+			QueueAddress address = new QueueAddress(_address);
+			address.FormatName
+				.ShouldEqual(_expectedQueuePath);
+			address.ActualUri
+				.ShouldEqual(_expectedUri);
+			address.IsLocal
+				.ShouldBeTrue();
 		}
 
 		[Test]
 		public void A_message_queue_uri_should_convert_to_a_queue_path()
 		{
-            ParsingResult result = MsmqUriParser.Convert(_uriAddress);
-            result.QueuePath
-                .ShouldEqual(_expectedQueuePath);
-            result.FullyQualifiedUri
-                .ShouldEqual(_expectedUri);
-
+			QueueAddress address = new QueueAddress(_uriAddress);
+			address.FormatName
+				.ShouldEqual(_expectedQueuePath);
+			address.ActualUri
+				.ShouldEqual(_expectedUri);
+			address.IsLocal
+				.ShouldBeTrue();
 		}
 
 		[Test]
 		public void A_remote_server_should_keep_the_remote_server_name()
 		{
 			Uri remoteUri = new Uri("msmq://remote_server/queue_name");
-            string remoteQueuePath = @"FormatName:DIRECT=OS:remote_server\private$\queue_name";
+			const string remoteQueuePath = @"FormatName:DIRECT=OS:remote_server\private$\queue_name";
 
-            ParsingResult result = MsmqUriParser.Convert(remoteUri);
-            
-            result.QueuePath
-                .ShouldEqual(remoteQueuePath);
-            result.FullyQualifiedUri
-                .ShouldEqual(remoteUri);
+			QueueAddress address = new QueueAddress(remoteUri);
+			address.FormatName
+				.ShouldEqual(remoteQueuePath);
+			address.ActualUri
+				.ShouldEqual(remoteUri);
+			address.IsLocal
+				.ShouldBeFalse();
 		}
 
 
-		[Test, ExpectedException(typeof (ParsingException))]
+		[Test, ExpectedException(typeof (UriParseException))]
 		public void An_address_cant_contain_a_path_specifier()
 		{
 			const string address = "msmq://localhost/test_endpoint/error_creator";
-            ParsingResult result = MsmqUriParser.Convert(address);
+
+			new QueueAddress(address);
 		}
 
-        [Test, ExpectedException(typeof(NotSupportedException))]
-        public void Public_queues_are_not_supported()
-        {
-            const string address = "msmq://localhost/public/bob";
-            ParsingResult result = MsmqUriParser.Convert(address);
-        }
+		[Test, ExpectedException(typeof (NotSupportedException))]
+		public void Public_queues_are_not_supported()
+		{
+			const string address = "msmq://localhost/public/bob";
+
+			new QueueAddress(address);
+		}
 	}
 
-    [TestFixture]
-    public class When_creating_a_MessageQueueEndpoint_from_a_Uri_string
-    {
-        [Test]
-        public void The_result_Uri_should_match_the_constructor_string()
-        {
-        	using (MsmqEndpoint q = new MsmqEndpoint("msmq://localhost/mt_client"))
-        	{
-        		Assert.That(q.Uri.AbsoluteUri, Is.EqualTo("msmq://" + Environment.MachineName.ToLowerInvariant() + "/mt_client"));
-        		Assert.That(q.QueuePath, Is.EqualTo(@"FormatName:DIRECT=OS:localhost\private$\mt_client"));
-        	}
-        }
+	[TestFixture]
+	public class When_creating_a_MessageQueueEndpoint_from_a_Uri_string
+	{
+		[Test]
+		public void The_result_Uri_should_match_the_constructor_string()
+		{
+			using (MsmqEndpoint q = new MsmqEndpoint("msmq://localhost/mt_client"))
+			{
+				Assert.That(q.Uri.AbsoluteUri, Is.EqualTo("msmq://" + Environment.MachineName.ToLowerInvariant() + "/mt_client"));
+				Assert.That(q.QueuePath, Is.EqualTo(@"FormatName:DIRECT=OS:localhost\private$\mt_client"));
+			}
+		}
 
-        [Test]
-        public void The_resulting_Uri_should_match_the_string()
-        {
-        	using (MsmqEndpoint addr = new MsmqEndpoint(@"msmq://localhost/mt_client"))
-        	{
-        		Assert.That(addr.Uri.AbsoluteUri, Is.EqualTo("msmq://" + Environment.MachineName.ToLowerInvariant() + "/mt_client"));
-        	}
-        }
-    }
+		[Test]
+		public void The_resulting_Uri_should_match_the_string()
+		{
+			using (MsmqEndpoint addr = new MsmqEndpoint(@"msmq://localhost/mt_client"))
+			{
+				Assert.That(addr.Uri.AbsoluteUri, Is.EqualTo("msmq://" + Environment.MachineName.ToLowerInvariant() + "/mt_client"));
+			}
+		}
+	}
 
-    [TestFixture]
-    public class When_creating_a_MessageQueueEndpoint_from_a_MessageQueue
-    {
-        [Test]
-        public void The_queue_path_should_be_correct()
-        {
-        	using (MsmqEndpoint q = new MsmqEndpoint(new MessageQueue("FormatName:DIRECT=OS:" + Environment.MachineName + @"\private$\mt_client")))
-        	{
-        		Assert.That(q.QueuePath, Is.EqualTo("FormatName:DIRECT=OS:" + Environment.MachineName.ToLowerInvariant() + "\\private$\\mt_client"));
-        	}
-        }
+	[TestFixture]
+	public class When_creating_a_MessageQueueEndpoint_from_a_MessageQueue
+	{
+		[Test]
+		public void The_queue_path_should_be_correct()
+		{
+			using (MsmqEndpoint q = new MsmqEndpoint(new MessageQueue("FormatName:DIRECT=OS:" + Environment.MachineName + @"\private$\mt_client")))
+			{
+				Assert.That(q.QueuePath, Is.EqualTo("FormatName:DIRECT=OS:" + Environment.MachineName.ToLowerInvariant() + "\\private$\\mt_client"));
+			}
+		}
 
-        [Test]
-        public void The_queue_path_should_be_correct_for_relative_queue_names()
-        {
-        	using (MsmqEndpoint q = new MsmqEndpoint(new MessageQueue(".\\private$\\mt_client")))
-        	{
-        		Assert.That(q.QueuePath, Is.EqualTo("FormatName:DIRECT=OS:" + Environment.MachineName.ToLowerInvariant() + "\\private$\\mt_client"));
-        	}
-        }
+		[Test]
+		public void The_queue_path_should_be_correct_for_relative_queue_names()
+		{
+			using (MsmqEndpoint q = new MsmqEndpoint(new MessageQueue(".\\private$\\mt_client")))
+			{
+				Assert.That(q.QueuePath, Is.EqualTo("FormatName:DIRECT=OS:" + Environment.MachineName.ToLowerInvariant() + "\\private$\\mt_client"));
+			}
+		}
 
-        [Test]
-        public void The_Uri_should_be_correct()
-        {
-        	using (MsmqEndpoint q = new MsmqEndpoint(new MessageQueue("FormatName:DIRECT=OS:" + Environment.MachineName + @"\private$\mt_client")))
-        	{
-        		Assert.That(q.Uri.AbsoluteUri, Is.EqualTo("msmq://" + Environment.MachineName.ToLowerInvariant() + "/mt_client"));
-        	}
-        }
+		[Test]
+		public void The_Uri_should_be_correct()
+		{
+			using (MsmqEndpoint q = new MsmqEndpoint(new MessageQueue("FormatName:DIRECT=OS:" + Environment.MachineName + @"\private$\mt_client")))
+			{
+				Assert.That(q.Uri.AbsoluteUri, Is.EqualTo("msmq://" + Environment.MachineName.ToLowerInvariant() + "/mt_client"));
+			}
+		}
 
-        [Test]
-        public void The_Uri_should_be_correct_for_relative_queue_names()
-        {
-        	using (MsmqEndpoint q = new MsmqEndpoint(new MessageQueue(".\\private$\\mt_client")))
-        	{
-        		Assert.That(q.Uri.AbsoluteUri, Is.EqualTo("msmq://" + Environment.MachineName.ToLowerInvariant() + "/mt_client"));
-        	}
-        }
-    }
+		[Test]
+		public void The_Uri_should_be_correct_for_relative_queue_names()
+		{
+			using (MsmqEndpoint q = new MsmqEndpoint(new MessageQueue(".\\private$\\mt_client")))
+			{
+				Assert.That(q.Uri.AbsoluteUri, Is.EqualTo("msmq://" + Environment.MachineName.ToLowerInvariant() + "/mt_client"));
+			}
+		}
+	}
 }
