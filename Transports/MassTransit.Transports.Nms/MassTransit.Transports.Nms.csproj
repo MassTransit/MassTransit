@@ -64,6 +64,7 @@
       <Link>SolutionVersion.cs</Link>
     </Compile>
     <Compile Include="NmsEndpoint.cs" />
+    <Compile Include="NmsEndpointConfigurator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
