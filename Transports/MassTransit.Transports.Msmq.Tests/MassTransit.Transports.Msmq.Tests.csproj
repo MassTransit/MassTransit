@@ -79,10 +79,8 @@
     <Compile Include="MsmqEndpoint_Extensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="QueueTestContext.cs" />
-    <Compile Include="ReceiveException_Specs.cs" />
-    <Compile Include="Receive_Specs.cs" />
+    <Compile Include="Learning\Receive_Specs.cs" />
     <Compile Include="Learning\TransactionalQueue_Specs.cs" />
-    <Compile Include="When_receiving_messages_slowly.cs" />
     <Compile Include="When_specifying_a_message_queue_address_for_an_endpoint.cs" />
   </ItemGroup>
   <ItemGroup>
