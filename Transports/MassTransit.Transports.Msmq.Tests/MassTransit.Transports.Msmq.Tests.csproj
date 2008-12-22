@@ -81,6 +81,7 @@
     <Compile Include="QueueTestContext.cs" />
     <Compile Include="Learning\Receive_Specs.cs" />
     <Compile Include="Learning\TransactionalQueue_Specs.cs" />
+    <Compile Include="TestFixtures\MsmqEndpointTestFixture.cs" />
     <Compile Include="When_specifying_a_message_queue_address_for_an_endpoint.cs" />
   </ItemGroup>
   <ItemGroup>

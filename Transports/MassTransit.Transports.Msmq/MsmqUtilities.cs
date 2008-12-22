@@ -16,9 +16,10 @@ namespace MassTransit.Transports.Msmq
     using System.Diagnostics;
     using System.Messaging;
     using System.Runtime.Serialization.Formatters.Binary;
+    using System.Transactions;
     using Serialization;
 
-	public class MsmqUtilities
+    public class MsmqUtilities
     {
         public int NumberOfMessages(Uri uri)
         {
@@ -85,6 +86,8 @@ namespace MassTransit.Transports.Msmq
 
             return result;
         }
+
+
     }
 
     public class WindowsUtilities

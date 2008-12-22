@@ -31,7 +31,7 @@ namespace MassTransit.Transports.Msmq.Tests
             [SetUp]
             public void SetUp()
             {
-                QueueTestContext.ValidateAndPurgeQueue(".\\private$\\mt_client", true);
+                MsmqUtilities.ValidateAndPurgeQueue(".\\private$\\mt_client", true);
                 _ep = new MsmqEndpoint("msmq://localhost/mt_client");
             }
 
@@ -76,7 +76,7 @@ namespace MassTransit.Transports.Msmq.Tests
             [SetUp]
             public void SetUp()
             {
-                QueueTestContext.ValidateAndPurgeQueue(".\\private$\\mt_client", true);
+                MsmqUtilities.ValidateAndPurgeQueue(".\\private$\\mt_client", true);
                 _ep = new MsmqEndpoint("msmq://localhost/mt_client");
             }
 
