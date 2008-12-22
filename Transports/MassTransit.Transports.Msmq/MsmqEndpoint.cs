@@ -34,7 +34,6 @@ namespace MassTransit.Transports.Msmq
 		private readonly IMessageSerializer _serializer;
 		private MessageQueue _queue;
 		private MessageQueueTransactionType _receiveTransactionType;
-		private bool _reliableMessaging = true;
 		private MessageQueueTransactionType _sendTransactionType;
 
 		/// <summary>
@@ -53,6 +52,8 @@ namespace MassTransit.Transports.Msmq
 		/// <param name="serializer">The serializer to use for the endpoint</param>
 		public MsmqEndpoint(Uri uri, IMessageSerializer serializer)
 		{
+		    ReliableMessaging = true;
+
 			_serializer = serializer;
 
 			_queueAddress = new QueueAddress(uri);
@@ -68,6 +69,8 @@ namespace MassTransit.Transports.Msmq
 		/// <param name="queue">A Microsoft Message Queue</param>
 		public MsmqEndpoint(MessageQueue queue)
 		{
+            ReliableMessaging = true;
+
 			_queueAddress = new QueueAddress(queue);
 
 			_queue = Open(QueueAccessMode.SendAndReceive);
@@ -75,11 +78,7 @@ namespace MassTransit.Transports.Msmq
 			Initialize();
 		}
 
-		public bool ReliableMessaging
-		{
-			get { return _reliableMessaging; }
-			set { _reliableMessaging = value; }
-		}
+		public bool ReliableMessaging { get; set; }
 
 		public static string Scheme
 		{
@@ -259,7 +258,7 @@ namespace MassTransit.Transports.Msmq
 
 			msg.Label = messageType.Name;
 
-			msg.Recoverable = _reliableMessaging;
+			msg.Recoverable = ReliableMessaging;
 
 			return msg;
 		}
@@ -272,15 +271,20 @@ namespace MassTransit.Transports.Msmq
 
 				try
 				{
-					//TODO: What do we want to do if the message body stream is null?
+                    if(msg==null)
+                        throw new MessageException(typeof(object), string.Format("Endpoint '{0}' just fed us a null Msmq Message", this._queueAddress.ActualUri));
 
+                    //TODO: What do we want to do if the message body stream is null?
 					object obj = _serializer.Deserialize(msg.BodyStream);
 
 					return obj;
 				}
 				catch (SerializationException ex)
 				{
-					throw new MessageException(typeof (Object), string.Format("An error occurred serializing a message of type {0}", msg.Label), ex);
+				    string messageName = msg == null ? "UNKNOWN" : msg.Label;
+                    string exceptionMessage = string.Format("An error occurred serializing a message of type '{0}'", messageName);
+
+				    throw new MessageException(typeof (Object),exceptionMessage, ex);
 				}
 			}
 			catch (MessageQueueException ex)
@@ -307,14 +311,21 @@ namespace MassTransit.Transports.Msmq
 						while (enumerator.MoveNext(timeout))
 						{
 							Message msg = enumerator.Current;
+                            if (msg == null)
+                                throw new MessageException(typeof(object), string.Format("Received a null Msmq Message while enumerating the queue '{0}'", this.Uri));
 
 							try
 							{
+                                
+							    
 								object obj = _serializer.Deserialize(msg.BodyStream);
 
 								if (accept(obj))
 								{
 									Message received = enumerator.RemoveCurrent(TimeSpan.FromSeconds(10), _receiveTransactionType);
+                                    if (received == null)
+                                        throw new MessageException(typeof(object), string.Format("Received a null Msmq Message while enumerating the queue '{0}' post accept", this.Uri));
+
 									if (received.Id != msg.Id)
 										throw new MessageException(obj.GetType(), "The message removed does not match the original message");
 
@@ -343,7 +354,7 @@ namespace MassTransit.Transports.Msmq
 								}
 								catch (Exception ex2)
 								{
-									_log.Error("Unable to purge message id " + msg.Id, ex2);
+									_log.Error(string.Format("Unable to purge message id '{0}'", msg.Id), ex2);
 								}
 
 								throw new MessageException(typeof (object), "An error occurred deserializing a message", ex);
