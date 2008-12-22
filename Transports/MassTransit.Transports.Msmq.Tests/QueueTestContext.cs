@@ -23,6 +23,7 @@ namespace MassTransit.Transports.Msmq.Tests
     using NUnit.Framework;
     using NUnit.Framework.SyntaxHelpers;
 
+    [Obsolete]
     public class QueueTestContext :
         IDisposable
     {

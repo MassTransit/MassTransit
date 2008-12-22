@@ -22,6 +22,7 @@ namespace MassTransit.Transports.Msmq.Tests
     using NUnit.Framework;
     using NUnit.Framework.SyntaxHelpers;
     using Rhino.Mocks;
+    using TestFixtures;
 
     [TestFixture]
     public class As_a_ServiceBus_working_with_an_endpoint
@@ -98,39 +99,38 @@ namespace MassTransit.Transports.Msmq.Tests
     }
 
     [TestFixture]
-    public class When_publishing_a_message
+    public class When_publishing_a_message :
+        MsmqEndpointTestFixture
+
     {
 
         [Test]
-        [Ignore]
         public void Multiple_Local_Services_Should_Be_Available()
         {
-            using (QueueTestContext qtc = new QueueTestContext(MockRepository.GenerateMock<IObjectBuilder>()))
-            {
-                ManualResetEvent _updateEvent = new ManualResetEvent(false);
+            ManualResetEvent _updateEvent = new ManualResetEvent(false);
+            LocalBus.Subscribe<UpdateMessage>(msg => _updateEvent.Set());
 
-                qtc.ServiceBus.Subscribe<UpdateMessage>(
-                    delegate { _updateEvent.Set(); });
+            ManualResetEvent _deleteEvent = new ManualResetEvent(false);
 
-                ManualResetEvent _deleteEvent = new ManualResetEvent(false);
 
-                qtc.ServiceBus.Subscribe<DeleteMessage>(
-                    delegate { _deleteEvent.Set(); });
+            LocalBus.Subscribe<DeleteMessage>(
+                delegate { _deleteEvent.Set(); });
 
-                DeleteMessage dm = new DeleteMessage();
 
-                qtc.ServiceBus.Publish(dm);
+            DeleteMessage dm = new DeleteMessage();
 
-                UpdateMessage um = new UpdateMessage();
+            LocalBus.Publish(dm);
 
-                qtc.ServiceBus.Publish(um);
+            UpdateMessage um = new UpdateMessage();
 
-                Assert.That(_deleteEvent.WaitOne(TimeSpan.FromSeconds(4), true), Is.True,
-                            "Timeout expired waiting for message");
+            LocalBus.Publish(um);
 
-                Assert.That(_updateEvent.WaitOne(TimeSpan.FromSeconds(4), true), Is.True,
-                            "Timeout expired waiting for message");
-            }
+            Assert.That(_deleteEvent.WaitOne(TimeSpan.FromSeconds(4), true), Is.True,
+                        "Timeout expired waiting for message");
+
+            Assert.That(_updateEvent.WaitOne(TimeSpan.FromSeconds(4), true), Is.True,
+                        "Timeout expired waiting for message");
+
         }
 
         [Test]
