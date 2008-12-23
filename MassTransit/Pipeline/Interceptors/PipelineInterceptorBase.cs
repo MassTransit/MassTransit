@@ -16,7 +16,7 @@ namespace MassTransit.Pipeline.Interceptors
 	using System.Collections.Generic;
 	using System.Reflection;
 
-	public abstract class PipelineInterceptorBase : 
+	public abstract class PipelineInterceptorBase :
 		IPipelineInterceptor
 	{
 		public abstract IEnumerable<Func<bool>> Subscribe<TComponent>(IInterceptorContext context);
@@ -50,31 +50,26 @@ namespace MassTransit.Pipeline.Interceptors
 				MethodInfo[] methods = type.GetMethods(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance);
 				foreach (MethodInfo method in methods)
 				{
-					if (method.Name == methodName)
-					{
-						// create the generic method
-						if (method.GetGenericArguments().Length == typeArguments.Length)
-						{
-							MethodInfo genericMethod = method.MakeGenericMethod(typeArguments);
-							ParameterInfo[] parameters = genericMethod.GetParameters();
+					if (method.Name != methodName)
+						continue;
+					
+					// create the generic method
+					if (method.GetGenericArguments().Length != typeArguments.Length) 
+						continue;
 
-							// compare the method parameters
-							if (parameters.Length == parameterTypes.Length)
-							{
-								for (int i = 0; i < parameters.Length; i++)
-								{
-									if (parameters[i].ParameterType != parameterTypes[i])
-									{
-										continue; // this is not the method we're looking for
-									}
-								}
+					MethodInfo genericMethod = method.MakeGenericMethod(typeArguments);
+					ParameterInfo[] parameters = genericMethod.GetParameters();
 
-								// if we're here, we got the right method
-								methodInfo = genericMethod;
-								break;
-							}
-						}
-					}
+					// compare the method parameters
+					if (parameters.Length != parameterTypes.Length) 
+						continue;
+
+					if (!ParameterTypesAreCompatible(parameterTypes, parameters))
+						continue;
+
+					// if we're here, we got the right method
+					methodInfo = genericMethod;
+					break;
 				}
 
 				if (null == methodInfo)
@@ -84,6 +79,22 @@ namespace MassTransit.Pipeline.Interceptors
 			}
 
 			return methodInfo;
+		}
+
+		private static bool ParameterTypesAreCompatible(Type[] parameterTypes, ParameterInfo[] parameters)
+		{
+			for (int i = 0; i < parameters.Length; i++)
+			{
+				if (parameters[i].ParameterType == parameterTypes[i]) 
+					continue;
+
+				if (parameters[i].ParameterType.IsAssignableFrom(parameterTypes[i])) 
+					continue;
+
+				return false;
+			}
+
+			return true;
 		}
 	}
 }
