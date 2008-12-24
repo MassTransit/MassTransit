@@ -16,14 +16,21 @@ namespace MassTransit.Tests
 	using System.Diagnostics;
 	using System.Threading;
 
-	public class FutureMessage<T>
+    /// <summary>
+    /// A simple class that helps to work with the async nature of messaging
+    /// </summary>
+    /// <remarks>
+    /// http://www.ps.uni-sb.de/alice/manual/futures.html
+    /// </remarks>
+    /// <typeparam name="TMessage">The type of message being consumed</typeparam>
+	public class FutureMessage<TMessage>
 	{
 		private readonly Stopwatch _elapsed = Stopwatch.StartNew();
 		private readonly ManualResetEvent _received = new ManualResetEvent(false);
 
-		public T Message { get; private set; }
+		public TMessage Message { get; private set; }
 
-		public void Set(T message)
+		public void Set(TMessage message)
 		{
 			_elapsed.Stop();
 
