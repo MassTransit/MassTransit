@@ -13,7 +13,11 @@ namespace MassTransit.Transports.Msmq.Tests.TestFixtures
         {
             base.EstablishContext();
 
-            LocalBus = ServiceBusConfigurator.New(x => { x.ReceiveFrom("msmq://localhost/mt_client"); });
+            LocalBus = ServiceBusConfigurator.New(x =>
+                {
+                    x.ReceiveFrom("msmq://localhost/mt_client");
+                    x.SendErrorsTo("msmq://localhost/mt_client_error");
+                });
 
             RemoteBus = ServiceBusConfigurator.New(x => { x.ReceiveFrom("msmq://localhost/mt_server"); });
         }
