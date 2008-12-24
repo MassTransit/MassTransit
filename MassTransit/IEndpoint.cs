@@ -44,7 +44,7 @@ namespace MassTransit
 		/// Receive a message from an endpoint and dispatch it to the consumer pipeline
 		/// </summary>
 		/// <param name="timeout"></param>
-		/// <param name="receiver"></param>
+		/// <param name="receiver">Func(the message, Func_To_Dequeue_the_Message(the message, did it work), did the dequeue work)</param>
 		void Receive(TimeSpan timeout, Func<object, Func<object, bool>, bool> receiver);
     }
 }
