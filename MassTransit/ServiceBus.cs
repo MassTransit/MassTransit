@@ -337,18 +337,24 @@ namespace MassTransit
 					bool released = false;
 					try
 					{
-						resource.Receive(_receiveTimeout, (message, acceptor) =>
+                        //TODO: This double lambda is throwing me for a loop
+						resource.Receive(ReceiveTimeout, (message, acceptor) =>
 							{
+                                //TODO: We could probably put the try/catch in the pipeline somewhere, and then
+                                //TODO: Just define what we want to have happen on error????
+                                //TODO: This could just end up making things harder. Not Sure.
 								try
 								{
+                                    //TODO: here is the other lambda
 									return _inbound.Dispatch(message, accepted =>
 										{
-											bool result = acceptor(message);
+											bool didIAcceptTheMessage = acceptor(message);
 
 											_asyncDispatcher.ReleaseResource(1);
+                                            //TODO: Is there a way to not set this here, but acheive the same effect?
 											released = true;
 
-											return result;
+											return didIAcceptTheMessage;
 										});
 								}
 								catch (Exception ex)
@@ -356,6 +362,7 @@ namespace MassTransit
 									//retry
 									SpecialLoggers.Iron.Error("An error was caught in the ServiceBus.IronDispatcher", ex);
 
+                                    //TODO: The message object here means I can't experiment with moving this around
 									IPublicationTypeInfo info = _typeInfoCache.GetPublicationTypeInfo(message.GetType());
 									info.PublishFault(this, ex, message);
 
