@@ -151,7 +151,6 @@
     <Compile Include="Messages\ClientMessage.cs" />
     <Compile Include="Messages\DeleteMessage.cs" />
     <Compile Include="Messages\PingMessage.cs" />
-    <Compile Include="Messages\PoisonMessage.cs" />
     <Compile Include="Messages\PongMessage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="MessageQueueEndpoint_MeetsCriteria.cs" />
