@@ -15,6 +15,7 @@ namespace MassTransit.Transports.Msmq.Tests
     using System;
     using System.Collections;
     using System.Threading;
+    using Configuration;
     using Magnum.Common.DateTimeExtensions;
     using MassTransit.Tests;
     using MassTransit.Tests.Messages;
@@ -22,11 +23,17 @@ namespace MassTransit.Transports.Msmq.Tests
     using NUnit.Framework;
     using NUnit.Framework.SyntaxHelpers;
     using Rhino.Mocks;
+    using Serialization;
     using TestFixtures;
 
     [TestFixture]
-    public class As_a_ServiceBus_working_with_an_endpoint
+    public class As_a_ServiceBus_working_with_an_endpoint :
+        MsmqEndpointTestFixture
+
     {
+        Uri inputAddress = new Uri("msmq://localhost/mt_client");
+        Uri errorAddress = new Uri("msmq://localhost/mt_client_error");
+
         [Test]
         public void When_an_error_is_thrown_on_publish_the_bus_will_not_rollback_any_messages()
         {
@@ -44,6 +51,20 @@ namespace MassTransit.Transports.Msmq.Tests
         {
             
         }
+
+        [Test]
+        public void When_a_consumer_errors_the_message_is_put_in_the_error_queue()
+        {
+            LocalBus.Subscribe(delegate(PingMessage msg)
+                              {
+                                  throw new NotSupportedException("POISON");
+                              });
+            new MsmqEndpoint(inputAddress).Send(new PingMessage());
+
+            //new MsmqEndpoint(errorAddress).VerifyMessageInQueue<PingMessage>();
+        }
+
+        
     }
     
     [TestFixture]
