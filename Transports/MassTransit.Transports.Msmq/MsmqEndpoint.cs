@@ -72,21 +72,6 @@ namespace MassTransit.Transports.Msmq
 			Initialize();
 		}
 
-		/// <summary>
-		/// Creates an instance of the <c ref="MessageQueueEndpoint" /> class using the specified queue
-		/// </summary>
-		/// <param name="queue">A Microsoft Message Queue</param>
-		public MsmqEndpoint(MessageQueue queue)
-		{
-            ReliableMessaging = true;
-
-			_queueAddress = new QueueAddress(queue);
-
-			_queue = Open(QueueAccessMode.SendAndReceive);
-
-			Initialize();
-		}
-
 		public bool ReliableMessaging { get; set; }
 
 		public static string Scheme

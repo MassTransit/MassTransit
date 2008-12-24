@@ -13,7 +13,6 @@
 namespace MassTransit.Transports.Msmq
 {
 	using System;
-	using System.Messaging;
 
 	/// <summary>
 	/// Deals with the various version of queue addresses required when dealing with MSMQ
@@ -36,40 +35,6 @@ namespace MassTransit.Transports.Msmq
 			ActualUri = IsLocal ? SetUriHostToLocalMachineName(uri) : uri;
 
 			FormatName = BuildQueueFormatName(uri);
-		}
-
-		public QueueAddress(MessageQueue queue)
-		{
-			string path = queue.Path;
-			const string prefix = "FormatName:DIRECT=OS:";
-
-			if (path.Length > prefix.Length && path.Substring(0, prefix.Length).ToUpperInvariant() == prefix.ToUpperInvariant())
-				path = path.Substring(prefix.Length);
-
-			string[] parts = path.Split('\\');
-
-			if (parts.Length != 3)
-				throw new ArgumentException("Invalid Queue Path Specified");
-
-			//Validate parts[1] = private$
-			if (string.Compare(parts[1], "private$", true) != 0)
-				throw new ArgumentException("Invalid Queue Path Specified");
-
-			string localhost = Environment.MachineName.ToLowerInvariant();
-			if (parts[0] == "." || string.Compare("localhost", parts[0], true) == 0)
-			{
-				parts[0] = localhost;
-				IsLocal = true;
-			}
-			else
-			{
-				parts[0] = parts[0].ToLowerInvariant();
-				IsLocal = string.Compare(localhost, parts[0], true) == 0;
-			}
-
-			FormatName = string.Format("{0}{1}\\{2}\\{3}", prefix, parts[0], parts[1], parts[2]);
-
-			ActualUri = new Uri(string.Format("msmq://{0}/{1}", parts[0], parts[2]));
 		}
 
 		public QueueAddress(string address)
