@@ -44,7 +44,6 @@ namespace MassTransit
 		private MessagePipeline _inbound;
 		private ISubscriptionEvent _inboundSubscriptionEvent;
 		private MessagePipeline _outbound;
-		private IEndpoint _poisonEndpoint = new PoisonEndpointDecorator(new NullEndpoint());
 		private ISubscriptionCache _subscriptionCache;
 		private ITypeInfoCache _typeInfoCache;
 		private TimeSpan _receiveTimeout;
@@ -112,6 +111,8 @@ namespace MassTransit
 			                                                             resourceLimit,
 			                                                             minThreads,
 			                                                             maxThreads);
+            
+            PoisonEndpoint = new PoisonEndpointDecorator(new NullEndpoint());
 		}
 
 		public ISubscriptionCache SubscriptionCache
@@ -193,11 +194,7 @@ namespace MassTransit
 		/// <summary>
 		/// The poison endpoint associated with this instance where exception messages are sent
 		/// </summary>
-		public IEndpoint PoisonEndpoint
-		{
-			get { return _poisonEndpoint; }
-			set { _poisonEndpoint = value; }
-		}
+        public IEndpoint PoisonEndpoint { get; set; }
 
 		public TimeSpan ReceiveTimeout
 		{
@@ -300,10 +297,10 @@ namespace MassTransit
 				_endpointToListenOn.Dispose();
 				_endpointToListenOn = null;
 
-				if (_poisonEndpoint != null)
+				if (PoisonEndpoint != null)
 				{
-					_poisonEndpoint.Dispose();
-					_poisonEndpoint = null;
+					PoisonEndpoint.Dispose();
+					PoisonEndpoint = null;
 				}
 			}
 			_disposed = true;
@@ -311,13 +308,24 @@ namespace MassTransit
 
 		public void Dispatch(object message)
 		{
-			IronDispatcher(message);
-		}
+            if (message == null)
+                return;
 
-		public bool Accept(object obj)
-		{
-			// TODO this is evil!
-			return true;
+            try
+            {
+                _inbound.Dispatch(message);
+            }
+            catch (Exception ex)
+            {
+                //retry
+                SpecialLoggers.Iron.Error("An error was caught in the ServiceBus.IronDispatcher", ex);
+
+                IPublicationTypeInfo info = _typeInfoCache.GetPublicationTypeInfo(message.GetType());
+                info.PublishFault(this, ex, message);
+
+
+                PoisonEndpoint.Send(message, TimeSpan.Zero);
+            }
 		}
 
 		private void EndpointReader(IEndpoint resource)
@@ -370,28 +378,6 @@ namespace MassTransit
 			{
 				_log.Error(string.Format("An exception occurred receiving a message from {0}", _endpointToListenOn.Uri), ex);
 				throw;
-			}
-		}
-
-		private void IronDispatcher(object message)
-		{
-			if (message == null)
-				return;
-
-			try
-			{
-				_inbound.Dispatch(message);
-			}
-			catch (Exception ex)
-			{
-				//retry
-				SpecialLoggers.Iron.Error("An error was caught in the ServiceBus.IronDispatcher", ex);
-
-				IPublicationTypeInfo info = _typeInfoCache.GetPublicationTypeInfo(message.GetType());
-				info.PublishFault(this, ex, message);
-
-
-				PoisonEndpoint.Send(message, TimeSpan.Zero);
 			}
 		}
 
