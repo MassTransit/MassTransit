@@ -45,6 +45,15 @@ namespace MassTransit.Transports.Msmq
 		{
 		}
 
+        /// <summary>
+        /// Initializes a <c ref="MessageQueueEndpoint" /> instance with the specified URI.
+        /// </summary>
+        /// <param name="uri">The URI for the endpoint</param>
+        public MsmqEndpoint(Uri uri)
+            : this(uri, new BinaryMessageSerializer())
+        {
+        }
+
 		/// <summary>
 		/// Initializes a <c ref="MessageQueueEndpoint" /> instance with the specified URI.
 		/// </summary>
@@ -122,21 +131,21 @@ namespace MassTransit.Transports.Msmq
 				if (SpecialLoggers.Messages.IsInfoEnabled)
 					SpecialLoggers.Messages.InfoFormat("SEND:{0}:{1}", Uri, messageType.Name);
 
-				if (_sendTransactionType == MessageQueueTransactionType.Automatic)
-				{
-					if (Transaction.Current == null)
-					{
-						_queue.Send(msg, MessageQueueTransactionType.Single);
-					}
-					else
-					{
-						_queue.Send(msg, _sendTransactionType);
-					}
-				}
-				else
-				{
-					_queue.Send(msg, _sendTransactionType);
-				}
+                if (_sendTransactionType == MessageQueueTransactionType.Automatic)
+                {
+                    if (Transaction.Current == null)
+                    {
+                        _queue.Send(msg, MessageQueueTransactionType.Single);
+                    }
+                    else
+                    {
+                        _queue.Send(msg, _sendTransactionType);
+                    }
+                }
+                else
+                {
+                    _queue.Send(msg, _sendTransactionType);
+                }
 			}
 			catch (MessageQueueException ex)
 			{
@@ -158,35 +167,35 @@ namespace MassTransit.Transports.Msmq
 				{
 					while (enumerator.MoveNext(timeout))
 					{
-						Message msg = enumerator.Current;
-						if (msg == null)
+						Message msmqMessage = enumerator.Current;
+						if (msmqMessage == null)
 							continue;
 
-						object obj = DeserializeMessage(msg);
-						if (obj == null)
+						object message = DeserializeMessage(msmqMessage);
+						if (message == null)
 							continue;
 
-						if (receiver(obj, x =>
+						if (receiver(message, x =>
 							{
 								Message received = enumerator.RemoveCurrent(timeout, _receiveTransactionType);
 								if (received == null)
-									throw new MessageException(obj.GetType(), "The message could not be removed from the queue");
+									throw new MessageException(message.GetType(), "The message could not be removed from the queue");
 
-								if (received.Id != msg.Id)
-									throw new MessageException(obj.GetType(), "The message removed does not match the original message");
+								if (received.Id != msmqMessage.Id)
+									throw new MessageException(message.GetType(), "The message removed does not match the original message");
 
 								if (_log.IsDebugEnabled)
-									_log.DebugFormat("Queue: {0} Received Message Id {1}", _queue.Path, msg.Id);
+									_log.DebugFormat("Queue: {0} Received Message Id {1}", _queue.Path, msmqMessage.Id);
 
 								if (SpecialLoggers.Messages.IsInfoEnabled)
-									SpecialLoggers.Messages.InfoFormat("RECV:{0}:{1}", _queueAddress.ActualUri, obj.GetType().Name);
+									SpecialLoggers.Messages.InfoFormat("RECV:{0}:{1}", _queueAddress.ActualUri, message.GetType().Name);
 
 								return true;
 							}))
 							return;
 
 						if (_log.IsDebugEnabled)
-							_log.DebugFormat("Queue: {0} Skipped Message Id {1}", _queue.Path, msg.Id);
+							_log.DebugFormat("Queue: {0} Skipped Message Id {1}", _queue.Path, msmqMessage.Id);
 					}
 					enumerator.Close();
 				}
