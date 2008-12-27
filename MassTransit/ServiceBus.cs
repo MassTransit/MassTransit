@@ -285,6 +285,7 @@ namespace MassTransit
 			// TODO silentry return for now but this is going away
 		}
 
+        [Obsolete]
 		public void Dispatch(object message)
 		{
 			if (message == null)
@@ -392,7 +393,7 @@ namespace MassTransit
 						}
 						catch (Exception ex)
 						{
-							_log.Error(string.Format("An exception occurred receiving a message from {0}", _endpointToListenOn.Uri), ex);
+							_log.Error(string.Format("An exception occurred receiving a message from '{0}'", _endpointToListenOn.Uri), ex);
 						}
 					}
 				}
@@ -444,119 +445,6 @@ namespace MassTransit
 			}
 
 			return atLeastOneConsumerFailed;
-		}
-
-//		private void EndpointReader(IEndpoint endpoint)
-//		{
-//			try
-//			{
-//				using (TransactionScope scope = new TransactionScope())
-//				{
-//					bool released = false;
-//					try
-//					{
-//						//TODO: This double lambda is throwing me for a loop
-//						endpoint.Receive(ReceiveTimeout, (message, acceptor) =>
-//							{
-//								//TODO: We could probably put the try/catch in the pipeline somewhere, and then
-//								//TODO: Just define what we want to have happen on error????
-//								//TODO: This could just end up making things harder. Not Sure.
-//								try
-//								{
-//									//TODO: here is the other lambda
-//									return _inbound.Dispatch(message, accepted =>
-//										{
-//											bool didIAcceptTheMessage = acceptor(message);
-//
-//											_asyncDispatcher.ReleaseResource(1);
-//											//TODO: Is there a way to not set this here, but acheive the same effect?
-//											released = true;
-//
-//											return didIAcceptTheMessage;
-//										});
-//								}
-//								catch (Exception ex)
-//								{
-//									//retry
-//									SpecialLoggers.Iron.Error("An error was caught in the ServiceBus.IronDispatcher", ex);
-//
-//									//TODO: The message object here means I can't experiment with moving this around
-//									IPublicationTypeInfo info = _typeInfoCache.GetPublicationTypeInfo(message.GetType());
-//									info.PublishFault(this, ex, message);
-//
-//									PoisonEndpoint.Send(message, TimeSpan.Zero);
-//								}
-//
-//								return false;
-//							});
-//					}
-//					finally
-//					{
-//						if (!released)
-//							_asyncDispatcher.ReleaseResource(1);
-//					}
-//
-//					scope.Complete();
-//				}
-//			}
-//			catch (Exception ex)
-//			{
-//				_log.Error(string.Format("An exception occurred receiving a message from {0}", _endpointToListenOn.Uri), ex);
-//				throw;
-//			}
-//		}
-	}
-
-	public class SubscriptionCacheEventConnector :
-		ISubscriptionEvent
-	{
-		private readonly ISubscriptionCache _cache;
-		private readonly IEndpoint _endpoint;
-
-		public SubscriptionCacheEventConnector(ISubscriptionCache cache, IEndpoint endpoint)
-		{
-			_cache = cache;
-			_endpoint = endpoint;
-		}
-
-		public Func<bool> SubscribedTo(Type messageType)
-		{
-			Subscription subscription = new Subscription(messageType, _endpoint.Uri);
-
-			_cache.Add(subscription);
-
-			return () =>
-				{
-					_cache.Remove(subscription);
-					return true;
-				};
-		}
-
-		public Func<bool> SubscribedTo(Type messageType, string correlationId)
-		{
-			Subscription subscription = new Subscription(messageType, correlationId, _endpoint.Uri);
-
-			_cache.Add(subscription);
-
-			return () =>
-				{
-					_cache.Remove(subscription);
-					return true;
-				};
-		}
-
-		public void UnsubscribedFrom(Type messageType)
-		{
-			Subscription subscription = new Subscription(messageType, _endpoint.Uri);
-
-			_cache.Remove(subscription);
-		}
-
-		public void UnsubscribedFrom(Type messageType, string correlationId)
-		{
-			Subscription subscription = new Subscription(messageType, correlationId, _endpoint.Uri);
-
-			_cache.Remove(subscription);
 		}
 	}
 }
