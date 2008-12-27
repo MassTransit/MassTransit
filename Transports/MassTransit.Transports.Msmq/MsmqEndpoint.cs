@@ -413,7 +413,7 @@ namespace MassTransit.Transports.Msmq
 			catch (SerializationException ex)
 			{
 				// if we get a message we cannot serialize, we need to do something about it or it will 
-				// hang the service bus forever
+				// hang the service bus for..ev..er..
 
 				try
 				{

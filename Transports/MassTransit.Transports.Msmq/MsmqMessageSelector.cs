@@ -18,6 +18,7 @@ namespace MassTransit.Transports.Msmq
 	using Exceptions;
 	using Internal;
 	using log4net;
+	using Magnum.Common.DateTimeExtensions;
 	using Serialization;
 
 	public class MsmqMessageSelector :
@@ -31,7 +32,7 @@ namespace MassTransit.Transports.Msmq
 		private volatile bool _disposed;
 		private object _message;
 		private MessageQueueTransactionType _receiveTransactionType;
-		private TimeSpan _timeout;
+		private readonly TimeSpan _timeout;
 		private Message _transportMessage;
 
 		public MsmqMessageSelector(MsmqEndpoint endpoint, MessageEnumerator enumerator, IMessageSerializer serializer)
@@ -39,6 +40,7 @@ namespace MassTransit.Transports.Msmq
 			_endpoint = endpoint;
 			_enumerator = enumerator;
 			_serializer = serializer;
+		    _timeout = 1.Seconds();
 		}
 
 		public void Dispose()
@@ -82,42 +84,42 @@ namespace MassTransit.Transports.Msmq
 			endpoint.Send(_message);
 		}
 
-		public object DeserializeMessage()
-		{
-			if (_disposed) throw new ObjectDisposedException("The object has been disposed");
+        public object DeserializeMessage()
+        {
+            if (_disposed) throw new ObjectDisposedException("The object has been disposed");
 
-			try
-			{
-				_transportMessage = _enumerator.Current;
+            try
+            {
+                _transportMessage = _enumerator.Current;
 
-				if (_transportMessage != null)
-				{
-					_message = _serializer.Deserialize(_transportMessage.BodyStream);
+                if (_transportMessage != null)
+                {
+                    _message = _serializer.Deserialize(_transportMessage.BodyStream);
 
-					return _message;
-				}
+                    return _message;
+                }
 
-				throw new EndpointException(_endpoint, "Unable to retrieve current message from queue");
-			}
-				catch(MessageQueueException mqex)
-				{
-					if (mqex.MessageQueueErrorCode == MessageQueueErrorCode.MessageAlreadyReceived)
-						return null;
+                throw new EndpointException(_endpoint, "Unable to retrieve current message from queue");
+            }
+            catch (MessageQueueException mqex)
+            {
+                if (mqex.MessageQueueErrorCode == MessageQueueErrorCode.MessageAlreadyReceived)
+                    return null;
 
-					throw;
-				}
-			catch (SerializationException ex)
-			{
-				// if we get a message we cannot serialize, we need to do something about it or it will 
-				// hang the service bus forever
+                throw;
+            }
+            catch (SerializationException ex)
+            {
+                // if we get a message we cannot serialize, we need to do something about it or it will 
+                // hang the service bus forever
 
-				_endpoint.DiscardMessage(_transportMessage.Id, ex.Message);
+                _endpoint.DiscardMessage(_transportMessage.Id, ex.Message);
 
-				throw new MessageException(typeof (object), "An error occurred deserializing a message", ex);
-			}
-		}
+                throw new MessageException(typeof (object), "An error occurred deserializing a message", ex);
+            }
+        }
 
-		protected virtual void Dispose(bool disposing)
+	    protected virtual void Dispose(bool disposing)
 		{
 			if (_disposed) return;
 			if (disposing)
