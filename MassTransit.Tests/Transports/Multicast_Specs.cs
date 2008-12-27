@@ -12,50 +12,51 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests.Transports
 {
-    using System;
-    using Messages;
-    using NUnit.Framework;
-    using TestConsumers;
-    using TextFixtures;
+	using System;
+	using Messages;
+	using NUnit.Framework;
+	using TestConsumers;
+	using TextFixtures;
 
-    [TestFixture]
-    public class When_publishing_a_message_via_multicast :
-        MulticastUdpTestFixture
-    {
-        private readonly TimeSpan _timeout = TimeSpan.FromSeconds(5);
+	[TestFixture]
+	public class When_publishing_a_message_via_multicast :
+		MulticastUdpTestFixture
+	{
+		private readonly TimeSpan _timeout = TimeSpan.FromSeconds(2);
 
-        [Test]
-        public void It_should_be_received()
-        {
-            PingMessage message = new PingMessage();
+		[Test]
+		public void It_should_be_received()
+		{
+			PingMessage message = new PingMessage();
 
-            TestCorrelatedConsumer<PingMessage, Guid> consumer = new TestCorrelatedConsumer<PingMessage, Guid>(message.CorrelationId);
-            RemoteBus.Subscribe(consumer);
+			var consumer = new TestCorrelatedConsumer<PingMessage, Guid>(message.CorrelationId);
+			RemoteBus.Subscribe(consumer);
 
-            LocalBus.Publish(message);
+			LocalBus.Publish(message);
+			LocalBus.Publish(message);
 
-            consumer.ShouldHaveReceivedMessage(message, _timeout);
-        }
+			consumer.ShouldHaveReceivedMessage(message, _timeout);
+		}
 
-        [Test]
-        public void It_should_be_received_by_both_receivers()
-        {
-            PingMessage message = new PingMessage();
+		[Test]
+		public void It_should_be_received_by_both_receivers()
+		{
+			PingMessage message = new PingMessage();
 
-            TestCorrelatedConsumer<PingMessage, Guid> remoteConsumer = new TestCorrelatedConsumer<PingMessage, Guid>(message.CorrelationId);
-            RemoteBus.Subscribe(remoteConsumer);
+			var remoteConsumer = new TestCorrelatedConsumer<PingMessage, Guid>(message.CorrelationId);
+			RemoteBus.Subscribe(remoteConsumer);
 
-            TestCorrelatedConsumer<PingMessage, Guid> localConsumer = new TestCorrelatedConsumer<PingMessage, Guid>(message.CorrelationId);
-            LocalBus.Subscribe(localConsumer);
+			var localConsumer = new TestCorrelatedConsumer<PingMessage, Guid>(message.CorrelationId);
+			LocalBus.Subscribe(localConsumer);
 
-            // okay so a shared endpoint results in only one service bus in the process getting the message
+			// okay so a shared endpoint results in only one service bus in the process getting the message
 
-            LocalBus.Publish(message);
-            LocalBus.Publish(message);
+			LocalBus.Publish(message);
+			LocalBus.Publish(message);
 
 
-            remoteConsumer.ShouldHaveReceivedMessage(message, _timeout);
-            localConsumer.ShouldHaveReceivedMessage(message, _timeout);
-        }
-    }
+			remoteConsumer.ShouldHaveReceivedMessage(message, _timeout);
+			localConsumer.ShouldHaveReceivedMessage(message, _timeout);
+		}
+	}
 }

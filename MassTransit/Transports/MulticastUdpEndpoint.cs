@@ -22,23 +22,26 @@ namespace MassTransit.Transports
 	using Exceptions;
 	using Internal;
 	using log4net;
-	using Magnum.Common.DateTimeExtensions;
 	using Serialization;
 
 	public class MulticastUdpEndpoint :
 		IEndpoint
 	{
 		private static readonly ILog _log = LogManager.GetLogger(typeof (MulticastUdpEndpoint));
-		private static readonly ILog _messageLog = LogManager.GetLogger("MassTransit.Messages");
 		private readonly ManualResetEvent _doneReceiving = new ManualResetEvent(false);
 		private readonly IMessageSerializer _serializer;
 		private readonly ManualResetEvent _shutdown = new ManualResetEvent(false);
 		private readonly Uri _uri;
-		private bool _disposed;
+		private volatile bool _disposed;
 		private IPAddress _groupAddress;
 		private UdpClient _receiveClient;
 		private UdpClient _sendClient;
 		private IPEndPoint _sendIPEndPoint;
+
+		public MulticastUdpEndpoint(string uriString, IMessageSerializer serializer)
+			: this(new Uri(uriString), serializer)
+		{
+		}
 
 		public MulticastUdpEndpoint(Uri uri, IMessageSerializer serializer)
 		{
@@ -47,17 +50,6 @@ namespace MassTransit.Transports
 
 			Initialize();
 		}
-
-		public MulticastUdpEndpoint(string uriString, IMessageSerializer serializer)
-			: this(new Uri(uriString), serializer)
-		{
-		}
-
-		public static string Scheme
-		{
-			get { return "multicast"; }
-		}
-
 
 		public void Dispose()
 		{
@@ -104,85 +96,18 @@ namespace MassTransit.Transports
 				_log.DebugFormat("Message Sent: Type = {1}", messageType.Name);
 		}
 
-		public void Receive(TimeSpan timeout, Func<object, Func<object, bool>, bool> receiver)
-		{
-			if (_disposed) throw new ObjectDisposedException("The object has been disposed");
-			try
-			{
-				IPEndPoint endPoint = new IPEndPoint(IPAddress.Any, _uri.Port);
-
-				byte[] data = _receiveClient.Receive(ref endPoint);
-				if (data == null)
-					return;
-
-				if (data.Length == 0)
-					return;
-
-				object obj;
-				using (MemoryStream mstream = new MemoryStream(data))
-				{
-					obj = _serializer.Deserialize(mstream);
-				}
-
-				if (receiver(obj, x =>
-					{
-						if (_messageLog.IsInfoEnabled)
-							_messageLog.InfoFormat("RECV:{0}:{1}", _uri, obj.GetType().Name);
-
-						return true;
-					}))
-					return;
-
-				if (_messageLog.IsInfoEnabled)
-					_messageLog.InfoFormat("SKIP:{0}:{1}", _uri, obj.GetType().Name);
-			}
-			catch (SocketException ex)
-			{
-				if (ex.SocketErrorCode == SocketError.TimedOut)
-					return;
-
-				_log.Error("Receive Exception: " + _uri, ex);
-			}
-			catch (Exception ex)
-			{
-				_log.Error("Receive Exception: " + _uri, ex);
-			}
-		}
-
 		public IEnumerable<IMessageSelector> SelectiveReceive(TimeSpan timeout)
 		{
-			if(_disposed) throw new ObjectDisposedException("The object has been disposed");
+			if (_disposed) throw new ObjectDisposedException("The object has been disposed");
 
-            IPEndPoint endPoint = new IPEndPoint(IPAddress.Any, _uri.Port);
+			IPEndPoint endPoint = new IPEndPoint(IPAddress.Any, _uri.Port);
 
-            byte[] data = _receiveClient.Receive(ref endPoint);
-            if (data == null)
-                yield break;
-
-            if (data.Length == 0)
-                yield break;
-
-            using(MulticastUdpMessageSelector selector = new MulticastUdpMessageSelector(this, data, _serializer))
-            {
-                yield return selector;
-            }
-		}
-
-		public static IEndpoint ConfigureEndpoint(Uri uri, Action<IEndpointConfigurator> configurator)
-		{
-			if (uri.Scheme.ToLowerInvariant() == Scheme)
-			{
-				IEndpoint endpoint = MulticastUdpEndpointConfigurator.New(x =>
-					{
-						x.SetUri(uri);
-
-						configurator(x);
-					});
-
-				return endpoint;
-			}
-
-			return null;
+			byte[] data = _receiveClient.Receive(ref endPoint);
+			if (data != null && data.Length > 0)
+				using (MulticastUdpMessageSelector selector = new MulticastUdpMessageSelector(this, data, _serializer))
+				{
+					yield return selector;
+				}
 		}
 
 		protected virtual void Dispose(bool disposing)
@@ -219,22 +144,19 @@ namespace MassTransit.Transports
 			if (_groupAddress.AddressFamily != AddressFamily.InterNetwork)
 				throw new ArgumentException("The specified address is not a valid multicast address: " + _uri);
 
-			InitializeSender();
-
 			InitializeReceiver();
+
+			InitializeSender();
 		}
 
 		private void InitializeSender()
 		{
 			_sendIPEndPoint = new IPEndPoint(_groupAddress, _uri.Port);
 
-		    int port = 0;
+			const int port = 0;
 			_sendClient = new UdpClient(port, AddressFamily.InterNetwork);
-		    _sendClient = new UdpClient()
-		                      {
-		                          DontFragment = true,
-                                  Ttl = 2 // 0 = host, 1 = subnet, <32 = same company
-                              };
+			_sendClient.DontFragment = true;
+			_sendClient.Ttl = 2; // 0 = host, 1 = subnet, <32 = same company 
 			_sendClient.Client.SendBufferSize = 256*1024;
 
 			_sendClient.JoinMulticastGroup(_groupAddress);
@@ -242,21 +164,40 @@ namespace MassTransit.Transports
 
 		private void InitializeReceiver()
 		{
-			_receiveClient = new UdpClient()
-			                     {
-			                         
-			                     };
+			_receiveClient = new UdpClient();
 
 			Socket s = _receiveClient.Client;
 
-		    int optionValue = 1;
+			const int optionValue = 1;
 			s.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, optionValue);
+
 			s.ReceiveBufferSize = 256*1024;
 			s.ReceiveTimeout = 2000;
-
 			s.Bind(new IPEndPoint(IPAddress.Any, _uri.Port));
 
-            _receiveClient.JoinMulticastGroup(_groupAddress, 2); // 0 = host, 1 = subnet, <32 = same company
+			_receiveClient.JoinMulticastGroup(_groupAddress, 2); // 0 = host, 1 = subnet, <32 = same company
+		}
+
+		~MulticastUdpEndpoint()
+		{
+			Dispose(false);
+		}
+
+		public static IEndpoint ConfigureEndpoint(Uri uri, Action<IEndpointConfigurator> configurator)
+		{
+			if (uri.Scheme.ToLowerInvariant() == "multicast")
+			{
+				IEndpoint endpoint = MulticastUdpEndpointConfigurator.New(x =>
+					{
+						x.SetUri(uri);
+
+						configurator(x);
+					});
+
+				return endpoint;
+			}
+
+			return null;
 		}
 	}
 }

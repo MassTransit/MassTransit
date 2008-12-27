@@ -37,16 +37,6 @@ namespace MassTransit.Transports.Msmq
 		private MessageQueue _queue;
 		private MessageQueueTransactionType _receiveTransactionType;
 
-		public MessageQueueTransactionType SendTransactionType
-		{
-			get { return _sendTransactionType; }
-		}
-
-		public MessageQueueTransactionType ReceiveTransactionType
-		{
-			get { return _receiveTransactionType; }
-		}
-
 		private MessageQueueTransactionType _sendTransactionType;
 
 		/// <summary>
@@ -85,13 +75,17 @@ namespace MassTransit.Transports.Msmq
 			Initialize();
 		}
 
-		public static string Scheme
+		public MessageQueueTransactionType SendTransactionType
 		{
-			get { return "msmq"; }
+			get { return _sendTransactionType; }
+		}
+
+		public MessageQueueTransactionType ReceiveTransactionType
+		{
+			get { return _receiveTransactionType; }
 		}
 
 		public bool ReliableMessaging { get; set; }
-
 
 		/// <summary>
 		/// The path of the message queue for the endpoint. Suitable for use with <c ref="MessageQueue" />.Open
@@ -156,56 +150,6 @@ namespace MassTransit.Transports.Msmq
 				_log.DebugFormat("Sent {0} from {1} [{2}]", messageType.FullName, Uri, msg.Id);
 		}
 
-        [Obsolete]
-		public void Receive(TimeSpan timeout, Func<object, Func<object, bool>, bool> receiver)
-		{
-			if (!_queue.CanRead)
-				throw new EndpointException(this, string.Format("Not allowed to read from endpoint: '{0}'", _queueAddress.ActualUri));
-
-			try
-			{
-				using (MessageEnumerator enumerator = _queue.GetMessageEnumerator2())
-				{
-					while (enumerator.MoveNext(timeout))
-					{
-						Message msmqMessage = enumerator.Current;
-						if (msmqMessage == null)
-							continue;
-
-						object message = DeserializeMessage(msmqMessage);
-						if (message == null)
-							continue;
-
-						if (receiver(message, x =>
-							{
-								Message received = enumerator.RemoveCurrent(timeout, _receiveTransactionType);
-								if (received == null)
-									throw new MessageException(message.GetType(), "The message could not be removed from the queue");
-
-								if (received.Id != msmqMessage.Id)
-									throw new MessageException(message.GetType(), "The message removed does not match the original message");
-
-								if (_log.IsDebugEnabled)
-									_log.DebugFormat("Queue: {0} Received Message Id {1}", _queue.Path, msmqMessage.Id);
-
-								if (SpecialLoggers.Messages.IsInfoEnabled)
-									SpecialLoggers.Messages.InfoFormat("RECV:{0}:{1}", _queueAddress.ActualUri, message.GetType().Name);
-
-								return true;
-							}))
-							return;
-
-						if (_log.IsDebugEnabled)
-							_log.DebugFormat("Queue: {0} Skipped Message Id {1}", _queue.Path, msmqMessage.Id);
-					}
-					enumerator.Close();
-				}
-			}
-			catch (MessageQueueException ex)
-			{
-				HandleVariousErrorCodes(ex.MessageQueueErrorCode, ex);
-			}
-		}
 
 		public void Dispose()
 		{
@@ -254,113 +198,6 @@ namespace MassTransit.Transports.Msmq
 			return queue;
 		}
 
-		public object Receive(TimeSpan timeout)
-		{
-			try
-			{
-				Message msg = _queue.Receive(timeout, _receiveTransactionType);
-
-				try
-				{
-					if (msg == null)
-						throw new MessageException(typeof (object), string.Format("Endpoint '{0}' just fed us a null Msmq Message", this._queueAddress.ActualUri));
-
-					//TODO: What do we want to do if the message body stream is null?
-					object obj = _serializer.Deserialize(msg.BodyStream);
-
-					return obj;
-				}
-				catch (SerializationException ex)
-				{
-					string messageName = msg == null ? "UNKNOWN" : msg.Label;
-					string exceptionMessage = string.Format("An error occurred serializing a message of type '{0}'", messageName);
-
-					throw new MessageException(typeof (Object), exceptionMessage, ex);
-				}
-			}
-			catch (MessageQueueException ex)
-			{
-				HandleVariousErrorCodes(ex.MessageQueueErrorCode, ex);
-			}
-
-			return null;
-		}
-
-		public object Receive(TimeSpan timeout, Predicate<object> accept)
-		{
-			if (!_queue.CanRead)
-				throw new EndpointException(this, string.Format("Not allowed to read from endpoint: '{0}'", _queueAddress.ActualUri));
-
-			try
-			{
-				DateTime started = DateTime.Now;
-				while (started + timeout > DateTime.Now)
-				{
-					using (MessageEnumerator enumerator = _queue.GetMessageEnumerator2())
-					{
-						// account for the fact that we might be doing multiple reads on the enumerator
-						while (enumerator.MoveNext(timeout))
-						{
-							Message msg = enumerator.Current;
-							if (msg == null)
-								throw new MessageException(typeof (object), string.Format("Received a null Msmq Message while enumerating the queue '{0}'", this.Uri));
-
-							try
-							{
-								object obj = _serializer.Deserialize(msg.BodyStream);
-
-								if (accept(obj))
-								{
-									Message received = enumerator.RemoveCurrent(TimeSpan.FromSeconds(10), _receiveTransactionType);
-									if (received == null)
-										throw new MessageException(typeof (object), string.Format("Received a null Msmq Message while enumerating the queue '{0}' post accept", this.Uri));
-
-									if (received.Id != msg.Id)
-										throw new MessageException(obj.GetType(), "The message removed does not match the original message");
-
-									if (_log.IsDebugEnabled)
-										_log.DebugFormat("Queue: {0} Received Message Id {1}", _queue.Path, msg.Id);
-
-									if (SpecialLoggers.Messages.IsInfoEnabled)
-										SpecialLoggers.Messages.InfoFormat("RECV:{0}:{1}", _queueAddress.ActualUri, obj.GetType().Name);
-
-									return obj;
-								}
-
-								if (_log.IsDebugEnabled)
-									_log.DebugFormat("Queue: {0} Skipped Message Id {1}", _queue.Path, msg.Id);
-							}
-							catch (SerializationException ex)
-							{
-								// if we get a message we cannot serialize, we need to do something about it or it will 
-								// hang the service bus forever
-
-								try
-								{
-									Message discard = _queue.ReceiveById(msg.Id, _receiveTransactionType);
-
-									_log.Error("Discarded message " + discard.Id + " due to a serialization error", ex);
-								}
-								catch (Exception ex2)
-								{
-									_log.Error(string.Format("Unable to purge message id '{0}'", msg.Id), ex2);
-								}
-
-								throw new MessageException(typeof (object), "An error occurred deserializing a message", ex);
-							}
-						}
-						enumerator.Close();
-					}
-				}
-			}
-			catch (MessageQueueException ex)
-			{
-				HandleVariousErrorCodes(ex.MessageQueueErrorCode, ex);
-			}
-
-			return null;
-		}
-
 		public void DiscardMessage(string messageId, string message)
 		{
 			try
@@ -401,34 +238,6 @@ namespace MassTransit.Transports.Msmq
 			return msg;
 		}
 
-
-		private object DeserializeMessage(Message msg)
-		{
-			try
-			{
-				object obj = _serializer.Deserialize(msg.BodyStream);
-
-				return obj;
-			}
-			catch (SerializationException ex)
-			{
-				// if we get a message we cannot serialize, we need to do something about it or it will 
-				// hang the service bus for..ev..er..
-
-				try
-				{
-					Message discard = _queue.ReceiveById(msg.Id, _receiveTransactionType);
-
-					_log.Error("Discarded message " + discard.Id + " due to a serialization error", ex);
-				}
-				catch (Exception ex2)
-				{
-					_log.Error("Unable to purge message id " + msg.Id, ex2);
-				}
-
-				throw new MessageException(typeof (object), "An error occurred deserializing a message", ex);
-			}
-		}
 
 		private void HandleVariousErrorCodes(MessageQueueErrorCode code, Exception ex)
 		{

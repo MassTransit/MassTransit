@@ -53,11 +53,6 @@ namespace MassTransit.Internal
 			_wrappedEndpoint.Send(message, timeToLive);
 		}
 
-		public void Receive(TimeSpan timeout, Func<object, Func<object, bool>, bool> receiver)
-		{
-			_wrappedEndpoint.Receive(timeout, receiver);
-		}
-
 		public IEnumerable<IMessageSelector> SelectiveReceive(TimeSpan timeout)
 		{
 			throw new System.NotImplementedException();
