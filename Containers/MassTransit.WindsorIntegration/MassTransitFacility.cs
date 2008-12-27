@@ -109,16 +109,6 @@ namespace MassTransit.WindsorIntegration
 						Type transportType = Type.GetType(transport.Value, true, true);
 
 						x.RegisterTransport(transportType);
-
-// TODO why is this here?
-//						Kernel.Register(
-//							Component.For(transportType)
-//								.ImplementedBy(transportType)
-//								.AddAttributeDescriptor("factoryId", "endpoint.factory")
-//								.AddAttributeDescriptor("factoryCreate", "Resolve")
-//								.LifeStyle.Transient
-//								.Named("transport." + scheme)
-//							);
 					}
 				});
 

@@ -334,28 +334,6 @@
             <param name="type"></param>
             <returns></returns>
         </member>
-        <member name="T:StructureMap.PluginTypeConfiguration">
-            <summary>
-            Metadata describing the registration of a PluginType
-            </summary>
-        </member>
-        <member name="P:StructureMap.PluginTypeConfiguration.Default">
-            <summary>
-            The "instance" that will be used when Container.GetInstance(PluginType) is called.
-            See <see cref="T:StructureMap.Pipeline.IInstance">IInstance</see> for more information
-            </summary>
-        </member>
-        <member name="P:StructureMap.PluginTypeConfiguration.Policy">
-            <summary>
-            The build "policy" for this PluginType.  Used by the WhatDoIHave() diagnostics methods
-            </summary>
-        </member>
-        <member name="P:StructureMap.PluginTypeConfiguration.Instances">
-            <summary>
-            All of the <see cref="T:StructureMap.Pipeline.IInstance">IInstance</see>'s registered
-            for this PluginType
-            </summary>
-        </member>
         <member name="T:StructureMap.Pipeline.IBuildPolicy">
             <summary>
             An object that specifies a "Policy" about how Instance's are invoked.
@@ -1971,6 +1949,39 @@
             </summary>
             <param name="configure"></param>
         </member>
+        <member name="M:StructureMap.ObjectFactory.TryGetInstance(System.Type,System.String)">
+            <summary>
+            Creates or finds the named instance of the pluginType. Returns null if the named instance is not known to the container.
+            </summary>
+            <param name="pluginType"></param>
+            <param name="instanceKey"></param>
+            <param name="instance"></param>
+            <returns></returns>
+        </member>
+        <member name="M:StructureMap.ObjectFactory.TryGetInstance(System.Type)">
+            <summary>
+            Creates or finds the default instance of the pluginType. Returns null if the pluginType is not known to the container.
+            </summary>
+            <param name="pluginType"></param>
+            <param name="instance"></param>
+            <returns></returns>
+        </member>
+        <member name="M:StructureMap.ObjectFactory.TryGetInstance``1">
+            <summary>
+            Creates or finds the default instance of type T. Returns the default value of T if it is not known to the container.
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="instance"></param>
+            <returns></returns>
+        </member>
+        <member name="M:StructureMap.ObjectFactory.TryGetInstance``1(System.String)">
+            <summary>
+            Creates or finds the named instance of type T. Returns the default value of T if the named instance is not known to the container.
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="instance"></param>
+            <returns></returns>
+        </member>
         <member name="P:StructureMap.ObjectFactory.Model">
             <summary>
             Provides queryable access to the configured PluginType's and Instances of the inner Container
@@ -2820,6 +2831,28 @@
             </summary>
             <typeparam name="CONCRETETYPE"></typeparam>
             <returns></returns>
+        </member>
+        <member name="T:StructureMap.PluginTypeConfiguration">
+            <summary>
+            Metadata describing the registration of a PluginType
+            </summary>
+        </member>
+        <member name="P:StructureMap.PluginTypeConfiguration.Default">
+            <summary>
+            The "instance" that will be used when Container.GetInstance(PluginType) is called.
+            See <see cref="T:StructureMap.Pipeline.IInstance">IInstance</see> for more information
+            </summary>
+        </member>
+        <member name="P:StructureMap.PluginTypeConfiguration.Policy">
+            <summary>
+            The build "policy" for this PluginType.  Used by the WhatDoIHave() diagnostics methods
+            </summary>
+        </member>
+        <member name="P:StructureMap.PluginTypeConfiguration.Instances">
+            <summary>
+            All of the <see cref="T:StructureMap.Pipeline.IInstance">IInstance</see>'s registered
+            for this PluginType
+            </summary>
         </member>
     </members>
 </doc>

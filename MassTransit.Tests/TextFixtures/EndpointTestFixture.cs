@@ -15,6 +15,7 @@ namespace MassTransit.Tests.TextFixtures
 	using Configuration;
 	using Magnum.Common.DateTimeExtensions;
 	using MassTransit.Internal;
+	using MassTransit.Serialization;
 	using MassTransit.Subscriptions;
 	using NUnit.Framework;
 	using Rhino.Mocks;
@@ -34,10 +35,15 @@ namespace MassTransit.Tests.TextFixtures
 			ITypeInfoCache typeInfoCache = new TypeInfoCache();
 			ObjectBuilder.Stub(x => x.GetInstance<ITypeInfoCache>()).Return(typeInfoCache);
 
+            //TODO: Is this how it should be set up?
+            BinaryMessageSerializer serializer = new BinaryMessageSerializer();
+		    ObjectBuilder.Stub(x => x.GetInstance<BinaryMessageSerializer>()).Return(serializer);
+
 			EndpointFactory = EndpointFactoryConfigurator.New(x =>
 				{
 					x.SetObjectBuilder(ObjectBuilder);
 					x.RegisterTransport<TTransport>();
+                    x.SetDefaultSerializer<BinaryMessageSerializer>();
 				});
 			ObjectBuilder.Stub(x => x.GetInstance<IEndpointFactory>()).Return(EndpointFactory);
 
