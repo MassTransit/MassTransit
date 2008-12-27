@@ -12,63 +12,30 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests
 {
-	using System;
-	using Configuration;
-	using MassTransit.Internal;
-	using MassTransit.Serialization;
-	using MassTransit.Transports;
-	using Messages;
+    using Magnum.Common.DateTimeExtensions;
+    using Messages;
 	using NUnit.Framework;
 	using NUnit.Framework.SyntaxHelpers;
-	using Rhino.Mocks;
-	using Subscriptions;
+	using TextFixtures;
 
-	[TestFixture]
+    [TestFixture]
 	public class MessageQueueEndpoint_MeetsCriteria :
-		Specification
+		LoopbackLocalAndRemoteTestFixture
 	{
 		private readonly PingMessage _message = new PingMessage();
-
-		private LocalSubscriptionCache _cache;
-		private IObjectBuilder _builder;
-		private IEndpointFactory _resolver;
-		private IEndpoint _endpoint;
-		private ServiceBus _bus;
-
-		protected override void Before_each()
-		{
-			_cache = new LocalSubscriptionCache();
-			_builder = MockRepository.GenerateMock<IObjectBuilder>();
-			_resolver = EndpointFactoryConfigurator.New(x =>
-				{
-					x.SetObjectBuilder(_builder);
-					x.SetDefaultSerializer<BinaryMessageSerializer>();
-					x.RegisterTransport<LoopbackEndpoint>();
-				});
-			_endpoint = _resolver.GetEndpoint(new Uri("loopback://localhost/servicebus"));
-			_bus = new ServiceBus(_endpoint, _builder, _cache, _resolver, new TypeInfoCache());
-			_bus.Start();
-		}
-
-		protected override void After_each()
-		{
-			_bus.Dispose();
-			_endpoint.Dispose();
-			_resolver.Dispose();
-		}
-
 
 		[Test]
 		public void Subscring_to_an_endpoint_should_accept_and_dispatch_messages()
 		{
+            FutureMessage<PingMessage> fm=new FutureMessage<PingMessage>();
 			bool workDid = false;
 
-			_bus.Subscribe<PingMessage>(
-				delegate { workDid = true; },
+			LocalBus.Subscribe<PingMessage>(
+				(msg)=> {workDid = true; fm.Set(msg); },
 				delegate { return true; });
 
-			_bus.Dispatch(_message);
-
+			RemoteBus.Publish(_message);
+		    fm.IsAvailable(1.Seconds());
 			Assert.That(workDid, Is.True, "Lazy Test!");
 		}
 	}
