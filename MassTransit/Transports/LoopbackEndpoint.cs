@@ -17,6 +17,7 @@ namespace MassTransit.Transports
 	using System.IO;
 	using System.Threading;
 	using Configuration;
+	using Internal;
 	using log4net;
 	using Magnum.Common.Threading;
 	using Serialization;

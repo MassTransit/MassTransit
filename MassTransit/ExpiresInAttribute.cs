@@ -21,27 +21,27 @@ namespace MassTransit
     [AttributeUsage(AttributeTargets.Class)]
     public class ExpiresInAttribute : Attribute
     {
-        private readonly TimeSpan _timeSpan;
+        private readonly TimeSpan _timeToLive;
 
         /// <summary>
         /// Specifies the elapsed time before the message expires.
         /// </summary>
-        /// <param name="timeSpanValue">The duration of the time period.</param>
-        public ExpiresInAttribute(string timeSpanValue)
+        /// <param name="timeToLive">The duration of the time period.</param>
+        public ExpiresInAttribute(string timeToLive)
         {
             TimeSpan value;
-            if (!TimeSpan.TryParse(timeSpanValue, out value))
-                throw new ArgumentException("Unable to convert string to TimeSpan", "timeSpanValue");
+            if (!TimeSpan.TryParse(timeToLive, out value))
+                throw new ArgumentException("Unable to convert string to TimeSpan", "timeToLive");
 
-            _timeSpan = value;
+            _timeToLive = value;
         }
 
         /// <summary>
         /// Returns the TimeSpan for the message expiration
         /// </summary>
-        public TimeSpan TimeSpan
+        public TimeSpan TimeToLive
         {
-            get { return _timeSpan; }
+            get { return _timeToLive; }
         }
     }
 }

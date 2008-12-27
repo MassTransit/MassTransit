@@ -193,7 +193,7 @@
     <Compile Include="Configuration\ServiceBusConfiguratorDefaults.cs" />
     <Compile Include="Configuration\SubscriptionClientConfigurator.cs" />
     <Compile Include="Exceptions\ConfigurationException.cs" />
-    <Compile Include="IMessageSelector.cs" />
+    <Compile Include="Internal\IMessageSelector.cs" />
     <Compile Include="Internal\EndpointFactory.cs" />
     <Compile Include="Internal\RequestResponse\CorrelatedResponseAction.cs" />
     <Compile Include="Internal\RequestResponse\CorrelatedResponseActionBuilder.cs" />
