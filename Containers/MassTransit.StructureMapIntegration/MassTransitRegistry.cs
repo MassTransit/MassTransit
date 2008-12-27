@@ -1,6 +1,7 @@
 ﻿namespace MassTransit.StructureMapIntegration
 {
     using System;
+    using Configuration;
     using Infrastructure.Subscriptions;
     using MassTransit.Internal;
     using MassTransit.Subscriptions;
@@ -20,20 +21,31 @@
         {
             ForRequestedType<IObjectBuilder>().AddConcreteType<StructureMapObjectBuilder>().AsSingletons();
             ForRequestedType<ISubscriptionCache>().AddConcreteType<LocalSubscriptionCache>().AsSingletons();
-            ForRequestedType<IEndpointResolver>().AddConcreteType<EndpointResolver>().AsSingletons();
             ForRequestedType<IServiceBus>().AddConcreteType<ServiceBus>();
         }
 
         //this at least once
-        public void AddTransport<T>() where T : IEndpoint
+        public void AddTransport<TTransport>() where TTransport : IEndpoint
         {
-            EndpointResolver.AddTransport(typeof (T));
+            AddTransports(typeof(TTransport));
+        }
+        public void AddTransports(params Type[] transportTypes)
+        {
+            var endpointFactory = EndpointFactoryConfigurator.New(x =>
+                                                                      {
+                                                                          x.SetObjectBuilder(ObjectFactory.GetInstance<IObjectBuilder>());
+                                                                          foreach (var transportType in transportTypes)
+                                                                          {
+                                                                              x.RegisterTransport(transportType);
+                                                                          }
+                                                                      });
+            ForRequestedType<IEndpointFactory>().AddInstances(o => o.IsThis(endpointFactory).WithName("endpointFactory")).AsSingletons();
         }
 
         //at least one of these
         public void AddBus(string id, Uri endpointToListenOn)
         {
-            IEndpoint ep = ObjectFactory.GetInstance<IEndpointResolver>().Resolve(endpointToListenOn);
+            IEndpoint ep = ObjectFactory.GetInstance<IEndpointFactory>().GetEndpoint(endpointToListenOn);
             ForRequestedType<IServiceBus>().AddInstances(o => o.OfConcreteType<ServiceBus>().WithName(id)
                                                                   .WithCtorArg("endpointListenOn").EqualTo(ep)
                                                                   .SetProperty(x => x.MinThreadCount = 1)
@@ -65,7 +77,7 @@
         //optional
         public void TurnOnSubscriptionClient(string busId, Uri subscribedVia)
         {
-            IEndpoint ep = ObjectFactory.GetInstance<IEndpointResolver>().Resolve(subscribedVia);
+            IEndpoint ep = ObjectFactory.GetInstance<IEndpointFactory>().GetEndpoint(subscribedVia);
             ForConcreteType<SubscriptionClient>().Configure
                 .WithName("subscription_client")
                 .CtorDependency<IServiceBus>().IsTheDefault().WithName(busId)
