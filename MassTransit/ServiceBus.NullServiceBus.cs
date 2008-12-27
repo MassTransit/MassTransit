@@ -4,6 +4,12 @@ namespace MassTransit
 
     public partial class ServiceBus
     {
+
+        public static IServiceBus Null
+        {
+            get; private set;
+        }
+
         private class NullServiceBus : IServiceBus
         {
             public void Dispose()

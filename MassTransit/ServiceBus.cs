@@ -34,7 +34,6 @@ namespace MassTransit
 		IServiceBus
 	{
 		private static readonly ILog _log;
-		private static readonly IServiceBus _nullServiceBus;
 
 		private readonly DispatcherContext _dispatcherContext;
 		private readonly IEndpointFactory _endpointFactory;
@@ -61,7 +60,7 @@ namespace MassTransit
 			{
 				_log = LogManager.GetLogger(typeof (ServiceBus));
 
-				_nullServiceBus = new NullServiceBus();
+				Null = new NullServiceBus();
 			}
 			catch (Exception ex)
 			{
@@ -113,11 +112,6 @@ namespace MassTransit
 			_dispatcherContext = new DispatcherContext(_objectBuilder, this, _subscriptionCache);
 
 			PoisonEndpoint = new PoisonEndpointDecorator(new NullEndpoint());
-		}
-
-		public static IServiceBus Null
-		{
-			get { return _nullServiceBus; }
 		}
 
 		public ISubscriptionCache SubscriptionCache
