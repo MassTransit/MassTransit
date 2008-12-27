@@ -156,7 +156,7 @@ namespace MassTransit.Transports.Msmq
 				_log.DebugFormat("Sent {0} from {1} [{2}]", messageType.FullName, Uri, msg.Id);
 		}
 
-
+        [Obsolete]
 		public void Receive(TimeSpan timeout, Func<object, Func<object, bool>, bool> receiver)
 		{
 			if (!_queue.CanRead)
