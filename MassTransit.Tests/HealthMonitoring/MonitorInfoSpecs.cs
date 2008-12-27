@@ -5,10 +5,9 @@ namespace MassTransit.Tests.HealthMonitoring
     using MassTransit.Internal;
     using MassTransit.Services.HealthMonitoring;
     using MassTransit.Services.HealthMonitoring.Messages;
+    using MassTransit.Transports;
     using NUnit.Framework;
    
-    using Transports;
-
     public class MonitorInfoSpecs :
         Specification
     {
