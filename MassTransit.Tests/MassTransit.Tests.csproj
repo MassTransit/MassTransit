@@ -179,6 +179,8 @@
     <Compile Include="ThreadPool_Specs.cs" />
     <Compile Include="Timeouts\DeferMessage_Specs.cs" />
     <Compile Include="Timeouts\TimeoutService_Specs.cs" />
+    <Compile Include="Transports\EndpointContract.cs" />
+    <Compile Include="Transports\TransactionalEndpointContract.cs" />
     <Compile Include="Uri_Specs.cs" />
   </ItemGroup>
   <ItemGroup>

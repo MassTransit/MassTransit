@@ -14,9 +14,9 @@ namespace MassTransit.Tests
 {
 	using Configuration;
 	using MassTransit.Serialization;
+	using MassTransit.Transports;
 	using NUnit.Framework;
 	using Rhino.Mocks;
-	using Transports;
 
 	[TestFixture]
 	public class Configuration_Specs
