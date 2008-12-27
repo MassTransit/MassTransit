@@ -14,13 +14,14 @@ namespace MassTransit.Transports
 {
 	using System;
 	using System.IO;
+	using Internal;
 	using log4net;
 	using Serialization;
 
 	public class LoopbackMessageSelector :
 		IMessageSelector
 	{
-		private static readonly ILog _messageLog = LogManager.GetLogger("MassTransit.Messages");
+		private static readonly ILog _messageLog = SpecialLoggers.Messages;
 
 		private readonly byte[] _data;
 		private readonly LoopbackEndpoint _endpoint;
