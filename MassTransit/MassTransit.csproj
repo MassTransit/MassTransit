@@ -236,6 +236,7 @@
     <Compile Include="Transports\LoopbackEndpointConfigurator.cs" />
     <Compile Include="Transports\LoopbackMessageSelector.cs" />
     <Compile Include="Transports\MulticastUdpEndpointConfigurator.cs" />
+    <Compile Include="Transports\MulticastUdpMessageSelector.cs" />
     <Compile Include="Util\ReaderWriterLockedDictionary.cs" />
     <Compile Include="Pipeline\ISubscriptionEvent.cs" />
     <Compile Include="Pipeline\Sinks\CorrelatedMessageSinkRouter.cs" />

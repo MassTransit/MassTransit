@@ -150,7 +150,21 @@ namespace MassTransit.Transports
 
 		public IEnumerable<IMessageSelector> SelectiveReceive(TimeSpan timeout)
 		{
-			throw new System.NotImplementedException();
+			if(_disposed) throw new ObjectDisposedException("The object has been disposed");
+
+            IPEndPoint endPoint = new IPEndPoint(IPAddress.Any, _uri.Port);
+
+            byte[] data = _receiveClient.Receive(ref endPoint);
+            if (data == null)
+                yield break;
+
+            if (data.Length == 0)
+                yield break;
+
+            using(MulticastUdpMessageSelector selector = new MulticastUdpMessageSelector(this, data, _serializer))
+            {
+                yield return selector;
+            }
 		}
 
 		public static IEndpoint ConfigureEndpoint(Uri uri, Action<IEndpointConfigurator> configurator)
