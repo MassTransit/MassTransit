@@ -13,6 +13,7 @@
 namespace MassTransit.Internal
 {
 	using System;
+	using System.Collections.Generic;
 	using log4net;
 
 	public class PoisonEndpointDecorator :
@@ -55,6 +56,11 @@ namespace MassTransit.Internal
 		public void Receive(TimeSpan timeout, Func<object, Func<object, bool>, bool> receiver)
 		{
 			_wrappedEndpoint.Receive(timeout, receiver);
+		}
+
+		public IEnumerable<IMessageSelector> SelectiveReceive(TimeSpan timeout)
+		{
+			throw new System.NotImplementedException();
 		}
 	}
 }

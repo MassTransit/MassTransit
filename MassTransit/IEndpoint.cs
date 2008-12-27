@@ -13,8 +13,9 @@
 namespace MassTransit
 {
     using System;
+    using System.Collections.Generic;
 
-    /// <summary>
+	/// <summary>
     /// IEndpoint is implemented by an endpoint. An endpoint is an addressable location on the network.
     /// </summary>
     public interface IEndpoint :
@@ -46,5 +47,25 @@ namespace MassTransit
 		/// <param name="timeout"></param>
 		/// <param name="receiver">Func(the message, Func_To_Dequeue_the_Message(the message, did it work), did the dequeue work)</param>
 		void Receive(TimeSpan timeout, Func<object, Func<object, bool>, bool> receiver);
+
+
+		IEnumerable<IMessageSelector> SelectiveReceive(TimeSpan timeout);
+
+		// new type of method
+
+		// IEnumerator<ISelectiveConsumer> Receive(TimeSpan timeout);
+
+
+
+
     }
+
+	public interface IMessageSelector :
+		IDisposable
+	{
+		bool AcceptMessage();
+		void MoveMessageTo(IEndpoint endpoint);
+		object DeserializeMessage();
+	}
+
 }

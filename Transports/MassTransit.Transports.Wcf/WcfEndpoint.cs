@@ -160,6 +160,11 @@ namespace MassTransit.Transports.Wcf
     		throw new System.NotImplementedException();
     	}
 
+    	public IEnumerable<IMessageSelector> SelectiveReceive(TimeSpan timeout)
+    	{
+    		throw new System.NotImplementedException();
+    	}
+
     	private void OpenHost()
         {
             _log.DebugFormat("Opening host for WCF endpoint: {0}", _serviceUri);

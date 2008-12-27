@@ -13,6 +13,7 @@
 namespace MassTransit.Transports
 {
 	using System;
+	using System.Collections.Generic;
 	using System.IO;
 	using System.Net;
 	using System.Net.Sockets;
@@ -145,6 +146,11 @@ namespace MassTransit.Transports
 			{
 				_log.Error("Receive Exception: " + _uri, ex);
 			}
+		}
+
+		public IEnumerable<IMessageSelector> SelectiveReceive(TimeSpan timeout)
+		{
+			throw new System.NotImplementedException();
 		}
 
 		public static IEndpoint ConfigureEndpoint(Uri uri, Action<IEndpointConfigurator> configurator)

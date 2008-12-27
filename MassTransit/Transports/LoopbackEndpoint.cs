@@ -104,27 +104,25 @@ namespace MassTransit.Transports
 			}
 		}
 
+		public IEnumerable<IMessageSelector> SelectiveReceive(TimeSpan timeout)
+		{
+			if (_disposed) throw new ObjectDisposedException("The object has been disposed");
+
+			if (!_messageReady.WaitOne(timeout, true))
+				yield break;
+
+			byte[] data = Dequeue();
+
+			using (LoopbackMessageSelector selector = new LoopbackMessageSelector(this, data, _serializer))
+			{
+				yield return selector;
+			}
+		}
+
 		public void Dispose()
 		{
 			Dispose(true);
 			GC.SuppressFinalize(this);
-		}
-
-		public static IEndpoint ConfigureEndpoint(Uri uri, Action<IEndpointConfigurator> configurator)
-		{
-			if (uri.Scheme.ToLowerInvariant() == "loopback")
-			{
-				IEndpoint endpoint = LoopbackEndpointConfigurator.New(x =>
-					{
-						x.SetUri(uri);
-
-						configurator(x);
-					});
-
-				return endpoint;
-			}
-
-			return null;
 		}
 
 		protected virtual void Dispose(bool disposing)
@@ -150,18 +148,30 @@ namespace MassTransit.Transports
 			_messageReady.Release();
 		}
 
-		private object Dequeue()
+		private byte[] Dequeue()
 		{
 			byte[] buffer;
 			using (_lockContext.EnterWriteLock())
 				buffer = _messages.Dequeue();
 
-			using (MemoryStream mstream = new MemoryStream(buffer))
-			{
-				object obj = _serializer.Deserialize(mstream);
+			return buffer;
+		}
 
-				return obj;
+		public static IEndpoint ConfigureEndpoint(Uri uri, Action<IEndpointConfigurator> configurator)
+		{
+			if (uri.Scheme.ToLowerInvariant() == "loopback")
+			{
+				IEndpoint endpoint = LoopbackEndpointConfigurator.New(x =>
+					{
+						x.SetUri(uri);
+
+						configurator(x);
+					});
+
+				return endpoint;
 			}
+
+			return null;
 		}
 	}
 }

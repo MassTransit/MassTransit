@@ -9,6 +9,6 @@
     <property name="connection.release_mode">auto</property>
     <property name="adonet.batch_size">500</property>
     <property name="default_schema">test.dbo</property>
-    <mapping assembly="MassTransit.Saga.Tests" />
+    <mapping assembly="MassTransit.Tests" />
   </session-factory>
 </hibernate-configuration>

@@ -18,10 +18,9 @@ namespace MassTransit.Tests.Saga
 	using MassTransit.Pipeline.Sinks;
 	using MassTransit.Saga;
 	using MassTransit.Saga.Pipeline;
+	using Messages;
 	using NUnit.Framework;
 	using NUnit.Framework.SyntaxHelpers;
-	using RegisterUser;
-	using RegisterUser.Messages;
 	using Rhino.Mocks;
 	using TextFixtures;
 
@@ -38,12 +37,12 @@ namespace MassTransit.Tests.Saga
 			ObjectBuilder.Stub(x => x.GetInstance<ISagaRepository<RegisterUserSaga>>())
 				.Return(sagaRepository);
 
-			ObjectBuilder.Stub(x => x.GetInstance<InitiateSagaMessageSink<RegisterUserSaga, RegisterUser.Messages.RegisterUser>>(new Hashtable()))
+			ObjectBuilder.Stub(x => x.GetInstance<InitiateSagaMessageSink<RegisterUserSaga, Messages.RegisterUser>>(new Hashtable()))
 				.IgnoreArguments()
 				.Return(null)
 				.WhenCalled(invocation => 
 					invocation.ReturnValue = 
-					new InitiateSagaMessageSink<RegisterUserSaga, RegisterUser.Messages.RegisterUser>(
+					new InitiateSagaMessageSink<RegisterUserSaga, Messages.RegisterUser>(
 						((Hashtable)invocation.Arguments[0])["context"] as IInterceptorContext,
 						RemoteBus, 
 						sagaRepository));

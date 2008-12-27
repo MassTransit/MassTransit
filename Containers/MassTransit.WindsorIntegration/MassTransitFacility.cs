@@ -201,6 +201,7 @@ namespace MassTransit.WindsorIntegration
 			ConfigureThreadingModel(threadConfig, bus);
 
 			Kernel.AddComponentInstance(id, typeof (IServiceBus), bus);
+			bus.Start();
 
 			return bus;
 		}

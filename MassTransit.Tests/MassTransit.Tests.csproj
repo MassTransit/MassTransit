@@ -132,18 +132,21 @@
     <Compile Include="PublishToConsumer_Specs.cs" />
     <Compile Include="RequestReply_Specs.cs" />
     <Compile Include="RequestResponseScope_Specs.cs" />
+    <Compile Include="ResourceLock_Specs.cs" />
     <Compile Include="ResourceThreadPool_Specs.cs" />
-    <Compile Include="Saga\RegisterUserSaga\Messages\CorrelatedMessage.cs" />
-    <Compile Include="Saga\RegisterUserSaga\Messages\RegisterUser.cs" />
-    <Compile Include="Saga\RegisterUserSaga\Messages\SendUserVerificationEmail.cs" />
-    <Compile Include="Saga\RegisterUserSaga\Messages\SendValidationEmail.cs" />
-    <Compile Include="Saga\RegisterUserSaga\Messages\UserRegistrationComplete.cs" />
-    <Compile Include="Saga\RegisterUserSaga\Messages\UserRegistrationPending.cs" />
-    <Compile Include="Saga\RegisterUserSaga\Messages\UserValidated.cs" />
-    <Compile Include="Saga\RegisterUserSaga\Messages\UserVerificationEmailSent.cs" />
-    <Compile Include="Saga\RegisterUserSaga\RegisterUserController.cs" />
-    <Compile Include="Saga\RegisterUserSaga\RegisterUserSaga.cs" />
+    <Compile Include="Saga\Messages\CorrelatedMessage.cs" />
+    <Compile Include="Saga\Messages\RegisterUser.cs" />
+    <Compile Include="Saga\Messages\SendUserVerificationEmail.cs" />
+    <Compile Include="Saga\Messages\SendValidationEmail.cs" />
+    <Compile Include="Saga\Messages\UserRegistrationComplete.cs" />
+    <Compile Include="Saga\Messages\UserRegistrationPending.cs" />
+    <Compile Include="Saga\Messages\UserValidated.cs" />
+    <Compile Include="Saga\Messages\UserVerificationEmailSent.cs" />
+    <Compile Include="Saga\RegisterUserController.cs" />
+    <Compile Include="Saga\RegisterUserSaga.cs" />
     <Compile Include="Saga\RegisterUser_Specs.cs" />
+    <Compile Include="Saga\StateMachine\RegisterUserStateMachine.cs" />
+    <Compile Include="Saga\StateMachine\SagaStateMachine_Specs.cs" />
     <Compile Include="Serialization\MessageSerialization_Specs.cs" />
     <Compile Include="Services\Metadata\MessageMetadataExtraction_spec.cs" />
     <Compile Include="Specification.cs" />
@@ -203,7 +206,7 @@
     <Content Include="multicast.castle.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <EmbeddedResource Include="Saga\RegisterUserSaga\RegisterUserSaga.hbm.xml" />
+    <EmbeddedResource Include="Saga\RegisterUserSaga.hbm.xml" />
     <Content Include="Saga\saga.nhibernate.cfg.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

@@ -60,6 +60,7 @@
     </Compile>
     <Compile Include="MsmqEndpoint.cs" />
     <Compile Include="MsmqEndpointConfigurator.cs" />
+    <Compile Include="MsmqMessageSelector.cs" />
     <Compile Include="QueueAddress.cs" />
     <Compile Include="MsmqUtilities.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
