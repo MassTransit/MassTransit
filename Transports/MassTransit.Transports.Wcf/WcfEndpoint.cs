@@ -52,12 +52,7 @@ namespace MassTransit.Transports.Wcf
             _channelFactory.Endpoint.Address = new EndpointAddress(_serviceUri);
         }
 
-        public static string Scheme
-        {
-            get { return "net.tcp"; }
-        }
-
-        public void Dispose()
+    	public void Dispose()
         {
             _log.DebugFormat("Closing host for WCF endpoint: {0}", _serviceUri);
             _host.Close();
@@ -213,7 +208,7 @@ namespace MassTransit.Transports.Wcf
 
         public static IEndpoint ConfigureEndpoint(Uri uri, Action<IEndpointConfigurator> configurator)
         {
-            if (uri.Scheme.ToLowerInvariant() == Scheme)
+			if (uri.Scheme.ToLowerInvariant() == "net.tcp")
             {
                 IEndpoint endpoint = WcfEndpointConfigurator.New(x =>
                 {
