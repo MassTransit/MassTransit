@@ -433,7 +433,7 @@ namespace MassTransit
 				}
 				catch (Exception ex)
 				{
-					_log.Error(string.Format("{0} threw an exception consuming message {1}",
+					_log.Error(string.Format("'{0}' threw an exception consuming message '{1}'",
 						consumer.GetType().FullName, message.GetType().FullName), ex);
 
 					atLeastOneConsumerFailed = true;
