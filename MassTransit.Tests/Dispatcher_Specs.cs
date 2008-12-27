@@ -6,12 +6,12 @@ namespace MassTransit.Tests
     using MassTransit.Internal;
     using MassTransit.Serialization;
     using MassTransit.Subscriptions;
+    using MassTransit.Transports;
     using NUnit.Framework;
     using NUnit.Framework.SyntaxHelpers;
     using Rhino.Mocks;
     
     using Tests.Messages;
-    using Transports;
 
     [TestFixture]
     public class When_a_message_is_delivered_to_the_service_bus :

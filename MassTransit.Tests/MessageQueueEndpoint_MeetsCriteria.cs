@@ -2,10 +2,10 @@ namespace MassTransit.Tests
 {
     using System;
     using MassTransit.Internal;
+    using MassTransit.Transports;
     using Messages;
     using NUnit.Framework;
     using NUnit.Framework.SyntaxHelpers;
-    using Transports;
 
     [TestFixture]
     public class MessageQueueEndpoint_MeetsCriteria :

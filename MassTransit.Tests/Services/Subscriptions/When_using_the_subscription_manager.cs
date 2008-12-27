@@ -18,10 +18,9 @@ namespace MassTransit.Tests.Services.Subscriptions
     using MassTransit.Services.Subscriptions.Client;
     using MassTransit.Services.Subscriptions.Messages;
     using MassTransit.Subscriptions;
+    using MassTransit.Transports;
     using NUnit.Framework;
     using Rhino.Mocks;
-    using Rhino.Mocks.Constraints;
-    using Transports;
 
     [TestFixture]
     public class When_using_the_subscription_manager : 

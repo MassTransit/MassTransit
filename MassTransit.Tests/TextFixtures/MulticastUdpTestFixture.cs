@@ -13,8 +13,8 @@
 namespace MassTransit.Tests.TextFixtures
 {
 	using Configuration;
+	using MassTransit.Transports;
 	using NUnit.Framework;
-	using Transports;
 
 	[TestFixture]
 	public class MulticastUdpTestFixture :

@@ -14,14 +14,13 @@ namespace MassTransit.Tests
 {
     using System;
     using Configuration;
-    using MassTransit.Internal;
     using MassTransit.Serialization;
     using MassTransit.Subscriptions;
+    using MassTransit.Transports;
     using Messages;
     using NUnit.Framework;
     using Rhino.Mocks;
     using TestConsumers;
-    using Transports;
 
     [TestFixture]
     public class When_a_handler_subscription_is_added :
