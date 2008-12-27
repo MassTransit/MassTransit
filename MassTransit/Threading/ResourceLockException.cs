@@ -10,26 +10,31 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Tests.Saga.RegisterUser.Messages
+namespace MassTransit.Threading
 {
-    using System;
+	using System;
+	using System.Runtime.Serialization;
 
-    [Reliable]
-    [Serializable]
-    public class UserVerificationEmailSent :
-        CorrelatedMessage
-    {
-        private readonly string _email;
+	[Serializable]
+	public class ResourceLockException : Exception
+	{
+		public ResourceLockException()
+		{
+		}
 
-        public UserVerificationEmailSent(Guid correlationId, string email) :
-            base(correlationId)
-        {
-            _email = email;
-        }
+		public ResourceLockException(string message)
+			: base(message)
+		{
+		}
 
-        public string Email
-        {
-            get { return _email; }
-        }
-    }
+		public ResourceLockException(string message, Exception innerException)
+			: base(message, innerException)
+		{
+		}
+
+		protected ResourceLockException(SerializationInfo info, StreamingContext context)
+			: base(info, context)
+		{
+		}
+	}
 }

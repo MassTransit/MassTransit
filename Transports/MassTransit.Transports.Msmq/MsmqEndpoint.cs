@@ -13,6 +13,7 @@
 namespace MassTransit.Transports.Msmq
 {
 	using System;
+	using System.Collections.Generic;
 	using System.Messaging;
 	using System.Runtime.Serialization;
 	using System.Threading;
@@ -32,8 +33,20 @@ namespace MassTransit.Transports.Msmq
 		private static readonly ILog _log = LogManager.GetLogger(typeof (MsmqEndpoint));
 		private readonly QueueAddress _queueAddress;
 		private readonly IMessageSerializer _serializer;
+		private volatile bool _disposed;
 		private MessageQueue _queue;
 		private MessageQueueTransactionType _receiveTransactionType;
+
+		public MessageQueueTransactionType SendTransactionType
+		{
+			get { return _sendTransactionType; }
+		}
+
+		public MessageQueueTransactionType ReceiveTransactionType
+		{
+			get { return _receiveTransactionType; }
+		}
+
 		private MessageQueueTransactionType _sendTransactionType;
 
 		/// <summary>
@@ -45,14 +58,14 @@ namespace MassTransit.Transports.Msmq
 		{
 		}
 
-        /// <summary>
-        /// Initializes a <c ref="MessageQueueEndpoint" /> instance with the specified URI.
-        /// </summary>
-        /// <param name="uri">The URI for the endpoint</param>
-        public MsmqEndpoint(Uri uri)
-            : this(uri, new BinaryMessageSerializer())
-        {
-        }
+		/// <summary>
+		/// Initializes a <c ref="MessageQueueEndpoint" /> instance with the specified URI.
+		/// </summary>
+		/// <param name="uri">The URI for the endpoint</param>
+		public MsmqEndpoint(Uri uri)
+			: this(uri, new BinaryMessageSerializer())
+		{
+		}
 
 		/// <summary>
 		/// Initializes a <c ref="MessageQueueEndpoint" /> instance with the specified URI.
@@ -61,7 +74,7 @@ namespace MassTransit.Transports.Msmq
 		/// <param name="serializer">The serializer to use for the endpoint</param>
 		public MsmqEndpoint(Uri uri, IMessageSerializer serializer)
 		{
-		    ReliableMessaging = true;
+			ReliableMessaging = true;
 
 			_serializer = serializer;
 
@@ -72,12 +85,12 @@ namespace MassTransit.Transports.Msmq
 			Initialize();
 		}
 
-		public bool ReliableMessaging { get; set; }
-
 		public static string Scheme
 		{
 			get { return "msmq"; }
 		}
+
+		public bool ReliableMessaging { get; set; }
 
 
 		/// <summary>
@@ -104,6 +117,8 @@ namespace MassTransit.Transports.Msmq
 
 		public void Send<T>(T message, TimeSpan timeToLive) where T : class
 		{
+			if (_disposed) throw new ObjectDisposedException("The object has been disposed");
+
 			if (!_queue.CanWrite)
 				throw new EndpointException(this, "Not allowed to write to endpoint " + _queueAddress.ActualUri);
 
@@ -116,21 +131,21 @@ namespace MassTransit.Transports.Msmq
 				if (SpecialLoggers.Messages.IsInfoEnabled)
 					SpecialLoggers.Messages.InfoFormat("SEND:{0}:{1}", Uri, messageType.Name);
 
-                if (_sendTransactionType == MessageQueueTransactionType.Automatic)
-                {
-                    if (Transaction.Current == null)
-                    {
-                        _queue.Send(msg, MessageQueueTransactionType.Single);
-                    }
-                    else
-                    {
-                        _queue.Send(msg, _sendTransactionType);
-                    }
-                }
-                else
-                {
-                    _queue.Send(msg, _sendTransactionType);
-                }
+				if (_sendTransactionType == MessageQueueTransactionType.Automatic)
+				{
+					if (Transaction.Current == null)
+					{
+						_queue.Send(msg, MessageQueueTransactionType.Single);
+					}
+					else
+					{
+						_queue.Send(msg, _sendTransactionType);
+					}
+				}
+				else
+				{
+					_queue.Send(msg, _sendTransactionType);
+				}
 			}
 			catch (MessageQueueException ex)
 			{
@@ -138,8 +153,9 @@ namespace MassTransit.Transports.Msmq
 			}
 
 			if (_log.IsDebugEnabled)
-				_log.DebugFormat("Message Sent: Id = {0}, Message Type = {1}", msg.Id, messageType.Name);
+				_log.DebugFormat("Sent {0} from {1} [{2}]", messageType.FullName, Uri, msg.Id);
 		}
+
 
 		public void Receive(TimeSpan timeout, Func<object, Func<object, bool>, bool> receiver)
 		{
@@ -197,28 +213,25 @@ namespace MassTransit.Transports.Msmq
 				_queue.Dispose();
 		}
 
-		private void Initialize()
+		public IEnumerable<IMessageSelector> SelectiveReceive(TimeSpan timeout)
 		{
-			_sendTransactionType = _queueAddress.IsLocal && _queue.Transactional ? MessageQueueTransactionType.Automatic : MessageQueueTransactionType.None;
+			if (_disposed) throw new ObjectDisposedException("The object has been disposed");
 
-			_receiveTransactionType = _queueAddress.IsLocal && _queue.Transactional ? MessageQueueTransactionType.Automatic : MessageQueueTransactionType.None;
-		}
+			if (!_queue.CanRead)
+				throw new EndpointException(this, string.Format("Not allowed to read from endpoint: '{0}'", _queueAddress.ActualUri));
 
-		public static IEndpoint ConfigureEndpoint(Uri uri, Action<IEndpointConfigurator> configurator)
-		{
-			if (uri.Scheme.ToLowerInvariant() == "msmq")
+			using (MessageEnumerator enumerator = _queue.GetMessageEnumerator2())
 			{
-				IEndpoint endpoint = MsmqEndpointConfigurator.New(x =>
+				while (enumerator.MoveNext(timeout))
+				{
+					using (MsmqMessageSelector selector = new MsmqMessageSelector(this, enumerator, _serializer))
 					{
-						x.SetUri(uri);
-
-						configurator(x);
-					});
-
-				return endpoint;
+						yield
+							return selector;
+					}
+				}
+				enumerator.Close();
 			}
-
-			return null;
 		}
 
 		/// <summary>
@@ -241,22 +254,6 @@ namespace MassTransit.Transports.Msmq
 			return queue;
 		}
 
-		private Message BuildMessage(TimeSpan timeToLive, Type messageType, object message)
-		{
-			var msg = new Message();
-
-			_serializer.Serialize(msg.BodyStream, message);
-
-			if (timeToLive < TimeSpan.MaxValue)
-				msg.TimeToBeReceived = timeToLive;
-
-			msg.Label = messageType.Name;
-
-			msg.Recoverable = ReliableMessaging;
-
-			return msg;
-		}
-
 		public object Receive(TimeSpan timeout)
 		{
 			try
@@ -265,20 +262,20 @@ namespace MassTransit.Transports.Msmq
 
 				try
 				{
-                    if(msg==null)
-                        throw new MessageException(typeof(object), string.Format("Endpoint '{0}' just fed us a null Msmq Message", this._queueAddress.ActualUri));
+					if (msg == null)
+						throw new MessageException(typeof (object), string.Format("Endpoint '{0}' just fed us a null Msmq Message", this._queueAddress.ActualUri));
 
-                    //TODO: What do we want to do if the message body stream is null?
+					//TODO: What do we want to do if the message body stream is null?
 					object obj = _serializer.Deserialize(msg.BodyStream);
 
 					return obj;
 				}
 				catch (SerializationException ex)
 				{
-				    string messageName = msg == null ? "UNKNOWN" : msg.Label;
-                    string exceptionMessage = string.Format("An error occurred serializing a message of type '{0}'", messageName);
+					string messageName = msg == null ? "UNKNOWN" : msg.Label;
+					string exceptionMessage = string.Format("An error occurred serializing a message of type '{0}'", messageName);
 
-				    throw new MessageException(typeof (Object),exceptionMessage, ex);
+					throw new MessageException(typeof (Object), exceptionMessage, ex);
 				}
 			}
 			catch (MessageQueueException ex)
@@ -305,20 +302,18 @@ namespace MassTransit.Transports.Msmq
 						while (enumerator.MoveNext(timeout))
 						{
 							Message msg = enumerator.Current;
-                            if (msg == null)
-                                throw new MessageException(typeof(object), string.Format("Received a null Msmq Message while enumerating the queue '{0}'", this.Uri));
+							if (msg == null)
+								throw new MessageException(typeof (object), string.Format("Received a null Msmq Message while enumerating the queue '{0}'", this.Uri));
 
 							try
 							{
-                                
-							    
 								object obj = _serializer.Deserialize(msg.BodyStream);
 
 								if (accept(obj))
 								{
 									Message received = enumerator.RemoveCurrent(TimeSpan.FromSeconds(10), _receiveTransactionType);
-                                    if (received == null)
-                                        throw new MessageException(typeof(object), string.Format("Received a null Msmq Message while enumerating the queue '{0}' post accept", this.Uri));
+									if (received == null)
+										throw new MessageException(typeof (object), string.Format("Received a null Msmq Message while enumerating the queue '{0}' post accept", this.Uri));
 
 									if (received.Id != msg.Id)
 										throw new MessageException(obj.GetType(), "The message removed does not match the original message");
@@ -364,6 +359,46 @@ namespace MassTransit.Transports.Msmq
 			}
 
 			return null;
+		}
+
+		public void DiscardMessage(string messageId, string message)
+		{
+			try
+			{
+				using (Message discarded = _queue.ReceiveById(messageId, MessageQueueTransactionType.Single))
+				{
+				}
+
+				if (_log.IsWarnEnabled)
+					_log.WarnFormat("Discarding {1} from {0}", _queueAddress.ActualUri, messageId);
+			}
+			catch (Exception ex)
+			{
+				_log.Error("Unable to purge message id " + messageId, ex);
+			}
+		}
+
+		private void Initialize()
+		{
+			_sendTransactionType = _queueAddress.IsLocal && _queue.Transactional ? MessageQueueTransactionType.Automatic : MessageQueueTransactionType.None;
+
+			_receiveTransactionType = _queueAddress.IsLocal && _queue.Transactional ? MessageQueueTransactionType.Automatic : MessageQueueTransactionType.None;
+		}
+
+		private Message BuildMessage(TimeSpan timeToLive, Type messageType, object message)
+		{
+			var msg = new Message();
+
+			_serializer.Serialize(msg.BodyStream, message);
+
+			if (timeToLive < TimeSpan.MaxValue)
+				msg.TimeToBeReceived = timeToLive;
+
+			msg.Label = messageType.Name;
+
+			msg.Recoverable = ReliableMessaging;
+
+			return msg;
 		}
 
 
@@ -448,6 +483,23 @@ namespace MassTransit.Transports.Msmq
 						_log.Error("An error occured while communicating with the queue", ex);
 					break;
 			}
+		}
+
+		public static IEndpoint ConfigureEndpoint(Uri uri, Action<IEndpointConfigurator> configurator)
+		{
+			if (uri.Scheme.ToLowerInvariant() == "msmq")
+			{
+				IEndpoint endpoint = MsmqEndpointConfigurator.New(x =>
+					{
+						x.SetUri(uri);
+
+						configurator(x);
+					});
+
+				return endpoint;
+			}
+
+			return null;
 		}
 	}
 }

@@ -13,6 +13,7 @@
 namespace MassTransit.Transports.Sqs
 {
     using System;
+    using System.Collections.Generic;
     using System.IO;
     using System.Runtime.Serialization.Formatters.Binary;
     using Amazon.SQS;
@@ -148,6 +149,11 @@ namespace MassTransit.Transports.Sqs
         }
 
     	public void Receive(TimeSpan timeout, Func<object, Func<object, bool>, bool> receiver)
+    	{
+    		throw new System.NotImplementedException();
+    	}
+
+    	public IEnumerable<IMessageSelector> SelectiveReceive(TimeSpan timeout)
     	{
     		throw new System.NotImplementedException();
     	}

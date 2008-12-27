@@ -14,6 +14,7 @@ namespace MassTransit
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Runtime.Serialization;
 	using System.Transactions;
 	using Configuration;
 	using Exceptions;
@@ -38,15 +39,21 @@ namespace MassTransit
 		private readonly DispatcherContext _dispatcherContext;
 		private readonly IEndpointFactory _endpointFactory;
 		private readonly IObjectBuilder _objectBuilder;
-		private ResourceThreadPool<IEndpoint, object> _asyncDispatcher;
 		private bool _disposed;
 		private IEndpoint _endpointToListenOn;
 		private MessagePipeline _inbound;
 		private ISubscriptionEvent _inboundSubscriptionEvent;
 		private MessagePipeline _outbound;
+		private TimeSpan _receiveTimeout = TimeSpan.FromSeconds(3);
 		private ISubscriptionCache _subscriptionCache;
 		private ITypeInfoCache _typeInfoCache;
-		private TimeSpan _receiveTimeout;
+		private volatile bool _started;
+		private int _readThreadLimit = 1;
+		private ResourceLock<IEndpoint> _readerLock;
+		private DynamicThreadPool _threadPool;
+		private int _minThreads = 1;
+		private int _maxThreads = Environment.ProcessorCount*4;
+		private TimeSpan _threadTimeout;
 
 		static ServiceBus()
 		{
@@ -65,7 +72,8 @@ namespace MassTransit
 		/// <summary>
 		/// Uses an in-memory subscription manager and the default object builder
 		/// </summary>
-		public ServiceBus(IEndpoint endpointToListenOn, IObjectBuilder objectBuilder) : this(endpointToListenOn, objectBuilder, new LocalSubscriptionCache())
+		public ServiceBus(IEndpoint endpointToListenOn, IObjectBuilder objectBuilder)
+			: this(endpointToListenOn, objectBuilder, new LocalSubscriptionCache())
 		{
 		}
 
@@ -94,6 +102,8 @@ namespace MassTransit
 
 			_typeInfoCache = typeInfoCache;
 
+			_threadTimeout = TimeSpan.FromSeconds(60);
+
 			_inboundSubscriptionEvent = new SubscriptionCacheEventConnector(_subscriptionCache, _endpointToListenOn);
 
 			_inbound = MessagePipelineConfigurator.CreateDefault(_objectBuilder, _inboundSubscriptionEvent);
@@ -102,17 +112,12 @@ namespace MassTransit
 
 			_dispatcherContext = new DispatcherContext(_objectBuilder, this, _subscriptionCache);
 
-			var resourceLimit = 1;
-			var minThreads = 1;
-			var maxThreads = Environment.ProcessorCount*8;
+			PoisonEndpoint = new PoisonEndpointDecorator(new NullEndpoint());
+		}
 
-			_asyncDispatcher = new ResourceThreadPool<IEndpoint, object>(endpointToListenOn,
-			                                                             EndpointReader,
-			                                                             resourceLimit,
-			                                                             minThreads,
-			                                                             maxThreads);
-            
-            PoisonEndpoint = new PoisonEndpointDecorator(new NullEndpoint());
+		public static IServiceBus Null
+		{
+			get { return _nullServiceBus; }
 		}
 
 		public ISubscriptionCache SubscriptionCache
@@ -122,25 +127,42 @@ namespace MassTransit
 
 		public int MinThreadCount
 		{
-			get { return _asyncDispatcher.MinThreads; }
-			set { _asyncDispatcher.MinThreads = value; }
+			get { return _minThreads; }
+			set
+			{
+				_minThreads = value;
+				if (_threadPool != null)
+					_threadPool.MinThreads = value;
+			}
 		}
 
 		public int MaxThreadCount
 		{
-			get { return _asyncDispatcher.MaxThreads; }
-			set { _asyncDispatcher.MaxThreads = value; }
+			get { return _maxThreads; }
+			set
+			{
+				_maxThreads = value;
+				if (_threadPool != null)
+					_threadPool.MaxThreads = value;
+			}
 		}
 
 		public int ReadThreadCount
 		{
-			get { return _asyncDispatcher.ResourceLimit; }
-			set { _asyncDispatcher.ResourceLimit = value; }
+			get { return _readThreadLimit; }
+			set
+			{
+				if (_threadPool != null)
+					throw new ConfigurationException("The read thread count cannot be changed once the bus is in motion");
+
+				_readThreadLimit = value;
+			}
 		}
 
-		public static IServiceBus Null
+		public TimeSpan ReceiveTimeout
 		{
-			get { return _nullServiceBus; }
+			get { return _receiveTimeout; }
+			set { _receiveTimeout = value; }
 		}
 
 		public void Dispose()
@@ -194,13 +216,7 @@ namespace MassTransit
 		/// <summary>
 		/// The poison endpoint associated with this instance where exception messages are sent
 		/// </summary>
-        public IEndpoint PoisonEndpoint { get; set; }
-
-		public TimeSpan ReceiveTimeout
-		{
-			get { return _receiveTimeout; }
-			set { _receiveTimeout = value; }
-		}
+		public IEndpoint PoisonEndpoint { get; set; }
 
 		/// <summary>
 		/// Adds a message handler to the service bus for handling a specific type of message
@@ -222,15 +238,12 @@ namespace MassTransit
 		{
 			var result = _inbound.Subscribe(new GenericComponent<T>(callback, condition, this));
 
-			_asyncDispatcher.WakeUp();
 			return result;
 		}
 
 		public Func<bool> Subscribe<T>(T consumer) where T : class
 		{
 			var result = _inbound.Subscribe(consumer);
-
-			_asyncDispatcher.WakeUp();
 
 			return (result);
 		}
@@ -254,8 +267,6 @@ namespace MassTransit
 		{
 			Func<bool> result = _inbound.Subscribe<TComponent>();
 
-			_asyncDispatcher.WakeUp();
-
 			return (result);
 		}
 
@@ -274,13 +285,51 @@ namespace MassTransit
 			// TODO silentry return for now but this is going away
 		}
 
+		public void Dispatch(object message)
+		{
+			if (message == null)
+				return;
+
+			try
+			{
+				_inbound.Dispatch(message);
+			}
+			catch (Exception ex)
+			{
+				//retry
+				SpecialLoggers.Iron.Error("An error was caught in the ServiceBus.IronDispatcher", ex);
+
+				IPublicationTypeInfo info = _typeInfoCache.GetPublicationTypeInfo(message.GetType());
+				info.PublishFault(this, ex, message);
+
+
+				PoisonEndpoint.Send(message, TimeSpan.Zero);
+			}
+		}
+
+		public void Start()
+		{
+			if (_started)
+				return;
+
+			_readerLock = new ResourceLock<IEndpoint>(_endpointToListenOn, _readThreadLimit);
+			_threadPool = new DynamicThreadPool(ReceiveFromEndpoint, _minThreads, _maxThreads);
+			_threadPool.Start();
+		}
+
 		protected virtual void Dispose(bool disposing)
 		{
 			if (_disposed) return;
 			if (disposing)
 			{
-				_asyncDispatcher.Dispose();
-				_asyncDispatcher = null;
+				_readerLock.Shutdown();
+
+				if (_threadPool != null)
+				{
+					_threadPool.Stop();
+					_threadPool.Dispose();
+					_threadPool = null;
+				}
 
 				_typeInfoCache.Dispose();
 				_typeInfoCache = null;
@@ -306,92 +355,156 @@ namespace MassTransit
 			_disposed = true;
 		}
 
-		public void Dispatch(object message)
+		private bool ReceiveFromEndpoint()
 		{
-            if (message == null)
-                return;
+			bool performedWork = false;
 
-            try
-            {
-                _inbound.Dispatch(message);
-            }
-            catch (Exception ex)
-            {
-                //retry
-                SpecialLoggers.Iron.Error("An error was caught in the ServiceBus.IronDispatcher", ex);
-
-                IPublicationTypeInfo info = _typeInfoCache.GetPublicationTypeInfo(message.GetType());
-                info.PublishFault(this, ex, message);
-
-
-                PoisonEndpoint.Send(message, TimeSpan.Zero);
-            }
-		}
-
-		private void EndpointReader(IEndpoint resource)
-		{
 			try
 			{
-				using (TransactionScope scope = new TransactionScope())
+				using (var resourceLock = _readerLock.AcquireLock(ThreadTimeout))
 				{
-					bool released = false;
-					try
+					foreach (IMessageSelector selector in resourceLock.Resource.SelectiveReceive(ReceiveTimeout))
 					{
-                        //TODO: This double lambda is throwing me for a loop
-						resource.Receive(ReceiveTimeout, (message, acceptor) =>
+						performedWork = true;
+
+						try
+						{
+							object message = selector.DeserializeMessage();
+							if (message == null)
+								continue;
+
+							using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required))
 							{
-                                //TODO: We could probably put the try/catch in the pipeline somewhere, and then
-                                //TODO: Just define what we want to have happen on error????
-                                //TODO: This could just end up making things harder. Not Sure.
-								try
+								bool atLeastOneConsumerFailed = DispatchMessageToConsumers(resourceLock, selector, message);
+								if (atLeastOneConsumerFailed)
 								{
-                                    //TODO: here is the other lambda
-									return _inbound.Dispatch(message, accepted =>
-										{
-											bool didIAcceptTheMessage = acceptor(message);
-
-											_asyncDispatcher.ReleaseResource(1);
-                                            //TODO: Is there a way to not set this here, but acheive the same effect?
-											released = true;
-
-											return didIAcceptTheMessage;
-										});
-								}
-								catch (Exception ex)
-								{
-									//retry
-									SpecialLoggers.Iron.Error("An error was caught in the ServiceBus.IronDispatcher", ex);
-
-                                    //TODO: The message object here means I can't experiment with moving this around
-									IPublicationTypeInfo info = _typeInfoCache.GetPublicationTypeInfo(message.GetType());
-									info.PublishFault(this, ex, message);
-
-									PoisonEndpoint.Send(message, TimeSpan.Zero);
+									PoisonEndpoint.Send(message);
 								}
 
-								return false;
-							});
-					}
-					finally
-					{
-						if (!released)
-							_asyncDispatcher.ReleaseResource(1);
-					}
+								scope.Complete();
+							}
+						}
+						catch (SerializationException sex)
+						{
+							selector.MoveMessageTo(PoisonEndpoint);
 
-					scope.Complete();
+							throw new MessageException(typeof (object), "An error occurred deserializing a message", sex);
+						}
+						catch (Exception ex)
+						{
+							_log.Error(string.Format("An exception occurred receiving a message from {0}", _endpointToListenOn.Uri), ex);
+						}
+					}
 				}
+			}
+			catch (ResourceLockException ex)
+			{
+				// this is not a big deal, just means we couldn't get the resource
+				// which means we're probably tired and ready to exit
 			}
 			catch (Exception ex)
 			{
-				_log.Error(string.Format("An exception occurred receiving a message from {0}", _endpointToListenOn.Uri), ex);
-				throw;
+				// this could be a bigger deal, but we'll probably just log it.
+				_log.Error("ReceiveFromEndpoint got an exception", ex);
 			}
+
+			return performedWork;
 		}
 
-		public void Start()
+		private TimeSpan ThreadTimeout
 		{
-			_asyncDispatcher.WakeUp();
+			get { return _threadTimeout; }
 		}
+
+		private bool DispatchMessageToConsumers(IResourceLockScope<IEndpoint> resourceLock, IMessageSelector selector, object message)
+		{
+			bool atLeastOneConsumerFailed = false;
+
+			foreach (Consumes<object>.All consumer in _inbound.Enumerate(message))
+			{
+				try
+				{
+					if (!selector.AcceptMessage())
+						break;
+
+					resourceLock.Release();
+
+					consumer.Consume(message);
+				}
+				catch (Exception ex)
+				{
+					_log.Error(string.Format("{0} threw an exception consuming message {1}",
+						consumer.GetType().FullName, message.GetType().FullName), ex);
+
+					atLeastOneConsumerFailed = true;
+
+					IPublicationTypeInfo info = _typeInfoCache.GetPublicationTypeInfo(message.GetType());
+					info.PublishFault(this, ex, message);
+				}
+			}
+
+			return atLeastOneConsumerFailed;
+		}
+
+//		private void EndpointReader(IEndpoint endpoint)
+//		{
+//			try
+//			{
+//				using (TransactionScope scope = new TransactionScope())
+//				{
+//					bool released = false;
+//					try
+//					{
+//						//TODO: This double lambda is throwing me for a loop
+//						endpoint.Receive(ReceiveTimeout, (message, acceptor) =>
+//							{
+//								//TODO: We could probably put the try/catch in the pipeline somewhere, and then
+//								//TODO: Just define what we want to have happen on error????
+//								//TODO: This could just end up making things harder. Not Sure.
+//								try
+//								{
+//									//TODO: here is the other lambda
+//									return _inbound.Dispatch(message, accepted =>
+//										{
+//											bool didIAcceptTheMessage = acceptor(message);
+//
+//											_asyncDispatcher.ReleaseResource(1);
+//											//TODO: Is there a way to not set this here, but acheive the same effect?
+//											released = true;
+//
+//											return didIAcceptTheMessage;
+//										});
+//								}
+//								catch (Exception ex)
+//								{
+//									//retry
+//									SpecialLoggers.Iron.Error("An error was caught in the ServiceBus.IronDispatcher", ex);
+//
+//									//TODO: The message object here means I can't experiment with moving this around
+//									IPublicationTypeInfo info = _typeInfoCache.GetPublicationTypeInfo(message.GetType());
+//									info.PublishFault(this, ex, message);
+//
+//									PoisonEndpoint.Send(message, TimeSpan.Zero);
+//								}
+//
+//								return false;
+//							});
+//					}
+//					finally
+//					{
+//						if (!released)
+//							_asyncDispatcher.ReleaseResource(1);
+//					}
+//
+//					scope.Complete();
+//				}
+//			}
+//			catch (Exception ex)
+//			{
+//				_log.Error(string.Format("An exception occurred receiving a message from {0}", _endpointToListenOn.Uri), ex);
+//				throw;
+//			}
+//		}
 	}
 
 	public class SubscriptionCacheEventConnector :

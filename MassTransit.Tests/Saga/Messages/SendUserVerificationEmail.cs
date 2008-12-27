@@ -10,18 +10,26 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Tests.Saga.RegisterUser.Messages
+namespace MassTransit.Tests.Saga.Messages
 {
-    using System;
+	using System;
 
-    [Serializable]
-    [Reliable]
-    public class SendValidationEmail :
-        CorrelatedMessage
-    {
-        public SendValidationEmail(Guid correlationId) :
-            base(correlationId)
-        {
-        }
-    }
+	[Serializable]
+	[Reliable]
+	public class SendUserVerificationEmail :
+		CorrelatedMessage
+	{
+		private readonly string _email;
+
+		public SendUserVerificationEmail(Guid correlationId, string email) :
+			base(correlationId)
+		{
+			_email = email;
+		}
+
+		public string Email
+		{
+			get { return _email; }
+		}
+	}
 }

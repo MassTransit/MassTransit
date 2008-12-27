@@ -226,8 +226,14 @@
     <Compile Include="Services\Subscriptions\Client\RemoteSubscriptionCoordinator.cs" />
     <Compile Include="Services\Subscriptions\Messages\SubscriptionInformation.cs" />
     <Compile Include="Services\Subscriptions\Server\RemoteEndpointCoordinator.cs" />
+    <Compile Include="Threading\IResourceLockScope.cs" />
+    <Compile Include="Threading\ResourceLock.cs" />
+    <Compile Include="Threading\ResourceLockException.cs" />
+    <Compile Include="Threading\ResourceLockScope.cs" />
+    <Compile Include="Threading\VariableThreadPool.cs" />
     <Compile Include="Transports\EndpointConfiguratorBase.cs" />
     <Compile Include="Transports\LoopbackEndpointConfigurator.cs" />
+    <Compile Include="Transports\LoopbackMessageSelector.cs" />
     <Compile Include="Transports\MulticastUdpEndpointConfigurator.cs" />
     <Compile Include="Util\ReaderWriterLockedDictionary.cs" />
     <Compile Include="Pipeline\ISubscriptionEvent.cs" />

@@ -13,6 +13,7 @@
 namespace MassTransit.Transports.Nms
 {
 	using System;
+	using System.Collections.Generic;
 	using System.IO;
 	using System.Runtime.Serialization;
 	using Apache.NMS;
@@ -157,6 +158,11 @@ namespace MassTransit.Transports.Nms
 		}
 
 		public void Receive(TimeSpan timeout, Func<object, Func<object, bool>, bool> receiver)
+		{
+			throw new System.NotImplementedException();
+		}
+
+		public IEnumerable<IMessageSelector> SelectiveReceive(TimeSpan timeout)
 		{
 			throw new System.NotImplementedException();
 		}
