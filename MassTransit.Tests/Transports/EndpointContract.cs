@@ -66,22 +66,5 @@ namespace MassTransit.Tests.Transports
 
             VerifyMessageIsInQueue(Address);
         }
-
-        [Test]
-        public void While_reading_it_should_pull_object_from_queue()
-        {
-            object obj;
-            _ep.Send(new DeleteMessage());
-            
-            //todo how to get the message back out
-            _ep.Receive(5.Seconds(), (message, receiver)=>
-                                                               {
-                                                                   obj = message;
-                                                                   return receiver(message);
-                                                               });
-
-            //obj.ShouldNotBeNull();
-            //obj.ShouldBeSameType<DeleteMessage>();
-        }
     }
 }

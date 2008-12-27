@@ -46,11 +46,6 @@ namespace MassTransit.Transports
 			_serializer = serializer;
 		}
 
-		public static string Scheme
-		{
-			get { return "loopback"; }
-		}
-
 		public Uri Uri
 		{
 			get { return _uri; }
@@ -74,34 +69,6 @@ namespace MassTransit.Transports
 				_messageLog.InfoFormat("SEND:{0}:{1}", Uri, typeof (T).Name);
 
 			Enqueue(message);
-		}
-
-		public void Receive(TimeSpan timeout, Func<object, Func<object, bool>, bool> receiver)
-		{
-			if (_disposed) throw new ObjectDisposedException("The object has been disposed");
-
-			if (!_messageReady.WaitOne(timeout, true))
-				return;
-
-			try
-			{
-				object obj = Dequeue();
-
-				if (receiver(obj, x =>
-					{
-						if (_messageLog.IsInfoEnabled)
-							_messageLog.InfoFormat("RECV:{0}:{1}", _uri, obj.GetType().Name);
-
-						return true;
-					}))
-					return;
-
-				if (_messageLog.IsInfoEnabled)
-					_messageLog.InfoFormat("SKIP:{0}:{1}", _uri, obj.GetType().Name);
-			}
-			catch (InvalidOperationException)
-			{
-			}
 		}
 
 		public IEnumerable<IMessageSelector> SelectiveReceive(TimeSpan timeout)

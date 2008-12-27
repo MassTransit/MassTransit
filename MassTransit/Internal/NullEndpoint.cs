@@ -39,11 +39,6 @@ namespace MassTransit.Internal
 			//do nothing
 		}
 
-		public void Receive(TimeSpan timeout, Func<object, Func<object, bool>, bool> receiver)
-		{
-			throw new EndpointException(this, "NullEndpoints have no messages");
-		}
-
 		public IEnumerable<IMessageSelector> SelectiveReceive(TimeSpan timeout)
 		{
 			throw new System.NotImplementedException();

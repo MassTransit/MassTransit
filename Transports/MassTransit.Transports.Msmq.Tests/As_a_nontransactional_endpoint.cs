@@ -94,15 +94,15 @@ namespace MassTransit.Transports.Msmq.Tests
             _ep.VerifyMessageInQueue<DeleteMessage>();
         }
 
-        [Test]
-        public void While_reading_it_should_pull_object_from_queue()
-        {
-            _ep.Purge();
-            _ep.Send(new VariableMessage("dru"));
-            object obj = _ep.Receive(TimeSpan.FromSeconds(30));
-
-            obj.ShouldNotBeNull();
-            obj.ShouldBeSameType<VariableMessage>();
-        }
+//        [Test]
+//        public void While_reading_it_should_pull_object_from_queue()
+//        {
+//            _ep.Purge();
+//            _ep.Send(new VariableMessage("dru"));
+//            object obj = _ep.Receive(TimeSpan.FromSeconds(30));
+//
+//            obj.ShouldNotBeNull();
+//            obj.ShouldBeSameType<VariableMessage>();
+//        }
     }
 }

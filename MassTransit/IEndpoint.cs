@@ -12,60 +12,41 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
-    using System;
-    using System.Collections.Generic;
+	using System;
+	using System.Collections.Generic;
 
 	/// <summary>
-    /// IEndpoint is implemented by an endpoint. An endpoint is an addressable location on the network.
-    /// </summary>
-    public interface IEndpoint :
-        IDisposable
-    {
-        /// <summary>
-        /// The address of the endpoint, in URI format
-        /// </summary>
-        Uri Uri { get; }
-
-        /// <summary>
-        /// Sends a message to the endpoint
-        /// </summary>
-        /// <typeparam name="T">The type of the message to send</typeparam>
-        /// <param name="message">The message to send</param>
-        void Send<T>(T message) where T : class;
-
-        /// <summary>
-        /// Sends a message to the endpoint
-        /// </summary>
-        /// <typeparam name="T">The type of the message to send</typeparam>
-        /// <param name="message">The message to send</param>
-        /// <param name="timeToLive">The maximum time for the message to be received before it expires</param>
-        void Send<T>(T message, TimeSpan timeToLive) where T : class;
-
-		/// <summary>
-		/// Receive a message from an endpoint and dispatch it to the consumer pipeline
-		/// </summary>
-		/// <param name="timeout"></param>
-		/// <param name="receiver">Func(the message, Func_To_Dequeue_the_Message(the message, did it work), did the dequeue work)</param>
-		void Receive(TimeSpan timeout, Func<object, Func<object, bool>, bool> receiver);
-
-
-		IEnumerable<IMessageSelector> SelectiveReceive(TimeSpan timeout);
-
-		// new type of method
-
-		// IEnumerator<ISelectiveConsumer> Receive(TimeSpan timeout);
-
-
-
-
-    }
-
-	public interface IMessageSelector :
+	/// IEndpoint is implemented by an endpoint. An endpoint is an addressable location on the network.
+	/// </summary>
+	public interface IEndpoint :
 		IDisposable
 	{
-		bool AcceptMessage();
-		void MoveMessageTo(IEndpoint endpoint);
-		object DeserializeMessage();
-	}
+		/// <summary>
+		/// The address of the endpoint, in URI format
+		/// </summary>
+		Uri Uri { get; }
 
+		/// <summary>
+		/// Sends a message to the endpoint
+		/// </summary>
+		/// <typeparam name="T">The type of the message to send</typeparam>
+		/// <param name="message">The message to send</param>
+		void Send<T>(T message) where T : class;
+
+		/// <summary>
+		/// Sends a message to the endpoint
+		/// </summary>
+		/// <typeparam name="T">The type of the message to send</typeparam>
+		/// <param name="message">The message to send</param>
+		/// <param name="timeToLive">The maximum time for the message to be received before it expires</param>
+		void Send<T>(T message, TimeSpan timeToLive) where T : class;
+
+		/// <summary>
+		/// Receives from the endpoint in a selective manner, making it possible to enumerate
+		/// available messages (when supported) and receive them for distribution
+		/// </summary>
+		/// <param name="timeout"></param>
+		/// <returns></returns>
+		IEnumerable<IMessageSelector> SelectiveReceive(TimeSpan timeout);
+	}
 }
