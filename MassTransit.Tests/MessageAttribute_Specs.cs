@@ -36,7 +36,7 @@ namespace MassTransit.Tests
 
             foreach (ExpiresInAttribute expiresIn in attributes)
             {
-                Assert.That(expiresIn.TimeSpan, Is.EqualTo(TimeSpan.FromMinutes(5)));
+                Assert.That(expiresIn.TimeToLive, Is.EqualTo(TimeSpan.FromMinutes(5)));
             }
         }
     }

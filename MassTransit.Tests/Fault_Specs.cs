@@ -8,8 +8,9 @@ namespace MassTransit.Tests
     using MassTransit.Subscriptions;
     using MassTransit.Transports;
     using NUnit.Framework;
+    using Rhino.Mocks;
 
-    [TestFixture]
+	[TestFixture]
     public class When_a_message_fault_occurs :
         Specification
     {
@@ -30,18 +31,13 @@ namespace MassTransit.Tests
         private LocalSubscriptionCache _cache;
         private IEndpointFactory _resolver;
         private IEndpoint _endpoint;
-        private IServiceBus _bus;
+        private ServiceBus _bus;
         private IObjectBuilder _builder;
-
-        static When_a_message_fault_occurs()
-        {
-            EndpointResolver.AddTransport(typeof (LoopbackEndpoint));
-        }
 
         protected override void Before_each()
         {
-            _cache = new LocalSubscriptionCache();
-			_builder = DynamicMock<IObjectBuilder>();
+			_cache = new LocalSubscriptionCache();
+			_builder = MockRepository.GenerateMock<IObjectBuilder>();
 			_resolver = EndpointFactoryConfigurator.New(x =>
 			{
 				x.SetObjectBuilder(_builder);
@@ -49,8 +45,9 @@ namespace MassTransit.Tests
 				x.RegisterTransport<LoopbackEndpoint>();
 			});
 			_endpoint = _resolver.GetEndpoint(new Uri("loopback://localhost/servicebus"));
-            _bus = new ServiceBus(_endpoint, _builder, _cache, _resolver, new TypeInfoCache());
-        }
+			_bus = new ServiceBus(_endpoint, _builder, _cache, _resolver, new TypeInfoCache());
+			_bus.Start();
+		}
 
         protected override void After_each()
         {
@@ -108,35 +105,32 @@ namespace MassTransit.Tests
         private LocalSubscriptionCache _cache;
         private IEndpointFactory _resolver;
         private IEndpoint _endpoint;
-        private IServiceBus _bus;
+        private ServiceBus _bus;
         private IObjectBuilder _builder;
-
-        static When_a_correlated_message_fault_is_received()
-        {
-            EndpointResolver.AddTransport(typeof (LoopbackEndpoint));
-        }
 
         protected override void Before_each()
         {
-            _cache = new LocalSubscriptionCache();
-        	_builder = DynamicMock<IObjectBuilder>();
-        	_resolver = EndpointFactoryConfigurator.New(x =>
+			_cache = new LocalSubscriptionCache();
+			_builder = MockRepository.GenerateMock<IObjectBuilder>();
+			_resolver = EndpointFactoryConfigurator.New(x =>
 			{
 				x.SetObjectBuilder(_builder);
 				x.SetDefaultSerializer<BinaryMessageSerializer>();
 				x.RegisterTransport<LoopbackEndpoint>();
 			});
-        	_endpoint = _resolver.GetEndpoint(new Uri("loopback://localhost/servicebus"));
-        	_bus = new ServiceBus(_endpoint, _builder, _cache, _resolver, new TypeInfoCache());
-        }
+			_endpoint = _resolver.GetEndpoint(new Uri("loopback://localhost/servicebus"));
+			_bus = new ServiceBus(_endpoint, _builder, _cache, _resolver, new TypeInfoCache());
+			_bus.Start();
+		}
 
 
         protected override void After_each()
         {
-            _bus.Dispose();
-            _endpoint.Dispose();
-            _cache.Dispose();
-        }
+			_bus.Dispose();
+			_endpoint.Dispose();
+			_resolver.Dispose();
+			_cache.Dispose();
+		}
 
         public class SmartConsumer :
             Consumes<Fault<Hello, Guid>>.For<Guid>
