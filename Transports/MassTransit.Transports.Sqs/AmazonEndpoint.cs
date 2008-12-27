@@ -60,12 +60,7 @@ namespace MassTransit.Transports.Sqs
             }
         }
 
-        public static string Scheme
-        {
-            get { return "amazon"; }
-        }
-
-        public Uri Uri
+    	public Uri Uri
         {
             get { return _uri; }
         }

@@ -56,11 +56,6 @@ namespace MassTransit.Transports.Nms
 		{
 		}
 
-		public static string Scheme
-		{
-			get { return "activemq"; }
-		}
-
 		public Uri Uri
 		{
 			get { return _uri; }
@@ -99,11 +94,6 @@ namespace MassTransit.Transports.Nms
 				if (_log.IsDebugEnabled)
 					_log.DebugFormat("Message Sent: Id = {0}, Message Type = {1}", bm.NMSMessageId, messageType);
 			});
-		}
-
-		public object Receive(TimeSpan timeout)
-		{
-			return Receive(timeout, x => true);
 		}
 
 		public object Receive(TimeSpan timeout, Predicate<object> accept)
@@ -300,9 +290,10 @@ namespace MassTransit.Transports.Nms
 			}
 			_disposed = true;
 		}
+
         public static IEndpoint ConfigureEndpoint(Uri uri, Action<IEndpointConfigurator> configurator)
         {
-            if (uri.Scheme.ToLowerInvariant() == Scheme)
+            if (uri.Scheme.ToLowerInvariant() == "activemq")
             {
                 IEndpoint endpoint = NmsEndpointConfigurator.New(x =>
                 {
