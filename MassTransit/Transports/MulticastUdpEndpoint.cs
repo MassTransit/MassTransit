@@ -22,6 +22,7 @@ namespace MassTransit.Transports
 	using Exceptions;
 	using Internal;
 	using log4net;
+	using Magnum.Common.DateTimeExtensions;
 	using Serialization;
 
 	public class MulticastUdpEndpoint :
@@ -169,7 +170,7 @@ namespace MassTransit.Transports
 
 		public static IEndpoint ConfigureEndpoint(Uri uri, Action<IEndpointConfigurator> configurator)
 		{
-			if (uri.Scheme.ToLowerInvariant() == "multicast")
+			if (uri.Scheme.ToLowerInvariant() == Scheme)
 			{
 				IEndpoint endpoint = MulticastUdpEndpointConfigurator.New(x =>
 					{
@@ -227,27 +228,35 @@ namespace MassTransit.Transports
 		{
 			_sendIPEndPoint = new IPEndPoint(_groupAddress, _uri.Port);
 
-			_sendClient = new UdpClient(0, AddressFamily.InterNetwork);
-			_sendClient.DontFragment = true;
+		    int port = 0;
+			_sendClient = new UdpClient(port, AddressFamily.InterNetwork);
+		    _sendClient = new UdpClient()
+		                      {
+		                          DontFragment = true,
+                                  Ttl = 2 // 0 = host, 1 = subnet, <32 = same company
+                              };
 			_sendClient.Client.SendBufferSize = 256*1024;
-			_sendClient.Ttl = 2; // 0 = host, 1 = subnet, <32 = same company
 
 			_sendClient.JoinMulticastGroup(_groupAddress);
 		}
 
 		private void InitializeReceiver()
 		{
-			_receiveClient = new UdpClient();
+			_receiveClient = new UdpClient()
+			                     {
+			                         
+			                     };
 
 			Socket s = _receiveClient.Client;
 
-			s.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, 1);
+		    int optionValue = 1;
+			s.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, optionValue);
 			s.ReceiveBufferSize = 256*1024;
 			s.ReceiveTimeout = 2000;
 
 			s.Bind(new IPEndPoint(IPAddress.Any, _uri.Port));
 
-			_receiveClient.JoinMulticastGroup(_groupAddress, 2);
+            _receiveClient.JoinMulticastGroup(_groupAddress, 2); // 0 = host, 1 = subnet, <32 = same company
 		}
 	}
 }
