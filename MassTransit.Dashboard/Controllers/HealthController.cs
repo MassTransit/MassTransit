@@ -18,6 +18,7 @@ namespace MassTransit.Dashboard.Controllers
     
     using Services.HealthMonitoring;
     using Services.HealthMonitoring.Messages;
+    using Services.HealthMonitoring.Server;
 
     [Layout("default")]
     public class HealthController :

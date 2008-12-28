@@ -3,11 +3,10 @@ namespace MassTransit.Tests.Services.HealthMonitoring
     using System;
     using System.Threading;
     using Magnum.Common.DateTimeExtensions;
-    using MassTransit.Services.HealthMonitoring;
     using MassTransit.Services.HealthMonitoring.Messages;
+    using MassTransit.Services.HealthMonitoring.Server;
     using NUnit.Framework;
     using Rhino.Mocks;
-    using Rhino.Mocks.Constraints;
     using TextFixtures;
 
     [TestFixture]
