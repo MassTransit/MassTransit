@@ -99,8 +99,6 @@ namespace MassTransit.Tests.Services.Subscriptions
         [Test]
         public void be_stopable()
         {
-            _bus.Expect(x => x.Unsubscribe<RemoteEndpointCoordinator>());
-
             _service.Stop();
 
             _repository.VerifyAllExpectations();

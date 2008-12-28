@@ -11,7 +11,9 @@ namespace Starbucks.Customer
                                           Consumes<PaymentDueMessage>.For<string>,
                                           Consumes<DrinkReadyMessage>.For<string>
     {
-        public OrderDrinkForm()
+    	private Func<bool> _unsubscribeToken;
+
+    	public OrderDrinkForm()
         {
             InitializeComponent();
         }
@@ -52,8 +54,8 @@ namespace Starbucks.Customer
             string name = txtName.Text;
 
             IServiceBus bus = GetBus();
-            bus.Subscribe(this);
-            bus.Publish(new NewOrderMessage(name, drink, size));
+        	_unsubscribeToken = bus.Subscribe(this);
+        	bus.Publish(new NewOrderMessage(name, drink, size));
         }
 
         private IServiceBus GetBus()
@@ -63,8 +65,7 @@ namespace Starbucks.Customer
 
         protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
         {
-            var bus = GetBus();
-            bus.Unsubscribe(this);
+        	_unsubscribeToken();
             base.OnClosing(e);
         }
     }

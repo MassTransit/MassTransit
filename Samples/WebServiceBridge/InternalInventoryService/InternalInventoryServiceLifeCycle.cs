@@ -1,6 +1,7 @@
 namespace InternalInventoryService
 {
-    using MassTransit;
+	using System;
+	using MassTransit;
     using MassTransit.Host.Actions;
     using MassTransit.Host.LifeCycles;
     using Microsoft.Practices.ServiceLocation;
@@ -9,8 +10,9 @@ namespace InternalInventoryService
         HostedLifecycle
     {
         private IServiceBus _bus;
+    	private Func<bool> _unsubscribeToken;
 
-        public InternalInventoryServiceLifeCycle(IServiceLocator serviceLocator)
+    	public InternalInventoryServiceLifeCycle(IServiceLocator serviceLocator)
             : base(serviceLocator)
         {
         }
@@ -24,11 +26,12 @@ namespace InternalInventoryService
         {
             _bus = this.ServiceLocator.GetInstance<IServiceBus>("server");
 
-            _bus.Subscribe<InventoryLevelService>();
+        	_unsubscribeToken = _bus.Subscribe<InventoryLevelService>();
         }
 
         public override void Stop()
         {
+        	_unsubscribeToken();
         }
     }
 }

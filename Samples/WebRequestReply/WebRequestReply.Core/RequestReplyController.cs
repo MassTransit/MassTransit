@@ -31,7 +31,7 @@ namespace WebRequestReply.Core
 
 		public void Dispose()
 		{
-			_serviceBus.Unsubscribe(this);
+			_request.Dispose();
 		}
 
 		public void SendRequest()

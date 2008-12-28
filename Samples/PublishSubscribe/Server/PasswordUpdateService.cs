@@ -1,5 +1,6 @@
 namespace Server
 {
+	using System;
 	using log4net;
 	using MassTransit;
 	using SecurityMessages;
@@ -10,6 +11,7 @@ namespace Server
 	{
 		private static readonly ILog _log = LogManager.GetLogger(typeof (PasswordUpdateService));
 		private readonly IServiceBus _serviceBus;
+		private Func<bool> _unsubscribeToken;
 
 		public PasswordUpdateService(IServiceBus serviceBus)
 		{
@@ -25,12 +27,12 @@ namespace Server
 
 		public void Start()
 		{
-			_serviceBus.Subscribe(this);
+			_unsubscribeToken = _serviceBus.Subscribe(this);
 		}
 
 		public void Stop()
 		{
-			_serviceBus.Unsubscribe(this);
+			_unsubscribeToken();
 		}
 
 		#endregion

@@ -51,27 +51,7 @@ namespace MassTransit
 				return () => false;
 			}
 
-            public void Unsubscribe<T>(Action<T> callback) where T : class
-            {
-            }
-
-            public void Unsubscribe<T>(Action<T> callback, Predicate<T> condition) where T : class
-            {
-            }
-
-            public void Unsubscribe<T>(T consumer) where T : class
-            {
-            }
-
-            public void Unsubscribe(Type consumerType)
-            {
-            }
-
-            public void Unsubscribe<TComponent>() where TComponent : class
-            {
-            }
-
-            public void Publish<T>(T message) where T : class
+        	public void Publish<T>(T message) where T : class
             {
             }
 

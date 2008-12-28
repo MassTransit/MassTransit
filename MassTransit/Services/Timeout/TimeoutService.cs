@@ -30,8 +30,9 @@ namespace MassTransit.Services.Timeout
         private readonly ManualResetEvent _stopped = new ManualResetEvent(false);
         private readonly AutoResetEvent _trigger = new AutoResetEvent(true);
         private Thread _watchThread;
+    	private Func<bool> _unsubscribeToken;
 
-        public TimeoutService(IServiceBus bus, ITimeoutRepository repository)
+    	public TimeoutService(IServiceBus bus, ITimeoutRepository repository)
         {
             _bus = bus;
             _repository = repository;
@@ -57,8 +58,8 @@ namespace MassTransit.Services.Timeout
             if (_log.IsInfoEnabled)
                 _log.Info("Timeout Service Starting");
 
-            _bus.Subscribe<ScheduleTimeoutConsumer>();
-            _bus.Subscribe<CancelTimeoutConsumer>();
+        	_unsubscribeToken = _bus.Subscribe<ScheduleTimeoutConsumer>();
+        	_unsubscribeToken += _bus.Subscribe<CancelTimeoutConsumer>();
 
             _repository.TimeoutAdded += TriggerPublisher;
 
@@ -80,8 +81,7 @@ namespace MassTransit.Services.Timeout
             if (_log.IsInfoEnabled)
                 _log.Info("Timeout Service Stopping");
 
-            _bus.Unsubscribe<ScheduleTimeoutConsumer>();
-            _bus.Unsubscribe<CancelTimeoutConsumer>();
+        	_unsubscribeToken();
 
             if (_log.IsInfoEnabled)
                 _log.Info("Timeout Service Stopped");

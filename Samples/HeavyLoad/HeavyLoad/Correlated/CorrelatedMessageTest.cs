@@ -27,8 +27,9 @@ namespace HeavyLoad.Correlated
 		private readonly IServiceBus _bus;
 		private int _successes;
 		private int _timeouts;
+    	private Func<bool> _unsubscribeToken;
 
-		public CorrelatedMessageTest()
+    	public CorrelatedMessageTest()
 		{
 			_container = new HeavyLoadContainer();
 
@@ -52,7 +53,7 @@ namespace HeavyLoad.Correlated
 
 			SimpleRequestService service = new SimpleRequestService(_bus);
 
-			_bus.Subscribe(service);
+			_unsubscribeToken = _bus.Subscribe(service);
 
 			CheckPoint point = stopWatch.Mark("Correlated Requests");
 		    CheckPoint responsePoint = stopWatch.Mark("Correlated Responses");
@@ -78,7 +79,7 @@ namespace HeavyLoad.Correlated
                 pool.Dispose();
             }
 
-		    _bus.Unsubscribe(service);
+			_unsubscribeToken();
 
 			Console.WriteLine("Attempts: {0}, Succeeded: {1}, Timeouts: {2}", _attempts, _successes, _timeouts);
 

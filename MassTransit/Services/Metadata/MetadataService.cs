@@ -1,28 +1,29 @@
 namespace MassTransit.Services.Metadata
 {
-    using Server;
+	using System;
+	using Server;
 
     public class MetadataService :
         IHostedService
     {
 
         private readonly IServiceBus _bus;
+    	private Func<bool> _unsubscribeToken;
 
-        public MetadataService(IServiceBus bus)
+    	public MetadataService(IServiceBus bus)
         {
             _bus = bus;
         }
 
         public void Start()
         {
-            _bus.Subscribe<MessageDefinitionConsumer>();
-            _bus.Subscribe<MetadataSearchConsumer>();
+        	_unsubscribeToken = _bus.Subscribe<MessageDefinitionConsumer>();
+        	_unsubscribeToken += _bus.Subscribe<MetadataSearchConsumer>();
         }
 
         public void Stop()
         {
-            _bus.Unsubscribe<MessageDefinitionConsumer>();
-            _bus.Unsubscribe<MetadataSearchConsumer>();
+        	_unsubscribeToken();
         }
 
         public void Dispose()
