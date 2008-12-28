@@ -1,34 +1,20 @@
-namespace MassTransit.Tests.HealthMonitoring
+namespace MassTransit.Tests.Services.HealthMonitoring
 {
     using System;
-    using System.Threading;
+    using Magnum.Common.DateTimeExtensions;
     using MassTransit.Services.HealthMonitoring;
     using MassTransit.Services.HealthMonitoring.Messages;
     using NUnit.Framework;
-    using Rhino.Mocks;
-    using Rhino.Mocks.Constraints;
-    
+    using TextFixtures;
+
     [TestFixture]
     public class When_monitoring_health :
-        Specification
+        LoopbackLocalAndRemoteTestFixture
     {
-        private IServiceBus _mockBus;
-        private IEndpoint _mockEndpoint;
-
-        private Uri u = new Uri("msmq://localhost/test");
-
-        protected override void Before_each()
-        {
-            _mockBus = DynamicMock<IServiceBus>();
-            _mockEndpoint = DynamicMock<IEndpoint>();
-            SetupResult.For(_mockBus.Endpoint).Return(_mockEndpoint);
-            SetupResult.For(_mockEndpoint.Uri).Return(u);
-        }
-
         [Test]
         public void Starting_should_enable_the_service()
         {
-            HealthClient hc = new HealthClient(_mockBus);
+            HealthClient hc = new HealthClient(RemoteBus);
             Assert.IsFalse(hc.Enabled);
             hc.Start();
             Assert.IsTrue(hc.Enabled);
@@ -41,7 +27,7 @@ namespace MassTransit.Tests.HealthMonitoring
         [Test]
         public void Calling_dispose_twice_shouldnt_error()
         {
-            HealthClient hc = new HealthClient(_mockBus);
+            HealthClient hc = new HealthClient(RemoteBus);
             hc.Start();
             hc.Dispose();
             hc.Dispose();
@@ -51,56 +37,41 @@ namespace MassTransit.Tests.HealthMonitoring
         [Test]
         public void Should_beat_continously()
         {
-            ManualResetEvent evt = new ManualResetEvent(false);
-            using(Record())
-            {
-                Expect.Call(delegate { _mockBus.Publish(new Heartbeat(1, u)); })
-                    .Constraints(Is.Matching<Heartbeat>(delegate(Heartbeat message)
-                                                            {
-                                                                return message.EndpointAddress.Equals(u);
-                                                            }));
+            FutureMessage<Heartbeat> fm = new FutureMessage<Heartbeat>();
+            int beatCount = 0;
+            LocalBus.Subscribe<Heartbeat>(msg =>
+                                              {
+                                                  beatCount++;
+                                                  if (beatCount > 1)
+                                                      fm.Set(msg);
+                                              });
 
-                Expect.Call(delegate { _mockBus.Publish(new Heartbeat(1, u)); })
-                    .Constraints(Is.Matching<Heartbeat>(delegate(Heartbeat message)
-                                                            {
-                                                                if(message.EndpointAddress != u) return false;
+            HealthClient hc = new HealthClient(RemoteBus, 1);
+            hc.Start();
 
-                                                                evt.Set();
-
-                                                                return true;
-                                                            }));
-            }
-            using(Playback())
-            {
-                HealthClient hc = new HealthClient(_mockBus, 1);
-                hc.Start();
-
-                Assert.IsTrue(evt.WaitOne(3000, true));
-            }
-
-
+            fm.IsAvailable(3.Seconds())
+                .ShouldBeTrue();
         }
 
         [Test]
         public void Should_respond_to_pings_by_publishing_pongs()
         {
             Guid id = Guid.NewGuid();
-            Ping message = new Ping(id);
+            Ping png = new Ping(id);
+            FutureMessage<Pong> fm = new FutureMessage<Pong>();
 
-            using(Record())
-            {
-                Expect.Call(delegate { _mockBus.Publish(new Pong(id, u)); })
-                    .Constraints(Is.Matching<Pong>(delegate(Pong msg)
-                                                       {
-                                                           return msg.CorrelationId.Equals(id) &&
-                                                                  msg.EndpointUri.Equals(u);
-                                                       }));
-            }
-            using(Playback())
-            {
-                HealthClient hc = new HealthClient(_mockBus);
-                hc.Consume(message);    
-            }
+            LocalBus.Subscribe<Pong>(msg =>
+                                         {
+                                             msg.CorrelationId
+                                                 .ShouldEqual(id);
+                                             fm.Set(msg);
+                                         });
+
+
+            HealthClient hc = new HealthClient(RemoteBus);
+            hc.Consume(png);
+            fm.IsAvailable(2.Seconds())
+                .ShouldBeTrue();
         }
     }
 }

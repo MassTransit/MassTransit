@@ -77,4 +77,6 @@ namespace MassTransit
         /// <returns>A request builder</returns>
         RequestBuilder Request();
     }
+
+    public delegate bool UnsubscribeToken();
 }

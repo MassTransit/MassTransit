@@ -81,13 +81,10 @@
     <Compile Include="Grid\Messages\SubTaskWorkerAvailable.cs" />
     <Compile Include="Grid\SubTaskWorker.cs" />
     <Compile Include="Services\HealthMonitoring\HealthInformation.cs" />
-    <Compile Include="Services\HealthMonitoring\HealthStatusConsumer.cs" />
-    <Compile Include="Services\HealthMonitoring\IHealthCache.cs" />
-    <Compile Include="Services\HealthMonitoring\IHeartbeatTimer.cs" />
-    <Compile Include="Services\HealthMonitoring\InMemoryHeartbeatTimer.cs" />
-    <Compile Include="Services\HealthMonitoring\LocalHealthCache.cs" />
-    <Compile Include="Services\HealthMonitoring\Messages\HealthStatusRequest.cs" />
-    <Compile Include="Services\HealthMonitoring\Messages\HealthStatusResponse.cs" />
+    <Compile Include="Services\HealthMonitoring\Server\IHealthCache.cs" />
+    <Compile Include="Services\HealthMonitoring\Server\IHeartbeatTimer.cs" />
+    <Compile Include="Services\HealthMonitoring\Server\InMemoryHeartbeatTimer.cs" />
+    <Compile Include="Services\HealthMonitoring\Server\LocalHealthCache.cs" />
     <Compile Include="Internal\CorrelatedPublication.cs" />
     <Compile Include="Internal\DispatcherContext.cs" />
     <Compile Include="Internal\IDispatcherContext.cs" />
@@ -134,15 +131,15 @@
     <Compile Include="Exceptions\MessageException.cs" />
     <Compile Include="Exceptions\ShutDownException.cs" />
     <Compile Include="Services\HealthMonitoring\HealthService.cs" />
-    <Compile Include="Services\HealthMonitoring\HeartbeatMonitor.cs" />
-    <Compile Include="Services\HealthMonitoring\Investigator.cs" />
+    <Compile Include="Services\HealthMonitoring\Server\HeartbeatMonitor.cs" />
+    <Compile Include="Services\HealthMonitoring\Server\Investigator.cs" />
     <Compile Include="Services\HealthMonitoring\Messages\DownEndpoint.cs" />
     <Compile Include="Services\HealthMonitoring\Messages\Heartbeat.cs" />
     <Compile Include="Services\HealthMonitoring\Messages\Ping.cs" />
     <Compile Include="Services\HealthMonitoring\Messages\Pong.cs" />
     <Compile Include="Services\HealthMonitoring\Messages\Suspect.cs" />
-    <Compile Include="Services\HealthMonitoring\MonitorInfo.cs" />
-    <Compile Include="Services\HealthMonitoring\Reporter.cs" />
+    <Compile Include="Services\HealthMonitoring\Server\MonitorInfo.cs" />
+    <Compile Include="Services\HealthMonitoring\Server\Reporter.cs" />
     <Compile Include="Services\HealthMonitoring\HealthClient.cs" />
     <Compile Include="Internal\GenericComponent.cs" />
     <Compile Include="IServiceBusRequest.cs" />
@@ -298,6 +295,9 @@
     <Compile Include="Services\Timeout\RemoteTimeoutViewer.cs" />
     <Compile Include="Util\ReflectiveVisitorBase.cs" />
     <Compile Include="Util\WeakReference.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Services\HealthMonitoring\Client\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
