@@ -13,8 +13,9 @@
 namespace MassTransit.Services.HealthMonitoring
 {
 	using System;
+	using Server;
 
-	public class HealthService :
+    public class HealthService :
         IHostedService
     {
         private readonly IServiceBus _bus;

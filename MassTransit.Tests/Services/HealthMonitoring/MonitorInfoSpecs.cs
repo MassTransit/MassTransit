@@ -2,8 +2,8 @@ namespace MassTransit.Tests.Services.HealthMonitoring
 {
     using System;
     using System.Threading;
-    using MassTransit.Services.HealthMonitoring;
     using MassTransit.Services.HealthMonitoring.Messages;
+    using MassTransit.Services.HealthMonitoring.Server;
     using NUnit.Framework;
     using TextFixtures;
 
