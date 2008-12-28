@@ -1,4 +1,4 @@
-namespace MassTransit.Tests.HealthMonitoring
+namespace MassTransit.Tests.Services.HealthMonitoring
 {
     using System;
     using System.Threading;

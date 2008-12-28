@@ -1,111 +1,95 @@
-namespace MassTransit.Tests.HealthMonitoring
+namespace MassTransit.Tests.Services.HealthMonitoring
 {
     using System;
     using System.Threading;
+    using Magnum.Common.DateTimeExtensions;
     using MassTransit.Services.HealthMonitoring;
     using MassTransit.Services.HealthMonitoring.Messages;
     using NUnit.Framework;
     using Rhino.Mocks;
     using Rhino.Mocks.Constraints;
-    
+    using TextFixtures;
+
     [TestFixture]
     public class When_monitoring_heartbeats :
-        Specification
+        LoopbackLocalAndRemoteTestFixture
     {
-        private HeartbeatMonitor hm;
-        private IServiceBus _bus;
+        private HeartbeatMonitor _heartbeatMonitor;
         private Heartbeat message;
-        private Uri u;
         private IHealthCache _theCacheIsntInterestingHere;
         private IHeartbeatTimer _timer;
+        private Uri _uri;
 
-        protected override void Before_each()
+        protected override void EstablishContext()
         {
-            u = new Uri("msmq://localhost/test");
-            _bus = StrictMock<IServiceBus>();
-            _theCacheIsntInterestingHere = DynamicMock<IHealthCache>();
-            _timer = DynamicMock<IHeartbeatTimer>();
-            hm = new HeartbeatMonitor(_theCacheIsntInterestingHere, _timer);
-            message = new Heartbeat(1, u);
+            base.EstablishContext();
+            _uri = RemoteBus.Endpoint.Uri;
+            _theCacheIsntInterestingHere = MockRepository.GenerateMock<IHealthCache>();
+            _timer = MockRepository.GenerateStub<IHeartbeatTimer>();
+
+            _heartbeatMonitor = new HeartbeatMonitor(_theCacheIsntInterestingHere, _timer);
+            message = new Heartbeat(1, _uri);
         }
 
-        protected override void After_each()
+        protected override void TeardownContext()
         {
-            _bus = null;
-            hm = null;
+            _heartbeatMonitor = null;
             _theCacheIsntInterestingHere = null;
             _timer = null;
+            base.TeardownContext();
         }
 
         [Test]
         public void When_a_heartbeat_comes_in_for_the_first_time()
         {
-            //Assert.IsFalse(hm.AmIWatchingYou(u));
-            var timer = MockRepository.GenerateStub<IHeartbeatTimer>();
-            hm = new HeartbeatMonitor(_theCacheIsntInterestingHere, timer);
-            hm.Consume(message);
+            _heartbeatMonitor = new HeartbeatMonitor(_theCacheIsntInterestingHere, _timer);
+            _heartbeatMonitor.Consume(message);
 
-            timer.AssertWasCalled(x => x.Add(null), o=>o.IgnoreArguments());
-            //Assert.IsTrue(hm.AmIWatchingYou(u));
+            _timer.AssertWasCalled(x => x.Add(null), o=>o.IgnoreArguments());
         }
 
         [Test]
         public void When_a_heartbeat_comes_in_again_resets_time()
         {
-            hm.Consume(message);
+            _heartbeatMonitor.Consume(message);
             Thread.Sleep(700);
-            hm.Consume(message);
+            _heartbeatMonitor.Consume(message);
             Thread.Sleep(700);
         }
 
         [Test]
         public void When_a_monitor_is_reset_it_can_still_fire()
         {
-            ManualResetEvent evt = new ManualResetEvent(false);
-            using (Record())
-            {
-                Expect.Call(delegate { _bus.Publish(new Suspect(u)); })
-                    .Constraints(Is.Matching<Suspect>(delegate(Suspect msg)
-                                                          {
-                                                              if (msg.EndpointUri != u)
-                                                                  return false;
+            FutureMessage<Suspect> fm = new FutureMessage<Suspect>();
 
-                                                              evt.Set();
+            RemoteBus.Subscribe<Suspect>(msg =>
+                                             {
+                                                 fm.Set(msg);
+                                             });
 
-                                                              return true;
-                                                          }));
-            }
-            using (Playback())
-            {
-                hm.Consume(message);
-                Thread.Sleep(700);
-                hm.Consume(message);
-                Assert.IsTrue(evt.WaitOne(1050, true));
-            }
+
+            _heartbeatMonitor.Consume(message);
+            Thread.Sleep(700);
+            _heartbeatMonitor.Consume(message);
+            fm.IsAvailable(2.Seconds())
+                .ShouldBeTrue();
         }
 
         [Test]
         public void When_a_heartbeat_is_missed_Suspect_published()
         {
-            ManualResetEvent evt = new ManualResetEvent(false);
-            using(Record())
-            {
-                Expect.Call(delegate { _bus.Publish(new Suspect(u)); })
-                    .Constraints(Is.Matching<Suspect>(delegate(Suspect msg)
-                                                          {
-                                                              if (msg.EndpointUri != u)
-                                                                  return false;
+            FutureMessage<Suspect> fm = new FutureMessage<Suspect>();
+            RemoteBus.Subscribe<Suspect>(msg =>
+                                             {
+                                                 fm.Set(msg);
+                                             });
+            
+            
+                _heartbeatMonitor.Consume(message);
+            fm.IsAvailable(2.Seconds())
+                .ShouldBeTrue();
 
-                                                              evt.Set();
-
-                                                              return true;
-                                                          }));
-            }
-            using(Playback())
-            {
-                hm.Consume(message);
-                Assert.IsTrue(evt.WaitOne(1050, true));
-            }
+            
         }
     }
 }
