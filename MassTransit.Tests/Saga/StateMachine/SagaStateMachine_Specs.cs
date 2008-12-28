@@ -31,7 +31,23 @@ namespace MassTransit.Tests.Saga.StateMachine
 
 			Assert.AreEqual(RegisterUserStateMachine.Initial, workflow.Current);
 
-			workflow.Consumes(new RegisterUser(_transactionId, _username, _password, _displayName, _email));
+			workflow.Consume(new RegisterUser(_transactionId, _username, _password, _displayName, _email));
+
+			Assert.AreEqual(RegisterUserStateMachine.WaitingForEmailValidation, workflow.Current);
+		}
+
+		[Test]
+		public void The_good_times_should_roll()
+		{
+			RegisterUserStateMachine workflow = new RegisterUserStateMachine();
+
+			Assert.AreEqual(RegisterUserStateMachine.Initial, workflow.Current);
+
+			workflow.Consume(new RegisterUser(_transactionId, _username, _password, _displayName, _email));
+
+			Assert.AreEqual(RegisterUserStateMachine.WaitingForEmailValidation, workflow.Current);
+
+			workflow.Consume(new UserValidated(_transactionId));
 
 			Assert.AreEqual(RegisterUserStateMachine.Completed, workflow.Current);
 		}

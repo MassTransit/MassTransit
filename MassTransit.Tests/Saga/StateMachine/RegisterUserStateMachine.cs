@@ -15,68 +15,91 @@ namespace MassTransit.Tests.Saga.StateMachine
 	using System;
 	using System.Runtime.Serialization;
 	using Magnum.Common.StateMachine;
+	using MassTransit.Saga;
 	using Messages;
 
 	[Serializable]
 	public class RegisterUserStateMachine :
-		SagaStateMachine<RegisterUserStateMachine>
+		SagaStateMachine<RegisterUserStateMachine>,
+		ISaga,
+		InitiatedBy<RegisterUser>,
+		Orchestrates<UserValidated>
 	{
 		static RegisterUserStateMachine()
 		{
 			Define(() =>
 				{
 					Initially(
-						When(RegisterUserReceived, (w, e) =>
+						When(NewUserRegistration, (w, e, m) =>
 							{
+								w.Username = m.Username;
+								w.Password = m.Password;
+								w.DisplayName = m.DisplayName;
+								w.Email = m.Email;
+
 								// e.Message would include the message
-								w.TransitionTo(Completed);
+								w.TransitionTo(WaitingForEmailValidation);
+							}));
+
+					During(WaitingForEmailValidation,
+						When(EmailValidated, (w) =>
+							{
+								w.Validated = true;
+
+								w.Complete();
 							}));
 				});
 		}
 
 		public RegisterUserStateMachine()
-		{}
+		{
+		}
 
 		public RegisterUserStateMachine(SerializationInfo info, StreamingContext context)
 			: base(info, context)
-		{}
+		{
+		}
 
-		public static MessageEvent<RegisterUser> RegisterUserReceived { get; set; }
+		public static Event<RegisterUser> NewUserRegistration { get; set; }
+		public static Event<UserValidated> EmailValidated { get; set; }
 
 		public static State Initial { get; set; }
+		public static State WaitingForEmailValidation { get; set; }
 		public static State Completed { get; set; }
 
-		public void Consumes(RegisterUser message)
+		public Guid CorrelationId { get; set; }
+		public string Username { get; set; }
+		public string Password { get; set; }
+		public string DisplayName { get; set; }
+		public string Email { get; set; }
+		public bool Validated { get; set; }
+
+		// i want to auto-wire these to a ghost consumer that just invokes the event and makes this unnecessary
+		public void Consume(RegisterUser message)
 		{
-			RaiseEvent(RegisterUserReceived, message);
+			RaiseEvent(NewUserRegistration, message);
 		}
-	}
 
-	public class MessageEvent<T, M> :
-		Event<T>,
-		MessageEvent<M>
-		where T : StateMachine<T>
-		where M : class
-	{
-		public MessageEvent(string name)
-			: base(name)
-		{}
-	}
+		// i want to auto-wire these to a ghost consumer that just invokes the event and makes this unnecessary
+		public void Consume(UserValidated message)
+		{
+			RaiseEvent(EmailValidated, message);
+		}
 
-	public interface MessageEvent<M> :
-		Event
-		where M : class
-	{}
+		public IServiceBus Bus { get; set; }
+	}
 
 	public class SagaStateMachine<T> :
 		StateMachine<T>
 		where T : SagaStateMachine<T>
 	{
 		protected SagaStateMachine()
-		{}
+		{
+		}
 
 		public SagaStateMachine(SerializationInfo info, StreamingContext context)
 			: base(info, context)
-		{}
+		{
+		}
 	}
 }
