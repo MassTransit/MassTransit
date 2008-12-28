@@ -12,29 +12,30 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Services.HealthMonitoring
 {
-    public class HealthService :
+	using System;
+
+	public class HealthService :
         IHostedService
     {
         private readonly IServiceBus _bus;
+    	private Func<bool> _unsubscribeToken;
 
 
-        public HealthService(IServiceBus bus)
+    	public HealthService(IServiceBus bus)
         {
             _bus = bus;
         }
 
         public void Start()
         {
-            _bus.Subscribe<HeartbeatMonitor>();
-            _bus.Subscribe<Investigator>();
-            _bus.Subscribe<Reporter>();
+        	_unsubscribeToken = _bus.Subscribe<HeartbeatMonitor>();
+        	_unsubscribeToken += _bus.Subscribe<Investigator>();
+			_unsubscribeToken += _bus.Subscribe<Reporter>();
         }
 
         public void Stop()
         {
-            _bus.Unsubscribe<Reporter>();
-            _bus.Unsubscribe<Investigator>();
-            _bus.Unsubscribe<HeartbeatMonitor>();
+        	_unsubscribeToken();
         }
 
         public void Dispose()

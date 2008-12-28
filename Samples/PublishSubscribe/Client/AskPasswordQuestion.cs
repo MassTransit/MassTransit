@@ -12,6 +12,7 @@ namespace Client
 		private static readonly ILog _log = LogManager.GetLogger(typeof(AskPasswordQuestion));
 		private readonly IServiceBus _bus;
     	private Guid _correlationId;
+    	private Func<bool> _unsubscribeToken;
 
     	public AskPasswordQuestion(IServiceBus bus)
         {
@@ -43,7 +44,7 @@ namespace Client
     		RequestPasswordUpdate message = new RequestPasswordUpdate(newPassword);
     		_correlationId = message.CorrelationId;
 
-    		_bus.Subscribe(this);
+    		_unsubscribeToken = _bus.Subscribe(this);
 
     		_bus.Publish(message);
 
@@ -53,7 +54,7 @@ namespace Client
 
         public void Stop()
         {
-        	_bus.Unsubscribe(this);
+        	_unsubscribeToken();
         }
 
         public void Dispose()

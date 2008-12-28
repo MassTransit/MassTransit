@@ -244,21 +244,6 @@ namespace MassTransit
 			return (result);
 		}
 
-		public void Unsubscribe<T>(Action<T> callback) where T : class
-		{
-			// TODO silentry return for now but this is going away
-		}
-
-		public void Unsubscribe<T>(Action<T> callback, Predicate<T> condition) where T : class
-		{
-			// TODO silentry return for now but this is going away
-		}
-
-		public void Unsubscribe<T>(T consumer) where T : class
-		{
-			// TODO silentry return for now but this is going away
-		}
-
 		public Func<bool> Subscribe<TComponent>() where TComponent : class
 		{
 			Func<bool> result = _inbound.Subscribe<TComponent>();
@@ -271,17 +256,7 @@ namespace MassTransit
 			throw new NotSupportedException("This needs fixed");
 		}
 
-		public void Unsubscribe(Type consumerType)
-		{
-			// TODO silentry return for now but this is going away
-		}
-
-		public void Unsubscribe<TComponent>() where TComponent : class
-		{
-			// TODO silentry return for now but this is going away
-		}
-
-        [Obsolete]
+		[Obsolete]
 		public void Dispatch(object message)
 		{
 			if (message == null)

@@ -28,6 +28,7 @@ namespace MassTransit
 		private volatile bool _completedSynchronously;
 		private volatile bool _isComplete = false;
 		private bool _disposed;
+		private Func<bool> _unsubscribeToken;
 
 		public ServiceBusRequest(IServiceBus bus, TComponent component, AsyncCallback callback, object state)
 		{
@@ -63,7 +64,8 @@ namespace MassTransit
 		{
 			_asyncWaitHandle.Set();
 
-			_bus.Unsubscribe(_component);
+			_unsubscribeToken();
+			_unsubscribeToken = () => false;
 		}
 
 		public void Complete()
@@ -82,8 +84,8 @@ namespace MassTransit
 			if (_disposed) return;
 			if (disposing)
 			{
-				if (_bus != null && _component != null)
-					_bus.Unsubscribe(_component);
+				_unsubscribeToken();
+				_unsubscribeToken = null;
 
 				_bus = null;
 				_component = null;
@@ -102,12 +104,13 @@ namespace MassTransit
 			if (_callback != null)
 				_callback(this);
 
-			_bus.Unsubscribe(_component);
+			_unsubscribeToken();
+			_unsubscribeToken = () => false;
 		}
 
 		public IServiceBusRequest Send<T>(T message) where T : class
 		{
-			_bus.Subscribe(_component);
+			_unsubscribeToken = _bus.Subscribe(_component);
 
 			_bus.Publish(message);
 

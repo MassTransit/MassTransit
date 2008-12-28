@@ -25,9 +25,10 @@ namespace MassTransit.Services.Subscriptions
         private readonly IServiceBus _bus;
         private readonly ISubscriptionCache _cache;
         private readonly ISubscriptionRepository _repository;
+    	private Func<bool> _unsubscribeToken;
 
 
-        public SubscriptionService(IServiceBus bus, ISubscriptionCache subscriptionCache, ISubscriptionRepository subscriptionRepository)
+    	public SubscriptionService(IServiceBus bus, ISubscriptionCache subscriptionCache, ISubscriptionRepository subscriptionRepository)
         {
             _bus = bus;
             _cache = subscriptionCache;
@@ -53,9 +54,9 @@ namespace MassTransit.Services.Subscriptions
 
         public void Start()
         {
-            _bus.Subscribe<RemoteEndpointCoordinator>();
+        	_unsubscribeToken = _bus.Subscribe<RemoteEndpointCoordinator>();
 
-            if (_log.IsInfoEnabled)
+        	if (_log.IsInfoEnabled)
                 _log.Info("Subscription Service Starting");
 
             foreach (Subscription sub in _repository.List())
@@ -72,9 +73,9 @@ namespace MassTransit.Services.Subscriptions
             if (_log.IsInfoEnabled)
                 _log.Info("Subscription Service Stopping");
 
-            _bus.Unsubscribe<RemoteEndpointCoordinator>();
+        	_unsubscribeToken();
 
-            if (_log.IsInfoEnabled)
+			if (_log.IsInfoEnabled)
                 _log.Info("Subscription Service Stopped");
         }
     }

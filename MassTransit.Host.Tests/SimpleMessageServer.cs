@@ -19,6 +19,7 @@ namespace MassTransit.Host.Tests
 	{
 		private readonly IServiceBus _serviceBus;
 		private int _hitCount;
+		private Func<bool> _unsubscribeToken;
 
 		public SimpleMessageServer(IServiceBus serviceBus)
 		{
@@ -27,12 +28,12 @@ namespace MassTransit.Host.Tests
 
 		public void Start()
 		{
-			_serviceBus.Subscribe<MySimpleMessage>(HandleMySimpleMessage);
+			_unsubscribeToken = _serviceBus.Subscribe<MySimpleMessage>(HandleMySimpleMessage);
 		}
 
 		public void Stop()
 		{
-			_serviceBus.Unsubscribe<MySimpleMessage>(HandleMySimpleMessage);
+			_unsubscribeToken();
 		}
 
 		public void Dispose()

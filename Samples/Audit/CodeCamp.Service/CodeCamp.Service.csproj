@@ -111,13 +111,13 @@
       <Project>{834ED79F-BA0E-48F9-831A-789576EE516B}</Project>
       <Name>MassTransit.Host</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\MassTransit.ServiceBus\MassTransit.csproj">
-      <Project>{90482397-6282-465E-8B86-39865FC30127}</Project>
-      <Name>MassTransit.ServiceBus</Name>
+    <ProjectReference Include="..\..\..\MassTransit\MassTransit.csproj">
+      <Project>{6EFD69FC-CBCC-4F85-AEE0-EFBA73F4D273}</Project>
+      <Name>MassTransit</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\Transports\MassTransit.ServiceBus.MSMQ\MassTransit.Transports.Msmq.csproj">
+    <ProjectReference Include="..\..\..\Transports\MassTransit.Transports.MSMQ\MassTransit.Transports.Msmq.csproj">
       <Project>{6F90867C-E092-4EDC-B3DE-600D39DF0335}</Project>
-      <Name>MassTransit.ServiceBus.MSMQ</Name>
+      <Name>MassTransit.Transports.Msmq</Name>
     </ProjectReference>
     <ProjectReference Include="..\CodeCamp.Domain\CodeCamp.Domain.csproj">
       <Project>{39D588EC-0104-432F-B9D7-A1D22C93B10C}</Project>

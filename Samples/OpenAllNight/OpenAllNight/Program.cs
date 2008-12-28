@@ -7,22 +7,22 @@ namespace OpenAllNight
 	using Castle.Windsor;
 	using log4net.Config;
 	using MassTransit;
-	using MassTransit.Internal;
 	using MassTransit.Services.Subscriptions.Messages;
 	using MassTransit.WindsorIntegration;
 
-    internal class Program
+	internal class Program
 	{
 		private static readonly DateTime _startedAt = DateTime.Now;
+		private static Func<bool> _unsubscribeToken = () => false;
 		private static DateTime lastPrint = DateTime.Now;
 
 		private static void Main()
 		{
 			XmlConfigurator.ConfigureAndWatch(new FileInfo("log4net.xml"));
 
-            WindsorContainer c = new DefaultMassTransitContainer("castle.xml");
-            c.AddComponentLifeStyle("counter", typeof(Counter), LifestyleType.Singleton);
-            c.AddComponentLifeStyle("rvaoeuaoe", typeof(CacheUpdateResponseHandler), LifestyleType.Transient);
+			WindsorContainer c = new DefaultMassTransitContainer("castle.xml");
+			c.AddComponentLifeStyle("counter", typeof (Counter), LifestyleType.Singleton);
+			c.AddComponentLifeStyle("rvaoeuaoe", typeof (CacheUpdateResponseHandler), LifestyleType.Transient);
 
 			IServiceBus bus = c.Resolve<IServiceBus>();
 			bus.Subscribe<CacheUpdateResponseHandler>();
@@ -48,12 +48,14 @@ namespace OpenAllNight
 
 				if (rand.Next(0, 10) == 0)
 				{
-					bus.Subscribe(handler);
+					_unsubscribeToken();
+					_unsubscribeToken = bus.Subscribe(handler);
 					counter.Subscribed = true;
 				}
 				else if (rand.Next(0, 10) == 0)
 				{
-					bus.Unsubscribe(handler);
+					_unsubscribeToken();
+					_unsubscribeToken = () => false;
 					counter.Subscribed = false;
 				}
 
@@ -79,7 +81,7 @@ namespace OpenAllNight
 			if (ts.Minutes >= 1)
 			{
 				Console.WriteLine("Elapsed Time: {0} mins, So far I have - Sent: {1}, Received: {2}, Published: {3}, Received: {4}",
-				                  (int)((DateTime.Now - _startedAt).TotalMinutes), counter.MessagesSent, counter.MessagesReceived, counter.PublishCount, SimpleMessageHandler.MessageCount);
+				                  (int) ((DateTime.Now - _startedAt).TotalMinutes), counter.MessagesSent, counter.MessagesReceived, counter.PublishCount, SimpleMessageHandler.MessageCount);
 
 				lastPrint = DateTime.Now;
 			}
@@ -90,7 +92,7 @@ namespace OpenAllNight
 	public class SimpleMessageHandler :
 		Consumes<SimpleMessage>.All
 	{
-		private static long _messageCount = 0;
+		private static long _messageCount;
 
 		public static long MessageCount
 		{

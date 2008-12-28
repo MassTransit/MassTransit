@@ -146,7 +146,6 @@
     <Compile Include="Services\HealthMonitoring\HealthClient.cs" />
     <Compile Include="Internal\GenericComponent.cs" />
     <Compile Include="IServiceBusRequest.cs" />
-    <Compile Include="Internal\EndpointResolver.cs" />
     <Compile Include="Exceptions\EndpointException.cs" />
     <Compile Include="IHostedService.cs" />
     <Compile Include="IEndpoint.cs" />

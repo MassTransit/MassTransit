@@ -12,15 +12,17 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Services.MessageDeferral
 {
-    using log4net;
+	using System;
+	using log4net;
 
     public class MessageDeferralService :
         IHostedService
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof (MessageDeferralService));
         private readonly IServiceBus _bus;
+    	private Func<bool> _unsubscribeToken;
 
-        public MessageDeferralService(IServiceBus bus)
+    	public MessageDeferralService(IServiceBus bus)
         {
             _bus = bus;
         }
@@ -34,8 +36,8 @@ namespace MassTransit.Services.MessageDeferral
             if (_log.IsInfoEnabled)
                 _log.Info("MessageDeferralService Starting");
 
-            _bus.Subscribe<DeferMessageConsumer>();
-            _bus.Subscribe<TimeoutExpiredConsumer>();
+        	_unsubscribeToken = _bus.Subscribe<DeferMessageConsumer>();
+        	_unsubscribeToken += _bus.Subscribe<TimeoutExpiredConsumer>();
 
             if (_log.IsInfoEnabled)
                 _log.Info("MessageDeferralService Started");
@@ -46,8 +48,7 @@ namespace MassTransit.Services.MessageDeferral
             if (_log.IsInfoEnabled)
                 _log.Info("MessageDeferralService Stopping");
 
-            _bus.Unsubscribe<TimeoutExpiredConsumer>();
-            _bus.Unsubscribe<DeferMessageConsumer>();
+        	_unsubscribeToken();
 
             if (_log.IsInfoEnabled)
                 _log.Info("MessageDeferralService Stopped");
