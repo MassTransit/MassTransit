@@ -47,12 +47,14 @@ namespace MassTransit
 		private ISubscriptionCache _subscriptionCache;
 		private ITypeInfoCache _typeInfoCache;
 		private volatile bool _started;
-		private int _readThreadLimit = 1;
 		private ResourceLock<IEndpoint> _readerLock;
 		private DynamicThreadPool _threadPool;
-		private int _minThreads = 1;
+        //threading config stuff?
+        private TimeSpan _threadTimeout;
+        private int _readThreadLimit = 1;
+        private int _minThreads = 1;
 		private int _maxThreads = Environment.ProcessorCount*4;
-		private TimeSpan _threadTimeout;
+		
 
 		static ServiceBus()
 		{
@@ -147,7 +149,7 @@ namespace MassTransit
 			set
 			{
 				if (_threadPool != null)
-					throw new ConfigurationException("The read thread count cannot be changed once the bus is in motion");
+					throw new ConfigurationException("The read thread count cannot be changed once the bus is in motion. Beep! Beep!");
 
 				_readThreadLimit = value;
 			}
