@@ -12,117 +12,86 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Serialization
 {
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-    using System.Runtime.Serialization;
-    using System.Xml;
-    using System.Xml.Serialization;
-    using Magnum.Common.Threading;
-    using Util;
+	using System;
+	using System.IO;
+	using System.Runtime.Serialization;
+	using System.Xml;
+	using System.Xml.Serialization;
+	using Util;
 
-    /// <summary>
-    /// Serializes messages using the .NET Xml Serializer
-    /// As such, limitations of that serializer apply to this one
-    /// </summary>
-    public class XmlMessageSerializer :
-        IMessageSerializer
-    {
-        private static readonly XmlAttributes _attributes;
-        private static readonly Dictionary<Type, XmlSerializer> _deserializers;
-        private static readonly UpgradeableLock _lockContext;
-        private static readonly XmlSerializerNamespaces _namespaces;
-        private static readonly Dictionary<Type, XmlSerializer> _serializers;
+	/// <summary>
+	/// Serializes messages using the .NET Xml Serializer
+	/// As such, limitations of that serializer apply to this one
+	/// </summary>
+	public class XmlMessageSerializer :
+		IMessageSerializer
+	{
+		private static readonly XmlAttributes _attributes;
+		private static readonly ReaderWriterLockedDictionary<Type, XmlSerializer> _deserializers;
+		private static readonly XmlSerializerNamespaces _namespaces;
+		private static readonly ReaderWriterLockedDictionary<Type, XmlSerializer> _serializers;
 
-        static XmlMessageSerializer()
-        {
-            _lockContext = new UpgradeableLock();
-            _serializers = new Dictionary<Type, XmlSerializer>
-                {
-                };
+		static XmlMessageSerializer()
+		{
+			_serializers = new ReaderWriterLockedDictionary<Type, XmlSerializer>();
 
-            _deserializers = new Dictionary<Type, XmlSerializer>
-                {
-                    {typeof (XmlReceiveMessageEnvelope), new XmlSerializer(typeof (XmlReceiveMessageEnvelope))},
-                };
+			_deserializers = new ReaderWriterLockedDictionary<Type, XmlSerializer>
+				{
+					{typeof (XmlReceiveMessageEnvelope), new XmlSerializer(typeof (XmlReceiveMessageEnvelope))},
+				};
 
-            _namespaces = new XmlSerializerNamespaces();
-            _namespaces.Add("", "");
+			_namespaces = new XmlSerializerNamespaces();
+			_namespaces.Add("", "");
 
-            _attributes = new XmlAttributes();
-            _attributes.XmlRoot = new XmlRootAttribute("Message");
-        }
+			_attributes = new XmlAttributes();
+			_attributes.XmlRoot = new XmlRootAttribute("Message");
+		}
 
-        public void Serialize<T>(Stream output, T message)
-        {
-            Check.EnsureSerializable(message);
-            XmlMessageEnvelope envelope = new XmlMessageEnvelope(message);
+		public void Serialize<T>(Stream output, T message)
+		{
+			Check.EnsureSerializable(message);
+			XmlMessageEnvelope envelope = new XmlMessageEnvelope(message);
 
-            GetSerializerFor<T>().Serialize(output, envelope);
-        }
+			GetSerializerFor<T>().Serialize(output, envelope);
+		}
 
-        public object Deserialize(Stream input)
-        {
-            object obj = GetDeserializerFor(typeof (XmlReceiveMessageEnvelope)).Deserialize(input);
-            if (obj.GetType() != typeof (XmlReceiveMessageEnvelope))
-                throw new SerializationException("An unknown message type was received: " + obj.GetType().FullName);
+		public object Deserialize(Stream input)
+		{
+			object obj = GetDeserializerFor(typeof (XmlReceiveMessageEnvelope)).Deserialize(input);
+			if (obj.GetType() != typeof (XmlReceiveMessageEnvelope))
+				throw new SerializationException("An unknown message type was received: " + obj.GetType().FullName);
 
-            XmlReceiveMessageEnvelope envelope = (XmlReceiveMessageEnvelope) obj;
+			XmlReceiveMessageEnvelope envelope = (XmlReceiveMessageEnvelope) obj;
 
-            if (string.IsNullOrEmpty(envelope.MessageType))
-                throw new SerializationException("No message type found on envelope");
+			if (string.IsNullOrEmpty(envelope.MessageType))
+				throw new SerializationException("No message type found on envelope");
 
-            Type t = Type.GetType(envelope.MessageType, true, true);
+			Type t = Type.GetType(envelope.MessageType, true, true);
 
-            using (var reader = new XmlNodeReader(envelope.Message))
-            {
-                obj = GetDeserializerFor(t).Deserialize(reader);
-            }
+			using (var reader = new XmlNodeReader(envelope.Message))
+			{
+				obj = GetDeserializerFor(t).Deserialize(reader);
+			}
 
-            return obj;
-        }
+			return obj;
+		}
 
-        private static XmlSerializer GetSerializerFor<T>()
-        {
-            Type type = typeof (T);
+		private static XmlSerializer GetSerializerFor<T>()
+		{
+			Type type = typeof (T);
 
-            using (var token = _lockContext.EnterUpgradableRead())
-            {
-                XmlSerializer serializer;
-                if (_serializers.TryGetValue(type, out serializer))
-                    return serializer;
+			return _serializers.Retrieve(type, () => new XmlSerializer(typeof (XmlMessageEnvelope), new[] {type}));
+		}
 
-                using (token.Upgrade())
-                {
-                    serializer = new XmlSerializer(typeof (XmlMessageEnvelope), new[] {type});
+		private static XmlSerializer GetDeserializerFor(Type type)
+		{
+			return _deserializers.Retrieve(type, () =>
+				{
+					XmlAttributeOverrides overrides = new XmlAttributeOverrides();
+					overrides.Add(type, _attributes);
 
-                    _serializers[type] = serializer;
-
-                    return serializer;
-                }
-            }
-        }
-
-        private static XmlSerializer GetDeserializerFor(Type type)
-        {
-            using (var token = _lockContext.EnterUpgradableRead())
-            {
-                XmlSerializer serializer;
-                if (_deserializers.TryGetValue(type, out serializer))
-                    return serializer;
-
-                using (token.Upgrade())
-                {
-                    XmlAttributeOverrides overrides = new XmlAttributeOverrides();
-                    overrides.Add(type, _attributes);
-
-                    serializer = new XmlSerializer(type, overrides);
-
-                    _deserializers[type] = serializer;
-
-                    return serializer;
-                }
-            }
-        }
-    }
+					return new XmlSerializer(type, overrides);
+				});
+		}
+	}
 }

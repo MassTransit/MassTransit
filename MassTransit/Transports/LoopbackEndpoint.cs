@@ -27,10 +27,10 @@ namespace MassTransit.Transports
 	{
 		private static readonly ILog _log = LogManager.GetLogger(typeof (LoopbackEndpoint));
 		private static readonly ILog _messageLog = LogManager.GetLogger("MassTransit.Messages");
-		private readonly UpgradeableLock _lockContext = new UpgradeableLock();
 
+		public readonly ReaderWriterLockedObject<Queue<byte[]>> _messages = new ReaderWriterLockedObject<Queue<byte[]>>(new Queue<byte[]>());
+		
 		private readonly Semaphore _messageReady = new Semaphore(0, int.MaxValue);
-		private readonly Queue<byte[]> _messages = new Queue<byte[]>();
 		private readonly IMessageSerializer _serializer;
 		private readonly Uri _uri;
 		private bool _disposed;
@@ -98,8 +98,7 @@ namespace MassTransit.Transports
 			if (_disposed) return;
 			if (disposing)
 			{
-				using (_lockContext.EnterWriteLock())
-					_messages.Clear();
+				_messages.WriteLock(x => x.Clear());
 			}
 			_disposed = true;
 		}
@@ -109,8 +108,8 @@ namespace MassTransit.Transports
 			using (MemoryStream mstream = new MemoryStream())
 			{
 				_serializer.Serialize(mstream, message);
-				using (_lockContext.EnterWriteLock())
-					_messages.Enqueue(mstream.ToArray());
+
+				_messages.WriteLock(x => x.Enqueue(mstream.ToArray()));
 			}
 
 			_messageReady.Release();
@@ -118,11 +117,7 @@ namespace MassTransit.Transports
 
 		private byte[] Dequeue()
 		{
-			byte[] buffer;
-			using (_lockContext.EnterWriteLock())
-				buffer = _messages.Dequeue();
-
-			return buffer;
+			return _messages.WriteLock(x => x.Dequeue());
 		}
 
 		public static IEndpoint ConfigureEndpoint(Uri uri, Action<IEndpointConfigurator> configurator)
