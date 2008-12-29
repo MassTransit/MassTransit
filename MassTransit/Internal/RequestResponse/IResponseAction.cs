@@ -16,6 +16,6 @@ namespace MassTransit.Internal.RequestResponse
 
 	public interface IResponseAction
 	{
-		Func<bool> SubscribeTo(IServiceBus bus);
+		UnsubscribeAction SubscribeTo(IServiceBus bus);
 	}
 }

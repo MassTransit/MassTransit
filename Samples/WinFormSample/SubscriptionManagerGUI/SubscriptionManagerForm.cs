@@ -19,6 +19,7 @@ namespace SubscriptionManagerGUI
     using System.Windows.Forms;
     using MassTransit;
     using MassTransit.Services.HealthMonitoring;
+    using MassTransit.Services.HealthMonitoring.Server;
     using MassTransit.Services.Timeout;
     using MassTransit.Subscriptions;
 

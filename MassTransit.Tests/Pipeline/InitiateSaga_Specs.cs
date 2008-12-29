@@ -89,7 +89,7 @@ namespace MassTransit.Tests.Pipeline
 		private Guid _sagaId;
 		private SimpleSaga _saga;
 		private MessagePipeline _pipeline;
-		private Func<bool> _remove;
+		private UnsubscribeAction _remove;
 		private ISubscriptionEvent _subscriptionEvent;
 
 		[Test]

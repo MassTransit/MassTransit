@@ -25,7 +25,7 @@ namespace MassTransit.Services.Subscriptions
         private readonly IServiceBus _bus;
         private readonly ISubscriptionCache _cache;
         private readonly ISubscriptionRepository _repository;
-    	private Func<bool> _unsubscribeToken = () => false;
+    	private UnsubscribeAction _unsubscribeToken = () => false;
 
 
     	public SubscriptionService(IServiceBus bus, ISubscriptionCache subscriptionCache, ISubscriptionRepository subscriptionRepository)

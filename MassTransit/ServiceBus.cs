@@ -219,7 +219,7 @@ namespace MassTransit
 		/// </summary>
 		/// <typeparam name="T">The message type to handle, often inferred from the callback specified</typeparam>
 		/// <param name="callback">The callback to invoke when messages of the specified type arrive on the service bus</param>
-		public Func<bool> Subscribe<T>(Action<T> callback) where T : class
+		public UnsubscribeAction Subscribe<T>(Action<T> callback) where T : class
 		{
 			return Subscribe(callback, null);
 		}
@@ -230,28 +230,28 @@ namespace MassTransit
 		/// <typeparam name="T">The message type to handle, often inferred from the callback specified</typeparam>
 		/// <param name="callback">The callback to invoke when messages of the specified type arrive on the service bus</param>
 		/// <param name="condition">A condition predicate to filter which messages are handled by the callback</param>
-		public Func<bool> Subscribe<T>(Action<T> callback, Predicate<T> condition) where T : class
+		public UnsubscribeAction Subscribe<T>(Action<T> callback, Predicate<T> condition) where T : class
 		{
 			var result = _inbound.Subscribe(new GenericComponent<T>(callback, condition, this));
 
 			return result;
 		}
 
-		public Func<bool> Subscribe<T>(T consumer) where T : class
+		public UnsubscribeAction Subscribe<T>(T consumer) where T : class
 		{
 			var result = _inbound.Subscribe(consumer);
 
 			return (result);
 		}
 
-		public Func<bool> Subscribe<TComponent>() where TComponent : class
+		public UnsubscribeAction Subscribe<TComponent>() where TComponent : class
 		{
-			Func<bool> result = _inbound.Subscribe<TComponent>();
+			UnsubscribeAction result = _inbound.Subscribe<TComponent>();
 
 			return (result);
 		}
 
-		public Func<bool> Subscribe(Type consumerType)
+		public UnsubscribeAction Subscribe(Type consumerType)
 		{
 			throw new NotSupportedException("This needs fixed");
 		}

@@ -28,7 +28,7 @@ namespace MassTransit.Pipeline.Interceptors
 			get { return typeof (InitiatedBy<>); }
 		}
 
-		protected virtual Func<bool> Connect<TComponent, TMessage>(IInterceptorContext context)
+		protected virtual UnsubscribeAction Connect<TComponent, TMessage>(IInterceptorContext context)
 			where TMessage : class, CorrelatedBy<Guid>
 			where TComponent : class, Orchestrates<TMessage>, ISaga
 		{
@@ -42,12 +42,12 @@ namespace MassTransit.Pipeline.Interceptors
 
 			var result = router.Connect(sink);
 
-			Func<bool> remove = context.SubscribedTo(typeof(TMessage));
+			UnsubscribeAction remove = context.SubscribedTo(typeof(TMessage));
 
 			return () => result() && (router.SinkCount == 0) && remove();
 		}
 
-		public override IEnumerable<Func<bool>> Subscribe<TComponent>(IInterceptorContext context, TComponent instance)
+		public override IEnumerable<UnsubscribeAction> Subscribe<TComponent>(IInterceptorContext context, TComponent instance)
 		{
 			yield break;
 		}

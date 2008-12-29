@@ -28,7 +28,7 @@ namespace MassTransit
 		private volatile bool _completedSynchronously;
 		private volatile bool _isComplete = false;
 		private bool _disposed;
-		private Func<bool> _unsubscribeToken;
+		private UnsubscribeAction _unsubscribeToken;
 
 		public ServiceBusRequest(IServiceBus bus, TComponent component, AsyncCallback callback, object state)
 		{

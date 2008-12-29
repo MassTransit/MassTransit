@@ -59,7 +59,7 @@ namespace MassTransit.Pipeline.Configuration
 			return router;
 		}
 
-		public Func<bool> Connect<TMessage>(MessagePipeline pipeline, IMessageSink<TMessage> sink)
+		public UnsubscribeAction Connect<TMessage>(MessagePipeline pipeline, IMessageSink<TMessage> sink)
 			where TMessage : class
 		{
 			MessageRouterConfigurator routerConfigurator = For(pipeline);

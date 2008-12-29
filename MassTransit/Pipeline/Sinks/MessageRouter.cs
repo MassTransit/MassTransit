@@ -66,7 +66,7 @@ namespace MassTransit.Pipeline.Sinks
 		/// </summary>
 		/// <param name="sink">The sink to be connected</param>
 		/// <returns>A function to disconnect the sink from the router</returns>
-		public Func<bool> Connect(IMessageSink<TMessage> sink)
+		public UnsubscribeAction Connect(IMessageSink<TMessage> sink)
 		{
 			_sinks.WriteLock(sinks => sinks.Add(sink));
 

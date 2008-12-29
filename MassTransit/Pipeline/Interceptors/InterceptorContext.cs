@@ -43,12 +43,12 @@ namespace MassTransit.Pipeline.Interceptors
 			_used.Add(messageType);
 		}
 
-		public Func<bool> SubscribedTo(Type messageType)
+		public UnsubscribeAction SubscribedTo(Type messageType)
 		{
 			return _subscriptionEvent.SubscribedTo(messageType);
 		}
 
-		public Func<bool> SubscribedTo(Type messageType, string correlationId)
+		public UnsubscribeAction SubscribedTo(Type messageType, string correlationId)
 		{
 			return _subscriptionEvent.SubscribedTo(messageType, correlationId);
 		}

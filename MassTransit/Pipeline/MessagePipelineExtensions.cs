@@ -62,7 +62,7 @@ namespace MassTransit.Pipeline
 		/// <typeparam name="TComponent"></typeparam>
 		/// <param name="pipeline">The pipeline to configure</param>
 		/// <returns></returns>
-		public static Func<bool> Subscribe<TComponent>(this MessagePipeline pipeline) where TComponent : class
+		public static UnsubscribeAction Subscribe<TComponent>(this MessagePipeline pipeline) where TComponent : class
 		{
 			return pipeline.Configure(x => x.Subscribe<TComponent>());
 		}
@@ -74,38 +74,38 @@ namespace MassTransit.Pipeline
 		/// <param name="pipeline">The pipeline to configure</param>
 		/// <param name="instance">The instance that will handle the messages</param>
 		/// <returns></returns>
-		public static Func<bool> Subscribe<TComponent>(this MessagePipeline pipeline, TComponent instance)
+		public static UnsubscribeAction Subscribe<TComponent>(this MessagePipeline pipeline, TComponent instance)
 			where TComponent : class
 		{
 			return pipeline.Configure(x => x.Subscribe(instance));
 		}
 
-		public static Func<bool> Subscribe<TMessage>(this MessagePipeline pipeline, IEndpoint endpoint) where TMessage : class
+		public static UnsubscribeAction Subscribe<TMessage>(this MessagePipeline pipeline, IEndpoint endpoint) where TMessage : class
 		{
 			MessageRouterConfigurator routerConfigurator = MessageRouterConfigurator.For(pipeline);
 
 			return routerConfigurator.FindOrCreate<TMessage>().Connect(new EndpointMessageSink<TMessage>(endpoint));
 		}
 
-		public static Func<bool> Filter<TMessage>(this MessagePipeline pipeline, Func<TMessage, bool> allow)
+		public static UnregisterAction Filter<TMessage>(this MessagePipeline pipeline, Func<TMessage, bool> allow)
 			where TMessage : class
 		{
 			return Filter(pipeline, "", allow);
 		}
 
-		public static Func<bool> Filter<TMessage>(this MessagePipeline pipeline, string description, Func<TMessage, bool> allow)
+		public static UnregisterAction Filter<TMessage>(this MessagePipeline pipeline, string description, Func<TMessage, bool> allow)
 			where TMessage : class
 		{
 			MessageFilterConfigurator configurator = MessageFilterConfigurator.For(pipeline);
 
 			var filter = configurator.Create(description, allow);
 
-			Func<bool> result = () => { throw new NotSupportedException("Removal of filters not yet supported"); };
+			UnregisterAction result = () => { throw new NotSupportedException("Removal of filters not yet supported"); };
 
 			return result;
 		}
 
-		public static Func<bool> Register(this IConfigurePipeline context, IPipelineInterceptor interceptor)
+		public static UnregisterAction Register(this IConfigurePipeline context, IPipelineInterceptor interceptor)
 		{
 			return context.Register(interceptor);
 		}

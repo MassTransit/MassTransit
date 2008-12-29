@@ -19,8 +19,8 @@ namespace MassTransit.Pipeline.Interceptors
 	public abstract class PipelineInterceptorBase :
 		IPipelineInterceptor
 	{
-		public abstract IEnumerable<Func<bool>> Subscribe<TComponent>(IInterceptorContext context);
-		public abstract IEnumerable<Func<bool>> Subscribe<TComponent>(IInterceptorContext context, TComponent instance);
+		public abstract IEnumerable<UnsubscribeAction> Subscribe<TComponent>(IInterceptorContext context);
+		public abstract IEnumerable<UnsubscribeAction> Subscribe<TComponent>(IInterceptorContext context, TComponent instance);
 
 		/// <summary>
 		/// Returns the method information for the requested type and arguments

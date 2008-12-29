@@ -38,7 +38,7 @@ namespace MassTransit.Internal.RequestResponse
 
 		public void Send()
 		{
-			Func<bool> unsubscribeToken = () => true;
+			UnsubscribeAction unsubscribeToken = () => true;
 			try
 			{
 				unsubscribeToken = SubscribeToResponseMessages(unsubscribeToken);
@@ -66,7 +66,7 @@ namespace MassTransit.Internal.RequestResponse
 			_requestAction(_bus);
 		}
 
-		private Func<bool> SubscribeToResponseMessages(Func<bool> unsubscribeToken)
+		private UnsubscribeAction SubscribeToResponseMessages(UnsubscribeAction unsubscribeToken)
 		{
 			for (int i = 0; i < _responseActions.Count; i++)
 			{

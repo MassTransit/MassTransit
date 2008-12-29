@@ -8,7 +8,7 @@ namespace MassTransit.Services.Metadata
     {
 
         private readonly IServiceBus _bus;
-    	private Func<bool> _unsubscribeToken;
+    	private UnsubscribeAction _unsubscribeToken;
 
     	public MetadataService(IServiceBus bus)
         {

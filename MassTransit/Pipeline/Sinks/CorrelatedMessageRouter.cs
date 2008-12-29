@@ -30,7 +30,7 @@ namespace MassTransit.Pipeline.Sinks
 			return EnumerateSinks(message, message.CorrelationId);
 		}
 
-		public Func<bool> Connect(TKey correlationId, IMessageSink<TMessage> sink)
+		public UnsubscribeAction Connect(TKey correlationId, IMessageSink<TMessage> sink)
 		{
 			IMessageSink<TMessage> keySink = null;
 
@@ -54,7 +54,7 @@ namespace MassTransit.Pipeline.Sinks
 
 			var router = configurator.FindOrCreate<TMessage>();
 
-			Func<bool> remove = router.Connect(sink);
+			UnsubscribeAction remove = router.Connect(sink);
 
 			return () => { return remove() && _sinks.WriteLock(x => DisconnectIfEmpty(x, correlationId)); };
 		}

@@ -16,7 +16,7 @@ namespace MassTransit
             _endpoint = endpoint;
         }
 
-        public Func<bool> SubscribedTo(Type messageType)
+        public UnsubscribeAction SubscribedTo(Type messageType)
         {
             Subscription subscription = new Subscription(messageType, _endpoint.Uri);
 
@@ -29,7 +29,7 @@ namespace MassTransit
                        };
         }
 
-        public Func<bool> SubscribedTo(Type messageType, string correlationId)
+        public UnsubscribeAction SubscribedTo(Type messageType, string correlationId)
         {
             Subscription subscription = new Subscription(messageType, correlationId, _endpoint.Uri);
 

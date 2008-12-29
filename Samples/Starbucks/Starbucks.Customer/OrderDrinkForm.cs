@@ -11,7 +11,7 @@ namespace Starbucks.Customer
                                           Consumes<PaymentDueMessage>.For<string>,
                                           Consumes<DrinkReadyMessage>.For<string>
     {
-    	private Func<bool> _unsubscribeToken;
+    	private UnsubscribeAction _unsubscribeToken;
 
     	public OrderDrinkForm()
         {

@@ -14,6 +14,10 @@ namespace MassTransit
 {
     using System;
 
+	public delegate bool UnsubscribeAction();
+
+	public delegate bool UnregisterAction();
+
     /// <summary>
     /// The base service bus interface
     /// </summary>
@@ -35,7 +39,7 @@ namespace MassTransit
         /// </summary>
         /// <typeparam name="T">The message type to handle, often inferred from the callback specified</typeparam>
         /// <param name="callback">The callback to invoke when messages of the specified type arrive on the service bus</param>
-		Func<bool> Subscribe<T>(Action<T> callback) where T : class;
+		UnsubscribeAction Subscribe<T>(Action<T> callback) where T : class;
 
         /// <summary>
         /// Adds a message handler to the service bus for handling a specific type of message
@@ -43,26 +47,26 @@ namespace MassTransit
         /// <typeparam name="T">The message type to handle, often inferred from the callback specified</typeparam>
         /// <param name="callback">The callback to invoke when messages of the specified type arrive on the service bus</param>
         /// <param name="condition">A condition predicate to filter which messages are handled by the callback</param>
-		Func<bool> Subscribe<T>(Action<T> callback, Predicate<T> condition) where T : class;
+		UnsubscribeAction Subscribe<T>(Action<T> callback, Predicate<T> condition) where T : class;
 
         /// <summary>
         /// Connects any consumers for the component to the message dispatcher
         /// </summary>
         /// <typeparam name="T">The consumer type</typeparam>
         /// <param name="consumer">The component</param>
-		Func<bool> Subscribe<T>(T consumer) where T : class;
+		UnsubscribeAction Subscribe<T>(T consumer) where T : class;
 
     	/// <summary>
         /// Adds a component to the dispatcher that will be created on demand to handle messages
         /// </summary>
         /// <typeparam name="TConsumer">The type of the component to add</typeparam>
-        Func<bool> Subscribe<TConsumer>() where TConsumer : class;
+		UnsubscribeAction Subscribe<TConsumer>() where TConsumer : class;
 
         /// <summary>
         /// Adds a component to the dispatcher that will be created on demand to handle messages
         /// </summary>
         /// <param name="consumerType">The type of component to add</param>
-        Func<bool> Subscribe(Type consumerType);
+		UnsubscribeAction Subscribe(Type consumerType);
 
     	/// <summary>
         /// Publishes a message to all subscribed consumers for the message type
@@ -77,6 +81,4 @@ namespace MassTransit
         /// <returns>A request builder</returns>
         RequestBuilder Request();
     }
-
-    public delegate bool UnsubscribeToken();
 }

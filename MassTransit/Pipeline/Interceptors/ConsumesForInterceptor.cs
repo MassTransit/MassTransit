@@ -26,48 +26,48 @@ namespace MassTransit.Pipeline.Interceptors
 	{
 		private static readonly Type _interfaceType = typeof (Consumes<>.For<>);
 
-		private readonly ReaderWriterLockedDictionary<Type, Func<ConsumesForInterceptor, IInterceptorContext, object, Func<bool>>> _instances;
+		private readonly ReaderWriterLockedDictionary<Type, Func<ConsumesForInterceptor, IInterceptorContext, object, UnsubscribeAction>> _instances;
 
 		public ConsumesForInterceptor()
 		{
-			_instances = new ReaderWriterLockedDictionary<Type, Func<ConsumesForInterceptor, IInterceptorContext, object, Func<bool>>>();
+			_instances = new ReaderWriterLockedDictionary<Type, Func<ConsumesForInterceptor, IInterceptorContext, object, UnsubscribeAction>>();
 		}
 
-		protected virtual Func<bool> Connect<TMessage, TKey>(IInterceptorContext context, Consumes<TMessage>.For<TKey> consumer)
+		protected virtual UnsubscribeAction Connect<TMessage, TKey>(IInterceptorContext context, Consumes<TMessage>.For<TKey> consumer)
 			where TMessage : class, CorrelatedBy<TKey>
 		{
 			var correlatedConfigurator = CorrelatedMessageRouterConfigurator.For(context.Pipeline);
 
 			var router = correlatedConfigurator.FindOrCreate<TMessage, TKey>();
 
-			Func<bool> result = router.Connect(consumer.CorrelationId, new InstanceMessageSink<TMessage>(message => consumer));
+			UnsubscribeAction result = router.Connect(consumer.CorrelationId, new InstanceMessageSink<TMessage>(message => consumer));
 
-			Func<bool> remove = context.SubscribedTo(typeof (TMessage), consumer.CorrelationId.ToString());
+			UnsubscribeAction remove = context.SubscribedTo(typeof (TMessage), consumer.CorrelationId.ToString());
 
 			return () => result() && remove();
 		}
 
-		public override IEnumerable<Func<bool>> Subscribe<TComponent>(IInterceptorContext context)
+		public override IEnumerable<UnsubscribeAction> Subscribe<TComponent>(IInterceptorContext context)
 		{
 			yield break;
 		}
 
-		public override IEnumerable<Func<bool>> Subscribe<TComponent>(IInterceptorContext context, TComponent instance)
+		public override IEnumerable<UnsubscribeAction> Subscribe<TComponent>(IInterceptorContext context, TComponent instance)
 		{
-			Func<ConsumesForInterceptor, IInterceptorContext, object, Func<bool>> invoker = GetInvokerForInstance<TComponent>();
+			Func<ConsumesForInterceptor, IInterceptorContext, object, UnsubscribeAction> invoker = GetInvokerForInstance<TComponent>();
 			if (invoker == null)
 				yield break;
 
 			yield return invoker(this, context, instance);
 		}
 
-		private Func<ConsumesForInterceptor, IInterceptorContext, object, Func<bool>> GetInvokerForInstance<TComponent>()
+		private Func<ConsumesForInterceptor, IInterceptorContext, object, UnsubscribeAction> GetInvokerForInstance<TComponent>()
 		{
 			Type componentType = typeof (TComponent);
 
 			return _instances.Retrieve(componentType, () =>
 				{
-					Func<ConsumesForInterceptor, IInterceptorContext, object, Func<bool>> invoker = null;
+					Func<ConsumesForInterceptor, IInterceptorContext, object, UnsubscribeAction> invoker = null;
 
 					// since we don't have it, we're going to build it
 
@@ -100,7 +100,7 @@ namespace MassTransit.Pipeline.Interceptors
 
 						var call = Expression.Call(interceptorParameter, genericMethod, contextParameter, instanceCast);
 
-						var connector = Expression.Lambda<Func<ConsumesForInterceptor, IInterceptorContext, object, Func<bool>>>(call, new[] {interceptorParameter, contextParameter, instanceParameter}).Compile();
+						var connector = Expression.Lambda<Func<ConsumesForInterceptor, IInterceptorContext, object, UnsubscribeAction>>(call, new[] { interceptorParameter, contextParameter, instanceParameter }).Compile();
 
 						if (invoker == null)
 						{

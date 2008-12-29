@@ -12,7 +12,7 @@ namespace Client
 		private static readonly ILog _log = LogManager.GetLogger(typeof(AskPasswordQuestion));
 		private readonly IServiceBus _bus;
     	private Guid _correlationId;
-    	private Func<bool> _unsubscribeToken;
+    	private UnsubscribeAction _unsubscribeToken;
 
     	public AskPasswordQuestion(IServiceBus bus)
         {

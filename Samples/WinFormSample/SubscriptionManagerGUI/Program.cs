@@ -18,6 +18,7 @@ namespace SubscriptionManagerGUI
     using MassTransit;
     using MassTransit.Host;
     using MassTransit.Services.HealthMonitoring;
+    using MassTransit.Services.HealthMonitoring.Server;
     using MassTransit.Services.Subscriptions;
     using MassTransit.Services.Subscriptions.Server;
     using MassTransit.Services.Timeout;

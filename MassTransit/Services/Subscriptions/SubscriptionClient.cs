@@ -23,8 +23,8 @@ namespace MassTransit.Services.Subscriptions
         private readonly IServiceBus _serviceBus;
         private readonly LocalEndpointHandler _localEndpoints;
         private readonly IEndpoint _subscriptionServiceEndpoint;
-        private Func<bool> _remoteUnsubscribe;
-        private Func<bool> _localUnsubscribe;
+        private UnsubscribeAction _remoteUnsubscribe;
+        private UnsubscribeAction _localUnsubscribe;
 
 
         public SubscriptionClient(IServiceBus serviceBus, IEndpoint subscriptionServiceEndpoint, LocalEndpointHandler localEndpoints)

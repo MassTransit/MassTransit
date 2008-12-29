@@ -28,7 +28,7 @@ namespace MassTransit.Pipeline.Interceptors
 			GC.SuppressFinalize(this);
 		}
 
-		public Func<bool> Register(T interceptor)
+		public UnregisterAction Register(T interceptor)
 		{
 			// we always insert new interceptors before the built-in ones
 			_interceptors.WriteLock(x => x.Insert(0, interceptor));

@@ -28,7 +28,7 @@ namespace MassTransit.Pipeline.Configuration
 			GC.SuppressFinalize(this);
 		}
 
-		public Func<bool> RegisterInterceptor(IPipelineInterceptor interceptor)
+		public UnregisterAction RegisterInterceptor(IPipelineInterceptor interceptor)
 		{
 			return _interceptors.Register(interceptor);
 		}

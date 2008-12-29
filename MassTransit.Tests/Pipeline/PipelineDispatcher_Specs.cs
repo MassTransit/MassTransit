@@ -61,8 +61,8 @@ namespace MassTransit.Tests.Pipeline
 			IndiscriminantConsumer<PingMessage> pingConsumer = new IndiscriminantConsumer<PingMessage>();
 			IndiscriminantConsumer<PongMessage> pongConsumer = new IndiscriminantConsumer<PongMessage>();
 
-			Func<bool> pingToken = _pipeline.Subscribe(pingConsumer);
-			Func<bool> pongToken = _pipeline.Subscribe(pongConsumer);
+			UnsubscribeAction pingToken = _pipeline.Subscribe(pingConsumer);
+			UnsubscribeAction pongToken = _pipeline.Subscribe(pongConsumer);
 
 			PipelineViewer.Trace(_pipeline);
 

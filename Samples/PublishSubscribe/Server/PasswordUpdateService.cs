@@ -11,7 +11,7 @@ namespace Server
 	{
 		private static readonly ILog _log = LogManager.GetLogger(typeof (PasswordUpdateService));
 		private readonly IServiceBus _serviceBus;
-		private Func<bool> _unsubscribeToken;
+		private UnsubscribeAction _unsubscribeToken;
 
 		public PasswordUpdateService(IServiceBus serviceBus)
 		{

@@ -1,15 +1,3 @@
-// Copyright 2007-2008 The Apache Software Foundation.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed 
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
 namespace MassTransit.Pipeline.Configuration
 {
 	using System;
@@ -18,14 +6,13 @@ namespace MassTransit.Pipeline.Configuration
 	using Interceptors;
 	using Saga.Pipeline;
 	using Sinks;
-	using Subscriptions;
 
 	public class MessagePipelineConfigurator :
 		IConfigurePipeline,
 		IDisposable
 	{
 		private readonly IObjectBuilder _builder;
-		private readonly Func<bool> _emptyToken = () => false;
+		private readonly UnsubscribeAction _emptyToken = () => false;
 		private volatile bool _disposed;
 
 		protected InterceptorList<IPipelineInterceptor> _interceptors = new InterceptorList<IPipelineInterceptor>();
@@ -50,28 +37,36 @@ namespace MassTransit.Pipeline.Configuration
 			_interceptors.Register(new InitiatesInterceptor());
 		}
 
-		public Func<bool> Register(IPipelineInterceptor interceptor)
+		#region IConfigurePipeline Members
+
+		public UnregisterAction Register(IPipelineInterceptor interceptor)
 		{
 			return _interceptors.Register(interceptor);
 		}
 
-		public Func<bool> Subscribe<TComponent>()
+		public UnsubscribeAction Subscribe<TComponent>()
 			where TComponent : class
 		{
 			return Subscribe((context, interceptor) => interceptor.Subscribe<TComponent>(context));
 		}
 
-		public Func<bool> Subscribe<TComponent>(TComponent instance)
+		public UnsubscribeAction Subscribe<TComponent>(TComponent instance)
 			where TComponent : class
 		{
 			return Subscribe((context, interceptor) => interceptor.Subscribe(context, instance));
 		}
+
+		#endregion
+
+		#region IDisposable Members
 
 		public void Dispose()
 		{
 			Dispose(true);
 			GC.SuppressFinalize(this);
 		}
+
+		#endregion
 
 		protected virtual void Dispose(bool disposing)
 		{
@@ -98,15 +93,15 @@ namespace MassTransit.Pipeline.Configuration
 			return result;
 		}
 
-		private Func<bool> Subscribe(Func<IInterceptorContext, IPipelineInterceptor, IEnumerable<Func<bool>>> subscriber)
+		private UnsubscribeAction Subscribe(Func<IInterceptorContext, IPipelineInterceptor, IEnumerable<UnsubscribeAction>> subscriber)
 		{
 			var context = new InterceptorContext(_pipeline, _builder, _subscriptionEvent);
 
-			Func<bool> result = null;
+			UnsubscribeAction result = null;
 
 			_interceptors.ForEach(interceptor =>
 				{
-					foreach (Func<bool> token in subscriber(context, interceptor))
+					foreach (UnsubscribeAction token in subscriber(context, interceptor))
 					{
 						if (result == null)
 							result = token;

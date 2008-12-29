@@ -19,7 +19,7 @@ namespace MassTransit.Services.HealthMonitoring
         IHostedService
     {
         private readonly IServiceBus _bus;
-    	private Func<bool> _unsubscribeToken = () => false;
+    	private UnsubscribeAction _unsubscribeToken = () => false;
 
 
     	public HealthService(IServiceBus bus)

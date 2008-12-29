@@ -19,8 +19,8 @@ namespace MassTransit.Pipeline
 	/// </summary>
 	public interface ISubscriptionEvent
 	{
-		Func<bool> SubscribedTo(Type messageType);
-		Func<bool> SubscribedTo(Type messageType, string correlationId);
+		UnsubscribeAction SubscribedTo(Type messageType);
+		UnsubscribeAction SubscribedTo(Type messageType, string correlationId);
 		void UnsubscribedFrom(Type messageType);
 		void UnsubscribedFrom(Type messageType, string correlationId);
 	}
