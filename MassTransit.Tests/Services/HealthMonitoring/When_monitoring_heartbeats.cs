@@ -61,10 +61,7 @@ namespace MassTransit.Tests.Services.HealthMonitoring
         {
             FutureMessage<Suspect> fm = new FutureMessage<Suspect>();
 
-            RemoteBus.Subscribe<Suspect>(msg =>
-                                             {
-                                                 fm.Set(msg);
-                                             });
+            RemoteBus.Subscribe<Suspect>(fm.Set);
 
 
             _heartbeatMonitor.Consume(message);
@@ -78,10 +75,7 @@ namespace MassTransit.Tests.Services.HealthMonitoring
         public void When_a_heartbeat_is_missed_Suspect_published()
         {
             FutureMessage<Suspect> fm = new FutureMessage<Suspect>();
-            RemoteBus.Subscribe<Suspect>(msg =>
-                                             {
-                                                 fm.Set(msg);
-                                             });
+            RemoteBus.Subscribe<Suspect>(fm.Set);
             
             
                 _heartbeatMonitor.Consume(message);
