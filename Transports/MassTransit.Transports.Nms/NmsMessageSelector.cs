@@ -30,10 +30,10 @@ namespace MassTransit.Transports.Nms
         private volatile bool _disposed;
         private object _message;
 
-        public NmsMessageSelector(NmsEndpoint endpoint, ISession _session, IMessage transportMessage, IMessageSerializer serializer)
+        public NmsMessageSelector(NmsEndpoint endpoint, ISession session, IMessage transportMessage, IMessageSerializer serializer)
         {
             _endpoint = endpoint;
-            this._session = _session;
+            _session = session;
             _transportMessage = transportMessage;
             _serializer = serializer;
         }
@@ -95,7 +95,8 @@ namespace MassTransit.Transports.Nms
         {
             if (_disposed) return;
             if (disposing)
-            {}
+            {
+            }
 
             _disposed = true;
         }
