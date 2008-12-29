@@ -55,28 +55,6 @@ namespace MassTransit.Tests
         }
 
         [Test]
-        public void The_pool_should_not_exceed_the_maximum_thread_count()
-        {
-            int expectedPendingCount = _numberOfWorkItemsToEnqueue - _maxNumberOfThreads;
-            int expectedAmountOnCounter = _numberOfWorkItemsToEnqueue;
-
-            using (ManagedThreadPool<string> pool = new ManagedThreadPool<string>(TestThreadDelegate, _minNumberOfThreads, _maxNumberOfThreads))
-            {
-                for (int i = 0; i < _numberOfWorkItemsToEnqueue; i++)
-                {
-                    pool.Enqueue("hello");
-                }
-
-                Assert.That(pool.CurrentThreadCount, Is.EqualTo(_maxNumberOfThreads), string.Format("Current Thread Count is {0} instead of {1}", pool.CurrentThreadCount, _maxNumberOfThreads));
-
-                Assert.That(pool.QueueDepth, Is.EqualTo(expectedPendingCount), "Pending work items was {0} instead of {1}", pool.QueueDepth, expectedPendingCount);
-
-            }
-
-            Assert.That(_counter, Is.EqualTo(expectedAmountOnCounter), "Counter should be {0} instead of {1} after a dispose", expectedAmountOnCounter, _counter);
-        }
-
-        [Test]
         public void The_pool_should_complete_with_a_high_level_of_level_of_work()
         {
             using(ManagedThreadPool<string> pool = new ManagedThreadPool<string>(FastTestThreadDelegate, _minNumberOfThreads, 10))

@@ -1,269 +1,243 @@
-// Copyright 2007-2008 The Apache Software Foundation.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed 
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Threading;
-    using Configuration;
-    using MassTransit.Internal;
-    using MassTransit.Serialization;
-    using MassTransit.Subscriptions;
-    using MassTransit.Transports;
-    using NUnit.Framework;
-    using NUnit.Framework.SyntaxHelpers;
-    
-    using Tests.Messages;
+	using System;
+	using System.Collections.Generic;
+	using System.Threading;
+	using Configuration;
+	using MassTransit.Internal;
+	using MassTransit.Serialization;
+	using MassTransit.Transports;
+	using Messages;
+	using NUnit.Framework;
+	using NUnit.Framework.SyntaxHelpers;
+	using Rhino.Mocks;
+	using Subscriptions;
+	using TextFixtures;
 
-    [TestFixture]
-    public class MessageGroup_Specs :
-        Specification
-    {
-        [Test]
-        public void I_should_be_able_to_join_a_bunch_of_messages_into_a_group()
-        {
-            object[] items = new object[] {new PingMessage(), new PongMessage()};
+	[TestFixture]
+	public class MessageGroup_Specs :
+		LoopbackTestFixture
+	{
+		[Test]
+		public void I_should_be_able_to_join_a_bunch_of_messages_into_a_group()
+		{
+			object[] items = new object[] {new PingMessage(), new PongMessage()};
 
-            MessageGroup group = MessageGroup.Join(items);
+			MessageGroup group = MessageGroup.Join(items);
 
-            Assert.That(group.Count, Is.EqualTo(2));
+			Assert.That(group.Count, Is.EqualTo(2));
 
-            Assert.That(group[0], Is.TypeOf(typeof (PingMessage)));
-            Assert.That(group[1], Is.TypeOf(typeof (PongMessage)));
-        }
+			Assert.That(group[0], Is.TypeOf(typeof (PingMessage)));
+			Assert.That(group[1], Is.TypeOf(typeof (PongMessage)));
+		}
 
-        [Test]
-        public void I_should_be_able_to_retrieve_a_single_message_by_position()
-        {
-            PingMessage ping = new PingMessage();
-            PongMessage pong = new PongMessage();
+		[Test]
+		public void I_should_be_able_to_retrieve_a_single_message_by_position()
+		{
+			PingMessage ping = new PingMessage();
+			PongMessage pong = new PongMessage();
 
-            MessageGroup group = MessageGroup.Build<MessageGroup>()
-                .Add(ping)
-                .Add(pong);
+			MessageGroup group = MessageGroup.Build<MessageGroup>()
+				.Add(ping)
+				.Add(pong);
 
-            PingMessage thePing = group.Get<PingMessage>(0);
-        }
+			PingMessage thePing = group.Get<PingMessage>(0);
+		}
 
-        [Test]
-        public void I_should_be_able_to_split_a_bunch_of_messages_from_a_group()
-        {
-            PingMessage ping = new PingMessage();
-            PongMessage pong = new PongMessage();
+		[Test]
+		public void I_should_be_able_to_split_a_bunch_of_messages_from_a_group()
+		{
+			PingMessage ping = new PingMessage();
+			PongMessage pong = new PongMessage();
 
-            MessageGroup group = MessageGroup.Build<MessageGroup>()
-                .Add(ping)
-                .Add(pong);
+			MessageGroup group = MessageGroup.Build<MessageGroup>()
+				.Add(ping)
+				.Add(pong);
 
-            object[] items = group.ToArray();
+			object[] items = group.ToArray();
 
-            Assert.That(items.Length, Is.EqualTo(2));
-        }
+			Assert.That(items.Length, Is.EqualTo(2));
+		}
 
-        [Test]
-        public void I_should_be_able_to_split_the_group_into_individual_messages_and_handle_each_one_on_its_own()
-        {
-            IServiceBus bus = DynamicMock<IServiceBus>();
+		[Test]
+		public void I_should_be_able_to_split_the_group_into_individual_messages_and_handle_each_one_on_its_own()
+		{
+			IServiceBus bus = MockRepository.GenerateMock<IServiceBus>();
 
-            PingMessage ping = new PingMessage();
-            PongMessage pong = new PongMessage();
+			PingMessage ping = new PingMessage();
+			PongMessage pong = new PongMessage();
 
-            MessageGroup group = MessageGroup.Build<MessageGroup>()
-                .Add(ping)
-                .Add(pong);
+			MessageGroup group = MessageGroup.Build<MessageGroup>()
+				.Add(ping)
+				.Add(pong);
 
-            using (Record())
-            {
-                bus.Publish(ping);
-                bus.Publish(pong);
-            }
+			bus.Expect(x => x.Publish(ping));
+			bus.Expect(x => x.Publish(pong));
 
-            using (Playback())
-            {
-                group.Split(bus);
-            }
-        }
+			group.Split(bus);
 
-        [Test, ExpectedException(typeof (ArgumentException))]
-        public void I_should_get_an_exception_when_I_try_to_get_an_unmatched_type()
-        {
-            PingMessage ping = new PingMessage();
-            PongMessage pong = new PongMessage();
+			bus.VerifyAllExpectations();
+		}
 
-            MessageGroup group = MessageGroup.Build<MessageGroup>()
-                .Add(ping)
-                .Add(pong);
+		[Test, ExpectedException(typeof (ArgumentException))]
+		public void I_should_get_an_exception_when_I_try_to_get_an_unmatched_type()
+		{
+			PingMessage ping = new PingMessage();
+			PongMessage pong = new PongMessage();
 
-            PingMessage thePing = group.Get<PingMessage>(1);
-        }
+			MessageGroup group = MessageGroup.Build<MessageGroup>()
+				.Add(ping)
+				.Add(pong);
 
-        [Test]
-        public void One()
-        {
-            IServiceBus bus = DynamicMock<IServiceBus>();
+			PingMessage thePing = group.Get<PingMessage>(1);
+		}
 
-            PingMessage ping = new PingMessage();
-            PongMessage pong = new PongMessage();
+		[Test]
+		public void One()
+		{
+			PingMessage ping = new PingMessage();
+			PongMessage pong = new PongMessage();
 
-            MessageGroup group = MessageGroup.Build<MessageGroup>()
-                .Add(ping)
-                .Add(pong);
+			MessageGroup group = MessageGroup.Build<MessageGroup>()
+				.Add(ping)
+				.Add(pong);
 
-            Assert.That(group.Count, Is.EqualTo(2));
+			Assert.That(group.Count, Is.EqualTo(2));
 
-            Assert.That(group[0], Is.TypeOf(typeof (PingMessage)));
-            Assert.That(group[1], Is.TypeOf(typeof (PongMessage)));
+			Assert.That(group[0], Is.TypeOf(typeof (PingMessage)));
+			Assert.That(group[1], Is.TypeOf(typeof (PongMessage)));
+		}
+	}
 
-            bus.Publish(group);
-        }
-    }
+	[TestFixture]
+	public class When_a_custom_message_group_is_defined : 
+		LoopbackTestFixture
+	{
+		internal class Consumer : 
+			Consumes<SpecialGroup>.All, 
+			Consumes<PingMessage>.All, 
+			Consumes<PongMessage>.All
+		{
+			private readonly IServiceBus _bus;
 
-    [TestFixture]
-    public class When_a_custom_message_group_is_defined : Specification
-    {
-        private IServiceBus _bus;
-        private IEndpoint _endpoint;
-        private IObjectBuilder _builder;
-        private ISubscriptionCache _cache;
-        private IEndpointFactory _resolver;
+			private readonly ManualResetEvent _gotPing = new ManualResetEvent(false);
+			private readonly ManualResetEvent _gotPong = new ManualResetEvent(false);
+			private readonly ManualResetEvent _received = new ManualResetEvent(false);
 
-        protected override void Before_each()
-        {
-            _builder = Stub<IObjectBuilder>();
-			_resolver = EndpointFactoryConfigurator.New(x =>
+			public Consumer(IServiceBus bus)
 			{
-				x.SetObjectBuilder(_builder);
-				x.SetDefaultSerializer<BinaryMessageSerializer>();
-				x.RegisterTransport<LoopbackEndpoint>();
-			});
+				_bus = bus;
+			}
 
-            _endpoint = _resolver.GetEndpoint(new Uri("loopback://localhost/test"));
-            _cache = new LocalSubscriptionCache();
-            _bus = new ServiceBus(_endpoint, _builder, _cache, _resolver, new TypeInfoCache());
-        }
+			public ManualResetEvent Received
+			{
+				get { return _received; }
+			}
 
-        internal class Consumer : Consumes<SpecialGroup>.All, Consumes<PingMessage>.All, Consumes<PongMessage>.All
-        {
-            private readonly IServiceBus _bus;
+			public ManualResetEvent GotPing
+			{
+				get { return _gotPing; }
+			}
 
-            private readonly ManualResetEvent _gotPing = new ManualResetEvent(false);
-            private readonly ManualResetEvent _gotPong = new ManualResetEvent(false);
-            private readonly ManualResetEvent _received = new ManualResetEvent(false);
+			public ManualResetEvent GotPong
+			{
+				get { return _gotPong; }
+			}
 
-            public Consumer(IServiceBus bus)
-            {
-                _bus = bus;
-            }
+			#region All Members
 
-            public ManualResetEvent Received
-            {
-                get { return _received; }
-            }
+			public void Consume(PingMessage message)
+			{
+				_gotPing.Set();
+			}
 
-            public ManualResetEvent GotPing
-            {
-                get { return _gotPing; }
-            }
+			#endregion
 
-            public ManualResetEvent GotPong
-            {
-                get { return _gotPong; }
-            }
+			#region All Members
 
-            public void Consume(PingMessage message)
-            {
-                _gotPing.Set();
-            }
+			public void Consume(PongMessage message)
+			{
+				_gotPong.Set();
+			}
 
-            public void Consume(PongMessage message)
-            {
-                _gotPong.Set();
-            }
+			#endregion
 
-            public void Consume(SpecialGroup message)
-            {
-                _received.Set();
+			#region All Members
 
-                if (message.SplitOnConsume)
-                    message.Split(_bus);
-            }
-        }
+			public void Consume(SpecialGroup message)
+			{
+				_received.Set();
 
-        [Serializable]
-        [AllowMessageType(typeof (PingMessage), typeof (PongMessage))]
-        public class SpecialGroup : MessageGroup
-        {
-            private bool _splitOnConsume;
+				if (message.SplitOnConsume)
+					message.Split(_bus);
+			}
 
-            protected SpecialGroup()
-            {
-            }
+			#endregion
+		}
 
-            public SpecialGroup(List<object> messages) :
-                base(messages)
-            {
-            }
+		[Serializable]
+		[AllowMessageType(typeof (PingMessage), typeof (PongMessage))]
+		public class SpecialGroup : MessageGroup
+		{
+			private bool _splitOnConsume;
 
-            public bool SplitOnConsume
-            {
-                get { return _splitOnConsume; }
-                set { _splitOnConsume = value; }
-            }
-        }
+			protected SpecialGroup()
+			{
+			}
 
-        [Test]
-        public void I_should_be_able_to_split_a_group_of_messages_into_parts()
-        {
-            Consumer c = new Consumer(_bus);
+			public SpecialGroup(List<object> messages) :
+				base(messages)
+			{
+			}
 
-            _bus.Subscribe(c);
+			public bool SplitOnConsume
+			{
+				get { return _splitOnConsume; }
+				set { _splitOnConsume = value; }
+			}
+		}
 
-            SpecialGroup group = MessageGroup.Build<SpecialGroup>()
-                .Add(new PingMessage())
-                .Add(new PongMessage());
+		[Test]
+		public void I_should_be_able_to_split_a_group_of_messages_into_parts()
+		{
+			Consumer c = new Consumer(LocalBus);
+			LocalBus.Subscribe(c);
 
-            group.SplitOnConsume = true;
+			SpecialGroup group = MessageGroup.Build<SpecialGroup>()
+				.Add(new PingMessage())
+				.Add(new PongMessage());
 
-            _bus.Publish(group);
+			group.SplitOnConsume = true;
 
-            Assert.That(c.Received.WaitOne(TimeSpan.FromSeconds(3), true), Is.True, "No message received by consumer");
-            Assert.That(c.GotPing.WaitOne(TimeSpan.FromSeconds(3), true), Is.True, "No ping received by consumer");
-            Assert.That(c.GotPong.WaitOne(TimeSpan.FromSeconds(3), true), Is.True, "No pong received by consumer");
-        }
+			LocalBus.Publish(group);
 
-        [Test]
-        public void I_Should_be_able_to_subscribe()
-        {
-            Consumer c = new Consumer(_bus);
+			Assert.That(c.Received.WaitOne(TimeSpan.FromSeconds(3), true), Is.True, "No message received by consumer");
+			Assert.That(c.GotPing.WaitOne(TimeSpan.FromSeconds(3), true), Is.True, "No ping received by consumer");
+			Assert.That(c.GotPong.WaitOne(TimeSpan.FromSeconds(3), true), Is.True, "No pong received by consumer");
+		}
 
-            _bus.Subscribe(c);
+		[Test]
+		public void I_Should_be_able_to_subscribe()
+		{
+			Consumer c = new Consumer(LocalBus);
+			LocalBus.Subscribe(c);
 
-            SpecialGroup group = MessageGroup.Build<SpecialGroup>()
-                .Add(new PingMessage())
-                .Add(new PongMessage());
+			SpecialGroup group = MessageGroup.Build<SpecialGroup>()
+				.Add(new PingMessage())
+				.Add(new PongMessage());
 
-            _bus.Publish(group);
+			LocalBus.Publish(group);
 
-            Assert.That(c.Received.WaitOne(TimeSpan.FromSeconds(5), true), Is.True, "No message received by consumer");
-        }
+			Assert.That(c.Received.WaitOne(TimeSpan.FromSeconds(5), true), Is.True, "No message received by consumer");
+		}
 
-        [Test, ExpectedException(typeof (ArgumentException))]
-        public void I_should_only_be_allowed_to_add_valid_message_types()
-        {
-            SpecialGroup group = MessageGroup.Build<SpecialGroup>()
-                .Add(new PingMessage())
-                .Add(new PongMessage())
-                .Add(new UpdateMessage());
-        }
-    }
+		[Test, ExpectedException(typeof (ArgumentException))]
+		public void I_should_only_be_allowed_to_add_valid_message_types()
+		{
+			SpecialGroup group = MessageGroup.Build<SpecialGroup>()
+				.Add(new PingMessage())
+				.Add(new PongMessage())
+				.Add(new UpdateMessage());
+		}
+	}
 }
