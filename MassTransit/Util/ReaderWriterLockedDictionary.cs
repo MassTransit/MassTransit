@@ -28,6 +28,11 @@ namespace MassTransit.Util
 		{
 			_collection = new ReaderWriterLockedObject<Dictionary<TKey, TValue>>(new Dictionary<TKey, TValue>());
 		}
+	
+		public void Add(TKey key, TValue value)
+		{
+			_collection.WriteLock(x => x.Add(key, value));
+		}
 
 		public ReaderWriterLockedDictionary(IEnumerable<KeyValuePair<TKey, TValue>> keyValuePairs)
 		{
