@@ -12,300 +12,189 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports.Nms
 {
-	using System;
-	using System.Collections.Generic;
-	using System.IO;
-	using System.Runtime.Serialization;
-	using Apache.NMS;
-	using Apache.NMS.ActiveMQ;
-	using Configuration;
-	using Exceptions;
-	using Internal;
-	using log4net;
-	using Serialization;
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Runtime.Serialization;
+    using Apache.NMS;
+    using Apache.NMS.ActiveMQ;
+    using Configuration;
+    using Exceptions;
+    using Internal;
+    using log4net;
+    using Serialization;
 
-	public class NmsEndpoint :
-		IEndpoint
-	{
-		private static readonly ILog _log = LogManager.GetLogger(typeof (NmsEndpoint));
-		private readonly IMessageSerializer _serializer;
-		private readonly IConnectionFactory _factory;
-		private readonly string _queueName;
-		private readonly Uri _uri;
-		private bool _disposed;
-		private IConnection _connection;
+    /// <summary>
+    /// The NMS endpoint is used to communicate with systems like ActiveMQ via the Apache.NMS
+    /// project
+    /// </summary>
+    public class NmsEndpoint :
+        IEndpoint
+    {
+        private static readonly ILog _log = LogManager.GetLogger(typeof (NmsEndpoint));
+        private readonly IConnectionFactory _factory;
+        private readonly string _queueName;
+        private readonly IMessageSerializer _serializer;
+        private readonly Uri _uri;
+        private IConnection _connection;
+        private bool _disposed;
 
-		public NmsEndpoint(Uri uri, IMessageSerializer serializer)
-		{
-			_uri = uri;
-		    _serializer = serializer;
-			UriBuilder queueUri = new UriBuilder("tcp", Uri.Host, Uri.Port);
+        public NmsEndpoint(Uri uri, IMessageSerializer serializer)
+        {
+            _uri = uri;
+            _serializer = serializer;
 
-			_queueName = Uri.AbsolutePath.Substring(1);
+            var queueUri = new UriBuilder("tcp", Uri.Host, Uri.Port);
 
-			_factory = new ConnectionFactory(queueUri.Uri);
+            _queueName = Uri.AbsolutePath.Substring(1);
 
-			_connection = _factory.CreateConnection();
-			_connection.ExceptionListener += ConnectionExceptionListener;
+            _factory = new ConnectionFactory(queueUri.Uri);
 
-			_connection.Start();
-		}
+            _connection = _factory.CreateConnection();
+            _connection.ExceptionListener += ConnectionExceptionListener;
 
-		public NmsEndpoint(string uriString, IMessageSerializer serializer)
-			: this(new Uri(uriString), serializer)
-		{
-		}
+            _connection.Start();
+        }
 
-		public Uri Uri
-		{
-			get { return _uri; }
-		}
+        public NmsEndpoint(string uriString, IMessageSerializer serializer)
+            : this(new Uri(uriString), serializer)
+        {}
 
-		public void Send<T>(T message) where T : class
-		{
-			Send(message, TimeSpan.MaxValue);
-		}
+        public Uri Uri
+        {
+            get { return _uri; }
+        }
 
-		public void Send<T>(T message, TimeSpan timeToLive) where T : class
-		{
-			WithinProducerContext((session, producer) =>
-			{
-				Type messageType = typeof(T);
+        public void Send<T>(T message) where T : class
+        {
+            Send(message, NMSConstants.defaultTimeToLive);
+        }
 
-				IBytesMessage bm = session.CreateBytesMessage();
+        public void Send<T>(T message, TimeSpan timeToLive) where T : class
+        {
+            if (_disposed) throw new ObjectDisposedException("The object has been disposed");
 
-				using (MemoryStream mem = new MemoryStream())
-				{
-					_serializer.Serialize(mem, message);
+            try
+            {
+                using (var session = _connection.CreateSession(AcknowledgementMode.Transactional))
+                {
+                    var destination = session.GetQueue(_queueName);
 
-					bm.Content = mem.ToArray();
-				}
+                    IBytesMessage bm;
+                    using (var producer = session.CreateProducer(destination))
+                    {
+                        bm = BuildMessage(session, message);
 
-				if (timeToLive < NMSConstants.defaultTimeToLive)
-					producer.TimeToLive = timeToLive;
+                        if (timeToLive < NMSConstants.defaultTimeToLive)
+                            producer.TimeToLive = timeToLive;
 
-				producer.Persistent = true;
+                        producer.Persistent = true;
 
-				producer.Send(bm);
+                        producer.Send(bm);
+                    }
 
-				if (SpecialLoggers.Messages.IsInfoEnabled)
-					SpecialLoggers.Messages.InfoFormat("SEND {0} {1} {2}", messageType, Uri, bm.NMSMessageId);
+                    if (SpecialLoggers.Messages.IsInfoEnabled)
+                        SpecialLoggers.Messages.InfoFormat("SEND:{0}:{1}:{2}", Uri, typeof (T).Name, bm.NMSMessageId);
 
-				if (_log.IsDebugEnabled)
-					_log.DebugFormat("Message Sent: Id = {0}, Message Type = {1}", bm.NMSMessageId, messageType);
-			});
-		}
+                    if (_log.IsDebugEnabled)
+                        _log.DebugFormat("Sent {0} from {1} [{2}]", typeof (T).FullName, Uri, bm.NMSMessageId);
 
-		public object Receive(TimeSpan timeout, Predicate<object> accept)
-		{
-			return WithinConsumerContext(consumer =>
-			{
-				IMessage message = consumer.Receive(timeout);
-				if (message == null)
-					return null;
+                    session.Commit();
+                }
+            }
+            catch (SerializationException sex)
+            {
+                throw new MessageException(message.GetType(), "Unable to serialize message", sex);
+            }
+            catch (Exception ex)
+            {
+                throw new EndpointException(this, "Unable to send message of type " + typeof (T).FullName, ex);
+            }
+        }
 
-				IBytesMessage bm = message as IBytesMessage;
-				if (bm == null)
-					throw new MessageException(message.GetType(), "Message not a IBytesMessage");
+        public IEnumerable<IMessageSelector> SelectiveReceive(TimeSpan timeout)
+        {
+            if (_disposed) throw new ObjectDisposedException("The object has been disposed");
 
-				try
-				{
-					using (MemoryStream mem = new MemoryStream(bm.Content, false))
-					{
-						object obj = _serializer.Deserialize(mem);
+            using (var session = _connection.CreateSession(AcknowledgementMode.Transactional))
+            {
+                var destination = session.GetQueue(_queueName);
 
-						if (accept(obj))
-						{
-							if (_log.IsDebugEnabled)
-								_log.DebugFormat("Queue: {0} Received Message Id {1}", _queueName, message.NMSMessageId);
+                using (var consumer = session.CreateConsumer(destination))
+                {
+                    IMessage message = consumer.Receive(timeout);
 
-							if (SpecialLoggers.Messages.IsInfoEnabled)
-								SpecialLoggers.Messages.InfoFormat("RECV {0} {1} {2}", obj.GetType().FullName, Uri, bm.NMSMessageId);
+                    using (var selector = new NmsMessageSelector(this, session, message, _serializer))
+                    {
+                        yield return selector;
+                    }
+                }
+            }
+        }
 
-							return obj;
-						}
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
 
-						if (_log.IsDebugEnabled)
-							_log.DebugFormat("Queue: {0} Skipped Message Id {1}", _queueName, message.NMSMessageId);
 
-						return null;
-					}
-				}
-				catch (SerializationException ex)
-				{
-					try
-					{
-						_log.Error("Discarded message " + message.NMSMessageId + " due to a serialization error", ex);
-					}
-					catch (Exception ex2)
-					{
-						_log.Error("Unable to purge message id " + message.NMSMessageId, ex2);
-					}
+        protected virtual void Dispose(bool disposing)
+        {
+            if (_disposed) return;
+            if (disposing)
+            {
+                if (_connection != null)
+                {
+                    _connection.Stop();
+                    _connection.ExceptionListener -= ConnectionExceptionListener;
+                    _connection.Close();
+                    _connection.Dispose();
+                    _connection = null;
+                }
+            }
+            _disposed = true;
+        }
 
-					throw new MessageException(typeof(object), "An error occurred deserializing a message", ex);
-				}
-			});
-		}
+        private IBytesMessage BuildMessage<T>(ISession session, T message)
+        {
+            IBytesMessage bm = session.CreateBytesMessage();
 
-		public void Receive(TimeSpan timeout, Func<object, Func<object, bool>, bool> receiver)
-		{
-			throw new System.NotImplementedException();
-		}
+            using (MemoryStream mem = new MemoryStream())
+            {
+                _serializer.Serialize(mem, message);
 
-		public IEnumerable<IMessageSelector> SelectiveReceive(TimeSpan timeout)
-		{
-			throw new System.NotImplementedException();
-		}
+                bm.Content = mem.ToArray();
+            }
 
-		private V WithinConsumerContext<V>(Func<IMessageConsumer, V> consumerAction)
-		{
-			return WithinSessionContext<V>(session =>
-			{
-				IMessageConsumer consumer = null;
-				try
-				{
-					IDestination destination = session.GetQueue(_queueName);
+            return bm;
+        }
 
-					consumer = session.CreateConsumer(destination);
+        private void ConnectionExceptionListener(Exception ex)
+        {
+            _log.Error("An exception occurred on the endpoint. Uri = " + _uri, ex);
+        }
 
-					V result = consumerAction(consumer);
-
-					return result;
-				}
-				finally
-				{
-					if (consumer != null)
-					{
-						consumer.Close();
-						consumer.Dispose();
-					}
-				}
-			});
-		}
-
-		private void WithinProducerContext(Action<ISession, IMessageProducer> producerAction)
-		{
-			WithinSessionContext(session =>
-			{
-				IMessageProducer producer = null;
-				try
-				{
-					IDestination destination = session.GetQueue(_queueName);
-
-					producer = session.CreateProducer(destination);
-
-					producerAction(session, producer);
-				}
-				finally
-				{
-					if (producer != null)
-					{
-						producer.Close();
-					}
-				}
-			});
-		}
-
-		private V WithinSessionContext<V>(Func<ISession, V> sessionAction)
-		{
-			ISession session = null;
-			try
-			{
-				session = _connection.CreateSession(AcknowledgementMode.Transactional);
-
-				V result = sessionAction(session);
-
-				session.Commit();
-
-				return result;
-			}
-			catch (Exception ex)
-			{
-				throw new EndpointException(this, "Error consuming message", ex);
-			}
-			finally
-			{
-				if (session != null)
-				{
-					session.Close();
-					session.Dispose();
-				}
-			}
-		}
-
-		private void WithinSessionContext(Action<ISession> sessionAction)
-		{
-			ISession session = null;
-			try
-			{
-				session = _connection.CreateSession(AcknowledgementMode.Transactional);
-
-				sessionAction(session);
-
-				session.Commit();
-			}
-			catch (Exception ex)
-			{
-				throw new EndpointException(this, "Error consuming message", ex);
-			}
-			finally
-			{
-				if (session != null)
-				{
-					session.Close();
-					session.Dispose();
-				}
-			}
-		}
-
-		public void Dispose()
-		{
-			Dispose(true);
-			GC.SuppressFinalize(this);
-		}
-
-		private void ConnectionExceptionListener(Exception ex)
-		{
-			_log.Error("An exception occurred on the endpoint. Uri = " + _uri, ex);
-		}
-
-		~NmsEndpoint()
-		{
-			Dispose(false);
-		}
-
-		protected virtual void Dispose(bool disposing)
-		{
-			if (_disposed) return;
-			if (disposing)
-			{
-				if (_connection != null)
-				{
-					_connection.Stop();
-					_connection.ExceptionListener -= ConnectionExceptionListener;
-					_connection.Close();
-					_connection.Dispose();
-					_connection = null;
-				}
-			}
-			_disposed = true;
-		}
+        ~NmsEndpoint()
+        {
+            Dispose(false);
+        }
 
         public static IEndpoint ConfigureEndpoint(Uri uri, Action<IEndpointConfigurator> configurator)
         {
             if (uri.Scheme.ToLowerInvariant() == "activemq")
             {
                 IEndpoint endpoint = NmsEndpointConfigurator.New(x =>
-                {
-                    x.SetUri(uri);
+                    {
+                        x.SetUri(uri);
 
-                    configurator(x);
-                });
+                        configurator(x);
+                    });
 
                 return endpoint;
             }
 
             return null;
         }
-	}
+    }
 }
