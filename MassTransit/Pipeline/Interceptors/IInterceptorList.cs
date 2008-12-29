@@ -24,7 +24,7 @@ namespace MassTransit.Pipeline.Interceptors
 		/// </summary>
 		/// <param name="interceptor">The intercept to insert in the list</param>
 		/// <returns>The unregister function, which should be called to remove the interceptor</returns>
-		Func<bool> Register(T interceptor);
+		UnregisterAction Register(T interceptor);
 
 		/// <summary>
 		/// Enumerate the interceptors

@@ -42,7 +42,7 @@ namespace MassTransit.Internal.RequestResponse
 			get { return _correlationId; }
 		}
 
-		public Func<bool> SubscribeTo(IServiceBus bus)
+		public UnsubscribeAction SubscribeTo(IServiceBus bus)
 		{
 			return bus.Subscribe(this);
 		}

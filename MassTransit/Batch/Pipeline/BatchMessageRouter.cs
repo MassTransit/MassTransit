@@ -85,7 +85,7 @@ namespace MassTransit.Batch.Pipeline
             }
         }
 
-        public Func<bool> Connect(IMessageSink<Batch<TMessage, TBatchId>> sink)
+		public UnsubscribeAction Connect(IMessageSink<Batch<TMessage, TBatchId>> sink)
         {
             _consumerSinks.WriteLock(sinks => sinks.Add(sink));
 

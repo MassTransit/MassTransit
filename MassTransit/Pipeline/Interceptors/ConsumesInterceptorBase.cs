@@ -23,42 +23,42 @@ namespace MassTransit.Pipeline.Interceptors
 		PipelineInterceptorBase
 		where TInterceptor : class
 	{
-		private readonly ReaderWriterLockedDictionary<Type, Func<TInterceptor, IInterceptorContext, Func<bool>>> _components;
-		private readonly ReaderWriterLockedDictionary<Type, Func<TInterceptor, IInterceptorContext, object, Func<bool>>> _instances;
+		private readonly ReaderWriterLockedDictionary<Type, Func<TInterceptor, IInterceptorContext, UnsubscribeAction>> _components;
+		private readonly ReaderWriterLockedDictionary<Type, Func<TInterceptor, IInterceptorContext, object, UnsubscribeAction>> _instances;
 
 		protected ConsumesInterceptorBase()
 		{
-			_components = new ReaderWriterLockedDictionary<Type, Func<TInterceptor, IInterceptorContext, Func<bool>>>();
-			_instances = new ReaderWriterLockedDictionary<Type, Func<TInterceptor, IInterceptorContext, object, Func<bool>>>();
+			_components = new ReaderWriterLockedDictionary<Type, Func<TInterceptor, IInterceptorContext, UnsubscribeAction>>();
+			_instances = new ReaderWriterLockedDictionary<Type, Func<TInterceptor, IInterceptorContext, object, UnsubscribeAction>>();
 		}
 
 		protected abstract Type InterfaceType { get; }
 
-		public override IEnumerable<Func<bool>> Subscribe<TComponent>(IInterceptorContext context)
+		public override IEnumerable<UnsubscribeAction> Subscribe<TComponent>(IInterceptorContext context)
 		{
-			Func<TInterceptor, IInterceptorContext, Func<bool>> invoker = GetInvoker<TComponent>();
+			Func<TInterceptor, IInterceptorContext, UnsubscribeAction> invoker = GetInvoker<TComponent>();
 			if (invoker == null)
 				yield break;
 
 			yield return invoker(TranslateTo<TInterceptor>.From(this), context);
 		}
 
-		public override IEnumerable<Func<bool>> Subscribe<TComponent>(IInterceptorContext context, TComponent instance)
+		public override IEnumerable<UnsubscribeAction> Subscribe<TComponent>(IInterceptorContext context, TComponent instance)
 		{
-			Func<TInterceptor, IInterceptorContext, object, Func<bool>> invoker = GetInvokerForInstance<TComponent>();
+			Func<TInterceptor, IInterceptorContext, object, UnsubscribeAction> invoker = GetInvokerForInstance<TComponent>();
 			if (invoker == null)
 				yield break;
 
 			yield return invoker(TranslateTo<TInterceptor>.From(this), context, instance);
 		}
 
-		private Func<TInterceptor, IInterceptorContext, Func<bool>> GetInvoker<TComponent>()
+		private Func<TInterceptor, IInterceptorContext, UnsubscribeAction> GetInvoker<TComponent>()
 		{
 			Type componentType = typeof (TComponent);
 
 			return _components.Retrieve(componentType, () =>
 				{
-					Func<TInterceptor, IInterceptorContext, Func<bool>> invoker = null;
+					Func<TInterceptor, IInterceptorContext, UnsubscribeAction> invoker = null;
 
 					foreach (Type interfaceType in componentType.GetInterfaces())
 					{
@@ -76,7 +76,7 @@ namespace MassTransit.Pipeline.Interceptors
 
 						var call = Expression.Call(interceptorParameter, genericMethod, contextParameter);
 
-						var connector = Expression.Lambda<Func<TInterceptor, IInterceptorContext, Func<bool>>>(call, new[] {interceptorParameter, contextParameter}).Compile();
+						var connector = Expression.Lambda<Func<TInterceptor, IInterceptorContext, UnsubscribeAction>>(call, new[] { interceptorParameter, contextParameter }).Compile();
 
 						if (invoker == null)
 						{
@@ -125,13 +125,13 @@ namespace MassTransit.Pipeline.Interceptors
 		}
 
 
-		private Func<TInterceptor, IInterceptorContext, object, Func<bool>> GetInvokerForInstance<TComponent>()
+		private Func<TInterceptor, IInterceptorContext, object, UnsubscribeAction> GetInvokerForInstance<TComponent>()
 		{
 			Type componentType = typeof (TComponent);
 
 			return _instances.Retrieve(componentType, () =>
 				{
-					Func<TInterceptor, IInterceptorContext, object, Func<bool>> invoker = null;
+					Func<TInterceptor, IInterceptorContext, object, UnsubscribeAction> invoker = null;
 
 					// since we don't have it, we're going to build it
 
@@ -154,7 +154,7 @@ namespace MassTransit.Pipeline.Interceptors
 
 						var call = Expression.Call(interceptorParameter, genericMethod, contextParameter, instanceCast);
 
-						var connector = Expression.Lambda<Func<TInterceptor, IInterceptorContext, object, Func<bool>>>(call, new[] {interceptorParameter, contextParameter, instanceParameter}).Compile();
+						var connector = Expression.Lambda<Func<TInterceptor, IInterceptorContext, object, UnsubscribeAction>>(call, new[] { interceptorParameter, contextParameter, instanceParameter }).Compile();
 
 						if (invoker == null)
 						{

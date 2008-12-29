@@ -33,7 +33,7 @@ namespace MassTransit.Grid
 		private readonly Guid _taskId;
 		private readonly Dictionary<string, Worker> _workers = new Dictionary<string, Worker>();
 		private int _nextSubTask;
-		private Func<bool> _unsubscribeToken;
+		private UnsubscribeAction _unsubscribeToken;
 
 		public DistributedTaskController(IServiceBus bus, IEndpointFactory endpointFactory, TTask distributedTask)
 		{

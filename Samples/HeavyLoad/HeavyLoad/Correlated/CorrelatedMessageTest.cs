@@ -27,7 +27,7 @@ namespace HeavyLoad.Correlated
 		private readonly IServiceBus _bus;
 		private int _successes;
 		private int _timeouts;
-    	private Func<bool> _unsubscribeToken;
+    	private UnsubscribeAction _unsubscribeToken;
 
     	public CorrelatedMessageTest()
 		{

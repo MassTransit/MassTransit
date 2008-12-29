@@ -30,7 +30,7 @@ namespace MassTransit.Services.Timeout
         private readonly ManualResetEvent _stopped = new ManualResetEvent(false);
         private readonly AutoResetEvent _trigger = new AutoResetEvent(true);
         private Thread _watchThread;
-    	private Func<bool> _unsubscribeToken;
+    	private UnsubscribeAction _unsubscribeToken;
 
     	public TimeoutService(IServiceBus bus, ITimeoutRepository repository)
         {

@@ -34,7 +34,7 @@ namespace MassTransit.Internal.RequestResponse
 			_scope.SetResponseReceived(message);
 		}
 
-		public Func<bool> SubscribeTo(IServiceBus bus)
+		public UnsubscribeAction SubscribeTo(IServiceBus bus)
 		{
 			return bus.Subscribe(this);
 		}

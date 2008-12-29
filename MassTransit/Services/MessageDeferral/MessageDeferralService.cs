@@ -20,7 +20,7 @@ namespace MassTransit.Services.MessageDeferral
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof (MessageDeferralService));
         private readonly IServiceBus _bus;
-    	private Func<bool> _unsubscribeToken;
+    	private UnsubscribeAction _unsubscribeToken;
 
     	public MessageDeferralService(IServiceBus bus)
         {

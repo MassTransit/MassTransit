@@ -17,7 +17,7 @@ namespace MassTransit.Pipeline.Interceptors
 
 	public interface IPipelineInterceptor
 	{
-		IEnumerable<Func<bool>> Subscribe<TComponent>(IInterceptorContext context);
-		IEnumerable<Func<bool>> Subscribe<TComponent>(IInterceptorContext context, TComponent instance);
+		IEnumerable<UnsubscribeAction> Subscribe<TComponent>(IInterceptorContext context);
+		IEnumerable<UnsubscribeAction> Subscribe<TComponent>(IInterceptorContext context, TComponent instance);
 	}
 }

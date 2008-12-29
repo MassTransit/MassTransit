@@ -24,7 +24,7 @@ namespace MassTransit.Pipeline.Interceptors
 			get { return typeof (Consumes<>.All); }
 		}
 
-		protected virtual Func<bool> Connect<TMessage>(IInterceptorContext context, IEndpoint endpoint) where TMessage : class
+		protected virtual UnsubscribeAction Connect<TMessage>(IInterceptorContext context, IEndpoint endpoint) where TMessage : class
 		{
 			MessageRouterConfigurator routerConfigurator = MessageRouterConfigurator.For(context.Pipeline);
 

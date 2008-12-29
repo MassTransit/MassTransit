@@ -10,7 +10,7 @@ namespace InternalInventoryService
         HostedLifecycle
     {
         private IServiceBus _bus;
-    	private Func<bool> _unsubscribeToken;
+    	private UnsubscribeAction _unsubscribeToken;
 
     	public InternalInventoryServiceLifeCycle(IServiceLocator serviceLocator)
             : base(serviceLocator)

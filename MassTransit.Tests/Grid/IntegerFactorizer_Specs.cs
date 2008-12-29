@@ -70,7 +70,7 @@ namespace MassTransit.Tests.Grid
             Assert.That(factors[1], Is.EqualTo(2));
         }
 
-        [Test]
+        [Test, Explicit]
         public void Factor_Huge_Number()
         {
             IntegerFactorizer factorizer = new IntegerFactorizer();

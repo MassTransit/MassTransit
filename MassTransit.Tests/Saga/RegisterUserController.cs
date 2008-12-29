@@ -115,7 +115,7 @@ namespace MassTransit.Tests.Saga
 	{
 		private readonly IServiceBus _bus;
 		private readonly TComponent _subscriber;
-		private Func<bool> _unsubscribeToken;
+		private UnsubscribeAction _unsubscribeToken;
 
 		public FlowSubscription(IServiceBus bus, TComponent subscriber)
 		{

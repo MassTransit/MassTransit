@@ -17,12 +17,12 @@ namespace MassTransit.Pipeline
 
 	public interface IConfigurePipeline
 	{
-		Func<bool> Subscribe<TComponent>()
+		UnsubscribeAction Subscribe<TComponent>()
 			where TComponent : class;
 
-		Func<bool> Subscribe<TComponent>(TComponent instance)
+		UnsubscribeAction Subscribe<TComponent>(TComponent instance)
 			where TComponent : class;
 
-		Func<bool> Register(IPipelineInterceptor interceptor);
+		UnregisterAction Register(IPipelineInterceptor interceptor);
 	}
 }

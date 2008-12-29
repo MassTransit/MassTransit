@@ -26,27 +26,27 @@ namespace MassTransit
                 get { return null; }
             }
 
-            public Func<bool> Subscribe<T>(Action<T> callback) where T : class
+            public UnsubscribeAction Subscribe<T>(Action<T> callback) where T : class
             {
             	return () => false;
             }
 
-            public Func<bool> Subscribe<T>(Action<T> callback, Predicate<T> condition) where T : class
+            public UnsubscribeAction Subscribe<T>(Action<T> callback, Predicate<T> condition) where T : class
             {
 				return () => false;
             }
 
-            public Func<bool> Subscribe<T>(T consumer) where T : class
+            public UnsubscribeAction Subscribe<T>(T consumer) where T : class
             {
 				return () => false;
 			}
 
-            public Func<bool> Subscribe<TComponent>() where TComponent : class
+            public UnsubscribeAction Subscribe<TComponent>() where TComponent : class
             {
 				return () => false;
 			}
 
-            public Func<bool> Subscribe(Type consumerType)
+            public UnsubscribeAction Subscribe(Type consumerType)
             {
 				return () => false;
 			}

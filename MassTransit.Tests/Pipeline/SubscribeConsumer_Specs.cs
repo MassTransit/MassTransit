@@ -167,7 +167,7 @@ namespace MassTransit.Tests.Pipeline
 			TestCorrelatedConsumer<PingMessage, Guid> consumer = new TestCorrelatedConsumer<PingMessage, Guid>(message.CorrelationId);
 			TestCorrelatedConsumer<PingMessage, Guid> negativeConsumer = new TestCorrelatedConsumer<PingMessage, Guid>(Guid.Empty);
 
-			Func<bool> token = _pipeline.Subscribe(consumer);
+			var token = _pipeline.Subscribe(consumer);
 			token += _pipeline.Subscribe(negativeConsumer);
 
 			PipelineViewer.Trace(_pipeline);
@@ -187,7 +187,7 @@ namespace MassTransit.Tests.Pipeline
 		{
 			TestCorrelatedConsumer<PingMessage, Guid> consumer = new TestCorrelatedConsumer<PingMessage, Guid>(Guid.NewGuid());
 
-			Func<bool> token = _pipeline.Subscribe(consumer);
+			UnsubscribeAction token = _pipeline.Subscribe(consumer);
 			token();
 
 			Stopwatch overall = Stopwatch.StartNew();

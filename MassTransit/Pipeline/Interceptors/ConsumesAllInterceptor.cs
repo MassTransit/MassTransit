@@ -24,20 +24,20 @@ namespace MassTransit.Pipeline.Interceptors
 			get { return typeof (Consumes<>.All); }
 		}
 
-		protected virtual Func<bool> Connect<TMessage>(IInterceptorContext context, Consumes<TMessage>.All consumer) where TMessage : class
+		protected virtual UnsubscribeAction Connect<TMessage>(IInterceptorContext context, Consumes<TMessage>.All consumer) where TMessage : class
 		{
 			MessageRouterConfigurator routerConfigurator = MessageRouterConfigurator.For(context.Pipeline);
 
 			var router = routerConfigurator.FindOrCreate<TMessage>();
 
-			Func<bool> result = router.Connect(new InstanceMessageSink<TMessage>(message => consumer));
+			UnsubscribeAction result = router.Connect(new InstanceMessageSink<TMessage>(message => consumer));
 
-			Func<bool> remove = context.SubscribedTo(typeof(TMessage));
+			UnsubscribeAction remove = context.SubscribedTo(typeof(TMessage));
 
 			return () => result() && ( router.SinkCount == 0 ) && remove();
 		}
 
-		protected virtual Func<bool> Connect<TComponent, TMessage>(IInterceptorContext context)
+		protected virtual UnsubscribeAction Connect<TComponent, TMessage>(IInterceptorContext context)
 			where TMessage : class
 			where TComponent : class, Consumes<TMessage>.All
 		{
@@ -45,9 +45,9 @@ namespace MassTransit.Pipeline.Interceptors
 
 			var router = routerConfigurator.FindOrCreate<TMessage>();
 
-			Func<bool> result = router.Connect(new ComponentMessageSink<TComponent, TMessage>(context));
+			UnsubscribeAction result = router.Connect(new ComponentMessageSink<TComponent, TMessage>(context));
 
-			Func<bool> remove = context.SubscribedTo(typeof(TMessage));
+			UnsubscribeAction remove = context.SubscribedTo(typeof(TMessage));
 
 			return () => result() && (router.SinkCount == 0) && remove();
 		}

@@ -13,7 +13,7 @@ namespace OpenAllNight
 	internal class Program
 	{
 		private static readonly DateTime _startedAt = DateTime.Now;
-		private static Func<bool> _unsubscribeToken = () => false;
+		private static UnsubscribeAction _unsubscribeToken = () => false;
 		private static DateTime lastPrint = DateTime.Now;
 
 		private static void Main()
