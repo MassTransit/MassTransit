@@ -306,6 +306,8 @@ namespace MassTransit
 				{
 					foreach (IMessageSelector selector in resourceLock.Resource.SelectiveReceive(ReceiveTimeout))
 					{
+						BusContext.Current.InboundMessage().Clear();
+
 						performedWork = true;
 
 						try
@@ -313,6 +315,8 @@ namespace MassTransit
 							object message = selector.DeserializeMessage();
 							if (message == null)
 								continue;
+
+							//InboundMessageContext.SetIncomingMessage(message);
 
 							using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required))
 							{
@@ -347,6 +351,10 @@ namespace MassTransit
 			{
 				// this could be a bigger deal, but we'll probably just log it.
 				_log.Error("ReceiveFromEndpoint got an exception", ex);
+			}
+			finally
+			{
+				BusContext.Current.InboundMessage().Clear();
 			}
 
 			return performedWork;
