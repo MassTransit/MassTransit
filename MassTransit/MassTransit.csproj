@@ -288,7 +288,7 @@
     <Compile Include="Serialization\XmlMessageEnvelope.cs" />
     <Compile Include="Serialization\XmlMessageSerializer.cs" />
     <Compile Include="Serialization\XmlReceiveMessageEnvelope.cs" />
-    <Compile Include="ServiceBus.NullServiceBus.cs" />
+    <Compile Include="Internal\NullServiceBus.cs" />
     <Compile Include="Services\MessageDeferral\RemoteMessageDeferralViewer.cs" />
     <Compile Include="Services\MessageDeferral\Messages\DeferedMessageRepublished.cs" />
     <Compile Include="Services\MessageDeferral\Messages\NewDeferMessageReceived.cs" />

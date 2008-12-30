@@ -200,9 +200,9 @@ namespace MassTransit.WindsorIntegration
 		{
 			if (threadConfig != null)
 			{
-				bus.MinThreadCount = GetConfigurationValue(threadConfig, "minThreads", bus.MinThreadCount);
-				bus.MaxThreadCount = GetConfigurationValue(threadConfig, "maxThreads", bus.MaxThreadCount);
-				bus.ReadThreadCount = GetConfigurationValue(threadConfig, "readThreads", bus.ReadThreadCount);
+				bus.MinimumConsumerThreads = GetConfigurationValue(threadConfig, "minThreads", bus.MinimumConsumerThreads);
+				bus.MaximumConsumerThreads = GetConfigurationValue(threadConfig, "maxThreads", bus.MaximumConsumerThreads);
+				bus.ConcurrentReceiveThreads = GetConfigurationValue(threadConfig, "readThreads", bus.ConcurrentReceiveThreads);
 			}
 		}
 

@@ -13,47 +13,92 @@
 namespace MassTransit.Configuration
 {
 	using System;
+	using Exceptions;
 	using Magnum.Common.DateTimeExtensions;
 
 	public class ServiceBusConfiguratorDefaults :
 		IServiceBusConfiguratorDefaults
 	{
-		private IObjectBuilder _objectBuilder;
-		private TimeSpan _receiveTimeout;
-		private int _receiveThreadLimit;
-		private int _threadLimit;
-
 		public ServiceBusConfiguratorDefaults()
 		{
-			_receiveTimeout = 3.Seconds();
+			AutoStart = true;
+			ReceiveTimeout = 3.Seconds();
+			ConcurrentReceiverLimit = 1;
+			ConcurrentConsumerLimit = Environment.ProcessorCount*4;
 		}
+
+		protected IObjectBuilder ObjectBuilder { get; private set; }
+		protected TimeSpan ReceiveTimeout { get; private set; }
+		protected int ConcurrentReceiverLimit { get; private set; }
+		protected int ConcurrentConsumerLimit { get; private set; }
+		protected bool AutoStart { get; private set; }
+		protected bool AutoSubscribe { get; private set; }
+		protected Uri ErrorUri { get; private set; }
 
 		public void SetObjectBuilder(IObjectBuilder objectBuilder)
 		{
-			_objectBuilder = objectBuilder;
+			ObjectBuilder = objectBuilder;
+		}
+
+		public void SendErrorsTo(string uriString)
+		{
+			try
+			{
+				ErrorUri = new Uri(uriString);
+			}
+			catch (UriFormatException ex)
+			{
+				throw new ConfigurationException("The Uri for the error endpoint is invalid: " + uriString, ex);
+			}
+		}
+
+		public void SendErrorsTo(Uri uri)
+		{
+			ErrorUri = uri;
+		}
+
+
+		public void EnableAutoSubscribe()
+		{
+			AutoSubscribe = true;
+		}
+
+		public void DisableAutoStart()
+		{
+			AutoStart = false;
 		}
 
 		public void SetReceiveTimeout(TimeSpan receiveTimeout)
 		{
-			_receiveTimeout = receiveTimeout;
+			ReceiveTimeout = receiveTimeout;
 		}
 
-		public void SetThreadLimit(int threadLimit)
+		public void SetConcurrentConsumerLimit(int concurrentConsumerLimit)
 		{
-			_threadLimit = threadLimit;
+			ConcurrentConsumerLimit = concurrentConsumerLimit;
 		}
 
-		public void SetReceiveThreadLimit(int receiveThreadLimit)
+		public void SetConcurrentReceiverLimit(int concurrentReceiverLimit)
 		{
-			_receiveThreadLimit = receiveThreadLimit;
+			ConcurrentReceiverLimit = concurrentReceiverLimit;
 		}
 
 		public void ApplyTo(IServiceBusConfigurator configurator)
 		{
-			configurator.SetObjectBuilder(_objectBuilder);
-			configurator.SetReceiveTimeout(_receiveTimeout);
-			configurator.SetThreadLimit(_threadLimit);
-			configurator.SetReceiveThreadLimit(_receiveThreadLimit);
+			if (ObjectBuilder != null)
+				configurator.SetObjectBuilder(ObjectBuilder);
+
+			if (ErrorUri != null)
+				configurator.SendErrorsTo(ErrorUri);
+
+			configurator.SetReceiveTimeout(ReceiveTimeout);
+			configurator.SetConcurrentConsumerLimit(ConcurrentConsumerLimit);
+			configurator.SetConcurrentReceiverLimit(ConcurrentReceiverLimit);
+
+			if (!AutoStart)
+				configurator.DisableAutoStart();
+			if (AutoSubscribe)
+				configurator.EnableAutoSubscribe();
 		}
 	}
 }

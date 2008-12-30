@@ -14,8 +14,16 @@ namespace MassTransit
 {
     using System;
 
+	/// <summary>
+	/// The action to call to unsubscribe a previously subscribed consumer
+	/// </summary>
+	/// <returns></returns>
 	public delegate bool UnsubscribeAction();
 
+	/// <summary>
+	/// The action to call to unregister a previously registered component
+	/// </summary>
+	/// <returns></returns>
 	public delegate bool UnregisterAction();
 
     /// <summary>
@@ -25,12 +33,12 @@ namespace MassTransit
         IDisposable
     {
         /// <summary>
-        /// The endpoint associated with this instance
+        /// The endpoint from which messages are received
         /// </summary>
         IEndpoint Endpoint { get; }
 
         /// <summary>
-        /// The poison endpoint associated with this instance where exception messages are sent
+        /// The poison endpoint associated with this instance where messages that cannot be processed are sent
         /// </summary>
         IEndpoint PoisonEndpoint { get; }
 
@@ -76,7 +84,8 @@ namespace MassTransit
         void Publish<T>(T message) where T : class;
 
         /// <summary>
-        /// Returns a request builder for this service bus to handle a request/response
+        /// Returns a request builder for this service bus to handle a request/response. Note this is being replaced
+        /// with the new request/response syntax of bus.MakeRequest();
         /// </summary>
         /// <returns>A request builder</returns>
         RequestBuilder Request();

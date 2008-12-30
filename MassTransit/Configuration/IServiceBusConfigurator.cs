@@ -17,14 +17,9 @@ namespace MassTransit.Configuration
 	/// <summary>
 	/// Enables the configuration of the service bus when it is being created
 	/// </summary>
-	public interface IServiceBusConfigurator
+	public interface IServiceBusConfigurator :
+		IServiceBusConfiguratorDefaults
 	{
-		/// <summary>
-		/// Specify the IObjectBuilder to use when creating objects
-		/// </summary>
-		/// <param name="objectBuilder"></param>
-		void SetObjectBuilder(IObjectBuilder objectBuilder);
-
 		/// <summary>
 		/// Specify the endpoint from which messages should be read
 		/// </summary>
@@ -37,34 +32,6 @@ namespace MassTransit.Configuration
 		/// <param name="uri">The uri of the endpoint</param>
 		void ReceiveFrom(Uri uri);
 
-		/// <summary>
-		/// Specify the endpoint where errors should be sent
-		/// </summary>
-		/// <param name="uriString">The Uri of the endpoint</param>
-		void SendErrorsTo(string uriString);
-
-		/// <summary>
-		/// Specify the endpoint where errors should be sent
-		/// </summary>
-		/// <param name="uri">The Uri of the endpoint</param>
-		void SendErrorsTo(Uri uri);
-
-		/// <summary>
-		/// Set the maximum number of concurrent consumers that can be active at any time. For consumers
-		/// performing high-latency, low-CPU operations, settings this number higher may increase throughput.
-		/// </summary>
-		/// <param name="threadLimit"></param>
-		void SetThreadLimit(int threadLimit);
-
-		/// <summary>
-		/// Enable the automatic subscription feature to subscribe all consumers found using the object builder
-		/// </summary>
-		void EnableAutoSubscribe();
-
-		/// <summary>
-		/// Do not start the ServiceBus when it is created
-		/// </summary>
-		void DisableAutoStart();
 
 		/// <summary>
 		/// Configure a service for use by the service bus
@@ -72,19 +39,5 @@ namespace MassTransit.Configuration
 		/// <typeparam name="TServiceConfigurator"></typeparam>
 		/// <param name="action"></param>
 		void ConfigureService<TServiceConfigurator>(Action<TServiceConfigurator> action) where TServiceConfigurator : IServiceConfigurator;
-
-		/// <summary>
-		/// Set the receive timeout to use before recycling the receive thread
-		/// </summary>
-		/// <param name="timeout"></param>
-		void SetReceiveTimeout(TimeSpan timeout);
-
-		/// <summary>
-		/// Set the maximum number of concurrent threads that are receiving messages from the endpoint.
-		/// In most cases, this can be left at the default value of 1, but can be increased when using
-		/// transactional queues.
-		/// </summary>
-		/// <param name="receiveThreadLimit"></param>
-		void SetReceiveThreadLimit(int receiveThreadLimit);
 	}
 }

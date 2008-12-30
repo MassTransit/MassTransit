@@ -38,8 +38,8 @@ namespace MassTransit.WindsorIntegration
 				{
 					def.SetObjectBuilder(objectBuilder);
 					def.SetReceiveTimeout(TimeSpan.FromSeconds(1));
-					def.SetThreadLimit(20);
-					def.SetReceiveThreadLimit(1);
+					def.SetConcurrentConsumerLimit(20);
+					def.SetConcurrentReceiverLimit(1);
 				});
 
 			IServiceBus bus = ServiceBusConfigurator.New(x =>
@@ -47,7 +47,7 @@ namespace MassTransit.WindsorIntegration
 					x.ReceiveFrom("msmq://localhost/mt_client");
 
 					x.SetObjectBuilder(objectBuilder);
-					x.SetThreadLimit(20);
+					x.SetConcurrentConsumerLimit(20);
 					x.SendErrorsTo("msmq://localhost/mt_client_errors");
 
 					x.ConfigureService<SubscriptionClientConfigurator>(y => y.SetEndpoint("msmq://localhost/mt_pubsub"));
