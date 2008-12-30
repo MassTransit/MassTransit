@@ -59,6 +59,7 @@
     <Reference Include="System.Data" />
     <Reference Include="System.EnterpriseServices" />
     <Reference Include="System.Transactions" />
+    <Reference Include="System.Web" />
     <Reference Include="System.Web.Services" />
     <Reference Include="System.Xml" />
   </ItemGroup>
@@ -177,9 +178,17 @@
     <Compile Include="Util\Tuple.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BusContext.cs" />
+    <Compile Include="CurrentMessage.cs" />
+    <Compile Include="Internal\IInboundMessageContext.cs" />
+    <Compile Include="Internal\InboundMessageContext.cs" />
+    <Compile Include="Internal\BusContextExtensions.cs" />
     <Compile Include="Configuration\EndpointFactoryConfigurator.cs" />
     <Compile Include="Configuration\IBusService.cs" />
     <Compile Include="Configuration\IEndpointConfigurator.cs" />
+    <Compile Include="Internal\IBusContext.cs" />
+    <Compile Include="Internal\IOutboundMessageContext.cs" />
+    <Compile Include="Internal\OutboundMessageContext.cs" />
     <Compile Include="IEndpointFactory.cs" />
     <Compile Include="Configuration\IEndpointFactoryConfigurator.cs" />
     <Compile Include="Configuration\IServiceBusConfigurator.cs" />

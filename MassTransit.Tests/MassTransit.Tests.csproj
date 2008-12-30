@@ -100,6 +100,7 @@
     <Compile Include="Grid\Workers\IntegerFactorizer.cs" />
     <Compile Include="Grid\IntegerFactorizer_Specs.cs" />
     <Compile Include="Grid\Messages\LongNumberFactored.cs" />
+    <Compile Include="MessageContext_Specs.cs" />
     <Compile Include="Services\HealthMonitoring\MonitorInfoSpecs.cs" />
     <Compile Include="Services\HealthMonitoring\When_a_suspect_is_received.cs" />
     <Compile Include="Services\HealthMonitoring\When_monitoring_health.cs" />
