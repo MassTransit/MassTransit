@@ -16,45 +16,37 @@ namespace MassTransit
 	using System.Collections.Generic;
 	using System.Runtime.Serialization;
 	using System.Transactions;
-	using Configuration;
 	using Exceptions;
 	using Internal;
 	using log4net;
+	using Magnum.Common.ObjectExtensions;
 	using Pipeline;
 	using Pipeline.Configuration;
 	using Subscriptions;
 	using Threading;
-	using Util;
 
 	/// <summary>
 	/// A service bus is used to attach message handlers (services) to endpoints, as well as 
 	/// communicate with other service bus instances in a distributed application
 	/// </summary>
-	public partial class ServiceBus :
+	public class ServiceBus :
 		IServiceBus
 	{
 		private static readonly ILog _log;
 
 		private readonly DispatcherContext _dispatcherContext;
 		private readonly IEndpointFactory _endpointFactory;
+		private readonly ISubscriptionEvent _inboundSubscriptionEvent;
 		private readonly IObjectBuilder _objectBuilder;
+		private int _concurrentReceiveThreads = 1;
 		private bool _disposed;
-		private IEndpoint _endpointToListenOn;
 		private MessagePipeline _inbound;
-		private ISubscriptionEvent _inboundSubscriptionEvent;
 		private MessagePipeline _outbound;
-		private TimeSpan _receiveTimeout = TimeSpan.FromSeconds(3);
-		private ISubscriptionCache _subscriptionCache;
-		private ITypeInfoCache _typeInfoCache;
+		private ResourceLock<IEndpoint> _receiveThreadLock;
 		private volatile bool _started;
-		private ResourceLock<IEndpoint> _readerLock;
 		private DynamicThreadPool _threadPool;
-        //threading config stuff?
-        private TimeSpan _threadTimeout;
-        private int _readThreadLimit = 1;
-        private int _minThreads = 1;
-		private int _maxThreads = Environment.ProcessorCount*4;
-		
+		private readonly TimeSpan _threadTimeout = TimeSpan.FromSeconds(60);
+		private ITypeInfoCache _typeInfoCache;
 
 		static ServiceBus()
 		{
@@ -71,21 +63,9 @@ namespace MassTransit
 		}
 
 		/// <summary>
-		/// Uses an in-memory subscription manager and the default object builder
-		/// </summary>
-		public ServiceBus(IEndpoint endpointToListenOn, IObjectBuilder objectBuilder)
-			: this(endpointToListenOn, objectBuilder, new LocalSubscriptionCache())
-		{
-		}
-
-		public ServiceBus(IEndpoint endpointToListenOn, IObjectBuilder objectBuilder,
-		                  ISubscriptionCache subscriptionCache)
-			: this(endpointToListenOn, objectBuilder, subscriptionCache, EndpointFactoryConfigurator.New(x => x.SetObjectBuilder(objectBuilder)), new TypeInfoCache())
-		{
-		}
-
-		/// <summary>
-		/// Uses the specified subscription cache
+		/// Creates an instance of the ServiceBus, which implements IServiceBus. This is normally
+		/// not called and should be created using the ServiceBusConfigurator to ensure proper defaults 
+		/// and operation.
 		/// </summary>
 		public ServiceBus(IEndpoint endpointToListenOn,
 		                  IObjectBuilder objectBuilder,
@@ -93,72 +73,60 @@ namespace MassTransit
 		                  IEndpointFactory endpointFactory,
 		                  ITypeInfoCache typeInfoCache)
 		{
-			Check.Parameter(endpointToListenOn).WithMessage("endpointToListenOn").IsNotNull();
-			Check.Parameter(subscriptionCache).WithMessage("subscriptionCache").IsNotNull();
+			ReceiveTimeout = TimeSpan.FromSeconds(3);
+			endpointToListenOn.MustNotBeNull("endpointToListenOn", "This parameter cannot be null");
+			objectBuilder.MustNotBeNull("objectBuilder", "This parameter cannot be null");
+			subscriptionCache.MustNotBeNull("subscriptionCache", "This parameter cannot be null");
+			endpointFactory.MustNotBeNull("endpointFactory", "This parameter cannot be null");
+			typeInfoCache.MustNotBeNull("typeInfoCache", "This parameter cannot be null");
 
-			_endpointToListenOn = endpointToListenOn;
-			_subscriptionCache = subscriptionCache;
+			Endpoint = endpointToListenOn;
+			SubscriptionCache = subscriptionCache;
 			_objectBuilder = objectBuilder;
 			_endpointFactory = endpointFactory;
-
 			_typeInfoCache = typeInfoCache;
 
-			_threadTimeout = TimeSpan.FromSeconds(60);
-
-			_inboundSubscriptionEvent = new SubscriptionCacheEventConnector(_subscriptionCache, _endpointToListenOn);
+			_inboundSubscriptionEvent = new SubscriptionCacheEventConnector(SubscriptionCache, Endpoint);
 
 			_inbound = MessagePipelineConfigurator.CreateDefault(_objectBuilder, _inboundSubscriptionEvent);
 
 			_outbound = MessagePipelineConfigurator.CreateDefault(_objectBuilder, null);
 
-			_dispatcherContext = new DispatcherContext(_objectBuilder, this, _subscriptionCache);
+			_dispatcherContext = new DispatcherContext(_objectBuilder, this, SubscriptionCache);
+
+			_threadPool = new DynamicThreadPool(ReceiveFromEndpoint, 1, Environment.ProcessorCount*4);
 
 			PoisonEndpoint = new PoisonEndpointDecorator(new NullEndpoint());
 		}
 
-		public ISubscriptionCache SubscriptionCache
+		public static IServiceBus Null { get; private set; }
+
+		public ISubscriptionCache SubscriptionCache { get; private set; }
+
+		public TimeSpan ReceiveTimeout { get; set; }
+
+		public int MinimumConsumerThreads
 		{
-			get { return _subscriptionCache; }
+			get { return _threadPool.MinThreads; }
+			set { _threadPool.MinThreads = value; }
 		}
 
-		public int MinThreadCount
+		public int MaximumConsumerThreads
 		{
-			get { return _minThreads; }
-			set
-			{
-				_minThreads = value;
-				if (_threadPool != null)
-					_threadPool.MinThreads = value;
-			}
+			get { return _threadPool.MaxThreads; }
+			set { _threadPool.MaxThreads = value; }
 		}
 
-		public int MaxThreadCount
+		public int ConcurrentReceiveThreads
 		{
-			get { return _maxThreads; }
+			get { return _concurrentReceiveThreads; }
 			set
 			{
-				_maxThreads = value;
-				if (_threadPool != null)
-					_threadPool.MaxThreads = value;
-			}
-		}
-
-		public int ReadThreadCount
-		{
-			get { return _readThreadLimit; }
-			set
-			{
-				if (_threadPool != null)
+				if (_started)
 					throw new ConfigurationException("The read thread count cannot be changed once the bus is in motion. Beep! Beep!");
 
-				_readThreadLimit = value;
+				_concurrentReceiveThreads = value;
 			}
-		}
-
-		public TimeSpan ReceiveTimeout
-		{
-			get { return _receiveTimeout; }
-			set { _receiveTimeout = value; }
 		}
 
 		public void Dispose()
@@ -166,7 +134,6 @@ namespace MassTransit
 			Dispose(true);
 			GC.SuppressFinalize(this);
 		}
-
 
 		/// <summary>
 		/// Publishes a message to all subscribed consumers for the message type
@@ -180,7 +147,7 @@ namespace MassTransit
 			IList<Subscription> subs = info.GetConsumers(_dispatcherContext, message);
 
 			if (_log.IsWarnEnabled && subs.Count == 0)
-				_log.WarnFormat("There are no subscriptions for the message type {0} for the bus listening on {1}", typeof (T).FullName, _endpointToListenOn.Uri);
+				_log.WarnFormat("There are no subscriptions for the message type {0} for the bus listening on {1}", typeof (T).FullName, Endpoint.Uri);
 
 			List<Uri> done = new List<Uri>();
 
@@ -196,6 +163,10 @@ namespace MassTransit
 			}
 		}
 
+		/// <summary>
+		/// This is becoming obsolete with the new MakeRequest syntax.
+		/// </summary>
+		/// <returns></returns>
 		public RequestBuilder Request()
 		{
 			return new RequestBuilder(this);
@@ -204,10 +175,7 @@ namespace MassTransit
 		/// <summary>
 		/// The endpoint associated with this instance
 		/// </summary>
-		public IEndpoint Endpoint
-		{
-			get { return _endpointToListenOn; }
-		}
+		public IEndpoint Endpoint { get; private set; }
 
 		/// <summary>
 		/// The poison endpoint associated with this instance where exception messages are sent
@@ -284,9 +252,10 @@ namespace MassTransit
 			if (_started)
 				return;
 
-			_readerLock = new ResourceLock<IEndpoint>(_endpointToListenOn, _readThreadLimit);
-			_threadPool = new DynamicThreadPool(ReceiveFromEndpoint, _minThreads, _maxThreads);
+			_receiveThreadLock = new ResourceLock<IEndpoint>(Endpoint, ConcurrentReceiveThreads);
 			_threadPool.Start();
+
+			_started = true;
 		}
 
 		protected virtual void Dispose(bool disposing)
@@ -294,7 +263,7 @@ namespace MassTransit
 			if (_disposed) return;
 			if (disposing)
 			{
-				_readerLock.Shutdown();
+				_receiveThreadLock.Shutdown();
 
 				if (_threadPool != null)
 				{
@@ -306,8 +275,8 @@ namespace MassTransit
 				_typeInfoCache.Dispose();
 				_typeInfoCache = null;
 
-				_subscriptionCache.Dispose();
-				_subscriptionCache = null;
+				SubscriptionCache.Dispose();
+				SubscriptionCache = null;
 
 				_inbound.Dispose();
 				_inbound = null;
@@ -315,8 +284,8 @@ namespace MassTransit
 				_outbound.Dispose();
 				_outbound = null;
 
-				_endpointToListenOn.Dispose();
-				_endpointToListenOn = null;
+				Endpoint.Dispose();
+				Endpoint = null;
 
 				if (PoisonEndpoint != null)
 				{
@@ -333,7 +302,7 @@ namespace MassTransit
 
 			try
 			{
-				using (var resourceLock = _readerLock.AcquireLock(ThreadTimeout))
+				using (var resourceLock = _receiveThreadLock.AcquireLock(_threadTimeout))
 				{
 					foreach (IMessageSelector selector in resourceLock.Resource.SelectiveReceive(ReceiveTimeout))
 					{
@@ -364,7 +333,7 @@ namespace MassTransit
 						}
 						catch (Exception ex)
 						{
-							_log.Error(string.Format("An exception occurred receiving a message from '{0}'", _endpointToListenOn.Uri), ex);
+							_log.Error(string.Format("An exception occurred receiving a message from '{0}'", Endpoint.Uri), ex);
 						}
 					}
 				}
@@ -381,11 +350,6 @@ namespace MassTransit
 			}
 
 			return performedWork;
-		}
-
-		private TimeSpan ThreadTimeout
-		{
-			get { return _threadTimeout; }
 		}
 
 		private bool DispatchMessageToConsumers(IResourceLockScope<IEndpoint> resourceLock, IMessageSelector selector, object message)
@@ -406,7 +370,7 @@ namespace MassTransit
 				catch (Exception ex)
 				{
 					_log.Error(string.Format("'{0}' threw an exception consuming message '{1}'",
-						consumer.GetType().FullName, message.GetType().FullName), ex);
+					                         consumer.GetType().FullName, message.GetType().FullName), ex);
 
 					atLeastOneConsumerFailed = true;
 

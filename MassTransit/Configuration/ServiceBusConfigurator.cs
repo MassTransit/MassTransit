@@ -18,33 +18,22 @@ namespace MassTransit.Configuration
 	using Subscriptions;
 
 	public class ServiceBusConfigurator :
+		ServiceBusConfiguratorDefaults,
 		IServiceBusConfigurator
 	{
 		private static readonly ServiceBusConfiguratorDefaults _defaults = new ServiceBusConfiguratorDefaults();
-		private bool _autoStart = true;
-		private bool _autoSubscribe;
-		private Uri _errorUri;
-		private Uri _listenToUri;
-		private IObjectBuilder _objectBuilder;
-		private TimeSpan _receiveTimeout;
-		private int _threadLimit;
-		private int _receiveThreadLimit;
+		private Uri _receiveFromUri;
 
 		private ServiceBusConfigurator()
 		{
 			_defaults.ApplyTo(this);
 		}
 
-		public void SetObjectBuilder(IObjectBuilder builder)
-		{
-			_objectBuilder = builder;
-		}
-
 		public void ReceiveFrom(string uriString)
 		{
 			try
 			{
-				_listenToUri = new Uri(uriString);
+				_receiveFromUri = new Uri(uriString);
 			}
 			catch (UriFormatException ex)
 			{
@@ -54,54 +43,12 @@ namespace MassTransit.Configuration
 
 		public void ReceiveFrom(Uri uri)
 		{
-			_listenToUri = uri;
-		}
-
-		public void SendErrorsTo(string uriString)
-		{
-			try
-			{
-				_errorUri = new Uri(uriString);
-			}
-			catch (UriFormatException ex)
-			{
-				throw new ConfigurationException("The Uri for the error endpoint is invalid: " + uriString, ex);
-			}
-		}
-
-		public void SendErrorsTo(Uri uri)
-		{
-			_errorUri = uri;
-		}
-
-		public void SetThreadLimit(int threadLimit)
-		{
-			_threadLimit = threadLimit;
-		}
-
-		public void EnableAutoSubscribe()
-		{
-			_autoSubscribe = true;
-		}
-
-		public void DisableAutoStart()
-		{
-			_autoStart = false;
+			_receiveFromUri = uri;
 		}
 
 		public void ConfigureService<TServiceConfigurator>(Action<TServiceConfigurator> action) where TServiceConfigurator : IServiceConfigurator
 		{
 			throw new NotImplementedException();
-		}
-
-		public void SetReceiveTimeout(TimeSpan timeout)
-		{
-			_receiveTimeout = timeout;
-		}
-
-		public void SetReceiveThreadLimit(int receiveThreadLimit)
-		{
-			_receiveThreadLimit = receiveThreadLimit;
 		}
 
 		public static IServiceBus New(Action<IServiceBusConfigurator> action)
@@ -116,39 +63,38 @@ namespace MassTransit.Configuration
 
 		private IServiceBus Create()
 		{
-			IEndpointFactory endpointFactory = _objectBuilder.GetInstance<IEndpointFactory>();
+			IEndpointFactory endpointFactory = ObjectBuilder.GetInstance<IEndpointFactory>();
 
-			IEndpoint endpoint = endpointFactory.GetEndpoint(_listenToUri);
+			IEndpoint endpoint = endpointFactory.GetEndpoint(_receiveFromUri);
 
-			ISubscriptionCache subscriptionCache = _objectBuilder.GetInstance<ISubscriptionCache>() ?? new LocalSubscriptionCache();
-			ITypeInfoCache typeInfoCache = _objectBuilder.GetInstance<ITypeInfoCache>() ?? new TypeInfoCache();
+			ISubscriptionCache subscriptionCache = ObjectBuilder.GetInstance<ISubscriptionCache>() ?? new LocalSubscriptionCache();
+			ITypeInfoCache typeInfoCache = ObjectBuilder.GetInstance<ITypeInfoCache>() ?? new TypeInfoCache();
 
-			ServiceBus bus = new ServiceBus(endpoint, _objectBuilder, subscriptionCache, endpointFactory, typeInfoCache);
+			ServiceBus bus = new ServiceBus(endpoint, ObjectBuilder, subscriptionCache, endpointFactory, typeInfoCache);
 
-			if (_errorUri != null)
+			if (ErrorUri != null)
 			{
-				IEndpoint poisonEndpoint = endpointFactory.GetEndpoint(_errorUri);
+				IEndpoint poisonEndpoint = endpointFactory.GetEndpoint(ErrorUri);
 				bus.PoisonEndpoint = poisonEndpoint;
 			}
 
-			if (_threadLimit > 0)
-				bus.MaxThreadCount = _threadLimit;
+			if (ConcurrentConsumerLimit > 0)
+				bus.MaximumConsumerThreads = ConcurrentConsumerLimit;
 
-			if(_receiveThreadLimit > 0)
-				bus.ReadThreadCount = _receiveThreadLimit;
+			if (ConcurrentReceiverLimit > 0)
+				bus.ConcurrentReceiveThreads = ConcurrentReceiverLimit;
 
-			bus.ReceiveTimeout = _receiveTimeout;
+			bus.ReceiveTimeout = ReceiveTimeout;
 
-			if (_autoStart)
-			{
-				bus.Start();
-			}
-
-			if (_autoSubscribe)
+			if (AutoSubscribe)
 			{
 				// get all the types and subscribe them to the bus
 			}
 
+			if (AutoStart)
+			{
+				bus.Start();
+			}
 			return bus;
 		}
 

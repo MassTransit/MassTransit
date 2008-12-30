@@ -14,6 +14,7 @@ namespace MassTransit.Tests
 {
     using System;
     using Configuration;
+    using MassTransit.Internal;
     using MassTransit.Serialization;
     using MassTransit.Subscriptions;
     using MassTransit.Transports;
@@ -33,8 +34,9 @@ namespace MassTransit.Tests
         private Subscription _subscription;
         private IObjectBuilder _builder;
         private IEndpointFactory _endpointResolver;
+    	private ITypeInfoCache _typeInfoCache;
 
-        protected override void Before_each()
+    	protected override void Before_each()
         {
             _builder = MockRepository.GenerateMock<IObjectBuilder>();
         	_builder.Stub(x => x.GetInstance<BinaryMessageSerializer>()).Return(new BinaryMessageSerializer());
@@ -45,10 +47,11 @@ namespace MassTransit.Tests
 			});
 
             _mockEndpoint = _endpointResolver.GetEndpoint(queueUri);
+    		_typeInfoCache = new TypeInfoCache();
 
             _mockSubscriptionCache = DynamicMock<ISubscriptionCache>();
             _subscription = new Subscription(typeof (PingMessage), queueUri);
-            _serviceBus = new ServiceBus(_mockEndpoint, _builder, _mockSubscriptionCache);
+        	_serviceBus = new ServiceBus(_mockEndpoint, _builder, _mockSubscriptionCache, _endpointResolver, _typeInfoCache);
         }
 
         protected override void After_each()

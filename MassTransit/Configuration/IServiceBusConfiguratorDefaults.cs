@@ -14,13 +14,38 @@ namespace MassTransit.Configuration
 {
 	using System;
 
+	/// <summary>
+	/// Enables the configuration of items that can be shared between multiple ServiceBus instances
+	/// </summary>
 	public interface IServiceBusConfiguratorDefaults
 	{
 		/// <summary>
-		/// Set the default object builder for all service buses created
+		/// Specify the IObjectBuilder to use when creating objects
 		/// </summary>
 		/// <param name="objectBuilder"></param>
 		void SetObjectBuilder(IObjectBuilder objectBuilder);
+
+		/// <summary>
+		/// Specify the endpoint where errors should be sent
+		/// </summary>
+		/// <param name="uriString">The Uri of the endpoint</param>
+		void SendErrorsTo(string uriString);
+
+		/// <summary>
+		/// Specify the endpoint where errors should be sent
+		/// </summary>
+		/// <param name="uri">The Uri of the endpoint</param>
+		void SendErrorsTo(Uri uri);
+
+		/// <summary>
+		/// Enable the automatic subscription feature to subscribe all consumers found using the object builder
+		/// </summary>
+		void EnableAutoSubscribe();
+
+		/// <summary>
+		/// Do not start the ServiceBus when it is created
+		/// </summary>
+		void DisableAutoStart();
 
 		/// <summary>
 		/// Set the default receive timeout for newly created buses
@@ -33,15 +58,15 @@ namespace MassTransit.Configuration
 		/// Set the maximum number of concurrent consumers that can be active at any time. For consumers
 		/// performing high-latency, low-CPU operations, settings this number higher may increase throughput.
 		/// </summary>
-		/// <param name="threadLimit"></param>
-		void SetThreadLimit(int threadLimit);
+		/// <param name="concurrentConsumerLimit"></param>
+		void SetConcurrentConsumerLimit(int concurrentConsumerLimit);
 
 		/// <summary>
 		/// Set the maximum number of concurrent threads that are receiving messages from the endpoint.
 		/// In most cases, this can be left at the default value of 1, but can be increased when using
 		/// transactional queues.
 		/// </summary>
-		/// <param name="receiveThreadLimit"></param>
-		void SetReceiveThreadLimit(int receiveThreadLimit);
+		/// <param name="concurrentReceiverLimit"></param>
+		void SetConcurrentReceiverLimit(int concurrentReceiverLimit);
 	}
 }
