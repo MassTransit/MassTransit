@@ -19,15 +19,13 @@ namespace MassTransit.Services.HealthMonitoring
         private readonly Uri _uri;
         private readonly int _secondsBetweenBeats;
         private readonly DateTime? _firstDetectedAt;
-        private DateTime? _lastDetectedAt;
-        private DateTime? _lastFaultDetectedAt;
 
         public HealthInformation(Uri uri, int secondsBetweenBeats)
         {
             _uri = uri;
             _secondsBetweenBeats = secondsBetweenBeats;
             _firstDetectedAt = DateTime.Now;
-            _lastFaultDetectedAt = FirstDetectedAt;
+            LastFaultDetectedAt = FirstDetectedAt;
         }
 
         public Uri Uri
@@ -45,16 +43,8 @@ namespace MassTransit.Services.HealthMonitoring
             get { return _firstDetectedAt; }
         }
 
-        public DateTime? LastDetectedAt
-        {
-            get { return _lastDetectedAt; }
-            set { _lastDetectedAt = value; }
-        }
+        public DateTime? LastDetectedAt { get; set; }
 
-        public DateTime? LastFaultDetectedAt
-        {
-            get { return _lastFaultDetectedAt; }
-            set { _lastFaultDetectedAt = value; }
-        }
+        public DateTime? LastFaultDetectedAt { get; set; }
     }
 }

@@ -224,29 +224,6 @@ namespace MassTransit
 			throw new NotSupportedException("This needs fixed");
 		}
 
-		[Obsolete]
-		public void Dispatch(object message)
-		{
-			if (message == null)
-				return;
-
-			try
-			{
-				_inbound.Dispatch(message);
-			}
-			catch (Exception ex)
-			{
-				//retry
-				SpecialLoggers.Iron.Error("An error was caught in the ServiceBus.IronDispatcher", ex);
-
-				IPublicationTypeInfo info = _typeInfoCache.GetPublicationTypeInfo(message.GetType());
-				info.PublishFault(this, ex, message);
-
-
-				PoisonEndpoint.Send(message, TimeSpan.Zero);
-			}
-		}
-
 		public void Start()
 		{
 			if (_started)
