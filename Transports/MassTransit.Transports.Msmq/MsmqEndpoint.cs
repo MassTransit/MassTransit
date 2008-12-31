@@ -15,7 +15,6 @@ namespace MassTransit.Transports.Msmq
 	using System;
 	using System.Collections.Generic;
 	using System.Messaging;
-	using System.Runtime.Serialization;
 	using System.Threading;
 	using System.Transactions;
 	using Configuration;

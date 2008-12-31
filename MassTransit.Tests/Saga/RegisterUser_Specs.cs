@@ -37,12 +37,12 @@ namespace MassTransit.Tests.Saga
 			ObjectBuilder.Stub(x => x.GetInstance<ISagaRepository<RegisterUserSaga>>())
 				.Return(sagaRepository);
 
-			ObjectBuilder.Stub(x => x.GetInstance<InitiateSagaMessageSink<RegisterUserSaga, Messages.RegisterUser>>(new Hashtable()))
+			ObjectBuilder.Stub(x => x.GetInstance<InitiateSagaMessageSink<RegisterUserSaga, RegisterUser>>(new Hashtable()))
 				.IgnoreArguments()
 				.Return(null)
 				.WhenCalled(invocation => 
 					invocation.ReturnValue = 
-					new InitiateSagaMessageSink<RegisterUserSaga, Messages.RegisterUser>(
+					new InitiateSagaMessageSink<RegisterUserSaga, RegisterUser>(
 						((Hashtable)invocation.Arguments[0])["context"] as IInterceptorContext,
 						RemoteBus, 
 						sagaRepository));

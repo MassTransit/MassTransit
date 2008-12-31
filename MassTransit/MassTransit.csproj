@@ -220,7 +220,7 @@
     <Compile Include="Pipeline\Inspectors\PipelineInspectorBase.cs" />
     <Compile Include="Serialization\BinaryMessageEnvelope.cs" />
     <Compile Include="Serialization\ExtensionsToMessageEnvelope.cs" />
-    <Compile Include="ServiceBusExtensions.cs" />
+    <Compile Include="ExtensionsToServiceBus.cs" />
     <Compile Include="Services\Metadata\Client\MessageModelFilter.cs" />
     <Compile Include="Services\Metadata\Domain\IMetadataRepository.cs" />
     <Compile Include="Services\Metadata\Domain\MessageMetadata.cs" />
@@ -238,7 +238,7 @@
     <Compile Include="Services\Subscriptions\Client\RemoteSubscriptionCoordinator.cs" />
     <Compile Include="Services\Subscriptions\Messages\SubscriptionInformation.cs" />
     <Compile Include="Services\Subscriptions\Server\RemoteEndpointCoordinator.cs" />
-    <Compile Include="SubscriptionCacheEventConnector.cs" />
+    <Compile Include="Internal\SubscriptionCacheEventConnector.cs" />
     <Compile Include="Threading\IResourceLockScope.cs" />
     <Compile Include="Threading\ResourceLock.cs" />
     <Compile Include="Threading\ResourceLockException.cs" />

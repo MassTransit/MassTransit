@@ -16,7 +16,7 @@ namespace MassTransit
 	using Internal;
 	using Internal.RequestResponse;
 
-	public static class ServiceBusExtensions
+	public static class ExtensionsToServiceBus
 	{
 		/// <summary>
 		/// Make a request to a service and wait for the response to be received, built
