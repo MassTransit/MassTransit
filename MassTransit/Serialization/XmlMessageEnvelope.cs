@@ -19,7 +19,7 @@ namespace MassTransit.Serialization
     /// </summary>
     [XmlRoot(ElementName = "MessageEnvelope")]
     public class XmlMessageEnvelope :
-        BaseMessageEnvelope
+        MessageEnvelopeBase
     {
         protected XmlMessageEnvelope()
         {

@@ -216,6 +216,8 @@
     <Compile Include="Pipeline\Configuration\MessageFilterConfigurator.cs" />
     <Compile Include="Pipeline\Configuration\MessageFilterConfiguratorScope.cs" />
     <Compile Include="Pipeline\Inspectors\PipelineInspectorBase.cs" />
+    <Compile Include="Serialization\BinaryMessageEnvelope.cs" />
+    <Compile Include="Serialization\ExtensionsToMessageEnvelope.cs" />
     <Compile Include="ServiceBusExtensions.cs" />
     <Compile Include="Services\Metadata\Client\MessageModelFilter.cs" />
     <Compile Include="Services\Metadata\Domain\IMetadataRepository.cs" />
@@ -291,7 +293,7 @@
     <Compile Include="Saga\Pipeline\SagaMessageSinkBase.cs" />
     <Compile Include="Pipeline\Sinks\SelectedComponentMessageSink.cs" />
     <Compile Include="TranslateTo.cs" />
-    <Compile Include="Serialization\BaseMessageEnvelope.cs" />
+    <Compile Include="Serialization\MessageEnvelopeBase.cs" />
     <Compile Include="Serialization\BinaryMessageSerializer.cs" />
     <Compile Include="Serialization\IMessageSerializer.cs" />
     <Compile Include="Serialization\JsonMessageEnvelope.cs" />

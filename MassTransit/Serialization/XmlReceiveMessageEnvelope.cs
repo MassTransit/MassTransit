@@ -22,7 +22,7 @@ namespace MassTransit.Serialization
     /// </summary>
     [XmlRoot(ElementName = "MessageEnvelope")]
     public class XmlReceiveMessageEnvelope :
-        BaseMessageEnvelope
+        MessageEnvelopeBase
     {
         [XmlAnyElement]
         public XmlNode Message { get; set; }

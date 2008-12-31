@@ -15,7 +15,7 @@ namespace MassTransit.Serialization
 	using Newtonsoft.Json;
 
 	public class JsonMessageEnvelope :
-		BaseMessageEnvelope
+		MessageEnvelopeBase
 	{
 		public JsonMessageEnvelope()
 		{
