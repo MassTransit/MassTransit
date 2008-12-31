@@ -14,36 +14,38 @@ namespace MassTransit.Internal
 {
 	using System;
 
-	public class OutboundMessageContext :
+	public class OutboundMessageContext : 
+		MessageContextBase,
 		IOutboundMessageContext
 	{
-		private Uri _faultsTo;
-		private Uri _replyTo;
-
-		public Uri ReplyTo
+		public void SendResponseTo(IServiceBus bus)
 		{
-			get { return _replyTo; }
+			ResponseAddress = bus.Endpoint.Uri;
 		}
 
-		public Uri FaultsTo
+		public void SendResponseTo(IEndpoint endpoint)
 		{
-			get { return _faultsTo; }
+			ResponseAddress = endpoint.Uri;
 		}
 
-		public void SendReplyTo(IServiceBus bus)
+		public void SendFaultTo(IServiceBus bus)
 		{
-			_replyTo = bus.Endpoint.Uri;
+			FaultAddress = bus.Endpoint.Uri;
 		}
 
-		public void SendReplyTo(IEndpoint endpoint)
+		public void SendFaultTo(IEndpoint endpoint)
 		{
-			_replyTo = endpoint.Uri;
+			FaultAddress = endpoint.Uri;
 		}
 
-		public void Clear()
+		public void SetDestinationAddress(Uri uri)
 		{
-			_replyTo = null;
-			_faultsTo = null;
+			DestinationAddress = uri;
+		}
+
+		public void SetSourceAddress(Uri uri)
+		{
+			SourceAddress = uri;
 		}
 	}
 }

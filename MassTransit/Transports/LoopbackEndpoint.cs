@@ -105,6 +105,8 @@ namespace MassTransit.Transports
 
 		private void Enqueue<T>(T message)
 		{
+			BusContext.Current.OutboundMessage(x => x.SetDestinationAddress(Uri));
+
 			using (MemoryStream mstream = new MemoryStream())
 			{
 				_serializer.Serialize(mstream, message);

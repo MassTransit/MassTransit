@@ -40,7 +40,7 @@ namespace MassTransit.Tests
 				{
 					pong.Set(new PongMessage(message.CorrelationId));
 
-					CurrentMessage.Reply(pong.Message);
+					CurrentMessage.Respond(pong.Message);
 				});
 
 			LocalBus.Publish(ping);
@@ -65,18 +65,86 @@ namespace MassTransit.Tests
 			FutureMessage<PongMessage> pong = new FutureMessage<PongMessage>();
 
 			RemoteBus.Subscribe<PingMessage>(message =>
-			{
-				pong.Set(new PongMessage(message.CorrelationId));
+				{
+					pong.Set(new PongMessage(message.CorrelationId));
 
-				CurrentMessage.Reply(pong.Message);
-			});
+					CurrentMessage.Respond(pong.Message);
+				});
 
-			LocalBus.Publish(ping, x => x.SendReplyTo(LocalBus));
+			LocalBus.Publish(ping, context => context.SendResponseTo(LocalBus));
 
 			Assert.IsTrue(pong.IsAvailable(3.Seconds()), "No pong generated");
 
 			consumer.ShouldHaveReceivedMessage(pong.Message, 3.Seconds());
 			otherConsumer.ShouldNotHaveReceivedMessage(pong.Message, 1.Seconds());
+		}
+
+		[Test]
+		public void The_destination_address_should_pass()
+		{
+			FutureMessage<PingMessage> received = new FutureMessage<PingMessage>();
+
+			LocalBus.Subscribe<PingMessage>(message =>
+				{
+					Assert.AreEqual(LocalBus.Endpoint.Uri, CurrentMessage.DestinationAddress);
+
+					received.Set(message);
+				});
+
+			LocalBus.Publish(new PingMessage());
+
+			Assert.IsTrue(received.IsAvailable(5.Seconds()), "No message was received");
+		}
+
+		[Test]
+		public void The_fault_address_should_pass()
+		{
+			FutureMessage<PingMessage> received = new FutureMessage<PingMessage>();
+
+			LocalBus.Subscribe<PingMessage>(message =>
+				{
+					Assert.AreEqual(LocalBus.Endpoint.Uri, CurrentMessage.FaultAddress);
+
+					received.Set(message);
+				});
+
+			LocalBus.Publish(new PingMessage(), context => context.SendFaultTo(LocalBus));
+
+			Assert.IsTrue(received.IsAvailable(5.Seconds()), "No message was received");
+		}
+
+		[Test]
+		public void The_response_address_should_pass()
+		{
+			FutureMessage<PingMessage> received = new FutureMessage<PingMessage>();
+
+			LocalBus.Subscribe<PingMessage>(message =>
+				{
+					Assert.AreEqual(LocalBus.Endpoint.Uri, CurrentMessage.ResponseAddress);
+
+					received.Set(message);
+				});
+
+			LocalBus.Publish(new PingMessage(), context => context.SendResponseTo(LocalBus));
+
+			Assert.IsTrue(received.IsAvailable(5.Seconds()), "No message was received");
+		}
+
+		[Test]
+		public void The_source_address_should_pass()
+		{
+			FutureMessage<PingMessage> received = new FutureMessage<PingMessage>();
+
+			LocalBus.Subscribe<PingMessage>(message =>
+				{
+					Assert.AreEqual(LocalBus.Endpoint.Uri, CurrentMessage.SourceAddress);
+
+					received.Set(message);
+				});
+
+			LocalBus.Publish(new PingMessage());
+
+			Assert.IsTrue(received.IsAvailable(5.Seconds()), "No message was received");
 		}
 	}
 }

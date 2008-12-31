@@ -12,16 +12,38 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
+	using System;
 	using Internal;
 
 	public static class CurrentMessage
 	{
-		public static void Reply<T>(T message) where T : class
+		public static Uri SourceAddress
+		{
+			get { return BusContext.Current.InboundMessage().SourceAddress; }
+		}
+
+		public static Uri DestinationAddress
+		{
+			get { return BusContext.Current.InboundMessage().DestinationAddress; }
+		}
+
+		public static Uri ResponseAddress
+		{
+			get { return BusContext.Current.InboundMessage().ResponseAddress; }
+		}
+
+		public static Uri FaultAddress
+		{
+			get { return BusContext.Current.InboundMessage().FaultAddress; }
+		}
+
+		public static void Respond<T>(T message) where T : class
 		{
 			var context = BusContext.Current.InboundMessage();
-			if (context.ReplyTo != null)
+
+			if (context.ResponseAddress != null)
 			{
-				context.ReplyTo.Send(message);
+				context.GetResponseEndpoint().Send(message);
 			}
 			else
 			{

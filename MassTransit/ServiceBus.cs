@@ -149,18 +149,25 @@ namespace MassTransit
 
 			List<Uri> done = new List<Uri>();
 
+			var context = BusContext.Current.OutboundMessage();
+			
+			context.SetSourceAddress(Endpoint.Uri);
+
 			foreach (Subscription subscription in subs)
 			{
 				if (done.Contains(subscription.EndpointUri))
 					continue;
 
 				IEndpoint endpoint = EndpointFactory.GetEndpoint(subscription.EndpointUri);
+
+				context.SetDestinationAddress(endpoint.Uri);
+
 				endpoint.Send(message, info.TimeToLive);
 
 				done.Add(subscription.EndpointUri);
 			}
 
-			BusContext.Current.OutboundMessage().Clear();
+			context.Clear();
 		}
 
 		/// <summary>

@@ -19,43 +19,46 @@ namespace MassTransit.Serialization
     /// </summary>
     public abstract class BaseMessageEnvelope
     {
-        public string MessageType { get; set; }
+    	/// <summary>
+    	/// The source where the message originated
+    	/// </summary>
+    	public string SourceAddress { get; set; }
 
-        /// <summary>
-        /// A transport specific message identifier if appropriate
-        /// </summary>
-        public string MessageId { get; set; }
+    	/// <summary>
+    	/// The destination where the message was originally sent
+    	/// </summary>
+    	public string DestinationAddress { get; set; }
 
-        /// <summary>
-        /// Indicates the message this message is related to, such as a response
-        /// </summary>
-        public string RelatedTo { get; set; }
+    	/// <summary>
+    	/// A transport specific message identifier if appropriate
+    	/// </summary>
+    	public string MessageId { get; set; }
 
-        /// <summary>
-        /// A transport-specific correlation identifier if appropriate
-        /// </summary>
-        public string CorrelationId { get; set; }
+		/// <summary>
+		/// A higher-level conversation identifier that goes above any type of saga or request/response
+		/// </summary>
+		public string ConversationId { get; set; }
 
-        /// <summary>
-        /// The source where the message originated
-        /// </summary>
-        public string Source { get; set; }
+    	/// <summary>
+    	/// A correlation identifier for the message, if a saga or correlated message
+    	/// </summary>
+    	public string CorrelationId { get; set; }
 
-        /// <summary>
-        /// The destination where the message was originally sent
-        /// </summary>
-        public string Destination { get; set; }
-
-        /// <summary>
+    	/// <summary>
         /// The destination to use for replies to this message
         /// </summary>
-        public string ReplyTo { get; set; }
+        public string ResponseAddress { get; set; }
 
-        /// <summary>
+    	/// <summary>
         /// The destination to send any faults caused by this message
-        /// If not specified, faults are either sent to the ReplyTo address
-        /// If this nor ReplyTo is specified, faults are published
+        /// If not specified, faults are either sent to the ResponseAddress address
+        /// If this nor ResponseAddress is specified, faults are published
         /// </summary>
-        public string FaultTo { get; set; }
+        public string FaultAddress { get; set; }
+
+		/// <summary>
+		/// The type of the message, including the full name and assembly
+		/// </summary>
+    	public string MessageType { get; set; }
     }
 }
