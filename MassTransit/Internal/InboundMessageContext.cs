@@ -19,18 +19,22 @@ namespace MassTransit.Internal
 	{
 		public Type MessageType { get; set; }
 
-		public IEndpoint ReplyTo
-		{
-			get { throw new NotImplementedException(); }
-		}
+		public IEndpoint ReplyTo { get; set; }
 
-		public IServiceBus Bus
-		{
-			get { throw new NotImplementedException(); }
-		}
+		public IServiceBus Bus { get; set; }
 
 		public void Clear()
 		{
+			MessageType = null;
+			ReplyTo = null;
+			Bus = null;
+		}
+
+		public void Initialize(IServiceBus bus)
+		{
+			Clear();
+
+			Bus = bus;
 		}
 	}
 }

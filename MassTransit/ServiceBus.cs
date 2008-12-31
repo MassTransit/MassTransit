@@ -306,7 +306,7 @@ namespace MassTransit
 				{
 					foreach (IMessageSelector selector in resourceLock.Resource.SelectiveReceive(ReceiveTimeout))
 					{
-						BusContext.Current.InboundMessage().Clear();
+						BusContext.Current.InboundMessage().Initialize(this);
 
 						performedWork = true;
 

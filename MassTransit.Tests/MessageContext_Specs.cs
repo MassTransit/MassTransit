@@ -13,8 +13,10 @@
 namespace MassTransit.Tests
 {
 	using System;
+	using Magnum.Common.DateTimeExtensions;
 	using Messages;
 	using NUnit.Framework;
+	using TestConsumers;
 	using TextFixtures;
 
 	[TestFixture]
@@ -24,7 +26,25 @@ namespace MassTransit.Tests
 		[Test]
 		public void A_consumer_should_be_able_to_get_at_the_headers()
 		{
-			LocalBus.Subscribe<PingMessage>(message => { CurrentMessage.Reply(new PongMessage(message.CorrelationId)); });
+			PingMessage ping = new PingMessage();
+
+			TestCorrelatedConsumer<PongMessage, Guid> consumer = new TestCorrelatedConsumer<PongMessage, Guid>(ping.CorrelationId);
+			LocalBus.Subscribe(consumer);
+
+			FutureMessage<PongMessage> pong = new FutureMessage<PongMessage>();
+
+			LocalBus.Subscribe<PingMessage>(message =>
+				{
+					pong.Set(new PongMessage(message.CorrelationId));
+
+					CurrentMessage.Reply(pong.Message);
+				});
+
+			LocalBus.Publish(ping);
+
+			Assert.IsTrue(pong.IsAvailable(1.Seconds()), "No pong generated");
+
+			consumer.ShouldHaveReceivedMessage(pong.Message, 1.Seconds());
 		}
 
 		[Test]
