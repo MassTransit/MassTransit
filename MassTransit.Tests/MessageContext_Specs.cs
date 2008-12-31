@@ -36,7 +36,7 @@ namespace MassTransit.Tests
 
 			FutureMessage<PongMessage> pong = new FutureMessage<PongMessage>();
 
-			LocalBus.Subscribe<PingMessage>(message =>
+			RemoteBus.Subscribe<PingMessage>(message =>
 				{
 					pong.Set(new PongMessage(message.CorrelationId));
 
@@ -45,47 +45,38 @@ namespace MassTransit.Tests
 
 			LocalBus.Publish(ping);
 
-			Assert.IsTrue(pong.IsAvailable(1.Seconds()), "No pong generated");
+			Assert.IsTrue(pong.IsAvailable(3.Seconds()), "No pong generated");
 
-			consumer.ShouldHaveReceivedMessage(pong.Message, 1.Seconds());
+			consumer.ShouldHaveReceivedMessage(pong.Message, 3.Seconds());
 			otherConsumer.ShouldHaveReceivedMessage(pong.Message, 1.Seconds());
 		}
 
 		[Test]
 		public void A_response_should_be_sent_directly_if_a_reply_address_is_specified()
 		{
-			var correlationId = Guid.NewGuid();
+			PingMessage ping = new PingMessage();
 
-			var pong = new PongMessage(correlationId);
+			TestMessageConsumer<PongMessage> otherConsumer = new TestMessageConsumer<PongMessage>();
+			RemoteBus.Subscribe(otherConsumer);
 
-//			LocalBus.Publish(pong, x =>
-//				{
-//					x.InResponseTo(correlationId.ToString());
-//				});
-//
-//
-//			var command = new UpdateMessage();
-//
-//			Uri _someUri= new Uri("loopback://localhost/mt_client");
-//			Uri _someOtherUri = new Uri("loopback://localhost/mt_client");
-//
-//			LocalBus.Publish(command, x =>
-//				{
-//					x.SendFaultsTo(_someUri);
-//					x.SendResponsesTo(_someOtherUri);
-//				});
-//
-//			LocalBus.Publish(command);
+			TestCorrelatedConsumer<PongMessage, Guid> consumer = new TestCorrelatedConsumer<PongMessage, Guid>(ping.CorrelationId);
+			LocalBus.Subscribe(consumer);
+
+			FutureMessage<PongMessage> pong = new FutureMessage<PongMessage>();
+
+			RemoteBus.Subscribe<PingMessage>(message =>
+			{
+				pong.Set(new PongMessage(message.CorrelationId));
+
+				CurrentMessage.Reply(pong.Message);
+			});
+
+			LocalBus.Publish(ping, x => x.SendReplyTo(LocalBus));
+
+			Assert.IsTrue(pong.IsAvailable(3.Seconds()), "No pong generated");
+
+			consumer.ShouldHaveReceivedMessage(pong.Message, 3.Seconds());
+			otherConsumer.ShouldNotHaveReceivedMessage(pong.Message, 1.Seconds());
 		}
 	}
-
-
-//
-//	public static class MoreExt
-//	{
-//		public static void Publish<T>(this IServiceBus bus, T message, Action<IMessageContext> action)
-//		{
-//			
-//		}
-//	}
 }

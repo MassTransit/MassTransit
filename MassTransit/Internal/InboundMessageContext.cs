@@ -17,24 +17,42 @@ namespace MassTransit.Internal
 	public class InboundMessageContext :
 		IInboundMessageContext
 	{
-		public Type MessageType { get; set; }
+		private ServiceBus _bus;
+		private Type _messageType;
+		private IEndpoint _replyTo;
 
-		public IEndpoint ReplyTo { get; set; }
+		public Type MessageType
+		{
+			get { return _messageType; }
+		}
 
-		public IServiceBus Bus { get; set; }
+		public IEndpoint ReplyTo
+		{
+			get { return _replyTo; }
+		}
+
+		public IServiceBus Bus
+		{
+			get { return _bus; }
+		}
 
 		public void Clear()
 		{
-			MessageType = null;
-			ReplyTo = null;
-			Bus = null;
+			_bus = null;
+			_messageType = null;
+			_replyTo = null;
 		}
 
-		public void Initialize(IServiceBus bus)
+		public void SetReplyTo(Uri uri)
+		{
+			_replyTo = _bus.EndpointFactory.GetEndpoint(uri);
+		}
+
+		public void Initialize(ServiceBus bus)
 		{
 			Clear();
 
-			Bus = bus;
+			_bus = bus;
 		}
 	}
 }

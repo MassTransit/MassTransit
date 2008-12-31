@@ -35,9 +35,8 @@ namespace MassTransit
 		private static readonly ILog _log;
 
 		private readonly DispatcherContext _dispatcherContext;
-		private readonly IEndpointFactory _endpointFactory;
 		private readonly ISubscriptionEvent _inboundSubscriptionEvent;
-		private readonly IObjectBuilder _objectBuilder;
+		private readonly TimeSpan _threadTimeout = TimeSpan.FromSeconds(60);
 		private int _concurrentReceiveThreads = 1;
 		private bool _disposed;
 		private MessagePipeline _inbound;
@@ -45,7 +44,6 @@ namespace MassTransit
 		private ResourceLock<IEndpoint> _receiveThreadLock;
 		private volatile bool _started;
 		private DynamicThreadPool _threadPool;
-		private readonly TimeSpan _threadTimeout = TimeSpan.FromSeconds(60);
 		private ITypeInfoCache _typeInfoCache;
 
 		static ServiceBus()
@@ -82,17 +80,17 @@ namespace MassTransit
 
 			Endpoint = endpointToListenOn;
 			SubscriptionCache = subscriptionCache;
-			_objectBuilder = objectBuilder;
-			_endpointFactory = endpointFactory;
+			ObjectBuilder = objectBuilder;
+			EndpointFactory = endpointFactory;
 			_typeInfoCache = typeInfoCache;
 
 			_inboundSubscriptionEvent = new SubscriptionCacheEventConnector(SubscriptionCache, Endpoint);
 
-			_inbound = MessagePipelineConfigurator.CreateDefault(_objectBuilder, _inboundSubscriptionEvent);
+			_inbound = MessagePipelineConfigurator.CreateDefault(ObjectBuilder, _inboundSubscriptionEvent);
 
-			_outbound = MessagePipelineConfigurator.CreateDefault(_objectBuilder, null);
+			_outbound = MessagePipelineConfigurator.CreateDefault(ObjectBuilder, null);
 
-			_dispatcherContext = new DispatcherContext(_objectBuilder, this, SubscriptionCache);
+			_dispatcherContext = new DispatcherContext(ObjectBuilder, this, SubscriptionCache);
 
 			_threadPool = new DynamicThreadPool(ReceiveFromEndpoint, 1, Environment.ProcessorCount*4);
 
@@ -100,9 +98,9 @@ namespace MassTransit
 		}
 
 		public static IServiceBus Null { get; private set; }
-
+		public IEndpointFactory EndpointFactory { get; private set; }
+		public IObjectBuilder ObjectBuilder { get; private set; }
 		public ISubscriptionCache SubscriptionCache { get; private set; }
-
 		public TimeSpan ReceiveTimeout { get; set; }
 
 		public int MinimumConsumerThreads
@@ -156,11 +154,13 @@ namespace MassTransit
 				if (done.Contains(subscription.EndpointUri))
 					continue;
 
-				IEndpoint endpoint = _endpointFactory.GetEndpoint(subscription.EndpointUri);
+				IEndpoint endpoint = EndpointFactory.GetEndpoint(subscription.EndpointUri);
 				endpoint.Send(message, info.TimeToLive);
 
 				done.Add(subscription.EndpointUri);
 			}
+
+			BusContext.Current.OutboundMessage().Clear();
 		}
 
 		/// <summary>
@@ -355,7 +355,7 @@ namespace MassTransit
 				catch (Exception ex)
 				{
 					_log.Error(string.Format("'{0}' threw an exception consuming message '{1}'",
-					                         consumer.GetType().FullName, message.GetType().FullName), ex);
+						consumer.GetType().FullName, message.GetType().FullName), ex);
 
 					atLeastOneConsumerFailed = true;
 

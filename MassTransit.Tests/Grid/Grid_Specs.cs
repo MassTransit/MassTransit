@@ -48,7 +48,7 @@ namespace MassTransit.Tests.Grid
 			_factorLongNumbers.WhenCompleted(x => _complete.Set());
 		}
 
-		[Test]
+		[Test, Ignore]
 		public void I_want_to_be_able_to_define_a_distributed_task_and_have_it_processed()
 		{
 			ObjectBuilder.Stub(x => x.GetInstance<FactorLongNumberWorker>()).Return(new FactorLongNumberWorker());

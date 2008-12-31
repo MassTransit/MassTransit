@@ -15,6 +15,7 @@ namespace MassTransit.Internal
 	public interface IInboundMessageContext
 	{
 		IEndpoint ReplyTo { get; }
+
 		IServiceBus Bus { get; }
 	}
 }

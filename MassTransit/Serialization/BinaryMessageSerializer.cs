@@ -12,10 +12,14 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Serialization
 {
-    using System.IO;
+	using System;
+	using System.Collections.Generic;
+	using System.IO;
+    using System.Runtime.Remoting.Messaging;
     using System.Runtime.Serialization;
     using System.Runtime.Serialization.Formatters.Binary;
-    using Util;
+	using Internal;
+	using Util;
 
     /// <summary>
     /// The binary message serializer used the .NET BinaryFormatter to serialize
@@ -24,19 +28,59 @@ namespace MassTransit.Serialization
     public class BinaryMessageSerializer
         : IMessageSerializer
     {
-        private static readonly IFormatter _formatter = new BinaryFormatter();
+		private static readonly BinaryFormatter _formatter = new BinaryFormatter();
 
         public void Serialize<T>(Stream output, T message)
         {
             Check.EnsureSerializable(message);
-            _formatter.Serialize(output, message);
+
+        	_formatter.Serialize(output, message, GetHeaders(message));
         }
 
-        public object Deserialize(Stream input)
+    	private static Header[] GetHeaders<T>(T message)
+    	{
+			List<Header> headers = new List<Header>();
+
+			var context = BusContext.Current.OutboundMessage();
+
+			if(context.ReplyTo != null)
+			{
+				headers.Add(new Header(MessageEnvelopeHeaders.ReplyTo, context.ReplyTo));
+			}
+
+    		return headers.ToArray();
+    	}
+
+    	public object Deserialize(Stream input)
         {
-            object obj = _formatter.Deserialize(input);
+            object obj = _formatter.Deserialize(input, DeserializeHeaderHandler);
 
             return obj;
         }
+
+    	private static object DeserializeHeaderHandler(Header[] headers)
+    	{
+			if (headers == null)
+				return null;
+
+    		var context = BusContext.Current.InboundMessage();
+
+    		for (int i = 0; i < headers.Length; i++)
+    		{
+				switch ( headers[i].Name)
+				{
+					case MessageEnvelopeHeaders.ReplyTo:
+						context.SetReplyTo((Uri) headers[i].Value);
+						break;
+				}
+    		}
+
+    		return null;
+    	}
     }
+
+	public static class MessageEnvelopeHeaders
+	{
+		public const string ReplyTo = "ReplyTo";
+	}
 }
