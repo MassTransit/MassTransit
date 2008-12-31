@@ -63,5 +63,15 @@ namespace MassTransit.Internal
 		{
 			return _bus.EndpointFactory.GetEndpoint(ResponseAddress);
 		}
+
+		public void SetMessage(object message)
+		{
+			Message = message;
+		}
+
+		public void SetRetryCount(int retryCount)
+		{
+			RetryCount = retryCount;
+		}
 	}
 }

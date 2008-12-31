@@ -20,9 +20,13 @@ namespace MassTransit.Internal
 		public Uri ResponseAddress { get; protected set; }
 		public Uri FaultAddress { get; protected set; }
 		public Uri SourceAddress { get; protected set; }
+		public int RetryCount { get; protected set; }
+		public object Message { get; protected set; }
 
 		public virtual void Clear()
 		{
+			RetryCount = 0;
+			Message = null;
 			DestinationAddress = null;
 			SourceAddress = null;
 			ResponseAddress = null;

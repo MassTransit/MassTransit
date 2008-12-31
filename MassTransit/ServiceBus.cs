@@ -284,13 +284,15 @@ namespace MassTransit
 		{
 			bool performedWork = false;
 
+			var context = BusContext.Current.InboundMessage();
+
 			try
 			{
 				using (var resourceLock = _receiveThreadLock.AcquireLock(_threadTimeout))
 				{
 					foreach (IMessageSelector selector in resourceLock.Resource.SelectiveReceive(ReceiveTimeout))
 					{
-						BusContext.Current.InboundMessage().Initialize(this);
+						context.Initialize(this);
 
 						performedWork = true;
 
@@ -300,7 +302,7 @@ namespace MassTransit
 							if (message == null)
 								continue;
 
-							//InboundMessageContext.SetIncomingMessage(message);
+							context.SetMessage(message);
 
 							using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required))
 							{
@@ -338,7 +340,7 @@ namespace MassTransit
 			}
 			finally
 			{
-				BusContext.Current.InboundMessage().Clear();
+				context.Clear();
 			}
 
 			return performedWork;

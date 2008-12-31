@@ -69,6 +69,9 @@ namespace MassTransit.Serialization
 				headers.Add(new Header(MessageEnvelopeHeaders.FaultAddress, context.FaultAddress));
 			}
 
+			if (context.RetryCount > 0)
+				headers.Add(new Header(MessageEnvelopeHeaders.RetryCount, context.RetryCount));
+
 			return headers.ToArray();
 		}
 
@@ -98,6 +101,10 @@ namespace MassTransit.Serialization
 					case MessageEnvelopeHeaders.FaultAddress:
 						context.SetFaultAddress((Uri) headers[i].Value);
 						break;
+
+					case MessageEnvelopeHeaders.RetryCount:
+						context.SetRetryCount((int) headers[i].Value);
+						break;
 				}
 			}
 
@@ -114,6 +121,7 @@ namespace MassTransit.Serialization
 		public const string MessageId = "MessageId";
 		public const string MessageType = "MessageType";
 		public const string ResponseAddress = "ResponseAddress";
+		public const string RetryCount = "RetryCount";
 		public const string SourceAddress = "SourceAddress";
 	}
 }
