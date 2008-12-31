@@ -12,12 +12,12 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Serialization
 {
-    /// <summary>
+	/// <summary>
     /// A base message envelope for transports that support enveloped messages
     /// This does not include the binary formatter, since it is retained for
     /// legacy support as a pure object formatter with no envelope
     /// </summary>
-    public abstract class BaseMessageEnvelope
+    public abstract class MessageEnvelopeBase
     {
     	/// <summary>
     	/// The source where the message originated
@@ -55,6 +55,12 @@ namespace MassTransit.Serialization
         /// If this nor ResponseAddress is specified, faults are published
         /// </summary>
         public string FaultAddress { get; set; }
+
+		/// <summary>
+		/// The number of times the message has been retried by a consumer
+		/// Starts at zero and is incremented every time the message is scheduled for retry
+		/// </summary>
+		public int RetryCount { get; set; }
 
 		/// <summary>
 		/// The type of the message, including the full name and assembly
