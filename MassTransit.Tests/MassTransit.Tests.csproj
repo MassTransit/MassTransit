@@ -101,7 +101,8 @@
     <Compile Include="Grid\IntegerFactorizer_Specs.cs" />
     <Compile Include="Grid\Messages\LongNumberFactored.cs" />
     <Compile Include="MessageContext_Specs.cs" />
-    <Compile Include="Services\HealthMonitoring\MonitorInfoSpecs.cs" />
+    <Compile Include="Services\HealthMonitoring\Specs_MonitorInfo.cs" />
+    <Compile Include="Services\HealthMonitoring\The_health_service_lifetime.cs" />
     <Compile Include="Services\HealthMonitoring\When_a_suspect_is_received.cs" />
     <Compile Include="Services\HealthMonitoring\When_monitoring_health.cs" />
     <Compile Include="Services\HealthMonitoring\When_monitoring_heartbeats.cs" />

@@ -7,7 +7,7 @@ namespace MassTransit.Tests.Services.HealthMonitoring
     using NUnit.Framework;
     using TextFixtures;
 
-    public class MonitorInfoSpecs :
+    public class Specs_MonitorInfo :
         LoopbackLocalAndRemoteTestFixture
     {
         [Test]
