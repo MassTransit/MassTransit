@@ -180,6 +180,7 @@
   <ItemGroup>
     <Compile Include="BusContext.cs" />
     <Compile Include="CurrentMessage.cs" />
+    <Compile Include="Internal\DisposableUnsubscribeAction.cs" />
     <Compile Include="Internal\IInboundMessageContext.cs" />
     <Compile Include="Internal\IMessageContext.cs" />
     <Compile Include="Internal\InboundMessageContext.cs" />
@@ -211,6 +212,7 @@
     <Compile Include="Batch\BatchMessage.cs" />
     <Compile Include="Batch\Pipeline\BatchMessageRouterConfigurator.cs" />
     <Compile Include="Batch\Pipeline\BatchMessageRouterConfiguratorScope.cs" />
+    <Compile Include="Internal\IUnsubscribeAction.cs" />
     <Compile Include="Pipeline\Configuration\CorrelatedMessageRouterConfigurator.cs" />
     <Compile Include="Pipeline\Configuration\CorrelatedMessageRouterConfiguratorScope.cs" />
     <Compile Include="Pipeline\Configuration\MessageFilterConfigurator.cs" />

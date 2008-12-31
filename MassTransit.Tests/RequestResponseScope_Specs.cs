@@ -30,7 +30,7 @@ namespace MassTransit.Tests
 
 			PingMessage ping = new PingMessage();
 
-			LocalBus.MakeRequest(bus => bus.Publish(ping))
+			LocalBus.MakeRequest(bus => bus.Publish(ping, context => context.SendResponseTo(bus)))
 				.When<PongMessage>().RelatedTo(ping.CorrelationId).IsReceived(pong =>
 					{
 						Assert.AreEqual(ping.CorrelationId, pong.CorrelationId);
@@ -49,7 +49,7 @@ namespace MassTransit.Tests
 
 			PingMessage ping = new PingMessage();
 
-			LocalBus.MakeRequest(bus => bus.Publish(ping))
+			LocalBus.MakeRequest(bus => bus.Publish(ping, context => context.SendResponseTo(bus)))
 				.When<PongMessage>().RelatedTo(ping.CorrelationId).IsReceived(pong =>
 					{
 						Assert.Fail("Should not have gotten a response");
@@ -73,7 +73,7 @@ namespace MassTransit.Tests
 
 			FutureMessage<PongMessage> ponged = new FutureMessage<PongMessage>();
 
-			LocalBus.MakeRequest(bus => RemoteBus.Endpoint.Send(ping))
+			LocalBus.MakeRequest(bus => RemoteBus.Endpoint.Send(ping, context => context.SendResponseTo(bus)))
 				.When<PongMessage>().RelatedTo(ping.CorrelationId).IsReceived(pong =>
 					{
 						Assert.AreEqual(ping.CorrelationId, pong.CorrelationId);
