@@ -45,5 +45,15 @@ namespace MassTransit
 
 			bus.Publish(message);
 		}
+
+		public static void Send<T>(this IEndpoint endpoint, T message, Action<IOutboundMessageContext> action) 
+			where T : class
+		{
+			var context = BusContext.Current.OutboundMessage();
+
+			action(context);
+
+			endpoint.Send(message);
+		}
 	}
 }

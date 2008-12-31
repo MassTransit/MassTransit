@@ -14,7 +14,7 @@ namespace MassTransit.Internal
 {
 	using System;
 
-	public class OutboundMessageContext : 
+	public class OutboundMessageContext :
 		MessageContextBase,
 		IOutboundMessageContext
 	{
@@ -46,6 +46,21 @@ namespace MassTransit.Internal
 		public void SetSourceAddress(Uri uri)
 		{
 			SourceAddress = uri;
+		}
+
+		public void SendFaultTo(Uri uri)
+		{
+			FaultAddress = uri;
+		}
+
+		public void SendResponseTo(Uri uri)
+		{
+			ResponseAddress = uri;
+		}
+
+		public void SetRetryCount(int retryCount)
+		{
+			RetryCount = retryCount;
 		}
 	}
 }

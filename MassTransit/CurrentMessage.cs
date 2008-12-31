@@ -13,6 +13,7 @@
 namespace MassTransit
 {
 	using System;
+	using Exceptions;
 	using Internal;
 
 	public static class CurrentMessage
@@ -37,6 +38,11 @@ namespace MassTransit
 			get { return BusContext.Current.InboundMessage().FaultAddress; }
 		}
 
+		public static int RetryCount
+		{
+			get { return BusContext.Current.InboundMessage().RetryCount; }
+		}
+
 		public static void Respond<T>(T message) where T : class
 		{
 			var context = BusContext.Current.InboundMessage();
@@ -49,6 +55,23 @@ namespace MassTransit
 			{
 				context.Bus.Publish(message);
 			}
+		}
+
+		public static void RetryLater()
+		{
+			var context = BusContext.Current.InboundMessage();
+
+			if (context.Message == null)
+				throw new ConventionException("RetryLater can only be called when a message is being consumed");
+
+			context.Bus.Endpoint.Send(context.Message, x =>
+				{
+					x.SetSourceAddress(context.SourceAddress);
+					x.SetDestinationAddress(context.DestinationAddress);
+					x.SendResponseTo(context.ResponseAddress);
+					x.SendFaultTo(context.FaultAddress);
+					x.SetRetryCount(context.RetryCount + 1);
+				});
 		}
 	}
 }

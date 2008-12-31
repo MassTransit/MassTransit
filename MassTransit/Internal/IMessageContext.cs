@@ -20,5 +20,6 @@ namespace MassTransit.Internal
 		Uri ResponseAddress { get; }
 		Uri FaultAddress { get; }
 		Uri SourceAddress { get; }
+		int RetryCount { get; }
 	}
 }
