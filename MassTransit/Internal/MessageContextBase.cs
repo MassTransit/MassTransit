@@ -12,9 +12,21 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Internal
 {
-	public interface IInboundMessageContext :
-		IMessageContext
+	using System;
+
+	public class MessageContextBase
 	{
-		IServiceBus Bus { get; }
+		public Uri DestinationAddress { get; protected set; }
+		public Uri ResponseAddress { get; protected set; }
+		public Uri FaultAddress { get; protected set; }
+		public Uri SourceAddress { get; protected set; }
+
+		public virtual void Clear()
+		{
+			DestinationAddress = null;
+			SourceAddress = null;
+			ResponseAddress = null;
+			FaultAddress = null;
+		}
 	}
 }

@@ -14,19 +14,11 @@ namespace MassTransit.Internal
 {
 	using System;
 
-	public static class BusContextExtensions
+	public interface IMessageContext
 	{
-		private static readonly Guid _inboundMessageContextKey = new Guid("E4DD4A53-C0B5-4B56-86A0-A7A88AE09B7A");
-		private static readonly Guid _outboundMessageContextKey = new Guid("366BD633-7D83-4137-B764-422AE8B71E24");
-
-		public static OutboundMessageContext OutboundMessage(this IBusContext busContext)
-		{
-			return busContext.Retrieve(_outboundMessageContextKey, () => new OutboundMessageContext());
-		}
-
-		public static InboundMessageContext InboundMessage(this IBusContext busContext)
-		{
-			return busContext.Retrieve(_inboundMessageContextKey, () => new InboundMessageContext());
-		}
+		Uri DestinationAddress { get; }
+		Uri ResponseAddress { get; }
+		Uri FaultAddress { get; }
+		Uri SourceAddress { get; }
 	}
 }

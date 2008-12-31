@@ -15,72 +15,105 @@ namespace MassTransit.Serialization
 	using System;
 	using System.Collections.Generic;
 	using System.IO;
-    using System.Runtime.Remoting.Messaging;
-    using System.Runtime.Serialization;
-    using System.Runtime.Serialization.Formatters.Binary;
+	using System.Runtime.Remoting.Messaging;
+	using System.Runtime.Serialization.Formatters.Binary;
 	using Internal;
 	using Util;
 
-    /// <summary>
-    /// The binary message serializer used the .NET BinaryFormatter to serialize
-    /// message content. 
-    /// </summary>
-    public class BinaryMessageSerializer
-        : IMessageSerializer
-    {
+	/// <summary>
+	/// The binary message serializer used the .NET BinaryFormatter to serialize
+	/// message content. 
+	/// </summary>
+	public class BinaryMessageSerializer
+		: IMessageSerializer
+	{
 		private static readonly BinaryFormatter _formatter = new BinaryFormatter();
 
-        public void Serialize<T>(Stream output, T message)
-        {
-            Check.EnsureSerializable(message);
+		public void Serialize<T>(Stream output, T message)
+		{
+			Check.EnsureSerializable(message);
 
-        	_formatter.Serialize(output, message, GetHeaders(message));
-        }
+			_formatter.Serialize(output, message, GetHeaders(message));
+		}
 
-    	private static Header[] GetHeaders<T>(T message)
-    	{
+		public object Deserialize(Stream input)
+		{
+			object obj = _formatter.Deserialize(input, DeserializeHeaderHandler);
+
+			return obj;
+		}
+
+		private static Header[] GetHeaders<T>(T message)
+		{
 			List<Header> headers = new List<Header>();
 
 			var context = BusContext.Current.OutboundMessage();
 
-			if(context.ReplyTo != null)
+			if (context.SourceAddress != null)
 			{
-				headers.Add(new Header(MessageEnvelopeHeaders.ReplyTo, context.ReplyTo));
+				headers.Add(new Header(MessageEnvelopeHeaders.SourceAddress, context.SourceAddress));
 			}
 
-    		return headers.ToArray();
-    	}
+			if (context.DestinationAddress != null)
+			{
+				headers.Add(new Header(MessageEnvelopeHeaders.DestinationAddress, context.DestinationAddress));
+			}
 
-    	public object Deserialize(Stream input)
-        {
-            object obj = _formatter.Deserialize(input, DeserializeHeaderHandler);
+			if (context.ResponseAddress != null)
+			{
+				headers.Add(new Header(MessageEnvelopeHeaders.ResponseAddress, context.ResponseAddress));
+			}
 
-            return obj;
-        }
+			if (context.FaultAddress != null)
+			{
+				headers.Add(new Header(MessageEnvelopeHeaders.FaultAddress, context.FaultAddress));
+			}
 
-    	private static object DeserializeHeaderHandler(Header[] headers)
-    	{
+			return headers.ToArray();
+		}
+
+		private static object DeserializeHeaderHandler(Header[] headers)
+		{
 			if (headers == null)
 				return null;
 
-    		var context = BusContext.Current.InboundMessage();
+			var context = BusContext.Current.InboundMessage();
 
-    		for (int i = 0; i < headers.Length; i++)
-    		{
-				switch ( headers[i].Name)
+			for (int i = 0; i < headers.Length; i++)
+			{
+				switch (headers[i].Name)
 				{
-					case MessageEnvelopeHeaders.ReplyTo:
-						context.SetReplyTo((Uri) headers[i].Value);
+					case MessageEnvelopeHeaders.SourceAddress:
+						context.SetSourceAddress((Uri) headers[i].Value);
+						break;
+
+					case MessageEnvelopeHeaders.ResponseAddress:
+						context.SetResponseAddress((Uri) headers[i].Value);
+						break;
+
+					case MessageEnvelopeHeaders.DestinationAddress:
+						context.SetDestinationAddress((Uri) headers[i].Value);
+						break;
+
+					case MessageEnvelopeHeaders.FaultAddress:
+						context.SetFaultAddress((Uri) headers[i].Value);
 						break;
 				}
-    		}
+			}
 
-    		return null;
-    	}
-    }
+			return null;
+		}
+	}
 
 	public static class MessageEnvelopeHeaders
 	{
-		public const string ReplyTo = "ReplyTo";
+		public const string ConversationId = "ConversationId";
+		public const string CorrelationId = "CorrelationId";
+		public const string DestinationAddress = "DestinationAddress";
+		public const string FaultAddress = "FaultAddress";
+		public const string MessageId = "MessageId";
+		public const string MessageType = "MessageType";
+		public const string ResponseAddress = "ResponseAddress";
+		public const string SourceAddress = "SourceAddress";
 	}
 }
