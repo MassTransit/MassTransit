@@ -49,7 +49,7 @@ namespace MassTransit.Tests.Saga
 
 		public bool RegisterUser(string username, string password, string displayName, string email)
 		{
-			using(Flow.Subscription(_bus, this))
+			using(_bus.Subscribe(this).Disposable())
 			{
 				Messages.RegisterUser message = new Messages.RegisterUser(_correlationId, "username", "password", "Display Name", "user@domain.com");
 				_bus.Publish(message);
@@ -76,7 +76,7 @@ namespace MassTransit.Tests.Saga
 
 		public bool ValidateUser()
 		{
-			using (Flow.Subscription(_bus, this))
+			using (_bus.Subscribe(this).Disposable())
 			{
 				_bus.Publish(new UserValidated(CorrelationId));
 
@@ -98,36 +98,6 @@ namespace MassTransit.Tests.Saga
 
 				throw new ApplicationException("A timeout occurred while registering the user");
 			}
-		}
-	}
-
-	public static class Flow
-	{
-		public static FlowSubscription<TComponent> Subscription<TComponent>(IServiceBus bus, TComponent subscriber) where TComponent : class
-		{
-			return new FlowSubscription<TComponent>(bus, subscriber);
-		}
-	}
-
-	public class FlowSubscription<TComponent> :
-		IDisposable 
-		where TComponent : class
-	{
-		private readonly IServiceBus _bus;
-		private readonly TComponent _subscriber;
-		private UnsubscribeAction _unsubscribeToken;
-
-		public FlowSubscription(IServiceBus bus, TComponent subscriber)
-		{
-			_bus = bus;
-			_subscriber = subscriber;
-
-			_unsubscribeToken = _bus.Subscribe(_subscriber);
-		}
-
-		public void Dispose()
-		{
-			_unsubscribeToken();
 		}
 	}
 }

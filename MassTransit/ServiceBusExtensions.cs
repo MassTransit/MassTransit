@@ -30,13 +30,18 @@ namespace MassTransit
 			return new RequestResponseScope(bus, requestAction);
 		}
 
-		public static ResponseActionBuilder<T> When<T>(this RequestResponseScope scope) 
+		public static ResponseActionBuilder<T> When<T>(this RequestResponseScope scope)
 			where T : class
 		{
 			return new ResponseActionBuilder<T>(scope);
 		}
 
-		public static void Publish<T>(this IServiceBus bus, T message, Action<IOutboundMessageContext> action) 
+		public static IUnsubscribeAction Disposable(this UnsubscribeAction action)
+		{
+			return new DisposableUnsubscribeAction(action);
+		}
+
+		public static void Publish<T>(this IServiceBus bus, T message, Action<IOutboundMessageContext> action)
 			where T : class
 		{
 			var context = BusContext.Current.OutboundMessage();
@@ -46,7 +51,7 @@ namespace MassTransit
 			bus.Publish(message);
 		}
 
-		public static void Send<T>(this IEndpoint endpoint, T message, Action<IOutboundMessageContext> action) 
+		public static void Send<T>(this IEndpoint endpoint, T message, Action<IOutboundMessageContext> action)
 			where T : class
 		{
 			var context = BusContext.Current.OutboundMessage();
