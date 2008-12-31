@@ -17,6 +17,33 @@ namespace MassTransit.Internal
 	public class OutboundMessageContext :
 		IOutboundMessageContext
 	{
-		public Uri FaultsTo { get; set; }
+		private Uri _faultsTo;
+		private Uri _replyTo;
+
+		public Uri ReplyTo
+		{
+			get { return _replyTo; }
+		}
+
+		public Uri FaultsTo
+		{
+			get { return _faultsTo; }
+		}
+
+		public void SendReplyTo(IServiceBus bus)
+		{
+			_replyTo = bus.Endpoint.Uri;
+		}
+
+		public void SendReplyTo(IEndpoint endpoint)
+		{
+			_replyTo = endpoint.Uri;
+		}
+
+		public void Clear()
+		{
+			_replyTo = null;
+			_faultsTo = null;
+		}
 	}
 }

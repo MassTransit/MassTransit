@@ -13,6 +13,7 @@
 namespace MassTransit
 {
 	using System;
+	using Internal;
 	using Internal.RequestResponse;
 
 	public static class ServiceBusExtensions
@@ -33,6 +34,16 @@ namespace MassTransit
 			where T : class
 		{
 			return new ResponseActionBuilder<T>(scope);
+		}
+
+		public static void Publish<T>(this IServiceBus bus, T message, Action<IOutboundMessageContext> action) 
+			where T : class
+		{
+			var context = BusContext.Current.OutboundMessage();
+
+			action(context);
+
+			bus.Publish(message);
 		}
 	}
 }

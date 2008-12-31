@@ -17,5 +17,9 @@ namespace MassTransit.Internal
 	public interface IOutboundMessageContext
 	{
 		Uri FaultsTo { get; }
+		Uri ReplyTo { get; }
+
+		void SendReplyTo(IServiceBus bus);
+		void SendReplyTo(IEndpoint endpoint);
 	}
 }
