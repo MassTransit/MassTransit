@@ -25,14 +25,11 @@ namespace MassTransit.Transports.Msmq.Tests
 	{
 		protected override void EstablishContext()
 		{
-			using (var endpoint = new MsmqEndpoint("msmq://localhost/mt_client"))
-				endpoint.Purge();
-			using (var endpoint = new MsmqEndpoint("msmq://localhost/mt_client_error"))
-				endpoint.Purge();
-			using (var endpoint = new MsmqEndpoint("msmq://localhost/mt_server"))
-				endpoint.Purge();
-
 			base.EstablishContext();
+
+			LocalEndpoint.Purge();
+			LocalErrorEndpoint.Purge();
+			RemoteEndpoint.Purge();
 		}
 	}
 
@@ -41,14 +38,17 @@ namespace MassTransit.Transports.Msmq.Tests
 		Given_a_message_is_received_from_a_nontransactional_queue
 	{
 		private PingMessage _ping;
+	    private FutureMessage<Fault<PingMessage, Guid>> _faultFuture;
 
 		protected override void EstablishContext()
 		{
 			base.EstablishContext();
+            _faultFuture = new FutureMessage<Fault<PingMessage, Guid>>();
 
 			LocalBus.Subscribe<PingMessage>(message => { throw new NotSupportedException("I am a naughty consumer! I go boom!"); });
-
-			_ping = new PingMessage();
+		    LocalBus.Subscribe<Fault<PingMessage, Guid>>(message => _faultFuture.Set(message));
+			
+            _ping = new PingMessage();
 
 			LocalBus.Publish(_ping);
 		}
@@ -66,6 +66,13 @@ namespace MassTransit.Transports.Msmq.Tests
 
 			LocalEndpoint.ShouldNotContain(_ping);
 		}
+
+	    [Test]
+	    public void A_fault_should_be_published()
+	    {
+	        _faultFuture.IsAvailable(3.Seconds())
+                .ShouldBeTrue();
+	    }
 	}
 	
 	[TestFixture]
@@ -91,7 +98,8 @@ namespace MassTransit.Transports.Msmq.Tests
 		[Test]
 		public void The_message_should_not_exist_in_the_error_queue()
 		{
-			Assert.IsTrue(_future.IsAvailable(3.Seconds()));
+            _future.IsAvailable(3.Seconds())
+                .ShouldBeTrue();
 
 			LocalErrorEndpoint.ShouldNotContain(_ping);
 		}
@@ -99,7 +107,8 @@ namespace MassTransit.Transports.Msmq.Tests
 		[Test]
 		public void The_message_should_not_exist_in_the_input_queue()
 		{
-			Assert.IsTrue(_future.IsAvailable(3.Seconds()));
+            _future.IsAvailable(3.Seconds())
+                .ShouldBeTrue();
 
 			LocalEndpoint.ShouldNotContain(_ping);
 		}
