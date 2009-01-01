@@ -21,6 +21,7 @@ namespace MassTransit.Tests.Pipeline
 	using Messages;
 	using NUnit.Framework;
 	using Rhino.Mocks;
+	using TestConsumers;
 
 	[TestFixture]
 	public class BatchConsumer_Specs
@@ -59,7 +60,7 @@ namespace MassTransit.Tests.Pipeline
 		[Test]
 		public void A_batch_consumer_should_be_delivered_messages()
 		{
-			var batchConsumer = new TestBatchMessageConsumer<IndividualBatchMessage, Guid>(x => PipelineViewer.Trace(_pipeline));
+			var batchConsumer = new TestBatchConsumer<IndividualBatchMessage, Guid>(x => PipelineViewer.Trace(_pipeline));
 			_pipeline.Subscribe(batchConsumer);
 
 			PublishBatch(_pipeline, 1);
@@ -72,24 +73,24 @@ namespace MassTransit.Tests.Pipeline
 		[Test]
 		public void A_batch_component_should_be_delivered_messages()
 		{
-			var consumer = new TestBatchMessageConsumer<IndividualBatchMessage, Guid>();
+			var consumer = new TestBatchConsumer<IndividualBatchMessage, Guid>();
 
-			_builder.Stub(x => x.GetInstance<TestBatchMessageConsumer<IndividualBatchMessage, Guid>>()).Return(consumer);
+			_builder.Stub(x => x.GetInstance<TestBatchConsumer<IndividualBatchMessage, Guid>>()).Return(consumer);
 
-			_pipeline.Subscribe<TestBatchMessageConsumer<IndividualBatchMessage, Guid>>();
+			_pipeline.Subscribe<TestBatchConsumer<IndividualBatchMessage, Guid>>();
 			PipelineViewer.Trace(_pipeline);
 
 			PublishBatch(_pipeline, 1);
 
 			TimeSpan _timeout = 5.Seconds();
 
-			TestBatchMessageConsumer<IndividualBatchMessage, Guid>.AnyShouldHaveReceivedBatch(_batchId, _timeout);
+			TestBatchConsumer<IndividualBatchMessage, Guid>.AnyShouldHaveReceivedBatch(_batchId, _timeout);
 		}
 
 		[Test]
 		public void A_batch_consumer_should_be_delivered_a_lot_of_messages()
 		{
-			var batchConsumer = new TestBatchMessageConsumer<IndividualBatchMessage, Guid>(x => PipelineViewer.Trace(_pipeline));
+			var batchConsumer = new TestBatchConsumer<IndividualBatchMessage, Guid>(x => PipelineViewer.Trace(_pipeline));
 
 			var removeSubscription = _pipeline.Subscribe(batchConsumer);
 

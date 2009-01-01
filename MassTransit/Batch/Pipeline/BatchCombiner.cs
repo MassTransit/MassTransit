@@ -51,7 +51,10 @@ namespace MassTransit.Batch.Pipeline
             _consumer = consumer;
 
             _batchMessage = new Batch<TMessage, TBatchId>(batchId, batchLength, this);
-            Start();
+			if(batchLength <= 0)
+				_complete.Set();
+
+			Start();
         }
 
         public object BatchId
@@ -69,11 +72,11 @@ namespace MassTransit.Batch.Pipeline
         {
             _messageRequested.Release();
 
-            WaitHandle[] handles = new WaitHandle[] {_messageWaiting, _complete};
+            WaitHandle[] handles = new WaitHandle[] {_complete, _messageWaiting};
 
             // TODO This can hang on shutdown if we're waiting for a batch to finish, so we need to have a kill/cancel to shut it down
             int waitResult;
-            while ((waitResult = WaitHandle.WaitAny(handles, _timeout, true)) == 0)
+            while ((waitResult = WaitHandle.WaitAny(handles, _timeout, true)) == 1)
             {
                 yield return _messages.WriteLock(x => x.Dequeue());
 

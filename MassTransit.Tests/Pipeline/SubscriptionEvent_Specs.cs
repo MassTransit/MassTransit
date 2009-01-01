@@ -55,7 +55,7 @@ namespace MassTransit.Tests.Pipeline
 					return true;
 				});
 
-			_pipeline.Subscribe<TestBatchMessageConsumer<IndividualBatchMessage, Guid>>();
+			_pipeline.Subscribe<TestBatchConsumer<IndividualBatchMessage, Guid>>();
 
 			_subscriptionEvent.VerifyAllExpectations();
 		}
@@ -69,7 +69,7 @@ namespace MassTransit.Tests.Pipeline
 					return true;
 				});
 
-			var consumer = new TestBatchMessageConsumer<IndividualBatchMessage, Guid>(x => { });
+			var consumer = new TestBatchConsumer<IndividualBatchMessage, Guid>();
 			_pipeline.Subscribe(consumer);
 
 			_subscriptionEvent.VerifyAllExpectations();
@@ -187,7 +187,7 @@ namespace MassTransit.Tests.Pipeline
 				});
 			_subscriptionEvent.Expect(x => x.UnsubscribedFrom(typeof (IndividualBatchMessage))).Repeat.Once();
 
-			var consumer = new TestBatchMessageConsumer<IndividualBatchMessage, Guid>();
+			var consumer = new TestBatchConsumer<IndividualBatchMessage, Guid>();
 			var token = _pipeline.Subscribe(consumer);
 
 			token();
@@ -205,10 +205,10 @@ namespace MassTransit.Tests.Pipeline
 				});
 			_subscriptionEvent.Expect(x => x.UnsubscribedFrom(typeof (IndividualBatchMessage))).Repeat.Never();
 
-			var consumer = new TestBatchMessageConsumer<IndividualBatchMessage, Guid>();
+			var consumer = new TestBatchConsumer<IndividualBatchMessage, Guid>();
 			var token = _pipeline.Subscribe(consumer);
 
-			var consumerB = new TestBatchMessageConsumer<IndividualBatchMessage, Guid>();
+			var consumerB = new TestBatchConsumer<IndividualBatchMessage, Guid>();
 			var tokenB = _pipeline.Subscribe(consumerB);
 
 			token();
