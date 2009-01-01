@@ -36,11 +36,6 @@ namespace MassTransit.Transports.Msmq.Tests.TestFixtures
 			get { return _localErrorUri; }
 		}
 
-		public string RemoteEndpointUri
-		{
-			get { return _remoteEndpointUri; }
-		}
-
 		public MsmqEndpoint LocalEndpoint
 		{
 			get { return _localEndpoint; }
@@ -49,6 +44,11 @@ namespace MassTransit.Transports.Msmq.Tests.TestFixtures
 		public MsmqEndpoint LocalErrorEndpoint
 		{
 			get { return _localErrorEndpoint; }
+		}
+
+		public string RemoteEndpointUri
+		{
+			get { return _remoteEndpointUri; }
 		}
 
 		public MsmqEndpoint RemoteEndpoint
