@@ -35,6 +35,7 @@ namespace MassTransit.Transports.Msmq.Tests.TestFixtures
 
 			LocalEndpoint = new MsmqEndpoint(LocalEndpointUri);
 			LocalErrorEndpoint = new MsmqEndpoint(LocalErrorUri);
+            RemoteEndpoint = new MsmqEndpoint(RemoteEndpointUri);
 
 			LocalBus = ServiceBusConfigurator.New(x =>
 				{
@@ -47,6 +48,7 @@ namespace MassTransit.Transports.Msmq.Tests.TestFixtures
 
 		public MsmqEndpoint LocalEndpoint { get; private set; }
 		public MsmqEndpoint LocalErrorEndpoint { get; private set; }
+        public MsmqEndpoint RemoteEndpoint { get; private set; }
 
 		protected override void TeardownContext()
 		{
