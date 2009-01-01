@@ -14,6 +14,7 @@ namespace MassTransit.Tests
 {
 	using System;
 	using Batch;
+	using Magnum.Common.DateTimeExtensions;
 	using Messages;
 	using NUnit.Framework;
 	using Rhino.Mocks;
@@ -29,7 +30,7 @@ namespace MassTransit.Tests
 
 		protected void RunTest()
 		{
-			var batchConsumer = new TestBatchMessageConsumer<IndividualBatchMessage, Guid>();
+			var batchConsumer = new TestBatchConsumer<IndividualBatchMessage, Guid>();
 
 			RemoteBus.Subscribe(batchConsumer);
 
@@ -75,10 +76,10 @@ namespace MassTransit.Tests
 
 		protected void RunTest()
 		{
-			ObjectBuilder.Stub(x => x.GetInstance<TestBatchMessageConsumer<IndividualBatchMessage, Guid>>())
-				.Return(new TestBatchMessageConsumer<IndividualBatchMessage, Guid>());
-			
-			RemoteBus.Subscribe<TestBatchMessageConsumer<IndividualBatchMessage, Guid>>();
+			ObjectBuilder.Stub(x => x.GetInstance<TestBatchConsumer<IndividualBatchMessage, Guid>>())
+				.Return(new TestBatchConsumer<IndividualBatchMessage, Guid>());
+
+			RemoteBus.Subscribe<TestBatchConsumer<IndividualBatchMessage, Guid>>();
 
 			Guid batchId = Guid.NewGuid();
 			for (int i = 0; i < _batchSize; i++)
@@ -88,7 +89,7 @@ namespace MassTransit.Tests
 				LocalBus.Publish(message);
 			}
 
-			TestBatchMessageConsumer<IndividualBatchMessage, Guid>.AnyShouldHaveReceivedBatch(batchId, _timeout);
+			TestBatchConsumer<IndividualBatchMessage, Guid>.AnyShouldHaveReceivedBatch(batchId, _timeout);
 		}
 
 		[Test]
@@ -128,7 +129,7 @@ namespace MassTransit.Tests
 			var timeoutConsumer = new TestMessageConsumer<BatchTimeout<IndividualBatchMessage, Guid>>();
 			RemoteBus.Subscribe(timeoutConsumer);
 
-			var batchConsumer = new TestBatchMessageConsumer<IndividualBatchMessage, Guid>();
+			var batchConsumer = new TestBatchConsumer<IndividualBatchMessage, Guid>();
 
 			RemoteBus.Subscribe(batchConsumer);
 
@@ -140,6 +141,31 @@ namespace MassTransit.Tests
 			timeoutConsumer.ShouldHaveReceivedMessage(new BatchTimeout<IndividualBatchMessage, Guid>(batchId), _timeout);
 
 			batchConsumer.ShouldNotHaveCompletedBatch(TimeSpan.Zero);
+		}
+	}
+
+	[TestFixture]
+	public class When_the_number_of_messages_in_a_batch_is_zero :
+		LoopbackTestFixture
+	{
+		[Test]
+		public void The_batch_should_not_be_dispatched()
+		{
+			ObjectBuilder.Stub(x => x.GetInstance<TestBatchConsumer<IndividualBatchMessage, Guid>>())
+				.Return(new TestBatchConsumer<IndividualBatchMessage, Guid>());
+
+			LocalBus.Subscribe<TestBatchConsumer<IndividualBatchMessage, Guid>>();
+
+			Guid batchId = Guid.NewGuid();
+			const int batchLength = 0;
+
+			LocalBus.Publish(new IndividualBatchMessage(batchId, batchLength));
+
+
+			TestBatchConsumer<IndividualBatchMessage, Guid>.AnyShouldHaveReceivedBatch(batchId, 115.Seconds());
+
+
+			
 		}
 	}
 
@@ -158,7 +184,7 @@ namespace MassTransit.Tests
 			var timeoutConsumer = new TestMessageConsumer<BatchTimeout<IndividualBatchMessage, Guid>>();
 			RemoteBus.Subscribe(timeoutConsumer);
 
-			var batchConsumer = new TestBatchMessageConsumer<IndividualBatchMessage, Guid>();
+			var batchConsumer = new TestBatchConsumer<IndividualBatchMessage, Guid>();
 			RemoteBus.Subscribe(batchConsumer);
 
 			Guid batchId = Guid.NewGuid();
