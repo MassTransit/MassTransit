@@ -50,6 +50,22 @@ namespace MassTransit.WindsorIntegration
 					x.SetConcurrentConsumerLimit(20);
 					x.SendErrorsTo("msmq://localhost/mt_client_errors");
 
+					// create a shim between the main ServiceBus and the child service bus that is really constrained
+					// to provide simple control interface to the services on the bus
+//
+//					x.SetControlBus(c => c.ReceiveFrom("msmq://localhost/mt_client_control"));
+//
+//					x.ConfigureServices(services =>
+//						{
+//							SubscriptionClientConfigurator.New(y =>
+//								{
+//									y.SetSubscriptionServiceEndpoint("");
+//
+//								});
+//						});
+//
+
+
 					x.ConfigureService<SubscriptionClientConfigurator>(y => y.SetEndpoint("msmq://localhost/mt_pubsub"));
 					//x.ConfigureService<HealthClientConfigurator>(y => y.SetEndpoint("msmq://localhost/mt_pubsub"));
 
