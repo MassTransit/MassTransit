@@ -15,13 +15,12 @@ namespace MassTransit.Infrastructure.Timeout
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using Magnum.Common.Repository;
+    using Magnum.Common.Data;
     using Services.Timeout;
     using Util;
 
     public class PersistantTimeoutRepository :
         ITimeoutRepository
-
     {
         private readonly IRepository<ScheduledTimeout, Guid> _repository;
 

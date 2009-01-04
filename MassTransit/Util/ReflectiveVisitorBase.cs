@@ -15,6 +15,7 @@ namespace MassTransit.Util
 	using System;
 	using System.Linq.Expressions;
 	using System.Reflection;
+	using Magnum.Common.Threading;
 
 	public abstract class ReflectiveVisitorBase<TVisitor> 
 		where TVisitor : class

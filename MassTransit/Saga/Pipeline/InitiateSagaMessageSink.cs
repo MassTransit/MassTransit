@@ -14,9 +14,10 @@ namespace MassTransit.Pipeline.Sinks
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Transactions;
+	using System.Data;
 	using Exceptions;
 	using Interceptors;
+	using Magnum.Common.Data;
 	using Saga;
 	using Saga.Pipeline;
 	using Util;
@@ -37,27 +38,25 @@ namespace MassTransit.Pipeline.Sinks
 			if (correlationId == Guid.Empty)
 				correlationId = CombGuid.NewCombGuid();
 
-			// if we are already pulling from a transactional queue, use the existing transaction
-			if (Transaction.Current != null)
+			try
 			{
-				TComponent saga = CreateSaga(correlationId);
-
-				yield return saga;
-
-				Repository.Save(saga);
-			}
-			else
-			{
-				using (TransactionScope scope = new TransactionScope())
+				using (IUnitOfWork work = UnitOfWork.Start())
+				using(ITransaction transaction = work.BeginTransaction(IsolationLevel.Serializable))
 				{
 					TComponent saga = CreateSaga(correlationId);
+
+					work.Flush();
 
 					yield return saga;
 
 					Repository.Save(saga);
 
-					scope.Complete();
+					transaction.Commit();
 				}
+			}
+			finally
+			{
+				UnitOfWork.Finish();
 			}
 		}
 

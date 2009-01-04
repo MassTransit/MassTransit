@@ -178,7 +178,6 @@
     <Compile Include="Util\Tuple.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BusContext.cs" />
     <Compile Include="CurrentMessage.cs" />
     <Compile Include="Internal\DisposableUnsubscribeAction.cs" />
     <Compile Include="Internal\IInboundMessageContext.cs" />
@@ -188,7 +187,6 @@
     <Compile Include="Configuration\EndpointFactoryConfigurator.cs" />
     <Compile Include="Configuration\IBusService.cs" />
     <Compile Include="Configuration\IEndpointConfigurator.cs" />
-    <Compile Include="Internal\IBusContext.cs" />
     <Compile Include="Internal\IOutboundMessageContext.cs" />
     <Compile Include="Internal\MessageContextBase.cs" />
     <Compile Include="Internal\OutboundMessageContext.cs" />
@@ -249,7 +247,6 @@
     <Compile Include="Transports\LoopbackMessageSelector.cs" />
     <Compile Include="Transports\MulticastUdpEndpointConfigurator.cs" />
     <Compile Include="Transports\MulticastUdpMessageSelector.cs" />
-    <Compile Include="Util\ReaderWriterLockedDictionary.cs" />
     <Compile Include="Pipeline\ISubscriptionEvent.cs" />
     <Compile Include="Pipeline\Sinks\CorrelatedMessageSinkRouter.cs" />
     <Compile Include="Saga\InMemorySagaRepository.cs" />

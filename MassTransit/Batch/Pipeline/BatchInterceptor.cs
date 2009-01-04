@@ -17,11 +17,11 @@ namespace MassTransit.Batch.Pipeline
     using System.Linq.Expressions;
     using System.Reflection;
     using Exceptions;
+    using Magnum.Common.Threading;
     using MassTransit.Pipeline.Interceptors;
     using MassTransit.Pipeline.Sinks;
-    using Util;
 
-    public class BatchInterceptor :
+	public class BatchInterceptor :
         PipelineInterceptorBase
     {
         private static readonly Type _batchType = typeof (Batch<,>);

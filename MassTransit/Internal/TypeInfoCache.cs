@@ -14,7 +14,7 @@ namespace MassTransit.Internal
 {
 	using System;
 	using System.Collections.Generic;
-	using Util;
+	using Magnum.Common.Threading;
 
 	public interface ITypeInfoCache : IDisposable
 	{

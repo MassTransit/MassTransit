@@ -29,11 +29,11 @@ namespace MassTransit.Tests.Saga.StateMachine
 		{
 			RegisterUserStateMachine workflow = new RegisterUserStateMachine();
 
-			Assert.AreEqual(RegisterUserStateMachine.Initial, workflow.Current);
+			Assert.AreEqual(RegisterUserStateMachine.Initial, workflow.CurrentState);
 
 			workflow.Consume(new RegisterUser(_transactionId, _username, _password, _displayName, _email));
 
-			Assert.AreEqual(RegisterUserStateMachine.WaitingForEmailValidation, workflow.Current);
+			Assert.AreEqual(RegisterUserStateMachine.WaitingForEmailValidation, workflow.CurrentState);
 		}
 
 		[Test]
@@ -41,15 +41,15 @@ namespace MassTransit.Tests.Saga.StateMachine
 		{
 			RegisterUserStateMachine workflow = new RegisterUserStateMachine();
 
-			Assert.AreEqual(RegisterUserStateMachine.Initial, workflow.Current);
+			workflow.CurrentState.ShouldEqual(RegisterUserStateMachine.Initial);
 
 			workflow.Consume(new RegisterUser(_transactionId, _username, _password, _displayName, _email));
 
-			Assert.AreEqual(RegisterUserStateMachine.WaitingForEmailValidation, workflow.Current);
+			workflow.CurrentState.ShouldEqual(RegisterUserStateMachine.WaitingForEmailValidation);
 
 			workflow.Consume(new UserValidated(_transactionId));
 
-			Assert.AreEqual(RegisterUserStateMachine.Completed, workflow.Current);
+			workflow.CurrentState.ShouldEqual(RegisterUserStateMachine.Completed);
 		}
 	}
 }

@@ -17,6 +17,7 @@ namespace HealthServiceHost
     using MassTransit.Host;
     using MassTransit;
     using MassTransit.Services.HealthMonitoring;
+    using MassTransit.Services.HealthMonitoring.Server;
     using MassTransit.WindsorIntegration;
     using Microsoft.Practices.ServiceLocation;
 
