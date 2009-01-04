@@ -15,6 +15,7 @@ namespace MassTransit
 	using System;
 	using Internal;
 	using Internal.RequestResponse;
+	using Magnum.Common;
 
 	public static class ExtensionsToServiceBus
 	{
@@ -44,7 +45,7 @@ namespace MassTransit
 		public static void Publish<T>(this IServiceBus bus, T message, Action<IOutboundMessageContext> action)
 			where T : class
 		{
-			var context = BusContext.Current.OutboundMessage();
+			var context = LocalContext.Current.OutboundMessage();
 
 			action(context);
 
@@ -54,7 +55,7 @@ namespace MassTransit
 		public static void Send<T>(this IEndpoint endpoint, T message, Action<IOutboundMessageContext> action)
 			where T : class
 		{
-			var context = BusContext.Current.OutboundMessage();
+			var context = LocalContext.Current.OutboundMessage();
 
 			action(context);
 

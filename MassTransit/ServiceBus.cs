@@ -19,6 +19,7 @@ namespace MassTransit
 	using Exceptions;
 	using Internal;
 	using log4net;
+	using Magnum.Common;
 	using Magnum.Common.ObjectExtensions;
 	using Pipeline;
 	using Pipeline.Configuration;
@@ -149,7 +150,7 @@ namespace MassTransit
 
 			List<Uri> done = new List<Uri>();
 
-			var context = BusContext.Current.OutboundMessage();
+			var context = LocalContext.Current.OutboundMessage();
 			
 			context.SetSourceAddress(Endpoint.Uri);
 
@@ -284,7 +285,7 @@ namespace MassTransit
 		{
 			bool performedWork = false;
 
-			var context = BusContext.Current.InboundMessage();
+			var context = LocalContext.Current.InboundMessage();
 
 			try
 			{

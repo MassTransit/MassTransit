@@ -19,6 +19,7 @@ namespace MassTransit.Transports
 	using Configuration;
 	using Internal;
 	using log4net;
+	using Magnum.Common;
 	using Magnum.Common.Threading;
 	using Serialization;
 
@@ -105,7 +106,7 @@ namespace MassTransit.Transports
 
 		private void Enqueue<T>(T message)
 		{
-			BusContext.Current.OutboundMessage(x => x.SetDestinationAddress(Uri));
+			LocalContext.Current.OutboundMessage(x => x.SetDestinationAddress(Uri));
 
 			using (MemoryStream mstream = new MemoryStream())
 			{

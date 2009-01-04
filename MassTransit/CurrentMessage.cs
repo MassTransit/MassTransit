@@ -15,37 +15,38 @@ namespace MassTransit
 	using System;
 	using Exceptions;
 	using Internal;
+	using Magnum.Common;
 
 	public static class CurrentMessage
 	{
 		public static Uri SourceAddress
 		{
-			get { return BusContext.Current.InboundMessage().SourceAddress; }
+			get { return LocalContext.Current.InboundMessage().SourceAddress; }
 		}
 
 		public static Uri DestinationAddress
 		{
-			get { return BusContext.Current.InboundMessage().DestinationAddress; }
+			get { return LocalContext.Current.InboundMessage().DestinationAddress; }
 		}
 
 		public static Uri ResponseAddress
 		{
-			get { return BusContext.Current.InboundMessage().ResponseAddress; }
+			get { return LocalContext.Current.InboundMessage().ResponseAddress; }
 		}
 
 		public static Uri FaultAddress
 		{
-			get { return BusContext.Current.InboundMessage().FaultAddress; }
+			get { return LocalContext.Current.InboundMessage().FaultAddress; }
 		}
 
 		public static int RetryCount
 		{
-			get { return BusContext.Current.InboundMessage().RetryCount; }
+			get { return LocalContext.Current.InboundMessage().RetryCount; }
 		}
 
 		public static void Respond<T>(T message) where T : class
 		{
-			var context = BusContext.Current.InboundMessage();
+			var context = LocalContext.Current.InboundMessage();
 
 			if (context.ResponseAddress != null)
 			{
@@ -59,7 +60,7 @@ namespace MassTransit
 
 		public static void RetryLater()
 		{
-			var context = BusContext.Current.InboundMessage();
+			var context = LocalContext.Current.InboundMessage();
 
 			if (context.Message == null)
 				throw new ConventionException("RetryLater can only be called when a message is being consumed");

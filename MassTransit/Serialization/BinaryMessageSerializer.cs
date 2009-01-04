@@ -16,6 +16,7 @@ namespace MassTransit.Serialization
 	using System.Runtime.Remoting.Messaging;
 	using System.Runtime.Serialization.Formatters.Binary;
 	using Internal;
+	using Magnum.Common;
 	using Util;
 
 	/// <summary>
@@ -43,7 +44,7 @@ namespace MassTransit.Serialization
 
 		private static Header[] GetHeaders()
 		{
-			var context = BusContext.Current.OutboundMessage();
+			var context = LocalContext.Current.OutboundMessage();
 
 			BinaryMessageEnvelope envelope = BinaryMessageEnvelope.From(context);
 
@@ -54,7 +55,7 @@ namespace MassTransit.Serialization
 		{
 			BinaryMessageEnvelope envelope = BinaryMessageEnvelope.From(headers);
 
-			BusContext.Current.InboundMessage(context => envelope.ApplyTo(context));
+			LocalContext.Current.InboundMessage(context => envelope.ApplyTo(context));
 
 			return null;
 		}

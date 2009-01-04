@@ -10,35 +10,42 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Infrastructure.Timeout
+namespace MassTransit.Infrastructure.Saga
 {
 	using System;
-	using Magnum.Common.Data;
+	using Magnum.Infrastructure.Data;
+	using MassTransit.Saga;
 
-	public class ScheduledTimeout :
-		IAggregateRoot
+	public class NHibernateSagaRepository<T> :
+		ISagaRepository<T>
+		where T : class, ISaga
 	{
-		private readonly DateTime _expiresAt;
-		private readonly Guid _id;
-
-		public ScheduledTimeout(Guid id, DateTime expiresAt)
-		{
-			_id = id;
-			_expiresAt = expiresAt;
-		}
-
-		protected ScheduledTimeout()
+		public void Dispose()
 		{
 		}
 
-		public DateTime ExpiresAt
+		public T Create(Guid correlationId)
 		{
-			get { return _expiresAt; }
+			using (var repository = new NHibernateRepository())
+			{
+				T saga = (T) Activator.CreateInstance(typeof (T), new object[] {correlationId});
+
+				repository.Save(saga);
+
+				return saga;
+			}
 		}
 
-		public Guid Id
+		public T Get(Guid id)
 		{
-			get { return _id; }
+			using (var repository = new NHibernateRepository())
+				return repository.Get<T>(id);
+		}
+
+		public void Save(T item)
+		{
+			using (var repository = new NHibernateRepository())
+				repository.Update(item);
 		}
 	}
 }

@@ -30,15 +30,15 @@ namespace MassTransit.Tests.Saga.StateMachine
 			Define(() =>
 				{
 					Initially(
-						When(NewUserRegistration, (w, e, m) =>
+						When(NewUserRegistration, (workflow, eevent, message) =>
 							{
-								w.Username = m.Username;
-								w.Password = m.Password;
-								w.DisplayName = m.DisplayName;
-								w.Email = m.Email;
+								workflow.Username = message.Username;
+								workflow.Password = message.Password;
+								workflow.DisplayName = message.DisplayName;
+								workflow.Email = message.Email;
 
 								// e.Message would include the message
-								w.TransitionTo(WaitingForEmailValidation);
+								workflow.TransitionTo(WaitingForEmailValidation);
 							}));
 
 					During(WaitingForEmailValidation,
@@ -49,6 +49,11 @@ namespace MassTransit.Tests.Saga.StateMachine
 								w.Complete();
 							}));
 				});
+		}
+
+		public RegisterUserStateMachine(Guid correlationId)
+		{
+			CorrelationId = correlationId;
 		}
 
 		public RegisterUserStateMachine()

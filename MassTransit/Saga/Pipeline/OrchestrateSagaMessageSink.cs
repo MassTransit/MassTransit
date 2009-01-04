@@ -14,8 +14,9 @@ namespace MassTransit.Saga.Pipeline
 {
     using System;
     using System.Collections.Generic;
-    using System.Transactions;
+    using System.Data;
     using Exceptions;
+    using Magnum.Common.Data;
     using MassTransit.Pipeline.Interceptors;
 
     public class OrchestrateSagaMessageSink<TComponent, TMessage> :
@@ -32,28 +33,24 @@ namespace MassTransit.Saga.Pipeline
         {
             Guid correlationId = message.CorrelationId;
 
-            // if we are already pulling from a transactional queue, use the existing transaction
-            if (Transaction.Current != null)
-            {
-                TComponent saga = GetSaga(correlationId);
+			try
+			{
+				using (IUnitOfWork work = UnitOfWork.Start())
+				using (ITransaction transaction = work.BeginTransaction(IsolationLevel.Serializable))
+				{
+					TComponent saga = GetSaga(correlationId);
 
-                yield return saga;
+					yield return saga;
 
-                Repository.Save(saga);
-            }
-            else
-            {
-                using (TransactionScope scope = new TransactionScope())
-                {
-                    TComponent saga = GetSaga(correlationId);
+					Repository.Save(saga);
 
-                    yield return saga;
-
-                    Repository.Save(saga);
-
-                    scope.Complete();
-                }
-            }
+					transaction.Commit();
+				}
+			}
+			finally
+			{
+				UnitOfWork.Finish();
+			}
         }
 
         private TComponent GetSaga(Guid correlationId)

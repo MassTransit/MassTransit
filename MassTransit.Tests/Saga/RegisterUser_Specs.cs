@@ -14,6 +14,7 @@ namespace MassTransit.Tests.Saga
 {
 	using System.Collections;
 	using System.Diagnostics;
+	using Magnum.Common.Data;
 	using MassTransit.Pipeline.Interceptors;
 	using MassTransit.Pipeline.Sinks;
 	using MassTransit.Saga;
@@ -67,11 +68,20 @@ namespace MassTransit.Tests.Saga
 						RemoteBus,
 						sagaRepository));
 
+			UnitOfWork.SetUnitOfWorkProvider(() => MockRepository.GenerateMock<IUnitOfWork>());
+
 			// this just shows that you can easily respond to the message
 			RemoteBus.Subscribe<SendUserVerificationEmail>(
 				x => RemoteBus.Publish(new UserVerificationEmailSent(x.CorrelationId, x.Email)));
 
 			RemoteBus.Subscribe<RegisterUserSaga>();
+		}
+
+		protected override void TeardownContext()
+		{
+			UnitOfWork.SetUnitOfWorkProvider(() => null);
+
+			base.TeardownContext();
 		}
 
 		[Test]

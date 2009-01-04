@@ -13,6 +13,7 @@
 namespace MassTransit.Services.Timeout
 {
 	using log4net;
+	using Magnum.Common.Data;
 	using Messages;
 
     public class ScheduleTimeoutConsumer :
@@ -27,12 +28,19 @@ namespace MassTransit.Services.Timeout
             _repository = repository;
         }
 
-
-        public void Consume(ScheduleTimeout message)
+		public void Consume(ScheduleTimeout message)
         {
         	_log.InfoFormat("Scheduling timeout for {0} at {1}", message.CorrelationId, message.TimeoutAt);
 
-            _repository.Schedule(message.CorrelationId, message.TimeoutAt);
+        	UnitOfWork.Start();
+        	try
+        	{
+				_repository.Schedule(message.CorrelationId, message.TimeoutAt);
+        	}
+        	finally
+        	{
+        		UnitOfWork.Finish();
+        	}
         }
     }
 }

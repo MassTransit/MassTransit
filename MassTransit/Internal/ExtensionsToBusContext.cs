@@ -13,30 +13,31 @@
 namespace MassTransit.Internal
 {
 	using System;
+	using Magnum.Common;
 
 	public static class ExtensionsToBusContext
 	{
 		private static readonly Guid _inboundMessageContextKey = new Guid("E4DD4A53-C0B5-4B56-86A0-A7A88AE09B7A");
 		private static readonly Guid _outboundMessageContextKey = new Guid("366BD633-7D83-4137-B764-422AE8B71E24");
 
-		public static OutboundMessageContext OutboundMessage(this IBusContext busContext)
+		public static OutboundMessageContext OutboundMessage(this ILocalContext busContext)
 		{
 			return busContext.Retrieve(_outboundMessageContextKey, () => new OutboundMessageContext());
 		}
 
-		public static void OutboundMessage(this IBusContext busContext, Action<OutboundMessageContext> action)
+		public static void OutboundMessage(this ILocalContext busContext, Action<OutboundMessageContext> action)
 		{
 			OutboundMessageContext context = OutboundMessage(busContext);
 
 			action(context);
 		}
 
-		public static InboundMessageContext InboundMessage(this IBusContext busContext)
+		public static InboundMessageContext InboundMessage(this ILocalContext busContext)
 		{
 			return busContext.Retrieve(_inboundMessageContextKey, () => new InboundMessageContext());
 		}
 
-		public static void InboundMessage(this IBusContext busContext, Action<InboundMessageContext> action)
+		public static void InboundMessage(this ILocalContext busContext, Action<InboundMessageContext> action)
 		{
 			InboundMessageContext context = InboundMessage(busContext);
 

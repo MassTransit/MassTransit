@@ -14,6 +14,8 @@ namespace MassTransit.Tests.Pipeline
 {
 	using System;
 	using System.Collections;
+	using System.Data;
+	using Magnum.Common.Data;
 	using MassTransit.Pipeline;
 	using MassTransit.Pipeline.Configuration;
 	using MassTransit.Pipeline.Inspectors;
@@ -72,6 +74,11 @@ namespace MassTransit.Tests.Pipeline
 			_remove = _pipeline.Subscribe<SimpleSaga>();
 
 			PipelineViewer.Trace(_pipeline);
+
+			IUnitOfWork work = MockRepository.GenerateStub<IUnitOfWork>();
+			work.Expect(w => w.BeginTransaction(IsolationLevel.Serializable)).Return(MockRepository.GenerateMock<ITransaction>());
+
+			UnitOfWork.SetUnitOfWorkProvider(() => work);
 		}
 
 		#endregion

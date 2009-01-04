@@ -13,7 +13,7 @@
 namespace MassTransit.Infrastructure.MessageDeferral
 {
 	using System;
-	using Magnum.Infrastructure.Repository;
+	using Magnum.Infrastructure.Data;
 	using Services.MessageDeferral;
 
 	public class PersistantDeferredMessageRepository :

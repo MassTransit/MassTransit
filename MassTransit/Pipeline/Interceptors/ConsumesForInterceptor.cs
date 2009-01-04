@@ -18,8 +18,8 @@ namespace MassTransit.Pipeline.Interceptors
 	using System.Reflection;
 	using Configuration;
 	using Exceptions;
+	using Magnum.Common.Threading;
 	using Sinks;
-	using Util;
 
 	public class ConsumesForInterceptor :
 		PipelineInterceptorBase

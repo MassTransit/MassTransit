@@ -18,7 +18,7 @@ namespace MassTransit.Internal
 	using System.Reflection;
 	using Configuration;
 	using Exceptions;
-	using Util;
+	using Magnum.Common.Threading;
 
 	public class EndpointFactory :
 		IEndpointFactory
@@ -89,6 +89,23 @@ namespace MassTransit.Internal
 			}
 		}
 
+		protected virtual void Dispose(bool disposing)
+		{
+			if (_disposed) return;
+			if (disposing)
+			{
+				_endpointConfigurators.Dispose();
+				_endpointConfigurators = null;
+
+				_transportConfigurators.Dispose();
+				_transportConfigurators = null;
+
+				_endpoints.Dispose();
+				_endpoints = null;
+			}
+			_disposed = true;
+		}
+
 		private IEndpoint BuildEndpoint(Uri uri)
 		{
 			var configurator = BuildEndpointConfigurationAction(uri);
@@ -134,6 +151,11 @@ namespace MassTransit.Internal
 				};
 		}
 
+		~EndpointFactory()
+		{
+			Dispose(false);
+		}
+
 		private static MethodInfo GetConfigureEndpointMethodInfo(Type transportType, BindingFlags bindingFlags)
 		{
 			MethodInfo mi = transportType.GetMethod("ConfigureEndpoint", bindingFlags);
@@ -148,28 +170,6 @@ namespace MassTransit.Internal
 			var endpointConfigurator = Expression.Parameter(typeof (Action<IEndpointConfigurator>), "endpointConfigurator");
 			var caller = Expression.Call(mi, new[] {endpointUri, endpointConfigurator});
 			return Expression.Lambda<Func<Uri, Action<IEndpointConfigurator>, IEndpoint>>(caller, new[] {endpointUri, endpointConfigurator}).Compile();
-		}
-
-		~EndpointFactory()
-		{
-			Dispose(false);
-		}
-
-		protected virtual void Dispose(bool disposing)
-		{
-			if (_disposed) return;
-			if (disposing)
-			{
-				_endpointConfigurators.Dispose();
-				_endpointConfigurators = null;
-
-				_transportConfigurators.Dispose();
-				_transportConfigurators = null;
-
-				_endpoints.Dispose();
-				_endpoints = null;
-			}
-			_disposed = true;
 		}
 	}
 }

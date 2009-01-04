@@ -17,7 +17,7 @@ namespace MassTransit.Pipeline.Interceptors
 	using System.Linq.Expressions;
 	using System.Reflection;
 	using Exceptions;
-	using Util;
+	using Magnum.Common.Threading;
 
 	public abstract class ConsumesInterceptorBase<TInterceptor> :
 		PipelineInterceptorBase
