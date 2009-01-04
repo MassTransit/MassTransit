@@ -111,8 +111,6 @@
     <Compile Include="Services\MessageDeferral\TimeoutExpiredConsumer.cs" />
     <Compile Include="MessageGroup.cs" />
     <Compile Include="ReliableAttribute.cs" />
-    <Compile Include="Threading\LockFreeQueue.cs" />
-    <Compile Include="Threading\ResourceThreadPool.cs" />
     <Compile Include="Services\Timeout\Messages\CancelTimeout.cs" />
     <Compile Include="Services\Timeout\CancelTimeoutConsumer.cs" />
     <Compile Include="Services\Timeout\InMemoryTimeoutRepository.cs" />
@@ -207,7 +205,7 @@
     <Compile Include="Internal\RequestResponse\RequestResponseScope.cs" />
     <Compile Include="Internal\RequestResponse\ResponseAction.cs" />
     <Compile Include="Internal\RequestResponse\ResponseActionBuilder.cs" />
-    <Compile Include="Batch\BatchMessage.cs" />
+    <Compile Include="Batch\Batch.cs" />
     <Compile Include="Batch\Pipeline\BatchMessageRouterConfigurator.cs" />
     <Compile Include="Batch\Pipeline\BatchMessageRouterConfiguratorScope.cs" />
     <Compile Include="Internal\IUnsubscribeAction.cs" />
