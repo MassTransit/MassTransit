@@ -138,7 +138,6 @@
     <Compile Include="RequestReply_Specs.cs" />
     <Compile Include="RequestResponseScope_Specs.cs" />
     <Compile Include="ResourceLock_Specs.cs" />
-    <Compile Include="ResourceThreadPool_Specs.cs" />
     <Compile Include="Saga\Messages\CorrelatedMessage.cs" />
     <Compile Include="Saga\Messages\RegisterUser.cs" />
     <Compile Include="Saga\Messages\SendUserVerificationEmail.cs" />

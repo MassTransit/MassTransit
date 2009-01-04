@@ -17,7 +17,6 @@ namespace MassTransit.Batch
 	using log4net;
 
 	public class Batch<TMessage, TBatchId> :
-		Consumes<TMessage>.All,
 		BatchedBy<TBatchId>,
 		IEnumerable<TMessage>
 		where TMessage : class, BatchedBy<TBatchId>
@@ -33,11 +32,6 @@ namespace MassTransit.Batch
 			_batchId = batchId;
 			_batchLength = batchLength;
 			_enumerable = enumerable;
-		}
-
-		public void Consume(TMessage message)
-		{
-			throw new System.NotImplementedException();
 		}
 
 		public TBatchId BatchId
