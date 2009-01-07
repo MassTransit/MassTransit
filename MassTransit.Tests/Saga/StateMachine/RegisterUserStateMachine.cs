@@ -30,24 +30,23 @@ namespace MassTransit.Tests.Saga.StateMachine
 			Define(() =>
 				{
 					Initially(
-						When(NewUserRegistration, (workflow, eevent, message) =>
+						When(NewUserRegistration)
+							.Then((workflow, message) =>
 							{
 								workflow.Username = message.Username;
 								workflow.Password = message.Password;
 								workflow.DisplayName = message.DisplayName;
 								workflow.Email = message.Email;
 
-								// e.Message would include the message
-								workflow.TransitionTo(WaitingForEmailValidation);
-							}));
+							}).TransitionTo(WaitingForEmailValidation));
 
 					During(WaitingForEmailValidation,
-						When(EmailValidated, (w) =>
+						When(EmailValidated)
+							.Then(w =>
 							{
 								w.Validated = true;
 
-								w.Complete();
-							}));
+							}).Complete());
 				});
 		}
 
