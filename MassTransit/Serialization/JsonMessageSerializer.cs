@@ -15,6 +15,8 @@ namespace MassTransit.Serialization
 	using System;
 	using System.IO;
 	using System.Text;
+	using Internal;
+	using Magnum.Common;
 	using Newtonsoft.Json;
 
 	public class JsonMessageSerializer :
@@ -41,6 +43,8 @@ namespace MassTransit.Serialization
 
 			Type t = Type.GetType(envelope.MessageType, true, true);
 			var message = JavaScriptConvert.DeserializeObject(envelope.Message, t);
+
+			LocalContext.Current.InboundMessage(context => envelope.ApplyTo(context));
 
 			return message;
 		}
