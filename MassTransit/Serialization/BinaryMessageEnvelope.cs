@@ -17,6 +17,7 @@ namespace MassTransit.Serialization
 	using System.Runtime.Remoting.Messaging;
 	using Internal;
 	using Magnum.Common;
+	using Magnum.Common.ObjectExtensions;
 
 	public class BinaryMessageEnvelope :
 		MessageEnvelopeBase
@@ -61,6 +62,11 @@ namespace MassTransit.Serialization
 				headers.Add(new Header(FaultAddressKey, context.FaultAddress));
 			}
 
+			if(!context.MessageType.IsNullOrEmpty())
+			{
+				headers.Add(new Header(MessageTypeKey, context.MessageType));
+			}
+
 			if (context.RetryCount > 0)
 				headers.Add(new Header(RetryCountKey, context.RetryCount));
 
@@ -89,6 +95,10 @@ namespace MassTransit.Serialization
 
 				case RetryCountKey:
 					RetryCount = (int) value;
+					break;
+
+				case MessageTypeKey:
+					MessageType = (string) value;
 					break;
 			}
 		}

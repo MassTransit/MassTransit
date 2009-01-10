@@ -25,6 +25,7 @@ namespace MassTransit.Serialization
 			context.SetResponseAddress(envelope.ResponseAddress.IsNullOrEmpty() ? null : new Uri(envelope.ResponseAddress));
 			context.SetFaultAddress(envelope.FaultAddress.IsNullOrEmpty() ? null : new Uri(envelope.FaultAddress));
 			context.SetRetryCount(envelope.RetryCount);
+			context.SetMessageType(envelope.MessageType);
 		}
 
 		public static void CopyFrom(this MessageEnvelopeBase envelope, IOutboundMessageContext context)
@@ -34,6 +35,7 @@ namespace MassTransit.Serialization
 			envelope.ResponseAddress = context.ResponseAddress.ToStringOrNull();
 			envelope.FaultAddress = context.FaultAddress.ToStringOrNull();
 			envelope.RetryCount = context.RetryCount;
+			envelope.MessageType = context.MessageType;
 		}
 
 		public static string ToStringOrNull(this Uri uri)

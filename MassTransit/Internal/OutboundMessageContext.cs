@@ -13,6 +13,7 @@
 namespace MassTransit.Internal
 {
 	using System;
+	using Serialization;
 
 	public class OutboundMessageContext :
 		MessageContextBase,
@@ -61,6 +62,11 @@ namespace MassTransit.Internal
 		public void SetRetryCount(int retryCount)
 		{
 			RetryCount = retryCount;
+		}
+
+		public void SetMessageType(Type messageType)
+		{
+			MessageType = MessageEnvelopeBase.FormatMessageType(messageType);
 		}
 	}
 }

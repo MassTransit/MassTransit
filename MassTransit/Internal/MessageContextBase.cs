@@ -22,6 +22,7 @@ namespace MassTransit.Internal
 		public Uri SourceAddress { get; protected set; }
 		public int RetryCount { get; protected set; }
 		public object Message { get; protected set; }
+		public string MessageType { get; protected set; }
 
 		public virtual void Clear()
 		{
@@ -31,6 +32,7 @@ namespace MassTransit.Internal
 			SourceAddress = null;
 			ResponseAddress = null;
 			FaultAddress = null;
+			MessageType = null;
 		}
 	}
 }

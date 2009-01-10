@@ -32,6 +32,11 @@ namespace MassTransit.Internal
 			_bus = null;
 		}
 
+		public void SetMessageType(string messageType)
+		{
+			MessageType = messageType;
+		}
+
 		public void SetSourceAddress(Uri uri)
 		{
 			SourceAddress = uri;

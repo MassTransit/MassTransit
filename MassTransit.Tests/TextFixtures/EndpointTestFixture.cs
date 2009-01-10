@@ -65,7 +65,7 @@ namespace MassTransit.Tests.TextFixtures
 			EndpointFactory = null;
 		}
 
-		protected IEndpointFactory EndpointFactory { get; private set; }
+		protected IEndpointFactory EndpointFactory { get; set; }
 		protected IObjectBuilder ObjectBuilder { get; private set; }
 
 		protected virtual void EstablishContext()
