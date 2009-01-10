@@ -13,8 +13,10 @@
 namespace MassTransit.Serialization
 {
     using System.Xml.Serialization;
+    using Internal;
+    using Magnum.Common;
 
-    /// <summary>
+	/// <summary>
     /// The envelope that is used to wrap messages serialized using Xml
     /// </summary>
     [XmlRoot(ElementName = "MessageEnvelope")]
@@ -28,7 +30,10 @@ namespace MassTransit.Serialization
         public XmlMessageEnvelope(object message)
         {
             Message = message;
-            MessageType = message.GetType().AssemblyQualifiedName;
+
+			var context = LocalContext.Current.OutboundMessage();
+
+        	this.CopyFrom(context);
         }
 
         public object Message { get; set; }

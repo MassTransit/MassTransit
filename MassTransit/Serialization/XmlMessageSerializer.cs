@@ -17,6 +17,8 @@ namespace MassTransit.Serialization
 	using System.Runtime.Serialization;
 	using System.Xml;
 	using System.Xml.Serialization;
+	using Internal;
+	using Magnum.Common;
 	using Magnum.Common.Threading;
 	using Util;
 
@@ -73,6 +75,8 @@ namespace MassTransit.Serialization
 			{
 				obj = GetDeserializerFor(t).Deserialize(reader);
 			}
+
+			LocalContext.Current.InboundMessage(context => envelope.ApplyTo(context));
 
 			return obj;
 		}
