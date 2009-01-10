@@ -44,6 +44,11 @@ namespace MassTransit
 			get { return LocalContext.Current.InboundMessage().RetryCount; }
 		}
 
+		public static string MessageType
+		{
+			get { return LocalContext.Current.InboundMessage().MessageType; }
+		}
+
 		public static void Respond<T>(T message) where T : class
 		{
 			var context = LocalContext.Current.InboundMessage();

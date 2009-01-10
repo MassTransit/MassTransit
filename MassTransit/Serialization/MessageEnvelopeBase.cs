@@ -12,6 +12,8 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Serialization
 {
+	using System;
+
 	/// <summary>
     /// A base message envelope for transports that support enveloped messages
     /// This does not include the binary formatter, since it is retained for
@@ -66,5 +68,10 @@ namespace MassTransit.Serialization
 		/// The type of the message, including the full name and assembly
 		/// </summary>
     	public string MessageType { get; set; }
+
+		public static string FormatMessageType(Type messageType)
+		{
+			return String.Format("{0}, {1}", messageType.FullName, messageType.Assembly.FullName);
+		}
     }
 }

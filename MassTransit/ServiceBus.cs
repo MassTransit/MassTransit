@@ -162,6 +162,7 @@ namespace MassTransit
 				IEndpoint endpoint = EndpointFactory.GetEndpoint(subscription.EndpointUri);
 
 				context.SetDestinationAddress(endpoint.Uri);
+				context.SetMessageType(typeof (T));
 
 				endpoint.Send(message, info.TimeToLive);
 

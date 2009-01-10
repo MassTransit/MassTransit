@@ -104,6 +104,7 @@
     <Compile Include="Groups\Group_Specs.cs" />
     <Compile Include="MessageContext_Specs.cs" />
     <Compile Include="Retry_Specs.cs" />
+    <Compile Include="Serialization\ContextSerialization_Specs.cs" />
     <Compile Include="Services\HealthMonitoring\Specs_MonitorInfo.cs" />
     <Compile Include="Services\HealthMonitoring\The_health_service_lifetime.cs" />
     <Compile Include="Services\HealthMonitoring\When_a_suspect_is_received.cs" />
