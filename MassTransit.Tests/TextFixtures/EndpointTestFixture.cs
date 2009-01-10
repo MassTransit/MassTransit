@@ -44,6 +44,8 @@ namespace MassTransit.Tests.TextFixtures
 					x.SetObjectBuilder(ObjectBuilder);
 					x.RegisterTransport<TTransport>();
                     x.SetDefaultSerializer<BinaryMessageSerializer>();
+
+					AdditionalEndpointFactoryConfiguration(x);
 				});
 			ObjectBuilder.Stub(x => x.GetInstance<IEndpointFactory>()).Return(EndpointFactory);
 
@@ -65,7 +67,12 @@ namespace MassTransit.Tests.TextFixtures
 			EndpointFactory = null;
 		}
 
+		protected virtual void AdditionalEndpointFactoryConfiguration(IEndpointFactoryConfigurator x)
+		{
+		}
+
 		protected IEndpointFactory EndpointFactory { get; set; }
+
 		protected IObjectBuilder ObjectBuilder { get; private set; }
 
 		protected virtual void EstablishContext()

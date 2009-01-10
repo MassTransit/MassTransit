@@ -28,7 +28,7 @@ namespace MassTransit.Serialization
 			context.SetMessageType(envelope.MessageType);
 		}
 
-		public static void CopyFrom(this MessageEnvelopeBase envelope, IOutboundMessageContext context)
+		public static void CopyFrom(this MessageEnvelopeBase envelope, IMessageContext context)
 		{
 			envelope.SourceAddress = context.SourceAddress.ToStringOrNull();
 			envelope.DestinationAddress = context.DestinationAddress.ToStringOrNull();

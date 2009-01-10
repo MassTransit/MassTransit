@@ -15,46 +15,18 @@ namespace MassTransit.Tests.Serialization
 	using Configuration;
 	using Magnum.Common.DateTimeExtensions;
 	using MassTransit.Serialization;
-	using MassTransit.Transports;
 	using Messages;
 	using NUnit.Framework;
-	using Rhino.Mocks;
 	using TextFixtures;
 
 	[TestFixture, Explicit]
 	public class When_sending_a_message_using_the_specified_serializer<TSerializer> :
-		EndpointTestFixture<LoopbackEndpoint>
+		LoopbackLocalAndRemoteTestFixture
 		where TSerializer : IMessageSerializer
 	{
-		public IServiceBus LocalBus { get; private set; }
-		public IServiceBus RemoteBus { get; private set; }
-
-		protected override void EstablishContext()
+		protected override void AdditionalEndpointFactoryConfiguration(IEndpointFactoryConfigurator x)
 		{
-			base.EstablishContext();
-
-			EndpointFactory = EndpointFactoryConfigurator.New(x =>
-				{
-					x.SetObjectBuilder(ObjectBuilder);
-					x.RegisterTransport<LoopbackEndpoint>();
-					x.SetDefaultSerializer<TSerializer>();
-				});
-
-			ObjectBuilder.Stub(x => x.GetInstance<IEndpointFactory>()).Return(EndpointFactory);
-
-			LocalBus = ServiceBusConfigurator.New(x => { x.ReceiveFrom("loopback://localhost/mt_client"); });
-			RemoteBus = ServiceBusConfigurator.New(x => { x.ReceiveFrom("loopback://localhost/mt_server"); });
-		}
-
-		protected override void TeardownContext()
-		{
-			LocalBus.Dispose();
-			LocalBus = null;
-
-			RemoteBus.Dispose();
-			RemoteBus = null;
-
-			base.TeardownContext();
+			x.SetDefaultSerializer<TSerializer>();
 		}
 
 		[Test]
@@ -91,6 +63,25 @@ namespace MassTransit.Tests.Serialization
 				});
 
 			LocalBus.Publish(ping, context => context.SendFaultTo(LocalBus.Endpoint.Uri));
+
+			Assert.IsTrue(received.IsAvailable(3.Seconds()), "Timeout waiting for message");
+		}
+
+		[Test]
+		public void The_message_type_should_be_properly_set_on_the_message_envelope()
+		{
+			PingMessage ping = new PingMessage();
+
+			FutureMessage<PingMessage> received = new FutureMessage<PingMessage>();
+
+			RemoteBus.Subscribe<PingMessage>(message =>
+				{
+					Assert.AreEqual(MessageEnvelopeBase.FormatMessageType(typeof (PingMessage)), CurrentMessage.MessageType);
+
+					received.Set(message);
+				});
+
+			LocalBus.Publish(ping);
 
 			Assert.IsTrue(received.IsAvailable(3.Seconds()), "Timeout waiting for message");
 		}
@@ -152,31 +143,17 @@ namespace MassTransit.Tests.Serialization
 
 			Assert.IsTrue(received.IsAvailable(3.Seconds()), "Timeout waiting for message");
 		}
-
-		[Test]
-		public void The_message_type_should_be_properly_set_on_the_message_envelope()
-		{
-			PingMessage ping = new PingMessage();
-
-			FutureMessage<PingMessage> received = new FutureMessage<PingMessage>();
-
-			RemoteBus.Subscribe<PingMessage>(message =>
-			{
-				Assert.AreEqual(MessageEnvelopeBase.FormatMessageType(typeof(PingMessage)), CurrentMessage.MessageType);
-
-				received.Set(message);
-			});
-
-			LocalBus.Publish(ping);
-
-			Assert.IsTrue(received.IsAvailable(3.Seconds()), "Timeout waiting for message");
-		}
-
 	}
 
 	[TestFixture]
 	public class For_the_binary_message_serializer :
 		When_sending_a_message_using_the_specified_serializer<BinaryMessageSerializer>
+	{
+	}
+
+	[TestFixture]
+	public class For_the_XML_message_serializer :
+		When_sending_a_message_using_the_specified_serializer<XmlMessageSerializer>
 	{
 	}
 }
