@@ -36,11 +36,7 @@ namespace MassTransit.Configuration
 			_endpointConfigurators = new ReaderWriterLockedDictionary<Uri, Action<IEndpointConfigurator>>();
 		}
 
-		public void Dispose()
-		{
-			Dispose(true);
-			GC.SuppressFinalize(this);
-		}
+
 
 		public void SetDefaultSerializer<TSerializer>()
 			where TSerializer : IMessageSerializer
@@ -107,6 +103,12 @@ namespace MassTransit.Configuration
 		{
 			Dispose(false);
 		}
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
 
 		protected virtual void Dispose(bool disposing)
 		{
