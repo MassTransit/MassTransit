@@ -4,7 +4,7 @@
     <facility id="masstransit">
 
       <bus id="subscriptions"
-				 endpoint="msmq://localhost/mt_pubsub">
+				 endpoint="msmq://localhost/mt_subscriptions">
       </bus>
       <transports>
         <transport>MassTransit.Transports.Msmq.MsmqEndpoint, MassTransit.Transports.Msmq</transport>

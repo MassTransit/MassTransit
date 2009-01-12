@@ -7,9 +7,10 @@ namespace Starbucks.Barista
 {
     using MassTransit;
 
-    public class DrinkPreparationSaga
-        : InitiatedBy<NewOrderMessage>,
-          Orchestrates<PaymentCompleteMessage>, ISaga
+    public class DrinkPreparationSaga :
+        InitiatedBy<NewOrderMessage>,
+        Orchestrates<PaymentCompleteMessage>,
+        ISaga
     {
         private readonly Guid _correlationId;
         private bool DrinkReady { get; set; }
@@ -65,6 +66,7 @@ namespace Starbucks.Barista
         public void Consume(PaymentCompleteMessage message)
         {
             PaymentComplete = true;
+            Console.WriteLine("Payment Complete for '{0}' got it!", message.Name);
             ServeDrinkIfStateComplete();
         }
     }
