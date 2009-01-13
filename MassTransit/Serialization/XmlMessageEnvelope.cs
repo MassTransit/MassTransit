@@ -31,6 +31,8 @@ namespace MassTransit.Serialization
         {
             Message = message;
 
+        	MessageType = FormatMessageType(message.GetType());
+
 			var context = LocalContext.Current.OutboundMessage();
 
         	this.CopyFrom(context);

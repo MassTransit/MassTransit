@@ -27,6 +27,8 @@ namespace MassTransit.Serialization
 		{
 			Message = JavaScriptConvert.SerializeObject(message);
 
+			MessageType = FormatMessageType(message.GetType());
+
 			var context = LocalContext.Current.OutboundMessage();
 
 			this.CopyFrom(context);

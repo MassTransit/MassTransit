@@ -30,12 +30,12 @@ namespace MassTransit.Serialization
 
 		public static void CopyFrom(this MessageEnvelopeBase envelope, IMessageContext context)
 		{
-			envelope.SourceAddress = context.SourceAddress.ToStringOrNull();
-			envelope.DestinationAddress = context.DestinationAddress.ToStringOrNull();
-			envelope.ResponseAddress = context.ResponseAddress.ToStringOrNull();
-			envelope.FaultAddress = context.FaultAddress.ToStringOrNull();
+			envelope.SourceAddress = context.SourceAddress.ToStringOrNull() ?? envelope.SourceAddress;
+			envelope.DestinationAddress = context.DestinationAddress.ToStringOrNull() ?? envelope.DestinationAddress;
+			envelope.ResponseAddress = context.ResponseAddress.ToStringOrNull() ?? envelope.ResponseAddress;
+			envelope.FaultAddress = context.FaultAddress.ToStringOrNull() ?? envelope.FaultAddress;
 			envelope.RetryCount = context.RetryCount;
-			envelope.MessageType = context.MessageType;
+			envelope.MessageType = context.MessageType ?? envelope.MessageType;
 		}
 
 		public static string ToStringOrNull(this Uri uri)
