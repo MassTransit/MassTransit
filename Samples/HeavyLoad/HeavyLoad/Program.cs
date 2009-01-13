@@ -21,19 +21,19 @@ namespace HeavyLoad
             Console.WriteLine("HeavyLoad - MassTransit Load Generator");
             Console.WriteLine();
 
+			RunBatchLoadTest();
+
+			RunTransactionLoadTest();
+
 			RunLocalMsmqLoadTest();
 
 			RunContainerLoadTest();
 
-			RunTransactionLoadTest();
-         
 			RunLoopbackLoadTest();
 
 			//RunWcfLoadTest();
 
 			RunCorrelatedMessageTest();
-
-			RunBatchLoadTest();
 
 			//RunLocalActiveMqLoadTest();
 
@@ -56,6 +56,7 @@ namespace HeavyLoad
 
 		private static void RunBatchLoadTest()
 		{
+            Console.WriteLine("Starting Local MSMQ Batch Load Test");
 			StopWatch stopWatch = new StopWatch();
 
 			using (BatchLoadTest test = new BatchLoadTest())

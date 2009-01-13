@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.21022</ProductVersion>
+    <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{E6AAB944-BFB0-4DD1-A3A0-D4D4E32A6A3A}</ProjectGuid>
     <OutputType>Exe</OutputType>
@@ -80,6 +80,9 @@
     <Compile Include="SagaRepository.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="barista.log4net.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Starbucks.Barista.Castle.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

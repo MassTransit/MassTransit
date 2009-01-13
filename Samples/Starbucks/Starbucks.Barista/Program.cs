@@ -7,6 +7,7 @@ using Microsoft.Practices.ServiceLocation;
 
 namespace Starbucks.Barista
 {
+    using System.IO;
     using MassTransit.Host.Configurations;
 
     static class Program
@@ -17,6 +18,7 @@ namespace Starbucks.Barista
         [STAThread]
         static void Main(string[] args)
         {
+            log4net.Config.XmlConfigurator.Configure(new FileInfo("barista.log4net.xml"));
             IWindsorContainer container = new DefaultMassTransitContainer("Starbucks.Barista.Castle.xml");
             var builder = new WindsorObjectBuilder(container.Kernel);
             ServiceLocator.SetLocatorProvider(() => builder);

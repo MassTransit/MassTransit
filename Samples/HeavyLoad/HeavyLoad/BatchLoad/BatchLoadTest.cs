@@ -38,11 +38,13 @@ namespace HeavyLoad.BatchLoad
 
 		public void Run(StopWatch watch)
 		{
-            MsmqUtilities.ValidateAndPurgeQueue(@".\private$\test_servicebus");
-
 			_container = new HeavyLoadContainer();
 
 			_bus = _container.Resolve<IServiceBus>();
+
+            MsmqEndpoint endpoint = _bus.Endpoint as MsmqEndpoint;
+            if (endpoint != null)
+                MsmqUtilities.ValidateAndPurgeQueue(endpoint.QueuePath);
 
 			watch.Start();
 
