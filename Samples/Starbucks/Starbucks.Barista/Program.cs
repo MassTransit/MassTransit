@@ -1,24 +1,23 @@
-﻿using System;
-using Castle.Windsor;
-using MassTransit.Host;
-using MassTransit.Saga;
-using MassTransit.WindsorIntegration;
-using Microsoft.Practices.ServiceLocation;
-
-namespace Starbucks.Barista
+﻿namespace Starbucks.Barista
 {
+    using System;
     using System.IO;
-    using MassTransit.Host.Configurations;
+    using Castle.Windsor;
+    using log4net.Config;
+    using MassTransit.Host;
+    using MassTransit.Saga;
+    using MassTransit.WindsorIntegration;
+    using Microsoft.Practices.ServiceLocation;
 
-    static class Program
+    internal static class Program
     {
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
         [STAThread]
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
-            log4net.Config.XmlConfigurator.Configure(new FileInfo("barista.log4net.xml"));
+            XmlConfigurator.Configure(new FileInfo("barista.log4net.xml"));
             IWindsorContainer container = new DefaultMassTransitContainer("Starbucks.Barista.Castle.xml");
             var builder = new WindsorObjectBuilder(container.Kernel);
             ServiceLocator.SetLocatorProvider(() => builder);
@@ -26,8 +25,8 @@ namespace Starbucks.Barista
             container.AddComponent<DrinkPreparationSaga>();
             container.AddComponent<ISagaRepository<DrinkPreparationSaga>, DrinkPreparationSagaRepository>();
 
-            var credentials = Credentials.Interactive;
-            var settings = WinServiceSettings.Custom(
+            Credentials credentials = Credentials.Interactive;
+            WinServiceSettings settings = WinServiceSettings.Custom(
                 "StarbucksBarista",
                 "Starbucks Barista",
                 "a Mass Transit sample service for making orders of coffee.",
