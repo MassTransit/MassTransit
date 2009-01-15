@@ -165,12 +165,15 @@ namespace MassTransit.Transports.Msmq
 
 			using (MessageEnumerator enumerator = _queue.GetMessageEnumerator2())
 			{
+				_log.DebugFormat("Enumerating endpoint: {0} ({1}ms)", Uri, timeout.ToString());
+
 				while (enumerator.MoveNext(timeout))
 				{
+					_log.DebugFormat("Moved Next on {0}", Uri);
+
 					using (MsmqMessageSelector selector = new MsmqMessageSelector(this, enumerator, _serializer))
 					{
-						yield
-							return selector;
+						yield return selector;
 					}
 				}
 				enumerator.Close();
