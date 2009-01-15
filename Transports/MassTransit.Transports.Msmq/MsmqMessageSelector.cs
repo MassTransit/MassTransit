@@ -31,9 +31,9 @@ namespace MassTransit.Transports.Msmq
 		private readonly IMessageSerializer _serializer;
 		private volatile bool _disposed;
 		private object _message;
-		private MessageQueueTransactionType _receiveTransactionType;
 		private readonly TimeSpan _timeout;
 		private Message _transportMessage;
+		private bool _accepted;
 
 		public MsmqMessageSelector(MsmqEndpoint endpoint, MessageEnumerator enumerator, IMessageSerializer serializer)
 		{
@@ -53,15 +53,23 @@ namespace MassTransit.Transports.Msmq
 		{
 			if (_disposed) throw new ObjectDisposedException("The object has been disposed");
 
+			if (_accepted)
+				return true;
+
 			try
 			{
+				_log.DebugFormat("Removing message {0} from {1}", _transportMessage.Id, _endpoint.Uri);
+
 				using (Message received = _enumerator.RemoveCurrent(_timeout, _endpoint.ReceiveTransactionType))
 				{
 					if (received == null)
 						throw new MessageException(_message.GetType(), "The message could not be removed from the queue");
 
 					if (received.Id != _transportMessage.Id)
-						throw new MessageException(_message.GetType(), "The message removed does not match the original message");
+					{
+						var message = string.Format("The message removed does not match the original message {0}/{1}", _transportMessage.Id, received.Id);
+						throw new MessageException(_message.GetType(), message);
+					}
 				}
 
 				if (_log.IsDebugEnabled)
@@ -69,6 +77,8 @@ namespace MassTransit.Transports.Msmq
 
 				if (SpecialLoggers.Messages.IsInfoEnabled)
 					SpecialLoggers.Messages.InfoFormat("RECV:{0}:{1}", _endpoint.Uri, _message.GetType());
+
+				_accepted = true;
 
 				return true;
 			}
