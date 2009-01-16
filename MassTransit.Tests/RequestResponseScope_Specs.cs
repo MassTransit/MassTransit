@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests
 {
+	using System.Threading;
 	using Magnum.Common.DateTimeExtensions;
 	using Messages;
 	using NUnit.Framework;
@@ -83,6 +84,55 @@ namespace MassTransit.Tests
 				.Send();
 
 			Assert.IsTrue(ponged.IsAvailable(1.Seconds()), "No response received");
+		}
+
+		[Test]
+		public void An_asynchronous_model_should_be_supported()
+		{
+			PingMessage ping = new PingMessage();
+
+			ManualResetEvent mre = new ManualResetEvent(false);
+
+			FutureMessage<PongMessage> ponged = new FutureMessage<PongMessage>();
+
+			LocalBus.MakeRequest(bus => LocalBus.Endpoint.Send(ping, context => context.SendResponseTo(bus)))
+				.When<PongMessage>().RelatedTo(ping.CorrelationId).IsReceived(pong =>
+					{
+						ponged.Set(pong);
+					})
+				.TimeoutAfter(5.Seconds())
+				.OnTimeout(() => mre.Set())
+				.BeginSend((state) => mre.Set(), null);
+
+			LocalBus.Subscribe<PingMessage>(x => LocalBus.Publish(new PongMessage(x.CorrelationId)));
+
+			Assert.IsTrue(mre.WaitOne(5.Seconds(), true));
+			Assert.IsTrue(ponged.IsAvailable(1.Seconds()));
+		}
+
+		[Test]
+		public void When_an_asynchronous_timeout_occurs_we_should_get_our_timeout_action_called()
+		{
+			PingMessage ping = new PingMessage();
+
+			ManualResetEvent mre = new ManualResetEvent(false);
+
+			FutureMessage<PongMessage> ponged = new FutureMessage<PongMessage>();
+
+			LocalBus.MakeRequest(bus => LocalBus.Endpoint.Send(ping, context => context.SendResponseTo(bus)))
+				.When<PongMessage>().RelatedTo(ping.CorrelationId).IsReceived(pong =>
+					{
+						ponged.Set(pong);
+					})
+				.OnTimeout(() =>
+					{
+						mre.Set();
+					})
+				.TimeoutAfter(2.Seconds())
+				.BeginSend((state) => { }, null);
+
+			Assert.IsTrue(mre.WaitOne(10.Seconds(), true));
+			Assert.IsFalse(ponged.IsAvailable(0.Seconds()));
 		}
 	}
 }
