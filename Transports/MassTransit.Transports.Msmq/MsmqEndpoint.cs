@@ -240,11 +240,6 @@ namespace MassTransit.Transports.Msmq
 			return msg;
 		}
 
-        //todo: experimental method
-        public Message ReceiveById(string id, TimeSpan timeout, MessageQueueTransactionType tranType)
-        {
-            return _queue.ReceiveById(id, timeout, tranType);
-        }
 
 		private void HandleVariousErrorCodes(MessageQueueErrorCode code, Exception ex)
 		{
