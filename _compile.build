@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<project name="masstransit" default="go">
+<project name="the compile step" default="go">
 	<property name="nant.settings.currentframework" value="net-3.5" />
-	<property name="dirs.install" value=".\pubsub_install" overwrite="false" />
 	<property name="dirs.build" value=".\bin" overwrite="false" />
 	
 	
-	<target name="go" depends="build_code, build_samples, build_deploys" description="Starting the build of MassTransit" />
+	<target name="go" depends="build_code, build_samples, build_services" description="begining the compilation" />
 	
 	<target name="build_code" description="Building Library">
 		<delete  dir=".\bin" failonerror="false" />
@@ -35,8 +34,8 @@
 		</msbuild>
 	</target>
 	
-	<target name="build_deploys" description="Building Deploys">
-		<msbuild project=".\Deployment\Deployment-2008.sln" verbosity="quiet">
+	<target name="build_services" description="Building Deploys">
+		<msbuild project=".\PreBuiltServices\Deployment-2008.sln" verbosity="quiet">
 			<property name="Configuration" value="${msbuild.configuration}" />
 		</msbuild>
 	</target>

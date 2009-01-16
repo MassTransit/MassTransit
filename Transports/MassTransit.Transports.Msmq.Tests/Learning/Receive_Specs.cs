@@ -16,6 +16,7 @@ namespace MassTransit.Transports.Msmq.Tests
     using System.Messaging;
     using System.Transactions;
     using Magnum.Common.DateTimeExtensions;
+    using MassTransit.Tests;
     using NUnit.Framework;
 
     //TODO: Remove?
@@ -138,6 +139,76 @@ namespace MassTransit.Transports.Msmq.Tests
                     }
                 }
             }
+        }
+    }
+
+    [TestFixture]
+    public class When_receiving_from_a_queue
+    {
+        #region Setup/Teardown
+
+        [SetUp]
+        public void Setup()
+        {
+            if (!MessageQueue.Exists(_queueName))
+                MessageQueue.Create(_queueName, true);
+
+            _queue = new MessageQueue(_queueName, false, true, QueueAccessMode.SendAndReceive);
+            _queue.Purge();
+
+            _firstMsg = new Message { Label = 0.Days().FromUtcNow().ToString() };
+            _secondMsg = new Message { Label = 1.Days().FromUtcNow().ToString() };
+
+            _queue.Send(_firstMsg);
+            _queue.Send(_secondMsg);
+        }
+
+        [TearDown]
+        public void Teardown()
+        {
+            try
+            {
+                _queue.Close();
+            }
+            finally
+            {
+                _queue.Dispose();
+                _queue = null;
+            }
+        }
+
+        #endregion
+
+        private MessageQueue _queue;
+        private Message _firstMsg;
+        private Message _secondMsg;
+        private const string _queueName = @".\private$\mt_client";
+
+
+
+
+
+        [Test]
+        public void Ids()
+        {
+            Message once;
+            Message twice;
+
+            using (MessageEnumerator enumerator = _queue.GetMessageEnumerator2())
+            {
+                if(enumerator.MoveNext())
+                {
+                    once = enumerator.Current;
+                    enumerator.MoveNext();
+                    twice = enumerator.RemoveCurrent();
+
+                    once.Id.ShouldEqual(twice.Id);
+                    var b = twice.BodyType;
+                }
+                enumerator.Close();
+            }
+
+            
         }
     }
 }
