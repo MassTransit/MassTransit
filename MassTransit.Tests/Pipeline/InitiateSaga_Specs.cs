@@ -14,13 +14,13 @@ namespace MassTransit.Tests.Pipeline
 {
 	using System;
 	using System.Collections;
+	using System.Collections.Generic;
 	using System.Data;
 	using Magnum.Common.Data;
 	using MassTransit.Pipeline;
 	using MassTransit.Pipeline.Configuration;
 	using MassTransit.Pipeline.Inspectors;
 	using MassTransit.Pipeline.Interceptors;
-	using MassTransit.Pipeline.Sinks;
 	using MassTransit.Saga;
 	using MassTransit.Saga.Pipeline;
 	using NUnit.Framework;
@@ -74,11 +74,6 @@ namespace MassTransit.Tests.Pipeline
 			_remove = _pipeline.Subscribe<SimpleSaga>();
 
 			PipelineViewer.Trace(_pipeline);
-
-			IUnitOfWork work = MockRepository.GenerateStub<IUnitOfWork>();
-			work.Expect(w => w.BeginTransaction(IsolationLevel.Serializable)).Return(MockRepository.GenerateMock<ITransaction>());
-
-			UnitOfWork.SetUnitOfWorkProvider(() => work);
 		}
 
 		#endregion
@@ -121,7 +116,7 @@ namespace MassTransit.Tests.Pipeline
 		{
 			_saga = MockRepository.GenerateMock<SimpleSaga>();
 
-			_repository.Stub(x => x.Create(_sagaId)).Return(_saga);
+			_repository.Stub(x => x.InitiateNewSaga(_sagaId)).Return(new List<SimpleSaga> {_saga}.GetEnumerator());
 
 			InitiateSimpleSaga initiateSimpleSaga = new InitiateSimpleSaga(_sagaId);
 
@@ -135,7 +130,7 @@ namespace MassTransit.Tests.Pipeline
 		{
 			_saga = MockRepository.GenerateMock<SimpleSaga>();
 
-			_repository.Stub(x => x.Get(_sagaId)).Return(_saga);
+			_repository.Stub(x => x.OrchestrateExistingSaga(_sagaId)).Return(new List<SimpleSaga> { _saga }.GetEnumerator());
 
 			CompleteSimpleSaga completeMessage = new CompleteSimpleSaga(_sagaId);
 

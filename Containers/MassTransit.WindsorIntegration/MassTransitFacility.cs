@@ -26,7 +26,6 @@ namespace MassTransit.WindsorIntegration
 	using Infrastructure.Subscriptions;
 	using Internal;
 	using Microsoft.Practices.ServiceLocation;
-	using Pipeline.Sinks;
 	using Saga.Pipeline;
 	using Serialization;
 	using Services.HealthMonitoring;

@@ -16,7 +16,6 @@ namespace MassTransit.Tests.Saga
 	using System.Diagnostics;
 	using Magnum.Common.Data;
 	using MassTransit.Pipeline.Interceptors;
-	using MassTransit.Pipeline.Sinks;
 	using MassTransit.Saga;
 	using MassTransit.Saga.Pipeline;
 	using Messages;
