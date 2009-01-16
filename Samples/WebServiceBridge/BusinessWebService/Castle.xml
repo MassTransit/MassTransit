@@ -5,7 +5,7 @@
 
       <bus id="client"
 				 endpoint="msmq://localhost/mt_client">
-        <subscriptionService endpoint="msmq://localhost/mt_pubsub" />
+        <subscriptionService endpoint="msmq://localhost/mt_subscriptions" />
       </bus>
       <transports>
         <transport>MassTransit.Transports.Msmq.MsmqEndpoint, MassTransit.Transports.Msmq</transport>

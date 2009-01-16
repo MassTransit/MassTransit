@@ -16,7 +16,8 @@ namespace MassTransit.Internal.RequestResponse
 	using System.Collections.Generic;
 	using System.Threading;
 
-	public class RequestResponseScope
+	public class RequestResponseScope :
+		IAsyncResult
 	{
 		private readonly IServiceBus _bus;
 		private readonly Action<IServiceBus> _requestAction;
@@ -24,6 +25,8 @@ namespace MassTransit.Internal.RequestResponse
 		private TimeSpan _responseTimeout = TimeSpan.MaxValue;
 		private readonly ManualResetEvent _responseReceived = new ManualResetEvent(false);
 		private Action _timeoutAction;
+		private object _state;
+		private RegisteredWaitHandle _waitHandle;
 
 		public RequestResponseScope(IServiceBus bus, Action<IServiceBus> requestAction)
 		{
@@ -93,6 +96,53 @@ namespace MassTransit.Internal.RequestResponse
 			_timeoutAction = action;
 
 			return this;
+		}
+
+		public IAsyncResult BeginSend(AsyncCallback callback, object state)
+		{
+			_state = state;
+
+			UnsubscribeAction unsubscribeToken = () => true;
+			unsubscribeToken = SubscribeToResponseMessages(unsubscribeToken);
+
+			InvokeRequestAction();
+
+			WaitOrTimerCallback timerCallback = (s, timedOut) =>
+				{
+					unsubscribeToken();
+
+					if (timedOut)
+					{
+						if(_timeoutAction != null)
+							_timeoutAction();
+					}
+
+					callback(this);
+				};
+
+			_waitHandle = ThreadPool.RegisterWaitForSingleObject(_responseReceived, timerCallback, state, _responseTimeout, true);
+
+			return this;
+		}
+
+		public bool IsCompleted
+		{
+			get { return _responseReceived.WaitOne(0, false); }
+		}
+
+		public WaitHandle AsyncWaitHandle
+		{
+			get { return _responseReceived; }
+		}
+
+		public object AsyncState
+		{
+			get { return _state; }
+		}
+
+		public bool CompletedSynchronously
+		{
+			get { return false; }
 		}
 	}
 }
