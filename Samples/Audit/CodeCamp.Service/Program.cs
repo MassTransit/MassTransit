@@ -1,39 +1,51 @@
 namespace CodeCamp.Service
 {
-    using Domain;
-    using Infrastructure;
-    using Magnum.Common.Repository;
-    using Magnum.Infrastructure.Repository;
-    using MassTransit.Host;
-    using MassTransit.Host.Configurations;
-    using MassTransit.Saga;
-    using MassTransit.WindsorIntegration;
-    using Microsoft.Practices.ServiceLocation;
+	using Domain;
+	using log4net.Config;
+	using Magnum.Common;
+	using Magnum.Common.Data;
+	using Magnum.Infrastructure.Data;
+	using MassTransit.Host;
+	using MassTransit.Infrastructure.Saga;
+	using MassTransit.Saga;
+	using MassTransit.WindsorIntegration;
+	using Microsoft.Practices.ServiceLocation;
+	using NHibernate;
+	using NHibernate.Cfg;
 
-    internal class Program
-    {
-        private static void Main(string[] args)
-        {
-            log4net.Config.XmlConfigurator.Configure();
+	internal class Program
+	{
+		private static void Main(string[] args)
+		{
+			XmlConfigurator.Configure();
 
-            var container = new DefaultMassTransitContainer("audit-castle.config");
-            container.Kernel.AddComponentInstance<IRepositoryFactory>(NHibernateRepositoryFactory.Build());
+			var container = new DefaultMassTransitContainer("audit-castle.config");
 
-            container.AddComponent("repository", typeof(IRepository<,>), typeof(NHibernateRepository<,>));
+			Configuration _cfg = new Configuration().Configure();
 
-            container.AddComponent<ISagaRepository<RegisterUserSaga>, SagaRepository<RegisterUserSaga>>();
+			_cfg.AddAssembly(typeof(NHibernateRepositoryFactory).Assembly);
 
-            container.AddComponent<Responder>();
-            container.AddComponent<RegisterUserSaga>();
+			ISessionFactory _sessionFactory = _cfg.BuildSessionFactory();
 
-            var credentials = Credentials.LocalSystem;
-            var settings = WinServiceSettings.Custom(
-                "Audit",
-                "Audit",
-                "Audit");
-            var lifecycle = new AuditServiceLifeCycle(ServiceLocator.Current);
+			LocalContext.Current.Store(_sessionFactory);
 
-            Runner.Run(credentials, settings, lifecycle, args);
-        }
-    }
+			NHibernateUnitOfWork.SetSessionProvider(_sessionFactory.OpenSession);
+
+			UnitOfWork.SetUnitOfWorkProvider(NHibernateUnitOfWork.Create);
+
+			container.AddComponent<ISagaRepository<RegisterUserSaga>, NHibernateSagaRepository<RegisterUserSaga>>();
+
+			container.AddComponent<Responder>();
+			container.AddComponent<RegisterUserSaga>();
+
+			var credentials = Credentials.LocalSystem;
+			var settings = WinServiceSettings.Custom(
+				"Audit",
+				"Audit",
+				"Audit");
+			var lifecycle = new AuditServiceLifeCycle(ServiceLocator.Current);
+
+			Runner.Run(credentials, settings, lifecycle, args);
+		}
+	}
 }

@@ -1,8 +1,8 @@
 namespace CodeCamp.Domain
 {
     using System;
+    using Magnum.Common.Data;
     using Magnum.Common.DateTimeExtensions;
-    using Magnum.Common.Repository;
     using MassTransit;
     using MassTransit.Saga;
     using MassTransit.Services.Timeout.Messages;
@@ -40,13 +40,6 @@ namespace CodeCamp.Domain
         public void Consume(RegisterUser message)
         {
             _user = new User(message.Name, message.Username, message.Password, message.Email);
-
-            using (
-                IRepository<User, Guid> repository =
-                    ServiceLocator.GetInstance<IRepositoryFactory>().GetRepository<User, Guid>())
-            {
-                repository.Save(_user);
-            }
 
             string body = string.Format("Please verify email http://localhost/ConfirmEmail/?registrationId={0}",
                                         _correlationId);
@@ -95,13 +88,6 @@ namespace CodeCamp.Domain
         public void Consume(UserVerifiedEmail message)
         {
             _user.ConfirmEmail();
-
-            using (
-                IRepository<User, Guid> repository =
-                    ServiceLocator.GetInstance<IRepositoryFactory>().GetRepository<User, Guid>())
-            {
-                repository.Update(_user);
-            }
 
             string body = string.Format("Thank you. You are now registered");
 

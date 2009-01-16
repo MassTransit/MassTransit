@@ -13,15 +13,28 @@
 namespace MassTransit.Saga
 {
     using System;
+    using System.Collections.Generic;
 
+	/// <summary>
+	/// A saga repository is used by the service bus to dispatch messages to sagas
+	/// </summary>
+	/// <typeparam name="T"></typeparam>
     public interface ISagaRepository<T> :
 		IDisposable
         where T : class
     {
-        T Create(Guid correlationId);
+		/// <summary>
+		/// Initiates a new saga, creating a new instance of the saga in the repository and
+		/// throwing an exception if the saga already exists
+		/// </summary>
+		/// <param name="id">The identifier for the saga</param>
+    	IEnumerator<T> InitiateNewSaga(Guid id);
 
-        T Get(Guid id);
-
-        void Save(T item);
+		/// <summary>
+		/// Orchestrates an existing saga, loading the existing instance of the saga and
+		/// throwing an exception if the saga does not exist
+		/// </summary>
+		/// <param name="id">The identifier for the saga</param>
+    	IEnumerator<T> OrchestrateExistingSaga(Guid id);
     }
 }

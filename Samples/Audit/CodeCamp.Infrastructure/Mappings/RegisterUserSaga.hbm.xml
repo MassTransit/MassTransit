@@ -23,6 +23,7 @@
                  column="UserId"
                  class="CodeCamp.Domain.User, CodeCamp.Domain"
 			           access="field.camelcase-underscore"
+                 cascade="save-update"
                  />
 
   </class>

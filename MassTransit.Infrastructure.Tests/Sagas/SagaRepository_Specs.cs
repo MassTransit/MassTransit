@@ -1,19 +1,6 @@
-// Copyright 2007-2008 The Apache Software Foundation.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed 
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
 namespace MassTransit.Infrastructure.Tests.Sagas
 {
 	using System;
-	using System.Data;
 	using Magnum.Common;
 	using Magnum.Common.Data;
 	using Magnum.Infrastructure.Data;
@@ -53,9 +40,6 @@ namespace MassTransit.Infrastructure.Tests.Sagas
 			UnitOfWork.SetUnitOfWorkProvider(NHibernateUnitOfWork.Create);
 		}
 
-		private const string _connectionString = "Server=localhost;initial catalog=test;Trusted_Connection=yes";
-		private Configuration _cfg;
-
 		[Test, Explicit]
 		public void First_we_need_a_schema_to_test()
 		{
@@ -67,40 +51,32 @@ namespace MassTransit.Infrastructure.Tests.Sagas
 		{
 			Guid transactionId = CombGuid.NewCombGuid();
 
-			using (var unitOfWork = UnitOfWork.Start())
-			using (var transaction = unitOfWork.BeginTransaction(IsolationLevel.Serializable))
+			using (var repository = new NHibernateSagaRepository<RegisterUserStateMachine>())
 			{
-				using (var repository = new NHibernateSagaRepository<RegisterUserStateMachine>())
+				using (var enumerator = repository.InitiateNewSaga(transactionId))
 				{
-					var stateMachine = repository.Create(transactionId);
-
-					stateMachine.Consume(new RegisterUser(transactionId, "Joe", "pass", "Joe Blow", "joe@bloe.com"));
-
-					repository.Save(stateMachine);
+					while (enumerator.MoveNext())
+					{
+						enumerator.Current.Consume(new RegisterUser(transactionId, "Joe", "pass", "Joe Blow", "joe@bloe.com"));
+					}
 				}
-
-				transaction.Commit();
 			}
-			UnitOfWork.Finish();
 
-
-			using (var unitOfWork = UnitOfWork.Start())
-			using (var transaction = unitOfWork.BeginTransaction(IsolationLevel.Serializable))
+			using (var repository = new NHibernateSagaRepository<RegisterUserStateMachine>())
 			{
-				using (var repository = new NHibernateSagaRepository<RegisterUserStateMachine>())
+				using (var enumerator = repository.OrchestrateExistingSaga(transactionId))
 				{
-					var instance = repository.Get(transactionId);
+					while (enumerator.MoveNext())
+					{
+						Assert.AreEqual(RegisterUserStateMachine.WaitingForEmailValidation, enumerator.Current.CurrentState);
 
-					Assert.AreEqual(RegisterUserStateMachine.WaitingForEmailValidation, instance.CurrentState);
-
-					instance.Consume(new UserValidated(transactionId));
-
-					repository.Save(instance);
+						enumerator.Current.Consume(new UserValidated(transactionId));
+					}
 				}
-
-				transaction.Commit();
 			}
-			UnitOfWork.Finish();
 		}
+
+		private const string _connectionString = "Server=localhost;initial catalog=test;Trusted_Connection=yes";
+		private Configuration _cfg;
 	}
 }

@@ -1,18 +1,9 @@
-// Copyright 2007-2008 The Apache Software Foundation.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed 
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
 namespace MassTransit.Infrastructure.Saga
 {
 	using System;
+	using System.Collections.Generic;
+	using System.Data;
+	using Magnum.Common.Data;
 	using Magnum.Infrastructure.Data;
 	using MassTransit.Saga;
 
@@ -24,28 +15,54 @@ namespace MassTransit.Infrastructure.Saga
 		{
 		}
 
-		public T Create(Guid correlationId)
+		public IEnumerator<T> InitiateNewSaga(Guid id)
 		{
-			using (var repository = new NHibernateRepository())
+			try
 			{
-				T saga = (T) Activator.CreateInstance(typeof (T), new object[] {correlationId});
+				using (IUnitOfWork work = UnitOfWork.Start())
+				using (ITransaction transaction = work.BeginTransaction(IsolationLevel.Serializable))
+				{
+					using (var repository = new NHibernateRepository())
+					{
+						var saga = (T) Activator.CreateInstance(typeof (T), new object[] {id});
+						repository.Save(saga);
+						work.Flush();
 
-				repository.Save(saga);
+						yield return saga;
 
-				return saga;
+						repository.Save(saga);
+						transaction.Commit();
+					}
+				}
+			}
+			finally
+			{
+				UnitOfWork.Finish();
 			}
 		}
 
-		public T Get(Guid id)
+		public IEnumerator<T> OrchestrateExistingSaga(Guid id)
 		{
-			using (var repository = new NHibernateRepository())
-				return repository.Get<T>(id);
-		}
+			try
+			{
+				using (IUnitOfWork work = UnitOfWork.Start())
+				using (ITransaction transaction = work.BeginTransaction(IsolationLevel.Serializable))
+				{
+					using (var repository = new NHibernateRepository())
+					{
+						var saga = repository.Get<T>(id);
 
-		public void Save(T item)
-		{
-			using (var repository = new NHibernateRepository())
-				repository.Update(item);
+						yield return saga;
+
+						repository.Update(saga);
+						transaction.Commit();
+					}
+				}
+			}
+			finally
+			{
+				UnitOfWork.Finish();
+			}
 		}
 	}
 }

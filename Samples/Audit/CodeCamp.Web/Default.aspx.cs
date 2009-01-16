@@ -5,7 +5,7 @@ namespace CodeCamp.Web
     using System.Web.UI;
     using Domain;
     using Magnum.Common;
-    using Magnum.Common.Repository;
+    using Magnum.Common.Data;
     using Masters;
 
     public partial class _Default : Page

@@ -1,7 +1,7 @@
 namespace CodeCamp.Domain
 {
     using System;
-    using Magnum.Common.Repository;
+    using Magnum.Common.Data;
     using Messages;
     using Magnum.Common.ObjectExtensions;
 

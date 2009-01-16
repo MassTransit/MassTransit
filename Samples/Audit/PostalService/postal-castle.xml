@@ -27,7 +27,7 @@
       <bus id="control"
 					 endpoint="msmq://localhost/mt_postal_control">
         <subscriptionCache name="subscriptioncache.shared"/>
-        <subscriptionService endpoint="msmq://localhost/mt_pubsub">
+        <subscriptionService endpoint="msmq://localhost/mt_subscriptions">
           <localEndpoint>msmq://localhost/mt_postal</localEndpoint>
         </subscriptionService>
       </bus>
