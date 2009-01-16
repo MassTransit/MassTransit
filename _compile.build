@@ -2,12 +2,13 @@
 <project name="the compile step" default="go">
 	<property name="nant.settings.currentframework" value="net-3.5" />
 	<property name="dirs.build" value=".\bin" overwrite="false" />
+	<property name="msbuild.configuration" value="Release" overwrite="false" />
 	
 	
 	<target name="go" depends="build_code, build_samples, build_services" description="begining the compilation" />
 	
 	<target name="build_code" description="Building Library">
-		<delete  dir=".\bin" failonerror="false" />
+		<delete  dir="${dirs.build}" failonerror="false" />
 		
 		
 		<msbuild project=".\MassTransit-2008.sln" verbosity="quiet">
