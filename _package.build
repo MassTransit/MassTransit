@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<project name="masstransit" default="go">
+<project name="the package step" default="go">
 	<property name="nant.settings.currentframework" value="net-3.5" />
 	<property name="dirs.deployment.build" value=".\PreBuiltServices\bin" overwrite="false" />
 	<property name="dirs.build" value=".\bin" overwrite="false" />
 	<property name="version.rev" value="222" overwrite="false" />
 	
-	<target name="go" depends="package_subscription,package_timeout,package_deferrel,package_health,zip" description="Starting the build of MassTransit"/>
+	<target name="go" depends="package_subscription,package_timeout,package_deferrel,package_health,zip" description="starting the packaging"/>
 
 
 	<target name="package_subscription">
@@ -138,16 +138,6 @@
 				<include name="**/*" />
 			</fileset>
 		</zip>
-	</target>
-	
-	<target name="make_pubsub_install">
-				
-		<mkdir dir="${dirs.install}\SQLScripts" />
-		<copy todir="${dirs.install}\SQLScripts" flatten="true">
-			<fileset>
-				<include name=".\MassTransit.SubscriptionStorage\*.sql" />
-			</fileset>
-		</copy>
 	</target>
 
 </project>

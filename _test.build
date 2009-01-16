@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<project name="masstransit" default="go">
+<project name="the test step" default="go">
 	<property name="nant.settings.currentframework" value="net-3.5" />
-	<property name="dirs.install" value=".\pubsub_install" overwrite="false" />
-	<property name="dirs.build" value=".\bin" overwrite="false" />
-	<property name="tool.ndepend" value="${project::get-base-directory()}\libs\NDepend_2_9_1_2235\" />
+	<property name="tools.ndepend" value="${project::get-base-directory()}\libs\NDepend_2_9_1_2235\" />
 	
 	<target name="go" depends="run_tests, run_ndepend" description="Testing the build of MassTransit"/>
 
@@ -15,7 +13,7 @@
 	</target>
 
 	<target name="run_ndepend">
-        <NDepend NDependConsoleExePath="${tool.ndepend}" 
+        <NDepend NDependConsoleExePath="${tools.ndepend}" 
                  ProjectFilePath=".\masstransit.ndepend.xml"/>
     </target>
 </project>
