@@ -34,7 +34,7 @@
 			property="version.rev"
 			failonerror="false"/>
 		<delete file="_revision.xml" failonerror="false" />
-		<echo message="INFO: Using Subversion revision number: ${svn.revision}"/>
+		<echo message="INFO: Using Subversion revision number: ${version.rev}"/>
 	</target>
 	
 	<target name="common.asminfo" depends="common.find-svninfo" description="generating the solutionversion.cs">
