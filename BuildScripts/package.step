@@ -132,7 +132,7 @@
 				<include name="*.zip" />
 			</fileset>
 		</delete>
-		<zip zipfile="masstransit-r${version.rev}.zip">
+		<zip zipfile="${dirs.root}\masstransit-r${version.rev}.zip">
 			<fileset basedir="${dirs.build}">
 				<include name="**/*" />
 			</fileset>
@@ -140,6 +140,7 @@
 	</target>
 
 	<!-- sensible defaults -->
-	<property name="dirs.build" value="..\bin" overwrite="false" />
+	<property name="dirs.root" value=".." overwrite="false" />
+	<property name="dirs.build" value="${dirs.root}\bin" overwrite="false" />
 	<property name="version.rev" value="222" overwrite="false" />
 </project>
