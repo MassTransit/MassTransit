@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <project name="the compile step" default="go">
 	<property name="nant.settings.currentframework" value="net-3.5" />
-	<property name="dirs.build" value=".\bin" overwrite="false" />
+	
 	<property name="msbuild.configuration" value="Release" overwrite="false" />
 	
 	
@@ -11,34 +11,38 @@
 		<delete  dir="${dirs.build}" failonerror="false" />
 		
 		
-		<msbuild project=".\MassTransit-2008.sln" verbosity="quiet">
+		<msbuild project="${dirs.root}\MassTransit-2008.sln" verbosity="quiet">
 			<property name="Configuration" value="${msbuild.configuration}" />
 		</msbuild>
-
+	</target>
+	
+	
+	<target name="build_services" description="Building Deploys">
+		<msbuild project="${dirs.root}\PreBuiltServices\Deployment-2008.sln" verbosity="quiet">
+			<property name="Configuration" value="${msbuild.configuration}" />
+		</msbuild>
 	</target>
 	
 	<target name="build_samples" description="Building Samples">
-		<msbuild project=".\Samples\HeavyLoad\HeavyLoad-2008.sln" verbosity="quiet">
+		<msbuild project="${dirs.root}\Samples\HeavyLoad\HeavyLoad-2008.sln" verbosity="quiet">
 			<property name="Configuration" value="${msbuild.configuration}" />
 		</msbuild>
-		<msbuild project=".\Samples\OpenAllNight\OpenAllNight-2008.sln" verbosity="quiet">
+		<msbuild project="${dirs.root}\Samples\OpenAllNight\OpenAllNight-2008.sln" verbosity="quiet">
 			<property name="Configuration" value="${msbuild.configuration}" />
 		</msbuild>
-		<msbuild project=".\Samples\Starbucks\Starbucks.sln" verbosity="quiet">
+		<msbuild project="${dirs.root}\Samples\Starbucks\Starbucks.sln" verbosity="quiet">
 			<property name="Configuration" value="${msbuild.configuration}" />
 		</msbuild>
-		<msbuild project=".\Samples\PublishSubscribe\PublishSubscribe-2008.sln" verbosity="quiet">
+		<msbuild project="${dirs.root}\Samples\PublishSubscribe\PublishSubscribe-2008.sln" verbosity="quiet">
 			<property name="Configuration" value="${msbuild.configuration}" />
 		</msbuild>
-		<msbuild project=".\Samples\WebRequestReply\WebRequestReply-2008.sln" verbosity="quiet">
-			<property name="Configuration" value="${msbuild.configuration}" />
-		</msbuild>
-	</target>
-	
-	<target name="build_services" description="Building Deploys">
-		<msbuild project=".\PreBuiltServices\Deployment-2008.sln" verbosity="quiet">
+		<msbuild project="${dirs.root}\Samples\WebRequestReply\WebRequestReply-2008.sln" verbosity="quiet">
 			<property name="Configuration" value="${msbuild.configuration}" />
 		</msbuild>
 	</target>
 	
+	
+	<!-- sensible defaults -->
+	<property name="dirs.root" value=".." overwrite="false" />
+	<property name="dirs.build" value="${dirs.root}\bin" overwrite="false" />
 </project>
