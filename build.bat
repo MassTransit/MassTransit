@@ -1,1 +1,1 @@
-.\libs\nant-0.85\nant.exe /f:__master.build
+.\libs\nant-0.85\nant.exe /f:.\BuildScripts\masstransit.build

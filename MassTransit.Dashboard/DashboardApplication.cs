@@ -2,6 +2,8 @@ namespace MassTransit.Dashboard
 {
     using System.Web;
     using Castle.Windsor;
+    using Microsoft.Practices.ServiceLocation;
+    using WindsorIntegration;
 
     public class DashboardApplication :
         HttpApplication, IContainerAccessor
@@ -11,6 +13,8 @@ namespace MassTransit.Dashboard
         public void Application_OnStart()
         {
             container = new WebAppContainer();
+            var wob = new WindsorObjectBuilder(container.Kernel);
+            ServiceLocator.SetLocatorProvider(() => wob);
         }
 
         public void Application_OnEnd()
