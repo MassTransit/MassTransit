@@ -6,12 +6,16 @@
 	<property name="svn.path" value="http://masstransit.googlecode.com/svn/trunk" overwrite="false" />
 	<property name="msbuild.configuration" value="Release" overwrite="false" />
 	
+	<property name="dirs.root" value="${directory::get-parent-directory(project::get-base-directory())}" /><!-- solution root -->
+	<property name="dirs.build" value="${dirs.root}\bin" />
+	<property name="dirs.package" value="${dirs.root}\packaged_files" />
+	
 	<target name="go" depends="build" description="Starting the build of MassTransit" />
 	
 	<target name="build" depends="common.asminfo">
-		<nant buildfile=".\_compile.build" inheritall="true" />
-		<!-- <nant buildfile=".\_test.build" /> -->
-		<nant buildfile=".\_package.build" inheritall="true" />
+		<nant buildfile=".\compile.step" inheritall="true" />
+		<!-- <nant buildfile=".\test.step" inheritall="true" /> -->
+		<nant buildfile=".\package.step" inheritall="true" />
 	</target>
 	
 	<target name="common.find-svninfo" description="Gets the current svn revision number">
@@ -41,7 +45,7 @@
 	
 		<property name="version.rev" value="${svn.revision}" overwrite="true" />
 		
-		<asminfo output="SolutionVersion.cs" language="CSharp">
+		<asminfo output="${dirs.root}\SolutionVersion.cs" language="CSharp">
 			<imports>
 				<import namespace="System" />
 				<import namespace="System.Reflection" />

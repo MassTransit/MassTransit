@@ -2,8 +2,7 @@
 <project name="the package step" default="go">
 	<property name="nant.settings.currentframework" value="net-3.5" />
 	<property name="dirs.deployment.build" value=".\PreBuiltServices\bin" overwrite="false" />
-	<property name="dirs.build" value=".\bin" overwrite="false" />
-	<property name="version.rev" value="222" overwrite="false" />
+	
 	
 	<target name="go" depends="package_subscription,package_timeout,package_deferrel,package_health,zip" description="starting the packaging"/>
 
@@ -140,4 +139,7 @@
 		</zip>
 	</target>
 
+	<!-- sensible defaults -->
+	<property name="dirs.build" value=".\bin" overwrite="false" />
+	<property name="version.rev" value="222" overwrite="false" />
 </project>
