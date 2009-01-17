@@ -23,7 +23,7 @@
             ServiceLocator.SetLocatorProvider(() => builder);
 
             container.AddComponent<DrinkPreparationSaga>();
-            container.AddComponent<ISagaRepository<DrinkPreparationSaga>, DrinkPreparationSagaRepository>();
+            container.AddComponent<ISagaRepository<DrinkPreparationSaga>, InMemorySagaRepository<DrinkPreparationSaga>>();
 
             Credentials credentials = Credentials.Interactive;
             WinServiceSettings settings = WinServiceSettings.Custom(
