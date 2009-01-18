@@ -1,0 +1,51 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mandelbrot.Core", "Mandelbrot.Core\Mandelbrot.Core.csproj", "{536A2048-6790-4929-91CF-426DC01F1FD9}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "References", "References", "{9E76BBF3-850B-49A6-935D-0FB4E41FFAEC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit", "..\..\MassTransit\MassTransit.csproj", "{6EFD69FC-CBCC-4F85-AEE0-EFBA73F4D273}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mandelbrot", "Mandelbrot\Mandelbrot.csproj", "{EEF1FDE3-8A97-41C4-B425-1D66EE6DE289}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.StructureMapIntegration", "..\..\Containers\MassTransit.StructureMapIntegration\MassTransit.StructureMapIntegration.csproj", "{F5E67502-2B30-484C-88C3-97710291F5AA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Infrastructure", "..\..\MassTransit.Infrastructure\MassTransit.Infrastructure.csproj", "{073A90FD-9A3E-4704-B3B5-6D8A9F4B442E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{536A2048-6790-4929-91CF-426DC01F1FD9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{536A2048-6790-4929-91CF-426DC01F1FD9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{536A2048-6790-4929-91CF-426DC01F1FD9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{536A2048-6790-4929-91CF-426DC01F1FD9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6EFD69FC-CBCC-4F85-AEE0-EFBA73F4D273}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6EFD69FC-CBCC-4F85-AEE0-EFBA73F4D273}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6EFD69FC-CBCC-4F85-AEE0-EFBA73F4D273}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6EFD69FC-CBCC-4F85-AEE0-EFBA73F4D273}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EEF1FDE3-8A97-41C4-B425-1D66EE6DE289}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EEF1FDE3-8A97-41C4-B425-1D66EE6DE289}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EEF1FDE3-8A97-41C4-B425-1D66EE6DE289}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EEF1FDE3-8A97-41C4-B425-1D66EE6DE289}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F5E67502-2B30-484C-88C3-97710291F5AA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F5E67502-2B30-484C-88C3-97710291F5AA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F5E67502-2B30-484C-88C3-97710291F5AA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F5E67502-2B30-484C-88C3-97710291F5AA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{073A90FD-9A3E-4704-B3B5-6D8A9F4B442E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{073A90FD-9A3E-4704-B3B5-6D8A9F4B442E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{073A90FD-9A3E-4704-B3B5-6D8A9F4B442E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{073A90FD-9A3E-4704-B3B5-6D8A9F4B442E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{6EFD69FC-CBCC-4F85-AEE0-EFBA73F4D273} = {9E76BBF3-850B-49A6-935D-0FB4E41FFAEC}
+		{F5E67502-2B30-484C-88C3-97710291F5AA} = {9E76BBF3-850B-49A6-935D-0FB4E41FFAEC}
+		{073A90FD-9A3E-4704-B3B5-6D8A9F4B442E} = {9E76BBF3-850B-49A6-935D-0FB4E41FFAEC}
+	EndGlobalSection
+EndGlobal
