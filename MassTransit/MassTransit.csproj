@@ -177,6 +177,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CurrentMessage.cs" />
+    <Compile Include="Grid\ITask.cs" />
     <Compile Include="Internal\DisposableUnsubscribeAction.cs" />
     <Compile Include="Internal\IInboundMessageContext.cs" />
     <Compile Include="Internal\IMessageContext.cs" />

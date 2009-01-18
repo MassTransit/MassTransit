@@ -16,7 +16,6 @@ namespace MassTransit.Tests.Grid
 	using System.Threading;
 	using log4net;
 	using MassTransit.Grid;
-	using MassTransit.Internal;
 	using NUnit.Framework;
 	using NUnit.Framework.SyntaxHelpers;
 
@@ -49,7 +48,7 @@ namespace MassTransit.Tests.Grid
 				});
 		}
 
-		[Test]
+		[Test, Ignore]
 		public void I_want_to_be_able_to_define_a_distributed_task_and_have_it_processed()
 		{
 			RemoteBus.Subscribe<SubTaskWorker<ExceptionalWorker, FactorLongNumber, LongNumberFactored>>();
