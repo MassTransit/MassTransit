@@ -30,9 +30,9 @@ namespace MassTransit.Tests.Grid
 			ObjectBuilder.Stub(x => x.GetInstance<ExceptionalWorker>()).Return(new ExceptionalWorker());
 			ObjectBuilder.Stub(x => x.GetInstance<FactorLongNumbersTask>()).Return(new FactorLongNumbersTask());
 			ObjectBuilder.Stub(x => x.GetInstance<SubTaskWorker<ExceptionalWorker, FactorLongNumber, LongNumberFactored>>())
-				.Return(new SubTaskWorker<ExceptionalWorker, FactorLongNumber, LongNumberFactored> { Bus = RemoteBus });
+				.Return(new SubTaskWorker<ExceptionalWorker, FactorLongNumber, LongNumberFactored>(RemoteBus, ObjectBuilder));
 			ObjectBuilder.Stub(x => x.GetInstance<SubTaskWorker<FactorLongNumberWorker, FactorLongNumber, LongNumberFactored>>())
-				.Return(new SubTaskWorker<FactorLongNumberWorker, FactorLongNumber, LongNumberFactored> { Bus = RemoteBus });
+				.Return(new SubTaskWorker<FactorLongNumberWorker, FactorLongNumber, LongNumberFactored>(RemoteBus, ObjectBuilder));
 		}
 	}
 }

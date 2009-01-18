@@ -95,7 +95,7 @@ namespace MassTransit.Grid
 
 				lock (_workers)
 				{
-					_workers[message.Address].ActiveTaskCount = message.ActiveTaskCount - 1;
+					_workers[message.Address].ActiveTaskCount--;
 					_workers[message.Address].TaskLimit = message.TaskLimit;
 				}
 
@@ -136,57 +136,6 @@ namespace MassTransit.Grid
 			_bus.Publish(new EnlistSubTaskWorkers<TInput>());
 		}
 
-		private void CompleteDistributedTask(TTask obj)
-		{
-			_unsubscribeToken();
-		}
-
-		private void DispatchSubTaskToWorkers()
-		{
-			if (_nextSubTask >= _distributedTask.SubTaskCount)
-				return;
-
-			IList<Worker> workers = GetAvailableWorkers();
-
-			foreach (Worker worker in workers)
-			{
-				IEndpoint endpoint = _endpointFactory.GetEndpoint(new Uri(worker.Address));
-				if (endpoint == null)
-					continue;
-
-				ExecuteSubTask<TInput> executeExecuteSubTask;
-				lock (_workers)
-				{
-					if (_nextSubTask >= _distributedTask.SubTaskCount)
-						break;
-
-					TInput input = _distributedTask.GetSubTaskInput(_nextSubTask);
-
-					executeExecuteSubTask = new ExecuteSubTask<TInput>(_bus.Endpoint.Uri.ToString(), _taskId, _nextSubTask++, input);
-
-					worker.ActiveTaskCount++;
-				}
-
-				endpoint.Send(executeExecuteSubTask);
-			}
-		}
-
-		private IList<Worker> GetAvailableWorkers()
-		{
-			List<Worker> workers = new List<Worker>();
-
-			foreach (Worker worker in _workers.Values)
-			{
-				if (worker.ActiveTaskCount < worker.TaskLimit)
-				{
-					workers.Add(worker);
-				}
-			}
-
-			return workers;
-		}
-
-
 		public class Worker
 		{
 			private readonly string _address;
@@ -214,6 +163,61 @@ namespace MassTransit.Grid
 				get { return _activeTaskCount; }
 				set { _activeTaskCount = value; }
 			}
+		}
+
+		private void CompleteDistributedTask(TTask obj)
+		{
+			_unsubscribeToken();
+		}
+
+		private void DispatchSubTaskToWorkers()
+		{
+			if (_nextSubTask >= _distributedTask.SubTaskCount)
+				return;
+
+
+			IList<Worker> workers = GetAvailableWorkers();
+			while (workers.Count > 0)
+			{
+				foreach (Worker worker in workers)
+				{
+					IEndpoint endpoint = _endpointFactory.GetEndpoint(new Uri(worker.Address));
+					if (endpoint == null)
+						continue;
+
+					ExecuteSubTask<TInput> executeExecuteSubTask;
+					lock (_workers)
+					{
+						if (_nextSubTask >= _distributedTask.SubTaskCount)
+							break;
+
+						TInput input = _distributedTask.GetSubTaskInput(_nextSubTask);
+
+						executeExecuteSubTask = new ExecuteSubTask<TInput>(_bus.Endpoint.Uri.ToString(), _taskId, _nextSubTask++, input);
+
+						worker.ActiveTaskCount++;
+					}
+
+					endpoint.Send(executeExecuteSubTask);
+				}
+
+				workers = GetAvailableWorkers();
+			}
+		}
+
+		private IList<Worker> GetAvailableWorkers()
+		{
+			List<Worker> workers = new List<Worker>();
+
+			foreach (Worker worker in _workers.Values)
+			{
+				if (worker.ActiveTaskCount <= worker.TaskLimit)
+				{
+					workers.Add(worker);
+				}
+			}
+
+			return workers;
 		}
 	}
 }
