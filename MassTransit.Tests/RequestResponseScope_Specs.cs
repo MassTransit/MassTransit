@@ -44,6 +44,30 @@ namespace MassTransit.Tests
 		}
 
 		[Test]
+		public void A_conditional_consumer_should_not_get_the_message_if_it_is_not_wanted()
+		{
+			FutureMessage<PongMessage> invalidPong = new FutureMessage<PongMessage>();
+			FutureMessage<PongMessage> validPong = new FutureMessage<PongMessage>();
+
+			LocalBus.Subscribe<PingMessage>(x => LocalBus.Publish(new PongMessage(x.CorrelationId)));
+
+			LocalBus.Subscribe<PongMessage>(message => validPong.Set(message));
+
+			PingMessage ping = new PingMessage();
+
+			LocalBus.MakeRequest(bus => bus.Publish(ping, context => context.SendResponseTo(bus)))
+				.When<PongMessage>().And(message => false).IsReceived(pong =>
+					{
+						invalidPong.Set(pong);
+					})
+				.TimeoutAfter(3.Seconds())
+				.Send();
+
+			Assert.IsTrue(validPong.IsAvailable(1.Seconds()), "Should have accepted message");
+			Assert.IsFalse(invalidPong.IsAvailable(1.Seconds()), "Should not have accepted message");
+		}
+
+		[Test]
 		public void A_timeout_handler_should_be_supported()
 		{
 			bool called = false;

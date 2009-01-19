@@ -14,29 +14,21 @@ namespace MassTransit.Internal.RequestResponse
 {
 	using System;
 
-	public class ResponseActionBuilder<T>
+	public class ConditionalResponseActionBuilder<T>
 		where T : class
 	{
+		private readonly Func<T, bool> _accept;
 		private readonly RequestResponseScope _scope;
 
-		public ResponseActionBuilder(RequestResponseScope scope)
+		public ConditionalResponseActionBuilder(RequestResponseScope scope, Func<T, bool> accept)
 		{
 			_scope = scope;
-		}
-
-		public CorrelatedResponseActionBuilder<T, K> RelatedTo<K>(K correlationId)
-		{
-			return new CorrelatedResponseActionBuilder<T, K>(_scope, correlationId);
-		}
-
-		public ConditionalResponseActionBuilder<T> And(Func<T, bool> accept)
-		{
-			return new ConditionalResponseActionBuilder<T>(_scope, accept);
+			_accept = accept;
 		}
 
 		public RequestResponseScope IsReceived(Action<T> action)
 		{
-			_scope.AddResponseAction(new ResponseAction<T>(_scope, action));
+			_scope.AddResponseAction(new ConditionalResponseAction<T>(_scope, _accept, action));
 
 			return _scope;
 		}
