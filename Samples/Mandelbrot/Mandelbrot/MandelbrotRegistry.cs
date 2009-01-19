@@ -22,11 +22,6 @@ namespace Mandelbrot
 		public MandelbrotRegistry(string uriString)
 		{
 			_endpointToListenOn = new Uri(uriString);
-		}
-
-		protected override void configure()
-		{
-			base.configure();
 
 			RegisterBusDependencies();
 

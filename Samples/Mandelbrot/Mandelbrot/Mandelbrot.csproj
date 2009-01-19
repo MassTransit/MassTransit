@@ -61,6 +61,12 @@
       <DependentUpon>MainForm.cs</DependentUpon>
     </Compile>
     <Compile Include="MandelbrotRegistry.cs" />
+    <Compile Include="MandelbrotViewer.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="MandelbrotViewer.Designer.cs">
+      <DependentUpon>MandelbrotViewer.cs</DependentUpon>
+    </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="MainForm.resx">

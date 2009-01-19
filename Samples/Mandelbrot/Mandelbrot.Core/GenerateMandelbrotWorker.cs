@@ -6,35 +6,23 @@ namespace Mandelbrot.Core
 	public class GenerateMandelbrotWorker :
 		ISubTaskWorker<GenerateRow, RowGenerated>
 	{
-		public const double OffsetX = -2.1;
-		public const double OffsetY = -1.25;
-		public const double SampleHeight = 2.5;
-		public const double SampleWidth = 3.2;
-
 		public void ExecuteTask(GenerateRow task, Action<RowGenerated> result)
 		{
-			RowGenerated rowGenerated = new RowGenerated
-			                            	{
-			                            		Data = new byte[task.Width]
-			                            	};
+			int[] data = new int[task.Width];
+			for (int column = 0; column < task.Width; column++)
+			{
+				double x = (column*task.SampleWidth)/task.Width + task.OffsetX;
+				double y = (task.Row*task.SampleHeight)/task.Height + task.OffsetY;
 
-			GenerateSingleRow(task.Width, task.Height, task.IterationLimit, rowGenerated.Data, task.Row);
+				data[column] = ComputeMandelbrotIndex(x, y, task.IterationLimit);
+			}
+
+			var rowGenerated = new RowGenerated {Data = data};
 
 			result(rowGenerated);
 		}
 
-		private static void GenerateSingleRow(int width, int height, int iterationLimit, byte[] data, int row)
-		{
-			for (int column = 0; column < width; column++)
-			{
-				double x = (column*SampleWidth)/width + OffsetX;
-				double y = (row*SampleHeight)/height + OffsetY;
-
-				data[column] = ComputeMandelbrotIndex(x, y, iterationLimit);
-			}
-		}
-
-		protected static byte ComputeMandelbrotIndex(double x, double y, int iterationLimit)
+		protected static int ComputeMandelbrotIndex(double x, double y, int iterationLimit)
 		{
 			double y0 = y;
 			double x0 = x;
@@ -43,7 +31,7 @@ namespace Mandelbrot.Core
 			{
 				if (x*x + y*y >= 4)
 				{
-					return (byte) ((i%255) + 1);
+					return i + 1;
 				}
 				double xtemp = x*x - y*y + x0;
 				y = 2*x*y + y0;
