@@ -181,6 +181,9 @@ namespace MassTransit.Grid
 			{
 				foreach (Worker worker in workers)
 				{
+					if (_nextSubTask >= _distributedTask.SubTaskCount)
+						return;
+
 					IEndpoint endpoint = _endpointFactory.GetEndpoint(new Uri(worker.Address));
 					if (endpoint == null)
 						continue;

@@ -53,12 +53,7 @@
     <level value="INFO" />
   </logger>
   
-  <!-- Standard MassTransit Logging Settings -->
-  <logger name="MassTransit.Grid">
-    <level value="DEBUG" />
-  </logger>
-
-  <logger name="MassTransit.Messages">
+   <logger name="MassTransit.Messages">
     <level value="OFF" />
     <appender-ref ref="MT.Messages" />
   </logger>
