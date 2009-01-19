@@ -14,31 +14,37 @@ namespace MassTransit.Internal.RequestResponse
 {
 	using System;
 
-	public class ResponseActionBuilder<T>
+	public class ConditionalResponseAction<T> :
+		IResponseAction,
+		Consumes<T>.Selected
 		where T : class
 	{
+		private readonly Func<T, bool> _accept;
+		private readonly Action<T> _responseAction;
 		private readonly RequestResponseScope _scope;
 
-		public ResponseActionBuilder(RequestResponseScope scope)
+		public ConditionalResponseAction(RequestResponseScope scope, Func<T, bool> accept, Action<T> action)
 		{
 			_scope = scope;
+			_accept = accept;
+			_responseAction = action;
 		}
 
-		public CorrelatedResponseActionBuilder<T, K> RelatedTo<K>(K correlationId)
+		public void Consume(T message)
 		{
-			return new CorrelatedResponseActionBuilder<T, K>(_scope, correlationId);
+			_responseAction(message);
+
+			_scope.SetResponseReceived(message);
 		}
 
-		public ConditionalResponseActionBuilder<T> And(Func<T, bool> accept)
+		public bool Accept(T message)
 		{
-			return new ConditionalResponseActionBuilder<T>(_scope, accept);
+			return _accept(message);
 		}
 
-		public RequestResponseScope IsReceived(Action<T> action)
+		public UnsubscribeAction SubscribeTo(IServiceBus bus)
 		{
-			_scope.AddResponseAction(new ResponseAction<T>(_scope, action));
-
-			return _scope;
+			return bus.Subscribe(this);
 		}
 	}
 }

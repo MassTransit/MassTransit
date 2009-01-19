@@ -50,7 +50,8 @@ namespace MassTransit.Internal.RequestResponse
 
 				if (WaitForResponseAction() == false)
 				{
-					_timeoutAction();
+					if (_timeoutAction != null)
+						_timeoutAction();
 				}
 			}
 			finally
