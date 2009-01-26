@@ -16,8 +16,6 @@ namespace MassTransit.Serialization
 	using System.IO;
 	using System.Text;
 	using Internal;
-	using Magnum.Common;
-	using Magnum.Common.Monads;
 	using Newtonsoft.Json;
 
 	public class JsonMessageSerializer :
@@ -25,7 +23,7 @@ namespace MassTransit.Serialization
 	{
 		public void Serialize<T>(Stream output, T message)
 		{
-			var envelope = new JsonMessageEnvelope(message);
+			var envelope = JsonMessageEnvelope.Create(message);
 			string wrappedJson = JavaScriptConvert.SerializeObject(envelope);
 
 			using (var mstream = new MemoryStream(Encoding.UTF8.GetBytes(wrappedJson)))
@@ -41,9 +39,10 @@ namespace MassTransit.Serialization
 			var envelope = JavaScriptConvert.DeserializeObject<JsonMessageEnvelope>(body);
 
 			Type t = Type.GetType(envelope.MessageType, true, true);
+			
 			var message = JavaScriptConvert.DeserializeObject(envelope.Message, t);
 
-			LocalContext.Current.InboundMessage(context => envelope.ApplyTo(context));
+			InboundMessageHeaders.SetCurrent(envelope.GetMessageHeadersSetAction());
 
 			return message;
 		}

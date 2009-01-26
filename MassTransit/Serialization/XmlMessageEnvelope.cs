@@ -12,32 +12,35 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Serialization
 {
-    using System.Xml.Serialization;
-    using Internal;
-    using Magnum.Common;
+	using System;
+	using System.Xml.Serialization;
+	using Internal;
 
 	/// <summary>
-    /// The envelope that is used to wrap messages serialized using Xml
-    /// </summary>
-    [XmlRoot(ElementName = "MessageEnvelope")]
-    public class XmlMessageEnvelope :
-        MessageEnvelopeBase
-    {
-        protected XmlMessageEnvelope()
-        {
-        }
+	/// The envelope that is used to wrap messages serialized using Xml
+	/// </summary>
+	[XmlRoot(ElementName = "MessageEnvelope")]
+	public class XmlMessageEnvelope :
+		MessageEnvelopeBase
+	{
+		protected XmlMessageEnvelope()
+		{
+		}
 
-        public XmlMessageEnvelope(object message)
-        {
-            Message = message;
+		private XmlMessageEnvelope(Type messageType, object message)
+		{
+			Message = message;
 
-        	MessageType = FormatMessageType(message.GetType());
+			MessageType = MessageHeadersBase.GetMessageTypeHeaderString(messageType);
 
-			var context = LocalContext.Current.OutboundMessage();
+			this.CopyFrom(OutboundMessage.Headers);
+		}
 
-        	this.CopyFrom(context);
-        }
+		public object Message { get; set; }
 
-        public object Message { get; set; }
-    }
+		public static XmlMessageEnvelope Create<T>(T message)
+		{
+			return new XmlMessageEnvelope(typeof (T), message);
+		}
+	}
 }

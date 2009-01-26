@@ -14,6 +14,7 @@ namespace MassTransit.Tests.Saga
 {
 	using System;
 	using System.Threading;
+	using Magnum.Common.DateTimeExtensions;
 	using Messages;
 
 	public class RegisterUserController :
@@ -49,29 +50,27 @@ namespace MassTransit.Tests.Saga
 
 		public bool RegisterUser(string username, string password, string displayName, string email)
 		{
-			using(_bus.Subscribe(this).Disposable())
-			{
-				Messages.RegisterUser message = new Messages.RegisterUser(_correlationId, "username", "password", "Display Name", "user@domain.com");
-				_bus.Publish(message);
+			var message = new RegisterUser(_correlationId, "username", "password", "Display Name", "user@domain.com");
 
-				WaitHandle[] handles = new WaitHandle[] {_completed, _pending};
+			bool result = false;
 
-				int result = WaitHandle.WaitAny(handles, TimeSpan.FromSeconds(10), true);
+			_bus.MakeRequest(bus => bus.Publish(message))
+				.When<UserRegistrationPending>().RelatedTo(_correlationId).IsReceived(x =>
+					{
+						result = false;
+					})
+				.When<UserRegistrationComplete>().RelatedTo(_correlationId).IsReceived(x =>
+					{
+						result = true;
+					})
+				.OnTimeout(() =>
+					{
+						throw new ApplicationException("A timeout occurred while registering the user");
+					})
+				.TimeoutAfter(10.Seconds())
+				.Send();
 
-				if (result == 0)
-				{
-					// we have success!
-					return true;
-				}
-
-				if (result == 1)
-				{
-					// we are pending, so we need to return false but not fail
-					return false;
-				}
-
-				throw new ApplicationException("A timeout occurred while registering the user");
-			}
+			return result;
 		}
 
 		public bool ValidateUser()

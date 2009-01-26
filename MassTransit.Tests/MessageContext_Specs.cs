@@ -14,6 +14,7 @@ namespace MassTransit.Tests
 {
 	using System;
 	using Magnum.Common.DateTimeExtensions;
+	using MassTransit.Internal;
 	using Messages;
 	using NUnit.Framework;
 	using TestConsumers;
@@ -86,7 +87,7 @@ namespace MassTransit.Tests
 
 			LocalBus.Subscribe<PingMessage>(message =>
 				{
-					Assert.AreEqual(LocalBus.Endpoint.Uri, CurrentMessage.DestinationAddress);
+					Assert.AreEqual(LocalBus.Endpoint.Uri, CurrentMessage.Headers.DestinationAddress);
 
 					received.Set(message);
 				});
@@ -103,7 +104,7 @@ namespace MassTransit.Tests
 
 			LocalBus.Subscribe<PingMessage>(message =>
 				{
-					Assert.AreEqual(LocalBus.Endpoint.Uri, CurrentMessage.FaultAddress);
+					Assert.AreEqual(LocalBus.Endpoint.Uri, CurrentMessage.Headers.FaultAddress);
 
 					received.Set(message);
 				});
@@ -120,7 +121,7 @@ namespace MassTransit.Tests
 
 			LocalBus.Subscribe<PingMessage>(message =>
 				{
-					Assert.AreEqual(LocalBus.Endpoint.Uri, CurrentMessage.ResponseAddress);
+					Assert.AreEqual(LocalBus.Endpoint.Uri, CurrentMessage.Headers.ResponseAddress);
 
 					received.Set(message);
 				});
@@ -137,7 +138,7 @@ namespace MassTransit.Tests
 
 			LocalBus.Subscribe<PingMessage>(message =>
 				{
-					Assert.AreEqual(LocalBus.Endpoint.Uri, CurrentMessage.SourceAddress);
+					Assert.AreEqual(LocalBus.Endpoint.Uri, CurrentMessage.Headers.SourceAddress);
 
 					received.Set(message);
 				});

@@ -32,7 +32,7 @@ namespace MassTransit.Tests
 				{
 					if(first)
 					{
-						Assert.AreEqual(0, CurrentMessage.RetryCount);
+						Assert.AreEqual(0, CurrentMessage.Headers.RetryCount);
 
 						CurrentMessage.RetryLater();
 
@@ -40,7 +40,7 @@ namespace MassTransit.Tests
 					}
 					else
 					{
-						Assert.AreEqual(1, CurrentMessage.RetryCount);
+						Assert.AreEqual(1, CurrentMessage.Headers.RetryCount);
 
 						future.Set(message);
 					}

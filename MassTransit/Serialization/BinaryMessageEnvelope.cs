@@ -16,7 +16,6 @@ namespace MassTransit.Serialization
 	using System.Collections.Generic;
 	using System.Runtime.Remoting.Messaging;
 	using Internal;
-	using Magnum.Common;
 	using Magnum.Common.ObjectExtensions;
 
 	public class BinaryMessageEnvelope :
@@ -40,7 +39,7 @@ namespace MassTransit.Serialization
 		{
 			List<Header> headers = new List<Header>();
 
-			var context = LocalContext.Current.OutboundMessage();
+			var context = OutboundMessage.Headers;
 
 			if (context.SourceAddress != null)
 			{
@@ -62,7 +61,7 @@ namespace MassTransit.Serialization
 				headers.Add(new Header(FaultAddressKey, context.FaultAddress));
 			}
 
-			if(!context.MessageType.IsNullOrEmpty())
+			if (!context.MessageType.IsNullOrEmpty())
 			{
 				headers.Add(new Header(MessageTypeKey, context.MessageType));
 			}
@@ -103,7 +102,7 @@ namespace MassTransit.Serialization
 			}
 		}
 
-		public static BinaryMessageEnvelope From(IOutboundMessageContext context)
+		public static BinaryMessageEnvelope From(IOutboundMessage context)
 		{
 			var envelope = new BinaryMessageEnvelope();
 

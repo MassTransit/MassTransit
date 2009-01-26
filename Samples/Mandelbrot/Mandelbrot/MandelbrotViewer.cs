@@ -3,6 +3,7 @@
 	using System;
 	using System.Drawing;
 	using System.Drawing.Drawing2D;
+	using System.Drawing.Imaging;
 	using System.Windows.Forms;
 	using Core;
 
@@ -25,9 +26,34 @@
 		private void CreateDefaultPalette()
 		{
 			_palette = new Color[1024];
-			for (int i = 0; i < 1024; i++)
+
+			for (int i = 0; i < 64; i++)
 			{
-				_palette[i] = Color.FromArgb(i / 4, (i % 64)*4, i % 256);
+				_palette[i + 1] = Color.FromArgb(255, 255, (byte)(255 - (i * 4)));
+			}
+			//create yellow to orange in positions 64-127
+			for (int i = 0; i < 64; i++)
+			{
+				_palette[i + 64 + 1] = Color.FromArgb(255, (byte)(255 - (i * 2)), 0);
+			}
+			//create orange to red in positions 128-191
+			for (int i = 0; i < 64; i++)
+			{
+				_palette[i + 128 + 1] = Color.FromArgb(255, (byte)(128 - (i * 2)), 0);
+			}
+			//create red to purple in positions 192-255
+			for (int i = 0; i < 64; i++)
+			{
+				_palette[i + 192 + 1] = Color.FromArgb(
+					(byte)(i == 63 ? 0 : 255 - i * 4),
+					(byte)(255 - (i * 2)), 0, (byte)(i * 2));
+			}
+			//create purple to white
+			for (int i = 0; i < 64; i++)
+			{
+				_palette[i + 256 + 1] = Color.FromArgb(
+					(byte)(i == 63 ? 255 : i * 4),
+					(byte)((i * 2)), 0, (byte)(i * 2));
 			}
 		}
 

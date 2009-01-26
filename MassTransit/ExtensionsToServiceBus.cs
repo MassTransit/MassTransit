@@ -15,7 +15,6 @@ namespace MassTransit
 	using System;
 	using Internal;
 	using Internal.RequestResponse;
-	using Magnum.Common;
 
 	public static class ExtensionsToServiceBus
 	{
@@ -42,22 +41,18 @@ namespace MassTransit
 			return new DisposableUnsubscribeAction(action);
 		}
 
-		public static void Publish<T>(this IServiceBus bus, T message, Action<IOutboundMessageContext> action)
+		public static void Publish<T>(this IServiceBus bus, T message, Action<IOutboundMessage> action)
 			where T : class
 		{
-			var context = LocalContext.Current.OutboundMessage();
-
-			action(context);
+			OutboundMessage.Set(action);
 
 			bus.Publish(message);
 		}
 
-		public static void Send<T>(this IEndpoint endpoint, T message, Action<IOutboundMessageContext> action)
+		public static void Send<T>(this IEndpoint endpoint, T message, Action<IOutboundMessage> action)
 			where T : class
 		{
-			var context = LocalContext.Current.OutboundMessage();
-
-			action(context);
+			OutboundMessage.Set(action);
 
 			endpoint.Send(message);
 		}

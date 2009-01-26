@@ -13,62 +13,66 @@
 namespace MassTransit
 {
 	using System;
-	using Exceptions;
 	using Internal;
-	using Magnum.Common;
 
 	public static class CurrentMessage
 	{
-		public static Uri SourceAddress
+		public static IInboundMessageHeaders Headers
 		{
-			get { return LocalContext.Current.InboundMessage().SourceAddress; }
+			get { return InboundMessageHeaders.Current; }
 		}
 
-		public static Uri DestinationAddress
-		{
-			get { return LocalContext.Current.InboundMessage().DestinationAddress; }
-		}
-
-		public static Uri ResponseAddress
-		{
-			get { return LocalContext.Current.InboundMessage().ResponseAddress; }
-		}
-
-		public static Uri FaultAddress
-		{
-			get { return LocalContext.Current.InboundMessage().FaultAddress; }
-		}
-
-		public static int RetryCount
-		{
-			get { return LocalContext.Current.InboundMessage().RetryCount; }
-		}
-
-		public static string MessageType
-		{
-			get { return LocalContext.Current.InboundMessage().MessageType; }
-		}
-
+		/// <summary>
+		/// Respond to the current inbound message with either a send to the ResponseAddress or a
+		/// Publish on the bus that received the message
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="message">The message to send/publish</param>
 		public static void Respond<T>(T message) where T : class
 		{
-			var context = LocalContext.Current.InboundMessage();
+			var headers = Headers;
 
-			if (context.ResponseAddress != null)
+			if (headers.ResponseAddress != null)
 			{
-				context.GetResponseEndpoint().Send(message);
+				headers.GetResponseEndpoint().Send(message);
 			}
 			else
 			{
-				context.Bus.Publish(message);
+				headers.Bus.Publish(message);
 			}
 		}
 
+
+		/// <summary>
+		/// Respond to the current inbound message with either a send to the ResponseAddress or a
+		/// Publish on the bus that received the message
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="message">The message to send/publish</param>
+		/// <param name="contextAction">The action to setup the context on the outbound message</param>
+		public static void Respond<T>(T message, Action<IOutboundMessage> contextAction) where T : class
+		{
+			var context = InboundMessageHeaders.Current;
+
+			if (context.ResponseAddress != null)
+			{
+				context.GetResponseEndpoint().Send(message, contextAction);
+			}
+			else
+			{
+				context.Bus.Publish(message, contextAction);
+			}
+		}
+
+		/// <summary>
+		/// Puts the message back on the input queue so that it can be processed again later
+		/// </summary>
 		public static void RetryLater()
 		{
-			var context = LocalContext.Current.InboundMessage();
+			var context = InboundMessageHeaders.Current;
 
 			if (context.Message == null)
-				throw new ConventionException("RetryLater can only be called when a message is being consumed");
+				throw new InvalidOperationException("RetryLater can only be called when a message is being consumed");
 
 			context.Bus.Endpoint.Send(context.Message, x =>
 				{
@@ -78,6 +82,22 @@ namespace MassTransit
 					x.SendFaultTo(context.FaultAddress);
 					x.SetRetryCount(context.RetryCount + 1);
 				});
+		}
+
+		private static IEndpoint GetFaultEndpoint(this IInboundMessageHeaders headers)
+		{
+			if (headers.FaultAddress == null)
+				throw new InvalidOperationException("No fault address was contained in the message");
+
+			return headers.Bus.EndpointFactory.GetEndpoint(headers.FaultAddress);
+		}
+
+		private static IEndpoint GetResponseEndpoint(this IInboundMessageHeaders headers)
+		{
+			if (headers.ResponseAddress == null)
+				throw new InvalidOperationException("No response address was contained in the message");
+
+			return headers.Bus.EndpointFactory.GetEndpoint(headers.ResponseAddress);
 		}
 	}
 }

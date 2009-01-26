@@ -19,7 +19,6 @@ namespace MassTransit.Transports
 	using Configuration;
 	using Internal;
 	using log4net;
-	using Magnum.Common;
 	using Magnum.Common.Threading;
 	using Serialization;
 
@@ -29,9 +28,8 @@ namespace MassTransit.Transports
 		private static readonly ILog _log = LogManager.GetLogger(typeof (LoopbackEndpoint));
 		private static readonly ILog _messageLog = LogManager.GetLogger("MassTransit.Messages");
 
-		public readonly ReaderWriterLockedObject<Queue<byte[]>> _messages = new ReaderWriterLockedObject<Queue<byte[]>>(new Queue<byte[]>());
-		
 		private readonly Semaphore _messageReady = new Semaphore(0, int.MaxValue);
+		public readonly ReaderWriterLockedObject<Queue<byte[]>> _messages = new ReaderWriterLockedObject<Queue<byte[]>>(new Queue<byte[]>());
 		private readonly IMessageSerializer _serializer;
 		private readonly Uri _uri;
 		private bool _disposed;
@@ -55,12 +53,7 @@ namespace MassTransit.Transports
 
 		public void Send<T>(T message) where T : class
 		{
-			if (_disposed) throw new ObjectDisposedException("The object has been disposed");
-
-			if (_messageLog.IsInfoEnabled)
-				_messageLog.InfoFormat("SEND:{0}:{1}", Uri, typeof (T).Name);
-
-			Enqueue(message);
+			Send(message, TimeSpan.MaxValue);
 		}
 
 		public void Send<T>(T message, TimeSpan timeToLive) where T : class
@@ -69,6 +62,12 @@ namespace MassTransit.Transports
 
 			if (_messageLog.IsInfoEnabled)
 				_messageLog.InfoFormat("SEND:{0}:{1}", Uri, typeof (T).Name);
+
+			OutboundMessage.Set(headers =>
+			{
+				headers.SetMessageType(typeof(T));
+				headers.SetDestinationAddress(Uri);
+			});
 
 			Enqueue(message);
 		}
@@ -106,8 +105,6 @@ namespace MassTransit.Transports
 
 		private void Enqueue<T>(T message)
 		{
-			LocalContext.Current.OutboundMessage(x => x.SetDestinationAddress(Uri));
-
 			using (MemoryStream mstream = new MemoryStream())
 			{
 				_serializer.Serialize(mstream, message);

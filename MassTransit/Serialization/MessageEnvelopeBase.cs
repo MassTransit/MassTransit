@@ -68,10 +68,5 @@ namespace MassTransit.Serialization
 		/// The type of the message, including the full name and assembly
 		/// </summary>
     	public string MessageType { get; set; }
-
-		public static string FormatMessageType(Type messageType)
-		{
-			return String.Format("{0}, {1}", messageType.FullName, messageType.Assembly.FullName);
-		}
     }
 }
