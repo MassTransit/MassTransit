@@ -14,28 +14,31 @@ namespace MassTransit.Serialization
 {
 	using System;
 	using Internal;
-	using Magnum.Common.ObjectExtensions;
 
 	public static class ExtensionsToMessageEnvelope
 	{
-		public static void ApplyTo(this MessageEnvelopeBase envelope, InboundMessageContext context)
+		public static Action<ISetInboundMessageHeaders> GetMessageHeadersSetAction(this MessageEnvelopeBase envelope)
 		{
-			context.SetSourceAddress(envelope.SourceAddress.IsNullOrEmpty() ? null : new Uri(envelope.SourceAddress));
-			context.SetDestinationAddress(envelope.DestinationAddress.IsNullOrEmpty() ? null : new Uri(envelope.DestinationAddress));
-			context.SetResponseAddress(envelope.ResponseAddress.IsNullOrEmpty() ? null : new Uri(envelope.ResponseAddress));
-			context.SetFaultAddress(envelope.FaultAddress.IsNullOrEmpty() ? null : new Uri(envelope.FaultAddress));
-			context.SetRetryCount(envelope.RetryCount);
-			context.SetMessageType(envelope.MessageType);
+			return headers =>
+				{
+					headers.Reset();
+					headers.SetSourceAddress(envelope.SourceAddress);
+					headers.SetDestinationAddress(envelope.DestinationAddress);
+					headers.SetResponseAddress(envelope.ResponseAddress);
+					headers.SetFaultAddress(envelope.FaultAddress);
+					headers.SetRetryCount(envelope.RetryCount);
+					headers.SetMessageType(envelope.MessageType);
+				};
 		}
 
-		public static void CopyFrom(this MessageEnvelopeBase envelope, IMessageContext context)
+		public static void CopyFrom(this MessageEnvelopeBase envelope, IMessageHeaders headers)
 		{
-			envelope.SourceAddress = context.SourceAddress.ToStringOrNull() ?? envelope.SourceAddress;
-			envelope.DestinationAddress = context.DestinationAddress.ToStringOrNull() ?? envelope.DestinationAddress;
-			envelope.ResponseAddress = context.ResponseAddress.ToStringOrNull() ?? envelope.ResponseAddress;
-			envelope.FaultAddress = context.FaultAddress.ToStringOrNull() ?? envelope.FaultAddress;
-			envelope.RetryCount = context.RetryCount;
-			envelope.MessageType = context.MessageType ?? envelope.MessageType;
+			envelope.SourceAddress = headers.SourceAddress.ToStringOrNull() ?? envelope.SourceAddress;
+			envelope.DestinationAddress = headers.DestinationAddress.ToStringOrNull() ?? envelope.DestinationAddress;
+			envelope.ResponseAddress = headers.ResponseAddress.ToStringOrNull() ?? envelope.ResponseAddress;
+			envelope.FaultAddress = headers.FaultAddress.ToStringOrNull() ?? envelope.FaultAddress;
+			envelope.RetryCount = headers.RetryCount;
+			envelope.MessageType = headers.MessageType ?? envelope.MessageType;
 		}
 
 		public static string ToStringOrNull(this Uri uri)

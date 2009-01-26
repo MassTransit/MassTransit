@@ -150,7 +150,7 @@ namespace MassTransit
 
 			List<Uri> done = new List<Uri>();
 
-			var context = LocalContext.Current.OutboundMessage();
+			var context = OutboundMessage.Headers;
 			
 			context.SetSourceAddress(Endpoint.Uri);
 
@@ -169,7 +169,7 @@ namespace MassTransit
 				done.Add(subscription.EndpointUri);
 			}
 
-			context.Clear();
+			context.Reset();
 		}
 
 		/// <summary>
@@ -286,16 +286,12 @@ namespace MassTransit
 		{
 			bool performedWork = false;
 
-			var context = LocalContext.Current.InboundMessage();
-
 			try
 			{
 				using (var resourceLock = _receiveThreadLock.AcquireLock(_threadTimeout))
 				{
 					foreach (IMessageSelector selector in resourceLock.Resource.SelectiveReceive(ReceiveTimeout))
 					{
-						context.Initialize(this);
-
 						performedWork = true;
 
 						try
@@ -304,7 +300,11 @@ namespace MassTransit
 							if (message == null)
 								continue;
 
-							context.SetMessage(message);
+							InboundMessageHeaders.SetCurrent(context =>
+								{
+									context.ReceivedOn(this);
+									context.ReceivedAs(message);
+								});
 
 							using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required))
 							{
@@ -339,10 +339,6 @@ namespace MassTransit
 			{
 				// this could be a bigger deal, but we'll probably just log it.
 				_log.Error("ReceiveFromEndpoint got an exception", ex);
-			}
-			finally
-			{
-				context.Clear();
 			}
 
 			return performedWork;

@@ -14,6 +14,7 @@ namespace MassTransit.Tests.Serialization
 {
 	using Configuration;
 	using Magnum.Common.DateTimeExtensions;
+	using MassTransit.Internal;
 	using MassTransit.Serialization;
 	using Messages;
 	using NUnit.Framework;
@@ -38,7 +39,7 @@ namespace MassTransit.Tests.Serialization
 
 			RemoteBus.Subscribe<PingMessage>(message =>
 				{
-					Assert.AreEqual(RemoteBus.Endpoint.Uri, CurrentMessage.DestinationAddress);
+					Assert.AreEqual(RemoteBus.Endpoint.Uri, CurrentMessage.Headers.DestinationAddress);
 
 					received.Set(message);
 				});
@@ -57,7 +58,7 @@ namespace MassTransit.Tests.Serialization
 
 			RemoteBus.Subscribe<PingMessage>(message =>
 				{
-					Assert.AreEqual(LocalBus.Endpoint.Uri, CurrentMessage.FaultAddress);
+					Assert.AreEqual(LocalBus.Endpoint.Uri, CurrentMessage.Headers.FaultAddress);
 
 					received.Set(message);
 				});
@@ -76,7 +77,7 @@ namespace MassTransit.Tests.Serialization
 
 			RemoteBus.Subscribe<PingMessage>(message =>
 				{
-					Assert.AreEqual(MessageEnvelopeBase.FormatMessageType(typeof (PingMessage)), CurrentMessage.MessageType);
+					Assert.AreEqual(MessageHeadersBase.GetMessageTypeHeaderString(typeof (PingMessage)), CurrentMessage.Headers.MessageType);
 
 					received.Set(message);
 				});
@@ -95,7 +96,7 @@ namespace MassTransit.Tests.Serialization
 
 			RemoteBus.Subscribe<PingMessage>(message =>
 				{
-					Assert.AreEqual(LocalBus.Endpoint.Uri, CurrentMessage.ResponseAddress);
+					Assert.AreEqual(LocalBus.Endpoint.Uri, CurrentMessage.Headers.ResponseAddress);
 
 					received.Set(message);
 				});
@@ -115,7 +116,7 @@ namespace MassTransit.Tests.Serialization
 			var retryCount = 69;
 			RemoteBus.Subscribe<PingMessage>(message =>
 				{
-					Assert.AreEqual(retryCount, CurrentMessage.RetryCount);
+					Assert.AreEqual(retryCount, CurrentMessage.Headers.RetryCount);
 
 					received.Set(message);
 				});
@@ -134,7 +135,7 @@ namespace MassTransit.Tests.Serialization
 
 			RemoteBus.Subscribe<PingMessage>(message =>
 				{
-					Assert.AreEqual(LocalBus.Endpoint.Uri, CurrentMessage.SourceAddress);
+					Assert.AreEqual(LocalBus.Endpoint.Uri, CurrentMessage.Headers.SourceAddress);
 
 					received.Set(message);
 				});

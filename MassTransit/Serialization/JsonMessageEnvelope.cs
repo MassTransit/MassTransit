@@ -12,8 +12,8 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Serialization
 {
+	using System;
 	using Internal;
-	using Magnum.Common;
 	using Newtonsoft.Json;
 
 	public class JsonMessageEnvelope :
@@ -23,17 +23,20 @@ namespace MassTransit.Serialization
 		{
 		}
 
-		public JsonMessageEnvelope(object message)
+		private JsonMessageEnvelope(Type messageType, object message)
 		{
 			Message = JavaScriptConvert.SerializeObject(message);
 
-			MessageType = FormatMessageType(message.GetType());
+			MessageType = MessageHeadersBase.GetMessageTypeHeaderString(messageType);
 
-			var context = LocalContext.Current.OutboundMessage();
-
-			this.CopyFrom(context);
+			this.CopyFrom(OutboundMessage.Headers);
 		}
 
 		public string Message { get; set; }
+
+		public static JsonMessageEnvelope Create<T>(T message)
+		{
+			return new JsonMessageEnvelope(typeof (T), message);
+		}
 	}
 }

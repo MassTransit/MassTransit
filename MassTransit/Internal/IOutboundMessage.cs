@@ -12,9 +12,17 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Internal
 {
-	public interface IInboundMessageContext :
-		IMessageContext
+	using System;
+
+	public interface IOutboundMessage :
+		ISetMessageHeaders
 	{
-		IServiceBus Bus { get; }
+		void SendResponseTo(IServiceBus bus);
+		void SendResponseTo(IEndpoint endpoint);
+		void SendResponseTo(Uri uri);
+
+		void SendFaultTo(IServiceBus bus);
+		void SendFaultTo(IEndpoint endpoint);
+		void SendFaultTo(Uri uri);
 	}
 }

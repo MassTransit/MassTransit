@@ -73,11 +73,15 @@ namespace MassTransit.Transports
 
 			Type messageType = typeof (T);
 
+			OutboundMessage.Set(headers =>
+			{
+				headers.SetMessageType(typeof(T));
+				headers.SetDestinationAddress(Uri);
+			});
+
 			using (MemoryStream mstream = new MemoryStream())
 			{
 				_serializer.Serialize(mstream, message);
-
-				// if (timeToLive < TimeSpan.MaxValue)
 
 				try
 				{

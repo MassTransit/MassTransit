@@ -117,6 +117,12 @@ namespace MassTransit.Transports.Msmq
 
 			Type messageType = typeof (T);
 
+			OutboundMessage.Set(headers =>
+				{
+					headers.SetMessageType(messageType);
+					headers.SetDestinationAddress(Uri);
+				});
+
 			Message msg = BuildMessage(timeToLive, messageType, message);
 
 			try

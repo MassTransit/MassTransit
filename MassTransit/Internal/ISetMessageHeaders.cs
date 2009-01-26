@@ -14,25 +14,29 @@ namespace MassTransit.Internal
 {
 	using System;
 
-	public class MessageContextBase
+	/// <summary>
+	/// Used to set the message headers
+	/// </summary>
+	public interface ISetMessageHeaders :
+		IMessageHeaders
 	{
-		public Uri DestinationAddress { get; protected set; }
-		public Uri ResponseAddress { get; protected set; }
-		public Uri FaultAddress { get; protected set; }
-		public Uri SourceAddress { get; protected set; }
-		public int RetryCount { get; protected set; }
-		public object Message { get; protected set; }
-		public string MessageType { get; protected set; }
+		void SetSourceAddress(Uri uri);
+		void SetSourceAddress(string uriString);
 
-		public virtual void Clear()
-		{
-			RetryCount = 0;
-			Message = null;
-			DestinationAddress = null;
-			SourceAddress = null;
-			ResponseAddress = null;
-			FaultAddress = null;
-			MessageType = null;
-		}
+		void SetDestinationAddress(Uri uri);
+		void SetDestinationAddress(string uriString);
+
+		void SetResponseAddress(Uri uri);
+		void SetResponseAddress(string uriString);
+
+		void SetFaultAddress(Uri uri);
+		void SetFaultAddress(string uriString);
+
+		void SetRetryCount(int retryCount);
+
+		void SetMessageType(Type messageType);
+		void SetMessageType(string messageType);
+
+		void Reset();
 	}
 }
