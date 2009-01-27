@@ -197,7 +197,7 @@
     <Compile Include="Configuration\IServiceConfigurator.cs" />
     <Compile Include="Configuration\ServiceBusConfigurator.cs" />
     <Compile Include="Configuration\ServiceBusConfiguratorDefaults.cs" />
-    <Compile Include="Configuration\SubscriptionClientConfigurator.cs" />
+    <Compile Include="Services\Subscriptions\Configuration\SubscriptionClientConfigurator.cs" />
     <Compile Include="Exceptions\ConfigurationException.cs" />
     <Compile Include="Internal\IMessageSelector.cs" />
     <Compile Include="Internal\EndpointFactory.cs" />

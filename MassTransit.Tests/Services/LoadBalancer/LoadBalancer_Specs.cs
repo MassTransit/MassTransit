@@ -12,9 +12,12 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests.Services.LoadBalancer
 {
+	using System.Collections;
 	using Configuration;
 	using Magnum.Common.DateTimeExtensions;
+	using MassTransit.Services.LoadBalancer;
 	using MassTransit.Services.LoadBalancer.Configuration;
+	using MassTransit.Subscriptions;
 	using Messages;
 	using NUnit.Framework;
 	using Rhino.Mocks;
@@ -30,6 +33,16 @@ namespace MassTransit.Tests.Services.LoadBalancer
 		protected override void EstablishContext()
 		{
 			base.EstablishContext();
+
+			ObjectBuilder.Stub(x => x.GetInstance<ILoadBalancerService>(new Hashtable()))
+				.IgnoreArguments()
+				.Return(null)
+				.WhenCalled(invocation =>
+				            invocation.ReturnValue =
+				            new LoadBalancerService(
+				            	((Hashtable) invocation.Arguments[0])["bus"] as IServiceBus,
+				            	((Hashtable) invocation.Arguments[0])["cache"] as ISubscriptionCache,
+				            	ObjectBuilder));
 
 			RemoteBus = ServiceBusConfigurator.New(x =>
 				{

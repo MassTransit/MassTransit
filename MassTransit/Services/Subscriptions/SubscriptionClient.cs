@@ -12,66 +12,66 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Services.Subscriptions
 {
-    using System;
-    using Client;
-    using Exceptions;
-    using Messages;
+	using Client;
+	using Exceptions;
+	using Internal;
+	using Messages;
 
-    public class SubscriptionClient :
-        IHostedService
-    {
-        private readonly IServiceBus _serviceBus;
-        private readonly LocalEndpointHandler _localEndpoints;
-        private readonly IEndpoint _subscriptionServiceEndpoint;
-        private UnsubscribeAction _remoteUnsubscribe;
-        private UnsubscribeAction _localUnsubscribe;
-
-
-        public SubscriptionClient(IServiceBus serviceBus, IEndpoint subscriptionServiceEndpoint, LocalEndpointHandler localEndpoints)
-        {
-            _serviceBus = serviceBus;
-            _localEndpoints = localEndpoints;
-            _subscriptionServiceEndpoint = subscriptionServiceEndpoint;
-        }
+	public class SubscriptionClient :
+		IBusService
+	{
+		private readonly LocalEndpointHandler _localEndpoints;
+		private readonly IServiceBus _serviceBus;
+		private readonly IEndpoint _subscriptionServiceEndpoint;
+		private UnsubscribeAction _localUnsubscribe;
+		private UnsubscribeAction _remoteUnsubscribe;
 
 
-        public void Dispose()
-        {
-            //the bus owns the client so it shouldn't be disposed
-            //the bus owns the cache so it shouldn't be disposed
-            _subscriptionServiceEndpoint.Dispose();
-        }
-
-        public void Start()
-        {
-            ValidateThatBusAndClientAreNotOnSameEndpoint(_serviceBus, _subscriptionServiceEndpoint);
-
-            _localEndpoints.AddLocalEndpoint(_serviceBus.Endpoint);
-
-            _remoteUnsubscribe = _serviceBus.Subscribe<RemoteSubscriptionCoordinator>();
-            _localUnsubscribe = _serviceBus.Subscribe<LocalSubscriptionCoordinator>();
-
-            //remote coordinator?
-            _subscriptionServiceEndpoint.Send(new CacheUpdateRequest(_serviceBus.Endpoint.Uri));
-        }
-
-        public void Stop()
-        {
-            //remote coordinator?
-            _subscriptionServiceEndpoint.Send(new CancelSubscriptionUpdates(_serviceBus.Endpoint.Uri));
-
-            _localUnsubscribe();
-            _remoteUnsubscribe();
-        }
+		public SubscriptionClient(IServiceBus serviceBus, IEndpoint subscriptionServiceEndpoint, LocalEndpointHandler localEndpoints)
+		{
+			_serviceBus = serviceBus;
+			_localEndpoints = localEndpoints;
+			_subscriptionServiceEndpoint = subscriptionServiceEndpoint;
+		}
 
 
-        private static void ValidateThatBusAndClientAreNotOnSameEndpoint(IServiceBus bus, IEndpoint endpoint)
-        {
-            if (bus.Endpoint.Uri.Equals(endpoint.Uri))
-            {
-                string message = string.Format("Both the service bus and subscription client are listening on the same endpoint {0}", endpoint.Uri);
-                throw new EndpointException(endpoint, message);
-            }
-        }
-    }
+		public void Dispose()
+		{
+			//the bus owns the client so it shouldn't be disposed
+			//the bus owns the cache so it shouldn't be disposed
+			_subscriptionServiceEndpoint.Dispose();
+		}
+
+		public void Start()
+		{
+			VerifyClientAndServiceNotOnSameEndpoint(_serviceBus, _subscriptionServiceEndpoint);
+
+			_localEndpoints.AddLocalEndpoint(_serviceBus.Endpoint);
+
+			_remoteUnsubscribe = _serviceBus.Subscribe<RemoteSubscriptionCoordinator>();
+			_localUnsubscribe = _serviceBus.Subscribe<LocalSubscriptionCoordinator>();
+
+			//remote coordinator?
+			_subscriptionServiceEndpoint.Send(new CacheUpdateRequest(_serviceBus.Endpoint.Uri));
+		}
+
+		public void Stop()
+		{
+			//remote coordinator?
+			_subscriptionServiceEndpoint.Send(new CancelSubscriptionUpdates(_serviceBus.Endpoint.Uri));
+
+			_localUnsubscribe();
+			_remoteUnsubscribe();
+		}
+
+
+		private static void VerifyClientAndServiceNotOnSameEndpoint(IServiceBus bus, IEndpoint endpoint)
+		{
+			if (bus.Endpoint.Uri.Equals(endpoint.Uri))
+			{
+				string message = string.Format("Both the service bus and subscription client are listening on the same endpoint {0}", endpoint.Uri);
+				throw new EndpointException(endpoint, message);
+			}
+		}
+	}
 }

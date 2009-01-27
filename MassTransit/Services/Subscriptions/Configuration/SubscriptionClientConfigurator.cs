@@ -10,32 +10,43 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Services.LoadBalancer.Configuration
+namespace MassTransit.Services.Subscriptions.Configuration
 {
 	using System;
-	using System.Collections;
+	using Exceptions;
 	using Internal;
+	using MassTransit.Configuration;
 	using MassTransit.Subscriptions;
 
-	public class LoadBalancerServiceConfigurator :
-		ILoadBalancerServiceConfigurator
+	public class SubscriptionClientConfigurator :
+		IServiceConfigurator
 	{
+		private Uri _subscriptionServiceUri;
+
 		public Type ServiceType
 		{
-			get { return typeof (ILoadBalancerService); }
+			get { return typeof (SubscriptionClient); }
 		}
 
 		public IBusService Create(IServiceBus bus, ISubscriptionCache cache, IObjectBuilder builder)
 		{
-			var arguments = new Hashtable
-				{
-					{ "bus", bus },
-					{ "cache", cache },
-				};
-
-			var service = builder.GetInstance<ILoadBalancerService>(arguments);
+			var service = builder.GetInstance<SubscriptionClient>();
 
 			return service;
+		}
+
+		public void SetSubscriptionServiceEndpoint(string uriString)
+		{
+			try
+			{
+				Uri uri = new Uri(uriString.ToLowerInvariant());
+
+				_subscriptionServiceUri = uri;
+			}
+			catch (UriFormatException ex)
+			{
+				throw new ConfigurationException("The endpoint Uri is invalid: " + uriString, ex);
+			}
 		}
 	}
 }
