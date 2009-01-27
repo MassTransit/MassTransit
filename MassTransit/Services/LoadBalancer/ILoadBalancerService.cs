@@ -10,26 +10,13 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Configuration
+namespace MassTransit.Services.LoadBalancer
 {
-	using System;
 	using Internal;
-	using Subscriptions;
 
-	public interface IServiceConfigurator
+	public interface ILoadBalancerService :
+		IBusService
 	{
-		/// <summary>
-		/// Returns the type of the service created by the configurator
-		/// </summary>
-		Type ServiceType { get; }
-
-		/// <summary>
-		/// Creates the service
-		/// </summary>
-		/// <param name="bus"></param>
-		/// <param name="cache"></param>
-		/// <param name="builder"></param>
-		/// <returns>The instance of the service</returns>
-		IBusService Create(IServiceBus bus, ISubscriptionCache cache, IObjectBuilder builder);
+		void Execute<T>(T message) where T : class;
 	}
 }

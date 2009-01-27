@@ -35,7 +35,7 @@ namespace MassTransit.Internal
 			get { return _timeToLive; }
 		}
 
-		public abstract IList<Subscription> GetConsumers<T>(IDispatcherContext context, T message) where T : class;
+		public abstract IList<Subscription> GetConsumers<T>(ISubscriptionCache cache, T message) where T : class;
 
 		public abstract void PublishFault<T>(IServiceBus bus, Exception ex, T message) where T : class;
 

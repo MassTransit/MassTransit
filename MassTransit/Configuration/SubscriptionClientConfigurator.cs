@@ -1,6 +1,8 @@
 namespace MassTransit.Configuration
 {
 	using System;
+	using Internal;
+	using Subscriptions;
 
 	public class SubscriptionClientConfigurator :
 		IServiceConfigurator
@@ -18,6 +20,16 @@ namespace MassTransit.Configuration
 		public void SetEndpoint(Uri uri)
 		{
 			throw new NotImplementedException();
+		}
+
+		public Type ServiceType
+		{
+			get { throw new System.NotImplementedException(); }
+		}
+
+		public IBusService Create(IServiceBus bus, ISubscriptionCache cache, IObjectBuilder builder)
+		{
+			throw new System.NotImplementedException();
 		}
 	}
 }

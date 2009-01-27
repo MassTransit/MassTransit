@@ -30,10 +30,10 @@ namespace MassTransit.Internal
 		/// Returns the consumers for the message type being published
 		/// </summary>
 		/// <typeparam name="T">The type of message to be published</typeparam>
-		/// <param name="context">The dispatch context from which the message is being published</param>
+		/// <param name="cache">The subscription cache to use to resolve the consumers</param>
 		/// <param name="message">The message to be published</param>
 		/// <returns>A list of subscribers that are interested in the message</returns>
-		IList<Subscription> GetConsumers<T>(IDispatcherContext context, T message) where T : class;
+		IList<Subscription> GetConsumers<T>(ISubscriptionCache cache, T message) where T : class;
 
 		/// <summary>
 		/// Publishes a fault message to any interested consumers

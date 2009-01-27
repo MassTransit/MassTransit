@@ -88,6 +88,14 @@ namespace MassTransit
         /// with the new request/response syntax of bus.MakeRequest();
         /// </summary>
         /// <returns>A request builder</returns>
-        RequestBuilder Request();
+        [Obsolete]
+		RequestBuilder Request();
+
+		/// <summary>
+		/// Returns the service for the requested interface if it was registered with the service bus
+		/// </summary>
+		/// <typeparam name="TService"></typeparam>
+		/// <returns></returns>
+    	TService GetService<TService>();
     }
 }

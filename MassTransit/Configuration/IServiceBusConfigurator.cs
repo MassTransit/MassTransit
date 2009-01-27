@@ -32,12 +32,10 @@ namespace MassTransit.Configuration
 		/// <param name="uri">The uri of the endpoint</param>
 		void ReceiveFrom(Uri uri);
 
-
 		/// <summary>
 		/// Configure a service for use by the service bus
 		/// </summary>
-		/// <typeparam name="TServiceConfigurator"></typeparam>
-		/// <param name="action"></param>
-		void ConfigureService<TServiceConfigurator>(Action<TServiceConfigurator> action) where TServiceConfigurator : IServiceConfigurator;
+		void ConfigureService<TServiceConfigurator>(Action<TServiceConfigurator> configure)
+			where TServiceConfigurator : IServiceConfigurator, new();
 	}
 }
