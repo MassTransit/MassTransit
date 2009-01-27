@@ -15,6 +15,7 @@ namespace MassTransit
 	using System;
 	using Internal;
 	using Internal.RequestResponse;
+	using Services.LoadBalancer;
 
 	public static class ExtensionsToServiceBus
 	{
@@ -39,6 +40,24 @@ namespace MassTransit
 		public static IUnsubscribeAction Disposable(this UnsubscribeAction action)
 		{
 			return new DisposableUnsubscribeAction(action);
+		}
+
+		public static void Execute<T>(this IServiceBus bus, T message, Action<IOutboundMessage> action)
+			where T : class
+		{
+			OutboundMessage.Set(action);
+
+			var loadBalancer = bus.GetService<ILoadBalancerService>();
+
+			loadBalancer.Execute(message);
+		}
+
+		public static void Execute<T>(this IServiceBus bus, T message) 
+			where T : class
+		{
+			var loadBalancer = bus.GetService<ILoadBalancerService>();
+
+			loadBalancer.Execute(message);
 		}
 
 		public static void Publish<T>(this IServiceBus bus, T message, Action<IOutboundMessage> action)

@@ -19,7 +19,6 @@ namespace MassTransit
 	using Exceptions;
 	using Internal;
 	using log4net;
-	using Magnum.Common;
 	using Magnum.Common.ObjectExtensions;
 	using Pipeline;
 	using Pipeline.Configuration;
@@ -43,6 +42,7 @@ namespace MassTransit
 		private MessagePipeline _inbound;
 		private MessagePipeline _outbound;
 		private ResourceLock<IEndpoint> _receiveThreadLock;
+		private IServiceContainer _serviceContainer;
 		private volatile bool _started;
 		private DynamicThreadPool _threadPool;
 		private ITypeInfoCache _typeInfoCache;
@@ -84,6 +84,8 @@ namespace MassTransit
 			ObjectBuilder = objectBuilder;
 			EndpointFactory = endpointFactory;
 			_typeInfoCache = typeInfoCache;
+
+			_serviceContainer = new ServiceContainer();
 
 			_inboundSubscriptionEvent = new SubscriptionCacheEventConnector(SubscriptionCache, Endpoint);
 
@@ -143,7 +145,7 @@ namespace MassTransit
 		{
 			IPublicationTypeInfo info = _typeInfoCache.GetPublicationTypeInfo<T>();
 
-			IList<Subscription> subs = info.GetConsumers(_dispatcherContext, message);
+			IList<Subscription> subs = info.GetConsumers(SubscriptionCache, message);
 
 			if (_log.IsWarnEnabled && subs.Count == 0)
 				_log.WarnFormat("There are no subscriptions for the message type {0} for the bus listening on {1}", typeof (T).FullName, Endpoint.Uri);
@@ -151,7 +153,7 @@ namespace MassTransit
 			List<Uri> done = new List<Uri>();
 
 			var context = OutboundMessage.Headers;
-			
+
 			context.SetSourceAddress(Endpoint.Uri);
 
 			foreach (Subscription subscription in subs)
@@ -179,6 +181,11 @@ namespace MassTransit
 		public RequestBuilder Request()
 		{
 			return new RequestBuilder(this);
+		}
+
+		public TService GetService<TService>()
+		{
+			return _serviceContainer.GetService<TService>();
 		}
 
 		/// <summary>
@@ -241,7 +248,14 @@ namespace MassTransit
 			_receiveThreadLock = new ResourceLock<IEndpoint>(Endpoint, ConcurrentReceiveThreads);
 			_threadPool.Start();
 
+			_serviceContainer.Start();
+
 			_started = true;
+		}
+
+		public void AddService(Type serviceType, IBusService service)
+		{
+			_serviceContainer.AddService(serviceType, service);
 		}
 
 		protected virtual void Dispose(bool disposing)
@@ -256,6 +270,13 @@ namespace MassTransit
 					_threadPool.Stop();
 					_threadPool.Dispose();
 					_threadPool = null;
+				}
+
+				if (_serviceContainer != null)
+				{
+					_serviceContainer.Stop();
+					_serviceContainer.Dispose();
+					_serviceContainer = null;
 				}
 
 				_typeInfoCache.Dispose();

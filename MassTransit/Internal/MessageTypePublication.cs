@@ -12,52 +12,52 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Internal
 {
-    using System;
-    using System.Collections.Generic;
-    using Exceptions;
-    using log4net;
-    using Subscriptions;
+	using System;
+	using System.Collections.Generic;
+	using Exceptions;
+	using log4net;
+	using Subscriptions;
 
-	public class MessageTypePublication<TMessage> : 
+	public class MessageTypePublication<TMessage> :
 		PublicationBase<TMessage>
-        where TMessage : class
-    {
-        private static readonly ILog _log = LogManager.GetLogger(typeof (MessageTypePublication<TMessage>));
+		where TMessage : class
+	{
+		private static readonly ILog _log = LogManager.GetLogger(typeof (MessageTypePublication<TMessage>));
 
 
-		public override IList<Subscription> GetConsumers<T>(IDispatcherContext context, T message)
+		public override IList<Subscription> GetConsumers<T>(ISubscriptionCache cache, T message)
 		{
-            TMessage msg = message as TMessage;
-            if (msg == null)
-                throw new ConventionException(string.Format("Object of type {0} is not of type {1}", typeof (T), _messageType));
+			TMessage msg = message as TMessage;
+			if (msg == null)
+				throw new ConventionException(string.Format("Object of type {0} is not of type {1}", typeof (T), _messageType));
 
-            return GetConsumers(context.SubscriptionCache, msg);
-        }
+			return GetConsumers(cache, msg);
+		}
 
-        public override void PublishFault<T>(IServiceBus bus, Exception ex, T message)
-        {
-            TMessage msg = message as TMessage;
-            if (msg == null)
-                throw new ConventionException(string.Format("Object of type {0} is not of type {1}", typeof (T), _messageType));
+		public override void PublishFault<T>(IServiceBus bus, Exception ex, T message)
+		{
+			TMessage msg = message as TMessage;
+			if (msg == null)
+				throw new ConventionException(string.Format("Object of type {0} is not of type {1}", typeof (T), _messageType));
 
-            Fault<TMessage> fault = new Fault<TMessage>(ex, msg);
+			Fault<TMessage> fault = new Fault<TMessage>(ex, msg);
 
-            try
-            {
-                bus.Publish(fault);
-            }
-            catch (Exception fex)
-            {
-                _log.Error("Failed to publish Fault<" + typeof (TMessage).Name + "> message for exception", fex);
-            }
-        }
+			try
+			{
+				bus.Publish(fault);
+			}
+			catch (Exception fex)
+			{
+				_log.Error("Failed to publish Fault<" + typeof (TMessage).Name + "> message for exception", fex);
+			}
+		}
 
-        public IList<Subscription> GetConsumers(ISubscriptionCache cache, TMessage message)
-        {
-            if (cache == null)
-                return new List<Subscription>();
+		public IList<Subscription> GetConsumers(ISubscriptionCache cache, TMessage message)
+		{
+			if (cache == null)
+				return new List<Subscription>();
 
 			return cache.List(Subscription.BuildMessageName(_messageType));
-        }
-    }
+		}
+	}
 }

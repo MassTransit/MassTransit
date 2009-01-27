@@ -13,6 +13,7 @@
 namespace MassTransit.Configuration
 {
 	using System;
+	using System.Collections.Generic;
 	using Exceptions;
 	using Internal;
 	using Subscriptions;
@@ -22,10 +23,13 @@ namespace MassTransit.Configuration
 		IServiceBusConfigurator
 	{
 		private static readonly ServiceBusConfiguratorDefaults _defaults = new ServiceBusConfiguratorDefaults();
+		private readonly List<Action<IServiceBus, ISubscriptionCache, IObjectBuilder, Action<Type, IBusService>>> _services;
 		private Uri _receiveFromUri;
 
 		private ServiceBusConfigurator()
 		{
+			_services = new List<Action<IServiceBus, ISubscriptionCache, IObjectBuilder, Action<Type, IBusService>>>();
+
 			_defaults.ApplyTo(this);
 		}
 
@@ -46,38 +50,66 @@ namespace MassTransit.Configuration
 			_receiveFromUri = uri;
 		}
 
-		public void ConfigureService<TServiceConfigurator>(Action<TServiceConfigurator> action) where TServiceConfigurator : IServiceConfigurator
+		public void ConfigureService<TServiceConfigurator>(Action<TServiceConfigurator> configure)
+			where TServiceConfigurator : IServiceConfigurator, new()
 		{
-			throw new NotImplementedException();
+			_services.Add((bus, cache, builder, add) =>
+				{
+					TServiceConfigurator configurator = new TServiceConfigurator();
+
+					configure(configurator);
+
+					var service = configurator.Create(bus, cache, builder);
+
+					add(configurator.ServiceType, service);
+				});
 		}
-
-		public static IServiceBus New(Action<IServiceBusConfigurator> action)
-		{
-			ServiceBusConfigurator configurator = new ServiceBusConfigurator();
-
-			action(configurator);
-
-			return configurator.Create();
-		}
-
 
 		private IServiceBus Create()
 		{
-			IEndpointFactory endpointFactory = ObjectBuilder.GetInstance<IEndpointFactory>();
+			ServiceBus bus = CreateServiceBus();
 
-			IEndpoint endpoint = endpointFactory.GetEndpoint(_receiveFromUri);
+			ConfigurePoisonEndpoint(bus);
 
-			ISubscriptionCache subscriptionCache = ObjectBuilder.GetInstance<ISubscriptionCache>() ?? new LocalSubscriptionCache();
-			ITypeInfoCache typeInfoCache = ObjectBuilder.GetInstance<ITypeInfoCache>() ?? new TypeInfoCache();
+			ConfigureThreadLimits(bus);
 
-			ServiceBus bus = new ServiceBus(endpoint, ObjectBuilder, subscriptionCache, endpointFactory, typeInfoCache);
-
-			if (ErrorUri != null)
+			if (AutoSubscribe)
 			{
-				IEndpoint poisonEndpoint = endpointFactory.GetEndpoint(ErrorUri);
-				bus.PoisonEndpoint = poisonEndpoint;
+				// get all the types and subscribe them to the bus
 			}
 
+			ConfigureBusServices(bus);
+
+			if (AutoStart)
+			{
+				bus.Start();
+			}
+
+			return bus;
+		}
+
+		private void ConfigurePoisonEndpoint(ServiceBus bus)
+		{
+			if (ErrorUri != null)
+			{
+				bus.PoisonEndpoint = bus.EndpointFactory.GetEndpoint(ErrorUri);
+			}
+		}
+
+		private ServiceBus CreateServiceBus()
+		{
+			var endpointFactory = ObjectBuilder.GetInstance<IEndpointFactory>();
+
+			var endpoint = endpointFactory.GetEndpoint(_receiveFromUri);
+
+			var subscriptionCache = ObjectBuilder.GetInstance<ISubscriptionCache>() ?? new LocalSubscriptionCache();
+			var typeInfoCache = ObjectBuilder.GetInstance<ITypeInfoCache>() ?? new TypeInfoCache();
+
+			return new ServiceBus(endpoint, ObjectBuilder, subscriptionCache, endpointFactory, typeInfoCache);
+		}
+
+		private void ConfigureThreadLimits(ServiceBus bus)
+		{
 			if (ConcurrentConsumerLimit > 0)
 				bus.MaximumConsumerThreads = ConcurrentConsumerLimit;
 
@@ -85,17 +117,23 @@ namespace MassTransit.Configuration
 				bus.ConcurrentReceiveThreads = ConcurrentReceiverLimit;
 
 			bus.ReceiveTimeout = ReceiveTimeout;
+		}
 
-			if (AutoSubscribe)
+		private void ConfigureBusServices(ServiceBus bus)
+		{
+			foreach (var serviceConfigurator in _services)
 			{
-				// get all the types and subscribe them to the bus
+				serviceConfigurator(bus, bus.SubscriptionCache, ObjectBuilder, bus.AddService);
 			}
+		}
 
-			if (AutoStart)
-			{
-				bus.Start();
-			}
-			return bus;
+		public static IServiceBus New(Action<IServiceBusConfigurator> action)
+		{
+			var configurator = new ServiceBusConfigurator();
+
+			action(configurator);
+
+			return configurator.Create();
 		}
 
 		public static void Defaults(Action<IServiceBusConfiguratorDefaults> action)

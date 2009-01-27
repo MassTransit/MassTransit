@@ -64,5 +64,10 @@ namespace MassTransit.Internal
 		{
 			throw new NotImplementedException();
 		}
+
+		public TService GetService<TService>()
+		{
+			throw new System.NotImplementedException();
+		}
 	}
 }

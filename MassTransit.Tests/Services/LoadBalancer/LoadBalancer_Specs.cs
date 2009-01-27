@@ -10,13 +10,19 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Tests.TextFixtures
+namespace MassTransit.Tests.Services.LoadBalancer
 {
 	using Configuration;
+	using Magnum.Common.DateTimeExtensions;
+	using MassTransit.Services.LoadBalancer.Configuration;
+	using Messages;
 	using NUnit.Framework;
+	using Rhino.Mocks;
+	using TestConsumers;
+	using TextFixtures;
 
 	[TestFixture]
-	public class LoopbackLocalAndRemoteTestFixture :
+	public class LoadBalancer_Specs :
 		LoopbackTestFixture
 	{
 		public IServiceBus RemoteBus { get; private set; }
@@ -25,7 +31,18 @@ namespace MassTransit.Tests.TextFixtures
 		{
 			base.EstablishContext();
 
-			RemoteBus = ServiceBusConfigurator.New(x => { x.ReceiveFrom("loopback://localhost/mt_server"); });
+			RemoteBus = ServiceBusConfigurator.New(x =>
+				{
+					x.ReceiveFrom("loopback://localhost/mt_server");
+
+					x.ConfigureService<LoadBalancerServiceConfigurator>(y => { });
+				});
+
+			ObjectBuilder.Stub(x => x.GetInstance<TestMessageConsumer<PingMessage>>())
+				.Return(new TestMessageConsumer<PingMessage>());
+
+			LocalBus.Subscribe<TestMessageConsumer<PingMessage>>();
+			RemoteBus.Subscribe<TestMessageConsumer<PingMessage>>();
 		}
 
 		protected override void TeardownContext()
@@ -34,6 +51,16 @@ namespace MassTransit.Tests.TextFixtures
 			RemoteBus = null;
 
 			base.TeardownContext();
+		}
+
+		[Test]
+		public void Example_syntax_for_the_load_balancer()
+		{
+			var ping = new PingMessage();
+
+			RemoteBus.Execute(ping);
+
+			TestConsumerBase<PingMessage>.AnyShouldHaveReceivedMessage(ping, 5.Seconds());
 		}
 	}
 }

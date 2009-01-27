@@ -121,6 +121,7 @@
     <Compile Include="MessageGroup_Specs.cs" />
     <Compile Include="Messages\RequestMessage.cs" />
     <Compile Include="Messages\SerializationTestMessage.cs" />
+    <Compile Include="Services\LoadBalancer\LoadBalancer_Specs.cs" />
     <Compile Include="Transports\Multicast_Specs.cs" />
     <Compile Include="Pipeline\BatchConsumer_Specs.cs" />
     <Compile Include="Pipeline\InitiateSaga_Specs.cs" />

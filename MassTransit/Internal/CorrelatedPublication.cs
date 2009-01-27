@@ -31,16 +31,16 @@ namespace MassTransit.Internal
             _keyType = typeof (TKey);
         }
 
-    	public override IList<Subscription> GetConsumers<T>(IDispatcherContext context, T message)
+    	public override IList<Subscription> GetConsumers<T>(ISubscriptionCache cache, T message)
     	{
             CorrelatedBy<TKey> key = message as CorrelatedBy<TKey>;
             if (key == null)
                 throw new ConventionException(string.Format("Object of type {0} is not correlated by type {1}", typeof (T), _keyType));
 
-			if (context.SubscriptionCache == null)
+			if (cache == null)
 				return new List<Subscription>();
 
-			return context.SubscriptionCache.List(Subscription.BuildMessageName(_messageType), key.CorrelationId.ToString());
+			return cache.List(Subscription.BuildMessageName(_messageType), key.CorrelationId.ToString());
         }
 
         public override void PublishFault<T>(IServiceBus bus, Exception ex, T message)
