@@ -174,24 +174,26 @@ namespace MassTransit.Infrastructure.Subscriptions
 			_messageTypes.Clear();
 		}
 
-		private void QueryCache(string messageName, SubscriptionKey key, List<Subscription> result)
-		{
-			MemcachedClient client = GetCacheClient();
+        private void QueryCache(string messageName, SubscriptionKey key, List<Subscription> result)
+        {
+            using (MemcachedClient client = GetCacheClient())
+            {
+                string value = client.Get<string>(key.CacheKey);
 
-			string value = client.Get<string>(key.CacheKey);
+                if (!string.IsNullOrEmpty(value))
+                {
+                    string[] uris = value.Split(_newLineToken);
 
-			if (!string.IsNullOrEmpty(value))
-			{
-				string[] uris = value.Split(_newLineToken);
+                    foreach (string uri in uris)
+                    {
+                        result.Add(new Subscription(messageName, key.CorrelationId, new Uri(uri)));
+                    }
+                }
+            }
+        }
 
-				foreach (string uri in uris)
-				{
-					result.Add(new Subscription(messageName, key.CorrelationId, new Uri(uri)));
-				}
-			}
-		}
 
-		private MemcachedClient GetCacheClient()
+	    private MemcachedClient GetCacheClient()
 		{
 			if (_configuration != null)
 				return new MemcachedClient(_configuration);
@@ -231,6 +233,7 @@ namespace MassTransit.Infrastructure.Subscriptions
 			public void Dispose()
 			{
 				_client.Remove(_key.LockKey);
+                _client.Dispose();
 			}
 
 			public R GetFromClient<R>(SubscriptionKey key)
