@@ -9,7 +9,7 @@
 
 			<bus id="main"
 				 endpoint="msmq://localhost/mt_client">
-				<subscriptionService endpoint="msmq://localhost/mt_pubsub" />
+				<subscriptionService endpoint="msmq://localhost/mt_subscriptions" />
 			</bus>
 
 			<transports>
