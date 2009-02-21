@@ -13,7 +13,8 @@
 	/// This is an extension of the StrutureMap registry exposing methods to make it easy to get Mass
 	/// Transit set up.
 	/// </summary>
-	public class MassTransitRegistry : Registry
+	public class MassTransitRegistry :
+        Registry
 	{
 		public MassTransitRegistry()
 		{
