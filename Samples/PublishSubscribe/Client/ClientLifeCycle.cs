@@ -2,22 +2,16 @@ namespace Client
 {
     using System;
     using MassTransit;
-    using MassTransit.Host.LifeCycles;
     using Microsoft.Practices.ServiceLocation;
     using SecurityMessages;
 
-    public class ClientLifeCycle :
-        HostedLifecycle
+    public class ClientLifeCycle
     {
         private IServiceBus _bus;
 
-        public ClientLifeCycle(IServiceLocator serviceLocator) : base(serviceLocator)
+        public void Start()
         {
-        }
-
-        public override void Start()
-        {
-            _bus = base.ServiceLocator.GetInstance<IServiceBus>();
+            _bus = ServiceLocator.Current.GetInstance<IServiceBus>();
 
             _bus.Subscribe<PasswordUpdater>();
 
@@ -37,7 +31,7 @@ namespace Client
             Console.WriteLine(new string('-', 20));
         }
 
-        public override void Stop()
+        public void Stop()
         {
             //do nothing
         }

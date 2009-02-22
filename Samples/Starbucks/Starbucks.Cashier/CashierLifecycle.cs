@@ -1,24 +1,17 @@
-using MassTransit.Host.LifeCycles;
-using Microsoft.Practices.ServiceLocation;
-
 namespace Starbucks.Cashier
 {
     using MassTransit;
+    using Microsoft.Practices.ServiceLocation;
 
-    public class CashierLifecycle : HostedLifecycle
+    public class CashierLifecycle 
     {
-        public CashierLifecycle(IServiceLocator serviceLocator)
-            : base(serviceLocator)
+        public void Start()
         {
-        }
-
-        public override void Start()
-        {
-            IServiceBus bus = ServiceLocator.GetInstance<IServiceBus>();            
+            IServiceBus bus = ServiceLocator.Current.GetInstance<IServiceBus>();
             bus.Subscribe<FriendlyCashier>();
         }
 
-        public override void Stop()
+        public void Stop()
         {
         }
     }
