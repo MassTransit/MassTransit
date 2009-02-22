@@ -3,9 +3,9 @@
     using System.IO;
     using Host;
     using log4net.Config;
-    using MassTransit.Host;
     using MassTransit.WindsorIntegration;
-    using Microsoft.Practices.ServiceLocation;
+    using Topshelf;
+    using Topshelf.Configuration;
 
     internal class Program
     {
@@ -13,19 +13,24 @@
         {
             XmlConfigurator.ConfigureAndWatch(new FileInfo("log4net.xml"));
 
+            var cfg = RunnerConfigurator.New(c =>
+                                                 {
+                                                     c.SetServiceName("PostalService");
+                                                     c.SetDisplayName("Sample Email Service");
+                                                     c.SetDescription("we goin' postal");
 
-            var container = new DefaultMassTransitContainer("postal-castle.xml");
-            container.AddComponent<SendEmailConsumer>("sec");
+                                                     c.RunAsLocalSystem();
+                                                     c.DependencyOnMsmq();
 
-            var credentials = Credentials.LocalSystem;
-            var settings = WinServiceSettings.Custom(
-                "PostalService",
-                "Sample Email Service",
-                "We goin' postal",
-                KnownServiceNames.Msmq);
-            var lifecycle = new PostalServiceLifeCycle(ServiceLocator.Current);
+                                                     c.BeforeStart(a =>
+                                                     {
+                                                         var container = new DefaultMassTransitContainer("postal-castle.xml");
+                                                         container.AddComponent<SendEmailConsumer>("sec");
+                                                     });
 
-            Runner.Run(credentials,settings,lifecycle, args);
+                                                     c.ConfigureService<PostalServiceLifeCycle>();
+                                                 });
+            Runner.Host(cfg, args);
         }
     }
 }

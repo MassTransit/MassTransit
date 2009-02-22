@@ -12,27 +12,13 @@
 // specific language governing permissions and limitations under the License.
 namespace SubscriptionManagerGUI
 {
-    using MassTransit.Host.Actions;
-    using MassTransit.Host.LifeCycles;
-    using Microsoft.Practices.ServiceLocation;
-
-    public class SubscriptionManagerLifeCycle :
-        HostedLifecycle
+    public class SubscriptionManagerLifeCycle 
     {
-        public SubscriptionManagerLifeCycle(IServiceLocator serviceLocator) : base(serviceLocator)
+        public void Start()
         {
         }
 
-        public override NamedAction DefaultAction
-        {
-            get { return NamedAction.Gui; }
-        }
-
-        public override void Start()
-        {
-        }
-
-        public override void Stop()
+        public  void Stop()
         {
         }
     }
