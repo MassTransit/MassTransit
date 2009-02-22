@@ -12,23 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace HealthServiceHost
 {
-    using MassTransit.Host.LifeCycles;
-    using Microsoft.Practices.ServiceLocation;
-
-    public class HealthServiceLifeCycle :
-        HostedLifecycle
+    public class HealthServiceLifeCycle
     {
-        public HealthServiceLifeCycle(IServiceLocator serviceLocator) : base(serviceLocator)
-        {
-        }
-
-        public override void Start()
-        {
-        }
-
-        public override void Stop()
-        {
-            
-        }
     }
 }

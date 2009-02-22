@@ -88,7 +88,7 @@ namespace MassTransit.WindsorIntegration
                 .DependsOn(new {
                                    HeartbeatInterval=heartbeatInterval
 		                       })
-                //how to mark specific dependency: bus
+                               .Parameters(Parameter.ForKey("bus").Eq("${" + busId + "}"))
                 //how to make startable
                 );
 		}
@@ -101,7 +101,7 @@ namespace MassTransit.WindsorIntegration
                 Component.For<SubscriptionClient>().Named("subscription_client")
                 .DependsOn(new { subscriptionServiceEndpoint = ep}
                 )
-                //how to mark a specific bus
+                .Parameters(Parameter.ForKey("serviceBus").Eq("${" + busId + "}"))
                 //how to mark startable
 		        );				
 		}
