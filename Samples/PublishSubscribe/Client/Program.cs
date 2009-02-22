@@ -1,9 +1,10 @@
 namespace Client
 {
 	using log4net;
-	using MassTransit.Host;
 	using MassTransit.WindsorIntegration;
 	using Microsoft.Practices.ServiceLocation;
+	using Topshelf;
+	using Topshelf.Configuration;
 
     internal class Program
 	{
@@ -13,21 +14,30 @@ namespace Client
 		{
 			_log.Info("Server Loading");
 
-		    var container = new DefaultMassTransitContainer("castle.xml");
+            var cfg = RunnerConfigurator.New(c =>
+		                                         {
+                                                     c.SetServiceName("SampleClientService");
+                                                     c.SetDisplayName("SampleClientService");
+                                                     c.SetDescription("SampleClientService");
+                                                     c.DependencyOnMsmq();
+                                                     c.RunAsLocalSystem();
 
-            container.AddComponent<PasswordUpdater>();
-            
+                                                     c.BeforeStart(a=>
+                                                                       {
+                                                                           var container = new DefaultMassTransitContainer("castle.xml");
+                                                                           container.AddComponent<PasswordUpdater>();
+                                                                           
+                                                                           var wob =new WindsorObjectBuilder(container.Kernel);
+                                                                           ServiceLocator.SetLocatorProvider(()=>wob);
+                                                                       });
 
-		    var credentials = Credentials.LocalSystem;
-		    var settings = WinServiceSettings.Custom(
-		        "SampleClientService",
-		        "SampleClientService",
-		        "SampleClientService",
-		        KnownServiceNames.Msmq);
-		    var lifecycle = new ClientLifeCycle(ServiceLocator.Current);
-
-		    
-			Runner.Run(credentials, settings, lifecycle, args);
+		                                             c.ConfigureService<ClientLifeCycle>(s=>
+		                                                                                     {
+		                                                                                         s.WhenStarted(o=>o.Start());
+		                                                                                         s.WhenStopped(o=>o.Stop());
+		                                                                                     });
+		                                         });
+			Runner.Host(cfg, args);
 		}
 	}
 }
