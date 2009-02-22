@@ -10,24 +10,9 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace SubscriptionServiceHost
+namespace DeferredMessageServiceHost
 {
-    using MassTransit.Host.LifeCycles;
-    using Microsoft.Practices.ServiceLocation;
-
-    public class SubscriptionServiceLifeCycle :
-        HostedLifecycle
+    public class DeferredMessageService
     {
-        public SubscriptionServiceLifeCycle(IServiceLocator serviceLocator) : base(serviceLocator)
-        {
-        }
-
-        public override void Start()
-        {
-        }
-
-        public override void Stop()
-        {
-        }
     }
 }
