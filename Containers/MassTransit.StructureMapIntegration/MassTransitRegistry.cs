@@ -47,7 +47,7 @@
 		{
 			IEndpoint ep = ObjectFactory.GetInstance<IEndpointFactory>().GetEndpoint(endpointToListenOn);
 			ForRequestedType<IServiceBus>().AddInstances(o => o.OfConcreteType<ServiceBus>().WithName(id)
-			                                             	.WithCtorArg("endpointListenOn").EqualTo(ep)
+                                                            .WithCtorArg("endpointToListenOn").EqualTo(ep)
 			                                             	.SetProperty(x => x.MinimumConsumerThreads = 1)
 			                                             	.SetProperty(x => x.MaximumConsumerThreads = 10));
 		}
