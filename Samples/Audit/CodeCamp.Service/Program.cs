@@ -5,47 +5,56 @@ namespace CodeCamp.Service
 	using Magnum.Common;
 	using Magnum.Common.Data;
 	using Magnum.Infrastructure.Data;
-	using MassTransit.Host;
 	using MassTransit.Infrastructure.Saga;
 	using MassTransit.Saga;
 	using MassTransit.WindsorIntegration;
-	using Microsoft.Practices.ServiceLocation;
 	using NHibernate;
 	using NHibernate.Cfg;
+	using Topshelf;
+	using Topshelf.Configuration;
 
-	internal class Program
+    internal class Program
 	{
 		private static void Main(string[] args)
 		{
 			XmlConfigurator.Configure();
 
-			var container = new DefaultMassTransitContainer("audit-castle.config");
+		    var cfg = RunnerConfigurator.New(c =>
+		                                         {
+                                                     c.RunAsLocalSystem();
+		                                             c.SetServiceName("audit");
+		                                             c.SetDisplayName("audit");
+		                                             c.SetDescription("audit");
 
-			Configuration _cfg = new Configuration().Configure();
+                                                     c.BeforeStart(a=>
+                                                                       {
+                                                                           var container = new DefaultMassTransitContainer("audit-castle.config");
 
-			_cfg.AddAssembly(typeof(NHibernateRepositoryFactory).Assembly);
+                                                                           Configuration _cfg = new Configuration().Configure();
 
-			ISessionFactory _sessionFactory = _cfg.BuildSessionFactory();
+                                                                           _cfg.AddAssembly(typeof(NHibernateRepositoryFactory).Assembly);
 
-			LocalContext.Current.Store(_sessionFactory);
+                                                                           ISessionFactory _sessionFactory = _cfg.BuildSessionFactory();
 
-			NHibernateUnitOfWork.SetSessionProvider(_sessionFactory.OpenSession);
+                                                                           LocalContext.Current.Store(_sessionFactory);
 
-			UnitOfWork.SetUnitOfWorkProvider(NHibernateUnitOfWork.Create);
+                                                                           NHibernateUnitOfWork.SetSessionProvider(_sessionFactory.OpenSession);
 
-			container.AddComponent<ISagaRepository<RegisterUserSaga>, NHibernateSagaRepository<RegisterUserSaga>>();
+                                                                           UnitOfWork.SetUnitOfWorkProvider(NHibernateUnitOfWork.Create);
 
-			container.AddComponent<Responder>();
-			container.AddComponent<RegisterUserSaga>();
+                                                                           container.AddComponent<ISagaRepository<RegisterUserSaga>, NHibernateSagaRepository<RegisterUserSaga>>();
+                                                                           container.AddComponent<Responder>();
+                                                                           container.AddComponent<RegisterUserSaga>();
+                                                                           
+                                                                       });
 
-			var credentials = Credentials.LocalSystem;
-			var settings = WinServiceSettings.Custom(
-				"Audit",
-				"Audit",
-				"Audit");
-			var lifecycle = new AuditServiceLifeCycle(ServiceLocator.Current);
-
-			Runner.Run(credentials, settings, lifecycle, args);
+                                                     c.ConfigureService<AuditServiceLifeCycle>(a=>
+                                                                                                   {
+                                                                                                       a.WhenStarted(o=>o.Start());
+                                                                                                       a.WhenStopped(o=>o.Stop());
+                                                                                                   });
+		                                         });
+			Runner.Host(cfg, args);
 		}
 	}
 }

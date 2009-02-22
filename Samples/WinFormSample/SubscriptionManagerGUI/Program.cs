@@ -16,14 +16,15 @@ namespace SubscriptionManagerGUI
     using Castle.Core;
     using log4net;
     using MassTransit;
-    using MassTransit.Host;
     using MassTransit.Services.HealthMonitoring;
     using MassTransit.Services.HealthMonitoring.Server;
     using MassTransit.Services.Subscriptions;
     using MassTransit.Services.Subscriptions.Server;
     using MassTransit.Services.Timeout;
     using MassTransit.WindsorIntegration;
-	using Microsoft.Practices.ServiceLocation;
+    using Microsoft.Practices.ServiceLocation;
+    using Topshelf;
+    using Topshelf.Configuration;
 
     internal static class Program
 	{
@@ -33,38 +34,46 @@ namespace SubscriptionManagerGUI
 		{
 			_log.Info("SubscriptionManagerGUI Loading...");
 
-		    var container = new DefaultMassTransitContainer("SubscriptionManager.Castle.xml");
-            container.AddComponentLifeStyle("followerRepository", typeof(FollowerRepository), LifestyleType.Singleton);
+		    var cfg = RunnerConfigurator.New(c =>
+		                                         {
+                                                     c.SetServiceName("SubscriptionManagerGUI");
+                                                     c.SetDisplayName("Sample GUI Subscription Service");
+                                                     c.SetDescription("Coordinates subscriptions between multiple systems");
+		                                             c.DependencyOnMsmq();
+                                                     c.RunAsLocalSystem();
+                                                     c.UseWinFormHost<SubscriptionManagerForm>();
 
-            container.AddComponent<ISubscriptionRepository, InMemorySubscriptionRepository>();
-            container.AddComponent<RemoteEndpointCoordinator>();
-            container.AddComponent<IHostedService, SubscriptionService>();
+                                                     c.BeforeStart(s=>
+                                                                       {
+                                                                           var container = new DefaultMassTransitContainer("SubscriptionManager.Castle.xml");
+                                                                           container.AddComponentLifeStyle("followerRepository", typeof(FollowerRepository), LifestyleType.Singleton);
 
-
-            container.AddComponent<IHealthCache, LocalHealthCache>();
-            container.AddComponent<IHeartbeatTimer, InMemoryHeartbeatTimer>();
-            container.AddComponent<IHostedService, HealthService>();
-            container.AddComponent<HeartbeatMonitor>();
-            container.AddComponent<Investigator>();
-            container.AddComponent<Reporter>();
-
-            container.AddComponent<ITimeoutRepository, InMemoryTimeoutRepository>();
-            container.AddComponent<IHostedService, TimeoutService>();
-            container.AddComponent<ScheduleTimeoutConsumer>();
-            container.AddComponent<CancelTimeoutConsumer>();
-
-            container.AddComponent<Form, SubscriptionManagerForm>();
-
-		    var credentials = Credentials.LocalSystem;
-		    var settings = WinServiceSettings.Custom(
-		        "SubscriptionManagerGUI",
-		        "Sample GUI Subscription Service",
-		        "Coordinates subscriptions between multiple systems",
-		        KnownServiceNames.Msmq);
-		    var lifecycle = new SubscriptionManagerLifeCycle(ServiceLocator.Current);
+                                                                           container.AddComponent<ISubscriptionRepository, InMemorySubscriptionRepository>();
+                                                                           container.AddComponent<RemoteEndpointCoordinator>();
+                                                                           container.AddComponent<IHostedService, SubscriptionService>();
 
 
-			Runner.Run(credentials, settings, lifecycle, args);
+                                                                           container.AddComponent<IHealthCache, LocalHealthCache>();
+                                                                           container.AddComponent<IHeartbeatTimer, InMemoryHeartbeatTimer>();
+                                                                           container.AddComponent<IHostedService, HealthService>();
+                                                                           container.AddComponent<HeartbeatMonitor>();
+                                                                           container.AddComponent<Investigator>();
+                                                                           container.AddComponent<Reporter>();
+
+                                                                           container.AddComponent<ITimeoutRepository, InMemoryTimeoutRepository>();
+                                                                           container.AddComponent<IHostedService, TimeoutService>();
+                                                                           container.AddComponent<ScheduleTimeoutConsumer>();
+                                                                           container.AddComponent<CancelTimeoutConsumer>();
+
+                                                                           container.AddComponent<Form, SubscriptionManagerForm>();
+
+                                                                           var wob = new WindsorObjectBuilder(container.Kernel);
+                                                                           ServiceLocator.SetLocatorProvider(()=>wob);
+                                                                       });
+
+                                                     c.ConfigureService<SubscriptionManagerLifeCycle>();
+		                                         });
+			Runner.Host(cfg, args);
 		}
 	}
 }

@@ -2,30 +2,22 @@ namespace PostalService.Host
 {
 	using System;
 	using MassTransit;
-	using MassTransit.Host.LifeCycles;
 	using Microsoft.Practices.ServiceLocation;
 
-    public class PostalServiceLifeCycle :
-        HostedLifecycle
+    public class PostalServiceLifeCycle
     {
         private IServiceBus _bus;
 
-        public PostalServiceLifeCycle(IServiceLocator serviceLocator):base(serviceLocator)
+        public void Start()
         {
-        }
-
-        public override void Start()
-        {
-            
-
-            _bus = base.ServiceLocator.GetInstance<IServiceBus>("server");
+            _bus = ServiceLocator.Current.GetInstance<IServiceBus>("server");
 
             _bus.Subscribe<SendEmailConsumer>();
 
             Console.WriteLine("Service running...");
         }
 
-        public override void Stop()
+        public void Stop()
         {
             Console.WriteLine("Service exiting...");
 
