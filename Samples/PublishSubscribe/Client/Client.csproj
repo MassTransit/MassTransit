@@ -85,7 +85,7 @@
       <Link>SolutionVersion.cs</Link>
     </Compile>
     <Compile Include="AskPasswordQuestion.cs" />
-    <Compile Include="ClientLifeCycle.cs" />
+    <Compile Include="ClientService.cs" />
     <Compile Include="PasswordUpdater.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

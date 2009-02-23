@@ -109,7 +109,7 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <Compile Include="SubscriptionManagerLifeCycle.cs" />
+    <Compile Include="SubscriptionManagerService.cs" />
     <Compile Include="TimeoutListViewItem.cs" />
   </ItemGroup>
   <ItemGroup>

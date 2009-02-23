@@ -5,7 +5,7 @@ namespace Client
     using Microsoft.Practices.ServiceLocation;
     using SecurityMessages;
 
-    public class ClientLifeCycle
+    public class ClientService
     {
         private IServiceBus _bus;
 
