@@ -65,13 +65,18 @@ namespace SubscriptionManagerGUI
                                                                            container.AddComponent<ScheduleTimeoutConsumer>();
                                                                            container.AddComponent<CancelTimeoutConsumer>();
 
-                                                                           container.AddComponent<Form, SubscriptionManagerForm>();
+                                                                           container.AddComponent<SubscriptionManagerForm>();
+                                                                           container.AddComponent<SubscriptionManagerService>();
 
                                                                            var wob = new WindsorObjectBuilder(container.Kernel);
                                                                            ServiceLocator.SetLocatorProvider(()=>wob);
                                                                        });
 
-                                                     c.ConfigureService<SubscriptionManagerLifeCycle>();
+		                                             c.ConfigureService<SubscriptionManagerService>(s =>
+		                                                                                                {
+		                                                                                                    s.WhenStarted(o => o.Start());
+		                                                                                                    s.WhenStopped(o => o.Stop());
+		                                                                                                });
 		                                         });
 			Runner.Host(cfg, args);
 		}

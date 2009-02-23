@@ -30,12 +30,17 @@ namespace Server
                                                                        {
                                                                            var container = new DefaultMassTransitContainer("server.castle.xml");
                                                                            container.AddComponent<RemoteEndpointCoordinator>();
+                                                                           container.AddComponent<ServerService>();
 
                                                                            var wob = new WindsorObjectBuilder(container.Kernel);
                                                                            ServiceLocator.SetLocatorProvider(() => wob);
                                                                        });
 
-                                                     c.ConfigureService<ServerLifeCycle>();
+                                                     c.ConfigureService<ServerService>(s=>
+                                                                                           {
+                                                                                               s.WhenStarted(o=>o.Start());
+                                                                                               s.WhenStopped(o=>o.Stop());
+                                                                                           });
                                                  });
             Runner.Host(cfg, args);
         }

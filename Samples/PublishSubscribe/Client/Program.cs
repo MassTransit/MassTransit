@@ -25,13 +25,14 @@ namespace Client
                                                      c.BeforeStart(a=>
                                                                        {
                                                                            var container = new DefaultMassTransitContainer("castle.xml");
+                                                                           container.AddComponent<ClientService>();
                                                                            container.AddComponent<PasswordUpdater>();
                                                                            
                                                                            var wob =new WindsorObjectBuilder(container.Kernel);
                                                                            ServiceLocator.SetLocatorProvider(()=>wob);
                                                                        });
 
-		                                             c.ConfigureService<ClientLifeCycle>(s=>
+		                                             c.ConfigureService<ClientService>(s=>
 		                                                                                     {
 		                                                                                         s.WhenStarted(o=>o.Start());
 		                                                                                         s.WhenStopped(o=>o.Stop());
