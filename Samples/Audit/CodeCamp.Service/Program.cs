@@ -45,10 +45,11 @@ namespace CodeCamp.Service
                                                                            container.AddComponent<ISagaRepository<RegisterUserSaga>, NHibernateSagaRepository<RegisterUserSaga>>();
                                                                            container.AddComponent<Responder>();
                                                                            container.AddComponent<RegisterUserSaga>();
+                                                                           container.AddComponent<AuditService>();
                                                                            
                                                                        });
 
-                                                     c.ConfigureService<AuditServiceLifeCycle>(a=>
+                                                     c.ConfigureService<AuditService>(a=>
                                                                                                    {
                                                                                                        a.WhenStarted(o=>o.Start());
                                                                                                        a.WhenStopped(o=>o.Stop());

@@ -70,7 +70,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Host\PostalServiceLifeCycle.cs" />
+    <Compile Include="Host\PostalService.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SendEmailConsumer.cs" />

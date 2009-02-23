@@ -5,7 +5,7 @@ namespace CodeCamp.Service
     using MassTransit;
     using Microsoft.Practices.ServiceLocation;
 
-    public class AuditServiceLifeCycle
+    public class AuditService
     {
         private IServiceBus _bus;
 
