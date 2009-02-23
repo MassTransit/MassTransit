@@ -4,15 +4,16 @@ namespace PostalService.Host
 	using MassTransit;
 	using Microsoft.Practices.ServiceLocation;
 
-    public class PostalServiceLifeCycle
+    public class PostalService
     {
         private IServiceBus _bus;
+        private UnsubscribeAction _unsubscribe;
 
         public void Start()
         {
             _bus = ServiceLocator.Current.GetInstance<IServiceBus>("server");
 
-            _bus.Subscribe<SendEmailConsumer>();
+            _unsubscribe = _bus.Subscribe<SendEmailConsumer>();
 
             Console.WriteLine("Service running...");
         }
@@ -20,7 +21,7 @@ namespace PostalService.Host
         public void Stop()
         {
             Console.WriteLine("Service exiting...");
-
+            _unsubscribe();
             _bus.Dispose();
         }
     }

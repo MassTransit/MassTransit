@@ -26,9 +26,14 @@
                                                      {
                                                          var container = new DefaultMassTransitContainer("postal-castle.xml");
                                                          container.AddComponent<SendEmailConsumer>("sec");
+                                                         container.AddComponent<PostalService>();
                                                      });
 
-                                                     c.ConfigureService<PostalServiceLifeCycle>();
+                                                     c.ConfigureService<PostalService>(a=>
+                                                                                                    {
+                                                                                                        a.WhenStarted(o=>o.Start());
+                                                                                                        a.WhenStopped(o=>o.Stop());
+                                                                                                    });
                                                  });
             Runner.Host(cfg, args);
         }
