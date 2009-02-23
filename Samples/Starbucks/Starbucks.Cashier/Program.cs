@@ -31,12 +31,13 @@
                                                      c.BeforeStart(a=>
                                                                        {
                                                                            IWindsorContainer container = new DefaultMassTransitContainer("Starbucks.Cashier.Castle.xml");
+                                                                           container.AddComponent<CashierService>();
                                                                            var builder = new WindsorObjectBuilder(container.Kernel);
                                                                            ServiceLocator.SetLocatorProvider(() => builder);
                                                                            container.AddComponent<FriendlyCashier>();
                                                                        });
 
-                                                     c.ConfigureService<CashierLifecycle>(s=>
+                                                     c.ConfigureService<CashierService>(s=>
                                                                                               {
                                                                                                   s.WhenStarted(o=>o.Start());
                                                                                                   s.WhenStopped(o=>o.Stop());

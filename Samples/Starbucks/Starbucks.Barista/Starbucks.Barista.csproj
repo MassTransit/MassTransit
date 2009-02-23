@@ -79,7 +79,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DrinkPreparationSaga.cs" />
-    <Compile Include="BaristaLifecycle.cs" />
+    <Compile Include="BaristaService.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
