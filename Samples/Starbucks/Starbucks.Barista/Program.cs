@@ -36,10 +36,11 @@
                                                                            ServiceLocator.SetLocatorProvider(() => builder);
 
                                                                            container.AddComponent<DrinkPreparationSaga>();
+                                                                           container.AddComponent<BaristaService>();
                                                                            container.AddComponent<ISagaRepository<DrinkPreparationSaga>, InMemorySagaRepository<DrinkPreparationSaga>>();
                                                                        });
 
-                                                     c.ConfigureService<BaristaLifecycle>(s=>
+                                                     c.ConfigureService<BaristaService>(s=>
                                                                                               {
                                                                                                   s.WhenStarted(o=>o.Start());
                                                                                                   s.WhenStopped(o=>o.Stop());

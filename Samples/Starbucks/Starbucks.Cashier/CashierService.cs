@@ -3,7 +3,7 @@ namespace Starbucks.Cashier
     using MassTransit;
     using Microsoft.Practices.ServiceLocation;
 
-    public class CashierLifecycle 
+    public class CashierService 
     {
         public void Start()
         {

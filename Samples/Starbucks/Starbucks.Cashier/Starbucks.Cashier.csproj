@@ -78,7 +78,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CashierLifecycle.cs" />
+    <Compile Include="CashierService.cs" />
     <Compile Include="FriendlyCashier.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

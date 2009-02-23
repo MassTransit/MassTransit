@@ -3,7 +3,7 @@ namespace Starbucks.Barista
     using MassTransit;
     using Microsoft.Practices.ServiceLocation;
 
-    public class BaristaLifecycle
+    public class BaristaService
     {
         public void Start()
         {

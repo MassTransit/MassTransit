@@ -74,7 +74,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CustomerLifecycle.cs" />
+    <Compile Include="CustomerService.cs" />
     <Compile Include="OrderDrinkForm.cs">
       <SubType>Form</SubType>
     </Compile>

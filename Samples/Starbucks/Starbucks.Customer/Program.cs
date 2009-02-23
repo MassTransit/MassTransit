@@ -28,13 +28,11 @@
 
                                                                    c.BeforeStart(a =>
                                                                                      {
-                                                                                         IWindsorContainer container =
-                                                                                             new DefaultMassTransitContainer
-                                                                                                 ("Starbucks.Customer.Castle.xml");
-                                                                                         container.AddComponent
-                                                                                             <Form, OrderDrinkForm>();
+                                                                                         IWindsorContainer container =new DefaultMassTransitContainer("Starbucks.Customer.Castle.xml");
+                                                                                         container.AddComponent<CustomerService>();
+                                                                                         container.AddComponent<OrderDrinkForm>();
                                                                                      });
-                                                                   c.ConfigureService<CustomerLifecycle>();
+                                                                   c.ConfigureService<CustomerService>();
                                                                });
             Runner.Host(cfg, args);
         }

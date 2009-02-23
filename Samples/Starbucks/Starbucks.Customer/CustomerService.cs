@@ -1,8 +1,7 @@
 namespace Starbucks.Customer
 {
-    public class CustomerLifecycle
+    public class CustomerService
     {
-
-        
+       
     }
 }
