@@ -103,6 +103,7 @@
     <Compile Include="Grid\Messages\LongNumberFactored.cs" />
     <Compile Include="Groups\Group_Specs.cs" />
     <Compile Include="MessageContext_Specs.cs" />
+    <Compile Include="Pipeline\MessageRouter_Perf.cs" />
     <Compile Include="Retry_Specs.cs" />
     <Compile Include="Serialization\ContextSerialization_Specs.cs" />
     <Compile Include="Services\HealthMonitoring\Specs_MonitorInfo.cs" />
