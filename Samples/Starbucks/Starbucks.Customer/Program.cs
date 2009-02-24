@@ -1,35 +1,40 @@
-﻿using System;
-using System.Windows.Forms;
-using Castle.Windsor;
-using MassTransit.Host;
-using MassTransit.WindsorIntegration;
-using Microsoft.Practices.ServiceLocation;
-
-namespace Starbucks.Customer
+﻿namespace Starbucks.Customer
 {
-    static class Program
+    using System;
+    using System.Windows.Forms;
+    using Castle.Windsor;
+    using MassTransit.WindsorIntegration;
+    using Topshelf;
+    using Topshelf.Configuration;
+
+    internal static class Program
     {
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
         [STAThread]
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
-            IWindsorContainer container = new DefaultMassTransitContainer("Starbucks.Customer.Castle.xml");
+            IRunConfiguration cfg = RunnerConfigurator.New(c =>
+                                                               {
+                                                                   c.SetServiceName("StarbucksCustomer");
+                                                                   c.SetDisplayName("Starbucks Customer");
+                                                                   c.SetDescription(
+                                                                       "a Mass Transit sample service for ordering coffee.");
 
-            container.AddComponent<Form, OrderDrinkForm>();
+                                                                   c.RunAsLocalSystem();
+                                                                   c.DependencyOnMsmq();
+                                                                   c.UseWinFormHost<OrderDrinkForm>();
 
-            //do container Stuff
-
-            var credentials = Credentials.LocalSystem;
-            var settings = WinServiceSettings.Custom(
-                "StarbucksCustomer",
-                "Starbucks Customer",
-                "a Mass Transit sample service for ordering coffee.",
-                KnownServiceNames.Msmq);
-            var lifecycle = new CustomerLifecycle(ServiceLocator.Current);
-            
-            Runner.Run(credentials, settings, lifecycle, args);
+                                                                   c.BeforeStart(a =>
+                                                                                     {
+                                                                                         IWindsorContainer container =new DefaultMassTransitContainer("Starbucks.Customer.Castle.xml");
+                                                                                         container.AddComponent<CustomerService>();
+                                                                                         container.AddComponent<OrderDrinkForm>();
+                                                                                     });
+                                                                   c.ConfigureService<CustomerService>();
+                                                               });
+            Runner.Host(cfg, args);
         }
     }
 }

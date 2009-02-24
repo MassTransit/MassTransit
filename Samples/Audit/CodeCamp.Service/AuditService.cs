@@ -3,21 +3,15 @@ namespace CodeCamp.Service
     using System;
     using Domain;
     using MassTransit;
-    using MassTransit.Host.LifeCycles;
     using Microsoft.Practices.ServiceLocation;
 
-    public class AuditServiceLifeCycle :
-        HostedLifecycle
+    public class AuditService
     {
         private IServiceBus _bus;
 
-        public AuditServiceLifeCycle(IServiceLocator serviceLocator):base(serviceLocator)
+        public void Start()
         {
-        }
-
-        public override void Start()
-        {
-            _bus = ServiceLocator.GetInstance<IServiceBus>("server");
+            _bus = ServiceLocator.Current.GetInstance<IServiceBus>("server");
 
             _bus.Subscribe<Responder>();
             _bus.Subscribe<RegisterUserSaga>();
@@ -25,7 +19,7 @@ namespace CodeCamp.Service
             Console.WriteLine("Service running...");
         }
 
-        public override void Stop()
+        public void Stop()
         {
             Console.WriteLine("Service exiting...");
 

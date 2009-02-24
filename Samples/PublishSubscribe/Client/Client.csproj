@@ -2,7 +2,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.21022</ProductVersion>
+    <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{8EBDD825-0A04-4DD8-9873-2196586EF618}</ProjectGuid>
     <OutputType>Exe</OutputType>
@@ -74,22 +74,23 @@
     </Reference>
     <Reference Include="System.Messaging" />
     <Reference Include="System.Transactions" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="Topshelf, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\libs\Topshelf\Topshelf.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\..\..\SolutionVersion.cs">
       <Link>SolutionVersion.cs</Link>
     </Compile>
     <Compile Include="AskPasswordQuestion.cs" />
-    <Compile Include="ClientLifeCycle.cs" />
+    <Compile Include="ClientService.cs" />
     <Compile Include="PasswordUpdater.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\MassTransit.Host\MassTransit.Host.csproj">
-      <Project>{834ED79F-BA0E-48F9-831A-789576EE516B}</Project>
-      <Name>MassTransit.Host</Name>
-    </ProjectReference>
     <ProjectReference Include="..\..\..\MassTransit\MassTransit.csproj">
       <Project>{6EFD69FC-CBCC-4F85-AEE0-EFBA73F4D273}</Project>
       <Name>MassTransit</Name>
