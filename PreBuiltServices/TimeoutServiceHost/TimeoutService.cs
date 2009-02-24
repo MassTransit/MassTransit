@@ -12,23 +12,8 @@
 // specific language governing permissions and limitations under the License.
 namespace TimeoutServiceHost
 {
-    using MassTransit.Host.LifeCycles;
-    using Microsoft.Practices.ServiceLocation;
-
-    public class TimeoutServiceLifeCycle :
-        HostedLifecycle
-
+    public class TimeoutService
     {
-        public TimeoutServiceLifeCycle(IServiceLocator serviceLocator) : base(serviceLocator)
-        {
-        }
 
-        public override void Start()
-        {
-        }
-
-        public override void Stop()
-        {
-        }
     }
 }

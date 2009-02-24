@@ -14,12 +14,13 @@ namespace HealthServiceHost
 {
     using System.IO;
     using log4net;
-    using MassTransit.Host;
     using MassTransit;
     using MassTransit.Services.HealthMonitoring;
     using MassTransit.Services.HealthMonitoring.Server;
     using MassTransit.WindsorIntegration;
     using Microsoft.Practices.ServiceLocation;
+    using Topshelf;
+    using Topshelf.Configuration;
 
     internal class Program
     {
@@ -30,28 +31,32 @@ namespace HealthServiceHost
             log4net.Config.XmlConfigurator.Configure(new FileInfo("healthService.log4net.xml"));
             _log.Info("Health Server Loading");
 
-            var container = new DefaultMassTransitContainer("healthService.castle.xml");
+            var cfg = RunnerConfigurator.New(c=>
+                                                 {
+                                                     c.RunAsFromInteractive();
+                                                     c.SetServiceName("MT-HEALTH");
+                                                     c.SetDisplayName("MassTransit Health Manager");
+                                                     c.SetDescription("Its like that machine at the hospital that goes beep beep, or errrrrrr... if you croak");
+                                                     c.DependencyOnMsmq();
 
-            
-            container.AddComponent<IHostedService, HealthService>();
-            container.AddComponent<IHealthCache, LocalHealthCache>();
-            container.AddComponent<IHeartbeatTimer, InMemoryHeartbeatTimer>();
-            //TODO: Put database persitance here too
+                                                     c.BeforeStart(a=>
+                                                                       {
+                                                                           var container = new DefaultMassTransitContainer("healthService.castle.xml");
 
 
-            var wob = new WindsorObjectBuilder(container.Kernel);
-            ServiceLocator.SetLocatorProvider(() => wob);
+                                                                           container.AddComponent<IHostedService, HealthService>();
+                                                                           container.AddComponent<IHealthCache, LocalHealthCache>();
+                                                                           container.AddComponent<IHeartbeatTimer, InMemoryHeartbeatTimer>();
+                                                                           //TODO: Put database persitance here too
 
-            var lifecycle = new HealthServiceLifeCycle(ServiceLocator.Current);
-            var settings = WinServiceSettings.Custom("MT-HEALTH",
-                                                     "MassTransit Health Manager",
-                                                     "Think Life Monitor",
-                                                     KnownServiceNames.Msmq);
 
-            Runner.Run(Credentials.Interactive,
-                settings,
-                lifecycle,
-                args);
+                                                                           var wob = new WindsorObjectBuilder(container.Kernel);
+                                                                           ServiceLocator.SetLocatorProvider(() => wob);
+                                                                       });
+
+                                                     c.ConfigureService<HealthServiceLifeCycle>();
+                                                 });
+            Runner.Host(cfg, args);
         }
     }
 }

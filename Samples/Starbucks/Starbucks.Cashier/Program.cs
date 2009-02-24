@@ -4,9 +4,10 @@
     using System.IO;
     using Castle.Windsor;
     using log4net.Config;
-    using MassTransit.Host;
     using MassTransit.WindsorIntegration;
     using Microsoft.Practices.ServiceLocation;
+    using Topshelf;
+    using Topshelf.Configuration;
 
     internal static class Program
     {
@@ -17,21 +18,32 @@
         private static void Main(string[] args)
         {
             XmlConfigurator.Configure(new FileInfo("cashier.log4net.xml"));
-            IWindsorContainer container = new DefaultMassTransitContainer("Starbucks.Cashier.Castle.xml");
-            var builder = new WindsorObjectBuilder(container.Kernel);
-            ServiceLocator.SetLocatorProvider(() => builder);
+            
+            var cfg = RunnerConfigurator.New(c =>
+                                                 {
+                                                     c.SetServiceName("StarbucksCashier");
+                                                     c.SetDisplayName("Starbucks Cashier");
+                                                     c.SetDescription("a Mass Transit sample service for handling orders of coffee.");
 
-            container.AddComponent<FriendlyCashier>();
+                                                     c.RunAsLocalSystem();
+                                                     c.DependencyOnMsmq();
 
-            Credentials credentials = Credentials.LocalSystem;
-            WinServiceSettings settings = WinServiceSettings.Custom(
-                "StarbucksCashier",
-                "Starbucks Cashier",
-                "a Mass Transit sample service for handling orders of coffee.",
-                KnownServiceNames.Msmq);
-            var lifecycle = new CashierLifecycle(ServiceLocator.Current);
+                                                     c.BeforeStart(a=>
+                                                                       {
+                                                                           IWindsorContainer container = new DefaultMassTransitContainer("Starbucks.Cashier.Castle.xml");
+                                                                           container.AddComponent<CashierService>();
+                                                                           var builder = new WindsorObjectBuilder(container.Kernel);
+                                                                           ServiceLocator.SetLocatorProvider(() => builder);
+                                                                           container.AddComponent<FriendlyCashier>();
+                                                                       });
 
-            Runner.Run(credentials, settings, lifecycle, args);
+                                                     c.ConfigureService<CashierService>(s=>
+                                                                                              {
+                                                                                                  s.WhenStarted(o=>o.Start());
+                                                                                                  s.WhenStopped(o=>o.Stop());
+                                                                                              });
+                                                 });
+            Runner.Host(cfg, args);
         }
     }
 }

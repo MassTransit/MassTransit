@@ -10,24 +10,29 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace DeferredMessageServiceHost
+namespace SubscriptionManagerGUI
 {
-    using MassTransit.Host.LifeCycles;
+    using MassTransit;
     using Microsoft.Practices.ServiceLocation;
 
-    public class DeferredMessageLifeCycle :
-        HostedLifecycle
+    public class SubscriptionManagerService 
     {
-        public DeferredMessageLifeCycle(IServiceLocator serviceLocator) : base(serviceLocator)
+        public void Start()
         {
+            var hs = ServiceLocator.Current.GetAllInstances<IHostedService>();
+            foreach (var hostedService in hs)
+            {
+                hostedService.Start();
+            }
         }
 
-        public override void Start()
+        public  void Stop()
         {
-        }
-
-        public override void Stop()
-        {
+            var hs = ServiceLocator.Current.GetAllInstances<IHostedService>();
+            foreach (var hostedService in hs)
+            {
+                hostedService.Stop();
+            }
         }
     }
 }

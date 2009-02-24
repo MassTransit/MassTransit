@@ -15,40 +15,47 @@ namespace DeferredMessageServiceHost
     using System.IO;
     using log4net;
     using log4net.Config;
-    using MassTransit.Host;
     using MassTransit;
     using MassTransit.Services.MessageDeferral;
     using MassTransit.WindsorIntegration;
     using Microsoft.Practices.ServiceLocation;
+    using Topshelf;
+    using Topshelf.Configuration;
 
     class Program
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof (Program));
+
         static void Main(string[] args)
         {
             XmlConfigurator.ConfigureAndWatch(new FileInfo("deferredMessageService.log4net.xml"));
             _log.Info("Deferred Message Service Loading");
 
-            var container = new DefaultMassTransitContainer("deferredMessageService.castle.xml");
-            container.AddComponent<IHostedService, MessageDeferralService>();
-            container.AddComponent<IDeferredMessageRepository, InMemoryDeferredMessageRepository>();
-            //TODO: Put the Database Repository here too
+            
+            var cfg = RunnerConfigurator.New(c=>
+                                                 {
+                                                     c.SetServiceName("MT-DEFERRED");
+                                                     c.SetDisplayName("MassTransit Deferred Message Service");
+                                                     c.SetDescription("Allows services to delay the handling of a message until a later time");
+                                                     c.RunAsFromInteractive();
+                                                     c.DependencyOnMsmq();
+                                                     c.DependsOn("MT-TIMEOUT");
 
-            var wob = new WindsorObjectBuilder(container.Kernel);
-            ServiceLocator.SetLocatorProvider(()=>wob);
+                                                     c.BeforeStart(a=>
+                                                                       {
+                                                                           var container = new DefaultMassTransitContainer("deferredMessageService.castle.xml");
+                                                                           container.AddComponent<IHostedService, MessageDeferralService>();
+                                                                           container.AddComponent<IDeferredMessageRepository, InMemoryDeferredMessageRepository>();
+                                                                           //TODO: Put the Database Repository here too
 
-            var lifecycle = new DeferredMessageLifeCycle(ServiceLocator.Current);
-            var settings = WinServiceSettings.Custom("MT-Deferred",
-                "Mass Transit Deferred Message Service",
-                "Think (Hold this)",
-                KnownServiceNames.Msmq);
+                                                                           var wob = new WindsorObjectBuilder(container.Kernel);
+                                                                           ServiceLocator.SetLocatorProvider(() => wob);
+                                                                       });
 
 
-
-            Runner.Run(Credentials.Interactive,
-                settings,
-                lifecycle,
-                KnownServiceNames.Msmq);
+                                                     c.ConfigureService<DeferredMessageService>();
+                                                 });
+            Runner.Host(cfg, args);
         }
     }
 }

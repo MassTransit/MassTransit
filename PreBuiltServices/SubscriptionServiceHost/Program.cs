@@ -16,12 +16,12 @@ namespace SubscriptionServiceHost
     using Castle.Core;
     using log4net;
     using log4net.Config;
-    using MassTransit.Host;
     using MassTransit;
-    using MassTransit.Services.Subscriptions;
     using MassTransit.Services.Subscriptions.Server;
     using MassTransit.WindsorIntegration;
     using Microsoft.Practices.ServiceLocation;
+    using Topshelf;
+    using Topshelf.Configuration;
 
     internal class Program
     {
@@ -32,28 +32,33 @@ namespace SubscriptionServiceHost
             XmlConfigurator.ConfigureAndWatch(new FileInfo("subscriptionService.log4net.xml"));
             _log.Info("SubMgr Loading");
 
-            var container = new DefaultMassTransitContainer("subscriptionService.castle.xml");
-            container.AddComponentLifeStyle("followerrepository", typeof(FollowerRepository), LifestyleType.Singleton);
+            var cfg = RunnerConfigurator.New(c=>
+                                                 {
+                                                     c.SetServiceName("MT-SUBSCRIPTIONS");
+                                                     c.SetDisplayName("MassTransit Subscription Service");
+                                                     c.SetDescription("Service to maintain message subscriptions");
+                                                     c.DependencyOnMsmq();
 
-            container.AddComponent<RemoteEndpointCoordinator>();
-            container.AddComponent<IHostedService, SubscriptionService>();
-            container.AddComponent<ISubscriptionRepository, InMemorySubscriptionRepository>();
+                                                     c.RunAsFromInteractive();
 
-            //TODO: Polish this DB configuration option
-            //Container.AddComponent<ISubscriptionRepository, NHibernateSubscriptionStorage>();   
+                                                     c.BeforeStart(a=>
+                                                                       {
+                                                                           var container = new DefaultMassTransitContainer("subscriptionService.castle.xml");
+                                                                           container.AddComponentLifeStyle("followerrepository", typeof(FollowerRepository), LifestyleType.Singleton);
 
-            var wob = new WindsorObjectBuilder(container.Kernel);
-            ServiceLocator.SetLocatorProvider(() => wob);
+                                                                           container.AddComponent<RemoteEndpointCoordinator>();
+                                                                           container.AddComponent<IHostedService, MassTransit.Services.Subscriptions.SubscriptionService>();
+                                                                           container.AddComponent<ISubscriptionRepository, InMemorySubscriptionRepository>();
 
-            var settings = WinServiceSettings.Custom("MT-SUBSCRIPTIONS",
-                                                     "MassTransit Subscriptions",
-                                                     "Service to maintain message subscriptions",
-                                                     KnownServiceNames.Msmq);
-            var lifecycle = new SubscriptionServiceLifeCycle(ServiceLocator.Current);
-            Runner.Run(Credentials.Interactive,
-                settings,
-                lifecycle,
-                args);
+                                                                           //TODO: Polish this DB configuration option
+                                                                           //Container.AddComponent<ISubscriptionRepository, NHibernateSubscriptionStorage>();   
+
+                                                                           var wob = new WindsorObjectBuilder(container.Kernel);
+                                                                           ServiceLocator.SetLocatorProvider(() => wob);
+                                                                       });
+                                                     c.ConfigureService<SubscriptionService>();
+                                                 });
+            Runner.Host(cfg, args);
         }
     }
 }

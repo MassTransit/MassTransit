@@ -15,11 +15,12 @@ namespace TimeoutServiceHost
     using System.IO;
     using log4net;
     using log4net.Config;
-    using MassTransit.Host;
     using MassTransit;
     using MassTransit.Services.Timeout;
     using MassTransit.WindsorIntegration;
     using Microsoft.Practices.ServiceLocation;
+    using Topshelf;
+    using Topshelf.Configuration;
 
     class Program
     {
@@ -30,23 +31,27 @@ namespace TimeoutServiceHost
             XmlConfigurator.ConfigureAndWatch(new FileInfo("timeoutService.log4net.xml"));
             _log.Info("Timeout Service Loading");
 
-            var container = new DefaultMassTransitContainer("timeoutService.castle.xml");
-            container.AddComponent<ITimeoutRepository, InMemoryTimeoutRepository>();
-            container.AddComponent<IHostedService, TimeoutService>();
+            var cfg = RunnerConfigurator.New(x =>
+                                                 {
+                                                     x.SetServiceName("MT-TIMEOUT");
+                                                     x.SetDescription("Think Egg Timer");
+                                                     x.SetDisplayName("MassTransit Timeout Service");
+                                                     x.DependencyOnMsmq();
+                                                     x.RunAsFromInteractive();
 
-            var wob = new WindsorObjectBuilder(container.Kernel);
-            ServiceLocator.SetLocatorProvider(() => wob);
+                                                     x.BeforeStart(a =>
+                                                                       {
+                                                                           var container = new DefaultMassTransitContainer("timeoutService.castle.xml");
+                                                                           container.AddComponent<ITimeoutRepository,InMemoryTimeoutRepository>();
+                                                                           container.AddComponent<IHostedService, MassTransit.Services.Timeout.TimeoutService>();
 
-            var lifecycle = new TimeoutServiceLifeCycle(ServiceLocator.Current);
-            var settings = WinServiceSettings.Custom("MT-TIMEOUT",
-                                                     "Mass Transit Timeout Service",
-                                                     "Think Egg Timer",
-                                                     KnownServiceNames.Msmq);
+                                                                           var wob = new WindsorObjectBuilder(container.Kernel);
+                                                                           ServiceLocator.SetLocatorProvider(() => wob);
+                                                                       });
 
-            Runner.Run(Credentials.Interactive,
-                settings, 
-                lifecycle,
-                args);
+                                                     x.ConfigureService<TimeoutService>();
+                                                 });
+            Runner.Host(cfg, args);
         }
     }
 }
