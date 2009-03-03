@@ -1,4 +1,6 @@
-﻿namespace MassTransit.NinjectIntegration
+﻿using MassTransit.Internal;
+
+namespace MassTransit.NinjectIntegration
 {
     using System;
     using Infrastructure.Subscriptions;
@@ -16,21 +18,19 @@
     public class MassTransitModule :
         Module
     {
-        public MassTransitModule()
+        // @cbioley :
+        // I moved the ctor implementation in the Load method.
+        public override void Load()
         {
             Bind<IObjectBuilder>()
                 .To<NinjectObjectBuilder>()
-                .ToString();
-            Bind<ISubscriptionCache>()
-                .To<LocalSubscriptionCache>()
-                .InSingletonScope();
+
             Bind<IServiceBus>()
                 .To<ServiceBus>();
-        }
-
-        public override void Load()
-        {
-            //no-op?
+            
+            Bind<ITypeInfoCache>()
+                .To<TypeInfoCache>()
+                .InSingletonScope();
         }
 
         //this at least once
@@ -64,11 +64,10 @@
                 .To<ServiceBus>()
                 .InSingletonScope()
                 .Named(id)
-                .WithConstructorArgument("endpointListenOn", ep)
+                .WithConstructorArgument("endpointToListenOn", ep)
                 .WithPropertyValue("MinimumConsumerThreads", 1)
                 .WithPropertyValue("MaximumConsumerThreads", 10);
         }
-
 
         //TODO: this is an either/or choice
         public void UseALocalSubscriptionCache()
@@ -99,6 +98,7 @@
         public void TurnOnSubscriptionClient(string busId, Uri subscribedVia)
         {
             IEndpoint ep = Kernel.Get<IEndpointFactory>().GetEndpoint(subscribedVia);
+
             Bind<SubscriptionClient>()
                 .ToSelf()
                 .InSingletonScope()
