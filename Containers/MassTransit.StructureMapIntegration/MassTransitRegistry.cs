@@ -3,9 +3,11 @@
 	using System;
 	using Configuration;
 	using Infrastructure.Subscriptions;
+	using Internal;
 	using Services.HealthMonitoring;
 	using Services.Subscriptions;
 	using StructureMap;
+	using StructureMap.Attributes;
 	using StructureMap.Configuration.DSL;
 	using Subscriptions;
 
@@ -18,9 +20,16 @@
 	{
 		public MassTransitRegistry()
 		{
-			ForRequestedType<IObjectBuilder>().AddConcreteType<StructureMapObjectBuilder>().AsSingletons();
-			ForRequestedType<ISubscriptionCache>().AddConcreteType<LocalSubscriptionCache>().AsSingletons();
-			ForRequestedType<IServiceBus>().AddConcreteType<ServiceBus>();
+			ForRequestedType<IObjectBuilder>()
+                .AddConcreteType<StructureMapObjectBuilder>()
+                .AsSingletons();
+			
+            ForRequestedType<IServiceBus>()
+                .AddConcreteType<ServiceBus>();
+
+            ForRequestedType<ITypeInfoCache>()
+                .TheDefaultIsConcreteType<TypeInfoCache>()
+                .CacheBy(InstanceScope.Singleton);
 		}
 
 		//this at least once
