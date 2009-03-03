@@ -23,7 +23,7 @@ namespace MassTransit.NinjectIntegration
         public override void Load()
         {
             Bind<IObjectBuilder>()
-                .To<NinjectObjectBuilder>()
+                .To<NinjectObjectBuilder>();
 
             Bind<IServiceBus>()
                 .To<ServiceBus>();
