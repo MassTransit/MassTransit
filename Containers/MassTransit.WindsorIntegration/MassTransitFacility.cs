@@ -57,7 +57,7 @@ namespace MassTransit.WindsorIntegration
 			LoadServiceBuses();
 
 			//Kernel.Resolver.AddSubResolver(new ServiceLocatorResolver());
-			//SetupAutoRegister();
+			SetupAutoRegister();
 			//AddStartableFacility();
 		}
 
