@@ -8,7 +8,7 @@
 		<facility id="masstransit">
 
 			<bus id="subscriptionService"
-				 endpoint="msmq://localhost/mt_subscription">
+				 endpoint="msmq://localhost/mt_subscriptions">
 			</bus>
 
 			<transports>

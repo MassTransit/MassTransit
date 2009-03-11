@@ -31,25 +31,32 @@ namespace TimeoutServiceHost
             XmlConfigurator.ConfigureAndWatch(new FileInfo("timeoutService.log4net.xml"));
             _log.Info("Timeout Service Loading");
 
-            var cfg = RunnerConfigurator.New(x =>
+            var cfg = RunnerConfigurator.New(c =>
                                                  {
-                                                     x.SetServiceName("MT-TIMEOUT");
-                                                     x.SetDescription("Think Egg Timer");
-                                                     x.SetDisplayName("MassTransit Timeout Service");
-                                                     x.DependencyOnMsmq();
-                                                     x.RunAsFromInteractive();
+                                                     c.SetServiceName("MT-TIMEOUT");
+                                                     c.SetDescription("Think Egg Timer");
+                                                     c.SetDisplayName("MassTransit Timeout Service");
 
-                                                     x.BeforeStart(a =>
+                                                     c.RunAsFromInteractive();
+
+                                                     c.DependencyOnMsmq();
+
+                                                     c.BeforeStart(a =>
                                                                        {
                                                                            var container = new DefaultMassTransitContainer("timeoutService.castle.xml");
                                                                            container.AddComponent<ITimeoutRepository,InMemoryTimeoutRepository>();
-                                                                           container.AddComponent<IHostedService, MassTransit.Services.Timeout.TimeoutService>();
+                                                                           container.AddComponent<IHostedService, TimeoutService>();
 
                                                                            var wob = new WindsorObjectBuilder(container.Kernel);
                                                                            ServiceLocator.SetLocatorProvider(() => wob);
                                                                        });
 
-                                                     x.ConfigureService<TimeoutService>();
+                                                     c.ConfigureService<IHostedService>( s =>
+                                                                                             {
+                                                                                                 s.WhenStarted(tc => tc.Start());
+                                                                                                 s.WhenStopped(tc => tc.Stop());
+                                                                                                 s.WithName("Timeout service");
+                                                                                             });
                                                  });
             Runner.Host(cfg, args);
         }

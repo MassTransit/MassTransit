@@ -33,28 +33,34 @@ namespace HealthServiceHost
 
             var cfg = RunnerConfigurator.New(c=>
                                                  {
-                                                     c.RunAsFromInteractive();
                                                      c.SetServiceName("MT-HEALTH");
                                                      c.SetDisplayName("MassTransit Health Manager");
                                                      c.SetDescription("Its like that machine at the hospital that goes beep beep, or errrrrrr... if you croak");
+
+                                                     c.RunAsFromInteractive();
+
                                                      c.DependencyOnMsmq();
 
                                                      c.BeforeStart(a=>
                                                                        {
                                                                            var container = new DefaultMassTransitContainer("healthService.castle.xml");
 
-
                                                                            container.AddComponent<IHostedService, HealthService>();
                                                                            container.AddComponent<IHealthCache, LocalHealthCache>();
                                                                            container.AddComponent<IHeartbeatTimer, InMemoryHeartbeatTimer>();
-                                                                           //TODO: Put database persitance here too
 
+                                                                           //TODO: Put database persitance here too
 
                                                                            var wob = new WindsorObjectBuilder(container.Kernel);
                                                                            ServiceLocator.SetLocatorProvider(() => wob);
                                                                        });
 
-                                                     c.ConfigureService<HealthServiceLifeCycle>();
+                                                     c.ConfigureService<IHostedService>( s =>
+                                                                                             {
+                                                                                                 s.WhenStarted(tc => tc.Start());
+                                                                                                 s.WhenStopped(tc => tc.Stop());
+                                                                                                 s.WithName("Health service");
+                                                                                             });
                                                  });
             Runner.Host(cfg, args);
         }
