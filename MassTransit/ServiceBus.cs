@@ -14,6 +14,7 @@ namespace MassTransit
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Reflection;
 	using System.Runtime.Serialization;
 	using System.Transactions;
 	using Exceptions;
@@ -237,10 +238,18 @@ namespace MassTransit
 
 		public UnsubscribeAction Subscribe(Type consumerType)
 		{
-			throw new NotSupportedException("This needs fixed");
+		   var method = typeof (ServiceBus).GetMethod("SometimesGenericsSuck", BindingFlags.NonPublic | BindingFlags.Instance);
+		   var genericMethod = method.MakeGenericMethod(consumerType);
+		   return (UnsubscribeAction) genericMethod.Invoke(this, null);
 		}
 
-		public void Start()
+		//Just here to support Subscribe(Type)
+		private UnsubscribeAction SometimesGenericsSuck<TComponent>() where TComponent : class
+		{
+			return Subscribe<TComponent>();
+		}
+
+	    public void Start()
 		{
 			if (_started)
 				return;
