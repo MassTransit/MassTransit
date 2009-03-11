@@ -55,7 +55,7 @@ namespace HealthServiceHost
                                                                            ServiceLocator.SetLocatorProvider(() => wob);
                                                                        });
 
-                                                     c.ConfigureService<IHostedService>( s =>
+                                                     c.ConfigureService<HealthService>( s =>
                                                                                              {
                                                                                                  s.WhenStarted(tc => tc.Start());
                                                                                                  s.WhenStopped(tc => tc.Stop());

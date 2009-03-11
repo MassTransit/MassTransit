@@ -56,7 +56,7 @@ namespace SubscriptionServiceHost
                                                                            ServiceLocator.SetLocatorProvider(() => wob);
                                                                        });
 
-                                                     c.ConfigureService<IHostedService>(s =>
+                                                     c.ConfigureService<SubscriptionService>(s =>
                                                                                             {
                                                                                                 s.WhenStarted(tc => tc.Start());
                                                                                                 s.WhenStopped(tc => tc.Stop());

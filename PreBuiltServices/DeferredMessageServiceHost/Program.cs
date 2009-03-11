@@ -55,7 +55,7 @@ namespace DeferredMessageServiceHost
                                                                        });
 
 
-                                                     c.ConfigureService<IHostedService>(s=>
+                                                     c.ConfigureService<MessageDeferralService>(s=>
                                                                                             {
                                                                                                 s.WhenStarted(tc => tc.Start());
                                                                                                 s.WhenStopped(tc => tc.Stop());

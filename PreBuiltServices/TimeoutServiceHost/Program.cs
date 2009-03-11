@@ -51,7 +51,7 @@ namespace TimeoutServiceHost
                                                                            ServiceLocator.SetLocatorProvider(() => wob);
                                                                        });
 
-                                                     c.ConfigureService<IHostedService>( s =>
+                                                     c.ConfigureService<TimeoutService>( s =>
                                                                                              {
                                                                                                  s.WhenStarted(tc => tc.Start());
                                                                                                  s.WhenStopped(tc => tc.Stop());
