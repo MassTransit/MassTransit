@@ -17,6 +17,7 @@ namespace SubscriptionServiceHost
     using log4net;
     using log4net.Config;
     using MassTransit;
+    using MassTransit.Services.Subscriptions;
     using MassTransit.Services.Subscriptions.Server;
     using MassTransit.WindsorIntegration;
     using Microsoft.Practices.ServiceLocation;
@@ -37,26 +38,30 @@ namespace SubscriptionServiceHost
                                                      c.SetServiceName("MT-SUBSCRIPTIONS");
                                                      c.SetDisplayName("MassTransit Subscription Service");
                                                      c.SetDescription("Service to maintain message subscriptions");
-                                                     c.DependencyOnMsmq();
 
                                                      c.RunAsFromInteractive();
 
-                                                     c.BeforeStart(a=>
+                                                     c.DependencyOnMsmq();
+
+                                                     c.BeforeStart(a =>
                                                                        {
                                                                            var container = new DefaultMassTransitContainer("subscriptionService.castle.xml");
                                                                            container.AddComponentLifeStyle("followerrepository", typeof(FollowerRepository), LifestyleType.Singleton);
 
-                                                                           container.AddComponent<RemoteEndpointCoordinator>();
-                                                                           container.AddComponent<IHostedService, MassTransit.Services.Subscriptions.SubscriptionService>();
                                                                            container.AddComponent<ISubscriptionRepository, InMemorySubscriptionRepository>();
-
-                                                                           //TODO: Polish this DB configuration option
-                                                                           //Container.AddComponent<ISubscriptionRepository, NHibernateSubscriptionStorage>();   
+                                                                           container.AddComponent<RemoteEndpointCoordinator>();
+                                                                           container.AddComponent<IHostedService, SubscriptionService>();
 
                                                                            var wob = new WindsorObjectBuilder(container.Kernel);
                                                                            ServiceLocator.SetLocatorProvider(() => wob);
                                                                        });
-                                                     c.ConfigureService<SubscriptionService>();
+
+                                                     c.ConfigureService<IHostedService>(s =>
+                                                                                            {
+                                                                                                s.WhenStarted(tc => tc.Start());
+                                                                                                s.WhenStopped(tc => tc.Stop());
+                                                                                                s.WithName("Subscription service");
+                                                                                            });
                                                  });
             Runner.Host(cfg, args);
         }

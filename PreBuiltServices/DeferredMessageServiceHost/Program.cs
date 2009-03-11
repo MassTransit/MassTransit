@@ -37,7 +37,9 @@ namespace DeferredMessageServiceHost
                                                      c.SetServiceName("MT-DEFERRED");
                                                      c.SetDisplayName("MassTransit Deferred Message Service");
                                                      c.SetDescription("Allows services to delay the handling of a message until a later time");
+
                                                      c.RunAsFromInteractive();
+
                                                      c.DependencyOnMsmq();
                                                      c.DependsOn("MT-TIMEOUT");
 
@@ -53,7 +55,12 @@ namespace DeferredMessageServiceHost
                                                                        });
 
 
-                                                     c.ConfigureService<DeferredMessageService>();
+                                                     c.ConfigureService<IHostedService>(s=>
+                                                                                            {
+                                                                                                s.WhenStarted(tc => tc.Start());
+                                                                                                s.WhenStopped(tc => tc.Stop());
+                                                                                                s.WithName("Deferred service");
+                                                                                            });
                                                  });
             Runner.Host(cfg, args);
         }
