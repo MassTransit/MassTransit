@@ -148,7 +148,7 @@
     <Compile Include="Threading\ManagedThreadPool.cs" />
     <Compile Include="TimeoutAttribute.cs" />
     <Compile Include="Transports\MulticastUdpEndpoint.cs" />
-    <Compile Include="Util\Check.cs" />
+    <Compile Include="Util\CheckConvention.cs" />
     <Compile Include="Util\Tuple.cs" />
   </ItemGroup>
   <ItemGroup>

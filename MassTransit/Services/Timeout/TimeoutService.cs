@@ -32,9 +32,8 @@ namespace MassTransit.Services.Timeout
         private Thread _watchThread;
     	private UnsubscribeAction _unsubscribeToken;
 
-    	public TimeoutService(IServiceBus bus, ITimeoutRepository repository)
+    	public TimeoutService(ITimeoutRepository repository)
     	{
-    		_bus = bus;
     		_repository = repository;
     	}
 
@@ -54,10 +53,12 @@ namespace MassTransit.Services.Timeout
             }
         }
 
-        public void Start()
+        public void Start(IServiceBus bus)
         {
 			if (_log.IsInfoEnabled)
                 _log.Info("Timeout Service Starting");
+
+            _bus = bus;
 
         	_unsubscribeToken = _bus.Subscribe<ScheduleTimeoutConsumer>();
         	_unsubscribeToken += _bus.Subscribe<CancelTimeoutConsumer>();

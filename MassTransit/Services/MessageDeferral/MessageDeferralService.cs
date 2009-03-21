@@ -18,22 +18,23 @@ namespace MassTransit.Services.MessageDeferral
     public class MessageDeferralService
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof (MessageDeferralService));
-        private readonly IServiceBus _bus;
+        private IServiceBus _bus;
     	private UnsubscribeAction _unsubscribeToken;
 
-    	public MessageDeferralService(IServiceBus bus)
+    	public MessageDeferralService()
         {
-            _bus = bus;
         }
 
         public void Dispose()
         {
         }
 
-        public void Start()
+        public void Start(IServiceBus bus)
         {
             if (_log.IsInfoEnabled)
                 _log.Info("MessageDeferralService Starting");
+
+            _bus = bus;
 
         	_unsubscribeToken = _bus.Subscribe<DeferMessageConsumer>();
         	_unsubscribeToken += _bus.Subscribe<TimeoutExpiredConsumer>();
