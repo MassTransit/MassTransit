@@ -14,7 +14,7 @@ namespace MassTransit.Tests.Pipeline
 {
 	using System;
 	using System.Diagnostics;
-	using Magnum.Common.DateTimeExtensions;
+	using Magnum.DateTimeExtensions;
 	using MassTransit.Pipeline;
 	using MassTransit.Pipeline.Configuration;
 	using MassTransit.Pipeline.Inspectors;
@@ -30,15 +30,11 @@ namespace MassTransit.Tests.Pipeline
 		public void Setup()
 		{
 			_builder = MockRepository.GenerateMock<IObjectBuilder>();
-			_subscriptionEvent = MockRepository.GenerateMock<ISubscriptionEvent>();
-			_subscriptionEvent.Expect(x => x.SubscribedTo(null)).IgnoreArguments().Repeat.Any().Return(() => true);
-			_subscriptionEvent.Expect(x => x.SubscribedTo(null,null)).IgnoreArguments().Repeat.Any().Return(() => true);
-			_pipeline = MessagePipelineConfigurator.CreateDefault(_builder, _subscriptionEvent);
+			_pipeline = MessagePipelineConfigurator.CreateDefault(_builder);
 		}
 
 		private IObjectBuilder _builder;
 		private MessagePipeline _pipeline;
-		private ISubscriptionEvent _subscriptionEvent;
 
 		[Test]
 		public void A_bunch_of_mixed_subscriber_types_should_work()

@@ -13,7 +13,7 @@
 namespace MassTransit.Tests.Serialization
 {
 	using Configuration;
-	using Magnum.Common.DateTimeExtensions;
+	using Magnum.DateTimeExtensions;
 	using MassTransit.Internal;
 	using MassTransit.Serialization;
 	using Messages;
@@ -77,7 +77,7 @@ namespace MassTransit.Tests.Serialization
 
 			RemoteBus.Subscribe<PingMessage>(message =>
 				{
-					Assert.AreEqual(MessageHeadersBase.GetMessageTypeHeaderString(typeof (PingMessage)), CurrentMessage.Headers.MessageType);
+					Assert.AreEqual(typeof (PingMessage).ToMessageName(), CurrentMessage.Headers.MessageType);
 
 					received.Set(message);
 				});

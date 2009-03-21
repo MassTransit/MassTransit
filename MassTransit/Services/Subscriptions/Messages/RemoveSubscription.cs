@@ -12,42 +12,36 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Services.Subscriptions.Messages
 {
-    using System;
-    using MassTransit.Subscriptions;
+	using System;
 
-    [Serializable]
-    public class RemoveSubscription :
-        SubscriptionChange
-    {
-        protected RemoveSubscription()
-        {
-        }
+	[Serializable]
+	public class RemoveSubscription :
+		SubscriptionChange
+	{
+		protected RemoveSubscription()
+		{
+		}
 
-        public RemoveSubscription(string messageName, Uri address)
-            : base(messageName, address)
-        {
-        }
+		public RemoveSubscription(SubscriptionInformation subscription)
+			: base(subscription)
+		{
+		}
 
-        public RemoveSubscription(SubscriptionInformation subscription)
-            : base(subscription)
-        {
-        }
+		public bool Equals(RemoveSubscription obj)
+		{
+			return base.Equals(obj);
+		}
 
-        public bool Equals(RemoveSubscription obj)
-        {
-            return base.Equals(obj);
-        }
+		public override bool Equals(object obj)
+		{
+			if (ReferenceEquals(null, obj)) return false;
+			if (ReferenceEquals(this, obj)) return true;
+			return Equals(obj as RemoveSubscription);
+		}
 
-        public override bool Equals(object obj)
-        {
-            if (ReferenceEquals(null, obj)) return false;
-            if (ReferenceEquals(this, obj)) return true;
-            return Equals(obj as RemoveSubscription);
-        }
-
-        public override int GetHashCode()
-        {
-            return base.GetHashCode();
-        }
-    }
+		public override int GetHashCode()
+		{
+			return base.GetHashCode();
+		}
+	}
 }

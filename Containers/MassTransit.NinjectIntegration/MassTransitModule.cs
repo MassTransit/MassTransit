@@ -6,8 +6,9 @@ namespace MassTransit.NinjectIntegration
     using Infrastructure.Subscriptions;
     using Ninject;
     using Ninject.Modules;
+    using Saga.Pipeline;
     using Services.HealthMonitoring;
-    using Services.Subscriptions;
+    using Services.Subscriptions.Client;
     using Subscriptions;
     using Configuration;
 
@@ -27,10 +28,6 @@ namespace MassTransit.NinjectIntegration
 
             Bind<IServiceBus>()
                 .To<ServiceBus>();
-            
-            Bind<ITypeInfoCache>()
-                .To<TypeInfoCache>()
-                .InSingletonScope();
         }
 
         //this at least once
@@ -91,7 +88,7 @@ namespace MassTransit.NinjectIntegration
                 .Named("health_client")
                 .WithConstructorArgument("heartbeatInterval", heartbeatInterval)
                 .WithConstructorArgument("bus", Kernel.Get<IServiceBus>(busId))
-                .OnActivation(x=>x.Start());
+                .OnActivation(x => x.Start(Kernel.Get<IServiceBus>(busId)));
         }
 
         //optional
@@ -104,8 +101,7 @@ namespace MassTransit.NinjectIntegration
                 .InSingletonScope()
                 .Named("subscription_client")
                 .WithConstructorArgument("subscriptionServiceEndpoint", ep)
-                .WithConstructorArgument("serviceBus", Kernel.Get<IServiceBus>(busId))
-                .OnActivation(x => x.Start());
+                .OnActivation(x => x.Start(Kernel.Get<IServiceBus>(busId)));
         }
     }
 }

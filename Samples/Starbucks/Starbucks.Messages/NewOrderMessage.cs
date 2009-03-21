@@ -8,9 +8,9 @@ namespace Starbucks.Messages
     [Serializable]
     public class NewOrderMessage : CorrelatedBy<Guid>
     {
-        public NewOrderMessage(string name, string drink, string size)
+        public NewOrderMessage(Guid correlationId, string name, string drink, string size)
         {
-            CorrelationId = CombGuid.NewCombGuid();
+            CorrelationId = correlationId;
             Name = name;
             Item = drink;
             Size = size;

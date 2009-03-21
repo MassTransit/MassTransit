@@ -14,37 +14,25 @@ namespace MassTransit.Services.HealthMonitoring
 {
     using System;
 
+    [Serializable]
     public class HealthInformation
     {
         private readonly Uri _uri;
-        private readonly int _secondsBetweenBeats;
-        private readonly DateTime? _firstDetectedAt;
+        private readonly string _state;
 
-        public HealthInformation(Uri uri, int secondsBetweenBeats)
+        public HealthInformation(Uri uri, string state)
         {
             _uri = uri;
-            _secondsBetweenBeats = secondsBetweenBeats;
-            _firstDetectedAt = DateTime.Now;
-            LastFaultDetectedAt = FirstDetectedAt;
+            _state = state;
         }
 
         public Uri Uri
         {
             get { return _uri; }
         }
-
-        public int SecondsBetweenBeats
+        public string State
         {
-            get { return _secondsBetweenBeats; }
+            get { return _state; }
         }
-
-        public DateTime? FirstDetectedAt
-        {
-            get { return _firstDetectedAt; }
-        }
-
-        public DateTime? LastDetectedAt { get; set; }
-
-        public DateTime? LastFaultDetectedAt { get; set; }
     }
 }

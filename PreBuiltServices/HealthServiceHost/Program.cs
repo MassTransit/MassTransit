@@ -45,9 +45,7 @@ namespace HealthServiceHost
                                                                        {
                                                                            var container = new DefaultMassTransitContainer("healthService.castle.xml");
 
-                                                                           container.AddComponent<IHostedService, HealthService>();
-                                                                           container.AddComponent<IHealthCache, LocalHealthCache>();
-                                                                           container.AddComponent<IHeartbeatTimer, InMemoryHeartbeatTimer>();
+                                                                           container.AddComponent<HealthService>();
 
                                                                            //TODO: Put database persitance here too
 

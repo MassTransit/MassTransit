@@ -19,9 +19,9 @@ namespace MassTransit.Batch.Pipeline
 
     public class BatchMessageRouterConfigurator
     {
-        private readonly IMessageSink<object> _sink;
+        private readonly IPipelineSink<object> _sink;
 
-        private BatchMessageRouterConfigurator(IMessageSink<object> sink)
+        private BatchMessageRouterConfigurator(IPipelineSink<object> sink)
         {
             _sink = sink;
         }
@@ -53,10 +53,10 @@ namespace MassTransit.Batch.Pipeline
             return router;
         }
 
-        public static BatchMessageRouterConfigurator For<TMessage>(IMessageSink<TMessage> sink)
+        public static BatchMessageRouterConfigurator For<TMessage>(IPipelineSink<TMessage> sink)
             where TMessage : class
         {
-            return new BatchMessageRouterConfigurator(TranslateTo<IMessageSink<object>>.From(sink));
+            return new BatchMessageRouterConfigurator(TranslateTo<IPipelineSink<object>>.From(sink));
         }
     }
 }

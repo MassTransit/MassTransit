@@ -3,7 +3,8 @@ namespace MassTransit.Tests.TestConsumers
     using System;
     using System.Collections.Generic;
     using System.Threading;
-    using Magnum.Common.DateTimeExtensions;
+    using Magnum.DateTimeExtensions;
+    using Messages;
     using NUnit.Framework;
     using NUnit.Framework.SyntaxHelpers;
 
@@ -12,12 +13,20 @@ namespace MassTransit.Tests.TestConsumers
     {
         private static readonly List<TMessage> _allMessages = new List<TMessage>();
         private static readonly Semaphore _allReceived = new Semaphore(0, 100);
-        private readonly List<TMessage> _messages = new List<TMessage>();
+    	private static int _allReceivedCount = 0;
+
+    	public static int AllReceivedCount
+    	{
+    		get { return _allReceivedCount; }
+    	}
+
+    	private readonly List<TMessage> _messages = new List<TMessage>();
         private readonly Semaphore _received = new Semaphore(0, 100);
 
         public virtual void Consume(TMessage message)
         {
 			Interlocked.Increment(ref _receivedMessageCount);
+        	Interlocked.Increment(ref _allReceivedCount);
 
             _messages.Add(message);
             _received.Release();
@@ -85,5 +94,10 @@ namespace MassTransit.Tests.TestConsumers
         {
             Assert.That(AnyReceivedMessage(message, timeout), Is.True, "Message should have been received");
         }
+
+    	public static void OnlyOneShouldHaveReceivedMessage(TMessage message, TimeSpan timeout)
+    	{
+			Assert.That(AnyReceivedMessage(message, timeout), Is.True, "Message should have been received");
+		}
     }
 }

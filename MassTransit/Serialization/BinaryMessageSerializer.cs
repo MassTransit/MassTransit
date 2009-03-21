@@ -19,7 +19,7 @@ namespace MassTransit.Serialization
 	using System.Runtime.Serialization.Formatters.Binary;
 	using Internal;
 	using log4net;
-	using Magnum.Common.ObjectExtensions;
+	using Magnum.ObjectExtensions;
 	using Util;
 
 	/// <summary>

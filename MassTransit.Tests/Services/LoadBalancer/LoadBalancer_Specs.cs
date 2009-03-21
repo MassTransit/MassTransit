@@ -13,8 +13,9 @@
 namespace MassTransit.Tests.Services.LoadBalancer
 {
 	using System.Collections;
+	using System.Threading;
 	using Configuration;
-	using Magnum.Common.DateTimeExtensions;
+	using Magnum.DateTimeExtensions;
 	using MassTransit.Services.LoadBalancer;
 	using MassTransit.Services.LoadBalancer.Configuration;
 	using MassTransit.Subscriptions;
@@ -39,16 +40,17 @@ namespace MassTransit.Tests.Services.LoadBalancer
 				.Return(null)
 				.WhenCalled(invocation =>
 				            invocation.ReturnValue =
-				            new LoadBalancerService(
-				            	((Hashtable) invocation.Arguments[0])["bus"] as IServiceBus,
-				            	((Hashtable) invocation.Arguments[0])["cache"] as ISubscriptionCache,
-				            	ObjectBuilder));
+				            new LoadBalancerService(ObjectBuilder,
+				            	((Hashtable) invocation.Arguments[0])["endpointFactory"] as IEndpointFactory));
 
 			RemoteBus = ServiceBusConfigurator.New(x =>
 				{
 					x.ReceiveFrom("loopback://localhost/mt_server");
 
-					x.ConfigureService<LoadBalancerServiceConfigurator>(y => { });
+					x.ConfigureService<LoadBalancerServiceConfigurator>(y =>
+						{
+							y.LoadBalance<PingMessage>();
+						});
 				});
 
 			ObjectBuilder.Stub(x => x.GetInstance<TestMessageConsumer<PingMessage>>())
@@ -74,6 +76,10 @@ namespace MassTransit.Tests.Services.LoadBalancer
 			RemoteBus.Execute(ping);
 
 			TestConsumerBase<PingMessage>.AnyShouldHaveReceivedMessage(ping, 5.Seconds());
+
+			Thread.Sleep(1000);
+
+			Assert.AreEqual(1, TestConsumerBase<PingMessage>.AllReceivedCount);
 		}
 	}
 }

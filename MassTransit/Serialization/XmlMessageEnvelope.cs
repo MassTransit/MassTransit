@@ -31,7 +31,7 @@ namespace MassTransit.Serialization
 		{
 			Message = message;
 
-			MessageType = MessageHeadersBase.GetMessageTypeHeaderString(messageType);
+			MessageType = messageType.ToMessageName();
 
 			this.CopyFrom(OutboundMessage.Headers);
 		}

@@ -14,27 +14,27 @@ namespace MassTransit.Pipeline.Sinks
 {
 	using System;
 	using System.Collections.Generic;
-	using Magnum.Common.Threading;
+	using Magnum.Threading;
 
 	public abstract class MessageRouterBase<TMessage, TKey> :
-		IMessageSink<TMessage>
+		IPipelineSink<TMessage>
 		where TMessage : class
 	{
 		private bool _disposed;
-		protected ReaderWriterLockedObject<Dictionary<TKey, IMessageSink<TMessage>>> _sinks;
+		protected ReaderWriterLockedObject<Dictionary<TKey, IPipelineSink<TMessage>>> _sinks;
 
 		protected MessageRouterBase()
 		{
-			_sinks = new ReaderWriterLockedObject<Dictionary<TKey, IMessageSink<TMessage>>>(new Dictionary<TKey, IMessageSink<TMessage>>());
+			_sinks = new ReaderWriterLockedObject<Dictionary<TKey, IPipelineSink<TMessage>>>(new Dictionary<TKey, IPipelineSink<TMessage>>());
 		}
 
-		public abstract IEnumerable<Consumes<TMessage>.All> Enumerate(TMessage message);
+		public abstract IEnumerable<Action<TMessage>> Enumerate(TMessage message);
 
 		public virtual bool Inspect(IPipelineInspector inspector)
 		{
 			return inspector.Inspect(this, () =>
 				{
-					foreach (IMessageSink<TMessage> sink in _sinks.ReadLock(x => x.Values))
+					foreach (IPipelineSink<TMessage> sink in _sinks.ReadLock(x => x.Values))
 					{
 						if (sink.Inspect(inspector) == false)
 							return false;
@@ -50,9 +50,9 @@ namespace MassTransit.Pipeline.Sinks
 			GC.SuppressFinalize(this);
 		}
 
-		protected IEnumerable<Consumes<TMessage>.All> EnumerateSinks(TMessage message, TKey batchId)
+		protected IEnumerable<Action<TMessage>> EnumerateSinks(TMessage message, TKey batchId)
 		{
-			IMessageSink<TMessage> sink = null;
+			IPipelineSink<TMessage> sink = null;
 
 			if (_sinks.ReadLock(x => x.TryGetValue(batchId, out sink)) == false)
 				yield break;
@@ -60,7 +60,7 @@ namespace MassTransit.Pipeline.Sinks
 			if (sink == null)
 				yield break;
 
-			foreach (Consumes<TMessage>.All consumer in sink.Enumerate(message))
+			foreach (var consumer in sink.Enumerate(message))
 			{
 				yield return consumer;
 			}

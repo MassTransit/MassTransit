@@ -12,16 +12,10 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests.Saga
 {
-	using System.Collections;
 	using System.Diagnostics;
-	using Magnum.Common.Data;
-	using MassTransit.Pipeline.Interceptors;
-	using MassTransit.Saga;
-	using MassTransit.Saga.Pipeline;
 	using Messages;
 	using NUnit.Framework;
 	using NUnit.Framework.SyntaxHelpers;
-	using Rhino.Mocks;
 	using TextFixtures;
 
 	[TestFixture]
@@ -32,55 +26,16 @@ namespace MassTransit.Tests.Saga
 		{
 			base.EstablishContext();
 
-			var sagaRepository = new InMemorySagaRepository<RegisterUserSaga>();
-
-			ObjectBuilder.Stub(x => x.GetInstance<ISagaRepository<RegisterUserSaga>>())
-				.Return(sagaRepository);
-
-			ObjectBuilder.Stub(x => x.GetInstance<InitiateSagaMessageSink<RegisterUserSaga, RegisterUser>>(new Hashtable()))
-				.IgnoreArguments()
-				.Return(null)
-				.WhenCalled(invocation => 
-					invocation.ReturnValue = 
-					new InitiateSagaMessageSink<RegisterUserSaga, RegisterUser>(
-						((Hashtable)invocation.Arguments[0])["context"] as IInterceptorContext,
-						RemoteBus, 
-						sagaRepository));
-
-			ObjectBuilder.Stub(x => x.GetInstance<OrchestrateSagaMessageSink<RegisterUserSaga, UserVerificationEmailSent>>(new Hashtable()))
-				.IgnoreArguments()
-				.Return(null)
-				.WhenCalled(invocation =>
-					invocation.ReturnValue = 
-					new OrchestrateSagaMessageSink<RegisterUserSaga, UserVerificationEmailSent>(
-						((Hashtable)invocation.Arguments[0])["context"] as IInterceptorContext,
-						RemoteBus,
-						sagaRepository));
-
-			ObjectBuilder.Stub(x => x.GetInstance<OrchestrateSagaMessageSink<RegisterUserSaga, UserValidated>>(new Hashtable()))
-				.IgnoreArguments()
-				.Return(null)
-				.WhenCalled(invocation =>
-					invocation.ReturnValue =
-					new OrchestrateSagaMessageSink<RegisterUserSaga, UserValidated>(
-						((Hashtable)invocation.Arguments[0])["context"] as IInterceptorContext,
-						RemoteBus,
-						sagaRepository));
-
-			UnitOfWork.SetUnitOfWorkProvider(() => MockRepository.GenerateMock<IUnitOfWork>());
+			var sagaRepository = SetupSagaRepository<RegisterUserSaga>();
+			SetupInitiateSagaSink<RegisterUserSaga, RegisterUser>(RemoteBus, sagaRepository);
+			SetupOrchestrateSagaSink<RegisterUserSaga, UserVerificationEmailSent>(RemoteBus, sagaRepository);
+			SetupOrchestrateSagaSink<RegisterUserSaga, UserValidated>(RemoteBus, sagaRepository);
 
 			// this just shows that you can easily respond to the message
 			RemoteBus.Subscribe<SendUserVerificationEmail>(
 				x => RemoteBus.Publish(new UserVerificationEmailSent(x.CorrelationId, x.Email)));
 
 			RemoteBus.Subscribe<RegisterUserSaga>();
-		}
-
-		protected override void TeardownContext()
-		{
-			UnitOfWork.SetUnitOfWorkProvider(() => null);
-
-			base.TeardownContext();
 		}
 
 		[Test]

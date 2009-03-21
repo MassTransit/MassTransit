@@ -13,7 +13,10 @@
 namespace MassTransit.Transports.Msmq.Tests.TestFixtures
 {
 	using Configuration;
+	using Internal;
 	using MassTransit.Tests.TextFixtures;
+	using Rhino.Mocks;
+	using Services.Subscriptions;
 
 	public class MsmqEndpointTestFixture :
 		EndpointTestFixture<MsmqEndpoint>
@@ -22,6 +25,7 @@ namespace MassTransit.Transports.Msmq.Tests.TestFixtures
 		public string LocalErrorUri { get; private set; }
 		public string RemoteEndpointUri { get; private set; }
 
+		public ISubscriptionService SubscriptionService { get; private set; }
 		public IServiceBus LocalBus { get; private set; }
 		public IServiceBus RemoteBus { get; private set; }
 
@@ -35,20 +39,55 @@ namespace MassTransit.Transports.Msmq.Tests.TestFixtures
 
 			LocalEndpoint = new MsmqEndpoint(LocalEndpointUri);
 			LocalErrorEndpoint = new MsmqEndpoint(LocalErrorUri);
-            RemoteEndpoint = new MsmqEndpoint(RemoteEndpointUri);
+			RemoteEndpoint = new MsmqEndpoint(RemoteEndpointUri);
+
+			SetupSubscriptionService();
 
 			LocalBus = ServiceBusConfigurator.New(x =>
 				{
+					x.AddService<SubscriptionPublisher>();
+					x.AddService<SubscriptionConsumer>();
 					x.ReceiveFrom(LocalEndpointUri);
 					x.SendErrorsTo(LocalErrorUri);
 				});
 
-			RemoteBus = ServiceBusConfigurator.New(x => { x.ReceiveFrom(RemoteEndpointUri); });
+			RemoteBus = ServiceBusConfigurator.New(x =>
+				{
+					x.AddService<SubscriptionPublisher>();
+					x.AddService<SubscriptionConsumer>();
+					x.ReceiveFrom(RemoteEndpointUri);
+				});
 		}
+
+
+		private void SetupSubscriptionService()
+		{
+			SubscriptionService = new LocalSubscriptionService();
+			ObjectBuilder.Stub(x => x.GetInstance<IEndpointSubscriptionEvent>())
+				.Return(SubscriptionService);
+
+			ObjectBuilder.Stub(x => x.GetInstance<SubscriptionPublisher>())
+				.Return(null)
+				.WhenCalled(invocation =>
+				{
+					// Return a unique instance of this class
+					invocation.ReturnValue = new SubscriptionPublisher(SubscriptionService);
+				});
+
+			ObjectBuilder.Stub(x => x.GetInstance<SubscriptionConsumer>())
+				.Return(null)
+				.WhenCalled(invocation =>
+				{
+					// Return a unique instance of this class
+					invocation.ReturnValue = new SubscriptionConsumer(SubscriptionService, EndpointFactory);
+				});
+		}
+
+
 
 		public MsmqEndpoint LocalEndpoint { get; private set; }
 		public MsmqEndpoint LocalErrorEndpoint { get; private set; }
-        public MsmqEndpoint RemoteEndpoint { get; private set; }
+		public MsmqEndpoint RemoteEndpoint { get; private set; }
 
 		protected override void TeardownContext()
 		{

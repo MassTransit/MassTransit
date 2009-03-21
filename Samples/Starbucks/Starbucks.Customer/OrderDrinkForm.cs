@@ -5,6 +5,7 @@ using Starbucks.Messages;
 
 namespace Starbucks.Customer
 {
+    using Magnum;
     using MassTransit;
 
     public partial class OrderDrinkForm : Form,
@@ -55,7 +56,7 @@ namespace Starbucks.Customer
 
             IServiceBus bus = GetBus();
         	_unsubscribeToken = bus.Subscribe(this);
-        	bus.Publish(new NewOrderMessage(name, drink, size));
+        	bus.Publish(new NewOrderMessage(CombGuid.Generate(), name, drink, size));
         }
 
         private IServiceBus GetBus()

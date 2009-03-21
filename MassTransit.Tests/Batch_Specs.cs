@@ -14,7 +14,7 @@ namespace MassTransit.Tests
 {
 	using System;
 	using Batch;
-	using Magnum.Common.DateTimeExtensions;
+	using Magnum.DateTimeExtensions;
 	using Messages;
 	using NUnit.Framework;
 	using Rhino.Mocks;

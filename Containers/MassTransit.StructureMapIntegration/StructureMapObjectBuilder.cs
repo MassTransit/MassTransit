@@ -5,13 +5,20 @@ namespace MassTransit.StructureMapIntegration
     using System.Collections.Generic;
     
     using StructureMap;
+    using StructureMap.Pipeline;
 
     public class StructureMapObjectBuilder :
         IObjectBuilder
     {
         public T GetInstance<T>(IDictionary arguments)
         {
-            return ObjectFactory.GetInstance<T>(); //how to handle component
+            IDictionary<string,object> bob = new Dictionary<string, object>();
+            foreach (DictionaryEntry entry in arguments)
+            {
+                bob.Add(entry.Key.ToString(), entry.Value);
+            }
+            var args = new ExplicitArguments(bob);
+            return ObjectFactory.GetInstance<T>(args); //how to handle component
         }
 
         public void Release<T>(T obj)

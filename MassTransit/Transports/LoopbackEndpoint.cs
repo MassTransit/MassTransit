@@ -19,7 +19,7 @@ namespace MassTransit.Transports
 	using Configuration;
 	using Internal;
 	using log4net;
-	using Magnum.Common.Threading;
+	using Magnum.Threading;
 	using Serialization;
 
 	public class LoopbackEndpoint :

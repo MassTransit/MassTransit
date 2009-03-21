@@ -20,9 +20,9 @@ namespace MassTransit.Pipeline.Configuration
 		PipelineInspectorBase<MessageFilterConfiguratorScope<TMessage>>
 		where TMessage : class
 	{
-		private Func<IMessageSink<TMessage>, IMessageSink<TMessage>> _insertAfter;
+		private Func<IPipelineSink<TMessage>, IPipelineSink<TMessage>> _insertAfter;
 
-		public Func<IMessageSink<TMessage>, IMessageSink<TMessage>> InsertAfter
+		public Func<IPipelineSink<TMessage>, IPipelineSink<TMessage>> InsertAfter
 		{
 			get { return _insertAfter; }
 		}
@@ -35,8 +35,8 @@ namespace MassTransit.Pipeline.Configuration
 			{
 				_insertAfter = (sink =>
 					{
-						return TranslateTo<IMessageSink<TMessage>>
-							.From(element.ReplaceOutputSink(TranslateTo<IMessageSink<TOutput>>.From(sink)));
+						return TranslateTo<IPipelineSink<TMessage>>
+							.From(element.ReplaceOutputSink(TranslateTo<IPipelineSink<TOutput>>.From(sink)));
 					});
 
 				return false;

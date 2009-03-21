@@ -1,8 +1,8 @@
 namespace MassTransit.Infrastructure.Tests.Sagas
 {
 	using System;
-	using Magnum.Common;
-	using Magnum.Common.Data;
+	using Magnum;
+	using Magnum.Data;
 	using Magnum.Infrastructure.Data;
 	using MassTransit.Tests.Saga.Messages;
 	using MassTransit.Tests.Saga.StateMachine;
@@ -11,7 +11,6 @@ namespace MassTransit.Infrastructure.Tests.Sagas
 	using NHibernate.Tool.hbm2ddl;
 	using NUnit.Framework;
 	using Saga;
-	using Util;
 
 	[TestFixture]
 	public class SagaRepository_Specs
@@ -49,7 +48,7 @@ namespace MassTransit.Infrastructure.Tests.Sagas
 		[Test]
 		public void I_should_be_able_to_store_and_load_a_saga_and_not_lose_state()
 		{
-			Guid transactionId = CombGuid.NewCombGuid();
+			Guid transactionId = CombGuid.Generate();
 
 			using (var repository = new NHibernateSagaRepository<RegisterUserStateMachine>())
 			{

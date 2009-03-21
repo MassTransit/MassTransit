@@ -13,7 +13,7 @@
 namespace MassTransit.Tests.Saga
 {
 	using System;
-	using Magnum.Common.DateTimeExtensions;
+	using Magnum.DateTimeExtensions;
 	using MassTransit.Saga;
 	using MassTransit.Services.Timeout.Messages;
 	using Messages;

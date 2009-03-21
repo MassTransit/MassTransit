@@ -13,25 +13,73 @@
 namespace MassTransit.Tests.TextFixtures
 {
 	using Configuration;
+	using MassTransit.Internal;
+	using MassTransit.Services.Subscriptions;
+	using MassTransit.Transports;
 	using NUnit.Framework;
+	using Rhino.Mocks;
 
 	[TestFixture]
 	public class LoopbackLocalAndRemoteTestFixture :
-		LoopbackTestFixture
+		EndpointTestFixture<LoopbackEndpoint>
 	{
+		public ISubscriptionService SubscriptionService { get; private set; }
+		public IServiceBus LocalBus { get; private set; }
 		public IServiceBus RemoteBus { get; private set; }
 
 		protected override void EstablishContext()
 		{
 			base.EstablishContext();
 
-			RemoteBus = ServiceBusConfigurator.New(x => { x.ReceiveFrom("loopback://localhost/mt_server"); });
+			SetupSubscriptionService();
+
+			LocalBus = ServiceBusConfigurator.New(x =>
+				{
+					x.AddService<SubscriptionPublisher>();
+					x.AddService<SubscriptionConsumer>();
+					x.ReceiveFrom("loopback://localhost/mt_client");
+				});
+
+			RemoteBus = ServiceBusConfigurator.New(x =>
+				{
+					x.AddService<SubscriptionPublisher>();
+					x.AddService<SubscriptionConsumer>();
+					x.ReceiveFrom("loopback://localhost/mt_server");
+				});
+		}
+
+		private void SetupSubscriptionService()
+		{
+			SubscriptionService = new LocalSubscriptionService();
+			ObjectBuilder.Stub(x => x.GetInstance<IEndpointSubscriptionEvent>())
+				.Return(SubscriptionService);
+
+			ObjectBuilder.Stub(x => x.GetInstance<SubscriptionPublisher>())
+				.Return(null)
+				.WhenCalled(invocation =>
+					{
+						// Return a unique instance of this class
+						invocation.ReturnValue = new SubscriptionPublisher(SubscriptionService);
+					});
+
+			ObjectBuilder.Stub(x => x.GetInstance<SubscriptionConsumer>())
+				.Return(null)
+				.WhenCalled(invocation =>
+					{
+						// Return a unique instance of this class
+						invocation.ReturnValue = new SubscriptionConsumer(SubscriptionService, EndpointFactory);
+					});
 		}
 
 		protected override void TeardownContext()
 		{
 			RemoteBus.Dispose();
 			RemoteBus = null;
+
+			LocalBus.Dispose();
+			LocalBus = null;
+
+			SubscriptionService = null;
 
 			base.TeardownContext();
 		}

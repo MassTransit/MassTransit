@@ -31,9 +31,12 @@ namespace MassTransit.Pipeline.Interceptors
 			var router = routerConfigurator.FindOrCreate<TMessage>();
 
 			UnsubscribeAction result = router.Connect(new InstanceMessageSink<TMessage>(message =>
-			                                                                     consumer.Accept(message) ? consumer : Consumes<TMessage>.Null));
+				{
+					// rock it
+					return consumer.Accept(message) ? (Action<TMessage>) consumer.Consume : null;
+				}));
 
-			UnsubscribeAction remove = context.SubscribedTo(typeof(TMessage));
+			UnsubscribeAction remove = context.SubscribedTo<TMessage>();
 
 			return () => result() && (router.SinkCount == 0) && remove();
 		}
@@ -48,7 +51,7 @@ namespace MassTransit.Pipeline.Interceptors
 
 			UnsubscribeAction result = router.Connect(new SelectedComponentMessageSink<TComponent, TMessage>(context));
 
-			UnsubscribeAction remove = context.SubscribedTo(typeof(TMessage));
+			UnsubscribeAction remove = context.SubscribedTo<TMessage>();
 
 			return () => result() && (router.SinkCount == 0) && remove();
 		}

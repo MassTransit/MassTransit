@@ -41,7 +41,7 @@ namespace MassTransit.Pipeline.Inspectors
 			_depth--;
 		}
 
-		public bool Inspect(MessagePipeline element)
+		public bool Inspect(IMessagePipeline element)
 		{
 			Append("Pipeline");
 
@@ -92,7 +92,7 @@ namespace MassTransit.Pipeline.Inspectors
 			return true;
 		}
 
-		public bool Inspect<TMessage>(IMessageSink<TMessage> sink) where TMessage : class
+		public bool Inspect<TMessage>(IPipelineSink<TMessage> sink) where TMessage : class
 		{
 			Append(string.Format("Unknown Message Sink {0} ({1})", sink.GetType(), typeof (TMessage).Name));
 
@@ -131,13 +131,39 @@ namespace MassTransit.Pipeline.Inspectors
 		
 		public bool Inspect<TComponent, TMessage>(InitiateSagaMessageSink<TComponent, TMessage> sink)
 			where TMessage : class, CorrelatedBy<Guid>
-			where TComponent : class, Orchestrates<TMessage>, ISaga
+			where TComponent : class, InitiatedBy<TMessage>, ISaga
 		{
 			Type componentType = typeof (TComponent);
 
 			string componentName = componentType.IsGenericType ? componentType.GetGenericTypeDefinition().FullName : componentType.FullName;
 
 			Append(string.Format("Initiates Saga {0} ({1})", componentName, typeof(TMessage).Name));
+
+			return true;
+		}
+
+		public bool Inspect<TComponent, TMessage>(InitiateSagaStateMachineSink<TComponent, TMessage> sink)
+			where TMessage : class, CorrelatedBy<Guid>
+			where TComponent : SagaStateMachine<TComponent>, ISaga
+		{
+			Type componentType = typeof (TComponent);
+
+			string componentName = componentType.IsGenericType ? componentType.GetGenericTypeDefinition().FullName : componentType.FullName;
+
+			Append(string.Format("Initiates State Machine Saga {0} ({1})", componentName, typeof(TMessage).Name));
+
+			return true;
+		}		
+		
+		public bool Inspect<TComponent, TMessage>(OrchestrateSagaStateMachineSink<TComponent, TMessage> sink)
+			where TMessage : class, CorrelatedBy<Guid>
+			where TComponent : SagaStateMachine<TComponent>, ISaga
+		{
+			Type componentType = typeof (TComponent);
+
+			string componentName = componentType.IsGenericType ? componentType.GetGenericTypeDefinition().FullName : componentType.FullName;
+
+			Append(string.Format("Orchestrates State Machine Saga {0} ({1})", componentName, typeof(TMessage).Name));
 
 			return true;
 		}
@@ -183,7 +209,7 @@ namespace MassTransit.Pipeline.Inspectors
 			_text.AppendFormat(text).AppendLine();
 		}
 
-		public static void Trace(MessagePipeline pipeline)
+		public static void Trace(IMessagePipeline pipeline)
 		{
 			PipelineViewer viewer = new PipelineViewer();
 

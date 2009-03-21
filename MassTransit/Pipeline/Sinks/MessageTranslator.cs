@@ -12,34 +12,37 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Pipeline.Sinks
 {
+	using System;
 	using System.Collections.Generic;
 
 	public class MessageTranslator<TInput, TOutput> :
-		MessageSinkBase<TInput, TOutput>
+		PipelineSinkBase<TInput, TOutput>
 		where TOutput : class, TInput
 		where TInput : class
 	{
-		public MessageTranslator(IMessageSink<TOutput> outputSink)
+		public MessageTranslator(IPipelineSink<TOutput> outputSink)
 			: base(outputSink)
 		{
 		}
 
-		public override IEnumerable<Consumes<TInput>.All> Enumerate(TInput message)
+		public override IEnumerable<Action<TInput>> Enumerate(TInput message)
 		{
 			// If the message cannot be safely cast to the output type, we have nothing to return
 			TOutput output = message as TOutput;
 			if (output == null)
 				yield break;
 
-			foreach (Consumes<TOutput>.All consumer in _outputSink.ReadLock(x => x.Enumerate(output)))
+			foreach (var consumer in _outputSink.Enumerate(output))
 			{
-				yield return Consumes<TInput>.WidenTo<TOutput>.For(consumer);
+				Action<TOutput> consume = consumer;
+
+				yield return x => consume((TOutput)x);
 			}
 		}
 
 		public override bool Inspect(IPipelineInspector inspector)
 		{
-			return inspector.Inspect(this) && _outputSink.ReadLock(x => x.Inspect(inspector));
+			return inspector.Inspect(this) && _outputSink.Inspect(inspector);
 		}
 	}
 }

@@ -55,9 +55,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\libs\log4net.dll</HintPath>
     </Reference>
-    <Reference Include="Magnum.Common, Version=0.1.0.75, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Magnum, Version=0.1.0.275, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\libs\Magnum.Common.dll</HintPath>
+      <HintPath>..\libs\Magnum.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Practices.ServiceLocation, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -105,12 +105,10 @@
     <Compile Include="MessageContext_Specs.cs" />
     <Compile Include="Pipeline\MessageRouter_Perf.cs" />
     <Compile Include="Retry_Specs.cs" />
+    <Compile Include="Saga\InMemorySagaRepository_Specs.cs" />
+    <Compile Include="Saga\StateMachine\AutoStateMachineSaga.cs" />
+    <Compile Include="Saga\StateMachine\AutoStateMachine_Specs.cs" />
     <Compile Include="Serialization\ContextSerialization_Specs.cs" />
-    <Compile Include="Services\HealthMonitoring\Specs_MonitorInfo.cs" />
-    <Compile Include="Services\HealthMonitoring\The_health_service_lifetime.cs" />
-    <Compile Include="Services\HealthMonitoring\When_a_suspect_is_received.cs" />
-    <Compile Include="Services\HealthMonitoring\When_monitoring_health.cs" />
-    <Compile Include="Services\HealthMonitoring\When_monitoring_heartbeats.cs" />
     <Compile Include="Messages\IndividualBatchMessage.cs" />
     <Compile Include="Internal\IdempotentHashtable_Specs.cs" />
     <Compile Include="Internal\IdempotentList_Specs.cs" />
@@ -122,8 +120,13 @@
     <Compile Include="MessageGroup_Specs.cs" />
     <Compile Include="Messages\RequestMessage.cs" />
     <Compile Include="Messages\SerializationTestMessage.cs" />
+    <Compile Include="Services\HealthMonitoring\HealthServiceTestFixture.cs" />
+    <Compile Include="Services\HealthMonitoring\HealthService_Specs.cs" />
     <Compile Include="Services\LoadBalancer\LoadBalancer_Specs.cs" />
     <Compile Include="Services\Subscriptions\SubscriptionClient_Specs.cs" />
+    <Compile Include="Services\Subscriptions\SubscriptionConsumer_Specs.cs" />
+    <Compile Include="Subscriptions\SubscriptionService_Specs.cs" />
+    <Compile Include="TextFixtures\SubscriptionServiceTestFixture.cs" />
     <Compile Include="Transports\Multicast_Specs.cs" />
     <Compile Include="Pipeline\BatchConsumer_Specs.cs" />
     <Compile Include="Pipeline\InitiateSaga_Specs.cs" />
@@ -158,7 +161,6 @@
     <Compile Include="Serialization\MessageSerialization_Specs.cs" />
     <Compile Include="Services\Metadata\MessageMetadataExtraction_spec.cs" />
     <Compile Include="Specification.cs" />
-    <Compile Include="Services\Subscriptions\As_a_SubscriptionService.cs" />
     <Compile Include="Messages\ClientMessage.cs" />
     <Compile Include="Messages\DeleteMessage.cs" />
     <Compile Include="Messages\PingMessage.cs" />
@@ -166,10 +168,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="MessageQueueEndpoint_MeetsCriteria.cs" />
     <Compile Include="Services\Subscriptions\MonitorSubscriptionCache.cs" />
-    <Compile Include="Services\Subscriptions\SubscriptionService_Specs.cs" />
     <Compile Include="Services\Subscriptions\When_managing_subscriptions_locally.cs" />
-    <Compile Include="Services\Subscriptions\When_managing_subscriptions_remotely.cs" />
-    <Compile Include="Services\Subscriptions\When_using_the_subscription_manager.cs" />
     <Compile Include="Services\Subscriptions\When_Working_With_Subscriptions.cs" />
     <Compile Include="Services\Subscriptions\When_Working_With_Subscription_Entries.cs" />
     <Compile Include="Messages\UpdateMessage.cs" />
@@ -223,7 +222,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Formatters\" />
-    <Folder Include="Subscriptions\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

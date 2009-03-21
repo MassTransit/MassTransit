@@ -2,7 +2,7 @@ namespace MassTransit.Grid
 {
 	using System;
 	using System.Collections.Generic;
-	using Magnum.Common.Monads;
+	using Magnum.Monads;
 
 	public interface ITask<T, R, TSubTask, TSubTaskResult>
 		where T : class 

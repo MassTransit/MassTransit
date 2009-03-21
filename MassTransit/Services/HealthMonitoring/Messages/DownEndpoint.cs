@@ -17,12 +17,11 @@ namespace MassTransit.Services.HealthMonitoring.Messages
     [Serializable]
     public class DownEndpoint
     {
-        public readonly Uri Endpoint;
+        public Uri EndpointAddress { get; set; }
 
-
-        public DownEndpoint(Uri endpoint)
+        public DownEndpoint(Uri endpointAddress)
         {
-            Endpoint = endpoint;
+            EndpointAddress = endpointAddress;
         }
     }
 }

@@ -15,8 +15,7 @@ namespace MassTransit.Tests.Pipeline
 	using System;
 	using System.Collections;
 	using System.Collections.Generic;
-	using System.Data;
-	using Magnum.Common.Data;
+	using MassTransit.Internal;
 	using MassTransit.Pipeline;
 	using MassTransit.Pipeline.Configuration;
 	using MassTransit.Pipeline.Inspectors;
@@ -49,6 +48,9 @@ namespace MassTransit.Tests.Pipeline
 			_context = MockRepository.GenerateMock<IInterceptorContext>();
 			_context.Stub(x => x.Builder).Return(_builder);
 
+			_initiateSimpleSagaUnsubscribe = MockRepository.GenerateMock<UnsubscribeAction>();
+			_completeSimpleSagaUnsubscribe = MockRepository.GenerateMock<UnsubscribeAction>();
+
 			Hashtable empty = new Hashtable();
 
 			_completeSink = new OrchestrateSagaMessageSink<SimpleSaga, CompleteSimpleSaga>(_context, _bus, _repository);
@@ -58,18 +60,19 @@ namespace MassTransit.Tests.Pipeline
 			_builder.Stub(x => x.GetInstance<InitiateSagaMessageSink<SimpleSaga, InitiateSimpleSaga>>(empty)).Return(_initiateSink).IgnoreArguments();
 
 			_subscriptionEvent = MockRepository.GenerateMock<ISubscriptionEvent>();
-			_subscriptionEvent.Expect(x => x.SubscribedTo(typeof (InitiateSimpleSaga))).Repeat.Any().Return(() =>
+			_subscriptionEvent.Expect(x => x.SubscribedTo<InitiateSimpleSaga>()).Repeat.Any().Return(() =>
 				{
-					_subscriptionEvent.UnsubscribedFrom(typeof (InitiateSimpleSaga));
+					_initiateSimpleSagaUnsubscribe();
 					return true;
 				});
-			_subscriptionEvent.Expect(x => x.SubscribedTo(typeof (CompleteSimpleSaga))).Repeat.Any().Return(() =>
+			_subscriptionEvent.Expect(x => x.SubscribedTo<CompleteSimpleSaga>()).Repeat.Any().Return(() =>
 				{
-					_subscriptionEvent.UnsubscribedFrom(typeof (CompleteSimpleSaga));
+					_completeSimpleSagaUnsubscribe();
 					return true;
 				});
 
-			_pipeline = MessagePipelineConfigurator.CreateDefault(_builder, _subscriptionEvent);
+			_pipeline = MessagePipelineConfigurator.CreateDefault(_builder);
+			_pipeline.Configure(x => x.Register(_subscriptionEvent));
 
 			_remove = _pipeline.Subscribe<SimpleSaga>();
 
@@ -93,6 +96,8 @@ namespace MassTransit.Tests.Pipeline
 		private MessagePipeline _pipeline;
 		private UnsubscribeAction _remove;
 		private ISubscriptionEvent _subscriptionEvent;
+		private UnsubscribeAction _initiateSimpleSagaUnsubscribe;
+		private UnsubscribeAction _completeSimpleSagaUnsubscribe;
 
 		[Test]
 		public void Should_publish_subscriptions_for_saga_subscriptions()
@@ -103,12 +108,12 @@ namespace MassTransit.Tests.Pipeline
 		[Test]
 		public void Should_remove_subscriptions_for_saga_subscriptions()
 		{
-			_subscriptionEvent.Expect(x => x.UnsubscribedFrom(typeof (InitiateSimpleSaga)));
-			_subscriptionEvent.Expect(x => x.UnsubscribedFrom(typeof (CompleteSimpleSaga)));
-
 			_remove();
 
 			_subscriptionEvent.VerifyAllExpectations();
+
+			_initiateSimpleSagaUnsubscribe.AssertWasCalled(x => x());
+			_completeSimpleSagaUnsubscribe.AssertWasCalled(x => x());
 		}
 
 		[Test]

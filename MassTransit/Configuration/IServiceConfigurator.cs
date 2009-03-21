@@ -14,7 +14,6 @@ namespace MassTransit.Configuration
 {
 	using System;
 	using Internal;
-	using Subscriptions;
 
 	public interface IServiceConfigurator
 	{
@@ -27,9 +26,8 @@ namespace MassTransit.Configuration
 		/// Creates the service
 		/// </summary>
 		/// <param name="bus"></param>
-		/// <param name="cache"></param>
 		/// <param name="builder"></param>
 		/// <returns>The instance of the service</returns>
-		IBusService Create(IServiceBus bus, ISubscriptionCache cache, IObjectBuilder builder);
+		IBusService Create(IServiceBus bus, IObjectBuilder builder);
 	}
 }

@@ -12,7 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests
 {
-    using Magnum.Common.DateTimeExtensions;
+    using Magnum.DateTimeExtensions;
     using Messages;
 	using NUnit.Framework;
 	using NUnit.Framework.SyntaxHelpers;

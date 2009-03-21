@@ -18,9 +18,10 @@ namespace MassTransit.Internal
 	using System.Reflection;
 	using Configuration;
 	using Exceptions;
-	using Magnum.Common.Threading;
+	using Magnum.Threading;
+	using Util;
 
-	public class EndpointFactory :
+    public class EndpointFactory :
 		IEndpointFactory
 	{
 		private static readonly IEndpoint _null = new NullEndpoint();
@@ -75,6 +76,7 @@ namespace MassTransit.Internal
 
 		public IEndpoint GetEndpoint(Uri uri)
 		{
+            Check.Parameter(uri).IsNotNull();
 			if (_disposed) throw new ObjectDisposedException("The object has been disposed");
 
 			try

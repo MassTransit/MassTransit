@@ -45,7 +45,7 @@ namespace TimeoutServiceHost
                                                                        {
                                                                            var container = new DefaultMassTransitContainer("timeoutService.castle.xml");
                                                                            container.AddComponent<ITimeoutRepository,InMemoryTimeoutRepository>();
-                                                                           container.AddComponent<IHostedService, TimeoutService>();
+                                                                           container.AddComponent<TimeoutService>();
 
                                                                            var wob = new WindsorObjectBuilder(container.Kernel);
                                                                            ServiceLocator.SetLocatorProvider(() => wob);

@@ -46,11 +46,9 @@ namespace SubscriptionServiceHost
                                                      c.BeforeStart(a =>
                                                                        {
                                                                            var container = new DefaultMassTransitContainer("subscriptionService.castle.xml");
-                                                                           container.AddComponentLifeStyle("followerrepository", typeof(FollowerRepository), LifestyleType.Singleton);
 
                                                                            container.AddComponent<ISubscriptionRepository, InMemorySubscriptionRepository>();
-                                                                           container.AddComponent<RemoteEndpointCoordinator>();
-                                                                           container.AddComponent<IHostedService, SubscriptionService>();
+                                                                           container.AddComponent<SubscriptionService>();
 
                                                                            var wob = new WindsorObjectBuilder(container.Kernel);
                                                                            ServiceLocator.SetLocatorProvider(() => wob);

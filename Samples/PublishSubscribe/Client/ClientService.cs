@@ -9,10 +9,9 @@ namespace Client
     {
         private IServiceBus _bus;
 
-        public void Start()
+        public void Start(IServiceBus bus)
         {
-            _bus = ServiceLocator.Current.GetInstance<IServiceBus>();
-
+            _bus = bus;
             _bus.Subscribe<PasswordUpdater>();
 
             Console.WriteLine(new string('-', 20));

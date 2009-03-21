@@ -17,7 +17,7 @@ namespace MassTransit.Internal
 	public interface IBusService :
 		IDisposable
 	{
-		void Start();
+		void Start(IServiceBus bus);
 		void Stop();
 	}
 }

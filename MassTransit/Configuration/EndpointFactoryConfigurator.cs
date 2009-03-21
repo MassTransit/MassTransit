@@ -16,7 +16,7 @@ namespace MassTransit.Configuration
 	using System.Collections.Generic;
 	using Exceptions;
 	using Internal;
-	using Magnum.Common.Threading;
+	using Magnum.Threading;
 	using Serialization;
 	using Util;
 

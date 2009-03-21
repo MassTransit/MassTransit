@@ -3,8 +3,7 @@ namespace MassTransit.Services.Metadata
 	using System;
 	using Server;
 
-    public class MetadataService :
-        IHostedService
+    public class MetadataService
     {
 
         private readonly IServiceBus _bus;

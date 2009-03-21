@@ -14,6 +14,7 @@ namespace MassTransit.Pipeline.Interceptors
 {
 	using System;
 	using System.Collections.Generic;
+	using Internal;
 
 	public class InterceptorContext :
 		IInterceptorContext
@@ -21,7 +22,7 @@ namespace MassTransit.Pipeline.Interceptors
 		private readonly ISubscriptionEvent _subscriptionEvent;
 		private readonly HashSet<Type> _used = new HashSet<Type>();
 
-		public InterceptorContext(MessagePipeline pipeline, IObjectBuilder builder, ISubscriptionEvent subscriptionEvent)
+		public InterceptorContext(IMessagePipeline pipeline, IObjectBuilder builder, ISubscriptionEvent subscriptionEvent)
 		{
 			_subscriptionEvent = subscriptionEvent;
 
@@ -31,7 +32,7 @@ namespace MassTransit.Pipeline.Interceptors
 
 		public IObjectBuilder Builder { get; private set; }
 
-		public MessagePipeline Pipeline { get; private set; }
+		public IMessagePipeline Pipeline { get; private set; }
 
 		public bool HasMessageTypeBeenDefined(Type messageType)
 		{
@@ -43,24 +44,16 @@ namespace MassTransit.Pipeline.Interceptors
 			_used.Add(messageType);
 		}
 
-		public UnsubscribeAction SubscribedTo(Type messageType)
+		public UnsubscribeAction SubscribedTo<T>() 
+			where T : class
 		{
-			return _subscriptionEvent.SubscribedTo(messageType);
+			return _subscriptionEvent.SubscribedTo<T>();
 		}
 
-		public UnsubscribeAction SubscribedTo(Type messageType, string correlationId)
+		public UnsubscribeAction SubscribedTo<T,K>(K correlationId)
+			where T : class, CorrelatedBy<K>
 		{
-			return _subscriptionEvent.SubscribedTo(messageType, correlationId);
-		}
-
-		public void UnsubscribedFrom(Type messageType)
-		{
-			_subscriptionEvent.UnsubscribedFrom(messageType);
-		}
-
-		public void UnsubscribedFrom(Type messageType, string correlationId)
-		{
-			_subscriptionEvent.UnsubscribedFrom(messageType, correlationId);
+			return _subscriptionEvent.SubscribedTo<T,K>(correlationId);
 		}
 	}
 }

@@ -22,11 +22,6 @@ namespace MassTransit.Services.Subscriptions.Messages
         {
         }
 
-        public AddSubscription(string messageName, Uri address)
-            : base(messageName, address)
-        {
-        }
-
         public AddSubscription(SubscriptionInformation subscription)
             : base(subscription)
         {

@@ -12,26 +12,30 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Services.Subscriptions.Messages
 {
-    using System;
+	using System;
+	using Magnum;
 
-    [Serializable]
-    public class CacheUpdateRequest
-    {
-        private Uri _RequestingUri;
+	[Serializable]
+	public class CacheUpdateRequest :
+		CorrelatedBy<Guid>
+	{
+		protected CacheUpdateRequest()
+		{
+		}
 
-        protected CacheUpdateRequest()
-        {
-        }
+		public CacheUpdateRequest(Uri requestingUri)
+			: this(CombGuid.Generate(), requestingUri)
+		{
+		}
 
-        public CacheUpdateRequest(Uri requstingUri)
-        {
-            _RequestingUri = requstingUri;
-        }
+		public CacheUpdateRequest(Guid correlationId, Uri requestingUri)
+		{
+			RequestingUri = requestingUri;
+			CorrelationId = correlationId;
+		}
 
-        public Uri RequestingUri
-        {
-            get { return _RequestingUri; }
-            set { _RequestingUri = value; }
-        }
-    }
+		public Uri RequestingUri { get; set; }
+
+		public Guid CorrelationId { get; set; }
+	}
 }

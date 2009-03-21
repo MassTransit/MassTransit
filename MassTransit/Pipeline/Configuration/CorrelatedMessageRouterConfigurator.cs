@@ -17,9 +17,9 @@ namespace MassTransit.Pipeline.Configuration
 
 	public class CorrelatedMessageRouterConfigurator
 	{
-		private readonly IMessageSink<object> _sink;
+		private readonly IPipelineSink<object> _sink;
 
-		private CorrelatedMessageRouterConfigurator(IMessageSink<object> sink)
+		private CorrelatedMessageRouterConfigurator(IPipelineSink<object> sink)
 		{
 			_sink = sink;
 		}
@@ -51,10 +51,10 @@ namespace MassTransit.Pipeline.Configuration
 			return router;
 		}
 
-		public static CorrelatedMessageRouterConfigurator For<TMessage>(IMessageSink<TMessage> sink)
+		public static CorrelatedMessageRouterConfigurator For<TMessage>(IPipelineSink<TMessage> sink)
 			where TMessage : class
 		{
-			return new CorrelatedMessageRouterConfigurator(TranslateTo<IMessageSink<object>>.From(sink));
+			return new CorrelatedMessageRouterConfigurator(TranslateTo<IPipelineSink<object>>.From(sink));
 		}
 	}
 }

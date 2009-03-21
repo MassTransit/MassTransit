@@ -40,9 +40,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\libs\log4net.dll</HintPath>
     </Reference>
-    <Reference Include="Magnum.Common, Version=0.1.0.44, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Magnum, Version=0.1.0.275, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\libs\Magnum.Common.dll</HintPath>
+      <HintPath>..\libs\Magnum.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Practices.ServiceLocation, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -57,10 +57,8 @@
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
     <Reference Include="System.Data" />
-    <Reference Include="System.EnterpriseServices" />
     <Reference Include="System.Transactions" />
     <Reference Include="System.Web" />
-    <Reference Include="System.Web.Services" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
@@ -82,23 +80,12 @@
     <Compile Include="Grid\Messages\SubTaskWorkerAvailable.cs" />
     <Compile Include="Grid\SubTaskWorker.cs" />
     <Compile Include="Services\HealthMonitoring\HealthInformation.cs" />
-    <Compile Include="Services\HealthMonitoring\Server\IHealthCache.cs" />
-    <Compile Include="Services\HealthMonitoring\Server\IHeartbeatTimer.cs" />
-    <Compile Include="Services\HealthMonitoring\Server\InMemoryHeartbeatTimer.cs" />
-    <Compile Include="Services\HealthMonitoring\Server\LocalHealthCache.cs" />
-    <Compile Include="Internal\CorrelatedPublication.cs" />
-    <Compile Include="Internal\DispatcherContext.cs" />
-    <Compile Include="Internal\IDispatcherContext.cs" />
     <Compile Include="Internal\IdempotentHashtable.cs" />
     <Compile Include="Internal\IdempotentList.cs" />
     <Compile Include="Internal\IEndpointResolver.cs" />
-    <Compile Include="Internal\IPublicationTypeInfo.cs" />
     <Compile Include="Saga\ISagaRepository.cs" />
-    <Compile Include="Internal\ITypeInfo.cs" />
     <Compile Include="Internal\NullEndpoint.cs" />
     <Compile Include="Internal\PoisonEndpointDecorator.cs" />
-    <Compile Include="Internal\PublicationBase.cs" />
-    <Compile Include="Internal\TypeInfo.cs" />
     <Compile Include="Saga\ISaga.cs" />
     <Compile Include="Saga\Orchestrates.cs" />
     <Compile Include="Saga\InitiatedBy.cs" />
@@ -120,9 +107,7 @@
     <Compile Include="Services\Timeout\Messages\TimeoutExpired.cs" />
     <Compile Include="Services\Timeout\TimeoutService.cs" />
     <Compile Include="Transports\LoopbackEndpoint.cs" />
-    <Compile Include="Internal\MessageTypePublication.cs" />
     <Compile Include="Internal\SpecialLoggers.cs" />
-    <Compile Include="Internal\TypeInfoCache.cs" />
     <Compile Include="ServiceBusRequest.cs" />
     <Compile Include="Consumes.cs" />
     <Compile Include="CorrelatedBy.cs" />
@@ -130,26 +115,19 @@
     <Compile Include="Exceptions\MessageException.cs" />
     <Compile Include="Exceptions\ShutDownException.cs" />
     <Compile Include="Services\HealthMonitoring\HealthService.cs" />
-    <Compile Include="Services\HealthMonitoring\Server\HeartbeatMonitor.cs" />
-    <Compile Include="Services\HealthMonitoring\Server\Investigator.cs" />
-    <Compile Include="Services\HealthMonitoring\Messages\DownEndpoint.cs" />
+    <Compile Include="Services\HealthMonitoring\Messages\PingTimeout.cs" />
     <Compile Include="Services\HealthMonitoring\Messages\Heartbeat.cs" />
     <Compile Include="Services\HealthMonitoring\Messages\Ping.cs" />
     <Compile Include="Services\HealthMonitoring\Messages\Pong.cs" />
     <Compile Include="Services\HealthMonitoring\Messages\Suspect.cs" />
-    <Compile Include="Services\HealthMonitoring\Server\MonitorInfo.cs" />
-    <Compile Include="Services\HealthMonitoring\Server\Reporter.cs" />
     <Compile Include="Services\HealthMonitoring\HealthClient.cs" />
-    <Compile Include="Internal\GenericComponent.cs" />
     <Compile Include="IServiceBusRequest.cs" />
     <Compile Include="Exceptions\EndpointException.cs" />
-    <Compile Include="IHostedService.cs" />
     <Compile Include="IEndpoint.cs" />
     <Compile Include="IObjectBuilder.cs" />
     <Compile Include="IServiceBus.cs" />
     <Compile Include="MessageFilter.cs" />
     <Compile Include="Services\Subscriptions\Server\InMemorySubscriptionRepository.cs" />
-    <Compile Include="Services\Subscriptions\Server\FollowerRepository.cs" />
     <Compile Include="Subscriptions\ISubscriptionCache.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ServiceBus.cs" />
@@ -164,21 +142,22 @@
     <Compile Include="Services\Subscriptions\Messages\SubscriptionChange.cs" />
     <Compile Include="Subscriptions\Subscription.cs" />
     <Compile Include="Subscriptions\SubscriptionCacheEntry.cs" />
-    <Compile Include="Services\Subscriptions\SubscriptionClient.cs" />
-    <Compile Include="Services\Subscriptions\SubscriptionService.cs" />
+    <Compile Include="Services\Subscriptions\Client\SubscriptionClient.cs" />
+    <Compile Include="Services\Subscriptions\Server\SubscriptionService.cs" />
     <Compile Include="Threading\ManagedThread.cs" />
     <Compile Include="Threading\ManagedThreadPool.cs" />
     <Compile Include="TimeoutAttribute.cs" />
     <Compile Include="Transports\MulticastUdpEndpoint.cs" />
     <Compile Include="Util\Check.cs" />
-    <Compile Include="Util\CombGuid.cs" />
     <Compile Include="Util\Guard.cs" />
     <Compile Include="Util\Tuple.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CurrentMessage.cs" />
     <Compile Include="Grid\ITask.cs" />
+    <Compile Include="IControlBus.cs" />
     <Compile Include="Internal\DisposableUnsubscribeAction.cs" />
+    <Compile Include="Internal\IEndpointSubscriptionEvent.cs" />
     <Compile Include="Internal\IInboundMessageHeaders.cs" />
     <Compile Include="Internal\IMessageHeaders.cs" />
     <Compile Include="Internal\InboundMessage.cs" />
@@ -188,6 +167,34 @@
     <Compile Include="Internal\IOutboundMessage.cs" />
     <Compile Include="Internal\ISetInboundMessageHeaders.cs" />
     <Compile Include="Internal\ISetMessageHeaders.cs" />
+    <Compile Include="Configuration\DefaultBusServiceConfigurator.cs" />
+    <Compile Include="Saga\Pipeline\InitiateSagaStateMachineSink.cs" />
+    <Compile Include="Saga\Pipeline\OrchestrateSagaStateMachineSink.cs" />
+    <Compile Include="Saga\Pipeline\SagaStateMachineInterceptor.cs" />
+    <Compile Include="Saga\Pipeline\SagaStateMachineSubsriber.cs" />
+    <Compile Include="Saga\SagaStateMachine.cs" />
+    <Compile Include="Services\HealthMonitoring\Configuration\HealthClientConfigurator.cs" />
+    <Compile Include="Services\HealthMonitoring\Messages\DownEndpoint.cs" />
+    <Compile Include="Services\HealthMonitoring\Messages\EndpointTurningOff.cs" />
+    <Compile Include="Services\HealthMonitoring\Messages\EndpointTurningOn.cs" />
+    <Compile Include="Services\HealthMonitoring\Messages\HealthUpdate.cs" />
+    <Compile Include="Services\HealthMonitoring\Server\HealthSaga.cs" />
+    <Compile Include="Services\HealthMonitoring\Messages\StatusChange.cs" />
+    <Compile Include="Services\Subscriptions\Client\ClientSubscriptionInfoMapper.cs" />
+    <Compile Include="Services\Subscriptions\Client\ClientSubscriptionInformation.cs" />
+    <Compile Include="Services\Subscriptions\ISubscriptionService.cs" />
+    <Compile Include="Services\Subscriptions\Server\AddSubscriptionClientMapper.cs" />
+    <Compile Include="Services\Subscriptions\Server\AddSubscriptionMapper.cs" />
+    <Compile Include="Services\Subscriptions\Server\Messages\SubscriptionAdded.cs" />
+    <Compile Include="Services\Subscriptions\Server\Messages\SubscriptionClientAdded.cs" />
+    <Compile Include="Services\Subscriptions\Server\Messages\SubscriptionClientRemoved.cs" />
+    <Compile Include="Services\Subscriptions\Server\Messages\SubscriptionRemoved.cs" />
+    <Compile Include="Services\Subscriptions\Server\RemoveSubscriptionClientMapper.cs" />
+    <Compile Include="Services\Subscriptions\Server\RemoveSubscriptionMapper.cs" />
+    <Compile Include="Services\Subscriptions\Server\SubscriptionClientSaga.cs" />
+    <Compile Include="Services\Subscriptions\Server\SubscriptionSaga.cs" />
+    <Compile Include="Services\Subscriptions\SubscriptionConsumer.cs" />
+    <Compile Include="Services\Subscriptions\SubscriptionPublisher.cs" />
     <Compile Include="Internal\MessageHeadersBase.cs" />
     <Compile Include="Internal\OutboundMessage.cs" />
     <Compile Include="IEndpointFactory.cs" />
@@ -197,6 +204,8 @@
     <Compile Include="Configuration\IServiceConfigurator.cs" />
     <Compile Include="Configuration\ServiceBusConfigurator.cs" />
     <Compile Include="Configuration\ServiceBusConfiguratorDefaults.cs" />
+    <Compile Include="Internal\InboundOutboundSubscriptionBinder.cs" />
+    <Compile Include="Pipeline\IMessagePipeline.cs" />
     <Compile Include="Services\Subscriptions\Configuration\SubscriptionClientConfigurator.cs" />
     <Compile Include="Exceptions\ConfigurationException.cs" />
     <Compile Include="Internal\IMessageSelector.cs" />
@@ -239,12 +248,9 @@
     <Compile Include="Services\Metadata\Server\MessageDefinitionConsumer.cs" />
     <Compile Include="Services\Metadata\Server\MetadataSearchConsumer.cs" />
     <Compile Include="Services\Metadata\WireTap.cs" />
-    <Compile Include="Services\Subscriptions\Client\LocalEndpointHandler.cs" />
-    <Compile Include="Services\Subscriptions\Client\LocalSubscriptionCoordinator.cs" />
-    <Compile Include="Services\Subscriptions\Client\RemoteSubscriptionCoordinator.cs" />
+    <Compile Include="Internal\EndpointList.cs" />
     <Compile Include="Services\Subscriptions\Messages\SubscriptionInformation.cs" />
-    <Compile Include="Services\Subscriptions\Server\RemoteEndpointCoordinator.cs" />
-    <Compile Include="Internal\SubscriptionCacheEventConnector.cs" />
+    <Compile Include="Services\Subscriptions\LocalSubscriptionService.cs" />
     <Compile Include="Threading\IResourceLockScope.cs" />
     <Compile Include="Threading\ResourceLock.cs" />
     <Compile Include="Threading\ResourceLockException.cs" />
@@ -255,7 +261,7 @@
     <Compile Include="Transports\LoopbackMessageSelector.cs" />
     <Compile Include="Transports\MulticastUdpEndpointConfigurator.cs" />
     <Compile Include="Transports\MulticastUdpMessageSelector.cs" />
-    <Compile Include="Pipeline\ISubscriptionEvent.cs" />
+    <Compile Include="Internal\ISubscriptionEvent.cs" />
     <Compile Include="Pipeline\Sinks\CorrelatedMessageSinkRouter.cs" />
     <Compile Include="Saga\InMemorySagaRepository.cs" />
     <Compile Include="Batch\Pipeline\BatchInterceptor.cs" />
@@ -270,16 +276,16 @@
     <Compile Include="Pipeline\Interceptors\InterceptorContext.cs" />
     <Compile Include="Pipeline\Interceptors\ConsumesAllInterceptor.cs" />
     <Compile Include="Pipeline\Configuration\MessageRouterConfigurator.cs" />
-    <Compile Include="Pipeline\ConsumerFor.cs" />
     <Compile Include="Pipeline\Interceptors\ConsumesInterceptorBase.cs" />
     <Compile Include="Pipeline\Interceptors\ConsumesSelectedInterceptor.cs" />
-    <Compile Include="Pipeline\Interceptors\IInterceptorList.cs" />
+    <Compile Include="Util\IRegistrationList.cs" />
     <Compile Include="Pipeline\IConfigurePipeline.cs" />
-    <Compile Include="Pipeline\IMessageSink.cs" />
+    <Compile Include="Pipeline\IPipelineSink.cs" />
     <Compile Include="Pipeline\IPipelineInspector.cs" />
     <Compile Include="Pipeline\Interceptors\IInterceptorContext.cs" />
     <Compile Include="Pipeline\Interceptors\IPipelineInterceptor.cs" />
-    <Compile Include="Pipeline\Interceptors\InterceptorList.cs" />
+    <Compile Include="Util\ReflectiveMethodInvoker.cs" />
+    <Compile Include="Util\RegistrationList.cs" />
     <Compile Include="Pipeline\MessagePipeline.cs" />
     <Compile Include="Pipeline\MessagePipelineExtensions.cs" />
     <Compile Include="Pipeline\Sinks\CorrelatedMessageRouter.cs" />
@@ -290,7 +296,7 @@
     <Compile Include="Pipeline\Sinks\MessageRouter.cs" />
     <Compile Include="Pipeline\Sinks\InstanceMessageSink.cs" />
     <Compile Include="Pipeline\Sinks\MessageRouterBase.cs" />
-    <Compile Include="Pipeline\Sinks\MessageSinkBase.cs" />
+    <Compile Include="Pipeline\Sinks\PipelineSinkBase.cs" />
     <Compile Include="Pipeline\Sinks\MessageTranslator.cs" />
     <Compile Include="Pipeline\Configuration\MessagePipelineConfiguratorBase.cs" />
     <Compile Include="Exceptions\PipelineException.cs" />
@@ -313,7 +319,6 @@
     <Compile Include="Services\MessageDeferral\Messages\DeferedMessageRepublished.cs" />
     <Compile Include="Services\MessageDeferral\Messages\NewDeferMessageReceived.cs" />
     <Compile Include="Services\Timeout\RemoteTimeoutViewer.cs" />
-    <Compile Include="Util\ReflectiveVisitorBase.cs" />
     <Compile Include="Util\WeakReference.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -2,7 +2,11 @@ namespace Server
 {
     using System.IO;
     using log4net;
-    using MassTransit.Services.Subscriptions.Server;
+    using log4net.Config;
+    using MassTransit;
+    using MassTransit.Configuration;
+    using MassTransit.Services.Subscriptions.Configuration;
+    using MassTransit.Transports.Msmq;
     using MassTransit.WindsorIntegration;
     using Microsoft.Practices.ServiceLocation;
     using Topshelf;
@@ -14,34 +18,45 @@ namespace Server
 
         private static void Main(string[] args)
         {
-            log4net.Config.XmlConfigurator.ConfigureAndWatch(new FileInfo("server.log4net.xml"));
+            XmlConfigurator.ConfigureAndWatch(new FileInfo("server.log4net.xml"));
             _log.Info("Server Loading");
 
-            var cfg = RunnerConfigurator.New(c =>
-                                                 {
-                                                     c.SetServiceName("SampleService");
-                                                     c.SetServiceName("Sample Service");
-                                                     c.SetServiceName("Something");
-                                                     c.DependencyOnMsmq();
+            IRunConfiguration cfg = RunnerConfigurator.New(c =>
+                                                           {
+                                                               c.SetServiceName("SampleService");
+                                                               c.SetServiceName("Sample Service");
+                                                               c.SetServiceName("Something");
+                                                               c.DependencyOnMsmq();
 
-                                                     c.RunAsLocalSystem();
+                                                               c.RunAsLocalSystem();
 
-                                                     c.BeforeStart(a=>
-                                                                       {
-                                                                           var container = new DefaultMassTransitContainer("server.castle.xml");
-                                                                           container.AddComponent<RemoteEndpointCoordinator>();
-                                                                           container.AddComponent<ServerService>();
-
-                                                                           var wob = new WindsorObjectBuilder(container.Kernel);
-                                                                           ServiceLocator.SetLocatorProvider(() => wob);
-                                                                       });
-
-                                                     c.ConfigureService<ServerService>(s=>
-                                                                                           {
-                                                                                               s.WhenStarted(o=>o.Start());
-                                                                                               s.WhenStopped(o=>o.Stop());
-                                                                                           });
-                                                 });
+                                                               c.ConfigureService<PasswordUpdateService>(s =>
+                                                                                                         {
+                                                                                                             s.WhenStarted(o =>
+                                                                                                             {
+                                                                                                                 IServiceBus bus = ServiceBusConfigurator.New(x =>
+                                                                                                                 {
+                                                                                                                     x.ReceiveFrom("msmq://localhost/mt_server");
+                                                                                                                     x.ConfigureService<SubscriptionClientConfigurator>(b => { b.SetSubscriptionServiceEndpoint("msmq://localhost/mt_subscriptions"); });
+                                                                                                                 });
+                                                                                                                 o.Start(bus);
+                                                                                                             });
+                                                                                                             s.WhenStopped(o => o.Stop());
+                                                                                                             s.CreateServiceLocator(()=>
+                                                                                                                                    {
+                                                                                                                                        var container = new DefaultMassTransitContainer();
+                                                                                                                                        IEndpointFactory endpointFactory = EndpointFactoryConfigurator
+                                                                                                                                            .New(x =>
+                                                                                                                                            {
+                                                                                                                                                x.SetObjectBuilder(ServiceLocator.Current.GetInstance<IObjectBuilder>());
+                                                                                                                                                x.RegisterTransport<MsmqEndpoint>();
+                                                                                                                                            });
+                                                                                                                                        container.Kernel.AddComponentInstance("endpointFactory", typeof(IEndpointFactory), endpointFactory);
+                                                                                                                                        container.AddComponent<PasswordUpdateService>();
+                                                                                                                                        return ServiceLocator.Current; //set in DefaultMTContainer
+                                                                                                                                    });
+                                                                                                         });
+                                                           });
             Runner.Host(cfg, args);
         }
     }

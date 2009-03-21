@@ -13,7 +13,7 @@
 namespace MassTransit.Transports.Nms.Tests
 {
 	using System;
-	using Magnum.Common.DateTimeExtensions;
+	using Magnum.DateTimeExtensions;
 	using MassTransit.Tests.Messages;
 	using MassTransit.Tests.TestConsumers;
 	using NUnit.Framework;

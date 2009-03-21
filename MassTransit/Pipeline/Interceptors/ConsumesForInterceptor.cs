@@ -18,7 +18,7 @@ namespace MassTransit.Pipeline.Interceptors
 	using System.Reflection;
 	using Configuration;
 	using Exceptions;
-	using Magnum.Common.Threading;
+	using Magnum.Threading;
 	using Sinks;
 
 	public class ConsumesForInterceptor :
@@ -40,9 +40,9 @@ namespace MassTransit.Pipeline.Interceptors
 
 			var router = correlatedConfigurator.FindOrCreate<TMessage, TKey>();
 
-			UnsubscribeAction result = router.Connect(consumer.CorrelationId, new InstanceMessageSink<TMessage>(message => consumer));
+			UnsubscribeAction result = router.Connect(consumer.CorrelationId, new InstanceMessageSink<TMessage>(message => consumer.Consume));
 
-			UnsubscribeAction remove = context.SubscribedTo(typeof (TMessage), consumer.CorrelationId.ToString());
+			UnsubscribeAction remove = context.SubscribedTo<TMessage,TKey>(consumer.CorrelationId);
 
 			return () => result() && remove();
 		}

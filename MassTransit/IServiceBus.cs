@@ -13,6 +13,8 @@
 namespace MassTransit
 {
     using System;
+    using Pipeline;
+    using Subscriptions;
 
 	/// <summary>
 	/// The action to call to unsubscribe a previously subscribed consumer
@@ -97,5 +99,9 @@ namespace MassTransit
 		/// <typeparam name="TService"></typeparam>
 		/// <returns></returns>
     	TService GetService<TService>();
+
+		IMessagePipeline OutboundPipeline { get; }
+
+		IMessagePipeline InboundPipeline { get; }
     }
 }

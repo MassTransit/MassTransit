@@ -14,28 +14,38 @@ namespace MassTransit.Services.LoadBalancer.Configuration
 {
 	using System;
 	using System.Collections;
+	using System.Collections.Generic;
 	using Internal;
-	using MassTransit.Subscriptions;
 
 	public class LoadBalancerServiceConfigurator :
 		ILoadBalancerServiceConfigurator
 	{
+		private readonly Dictionary<Type, ILoadBalancerStrategy> _types = new Dictionary<Type, ILoadBalancerStrategy>();
 		public Type ServiceType
 		{
 			get { return typeof (ILoadBalancerService); }
 		}
 
-		public IBusService Create(IServiceBus bus, ISubscriptionCache cache, IObjectBuilder builder)
+		public IBusService Create(IServiceBus bus, IObjectBuilder builder)
 		{
 			var arguments = new Hashtable
 				{
 					{ "bus", bus },
-					{ "cache", cache },
 				};
 
 			var service = builder.GetInstance<ILoadBalancerService>(arguments);
 
+			service.AddTypes(_types);
+
 			return service;
 		}
+
+		public void LoadBalance<T>()
+		{
+		}
+	}
+
+	public interface ILoadBalancerStrategy
+	{
 	}
 }

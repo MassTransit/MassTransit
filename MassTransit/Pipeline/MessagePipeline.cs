@@ -17,19 +17,20 @@ namespace MassTransit.Pipeline
 	using Sinks;
 
 	public class MessagePipeline :
-		MessageSinkBase<object, object>
+		PipelineSinkBase<object, object>,
+		IMessagePipeline
 	{
 		private readonly IConfigurePipeline _configurator;
 
-		public MessagePipeline(IMessageSink<object> outputSink, IConfigurePipeline configurator) :
+		public MessagePipeline(IPipelineSink<object> outputSink, IConfigurePipeline configurator) :
 			base(outputSink)
 		{
 			_configurator = configurator;
 		}
 
-		public override IEnumerable<Consumes<object>.All> Enumerate(object message)
+		public override IEnumerable<Action<object>> Enumerate(object message)
 		{
-			foreach (Consumes<object>.All consumer in _outputSink.ReadLock(x => x.Enumerate(message)))
+			foreach (Action<object> consumer in _outputSink.Enumerate(message))
 			{
 				yield return consumer;
 			}
@@ -37,7 +38,7 @@ namespace MassTransit.Pipeline
 
 		public override bool Inspect(IPipelineInspector inspector)
 		{
-			return inspector.Inspect(this, () => _outputSink.ReadLock(x => x.Inspect(inspector)));
+			return inspector.Inspect(this, () => _outputSink.Inspect(inspector));
 		}
 
 		public void Configure(Action<IConfigurePipeline> action)

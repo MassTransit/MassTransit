@@ -18,7 +18,6 @@ namespace MassTransit.Infrastructure.Subscriptions
 	using MassTransit.Subscriptions;
 	using NHibernate;
 	using NHibernate.Criterion;
-	using Services.Subscriptions;
 	using Services.Subscriptions.Server;
 
     public class PersistantSubscriptionRepository :

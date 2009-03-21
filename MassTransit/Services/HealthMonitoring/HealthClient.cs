@@ -12,35 +12,38 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Services.HealthMonitoring
 {
+    using System;
     using System.Timers;
+    using Internal;
+    using Magnum;
     using Messages;
 
     public class HealthClient :
         Consumes<Ping>.All,
-        IHostedService
+        IBusService
     {
-        private readonly IServiceBus _bus;
+        private IServiceBus _bus;
         private readonly int _timeInMilliseconds;
         private readonly int _timeInSeconds;
         private readonly Timer _timer;
+        private readonly Guid _systemId;
 
-        public HealthClient(IServiceBus bus) : this(bus, 3)
+        public HealthClient() : this(3)
         {
         }
 
         /// <summary>
         /// Constructs a new HealthClient object
         /// </summary>
-        /// <param name="bus">The service bus to monitor</param>
         /// <param name="heartbeatInterval">The heartbeat interval in seconds</param>
-        public HealthClient(IServiceBus bus, int heartbeatInterval)
+        public HealthClient(int heartbeatInterval)
         {
-            _bus = bus;
             _timeInSeconds = heartbeatInterval;
             _timeInMilliseconds = heartbeatInterval*1000;
             _timer = new Timer(_timeInMilliseconds);
             _timer.Elapsed += Beat;
             _timer.AutoReset = true;
+            _systemId = CombGuid.Generate();
         }
 
         public bool Enabled
@@ -53,13 +56,16 @@ namespace MassTransit.Services.HealthMonitoring
             _bus.Publish(new Pong(message.CorrelationId, _bus.Endpoint.Uri));
         }
 
-        public void Start()
+        public void Start(IServiceBus bus)
         {
+            _bus = bus;
             _timer.Start();
+            _bus.Publish(new EndpointTurningOn(bus.Endpoint.Uri, _timeInSeconds, _systemId));
         }
 
         public void Stop()
         {
+            _bus.Publish(new EndpointTurningOff(_systemId));
             _timer.Stop();
         }
 
@@ -71,7 +77,7 @@ namespace MassTransit.Services.HealthMonitoring
 
         public void Beat(object sender, ElapsedEventArgs e)
         {
-            _bus.Publish(new Heartbeat(_timeInSeconds, _bus.Endpoint.Uri));
+            _bus.Publish(new Heartbeat(_bus.Endpoint.Uri, _systemId));
         }
     }
 }

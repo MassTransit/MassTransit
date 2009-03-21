@@ -13,11 +13,11 @@
 namespace MassTransit.Services.MessageDeferral
 {
     using System;
+    using Magnum;
     using Messages;
     using Timeout.Messages;
-    using Util;
 
-    public class DeferMessageConsumer :
+	public class DeferMessageConsumer :
         Consumes<DeferMessage>.All
     {
         private readonly IServiceBus _bus;
@@ -31,7 +31,7 @@ namespace MassTransit.Services.MessageDeferral
 
         public void Consume(DeferMessage message)
         {
-            Guid id = CombGuid.NewCombGuid();
+            Guid id = CombGuid.Generate();
 
             _repository.Add(new DeferredMessage(id, message.DeliverAt, message.Message));
 

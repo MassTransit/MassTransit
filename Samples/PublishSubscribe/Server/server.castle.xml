@@ -1,14 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <castle>
 	<components>
-
-		<!-- load all of the services here : Windsor.Register(AllTypes.Of(IHostedService)-->
-		<!-- use the startable facitlity -->
-		<component id="mySimpleServer"
-				   lifestyle="singleton"
-				   service="MassTransit.IHostedService, MassTransit"
-				   type="Server.PasswordUpdateService, Server">
-		</component>
 	</components>
 
 	<facilities>
@@ -17,6 +9,7 @@
 			<bus id="main"
 				 endpoint="msmq://localhost/mt_server">
 				<subscriptionService endpoint="msmq://localhost/mt_subscriptions" />
+        <managementService heartbeatInterval="3" />
 			</bus>
 
 			<transports>

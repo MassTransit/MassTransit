@@ -33,7 +33,7 @@ namespace MassTransit
 		/// </summary>
 		/// <param name="ex">The exception thrown by the message consumer</param>
 		/// <param name="message">The message that was being processed when the exception was thrown</param>
-		public Fault(Exception ex, TMessage message)
+		public Fault(TMessage message, Exception ex)
 		{
 			_caughtException = ex;
 
@@ -133,8 +133,8 @@ namespace MassTransit
 		/// </summary>
 		/// <param name="ex"></param>
 		/// <param name="message"></param>
-		public Fault(Exception ex, TMessage message) :
-			base(ex, message)
+		public Fault(TMessage message, Exception ex) :
+			base(message, ex)
 		{
 		}
 

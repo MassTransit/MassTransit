@@ -14,10 +14,11 @@ namespace MassTransit.Pipeline.Interceptors
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Diagnostics;
 	using System.Linq.Expressions;
 	using System.Reflection;
 	using Exceptions;
-	using Magnum.Common.Threading;
+	using Magnum.Threading;
 
 	public abstract class ConsumesInterceptorBase<TInterceptor> :
 		PipelineInterceptorBase
@@ -86,7 +87,6 @@ namespace MassTransit.Pipeline.Interceptors
 										return () => false;
 
 									context.MessageTypeWasDefined(messageType);
-
 									return connector(interceptor, context);
 								};
 						}
@@ -98,7 +98,6 @@ namespace MassTransit.Pipeline.Interceptors
 										return () => false;
 
 									context.MessageTypeWasDefined(messageType);
-
 									return connector(interceptor, context);
 								};
 						}

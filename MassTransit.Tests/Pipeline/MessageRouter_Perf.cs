@@ -1,24 +1,44 @@
 namespace MassTransit.Tests.Pipeline
 {
+	using System;
 	using System.Diagnostics;
+	using System.Threading;
+	using Magnum.DateTimeExtensions;
 	using MassTransit.Pipeline;
 	using MassTransit.Pipeline.Sinks;
 	using Messages;
 	using NUnit.Framework;
-	using TestConsumers;
+	using Threading;
 
 	[TestFixture]
 	public class MessageRouter_Perf
 	{
+		private ManagedThreadPool<int> _threads;
+		private static PerformantConsumer<PingMessage> _consumer;
+
 		internal class PerformantConsumer<T> :
 			Consumes<T>.All
 			where T : class
 		{
+			private readonly long _limit;
 			private long _count = 0;
+			private readonly ManualResetEvent _complete = new ManualResetEvent(false);
+
+			public ManualResetEvent Complete
+			{
+				get { return _complete; }
+			}
+
+			public PerformantConsumer(long limit)
+			{
+				_limit = limit;
+			}
 
 			public void Consume(T message)
 			{
-				_count++;
+				long value = Interlocked.Increment(ref _count);
+				if (value == _limit)
+					_complete.Set();
 			}
 		}
 
@@ -26,7 +46,7 @@ namespace MassTransit.Tests.Pipeline
 		[Test, Explicit]
 		public void Router_performance_measurement()
 		{
-			IMessageSink<PingMessage> router = SetupRouterOnly();
+			IPipelineSink<PingMessage> router = SetupRouterOnly();
 
 			const int primeLoopCount = 10;
 			SendMessages(router, primeLoopCount);
@@ -45,7 +65,7 @@ namespace MassTransit.Tests.Pipeline
 		[Test, Explicit]
 		public void Nested_router_performance_measurement()
 		{
-			IMessageSink<object> router = SetupTwoRoutersOnly();
+			IPipelineSink<object> router = SetupTwoRoutersOnly();
 
 			const int primeLoopCount = 10;
 			SendMessages(router, primeLoopCount);
@@ -61,27 +81,49 @@ namespace MassTransit.Tests.Pipeline
 			Trace.WriteLine("Messages Per Second: " + loopCount*1000/timer.ElapsedMilliseconds);
 		}
 
-		private static IMessageSink<PingMessage> SetupRouterOnly()
+		[Test, Explicit]
+		public void Threaded_router_performance_test()
 		{
-			var consumer = new PerformantConsumer<PingMessage>();
+			IPipelineSink<object> router = SetupTwoRoutersOnly();
 
-			var messageSink = new InstanceMessageSink<PingMessage>(message => consumer);
+			const int primeLoopCount = 10;
+			SendMessages(router, primeLoopCount);
 
-			var messageSink2 = new InstanceMessageSink<PingMessage>(message => consumer);
-			var messageSink3 = new InstanceMessageSink<PingMessage>(message => consumer);
+
+			const int loopCount = 1500000;
+			_threads = new ManagedThreadPool<int>(delegate { SendMessages(router, loopCount / 2); }, 2, 2);
+
+			Stopwatch timer = Stopwatch.StartNew();
+
+			for (int i = 0; i < 2; i++)
+			{
+				_threads.Enqueue(100);
+			}
+
+			_consumer.Complete.WaitOne(20.Seconds(), true);
+
+			timer.Stop();
+
+			Trace.WriteLine("Elapsed Time: " + timer.ElapsedMilliseconds + "ms");
+			Trace.WriteLine("Messages Per Second: " + loopCount*1000/timer.ElapsedMilliseconds);
+		}
+
+		private static IPipelineSink<PingMessage> SetupRouterOnly()
+		{
+			_consumer = new PerformantConsumer<PingMessage>(1500000);
+
+			var messageSink = new InstanceMessageSink<PingMessage>(message => _consumer.Consume);
 
 			var router = new MessageRouter<PingMessage>();
 			router.Connect(messageSink);
-			router.Connect(messageSink2);
-			router.Connect(messageSink3);
 			return router;
 		}
 
-		private static IMessageSink<object> SetupTwoRoutersOnly()
+		private static IPipelineSink<object> SetupTwoRoutersOnly()
 		{
-			var consumer = new PerformantConsumer<PingMessage>();
+			_consumer = new PerformantConsumer<PingMessage>(1500000);
 
-			var messageSink = new InstanceMessageSink<PingMessage>(message => consumer);
+			var messageSink = new InstanceMessageSink<PingMessage>(message => _consumer.Consume);
 
 			var router = new MessageRouter<PingMessage>();
 			router.Connect(messageSink);
@@ -94,26 +136,26 @@ namespace MassTransit.Tests.Pipeline
 			return nextRouter;
 		}
 
-		private static void SendMessages(IMessageSink<PingMessage> sink, int primeLoopCount)
+		private static void SendMessages(IPipelineSink<PingMessage> sink, int primeLoopCount)
 		{
 			for (int i = 0; i < primeLoopCount; i++)
 			{
 				var message = new PingMessage();
 				foreach (var item in sink.Enumerate(message))
 				{
-					item.Consume(message);
+					item(message);
 				}
 			}
 		}
 
-		private static void SendMessages(IMessageSink<object> sink, int primeLoopCount)
+		private static void SendMessages(IPipelineSink<object> sink, int primeLoopCount)
 		{
 			for (int i = 0; i < primeLoopCount; i++)
 			{
 				var message = new PingMessage();
 				foreach (var item in sink.Enumerate(message))
 				{
-					item.Consume(message);
+					item(message);
 				}
 			}
 		}

@@ -14,7 +14,7 @@ namespace MassTransit.Dashboard.Controllers
 {
     using System;
     using Castle.MonoRail.Framework;
-    using Magnum.Common.DateTimeExtensions;
+    using Magnum.DateTimeExtensions;
     
     using Services.MessageDeferral;
     using Services.MessageDeferral.Messages;

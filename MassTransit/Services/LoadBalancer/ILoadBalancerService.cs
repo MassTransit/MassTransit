@@ -12,11 +12,15 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Services.LoadBalancer
 {
+	using System;
+	using System.Collections.Generic;
+	using Configuration;
 	using Internal;
 
 	public interface ILoadBalancerService :
 		IBusService
 	{
-		void Execute<T>(T message) where T : class;
+		void Execute<T>(T message, Action<object>[] consumers) where T : class;
+		void AddTypes(IEnumerable<KeyValuePair<Type, ILoadBalancerStrategy>> types);
 	}
 }

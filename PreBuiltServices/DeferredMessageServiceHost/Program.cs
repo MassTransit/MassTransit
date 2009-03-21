@@ -46,7 +46,7 @@ namespace DeferredMessageServiceHost
                                                      c.BeforeStart(a=>
                                                                        {
                                                                            var container = new DefaultMassTransitContainer("deferredMessageService.castle.xml");
-                                                                           container.AddComponent<IHostedService, MessageDeferralService>();
+                                                                           container.AddComponent<MessageDeferralService>();
                                                                            container.AddComponent<IDeferredMessageRepository, InMemoryDeferredMessageRepository>();
                                                                            //TODO: Put the Database Repository here too
 

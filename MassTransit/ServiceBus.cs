@@ -13,40 +13,38 @@
 namespace MassTransit
 {
 	using System;
-	using System.Collections.Generic;
+	using System.Reflection;
 	using System.Reflection;
 	using System.Runtime.Serialization;
 	using System.Transactions;
 	using Exceptions;
 	using Internal;
 	using log4net;
-	using Magnum.Common.ObjectExtensions;
+	using Magnum.ObjectExtensions;
+	using Magnum.Reflection;
+	using Magnum.InterfaceExtensions;
 	using Pipeline;
 	using Pipeline.Configuration;
-	using Subscriptions;
 	using Threading;
+	using Util;
 
 	/// <summary>
 	/// A service bus is used to attach message handlers (services) to endpoints, as well as 
 	/// communicate with other service bus instances in a distributed application
 	/// </summary>
 	public class ServiceBus :
-		IServiceBus
+		IControlBus
 	{
 		private static readonly ILog _log;
 
-		private readonly DispatcherContext _dispatcherContext;
-		private readonly ISubscriptionEvent _inboundSubscriptionEvent;
 		private readonly TimeSpan _threadTimeout = TimeSpan.FromSeconds(60);
 		private int _concurrentReceiveThreads = 1;
 		private bool _disposed;
-		private MessagePipeline _inbound;
-		private MessagePipeline _outbound;
 		private ResourceLock<IEndpoint> _receiveThreadLock;
 		private IServiceContainer _serviceContainer;
 		private volatile bool _started;
 		private DynamicThreadPool _threadPool;
-		private ITypeInfoCache _typeInfoCache;
+		private UnregisterAction _unsubscribeEventDispatchers = () => false;
 
 		static ServiceBus()
 		{
@@ -69,42 +67,38 @@ namespace MassTransit
 		/// </summary>
 		public ServiceBus(IEndpoint endpointToListenOn,
 		                  IObjectBuilder objectBuilder,
-		                  ISubscriptionCache subscriptionCache,
-		                  IEndpointFactory endpointFactory,
-		                  ITypeInfoCache typeInfoCache)
+		                  IEndpointFactory endpointFactory)
 		{
+
 			ReceiveTimeout = TimeSpan.FromSeconds(3);
 			endpointToListenOn.MustNotBeNull("endpointToListenOn", "This parameter cannot be null");
 			objectBuilder.MustNotBeNull("objectBuilder", "This parameter cannot be null");
-			subscriptionCache.MustNotBeNull("subscriptionCache", "This parameter cannot be null");
 			endpointFactory.MustNotBeNull("endpointFactory", "This parameter cannot be null");
-			typeInfoCache.MustNotBeNull("typeInfoCache", "This parameter cannot be null");
 
 			Endpoint = endpointToListenOn;
-			SubscriptionCache = subscriptionCache;
 			ObjectBuilder = objectBuilder;
 			EndpointFactory = endpointFactory;
-			_typeInfoCache = typeInfoCache;
 
-			_serviceContainer = new ServiceContainer();
+			_serviceContainer = new ServiceContainer(this);
 
-			_inboundSubscriptionEvent = new SubscriptionCacheEventConnector(SubscriptionCache, Endpoint);
+			OutboundPipeline = MessagePipelineConfigurator.CreateDefault(ObjectBuilder);
 
-			_inbound = MessagePipelineConfigurator.CreateDefault(ObjectBuilder, _inboundSubscriptionEvent);
-
-			_outbound = MessagePipelineConfigurator.CreateDefault(ObjectBuilder, null);
-
-			_dispatcherContext = new DispatcherContext(ObjectBuilder, this, SubscriptionCache);
+			InboundPipeline = MessagePipelineConfigurator.CreateDefault(ObjectBuilder);
+			InboundPipeline.Configure(x =>
+				{
+					_unsubscribeEventDispatchers += x.Register(new InboundOutboundSubscriptionBinder(OutboundPipeline, Endpoint));
+				});
 
 			_threadPool = new DynamicThreadPool(ReceiveFromEndpoint, 1, Environment.ProcessorCount*4);
 
 			PoisonEndpoint = new PoisonEndpointDecorator(new NullEndpoint());
+
+			DataBus = this;
 		}
 
 		public static IServiceBus Null { get; private set; }
 		public IEndpointFactory EndpointFactory { get; private set; }
 		public IObjectBuilder ObjectBuilder { get; private set; }
-		public ISubscriptionCache SubscriptionCache { get; private set; }
 		public TimeSpan ReceiveTimeout { get; set; }
 
 		public int MinimumConsumerThreads
@@ -142,38 +136,36 @@ namespace MassTransit
 		/// </summary>
 		/// <typeparam name="T">The type of the message</typeparam>
 		/// <param name="message">The messages to be published</param>
-		public void Publish<T>(T message) where T : class
+		public void Publish<T>(T message) 
+			where T : class
 		{
-			IPublicationTypeInfo info = _typeInfoCache.GetPublicationTypeInfo<T>();
-
-			IList<Subscription> subs = info.GetConsumers(SubscriptionCache, message);
-
-			if (_log.IsWarnEnabled && subs.Count == 0)
-				_log.WarnFormat("There are no subscriptions for the message type {0} for the bus listening on {1}", typeof (T).FullName, Endpoint.Uri);
-
-			List<Uri> done = new List<Uri>();
-
 			var context = OutboundMessage.Headers;
 
 			context.SetSourceAddress(Endpoint.Uri);
+			context.SetMessageType(typeof (T));
 
-			foreach (Subscription subscription in subs)
+			int publishedCount = 0;
+			foreach (var consumer in OutboundPipeline.Enumerate(message))
 			{
-				if (done.Contains(subscription.EndpointUri))
-					continue;
-
-				IEndpoint endpoint = EndpointFactory.GetEndpoint(subscription.EndpointUri);
-
-				context.SetDestinationAddress(endpoint.Uri);
-				context.SetMessageType(typeof (T));
-
-				endpoint.Send(message, info.TimeToLive);
-
-				done.Add(subscription.EndpointUri);
+				try
+				{
+					consumer(message);
+					publishedCount++;
+				}
+				catch (Exception ex)
+				{
+					_log.Error(string.Format("'{0}' threw an exception publishing message '{1}'",
+						consumer.GetType().FullName, message.GetType().FullName), ex);
+				}
 			}
 
 			context.Reset();
+
+			if (_log.IsWarnEnabled && publishedCount == 0)
+				_log.WarnFormat("There are no subscriptions for the message type {0} for the bus listening on {1}", typeof (T).FullName, Endpoint.Uri);
 		}
+
+		//		endpoint.Send(message, info.TimeToLive);
 
 		/// <summary>
 		/// This is becoming obsolete with the new MakeRequest syntax.
@@ -188,6 +180,10 @@ namespace MassTransit
 		{
 			return _serviceContainer.GetService<TService>();
 		}
+
+		public IMessagePipeline OutboundPipeline { get; private set; }
+
+		public IMessagePipeline InboundPipeline { get; private set; }
 
 		/// <summary>
 		/// The endpoint associated with this instance
@@ -217,21 +213,21 @@ namespace MassTransit
 		/// <param name="condition">A condition predicate to filter which messages are handled by the callback</param>
 		public UnsubscribeAction Subscribe<T>(Action<T> callback, Predicate<T> condition) where T : class
 		{
-			var result = _inbound.Subscribe(new GenericComponent<T>(callback, condition, this));
+			var result = InboundPipeline.Subscribe(callback, condition);
 
 			return result;
 		}
 
 		public UnsubscribeAction Subscribe<T>(T consumer) where T : class
 		{
-			var result = _inbound.Subscribe(consumer);
+			var result = InboundPipeline.Subscribe(consumer);
 
 			return (result);
 		}
 
 		public UnsubscribeAction Subscribe<TComponent>() where TComponent : class
 		{
-			UnsubscribeAction result = _inbound.Subscribe<TComponent>();
+			UnsubscribeAction result = InboundPipeline.Subscribe<TComponent>();
 
 			return (result);
 		}
@@ -272,6 +268,8 @@ namespace MassTransit
 			if (_disposed) return;
 			if (disposing)
 			{
+				_unsubscribeEventDispatchers();
+
 				_receiveThreadLock.Shutdown();
 
 				if (_threadPool != null)
@@ -288,24 +286,16 @@ namespace MassTransit
 					_serviceContainer = null;
 				}
 
-				_typeInfoCache.Dispose();
-				_typeInfoCache = null;
+				InboundPipeline.Dispose();
+				InboundPipeline = null;
 
-				SubscriptionCache.Dispose();
-				SubscriptionCache = null;
+				OutboundPipeline.Dispose();
+				OutboundPipeline = null;
 
-				_inbound.Dispose();
-				_inbound = null;
-
-				_outbound.Dispose();
-				_outbound = null;
-
-				Endpoint.Dispose();
 				Endpoint = null;
 
 				if (PoisonEndpoint != null)
 				{
-					PoisonEndpoint.Dispose();
 					PoisonEndpoint = null;
 				}
 			}
@@ -353,6 +343,11 @@ namespace MassTransit
 
 							throw new MessageException(typeof (object), "An error occurred deserializing a message", sex);
 						}
+						catch(SagaException sax)
+						{
+							selector.MoveMessageTo(PoisonEndpoint);
+							throw;
+						}
 						catch (Exception ex)
 						{
 							_log.Error(string.Format("An exception occurred receiving a message from '{0}'", Endpoint.Uri), ex);
@@ -378,7 +373,7 @@ namespace MassTransit
 		{
 			bool atLeastOneConsumerFailed = false;
 
-			foreach (Consumes<object>.All consumer in _inbound.Enumerate(message))
+			foreach (var consumer in InboundPipeline.Enumerate(message))
 			{
 				try
 				{
@@ -387,7 +382,7 @@ namespace MassTransit
 
 					resourceLock.Release();
 
-					consumer.Consume(message);
+					consumer(message);
 				}
 				catch (Exception ex)
 				{
@@ -396,12 +391,18 @@ namespace MassTransit
 
 					atLeastOneConsumerFailed = true;
 
-					IPublicationTypeInfo info = _typeInfoCache.GetPublicationTypeInfo(message.GetType());
-					info.PublishFault(this, ex, message);
+					// TODO we need to see if the message is correlated in some way and create the appropriate fault
+
+					if(message.Implements(typeof(CorrelatedBy<>)))
+						this.Call("Publish", ClassFactory.New(typeof(Fault<,>), message, ex));
+					else
+						this.Call("Publish", ClassFactory.New(typeof(Fault<>), message, ex));
 				}
 			}
 
 			return atLeastOneConsumerFailed;
 		}
+
+		public IServiceBus DataBus { get; set; }
 	}
 }

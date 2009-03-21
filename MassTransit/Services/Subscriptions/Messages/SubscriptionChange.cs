@@ -12,51 +12,56 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Services.Subscriptions.Messages
 {
-    using System;
+	using System;
+	using Magnum;
 
-    [Serializable]
-    public abstract class SubscriptionChange
-    {
-        private SubscriptionInformation _subscription;
+	[Serializable]
+	public abstract class SubscriptionChange :
+		CorrelatedBy<Guid>
+	{
+		private SubscriptionInformation _subscription;
 
-        protected SubscriptionChange()
-        {
-        }
+		protected SubscriptionChange()
+		{
+		}
 
-        protected SubscriptionChange(string messageName, Uri address)
-            : this(new SubscriptionInformation(messageName, address))
-        {
-        }
+		protected SubscriptionChange(SubscriptionInformation subscription)
+		{
+			_subscription = subscription;
 
-        protected SubscriptionChange(SubscriptionInformation subscription)
-        {
-            _subscription = subscription;
-        }
+			if (_subscription.SubscriptionId == Guid.Empty)
+				_subscription.SubscriptionId = CombGuid.Generate();
+		}
 
-        public SubscriptionInformation Subscription
-        {
-            get { return _subscription; }
-            set { _subscription = value; }
-        }
+		public SubscriptionInformation Subscription
+		{
+			get { return _subscription; }
+			set { _subscription = value; }
+		}
 
-        public bool Equals(SubscriptionChange obj)
-        {
-            if (ReferenceEquals(null, obj)) return false;
-            if (ReferenceEquals(this, obj)) return true;
-            return Equals(obj._subscription, _subscription);
-        }
+		public Guid CorrelationId
+		{
+			get { return _subscription.SubscriptionId; }
+		}
 
-        public override bool Equals(object obj)
-        {
-            if (ReferenceEquals(null, obj)) return false;
-            if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != typeof (SubscriptionChange)) return false;
-            return Equals((SubscriptionChange) obj);
-        }
+		public bool Equals(SubscriptionChange obj)
+		{
+			if (ReferenceEquals(null, obj)) return false;
+			if (ReferenceEquals(this, obj)) return true;
+			return Equals(obj._subscription, _subscription);
+		}
 
-        public override int GetHashCode()
-        {
-            return (_subscription != null ? _subscription.GetHashCode() : 0);
-        }
-    }
+		public override bool Equals(object obj)
+		{
+			if (ReferenceEquals(null, obj)) return false;
+			if (ReferenceEquals(this, obj)) return true;
+			if (obj.GetType() != typeof (SubscriptionChange)) return false;
+			return Equals((SubscriptionChange) obj);
+		}
+
+		public override int GetHashCode()
+		{
+			return (_subscription != null ? _subscription.GetHashCode() : 0);
+		}
+	}
 }

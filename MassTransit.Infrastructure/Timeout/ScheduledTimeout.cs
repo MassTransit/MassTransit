@@ -13,7 +13,7 @@
 namespace MassTransit.Infrastructure.Timeout
 {
 	using System;
-	using Magnum.Common.Data;
+	using Magnum.Data;
 
 	public class ScheduledTimeout :
 		IAggregateRoot

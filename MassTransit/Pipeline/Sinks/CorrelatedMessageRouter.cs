@@ -25,14 +25,14 @@ namespace MassTransit.Pipeline.Sinks
 		MessageRouterBase<TMessage, TKey>
 		where TMessage : class, CorrelatedBy<TKey>
 	{
-		public override IEnumerable<Consumes<TMessage>.All> Enumerate(TMessage message)
+		public override IEnumerable<Action<TMessage>> Enumerate(TMessage message)
 		{
 			return EnumerateSinks(message, message.CorrelationId);
 		}
 
-		public UnsubscribeAction Connect(TKey correlationId, IMessageSink<TMessage> sink)
+		public UnsubscribeAction Connect(TKey correlationId, IPipelineSink<TMessage> sink)
 		{
-			IMessageSink<TMessage> keySink = null;
+			IPipelineSink<TMessage> keySink = null;
 
 			if (_sinks.ReadLock(x => x.TryGetValue(correlationId, out keySink)) == false)
 			{
@@ -59,9 +59,9 @@ namespace MassTransit.Pipeline.Sinks
 			return () => { return remove() && _sinks.WriteLock(x => DisconnectIfEmpty(x, correlationId)); };
 		}
 
-		private static bool DisconnectIfEmpty(IDictionary<TKey, IMessageSink<TMessage>> sinks, TKey correlationId)
+		private static bool DisconnectIfEmpty(IDictionary<TKey, IPipelineSink<TMessage>> sinks, TKey correlationId)
 		{
-			IMessageSink<TMessage> keySink = null;
+			IPipelineSink<TMessage> keySink = null;
 
 			if (!sinks.TryGetValue(correlationId, out keySink))
 				return false;

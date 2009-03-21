@@ -18,11 +18,13 @@ namespace MassTransit.Internal
 	public class ServiceContainer :
 		IServiceContainer
 	{
+		private readonly IServiceBus _bus;
 		private readonly Dictionary<Type, IBusService> _services;
 		private bool _disposed;
 
-		public ServiceContainer()
+		public ServiceContainer(IServiceBus bus)
 		{
+			_bus = bus;
 			_services = new Dictionary<Type, IBusService>();
 		}
 
@@ -43,7 +45,7 @@ namespace MassTransit.Internal
 		{
 			foreach (var service in _services.Values)
 			{
-				service.Start();
+				service.Start(_bus);
 			}
 		}
 

@@ -12,11 +12,9 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests.Pipeline
 {
-	using System;
 	using MassTransit.Pipeline;
 	using MassTransit.Pipeline.Configuration;
 	using MassTransit.Pipeline.Inspectors;
-	using MassTransit.Subscriptions;
 	using Messages;
 	using NUnit.Framework;
 	using Rhino.Mocks;
@@ -28,16 +26,11 @@ namespace MassTransit.Tests.Pipeline
 		public void Setup()
 		{
 			_builder = MockRepository.GenerateMock<IObjectBuilder>();
-			_subscriptionEvent = MockRepository.GenerateMock<ISubscriptionEvent>();
-			_subscriptionEvent.Expect(x => x.SubscribedTo(null)).IgnoreArguments().Repeat.Any().Return(() => true);
-
-			_pipeline = MessagePipelineConfigurator.CreateDefault(_builder, _subscriptionEvent);
+			_pipeline = MessagePipelineConfigurator.CreateDefault(_builder);
 		}
 
 		private IObjectBuilder _builder;
 		private MessagePipeline _pipeline;
-		private ISubscriptionCache _cache;
-		private ISubscriptionEvent _subscriptionEvent;
 
 		[Test]
 		public void The_appropriate_handler_should_be_added()
