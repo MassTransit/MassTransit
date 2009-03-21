@@ -102,6 +102,7 @@
     <Compile Include="Grid\IntegerFactorizer_Specs.cs" />
     <Compile Include="Grid\Messages\LongNumberFactored.cs" />
     <Compile Include="Groups\Group_Specs.cs" />
+    <Compile Include="Load\RequestResponse_LoadTest.cs" />
     <Compile Include="MessageContext_Specs.cs" />
     <Compile Include="Pipeline\MessageRouter_Perf.cs" />
     <Compile Include="Retry_Specs.cs" />

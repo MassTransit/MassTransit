@@ -26,7 +26,10 @@ namespace MassTransit.Tests.TextFixtures
 		{
 			base.EstablishContext();
 
-			LocalBus = ServiceBusConfigurator.New(x => { x.ReceiveFrom("loopback://localhost/mt_client"); });
+			LocalBus = ServiceBusConfigurator.New(x =>
+				{
+					x.ReceiveFrom("loopback://localhost/mt_client");
+				});
 		}
 
 		protected override void TeardownContext()
