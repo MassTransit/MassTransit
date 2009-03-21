@@ -45,7 +45,7 @@ namespace MassTransit.Serialization
 
 		public void Serialize<T>(Stream output, T message)
 		{
-			Check.EnsureSerializable(message);
+			ConventionCheck.EnsureSerializable(message);
 
 			_formatter.Serialize(output, message, GetHeaders());
 		}

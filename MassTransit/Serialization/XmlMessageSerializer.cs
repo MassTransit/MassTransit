@@ -51,7 +51,7 @@ namespace MassTransit.Serialization
 
 		public void Serialize<T>(Stream output, T message)
 		{
-			Check.EnsureSerializable(message);
+			ConventionCheck.EnsureSerializable(message);
 			var envelope = XmlMessageEnvelope.Create(message);
 
 			GetSerializerFor<T>().Serialize(output, envelope);

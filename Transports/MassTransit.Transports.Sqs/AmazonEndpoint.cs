@@ -93,7 +93,7 @@ namespace MassTransit.Transports.Sqs
             }
             catch (Exception ex)
             {
-                throw new EndpointException(this, "Error sending message to " + _queueName, ex);
+                throw new EndpointException(this.Uri, "Error sending message to " + _queueName, ex);
             }
         }
 
@@ -139,7 +139,7 @@ namespace MassTransit.Transports.Sqs
             }
             catch (Exception ex)
             {
-                throw new EndpointException(this, "Error receiving message from " + _queueName, ex);
+                throw new EndpointException(this.Uri, "Error receiving message from " + _queueName, ex);
             }
         }
 

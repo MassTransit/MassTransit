@@ -52,7 +52,7 @@ namespace MassTransit.Transports.Nms
             if (_disposed) throw new ObjectDisposedException("The object has been disposed");
 
             if (_message == null)
-                throw new EndpointException(_endpoint, "Unable to move message since it has not been deserialized");
+                throw new EndpointException(_endpoint.Uri, "Unable to move message since it has not been deserialized");
 
             endpoint.Send(_message, _transportMessage.NMSTimeToLive);
         }

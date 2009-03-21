@@ -108,7 +108,7 @@ namespace MassTransit.Transports.Nms
             }
             catch (Exception ex)
             {
-                throw new EndpointException(this, "Unable to send message of type " + typeof (T).FullName, ex);
+                throw new EndpointException(this.Uri, "Unable to send message of type " + typeof (T).FullName, ex);
             }
         }
 

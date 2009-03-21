@@ -16,6 +16,7 @@ namespace MassTransit.Threading
 	using System.Collections.Generic;
 	using System.Threading;
 	using log4net;
+	using Magnum;
 	using Util;
 
 	/// <summary>

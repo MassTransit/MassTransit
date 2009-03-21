@@ -113,7 +113,7 @@ namespace MassTransit.Transports.Msmq
 			if (_disposed) throw new ObjectDisposedException("The object has been disposed");
 
 			if (!_queue.CanWrite)
-				throw new EndpointException(this, "Not allowed to write to endpoint " + _queueAddress.ActualUri);
+				throw new EndpointException(this.Uri, "Not allowed to write to endpoint " + _queueAddress.ActualUri);
 
 			Type messageType = typeof (T);
 
@@ -148,7 +148,7 @@ namespace MassTransit.Transports.Msmq
 			}
 			catch (MessageQueueException ex)
 			{
-				throw new EndpointException(this, "Problem with " + QueuePath, ex);
+				throw new EndpointException(this.Uri, "Problem with " + QueuePath, ex);
 			}
 
 			if (_log.IsDebugEnabled)
@@ -167,7 +167,7 @@ namespace MassTransit.Transports.Msmq
 			if (_disposed) throw new ObjectDisposedException("The object has been disposed");
 
 			if (!_queue.CanRead)
-				throw new EndpointException(this, string.Format("Not allowed to read from endpoint: '{0}'", _queueAddress.ActualUri));
+				throw new EndpointException(this.Uri, string.Format("Not allowed to read from endpoint: '{0}'", _queueAddress.ActualUri));
 
 			using (MessageEnumerator enumerator = _queue.GetMessageEnumerator2())
 			{
@@ -201,7 +201,7 @@ namespace MassTransit.Transports.Msmq
 			queue.MessageReadPropertyFilter = mpf;
 
 			if (!queue.CanRead)
-				throw new EndpointException(this, "The endpoint could not be found: " + QueuePath);
+				throw new EndpointException(this.Uri, "The endpoint could not be found: " + QueuePath);
 
 			return queue;
 		}

@@ -109,7 +109,7 @@ namespace MassTransit.Transports.Msmq
                     return _message;
                 }
 
-                throw new EndpointException(_endpoint, "Unable to retrieve current message from queue");
+                throw new EndpointException(_endpoint.Uri, "Unable to retrieve current message from queue");
             }
             catch (MessageQueueException mqex)
             {

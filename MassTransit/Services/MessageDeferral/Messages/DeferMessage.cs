@@ -13,6 +13,7 @@
 namespace MassTransit.Services.MessageDeferral.Messages
 {
     using System;
+    using Magnum;
     using Util;
 
     [Serializable]

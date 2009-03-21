@@ -2,6 +2,7 @@ namespace MassTransit.Transports.Nms.Tests
 {
     using System;
     using Configuration;
+    using Magnum;
     using Serialization;
     using Util;
 
