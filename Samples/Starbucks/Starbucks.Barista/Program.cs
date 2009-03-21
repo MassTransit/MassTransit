@@ -31,17 +31,22 @@
 
                                                      c.BeforeStart(a=>
                                                                        {
-                                                                           IWindsorContainer container = new DefaultMassTransitContainer("Starbucks.Barista.Castle.xml");
-                                                                           var builder = new WindsorObjectBuilder(container.Kernel);
-                                                                           ServiceLocator.SetLocatorProvider(() => builder);
-
-                                                                           container.AddComponent<DrinkPreparationSaga>();
-                                                                           container.AddComponent<BaristaService>();
-                                                                           container.AddComponent<ISagaRepository<DrinkPreparationSaga>, InMemorySagaRepository<DrinkPreparationSaga>>();
+                                                                           
                                                                        });
 
                                                      c.ConfigureService<BaristaService>(s=>
                                                                                               {
+                                                                                                  s.CreateServiceLocator(()=>
+                                                                                                                         {
+                                                                                                                             IWindsorContainer container = new DefaultMassTransitContainer("Starbucks.Barista.Castle.xml");
+                                                                                                                             
+                                                                                                                             container.AddComponent<DrinkPreparationSaga>();
+                                                                                                                             container.AddComponent<BaristaService>();
+                                                                                                                             container.AddComponent<ISagaRepository<DrinkPreparationSaga>, InMemorySagaRepository<DrinkPreparationSaga>>();
+
+                                                                                                                             return ServiceLocator.Current;
+
+                                                                                                                         });
                                                                                                   s.WhenStarted(o=>o.Start());
                                                                                                   s.WhenStopped(o=>o.Stop());
                                                                                               });

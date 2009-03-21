@@ -30,15 +30,18 @@
 
                                                      c.BeforeStart(a=>
                                                                        {
-                                                                           IWindsorContainer container = new DefaultMassTransitContainer("Starbucks.Cashier.Castle.xml");
-                                                                           container.AddComponent<CashierService>();
-                                                                           var builder = new WindsorObjectBuilder(container.Kernel);
-                                                                           ServiceLocator.SetLocatorProvider(() => builder);
-                                                                           container.AddComponent<FriendlyCashier>();
+                                                                           
                                                                        });
 
                                                      c.ConfigureService<CashierService>(s=>
                                                                                               {
+                                                                                                  s.CreateServiceLocator(() =>
+                                                                                                                         {
+                                                                                                                             IWindsorContainer container = new DefaultMassTransitContainer("Starbucks.Cashier.Castle.xml");
+                                                                                                                             container.AddComponent<CashierService>();
+                                                                                                                             container.AddComponent<FriendlyCashier>();
+                                                                                                                             return ServiceLocator.Current;
+                                                                                                                         });
                                                                                                   s.WhenStarted(o=>o.Start());
                                                                                                   s.WhenStopped(o=>o.Stop());
                                                                                               });

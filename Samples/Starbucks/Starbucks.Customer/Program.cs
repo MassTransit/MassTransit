@@ -4,6 +4,7 @@
     using System.Windows.Forms;
     using Castle.Windsor;
     using MassTransit.WindsorIntegration;
+    using Microsoft.Practices.ServiceLocation;
     using Topshelf;
     using Topshelf.Configuration;
 
@@ -26,13 +27,13 @@
                                                                    c.DependencyOnMsmq();
                                                                    c.UseWinFormHost<OrderDrinkForm>();
 
-                                                                   c.BeforeStart(a =>
-                                                                                     {
-                                                                                         IWindsorContainer container =new DefaultMassTransitContainer("Starbucks.Customer.Castle.xml");
-                                                                                         container.AddComponent<CustomerService>();
-                                                                                         container.AddComponent<OrderDrinkForm>();
-                                                                                     });
-                                                                   c.ConfigureService<CustomerService>();
+                                                                   c.ConfigureService<CustomerService>(s=> s.CreateServiceLocator(()=>
+                                                                                                                                  {
+                                                                                                                                      IWindsorContainer container = new DefaultMassTransitContainer("Starbucks.Customer.Castle.xml");
+                                                                                                                                      container.AddComponent<CustomerService>();
+                                                                                                                                      container.AddComponent<OrderDrinkForm>();
+                                                                                                                                      return ServiceLocator.Current;
+                                                                                                                                  }));
                                                                });
             Runner.Host(cfg, args);
         }
