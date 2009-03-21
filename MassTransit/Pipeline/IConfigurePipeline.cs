@@ -14,15 +14,20 @@ namespace MassTransit.Pipeline
 {
 	using System;
 	using Interceptors;
+	using Internal;
 
 	public interface IConfigurePipeline
 	{
 		UnsubscribeAction Subscribe<TComponent>()
 			where TComponent : class;
 
+		UnsubscribeAction Subscribe<TMessage>(Action<TMessage> handler, Predicate<TMessage> acceptor)
+			where TMessage : class;
+
 		UnsubscribeAction Subscribe<TComponent>(TComponent instance)
 			where TComponent : class;
 
 		UnregisterAction Register(IPipelineInterceptor interceptor);
+		UnregisterAction Register(ISubscriptionEvent subscriptionEventHandler);
 	}
 }

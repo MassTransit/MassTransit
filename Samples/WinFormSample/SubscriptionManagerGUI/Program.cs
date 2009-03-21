@@ -1,32 +1,20 @@
-﻿// Copyright 2007-2008 The Apache Software Foundation.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed 
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
-namespace SubscriptionManagerGUI
+﻿namespace SubscriptionManagerGUI
 {
-    using System.Windows.Forms;
-    using Castle.Core;
-    using log4net;
-    using MassTransit;
-    using MassTransit.Services.HealthMonitoring;
-    using MassTransit.Services.HealthMonitoring.Server;
-    using MassTransit.Services.Subscriptions;
-    using MassTransit.Services.Subscriptions.Server;
-    using MassTransit.Services.Timeout;
-    using MassTransit.WindsorIntegration;
-    using Microsoft.Practices.ServiceLocation;
-    using Topshelf;
-    using Topshelf.Configuration;
+	using log4net;
+	using MassTransit;
+	using MassTransit.Configuration;
+	using MassTransit.Saga;
+	using MassTransit.Services.HealthMonitoring;
+	using MassTransit.Services.Subscriptions.Configuration;
+	using MassTransit.Services.Subscriptions.Server;
+	using MassTransit.Services.Timeout;
+	using MassTransit.Transports.Msmq;
+	using MassTransit.WindsorIntegration;
+	using Microsoft.Practices.ServiceLocation;
+	using Topshelf;
+	using Topshelf.Configuration;
 
-    internal static class Program
+	internal static class Program
 	{
 		private static readonly ILog _log = LogManager.GetLogger(typeof (Program));
 
@@ -34,51 +22,166 @@ namespace SubscriptionManagerGUI
 		{
 			_log.Info("SubscriptionManagerGUI Loading...");
 
-		    var cfg = RunnerConfigurator.New(c =>
-		                                         {
-                                                     c.SetServiceName("SubscriptionManagerGUI");
-                                                     c.SetDisplayName("Sample GUI Subscription Service");
-                                                     c.SetDescription("Coordinates subscriptions between multiple systems");
-		                                             c.DependencyOnMsmq();
-                                                     c.RunAsLocalSystem();
-                                                     c.UseWinFormHost<SubscriptionManagerForm>();
+			var cfg = RunnerConfigurator.New(x =>
+				{
+					x.SetServiceName("SubscriptionManagerGUI");
+					x.SetDisplayName("Sample GUI Subscription Service");
+					x.SetDescription("Coordinates subscriptions between multiple systems");
+					x.DependencyOnMsmq();
+					x.RunAsLocalSystem();
+					x.UseWinFormHost<SubscriptionManagerForm>();
 
-                                                     c.BeforeStart(s=>
-                                                                       {
-                                                                           var container = new DefaultMassTransitContainer("SubscriptionManager.Castle.xml");
-                                                                           container.AddComponentLifeStyle("followerRepository", typeof(FollowerRepository), LifestyleType.Singleton);
+					x.BeforeStart(s =>
+						{
+							var container = new DefaultMassTransitContainer();
 
-                                                                           container.AddComponent<ISubscriptionRepository, InMemorySubscriptionRepository>();
-                                                                           container.AddComponent<RemoteEndpointCoordinator>();
-                                                                           container.AddComponent<IHostedService, SubscriptionService>();
+							IEndpointFactory endpointFactory = EndpointFactoryConfigurator.New(e =>
+								{
+									e.SetObjectBuilder(container.Resolve<IObjectBuilder>());
+									e.RegisterTransport<MsmqEndpoint>();
+								});
+							container.Kernel.AddComponentInstance("endpointFactory", typeof (IEndpointFactory), endpointFactory);
 
+							container.AddComponent<SubscriptionManagerForm>();
 
-                                                                           container.AddComponent<IHealthCache, LocalHealthCache>();
-                                                                           container.AddComponent<IHeartbeatTimer, InMemoryHeartbeatTimer>();
-                                                                           container.AddComponent<IHostedService, HealthService>();
-                                                                           container.AddComponent<HeartbeatMonitor>();
-                                                                           container.AddComponent<Investigator>();
-                                                                           container.AddComponent<Reporter>();
+							var wob = new WindsorObjectBuilder(container.Kernel);
+							ServiceLocator.SetLocatorProvider(() => wob);
+						});
 
-                                                                           container.AddComponent<ITimeoutRepository, InMemoryTimeoutRepository>();
-                                                                           container.AddComponent<IHostedService, TimeoutService>();
-                                                                           container.AddComponent<ScheduleTimeoutConsumer>();
-                                                                           container.AddComponent<CancelTimeoutConsumer>();
+					x.ConfigureService<SubscriptionService>(ConfigureSubscriptionService);
 
-                                                                           container.AddComponent<SubscriptionManagerForm>();
-                                                                           container.AddComponent<SubscriptionManagerService>();
+					x.ConfigureService<TimeoutService>(ConfigureTimeoutService);
 
-                                                                           var wob = new WindsorObjectBuilder(container.Kernel);
-                                                                           ServiceLocator.SetLocatorProvider(()=>wob);
-                                                                       });
-
-		                                             c.ConfigureService<SubscriptionManagerService>(s =>
-		                                                                                                {
-		                                                                                                    s.WhenStarted(o => o.Start());
-		                                                                                                    s.WhenStopped(o => o.Stop());
-		                                                                                                });
-		                                         });
+					x.ConfigureService<HealthService>(ConfigureHealthService);
+				});
 			Runner.Host(cfg, args);
+		}
+
+		private static void ConfigureSubscriptionService(IServiceConfigurator<SubscriptionService> configurator)
+		{
+			configurator.CreateServiceLocator(() =>
+				{
+					var container = new DefaultMassTransitContainer();
+
+					container.AddComponent("sagaRepository", typeof (ISagaRepository<>), typeof (InMemorySagaRepository<>));
+
+					container.AddComponent<ISubscriptionRepository, InMemorySubscriptionRepository>();
+					container.AddComponent<SubscriptionService, SubscriptionService>(typeof (SubscriptionService).Name);
+
+					var endpointFactory = EndpointFactoryConfigurator.New(x =>
+						{
+							// the default
+							x.SetObjectBuilder(container.Resolve<IObjectBuilder>());
+							x.RegisterTransport<MsmqEndpoint>();
+						});
+
+					container.Kernel.AddComponentInstance("endpointFactory", typeof (IEndpointFactory), endpointFactory);
+
+					var bus = ServiceBusConfigurator.New(servicesBus =>
+						{
+							servicesBus.SetObjectBuilder(container.Resolve<IObjectBuilder>());
+							servicesBus.ReceiveFrom("msmq://localhost/mt_subscriptions");
+						});
+
+					container.Kernel.AddComponentInstance("bus", typeof (IServiceBus), bus);
+
+					return container.Resolve<IObjectBuilder>();
+				});
+
+			configurator.WhenStarted(service => { service.Start(); });
+
+			configurator.WhenStopped(service =>
+				{
+					service.Stop();
+					service.Dispose();
+				});
+		}
+
+		private static void ConfigureTimeoutService(IServiceConfigurator<TimeoutService> configurator)
+		{
+			configurator.CreateServiceLocator(() =>
+				{
+					var container = new DefaultMassTransitContainer();
+
+					container.AddComponent<ITimeoutRepository, InMemoryTimeoutRepository>();
+					container.AddComponent<TimeoutService>(typeof (TimeoutService).Name);
+					container.AddComponent<ScheduleTimeoutConsumer>();
+					container.AddComponent<CancelTimeoutConsumer>();
+
+					var endpointFactory = EndpointFactoryConfigurator.New(x =>
+						{
+							// the default
+							x.SetObjectBuilder(container.Resolve<IObjectBuilder>());
+							x.RegisterTransport<MsmqEndpoint>();
+						});
+
+					container.Kernel.AddComponentInstance("endpointFactory", typeof (IEndpointFactory), endpointFactory);
+
+					var bus = ServiceBusConfigurator.New(x =>
+						{
+							x.SetObjectBuilder(container.Resolve<IObjectBuilder>());
+							x.ReceiveFrom("msmq://localhost/mt_timeout");
+							x.ConfigureService<SubscriptionClientConfigurator>(client =>
+								{
+									// need to add the ability to read from configuratino settings somehow
+									client.SetSubscriptionServiceEndpoint("msmq://localhost/mt_subscriptions");
+								});
+						});
+					container.Kernel.AddComponentInstance("bus", typeof (IServiceBus), bus);
+
+					return container.Resolve<IObjectBuilder>();
+				});
+
+			configurator.WhenStarted(service => { service.Start(); });
+
+			configurator.WhenStopped(service =>
+				{
+					service.Stop();
+					service.Dispose();
+				});
+		}
+
+		private static void ConfigureHealthService(IServiceConfigurator<HealthService> configurator)
+		{
+			configurator.CreateServiceLocator(() =>
+				{
+					var container = new DefaultMassTransitContainer();
+
+					container.AddComponent<HealthService>(typeof (HealthService).Name);
+					container.AddComponent("sagaRepository", typeof (ISagaRepository<>), typeof (InMemorySagaRepository<>));
+
+					var endpointFactory = EndpointFactoryConfigurator.New(x =>
+						{
+							// the default
+							x.SetObjectBuilder(container.Resolve<IObjectBuilder>());
+							x.RegisterTransport<MsmqEndpoint>();
+						});
+
+					container.Kernel.AddComponentInstance("endpointFactory", typeof (IEndpointFactory), endpointFactory);
+
+					var bus = ServiceBusConfigurator.New(x =>
+						{
+							x.SetObjectBuilder(container.Resolve<IObjectBuilder>());
+							x.ReceiveFrom("msmq://localhost/mt_health");
+							x.ConfigureService<SubscriptionClientConfigurator>(client =>
+								{
+									// need to add the ability to read from configuratino settings somehow
+									client.SetSubscriptionServiceEndpoint("msmq://localhost/mt_subscriptions");
+								});
+						});
+
+					container.Kernel.AddComponentInstance("bus", typeof (IServiceBus), bus);
+
+					return container.Resolve<IObjectBuilder>();
+				});
+
+			configurator.WhenStarted(service => { service.Start(); });
+
+			configurator.WhenStopped(service =>
+				{
+					service.Stop();
+					service.Dispose();
+				});
 		}
 	}
 }

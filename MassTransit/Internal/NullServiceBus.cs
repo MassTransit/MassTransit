@@ -13,6 +13,7 @@
 namespace MassTransit.Internal
 {
 	using System;
+	using Pipeline;
 
 	public class NullServiceBus :
 		IServiceBus
@@ -68,6 +69,21 @@ namespace MassTransit.Internal
 		public TService GetService<TService>()
 		{
 			throw new System.NotImplementedException();
+		}
+
+		public UnregisterAction RegisterEventHandler(ISubscriptionEvent subscriptionEvent)
+		{
+			throw new System.NotImplementedException();
+		}
+
+		public IMessagePipeline OutboundPipeline
+		{
+			get { throw new System.NotImplementedException(); }
+		}
+
+		public IMessagePipeline InboundPipeline
+		{
+			get { throw new System.NotImplementedException(); }
 		}
 	}
 }

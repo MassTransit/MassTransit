@@ -15,8 +15,7 @@ namespace MassTransit.Services.MessageDeferral
 	using System;
 	using log4net;
 
-    public class MessageDeferralService :
-        IHostedService
+    public class MessageDeferralService
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof (MessageDeferralService));
         private readonly IServiceBus _bus;

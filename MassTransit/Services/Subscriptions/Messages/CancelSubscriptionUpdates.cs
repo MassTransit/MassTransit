@@ -12,21 +12,29 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Services.Subscriptions.Messages
 {
-    using System;
+	using System;
+	using Magnum;
 
-    [Serializable]
-    public class CancelSubscriptionUpdates
-    {
-        protected CancelSubscriptionUpdates()
-        {
-        }
+	[Serializable]
+	public class CancelSubscriptionUpdates :
+		CorrelatedBy<Guid>
+	{
+		protected CancelSubscriptionUpdates()
+		{
+		}
 
-        public CancelSubscriptionUpdates(Uri requstingUri)
-        {
-            RequestingUri = requstingUri;
-        }
+		public CancelSubscriptionUpdates(Uri requestingUri)
+			: this(CombGuid.Generate(), requestingUri)
+		{
+		}
 
+		public CancelSubscriptionUpdates(Guid correlationId, Uri requestingUri)
+		{
+			RequestingUri = requestingUri;
+			CorrelationId = correlationId;
+		}
 
-        public Uri RequestingUri { get; set; }
-    }
+		public Uri RequestingUri { get; set; }
+		public Guid CorrelationId { get; set; }
+	}
 }

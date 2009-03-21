@@ -17,7 +17,7 @@ namespace MassTransit.Batch.Pipeline
     using System.Linq.Expressions;
     using System.Reflection;
     using Exceptions;
-    using Magnum.Common.Threading;
+    using Magnum.Threading;
     using MassTransit.Pipeline.Interceptors;
     using MassTransit.Pipeline.Sinks;
 
@@ -43,9 +43,9 @@ namespace MassTransit.Batch.Pipeline
 
             var router = configurator.FindOrCreate<TMessage, TBatchId>();
 
-            var result = router.Connect(new InstanceMessageSink<Batch<TMessage, TBatchId>>(message => consumer));
+            var result = router.Connect(new InstanceMessageSink<Batch<TMessage, TBatchId>>(message => consumer.Consume));
 
-			UnsubscribeAction remove = context.SubscribedTo(typeof(TMessage));
+			UnsubscribeAction remove = context.SubscribedTo<TMessage>();
 
             return () => result() && (router.SinkCount == 0) && remove();
         }
@@ -60,7 +60,7 @@ namespace MassTransit.Batch.Pipeline
 
             var result = router.Connect(new ComponentMessageSink<TComponent, Batch<TMessage, TBatchId>>(context));
 
-			UnsubscribeAction remove = context.SubscribedTo(typeof(TMessage));
+			UnsubscribeAction remove = context.SubscribedTo<TMessage>();
 
             return () => result() && (router.SinkCount == 0) && remove();
         }

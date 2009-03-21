@@ -13,17 +13,13 @@
 namespace MassTransit.Transports.Msmq.Tests
 {
     using System;
-    using System.Collections;
     using System.Threading;
-    using Configuration;
-    using Magnum.Common.DateTimeExtensions;
+    using Magnum.DateTimeExtensions;
     using MassTransit.Tests;
     using MassTransit.Tests.Messages;
     using MassTransit.Tests.TestConsumers;
     using NUnit.Framework;
     using NUnit.Framework.SyntaxHelpers;
-    using Rhino.Mocks;
-    using Serialization;
     using TestFixtures;
 
     [TestFixture]

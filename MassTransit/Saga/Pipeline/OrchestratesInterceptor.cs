@@ -41,7 +41,7 @@ namespace MassTransit.Saga.Pipeline
 
             var result = router.Connect(sink);
 
-			UnsubscribeAction remove = context.SubscribedTo(typeof(TMessage));
+			UnsubscribeAction remove = context.SubscribedTo<TMessage>();
 
             return () => result() && (router.SinkCount == 0) && remove();
         }

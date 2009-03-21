@@ -14,7 +14,7 @@ namespace MassTransit.Tests.Saga.StateMachine
 {
 	using System;
 	using System.Runtime.Serialization;
-	using Magnum.Common.StateMachine;
+	using Magnum.StateMachine;
 	using MassTransit.Saga;
 	using Messages;
 
@@ -93,17 +93,4 @@ namespace MassTransit.Tests.Saga.StateMachine
 		public IServiceBus Bus { get; set; }
 	}
 
-	public class SagaStateMachine<T> :
-		StateMachine<T>
-		where T : SagaStateMachine<T>
-	{
-		protected SagaStateMachine()
-		{
-		}
-
-		public SagaStateMachine(SerializationInfo info, StreamingContext context)
-			: base(info, context)
-		{
-		}
-	}
 }

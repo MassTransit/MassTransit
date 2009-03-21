@@ -16,7 +16,7 @@ namespace MassTransit.Serialization
 	using System.Collections.Generic;
 	using System.Runtime.Remoting.Messaging;
 	using Internal;
-	using Magnum.Common.ObjectExtensions;
+	using Magnum.ObjectExtensions;
 
 	public class BinaryMessageEnvelope :
 		MessageEnvelopeBase

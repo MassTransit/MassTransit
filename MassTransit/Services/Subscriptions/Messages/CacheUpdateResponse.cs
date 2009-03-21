@@ -14,26 +14,25 @@ namespace MassTransit.Services.Subscriptions.Messages
 {
     using System;
     using System.Collections.Generic;
-    using MassTransit.Subscriptions;
 
     [Serializable]
     public class CacheUpdateResponse
     {
-        private List<Subscription> _subscriptions;
+		private List<SubscriptionInformation> _subscriptions;
 
         protected CacheUpdateResponse()
         {
         }
 
-        public CacheUpdateResponse(IEnumerable<Subscription> subscriptions)
+		public CacheUpdateResponse(IEnumerable<SubscriptionInformation> subscriptions)
         {
-            _subscriptions = new List<Subscription>(subscriptions);
+			_subscriptions = new List<SubscriptionInformation>(subscriptions);
         }
 
-        public IList<Subscription> Subscriptions
+        public IList<SubscriptionInformation> Subscriptions
         {
             get { return _subscriptions; }
-            set { _subscriptions = new List<Subscription>(value); }
+			set { _subscriptions = new List<SubscriptionInformation>(value); }
         }
     }
 }

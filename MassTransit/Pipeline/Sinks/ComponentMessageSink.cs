@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Pipeline.Sinks
 {
+	using System;
 	using System.Collections.Generic;
 	using Exceptions;
 	using Interceptors;
@@ -23,7 +24,7 @@ namespace MassTransit.Pipeline.Sinks
 	/// <typeparam name="TComponent">The component type to handle the message</typeparam>
 	/// <typeparam name="TMessage">The message to handle</typeparam>
 	public class ComponentMessageSink<TComponent, TMessage> :
-		IMessageSink<TMessage>
+		IPipelineSink<TMessage>
 		where TMessage : class
 		where TComponent : class, Consumes<TMessage>.All
 	{
@@ -38,13 +39,13 @@ namespace MassTransit.Pipeline.Sinks
 		{
 		}
 
-		public IEnumerable<Consumes<TMessage>.All> Enumerate(TMessage message)
+		public IEnumerable<Action<TMessage>> Enumerate(TMessage message)
 		{
 			Consumes<TMessage>.All consumer = BuildConsumer();
 
 			try
 			{
-				yield return consumer;
+				yield return consumer.Consume;
 			}
 			finally
 			{

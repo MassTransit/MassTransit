@@ -15,7 +15,7 @@ namespace MassTransit.Transports.Msmq.Tests
     using System;
     using System.Messaging;
     using System.Transactions;
-    using Magnum.Common.DateTimeExtensions;
+    using Magnum.DateTimeExtensions;
     using MassTransit.Tests;
     using NUnit.Framework;
 

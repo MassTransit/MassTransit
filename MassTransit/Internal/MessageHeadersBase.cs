@@ -14,7 +14,7 @@ namespace MassTransit.Internal
 {
 	using System;
 	using log4net;
-	using Magnum.Common.ObjectExtensions;
+	using Magnum.ObjectExtensions;
 
 	public class MessageHeadersBase :
 		ISetMessageHeaders
@@ -75,7 +75,7 @@ namespace MassTransit.Internal
 
 		public void SetMessageType(Type messageType)
 		{
-			MessageType = GetMessageTypeHeaderString(messageType);
+			MessageType = messageType.ToMessageName();
 		}
 
 		public void SetMessageType(string messageType)
@@ -106,11 +106,6 @@ namespace MassTransit.Internal
 
 				return null;
 			}
-		}
-
-		public static string GetMessageTypeHeaderString(Type messageType)
-		{
-			return string.Format("{0}, {1}", messageType.FullName, messageType.Assembly.FullName);
 		}
 	}
 }

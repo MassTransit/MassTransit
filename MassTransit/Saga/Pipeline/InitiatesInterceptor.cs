@@ -29,7 +29,7 @@ namespace MassTransit.Saga.Pipeline
 
 		protected virtual UnsubscribeAction Connect<TComponent, TMessage>(IInterceptorContext context)
 			where TMessage : class, CorrelatedBy<Guid>
-			where TComponent : class, Orchestrates<TMessage>, ISaga
+			where TComponent : class, InitiatedBy<TMessage>, ISaga
 		{
 			MessageRouterConfigurator routerConfigurator = MessageRouterConfigurator.For(context.Pipeline);
 
@@ -41,7 +41,7 @@ namespace MassTransit.Saga.Pipeline
 
 			var result = router.Connect(sink);
 
-			UnsubscribeAction remove = context.SubscribedTo(typeof(TMessage));
+			UnsubscribeAction remove = context.SubscribedTo<TMessage>();
 
 			return () => result() && (router.SinkCount == 0) && remove();
 		}

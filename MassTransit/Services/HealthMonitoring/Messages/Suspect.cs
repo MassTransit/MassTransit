@@ -15,20 +15,29 @@ namespace MassTransit.Services.HealthMonitoring.Messages
     using System;
 
     [Serializable]
-    public class Suspect
+    public class Suspect :
+        CorrelatedBy<Guid>
     {
         private readonly Uri _endpointUri;
+        private readonly Guid _correlationId;
 
-
-        public Suspect(Uri endpointUri)
+        public Suspect(Uri endpointUri, Guid correlationId)
         {
             _endpointUri = endpointUri;
+            _correlationId = correlationId;
         }
 
 
         public Uri EndpointUri
         {
             get { return _endpointUri; }
+        }
+        public Guid CorrelationId
+        {
+            get
+            {
+                return _correlationId;
+            }
         }
     }
 }

@@ -14,74 +14,71 @@ namespace MassTransit.Services.LoadBalancer
 {
 	using System;
 	using System.Collections.Generic;
+	using Configuration;
 	using Exceptions;
 	using Internal;
 	using log4net;
 	using MassTransit.Subscriptions;
+	using Pipeline;
 
 	public class LoadBalancerService :
 		ILoadBalancerService
 	{
 		private static readonly ILog _log = LogManager.GetLogger(typeof (LoadBalancerService));
 		private static readonly Random _randomizer = new Random();
+		private readonly Dictionary<Type, ILoadBalancerStrategy> _types = new Dictionary<Type, ILoadBalancerStrategy>();
 
 		private readonly IObjectBuilder _builder;
-		private readonly IServiceBus _bus;
-		private readonly ISubscriptionCache _cache;
+		private IServiceBus _bus;
 		private readonly IEndpointFactory _endpointFactory;
-		private readonly ITypeInfoCache _typeInfoCache;
 
-		public LoadBalancerService(IServiceBus bus, ISubscriptionCache cache, IObjectBuilder builder)
+		public LoadBalancerService(IObjectBuilder builder, IEndpointFactory endpointFactory)
 		{
-			_bus = bus;
-			_cache = cache;
 			_builder = builder;
-
-			_typeInfoCache = _builder.GetInstance<ITypeInfoCache>();
-			_endpointFactory = _builder.GetInstance<IEndpointFactory>();
+			_endpointFactory = endpointFactory;
 		}
 
-		public void Start()
+		public void Start(IServiceBus bus)
 		{
+			_bus = bus;
 		}
 
 		public void Stop()
 		{
 		}
 
-		public void Execute<T>(T message)
+		public void Execute<T>(T message, Action<object>[] consumers)
 			where T : class
 		{
-			IPublicationTypeInfo info = _typeInfoCache.GetPublicationTypeInfo<T>();
-
-			IList<Subscription> subs = info.GetConsumers(_cache, message);
-
-			if (subs.Count == 0)
+			if (consumers.Length == 0)
 				throw new MessageException(typeof (T), "No subscriptions for " + typeof (T).FullName);
 
-			IEndpoint endpoint = SelectNode(subs);
+			Action<object> consumer = SelectConsumer(consumers);
 
 			OutboundMessage.Set(x =>
 				{
 					x.SetSourceAddress(_bus.Endpoint.Uri);
-					x.SetDestinationAddress(endpoint.Uri);
 					x.SetMessageType(typeof (T));
 				});
 
-			endpoint.Send(message, info.TimeToLive);
+			consumer(message);
 
 			OutboundMessage.Headers.Reset();
 		}
 
-		private IEndpoint SelectNode(IList<Subscription> subs)
+		public void AddTypes(IEnumerable<KeyValuePair<Type, ILoadBalancerStrategy>> types)
 		{
-			int index = _randomizer.Next(subs.Count - 1);
+			foreach (KeyValuePair<Type, ILoadBalancerStrategy> pair in types)
+			{
+				_types.Add(pair.Key, pair.Value);
+			};
+		}
 
-			var subscription = subs[index];
+		private Action<object> SelectConsumer(Action<object>[] consumers)
+		{
+			int index = _randomizer.Next(consumers.Length - 1);
 
-			IEndpoint endpoint = _endpointFactory.GetEndpoint(subscription.EndpointUri);
-
-			return endpoint;
+			return consumers[index];
 		}
 
 		public void Dispose()

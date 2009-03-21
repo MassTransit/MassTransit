@@ -18,10 +18,10 @@ namespace MassTransit.Pipeline.Configuration
 
 	public class MessageRouterConfigurator
 	{
-		private readonly IMessageSink<object> _sink;
+		private readonly IPipelineSink<object> _sink;
 		private readonly object _typedSink;
 
-		private MessageRouterConfigurator(IMessageSink<object> sink)
+		private MessageRouterConfigurator(IPipelineSink<object> sink)
 		{
 			_sink = sink;
 		}
@@ -39,7 +39,7 @@ namespace MassTransit.Pipeline.Configuration
 			if (_sink != null)
 				_sink.Inspect(scope);
 			else if (_typedSink != null)
-				TranslateTo<IMessageSink<TMessage>>.From(_typedSink).Inspect(scope);
+				TranslateTo<IPipelineSink<TMessage>>.From(_typedSink).Inspect(scope);
 
 			return scope.Router ?? ConfigureRouter<TMessage>(scope.ObjectRouter);
 		}
@@ -59,7 +59,7 @@ namespace MassTransit.Pipeline.Configuration
 			return router;
 		}
 
-		public UnsubscribeAction Connect<TMessage>(MessagePipeline pipeline, IMessageSink<TMessage> sink)
+		public UnsubscribeAction Connect<TMessage>(IMessagePipeline pipeline, IPipelineSink<TMessage> sink)
 			where TMessage : class
 		{
 			MessageRouterConfigurator routerConfigurator = For(pipeline);
@@ -67,12 +67,12 @@ namespace MassTransit.Pipeline.Configuration
 			return routerConfigurator.FindOrCreate<TMessage>().Connect(sink);
 		}
 
-		public static MessageRouterConfigurator For(IMessageSink<object> sink)
+		public static MessageRouterConfigurator For(IPipelineSink<object> sink)
 		{
 			return new MessageRouterConfigurator(sink);
 		}
 
-		public static MessageRouterConfigurator For<TMessage>(IMessageSink<TMessage> sink)
+		public static MessageRouterConfigurator For<TMessage>(IPipelineSink<TMessage> sink)
 			where TMessage : class
 		{
 			return new MessageRouterConfigurator(sink);

@@ -13,7 +13,7 @@
 namespace MassTransit.Internal
 {
 	using System;
-	using Magnum.Common;
+	using Magnum;
 
 	public class InboundMessageHeaders :
 		MessageHeadersBase,

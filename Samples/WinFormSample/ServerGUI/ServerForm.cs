@@ -26,7 +26,7 @@ namespace ServerGUI
 
 		private IServiceBus _bus;
 
-		private IWindsorContainer _container;
+		private DefaultMassTransitContainer _container;
 		private IServiceBus _controlBus;
 
 		public ServerForm()
@@ -45,10 +45,11 @@ namespace ServerGUI
 
 			try
 			{
+				
 				_container = new DefaultMassTransitContainer("Server.Castle.xml");
 
 				_bus = _container.Resolve<IServiceBus>("server");
-				_controlBus = _container.Resolve<IServiceBus>("control");
+				//_controlBus = _container.Resolve<IServiceBus>("control");
 
 			    _container.AddComponent<UserAgentSession>();
 			    _container.AddComponent<TheAnswerMan>();

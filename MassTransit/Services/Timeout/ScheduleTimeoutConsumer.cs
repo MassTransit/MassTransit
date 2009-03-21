@@ -13,7 +13,7 @@
 namespace MassTransit.Services.Timeout
 {
 	using log4net;
-	using Magnum.Common.Data;
+	using Magnum.Data;
 	using Messages;
 
     public class ScheduleTimeoutConsumer :

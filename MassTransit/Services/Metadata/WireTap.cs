@@ -10,7 +10,7 @@ namespace MassTransit.Services.Metadata
         private readonly Action<TMessage> _action;
 
         public WireTap(string description, 
-            Func<IMessageSink<TMessage>, IMessageSink<TMessage>> insertAfter,
+            Func<IPipelineSink<TMessage>, IPipelineSink<TMessage>> insertAfter,
             Func<TMessage, bool> allow,
             Action<TMessage> action) :
             base(description, insertAfter, allow)

@@ -14,7 +14,7 @@ namespace MassTransit.Configuration
 {
 	using System;
 	using Exceptions;
-	using Magnum.Common.DateTimeExtensions;
+	using Magnum.DateTimeExtensions;
 
 	public class ServiceBusConfiguratorDefaults :
 		IServiceBusConfiguratorDefaults

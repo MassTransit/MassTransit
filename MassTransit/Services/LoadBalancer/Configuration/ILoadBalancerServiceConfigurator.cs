@@ -17,5 +17,6 @@ namespace MassTransit.Services.LoadBalancer.Configuration
 	public interface ILoadBalancerServiceConfigurator :
 		IServiceConfigurator
 	{
+		void LoadBalance<T>();
 	}
 }

@@ -1,19 +1,6 @@
-// Copyright 2007-2008 The Apache Software Foundation.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed 
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
 namespace MassTransit.WindsorIntegration
 {
 	using System;
-	using System.Collections.Generic;
 	using System.ComponentModel;
 	using Castle.Core;
 	using Castle.Core.Configuration;
@@ -23,15 +10,10 @@ namespace MassTransit.WindsorIntegration
 	using Castle.MicroKernel.Registration;
 	using Configuration;
 	using Exceptions;
-	using Infrastructure.Subscriptions;
-	using Internal;
+	using Magnum.ObjectExtensions;
 	using Microsoft.Practices.ServiceLocation;
-	using Saga.Pipeline;
-	using Serialization;
-	using Services.HealthMonitoring;
-	using Services.Subscriptions;
-	using Services.Subscriptions.Client;
-	using Subscriptions;
+	using Services.HealthMonitoring.Configuration;
+	using Services.Subscriptions.Configuration;
 	using Component=Castle.MicroKernel.Registration.Component;
 
 	/// <summary>
@@ -42,24 +24,79 @@ namespace MassTransit.WindsorIntegration
 	{
 		protected override void Init()
 		{
-			Kernel.AddComponentInstance("kernel", typeof (IKernel), Kernel);
-
-			RegisterMessageSerializers();
-
-			RegisterDefaultSubscriptionCache();
-
-			RegisterDefaultTypeInfoCache();
-
-			RegisterSagaMessageSinks();
-
 			ConfigureEndpointFactory();
 
-			LoadServiceBuses();
+			ConfigureServiceBus();
 
 			//Kernel.Resolver.AddSubResolver(new ServiceLocatorResolver());
 			SetupAutoRegister();
 			//AddStartableFacility();
 		}
+
+		private void ConfigureEndpointFactory()
+		{
+			var transportConfiguration = FacilityConfig.Children["transports"];
+			if (transportConfiguration == null)
+				throw new ConventionException("At least one transport must be defined in the facility configuration.");
+
+			RegisterEndpointFactory(x =>
+				{
+					foreach (IConfiguration transport in transportConfiguration.Children)
+					{
+						Type transportType = Type.GetType(transport.Value, true, true);
+
+						x.RegisterTransport(transportType);
+					}
+				});
+		}
+
+		private void ConfigureServiceBus()
+		{
+			foreach (IConfiguration child in FacilityConfig.Children)
+			{
+				if (child.Name.Equals("bus"))
+				{
+					var busConfig = child;
+
+					string id = busConfig.Attributes["id"];
+					string endpointUri = busConfig.Attributes["endpoint"];
+
+					RegisterServiceBus(id, endpointUri, x =>
+						{
+							ConfigureThreadingModel(busConfig, x);
+
+							ConfigureSubscriptionClient(busConfig, x);
+
+							ConfigureManagementClient(busConfig, x);
+						});
+				}
+			}
+		}
+
+		private void RegisterEndpointFactory(Action<IEndpointFactoryConfigurator> configAction)
+		{
+			var endpointFactory = EndpointFactoryConfigurator.New(x =>
+				{
+					x.SetObjectBuilder(Kernel.Resolve<IObjectBuilder>());
+					configAction(x);
+				});
+
+
+			Kernel.AddComponentInstance("endpointFactory", typeof (IEndpointFactory), endpointFactory);
+		}
+
+		private void RegisterServiceBus(string id, string endpointUri, Action<IServiceBusConfigurator> configAction)
+		{
+			IServiceBus bus = ServiceBusConfigurator.New(x =>
+				{
+					x.ReceiveFrom(endpointUri);
+
+					configAction(x);
+				});
+
+			Kernel.AddComponentInstance(id, typeof (IServiceBus), bus);
+		}
+
 
 		public void AddStartableFacility()
 		{
@@ -93,228 +130,50 @@ namespace MassTransit.WindsorIntegration
 			}
 		}
 
-		private void ConfigureEndpointFactory()
+		private static void ConfigureThreadingModel(IConfiguration busConfig, IServiceBusConfigurator configurator)
 		{
-			var transportConfiguration = FacilityConfig.Children["transports"];
-			if (transportConfiguration == null)
-				throw new ConventionException("At least one transport must be defined in the facility configuration.");
-
-			var endpointFactory = EndpointFactoryConfigurator.New(x =>
+			WithConfig(busConfig, "dispatcher", config =>
 				{
-					x.SetObjectBuilder(Kernel.Resolve<IObjectBuilder>());
-
-					foreach (IConfiguration transport in transportConfiguration.Children)
-					{
-						Type transportType = Type.GetType(transport.Value, true, true);
-
-						x.RegisterTransport(transportType);
-					}
+					GetConfigurationValue<int>(config, "readThreads", configurator.SetConcurrentConsumerLimit);
+					GetConfigurationValue<int>(config, "maxThreads", configurator.SetConcurrentReceiverLimit);
 				});
-
-			Kernel.AddComponentInstance("endpointFactory", typeof (IEndpointFactory), typeof (EndpointFactory), endpointFactory);
 		}
 
-		private void RegisterDefaultSubscriptionCache()
+		private static void ConfigureSubscriptionClient(IConfiguration busConfig, IServiceBusConfigurator configurator)
 		{
-			Kernel.Register(
-				Component.For<ISubscriptionCache>()
-					.ImplementedBy<LocalSubscriptionCache>()
-					.LifeStyle.Singleton
-				);
-		}
-
-		private void RegisterSagaMessageSinks()
-		{
-			Kernel.AddComponent("initiateSagaMessageSink", typeof (InitiateSagaMessageSink<,>), LifestyleType.Transient);
-			Kernel.AddComponent("orchestrateSagaMessageSink", typeof (OrchestrateSagaMessageSink<,>), LifestyleType.Transient);
-		}
-
-		private void RegisterDefaultTypeInfoCache()
-		{
-			Kernel.Register(
-				Component.For<ITypeInfoCache>()
-					.ImplementedBy<TypeInfoCache>()
-					.Named("typeinfocache")
-					.LifeStyle.Singleton
-				);
-		}
-
-		private void RegisterMessageSerializers()
-		{
-			Kernel.Register(
-				Component.For<BinaryMessageSerializer>()
-					.ImplementedBy<BinaryMessageSerializer>()
-					.Named("binaryMessageSerializer")
-					.LifeStyle.Singleton,
-				Component.For<JsonMessageSerializer>()
-					.ImplementedBy<JsonMessageSerializer>()
-					.Named("jsonMessageSerializer")
-					.LifeStyle.Singleton,
-				Component.For<XmlMessageSerializer>()
-					.ImplementedBy<XmlMessageSerializer>()
-					.Named("xmlMessageSerializer")
-					.LifeStyle.Singleton
-				);
-		}
-
-		private void LoadServiceBuses()
-		{
-			foreach (IConfiguration child in FacilityConfig.Children)
-			{
-				if (child.Name.Equals("bus"))
+			WithConfig(busConfig, "subscriptionService", config =>
 				{
-					string id = child.Attributes["id"];
-					string endpointUri = child.Attributes["endpoint"];
+					string subscriptionServiceEndpointUri = config.Attributes["endpoint"];
+					if (string.IsNullOrEmpty(subscriptionServiceEndpointUri))
+						throw new ConfigurationException("The endponit for the subscriptionService cannot be null or empty");
 
-					IEndpoint endpoint = Kernel.Resolve<IEndpointFactory>().GetEndpoint(new Uri(endpointUri));
-
-					ISubscriptionCache cache = ResolveSubscriptionCache(child);
-
-					IServiceBus bus = BuildServiceBus(id, endpoint, cache, child);
-
-					ResolveSubscriptionClient(child, bus, id, cache);
-					ResolveManagementClient(child, bus, id);
-				}
-			}
+					configurator.ConfigureService<SubscriptionClientConfigurator>(x =>
+						{
+							x.SetSubscriptionServiceEndpoint(subscriptionServiceEndpointUri);
+						});
+				});
 		}
 
-		private IServiceBus BuildServiceBus(string id, IEndpoint endpoint, ISubscriptionCache cache, IConfiguration busConfig)
+		private static void ConfigureManagementClient(IConfiguration busConfig, IServiceBusConfigurator configurator)
 		{
-			ServiceBus bus = new ServiceBus(endpoint,
-			                                Kernel.Resolve<IObjectBuilder>(),
-			                                cache,
-			                                Kernel.Resolve<IEndpointFactory>(),
-			                                Kernel.Resolve<ITypeInfoCache>());
-
-			IConfiguration threadConfig = busConfig.Children["dispatcher"];
-			ConfigureThreadingModel(threadConfig, bus);
-
-			Kernel.AddComponentInstance(id, typeof (IServiceBus), bus);
-			bus.Start();
-
-			return bus;
-		}
-
-		private void ConfigureThreadingModel(IConfiguration threadConfig, ServiceBus bus)
-		{
-			if (threadConfig != null)
-			{
-				bus.MinimumConsumerThreads = GetConfigurationValue(threadConfig, "minThreads", bus.MinimumConsumerThreads);
-				bus.MaximumConsumerThreads = GetConfigurationValue(threadConfig, "maxThreads", bus.MaximumConsumerThreads);
-				bus.ConcurrentReceiveThreads = GetConfigurationValue(threadConfig, "readThreads", bus.ConcurrentReceiveThreads);
-			}
-		}
-
-		private void ResolveManagementClient(IConfiguration child, IServiceBus bus, string id)
-		{
-			var managementClientConfig = child.Children["managementService"];
-			if (managementClientConfig != null)
-			{
-				string heartbeatInterval = managementClientConfig.Attributes["heartbeatInterval"];
-
-				int interval = string.IsNullOrEmpty(heartbeatInterval) ? 3 : int.Parse(heartbeatInterval);
-
-				HealthClient sc = new HealthClient(bus, interval);
-				bus.Subscribe(sc);
-
-				Kernel.AddComponentInstance(id + ".managementClient", sc);
-				sc.Start(); //TODO: Should use startable
-			}
-		}
-
-		private void ResolveSubscriptionClient(IConfiguration child, IServiceBus bus, string id, ISubscriptionCache cache)
-		{
-			var subscriptionClientConfig = child.Children["subscriptionService"];
-			if (subscriptionClientConfig != null)
-			{
-                Kernel.AddComponent<LocalEndpointHandler>();
-                Kernel.AddComponent<RemoteSubscriptionCoordinator>();
-                
-
-				string subscriptionServiceEndpointUri = subscriptionClientConfig.Attributes["endpoint"];
-
-				IEndpoint subscriptionServiceEndpoint =
-					Kernel.Resolve<IEndpointFactory>().GetEndpoint(new Uri(subscriptionServiceEndpointUri));
-
-
-                var leh = Kernel.Resolve<LocalEndpointHandler>();			    
-                var lec = new LocalSubscriptionCoordinator(cache, subscriptionServiceEndpoint, leh);
-                Kernel.AddComponentInstance("localsubscriptioncoordinator", lec);
-
-				SubscriptionClient sc = new SubscriptionClient(bus, subscriptionServiceEndpoint, leh);
-
-				IConfiguration localEndpointConfig = subscriptionClientConfig.Children["localEndpoint"];
-				if (localEndpointConfig != null)
+			WithConfig(busConfig, "managementService", config =>
 				{
-					IEndpoint localEndpoint =
-						Kernel.Resolve<IEndpointFactory>().GetEndpoint(new Uri(localEndpointConfig.Value));
+					string heartbeatInterval = config.Attributes["heartbeatInterval"];
 
-					leh.AddLocalEndpoint(localEndpoint);
-				}
+					int interval = heartbeatInterval.IsNullOrEmpty() ? 3 : int.Parse(heartbeatInterval);
 
-				Kernel.AddComponentInstance(id + ".subscriptionClient", sc);
-				sc.Start(); //TODO: should use the startable
-			}
+					configurator.ConfigureService<HealthClientConfigurator>(x =>
+						{
+							x.SetHeartbeatInterval(interval);
+						});
+				});
 		}
 
-
-		private ISubscriptionCache ResolveSubscriptionCache(IConfiguration configuration)
+		private static void WithConfig(IConfiguration configuration, string key, Action<IConfiguration> action)
 		{
-			var cacheConfig = configuration.Children["subscriptionCache"];
-			if (cacheConfig == null)
-				return Kernel.Resolve<ISubscriptionCache>();
-
-			// naming the cache makes it available to others
-			string name = cacheConfig.Attributes["name"];
-
-			string mode = cacheConfig.Attributes["mode"] ?? "local";
-			ISubscriptionCache cache;
-			switch (mode)
-			{
-				case "local":
-					if (string.IsNullOrEmpty(name))
-						return Kernel.Resolve<ISubscriptionCache>();
-
-					cache = Kernel.Resolve<ISubscriptionCache>(name);
-					if (cache == null)
-					{
-						cache = Kernel.Resolve<ISubscriptionCache>();
-						Kernel.AddComponentInstance(name, cache);
-					}
-
-					return cache;
-
-				case "distributed":
-					if (string.IsNullOrEmpty(name))
-						return new DistributedSubscriptionCache(GetDistributedCacheServerList(cacheConfig));
-
-					cache = Kernel.Resolve<DistributedSubscriptionCache>(name);
-					if (cache == null)
-					{
-						cache = new DistributedSubscriptionCache(GetDistributedCacheServerList(cacheConfig));
-						Kernel.AddComponentInstance(name, cache);
-					}
-					return cache;
-
-				default:
-					throw new ConventionException(mode + " is not a valid subscriptionCache mode");
-			}
-		}
-
-		private static IEnumerable<string> GetDistributedCacheServerList(IConfiguration configuration)
-		{
-			var servers = new List<string>();
-
-			var serversConfig = configuration.Children["servers"];
-			if (serversConfig != null) //TODO: If this is null shouldn't we throw?
-			{
-				foreach (IConfiguration serverConfig in serversConfig.Children)
-				{
-					servers.Add("memcached://" + serverConfig.Value);
-				}
-			}
-
-			return servers;
+			var config = configuration.Children[key];
+			if (config != null)
+				action(config);
 		}
 
 
@@ -327,17 +186,17 @@ namespace MassTransit.WindsorIntegration
 				.LifeStyle.Transient;
 		}
 
-		private static T GetConfigurationValue<T>(IConfiguration config, string attributeName, T defaultValue)
+		private static void GetConfigurationValue<T>(IConfiguration config, string attributeName, Action<T> applyValue)
 		{
 			string value = config.Attributes[attributeName];
 			if (string.IsNullOrEmpty(value))
-				return defaultValue;
+				return;
 
 			TypeConverter tc = TypeDescriptor.GetConverter(typeof (T));
 
 			T newValue = (T) tc.ConvertFromInvariantString(value);
 
-			return newValue;
+			applyValue(newValue);
 		}
 	}
 

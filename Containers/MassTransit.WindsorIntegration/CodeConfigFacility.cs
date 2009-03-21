@@ -6,7 +6,7 @@ namespace MassTransit.WindsorIntegration
     using Configuration;
     using Infrastructure.Subscriptions;
     using Services.HealthMonitoring;
-    using Services.Subscriptions;
+    using Services.Subscriptions.Client;
     using Subscriptions;
 
     public class CodeConfigFacility :
@@ -21,7 +21,6 @@ namespace MassTransit.WindsorIntegration
 		{
             Kernel.Register(
                 Component.For<IObjectBuilder>().ImplementedBy<WindsorObjectBuilder>().LifeStyle.Singleton,
-                Component.For<ISubscriptionCache>().ImplementedBy<LocalSubscriptionCache>().LifeStyle.Singleton,
                 Component.For<IServiceBus>().ImplementedBy<ServiceBus>()
                 );
 		}

@@ -1,9 +1,10 @@
 namespace MassTransit.Infrastructure.Saga
 {
 	using System;
+	using System.Collections;
 	using System.Collections.Generic;
 	using System.Data;
-	using Magnum.Common.Data;
+	using Magnum.Data;
 	using Magnum.Infrastructure.Data;
 	using MassTransit.Saga;
 
@@ -63,6 +64,29 @@ namespace MassTransit.Infrastructure.Saga
 			{
 				UnitOfWork.Finish();
 			}
+		}
+
+		public IEnumerator<T> GetEnumerator()
+		{
+			try
+			{
+				using (IUnitOfWork work = UnitOfWork.Start())
+				{
+					using (var repository = new NHibernateRepository())
+					{
+						return repository.List<T>().GetEnumerator();
+					}
+				}
+			}
+			finally
+			{
+				UnitOfWork.Finish();
+			}
+		}
+
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return GetEnumerator();
 		}
 	}
 }

@@ -51,6 +51,17 @@ namespace MassTransit
 		public class NullConsumer : Selected
 		{
 			private static readonly ILog _log = LogManager.GetLogger(typeof (NullConsumer));
+			private readonly string _message;
+
+			public NullConsumer()
+			{
+				_message = "A message of type " + typeof (TMessage).ToFriendlyName() + " was discarded: (NullConsumer)";
+			}
+
+			public NullConsumer(string message)
+			{
+				_message = "A message of type " + typeof(TMessage).ToFriendlyName() + " was discarded: " + message;
+			}
 
 			public bool Accept(TMessage message)
 			{
@@ -59,37 +70,13 @@ namespace MassTransit
 
 			public void Consume(TMessage message)
 			{
-				_log.Warn("NullConsumer consumed a message");
+				_log.Warn(_message);
 			}
 		}
 
 		public interface Selected : All
 		{
 			bool Accept(TMessage message);
-		}
-
-		public class WidenTo<T> :
-			All
-			where T : class, TMessage
-		{
-			private readonly Consumes<T>.All _consumer;
-
-			private WidenTo(Consumes<T>.All consumer)
-			{
-				_consumer = consumer;
-			}
-
-			public void Consume(TMessage message)
-			{
-				T output = TranslateTo<T>.From(message);
-
-				_consumer.Consume(output);
-			}
-
-			public static WidenTo<T> For(Consumes<T>.All consumer)
-			{
-				return new WidenTo<T>(consumer);
-			}
 		}
 	}
 }

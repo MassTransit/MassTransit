@@ -16,19 +16,18 @@ namespace MassTransit.Configuration
 	using System.Collections.Generic;
 	using Exceptions;
 	using Internal;
-	using Subscriptions;
 
 	public class ServiceBusConfigurator :
 		ServiceBusConfiguratorDefaults,
 		IServiceBusConfigurator
 	{
 		private static readonly ServiceBusConfiguratorDefaults _defaults = new ServiceBusConfiguratorDefaults();
-		private readonly List<Action<IServiceBus, ISubscriptionCache, IObjectBuilder, Action<Type, IBusService>>> _services;
+		private readonly List<Action<IServiceBus, IObjectBuilder, Action<Type, IBusService>>> _services;
 		private Uri _receiveFromUri;
 
 		private ServiceBusConfigurator()
 		{
-			_services = new List<Action<IServiceBus, ISubscriptionCache, IObjectBuilder, Action<Type, IBusService>>>();
+			_services = new List<Action<IServiceBus, IObjectBuilder, Action<Type, IBusService>>>();
 
 			_defaults.ApplyTo(this);
 		}
@@ -53,13 +52,26 @@ namespace MassTransit.Configuration
 		public void ConfigureService<TServiceConfigurator>(Action<TServiceConfigurator> configure)
 			where TServiceConfigurator : IServiceConfigurator, new()
 		{
-			_services.Add((bus, cache, builder, add) =>
+			_services.Add((bus, builder, add) =>
 				{
 					TServiceConfigurator configurator = new TServiceConfigurator();
 
 					configure(configurator);
 
-					var service = configurator.Create(bus, cache, builder);
+					var service = configurator.Create(bus, builder);
+
+					add(configurator.ServiceType, service);
+				});
+		}
+
+		public void AddService<TService>()
+			where TService : IBusService
+		{
+			_services.Add((bus, builder, add) =>
+				{
+					DefaultBusServiceConfigurator<TService> configurator = new DefaultBusServiceConfigurator<TService>();
+
+					var service = configurator.Create(bus, builder);
 
 					add(configurator.ServiceType, service);
 				});
@@ -102,10 +114,7 @@ namespace MassTransit.Configuration
 
 			var endpoint = endpointFactory.GetEndpoint(_receiveFromUri);
 
-			var subscriptionCache = ObjectBuilder.GetInstance<ISubscriptionCache>() ?? new LocalSubscriptionCache();
-			var typeInfoCache = ObjectBuilder.GetInstance<ITypeInfoCache>() ?? new TypeInfoCache();
-
-			return new ServiceBus(endpoint, ObjectBuilder, subscriptionCache, endpointFactory, typeInfoCache);
+			return new ServiceBus(endpoint, ObjectBuilder, endpointFactory);
 		}
 
 		private void ConfigureThreadLimits(ServiceBus bus)
@@ -123,7 +132,7 @@ namespace MassTransit.Configuration
 		{
 			foreach (var serviceConfigurator in _services)
 			{
-				serviceConfigurator(bus, bus.SubscriptionCache, ObjectBuilder, bus.AddService);
+				serviceConfigurator(bus, ObjectBuilder, bus.AddService);
 			}
 		}
 

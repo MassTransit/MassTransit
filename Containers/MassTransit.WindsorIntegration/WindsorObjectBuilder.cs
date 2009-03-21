@@ -15,7 +15,6 @@ namespace MassTransit.WindsorIntegration
     using System;
     using System.Collections;
     using System.Collections.Generic;
-    using Castle.Core;
     using Castle.MicroKernel;
     
 

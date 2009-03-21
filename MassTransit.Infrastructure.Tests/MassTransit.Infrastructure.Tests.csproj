@@ -47,9 +47,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\libs\NHibernate 2.0\Iesi.Collections.dll</HintPath>
     </Reference>
-    <Reference Include="Magnum.Common, Version=0.1.0.211, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Magnum, Version=0.1.0.275, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\libs\Magnum.Common.dll</HintPath>
+      <HintPath>..\libs\Magnum.dll</HintPath>
     </Reference>
     <Reference Include="Magnum.Infrastructure, Version=0.1.0.219, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>

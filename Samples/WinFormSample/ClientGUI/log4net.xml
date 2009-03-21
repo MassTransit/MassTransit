@@ -2,7 +2,7 @@
 <log4net>
   <appender name="RollingFile"
 						type="log4net.Appender.RollingFileAppender">
-    <file value="ServerGUI.log" />
+    <file value="..\..\..\..\..\logs\sample.winform.client_gui.log" />
     <appendToFile value="true" />
     <rollingStyle value="Date" />
     <datePattern value="yyyyMMdd" />
@@ -20,7 +20,7 @@
   <!-- Custom appender for MassTransit's Messages -->
   <appender name="MT.Messages"
 						type="log4net.Appender.FileAppender">
-    <file value="..\..\..\..\..\logs\sample.winform.client_gui.log" />
+    <file value="masstransit.messages.log" />
     <appendToFile value="false" />
     <layout type="log4net.Layout.PatternLayout">
       <conversionPattern value="%-5p %d{hh:mm:ss} %message%newline" />
@@ -51,6 +51,10 @@
   <!-- Standard MassTransit Logging Settings -->
   <logger name="MassTransit">
     <level value="INFO" />
+  </logger>
+
+  <logger name="MassTransit.Services.Subscriptions.Client">
+    <level value="DEBUG" />
   </logger>
 
   <logger name="MassTransit.Messages">

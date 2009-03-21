@@ -30,7 +30,7 @@ namespace OpenAllNight
 			SimpleMessageHandler handler = new SimpleMessageHandler();
 
 
-			IEndpoint ep = c.Resolve<IEndpointFactory>().GetEndpoint(new Uri("msmq://localhost/mt_pubsub"));
+			IEndpoint ep = c.Resolve<IEndpointFactory>().GetEndpoint(new Uri("msmq://localhost/mt_subscriptions"));
 			Counter counter = c.Resolve<Counter>();
 			Console.WriteLine("Please enter the number of hours you would like this test to run for?");
 			string input = Console.ReadLine();
@@ -43,7 +43,7 @@ namespace OpenAllNight
 
 			while (DateTime.Now < stopTime)
 			{
-				ep.Send(new CacheUpdateRequest(new Uri("msmq://localhost/test_servicebus")));
+				ep.Send(new CacheUpdateRequest(new Uri("msmq://localhost/mt_client")));
 				counter.IncrementMessagesSent();
 
 				if (rand.Next(0, 10) == 0)

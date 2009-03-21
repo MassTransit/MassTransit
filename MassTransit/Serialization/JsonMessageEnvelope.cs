@@ -27,7 +27,7 @@ namespace MassTransit.Serialization
 		{
 			Message = JavaScriptConvert.SerializeObject(message);
 
-			MessageType = MessageHeadersBase.GetMessageTypeHeaderString(messageType);
+			MessageType = messageType.ToMessageName();
 
 			this.CopyFrom(OutboundMessage.Headers);
 		}

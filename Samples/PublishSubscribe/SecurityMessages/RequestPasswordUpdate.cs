@@ -4,7 +4,8 @@ namespace SecurityMessages
     using MassTransit;
 
 	[Serializable]
-    public class RequestPasswordUpdate : CorrelatedBy<Guid>
+    public class RequestPasswordUpdate :
+        CorrelatedBy<Guid>
     {
         private readonly string _newPassword;
 		private readonly Guid _correlationId;

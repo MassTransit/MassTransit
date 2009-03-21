@@ -29,12 +29,10 @@ namespace MassTransit.Tests
     {
         private ServiceBus _serviceBus;
         private IEndpoint _mockEndpoint;
-        private ISubscriptionCache _mockSubscriptionCache;
         private readonly Uri queueUri = new Uri("loopback://localhost/test");
         private Subscription _subscription;
         private IObjectBuilder _builder;
         private IEndpointFactory _endpointResolver;
-    	private ITypeInfoCache _typeInfoCache;
 
     	protected override void Before_each()
         {
@@ -47,18 +45,15 @@ namespace MassTransit.Tests
 			});
 
             _mockEndpoint = _endpointResolver.GetEndpoint(queueUri);
-    		_typeInfoCache = new TypeInfoCache();
 
-            _mockSubscriptionCache = DynamicMock<ISubscriptionCache>();
             _subscription = new Subscription(typeof (PingMessage), queueUri);
-        	_serviceBus = new ServiceBus(_mockEndpoint, _builder, _mockSubscriptionCache, _endpointResolver, _typeInfoCache);
+        	_serviceBus = new ServiceBus(_mockEndpoint, _builder, _endpointResolver);
         }
 
         protected override void After_each()
         {
             _serviceBus = null;
             _mockEndpoint = null;
-            _mockSubscriptionCache = null;
         }
 
 
@@ -67,7 +62,7 @@ namespace MassTransit.Tests
         {
             using (Record())
             {
-                _mockSubscriptionCache.Add(_subscription);
+//                _mockSubscriptionCache.Add(_subscription);
             }
 
             using (Playback())
@@ -84,7 +79,7 @@ namespace MassTransit.Tests
         {
             using (Record())
             {
-                _mockSubscriptionCache.Add(_subscription);
+  //              _mockSubscriptionCache.Add(_subscription);
             }
 
             using (Playback())
@@ -100,7 +95,7 @@ namespace MassTransit.Tests
         {
             using (Record())
             {
-                _mockSubscriptionCache.Add(_subscription);
+    //            _mockSubscriptionCache.Add(_subscription);
             }
 
             using (Playback())

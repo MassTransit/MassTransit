@@ -37,10 +37,8 @@ namespace MassTransit.Tests.Services.Metadata
         [Test]
         public void PipelineBuilding()
         {
-
             var builder = MockRepository.GenerateMock<IObjectBuilder>();
-            var subscriptionEvent = MockRepository.GenerateMock<ISubscriptionEvent>();
-            MessagePipeline pipeline = MessagePipelineConfigurator.CreateDefault(builder, subscriptionEvent);
+            MessagePipeline pipeline = MessagePipelineConfigurator.CreateDefault(builder);
 
             pipeline.Subscribe<MetadataConsumer>();
             pipeline.Subscribe<MetadataPConsumer>();

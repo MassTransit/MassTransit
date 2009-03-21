@@ -1,9 +1,7 @@
 namespace MassTransit.Transports.Wcf.Tests
 {
-    using System;
-    using Magnum.Common.DateTimeExtensions;
-    using MassTransit.Tests;
-    using MassTransit.Tests.Messages;
+	using Magnum.DateTimeExtensions;
+	using MassTransit.Tests.Messages;
     using MassTransit.Tests.TestConsumers;
     using NUnit.Framework;
     using TestFixtures;

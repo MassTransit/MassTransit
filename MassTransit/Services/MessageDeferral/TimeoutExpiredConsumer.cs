@@ -12,16 +12,13 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Services.MessageDeferral
 {
-    using System;
-    using System.Reflection;
+	using Magnum.Reflection;
     using Messages;
     using Timeout.Messages;
 
     public class TimeoutExpiredConsumer :
         Consumes<TimeoutExpired>.Selected
     {
-        private static readonly MethodInfo _publishMethodInfo = typeof (IServiceBus).GetMethod("Publish", BindingFlags.Public | BindingFlags.Instance);
-
         private readonly IServiceBus _bus;
         private readonly IDeferredMessageRepository _repository;
 
@@ -48,16 +45,7 @@ namespace MassTransit.Services.MessageDeferral
 
         private void RepublishMessage(object message)
         {
-            Type objType = message.GetType();
-
-            MethodInfo inv = GetPublishMethod(objType);
-
-            inv.Invoke(_bus, new[] {message});
-        }
-
-        private static MethodInfo GetPublishMethod(Type objType)
-        {
-            return _publishMethodInfo.MakeGenericMethod(objType);
+        	_bus.Call("Publish", message);
         }
     }
 }

@@ -12,7 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Services.Timeout
 {
-	using Magnum.Common.Data;
+	using Magnum.Data;
 	using Messages;
 
     public class CancelTimeoutConsumer :

@@ -3,7 +3,6 @@ namespace MassTransit.Tests.Transports
     using System;
     using System.Transactions;
     using Configuration;
-    using Magnum.Common.DateTimeExtensions;
     using NUnit.Framework;
 
     public abstract class EndpointContract<TEndpoint> where TEndpoint : IEndpoint

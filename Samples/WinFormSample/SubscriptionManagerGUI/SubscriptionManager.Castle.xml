@@ -2,9 +2,8 @@
 <configuration>
   <facilities>
     <facility id="masstransit">
-
-      <bus id="subscriptions"
-				 endpoint="msmq://localhost/mt_subscriptions">
+      <bus id="subscription_ui" 
+           endpoint="msmq://localhost/mt_subscription_ui">
       </bus>
       <transports>
         <transport>MassTransit.Transports.Msmq.MsmqEndpoint, MassTransit.Transports.Msmq</transport>

@@ -13,35 +13,65 @@
 namespace MassTransit.Services.HealthMonitoring
 {
 	using System;
-	using Server;
+	using System.Linq;
+    using log4net;
+    using Messages;
+    using Saga;
+    using Server;
 
     public class HealthService :
-        IHostedService
+        Consumes<StatusChange>.All,
+		IDisposable
     {
-        private readonly IServiceBus _bus;
+        private static readonly ILog _log = LogManager.GetLogger(typeof(HealthService));
+        private IServiceBus _bus;
     	private UnsubscribeAction _unsubscribeToken = () => false;
+        private readonly ISagaRepository<HealthSaga> _healthSagas;
 
+    	public HealthService(IServiceBus bus, ISagaRepository<HealthSaga> healthSagas)
+    	{
+    		_bus = bus;
+    		_healthSagas = healthSagas;
+    	}
 
-    	public HealthService(IServiceBus bus)
+    	public void Start()
         {
-            _bus = bus;
-        }
+            _log.Info("Health Service Starting");
 
-        public void Start()
-        {
-        	_unsubscribeToken = _bus.Subscribe<HeartbeatMonitor>();
-        	_unsubscribeToken += _bus.Subscribe<Investigator>();
-			_unsubscribeToken += _bus.Subscribe<Reporter>();
+            _unsubscribeToken += _bus.Subscribe(this);
+
+        	_unsubscribeToken += _bus.Subscribe<HealthSaga>();
+
+            _log.Info("Health Service Started");
         }
 
         public void Stop()
         {
-        	_unsubscribeToken();
+            _log.Info("Health Service Stopping");
+
+            _unsubscribeToken();
+
+            _log.Info("Health Service Stopped");
         }
 
         public void Dispose()
         {
-            //nothing yet
+        	_bus.Dispose();
+        }
+
+        public void Consume(StatusChange message)
+        {
+            UpdateSubscribers();
+        }
+
+        public void UpdateSubscribers()
+        {
+            var sagas = _healthSagas.ToList();
+            var msg = new HealthUpdate();
+
+            sagas.ForEach(x => msg.Information.Add(new HealthInformation(x.EndpointAddress, x.CurrentState.Name)));
+
+            _bus.Publish(msg);
         }
     }
 }

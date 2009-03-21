@@ -18,8 +18,8 @@ namespace MassTransit.Saga.Pipeline
     using MassTransit.Pipeline.Interceptors;
 
     public abstract class SagaMessageSinkBase<TComponent, TMessage> :
-        IMessageSink<TMessage>
-        where TComponent : class, Consumes<TMessage>.All, ISaga
+        IPipelineSink<TMessage>
+        where TComponent : class, ISaga
         where TMessage : class, CorrelatedBy<Guid>
     {
         private volatile bool _disposed;
@@ -41,7 +41,7 @@ namespace MassTransit.Saga.Pipeline
             GC.SuppressFinalize(this);
         }
 
-        public abstract IEnumerable<Consumes<TMessage>.All> Enumerate(TMessage message);
+        public abstract IEnumerable<Action<TMessage>> Enumerate(TMessage message);
 
         public bool Inspect(IPipelineInspector inspector)
         {

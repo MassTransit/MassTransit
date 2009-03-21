@@ -13,10 +13,10 @@
 namespace MassTransit.Services.Subscriptions.Configuration
 {
 	using System;
+	using Client;
 	using Exceptions;
 	using Internal;
 	using MassTransit.Configuration;
-	using MassTransit.Subscriptions;
 
 	public class SubscriptionClientConfigurator :
 		IServiceConfigurator
@@ -28,9 +28,14 @@ namespace MassTransit.Services.Subscriptions.Configuration
 			get { return typeof (SubscriptionClient); }
 		}
 
-		public IBusService Create(IServiceBus bus, ISubscriptionCache cache, IObjectBuilder builder)
+		public IBusService Create(IServiceBus bus, IObjectBuilder builder)
 		{
-			var service = builder.GetInstance<SubscriptionClient>();
+			var endpointFactory = builder.GetInstance<IEndpointFactory>();
+
+			var service = new SubscriptionClient(endpointFactory)
+				{
+					SubscriptionServiceUri = _subscriptionServiceUri
+				};
 
 			return service;
 		}

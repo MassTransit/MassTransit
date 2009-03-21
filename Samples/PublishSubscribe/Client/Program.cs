@@ -1,6 +1,11 @@
 namespace Client
 {
-	using log4net;
+    using Castle.MicroKernel.Registration;
+    using log4net;
+	using MassTransit;
+	using MassTransit.Configuration;
+	using MassTransit.Services.Subscriptions.Configuration;
+	using MassTransit.Transports.Msmq;
 	using MassTransit.WindsorIntegration;
 	using Microsoft.Practices.ServiceLocation;
 	using Topshelf;
@@ -22,20 +27,36 @@ namespace Client
                                                      c.DependencyOnMsmq();
                                                      c.RunAsLocalSystem();
 
-                                                     c.BeforeStart(a=>
-                                                                       {
-                                                                           var container = new DefaultMassTransitContainer("castle.xml");
-                                                                           container.AddComponent<ClientService>();
-                                                                           container.AddComponent<PasswordUpdater>();
-                                                                           
-                                                                           var wob =new WindsorObjectBuilder(container.Kernel);
-                                                                           ServiceLocator.SetLocatorProvider(()=>wob);
-                                                                       });
-
+                                                     
 		                                             c.ConfigureService<ClientService>(s=>
 		                                                                                     {
-		                                                                                         s.WhenStarted(o=>o.Start());
+                                                                                                 s.WhenStarted(o => {
+                                                                                                     var bus = ServiceBusConfigurator.New(servicesBus =>
+                                                                                                     {
+                                                                                                         servicesBus.ReceiveFrom("msmq://localhost/mt_client");
+                                                                                                         servicesBus.ConfigureService<SubscriptionClientConfigurator>(client =>
+                                                                                                         {
+                                                                                                             // need to add the ability to read from configuratino settings somehow
+                                                                                                             client.SetSubscriptionServiceEndpoint("msmq://localhost/mt_subscriptions");
+                                                                                                         });
+                                                                                                     });
+
+                                                                                                     o.Start(bus);
+                                                                                                 });
 		                                                                                         s.WhenStopped(o=>o.Stop());
+                                                                                                 s.CreateServiceLocator(()=>
+                                                                                                                        {
+                                                                                                                            var container = new DefaultMassTransitContainer();
+                                                                                                                            IEndpointFactory endpointFactory = EndpointFactoryConfigurator.New(e =>
+                                                                                                                            {
+                                                                                                                                e.SetObjectBuilder(ServiceLocator.Current.GetInstance<IObjectBuilder>());
+                                                                                                                                e.RegisterTransport<MsmqEndpoint>();
+                                                                                                                            });
+                                                                                                                            container.Kernel.AddComponentInstance("endpointFactory", typeof(IEndpointFactory), endpointFactory);
+                                                                                                                            container.AddComponent<ClientService>();
+                                                                                                                            container.AddComponent<PasswordUpdater>();
+                                                                                                                            return ServiceLocator.Current; //set in the DefaultMTContainer
+                                                                                                                        });
 		                                                                                     });
 		                                         });
 			Runner.Host(cfg, args);

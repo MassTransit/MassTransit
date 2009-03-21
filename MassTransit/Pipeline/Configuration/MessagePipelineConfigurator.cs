@@ -4,25 +4,27 @@ namespace MassTransit.Pipeline.Configuration
 	using System.Collections.Generic;
 	using Batch.Pipeline;
 	using Interceptors;
+	using Internal;
 	using Saga.Pipeline;
 	using Sinks;
+	using Util;
 
 	public class MessagePipelineConfigurator :
 		IConfigurePipeline,
+		ISubscriptionEvent,
 		IDisposable
 	{
 		private readonly IObjectBuilder _builder;
 		private readonly UnsubscribeAction _emptyToken = () => false;
 		private volatile bool _disposed;
 
-		protected InterceptorList<IPipelineInterceptor> _interceptors = new InterceptorList<IPipelineInterceptor>();
+		protected RegistrationList<IPipelineInterceptor> _interceptors = new RegistrationList<IPipelineInterceptor>();
+		protected RegistrationList<ISubscriptionEvent> _subscriptionEventHandlers = new RegistrationList<ISubscriptionEvent>();
 		private MessagePipeline _pipeline;
-		private ISubscriptionEvent _subscriptionEvent;
 
-		public MessagePipelineConfigurator(IObjectBuilder builder, ISubscriptionEvent subscriptionEvent)
+		public MessagePipelineConfigurator(IObjectBuilder builder)
 		{
 			_builder = builder;
-			_subscriptionEvent = subscriptionEvent;
 
 			MessageRouter<object> router = new MessageRouter<object>();
 
@@ -33,6 +35,7 @@ namespace MassTransit.Pipeline.Configuration
 			_interceptors.Register(new ConsumesSelectedInterceptor());
 			_interceptors.Register(new ConsumesForInterceptor());
 			_interceptors.Register(new BatchInterceptor());
+			_interceptors.Register(new SagaStateMachineInterceptor());
 			_interceptors.Register(new OrchestratesInterceptor());
 			_interceptors.Register(new InitiatesInterceptor());
 		}
@@ -44,10 +47,37 @@ namespace MassTransit.Pipeline.Configuration
 			return _interceptors.Register(interceptor);
 		}
 
+		public UnregisterAction Register(ISubscriptionEvent subscriptionEventHandler)
+		{
+			return _subscriptionEventHandlers.Register(subscriptionEventHandler);
+		}
+
 		public UnsubscribeAction Subscribe<TComponent>()
 			where TComponent : class
 		{
 			return Subscribe((context, interceptor) => interceptor.Subscribe<TComponent>(context));
+		}
+
+		public UnsubscribeAction Subscribe<TMessage>(Action<TMessage> handler, Predicate<TMessage> acceptor)
+			where TMessage : class
+		{
+			MessageRouterConfigurator routerConfigurator = MessageRouterConfigurator.For(_pipeline);
+
+			var router = routerConfigurator.FindOrCreate<TMessage>();
+
+			Func<TMessage, Action<TMessage>> consumer;
+			if (acceptor != null)
+				consumer = (message => acceptor(message) ? handler : null);
+			else
+				consumer = message => handler;
+
+			InstanceMessageSink<TMessage> sink = new InstanceMessageSink<TMessage>(consumer);
+
+			var result = router.Connect(sink);
+
+			UnsubscribeAction remove = SubscribedTo<TMessage>();
+
+			return () => result() && (router.SinkCount == 0) && remove();
 		}
 
 		public UnsubscribeAction Subscribe<TComponent>(TComponent instance)
@@ -95,11 +125,11 @@ namespace MassTransit.Pipeline.Configuration
 
 		private UnsubscribeAction Subscribe(Func<IInterceptorContext, IPipelineInterceptor, IEnumerable<UnsubscribeAction>> subscriber)
 		{
-			var context = new InterceptorContext(_pipeline, _builder, _subscriptionEvent);
+			var context = new InterceptorContext(_pipeline, _builder, this);
 
 			UnsubscribeAction result = null;
 
-			_interceptors.ForEach(interceptor =>
+			_interceptors.Each(interceptor =>
 				{
 					foreach (UnsubscribeAction token in subscriber(context, interceptor))
 					{
@@ -113,14 +143,33 @@ namespace MassTransit.Pipeline.Configuration
 			return result ?? _emptyToken;
 		}
 
-		public static implicit operator MessagePipeline(MessagePipelineConfigurator configurator)
+		public static MessagePipeline CreateDefault(IObjectBuilder builder)
 		{
-			return configurator._pipeline;
+			return new MessagePipelineConfigurator(builder)._pipeline;
 		}
 
-		public static MessagePipelineConfigurator CreateDefault(IObjectBuilder builder, ISubscriptionEvent subscriptionEvent)
+		public UnsubscribeAction SubscribedTo<T>() where T : class
 		{
-			return new MessagePipelineConfigurator(builder, subscriptionEvent);
+			UnsubscribeAction result = () => false;
+
+			_subscriptionEventHandlers.Each(x =>
+				{
+					result += x.SubscribedTo<T>();
+				});
+
+			return result;
+		}
+
+		public UnsubscribeAction SubscribedTo<T, K>(K correlationId) where T : class, CorrelatedBy<K>
+		{
+			UnsubscribeAction result = () => false;
+
+			_subscriptionEventHandlers.Each(x =>
+			{
+				result += x.SubscribedTo<T,K>(correlationId);
+			});
+
+			return result;
 		}
 	}
 }

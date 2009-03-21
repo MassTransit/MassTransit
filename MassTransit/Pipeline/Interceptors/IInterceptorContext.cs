@@ -17,15 +17,12 @@ namespace MassTransit.Pipeline.Interceptors
 	public interface IInterceptorContext
 	{
 		IObjectBuilder Builder { get; }
-		MessagePipeline Pipeline { get; }
+		IMessagePipeline Pipeline { get; }
 
 		bool HasMessageTypeBeenDefined(Type messageType);
 		void MessageTypeWasDefined(Type messageType);
 
-		UnsubscribeAction SubscribedTo(Type messageType);
-		UnsubscribeAction SubscribedTo(Type messageType, string correlationId);
-
-		void UnsubscribedFrom(Type messageType);
-		void UnsubscribedFrom(Type messageType, string correlationId);
+		UnsubscribeAction SubscribedTo<T>() where T : class;
+		UnsubscribeAction SubscribedTo<T,K>(K correlationId) where T : class, CorrelatedBy<K>;
 	}
 }

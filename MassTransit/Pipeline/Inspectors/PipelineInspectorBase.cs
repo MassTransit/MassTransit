@@ -13,7 +13,7 @@
 namespace MassTransit.Pipeline.Inspectors
 {
 	using System;
-	using Util;
+	using Magnum.Reflection;
 
 	/// <summary>
 	/// Base class for pipeline inspectors

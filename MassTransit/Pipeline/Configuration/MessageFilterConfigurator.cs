@@ -18,9 +18,9 @@ namespace MassTransit.Pipeline.Configuration
 
 	public class MessageFilterConfigurator
 	{
-		private readonly IMessageSink<object> _sink;
+		private readonly IPipelineSink<object> _sink;
 
-		private MessageFilterConfigurator(IMessageSink<object> sink)
+		private MessageFilterConfigurator(IPipelineSink<object> sink)
 		{
 			_sink = sink;
 		}
@@ -43,7 +43,7 @@ namespace MassTransit.Pipeline.Configuration
 		}
 
 		private static MessageFilter<TMessage> ConfigureFilter<TMessage>(string description,
-		                                                                 Func<IMessageSink<TMessage>, IMessageSink<TMessage>> insertAfter,
+		                                                                 Func<IPipelineSink<TMessage>, IPipelineSink<TMessage>> insertAfter,
 		                                                                 Func<TMessage, bool> allow)
 			where TMessage : class
 		{
@@ -55,14 +55,14 @@ namespace MassTransit.Pipeline.Configuration
 			return filter;
 		}
 
-		private static void EnsureRouterExists<TMessage>(IMessageSink<object> sink) where TMessage : class
+		private static void EnsureRouterExists<TMessage>(IPipelineSink<object> sink) where TMessage : class
 		{
 			MessageRouterConfigurator routerConfigurator = MessageRouterConfigurator.For(sink);
 
 			routerConfigurator.FindOrCreate<TMessage>();
 		}
 
-		public static MessageFilterConfigurator For(MessagePipeline sink)
+		public static MessageFilterConfigurator For(IMessagePipeline sink)
 		{
 			return new MessageFilterConfigurator(sink);
 		}

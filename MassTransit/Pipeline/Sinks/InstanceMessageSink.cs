@@ -16,21 +16,20 @@ namespace MassTransit.Pipeline.Sinks
 	using System.Collections.Generic;
 
 	public class InstanceMessageSink<TMessage> :
-		IMessageSink<TMessage>
+		IPipelineSink<TMessage>
 		where TMessage : class
 	{
-		private readonly Func<TMessage, Consumes<TMessage>.All> _acceptor;
+		private readonly Func<TMessage, Action<TMessage>> _acceptor;
 
-		public InstanceMessageSink(Func<TMessage, Consumes<TMessage>.All> acceptor)
+		public InstanceMessageSink(Func<TMessage, Action<TMessage>> acceptor)
 		{
 			_acceptor = acceptor;
 		}
 
-		public IEnumerable<Consumes<TMessage>.All> Enumerate(TMessage message)
+		public IEnumerable<Action<TMessage>> Enumerate(TMessage message)
 		{
 			var consumer = _acceptor(message);
-
-			if (consumer != Consumes<TMessage>.Null)
+			if (consumer != null)
 				yield return consumer;
 		}
 

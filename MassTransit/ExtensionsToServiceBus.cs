@@ -1,20 +1,11 @@
-// Copyright 2007-2008 The Apache Software Foundation.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed 
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
 	using System;
+	using System.Linq;
+	using Exceptions;
 	using Internal;
 	using Internal.RequestResponse;
+	using log4net;
 	using Services.LoadBalancer;
 
 	public static class ExtensionsToServiceBus
@@ -47,17 +38,16 @@ namespace MassTransit
 		{
 			OutboundMessage.Set(action);
 
-			var loadBalancer = bus.GetService<ILoadBalancerService>();
-
-			loadBalancer.Execute(message);
+			bus.Execute(message);
 		}
 
-		public static void Execute<T>(this IServiceBus bus, T message) 
+		public static void Execute<T>(this IServiceBus bus, T message)
 			where T : class
 		{
 			var loadBalancer = bus.GetService<ILoadBalancerService>();
 
-			loadBalancer.Execute(message);
+			var consumers = bus.OutboundPipeline.Enumerate(message).ToArray();
+			loadBalancer.Execute(message, consumers);
 		}
 
 		public static void Publish<T>(this IServiceBus bus, T message, Action<IOutboundMessage> action)
@@ -74,6 +64,39 @@ namespace MassTransit
 			OutboundMessage.Set(action);
 
 			endpoint.Send(message);
+		}
+
+		public static string ToMessageName(this Type messageType)
+		{
+			string assembly = messageType.Assembly.FullName;
+			assembly = assembly.Substring(0, assembly.IndexOf(','));
+
+			return string.Format("{0}, {1}", messageType.FullName, assembly);
+		}
+
+		public static string ToFriendlyName(this Type type)
+		{
+			if (type.IsGenericType)
+			{
+				string name = type.GetGenericTypeDefinition().FullName;
+				name = name.Substring(0, name.IndexOf('`'));
+				name += "<";
+
+				Type[] arguments = type.GetGenericArguments();
+				for (int i = 0; i < arguments.Length; i++)
+				{
+					if (i > 0)
+						name += ",";
+
+					name += arguments[i].Name;
+				}
+
+				name += ">";
+
+				return name;
+			}
+
+			return type.FullName;
 		}
 	}
 }

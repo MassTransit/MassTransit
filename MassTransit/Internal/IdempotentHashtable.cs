@@ -41,6 +41,11 @@ namespace MassTransit.Internal
             get { return _cache.Count; }
         }
 
+    	public bool Contains(K key)
+    	{
+    		return _cache.ContainsKey(key);
+    	}
+
         #region Implementation of IEnumerable
 
         IEnumerator IEnumerable.GetEnumerator()

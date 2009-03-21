@@ -13,6 +13,7 @@
 namespace MassTransit.Tests.Pipeline
 {
 	using System;
+	using MassTransit.Internal;
 	using MassTransit.Pipeline;
 	using MassTransit.Pipeline.Configuration;
 	using Messages;
@@ -34,8 +35,11 @@ namespace MassTransit.Tests.Pipeline
 			_bus = MockRepository.GenerateMock<IServiceBus>();
 			_bus.Stub(x => x.Endpoint).Return(_endpoint);
 
+			_unsubscribe = MockRepository.GenerateMock<UnsubscribeAction>();
+
 			_subscriptionEvent = MockRepository.GenerateMock<ISubscriptionEvent>();
-			_pipeline = MessagePipelineConfigurator.CreateDefault(_builder, _subscriptionEvent);
+			_pipeline = MessagePipelineConfigurator.CreateDefault(_builder);
+			_pipeline.Configure(x => x.Register(_subscriptionEvent));
 		}
 
 		private IObjectBuilder _builder;
@@ -45,13 +49,14 @@ namespace MassTransit.Tests.Pipeline
 		private IEndpoint _endpoint;
 		private MessagePipeline _pipeline;
 		private ISubscriptionEvent _subscriptionEvent;
+		private UnsubscribeAction _unsubscribe;
 
 		[Test]
 		public void for_batch_component_subscriptions()
 		{
-			_subscriptionEvent.Expect(x => x.SubscribedTo(typeof (IndividualBatchMessage))).Return(() =>
+			_subscriptionEvent.Expect(x => x.SubscribedTo<IndividualBatchMessage>()).Return(() =>
 				{
-					_subscriptionEvent.UnsubscribedFrom(typeof (IndividualBatchMessage));
+					_unsubscribe();
 					return true;
 				});
 
@@ -63,10 +68,10 @@ namespace MassTransit.Tests.Pipeline
 		[Test]
 		public void for_batch_subscriptions()
 		{
-			_subscriptionEvent.Expect(x => x.SubscribedTo(typeof (IndividualBatchMessage))).Return(() =>
-				{
-					_subscriptionEvent.UnsubscribedFrom(typeof (IndividualBatchMessage));
-					return true;
+			_subscriptionEvent.Expect(x => x.SubscribedTo<IndividualBatchMessage>()).Return(() =>
+			{
+				_unsubscribe();
+				return true;
 				});
 
 			var consumer = new TestBatchConsumer<IndividualBatchMessage, Guid>();
@@ -78,9 +83,9 @@ namespace MassTransit.Tests.Pipeline
 		[Test]
 		public void for_component_subscriptions()
 		{
-			_subscriptionEvent.Expect(x => x.SubscribedTo(typeof (PingMessage))).Return(() =>
+			_subscriptionEvent.Expect(x => x.SubscribedTo<PingMessage>()).Return(() =>
 				{
-					_subscriptionEvent.UnsubscribedFrom(typeof (PingMessage));
+					_unsubscribe();
 					return true;
 				});
 
@@ -94,9 +99,9 @@ namespace MassTransit.Tests.Pipeline
 		{
 			Guid pongGuid = Guid.NewGuid();
 
-			_subscriptionEvent.Expect(x => x.SubscribedTo(typeof (PongMessage), pongGuid.ToString())).Return(() =>
+			_subscriptionEvent.Expect(x => x.SubscribedTo<PongMessage,Guid>(pongGuid)).Return(() =>
 				{
-					_subscriptionEvent.UnsubscribedFrom(typeof (PongMessage), pongGuid.ToString());
+					_unsubscribe();
 					return true;
 				});
 
@@ -109,9 +114,9 @@ namespace MassTransit.Tests.Pipeline
 		[Test]
 		public void for_regular_subscriptions()
 		{
-			_subscriptionEvent.Expect(x => x.SubscribedTo(typeof (PingMessage))).Return(() =>
+			_subscriptionEvent.Expect(x => x.SubscribedTo<PingMessage>()).Return(() =>
 				{
-					_subscriptionEvent.UnsubscribedFrom(typeof (PingMessage));
+					_unsubscribe();
 					return true;
 				});
 
@@ -124,9 +129,9 @@ namespace MassTransit.Tests.Pipeline
 		[Test]
 		public void for_selective_component_subscriptions()
 		{
-			_subscriptionEvent.Expect(x => x.SubscribedTo(typeof (PingMessage))).Return(() =>
+			_subscriptionEvent.Expect(x => x.SubscribedTo<PingMessage>()).Return(() =>
 				{
-					_subscriptionEvent.UnsubscribedFrom(typeof (PingMessage));
+					_unsubscribe();
 					return true;
 				});
 
@@ -138,9 +143,9 @@ namespace MassTransit.Tests.Pipeline
 		[Test]
 		public void for_selective_subscriptions()
 		{
-			_subscriptionEvent.Expect(x => x.SubscribedTo(typeof (PingMessage))).Return(() =>
+			_subscriptionEvent.Expect(x => x.SubscribedTo<PingMessage>()).Return(() =>
 				{
-					_subscriptionEvent.UnsubscribedFrom(typeof (PingMessage));
+					_unsubscribe();
 					return true;
 				});
 
@@ -162,11 +167,14 @@ namespace MassTransit.Tests.Pipeline
 			_endpoint = MockRepository.GenerateMock<IEndpoint>();
 			_endpoint.Stub(x => x.Uri).Return(_uri);
 
+			_unsubscribe = MockRepository.GenerateMock<UnsubscribeAction>();
+
 			_bus = MockRepository.GenerateMock<IServiceBus>();
 			_bus.Stub(x => x.Endpoint).Return(_endpoint);
 
 			_subscriptionEvent = MockRepository.GenerateMock<ISubscriptionEvent>();
-			_pipeline = MessagePipelineConfigurator.CreateDefault(_builder, _subscriptionEvent);
+			_pipeline = MessagePipelineConfigurator.CreateDefault(_builder);
+			_pipeline.Configure(x => x.Register(_subscriptionEvent));
 		}
 
 		private IObjectBuilder _builder;
@@ -176,16 +184,16 @@ namespace MassTransit.Tests.Pipeline
 		private IEndpoint _endpoint;
 		private MessagePipeline _pipeline;
 		private ISubscriptionEvent _subscriptionEvent;
+		private UnsubscribeAction _unsubscribe;
 
 		[Test]
 		public void for_batch_subscriptions()
 		{
-			_subscriptionEvent.Expect(x => x.SubscribedTo(typeof (IndividualBatchMessage))).Return(() =>
+			_subscriptionEvent.Expect(x => x.SubscribedTo<IndividualBatchMessage>()).Return(() =>
 				{
-					_subscriptionEvent.UnsubscribedFrom(typeof (IndividualBatchMessage));
+					_unsubscribe();
 					return true;
 				});
-			_subscriptionEvent.Expect(x => x.UnsubscribedFrom(typeof (IndividualBatchMessage))).Repeat.Once();
 
 			var consumer = new TestBatchConsumer<IndividualBatchMessage, Guid>();
 			var token = _pipeline.Subscribe(consumer);
@@ -193,17 +201,17 @@ namespace MassTransit.Tests.Pipeline
 			token();
 
 			_subscriptionEvent.VerifyAllExpectations();
+			_unsubscribe.AssertWasCalled(x => x());
 		}
 
 		[Test]
 		public void for_batch_subscriptions_but_not_when_another_exists()
 		{
-			_subscriptionEvent.Expect(x => x.SubscribedTo(typeof (IndividualBatchMessage))).Repeat.Twice().Return(() =>
+			_subscriptionEvent.Expect(x => x.SubscribedTo<IndividualBatchMessage>()).Repeat.Twice().Return(() =>
 				{
-					_subscriptionEvent.UnsubscribedFrom(typeof (IndividualBatchMessage));
+					_unsubscribe();
 					return true;
 				});
-			_subscriptionEvent.Expect(x => x.UnsubscribedFrom(typeof (IndividualBatchMessage))).Repeat.Never();
 
 			var consumer = new TestBatchConsumer<IndividualBatchMessage, Guid>();
 			var token = _pipeline.Subscribe(consumer);
@@ -214,23 +222,24 @@ namespace MassTransit.Tests.Pipeline
 			token();
 
 			_subscriptionEvent.VerifyAllExpectations();
+			_unsubscribe.AssertWasNotCalled(x => x());
 		}
 
 		[Test]
 		public void for_component_subscriptions()
 		{
-			_subscriptionEvent.Expect(x => x.SubscribedTo(typeof (PingMessage))).Return(() =>
+			_subscriptionEvent.Expect(x => x.SubscribedTo<PingMessage>()).Return(() =>
 				{
-					_subscriptionEvent.UnsubscribedFrom(typeof (PingMessage));
+					_unsubscribe();
 					return true;
 				});
-			_subscriptionEvent.Expect(x => x.UnsubscribedFrom(typeof (PingMessage))).Repeat.Once();
 
 			var token = _pipeline.Subscribe<TestMessageConsumer<PingMessage>>();
 
 			token();
 
 			_subscriptionEvent.VerifyAllExpectations();
+			_unsubscribe.AssertWasCalled(x => x());
 		}
 
 		[Test]
@@ -238,12 +247,11 @@ namespace MassTransit.Tests.Pipeline
 		{
 			Guid pongGuid = Guid.NewGuid();
 
-			_subscriptionEvent.Expect(x => x.SubscribedTo(typeof (PongMessage), pongGuid.ToString())).Return(() =>
+			_subscriptionEvent.Expect(x => x.SubscribedTo<PongMessage,Guid>(pongGuid)).Return(() =>
 				{
-					_subscriptionEvent.UnsubscribedFrom(typeof (PongMessage), pongGuid.ToString());
+					_unsubscribe();
 					return true;
 				});
-			_subscriptionEvent.Expect(x => x.UnsubscribedFrom(typeof (PongMessage), pongGuid.ToString()));
 
 			var consumer = new TestCorrelatedConsumer<PongMessage, Guid>(pongGuid);
 			var remove = _pipeline.Subscribe(consumer);
@@ -251,6 +259,7 @@ namespace MassTransit.Tests.Pipeline
 			remove();
 
 			_subscriptionEvent.VerifyAllExpectations();
+			_unsubscribe.AssertWasCalled(x => x());
 		}
 
 		[Test]
@@ -258,12 +267,11 @@ namespace MassTransit.Tests.Pipeline
 		{
 			Guid pongGuid = Guid.NewGuid();
 
-			_subscriptionEvent.Expect(x => x.SubscribedTo(typeof (PongMessage), pongGuid.ToString())).Repeat.Twice().Return(() =>
+			_subscriptionEvent.Expect(x => x.SubscribedTo<PongMessage, Guid>(pongGuid)).Repeat.Twice().Return(() =>
 				{
-					_subscriptionEvent.UnsubscribedFrom(typeof (PongMessage), pongGuid.ToString());
+					_unsubscribe();
 					return true;
 				});
-			_subscriptionEvent.Expect(x => x.UnsubscribedFrom(typeof (PongMessage), pongGuid.ToString())).Repeat.Never();
 
 			var consumer = new TestCorrelatedConsumer<PongMessage, Guid>(pongGuid);
 			var otherConsumer = new TestCorrelatedConsumer<PongMessage, Guid>(pongGuid);
@@ -272,25 +280,24 @@ namespace MassTransit.Tests.Pipeline
 
 			remove();
 			_subscriptionEvent.VerifyAllExpectations();
+			_unsubscribe.AssertWasNotCalled(x => x());
 
 
-			_subscriptionEvent.BackToRecord();
-			_subscriptionEvent.Expect(x => x.UnsubscribedFrom(typeof (PongMessage), pongGuid.ToString())).Repeat.Once();
-			_subscriptionEvent.Replay();
+			_unsubscribe.BackToRecord();
+			_unsubscribe.Replay();
 
 			removeOther();
-			_subscriptionEvent.VerifyAllExpectations();
+			_unsubscribe.AssertWasCalled(x => x());
 		}
 
 		[Test]
 		public void for_regular_subscriptions()
 		{
-			_subscriptionEvent.Expect(x => x.SubscribedTo(typeof (PingMessage))).Return(() =>
+			_subscriptionEvent.Expect(x => x.SubscribedTo<PingMessage>()).Return(() =>
 				{
-					_subscriptionEvent.UnsubscribedFrom(typeof (PingMessage));
+					_unsubscribe();
 					return true;
 				});
-			_subscriptionEvent.Expect(x => x.UnsubscribedFrom(typeof (PingMessage))).Repeat.Once();
 
 			var consumer = new TestMessageConsumer<PingMessage>();
 			var token = _pipeline.Subscribe(consumer);
@@ -298,34 +305,34 @@ namespace MassTransit.Tests.Pipeline
 			token();
 
 			_subscriptionEvent.VerifyAllExpectations();
+			_unsubscribe.AssertWasCalled(x => x());
 		}
 
 		[Test]
 		public void for_selective_component_subscriptions()
 		{
-			_subscriptionEvent.Expect(x => x.SubscribedTo(typeof (PingMessage))).Return(() =>
+			_subscriptionEvent.Expect(x => x.SubscribedTo<PingMessage>()).Return(() =>
 				{
-					_subscriptionEvent.UnsubscribedFrom(typeof (PingMessage));
+					_unsubscribe();
 					return true;
 				});
-			_subscriptionEvent.Expect(x => x.UnsubscribedFrom(typeof (PingMessage))).Repeat.Once();
 
 			var token = _pipeline.Subscribe<TestSelectiveConsumer<PingMessage>>();
 
 			token();
 
 			_subscriptionEvent.VerifyAllExpectations();
+			_unsubscribe.AssertWasCalled(x => x());
 		}
 
 		[Test]
 		public void for_selective_subscriptions()
 		{
-			_subscriptionEvent.Expect(x => x.SubscribedTo(typeof (PingMessage))).Return(() =>
+			_subscriptionEvent.Expect(x => x.SubscribedTo<PingMessage>()).Return(() =>
 				{
-					_subscriptionEvent.UnsubscribedFrom(typeof (PingMessage));
+					_unsubscribe();
 					return true;
 				});
-			_subscriptionEvent.Expect(x => x.UnsubscribedFrom(typeof (PingMessage))).Repeat.Once();
 
 			var consumer = new TestSelectiveConsumer<PingMessage>();
 			var token = _pipeline.Subscribe(consumer);
@@ -333,6 +340,7 @@ namespace MassTransit.Tests.Pipeline
 			token();
 
 			_subscriptionEvent.VerifyAllExpectations();
+			_unsubscribe.AssertWasCalled(x => x());
 		}
 	}
 }

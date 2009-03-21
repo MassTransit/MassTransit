@@ -15,7 +15,6 @@ namespace MassTransit.Tests.Pipeline
 	using MassTransit.Pipeline;
 	using MassTransit.Pipeline.Configuration;
 	using MassTransit.Pipeline.Interceptors;
-	using MassTransit.Subscriptions;
 	using Messages;
 	using NUnit.Framework;
 	using Rhino.Mocks;
@@ -27,14 +26,19 @@ namespace MassTransit.Tests.Pipeline
 		public void Setup()
 		{
 			_builder = MockRepository.GenerateMock<IObjectBuilder>();
-			_subscriptionEvent = MockRepository.GenerateMock<ISubscriptionEvent>();
-			_pipeline = MessagePipelineConfigurator.CreateDefault(_builder, _subscriptionEvent);
+			_pipeline = MessagePipelineConfigurator.CreateDefault(_builder);
 		}
 
 		private IObjectBuilder _builder;
-		private ISubscriptionCache _cache;
 		private MessagePipeline _pipeline;
-		private ISubscriptionEvent _subscriptionEvent;
+
+		[Test]
+		public void The_builder_should_stay_with_the_pipeline()
+		{
+			var interceptor = MockRepository.GenerateMock<IPipelineInterceptor>();
+
+			_pipeline.Configure(x => { x.Register(interceptor); });
+		}
 
 		[Test]
 		public void The_pipeline_should_be_happy()
@@ -46,17 +50,6 @@ namespace MassTransit.Tests.Pipeline
 			_pipeline.Dispatch(new PingMessage());
 
 			Assert.IsNotNull(consumer.Consumed);
-		}
-
-		[Test]
-		public void The_builder_should_stay_with_the_pipeline()
-		{
-			var interceptor = MockRepository.GenerateMock<IPipelineInterceptor>();
-
-			_pipeline.Configure(x =>
-				{
-					x.Register(interceptor);
-				});
 		}
 	}
 }

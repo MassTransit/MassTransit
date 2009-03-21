@@ -12,11 +12,15 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests.TextFixtures
 {
+	using System;
+	using System.Collections;
 	using Configuration;
-	using Magnum.Common.DateTimeExtensions;
-	using MassTransit.Internal;
+	using Magnum.DateTimeExtensions;
+	using Magnum.StateMachine;
+	using MassTransit.Pipeline.Interceptors;
+	using MassTransit.Saga;
+	using MassTransit.Saga.Pipeline;
 	using MassTransit.Serialization;
-	using MassTransit.Subscriptions;
 	using NUnit.Framework;
 	using Rhino.Mocks;
 
@@ -29,31 +33,25 @@ namespace MassTransit.Tests.TextFixtures
 		{
 			ObjectBuilder = MockRepository.GenerateMock<IObjectBuilder>();
 
-			ISubscriptionCache subscriptionCache = new LocalSubscriptionCache();
-			ObjectBuilder.Stub(x => x.GetInstance<ISubscriptionCache>()).Return(subscriptionCache);
-
-			ITypeInfoCache typeInfoCache = new TypeInfoCache();
-			ObjectBuilder.Stub(x => x.GetInstance<ITypeInfoCache>()).Return(typeInfoCache);
-
-            //TODO: Is this how it should be set up?
-            BinaryMessageSerializer serializer = new BinaryMessageSerializer();
-		    ObjectBuilder.Stub(x => x.GetInstance<BinaryMessageSerializer>()).Return(serializer);
+			//TODO: Is this how it should be set up?
+			BinaryMessageSerializer serializer = new BinaryMessageSerializer();
+			ObjectBuilder.Stub(x => x.GetInstance<BinaryMessageSerializer>()).Return(serializer);
 
 			EndpointFactory = EndpointFactoryConfigurator.New(x =>
 				{
 					x.SetObjectBuilder(ObjectBuilder);
 					x.RegisterTransport<TTransport>();
-                    x.SetDefaultSerializer<BinaryMessageSerializer>();
+					x.SetDefaultSerializer<BinaryMessageSerializer>();
 
 					AdditionalEndpointFactoryConfiguration(x);
 				});
 			ObjectBuilder.Stub(x => x.GetInstance<IEndpointFactory>()).Return(EndpointFactory);
 
-			ServiceBusConfigurator.Defaults(x => 
-			{
-				x.SetObjectBuilder(ObjectBuilder);
-				x.SetReceiveTimeout(50.Milliseconds());
-			});
+			ServiceBusConfigurator.Defaults(x =>
+				{
+					x.SetObjectBuilder(ObjectBuilder);
+					x.SetReceiveTimeout(50.Milliseconds());
+				});
 
 			EstablishContext();
 		}
@@ -81,6 +79,79 @@ namespace MassTransit.Tests.TextFixtures
 
 		protected virtual void TeardownContext()
 		{
+		}
+
+		protected ISagaRepository<TSaga> SetupSagaRepository<TSaga>()
+				where TSaga : class, ISaga
+		{
+			var sagaRepository = new InMemorySagaRepository<TSaga>();
+
+			ObjectBuilder.Stub(x => x.GetInstance<ISagaRepository<TSaga>>())
+				.Return(sagaRepository);
+
+			return sagaRepository;
+		}
+
+		protected void SetupInitiateSagaSink<TSaga, TMessage>(IServiceBus bus, ISagaRepository<TSaga> repository)
+			where TSaga : class, ISaga, InitiatedBy<TMessage>
+			where TMessage : class, CorrelatedBy<Guid>
+		{
+			ObjectBuilder.Stub(x => x.GetInstance<InitiateSagaMessageSink<TSaga, TMessage>>(new Hashtable()))
+				.IgnoreArguments()
+				.Return(null)
+				.WhenCalled(invocation =>
+							invocation.ReturnValue =
+							new InitiateSagaMessageSink<TSaga, TMessage>(
+								((Hashtable)invocation.Arguments[0])["context"] as IInterceptorContext,
+								bus,
+								repository));
+		}
+
+		protected void SetupInitiateSagaStateMachineSink<TSaga, TMessage>(IServiceBus bus, ISagaRepository<TSaga> repository)
+			where TSaga : SagaStateMachine<TSaga>, ISaga 
+			where TMessage : class, CorrelatedBy<Guid>
+		{
+			ObjectBuilder.Stub(x => x.GetInstance<InitiateSagaStateMachineSink<TSaga, TMessage>>(new Hashtable()))
+				.IgnoreArguments()
+				.Return(null)
+				.WhenCalled(invocation =>
+							invocation.ReturnValue =
+							new InitiateSagaStateMachineSink<TSaga, TMessage>(
+								((Hashtable)invocation.Arguments[0])["context"] as IInterceptorContext,
+								bus,
+								repository,
+								((Hashtable)invocation.Arguments[0])["dataEvent"] as DataEvent<TSaga,TMessage>));
+		}
+
+		protected void SetupOrchestrateSagaSink<TSaga, TMessage>(IServiceBus bus, ISagaRepository<TSaga> repository)
+			where TSaga : class, ISaga, Orchestrates<TMessage>
+			where TMessage : class, CorrelatedBy<Guid>
+		{
+			ObjectBuilder.Stub(x => x.GetInstance<OrchestrateSagaMessageSink<TSaga, TMessage>>(new Hashtable()))
+				.IgnoreArguments()
+				.Return(null)
+				.WhenCalled(invocation =>
+							invocation.ReturnValue =
+							new OrchestrateSagaMessageSink<TSaga, TMessage>(
+								((Hashtable)invocation.Arguments[0])["context"] as IInterceptorContext,
+								bus,
+								repository));
+		}
+
+		protected void SetupOrchestrateSagaStateMachineSink<TSaga, TMessage>(IServiceBus bus, ISagaRepository<TSaga> repository)
+			where TSaga : SagaStateMachine<TSaga>, ISaga
+			where TMessage : class, CorrelatedBy<Guid>
+		{
+			ObjectBuilder.Stub(x => x.GetInstance<OrchestrateSagaStateMachineSink<TSaga, TMessage>>(new Hashtable()))
+				.IgnoreArguments()
+				.Return(null)
+				.WhenCalled(invocation =>
+							invocation.ReturnValue =
+							new OrchestrateSagaStateMachineSink<TSaga, TMessage>(
+								((Hashtable)invocation.Arguments[0])["context"] as IInterceptorContext,
+								bus,
+								repository,
+								((Hashtable)invocation.Arguments[0])["dataEvent"] as DataEvent<TSaga, TMessage>));
 		}
 	}
 }

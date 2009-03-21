@@ -14,13 +14,14 @@ namespace MassTransit.Pipeline.Configuration
 {
 	using System;
 	using Interceptors;
+	using Util;
 
 	public class MessagePipelineConfiguratorBase :
 		IDisposable
 	{
 		private volatile bool _disposed;
 
-		protected InterceptorList<IPipelineInterceptor> _interceptors = new InterceptorList<IPipelineInterceptor>();
+		protected RegistrationList<IPipelineInterceptor> _interceptors = new RegistrationList<IPipelineInterceptor>();
 
 		public void Dispose()
 		{

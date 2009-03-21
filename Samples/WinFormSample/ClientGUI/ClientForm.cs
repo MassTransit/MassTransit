@@ -18,6 +18,7 @@ namespace ClientGUI
     using System.Windows.Forms;
     using Castle.Windsor;
     using log4net;
+    using Magnum;
     using MassTransit;
     using MassTransit.Services.Timeout.Messages;
     using MassTransit.Util;
@@ -31,7 +32,7 @@ namespace ClientGUI
 
         private IServiceBus _bus;
 
-        private IWindsorContainer _container;
+        private DefaultMassTransitContainer _container;
 
         private int _target;
 
@@ -67,7 +68,7 @@ namespace ClientGUI
 
             for (int i = 0; i < _target; i++)
             {
-                var question = new SubmitQuestion(CombGuid.NewCombGuid());
+                var question = new SubmitQuestion(CombGuid.Generate());
                 tk.Add(question);
 
                 if (i%10 == 0) //update every ten things

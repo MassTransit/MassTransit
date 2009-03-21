@@ -20,6 +20,7 @@ namespace MassTransit.Saga
 	/// </summary>
 	/// <typeparam name="T"></typeparam>
     public interface ISagaRepository<T> :
+		IEnumerable<T>,
 		IDisposable
         where T : class
     {

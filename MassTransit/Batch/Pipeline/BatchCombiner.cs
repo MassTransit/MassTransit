@@ -17,14 +17,14 @@ namespace MassTransit.Batch.Pipeline
     using System.Collections.Generic;
     using System.Threading;
     using log4net;
-    using Magnum.Common.DateTimeExtensions;
-    using Magnum.Common.Threading;
+    using Magnum.DateTimeExtensions;
+    using Magnum.Threading;
     using MassTransit.Pipeline;
     using Threading;
 
     public class BatchCombiner<TMessage, TBatchId> :
         ManagedThread,
-        IMessageSink<TMessage>,
+        IPipelineSink<TMessage>,
         Consumes<TMessage>.All,
         IEnumerable<TMessage>
         where TMessage : class, BatchedBy<TBatchId>
@@ -34,7 +34,7 @@ namespace MassTransit.Batch.Pipeline
         private readonly TBatchId _batchId;
         private readonly int _batchLength;
         private readonly Batch<TMessage, TBatchId> _batchMessage;
-        private readonly Consumes<Batch<TMessage, TBatchId>>.All _consumer;
+        private readonly Action<Batch<TMessage, TBatchId>> _consumer;
         private readonly TimeSpan _timeout = 30.Seconds();
         private ManualResetEvent _complete = new ManualResetEvent(false);
         private volatile bool _disposed;
@@ -44,7 +44,7 @@ namespace MassTransit.Batch.Pipeline
         private Semaphore _messageWaiting = new Semaphore(0, 1);
 
 
-        public BatchCombiner(TBatchId batchId, int batchLength, Consumes<Batch<TMessage, TBatchId>>.All consumer)
+        public BatchCombiner(TBatchId batchId, int batchLength, Action<Batch<TMessage, TBatchId>> consumer)
         {
             _batchId = batchId;
             _batchLength = batchLength;
@@ -100,13 +100,13 @@ namespace MassTransit.Batch.Pipeline
             return GetEnumerator();
         }
 
-        public IEnumerable<Consumes<TMessage>.All> Enumerate(TMessage message)
+        public IEnumerable<Action<TMessage>> Enumerate(TMessage message)
         {
             if (IsCompleted())
                 yield break;
 
             if (_batchId.Equals(message.BatchId) && _messageRequested.WaitOne(_timeout, false))
-                yield return this;
+                yield return Consume;
         }
 
         public bool Inspect(IPipelineInspector inspector)
@@ -153,7 +153,7 @@ namespace MassTransit.Batch.Pipeline
         {
             try
             {
-                _consumer.Consume(_batchMessage);
+                _consumer(_batchMessage);
             }
             catch (Exception ex)
             {

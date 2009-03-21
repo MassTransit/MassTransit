@@ -21,11 +21,11 @@ namespace MassTransit.Services.Timeout
     using Util;
 
     public class TimeoutService :
-        IHostedService
+		IDisposable
     {
         private static readonly TimeSpan _interval = TimeSpan.FromSeconds(1);
         private static readonly ILog _log = LogManager.GetLogger(typeof (TimeoutService));
-        private readonly IServiceBus _bus;
+        private IServiceBus _bus;
         private readonly ITimeoutRepository _repository;
         private readonly ManualResetEvent _stopped = new ManualResetEvent(false);
         private readonly AutoResetEvent _trigger = new AutoResetEvent(true);
@@ -33,16 +33,17 @@ namespace MassTransit.Services.Timeout
     	private UnsubscribeAction _unsubscribeToken;
 
     	public TimeoutService(IServiceBus bus, ITimeoutRepository repository)
-        {
-            _bus = bus;
-            _repository = repository;
-        }
+    	{
+    		_bus = bus;
+    		_repository = repository;
+    	}
 
-        public void Dispose()
+    	public void Dispose()
         {
             try
             {
                 _bus.Dispose();
+            	_bus = null;
             }
             catch (Exception ex)
             {
@@ -55,7 +56,7 @@ namespace MassTransit.Services.Timeout
 
         public void Start()
         {
-            if (_log.IsInfoEnabled)
+			if (_log.IsInfoEnabled)
                 _log.Info("Timeout Service Starting");
 
         	_unsubscribeToken = _bus.Subscribe<ScheduleTimeoutConsumer>();

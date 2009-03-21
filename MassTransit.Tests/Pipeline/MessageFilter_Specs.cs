@@ -27,12 +27,10 @@ namespace MassTransit.Tests.Pipeline
 		public void Setup()
 		{
 			_builder = MockRepository.GenerateMock<IObjectBuilder>();
-			_subscriptionEvent = MockRepository.GenerateMock<ISubscriptionEvent>();
-			_pipeline = MessagePipelineConfigurator.CreateDefault(_builder, _subscriptionEvent);
+			_pipeline = MessagePipelineConfigurator.CreateDefault(_builder);
 		}
 
 		private IObjectBuilder _builder;
-		private ISubscriptionEvent _subscriptionEvent;
 		private MessagePipeline _pipeline;
 
 		[Test]

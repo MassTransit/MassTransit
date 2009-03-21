@@ -15,16 +15,15 @@ namespace MassTransit.Tests.Timeouts
     using System;
     using System.Diagnostics;
     using System.Threading;
-    using Castle.Core;
-    using Magnum.Common.DateTimeExtensions;
+    using Magnum;
+    using Magnum.DateTimeExtensions;
     using MassTransit.Services.Timeout;
     using MassTransit.Services.Timeout.Messages;
     using NUnit.Framework;
     using Rhino.Mocks;
     using TextFixtures;
-    using Util;
 
-    [TestFixture]
+	[TestFixture]
     public class When_scheduling_a_timeout_for_a_new_id :
         LoopbackLocalAndRemoteTestFixture
     {
@@ -36,7 +35,7 @@ namespace MassTransit.Tests.Timeouts
         {
             base.EstablishContext();
 
-            _correlationId = CombGuid.NewCombGuid();
+            _correlationId = CombGuid.Generate();
 
             _repository = new InMemoryTimeoutRepository();
             ObjectBuilder.Stub(x => x.GetInstance<ITimeoutRepository>()).Return(_repository);

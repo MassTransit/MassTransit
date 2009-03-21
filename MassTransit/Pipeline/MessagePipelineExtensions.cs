@@ -24,7 +24,7 @@ namespace MassTransit.Pipeline
 		/// </summary>
 		/// <param name="pipeline">The pipeline instance</param>
 		/// <param name="message">The message to dispatch</param>
-		public static bool Dispatch(this MessagePipeline pipeline, object message)
+		public static bool Dispatch(this IMessagePipeline pipeline, object message)
 		{
 			return pipeline.Dispatch(message, x => true);
 		}
@@ -36,11 +36,11 @@ namespace MassTransit.Pipeline
 		/// <param name="pipeline">The pipeline instance</param>
 		/// <param name="message">The message to dispatch</param>
 		/// <param name="acknowledge">The function to call if the message will be consumed by the pipeline</param>
-		public static bool Dispatch(this MessagePipeline pipeline, object message, Func<object, bool> acknowledge)
+		public static bool Dispatch(this IMessagePipeline pipeline, object message, Func<object, bool> acknowledge)
 		{
 			bool consumed = false;
 
-			foreach (Consumes<object>.All consumer in pipeline.Enumerate(message))
+			foreach (Action<object> consumer in pipeline.Enumerate(message))
 			{
 				if (!acknowledge(message))
 					return false;
@@ -49,7 +49,7 @@ namespace MassTransit.Pipeline
 
 				consumed = true;
 
-				consumer.Consume(message);
+				consumer(message);
 
 			}
 
@@ -62,7 +62,7 @@ namespace MassTransit.Pipeline
 		/// <typeparam name="TComponent"></typeparam>
 		/// <param name="pipeline">The pipeline to configure</param>
 		/// <returns></returns>
-		public static UnsubscribeAction Subscribe<TComponent>(this MessagePipeline pipeline) where TComponent : class
+		public static UnsubscribeAction Subscribe<TComponent>(this IMessagePipeline pipeline) where TComponent : class
 		{
 			return pipeline.Configure(x => x.Subscribe<TComponent>());
 		}
@@ -74,26 +74,49 @@ namespace MassTransit.Pipeline
 		/// <param name="pipeline">The pipeline to configure</param>
 		/// <param name="instance">The instance that will handle the messages</param>
 		/// <returns></returns>
-		public static UnsubscribeAction Subscribe<TComponent>(this MessagePipeline pipeline, TComponent instance)
+		public static UnsubscribeAction Subscribe<TComponent>(this IMessagePipeline pipeline, TComponent instance)
 			where TComponent : class
 		{
 			return pipeline.Configure(x => x.Subscribe(instance));
 		}
 
-		public static UnsubscribeAction Subscribe<TMessage>(this MessagePipeline pipeline, IEndpoint endpoint) where TMessage : class
+		public static UnsubscribeAction Subscribe<TMessage>(this IMessagePipeline pipeline, Action<TMessage> handler, Predicate<TMessage> acceptor) 
+			where TMessage : class
+		{
+			return pipeline.Configure(x => x.Subscribe(handler, acceptor));
+		}
+
+		public static UnsubscribeAction Subscribe<TMessage>(this IMessagePipeline pipeline, IEndpoint endpoint) where TMessage : class
 		{
 			MessageRouterConfigurator routerConfigurator = MessageRouterConfigurator.For(pipeline);
 
 			return routerConfigurator.FindOrCreate<TMessage>().Connect(new EndpointMessageSink<TMessage>(endpoint));
 		}
 
-		public static UnregisterAction Filter<TMessage>(this MessagePipeline pipeline, Func<TMessage, bool> allow)
+		public static UnsubscribeAction Subscribe<TMessage,TKey>(this IMessagePipeline pipeline, TKey correlationId, IEndpoint endpoint) 
+			where TMessage : class, CorrelatedBy<TKey>
+		{
+			var correlatedConfigurator = CorrelatedMessageRouterConfigurator.For(pipeline);
+
+			var router = correlatedConfigurator.FindOrCreate<TMessage, TKey>();
+
+			UnsubscribeAction result = router.Connect(correlationId, new EndpointMessageSink<TMessage>(endpoint));
+
+			// TODO we need to echo this out to the subscription manager at some point I imagine
+			//UnsubscribeAction remove = context.SubscribedTo<TMessage, TKey>(consumer.CorrelationId);
+
+			return result;
+			//return () => result() && remove();
+		}
+
+
+		public static UnregisterAction Filter<TMessage>(this IMessagePipeline pipeline, Func<TMessage, bool> allow)
 			where TMessage : class
 		{
 			return Filter(pipeline, "", allow);
 		}
 
-		public static UnregisterAction Filter<TMessage>(this MessagePipeline pipeline, string description, Func<TMessage, bool> allow)
+		public static UnregisterAction Filter<TMessage>(this IMessagePipeline pipeline, string description, Func<TMessage, bool> allow)
 			where TMessage : class
 		{
 			MessageFilterConfigurator configurator = MessageFilterConfigurator.For(pipeline);

@@ -14,7 +14,7 @@ namespace MassTransit.Tests.Saga
 {
 	using System;
 	using System.Threading;
-	using Magnum.Common.DateTimeExtensions;
+	using Magnum.DateTimeExtensions;
 	using Messages;
 
 	public class RegisterUserController :

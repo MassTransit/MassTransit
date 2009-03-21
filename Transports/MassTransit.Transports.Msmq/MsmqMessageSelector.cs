@@ -18,7 +18,7 @@ namespace MassTransit.Transports.Msmq
 	using Exceptions;
 	using Internal;
 	using log4net;
-	using Magnum.Common.DateTimeExtensions;
+	using Magnum.DateTimeExtensions;
 	using Serialization;
 
 	public class MsmqMessageSelector :

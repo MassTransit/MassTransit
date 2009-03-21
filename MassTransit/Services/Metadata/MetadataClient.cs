@@ -1,7 +1,6 @@
 namespace MassTransit.Services.Metadata
 {
-    public class MetadataClient :
-        IHostedService
+    public class MetadataClient
     {
 
         public void Start()

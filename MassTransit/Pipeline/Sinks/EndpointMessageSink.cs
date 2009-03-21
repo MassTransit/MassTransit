@@ -20,8 +20,7 @@ namespace MassTransit.Pipeline.Sinks
 	/// </summary>
 	/// <typeparam name="TMessage"></typeparam>
 	public class EndpointMessageSink<TMessage> :
-		IMessageSink<TMessage>,
-		Consumes<TMessage>.All
+		IPipelineSink<TMessage>
 		where TMessage : class
 	{
 		private readonly IEndpoint _endpoint;
@@ -36,14 +35,9 @@ namespace MassTransit.Pipeline.Sinks
 			get { return _endpoint.Uri; }
 		}
 
-		public void Consume(TMessage message)
+		public IEnumerable<Action<TMessage>> Enumerate(TMessage message)
 		{
-			_endpoint.Send(message);
-		}
-
-		public IEnumerable<Consumes<TMessage>.All> Enumerate(TMessage message)
-		{
-			yield return this;
+			yield return x => _endpoint.Send(x);
 		}
 
 		public bool Inspect(IPipelineInspector inspector)

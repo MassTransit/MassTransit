@@ -145,6 +145,7 @@ namespace MassTransit.Threading
 			}
 
 			Thread thread = new Thread(RunThread);
+			thread.Name = GetType().Name + "-" + thread.ManagedThreadId;
 
 			lock (_threads)
 			{

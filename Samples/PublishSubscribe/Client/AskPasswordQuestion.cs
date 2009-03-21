@@ -6,7 +6,6 @@ namespace Client
     using SecurityMessages;
 
     public class AskPasswordQuestion :
-        IHostedService,
 		Consumes<PasswordUpdateComplete>.For<Guid>
     {
 		private static readonly ILog _log = LogManager.GetLogger(typeof(AskPasswordQuestion));

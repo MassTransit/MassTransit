@@ -12,10 +12,10 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Batch.Pipeline
 {
-    using System;
-    using System.Collections.Generic;
+	using System;
+	using System.Collections.Generic;
     using log4net;
-    using Magnum.Common.Threading;
+    using Magnum.Threading;
     using MassTransit.Pipeline;
     using MassTransit.Pipeline.Sinks;
 
@@ -30,12 +30,12 @@ namespace MassTransit.Batch.Pipeline
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof (BatchMessageRouter<TMessage, TBatchId>));
 
-        private ReaderWriterLockedObject<List<IMessageSink<Batch<TMessage, TBatchId>>>> _consumerSinks;
+        private ReaderWriterLockedObject<List<IPipelineSink<Batch<TMessage, TBatchId>>>> _consumerSinks;
         private bool _disposed;
 
         public BatchMessageRouter()
         {
-            _consumerSinks = new ReaderWriterLockedObject<List<IMessageSink<Batch<TMessage, TBatchId>>>>(new List<IMessageSink<Batch<TMessage, TBatchId>>>());
+            _consumerSinks = new ReaderWriterLockedObject<List<IPipelineSink<Batch<TMessage, TBatchId>>>>(new List<IPipelineSink<Batch<TMessage, TBatchId>>>());
         }
 
         public int SinkCount
@@ -43,9 +43,9 @@ namespace MassTransit.Batch.Pipeline
             get { return _consumerSinks.ReadLock(x => x.Count); }
         }
 
-        public override IEnumerable<Consumes<TMessage>.All> Enumerate(TMessage message)
+        public override IEnumerable<Action<TMessage>> Enumerate(TMessage message)
         {
-            IMessageSink<TMessage> sink = null;
+            IPipelineSink<TMessage> sink = null;
 
             _sinks.UpgradeableReadLock(x =>
                                            {
@@ -79,13 +79,13 @@ namespace MassTransit.Batch.Pipeline
             if (sink == null)
                 yield break;
 
-            foreach (Consumes<TMessage>.All consumer in sink.Enumerate(message))
+            foreach (Action<TMessage> consumer in sink.Enumerate(message))
             {
                 yield return consumer;
             }
         }
 
-		public UnsubscribeAction Connect(IMessageSink<Batch<TMessage, TBatchId>> sink)
+		public UnsubscribeAction Connect(IPipelineSink<Batch<TMessage, TBatchId>> sink)
         {
             _consumerSinks.WriteLock(sinks => sinks.Add(sink));
 

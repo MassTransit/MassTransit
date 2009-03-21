@@ -27,12 +27,10 @@ namespace MassTransit.Dashboard.Controllers
         private readonly IServiceBus _bus;
         private ServiceBusRequest<HealthController> _request;
         private readonly Guid _correlationId = Guid.NewGuid();
-        private IHealthCache _cache;
 
-        public HealthController(IServiceBus bus, IHealthCache cache)
+        public HealthController(IServiceBus bus)
         {
             _bus = bus;
-            _cache = cache;
         }
 
         //public IAsyncResult BeginView()

@@ -6,16 +6,14 @@ namespace Server
 	using SecurityMessages;
 
 	public class PasswordUpdateService :
-		IHostedService,
 		Consumes<RequestPasswordUpdate>.All
 	{
 		private static readonly ILog _log = LogManager.GetLogger(typeof (PasswordUpdateService));
-		private readonly IServiceBus _serviceBus;
+		private IServiceBus _serviceBus;
 		private UnsubscribeAction _unsubscribeToken;
 
-		public PasswordUpdateService(IServiceBus serviceBus)
+		public PasswordUpdateService()
 		{
-			_serviceBus = serviceBus;
 		}
 
 		#region IMessageService Members
@@ -25,8 +23,9 @@ namespace Server
 			_serviceBus.Dispose();
 		}
 
-		public void Start()
+		public void Start(IServiceBus bus)
 		{
+		    _serviceBus = bus;
 			_unsubscribeToken = _serviceBus.Subscribe(this);
 		}
 
