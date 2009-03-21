@@ -27,74 +27,70 @@ namespace MassTransit.Services.HealthMonitoring.Server
         static HealthSaga()
         {
             Define(() =>
-                       {
-                           Initially(
-                               When(EndpointDetected)
-                                   .Then((saga, message) =>
-                                             {
-                                                 //store stuff
-                                                 saga.EndpointAddress = message.EndpointAddress;
-                                                 saga.TimeBetweenBeatsInSeconds = message.TimeBetweenBeatsInSeconds;
-                                                 saga.MarkBeat();
-                                                 saga.Bus.Publish(new ScheduleTimeout(saga.CorrelationId, saga.TimeBetweenBeatsInSeconds.Seconds()));
-                                             })
-                                             .Then(StatusChange)
-                                             .TransitionTo(Healthy));
+                   {
+                       Initially(
+                           When(EndpointDetected)
+                               .Then((saga, message) =>
+                                     {
+                                         //store stuff
+                                         saga.EndpointAddress = message.EndpointAddress;
+                                         saga.TimeBetweenBeatsInSeconds = message.TimeBetweenBeatsInSeconds;
+                                         saga.MarkBeat();
+                                         saga.Bus.Publish(new ScheduleTimeout(saga.CorrelationId, saga.TimeBetweenBeatsInSeconds.Seconds()));
+                                     })
+                               .Then(StatusChange)
+                               .TransitionTo(Healthy));
 
-                           During(Healthy,
-                                  When(EndpointBreathes)
-                                      .Then((saga, message) =>
-                                                {
-                                                    saga.MarkBeat();
-                                                    //reschedule
-                                                    saga.Bus.Publish(new ScheduleTimeout(saga.CorrelationId, saga.TimeBetweenBeatsInSeconds.Seconds()));
-                                                })
-							       	.Then(StatusChange),
+                       During(Healthy,
+                              When(EndpointBreathes)
+                                  .Then((saga, message) =>
+                                        {
+                                            saga.MarkBeat();
+                                            //reschedule
+                                            saga.Bus.Publish(new ScheduleTimeout(saga.CorrelationId, saga.TimeBetweenBeatsInSeconds.Seconds()));
+                                        })
+                                  .Then(StatusChange),
+                              When(TimeoutExpired)
+                                  .Then((saga, message) =>
+                                        {
+                                            //attempt to directly contact the endpoint
+                                            //how to catch the ping timing out?
+                                            saga.Bus.Publish(new ScheduleTimeout(saga.CorrelationId, 5.Seconds())); //ideally i would tag this with ping-timeout or something.
 
-                                  When(TimeoutExpired)
-                                      .Then((saga, message) =>
-                                                {
-                                                    //attempt to directly contact the endpoint
-                                                    //how to catch the ping timing out?
-                                                    saga.Bus.Publish(new ScheduleTimeout(saga.CorrelationId, 5.Seconds())); //ideally i would tag this with ping-timeout or something.
-                                                    
-                                                    var ef = ServiceLocator.Current.GetInstance<IEndpointFactory>();
-                                                    ef.GetEndpoint(saga.EndpointAddress).Send(new Ping(saga.CorrelationId));
-                                                })
-                                      .Then(StatusChange)
-                                      .TransitionTo(Suspect));
+                                            var ef = ServiceLocator.Current.GetInstance<IEndpointFactory>();
+                                            ef.GetEndpoint(saga.EndpointAddress).Send(new Ping(saga.CorrelationId));
+                                        })
+                                  .Then(StatusChange)
+                                  .TransitionTo(Suspect));
 
 
-                           During(Suspect,
-                                When(EndpointBreathes)
-									.Then(StatusChange)
-									.TransitionTo(Healthy),
-                                When(SuspectRespondsToPing)
-									.Then(StatusChange)
-									.TransitionTo(Healthy),
-                                  When(PingTimesout)
-                                      .Then((saga, message) =>
-                                                {
-                                                    saga.Bus.Publish(new DownEndpoint(saga.EndpointAddress));
-                                                })
-                                                .Then(StatusChange)
-                                                .TransitionTo(Down));
+                       During(Suspect,
+                              When(EndpointBreathes)
+                                  .Then(StatusChange)
+                                  .TransitionTo(Healthy),
+                              When(SuspectRespondsToPing)
+                                  .Then(StatusChange)
+                                  .TransitionTo(Healthy),
+                              When(PingTimesout)
+                                  .Then((saga, message) => { saga.Bus.Publish(new DownEndpoint(saga.EndpointAddress)); })
+                                  .Then(StatusChange)
+                                  .TransitionTo(Down));
 
-                           During(Down,
-                                  When(EndpointBreathes).Then(StatusChange).TransitionTo(Healthy));
+                       During(Down,
+                              When(EndpointBreathes).Then(StatusChange).TransitionTo(Healthy));
 
-                           //Anytime(EndpointPoweringDown).Complete();
-				});
+                       //Anytime(EndpointPoweringDown).Complete();
+                   });
         }
 
         public HealthSaga(Guid correlationId)
-		{
-			CorrelationId = correlationId;
-		}
+        {
+            CorrelationId = correlationId;
+        }
 
         public HealthSaga()
-		{
-		}
+        {
+        }
 
         public static State Initial { get; set; }
         public static State Healthy { get; set; }
@@ -112,15 +108,18 @@ namespace MassTransit.Services.HealthMonitoring.Server
         public DateTime LastHeartbeat { get; private set; }
         public Uri EndpointAddress { get; set; }
         public int TimeBetweenBeatsInSeconds { get; set; }
-        
+
+        #region ISaga Members
 
         public IServiceBus Bus { get; set; }
         public Guid CorrelationId { get; set; }
 
+        #endregion
+
         private bool HasExpiredAccordingToPolicy()
         {
             int actualDuration = DateTime.Now.Subtract(LastHeartbeat).Seconds;
-            return (actualDuration /2) > TimeBetweenBeatsInSeconds;
+            return (actualDuration/2) > TimeBetweenBeatsInSeconds;
         }
 
         private void MarkBeat()
@@ -140,6 +139,7 @@ namespace MassTransit.Services.HealthMonitoring.Server
         {
             return start < current;
         }
+
         public static bool IsEarlierThan(this DateTime start, DateTime current)
         {
             return start > current;

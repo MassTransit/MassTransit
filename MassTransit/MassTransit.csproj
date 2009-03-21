@@ -79,7 +79,7 @@
     <Compile Include="Grid\Messages\SubTaskComplete.cs" />
     <Compile Include="Grid\Messages\SubTaskWorkerAvailable.cs" />
     <Compile Include="Grid\SubTaskWorker.cs" />
-    <Compile Include="Services\HealthMonitoring\HealthInformation.cs" />
+    <Compile Include="Services\HealthMonitoring\Messages\HealthInformation.cs" />
     <Compile Include="Internal\IdempotentHashtable.cs" />
     <Compile Include="Internal\IdempotentList.cs" />
     <Compile Include="Internal\IEndpointResolver.cs" />
