@@ -48,8 +48,8 @@ namespace MassTransit.Tests.Timeouts
 			ObjectBuilder.Stub(x => x.GetInstance<ScheduleTimeoutConsumer>()).Return(new ScheduleTimeoutConsumer(_timeoutRepository));
 			ObjectBuilder.Stub(x => x.GetInstance<CancelTimeoutConsumer>()).Return(new CancelTimeoutConsumer(_timeoutRepository));
 
-			_timeoutService = new TimeoutService(_timeoutRepository);
-            _timeoutService.Start(RemoteBus);
+            _timeoutService = new TimeoutService(RemoteBus, _timeoutRepository);
+            _timeoutService.Start();
 
 
 			_repository = new InMemoryDeferredMessageRepository();
@@ -57,8 +57,8 @@ namespace MassTransit.Tests.Timeouts
 			ObjectBuilder.Stub(x => x.GetInstance<DeferMessageConsumer>()).Return(new DeferMessageConsumer(RemoteBus, _repository));
 			ObjectBuilder.Stub(x => x.GetInstance<TimeoutExpiredConsumer>()).Return(new TimeoutExpiredConsumer(RemoteBus, _repository));
 
-			_deferService = new MessageDeferralService();
-            _deferService.Start(RemoteBus);
+            _deferService = new MessageDeferralService(RemoteBus);
+            _deferService.Start();
 		}
 
 		protected override void TeardownContext()

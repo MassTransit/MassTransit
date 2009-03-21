@@ -15,6 +15,7 @@ namespace SubscriptionServiceHost
     using System.IO;
     using log4net;
     using log4net.Config;
+    using MassTransit;
     using MassTransit.Configuration;
     using MassTransit.Services.Subscriptions.Server;
     using MassTransit.WindsorIntegration;
@@ -55,16 +56,14 @@ namespace SubscriptionServiceHost
                                     container.AddComponent<ISubscriptionRepository, InMemorySubscriptionRepository>();
                                     container.AddComponent<SubscriptionService>();
 
-                                    return container.ObjectBuilder;
-                                });
-                            s.WhenStarted(tc =>
-                            {
-                                var bus = ServiceBusConfigurator.New(sbc =>
+                                    var bus = ServiceBusConfigurator.New(sbc =>
                                     {
                                         sbc.ReceiveFrom("msmq://localhost/mt_subscriptions");
                                     });
-                                tc.Start(bus);
-                            });
+                                    container.Kernel.AddComponentInstance<IServiceBus>(bus);
+                                    return container.ObjectBuilder;
+                                });
+                            s.WhenStarted(tc => tc.Start());
                             s.WhenStopped(tc => tc.Stop());
                             s.WithName("Subscription service");
                         });

@@ -49,19 +49,20 @@ namespace HealthServiceHost
 									var container = new DefaultMassTransitContainer();
 
 									container.AddComponent<HealthService>();
-
+                                    IServiceBus bus = ServiceBusConfigurator.New(a =>
+                                    {
+                                        a.ReceiveFrom("msmq://localhost/mt_health");
+                                        a.ConfigureService<SubscriptionClientConfigurator>(sc => { sc.SetSubscriptionServiceEndpoint("msmq://localhost/mt_subscriptions"); });
+                                    });
+                                    container.Kernel.AddComponentInstance<IServiceBus>(bus);
 									//TODO: Put database persitance here too
 
 									return container.ObjectBuilder;
 								});
 							s.WhenStarted(tc =>
 								{
-									IServiceBus bus = ServiceBusConfigurator.New(a =>
-										{
-											a.ReceiveFrom("msmq://localhost/mt_health");
-											a.ConfigureService<SubscriptionClientConfigurator>(sc => { sc.SetSubscriptionServiceEndpoint("msmq://localhost/mt_subscriptions"); });
-										});
-									tc.Start(bus);
+									
+									tc.Start();
 								});
 							s.WhenStopped(tc => tc.Stop());
 							s.WithName("Health service");

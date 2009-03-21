@@ -92,9 +92,9 @@ namespace MassTransit.Tests.Services.HealthMonitoring
             SetupInitiateSagaSink<SubscriptionSaga, AddSubscription>(SubscriptionBus, _subscriptionSagaRepository);
             SetupOrchestrateSagaSink<SubscriptionSaga, RemoveSubscription>(SubscriptionBus, _subscriptionSagaRepository);
 
-            SubscriptionService = new SubscriptionService(SubscriptionRepository, EndpointFactory, _subscriptionSagaRepository, _subscriptionClientSagaRepository);
+            SubscriptionService = new SubscriptionService(SubscriptionBus,SubscriptionRepository, EndpointFactory, _subscriptionSagaRepository, _subscriptionClientSagaRepository);
 
-            SubscriptionService.Start(SubscriptionBus);
+            SubscriptionService.Start();
 
             ObjectBuilder.Stub(x => x.GetInstance<SubscriptionClient>())
                 .Return(null)
@@ -110,11 +110,11 @@ namespace MassTransit.Tests.Services.HealthMonitoring
             SetupOrchestrateSagaStateMachineSink<HealthSaga, TimeoutExpired>(RemoteBus, _healthSagaRepository);
             SetupOrchestrateSagaStateMachineSink<HealthSaga, Pong>(RemoteBus, _healthSagaRepository);
             SetupOrchestrateSagaStateMachineSink<HealthSaga, PingTimeout>(RemoteBus, _healthSagaRepository);
-            
 
-            HealthService = new HealthService(_healthSagaRepository);
 
-            HealthService.Start(RemoteBus);
+            HealthService = new HealthService(RemoteBus, _healthSagaRepository);
+
+            HealthService.Start();
         }
 
         public ISagaRepository<HealthSaga> Repository

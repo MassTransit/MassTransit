@@ -35,11 +35,13 @@ namespace MassTransit.Services.Subscriptions.Server
 		private ISubscriptionRepository _repository;
 		private UnsubscribeAction _unsubscribeToken = () => false;
 
-		public SubscriptionService(ISubscriptionRepository subscriptionRepository,
+		public SubscriptionService(IServiceBus bus,
+                                   ISubscriptionRepository subscriptionRepository,
 		                           IEndpointFactory endpointFactory,
 		                           ISagaRepository<SubscriptionSaga> subscriptionSagas,
 		                           ISagaRepository<SubscriptionClientSaga> subscriptionClientSagas)
 		{
+		    _bus = bus;
 			_repository = subscriptionRepository;
 			_endpointFactory = endpointFactory;
 			_subscriptionSagas = subscriptionSagas;
@@ -99,10 +101,9 @@ namespace MassTransit.Services.Subscriptions.Server
 			}
 		}
 
-		public void Start(IServiceBus bus)
+		public void Start()
 		{
 			_log.Info("Subscription Service Starting");
-		    _bus = bus;
 			_unsubscribeToken += _bus.Subscribe(this);
 
 			_unsubscribeToken += _bus.Subscribe<SubscriptionClientSaga>();

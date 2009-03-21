@@ -42,9 +42,9 @@ namespace MassTransit.Tests.Timeouts
 
             ObjectBuilder.Stub(x => x.GetInstance<ScheduleTimeoutConsumer>()).Return(new ScheduleTimeoutConsumer(_repository));
             ObjectBuilder.Stub(x => x.GetInstance<CancelTimeoutConsumer>()).Return(new CancelTimeoutConsumer(_repository));
-            
-            _timeoutService = new TimeoutService(_repository);
-            _timeoutService.Start(LocalBus);
+
+            _timeoutService = new TimeoutService(LocalBus, _repository);
+            _timeoutService.Start();
         }
 
         protected override void TeardownContext()

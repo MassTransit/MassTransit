@@ -49,16 +49,18 @@ namespace TimeoutServiceHost
 									var container = new DefaultMassTransitContainer();
 									container.AddComponent<ITimeoutRepository, InMemoryTimeoutRepository>();
 									container.AddComponent<TimeoutService>();
+                                    IServiceBus bus = ServiceBusConfigurator.New(sbc =>
+                                    {
+                                        sbc.ReceiveFrom("msmq://localhost/mt_timeout");
+                                        sbc.ConfigureService<SubscriptionClientConfigurator>(cc => { cc.SetSubscriptionServiceEndpoint("msmq://localhost/mt_subscriptions"); });
+                                    });
+                                    container.Kernel.AddComponentInstance<IServiceBus>(bus);
 									return container.ObjectBuilder;
 								});
 							s.WhenStarted(tc =>
 								{
-									IServiceBus bus = ServiceBusConfigurator.New(sbc =>
-										{
-											sbc.ReceiveFrom("msmq://localhost/mt_timeout");
-											sbc.ConfigureService<SubscriptionClientConfigurator>(cc => { cc.SetSubscriptionServiceEndpoint("msmq://localhost/mt_subscriptions"); });
-										});
-									tc.Start(bus);
+									
+									tc.Start();
 								});
 							s.WhenStopped(tc => tc.Stop());
 							s.WithName("Timeout service");

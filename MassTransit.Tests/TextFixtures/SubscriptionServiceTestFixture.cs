@@ -84,9 +84,9 @@ namespace MassTransit.Tests.TextFixtures
 			SetupInitiateSagaSink<SubscriptionSaga, AddSubscription>(SubscriptionBus, _subscriptionSagaRepository);
 			SetupOrchestrateSagaSink<SubscriptionSaga, RemoveSubscription>(SubscriptionBus, _subscriptionSagaRepository);
 
-			SubscriptionService = new SubscriptionService(SubscriptionRepository, EndpointFactory, _subscriptionSagaRepository, _subscriptionClientSagaRepository);
+			SubscriptionService = new SubscriptionService(SubscriptionBus, SubscriptionRepository, EndpointFactory, _subscriptionSagaRepository, _subscriptionClientSagaRepository);
 
-            SubscriptionService.Start(SubscriptionBus);
+            SubscriptionService.Start();
 
 			ObjectBuilder.Stub(x => x.GetInstance<SubscriptionClient>())
 				.Return(null)

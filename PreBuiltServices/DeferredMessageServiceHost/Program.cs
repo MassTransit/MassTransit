@@ -15,6 +15,7 @@ namespace DeferredMessageServiceHost
 	using System.IO;
 	using log4net;
 	using log4net.Config;
+	using MassTransit;
 	using MassTransit.Configuration;
 	using MassTransit.Services.MessageDeferral;
 	using MassTransit.Services.Subscriptions.Configuration;
@@ -52,19 +53,23 @@ namespace DeferredMessageServiceHost
                                     container.AddComponent<MessageDeferralService>();
                                     container.AddComponent<IDeferredMessageRepository, InMemoryDeferredMessageRepository>();
                                     //TODO: Put the Database Repository here too
+
+                                    var bus = ServiceBusConfigurator.New(sbc =>
+                                    {
+                                        sbc.ReceiveFrom("msmq://localhost/mt_timeout");
+                                        sbc.ConfigureService<SubscriptionClientConfigurator>(scc =>
+                                        {
+                                            scc.SetSubscriptionServiceEndpoint("msmq://localhost/mt_subscriptions");
+                                        });
+                                    });
+
+                                    container.Kernel.AddComponentInstance<IServiceBus>(bus);
                                     return container.ObjectBuilder;
                                 });
 							s.WhenStarted(tc =>
 							    {
-							        var bus = ServiceBusConfigurator.New(sbc =>
-							            {
-							                sbc.ReceiveFrom("msmq://localhost/mt_timeout");
-                                            sbc.ConfigureService<SubscriptionClientConfigurator>(scc=>
-                                                {
-                                                    scc.SetSubscriptionServiceEndpoint("msmq://localhost/mt_subscriptions");
-                                                });
-							            });
-							        tc.Start(bus);
+							        
+							        tc.Start();
 							    });
 							s.WhenStopped(tc => tc.Stop());
 							s.WithName("Deferred service");
