@@ -12,53 +12,59 @@
 // specific language governing permissions and limitations under the License.
 namespace TimeoutServiceHost
 {
-    using System.IO;
-    using log4net;
-    using log4net.Config;
-    using MassTransit;
-    using MassTransit.Services.Timeout;
-    using MassTransit.WindsorIntegration;
-    using Microsoft.Practices.ServiceLocation;
-    using Topshelf;
-    using Topshelf.Configuration;
+	using System.IO;
+	using log4net;
+	using log4net.Config;
+	using MassTransit;
+	using MassTransit.Configuration;
+	using MassTransit.Services.Subscriptions.Configuration;
+	using MassTransit.Services.Timeout;
+	using MassTransit.WindsorIntegration;
+	using Topshelf;
+	using Topshelf.Configuration;
 
-    class Program
-    {
-        private static readonly ILog _log = LogManager.GetLogger(typeof(Program));
+	internal class Program
+	{
+		private static readonly ILog _log = LogManager.GetLogger(typeof (Program));
 
-        static void Main(string[] args)
-        {
-            XmlConfigurator.ConfigureAndWatch(new FileInfo("timeoutService.log4net.xml"));
-            _log.Info("Timeout Service Loading");
+		private static void Main(string[] args)
+		{
+			XmlConfigurator.ConfigureAndWatch(new FileInfo("timeoutService.log4net.xml"));
+			_log.Info("Timeout Service Loading");
 
-            var cfg = RunnerConfigurator.New(c =>
-                                                 {
-                                                     c.SetServiceName("MT-TIMEOUT");
-                                                     c.SetDescription("Think Egg Timer");
-                                                     c.SetDisplayName("MassTransit Timeout Service");
+			IRunConfiguration cfg = RunnerConfigurator.New(c =>
+				{
+					c.SetServiceName("MT-TIMEOUT");
+					c.SetDescription("Think Egg Timer");
+					c.SetDisplayName("MassTransit Timeout Service");
 
-                                                     c.RunAsFromInteractive();
+					c.RunAsFromInteractive();
 
-                                                     c.DependencyOnMsmq();
+					c.DependencyOnMsmq();
 
-                                                     c.BeforeStart(a =>
-                                                                       {
-                                                                           var container = new DefaultMassTransitContainer("timeoutService.castle.xml");
-                                                                           container.AddComponent<ITimeoutRepository,InMemoryTimeoutRepository>();
-                                                                           container.AddComponent<TimeoutService>();
-
-                                                                           var wob = new WindsorObjectBuilder(container.Kernel);
-                                                                           ServiceLocator.SetLocatorProvider(() => wob);
-                                                                       });
-
-                                                     c.ConfigureService<TimeoutService>( s =>
-                                                                                             {
-                                                                                                 s.WhenStarted(tc => tc.Start());
-                                                                                                 s.WhenStopped(tc => tc.Stop());
-                                                                                                 s.WithName("Timeout service");
-                                                                                             });
-                                                 });
-            Runner.Host(cfg, args);
-        }
-    }
+					c.ConfigureService<TimeoutService>(s =>
+						{
+							s.CreateServiceLocator(() =>
+								{
+									var container = new DefaultMassTransitContainer();
+									container.AddComponent<ITimeoutRepository, InMemoryTimeoutRepository>();
+									container.AddComponent<TimeoutService>();
+									return container.ObjectBuilder;
+								});
+							s.WhenStarted(tc =>
+								{
+									IServiceBus bus = ServiceBusConfigurator.New(sbc =>
+										{
+											sbc.ReceiveFrom("msmq://localhost/mt_timeout");
+											sbc.ConfigureService<SubscriptionClientConfigurator>(cc => { cc.SetSubscriptionServiceEndpoint("msmq://localhost/mt_subscriptions"); });
+										});
+									tc.Start(bus);
+								});
+							s.WhenStopped(tc => tc.Stop());
+							s.WithName("Timeout service");
+						});
+				});
+			Runner.Host(cfg, args);
+		}
+	}
 }

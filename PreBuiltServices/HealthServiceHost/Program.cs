@@ -12,55 +12,62 @@
 // specific language governing permissions and limitations under the License.
 namespace HealthServiceHost
 {
-    using System.IO;
-    using log4net;
-    using MassTransit;
-    using MassTransit.Services.HealthMonitoring;
-    using MassTransit.Services.HealthMonitoring.Server;
-    using MassTransit.WindsorIntegration;
-    using Microsoft.Practices.ServiceLocation;
-    using Topshelf;
-    using Topshelf.Configuration;
+	using System.IO;
+	using log4net;
+	using log4net.Config;
+	using MassTransit;
+	using MassTransit.Configuration;
+	using MassTransit.Services.HealthMonitoring;
+	using MassTransit.Services.Subscriptions.Configuration;
+	using MassTransit.WindsorIntegration;
+	using Topshelf;
+	using Topshelf.Configuration;
 
-    internal class Program
-    {
-        private static readonly ILog _log = LogManager.GetLogger(typeof (Program));
+	internal class Program
+	{
+		private static readonly ILog _log = LogManager.GetLogger(typeof (Program));
 
-        private static void Main(string[] args)
-        {
-            log4net.Config.XmlConfigurator.Configure(new FileInfo("healthService.log4net.xml"));
-            _log.Info("Health Server Loading");
+		private static void Main(string[] args)
+		{
+			XmlConfigurator.Configure(new FileInfo("healthService.log4net.xml"));
+			_log.Info("Health Server Loading");
 
-            var cfg = RunnerConfigurator.New(c=>
-                                                 {
-                                                     c.SetServiceName("MT-HEALTH");
-                                                     c.SetDisplayName("MassTransit Health Manager");
-                                                     c.SetDescription("Its like that machine at the hospital that goes beep beep, or errrrrrr... if you croak");
+			IRunConfiguration cfg = RunnerConfigurator.New(c =>
+				{
+					c.SetServiceName("MT-HEALTH");
+					c.SetDisplayName("MassTransit Health Manager");
+					c.SetDescription("Its like that machine at the hospital that goes beep beep, or errrrrrr... if you croak");
 
-                                                     c.RunAsFromInteractive();
+					c.RunAsFromInteractive();
 
-                                                     c.DependencyOnMsmq();
+					c.DependencyOnMsmq();
 
-                                                     c.BeforeStart(a=>
-                                                                       {
-                                                                           var container = new DefaultMassTransitContainer("healthService.castle.xml");
+					c.ConfigureService<HealthService>(s =>
+						{
+							s.CreateServiceLocator(() =>
+								{
+									var container = new DefaultMassTransitContainer();
 
-                                                                           container.AddComponent<HealthService>();
+									container.AddComponent<HealthService>();
 
-                                                                           //TODO: Put database persitance here too
+									//TODO: Put database persitance here too
 
-                                                                           var wob = new WindsorObjectBuilder(container.Kernel);
-                                                                           ServiceLocator.SetLocatorProvider(() => wob);
-                                                                       });
-
-                                                     c.ConfigureService<HealthService>( s =>
-                                                                                             {
-                                                                                                 s.WhenStarted(tc => tc.Start());
-                                                                                                 s.WhenStopped(tc => tc.Stop());
-                                                                                                 s.WithName("Health service");
-                                                                                             });
-                                                 });
-            Runner.Host(cfg, args);
-        }
-    }
+									return container.ObjectBuilder;
+								});
+							s.WhenStarted(tc =>
+								{
+									IServiceBus bus = ServiceBusConfigurator.New(a =>
+										{
+											a.ReceiveFrom("msmq://localhost/mt_health");
+											a.ConfigureService<SubscriptionClientConfigurator>(sc => { sc.SetSubscriptionServiceEndpoint("msmq://localhost/mt_subscriptions"); });
+										});
+									tc.Start(bus);
+								});
+							s.WhenStopped(tc => tc.Stop());
+							s.WithName("Health service");
+						});
+				});
+			Runner.Host(cfg, args);
+		}
+	}
 }
