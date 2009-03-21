@@ -20,7 +20,6 @@ namespace MassTransit.Internal
 	using Exceptions;
 	using Magnum;
 	using Magnum.Threading;
-	using Util;
 
     public class EndpointFactory :
 		IEndpointFactory

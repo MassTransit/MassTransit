@@ -22,7 +22,7 @@ namespace MassTransit.Util
     /// <summary>
     /// Check class for verifying the condition of items included in interface contracts
     /// </summary>
-    public static class ConventionCheck
+    public static class CheckConvention
     {
         public static void EnsureSerializable(object message)
         {

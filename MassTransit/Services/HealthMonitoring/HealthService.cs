@@ -28,14 +28,16 @@ namespace MassTransit.Services.HealthMonitoring
     	private UnsubscribeAction _unsubscribeToken = () => false;
         private readonly ISagaRepository<HealthSaga> _healthSagas;
 
-    	public HealthService(IServiceBus bus, ISagaRepository<HealthSaga> healthSagas)
+    	public HealthService(ISagaRepository<HealthSaga> healthSagas)
     	{
-    		_bus = bus;
+    		
     		_healthSagas = healthSagas;
     	}
 
-    	public void Start()
+    	public void Start(IServiceBus bus)
         {
+            _bus = bus;
+
             _log.Info("Health Service Starting");
 
             _unsubscribeToken += _bus.Subscribe(this);

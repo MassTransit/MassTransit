@@ -28,6 +28,8 @@ namespace MassTransit.WindsorIntegration
 	public class DefaultMassTransitContainer :
 		WindsorContainer
 	{
+	    private IObjectBuilder _objectBuilder;
+
 		public DefaultMassTransitContainer()
 		{
 			Initialize();
@@ -71,6 +73,7 @@ namespace MassTransit.WindsorIntegration
 		private void Initialize()
 		{
 			var wob = new WindsorObjectBuilder(Kernel);
+		    _objectBuilder = wob;
 			ServiceLocator.SetLocatorProvider(() => wob);
 
 			Kernel.AddComponentInstance("kernel", typeof (IKernel), Kernel);
@@ -119,7 +122,12 @@ namespace MassTransit.WindsorIntegration
 				});
 		}
 
-		private void AddMassTransitFacility()
+	    public IObjectBuilder ObjectBuilder
+	    {
+	        get { return _objectBuilder; }
+	    }
+
+	    private void AddMassTransitFacility()
 		{
 			AddFacility("masstransit", new MassTransitFacility());
 		}
