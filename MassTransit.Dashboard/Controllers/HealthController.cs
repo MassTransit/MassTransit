@@ -15,18 +15,15 @@ namespace MassTransit.Dashboard.Controllers
     using System;
     using System.Collections.Generic;
     using Castle.MonoRail.Framework;
-    
-    using Services.HealthMonitoring;
     using Services.HealthMonitoring.Messages;
-    using Services.HealthMonitoring.Server;
 
     [Layout("default")]
     public class HealthController :
         SmartDispatcherController
     {
         private readonly IServiceBus _bus;
-        private ServiceBusRequest<HealthController> _request;
         private readonly Guid _correlationId = Guid.NewGuid();
+        private ServiceBusRequest<HealthController> _request;
 
         public HealthController(IServiceBus bus)
         {

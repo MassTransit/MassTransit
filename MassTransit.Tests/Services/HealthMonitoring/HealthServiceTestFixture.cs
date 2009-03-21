@@ -1,15 +1,10 @@
 namespace MassTransit.Tests.Services.HealthMonitoring
 {
-    using System;
-    using System.Collections;
     using System.Collections.Generic;
     using System.Threading;
     using Configuration;
-    using MassTransit.Pipeline.Interceptors;
     using MassTransit.Saga;
-    using MassTransit.Saga.Pipeline;
     using MassTransit.Services.HealthMonitoring;
-    using MassTransit.Services.HealthMonitoring.Configuration;
     using MassTransit.Services.HealthMonitoring.Messages;
     using MassTransit.Services.HealthMonitoring.Server;
     using MassTransit.Services.Subscriptions.Client;
@@ -23,9 +18,6 @@ namespace MassTransit.Tests.Services.HealthMonitoring
     using NUnit.Framework;
     using Rhino.Mocks;
     using TextFixtures;
-    using ISubscriptionRepository=MassTransit.Services.Subscriptions.Server.ISubscriptionRepository;
-    using SubscriptionClientSaga=MassTransit.Services.Subscriptions.Server.SubscriptionClientSaga;
-    using SubscriptionSaga=MassTransit.Services.Subscriptions.Server.SubscriptionSaga;
 
     [TestFixture]
     public class HealthServiceTestFixture :
@@ -36,7 +28,7 @@ namespace MassTransit.Tests.Services.HealthMonitoring
         public ISubscriptionRepository SubscriptionRepository { get; private set; }
         private ISagaRepository<SubscriptionClientSaga> _subscriptionClientSagaRepository;
         public IServiceBus SubscriptionBus { get; private set; }
-        public MassTransit.Services.Subscriptions.Server.SubscriptionService SubscriptionService { get; private set; }
+        public SubscriptionService SubscriptionService { get; private set; }
         public HealthService HealthService { get; private set; }
         public IServiceBus LocalBus { get; private set; }
         public IServiceBus RemoteBus { get; private set; }
@@ -45,7 +37,7 @@ namespace MassTransit.Tests.Services.HealthMonitoring
         {
             base.EstablishContext();
 
-            ServiceLocator.SetLocatorProvider(()=>ObjectBuilder);
+            ServiceLocator.SetLocatorProvider(() => ObjectBuilder);
             const string subscriptionServiceEndpointAddress = "loopback://localhost/mt_subscriptions";
 
             SubscriptionBus = ServiceBusConfigurator.New(x => { x.ReceiveFrom(subscriptionServiceEndpointAddress); });
@@ -53,25 +45,24 @@ namespace MassTransit.Tests.Services.HealthMonitoring
             SetupSubscriptionService();
 
             LocalBus = ServiceBusConfigurator.New(x =>
-            {
-                x.ConfigureService<SubscriptionClientConfigurator>(y =>
-                {
-                    // setup endpoint
-                    y.SetSubscriptionServiceEndpoint(subscriptionServiceEndpointAddress);
-                });
-                x.ReceiveFrom("loopback://localhost/mt_client");
-            });
+                                                  {
+                                                      x.ConfigureService<SubscriptionClientConfigurator>(y =>
+                                                                                                         {
+                                                                                                             // setup endpoint
+                                                                                                             y.SetSubscriptionServiceEndpoint(subscriptionServiceEndpointAddress);
+                                                                                                         });
+                                                      x.ReceiveFrom("loopback://localhost/mt_client");
+                                                  });
 
             RemoteBus = ServiceBusConfigurator.New(x =>
-            {
-
-                x.ConfigureService<SubscriptionClientConfigurator>(y =>
-                {
-                    // setup endpoint
-                    y.SetSubscriptionServiceEndpoint(subscriptionServiceEndpointAddress);
-                });
-                x.ReceiveFrom("loopback://localhost/mt_server");
-            });
+                                                   {
+                                                       x.ConfigureService<SubscriptionClientConfigurator>(y =>
+                                                                                                          {
+                                                                                                              // setup endpoint
+                                                                                                              y.SetSubscriptionServiceEndpoint(subscriptionServiceEndpointAddress);
+                                                                                                          });
+                                                       x.ReceiveFrom("loopback://localhost/mt_server");
+                                                   });
 
             SetupHealthService();
         }
@@ -92,7 +83,7 @@ namespace MassTransit.Tests.Services.HealthMonitoring
             SetupInitiateSagaSink<SubscriptionSaga, AddSubscription>(SubscriptionBus, _subscriptionSagaRepository);
             SetupOrchestrateSagaSink<SubscriptionSaga, RemoveSubscription>(SubscriptionBus, _subscriptionSagaRepository);
 
-            SubscriptionService = new SubscriptionService(SubscriptionBus,SubscriptionRepository, EndpointFactory, _subscriptionSagaRepository, _subscriptionClientSagaRepository);
+            SubscriptionService = new SubscriptionService(SubscriptionBus, SubscriptionRepository, EndpointFactory, _subscriptionSagaRepository, _subscriptionClientSagaRepository);
 
             SubscriptionService.Start();
 
@@ -119,10 +110,7 @@ namespace MassTransit.Tests.Services.HealthMonitoring
 
         public ISagaRepository<HealthSaga> Repository
         {
-            get
-            {
-                return _healthSagaRepository;
-            }
+            get { return _healthSagaRepository; }
         }
 
         protected override void TeardownContext()
