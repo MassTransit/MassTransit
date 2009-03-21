@@ -21,20 +21,19 @@ namespace MassTransit.Services.MessageDeferral
         private IServiceBus _bus;
     	private UnsubscribeAction _unsubscribeToken;
 
-    	public MessageDeferralService()
+    	public MessageDeferralService(IServiceBus bus)
         {
+            _bus = bus;
         }
 
         public void Dispose()
         {
         }
 
-        public void Start(IServiceBus bus)
+        public void Start()
         {
             if (_log.IsInfoEnabled)
                 _log.Info("MessageDeferralService Starting");
-
-            _bus = bus;
 
         	_unsubscribeToken = _bus.Subscribe<DeferMessageConsumer>();
         	_unsubscribeToken += _bus.Subscribe<TimeoutExpiredConsumer>();

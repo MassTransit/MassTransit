@@ -85,10 +85,10 @@
 
 					container.Kernel.AddComponentInstance("bus", typeof (IServiceBus), bus);
 
-					return container.Resolve<IObjectBuilder>();
+				    return container.ObjectBuilder;
 				});
 
-			configurator.WhenStarted(service => { service.Start(); });
+			configurator.WhenStarted(service => service.Start());
 
 			configurator.WhenStopped(service =>
 				{
