@@ -13,11 +13,9 @@
 namespace SubscriptionServiceHost
 {
     using System.IO;
-    using Castle.Core;
     using log4net;
     using log4net.Config;
-    using MassTransit;
-    using MassTransit.Services.Subscriptions;
+    using MassTransit.Configuration;
     using MassTransit.Services.Subscriptions.Server;
     using MassTransit.WindsorIntegration;
     using Microsoft.Practices.ServiceLocation;
@@ -33,34 +31,44 @@ namespace SubscriptionServiceHost
             XmlConfigurator.ConfigureAndWatch(new FileInfo("subscriptionService.log4net.xml"));
             _log.Info("SubMgr Loading");
 
-            var cfg = RunnerConfigurator.New(c=>
-                                                 {
-                                                     c.SetServiceName("MT-SUBSCRIPTIONS");
-                                                     c.SetDisplayName("MassTransit Subscription Service");
-                                                     c.SetDescription("Service to maintain message subscriptions");
+            IRunConfiguration cfg = RunnerConfigurator.New(c =>
+                {
+                    c.SetServiceName("MT-SUBSCRIPTIONS");
+                    c.SetDisplayName("MassTransit Subscription Service");
+                    c.SetDescription("Service to maintain message subscriptions");
 
-                                                     c.RunAsFromInteractive();
+                    c.RunAsFromInteractive();
 
-                                                     c.DependencyOnMsmq();
+                    c.DependencyOnMsmq();
 
-                                                     c.BeforeStart(a =>
-                                                                       {
-                                                                           var container = new DefaultMassTransitContainer("subscriptionService.castle.xml");
+                    c.BeforeStart(a =>
+                        {
+                            
+                        });
 
-                                                                           container.AddComponent<ISubscriptionRepository, InMemorySubscriptionRepository>();
-                                                                           container.AddComponent<SubscriptionService>();
+                    c.ConfigureService<SubscriptionService>(s =>
+                        {
+                            s.CreateServiceLocator(()=>
+                                {
+                                    var container = new DefaultMassTransitContainer();
 
-                                                                           var wob = new WindsorObjectBuilder(container.Kernel);
-                                                                           ServiceLocator.SetLocatorProvider(() => wob);
-                                                                       });
+                                    container.AddComponent<ISubscriptionRepository, InMemorySubscriptionRepository>();
+                                    container.AddComponent<SubscriptionService>();
 
-                                                     c.ConfigureService<SubscriptionService>(s =>
-                                                                                            {
-                                                                                                s.WhenStarted(tc => tc.Start());
-                                                                                                s.WhenStopped(tc => tc.Stop());
-                                                                                                s.WithName("Subscription service");
-                                                                                            });
-                                                 });
+                                    return container.ObjectBuilder;
+                                });
+                            s.WhenStarted(tc =>
+                            {
+                                var bus = ServiceBusConfigurator.New(sbc =>
+                                    {
+                                        sbc.ReceiveFrom("msmq://localhost/mt_subscriptions");
+                                    });
+                                tc.Start(bus);
+                            });
+                            s.WhenStopped(tc => tc.Stop());
+                            s.WithName("Subscription service");
+                        });
+                });
             Runner.Host(cfg, args);
         }
     }

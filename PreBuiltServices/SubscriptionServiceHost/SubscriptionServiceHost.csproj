@@ -100,9 +100,6 @@
     <Content Include="subscriptionService.log4net.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="subscriptionService.castle.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Containers\MassTransit.WindsorIntegration\MassTransit.WindsorIntegration.csproj">
