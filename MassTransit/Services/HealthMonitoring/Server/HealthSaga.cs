@@ -49,8 +49,7 @@ namespace MassTransit.Services.HealthMonitoring.Server
                                                     //reschedule
                                                     saga.Bus.Publish(new ScheduleTimeout(saga.CorrelationId, saga.TimeBetweenBeatsInSeconds.Seconds()));
                                                 })
-                                      .Then(StatusChange)
-                                      .TransitionTo(Healthy),
+							       	.Then(StatusChange),
 
                                   When(TimeoutExpired)
                                       .Then((saga, message) =>
@@ -67,8 +66,12 @@ namespace MassTransit.Services.HealthMonitoring.Server
 
 
                            During(Suspect,
-                                  When(EndpointBreathes).Then(StatusChange).TransitionTo(Healthy),
-                                  When(SuspectRespondsToPing).Then(StatusChange).TransitionTo(Healthy),
+                                When(EndpointBreathes)
+									.Then(StatusChange)
+									.TransitionTo(Healthy),
+                                When(SuspectRespondsToPing)
+									.Then(StatusChange)
+									.TransitionTo(Healthy),
                                   When(PingTimesout)
                                       .Then((saga, message) =>
                                                 {
@@ -81,8 +84,7 @@ namespace MassTransit.Services.HealthMonitoring.Server
                                   When(EndpointBreathes).Then(StatusChange).TransitionTo(Healthy));
 
                            //Anytime(EndpointPoweringDown).Complete();
-                       }
-                );
+				});
         }
 
         public HealthSaga(Guid correlationId)
