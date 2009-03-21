@@ -18,6 +18,7 @@ namespace MassTransit.Internal
 	using System.Reflection;
 	using Configuration;
 	using Exceptions;
+	using Magnum;
 	using Magnum.Threading;
 	using Util;
 

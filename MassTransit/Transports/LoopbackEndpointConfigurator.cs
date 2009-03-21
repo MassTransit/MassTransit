@@ -15,6 +15,7 @@ namespace MassTransit.Transports
 	using System;
 	using System.Linq.Expressions;
 	using Configuration;
+	using Magnum;
 	using Serialization;
 	using Util;
 

@@ -21,16 +21,16 @@ namespace MassTransit.Exceptions
     {
         
 
-        public EndpointException(IEndpoint endpoint, string message)
+        public EndpointException(Uri endpointAddress, string message)
             : base(message)
         {
-            Endpoint = endpoint.Uri;
+            Endpoint = endpointAddress;
         }
 
-        public EndpointException(IEndpoint endpoint, string message, Exception innerException)
+        public EndpointException(Uri endpointAddress, string message, Exception innerException)
             : base(message, innerException)
         {
-            Endpoint = endpoint.Uri;
+            Endpoint = endpointAddress;
         }
 
         protected EndpointException(SerializationInfo info, StreamingContext context) : base(info, context)

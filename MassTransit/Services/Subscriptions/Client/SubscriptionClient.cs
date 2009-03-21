@@ -230,7 +230,7 @@ namespace MassTransit.Services.Subscriptions.Client
 				return;
 
 			var message = "The service bus and subscription service cannot use the same endpoint: " + _bus.Endpoint.Uri;
-			throw new EndpointException(_bus.Endpoint, message);
+			throw new EndpointException(_bus.Endpoint.Uri, message);
 		}
 
 		private UnsubscribeAction SendAddSubscription(SubscriptionInformation info)

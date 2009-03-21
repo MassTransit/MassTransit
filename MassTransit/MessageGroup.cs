@@ -15,6 +15,7 @@ namespace MassTransit
 	using System;
 	using System.Collections.Generic;
 	using System.Reflection;
+	using Magnum;
 	using Util;
 
 	/// <summary>

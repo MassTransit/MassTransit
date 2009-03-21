@@ -92,7 +92,7 @@ namespace MassTransit.Transports
 				}
 				catch (Exception ex)
 				{
-					throw new EndpointException(this, "Problem sending to " + _sendIPEndPoint, ex);
+					throw new EndpointException(this.Uri, "Problem sending to " + _sendIPEndPoint, ex);
 				}
 			}
 

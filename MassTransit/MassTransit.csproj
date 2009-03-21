@@ -149,7 +149,6 @@
     <Compile Include="TimeoutAttribute.cs" />
     <Compile Include="Transports\MulticastUdpEndpoint.cs" />
     <Compile Include="Util\Check.cs" />
-    <Compile Include="Util\Guard.cs" />
     <Compile Include="Util\Tuple.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -319,7 +318,6 @@
     <Compile Include="Services\MessageDeferral\Messages\DeferedMessageRepublished.cs" />
     <Compile Include="Services\MessageDeferral\Messages\NewDeferMessageReceived.cs" />
     <Compile Include="Services\Timeout\RemoteTimeoutViewer.cs" />
-    <Compile Include="Util\WeakReference.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Services\HealthMonitoring\Client\" />

@@ -14,6 +14,7 @@ namespace MassTransit.Transports.Msmq
 {
 	using System;
 	using Configuration;
+	using Magnum;
 	using Serialization;
 	using Util;
 
