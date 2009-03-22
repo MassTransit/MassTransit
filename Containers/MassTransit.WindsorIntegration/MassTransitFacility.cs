@@ -199,20 +199,4 @@ namespace MassTransit.WindsorIntegration
 			applyValue(newValue);
 		}
 	}
-
-	internal class ServiceLocatorResolver
-		: ISubDependencyResolver
-	{
-		private static Type serviceLocatorType = typeof (IServiceLocator);
-
-		public object Resolve(CreationContext context, ISubDependencyResolver parentResolver, ComponentModel model, DependencyModel dependency)
-		{
-			return ServiceLocator.Current;
-		}
-
-		public bool CanResolve(CreationContext context, ISubDependencyResolver parentResolver, ComponentModel model, DependencyModel dependency)
-		{
-			return serviceLocatorType.IsAssignableFrom(model.Service);
-		}
-	}
 }
