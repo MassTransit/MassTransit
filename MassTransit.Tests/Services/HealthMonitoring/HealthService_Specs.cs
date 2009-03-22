@@ -2,6 +2,7 @@ namespace MassTransit.Tests.Services.HealthMonitoring
 {
     using System;
     using System.Threading;
+    using Magnum.DateTimeExtensions;
     using Magnum.StateMachine;
     using MassTransit.Services.HealthMonitoring.Messages;
     using MassTransit.Services.HealthMonitoring.Server;
@@ -13,7 +14,7 @@ namespace MassTransit.Tests.Services.HealthMonitoring
     public class HealthService_Specs : 
         HealthServiceTestFixture
     {
-        private Guid _id = Guid.NewGuid();
+        private readonly Guid _id = Guid.NewGuid();
 
         [Test]
         public void The_HealthClient_should_publish_heartbeats()
@@ -21,7 +22,6 @@ namespace MassTransit.Tests.Services.HealthMonitoring
             LocalBus.Publish(new EndpointTurningOn(LocalBus.Endpoint.Uri, 1, _id));
             var y = Repository.Where(x => x.CorrelationId == _id).First();
             y.ShouldNotBeNull();
-            StateMachineInspector.Trace(y);
             y.CurrentState.ShouldEqual(HealthSaga.Healthy);
         }
 
@@ -55,9 +55,15 @@ namespace MassTransit.Tests.Services.HealthMonitoring
         public void If_a_saga_is_suspect_a_pingtimeout_should_make_it_down()
         {
             MakeSagaSuspect();
+            
+            var fm = new FutureMessage<TimeoutExpired>();
+            RemoteBus.Subscribe<TimeoutExpired>(fm.Set);
+            LocalBus.Publish(new TimeoutExpired(_id));
 
-            //publish timeout
-            Repository.Where(x => x.CurrentState == HealthSaga.Down).Count().ShouldEqual(1);
+            fm.IsAvailable(1.Seconds()).ShouldBeTrue();
+
+            var saga = Repository.Where(x => x.CorrelationId == _id).First();
+            saga.CurrentState.ShouldEqual(HealthSaga.Down);
         }
 
         [Test]
@@ -65,23 +71,33 @@ namespace MassTransit.Tests.Services.HealthMonitoring
         {
             MakeSagaDown();
             Repository.Where(x => x.CurrentState == HealthSaga.Down).Count().ShouldEqual(1);
+            LocalBus.Publish(new Heartbeat(LocalBus.Endpoint.Uri, _id));
         }
 
         private void MakeSagaDown()
         {
             MakeSagaSuspect();
+            var fm = new FutureMessage<PingTimeout>();
+            RemoteBus.Subscribe<PingTimeout>(fm.Set);
             LocalBus.Publish(new PingTimeout(LocalBus.Endpoint.Uri));
-            //change this to timeout service
-            Thread.Sleep(10);
+            fm.IsAvailable(1.Seconds()).ShouldBeTrue();
+
+            var saga = Repository.Where(x => x.CorrelationId == _id).First();
+            saga.CurrentState.ShouldEqual(HealthSaga.Down, "MakeSagaDown failed");
         }
 
 
         public void MakeSagaSuspect()
         {
             LocalBus.Publish(new EndpointTurningOn(LocalBus.Endpoint.Uri, 0, _id));
-            //PipelineViewer.Trace(LocalBus.InboundPipeline);
+            var fm = new FutureMessage<TimeoutExpired>();
+            RemoteBus.Subscribe<TimeoutExpired>(fm.Set);
             LocalBus.Publish(new TimeoutExpired(_id));
-            Thread.Sleep(10);
+            fm.IsAvailable(1.Seconds()).ShouldBeTrue();
+            
+            var saga = Repository.Where(x => x.CorrelationId == _id).First();
+            saga.CurrentState.ShouldEqual(HealthSaga.Suspect, "MakeSagaSuspect failed");
+            
         }
 
     }
