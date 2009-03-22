@@ -14,22 +14,22 @@ namespace MassTransit.Dashboard.Controllers
 {
     using System.Collections.Generic;
     using Castle.MonoRail.Framework;
-    using MassTransit.Subscriptions;
+    using Services.Subscriptions;
 
     [Layout("default")]
     public class SubscriptionsController : 
         SmartDispatcherController
     {
-        private readonly ISubscriptionCache _cache;
+        
 
-        public SubscriptionsController(ISubscriptionCache cache)
+        public SubscriptionsController()
         {
-            _cache = cache;
+            
         }
 
         public void View()
         {
-            List <Subscription> subs = new List<Subscription>(_cache.List());
+            List <Subscription> subs = new List<Subscription>();
             subs.Sort(delegate(Subscription left, Subscription right)
                           {
                               return left.EndpointUri.ToString().CompareTo(right.EndpointUri.ToString());

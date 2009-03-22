@@ -89,7 +89,6 @@
       <Link>SolutionVersion.cs</Link>
     </Compile>
     <Compile Include="Saga\NHibernateSagaRepository.cs" />
-    <Compile Include="Subscriptions\DistributedSubscriptionCache.cs" />
     <Compile Include="Subscriptions\PersistentSubscription.cs" />
     <Compile Include="Metadata\InMemoryMetadataRepository.cs" />
     <Compile Include="Metadata\PersistantMetadataRepository.cs" />

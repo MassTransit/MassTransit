@@ -13,9 +13,9 @@
 namespace MassTransit.Infrastructure.Subscriptions
 {
 	using System;
-	using MassTransit.Subscriptions;
+	using Services.Subscriptions;
 
-	public class PersistentSubscription :
+    public class PersistentSubscription :
 		Subscription
 	{
 #pragma warning disable 649

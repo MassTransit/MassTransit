@@ -77,8 +77,6 @@
   <ItemGroup>
     <Compile Include="DbQuery.cs" />
     <Compile Include="DistributedServiceBus_Specs.cs" />
-    <Compile Include="DistributedSubscriptionCache_Specs.cs" />
-    <Compile Include="MultipleCacheEntry_Specs.cs" />
     <Compile Include="NHibernateSubscriptionStorage_Specs.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Sagas\SagaLoadTest.cs" />

@@ -9,7 +9,6 @@ namespace MassTransit.NinjectIntegration
     using Saga.Pipeline;
     using Services.HealthMonitoring;
     using Services.Subscriptions.Client;
-    using Subscriptions;
     using Configuration;
 
     /// <summary>
@@ -64,19 +63,6 @@ namespace MassTransit.NinjectIntegration
                 .WithConstructorArgument("endpointToListenOn", ep)
                 .WithPropertyValue("MinimumConsumerThreads", 1)
                 .WithPropertyValue("MaximumConsumerThreads", 10);
-        }
-
-        //TODO: this is an either/or choice
-        public void UseALocalSubscriptionCache()
-        {
-            Bind<ISubscriptionCache>().To<LocalSubscriptionCache>();
-        }
-
-        public void UseADistributedSubscriptionCache(string[] servers)
-        {
-            Bind<ISubscriptionCache>()
-                .To<DistributedSubscriptionCache>()
-                .WithConstructorArgument("servers", servers);
         }
 
         //optional

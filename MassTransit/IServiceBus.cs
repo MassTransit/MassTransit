@@ -14,9 +14,8 @@ namespace MassTransit
 {
     using System;
     using Pipeline;
-    using Subscriptions;
 
-	/// <summary>
+    /// <summary>
 	/// The action to call to unsubscribe a previously subscribed consumer
 	/// </summary>
 	/// <returns></returns>

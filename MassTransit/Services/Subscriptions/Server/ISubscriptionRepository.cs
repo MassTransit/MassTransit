@@ -14,7 +14,6 @@ namespace MassTransit.Services.Subscriptions.Server
 {
     using System;
     using System.Collections.Generic;
-    using MassTransit.Subscriptions;
 
     public interface ISubscriptionRepository :
         IDisposable

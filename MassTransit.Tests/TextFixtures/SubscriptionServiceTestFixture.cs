@@ -16,11 +16,11 @@ namespace MassTransit.Tests.TextFixtures
 	using System.Threading;
 	using Configuration;
 	using MassTransit.Saga;
+	using MassTransit.Services.Subscriptions;
 	using MassTransit.Services.Subscriptions.Client;
 	using MassTransit.Services.Subscriptions.Configuration;
 	using MassTransit.Services.Subscriptions.Messages;
 	using MassTransit.Services.Subscriptions.Server;
-	using MassTransit.Subscriptions;
 	using MassTransit.Transports;
 	using NUnit.Framework;
 	using Rhino.Mocks;

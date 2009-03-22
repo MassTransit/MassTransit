@@ -7,12 +7,12 @@ namespace MassTransit.Tests.Services.HealthMonitoring
     using MassTransit.Services.HealthMonitoring;
     using MassTransit.Services.HealthMonitoring.Messages;
     using MassTransit.Services.HealthMonitoring.Server;
+    using MassTransit.Services.Subscriptions;
     using MassTransit.Services.Subscriptions.Client;
     using MassTransit.Services.Subscriptions.Configuration;
     using MassTransit.Services.Subscriptions.Messages;
     using MassTransit.Services.Subscriptions.Server;
     using MassTransit.Services.Timeout.Messages;
-    using MassTransit.Subscriptions;
     using MassTransit.Transports;
     using Microsoft.Practices.ServiceLocation;
     using NUnit.Framework;

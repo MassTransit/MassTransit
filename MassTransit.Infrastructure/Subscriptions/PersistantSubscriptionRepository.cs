@@ -15,9 +15,9 @@ namespace MassTransit.Infrastructure.Subscriptions
 	using System;
 	using System.Collections.Generic;
 	using log4net;
-	using MassTransit.Subscriptions;
 	using NHibernate;
 	using NHibernate.Criterion;
+	using Services.Subscriptions;
 	using Services.Subscriptions.Server;
 
     public class PersistantSubscriptionRepository :

@@ -18,7 +18,6 @@ namespace MassTransit.Services.LoadBalancer
 	using Exceptions;
 	using Internal;
 	using log4net;
-	using MassTransit.Subscriptions;
 	using Pipeline;
 
 	public class LoadBalancerService :
