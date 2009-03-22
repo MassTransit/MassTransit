@@ -18,35 +18,48 @@ namespace MassTransit.Services.Timeout.Messages
     public class ScheduleTimeout :
         CorrelatedBy<Guid>
     {
-        private Guid _correlationId;
-        private DateTime _timeoutAt;
-
-        protected ScheduleTimeout()
+    	protected ScheduleTimeout()
         {
         }
 
         public ScheduleTimeout(Guid correlationId, TimeSpan timeoutIn)
+			: this(correlationId, DateTime.UtcNow + timeoutIn)
+		{
+        }
+
+        public ScheduleTimeout(Guid correlationId, TimeSpan timeoutIn, int tag)
+			: this(correlationId, DateTime.UtcNow + timeoutIn, tag)
         {
-            _correlationId = correlationId;
-            _timeoutAt = DateTime.UtcNow + timeoutIn;
         }
 
         public ScheduleTimeout(Guid correlationId, DateTime timeoutAt)
+			: this(correlationId, timeoutAt, 0)
         {
-            _correlationId = correlationId;
-            _timeoutAt = timeoutAt.ToUniversalTime();
         }
 
-        public DateTime TimeoutAt
+        public ScheduleTimeout(Guid correlationId, DateTime timeoutAt, int tag)
         {
-            get { return _timeoutAt; }
-            set { _timeoutAt = value; }
+            CorrelationId = correlationId;
+            TimeoutAt = timeoutAt.ToUniversalTime();
+        	Tag = tag;
         }
 
-        public Guid CorrelationId
-        {
-            get { return _correlationId; }
-            set { _correlationId = value; }
-        }
+		/// <summary>
+		/// The tag associated with the timeout message
+		/// This is mainly because we can't publish type-specific messages yet. 
+		/// We really want to be able to schedule a timeout and specify a message type
+		/// to publish on the timeout, but that is going to be tough to handle (period).
+		/// </summary>
+    	public int Tag { get; set; }
+
+		/// <summary>
+		/// The time (in UTC) when the timeout expires
+		/// </summary>
+    	public DateTime TimeoutAt { get; set; }
+
+		/// <summary>
+		/// The CorrelationId to use when publishing the timeout message
+		/// </summary>
+    	public Guid CorrelationId { get; set; }
     }
 }

@@ -103,7 +103,7 @@ namespace MassTransit.Services.Timeout
                     {
                     	_log.InfoFormat("Publishing timeout message for {0}", tuple.Key);
 
-                        _bus.Publish(new TimeoutExpired(tuple.Key));
+                        _bus.Publish(new TimeoutExpired { CorrelationId = tuple.Key });
 
                         _repository.Remove(tuple.Key);
                     }
