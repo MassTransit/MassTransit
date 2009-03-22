@@ -6,16 +6,13 @@ namespace WebRequestReply.UI.MonoRail.Controllers
 	using MassTransit;
 
 	public class DemoController :
-		SmartDispatcherController,
-		Consumes<ResponseMessage>.For<Guid>
+		SmartDispatcherController
 	{
-		private IServiceBus _bus;
-		private Guid _correlationId;
+		private readonly IServiceBus _bus;
 
 		public DemoController(IServiceBus bus)
 		{
 			_bus = bus;
-			_correlationId = Guid.NewGuid();
 		}
 
 		public void Default()
@@ -31,42 +28,27 @@ namespace WebRequestReply.UI.MonoRail.Controllers
 		//http://www.ayende.com/Blog/archive/2008/03/25/Async-Actions-in-Monorail.aspx
 		public IAsyncResult BeginAsync(string requestText)
 		{
-			_request = _bus.Request()
-				.From(this)
-				.WithCallback(ControllerContext.Async.Callback, ControllerContext.Async.State);
+			Guid requestId = Guid.NewGuid();
 
-			_request.Send(new RequestMessage(CorrelationId, requestText));
-
-			return _request;
+			return _bus.MakeRequest(x => x.Publish(new RequestMessage(requestId, requestText),
+									y => y.SetResponseAddress(_bus.Endpoint.Uri)))
+				.When<ResponseMessage>().RelatedTo(requestId).IsReceived(message =>
+				{
+					PropertyBag.Add("responseText", message.Text + " (and my response)");
+				})
+				.OnTimeout(() =>
+				{
+					PropertyBag.Add("responseText", "Async Task Timeout");
+				})
+				.TimeoutAfter(TimeSpan.FromSeconds(10))
+				.BeginSend(ControllerContext.Async.Callback, ControllerContext.Async.State);
 		}
 
 		public void EndAsync()
 		{
 			IAsyncResult r = ControllerContext.Async.Result;
-			PropertyBag.Add("responseText", msg.Text + " (and my response)");
+
 			RenderView("Default");
 		}
-
-		#region Consumes<ResponseMessage>.All Members
-
-		private ServiceBusRequest<DemoController> _request;
-		private ResponseMessage msg;
-
-		public void Consume(ResponseMessage message)
-		{
-			msg = message;
-			_request.Complete();
-		}
-
-		#endregion
-
-		#region CorrelatedBy<Guid> Members
-
-		public Guid CorrelationId
-		{
-			get { return _correlationId; }
-		}
-
-		#endregion
 	}
 }

@@ -32,7 +32,7 @@ namespace WebRequestReply.UI
 
 		protected void Button2_Click(object sender, EventArgs e)
 		{
-			RegisterAsyncTask(new PageAsyncTask(_controller.BeginRequest, _controller.EndRequest, _controller.OnTimeout, this));
+			RegisterAsyncTask(new PageAsyncTask(_controller.BeginRequest, _controller.EndRequest, x => { }, this));
 		}
 	}
 }
