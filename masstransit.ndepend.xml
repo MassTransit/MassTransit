@@ -24,7 +24,6 @@
     <Name>System.Messaging</Name>
     <Name>System.Transactions</Name>
     <Name>Castle.MicroKernel</Name>
-    <Name>Enyim.Caching</Name>
     <Name>NHibernate</Name>
     <Name>Magnum.Infrastructure</Name>
     <Name>System.Xml</Name>
