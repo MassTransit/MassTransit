@@ -18,7 +18,6 @@ namespace MassTransit.Tests
 	using Configuration;
 	using Magnum.InterfaceExtensions;
 	using MassTransit.Serialization;
-	using MassTransit.Subscriptions;
 	using MassTransit.Transports;
 	using Messages;
 	using NUnit.Framework;
@@ -28,7 +27,6 @@ namespace MassTransit.Tests
 	public class When_a_message_fault_occurs :
 		Specification
 	{
-		private LocalSubscriptionCache _cache;
 		private IEndpointFactory _resolver;
 		private IEndpoint _endpoint;
 		private ServiceBus _bus;
@@ -36,7 +34,6 @@ namespace MassTransit.Tests
 
 		protected override void Before_each()
 		{
-			_cache = new LocalSubscriptionCache();
 			_builder = MockRepository.GenerateMock<IObjectBuilder>();
 			_resolver = EndpointFactoryConfigurator.New(x =>
 				{
@@ -54,7 +51,6 @@ namespace MassTransit.Tests
 			_bus.Dispose();
 			_endpoint.Dispose();
 			_resolver.Dispose();
-			_cache.Dispose();
 		}
 
 		public class SmartConsumer :
@@ -124,7 +120,7 @@ namespace MassTransit.Tests
 	public class When_a_correlated_message_fault_is_received :
 		Specification
 	{
-		private LocalSubscriptionCache _cache;
+
 		private IEndpointFactory _resolver;
 		private IEndpoint _endpoint;
 		private ServiceBus _bus;
@@ -132,7 +128,6 @@ namespace MassTransit.Tests
 
 		protected override void Before_each()
 		{
-			_cache = new LocalSubscriptionCache();
 			_builder = MockRepository.GenerateMock<IObjectBuilder>();
 			_resolver = EndpointFactoryConfigurator.New(x =>
 				{
@@ -151,7 +146,6 @@ namespace MassTransit.Tests
 			_bus.Dispose();
 			_endpoint.Dispose();
 			_resolver.Dispose();
-			_cache.Dispose();
 		}
 
 		public class SmartConsumer :

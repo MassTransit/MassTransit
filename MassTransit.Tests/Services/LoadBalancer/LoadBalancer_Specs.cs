@@ -18,7 +18,6 @@ namespace MassTransit.Tests.Services.LoadBalancer
 	using Magnum.DateTimeExtensions;
 	using MassTransit.Services.LoadBalancer;
 	using MassTransit.Services.LoadBalancer.Configuration;
-	using MassTransit.Subscriptions;
 	using Messages;
 	using NUnit.Framework;
 	using Rhino.Mocks;

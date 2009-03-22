@@ -2,9 +2,8 @@ namespace MassTransit.Services.Subscriptions.Messages
 {
 	using System;
 	using Magnum;
-	using MassTransit.Subscriptions;
 
-	[Serializable]
+    [Serializable]
 	public class SubscriptionInformation :
 		IEquatable<SubscriptionInformation>
 	{

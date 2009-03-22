@@ -13,11 +13,11 @@
 namespace MassTransit.Infrastructure.Tests
 {
     using System;
-    using MassTransit.Subscriptions;
     using NHibernate;
     using NHibernate.Cfg;
     using NUnit.Framework;
     using NUnit.Framework.SyntaxHelpers;
+    using Services.Subscriptions;
     using Services.Subscriptions.Server;
     using Subscriptions;
 

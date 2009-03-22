@@ -7,7 +7,6 @@ namespace MassTransit.WindsorIntegration
     using Infrastructure.Subscriptions;
     using Services.HealthMonitoring;
     using Services.Subscriptions.Client;
-    using Subscriptions;
 
     public class CodeConfigFacility :
         AbstractFacility
@@ -58,26 +57,6 @@ namespace MassTransit.WindsorIntegration
                     .Named(id)
 		        );
 		}
-
-
-		//TODO: this is an either/or choice
-		public void UseALocalSubscriptionCache()
-		{
-		    Kernel.Register(
-                Component.For<ISubscriptionCache>().ImplementedBy<LocalSubscriptionCache>()
-		        );
-		}
-
-		public void UseADistributedSubscriptionCache(string[] servers)
-		{
-		    Kernel.Register(
-		        Component.For<ISubscriptionCache>().ImplementedBy<DistributedSubscriptionCache>()
-		            .DependsOn(new {
-                                        Servers = servers
-		                           })
-		        );
-		}
-
 
 		//optional
 		public void TurnOnHealthClient(string busId, int heartbeatInterval)

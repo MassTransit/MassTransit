@@ -16,7 +16,7 @@ namespace MassTransit.Tests
     using Configuration;
     using MassTransit.Internal;
     using MassTransit.Serialization;
-    using MassTransit.Subscriptions;
+    using MassTransit.Services.Subscriptions;
     using MassTransit.Transports;
     using Messages;
     using NUnit.Framework;

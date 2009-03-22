@@ -13,9 +13,9 @@
 namespace MassTransit
 {
 	using System;
-	using Subscriptions;
+	using Services.Subscriptions;
 
-	public class SubscriptionEventArgs : EventArgs
+    public class SubscriptionEventArgs : EventArgs
 	{
 		private readonly Subscription _subscription;
 
