@@ -41,7 +41,7 @@ namespace MassTransit.Pipeline.Interceptors
 			if (invoker == null)
 				yield break;
 
-			yield return invoker(TranslateTo<TInterceptor>.From(this), context);
+			yield return invoker(this.TranslateTo<TInterceptor>(), context);
 		}
 
 		public override IEnumerable<UnsubscribeAction> Subscribe<TComponent>(IInterceptorContext context, TComponent instance)
@@ -50,7 +50,7 @@ namespace MassTransit.Pipeline.Interceptors
 			if (invoker == null)
 				yield break;
 
-			yield return invoker(TranslateTo<TInterceptor>.From(this), context, instance);
+			yield return invoker(this.TranslateTo<TInterceptor>(), context, instance);
 		}
 
 		private Func<TInterceptor, IInterceptorContext, UnsubscribeAction> GetInvoker<TComponent>()

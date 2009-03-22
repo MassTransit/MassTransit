@@ -108,7 +108,6 @@
     <Compile Include="Services\Timeout\TimeoutService.cs" />
     <Compile Include="Transports\LoopbackEndpoint.cs" />
     <Compile Include="Internal\SpecialLoggers.cs" />
-    <Compile Include="ServiceBusRequest.cs" />
     <Compile Include="Consumes.cs" />
     <Compile Include="CorrelatedBy.cs" />
     <Compile Include="Exceptions\ConventionException.cs" />
@@ -301,7 +300,6 @@
     <Compile Include="Pipeline\Configuration\MessagePipelineConfigurator.cs" />
     <Compile Include="Saga\Pipeline\SagaMessageSinkBase.cs" />
     <Compile Include="Pipeline\Sinks\SelectedComponentMessageSink.cs" />
-    <Compile Include="TranslateTo.cs" />
     <Compile Include="Serialization\MessageEnvelopeBase.cs" />
     <Compile Include="Serialization\BinaryMessageSerializer.cs" />
     <Compile Include="Serialization\IMessageSerializer.cs" />

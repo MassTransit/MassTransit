@@ -56,7 +56,7 @@ namespace MassTransit.Batch.Pipeline
         public static BatchMessageRouterConfigurator For<TMessage>(IPipelineSink<TMessage> sink)
             where TMessage : class
         {
-            return new BatchMessageRouterConfigurator(TranslateTo<IPipelineSink<object>>.From(sink));
+            return new BatchMessageRouterConfigurator(sink.TranslateTo<IPipelineSink<object>>());
         }
     }
 }

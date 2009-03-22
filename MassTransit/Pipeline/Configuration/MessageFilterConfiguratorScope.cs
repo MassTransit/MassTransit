@@ -35,8 +35,9 @@ namespace MassTransit.Pipeline.Configuration
 			{
 				_insertAfter = (sink =>
 					{
-						return TranslateTo<IPipelineSink<TMessage>>
-							.From(element.ReplaceOutputSink(TranslateTo<IPipelineSink<TOutput>>.From(sink)));
+						return element
+							.ReplaceOutputSink(sink.TranslateTo<IPipelineSink<TOutput>>())
+							.TranslateTo<IPipelineSink<TMessage>>();
 					});
 
 				return false;
