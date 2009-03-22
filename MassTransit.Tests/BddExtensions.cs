@@ -25,6 +25,10 @@ namespace MassTransit.Tests
 		{
 			Assert.AreEqual(expected, obj);
 		}
+        public static void ShouldEqual(this object obj, object expected, string message)
+        {
+            Assert.AreEqual(expected, obj, message);
+        }
         public static void ShouldEqual(this Uri actual, Uri expected)
         {
             Assert.AreEqual(expected, actual);
