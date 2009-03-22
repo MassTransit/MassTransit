@@ -54,7 +54,7 @@ namespace MassTransit.Pipeline.Configuration
 		public static CorrelatedMessageRouterConfigurator For<TMessage>(IPipelineSink<TMessage> sink)
 			where TMessage : class
 		{
-			return new CorrelatedMessageRouterConfigurator(TranslateTo<IPipelineSink<object>>.From(sink));
+			return new CorrelatedMessageRouterConfigurator(sink.TranslateTo<IPipelineSink<object>>());
 		}
 	}
 }

@@ -60,7 +60,7 @@ namespace MassTransit.Pipeline.Sinks
 
 		private void Release(Consumes<TMessage>.All consumer)
 		{
-			_builder.Release(TranslateTo<TComponent>.From(consumer));
+			_builder.Release(consumer.TranslateTo<TComponent>());
 		}
 
 		private Consumes<TMessage>.All BuildConsumer()
@@ -69,7 +69,7 @@ namespace MassTransit.Pipeline.Sinks
 			if (component == null)
 				throw new ConfigurationException("Unable to resolve type from container: " + typeof (TComponent));
 
-			Consumes<TMessage>.All consumer = TranslateTo<Consumes<TMessage>.All>.From(component);
+			Consumes<TMessage>.All consumer = component.TranslateTo<Consumes<TMessage>.All>();
 
 			return consumer;
 		}

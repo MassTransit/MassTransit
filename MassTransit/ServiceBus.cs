@@ -14,7 +14,6 @@ namespace MassTransit
 {
 	using System;
 	using System.Reflection;
-	using System.Reflection;
 	using System.Runtime.Serialization;
 	using System.Transactions;
 	using Exceptions;
@@ -26,7 +25,6 @@ namespace MassTransit
 	using Pipeline;
 	using Pipeline.Configuration;
 	using Threading;
-	using Util;
 
 	/// <summary>
 	/// A service bus is used to attach message handlers (services) to endpoints, as well as 
@@ -166,15 +164,6 @@ namespace MassTransit
 		}
 
 		//		endpoint.Send(message, info.TimeToLive);
-
-		/// <summary>
-		/// This is becoming obsolete with the new MakeRequest syntax.
-		/// </summary>
-		/// <returns></returns>
-		public RequestBuilder Request()
-		{
-			return new RequestBuilder(this);
-		}
 
 		public TService GetService<TService>()
 		{

@@ -62,14 +62,14 @@ namespace MassTransit.Pipeline.Sinks
 
 		private void Release(Consumes<TMessage>.Selected consumer)
 		{
-			_builder.Release(TranslateTo<TComponent>.From(consumer));
+			_builder.Release(consumer.TranslateTo<TComponent>());
 		}
 
 		private Consumes<TMessage>.Selected BuildConsumer()
 		{
 			TComponent component = _builder.GetInstance<TComponent>();
 
-			Consumes<TMessage>.Selected consumer = TranslateTo<Consumes<TMessage>.Selected>.From(component);
+			Consumes<TMessage>.Selected consumer = component.TranslateTo<Consumes<TMessage>.Selected>();
 
 			return consumer;
 		}

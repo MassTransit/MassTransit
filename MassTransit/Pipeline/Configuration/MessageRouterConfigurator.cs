@@ -39,7 +39,7 @@ namespace MassTransit.Pipeline.Configuration
 			if (_sink != null)
 				_sink.Inspect(scope);
 			else if (_typedSink != null)
-				TranslateTo<IPipelineSink<TMessage>>.From(_typedSink).Inspect(scope);
+				_typedSink.TranslateTo<IPipelineSink<TMessage>>().Inspect(scope);
 
 			return scope.Router ?? ConfigureRouter<TMessage>(scope.ObjectRouter);
 		}

@@ -27,14 +27,14 @@ namespace MassTransit.Pipeline.Configuration
 		{
 			if (typeof (TRoutedMessage) == typeof (TMessage))
 			{
-				Router = TranslateTo<MessageRouter<TMessage>>.From(element);
+				Router = element.TranslateTo<MessageRouter<TMessage>>();
 
 				return false;
 			}
 
 			if (typeof (TRoutedMessage) == typeof (object))
 			{
-				ObjectRouter = TranslateTo<MessageRouter<object>>.From(element);
+				ObjectRouter = element.TranslateTo<MessageRouter<object>>();
 			}
 
 			return true;

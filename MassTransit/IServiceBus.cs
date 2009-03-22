@@ -84,15 +84,7 @@ namespace MassTransit
         /// <param name="message">The messages to be published</param>
         void Publish<T>(T message) where T : class;
 
-        /// <summary>
-        /// Returns a request builder for this service bus to handle a request/response. Note this is being replaced
-        /// with the new request/response syntax of bus.MakeRequest();
-        /// </summary>
-        /// <returns>A request builder</returns>
-        [Obsolete]
-		RequestBuilder Request();
-
-		/// <summary>
+    	/// <summary>
 		/// Returns the service for the requested interface if it was registered with the service bus
 		/// </summary>
 		/// <typeparam name="TService"></typeparam>

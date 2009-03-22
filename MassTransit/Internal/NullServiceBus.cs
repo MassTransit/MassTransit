@@ -61,17 +61,7 @@ namespace MassTransit.Internal
 		{
 		}
 
-		public RequestBuilder Request()
-		{
-			throw new NotImplementedException();
-		}
-
 		public TService GetService<TService>()
-		{
-			throw new System.NotImplementedException();
-		}
-
-		public UnregisterAction RegisterEventHandler(ISubscriptionEvent subscriptionEvent)
 		{
 			throw new System.NotImplementedException();
 		}

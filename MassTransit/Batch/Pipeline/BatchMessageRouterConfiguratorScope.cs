@@ -25,7 +25,7 @@ namespace MassTransit.Batch.Pipeline
         {
             if (typeof (TRoutedMessage) == typeof (TMessage))
             {
-                Router = TranslateTo<BatchMessageRouter<TMessage, TKey>>.From(element);
+                Router = element.TranslateTo<BatchMessageRouter<TMessage, TKey>>();
 
                 return false;
             }

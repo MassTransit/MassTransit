@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Pipeline.Configuration
 {
+	using MassTransit;
 	using Inspectors;
 	using Sinks;
 
@@ -26,7 +27,7 @@ namespace MassTransit.Pipeline.Configuration
 		{
 			if (typeof (TRoutedMessage) == typeof (TMessage))
 			{
-				Router = TranslateTo<CorrelatedMessageRouter<TMessage, TKey>>.From(element);
+				Router = element.TranslateTo<CorrelatedMessageRouter<TMessage, TKey>>();
 
 				return false;
 			}

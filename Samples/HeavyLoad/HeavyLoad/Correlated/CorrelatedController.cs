@@ -12,51 +12,45 @@
 // specific language governing permissions and limitations under the License.
 namespace HeavyLoad.Correlated
 {
-    using System;
-    using MassTransit;
+	using System;
+	using Magnum.DateTimeExtensions;
+	using MassTransit;
 
-    internal class CorrelatedController :
-        Consumes<SimpleResponseMessage>.For<Guid>
-    {
-        private static readonly TimeSpan _timeout = TimeSpan.FromSeconds(6);
-        private readonly IServiceBus _bus;
-        private readonly Guid _id;
-        private readonly Action<CorrelatedController> _successAction;
-        private readonly Action<CorrelatedController> _timeoutAction;
-        private ServiceBusRequest<CorrelatedController> _request;
+	internal class CorrelatedController
+	{
+		private static readonly TimeSpan _timeout = 6.Seconds();
+		private readonly IServiceBus _bus;
+		private readonly Guid _id;
+		private readonly Action<CorrelatedController> _successAction;
+		private readonly Action<CorrelatedController> _timeoutAction;
 
-        public CorrelatedController(IServiceBus bus, Action<CorrelatedController> successAction, Action<CorrelatedController> timeoutAction)
-        {
-            _bus = bus;
-            _successAction = successAction;
-            _timeoutAction = timeoutAction;
+		public CorrelatedController(IServiceBus bus, Action<CorrelatedController> successAction, Action<CorrelatedController> timeoutAction)
+		{
+			_bus = bus;
+			_successAction = successAction;
+			_timeoutAction = timeoutAction;
 
-            _id = Guid.NewGuid();
-        }
+			_id = Guid.NewGuid();
+		}
 
-        public void Consume(SimpleResponseMessage message)
-        {
-            if (message.CorrelationId != _id)
-                throw new ArgumentException("Unknown message response received");
+		public void SimulateRequestResponse()
+		{
+			_bus.MakeRequest(x => x.Publish(new SimpleRequestMessage(_id), y => y.SetResponseAddress(_bus.Endpoint.Uri)))
+				.When<SimpleResponseMessage>().RelatedTo(_id).IsReceived(message =>
+					{
+						if (message.CorrelationId != _id)
+							throw new ArgumentException("Unknown message response received");
 
-            _request.Complete();
-        }
-
-        public Guid CorrelationId
-        {
-            get { return _id; }
-        }
-
-        public void SimulateRequestResponse()
-        {
-            _request = _bus.Request().From(this);
-
-            _request.Send(new SimpleRequestMessage(_id), RequestMode.Synchronous, _timeout);
-
-            if (_request.IsCompleted)
-                _successAction(this);
-            else
-                _timeoutAction(this);
-        }
-    }
+						// we got a response, that's a happy ending!
+						_successAction(this);
+					})
+				.OnTimeout(() =>
+					{
+						// we timed out, not so happy
+						_timeoutAction(this);
+					})
+				.TimeoutAfter(_timeout)
+				.Send();
+		}
+	}
 }

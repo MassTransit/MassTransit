@@ -22,8 +22,8 @@ namespace MassTransit.Dashboard.Controllers
         SmartDispatcherController
     {
         private readonly IServiceBus _bus;
-        private readonly Guid _correlationId = Guid.NewGuid();
-        private ServiceBusRequest<HealthController> _request;
+       // private readonly Guid _correlationId = Guid.NewGuid();
+      //  private ServiceBusRequest<HealthController> _request;
 
         public HealthController(IServiceBus bus)
         {
@@ -55,11 +55,11 @@ namespace MassTransit.Dashboard.Controllers
 
         public void Ping(string uri)
         {
-            _request = _bus.Request().From(this);
+//            _request = _bus.Request().From(this);
 
-            _request.Send(new Ping(_correlationId));
+  //          _request.Send(new Ping(_correlationId));
 
-            _request.AsyncWaitHandle.WaitOne(3000, true); //the consumes method will set the property bag
+    //        _request.AsyncWaitHandle.WaitOne(3000, true); //the consumes method will set the property bag
         }
     }
 }
