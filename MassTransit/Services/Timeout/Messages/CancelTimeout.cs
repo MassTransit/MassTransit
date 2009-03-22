@@ -14,25 +14,14 @@ namespace MassTransit.Services.Timeout.Messages
 {
     using System;
 
+	/// <summary>
+	/// Used by the Timeout Service, cancels the scheduled timeout with the specified CorrelationId
+	/// </summary>
     [Serializable]
     public class CancelTimeout :
         CorrelatedBy<Guid>
     {
-        private Guid _correlationId;
-
-        protected CancelTimeout()
-        {
-        }
-
-        public CancelTimeout(Guid correlationId)
-        {
-            _correlationId = correlationId;
-        }
-
-        public Guid CorrelationId
-        {
-            get { return _correlationId; }
-            set { _correlationId = value; }
-        }
+    	public Guid CorrelationId { get; set; }
+		public int Tag { get; set; }
     }
 }

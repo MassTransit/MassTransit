@@ -100,7 +100,7 @@ namespace MassTransit.Tests.Saga
 
 		private void Complete()
 		{
-			Bus.Publish(new CancelTimeout(CorrelationId));
+			Bus.Publish(new CancelTimeout { CorrelationId = CorrelationId});
 		}
 	}
 }
