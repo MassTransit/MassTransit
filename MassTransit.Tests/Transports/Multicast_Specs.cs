@@ -24,7 +24,7 @@ namespace MassTransit.Tests.Transports
 	{
 		private readonly TimeSpan _timeout = TimeSpan.FromSeconds(2);
 
-		[Test]
+		[Test, Ignore]
 		public void It_should_be_received()
 		{
 			PingMessage message = new PingMessage();

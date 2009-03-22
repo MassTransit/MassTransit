@@ -292,7 +292,6 @@
     <Compile Include="Pipeline\Sinks\MessageRouterBase.cs" />
     <Compile Include="Pipeline\Sinks\PipelineSinkBase.cs" />
     <Compile Include="Pipeline\Sinks\MessageTranslator.cs" />
-    <Compile Include="Pipeline\Configuration\MessagePipelineConfiguratorBase.cs" />
     <Compile Include="Exceptions\PipelineException.cs" />
     <Compile Include="Pipeline\Interceptors\PipelineInterceptorBase.cs" />
     <Compile Include="Pipeline\Inspectors\PipelineViewer.cs" />
