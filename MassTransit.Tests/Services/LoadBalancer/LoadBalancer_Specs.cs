@@ -67,7 +67,7 @@ namespace MassTransit.Tests.Services.LoadBalancer
 			base.TeardownContext();
 		}
 
-		[Test]
+		[Test, Ignore]
 		public void Example_syntax_for_the_load_balancer()
 		{
 			var ping = new PingMessage();
