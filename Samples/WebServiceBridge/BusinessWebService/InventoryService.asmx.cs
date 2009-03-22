@@ -4,7 +4,7 @@
 	using System.ComponentModel;
 	using System.Web.Services;
 	using Inventory.Messages;
-	using Magnum.Common;
+	using Magnum;
 	using Magnum.Common.DateTimeExtensions;
 	using MassTransit;
 	using MassTransit.Util;
@@ -18,7 +18,7 @@
 	public class InventoryService :
 		WebService
 	{
-		private static readonly Mapper<PartInventoryLevelStatus, InventoryLevel> _mapper;
+		private static readonly Magnum.Common.Mapper<PartInventoryLevelStatus, InventoryLevel> _mapper;
 		private IServiceBus _bus;
 
 		private string _partNumber;
@@ -27,7 +27,7 @@
 
 		static InventoryService()
 		{
-			_mapper = new Mapper<PartInventoryLevelStatus, InventoryLevel>();
+			_mapper = new Magnum.Common.Mapper<PartInventoryLevelStatus, InventoryLevel>();
 			_mapper.From(x => x.PartNumber).To(y => y.PartNumber);
 			_mapper.From(x => x.OnHand).To(y => y.QuantityOnHand);
 			_mapper.From(x => x.OnOrder).To(y => y.QuantityOnOrder);
@@ -47,7 +47,7 @@
 		public IAsyncResult BeginCheckInventory(string partNumber, AsyncCallback callback, object state)
 		{
 			_partNumber = partNumber;
-			_requestId = CombGuid.NewCombGuid();
+			_requestId = CombGuid.Generate();
 
 			return _bus.MakeRequest(bus => bus.Publish(new QueryInventoryLevel(_requestId, partNumber), context => context.SendResponseTo(bus)))
 				.When<PartInventoryLevelStatus>().RelatedTo(_partNumber).IsReceived(message =>

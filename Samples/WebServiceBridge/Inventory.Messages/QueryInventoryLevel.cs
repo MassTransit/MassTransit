@@ -1,10 +1,10 @@
 namespace Inventory.Messages
 {
     using System;
+    using Magnum;
     using MassTransit;
-    using MassTransit.Util;
 
-    [Serializable]
+	[Serializable]
     public class QueryInventoryLevel :
         CorrelatedBy<Guid>
     {
@@ -12,7 +12,7 @@ namespace Inventory.Messages
         private readonly string _partNumber;
 
         public QueryInventoryLevel(string partNumber)
-            : this(CombGuid.NewCombGuid(), partNumber)
+            : this(CombGuid.Generate(), partNumber)
         {
         }
 
