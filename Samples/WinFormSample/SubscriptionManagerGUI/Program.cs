@@ -105,8 +105,6 @@
 
 					container.AddComponent<ITimeoutRepository, InMemoryTimeoutRepository>();
 					container.AddComponent<TimeoutService>(typeof (TimeoutService).Name);
-					container.AddComponent<ScheduleTimeoutConsumer>();
-					container.AddComponent<CancelTimeoutConsumer>();
 
 					var endpointFactory = EndpointFactoryConfigurator.New(x =>
 						{

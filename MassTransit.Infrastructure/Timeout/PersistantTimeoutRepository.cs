@@ -13,13 +13,14 @@
 namespace MassTransit.Infrastructure.Timeout
 {
     using System;
+    using System.Collections;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Linq.Expressions;
     using Magnum.Data;
     using Services.Timeout;
-    using Util;
 
-    public class PersistantTimeoutRepository :
+	public class PersistantTimeoutRepository :
         ITimeoutRepository
     {
         private readonly IRepository<ScheduledTimeout, Guid> _repository;
@@ -29,42 +30,76 @@ namespace MassTransit.Infrastructure.Timeout
             _repository = repository;
         }
 
-        public void Schedule(Guid id, DateTime timeoutAt)
+        public void Schedule(ScheduledTimeout timeout)
         {
-            ScheduledTimeout to = new ScheduledTimeout(id, timeoutAt);
-            _repository.Save(to);
+            _repository.Save(timeout);
         }
 
-        public void Remove(Guid id)
+        public void Remove(ScheduledTimeout timeout)
         {
-            _repository.Delete(_repository.Get(id));
+        	var existing = _repository
+        		.Where(x => x.Id == timeout.Id && x.Tag == timeout.Tag)
+        		.FirstOrDefault();
+
+			if(existing != null)
+			{
+				_repository.Delete(existing);	
+			}
         }
 
-        public IList<Tuple<Guid, DateTime>> List()
-        {
-            var items = _repository.List();
-            IList<Tuple<Guid, DateTime>> result = new List<Tuple<Guid, DateTime>>();
-            foreach (var item in items)
-            {
-                result.Add(new Tuple<Guid, DateTime>(item.Id, item.ExpiresAt));
-            }
-            return result;
-        }
+    	public IEnumerator<ScheduledTimeout> GetEnumerator()
+    	{
+    		return _repository.GetEnumerator();
+    	}
 
-        public IList<Tuple<Guid, DateTime>> List(DateTime lessThan)
-        {
-            var query = from item in _repository where item.ExpiresAt <= lessThan select item;
+    	IEnumerator IEnumerable.GetEnumerator()
+    	{
+    		return GetEnumerator();
+    	}
 
-            IList<Tuple<Guid, DateTime>> result = new List<Tuple<Guid, DateTime>>();
-            foreach (ScheduledTimeout item in query)
-            {
-                result.Add(new Tuple<Guid, DateTime>(item.Id, item.ExpiresAt));
-            }
-            return result;
-        }
+    	public Expression Expression
+    	{
+    		get { return _repository.Expression; }
+    	}
 
-        public event Action<Guid> TimeoutAdded;
-        public event Action<Guid> TimeoutUpdated;
-        public event Action<Guid> TimeoutRemoved;
+    	public Type ElementType
+    	{
+			get { return _repository.ElementType; }
+    	}
+
+    	public IQueryProvider Provider
+    	{
+			get { return _repository.Provider; }
+    	}
+
+    	public void Dispose()
+    	{
+    		_repository.Dispose();
+    	}
+
+    	public ScheduledTimeout Get(Guid id)
+    	{
+    		return _repository.Get(id);
+    	}
+
+    	public IList<ScheduledTimeout> List()
+    	{
+    		return _repository.List();
+    	}
+
+    	public void Save(ScheduledTimeout item)
+    	{
+    		_repository.Save(item);
+    	}
+
+    	public void Update(ScheduledTimeout item)
+    	{
+    		_repository.Update(item);
+    	}
+
+    	public void Delete(ScheduledTimeout item)
+    	{
+    		_repository.Delete(item);
+    	}
     }
 }

@@ -96,7 +96,6 @@
     <Compile Include="Subscriptions\PersistantSubscriptionRepository.cs" />
     <Compile Include="MessageDeferral\PersistantDeferredMessageRepository.cs" />
     <Compile Include="Timeout\PersistantTimeoutRepository.cs" />
-    <Compile Include="Timeout\ScheduledTimeout.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="MessageDeferral\DeferredMessage.hbm.xml" />

@@ -40,9 +40,6 @@ namespace MassTransit.Tests.Timeouts
             _repository = new InMemoryTimeoutRepository();
             ObjectBuilder.Stub(x => x.GetInstance<ITimeoutRepository>()).Return(_repository);
 
-            ObjectBuilder.Stub(x => x.GetInstance<ScheduleTimeoutConsumer>()).Return(new ScheduleTimeoutConsumer(_repository));
-            ObjectBuilder.Stub(x => x.GetInstance<CancelTimeoutConsumer>()).Return(new CancelTimeoutConsumer(_repository));
-
             _timeoutService = new TimeoutService(LocalBus, _repository);
             _timeoutService.Start();
         }

@@ -1,9 +1,9 @@
 namespace CodeCamp.Domain
 {
     using System;
-    using Magnum.Common.Data;
+    using Magnum.Data;
     using Messages;
-    using Magnum.Common.ObjectExtensions;
+    using Magnum.ObjectExtensions;
 
     public class User : 
         IAggregateRoot<Guid>

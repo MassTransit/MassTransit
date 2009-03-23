@@ -1,8 +1,8 @@
 namespace CodeCamp.Domain
 {
     using System;
-    using Magnum.Common.Data;
-    using Magnum.Common.DateTimeExtensions;
+    using Magnum.Data;
+    using Magnum.DateTimeExtensions;
     using MassTransit;
     using MassTransit.Saga;
     using MassTransit.Services.Timeout.Messages;

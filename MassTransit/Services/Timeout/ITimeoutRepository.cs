@@ -13,19 +13,12 @@
 namespace MassTransit.Services.Timeout
 {
     using System;
-    using System.Collections.Generic;
-    using Util;
+    using Magnum.Data;
 
-    public interface ITimeoutRepository
+	public interface ITimeoutRepository :
+		IRepository<ScheduledTimeout, Guid>
     {
-        void Schedule(Guid id, DateTime timeoutAt);
-        void Remove(Guid id);
-
-        IList<Tuple<Guid, DateTime>> List();
-        IList<Tuple<Guid, DateTime>> List(DateTime lessThan);
-
-        event Action<Guid> TimeoutAdded;
-        event Action<Guid> TimeoutUpdated;
-        event Action<Guid> TimeoutRemoved;
+		void Schedule(ScheduledTimeout timeout);
+		void Remove(ScheduledTimeout timeout);
     }
 }

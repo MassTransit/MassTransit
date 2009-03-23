@@ -3,7 +3,7 @@
     using System;
     using System.Web.UI;
     using Domain;
-    using Magnum.Common;
+    using Magnum;
     using MassTransit.Util;
     using Masters;
     using Messages;

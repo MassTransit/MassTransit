@@ -12,84 +12,42 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Services.Timeout
 {
-    using System;
-    using System.Collections.Generic;
-    using Util;
+	using System;
+	using System.Linq;
+	using Magnum.Data;
 
-    public class InMemoryTimeoutRepository :
-        ITimeoutRepository
-    {
-        private volatile Dictionary<Guid, DateTime> _schedule = new Dictionary<Guid, DateTime>();
+	public class InMemoryTimeoutRepository :
+		InMemoryRepository<ScheduledTimeout, Guid>,
+		ITimeoutRepository
+	{
+		private readonly object _lock = new object();
 
-        public void Schedule(Guid id, DateTime timeoutAt)
-        {
-            bool added = false;
-            bool updated = false;
-            lock (_schedule)
-            {
-                if (_schedule.ContainsKey(id))
-                {
-                    _schedule[id] = timeoutAt;
-                    updated = true;
-                }
-                else
-                {
-                    _schedule.Add(id, timeoutAt);
-                    added = true;
-                }
-            }
+		public void Schedule(ScheduledTimeout timeout)
+		{
+			lock (_lock)
+			{
+				ScheduledTimeout existing = this.Where(x => x.Id == timeout.Id && x.ExpiresAt == timeout.ExpiresAt).FirstOrDefault();
+				if (existing == null)
+				{
+					Save(timeout);
+				}
+				else
+				{
+					existing.ExpiresAt = timeout.ExpiresAt;
+				}
+			}
+		}
 
-            if (added)
-                TimeoutAdded(id);
-            if (updated)
-                TimeoutUpdated(id);
-        }
-
-        public void Remove(Guid id)
-        {
-            bool notify = false;
-            lock (_schedule)
-            {
-                if (_schedule.ContainsKey(id))
-                {
-                    _schedule.Remove(id);
-                    notify = true;
-                }
-            }
-
-            if (notify)
-                TimeoutRemoved(id);
-        }
-
-        public event Action<Guid> TimeoutAdded = delegate { };
-
-        public event Action<Guid> TimeoutUpdated = delegate { };
-
-        public event Action<Guid> TimeoutRemoved = delegate { };
-
-        public IList<Tuple<Guid, DateTime>> List()
-        {
-            List<Tuple<Guid, DateTime>> result = new List<Tuple<Guid, DateTime>>();
-
-            foreach (KeyValuePair<Guid, DateTime> pair in _schedule)
-            {
-                result.Add(new Tuple<Guid, DateTime>(pair));
-            }
-
-            return result;
-        }
-
-        public IList<Tuple<Guid, DateTime>> List(DateTime lessThan)
-        {
-            List<Tuple<Guid, DateTime>> result = new List<Tuple<Guid, DateTime>>();
-
-            foreach (KeyValuePair<Guid, DateTime> pair in _schedule)
-            {
-                if(pair.Value <= lessThan)
-                    result.Add(new Tuple<Guid, DateTime>(pair));
-            }
-
-            return result;
-        }
-    }
+		public void Remove(ScheduledTimeout timeout)
+		{
+			lock (_lock)
+			{
+				ScheduledTimeout existing = this.Where(x => x.Id == timeout.Id && x.ExpiresAt == timeout.ExpiresAt).FirstOrDefault();
+				if (existing != null)
+				{
+					Delete(existing);
+				}
+			}
+		}
+	}
 }
