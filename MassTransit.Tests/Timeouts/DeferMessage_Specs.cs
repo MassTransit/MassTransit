@@ -44,13 +44,8 @@ namespace MassTransit.Tests.Timeouts
 			_timeoutRepository = new InMemoryTimeoutRepository();
 			ObjectBuilder.Stub(x => x.GetInstance<ITimeoutRepository>()).Return(_timeoutRepository);
 
-
-			ObjectBuilder.Stub(x => x.GetInstance<ScheduleTimeoutConsumer>()).Return(new ScheduleTimeoutConsumer(_timeoutRepository));
-			ObjectBuilder.Stub(x => x.GetInstance<CancelTimeoutConsumer>()).Return(new CancelTimeoutConsumer(_timeoutRepository));
-
             _timeoutService = new TimeoutService(RemoteBus, _timeoutRepository);
             _timeoutService.Start();
-
 
 			_repository = new InMemoryDeferredMessageRepository();
 			ObjectBuilder.Stub(x => x.GetInstance<IDeferredMessageRepository>()).Return(_repository);

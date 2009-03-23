@@ -1,6 +1,6 @@
 namespace CodeCamp.Domain
 {
-    using Magnum.Common.ObjectExtensions;
+    using Magnum.ObjectExtensions;
     using MassTransit;
     using Microsoft.Practices.ServiceLocation;
 

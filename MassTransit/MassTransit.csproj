@@ -99,11 +99,9 @@
     <Compile Include="MessageGroup.cs" />
     <Compile Include="ReliableAttribute.cs" />
     <Compile Include="Services\Timeout\Messages\CancelTimeout.cs" />
-    <Compile Include="Services\Timeout\CancelTimeoutConsumer.cs" />
     <Compile Include="Services\Timeout\InMemoryTimeoutRepository.cs" />
     <Compile Include="Services\Timeout\ITimeoutRepository.cs" />
     <Compile Include="Services\Timeout\Messages\ScheduleTimeout.cs" />
-    <Compile Include="Services\Timeout\ScheduleTimeoutConsumer.cs" />
     <Compile Include="Services\Timeout\Messages\TimeoutExpired.cs" />
     <Compile Include="Services\Timeout\TimeoutService.cs" />
     <Compile Include="Transports\LoopbackEndpoint.cs" />
@@ -244,6 +242,7 @@
     <Compile Include="Internal\EndpointList.cs" />
     <Compile Include="Services\Subscriptions\Messages\SubscriptionInformation.cs" />
     <Compile Include="Services\Subscriptions\LocalSubscriptionService.cs" />
+    <Compile Include="Services\Timeout\ScheduledTimeout.cs" />
     <Compile Include="Threading\IResourceLockScope.cs" />
     <Compile Include="Threading\ResourceLock.cs" />
     <Compile Include="Threading\ResourceLockException.cs" />

@@ -2,8 +2,8 @@ namespace CodeCamp.Service
 {
 	using Domain;
 	using log4net.Config;
-	using Magnum.Common;
-	using Magnum.Common.Data;
+	using Magnum;
+	using Magnum.Data;
 	using Magnum.Infrastructure.Data;
 	using MassTransit.Infrastructure.Saga;
 	using MassTransit.Saga;

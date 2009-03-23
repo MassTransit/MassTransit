@@ -380,16 +380,24 @@ namespace MassTransit
 
 					atLeastOneConsumerFailed = true;
 
-					// TODO we need to see if the message is correlated in some way and create the appropriate fault
-
-					if(message.Implements(typeof(CorrelatedBy<>)))
-						this.Call("Publish", ClassFactory.New(typeof(Fault<,>), message, ex));
-					else
-						this.Call("Publish", ClassFactory.New(typeof(Fault<>), message, ex));
+					CreateAndPublishFault(message, ex);
 				}
 			}
 
 			return atLeastOneConsumerFailed;
+		}
+
+		private void CreateAndPublishFault(object message, Exception ex)
+		{
+			if (message.Implements(typeof (CorrelatedBy<>)))
+				this.Call("PublishFault", ClassFactory.New(typeof (Fault<,>), message, ex));
+			else
+				this.Call("PublishFault", ClassFactory.New(typeof (Fault<>), message, ex));
+		}
+
+		private void PublishFault<T>(T message) where T : class 
+		{
+			CurrentMessage.GenerateFault(message);
 		}
 
 		public IServiceBus DataBus { get; set; }

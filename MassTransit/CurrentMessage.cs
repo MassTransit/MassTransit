@@ -42,6 +42,24 @@ namespace MassTransit
 			}
 		}
 
+		/// <summary>
+		/// Send a fault to either via publishing or to the Fault Endpoint
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="message">The message to send/publish</param>
+		public static void GenerateFault<T>(T message) where T : class
+		{
+			var headers = Headers;
+
+			if (headers.ResponseAddress != null)
+			{
+				headers.GetFaultEndpoint().Send(message);
+			}
+			else
+			{
+				headers.Bus.Publish(message);
+			}
+		}
 
 		/// <summary>
 		/// Respond to the current inbound message with either a send to the ResponseAddress or a

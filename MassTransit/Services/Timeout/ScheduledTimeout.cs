@@ -12,30 +12,14 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Services.Timeout
 {
+	using System;
 	using Magnum.Data;
-	using Messages;
 
-    public class CancelTimeoutConsumer :
-        Consumes<CancelTimeout>.All
-    {
-        private readonly ITimeoutRepository _repository;
-
-        public CancelTimeoutConsumer(ITimeoutRepository repository)
-        {
-            _repository = repository;
-        }
-
-        public void Consume(CancelTimeout message)
-        {
-        	UnitOfWork.Start();
-        	try
-        	{
-				_repository.Remove(message.CorrelationId);
-        	}
-        	finally
-        	{
-        		UnitOfWork.Finish();
-        	}
-        }
-    }
+	public class ScheduledTimeout :
+		IAggregateRoot
+	{
+		public Guid Id { get; set; }
+		public int Tag { get; set; }
+		public DateTime ExpiresAt { get; set; }
+	}
 }

@@ -5,7 +5,7 @@
 	using System.Web.Services;
 	using Inventory.Messages;
 	using Magnum;
-	using Magnum.Common.DateTimeExtensions;
+	using Magnum.DateTimeExtensions;
 	using MassTransit;
 	using MassTransit.Util;
 
@@ -18,7 +18,7 @@
 	public class InventoryService :
 		WebService
 	{
-		private static readonly Magnum.Common.Mapper<PartInventoryLevelStatus, InventoryLevel> _mapper;
+		private static readonly Magnum.Mapper<PartInventoryLevelStatus, InventoryLevel> _mapper;
 		private IServiceBus _bus;
 
 		private string _partNumber;
@@ -27,7 +27,7 @@
 
 		static InventoryService()
 		{
-			_mapper = new Magnum.Common.Mapper<PartInventoryLevelStatus, InventoryLevel>();
+			_mapper = new Magnum.Mapper<PartInventoryLevelStatus, InventoryLevel>();
 			_mapper.From(x => x.PartNumber).To(y => y.PartNumber);
 			_mapper.From(x => x.OnHand).To(y => y.QuantityOnHand);
 			_mapper.From(x => x.OnOrder).To(y => y.QuantityOnOrder);
