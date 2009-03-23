@@ -50,7 +50,7 @@ namespace MassTransit.Services.HealthMonitoring.Server
                                             saga.Bus.Publish(new ScheduleTimeout(saga.CorrelationId, saga.TimeBetweenBeatsInSeconds.Seconds()));
                                         })
                                   .Then(StatusChange),
-                              When(TimeoutExpired)
+                              When(TimeoutExpired).And(msg=>msg.Tag == (int)Timeouts.HeartBeatTimeout)
                                   .Then((saga, message) =>
                                         {
                                             //attempt to directly contact the endpoint
@@ -71,7 +71,7 @@ namespace MassTransit.Services.HealthMonitoring.Server
                               When(SuspectRespondsToPing)
                                   .Then(StatusChange)
                                   .TransitionTo(Healthy),
-                              When(PingTimesout)
+                              When(PingTimesout).And((msg)=>msg.Tag == (int)Timeouts.PingTimeout)
                                   .Then((saga, message) => { saga.Bus.Publish(new DownEndpoint(saga.EndpointAddress)); })
                                   .Then(StatusChange)
                                   .TransitionTo(Down));
@@ -130,6 +130,12 @@ namespace MassTransit.Services.HealthMonitoring.Server
         private static void StatusChange(HealthSaga saga)
         {
             saga.Bus.Publish(new StatusChange());
+        }
+
+        private enum Timeouts : int
+        {
+            HeartBeatTimeout = 1,
+            PingTimeout = 2
         }
     }
 

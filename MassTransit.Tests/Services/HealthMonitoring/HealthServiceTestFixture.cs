@@ -100,7 +100,7 @@ namespace MassTransit.Tests.Services.HealthMonitoring
             SetupOrchestrateSagaStateMachineSink<HealthSaga, Heartbeat>(RemoteBus, _healthSagaRepository);
             SetupOrchestrateSagaStateMachineSink<HealthSaga, TimeoutExpired>(RemoteBus, _healthSagaRepository);
             SetupOrchestrateSagaStateMachineSink<HealthSaga, Pong>(RemoteBus, _healthSagaRepository);
-            SetupOrchestrateSagaStateMachineSink<HealthSaga, PingTimeout>(RemoteBus, _healthSagaRepository);
+            //SetupOrchestrateSagaStateMachineSink<HealthSaga, TimeoutExpired>(RemoteBus, _healthSagaRepository);
 
 
             HealthService = new HealthService(RemoteBus, _healthSagaRepository);
