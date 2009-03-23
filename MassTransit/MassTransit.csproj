@@ -114,7 +114,6 @@
     <Compile Include="Exceptions\MessageException.cs" />
     <Compile Include="Exceptions\ShutDownException.cs" />
     <Compile Include="Services\HealthMonitoring\HealthService.cs" />
-    <Compile Include="Services\HealthMonitoring\Messages\PingTimeout.cs" />
     <Compile Include="Services\HealthMonitoring\Messages\Heartbeat.cs" />
     <Compile Include="Services\HealthMonitoring\Messages\Ping.cs" />
     <Compile Include="Services\HealthMonitoring\Messages\Pong.cs" />

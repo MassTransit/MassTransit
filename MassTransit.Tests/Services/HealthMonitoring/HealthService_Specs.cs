@@ -59,7 +59,7 @@ namespace MassTransit.Tests.Services.HealthMonitoring
             
             var fm = new FutureMessage<TimeoutExpired>();
             RemoteBus.Subscribe<TimeoutExpired>(fm.Set);
-			LocalBus.Publish(new TimeoutExpired { CorrelationId = _id });
+			LocalBus.Publish(new TimeoutExpired { CorrelationId = _id, Tag = 2 });
 
             fm.IsAvailable(1.Seconds()).ShouldBeTrue("never got message");
 
@@ -79,9 +79,9 @@ namespace MassTransit.Tests.Services.HealthMonitoring
         private void MakeSagaDown()
         {
             MakeSagaSuspect();
-            var fm = new FutureMessage<PingTimeout>();
-            RemoteBus.Subscribe<PingTimeout>(fm.Set);
-            LocalBus.Publish(new PingTimeout(LocalBus.Endpoint.Uri));
+            var fm = new FutureMessage<TimeoutExpired>();
+            RemoteBus.Subscribe<TimeoutExpired>(fm.Set);
+            LocalBus.Publish(new TimeoutExpired{CorrelationId = _id, Tag = 2});
             fm.IsAvailable(1.Seconds()).ShouldBeTrue();
 
             var saga = Repository.Where(x => x.CorrelationId == _id).First();
@@ -94,7 +94,7 @@ namespace MassTransit.Tests.Services.HealthMonitoring
             LocalBus.Publish(new EndpointTurningOn(LocalBus.Endpoint.Uri, 0, _id));
             var fm = new FutureMessage<TimeoutExpired>();
             RemoteBus.Subscribe<TimeoutExpired>(fm.Set);
-			LocalBus.Publish(new TimeoutExpired { CorrelationId = _id });
+			LocalBus.Publish(new TimeoutExpired { CorrelationId = _id, Tag = 1 });
             fm.IsAvailable(1.Seconds()).ShouldBeTrue();
             
             var saga = Repository.Where(x => x.CorrelationId == _id).First();
