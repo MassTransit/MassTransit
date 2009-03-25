@@ -19,6 +19,7 @@ namespace TimeoutServiceHost
 	using MassTransit.Configuration;
 	using MassTransit.Services.Subscriptions.Configuration;
 	using MassTransit.Services.Timeout;
+	using MassTransit.Transports.Msmq;
 	using MassTransit.WindsorIntegration;
 	using Topshelf;
 	using Topshelf.Configuration;
@@ -47,6 +48,14 @@ namespace TimeoutServiceHost
 							s.CreateServiceLocator(() =>
 								{
 									var container = new DefaultMassTransitContainer();
+                                    container.RegisterInMemorySagaRepository();
+                                    var ef = EndpointFactoryConfigurator.New(e =>
+                                    {
+                                        e.RegisterTransport<MsmqEndpoint>();
+                                    });
+                                    container.Kernel.AddComponentInstance("endpointFactory", typeof(IEndpointFactory), ef);
+
+
 									container.AddComponent<ITimeoutRepository, InMemoryTimeoutRepository>();
 									container.AddComponent<TimeoutService>();
                                     IServiceBus bus = ServiceBusConfigurator.New(sbc =>
