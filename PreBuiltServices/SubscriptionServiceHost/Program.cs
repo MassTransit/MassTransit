@@ -18,6 +18,7 @@ namespace SubscriptionServiceHost
     using MassTransit;
     using MassTransit.Configuration;
     using MassTransit.Services.Subscriptions.Server;
+    using MassTransit.Transports.Msmq;
     using MassTransit.WindsorIntegration;
     using Microsoft.Practices.ServiceLocation;
     using Topshelf;
@@ -52,9 +53,17 @@ namespace SubscriptionServiceHost
                             s.CreateServiceLocator(()=>
                                 {
                                     var container = new DefaultMassTransitContainer();
+                                    container.RegisterInMemorySagaRepository();
+                                    var ef = EndpointFactoryConfigurator.New(e =>
+                                    {
+                                        e.RegisterTransport<MsmqEndpoint>();
+                                    });
+                                    container.Kernel.AddComponentInstance("endpointFactory", typeof(IEndpointFactory), ef);
 
                                     container.AddComponent<ISubscriptionRepository, InMemorySubscriptionRepository>();
                                     container.AddComponent<SubscriptionService>();
+                                    
+                                    
 
                                     var bus = ServiceBusConfigurator.New(sbc =>
                                     {

@@ -19,6 +19,7 @@ namespace HealthServiceHost
 	using MassTransit.Configuration;
 	using MassTransit.Services.HealthMonitoring;
 	using MassTransit.Services.Subscriptions.Configuration;
+	using MassTransit.Transports.Msmq;
 	using MassTransit.WindsorIntegration;
 	using Topshelf;
 	using Topshelf.Configuration;
@@ -47,6 +48,12 @@ namespace HealthServiceHost
 							s.CreateServiceLocator(() =>
 								{
 									var container = new DefaultMassTransitContainer();
+                                    container.RegisterInMemorySagaRepository();
+                                    var ef = EndpointFactoryConfigurator.New(e =>
+                                    {
+                                        e.RegisterTransport<MsmqEndpoint>();
+                                    });
+                                    container.Kernel.AddComponentInstance("endpointFactory", typeof(IEndpointFactory), ef);
 
 									container.AddComponent<HealthService>();
                                     IServiceBus bus = ServiceBusConfigurator.New(a =>

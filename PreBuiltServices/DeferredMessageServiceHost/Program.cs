@@ -19,6 +19,7 @@ namespace DeferredMessageServiceHost
 	using MassTransit.Configuration;
 	using MassTransit.Services.MessageDeferral;
 	using MassTransit.Services.Subscriptions.Configuration;
+	using MassTransit.Transports.Msmq;
 	using MassTransit.WindsorIntegration;
 	using Microsoft.Practices.ServiceLocation;
 	using Topshelf;
@@ -49,7 +50,14 @@ namespace DeferredMessageServiceHost
 						{
                             s.CreateServiceLocator(()=>
                                 {
-                                    var container = new DefaultMassTransitContainer("deferredMessageService.castle.xml");
+                                    var container = new DefaultMassTransitContainer();
+                                    container.RegisterInMemorySagaRepository();
+                                    var ef = EndpointFactoryConfigurator.New(e =>
+                                    {
+                                        e.RegisterTransport<MsmqEndpoint>();
+                                    });
+                                    container.Kernel.AddComponentInstance("endpointFactory", typeof(IEndpointFactory), ef);
+
                                     container.AddComponent<MessageDeferralService>();
                                     container.AddComponent<IDeferredMessageRepository, InMemoryDeferredMessageRepository>();
                                     //TODO: Put the Database Repository here too
