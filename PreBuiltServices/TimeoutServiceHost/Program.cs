@@ -61,16 +61,15 @@ namespace TimeoutServiceHost
                                     IServiceBus bus = ServiceBusConfigurator.New(sbc =>
                                     {
                                         sbc.ReceiveFrom("msmq://localhost/mt_timeout");
-                                        sbc.ConfigureService<SubscriptionClientConfigurator>(cc => { cc.SetSubscriptionServiceEndpoint("msmq://localhost/mt_subscriptions"); });
+                                        sbc.ConfigureService<SubscriptionClientConfigurator>(cc =>
+                                            {
+                                                cc.SetSubscriptionServiceEndpoint("msmq://localhost/mt_subscriptions");
+                                            });
                                     });
                                     container.Kernel.AddComponentInstance<IServiceBus>(bus);
 									return container.ObjectBuilder;
 								});
-							s.WhenStarted(tc =>
-								{
-									
-									tc.Start();
-								});
+							s.WhenStarted(tc => tc.Start());
 							s.WhenStopped(tc => tc.Stop());
 							s.WithName("Timeout service");
 						});

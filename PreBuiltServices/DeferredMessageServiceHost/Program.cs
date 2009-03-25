@@ -64,7 +64,7 @@ namespace DeferredMessageServiceHost
 
                                     var bus = ServiceBusConfigurator.New(sbc =>
                                     {
-                                        sbc.ReceiveFrom("msmq://localhost/mt_timeout");
+                                        sbc.ReceiveFrom("msmq://localhost/mt_deferral");
                                         sbc.ConfigureService<SubscriptionClientConfigurator>(scc =>
                                         {
                                             scc.SetSubscriptionServiceEndpoint("msmq://localhost/mt_subscriptions");
@@ -74,11 +74,7 @@ namespace DeferredMessageServiceHost
                                     container.Kernel.AddComponentInstance<IServiceBus>(bus);
                                     return container.ObjectBuilder;
                                 });
-							s.WhenStarted(tc =>
-							    {
-							        
-							        tc.Start();
-							    });
+							s.WhenStarted(tc => tc.Start());
 							s.WhenStopped(tc => tc.Stop());
 							s.WithName("Deferred service");
 						});
