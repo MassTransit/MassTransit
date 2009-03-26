@@ -11,20 +11,24 @@
 		<copy todir="${dirs.build}\subscription_service" flatten="true">
 			<fileset>
 				<!-- dlls -->
-				<include name="${dirs.build}\MassTransit.dll" />
-				<include name="${dirs.build}\MassTransit.Transports.Msmq.dll" />
-				<include name="${dirs.build}\MassTransit.Host.dll" />
-				<include name="${dirs.build}\MassTransit.SubscriptionStorage.dll" />
-				<include name="${dirs.build}\NHibernate.dll" />
-				<include name="${dirs.build}\Iesi.Collections.dll" />
-				<include name="${dirs.build}\log4net.dll" />
 				<include name="${dirs.build}\Castle.MicroKernel.dll" />
 				<include name="${dirs.build}\Castle.DynamicProxy2.dll" />
 				<include name="${dirs.build}\Castle.Core.dll" />
 				<include name="${dirs.build}\Castle.Facilities.NHibernateIntegration.dll" />
 				<include name="${dirs.build}\Castle.Services.Transaction.dll" />
 				<include name="${dirs.build}\Castle.Windsor.dll" />
-				
+				<include name="${dirs.build}\Iesi.Collections.dll" />
+				<include name="${dirs.build}\log4net.dll" />
+				<include name="${dirs.build}\Magnum.dll" />
+				<include name="${dirs.build}\MassTransit.dll" />
+				<include name="${dirs.build}\MassTransit.Transports.Msmq.dll" />
+				<include name="${dirs.build}\MassTransit.Host.dll" />
+				<include name="${dirs.build}\MassTransit.SubscriptionStorage.dll" />
+				<include name="${dirs.build}\MassTransit.WindsorIntegration.dll" />
+				<include name="${dirs.build}\Microsoft.Practices.ServiceLocator.dll" />
+				<include name="${dirs.build}\NHibernate.dll" />
+				<include name="${dirs.build}\Topshelf.dll" />
+
 				<!--application-->
 				<include name="${dirs.deployment.build}\SubscriptionServiceHost.exe" />
 				
@@ -48,11 +52,13 @@
 				<include name="${dirs.build}\Castle.MicroKernel.dll" />
 				<include name="${dirs.build}\Castle.Windsor.dll" />
 				<include name="${dirs.build}\log4net.dll" />
+				<include name="${dirs.build}\Magnum.dll" />
 				<include name="${dirs.build}\MassTransit.dll" />
 				<include name="${dirs.build}\MassTransit.Host.dll" />
 				<include name="${dirs.build}\MassTransit.Transports.Msmq.dll" />
 				<include name="${dirs.build}\MassTransit.WindsorIntegration.dll" />
 				<include name="${dirs.build}\Microsoft.Practices.ServiceLocation.dll" />
+				<include name="${dirs.build}\Topshelf.dll" />
 				
 				<!-- application -->
 				<include name="${dirs.deployment.build}\TimeoutServiceHost.exe" />
@@ -77,12 +83,14 @@
 				<include name="${dirs.build}\Castle.MicroKernel.dll" />
 				<include name="${dirs.build}\Castle.Windsor.dll" />
 				<include name="${dirs.build}\log4net.dll" />
+				<include name="${dirs.build}\Magnum.dll" />
 				<include name="${dirs.build}\MassTransit.dll" />
 				<include name="${dirs.build}\MassTransit.Host.dll" />
 				<include name="${dirs.build}\MassTransit.Transports.Msmq.dll" />
 				<include name="${dirs.build}\MassTransit.WindsorIntegration.dll" />
 				<include name="${dirs.build}\Microsoft.Practices.ServiceLocation.dll" />
-				
+				<include name="${dirs.build}\Topshelf.dll" />
+
 				<!-- application -->
 				<include name="${dirs.deployment.build}\DeferredMessageServiceHost.exe" />
 				
@@ -106,11 +114,13 @@
 				<include name="${dirs.build}\Castle.MicroKernel.dll" />
 				<include name="${dirs.build}\Castle.Windsor.dll" />
 				<include name="${dirs.build}\log4net.dll" />
+				<include name="${dirs.build}\Magnum.dll" />
 				<include name="${dirs.build}\MassTransit.dll" />
 				<include name="${dirs.build}\MassTransit.Host.dll" />
 				<include name="${dirs.build}\MassTransit.Transports.Msmq.dll" />
 				<include name="${dirs.build}\MassTransit.WindsorIntegration.dll" />
 				<include name="${dirs.build}\Microsoft.Practices.ServiceLocation.dll" />
+				<include name="${dirs.build}\Topshelf.dll" />
 				
 				<!-- application -->
 				<include name="${dirs.deployment.build}\HealthServiceHost.exe" />
