@@ -110,7 +110,9 @@
 			}
 
 			string messageName = subscription.MessageName;
-			var d = subscription.MessageName;
+
+			var parts = subscription.MessageName.Split(',');
+			var d = parts.Length > 0 ? parts[0] : subscription.MessageName;
 			var dd = d.Split('.');
 
 			string description = dd[dd.Length - 1];

@@ -5,14 +5,19 @@ namespace Starbucks.Barista
 
     public class BaristaService
     {
-        public void Start()
+    	private IServiceBus _bus;
+    	private UnsubscribeAction _unsubscribeAction;
+
+    	public void Start()
         {
-            IServiceBus bus = ServiceLocator.Current.GetInstance<IServiceBus>();
-            bus.Subscribe<DrinkPreparationSaga>();            
+    		_bus = ServiceLocator.Current.GetInstance<IServiceBus>();
+    		_unsubscribeAction = _bus.Subscribe<DrinkPreparationSaga>();
         }
 
         public void Stop()
         {
+        	_unsubscribeAction();
+        	_bus.Dispose();
         }
     }
 }

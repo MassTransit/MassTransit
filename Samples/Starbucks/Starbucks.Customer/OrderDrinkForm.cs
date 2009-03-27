@@ -1,73 +1,95 @@
-﻿using System;
-using System.Windows.Forms;
-using Microsoft.Practices.ServiceLocation;
-using Starbucks.Messages;
-
-namespace Starbucks.Customer
+﻿namespace Starbucks.Customer
 {
-    using Magnum;
-    using MassTransit;
+	using System;
+	using System.ComponentModel;
+	using System.Windows.Forms;
+	using Magnum;
+	using MassTransit;
+	using Messages;
+	using Microsoft.Practices.ServiceLocation;
 
-    public partial class OrderDrinkForm : Form,
-                                          Consumes<PaymentDueMessage>.For<string>,
-                                          Consumes<DrinkReadyMessage>.For<string>
-    {
-    	private UnsubscribeAction _unsubscribeToken;
+	public partial class OrderDrinkForm : Form,
+	                                      Consumes<PaymentDueMessage>.For<string>,
+	                                      Consumes<DrinkReadyMessage>.For<string>
+	{
+		private UnsubscribeAction _unsubscribeToken;
+		private IServiceBus _bus;
+		private IServiceBus Bus
+		{
+			get
+			{
+				if (_bus == null)
+					_bus = ServiceLocator.Current.GetInstance<IServiceBus>();
 
-    	public OrderDrinkForm()
-        {
-            InitializeComponent();
-        }
+				return _bus;
+			}
+		}
 
-        #region For<string> Members
 
-        public void Consume(DrinkReadyMessage message)
-        {
-            MessageBox.Show(string.Format("Hey, {0}, your drink is ready.", message.Name));
-        }
+		public OrderDrinkForm()
+		{
+			InitializeComponent();
+		}
 
-        #endregion
+		#region For<string> Members
 
-        #region For<string> Members
+		public void Consume(DrinkReadyMessage message)
+		{
+			MessageBox.Show(string.Format("Hey, {0}, your drink is ready.", message.Name));
 
-        public string CorrelationId
-        {
-            get { return txtName.Text; }
-        }
+			_unsubscribeToken();
+			_unsubscribeToken = null;
+		}
 
-        public void Consume(PaymentDueMessage message)
-        {
-            string prompt = string.Format("Payment due: ${0}", message.Amount);
-            if (MessageBox.Show(prompt, "You need to pay", MessageBoxButtons.OKCancel) == DialogResult.OK)
-            {
-                IServiceBus bus = GetBus();
-                bus.Publish(new SubmitPaymentMessage(message.StarbucksTransactionId, PaymentType.CreditCard, message.Amount, message.Name));
-            }
-        }
+		#endregion
 
-        #endregion
+		#region For<string> Members
 
-        private void button1_Click(object sender, EventArgs e)
-        {
-            string drink = comboBox1.Text;
-            string size = comboBox2.Text;
+		public string CorrelationId
+		{
+			get { return txtName.Text; }
+		}
 
-            string name = txtName.Text;
+		public void Consume(PaymentDueMessage message)
+		{
+			string prompt = string.Format("Payment due: ${0}", message.Amount);
+			if (MessageBox.Show(prompt, "You need to pay", MessageBoxButtons.OKCancel) == DialogResult.OK)
+			{
+				Bus.Publish(new SubmitPaymentMessage(message.StarbucksTransactionId, PaymentType.CreditCard, message.Amount, message.Name));
+			}
+		}
 
-            IServiceBus bus = GetBus();
-        	_unsubscribeToken = bus.Subscribe(this);
-        	bus.Publish(new NewOrderMessage(CombGuid.Generate(), name, drink, size));
-        }
+		#endregion
 
-        private IServiceBus GetBus()
-        {
-            return ServiceLocator.Current.GetInstance<IServiceBus>();
-        }
+		private void button1_Click(object sender, EventArgs e)
+		{
+			string drink = comboBox1.Text;
+			string size = comboBox2.Text;
 
-        protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
-        {
-        	_unsubscribeToken();
-            base.OnClosing(e);
-        }
-    }
+			string name = txtName.Text;
+
+			if (_unsubscribeToken != null)
+				_unsubscribeToken();
+
+			_unsubscribeToken = Bus.Subscribe(this);
+
+			Bus.Publish(new NewOrderMessage(CombGuid.Generate(), name, drink, size));
+		}
+
+		protected override void OnClosing(CancelEventArgs e)
+		{
+			if (_unsubscribeToken != null)
+			{
+				_unsubscribeToken();
+				_unsubscribeToken = null;
+			}
+			if(_bus != null)
+			{
+				_bus.Dispose();
+				_bus = null;
+			}
+
+			base.OnClosing(e);
+		}
+	}
 }

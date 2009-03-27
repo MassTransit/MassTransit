@@ -1,18 +1,23 @@
 namespace Starbucks.Cashier
 {
-    using MassTransit;
-    using Microsoft.Practices.ServiceLocation;
+	using MassTransit;
+	using Microsoft.Practices.ServiceLocation;
 
-    public class CashierService 
-    {
-        public void Start()
-        {
-            IServiceBus bus = ServiceLocator.Current.GetInstance<IServiceBus>();
-            bus.Subscribe<FriendlyCashier>();
-        }
+	public class CashierService
+	{
+		private IServiceBus _bus;
+		private UnsubscribeAction _unsubscribeAction;
 
-        public void Stop()
-        {
-        }
-    }
+		public void Start()
+		{
+			_bus = ServiceLocator.Current.GetInstance<IServiceBus>();
+			_unsubscribeAction = _bus.Subscribe<FriendlyCashier>();
+		}
+
+		public void Stop()
+		{
+			_unsubscribeAction();
+			_bus.Dispose();
+		}
+	}
 }

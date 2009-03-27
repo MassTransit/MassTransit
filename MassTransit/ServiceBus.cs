@@ -42,7 +42,7 @@ namespace MassTransit
 		private IServiceContainer _serviceContainer;
 		private volatile bool _started;
 		private DynamicThreadPool _threadPool;
-		private UnregisterAction _unsubscribeEventDispatchers = () => false;
+		private UnregisterAction _unsubscribeEventDispatchers = () => true;
 
 		static ServiceBus()
 		{

@@ -72,7 +72,10 @@ namespace MassTransit.Batch.Pipeline
             if (invoker == null)
                 yield break;
 
-            yield return invoker(this, context);
+			foreach (Func<BatchInterceptor, IInterceptorContext, UnsubscribeAction> action in invoker.GetInvocationList())
+			{
+				yield return action(this, context);
+			}
         }
 
         public override IEnumerable<UnsubscribeAction> Subscribe<TComponent>(IInterceptorContext context, TComponent instance)
@@ -81,7 +84,10 @@ namespace MassTransit.Batch.Pipeline
             if (invoker == null)
                 yield break;
 
-            yield return invoker(this, context, instance);
+			foreach (Func<BatchInterceptor, IInterceptorContext, object, UnsubscribeAction> action in invoker.GetInvocationList())
+			{
+				yield return action(this, context, instance);
+			}
         }
 
 
