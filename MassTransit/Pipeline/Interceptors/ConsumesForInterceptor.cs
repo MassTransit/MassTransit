@@ -58,7 +58,10 @@ namespace MassTransit.Pipeline.Interceptors
 			if (invoker == null)
 				yield break;
 
-			yield return invoker(this, context, instance);
+			foreach (Func<ConsumesForInterceptor, IInterceptorContext, object, UnsubscribeAction> action in invoker.GetInvocationList())
+			{
+				yield return action(this, context, instance);
+			}
 		}
 
 		private Func<ConsumesForInterceptor, IInterceptorContext, object, UnsubscribeAction> GetInvokerForInstance<TComponent>()
@@ -107,7 +110,7 @@ namespace MassTransit.Pipeline.Interceptors
 							invoker = (interceptor, context, obj) =>
 								{
 									if (context.HasMessageTypeBeenDefined(messageType))
-										return () => false;
+										return () => true;
 
 									context.MessageTypeWasDefined(messageType);
 
@@ -119,7 +122,7 @@ namespace MassTransit.Pipeline.Interceptors
 							invoker += (interceptor, context, obj) =>
 								{
 									if (context.HasMessageTypeBeenDefined(messageType))
-										return () => false;
+										return () => true;
 
 									context.MessageTypeWasDefined(messageType);
 

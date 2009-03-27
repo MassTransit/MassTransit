@@ -14,7 +14,6 @@ namespace MassTransit.Pipeline.Interceptors
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Diagnostics;
 	using System.Linq.Expressions;
 	using System.Reflection;
 	using Exceptions;
@@ -41,7 +40,10 @@ namespace MassTransit.Pipeline.Interceptors
 			if (invoker == null)
 				yield break;
 
-			yield return invoker(this.TranslateTo<TInterceptor>(), context);
+			foreach (Func<TInterceptor, IInterceptorContext, UnsubscribeAction> action in invoker.GetInvocationList())
+			{
+				yield return action(this.TranslateTo<TInterceptor>(), context);
+			}
 		}
 
 		public override IEnumerable<UnsubscribeAction> Subscribe<TComponent>(IInterceptorContext context, TComponent instance)
@@ -50,7 +52,10 @@ namespace MassTransit.Pipeline.Interceptors
 			if (invoker == null)
 				yield break;
 
-			yield return invoker(this.TranslateTo<TInterceptor>(), context, instance);
+			foreach (Func<TInterceptor, IInterceptorContext, object, UnsubscribeAction> action in invoker.GetInvocationList())
+			{
+				yield return action(this.TranslateTo<TInterceptor>(), context, instance);
+			}
 		}
 
 		private Func<TInterceptor, IInterceptorContext, UnsubscribeAction> GetInvoker<TComponent>()
@@ -84,7 +89,7 @@ namespace MassTransit.Pipeline.Interceptors
 							invoker = (interceptor, context) =>
 								{
 									if (context.HasMessageTypeBeenDefined(messageType))
-										return () => false;
+										return () => true;
 
 									context.MessageTypeWasDefined(messageType);
 									return connector(interceptor, context);
@@ -95,7 +100,7 @@ namespace MassTransit.Pipeline.Interceptors
 							invoker += (interceptor, context) =>
 								{
 									if (context.HasMessageTypeBeenDefined(messageType))
-										return () => false;
+										return () => true;
 
 									context.MessageTypeWasDefined(messageType);
 									return connector(interceptor, context);
@@ -160,7 +165,7 @@ namespace MassTransit.Pipeline.Interceptors
 							invoker = (interceptor, context, obj) =>
 								{
 									if (context.HasMessageTypeBeenDefined(messageType))
-										return () => false;
+										return () => true;
 
 									context.MessageTypeWasDefined(messageType);
 
@@ -172,7 +177,7 @@ namespace MassTransit.Pipeline.Interceptors
 							invoker += (interceptor, context, obj) =>
 								{
 									if (context.HasMessageTypeBeenDefined(messageType))
-										return () => false;
+										return () => true;
 
 									context.MessageTypeWasDefined(messageType);
 

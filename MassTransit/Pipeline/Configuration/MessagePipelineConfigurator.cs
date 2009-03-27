@@ -15,7 +15,7 @@ namespace MassTransit.Pipeline.Configuration
 		IDisposable
 	{
 		private readonly IObjectBuilder _builder;
-		private readonly UnsubscribeAction _emptyToken = () => false;
+		private readonly UnsubscribeAction _emptyToken = () => true;
 		private volatile bool _disposed;
 
 		protected RegistrationList<IPipelineInterceptor> _interceptors = new RegistrationList<IPipelineInterceptor>();
@@ -150,7 +150,7 @@ namespace MassTransit.Pipeline.Configuration
 
 		public UnsubscribeAction SubscribedTo<T>() where T : class
 		{
-			UnsubscribeAction result = () => false;
+			UnsubscribeAction result = () => true;
 
 			_subscriptionEventHandlers.Each(x =>
 				{
@@ -162,7 +162,7 @@ namespace MassTransit.Pipeline.Configuration
 
 		public UnsubscribeAction SubscribedTo<T, K>(K correlationId) where T : class, CorrelatedBy<K>
 		{
-			UnsubscribeAction result = () => false;
+			UnsubscribeAction result = () => true;
 
 			_subscriptionEventHandlers.Each(x =>
 			{

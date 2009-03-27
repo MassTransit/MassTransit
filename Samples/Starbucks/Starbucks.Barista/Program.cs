@@ -1,57 +1,53 @@
 ﻿namespace Starbucks.Barista
 {
-    using System;
-    using System.IO;
-    using Castle.Windsor;
-    using log4net.Config;
-    using MassTransit.Saga;
-    using MassTransit.WindsorIntegration;
-    using Microsoft.Practices.ServiceLocation;
-    using Topshelf;
-    using Topshelf.Configuration;
+	using System;
+	using System.IO;
+	using Castle.Windsor;
+	using log4net.Config;
+	using MassTransit.Saga;
+	using MassTransit.WindsorIntegration;
+	using Microsoft.Practices.ServiceLocation;
+	using Topshelf;
+	using Topshelf.Configuration;
 
-    internal static class Program
-    {
-        /// <summary>
-        /// The main entry point for the application.
-        /// </summary>
-        [STAThread]
-        private static void Main(string[] args)
-        {
-            XmlConfigurator.Configure(new FileInfo("barista.log4net.xml"));
-            
-            var cfg = RunnerConfigurator.New(c =>
-                                                 {
-                                                     c.SetServiceName("StarbucksBarista");
-                                                     c.SetDisplayName("Starbucks Barista");
-                                                     c.SetDescription("a Mass Transit sample service for making orders of coffee.");
+	internal static class Program
+	{
+		/// <summary>
+		/// The main entry point for the application.
+		/// </summary>
+		[STAThread]
+		private static void Main(string[] args)
+		{
+			XmlConfigurator.Configure(new FileInfo("barista.log4net.xml"));
 
-                                                     c.DependencyOnMsmq();
-                                                     c.RunAsFromInteractive();
+			var cfg = RunnerConfigurator.New(c =>
+				{
+					c.SetServiceName("StarbucksBarista");
+					c.SetDisplayName("Starbucks Barista");
+					c.SetDescription("a Mass Transit sample service for making orders of coffee.");
 
-                                                     c.BeforeStart(a=>
-                                                                       {
-                                                                           
-                                                                       });
+					c.DependencyOnMsmq();
+					c.RunAsFromInteractive();
 
-                                                     c.ConfigureService<BaristaService>(s=>
-                                                                                              {
-                                                                                                  s.CreateServiceLocator(()=>
-                                                                                                                         {
-                                                                                                                             IWindsorContainer container = new DefaultMassTransitContainer("Starbucks.Barista.Castle.xml");
-                                                                                                                             
-                                                                                                                             container.AddComponent<DrinkPreparationSaga>();
-                                                                                                                             container.AddComponent<BaristaService>();
-                                                                                                                             container.AddComponent<ISagaRepository<DrinkPreparationSaga>, InMemorySagaRepository<DrinkPreparationSaga>>();
+					c.BeforeStart(a => { });
 
-                                                                                                                             return ServiceLocator.Current;
+					c.ConfigureService<BaristaService>(s =>
+						{
+							s.CreateServiceLocator(() =>
+								{
+									IWindsorContainer container = new DefaultMassTransitContainer("Starbucks.Barista.Castle.xml");
+									container.AddComponent("sagaRepository", typeof(ISagaRepository<>), typeof(InMemorySagaRepository<>));
 
-                                                                                                                         });
-                                                                                                  s.WhenStarted(o=>o.Start());
-                                                                                                  s.WhenStopped(o=>o.Stop());
-                                                                                              });
-                                                 });
-            Runner.Host(cfg, args);
-        }
-    }
+									container.AddComponent<DrinkPreparationSaga>();
+									container.AddComponent<BaristaService>();
+
+									return ServiceLocator.Current;
+								});
+							s.WhenStarted(o => o.Start());
+							s.WhenStopped(o => o.Stop());
+						});
+				});
+			Runner.Host(cfg, args);
+		}
+	}
 }

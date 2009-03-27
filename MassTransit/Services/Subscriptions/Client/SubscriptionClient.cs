@@ -236,7 +236,7 @@ namespace MassTransit.Services.Subscriptions.Client
 		private UnsubscribeAction SendAddSubscription(SubscriptionInformation info)
 		{
 			if (_ignoredSubscriptions.Contains(info.MessageName))
-				return () => false;
+				return () => true;
 
 			var add = new AddSubscription(info);
 
@@ -260,7 +260,7 @@ namespace MassTransit.Services.Subscriptions.Client
 		private UnsubscribeAction AddToClients<T>(Uri endpointUri)
 			where T : class
 		{
-			UnsubscribeAction result = () => false;
+			UnsubscribeAction result = () => true;
 
 			_clients.Each(x => { result += x.SubscribedTo<T>(endpointUri); });
 
