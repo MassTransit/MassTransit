@@ -51,7 +51,10 @@ namespace MassTransit.Saga
 
 			_sagas.Add(id, saga);
 
-			yield return saga;
+			lock(saga)
+			{
+				yield return saga;
+			}
 		}
 
 		public IEnumerator<T> OrchestrateExistingSaga(Guid id)
@@ -63,7 +66,10 @@ namespace MassTransit.Saga
 			if (!_sagas.TryGetValue(id, out saga))
 				throw new SagaException("The saga was not found and cannot be loaded", typeof (T), typeof (T), id);
 
-			yield return saga;
+			lock (saga)
+			{
+				yield return saga;
+			}
 		}
 
 		public IEnumerator<T> GetEnumerator()

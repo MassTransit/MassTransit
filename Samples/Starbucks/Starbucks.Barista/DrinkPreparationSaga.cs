@@ -1,81 +1,87 @@
-﻿using System;
-using System.Threading;
-using MassTransit.Saga;
-using Starbucks.Messages;
-
-namespace Starbucks.Barista
+﻿namespace Starbucks.Barista
 {
-    using MassTransit;
+	using System;
+	using System.Threading;
+	using Magnum.StateMachine;
+	using MassTransit;
+	using MassTransit.Saga;
+	using Messages;
 
-    public class DrinkPreparationSaga :
-        InitiatedBy<NewOrderMessage>,
-        Orchestrates<PaymentCompleteMessage>,
-        ISaga
-    {
-        private readonly Guid _correlationId;
-        private bool DrinkReady { get; set; }
-        private bool PaymentComplete { get; set; }
-        public string Drink { get; set; }
-        public string Name { get; set; }
+	public class DrinkPreparationSaga :
+		SagaStateMachine<DrinkPreparationSaga>,
+		ISaga
+	{
+		static DrinkPreparationSaga()
+		{
+			Define(() =>
+				{
+					Initially(
+						When(NewOrder)
+							.Then((saga, message) => saga.ProcessNewOrder(message))
+							.TransitionTo(WaitingForPayment)
+						);
 
-        public DrinkPreparationSaga(Guid correlationId)
-        {
-            _correlationId = correlationId;
-        }
+					During(WaitingForPayment,
+					       When(PaymentComplete)
+					       	.Then((saga,message) =>
+					       		{
+					       			Console.WriteLine("Payment Complete for '{0}' got it!", saga.Name);
+					       			saga.ServeDrink();
+					       		})
+					       	.Complete()
+						);
+				});
+		}
 
-        public Guid CorrelationId
-        {
-            get { return _correlationId; }
-        }
+		public DrinkPreparationSaga(Guid correlationId)
+		{
+			CorrelationId = correlationId;
+		}
 
-        public IServiceBus Bus
-        {
-            get; set;
-        }
 
-        public void Consume(NewOrderMessage message)
-        {
+		public string Drink { get; set; }
+		public string Name { get; set; }
 
-            string drink = string.Format("{0} {1}", message.Size, message.Item);
+		public static State Initial { get; set; }
+		public static State Completed { get; set; }
+		public static State PreparingDrink { get; set; }
+		public static State WaitingForPayment { get; set; }
 
-        	Drink = drink;
-        	Name = message.Name;
 
-            Console.WriteLine(string.Format("{0} for {1}, got it!", drink, message.Name));
+		public static Event<NewOrderMessage> NewOrder { get; set; }
+		public static Event<PaymentCompleteMessage> PaymentComplete { get; set; }
 
-            for (int i = 0; i < 10; i++)
-            {
-                Thread.Sleep(i * 200);
-                Console.WriteLine("[wwhhrrrr....psssss...chrhrhrhrrr]");
-            }
+		public Guid CorrelationId { get; private set; }
 
-            DrinkReady = true;
+		public IServiceBus Bus { get; set; }
 
-            ServeDrinkIfStateComplete();
-        }
 
-        private void ServeDrinkIfStateComplete()
-        {
-            if(PaymentComplete && DrinkReady)
-            {
-                Console.WriteLine(string.Format("I've got a {0} ready for {1}!", Drink, Name));
+		public void ProcessNewOrder(NewOrderMessage message)
+		{
+			Name = message.Name;
+			Drink = string.Format("{0} {1}", message.Size, message.Item);
 
-            	var message = new DrinkReadyMessage
-            		{
-            			CorrelationId = CorrelationId,
-            			Drink = Drink,
-						Name = Name,
-            		};
+			Console.WriteLine(string.Format("{0} for {1}, got it!", Drink, Name));
 
-                Bus.Publish(message);
-            }
-        }
+			for (int i = 0; i < 10; i++)
+			{
+				Thread.Sleep(i*200);
+				Console.WriteLine("[wwhhrrrr....psssss...chrhrhrhrrr]");
+			}
+		}
 
-        public void Consume(PaymentCompleteMessage message)
-        {
-            PaymentComplete = true;
-            Console.WriteLine("Payment Complete for '{0}' got it!", Name);
-            ServeDrinkIfStateComplete();
-        }
-    }
+		private void ServeDrink()
+		{
+			Console.WriteLine(string.Format("I've got a {0} ready for {1}!", Drink, Name));
+
+			var message = new DrinkReadyMessage
+				{
+					CorrelationId = CorrelationId,
+					Drink = Drink,
+					Name = Name,
+				};
+
+			Bus.Publish(message);
+		}
+	}
 }
