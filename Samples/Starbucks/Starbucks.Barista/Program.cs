@@ -1,9 +1,12 @@
 ﻿namespace Starbucks.Barista
 {
 	using System;
+	using System.Diagnostics;
 	using System.IO;
 	using Castle.Windsor;
 	using log4net.Config;
+	using Magnum;
+	using Magnum.StateMachine;
 	using MassTransit.Saga;
 	using MassTransit.WindsorIntegration;
 	using Microsoft.Practices.ServiceLocation;
@@ -40,6 +43,10 @@
 
 									container.AddComponent<DrinkPreparationSaga>();
 									container.AddComponent<BaristaService>();
+
+									Trace.Listeners.Add(new TextWriterTraceListener(Console.Out));
+
+									StateMachineInspector.Trace(new DrinkPreparationSaga(CombGuid.Generate()));
 
 									return ServiceLocator.Current;
 								});

@@ -1,9 +1,12 @@
 ﻿namespace Starbucks.Cashier
 {
 	using System;
+	using System.Diagnostics;
 	using System.IO;
 	using Castle.Windsor;
 	using log4net.Config;
+	using Magnum;
+	using Magnum.StateMachine;
 	using MassTransit.Saga;
 	using MassTransit.WindsorIntegration;
 	using Microsoft.Practices.ServiceLocation;
@@ -39,8 +42,11 @@
 									container.AddComponent("sagaRepository", typeof(ISagaRepository<>), typeof(InMemorySagaRepository<>));
 
 									container.AddComponent<CashierService>();
-
 									container.AddComponent<CashierSaga>();
+
+									Trace.Listeners.Add(new TextWriterTraceListener(Console.Out));
+
+									StateMachineInspector.Trace(new CashierSaga(CombGuid.Generate()));
 
 									return ServiceLocator.Current;
 								});
