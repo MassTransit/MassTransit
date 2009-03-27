@@ -59,14 +59,22 @@ namespace Starbucks.Barista
             if(PaymentComplete && DrinkReady)
             {
                 Console.WriteLine(string.Format("I've got a {0} ready for {1}!", Drink, Name));
-                Bus.Publish(new DrinkReadyMessage(Name, Drink));
+
+            	var message = new DrinkReadyMessage
+            		{
+            			CorrelationId = CorrelationId,
+            			Drink = Drink,
+						Name = Name,
+            		};
+
+                Bus.Publish(message);
             }
         }
 
         public void Consume(PaymentCompleteMessage message)
         {
             PaymentComplete = true;
-            Console.WriteLine("Payment Complete for '{0}' got it!", message.Name);
+            Console.WriteLine("Payment Complete for '{0}' got it!", Name);
             ServeDrinkIfStateComplete();
         }
     }

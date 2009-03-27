@@ -11,7 +11,8 @@ namespace Starbucks.Cashier
 		public void Start()
 		{
 			_bus = ServiceLocator.Current.GetInstance<IServiceBus>();
-			_unsubscribeAction = _bus.Subscribe<FriendlyCashier>();
+
+			_unsubscribeAction = _bus.Subscribe<CashierSaga>();
 		}
 
 		public void Stop()

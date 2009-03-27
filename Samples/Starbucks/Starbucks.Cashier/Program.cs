@@ -4,6 +4,7 @@
 	using System.IO;
 	using Castle.Windsor;
 	using log4net.Config;
+	using MassTransit.Saga;
 	using MassTransit.WindsorIntegration;
 	using Microsoft.Practices.ServiceLocation;
 	using Topshelf;
@@ -35,8 +36,12 @@
 							s.CreateServiceLocator(() =>
 								{
 									IWindsorContainer container = new DefaultMassTransitContainer("Starbucks.Cashier.Castle.xml");
+									container.AddComponent("sagaRepository", typeof(ISagaRepository<>), typeof(InMemorySagaRepository<>));
+
 									container.AddComponent<CashierService>();
-									container.AddComponent<FriendlyCashier>();
+
+									container.AddComponent<CashierSaga>();
+
 									return ServiceLocator.Current;
 								});
 							s.WhenStarted(o => o.Start());

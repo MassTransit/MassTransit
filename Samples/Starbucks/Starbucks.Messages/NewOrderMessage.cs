@@ -3,19 +3,11 @@
 namespace Starbucks.Messages
 {
     using MassTransit;
-    using MassTransit.Util;
 
-    [Serializable]
-    public class NewOrderMessage : CorrelatedBy<Guid>
+	[Serializable]
+    public class NewOrderMessage : 
+		CorrelatedBy<Guid>
     {
-        public NewOrderMessage(Guid correlationId, string name, string drink, string size)
-        {
-            CorrelationId = correlationId;
-            Name = name;
-            Item = drink;
-            Size = size;
-        }
-
         public Guid CorrelationId { get; set; }
         public string Name { get; set; }
         public string Item { get; set;}

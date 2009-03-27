@@ -8,12 +8,21 @@
 	using Messages;
 	using Microsoft.Practices.ServiceLocation;
 
-	public partial class OrderDrinkForm : Form,
-	                                      Consumes<PaymentDueMessage>.For<string>,
-	                                      Consumes<DrinkReadyMessage>.For<string>
+	public partial class OrderDrinkForm :
+		Form,
+		Consumes<PaymentDueMessage>.For<Guid>,
+		Consumes<DrinkReadyMessage>.For<Guid>
 	{
-		private UnsubscribeAction _unsubscribeToken;
 		private IServiceBus _bus;
+		private Guid _transactionId;
+		private UnsubscribeAction _unsubscribeToken;
+
+
+		public OrderDrinkForm()
+		{
+			InitializeComponent();
+		}
+
 		private IServiceBus Bus
 		{
 			get
@@ -25,55 +34,64 @@
 			}
 		}
 
-
-		public OrderDrinkForm()
-		{
-			InitializeComponent();
-		}
-
-		#region For<string> Members
-
 		public void Consume(DrinkReadyMessage message)
 		{
-			MessageBox.Show(string.Format("Hey, {0}, your drink is ready.", message.Name));
+			MessageBox.Show(string.Format("Hey, {0}, your {1} is ready.", message.Name, message.Drink));
 
 			_unsubscribeToken();
 			_unsubscribeToken = null;
 		}
 
-		#endregion
-
-		#region For<string> Members
-
-		public string CorrelationId
+		public Guid CorrelationId
 		{
-			get { return txtName.Text; }
+			get { return _transactionId; }
 		}
 
 		public void Consume(PaymentDueMessage message)
 		{
-			string prompt = string.Format("Payment due: ${0}", message.Amount);
-			if (MessageBox.Show(prompt, "You need to pay", MessageBoxButtons.OKCancel) == DialogResult.OK)
+			
+			string prompt = string.Format("Payment due: ${0} Would you like to add a tip?", message.Amount);
+
+			DialogResult result = MessageBox.Show(prompt, "Payment Due", MessageBoxButtons.YesNoCancel);
+
+			decimal payment = message.Amount;
+			if (result == DialogResult.Yes)
+				payment += payment*0.2m;
+
+			if (result != DialogResult.Cancel)
 			{
-				Bus.Publish(new SubmitPaymentMessage(message.StarbucksTransactionId, PaymentType.CreditCard, message.Amount, message.Name));
+				var submitPaymentMessage = new SubmitPaymentMessage
+					{
+						CorrelationId = message.CorrelationId,
+						PaymentType = PaymentType.CreditCard,
+						Amount = payment,
+					};
+
+				Bus.Publish(submitPaymentMessage);
 			}
 		}
-
-		#endregion
 
 		private void button1_Click(object sender, EventArgs e)
 		{
 			string drink = comboBox1.Text;
 			string size = comboBox2.Text;
-
 			string name = txtName.Text;
+
+			_transactionId = CombGuid.Generate();
 
 			if (_unsubscribeToken != null)
 				_unsubscribeToken();
-
 			_unsubscribeToken = Bus.Subscribe(this);
 
-			Bus.Publish(new NewOrderMessage(CombGuid.Generate(), name, drink, size));
+			var message = new NewOrderMessage
+				{
+					CorrelationId = _transactionId,
+					Item = drink,
+					Name = name,
+					Size = size,
+				};
+
+			Bus.Publish(message);
 		}
 
 		protected override void OnClosing(CancelEventArgs e)
@@ -83,7 +101,7 @@
 				_unsubscribeToken();
 				_unsubscribeToken = null;
 			}
-			if(_bus != null)
+			if (_bus != null)
 			{
 				_bus.Dispose();
 				_bus = null;
