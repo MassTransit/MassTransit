@@ -1,24 +1,14 @@
-using System;
-
 namespace Starbucks.Messages
 {
-    using MassTransit;
+	using System;
+	using MassTransit;
 
-    [Serializable]
-    public class SubmitPaymentMessage : 
-        CorrelatedBy<Guid>
-    {
-        public Guid CorrelationId { get; private set; }
-        public PaymentType PaymentType { get; private set; }
-        public decimal Amount { get; private set; }
-        public string Name { get; private set; }
-
-        public SubmitPaymentMessage(Guid correlationId, PaymentType paymentType, decimal amount, string name)
-        {
-            CorrelationId = correlationId;
-            PaymentType = paymentType;
-            Amount = amount;
-            Name = name;
-        }
-    }
+	[Serializable]
+	public class SubmitPaymentMessage :
+		CorrelatedBy<Guid>
+	{
+		public PaymentType PaymentType { get; set; }
+		public decimal Amount { get; set; }
+		public Guid CorrelationId { get; set; }
+	}
 }
