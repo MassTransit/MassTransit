@@ -74,24 +74,28 @@ namespace MassTransit.Internal
 			}
 		}
 
-		public IEndpoint GetEndpoint(Uri uri)
-		{
+        public IEndpoint GetEndpoint(Uri uri)
+        {
             Check.Parameter(uri).IsNotNull();
-			if (_disposed) throw new ObjectDisposedException("The object has been disposed");
+            if (_disposed) throw new ObjectDisposedException("The object has been disposed");
 
-			try
-			{
-				Uri key = new Uri(uri.ToString().ToLowerInvariant());
+            try
+            {
+                Uri key = new Uri(uri.ToString().ToLowerInvariant());
 
-				return _endpoints.Retrieve(key, () => BuildEndpoint(uri));
-			}
-			catch (Exception ex)
-			{
-				throw new ConfigurationException("An error occurred retrieving the endpoint for " + uri, ex);
-			}
-		}
+                return _endpoints.Retrieve(key, () => BuildEndpoint(uri));
+            }
+            catch (EndpointException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                throw new ConfigurationException("An error occurred retrieving the endpoint for " + uri, ex);
+            }
+        }
 
-		protected virtual void Dispose(bool disposing)
+        protected virtual void Dispose(bool disposing)
 		{
 			if (_disposed) return;
 			if (disposing)
