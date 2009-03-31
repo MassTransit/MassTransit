@@ -1,6 +1,7 @@
 namespace MassTransit.Transports.Msmq.Tests
 {
     using System;
+    using Configuration;
     using Exceptions;
     using MassTransit.Tests;
     using NUnit.Framework;
@@ -13,6 +14,17 @@ namespace MassTransit.Transports.Msmq.Tests
         public void Should_throw_an_endpoint_exception()
         {
             new MsmqEndpoint("msmq://localhost/idontexist_tx");
+        }
+
+        [Test]
+        [ExpectedException(typeof(EndpointException))]
+        public void Should_throw_an_endpoint_exception_from_the_factory()
+        {
+            var ef = EndpointFactoryConfigurator.New(x =>
+                {
+                    x.RegisterTransport<MsmqEndpoint>();
+                });
+            ef.GetEndpoint("msmq://localhost/idontexist_tx");
         }
     }
 
