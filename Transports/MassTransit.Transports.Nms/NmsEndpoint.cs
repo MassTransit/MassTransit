@@ -124,10 +124,13 @@ namespace MassTransit.Transports.Nms
                 {
                     IMessage message = consumer.Receive(timeout);
 
-                    using (var selector = new NmsMessageSelector(this, session, message, _serializer))
-                    {
-                        yield return selector;
-                    }
+					if (message != null)
+					{
+						using (var selector = new NmsMessageSelector(this, session, message, _serializer))
+						{
+							yield return selector;
+						}
+					}
                 }
             }
         }
