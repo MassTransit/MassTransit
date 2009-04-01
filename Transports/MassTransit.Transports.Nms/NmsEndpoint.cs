@@ -76,6 +76,14 @@ namespace MassTransit.Transports.Nms
 
             try
             {
+                Type messageType = typeof(T);
+
+                OutboundMessage.Set(headers =>
+                {
+                    headers.SetMessageType(messageType);
+                    headers.SetDestinationAddress(Uri);
+                });
+
                 using (var session = _connection.CreateSession(AcknowledgementMode.Transactional))
                 {
                     var destination = session.GetQueue(_queueName);
@@ -94,10 +102,10 @@ namespace MassTransit.Transports.Nms
                     }
 
                     if (SpecialLoggers.Messages.IsInfoEnabled)
-                        SpecialLoggers.Messages.InfoFormat("SEND:{0}:{1}:{2}", Uri, typeof (T).Name, bm.NMSMessageId);
+                        SpecialLoggers.Messages.InfoFormat("SEND:{0}:{1}:{2}", Uri, messageType.Name, bm.NMSMessageId);
 
                     if (_log.IsDebugEnabled)
-                        _log.DebugFormat("Sent {0} from {1} [{2}]", typeof (T).FullName, Uri, bm.NMSMessageId);
+                        _log.DebugFormat("Sent {0} from {1} [{2}]", messageType.FullName, Uri, bm.NMSMessageId);
 
                     session.Commit();
                 }
