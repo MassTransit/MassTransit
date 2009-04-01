@@ -12,8 +12,8 @@
 	</target>
 	
 	
-	<target name="build_services" description="Building Deploys">
-		<msbuild project="${dirs.root}\PreBuiltServices\Deployment-2008.sln" verbosity="quiet">
+	<target name="build_services" description="Building PreBuiltServices">
+		<msbuild project="${dirs.root}\PreBuiltServices\PreBuiltServices-2008.sln" verbosity="quiet">
 			<property name="Configuration" value="${msbuild.configuration}" />
 		</msbuild>
 	</target>
