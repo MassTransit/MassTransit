@@ -1,4 +1,4 @@
-namespace OpenAllNight
+namespace OpenAllNight.Testers
 {
     using log4net;
     using MassTransit;
@@ -18,7 +18,6 @@ namespace OpenAllNight
         public void Consume(CacheUpdateResponse message)
         {
             _counter.IncrementMessagesReceived();
-            //Console.WriteLine("Received update message number {0}", _counter.MessagesReceived);
         }
     }
 }

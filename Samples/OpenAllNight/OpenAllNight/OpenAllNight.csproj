@@ -2,7 +2,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.21022</ProductVersion>
+    <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{EB825C40-FE8F-4F56-8397-A158F7482970}</ProjectGuid>
     <OutputType>Exe</OutputType>
@@ -74,10 +74,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CacheUpdateResponseHandler.cs" />
+    <Compile Include="Testers\CacheUpdateResponseHandler.cs" />
     <Compile Include="Counter.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Testers\MessageCounter.cs" />
+    <Compile Include="Testers\SubscriptionServiceTester.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\MassTransit\MassTransit.csproj">
@@ -94,9 +96,6 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="castle.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
     <Content Include="log4net.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
