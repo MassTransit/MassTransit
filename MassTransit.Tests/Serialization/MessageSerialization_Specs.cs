@@ -16,6 +16,8 @@ namespace MassTransit.Tests.Serialization
     using System.Diagnostics;
     using System.IO;
     using System.Text;
+    using Magnum.DateTimeExtensions;
+    using MassTransit.Internal;
     using MassTransit.Serialization;
     using Messages;
     using NUnit.Framework;
@@ -26,15 +28,18 @@ namespace MassTransit.Tests.Serialization
         [SetUp]
         public void SetupContext()
         {
-            _message = new SerializationTestMessage
-                {
-                    Amount = 123.45m,
-                    BigCount = 098123213,
-                    Count = 123,
-                    Created = new DateTime(2008,9,8,7,6,5,4),
-                    Id = Guid.NewGuid(),
-                    Name = "Chris",
-                    Radians = 1823.172,
+        	_message = new SerializationTestMessage
+        		{
+        			DecimalValue = 123.45m,
+        			LongValue = 098123213,
+        			BoolValue = true,
+        			ByteValue = 127,
+        			IntValue = 123,
+        			DateTimeValue = new DateTime(2008, 9, 8, 7, 6, 5, 4),
+        			TimeSpanValue = 30.Seconds(),
+                    GuidValue = Guid.NewGuid(),
+                    StringValue = "Chris's Sample Code",
+                    DoubleValue = 1823.172,
                 };
         }
 
@@ -45,7 +50,40 @@ namespace MassTransit.Tests.Serialization
         {
             byte[] serializedMessageData;
 
-            IMessageSerializer serializer = new XmlMessageSerializer();
+            var serializer = new XmlMessageSerializer();
+
+            using (MemoryStream output = new MemoryStream())
+            {
+                serializer.Serialize(output, _message);
+
+                serializedMessageData = output.ToArray();
+
+                Trace.WriteLine(Encoding.UTF8.GetString(serializedMessageData));
+            }
+
+            using (MemoryStream input = new MemoryStream(serializedMessageData))
+            {
+                SerializationTestMessage receivedMessage = serializer.Deserialize(input) as SerializationTestMessage;
+
+                Assert.AreEqual(_message, receivedMessage);
+            }
+        }
+
+        [Test]
+        public void Using_Udis_serializer_should_be_a_start_towards_message_equality()
+        {
+            byte[] serializedMessageData;
+
+            var serializer = new CustomXmlMessageSerializer(new MessageMapper());
+
+			OutboundMessage.Set(x =>
+				{
+					x.SetSourceAddress("msmq://localhost/queue_name");
+					x.SetDestinationAddress("msmq://remotehost/queue_name");
+					x.SetResponseAddress("msmq://localhost/response_queue");
+					x.SetFaultAddress("msmq://localhost/fault_queue");
+					x.SetRetryCount(7);
+				});
 
             using (MemoryStream output = new MemoryStream())
             {

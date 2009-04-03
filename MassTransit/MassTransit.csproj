@@ -164,6 +164,11 @@
     <Compile Include="Saga\Pipeline\SagaStateMachineInterceptor.cs" />
     <Compile Include="Saga\Pipeline\SagaStateMachineSubsriber.cs" />
     <Compile Include="Saga\SagaStateMachine.cs" />
+    <Compile Include="Serialization\MessageMapper.cs" />
+    <Compile Include="Serialization\NewXmlMessageSerializer.cs" />
+    <Compile Include="Serialization\TypeFieldInfo.cs" />
+    <Compile Include="Serialization\TypePropertyInfo.cs" />
+    <Compile Include="Serialization\XmlObjectSerializer.cs" />
     <Compile Include="Services\HealthMonitoring\Configuration\HealthClientConfigurator.cs" />
     <Compile Include="Services\HealthMonitoring\Messages\DownEndpoint.cs" />
     <Compile Include="Services\HealthMonitoring\Messages\EndpointTurningOff.cs" />

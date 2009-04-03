@@ -19,11 +19,12 @@ namespace MassTransit.Tests.Messages
 		IEquatable<PingMessage>,
 		CorrelatedBy<Guid>
 	{
-		private readonly Guid _id = new Guid("D62C9B1C-8E31-4D54-ADD7-C624D56085A4");
+		private Guid _id = new Guid("D62C9B1C-8E31-4D54-ADD7-C624D56085A4");
 
 		public Guid CorrelationId
 		{
 			get { return _id; }
+			set { _id = value; }
 		}
 
 		public bool Equals(PingMessage obj)
