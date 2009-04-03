@@ -1,113 +1,115 @@
 namespace OpenAllNight
 {
-	using System;
-	using System.IO;
-	using System.Threading;
-	using Castle.Core;
-	using Castle.Windsor;
-	using log4net.Config;
-	using MassTransit;
-	using MassTransit.Services.Subscriptions.Messages;
-	using MassTransit.WindsorIntegration;
+    using System;
+    using System.IO;
+    using System.Threading;
+    using Castle.Core;
+    using Castle.Windsor;
+    using log4net.Config;
+    using MassTransit;
+    using MassTransit.Configuration;
+    using MassTransit.Services.Subscriptions.Configuration;
+    using MassTransit.Transports.Msmq;
+    using MassTransit.WindsorIntegration;
+    using Testers;
 
-	internal class Program
-	{
-		private static readonly DateTime _startedAt = DateTime.Now;
-		private static UnsubscribeAction _unsubscribeToken = () => false;
-		private static DateTime lastPrint = DateTime.Now;
+    internal class Program
+    {
+        private static readonly DateTime _startedAt = DateTime.Now;
+        private static DateTime lastPrint = DateTime.Now;
 
-		private static void Main()
-		{
-			XmlConfigurator.ConfigureAndWatch(new FileInfo("log4net.xml"));
+        private static void Main()
+        {
+            /////setup
+            XmlConfigurator.ConfigureAndWatch(new FileInfo("log4net.xml"));
 
-			WindsorContainer c = new DefaultMassTransitContainer("castle.xml");
-			c.AddComponentLifeStyle("counter", typeof (Counter), LifestyleType.Singleton);
-			c.AddComponentLifeStyle("rvaoeuaoe", typeof (CacheUpdateResponseHandler), LifestyleType.Transient);
+            WindsorContainer c = new DefaultMassTransitContainer();
+            IEndpointFactory ef = EndpointFactoryConfigurator.New(e => e.RegisterTransport<MsmqEndpoint>());
+            c.Kernel.AddComponentInstance("endpointFactory", typeof (IEndpointFactory), ef);
 
-			IServiceBus bus = c.Resolve<IServiceBus>();
-			bus.Subscribe<CacheUpdateResponseHandler>();
+            c.AddComponentLifeStyle("counter", typeof (Counter), LifestyleType.Singleton);
+            c.AddComponentLifeStyle("rvaoeuaoe", typeof (CacheUpdateResponseHandler), LifestyleType.Transient);
 
-			SimpleMessageHandler handler = new SimpleMessageHandler();
-
-
-			IEndpoint ep = c.Resolve<IEndpointFactory>().GetEndpoint(new Uri("msmq://localhost/mt_subscriptions"));
-			Counter counter = c.Resolve<Counter>();
-			Console.WriteLine("Please enter the number of hours you would like this test to run for?");
-			string input = Console.ReadLine();
-			double hours = double.Parse(input);
-			DateTime stopTime = DateTime.Now.AddHours(hours);
-
-			Console.WriteLine("Test Started");
-
-			Random rand = new Random();
-
-			while (DateTime.Now < stopTime)
-			{
-				ep.Send(new CacheUpdateRequest(new Uri("msmq://localhost/mt_client")));
-				counter.IncrementMessagesSent();
-
-				if (rand.Next(0, 10) == 0)
-				{
-					_unsubscribeToken();
-					_unsubscribeToken = bus.Subscribe(handler);
-					counter.Subscribed = true;
-				}
-				else if (rand.Next(0, 10) == 0)
-				{
-					_unsubscribeToken();
-					_unsubscribeToken = () => false;
-					counter.Subscribed = false;
-				}
-
-				if (rand.Next(0, 10) < 4)
-				{
-					bus.Publish(new SimpleMessage());
-					counter.IncrementPublishCount();
-				}
-
-				Thread.Sleep(rand.Next(1, 20));
-				PrintTime(bus, counter);
-			}
-
-			Console.WriteLine("Messages Sent: {0}", counter.MessagesSent);
-			Console.WriteLine("Messages Received: {0}", counter.MessagesReceived);
-			Console.WriteLine("Done");
-			Console.ReadLine();
-		}
-
-		private static void PrintTime(IServiceBus bus, Counter counter)
-		{
-			TimeSpan ts = DateTime.Now.Subtract(lastPrint);
-			if (ts.Minutes >= 1)
-			{
-				Console.WriteLine("Elapsed Time: {0} mins, So far I have - Sent: {1}, Received: {2}, Published: {3}, Received: {4}",
-				                  (int) ((DateTime.Now - _startedAt).TotalMinutes), counter.MessagesSent, counter.MessagesReceived, counter.PublishCount, SimpleMessageHandler.MessageCount);
-
-				lastPrint = DateTime.Now;
-			}
-		}
-	}
+            IServiceBus bus = ServiceBusConfigurator.New(b =>
+            {
+                b.ReceiveFrom("msmq://localhost/mt_client");
+                b.ConfigureService<SubscriptionClientConfigurator>(sc => sc.SetSubscriptionServiceEndpoint("msmq://localhost/mt_subscriptions"));
+            });
+            c.Kernel.AddComponentInstance("bus", typeof(IServiceBus), bus);
+            
+            bus.Subscribe<CacheUpdateResponseHandler>();
 
 
-	public class SimpleMessageHandler :
-		Consumes<SimpleMessage>.All
-	{
-		private static long _messageCount;
+            IEndpoint ep = c.Resolve<IEndpointFactory>().GetEndpoint(new Uri("msmq://localhost/mt_subscriptions"));
+            var subTester = new SubscriptionServiceTester(ep, bus, c.Resolve<Counter>());
+            ///////
 
-		public static long MessageCount
-		{
-			get { return _messageCount; }
-		}
 
-		public void Consume(SimpleMessage message)
-		{
-			Interlocked.Increment(ref _messageCount);
-		}
-	}
+            Console.WriteLine("Please enter the number of hours you would like this test to run for?");
+            Console.WriteLine("(use 0.1 for 6 minutes)");
+            Console.WriteLine("(use 0.016 for 1 minute)");
+            string input = Console.ReadLine();
+           double hours = double.Parse(input ?? "0");
+            DateTime stopTime = DateTime.Now.AddHours(hours);
 
-	[Serializable]
-	public class SimpleMessage
-	{
-		private readonly string _data = new string('*', 1024);
-	}
+
+            Console.WriteLine("Test Started");
+            var rand = new Random();
+            while (DateTime.Now < stopTime)
+            {
+                subTester.Test();
+
+                Thread.Sleep(rand.Next(1, 3)*10);
+                PrintTime(bus, c.Resolve<Counter>());
+            }
+
+            //print final stuff (probably do this by tester)
+            subTester.Results();
+            Console.WriteLine("Done (press any key to exit)");
+            Console.ReadKey(true);
+        }
+
+        private static void Initialize()
+        {
+        }
+
+        private static void PrintTime(IServiceBus bus, Counter counter)
+        {
+            TimeSpan ts = DateTime.Now.Subtract(lastPrint);
+            if (ts.Minutes >= 1)
+            {
+                Console.WriteLine("Elapsed Time: {0} mins, So far I have - Sent: {1}, Received: {2}, Published: {3}, Received: {4}",
+                                  (int) ((DateTime.Now - _startedAt).TotalMinutes), counter.MessagesSent, counter.MessagesReceived, counter.PublishCount, SimpleMessageHandler.MessageCount);
+
+                lastPrint = DateTime.Now;
+            }
+        }
+    }
+
+
+    public class SimpleMessageHandler :
+        Consumes<SimpleMessage>.All
+    {
+        private static long _messageCount;
+
+        public static long MessageCount
+        {
+            get { return _messageCount; }
+        }
+
+        #region All Members
+
+        public void Consume(SimpleMessage message)
+        {
+            Interlocked.Increment(ref _messageCount);
+        }
+
+        #endregion
+    }
+
+    [Serializable]
+    public class SimpleMessage
+    {
+        private readonly string _data = new string('*', 1024);
+    }
 }

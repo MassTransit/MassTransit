@@ -2,7 +2,7 @@
 <log4net>
 	<appender name="RollingFile"
 			  type="log4net.Appender.RollingFileAppender">
-		<file value="app_name.log" />
+		<file value="masstranist.timeout.log" />
 		<appendToFile value="true" />
 		<rollingStyle value="Date" />
 		<datePattern value="yyyyMMdd" />
@@ -39,20 +39,10 @@
 	<!-- Custom appender for MassTransit's Messages -->
 	<appender name="MT.Messages"
 			  type="log4net.Appender.FileAppender">
-		<file value="masstransit.messages.log" />
+		<file value="masstransit.timeout.messages.log" />
 		<appendToFile value="false" />
 		<layout type="log4net.Layout.PatternLayout">
 			<conversionPattern value="%-5p %d{hh:mm:ss} %message%newline" />
-		</layout>
-	</appender>
-
-	<!-- Custom appender for MassTransit's Messages -->
-	<appender name="NH.SQL"
-			  type="log4net.Appender.FileAppender">
-		<file value="nhibernate.sql.log" />
-		<appendToFile value="false" />
-		<layout type="log4net.Layout.PatternLayout">
-			<conversionPattern value="%d{hh:mm:ss} %message%newline" />
 		</layout>
 	</appender>
 
@@ -65,16 +55,6 @@
 	<!-- Seeing service messages would be good here -->
 	<logger name="MassTransit.Host">
 		<level value="INFO"/>
-	</logger>
-
-	<!-- Standard NHibernate Logging Settings -->
-	<logger name="NHibernate">
-		<level value="OFF" />
-	</logger>
-
-	<logger name="NHibernate.SQL">
-		<level value="OFF" />
-		<appender-ref ref="NH.SQL" />
 	</logger>
 
 	<!-- Standard MassTransit Logging Settings -->

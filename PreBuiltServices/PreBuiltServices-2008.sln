@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 10.00
 # Visual Studio 2008
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Mass Transit", "Mass Transit", "{12A2E13A-D405-49EC-89EB-15D089F2A824}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Services", "Services", "{82671CE1-CB09-4365-B1C6-896D8B665550}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "OpenAllNight", "OpenAllNight", "{82671CE1-CB09-4365-B1C6-896D8B665550}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SubscriptionServiceHost", "SubscriptionServiceHost\SubscriptionServiceHost.csproj", "{4669EFE9-2076-4635-A57B-BC2BE7C9CFDB}"
 EndProject
@@ -20,6 +20,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DeferredMessageServiceHost", "DeferredMessageServiceHost\DeferredMessageServiceHost.csproj", "{6F5367EE-52B6-4CC4-8F5E-11D17373CF94}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Infrastructure", "..\MassTransit.Infrastructure\MassTransit.Infrastructure.csproj", "{073A90FD-9A3E-4704-B3B5-6D8A9F4B442E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenAllNight", "..\Samples\OpenAllNight\OpenAllNight\OpenAllNight.csproj", "{EB825C40-FE8F-4F56-8397-A158F7482970}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -59,6 +61,10 @@ Global
 		{073A90FD-9A3E-4704-B3B5-6D8A9F4B442E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{073A90FD-9A3E-4704-B3B5-6D8A9F4B442E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{073A90FD-9A3E-4704-B3B5-6D8A9F4B442E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EB825C40-FE8F-4F56-8397-A158F7482970}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EB825C40-FE8F-4F56-8397-A158F7482970}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EB825C40-FE8F-4F56-8397-A158F7482970}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EB825C40-FE8F-4F56-8397-A158F7482970}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -68,5 +74,6 @@ Global
 		{6F90867C-E092-4EDC-B3DE-600D39DF0335} = {12A2E13A-D405-49EC-89EB-15D089F2A824}
 		{98D5A59C-96FA-4A1B-A653-EA5A35C45FC9} = {12A2E13A-D405-49EC-89EB-15D089F2A824}
 		{073A90FD-9A3E-4704-B3B5-6D8A9F4B442E} = {12A2E13A-D405-49EC-89EB-15D089F2A824}
+		{EB825C40-FE8F-4F56-8397-A158F7482970} = {82671CE1-CB09-4365-B1C6-896D8B665550}
 	EndGlobalSection
 EndGlobal
