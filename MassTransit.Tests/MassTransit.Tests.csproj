@@ -121,6 +121,8 @@
     <Compile Include="MessageGroup_Specs.cs" />
     <Compile Include="Messages\RequestMessage.cs" />
     <Compile Include="Messages\SerializationTestMessage.cs" />
+    <Compile Include="Serialization\MoreSerialization_Specs.cs" />
+    <Compile Include="Serialization\SerializationSpecificationBase.cs" />
     <Compile Include="Services\HealthMonitoring\HealthServiceTestFixture.cs" />
     <Compile Include="Services\HealthMonitoring\HealthService_Specs.cs" />
     <Compile Include="Services\LoadBalancer\LoadBalancer_Specs.cs" />

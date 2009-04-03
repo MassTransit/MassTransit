@@ -15,6 +15,7 @@ namespace MassTransit.Serialization
 	using System;
 	using System.Collections;
 	using System.Collections.Generic;
+	using System.Linq;
 	using System.Reflection;
 	using System.Runtime.Serialization;
 	using System.Xml;
@@ -58,6 +59,7 @@ namespace MassTransit.Serialization
 					{typeof (uint), x => XmlConvert.ToString((uint) x)},
 					{typeof (ulong), x => XmlConvert.ToString((ulong) x)},
 					{typeof (ushort), x => XmlConvert.ToString((ushort) x)},
+					{typeof(string),x => (string)x}
 				};
 		}
 
@@ -108,38 +110,46 @@ namespace MassTransit.Serialization
 			if (value == null)
 				return;
 
-			if (type.IsValueType || type == typeof (string))
+			Func<object, string> converter;
+			if(_stringConverters.TryGetValue(type, out converter))
 			{
-				writer.WriteElementString(name, FormatAsString(value));
+				writer.WriteElementString(name, converter(value));
 				return;
 			}
-
+			
 			if (typeof (IEnumerable).IsAssignableFrom(type))
 			{
-				writer.WriteStartElement(name);
-
-				Type baseType = typeof (object);
-				Type[] generics = type.GetGenericArguments();
-				if (generics != null && generics.Length > 0)
-					baseType = generics[0];
-
-				foreach (object obj in ((IEnumerable) value))
-					if (obj.GetType().IsSimpleType())
-						WriteEntry(obj.GetType().Name, obj.GetType(), obj, writer);
-					else
-					{
-						var elementWriter = GetSerializerForType(baseType);
-
-						elementWriter.WriteObject(writer, obj);
-					}
-
-				writer.WriteEndElement();
+				WriteEnumerableEntry(value, type, writer, name);
 				return;
 			}
 
 			var objectWriter = GetSerializerForType(value.GetType());
 
 			objectWriter.WriteObject(writer, string.Empty, name, value, x => { });
+		}
+
+		private void WriteEnumerableEntry(object value, Type type, XmlWriter writer, string name)
+		{
+			writer.WriteStartElement(name);
+
+			Type elementType = typeof(object);
+			Type[] genericArguments = type.GetDeclaredGenericArguments().ToArray();
+			if (genericArguments != null && genericArguments.Length > 0)
+				elementType = genericArguments[0];
+
+			writer.WriteAttributeString("xsi", "type", null, type.ToMessageName());
+
+			foreach (object obj in ((IEnumerable) value))
+				if (obj.GetType().IsSimpleType())
+					WriteEntry(obj.GetType().Name, obj.GetType(), obj, writer);
+				else
+				{
+					var elementWriter = GetSerializerForType(elementType);
+
+					elementWriter.WriteObject(writer, obj);
+				}
+
+			writer.WriteEndElement();
 		}
 
 		private string FormatAsString(object value)
@@ -226,29 +236,30 @@ namespace MassTransit.Serialization
 					return Enum.Parse(type, n.ChildNodes[0].InnerText);
 			}
 
-//			if (typeof(IEnumerable).IsAssignableFrom(type) && type != typeof(string))
-//			{
-//				bool isArray = type.IsArray;
-//
-//				Type typeToCreate = type;
-//				if (isArray)
-//					typeToCreate = typesToCreateForArrays[type];
-//
-//				IList list = Activator.CreateInstance(typeToCreate) as IList;
-//
-//				foreach (XmlNode xn in n.ChildNodes)
-//				{
-//					object m = ReadObject(xn, list);
-//
-//					if (list != null)
-//						list.Add(m);
-//				}
-//
+			if (typeof(IEnumerable).IsAssignableFrom(type) && type != typeof(string))
+			{
+				Type typeToCreate = type;
+
+				if (typeToCreate.GetGenericTypeDefinition() == typeof(IList<>))
+					typeToCreate = typeof (List<>).MakeGenericType(typeToCreate.GetGenericArguments());
+
+				IList list = Activator.CreateInstance(typeToCreate) as IList;
+
+				foreach (XmlNode xn in n.ChildNodes)
+				{
+					var elementSerializer = GetSerializerForNode(xn);
+
+					object m = elementSerializer.ReadObject(xn);
+
+					if (list != null)
+						list.Add(m);
+				}
+
 //				if (isArray)
 //					return typeToCreate.GetMethod("ToArray").Invoke(list, null);
-//
-//				return list;
-//			}
+
+				return list;
+			}
 
 			if (n.ChildNodes.Count == 0)
 				if (type == typeof(string))
@@ -256,21 +267,26 @@ namespace MassTransit.Serialization
 				else
 					return null;
 
-			XmlAttribute typeAttribute = n.Attributes["type", "http://www.w3.org/2001/XMLSchema-instance"];
-			if(typeAttribute != null)
-			{
-				var objectType = Type.GetType(typeAttribute.Value);
-				if(objectType == null)
-					throw new SerializationException("Unable to get type for " + typeAttribute.Value);
-
-				type = objectType;
-			}
-
-			var childSerializer = GetSerializerForType(type);
+			var childSerializer = GetSerializerForNode(n);
 
 			return childSerializer.ReadObject(n);
 		}
 
+
+		public static XmlObjectSerializer GetSerializerForNode(XmlNode node)
+		{
+			XmlAttribute typeAttribute = node.Attributes["type", "http://www.w3.org/2001/XMLSchema-instance"];
+			if (typeAttribute != null)
+			{
+				var objectType = Type.GetType(typeAttribute.Value);
+				if (objectType == null)
+					throw new SerializationException("Unable to get type for " + typeAttribute.Value);
+
+				return GetSerializerForType(objectType);
+			}
+
+			throw new SerializationException("Unable to get type for node: " + node.Name);
+		}
 
 		public static XmlObjectSerializer GetSerializerForType(Type type)
 		{
@@ -280,4 +296,28 @@ namespace MassTransit.Serialization
 			return new XmlObjectSerializer(type, properties, fields);
 		}
 	}
+
+	/// <summary>
+	/// Contains extension methods
+	/// </summary>
+	public static class ExtensionMethods
+	{
+		/// <summary>
+		/// Returns true if the type can be serialized as is.
+		/// </summary>
+		/// <param name="type"></param>
+		/// <returns></returns>
+		public static bool IsSimpleType(this Type type)
+		{
+			return (type.IsPrimitive ||
+					type == typeof(string) ||
+					type == typeof(decimal) ||
+					type == typeof(Guid) ||
+					type == typeof(DateTime) ||
+					type == typeof(DateTimeOffset) ||
+					type == typeof(TimeSpan) ||
+					type.IsEnum);
+		}
+	}
+
 }

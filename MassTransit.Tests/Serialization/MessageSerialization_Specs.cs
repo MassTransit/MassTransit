@@ -74,7 +74,7 @@ namespace MassTransit.Tests.Serialization
         {
             byte[] serializedMessageData;
 
-            var serializer = new CustomXmlMessageSerializer(new MessageMapper());
+            var serializer = new CustomXmlMessageSerializer();
 
 			OutboundMessage.Set(x =>
 				{

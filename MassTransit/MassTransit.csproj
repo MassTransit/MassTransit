@@ -165,7 +165,7 @@
     <Compile Include="Saga\Pipeline\SagaStateMachineSubsriber.cs" />
     <Compile Include="Saga\SagaStateMachine.cs" />
     <Compile Include="Serialization\MessageMapper.cs" />
-    <Compile Include="Serialization\NewXmlMessageSerializer.cs" />
+    <Compile Include="Serialization\CustomXmlMessageSerializer.cs" />
     <Compile Include="Serialization\TypeFieldInfo.cs" />
     <Compile Include="Serialization\TypePropertyInfo.cs" />
     <Compile Include="Serialization\XmlObjectSerializer.cs" />
