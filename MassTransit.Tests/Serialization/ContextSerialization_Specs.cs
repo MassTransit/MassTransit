@@ -14,7 +14,6 @@ namespace MassTransit.Tests.Serialization
 {
 	using Configuration;
 	using Magnum.DateTimeExtensions;
-	using MassTransit.Internal;
 	using MassTransit.Serialization;
 	using Messages;
 	using NUnit.Framework;
@@ -161,6 +160,12 @@ namespace MassTransit.Tests.Serialization
 	[TestFixture]
 	public class For_the_JSON_message_serializer :
 		When_sending_a_message_using_the_specified_serializer<JsonMessageSerializer>
+	{
+	}
+
+	[TestFixture]
+	public class For_the_custom_xml_message_serializer :
+		When_sending_a_message_using_the_specified_serializer<CustomXmlMessageSerializer>
 	{
 	}
 }

@@ -18,25 +18,31 @@ namespace MassTransit.Tests.Messages
 	public class SerializationTestMessage :
 		IEquatable<SerializationTestMessage>
 	{
-		public Guid Id { get; set; }
-		public string Name { get; set; }
-		public int Count { get; set; }
-		public long BigCount { get; set; }
-		public decimal Amount { get; set; }
-		public double Radians { get; set; }
-		public DateTime Created { get; set; }
+		public Guid GuidValue { get; set; }
+		public bool BoolValue { get; set; }
+		public byte ByteValue { get; set; }
+		public string StringValue { get; set; }
+		public int IntValue { get; set; }
+		public long LongValue { get; set; }
+		public decimal DecimalValue { get; set; }
+		public double DoubleValue { get; set; }
+		public DateTime DateTimeValue { get; set; }
+		public TimeSpan TimeSpanValue { get; set; }
 
 		public bool Equals(SerializationTestMessage obj)
 		{
 			if (ReferenceEquals(null, obj)) return false;
 			if (ReferenceEquals(this, obj)) return true;
-			return obj.Id.Equals(Id) &&
-			       Equals(obj.Name, Name) &&
-			       obj.Count == Count &&
-			       obj.BigCount == BigCount &&
-			       obj.Amount == Amount &&
-			       obj.Radians == Radians &&
-			       obj.Created.Equals(Created);
+			return obj.GuidValue.Equals(GuidValue) &&
+			       Equals(obj.StringValue, StringValue) &&
+			       obj.IntValue == IntValue &&
+			       obj.BoolValue == BoolValue &&
+			       obj.ByteValue == ByteValue &&
+			       obj.LongValue == LongValue &&
+			       obj.DecimalValue == DecimalValue &&
+			       obj.DoubleValue == DoubleValue &&
+				   obj.TimeSpanValue == TimeSpanValue &&
+			       obj.DateTimeValue.Equals(DateTimeValue);
 		}
 
 		public override bool Equals(object obj)
@@ -51,13 +57,16 @@ namespace MassTransit.Tests.Messages
 		{
 			unchecked
 			{
-				int result = Id.GetHashCode();
-				result = (result*397) ^ (Name != null ? Name.GetHashCode() : 0);
-				result = (result*397) ^ Count;
-				result = (result*397) ^ BigCount.GetHashCode();
-				result = (result*397) ^ Amount.GetHashCode();
-				result = (result*397) ^ Radians.GetHashCode();
-				result = (result*397) ^ Created.GetHashCode();
+				int result = GuidValue.GetHashCode();
+				result = (result*397) ^ (StringValue != null ? StringValue.GetHashCode() : 0);
+				result = (result*397) ^ IntValue;
+				result = (result*397) ^ LongValue.GetHashCode();
+				result = (result*397) ^ BoolValue.GetHashCode();
+				result = (result*397) ^ ByteValue.GetHashCode();
+				result = (result*397) ^ DecimalValue.GetHashCode();
+				result = (result*397) ^ DoubleValue.GetHashCode();
+				result = (result*397) ^ DateTimeValue.GetHashCode();
+				result = (result*397) ^ TimeSpanValue.GetHashCode();
 				return result;
 			}
 		}
