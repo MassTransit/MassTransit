@@ -8,6 +8,7 @@ namespace OpenAllNight
     using log4net.Config;
     using MassTransit;
     using MassTransit.Configuration;
+    using MassTransit.Services.HealthMonitoring.Configuration;
     using MassTransit.Services.Subscriptions.Configuration;
     using MassTransit.Transports.Msmq;
     using MassTransit.WindsorIntegration;
@@ -34,6 +35,7 @@ namespace OpenAllNight
             {
                 b.ReceiveFrom("msmq://localhost/mt_client");
                 b.ConfigureService<SubscriptionClientConfigurator>(sc => sc.SetSubscriptionServiceEndpoint("msmq://localhost/mt_subscriptions"));
+                b.ConfigureService<HealthClientConfigurator>(hc=>hc.SetHeartbeatInterval(10));
             });
             c.Kernel.AddComponentInstance("bus", typeof(IServiceBus), bus);
             
@@ -42,6 +44,8 @@ namespace OpenAllNight
 
             IEndpoint ep = c.Resolve<IEndpointFactory>().GetEndpoint(new Uri("msmq://localhost/mt_subscriptions"));
             var subTester = new SubscriptionServiceTester(ep, bus, c.Resolve<Counter>());
+            var healthTester = new HealthServiceTester(c.Resolve<Counter>(), bus);
+            bus.Subscribe(healthTester);
             ///////
 
 
@@ -58,8 +62,9 @@ namespace OpenAllNight
             while (DateTime.Now < stopTime)
             {
                 subTester.Test();
+                healthTester.Test();
 
-                Thread.Sleep(rand.Next(1, 3)*10);
+                Thread.Sleep(rand.Next(5, 10)*1000);
                 PrintTime(bus, c.Resolve<Counter>());
             }
 

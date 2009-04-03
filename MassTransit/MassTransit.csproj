@@ -169,6 +169,7 @@
     <Compile Include="Services\HealthMonitoring\Messages\EndpointTurningOff.cs" />
     <Compile Include="Services\HealthMonitoring\Messages\EndpointTurningOn.cs" />
     <Compile Include="Services\HealthMonitoring\Messages\HealthUpdate.cs" />
+    <Compile Include="Services\HealthMonitoring\Messages\HealthUpdateRequest.cs" />
     <Compile Include="Services\HealthMonitoring\Server\HealthSaga.cs" />
     <Compile Include="Services\HealthMonitoring\Messages\StatusChange.cs" />
     <Compile Include="Services\Subscriptions\Client\ClientSubscriptionInfoMapper.cs" />

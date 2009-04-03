@@ -21,6 +21,7 @@ namespace MassTransit.Services.HealthMonitoring
 
     public class HealthService :
         Consumes<StatusChange>.All,
+        Consumes<HealthUpdateRequest>.All,
 		IDisposable
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(HealthService));
@@ -64,12 +65,18 @@ namespace MassTransit.Services.HealthMonitoring
             UpdateSubscribers();
         }
 
+        public void Consume(HealthUpdateRequest message)
+        {
+            UpdateSubscribers();
+        }
+
         public void UpdateSubscribers()
         {
             var sagas = _healthSagas.ToList();
             var msg = new HealthUpdate();
 
             sagas.ForEach(x => msg.Information.Add(new HealthInformation(x.EndpointAddress, x.CurrentState.Name)));
+            _log.Debug("Publishing HealthUpdate");
 
             _bus.Publish(msg);
         }

@@ -13,6 +13,7 @@
 namespace MassTransit.Services.HealthMonitoring.Server
 {
 	using System;
+	using log4net;
 	using Magnum.DateTimeExtensions;
 	using Magnum.StateMachine;
 	using Messages;
@@ -24,6 +25,8 @@ namespace MassTransit.Services.HealthMonitoring.Server
 		SagaStateMachine<HealthSaga>,
 		ISaga
 	{
+	    private static readonly ILog _log = LogManager.GetLogger(typeof (HealthSaga));
+
 		static HealthSaga()
 		{
 			Define(() =>
@@ -32,6 +35,8 @@ namespace MassTransit.Services.HealthMonitoring.Server
 						When(EndpointDetected)
 							.Then((saga, message) =>
 								{
+                                    _log.DebugFormat("Endpoint '{0}' detected", message.EndpointAddress);
+
 									//store stuff
 									saga.EndpointAddress = message.EndpointAddress;
 									saga.TimeBetweenBeatsInSeconds = message.TimeBetweenBeatsInSeconds;

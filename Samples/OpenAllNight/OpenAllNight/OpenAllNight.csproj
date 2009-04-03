@@ -78,6 +78,7 @@
     <Compile Include="Counter.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Testers\HealthServiceTester.cs" />
     <Compile Include="Testers\MessageCounter.cs" />
     <Compile Include="Testers\SubscriptionServiceTester.cs" />
   </ItemGroup>
