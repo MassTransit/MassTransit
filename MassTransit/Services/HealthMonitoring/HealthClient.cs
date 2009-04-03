@@ -46,6 +46,11 @@ namespace MassTransit.Services.HealthMonitoring
             _systemId = CombGuid.Generate();
         }
 
+        public Guid SystemId
+        {
+            get { return _systemId; }
+        }
+
         public bool Enabled
         {
             get { return _timer.Enabled; }

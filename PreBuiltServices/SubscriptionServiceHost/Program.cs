@@ -17,6 +17,7 @@ namespace SubscriptionServiceHost
     using log4net.Config;
     using MassTransit;
     using MassTransit.Configuration;
+    using MassTransit.Services.HealthMonitoring.Configuration;
     using MassTransit.Services.Subscriptions.Server;
     using MassTransit.Transports.Msmq;
     using MassTransit.WindsorIntegration;
@@ -68,6 +69,7 @@ namespace SubscriptionServiceHost
                                     var bus = ServiceBusConfigurator.New(sbc =>
                                     {
                                         sbc.ReceiveFrom("msmq://localhost/mt_subscriptions");
+                                        sbc.ConfigureService<HealthClientConfigurator>(hc=>hc.SetHeartbeatInterval(10));
                                     });
                                     container.Kernel.AddComponentInstance<IServiceBus>(bus);
                                     return container.ObjectBuilder;
