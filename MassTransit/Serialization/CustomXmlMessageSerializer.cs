@@ -62,11 +62,11 @@ namespace MassTransit.Serialization
 
 		public object Deserialize(Stream stream)
 		{
-			using (StreamReader streamReader = new StreamReader(stream))
-			using (XmlReader xmlReader = XmlReader.Create(streamReader))
-			{
+//			using (StreamReader streamReader = new StreamReader(stream))
+//			using (XmlReader xmlReader = XmlReader.Create(streamReader))
+//			{
 				var doc = new XmlDocument();
-				doc.Load(xmlReader);
+				doc.Load(stream);
 
 				var documentElement = doc.DocumentElement;
 				if (documentElement == null)
@@ -86,7 +86,7 @@ namespace MassTransit.Serialization
 				}
 
 				return message;
-			}
+			//}
 		}
 
 		private object Process(XmlNode node, object parent)

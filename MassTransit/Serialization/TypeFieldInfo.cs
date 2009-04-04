@@ -17,11 +17,12 @@ namespace MassTransit.Serialization
 	using System.Collections.Generic;
 	using System.Reflection;
 
-	public class TypeFieldInfo : IEnumerable<FieldInfo>
+	public class TypeFieldInfo : 
+		IEnumerable<FieldInfo>
 	{
 		private const BindingFlags _bindingFlags = BindingFlags.FlattenHierarchy | BindingFlags.Instance | BindingFlags.Public;
 
-		private List<FieldInfo> _fields;
+		private readonly List<FieldInfo> _fields;
 
 		public TypeFieldInfo(Type type)
 		{
