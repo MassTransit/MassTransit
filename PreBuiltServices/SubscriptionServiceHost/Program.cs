@@ -69,7 +69,8 @@ namespace SubscriptionServiceHost
                                     var bus = ServiceBusConfigurator.New(sbc =>
                                     {
                                         sbc.ReceiveFrom("msmq://localhost/mt_subscriptions");
-                                        sbc.ConfigureService<HealthClientConfigurator>(hc=>hc.SetHeartbeatInterval(10));
+                                        //no subscription client
+                                        //sbc.ConfigureService<HealthClientConfigurator>(hc=>hc.SetHeartbeatInterval(10));
                                     });
                                     container.Kernel.AddComponentInstance<IServiceBus>(bus);
                                     return container.ObjectBuilder;
