@@ -16,40 +16,52 @@ namespace MassTransit.Serialization
 	using System.Collections;
 	using System.Collections.Generic;
 	using System.Reflection;
+	using Magnum.Reflection;
 
-	public class TypePropertyInfo : IEnumerable<PropertyInfo>
+	public class TypePropertyInfo :
+		IEnumerable<FastProperty>
 	{
 		private const BindingFlags _bindingFlags = BindingFlags.Public | BindingFlags.Instance;
 
-		private readonly List<PropertyInfo> _properties;
+		private readonly Dictionary<string, FastProperty> _properties;
 
 		public TypePropertyInfo(Type type)
 		{
-			_properties = new List<PropertyInfo>(GetAllPropertiesForType(type));
+			_properties = new Dictionary<string, FastProperty>();
+			foreach (FastProperty property in GetAllPropertiesForType(type))
+			{
+				_properties.Add(property.Property.Name, property);
+			}
 		}
 
-		private static IEnumerable<PropertyInfo> GetAllPropertiesForType(Type type)
+		public FastProperty Get(string name)
+		{
+			FastProperty result;
+			return _properties.TryGetValue(name, out result) ? result : null;
+		}
+
+		private static IEnumerable<FastProperty> GetAllPropertiesForType(Type type)
 		{
 			foreach (PropertyInfo propertyInfo in type.GetProperties(_bindingFlags))
 			{
-				yield return propertyInfo;
+				yield return new FastProperty(propertyInfo);
 			}
 
 			if (type.IsInterface)
 			{
 				foreach (Type interfaceType in type.GetInterfaces())
 				{
-					foreach (PropertyInfo propertyInfo in GetAllPropertiesForType(interfaceType))
+					foreach (FastProperty fastProperty in GetAllPropertiesForType(interfaceType))
 					{
-						yield return propertyInfo;
+						yield return fastProperty;
 					}
 				}
 			}
 		}
 
-		public IEnumerator<PropertyInfo> GetEnumerator()
+		public IEnumerator<FastProperty> GetEnumerator()
 		{
-			return _properties.GetEnumerator();
+			return _properties.Values.GetEnumerator();
 		}
 
 		IEnumerator IEnumerable.GetEnumerator()
