@@ -2,7 +2,7 @@
 <log4net>
 	<appender name="RollingFile"
 			  type="log4net.Appender.RollingFileAppender">
-		<file value="masstranist.health.log" />
+		<file value="masstransit.health.log" />
 		<appendToFile value="true" />
 		<rollingStyle value="Date" />
 		<datePattern value="yyyyMMdd" />
@@ -54,15 +54,14 @@
 
 	<!-- Standard MassTransit Logging Settings -->
 	<logger name="MassTransit">
-		<level value="OFF" />
+		<level value="DEBUG" />
+    <appender-ref ref="RollingFile" />
 	</logger>
 
   <logger name="MassTransit.Services.HealthMonitoring">
-    <level value="DEBUG" />
   </logger>
 
 	<logger name="MassTransit.Messages">
-		<level value="OFF" />
 		<appender-ref ref="MT.Messages" />
 	</logger>
 </log4net>

@@ -52,7 +52,8 @@ namespace MassTransit.Saga.Pipeline
 				}
 				catch (SagaException sax)
 				{
-					_log.Error(sax);
+				    string msg = string.Format("Message Type: {0} - From {1}", message.GetType().FullName, CurrentMessage.Headers.SourceAddress);
+					_log.Error(msg, sax);
 				}
 
 				if (!found)

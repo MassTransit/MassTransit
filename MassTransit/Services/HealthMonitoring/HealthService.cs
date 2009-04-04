@@ -13,10 +13,12 @@
 namespace MassTransit.Services.HealthMonitoring
 {
 	using System;
+	using System.Diagnostics;
 	using System.Linq;
     using log4net;
     using Messages;
-    using Saga;
+	using Pipeline.Inspectors;
+	using Saga;
     using Server;
 
     public class HealthService :
@@ -42,6 +44,9 @@ namespace MassTransit.Services.HealthMonitoring
             _unsubscribeToken += _bus.Subscribe(this);
 
         	_unsubscribeToken += _bus.Subscribe<HealthSaga>();
+
+    	    Trace.Listeners.Add(new ConsoleTraceListener());
+            PipelineViewer.Trace(_bus.InboundPipeline);
 
             _log.Info("Health Service Started");
         }

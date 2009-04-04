@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace HealthServiceHost
 {
+    using System.Configuration;
     using System.IO;
     using log4net;
     using log4net.Config;
@@ -55,8 +56,8 @@ namespace HealthServiceHost
                         container.AddComponent<HealthService>();
                         IServiceBus bus = ServiceBusConfigurator.New(a =>
                         {
-                            a.ReceiveFrom("msmq://localhost/mt_health");
-                            a.ConfigureService<SubscriptionClientConfigurator>(sc => sc.SetSubscriptionServiceEndpoint("msmq://localhost/mt_subscriptions"));
+                            a.ReceiveFrom(ConfigurationManager.AppSettings["receiveFrom"]);
+                            a.ConfigureService<SubscriptionClientConfigurator>(sc => sc.SetSubscriptionServiceEndpoint(ConfigurationManager.AppSettings["subscriptionServiceEndpoint"]));
                         });
                         container.Kernel.AddComponentInstance<IServiceBus>(bus);
                         //TODO: Put database persitance here too
