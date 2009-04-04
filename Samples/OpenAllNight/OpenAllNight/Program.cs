@@ -27,7 +27,7 @@ namespace OpenAllNight
             WindsorContainer c = new DefaultMassTransitContainer();
             IEndpointFactory ef = EndpointFactoryConfigurator.New(e => e.RegisterTransport<MsmqEndpoint>());
             c.Kernel.AddComponentInstance("endpointFactory", typeof (IEndpointFactory), ef);
-
+            c.AddComponent<SimpleMessageHandler>();
             c.AddComponentLifeStyle("counter", typeof (Counter), LifestyleType.Singleton);
             c.AddComponentLifeStyle("rvaoeuaoe", typeof (CacheUpdateResponseHandler), LifestyleType.Transient);
 
@@ -40,11 +40,12 @@ namespace OpenAllNight
             c.Kernel.AddComponentInstance("bus", typeof(IServiceBus), bus);
             
             bus.Subscribe<CacheUpdateResponseHandler>();
-
+            bus.Subscribe<SimpleMessageHandler>();
 
             IEndpoint ep = c.Resolve<IEndpointFactory>().GetEndpoint(new Uri("msmq://localhost/mt_subscriptions"));
             var subTester = new SubscriptionServiceTester(ep, bus, c.Resolve<Counter>());
             var healthTester = new HealthServiceTester(c.Resolve<Counter>(), bus);
+            var timeoutTester = new TimeoutTester(bus);
             bus.Subscribe(healthTester);
             ///////
 
@@ -63,6 +64,7 @@ namespace OpenAllNight
             {
                 subTester.Test();
                 healthTester.Test();
+                timeoutTester.Test();
 
                 Thread.Sleep(rand.Next(5, 10)*1000);
                 PrintTime(bus, c.Resolve<Counter>());

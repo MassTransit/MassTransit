@@ -7,7 +7,7 @@
   </appender>
   <appender name="mt"
       type="log4net.Appender.RollingFileAppender">
-    <file value="mt.log" />
+    <file value="openallnight.log" />
     <appendToFile value="true" />
     <rollingStyle value="Date" />
     <datePattern value="yyyyMMdd" />
