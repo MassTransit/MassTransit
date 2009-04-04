@@ -25,14 +25,14 @@ namespace MassTransit.Serialization
 
 	public class XmlObjectSerializer
 	{
+		private static readonly Dictionary<Type, Func<XmlReader, object>> _readerConverters;
+		private static readonly Dictionary<Type, Func<object, string>> _stringConverters;
+
 		[ThreadStatic]
 		private static Dictionary<Type, TypeFieldInfo> _fieldsForType;
 
 		[ThreadStatic]
 		private static Dictionary<Type, TypePropertyInfo> _propertiesForType;
-
-		[ThreadStatic]
-		private static Dictionary<Type, Func<object, string>> _stringConverters;
 
 		private readonly TypeFieldInfo _fields;
 		private readonly TypePropertyInfo _properties;
@@ -40,9 +40,6 @@ namespace MassTransit.Serialization
 
 		static XmlObjectSerializer()
 		{
-			_fieldsForType = new Dictionary<Type, TypeFieldInfo>();
-			_propertiesForType = new Dictionary<Type, TypePropertyInfo>();
-
 			_stringConverters = new Dictionary<Type, Func<object, string>>
 				{
 					{typeof (bool), x => XmlConvert.ToString((bool) x)},
@@ -64,6 +61,28 @@ namespace MassTransit.Serialization
 					{typeof (ushort), x => XmlConvert.ToString((ushort) x)},
 					{typeof (string), x => (string) x}
 				};
+
+			_readerConverters = new Dictionary<Type, Func<XmlReader, object>>
+				{
+					{typeof (bool), x => x.ReadElementContentAsBoolean()},
+					{typeof (byte), x => XmlConvert.ToByte(x.ReadElementContentAsString())},
+					{typeof (char), x => XmlConvert.ToChar(x.ReadElementContentAsString())},
+					{typeof (DateTime), x => x.ReadElementContentAsDateTime()},
+					{typeof (DateTimeOffset), x => XmlConvert.ToDateTimeOffset(x.ReadElementContentAsString())},
+					{typeof (decimal), x => x.ReadElementContentAsDecimal()},
+					{typeof (double), x => x.ReadElementContentAsDouble()},
+					{typeof (float), x => x.ReadElementContentAsFloat()},
+					{typeof (Guid), x => XmlConvert.ToGuid(x.ReadElementContentAsString())},
+					{typeof (int), x => x.ReadElementContentAsInt()},
+					{typeof (long), x => x.ReadElementContentAsLong()},
+					{typeof (sbyte), x => XmlConvert.ToSByte(x.ReadElementContentAsString())},
+					{typeof (short), x => XmlConvert.ToInt16(x.ReadElementContentAsString())},
+					{typeof (TimeSpan), x => XmlConvert.ToTimeSpan(x.ReadElementContentAsString())},
+					{typeof (uint), x => XmlConvert.ToUInt32(x.ReadElementContentAsString())},
+					{typeof (ulong), x => XmlConvert.ToUInt64(x.ReadElementContentAsString())},
+					{typeof (ushort), x => XmlConvert.ToUInt16(x.ReadElementContentAsString())},
+					{typeof (string), x => x.ReadElementContentAsString()}
+				};
 		}
 
 		private XmlObjectSerializer(Type type, TypePropertyInfo properties, TypeFieldInfo fields)
@@ -71,6 +90,28 @@ namespace MassTransit.Serialization
 			_type = type;
 			_properties = properties;
 			_fields = fields;
+		}
+
+		private static Dictionary<Type, TypeFieldInfo> FieldsForType
+		{
+			get
+			{
+				if (_fieldsForType == null)
+					_fieldsForType = new Dictionary<Type, TypeFieldInfo>();
+
+				return _fieldsForType;
+			}
+		}
+
+		private static Dictionary<Type, TypePropertyInfo> PropertiesForType
+		{
+			get
+			{
+				if (_propertiesForType == null)
+					_propertiesForType = new Dictionary<Type, TypePropertyInfo>();
+
+				return _propertiesForType;
+			}
 		}
 
 		public void WriteObject(XmlWriter writer, object value)
@@ -96,35 +137,50 @@ namespace MassTransit.Serialization
 			writer.WriteEndElement();
 		}
 
-		public object ReadObject(XmlNode node)
+		public object ReadObject(XmlReader reader)
 		{
-			if (_type.IsSimpleType())
-				return GetPropertyValue(_type, node, null);
+			Func<XmlReader, object> converter;
+			if (_readerConverters.TryGetValue(_type, out converter))
+			{
+				return converter(reader);
+			}
 
 			object result = ClassFactory.New(_type);
 
-			foreach (XmlNode n in node.ChildNodes)
+			while (reader.NodeType != XmlNodeType.EndElement)
 			{
-				FastProperty prop = _properties.Get(n.Name);
-				if (prop != null)
+				if (reader.NodeType == XmlNodeType.Element)
 				{
-					object val = GetPropertyValue(prop.Property.PropertyType, n, result);
-					if (val != null)
-						prop.Set(result, val);
+					FastProperty prop = _properties.Get(reader.Name);
+					if (prop != null)
+					{
+						object val = GetPropertyValue(prop.Property.PropertyType, reader, result);
+						if (val != null)
+							prop.Set(result, val);
 
-					continue;
+						continue;
+					}
+
+					FieldInfo field = GetField(reader.Name);
+					if (field != null)
+					{
+						object val = GetPropertyValue(field.FieldType, reader, result);
+						if (val != null)
+							field.SetValue(result, val);
+
+						continue;
+					}
+				}
+				else
+				{
+					throw new SerializationException("Unknown node type: " + reader.NodeType + " Name: " + reader.Name + " on type " + _type.FullName + " value " + reader.Value);
 				}
 
-				FieldInfo field = GetField(n.Name);
-				if (field != null)
-				{
-					object val = GetPropertyValue(field.FieldType, n, result);
-					if (val != null)
-						field.SetValue(result, val);
-
-					continue;
-				}
+				reader.Read();
 			}
+
+			// exit out of the EndElement
+			reader.Read();
 
 			return result;
 		}
@@ -199,87 +255,112 @@ namespace MassTransit.Serialization
 			return null;
 		}
 
-
-		public static XmlObjectSerializer GetSerializerForNode(XmlNode node)
+		private static Type GetObjectType(XmlReader reader)
 		{
-			XmlAttribute typeAttribute = node.Attributes["type", "http://www.w3.org/2001/XMLSchema-instance"];
-			if (typeAttribute != null)
+			Type objectType = null;
+			if (reader.HasAttributes &&
+				reader.MoveToAttribute("type", "http://www.w3.org/2001/XMLSchema-instance"))
 			{
-				var objectType = Type.GetType(typeAttribute.Value);
-				if (objectType == null)
-					throw new SerializationException("Unable to get type for " + typeAttribute.Value);
+				string typeName = reader.ReadContentAsString();
 
-				return GetSerializerForType(objectType);
+				objectType = Type.GetType(typeName);
 			}
 
-			throw new SerializationException("Unable to get type for node: " + node.Name);
+			reader.MoveToContent();
+			return objectType;
+		}
+
+
+		public static XmlObjectSerializer GetSerializerFor(XmlReader reader)
+		{
+			if (!reader.HasAttributes ||
+			    !reader.MoveToAttribute("type", "http://www.w3.org/2001/XMLSchema-instance"))
+				throw new SerializationException("Unable to deserialize message body, no type information found");
+
+			string typeName = reader.ReadContentAsString();
+
+			var objectType = Type.GetType(typeName);
+			if (objectType == null)
+				throw new SerializationException("Unable to get type for " + typeName);
+
+			reader.MoveToContent();
+
+			return GetSerializerForType(objectType);
 		}
 
 		public static XmlObjectSerializer GetSerializerForType(Type type)
 		{
-			var properties = _propertiesForType.Retrieve(type, () => new TypePropertyInfo(type));
-			var fields = _fieldsForType.Retrieve(type, () => new TypeFieldInfo(type));
+			var properties = PropertiesForType.Retrieve(type, () => new TypePropertyInfo(type));
+			var fields = FieldsForType.Retrieve(type, () => new TypeFieldInfo(type));
 
 			return new XmlObjectSerializer(type, properties, fields);
 		}
 
-		private static object GetPropertyValue(Type type, XmlNode n, object parent)
+		private static object GetPropertyValue(Type type, XmlReader reader, object parent)
 		{
-			if (n.ChildNodes.Count == 1 && n.ChildNodes[0] is XmlText)
+			Func<XmlReader, object> converter;
+			if (_readerConverters.TryGetValue(type, out converter))
 			{
-				if (type == typeof (string))
-					return n.ChildNodes[0].InnerText;
-
-				if (type.IsPrimitive || type == typeof (decimal))
-					return Convert.ChangeType(n.ChildNodes[0].InnerText, type);
-
-				if (type == typeof (Guid))
-					return new Guid(n.ChildNodes[0].InnerText);
-
-				if (type == typeof (DateTime))
-					return XmlConvert.ToDateTime(n.ChildNodes[0].InnerText, XmlDateTimeSerializationMode.Utc);
-
-				if (type == typeof (TimeSpan))
-					return XmlConvert.ToTimeSpan(n.ChildNodes[0].InnerText);
-
-				if (type.IsEnum)
-					return Enum.Parse(type, n.ChildNodes[0].InnerText);
+				return converter(reader);
 			}
+
+			if (type.IsEnum)
+				return Enum.Parse(type, reader.ReadElementContentAsString());
 
 			if (typeof (IEnumerable).IsAssignableFrom(type) && type != typeof (string))
 			{
+				XmlObjectSerializer elementSerializer = null;
+
 				Type typeToCreate = type;
-
-				if (typeToCreate.GetGenericTypeDefinition() == typeof (IList<>))
-					typeToCreate = typeof (List<>).MakeGenericType(typeToCreate.GetGenericArguments());
-
-				IList list = Activator.CreateInstance(typeToCreate) as IList;
-
-				foreach (XmlNode xn in n.ChildNodes)
+				if (type.IsArray)
 				{
-					var elementSerializer = GetSerializerForNode(xn);
+					typeToCreate = typeof(List<>).MakeGenericType(type.GetElementType());
+					elementSerializer = GetSerializerForType(type.GetElementType());
+				}
+				else if (typeToCreate.IsGenericType)
+				{
+					if (typeToCreate.GetGenericTypeDefinition() == typeof(IList<>))
+					{
+						Type[] arguments = typeToCreate.GetGenericArguments();
 
-					object m = elementSerializer.ReadObject(xn);
+						typeToCreate = typeof (List<>).MakeGenericType(arguments);
+						elementSerializer = GetSerializerForType(arguments[0]);
+					}
+				}
 
-					if (list != null)
+				IList list = ClassFactory.New(typeToCreate) as IList;
+				if (list == null)
+					throw new SerializationException("Unable to create list " + typeToCreate.FullName);
+
+				reader.Read();
+
+				while (reader.NodeType != XmlNodeType.EndElement)
+				{
+					object m = null;
+
+					Type elementType = GetObjectType(reader);
+					if(elementType != null)
+					{
+						m = GetSerializerForType(elementType).ReadObject(reader);
+					}
+					else if (elementSerializer != null)
+					{
+						m = elementSerializer.ReadObject(reader);
+					}
+
+					if (m != null)
 						list.Add(m);
 				}
 
-//				if (isArray)
-//					return typeToCreate.GetMethod("ToArray").Invoke(list, null);
+				if (type.IsArray)
+					return typeToCreate.GetMethod("ToArray").Invoke(list, null);
 
 				return list;
 			}
 
-			if (n.ChildNodes.Count == 0)
-				if (type == typeof (string))
-					return string.Empty;
-				else
-					return null;
+			var childSerializer = GetSerializerFor(reader);
 
-			var childSerializer = GetSerializerForNode(n);
-
-			return childSerializer.ReadObject(n);
+			return childSerializer.ReadObject(reader);
 		}
 	}
 

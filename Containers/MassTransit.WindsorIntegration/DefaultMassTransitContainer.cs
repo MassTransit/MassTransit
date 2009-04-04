@@ -112,6 +112,9 @@ namespace MassTransit.WindsorIntegration
 					.LifeStyle.Singleton,
 				Component.For<XmlMessageSerializer>()
 					.ImplementedBy<XmlMessageSerializer>()
+					.LifeStyle.Singleton,
+				Component.For<CustomXmlMessageSerializer>()
+					.ImplementedBy<CustomXmlMessageSerializer>()
 					.LifeStyle.Singleton
 				);
 
