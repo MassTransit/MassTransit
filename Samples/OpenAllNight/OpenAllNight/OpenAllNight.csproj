@@ -81,6 +81,7 @@
     <Compile Include="Testers\HealthServiceTester.cs" />
     <Compile Include="Testers\MessageCounter.cs" />
     <Compile Include="Testers\SubscriptionServiceTester.cs" />
+    <Compile Include="Testers\TimeoutTester.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\MassTransit\MassTransit.csproj">
