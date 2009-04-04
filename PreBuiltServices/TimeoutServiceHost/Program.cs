@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace TimeoutServiceHost
 {
+    using System.Configuration;
     using System.IO;
     using log4net;
     using log4net.Config;
@@ -58,8 +59,8 @@ namespace TimeoutServiceHost
                         container.AddComponent<TimeoutService>();
                         IServiceBus bus = ServiceBusConfigurator.New(sbc =>
                         {
-                            sbc.ReceiveFrom("msmq://localhost/mt_timeout");
-                            sbc.ConfigureService<SubscriptionClientConfigurator>(cc => cc.SetSubscriptionServiceEndpoint("msmq://localhost/mt_subscriptions"));
+                            sbc.ReceiveFrom(ConfigurationManager.AppSettings["receiveFrom"]);
+                            sbc.ConfigureService<SubscriptionClientConfigurator>(sc => sc.SetSubscriptionServiceEndpoint(ConfigurationManager.AppSettings["subscriptionServiceEndpoint"]));
                             sbc.ConfigureService<HealthClientConfigurator>(hc => hc.SetHeartbeatInterval(10));
                         });
                         container.Kernel.AddComponentInstance<IServiceBus>(bus);
