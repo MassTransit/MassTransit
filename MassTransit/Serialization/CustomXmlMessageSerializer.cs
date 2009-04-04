@@ -12,10 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Serialization
 {
-	using System;
-	using System.Collections;
 	using System.IO;
-	using System.Reflection;
 	using System.Runtime.Serialization;
 	using System.Text;
 	using System.Xml;
@@ -62,17 +59,20 @@ namespace MassTransit.Serialization
 
 		public object Deserialize(Stream stream)
 		{
-//			using (StreamReader streamReader = new StreamReader(stream))
-//			using (XmlReader xmlReader = XmlReader.Create(streamReader))
-//			{
-				var doc = new XmlDocument();
-				doc.Load(stream);
+			var settings = new XmlReaderSettings { IgnoreWhitespace = true};
+			using (StreamReader streamReader = new StreamReader(stream))
+			using (XmlReader reader = XmlReader.Create(streamReader, settings))
+			{
+				while (reader.Read() && reader.NodeType != XmlNodeType.Element)
+				{
+				}
 
-				var documentElement = doc.DocumentElement;
-				if (documentElement == null)
-					throw new InvalidOperationException("Unable to parse to XML document element");
+				if (reader.EOF)
+					throw new SerializationException("No document element found");
 
-				object message = Process(documentElement, null);
+				object message = XmlObjectSerializer.GetSerializerFor(reader)
+					.ReadObject(reader);
+
 				if (message == null)
 					throw new SerializationException("Could not deserialize message.");
 
@@ -86,44 +86,7 @@ namespace MassTransit.Serialization
 				}
 
 				return message;
-			//}
-		}
-
-		private object Process(XmlNode node, object parent)
-		{
-			XmlAttribute typeAttribute = node.Attributes["type", "http://www.w3.org/2001/XMLSchema-instance"];
-			if (typeAttribute == null)
-				throw new SerializationException("Unable to deserialize message body, no type information found");
-
-			string typeName = typeAttribute.Value;
-			string name = node.Name;
-
-			if (parent != null)
-			{
-				if (parent is IEnumerable)
-				{
-					if (parent.GetType().IsArray)
-						return XmlObjectSerializer.GetSerializerForType(parent.GetType().GetElementType()).ReadObject(node);
-
-					var args = parent.GetType().GetGenericArguments();
-					if (args.Length == 1)
-						return XmlObjectSerializer.GetSerializerForType(args[0]).ReadObject(node);
-				}
-
-				PropertyInfo prop = parent.GetType().GetProperty(name);
-				if (prop != null)
-					return XmlObjectSerializer.GetSerializerForType(prop.PropertyType).ReadObject(node);
 			}
-
-			Type t = Type.GetType(typeName);
-			if (t == null)
-			{
-				_log.Debug("Could not load " + typeName);
-
-				throw new TypeLoadException("Could not handle type '" + typeName + "'.");
-			}
-
-			return XmlObjectSerializer.GetSerializerForType(t).ReadObject(node);
 		}
 	}
 }

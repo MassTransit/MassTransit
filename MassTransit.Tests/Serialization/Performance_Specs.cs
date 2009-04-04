@@ -3,6 +3,7 @@ namespace MassTransit.Tests.Serialization
 	using System;
 	using System.Diagnostics;
 	using System.IO;
+	using Magnum;
 	using Magnum.DateTimeExtensions;
 	using MassTransit.Serialization;
 	using Messages;
@@ -27,6 +28,11 @@ namespace MassTransit.Tests.Serialization
 				StringValue = "Chris's Sample Code",
 				DoubleValue = 1823.172,
 			};
+
+//			var message = new PingMessage
+//				{
+//					CorrelationId = CombGuid.Generate()
+//				};
 
 			var serializer = new CustomXmlMessageSerializer();
 

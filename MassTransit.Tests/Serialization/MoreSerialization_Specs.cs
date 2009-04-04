@@ -60,6 +60,47 @@ namespace MassTransit.Tests.Serialization
 			}
 		}
 
+		public class PrimitiveArrayClass
+		{
+			public int[] Values { get; set; }
+
+			public bool Equals(PrimitiveArrayClass other)
+			{
+				if (ReferenceEquals(null, other)) return false;
+				if (ReferenceEquals(this, other)) return true;
+
+				if (ReferenceEquals(other.Values, Values)) return true;
+				if (other.Values == null && Values != null) return false;
+				if (other.Values != null && Values == null) return false;
+
+				if (other.Values != null && Values != null)
+				{
+					if (other.Values.Length != Values.Length) return false;
+
+					for (int i = 0; i < Values.Length; i++)
+					{
+						if (!Equals(other.Values[i], Values[i]))
+							return false;
+					}
+				}
+
+				return true;
+			}
+
+			public override bool Equals(object obj)
+			{
+				if (ReferenceEquals(null, obj)) return false;
+				if (ReferenceEquals(this, obj)) return true;
+				if (obj.GetType() != typeof (PrimitiveArrayClass)) return false;
+				return Equals((PrimitiveArrayClass) obj);
+			}
+
+			public override int GetHashCode()
+			{
+				return (Values != null ? Values.GetHashCode() : 0);
+			}
+		}
+
 		public class OuterClass
 		{
 			public InnerClass Inner { get; set; }
@@ -130,6 +171,20 @@ namespace MassTransit.Tests.Serialization
 
 			TestSerialization(message);
 		}
+
+
+		[Test]
+		public void A_primitive_array_of_objects_should_be_properly_serialized()
+		{
+			PrimitiveArrayClass message = new PrimitiveArrayClass
+				{
+					Values = new[] {1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
+
+				};
+
+			TestSerialization(message);
+		}
+
 
 		[Test]
 		public void A_nested_object_should_be_properly_serialized()
