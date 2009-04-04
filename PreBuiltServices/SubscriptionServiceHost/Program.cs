@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace SubscriptionServiceHost
 {
+    using System.Configuration;
     using System.IO;
     using log4net;
     using log4net.Config;
@@ -68,7 +69,7 @@ namespace SubscriptionServiceHost
 
                                     var bus = ServiceBusConfigurator.New(sbc =>
                                     {
-                                        sbc.ReceiveFrom("msmq://localhost/mt_subscriptions");
+                                        sbc.ReceiveFrom(ConfigurationManager.AppSettings["receiveFrom"]);
                                         //no subscription client
                                         //sbc.ConfigureService<HealthClientConfigurator>(hc=>hc.SetHeartbeatInterval(10));
                                     });

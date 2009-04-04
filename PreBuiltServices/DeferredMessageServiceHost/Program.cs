@@ -12,7 +12,8 @@
 // specific language governing permissions and limitations under the License.
 namespace DeferredMessageServiceHost
 {
-	using System.IO;
+    using System.Configuration;
+    using System.IO;
 	using log4net;
 	using log4net.Config;
 	using MassTransit;
@@ -65,8 +66,8 @@ namespace DeferredMessageServiceHost
 
                                     var bus = ServiceBusConfigurator.New(sbc =>
                                     {
-                                        sbc.ReceiveFrom("msmq://localhost/mt_deferral");
-                                        sbc.ConfigureService<SubscriptionClientConfigurator>(scc => scc.SetSubscriptionServiceEndpoint("msmq://localhost/mt_subscriptions"));
+                                        sbc.ReceiveFrom(ConfigurationManager.AppSettings["receiveFrom"]);
+                                        sbc.ConfigureService<SubscriptionClientConfigurator>(sc => sc.SetSubscriptionServiceEndpoint(ConfigurationManager.AppSettings["subscriptionServiceEndpoint"]));
                                         sbc.ConfigureService<HealthClientConfigurator>(hc => hc.SetHeartbeatInterval(10));
                                     });
 
