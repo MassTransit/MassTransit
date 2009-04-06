@@ -20,6 +20,7 @@ namespace MassTransit.Serialization
 	using System.Runtime.Serialization;
 	using System.Xml;
 	using Magnum.CollectionExtensions;
+	using Magnum.InterfaceExtensions;
 	using Magnum.ObjectExtensions;
 	using Magnum.Reflection;
 
@@ -37,6 +38,7 @@ namespace MassTransit.Serialization
 		private readonly TypeFieldInfo _fields;
 		private readonly TypePropertyInfo _properties;
 		private readonly Type _type;
+		private static Dictionary<Type, Func<XmlReader, object>> _attributeConverters;
 
 		static XmlObjectSerializer()
 		{
@@ -82,6 +84,28 @@ namespace MassTransit.Serialization
 					{typeof (ulong), x => XmlConvert.ToUInt64(x.ReadElementContentAsString())},
 					{typeof (ushort), x => XmlConvert.ToUInt16(x.ReadElementContentAsString())},
 					{typeof (string), x => x.ReadElementContentAsString()}
+				};			
+			
+			_attributeConverters = new Dictionary<Type, Func<XmlReader, object>>
+				{
+					{typeof (bool), x => x.ReadContentAsBoolean()},
+					{typeof (byte), x => XmlConvert.ToByte(x.ReadContentAsString())},
+					{typeof (char), x => XmlConvert.ToChar(x.ReadContentAsString())},
+					{typeof (DateTime), x => x.ReadContentAsDateTime()},
+					{typeof (DateTimeOffset), x => XmlConvert.ToDateTimeOffset(x.ReadContentAsString())},
+					{typeof (decimal), x => x.ReadContentAsDecimal()},
+					{typeof (double), x => x.ReadContentAsDouble()},
+					{typeof (float), x => x.ReadContentAsFloat()},
+					{typeof (Guid), x => XmlConvert.ToGuid(x.ReadContentAsString())},
+					{typeof (int), x => x.ReadContentAsInt()},
+					{typeof (long), x => x.ReadContentAsLong()},
+					{typeof (sbyte), x => XmlConvert.ToSByte(x.ReadContentAsString())},
+					{typeof (short), x => XmlConvert.ToInt16(x.ReadContentAsString())},
+					{typeof (TimeSpan), x => XmlConvert.ToTimeSpan(x.ReadContentAsString())},
+					{typeof (uint), x => XmlConvert.ToUInt32(x.ReadContentAsString())},
+					{typeof (ulong), x => XmlConvert.ToUInt64(x.ReadContentAsString())},
+					{typeof (ushort), x => XmlConvert.ToUInt16(x.ReadContentAsString())},
+					{typeof (string), x => x.ReadContentAsString()}
 				};
 		}
 
@@ -223,14 +247,35 @@ namespace MassTransit.Serialization
 		private void WriteEnumerableEntry(object value, Type type, XmlWriter writer, string name)
 		{
 			writer.WriteStartElement(name);
-
-			Type elementType = typeof (object);
-			Type[] genericArguments = type.GetDeclaredGenericArguments().ToArray();
-			if (genericArguments != null && genericArguments.Length > 0)
-				elementType = genericArguments[0];
-
 			writer.WriteAttributeString("xsi", "type", null, type.ToMessageName());
 
+			Type[] genericArguments = type.GetDeclaredGenericArguments().ToArray();
+			if (genericArguments != null && genericArguments.Length > 0)
+			{
+				if(value.Implements(typeof(IDictionary<,>)))
+				{
+					var keyType = genericArguments[0];
+					var elementType = genericArguments[1];
+
+					WriteEnumerableKeyValues(writer, value, keyType, elementType);
+				}
+				else if (value.Implements(typeof(IList<>)) || value.Implements(typeof(IEnumerable<>)))
+				{
+					WriteEnumerableValues(writer, value, genericArguments[0]);
+				}
+			}
+			else
+			{
+				Type elementType =  type.IsArray ? type.GetElementType() : typeof(object);
+
+				WriteEnumerableValues(writer, value, elementType);
+			}
+
+			writer.WriteEndElement();
+		}
+
+		private void WriteEnumerableValues(XmlWriter writer, object value, Type elementType)
+		{
 			foreach (object obj in ((IEnumerable) value))
 				if (obj.GetType().IsSimpleType())
 					WriteEntry(obj.GetType().Name, obj.GetType(), obj, writer);
@@ -240,9 +285,48 @@ namespace MassTransit.Serialization
 
 					elementWriter.WriteObject(writer, obj);
 				}
+		}	
+		
+		private void WriteEnumerableKeyValues(XmlWriter writer, object value, Type keyType, Type elementType)
+		{
+			foreach (DictionaryEntry entry in ((IDictionary) value))
+			{
+				WriteKeyValuePair(writer, entry.Key, entry.Value);
+			}
+		}
+
+		private void WriteKeyValuePair(XmlWriter writer, object key, object value)
+		{
+			writer.WriteStartElement("entry");
+
+			Func<object, string> converter;
+			Type keyType = key.GetType();
+
+			if(_stringConverters.TryGetValue(keyType, out converter))
+			{
+				writer.WriteAttributeString("key", converter(key));
+			}
+			else
+			{
+				writer.WriteStartElement("key");
+
+				GetSerializerForType(keyType).WriteObject(writer, key);
+				writer.WriteEndElement();
+			}
+
+			Type valueType = value.GetType();
+			if(_stringConverters.TryGetValue(valueType, out converter))
+			{
+				writer.WriteValue(converter(value));
+			}
+			else
+			{
+				GetSerializerForType(valueType).WriteObject(writer, value);
+			}
 
 			writer.WriteEndElement();
 		}
+
 
 		private FieldInfo GetField(string name)
 		{
@@ -316,51 +400,134 @@ namespace MassTransit.Serialization
 				{
 					typeToCreate = typeof(List<>).MakeGenericType(type.GetElementType());
 					elementSerializer = GetSerializerForType(type.GetElementType());
+
+					return GetListProperty(type, reader, typeToCreate, elementSerializer);
 				}
-				else if (typeToCreate.IsGenericType)
+				if (typeToCreate.IsGenericType)
 				{
-					if (typeToCreate.GetGenericTypeDefinition() == typeof(IList<>))
+					Type genericTypeDefinition = typeToCreate.GetGenericTypeDefinition();
+					if (genericTypeDefinition == typeof(IList<>))
 					{
 						Type[] arguments = typeToCreate.GetGenericArguments();
 
 						typeToCreate = typeof (List<>).MakeGenericType(arguments);
 						elementSerializer = GetSerializerForType(arguments[0]);
+
+						return GetListProperty(type, reader, typeToCreate, elementSerializer);
+					}
+
+					if (genericTypeDefinition == typeof(IDictionary<,>))
+					{
+						Type[] arguments = typeToCreate.GetGenericArguments();
+
+						typeToCreate = typeof(Dictionary<,>).MakeGenericType(arguments);
+
+
+						return GetDictionaryProperty(reader, typeToCreate);
 					}
 				}
 
-				IList list = ClassFactory.New(typeToCreate) as IList;
-				if (list == null)
-					throw new SerializationException("Unable to create list " + typeToCreate.FullName);
-
-				reader.Read();
-
-				while (reader.NodeType != XmlNodeType.EndElement)
-				{
-					object m = null;
-
-					Type elementType = GetObjectType(reader);
-					if(elementType != null)
-					{
-						m = GetSerializerForType(elementType).ReadObject(reader);
-					}
-					else if (elementSerializer != null)
-					{
-						m = elementSerializer.ReadObject(reader);
-					}
-
-					if (m != null)
-						list.Add(m);
-				}
-
-				if (type.IsArray)
-					return typeToCreate.GetMethod("ToArray").Invoke(list, null);
-
-				return list;
+				return GetListProperty(type, reader, typeToCreate, elementSerializer);
 			}
 
 			var childSerializer = GetSerializerFor(reader);
 
 			return childSerializer.ReadObject(reader);
+		}
+
+		private static object GetListProperty(Type type, XmlReader reader, Type typeToCreate, XmlObjectSerializer elementSerializer)
+		{
+			IList list = ClassFactory.New(typeToCreate) as IList;
+			if (list == null)
+				throw new SerializationException("Unable to create list " + typeToCreate.FullName);
+
+			reader.Read();
+
+			while (reader.NodeType != XmlNodeType.EndElement)
+			{
+				object m = null;
+
+				Type elementType = GetObjectType(reader);
+				if(elementType != null)
+				{
+					m = GetSerializerForType(elementType).ReadObject(reader);
+				}
+				else if (elementSerializer != null)
+				{
+					m = elementSerializer.ReadObject(reader);
+				}
+
+				if (m != null)
+					list.Add(m);
+			}
+
+			if (type.IsArray)
+				return typeToCreate.GetMethod("ToArray").Invoke(list, null);
+
+			return list;
+		}
+
+		private static object GetDictionaryProperty(XmlReader reader, Type typeToCreate)
+		{
+			IDictionary dictionary = ClassFactory.New(typeToCreate) as IDictionary;
+			if (dictionary == null)
+				throw new SerializationException("Unable to create dictionary " + typeToCreate.FullName);
+
+			Type[] arguments = typeToCreate.GetGenericArguments();
+
+			Func<XmlObjectSerializer> keySerializer = () => GetSerializerForType(arguments[0]);
+			Func<XmlObjectSerializer> elementSerializer = () => GetSerializerForType(arguments[1]);
+
+			Type keyType = arguments[0];
+			Type valueType = arguments[1];
+
+			reader.Read();
+
+			while (reader.NodeType != XmlNodeType.EndElement)
+			{
+				object key;
+
+				if (reader.HasAttributes &&
+					reader.MoveToAttribute("key"))
+				{
+					Func<XmlReader, object> converter;
+					if (_attributeConverters.TryGetValue(keyType, out converter))
+					{
+						key = converter(reader);
+					}
+					else
+					{
+						throw new InvalidOperationException("Not sure how to handle this key type");
+					}
+					reader.Read();
+				}
+				else
+				{
+					reader.Read();
+
+					key = keySerializer().ReadObject(reader);
+				}
+
+				Func<XmlReader, object> valueConverter;
+				object value;
+				if(_readerConverters.TryGetValue(valueType, out valueConverter))
+				{
+					value = valueConverter(reader);
+				}
+				else
+				{
+					value = elementSerializer().ReadObject(reader);
+				}
+
+				reader.Read(); // get past end element
+
+				if ( key != null)
+					dictionary.Add(key, value);
+			}
+
+			reader.Read(); // end element
+
+			return dictionary;
 		}
 	}
 

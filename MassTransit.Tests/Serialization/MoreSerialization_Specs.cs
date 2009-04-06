@@ -60,6 +60,50 @@ namespace MassTransit.Tests.Serialization
 			}
 		}
 
+		public class DictionaryContainerClass
+		{
+			public IDictionary<string, OuterClass> Elements { get; set; }
+
+			public bool Equals(DictionaryContainerClass other)
+			{
+				if (ReferenceEquals(null, other)) return false;
+				if (ReferenceEquals(this, other)) return true;
+
+				if (ReferenceEquals(other.Elements, Elements)) return true;
+				if (other.Elements == null && Elements != null) return false;
+				if (other.Elements != null && Elements == null) return false;
+
+				if (other.Elements != null && Elements != null)
+				{
+					if (other.Elements.Count != Elements.Count) return false;
+
+					foreach (KeyValuePair<string, OuterClass> pair in Elements)
+					{
+						if (!other.Elements.ContainsKey(pair.Key))
+							return false;
+
+						if (!Equals(pair.Value, other.Elements[pair.Key]))
+							return false;
+					}
+				}
+
+				return true;
+			}
+
+			public override bool Equals(object obj)
+			{
+				if (ReferenceEquals(null, obj)) return false;
+				if (ReferenceEquals(this, obj)) return true;
+				if (obj.GetType() != typeof(DictionaryContainerClass)) return false;
+				return Equals((DictionaryContainerClass)obj);
+			}
+
+			public override int GetHashCode()
+			{
+				return (Elements != null ? Elements.GetHashCode() : 0);
+			}
+		}
+
 		public class PrimitiveArrayClass
 		{
 			public int[] Values { get; set; }
@@ -93,6 +137,47 @@ namespace MassTransit.Tests.Serialization
 				if (ReferenceEquals(this, obj)) return true;
 				if (obj.GetType() != typeof (PrimitiveArrayClass)) return false;
 				return Equals((PrimitiveArrayClass) obj);
+			}
+
+			public override int GetHashCode()
+			{
+				return (Values != null ? Values.GetHashCode() : 0);
+			}
+		}
+
+		public class GenericArrayClass<T>
+		{
+			public T[] Values { get; set; }
+
+			public bool Equals(GenericArrayClass<T> other)
+			{
+				if (ReferenceEquals(null, other)) return false;
+				if (ReferenceEquals(this, other)) return true;
+
+				if (ReferenceEquals(other.Values, Values)) return true;
+				if (other.Values == null && Values != null) return false;
+				if (other.Values != null && Values == null) return false;
+
+				if (other.Values != null && Values != null)
+				{
+					if (other.Values.Length != Values.Length) return false;
+
+					for (int i = 0; i < Values.Length; i++)
+					{
+						if (!Equals(other.Values[i], Values[i]))
+							return false;
+					}
+				}
+
+				return true;
+			}
+
+			public override bool Equals(object obj)
+			{
+				if (ReferenceEquals(null, obj)) return false;
+				if (ReferenceEquals(this, obj)) return true;
+				if (obj.GetType() != typeof(GenericArrayClass<T>)) return false;
+				return Equals((GenericArrayClass<T>)obj);
 			}
 
 			public override int GetHashCode()
@@ -172,6 +257,21 @@ namespace MassTransit.Tests.Serialization
 			TestSerialization(message);
 		}
 
+		[Test]
+		public void A_dictionary_of_objects_should_be_properly_serialized()
+		{
+			DictionaryContainerClass message = new DictionaryContainerClass
+				{
+					Elements = new Dictionary<string, OuterClass>
+						{
+                            {"Chris", new OuterClass{Inner = new InnerClass {Name = "Chris"}}},
+							{"David", new OuterClass{Inner = new InnerClass {Name = "David"}}},
+						}
+				};
+
+			TestSerialization(message);
+		}
+
 
 		[Test]
 		public void A_primitive_array_of_objects_should_be_properly_serialized()
@@ -184,6 +284,34 @@ namespace MassTransit.Tests.Serialization
 
 			TestSerialization(message);
 		}
+
+		[Test]
+		public void An_empty_array_of_objects_should_be_properly_serialized()
+		{
+			PrimitiveArrayClass message = new PrimitiveArrayClass
+				{
+					Values = new int[] {}
+				};
+
+			TestSerialization(message);
+		}
+
+		[Test]
+		public void An_array_of_objects_should_be_properly_serialized()
+		{
+			var message = new GenericArrayClass<InnerClass>
+				{
+					Values = new[]
+						{
+							new InnerClass { Name = "Chris" },
+							new InnerClass { Name = "David" },
+						}
+				};
+
+			TestSerialization(message);
+		}
+
+
 
 
 		[Test]
