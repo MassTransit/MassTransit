@@ -33,6 +33,7 @@ namespace MassTransit.Configuration
 		protected int ConcurrentConsumerLimit { get; private set; }
 		protected bool AutoStart { get; private set; }
 		protected bool AutoSubscribe { get; private set; }
+		protected bool PurgeBeforeStart{get;private set;}
 		protected Uri ErrorUri { get; private set; }
 
 		public void SetObjectBuilder(IObjectBuilder objectBuilder)
@@ -66,6 +67,11 @@ namespace MassTransit.Configuration
 		public void DisableAutoStart()
 		{
 			AutoStart = false;
+		}
+
+		public void PurgeBeforeStarting()
+		{
+			PurgeBeforeStart = true;
 		}
 
 		public void SetReceiveTimeout(TimeSpan receiveTimeout)

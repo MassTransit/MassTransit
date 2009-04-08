@@ -65,12 +65,12 @@ namespace MassTransit.Services.HealthMonitoring
         {
             _bus = bus;
             _timer.Start();
-            _bus.Publish(new EndpointTurningOn(bus.Endpoint.Uri, _timeInSeconds, _systemId));
+            _bus.ControlBus.Publish(new EndpointTurningOn(_bus.Endpoint.Uri, _timeInSeconds, _systemId));
         }
 
         public void Stop()
         {
-            _bus.Publish(new EndpointTurningOff(_systemId));
+			_bus.ControlBus.Publish(new EndpointTurningOff(_systemId));
             _timer.Stop();
         }
 
@@ -82,7 +82,7 @@ namespace MassTransit.Services.HealthMonitoring
 
         public void Beat(object sender, ElapsedEventArgs e)
         {
-            _bus.Publish(new Heartbeat(_bus.Endpoint.Uri, _systemId));
+			_bus.ControlBus.Publish(new Heartbeat(_bus.Endpoint.Uri, _systemId));
         }
     }
 }

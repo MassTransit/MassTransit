@@ -16,21 +16,26 @@ namespace MassTransit.Configuration
 	using System.Collections.Generic;
 	using Exceptions;
 	using Internal;
+	using log4net;
 
 	public class ServiceBusConfigurator :
 		ServiceBusConfiguratorDefaults,
 		IServiceBusConfigurator
 	{
+		private static readonly ILog _log = LogManager.GetLogger(typeof (ServiceBusConfigurator));
+
 		private static readonly ServiceBusConfiguratorDefaults _defaults = new ServiceBusConfiguratorDefaults();
 		private readonly List<Action<IServiceBus, IObjectBuilder, Action<Type, IBusService>>> _services;
 		private Uri _receiveFromUri;
 
-		private ServiceBusConfigurator()
+		protected ServiceBusConfigurator()
 		{
 			_services = new List<Action<IServiceBus, IObjectBuilder, Action<Type, IBusService>>>();
 
 			_defaults.ApplyTo(this);
 		}
+
+		protected IControlBus ControlBus { get; set; }
 
 		public void ReceiveFrom(string uriString)
 		{
@@ -77,7 +82,12 @@ namespace MassTransit.Configuration
 				});
 		}
 
-		private IServiceBus Create()
+		public void UseControlBus(IControlBus bus)
+		{
+			ControlBus = bus;
+		}
+
+		internal IControlBus Create()
 		{
 			ServiceBus bus = CreateServiceBus();
 
@@ -90,6 +100,8 @@ namespace MassTransit.Configuration
 				// get all the types and subscribe them to the bus
 			}
 
+			ConfigureControlBus(bus);
+
 			ConfigureBusServices(bus);
 
 			if (AutoStart)
@@ -98,6 +110,17 @@ namespace MassTransit.Configuration
 			}
 
 			return bus;
+		}
+
+		private void ConfigureControlBus(ServiceBus bus)
+		{
+			if (ControlBus == null) 
+				return;
+
+			if(_log.IsDebugEnabled)
+				_log.DebugFormat("Associating control bus ({0}) with service bus ({1})", ControlBus.Endpoint.Uri, bus.Endpoint.Uri);
+
+			bus.ControlBus = ControlBus;
 		}
 
 		private void ConfigurePoisonEndpoint(ServiceBus bus)
@@ -148,6 +171,19 @@ namespace MassTransit.Configuration
 		public static void Defaults(Action<IServiceBusConfiguratorDefaults> action)
 		{
 			action(_defaults);
+		}
+	}
+
+	public class ControlBusConfigurator :
+		ServiceBusConfigurator
+	{
+		public new static IControlBus New(Action<IServiceBusConfigurator> action)
+		{
+			var configurator = new ControlBusConfigurator();
+
+			action(configurator);
+
+			return configurator.Create();
 		}
 	}
 }

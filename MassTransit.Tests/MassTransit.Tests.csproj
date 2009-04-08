@@ -88,6 +88,7 @@
     <Compile Include="BddExtensions.cs" />
     <Compile Include="Configuration_Specs.cs" />
     <Compile Include="ContextSetup.cs" />
+    <Compile Include="ControlBus_Specs.cs" />
     <Compile Include="ExtensionsForTestingEndpoints.cs" />
     <Compile Include="Fault_Specs.cs" />
     <Compile Include="FutureMessage.cs" />
@@ -127,7 +128,6 @@
     <Compile Include="Services\HealthMonitoring\HealthServiceTestFixture.cs" />
     <Compile Include="Services\HealthMonitoring\HealthService_Specs.cs" />
     <Compile Include="Services\LoadBalancer\LoadBalancer_Specs.cs" />
-    <Compile Include="Services\Subscriptions\SubscriptionClient_Specs.cs" />
     <Compile Include="Services\Subscriptions\SubscriptionConsumer_Specs.cs" />
     <Compile Include="Subscriptions\SubscriptionService_Specs.cs" />
     <Compile Include="TextFixtures\SubscriptionServiceTestFixture.cs" />

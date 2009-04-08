@@ -45,9 +45,6 @@ namespace MassTransit.Services.HealthMonitoring
 
         	_unsubscribeToken += _bus.Subscribe<HealthSaga>();
 
-    	    Trace.Listeners.Add(new ConsoleTraceListener());
-            PipelineViewer.Trace(_bus.InboundPipeline);
-
             _log.Info("Health Service Started");
         }
 

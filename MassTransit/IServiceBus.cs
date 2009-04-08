@@ -94,5 +94,7 @@ namespace MassTransit
 		IMessagePipeline OutboundPipeline { get; }
 
 		IMessagePipeline InboundPipeline { get; }
+
+    	IServiceBus ControlBus { get; }
     }
 }
