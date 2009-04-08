@@ -16,9 +16,7 @@ namespace MassTransit.StructureMapIntegration
 	using Configuration;
 	using Internal;
 	using Saga;
-	using Saga.Pipeline;
 	using Services.Subscriptions;
-	using Services.Subscriptions.Client;
 	using Services.Subscriptions.Configuration;
 	using Services.Subscriptions.Server;
 	using StructureMap;
@@ -42,15 +40,17 @@ namespace MassTransit.StructureMapIntegration
 		/// <summary>
 		/// Creates a registry for a service bus listening to an endpoint
 		/// </summary>
-		/// <param name="transportType"></param>
-		/// <param name="uriString"></param>
-		public MassTransitRegistryBase(Type transportType, string uriString)
+		public MassTransitRegistryBase(params Type[] transportTypes)
 		{
 			RegisterBusDependencies();
 
-			RegisterEndpointFactory(x => { x.RegisterTransport(transportType); });
-
-			RegisterServiceBus(uriString, x => { });
+			RegisterEndpointFactory(x =>
+				{
+					foreach (Type type in transportTypes)
+					{
+						x.RegisterTransport(type);
+					}
+				});
 		}
 
 
@@ -130,6 +130,22 @@ namespace MassTransit.StructureMapIntegration
 								configAction(x);
 							});
 					});
+		}
+
+		protected void RegisterControlBus(string endpointUri, Action<IServiceBusConfigurator> configAction)
+		{
+			ForRequestedType<IControlBus>()
+				.CacheBy(InstanceScope.Singleton)
+				.TheDefault.Is.ConstructedBy(context =>
+				{
+					return ControlBusConfigurator.New(x =>
+					{
+						x.SetObjectBuilder(ObjectFactory.GetInstance<IObjectBuilder>());
+						x.ReceiveFrom(endpointUri);
+
+						configAction(x);
+					});
+				});
 		}
 
 		protected static void ConfigureSubscriptionClient(string subscriptionServiceEndpointAddress, IServiceBusConfigurator configurator)

@@ -275,6 +275,9 @@ namespace MassTransit
 					_serviceContainer = null;
 				}
 
+				if (ControlBus != this)
+					ControlBus.Dispose();
+
 				InboundPipeline.Dispose();
 				InboundPipeline = null;
 
