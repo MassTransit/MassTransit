@@ -17,7 +17,7 @@
 		{
 			_log.Info("Starting Mandelbrot Application");
 
-			ObjectFactory.Initialize(x => x.AddRegistry(new MandelbrotRegistry("loopback://localhost/queue")));
+			ObjectFactory.Initialize(x => x.AddRegistry(new MandelbrotRegistry()));
 
 			Application.EnableVisualStyles();
 			Application.SetCompatibleTextRenderingDefault(false);
