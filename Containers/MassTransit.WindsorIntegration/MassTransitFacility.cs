@@ -1,8 +1,19 @@
+// Copyright 2007-2008 The Apache Software Foundation.
+// 
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
+// this file except in compliance with the License. You may obtain a copy of the 
+// License at 
+// 
+//   http://www.apache.org/licenses/LICENSE-2.0 
+// 
+// Unless required by applicable law or agreed to in writing, software distributed 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// specific language governing permissions and limitations under the License.
 namespace MassTransit.WindsorIntegration
 {
 	using System;
 	using System.ComponentModel;
-	using Castle.Core;
 	using Castle.Core.Configuration;
 	using Castle.Facilities.Startable;
 	using Castle.MicroKernel;
@@ -11,7 +22,6 @@ namespace MassTransit.WindsorIntegration
 	using Configuration;
 	using Exceptions;
 	using Magnum.ObjectExtensions;
-	using Microsoft.Practices.ServiceLocation;
 	using Services.HealthMonitoring.Configuration;
 	using Services.Subscriptions.Configuration;
 	using Component=Castle.MicroKernel.Registration.Component;
@@ -68,6 +78,8 @@ namespace MassTransit.WindsorIntegration
 							ConfigureSubscriptionClient(busConfig, x);
 
 							ConfigureManagementClient(busConfig, x);
+
+							ConfigureControlBus(busConfig, x);
 						});
 				}
 			}
@@ -85,7 +97,7 @@ namespace MassTransit.WindsorIntegration
 			Kernel.AddComponentInstance("endpointFactory", typeof (IEndpointFactory), endpointFactory);
 		}
 
-		private void RegisterServiceBus(string id, string endpointUri, Action<IServiceBusConfigurator> configAction)
+		private IServiceBus RegisterServiceBus(string id, string endpointUri, Action<IServiceBusConfigurator> configAction)
 		{
 			IServiceBus bus = ServiceBusConfigurator.New(x =>
 				{
@@ -95,8 +107,24 @@ namespace MassTransit.WindsorIntegration
 				});
 
 			Kernel.AddComponentInstance(id, typeof (IServiceBus), bus);
+
+			return bus;
 		}
 
+		private IControlBus RegisterControlBus(string id, string endpointUri, Action<IServiceBusConfigurator> configAction)
+		{
+			IControlBus bus = ControlBusConfigurator.New(x =>
+				{
+					x.ReceiveFrom(endpointUri);
+					x.SetConcurrentReceiverLimit(1);
+
+					configAction(x);
+				});
+
+			Kernel.AddComponentInstance(id, typeof (IControlBus), bus);
+
+			return bus;
+		}
 
 		public void AddStartableFacility()
 		{
@@ -167,6 +195,22 @@ namespace MassTransit.WindsorIntegration
 							x.SetHeartbeatInterval(interval);
 						});
 				});
+		}
+
+		private void ConfigureControlBus(IConfiguration busConfig, IServiceBusConfigurator configurator)
+		{
+			WithConfig(busConfig, "controlBus", config =>
+			{
+				string id = config.Attributes["id"];
+				string endpointUri = config.Attributes["endpoint"];
+
+				IControlBus bus = RegisterControlBus(id, endpointUri, x =>
+				{
+					ConfigureThreadingModel(busConfig, x);
+				});
+
+				configurator.UseControlBus(bus);
+			});
 		}
 
 		private static void WithConfig(IConfiguration configuration, string key, Action<IConfiguration> action)

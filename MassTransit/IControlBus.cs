@@ -19,6 +19,5 @@ namespace MassTransit
 	public interface IControlBus :
 		IServiceBus
 	{
-		IServiceBus DataBus { get; }
 	}
 }

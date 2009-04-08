@@ -91,7 +91,7 @@ namespace MassTransit
 
 			PoisonEndpoint = new PoisonEndpointDecorator(new NullEndpoint());
 
-			DataBus = this;
+			ControlBus = this;
 		}
 
 		public static IServiceBus Null { get; private set; }
@@ -400,6 +400,6 @@ namespace MassTransit
 			CurrentMessage.GenerateFault(message);
 		}
 
-		public IServiceBus DataBus { get; set; }
+		public IServiceBus ControlBus { get; set; }
 	}
 }

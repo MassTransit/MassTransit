@@ -75,5 +75,10 @@ namespace MassTransit.Internal
 		{
 			get { throw new System.NotImplementedException(); }
 		}
+
+		public IServiceBus ControlBus
+		{
+			get { return this; }
+		}
 	}
 }

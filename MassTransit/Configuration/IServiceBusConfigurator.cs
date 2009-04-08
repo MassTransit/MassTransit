@@ -44,5 +44,16 @@ namespace MassTransit.Configuration
 		/// </summary>
 		void AddService<TService>()
 			where TService : IBusService;
+
+		/// <summary>
+		/// Sets the endpoint to be purged before starting the service bus
+		/// </summary>
+		void PurgeBeforeStarting();
+
+		/// <summary>
+		/// Specifies a control bus for the service bus
+		/// </summary>
+		/// <param name="bus">The bus instance to use as the control bus</param>
+		void UseControlBus(IControlBus bus);
 	}
 }

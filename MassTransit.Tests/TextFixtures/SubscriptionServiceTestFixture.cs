@@ -33,7 +33,9 @@ namespace MassTransit.Tests.TextFixtures
 		private ISagaRepository<SubscriptionSaga> _subscriptionSagaRepository;
 		public SubscriptionService SubscriptionService { get; private set; }
 		public IServiceBus LocalBus { get; private set; }
+		public IControlBus LocalControlBus { get; private set; }
 		public IServiceBus RemoteBus { get; private set; }
+		public IControlBus RemoteControlBus { get; private set; }
 		public IServiceBus SubscriptionBus { get; private set; }
 		public ISubscriptionRepository SubscriptionRepository { get; private set; }
 
@@ -47,6 +49,20 @@ namespace MassTransit.Tests.TextFixtures
 
 			SetupSubscriptionService();
 
+			LocalControlBus = ControlBusConfigurator.New(x =>
+			{
+				x.ReceiveFrom("loopback://localhost/mt_client_control");
+
+				x.PurgeBeforeStarting();
+			});
+
+			RemoteControlBus = ControlBusConfigurator.New(x =>
+			{
+				x.ReceiveFrom("loopback://localhost/mt_server_control");
+
+				x.PurgeBeforeStarting();
+			});
+
 			LocalBus = ServiceBusConfigurator.New(x =>
 				{
 					x.ConfigureService<SubscriptionClientConfigurator>(y =>
@@ -55,6 +71,7 @@ namespace MassTransit.Tests.TextFixtures
 							y.SetSubscriptionServiceEndpoint(subscriptionServiceEndpointAddress);
 						});
 					x.ReceiveFrom("loopback://localhost/mt_client");
+					x.UseControlBus(LocalControlBus);
 				});
 
 			RemoteBus = ServiceBusConfigurator.New(x =>
@@ -65,6 +82,7 @@ namespace MassTransit.Tests.TextFixtures
 							y.SetSubscriptionServiceEndpoint(subscriptionServiceEndpointAddress);
 						});
 					x.ReceiveFrom("loopback://localhost/mt_server");
+					x.UseControlBus(RemoteControlBus);
 				});
 		}
 
@@ -99,8 +117,14 @@ namespace MassTransit.Tests.TextFixtures
 			RemoteBus.Dispose();
 			RemoteBus = null;
 
+			RemoteControlBus.Dispose();
+			RemoteControlBus = null;
+
 			LocalBus.Dispose();
 			LocalBus = null;
+
+			LocalControlBus.Dispose();
+			LocalControlBus = null;
 
 			Thread.Sleep(500);
 

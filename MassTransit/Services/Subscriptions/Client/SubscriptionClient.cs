@@ -100,6 +100,7 @@ namespace MassTransit.Services.Subscriptions.Client
 			VerifyClientAndServiceNotOnSameEndpoint();
 
 			_localEndpoints.Add(_bus.Endpoint);
+			_localEndpoints.Add(_bus.ControlBus.Endpoint);
 
 			_clientId = CombGuid.Generate();
 			_ready.Reset();
@@ -123,15 +124,23 @@ namespace MassTransit.Services.Subscriptions.Client
 
 		private void ConnectToSubscriptionService(IServiceBus bus)
 		{
+			ConnectSubscriptionPublisherToBus(bus);
+			
+			if (bus != bus.ControlBus)
+				ConnectSubscriptionPublisherToBus(bus.ControlBus);
+
+			_unsubscribeAction = _bus.ControlBus.Subscribe(this);
+
+			_subscriptionServiceEndpoint.Send(new CacheUpdateRequest(_clientId, _bus.ControlBus.Endpoint.Uri));
+		}
+
+		private void ConnectSubscriptionPublisherToBus(IServiceBus bus)
+		{
 			_publisher = new SubscriptionPublisher(this);
 			_publisher.Start(bus);
 
 			_consumer = new SubscriptionConsumer(this, _endpointFactory);
 			_consumer.Start(bus);
-
-			_unsubscribeAction = _bus.Subscribe(this);
-
-			_subscriptionServiceEndpoint.Send(new CacheUpdateRequest(_clientId, _bus.Endpoint.Uri));
 		}
 
 		public void Stop()
@@ -139,7 +148,7 @@ namespace MassTransit.Services.Subscriptions.Client
 			if (_log.IsInfoEnabled)
 				_log.InfoFormat("Stopping the SubscriptionClient on {0}", _bus.Endpoint.Uri);
 
-			_subscriptionServiceEndpoint.Send(new CancelSubscriptionUpdates(_clientId, _bus.Endpoint.Uri));
+			_subscriptionServiceEndpoint.Send(new CancelSubscriptionUpdates(_clientId, _bus.ControlBus.Endpoint.Uri));
 
 			_unsubscribeAction();
 
@@ -226,11 +235,11 @@ namespace MassTransit.Services.Subscriptions.Client
 
 		private void VerifyClientAndServiceNotOnSameEndpoint()
 		{
-			if (!_bus.Endpoint.Uri.Equals(_subscriptionServiceEndpoint.Uri))
+			if (!_bus.ControlBus.Endpoint.Uri.Equals(_subscriptionServiceEndpoint.Uri))
 				return;
 
-			var message = "The service bus and subscription service cannot use the same endpoint: " + _bus.Endpoint.Uri;
-			throw new EndpointException(_bus.Endpoint.Uri, message);
+			var message = "The service bus and subscription service cannot use the same endpoint: " + _bus.ControlBus.Endpoint.Uri;
+			throw new EndpointException(_bus.ControlBus.Endpoint.Uri, message);
 		}
 
 		private UnsubscribeAction SendAddSubscription(SubscriptionInformation info)
