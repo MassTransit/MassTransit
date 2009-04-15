@@ -28,14 +28,14 @@ namespace MassTransit.Pipeline.Inspectors
 		{
 		}
 
-		public bool Inspect(object obj)
+		public bool Inspect(object sink)
 		{
-			return Visit(obj);
+			return Visit(sink);
 		}
 
-		public bool Inspect(object obj, Func<bool> action)
+		public bool Inspect(object sink, Func<bool> inspectChildSinks)
 		{
-			return Visit(obj, action);
+			return Visit(sink, inspectChildSinks);
 		}
 	}
 }

@@ -12,7 +12,6 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Pipeline.Configuration
 {
-	using System;
 	using Exceptions;
 	using Sinks;
 
@@ -26,7 +25,7 @@ namespace MassTransit.Pipeline.Configuration
 			_sink = sink;
 		}
 
-		private MessageRouterConfigurator(object typedSink)
+		private MessageRouterConfigurator(IPipelineSink typedSink)
 		{
 			_typedSink = typedSink;
 		}

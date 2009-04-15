@@ -25,8 +25,8 @@ namespace MassTransit.Saga.Pipeline
 	using MassTransit.Pipeline.Interceptors;
 	using Util;
 
-	public class SagaStateMachineSubsriber :
-		ReflectiveVisitorBase<SagaStateMachineSubsriber>,
+	public class SagaStateMachineSubscriber :
+		ReflectiveVisitorBase<SagaStateMachineSubscriber>,
 		IStateMachineInspector
 	{
 		private readonly IInterceptorContext _context;
@@ -34,7 +34,7 @@ namespace MassTransit.Saga.Pipeline
 		private State _currentState;
 		private readonly List<UnsubscribeAction> _unsubscribeActions = new List<UnsubscribeAction>();
 
-		public SagaStateMachineSubsriber(IInterceptorContext context)
+		public SagaStateMachineSubscriber(IInterceptorContext context)
 			: base("Inspect")
 		{
 			_context = context;
@@ -144,11 +144,11 @@ namespace MassTransit.Saga.Pipeline
 				throw new ConfigurationException(string.Format("Unable to subscribe for type: {0} ({1})",
 					typeof (TComponent).FullName, messageType.FullName));
 
-			var target = Expression.Parameter(typeof(SagaStateMachineSubsriber), "target");
+			var target = Expression.Parameter(typeof(SagaStateMachineSubscriber), "target");
 			var dataEvent = Expression.Parameter(typeof(DataEvent<TComponent,TMessage>), "dataEvent");
 			var call = Expression.Call(target, genericMethod, dataEvent);
 
-			var connector = Expression.Lambda<Func<SagaStateMachineSubsriber, DataEvent<TComponent,TMessage>, UnsubscribeAction>>(call, new[] { target, dataEvent }).Compile();
+			var connector = Expression.Lambda<Func<SagaStateMachineSubscriber, DataEvent<TComponent,TMessage>, UnsubscribeAction>>(call, new[] { target, dataEvent }).Compile();
 
 			return connector(this, eevent);
 		}

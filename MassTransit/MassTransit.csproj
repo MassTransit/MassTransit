@@ -162,7 +162,7 @@
     <Compile Include="Saga\Pipeline\InitiateSagaStateMachineSink.cs" />
     <Compile Include="Saga\Pipeline\OrchestrateSagaStateMachineSink.cs" />
     <Compile Include="Saga\Pipeline\SagaStateMachineInterceptor.cs" />
-    <Compile Include="Saga\Pipeline\SagaStateMachineSubsriber.cs" />
+    <Compile Include="Saga\Pipeline\SagaStateMachineSubscriber.cs" />
     <Compile Include="Saga\SagaStateMachine.cs" />
     <Compile Include="Serialization\MessageMapper.cs" />
     <Compile Include="Serialization\CustomXmlMessageSerializer.cs" />
