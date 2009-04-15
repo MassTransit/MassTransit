@@ -108,6 +108,11 @@
     <Compile Include="Pipeline\MessageRouter_Perf.cs" />
     <Compile Include="Retry_Specs.cs" />
     <Compile Include="Saga\InMemorySagaRepository_Specs.cs" />
+    <Compile Include="Saga\Locator\CorrelatedSagaLocator.cs" />
+    <Compile Include="Saga\Locator\ISagaLocator.cs" />
+    <Compile Include="Saga\Locator\PropertySagaLocator.cs" />
+    <Compile Include="Saga\Locator\SagaLocator_Specs.cs" />
+    <Compile Include="Saga\Locator\TestSaga.cs" />
     <Compile Include="Saga\StateMachine\AutoStateMachineSaga.cs" />
     <Compile Include="Saga\StateMachine\AutoStateMachine_Specs.cs" />
     <Compile Include="Serialization\Approach\Approach_Specs.cs" />
