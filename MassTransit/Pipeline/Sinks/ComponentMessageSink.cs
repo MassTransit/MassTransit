@@ -67,7 +67,7 @@ namespace MassTransit.Pipeline.Sinks
 		{
 			TComponent component = _builder.GetInstance<TComponent>();
 			if (component == null)
-				throw new ConfigurationException("Unable to resolve type from container: " + typeof (TComponent));
+				throw new ConfigurationException(string.Format("Unable to resolve type '{0}' from container: ", typeof(TComponent)));
 
 			Consumes<TMessage>.All consumer = component.TranslateTo<Consumes<TMessage>.All>();
 

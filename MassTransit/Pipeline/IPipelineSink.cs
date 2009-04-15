@@ -20,6 +20,7 @@ namespace MassTransit.Pipeline
 	/// </summary>
 	/// <typeparam name="T">The message type passed by this sink</typeparam>
 	public interface IPipelineSink<T> :
+        IPipelineSink,
 		IDisposable
 		where T : class
 	{
@@ -41,4 +42,6 @@ namespace MassTransit.Pipeline
 		/// <returns>True if the inspection should continue, false to stop</returns>
 		bool Inspect(IPipelineInspector inspector);
 	}
+
+    public interface IPipelineSink {}
 }

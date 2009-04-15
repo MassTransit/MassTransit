@@ -6,7 +6,7 @@ namespace OpenAllNight.Testers
     using MassTransit.Services.Timeout.Messages;
 
     public class TimeoutTester :
-        Consumes<TimeoutExpired>.All
+        Consumes<TimeoutExpired>.For<Guid>
 
     {
         private IServiceBus _bus;

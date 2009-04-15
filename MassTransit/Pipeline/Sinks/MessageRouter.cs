@@ -70,10 +70,10 @@ namespace MassTransit.Pipeline.Sinks
 		{
 			_sinks.WriteLock(sinks => sinks.Add(sink));
 
-			return () => _sinks.WriteLock(sinks => sinks.Remove(sink));
+            return () => _sinks.WriteLock(sinks => sinks.Remove(sink));
 		}
 
-		public void Dispose()
+	    public void Dispose()
 		{
 			_sinks.Dispose();
 		}

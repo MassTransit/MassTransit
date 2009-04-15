@@ -16,7 +16,7 @@ namespace MassTransit.Pipeline
 
 	public interface IPipelineInspector
 	{
-		bool Inspect(object obj);
-		bool Inspect(object obj, Func<bool> action);
+		bool Inspect(object sink);
+		bool Inspect(object sink, Func<bool> inspectChildSinks);
 	}
 }

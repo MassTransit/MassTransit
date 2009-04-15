@@ -20,7 +20,7 @@ namespace MassTransit.Pipeline.Interceptors
 		IInterceptorContext
 	{
 		private readonly ISubscriptionEvent _subscriptionEvent;
-		private readonly HashSet<Type> _used = new HashSet<Type>();
+		private readonly HashSet<Type> _usedMessageTypes = new HashSet<Type>();
 
 		public InterceptorContext(IMessagePipeline pipeline, IObjectBuilder builder, ISubscriptionEvent subscriptionEvent)
 		{
@@ -36,12 +36,12 @@ namespace MassTransit.Pipeline.Interceptors
 
 		public bool HasMessageTypeBeenDefined(Type messageType)
 		{
-			return _used.Contains(messageType);
+			return _usedMessageTypes.Contains(messageType);
 		}
 
 		public void MessageTypeWasDefined(Type messageType)
 		{
-			_used.Add(messageType);
+			_usedMessageTypes.Add(messageType);
 		}
 
 		public UnsubscribeAction SubscribedTo<T>() 

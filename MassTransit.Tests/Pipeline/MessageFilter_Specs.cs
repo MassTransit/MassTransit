@@ -123,5 +123,24 @@ namespace MassTransit.Tests.Pipeline
 
 			consumer.ShouldHaveReceivedMessage(message);
 		}
+
+	    [Test]
+        [Ignore]
+	    public void I_should_be_able_to_filter_on_object()
+	    {
+            TestMessageConsumer<object> consumer = new TestMessageConsumer<object>();
+
+            _pipeline.Filter<object>("cock blocker", x => false);
+
+            _pipeline.Subscribe(consumer);
+
+            PingMessage message = new PingMessage();
+
+            _pipeline.Dispatch(message);
+
+            consumer.ShouldHaveReceivedMessage(message);
+
+            PipelineViewer.Trace(_pipeline);
+	    }
 	}
 }

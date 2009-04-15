@@ -35,22 +35,9 @@ namespace MassTransit.Saga.Pipeline
 			if (baseType.GetGenericTypeDefinition() != typeof (SagaStateMachine<>))
 				yield break;
 
-			Func<SagaStateMachineInterceptor, IInterceptorContext, IEnumerable<UnsubscribeAction>> invoker = null;
+		    MethodInfo genericMethod = FindConnectMethod<TComponent>();
 
-			MethodInfo genericMethod = ReflectiveMethodInvoker.FindMethod(GetType(),
-				"Connect",
-				new[] {typeof (TComponent)},
-				new[] {typeof (IInterceptorContext)});
-
-			if (genericMethod == null)
-				throw new ConfigurationException(string.Format("Unable to subscribe for type: {0} ({1})",
-					typeof (TComponent).FullName));
-
-			var interceptorParameter = Expression.Parameter(typeof (SagaStateMachineInterceptor), "interceptor");
-			var contextParameter = Expression.Parameter(typeof (IInterceptorContext), "context");
-
-			var call = Expression.Call(interceptorParameter, genericMethod, contextParameter);
-			var connector = Expression.Lambda<Func<SagaStateMachineInterceptor, IInterceptorContext, IEnumerable<UnsubscribeAction>>>(call, new[] {interceptorParameter, contextParameter}).Compile();
+		    var connector = BuildConnector(genericMethod);
 
 			foreach (var result in connector(this, context))
 			{
@@ -68,11 +55,36 @@ namespace MassTransit.Saga.Pipeline
 		{
 			var component = (TComponent) Activator.CreateInstance(typeof (TComponent), CombGuid.Generate());
 
-			var subscriber = new SagaStateMachineSubsriber(context);
+			var subscriber = new SagaStateMachineSubscriber(context);
 
 			component.Inspect(subscriber);
 
 			return subscriber.Results;
 		}
+
+        private MethodInfo FindConnectMethod<TComponent>()
+        {
+            var genericMethod = ReflectiveMethodInvoker.FindMethod(GetType(),
+                "Connect",
+                new[] { typeof(TComponent) },
+                new[] { typeof(IInterceptorContext) });
+
+            if (genericMethod == null)
+                throw new ConfigurationException(string.Format("Unable to subscribe for type: '{0}'",
+                    typeof(TComponent).FullName));
+
+            return genericMethod;
+        }
+
+        private Func<SagaStateMachineInterceptor, IInterceptorContext, IEnumerable<UnsubscribeAction>> BuildConnector(MethodInfo genericMethod)
+        {
+            var interceptorParameter = Expression.Parameter(typeof(SagaStateMachineInterceptor), "interceptor");
+            var contextParameter = Expression.Parameter(typeof(IInterceptorContext), "context");
+
+            var call = Expression.Call(interceptorParameter, genericMethod, contextParameter);
+            var connector = Expression.Lambda<Func<SagaStateMachineInterceptor, IInterceptorContext, IEnumerable<UnsubscribeAction>>>(call, new[] { interceptorParameter, contextParameter }).Compile();
+
+            return connector;
+        }
 	}
 }
