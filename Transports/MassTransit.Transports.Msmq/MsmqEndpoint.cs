@@ -230,7 +230,7 @@ namespace MassTransit.Transports.Msmq
 			_receiveTransactionType = _queueAddress.IsLocal && _queue.Transactional ? MessageQueueTransactionType.Automatic : MessageQueueTransactionType.None;
 		}
 
-		private Message BuildMessage(TimeSpan timeToLive, Type messageType, object message)
+		private Message BuildMessage<T>(TimeSpan timeToLive, Type messageType, T message)
 		{
 			var msg = new Message();
 
