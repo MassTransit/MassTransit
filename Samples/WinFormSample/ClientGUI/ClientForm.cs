@@ -75,7 +75,7 @@ namespace ClientGUI
                     UpdateMessageCount(args.Client, i + 1, tk.Answered, tk.SendingElapsedMilliseconds,
                                        tk.ElapsedMilliseconds);
 
-                _bus.Publish(question);
+            	_bus.Publish(question, x => x.SetResponseAddress(_bus.Endpoint.Uri));
 
                 if (args.WaitTime > 0)
                     Thread.Sleep(args.WaitTime);

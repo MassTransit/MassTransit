@@ -57,7 +57,9 @@ namespace ServerGUI
 
 			QuestionAnswered answer = new QuestionAnswered(message.CorrelationId);
 
-			Bus.Publish(answer);
+			CurrentMessage.Respond(answer);
+
+			//Bus.Publish(answer);
 
 			Interlocked.Increment(ref _messagesSent);
 		}
