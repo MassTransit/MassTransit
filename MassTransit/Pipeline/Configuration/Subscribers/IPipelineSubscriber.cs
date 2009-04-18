@@ -10,14 +10,13 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Pipeline.Interceptors
+namespace MassTransit.Pipeline.Configuration.Subscribers
 {
-	using System;
-	using System.Collections.Generic;
+    using System.Collections.Generic;
 
-	public interface IPipelineInterceptor
-	{
-		IEnumerable<UnsubscribeAction> Subscribe<TComponent>(IInterceptorContext context);
-		IEnumerable<UnsubscribeAction> Subscribe<TComponent>(IInterceptorContext context, TComponent instance);
-	}
+    public interface IPipelineSubscriber
+    {
+        IEnumerable<UnsubscribeAction> Subscribe<TComponent>(ISubscriberContext context);
+        IEnumerable<UnsubscribeAction> Subscribe<TComponent>(ISubscriberContext context, TComponent instance);
+    }
 }

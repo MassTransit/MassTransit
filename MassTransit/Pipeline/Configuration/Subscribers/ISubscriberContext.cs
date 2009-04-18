@@ -10,19 +10,19 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Pipeline.Interceptors
+namespace MassTransit.Pipeline.Configuration.Subscribers
 {
-	using System;
+    using System;
 
-	public interface IInterceptorContext
-	{
-		IObjectBuilder Builder { get; }
-		IMessagePipeline Pipeline { get; }
+    public interface ISubscriberContext
+    {
+        IObjectBuilder Builder { get; }
+        IMessagePipeline Pipeline { get; }
 
-		bool HasMessageTypeBeenDefined(Type messageType);
-		void MessageTypeWasDefined(Type messageType);
+        bool HasMessageTypeBeenDefined(Type messageType);
+        void MessageTypeWasDefined(Type messageType);
 
-		UnsubscribeAction SubscribedTo<T>() where T : class;
-		UnsubscribeAction SubscribedTo<T,K>(K correlationId) where T : class, CorrelatedBy<K>;
-	}
+        UnsubscribeAction SubscribedTo<T>() where T : class;
+        UnsubscribeAction SubscribedTo<T,K>(K correlationId) where T : class, CorrelatedBy<K>;
+    }
 }

@@ -14,7 +14,7 @@ namespace MassTransit.Tests.Pipeline
 {
 	using MassTransit.Pipeline;
 	using MassTransit.Pipeline.Configuration;
-	using MassTransit.Pipeline.Interceptors;
+	using MassTransit.Pipeline.Configuration.Subscribers;
 	using Messages;
 	using NUnit.Framework;
 	using Rhino.Mocks;
@@ -35,7 +35,7 @@ namespace MassTransit.Tests.Pipeline
 		[Test]
 		public void The_builder_should_stay_with_the_pipeline()
 		{
-			var interceptor = MockRepository.GenerateMock<IPipelineInterceptor>();
+			var interceptor = MockRepository.GenerateMock<IPipelineSubscriber>();
 
 			_pipeline.Configure(x => { x.Register(interceptor); });
 		}

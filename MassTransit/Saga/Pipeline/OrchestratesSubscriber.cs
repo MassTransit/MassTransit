@@ -17,17 +17,17 @@ namespace MassTransit.Saga.Pipeline
     using System.Collections.Generic;
     using Exceptions;
     using MassTransit.Pipeline.Configuration;
-    using MassTransit.Pipeline.Interceptors;
+    using MassTransit.Pipeline.Configuration.Subscribers;
 
-    public class OrchestratesInterceptor :
-        ConsumesInterceptorBase<OrchestratesInterceptor>
+    public class OrchestratesSubscriber :
+        ConsumesSubscriberBase<OrchestratesSubscriber>
     {
         protected override Type InterfaceType
         {
             get { return typeof (Orchestrates<>); }
         }
 
-		protected virtual UnsubscribeAction Connect<TComponent, TMessage>(IInterceptorContext context)
+		protected virtual UnsubscribeAction Connect<TComponent, TMessage>(ISubscriberContext context)
             where TMessage : class, CorrelatedBy<Guid>
             where TComponent : class, Orchestrates<TMessage>, ISaga
         {
@@ -46,7 +46,7 @@ namespace MassTransit.Saga.Pipeline
             return () => result() && (router.SinkCount == 0) && remove();
         }
 
-		public override IEnumerable<UnsubscribeAction> Subscribe<TComponent>(IInterceptorContext context, TComponent instance)
+		public override IEnumerable<UnsubscribeAction> Subscribe<TComponent>(ISubscriberContext context, TComponent instance)
         {
             yield break;
         }

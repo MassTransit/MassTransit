@@ -16,16 +16,16 @@ namespace MassTransit.Saga.Pipeline
 	using System.Collections.Generic;
 	using Exceptions;
 	using log4net;
-	using MassTransit.Pipeline.Interceptors;
+	using MassTransit.Pipeline.Configuration.Subscribers;
 
-	public class OrchestrateSagaMessageSink<TComponent, TMessage> :
+    public class OrchestrateSagaMessageSink<TComponent, TMessage> :
 		SagaMessageSinkBase<TComponent, TMessage>
 		where TMessage : class, CorrelatedBy<Guid>
 		where TComponent : class, Orchestrates<TMessage>, ISaga
 	{
 		private static readonly ILog _log = LogManager.GetLogger(typeof (OrchestrateSagaMessageSink<TComponent, TMessage>).ToFriendlyName());
 
-		public OrchestrateSagaMessageSink(IInterceptorContext context, IServiceBus bus, ISagaRepository<TComponent> repository)
+		public OrchestrateSagaMessageSink(ISubscriberContext context, IServiceBus bus, ISagaRepository<TComponent> repository)
 			: base(context, bus, repository)
 		{
 		}

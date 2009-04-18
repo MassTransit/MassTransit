@@ -18,8 +18,8 @@ namespace MassTransit.Tests.Pipeline
 	using MassTransit.Internal;
 	using MassTransit.Pipeline;
 	using MassTransit.Pipeline.Configuration;
+	using MassTransit.Pipeline.Configuration.Subscribers;
 	using MassTransit.Pipeline.Inspectors;
-	using MassTransit.Pipeline.Interceptors;
 	using MassTransit.Saga;
 	using MassTransit.Saga.Pipeline;
 	using NUnit.Framework;
@@ -45,7 +45,7 @@ namespace MassTransit.Tests.Pipeline
 			_bus = MockRepository.GenerateMock<IServiceBus>();
 			_bus.Stub(x => x.Endpoint).Return(_endpoint);
 
-			_context = MockRepository.GenerateMock<IInterceptorContext>();
+			_context = MockRepository.GenerateMock<ISubscriberContext>();
 			_context.Stub(x => x.Builder).Return(_builder);
 
 			_initiateSimpleSagaUnsubscribe = MockRepository.GenerateMock<UnsubscribeAction>();
@@ -88,7 +88,7 @@ namespace MassTransit.Tests.Pipeline
 		private OrchestrateSagaMessageSink<SimpleSaga, CompleteSimpleSaga> _completeSink;
 		private ISagaRepository<SimpleSaga> _repository;
 		private IServiceBus _bus;
-		private IInterceptorContext _context;
+		private ISubscriberContext _context;
 		private InitiateSagaMessageSink<SimpleSaga, InitiateSimpleSaga> _initiateSink;
 
 		private Guid _sagaId;

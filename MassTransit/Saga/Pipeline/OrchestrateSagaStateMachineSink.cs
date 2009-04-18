@@ -17,16 +17,16 @@ namespace MassTransit.Saga.Pipeline
 	using Exceptions;
 	using log4net;
 	using Magnum.StateMachine;
-	using MassTransit.Pipeline.Interceptors;
+	using MassTransit.Pipeline.Configuration.Subscribers;
 
-	public class OrchestrateSagaStateMachineSink<TComponent, TMessage> :
+    public class OrchestrateSagaStateMachineSink<TComponent, TMessage> :
 		SagaMessageSinkBase<TComponent, TMessage>
 		where TMessage : class, CorrelatedBy<Guid>
 		where TComponent : SagaStateMachine<TComponent>, ISaga
 	{
 		private static readonly ILog _log = LogManager.GetLogger(typeof(OrchestrateSagaStateMachineSink<TComponent, TMessage>).ToFriendlyName());
 
-		public OrchestrateSagaStateMachineSink(IInterceptorContext context, IServiceBus bus, ISagaRepository<TComponent> repository,DataEvent<TComponent,TMessage> dataEvent)
+		public OrchestrateSagaStateMachineSink(ISubscriberContext context, IServiceBus bus, ISagaRepository<TComponent> repository,DataEvent<TComponent,TMessage> dataEvent)
 			: base(context, bus, repository)
 		{
 			EventToRaise = dataEvent;
