@@ -45,11 +45,17 @@ namespace MassTransit.Services.Routing.Configuration
                     return bus.OutboundPipeline.Subscribe<TMessage>(ep);
                 });
             }
+
+            public void To(string addressUri)
+            {
+                To(new Uri(addressUri));
+            }
         }
     }
 
     public interface RouteTo<TMessage> where TMessage : class
     {
         void To(Uri address);
+        void To(string addressUri);
     }
 }
