@@ -17,7 +17,7 @@ namespace MassTransit.Tests.TextFixtures
 	using Configuration;
 	using Magnum.DateTimeExtensions;
 	using Magnum.StateMachine;
-	using MassTransit.Pipeline.Interceptors;
+	using MassTransit.Pipeline.Configuration.Subscribers;
 	using MassTransit.Saga;
 	using MassTransit.Saga.Pipeline;
 	using MassTransit.Serialization;
@@ -103,7 +103,7 @@ namespace MassTransit.Tests.TextFixtures
 				.WhenCalled(invocation =>
 							invocation.ReturnValue =
 							new InitiateSagaMessageSink<TSaga, TMessage>(
-								((Hashtable)invocation.Arguments[0])["context"] as IInterceptorContext,
+								((Hashtable)invocation.Arguments[0])["context"] as ISubscriberContext,
 								bus,
 								repository));
 		}
@@ -118,7 +118,7 @@ namespace MassTransit.Tests.TextFixtures
 				.WhenCalled(invocation =>
 							invocation.ReturnValue =
 							new InitiateSagaStateMachineSink<TSaga, TMessage>(
-								((Hashtable)invocation.Arguments[0])["context"] as IInterceptorContext,
+								((Hashtable)invocation.Arguments[0])["context"] as ISubscriberContext,
 								bus,
 								repository,
 								((Hashtable)invocation.Arguments[0])["dataEvent"] as DataEvent<TSaga,TMessage>));
@@ -134,7 +134,7 @@ namespace MassTransit.Tests.TextFixtures
 				.WhenCalled(invocation =>
 							invocation.ReturnValue =
 							new OrchestrateSagaMessageSink<TSaga, TMessage>(
-								((Hashtable)invocation.Arguments[0])["context"] as IInterceptorContext,
+								((Hashtable)invocation.Arguments[0])["context"] as ISubscriberContext,
 								bus,
 								repository));
 		}
@@ -149,7 +149,7 @@ namespace MassTransit.Tests.TextFixtures
 				.WhenCalled(invocation =>
 							invocation.ReturnValue =
 							new OrchestrateSagaStateMachineSink<TSaga, TMessage>(
-								((Hashtable)invocation.Arguments[0])["context"] as IInterceptorContext,
+								((Hashtable)invocation.Arguments[0])["context"] as ISubscriberContext,
 								bus,
 								repository,
 								((Hashtable)invocation.Arguments[0])["dataEvent"] as DataEvent<TSaga, TMessage>));

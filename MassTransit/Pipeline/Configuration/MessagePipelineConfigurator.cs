@@ -3,10 +3,10 @@ namespace MassTransit.Pipeline.Configuration
 	using System;
 	using System.Collections.Generic;
 	using Batch.Pipeline;
-	using Interceptors;
 	using Internal;
 	using Saga.Pipeline;
 	using Sinks;
+	using Subscribers;
 	using Util;
 
 	public class MessagePipelineConfigurator :
@@ -18,7 +18,7 @@ namespace MassTransit.Pipeline.Configuration
 		private readonly UnsubscribeAction _emptyToken = () => true;
 		private volatile bool _disposed;
 
-		protected RegistrationList<IPipelineInterceptor> _interceptors = new RegistrationList<IPipelineInterceptor>();
+		protected RegistrationList<IPipelineSubscriber> _interceptors = new RegistrationList<IPipelineSubscriber>();
 		protected RegistrationList<ISubscriptionEvent> _subscriptionEventHandlers = new RegistrationList<ISubscriptionEvent>();
 		private MessagePipeline _pipeline;
 
@@ -31,20 +31,20 @@ namespace MassTransit.Pipeline.Configuration
 			_pipeline = new MessagePipeline(router, this);
 
 			// interceptors are inserted at the front of the list, so do them from least to most specific
-			_interceptors.Register(new ConsumesAllInterceptor());
-			_interceptors.Register(new ConsumesSelectedInterceptor());
-			_interceptors.Register(new ConsumesForInterceptor());
-			_interceptors.Register(new BatchInterceptor());
+			_interceptors.Register(new ConsumesAllSubscriber());
+			_interceptors.Register(new ConsumesSelectedSubscriber());
+			_interceptors.Register(new ConsumesForSubscriber());
+			_interceptors.Register(new BatchSubscriber());
 			_interceptors.Register(new SagaStateMachineInterceptor());
-			_interceptors.Register(new OrchestratesInterceptor());
-			_interceptors.Register(new InitiatesInterceptor());
+			_interceptors.Register(new OrchestratesSubscriber());
+			_interceptors.Register(new InitiatesSubscriber());
 		}
 
 		#region IConfigurePipeline Members
 
-		public UnregisterAction Register(IPipelineInterceptor interceptor)
+		public UnregisterAction Register(IPipelineSubscriber subscriber)
 		{
-			return _interceptors.Register(interceptor);
+			return _interceptors.Register(subscriber);
 		}
 
 		public UnregisterAction Register(ISubscriptionEvent subscriptionEventHandler)
@@ -123,9 +123,9 @@ namespace MassTransit.Pipeline.Configuration
 			return result;
 		}
 
-		private UnsubscribeAction Subscribe(Func<IInterceptorContext, IPipelineInterceptor, IEnumerable<UnsubscribeAction>> subscriber)
+		private UnsubscribeAction Subscribe(Func<ISubscriberContext, IPipelineSubscriber, IEnumerable<UnsubscribeAction>> subscriber)
 		{
-			var context = new InterceptorContext(_pipeline, _builder, this);
+			var context = new SubscriberContext(_pipeline, _builder, this);
 
 			UnsubscribeAction result = null;
 

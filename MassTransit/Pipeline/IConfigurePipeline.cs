@@ -13,7 +13,7 @@
 namespace MassTransit.Pipeline
 {
 	using System;
-	using Interceptors;
+	using Configuration.Subscribers;
 	using Internal;
 
 	public interface IConfigurePipeline
@@ -27,7 +27,7 @@ namespace MassTransit.Pipeline
 		UnsubscribeAction Subscribe<TComponent>(TComponent instance)
 			where TComponent : class;
 
-		UnregisterAction Register(IPipelineInterceptor interceptor);
+		UnregisterAction Register(IPipelineSubscriber subscriber);
 		UnregisterAction Register(ISubscriptionEvent subscriptionEventHandler);
 	}
 }

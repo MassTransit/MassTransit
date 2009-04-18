@@ -14,7 +14,7 @@ namespace MassTransit.Pipeline
 {
 	using System;
 	using Configuration;
-	using Interceptors;
+	using Configuration.Subscribers;
 	using Sinks;
 
 	public static class MessagePipelineExtensions
@@ -128,9 +128,9 @@ namespace MassTransit.Pipeline
 			return result;
 		}
 
-		public static UnregisterAction Register(this IConfigurePipeline context, IPipelineInterceptor interceptor)
+		public static UnregisterAction Register(this IConfigurePipeline context, IPipelineSubscriber subscriber)
 		{
-			return context.Register(interceptor);
+			return context.Register(subscriber);
 		}
 	}
 }

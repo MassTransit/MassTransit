@@ -22,19 +22,19 @@ namespace MassTransit.Saga.Pipeline
 	using Magnum.StateMachine;
 	using MassTransit.Pipeline;
 	using MassTransit.Pipeline.Configuration;
-	using MassTransit.Pipeline.Interceptors;
+	using MassTransit.Pipeline.Configuration.Subscribers;
 	using Util;
 
 	public class SagaStateMachineSubscriber :
 		ReflectiveVisitorBase<SagaStateMachineSubscriber>,
 		IStateMachineInspector
 	{
-		private readonly IInterceptorContext _context;
+		private readonly ISubscriberContext _context;
 		private readonly HashSet<Type> _subscribedMessageTypes = new HashSet<Type>();
 		private State _currentState;
 		private readonly List<UnsubscribeAction> _unsubscribeActions = new List<UnsubscribeAction>();
 
-		public SagaStateMachineSubscriber(IInterceptorContext context)
+		public SagaStateMachineSubscriber(ISubscriberContext context)
 			: base("Inspect")
 		{
 			_context = context;

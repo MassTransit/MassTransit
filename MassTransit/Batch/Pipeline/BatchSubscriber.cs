@@ -18,25 +18,25 @@ namespace MassTransit.Batch.Pipeline
     using System.Reflection;
     using Exceptions;
     using Magnum.Threading;
-    using MassTransit.Pipeline.Interceptors;
+    using MassTransit.Pipeline.Configuration.Subscribers;
     using MassTransit.Pipeline.Sinks;
 
-	public class BatchInterceptor :
-        PipelineInterceptorBase
+	public class BatchSubscriber :
+        PipelineSubscriberBase
     {
         private static readonly Type _batchType = typeof (Batch<,>);
         private static readonly Type _interfaceType = typeof (Consumes<>.All);
 
-		private readonly ReaderWriterLockedDictionary<Type, Func<BatchInterceptor, IInterceptorContext, UnsubscribeAction>> _components;
-		private readonly ReaderWriterLockedDictionary<Type, Func<BatchInterceptor, IInterceptorContext, object, UnsubscribeAction>> _instances;
+		private readonly ReaderWriterLockedDictionary<Type, Func<BatchSubscriber, ISubscriberContext, UnsubscribeAction>> _components;
+		private readonly ReaderWriterLockedDictionary<Type, Func<BatchSubscriber, ISubscriberContext, object, UnsubscribeAction>> _instances;
 
-        public BatchInterceptor()
+        public BatchSubscriber()
         {
-			_instances = new ReaderWriterLockedDictionary<Type, Func<BatchInterceptor, IInterceptorContext, object, UnsubscribeAction>>();
-			_components = new ReaderWriterLockedDictionary<Type, Func<BatchInterceptor, IInterceptorContext, UnsubscribeAction>>();
+			_instances = new ReaderWriterLockedDictionary<Type, Func<BatchSubscriber, ISubscriberContext, object, UnsubscribeAction>>();
+			_components = new ReaderWriterLockedDictionary<Type, Func<BatchSubscriber, ISubscriberContext, UnsubscribeAction>>();
         }
 
-		protected virtual UnsubscribeAction Connect<TMessage, TBatchId>(IInterceptorContext context, Consumes<Batch<TMessage, TBatchId>>.All consumer)
+		protected virtual UnsubscribeAction Connect<TMessage, TBatchId>(ISubscriberContext context, Consumes<Batch<TMessage, TBatchId>>.All consumer)
             where TMessage : class, BatchedBy<TBatchId>
         {
             var configurator = BatchMessageRouterConfigurator.For(context.Pipeline);
@@ -50,7 +50,7 @@ namespace MassTransit.Batch.Pipeline
             return () => result() && (router.SinkCount == 0) && remove();
         }
 
-		protected virtual UnsubscribeAction Connect<TComponent, TMessage, TBatchId>(IInterceptorContext context)
+		protected virtual UnsubscribeAction Connect<TComponent, TMessage, TBatchId>(ISubscriberContext context)
             where TMessage : class, BatchedBy<TBatchId>
             where TComponent : class, Consumes<Batch<TMessage, TBatchId>>.All
         {
@@ -66,38 +66,38 @@ namespace MassTransit.Batch.Pipeline
         }
 
 
-        public override IEnumerable<UnsubscribeAction> Subscribe<TComponent>(IInterceptorContext context)
+        public override IEnumerable<UnsubscribeAction> Subscribe<TComponent>(ISubscriberContext context)
         {
-            Func<BatchInterceptor, IInterceptorContext, UnsubscribeAction> invoker = GetInvoker<TComponent>();
+            Func<BatchSubscriber, ISubscriberContext, UnsubscribeAction> invoker = GetInvoker<TComponent>();
             if (invoker == null)
                 yield break;
 
-			foreach (Func<BatchInterceptor, IInterceptorContext, UnsubscribeAction> action in invoker.GetInvocationList())
+			foreach (Func<BatchSubscriber, ISubscriberContext, UnsubscribeAction> action in invoker.GetInvocationList())
 			{
 				yield return action(this, context);
 			}
         }
 
-        public override IEnumerable<UnsubscribeAction> Subscribe<TComponent>(IInterceptorContext context, TComponent instance)
+        public override IEnumerable<UnsubscribeAction> Subscribe<TComponent>(ISubscriberContext context, TComponent instance)
         {
-            Func<BatchInterceptor, IInterceptorContext, object, UnsubscribeAction> invoker = GetInvokerForInstance<TComponent>();
+            Func<BatchSubscriber, ISubscriberContext, object, UnsubscribeAction> invoker = GetInvokerForInstance<TComponent>();
             if (invoker == null)
                 yield break;
 
-			foreach (Func<BatchInterceptor, IInterceptorContext, object, UnsubscribeAction> action in invoker.GetInvocationList())
+			foreach (Func<BatchSubscriber, ISubscriberContext, object, UnsubscribeAction> action in invoker.GetInvocationList())
 			{
 				yield return action(this, context, instance);
 			}
         }
 
 
-        private Func<BatchInterceptor, IInterceptorContext, object, UnsubscribeAction> GetInvokerForInstance<TComponent>()
+        private Func<BatchSubscriber, ISubscriberContext, object, UnsubscribeAction> GetInvokerForInstance<TComponent>()
         {
             Type componentType = typeof (TComponent);
 
             return _instances.Retrieve(componentType, () =>
                                                           {
-															  Func<BatchInterceptor, IInterceptorContext, object, UnsubscribeAction> invoker = null;
+															  Func<BatchSubscriber, ISubscriberContext, object, UnsubscribeAction> invoker = null;
 
                                                               // since we don't have it, we're going to build it
 
@@ -109,22 +109,22 @@ namespace MassTransit.Batch.Pipeline
                                                                       continue;
 
                                                                   var typeArguments = new[] {messageType, keyType};
-                                                                  MethodInfo genericMethod = FindMethod(GetType(), "Connect", typeArguments, new[] {typeof (IInterceptorContext), typeof (TComponent)});
+                                                                  MethodInfo genericMethod = FindMethod(GetType(), "Connect", typeArguments, new[] {typeof (ISubscriberContext), typeof (TComponent)});
                                                                   if (genericMethod == null)
                                                                       throw new PipelineException(string.Format("Unable to subscribe for type: {0} ({1})",
                                                                                                                 typeof (TComponent).FullName, messageType.FullName));
 
-                                                                  var interceptorParameter = Expression.Parameter(typeof (BatchInterceptor), "interceptor");
-                                                                  var contextParameter = Expression.Parameter(typeof (IInterceptorContext), "context");
+                                                                  var interceptorParameter = Expression.Parameter(typeof (BatchSubscriber), "interceptor");
+                                                                  var contextParameter = Expression.Parameter(typeof (ISubscriberContext), "context");
                                                                   var instanceParameter = Expression.Parameter(typeof (object), "instance");
 
                                                                   var instanceCast = Expression.Convert(instanceParameter, typeof (TComponent));
 
                                                                   var call = Expression.Call(interceptorParameter, genericMethod, contextParameter, instanceCast);
                                                                   var parameters = new[] {interceptorParameter, contextParameter, instanceParameter};
-																  var connector = Expression.Lambda<Func<BatchInterceptor, IInterceptorContext, object, UnsubscribeAction>>(call, parameters).Compile();
+																  var connector = Expression.Lambda<Func<BatchSubscriber, ISubscriberContext, object, UnsubscribeAction>>(call, parameters).Compile();
 
-																  Func<BatchInterceptor, IInterceptorContext, object, UnsubscribeAction> method = (interceptor, context, obj) =>
+																  Func<BatchSubscriber, ISubscriberContext, object, UnsubscribeAction> method = (interceptor, context, obj) =>
                                                                                                                                                {
                                                                                                                                                    if (context.HasMessageTypeBeenDefined(messageType))
                                                                                                                                                        return () => false;
@@ -145,13 +145,13 @@ namespace MassTransit.Batch.Pipeline
                                                           });
         }
 
-		private Func<BatchInterceptor, IInterceptorContext, UnsubscribeAction> GetInvoker<TComponent>()
+		private Func<BatchSubscriber, ISubscriberContext, UnsubscribeAction> GetInvoker<TComponent>()
         {
             Type componentType = typeof (TComponent);
 
             return _components.Retrieve(componentType, () =>
                                                            {
-															   Func<BatchInterceptor, IInterceptorContext, UnsubscribeAction> invoker = null;
+															   Func<BatchSubscriber, ISubscriberContext, UnsubscribeAction> invoker = null;
 
                                                                // since we don't have it, we're going to build it
 
@@ -163,19 +163,19 @@ namespace MassTransit.Batch.Pipeline
                                                                        continue;
 
                                                                    var typeArguments = new[] {typeof (TComponent), messageType, keyType};
-                                                                   MethodInfo genericMethod = FindMethod(GetType(), "Connect", typeArguments, new[] {typeof (IInterceptorContext)});
+                                                                   MethodInfo genericMethod = FindMethod(GetType(), "Connect", typeArguments, new[] {typeof (ISubscriberContext)});
                                                                    if (genericMethod == null)
                                                                        throw new PipelineException(string.Format("Unable to subscribe for type: {0} ({1})",
                                                                                                                  typeof (TComponent).FullName, messageType.FullName));
 
-                                                                   var interceptorParameter = Expression.Parameter(typeof (BatchInterceptor), "interceptor");
-                                                                   var contextParameter = Expression.Parameter(typeof (IInterceptorContext), "context");
+                                                                   var interceptorParameter = Expression.Parameter(typeof (BatchSubscriber), "interceptor");
+                                                                   var contextParameter = Expression.Parameter(typeof (ISubscriberContext), "context");
 
                                                                    var call = Expression.Call(interceptorParameter, genericMethod, contextParameter);
                                                                    var parameters = new[] {interceptorParameter, contextParameter};
-																   var connector = Expression.Lambda<Func<BatchInterceptor, IInterceptorContext, UnsubscribeAction>>(call, parameters).Compile();
+																   var connector = Expression.Lambda<Func<BatchSubscriber, ISubscriberContext, UnsubscribeAction>>(call, parameters).Compile();
 
-																   Func<BatchInterceptor, IInterceptorContext, UnsubscribeAction> method = (interceptor, context) =>
+																   Func<BatchSubscriber, ISubscriberContext, UnsubscribeAction> method = (interceptor, context) =>
                                                                                                                                         {
                                                                                                                                             if (context.HasMessageTypeBeenDefined(messageType))
                                                                                                                                                 return () => false;

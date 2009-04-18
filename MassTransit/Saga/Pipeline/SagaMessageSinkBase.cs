@@ -15,7 +15,7 @@ namespace MassTransit.Saga.Pipeline
     using System;
     using System.Collections.Generic;
     using MassTransit.Pipeline;
-    using MassTransit.Pipeline.Interceptors;
+    using MassTransit.Pipeline.Configuration.Subscribers;
 
     public abstract class SagaMessageSinkBase<TComponent, TMessage> :
         IPipelineSink<TMessage>
@@ -24,7 +24,7 @@ namespace MassTransit.Saga.Pipeline
     {
         private volatile bool _disposed;
 
-        protected SagaMessageSinkBase(IInterceptorContext context, IServiceBus bus, ISagaRepository<TComponent> repository)
+        protected SagaMessageSinkBase(ISubscriberContext context, IServiceBus bus, ISagaRepository<TComponent> repository)
         {
             Builder = context.Builder;
             Bus = bus;

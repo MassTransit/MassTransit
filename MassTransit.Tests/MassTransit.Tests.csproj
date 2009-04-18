@@ -159,6 +159,7 @@
     <Compile Include="Services\HealthMonitoring\HealthServiceTestFixture.cs" />
     <Compile Include="Services\HealthMonitoring\HealthService_Specs.cs" />
     <Compile Include="Services\LoadBalancer\LoadBalancer_Specs.cs" />
+    <Compile Include="Services\Routing\RoutingConfiguration_Specs.cs" />
     <Compile Include="Services\Subscriptions\SubscriptionConsumer_Specs.cs" />
     <Compile Include="Subscriptions\SubscriptionService_Specs.cs" />
     <Compile Include="TextFixtures\SubscriptionServiceTestFixture.cs" />

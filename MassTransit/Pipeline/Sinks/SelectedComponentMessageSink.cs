@@ -14,9 +14,9 @@ namespace MassTransit.Pipeline.Sinks
 {
 	using System;
 	using System.Collections.Generic;
-	using Interceptors;
+	using Configuration.Subscribers;
 
-	/// <summary>
+    /// <summary>
 	/// Routes messages to instances of subscribed components. A new instance of the component
 	/// is created from the container for each message received.
 	/// </summary>
@@ -29,7 +29,7 @@ namespace MassTransit.Pipeline.Sinks
 	{
 		private readonly IObjectBuilder _builder;
 
-		public SelectedComponentMessageSink(IInterceptorContext context)
+		public SelectedComponentMessageSink(ISubscriberContext context)
 		{
 			_builder = context.Builder;
 		}
