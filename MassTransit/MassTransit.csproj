@@ -159,7 +159,6 @@
     <Compile Include="Internal\ISetInboundMessageHeaders.cs" />
     <Compile Include="Internal\ISetMessageHeaders.cs" />
     <Compile Include="Configuration\DefaultBusServiceConfigurator.cs" />
-    <Compile Include="Pipeline\Configuration\MessagePipelineExtensions.cs" />
     <Compile Include="Saga\Pipeline\InitiateSagaStateMachineSink.cs" />
     <Compile Include="Saga\Pipeline\OrchestrateSagaStateMachineSink.cs" />
     <Compile Include="Saga\Pipeline\SagaStateMachineInterceptor.cs" />
