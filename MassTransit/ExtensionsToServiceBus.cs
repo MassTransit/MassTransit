@@ -79,6 +79,22 @@ namespace MassTransit
 
 		public static string ToMessageName(this Type messageType)
 		{
+			string messageName;
+			if(messageType.IsGenericType)
+			{
+				messageName = messageType.GetGenericTypeDefinition().FullName;
+				messageName += "[";
+				foreach (Type argument in messageType.GetGenericArguments())
+				{
+					messageName += "[" + argument.ToMessageName() + "]";
+				}
+				messageName += "]";
+			}
+			else
+			{
+				messageName = messageType.FullName;
+			}
+
 			string assembly = messageType.Assembly.FullName;
 			if (assembly != null)
 			{
@@ -89,7 +105,7 @@ namespace MassTransit
 				assembly = string.Empty;
 			}
 
-			return string.Format("{0}{1}", messageType.FullName, assembly);
+			return string.Format("{0}{1}", messageName, assembly);
 		}
 
 		public static string ToFriendlyName(this Type type)

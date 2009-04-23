@@ -14,58 +14,60 @@ namespace MassTransit.Tests.Serialization.Approach
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Reflection;
 	using System.Xml;
 	using Magnum.Monads;
 
-	public class ObjectSerializer<T> :
+	public class DictionarySerializer<TKey, TValue> :
 		IObjectSerializer
 	{
-		private readonly IObjectPropertyCache _propertyCache;
-		private readonly IObjectFieldCache _fieldCache;
-		private readonly Type _type;
-		private readonly string _ns;
+		private Type _keyType;
+		private string _ns;
+		private Type _valueType;
+		private Type _containerType;
 
-		public ObjectSerializer()
-			: this(new ObjectPropertyCache(typeof(T)), new ObjectFieldCache(typeof(T)))
+		public DictionarySerializer()
 		{
-		}
-
-		public ObjectSerializer(IObjectPropertyCache propertyCache, IObjectFieldCache fieldCache)
-		{
-			_propertyCache = propertyCache;
-			_fieldCache = fieldCache;
-
-			_type = typeof(T);
-			_ns = _type.ToMessageName();
+			_valueType = typeof (TValue);
+			_keyType = typeof (TKey);
+			_containerType = typeof (Dictionary<TKey, TValue>);
+			_ns = _containerType.ToMessageName();
 		}
 
 		public IEnumerable<K<Action<XmlWriter>>> GetSerializationActions(ISerializerContext context, string localName, object value)
 		{
-			if(value == null)
+			if (value == null)
 				yield break;
 
 			string prefix = context.GetPrefix(localName, _ns);
 
 			yield return output => output(writer =>
+				{
+					bool isDocumentElement = writer.WriteState == WriteState.Start;
+
+					writer.WriteStartElement(prefix, localName, _ns);
+
+					if (isDocumentElement)
+						context.WriteNamespaceInformationToXml(writer);
+				});
+
+			foreach (KeyValuePair<TKey, TValue> entry in ((IDictionary<TKey, TValue>) value))
 			{
-				bool isDocumentElement = writer.WriteState == WriteState.Start;
+				yield return output => output(writer => writer.WriteStartElement("item"));
 
-				writer.WriteStartElement(prefix, localName, _ns);
-
-				if (isDocumentElement)
-					context.WriteNamespaceInformationToXml(writer);
-			});
-
-			foreach (PropertyInfo property in _type.GetProperties())
-			{
-				object obj = property.GetValue(value, null);
-
-				var enumerable = context.SerializeObject(property.Name, property.PropertyType, obj);
+				// TODO would really like a way to write the key as an attribute string if it is a simple type
+				var enumerable = context.SerializeObject("key", _keyType, entry.Key);
 				foreach (var action in enumerable)
 				{
 					yield return action;
 				}
+
+				enumerable = context.SerializeObject(_valueType.Name, _valueType, entry.Value);
+				foreach (var action in enumerable)
+				{
+					yield return action;
+				}
+
+				yield return output => output(writer => writer.WriteEndElement());
 			}
 
 			yield return output => output(writer => { writer.WriteEndElement(); });
