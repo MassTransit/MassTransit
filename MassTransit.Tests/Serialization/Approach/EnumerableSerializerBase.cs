@@ -14,61 +14,58 @@ namespace MassTransit.Tests.Serialization.Approach
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Reflection;
 	using System.Xml;
 	using Magnum.Monads;
 
-	public class ObjectSerializer<T> :
+	public class EnumerableSerializerBase<T> :
 		IObjectSerializer
 	{
-		private readonly IObjectPropertyCache _propertyCache;
-		private readonly IObjectFieldCache _fieldCache;
-		private readonly Type _type;
-		private readonly string _ns;
+		private Type _containerType;
+		private string _ns;
+		private Type _type;
 
-		public ObjectSerializer()
-			: this(new ObjectPropertyCache(typeof(T)), new ObjectFieldCache(typeof(T)))
+		protected EnumerableSerializerBase(Type containerType)
 		{
-		}
-
-		public ObjectSerializer(IObjectPropertyCache propertyCache, IObjectFieldCache fieldCache)
-		{
-			_propertyCache = propertyCache;
-			_fieldCache = fieldCache;
-
-			_type = typeof(T);
-			_ns = _type.ToMessageName();
+			_containerType = containerType;
+			_type = typeof (T);
+			_ns = _containerType.ToMessageName();
 		}
 
 		public IEnumerable<K<Action<XmlWriter>>> GetSerializationActions(ISerializerContext context, string localName, object value)
 		{
-			if(value == null)
+			if (value == null)
 				yield break;
 
 			string prefix = context.GetPrefix(localName, _ns);
 
 			yield return output => output(writer =>
+				{
+					bool isDocumentElement = writer.WriteState == WriteState.Start;
+
+					writer.WriteStartElement(prefix, localName, _ns);
+
+					if (isDocumentElement)
+						context.WriteNamespaceInformationToXml(writer);
+				});
+
+			foreach (var action in SerializeElements(value, context))
 			{
-				bool isDocumentElement = writer.WriteState == WriteState.Start;
+				yield return action;
+			}
 
-				writer.WriteStartElement(prefix, localName, _ns);
+			yield return output => output(writer => { writer.WriteEndElement(); });
+		}
 
-				if (isDocumentElement)
-					context.WriteNamespaceInformationToXml(writer);
-			});
-
-			foreach (PropertyInfo property in _type.GetProperties())
+		protected virtual IEnumerable<K<Action<XmlWriter>>> SerializeElements(object value, ISerializerContext context)
+		{
+			foreach (T obj in ((IEnumerable<T>) value))
 			{
-				object obj = property.GetValue(value, null);
-
-				var enumerable = context.SerializeObject(property.Name, property.PropertyType, obj);
+				var enumerable = context.SerializeObject(_type.Name, _type, obj);
 				foreach (var action in enumerable)
 				{
 					yield return action;
 				}
 			}
-
-			yield return output => output(writer => { writer.WriteEndElement(); });
 		}
 	}
 }

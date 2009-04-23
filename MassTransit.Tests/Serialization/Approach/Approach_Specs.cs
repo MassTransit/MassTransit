@@ -13,6 +13,7 @@
 namespace MassTransit.Tests.Serialization.Approach
 {
 	using System;
+	using System.Collections.Generic;
 	using System.Diagnostics;
 	using System.Text;
 	using Magnum.DateTimeExtensions;
@@ -22,10 +23,10 @@ namespace MassTransit.Tests.Serialization.Approach
 	[TestFixture]
 	public class Approach_Specs
 	{
+
 		[Test]
 		public void A_new_way_to_say_go()
 		{
-
 			var message = new Envelope
 				{
 					Name = "Chris",
@@ -36,12 +37,7 @@ namespace MassTransit.Tests.Serialization.Approach
 					NetWorth = 100000000,
 				};
 
-			CustomXmlSerializer serializer = new CustomXmlSerializer();
-
-			byte[] data = serializer.Serialize(message);
-
-			Trace.WriteLine("Result XML:");
-			Trace.WriteLine(Encoding.UTF8.GetString(data));
+			TestSerialization(message);
 		}
 
 		[Test]
@@ -55,16 +51,11 @@ namespace MassTransit.Tests.Serialization.Approach
 
 
 
-			CustomXmlSerializer serializer = new CustomXmlSerializer();
-
-			byte[] data = serializer.Serialize(message);
-
-			Trace.WriteLine("Result XML:");
-			Trace.WriteLine(Encoding.UTF8.GetString(data));
+			TestSerialization(message);
 		}
 
 		[Test]
-		public void A_collection_of_objects_should_be_properly_serialized()
+		public void A_fully_loaded_object_should_be_serialized()
 		{
 			var message = new SerializationTestMessage
 			{
@@ -80,6 +71,48 @@ namespace MassTransit.Tests.Serialization.Approach
 				DoubleValue = 1823.172,
 			};
 
+			TestSerialization(message);
+		}
+
+
+		[Test]
+		public void A_collection_of_objects_should_be_properly_serialized()
+		{
+			MoreSerialization_Specs.ContainerClass message = new MoreSerialization_Specs.ContainerClass
+			{
+				Elements = new List<MoreSerialization_Specs.OuterClass>
+						{
+							new MoreSerialization_Specs.OuterClass
+								{
+									Inner = new MoreSerialization_Specs.InnerClass {Name = "Chris"},
+								},
+							new MoreSerialization_Specs.OuterClass
+								{
+									Inner = new MoreSerialization_Specs.InnerClass {Name = "David"},
+								},
+						}
+			};
+
+			TestSerialization(message);
+		}
+
+		[Test]
+		public void A_dictionary_of_objects_should_be_properly_serialized()
+		{
+			MoreSerialization_Specs.DictionaryContainerClass message = new MoreSerialization_Specs.DictionaryContainerClass
+			{
+				Elements = new Dictionary<string, MoreSerialization_Specs.OuterClass>
+						{
+                            {"Chris", new MoreSerialization_Specs.OuterClass{Inner = new MoreSerialization_Specs.InnerClass {Name = "Chris"}}},
+							{"David", new MoreSerialization_Specs.OuterClass{Inner = new MoreSerialization_Specs.InnerClass {Name = "David"}}},
+						}
+			};
+
+			TestSerialization(message);
+		}
+
+		private void TestSerialization<T>(T message)
+		{
 			CustomXmlSerializer serializer = new CustomXmlSerializer();
 
 			byte[] data = serializer.Serialize(message);
@@ -87,6 +120,47 @@ namespace MassTransit.Tests.Serialization.Approach
 			Trace.WriteLine("Result XML:");
 			Trace.WriteLine(Encoding.UTF8.GetString(data));
 		}
+
+
+		[Test]
+		public void A_primitive_array_of_objects_should_be_properly_serialized()
+		{
+			MoreSerialization_Specs.PrimitiveArrayClass message = new MoreSerialization_Specs.PrimitiveArrayClass
+			{
+				Values = new[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 }
+
+			};
+
+			TestSerialization(message);
+		}
+
+		[Test]
+		public void An_empty_array_of_objects_should_be_properly_serialized()
+		{
+			MoreSerialization_Specs.PrimitiveArrayClass message = new MoreSerialization_Specs.PrimitiveArrayClass
+			{
+				Values = new int[] { }
+			};
+
+			TestSerialization(message);
+		}
+
+		[Test]
+		public void An_array_of_objects_should_be_properly_serialized()
+		{
+			var message = new MoreSerialization_Specs.GenericArrayClass<MoreSerialization_Specs.InnerClass>
+			{
+				Values = new[]
+						{
+							new MoreSerialization_Specs.InnerClass { Name = "Chris" },
+							new MoreSerialization_Specs.InnerClass { Name = "David" },
+						}
+			};
+
+			TestSerialization(message);
+		}
+
+
 
 
 
