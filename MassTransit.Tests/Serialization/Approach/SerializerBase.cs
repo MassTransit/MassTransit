@@ -41,11 +41,15 @@ namespace MassTransit.Tests.Serialization.Approach
 
 					if (isDocumentElement)
 						context.WriteNamespaceInformationToXml(writer);
+
+					WriteValue(writer, value);
+                    
+					writer.WriteEndElement();
 				});
 
-			yield return output => output(writer => { WriteValue(writer, value); });
+//			yield return output => output(writer => { WriteValue(writer, value); });
 
-			yield return output => output(writer => { writer.WriteEndElement(); });
+//			yield return output => output(writer => { writer.WriteEndElement(); });
 		}
 
 		protected abstract void WriteValue(XmlWriter writer, object value);

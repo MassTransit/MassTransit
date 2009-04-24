@@ -7,8 +7,8 @@ namespace MassTransit.Tests.Serialization.Approach
 	public class NamespaceTable
 	{
 		private Dictionary<string, string> _mapNamespaceToPrefix = new Dictionary<string, string>();
-
 		private HashSet<string> _prefixes = new HashSet<string>();
+		private int _counter = 1;
 
 
 		public void Each(Action<string,string> action)
@@ -35,18 +35,10 @@ namespace MassTransit.Tests.Serialization.Approach
 
 		private string GeneratePrefix(string localName, string ns)
 		{
-			if (localName.IsNullOrEmpty())
-				localName = "x";
+			string prefix = localName.IsNullOrEmpty() ? "o" : char.ToLower(localName[0]).ToString();
 
-			string tag = (localName.IsNullOrEmpty() ? "x" : localName.Substring(0, 1)).ToLowerInvariant();
-			string prefix = tag;
-
-			int index = 0;
-			while(_prefixes.Contains(prefix))
-			{
-				index++;
-				prefix = tag + index;
-			}
+			if (_prefixes.Contains(prefix))
+				prefix += _counter++;
 
 			return prefix;
 		}

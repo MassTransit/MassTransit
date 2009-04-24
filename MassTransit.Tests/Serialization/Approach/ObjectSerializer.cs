@@ -14,26 +14,20 @@ namespace MassTransit.Tests.Serialization.Approach
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Reflection;
 	using System.Xml;
 	using Magnum.Monads;
 
 	public class ObjectSerializer<T> :
 		IObjectSerializer
 	{
-		private readonly IObjectPropertyCache _propertyCache;
+		private readonly IObjectPropertyCache<T> _propertyCache;
 		private readonly IObjectFieldCache _fieldCache;
 		private readonly Type _type;
 		private readonly string _ns;
 
-		public ObjectSerializer()
-			: this(new ObjectPropertyCache(typeof(T)), new ObjectFieldCache(typeof(T)))
+		public ObjectSerializer(IObjectFieldCache fieldCache)
 		{
-		}
-
-		public ObjectSerializer(IObjectPropertyCache propertyCache, IObjectFieldCache fieldCache)
-		{
-			_propertyCache = propertyCache;
+			_propertyCache = new ObjectPropertyCache<T>();
 			_fieldCache = fieldCache;
 
 			_type = typeof(T);
@@ -57,9 +51,9 @@ namespace MassTransit.Tests.Serialization.Approach
 					context.WriteNamespaceInformationToXml(writer);
 			});
 
-			foreach (PropertyInfo property in _type.GetProperties())
+			foreach (ObjectProperty<T> property in _propertyCache.GetProperties())
 			{
-				object obj = property.GetValue(value, null);
+				object obj = property.GetValue((T)value);
 
 				var enumerable = context.SerializeObject(property.Name, property.PropertyType, obj);
 				foreach (var action in enumerable)

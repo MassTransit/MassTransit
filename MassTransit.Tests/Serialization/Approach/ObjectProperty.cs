@@ -12,21 +12,32 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests.Serialization.Approach
 {
+	using System;
 	using System.Reflection;
 	using Magnum.Reflection;
 
-	public class ObjectProperty
+	public class ObjectProperty<T>
 	{
-		private FastProperty _fastProperty;
+		private FastProperty<T> _fastProperty;
 
 		public ObjectProperty(PropertyInfo info)
 		{
-			_fastProperty = new FastProperty(info);
+			_fastProperty = new FastProperty<T>(info);
 		}
 
 		public string Name
 		{
 			get { return _fastProperty.Property.Name; }
+		}
+
+		public Type PropertyType
+		{
+			get { return _fastProperty.Property.PropertyType; }
+		}
+
+		public object GetValue(T instance)
+		{
+			return _fastProperty.Get(instance);
 		}
 	}
 }
