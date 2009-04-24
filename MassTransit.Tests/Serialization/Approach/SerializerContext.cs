@@ -31,12 +31,10 @@ namespace MassTransit.Tests.Serialization.Approach
 		private static readonly Dictionary<Type, IObjectSerializer> _serializers;
 
 		private static Dictionary<Type, IObjectFieldCache> _fieldCaches;
-		private static Dictionary<Type, IObjectPropertyCache> _propertyCaches;
 		private NamespaceTable _namespaceTable = new NamespaceTable();
 
 		static SerializerContext()
 		{
-			_propertyCaches = new Dictionary<Type, IObjectPropertyCache>();
 			_fieldCaches = new Dictionary<Type, IObjectFieldCache>();
 			_serializers = new Dictionary<Type, IObjectSerializer>();
 
@@ -92,10 +90,9 @@ namespace MassTransit.Tests.Serialization.Approach
 
 			Type serializerType = typeof (ObjectSerializer<>).MakeGenericType(type);
 
-			var propertyCache = _propertyCaches.Retrieve(type, () => new ObjectPropertyCache(type));
 			var fieldCache = _fieldCaches.Retrieve(type, () => new ObjectFieldCache(type));
 
-			var serializer = (IObjectSerializer) Activator.CreateInstance(serializerType, propertyCache, fieldCache);
+			var serializer = (IObjectSerializer) Activator.CreateInstance(serializerType, fieldCache);
 
 			return serializer;
 		}

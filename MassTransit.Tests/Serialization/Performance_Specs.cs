@@ -3,6 +3,7 @@ namespace MassTransit.Tests.Serialization
 	using System;
 	using System.Diagnostics;
 	using System.IO;
+	using Approach;
 	using Magnum;
 	using Magnum.DateTimeExtensions;
 	using MassTransit.Serialization;
@@ -34,7 +35,7 @@ namespace MassTransit.Tests.Serialization
 //					CorrelationId = CombGuid.Generate()
 //				};
 
-			var serializer = new CustomXmlMessageSerializer();
+			var serializer = new CustomXmlSerializer();
 
 			for (int i = 0; i < 10; i++)
 			{
@@ -46,7 +47,7 @@ namespace MassTransit.Tests.Serialization
 				}
 				using(MemoryStream input = new MemoryStream(data))
 				{
-					serializer.Deserialize(input);
+			//		serializer.Deserialize(input);
 				}
 			}
 
@@ -82,7 +83,7 @@ namespace MassTransit.Tests.Serialization
 			{
 				using (MemoryStream input = new MemoryStream(sample))
 				{
-					serializer.Deserialize(input);
+			//		serializer.Deserialize(input);
 				}
 			}
 
