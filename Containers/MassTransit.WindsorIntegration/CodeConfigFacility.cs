@@ -49,9 +49,10 @@ namespace MassTransit.WindsorIntegration
 		public void AddBus(string id, Uri endpointToListenOn)
 		{
 			IEndpoint ep = Kernel.Resolve<IEndpointFactory>().GetEndpoint(endpointToListenOn);
+			//Component.For<IEndpoint>().Instance(ep).Named("lep"),
 		    Kernel.Register(
                 Component.For<IServiceBus>().ImplementedBy<ServiceBus>().Parameters(
-                    Parameter.ForKey("endpointListeOn").Eq("ep"), //how to handle this?
+                    Parameter.ForKey("endpointListenOn").Eq("${lep}"), //how to handle this?
                     Parameter.ForKey("MinimumConsumerThreads").Eq("1"),
                     Parameter.ForKey("MaximumConsumerThreads").Eq("10"))
                     .Named(id)
