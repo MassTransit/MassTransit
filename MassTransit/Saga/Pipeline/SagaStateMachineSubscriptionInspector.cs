@@ -129,11 +129,7 @@ namespace MassTransit.Saga.Pipeline
 			Type componentType = typeof (TComponent);
 			Type messageType = typeof (TMessage);
 
-			Type sinkType;
-			if (InInitialState())
-				sinkType = typeof (InitiateSagaStateMachineSink<,>).MakeGenericType(componentType, messageType);
-			else
-				sinkType = typeof(OrchestrateSagaStateMachineSink<,>).MakeGenericType(componentType, messageType);
+			Type sinkType = typeof (CorrelatedSagaStateMachineMessageSink<,>).MakeGenericType(componentType, messageType);
 
 			MethodInfo genericMethod = ReflectiveMethodInvoker.FindMethod(GetType(),
 				"Connect",
