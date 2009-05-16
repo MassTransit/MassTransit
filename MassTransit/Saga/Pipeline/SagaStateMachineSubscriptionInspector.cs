@@ -22,7 +22,6 @@ namespace MassTransit.Saga.Pipeline
 	using Magnum.StateMachine;
 	using MassTransit.Pipeline;
 	using MassTransit.Pipeline.Configuration;
-	using MassTransit.Pipeline.Configuration.Subscribers;
 	using Util;
 
 	public class SagaStateMachineSubscriptionInspector :
