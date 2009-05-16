@@ -13,10 +13,21 @@
 namespace MassTransit.Saga
 {
 	using System;
+	using System.Collections.Generic;
+	using MassTransit.Pipeline;
 
 	public interface ISagaLocator<TSaga, TMessage>
 		where TSaga : CorrelatedBy<Guid>
+		where TMessage : class
 	{
-		bool TryGetSagaForMessage(TMessage message, out InstanceScope<TSaga> instanceScope);
+		IEnumerator<TSaga> Find(TMessage message);
+	}
+
+
+	public interface ISagaMessageSink<TSaga, TMessage> :
+		IPipelineSink<TMessage>
+		where TMessage : class
+		where TSaga : ISaga
+	{
 	}
 }
