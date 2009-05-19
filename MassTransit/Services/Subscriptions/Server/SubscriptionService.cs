@@ -13,6 +13,7 @@
 namespace MassTransit.Services.Subscriptions.Server
 {
 	using System;
+	using System.Collections.Generic;
 	using System.Linq;
 	using Exceptions;
 	using log4net;
@@ -126,28 +127,25 @@ namespace MassTransit.Services.Subscriptions.Server
 		private void SendToClients<T>(T message)
 			where T : class
 		{
-			var clients = _subscriptionClientSagas
-				.Where(x => x.CurrentState == SubscriptionClientSaga.Active);
-
-			foreach (var client in clients)
+			_subscriptionClientSagas.Where(x => x.CurrentState == SubscriptionClientSaga.Active)
+				.Each(client =>
 			{
 				IEndpoint endpoint = _endpointFactory.GetEndpoint(client.EndpointUri);
 
 				endpoint.Send(message, x => x.SetSourceAddress(_bus.Endpoint.Uri));
-			}
+					});
 		}
 
 		private void SendCacheUpdateToClient(Uri uri)
 		{
-			var subscriptions = _subscriptionSagas
-				.Where(x => x.CurrentState == SubscriptionSaga.Active)
+			var subscriptions = _subscriptionSagas.Where(x => x.CurrentState == SubscriptionSaga.Active)
 				.Select(x => x.SubscriptionInfo);
 
-			var message = new CacheUpdateResponse(subscriptions);
+			var response = new CacheUpdateResponse(subscriptions);
 
 			IEndpoint endpoint = _endpointFactory.GetEndpoint(uri);
 
-			endpoint.Send(message, x => x.SetSourceAddress(_bus.Endpoint.Uri));
+			endpoint.Send(response, x => x.SetSourceAddress(_bus.Endpoint.Uri));
 		}
 	}
 }

@@ -10,28 +10,19 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Tests.Saga.Locator
+namespace MassTransit.Pipeline
 {
 	using System;
-	using System.Linq;
-	using MassTransit.Saga;
 
-	public class PropertySagaLocator<TSaga, TMessage> :
-		ISagaLocator<TSaga, TMessage>
-		where TSaga : class, ISaga, CorrelatedBy<Guid>
+	public interface ISubscriberContext
 	{
-		private readonly InMemorySagaRepository<TSaga> _repository;
-		private readonly Func<TSaga, TMessage, bool> _selector;
+		IObjectBuilder Builder { get; }
+		IMessagePipeline Pipeline { get; }
 
-		public PropertySagaLocator(InMemorySagaRepository<TSaga> repository, Func<TSaga, TMessage, bool> selector)
-		{
-			_repository = repository;
-			_selector = selector;
-		}
+		bool HasMessageTypeBeenDefined(Type messageType);
+		void MessageTypeWasDefined(Type messageType);
 
-		public TSaga GetSagaForMessage(TMessage message)
-		{
-			return _repository.Where(x => _selector(x, message)).FirstOrDefault();
-		}
+		UnsubscribeAction SubscribedTo<T>() where T : class;
+		UnsubscribeAction SubscribedTo<T,K>(K correlationId) where T : class, CorrelatedBy<K>;
 	}
 }

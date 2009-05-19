@@ -22,6 +22,12 @@ namespace MassTransit.Services.Timeout
 	{
 		private readonly object _lock = new object();
 
+		public InMemoryTimeoutRepository()
+			: base(x => x.Id)
+		{
+			
+		}
+
 		public void Schedule(ScheduledTimeout timeout)
 		{
 			lock (_lock)

@@ -4,7 +4,7 @@ namespace MassTransit.Pipeline.Configuration
 	using System.Collections.Generic;
 	using Batch.Pipeline;
 	using Internal;
-	using Saga.Pipeline;
+	using Saga.Configuration;
 	using Sinks;
 	using Subscribers;
 	using Util;
@@ -35,7 +35,8 @@ namespace MassTransit.Pipeline.Configuration
 			_interceptors.Register(new ConsumesSelectedSubscriber());
 			_interceptors.Register(new ConsumesForSubscriber());
 			_interceptors.Register(new BatchSubscriber());
-			_interceptors.Register(new SagaStateMachineInterceptor());
+			_interceptors.Register(new SagaStateMachineSubscriber());
+			_interceptors.Register(new ObservesSubscriber());
 			_interceptors.Register(new OrchestratesSubscriber());
 			_interceptors.Register(new InitiatesSubscriber());
 		}

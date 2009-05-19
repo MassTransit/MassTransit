@@ -13,8 +13,9 @@
 namespace MassTransit.Exceptions
 {
 	using System;
+	using System.Linq.Expressions;
 
-    [Serializable]
+	[Serializable]
 	public class SagaException :
 		Exception
 	{
@@ -28,6 +29,13 @@ namespace MassTransit.Exceptions
 			_sagaType = sagaType;
 			_messageType = messageType;
 			_correlationId = correlationId;
+		}
+
+		public SagaException(string message, Type sagaType, Type messageType, Expression findExpression)
+			: base(string.Format("{0} {1}({2}) - {3}", sagaType.FullName, message, messageType.FullName, findExpression))
+		{
+			_sagaType = sagaType;
+			_messageType = messageType;
 		}
 
 		public SagaException(string message, Type sagaType, Type messageType, Guid correlationId, Exception innerException)

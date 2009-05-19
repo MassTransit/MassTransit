@@ -13,73 +13,71 @@
 namespace MassTransit.Saga
 {
 	using System;
-	using System.Collections;
 	using System.Collections.Generic;
 	using System.Linq;
-	using Exceptions;
+	using System.Linq.Expressions;
 	using log4net;
-	using Magnum.Threading;
+	using Magnum.Data;
 
 	public class InMemorySagaRepository<T> :
 		ISagaRepository<T>
 		where T : class, ISaga
 	{
-		private static readonly ILog _log = LogManager.GetLogger(typeof(InMemorySagaRepository<T>).ToFriendlyName());
-
-		private readonly ReaderWriterLockedDictionary<Guid, T> _sagas = new ReaderWriterLockedDictionary<Guid, T>();
+		private static readonly ILog _log = LogManager.GetLogger(typeof (InMemorySagaRepository<T>).ToFriendlyName());
+		private IRepository<T> _repository;
 
 		public InMemorySagaRepository()
 		{
 			_log.InfoFormat("Creating saga repository for {0}", typeof (T).FullName);
+
+			_repository = new InMemoryRepository<T, Guid>(x => x.CorrelationId);
 		}
 
 		public void Dispose()
 		{
-			_sagas.Clear();
+			_repository.Dispose();
+			_repository = null;
 		}
 
-		public IEnumerator<T> InitiateNewSaga(Guid id)
+		public IEnumerable<Action<V>> Create<V>(Guid sagaId, Action<T, V> action)
 		{
-			T saga;
-			if(_sagas.TryGetValue(id, out saga))
-				throw new SagaException("The saga already exists and cannot be initiated", typeof (T), typeof (T), id);
+			T saga = (T) Activator.CreateInstance(typeof (T), new object[] {sagaId});
 
-			if (_log.IsDebugEnabled)
-				_log.DebugFormat("Creating saga [{0}] - {1}", typeof(T).FullName, id);
-
-			saga = (T) Activator.CreateInstance(typeof (T), new object[] {id});
-
-			_sagas.Add(id, saga);
-
-			lock(saga)
-			{
-				yield return saga;
-			}
-		}
-
-		public IEnumerator<T> OrchestrateExistingSaga(Guid id)
-		{
-			if(_log.IsDebugEnabled)
-				_log.DebugFormat("Loading saga [{0}] - {1}", typeof (T).FullName, id);
-
-			T saga;
-			if (!_sagas.TryGetValue(id, out saga))
-				throw new SagaException("The saga was not found and cannot be loaded", typeof (T), typeof (T), id);
+			_repository.Save(saga);
 
 			lock (saga)
 			{
-				yield return saga;
+				yield return x => action(saga, x);
 			}
 		}
 
-		public IEnumerator<T> GetEnumerator()
+		public IEnumerable<Action<V>> Find<V>(Expression<Func<T, bool>> expression, Action<T, V> action)
 		{
-			return _sagas.Values.ToList().GetEnumerator();
+			foreach (T saga in _repository.Where(expression))
+			{
+				T consumer = saga;
+				lock (consumer)
+				{
+					yield return x => action(consumer, x);
+				}
+			}
 		}
 
-		IEnumerator IEnumerable.GetEnumerator()
+		public IEnumerable<Action> Find(Expression<Func<T, bool>> expression, Action<T> action)
 		{
-			return GetEnumerator();
+			foreach (T saga in _repository.Where(expression))
+			{
+				T consumer = saga;
+				lock (consumer)
+				{
+					yield return () => action(consumer);
+				}
+			}
+		}
+
+		public IEnumerable<T> Where(Expression<Func<T, bool>> filter)
+		{
+			return _repository.Where(filter);
 		}
 	}
 }

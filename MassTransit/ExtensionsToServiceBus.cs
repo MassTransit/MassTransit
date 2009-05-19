@@ -13,6 +13,7 @@
 namespace MassTransit
 {
 	using System;
+	using System.Collections.Generic;
 	using System.Linq;
 	using Internal;
 	using Internal.RequestResponse;
@@ -144,6 +145,16 @@ namespace MassTransit
 				throw new InvalidOperationException("Unable to convert from " + input.GetType().FullName + " to " + typeof (T).FullName);
 
 			return result;
+		}
+
+		public static IEnumerable<T> Each<T>(this IEnumerable<T> collection, Action<T> action)
+		{
+			foreach (T item in collection)
+			{
+				action(item);
+			}
+
+			return collection;
 		}
 	}
 }

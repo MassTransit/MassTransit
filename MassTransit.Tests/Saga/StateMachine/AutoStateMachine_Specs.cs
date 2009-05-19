@@ -64,21 +64,21 @@ namespace MassTransit.Tests.Saga.StateMachine
 			PipelineViewer.Trace(RemoteBus.OutboundPipeline);
 
 
-			Assert.AreEqual(0, _repository.Count());
+			Assert.AreEqual(0, _repository.Where(x => true).Count());
 
 			RemoteBus.Publish(new RegisterUser(_transactionId, _username, _password, _displayName, _email));
 
 			for (int i = 0; i < 20; i++)
 			{
-				if (_repository.Count() == 1)
+				if (_repository.Where(x=>true).Count() == 1)
 					break;
 
 				Thread.Sleep(100);
 			}
 
-			Assert.AreEqual(1, _repository.Count());
+			Assert.AreEqual(1, _repository.Where(x=>true).Count());
 
-			foreach (AutoStateMachineSaga saga in _repository)
+			foreach (AutoStateMachineSaga saga in _repository.Where(x=>true))
 			{
 				saga.CurrentState.ShouldEqual(AutoStateMachineSaga.WaitingForEmailValidation);
 			}

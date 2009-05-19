@@ -12,21 +12,12 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Saga
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq.Expressions;
+	using MassTransit.Pipeline;
 
-	/// <summary>
-	/// A saga repository is used by the service bus to dispatch messages to sagas
-	/// </summary>
-	/// <typeparam name="T"></typeparam>
-    public interface ISagaRepository<T> :
-		IDisposable
-        where T : ISaga
-    {
-		IEnumerable<Action<V>> Create<V>(Guid sagaId, Action<T,V> action);
-		IEnumerable<Action<V>> Find<V>(Expression<Func<T, bool>> expression, Action<T,V> action);
-		IEnumerable<Action> Find(Expression<Func<T, bool>> expression, Action<T> action);
-		IEnumerable<T> Where(Expression<Func<T, bool>> filter);
-    }
+	public interface ISagaMessageSink<TSaga, TMessage> :
+		IPipelineSink<TMessage>
+		where TMessage : class
+		where TSaga : ISaga
+	{
+	}
 }

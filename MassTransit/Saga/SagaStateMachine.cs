@@ -12,13 +12,20 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Saga
 {
+	using System;
+	using System.Collections.Generic;
+	using System.Linq;
+	using System.Linq.Expressions;
 	using System.Runtime.Serialization;
+	using Magnum.CollectionExtensions;
 	using Magnum.StateMachine;
 
 	public class SagaStateMachine<T> :
 		StateMachine<T>
 		where T : SagaStateMachine<T>
 	{
+		private static readonly Dictionary<Event, EventBinder<T>> _binders = new Dictionary<Event, EventBinder<T>>();
+
 		protected SagaStateMachine()
 		{
 		}
@@ -26,6 +33,42 @@ namespace MassTransit.Saga
 		public SagaStateMachine(SerializationInfo info, StreamingContext context)
 			: base(info, context)
 		{
+		}
+
+		protected static EventBinder<T,V> Correlate<V>(Event<V> targetEvent)
+		{
+			return (EventBinder<T,V>)_binders.Retrieve(targetEvent, () => new DataEventBinder<T, V>());
+		}
+	}
+
+	public interface EventBinder<TSaga>
+	{
+		Expression<Func<TSaga, T, bool>> Bind<T>();
+	}
+
+	public interface EventBinder<TSaga,TMessage> :
+		EventBinder<TSaga>
+	{
+		void By(Expression<Func<TSaga, TMessage, bool>> expression);
+	}
+
+	public class DataEventBinder<TSaga, TMessage> :
+		EventBinder<TSaga,TMessage>
+	{
+		private Expression<Func<TSaga, TMessage, bool>> _expression;
+
+		public void By(Expression<Func<TSaga, TMessage, bool>> expression)
+		{
+			_expression = expression;
+		}
+
+		public Expression<Func<TSaga, T, bool>> Bind<T>()
+		{
+			var sagaParameter = Expression.Parameter(typeof (TSaga), "saga");
+			var messageParameter = Expression.Parameter(typeof (T), "message");
+			var cast = Expression.Convert(messageParameter, typeof (TMessage));
+
+			return Expression.Lambda<Func<TSaga, T, bool>>(Expression.Invoke(_expression, sagaParameter, cast), new[]{sagaParameter,messageParameter});
 		}
 	}
 }

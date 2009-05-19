@@ -13,6 +13,9 @@
 namespace MassTransit.Tests.Saga.Locator
 {
 	using System;
+	using System.Collections.Generic;
+	using System.Linq;
+	using System.Linq.Expressions;
 	using Magnum;
 	using MassTransit.Saga;
 	using NUnit.Framework;
@@ -27,13 +30,9 @@ namespace MassTransit.Tests.Saga.Locator
 			_sagaId = CombGuid.Generate();
 
 			_repository = new InMemorySagaRepository<TestSaga>();
-			var enumerator = _repository.InitiateNewSaga(_sagaId);
-			enumerator.MoveNext();
-			enumerator.Current.Name = "Joe";
 
-			enumerator = _repository.InitiateNewSaga(CombGuid.Generate());
-			enumerator.MoveNext();
-			enumerator.Current.Name = "Chris";
+			_repository.Create<PingMessage>(_sagaId, (s, m) => s.Name = "Joe").ToArray();
+			_repository.Create<PingMessage>(CombGuid.Generate(), (s, m) => s.Name = "Chris").ToArray();
 		}
 
 		[TearDown]
@@ -49,14 +48,11 @@ namespace MassTransit.Tests.Saga.Locator
 		[Test]
 		public void A_correlated_message_should_find_the_correct_saga()
 		{
-			ISagaLocator<TestSaga, PingMessage> locator =
-				new CorrelatedSagaLocator<TestSaga, PingMessage>(_repository);
-
 			var ping = new PingMessage(_sagaId);
 
-			TestSaga saga = locator.GetSagaForMessage(ping);
+			bool found = false;// locator.TryGetSagaForMessage(ping, out saga);
 
-			Assert.AreEqual(_sagaId, saga.CorrelationId);
+			Assert.IsTrue(found);
 		}
 
 		[Test]
@@ -64,13 +60,9 @@ namespace MassTransit.Tests.Saga.Locator
 		{
 			NameMessage name = new NameMessage {Name = "Joe"};
 
-			ISagaLocator<TestSaga, NameMessage> locator =
-				new PropertySagaLocator<TestSaga, NameMessage>(_repository,
-					(s, m) => s.Name == m.Name);
+			bool found = false;// locator.TryGetSagaForMessage(name, out saga);
 
-			TestSaga saga = locator.GetSagaForMessage(name);
-
-			Assert.AreEqual(_sagaId, saga.CorrelationId);
+			Assert.IsTrue(found);
 		}
 
 		[Test]
@@ -78,15 +70,74 @@ namespace MassTransit.Tests.Saga.Locator
 		{
 			NameMessage name = new NameMessage {Name = "Tom"};
 
-			ISagaLocator<TestSaga, NameMessage> locator =
-				new PropertySagaLocator<TestSaga, NameMessage>(_repository,
-					(s, m) => s.Name == m.Name);
+			//ISagaLocator<TestSaga, NameMessage> locator =
+			//	new PropertySagaLocator<TestSaga, NameMessage>(_repository, new ExistingSagaPolicy<TestSaga, NameMessage>(),
+			//		(s, m) => s.Name == m.Name);
 
-			TestSaga saga = locator.GetSagaForMessage(name);
+			bool found = false;// locator.TryGetSagaForMessage(name, out saga);
 
-			Assert.IsNull(saga);
+		}
+
+		[Test]
+		public void A_nice_interface_should_be_available_for_defining_saga_locators()
+		{
+			IServiceBus bus = null;
+
+			bus.Bind<PingMessage>().To<TestSaga>().ByCorrelationId();
+
+
+			bus.Bind<NameMessage>().To<TestSaga>().By((saga, message) => saga.Name == message.Name);
+		}
+
+	}
+
+	public static class ExtensionForSagaBinding
+	{
+		public static SagaConfigurationBinder<TMessage> Bind<TMessage>(this IServiceBus bus)
+		{
+			return new SagaConfigurationBinder<TMessage>();
+		}
+
+		public static IServiceBus ByCorrelationId<TSaga,TMessage>(this SagaConfigurationBinder<TSaga,TMessage> binder) 
+			where TMessage : CorrelatedBy<Guid> 
+			where TSaga : class, ISaga
+		{
+			// this should register something in the container to handle this message on demand
+
+			throw new NotImplementedException();
+		}
+
+		public static IServiceBus By<TSaga,TMessage>(this SagaConfigurationBinder<TSaga,TMessage> binder, Expression<Func<TSaga,TMessage,bool>> expression)
+		{
+
+			throw new NotImplementedException();
+			
 		}
 	}
+
+	public class SagaConfigurationBinder<TMessage>
+	{
+		public SagaConfigurationBinder<TSaga,TMessage> To<TSaga>()
+		{
+			return new SagaConfigurationBinder<TSaga, TMessage>();
+		}
+	}
+
+	public class SagaConfigurationBinder<TSaga,TMessage>
+	{
+	}
+
+
+	public class Bind<TMessage>
+	{
+		public class To<TSaga>
+		{
+			public static void ByCorrelationId()
+			{
+			}
+		}
+	}
+
 
 	public class NameMessage
 	{

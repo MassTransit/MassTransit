@@ -15,8 +15,7 @@ namespace MassTransit.Services.Timeout
 	using System;
 	using Magnum.Data;
 
-	public class ScheduledTimeout :
-		IAggregateRoot
+	public class ScheduledTimeout
 	{
 		public Guid Id { get; set; }
 		public int Tag { get; set; }
