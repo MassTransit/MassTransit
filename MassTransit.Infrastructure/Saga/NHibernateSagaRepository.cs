@@ -1,12 +1,26 @@
+// Copyright 2007-2008 The Apache Software Foundation.
+//  
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
+// this file except in compliance with the License. You may obtain a copy of the 
+// License at 
+// 
+//     http://www.apache.org/licenses/LICENSE-2.0 
+// 
+// Unless required by applicable law or agreed to in writing, software distributed 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// specific language governing permissions and limitations under the License.
 namespace MassTransit.Infrastructure.Saga
 {
 	using System;
-	using System.Collections;
 	using System.Collections.Generic;
 	using System.Data;
-	using Magnum.Data;
+	using System.Linq;
+	using System.Linq.Expressions;
 	using Magnum.Infrastructure.Data;
 	using MassTransit.Saga;
+	using NHibernate;
+	using NHibernate.Linq;
 
 	public class NHibernateSagaRepository<T> :
 		ISagaRepository<T>
@@ -16,77 +30,63 @@ namespace MassTransit.Infrastructure.Saga
 		{
 		}
 
-		public IEnumerator<T> InitiateNewSaga(Guid id)
+		public IEnumerable<Action<V>> Find<V>(Expression<Func<T, bool>> expression, Action<T, V> action)
 		{
-			try
+			ISession session = NHibernateUnitOfWork.Current.Session;
+
+			foreach (T saga in session.Linq<T>().Where(expression))
 			{
-				using (IUnitOfWork work = UnitOfWork.Start())
-				using (ITransaction transaction = work.BeginTransaction(IsolationLevel.Serializable))
+				using (var transaction = session.BeginTransaction(IsolationLevel.Serializable))
 				{
-					using (var repository = new NHibernateRepository())
-					{
-						var saga = (T) Activator.CreateInstance(typeof (T), new object[] {id});
-						repository.Save(saga);
-						work.Flush();
+					T lockedSaga = session.Load<T>(saga.CorrelationId, LockMode.Upgrade);
 
-						yield return saga;
+					yield return x => action(lockedSaga, x);
 
-						repository.Save(saga);
+					session.Update(lockedSaga);
+
 						transaction.Commit();
 					}
-				}
-			}
-			finally
-			{
-				UnitOfWork.Finish();
+				session.Flush();
 			}
 		}
 
-		public IEnumerator<T> OrchestrateExistingSaga(Guid id)
+		public IEnumerable<Action> Find(Expression<Func<T, bool>> expression, Action<T> action)
 		{
-			try
+			foreach (var item in Find<int>(expression, (s,m) => action(s)))
 			{
-				using (IUnitOfWork work = UnitOfWork.Start())
-				using (ITransaction transaction = work.BeginTransaction(IsolationLevel.Serializable))
-				{
-					using (var repository = new NHibernateRepository())
-					{
-						var saga = repository.Get<T>(id);
+				Action<int> actionItem = item;
 
-						yield return saga;
-
-						repository.Update(saga);
-						transaction.Commit();
+				yield return () => actionItem(0);
 					}
 				}
-			}
-			finally
+
+		public IEnumerable<T> Where(Expression<Func<T, bool>> filter)
 			{
-				UnitOfWork.Finish();
-			}
+			ISession session = NHibernateUnitOfWork.Current.Session;
+
+			return session.Linq<T>().Where(filter);
 		}
 
-		public IEnumerator<T> GetEnumerator()
+		public IEnumerable<Action<V>> Create<V>(Guid sagaId, Action<T, V> action)
 		{
-			try
+			ISession session = NHibernateUnitOfWork.Current.Session;
+
+			using (var transaction = session.BeginTransaction(IsolationLevel.Serializable))
 			{
-				using (IUnitOfWork work = UnitOfWork.Start())
-				{
-					using (var repository = new NHibernateRepository())
-					{
-						return repository.List<T>().GetEnumerator();
-					}
-				}
-			}
-			finally
-			{
-				UnitOfWork.Finish();
-			}
+				T saga = (T) Activator.CreateInstance(typeof (T), sagaId);
+				session.Save(saga);
+				session.Flush();
+
+				saga = session.Load<T>(sagaId, LockMode.Upgrade);
+
+				yield return x => action(saga, x);
+
+				session.Update(saga);
+
+				transaction.Commit();
 		}
 
-		IEnumerator IEnumerable.GetEnumerator()
-		{
-			return GetEnumerator();
+			session.Flush();
 		}
 	}
 }

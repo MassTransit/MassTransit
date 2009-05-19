@@ -23,9 +23,9 @@ namespace MassTransit.Infrastructure.Timeout
 	public class PersistantTimeoutRepository :
         ITimeoutRepository
     {
-        private readonly IRepository<ScheduledTimeout, Guid> _repository;
+        private readonly IRepository<ScheduledTimeout> _repository;
 
-        public PersistantTimeoutRepository(IRepository<ScheduledTimeout, Guid> repository)
+        public PersistantTimeoutRepository(IRepository<ScheduledTimeout> repository)
         {
             _repository = repository;
         }
@@ -75,16 +75,6 @@ namespace MassTransit.Infrastructure.Timeout
     	public void Dispose()
     	{
     		_repository.Dispose();
-    	}
-
-    	public ScheduledTimeout Get(Guid id)
-    	{
-    		return _repository.Get(id);
-    	}
-
-    	public IList<ScheduledTimeout> List()
-    	{
-    		return _repository.List();
     	}
 
     	public void Save(ScheduledTimeout item)

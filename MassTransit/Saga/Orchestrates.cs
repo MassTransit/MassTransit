@@ -13,9 +13,9 @@
 namespace MassTransit.Saga
 {
     using System;
-    
 
-    /// <summary>
+
+	/// <summary>
     /// Specifies that a class implementing ISaga consumes TMessage as part of the saga
     /// </summary>
     /// <typeparam name="TMessage">The type of message to consume</typeparam>

@@ -17,7 +17,6 @@ namespace MassTransit.Services.HealthMonitoring
 	using System.Linq;
     using log4net;
     using Messages;
-	using Pipeline.Inspectors;
 	using Saga;
     using Server;
 
@@ -27,15 +26,30 @@ namespace MassTransit.Services.HealthMonitoring
 		IDisposable
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(HealthService));
+		private readonly ISagaRepository<HealthSaga> _healthSagas;
         private IServiceBus _bus;
     	private UnsubscribeAction _unsubscribeToken = () => false;
-        private readonly ISagaRepository<HealthSaga> _healthSagas;
 
     	public HealthService(IServiceBus bus, ISagaRepository<HealthSaga> healthSagas)
     	{
     	    _bus = bus;
     		_healthSagas = healthSagas;
     	}
+
+		public void Consume(HealthUpdateRequest message)
+		{
+			UpdateSubscribers();
+		}
+
+		public void Consume(StatusChange message)
+		{
+			UpdateSubscribers();
+		}
+
+		public void Dispose()
+		{
+			_bus.Dispose();
+		}
 
     	public void Start()
         {
@@ -57,30 +71,15 @@ namespace MassTransit.Services.HealthMonitoring
             _log.Info("Health Service Stopped");
         }
 
-        public void Dispose()
+		public void UpdateSubscribers()
         {
-        	_bus.Dispose();
-        }
+			var message = new HealthUpdate();
 
-        public void Consume(StatusChange message)
-        {
-            UpdateSubscribers();
-        }
+			_healthSagas.Where(x => true)
+				.Each(x => { message.Information.Add(new HealthInformation(x.EndpointAddress, x.CurrentState.Name)); });
 
-        public void Consume(HealthUpdateRequest message)
-        {
-            UpdateSubscribers();
-        }
-
-        public void UpdateSubscribers()
-        {
-            var sagas = _healthSagas.ToList();
-            var msg = new HealthUpdate();
-
-            sagas.ForEach(x => msg.Information.Add(new HealthInformation(x.EndpointAddress, x.CurrentState.Name)));
             _log.Debug("Publishing HealthUpdate");
-
-            _bus.Publish(msg);
+			_bus.Publish(message);
         }
     }
 }

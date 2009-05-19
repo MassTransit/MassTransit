@@ -14,7 +14,6 @@ namespace MassTransit.Pipeline.Sinks
 {
 	using System;
 	using System.Collections.Generic;
-	using Configuration.Subscribers;
 	using Exceptions;
 
     /// <summary>

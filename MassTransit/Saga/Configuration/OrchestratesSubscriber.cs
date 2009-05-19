@@ -10,34 +10,41 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Saga.Pipeline
+namespace MassTransit.Saga.Configuration
 {
 	using System;
 	using System.Collections;
 	using System.Collections.Generic;
 	using Exceptions;
+	using MassTransit.Pipeline;
 	using MassTransit.Pipeline.Configuration;
 	using MassTransit.Pipeline.Configuration.Subscribers;
+	using Pipeline;
 
-    public class InitiatesSubscriber :
-		ConsumesSubscriberBase<InitiatesSubscriber>
+	public class OrchestratesSubscriber :
+		ConsumesSubscriberBase<OrchestratesSubscriber>
 	{
 		protected override Type InterfaceType
 		{
-			get { return typeof (InitiatedBy<>); }
+			get { return typeof (Orchestrates<>); }
 		}
 
 		protected virtual UnsubscribeAction Connect<TComponent, TMessage>(ISubscriberContext context)
 			where TMessage : class, CorrelatedBy<Guid>
-			where TComponent : class, InitiatedBy<TMessage>, ISaga
+			where TComponent : class, Orchestrates<TMessage>, ISaga
 		{
 			MessageRouterConfigurator routerConfigurator = MessageRouterConfigurator.For(context.Pipeline);
 
 			var router = routerConfigurator.FindOrCreate<TMessage>();
 
-			var sink = context.Builder.GetInstance<InitiateSagaMessageSink<TComponent, TMessage>>(new Hashtable {{"context", context}});
+			var arguments = new Hashtable
+				{
+					{"context", context},
+					{"policy", new ExistingSagaPolicy<TComponent, TMessage>()},
+				};
+			var sink = context.Builder.GetInstance<CorrelatedSagaMessageSink<TComponent, TMessage>>(arguments);
 			if (sink == null)
-				throw new ConfigurationException("Could not build the initiating message sink for " + typeof (TComponent).FullName);
+				throw new ConfigurationException("Could not build the message sink for " + typeof (TComponent).FullName);
 
 			var result = router.Connect(sink);
 

@@ -10,19 +10,23 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Pipeline.Configuration.Subscribers
+namespace MassTransit.Tests.Saga
 {
-    using System;
+	using System;
 
-    public interface ISubscriberContext
-    {
-        IObjectBuilder Builder { get; }
-        IMessagePipeline Pipeline { get; }
+	[Serializable]
+	public class InitiateSimpleSaga :
+		SimpleSagaMessageBase
+	{
+		public InitiateSimpleSaga()
+		{
+		}
 
-        bool HasMessageTypeBeenDefined(Type messageType);
-        void MessageTypeWasDefined(Type messageType);
+		public InitiateSimpleSaga(Guid correlationId)
+			:base(correlationId)
+		{
+		}
 
-        UnsubscribeAction SubscribedTo<T>() where T : class;
-        UnsubscribeAction SubscribedTo<T,K>(K correlationId) where T : class, CorrelatedBy<K>;
-    }
+		public string Name { get; set; }
+	}
 }

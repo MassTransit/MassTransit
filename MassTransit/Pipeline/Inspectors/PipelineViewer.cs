@@ -129,33 +129,33 @@ namespace MassTransit.Pipeline.Inspectors
 			return true;
 		}	
 		
-		public bool Inspect<TComponent, TMessage>(InitiateSagaMessageSink<TComponent, TMessage> sink)
+		public bool Inspect<TComponent, TMessage>(CorrelatedSagaMessageSink<TComponent, TMessage> sink)
 			where TMessage : class, CorrelatedBy<Guid>
-			where TComponent : class, InitiatedBy<TMessage>, ISaga
+			where TComponent : class, Consumes<TMessage>.All, ISaga
 		{
 			Type componentType = typeof (TComponent);
 
 			string componentName = componentType.IsGenericType ? componentType.GetGenericTypeDefinition().FullName : componentType.FullName;
 
-			Append(string.Format("Initiates Saga {0} ({1})", componentName, typeof(TMessage).Name));
+			Append(string.Format("Saga {0} ({1})", componentName, typeof(TMessage).Name));
 
 			return true;
 		}
 
-		public bool Inspect<TComponent, TMessage>(InitiateSagaStateMachineSink<TComponent, TMessage> sink)
-			where TMessage : class, CorrelatedBy<Guid>
-			where TComponent : SagaStateMachine<TComponent>, ISaga
+		public bool Inspect<TComponent, TMessage>(PropertySagaMessageSink<TComponent, TMessage> sink)
+			where TMessage : class
+			where TComponent : class, Consumes<TMessage>.All, ISaga
 		{
 			Type componentType = typeof (TComponent);
 
 			string componentName = componentType.IsGenericType ? componentType.GetGenericTypeDefinition().FullName : componentType.FullName;
 
-			Append(string.Format("Initiates State Machine Saga {0} ({1})", componentName, typeof(TMessage).Name));
+			Append(string.Format("Property Saga {0} ({1})", componentName, typeof(TMessage).Name));
 
 			return true;
 		}		
 		
-		public bool Inspect<TComponent, TMessage>(OrchestrateSagaStateMachineSink<TComponent, TMessage> sink)
+		public bool Inspect<TComponent, TMessage>(CorrelatedSagaStateMachineMessageSink<TComponent, TMessage> sink)
 			where TMessage : class, CorrelatedBy<Guid>
 			where TComponent : SagaStateMachine<TComponent>, ISaga
 		{
@@ -163,20 +163,7 @@ namespace MassTransit.Pipeline.Inspectors
 
 			string componentName = componentType.IsGenericType ? componentType.GetGenericTypeDefinition().FullName : componentType.FullName;
 
-			Append(string.Format("Orchestrates State Machine Saga {0} ({1})", componentName, typeof(TMessage).Name));
-
-			return true;
-		}
-
-		public bool Inspect<TComponent, TMessage>(OrchestrateSagaMessageSink<TComponent, TMessage> sink)
-			where TMessage : class, CorrelatedBy<Guid>
-			where TComponent : class, Orchestrates<TMessage>, ISaga
-		{
-			Type componentType = typeof (TComponent);
-
-			string componentName = componentType.IsGenericType ? componentType.GetGenericTypeDefinition().FullName : componentType.FullName;
-
-			Append(string.Format("Orchestrates Saga {0} ({1})", componentName, typeof(TMessage).Name));
+			Append(string.Format("State Machine Saga {0} ({1})", componentName, typeof(TMessage).Name));
 
 			return true;
 		}

@@ -18,6 +18,7 @@ namespace MassTransit.Batch.Pipeline
     using System.Reflection;
     using Exceptions;
     using Magnum.Threading;
+    using MassTransit.Pipeline;
     using MassTransit.Pipeline.Configuration.Subscribers;
     using MassTransit.Pipeline.Sinks;
 

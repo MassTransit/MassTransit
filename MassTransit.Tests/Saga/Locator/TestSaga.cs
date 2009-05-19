@@ -20,23 +20,21 @@ namespace MassTransit.Tests.Saga.Locator
 		SagaStateMachine<TestSaga>,
 		ISaga
 	{
-		private readonly Guid _correlationId;
+		protected TestSaga()
+		{
+		}
 
 		public TestSaga(Guid correlationId)
 		{
-			_correlationId = correlationId;
+			CorrelationId = correlationId;
 		}
-
-		public Guid CorrelationId
-		{
-			get { return _correlationId; }
-		}
-
-		public IServiceBus Bus { get; set; }
 
 		public static State Initial { get; set; }
 		public static State Completed { get; set; }
 
 		public string Name { get; set; }
+		public Guid CorrelationId { get; private set; }
+
+		public IServiceBus Bus { get; set; }
 	}
 }

@@ -10,15 +10,22 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Services.Timeout
+namespace MassTransit.Tests.Saga
 {
-    using System;
-    using Magnum.Data;
+	using System;
 
-	public interface ITimeoutRepository :
-		IRepository<ScheduledTimeout>
-    {
-		void Schedule(ScheduledTimeout timeout);
-		void Remove(ScheduledTimeout timeout);
-    }
+	[Serializable]
+	public class CompleteSimpleSaga :
+		SimpleSagaMessageBase
+	{
+		public CompleteSimpleSaga()
+		{
+		}
+
+		public CompleteSimpleSaga(Guid correlationId)
+			:
+				base(correlationId)
+		{
+		}
+	}
 }

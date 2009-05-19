@@ -45,6 +45,7 @@ namespace MassTransit.Infrastructure.Tests.Sagas
 			new SchemaExport(_cfg).Create(true, true);
 		}
 
+/*
 		[Test]
 		public void I_should_be_able_to_store_and_load_a_saga_and_not_lose_state()
 		{
@@ -74,6 +75,7 @@ namespace MassTransit.Infrastructure.Tests.Sagas
 				}
 			}
 		}
+*/
 
 		private const string _connectionString = "Server=localhost;initial catalog=test;Trusted_Connection=yes";
 		private Configuration _cfg;

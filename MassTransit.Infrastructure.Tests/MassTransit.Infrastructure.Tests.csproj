@@ -80,6 +80,7 @@
     <Compile Include="NHibernateSubscriptionStorage_Specs.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Sagas\SagaLoadTest.cs" />
+    <Compile Include="Sagas\SagaLocator_Specs.cs" />
     <Compile Include="Sagas\SagaRepository_Specs.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -101,6 +102,9 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Sagas\RegisterUserStateMachine.hbm.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Sagas\TestSaga.hbm.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
