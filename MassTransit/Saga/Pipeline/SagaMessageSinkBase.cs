@@ -6,6 +6,7 @@ namespace MassTransit.Saga.Pipeline
 	using Exceptions;
 	using log4net;
 	using MassTransit.Pipeline;
+	using Util;
 
 	public abstract class SagaMessageSinkBase<TSaga, TMessage> :
 		ISagaMessageSink<TSaga, TMessage>
@@ -42,12 +43,12 @@ namespace MassTransit.Saga.Pipeline
 		{
 			int count = 0;
 
-			var expression = GetExpressionForFindingSaga(item);
+			var filter = CreateFilterExpressionForMessage(item);
 
-			foreach (var consumer in Repository.Find<TMessage>(expression, ConsumerAction))
+			foreach (var consumer in Repository.Find<TMessage>(filter, ConsumerAction))
 			{
 				if (!Policy.SagaShouldExist)
-					throw new SagaException("The saga should not exist", typeof (TSaga), typeof (TMessage), expression);
+					throw new SagaException("The saga should not exist", typeof (TSaga), typeof (TMessage), filter);
 
 				yield return consumer;
 
@@ -77,9 +78,14 @@ namespace MassTransit.Saga.Pipeline
 			return inspector.Inspect(this);
 		}
 
-		protected abstract Expression<Func<TSaga, bool>> GetExpressionForFindingSaga(TMessage item);
+		protected abstract Expression<Func<TSaga, TMessage, bool>> FilterExpression { get; }
 
 		protected abstract void ConsumerAction(TSaga saga, TMessage message);
+
+		private Expression<Func<TSaga, bool>> CreateFilterExpressionForMessage(TMessage message)
+		{
+			return new SagaFilterExpressionConverter<TSaga,TMessage>(message).Convert(FilterExpression);
+		}
 
 		protected virtual void Dispose(bool disposing)
 		{

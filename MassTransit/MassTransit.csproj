@@ -160,6 +160,8 @@
     <Compile Include="Internal\ISetMessageHeaders.cs" />
     <Compile Include="Configuration\DefaultBusServiceConfigurator.cs" />
     <Compile Include="Saga\Configuration\ObservesSubscriber.cs" />
+    <Compile Include="Saga\DataEventBinder.cs" />
+    <Compile Include="Saga\EventBinder.cs" />
     <Compile Include="Saga\Observes.cs" />
     <Compile Include="Saga\Pipeline\CorrelatedSagaMessageSink.cs" />
     <Compile Include="Saga\Pipeline\CorrelatedSagaStateMachineMessageSink.cs" />
@@ -167,12 +169,14 @@
     <Compile Include="Saga\InitiatingSagaPolicy.cs" />
     <Compile Include="Saga\ISagaMessageSink.cs" />
     <Compile Include="Saga\ISagaPolicy.cs" />
+    <Compile Include="Saga\Pipeline\SagaFilterExpressionConverter.cs" />
     <Compile Include="Util\BranchEvaluator.cs" />
     <Compile Include="Util\EvaluationCandidateSelector.cs" />
     <Compile Include="Util\ExpressionVisitor.cs" />
     <Compile Include="Util\IEvaluationCandidateSelector.cs" />
     <Compile Include="Util\IExpressionEvaluator.cs" />
     <Compile Include="Util\LocalExpressionEvaluator.cs" />
+    <Compile Include="Util\MemberAccessEvaluator.cs" />
     <Compile Include="Util\PredicateBuilder.cs" />
     <Compile Include="Saga\Pipeline\PropertySagaMessageSink.cs" />
     <Compile Include="Saga\Pipeline\PropertySagaStateMachineMessageSink.cs" />

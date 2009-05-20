@@ -15,10 +15,19 @@ namespace MassTransit.Saga
 	using System;
 	using System.Linq.Expressions;
 
-	public interface Observes<TMessage, TSaga> :
-		Consumes<TMessage>.All
-		where TMessage : class
+	public class DataEventBinder<TSaga, TMessage> :
+		EventBinder<TSaga, TMessage>
 	{
-		Expression<Func<TSaga, TMessage, bool>> GetBindExpression();
+		private Expression<Func<TSaga, TMessage, bool>> _expression;
+
+		public void By(Expression<Func<TSaga, TMessage, bool>> expression)
+		{
+			_expression = expression;
+		}
+
+		public Expression<Func<TSaga, TMessage1, bool>> GetBindExpression<TMessage1>()
+		{
+			return _expression.TranslateTo<Expression<Func<TSaga, TMessage1, bool>>>();
+		}
 	}
 }

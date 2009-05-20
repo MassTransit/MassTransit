@@ -15,9 +15,11 @@ namespace MassTransit.Saga.Configuration
 	using System;
 	using System.Collections;
 	using System.Collections.Generic;
+	using System.Linq;
 	using System.Linq.Expressions;
 	using System.Reflection;
 	using Exceptions;
+	using Magnum.InterfaceExtensions;
 	using Magnum.Reflection;
 	using Magnum.StateMachine;
 	using MassTransit.Pipeline;
@@ -60,13 +62,13 @@ namespace MassTransit.Saga.Configuration
 		}
 
 		public bool Inspect<T>(T machine)
-			where T : StateMachine<T>
+			where T : SagaStateMachine<T>
 		{
 			return true;
 		}
 
 		public bool Inspect<T>(State<T> state)
-			where T : StateMachine<T>
+			where T : SagaStateMachine<T>
 		{
 			_currentState = state;
 
@@ -74,13 +76,13 @@ namespace MassTransit.Saga.Configuration
 		}
 
 		public bool Inspect<T>(BasicEvent<T> eevent)
-			where T : StateMachine<T>
+			where T : SagaStateMachine<T>
 		{
 			return true;
 		}
 
 		public bool Inspect<T, V>(DataEvent<T, V> eevent)
-			where T : StateMachine<T>, ISaga
+			where T : SagaStateMachine<T>, ISaga
 		{
 			if (_subscribedMessageTypes.Contains(typeof (V)))
 				return true;
@@ -134,14 +136,86 @@ namespace MassTransit.Saga.Configuration
 			return () => result() && (router.SinkCount == 0) && remove();
 		}
 
+		protected virtual UnsubscribeAction Connect<TSink, TComponent, TMessage>(DataEvent<TComponent,TMessage> dataEvent, Expression<Func<TComponent,TMessage,bool>> selector)
+			where TMessage : class
+			where TComponent : SagaStateMachine<TComponent>, ISaga
+			where TSink : class, IPipelineSink<TMessage>
+		{
+			MessageRouterConfigurator routerConfigurator = MessageRouterConfigurator.For(_context.Pipeline);
+
+			var router = routerConfigurator.FindOrCreate<TMessage>();
+
+			ISagaPolicy<TComponent, TMessage> policy;
+			if (InInitialState())
+				policy = new InitiatingSagaPolicy<TComponent, TMessage>();
+			else
+				policy = new ExistingSagaPolicy<TComponent, TMessage>();
+
+			var sink = _context.Builder.GetInstance<TSink>(new Hashtable
+			                                               	{
+			                                               		{"context", _context},
+																{"dataEvent", dataEvent},
+                                                                {"policy", policy},
+																{"selector", selector},
+			                                               	});
+			if (sink == null)
+				throw new ConfigurationException("Could not build the message sink: " + typeof(TSink).ToFriendlyName());
+
+			var result = router.Connect(sink);
+
+			UnsubscribeAction remove = _context.SubscribedTo<TMessage>();
+
+			return () => result() && (router.SinkCount == 0) && remove();
+		}
+
 		private UnsubscribeAction InvokeConnectMethod<TComponent, TMessage>(DataEvent<TComponent,TMessage> eevent) 
-			where TComponent : StateMachine<TComponent>, ISaga
+			where TComponent : SagaStateMachine<TComponent>, ISaga
 		{
 			Type componentType = typeof (TComponent);
 			Type messageType = typeof (TMessage);
 
-			Type sinkType = typeof (CorrelatedSagaStateMachineMessageSink<,>).MakeGenericType(componentType, messageType);
+			if(messageType.GetInterfaces().Where(x => x == typeof(CorrelatedBy<Guid>)).Count() > 0)
+			{
+				return InvokeCorrelatedConnectMethod(messageType, componentType, eevent);
+			}
 
+			Expression<Func<TComponent,TMessage,bool>> expression;
+			if(SagaStateMachine<TComponent>.TryGetCorrelationExpressionForEvent(eevent, out expression))
+			{
+				return InvokePropertyConnectMethod(messageType, componentType, eevent, expression);
+			}
+
+			throw new NotSupportedException("No method to connect to event was found");
+		}
+
+		private UnsubscribeAction InvokePropertyConnectMethod<TComponent, TMessage>(Type messageType, Type componentType, DataEvent<TComponent, TMessage> eevent, Expression<Func<TComponent, TMessage, bool>> selector) 
+			where TComponent : SagaStateMachine<TComponent>
+		{
+			Type sinkType = typeof(PropertySagaStateMachineMessageSink<,>).MakeGenericType(componentType, messageType);
+
+			MethodInfo genericMethod = ReflectiveMethodInvoker.FindMethod(GetType(),
+				"Connect",
+				new[] { sinkType, typeof(TComponent), messageType },
+				new[] { typeof(DataEvent<TComponent, TMessage>), typeof(Expression<Func<TComponent,TMessage,bool>>)});
+
+			if (genericMethod == null)
+				throw new ConfigurationException(string.Format("Unable to subscribe for type: {0} ({1})",
+					typeof(TComponent).FullName, messageType.FullName));
+
+			var target = Expression.Parameter(typeof(SagaStateMachineSubscriptionInspector), "target");
+			var dataEvent = Expression.Parameter(typeof(DataEvent<TComponent, TMessage>), "dataEvent");
+			var expression = Expression.Parameter(typeof(Expression<Func<TComponent, TMessage, bool>>), "expression");
+			var call = Expression.Call(target, genericMethod, dataEvent, expression);
+
+			var connector = Expression.Lambda<Func<SagaStateMachineSubscriptionInspector, DataEvent<TComponent, TMessage>, Expression<Func<TComponent,TMessage,bool>>, UnsubscribeAction>>(call, new[] { target, dataEvent, expression }).Compile();
+
+			return connector(this, eevent, selector);
+		}
+
+		private UnsubscribeAction InvokeCorrelatedConnectMethod<TComponent, TMessage>(Type messageType, Type componentType, DataEvent<TComponent, TMessage> eevent) 
+			where TComponent : SagaStateMachine<TComponent>
+		{
+			Type sinkType = typeof (CorrelatedSagaStateMachineMessageSink<,>).MakeGenericType(componentType, messageType);
 
 			MethodInfo genericMethod = ReflectiveMethodInvoker.FindMethod(GetType(),
 				"Connect",

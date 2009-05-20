@@ -20,6 +20,30 @@ namespace MassTransit.Tests.Saga.Locator
 		SagaStateMachine<TestSaga>,
 		ISaga
 	{
+		static TestSaga()
+		{
+			Define(() =>
+				{
+					Correlate(Observation).By((saga, message) => saga.Name == message.Name);
+
+					Initially(
+						When(Initiate)
+							.Then((saga, message) =>
+								{
+									saga.WasInitiated = true;
+									saga.Name = message.Name;
+								})
+							.TransitionTo(Initiated));
+
+					During(Initiated,
+						When(Observation)
+							.Then((saga, message) => { saga.WasObserved = true; }),
+						When(Complete)
+							.Then((saga, message) => { saga.WasCompleted = true; })
+							.TransitionTo(Completed));
+				});
+		}
+
 		protected TestSaga()
 		{
 		}
@@ -31,6 +55,15 @@ namespace MassTransit.Tests.Saga.Locator
 
 		public static State Initial { get; set; }
 		public static State Completed { get; set; }
+		public static State Initiated { get; set; }
+
+		public static Event<InitiateSimpleSaga> Initiate { get; set; }
+		public static Event<ObservableSagaMessage> Observation { get; set; }
+		public static Event<CompleteSimpleSaga> Complete { get; set; }
+
+		public bool WasInitiated { get; set; }
+		public bool WasObserved { get; set; }
+		public bool WasCompleted { get; set; }
 
 		public string Name { get; set; }
 		public Guid CorrelationId { get; private set; }

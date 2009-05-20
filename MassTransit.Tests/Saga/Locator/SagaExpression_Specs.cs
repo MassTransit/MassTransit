@@ -14,31 +14,64 @@ namespace MassTransit.Tests.Saga.Locator
 {
 	using System;
 	using System.Diagnostics;
+	using System.Linq;
 	using System.Linq.Expressions;
 	using Magnum;
 	using MassTransit.Saga;
+	using MassTransit.Saga.Pipeline;
 	using NUnit.Framework;
+	using Util;
 
 	[TestFixture]
 	public class SagaExpression_Specs
 	{
-		private Expression<Func<TSaga, bool>> BuildExpression<TSaga, TMessage>(Expression<Func<TSaga, TMessage, bool>> expression, TMessage message)
-			where TSaga : ISaga
-			where TMessage : class, CorrelatedBy<Guid>
+		private Guid _sagaId;
+		private InitiateSimpleSaga _initiateSaga;
+		private InMemorySagaRepository<SimpleSaga> _repository;
+		private Guid _otherSagaId;
+		private ObservableSagaMessage _observeSaga;
+
+		[SetUp]
+		public void Setup()
 		{
-			return x => x.CorrelationId == message.CorrelationId;
+			_sagaId = CombGuid.Generate();
+			_initiateSaga = new InitiateSimpleSaga { CorrelationId = _sagaId, Name = "Chris" };
+
+			_repository = new InMemorySagaRepository<SimpleSaga>();
+			_repository.Create<InitiateSimpleSaga>(_sagaId, (s, m) => { s.Consume(m); })
+				.Each(x => x(_initiateSaga));
+
+			_otherSagaId = Guid.NewGuid();
+			_repository.Create<InitiateSimpleSaga>(_otherSagaId, (s, m) => { s.Consume(m); })
+				.Each(x => x(new InitiateSimpleSaga { CorrelationId = _otherSagaId, Name = "Dru" }));
+
+			_observeSaga = new ObservableSagaMessage {Name = "Chris"};
 		}
 
 		[Test]
 		public void The_saga_expression_should_be_converted_down_to_a_saga_only_filter()
 		{
-			var message = new InitiateSimpleSaga { CorrelationId = CombGuid.Generate() };
-
 			Expression<Func<SimpleSaga, InitiateSimpleSaga, bool>> selector = (s, m) => s.CorrelationId == m.CorrelationId;
 
-			var filter = BuildExpression(selector, message);
-
+			var filter = new SagaFilterExpressionConverter<SimpleSaga, InitiateSimpleSaga>(_initiateSaga).Convert(selector);
 			Trace.WriteLine(filter.ToString());
+
+			var matches = _repository.Where(filter);
+
+			Assert.AreEqual(1, matches.Count());
+		}
+
+		[Test]
+		public void Matching_by_property_should_be_happy()
+		{
+			Expression<Func<SimpleSaga, ObservableSagaMessage, bool>> selector = (s, m) => s.Name == m.Name;
+
+			var filter = new SagaFilterExpressionConverter<SimpleSaga, ObservableSagaMessage>(_observeSaga).Convert(selector);
+			Trace.WriteLine(filter.ToString());
+
+			var matches = _repository.Where(filter);
+
+			Assert.AreEqual(1, matches.Count());
 		}
 	}
 }

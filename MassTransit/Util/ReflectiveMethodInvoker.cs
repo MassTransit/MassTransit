@@ -32,6 +32,9 @@ namespace MassTransit.Util
 					if (method.GetGenericArguments().Length != typeArguments.Length)
 						continue;
 
+					if (method.GetParameters().Length != parameterTypes.Length)
+						continue;
+
 					MethodInfo genericMethod = method.MakeGenericMethod(typeArguments);
 					ParameterInfo[] parameters = genericMethod.GetParameters();
 
