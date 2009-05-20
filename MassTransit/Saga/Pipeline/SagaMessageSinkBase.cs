@@ -1,12 +1,22 @@
+// Copyright 2007-2008 The Apache Software Foundation.
+//  
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
+// this file except in compliance with the License. You may obtain a copy of the 
+// License at 
+// 
+//     http://www.apache.org/licenses/LICENSE-2.0 
+// 
+// Unless required by applicable law or agreed to in writing, software distributed 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// specific language governing permissions and limitations under the License.
 namespace MassTransit.Saga.Pipeline
 {
 	using System;
 	using System.Collections.Generic;
 	using System.Linq.Expressions;
-	using Exceptions;
 	using log4net;
 	using MassTransit.Pipeline;
-	using Util;
 
 	public abstract class SagaMessageSinkBase<TSaga, TMessage> :
 		ISagaMessageSink<TSaga, TMessage>
@@ -14,8 +24,7 @@ namespace MassTransit.Saga.Pipeline
 		where TMessage : class
 	{
 		private static readonly ILog _log = LogManager.GetLogger(typeof (SagaMessageSinkBase<TSaga, TMessage>).ToFriendlyName());
-
-		private volatile bool _disposed;
+		private bool _disposed;
 
 		protected SagaMessageSinkBase(ISubscriberContext context,
 		                              IServiceBus bus,
@@ -33,6 +42,8 @@ namespace MassTransit.Saga.Pipeline
 		public IObjectBuilder Builder { get; private set; }
 		public IServiceBus Bus { get; private set; }
 
+		protected abstract Expression<Func<TSaga, TMessage, bool>> FilterExpression { get; }
+
 		public void Dispose()
 		{
 			Dispose(true);
@@ -47,8 +58,7 @@ namespace MassTransit.Saga.Pipeline
 
 			foreach (var consumer in Repository.Find<TMessage>(filter, ConsumerAction))
 			{
-				if (!Policy.SagaShouldExist)
-					throw new SagaException("The saga should not exist", typeof (TSaga), typeof (TMessage), filter);
+				Policy.ForExistingSaga(item);
 
 				yield return consumer;
 
@@ -57,6 +67,8 @@ namespace MassTransit.Saga.Pipeline
 
 			if (count > 0)
 				yield break;
+
+			Policy.ForMissingSaga(item);
 
 			Guid sagaId;
 			if (Policy.CreateSagaWhenMissing(item, out sagaId))
@@ -78,14 +90,7 @@ namespace MassTransit.Saga.Pipeline
 			return inspector.Inspect(this);
 		}
 
-		protected abstract Expression<Func<TSaga, TMessage, bool>> FilterExpression { get; }
-
 		protected abstract void ConsumerAction(TSaga saga, TMessage message);
-
-		private Expression<Func<TSaga, bool>> CreateFilterExpressionForMessage(TMessage message)
-		{
-			return new SagaFilterExpressionConverter<TSaga,TMessage>(message).Convert(FilterExpression);
-		}
 
 		protected virtual void Dispose(bool disposing)
 		{
@@ -95,6 +100,11 @@ namespace MassTransit.Saga.Pipeline
 			}
 
 			_disposed = true;
+		}
+
+		private Expression<Func<TSaga, bool>> CreateFilterExpressionForMessage(TMessage message)
+		{
+			return new SagaFilterExpressionConverter<TSaga, TMessage>(message).Convert(FilterExpression);
 		}
 
 		~SagaMessageSinkBase()

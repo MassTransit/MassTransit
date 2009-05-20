@@ -46,6 +46,14 @@ namespace MassTransit.Exceptions
 			_correlationId = correlationId;
 		}
 
+		public SagaException(string message, Type sagaType, Type messageType)
+			: base(FormatMessage(sagaType, messageType, message))
+		{
+			_sagaType = sagaType;
+			_messageType = messageType;
+			_correlationId = Guid.Empty;
+		}
+
 		public Type SagaType
 		{
 			get { return _sagaType; }
@@ -59,6 +67,11 @@ namespace MassTransit.Exceptions
 		public Guid CorrelationId
 		{
 			get { return _correlationId; }
+		}
+
+		private static string FormatMessage(Type sagaType, Type messageType, string message)
+		{
+			return string.Format("{0} Saga exception on receipt of {1}: {2}", sagaType.FullName, messageType.FullName, message);
 		}
 
 		private static string FormatMessage(Type sagaType, Guid correlationId, Type messageType, string message)

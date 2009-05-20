@@ -14,11 +14,34 @@ namespace MassTransit.Saga
 {
 	using System;
 
+	/// <summary>
+	/// A saga policy defines how the pipeline should handle messages when being routed 
+	/// to the saga. Checks are made for the existence of a saga, whether the message should
+	/// create a new saga, or otherwise
+	/// </summary>
+	/// <typeparam name="TSaga">The saga that will handle the message</typeparam>
+	/// <typeparam name="TMessage">The message that will be handled by the saga</typeparam>
 	public interface ISagaPolicy<TSaga, TMessage>
 		where TSaga : ISaga
 	{
+		/// <summary>
+		/// Determines if the message should result in the creation of a new instance of the saga
+		/// </summary>
+		/// <param name="message">The message that triggered the action</param>
+		/// <param name="sagaId">The sagaId to use for the new saga instance</param>
+		/// <returns>True if the saga should be created, otherwise false</returns>
 		bool CreateSagaWhenMissing(TMessage message, out Guid sagaId);
-		bool SagaShouldExist { get; }
-	}
 
+		/// <summary>
+		/// Called when an instance of the saga associated with the message already exists
+		/// </summary>
+		/// <param name="message">The message to correlate to the saga</param>
+		void ForExistingSaga(TMessage message);
+
+		/// <summary>
+		/// Called when there are no matching instances of the saga available
+		/// </summary>
+		/// <param name="message">The message to correlate to the saga</param>
+		void ForMissingSaga(TMessage message);
+	}
 }
