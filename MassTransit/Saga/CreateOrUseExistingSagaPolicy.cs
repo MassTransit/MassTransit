@@ -14,16 +14,15 @@ namespace MassTransit.Saga
 {
 	using System;
 	using System.Linq;
-	using Exceptions;
 	using Magnum;
 
-	public class InitiatingSagaPolicy<TSaga, TMessage> :
+	public class CreateOrUseExistingSagaPolicy<TSaga, TMessage> :
 		ISagaPolicy<TSaga, TMessage>
 		where TSaga : ISaga
 	{
 		private bool _useMessageIdForSagaId;
 
-		public InitiatingSagaPolicy()
+		public CreateOrUseExistingSagaPolicy()
 		{
 			_useMessageIdForSagaId = typeof (TMessage).GetInterfaces().Where(x => x == typeof (CorrelatedBy<Guid>)).Any();
 		}
@@ -38,12 +37,12 @@ namespace MassTransit.Saga
 
 		public void ForExistingSaga(TMessage message)
 		{
-			throw new SagaException("Saga already exists and cannot be initiated: " + message, typeof (TSaga), typeof (TMessage));
+			// do nothing, we are fine if we have an existing saga
 		}
 
 		public void ForMissingSaga(TMessage message)
 		{
-			// good, no saga exists yet
+			// do nothing, we dont' care if the saga is missing
 		}
 
 		private bool UseMessageIdForSaga(TMessage message, out Guid sagaId)

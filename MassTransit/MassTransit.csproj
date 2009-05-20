@@ -160,6 +160,7 @@
     <Compile Include="Internal\ISetMessageHeaders.cs" />
     <Compile Include="Configuration\DefaultBusServiceConfigurator.cs" />
     <Compile Include="Saga\Configuration\ObservesSubscriber.cs" />
+    <Compile Include="Saga\CreateOrUseExistingSagaPolicy.cs" />
     <Compile Include="Saga\DataEventBinder.cs" />
     <Compile Include="Saga\EventBinder.cs" />
     <Compile Include="Saga\Observes.cs" />
