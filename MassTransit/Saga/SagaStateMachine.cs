@@ -14,7 +14,6 @@ namespace MassTransit.Saga
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Linq;
 	using System.Linq.Expressions;
 	using System.Runtime.Serialization;
 	using Magnum.CollectionExtensions;
@@ -35,40 +34,21 @@ namespace MassTransit.Saga
 		{
 		}
 
-		protected static EventBinder<T,V> Correlate<V>(Event<V> targetEvent)
+		public static bool TryGetCorrelationExpressionForEvent<TMessage>(Event targetEvent, out Expression<Func<T, TMessage, bool>> expression)
 		{
-			return (EventBinder<T,V>)_binders.Retrieve(targetEvent, () => new DataEventBinder<T, V>());
-		}
-	}
+			if(_binders.ContainsKey(targetEvent))
+			{
+				expression = _binders[targetEvent].GetBindExpression<TMessage>();
+				return true;
+			}
 
-	public interface EventBinder<TSaga>
-	{
-		Expression<Func<TSaga, T, bool>> Bind<T>();
-	}
-
-	public interface EventBinder<TSaga,TMessage> :
-		EventBinder<TSaga>
-	{
-		void By(Expression<Func<TSaga, TMessage, bool>> expression);
-	}
-
-	public class DataEventBinder<TSaga, TMessage> :
-		EventBinder<TSaga,TMessage>
-	{
-		private Expression<Func<TSaga, TMessage, bool>> _expression;
-
-		public void By(Expression<Func<TSaga, TMessage, bool>> expression)
-		{
-			_expression = expression;
+			expression = null;
+			return false;
 		}
 
-		public Expression<Func<TSaga, T, bool>> Bind<T>()
+		protected static EventBinder<T, V> Correlate<V>(Event<V> targetEvent)
 		{
-			var sagaParameter = Expression.Parameter(typeof (TSaga), "saga");
-			var messageParameter = Expression.Parameter(typeof (T), "message");
-			var cast = Expression.Convert(messageParameter, typeof (TMessage));
-
-			return Expression.Lambda<Func<TSaga, T, bool>>(Expression.Invoke(_expression, sagaParameter, cast), new[]{sagaParameter,messageParameter});
+			return (EventBinder<T, V>) _binders.Retrieve(targetEvent, () => new DataEventBinder<T, V>());
 		}
 	}
 }

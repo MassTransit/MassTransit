@@ -84,21 +84,6 @@ namespace MassTransit.Tests.Grid
 
 			state.RaiseEvent(NodeState.NodeAvailable, _notifyNodeAvailable);
 			Assert.AreEqual(NodeState.Available, state.CurrentState);
-
 		}
-	}
-
-	[TestFixture]
-	public class The_NodeState_saga :
-		LoopbackTestFixture
-	{
-		[Test]
-		public void Should_be_subscribable()
-		{
-			SetupSagaRepository<NodeState>();
-
-			LocalBus.Subscribe<NodeState>();
-		}
-
 	}
 }

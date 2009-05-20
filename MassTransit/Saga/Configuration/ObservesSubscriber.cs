@@ -27,7 +27,7 @@ namespace MassTransit.Saga.Configuration
 	{
 		protected override Type InterfaceType
 		{
-			get { return typeof (Observes<>); }
+			get { return typeof (Observes<,>); }
 		}
 
 		public override IEnumerable<UnsubscribeAction> Subscribe<TComponent>(ISubscriberContext context, TComponent instance)
@@ -37,21 +37,15 @@ namespace MassTransit.Saga.Configuration
 
 		protected virtual UnsubscribeAction Connect<TComponent, TMessage>(ISubscriberContext context)
 			where TMessage : class
-			where TComponent : class, Observes<TMessage>, ISaga
+			where TComponent : class, Observes<TMessage,TComponent>, ISaga
 		{
 			MessageRouterConfigurator routerConfigurator = MessageRouterConfigurator.For(context.Pipeline);
 
 			var router = routerConfigurator.FindOrCreate<TMessage>();
 
-			TComponent instance = (TComponent) Activator.CreateInstance(typeof (TComponent), Guid.Empty);
+			Observes<TMessage, TComponent> instance = (Observes<TMessage, TComponent>)Activator.CreateInstance(typeof(TComponent), Guid.Empty);
 
-			Expression<Func<TMessage, bool>> expression = instance.BindExpression;
-
-			var messageParameter = expression.Parameters[0];
-			var sagaParameter = Expression.Parameter(typeof (TComponent), "saga");
-			var invoke = Expression.Invoke(expression, messageParameter);
-
-			var selector =  Expression.Lambda<Func<TComponent, TMessage, bool>>(invoke, sagaParameter, messageParameter);
+			Expression<Func<TComponent, TMessage, bool>> selector = instance.GetBindExpression();
 
 			var arguments = new Hashtable
 				{

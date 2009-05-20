@@ -113,7 +113,7 @@ namespace MassTransit.Tests.TextFixtures
 		}
 
 		protected void SetupObservesSagaSink<TSaga, TMessage>(IServiceBus bus, ISagaRepository<TSaga> repository)
-			where TSaga : class, ISaga, Observes<TMessage>
+			where TSaga : class, ISaga, Observes<TMessage,TSaga>
 			where TMessage : class
 		{
 			var policy = new ExistingSagaPolicy<TSaga, TMessage>();
@@ -137,6 +137,15 @@ namespace MassTransit.Tests.TextFixtures
 			var policy = new ExistingSagaPolicy<TSaga, TMessage>();
 
 			SetupSagaSinkStub(x => new CorrelatedSagaStateMachineMessageSink<TSaga, TMessage>(x["context"] as ISubscriberContext, bus, repository, policy, x["dataEvent"] as DataEvent<TSaga, TMessage>));
+		}
+
+		protected void SetupObservesSagaStateMachineSink<TSaga, TMessage>(IServiceBus bus, ISagaRepository<TSaga> repository)
+			where TSaga : SagaStateMachine<TSaga>, ISaga 
+			where TMessage : class
+		{
+			var policy = new ExistingSagaPolicy<TSaga, TMessage>();
+
+			SetupSagaSinkStub(x => new PropertySagaStateMachineMessageSink<TSaga, TMessage>(x["context"] as ISubscriberContext, bus, repository, policy, (Expression<Func<TSaga, TMessage, bool>>)x["selector"], x["dataEvent"] as DataEvent<TSaga, TMessage>));
 		}
 
 		private void SetupSagaSinkStub<TSink>(Func<Hashtable, TSink> createSink)

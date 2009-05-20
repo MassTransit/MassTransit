@@ -19,7 +19,7 @@ namespace MassTransit.Tests.Saga
 	public class SimpleSaga :
 		InitiatedBy<InitiateSimpleSaga>,
 		Orchestrates<CompleteSimpleSaga>,
-		Observes<ObservableSagaMessage>,
+		Observes<ObservableSagaMessage,SimpleSaga>,
 		ISaga
 	{
 		public SimpleSaga()
@@ -64,6 +64,11 @@ namespace MassTransit.Tests.Saga
 		public void Consume(CompleteSimpleSaga message)
 		{
 			Completed = true;
+		}
+
+		public Expression<Func<SimpleSaga, ObservableSagaMessage, bool>> GetBindExpression()
+		{
+			return (saga, message) => saga.Name == message.Name;
 		}
 	}
 }

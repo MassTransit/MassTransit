@@ -40,10 +40,9 @@ namespace MassTransit.Saga.Pipeline
 			saga.RaiseEvent(_dataEvent, message);
 		}
 
-		protected override Expression<Func<TSaga, bool>> GetExpressionForFindingSaga(TMessage item)
+		protected override Expression<Func<TSaga, TMessage, bool>> FilterExpression
 		{
-			Guid sagaId = item.CorrelationId;
-			return x => x.CorrelationId == sagaId;
+			get { return (saga, message) => saga.CorrelationId == message.CorrelationId; }
 		}
 	}
 }

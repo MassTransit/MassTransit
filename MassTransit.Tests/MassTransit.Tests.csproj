@@ -115,6 +115,7 @@
     <Compile Include="Saga\InitiateSimpleSaga.cs" />
     <Compile Include="Pipeline\MessageRouter_Perf.cs" />
     <Compile Include="Saga\Locator\SagaExpression_Specs.cs" />
+    <Compile Include="Saga\Locator\SomeClass.cs" />
     <Compile Include="Saga\ObservableSagaMessage.cs" />
     <Compile Include="Saga\SimpleSaga.cs" />
     <Compile Include="Retry_Specs.cs" />
@@ -123,6 +124,7 @@
     <Compile Include="Saga\SimpleSagaMessageBase.cs" />
     <Compile Include="Saga\StateMachine\AutoStateMachineSaga.cs" />
     <Compile Include="Saga\StateMachine\AutoStateMachine_Specs.cs" />
+    <Compile Include="Saga\StateMachine\TestSaga_Specs.cs" />
     <Compile Include="Serialization\Approach\Approach_Specs.cs" />
     <Compile Include="Serialization\Approach\ArraySerializer.cs" />
     <Compile Include="Serialization\Approach\BooleanSerializer.cs" />

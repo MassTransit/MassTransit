@@ -36,13 +36,9 @@ namespace MassTransit.Saga.Pipeline
 			_selector = selector;
 		}
 
-		protected override Expression<Func<TSaga, bool>> GetExpressionForFindingSaga(TMessage item)
+		protected override Expression<Func<TSaga, TMessage, bool>> FilterExpression
 		{
-			var messageParameter = Expression.Constant(item);
-			var sagaParameter = _selector.Parameters[0];
-			var invoke = Expression.Invoke(_selector, sagaParameter, messageParameter);
-
-			return Expression.Lambda<Func<TSaga, bool>>(invoke, sagaParameter);
+			get { return _selector; }
 		}
 
 		protected override void ConsumerAction(TSaga saga, TMessage message)
