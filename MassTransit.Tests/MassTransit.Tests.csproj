@@ -114,6 +114,7 @@
     <Compile Include="Saga\CompleteSimpleSaga.cs" />
     <Compile Include="Saga\InitiateSimpleSaga.cs" />
     <Compile Include="Pipeline\MessageRouter_Perf.cs" />
+    <Compile Include="Saga\Locator\SagaExpression_Specs.cs" />
     <Compile Include="Saga\ObservableSagaMessage.cs" />
     <Compile Include="Saga\SimpleSaga.cs" />
     <Compile Include="Retry_Specs.cs" />
