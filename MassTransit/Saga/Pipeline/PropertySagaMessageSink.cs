@@ -24,21 +24,21 @@ namespace MassTransit.Saga.Pipeline
 	{
 		private static readonly ILog _log = LogManager.GetLogger(typeof (PropertySagaMessageSink<TSaga, TMessage>).ToFriendlyName());
 
-		private readonly Expression<Func<TSaga, TMessage, bool>> _selector;
-
-		public PropertySagaMessageSink(ISubscriberContext context, 
-			IServiceBus bus, 
-			ISagaRepository<TSaga> repository, 
-			ISagaPolicy<TSaga, TMessage> policy, 
-			Expression<Func<TSaga, TMessage, bool>> selector)
+		public PropertySagaMessageSink(ISubscriberContext context,
+		                               IServiceBus bus,
+		                               ISagaRepository<TSaga> repository,
+		                               ISagaPolicy<TSaga, TMessage> policy,
+		                               Expression<Func<TSaga, TMessage, bool>> selector)
 			: base(context, bus, repository, policy)
 		{
-			_selector = selector;
+			Selector = selector;
 		}
+
+		public Expression<Func<TSaga, TMessage, bool>> Selector { get; private set; }
 
 		protected override Expression<Func<TSaga, TMessage, bool>> FilterExpression
 		{
-			get { return _selector; }
+			get { return Selector; }
 		}
 
 		protected override void ConsumerAction(TSaga saga, TMessage message)

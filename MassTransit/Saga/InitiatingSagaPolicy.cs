@@ -57,8 +57,8 @@ namespace MassTransit.Saga
 				return true;
 			}
 
-			sagaId = Guid.Empty;
-			return false;
+			sagaId = CombGuid.Generate();
+			return true;
 		}
 
 		private bool GenerateNewIdForSaga(out Guid sagaId)

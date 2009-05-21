@@ -55,7 +55,7 @@ namespace MassTransit.Pipeline.Inspectors
 			return true;
 		}
 
-		public bool Inspect<TMessage, TBatchId>(BatchMessageRouter<TMessage,TBatchId> element) 
+		public bool Inspect<TMessage, TBatchId>(BatchMessageRouter<TMessage, TBatchId> element)
 			where TMessage : class, BatchedBy<TBatchId>
 		{
 			Append(string.Format("Batch Routed ({0})", typeof (TMessage).Name));
@@ -63,7 +63,7 @@ namespace MassTransit.Pipeline.Inspectors
 			return true;
 		}
 
-		public bool Inspect<TMessage, TBatchId>(BatchCombiner<TMessage,TBatchId> element) 
+		public bool Inspect<TMessage, TBatchId>(BatchCombiner<TMessage, TBatchId> element)
 			where TMessage : class, BatchedBy<TBatchId>
 		{
 			Append(string.Format("Batch Combiner ({0}) [{1}]", typeof (TMessage).Name, element.BatchId));
@@ -73,7 +73,7 @@ namespace MassTransit.Pipeline.Inspectors
 
 		public bool Inspect<TMessage>(MessageFilter<TMessage> element) where TMessage : class
 		{
-			Append(string.Format("Filtered '{0}' ({1})", element.Description,typeof (TMessage).Name));
+			Append(string.Format("Filtered '{0}' ({1})", element.Description, typeof (TMessage).Name));
 
 			return true;
 		}
@@ -108,9 +108,9 @@ namespace MassTransit.Pipeline.Inspectors
 		}
 
 		public bool Inspect<TMessage, TKey>(CorrelatedMessageSinkRouter<TMessage, TKey> sink)
-	where TMessage : class, CorrelatedBy<TKey>
+			where TMessage : class, CorrelatedBy<TKey>
 		{
-			Append(string.Format("Routed for Correlation Id {1} ({0})", typeof(TMessage).Name, sink.CorrelationId));
+			Append(string.Format("Routed for Correlation Id {1} ({0})", typeof (TMessage).Name, sink.CorrelationId));
 
 			return true;
 		}
@@ -124,11 +124,11 @@ namespace MassTransit.Pipeline.Inspectors
 
 			string componentName = componentType.IsGenericType ? componentType.GetGenericTypeDefinition().FullName : componentType.FullName;
 
-			Append(string.Format("Consumed by Component {0} ({1})", componentName, typeof(TMessage).Name));
+			Append(string.Format("Consumed by Component {0} ({1})", componentName, typeof (TMessage).Name));
 
 			return true;
-		}	
-		
+		}
+
 		public bool Inspect<TComponent, TMessage>(CorrelatedSagaMessageSink<TComponent, TMessage> sink)
 			where TMessage : class, CorrelatedBy<Guid>
 			where TComponent : class, Consumes<TMessage>.All, ISaga
@@ -137,9 +137,27 @@ namespace MassTransit.Pipeline.Inspectors
 
 			string componentName = componentType.IsGenericType ? componentType.GetGenericTypeDefinition().FullName : componentType.FullName;
 
-			Append(string.Format("Saga {0} ({1})", componentName, typeof(TMessage).Name));
+			string policyDescription = GetPolicy(sink.Policy);
+
+			Append(string.Format("{0} Saga {1} ({2})", policyDescription, componentName, typeof (TMessage).Name));
 
 			return true;
+		}
+
+		private string GetPolicy<TComponent, TMessage>(ISagaPolicy<TComponent, TMessage> policy)
+			where TComponent : ISaga
+		{
+			string description;
+			Type policyType = policy.GetType().GetGenericTypeDefinition();
+			if (policyType == typeof (InitiatingSagaPolicy<,>))
+				description = "Initiates New";
+			else if (policyType == typeof (ExistingSagaPolicy<,>))
+				description = "Orchestrates Existing";
+			else if (policyType == typeof (CreateOrUseExistingSagaPolicy<,>))
+				description = "Initiates New Or Orchestrates Existing";
+			else
+				description = policyType.Name;
+			return description;
 		}
 
 		public bool Inspect<TComponent, TMessage>(PropertySagaMessageSink<TComponent, TMessage> sink)
@@ -150,11 +168,30 @@ namespace MassTransit.Pipeline.Inspectors
 
 			string componentName = componentType.IsGenericType ? componentType.GetGenericTypeDefinition().FullName : componentType.FullName;
 
-			Append(string.Format("Property Saga {0} ({1})", componentName, typeof(TMessage).Name));
+			string policyDescription = GetPolicy(sink.Policy);
+			string expression = sink.Selector.ToString();
+
+			Append(string.Format("{0} Saga {1} ({2}): {3}", policyDescription, componentName, typeof (TMessage).Name, expression));
 
 			return true;
-		}		
-		
+		}
+
+		public bool Inspect<TComponent, TMessage>(PropertySagaStateMachineMessageSink<TComponent, TMessage> sink)
+			where TMessage : class
+			where TComponent : SagaStateMachine<TComponent>, Consumes<TMessage>.All, ISaga
+		{
+			Type componentType = typeof (TComponent);
+
+			string componentName = componentType.IsGenericType ? componentType.GetGenericTypeDefinition().FullName : componentType.FullName;
+
+			string policyDescription = GetPolicy(sink.Policy);
+			string expression = sink.Selector.ToString();
+
+			Append(string.Format("{0} Saga {1} ({2}): {3}", policyDescription, componentName, typeof (TMessage).Name, expression));
+
+			return true;
+		}
+
 		public bool Inspect<TComponent, TMessage>(CorrelatedSagaStateMachineMessageSink<TComponent, TMessage> sink)
 			where TMessage : class, CorrelatedBy<Guid>
 			where TComponent : SagaStateMachine<TComponent>, ISaga
@@ -163,7 +200,9 @@ namespace MassTransit.Pipeline.Inspectors
 
 			string componentName = componentType.IsGenericType ? componentType.GetGenericTypeDefinition().FullName : componentType.FullName;
 
-			Append(string.Format("State Machine Saga {0} ({1})", componentName, typeof(TMessage).Name));
+			string policyDescription = GetPolicy(sink.Policy);
+
+			Append(string.Format("{0} SagaStateMachine {1} ({2})", policyDescription, componentName, typeof (TMessage).Name));
 
 			return true;
 		}

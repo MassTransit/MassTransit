@@ -25,9 +25,6 @@ namespace MassTransit.Saga.Pipeline
 	{
 		private static readonly ILog _log = LogManager.GetLogger(typeof (PropertySagaStateMachineMessageSink<TSaga, TMessage>).ToFriendlyName());
 
-		private readonly DataEvent<TSaga, TMessage> _dataEvent;
-		private readonly Expression<Func<TSaga, TMessage, bool>> _selector;
-
 		public PropertySagaStateMachineMessageSink(ISubscriberContext context,
 		                                           IServiceBus bus,
 		                                           ISagaRepository<TSaga> repository,
@@ -36,19 +33,23 @@ namespace MassTransit.Saga.Pipeline
 		                                           DataEvent<TSaga, TMessage> dataEvent)
 			: base(context, bus, repository, policy)
 		{
-			_selector = selector;
-			_dataEvent = dataEvent;
+			Selector = selector;
+			DataEvent = dataEvent;
 		}
+
+		public DataEvent<TSaga, TMessage> DataEvent { get; private set; }
+
+		public Expression<Func<TSaga, TMessage, bool>> Selector { get; private set; }
 
 		protected override Expression<Func<TSaga, TMessage, bool>> FilterExpression
 		{
-			get { return _selector; }
+			get { return Selector; }
 		}
 
 		protected override void ConsumerAction(TSaga saga, TMessage message)
 		{
 			saga.Bus = Bus;
-			saga.RaiseEvent(_dataEvent, message);
+			saga.RaiseEvent(DataEvent, message);
 		}
 	}
 }
