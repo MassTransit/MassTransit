@@ -12,8 +12,10 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests.Subscriptions
 {
+	using System.Diagnostics;
 	using System.Threading;
 	using Magnum.DateTimeExtensions;
+	using MassTransit.Pipeline.Inspectors;
 	using Messages;
 	using NUnit.Framework;
 	using Rhino.Mocks;
@@ -38,10 +40,33 @@ namespace MassTransit.Tests.Subscriptions
 
 			Thread.Sleep(1000);
 
+			DumpPipelines();
+
 			PingMessage message = new PingMessage();
 			LocalBus.Publish(message);
 
 			consumer.ShouldHaveReceivedMessage(message, 500.Milliseconds());
+		}
+
+		private void DumpPipelines()
+		{
+			Trace.WriteLine("LocalBus.InboundPipeline");
+			PipelineViewer.Trace(LocalBus.InboundPipeline);
+
+			Trace.WriteLine("LocalBus.OutboundPipeline");
+			PipelineViewer.Trace(LocalBus.OutboundPipeline);
+
+			Trace.WriteLine("RemoteBus.InboundPipeline");
+			PipelineViewer.Trace(RemoteBus.InboundPipeline);
+
+			Trace.WriteLine("RemoteBus.OutboundPipeline");
+			PipelineViewer.Trace(RemoteBus.OutboundPipeline);
+
+			Trace.WriteLine("SubscriptionBus.InboundPipeline");
+			PipelineViewer.Trace(SubscriptionBus.InboundPipeline);
+
+			Trace.WriteLine("SubscriptionBus.OutboundPipeline");
+			PipelineViewer.Trace(SubscriptionBus.OutboundPipeline);
 		}
 	}
 }

@@ -28,21 +28,11 @@ namespace MassTransit.Saga
 
 		public void ForExistingSaga(TMessage message)
 		{
-			// we are happy
 		}
 
 		public void ForMissingSaga(TMessage message)
 		{
 			throw new SagaException("Saga not found: " + message, typeof(TSaga), typeof(TMessage));
-		}
-
-		public bool SagaShouldExist
-		{
-			get { return true; }
-		}
-
-		public void ForExistingSaga(object message)
-		{
 		}
 	}
 }

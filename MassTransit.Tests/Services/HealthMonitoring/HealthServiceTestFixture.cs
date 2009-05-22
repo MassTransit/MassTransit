@@ -88,12 +88,14 @@ namespace MassTransit.Tests.Services.HealthMonitoring
 				.Return(SubscriptionRepository);
 
 			_subscriptionClientSagaRepository = SetupSagaRepository<SubscriptionClientSaga>();
-			SetupInitiateSagaSink<SubscriptionClientSaga, CacheUpdateRequest>(SubscriptionBus, _subscriptionClientSagaRepository);
-			SetupOrchestrateSagaSink<SubscriptionClientSaga, CancelSubscriptionUpdates>(SubscriptionBus, _subscriptionClientSagaRepository);
+			SetupInitiateSagaStateMachineSink<SubscriptionClientSaga, AddSubscriptionClient>(SubscriptionBus, _subscriptionClientSagaRepository);
+			SetupOrchestrateSagaStateMachineSink<SubscriptionClientSaga, RemoveSubscriptionClient>(SubscriptionBus, _subscriptionClientSagaRepository);
 
 			_subscriptionSagaRepository = SetupSagaRepository<SubscriptionSaga>();
-			SetupInitiateSagaSink<SubscriptionSaga, AddSubscription>(SubscriptionBus, _subscriptionSagaRepository);
-			SetupOrchestrateSagaSink<SubscriptionSaga, RemoveSubscription>(SubscriptionBus, _subscriptionSagaRepository);
+			SetupInitiateSagaStateMachineSink<SubscriptionSaga, AddSubscription>(SubscriptionBus, _subscriptionSagaRepository);
+			SetupOrchestrateSagaStateMachineSink<SubscriptionSaga, RemoveSubscription>(SubscriptionBus, _subscriptionSagaRepository);
+			SetupObservesSagaStateMachineSink<SubscriptionSaga, AddSubscriptionClient>(SubscriptionBus, _subscriptionSagaRepository);
+			SetupObservesSagaStateMachineSink<SubscriptionSaga, RemoveSubscriptionClient>(SubscriptionBus, _subscriptionSagaRepository);
 
 			SubscriptionService = new SubscriptionService(SubscriptionBus, SubscriptionRepository, EndpointFactory, _subscriptionSagaRepository, _subscriptionClientSagaRepository);
 

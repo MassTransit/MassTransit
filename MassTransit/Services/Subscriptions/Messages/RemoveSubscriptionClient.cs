@@ -13,29 +13,18 @@
 namespace MassTransit.Services.Subscriptions.Messages
 {
 	using System;
-	using Magnum;
 
 	[Serializable]
-	public class CacheUpdateRequest :
-		CorrelatedBy<Guid>
+	public class RemoveSubscriptionClient :
+		SubscriptionClientMessageBase
 	{
-		protected CacheUpdateRequest()
+		public RemoveSubscriptionClient(Guid clientId, Uri controlUri, Uri dataUri) :
+			base(clientId, controlUri, dataUri)
 		{
 		}
 
-		public CacheUpdateRequest(Uri requestingUri)
-			: this(CombGuid.Generate(), requestingUri)
+		protected RemoveSubscriptionClient()
 		{
 		}
-
-		public CacheUpdateRequest(Guid correlationId, Uri requestingUri)
-		{
-			RequestingUri = requestingUri;
-			CorrelationId = correlationId;
-		}
-
-		public Uri RequestingUri { get; set; }
-
-		public Guid CorrelationId { get; set; }
 	}
 }

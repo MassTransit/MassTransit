@@ -1,3 +1,15 @@
+// Copyright 2007-2008 The Apache Software Foundation.
+//  
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
+// this file except in compliance with the License. You may obtain a copy of the 
+// License at 
+// 
+//     http://www.apache.org/licenses/LICENSE-2.0 
+// 
+// Unless required by applicable law or agreed to in writing, software distributed 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// specific language governing permissions and limitations under the License.
 namespace MassTransit.Services.Subscriptions.Client
 {
 	using System;
@@ -16,25 +28,26 @@ namespace MassTransit.Services.Subscriptions.Client
 	public class SubscriptionClient :
 		IBusService,
 		ISubscriptionService,
-		Consumes<CacheUpdateResponse>.All,
+		Consumes<SubscriptionRefresh>.All,
 		Consumes<AddSubscription>.All,
 		Consumes<RemoveSubscription>.All
 	{
+		private static readonly HashSet<string> _ignoredSubscriptions;
 		private static readonly ILog _log = LogManager.GetLogger(typeof (SubscriptionClient));
 		private static readonly ClientSubscriptionInfoMapper _mapper = new ClientSubscriptionInfoMapper();
+		private readonly RegistrationList<IEndpointSubscriptionEvent> _clients = new RegistrationList<IEndpointSubscriptionEvent>();
 		private readonly IEndpointFactory _endpointFactory;
 		private readonly EndpointList _localEndpoints = new EndpointList();
+		private readonly ManualResetEvent _ready = new ManualResetEvent(false);
 		private readonly IdempotentHashtable<Guid, ClientSubscriptionInformation> _subscriptions = new IdempotentHashtable<Guid, ClientSubscriptionInformation>();
 		private IServiceBus _bus;
-		private Guid _clientId;
 
-		private readonly RegistrationList<IEndpointSubscriptionEvent> _clients = new RegistrationList<IEndpointSubscriptionEvent>();
+		private Guid _clientId;
 		private SubscriptionConsumer _consumer;
 		private SubscriptionPublisher _publisher;
+		private SequenceNumberGenerator _sequence = new SequenceNumberGenerator();
 		private IEndpoint _subscriptionServiceEndpoint;
 		private UnsubscribeAction _unsubscribeAction;
-		private readonly ManualResetEvent _ready = new ManualResetEvent(false);
-		private static readonly HashSet<string> _ignoredSubscriptions;
 
 		static SubscriptionClient()
 		{
@@ -42,13 +55,11 @@ namespace MassTransit.Services.Subscriptions.Client
 				{
 					typeof (AddSubscription).ToMessageName(),
 					typeof (RemoveSubscription).ToMessageName(),
-					typeof (CacheUpdateRequest).ToMessageName(),
-					typeof (CacheUpdateResponse).ToMessageName(),
-					typeof (CancelSubscriptionUpdates).ToMessageName(),
+					typeof (AddSubscriptionClient).ToMessageName(),
+					typeof (SubscriptionRefresh).ToMessageName(),
+					typeof (RemoveSubscriptionClient).ToMessageName(),
 				};
 		}
-
-		public TimeSpan StartTimeout { get; set; }
 
 		public SubscriptionClient(IEndpointFactory endpointFactory)
 		{
@@ -57,6 +68,8 @@ namespace MassTransit.Services.Subscriptions.Client
 			StartTimeout = 30.Seconds();
 		}
 
+		public TimeSpan StartTimeout { get; set; }
+
 		public Uri SubscriptionServiceUri { get; set; }
 
 		public void Consume(AddSubscription message)
@@ -64,7 +77,12 @@ namespace MassTransit.Services.Subscriptions.Client
 			Add(message.Subscription);
 		}
 
-		public void Consume(CacheUpdateResponse message)
+		public void Consume(RemoveSubscription message)
+		{
+			Remove(message.Subscription);
+		}
+
+		public void Consume(SubscriptionRefresh message)
 		{
 			foreach (SubscriptionInformation subscription in message.Subscriptions)
 			{
@@ -72,11 +90,6 @@ namespace MassTransit.Services.Subscriptions.Client
 			}
 
 			_ready.Set();
-		}
-
-		public void Consume(RemoveSubscription message)
-		{
-			Remove(message.Subscription);
 		}
 
 		public void Dispose()
@@ -87,7 +100,7 @@ namespace MassTransit.Services.Subscriptions.Client
 
 		public void Start(IServiceBus bus)
 		{
-			if(_log.IsDebugEnabled)
+			if (_log.IsDebugEnabled)
 				_log.DebugFormat("Starting SubscriptionClient on {0}", bus.Endpoint.Uri);
 
 			_bus = bus;
@@ -110,13 +123,48 @@ namespace MassTransit.Services.Subscriptions.Client
 			WaitForSubscriptionServiceResponse();
 		}
 
+		public void Stop()
+		{
+			if (_log.IsInfoEnabled)
+				_log.InfoFormat("Stopping the SubscriptionClient on {0}", _bus.Endpoint.Uri);
+
+			var message = new RemoveSubscriptionClient(_clientId, _bus.ControlBus.Endpoint.Uri, _bus.Endpoint.Uri);
+			_subscriptionServiceEndpoint.Send(message);
+
+			_unsubscribeAction();
+
+			_consumer.Stop();
+			_publisher.Stop();
+		}
+
+		public UnsubscribeAction SubscribedTo<TMessage>(Uri endpointUri) 
+			where TMessage : class
+		{
+			var info = new SubscriptionInformation(_clientId, _sequence.Next(), typeof (TMessage), endpointUri);
+
+			return SendAddSubscription(info);
+		}
+
+		public UnsubscribeAction SubscribedTo<TMessage, TKey>(TKey correlationId, Uri endpointUri) 
+			where TMessage : class, CorrelatedBy<TKey>
+		{
+			var info = new SubscriptionInformation(_clientId, _sequence.Next(), typeof (TMessage), correlationId.ToString(), endpointUri);
+
+			return SendAddSubscription(info);
+		}
+
+		public UnregisterAction Register(IEndpointSubscriptionEvent consumer)
+		{
+			return _clients.Register(consumer);
+		}
+
 		private void WaitForSubscriptionServiceResponse()
 		{
 			if (_log.IsDebugEnabled)
 				_log.Debug("Waiting for response from the subscription service");
 
 			bool received = _ready.WaitOne(StartTimeout);
-			if(!received)
+			if (!received)
 			{
 				throw new InvalidOperationException("Timeout waiting for subscription service to respond");
 			}
@@ -125,13 +173,14 @@ namespace MassTransit.Services.Subscriptions.Client
 		private void ConnectToSubscriptionService(IServiceBus bus)
 		{
 			ConnectSubscriptionPublisherToBus(bus);
-			
+
 			if (bus != bus.ControlBus)
 				ConnectSubscriptionPublisherToBus(bus.ControlBus);
 
 			_unsubscribeAction = _bus.ControlBus.Subscribe(this);
 
-			_subscriptionServiceEndpoint.Send(new CacheUpdateRequest(_clientId, _bus.ControlBus.Endpoint.Uri));
+			var message = new AddSubscriptionClient(_clientId, _bus.ControlBus.Endpoint.Uri, _bus.Endpoint.Uri);
+			_subscriptionServiceEndpoint.Send(message);
 		}
 
 		private void ConnectSubscriptionPublisherToBus(IServiceBus bus)
@@ -141,38 +190,6 @@ namespace MassTransit.Services.Subscriptions.Client
 
 			_consumer = new SubscriptionConsumer(this, _endpointFactory);
 			_consumer.Start(bus);
-		}
-
-		public void Stop()
-		{
-			if (_log.IsInfoEnabled)
-				_log.InfoFormat("Stopping the SubscriptionClient on {0}", _bus.Endpoint.Uri);
-
-			_subscriptionServiceEndpoint.Send(new CancelSubscriptionUpdates(_clientId, _bus.ControlBus.Endpoint.Uri));
-
-			_unsubscribeAction();
-
-			_consumer.Stop();
-			_publisher.Stop();
-		}
-
-		public UnsubscribeAction SubscribedTo<T>(Uri endpointUri) where T : class
-		{
-			var info = new SubscriptionInformation(typeof (T), endpointUri);
-
-			return SendAddSubscription(info);
-		}
-
-		public UnsubscribeAction SubscribedTo<T, K>(K correlationId, Uri endpointUri) where T : class, CorrelatedBy<K>
-		{
-			var info = new SubscriptionInformation(typeof (T), correlationId.ToString(), endpointUri);
-
-			return SendAddSubscription(info);
-		}
-
-		public UnregisterAction Register(IEndpointSubscriptionEvent consumer)
-		{
-			return _clients.Register(consumer);
 		}
 
 		private void Remove(SubscriptionInformation subscription)
@@ -259,7 +276,8 @@ namespace MassTransit.Services.Subscriptions.Client
 			_subscriptionServiceEndpoint.Send(add);
 			return () =>
 				{
-					var remove = new RemoveSubscription(info);
+					var remove = new RemoveSubscription(info, _sequence.Next());
+
 					_subscriptionServiceEndpoint.Send(remove);
 
 					return true;

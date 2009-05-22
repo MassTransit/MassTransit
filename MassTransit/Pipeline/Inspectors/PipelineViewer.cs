@@ -178,7 +178,7 @@ namespace MassTransit.Pipeline.Inspectors
 
 		public bool Inspect<TComponent, TMessage>(PropertySagaStateMachineMessageSink<TComponent, TMessage> sink)
 			where TMessage : class
-			where TComponent : SagaStateMachine<TComponent>, Consumes<TMessage>.All, ISaga
+			where TComponent : SagaStateMachine<TComponent>, ISaga
 		{
 			Type componentType = typeof (TComponent);
 

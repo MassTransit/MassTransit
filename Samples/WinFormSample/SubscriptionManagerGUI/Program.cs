@@ -81,6 +81,7 @@
 						{
 							servicesBus.SetObjectBuilder(container.Resolve<IObjectBuilder>());
 							servicesBus.ReceiveFrom("msmq://localhost/mt_subscriptions");
+							servicesBus.SetConcurrentConsumerLimit(1);
 						});
 
 					container.Kernel.AddComponentInstance("bus", typeof (IServiceBus), bus);

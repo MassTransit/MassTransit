@@ -10,31 +10,17 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Services.Subscriptions.Messages
+namespace MassTransit.Util
 {
-	using System;
-	using Magnum;
+	using System.Threading;
 
-	[Serializable]
-	public class CancelSubscriptionUpdates :
-		CorrelatedBy<Guid>
+	public class SequenceNumberGenerator
 	{
-		protected CancelSubscriptionUpdates()
-		{
-		}
+		private long _nextValue;
 
-		public CancelSubscriptionUpdates(Uri requestingUri)
-			: this(CombGuid.Generate(), requestingUri)
+		public long Next()
 		{
+			return Interlocked.Increment(ref _nextValue);
 		}
-
-		public CancelSubscriptionUpdates(Guid correlationId, Uri requestingUri)
-		{
-			RequestingUri = requestingUri;
-			CorrelationId = correlationId;
-		}
-
-		public Uri RequestingUri { get; set; }
-		public Guid CorrelationId { get; set; }
 	}
 }

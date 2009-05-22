@@ -13,7 +13,6 @@
 namespace MassTransit.Services.Subscriptions.Server
 {
 	using System;
-	using System.Collections.Generic;
 	using System.Linq;
 	using Exceptions;
 	using log4net;
@@ -37,12 +36,12 @@ namespace MassTransit.Services.Subscriptions.Server
 		private UnsubscribeAction _unsubscribeToken = () => false;
 
 		public SubscriptionService(IServiceBus bus,
-                                   ISubscriptionRepository subscriptionRepository,
+		                           ISubscriptionRepository subscriptionRepository,
 		                           IEndpointFactory endpointFactory,
 		                           ISagaRepository<SubscriptionSaga> subscriptionSagas,
 		                           ISagaRepository<SubscriptionClientSaga> subscriptionClientSagas)
 		{
-		    _bus = bus;
+			_bus = bus;
 			_repository = subscriptionRepository;
 			_endpointFactory = endpointFactory;
 			_subscriptionSagas = subscriptionSagas;
@@ -62,15 +61,15 @@ namespace MassTransit.Services.Subscriptions.Server
 		public void Consume(SubscriptionClientAdded message)
 		{
 			if (_log.IsInfoEnabled)
-				_log.InfoFormat("Sending cache update to {0}", message.EndpointUri);
+				_log.InfoFormat("Sending cache update to {0}", message.ControlUri);
 
-			SendCacheUpdateToClient(message.EndpointUri);
+			SendCacheUpdateToClient(message.ControlUri);
 		}
 
 		public void Consume(SubscriptionClientRemoved message)
 		{
 			if (_log.IsInfoEnabled)
-				_log.InfoFormat("Removing client: {0}", message.EndpointUri);
+				_log.InfoFormat("Removing client: {0}", message.DataUri);
 		}
 
 		public void Consume(SubscriptionRemoved message)
@@ -129,10 +128,10 @@ namespace MassTransit.Services.Subscriptions.Server
 		{
 			_subscriptionClientSagas.Where(x => x.CurrentState == SubscriptionClientSaga.Active)
 				.Each(client =>
-			{
-				IEndpoint endpoint = _endpointFactory.GetEndpoint(client.EndpointUri);
+					{
+						IEndpoint endpoint = _endpointFactory.GetEndpoint(client.ControlUri);
 
-				endpoint.Send(message, x => x.SetSourceAddress(_bus.Endpoint.Uri));
+						endpoint.Send(message, x => x.SetSourceAddress(_bus.Endpoint.Uri));
 					});
 		}
 
@@ -141,7 +140,7 @@ namespace MassTransit.Services.Subscriptions.Server
 			var subscriptions = _subscriptionSagas.Where(x => x.CurrentState == SubscriptionSaga.Active)
 				.Select(x => x.SubscriptionInfo);
 
-			var response = new CacheUpdateResponse(subscriptions);
+			var response = new SubscriptionRefresh(subscriptions);
 
 			IEndpoint endpoint = _endpointFactory.GetEndpoint(uri);
 

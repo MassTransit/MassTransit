@@ -11,11 +11,11 @@
     </root>
 
     <logger name="MassTransit">
-      <level value="INFO" />
+      <level value="DEBUG" />
     </logger>
 
     <logger name="MassTransit.Messages" additivity="false">
-      <level value="INFO" />
+      <level value="DEBUG" />
 			<appender-ref ref="MessageLogAppender" />
 		</logger>
 

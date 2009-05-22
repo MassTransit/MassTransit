@@ -18,16 +18,16 @@ namespace MassTransit.Services.Subscriptions.Messages
     public class AddSubscription :
         SubscriptionChange
     {
-        protected AddSubscription()
-        {
-        }
-
-        public AddSubscription(SubscriptionInformation subscription)
+    	public AddSubscription(SubscriptionInformation subscription)
             : base(subscription)
         {
         }
 
-        public bool Equals(AddSubscription obj)
+    	protected AddSubscription()
+    	{
+    	}
+
+    	public bool Equals(AddSubscription obj)
         {
             return base.Equals(obj);
         }

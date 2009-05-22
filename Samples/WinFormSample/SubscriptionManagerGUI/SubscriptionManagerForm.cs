@@ -5,6 +5,7 @@
 	using System.ComponentModel;
 	using System.Drawing;
 	using System.Windows.Forms;
+	using Magnum;
 	using MassTransit;
 	using MassTransit.Configuration;
 	using MassTransit.Services.HealthMonitoring;
@@ -14,7 +15,7 @@
 
 	public partial class SubscriptionManagerForm :
 		Form,
-		Consumes<CacheUpdateResponse>.All,
+		Consumes<SubscriptionRefresh>.All,
 		Consumes<AddSubscription>.All,
 		Consumes<RemoveSubscription>.All,
         Consumes<HealthUpdate>.All
@@ -23,6 +24,7 @@
 		private IServiceBus _bus;
 		private UnsubscribeAction _unsubscribe;
 		private IEndpoint _subscriptionServiceEndpoint;
+		private Guid _clientId = CombGuid.Generate();
 
 		public SubscriptionManagerForm(IObjectBuilder builder)
 		{
@@ -50,7 +52,7 @@
 			_subscriptionServiceEndpoint = _builder.GetInstance<IEndpointFactory>().GetEndpoint("msmq://localhost/mt_subscriptions");
 
 
-			_subscriptionServiceEndpoint.Send(new CacheUpdateRequest(_bus.Endpoint.Uri));
+			_subscriptionServiceEndpoint.Send(new AddSubscriptionClient(_clientId, _bus.Endpoint.Uri, _bus.Endpoint.Uri));
 
 //			_timeoutRepository.TimeoutAdded += TimeoutRefreshNeeded;
 //			_timeoutRepository.TimeoutUpdated += TimeoutRefreshNeeded;
@@ -61,7 +63,7 @@
 		{
 			_unsubscribe();
 
-			_subscriptionServiceEndpoint.Send(new CancelSubscriptionUpdates(_bus.Endpoint.Uri));
+			_subscriptionServiceEndpoint.Send(new RemoveSubscriptionClient(_clientId, _bus.Endpoint.Uri, _bus.Endpoint.Uri));
 
 			_bus.Dispose();
 
@@ -249,7 +251,7 @@
         {
             HeartBeatRefreshNeeded(message);
         }
-		public void Consume(CacheUpdateResponse message)
+		public void Consume(SubscriptionRefresh message)
 		{
 			Action<IEnumerable<SubscriptionInformation>> method = x => RefreshSubscriptions(x);
 			BeginInvoke(method, new object[] { message.Subscriptions });
