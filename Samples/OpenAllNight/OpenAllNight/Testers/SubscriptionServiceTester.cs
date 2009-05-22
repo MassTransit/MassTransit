@@ -23,7 +23,7 @@ namespace OpenAllNight.Testers
         public void Test()
         {
             Guid ticket = Guid.NewGuid();
-            _subscriptionEndpoint.Send(new CacheUpdateRequest(ticket, _bus.Endpoint.Uri));
+            _subscriptionEndpoint.Send(new AddSubscriptionClient(ticket, _bus.Endpoint.Uri, _bus.Endpoint.Uri));
             _counter.IncrementMessagesSent();
 
             if (_rand.Next(0, 10) == 0)
@@ -44,7 +44,7 @@ namespace OpenAllNight.Testers
                 _bus.Publish(new SimpleMessage());
                 _counter.IncrementPublishCount();
             }
-            _subscriptionEndpoint.Send(new CancelSubscriptionUpdates(ticket, _bus.Endpoint.Uri));
+			_subscriptionEndpoint.Send(new RemoveSubscriptionClient(ticket, _bus.Endpoint.Uri, _bus.Endpoint.Uri));
         }
 
         public void Results()
