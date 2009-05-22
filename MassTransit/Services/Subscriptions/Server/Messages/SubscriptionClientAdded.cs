@@ -15,8 +15,10 @@ namespace MassTransit.Services.Subscriptions.Server.Messages
 	using System;
 
 	[Serializable]
-	public class SubscriptionClientAdded 
+	public class SubscriptionClientAdded
 	{
-		public Uri EndpointUri { get; set; }
+		public Guid ClientId { get; set; }
+		public Uri ControlUri { get; set; }
+		public Uri DataUri { get; set; }
 	}
 }

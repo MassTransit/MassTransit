@@ -148,7 +148,7 @@ namespace MassTransit.Saga.Configuration
 			if (InInitialState())
 				policy = new InitiatingSagaPolicy<TComponent, TMessage>();
 			else
-				policy = new ExistingSagaPolicy<TComponent, TMessage>();
+				policy = new ExistingOrIgnoreSagaPolicy<TComponent, TMessage>();
 
 			var sink = _context.Builder.GetInstance<TSink>(new Hashtable
 				{

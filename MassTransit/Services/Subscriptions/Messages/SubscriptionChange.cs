@@ -19,36 +19,30 @@ namespace MassTransit.Services.Subscriptions.Messages
 	public abstract class SubscriptionChange :
 		CorrelatedBy<Guid>
 	{
-		private SubscriptionInformation _subscription;
-
 		protected SubscriptionChange()
 		{
 		}
 
 		protected SubscriptionChange(SubscriptionInformation subscription)
 		{
-			_subscription = subscription;
+			Subscription = subscription;
 
-			if (_subscription.SubscriptionId == Guid.Empty)
-				_subscription.SubscriptionId = CombGuid.Generate();
+			if (Subscription.SubscriptionId == Guid.Empty)
+				Subscription.SubscriptionId = CombGuid.Generate();
 		}
 
-		public SubscriptionInformation Subscription
-		{
-			get { return _subscription; }
-			set { _subscription = value; }
-		}
+		public SubscriptionInformation Subscription { get; set; }
 
 		public Guid CorrelationId
 		{
-			get { return _subscription.SubscriptionId; }
+			get { return Subscription.SubscriptionId; }
 		}
 
 		public bool Equals(SubscriptionChange obj)
 		{
 			if (ReferenceEquals(null, obj)) return false;
 			if (ReferenceEquals(this, obj)) return true;
-			return Equals(obj._subscription, _subscription);
+			return Equals(obj.Subscription, Subscription);
 		}
 
 		public override bool Equals(object obj)
@@ -61,7 +55,7 @@ namespace MassTransit.Services.Subscriptions.Messages
 
 		public override int GetHashCode()
 		{
-			return (_subscription != null ? _subscription.GetHashCode() : 0);
+			return (Subscription != null ? Subscription.GetHashCode() : 0);
 		}
 	}
 }

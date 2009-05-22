@@ -10,18 +10,21 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Services.Subscriptions.Server
+namespace MassTransit.Services.Subscriptions.Messages
 {
-	using Magnum;
-	using Messages;
-	using Subscriptions.Messages;
+	using System;
 
-	public class RemoveSubscriptionClientMapper :
-		Mapper<CancelSubscriptionUpdates, SubscriptionClientRemoved>
+	[Serializable]
+	public class AddSubscriptionClient :
+		SubscriptionClientMessageBase
 	{
-		public RemoveSubscriptionClientMapper()
+		public AddSubscriptionClient(Guid clientId, Uri controlUri, Uri dataUri)
+			: base(clientId, controlUri, dataUri)
 		{
-			From(x => x.RequestingUri).To(y => y.EndpointUri);
+		}
+
+		protected AddSubscriptionClient()
+		{
 		}
 	}
 }

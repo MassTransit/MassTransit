@@ -18,12 +18,18 @@ namespace MassTransit.Services.Subscriptions.Messages
 	public class RemoveSubscription :
 		SubscriptionChange
 	{
-		protected RemoveSubscription()
+		public RemoveSubscription(SubscriptionInformation subscription)
+			: base(subscription)
 		{
 		}
 
-		public RemoveSubscription(SubscriptionInformation subscription)
+		public RemoveSubscription(SubscriptionInformation subscription, long sequenceNumber)
 			: base(subscription)
+		{
+			Subscription.SequenceNumber = sequenceNumber;
+		}
+
+		protected RemoveSubscription()
 		{
 		}
 

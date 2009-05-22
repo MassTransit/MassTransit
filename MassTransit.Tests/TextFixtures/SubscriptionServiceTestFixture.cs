@@ -21,6 +21,7 @@ namespace MassTransit.Tests.TextFixtures
 	using MassTransit.Services.Subscriptions.Configuration;
 	using MassTransit.Services.Subscriptions.Messages;
 	using MassTransit.Services.Subscriptions.Server;
+	using MassTransit.Services.Subscriptions.Server.Messages;
 	using MassTransit.Transports;
 	using NUnit.Framework;
 	using Rhino.Mocks;
@@ -45,7 +46,11 @@ namespace MassTransit.Tests.TextFixtures
 
 			const string subscriptionServiceEndpointAddress = "loopback://localhost/mt_subscriptions";
 
-			SubscriptionBus = ServiceBusConfigurator.New(x => { x.ReceiveFrom(subscriptionServiceEndpointAddress); });
+			SubscriptionBus = ServiceBusConfigurator.New(x =>
+				{
+					x.ReceiveFrom(subscriptionServiceEndpointAddress);
+					x.SetConcurrentConsumerLimit(1);
+				});
 
 			SetupSubscriptionService();
 
@@ -95,12 +100,15 @@ namespace MassTransit.Tests.TextFixtures
 				.Return(SubscriptionRepository);
 
 			_subscriptionClientSagaRepository = SetupSagaRepository<SubscriptionClientSaga>();
-			SetupInitiateSagaSink<SubscriptionClientSaga, CacheUpdateRequest>(SubscriptionBus, _subscriptionClientSagaRepository);
-			SetupOrchestrateSagaSink<SubscriptionClientSaga, CancelSubscriptionUpdates>(SubscriptionBus, _subscriptionClientSagaRepository);
+			SetupInitiateSagaStateMachineSink<SubscriptionClientSaga, AddSubscriptionClient>(SubscriptionBus, _subscriptionClientSagaRepository);
+			SetupOrchestrateSagaStateMachineSink<SubscriptionClientSaga, RemoveSubscriptionClient>(SubscriptionBus, _subscriptionClientSagaRepository);
+			SetupObservesSagaStateMachineSink<SubscriptionClientSaga, SubscriptionClientAdded>(SubscriptionBus, _subscriptionClientSagaRepository);
 
 			_subscriptionSagaRepository = SetupSagaRepository<SubscriptionSaga>();
-			SetupInitiateSagaSink<SubscriptionSaga, AddSubscription>(SubscriptionBus, _subscriptionSagaRepository);
-			SetupOrchestrateSagaSink<SubscriptionSaga, RemoveSubscription>(SubscriptionBus, _subscriptionSagaRepository);
+			SetupInitiateSagaStateMachineSink<SubscriptionSaga, AddSubscription>(SubscriptionBus, _subscriptionSagaRepository);
+			SetupOrchestrateSagaStateMachineSink<SubscriptionSaga, RemoveSubscription>(SubscriptionBus, _subscriptionSagaRepository);
+			SetupObservesSagaStateMachineSink<SubscriptionSaga, AddSubscriptionClient>(SubscriptionBus, _subscriptionSagaRepository);
+			SetupObservesSagaStateMachineSink<SubscriptionSaga, RemoveSubscriptionClient>(SubscriptionBus, _subscriptionSagaRepository);
 
 			SubscriptionService = new SubscriptionService(SubscriptionBus, SubscriptionRepository, EndpointFactory, _subscriptionSagaRepository, _subscriptionClientSagaRepository);
 

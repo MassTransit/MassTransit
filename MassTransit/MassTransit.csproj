@@ -128,9 +128,9 @@
     <Compile Include="ServiceBus.cs" />
     <Compile Include="Services\Subscriptions\Server\ISubscriptionRepository.cs" />
     <Compile Include="Services\Subscriptions\Messages\AddSubscription.cs" />
-    <Compile Include="Services\Subscriptions\Messages\CacheUpdateResponse.cs" />
-    <Compile Include="Services\Subscriptions\Messages\CacheUpdateRequest.cs" />
-    <Compile Include="Services\Subscriptions\Messages\CancelSubscriptionUpdates.cs" />
+    <Compile Include="Services\Subscriptions\Messages\SubscriptionRefresh.cs" />
+    <Compile Include="Services\Subscriptions\Messages\AddSubscriptionClient.cs" />
+    <Compile Include="Services\Subscriptions\Messages\RemoveSubscriptionClient.cs" />
     <Compile Include="Services\Subscriptions\Messages\RemoveSubscription.cs" />
     <Compile Include="Services\Subscriptions\Messages\SubscriptionChange.cs" />
     <Compile Include="Services\Subscriptions\Subscription.cs" />
@@ -163,6 +163,7 @@
     <Compile Include="Saga\CreateOrUseExistingSagaPolicy.cs" />
     <Compile Include="Saga\DataEventBinder.cs" />
     <Compile Include="Saga\EventBinder.cs" />
+    <Compile Include="Saga\ExistingOrIgnoreSagaPolicy.cs" />
     <Compile Include="Saga\Observes.cs" />
     <Compile Include="Saga\Pipeline\CorrelatedSagaMessageSink.cs" />
     <Compile Include="Saga\Pipeline\CorrelatedSagaStateMachineMessageSink.cs" />
@@ -171,6 +172,7 @@
     <Compile Include="Saga\ISagaMessageSink.cs" />
     <Compile Include="Saga\ISagaPolicy.cs" />
     <Compile Include="Saga\Pipeline\SagaFilterExpressionConverter.cs" />
+    <Compile Include="Services\Subscriptions\Messages\SubscriptionClientMessageBase.cs" />
     <Compile Include="Util\BranchEvaluator.cs" />
     <Compile Include="Util\EvaluationCandidateSelector.cs" />
     <Compile Include="Util\ExpressionVisitor.cs" />
@@ -203,14 +205,10 @@
     <Compile Include="Services\Subscriptions\Client\ClientSubscriptionInfoMapper.cs" />
     <Compile Include="Services\Subscriptions\Client\ClientSubscriptionInformation.cs" />
     <Compile Include="Services\Subscriptions\ISubscriptionService.cs" />
-    <Compile Include="Services\Subscriptions\Server\AddSubscriptionClientMapper.cs" />
-    <Compile Include="Services\Subscriptions\Server\AddSubscriptionMapper.cs" />
     <Compile Include="Services\Subscriptions\Server\Messages\SubscriptionAdded.cs" />
     <Compile Include="Services\Subscriptions\Server\Messages\SubscriptionClientAdded.cs" />
     <Compile Include="Services\Subscriptions\Server\Messages\SubscriptionClientRemoved.cs" />
     <Compile Include="Services\Subscriptions\Server\Messages\SubscriptionRemoved.cs" />
-    <Compile Include="Services\Subscriptions\Server\RemoveSubscriptionClientMapper.cs" />
-    <Compile Include="Services\Subscriptions\Server\RemoveSubscriptionMapper.cs" />
     <Compile Include="Services\Subscriptions\Server\SubscriptionClientSaga.cs" />
     <Compile Include="Services\Subscriptions\Server\SubscriptionSaga.cs" />
     <Compile Include="Services\Subscriptions\SubscriptionConsumer.cs" />
@@ -335,6 +333,7 @@
     <Compile Include="Services\MessageDeferral\Messages\DeferedMessageRepublished.cs" />
     <Compile Include="Services\MessageDeferral\Messages\NewDeferMessageReceived.cs" />
     <Compile Include="Services\Timeout\RemoteTimeoutViewer.cs" />
+    <Compile Include="Util\SequenceNumberGenerator.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Services\HealthMonitoring\Client\" />

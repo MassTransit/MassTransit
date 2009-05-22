@@ -14,6 +14,7 @@ namespace MassTransit.Services.Subscriptions.Server
 {
 	using System;
 	using Magnum.StateMachine;
+	using Messages;
 	using Saga;
 	using Subscriptions.Messages;
 
@@ -22,35 +23,40 @@ namespace MassTransit.Services.Subscriptions.Server
 	/// </summary>
 	public class SubscriptionSaga :
 		SagaStateMachine<SubscriptionSaga>,
-		ISaga,
-		InitiatedBy<AddSubscription>,
-		Orchestrates<RemoveSubscription>
+		ISaga
 	{
-		private static readonly AddSubscriptionMapper _addMapper = new AddSubscriptionMapper();
-		private static readonly RemoveSubscriptionMapper _removeMapper = new RemoveSubscriptionMapper();
-
 		static SubscriptionSaga()
 		{
 			Define(() =>
 				{
+					Correlate(ClientAdded).By((saga, message) =>
+					                          saga.SubscriptionInfo.EndpointUri == message.DataUri &&
+					                          saga.SubscriptionInfo.ClientId != message.ClientId);
+
+					Correlate(ClientRemoved).By((saga, message) =>
+					                            saga.SubscriptionInfo.EndpointUri == message.DataUri &&
+					                            saga.SubscriptionInfo.ClientId == message.ClientId);
+
 					Initially(
 						When(SubscriptionAdded)
 							.Then((saga, message) =>
 								{
-									// store the subscription information
 									saga.SubscriptionInfo = message.Subscription;
 
-									saga.Bus.Publish(_addMapper.Transform(message));
+									saga.NotifySubscriptionAdded();
 								}).TransitionTo(Active));
 
 					During(Active,
-						When(SubscriptionRemoved)
-						.Then((saga,message)=>
-							{
-								// remove it
-								saga.Bus.Publish(_removeMapper.Transform(message));
-							})
-							.Complete());
+					       When(SubscriptionRemoved)
+					       	.Then((saga, message) => { saga.NotifySubscriptionRemoved(message.Subscription); })
+					       	.Complete(),
+					       When(ClientAdded)
+					       	.Then((saga, message) => saga.NotifySubscriptionRemoved())
+					       	.Complete(),
+					       When(ClientRemoved)
+					       	.Then((saga, message) => saga.NotifySubscriptionRemoved())
+					       	.Complete()
+						);
 				});
 		}
 
@@ -71,19 +77,27 @@ namespace MassTransit.Services.Subscriptions.Server
 		public static Event<AddSubscription> SubscriptionAdded { get; set; }
 		public static Event<RemoveSubscription> SubscriptionRemoved { get; set; }
 
-		public SubscriptionInformation SubscriptionInfo { get; set; }
+		public static Event<AddSubscriptionClient> ClientAdded { get; set; }
+		public static Event<RemoveSubscriptionClient> ClientRemoved { get; set; }
 
-		public void Consume(AddSubscription message)
-		{
-			RaiseEvent(SubscriptionAdded, message);
-		}
+		public SubscriptionInformation SubscriptionInfo { get; set; }
 
 		public IServiceBus Bus { get; set; }
 		public Guid CorrelationId { get; set; }
 
-		public void Consume(RemoveSubscription message)
+		private void NotifySubscriptionAdded()
 		{
-			RaiseEvent(SubscriptionRemoved, message);
+			Bus.Publish(new SubscriptionAdded {Subscription = SubscriptionInfo});
+		}
+
+		private void NotifySubscriptionRemoved()
+		{
+			NotifySubscriptionRemoved(SubscriptionInfo);
+		}
+
+		private void NotifySubscriptionRemoved(SubscriptionInformation subscription)
+		{
+			Bus.Publish(new SubscriptionRemoved {Subscription = subscription});
 		}
 	}
 }

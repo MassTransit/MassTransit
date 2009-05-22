@@ -14,38 +14,40 @@ namespace MassTransit.Services.Subscriptions.Server
 {
 	using System;
 	using Magnum.StateMachine;
+	using Messages;
 	using Saga;
 	using Subscriptions.Messages;
 
 	public class SubscriptionClientSaga :
 		SagaStateMachine<SubscriptionClientSaga>,
-		ISaga,
-		InitiatedBy<CacheUpdateRequest>,
-		Orchestrates<CancelSubscriptionUpdates>
+		ISaga
 	{
-		private static readonly AddSubscriptionClientMapper _addMapper = new AddSubscriptionClientMapper();
-		private static readonly RemoveSubscriptionClientMapper _removeMapper = new RemoveSubscriptionClientMapper();
-
 		static SubscriptionClientSaga()
 		{
 			Define(() =>
 				{
+					Correlate(DuplicateClientAdded)
+						.By((saga, message) => saga.ControlUri == message.ControlUri &&
+						                       saga.CorrelationId != message.ClientId);
+
 					Initially(
 						When(ClientAdded)
 							.Then((saga, message) =>
 								{
-									saga.EndpointUri = message.RequestingUri;
+									saga.ControlUri = message.ControlUri;
+									saga.DataUri = message.DataUri;
 
-									saga.Bus.Publish(_addMapper.Transform(message));
-								}).TransitionTo(Active));
+									saga.NotifySubscriptionClientAdded();
+								})
+							.TransitionTo(Active));
 
 					During(Active,
-						When(ClientRemoved)
-							.Then((saga, message) =>
-								{
-									// republish as a removal for the service to handle
-									saga.Bus.Publish(_removeMapper.Transform(message));
-								}).Complete());
+					       When(ClientRemoved)
+					       	.Then((saga, message) => saga.NotifySubscriptionClientRemoved())
+					       	.Complete(),
+					       When(DuplicateClientAdded)
+					       	.Then((saga, message) => saga.NotifySubscriptionClientRemoved())
+					       	.Complete());
 				});
 		}
 
@@ -62,22 +64,37 @@ namespace MassTransit.Services.Subscriptions.Server
 		public static State Active { get; set; }
 		public static State Completed { get; set; }
 
-		public static Event<CacheUpdateRequest> ClientAdded { get; set; }
-		public static Event<CancelSubscriptionUpdates> ClientRemoved { get; set; }
-		public Uri EndpointUri { get; set; }
+		public static Event<AddSubscriptionClient> ClientAdded { get; set; }
+		public static Event<RemoveSubscriptionClient> ClientRemoved { get; set; }
+		public static Event<SubscriptionClientAdded> DuplicateClientAdded { get; set; }
 
-
-		public void Consume(CacheUpdateRequest message)
-		{
-			RaiseEvent(ClientAdded, message);
-		}
+		public Uri ControlUri { get; set; }
+		public Uri DataUri { get; set; }
 
 		public Guid CorrelationId { get; set; }
 		public IServiceBus Bus { get; set; }
 
-		public void Consume(CancelSubscriptionUpdates message)
+		private void NotifySubscriptionClientAdded()
 		{
-			RaiseEvent(ClientRemoved, message);
+			var message = new SubscriptionClientAdded
+				{
+					ClientId = CorrelationId,
+					ControlUri = ControlUri,
+					DataUri = DataUri,
+				};
+
+			Bus.Publish(message);
+		}
+
+		private void NotifySubscriptionClientRemoved()
+		{
+			var message = new SubscriptionClientRemoved
+				{
+					ControlUri = ControlUri,
+					DataUri = DataUri,
+				};
+
+			Bus.Publish(message);
 		}
 	}
 }

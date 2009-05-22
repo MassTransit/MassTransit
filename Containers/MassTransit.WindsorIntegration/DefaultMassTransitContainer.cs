@@ -97,6 +97,14 @@ namespace MassTransit.WindsorIntegration
 					.ImplementedBy(typeof(ExistingSagaPolicy<,>))
 					.LifeStyle.Transient,
 
+				Component.For(typeof(ExistingOrIgnoreSagaPolicy<,>))
+					.ImplementedBy(typeof(ExistingOrIgnoreSagaPolicy<,>))
+					.LifeStyle.Transient,
+
+				Component.For(typeof(CreateOrUseExistingSagaPolicy<,>))
+					.ImplementedBy(typeof(CreateOrUseExistingSagaPolicy<,>))
+					.LifeStyle.Transient,
+
 
 				// Saga message sinks
 				Component.For(typeof (CorrelatedSagaMessageSink<,>))
@@ -104,6 +112,13 @@ namespace MassTransit.WindsorIntegration
 					.LifeStyle.Transient,
 				Component.For(typeof(CorrelatedSagaStateMachineMessageSink<,>))
 					.ImplementedBy(typeof(CorrelatedSagaStateMachineMessageSink<,>))
+					.LifeStyle.Transient,
+
+				Component.For(typeof (PropertySagaMessageSink<,>))
+					.ImplementedBy(typeof(PropertySagaMessageSink<,>))
+					.LifeStyle.Transient,
+				Component.For(typeof(PropertySagaStateMachineMessageSink<,>))
+					.ImplementedBy(typeof(PropertySagaStateMachineMessageSink<,>))
 					.LifeStyle.Transient,
 
 				// Message Serializers

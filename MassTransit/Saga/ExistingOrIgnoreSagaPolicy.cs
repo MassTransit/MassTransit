@@ -10,18 +10,27 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Services.Subscriptions.Server
+namespace MassTransit.Saga
 {
-	using Magnum;
-	using Messages;
-	using Subscriptions.Messages;
+	using System;
 
-	public class RemoveSubscriptionMapper :
-		Mapper<RemoveSubscription, SubscriptionRemoved>
+	public class ExistingOrIgnoreSagaPolicy<TSaga, TMessage> :
+		ISagaPolicy<TSaga, TMessage>
+		where TSaga : ISaga
 	{
-		public RemoveSubscriptionMapper()
+		public bool CreateSagaWhenMissing(TMessage message, out Guid sagaId)
 		{
-			From(x => x.Subscription).To(y => y.Subscription);
+			sagaId = Guid.Empty;
+
+			return false;
+		}
+
+		public void ForExistingSaga(TMessage message)
+		{
+		}
+
+		public void ForMissingSaga(TMessage message)
+		{
 		}
 	}
 }

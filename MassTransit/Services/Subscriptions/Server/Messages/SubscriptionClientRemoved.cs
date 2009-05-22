@@ -17,6 +17,7 @@ namespace MassTransit.Services.Subscriptions.Server.Messages
 	[Serializable]
 	public class SubscriptionClientRemoved
 	{
-		public Uri EndpointUri { get; set; }
+		public Uri ControlUri { get; set; }
+		public Uri DataUri { get; set; }
 	}
 }
