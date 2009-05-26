@@ -85,9 +85,11 @@ namespace MassTransit
 			{
 				messageName = messageType.GetGenericTypeDefinition().FullName;
 				messageName += "[";
+				var prefix = "";
 				foreach (Type argument in messageType.GetGenericArguments())
 				{
-					messageName += "[" + argument.ToMessageName() + "]";
+					messageName += prefix + "[" + argument.ToMessageName() + "]";
+					prefix = ",";
 				}
 				messageName += "]";
 			}
