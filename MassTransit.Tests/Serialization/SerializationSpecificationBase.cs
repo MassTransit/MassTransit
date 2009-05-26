@@ -16,6 +16,7 @@ namespace MassTransit.Tests.Serialization
 	using System.IO;
 	using System.Text;
 	using MassTransit.Serialization;
+	using MassTransit.Serialization.Custom;
 	using NUnit.Framework;
 
 	public class SerializationSpecificationBase
@@ -23,7 +24,7 @@ namespace MassTransit.Tests.Serialization
 		protected void TestSerialization<T>(T message)
 		{
 			byte[] data;
-			var serializer = new CustomXmlMessageSerializer();
+			var serializer = new CustomXmlSerializer();
 
 			using (MemoryStream output = new MemoryStream())
 			{

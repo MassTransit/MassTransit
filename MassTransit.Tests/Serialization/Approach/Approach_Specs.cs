@@ -17,6 +17,7 @@ namespace MassTransit.Tests.Serialization.Approach
 	using System.Diagnostics;
 	using System.Text;
 	using Magnum.DateTimeExtensions;
+	using MassTransit.Serialization.Custom;
 	using Messages;
 	using NUnit.Framework;
 
@@ -119,6 +120,8 @@ namespace MassTransit.Tests.Serialization.Approach
 
 			Trace.WriteLine("Result XML:");
 			Trace.WriteLine(Encoding.UTF8.GetString(data));
+
+			serializer.Deserialize(data);
 		}
 
 
