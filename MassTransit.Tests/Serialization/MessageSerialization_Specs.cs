@@ -51,7 +51,7 @@ namespace MassTransit.Tests.Serialization
         {
             byte[] serializedMessageData;
 
-            var serializer = new XmlMessageSerializer();
+            var serializer = new DotNotXmlMessageSerializer();
 
             using (MemoryStream output = new MemoryStream())
             {
@@ -75,7 +75,7 @@ namespace MassTransit.Tests.Serialization
         {
             byte[] serializedMessageData;
 
-            var serializer = new CustomXmlMessageSerializer();
+            var serializer = new XmlMessageSerializer();
 
 			OutboundMessage.Set(x =>
 				{

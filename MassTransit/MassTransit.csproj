@@ -180,7 +180,9 @@
     <Compile Include="Serialization\Custom\IObjectPropertyCache.cs" />
     <Compile Include="Serialization\Custom\IObjectSerializer.cs" />
     <Compile Include="Serialization\Custom\ISerializerContext.cs" />
+    <Compile Include="Serialization\Custom\IXmlSerializer.cs" />
     <Compile Include="Serialization\Custom\NamespaceTable.cs" />
+    <Compile Include="Serialization\Custom\NonClosingStream.cs" />
     <Compile Include="Serialization\Custom\ObjectDeserializer.cs" />
     <Compile Include="Serialization\Custom\ObjectField.cs" />
     <Compile Include="Serialization\Custom\ObjectFieldCache.cs" />
@@ -210,6 +212,7 @@
     <Compile Include="Serialization\Custom\TypeDeserializers\TimeSpanDeserializer.cs" />
     <Compile Include="Serialization\Custom\TypeDeserializers\UIntDeserializer.cs" />
     <Compile Include="Serialization\Custom\TypeDeserializers\ULongDeserializer.cs" />
+    <Compile Include="Serialization\Custom\TypeDeserializers\UriDeserializer.cs" />
     <Compile Include="Serialization\Custom\TypeDeserializers\UShortDeserializer.cs" />
     <Compile Include="Serialization\Custom\TypeSerializers\ArraySerializer.cs" />
     <Compile Include="Serialization\Custom\TypeSerializers\BooleanSerializer.cs" />
@@ -221,6 +224,7 @@
     <Compile Include="Serialization\Custom\TypeSerializers\DictionarySerializer.cs" />
     <Compile Include="Serialization\Custom\TypeSerializers\DoubleSerializer.cs" />
     <Compile Include="Serialization\Custom\TypeSerializers\EnumerableSerializerBase.cs" />
+    <Compile Include="Serialization\Custom\TypeSerializers\EnumSerializer.cs" />
     <Compile Include="Serialization\Custom\TypeSerializers\FloatSerializer.cs" />
     <Compile Include="Serialization\Custom\TypeSerializers\GuidSerializer.cs" />
     <Compile Include="Serialization\Custom\TypeSerializers\IntSerializer.cs" />
@@ -233,6 +237,7 @@
     <Compile Include="Serialization\Custom\TypeSerializers\TimeSpanSerializer.cs" />
     <Compile Include="Serialization\Custom\TypeSerializers\UIntSerializer.cs" />
     <Compile Include="Serialization\Custom\TypeSerializers\ULongSerializer.cs" />
+    <Compile Include="Serialization\Custom\TypeSerializers\UriSerializer.cs" />
     <Compile Include="Serialization\Custom\TypeSerializers\UShortSerializer.cs" />
     <Compile Include="Services\Subscriptions\Messages\SubscriptionClientMessageBase.cs" />
     <Compile Include="Util\BranchEvaluator.cs" />
@@ -249,11 +254,7 @@
     <Compile Include="Saga\Configuration\SagaStateMachineSubscriptionInspector.cs" />
     <Compile Include="Saga\Pipeline\SagaMessageSinkBase.cs" />
     <Compile Include="Saga\SagaStateMachine.cs" />
-    <Compile Include="Serialization\MessageMapper.cs" />
-    <Compile Include="Serialization\CustomXmlMessageSerializer.cs" />
-    <Compile Include="Serialization\TypeFieldInfo.cs" />
-    <Compile Include="Serialization\TypePropertyInfo.cs" />
-    <Compile Include="Serialization\XmlObjectSerializer.cs" />
+    <Compile Include="Serialization\XmlMessageSerializer.cs" />
     <Compile Include="Services\HealthMonitoring\Configuration\HealthClientConfigurator.cs" />
     <Compile Include="Services\HealthMonitoring\Messages\DownEndpoint.cs" />
     <Compile Include="Services\HealthMonitoring\Messages\EndpointTurningOff.cs" />
@@ -388,7 +389,7 @@
     <Compile Include="Serialization\JsonMessageEnvelope.cs" />
     <Compile Include="Serialization\JsonMessageSerializer.cs" />
     <Compile Include="Serialization\XmlMessageEnvelope.cs" />
-    <Compile Include="Serialization\XmlMessageSerializer.cs" />
+    <Compile Include="Serialization\DotNotXmlMessageSerializer.cs" />
     <Compile Include="Serialization\XmlReceiveMessageEnvelope.cs" />
     <Compile Include="Internal\NullServiceBus.cs" />
     <Compile Include="Services\MessageDeferral\RemoteMessageDeferralViewer.cs" />

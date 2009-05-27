@@ -10,59 +10,43 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Serialization.Custom
+namespace MassTransit.Serialization.Custom.TypeSerializers
 {
 	using System;
 	using System.Collections.Generic;
 	using System.Xml;
 	using Magnum.Monads;
 
-	public class ObjectSerializer<T> :
+	public class EnumSerializer<T> :
 		IObjectSerializer
 	{
-		private readonly string _ns;
-		private readonly IObjectPropertyCache<T> _propertyCache;
-		private readonly Type _type;
+		private static string _namespace;
+		private static Type _type;
 
-		public ObjectSerializer()
+		static EnumSerializer()
 		{
-			_propertyCache = new ObjectPropertyCache<T>();
-
 			_type = typeof (T);
-			_ns = _type.ToMessageName();
+			_namespace = _type.ToMessageName();
 		}
 
 		public IEnumerable<K<Action<XmlWriter>>> GetSerializationActions(ISerializerContext context, string localName, object value)
 		{
-			if (value == null)
-				yield break;
-
-			string prefix = context.GetPrefix(localName, _ns);
+			string prefix = context.GetPrefix(_type.Name, _namespace);
 
 			yield return output => output(writer =>
 				{
 					bool isDocumentElement = writer.WriteState == WriteState.Start;
 
-					writer.WriteStartElement(prefix, localName, _ns);
+					writer.WriteStartElement(prefix, localName, _namespace);
 
 					if (isDocumentElement)
 						context.WriteNamespaceInformationToXml(writer);
+
+					if (value != null)
+						writer.WriteString(value.ToString());
+
+					writer.WriteEndElement();
 				});
-
-			foreach (ObjectProperty<T> property in _propertyCache)
-			{
-				object obj = property.GetValue((T) value);
-				if (obj == null)
-					continue;
-
-				IEnumerable<K<Action<XmlWriter>>> enumerable = context.SerializeObject(property.Name, obj.GetType(), obj);
-				foreach (K<Action<XmlWriter>> action in enumerable)
-				{
-					yield return action;
-				}
-			}
-
-			yield return output => output(writer => { writer.WriteEndElement(); });
 		}
 	}
 }

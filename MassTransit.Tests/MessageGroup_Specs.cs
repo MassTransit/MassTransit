@@ -186,23 +186,16 @@ namespace MassTransit.Tests
 		[AllowMessageType(typeof (PingMessage), typeof (PongMessage))]
 		public class SpecialGroup : MessageGroup
 		{
-			private bool _splitOnConsume;
+			public SpecialGroup(List<object> messages)
+				: base(messages)
+			{
+			}
 
 			protected SpecialGroup()
 			{
 			}
 
-			public SpecialGroup(List<object> messages)
-				:
-					base(messages)
-			{
-			}
-
-			public bool SplitOnConsume
-			{
-				get { return _splitOnConsume; }
-				set { _splitOnConsume = value; }
-			}
+			public bool SplitOnConsume { get; set; }
 		}
 
 		[Test]
@@ -219,9 +212,9 @@ namespace MassTransit.Tests
 
 			LocalBus.Publish(group);
 
-			Assert.That(c.Received.WaitOne(TimeSpan.FromSeconds(3), true), Is.True, "No message received by consumer");
-			Assert.That(c.GotPing.WaitOne(TimeSpan.FromSeconds(3), true), Is.True, "No ping received by consumer");
-			Assert.That(c.GotPong.WaitOne(TimeSpan.FromSeconds(3), true), Is.True, "No pong received by consumer");
+			Assert.That(c.Received.WaitOne(TimeSpan.FromSeconds(300), true), Is.True, "No message received by consumer");
+			Assert.That(c.GotPing.WaitOne(TimeSpan.FromSeconds(300), true), Is.True, "No ping received by consumer");
+			Assert.That(c.GotPong.WaitOne(TimeSpan.FromSeconds(300), true), Is.True, "No pong received by consumer");
 		}
 
 		[Test]

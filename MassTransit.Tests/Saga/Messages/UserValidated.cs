@@ -19,7 +19,12 @@ namespace MassTransit.Tests.Saga.Messages
 	public class UserValidated :
 		CorrelatedMessage
 	{
-		public UserValidated(Guid correlationId) : base(correlationId)
+		public UserValidated(Guid correlationId) :
+			base(correlationId)
+		{
+		}
+
+		protected UserValidated()
 		{
 		}
 	}

@@ -30,10 +30,6 @@ namespace MassTransit.Services.Subscriptions.Messages
 		}
 
 		public Guid CorrelationId { get; set; }
-		public Guid ClientId
-		{
-			get { return CorrelationId; }
-		}
 		public Uri ControlUri { get; set; }
 		public Uri DataUri { get; set; }
 	}

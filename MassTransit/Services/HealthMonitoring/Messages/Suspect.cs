@@ -1,10 +1,10 @@
 // Copyright 2007-2008 The Apache Software Foundation.
-// 
+//  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
 // License at 
 // 
-//   http://www.apache.org/licenses/LICENSE-2.0 
+//     http://www.apache.org/licenses/LICENSE-2.0 
 // 
 // Unless required by applicable law or agreed to in writing, software distributed 
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
@@ -12,32 +12,24 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Services.HealthMonitoring.Messages
 {
-    using System;
+	using System;
 
-    [Serializable]
-    public class Suspect :
-        CorrelatedBy<Guid>
-    {
-        private readonly Uri _endpointUri;
-        private readonly Guid _correlationId;
+	[Serializable]
+	public class Suspect :
+		CorrelatedBy<Guid>
+	{
+		public Suspect(Uri endpointUri, Guid correlationId)
+		{
+			EndpointUri = endpointUri;
+			CorrelationId = correlationId;
+		}
 
-        public Suspect(Uri endpointUri, Guid correlationId)
-        {
-            _endpointUri = endpointUri;
-            _correlationId = correlationId;
-        }
+		protected Suspect()
+		{
+		}
 
+		public Uri EndpointUri { get; set; }
 
-        public Uri EndpointUri
-        {
-            get { return _endpointUri; }
-        }
-        public Guid CorrelationId
-        {
-            get
-            {
-                return _correlationId;
-            }
-        }
-    }
+		public Guid CorrelationId { get; set; }
+	}
 }

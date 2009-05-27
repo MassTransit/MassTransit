@@ -83,6 +83,7 @@
     <Compile Include="Learning\Receive_Specs.cs" />
     <Compile Include="Learning\TransactionalQueue_Specs.cs" />
     <Compile Include="Receive_Specs.cs" />
+    <Compile Include="Serialization\ContextSerialization_Specs.cs" />
     <Compile Include="TestFixtures\MsmqEndpointTestFixture.cs" />
     <Compile Include="TestFixtures\MsmqTransactionalEndpointTestFixture.cs" />
     <Compile Include="As_a_queue_address.cs" />

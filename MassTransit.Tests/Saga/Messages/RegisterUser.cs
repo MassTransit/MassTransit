@@ -19,43 +19,22 @@ namespace MassTransit.Tests.Saga.Messages
 	public class RegisterUser :
 		CorrelatedMessage
 	{
-		private readonly string _displayName;
-		private readonly string _email;
-		private readonly string _password;
-		private readonly string _username;
-
 		public RegisterUser(Guid correlationId, string username, string password, string displayName, string email) :
 			base(correlationId)
 		{
-			_username = username;
-			_password = password;
-			_displayName = displayName;
-			_email = email;
+			Username = username;
+			Password = password;
+			DisplayName = displayName;
+			Email = email;
 		}
 
-		public string Username
+		protected RegisterUser()
 		{
-			get { return _username; }
 		}
 
-		public string Password
-		{
-			get { return _password; }
-		}
-
-		public string Email
-		{
-			get { return _email; }
-		}
-
-		public string DisplayName
-		{
-			get { return _displayName; }
-		}
-
-		public Guid Id
-		{
-			get { return CorrelationId; }
-		}
+		public string Username { get; set; }
+		public string Password { get; set; }
+		public string Email { get; set; }
+		public string DisplayName { get; set; }
 	}
 }

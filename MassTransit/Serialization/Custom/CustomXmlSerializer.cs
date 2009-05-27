@@ -13,17 +13,15 @@
 namespace MassTransit.Serialization.Custom
 {
 	using System;
-	using System.Diagnostics;
 	using System.IO;
 	using System.Linq;
 	using System.Runtime.Serialization;
 	using System.Text;
 	using System.Xml;
-	using Internal;
 	using Magnum.Monads;
 
 	public class CustomXmlSerializer :
-		IMessageSerializer
+		IXmlSerializer
 	{
 		private XmlReaderSettings _readerSettings;
 		private XmlWriterSettings _writerSettings;
@@ -35,17 +33,20 @@ namespace MassTransit.Serialization.Custom
 					Encoding = Encoding.UTF8,
 					Indent = true,
 					NewLineOnAttributes = true,
+					CloseOutput = false,
 				};
 
 			_readerSettings = new XmlReaderSettings
 				{
-					IgnoreWhitespace = true
+					IgnoreWhitespace = true,
+					CloseInput = false,
 				};
 		}
 
 		public void Serialize<T>(Stream stream, T message)
 		{
-			using (var streamWriter = new StreamWriter(stream))
+			using (var outputStream = new NonClosingStream(stream))
+			using (var streamWriter = new StreamWriter(outputStream))
 			using (var writer = XmlWriter.Create(streamWriter, _writerSettings))
 			{
 				SerializerContext context = new SerializerContext();
@@ -54,15 +55,13 @@ namespace MassTransit.Serialization.Custom
 				{
 					writerAction(x => x(writer));
 				}
-
-				writer.Close();
-				streamWriter.Close();
 			}
 		}
 
 		public object Deserialize(Stream input)
 		{
-			using (StreamReader streamReader = new StreamReader(input))
+			using(var inputStream = new NonClosingStream(input))
+			using(var streamReader = new StreamReader(inputStream))
 			using (XmlReader reader = XmlReader.Create(streamReader, _readerSettings))
 			{
 				IDeserializerContext context = new DeserializerContext(reader);
@@ -71,15 +70,6 @@ namespace MassTransit.Serialization.Custom
 
 				if (message == null)
 					throw new SerializationException("Could not deserialize message.");
-
-				if (message is XmlMessageEnvelope)
-				{
-					XmlMessageEnvelope envelope = message as XmlMessageEnvelope;
-
-					InboundMessageHeaders.SetCurrent(envelope.GetMessageHeadersSetAction());
-
-					return envelope.Message;
-				}
 
 				return message;
 			}
@@ -97,7 +87,7 @@ namespace MassTransit.Serialization.Custom
 
 		public object Deserialize(byte[] data)
 		{
-			using(MemoryStream input = new MemoryStream(data))
+			using (MemoryStream input = new MemoryStream(data))
 			{
 				return Deserialize(input);
 			}

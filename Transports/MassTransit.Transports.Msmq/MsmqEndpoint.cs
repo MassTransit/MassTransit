@@ -43,7 +43,7 @@ namespace MassTransit.Transports.Msmq
 		/// </summary>
 		/// <param name="uriString">The URI for the endpoint</param>
 		public MsmqEndpoint(string uriString)
-			: this(new Uri(uriString), new BinaryMessageSerializer())
+			: this(new Uri(uriString), new XmlMessageSerializer())
 		{
 		}
 
@@ -52,7 +52,7 @@ namespace MassTransit.Transports.Msmq
 		/// </summary>
 		/// <param name="uri">The URI for the endpoint</param>
 		public MsmqEndpoint(Uri uri)
-			: this(uri, new BinaryMessageSerializer())
+			: this(uri, new XmlMessageSerializer())
 		{
 		}
 

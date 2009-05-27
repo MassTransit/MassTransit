@@ -19,13 +19,12 @@ namespace MassTransit.Configuration
 	using Magnum;
 	using Magnum.Threading;
 	using Serialization;
-	using Util;
 
 	public class EndpointFactoryConfigurator :
 		IEndpointFactoryConfigurator,
 		IDisposable
 	{
-		private Type _defaultSerializer = typeof (BinaryMessageSerializer);
+		private Type _defaultSerializer = typeof (XmlMessageSerializer);
 		private volatile bool _disposed;
 		private ReaderWriterLockedDictionary<Uri, Action<IEndpointConfigurator>> _endpointConfigurators;
 		private IObjectBuilder _objectBuilder;
@@ -36,8 +35,6 @@ namespace MassTransit.Configuration
 			_transportTypes = new ReaderWriterLockedObject<HashSet<Type>>(new HashSet<Type>());
 			_endpointConfigurators = new ReaderWriterLockedDictionary<Uri, Action<IEndpointConfigurator>>();
 		}
-
-
 
 		public void SetDefaultSerializer<TSerializer>()
 			where TSerializer : IMessageSerializer

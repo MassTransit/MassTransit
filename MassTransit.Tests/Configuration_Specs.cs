@@ -31,11 +31,11 @@ namespace MassTransit.Tests
 					x.SetObjectBuilder(objectBuilder);
 					x.RegisterTransport<LoopbackEndpoint>();
 
-					x.ConfigureEndpoint("loopback://localhost/mt_client", y => { y.SetSerializer<XmlMessageSerializer>(); });
+					x.ConfigureEndpoint("loopback://localhost/mt_client", y => { y.SetSerializer<DotNotXmlMessageSerializer>(); });
 				});
 
 			objectBuilder.Stub(x => x.GetInstance<IEndpointFactory>()).Return(endpointFactory);
-			objectBuilder.Expect(x => x.GetInstance(typeof (XmlMessageSerializer))).Return(new XmlMessageSerializer());
+			objectBuilder.Expect(x => x.GetInstance(typeof (DotNotXmlMessageSerializer))).Return(new DotNotXmlMessageSerializer());
 
 			IEndpoint endpoint = endpointFactory.GetEndpoint("loopback://localhost/mt_client");
 

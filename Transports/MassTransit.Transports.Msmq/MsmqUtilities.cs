@@ -25,7 +25,7 @@ namespace MassTransit.Transports.Msmq
         {
             int i = 0;
 
-			MessageQueue q = new MessageQueue(new MsmqEndpoint(uri, new BinaryMessageSerializer()).QueuePath);
+			MessageQueue q = new MessageQueue(new MsmqEndpoint(uri, new XmlMessageSerializer()).QueuePath);
             using (MessageEnumerator e = q.GetMessageEnumerator2())
             {
                 while (e.MoveNext(new TimeSpan(0)))
@@ -39,7 +39,7 @@ namespace MassTransit.Transports.Msmq
 
         public void PurgeQueue(Uri uri)
         {
-			MessageQueue q = new MessageQueue(new MsmqEndpoint(uri, new BinaryMessageSerializer()).QueuePath);
+			MessageQueue q = new MessageQueue(new MsmqEndpoint(uri, new XmlMessageSerializer()).QueuePath);
             q.Purge();
         }
 

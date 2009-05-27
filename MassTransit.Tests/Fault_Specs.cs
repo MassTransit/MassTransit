@@ -27,30 +27,32 @@ namespace MassTransit.Tests
 	public class When_a_message_fault_occurs :
 		Specification
 	{
-		private IEndpointFactory _resolver;
+		private IEndpointFactory _endpointFactory;
 		private IEndpoint _endpoint;
-		private ServiceBus _bus;
+		private IServiceBus _bus;
 		private IObjectBuilder _builder;
 
 		protected override void Before_each()
 		{
 			_builder = MockRepository.GenerateMock<IObjectBuilder>();
-			_resolver = EndpointFactoryConfigurator.New(x =>
+			_endpointFactory = EndpointFactoryConfigurator.New(x =>
 				{
 					x.SetObjectBuilder(_builder);
-					x.SetDefaultSerializer<BinaryMessageSerializer>();
+					x.SetDefaultSerializer<XmlMessageSerializer>();
 					x.RegisterTransport<LoopbackEndpoint>();
 				});
-			_endpoint = _resolver.GetEndpoint(new Uri("loopback://localhost/servicebus"));
-			_bus = new ServiceBus(_endpoint, _builder, _resolver);
-			_bus.Start();
+			_builder.Stub(x => x.GetInstance<IEndpointFactory>()).Return(_endpointFactory);
+			_bus = ServiceBusConfigurator.New(x =>
+				{
+					x.SetObjectBuilder(_builder);
+					x.ReceiveFrom("loopback://localhost/servicebus");
+				});
 		}
 
 		protected override void After_each()
 		{
 			_bus.Dispose();
-			_endpoint.Dispose();
-			_resolver.Dispose();
+			_endpointFactory.Dispose();
 		}
 
 		public class SmartConsumer :
@@ -112,7 +114,7 @@ namespace MassTransit.Tests
 
 			_bus.Publish(new Hello());
 
-			Assert.IsTrue(sc.GotFault.WaitOne(TimeSpan.FromSeconds(5), true));
+			Assert.IsTrue(sc.GotFault.WaitOne(TimeSpan.FromSeconds(500), true));
 		}
 	}
 
@@ -132,7 +134,7 @@ namespace MassTransit.Tests
 			_resolver = EndpointFactoryConfigurator.New(x =>
 				{
 					x.SetObjectBuilder(_builder);
-					x.SetDefaultSerializer<BinaryMessageSerializer>();
+					x.SetDefaultSerializer<XmlMessageSerializer>();
 					x.RegisterTransport<LoopbackEndpoint>();
 				});
 			_endpoint = _resolver.GetEndpoint(new Uri("loopback://localhost/servicebus"));

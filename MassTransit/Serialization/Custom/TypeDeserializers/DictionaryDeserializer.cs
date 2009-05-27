@@ -23,14 +23,40 @@ namespace MassTransit.Serialization.Custom.TypeDeserializers
 		{
 			Dictionary<TKey, TValue> dictionary = new Dictionary<TKey, TValue>();
 
-			context.Read();
+			if (DictionaryIsEmpty(context))
+				return dictionary;
+
+			MoveToFirstElement(context);
 
 			while (context.NodeType != XmlNodeType.EndElement)
 			{
 				ReadItem(context, dictionary);
 			}
 
+			MovePastEndElement(context);
+
 			return dictionary;
+		}
+
+		private void MovePastEndElement(IDeserializerContext context)
+		{
+			context.Read();
+		}
+
+		private bool DictionaryIsEmpty(IDeserializerContext context)
+		{
+			if (context.IsEmptyElement)
+			{
+				context.Read();
+				return true;
+			}
+
+			return false;
+		}
+
+		private void MoveToFirstElement(IDeserializerContext context)
+		{
+			context.Read();
 		}
 
 		private void ReadItem(IDeserializerContext context, IDictionary<TKey, TValue> dictionary)

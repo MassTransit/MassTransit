@@ -57,7 +57,7 @@ namespace MassTransit.Serialization.Custom
 		{
 			IObjectSerializer serializer = GetSerializerFor(type);
 
-			foreach (var action in serializer.GetSerializationActions(this, localName, value))
+			foreach (K<Action<XmlWriter>> action in serializer.GetSerializationActions(this, localName, value))
 			{
 				yield return action;
 			}
@@ -71,7 +71,7 @@ namespace MassTransit.Serialization.Custom
 			Type type = value.GetType();
 			string localName = type.ToXmlFriendlyName();
 
-			foreach (var action in SerializeObject(localName, type, value))
+			foreach (K<Action<XmlWriter>> action in SerializeObject(localName, type, value))
 			{
 				yield return action;
 			}
@@ -80,17 +80,21 @@ namespace MassTransit.Serialization.Custom
 		private IObjectSerializer GetSerializerFor(Type type)
 		{
 			IObjectSerializer serializer;
-			if(_serializers.TryGetValue(type, out serializer))
-				return serializer;
-
-			serializer = CreateSerializerFor(type);
-			_serializers.Add(type, serializer);
+			lock(_serializers)
+			{
+				serializer = _serializers.Retrieve(type, () => CreateSerializerFor(type));
+			}
 
 			return serializer;
 		}
 
 		private IObjectSerializer CreateSerializerFor(Type type)
 		{
+			if (type.IsEnum)
+			{
+				return (IObjectSerializer)ClassFactory.New(typeof(EnumSerializer<>).MakeGenericType(type));
+			}
+
 			if (typeof (IEnumerable).IsAssignableFrom(type))
 			{
 				return CreateEnumerableSerializerFor(type);
@@ -98,9 +102,7 @@ namespace MassTransit.Serialization.Custom
 
 			Type serializerType = typeof (ObjectSerializer<>).MakeGenericType(type);
 
-			var fieldCache = _fieldCaches.Retrieve(type, () => new ObjectFieldCache(type));
-
-			var serializer = (IObjectSerializer) Activator.CreateInstance(serializerType, fieldCache);
+			var serializer = (IObjectSerializer)ClassFactory.New(serializerType);
 
 			return serializer;
 		}

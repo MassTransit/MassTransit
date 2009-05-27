@@ -20,9 +20,11 @@ namespace MassTransit.Tests.Services.HealthMonitoring
         public void The_HealthClient_should_publish_heartbeats()
         {
             LocalBus.Publish(new EndpointTurningOn(LocalBus.Endpoint.Uri, 1, _id));
-            var y = Repository.Where(x => x.CorrelationId == _id).First();
-            y.ShouldNotBeNull();
-            y.CurrentState.ShouldEqual(HealthSaga.Healthy);
+        	Thread.Sleep(500);
+            
+			HealthSaga saga = Repository.Where(x => x.CorrelationId == _id).FirstOrDefault();
+            saga.ShouldNotBeNull();
+            saga.CurrentState.ShouldEqual(HealthSaga.Healthy);
         }
 
         [Test]
@@ -48,6 +50,7 @@ namespace MassTransit.Tests.Services.HealthMonitoring
             MakeSagaSuspect();
 
             LocalBus.Publish(new Pong(_id, LocalBus.Endpoint.Uri));
+        	Thread.Sleep(500);
             Repository.Where(x => x.CurrentState == HealthSaga.Healthy).Count().ShouldEqual(1);
         }
 
@@ -94,10 +97,12 @@ namespace MassTransit.Tests.Services.HealthMonitoring
             LocalBus.Publish(new EndpointTurningOn(LocalBus.Endpoint.Uri, 0, _id));
             var fm = new FutureMessage<TimeoutExpired>();
             RemoteBus.Subscribe<TimeoutExpired>(fm.Set);
+        	Thread.Sleep(500);
 			LocalBus.Publish(new TimeoutExpired { CorrelationId = _id, Tag = 1 });
             fm.IsAvailable(1.Seconds()).ShouldBeTrue();
-            
-            var saga = Repository.Where(x => x.CorrelationId == _id).First();
+
+            var saga = Repository.Where(x => x.CorrelationId == _id).FirstOrDefault();
+        	saga.ShouldNotBeNull();
             saga.CurrentState.ShouldEqual(HealthSaga.Suspect, "MakeSagaSuspect failed");
             
         }

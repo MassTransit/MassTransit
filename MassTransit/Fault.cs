@@ -20,14 +20,9 @@ namespace MassTransit
 	/// </summary>
 	/// <typeparam name="TMessage">The type of message that threw the exception</typeparam>
 	[Serializable]
-	public class Fault<TMessage> where TMessage : class
+	public class Fault<TMessage>
+		where TMessage : class
 	{
-		private readonly TMessage _failedMessage;
-		private readonly List<string> _messages;
-		private readonly DateTime _occurredAt;
-		private readonly List<string> _stackTrace;
-		private readonly Exception _caughtException;
-
 		/// <summary>
 		/// Creates a new fault message for the failed message
 		/// </summary>
@@ -35,51 +30,42 @@ namespace MassTransit
 		/// <param name="message">The message that was being processed when the exception was thrown</param>
 		public Fault(TMessage message, Exception ex)
 		{
-			_caughtException = ex;
+			CaughtException = ex;
 
-			_failedMessage = message;
-			_occurredAt = DateTime.UtcNow;
+			FailedMessage = message;
+			OccurredAt = DateTime.UtcNow;
+			Messages = GetExceptionMessages(ex);
+			StackTrace = GetStackTrace(ex);
+		}
 
-			_messages = GetExceptionMessages(ex);
-			_stackTrace = GetStackTrace(ex);
+		protected Fault()
+		{
 		}
 
 		/// <summary>
 		/// When the exception occurred
 		/// </summary>
-		public DateTime OccurredAt
-		{
-			get { return _occurredAt; }
-		}
+		public DateTime OccurredAt { get; set; }
 
 		/// <summary>
 		/// Messages associated with the exception
 		/// </summary>
-		public IEnumerable<string> Messages
-		{
-			get { return _messages; }
-		}
+		public List<string> Messages { get; set; }
 
 		/// <summary>
 		/// A stack trace related to the exception
 		/// </summary>
-		public IEnumerable<string> StackTrace
-		{
-			get { return _stackTrace; }
-		}
+		public List<string> StackTrace { get; set; }
 
 		/// <summary>
 		/// The message that failed to be consumed
 		/// </summary>
-		public TMessage FailedMessage
-		{
-			get { return _failedMessage; }
-		}
+		public TMessage FailedMessage { get; set; }
 
-		public Exception CaughtException
-		{
-			get { return _caughtException; }
-		}
+		/// <summary>
+		/// The exception that was caught
+		/// </summary>
+		public Exception CaughtException { get; set; }
 
 		private static List<string> GetStackTrace(Exception ex)
 		{
@@ -136,11 +122,13 @@ namespace MassTransit
 		public Fault(TMessage message, Exception ex) :
 			base(message, ex)
 		{
+			CorrelationId = message.CorrelationId;
 		}
 
-		public TKey CorrelationId
+		protected Fault()
 		{
-			get { return FailedMessage.CorrelationId; }
 		}
+
+		public TKey CorrelationId { get; set; }
 	}
 }

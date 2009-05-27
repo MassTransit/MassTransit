@@ -20,7 +20,7 @@ namespace MassTransit.Tests.Grid
 	public class GridService_Specs :
 		SubscriptionServiceTestFixture
 	{
-		[Test]
+		[Test, Explicit]
 		public void A_grid_service_framework_should_run_on_top_of_the_service_bus()
 		{
 			Grid grid = new ServiceGrid(EndpointFactory);

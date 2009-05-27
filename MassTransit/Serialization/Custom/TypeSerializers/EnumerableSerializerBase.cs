@@ -60,7 +60,7 @@ namespace MassTransit.Serialization.Custom.TypeSerializers
 		{
 			foreach (T obj in ((IEnumerable<T>) value))
 			{
-				var enumerable = context.SerializeObject(_type.Name, _type, obj);
+				var enumerable = context.SerializeObject(obj.GetType().Name, obj.GetType(), obj);
 				foreach (var action in enumerable)
 				{
 					yield return action;

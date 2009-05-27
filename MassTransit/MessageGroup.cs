@@ -1,22 +1,21 @@
-/// Copyright 2007-2008 The Apache Software Foundation.
-/// 
-/// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
-/// this file except in compliance with the License. You may obtain a copy of the 
-/// License at 
-/// 
-///   http://www.apache.org/licenses/LICENSE-2.0 
-/// 
-/// Unless required by applicable law or agreed to in writing, software distributed 
-/// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-/// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-/// specific language governing permissions and limitations under the License.
+// Copyright 2007-2008 The Apache Software Foundation.
+//  
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
+// this file except in compliance with the License. You may obtain a copy of the 
+// License at 
+// 
+//     http://www.apache.org/licenses/LICENSE-2.0 
+// 
+// Unless required by applicable law or agreed to in writing, software distributed 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Reflection;
 	using Magnum;
-	using Util;
+	using Magnum.Reflection;
 
 	/// <summary>
 	/// A message group allows a set of messages to be sent as a single message to a single consumer with the intent
@@ -25,28 +24,27 @@ namespace MassTransit
 	[Serializable]
 	public class MessageGroup
 	{
-		private static readonly MethodInfo _publishMethodInfo = typeof (IServiceBus).GetMethod("Publish", BindingFlags.Public | BindingFlags.Instance);
-		private List<object> _messages;
-
 		/// <summary>
 		/// Creates a message group with the specified list of messages. This class is normally built by the <c>MessageGroupBuilder</c>
 		/// </summary>
 		/// <param name="messages">The messages included in the group</param>
 		public MessageGroup(List<object> messages)
 		{
-			_messages = messages;
+			Messages = messages;
 		}
 
-	    protected MessageGroup()
-	    {
-	    }
+		protected MessageGroup()
+		{
+		}
 
-	    /// <summary>
+		public List<object> Messages { get; set; }
+
+		/// <summary>
 		/// The number of messages in the message group.
 		/// </summary>
 		public int Count
 		{
-			get { return _messages.Count; }
+			get { return Messages.Count; }
 		}
 
 		/// <summary>
@@ -56,7 +54,7 @@ namespace MassTransit
 		/// <returns>The message at the specified index</returns>
 		public object this[int index]
 		{
-			get { return _messages[index]; }
+			get { return Messages[index]; }
 		}
 
 		/// <summary>
@@ -88,16 +86,16 @@ namespace MassTransit
 
 		public object[] ToArray()
 		{
-			return _messages.ToArray();
+			return Messages.ToArray();
 		}
 
 		public T Get<T>(int index)
 		{
-			Guard.Against.IndexOutOfRange(index, _messages.Count);
+			Guard.Against.IndexOutOfRange(index, Messages.Count);
 
 			Type typeofT = typeof (T);
 
-			object obj = _messages[index];
+			object obj = Messages[index];
 
 			Type objType = obj.GetType();
 
@@ -109,7 +107,7 @@ namespace MassTransit
 
 		public void Split(IServiceBus bus)
 		{
-			foreach (object message in _messages)
+			foreach (object message in Messages)
 			{
 				RepublishMessage(message, bus);
 			}
@@ -117,21 +115,7 @@ namespace MassTransit
 
 		private static void RepublishMessage(object message, IServiceBus bus)
 		{
-			Type objType = message.GetType();
-
-			if (!objType.IsSerializable)
-			{
-				//_log.ErrorFormat("")
-			}
-
-			MethodInfo inv = GetPublishMethod(objType);
-
-			inv.Invoke(bus, new[] {message});
-		}
-
-		private static MethodInfo GetPublishMethod(Type objType)
-		{
-			return _publishMethodInfo.MakeGenericMethod(objType);
+			bus.Call("Publish", message);
 		}
 	}
 
@@ -141,13 +125,13 @@ namespace MassTransit
 	/// <typeparam name="TBuilder">The type of class to create for the message group</typeparam>
 	public class MessageGroupBuilder<TBuilder> where TBuilder : class
 	{
-		internal readonly List<object> _messages = new List<object>();
 		internal static readonly AllowMessageTypeAttribute _allow;
+		internal readonly List<object> _messages = new List<object>();
 
 		static MessageGroupBuilder()
 		{
 			object[] attributes = typeof (TBuilder).GetCustomAttributes(typeof (AllowMessageTypeAttribute), false);
-			if(attributes != null && attributes.Length > 0)
+			if (attributes != null && attributes.Length > 0)
 			{
 				_allow = attributes[0] as AllowMessageTypeAttribute;
 			}
@@ -160,7 +144,6 @@ namespace MassTransit
 
 		public MessageGroupBuilder()
 		{
-			
 		}
 
 		/// <summary>

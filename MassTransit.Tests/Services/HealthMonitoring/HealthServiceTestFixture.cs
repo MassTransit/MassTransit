@@ -24,6 +24,7 @@ namespace MassTransit.Tests.Services.HealthMonitoring
 	using MassTransit.Services.Subscriptions.Configuration;
 	using MassTransit.Services.Subscriptions.Messages;
 	using MassTransit.Services.Subscriptions.Server;
+	using MassTransit.Services.Subscriptions.Server.Messages;
 	using MassTransit.Services.Timeout.Messages;
 	using MassTransit.Transports;
 	using Microsoft.Practices.ServiceLocation;
@@ -77,6 +78,8 @@ namespace MassTransit.Tests.Services.HealthMonitoring
 				});
 
 			SetupHealthService();
+
+			Thread.Sleep(1000);
 		}
 
 		private void SetupSubscriptionService()
@@ -90,6 +93,7 @@ namespace MassTransit.Tests.Services.HealthMonitoring
 			_subscriptionClientSagaRepository = SetupSagaRepository<SubscriptionClientSaga>();
 			SetupInitiateSagaStateMachineSink<SubscriptionClientSaga, AddSubscriptionClient>(SubscriptionBus, _subscriptionClientSagaRepository);
 			SetupOrchestrateSagaStateMachineSink<SubscriptionClientSaga, RemoveSubscriptionClient>(SubscriptionBus, _subscriptionClientSagaRepository);
+			SetupObservesSagaStateMachineSink<SubscriptionClientSaga, SubscriptionClientAdded>(SubscriptionBus, _subscriptionClientSagaRepository);
 
 			_subscriptionSagaRepository = SetupSagaRepository<SubscriptionSaga>();
 			SetupInitiateSagaStateMachineSink<SubscriptionSaga, AddSubscription>(SubscriptionBus, _subscriptionSagaRepository);
@@ -114,7 +118,6 @@ namespace MassTransit.Tests.Services.HealthMonitoring
 			SetupOrchestrateSagaStateMachineSink<HealthSaga, Heartbeat>(RemoteBus, _healthSagaRepository);
 			SetupOrchestrateSagaStateMachineSink<HealthSaga, TimeoutExpired>(RemoteBus, _healthSagaRepository);
 			SetupOrchestrateSagaStateMachineSink<HealthSaga, Pong>(RemoteBus, _healthSagaRepository);
-			//SetupOrchestrateSagaStateMachineSink<HealthSaga, TimeoutExpired>(RemoteBus, _healthSagaRepository);
 
 
 			HealthService = new HealthService(RemoteBus, _healthSagaRepository);

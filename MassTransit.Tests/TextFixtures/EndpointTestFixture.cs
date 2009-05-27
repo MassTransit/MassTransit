@@ -35,14 +35,14 @@ namespace MassTransit.Tests.TextFixtures
 			ObjectBuilder = MockRepository.GenerateMock<IObjectBuilder>();
 
 			//TODO: Is this how it should be set up?
-			BinaryMessageSerializer serializer = new BinaryMessageSerializer();
-			ObjectBuilder.Stub(x => x.GetInstance<BinaryMessageSerializer>()).Return(serializer);
+			XmlMessageSerializer serializer = new XmlMessageSerializer();
+			ObjectBuilder.Stub(x => x.GetInstance<XmlMessageSerializer>()).Return(serializer);
 
 			EndpointFactory = EndpointFactoryConfigurator.New(x =>
 				{
 					x.SetObjectBuilder(ObjectBuilder);
 					x.RegisterTransport<TTransport>();
-					x.SetDefaultSerializer<BinaryMessageSerializer>();
+					x.SetDefaultSerializer<XmlMessageSerializer>();
 
 					AdditionalEndpointFactoryConfiguration(x);
 				});

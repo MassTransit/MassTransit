@@ -25,6 +25,7 @@ namespace MassTransit.Serialization.Custom
 		string LocalName { get; }
 		string Namespace { get; }
 		string Name { get; }
+		bool IsEmptyElement { get; }
 		void ExitElement();
 		string ReadElementAsString();
 	}

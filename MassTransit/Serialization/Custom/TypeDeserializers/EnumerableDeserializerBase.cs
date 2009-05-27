@@ -24,7 +24,10 @@ namespace MassTransit.Serialization.Custom.TypeDeserializers
 		{
 			List<T> list = new List<T>();
 
-			context.Read();
+			if (ListIsEmpty(context))
+				return list;
+
+			MoveToFirstElement(context);
 
 			while (context.NodeType != XmlNodeType.EndElement)
 			{
@@ -35,7 +38,30 @@ namespace MassTransit.Serialization.Custom.TypeDeserializers
 				}
 			}
 
+			MovePastEndElement(context);
+
 			return list;
+		}
+
+		private bool ListIsEmpty(IDeserializerContext context)
+		{
+			if (context.IsEmptyElement)
+			{
+				context.Read();
+				return true;
+			}
+
+			return false;
+		}
+
+		private void MovePastEndElement(IDeserializerContext context)
+		{
+			context.Read();
+		}
+
+		private void MoveToFirstElement(IDeserializerContext context)
+		{
+			context.Read();
 		}
 	}
 }

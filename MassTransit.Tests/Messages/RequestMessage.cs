@@ -18,11 +18,11 @@ namespace MassTransit.Tests.Messages
 	public class RequestMessage :
 		CorrelatedBy<Guid>
 	{
-		private readonly Guid _correlationId = Guid.NewGuid();
+    	public RequestMessage()
+    	{
+    		CorrelationId = Guid.NewGuid();
+    	}
 
-		public Guid CorrelationId
-		{
-			get { return _correlationId; }
-		}
+    	public Guid CorrelationId { get; set; }
 	}
 }
