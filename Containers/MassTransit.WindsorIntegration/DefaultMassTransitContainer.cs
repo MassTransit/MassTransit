@@ -121,9 +121,9 @@ namespace MassTransit.WindsorIntegration
 					.LifeStyle.Transient,
 
 				// Message Serializers
-//				Component.For<BinaryMessageSerializer>()
-//					.ImplementedBy<BinaryMessageSerializer>()
-//					.LifeStyle.Singleton,
+				Component.For<BinaryMessageSerializer>()
+					.ImplementedBy<BinaryMessageSerializer>()
+					.LifeStyle.Singleton,
 				Component.For<JsonMessageSerializer>()
 					.ImplementedBy<JsonMessageSerializer>()
 					.LifeStyle.Singleton,
