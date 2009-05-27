@@ -146,7 +146,7 @@ namespace MassTransit.Saga.Configuration
 
 			ISagaPolicy<TComponent, TMessage> policy;
 			if (InInitialState())
-				policy = new InitiatingSagaPolicy<TComponent, TMessage>();
+				policy = new CreateOrUseExistingSagaPolicy<TComponent, TMessage>();
 			else
 				policy = new ExistingOrIgnoreSagaPolicy<TComponent, TMessage>();
 

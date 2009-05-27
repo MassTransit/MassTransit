@@ -25,21 +25,33 @@ namespace MassTransit.Services.HealthMonitoring.Server
 		SagaStateMachine<HealthSaga>,
 		ISaga
 	{
-	    private static readonly ILog _log = LogManager.GetLogger(typeof (HealthSaga));
+		private static readonly ILog _log = LogManager.GetLogger(typeof (HealthSaga));
 
 		static HealthSaga()
 		{
 			Define(() =>
 				{
+					Correlate(EndpointBreathes).By((saga, message) => saga.CorrelationId == message.CorrelationId);
+
 					Initially(
 						When(EndpointDetected)
 							.Then((saga, message) =>
 								{
-                                    _log.DebugFormat("Endpoint '{0}' detected", message.EndpointAddress);
+									_log.DebugFormat("Endpoint '{0}' detected", message.EndpointAddress);
 
 									//store stuff
 									saga.EndpointAddress = message.EndpointAddress;
 									saga.TimeBetweenBeatsInSeconds = message.TimeBetweenBeatsInSeconds;
+									saga.MarkBeat();
+									saga.Bus.Publish(new ScheduleTimeout(saga.CorrelationId, saga.TimeBetweenBeatsInSeconds.Seconds()));
+								})
+							.Then(StatusChange)
+							.TransitionTo(Healthy),
+						When(EndpointBreathes)
+							.Then((saga, message) =>
+								{
+									saga.EndpointAddress = message.EndpointAddress;
+									saga.TimeBetweenBeatsInSeconds = 10;
 									saga.MarkBeat();
 									saga.Bus.Publish(new ScheduleTimeout(saga.CorrelationId, saga.TimeBetweenBeatsInSeconds.Seconds()));
 								})
@@ -77,17 +89,14 @@ namespace MassTransit.Services.HealthMonitoring.Server
 							.Then(StatusChange)
 							.TransitionTo(Healthy),
 						When(PingTimesout).And((msg) => msg.Tag == (int) Timeouts.PingTimeout)
-							.Then((saga, message) =>
-								{
-									saga.Bus.Publish(new DownEndpoint(saga.EndpointAddress));
-								})
+							.Then((saga, message) => { saga.Bus.Publish(new DownEndpoint(saga.EndpointAddress)); })
 							.Then(StatusChange)
 							.TransitionTo(Down));
 
 					During(Down,
 						When(EndpointBreathes)
-						.Then(StatusChange)
-						.TransitionTo(Healthy));
+							.Then(StatusChange)
+							.TransitionTo(Healthy));
 
 					//Anytime(EndpointPoweringDown).Complete();
 				});

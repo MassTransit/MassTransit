@@ -24,6 +24,10 @@ namespace Messages
             CorrelationId = correlationId;
         }
 
-        public Guid CorrelationId { private set; get; }
+        protected QuestionAnswered()
+        {
+        }
+
+        public Guid CorrelationId { set; get; }
     }
 }
