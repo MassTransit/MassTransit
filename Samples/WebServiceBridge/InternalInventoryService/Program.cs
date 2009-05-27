@@ -1,43 +1,44 @@
 ﻿namespace InternalInventoryService
 {
-    using log4net;
-    using MassTransit.WindsorIntegration;
-    using Microsoft.Practices.ServiceLocation;
-    using Topshelf;
-    using Topshelf.Configuration;
+	using log4net;
+	using MassTransit.WindsorIntegration;
+	using Microsoft.Practices.ServiceLocation;
+	using Topshelf;
+	using Topshelf.Configuration;
 
-    internal static class Program
-    {
-        private static readonly ILog _log = LogManager.GetLogger(typeof (Program));
+	internal static class Program
+	{
+		private static readonly ILog _log = LogManager.GetLogger(typeof (Program));
 
-        private static void Main(string[] args)
-        {
-            _log.Info("InternalInventoryService Loading...");
+		private static void Main(string[] args)
+		{
+			_log.Info("InternalInventoryService Loading...");
 
-            var cfg = RunnerConfigurator.New(c =>
-                                                 {
-                                                     c.SetServiceName("InternalInventoryService");
-                                                     c.SetDisplayName("Internal Inventory Service");
-                                                     c.SetDescription("Handles inventory for internal systems");
+			var cfg = RunnerConfigurator.New(c =>
+				{
+					c.SetServiceName("InternalInventoryService");
+					c.SetDisplayName("Internal Inventory Service");
+					c.SetDescription("Handles inventory for internal systems");
 
-                                                     c.RunAsLocalSystem();
-                                                     c.DependencyOnMsmq();
+					c.RunAsLocalSystem();
+					c.DependencyOnMsmq();
 
-                                                     c.BeforeStart(a=>
-                                                     {
-                                                         var container = new DefaultMassTransitContainer("InternalInventoryService.Castle.xml");
-                                                         container.AddComponent<InventoryLevelService>();
-                                                         var wob = new WindsorObjectBuilder(container.Kernel);
-                                                         ServiceLocator.SetLocatorProvider(()=>wob);
-                                                     });
+					c.BeforeStartingServices(a =>
+						{
+							var container = new DefaultMassTransitContainer("InternalInventoryService.Castle.xml");
+							container.AddComponent<InventoryLevelService>();
+							container.AddComponent<InternalInventoryServiceLifeCycle>();
+							var wob = new WindsorObjectBuilder(container.Kernel);
+							ServiceLocator.SetLocatorProvider(() => wob);
+						});
 
-                                                     c.ConfigureService<InternalInventoryServiceLifeCycle>(s=>
-                                                                                                               {
-                                                                                                                   s.WhenStarted(o=>o.Start());
-                                                                                                                   s.WhenStopped(o=>o.Stop());
-                                                                                                               });
-                                                 });
-            Runner.Host(cfg, args);
-        }
-    }
+					c.ConfigureService<InternalInventoryServiceLifeCycle>(s =>
+						{
+							s.WhenStarted(o => o.Start());
+							s.WhenStopped(o => o.Stop());
+						});
+				});
+			Runner.Host(cfg, args);
+		}
+	}
 }
