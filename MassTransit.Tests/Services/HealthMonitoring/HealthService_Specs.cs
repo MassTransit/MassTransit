@@ -41,6 +41,8 @@ namespace MassTransit.Tests.Services.HealthMonitoring
             MakeSagaSuspect();
 
             LocalBus.Publish(new Heartbeat(LocalBus.Endpoint.Uri, _id));
+
+        	Thread.Sleep(500);
             Repository.Where(x => x.CurrentState == HealthSaga.Healthy).Count().ShouldEqual(1);
         }
 
