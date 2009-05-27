@@ -16,6 +16,7 @@ namespace MassTransit.Tests.Serialization
 	using System.Diagnostics;
 	using System.IO;
 	using Magnum.DateTimeExtensions;
+	using MassTransit.Serialization;
 	using MassTransit.Serialization.Custom;
 	using Messages;
 	using NUnit.Framework;
@@ -45,7 +46,7 @@ namespace MassTransit.Tests.Serialization
 //					CorrelationId = CombGuid.Generate()
 //				};
 
-			var serializer = new CustomXmlSerializer();
+			var serializer = new XmlMessageSerializer();
 
 			for (int i = 0; i < 10; i++)
 			{

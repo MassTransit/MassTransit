@@ -10,25 +10,15 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Services.HealthMonitoring.Messages
+namespace MassTransit.Serialization.Custom
 {
-	using System;
+	using System.IO;
 
-	[Serializable]
-	public class Heartbeat :
-		CorrelatedBy<Guid>
+	public interface IXmlSerializer
 	{
-		public Heartbeat(Uri endpointAddress, Guid correlationId)
-		{
-			EndpointAddress = endpointAddress;
-			CorrelationId = correlationId;
-		}
-
-		protected Heartbeat()
-		{
-		}
-
-		public Uri EndpointAddress { get; set; }
-		public Guid CorrelationId { get; set; }
+		void Serialize<T>(Stream stream, T message);
+		object Deserialize(Stream input);
+		byte[] Serialize<T>(T message);
+		object Deserialize(byte[] data);
 	}
 }

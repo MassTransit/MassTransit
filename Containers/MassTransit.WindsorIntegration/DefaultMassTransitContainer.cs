@@ -12,7 +12,6 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.WindsorIntegration
 {
-	using Castle.Facilities.Startable;
 	using Castle.MicroKernel;
 	using Castle.MicroKernel.Registration;
 	using Castle.Windsor;
@@ -122,17 +121,17 @@ namespace MassTransit.WindsorIntegration
 					.LifeStyle.Transient,
 
 				// Message Serializers
-				Component.For<BinaryMessageSerializer>()
-					.ImplementedBy<BinaryMessageSerializer>()
-					.LifeStyle.Singleton,
+//				Component.For<BinaryMessageSerializer>()
+//					.ImplementedBy<BinaryMessageSerializer>()
+//					.LifeStyle.Singleton,
 				Component.For<JsonMessageSerializer>()
 					.ImplementedBy<JsonMessageSerializer>()
 					.LifeStyle.Singleton,
+				Component.For<DotNotXmlMessageSerializer>()
+					.ImplementedBy<DotNotXmlMessageSerializer>()
+					.LifeStyle.Singleton,
 				Component.For<XmlMessageSerializer>()
 					.ImplementedBy<XmlMessageSerializer>()
-					.LifeStyle.Singleton,
-				Component.For<CustomXmlMessageSerializer>()
-					.ImplementedBy<CustomXmlMessageSerializer>()
 					.LifeStyle.Singleton
 				);
 

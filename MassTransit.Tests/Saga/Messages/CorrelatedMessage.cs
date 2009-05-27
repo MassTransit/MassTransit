@@ -18,16 +18,15 @@ namespace MassTransit.Tests.Saga.Messages
 	public class CorrelatedMessage :
 		CorrelatedBy<Guid>
 	{
-		private readonly Guid _correlationId;
-
 		public CorrelatedMessage(Guid correlationId)
 		{
-			_correlationId = correlationId;
+			CorrelationId = correlationId;
 		}
 
-		public Guid CorrelationId
+		protected CorrelatedMessage()
 		{
-			get { return _correlationId; }
 		}
+
+		public Guid CorrelationId { get; set; }
 	}
 }

@@ -10,25 +10,30 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Services.HealthMonitoring.Messages
+namespace MassTransit.Serialization.Custom.TypeDeserializers
 {
 	using System;
+	using System.Runtime.Serialization;
 
-	[Serializable]
-	public class Heartbeat :
-		CorrelatedBy<Guid>
+	public class UriDeserializer :
+		IObjectDeserializer<Uri>
 	{
-		public Heartbeat(Uri endpointAddress, Guid correlationId)
+		public object Deserialize(IDeserializerContext context)
 		{
-			EndpointAddress = endpointAddress;
-			CorrelationId = correlationId;
-		}
+			string uriString = context.ReadElementAsString();
+			if (uriString == null)
+				return null;
 
-		protected Heartbeat()
-		{
-		}
+			try
+			{
+				Uri uri = new Uri(uriString);
 
-		public Uri EndpointAddress { get; set; }
-		public Guid CorrelationId { get; set; }
+				return uri;
+			}
+			catch (UriFormatException ex)
+			{
+				throw new SerializationException("The Uri is in an invalid format: " + uriString, ex);
+			}
+		}
 	}
 }

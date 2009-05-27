@@ -15,15 +15,14 @@ namespace MassTransit.Serialization.Custom
 	using System;
 	using System.Collections;
 	using System.Collections.Generic;
-	using System.Diagnostics;
 	using System.Linq;
 	using System.Reflection;
+	using System.Runtime.Serialization;
 	using System.Xml;
 	using log4net;
 	using Magnum.CollectionExtensions;
 	using Magnum.Reflection;
 	using TypeDeserializers;
-	using TypeSerializers;
 
 	public class DeserializerContext :
 		IDeserializerContext
@@ -78,7 +77,8 @@ namespace MassTransit.Serialization.Custom
 					return Deserialize(_reader.NamespaceURI);
 				}
 
-				Trace.WriteLine(_reader.NodeType + " - " + (_reader.Name ?? "(none)") + " : " + _reader.NamespaceURI);
+				if(_log.IsDebugEnabled)
+					_log.DebugFormat("Unknown XML node: " + _reader.NodeType + " - " + (_reader.Name ?? "(none)") + " : " + _reader.NamespaceURI);
 			}
 
 			return null;
@@ -86,7 +86,11 @@ namespace MassTransit.Serialization.Custom
 
 		public object Deserialize(string ns)
 		{
-			IObjectDeserializer deserializer = _deserializers.Retrieve(ns, () => CreateDeserializerFor(ns));
+			IObjectDeserializer deserializer;
+			lock (_deserializers)
+			{
+				deserializer = _deserializers.Retrieve(ns, () => CreateDeserializerFor(ns));
+			}
 
 			return deserializer.Deserialize(this);
 		}
@@ -116,6 +120,11 @@ namespace MassTransit.Serialization.Custom
 			get { return _reader.Name; }
 		}
 
+		public bool IsEmptyElement
+		{
+			get { return _reader.IsEmptyElement; }
+		}
+
 		public void ExitElement()
 		{
 			if(NodeType == XmlNodeType.EndElement)
@@ -134,7 +143,7 @@ namespace MassTransit.Serialization.Custom
 		{
 			Type type = Type.GetType(ns, false);
 			if (type == null)
-				throw new NotSupportedException("Not able to deserialize to an unknown type just yet");
+				throw new SerializationException("Unable to deserialize an unknown type: " + ns);
 
 			return CreateDeserializerFor(type);
 		}
@@ -143,14 +152,14 @@ namespace MassTransit.Serialization.Custom
 		{
 			if (type.IsEnum)
 			{
-				return (IObjectDeserializer)Activator.CreateInstance(typeof(EnumDeserializer<>).MakeGenericType(type));
+				return (IObjectDeserializer)ClassFactory.New(typeof(EnumDeserializer<>).MakeGenericType(type));
 			}
 
 			if (typeof (IEnumerable).IsAssignableFrom(type) && type != typeof (string))
 			{
 				if (type.IsArray)
 				{
-					return (IObjectDeserializer) Activator.CreateInstance(typeof (ArrayDeserializer<>).MakeGenericType(type.GetElementType()));
+					return (IObjectDeserializer)ClassFactory.New(typeof(ArrayDeserializer<>).MakeGenericType(type.GetElementType()));
 				}
 				if (type.IsGenericType)
 				{
@@ -158,12 +167,12 @@ namespace MassTransit.Serialization.Custom
 					Type[] arguments = type.GetGenericArguments();
 					if (genericTypeDefinition == typeof (IList<>) || genericTypeDefinition == typeof (List<>))
 					{
-						return (IObjectDeserializer) Activator.CreateInstance(typeof (ListDeserializer<>).MakeGenericType(arguments));
+						return (IObjectDeserializer)ClassFactory.New(typeof(ListDeserializer<>).MakeGenericType(arguments));
 					}
 
 					if (genericTypeDefinition == typeof (IDictionary<,>) || genericTypeDefinition == typeof (Dictionary<,>))
 					{
-						return (IObjectDeserializer) Activator.CreateInstance(typeof (DictionaryDeserializer<,>).MakeGenericType(arguments));
+						return (IObjectDeserializer)ClassFactory.New(typeof(DictionaryDeserializer<,>).MakeGenericType(arguments));
 					}
 				}
 
@@ -172,9 +181,7 @@ namespace MassTransit.Serialization.Custom
 
 			Type deserializerType = typeof (ObjectDeserializer<>).MakeGenericType(type);
 
-			var deserializer = (IObjectDeserializer) Activator.CreateInstance(deserializerType);
-
-			return deserializer;
+			return (IObjectDeserializer) ClassFactory.New(deserializerType);
 		}
 	}
 }

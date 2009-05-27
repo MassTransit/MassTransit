@@ -1,27 +1,16 @@
-// Copyright 2007-2008 The Apache Software Foundation.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed 
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.Tests.Serialization
+namespace MassTransit.Transports.Msmq.Tests.Serialization
 {
 	using Configuration;
 	using Magnum.DateTimeExtensions;
 	using MassTransit.Serialization;
-	using Messages;
+	using MassTransit.Tests;
+	using MassTransit.Tests.Messages;
 	using NUnit.Framework;
-	using TextFixtures;
+	using TestFixtures;
 
 	[TestFixture, Explicit]
 	public class When_sending_a_message_using_the_specified_serializer<TSerializer> :
-		LoopbackLocalAndRemoteTestFixture
+		MsmqEndpointTestFixture
 		where TSerializer : IMessageSerializer
 	{
 		protected override void AdditionalEndpointFactoryConfiguration(IEndpointFactoryConfigurator x)
@@ -37,11 +26,11 @@ namespace MassTransit.Tests.Serialization
 			FutureMessage<PingMessage> received = new FutureMessage<PingMessage>();
 
 			RemoteBus.Subscribe<PingMessage>(message =>
-				{
-					Assert.AreEqual(RemoteBus.Endpoint.Uri, CurrentMessage.Headers.DestinationAddress);
+			{
+				Assert.AreEqual(RemoteBus.Endpoint.Uri, CurrentMessage.Headers.DestinationAddress);
 
-					received.Set(message);
-				});
+				received.Set(message);
+			});
 
 			LocalBus.Publish(ping);
 
@@ -56,11 +45,11 @@ namespace MassTransit.Tests.Serialization
 			FutureMessage<PingMessage> received = new FutureMessage<PingMessage>();
 
 			RemoteBus.Subscribe<PingMessage>(message =>
-				{
-					Assert.AreEqual(LocalBus.Endpoint.Uri, CurrentMessage.Headers.FaultAddress);
+			{
+				Assert.AreEqual(LocalBus.Endpoint.Uri, CurrentMessage.Headers.FaultAddress);
 
-					received.Set(message);
-				});
+				received.Set(message);
+			});
 
 			LocalBus.Publish(ping, context => context.SendFaultTo(LocalBus.Endpoint.Uri));
 
@@ -75,11 +64,11 @@ namespace MassTransit.Tests.Serialization
 			FutureMessage<PingMessage> received = new FutureMessage<PingMessage>();
 
 			RemoteBus.Subscribe<PingMessage>(message =>
-				{
-					Assert.AreEqual(typeof (PingMessage).ToMessageName(), CurrentMessage.Headers.MessageType);
+			{
+				Assert.AreEqual(typeof(PingMessage).ToMessageName(), CurrentMessage.Headers.MessageType);
 
-					received.Set(message);
-				});
+				received.Set(message);
+			});
 
 			LocalBus.Publish(ping);
 
@@ -94,11 +83,11 @@ namespace MassTransit.Tests.Serialization
 			FutureMessage<PingMessage> received = new FutureMessage<PingMessage>();
 
 			RemoteBus.Subscribe<PingMessage>(message =>
-				{
-					Assert.AreEqual(LocalBus.Endpoint.Uri, CurrentMessage.Headers.ResponseAddress);
+			{
+				Assert.AreEqual(LocalBus.Endpoint.Uri, CurrentMessage.Headers.ResponseAddress);
 
-					received.Set(message);
-				});
+				received.Set(message);
+			});
 
 			LocalBus.Publish(ping, context => context.SendResponseTo(LocalBus.Endpoint.Uri));
 
@@ -114,11 +103,11 @@ namespace MassTransit.Tests.Serialization
 
 			var retryCount = 69;
 			RemoteBus.Subscribe<PingMessage>(message =>
-				{
-					Assert.AreEqual(retryCount, CurrentMessage.Headers.RetryCount);
+			{
+				Assert.AreEqual(retryCount, CurrentMessage.Headers.RetryCount);
 
-					received.Set(message);
-				});
+				received.Set(message);
+			});
 
 			LocalBus.Publish(ping, context => context.SetRetryCount(retryCount));
 
@@ -133,11 +122,11 @@ namespace MassTransit.Tests.Serialization
 			FutureMessage<PingMessage> received = new FutureMessage<PingMessage>();
 
 			RemoteBus.Subscribe<PingMessage>(message =>
-				{
-					Assert.AreEqual(LocalBus.Endpoint.Uri, CurrentMessage.Headers.SourceAddress);
+			{
+				Assert.AreEqual(LocalBus.Endpoint.Uri, CurrentMessage.Headers.SourceAddress);
 
-					received.Set(message);
-				});
+				received.Set(message);
+			});
 
 			LocalBus.Publish(ping);
 

@@ -236,6 +236,28 @@ namespace MassTransit.Tests.Serialization
 			}
 		}
 
+
+		public class EmptyClass
+		{
+			public bool Equals(EmptyClass other)
+			{
+				return !ReferenceEquals(null, other);
+			}
+
+			public override bool Equals(object obj)
+			{
+				if (ReferenceEquals(null, obj)) return false;
+				if (ReferenceEquals(this, obj)) return true;
+				if (obj.GetType() != typeof (EmptyClass)) return false;
+				return Equals((EmptyClass) obj);
+			}
+
+			public override int GetHashCode()
+			{
+				return 0;
+			}
+		}
+
 		[Test]
 		public void A_collection_of_objects_should_be_properly_serialized()
 		{
@@ -286,6 +308,49 @@ namespace MassTransit.Tests.Serialization
 		}
 
 		[Test]
+		public void An_empty_class_should_not_break_the_mold()
+		{
+			EmptyClass message = new EmptyClass();
+
+			TestSerialization(message);
+		}
+
+
+		public class EnumClass
+		{
+			public SomeEnum Setting { get; set; }
+
+			public bool Equals(EnumClass other)
+			{
+				if (ReferenceEquals(null, other)) return false;
+				if (ReferenceEquals(this, other)) return true;
+				return Equals(other.Setting, Setting);
+			}
+
+			public override bool Equals(object obj)
+			{
+				if (ReferenceEquals(null, obj)) return false;
+				if (ReferenceEquals(this, obj)) return true;
+				if (obj.GetType() != typeof (EnumClass)) return false;
+				return Equals((EnumClass) obj);
+			}
+
+			public override int GetHashCode()
+			{
+				return Setting.GetHashCode();
+			}
+		}
+
+		[Test]
+		public void An_enumeration_should_be_serializable()
+		{
+			EnumClass message = new EnumClass {Setting = SomeEnum.Second};
+
+			TestSerialization(message);
+			
+		}
+
+		[Test]
 		public void An_empty_array_of_objects_should_be_properly_serialized()
 		{
 			PrimitiveArrayClass message = new PrimitiveArrayClass
@@ -324,5 +389,12 @@ namespace MassTransit.Tests.Serialization
 
 			TestSerialization(message);
 		}
+	}
+
+	public enum SomeEnum
+	{
+		First,
+		Second,
+		Third,
 	}
 }

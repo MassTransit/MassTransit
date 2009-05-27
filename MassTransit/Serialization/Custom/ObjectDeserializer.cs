@@ -12,7 +12,6 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Serialization.Custom
 {
-	using System.Diagnostics;
 	using System.Runtime.Serialization;
 	using System.Xml;
 	using log4net;
@@ -33,6 +32,12 @@ namespace MassTransit.Serialization.Custom
 		public object Deserialize(IDeserializerContext context)
 		{
 			T instance = (T) ClassFactory.New(typeof (T));
+
+			if(context.IsEmptyElement)
+			{
+				context.Read();
+				return instance;
+			}
 
 			if (!context.Read())
 				return instance;

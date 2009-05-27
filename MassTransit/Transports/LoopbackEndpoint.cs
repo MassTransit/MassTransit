@@ -37,7 +37,7 @@ namespace MassTransit.Transports
 		public LoopbackEndpoint(Uri uri)
 		{
 			_uri = uri;
-			_serializer = new BinaryMessageSerializer();
+			_serializer = new XmlMessageSerializer();
 		}
 
 		public LoopbackEndpoint(Uri uri, IMessageSerializer serializer)

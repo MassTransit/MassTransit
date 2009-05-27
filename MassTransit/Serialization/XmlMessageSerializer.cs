@@ -12,90 +12,45 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Serialization
 {
-	using System;
 	using System.IO;
 	using System.Runtime.Serialization;
-	using System.Xml;
-	using System.Xml.Serialization;
+	using Custom;
 	using Internal;
-	using Magnum.Threading;
-	using Util;
+	using log4net;
 
-	/// <summary>
-	/// Serializes messages using the .NET Xml Serializer
-	/// As such, limitations of that serializer apply to this one
-	/// </summary>
 	public class XmlMessageSerializer :
 		IMessageSerializer
 	{
-		private static readonly XmlAttributes _attributes;
-		private static readonly ReaderWriterLockedDictionary<Type, XmlSerializer> _deserializers;
-		private static readonly XmlSerializerNamespaces _namespaces;
-		private static readonly ReaderWriterLockedDictionary<Type, XmlSerializer> _serializers;
+		private static readonly ILog _log = LogManager.GetLogger(typeof (XmlMessageSerializer));
+		private static readonly IXmlSerializer _serializer = new CustomXmlSerializer();
 
-		static XmlMessageSerializer()
+		public void Serialize<T>(Stream stream, T message)
 		{
-			_serializers = new ReaderWriterLockedDictionary<Type, XmlSerializer>();
-
-			_deserializers = new ReaderWriterLockedDictionary<Type, XmlSerializer>
-				{
-					{typeof (XmlReceiveMessageEnvelope), new XmlSerializer(typeof (XmlReceiveMessageEnvelope))},
-				};
-
-			_namespaces = new XmlSerializerNamespaces();
-			_namespaces.Add("", "");
-
-			_attributes = new XmlAttributes();
-			_attributes.XmlRoot = new XmlRootAttribute("Message");
-		}
-
-		public void Serialize<T>(Stream output, T message)
-		{
-			CheckConvention.EnsureSerializable(message);
 			var envelope = XmlMessageEnvelope.Create(message);
 
-			GetSerializerFor<T>().Serialize(output, envelope);
+			_serializer.Serialize(stream, envelope);
+
+//			if(_log.IsDebugEnabled)
+//				_log.Debug(Encoding.UTF8.GetString(_serializer.Serialize(envelope)));
 		}
 
-		public object Deserialize(Stream input)
+		public object Deserialize(Stream stream)
 		{
-			object obj = GetDeserializerFor(typeof (XmlReceiveMessageEnvelope)).Deserialize(input);
-			if (obj.GetType() != typeof (XmlReceiveMessageEnvelope))
-				throw new SerializationException("An unknown message type was received: " + obj.GetType().FullName);
+			object message = _serializer.Deserialize(stream);
 
-			XmlReceiveMessageEnvelope envelope = (XmlReceiveMessageEnvelope) obj;
+			if (message == null)
+				throw new SerializationException("Could not deserialize message.");
 
-			if (string.IsNullOrEmpty(envelope.MessageType))
-				throw new SerializationException("No message type found on envelope");
-
-			Type t = Type.GetType(envelope.MessageType, true, true);
-
-			using (var reader = new XmlNodeReader(envelope.Message))
+			if (message is XmlMessageEnvelope)
 			{
-				obj = GetDeserializerFor(t).Deserialize(reader);
+				XmlMessageEnvelope envelope = message as XmlMessageEnvelope;
+
+				InboundMessageHeaders.SetCurrent(envelope.GetMessageHeadersSetAction());
+
+				return envelope.Message;
 			}
 
-			InboundMessageHeaders.SetCurrent(envelope.GetMessageHeadersSetAction());
-
-			return obj;
-		}
-
-		private static XmlSerializer GetSerializerFor<T>()
-		{
-			Type type = typeof (T);
-
-			return _serializers.Retrieve(type, () => new XmlSerializer(typeof (XmlMessageEnvelope), new[] {type}));
-		}
-
-		private static XmlSerializer GetDeserializerFor(Type type)
-		{
-			return _deserializers.Retrieve(type, () =>
-				{
-					XmlAttributeOverrides overrides = new XmlAttributeOverrides();
-					overrides.Add(type, _attributes);
-
-					return new XmlSerializer(type, overrides);
-				});
+			return message;
 		}
 	}
 }

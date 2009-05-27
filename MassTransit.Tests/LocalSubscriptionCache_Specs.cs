@@ -37,7 +37,7 @@ namespace MassTransit.Tests
     	protected override void Before_each()
         {
             _builder = MockRepository.GenerateMock<IObjectBuilder>();
-        	_builder.Stub(x => x.GetInstance<BinaryMessageSerializer>()).Return(new BinaryMessageSerializer());
+        	_builder.Stub(x => x.GetInstance<XmlMessageSerializer>()).Return(new XmlMessageSerializer());
 			_endpointResolver = EndpointFactoryConfigurator.New(x =>
 			{
 				x.SetObjectBuilder(_builder);

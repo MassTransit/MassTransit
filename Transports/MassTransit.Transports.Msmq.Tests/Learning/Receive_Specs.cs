@@ -202,7 +202,7 @@ namespace MassTransit.Transports.Msmq.Tests
                     enumerator.MoveNext();
                     twice = enumerator.RemoveCurrent();
 
-                    once.Id.ShouldEqual(twice.Id);
+                	Assert.AreNotSame(once.Id, twice.Id);
                     var b = twice.BodyType;
                 }
                 enumerator.Close();

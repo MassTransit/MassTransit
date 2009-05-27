@@ -331,7 +331,14 @@ namespace MassTransit
 						}
 						catch (SerializationException sex)
 						{
-							selector.MoveMessageTo(PoisonEndpoint);
+							try
+							{
+								selector.MoveMessageTo(PoisonEndpoint);
+							}
+							catch (Exception ex)
+							{
+								_log.Error("Failed to move message to poison endpoint", ex);
+							}
 
 							throw new MessageException(typeof (object), "An error occurred deserializing a message", sex);
 						}
@@ -346,7 +353,7 @@ namespace MassTransit
 								_log.Error("Failed to move message to poison endpoint", ex);
 							}
 
-							throw;
+							throw new MessageException(typeof(object), "There was a problem with a saga message", sax);
 						}
 						catch (Exception ex)
 						{

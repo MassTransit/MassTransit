@@ -23,5 +23,9 @@ namespace MassTransit.Tests.Saga.Messages
 			base(correlationId)
 		{
 		}
+
+		protected SendValidationEmail()
+		{
+		}
 	}
 }

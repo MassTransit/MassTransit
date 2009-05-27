@@ -31,11 +31,11 @@ namespace MassTransit.Services.Subscriptions.Server
 				{
 					Correlate(ClientAdded).By((saga, message) =>
 					                          saga.SubscriptionInfo.EndpointUri == message.DataUri &&
-					                          saga.SubscriptionInfo.ClientId != message.ClientId);
+					                          saga.SubscriptionInfo.ClientId != message.CorrelationId);
 
 					Correlate(ClientRemoved).By((saga, message) =>
 					                            saga.SubscriptionInfo.EndpointUri == message.DataUri &&
-					                            saga.SubscriptionInfo.ClientId == message.ClientId);
+					                            saga.SubscriptionInfo.ClientId == message.CorrelationId);
 
 					Initially(
 						When(SubscriptionAdded)

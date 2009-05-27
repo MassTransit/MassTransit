@@ -18,7 +18,7 @@ namespace MassTransit.Serialization.Custom
 	using System.Linq;
 	using System.Reflection;
 
-	public class ObjectPropertyCache<T> : 
+	public class ObjectPropertyCache<T> :
 		IObjectPropertyCache<T>
 	{
 		private const BindingFlags _bindingFlags = BindingFlags.Public | BindingFlags.Instance;
@@ -29,11 +29,19 @@ namespace MassTransit.Serialization.Custom
 		{
 			_properties = new Dictionary<string, ObjectProperty<T>>();
 
-			var properties = GetAllPropertiesForType(typeof(T)).Select(x => new ObjectProperty<T>(x));
+			var properties = GetAllPropertiesForType(typeof (T))
+				.Where(x => x.GetGetMethod() != null)
+				.Where(x => x.GetSetMethod() != null)
+				.Select(x => new ObjectProperty<T>(x));
 			foreach (ObjectProperty<T> property in properties)
 			{
 				_properties.Add(property.Name, property);
 			}
+		}
+
+		public bool TryGetProperty(string name, out ObjectProperty<T> property)
+		{
+			return _properties.TryGetValue(name, out property);
 		}
 
 		public IEnumerator<ObjectProperty<T>> GetEnumerator()
@@ -44,11 +52,6 @@ namespace MassTransit.Serialization.Custom
 		IEnumerator IEnumerable.GetEnumerator()
 		{
 			return GetEnumerator();
-		}
-
-		public bool TryGetProperty(string name, out ObjectProperty<T> property)
-		{
-			return _properties.TryGetValue(name, out property);
 		}
 
 		private static IEnumerable<PropertyInfo> GetAllPropertiesForType(Type type)
@@ -68,11 +71,6 @@ namespace MassTransit.Serialization.Custom
 					}
 				}
 			}
-		}
-
-		public IEnumerable<ObjectProperty<T>> GetProperties()
-		{
-			return _properties.Values;
 		}
 	}
 }

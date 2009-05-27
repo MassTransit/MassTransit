@@ -17,7 +17,6 @@ namespace MassTransit.Serialization.Custom
 	public interface IObjectPropertyCache<T> :
 		IEnumerable<ObjectProperty<T>>
 	{
-		IEnumerable<ObjectProperty<T>> GetProperties();
 		bool TryGetProperty(string name, out ObjectProperty<T> property);
 	}
 }

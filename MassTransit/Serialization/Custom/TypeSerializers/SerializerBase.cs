@@ -42,7 +42,8 @@ namespace MassTransit.Serialization.Custom.TypeSerializers
 					if (isDocumentElement)
 						context.WriteNamespaceInformationToXml(writer);
 
-					WriteValue(writer, value);
+					if(value != null)
+						WriteValue(writer, value);
                     
 					writer.WriteEndElement();
 				});

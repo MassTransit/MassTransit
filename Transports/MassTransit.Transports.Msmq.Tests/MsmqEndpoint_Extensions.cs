@@ -14,8 +14,8 @@ namespace MassTransit.Transports.Msmq.Tests
 {
 	using System;
 	using System.Messaging;
-	using System.Runtime.Serialization.Formatters.Binary;
 	using System.Transactions;
+	using MassTransit.Serialization;
 	using MassTransit.Tests;
 
 	public static class MsmqEndpoint_Extensions
@@ -35,7 +35,7 @@ namespace MassTransit.Transports.Msmq.Tests
 				Message msg = mq.Receive(TimeSpan.FromSeconds(3));
 				msg.ShouldNotBeNull();
 
-				object message = new BinaryFormatter().Deserialize(msg.BodyStream);
+				object message = new XmlMessageSerializer().Deserialize(msg.BodyStream);
 
 				message.ShouldNotBeNull();
 
