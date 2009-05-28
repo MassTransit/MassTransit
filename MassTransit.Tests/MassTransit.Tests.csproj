@@ -124,6 +124,7 @@
     <Compile Include="Saga\SimpleSagaMessageBase.cs" />
     <Compile Include="Saga\StateMachine\AutoStateMachineSaga.cs" />
     <Compile Include="Saga\StateMachine\AutoStateMachine_Specs.cs" />
+    <Compile Include="Saga\StateMachine\SagaFault_Specs.cs" />
     <Compile Include="Saga\StateMachine\TestSaga_Specs.cs" />
     <Compile Include="Serialization\Approach\Approach_Specs.cs" />
     <Compile Include="Serialization\ContextSerialization_Specs.cs" />
