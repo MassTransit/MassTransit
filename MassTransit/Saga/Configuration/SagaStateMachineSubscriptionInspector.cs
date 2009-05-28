@@ -186,7 +186,7 @@ namespace MassTransit.Saga.Configuration
 				return InvokeCorrelatedConnectMethod(messageType, componentType, eevent);
 			}
 
-			throw new NotSupportedException("No method to connect to event was found");
+			throw new NotSupportedException("No method to connect to event was found for " + typeof(TMessage).FullName);
 		}
 
 		private UnsubscribeAction InvokePropertyConnectMethod<TComponent, TMessage>(Type messageType, Type componentType, DataEvent<TComponent, TMessage> eevent, Expression<Func<TComponent, TMessage, bool>> selector)
