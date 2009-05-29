@@ -13,8 +13,10 @@
 namespace MassTransit.Transports.Tibco
 {
 	using System;
+	using System.Collections.Generic;
 	using System.IO;
-	using System.Runtime.Serialization;
+	using System.Text;
+	using Configuration;
 	using Exceptions;
 	using Internal;
 	using log4net;
@@ -26,8 +28,8 @@ namespace MassTransit.Transports.Tibco
 		IExceptionListener
 	{
 		private static readonly ILog _log = LogManager.GetLogger(typeof (TibcoEndpoint));
-		private static readonly IMessageSerializer _serializer = new BinaryMessageSerializer();
 
+		private readonly IMessageSerializer _serializer;
 		private readonly Uri _uri;
 		private Connection _connection;
 		private int _deliveryMode = DeliveryMode.RELIABLE_DELIVERY;
@@ -35,14 +37,15 @@ namespace MassTransit.Transports.Tibco
 		private ConnectionFactory _factory;
 		private string _queueName;
 
-		public TibcoEndpoint(string uriString)
-			: this(new Uri(uriString))
+		public TibcoEndpoint(string uriString, IMessageSerializer serializer)
+			: this(new Uri(uriString), serializer)
 		{
 		}
 
-		public TibcoEndpoint(Uri uri)
+		public TibcoEndpoint(Uri uri, IMessageSerializer serializer)
 		{
 			_uri = uri;
+			_serializer = serializer;
 
 			_queueName = Uri.AbsolutePath.Substring(1);
 
@@ -55,11 +58,6 @@ namespace MassTransit.Transports.Tibco
 			_connection.ExceptionListener = this;
 
 			_connection.Start();
-		}
-
-		public static string Scheme
-		{
-			get { return "tibco"; }
 		}
 
 		public void Dispose()
@@ -80,194 +78,86 @@ namespace MassTransit.Transports.Tibco
 
 		public void Send<T>(T message, TimeSpan timeToLive) where T : class
 		{
-			WithinProducerContext((session, producer) =>
+			if (_disposed) throw new ObjectDisposedException("The object has been disposed");
+
+			Session session = _connection.CreateSession(true, SessionMode.SessionTransacted);
+			if (session == null)
+				throw new EndpointException(Uri, "Unable to open session to endpoint");
+
+			Destination destination = session.CreateQueue(_queueName);
+
+			MessageProducer producer = session.CreateProducer(destination);
+			if (producer != null)
+			{
+				Type messageType = typeof (T);
+
+				TextMessage textMessage = session.CreateTextMessage();
+
+				using (MemoryStream mem = new MemoryStream())
 				{
-					Type messageType = typeof (T);
+					_serializer.Serialize(mem, message);
 
-					BytesMessage bm = session.CreateBytesMessage();
+					textMessage.Text = Encoding.UTF8.GetString(mem.ToArray());
+				}
 
-					using (MemoryStream mem = new MemoryStream())
-					{
-						_serializer.Serialize(mem, message);
+				if (timeToLive < TimeSpan.MaxValue)
+					producer.TimeToLive = (long) timeToLive.TotalMilliseconds;
 
-						bm.WriteBytes(mem.ToArray());
-					}
+				producer.DeliveryMode = _deliveryMode;
 
-					if (timeToLive < TimeSpan.MaxValue)
-						producer.TimeToLive = (long) timeToLive.TotalMilliseconds;
+				producer.Send(textMessage);
 
-					producer.DeliveryMode = _deliveryMode;
+				session.Commit();
 
-					producer.Send(bm);
+				if (SpecialLoggers.Messages.IsInfoEnabled)
+					SpecialLoggers.Messages.InfoFormat("SEND:{0}:{1}:{2}", Uri, messageType.Name, textMessage.MessageID);
 
-					if (SpecialLoggers.Messages.IsInfoEnabled)
-						SpecialLoggers.Messages.InfoFormat("Message {0} Sent To {1}", messageType, Uri);
+				if (_log.IsDebugEnabled)
+					_log.DebugFormat("Sent {0} from {1} [{2}]", messageType.FullName, Uri, textMessage.MessageID);
 
-					if (_log.IsDebugEnabled)
-						_log.DebugFormat("Message Sent: Id = {0}, Message Type = {1}", bm.MessageID, messageType);
-				});
+				producer.Close();
+			}
+			else
+				throw new EndpointException(Uri, "Unable to create message producer");
+
+			session.Close();
 		}
 
-		public object Receive(TimeSpan timeout)
+		public IEnumerable<IMessageSelector> SelectiveReceive(TimeSpan timeout)
 		{
-			return Receive(timeout, x => true);
-		}
+			Session session = _connection.CreateSession(true, SessionMode.SessionTransacted);
+			if (session == null)
+				throw new EndpointException(Uri, "Unable to open session to endpoint");
 
-		public object Receive(TimeSpan timeout, Predicate<object> accept)
-		{
-			return WithinConsumerContext(consumer =>
+			Destination destination = session.CreateQueue(_queueName);
+
+			MessageConsumer consumer = session.CreateConsumer(destination);
+			if (consumer != null)
+			{
+				Message message;
+				do
 				{
-					Message message = consumer.Receive((long) timeout.TotalMilliseconds);
-					if (message == null)
-						return null;
-
-					BytesMessage bm = message as BytesMessage;
-					if (bm == null)
-						throw new MessageException(message.GetType(), "Message not a IBytesMessage");
-
-					byte[] bytes = new byte[bm.BodyLength];
-					bm.ReadBytes(bytes);
-
-					try
+					message = consumer.Receive((long) timeout.TotalMilliseconds);
+					if (message != null)
 					{
-						using (MemoryStream mem = new MemoryStream(bytes, false))
+						using (var selector = new TibcoMessageSelector(this, session, message, _serializer))
 						{
-							object obj = _serializer.Deserialize(mem);
-
-							if (accept(obj))
-							{
-								if (_log.IsDebugEnabled)
-									_log.DebugFormat("Queue: {0} Received Message Id {1}", _queueName, message.MessageID);
-
-								if (SpecialLoggers.Messages.IsInfoEnabled)
-									SpecialLoggers.Messages.InfoFormat("RECV:{0}:{1}", _uri, obj.GetType().Name);
-
-								return obj;
-							}
-
-							if (_log.IsDebugEnabled)
-								_log.DebugFormat("Queue: {0} Skipped Message Id {1}", _queueName, message.MessageID);
-
-							return null;
+							yield return selector;
 						}
 					}
-					catch (SerializationException ex)
-					{
-						try
-						{
-							_log.Error("Discarded message " + message.MessageID + " due to a serialization error", ex);
-						}
-						catch (Exception ex2)
-						{
-							_log.Error("Unable to purge message id " + message.MessageID, ex2);
-						}
+				} while (message != null);
 
-						throw new MessageException(typeof (object), "An error occurred deserializing a message", ex);
-					}
-				});
+				consumer.Close();
+			}
+			else
+				throw new EndpointException(Uri, "Unable to create message consumer");
+
+			session.Close();
 		}
 
 		public void OnException(EMSException exception)
 		{
 			_log.Error("An exception occurred on the endpoint. Uri = " + _uri, exception);
-		}
-
-		private V WithinConsumerContext<V>(Func<MessageConsumer, V> consumerAction)
-		{
-			return WithinSessionContext<V>(session =>
-				{
-					MessageConsumer consumer = null;
-					try
-					{
-						Destination destination = session.CreateQueue(_queueName);
-
-						consumer = session.CreateConsumer(destination);
-
-						V result = consumerAction(consumer);
-
-						return result;
-					}
-					finally
-					{
-						if (consumer != null)
-						{
-							consumer.Close();
-						}
-					}
-				});
-		}
-
-		private void WithinProducerContext(Action<Session, MessageProducer> producerAction)
-		{
-			WithinSessionContext(session =>
-				{
-					MessageProducer producer = null;
-					try
-					{
-						Destination destination = session.CreateQueue(_queueName);
-
-						producer = session.CreateProducer(destination);
-
-						producerAction(session, producer);
-					}
-					finally
-					{
-						if (producer != null)
-						{
-							producer.Close();
-						}
-					}
-				});
-		}
-
-		private V WithinSessionContext<V>(Func<Session, V> sessionAction)
-		{
-			Session session = null;
-			try
-			{
-				session = _connection.CreateSession(true, SessionMode.SessionTransacted);
-
-				V result = sessionAction(session);
-
-				session.Commit();
-
-				return result;
-			}
-			catch (Exception ex)
-			{
-				throw new EndpointException(this, "Error consuming message", ex);
-			}
-			finally
-			{
-				if (session != null)
-				{
-					session.Close();
-				}
-			}
-		}
-
-		private void WithinSessionContext(Action<Session> sessionAction)
-		{
-			Session session = null;
-			try
-			{
-				session = _connection.CreateSession(true, SessionMode.SessionTransacted);
-
-				sessionAction(session);
-
-				session.Commit();
-			}
-			catch (Exception ex)
-			{
-				throw new EndpointException(this, "Error consuming message", ex);
-			}
-			finally
-			{
-				if (session != null)
-				{
-					session.Close();
-				}
-			}
 		}
 
 		~TibcoEndpoint()
@@ -285,6 +175,23 @@ namespace MassTransit.Transports.Tibco
 				_connection = null;
 			}
 			_disposed = true;
+		}
+
+		public static IEndpoint ConfigureEndpoint(Uri uri, Action<IEndpointConfigurator> configurator)
+		{
+			if (uri.Scheme.ToLowerInvariant() == "tibco")
+			{
+				IEndpoint endpoint = TibcoEndpointConfigurator.New(x =>
+					{
+						x.SetUri(uri);
+
+						configurator(x);
+					});
+
+				return endpoint;
+			}
+
+			return null;
 		}
 	}
 }
