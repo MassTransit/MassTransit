@@ -68,11 +68,11 @@ namespace MassTransit.Services.Subscriptions.Server
 		public static Event<RemoveSubscriptionClient> ClientRemoved { get; set; }
 		public static Event<SubscriptionClientAdded> DuplicateClientAdded { get; set; }
 
-		public Uri ControlUri { get; set; }
-		public Uri DataUri { get; set; }
+		public virtual Uri ControlUri { get; set; }
+		public virtual Uri DataUri { get; set; }
 
-		public Guid CorrelationId { get; set; }
-		public IServiceBus Bus { get; set; }
+		public virtual Guid CorrelationId { get; set; }
+		public virtual IServiceBus Bus { get; set; }
 
 		private void NotifySubscriptionClientAdded()
 		{

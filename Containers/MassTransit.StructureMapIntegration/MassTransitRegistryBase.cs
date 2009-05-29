@@ -19,7 +19,6 @@ namespace MassTransit.StructureMapIntegration
 	using Services.Subscriptions;
 	using Services.Subscriptions.Configuration;
 	using Services.Subscriptions.Server;
-	using StructureMap;
 	using StructureMap.Attributes;
 	using StructureMap.Configuration.DSL;
 
@@ -110,7 +109,7 @@ namespace MassTransit.StructureMapIntegration
 					{
 						return EndpointFactoryConfigurator.New(x =>
 							{
-								x.SetObjectBuilder(ObjectFactory.GetInstance<IObjectBuilder>());
+								x.SetObjectBuilder(context.GetInstance<IObjectBuilder>());
 								configAction(x);
 							});
 					});
@@ -118,13 +117,18 @@ namespace MassTransit.StructureMapIntegration
 
 		protected void RegisterServiceBus(string endpointUri, Action<IServiceBusConfigurator> configAction)
 		{
+			RegisterServiceBus(new Uri(endpointUri), configAction);
+		}
+
+		protected void RegisterServiceBus(Uri endpointUri, Action<IServiceBusConfigurator> configAction)
+		{
 			ForRequestedType<IServiceBus>()
 				.CacheBy(InstanceScope.Singleton)
 				.TheDefault.Is.ConstructedBy(context =>
 					{
 						return ServiceBusConfigurator.New(x =>
 							{
-								x.SetObjectBuilder(ObjectFactory.GetInstance<IObjectBuilder>());
+								x.SetObjectBuilder(context.GetInstance<IObjectBuilder>());
 								x.ReceiveFrom(endpointUri);
 
 								configAction(x);
@@ -134,13 +138,18 @@ namespace MassTransit.StructureMapIntegration
 
 		protected void RegisterControlBus(string endpointUri, Action<IServiceBusConfigurator> configAction)
 		{
+			RegisterControlBus(new Uri(endpointUri), configAction);
+		}
+
+		protected void RegisterControlBus(Uri endpointUri, Action<IServiceBusConfigurator> configAction)
+		{
 			ForRequestedType<IControlBus>()
 				.CacheBy(InstanceScope.Singleton)
 				.TheDefault.Is.ConstructedBy(context =>
 				{
 					return ControlBusConfigurator.New(x =>
 					{
-						x.SetObjectBuilder(ObjectFactory.GetInstance<IObjectBuilder>());
+						x.SetObjectBuilder(context.GetInstance<IObjectBuilder>());
 						x.ReceiveFrom(endpointUri);
 
 						configAction(x);
@@ -149,6 +158,11 @@ namespace MassTransit.StructureMapIntegration
 		}
 
 		protected static void ConfigureSubscriptionClient(string subscriptionServiceEndpointAddress, IServiceBusConfigurator configurator)
+		{
+			ConfigureSubscriptionClient(new Uri(subscriptionServiceEndpointAddress), configurator);
+		}
+
+		protected static void ConfigureSubscriptionClient(Uri subscriptionServiceEndpointAddress, IServiceBusConfigurator configurator)
 		{
 			configurator.ConfigureService<SubscriptionClientConfigurator>(y =>
 				{

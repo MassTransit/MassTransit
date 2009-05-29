@@ -10,14 +10,20 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Services.Timeout
+namespace MassTransitServices.Model
 {
-	using System;
+	using FluentNHibernate.Mapping;
+	using MassTransit.Services.Timeout;
 
-	public class ScheduledTimeout
+	public class ScheduledTimeoutMap :
+		ClassMap<ScheduledTimeout>
 	{
-		public virtual Guid Id { get; set; }
-		public virtual int Tag { get; set; }
-		public virtual DateTime ExpiresAt { get; set; }
+		public ScheduledTimeoutMap()
+		{
+			Id(x => x.Id);
+
+			Map(x => x.Tag);
+			Map(x => x.ExpiresAt);
+		}
 	}
 }

@@ -344,6 +344,8 @@ namespace MassTransit
 						}
 						catch(SagaException sax)
 						{
+							selector.AcceptMessage();
+
 							try
 							{
 								selector.MoveMessageTo(PoisonEndpoint);

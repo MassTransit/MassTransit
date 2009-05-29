@@ -53,5 +53,10 @@ namespace MassTransit.Services.Subscriptions.Configuration
 				throw new ConfigurationException("The endpoint Uri is invalid: " + uriString, ex);
 			}
 		}
+
+		public void SetSubscriptionServiceEndpoint(Uri uri)
+		{
+			_subscriptionServiceUri = uri;
+		}
 	}
 }

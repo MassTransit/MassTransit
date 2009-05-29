@@ -80,10 +80,10 @@ namespace MassTransit.Services.Subscriptions.Server
 		public static Event<AddSubscriptionClient> ClientAdded { get; set; }
 		public static Event<RemoveSubscriptionClient> ClientRemoved { get; set; }
 
-		public SubscriptionInformation SubscriptionInfo { get; set; }
+		public virtual SubscriptionInformation SubscriptionInfo { get; set; }
 
-		public IServiceBus Bus { get; set; }
-		public Guid CorrelationId { get; set; }
+		public virtual IServiceBus Bus { get; set; }
+		public virtual Guid CorrelationId { get; set; }
 
 		private void NotifySubscriptionAdded()
 		{
