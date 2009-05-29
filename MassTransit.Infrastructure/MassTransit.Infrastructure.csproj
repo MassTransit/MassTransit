@@ -41,13 +41,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\libs\NHibernate 2.0\Castle.DynamicProxy2.dll</HintPath>
     </Reference>
-    <Reference Include="Enyim.Caching, Version=1.2.0.0, Culture=neutral, PublicKeyToken=cec98615db04012e, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\libs\Enyim.Caching.dll</HintPath>
-    </Reference>
     <Reference Include="Iesi.Collections, Version=1.0.0.3, Culture=neutral, PublicKeyToken=aa95f207798dfdb4, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\libs\NHibernate 2.0\Iesi.Collections.dll</HintPath>
+      <HintPath>..\libs\FluentNHibernate\Iesi.Collections.dll</HintPath>
     </Reference>
     <Reference Include="log4net, Version=1.2.10.0, Culture=neutral, PublicKeyToken=1b44e1d426115821, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -69,13 +65,13 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\libs\Microsoft.Practices.ServiceLocation.dll</HintPath>
     </Reference>
-    <Reference Include="NHibernate, Version=2.0.0.4000, Culture=neutral, PublicKeyToken=aa95f207798dfdb4, processorArchitecture=MSIL">
+    <Reference Include="NHibernate, Version=2.0.1.4000, Culture=neutral, PublicKeyToken=aa95f207798dfdb4, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\libs\NHibernate 2.0\NHibernate.dll</HintPath>
+      <HintPath>..\libs\FluentNHibernate\NHibernate.dll</HintPath>
     </Reference>
     <Reference Include="NHibernate.Linq, Version=1.0.0.0, Culture=neutral, PublicKeyToken=444cf6a87fdab271, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\libs\NHibernate 2.0\NHibernate.Linq.dll</HintPath>
+      <HintPath>..\libs\FluentNHibernate\NHibernate.Linq.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
@@ -89,12 +85,14 @@
       <Link>SolutionVersion.cs</Link>
     </Compile>
     <Compile Include="Saga\NHibernateSagaRepository.cs" />
+    <Compile Include="Saga\NHibernateSagaRepositoryForContainers.cs" />
     <Compile Include="Subscriptions\PersistentSubscription.cs" />
     <Compile Include="Metadata\InMemoryMetadataRepository.cs" />
     <Compile Include="Metadata\PersistantMetadataRepository.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Subscriptions\PersistantSubscriptionRepository.cs" />
     <Compile Include="MessageDeferral\PersistantDeferredMessageRepository.cs" />
+    <Compile Include="Timeout\NHibernateTimeoutRepository.cs" />
     <Compile Include="Timeout\PersistantTimeoutRepository.cs" />
   </ItemGroup>
   <ItemGroup>

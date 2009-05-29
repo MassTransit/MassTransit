@@ -23,6 +23,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Infrastructure"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenAllNight", "..\Samples\OpenAllNight\OpenAllNight\OpenAllNight.csproj", "{EB825C40-FE8F-4F56-8397-A158F7482970}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransitServices", "MassTransitServices\MassTransitServices.csproj", "{8AFA8821-2851-4134-8E0A-F9E7E10D28D9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.StructureMapIntegration", "..\Containers\MassTransit.StructureMapIntegration\MassTransit.StructureMapIntegration.csproj", "{F5E67502-2B30-484C-88C3-97710291F5AA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -65,6 +69,14 @@ Global
 		{EB825C40-FE8F-4F56-8397-A158F7482970}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EB825C40-FE8F-4F56-8397-A158F7482970}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EB825C40-FE8F-4F56-8397-A158F7482970}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8AFA8821-2851-4134-8E0A-F9E7E10D28D9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8AFA8821-2851-4134-8E0A-F9E7E10D28D9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8AFA8821-2851-4134-8E0A-F9E7E10D28D9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8AFA8821-2851-4134-8E0A-F9E7E10D28D9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F5E67502-2B30-484C-88C3-97710291F5AA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F5E67502-2B30-484C-88C3-97710291F5AA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F5E67502-2B30-484C-88C3-97710291F5AA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F5E67502-2B30-484C-88C3-97710291F5AA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -74,6 +86,7 @@ Global
 		{6F90867C-E092-4EDC-B3DE-600D39DF0335} = {12A2E13A-D405-49EC-89EB-15D089F2A824}
 		{98D5A59C-96FA-4A1B-A653-EA5A35C45FC9} = {12A2E13A-D405-49EC-89EB-15D089F2A824}
 		{073A90FD-9A3E-4704-B3B5-6D8A9F4B442E} = {12A2E13A-D405-49EC-89EB-15D089F2A824}
+		{F5E67502-2B30-484C-88C3-97710291F5AA} = {12A2E13A-D405-49EC-89EB-15D089F2A824}
 		{EB825C40-FE8F-4F56-8397-A158F7482970} = {82671CE1-CB09-4365-B1C6-896D8B665550}
 	EndGlobalSection
 EndGlobal

@@ -17,36 +17,42 @@ namespace MassTransit.Infrastructure.Saga
 	using System.Data;
 	using System.Linq;
 	using System.Linq.Expressions;
-	using Magnum.Infrastructure.Data;
 	using MassTransit.Saga;
 	using NHibernate;
 	using NHibernate.Linq;
 
-	public class NHibernateSagaRepository<T> :
+	public class NHibernateSagaRepositoryForContainers<T> :
 		ISagaRepository<T>
 		where T : class, ISaga
 	{
+		private readonly ISessionFactory _sessionFactory;
+		private ISession _session;
+
+		public NHibernateSagaRepositoryForContainers(ISessionFactory sessionFactory)
+		{
+			_sessionFactory = sessionFactory;
+			_session = _sessionFactory.OpenSession();
+		}
+
 		public void Dispose()
 		{
+			_session.Dispose();
 		}
 
 		public IEnumerable<Action<V>> Find<V>(Expression<Func<T, bool>> expression, Action<T, V> action)
 		{
-			ISession session = NHibernateUnitOfWork.Current.Session;
-
-			foreach (T saga in session.Linq<T>().Where(expression))
+			foreach (T saga in _session.Linq<T>().Where(expression))
 			{
-				using (var transaction = session.BeginTransaction(IsolationLevel.Serializable))
+				using (var transaction = _session.BeginTransaction(IsolationLevel.Serializable))
 				{
-					T lockedSaga = session.Load<T>(saga.CorrelationId, LockMode.Upgrade);
+					T lockedSaga = _session.Load<T>(saga.CorrelationId, LockMode.Upgrade);
 
 					yield return x => action(lockedSaga, x);
 
-					session.Update(lockedSaga);
+					_session.Update(lockedSaga);
 
 					transaction.Commit();
 				}
-				session.Flush();
 			}
 		}
 
@@ -62,31 +68,23 @@ namespace MassTransit.Infrastructure.Saga
 
 		public IEnumerable<T> Where(Expression<Func<T, bool>> filter)
 		{
-			ISession session = NHibernateUnitOfWork.Current.Session;
-
-			return session.Linq<T>().Where(filter);
+			return _session.Linq<T>().Where(filter);
 		}
 
 		public IEnumerable<Action<V>> Create<V>(Guid sagaId, Action<T, V> action)
 		{
-			ISession session = NHibernateUnitOfWork.Current.Session;
-
-			using (var transaction = session.BeginTransaction(IsolationLevel.Serializable))
+			using (var transaction = _session.BeginTransaction(IsolationLevel.Serializable))
 			{
 				T saga = (T) Activator.CreateInstance(typeof (T), sagaId);
-				session.Save(saga);
-				session.Flush();
 
-				saga = session.Load<T>(sagaId, LockMode.Upgrade);
+				_session.Save(saga);
 
 				yield return x => action(saga, x);
 
-				session.Update(saga);
+				_session.Update(saga);
 
 				transaction.Commit();
 			}
-
-			session.Flush();
 		}
 	}
 }

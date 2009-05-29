@@ -10,14 +10,14 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Services.Timeout
+namespace MassTransitServices
 {
 	using System;
 
-	public class ScheduledTimeout
+	public interface IConfiguration
 	{
-		public virtual Guid Id { get; set; }
-		public virtual int Tag { get; set; }
-		public virtual DateTime ExpiresAt { get; set; }
+		Uri SubscriptionServiceUri { get; }
+		Uri TimeoutServiceControlUri { get; }
+		Uri TimeoutServiceDataUri { get; }
 	}
 }
