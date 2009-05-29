@@ -10,19 +10,19 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Transports.Msmq
+namespace MassTransit.Transports.Tibco
 {
 	using System;
 	using Configuration;
 	using Magnum;
 	using Serialization;
 
-	public class MsmqEndpointConfigurator :
+	public class TibcoEndpointConfigurator :
 		EndpointConfiguratorBase
 	{
 		public static IEndpoint New(Action<IEndpointConfigurator> action)
 		{
-			var configurator = new MsmqEndpointConfigurator();
+			var configurator = new TibcoEndpointConfigurator();
 
 			action(configurator);
 
@@ -36,7 +36,7 @@ namespace MassTransit.Transports.Msmq
 
 			IMessageSerializer serializer = GetSerializer();
 
-			IEndpoint endpoint = new MsmqEndpoint(Uri, serializer);
+			IEndpoint endpoint = new TibcoEndpoint(Uri, serializer);
 
 			return endpoint;
 		}

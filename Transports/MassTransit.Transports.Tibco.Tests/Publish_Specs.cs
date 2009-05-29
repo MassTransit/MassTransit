@@ -17,16 +17,12 @@ namespace MassTransit.Transports.Tibco.Tests
 	using MassTransit.Tests.Messages;
 	using MassTransit.Tests.TestConsumers;
 	using NUnit.Framework;
+	using TestFixtures;
 
 	[TestFixture]
 	public class Publish_Specs :
-		LocalAndRemoteTestContext
+		TibcoEndpointTestFixture
 	{
-		protected override string GetCastleConfigurationFile()
-		{
-			return "tibco.castle.xml";
-		}
-
 		private readonly TimeSpan _timeout = TimeSpan.FromSeconds(10);
 
 		[Test]
