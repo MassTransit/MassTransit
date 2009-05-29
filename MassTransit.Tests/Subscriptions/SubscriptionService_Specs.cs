@@ -36,7 +36,7 @@ namespace MassTransit.Tests.Subscriptions
 		public void The_system_should_be_ready_to_use_before_getting_underway()
 		{
 			TestMessageConsumer<PingMessage> consumer = new TestMessageConsumer<PingMessage>();
-			RemoteBus.Subscribe(consumer);
+			var unsubscribeAction = RemoteBus.Subscribe(consumer);
 
 			Thread.Sleep(1000);
 
@@ -46,6 +46,8 @@ namespace MassTransit.Tests.Subscriptions
 			LocalBus.Publish(message);
 
 			consumer.ShouldHaveReceivedMessage(message, 500.Milliseconds());
+
+			unsubscribeAction();
 		}
 
 		private void DumpPipelines()

@@ -22,7 +22,8 @@ namespace MassTransitServices.Model
 	{
 		public SubscriptionClientSagaMap()
 		{
-			Id(x => x.CorrelationId);
+			Id(x => x.CorrelationId)
+				.GeneratedBy.Assigned();
 
 			Map(x => x.CurrentState)
 				.Access.AsReadOnlyPropertyThroughCamelCaseField(Prefix.Underscore)
