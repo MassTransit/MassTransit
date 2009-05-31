@@ -10,7 +10,7 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransitServices
+namespace MassTransit.RuntimeServices
 {
 	using System;
 	using System.Configuration;
@@ -75,9 +75,9 @@ namespace MassTransitServices
 		private System.Configuration.Configuration LocateConfiguration()
 		{
 			ExeConfigurationFileMap map = new ExeConfigurationFileMap
-				{
-					ExeConfigFilename = Assembly.GetExecutingAssembly().Location + ".config"
-				};
+			                              	{
+			                              		ExeConfigFilename = Assembly.GetExecutingAssembly().Location + ".config"
+			                              	};
 
 			_log.InfoFormat("Using Configuration File: {0}", map.ExeConfigFilename);
 

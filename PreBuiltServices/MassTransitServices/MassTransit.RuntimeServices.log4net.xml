@@ -2,7 +2,7 @@
 <log4net>
   <appender name="MT"
 			  type="log4net.Appender.RollingFileAppender">
-    <file value="MassTransitServices.log" />
+    <file value="MassTransit.RuntimeServices.log" />
     <appendToFile value="true" />
     <rollingStyle value="Date" />
     <datePattern value="yyyyMMdd" />
@@ -54,7 +54,7 @@
   </root>
 
   <logger name="NHibernate.SQL">
-    <level value="ALL" />
+    <level value="OFF" />
     <appender-ref ref="MT" />
   </logger>
   

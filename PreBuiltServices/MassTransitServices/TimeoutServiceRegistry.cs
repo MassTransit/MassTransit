@@ -10,23 +10,22 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransitServices
+namespace MassTransit.RuntimeServices
 {
 	using System.Data;
 	using FluentNHibernate.Cfg;
 	using FluentNHibernate.Cfg.Db;
-	using MassTransit;
-	using MassTransit.Infrastructure.Timeout;
-	using MassTransit.Services.Timeout;
-	using MassTransit.StructureMapIntegration;
-	using MassTransit.Transports;
-	using MassTransit.Transports.Msmq;
+	using Infrastructure.Timeout;
 	using Model;
 	using NHibernate;
 	using NHibernate.Cfg;
 	using NHibernate.Tool.hbm2ddl;
+	using Services.Timeout;
 	using StructureMap;
 	using StructureMap.Attributes;
+	using StructureMapIntegration;
+	using Transports;
+	using Transports.Msmq;
 
 	public class TimeoutServiceRegistry :
 		MassTransitRegistryBase
@@ -74,8 +73,7 @@ namespace MassTransitServices
 
 		private void BuildSchema(NHibernate.Cfg.Configuration config)
 		{
-			new SchemaExport(config)
-				.Create(false, true);
+			new SchemaUpdate(config).Execute(false, true);
 		}
 	}
 }
