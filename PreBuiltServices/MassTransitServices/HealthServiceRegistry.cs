@@ -15,25 +15,24 @@ namespace MassTransit.RuntimeServices
 	using System.Data;
 	using FluentNHibernate.Cfg;
 	using FluentNHibernate.Cfg.Db;
-	using Infrastructure.Timeout;
+	using Infrastructure.Saga;
 	using Model;
 	using NHibernate;
 	using NHibernate.Cfg;
 	using NHibernate.Tool.hbm2ddl;
-	using Services.HealthMonitoring.Configuration;
-	using Services.Timeout;
+	using Saga;
 	using StructureMap;
 	using StructureMap.Attributes;
 	using StructureMapIntegration;
 	using Transports;
 	using Transports.Msmq;
 
-	public class TimeoutServiceRegistry :
+	public class HealthServiceRegistry :
 		MassTransitRegistryBase
 	{
 		private readonly IContainer _container;
 
-		public TimeoutServiceRegistry(IContainer container)
+		public HealthServiceRegistry(IContainer container)
 			: base(typeof (MsmqEndpoint), typeof (LoopbackEndpoint))
 		{
 			_container = container;
@@ -44,18 +43,16 @@ namespace MassTransit.RuntimeServices
 				.CacheBy(InstanceScope.Singleton)
 				.TheDefault.Is.ConstructedBy(context => CreateSessionFactory());
 
-			ForRequestedType<ITimeoutRepository>()
-				.AddConcreteType<NHibernateTimeoutRepository>();
+			ForRequestedType(typeof (ISagaRepository<>))
+				.AddConcreteType(typeof (NHibernateSagaRepositoryForContainers<>));
 
-			RegisterControlBus(configuration.TimeoutServiceControlUri, x => { x.SetConcurrentConsumerLimit(1); });
+			RegisterControlBus(configuration.HealthServiceControlUri, x => { });
 
-			RegisterServiceBus(configuration.TimeoutServiceDataUri, x =>
+			RegisterServiceBus(configuration.HealthServiceDataUri, x =>
 				{
 					x.UseControlBus(_container.GetInstance<IControlBus>());
 
 					ConfigureSubscriptionClient(configuration.SubscriptionServiceUri, x);
-
-					x.ConfigureService<HealthClientConfigurator>(health => health.SetHeartbeatInterval(10));
 				});
 		}
 
@@ -69,7 +66,7 @@ namespace MassTransit.RuntimeServices
 					.DefaultSchema("dbo")
 					.ShowSql()
 					.Raw(Environment.Isolation, IsolationLevel.Serializable.ToString()))
-				.Mappings(m => { m.FluentMappings.Add<ScheduledTimeoutMap>(); })
+				.Mappings(m => { m.FluentMappings.Add<HealthSagaMap>(); })
 				.ExposeConfiguration(BuildSchema)
 				.BuildSessionFactory();
 		}

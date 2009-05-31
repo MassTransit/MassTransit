@@ -12,13 +12,16 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.RuntimeServices
 {
+	using System;
 	using System.IO;
 	using log4net;
 	using log4net.Config;
+	using Services.HealthMonitoring;
 	using Services.Subscriptions.Server;
 	using Services.Timeout;
 	using StructureMap;
 	using StructureMap.Attributes;
+	using StructureMap.Configuration.DSL;
 	using StructureMapIntegration;
 	using Topshelf;
 	using Topshelf.Configuration;
@@ -33,8 +36,8 @@ namespace MassTransit.RuntimeServices
 
 			var configuration = RunnerConfigurator.New(config =>
 				{
-					config.SetServiceName(typeof(Program).Namespace);
-					config.SetDisplayName(typeof(Program).Namespace);
+					config.SetServiceName(typeof (Program).Namespace);
+					config.SetDisplayName(typeof (Program).Namespace);
 					config.SetDescription("MassTransit Runtime Services (Subscriptions, Timeouts, Health Monitoring, Deferred Messages)");
 
 					config.RunAsLocalSystem();
@@ -44,25 +47,37 @@ namespace MassTransit.RuntimeServices
 
 					config.BeforeStart(x => { });
 
-					config.ConfigureService<SubscriptionService>(service => ConfigureSubscriptionService(service));
+					config.ConfigureService<SubscriptionService>(service =>
+						{
+							ConfigureService<SubscriptionService, SubscriptionServiceRegistry>(service, start => start.Start(), stop => stop.Stop());
+						});
 
-					config.ConfigureService<TimeoutService>(service => ConfigureTimeoutService(service));
+					config.ConfigureService<TimeoutService>(service =>
+						{
+							ConfigureService<TimeoutService, TimeoutServiceRegistry>(service, start => start.Start(), stop => stop.Stop());
+						});
 
-					config.AfterStop(x => { _log.Info("MassTransit Runtime Services is exiting..."); });
+					config.ConfigureService<HealthService>(service =>
+						{
+							ConfigureService<HealthService, HealthServiceRegistry>(service, start => start.Start(), stop => stop.Stop());
+						});
+
+					config.AfterStop(x => { _log.Info("MassTransit Runtime Services are exiting..."); });
 				});
 			Runner.Host(configuration, args);
 		}
 
 		private static void BootstrapLogger()
 		{
-			var configFileName = typeof(Program).Namespace + ".log4net.xml";
+			var configFileName = typeof (Program).Namespace + ".log4net.xml";
 
 			XmlConfigurator.ConfigureAndWatch(new FileInfo(configFileName));
 
-			_log.Info("Loading " + typeof(Program).Namespace + " Services...");
+			_log.Info("Loading " + typeof (Program).Namespace + " Services...");
 		}
 
-		private static void ConfigureSubscriptionService(IServiceConfigurator<SubscriptionService> service)
+		private static void ConfigureService<TService, TRegistry>(IServiceConfigurator<TService> service, Action<TService> start, Action<TService> stop)
+			where TRegistry : Registry
 		{
 			service.CreateServiceLocator(() =>
 				{
@@ -73,37 +88,16 @@ namespace MassTransit.RuntimeServices
 								.AddConcreteType<Configuration>();
 						});
 
-					var registry = new SubscriptionServiceRegistry(container);
+					TRegistry registry = (TRegistry) Activator.CreateInstance(typeof (TRegistry), container);
 
 					container.Configure(x => x.AddRegistry(registry));
 
 					return new StructureMapObjectBuilder(container);
 				});
-			service.WhenStarted(instance => instance.Start());
-			service.WhenStopped(instance => instance.Stop());
-			service.WithName("Subscription Service");
-		}
+			service.WhenStarted(start);
+			service.WhenStopped(stop);
 
-		private static void ConfigureTimeoutService(IServiceConfigurator<TimeoutService> service)
-		{
-			service.CreateServiceLocator(() =>
-				{
-					var container = new Container(x =>
-						{
-							x.ForRequestedType<IConfiguration>()
-								.CacheBy(InstanceScope.Singleton)
-								.AddConcreteType<Configuration>();
-						});
-
-					var registry = new TimeoutServiceRegistry(container);
-
-					container.Configure(x => x.AddRegistry(registry));
-
-					return new StructureMapObjectBuilder(container);
-				});
-			service.WhenStarted(instance => instance.Start());
-			service.WhenStopped(instance => instance.Stop());
-			service.WithName("Timeout Service");
+			service.WithName(typeof (TService).Name);
 		}
 	}
 }

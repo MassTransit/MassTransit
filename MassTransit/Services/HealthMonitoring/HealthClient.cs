@@ -35,11 +35,11 @@ namespace MassTransit.Services.HealthMonitoring
         /// <summary>
         /// Constructs a new HealthClient object
         /// </summary>
-        /// <param name="heartbeatInterval">The heartbeat interval in seconds</param>
-        public HealthClient(int heartbeatInterval)
+        /// <param name="intervalInSeconds">The heartbeat interval in seconds</param>
+        public HealthClient(int intervalInSeconds)
         {
-            _timeInSeconds = heartbeatInterval;
-            _timeInMilliseconds = heartbeatInterval*1000;
+            _timeInSeconds = intervalInSeconds;
+            _timeInMilliseconds = intervalInSeconds*1000;
             _timer = new Timer(_timeInMilliseconds);
             _timer.Elapsed += Beat;
             _timer.AutoReset = true;

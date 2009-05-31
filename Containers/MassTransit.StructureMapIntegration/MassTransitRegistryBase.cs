@@ -151,6 +151,7 @@ namespace MassTransit.StructureMapIntegration
 					{
 						x.SetObjectBuilder(context.GetInstance<IObjectBuilder>());
 						x.ReceiveFrom(endpointUri);
+						x.SetConcurrentConsumerLimit(1);
 
 						configAction(x);
 					});

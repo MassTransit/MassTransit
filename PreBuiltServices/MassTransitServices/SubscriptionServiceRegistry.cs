@@ -32,13 +32,9 @@ namespace MassTransit.RuntimeServices
 	public class SubscriptionServiceRegistry :
 		MassTransitRegistryBase
 	{
-		private readonly IContainer _container;
-
 		public SubscriptionServiceRegistry(IContainer container)
 			: base(typeof (MsmqEndpoint), typeof (LoopbackEndpoint))
 		{
-			_container = container;
-
 			var configuration = container.GetInstance<IConfiguration>();
 
 			ForRequestedType<ISessionFactory>()
@@ -51,10 +47,10 @@ namespace MassTransit.RuntimeServices
 			ForRequestedType<ISubscriptionRepository>()
 				.AddConcreteType<PersistantSubscriptionRepository>();
 
-			RegisterServiceBus(configuration.SubscriptionServiceUri, x => { x.SetConcurrentConsumerLimit(1); });
+			RegisterServiceBus(configuration.SubscriptionServiceUri, x => { });
 		}
 
-		private ISessionFactory CreateSessionFactory()
+		private static ISessionFactory CreateSessionFactory()
 		{
 			return Fluently.Configure()
 				.Database(
@@ -73,7 +69,7 @@ namespace MassTransit.RuntimeServices
 				.BuildSessionFactory();
 		}
 
-		private void BuildSchema(NHibernate.Cfg.Configuration config)
+		private static void BuildSchema(NHibernate.Cfg.Configuration config)
 		{
 			new SchemaUpdate(config).Execute(false, true);
 		}

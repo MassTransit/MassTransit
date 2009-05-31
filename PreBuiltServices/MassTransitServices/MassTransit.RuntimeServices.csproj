@@ -99,7 +99,9 @@
       <Link>SolutionVersion.cs</Link>
     </Compile>
     <Compile Include="Configuration.cs" />
+    <Compile Include="HealthServiceRegistry.cs" />
     <Compile Include="IConfiguration.cs" />
+    <Compile Include="Model\HealthSagaMap.cs" />
     <Compile Include="Model\ScheduledTimeoutMap.cs" />
     <Compile Include="Model\SubscriptionClientSagaMap.cs" />
     <Compile Include="Model\SubscriptionSagaMap.cs" />
