@@ -90,7 +90,7 @@
     </ProjectReference>
     <ProjectReference Include="..\..\..\Transports\MassTransit.Transports.Msmq\MassTransit.Transports.Msmq.csproj">
       <Project>{6F90867C-E092-4EDC-B3DE-600D39DF0335}</Project>
-      <Name>MassTransit.ServiceBus.MSMQ</Name>
+      <Name>MassTransit.Transports.Msmq</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\..\Containers\MassTransit.WindsorIntegration\MassTransit.WindsorIntegration.csproj">
       <Project>{98D5A59C-96FA-4A1B-A653-EA5A35C45FC9}</Project>

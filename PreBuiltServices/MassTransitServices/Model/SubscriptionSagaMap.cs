@@ -10,12 +10,12 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransitServices.Model
+namespace MassTransit.RuntimeServices.Model
 {
 	using FluentNHibernate.Mapping;
 	using Magnum.Infrastructure;
 	using Magnum.Infrastructure.StateMachine;
-	using MassTransit.Services.Subscriptions.Server;
+	using Services.Subscriptions.Server;
 
 	public class SubscriptionSagaMap :
 		ClassMap<SubscriptionSaga>

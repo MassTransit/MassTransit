@@ -1,17 +1,6 @@
-// Copyright 2007-2008 The Apache Software Foundation.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed 
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
 namespace MassTransit.Serialization
 {
+	using System;
 	using System.IO;
 	using System.Runtime.Serialization;
 	using Custom;
@@ -26,31 +15,52 @@ namespace MassTransit.Serialization
 
 		public void Serialize<T>(Stream stream, T message)
 		{
-			var envelope = XmlMessageEnvelope.Create(message);
+			try
+			{
+				var envelope = XmlMessageEnvelope.Create(message);
 
-			_serializer.Serialize(stream, envelope);
-
+				_serializer.Serialize(stream, envelope);
+			}
+			catch (SerializationException)
+			{
+				throw;
+			}
+			catch (Exception ex)
+			{
+				throw new SerializationException("Failed to serialize message", ex);
+			}
 //			if(_log.IsDebugEnabled)
 //				_log.Debug(Encoding.UTF8.GetString(_serializer.Serialize(envelope)));
 		}
 
 		public object Deserialize(Stream stream)
 		{
-			object message = _serializer.Deserialize(stream);
-
-			if (message == null)
-				throw new SerializationException("Could not deserialize message.");
-
-			if (message is XmlMessageEnvelope)
+			try
 			{
-				XmlMessageEnvelope envelope = message as XmlMessageEnvelope;
+				object message = _serializer.Deserialize(stream);
 
-				InboundMessageHeaders.SetCurrent(envelope.GetMessageHeadersSetAction());
+				if (message == null)
+					throw new SerializationException("Could not deserialize message.");
 
-				return envelope.Message;
+				if (message is XmlMessageEnvelope)
+				{
+					XmlMessageEnvelope envelope = message as XmlMessageEnvelope;
+
+					InboundMessageHeaders.SetCurrent(envelope.GetMessageHeadersSetAction());
+
+					return envelope.Message;
+				}
+
+				return message;
 			}
-
-			return message;
+			catch (SerializationException)
+			{
+				throw;
+			}
+			catch (Exception ex)
+			{
+				throw new SerializationException("Failed to serialize message", ex);
+			}
 		}
 	}
 }

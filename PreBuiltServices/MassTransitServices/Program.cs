@@ -10,16 +10,16 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransitServices
+namespace MassTransit.RuntimeServices
 {
 	using System.IO;
 	using log4net;
 	using log4net.Config;
-	using MassTransit.Services.Subscriptions.Server;
-	using MassTransit.Services.Timeout;
-	using MassTransit.StructureMapIntegration;
+	using Services.Subscriptions.Server;
+	using Services.Timeout;
 	using StructureMap;
 	using StructureMap.Attributes;
+	using StructureMapIntegration;
 	using Topshelf;
 	using Topshelf.Configuration;
 
@@ -29,14 +29,13 @@ namespace MassTransitServices
 
 		private static void Main(string[] args)
 		{
-			XmlConfigurator.ConfigureAndWatch(new FileInfo("MassTransitServices.log4net.xml"));
-			_log.Info("Loading MassTransit Runtime Services...");
+			BootstrapLogger();
 
 			var configuration = RunnerConfigurator.New(config =>
 				{
-					config.SetServiceName("MassTransitServices");
-					config.SetDisplayName("MassTransit Runtime Services");
-					config.SetDescription("Services to support a MassTransit implementation");
+					config.SetServiceName(typeof(Program).Namespace);
+					config.SetDisplayName(typeof(Program).Namespace);
+					config.SetDescription("MassTransit Runtime Services (Subscriptions, Timeouts, Health Monitoring, Deferred Messages)");
 
 					config.RunAsLocalSystem();
 
@@ -52,6 +51,15 @@ namespace MassTransitServices
 					config.AfterStop(x => { _log.Info("MassTransit Runtime Services is exiting..."); });
 				});
 			Runner.Host(configuration, args);
+		}
+
+		private static void BootstrapLogger()
+		{
+			var configFileName = typeof(Program).Namespace + ".log4net.xml";
+
+			XmlConfigurator.ConfigureAndWatch(new FileInfo(configFileName));
+
+			_log.Info("Loading " + typeof(Program).Namespace + " Services...");
 		}
 
 		private static void ConfigureSubscriptionService(IServiceConfigurator<SubscriptionService> service)

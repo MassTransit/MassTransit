@@ -23,7 +23,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Infrastructure"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenAllNight", "..\Samples\OpenAllNight\OpenAllNight\OpenAllNight.csproj", "{EB825C40-FE8F-4F56-8397-A158F7482970}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransitServices", "MassTransitServices\MassTransitServices.csproj", "{8AFA8821-2851-4134-8E0A-F9E7E10D28D9}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.RuntimeServices", "MassTransitServices\MassTransit.RuntimeServices.csproj", "{8AFA8821-2851-4134-8E0A-F9E7E10D28D9}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.StructureMapIntegration", "..\Containers\MassTransit.StructureMapIntegration\MassTransit.StructureMapIntegration.csproj", "{F5E67502-2B30-484C-88C3-97710291F5AA}"
 EndProject

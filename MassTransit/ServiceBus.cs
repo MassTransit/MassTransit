@@ -331,6 +331,8 @@ namespace MassTransit
 						}
 						catch (SerializationException sex)
 						{
+							selector.AcceptMessage();
+
 							try
 							{
 								selector.MoveMessageTo(PoisonEndpoint);
