@@ -10,18 +10,30 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.RuntimeServices
+namespace MassTransit.RuntimeServices.Model
 {
-	using System;
+	using FluentNHibernate.Mapping;
+	using Magnum.Infrastructure;
+	using Magnum.Infrastructure.StateMachine;
+	using Services.HealthMonitoring.Server;
 
-	public interface IConfiguration
+	public class HealthSagaMap :
+		ClassMap<HealthSaga>
 	{
-		Uri HealthServiceControlUri { get; }
-		Uri HealthServiceDataUri { get; }
+		public HealthSagaMap()
+		{
+			Id(x => x.CorrelationId)
+				.GeneratedBy.Assigned();
 
-		Uri SubscriptionServiceUri { get; }
-	
-		Uri TimeoutServiceControlUri { get; }
-		Uri TimeoutServiceDataUri { get; }
+			Map(x => x.CurrentState)
+				.Access.AsReadOnlyPropertyThroughCamelCaseField(Prefix.Underscore)
+				.CustomTypeIs<StateMachineUserType>();
+
+			Map(x => x.EndpointAddress)
+				.CustomTypeIs<UriUserType>();
+
+			Map(x => x.LastHeartbeat);
+			Map(x => x.TimeBetweenBeatsInSeconds);
+		}
 	}
 }

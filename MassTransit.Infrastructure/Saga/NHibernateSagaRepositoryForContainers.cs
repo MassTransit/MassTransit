@@ -14,7 +14,6 @@ namespace MassTransit.Infrastructure.Saga
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Data;
 	using System.Linq;
 	using System.Linq.Expressions;
 	using MassTransit.Saga;
@@ -43,16 +42,13 @@ namespace MassTransit.Infrastructure.Saga
 		{
 			foreach (T saga in _session.Linq<T>().Where(expression))
 			{
-				using (var transaction = _session.BeginTransaction(IsolationLevel.Serializable))
-				{
-					T lockedSaga = _session.Load<T>(saga.CorrelationId, LockMode.Upgrade);
+				T sagaInstance = saga;
 
-					yield return x => action(lockedSaga, x);
+				_session.Lock(sagaInstance, LockMode.Upgrade);
 
-					_session.Update(lockedSaga);
+				yield return x => action(sagaInstance, x);
 
-					transaction.Commit();
-				}
+				_session.Update(sagaInstance);
 			}
 		}
 
@@ -73,18 +69,15 @@ namespace MassTransit.Infrastructure.Saga
 
 		public IEnumerable<Action<V>> Create<V>(Guid sagaId, Action<T, V> action)
 		{
-			using (var transaction = _session.BeginTransaction(IsolationLevel.Serializable))
-			{
-				T saga = (T) Activator.CreateInstance(typeof (T), sagaId);
+			T saga = (T) Activator.CreateInstance(typeof (T), sagaId);
 
-				_session.Save(saga);
+			_session.Save(saga);
+			_session.Lock(saga, LockMode.Upgrade);
 
-				yield return x => action(saga, x);
 
-				_session.Update(saga);
+			yield return x => action(saga, x);
 
-				transaction.Commit();
-			}
+			_session.Update(saga);
 		}
 	}
 }

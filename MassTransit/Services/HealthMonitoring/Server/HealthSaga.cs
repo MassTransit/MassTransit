@@ -124,16 +124,12 @@ namespace MassTransit.Services.HealthMonitoring.Server
 		public static Event<Pong> SuspectRespondsToPing { get; set; }
 		public static Event<TimeoutExpired> PingTimesout { get; set; }
 
-		public DateTime LastHeartbeat { get; private set; }
-		public Uri EndpointAddress { get; set; }
-		public int TimeBetweenBeatsInSeconds { get; set; }
+		public virtual DateTime LastHeartbeat { get; set; }
+		public virtual Uri EndpointAddress { get; set; }
+		public virtual int TimeBetweenBeatsInSeconds { get; set; }
 
-		#region ISaga Members
-
-		public IServiceBus Bus { get; set; }
-		public Guid CorrelationId { get; set; }
-
-		#endregion
+		public virtual Guid CorrelationId { get; set; }
+		public virtual IServiceBus Bus { get; set; }
 
 		private bool HasExpiredAccordingToPolicy()
 		{
@@ -151,23 +147,10 @@ namespace MassTransit.Services.HealthMonitoring.Server
 			saga.Bus.Publish(new StatusChange());
 		}
 
-		private enum Timeouts : int
+		private enum Timeouts
 		{
 			HeartBeatTimeout = 1,
 			PingTimeout = 2
-		}
-	}
-
-	public static class Bob
-	{
-		public static bool IsLaterThan(this DateTime start, DateTime current)
-		{
-			return start < current;
-		}
-
-		public static bool IsEarlierThan(this DateTime start, DateTime current)
-		{
-			return start > current;
 		}
 	}
 }

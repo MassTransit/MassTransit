@@ -20,9 +20,12 @@ namespace MassTransit.RuntimeServices
 	public class Configuration :
 		IConfiguration
 	{
+		private const string _healthServiceControlUriKey = "HealthServiceControlUri";
+		private const string _healthServiceDataUriKey = "HealthServiceDataUri";
 		private const string _subscriptionServiceUriKey = "SubscriptionServiceUri";
 		private const string _timeoutServiceControlUriKey = "TimeoutServiceControlUri";
 		private const string _timeoutServiceDataUriKey = "TimeoutServiceDataUri";
+
 		private static readonly ILog _log = LogManager.GetLogger(typeof (Configuration));
 
 		public Uri SubscriptionServiceUri
@@ -38,6 +41,16 @@ namespace MassTransit.RuntimeServices
 		public Uri TimeoutServiceDataUri
 		{
 			get { return GetUriApplicationSetting(_timeoutServiceDataUriKey); }
+		}
+
+		public Uri HealthServiceControlUri
+		{
+			get { return GetUriApplicationSetting(_healthServiceControlUriKey); }
+		}
+
+		public Uri HealthServiceDataUri
+		{
+			get { return GetUriApplicationSetting(_healthServiceDataUriKey); }
 		}
 
 		private Uri GetUriApplicationSetting(string key)
@@ -75,9 +88,9 @@ namespace MassTransit.RuntimeServices
 		private System.Configuration.Configuration LocateConfiguration()
 		{
 			ExeConfigurationFileMap map = new ExeConfigurationFileMap
-			                              	{
-			                              		ExeConfigFilename = Assembly.GetExecutingAssembly().Location + ".config"
-			                              	};
+				{
+					ExeConfigFilename = Assembly.GetExecutingAssembly().Location + ".config"
+				};
 
 			_log.InfoFormat("Using Configuration File: {0}", map.ExeConfigFilename);
 
