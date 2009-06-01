@@ -29,13 +29,7 @@ namespace MassTransit.Services.Subscriptions.Server
 		{
 			Define(() =>
 				{
-					Correlate(ClientAdded).By((saga, message) =>
-					                          saga.SubscriptionInfo.EndpointUri == message.DataUri &&
-					                          saga.SubscriptionInfo.ClientId != message.CorrelationId);
-
-					Correlate(ClientRemoved).By((saga, message) =>
-					                            saga.SubscriptionInfo.EndpointUri == message.DataUri &&
-					                            saga.SubscriptionInfo.ClientId == message.CorrelationId);
+					Correlate(ClientRemoved).By((saga, message) => saga.SubscriptionInfo.ClientId == message.CorrelationId);
 
 					Initially(
 						When(SubscriptionAdded)
@@ -47,15 +41,12 @@ namespace MassTransit.Services.Subscriptions.Server
 								}).TransitionTo(Active));
 
 					During(Active,
-					       When(SubscriptionRemoved)
-					       	.Then((saga, message) => { saga.NotifySubscriptionRemoved(message.Subscription); })
-					       	.Complete(),
-					       When(ClientAdded)
-					       	.Then((saga, message) => saga.NotifySubscriptionRemoved())
-					       	.Complete(),
-					       When(ClientRemoved)
-					       	.Then((saga, message) => saga.NotifySubscriptionRemoved())
-					       	.Complete()
+						When(SubscriptionRemoved)
+							.Then((saga, message) => { saga.NotifySubscriptionRemoved(message.Subscription); })
+							.Complete(),
+						When(ClientRemoved)
+							.Then((saga, message) => saga.NotifySubscriptionRemoved())
+							.Complete()
 						);
 				});
 		}
@@ -77,8 +68,7 @@ namespace MassTransit.Services.Subscriptions.Server
 		public static Event<AddSubscription> SubscriptionAdded { get; set; }
 		public static Event<RemoveSubscription> SubscriptionRemoved { get; set; }
 
-		public static Event<AddSubscriptionClient> ClientAdded { get; set; }
-		public static Event<RemoveSubscriptionClient> ClientRemoved { get; set; }
+		public static Event<SubscriptionClientRemoved> ClientRemoved { get; set; }
 
 		public virtual SubscriptionInformation SubscriptionInfo { get; set; }
 

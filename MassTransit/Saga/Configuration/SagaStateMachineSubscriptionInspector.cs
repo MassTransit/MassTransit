@@ -19,6 +19,7 @@ namespace MassTransit.Saga.Configuration
 	using System.Linq.Expressions;
 	using System.Reflection;
 	using Exceptions;
+	using log4net;
 	using Magnum.Reflection;
 	using Magnum.StateMachine;
 	using MassTransit.Pipeline;
@@ -30,6 +31,8 @@ namespace MassTransit.Saga.Configuration
 		ReflectiveVisitorBase<SagaStateMachineSubscriptionInspector>,
 		IStateMachineInspector
 	{
+		private static readonly ILog _log = LogManager.GetLogger(typeof (SagaStateMachineSubscriptionInspector));
+
 		private readonly ISubscriberContext _context;
 		private readonly HashSet<Type> _subscribedMessageTypes = new HashSet<Type>();
 		private readonly List<UnsubscribeAction> _unsubscribeActions = new List<UnsubscribeAction>();

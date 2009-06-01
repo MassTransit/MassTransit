@@ -98,8 +98,7 @@ namespace MassTransit.Tests.Services.HealthMonitoring
 			_subscriptionSagaRepository = SetupSagaRepository<SubscriptionSaga>();
 			SetupInitiateSagaStateMachineSink<SubscriptionSaga, AddSubscription>(SubscriptionBus, _subscriptionSagaRepository);
 			SetupOrchestrateSagaStateMachineSink<SubscriptionSaga, RemoveSubscription>(SubscriptionBus, _subscriptionSagaRepository);
-			SetupObservesSagaStateMachineSink<SubscriptionSaga, AddSubscriptionClient>(SubscriptionBus, _subscriptionSagaRepository);
-			SetupObservesSagaStateMachineSink<SubscriptionSaga, RemoveSubscriptionClient>(SubscriptionBus, _subscriptionSagaRepository);
+			SetupObservesSagaStateMachineSink<SubscriptionSaga, SubscriptionClientRemoved>(SubscriptionBus, _subscriptionSagaRepository);
 
 			SubscriptionService = new SubscriptionService(SubscriptionBus, SubscriptionRepository, EndpointFactory, _subscriptionSagaRepository, _subscriptionClientSagaRepository);
 
@@ -119,7 +118,7 @@ namespace MassTransit.Tests.Services.HealthMonitoring
 			SetupOrchestrateSagaStateMachineSink<HealthSaga, Pong>(RemoteBus, _healthSagaRepository);
 			SetupObservesSagaStateMachineSink<HealthSaga, Heartbeat>(RemoteBus, _healthSagaRepository);
 
-			HealthService = new HealthService(RemoteBus, _healthSagaRepository);
+			HealthService = new HealthService(RemoteBus, _healthSagaRepository, ObjectBuilder);
 
 			HealthService.Start();
 		}

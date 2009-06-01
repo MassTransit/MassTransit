@@ -34,7 +34,8 @@ namespace MassTransit.Services.Timeout
 		private readonly Scheduler _scheduler = new ThreadPoolScheduler();
 		private IServiceBus _bus;
 		private UnsubscribeAction _unsubscribeToken;
-		private ISagaRepository<TimeoutSaga> _repository;
+		private readonly ISagaRepository<TimeoutSaga> _repository;
+		private Unschedule _unschedule;
 
 		public TimeoutService(IServiceBus bus, ISagaRepository<TimeoutSaga> repository)
 		{
@@ -90,16 +91,18 @@ namespace MassTransit.Services.Timeout
 
 		private void CheckExistingTimeouts()
 		{
+			DateTime now = DateTime.UtcNow;
+
+			_log.DebugFormat("TimeoutService Checking For Existing Timeouts: {0}", now.ToLocalTime());
 			try
 			{
-				DateTime now = DateTime.UtcNow;
-
 				var sagas = _repository.Where(x => x.TimeoutAt < now && x.CurrentState == TimeoutSaga.WaitingForTime).ToArray();
 				foreach (TimeoutSaga saga in sagas)
 				{
-					_bus.Publish(new TimeoutExpired { CorrelationId = saga.CorrelationId, Tag = saga.Tag });
-				}
+					TimeoutSaga instance = saga;
 
+					_queue.Enqueue(() => _bus.Publish(new TimeoutExpired { CorrelationId = instance.CorrelationId, Tag = instance.Tag }));
+				}
 			}
 			catch (Exception ex)
 			{
@@ -107,7 +110,11 @@ namespace MassTransit.Services.Timeout
 			}
 			finally
 			{
-				_scheduler.Schedule(1000, CheckExistingTimeouts);
+				if (_unschedule != null)
+					_unschedule();
+
+				_log.DebugFormat("Scheduling next check at " + DateTime.Now);
+				_unschedule = _scheduler.Schedule(1000, CheckExistingTimeouts);
 			}
 		}
 

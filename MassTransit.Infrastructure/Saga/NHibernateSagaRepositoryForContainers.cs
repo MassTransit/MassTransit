@@ -42,26 +42,21 @@ namespace MassTransit.Infrastructure.Saga
 
 		public IEnumerable<Action<V>> Find<V>(Expression<Func<T, bool>> expression, Action<T, V> action)
 		{
-			List<T> existingSagas;
 			using (var session = _sessionFactory.OpenSession())
 			{
-				existingSagas = session.Linq<T>().Where(expression).ToList();
-			}
+				List<T> existingSagas = session.Linq<T>().Where(expression).ToList();
 
-			foreach (T saga in existingSagas)
-			{
-				if (_log.IsDebugEnabled)
-					_log.DebugFormat("Found saga [{0}] - {1}", typeof(T).ToFriendlyName(), saga.CorrelationId);
-
-				using (var session = _sessionFactory.OpenSession())
+				foreach (T saga in existingSagas)
 				{
-					T sagaInstance = session.Load<T>(saga.CorrelationId, LockMode.Upgrade);
+					if (_log.IsDebugEnabled)
+						_log.DebugFormat("Found saga [{0}] - {1}", typeof (T).ToFriendlyName(), saga.CorrelationId);
 
+					var sagaInstance = saga;
 					yield return x => action(sagaInstance, x);
 
-					session.Update(sagaInstance);
-					session.Flush();
+					session.Update(saga);
 				}
+				session.Flush();
 			}
 		}
 
@@ -88,7 +83,7 @@ namespace MassTransit.Infrastructure.Saga
 			T saga = (T) Activator.CreateInstance(typeof (T), sagaId);
 
 			if (_log.IsDebugEnabled)
-				_log.DebugFormat("Created saga [{0}] - {1}", typeof(T).ToFriendlyName(), sagaId);
+				_log.DebugFormat("Created saga [{0}] - {1}", typeof (T).ToFriendlyName(), sagaId);
 
 			yield return x => action(saga, x);
 

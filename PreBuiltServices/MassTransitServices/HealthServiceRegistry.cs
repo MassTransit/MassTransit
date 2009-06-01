@@ -64,7 +64,7 @@ namespace MassTransit.RuntimeServices
 					.AdoNetBatchSize(100)
 					.ConnectionString(s => s.FromConnectionStringWithKey("MassTransit"))
 					.DefaultSchema("dbo")
-					.ShowSql()
+					//.ShowSql()
 					.Raw(Environment.Isolation, IsolationLevel.Serializable.ToString()))
 				.Mappings(m => { m.FluentMappings.Add<HealthSagaMap>(); })
 				.ExposeConfiguration(BuildSchema)
