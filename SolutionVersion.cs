@@ -14,7 +14,7 @@ using System.Runtime.InteropServices;
 
 [assembly: ComVisibleAttribute(false)]
 [assembly: CLSCompliantAttribute(true)]
-[assembly: AssemblyVersionAttribute("0.5.0.1894")]
+[assembly: AssemblyVersionAttribute("0.5.0.1897")]
 [assembly: AssemblyCopyrightAttribute("MassTransit Project, original author or authors")]
 [assembly: AssemblyCompanyAttribute("CFT & ACM")]
 
