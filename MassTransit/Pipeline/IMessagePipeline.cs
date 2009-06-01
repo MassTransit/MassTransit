@@ -17,7 +17,7 @@ namespace MassTransit.Pipeline
 	public interface IMessagePipeline :
 		IPipelineSink<object>
 	{
-		void Configure(Action<IConfigurePipeline> action);
-		V Configure<V>(Func<IConfigurePipeline, V> action);
+		void Configure(Action<IConfigurePipeline> configurePipeline);
+		V Configure<V>(Func<IConfigurePipeline, V> configurePipeline);
 	}
 }
