@@ -67,9 +67,9 @@ namespace MassTransit.RuntimeServices
 					.AdoNetBatchSize(100)
 					.ConnectionString(s => s.FromConnectionStringWithKey("MassTransit"))
 					.DefaultSchema("dbo")
-					.ShowSql()
+					//.ShowSql()
 					.Raw(Environment.Isolation, IsolationLevel.Serializable.ToString()))
-				.Mappings(m => { m.FluentMappings.Add<ScheduledTimeoutMap>(); })
+				.Mappings(m => { m.FluentMappings.Add<TimeoutSagaMap>(); })
 				.ExposeConfiguration(BuildSchema)
 				.BuildSessionFactory();
 		}

@@ -49,7 +49,7 @@
 
   <!-- Set root logger level to DEBUG and its only appender to Console -->
   <root>
-    <level value="INFO" />
+    <level value="WARN" />
     <appender-ref ref="ColoredConsoleAppender" />
   </root>
 
@@ -60,7 +60,7 @@
   
   <!-- Standard MassTransit Logging Settings -->
   <logger name="MassTransit">
-    <level value="WARN" />
+    <level value="INFO" />
     <appender-ref ref="MT" />
   </logger>
 

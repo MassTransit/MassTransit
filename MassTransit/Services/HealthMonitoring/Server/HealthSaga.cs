@@ -17,7 +17,6 @@ namespace MassTransit.Services.HealthMonitoring.Server
 	using Magnum.DateTimeExtensions;
 	using Magnum.StateMachine;
 	using Messages;
-	using Microsoft.Practices.ServiceLocation;
 	using Saga;
 	using Timeout.Messages;
 
@@ -71,14 +70,14 @@ namespace MassTransit.Services.HealthMonitoring.Server
 								{
 									saga.ScheduleTimeoutForPing();
 
-									ServiceLocator.Current
+									// TODO we need to inject the object builder into the class I think
+									HealthService.Builder
 										.GetInstance<IEndpointFactory>()
 										.GetEndpoint(saga.EndpointAddress)
 										.Send(new Ping(saga.CorrelationId));
 								})
 							.Then(StatusChange)
 							.TransitionTo(Suspect));
-
 
 					During(Suspect,
 						When(EndpointBreathes)
@@ -140,14 +139,14 @@ namespace MassTransit.Services.HealthMonitoring.Server
 		{
 			int timeout = TimeBetweenBeatsInSeconds*2;
 
-			Bus.Publish(new ScheduleTimeout(CorrelationId, timeout.Seconds(), (int)Timeouts.HeartBeatTimeout));
+			Bus.Publish(new ScheduleTimeout(CorrelationId, timeout.Seconds(), (int) Timeouts.HeartBeatTimeout));
 		}
 
 		private void ScheduleTimeoutForPing()
 		{
 			int timeout = 5;
 
-			Bus.Publish(new ScheduleTimeout(CorrelationId, timeout.Seconds(), (int)Timeouts.PingTimeout));
+			Bus.Publish(new ScheduleTimeout(CorrelationId, timeout.Seconds(), (int) Timeouts.PingTimeout));
 		}
 
 		private void MarkBeat()

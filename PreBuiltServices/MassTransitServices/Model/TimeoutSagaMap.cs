@@ -13,18 +13,23 @@
 namespace MassTransit.RuntimeServices.Model
 {
 	using FluentNHibernate.Mapping;
-	using Services.Timeout;
+	using Magnum.Infrastructure.StateMachine;
+	using Services.Timeout.Server;
 
-	public class ScheduledTimeoutMap :
-		ClassMap<ScheduledTimeout>
+	public class TimeoutSagaMap :
+		ClassMap<TimeoutSaga>
 	{
-		public ScheduledTimeoutMap()
+		public TimeoutSagaMap()
 		{
 			UseCompositeId()
-			   .WithKeyProperty(x => x.Id)
-			   .WithKeyProperty(x => x.Tag);  
+				.WithKeyProperty(x => x.CorrelationId)
+				.WithKeyProperty(x => x.Tag);
 
-			Map(x => x.ExpiresAt);
+			Map(x => x.CurrentState)
+				.Access.AsReadOnlyPropertyThroughCamelCaseField(Prefix.Underscore)
+				.CustomTypeIs<StateMachineUserType>();
+
+			Map(x => x.TimeoutAt);
 		}
 	}
 }

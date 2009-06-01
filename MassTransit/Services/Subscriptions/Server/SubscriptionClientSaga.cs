@@ -90,6 +90,7 @@ namespace MassTransit.Services.Subscriptions.Server
 		{
 			var message = new SubscriptionClientRemoved
 				{
+					CorrelationId = CorrelationId,
 					ControlUri = ControlUri,
 					DataUri = DataUri,
 				};

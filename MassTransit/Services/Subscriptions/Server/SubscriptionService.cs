@@ -17,6 +17,7 @@ namespace MassTransit.Services.Subscriptions.Server
 	using Exceptions;
 	using log4net;
 	using Messages;
+	using Pipeline.Inspectors;
 	using Saga;
 	using Subscriptions.Messages;
 
@@ -69,7 +70,7 @@ namespace MassTransit.Services.Subscriptions.Server
 		public void Consume(SubscriptionClientRemoved message)
 		{
 			if (_log.IsInfoEnabled)
-				_log.InfoFormat("Removing client: {0}", message.DataUri);
+				_log.InfoFormat("Removing client: {0}", message.ControlUri);
 		}
 
 		public void Consume(SubscriptionRemoved message)
@@ -110,6 +111,8 @@ namespace MassTransit.Services.Subscriptions.Server
 			_unsubscribeToken += _bus.Subscribe<SubscriptionSaga>();
 
 			// TODO may need to load/prime the subscription repository at this point?
+
+			PipelineViewer.Trace(_bus.InboundPipeline);
 
 			_log.Info("Subscription Service Started");
 		}

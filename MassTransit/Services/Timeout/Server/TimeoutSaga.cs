@@ -89,6 +89,29 @@ namespace MassTransit.Services.Timeout.Server
 		public virtual IServiceBus Bus { get; set; }
 		public virtual Guid CorrelationId { get; set; }
 
+		public virtual bool Equals(TimeoutSaga obj)
+		{
+			if (ReferenceEquals(null, obj)) return false;
+			if (ReferenceEquals(this, obj)) return true;
+			return obj.Tag == Tag && obj.CorrelationId.Equals(CorrelationId);
+		}
+
+		public override bool Equals(object obj)
+		{
+			if (ReferenceEquals(null, obj)) return false;
+			if (ReferenceEquals(this, obj)) return true;
+			if (obj.GetType() != typeof (TimeoutSaga)) return false;
+			return Equals((TimeoutSaga) obj);
+		}
+
+		public override int GetHashCode()
+		{
+			unchecked
+			{
+				return (Tag*397) ^ CorrelationId.GetHashCode();
+			}
+		}
+
 		private void NotifyTimeoutScheduled()
 		{
 			Bus.Publish(new TimeoutScheduled

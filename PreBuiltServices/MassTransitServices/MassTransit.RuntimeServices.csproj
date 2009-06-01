@@ -102,7 +102,7 @@
     <Compile Include="HealthServiceRegistry.cs" />
     <Compile Include="IConfiguration.cs" />
     <Compile Include="Model\HealthSagaMap.cs" />
-    <Compile Include="Model\ScheduledTimeoutMap.cs" />
+    <Compile Include="Model\TimeoutSagaMap.cs" />
     <Compile Include="Model\SubscriptionClientSagaMap.cs" />
     <Compile Include="Model\SubscriptionSagaMap.cs" />
     <Compile Include="Program.cs" />
