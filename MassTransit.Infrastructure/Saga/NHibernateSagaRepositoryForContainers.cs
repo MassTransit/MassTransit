@@ -24,31 +24,39 @@ namespace MassTransit.Infrastructure.Saga
 		ISagaRepository<T>
 		where T : class, ISaga
 	{
-		private readonly ISessionFactory _sessionFactory;
-		private ISession _session;
+		private volatile bool _disposed;
+		private ISessionFactory _sessionFactory;
 
 		public NHibernateSagaRepositoryForContainers(ISessionFactory sessionFactory)
 		{
 			_sessionFactory = sessionFactory;
-			_session = _sessionFactory.OpenSession();
 		}
 
 		public void Dispose()
 		{
-			_session.Dispose();
+			Dispose(true);
+			GC.SuppressFinalize(this);
 		}
 
 		public IEnumerable<Action<V>> Find<V>(Expression<Func<T, bool>> expression, Action<T, V> action)
 		{
-			foreach (T saga in _session.Linq<T>().Where(expression))
+			List<T> existingSagas;
+			using (var session = _sessionFactory.OpenSession())
 			{
-				T sagaInstance = saga;
+				existingSagas = session.Linq<T>().Where(expression).ToList();
+			}
 
-				_session.Lock(sagaInstance, LockMode.Upgrade);
+			foreach (T saga in existingSagas)
+			{
+				using (var session = _sessionFactory.OpenSession())
+				{
+					T sagaInstance = session.Load<T>(saga.CorrelationId, LockMode.Upgrade);
 
-				yield return x => action(sagaInstance, x);
+					yield return x => action(sagaInstance, x);
 
-				_session.Update(sagaInstance);
+					session.Update(sagaInstance);
+					session.Flush();
+				}
 			}
 		}
 
@@ -64,20 +72,38 @@ namespace MassTransit.Infrastructure.Saga
 
 		public IEnumerable<T> Where(Expression<Func<T, bool>> filter)
 		{
-			return _session.Linq<T>().Where(filter);
+			using (var session = _sessionFactory.OpenSession())
+			{
+				return session.Linq<T>().Where(filter).ToList();
+			}
 		}
 
 		public IEnumerable<Action<V>> Create<V>(Guid sagaId, Action<T, V> action)
 		{
 			T saga = (T) Activator.CreateInstance(typeof (T), sagaId);
 
-			_session.Save(saga);
-			_session.Lock(saga, LockMode.Upgrade);
-
-
 			yield return x => action(saga, x);
 
-			_session.Update(saga);
+			using (var session = _sessionFactory.OpenSession())
+			{
+				session.Save(saga);
+				session.Flush();
+			}
+		}
+
+		public void Dispose(bool disposing)
+		{
+			if (_disposed) return;
+			if (disposing)
+			{
+				_sessionFactory = null;
+			}
+			_disposed = true;
+		}
+
+		~NHibernateSagaRepositoryForContainers()
+		{
+			Dispose(false);
 		}
 	}
 }

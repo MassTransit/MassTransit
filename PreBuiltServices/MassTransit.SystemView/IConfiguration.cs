@@ -10,21 +10,15 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.RuntimeServices.Model
+namespace MassTransit.SystemView
 {
-	using FluentNHibernate.Mapping;
-	using Services.Timeout;
+	using System;
 
-	public class ScheduledTimeoutMap :
-		ClassMap<ScheduledTimeout>
+	public interface IConfiguration
 	{
-		public ScheduledTimeoutMap()
-		{
-			UseCompositeId()
-			   .WithKeyProperty(x => x.Id)
-			   .WithKeyProperty(x => x.Tag);  
+		Uri SystemViewControlUri { get; }
+		Uri SystemViewDataUri { get; }
 
-			Map(x => x.ExpiresAt);
-		}
+		Uri SubscriptionServiceUri { get; }
 	}
 }

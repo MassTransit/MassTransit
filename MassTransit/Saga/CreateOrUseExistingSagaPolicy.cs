@@ -20,7 +20,7 @@ namespace MassTransit.Saga
 		ISagaPolicy<TSaga, TMessage>
 		where TSaga : ISaga
 	{
-		private bool _useMessageIdForSagaId;
+		private readonly bool _useMessageIdForSagaId;
 
 		public CreateOrUseExistingSagaPolicy()
 		{
@@ -60,7 +60,7 @@ namespace MassTransit.Saga
 			return false;
 		}
 
-		private bool GenerateNewIdForSaga(out Guid sagaId)
+		private static bool GenerateNewIdForSaga(out Guid sagaId)
 		{
 			sagaId = CombGuid.Generate();
 			return true;

@@ -73,7 +73,7 @@ namespace MassTransit.RuntimeServices
 
 		private static void BuildSchema(NHibernate.Cfg.Configuration config)
 		{
-			new SchemaUpdate(config).Execute(false, true);
+			new SchemaExport(config).Create(false, true);
 		}
 	}
 }

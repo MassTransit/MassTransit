@@ -3,7 +3,7 @@
   <appender name="MT"
 			  type="log4net.Appender.RollingFileAppender">
     <file value="MassTransit.RuntimeServices.log" />
-    <appendToFile value="true" />
+    <appendToFile value="false" />
     <rollingStyle value="Date" />
     <datePattern value="yyyyMMdd" />
     <!-- files rolled at day -->

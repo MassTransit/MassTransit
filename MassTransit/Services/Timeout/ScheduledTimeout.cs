@@ -19,5 +19,28 @@ namespace MassTransit.Services.Timeout
 		public virtual Guid Id { get; set; }
 		public virtual int Tag { get; set; }
 		public virtual DateTime ExpiresAt { get; set; }
+
+		public virtual bool Equals(ScheduledTimeout obj)
+		{
+			if (ReferenceEquals(null, obj)) return false;
+			if (ReferenceEquals(this, obj)) return true;
+			return obj.Id.Equals(Id) && obj.Tag == Tag;
+		}
+
+		public override bool Equals(object obj)
+		{
+			if (ReferenceEquals(null, obj)) return false;
+			if (ReferenceEquals(this, obj)) return true;
+			if (obj.GetType() != typeof (ScheduledTimeout)) return false;
+			return Equals((ScheduledTimeout) obj);
+		}
+
+		public override int GetHashCode()
+		{
+			unchecked
+			{
+				return (Id.GetHashCode()*397) ^ Tag;
+			}
+		}
 	}
 }

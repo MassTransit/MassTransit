@@ -125,7 +125,7 @@ namespace MassTransit.Services.Timeout
 					{
 						Id = message.CorrelationId,
 						Tag = message.Tag,
-						ExpiresAt = message.TimeoutAt
+						ExpiresAt = message.TimeoutAt,
 					};
 
 				_repository.Schedule(timeout);
