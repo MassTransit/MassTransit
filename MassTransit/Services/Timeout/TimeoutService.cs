@@ -13,7 +13,6 @@
 namespace MassTransit.Services.Timeout
 {
 	using System;
-	using System.Linq;
 	using Exceptions;
 	using log4net;
 	using Magnum.Actors;
@@ -38,6 +37,47 @@ namespace MassTransit.Services.Timeout
 		{
 			_bus = bus;
 			_repository = repository;
+		}
+
+		public void Consume(CancelTimeout message)
+		{
+			try
+			{
+				var timeout = new ScheduledTimeout
+					{
+						Id = message.CorrelationId,
+						Tag = message.Tag
+					};
+
+				_repository.Remove(timeout);
+			}
+			catch (Exception ex)
+			{
+				_log.Error(string.Format("Unable to cancel a scheduled timeout {0}:{1}", message.CorrelationId, message.Tag), ex);
+				throw;
+			}
+		}
+
+		public void Consume(ScheduleTimeout message)
+		{
+			try
+			{
+				var timeout = new ScheduledTimeout
+					{
+						Id = message.CorrelationId,
+						Tag = message.Tag,
+						ExpiresAt = message.TimeoutAt,
+					};
+
+				_repository.Schedule(timeout);
+
+				CheckExistingTimeouts();
+			}
+			catch (Exception ex)
+			{
+				_log.Error(string.Format("Unable to cancel a scheduled timeout {0}:{1}", message.CorrelationId, message.Tag), ex);
+				throw;
+			}
 		}
 
 		public void Dispose()
@@ -89,11 +129,8 @@ namespace MassTransit.Services.Timeout
 		{
 			try
 			{
-				ScheduledTimeout soonest = _repository
-					.OrderBy(x => x.ExpiresAt)
-					.FirstOrDefault();
-
-				if (soonest == null)
+				ScheduledTimeout soonest;
+				if (!_repository.TryGetNextScheduledTimeout(out soonest))
 					return;
 
 				DateTime now = DateTime.UtcNow;
@@ -109,52 +146,10 @@ namespace MassTransit.Services.Timeout
 						_scheduler.Schedule((int) interval.TotalMilliseconds, PublishPendingTimeoutMessages);
 					}
 				}
-
 			}
 			catch (Exception ex)
 			{
 				_log.Error("Unable to retrieve existing timeouts", ex);
-			}
-		}
-
-		public void Consume(ScheduleTimeout message)
-		{
-			try
-			{
-				var timeout = new ScheduledTimeout
-					{
-						Id = message.CorrelationId,
-						Tag = message.Tag,
-						ExpiresAt = message.TimeoutAt,
-					};
-
-				_repository.Schedule(timeout);
-
-				CheckExistingTimeouts();
-			}
-			catch (Exception ex)
-			{
-				_log.Error(string.Format("Unable to cancel a scheduled timeout {0}:{1}", message.CorrelationId, message.Tag), ex);
-				throw;
-			}
-		}
-
-		public void Consume(CancelTimeout message)
-		{
-			try
-			{
-				var timeout = new ScheduledTimeout
-					{
-						Id = message.CorrelationId,
-						Tag = message.Tag
-					};
-
-				_repository.Remove(timeout);
-			}
-			catch (Exception ex)
-			{
-				_log.Error(string.Format("Unable to cancel a scheduled timeout {0}:{1}", message.CorrelationId, message.Tag), ex);
-				throw;
 			}
 		}
 
@@ -164,13 +159,12 @@ namespace MassTransit.Services.Timeout
 			{
 				var now = DateTime.UtcNow;
 
-				var expired = _repository
-					.Where(x => x.ExpiresAt <= now)
-					.OrderBy(x => x.ExpiresAt)
-					.ToList();
-
-				foreach (var timeout in expired)
+				ScheduledTimeout timeout;
+				while (_repository.TryGetNextScheduledTimeout(out timeout))
 				{
+					if (timeout.ExpiresAt > now)
+						break;
+
 					try
 					{
 						_log.InfoFormat("Publishing timeout message for {0}:{1}", timeout.Id, timeout.Tag);

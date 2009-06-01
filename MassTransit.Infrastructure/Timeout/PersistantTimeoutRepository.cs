@@ -12,12 +12,8 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Infrastructure.Timeout
 {
-    using System;
-    using System.Collections;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Linq.Expressions;
-    using Magnum.Data;
+	using System.Linq;
+	using Magnum.Data;
     using Services.Timeout;
 
 	public class PersistantTimeoutRepository :
@@ -47,49 +43,16 @@ namespace MassTransit.Infrastructure.Timeout
 			}
         }
 
-    	public IEnumerator<ScheduledTimeout> GetEnumerator()
-    	{
-    		return _repository.GetEnumerator();
-    	}
+		public bool TryGetNextScheduledTimeout(out ScheduledTimeout timeout)
+		{
+			timeout = _repository.OrderBy(x => x.ExpiresAt).FirstOrDefault();
 
-    	IEnumerator IEnumerable.GetEnumerator()
-    	{
-    		return GetEnumerator();
-    	}
-
-    	public Expression Expression
-    	{
-    		get { return _repository.Expression; }
-    	}
-
-    	public Type ElementType
-    	{
-			get { return _repository.ElementType; }
-    	}
-
-    	public IQueryProvider Provider
-    	{
-			get { return _repository.Provider; }
-    	}
+			return timeout != null;
+		}
 
     	public void Dispose()
     	{
     		_repository.Dispose();
-    	}
-
-    	public void Save(ScheduledTimeout item)
-    	{
-    		_repository.Save(item);
-    	}
-
-    	public void Update(ScheduledTimeout item)
-    	{
-    		_repository.Update(item);
-    	}
-
-    	public void Delete(ScheduledTimeout item)
-    	{
-    		_repository.Delete(item);
     	}
     }
 }
