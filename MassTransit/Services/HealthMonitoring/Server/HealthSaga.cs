@@ -45,7 +45,7 @@ namespace MassTransit.Services.HealthMonitoring.Server
 									saga.ScheduleTimeoutForHeartbeat();
 								})
 							.Then(StatusChange)
-							.TransitionTo(Healthy),
+							.TransitionTo(Healthy)/*,
 						When(EndpointBreathes)
 							.Then((saga, message) =>
 								{
@@ -55,7 +55,7 @@ namespace MassTransit.Services.HealthMonitoring.Server
 									saga.ScheduleTimeoutForHeartbeat();
 								})
 							.Then(StatusChange)
-							.TransitionTo(Healthy));
+							.TransitionTo(Healthy)*/);
 
 					During(Healthy,
 						When(EndpointBreathes)

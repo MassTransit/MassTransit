@@ -13,47 +13,42 @@
 namespace MassTransit.RuntimeServices
 {
 	using System.Data;
+	using System.IO;
 	using FluentNHibernate.Cfg;
 	using FluentNHibernate.Cfg.Db;
 	using Infrastructure.Saga;
+	using Infrastructure.Subscriptions;
 	using Model;
 	using NHibernate;
 	using NHibernate.Cfg;
 	using NHibernate.Tool.hbm2ddl;
 	using Saga;
+	using Services.Subscriptions.Server;
 	using StructureMap;
 	using StructureMap.Attributes;
 	using StructureMapIntegration;
 	using Transports;
 	using Transports.Msmq;
 
-	public class HealthServiceRegistry :
+	public class SubscriptionServiceRegistry :
 		MassTransitRegistryBase
 	{
-		private readonly IContainer _container;
-
-		public HealthServiceRegistry(IContainer container)
+		public SubscriptionServiceRegistry(IContainer container)
 			: base(typeof (MsmqEndpoint), typeof (LoopbackEndpoint))
 		{
-			_container = container;
-
 			var configuration = container.GetInstance<IConfiguration>();
 
 			ForRequestedType<ISessionFactory>()
 				.CacheBy(InstanceScope.Singleton)
 				.TheDefault.Is.ConstructedBy(context => CreateSessionFactory());
 
+
 			ForRequestedType(typeof (ISagaRepository<>))
 				.AddConcreteType(typeof (NHibernateSagaRepositoryForContainers<>));
+			ForRequestedType<ISubscriptionRepository>()
+				.AddConcreteType<PersistantSubscriptionRepository>();
 
-			RegisterControlBus(configuration.HealthServiceControlUri, x => { });
-
-			RegisterServiceBus(configuration.HealthServiceDataUri, x =>
-				{
-					x.UseControlBus(_container.GetInstance<IControlBus>());
-
-					ConfigureSubscriptionClient(configuration.SubscriptionServiceUri, x);
-				});
+			RegisterServiceBus(configuration.SubscriptionServiceUri, x => { });
 		}
 
 		private static ISessionFactory CreateSessionFactory()
@@ -65,15 +60,21 @@ namespace MassTransit.RuntimeServices
 					.ConnectionString(s => s.FromConnectionStringWithKey("MassTransit"))
 					.DefaultSchema("dbo")
 					//.ShowSql()
-					.Raw(Environment.Isolation, IsolationLevel.Serializable.ToString()))
-				.Mappings(m => { m.FluentMappings.Add<HealthSagaMap>(); })
+					.Raw(Environment.Isolation, IsolationLevel.ReadCommitted.ToString()))
+				.Mappings(m =>
+					{
+						m.FluentMappings.Add<SubscriptionSagaMap>();
+						m.FluentMappings.Add<SubscriptionClientSagaMap>();
+					})
 				.ExposeConfiguration(BuildSchema)
 				.BuildSessionFactory();
 		}
 
 		private static void BuildSchema(NHibernate.Cfg.Configuration config)
 		{
-			new SchemaExport(config).Create(false, true);
+			var schemaFile = Path.Combine(Path.GetDirectoryName(typeof (SubscriptionService).Assembly.Location), typeof (SubscriptionService).Name + ".sql");
+
+			new SchemaExport(config).SetOutputFile(schemaFile).Execute(false, false, false, true);
 		}
 	}
 }

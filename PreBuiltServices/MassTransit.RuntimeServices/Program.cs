@@ -52,14 +52,14 @@ namespace MassTransit.RuntimeServices
 							ConfigureService<SubscriptionService, SubscriptionServiceRegistry>(service, start => start.Start(), stop => stop.Stop());
 						});
 
+					config.ConfigureService<HealthService>(service =>
+					{
+						ConfigureService<HealthService, HealthServiceRegistry>(service, start => start.Start(), stop => stop.Stop());
+					});
+
 					config.ConfigureService<TimeoutService>(service =>
 						{
 							ConfigureService<TimeoutService, TimeoutServiceRegistry>(service, start => start.Start(), stop => stop.Stop());
-						});
-
-					config.ConfigureService<HealthService>(service =>
-						{
-							ConfigureService<HealthService, HealthServiceRegistry>(service, start => start.Start(), stop => stop.Stop());
 						});
 
 					config.AfterStop(x => { _log.Info("MassTransit Runtime Services are exiting..."); });

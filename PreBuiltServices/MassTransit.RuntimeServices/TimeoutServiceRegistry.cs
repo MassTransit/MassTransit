@@ -13,6 +13,7 @@
 namespace MassTransit.RuntimeServices
 {
 	using System.Data;
+	using System.IO;
 	using FluentNHibernate.Cfg;
 	using FluentNHibernate.Cfg.Db;
 	using Infrastructure.Saga;
@@ -22,6 +23,7 @@ namespace MassTransit.RuntimeServices
 	using NHibernate.Tool.hbm2ddl;
 	using Saga;
 	using Services.HealthMonitoring.Configuration;
+	using Services.Timeout;
 	using StructureMap;
 	using StructureMap.Attributes;
 	using StructureMapIntegration;
@@ -68,7 +70,7 @@ namespace MassTransit.RuntimeServices
 					.ConnectionString(s => s.FromConnectionStringWithKey("MassTransit"))
 					.DefaultSchema("dbo")
 					//.ShowSql()
-					.Raw(Environment.Isolation, IsolationLevel.Serializable.ToString()))
+					.Raw(Environment.Isolation, IsolationLevel.ReadCommitted.ToString()))
 				.Mappings(m => { m.FluentMappings.Add<TimeoutSagaMap>(); })
 				.ExposeConfiguration(BuildSchema)
 				.BuildSessionFactory();
@@ -76,7 +78,9 @@ namespace MassTransit.RuntimeServices
 
 		private static void BuildSchema(NHibernate.Cfg.Configuration config)
 		{
-			new SchemaExport(config).Create(false, true);
+			var schemaFile = Path.Combine(Path.GetDirectoryName(typeof(TimeoutService).Assembly.Location), typeof(TimeoutService).Name + ".sql");
+
+			new SchemaExport(config).SetOutputFile(schemaFile).Execute(false, false, false, true);
 		}
 	}
 }

@@ -29,6 +29,7 @@ namespace MassTransit.SystemView
 
 			RegisterServiceBus(configuration.SystemViewDataUri, x =>
 				{
+					x.SetConcurrentConsumerLimit(1);
 					x.UseControlBus(container.GetInstance<IControlBus>());
 
 					ConfigureSubscriptionClient(configuration.SubscriptionServiceUri, x);
