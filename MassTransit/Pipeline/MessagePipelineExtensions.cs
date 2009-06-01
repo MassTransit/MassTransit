@@ -128,7 +128,7 @@ namespace MassTransit.Pipeline
 			return result;
 		}
 
-		public static UnregisterAction Register(this IConfigurePipeline context, IPipelineSubscriber subscriber)
+		public static UnregisterAction Register(this IPipelineConfigurator context, IPipelineSubscriber subscriber)
 		{
 			return context.Register(subscriber);
 		}

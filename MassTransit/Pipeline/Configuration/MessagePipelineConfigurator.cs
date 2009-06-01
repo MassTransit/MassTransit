@@ -10,7 +10,7 @@ namespace MassTransit.Pipeline.Configuration
 	using Util;
 
 	public class MessagePipelineConfigurator :
-		IConfigurePipeline,
+		IPipelineConfigurator,
 		ISubscriptionEvent,
 		IDisposable
 	{
@@ -41,7 +41,7 @@ namespace MassTransit.Pipeline.Configuration
 			_interceptors.Register(new InitiatesSubscriber());
 		}
 
-		#region IConfigurePipeline Members
+		#region IPipelineConfigurator Members
 
 		public UnregisterAction Register(IPipelineSubscriber subscriber)
 		{
@@ -117,7 +117,7 @@ namespace MassTransit.Pipeline.Configuration
 			Dispose(false);
 		}
 
-		public V Configure<V>(Func<IConfigurePipeline, V> action)
+		public V Configure<V>(Func<IPipelineConfigurator, V> action)
 		{
 			V result = action(this);
 

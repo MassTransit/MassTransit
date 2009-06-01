@@ -16,7 +16,7 @@ namespace MassTransit.Pipeline
 	using Configuration.Subscribers;
 	using Internal;
 
-	public interface IConfigurePipeline
+	public interface IPipelineConfigurator
 	{
 		UnsubscribeAction Subscribe<TComponent>()
 			where TComponent : class;

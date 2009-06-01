@@ -15,6 +15,7 @@ namespace MassTransit.Tests.Pipeline
 	using MassTransit.Pipeline;
 	using MassTransit.Pipeline.Configuration;
 	using MassTransit.Pipeline.Inspectors;
+	using Messages;
 	using NUnit.Framework;
 	using Rhino.Mocks;
 
@@ -36,5 +37,12 @@ namespace MassTransit.Tests.Pipeline
 		{
 			PipelineViewer.Trace(_pipeline);
 		}
+
+	    [Test]
+	    public void I_want_to_display_a_more_detailed_flow()
+	    {
+            _pipeline.Subscribe<PingMessage>(m => { }, x => { return true; });
+            PipelineViewer.Trace(_pipeline);
+	    }
 	}
 }
