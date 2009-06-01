@@ -361,7 +361,7 @@
     <Compile Include="Pipeline\Configuration\Subscribers\ConsumesSubscriberBase.cs" />
     <Compile Include="Pipeline\Configuration\Subscribers\ConsumesSelectedSubscriber.cs" />
     <Compile Include="Util\IRegistrationList.cs" />
-    <Compile Include="Pipeline\IConfigurePipeline.cs" />
+    <Compile Include="Pipeline\IPipelineConfigurator.cs" />
     <Compile Include="Pipeline\IPipelineSink.cs" />
     <Compile Include="Pipeline\IPipelineInspector.cs" />
     <Compile Include="Pipeline\ISubscriberContext.cs" />

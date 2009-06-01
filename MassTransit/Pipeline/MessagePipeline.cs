@@ -20,9 +20,9 @@ namespace MassTransit.Pipeline
 		PipelineSinkBase<object, object>,
 		IMessagePipeline
 	{
-		private readonly IConfigurePipeline _configurator;
+		private readonly IPipelineConfigurator _configurator;
 
-		public MessagePipeline(IPipelineSink<object> outputSink, IConfigurePipeline configurator) :
+		public MessagePipeline(IPipelineSink<object> outputSink, IPipelineConfigurator configurator) :
 			base(outputSink)
 		{
 			_configurator = configurator;
@@ -41,12 +41,12 @@ namespace MassTransit.Pipeline
 			return inspector.Inspect(this, () => _outputSink.Inspect(inspector));
 		}
 
-		public void Configure(Action<IConfigurePipeline> configurePipeline)
+		public void Configure(Action<IPipelineConfigurator> configurePipeline)
 		{
 			configurePipeline(_configurator);
 		}
 
-		public V Configure<V>(Func<IConfigurePipeline, V> configurePipeline)
+		public V Configure<V>(Func<IPipelineConfigurator, V> configurePipeline)
 		{
 			return configurePipeline(_configurator);
 		}
