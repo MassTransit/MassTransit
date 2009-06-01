@@ -18,6 +18,7 @@ namespace TimeoutServiceHost
     using log4net.Config;
     using MassTransit;
     using MassTransit.Configuration;
+    using MassTransit.Saga;
     using MassTransit.Services.HealthMonitoring.Configuration;
     using MassTransit.Services.Subscriptions.Configuration;
     using MassTransit.Services.Timeout;
@@ -54,8 +55,7 @@ namespace TimeoutServiceHost
                         IEndpointFactory ef = EndpointFactoryConfigurator.New(e => e.RegisterTransport<MsmqEndpoint>());
                         container.Kernel.AddComponentInstance("endpointFactory", typeof (IEndpointFactory), ef);
 
-
-                        container.AddComponent<ITimeoutRepository, InMemoryTimeoutRepository>();
+                    	container.AddComponent("sagaRepository", typeof (ISagaRepository<>), typeof (InMemorySagaRepository<>));
                         container.AddComponent<TimeoutService>();
                         IServiceBus bus = ServiceBusConfigurator.New(sbc =>
                         {

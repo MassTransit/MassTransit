@@ -15,13 +15,13 @@ namespace MassTransit.RuntimeServices
 	using System.Data;
 	using FluentNHibernate.Cfg;
 	using FluentNHibernate.Cfg.Db;
-	using Infrastructure.Timeout;
+	using Infrastructure.Saga;
 	using Model;
 	using NHibernate;
 	using NHibernate.Cfg;
 	using NHibernate.Tool.hbm2ddl;
+	using Saga;
 	using Services.HealthMonitoring.Configuration;
-	using Services.Timeout;
 	using StructureMap;
 	using StructureMap.Attributes;
 	using StructureMapIntegration;
@@ -44,8 +44,8 @@ namespace MassTransit.RuntimeServices
 				.CacheBy(InstanceScope.Singleton)
 				.TheDefault.Is.ConstructedBy(context => CreateSessionFactory());
 
-			ForRequestedType<ITimeoutRepository>()
-				.AddConcreteType<NHibernateTimeoutRepository>();
+			ForRequestedType(typeof (ISagaRepository<>))
+				.AddConcreteType(typeof (NHibernateSagaRepositoryForContainers<>));
 
 			RegisterControlBus(configuration.TimeoutServiceControlUri, x => { x.SetConcurrentConsumerLimit(1); });
 

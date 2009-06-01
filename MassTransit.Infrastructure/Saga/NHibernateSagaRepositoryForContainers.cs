@@ -16,6 +16,7 @@ namespace MassTransit.Infrastructure.Saga
 	using System.Collections.Generic;
 	using System.Linq;
 	using System.Linq.Expressions;
+	using log4net;
 	using MassTransit.Saga;
 	using NHibernate;
 	using NHibernate.Linq;
@@ -24,6 +25,7 @@ namespace MassTransit.Infrastructure.Saga
 		ISagaRepository<T>
 		where T : class, ISaga
 	{
+		private static readonly ILog _log = LogManager.GetLogger(typeof (NHibernateSagaRepositoryForContainers<T>).ToFriendlyName());
 		private volatile bool _disposed;
 		private ISessionFactory _sessionFactory;
 
@@ -48,6 +50,9 @@ namespace MassTransit.Infrastructure.Saga
 
 			foreach (T saga in existingSagas)
 			{
+				if (_log.IsDebugEnabled)
+					_log.DebugFormat("Found saga [{0}] - {1}", typeof(T).ToFriendlyName(), saga.CorrelationId);
+
 				using (var session = _sessionFactory.OpenSession())
 				{
 					T sagaInstance = session.Load<T>(saga.CorrelationId, LockMode.Upgrade);
@@ -81,6 +86,9 @@ namespace MassTransit.Infrastructure.Saga
 		public IEnumerable<Action<V>> Create<V>(Guid sagaId, Action<T, V> action)
 		{
 			T saga = (T) Activator.CreateInstance(typeof (T), sagaId);
+
+			if (_log.IsDebugEnabled)
+				_log.DebugFormat("Created saga [{0}] - {1}", typeof(T).ToFriendlyName(), sagaId);
 
 			yield return x => action(saga, x);
 

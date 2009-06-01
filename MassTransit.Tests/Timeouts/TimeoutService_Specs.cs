@@ -17,8 +17,10 @@ namespace MassTransit.Tests.Timeouts
     using System.Threading;
     using Magnum;
     using Magnum.DateTimeExtensions;
+    using MassTransit.Saga;
     using MassTransit.Services.Timeout;
     using MassTransit.Services.Timeout.Messages;
+    using MassTransit.Services.Timeout.Server;
     using NUnit.Framework;
     using Rhino.Mocks;
     using TextFixtures;
@@ -27,20 +29,22 @@ namespace MassTransit.Tests.Timeouts
     public class When_scheduling_a_timeout_for_a_new_id :
         LoopbackLocalAndRemoteTestFixture
     {
-        private ITimeoutRepository _repository;
         private TimeoutService _timeoutService;
         private Guid _correlationId;
+		private ISagaRepository<TimeoutSaga> _timeoutSagaRepository;
 
-        protected override void EstablishContext()
+		protected override void EstablishContext()
         {
             base.EstablishContext();
 
             _correlationId = CombGuid.Generate();
 
-            _repository = new InMemoryTimeoutRepository();
-            ObjectBuilder.Stub(x => x.GetInstance<ITimeoutRepository>()).Return(_repository);
+        	_timeoutSagaRepository = SetupSagaRepository<TimeoutSaga>();
+			SetupObservesSagaStateMachineSink<TimeoutSaga, ScheduleTimeout>(LocalBus, _timeoutSagaRepository);
+			SetupObservesSagaStateMachineSink<TimeoutSaga, CancelTimeout>(LocalBus, _timeoutSagaRepository);
+			SetupObservesSagaStateMachineSink<TimeoutSaga, TimeoutExpired>(LocalBus, _timeoutSagaRepository);
 
-            _timeoutService = new TimeoutService(LocalBus, _repository);
+            _timeoutService = new TimeoutService(LocalBus, _timeoutSagaRepository);
             _timeoutService.Start();
         }
 
@@ -56,7 +60,6 @@ namespace MassTransit.Tests.Timeouts
         public void The_timeout_should_be_added_to_the_storage()
         {
             var _timedOut = new ManualResetEvent(false);
-
 
             LocalBus.Subscribe<TimeoutExpired>(x => _timedOut.Set());
 

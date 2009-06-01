@@ -13,6 +13,7 @@
 namespace MassTransit.Services.Timeout
 {
 	using System;
+	using System.Linq;
 	using Exceptions;
 	using log4net;
 	using Magnum.Actors;
@@ -20,64 +21,25 @@ namespace MassTransit.Services.Timeout
 	using Magnum.Actors.Schedulers;
 	using Magnum.DateTimeExtensions;
 	using Messages;
+	using Saga;
+	using Server;
 
 	public class TimeoutService :
 		IDisposable,
-		Consumes<ScheduleTimeout>.All,
-		Consumes<CancelTimeout>.All
+		Consumes<TimeoutScheduled>.All,
+		Consumes<TimeoutRescheduled>.All
 	{
 		private static readonly ILog _log = LogManager.GetLogger(typeof (TimeoutService));
 		private readonly CommandQueue _queue = new ThreadPoolCommandQueue();
-		private readonly ITimeoutRepository _repository;
 		private readonly Scheduler _scheduler = new ThreadPoolScheduler();
 		private IServiceBus _bus;
 		private UnsubscribeAction _unsubscribeToken;
+		private ISagaRepository<TimeoutSaga> _repository;
 
-		public TimeoutService(IServiceBus bus, ITimeoutRepository repository)
+		public TimeoutService(IServiceBus bus, ISagaRepository<TimeoutSaga> repository)
 		{
 			_bus = bus;
 			_repository = repository;
-		}
-
-		public void Consume(CancelTimeout message)
-		{
-			try
-			{
-				var timeout = new ScheduledTimeout
-					{
-						Id = message.CorrelationId,
-						Tag = message.Tag
-					};
-
-				_repository.Remove(timeout);
-			}
-			catch (Exception ex)
-			{
-				_log.Error(string.Format("Unable to cancel a scheduled timeout {0}:{1}", message.CorrelationId, message.Tag), ex);
-				throw;
-			}
-		}
-
-		public void Consume(ScheduleTimeout message)
-		{
-			try
-			{
-				var timeout = new ScheduledTimeout
-					{
-						Id = message.CorrelationId,
-						Tag = message.Tag,
-						ExpiresAt = message.TimeoutAt,
-					};
-
-				_repository.Schedule(timeout);
-
-				CheckExistingTimeouts();
-			}
-			catch (Exception ex)
-			{
-				_log.Error(string.Format("Unable to cancel a scheduled timeout {0}:{1}", message.CorrelationId, message.Tag), ex);
-				throw;
-			}
 		}
 
 		public void Dispose()
@@ -105,6 +67,7 @@ namespace MassTransit.Services.Timeout
 				_log.Info("Timeout Service Starting");
 
 			_unsubscribeToken = _bus.Subscribe(this);
+			_unsubscribeToken += _bus.Subscribe<TimeoutSaga>();
 
 			_queue.Enqueue(CheckExistingTimeouts);
 
@@ -129,62 +92,33 @@ namespace MassTransit.Services.Timeout
 		{
 			try
 			{
-				ScheduledTimeout soonest;
-				if (!_repository.TryGetNextScheduledTimeout(out soonest))
-					return;
-
 				DateTime now = DateTime.UtcNow;
-				if (soonest.ExpiresAt < now)
-					_queue.Enqueue(PublishPendingTimeoutMessages);
-				else
+
+				var sagas = _repository.Where(x => x.TimeoutAt < now && x.CurrentState == TimeoutSaga.WaitingForTime).ToArray();
+				foreach (TimeoutSaga saga in sagas)
 				{
-					TimeSpan interval = soonest.ExpiresAt - now;
-					if (interval > 30.Seconds())
-						_scheduler.Schedule(30000, CheckExistingTimeouts);
-					else
-					{
-						_scheduler.Schedule((int) interval.TotalMilliseconds, PublishPendingTimeoutMessages);
-					}
+					_bus.Publish(new TimeoutExpired { CorrelationId = saga.CorrelationId, Tag = saga.Tag });
 				}
+
 			}
 			catch (Exception ex)
 			{
-				_log.Error("Unable to retrieve existing timeouts", ex);
+				_log.Error("Error rescheduling existing timeouts", ex);
+			}
+			finally
+			{
+				_scheduler.Schedule(1000, CheckExistingTimeouts);
 			}
 		}
 
-		private void PublishPendingTimeoutMessages()
+		public void Consume(TimeoutScheduled message)
 		{
-			try
-			{
-				var now = DateTime.UtcNow;
+			_queue.Enqueue(CheckExistingTimeouts);
+		}
 
-				ScheduledTimeout timeout;
-				while (_repository.TryGetNextScheduledTimeout(out timeout))
-				{
-					if (timeout.ExpiresAt > now)
-						break;
-
-					try
-					{
-						_log.InfoFormat("Publishing timeout message for {0}:{1}", timeout.Id, timeout.Tag);
-
-						_bus.Publish(new TimeoutExpired {CorrelationId = timeout.Id, Tag = timeout.Tag});
-
-						_repository.Remove(timeout);
-					}
-					catch (Exception ex)
-					{
-						_log.Error("A problem occurred publishing the timeout expiration", ex);
-					}
-				}
-
-				_queue.Enqueue(CheckExistingTimeouts);
-			}
-			catch (Exception ex)
-			{
-				_log.Error("Unable to retrieve a timeout from the repository", ex);
-			}
+		public void Consume(TimeoutRescheduled message)
+		{
+			_queue.Enqueue(CheckExistingTimeouts);
 		}
 	}
 }

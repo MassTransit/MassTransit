@@ -43,6 +43,9 @@ namespace MassTransit.Saga
 		{
 			T saga = (T) Activator.CreateInstance(typeof (T), new object[] {sagaId});
 
+			if (_log.IsDebugEnabled)
+				_log.DebugFormat("Created saga [{0}] - {1}", typeof(T).ToFriendlyName(), sagaId);
+
 			_repository.Save(saga);
 
 			lock (saga)
@@ -55,6 +58,9 @@ namespace MassTransit.Saga
 		{
 			foreach (T saga in _repository.Where(expression))
 			{
+				if (_log.IsDebugEnabled)
+					_log.DebugFormat("Found saga [{0}] - {1}", typeof(T).ToFriendlyName(), expression.ToString());
+
 				T consumer = saga;
 				lock (consumer)
 				{
@@ -67,6 +73,9 @@ namespace MassTransit.Saga
 		{
 			foreach (T saga in _repository.Where(expression))
 			{
+				if (_log.IsDebugEnabled)
+					_log.DebugFormat("Found saga [{0}] - {1}", typeof(T).ToFriendlyName(), expression.ToString());
+
 				T consumer = saga;
 				lock (consumer)
 				{
