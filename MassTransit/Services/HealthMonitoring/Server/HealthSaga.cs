@@ -30,22 +30,18 @@ namespace MassTransit.Services.HealthMonitoring.Server
 		{
 			Define(() =>
 				{
-					Correlate(EndpointBreathes).By((saga, message) => saga.CorrelationId == message.CorrelationId);
+					Correlate(EndpointHeartBeats).By((saga, message) => saga.CorrelationId == message.CorrelationId);
 
 					Initially(
-						When(EndpointDetected)
+						When(EndpointComesOnline)
 							.Then((saga, message) =>
 								{
-									_log.DebugFormat("Endpoint '{0}' detected", message.EndpointAddress);
+									_log.DebugFormat("Endpoint came online: {0} ({1})", message.DataUri, message.ControlUri);
 
-									//store stuff
-									saga.EndpointAddress = message.EndpointAddress;
-									saga.TimeBetweenBeatsInSeconds = message.TimeBetweenBeatsInSeconds;
-									saga.MarkBeat();
-									saga.ScheduleTimeoutForHeartbeat();
+									InitializeSagaFromMessage(saga, message.ControlUri, message.DataUri, message.HeartbeatIntervalInSeconds);
 								})
-							.Then(StatusChange)
-							.TransitionTo(Healthy)/*,
+							.Then(saga => saga.NotifyEndpointIsHealthy())
+							.TransitionTo(Healthy) /*,
 						When(EndpointBreathes)
 							.Then((saga, message) =>
 								{
@@ -55,48 +51,41 @@ namespace MassTransit.Services.HealthMonitoring.Server
 									saga.ScheduleTimeoutForHeartbeat();
 								})
 							.Then(StatusChange)
-							.TransitionTo(Healthy)*/);
+							.TransitionTo(Healthy)*/
+						);
 
 					During(Healthy,
-						When(EndpointBreathes)
-							.Then((saga, message) =>
-								{
-									saga.MarkBeat();
-									saga.ScheduleTimeoutForHeartbeat();
-								})
-							.Then(StatusChange),
-						When(TimeoutExpired).And(msg => msg.Tag == (int) Timeouts.HeartBeatTimeout)
-							.Then((saga, message) =>
-								{
-									saga.ScheduleTimeoutForPing();
-
-									// TODO we need to inject the object builder into the class I think
-									HealthService.Builder
-										.GetInstance<IEndpointFactory>()
-										.GetEndpoint(saga.EndpointAddress)
-										.Send(new Ping(saga.CorrelationId));
-								})
-							.Then(StatusChange)
-							.TransitionTo(Suspect));
+						When(EndpointHeartBeats)
+							.Then((saga, message) => saga.ResetHeartbeatTimeout()),
+						When(TimeoutExpires).And(msg => msg.Tag == (int) Timeouts.HeartBeatTimeout)
+							.Then((saga, message) => saga.PingUnresponsiveEndpoint())
+							.Then(saga => saga.NotifyEndpointIsSuspect())
+							.TransitionTo(Suspect),
+						When(EndpointGoesOffline)
+							.Then(saga => saga.NotifyEndpointIsOffline())
+							.TransitionTo(Completed));
 
 					During(Suspect,
-						When(EndpointBreathes)
-							.Then(StatusChange)
+						When(EndpointHeartBeats)
+							.Then(saga => saga.NotifyEndpointIsHealthy())
 							.TransitionTo(Healthy),
-						When(SuspectRespondsToPing)
-							.Then(StatusChange)
+						When(EndpointRespondsToPing)
+							.Then(saga => saga.NotifyEndpointIsHealthy())
 							.TransitionTo(Healthy),
-						When(PingTimesout).And((msg) => msg.Tag == (int) Timeouts.PingTimeout)
-							.Then((saga, message) => { saga.Bus.Publish(new DownEndpoint(saga.EndpointAddress)); })
-							.Then(StatusChange)
-							.TransitionTo(Down));
+						When(TimeoutExpires).And(msg => msg.Tag == (int) Timeouts.PingTimeout)
+							.Then((saga, message) => saga.NotifyEndpointIsDown())
+							.TransitionTo(Down),
+						When(EndpointGoesOffline)
+							.Then(saga => saga.NotifyEndpointIsOffline())
+							.TransitionTo(Completed));
 
 					During(Down,
-						When(EndpointBreathes)
-							.Then(StatusChange)
-							.TransitionTo(Healthy));
-
-					//Anytime(EndpointPoweringDown).Complete();
+						When(EndpointHeartBeats)
+							.Then(saga => saga.NotifyEndpointIsHealthy())
+							.TransitionTo(Healthy),
+						When(EndpointGoesOffline)
+							.Then(saga => saga.NotifyEndpointIsOffline())
+							.TransitionTo(Completed));
 				});
 		}
 
@@ -115,38 +104,56 @@ namespace MassTransit.Services.HealthMonitoring.Server
 		public static State Down { get; set; }
 		public static State Completed { get; set; }
 
-		public static Event<EndpointTurningOn> EndpointDetected { get; set; }
-		public static Event<Heartbeat> EndpointBreathes { get; set; }
-		public static Event<EndpointTurningOff> EndpointPoweringDown { get; set; }
-		public static Event<TimeoutExpired> TimeoutExpired { get; set; }
-		public static Event<Pong> SuspectRespondsToPing { get; set; }
-		public static Event<TimeoutExpired> PingTimesout { get; set; }
+		public static Event<EndpointCameOnline> EndpointComesOnline { get; set; }
+		public static Event<Heartbeat> EndpointHeartBeats { get; set; }
+		public static Event<EndpointWentOffline> EndpointGoesOffline { get; set; }
+		public static Event<TimeoutExpired> TimeoutExpires { get; set; }
+		public static Event<PingEndpointResponse> EndpointRespondsToPing { get; set; }
 
 		public virtual DateTime LastHeartbeat { get; set; }
-		public virtual Uri EndpointAddress { get; set; }
-		public virtual int TimeBetweenBeatsInSeconds { get; set; }
+		public virtual Uri ControlUri { get; set; }
+		public virtual Uri DataUri { get; set; }
+		public virtual int HeartbeatIntervalInSeconds { get; set; }
 
 		public virtual Guid CorrelationId { get; set; }
 		public virtual IServiceBus Bus { get; set; }
 
-		private bool HasExpiredAccordingToPolicy()
+		private void NotifyEndpointIsDown()
 		{
-			int actualDuration = DateTime.Now.Subtract(LastHeartbeat).Seconds;
-			return (actualDuration/2) > TimeBetweenBeatsInSeconds;
+			Bus.Publish(new EndpointIsDown(CorrelationId, ControlUri, DataUri, HeartbeatIntervalInSeconds, LastHeartbeat, Down.Name));
 		}
 
-		private void ScheduleTimeoutForHeartbeat()
+		private void NotifyEndpointIsSuspect()
 		{
-			int timeout = TimeBetweenBeatsInSeconds*2;
-
-			Bus.Publish(new ScheduleTimeout(CorrelationId, timeout.Seconds(), (int) Timeouts.HeartBeatTimeout));
+			Bus.Publish(new EndpointIsSuspect(CorrelationId, ControlUri, DataUri, HeartbeatIntervalInSeconds, LastHeartbeat, Suspect.Name));
 		}
 
-		private void ScheduleTimeoutForPing()
+		private void NotifyEndpointIsOffline()
 		{
-			int timeout = 5;
+			Bus.Publish(new EndpointIsOffline(CorrelationId, ControlUri, DataUri, HeartbeatIntervalInSeconds, LastHeartbeat, "Off Line"));
+		}
 
-			Bus.Publish(new ScheduleTimeout(CorrelationId, timeout.Seconds(), (int) Timeouts.PingTimeout));
+		private void NotifyEndpointIsHealthy()
+		{
+			Bus.Publish(new EndpointIsHealthy(CorrelationId, ControlUri, DataUri, HeartbeatIntervalInSeconds, LastHeartbeat, Healthy.Name));
+		}
+
+		private void PingUnresponsiveEndpoint()
+		{
+			Bus.Publish(new ScheduleTimeout(CorrelationId, HeartbeatIntervalInSeconds.Seconds(), (int) Timeouts.PingTimeout));
+
+			// TODO we need to inject the object builder into the class I think
+			HealthService.Builder
+				.GetInstance<IEndpointFactory>()
+				.GetEndpoint(ControlUri)
+				.Send(new PingEndpoint(CorrelationId));
+		}
+
+		private void ResetHeartbeatTimeout()
+		{
+			LastHeartbeat = DateTime.UtcNow;
+
+			Bus.Publish(new ScheduleTimeout(CorrelationId, TimeSpan.FromSeconds(HeartbeatIntervalInSeconds*2), (int) Timeouts.HeartBeatTimeout));
 		}
 
 		private void MarkBeat()
@@ -154,9 +161,13 @@ namespace MassTransit.Services.HealthMonitoring.Server
 			LastHeartbeat = DateTime.Now;
 		}
 
-		private static void StatusChange(HealthSaga saga)
+		private static void InitializeSagaFromMessage(HealthSaga saga, Uri controlUri, Uri dataUri, int heartbeatIntervalInSeconds)
 		{
-			saga.Bus.Publish(new StatusChange());
+			saga.ControlUri = controlUri;
+			saga.DataUri = dataUri;
+			saga.HeartbeatIntervalInSeconds = heartbeatIntervalInSeconds;
+
+			saga.ResetHeartbeatTimeout();
 		}
 
 		private enum Timeouts

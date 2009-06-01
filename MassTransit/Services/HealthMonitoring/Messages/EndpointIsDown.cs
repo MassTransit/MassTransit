@@ -15,18 +15,20 @@ namespace MassTransit.Services.HealthMonitoring.Messages
 	using System;
 
 	[Serializable]
-	public class Heartbeat :
-		EndpointMessageBase
+	public class EndpointIsDown :
+		EndpointNotificationBase
 	{
-		public Heartbeat(Guid correlationId, Uri controlUri, Uri dataUri, int heartbeatIntervalInSeconds)
+		public EndpointIsDown(Guid correlationId, Uri controlUri, Uri dataUri, int heartbeatIntervalInSeconds, DateTime lastHeartbeat, string state)
 		{
 			CorrelationId = correlationId;
 			ControlUri = controlUri;
 			DataUri = dataUri;
 			HeartbeatIntervalInSeconds = heartbeatIntervalInSeconds;
+			LastHeartbeat = lastHeartbeat;
+			State = state;
 		}
 
-		protected Heartbeat()
+		protected EndpointIsDown()
 		{
 		}
 	}

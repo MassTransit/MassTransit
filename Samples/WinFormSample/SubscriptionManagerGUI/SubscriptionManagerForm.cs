@@ -86,7 +86,7 @@
             {
                 var items = new[]
 				            	{
-				            		information.Uri.ToString(),
+				            		information.DataUri.ToString(),
                                     information.State
 				            		//information.FirstDetectedAt.Value.ToString("hh:mm:ss"),
 				            		//information.LastDetectedAt.Value.ToString("hh:mm:ss")

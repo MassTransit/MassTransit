@@ -14,18 +14,10 @@ namespace MassTransit.Services.HealthMonitoring.Messages
 {
 	using System;
 
-	[Serializable]
-	public class DownEndpoint
+	public class EndpointNotificationBase :
+		EndpointMessageBase
 	{
-		public DownEndpoint(Uri endpointAddress)
-		{
-			EndpointAddress = endpointAddress;
-		}
-
-		protected DownEndpoint()
-		{
-		}
-
-		public Uri EndpointAddress { get; set; }
+		public DateTime LastHeartbeat { get; set; }
+		public string State { get; set; }
 	}
 }

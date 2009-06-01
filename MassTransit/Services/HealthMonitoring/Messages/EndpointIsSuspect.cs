@@ -15,20 +15,21 @@ namespace MassTransit.Services.HealthMonitoring.Messages
 	using System;
 
 	[Serializable]
-	public class Pong :
-		CorrelatedBy<Guid>
+	public class EndpointIsSuspect :
+		EndpointNotificationBase
 	{
-		public Pong(Guid correlationId, Uri endpointUri)
+		public EndpointIsSuspect(Guid correlationId, Uri controlUri, Uri dataUri, int heartbeatIntervalInSeconds, DateTime lastHeartbeat, string state)
 		{
 			CorrelationId = correlationId;
-			EndpointUri = endpointUri;
+			ControlUri = controlUri;
+			DataUri = dataUri;
+			HeartbeatIntervalInSeconds = heartbeatIntervalInSeconds;
+			LastHeartbeat = lastHeartbeat;
+			State = state;
 		}
 
-		protected Pong()
+		protected EndpointIsSuspect()
 		{
 		}
-
-		public Uri EndpointUri { get; set; }
-		public Guid CorrelationId { get; set; }
 	}
 }

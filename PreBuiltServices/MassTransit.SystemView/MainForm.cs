@@ -22,8 +22,6 @@ namespace MassTransit.SystemView
 	using Services.Subscriptions.Messages;
 	using Services.Timeout.Messages;
 	using StructureMap.Attributes;
-	using Container=StructureMap.Container;
-	using IContainer=StructureMap.IContainer;
 
 	public partial class MainForm :
 		Form,
@@ -33,11 +31,15 @@ namespace MassTransit.SystemView
 		Consumes<HealthUpdate>.All,
 		Consumes<TimeoutScheduled>.All,
 		Consumes<TimeoutRescheduled>.All,
-		Consumes<TimeoutExpired>.All
+		Consumes<TimeoutExpired>.All,
+		Consumes<EndpointIsHealthy>.All,
+		Consumes<EndpointIsDown>.All,
+		Consumes<EndpointIsSuspect>.All,
+		Consumes<EndpointIsOffline>.All
 	{
 		private IServiceBus _bus;
 		private Guid _clientId = CombGuid.Generate();
-		private IContainer _container;
+		private StructureMap.IContainer _container;
 		private IEndpoint _subscriptionServiceEndpoint;
 		private UnsubscribeAction _unsubscribe;
 
@@ -52,45 +54,34 @@ namespace MassTransit.SystemView
 			BeginInvoke(method, new object[] {message.Subscription});
 		}
 
+		public void Consume(EndpointIsDown message)
+		{
+			Action<EndpointIsDown> method = x => AddOrUpdateHealthItem(x.CorrelationId, x.ControlUri, x.LastHeartbeat, x.State);
+			BeginInvoke(method, new object[] { message });
+		}
+
+		public void Consume(EndpointIsHealthy message)
+		{
+			Action<EndpointIsHealthy> method = x => AddOrUpdateHealthItem(x.CorrelationId, x.ControlUri, x.LastHeartbeat, x.State);
+			BeginInvoke(method, new object[] { message });
+		}
+
+		public void Consume(EndpointIsOffline message)
+		{
+			Action<EndpointIsOffline> method = x => AddOrUpdateHealthItem(x.CorrelationId, x.ControlUri, x.LastHeartbeat, x.State);
+			BeginInvoke(method, new object[] { message });
+		}
+
+		public void Consume(EndpointIsSuspect message)
+		{
+			Action<EndpointIsSuspect> method = x => AddOrUpdateHealthItem(x.CorrelationId, x.ControlUri, x.LastHeartbeat, x.State);
+			BeginInvoke(method, new object[] { message });
+		}
+
 		public void Consume(HealthUpdate message)
 		{
 			Action<IEnumerable<HealthInformation>> method = x => RefreshHealthView(x);
 			BeginInvoke(method, new object[] {message.Information});
-		}
-
-		private void RefreshHealthView(IEnumerable<HealthInformation> informations)
-		{
-			var existing = new List<ListViewItem>();
-			foreach (ListViewItem item in healthListView.Items)
-			{
-				existing.Add(item);
-			}
-
-			foreach (HealthInformation information in informations)
-			{
-				string key = information.Uri.ToString();
-
-				ListViewItem item;
-				if (timeoutListView.Items.ContainsKey(key))
-				{
-					item = healthListView.Items[key];
-					item.SubItems[1].Text = information.State;
-				}
-				else
-				{
-					item = healthListView.Items.Add(key, key, 0);
-
-					item.SubItems.Add(new ListViewItem.ListViewSubItem(item, information.State));
-				}
-
-				if (existing.Contains(item))
-					existing.Remove(item);
-			}
-
-			foreach (ListViewItem item in existing)
-			{
-				item.Remove();
-			}
 		}
 
 		public void Consume(RemoveSubscription message)
@@ -133,6 +124,49 @@ namespace MassTransit.SystemView
 			base.OnClosing(e);
 		}
 
+		private void RefreshHealthView(IEnumerable<HealthInformation> informations)
+		{
+			var existing = new List<ListViewItem>();
+			foreach (ListViewItem item in healthListView.Items)
+			{
+				existing.Add(item);
+			}
+
+			foreach (HealthInformation entry in informations)
+			{
+				ListViewItem item = AddOrUpdateHealthItem(entry.ClientId, entry.ControlUri, entry.LastHeartbeat, entry.State);
+
+				if (existing.Contains(item))
+					existing.Remove(item);
+			}
+
+			foreach (ListViewItem item in existing)
+			{
+				item.Remove();
+			}
+		}
+
+		private ListViewItem AddOrUpdateHealthItem(Guid clientId, Uri controlUri, DateTime lastHeartbeat, string state)
+		{
+			string key = clientId.ToString();
+
+			ListViewItem item;
+			if (timeoutListView.Items.ContainsKey(key))
+			{
+				item = healthListView.Items[key];
+				item.SubItems[1].Text = lastHeartbeat.ToLocalTime().ToShortTimeString();
+				item.SubItems[2].Text = state;
+			}
+			else
+			{
+				item = healthListView.Items.Add(key, controlUri.ToString(), 0);
+
+				item.SubItems.Add(new ListViewItem.ListViewSubItem(item, state));
+				item.SubItems.Add(new ListViewItem.ListViewSubItem(item, lastHeartbeat.ToLocalTime().ToShortTimeString()));
+			}
+			return item;
+		}
+
 		private void MainForm_Load(object sender, EventArgs e)
 		{
 			BootstrapContainer();
@@ -159,7 +193,7 @@ namespace MassTransit.SystemView
 
 		private void BootstrapContainer()
 		{
-			_container = new Container();
+			_container = new StructureMap.Container();
 			_container.Configure(x =>
 				{
 					x.ForRequestedType<IConfiguration>()
