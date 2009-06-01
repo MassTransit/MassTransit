@@ -31,9 +31,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Magnum, Version=0.1.0.292, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Magnum, Version=0.1.0.297, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\libs\Magnum.dll</HintPath>
+      <HintPath>..\..\libs\Magnum.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
