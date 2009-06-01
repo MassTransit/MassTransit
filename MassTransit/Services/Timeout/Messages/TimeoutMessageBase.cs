@@ -15,33 +15,25 @@ namespace MassTransit.Services.Timeout.Messages
 	using System;
 
 	[Serializable]
-	public class ScheduleTimeout : 
-		TimeoutMessageBase
+	public class TimeoutMessageBase : 
+		CorrelatedBy<Guid>
 	{
-		protected ScheduleTimeout()
-		{
-		}
+		/// <summary>
+		/// The tag associated with the timeout message
+		/// This is mainly because we can't publish type-specific messages yet. 
+		/// We really want to be able to schedule a timeout and specify a message type
+		/// to publish on the timeout, but that is going to be tough to handle (period).
+		/// </summary>
+		public int Tag { get; set; }
 
-		public ScheduleTimeout(Guid correlationId, TimeSpan timeoutIn)
-			: this(correlationId, DateTime.UtcNow + timeoutIn)
-		{
-		}
+		/// <summary>
+		/// The time (in UTC) when the timeout expires
+		/// </summary>
+		public DateTime TimeoutAt { get; set; }
 
-		public ScheduleTimeout(Guid correlationId, TimeSpan timeoutIn, int tag)
-			: this(correlationId, DateTime.UtcNow + timeoutIn, tag)
-		{
-		}
-
-		public ScheduleTimeout(Guid correlationId, DateTime timeoutAt)
-			: this(correlationId, timeoutAt, 0)
-		{
-		}
-
-		public ScheduleTimeout(Guid correlationId, DateTime timeoutAt, int tag)
-		{
-			CorrelationId = correlationId;
-			TimeoutAt = timeoutAt.ToUniversalTime();
-			Tag = tag;
-		}
+		/// <summary>
+		/// The CorrelationId to use when publishing the timeout message
+		/// </summary>
+		public Guid CorrelationId { get; set; }
 	}
 }

@@ -16,9 +16,12 @@ namespace MassTransit.Tests.Timeouts
 	using System.Diagnostics;
 	using Magnum;
 	using Magnum.DateTimeExtensions;
+	using MassTransit.Saga;
 	using MassTransit.Services.MessageDeferral;
 	using MassTransit.Services.MessageDeferral.Messages;
 	using MassTransit.Services.Timeout;
+	using MassTransit.Services.Timeout.Messages;
+	using MassTransit.Services.Timeout.Server;
 	using Messages;
 	using NUnit.Framework;
 	using Rhino.Mocks;
@@ -29,11 +32,11 @@ namespace MassTransit.Tests.Timeouts
 	public class When_a_message_is_deferred :
 		LoopbackLocalAndRemoteTestFixture
 	{
-		private ITimeoutRepository _timeoutRepository;
 		private TimeoutService _timeoutService;
 		private Guid _correlationId;
 		private IDeferredMessageRepository _repository;
 		private MessageDeferralService _deferService;
+		private ISagaRepository<TimeoutSaga> _timeoutSagaRepository;
 
 		protected override void EstablishContext()
 		{
@@ -41,19 +44,21 @@ namespace MassTransit.Tests.Timeouts
 
 			_correlationId = CombGuid.Generate();
 
-			_timeoutRepository = new InMemoryTimeoutRepository();
-			ObjectBuilder.Stub(x => x.GetInstance<ITimeoutRepository>()).Return(_timeoutRepository);
+			_timeoutSagaRepository = SetupSagaRepository<TimeoutSaga>();
+			SetupObservesSagaStateMachineSink<TimeoutSaga, ScheduleTimeout>(LocalBus, _timeoutSagaRepository);
+			SetupObservesSagaStateMachineSink<TimeoutSaga, CancelTimeout>(LocalBus, _timeoutSagaRepository);
+			SetupObservesSagaStateMachineSink<TimeoutSaga, TimeoutExpired>(LocalBus, _timeoutSagaRepository);
 
-            _timeoutService = new TimeoutService(RemoteBus, _timeoutRepository);
-            _timeoutService.Start();
+			_timeoutService = new TimeoutService(RemoteBus, _timeoutSagaRepository);
+			_timeoutService.Start();
 
 			_repository = new InMemoryDeferredMessageRepository();
 			ObjectBuilder.Stub(x => x.GetInstance<IDeferredMessageRepository>()).Return(_repository);
 			ObjectBuilder.Stub(x => x.GetInstance<DeferMessageConsumer>()).Return(new DeferMessageConsumer(RemoteBus, _repository));
 			ObjectBuilder.Stub(x => x.GetInstance<TimeoutExpiredConsumer>()).Return(new TimeoutExpiredConsumer(RemoteBus, _repository));
 
-            _deferService = new MessageDeferralService(RemoteBus);
-            _deferService.Start();
+			_deferService = new MessageDeferralService(RemoteBus);
+			_deferService.Start();
 		}
 
 		protected override void TeardownContext()

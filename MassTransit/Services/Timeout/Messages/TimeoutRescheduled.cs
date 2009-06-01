@@ -15,33 +15,8 @@ namespace MassTransit.Services.Timeout.Messages
 	using System;
 
 	[Serializable]
-	public class ScheduleTimeout : 
+	public class TimeoutRescheduled :
 		TimeoutMessageBase
 	{
-		protected ScheduleTimeout()
-		{
-		}
-
-		public ScheduleTimeout(Guid correlationId, TimeSpan timeoutIn)
-			: this(correlationId, DateTime.UtcNow + timeoutIn)
-		{
-		}
-
-		public ScheduleTimeout(Guid correlationId, TimeSpan timeoutIn, int tag)
-			: this(correlationId, DateTime.UtcNow + timeoutIn, tag)
-		{
-		}
-
-		public ScheduleTimeout(Guid correlationId, DateTime timeoutAt)
-			: this(correlationId, timeoutAt, 0)
-		{
-		}
-
-		public ScheduleTimeout(Guid correlationId, DateTime timeoutAt, int tag)
-		{
-			CorrelationId = correlationId;
-			TimeoutAt = timeoutAt.ToUniversalTime();
-			Tag = tag;
-		}
 	}
 }

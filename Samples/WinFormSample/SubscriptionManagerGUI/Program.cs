@@ -8,6 +8,7 @@
 	using MassTransit.Services.Subscriptions.Configuration;
 	using MassTransit.Services.Subscriptions.Server;
 	using MassTransit.Services.Timeout;
+	using MassTransit.Services.Timeout.Server;
 	using MassTransit.Transports.Msmq;
 	using MassTransit.WindsorIntegration;
 	using Microsoft.Practices.ServiceLocation;
@@ -104,8 +105,8 @@
 				{
 					var container = new DefaultMassTransitContainer();
 
-					container.AddComponent<ITimeoutRepository, InMemoryTimeoutRepository>();
-					container.AddComponent<TimeoutService>(typeof (TimeoutService).Name);
+					container.AddComponent("sagaRepository", typeof(ISagaRepository<>), typeof(InMemorySagaRepository<>));
+					container.AddComponent<TimeoutService>(typeof(TimeoutService).Name);
 
 					var endpointFactory = EndpointFactoryConfigurator.New(x =>
 						{

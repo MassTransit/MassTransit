@@ -10,12 +10,15 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Services.Timeout
+namespace MassTransit.Services.Timeout.Messages
 {
-	public interface ITimeoutRepository
-    {
-		void Schedule(ScheduledTimeout timeout);
-		void Remove(ScheduledTimeout timeout);
-		bool TryGetNextScheduledTimeout(out ScheduledTimeout timeout);
-    }
+	using System;
+
+	[Serializable]
+	public class TimeoutCancelled :
+		CorrelatedBy<Guid>
+	{
+		public int Tag { get; set; }
+		public Guid CorrelationId { get; set; }
+	}
 }
