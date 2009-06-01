@@ -17,9 +17,12 @@ namespace MassTransit.Services.HealthMonitoring.Messages
 	[Serializable]
 	public class HealthInformation
 	{
-		public HealthInformation(Uri uri, string state)
+		public HealthInformation(Guid clientId, Uri controlUri, Uri dataUri, DateTime lastHeartbeat, string state)
 		{
-			Uri = uri;
+			ClientId = clientId;
+			ControlUri = controlUri;
+			DataUri = dataUri;
+			LastHeartbeat = lastHeartbeat;
 			State = state;
 		}
 
@@ -27,8 +30,10 @@ namespace MassTransit.Services.HealthMonitoring.Messages
 		{
 		}
 
-		public Uri Uri { get; set; }
-
+		public Guid ClientId { get; set; }
+		public Uri ControlUri { get; set; }
+		public Uri DataUri { get; set; }
+		public DateTime LastHeartbeat { get; set; }
 		public string State { get; set; }
 	}
 }

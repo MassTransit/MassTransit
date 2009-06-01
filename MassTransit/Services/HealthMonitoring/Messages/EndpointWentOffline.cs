@@ -15,10 +15,10 @@ namespace MassTransit.Services.HealthMonitoring.Messages
 	using System;
 
 	[Serializable]
-	public class Heartbeat :
+	public class EndpointWentOffline :
 		EndpointMessageBase
 	{
-		public Heartbeat(Guid correlationId, Uri controlUri, Uri dataUri, int heartbeatIntervalInSeconds)
+		public EndpointWentOffline(Guid correlationId, Uri controlUri, Uri dataUri, int heartbeatIntervalInSeconds)
 		{
 			CorrelationId = correlationId;
 			ControlUri = controlUri;
@@ -26,7 +26,7 @@ namespace MassTransit.Services.HealthMonitoring.Messages
 			HeartbeatIntervalInSeconds = heartbeatIntervalInSeconds;
 		}
 
-		protected Heartbeat()
+		protected EndpointWentOffline()
 		{
 		}
 	}

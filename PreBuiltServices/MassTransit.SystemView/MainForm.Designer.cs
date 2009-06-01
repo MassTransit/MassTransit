@@ -32,12 +32,13 @@
 			this.subscriptionView = new System.Windows.Forms.TreeView();
 			this.horizontalSplit = new System.Windows.Forms.SplitContainer();
 			this.timeoutListView = new System.Windows.Forms.ListView();
-			this.healthListView = new System.Windows.Forms.ListView();
+			this.timeoutExpiresAt = new System.Windows.Forms.ColumnHeader();
 			this.timeoutId = new System.Windows.Forms.ColumnHeader();
 			this.timeoutTag = new System.Windows.Forms.ColumnHeader();
-			this.timeoutExpiresAt = new System.Windows.Forms.ColumnHeader();
+			this.healthListView = new System.Windows.Forms.ListView();
 			this.healthUri = new System.Windows.Forms.ColumnHeader();
 			this.healthState = new System.Windows.Forms.ColumnHeader();
+			this.healthLastHeartbeat = new System.Windows.Forms.ColumnHeader();
 			this.verticalSplit.Panel1.SuspendLayout();
 			this.verticalSplit.Panel2.SuspendLayout();
 			this.verticalSplit.SuspendLayout();
@@ -103,18 +104,10 @@
 			this.timeoutListView.UseCompatibleStateImageBehavior = false;
 			this.timeoutListView.View = System.Windows.Forms.View.Details;
 			// 
-			// healthListView
+			// timeoutExpiresAt
 			// 
-			this.healthListView.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
-            this.healthUri,
-            this.healthState});
-			this.healthListView.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.healthListView.Location = new System.Drawing.Point(0, 0);
-			this.healthListView.Name = "healthListView";
-			this.healthListView.Size = new System.Drawing.Size(449, 262);
-			this.healthListView.TabIndex = 0;
-			this.healthListView.UseCompatibleStateImageBehavior = false;
-			this.healthListView.View = System.Windows.Forms.View.Details;
+			this.timeoutExpiresAt.Text = "Expires At";
+			this.timeoutExpiresAt.Width = 120;
 			// 
 			// timeoutId
 			// 
@@ -126,20 +119,34 @@
 			this.timeoutTag.Text = "Tag";
 			this.timeoutTag.Width = 80;
 			// 
-			// timeoutExpiresAt
+			// healthListView
 			// 
-			this.timeoutExpiresAt.Text = "Expires At";
-			this.timeoutExpiresAt.Width = 120;
+			this.healthListView.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.healthUri,
+            this.healthLastHeartbeat,
+            this.healthState});
+			this.healthListView.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.healthListView.Location = new System.Drawing.Point(0, 0);
+			this.healthListView.Name = "healthListView";
+			this.healthListView.Size = new System.Drawing.Size(449, 262);
+			this.healthListView.TabIndex = 0;
+			this.healthListView.UseCompatibleStateImageBehavior = false;
+			this.healthListView.View = System.Windows.Forms.View.Details;
 			// 
 			// healthUri
 			// 
 			this.healthUri.Text = "Endpoint";
-			this.healthUri.Width = 300;
+			this.healthUri.Width = 240;
 			// 
 			// healthState
 			// 
 			this.healthState.Text = "State";
 			this.healthState.Width = 100;
+			// 
+			// healthLastHeartbeat
+			// 
+			this.healthLastHeartbeat.Text = "Last Update";
+			this.healthLastHeartbeat.Width = 100;
 			// 
 			// MainForm
 			// 
@@ -172,6 +179,7 @@
 		private System.Windows.Forms.ListView healthListView;
 		private System.Windows.Forms.ColumnHeader healthUri;
 		private System.Windows.Forms.ColumnHeader healthState;
+		private System.Windows.Forms.ColumnHeader healthLastHeartbeat;
 	}
 }
 

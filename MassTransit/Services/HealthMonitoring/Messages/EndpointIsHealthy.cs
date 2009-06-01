@@ -15,18 +15,22 @@ namespace MassTransit.Services.HealthMonitoring.Messages
 	using System;
 
 	[Serializable]
-	public class Ping :
-		CorrelatedBy<Guid>
+	public class EndpointIsHealthy :
+		EndpointNotificationBase
 	{
-		public Ping(Guid correlationId)
+		public EndpointIsHealthy(Guid correlationId, Uri controlUri, Uri dataUri, int heartbeatIntervalInSeconds, DateTime lastHeartbeat, string state)
 		{
 			CorrelationId = correlationId;
+			ControlUri = controlUri;
+			DataUri = dataUri;
+			HeartbeatIntervalInSeconds = heartbeatIntervalInSeconds;
+			LastHeartbeat = lastHeartbeat;
+			State = state;
 		}
 
-		protected Ping()
+		protected EndpointIsHealthy()
 		{
 		}
 
-		public Guid CorrelationId { get; set; }
 	}
 }

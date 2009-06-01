@@ -29,11 +29,13 @@ namespace MassTransit.RuntimeServices.Model
 				.Access.AsReadOnlyPropertyThroughCamelCaseField(Prefix.Underscore)
 				.CustomTypeIs<StateMachineUserType>();
 
-			Map(x => x.EndpointAddress)
+			Map(x => x.ControlUri)
+				.CustomTypeIs<UriUserType>();
+			Map(x => x.DataUri)
 				.CustomTypeIs<UriUserType>();
 
 			Map(x => x.LastHeartbeat);
-			Map(x => x.TimeBetweenBeatsInSeconds);
+			Map(x => x.HeartbeatIntervalInSeconds);
 		}
 	}
 }

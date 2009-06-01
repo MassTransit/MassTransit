@@ -13,6 +13,7 @@
 namespace MassTransit.Services.HealthMonitoring
 {
 	using System;
+	using System.Linq;
 	using log4net;
 	using Messages;
 	using Pipeline.Inspectors;
@@ -20,7 +21,6 @@ namespace MassTransit.Services.HealthMonitoring
 	using Server;
 
 	public class HealthService :
-		Consumes<StatusChange>.All,
 		Consumes<HealthUpdateRequest>.All,
 		IDisposable
 	{
@@ -47,11 +47,6 @@ namespace MassTransit.Services.HealthMonitoring
 			UpdateSubscribers();
 		}
 
-		public void Consume(StatusChange message)
-		{
-			UpdateSubscribers();
-		}
-
 		public void Dispose()
 		{
 			_bus.Dispose();
@@ -62,7 +57,6 @@ namespace MassTransit.Services.HealthMonitoring
 			_log.Info("Health Service Starting");
 
 			_unsubscribeToken += _bus.Subscribe(this);
-
 			_unsubscribeToken += _bus.Subscribe<HealthSaga>();
 
 			PipelineViewer.Trace(_bus.InboundPipeline);
@@ -84,7 +78,8 @@ namespace MassTransit.Services.HealthMonitoring
 			var message = new HealthUpdate();
 
 			_healthSagas.Where(x => true)
-				.Each(x => { message.Information.Add(new HealthInformation(x.EndpointAddress, x.CurrentState.Name)); });
+				.Select(x => new HealthInformation(x.CorrelationId, x.ControlUri, x.DataUri, x.LastHeartbeat, x.CurrentState.Name))
+				.Each(x => message.Information.Add(x));
 
 			_log.Debug("Publishing HealthUpdate");
 			_bus.Publish(message);
