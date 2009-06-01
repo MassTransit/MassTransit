@@ -41,14 +41,14 @@ namespace MassTransit.Pipeline
 			return inspector.Inspect(this, () => _outputSink.Inspect(inspector));
 		}
 
-		public void Configure(Action<IConfigurePipeline> action)
+		public void Configure(Action<IConfigurePipeline> configurePipeline)
 		{
-			action(_configurator);
+			configurePipeline(_configurator);
 		}
 
-		public V Configure<V>(Func<IConfigurePipeline, V> action)
+		public V Configure<V>(Func<IConfigurePipeline, V> configurePipeline)
 		{
-			return action(_configurator);
+			return configurePipeline(_configurator);
 		}
 	}
 }
