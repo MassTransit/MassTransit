@@ -13,6 +13,7 @@
 namespace MassTransit.Services.Timeout.Messages
 {
 	using System;
+	using System.Data.SqlTypes;
 
 	[Serializable]
 	public class ScheduleTimeout : 
@@ -39,6 +40,9 @@ namespace MassTransit.Services.Timeout.Messages
 
 		public ScheduleTimeout(Guid correlationId, DateTime timeoutAt, int tag)
 		{
+			if(timeoutAt < SqlDateTime.MinValue || timeoutAt > SqlDateTime.MaxValue)
+				throw new ArgumentException("The scheduled time must be between " + SqlDateTime.MinValue + " and " + SqlDateTime.MaxValue);
+
 			CorrelationId = correlationId;
 			TimeoutAt = timeoutAt.ToUniversalTime();
 			Tag = tag;

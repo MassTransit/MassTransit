@@ -14,6 +14,7 @@ namespace MassTransit.Infrastructure.Saga
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Data;
 	using System.Linq;
 	using System.Linq.Expressions;
 	using log4net;
@@ -43,6 +44,7 @@ namespace MassTransit.Infrastructure.Saga
 		public IEnumerable<Action<V>> Find<V>(Expression<Func<T, bool>> expression, Action<T, V> action)
 		{
 			using (var session = _sessionFactory.OpenSession())
+			using (var transaction = session.BeginTransaction())
 			{
 				List<T> existingSagas = session.Linq<T>().Where(expression).ToList();
 
@@ -56,7 +58,8 @@ namespace MassTransit.Infrastructure.Saga
 
 					session.Update(saga);
 				}
-				session.Flush();
+
+				transaction.Commit();
 			}
 		}
 
@@ -73,8 +76,13 @@ namespace MassTransit.Infrastructure.Saga
 		public IEnumerable<T> Where(Expression<Func<T, bool>> filter)
 		{
 			using (var session = _sessionFactory.OpenSession())
+			using (var transaction = session.BeginTransaction(IsolationLevel.ReadUncommitted))
 			{
-				return session.Linq<T>().Where(filter).ToList();
+				var result =  session.Linq<T>().Where(filter).ToList();
+
+				transaction.Commit();
+
+				return result;
 			}
 		}
 
@@ -85,12 +93,13 @@ namespace MassTransit.Infrastructure.Saga
 			if (_log.IsDebugEnabled)
 				_log.DebugFormat("Created saga [{0}] - {1}", typeof (T).ToFriendlyName(), sagaId);
 
-			yield return x => action(saga, x);
-
 			using (var session = _sessionFactory.OpenSession())
+			using (var transaction = session.BeginTransaction())
 			{
+				yield return x => action(saga, x);
+
 				session.Save(saga);
-				session.Flush();
+				transaction.Commit();
 			}
 		}
 

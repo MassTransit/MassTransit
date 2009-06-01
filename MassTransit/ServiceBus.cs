@@ -318,45 +318,25 @@ namespace MassTransit
 									context.ReceivedAs(message);
 								});
 
-							using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required))
-							{
+							//using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required))
+							//{
 								bool atLeastOneConsumerFailed = DispatchMessageToConsumers(resourceLock, selector, message);
 								if (atLeastOneConsumerFailed)
 								{
-									PoisonEndpoint.Send(message);
+									MoveMessageToPoisonEndpoint(selector);
 								}
 
-								scope.Complete();
-							}
+							//	scope.Complete();
+							//}
 						}
 						catch (SerializationException sex)
 						{
-							selector.AcceptMessage();
-
-							try
-							{
-								selector.MoveMessageTo(PoisonEndpoint);
-							}
-							catch (Exception ex)
-							{
-								_log.Error("Failed to move message to poison endpoint", ex);
-							}
-
+							MoveMessageToPoisonEndpoint(selector);
 							throw new MessageException(typeof (object), "An error occurred deserializing a message", sex);
 						}
 						catch(SagaException sax)
 						{
-							selector.AcceptMessage();
-
-							try
-							{
-								selector.MoveMessageTo(PoisonEndpoint);
-							}
-							catch(Exception ex)
-							{
-								_log.Error("Failed to move message to poison endpoint", ex);
-							}
-
+							MoveMessageToPoisonEndpoint(selector);
 							throw new MessageException(typeof(object), "There was a problem with a saga message", sax);
 						}
 						catch (Exception ex)
@@ -378,6 +358,20 @@ namespace MassTransit
 			}
 
 			return performedWork;
+		}
+
+		private void MoveMessageToPoisonEndpoint(IMessageSelector selector)
+		{
+			selector.AcceptMessage();
+
+			try
+			{
+				selector.MoveMessageTo(PoisonEndpoint);
+			}
+			catch (Exception ex)
+			{
+				_log.Error("Failed to move message to poison endpoint", ex);
+			}
 		}
 
 		private bool DispatchMessageToConsumers(IResourceLockScope<IEndpoint> resourceLock, IMessageSelector selector, object message)
