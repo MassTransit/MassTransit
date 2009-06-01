@@ -12,13 +12,10 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Services.Timeout
 {
-    using System;
-    using Magnum.Data;
-
-	public interface ITimeoutRepository :
-		IRepository<ScheduledTimeout>
+	public interface ITimeoutRepository
     {
 		void Schedule(ScheduledTimeout timeout);
 		void Remove(ScheduledTimeout timeout);
+		bool TryGetNextScheduledTimeout(out ScheduledTimeout timeout);
     }
 }

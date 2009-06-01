@@ -25,7 +25,6 @@ namespace MassTransit.Services.Timeout
 		public InMemoryTimeoutRepository()
 			: base(x => x.Id)
 		{
-			
 		}
 
 		public void Schedule(ScheduledTimeout timeout)
@@ -54,6 +53,13 @@ namespace MassTransit.Services.Timeout
 					Delete(existing);
 				}
 			}
+		}
+
+		public bool TryGetNextScheduledTimeout(out ScheduledTimeout timeout)
+		{
+			timeout = this.OrderBy(x => x.ExpiresAt).FirstOrDefault();
+
+			return timeout != null;
 		}
 	}
 }

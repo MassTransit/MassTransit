@@ -14,70 +14,42 @@ namespace MassTransit.Infrastructure.Timeout
 {
 	using System;
 	using System.Linq;
-	using Magnum.Data;
 	using NHibernate;
 	using NHibernate.Linq;
 	using Services.Timeout;
 
 	public class NHibernateTimeoutRepository :
-		RepositoryBase<ScheduledTimeout>,
 		ITimeoutRepository
 	{
-		private readonly object _queryLock = new object();
 		private volatile bool _disposed;
-		private ISession _session;
+		private ISessionFactory _sessionFactory;
 
 		public NHibernateTimeoutRepository(ISessionFactory sessionFactory)
 		{
-			_session = sessionFactory.OpenSession();
+			_sessionFactory = sessionFactory;
 		}
 
-		protected override IQueryable<ScheduledTimeout> RepositoryQuery
-		{
-			get
-			{
-				lock (_queryLock)
-				{
-					return _session.Linq<ScheduledTimeout>();
-				}
-			}
-		}
-
-		public override void Dispose()
-		{
-			Dispose(true);
-			GC.SuppressFinalize(this);
-		}
-
-		public override void Save(ScheduledTimeout item)
-		{
-			_session.Save(item);
-		}
-
-		public override void Update(ScheduledTimeout item)
-		{
-			_session.Update(item);
-		}
-
-		public override void Delete(ScheduledTimeout item)
-		{
-			_session.Delete(item);
-		}
 
 		public void Schedule(ScheduledTimeout timeout)
 		{
 			ScheduledTimeout existingTimeout;
 			if (TryGetExistingTimeout(timeout, out existingTimeout))
 			{
-				existingTimeout.ExpiresAt = timeout.ExpiresAt;
-				_session.Save(existingTimeout);
+				using (var session = _sessionFactory.OpenSession())
+				{
+					existingTimeout.ExpiresAt = timeout.ExpiresAt;
+					session.Update(existingTimeout);
+					session.Flush();
+				}
 			}
 			else
 			{
-				_session.Save(timeout);
+				using (var session = _sessionFactory.OpenSession())
+				{
+					session.Save(timeout);
+					session.Flush();
+				}
 			}
-
-			_session.Flush();
 		}
 
 		public void Remove(ScheduledTimeout timeout)
@@ -85,9 +57,30 @@ namespace MassTransit.Infrastructure.Timeout
 			ScheduledTimeout existingTimeout;
 			if (TryGetExistingTimeout(timeout, out existingTimeout))
 			{
-				_session.Delete(existingTimeout);
-				_session.Flush();
+				using (var session = _sessionFactory.OpenSession())
+				{
+					session.Delete(existingTimeout);
+					session.Flush();
+				}
 			}
+		}
+
+		public bool TryGetNextScheduledTimeout(out ScheduledTimeout timeout)
+		{
+			using (var session = _sessionFactory.OpenSession())
+			{
+				timeout = session.Linq<ScheduledTimeout>()
+					.OrderBy(x => x.ExpiresAt)
+					.FirstOrDefault();
+			}
+
+			return timeout != null;
+		}
+
+		public void Dispose()
+		{
+			Dispose(true);
+			GC.SuppressFinalize(this);
 		}
 
 		public void Dispose(bool disposing)
@@ -95,19 +88,21 @@ namespace MassTransit.Infrastructure.Timeout
 			if (_disposed) return;
 			if (disposing)
 			{
-				_session.Dispose();
-				_session = null;
+				_sessionFactory = null;
 			}
 			_disposed = true;
 		}
 
 		private bool TryGetExistingTimeout(ScheduledTimeout timeout, out ScheduledTimeout existingTimeout)
 		{
-			existingTimeout = _session.Linq<ScheduledTimeout>()
-				.Where(x => x.Id == timeout.Id && x.Tag == timeout.Tag)
-				.FirstOrDefault();
+			using (var session = _sessionFactory.OpenSession())
+			{
+				existingTimeout = session.Linq<ScheduledTimeout>()
+					.Where(x => x.Id == timeout.Id && x.Tag == timeout.Tag)
+					.FirstOrDefault();
 
-			return existingTimeout != null;
+				return existingTimeout != null;
+			}
 		}
 
 		~NHibernateTimeoutRepository()

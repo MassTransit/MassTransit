@@ -43,7 +43,7 @@ namespace MassTransit.Services.HealthMonitoring.Server
 									saga.EndpointAddress = message.EndpointAddress;
 									saga.TimeBetweenBeatsInSeconds = message.TimeBetweenBeatsInSeconds;
 									saga.MarkBeat();
-									saga.Bus.Publish(new ScheduleTimeout(saga.CorrelationId, saga.TimeBetweenBeatsInSeconds.Seconds()));
+									saga.ScheduleTimeoutForHeartbeat();
 								})
 							.Then(StatusChange)
 							.TransitionTo(Healthy),
@@ -53,7 +53,7 @@ namespace MassTransit.Services.HealthMonitoring.Server
 									saga.EndpointAddress = message.EndpointAddress;
 									saga.TimeBetweenBeatsInSeconds = 10;
 									saga.MarkBeat();
-									saga.Bus.Publish(new ScheduleTimeout(saga.CorrelationId, saga.TimeBetweenBeatsInSeconds.Seconds()));
+									saga.ScheduleTimeoutForHeartbeat();
 								})
 							.Then(StatusChange)
 							.TransitionTo(Healthy));
@@ -63,19 +63,18 @@ namespace MassTransit.Services.HealthMonitoring.Server
 							.Then((saga, message) =>
 								{
 									saga.MarkBeat();
-									//reschedule
-									saga.Bus.Publish(new ScheduleTimeout(saga.CorrelationId, saga.TimeBetweenBeatsInSeconds.Seconds()));
+									saga.ScheduleTimeoutForHeartbeat();
 								})
 							.Then(StatusChange),
 						When(TimeoutExpired).And(msg => msg.Tag == (int) Timeouts.HeartBeatTimeout)
 							.Then((saga, message) =>
 								{
-									//attempt to directly contact the endpoint
-									//how to catch the ping timing out?
-									saga.Bus.Publish(new ScheduleTimeout(saga.CorrelationId, 5.Seconds())); //ideally i would tag this with ping-timeout or something.
+									saga.ScheduleTimeoutForPing();
 
-									var ef = ServiceLocator.Current.GetInstance<IEndpointFactory>();
-									ef.GetEndpoint(saga.EndpointAddress).Send(new Ping(saga.CorrelationId));
+									ServiceLocator.Current
+										.GetInstance<IEndpointFactory>()
+										.GetEndpoint(saga.EndpointAddress)
+										.Send(new Ping(saga.CorrelationId));
 								})
 							.Then(StatusChange)
 							.TransitionTo(Suspect));
@@ -135,6 +134,20 @@ namespace MassTransit.Services.HealthMonitoring.Server
 		{
 			int actualDuration = DateTime.Now.Subtract(LastHeartbeat).Seconds;
 			return (actualDuration/2) > TimeBetweenBeatsInSeconds;
+		}
+
+		private void ScheduleTimeoutForHeartbeat()
+		{
+			int timeout = TimeBetweenBeatsInSeconds*2;
+
+			Bus.Publish(new ScheduleTimeout(CorrelationId, timeout.Seconds(), (int)Timeouts.HeartBeatTimeout));
+		}
+
+		private void ScheduleTimeoutForPing()
+		{
+			int timeout = 5;
+
+			Bus.Publish(new ScheduleTimeout(CorrelationId, timeout.Seconds(), (int)Timeouts.PingTimeout));
 		}
 
 		private void MarkBeat()
