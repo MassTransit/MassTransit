@@ -45,12 +45,7 @@ namespace SubscriptionServiceHost
 
                     c.DependencyOnMsmq();
 
-                    c.BeforeStart(a =>
-                        {
-                            
-                        });
-
-                    c.ConfigureService<SubscriptionService>(s =>
+                    c.ConfigureService<SubscriptionService>(typeof(SubscriptionService).Name, s =>
                         {
                             s.CreateServiceLocator(()=>
                                 {
@@ -78,7 +73,6 @@ namespace SubscriptionServiceHost
                                 });
                             s.WhenStarted(tc => tc.Start());
                             s.WhenStopped(tc => tc.Stop());
-                            s.WithName("Subscription service");
                         });
                 });
             Runner.Host(cfg, args);

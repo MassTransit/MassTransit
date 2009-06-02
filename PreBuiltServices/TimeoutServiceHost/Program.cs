@@ -46,7 +46,7 @@ namespace TimeoutServiceHost
 
                 c.DependencyOnMsmq();
 
-                c.ConfigureService<TimeoutService>(s =>
+                c.ConfigureService<TimeoutService>(typeof(TimeoutService).Name, s =>
                 {
                     s.CreateServiceLocator(() =>
                     {
@@ -68,7 +68,6 @@ namespace TimeoutServiceHost
                     });
                     s.WhenStarted(tc => tc.Start());
                     s.WhenStopped(tc => tc.Stop());
-                    s.WithName("Timeout service");
                 });
             });
             Runner.Host(cfg, args);

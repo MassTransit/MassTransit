@@ -1,29 +1,24 @@
 namespace SecurityMessages
 {
-    using System;
-    using MassTransit;
+	using System;
+	using MassTransit;
 
 	[Serializable]
-    public class RequestPasswordUpdate :
-        CorrelatedBy<Guid>
-    {
-        private readonly string _newPassword;
-		private readonly Guid _correlationId;
-
-    	public RequestPasswordUpdate(string newPassword)
-        {
-			_correlationId = Guid.NewGuid();
-            _newPassword = newPassword;
-        }
-
-        public string NewPassword
-        {
-            get { return _newPassword; }
-        }
-
-		public Guid CorrelationId
+	public class RequestPasswordUpdate :
+		CorrelatedBy<Guid>
+	{
+		public RequestPasswordUpdate(string newPassword)
 		{
-			get { return _correlationId; }
+			CorrelationId = Guid.NewGuid();
+			NewPassword = newPassword;
 		}
-    }
+
+		protected RequestPasswordUpdate()
+		{
+		}
+
+		public string NewPassword { get; set; }
+
+		public Guid CorrelationId { get; set; }
+	}
 }

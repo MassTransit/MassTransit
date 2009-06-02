@@ -3,27 +3,22 @@ namespace SecurityMessages
 	using System;
 	using MassTransit;
 
-    [Serializable]
-	public class PasswordUpdateComplete : 
-        CorrelatedBy<Guid>
+	[Serializable]
+	public class PasswordUpdateComplete :
+		CorrelatedBy<Guid>
 	{
-		private readonly Guid _correlationId;
-		private readonly int _errorCode;
-
 		public PasswordUpdateComplete(Guid correlationId, int errorCode)
 		{
-			_correlationId = correlationId;
-			_errorCode = errorCode;
+			CorrelationId = correlationId;
+			ErrorCode = errorCode;
 		}
 
-		public int ErrorCode
+		protected PasswordUpdateComplete()
 		{
-			get { return _errorCode; }
 		}
 
-		public Guid CorrelationId
-		{
-			get { return _correlationId; }
-		}
+		public int ErrorCode { get; set; }
+
+		public Guid CorrelationId { get; set; }
 	}
 }

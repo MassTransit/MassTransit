@@ -44,7 +44,7 @@ namespace HealthServiceHost
 
                 c.DependencyOnMsmq();
 
-                c.ConfigureService<HealthService>(s =>
+                c.ConfigureService<HealthService>(typeof(HealthService).Name, s =>
                 {
                     s.CreateServiceLocator(() =>
                     {
@@ -66,7 +66,6 @@ namespace HealthServiceHost
                     });
                     s.WhenStarted(tc => tc.Start());
                     s.WhenStopped(tc => tc.Stop());
-                    s.WithName("Health service");
                 });
             });
             Runner.Host(cfg, args);
