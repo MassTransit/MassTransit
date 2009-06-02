@@ -12,14 +12,11 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.RuntimeServices
 {
-	using System.Data;
 	using System.IO;
 	using FluentNHibernate.Cfg;
-	using FluentNHibernate.Cfg.Db;
 	using Infrastructure.Saga;
 	using Model;
 	using NHibernate;
-	using NHibernate.Cfg;
 	using NHibernate.Tool.hbm2ddl;
 	using Saga;
 	using Services.HealthMonitoring;
@@ -61,13 +58,6 @@ namespace MassTransit.RuntimeServices
 		private static ISessionFactory CreateSessionFactory()
 		{
 			return Fluently.Configure()
-				.Database(
-				MsSqlConfiguration.MsSql2005
-					.AdoNetBatchSize(100)
-					.ConnectionString(s => s.FromConnectionStringWithKey("MassTransit"))
-					.DefaultSchema("dbo")
-					//.ShowSql()
-					.Raw(Environment.Isolation, IsolationLevel.ReadCommitted.ToString()))
 				.Mappings(m => { m.FluentMappings.Add<HealthSagaMap>(); })
 				.ExposeConfiguration(BuildSchema)
 				.BuildSessionFactory();
@@ -75,7 +65,7 @@ namespace MassTransit.RuntimeServices
 
 		private static void BuildSchema(NHibernate.Cfg.Configuration config)
 		{
-			var schemaFile = Path.Combine(Path.GetDirectoryName(typeof(HealthService).Assembly.Location), typeof(HealthService).Name + ".sql");
+			var schemaFile = Path.Combine(Path.GetDirectoryName(typeof (HealthService).Assembly.Location), typeof (HealthService).Name + ".sql");
 
 			new SchemaExport(config).SetOutputFile(schemaFile).Execute(false, false, false, true);
 		}
