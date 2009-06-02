@@ -32,7 +32,7 @@
 					x.RunAsLocalSystem();
 					x.UseWinFormHost<SubscriptionManagerForm>();
 
-					x.BeforeStart(s =>
+					x.BeforeStartingServices(s =>
 						{
 							var container = new DefaultMassTransitContainer();
 
@@ -49,11 +49,11 @@
 							ServiceLocator.SetLocatorProvider(() => wob);
 						});
 
-					x.ConfigureService<SubscriptionService>(ConfigureSubscriptionService);
+					x.ConfigureService<SubscriptionService>(typeof(SubscriptionService).Name, ConfigureSubscriptionService);
 
-					x.ConfigureService<TimeoutService>(ConfigureTimeoutService);
+					x.ConfigureService<TimeoutService>(typeof(TimeoutService).Name, ConfigureTimeoutService);
 
-					x.ConfigureService<HealthService>(ConfigureHealthService);
+					x.ConfigureService<HealthService>(typeof(HealthService).Name, ConfigureHealthService);
 				});
 			Runner.Host(cfg, args);
 		}

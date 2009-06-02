@@ -27,12 +27,12 @@
 						{
 							var container = new DefaultMassTransitContainer("InternalInventoryService.Castle.xml");
 							container.AddComponent<InventoryLevelService>();
-							container.AddComponent<InternalInventoryServiceLifeCycle>();
+							container.AddComponent<InternalInventoryServiceLifeCycle>(typeof (InternalInventoryServiceLifeCycle).Name);
 							var wob = new WindsorObjectBuilder(container.Kernel);
 							ServiceLocator.SetLocatorProvider(() => wob);
 						});
 
-					c.ConfigureService<InternalInventoryServiceLifeCycle>(s =>
+					c.ConfigureService<InternalInventoryServiceLifeCycle>(typeof(InternalInventoryServiceLifeCycle).Name, s =>
 						{
 							s.WhenStarted(o => o.Start());
 							s.WhenStopped(o => o.Stop());

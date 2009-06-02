@@ -32,9 +32,7 @@
 					c.DependencyOnMsmq();
 					c.RunAsFromInteractive();
 
-					c.BeforeStart(a => { });
-
-					c.ConfigureService<BaristaService>(s =>
+					c.ConfigureService<BaristaService>(typeof(BaristaService).Name, s =>
 						{
 							s.CreateServiceLocator(() =>
 								{
@@ -42,7 +40,7 @@
 									container.AddComponent("sagaRepository", typeof(ISagaRepository<>), typeof(InMemorySagaRepository<>));
 
 									container.AddComponent<DrinkPreparationSaga>();
-									container.AddComponent<BaristaService>();
+									container.AddComponent<BaristaService>(typeof(BaristaService).Name);
 
 									Trace.Listeners.Add(new TextWriterTraceListener(Console.Out));
 

@@ -39,7 +39,6 @@ namespace MassTransit.RuntimeServices
 				.CacheBy(InstanceScope.Singleton)
 				.TheDefault.Is.ConstructedBy(context => CreateSessionFactory());
 
-
 			ForRequestedType(typeof (ISagaRepository<>))
 				.AddConcreteType(typeof (NHibernateSagaRepositoryForContainers<>));
 			ForRequestedType<ISubscriptionRepository>()

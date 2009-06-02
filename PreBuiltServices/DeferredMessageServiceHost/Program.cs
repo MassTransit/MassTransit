@@ -48,7 +48,7 @@ namespace DeferredMessageServiceHost
 					c.DependencyOnMsmq();
 					c.DependsOn("MT-TIMEOUT");
 
-					c.ConfigureService<MessageDeferralService>(s =>
+					c.ConfigureService<MessageDeferralService>(typeof(MessageDeferralService).Name, s =>
 						{
                             s.CreateServiceLocator(()=>
                                 {
@@ -76,7 +76,6 @@ namespace DeferredMessageServiceHost
                                 });
 							s.WhenStarted(tc => tc.Start());
 							s.WhenStopped(tc => tc.Stop());
-							s.WithName("Deferred service");
 						});
 				});
 			Runner.Host(cfg, args);

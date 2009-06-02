@@ -32,16 +32,14 @@
 					c.RunAsLocalSystem();
 					c.DependencyOnMsmq();
 
-					c.BeforeStart(a => { });
-
-					c.ConfigureService<CashierService>(s =>
+					c.ConfigureService<CashierService>(typeof(CashierService).Name, s =>
 						{
 							s.CreateServiceLocator(() =>
 								{
 									IWindsorContainer container = new DefaultMassTransitContainer("Starbucks.Cashier.Castle.xml");
 									container.AddComponent("sagaRepository", typeof(ISagaRepository<>), typeof(InMemorySagaRepository<>));
 
-									container.AddComponent<CashierService>();
+									container.AddComponent<CashierService>(typeof(CashierService).Name);
 									container.AddComponent<CashierSaga>();
 
 									Trace.Listeners.Add(new TextWriterTraceListener(Console.Out));

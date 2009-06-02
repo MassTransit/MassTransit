@@ -45,24 +45,22 @@ namespace MassTransit.RuntimeServices
 					config.DependencyOnMsmq();
 					config.DependencyOnMsSql();
 
-					config.BeforeStart(x => { });
-
-					config.ConfigureService<SubscriptionService>(service =>
+					config.ConfigureService<SubscriptionService>(typeof(SubscriptionService).Name, service =>
 						{
 							ConfigureService<SubscriptionService, SubscriptionServiceRegistry>(service, start => start.Start(), stop => stop.Stop());
 						});
 
-					config.ConfigureService<HealthService>(service =>
+					config.ConfigureService<HealthService>(typeof(HealthService).Name, service =>
 					{
 						ConfigureService<HealthService, HealthServiceRegistry>(service, start => start.Start(), stop => stop.Stop());
 					});
 
-					config.ConfigureService<TimeoutService>(service =>
+					config.ConfigureService<TimeoutService>(typeof(TimeoutService).Name, service =>
 						{
 							ConfigureService<TimeoutService, TimeoutServiceRegistry>(service, start => start.Start(), stop => stop.Stop());
 						});
 
-					config.AfterStop(x => { _log.Info("MassTransit Runtime Services are exiting..."); });
+					config.AfterStoppingTheHost(x => { _log.Info("MassTransit Runtime Services are exiting..."); });
 				});
 			Runner.Host(configuration, args);
 		}
@@ -86,6 +84,9 @@ namespace MassTransit.RuntimeServices
 							x.ForRequestedType<IConfiguration>()
 								.CacheBy(InstanceScope.Singleton)
 								.AddConcreteType<Configuration>();
+
+							x.ForRequestedType<TService>()
+								.AddInstances(i => i.OfConcreteType<TService>().WithName(typeof (TService).Name));
 						});
 
 					TRegistry registry = (TRegistry) Activator.CreateInstance(typeof (TRegistry), container);
@@ -96,8 +97,6 @@ namespace MassTransit.RuntimeServices
 				});
 			service.WhenStarted(start);
 			service.WhenStopped(stop);
-
-			service.WithName(typeof (TService).Name);
 		}
 	}
 }

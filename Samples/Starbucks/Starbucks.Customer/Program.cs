@@ -26,10 +26,10 @@
 					c.DependencyOnMsmq();
 					c.UseWinFormHost<OrderDrinkForm>();
 
-					c.ConfigureService<CustomerService>(s => s.CreateServiceLocator(() =>
+					c.ConfigureService<CustomerService>(typeof(CustomerService).Name, s => s.CreateServiceLocator(() =>
 						{
 							IWindsorContainer container = new DefaultMassTransitContainer("Starbucks.Customer.Castle.xml");
-							container.AddComponent<CustomerService>();
+							container.AddComponent<CustomerService>(typeof(CustomerService).Name);
 							container.AddComponent<OrderDrinkForm>();
 							return ServiceLocator.Current;
 						}));
