@@ -54,13 +54,6 @@ namespace MassTransit.RuntimeServices
 		private static ISessionFactory CreateSessionFactory()
 		{
 			return Fluently.Configure()
-				.Database(
-				MsSqlConfiguration.MsSql2005
-					.AdoNetBatchSize(100)
-					.ConnectionString(s => s.FromConnectionStringWithKey("MassTransit"))
-					.DefaultSchema("dbo")
-					//.ShowSql()
-					.Raw(Environment.Isolation, IsolationLevel.ReadCommitted.ToString()))
 				.Mappings(m =>
 					{
 						m.FluentMappings.Add<SubscriptionSagaMap>();
