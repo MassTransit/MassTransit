@@ -12,15 +12,12 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.RuntimeServices
 {
-	using System.Data;
 	using System.IO;
 	using FluentNHibernate.Cfg;
-	using FluentNHibernate.Cfg.Db;
 	using Infrastructure.Saga;
 	using Infrastructure.Subscriptions;
 	using Model;
 	using NHibernate;
-	using NHibernate.Cfg;
 	using NHibernate.Tool.hbm2ddl;
 	using Saga;
 	using Services.Subscriptions.Server;
