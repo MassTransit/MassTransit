@@ -12,10 +12,14 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests.Subscriptions
 {
+	using System;
 	using System.Diagnostics;
 	using System.Threading;
+	using Magnum;
 	using Magnum.DateTimeExtensions;
 	using MassTransit.Pipeline.Inspectors;
+	using MassTransit.Services.Subscriptions;
+	using MassTransit.Services.Subscriptions.Messages;
 	using Messages;
 	using NUnit.Framework;
 	using Rhino.Mocks;
@@ -48,6 +52,23 @@ namespace MassTransit.Tests.Subscriptions
 			consumer.ShouldHaveReceivedMessage(message, 500.Milliseconds());
 
 			unsubscribeAction();
+		}
+
+		[Test]
+		public void Removing_a_subscription_twice_should_not_have_a_negative_impact()
+		{
+			Guid clientId = CombGuid.Generate();
+
+			SubscriptionInformation subscription = new SubscriptionInformation(clientId, 1, typeof (PingMessage), RemoteBus.Endpoint.Uri);
+
+			LocalControlBus.Endpoint.Send(new AddSubscription(subscription));
+			Thread.Sleep(250);
+
+			LocalControlBus.Endpoint.Send(new RemoveSubscription(subscription));
+			LocalControlBus.Endpoint.Send(new RemoveSubscription(subscription));
+			Thread.Sleep(250);
+
+			PipelineViewer.Trace(LocalBus.OutboundPipeline);
 		}
 
 		private void DumpPipelines()

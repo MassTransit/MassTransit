@@ -257,8 +257,6 @@ namespace MassTransit
 			if (_disposed) return;
 			if (disposing)
 			{
-				_unsubscribeEventDispatchers();
-
 				_receiveThreadLock.Shutdown();
 
 				if (_threadPool != null)
@@ -274,6 +272,8 @@ namespace MassTransit
 					_serviceContainer.Dispose();
 					_serviceContainer = null;
 				}
+
+				_unsubscribeEventDispatchers();
 
 				if (ControlBus != this)
 					ControlBus.Dispose();
