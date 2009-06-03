@@ -180,6 +180,7 @@ namespace MassTransit.Configuration
 		public new static IControlBus New(Action<IServiceBusConfigurator> action)
 		{
 			var configurator = new ControlBusConfigurator();
+			configurator.SetConcurrentConsumerLimit(1);
 
 			action(configurator);
 
