@@ -59,7 +59,7 @@ namespace MassTransit.Serialization.Custom
 
 									_log.DebugFormat("Adding deserializer for {0} ({1})", itemType.Name, type.Name);
 
-									_deserializers.Add(itemType.ToMessageName(), ClassFactory.New(type) as IObjectDeserializer);
+									_deserializers.Add(itemType.AssemblyQualifiedName/*.ToMessageName()*/, ClassFactory.New(type) as IObjectDeserializer);
 								});
 					});
 		}

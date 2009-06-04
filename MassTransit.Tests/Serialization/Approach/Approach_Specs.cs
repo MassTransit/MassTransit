@@ -75,7 +75,28 @@ namespace MassTransit.Tests.Serialization.Approach
 			TestSerialization(message);
 		}
 
+		[Test]
+		public void Fault_Messages_should_be_properly_serialized()
+		{
+			var message = new SerializationTestMessage
+			{
+				DecimalValue = 123.45m,
+				LongValue = 098123213,
+				BoolValue = true,
+				ByteValue = 127,
+				IntValue = 123,
+				DateTimeValue = new DateTime(2008, 9, 8, 7, 6, 5, 4),
+				TimeSpanValue = 30.Seconds(),
+				GuidValue = Guid.NewGuid(),
+				StringValue = "Chris's Sample Code",
+				DoubleValue = 1823.172,
+			};
 
+			var faltMessage = new Fault<SerializationTestMessage>(message, new System.Net.Mail.SmtpException("Crap!"));
+
+			TestSerialization(faltMessage);
+		}
+        
 		[Test]
 		public void A_collection_of_objects_should_be_properly_serialized()
 		{

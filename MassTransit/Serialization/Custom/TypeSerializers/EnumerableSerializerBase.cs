@@ -28,7 +28,7 @@ namespace MassTransit.Serialization.Custom.TypeSerializers
 		{
 			_containerType = containerType;
 			_type = typeof (T);
-			_ns = _containerType.ToMessageName();
+			_ns = _containerType.AssemblyQualifiedName;//.ToMessageName();
 		}
 
 		public IEnumerable<K<Action<XmlWriter>>> GetSerializationActions(ISerializerContext context, string localName, object value)
