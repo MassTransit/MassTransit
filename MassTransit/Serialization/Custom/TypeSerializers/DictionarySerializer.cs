@@ -20,17 +20,17 @@ namespace MassTransit.Serialization.Custom.TypeSerializers
 	public class DictionarySerializer<TKey, TValue> :
 		IObjectSerializer
 	{
-		private Type _keyType;
-		private string _ns;
-		private Type _valueType;
-		private Type _containerType;
+		private readonly Type _keyType;
+		private readonly string _ns;
+		private readonly Type _valueType;
+		private readonly Type _containerType;
 
 		public DictionarySerializer()
 		{
 			_valueType = typeof (TValue);
 			_keyType = typeof (TKey);
 			_containerType = typeof (Dictionary<TKey, TValue>);
-			_ns = _containerType.ToMessageName();
+			_ns = _containerType.AssemblyQualifiedName;//.ToMessageName();
 		}
 
 		public IEnumerable<K<Action<XmlWriter>>> GetSerializationActions(ISerializerContext context, string localName, object value)

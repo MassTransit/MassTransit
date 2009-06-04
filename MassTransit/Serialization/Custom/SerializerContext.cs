@@ -32,7 +32,7 @@ namespace MassTransit.Serialization.Custom
 		private static readonly Dictionary<Type, IObjectSerializer> _serializers;
 
 		private static Dictionary<Type, IObjectFieldCache> _fieldCaches;
-		private NamespaceTable _namespaceTable = new NamespaceTable();
+		private readonly NamespaceTable _namespaceTable = new NamespaceTable();
 
 		static SerializerContext()
 		{

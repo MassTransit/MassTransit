@@ -29,7 +29,7 @@ namespace MassTransit.Serialization.Custom
 			_propertyCache = new ObjectPropertyCache<T>();
 
 			_type = typeof (T);
-			_ns = _type.ToMessageName();
+			_ns = _type.AssemblyQualifiedName;//.ToMessageName();
 		}
 
 		public IEnumerable<K<Action<XmlWriter>>> GetSerializationActions(ISerializerContext context, string localName, object value)

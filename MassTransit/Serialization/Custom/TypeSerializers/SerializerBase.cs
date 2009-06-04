@@ -20,13 +20,13 @@ namespace MassTransit.Serialization.Custom.TypeSerializers
 	public abstract class SerializerBase<T> :
 		IObjectSerializer
 	{
-		private static string _namespace;
-		private static Type _type;
+		private static readonly string _namespace;
+		private static readonly Type _type;
 
 		static SerializerBase()
 		{
 			_type = typeof (T);
-			_namespace = _type.ToMessageName();
+			_namespace = _type.AssemblyQualifiedName;//.ToMessageName();
 		}
 
 		public IEnumerable<K<Action<XmlWriter>>> GetSerializationActions(ISerializerContext context, string localName, object value)
