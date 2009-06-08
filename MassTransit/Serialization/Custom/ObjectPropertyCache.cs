@@ -31,7 +31,7 @@ namespace MassTransit.Serialization.Custom
 
 			var properties = GetAllPropertiesForType(typeof (T))
 				.Where(x => x.GetGetMethod() != null)
-				.Where(x => x.GetSetMethod() != null)
+				.Where(x => x.GetSetMethod(true) != null)
 				.Select(x => new ObjectProperty<T>(x));
 			foreach (ObjectProperty<T> property in properties)
 			{
