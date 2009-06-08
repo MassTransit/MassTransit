@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests.Serialization
 {
+	using System;
 	using System.Collections.Generic;
 	using NUnit.Framework;
 
@@ -315,6 +316,16 @@ namespace MassTransit.Tests.Serialization
 			TestSerialization(message);
 		}
 
+		[Test]
+		public void A_private_setter_should_be_serializable()
+		{
+			const string expected = "Dr. Cox";
+
+			PrivateSetter message = new PrivateSetter(expected);
+
+			TestSerialization(message);
+		}
+
 
 		public class EnumClass
 		{
@@ -388,6 +399,40 @@ namespace MassTransit.Tests.Serialization
 				};
 
 			TestSerialization(message);
+		}
+	}
+
+	public class PrivateSetter
+	{
+		public PrivateSetter(string name)
+		{
+			Name = name;
+		}
+
+		protected PrivateSetter()
+		{
+		}
+
+		public string Name { get; private set; }
+
+		public bool Equals(PrivateSetter other)
+		{
+			if (ReferenceEquals(null, other)) return false;
+			if (ReferenceEquals(this, other)) return true;
+			return Equals(other.Name, Name);
+		}
+
+		public override bool Equals(object obj)
+		{
+			if (ReferenceEquals(null, obj)) return false;
+			if (ReferenceEquals(this, obj)) return true;
+			if (obj.GetType() != typeof (PrivateSetter)) return false;
+			return Equals((PrivateSetter) obj);
+		}
+
+		public override int GetHashCode()
+		{
+			return (Name != null ? Name.GetHashCode() : 0);
 		}
 	}
 

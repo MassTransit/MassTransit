@@ -22,7 +22,7 @@ namespace MassTransit.Serialization.Custom
 
 		public ObjectProperty(PropertyInfo info)
 		{
-			_fastProperty = new FastProperty<T>(info);
+			_fastProperty = new FastProperty<T>(info, BindingFlags.NonPublic);
 		}
 
 		public string Name
