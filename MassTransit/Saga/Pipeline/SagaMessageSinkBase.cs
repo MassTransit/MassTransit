@@ -14,6 +14,7 @@ namespace MassTransit.Saga.Pipeline
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Linq;
 	using System.Linq.Expressions;
 	using log4net;
 	using MassTransit.Pipeline;
@@ -110,6 +111,19 @@ namespace MassTransit.Saga.Pipeline
 		~SagaMessageSinkBase()
 		{
 			Dispose(false);
+		}
+
+		protected Expression<Func<TSaga, TMessage, bool>> CreateCorrelatedSelector()
+		{
+			var saga = Expression.Parameter(typeof (TSaga), "saga");
+			var message = Expression.Parameter(typeof (TMessage), "message");
+
+			var sagaId = Expression.Property(saga, typeof (TSaga).GetProperties().Where(x => x.Name == "CorrelationId").First());
+			var messageId = Expression.Property(message, typeof (TMessage).GetProperties().Where(x => x.Name == "CorrelationId").First());
+
+			var comparison = Expression.Equal(sagaId, messageId);
+
+			return Expression.Lambda<Func<TSaga, TMessage, bool>>(comparison, new[] {saga, message});
 		}
 	}
 }

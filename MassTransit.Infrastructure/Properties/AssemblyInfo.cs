@@ -23,6 +23,5 @@ using System.Reflection;
 [assembly : AssemblyTrademark("")]
 [assembly : AssemblyCulture("")]
 
-namespace MassTransit.Infrastructure
-{
-}
+
+[assembly: log4net.Config.XmlConfigurator(ConfigFile = "test.log4net.xml")]

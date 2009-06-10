@@ -21,23 +21,26 @@ namespace MassTransit.Saga.Pipeline
 		where TMessage : class, CorrelatedBy<Guid>
 		where TSaga : ISaga, Consumes<TMessage>.All
 	{
+		private Expression<Func<TSaga, TMessage, bool>> _selector;
+
 		public CorrelatedSagaMessageSink(ISubscriberContext context,
 		                                 IServiceBus bus,
 		                                 ISagaRepository<TSaga> repository,
 		                                 ISagaPolicy<TSaga, TMessage> policy)
 			: base(context, bus, repository, policy)
 		{
+			_selector = CreateCorrelatedSelector();
+		}
+
+		protected override Expression<Func<TSaga, TMessage, bool>> FilterExpression
+		{
+			get { return _selector; }
 		}
 
 		protected override void ConsumerAction(TSaga saga, TMessage message)
 		{
 			saga.Bus = Bus;
 			saga.Consume(message);
-		}
-
-		protected override Expression<Func<TSaga, TMessage, bool>> FilterExpression
-		{
-			get { return (saga, message) => saga.CorrelationId == message.CorrelationId; }
 		}
 	}
 }
