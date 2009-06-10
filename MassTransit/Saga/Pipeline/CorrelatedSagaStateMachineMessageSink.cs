@@ -23,6 +23,7 @@ namespace MassTransit.Saga.Pipeline
 		where TSaga : SagaStateMachine<TSaga>, ISaga
 	{
 		private readonly DataEvent<TSaga, TMessage> _dataEvent;
+		private Expression<Func<TSaga, TMessage, bool>> _selector;
 
 		public CorrelatedSagaStateMachineMessageSink(ISubscriberContext context,
 		                                             IServiceBus bus,
@@ -32,17 +33,19 @@ namespace MassTransit.Saga.Pipeline
 			: base(context, bus, repository, policy)
 		{
 			_dataEvent = dataEvent;
+
+			_selector = CreateCorrelatedSelector();
+		}
+
+		protected override Expression<Func<TSaga, TMessage, bool>> FilterExpression
+		{
+			get { return _selector; }
 		}
 
 		protected override void ConsumerAction(TSaga saga, TMessage message)
 		{
 			saga.Bus = Bus;
 			saga.RaiseEvent(_dataEvent, message);
-		}
-
-		protected override Expression<Func<TSaga, TMessage, bool>> FilterExpression
-		{
-			get { return (saga, message) => saga.CorrelationId == message.CorrelationId; }
 		}
 	}
 }
