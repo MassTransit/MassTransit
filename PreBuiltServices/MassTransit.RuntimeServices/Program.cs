@@ -67,7 +67,7 @@ namespace MassTransit.RuntimeServices
 
 		private static void BootstrapLogger()
 		{
-			var configFileName = typeof (Program).Namespace + ".log4net.xml";
+            var configFileName = AppDomain.CurrentDomain.BaseDirectory + Path.DirectorySeparatorChar + typeof(Program).Namespace + ".log4net.xml";
 
 			XmlConfigurator.ConfigureAndWatch(new FileInfo(configFileName));
 
