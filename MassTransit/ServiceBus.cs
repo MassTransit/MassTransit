@@ -273,10 +273,10 @@ namespace MassTransit
 					_serviceContainer = null;
 				}
 
-				_unsubscribeEventDispatchers();
-
 				if (ControlBus != this)
 					ControlBus.Dispose();
+
+				_unsubscribeEventDispatchers();
 
 				InboundPipeline.Dispose();
 				InboundPipeline = null;

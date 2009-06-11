@@ -44,6 +44,7 @@ namespace MassTransit.Services.Subscriptions.Client
 
 		private Guid _clientId;
 		private SubscriptionConsumer _consumer;
+		private volatile bool _disposed;
 		private SubscriptionPublisher _publisher;
 		private SequenceNumberGenerator _sequence = new SequenceNumberGenerator();
 		private IEndpoint _subscriptionServiceEndpoint;
@@ -94,8 +95,8 @@ namespace MassTransit.Services.Subscriptions.Client
 
 		public void Dispose()
 		{
-			_consumer.Dispose();
-			_publisher.Dispose();
+			Dispose(true);
+			GC.SuppressFinalize(this);
 		}
 
 		public void Start(IServiceBus bus)
@@ -137,7 +138,7 @@ namespace MassTransit.Services.Subscriptions.Client
 			_publisher.Stop();
 		}
 
-		public UnsubscribeAction SubscribedTo<TMessage>(Uri endpointUri) 
+		public UnsubscribeAction SubscribedTo<TMessage>(Uri endpointUri)
 			where TMessage : class
 		{
 			var info = new SubscriptionInformation(_clientId, _sequence.Next(), typeof (TMessage), endpointUri);
@@ -145,7 +146,7 @@ namespace MassTransit.Services.Subscriptions.Client
 			return SendAddSubscription(info);
 		}
 
-		public UnsubscribeAction SubscribedTo<TMessage, TKey>(TKey correlationId, Uri endpointUri) 
+		public UnsubscribeAction SubscribedTo<TMessage, TKey>(TKey correlationId, Uri endpointUri)
 			where TMessage : class, CorrelatedBy<TKey>
 		{
 			var info = new SubscriptionInformation(_clientId, _sequence.Next(), typeof (TMessage), correlationId.ToString(), endpointUri);
@@ -156,6 +157,16 @@ namespace MassTransit.Services.Subscriptions.Client
 		public UnregisterAction Register(IEndpointSubscriptionEvent consumer)
 		{
 			return _clients.Register(consumer);
+		}
+
+		public virtual void Dispose(bool disposing)
+		{
+			if (!disposing || _disposed) return;
+
+			_consumer.Dispose();
+			_publisher.Dispose();
+
+			_disposed = true;
 		}
 
 		private void WaitForSubscriptionServiceResponse()
@@ -297,6 +308,11 @@ namespace MassTransit.Services.Subscriptions.Client
 		private bool IgnoreIfLocalEndpoint(Uri endpointUri)
 		{
 			return _localEndpoints.Contains(endpointUri);
+		}
+
+		~SubscriptionClient()
+		{
+			Dispose(false);
 		}
 
 		private static Func<SubscriptionClient, Uri, UnsubscribeAction> GenerateLambda(MethodInfo mi)

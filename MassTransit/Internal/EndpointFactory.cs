@@ -106,6 +106,8 @@ namespace MassTransit.Internal
 				_transportConfigurators.Dispose();
 				_transportConfigurators = null;
 
+				_endpoints.Values.Each(endpoint => endpoint.Dispose());
+
 				_endpoints.Dispose();
 				_endpoints = null;
 			}
