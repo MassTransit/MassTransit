@@ -34,7 +34,6 @@ namespace MassTransit.Tests.TextFixtures
 		{
 			ObjectBuilder = MockRepository.GenerateMock<IObjectBuilder>();
 
-			//TODO: Is this how it should be set up?
 			XmlMessageSerializer serializer = new XmlMessageSerializer();
 			ObjectBuilder.Stub(x => x.GetInstance<XmlMessageSerializer>()).Return(serializer);
 
@@ -83,63 +82,63 @@ namespace MassTransit.Tests.TextFixtures
 		{
 		}
 
-		protected ISagaRepository<TSaga> SetupSagaRepository<TSaga>()
+		public static ISagaRepository<TSaga> SetupSagaRepository<TSaga>(IObjectBuilder builder)
 				where TSaga : class, ISaga
 		{
 			var sagaRepository = new InMemorySagaRepository<TSaga>();
 
-			ObjectBuilder.Stub(x => x.GetInstance<ISagaRepository<TSaga>>())
+			builder.Stub(x => x.GetInstance<ISagaRepository<TSaga>>())
 				.Return(sagaRepository);
 
 			return sagaRepository;
 		}
 
-		protected void SetupInitiateSagaSink<TSaga, TMessage>(IServiceBus bus, ISagaRepository<TSaga> repository)
+		public static void SetupInitiateSagaSink<TSaga, TMessage>(IServiceBus bus, ISagaRepository<TSaga> repository, IObjectBuilder builder)
 			where TSaga : class, ISaga, InitiatedBy<TMessage>
 			where TMessage : class, CorrelatedBy<Guid>
 		{
-			SetupSagaSinkStub(x => new CorrelatedSagaMessageSink<TSaga, TMessage>(x["context"] as ISubscriberContext, bus, repository, (ISagaPolicy<TSaga, TMessage>)x["policy"]));
+			SetupSagaSinkStub(x => new CorrelatedSagaMessageSink<TSaga, TMessage>(x["context"] as ISubscriberContext, bus, repository, (ISagaPolicy<TSaga, TMessage>)x["policy"]), builder);
 		}
 
-		protected void SetupOrchestrateSagaSink<TSaga, TMessage>(IServiceBus bus, ISagaRepository<TSaga> repository)
+		public static void SetupOrchestrateSagaSink<TSaga, TMessage>(IServiceBus bus, ISagaRepository<TSaga> repository, IObjectBuilder builder)
 			where TSaga : class, ISaga, Orchestrates<TMessage>
 			where TMessage : class, CorrelatedBy<Guid>
 		{
-			SetupSagaSinkStub(x => new CorrelatedSagaMessageSink<TSaga, TMessage>(x["context"] as ISubscriberContext, bus, repository, (ISagaPolicy<TSaga, TMessage>)x["policy"]));
+			SetupSagaSinkStub(x => new CorrelatedSagaMessageSink<TSaga, TMessage>(x["context"] as ISubscriberContext, bus, repository, (ISagaPolicy<TSaga, TMessage>)x["policy"]), builder);
 		}
 
-		protected void SetupObservesSagaSink<TSaga, TMessage>(IServiceBus bus, ISagaRepository<TSaga> repository)
+		public static void SetupObservesSagaSink<TSaga, TMessage>(IServiceBus bus, ISagaRepository<TSaga> repository, IObjectBuilder builder)
 			where TSaga : class, ISaga, Observes<TMessage,TSaga>
 			where TMessage : class
 		{
-			SetupSagaSinkStub(x => new PropertySagaMessageSink<TSaga, TMessage>((ISubscriberContext)x["context"], bus, repository, (ISagaPolicy<TSaga, TMessage>)x["policy"], (Expression<Func<TSaga, TMessage, bool>>)x["selector"]));
+			SetupSagaSinkStub(x => new PropertySagaMessageSink<TSaga, TMessage>((ISubscriberContext)x["context"], bus, repository, (ISagaPolicy<TSaga, TMessage>)x["policy"], (Expression<Func<TSaga, TMessage, bool>>)x["selector"]), builder);
 		}
 
-		protected void SetupInitiateSagaStateMachineSink<TSaga, TMessage>(IServiceBus bus, ISagaRepository<TSaga> repository)
+		public static void SetupInitiateSagaStateMachineSink<TSaga, TMessage>(IServiceBus bus, ISagaRepository<TSaga> repository, IObjectBuilder builder)
 			where TSaga : SagaStateMachine<TSaga>, ISaga 
 			where TMessage : class, CorrelatedBy<Guid>
 		{
-			SetupSagaSinkStub(x => new CorrelatedSagaStateMachineMessageSink<TSaga, TMessage>(x["context"] as ISubscriberContext, bus, repository, (ISagaPolicy<TSaga, TMessage>)x["policy"], x["dataEvent"] as DataEvent<TSaga, TMessage>));
+			SetupSagaSinkStub(x => new CorrelatedSagaStateMachineMessageSink<TSaga, TMessage>(x["context"] as ISubscriberContext, bus, repository, (ISagaPolicy<TSaga, TMessage>)x["policy"], x["dataEvent"] as DataEvent<TSaga, TMessage>), builder);
 		}
 
-		protected void SetupOrchestrateSagaStateMachineSink<TSaga, TMessage>(IServiceBus bus, ISagaRepository<TSaga> repository)
+		public static void SetupOrchestrateSagaStateMachineSink<TSaga, TMessage>(IServiceBus bus, ISagaRepository<TSaga> repository, IObjectBuilder builder)
 			where TSaga : SagaStateMachine<TSaga>, ISaga 
 			where TMessage : class, CorrelatedBy<Guid>
 		{
-			SetupSagaSinkStub(x => new CorrelatedSagaStateMachineMessageSink<TSaga, TMessage>(x["context"] as ISubscriberContext, bus, repository, (ISagaPolicy<TSaga, TMessage>)x["policy"], x["dataEvent"] as DataEvent<TSaga, TMessage>));
+			SetupSagaSinkStub(x => new CorrelatedSagaStateMachineMessageSink<TSaga, TMessage>(x["context"] as ISubscriberContext, bus, repository, (ISagaPolicy<TSaga, TMessage>)x["policy"], x["dataEvent"] as DataEvent<TSaga, TMessage>), builder);
 		}
 
-		protected void SetupObservesSagaStateMachineSink<TSaga, TMessage>(IServiceBus bus, ISagaRepository<TSaga> repository)
+		public static void SetupObservesSagaStateMachineSink<TSaga, TMessage>(IServiceBus bus, ISagaRepository<TSaga> repository, IObjectBuilder builder)
 			where TSaga : SagaStateMachine<TSaga>, ISaga 
 			where TMessage : class
 		{
-			SetupSagaSinkStub(x => new PropertySagaStateMachineMessageSink<TSaga, TMessage>(x["context"] as ISubscriberContext, bus, repository, (ISagaPolicy<TSaga,TMessage>)x["policy"], (Expression<Func<TSaga, TMessage, bool>>)x["selector"], x["dataEvent"] as DataEvent<TSaga, TMessage>));
+			SetupSagaSinkStub(x => new PropertySagaStateMachineMessageSink<TSaga, TMessage>(x["context"] as ISubscriberContext, bus, repository, (ISagaPolicy<TSaga,TMessage>)x["policy"], (Expression<Func<TSaga, TMessage, bool>>)x["selector"], x["dataEvent"] as DataEvent<TSaga, TMessage>), builder);
 		}
 
-		private void SetupSagaSinkStub<TSink>(Func<Hashtable, TSink> createSink)
+		private static void SetupSagaSinkStub<TSink>(Func<Hashtable, TSink> createSink, IObjectBuilder builder)
 			where TSink : class
 		{
-			ObjectBuilder.Stub(x => x.GetInstance<TSink>(new Hashtable()))
+			builder.Stub(x => x.GetInstance<TSink>(new Hashtable()))
 				.IgnoreArguments()
 				.Return(null)
 				.WhenCalled(invocation =>

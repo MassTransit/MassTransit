@@ -30,6 +30,7 @@ namespace MassTransit.Tests.TextFixtures
 	public class SubscriptionServiceTestFixture :
 		EndpointTestFixture<LoopbackEndpoint>
 	{
+		public const string SubscriptionServiceEndpointAddress = "loopback://localhost/mt_subscriptions";
 		private ISagaRepository<SubscriptionClientSaga> _subscriptionClientSagaRepository;
 		private ISagaRepository<SubscriptionSaga> _subscriptionSagaRepository;
 		public SubscriptionService SubscriptionService { get; private set; }
@@ -44,15 +45,13 @@ namespace MassTransit.Tests.TextFixtures
 		{
 			base.EstablishContext();
 
-			const string subscriptionServiceEndpointAddress = "loopback://localhost/mt_subscriptions";
-
 			SubscriptionBus = ServiceBusConfigurator.New(x =>
 				{
-					x.ReceiveFrom(subscriptionServiceEndpointAddress);
+					x.ReceiveFrom(SubscriptionServiceEndpointAddress);
 					x.SetConcurrentConsumerLimit(1);
 				});
 
-			SetupSubscriptionService();
+			SetupSubscriptionService(ObjectBuilder);
 
 			LocalControlBus = ControlBusConfigurator.New(x =>
 			{
@@ -73,7 +72,7 @@ namespace MassTransit.Tests.TextFixtures
 					x.ConfigureService<SubscriptionClientConfigurator>(y =>
 						{
 							// setup endpoint
-							y.SetSubscriptionServiceEndpoint(subscriptionServiceEndpointAddress);
+							y.SetSubscriptionServiceEndpoint(SubscriptionServiceEndpointAddress);
 						});
 					x.ReceiveFrom("loopback://localhost/mt_client");
 					x.UseControlBus(LocalControlBus);
@@ -84,36 +83,36 @@ namespace MassTransit.Tests.TextFixtures
 					x.ConfigureService<SubscriptionClientConfigurator>(y =>
 						{
 							// setup endpoint
-							y.SetSubscriptionServiceEndpoint(subscriptionServiceEndpointAddress);
+							y.SetSubscriptionServiceEndpoint(SubscriptionServiceEndpointAddress);
 						});
 					x.ReceiveFrom("loopback://localhost/mt_server");
 					x.UseControlBus(RemoteControlBus);
 				});
 		}
 
-		private void SetupSubscriptionService()
+		private void SetupSubscriptionService(IObjectBuilder builder)
 		{
 			//SubscriptionRepository = new InMemorySubscriptionRepository();
 			SubscriptionRepository = MockRepository.GenerateMock<ISubscriptionRepository>();
 			SubscriptionRepository.Expect(x => x.List()).Return(new List<Subscription>());
-			ObjectBuilder.Stub(x => x.GetInstance<ISubscriptionRepository>())
+			builder.Stub(x => x.GetInstance<ISubscriptionRepository>())
 				.Return(SubscriptionRepository);
 
-			_subscriptionClientSagaRepository = SetupSagaRepository<SubscriptionClientSaga>();
-			SetupInitiateSagaStateMachineSink<SubscriptionClientSaga, AddSubscriptionClient>(SubscriptionBus, _subscriptionClientSagaRepository);
-			SetupOrchestrateSagaStateMachineSink<SubscriptionClientSaga, RemoveSubscriptionClient>(SubscriptionBus, _subscriptionClientSagaRepository);
-			SetupObservesSagaStateMachineSink<SubscriptionClientSaga, SubscriptionClientAdded>(SubscriptionBus, _subscriptionClientSagaRepository);
+			_subscriptionClientSagaRepository = SetupSagaRepository<SubscriptionClientSaga>(builder);
+			SetupInitiateSagaStateMachineSink<SubscriptionClientSaga, AddSubscriptionClient>(SubscriptionBus, _subscriptionClientSagaRepository, builder);
+			SetupOrchestrateSagaStateMachineSink<SubscriptionClientSaga, RemoveSubscriptionClient>(SubscriptionBus, _subscriptionClientSagaRepository, builder);
+			SetupObservesSagaStateMachineSink<SubscriptionClientSaga, SubscriptionClientAdded>(SubscriptionBus, _subscriptionClientSagaRepository, builder);
 
-			_subscriptionSagaRepository = SetupSagaRepository<SubscriptionSaga>();
-			SetupInitiateSagaStateMachineSink<SubscriptionSaga, AddSubscription>(SubscriptionBus, _subscriptionSagaRepository);
-			SetupOrchestrateSagaStateMachineSink<SubscriptionSaga, RemoveSubscription>(SubscriptionBus, _subscriptionSagaRepository);
-			SetupObservesSagaStateMachineSink<SubscriptionSaga, SubscriptionClientRemoved>(SubscriptionBus, _subscriptionSagaRepository);
+			_subscriptionSagaRepository = SetupSagaRepository<SubscriptionSaga>(builder);
+			SetupInitiateSagaStateMachineSink<SubscriptionSaga, AddSubscription>(SubscriptionBus, _subscriptionSagaRepository, builder);
+			SetupOrchestrateSagaStateMachineSink<SubscriptionSaga, RemoveSubscription>(SubscriptionBus, _subscriptionSagaRepository, builder);
+			SetupObservesSagaStateMachineSink<SubscriptionSaga, SubscriptionClientRemoved>(SubscriptionBus, _subscriptionSagaRepository, builder);
 
 			SubscriptionService = new SubscriptionService(SubscriptionBus, SubscriptionRepository, EndpointFactory, _subscriptionSagaRepository, _subscriptionClientSagaRepository);
 
             SubscriptionService.Start();
 
-			ObjectBuilder.Stub(x => x.GetInstance<SubscriptionClient>())
+			builder.Stub(x => x.GetInstance<SubscriptionClient>())
 				.Return(null)
 				.WhenCalled(invocation => { invocation.ReturnValue = new SubscriptionClient(EndpointFactory); });
 		}

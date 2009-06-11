@@ -94,10 +94,12 @@
     <Compile Include="FutureMessage.cs" />
     <Compile Include="Grid\Grid.cs" />
     <Compile Include="Grid\GridService_Specs.cs" />
+    <Compile Include="Grid\GridTestFixture.cs" />
     <Compile Include="Grid\NodeState.cs" />
     <Compile Include="Grid\NodeState_Specs.cs" />
     <Compile Include="Grid\NotifyNodeAvailable.cs" />
     <Compile Include="Grid\ServiceGrid.cs" />
+    <Compile Include="Grid\TestGridNode.cs" />
     <Compile Include="Grid\Workers\ExceptionalWorker.cs" />
     <Compile Include="Grid\Messages\FactorLongNumber.cs" />
     <Compile Include="Grid\Tasks\FactorLongNumbersTask.cs" />

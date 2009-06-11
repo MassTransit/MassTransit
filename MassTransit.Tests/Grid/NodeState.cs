@@ -26,14 +26,33 @@ namespace MassTransit.Tests.Grid
 				{
 					Correlate(NodeAvailable)
 						.By((saga, message) => saga.ControlEndpointUri == message.ControlEndpointUri);
-
+					Correlate(NodeDown)
+						.By((saga, message) => saga.ControlEndpointUri == message.ControlEndpointUri);
+					Correlate(NodeWorkload)
+						.By((saga, message) => saga.ControlEndpointUri == message.ControlEndpointUri);
 
 					Initially(
 						When(NodeAvailable)
-							.Then((saga, message) => saga.CopyNodeDetails(message))
+							.Then((saga, message) =>
+								{
+									saga.CopyNodeDetails(message);
+									saga.NotifyServiceGridOfNewNode(message);
+								})
 							.TransitionTo(Available),
 						When(NodeDown)
-							.Then((saga, message) => saga.CopyNodeDetails(message))
+							.Then((saga, message) =>
+								{
+									saga.CopyNodeDetails(message);
+									saga.NotifyServiceGridOfNewNode(message);
+								})
+							.TransitionTo(Down),
+						When(NodeWorkload)
+							.Then((saga, message) =>
+								{
+									saga.CopyNodeDetails(message);
+									saga.NotifyServiceGridOfNewNode(message);
+									saga.UpdateWorkload(message);
+								})
 							.TransitionTo(Down)
 						);
 
@@ -71,16 +90,33 @@ namespace MassTransit.Tests.Grid
 		public Uri ControlEndpointUri { get; set; }
 		public Uri DataEndpointUri { get; set; }
 		public DateTime LastUpdated { get; set; }
+		public DateTime Created { get; set; }
 		public int ActiveJobCount { get; set; }
 		public int PendingJobCount { get; set; }
 
+		public Guid Id
+		{
+			get { return CorrelationId; }
+		}
+
 		public Guid CorrelationId { get; set; }
 		public IServiceBus Bus { get; set; }
+
+		private void NotifyServiceGridOfNewNode(NotifyNodeState message)
+		{
+			Bus.Endpoint.Send(new NotifyNewNodeAvailable
+				{
+					ControlEndpointUri = message.ControlEndpointUri,
+					DataEndpointUri = message.DataEndpointUri,
+					LastUpdated = message.LastUpdated,
+				});
+		}
 
 		private void CopyNodeDetails(NotifyNodeState nodeState)
 		{
 			ControlEndpointUri = nodeState.ControlEndpointUri;
 			DataEndpointUri = nodeState.DataEndpointUri;
+			Created = nodeState.Created;
 			LastUpdated = nodeState.LastUpdated;
 		}
 
@@ -88,11 +124,6 @@ namespace MassTransit.Tests.Grid
 		{
 			ActiveJobCount = workload.ActiveJobCount;
 			PendingJobCount = workload.PendingJobCount;
-		}
-
-		public Guid Id
-		{
-			get { return CorrelationId; }
 		}
 	}
 }

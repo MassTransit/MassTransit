@@ -57,8 +57,8 @@ namespace MassTransit.Infrastructure.Tests.Sagas
 
 			_sagaRepository = new NHibernateSagaRepositoryForContainers<ConcurrentSaga>(sessionFactory);
 			//_sagaRepository = SetupSagaRepository<ConcurrentSaga>();
-			SetupInitiateSagaStateMachineSink<ConcurrentSaga, StartConcurrentSaga>(LocalBus, _sagaRepository);
-			SetupOrchestrateSagaStateMachineSink<ConcurrentSaga, ContinueConcurrentSaga>(LocalBus, _sagaRepository);
+			SetupInitiateSagaStateMachineSink<ConcurrentSaga, StartConcurrentSaga>(LocalBus, _sagaRepository, ObjectBuilder);
+			SetupOrchestrateSagaStateMachineSink<ConcurrentSaga, ContinueConcurrentSaga>(LocalBus, _sagaRepository, ObjectBuilder);
 		}
 
 		private static void BuildSchema(Configuration config)
@@ -130,8 +130,8 @@ namespace MassTransit.Infrastructure.Tests.Sagas
 
 			_sagaRepository = new NHibernateSagaRepositoryForContainers<ConcurrentLegacySaga>(sessionFactory);
 			//_sagaRepository = SetupSagaRepository<ConcurrentSaga>();
-			SetupInitiateSagaSink<ConcurrentLegacySaga, StartConcurrentSaga>(LocalBus, _sagaRepository);
-			SetupOrchestrateSagaSink<ConcurrentLegacySaga, ContinueConcurrentSaga>(LocalBus, _sagaRepository);
+			SetupInitiateSagaSink<ConcurrentLegacySaga, StartConcurrentSaga>(LocalBus, _sagaRepository, ObjectBuilder);
+			SetupOrchestrateSagaSink<ConcurrentLegacySaga, ContinueConcurrentSaga>(LocalBus, _sagaRepository, ObjectBuilder);
 		}
 
 		private static void BuildSchema(Configuration config)
