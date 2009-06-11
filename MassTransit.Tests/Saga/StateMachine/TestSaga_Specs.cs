@@ -34,11 +34,11 @@ namespace MassTransit.Tests.Saga.StateMachine
 
 			_sagaId = Guid.NewGuid();
 
-			_repository = SetupSagaRepository<TestSaga>();
+			_repository = SetupSagaRepository<TestSaga>(ObjectBuilder);
 
-			SetupInitiateSagaStateMachineSink<TestSaga, InitiateSimpleSaga>(LocalBus, _repository);
-			SetupOrchestrateSagaStateMachineSink<TestSaga, CompleteSimpleSaga>(LocalBus, _repository);
-			SetupObservesSagaStateMachineSink<TestSaga, ObservableSagaMessage>(LocalBus, _repository);
+			SetupInitiateSagaStateMachineSink<TestSaga, InitiateSimpleSaga>(LocalBus, _repository, ObjectBuilder);
+			SetupOrchestrateSagaStateMachineSink<TestSaga, CompleteSimpleSaga>(LocalBus, _repository, ObjectBuilder);
+			SetupObservesSagaStateMachineSink<TestSaga, ObservableSagaMessage>(LocalBus, _repository, ObjectBuilder);
 
 			_InitiateSimpleSagaUnsubscribe = MockRepository.GenerateMock<UnsubscribeAction>();
 			_CompleteSimpleSagaUnsubscribe = MockRepository.GenerateMock<UnsubscribeAction>();
@@ -97,11 +97,11 @@ namespace MassTransit.Tests.Saga.StateMachine
 
 			_sagaId = Guid.NewGuid();
 
-			_repository = SetupSagaRepository<TestSaga>();
+			_repository = SetupSagaRepository<TestSaga>(ObjectBuilder);
 
-			SetupInitiateSagaStateMachineSink<TestSaga, InitiateSimpleSaga>(LocalBus, _repository);
-			SetupOrchestrateSagaStateMachineSink<TestSaga, CompleteSimpleSaga>(LocalBus, _repository);
-			SetupObservesSagaStateMachineSink<TestSaga, ObservableSagaMessage>(LocalBus, _repository);
+			SetupInitiateSagaStateMachineSink<TestSaga, InitiateSimpleSaga>(LocalBus, _repository, ObjectBuilder);
+			SetupOrchestrateSagaStateMachineSink<TestSaga, CompleteSimpleSaga>(LocalBus, _repository, ObjectBuilder);
+			SetupObservesSagaStateMachineSink<TestSaga, ObservableSagaMessage>(LocalBus, _repository, ObjectBuilder);
 
 			_remove = LocalBus.Subscribe<TestSaga>();
 
@@ -161,11 +161,11 @@ namespace MassTransit.Tests.Saga.StateMachine
 
 			_sagaId = Guid.NewGuid();
 
-			_repository = SetupSagaRepository<TestSaga>();
+			_repository = SetupSagaRepository<TestSaga>(ObjectBuilder);
 
-			SetupInitiateSagaStateMachineSink<TestSaga, InitiateSimpleSaga>(LocalBus, _repository);
-			SetupOrchestrateSagaStateMachineSink<TestSaga, CompleteSimpleSaga>(LocalBus, _repository);
-			SetupObservesSagaStateMachineSink<TestSaga, ObservableSagaMessage>(LocalBus, _repository);
+			SetupInitiateSagaStateMachineSink<TestSaga, InitiateSimpleSaga>(LocalBus, _repository, ObjectBuilder);
+			SetupOrchestrateSagaStateMachineSink<TestSaga, CompleteSimpleSaga>(LocalBus, _repository, ObjectBuilder);
+			SetupObservesSagaStateMachineSink<TestSaga, ObservableSagaMessage>(LocalBus, _repository, ObjectBuilder);
 
 			LocalBus.Subscribe<TestSaga>();
 		}

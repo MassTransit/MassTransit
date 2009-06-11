@@ -112,8 +112,6 @@ namespace MassTransit.Services.Subscriptions.Server
 
 			// TODO may need to load/prime the subscription repository at this point?
 
-			PipelineViewer.Trace(_bus.InboundPipeline);
-
 			_log.Info("Subscription Service Started");
 		}
 

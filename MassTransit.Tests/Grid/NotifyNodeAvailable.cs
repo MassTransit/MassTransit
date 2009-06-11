@@ -22,6 +22,14 @@ namespace MassTransit.Tests.Grid
 		public Uri ControlEndpointUri { get; set; }
 		public Uri DataEndpointUri { get; set; }
 		public DateTime LastUpdated { get; set; }
+		public DateTime Created { get; set; }
+	}
+
+
+	[Serializable]
+	public class NotifyNewNodeAvailable :
+		NotifyNodeState
+	{
 	}
 
 	[Serializable]

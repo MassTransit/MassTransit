@@ -13,46 +13,120 @@
 namespace MassTransit.Tests.Grid
 {
 	using System;
+	using System.Diagnostics;
+	using System.Linq;
+	using System.Threading;
+	using Magnum;
+	using Magnum.DateTimeExtensions;
 	using NUnit.Framework;
-	using TextFixtures;
+	using Rhino.Mocks;
 
 	[TestFixture]
 	public class GridService_Specs :
-		SubscriptionServiceTestFixture
+		GridTestFixture
 	{
+		protected override void EstablishContext()
+		{
+			base.EstablishContext();
+
+			GridNodes.Each(x => x.ObjectBuilder.Stub(b => b.GetInstance<SimpleGridService>()).Return(new SimpleGridService()));
+		}
+
 		[Test, Explicit]
 		public void A_grid_service_framework_should_run_on_top_of_the_service_bus()
 		{
-			Grid grid = new ServiceGrid(EndpointFactory);
+			Thread.Sleep(500);
 
-			grid.Start(LocalBus);
+			Assert.AreEqual(3, nodeA.NodeStateRepository.Where(x => true).Count());
+			Assert.AreEqual(3, nodeB.NodeStateRepository.Where(x => true).Count());
+			Assert.AreEqual(3, nodeC.NodeStateRepository.Where(x => true).Count());
 
-			grid.Execute(new SimpleGridCommand());
-
-
-
-			grid.ConfigureService<MyService>(x =>
-				{
-					x.WorkerLimit = 8;
-				});
+//			grid.Execute(new SimpleGridCommand());
+//
+//
+//
+//			grid.ConfigureService<MyService>(x =>
+//				{
+//					x.WorkerLimit = 8;
+//				});
 
 
 
 
 		}
+
+		[Test, Explicit]
+		public void A_service_should_be_registered_to_the_grid()
+		{
+			nodeA.ServiceGrid.ConfigureService<SimpleGridService>(x =>
+				{
+				});
+
+			Thread.Sleep(200);
+			var transactionId = CombGuid.Generate();
+			nodeB.DataBus.MakeRequest(x => x.Publish(new SimpleGridCommand(transactionId), context => context.SendResponseTo(nodeB.DataBus)))
+				.When<SimpleGridResult>().RelatedTo(transactionId).IsReceived(result =>
+					{
+						Trace.WriteLine("Happy ending!");
+					})
+				.TimeoutAfter(2.Seconds())
+				.OnTimeout(() => { throw new ApplicationException("Timeout waiting for response"); })
+				.Send();
+		}
 	}
 
-	public class MyService
+	public class SimpleGridService :
+		Consumes<SimpleGridCommand>.All
 	{
 		public int WorkerLimit { get; set; }
-	}
 
-	public class SimpleCommandService
-	{
+		public void Consume(SimpleGridCommand message)
+		{
+			CurrentMessage.Respond(new SimpleGridResult(message.CorrelationId));
+		}
 	}
 
 	[Serializable]
-	public class SimpleGridCommand
+	public class SimpleGridBase :
+		CorrelatedBy<Guid>
 	{
+		public SimpleGridBase(Guid correlationId)
+		{
+			CorrelationId = correlationId;
+		}
+
+		protected SimpleGridBase()
+		{
+		}
+
+		public Guid CorrelationId { get; set; }
+	}
+
+	[Serializable]
+	public class SimpleGridCommand : 
+		SimpleGridBase
+	{
+		public SimpleGridCommand(Guid correlationId)
+			: base(correlationId)
+		{
+		}
+		protected SimpleGridCommand()
+		{
+		}
+
+	}
+
+	[Serializable]
+	public class SimpleGridResult : 
+		SimpleGridBase
+	{
+		public SimpleGridResult(Guid correlationId)
+			: base(correlationId)
+		{
+		}
+		protected SimpleGridResult()
+		{
+		}
+
 	}
 }

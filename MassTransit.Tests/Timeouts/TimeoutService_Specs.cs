@@ -39,10 +39,10 @@ namespace MassTransit.Tests.Timeouts
 
             _correlationId = CombGuid.Generate();
 
-        	_timeoutSagaRepository = SetupSagaRepository<TimeoutSaga>();
-			SetupObservesSagaStateMachineSink<TimeoutSaga, ScheduleTimeout>(LocalBus, _timeoutSagaRepository);
-			SetupObservesSagaStateMachineSink<TimeoutSaga, CancelTimeout>(LocalBus, _timeoutSagaRepository);
-			SetupObservesSagaStateMachineSink<TimeoutSaga, TimeoutExpired>(LocalBus, _timeoutSagaRepository);
+        	_timeoutSagaRepository = SetupSagaRepository<TimeoutSaga>(ObjectBuilder);
+			SetupObservesSagaStateMachineSink<TimeoutSaga, ScheduleTimeout>(LocalBus, _timeoutSagaRepository, ObjectBuilder);
+			SetupObservesSagaStateMachineSink<TimeoutSaga, CancelTimeout>(LocalBus, _timeoutSagaRepository, ObjectBuilder);
+			SetupObservesSagaStateMachineSink<TimeoutSaga, TimeoutExpired>(LocalBus, _timeoutSagaRepository, ObjectBuilder);
 
             _timeoutService = new TimeoutService(LocalBus, _timeoutSagaRepository);
             _timeoutService.Start();

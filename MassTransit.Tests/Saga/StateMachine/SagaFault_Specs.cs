@@ -27,16 +27,16 @@ namespace MassTransit.Tests.Saga.StateMachine
 		{
 			base.EstablishContext();
 
-			var repository = SetupSagaRepository<CreateCustomerSaga>();
-			SetupInitiateSagaStateMachineSink<CreateCustomerSaga, InitiateCreateAccountMessage>(LocalBus, repository);
+			var repository = SetupSagaRepository<CreateCustomerSaga>(ObjectBuilder);
+			SetupInitiateSagaStateMachineSink<CreateCustomerSaga, InitiateCreateAccountMessage>(LocalBus, repository, ObjectBuilder);
 
-			SetupOrchestrateSagaStateMachineSink<CreateCustomerSaga, CustomerCreatedMessage>(LocalBus, repository);
-			SetupOrchestrateSagaStateMachineSink<CreateCustomerSaga, AgencyCreatedMessage>(LocalBus, repository);
-			SetupOrchestrateSagaStateMachineSink<CreateCustomerSaga, UpdateAccountMessage>(LocalBus, repository);
+			SetupOrchestrateSagaStateMachineSink<CreateCustomerSaga, CustomerCreatedMessage>(LocalBus, repository, ObjectBuilder);
+			SetupOrchestrateSagaStateMachineSink<CreateCustomerSaga, AgencyCreatedMessage>(LocalBus, repository, ObjectBuilder);
+			SetupOrchestrateSagaStateMachineSink<CreateCustomerSaga, UpdateAccountMessage>(LocalBus, repository, ObjectBuilder);
 
-			SetupInitiateSagaStateMachineSink<CreateCustomerSaga, Fault<InitiateCreateAccountMessage, Guid>>(LocalBus, repository);
-			SetupOrchestrateSagaStateMachineSink<CreateCustomerSaga, Fault<CreateCustomerMessage, Guid>>(LocalBus, repository);
-			SetupOrchestrateSagaStateMachineSink<CreateCustomerSaga, Fault<CreateAgencyMessage, Guid>>(LocalBus, repository);
+			SetupInitiateSagaStateMachineSink<CreateCustomerSaga, Fault<InitiateCreateAccountMessage, Guid>>(LocalBus, repository, ObjectBuilder);
+			SetupOrchestrateSagaStateMachineSink<CreateCustomerSaga, Fault<CreateCustomerMessage, Guid>>(LocalBus, repository, ObjectBuilder);
+			SetupOrchestrateSagaStateMachineSink<CreateCustomerSaga, Fault<CreateAgencyMessage, Guid>>(LocalBus, repository, ObjectBuilder);
 		}
 
 		[Test]
