@@ -44,6 +44,7 @@ namespace MassTransit.Serialization.Custom
 		}
 
 		public void Serialize<T>(Stream stream, T message)
+			where T : class
 		{
 			using (var outputStream = new NonClosingStream(stream))
 			using (var streamWriter = new StreamWriter(outputStream))
@@ -76,6 +77,7 @@ namespace MassTransit.Serialization.Custom
 		}
 
 		public byte[] Serialize<T>(T message)
+			where T : class
 		{
 			using (MemoryStream output = new MemoryStream())
 			{

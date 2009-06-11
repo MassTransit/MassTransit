@@ -134,6 +134,7 @@ namespace MassTransit.Tests.Serialization.Approach
 		}
 
 		private void TestSerialization<T>(T message)
+			where T : class
 		{
 			CustomXmlSerializer serializer = new CustomXmlSerializer();
 

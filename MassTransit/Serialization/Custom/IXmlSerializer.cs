@@ -16,9 +16,9 @@ namespace MassTransit.Serialization.Custom
 
 	public interface IXmlSerializer
 	{
-		void Serialize<T>(Stream stream, T message);
+		void Serialize<T>(Stream stream, T message) where T : class;
 		object Deserialize(Stream input);
-		byte[] Serialize<T>(T message);
+		byte[] Serialize<T>(T message) where T : class;
 		object Deserialize(byte[] data);
 	}
 }

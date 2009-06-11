@@ -63,12 +63,13 @@ namespace MassTransit.Serialization.Custom
 			}
 		}
 
-		public IEnumerable<K<Action<XmlWriter>>> Serialize(object value)
+		public IEnumerable<K<Action<XmlWriter>>> Serialize<T>(T value)
+			where T : class
 		{
 			if (value == null)
 				yield break;
 
-			Type type = value.GetType();
+			Type type = typeof(T);
 			string localName = type.ToXmlFriendlyName();
 
 			foreach (K<Action<XmlWriter>> action in SerializeObject(localName, type, value))
