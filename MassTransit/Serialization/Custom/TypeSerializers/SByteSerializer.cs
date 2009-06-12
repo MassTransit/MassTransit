@@ -14,6 +14,7 @@ namespace MassTransit.Serialization.Custom.TypeSerializers
 {
 	using System.Xml;
 
+#pragma warning disable 3009
 	public class SByteSerializer :
 		SerializerBase<sbyte>
 	{
@@ -22,4 +23,5 @@ namespace MassTransit.Serialization.Custom.TypeSerializers
 			writer.WriteValue(XmlConvert.ToString((sbyte) value));
 		}
 	}
+#pragma warning restore 3009
 }

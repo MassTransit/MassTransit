@@ -10,26 +10,27 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Tests.Grid
+namespace MassTransit.Grid.Sagas
 {
 	using System;
 	using Magnum.StateMachine;
-	using MassTransit.Saga;
+	using Messages;
+	using Saga;
 
-	public class NodeState :
-		SagaStateMachine<NodeState>,
+	public class GridNode :
+		SagaStateMachine<GridNode>,
 		ISaga
 	{
-		static NodeState()
+		static GridNode()
 		{
 			Define(() =>
 				{
 					Correlate(NodeAvailable)
-						.By((saga, message) => saga.ControlEndpointUri == message.ControlEndpointUri);
+						.By((saga, message) => saga.ControlUri == message.ControlUri);
 					Correlate(NodeDown)
-						.By((saga, message) => saga.ControlEndpointUri == message.ControlEndpointUri);
+						.By((saga, message) => saga.ControlUri == message.ControlUri);
 					Correlate(NodeWorkload)
-						.By((saga, message) => saga.ControlEndpointUri == message.ControlEndpointUri);
+						.By((saga, message) => saga.ControlUri == message.ControlUri);
 
 					Initially(
 						When(NodeAvailable)
@@ -68,13 +69,13 @@ namespace MassTransit.Tests.Grid
 				});
 		}
 
-		public NodeState()
-		{
-		}
-
-		public NodeState(Guid correlationId)
+		public GridNode(Guid correlationId)
 		{
 			CorrelationId = correlationId;
+		}
+
+		protected GridNode()
+		{
 		}
 
 		public static State Initial { get; set; }
@@ -87,17 +88,12 @@ namespace MassTransit.Tests.Grid
 		public static Event<NotifyNodeWorkload> NodeWorkload { get; set; }
 
 
-		public Uri ControlEndpointUri { get; set; }
-		public Uri DataEndpointUri { get; set; }
+		public Uri ControlUri { get; set; }
+		public Uri DataUri { get; set; }
 		public DateTime LastUpdated { get; set; }
 		public DateTime Created { get; set; }
 		public int ActiveJobCount { get; set; }
 		public int PendingJobCount { get; set; }
-
-		public Guid Id
-		{
-			get { return CorrelationId; }
-		}
 
 		public Guid CorrelationId { get; set; }
 		public IServiceBus Bus { get; set; }
@@ -106,16 +102,16 @@ namespace MassTransit.Tests.Grid
 		{
 			Bus.Endpoint.Send(new NotifyNewNodeAvailable
 				{
-					ControlEndpointUri = message.ControlEndpointUri,
-					DataEndpointUri = message.DataEndpointUri,
+					ControlUri = message.ControlUri,
+					DataUri = message.DataUri,
 					LastUpdated = message.LastUpdated,
 				});
 		}
 
 		private void CopyNodeDetails(NotifyNodeState nodeState)
 		{
-			ControlEndpointUri = nodeState.ControlEndpointUri;
-			DataEndpointUri = nodeState.DataEndpointUri;
+			ControlUri = nodeState.ControlUri;
+			DataUri = nodeState.DataUri;
 			Created = nodeState.Created;
 			LastUpdated = nodeState.LastUpdated;
 		}

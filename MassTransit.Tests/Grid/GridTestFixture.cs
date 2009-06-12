@@ -13,6 +13,7 @@
 namespace MassTransit.Tests.Grid
 {
 	using System.Threading;
+	using MassTransit.Grid.Configuration;
 	using NUnit.Framework;
 	using TextFixtures;
 
@@ -33,14 +34,27 @@ namespace MassTransit.Tests.Grid
 		{
 			base.EstablishContext();
 
-			nodeA = new TestGridNode("a", EndpointFactory, SubscriptionServiceEndpointAddress);
-			nodeB = new TestGridNode("b", EndpointFactory, SubscriptionServiceEndpointAddress);
-			nodeC = new TestGridNode("c", EndpointFactory, SubscriptionServiceEndpointAddress);
+			nodeA = new TestGridNode("a", EndpointFactory, SubscriptionServiceEndpointAddress, ConfigureGridA);
+			nodeB = new TestGridNode("b", EndpointFactory, SubscriptionServiceEndpointAddress, ConfigureGridB);
+			nodeC = new TestGridNode("c", EndpointFactory, SubscriptionServiceEndpointAddress, ConfigureGridC);
 
 			Thread.Sleep(500);
 		}
 
-		private void TeardownGrideNode(ref ServiceGrid grid, ref IControlBus controlBus, ref IServiceBus dataBus)
+		protected virtual void ConfigureGridA(GridConfigurator grid)
+		{
+		}
+
+		protected virtual void ConfigureGridB(GridConfigurator grid)
+		{
+		}
+	
+		protected virtual void ConfigureGridC(GridConfigurator grid)
+		{
+		}
+
+
+		private void TeardownGridNodes()
 		{
 			nodeA.Dispose();
 			nodeA = null;
@@ -48,18 +62,11 @@ namespace MassTransit.Tests.Grid
 			nodeB = null;
 			nodeC.Dispose();
 			nodeC = null;
-
-			dataBus.Dispose();
-			dataBus = null;
-
-			controlBus.Dispose();
-			controlBus = null;
 		}
 
 		protected override void TeardownContext()
 		{
-			nodeC.Dispose();
-			nodeC = null;
+			TeardownGridNodes();
 
 			base.TeardownContext();
 		}

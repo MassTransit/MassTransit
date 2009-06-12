@@ -14,6 +14,9 @@ namespace MassTransit.Tests.Grid
 {
 	using System;
 	using Configuration;
+	using MassTransit.Grid.Configuration;
+	using MassTransit.Grid.Messages;
+	using MassTransit.Grid.Sagas;
 	using MassTransit.Saga;
 	using MassTransit.Services.Subscriptions.Configuration;
 	using MassTransit.Transports;
@@ -25,7 +28,7 @@ namespace MassTransit.Tests.Grid
 	{
 		private volatile bool _disposed;
 
-		public TestGridNode(string name, IEndpointFactory endpointFactory, string subscriptionServiceEndpointAddress)
+		public TestGridNode(string name, IEndpointFactory endpointFactory, string subscriptionServiceEndpointAddress, Action<GridConfigurator> configureGrid)
 		{
 			ObjectBuilder = MockRepository.GenerateMock<IObjectBuilder>();
 			ObjectBuilder.Stub(x => x.GetInstance<IEndpointFactory>()).Return(endpointFactory);
@@ -38,6 +41,10 @@ namespace MassTransit.Tests.Grid
 					x.PurgeBeforeStarting();
 				});
 
+			SetupGridNodeRepository();
+			SetupGridServiceRepository();
+			SetupGridServiceNodeRepository();
+
 			DataBus = ServiceBusConfigurator.New(x =>
 				{
 					x.SetObjectBuilder(ObjectBuilder);
@@ -48,25 +55,16 @@ namespace MassTransit.Tests.Grid
 						});
 					x.ReceiveFrom("loopback://localhost/mt_grid_" + name);
 					x.UseControlBus(ControlBus);
+
+					x.ConfigureService(configureGrid);
 				});
-
-			NodeStateRepository = EndpointTestFixture<LoopbackEndpoint>.SetupSagaRepository<NodeState>(ObjectBuilder);
-			EndpointTestFixture<LoopbackEndpoint>
-				.SetupObservesSagaStateMachineSink<NodeState, NotifyNodeAvailable>(ControlBus, NodeStateRepository, ObjectBuilder);
-			EndpointTestFixture<LoopbackEndpoint>
-				.SetupObservesSagaStateMachineSink<NodeState, NotifyNodeDown>(ControlBus, NodeStateRepository, ObjectBuilder);
-			EndpointTestFixture<LoopbackEndpoint>
-				.SetupObservesSagaStateMachineSink<NodeState, NotifyNodeWorkload>(ControlBus, NodeStateRepository, ObjectBuilder);
-
-			ServiceGrid = new ServiceGrid(ObjectBuilder.GetInstance<IEndpointFactory>(), ObjectBuilder.GetInstance<ISagaRepository<NodeState>>());
-			ServiceGrid.Start(DataBus);
 		}
 
-		public ISagaRepository<NodeState> NodeStateRepository { get; private set; }
+		public ISagaRepository<GridNode> GridNodeRepository { get; private set; }
+		public ISagaRepository<GridService> GridServiceRepository { get; private set; }
+		public ISagaRepository<GridServiceNode> GridServiceNodeRepository { get; private set; }
 
 		public IObjectBuilder ObjectBuilder { get; private set; }
-
-		public ServiceGrid ServiceGrid { get; private set; }
 		public IControlBus ControlBus { get; private set; }
 		public IServiceBus DataBus { get; private set; }
 
@@ -80,9 +78,6 @@ namespace MassTransit.Tests.Grid
 		{
 			if (!disposing || _disposed) return;
 
-			ServiceGrid.Stop();
-			ServiceGrid = null;
-
 			DataBus.Dispose();
 			DataBus = null;
 
@@ -90,6 +85,33 @@ namespace MassTransit.Tests.Grid
 			ControlBus = null;
 
 			_disposed = true;
+		}
+
+		private void SetupGridNodeRepository()
+		{
+			GridNodeRepository = EndpointTestFixture<LoopbackEndpoint>.SetupSagaRepository<GridNode>(ObjectBuilder);
+			EndpointTestFixture<LoopbackEndpoint>
+				.SetupObservesSagaStateMachineSink<GridNode, NotifyNodeAvailable>(ControlBus, GridNodeRepository, ObjectBuilder);
+			EndpointTestFixture<LoopbackEndpoint>
+				.SetupObservesSagaStateMachineSink<GridNode, NotifyNodeDown>(ControlBus, GridNodeRepository, ObjectBuilder);
+			EndpointTestFixture<LoopbackEndpoint>
+				.SetupObservesSagaStateMachineSink<GridNode, NotifyNodeWorkload>(ControlBus, GridNodeRepository, ObjectBuilder);
+		}
+
+		private void SetupGridServiceRepository()
+		{
+			GridServiceRepository = EndpointTestFixture<LoopbackEndpoint>.SetupSagaRepository<GridService>(ObjectBuilder);
+			EndpointTestFixture<LoopbackEndpoint>
+				.SetupObservesSagaStateMachineSink<GridService, GridServiceAddedToNode>(ControlBus, GridServiceRepository, ObjectBuilder);
+		}
+
+		private void SetupGridServiceNodeRepository()
+		{
+			GridServiceNodeRepository = EndpointTestFixture<LoopbackEndpoint>.SetupSagaRepository<GridServiceNode>(ObjectBuilder);
+			EndpointTestFixture<LoopbackEndpoint>
+				.SetupObservesSagaStateMachineSink<GridServiceNode, AddGridServiceToNode>(ControlBus, GridServiceNodeRepository, ObjectBuilder);
+			EndpointTestFixture<LoopbackEndpoint>
+				.SetupObservesSagaStateMachineSink<GridServiceNode, RemoveGridServiceFromNode>(ControlBus, GridServiceNodeRepository, ObjectBuilder);
 		}
 
 		~TestGridNode()
