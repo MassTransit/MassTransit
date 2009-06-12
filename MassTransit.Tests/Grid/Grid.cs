@@ -19,6 +19,7 @@ namespace MassTransit.Tests.Grid
 		bool IsHealthy { get; }
 		void Start(IServiceBus bus);
 		void Execute<T>(T command);
-		void ConfigureService<T>(Action<T> action) where T : class;
+		void ConfigureService<T>(Action<IServiceGridConfigurator<T>> configurator) where T : class;
+		void AddCommand<T>();
 	}
 }

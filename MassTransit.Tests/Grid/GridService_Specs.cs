@@ -42,17 +42,6 @@ namespace MassTransit.Tests.Grid
 			Assert.AreEqual(3, nodeC.NodeStateRepository.Where(x => true).Count());
 
 //			grid.Execute(new SimpleGridCommand());
-//
-//
-//
-//			grid.ConfigureService<MyService>(x =>
-//				{
-//					x.WorkerLimit = 8;
-//				});
-
-
-
-
 		}
 
 		[Test, Explicit]
@@ -60,6 +49,7 @@ namespace MassTransit.Tests.Grid
 		{
 			nodeA.ServiceGrid.ConfigureService<SimpleGridService>(x =>
 				{
+					x.ForCommand<SimpleGridCommand>();
 				});
 
 			Thread.Sleep(200);
