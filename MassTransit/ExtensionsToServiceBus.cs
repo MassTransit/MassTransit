@@ -15,6 +15,7 @@ namespace MassTransit
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
+	using Grid;
 	using Internal;
 	using Internal.RequestResponse;
 	using Magnum.ObjectExtensions;
@@ -45,35 +46,34 @@ namespace MassTransit
 			return new DisposableUnsubscribeAction(action);
 		}
 
-		public static void Execute<T>(this IServiceBus bus, T message, Action<IOutboundMessage> action)
+		public static void Execute<T>(this IServiceBus bus, T command, Action<IOutboundMessage> messageHeaderAction)
 			where T : class
 		{
-			OutboundMessage.Set(action);
+			var grid = bus.GetService<IGrid>();
 
-			bus.Execute(message);
+			grid.Execute(command, messageHeaderAction);
 		}
 
-		public static void Execute<T>(this IServiceBus bus, T message)
+		public static void Execute<T>(this IServiceBus bus, T command)
 			where T : class
 		{
-			var loadBalancer = bus.GetService<ILoadBalancerService>();
+			var grid = bus.GetService<IGrid>();
 
-			Action<object>[] consumers = bus.OutboundPipeline.Enumerate(message).ToArray();
-			loadBalancer.Execute(message, consumers);
+			grid.Execute(command);
 		}
 
-		public static void Publish<T>(this IServiceBus bus, T message, Action<IOutboundMessage> action)
+		public static void Publish<T>(this IServiceBus bus, T message, Action<IOutboundMessage> messageHeaderAction)
 			where T : class
 		{
-			OutboundMessage.Set(action);
+			OutboundMessage.Set(messageHeaderAction);
 
 			bus.Publish(message);
 		}
 
-		public static void Send<T>(this IEndpoint endpoint, T message, Action<IOutboundMessage> action)
+		public static void Send<T>(this IEndpoint endpoint, T message, Action<IOutboundMessage> messageHeaderAction)
 			where T : class
 		{
-			OutboundMessage.Set(action);
+			OutboundMessage.Set(messageHeaderAction);
 
 			endpoint.Send(message);
 		}

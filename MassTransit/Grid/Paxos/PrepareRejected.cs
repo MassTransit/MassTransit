@@ -10,18 +10,16 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Serialization.Custom.TypeSerializers
+namespace MassTransit.Grid.Paxos
 {
-	using System.Xml;
+	using System;
 
-#pragma warning disable 3009
-	public class ULongSerializer :
-		SerializerBase<ulong>
+	/// <summary>
+	/// When a prepare isn't accepted by an acceptor, this is sent to the proposer
+	/// </summary>
+	[Serializable]
+	public class PrepareRejected :
+		PaxosValueMessageBase
 	{
-		protected override void WriteValue(XmlWriter writer, object value)
-		{
-			writer.WriteValue(XmlConvert.ToString((ulong) value));
-		}
 	}
-#pragma warning restore 3009
 }

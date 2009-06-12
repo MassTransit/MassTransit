@@ -10,18 +10,14 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Serialization.Custom.TypeSerializers
+namespace MassTransit.Grid.Messages
 {
-	using System.Xml;
+	using System;
 
-#pragma warning disable 3009
-	public class ULongSerializer :
-		SerializerBase<ulong>
+	[Serializable]
+	public class GridServiceAdded
 	{
-		protected override void WriteValue(XmlWriter writer, object value)
-		{
-			writer.WriteValue(XmlConvert.ToString((ulong) value));
-		}
+		public Guid ServiceId { get; set; }
+		public string ServiceName { get; set; }
 	}
-#pragma warning restore 3009
 }

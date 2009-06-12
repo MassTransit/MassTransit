@@ -10,16 +10,12 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Tests.Grid
+namespace MassTransit.Grid
 {
-	using System;
-
-	public interface Grid
+	public interface IGridControl :
+		IGrid
 	{
-		bool IsHealthy { get; }
-		void Start(IServiceBus bus);
-		void Execute<T>(T command);
-		void ConfigureService<T>(Action<IServiceGridConfigurator<T>> configurator) where T : class;
-		void AddCommand<T>();
+		void RegisterServiceInterceptor<TService>(GridServiceInterceptor<TService> interceptor)
+			where TService : class;
 	}
 }

@@ -18,11 +18,28 @@ namespace MassTransit.Tests.Grid
 	using System.Threading;
 	using Magnum;
 	using Magnum.DateTimeExtensions;
+	using MassTransit.Grid.Configuration;
+	using MassTransit.Grid.Sagas;
 	using NUnit.Framework;
 	using Rhino.Mocks;
 
 	[TestFixture]
-	public class GridService_Specs :
+	public class When_the_grid_services_are_attached_to_the_bus :
+		GridTestFixture
+	{
+		[Test, Explicit]
+		public void A_grid_service_framework_should_run_on_top_of_the_service_bus()
+		{
+			Thread.Sleep(500);
+
+			Assert.AreEqual(3, nodeA.GridNodeRepository.Where(x => true).Count());
+			Assert.AreEqual(3, nodeB.GridNodeRepository.Where(x => true).Count());
+			Assert.AreEqual(3, nodeC.GridNodeRepository.Where(x => true).Count());
+		}
+	}
+
+	[TestFixture]
+	public class Configuring_a_service_to_run_on_the_grid :
 		GridTestFixture
 	{
 		protected override void EstablishContext()
@@ -32,29 +49,31 @@ namespace MassTransit.Tests.Grid
 			GridNodes.Each(x => x.ObjectBuilder.Stub(b => b.GetInstance<SimpleGridService>()).Return(new SimpleGridService()));
 		}
 
-		[Test, Explicit]
-		public void A_grid_service_framework_should_run_on_top_of_the_service_bus()
+		protected override void ConfigureGridA(GridConfigurator grid)
 		{
-			Thread.Sleep(500);
-
-			Assert.AreEqual(3, nodeA.NodeStateRepository.Where(x => true).Count());
-			Assert.AreEqual(3, nodeB.NodeStateRepository.Where(x => true).Count());
-			Assert.AreEqual(3, nodeC.NodeStateRepository.Where(x => true).Count());
-
-//			grid.Execute(new SimpleGridCommand());
+			grid.For<SimpleGridCommand>()
+				.Use<SimpleGridService>();
 		}
 
 		[Test, Explicit]
-		public void A_service_should_be_registered_to_the_grid()
+		public void Should_advertise_the_service_to_all_grid_nodes()
 		{
-			nodeA.ServiceGrid.ConfigureService<SimpleGridService>(x =>
-				{
-					x.ForCommand<SimpleGridCommand>();
-				});
+			Thread.Sleep(500);
 
-			Thread.Sleep(200);
+			nodeA.GridServiceRepository.Where(x => true).Count().ShouldEqual(1);
+			nodeB.GridServiceRepository.Where(x => true).Count().ShouldEqual(1);
+			nodeC.GridServiceRepository.Where(x => true).Count().ShouldEqual(1);
+		}
+
+		[Test, Explicit]
+		public void Should_respond_when_commands_are_executed()
+		{
+			Thread.Sleep(500);
+
 			var transactionId = CombGuid.Generate();
-			nodeB.DataBus.MakeRequest(x => x.Publish(new SimpleGridCommand(transactionId), context => context.SendResponseTo(nodeB.DataBus)))
+			var command = new SimpleGridCommand(transactionId);
+
+			nodeB.DataBus.MakeRequest(x => nodeB.DataBus.Execute(command, context => context.SendResponseTo(nodeB.DataBus)))
 				.When<SimpleGridResult>().RelatedTo(transactionId).IsReceived(result =>
 					{
 						Trace.WriteLine("Happy ending!");
@@ -62,6 +81,52 @@ namespace MassTransit.Tests.Grid
 				.TimeoutAfter(2.Seconds())
 				.OnTimeout(() => { throw new ApplicationException("Timeout waiting for response"); })
 				.Send();
+		}
+	}
+
+	[TestFixture]
+	public class Configuring_a_service_to_run_on_multiple_nodes_of_the_grid :
+		GridTestFixture
+	{
+		protected override void EstablishContext()
+		{
+			base.EstablishContext();
+
+			GridNodes.Each(x => x.ObjectBuilder.Stub(b => b.GetInstance<SimpleGridService>()).Return(new SimpleGridService()));
+		}
+
+		protected override void ConfigureGridA(GridConfigurator grid)
+		{
+			grid.For<SimpleGridCommand>()
+				.Use<SimpleGridService>();
+		}
+
+		protected override void ConfigureGridB(GridConfigurator grid)
+		{
+			grid.For<SimpleGridCommand>()
+				.Use<SimpleGridService>();
+		}
+
+		[Test, Explicit]
+		public void Multiple_nodes_advertising_should_only_have_one_instance_of_the_service()
+		{
+			Thread.Sleep(1000);
+
+			nodeC.GridServiceRepository.Where(x => true).Each(x => Trace.WriteLine(x.ServiceName + " = " + x.CorrelationId));
+
+			nodeA.GridServiceRepository.Where(x => true).Count().ShouldEqual(1);
+			nodeB.GridServiceRepository.Where(x => true).Count().ShouldEqual(1);
+			nodeC.GridServiceRepository.Where(x => true).Count().ShouldEqual(1);
+
+			var serviceId = GridService.GenerateIdForType(typeof (SimpleGridCommand));
+
+			nodeA.GridServiceNodeRepository.Where(x => x.ServiceId == serviceId).Count().ShouldEqual(2);
+			nodeB.GridServiceNodeRepository.Where(x => x.ServiceId == serviceId).Count().ShouldEqual(2);
+			nodeC.GridServiceNodeRepository.Where(x => x.ServiceId == serviceId).Count().ShouldEqual(2);
+
+			GridNodes.Each(node => node.GridServiceNodeRepository
+			                       	.Where(x => x.ServiceId == serviceId)
+			                       	.Each(x => Trace.WriteLine(node.ControlBus.Endpoint.Uri + " => " + x.DataUri)));
 		}
 	}
 
@@ -93,30 +158,30 @@ namespace MassTransit.Tests.Grid
 	}
 
 	[Serializable]
-	public class SimpleGridCommand : 
+	public class SimpleGridCommand :
 		SimpleGridBase
 	{
 		public SimpleGridCommand(Guid correlationId)
 			: base(correlationId)
 		{
 		}
+
 		protected SimpleGridCommand()
 		{
 		}
-
 	}
 
 	[Serializable]
-	public class SimpleGridResult : 
+	public class SimpleGridResult :
 		SimpleGridBase
 	{
 		public SimpleGridResult(Guid correlationId)
 			: base(correlationId)
 		{
 		}
+
 		protected SimpleGridResult()
 		{
 		}
-
 	}
 }
