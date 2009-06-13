@@ -107,7 +107,7 @@ namespace MassTransit
 			if (headers.FaultAddress == null)
 				throw new InvalidOperationException("No fault address was contained in the message");
 
-			return headers.Bus.EndpointFactory.GetEndpoint(headers.FaultAddress);
+			return headers.ObjectBuilder.GetInstance<IEndpointFactory>().GetEndpoint(headers.FaultAddress);
 		}
 
 		private static IEndpoint GetResponseEndpoint(this IInboundMessageHeaders headers)
@@ -115,7 +115,7 @@ namespace MassTransit
 			if (headers.ResponseAddress == null)
 				throw new InvalidOperationException("No response address was contained in the message");
 
-			return headers.Bus.EndpointFactory.GetEndpoint(headers.ResponseAddress);
+			return headers.ObjectBuilder.GetInstance<IEndpointFactory>().GetEndpoint(headers.ResponseAddress);
 		}
 	}
 }

@@ -18,8 +18,8 @@ namespace MassTransit.Grid.Paxos
 	/// The promise is phase 1b of the Paxos algorithm
 	/// </summary>
 	[Serializable]
-	public class Promise :
-		PaxosValueMessageBase
+	public class Promise<T> :
+		PaxosValueMessageBase<T>
 	{
 	}
 }

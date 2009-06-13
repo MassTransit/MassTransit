@@ -25,9 +25,11 @@ namespace MassTransit.Internal
 			get { return LocalContext.Current.Retrieve(TypedKey<InboundMessageHeaders>.UniqueKey, () => new InboundMessageHeaders()); }
 		}
 
+		public IObjectBuilder ObjectBuilder { get; private set; }
+
 		public object Message { get; private set; }
 
-		public ServiceBus Bus { get; private set; }
+		public IServiceBus Bus { get; private set; }
 
 		public override void Reset()
 		{
@@ -36,7 +38,7 @@ namespace MassTransit.Internal
 			Bus = null;
 		}
 
-		public void ReceivedOn(ServiceBus bus)
+		public void ReceivedOn(IServiceBus bus)
 		{
 			Bus = bus;
 		}
@@ -44,6 +46,11 @@ namespace MassTransit.Internal
 		public void ReceivedAs(object message)
 		{
 			Message = message;
+		}
+
+		public void SetObjectBuilder(IObjectBuilder objectBuilder)
+		{
+			ObjectBuilder = objectBuilder;
 		}
 
 		public static void SetCurrent(Action<ISetInboundMessageHeaders> action)

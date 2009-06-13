@@ -15,17 +15,8 @@ namespace MassTransit.Grid.Paxos
 	using System;
 
 	[Serializable]
-	public class PaxosValueMessageBase<T> :
-		PaxosMessageBase
+	public class ListenerAccepted<T> :
+		PaxosValueMessageBase<T>
 	{
-		/// <summary>
-		/// The number that established with the current value
-		/// </summary>
-		public long ValueBallotId { get; set; }
-
-		/// <summary>
-		/// The last assigned value associated with this key
-		/// </summary>
-		public T Value { get; set; }
 	}
 }
