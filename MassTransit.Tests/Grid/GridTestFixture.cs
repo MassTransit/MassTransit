@@ -12,8 +12,12 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests.Grid
 {
+	using System;
+	using System.Diagnostics;
+	using System.Linq;
 	using System.Threading;
 	using MassTransit.Grid.Configuration;
+	using MassTransit.Grid.Sagas;
 	using NUnit.Framework;
 	using TextFixtures;
 
@@ -27,7 +31,7 @@ namespace MassTransit.Tests.Grid
 
 		public TestGridNode[] GridNodes
 		{
-			get { return new[] { nodeA, nodeB, nodeC }; }
+			get { return new[] {nodeA, nodeB, nodeC}; }
 		}
 
 		protected override void EstablishContext()
@@ -48,11 +52,39 @@ namespace MassTransit.Tests.Grid
 		protected virtual void ConfigureGridB(GridConfigurator grid)
 		{
 		}
-	
+
 		protected virtual void ConfigureGridC(GridConfigurator grid)
 		{
 		}
 
+		protected void WaitForServiceToBeAvailable<TService>(TimeSpan timeout, int nodeCount)
+		{
+			Guid serviceId = GridService.GenerateIdForType(typeof (TService));
+
+			DateTime giveUpAt = DateTime.Now + timeout;
+			ManualResetEvent neverSurrender = new ManualResetEvent(false);
+
+			int expectedTotal = 3*nodeCount;
+
+			while ( DateTime.Now < giveUpAt )
+			{
+				int total = 0;
+				foreach (var node in GridNodes)
+				{
+					int count = node.GridServiceRepository.Where(y => y.CorrelationId == serviceId).Count();
+					total += count;
+				}
+
+				if (total == expectedTotal)
+					return;
+
+				Trace.WriteLine("Only " + total + ", waiting for " + expectedTotal);
+
+				neverSurrender.WaitOne(30, true);
+			}
+
+			Assert.Fail("Timeout waiting for " + typeof (TService).Name);
+		}
 
 		private void TeardownGridNodes()
 		{

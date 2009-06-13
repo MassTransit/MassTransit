@@ -143,6 +143,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CurrentMessage.cs" />
+    <Compile Include="FutureMessage.cs" />
     <Compile Include="Grid\Paxos\Accept.cs" />
     <Compile Include="Grid\Paxos\Accepted.cs" />
     <Compile Include="Grid\Configuration\GridConfigurator.cs" />

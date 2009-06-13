@@ -16,6 +16,7 @@ namespace MassTransit.Grid
 	using System.Linq;
 	using Internal;
 	using log4net;
+	using Magnum.DateTimeExtensions;
 	using Messages;
 	using Saga;
 	using Sagas;
@@ -48,6 +49,11 @@ namespace MassTransit.Grid
 		}
 
 		public Action WhenStarted { get; set; }
+
+		public void Consume(GridServiceAdded message)
+		{
+			_log.Info("New Grid Service Detected: " + message.ServiceName);
+		}
 
 		public void Consume(NotifyNewNodeAvailable message)
 		{
@@ -112,18 +118,32 @@ namespace MassTransit.Grid
 
 			Guid serviceId = GridService.GenerateIdForType(typeof (TService));
 
-			var message = new AddGridServiceToNode
-				{
-					ControlUri = _controlBus.Endpoint.Uri,
-					DataUri = _bus.Endpoint.Uri,
-					ServiceId = serviceId,
-					ServiceName = typeof (TService).ToMessageName(),
-				};
+			var future = new SelectedFutureMessage<GridServiceAddedToNode>(x => x.ServiceId == serviceId && 
+				x.ControlUri == _controlBus.Endpoint.Uri);
 
-			_nodeRepository
-				.Where(x => x.CurrentState == GridNode.Available)
-				.Select(x => _endpointFactory.GetEndpoint(x.ControlUri))
-				.Each(x => x.Send(message));
+			var unsubscribeFuture = _bus.ControlBus.Subscribe(future);
+			try
+			{
+				var message = new AddGridServiceToNode
+					{
+						ControlUri = _controlBus.Endpoint.Uri,
+						DataUri = _bus.Endpoint.Uri,
+						ServiceId = serviceId,
+						ServiceName = typeof (TService).ToMessageName(),
+					};
+
+				_nodeRepository
+					.Where(x => x.CurrentState == GridNode.Available)
+					.Select(x => _endpointFactory.GetEndpoint(x.ControlUri))
+					.Each(x => x.Send(message));
+
+				if (!future.WaitUntilAvailable(10.Seconds()))
+					_log.WarnFormat("Timeout waiting for interceptor to register: " + typeof (TService).Name);
+			}
+			finally
+			{
+				unsubscribeFuture();
+			}
 		}
 
 		public void Stop()
@@ -181,7 +201,20 @@ namespace MassTransit.Grid
 
 		private void NotifyAvailable()
 		{
-			_controlBus.Publish(NewNotifyNodeAvailableMessage());
+			var future = new SelectedFutureMessage<NotifyNewNodeAvailable>(x => x.ControlUri == _controlBus.Endpoint.Uri);
+
+			var unsubscribeFuture = _controlBus.Subscribe(future);
+			try
+			{
+				_controlBus.Publish(NewNotifyNodeAvailableMessage());
+
+				if(!future.WaitUntilAvailable(10.Seconds()))
+					_log.Warn("Timeout waiting for node to become available: " + _controlBus.Endpoint.Uri);
+			}
+			finally
+			{
+				unsubscribeFuture();
+			}
 		}
 
 		private NotifyNodeAvailable NewNotifyNodeAvailableMessage()
@@ -193,11 +226,6 @@ namespace MassTransit.Grid
 					LastUpdated = DateTime.UtcNow,
 					Created = _created,
 				};
-		}
-
-		public void Consume(GridServiceAdded message)
-		{
-			_log.Info("New Grid Service Detected: " + message.ServiceName);
 		}
 
 		~ServiceGrid()
