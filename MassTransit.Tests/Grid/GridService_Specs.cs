@@ -55,13 +55,13 @@ namespace MassTransit.Tests.Grid
 				.Use<SimpleGridService>();
 		}
 
-		[Test, Explicit]
+		[Test]
 		public void Should_advertise_the_service_to_all_grid_nodes()
 		{
 			WaitForServiceToBeAvailable<SimpleGridCommand>(5.Seconds(), 1);
 		}
 
-		[Test, Explicit]
+		[Test]
 		public void Should_respond_when_commands_are_executed()
 		{
 			WaitForServiceToBeAvailable<SimpleGridCommand>(5.Seconds(), 1);
@@ -103,10 +103,10 @@ namespace MassTransit.Tests.Grid
 				.Use<SimpleGridService>();
 		}
 
-		[Test, Explicit]
+		[Test]
 		public void Multiple_nodes_advertising_should_only_have_one_instance_of_the_service()
 		{
-			Thread.Sleep(1000);
+			WaitForServiceToBeAvailable<SimpleGridCommand>(5.Seconds(), 1);
 
 			nodeC.GridServiceRepository.Where(x => true).Each(x => Trace.WriteLine(x.ServiceName + " = " + x.CorrelationId));
 

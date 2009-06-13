@@ -92,6 +92,7 @@
     <Compile Include="ExtensionsForTestingEndpoints.cs" />
     <Compile Include="Fault_Specs.cs" />
     <Compile Include="FutureMessage.cs" />
+    <Compile Include="Grid\Balancing_Specs.cs" />
     <Compile Include="Grid\GridService_Specs.cs" />
     <Compile Include="Grid\GridTestFixture.cs" />
     <Compile Include="Grid\GridNode_Specs.cs" />
