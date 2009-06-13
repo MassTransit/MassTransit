@@ -58,17 +58,13 @@ namespace MassTransit.Tests.Grid
 		[Test, Explicit]
 		public void Should_advertise_the_service_to_all_grid_nodes()
 		{
-			Thread.Sleep(500);
-
-			nodeA.GridServiceRepository.Where(x => true).Count().ShouldEqual(1);
-			nodeB.GridServiceRepository.Where(x => true).Count().ShouldEqual(1);
-			nodeC.GridServiceRepository.Where(x => true).Count().ShouldEqual(1);
+			WaitForServiceToBeAvailable<SimpleGridCommand>(5.Seconds(), 1);
 		}
 
 		[Test, Explicit]
 		public void Should_respond_when_commands_are_executed()
 		{
-			Thread.Sleep(500);
+			WaitForServiceToBeAvailable<SimpleGridCommand>(5.Seconds(), 1);
 
 			var transactionId = CombGuid.Generate();
 			var command = new SimpleGridCommand(transactionId);
