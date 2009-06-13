@@ -24,6 +24,7 @@ namespace MassTransit.Grid.Paxos
 		/// <summary>
 		/// The value proposed for this key
 		/// </summary>
-		public string Value { get; set; }
+		public Uri ControlUri { get; set; }
+		public Uri DataUri { get; set; }
 	}
 }
