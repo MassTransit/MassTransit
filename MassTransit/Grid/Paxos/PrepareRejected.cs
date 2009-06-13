@@ -18,8 +18,8 @@ namespace MassTransit.Grid.Paxos
 	/// When a prepare isn't accepted by an acceptor, this is sent to the proposer
 	/// </summary>
 	[Serializable]
-	public class PrepareRejected :
-		PaxosValueMessageBase
+	public class PrepareRejected<T> :
+		PaxosValueMessageBase<T>
 	{
 	}
 }

@@ -18,8 +18,8 @@ namespace MassTransit.Grid.Paxos
 	/// Accepted is phase 2b of the Paxos algorithm
 	/// </summary>
 	[Serializable]
-	public class Accepted :
-		PaxosValueMessageBase
+	public class Accepted<T> :
+		PaxosValueMessageBase<T>
 	{
 		/// <summary>
 		/// True if this is the final value (TODO is this right?)

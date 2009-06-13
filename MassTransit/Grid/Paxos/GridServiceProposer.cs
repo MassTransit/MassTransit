@@ -17,14 +17,13 @@ namespace MassTransit.Grid.Paxos
 	using System.Linq;
 	using System.Threading;
 	using Internal;
-	using Magnum.StateMachine;
 	using Saga;
 	using Sagas;
 
-	public class GridServiceProposer : 
-		Consumes<Promise>.For<Guid>,
-		Consumes<PrepareRejected>.For<Guid>,
-		Consumes<Accepted>.For<Guid>
+	public class GridServiceProposer<T> : 
+		Consumes<Promise<T>>.For<Guid>,
+		Consumes<PrepareRejected<T>>.For<Guid>,
+		Consumes<Accepted<T>>.For<Guid>
 	{
 		private long _highestBallotId;
 		private long _proposedBallotId;
@@ -41,6 +40,7 @@ namespace MassTransit.Grid.Paxos
 		private int _rejectedPromiseCount;
 		private long _highestRejectedBallotId;
 		private Guid _serviceId;
+		private T _proposedValue;
 
 		public GridServiceProposer(IServiceBus bus, IEndpointFactory endpointFactory, ISagaRepository<GridServiceNode> serviceNodeRepository)
 		{
@@ -50,16 +50,15 @@ namespace MassTransit.Grid.Paxos
 			_controlBus = bus.ControlBus;
 		}
 
-		public void ProposeNextServiceNode(Type serviceType, Uri controlUri, Uri dataUri)
+		public void ProposeNextServiceNode(Type serviceType, T value)
 		{
 			_serviceId = GridService.GenerateIdForType(serviceType);
-			_proposedControlUri = controlUri;
-			_proposedDataUri = dataUri;
+			_proposedValue = value;
 
 			EnterPreparePhase();
 		}
 
-		public void Consume(Promise message)
+		public void Consume(Promise<T> message)
 		{
 			if (message.BallotId != _proposedBallotId) return;
 
@@ -73,12 +72,11 @@ namespace MassTransit.Grid.Paxos
 
 		private void EnterAcceptPhase()
 		{
-			Accept accept = new Accept
+			Accept<T> accept = new Accept<T>
 			{
 				CorrelationId = _serviceId,
 				BallotId = _highestBallotId,
-				ControlUri = _proposedControlUri,
-				DataUri = _proposedDataUri,
+				Value = _proposedValue,
 			};
 
 			_promised
@@ -96,7 +94,7 @@ namespace MassTransit.Grid.Paxos
 			get { return _serviceId; }
 		}
 
-		public void Consume(Accepted message)
+		public void Consume(Accepted<T> message)
 		{
 			if (message.BallotId != _proposedBallotId) return;
 
@@ -111,7 +109,7 @@ namespace MassTransit.Grid.Paxos
 		{
 		}
 
-		public void Consume(PrepareRejected message)
+		public void Consume(PrepareRejected<T> message)
 		{
 			if (message.BallotId != _proposedBallotId) return;
 
@@ -128,7 +126,7 @@ namespace MassTransit.Grid.Paxos
 		{
 			_proposedBallotId = _highestBallotId + 1;
 
-			Prepare prepare = new Prepare
+			var prepare = new Prepare<T>
 			{
 				CorrelationId = _serviceId,
 				BallotId = _proposedBallotId,
@@ -146,26 +144,5 @@ namespace MassTransit.Grid.Paxos
 			_acceptors.Each(x => x.Send(prepare, context => context.SendResponseTo(_controlBus.Endpoint)));
 
 		}
-	}
-
-
-	public class PreferredGridService :
-		SagaStateMachine<PreferredGridService>,
-		ISaga
-	{
-		static PreferredGridService()
-		{
-			Define(() =>
-				{
-				});
-		}
-
-
-		public static State Initial { get; set; }
-		public static State Completed { get; set; }
-
-		public Guid CorrelationId { get; set; }
-
-		public IServiceBus Bus { get; set; }
 	}
 }

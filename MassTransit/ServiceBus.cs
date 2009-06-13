@@ -315,6 +315,7 @@ namespace MassTransit
 							InboundMessageHeaders.SetCurrent(context =>
 								{
 									context.ReceivedOn(this);
+									context.SetObjectBuilder(ObjectBuilder);
 									context.ReceivedAs(message);
 								});
 

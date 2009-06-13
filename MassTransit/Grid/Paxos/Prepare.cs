@@ -18,7 +18,7 @@ namespace MassTransit.Grid.Paxos
 	/// The prepare is phase 1a of the Paxos algorithm
 	/// </summary>
 	[Serializable]
-	public class Prepare :
+	public class Prepare<T> :
 		PaxosMessageBase
 	{
 	}

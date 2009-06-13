@@ -27,5 +27,10 @@ namespace MassTransit.Grid.Paxos
 		/// The key for this value, unique for each thing being synchronized
 		/// </summary>
 		public Guid CorrelationId { get; set; }
+
+		/// <summary>
+		/// The leader in use with this request
+		/// </summary>
+		public Guid LeaderId { get; set; }
 	}
 }

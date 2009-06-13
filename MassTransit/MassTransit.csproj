@@ -151,6 +151,7 @@
     <Compile Include="Grid\Configuration\IGridConfigurator.cs" />
     <Compile Include="Grid\Configuration\IGridServiceConfigurator.cs" />
     <Compile Include="Grid\GridServiceComponentInterceptor.cs" />
+    <Compile Include="Grid\Paxos\Acceptor.cs" />
     <Compile Include="Grid\Paxos\GridServiceProposer.cs" />
     <Compile Include="Grid\IGrid.cs" />
     <Compile Include="Grid\IGridControl.cs" />
@@ -167,6 +168,8 @@
     <Compile Include="Grid\Messages\NotifyNodeState.cs" />
     <Compile Include="Grid\Messages\NotifyNodeWorkload.cs" />
     <Compile Include="Grid\Messages\RemoveGridServiceFromNode.cs" />
+    <Compile Include="Grid\Paxos\Listener.cs" />
+    <Compile Include="Grid\Paxos\ListenerAccepted.cs" />
     <Compile Include="Grid\Paxos\PaxosMessageBase.cs" />
     <Compile Include="Grid\Paxos\PaxosValueMessageBase.cs" />
     <Compile Include="Grid\Paxos\Prepare.cs" />

@@ -18,13 +18,12 @@ namespace MassTransit.Grid.Paxos
 	/// The accept is the phase 2a of Paxos
 	/// </summary>
 	[Serializable]
-	public class Accept :
+	public class Accept<T> :
 		PaxosMessageBase
 	{
 		/// <summary>
 		/// The value proposed for this key
 		/// </summary>
-		public Uri ControlUri { get; set; }
-		public Uri DataUri { get; set; }
+		public T Value { get; set; }
 	}
 }

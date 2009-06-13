@@ -15,7 +15,8 @@ namespace MassTransit.Internal
 	public interface IInboundMessageHeaders :
 		IMessageHeaders
 	{
-		ServiceBus Bus { get; }
+		IObjectBuilder ObjectBuilder { get; }
+		IServiceBus Bus { get; }
 		object Message { get; }
 	}
 }
