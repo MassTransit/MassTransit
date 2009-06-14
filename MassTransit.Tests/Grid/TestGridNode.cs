@@ -14,8 +14,10 @@ namespace MassTransit.Tests.Grid
 {
 	using System;
 	using Configuration;
+	using MassTransit.Grid;
 	using MassTransit.Grid.Configuration;
 	using MassTransit.Grid.Messages;
+	using MassTransit.Grid.Paxos;
 	using MassTransit.Grid.Sagas;
 	using MassTransit.Saga;
 	using MassTransit.Services.Subscriptions.Configuration;
@@ -44,6 +46,8 @@ namespace MassTransit.Tests.Grid
 			SetupGridNodeRepository();
 			SetupGridServiceRepository();
 			SetupGridServiceNodeRepository();
+			SetupGridListenerRepository();
+			SetupGridAcceptorRepository();
 
 			DataBus = ServiceBusConfigurator.New(x =>
 				{
@@ -63,6 +67,8 @@ namespace MassTransit.Tests.Grid
 		public ISagaRepository<GridNode> GridNodeRepository { get; private set; }
 		public ISagaRepository<GridService> GridServiceRepository { get; private set; }
 		public ISagaRepository<GridServiceNode> GridServiceNodeRepository { get; private set; }
+		public ISagaRepository<Listener<AvailableGridServiceNode>> GridListenerRepository { get; private set; }
+		public ISagaRepository<Acceptor<AvailableGridServiceNode>> GridAcceptorRepository { get; private set; }
 
 		public IObjectBuilder ObjectBuilder { get; private set; }
 		public IControlBus ControlBus { get; private set; }
@@ -103,6 +109,22 @@ namespace MassTransit.Tests.Grid
 			GridServiceRepository = EndpointTestFixture<LoopbackEndpoint>.SetupSagaRepository<GridService>(ObjectBuilder);
 			EndpointTestFixture<LoopbackEndpoint>
 				.SetupObservesSagaStateMachineSink<GridService, GridServiceAddedToNode>(ControlBus, GridServiceRepository, ObjectBuilder);
+		}
+
+		private void SetupGridListenerRepository()
+		{
+			GridListenerRepository = EndpointTestFixture<LoopbackEndpoint>.SetupSagaRepository<Listener<AvailableGridServiceNode>>(ObjectBuilder);
+			EndpointTestFixture<LoopbackEndpoint>
+				.SetupObservesSagaStateMachineSink<Listener<AvailableGridServiceNode>, Accepted<AvailableGridServiceNode>>(ControlBus, GridListenerRepository, ObjectBuilder);
+		}
+
+		private void SetupGridAcceptorRepository()
+		{
+			GridAcceptorRepository = EndpointTestFixture<LoopbackEndpoint>.SetupSagaRepository<Acceptor<AvailableGridServiceNode>>(ObjectBuilder);
+			EndpointTestFixture<LoopbackEndpoint>
+				.SetupObservesSagaStateMachineSink<Acceptor<AvailableGridServiceNode>, Prepare<AvailableGridServiceNode>>(ControlBus, GridAcceptorRepository, ObjectBuilder);
+			EndpointTestFixture<LoopbackEndpoint>
+				.SetupObservesSagaStateMachineSink<Acceptor<AvailableGridServiceNode>, Accept<AvailableGridServiceNode>>(ControlBus, GridAcceptorRepository, ObjectBuilder);
 		}
 
 		private void SetupGridServiceNodeRepository()
