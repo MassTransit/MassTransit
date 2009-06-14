@@ -96,6 +96,7 @@
     <Compile Include="Grid\GridService_Specs.cs" />
     <Compile Include="Grid\GridTestFixture.cs" />
     <Compile Include="Grid\GridNode_Specs.cs" />
+    <Compile Include="Grid\LoadBalancer_Specs.cs" />
     <Compile Include="Grid\Paxos\Acceptor_Specs.cs" />
     <Compile Include="Grid\Paxos\Listener_Specs.cs" />
     <Compile Include="Grid\TestGridNode.cs" />

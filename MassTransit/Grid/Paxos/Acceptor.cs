@@ -24,6 +24,9 @@ namespace MassTransit.Grid.Paxos
 		{
 			Define(() =>
 				{
+					Correlate(Prepare).By((saga, message) => saga.CorrelationId == message.CorrelationId);
+					Correlate(Accept).By((saga, message) => saga.CorrelationId == message.CorrelationId);
+
 					Initially(
 						When(Prepare)
 							.Then((saga, message) => saga.AcknowledgePrepare(message))
