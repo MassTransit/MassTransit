@@ -17,7 +17,7 @@ namespace MassTransit.Grid.Configuration
 
 	public class GridServiceConfigurator<T> :
 		IGridServiceConfigurator<T>
-		where T : class
+		where T : class, CorrelatedBy<Guid>
 	{
 		private Action<IServiceBus, IGridControl, IObjectBuilder> _startAction;
 

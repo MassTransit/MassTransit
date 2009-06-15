@@ -16,6 +16,7 @@ namespace MassTransit.Grid
 	using System.Linq;
 	using Internal;
 	using log4net;
+	using Magnum;
 	using Magnum.DateTimeExtensions;
 	using Messages;
 	using Saga;
@@ -118,8 +119,8 @@ namespace MassTransit.Grid
 
 			Guid serviceId = GridService.GenerateIdForType(typeof (TService));
 
-			var future = new SelectedFutureMessage<GridServiceAddedToNode>(x => x.ServiceId == serviceId && 
-				x.ControlUri == _controlBus.Endpoint.Uri);
+			var future = new SelectedFutureMessage<GridServiceAddedToNode>(x => x.ServiceId == serviceId &&
+			                                                                    x.ControlUri == _controlBus.Endpoint.Uri);
 
 			var unsubscribeFuture = _bus.ControlBus.Subscribe(future);
 			try
@@ -146,9 +147,25 @@ namespace MassTransit.Grid
 			}
 		}
 
-		public RemoveActiveInterceptor AddActiveInterceptor(Guid serviceId, IGridServiceInteceptor interceptor)
+		public RemoveActiveInterceptor AddActiveInterceptor(Guid serviceId, Guid correlationId, IGridServiceInteceptor interceptor)
 		{
 			return () => { };
+		}
+
+		public void NotifyNewMessage(Guid correlationId)
+		{
+			_controlBus.Publish(new NewMessageReceived
+				{
+					BallotId = 1,
+					ControlUri = _controlBus.Endpoint.Uri,
+					DataUri = _bus.Endpoint.Uri,
+					CorrelationId = correlationId,
+				});
+		}
+
+		public void NotifyMessageComplete(Guid correlationId)
+		{
+			throw new NotImplementedException();
 		}
 
 		public void Stop()
@@ -161,6 +178,11 @@ namespace MassTransit.Grid
 		{
 			Dispose(true);
 			GC.SuppressFinalize(this);
+		}
+
+		public RemoveActiveInterceptor AddActiveInterceptor(Guid serviceId, IGridServiceInteceptor interceptor)
+		{
+			return () => { };
 		}
 
 		public virtual void Dispose(bool disposing)
@@ -213,7 +235,7 @@ namespace MassTransit.Grid
 			{
 				_controlBus.Publish(NewNotifyNodeAvailableMessage());
 
-				if(!future.WaitUntilAvailable(10.Seconds()))
+				if (!future.WaitUntilAvailable(10.Seconds()))
 					_log.Warn("Timeout waiting for node to become available: " + _controlBus.Endpoint.Uri);
 			}
 			finally

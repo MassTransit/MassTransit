@@ -40,7 +40,7 @@ namespace MassTransit.Grid.Configuration
 		}
 
 		public IGridServiceConfigurator<TMessage> For<TMessage>()
-			where TMessage : class
+			where TMessage : class, CorrelatedBy<Guid>
 		{
 			var configurator = new GridServiceConfigurator<TMessage>();
 

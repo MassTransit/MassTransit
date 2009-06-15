@@ -17,12 +17,11 @@ namespace MassTransit.Grid
 
 	public interface IGridServiceInteceptor
 	{
-		
 	}
 
 
 	public abstract class GridServiceInterceptor<TService> :
-		Consumes<TService>.All,
+		Consumes<TService>.Selected,
 		IGridServiceInteceptor
 		where TService : class
 	{
@@ -37,9 +36,11 @@ namespace MassTransit.Grid
 
 		public abstract void Consume(TService message);
 
-		protected RemoveActiveInterceptor NotifyGridOfActiveInterceptor()
+		public abstract bool Accept(TService message);
+
+		protected RemoveActiveInterceptor NotifyGridOfActiveInterceptor(Guid correlationId)
 		{
-			return Grid.AddActiveInterceptor(_serviceId, this);
+			return Grid.AddActiveInterceptor(_serviceId, correlationId, this);
 		}
 	}
 }

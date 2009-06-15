@@ -22,6 +22,20 @@ namespace MassTransit.Grid
 		void RegisterServiceInterceptor<TService>(GridServiceInterceptor<TService> interceptor)
 			where TService : class;
 
-		RemoveActiveInterceptor AddActiveInterceptor(Guid serviceId, IGridServiceInteceptor interceptor);
+		RemoveActiveInterceptor AddActiveInterceptor(Guid serviceId, Guid correlationId, IGridServiceInteceptor interceptor);
+
+		/// <summary>
+		/// Notifies the grid that a new message was received. The grid will then initiate a GridMessageNode saga instance
+		/// to determine which node should process this message.
+		/// </summary>
+		/// <param name="correlationId">The correlationId of the message, used to coordinate the service nodes</param>
+		void NotifyNewMessage(Guid correlationId);
+
+		/// <summary>
+		/// Notifies the grid that a message was consumed. The grid will then update the GridMessageNode saga instance
+		/// to reflect the completion of the message processing.
+		/// </summary>
+		/// <param name="correlationId"></param>
+		void NotifyMessageComplete(Guid correlationId);
 	}
 }

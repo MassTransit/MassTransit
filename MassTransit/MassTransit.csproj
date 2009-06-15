@@ -180,6 +180,7 @@
     <Compile Include="Grid\Paxos\Promise.cs" />
     <Compile Include="Grid\Sagas\GridNode.cs" />
     <Compile Include="Grid\Sagas\GridService.cs" />
+    <Compile Include="Grid\Sagas\GridMessageNode.cs" />
     <Compile Include="Grid\Sagas\GridServiceNode.cs" />
     <Compile Include="Grid\ServiceGrid.cs" />
     <Compile Include="IControlBus.cs" />
