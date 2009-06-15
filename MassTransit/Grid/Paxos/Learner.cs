@@ -16,11 +16,11 @@ namespace MassTransit.Grid.Paxos
 	using Magnum.StateMachine;
 	using Saga;
 
-	public class Listener<T> :
-		SagaStateMachine<Listener<T>>,
+	public class Learner<T> :
+		SagaStateMachine<Learner<T>>,
 		ISaga
 	{
-		static Listener()
+		static Learner()
 		{
 			Define(() =>
 				{
@@ -43,12 +43,12 @@ namespace MassTransit.Grid.Paxos
 				});
 		}
 
-		public Listener(Guid correlationId)
+		public Learner(Guid correlationId)
 		{
 			CorrelationId = correlationId;
 		}
 
-		protected Listener()
+		protected Learner()
 		{
 		}
 
@@ -65,7 +65,7 @@ namespace MassTransit.Grid.Paxos
 
 		public IServiceBus Bus { get; set; }
 
-		private static void UpdateAcceptedValue(Listener<T> saga, Accepted<T> message)
+		private static void UpdateAcceptedValue(Learner<T> saga, Accepted<T> message)
 		{
 			saga.BallotId = message.ValueBallotId;
 			saga.Value = message.Value;
@@ -75,7 +75,7 @@ namespace MassTransit.Grid.Paxos
 
 		private void NotifyAcceptedValue()
 		{
-			var message = new ListenerAccepted<T>
+			var message = new LearnerAccepted<T>
 				{
 					BallotId = BallotId,
 					CorrelationId = CorrelationId,

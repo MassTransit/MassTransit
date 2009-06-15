@@ -12,10 +12,16 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Grid
 {
+	using System;
+
+	public delegate void RemoveActiveInterceptor();
+
 	public interface IGridControl :
 		IGrid
 	{
 		void RegisterServiceInterceptor<TService>(GridServiceInterceptor<TService> interceptor)
 			where TService : class;
+
+		RemoveActiveInterceptor AddActiveInterceptor(Guid serviceId, IGridServiceInteceptor interceptor);
 	}
 }

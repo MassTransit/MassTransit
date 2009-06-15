@@ -10,13 +10,36 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Grid.Paxos
+namespace MassTransit.Grid
 {
 	using System;
+	using Sagas;
 
-	[Serializable]
-	public class ListenerAccepted<T> :
-		PaxosValueMessageBase<T>
+	public interface IGridServiceInteceptor
 	{
+		
+	}
+
+
+	public abstract class GridServiceInterceptor<TService> :
+		Consumes<TService>.All,
+		IGridServiceInteceptor
+		where TService : class
+	{
+		private static readonly Guid _serviceId = GridService.GenerateIdForType(typeof (TService));
+
+		protected GridServiceInterceptor(IGridControl grid)
+		{
+			Grid = grid;
+		}
+
+		protected IGridControl Grid { get; set; }
+
+		public abstract void Consume(TService message);
+
+		protected RemoveActiveInterceptor NotifyGridOfActiveInterceptor()
+		{
+			return Grid.AddActiveInterceptor(_serviceId, this);
+		}
 	}
 }
