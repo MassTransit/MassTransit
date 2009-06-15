@@ -20,11 +20,11 @@ namespace MassTransit.Grid
 		private ISagaRepository<Acceptor<AvailableGridServiceNode>> _acceptors;
 		private IServiceBus _bus;
 		private IServiceBus _controlBus;
-		private ISagaRepository<Listener<AvailableGridServiceNode>> _listeners;
+		private ISagaRepository<Learner<AvailableGridServiceNode>> _listeners;
 		private UnsubscribeAction _unsubscribe = () => true;
 
 		public GridServiceLoadBalancer(ISagaRepository<Acceptor<AvailableGridServiceNode>> acceptors,
-		                               ISagaRepository<Listener<AvailableGridServiceNode>> listeners)
+		                               ISagaRepository<Learner<AvailableGridServiceNode>> listeners)
 		{
 			_acceptors = acceptors;
 			_listeners = listeners;
@@ -36,7 +36,7 @@ namespace MassTransit.Grid
 			_controlBus = bus.ControlBus;
 
 			_unsubscribe += _controlBus.Subscribe<Acceptor<AvailableGridServiceNode>>();
-			_unsubscribe += _controlBus.Subscribe<Listener<AvailableGridServiceNode>>();
+			_unsubscribe += _controlBus.Subscribe<Learner<AvailableGridServiceNode>>();
 		}
 
 

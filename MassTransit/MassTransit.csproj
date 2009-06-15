@@ -145,6 +145,7 @@
     <Compile Include="CurrentMessage.cs" />
     <Compile Include="FutureMessage.cs" />
     <Compile Include="Grid\AvailableGridServiceNode.cs" />
+    <Compile Include="Grid\GridServiceInterceptor.cs" />
     <Compile Include="Grid\GridServiceLoadBalancer.cs" />
     <Compile Include="Grid\Paxos\Accept.cs" />
     <Compile Include="Grid\Paxos\Accepted.cs" />
@@ -170,8 +171,8 @@
     <Compile Include="Grid\Messages\NotifyNodeState.cs" />
     <Compile Include="Grid\Messages\NotifyNodeWorkload.cs" />
     <Compile Include="Grid\Messages\RemoveGridServiceFromNode.cs" />
-    <Compile Include="Grid\Paxos\Listener.cs" />
-    <Compile Include="Grid\Paxos\ListenerAccepted.cs" />
+    <Compile Include="Grid\Paxos\Learner.cs" />
+    <Compile Include="Grid\Paxos\LearnerAccepted.cs" />
     <Compile Include="Grid\Paxos\PaxosMessageBase.cs" />
     <Compile Include="Grid\Paxos\PaxosValueMessageBase.cs" />
     <Compile Include="Grid\Paxos\Prepare.cs" />
@@ -356,10 +357,6 @@
     <Compile Include="Serialization\ExtensionsToMessageEnvelope.cs" />
     <Compile Include="ExtensionsToServiceBus.cs" />
     <Compile Include="Internal\ServiceContainer.cs" />
-    <Compile Include="Services\LoadBalancer\Configuration\ILoadBalancerServiceConfigurator.cs" />
-    <Compile Include="Services\LoadBalancer\Configuration\LoadBalancerServiceConfigurator.cs" />
-    <Compile Include="Services\LoadBalancer\ILoadBalancerService.cs" />
-    <Compile Include="Services\LoadBalancer\LoadBalancerService.cs" />
     <Compile Include="Services\Metadata\Client\MessageModelFilter.cs" />
     <Compile Include="Services\Metadata\Domain\IMetadataRepository.cs" />
     <Compile Include="Services\Metadata\Domain\MessageMetadata.cs" />

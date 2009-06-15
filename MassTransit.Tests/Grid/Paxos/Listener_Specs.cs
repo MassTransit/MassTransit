@@ -13,7 +13,7 @@ namespace MassTransit.Tests.Grid.Paxos
 		{
 			Guid serviceId = Guid.NewGuid();
 
-			Listener<string> listener = new Listener<string>(serviceId)
+			Learner<string> learner = new Learner<string>(serviceId)
 				{
 					Bus = MockRepository.GenerateMock<IServiceBus>()
 				};
@@ -28,11 +28,11 @@ namespace MassTransit.Tests.Grid.Paxos
 					ValueBallotId = 1,
 				};
 
-			listener.RaiseEvent(Listener<string>.ValueAccepted, message);
+			learner.RaiseEvent(Learner<string>.ValueAccepted, message);
 
-			listener.CurrentState.ShouldEqual(Listener<string>.Active);
-			listener.Value.ShouldEqual(message.Value);
-			listener.BallotId.ShouldEqual(message.BallotId);
+			learner.CurrentState.ShouldEqual(Learner<string>.Active);
+			learner.Value.ShouldEqual(message.Value);
+			learner.BallotId.ShouldEqual(message.BallotId);
 		}
 	}
 }

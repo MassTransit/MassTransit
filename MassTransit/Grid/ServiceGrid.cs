@@ -146,6 +146,11 @@ namespace MassTransit.Grid
 			}
 		}
 
+		public RemoveActiveInterceptor AddActiveInterceptor(Guid serviceId, IGridServiceInteceptor interceptor)
+		{
+			return () => { };
+		}
+
 		public void Stop()
 		{
 			_unsubscribeAction();

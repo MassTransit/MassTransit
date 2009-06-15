@@ -14,20 +14,6 @@ namespace MassTransit.Grid
 {
 	using System;
 
-	public abstract class GridServiceInterceptor<TService> :
-		Consumes<TService>.All
-		where TService : class
-	{
-		protected GridServiceInterceptor(IGrid grid)
-		{
-			Grid = grid;
-		}
-
-		protected IGrid Grid { get; set; }
-
-		public abstract void Consume(TService message);
-	}
-
 	public class GridServiceComponentInterceptor<TService, TComponent> :
 		GridServiceInterceptor<TService>
 		where TService : class
@@ -35,7 +21,7 @@ namespace MassTransit.Grid
 	{
 		private readonly Func<TComponent> _getComponent;
 
-		public GridServiceComponentInterceptor(IGrid grid, Func<TComponent> getComponent)
+		public GridServiceComponentInterceptor(IGridControl grid, Func<TComponent> getComponent)
 			: base(grid)
 		{
 			_getComponent = getComponent;
@@ -43,7 +29,8 @@ namespace MassTransit.Grid
 
 		public override void Consume(TService message)
 		{
-			// update grid state to working on message
+			RemoveActiveInterceptor removeActiveInterceptor = NotifyGridOfActiveInterceptor();
+
 			try
 			{
 				var component = _getComponent();
@@ -51,7 +38,7 @@ namespace MassTransit.Grid
 			}
 			finally
 			{
-				// notify grid job completed
+				removeActiveInterceptor();
 			}
 		}
 	}

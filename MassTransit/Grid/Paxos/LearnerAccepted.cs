@@ -10,13 +10,13 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Services.LoadBalancer.Configuration
+namespace MassTransit.Grid.Paxos
 {
-	using MassTransit.Configuration;
+	using System;
 
-	public interface ILoadBalancerServiceConfigurator :
-		IServiceConfigurator
+	[Serializable]
+	public class LearnerAccepted<T> :
+		PaxosValueMessageBase<T>
 	{
-		void LoadBalance<T>();
 	}
 }

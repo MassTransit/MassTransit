@@ -67,7 +67,7 @@ namespace MassTransit.Tests.Grid
 		public ISagaRepository<GridNode> GridNodeRepository { get; private set; }
 		public ISagaRepository<GridService> GridServiceRepository { get; private set; }
 		public ISagaRepository<GridServiceNode> GridServiceNodeRepository { get; private set; }
-		public ISagaRepository<Listener<AvailableGridServiceNode>> GridListenerRepository { get; private set; }
+		public ISagaRepository<Learner<AvailableGridServiceNode>> GridListenerRepository { get; private set; }
 		public ISagaRepository<Acceptor<AvailableGridServiceNode>> GridAcceptorRepository { get; private set; }
 
 		public IObjectBuilder ObjectBuilder { get; private set; }
@@ -113,9 +113,9 @@ namespace MassTransit.Tests.Grid
 
 		private void SetupGridListenerRepository()
 		{
-			GridListenerRepository = EndpointTestFixture<LoopbackEndpoint>.SetupSagaRepository<Listener<AvailableGridServiceNode>>(ObjectBuilder);
+			GridListenerRepository = EndpointTestFixture<LoopbackEndpoint>.SetupSagaRepository<Learner<AvailableGridServiceNode>>(ObjectBuilder);
 			EndpointTestFixture<LoopbackEndpoint>
-				.SetupObservesSagaStateMachineSink<Listener<AvailableGridServiceNode>, Accepted<AvailableGridServiceNode>>(ControlBus, GridListenerRepository, ObjectBuilder);
+				.SetupObservesSagaStateMachineSink<Learner<AvailableGridServiceNode>, Accepted<AvailableGridServiceNode>>(ControlBus, GridListenerRepository, ObjectBuilder);
 		}
 
 		private void SetupGridAcceptorRepository()
