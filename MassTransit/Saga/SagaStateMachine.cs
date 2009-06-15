@@ -36,7 +36,7 @@ namespace MassTransit.Saga
 
 		public static bool TryGetCorrelationExpressionForEvent<TMessage>(Event targetEvent, out Expression<Func<T, TMessage, bool>> expression)
 		{
-			if(_binders.ContainsKey(targetEvent))
+			if (_binders.ContainsKey(targetEvent))
 			{
 				expression = _binders[targetEvent].GetBindExpression<TMessage>();
 				return true;
@@ -49,6 +49,35 @@ namespace MassTransit.Saga
 		protected static EventBinder<T, V> Correlate<V>(Event<V> targetEvent)
 		{
 			return (EventBinder<T, V>) _binders.Retrieve(targetEvent, () => new DataEventBinder<T, V>());
+		}
+	}
+
+	public static class ExtensionsToStateMachine
+	{
+		public static DataEventAction<T, TData> Publish<T, TData, TMessage>(this DataEventAction<T, TData> eventAction, Func<T, TData, TMessage> action)
+			where T : SagaStateMachine<T>, ISaga
+			where TData : class 
+			where TMessage : class
+		{
+			eventAction.Call((saga, message) => saga.Bus.Publish(action(saga, message)));
+			return eventAction;
+		}
+
+		public static DataEventAction<T, TData> RespondWith<T, TData, TMessage>(this DataEventAction<T, TData> eventAction, Func<T, TData, TMessage> action)
+			where T : SagaStateMachine<T>, ISaga
+			where TData : class 
+			where TMessage : class
+		{
+			eventAction.Call((saga, message) => CurrentMessage.Respond(action(saga, message)));
+			return eventAction;
+		}
+
+		public static DataEventAction<T, TData> RetryLater<T, TData>(this DataEventAction<T, TData> eventAction)
+			where T : SagaStateMachine<T>, ISaga
+			where TData : class
+		{
+			eventAction.Call((saga, message) => CurrentMessage.RetryLater());
+			return eventAction;
 		}
 	}
 }

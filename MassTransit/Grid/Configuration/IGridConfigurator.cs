@@ -12,11 +12,12 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Grid.Configuration
 {
+	using System;
 	using MassTransit.Configuration;
 
 	public interface IGridConfigurator :
 		IServiceConfigurator
 	{
-		IGridServiceConfigurator<T> For<T>() where T : class;
+		IGridServiceConfigurator<T> For<T>() where T : class, CorrelatedBy<Guid>;
 	}
 }
