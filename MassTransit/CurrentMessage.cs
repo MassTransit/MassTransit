@@ -34,7 +34,7 @@ namespace MassTransit
 
 			if (headers.ResponseAddress != null)
 			{
-				headers.GetResponseEndpoint().Send(message);
+				headers.GetResponseEndpoint().Send(message, context => context.SetSourceAddress(headers.Bus.Endpoint.Uri));
 			}
 			else
 			{
@@ -53,7 +53,7 @@ namespace MassTransit
 
 			if (headers.ResponseAddress != null)
 			{
-				headers.GetFaultEndpoint().Send(message);
+				headers.GetFaultEndpoint().Send(message, context => context.SetSourceAddress(headers.Bus.Endpoint.Uri));
 			}
 			else
 			{
@@ -74,7 +74,11 @@ namespace MassTransit
 
 			if (context.ResponseAddress != null)
 			{
-				context.GetResponseEndpoint().Send(message, contextAction);
+				context.GetResponseEndpoint().Send(message, x =>
+					{
+						x.SetSourceAddress(context.Bus.Endpoint.Uri);
+						contextAction(x);
+					});
 			}
 			else
 			{

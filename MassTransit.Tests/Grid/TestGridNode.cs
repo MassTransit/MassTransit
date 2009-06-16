@@ -46,6 +46,7 @@ namespace MassTransit.Tests.Grid
 			SetupGridNodeRepository();
 			SetupGridServiceRepository();
 			SetupGridServiceNodeRepository();
+			SetupGridMessageNodeRepository();
 			SetupGridListenerRepository();
 			SetupGridAcceptorRepository();
 
@@ -66,6 +67,7 @@ namespace MassTransit.Tests.Grid
 
 		public ISagaRepository<GridNode> GridNodeRepository { get; private set; }
 		public ISagaRepository<GridService> GridServiceRepository { get; private set; }
+		public ISagaRepository<GridMessageNode> GridMessageNodeRepository { get; private set; }
 		public ISagaRepository<GridServiceNode> GridServiceNodeRepository { get; private set; }
 		public ISagaRepository<Learner<AvailableGridServiceNode>> GridListenerRepository { get; private set; }
 		public ISagaRepository<Acceptor<AvailableGridServiceNode>> GridAcceptorRepository { get; private set; }
@@ -109,6 +111,17 @@ namespace MassTransit.Tests.Grid
 			GridServiceRepository = EndpointTestFixture<LoopbackEndpoint>.SetupSagaRepository<GridService>(ObjectBuilder);
 			EndpointTestFixture<LoopbackEndpoint>
 				.SetupObservesSagaStateMachineSink<GridService, GridServiceAddedToNode>(ControlBus, GridServiceRepository, ObjectBuilder);
+		}
+
+		private void SetupGridMessageNodeRepository()
+		{
+			GridMessageNodeRepository = EndpointTestFixture<LoopbackEndpoint>.SetupSagaRepository<GridMessageNode>(ObjectBuilder);
+			EndpointTestFixture<LoopbackEndpoint>
+				.SetupObservesSagaStateMachineSink<GridMessageNode, ProposeMessageNode>(ControlBus, GridMessageNodeRepository, ObjectBuilder);
+			EndpointTestFixture<LoopbackEndpoint>
+				.SetupObservesSagaStateMachineSink<GridMessageNode, AcceptProposedMessageNode>(ControlBus, GridMessageNodeRepository, ObjectBuilder);
+			EndpointTestFixture<LoopbackEndpoint>
+				.SetupObservesSagaStateMachineSink<GridMessageNode, MessageCompleted>(ControlBus, GridMessageNodeRepository, ObjectBuilder);
 		}
 
 		private void SetupGridListenerRepository()

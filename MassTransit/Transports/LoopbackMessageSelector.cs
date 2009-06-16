@@ -16,6 +16,7 @@ namespace MassTransit.Transports
 	using System.IO;
 	using Internal;
 	using log4net;
+	using Magnum.Reflection;
 	using Serialization;
 
 	public class LoopbackMessageSelector :
@@ -23,22 +24,25 @@ namespace MassTransit.Transports
 	{
 		private static readonly ILog _messageLog = SpecialLoggers.Messages;
 
-		private readonly byte[] _data;
 		private readonly LoopbackEndpoint _endpoint;
+		private readonly Action _acceptor;
 		private readonly IMessageSerializer _serializer;
-		private bool _accepted;
+		private byte[] _data;
 		private object _message;
 
-		public LoopbackMessageSelector(LoopbackEndpoint endpoint, byte[] data, IMessageSerializer serializer)
+		public LoopbackMessageSelector(LoopbackEndpoint endpoint, byte[] data, Action acceptor, IMessageSerializer serializer)
 		{
 			_endpoint = endpoint;
 			_data = data;
+			_acceptor = acceptor;
 			_serializer = serializer;
 		}
 
+		public bool AcceptedMessage { get; private set; }
+
 		public void Dispose()
 		{
-			if (_accepted) return;
+			if (AcceptedMessage) return;
 
 			if (_messageLog.IsInfoEnabled)
 				_messageLog.InfoFormat("SKIP:{0}:{1}", _endpoint.Uri, _message != null ? _message.GetType().Name : "(Unknown)");
@@ -46,18 +50,28 @@ namespace MassTransit.Transports
 
 		public bool AcceptMessage()
 		{
+			if (AcceptedMessage)
+				return true;
+
 			if (_messageLog.IsInfoEnabled)
 				_messageLog.InfoFormat("RECV:{0}:{1}", _endpoint.Uri, _message != null ? _message.GetType().Name : "(Unknown)");
 
-			_accepted = true;
-
-			// we were able to get the message without conflict, because we don't support peeking with loopback
-			return true;
+			try
+			{
+				_acceptor();
+				AcceptedMessage = true;
+				return true;
+			}
+			catch (Exception ex)
+			{
+				_messageLog.WarnFormat("FAIL:{0}:{1} - {2}", _endpoint.Uri, _message != null ? _message.GetType().Name : "(Unknown)", ex.Message);
+				return false;
+			}
 		}
 
 		public void MoveMessageTo(IEndpoint endpoint)
 		{
-			throw new NotImplementedException();
+			endpoint.Call("Send", _message);
 		}
 
 		public object DeserializeMessage()

@@ -24,6 +24,7 @@ namespace MassTransit.Tests.Grid.Paxos
 
 			_endpoint = MockRepository.GenerateMock<IEndpoint>();
 			_endpoint.Expect(x => x.Send<Promise<string>>(null)).IgnoreArguments();
+			_endpoint.Stub(x => x.Uri).Return(new Uri("loopback://localhost/queue"));
 
 			_endpointFactory = MockRepository.GenerateMock<IEndpointFactory>();
 			_endpointFactory.Stub(x => x.GetEndpoint((Uri)null)).IgnoreArguments().Return(_endpoint);
@@ -32,6 +33,7 @@ namespace MassTransit.Tests.Grid.Paxos
 			_builder.Stub(x => x.GetInstance<IEndpointFactory>()).Return(_endpointFactory);
 
 			_bus = MockRepository.GenerateMock<IServiceBus>();
+			_bus.Stub(x => x.Endpoint).Return(_endpoint);
 		}
 
 		[Test]

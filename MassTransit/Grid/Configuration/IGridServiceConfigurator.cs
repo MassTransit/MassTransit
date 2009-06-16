@@ -12,8 +12,6 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Grid.Configuration
 {
-	using System;
-
 	/// <summary>
 	/// Used to configure a service on the grid. A service is a message that is handled by 
 	/// some component. The grid will create a intercepter that actually consumes the message. 
@@ -30,7 +28,7 @@ namespace MassTransit.Grid.Configuration
 		/// </summary>
 		/// <typeparam name="TComponent"></typeparam>
 		/// <returns></returns>
-		IGridServiceConfigurator<TService> Use<TComponent>() 
+		IGridServiceConfigurator<TService> Use<TComponent>()
 			where TComponent : Consumes<TService>.All;
 	}
 }

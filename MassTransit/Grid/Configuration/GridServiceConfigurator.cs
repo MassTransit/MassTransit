@@ -14,6 +14,8 @@ namespace MassTransit.Grid.Configuration
 {
 	using System;
 	using Exceptions;
+	using Saga;
+	using Sagas;
 
 	public class GridServiceConfigurator<T> :
 		IGridServiceConfigurator<T>
@@ -31,7 +33,10 @@ namespace MassTransit.Grid.Configuration
 		{
 			_startAction = (bus, grid, builder) =>
 				{
-					var interceptor = new GridServiceComponentInterceptor<T, TComponent>(grid, () => builder.GetInstance<TComponent>());
+					var interceptor = new GridServiceComponentInterceptor<T, TComponent>(grid, 
+						builder.GetInstance<ISagaRepository<GridMessageNode>>(),
+						builder.GetInstance<ISagaRepository<GridServiceNode>>(),
+						() => builder.GetInstance<TComponent>());
 
 					grid.RegisterServiceInterceptor(interceptor);
 				};

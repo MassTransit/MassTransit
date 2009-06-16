@@ -106,7 +106,7 @@ namespace MassTransit.Tests.Services.HealthMonitoring
 			MakeSagaDown();
 			Repository.Where(x => x.CurrentState == HealthSaga.Down).Count().ShouldEqual(1);
 			LocalBus.Publish(new Heartbeat(_id, LocalBus.ControlBus.Endpoint.Uri, LocalBus.Endpoint.Uri, 0));
-			Thread.Sleep(500);
+			Thread.Sleep(1500);
 			Repository.Where(x => x.CurrentState == HealthSaga.Healthy).Count().ShouldEqual(1);
 		}
 
