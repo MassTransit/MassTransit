@@ -1,7 +1,7 @@
 namespace Mandelbrot.Core
 {
 	using System;
-	using MassTransit.Grid;
+	using MassTransit.Parallel;
 
 	public class GenerateMandelbrotWorker :
 		ISubTaskWorker<GenerateRow, RowGenerated>

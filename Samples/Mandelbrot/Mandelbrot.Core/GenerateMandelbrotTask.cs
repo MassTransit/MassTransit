@@ -2,7 +2,7 @@ namespace Mandelbrot.Core
 {
 	using System;
 	using System.Threading;
-	using MassTransit.Grid;
+	using MassTransit.Parallel;
 
 	public class GenerateMandelbrotTask :
 		IDistributedTask<GenerateMandelbrotTask, GenerateRow, RowGenerated>,

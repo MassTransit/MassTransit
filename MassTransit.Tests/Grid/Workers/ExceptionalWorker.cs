@@ -1,9 +1,9 @@
 namespace MassTransit.Tests.Grid
 {
     using System;
-    using MassTransit.Grid;
+    using Parallel;
 
-    public class ExceptionalWorker :
+	public class ExceptionalWorker :
         ISubTaskWorker<FactorLongNumber, LongNumberFactored>
     {
         public void ExecuteTask(FactorLongNumber task, Action<LongNumberFactored> result)

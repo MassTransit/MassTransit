@@ -2,7 +2,7 @@ namespace Mandelbrot
 {
 	using Core;
 	using MassTransit;
-	using MassTransit.Grid;
+	using MassTransit.Parallel;
 	using MassTransit.StructureMapIntegration;
 	using MassTransit.Transports;
 	using StructureMap;

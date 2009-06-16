@@ -10,7 +10,7 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Grid
+namespace MassTransit.Parallel
 {
 	using System;
 	using System.Collections.Generic;
@@ -136,35 +136,6 @@ namespace MassTransit.Grid
 			_bus.Publish(new EnlistSubTaskWorkers<TInput>());
 		}
 
-		public class Worker
-		{
-			private readonly string _address;
-			private int _activeTaskCount;
-			private int _taskLimit;
-
-			public Worker(string address)
-			{
-				_address = address;
-			}
-
-			public string Address
-			{
-				get { return _address; }
-			}
-
-			public int TaskLimit
-			{
-				get { return _taskLimit; }
-				set { _taskLimit = value; }
-			}
-
-			public int ActiveTaskCount
-			{
-				get { return _activeTaskCount; }
-				set { _activeTaskCount = value; }
-			}
-		}
-
 		private void CompleteDistributedTask(TTask obj)
 		{
 			_unsubscribeToken();
@@ -221,6 +192,20 @@ namespace MassTransit.Grid
 			}
 
 			return workers;
+		}
+
+		public class Worker
+		{
+			public Worker(string address)
+			{
+				Address = address;
+			}
+
+			public string Address { get; private set; }
+
+			public int TaskLimit { get; set; }
+
+			public int ActiveTaskCount { get; set; }
 		}
 	}
 }

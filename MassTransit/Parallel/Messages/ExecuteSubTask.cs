@@ -10,12 +10,32 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Grid
+namespace MassTransit.Parallel.Messages
 {
-    using System;
+	using System;
 
-    public interface ISubTaskWorker<TInput, TOutput>
-    {
-        void ExecuteTask(TInput task, Action<TOutput> result);
-    }
+	[Serializable]
+	public class ExecuteSubTask<TInput>
+		where TInput : class
+	{
+		public ExecuteSubTask(string address, Guid taskId, int subTaskId, TInput task)
+		{
+			Address = address;
+			TaskId = taskId;
+			SubTaskId = subTaskId;
+			Task = task;
+		}
+
+		protected ExecuteSubTask()
+		{
+		}
+
+		public string Address { get; set; }
+
+		public Guid TaskId { get; set; }
+
+		public int SubTaskId { get; set; }
+
+		public TInput Task { get; set; }
+	}
 }
