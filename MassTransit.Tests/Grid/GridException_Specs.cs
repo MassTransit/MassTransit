@@ -15,9 +15,9 @@ namespace MassTransit.Tests.Grid
 	using System;
 	using System.Threading;
 	using log4net;
-	using MassTransit.Grid;
 	using NUnit.Framework;
 	using NUnit.Framework.SyntaxHelpers;
+	using Parallel;
 
 	[TestFixture]
 	public class When_a_worker_throws_an_exception :

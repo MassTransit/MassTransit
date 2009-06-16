@@ -10,12 +10,11 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Grid
+namespace MassTransit.Parallel
 {
 	using System.Threading;
 	using log4net;
 	using Messages;
-	
 
 	public class SubTaskWorker<TWorker, TInput, TOutput> :
 		Consumes<ExecuteSubTask<TInput>>.All,
@@ -44,7 +43,7 @@ namespace MassTransit.Grid
 
 		public void Consume(ExecuteSubTask<TInput> message)
 		{
-            TWorker worker = Builder.GetInstance<TWorker>();
+			TWorker worker = Builder.GetInstance<TWorker>();
 			try
 			{
 				int activeCount = Interlocked.Increment(ref _activeTaskCount);
@@ -53,11 +52,11 @@ namespace MassTransit.Grid
 
 				worker.ExecuteTask(message.Task,
 				                   output => Bus.Publish(new SubTaskComplete<TOutput>(Bus.Endpoint.Uri.ToString(),
-				                                                                 _taskLimit,
-				                                                                 _activeTaskCount - 1,
-				                                                                 message.TaskId,
-				                                                                 message.SubTaskId, 
-																				 output)));
+				                                                                      _taskLimit,
+				                                                                      _activeTaskCount - 1,
+				                                                                      message.TaskId,
+				                                                                      message.SubTaskId,
+				                                                                      output)));
 			}
 			finally
 			{

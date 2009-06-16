@@ -15,9 +15,9 @@ namespace MassTransit.Tests.Grid
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
-    using MassTransit.Grid;
+    using Parallel;
 
-    public class FactorLongNumberWorker :
+	public class FactorLongNumberWorker :
         ISubTaskWorker<FactorLongNumber, LongNumberFactored>
     {
         private readonly IntegerFactorizer _factorizer = new IntegerFactorizer();

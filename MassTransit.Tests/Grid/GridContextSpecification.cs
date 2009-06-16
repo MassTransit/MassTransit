@@ -14,7 +14,7 @@ namespace MassTransit.Tests.Grid
 {
 	using System.IO;
 	using log4net.Config;
-	using MassTransit.Grid;
+	using Parallel;
 	using Rhino.Mocks;
 	using TextFixtures;
 

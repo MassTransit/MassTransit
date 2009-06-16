@@ -10,14 +10,29 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Grid.Messages
+namespace MassTransit.Parallel.Messages
 {
-    using System;
-    
+	using System;
 
-    [Serializable]
-    [ExpiresIn("00:01:00")]
-    public class EnlistSubTaskWorkers<TInput>
-    {
-    }
+	[Serializable]
+	[ExpiresIn("00:01:00")]
+	public class SubTaskWorkerAvailable<TInput>
+	{
+		public SubTaskWorkerAvailable(string address, int taskLimit, int activeTaskCount)
+		{
+			Address = address;
+			ActiveTaskCount = activeTaskCount;
+			TaskLimit = taskLimit;
+		}
+
+		protected SubTaskWorkerAvailable()
+		{
+		}
+
+		public string Address { get; set; }
+
+		public int TaskLimit { get; set; }
+
+		public int ActiveTaskCount { get; set; }
+	}
 }

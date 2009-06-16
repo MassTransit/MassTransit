@@ -7,7 +7,7 @@
 	using System.Windows.Forms;
 	using Core;
 	using MassTransit;
-	using MassTransit.Grid;
+	using MassTransit.Parallel;
 	using StructureMap;
 
 	public partial class MainForm : Form

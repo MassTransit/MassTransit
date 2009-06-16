@@ -16,7 +16,7 @@ namespace MassTransit.Tests.Grid
     using System.Collections.Generic;
     using System.Diagnostics;
     using Magnum;
-    using MassTransit.Grid;
+    using Parallel;
     using Util;
 
     public class FactorLongNumbersTask :

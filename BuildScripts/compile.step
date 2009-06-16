@@ -28,6 +28,9 @@
 		<msbuild project="${dirs.root}\Samples\Starbucks\Starbucks.sln" verbosity="quiet">
 			<property name="Configuration" value="${msbuild.configuration}" />
 		</msbuild>
+		<msbuild project="${dirs.root}\Samples\Mandelbrot\Mandelbrot.sln" verbosity="quiet">
+			<property name="Configuration" value="${msbuild.configuration}" />
+		</msbuild>
 		<msbuild project="${dirs.root}\Samples\PublishSubscribe\PublishSubscribe-2008.sln" verbosity="quiet">
 			<property name="Configuration" value="${msbuild.configuration}" />
 		</msbuild>

@@ -16,9 +16,9 @@ namespace MassTransit.Tests.Grid
 	using System.Collections.Generic;
 	using System.Text;
 	using System.Threading;
-	using MassTransit.Grid;
 	using NUnit.Framework;
 	using NUnit.Framework.SyntaxHelpers;
+	using Parallel;
 	using Rhino.Mocks;
 
 	[TestFixture]
