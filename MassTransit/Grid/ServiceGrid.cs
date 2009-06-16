@@ -13,10 +13,11 @@
 namespace MassTransit.Grid
 {
 	using System;
+	using System.Diagnostics;
 	using System.Linq;
+	using System.Threading;
 	using Internal;
 	using log4net;
-	using Magnum;
 	using Magnum.DateTimeExtensions;
 	using Messages;
 	using Saga;
@@ -35,18 +36,21 @@ namespace MassTransit.Grid
 		private IEndpointFactory _endpointFactory;
 		private ISagaRepository<GridNode> _nodeRepository;
 		private ISagaRepository<GridServiceNode> _serviceNodeRepository;
+		private readonly ISagaRepository<GridMessageNode> _messageNodeRepository;
 		private ISagaRepository<GridService> _serviceRepository;
 		private UnsubscribeAction _unsubscribeAction;
 
 		public ServiceGrid(IEndpointFactory endpointFactory,
 		                   ISagaRepository<GridNode> nodeRepository,
 		                   ISagaRepository<GridService> serviceRepository,
-		                   ISagaRepository<GridServiceNode> serviceNodeRepository)
+		                   ISagaRepository<GridServiceNode> serviceNodeRepository,
+		                   ISagaRepository<GridMessageNode> messageNodeRepository)
 		{
 			_endpointFactory = endpointFactory;
 			_nodeRepository = nodeRepository;
 			_serviceRepository = serviceRepository;
 			_serviceNodeRepository = serviceNodeRepository;
+			_messageNodeRepository = messageNodeRepository;
 		}
 
 		public Action WhenStarted { get; set; }
@@ -64,6 +68,9 @@ namespace MassTransit.Grid
 			}
 		}
 
+		public Uri ControlUri { get; private set; }
+
+		public Uri DataUri { get; private set; }
 
 		public bool IsHealthy
 		{
@@ -74,6 +81,9 @@ namespace MassTransit.Grid
 		{
 			_bus = bus;
 			_controlBus = bus.ControlBus;
+
+			ControlUri = _controlBus.Endpoint.Uri;
+			DataUri = _bus.Endpoint.Uri;
 
 			_created = DateTime.UtcNow;
 
@@ -136,6 +146,7 @@ namespace MassTransit.Grid
 				_nodeRepository
 					.Where(x => x.CurrentState == GridNode.Available)
 					.Select(x => _endpointFactory.GetEndpoint(x.ControlUri))
+					.ToList()
 					.Each(x => x.Send(message));
 
 				if (!future.WaitUntilAvailable(10.Seconds()))
@@ -152,20 +163,66 @@ namespace MassTransit.Grid
 			return () => { };
 		}
 
-		public void NotifyNewMessage(Guid correlationId)
+		public void ProposeMessageNodeToQuorum(Guid serviceId, Guid correlationId)
 		{
-			_controlBus.Publish(new NewMessageReceived
+			ProposeMessageNode message = new ProposeMessageNode
 				{
 					BallotId = 1,
-					ControlUri = _controlBus.Endpoint.Uri,
-					DataUri = _bus.Endpoint.Uri,
+					ControlUri = ControlUri,
+					DataUri = DataUri,
 					CorrelationId = correlationId,
+				};
+
+			var nodes = _serviceNodeRepository
+				.Where(x => x.ServiceId == serviceId && x.ControlUri != ControlUri)
+				.SelectQuorum();
+
+			_log.InfoFormat("PROPOSAL: {0} ({1}) TO {2} FROM {3}", serviceId, correlationId, ControlUri, ControlUri);
+			_controlBus.Endpoint.Send(message, context => context.SendResponseTo(_controlBus));
+
+			nodes.Each(node =>
+				{
+					_log.InfoFormat("PROPOSAL: {0} ({1}) TO {2} FROM {3}", serviceId, correlationId, node.ControlUri, ControlUri);
+
+					_endpointFactory.GetEndpoint(node.ControlUri).Send(message, context => context.SendResponseTo(_controlBus));
 				});
+
+			WaitUntilMessageNodeIsAvailable(correlationId);
+		}
+
+		private void WaitUntilMessageNodeIsAvailable(Guid correlationId)
+		{
+			DateTime giveUpAt = DateTime.Now + 2.Seconds();
+			ManualResetEvent neverSurrender = new ManualResetEvent(false);
+
+			while (DateTime.Now < giveUpAt)
+			{
+				var count = _messageNodeRepository.Where(x => x.CorrelationId == correlationId).Count();
+				if (count > 0)
+					break;
+
+				neverSurrender.WaitOne(30, true);
+			}
+		}
+
+		public GridMessageNode GetMessageNode(Guid correlationId)
+		{
+			return _messageNodeRepository.Where(x => x.CorrelationId == correlationId).FirstOrDefault();
 		}
 
 		public void NotifyMessageComplete(Guid correlationId)
 		{
-			throw new NotImplementedException();
+			_controlBus.Publish(new MessageCompleted
+			{
+				CorrelationId = correlationId,
+			});
+		}
+
+		public bool IsAssignedToMessage(GridMessageNode messageNode)
+		{
+			return messageNode.CurrentState == GridMessageNode.WaitingForCompletion &&
+			       messageNode.DataUri == DataUri && 
+			       messageNode.ControlUri == ControlUri;
 		}
 
 		public void Stop()
@@ -224,6 +281,7 @@ namespace MassTransit.Grid
 			_unsubscribeAction += _controlBus.Subscribe<GridNode>();
 			_unsubscribeAction += _controlBus.Subscribe<GridService>();
 			_unsubscribeAction += _controlBus.Subscribe<GridServiceNode>();
+			_unsubscribeAction += _controlBus.Subscribe<GridMessageNode>();
 		}
 
 		private void NotifyAvailable()

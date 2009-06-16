@@ -13,6 +13,7 @@
 namespace MassTransit.Grid
 {
 	using System;
+	using System.Collections.Generic;
 	using System.Linq;
 	using log4net;
 	using Saga;
@@ -23,55 +24,26 @@ namespace MassTransit.Grid
 		where TService : class, CorrelatedBy<Guid>
 		where TComponent : Consumes<TService>.All
 	{
-		private readonly Func<TComponent> _getComponent;
-
-		public GridServiceComponentInterceptor(IGridControl grid, Func<TComponent> getComponent)
-			: base(grid)
-		{
-			_getComponent = getComponent;
-		}
-
-		public override void Consume(TService message)
-		{
-			RemoveActiveInterceptor removeActiveInterceptor = NotifyGridOfActiveInterceptor(message.CorrelationId);
-
-			try
-			{
-				var component = _getComponent();
-				component.Consume(message);
-			}
-			finally
-			{
-				removeActiveInterceptor();
-			}
-		}
-
-		public override bool Accept(TService message)
-		{
-			return true;
-		}
-	}
-
-	public class GridXServiceComponentInterceptor<TService, TComponent> :
-		GridServiceInterceptor<TService>
-		where TService : class, CorrelatedBy<Guid>
-		where TComponent : Consumes<TService>.Selected
-	{
-		private static readonly ILog _log = LogManager.GetLogger(typeof (GridXServiceComponentInterceptor<TService, TComponent>).ToFriendlyName());
+		private static readonly ILog _log = LogManager.GetLogger(typeof (GridServiceComponentInterceptor<TService, TComponent>).ToFriendlyName());
 
 		private readonly ISagaRepository<GridMessageNode> _messageNodeRepository;
+		private readonly ISagaRepository<GridServiceNode> _serviceNodeRepository;
 		private readonly Func<TComponent> _getComponent;
 
-		public GridXServiceComponentInterceptor(IGridControl grid, ISagaRepository<GridMessageNode> messageNodeRepository, Func<TComponent> getComponent)
+		public GridServiceComponentInterceptor(IGridControl grid, 
+			ISagaRepository<GridMessageNode> messageNodeRepository, 
+			ISagaRepository<GridServiceNode> serviceNodeRepository,
+			Func<TComponent> getComponent)
 			: base(grid)
 		{
 			_messageNodeRepository = messageNodeRepository;
+			_serviceNodeRepository = serviceNodeRepository;
 			_getComponent = getComponent;
 		}
 
 		public override void Consume(TService message)
 		{
-			var messageNode = GetMessageNode(message.CorrelationId);
+			var messageNode = Grid.GetMessageNode(message.CorrelationId);
 			if (messageNode == null)
 			{
 				_log.ErrorFormat("GRID Consume received unknown message: {0}/{1}", message.CorrelationId, typeof(TService).FullName);
@@ -81,6 +53,12 @@ namespace MassTransit.Grid
 			if (messageNode.CurrentState == GridMessageNode.Completed)
 			{
 				_log.DebugFormat("GRID: {0}/{1} discarded, already complete", message.CorrelationId, typeof(TService).FullName);
+				return;
+			}
+
+			if(!Grid.IsAssignedToMessage(messageNode))
+			{
+				_log.WarnFormat("GRID: {0}/{1} discarded, should have not been assigned", message.CorrelationId, typeof(TService).FullName);
 				return;
 			}
 
@@ -99,31 +77,41 @@ namespace MassTransit.Grid
 			}
 		}
 
-		private GridMessageNode GetMessageNode(Guid correlationId)
-		{
-			 return _messageNodeRepository.Where(x => x.CorrelationId == correlationId).FirstOrDefault();
-		}
-
 		public override bool Accept(TService message)
 		{
-			var messageNode = GetMessageNode(message.CorrelationId);
+			var messageNode = Grid.GetMessageNode(message.CorrelationId);
 			if(messageNode == null)
 			{
-				Grid.NotifyNewMessage(message.CorrelationId);
+				Grid.ProposeMessageNodeToQuorum(ServiceId, message.CorrelationId);
 				return false;
 			}
 
 			if (messageNode.CurrentState == GridMessageNode.Completed)
 				return true;
 
-			if(messageNode.CurrentState == GridMessageNode.WaitingForCompletion && 
-				messageNode.DataUri == CurrentMessage.Headers.Bus.Endpoint.Uri && 
-				messageNode.ControlUri == CurrentMessage.Headers.Bus.ControlBus.Endpoint.Uri)
-			{
-				return true;
-			}
+			return Grid.IsAssignedToMessage(messageNode);
+		}
+	}
 
-			return false;
+	public static class ExtensionsForGridThings
+	{
+		private static Random _random;
+
+		static ExtensionsForGridThings()
+		{
+			_random = new Random();
+		}
+
+		public static IList<GridServiceNode> SelectQuorum(this IEnumerable<GridServiceNode> nodes)
+		{
+			var all = nodes.ToList();
+
+			if (all.Count <= 2)
+				return all;
+
+			int required = all.Count/2 + 1;
+
+			return all.OrderBy(x => _random.Next()).Take(required).ToList();
 		}
 	}
 }

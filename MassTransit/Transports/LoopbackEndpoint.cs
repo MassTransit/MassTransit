@@ -19,7 +19,6 @@ namespace MassTransit.Transports
 	using Configuration;
 	using Internal;
 	using log4net;
-	using Magnum.Threading;
 	using Serialization;
 
 	public class LoopbackEndpoint :
@@ -28,8 +27,10 @@ namespace MassTransit.Transports
 		private static readonly ILog _log = LogManager.GetLogger(typeof (LoopbackEndpoint));
 		private static readonly ILog _messageLog = LogManager.GetLogger("MassTransit.Messages");
 
-		private readonly Semaphore _messageReady = new Semaphore(0, int.MaxValue);
-		public readonly ReaderWriterLockedObject<Queue<byte[]>> _messages = new ReaderWriterLockedObject<Queue<byte[]>>(new Queue<byte[]>());
+		private readonly AutoResetEvent _messageReady = new AutoResetEvent(false);
+
+		public readonly LinkedList<byte[]> _messages = new LinkedList<byte[]>();
+
 		private readonly IMessageSerializer _serializer;
 		private readonly Uri _uri;
 		private bool _disposed;
@@ -64,10 +65,10 @@ namespace MassTransit.Transports
 				_messageLog.InfoFormat("SEND:{0}:{1}", Uri, typeof (T).Name);
 
 			OutboundMessage.Set(headers =>
-			{
-				headers.SetMessageType(typeof(T));
-				headers.SetDestinationAddress(Uri);
-			});
+				{
+					headers.SetMessageType(typeof (T));
+					headers.SetDestinationAddress(Uri);
+				});
 
 			Enqueue(message);
 		}
@@ -76,15 +77,30 @@ namespace MassTransit.Transports
 		{
 			if (_disposed) throw new ObjectDisposedException("The object has been disposed");
 
-			if (!_messageReady.WaitOne(timeout, true))
-				yield break;
-
-			byte[] data = Dequeue();
-
-			using (LoopbackMessageSelector selector = new LoopbackMessageSelector(this, data, _serializer))
+			if (_messages.Count == 0)
 			{
-				yield return selector;
+				if (!_messageReady.WaitOne(timeout, true))
+					yield break;
 			}
+
+			var iterator = _messages.First;
+			while (iterator != null)
+			{
+				var node = iterator;
+				Action acceptor = () => _messages.Remove(node);
+
+				using (var selector = new LoopbackMessageSelector(this, node.Value, acceptor, _serializer))
+				{
+					yield return selector;
+
+					if (selector.AcceptedMessage)
+						yield break;
+				}
+
+				iterator = iterator.Next;
+			}
+
+			_messageReady.WaitOne(timeout, true);
 		}
 
 		public void Dispose()
@@ -98,7 +114,8 @@ namespace MassTransit.Transports
 			if (_disposed) return;
 			if (disposing)
 			{
-				_messages.WriteLock(x => x.Clear());
+				lock (_messages)
+					_messages.Clear();
 			}
 			_disposed = true;
 		}
@@ -109,15 +126,10 @@ namespace MassTransit.Transports
 			{
 				_serializer.Serialize(mstream, message);
 
-				_messages.WriteLock(x => x.Enqueue(mstream.ToArray()));
+				_messages.AddLast(mstream.ToArray());
 			}
 
-			_messageReady.Release();
-		}
-
-		private byte[] Dequeue()
-		{
-			return _messages.WriteLock(x => x.Dequeue());
+			_messageReady.Set();
 		}
 
 		public static IEndpoint ConfigureEndpoint(Uri uri, Action<IEndpointConfigurator> configurator)

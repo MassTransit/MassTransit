@@ -13,6 +13,7 @@
 namespace MassTransit.Grid
 {
 	using System;
+	using Sagas;
 
 	public delegate void RemoveActiveInterceptor();
 
@@ -24,12 +25,13 @@ namespace MassTransit.Grid
 
 		RemoveActiveInterceptor AddActiveInterceptor(Guid serviceId, Guid correlationId, IGridServiceInteceptor interceptor);
 
-		/// <summary>
-		/// Notifies the grid that a new message was received. The grid will then initiate a GridMessageNode saga instance
-		/// to determine which node should process this message.
-		/// </summary>
-		/// <param name="correlationId">The correlationId of the message, used to coordinate the service nodes</param>
-		void NotifyNewMessage(Guid correlationId);
+
+
+		void ProposeMessageNodeToQuorum(Guid serviceId, Guid correlationId);
+
+
+		GridMessageNode GetMessageNode(Guid correlationId);
+
 
 		/// <summary>
 		/// Notifies the grid that a message was consumed. The grid will then update the GridMessageNode saga instance
@@ -37,5 +39,7 @@ namespace MassTransit.Grid
 		/// </summary>
 		/// <param name="correlationId"></param>
 		void NotifyMessageComplete(Guid correlationId);
+
+		bool IsAssignedToMessage(GridMessageNode messageNode);
 	}
 }

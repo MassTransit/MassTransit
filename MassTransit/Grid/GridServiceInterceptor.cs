@@ -25,12 +25,17 @@ namespace MassTransit.Grid
 		IGridServiceInteceptor
 		where TService : class
 	{
-		private static readonly Guid _serviceId = GridService.GenerateIdForType(typeof (TService));
+		static GridServiceInterceptor()
+		{
+			ServiceId = GridService.GenerateIdForType(typeof (TService));
+		}
 
 		protected GridServiceInterceptor(IGridControl grid)
 		{
 			Grid = grid;
 		}
+
+		public static Guid ServiceId { get; private set; }
 
 		protected IGridControl Grid { get; set; }
 
@@ -40,7 +45,7 @@ namespace MassTransit.Grid
 
 		protected RemoveActiveInterceptor NotifyGridOfActiveInterceptor(Guid correlationId)
 		{
-			return Grid.AddActiveInterceptor(_serviceId, correlationId, this);
+			return Grid.AddActiveInterceptor(ServiceId, correlationId, this);
 		}
 	}
 }

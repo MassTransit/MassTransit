@@ -18,6 +18,10 @@ namespace MassTransit.Grid
 	public interface IGrid :
 		IBusService
 	{
+		Uri ControlUri { get; }
+
+		Uri DataUri { get; }
+
 		bool IsHealthy { get; }
 
 		void Execute<T>(T command)
