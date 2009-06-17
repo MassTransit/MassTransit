@@ -16,16 +16,18 @@ namespace MassTransit.Tests.Grid
 	using System.Diagnostics;
 	using System.Linq;
 	using System.Threading;
+	using log4net;
 	using Magnum;
 	using Magnum.DateTimeExtensions;
 	using MassTransit.Grid.Configuration;
 	using MassTransit.Grid.Sagas;
+	using MassTransit.Transports;
 	using NUnit.Framework;
 	using Rhino.Mocks;
 
 	[TestFixture]
 	public class When_the_grid_services_are_attached_to_the_bus :
-		GridTestFixture
+		GridTestFixture<LoopbackEndpoint>
 	{
 		[Test, Explicit]
 		public void A_grid_service_framework_should_run_on_top_of_the_service_bus()
@@ -40,7 +42,7 @@ namespace MassTransit.Tests.Grid
 
 	[TestFixture]
 	public class Configuring_a_service_to_run_on_the_grid :
-		GridTestFixture
+		GridTestFixture<LoopbackEndpoint>
 	{
 		protected override void EstablishContext()
 		{
@@ -61,7 +63,7 @@ namespace MassTransit.Tests.Grid
 			WaitForServiceToBeAvailable<SimpleGridCommand>(5.Seconds(), 1);
 		}
 
-		[Test]
+		[Test, Explicit]
 		public void Should_respond_when_commands_are_executed()
 		{
 			WaitForServiceToBeAvailable<SimpleGridCommand>(5.Seconds(), 1);
@@ -82,7 +84,7 @@ namespace MassTransit.Tests.Grid
 
 	[TestFixture]
 	public class Configuring_a_service_to_run_on_multiple_nodes_of_the_grid :
-		GridTestFixture
+		GridTestFixture<LoopbackEndpoint>
 	{
 		protected override void EstablishContext()
 		{
@@ -129,10 +131,15 @@ namespace MassTransit.Tests.Grid
 	public class SimpleGridService :
 		Consumes<SimpleGridCommand>.All
 	{
+		private static readonly ILog _log = LogManager.GetLogger(typeof (SimpleGridService));
+
 		public int WorkerLimit { get; set; }
 
 		public void Consume(SimpleGridCommand message)
 		{
+			_log.InfoFormat("{0} -DONE-: {1}", CurrentMessage.Headers.Bus.Endpoint.Uri,message.CorrelationId);
+
+			Thread.Sleep(10);
 			CurrentMessage.Respond(new SimpleGridResult(message.CorrelationId));
 		}
 	}

@@ -72,6 +72,8 @@
     <Compile Include="As_a_nontransactional_endpoint.cs" />
     <Compile Include="As_a_ServiceBus_working_with_an_endpoint.cs" />
     <Compile Include="As_a_transactional_endpoint.cs" />
+    <Compile Include="ContextSetup.cs" />
+    <Compile Include="GridOnMsmq_Specs.cs" />
     <Compile Include="MessageQueue_Extensions.cs" />
     <Compile Include="Messages\VariableMessage.cs" />
     <Compile Include="Messages\DeleteMessage.cs" />
@@ -87,6 +89,7 @@
     <Compile Include="TestFixtures\MsmqEndpointTestFixture.cs" />
     <Compile Include="TestFixtures\MsmqTransactionalEndpointTestFixture.cs" />
     <Compile Include="As_a_queue_address.cs" />
+    <Compile Include="ThreeNodeMsmqGridTestFixture.cs" />
     <Compile Include="Transactional_Specs.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -102,6 +105,11 @@
       <Project>{6F90867C-E092-4EDC-B3DE-600D39DF0335}</Project>
       <Name>MassTransit.Transports.Msmq</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="test.log4net.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

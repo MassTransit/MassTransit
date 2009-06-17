@@ -165,26 +165,22 @@ namespace MassTransit.Grid
 
 		public void ProposeMessageNodeToQuorum(Guid serviceId, Guid correlationId)
 		{
+			var nodes = _serviceNodeRepository
+				.Where(x => x.ServiceId == serviceId)
+				.SelectQuorum(ControlUri, DataUri);
+
 			ProposeMessageNode message = new ProposeMessageNode
 				{
 					BallotId = 1,
 					ControlUri = ControlUri,
 					DataUri = DataUri,
 					CorrelationId = correlationId,
+					Quorum = nodes.Select(x => x.ControlUri).ToList(),
 				};
-
-			var nodes = _serviceNodeRepository
-				.Where(x => x.ServiceId == serviceId && x.ControlUri != ControlUri)
-				.SelectQuorum();
-
-			_log.InfoFormat("PROPOSAL: {0} ({1}) TO {2} FROM {3}", serviceId, correlationId, ControlUri, ControlUri);
-			_controlBus.Endpoint.Send(message, context => context.SendResponseTo(_controlBus));
 
 			nodes.Each(node =>
 				{
-					_log.InfoFormat("PROPOSAL: {0} ({1}) TO {2} FROM {3}", serviceId, correlationId, node.ControlUri, ControlUri);
-
-					_endpointFactory.GetEndpoint(node.ControlUri).Send(message, context => context.SendResponseTo(_controlBus));
+					_endpointFactory.GetEndpoint(node.ControlUri).Send(message, context => context.SetSourceAddress(ControlUri));
 				});
 
 			WaitUntilMessageNodeIsAvailable(correlationId);
@@ -220,6 +216,12 @@ namespace MassTransit.Grid
 
 		public bool IsAssignedToMessage(GridMessageNode messageNode)
 		{
+			if (messageNode.CurrentState != GridMessageNode.WaitingForCompletion)
+				return false;
+
+			_log.InfoFormat("{0} WAITER: {1}.{2}:{3}", ControlUri,
+							messageNode.CorrelationId, messageNode.BallotId, messageNode.ControlUri);
+
 			return messageNode.CurrentState == GridMessageNode.WaitingForCompletion &&
 			       messageNode.DataUri == DataUri && 
 			       messageNode.ControlUri == ControlUri;

@@ -22,9 +22,12 @@ namespace MassTransit.Tests.Grid
 	using TextFixtures;
 
 	[TestFixture]
-	public class GridTestFixture :
-		SubscriptionServiceTestFixture
+	public class GridTestFixture<TEndpoint> :
+		SubscriptionServiceTestFixture<TEndpoint>
+		where TEndpoint:IEndpoint
 	{
+		public string BaseGridNodeUri = "loopback://localhost/mt_grid_";
+
 		public TestGridNode nodeA { get; private set; }
 		public TestGridNode nodeB { get; private set; }
 		public TestGridNode nodeC { get; private set; }
@@ -38,9 +41,9 @@ namespace MassTransit.Tests.Grid
 		{
 			base.EstablishContext();
 
-			nodeA = new TestGridNode("a", EndpointFactory, SubscriptionServiceEndpointAddress, ConfigureGridA);
-			nodeB = new TestGridNode("b", EndpointFactory, SubscriptionServiceEndpointAddress, ConfigureGridB);
-			nodeC = new TestGridNode("c", EndpointFactory, SubscriptionServiceEndpointAddress, ConfigureGridC);
+			nodeA = new TestGridNode(BaseGridNodeUri+"a", EndpointFactory, SubscriptionServiceUri, ConfigureGridA);
+			nodeB = new TestGridNode(BaseGridNodeUri+"b", EndpointFactory, SubscriptionServiceUri, ConfigureGridB);
+			nodeC = new TestGridNode(BaseGridNodeUri+"c", EndpointFactory, SubscriptionServiceUri, ConfigureGridC);
 
 			Thread.Sleep(500);
 		}

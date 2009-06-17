@@ -22,17 +22,21 @@ namespace MassTransit.Tests.TextFixtures
 	using MassTransit.Services.Subscriptions.Messages;
 	using MassTransit.Services.Subscriptions.Server;
 	using MassTransit.Services.Subscriptions.Server.Messages;
-	using MassTransit.Transports;
 	using NUnit.Framework;
 	using Rhino.Mocks;
 
 	[TestFixture]
-	public class SubscriptionServiceTestFixture :
-		EndpointTestFixture<LoopbackEndpoint>
+	public class SubscriptionServiceTestFixture<TEndpoint> :
+		EndpointTestFixture<TEndpoint>
+		where TEndpoint : IEndpoint
 	{
-		public const string SubscriptionServiceEndpointAddress = "loopback://localhost/mt_subscriptions";
 		private ISagaRepository<SubscriptionClientSaga> _subscriptionClientSagaRepository;
 		private ISagaRepository<SubscriptionSaga> _subscriptionSagaRepository;
+		public string SubscriptionServiceUri = "loopback://localhost/mt_subscriptions";
+		public string ClientControlUri = "loopback://localhost/mt_client_control";
+		public string ServerControlUri = "loopback://localhost/mt_server_control";
+		public string ClientUri = "loopback://localhost/mt_client";
+		public string ServerUri = "loopback://localhost/mt_server";
 		public SubscriptionService SubscriptionService { get; private set; }
 		public IServiceBus LocalBus { get; private set; }
 		public IControlBus LocalControlBus { get; private set; }
@@ -47,34 +51,34 @@ namespace MassTransit.Tests.TextFixtures
 
 			SubscriptionBus = ServiceBusConfigurator.New(x =>
 				{
-					x.ReceiveFrom(SubscriptionServiceEndpointAddress);
+					x.ReceiveFrom(SubscriptionServiceUri);
 					x.SetConcurrentConsumerLimit(1);
 				});
 
 			SetupSubscriptionService(ObjectBuilder);
 
 			LocalControlBus = ControlBusConfigurator.New(x =>
-			{
-				x.ReceiveFrom("loopback://localhost/mt_client_control");
+				{
+					x.ReceiveFrom(ClientControlUri);
 
-				x.PurgeBeforeStarting();
-			});
+					x.PurgeBeforeStarting();
+				});
 
 			RemoteControlBus = ControlBusConfigurator.New(x =>
-			{
-				x.ReceiveFrom("loopback://localhost/mt_server_control");
+				{
+					x.ReceiveFrom(ServerControlUri);
 
-				x.PurgeBeforeStarting();
-			});
+					x.PurgeBeforeStarting();
+				});
 
 			LocalBus = ServiceBusConfigurator.New(x =>
 				{
 					x.ConfigureService<SubscriptionClientConfigurator>(y =>
 						{
 							// setup endpoint
-							y.SetSubscriptionServiceEndpoint(SubscriptionServiceEndpointAddress);
+							y.SetSubscriptionServiceEndpoint(SubscriptionServiceUri);
 						});
-					x.ReceiveFrom("loopback://localhost/mt_client");
+					x.ReceiveFrom(ClientUri);
 					x.UseControlBus(LocalControlBus);
 				});
 
@@ -83,9 +87,9 @@ namespace MassTransit.Tests.TextFixtures
 					x.ConfigureService<SubscriptionClientConfigurator>(y =>
 						{
 							// setup endpoint
-							y.SetSubscriptionServiceEndpoint(SubscriptionServiceEndpointAddress);
+							y.SetSubscriptionServiceEndpoint(SubscriptionServiceUri);
 						});
-					x.ReceiveFrom("loopback://localhost/mt_server");
+					x.ReceiveFrom(ServerUri);
 					x.UseControlBus(RemoteControlBus);
 				});
 		}
@@ -110,7 +114,7 @@ namespace MassTransit.Tests.TextFixtures
 
 			SubscriptionService = new SubscriptionService(SubscriptionBus, SubscriptionRepository, EndpointFactory, _subscriptionSagaRepository, _subscriptionClientSagaRepository);
 
-            SubscriptionService.Start();
+			SubscriptionService.Start();
 
 			builder.Stub(x => x.GetInstance<SubscriptionClient>())
 				.Return(null)

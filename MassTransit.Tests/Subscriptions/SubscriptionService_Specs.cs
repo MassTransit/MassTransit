@@ -18,8 +18,8 @@ namespace MassTransit.Tests.Subscriptions
 	using Magnum;
 	using Magnum.DateTimeExtensions;
 	using MassTransit.Pipeline.Inspectors;
-	using MassTransit.Services.Subscriptions;
 	using MassTransit.Services.Subscriptions.Messages;
+	using MassTransit.Transports;
 	using Messages;
 	using NUnit.Framework;
 	using Rhino.Mocks;
@@ -28,8 +28,46 @@ namespace MassTransit.Tests.Subscriptions
 
 	[TestFixture]
 	public class SubscriptionService_Specs :
-		SubscriptionServiceTestFixture
+		SubscriptionServiceTestFixture<LoopbackEndpoint>
 	{
+		private void DumpPipelines()
+		{
+			Trace.WriteLine("LocalBus.InboundPipeline");
+			PipelineViewer.Trace(LocalBus.InboundPipeline);
+
+			Trace.WriteLine("LocalBus.OutboundPipeline");
+			PipelineViewer.Trace(LocalBus.OutboundPipeline);
+
+			Trace.WriteLine("RemoteBus.InboundPipeline");
+			PipelineViewer.Trace(RemoteBus.InboundPipeline);
+
+			Trace.WriteLine("RemoteBus.OutboundPipeline");
+			PipelineViewer.Trace(RemoteBus.OutboundPipeline);
+
+			Trace.WriteLine("SubscriptionBus.InboundPipeline");
+			PipelineViewer.Trace(SubscriptionBus.InboundPipeline);
+
+			Trace.WriteLine("SubscriptionBus.OutboundPipeline");
+			PipelineViewer.Trace(SubscriptionBus.OutboundPipeline);
+		}
+
+		[Test]
+		public void Removing_a_subscription_twice_should_not_have_a_negative_impact()
+		{
+			Guid clientId = CombGuid.Generate();
+
+			SubscriptionInformation subscription = new SubscriptionInformation(clientId, 1, typeof (PingMessage), RemoteBus.Endpoint.Uri);
+
+			LocalControlBus.Endpoint.Send(new AddSubscription(subscription));
+			Thread.Sleep(250);
+
+			LocalControlBus.Endpoint.Send(new RemoveSubscription(subscription));
+			LocalControlBus.Endpoint.Send(new RemoveSubscription(subscription));
+			Thread.Sleep(250);
+
+			PipelineViewer.Trace(LocalBus.OutboundPipeline);
+		}
+
 		[Test]
 		public void The_initial_subscriptions_should_be_read_from_the_repository()
 		{
@@ -52,44 +90,6 @@ namespace MassTransit.Tests.Subscriptions
 			consumer.ShouldHaveReceivedMessage(message, 500.Milliseconds());
 
 			unsubscribeAction();
-		}
-
-		[Test]
-		public void Removing_a_subscription_twice_should_not_have_a_negative_impact()
-		{
-			Guid clientId = CombGuid.Generate();
-
-			SubscriptionInformation subscription = new SubscriptionInformation(clientId, 1, typeof (PingMessage), RemoteBus.Endpoint.Uri);
-
-			LocalControlBus.Endpoint.Send(new AddSubscription(subscription));
-			Thread.Sleep(250);
-
-			LocalControlBus.Endpoint.Send(new RemoveSubscription(subscription));
-			LocalControlBus.Endpoint.Send(new RemoveSubscription(subscription));
-			Thread.Sleep(250);
-
-			PipelineViewer.Trace(LocalBus.OutboundPipeline);
-		}
-
-		private void DumpPipelines()
-		{
-			Trace.WriteLine("LocalBus.InboundPipeline");
-			PipelineViewer.Trace(LocalBus.InboundPipeline);
-
-			Trace.WriteLine("LocalBus.OutboundPipeline");
-			PipelineViewer.Trace(LocalBus.OutboundPipeline);
-
-			Trace.WriteLine("RemoteBus.InboundPipeline");
-			PipelineViewer.Trace(RemoteBus.InboundPipeline);
-
-			Trace.WriteLine("RemoteBus.OutboundPipeline");
-			PipelineViewer.Trace(RemoteBus.OutboundPipeline);
-
-			Trace.WriteLine("SubscriptionBus.InboundPipeline");
-			PipelineViewer.Trace(SubscriptionBus.InboundPipeline);
-
-			Trace.WriteLine("SubscriptionBus.OutboundPipeline");
-			PipelineViewer.Trace(SubscriptionBus.OutboundPipeline);
 		}
 	}
 }

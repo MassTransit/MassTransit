@@ -38,7 +38,7 @@ namespace MassTransit.Tests.Grid
 			ControlBus = ControlBusConfigurator.New(x =>
 				{
 					x.SetObjectBuilder(ObjectBuilder);
-					x.ReceiveFrom("loopback://localhost/mt_grid_" + name + "_control");
+					x.ReceiveFrom(name + "_control");
 
 					x.PurgeBeforeStarting();
 				});
@@ -58,8 +58,9 @@ namespace MassTransit.Tests.Grid
 							// setup endpoint
 							y.SetSubscriptionServiceEndpoint(subscriptionServiceEndpointAddress);
 						});
-					x.ReceiveFrom("loopback://localhost/mt_grid_" + name);
+					x.ReceiveFrom(name);
 					x.UseControlBus(ControlBus);
+					x.SetConcurrentConsumerLimit(2);
 
 					x.ConfigureService(configureGrid);
 				});
@@ -122,6 +123,8 @@ namespace MassTransit.Tests.Grid
 				.SetupObservesSagaStateMachineSink<GridMessageNode, AcceptProposedMessageNode>(ControlBus, GridMessageNodeRepository, ObjectBuilder);
 			EndpointTestFixture<LoopbackEndpoint>
 				.SetupObservesSagaStateMachineSink<GridMessageNode, MessageCompleted>(ControlBus, GridMessageNodeRepository, ObjectBuilder);
+			EndpointTestFixture<LoopbackEndpoint>
+				.SetupObservesSagaStateMachineSink<GridMessageNode, AcceptedMessageNode>(ControlBus, GridMessageNodeRepository, ObjectBuilder);
 		}
 
 		private void SetupGridListenerRepository()

@@ -19,12 +19,13 @@ namespace MassTransit.Tests.Grid
 	using Magnum;
 	using Magnum.DateTimeExtensions;
 	using MassTransit.Grid.Configuration;
+	using MassTransit.Transports;
 	using NUnit.Framework;
 	using Rhino.Mocks;
 
 	[TestFixture]
 	public class ThreeNodeGridTestFixture :
-		GridTestFixture
+		GridTestFixture<LoopbackEndpoint>
 	{
 		protected override void EstablishContext()
 		{
