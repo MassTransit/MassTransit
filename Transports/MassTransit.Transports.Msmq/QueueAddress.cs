@@ -35,6 +35,9 @@ namespace MassTransit.Transports.Msmq
 			ActualUri = IsLocal ? SetUriHostToLocalMachineName(uri) : uri;
 
 			FormatName = BuildQueueFormatName(uri);
+
+			if (IsLocal)
+				LocalName = @".\private$\" + uri.AbsolutePath.Substring(1);
 		}
 
 		public QueueAddress(string address)
@@ -61,6 +64,11 @@ namespace MassTransit.Transports.Msmq
 		/// The format name used to talk to MSMQ
 		/// </summary>
 		public string FormatName { get; private set; }
+
+		/// <summary>
+		/// The name of the queue in local format (.\private$\name)
+		/// </summary>
+		public string LocalName { get; private set; }
 
 		private static string BuildQueueFormatName(Uri uri)
 		{

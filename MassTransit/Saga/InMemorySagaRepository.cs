@@ -46,7 +46,8 @@ namespace MassTransit.Saga
 			if (_log.IsDebugEnabled)
 				_log.DebugFormat("Created saga [{0}] - {1}", typeof(T).ToFriendlyName(), sagaId);
 
-			_repository.Save(saga);
+			lock(_repository)
+				_repository.Save(saga);
 
 			lock (saga)
 			{
@@ -56,7 +57,7 @@ namespace MassTransit.Saga
 
 		public IEnumerable<Action<V>> Find<V>(Expression<Func<T, bool>> expression, Action<T, V> action)
 		{
-			foreach (T saga in _repository.Where(expression))
+			foreach (T saga in Where(expression))
 			{
 				if (_log.IsDebugEnabled)
 					_log.DebugFormat("Found saga [{0}] - {1}", typeof(T).ToFriendlyName(), expression.ToString());
@@ -71,7 +72,7 @@ namespace MassTransit.Saga
 
 		public IEnumerable<Action> Find(Expression<Func<T, bool>> expression, Action<T> action)
 		{
-			foreach (T saga in _repository.Where(expression))
+			foreach (T saga in Where(expression))
 			{
 				if (_log.IsDebugEnabled)
 					_log.DebugFormat("Found saga [{0}] - {1}", typeof(T).ToFriendlyName(), expression.ToString());
@@ -86,7 +87,10 @@ namespace MassTransit.Saga
 
 		public IEnumerable<T> Where(Expression<Func<T, bool>> filter)
 		{
-			return _repository.Where(filter);
+			lock (_repository)
+			{
+				return _repository.Where(filter).ToList();
+			}
 		}
 	}
 }

@@ -102,16 +102,16 @@ namespace MassTransit.Grid
 			_random = new Random();
 		}
 
-		public static IList<GridServiceNode> SelectQuorum(this IEnumerable<GridServiceNode> nodes)
+		public static IList<GridServiceNode> SelectQuorum(this IEnumerable<GridServiceNode> nodes, Uri controlUri, Uri dataUri)
 		{
 			var all = nodes.ToList();
-
-			if (all.Count <= 2)
+			if (all.Count <= 3)
 				return all;
 
-			int required = all.Count/2 + 1;
+			var me = all.Where(x => x.ControlUri == controlUri);
+			var everyoneElse = nodes.Except(me).ToList();
 
-			return all.OrderBy(x => _random.Next()).Take(required).ToList();
+			return everyoneElse.OrderBy(x => _random.Next()).Take(all.Count/2).Union(me).ToList();
 		}
 	}
 }

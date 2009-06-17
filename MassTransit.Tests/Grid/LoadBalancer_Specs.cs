@@ -21,12 +21,13 @@ namespace MassTransit.Tests.Grid
 	using MassTransit.Grid.Configuration;
 	using MassTransit.Grid.Paxos;
 	using MassTransit.Grid.Sagas;
+	using MassTransit.Transports;
 	using NUnit.Framework;
 	using Rhino.Mocks;
 
 	[TestFixture]
 	public class Using_the_load_balancer_with_the_grid :
-		GridTestFixture
+		GridTestFixture<LoopbackEndpoint>
 	{
 		protected override void EstablishContext()
 		{

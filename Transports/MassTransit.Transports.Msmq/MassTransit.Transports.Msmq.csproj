@@ -62,8 +62,10 @@
     <Compile Include="..\..\SolutionVersion.cs">
       <Link>SolutionVersion.cs</Link>
     </Compile>
+    <Compile Include="IMsmqEndpointDefaults.cs" />
     <Compile Include="MsmqEndpoint.cs" />
     <Compile Include="MsmqEndpointConfigurator.cs" />
+    <Compile Include="MsmqEndpointConfiguratorDefaults.cs" />
     <Compile Include="MsmqMessageSelector.cs" />
     <Compile Include="QueueAddress.cs" />
     <Compile Include="MsmqUtilities.cs" />
