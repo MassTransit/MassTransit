@@ -137,7 +137,7 @@ namespace MassTransit
 		public void Publish<T>(T message) 
 			where T : class
 		{
-			var context = OutboundMessage.Headers;
+			var context = OutboundMessage.Context;
 
 			context.SetSourceAddress(Endpoint.Uri);
 			context.SetMessageType(typeof (T));
@@ -158,9 +158,11 @@ namespace MassTransit
 			}
 
 			context.Reset();
-
-			if (_log.IsWarnEnabled && publishedCount == 0)
-				_log.WarnFormat("There are no subscriptions for the message type {0} for the bus listening on {1}", typeof (T).FullName, Endpoint.Uri);
+			
+			if (publishedCount == 0)
+			{
+				context.NotifyNoSubscribers(message);
+			}
 		}
 
 		//		endpoint.Send(message, info.TimeToLive);

@@ -17,9 +17,17 @@ namespace MassTransit.Internal
 
 	public class OutboundMessage :
 		MessageHeadersBase,
-		IOutboundMessage
+		IOutboundMessageContext
 	{
+		private Action<object> _noSubscribersAction = x => { };
+		private Action<object, IEndpoint> _eachConsumerAction = (x, y) => { };
+
 		public static IOutboundMessage Headers
+		{
+			get { return Context; }
+		}
+
+		internal static IOutboundMessageContext Context
 		{
 			get { return LocalContext.Current.Retrieve(TypedKey<OutboundMessage>.UniqueKey, () => new OutboundMessage()); }
 		}
@@ -59,6 +67,26 @@ namespace MassTransit.Internal
 		public void SendFaultTo(Uri uri)
 		{
 			SetFaultAddress(uri);
+		}
+
+		public void IfNoSubscribers<T>(Action<T> action)
+		{
+			_noSubscribersAction = x => action((T) x);
+		}
+
+		public void ForEachSubscriber<T>(Action<T, IEndpoint> action)
+		{
+			_eachConsumerAction = (message, endpoint) => action((T) message, endpoint);
+		}
+
+		public void NotifyForMessageConsumer<T>(T message, IEndpoint endpoint)
+		{
+			_eachConsumerAction(message, endpoint);
+		}
+
+		public void NotifyNoSubscribers<T>(T message)
+		{
+			_noSubscribersAction(message);
 		}
 	}
 }

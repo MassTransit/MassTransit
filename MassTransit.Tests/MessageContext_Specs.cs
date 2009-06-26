@@ -13,6 +13,7 @@
 namespace MassTransit.Tests
 {
 	using System;
+	using System.Collections.Generic;
 	using Magnum.DateTimeExtensions;
 	using Messages;
 	using NUnit.Framework;
@@ -147,4 +148,86 @@ namespace MassTransit.Tests
 			Assert.IsTrue(received.IsAvailable(5.Seconds()), "No message was received");
 		}
 	}
+	[TestFixture]
+	public class When_publishing_a_message_with_no_consumers :
+		LoopbackLocalAndRemoteTestFixture
+	{
+		[Test]
+		public void The_method_should_be_called_to_notify_the_caller()
+		{
+			var ping = new PingMessage();
+
+			bool noConsumers = false;
+
+			LocalBus.Publish(ping, x =>
+				{
+					x.IfNoSubscribers<PingMessage>(message =>
+						{
+							Assert.IsInstanceOfType(typeof (PingMessage), message);
+							noConsumers = true;
+						});
+				});
+
+			Assert.IsTrue(noConsumers, "There should have been no consumers");
+		}
+	}
+
+	[TestFixture]
+	public class When_publishing_a_message_with_an_each_consumer_action_specified :
+		LoopbackLocalAndRemoteTestFixture
+	{
+		[Test]
+		public void The_method_should_not_be_called_when_there_are_no_subscribers()
+		{
+			var ping = new PingMessage();
+
+			List<Uri> consumers = new List<Uri>();
+
+			LocalBus.Publish(ping, x =>
+				{
+					x.ForEachSubscriber<PingMessage>((message,consumer) => consumers.Add(consumer.Uri));
+				});
+
+			Assert.AreEqual(0, consumers.Count);
+		}
+
+		[Test]
+		public void The_method_should_be_called_for_each_destination_endpoint()
+		{
+			LocalBus.Subscribe<PingMessage>(x => { });
+
+			var ping = new PingMessage();
+
+			List<Uri> consumers = new List<Uri>();
+
+			LocalBus.Publish(ping, x =>
+				{
+					x.ForEachSubscriber<PingMessage>((message,endpoint) => consumers.Add(endpoint.Uri));
+				});
+
+			Assert.AreEqual(1, consumers.Count);
+			Assert.AreEqual(LocalBus.Endpoint.Uri, consumers[0]);
+		}
+		
+		[Test]
+		public void The_method_should_be_called_for_each_destination_endpoint_when_there_are_multiple()
+		{
+			LocalBus.Subscribe<PingMessage>(x => { });
+			RemoteBus.Subscribe<PingMessage>(x => { });
+
+			var ping = new PingMessage();
+
+			List<Uri> consumers = new List<Uri>();
+
+			LocalBus.Publish(ping, x =>
+				{
+					x.ForEachSubscriber<PingMessage>((message,endpoint) => consumers.Add(endpoint.Uri));
+				});
+
+			Assert.AreEqual(2, consumers.Count);
+			Assert.IsTrue(consumers.Contains(LocalBus.Endpoint.Uri));
+			Assert.IsTrue(consumers.Contains(RemoteBus.Endpoint.Uri));
+		}
+	}
+
 }
