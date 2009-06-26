@@ -24,5 +24,15 @@ namespace MassTransit.Internal
 		void SendFaultTo(IServiceBus bus);
 		void SendFaultTo(IEndpoint endpoint);
 		void SendFaultTo(Uri uri);
+
+		void IfNoSubscribers<T>(Action<T> action);
+		void ForEachSubscriber<T>(Action<T, IEndpoint> action);
+	}
+
+	public interface IOutboundMessageContext :
+		IOutboundMessage
+	{
+		void NotifyForMessageConsumer<T>(T message, IEndpoint endpoint);
+		void NotifyNoSubscribers<T>(T message);
 	}
 }

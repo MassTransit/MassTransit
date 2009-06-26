@@ -14,6 +14,7 @@ namespace MassTransit.Pipeline.Sinks
 {
 	using System;
 	using System.Collections.Generic;
+	using Internal;
 
 	/// <summary>
 	/// A message sink that sends to an endpoint
@@ -37,7 +38,12 @@ namespace MassTransit.Pipeline.Sinks
 
 		public IEnumerable<Action<TMessage>> Enumerate(TMessage message)
 		{
-			yield return x => _endpoint.Send(x);
+			yield return x =>
+				{
+					_endpoint.Send(x);
+
+					OutboundMessage.Context.NotifyForMessageConsumer(message, _endpoint);
+				}; 
 		}
 
 		public bool Inspect(IPipelineInspector inspector)
