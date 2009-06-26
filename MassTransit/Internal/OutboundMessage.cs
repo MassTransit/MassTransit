@@ -19,8 +19,8 @@ namespace MassTransit.Internal
 		MessageHeadersBase,
 		IOutboundMessageContext
 	{
-		private Action<object> _noSubscribersAction = x => { };
-		private Action<object, IEndpoint> _eachSubscriberAction = (x, y) => { };
+		private Action<object, IEndpoint> _eachSubscriberAction = Ignore;
+		private Action<object> _noSubscribersAction = Ignore;
 
 		public static IOutboundMessage Headers
 		{
@@ -30,13 +30,6 @@ namespace MassTransit.Internal
 		internal static IOutboundMessageContext Context
 		{
 			get { return LocalContext.Current.Retrieve(TypedKey<OutboundMessage>.UniqueKey, () => new OutboundMessage()); }
-		}
-
-		public static void Set(Action<IOutboundMessage> setAction)
-		{
-			var headers = Headers;
-
-			setAction(headers);
 		}
 
 		public void SendResponseTo(IServiceBus bus)
@@ -73,8 +66,8 @@ namespace MassTransit.Internal
 		{
 			base.Reset();
 
-			_noSubscribersAction = x => { };
-			_eachSubscriberAction = (x, y) => { };
+			_noSubscribersAction = Ignore;
+			_eachSubscriberAction = Ignore;
 		}
 
 		public void IfNoSubscribers<T>(Action<T> action)
@@ -95,6 +88,21 @@ namespace MassTransit.Internal
 		public void NotifyNoSubscribers<T>(T message)
 		{
 			_noSubscribersAction(message);
+		}
+
+		public static void Set(Action<IOutboundMessage> setAction)
+		{
+			var headers = Headers;
+
+			setAction(headers);
+		}
+
+		private static void Ignore<T>(T message)
+		{
+		}
+
+		private static void Ignore<T>(T message, IEndpoint endpoint)
+		{
 		}
 	}
 }
