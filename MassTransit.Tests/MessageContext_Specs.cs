@@ -148,6 +148,7 @@ namespace MassTransit.Tests
 			Assert.IsTrue(received.IsAvailable(5.Seconds()), "No message was received");
 		}
 	}
+
 	[TestFixture]
 	public class When_publishing_a_message_with_no_consumers :
 		LoopbackLocalAndRemoteTestFixture
@@ -169,6 +170,19 @@ namespace MassTransit.Tests
 				});
 
 			Assert.IsTrue(noConsumers, "There should have been no consumers");
+		}
+
+		[Test]
+		public void The_method_should_not_carry_over_the_subsequent_calls()
+		{
+			var ping = new PingMessage();
+
+			int hitCount = 0;
+
+			LocalBus.Publish(ping, x => x.IfNoSubscribers<PingMessage>(message => hitCount++));
+			LocalBus.Publish(ping);
+
+			Assert.AreEqual(1, hitCount, "There should have been no consumers");
 		}
 	}
 
@@ -207,6 +221,25 @@ namespace MassTransit.Tests
 
 			Assert.AreEqual(1, consumers.Count);
 			Assert.AreEqual(LocalBus.Endpoint.Uri, consumers[0]);
+		}
+
+		[Test]
+		public void The_method_should_not_carry_over_to_the_next_call_context()
+		{
+			var ping = new PingMessage();
+
+			List<Uri> consumers = new List<Uri>();
+
+			LocalBus.Publish(ping, x =>
+				{
+					x.ForEachSubscriber<PingMessage>((message,endpoint) => consumers.Add(endpoint.Uri));
+				});
+
+			LocalBus.Subscribe<PingMessage>(x => { });
+
+			LocalBus.Publish(ping);
+
+			Assert.AreEqual(0, consumers.Count);
 		}
 		
 		[Test]
