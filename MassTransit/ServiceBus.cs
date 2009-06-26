@@ -157,12 +157,12 @@ namespace MassTransit
 				}
 			}
 
-			context.Reset();
-			
 			if (publishedCount == 0)
 			{
 				context.NotifyNoSubscribers(message);
 			}
+
+			context.Reset();
 		}
 
 		//		endpoint.Send(message, info.TimeToLive);

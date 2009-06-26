@@ -20,7 +20,7 @@ namespace MassTransit.Internal
 		IOutboundMessageContext
 	{
 		private Action<object> _noSubscribersAction = x => { };
-		private Action<object, IEndpoint> _eachConsumerAction = (x, y) => { };
+		private Action<object, IEndpoint> _eachSubscriberAction = (x, y) => { };
 
 		public static IOutboundMessage Headers
 		{
@@ -69,6 +69,14 @@ namespace MassTransit.Internal
 			SetFaultAddress(uri);
 		}
 
+		public override void Reset()
+		{
+			base.Reset();
+
+			_noSubscribersAction = x => { };
+			_eachSubscriberAction = (x, y) => { };
+		}
+
 		public void IfNoSubscribers<T>(Action<T> action)
 		{
 			_noSubscribersAction = x => action((T) x);
@@ -76,12 +84,12 @@ namespace MassTransit.Internal
 
 		public void ForEachSubscriber<T>(Action<T, IEndpoint> action)
 		{
-			_eachConsumerAction = (message, endpoint) => action((T) message, endpoint);
+			_eachSubscriberAction = (message, endpoint) => action((T) message, endpoint);
 		}
 
 		public void NotifyForMessageConsumer<T>(T message, IEndpoint endpoint)
 		{
-			_eachConsumerAction(message, endpoint);
+			_eachSubscriberAction(message, endpoint);
 		}
 
 		public void NotifyNoSubscribers<T>(T message)
