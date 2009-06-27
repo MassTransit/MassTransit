@@ -29,7 +29,7 @@
       <param name="File"
 				   value="C:\LogFiles\MassTransit.ServiceBus.Tests.log" />
       <param name="AppendToFile"
-				   value="true" />
+				   value="false" />
       <rollingStyle value="Size" />
       <maxSizeRollBackups value="4" />
       <maximumFileSize value="10MB" />
@@ -44,7 +44,7 @@
       <param name="File"
 				   value="C:\LogFiles\MassTransit.ServiceBus.Tests.Messages.log" />
       <param name="AppendToFile"
-				   value="true" />
+				   value="false" />
       <rollingStyle value="Size" />
       <maxSizeRollBackups value="4" />
       <maximumFileSize value="10MB" />

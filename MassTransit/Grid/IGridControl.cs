@@ -26,12 +26,21 @@ namespace MassTransit.Grid
 		RemoveActiveInterceptor AddActiveInterceptor(Guid serviceId, Guid correlationId, IGridServiceInteceptor interceptor);
 
 
+		/// <summary>
+		/// Indicates whether this grid node should accept the message from the endpoint
+		/// </summary>
+		/// <param name="serviceId"></param>
+		/// <param name="correlationId"></param>
+		/// <returns></returns>
+		bool AcceptMessage(Guid serviceId, Guid correlationId);
 
-		void ProposeMessageNodeToQuorum(Guid serviceId, Guid correlationId);
-
-
-		GridMessageNode GetMessageNode(Guid correlationId);
-
+		/// <summary>
+		/// Indicates whether this grid node should consume the message
+		/// </summary>
+		/// <param name="serviceId"></param>
+		/// <param name="correlationId"></param>
+		/// <returns></returns>
+		bool ConsumeMessage(Guid serviceId, Guid correlationId);
 
 		/// <summary>
 		/// Notifies the grid that a message was consumed. The grid will then update the GridMessageNode saga instance
@@ -39,7 +48,5 @@ namespace MassTransit.Grid
 		/// </summary>
 		/// <param name="correlationId"></param>
 		void NotifyMessageComplete(Guid correlationId);
-
-		bool IsAssignedToMessage(GridMessageNode messageNode);
 	}
 }

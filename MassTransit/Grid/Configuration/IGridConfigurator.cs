@@ -19,5 +19,10 @@ namespace MassTransit.Grid.Configuration
 		IServiceConfigurator
 	{
 		IGridServiceConfigurator<T> For<T>() where T : class, CorrelatedBy<Guid>;
+		
+		/// <summary>
+		/// Specifies this node should be a proposer in the grid for jobs
+		/// </summary>
+		void SetProposer();
 	}
 }

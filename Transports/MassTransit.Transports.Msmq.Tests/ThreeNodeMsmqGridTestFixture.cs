@@ -50,19 +50,21 @@ namespace MassTransit.Transports.Msmq.Tests
 				});
 		}
 
-		protected override void ConfigureGridA(GridConfigurator grid)
+		protected override void ConfigureGridA(IGridConfigurator grid)
 		{
 			grid.For<SimpleGridCommand>()
 				.Use<SimpleGridService>();
 		}
 
-		protected override void ConfigureGridB(GridConfigurator grid)
+		protected override void ConfigureGridB(IGridConfigurator grid)
 		{
 			grid.For<SimpleGridCommand>()
 				.Use<SimpleGridService>();
+
+			grid.SetProposer();
 		}
 
-		protected override void ConfigureGridC(GridConfigurator grid)
+		protected override void ConfigureGridC(IGridConfigurator grid)
 		{
 			grid.For<SimpleGridCommand>()
 				.Use<SimpleGridService>();
