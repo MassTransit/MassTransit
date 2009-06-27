@@ -13,7 +13,6 @@
 namespace MassTransit.Grid
 {
 	using System;
-	using System.Diagnostics;
 	using System.Linq;
 	using System.Threading;
 	using Internal;
@@ -29,6 +28,7 @@ namespace MassTransit.Grid
 		Consumes<GridServiceAdded>.All
 	{
 		private static readonly ILog _log = LogManager.GetLogger(typeof (ServiceGrid));
+		private readonly ISagaRepository<GridMessageNode> _messageNodeRepository;
 		private IServiceBus _bus;
 		private IServiceBus _controlBus;
 		private DateTime _created;
@@ -36,7 +36,6 @@ namespace MassTransit.Grid
 		private IEndpointFactory _endpointFactory;
 		private ISagaRepository<GridNode> _nodeRepository;
 		private ISagaRepository<GridServiceNode> _serviceNodeRepository;
-		private readonly ISagaRepository<GridMessageNode> _messageNodeRepository;
 		private ISagaRepository<GridService> _serviceRepository;
 		private UnsubscribeAction _unsubscribeAction;
 
@@ -54,6 +53,7 @@ namespace MassTransit.Grid
 		}
 
 		public Action WhenStarted { get; set; }
+		public Uri ProposerUri { get; set; }
 
 		public void Consume(GridServiceAdded message)
 		{
@@ -163,25 +163,82 @@ namespace MassTransit.Grid
 			return () => { };
 		}
 
+		public bool AcceptMessage(Guid serviceId, Guid correlationId)
+		{
+			bool accept = false;
+			bool found = false;
+			_messageNodeRepository.Find<int>(x => x.CorrelationId == correlationId, (saga, message) =>
+				{
+					accept = saga.CurrentState == GridMessageNode.Completed ||
+					         IsAssignedToMessage(saga);
+
+					found = true;
+				})
+				.Each(x => x(0));
+
+			if (accept)
+				return true;
+
+			if (!found)
+			{
+				if (ProposerUri != null && ControlUri == ProposerUri)
+				{
+					ProposeMessageNodeToQuorum(serviceId, correlationId);
+				}
+			}
+
+			return false;
+		}
+
+		public bool ConsumeMessage(Guid serviceId, Guid correlationId)
+		{
+			bool consume = false;
+			_messageNodeRepository.Find<int>(x => x.CorrelationId == correlationId, (saga, message) => { consume = IsAssignedToMessage(saga); })
+				.Each(x => x(0));
+
+			return consume;
+		}
+
+		public void NotifyMessageComplete(Guid correlationId)
+		{
+			_controlBus.Publish(new MessageCompleted
+				{
+					CorrelationId = correlationId,
+				});
+		}
+
+		public void Stop()
+		{
+			_unsubscribeAction();
+			_unsubscribeAction = () => true;
+		}
+
+		public void Dispose()
+		{
+			Dispose(true);
+			GC.SuppressFinalize(this);
+		}
+
 		public void ProposeMessageNodeToQuorum(Guid serviceId, Guid correlationId)
 		{
 			var nodes = _serviceNodeRepository
 				.Where(x => x.ServiceId == serviceId)
-				.SelectQuorum(ControlUri, DataUri);
+				.ToList();
+
+			var selectedNode = nodes.SelectNodeToUse();
+
+			_log.InfoFormat("{0} sending proposal message for {1}", ControlUri, correlationId);
 
 			ProposeMessageNode message = new ProposeMessageNode
 				{
 					BallotId = 1,
-					ControlUri = ControlUri,
-					DataUri = DataUri,
+					ControlUri = selectedNode.ControlUri,
+					DataUri = selectedNode.DataUri,
 					CorrelationId = correlationId,
 					Quorum = nodes.Select(x => x.ControlUri).ToList(),
 				};
 
-			nodes.Each(node =>
-				{
-					_endpointFactory.GetEndpoint(node.ControlUri).Send(message, context => context.SetSourceAddress(ControlUri));
-				});
+			nodes.Each(node => { _endpointFactory.GetEndpoint(node.ControlUri).Send(message, context => context.SetSourceAddress(ControlUri)); });
 
 			WaitUntilMessageNodeIsAvailable(correlationId);
 		}
@@ -200,18 +257,9 @@ namespace MassTransit.Grid
 				neverSurrender.WaitOne(30, true);
 			}
 		}
-
 		public GridMessageNode GetMessageNode(Guid correlationId)
 		{
 			return _messageNodeRepository.Where(x => x.CorrelationId == correlationId).FirstOrDefault();
-		}
-
-		public void NotifyMessageComplete(Guid correlationId)
-		{
-			_controlBus.Publish(new MessageCompleted
-			{
-				CorrelationId = correlationId,
-			});
 		}
 
 		public bool IsAssignedToMessage(GridMessageNode messageNode)
@@ -220,23 +268,11 @@ namespace MassTransit.Grid
 				return false;
 
 			_log.InfoFormat("{0} WAITER: {1}.{2}:{3}", ControlUri,
-							messageNode.CorrelationId, messageNode.BallotId, messageNode.ControlUri);
+				messageNode.CorrelationId, messageNode.BallotId, messageNode.ControlUri);
 
 			return messageNode.CurrentState == GridMessageNode.WaitingForCompletion &&
-			       messageNode.DataUri == DataUri && 
+			       messageNode.DataUri == DataUri &&
 			       messageNode.ControlUri == ControlUri;
-		}
-
-		public void Stop()
-		{
-			_unsubscribeAction();
-			_unsubscribeAction = () => true;
-		}
-
-		public void Dispose()
-		{
-			Dispose(true);
-			GC.SuppressFinalize(this);
 		}
 
 		public RemoveActiveInterceptor AddActiveInterceptor(Guid serviceId, IGridServiceInteceptor interceptor)

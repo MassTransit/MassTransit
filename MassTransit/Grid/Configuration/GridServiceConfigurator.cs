@@ -33,9 +33,7 @@ namespace MassTransit.Grid.Configuration
 		{
 			_startAction = (bus, grid, builder) =>
 				{
-					var interceptor = new GridServiceComponentInterceptor<T, TComponent>(grid, 
-						builder.GetInstance<ISagaRepository<GridMessageNode>>(),
-						builder.GetInstance<ISagaRepository<GridServiceNode>>(),
+					var interceptor = new GridServiceComponentInterceptor<T, TComponent>(grid,
 						() => builder.GetInstance<TComponent>());
 
 					grid.RegisterServiceInterceptor(interceptor);

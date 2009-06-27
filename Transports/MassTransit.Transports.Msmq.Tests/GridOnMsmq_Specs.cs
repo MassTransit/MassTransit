@@ -29,6 +29,10 @@ namespace MassTransit.Transports.Msmq.Tests
 		private readonly List<string> _sourceList = new List<string>();
 		private readonly Dictionary<Guid, int> _responses = new Dictionary<Guid, int>();
 		private readonly Dictionary<string, int> _sources = new Dictionary<string, int>();
+		private readonly List<double> _elapsed = new List<double>();
+		private double _minResponseTime;
+		private double _maxResponseTime;
+		private double _meanResponseTime;
 
 		private void TabulateResults()
 		{
@@ -47,6 +51,19 @@ namespace MassTransit.Transports.Msmq.Tests
 					else
 						_sources.Add(x, 1);
 				});
+
+			_minResponseTime = double.MaxValue;
+			_maxResponseTime = double.MinValue;
+			_meanResponseTime = 0;
+			_elapsed.Each(x =>
+				{
+					_minResponseTime = Math.Min(_minResponseTime, x);
+					_maxResponseTime = Math.Max(_maxResponseTime, x);
+
+					_meanResponseTime += x;
+				});
+
+			_meanResponseTime /= _responseList.Count;
 		}
 
 		[Test, Explicit]
@@ -60,6 +77,9 @@ namespace MassTransit.Transports.Msmq.Tests
 
 					lock (_sourceList)
 						_sourceList.Add(CurrentMessage.Headers.SourceAddress.ToString());
+
+					lock (_elapsed)
+						_elapsed.Add((DateTime.UtcNow - message.CreatedAt).TotalMilliseconds);
 
 					received.Set();
 				});
@@ -89,6 +109,11 @@ namespace MassTransit.Transports.Msmq.Tests
 			Assert.AreEqual(100, _responses.Count);
 
 			_responses.Values.Each(x => Assert.AreEqual(1, x, "Too many results received"));
+
+			Trace.WriteLine("Min Response Time: " + _minResponseTime.ToString("F4"));
+			Trace.WriteLine("Max Response Time: " + _maxResponseTime.ToString("F4"));
+			Trace.WriteLine("Mean Response Time: " + _meanResponseTime.ToString("F4"));
+
 		}
 
 		[Test]

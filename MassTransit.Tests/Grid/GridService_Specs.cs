@@ -51,7 +51,7 @@ namespace MassTransit.Tests.Grid
 			GridNodes.Each(x => x.ObjectBuilder.Stub(b => b.GetInstance<SimpleGridService>()).Return(new SimpleGridService()));
 		}
 
-		protected override void ConfigureGridA(GridConfigurator grid)
+		protected override void ConfigureGridA(IGridConfigurator grid)
 		{
 			grid.For<SimpleGridCommand>()
 				.Use<SimpleGridService>();
@@ -93,13 +93,13 @@ namespace MassTransit.Tests.Grid
 			GridNodes.Each(x => x.ObjectBuilder.Stub(b => b.GetInstance<SimpleGridService>()).Return(new SimpleGridService()));
 		}
 
-		protected override void ConfigureGridA(GridConfigurator grid)
+		protected override void ConfigureGridA(IGridConfigurator grid)
 		{
 			grid.For<SimpleGridCommand>()
 				.Use<SimpleGridService>();
 		}
 
-		protected override void ConfigureGridB(GridConfigurator grid)
+		protected override void ConfigureGridB(IGridConfigurator grid)
 		{
 			grid.For<SimpleGridCommand>()
 				.Use<SimpleGridService>();
@@ -181,10 +181,13 @@ namespace MassTransit.Tests.Grid
 		public SimpleGridResult(Guid correlationId)
 			: base(correlationId)
 		{
+			CreatedAt = DateTime.UtcNow;
 		}
 
 		protected SimpleGridResult()
 		{
 		}
+
+		public DateTime CreatedAt { get; set; }
 	}
 }

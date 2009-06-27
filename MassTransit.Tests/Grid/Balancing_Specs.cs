@@ -36,19 +36,21 @@ namespace MassTransit.Tests.Grid
 			WaitForServiceToBeAvailable<SimpleGridCommand>(5.Seconds(), 1);
 		}
 
-		protected override void ConfigureGridA(GridConfigurator grid)
+		protected override void ConfigureGridA(IGridConfigurator grid)
 		{
 			grid.For<SimpleGridCommand>()
 				.Use<SimpleGridService>();
 		}
 
-		protected override void ConfigureGridB(GridConfigurator grid)
+		protected override void ConfigureGridB(IGridConfigurator grid)
 		{
 			grid.For<SimpleGridCommand>()
 				.Use<SimpleGridService>();
+
+			grid.SetProposer();
 		}
 
-		protected override void ConfigureGridC(GridConfigurator grid)
+		protected override void ConfigureGridC(IGridConfigurator grid)
 		{
 			grid.For<SimpleGridCommand>()
 				.Use<SimpleGridService>();

@@ -48,15 +48,15 @@ namespace MassTransit.Tests.Grid
 			Thread.Sleep(500);
 		}
 
-		protected virtual void ConfigureGridA(GridConfigurator grid)
+		protected virtual void ConfigureGridA(IGridConfigurator grid)
 		{
 		}
 
-		protected virtual void ConfigureGridB(GridConfigurator grid)
+		protected virtual void ConfigureGridB(IGridConfigurator grid)
 		{
 		}
 
-		protected virtual void ConfigureGridC(GridConfigurator grid)
+		protected virtual void ConfigureGridC(IGridConfigurator grid)
 		{
 		}
 

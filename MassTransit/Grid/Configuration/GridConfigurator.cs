@@ -21,6 +21,7 @@ namespace MassTransit.Grid.Configuration
 		IGridConfigurator
 	{
 		private Action<IServiceBus, IGridControl, IObjectBuilder> _startActions = (x, y, z) => { };
+		public bool Proposer { get; private set; }
 
 		public Type ServiceType
 		{
@@ -37,6 +38,9 @@ namespace MassTransit.Grid.Configuration
 
 			grid.WhenStarted = () => _startActions(bus, grid, builder);
 
+			if(Proposer)
+				grid.ProposerUri = bus.ControlBus.Endpoint.Uri;
+
 			return grid;
 		}
 
@@ -48,6 +52,11 @@ namespace MassTransit.Grid.Configuration
 			_startActions += (bus, grid, builder) => configurator.Start(bus, grid, builder);
 
 			return configurator;
+		}
+
+		public void SetProposer()
+		{
+			Proposer = true;
 		}
 	}
 }
