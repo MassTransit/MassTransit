@@ -4,7 +4,7 @@
     <facility id="masstransit">
 
       <bus id="customer"
-				 endpoint="msmq://localhost/mt_client">
+				 endpoint="msmq://localhost/starbucks_customer">
         <subscriptionService endpoint="msmq://localhost/mt_subscriptions" />
         <managementService heartbeatInterval="3" />
       </bus>

@@ -8,6 +8,7 @@
 	using Magnum;
 	using Magnum.StateMachine;
 	using MassTransit.Saga;
+	using MassTransit.Transports.Msmq;
 	using MassTransit.WindsorIntegration;
 	using Microsoft.Practices.ServiceLocation;
 	using Topshelf;
@@ -36,6 +37,11 @@
 						{
 							s.CreateServiceLocator(() =>
 								{
+									MsmqEndpointConfigurator.Defaults(x =>
+									{
+										x.CreateMissingQueues = true;
+									});
+
 									IWindsorContainer container = new DefaultMassTransitContainer("Starbucks.Cashier.Castle.xml");
 									container.AddComponent("sagaRepository", typeof(ISagaRepository<>), typeof(InMemorySagaRepository<>));
 
