@@ -2,6 +2,7 @@
 {
 	using System;
 	using Castle.Windsor;
+	using MassTransit.Transports.Msmq;
 	using MassTransit.WindsorIntegration;
 	using Microsoft.Practices.ServiceLocation;
 	using Topshelf;
@@ -28,6 +29,11 @@
 
 					c.ConfigureService<CustomerService>(typeof(CustomerService).Name, s => s.CreateServiceLocator(() =>
 						{
+							MsmqEndpointConfigurator.Defaults(x =>
+							{
+								x.CreateMissingQueues = true;
+							});
+
 							IWindsorContainer container = new DefaultMassTransitContainer("Starbucks.Customer.Castle.xml");
 							container.AddComponent<CustomerService>(typeof(CustomerService).Name);
 							container.AddComponent<OrderDrinkForm>();

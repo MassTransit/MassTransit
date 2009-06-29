@@ -25,6 +25,7 @@ namespace MassTransit.RuntimeServices
 	using StructureMapIntegration;
 	using Topshelf;
 	using Topshelf.Configuration;
+	using Transports.Msmq;
 
 	internal class Program
 	{
@@ -33,6 +34,11 @@ namespace MassTransit.RuntimeServices
 		private static void Main(string[] args)
 		{
 			BootstrapLogger();
+
+			MsmqEndpointConfigurator.Defaults(x =>
+				{
+					x.CreateMissingQueues = true;
+				});
 
 			var configuration = RunnerConfigurator.New(config =>
 				{

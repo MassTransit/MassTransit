@@ -24,6 +24,7 @@ namespace MassTransit.SystemView
 	using Services.Subscriptions.Messages;
 	using Services.Timeout.Messages;
 	using StructureMap.Attributes;
+	using Transports.Msmq;
 
 	public partial class MainForm :
 		Form,
@@ -189,6 +190,11 @@ namespace MassTransit.SystemView
 
 	    private void BootstrapServiceBus()
 		{
+			MsmqEndpointConfigurator.Defaults(x =>
+			{
+				x.CreateMissingQueues = true;
+			});
+
 			_bus = _container.GetInstance<IServiceBus>();
 			_unsubscribe = _bus.Subscribe(this);
 		}
