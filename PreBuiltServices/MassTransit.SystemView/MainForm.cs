@@ -41,7 +41,7 @@ namespace MassTransit.SystemView
 		Consumes<EndpointIsOffline>.All
 	{
 		private IServiceBus _bus;
-		private Guid _clientId = CombGuid.Generate();
+		private readonly Guid _clientId = CombGuid.Generate();
 		private StructureMap.IContainer _container;
 		private IEndpoint _subscriptionServiceEndpoint;
 		private UnsubscribeAction _unsubscribe;

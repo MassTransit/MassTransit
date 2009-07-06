@@ -46,7 +46,8 @@ namespace MassTransit.Tests.Saga
 		private string _username;
 
 		protected RegisterUserSaga()
-		{}
+		{
+		}
 
 		public RegisterUserSaga(Guid correlationId)
 		{
@@ -100,7 +101,7 @@ namespace MassTransit.Tests.Saga
 
 		private void Complete()
 		{
-			Bus.Publish(new CancelTimeout { CorrelationId = CorrelationId});
+			Bus.Publish(new CancelTimeout {CorrelationId = CorrelationId});
 		}
 	}
 }
