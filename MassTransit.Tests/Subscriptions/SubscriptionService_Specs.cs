@@ -56,7 +56,7 @@ namespace MassTransit.Tests.Subscriptions
 		{
 			Guid clientId = CombGuid.Generate();
 
-			SubscriptionInformation subscription = new SubscriptionInformation(clientId, 1, typeof (PingMessage), RemoteBus.Endpoint.Uri);
+			var subscription = new SubscriptionInformation(clientId, 1, typeof (PingMessage), RemoteBus.Endpoint.Uri);
 
 			LocalControlBus.Endpoint.Send(new AddSubscription(subscription));
 			Thread.Sleep(250);
@@ -77,14 +77,14 @@ namespace MassTransit.Tests.Subscriptions
 		[Test]
 		public void The_system_should_be_ready_to_use_before_getting_underway()
 		{
-			TestMessageConsumer<PingMessage> consumer = new TestMessageConsumer<PingMessage>();
+			var consumer = new TestMessageConsumer<PingMessage>();
 			var unsubscribeAction = RemoteBus.Subscribe(consumer);
 
 			Thread.Sleep(1000);
 
 			DumpPipelines();
 
-			PingMessage message = new PingMessage();
+			var message = new PingMessage();
 			LocalBus.Publish(message);
 
 			consumer.ShouldHaveReceivedMessage(message, 500.Milliseconds());

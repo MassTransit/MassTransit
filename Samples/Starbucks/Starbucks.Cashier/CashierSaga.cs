@@ -68,7 +68,7 @@ namespace Starbucks.Cashier
 			CurrentMessage.Respond(paymentDueMessage);
 		}
 
-		public void ProcessPayment(SubmitPaymentMessage message)
+	    private void ProcessPayment(SubmitPaymentMessage message)
 		{
 			if (message.Amount > _amount)
 			{
