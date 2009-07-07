@@ -78,6 +78,13 @@ namespace MassTransit.Pipeline.Inspectors
 			return true;
 		}
 
+		public bool Inspect(MessageInterceptor element)
+		{
+			Append(string.Format("Interceptor"));
+
+			return true;
+		}
+
 		public bool Inspect<TMessage>(InstanceMessageSink<TMessage> sink) where TMessage : class
 		{
 			Append(string.Format("Consumed by Instance ({0})", typeof (TMessage).Name));

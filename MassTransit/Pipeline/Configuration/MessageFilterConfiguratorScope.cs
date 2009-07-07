@@ -20,20 +20,32 @@ namespace MassTransit.Pipeline.Configuration
 		PipelineInspectorBase<MessageFilterConfiguratorScope<TMessage>>
 		where TMessage : class
 	{
-		private Func<IPipelineSink<TMessage>, IPipelineSink<TMessage>> _insertAfter;
+	    public Func<IPipelineSink<TMessage>, IPipelineSink<TMessage>> InsertAfter { get; private set; }
 
-		public Func<IPipelineSink<TMessage>, IPipelineSink<TMessage>> InsertAfter
-		{
-			get { return _insertAfter; }
-		}
+        protected bool Inspect(MessagePipeline element) 
+        {
+            if(typeof(TMessage) == typeof(object))
+            {
+                InsertAfter = (sink =>
+                {
+                    return element
+                        .ReplaceOutputSink(sink.TranslateTo<IPipelineSink<object>>())
+                        .TranslateTo<IPipelineSink<TMessage>>();
+                });
 
-		protected bool Inspect<TInput, TOutput>(MessageTranslator<TInput, TOutput> element)
+                return false;
+            }
+
+            return true;
+        }
+
+	    protected bool Inspect<TInput, TOutput>(MessageTranslator<TInput, TOutput> element)
 			where TOutput : class, TInput
 			where TInput : class
 		{
 			if (typeof (TOutput) == typeof (TMessage))
 			{
-				_insertAfter = (sink =>
+				InsertAfter = (sink =>
 					{
 						return element
 							.ReplaceOutputSink(sink.TranslateTo<IPipelineSink<TOutput>>())

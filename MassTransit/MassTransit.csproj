@@ -196,6 +196,9 @@
     <Compile Include="Internal\ISetInboundMessageHeaders.cs" />
     <Compile Include="Internal\ISetMessageHeaders.cs" />
     <Compile Include="Configuration\DefaultBusServiceConfigurator.cs" />
+    <Compile Include="Pipeline\Configuration\MessageInterceptorConfigurator.cs" />
+    <Compile Include="Pipeline\Configuration\MessageInterceptorConfiguratorScope.cs" />
+    <Compile Include="Pipeline\Sinks\MessageInterceptor.cs" />
     <Compile Include="Saga\Configuration\ObservesSubscriber.cs" />
     <Compile Include="Saga\CreateOrUseExistingSagaPolicy.cs" />
     <Compile Include="Saga\DataEventBinder.cs" />
