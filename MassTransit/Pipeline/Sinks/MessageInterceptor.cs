@@ -15,34 +15,34 @@ namespace MassTransit.Pipeline.Sinks
     using System;
     using System.Collections.Generic;
 
-    public class MessageFilter<TMessage> :
-        PipelineSinkBase<TMessage, TMessage>
-        where TMessage : class
+    public class MessageInterceptor :
+        PipelineSinkBase<object, object>
     {
-        private readonly Func<TMessage, bool> _allow;
+        public Action BeforeConsume { get; private set; }
+        public Action AfterConsume { get; private set; }
 
-        public MessageFilter(string description, Func<IPipelineSink<TMessage>, IPipelineSink<TMessage>> insertAfter, Func<TMessage, bool> allow)
-            :
-                base(null)
+        public MessageInterceptor(Func<IPipelineSink<object>, IPipelineSink<object>> insertAfter, Action beforeConsume, Action afterConsume)
+            : base(null)
         {
-            Description = description ?? string.Empty;
-
-            _allow = allow;
-
+            BeforeConsume = beforeConsume ?? Noop;
+            AfterConsume = afterConsume ?? Noop;
             ReplaceOutputSink(insertAfter(this));
         }
 
-        public string Description { get; private set; }
-
-        public override IEnumerable<Action<TMessage>> Enumerate(TMessage message)
+        private static void Noop()
         {
-            if (!_allow(message))
-                yield break;
+        }
 
-            foreach (Action<TMessage> consumer in _outputSink.Enumerate(message))
+        public override IEnumerable<Action<object>> Enumerate(object message)
+        {
+            BeforeConsume();
+
+            foreach (Action<object> consumer in _outputSink.Enumerate(message))
             {
                 yield return consumer;
             }
+
+            AfterConsume();
         }
 
         public override bool Inspect(IPipelineInspector inspector)

@@ -113,6 +113,7 @@
     <Compile Include="Groups\Group_Specs.cs" />
     <Compile Include="Load\RequestResponse_LoadTest.cs" />
     <Compile Include="MessageContext_Specs.cs" />
+    <Compile Include="MessageInterceptor_Specs.cs" />
     <Compile Include="Performance\EndpointLoadTest.cs" />
     <Compile Include="Performance\LoadedRequest.cs" />
     <Compile Include="Performance\LoadedResponse.cs" />

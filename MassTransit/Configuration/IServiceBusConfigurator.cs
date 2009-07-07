@@ -55,5 +55,17 @@ namespace MassTransit.Configuration
 		/// </summary>
 		/// <param name="bus">The bus instance to use as the control bus</param>
 		void UseControlBus(IControlBus bus);
+
+        /// <summary>
+        /// Specifies an action to call before a message is consumed
+        /// </summary>
+        /// <param name="beforeConsume"></param>
+	    void BeforeConsumingMessage(Action beforeConsume);
+
+        /// <summary>
+        /// Specifies an action to call after a message is consumed
+        /// </summary>
+        /// <param name="afterConsume"></param>
+	    void AfterConsumingMessage(Action afterConsume);
 	}
 }

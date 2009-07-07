@@ -17,8 +17,9 @@ namespace MassTransit.Configuration
 	using Exceptions;
 	using Internal;
 	using log4net;
+	using Pipeline.Configuration;
 
-	public class ServiceBusConfigurator :
+    public class ServiceBusConfigurator :
 		ServiceBusConfiguratorDefaults,
 		IServiceBusConfigurator
 	{
@@ -27,8 +28,10 @@ namespace MassTransit.Configuration
 		private static readonly ServiceBusConfiguratorDefaults _defaults = new ServiceBusConfiguratorDefaults();
 		private readonly List<Action<IServiceBus, IObjectBuilder, Action<Type, IBusService>>> _services;
 		private Uri _receiveFromUri;
+	    private Action _beforeConsume;
+	    private Action _afterConsume;
 
-		protected ServiceBusConfigurator()
+	    protected ServiceBusConfigurator()
 		{
 			_services = new List<Action<IServiceBus, IObjectBuilder, Action<Type, IBusService>>>();
 
@@ -87,7 +90,23 @@ namespace MassTransit.Configuration
 			ControlBus = bus;
 		}
 
-		internal IControlBus Create()
+	    public void BeforeConsumingMessage(Action beforeConsume)
+	    {
+	        if (_beforeConsume == null)
+	            _beforeConsume = beforeConsume;
+	        else
+	            _beforeConsume += beforeConsume;
+	    }
+
+	    public void AfterConsumingMessage(Action afterConsume)
+	    {
+            if (_afterConsume == null)
+                _afterConsume = afterConsume;
+            else
+                _afterConsume += afterConsume;
+	    }
+
+	    internal IControlBus Create()
 		{
 			ServiceBus bus = CreateServiceBus();
 
@@ -99,6 +118,8 @@ namespace MassTransit.Configuration
 			{
 				// get all the types and subscribe them to the bus
 			}
+
+	        ConfigureMessageInterceptors(bus);
 
 			ConfigureControlBus(bus);
 
@@ -112,7 +133,15 @@ namespace MassTransit.Configuration
 			return bus;
 		}
 
-		private void ConfigureControlBus(ServiceBus bus)
+	    private void ConfigureMessageInterceptors(IServiceBus bus)
+	    {
+	        if(_beforeConsume != null || _afterConsume != null)
+	        {
+	            MessageInterceptorConfigurator.For(bus.InboundPipeline).Create(_beforeConsume, _afterConsume);
+	        }
+	    }
+
+	    private void ConfigureControlBus(ServiceBus bus)
 		{
 			if (ControlBus == null) 
 				return;

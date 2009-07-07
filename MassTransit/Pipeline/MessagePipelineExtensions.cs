@@ -102,13 +102,8 @@ namespace MassTransit.Pipeline
 
 			UnsubscribeAction result = router.Connect(correlationId, new EndpointMessageSink<TMessage>(endpoint));
 
-			// TODO we need to echo this out to the subscription manager at some point I imagine
-			//UnsubscribeAction remove = context.SubscribedTo<TMessage, TKey>(consumer.CorrelationId);
-
 			return result;
-			//return () => result() && remove();
 		}
-
 
 		public static UnregisterAction Filter<TMessage>(this IMessagePipeline pipeline, Func<TMessage, bool> allow)
 			where TMessage : class

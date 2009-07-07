@@ -36,13 +36,13 @@ namespace MassTransit.Tests.Pipeline
 		[Test]
 		public void A_filter_should_be_nameable()
 		{
-			TestMessageConsumer<PingMessage> consumer = new TestMessageConsumer<PingMessage>();
+			var consumer = new TestMessageConsumer<PingMessage>();
 
-			_pipeline.Filter<PingMessage>("cock blocker", x => false);
+			_pipeline.Filter<PingMessage>("Message Blocker", x => false);
 
 			_pipeline.Subscribe(consumer);
 
-			PingMessage message = new PingMessage();
+			var message = new PingMessage();
 
 			_pipeline.Dispatch(message);
 
@@ -55,12 +55,12 @@ namespace MassTransit.Tests.Pipeline
 		[Ignore("This is a planned feature, but is not yet functional.")]
 		public void A_filter_should_be_removable()
 		{
-			TestMessageConsumer<PingMessage> consumer = new TestMessageConsumer<PingMessage>();
+			var consumer = new TestMessageConsumer<PingMessage>();
 
 			var f = _pipeline.Filter<PingMessage>(x => false);
 			PipelineViewer.Trace(_pipeline);
 
-			PingMessage message = new PingMessage();
+			var message = new PingMessage();
 			_pipeline.Dispatch(message);
 
 			consumer.ShouldNotHaveReceivedMessage(message);
@@ -95,13 +95,13 @@ namespace MassTransit.Tests.Pipeline
 		[Test]
 		public void A_message_should_fall_throuh_happy_filters()
 		{
-			TestMessageConsumer<PingMessage> consumer = new TestMessageConsumer<PingMessage>();
+			var consumer = new TestMessageConsumer<PingMessage>();
 
 			_pipeline.Filter<PingMessage>(x => true);
 
 			_pipeline.Subscribe(consumer);
 
-			PingMessage message = new PingMessage();
+			var message = new PingMessage();
 
 			_pipeline.Dispatch(message);
 
@@ -113,11 +113,11 @@ namespace MassTransit.Tests.Pipeline
 		[Test]
 		public void An_unfiltered_message_should_be_received()
 		{
-			TestMessageConsumer<PingMessage> consumer = new TestMessageConsumer<PingMessage>();
+			var consumer = new TestMessageConsumer<PingMessage>();
 
 			_pipeline.Subscribe(consumer);
 
-			PingMessage message = new PingMessage();
+			var message = new PingMessage();
 
 			_pipeline.Dispatch(message);
 
@@ -125,16 +125,33 @@ namespace MassTransit.Tests.Pipeline
 		}
 
 	    [Test]
-        [Ignore]
 	    public void I_should_be_able_to_filter_on_object()
 	    {
-            TestMessageConsumer<object> consumer = new TestMessageConsumer<object>();
+            var consumer = new TestMessageConsumer<object>();
 
-            _pipeline.Filter<object>("cock blocker", x => false);
+            _pipeline.Filter<object>("Message Blocker", x => false);
 
             _pipeline.Subscribe(consumer);
+ 
+            var message = new PingMessage();
 
-            PingMessage message = new PingMessage();
+            _pipeline.Dispatch(message);
+
+            consumer.ShouldNotHaveReceivedMessage(message);
+
+            PipelineViewer.Trace(_pipeline);
+	    }
+
+	    [Test]
+	    public void An_object_filter_should_pass_the_message_if_allowed()
+	    {
+            var consumer = new TestMessageConsumer<object>();
+
+            _pipeline.Filter<object>("Message Passer", x => true);
+
+            _pipeline.Subscribe(consumer);
+ 
+            var message = new PingMessage();
 
             _pipeline.Dispatch(message);
 

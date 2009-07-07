@@ -1,176 +1,175 @@
+// Copyright 2007-2008 The Apache Software Foundation.
+//  
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
+// this file except in compliance with the License. You may obtain a copy of the 
+// License at 
+// 
+//     http://www.apache.org/licenses/LICENSE-2.0 
+// 
+// Unless required by applicable law or agreed to in writing, software distributed 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// specific language governing permissions and limitations under the License.
 namespace MassTransit.Pipeline.Configuration
 {
-	using System;
-	using System.Collections.Generic;
-	using Batch.Pipeline;
-	using Internal;
-	using Saga.Configuration;
-	using Sinks;
-	using Subscribers;
-	using Util;
+    using System;
+    using System.Collections.Generic;
+    using Batch.Pipeline;
+    using Internal;
+    using Saga.Configuration;
+    using Sinks;
+    using Subscribers;
+    using Util;
 
-	public class MessagePipelineConfigurator :
-		IPipelineConfigurator,
-		ISubscriptionEvent,
-		IDisposable
-	{
-		private readonly IObjectBuilder _builder;
-		private readonly UnsubscribeAction _emptyToken = () => true;
-		private volatile bool _disposed;
+    public class MessagePipelineConfigurator :
+        IPipelineConfigurator,
+        ISubscriptionEvent,
+        IDisposable
+    {
+        private readonly IObjectBuilder _builder;
+        private readonly UnsubscribeAction _emptyToken = () => true;
+        private volatile bool _disposed;
 
-		protected RegistrationList<IPipelineSubscriber> _interceptors = new RegistrationList<IPipelineSubscriber>();
-		protected RegistrationList<ISubscriptionEvent> _subscriptionEventHandlers = new RegistrationList<ISubscriptionEvent>();
-		private MessagePipeline _pipeline;
+        private RegistrationList<IPipelineSubscriber> _interceptors = new RegistrationList<IPipelineSubscriber>();
+        private RegistrationList<ISubscriptionEvent> _subscriptionEventHandlers = new RegistrationList<ISubscriptionEvent>();
+        private MessagePipeline _pipeline;
 
-		public MessagePipelineConfigurator(IObjectBuilder builder)
-		{
-			_builder = builder;
+        private MessagePipelineConfigurator(IObjectBuilder builder)
+        {
+            _builder = builder;
 
-			MessageRouter<object> router = new MessageRouter<object>();
+            var router = new MessageRouter<object>();
 
-			_pipeline = new MessagePipeline(router, this);
+            _pipeline = new MessagePipeline(router, this);
 
-			// interceptors are inserted at the front of the list, so do them from least to most specific
-			_interceptors.Register(new ConsumesAllSubscriber());
-			_interceptors.Register(new ConsumesSelectedSubscriber());
-			_interceptors.Register(new ConsumesForSubscriber());
-			_interceptors.Register(new BatchSubscriber());
-			_interceptors.Register(new SagaStateMachineSubscriber());
-			_interceptors.Register(new ObservesSubscriber());
-			_interceptors.Register(new OrchestratesSubscriber());
-			_interceptors.Register(new InitiatesSubscriber());
-		}
+            // interceptors are inserted at the front of the list, so do them from least to most specific
+            _interceptors.Register(new ConsumesAllSubscriber());
+            _interceptors.Register(new ConsumesSelectedSubscriber());
+            _interceptors.Register(new ConsumesForSubscriber());
+            _interceptors.Register(new BatchSubscriber());
+            _interceptors.Register(new SagaStateMachineSubscriber());
+            _interceptors.Register(new ObservesSubscriber());
+            _interceptors.Register(new OrchestratesSubscriber());
+            _interceptors.Register(new InitiatesSubscriber());
+        }
 
-		#region IPipelineConfigurator Members
+        public UnregisterAction Register(IPipelineSubscriber subscriber)
+        {
+            return _interceptors.Register(subscriber);
+        }
 
-		public UnregisterAction Register(IPipelineSubscriber subscriber)
-		{
-			return _interceptors.Register(subscriber);
-		}
+        public UnregisterAction Register(ISubscriptionEvent subscriptionEventHandler)
+        {
+            return _subscriptionEventHandlers.Register(subscriptionEventHandler);
+        }
 
-		public UnregisterAction Register(ISubscriptionEvent subscriptionEventHandler)
-		{
-			return _subscriptionEventHandlers.Register(subscriptionEventHandler);
-		}
+        public UnsubscribeAction Subscribe<TComponent>()
+            where TComponent : class
+        {
+            return Subscribe((context, interceptor) => interceptor.Subscribe<TComponent>(context));
+        }
 
-		public UnsubscribeAction Subscribe<TComponent>()
-			where TComponent : class
-		{
-			return Subscribe((context, interceptor) => interceptor.Subscribe<TComponent>(context));
-		}
+        public UnsubscribeAction Subscribe<TMessage>(Action<TMessage> handler, Predicate<TMessage> acceptor)
+            where TMessage : class
+        {
+            var routerConfigurator = MessageRouterConfigurator.For(_pipeline);
 
-		public UnsubscribeAction Subscribe<TMessage>(Action<TMessage> handler, Predicate<TMessage> acceptor)
-			where TMessage : class
-		{
-			MessageRouterConfigurator routerConfigurator = MessageRouterConfigurator.For(_pipeline);
+            var router = routerConfigurator.FindOrCreate<TMessage>();
 
-			var router = routerConfigurator.FindOrCreate<TMessage>();
+            Func<TMessage, Action<TMessage>> consumer;
+            if (acceptor != null)
+                consumer = (message => acceptor(message) ? handler : null);
+            else
+                consumer = message => handler;
 
-			Func<TMessage, Action<TMessage>> consumer;
-			if (acceptor != null)
-				consumer = (message => acceptor(message) ? handler : null);
-			else
-				consumer = message => handler;
+            var sink = new InstanceMessageSink<TMessage>(consumer);
 
-			InstanceMessageSink<TMessage> sink = new InstanceMessageSink<TMessage>(consumer);
+            var result = router.Connect(sink);
 
-			var result = router.Connect(sink);
+            UnsubscribeAction remove = SubscribedTo<TMessage>();
 
-			UnsubscribeAction remove = SubscribedTo<TMessage>();
+            return () => result() && (router.SinkCount == 0) && remove();
+        }
 
-			return () => result() && (router.SinkCount == 0) && remove();
-		}
+        public UnsubscribeAction Subscribe<TComponent>(TComponent instance)
+            where TComponent : class
+        {
+            return Subscribe((context, interceptor) => interceptor.Subscribe(context, instance));
+        }
 
-		public UnsubscribeAction Subscribe<TComponent>(TComponent instance)
-			where TComponent : class
-		{
-			return Subscribe((context, interceptor) => interceptor.Subscribe(context, instance));
-		}
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
 
-		#endregion
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposing || _disposed) return;
 
-		#region IDisposable Members
+            if (_interceptors != null)
+                _interceptors.Dispose();
 
-		public void Dispose()
-		{
-			Dispose(true);
-			GC.SuppressFinalize(this);
-		}
+            _pipeline = null;
+            _interceptors = null;
+            _subscriptionEventHandlers = null;
 
-		#endregion
+            _disposed = true;
+        }
 
-		protected virtual void Dispose(bool disposing)
-		{
-			if (!disposing || _disposed) return;
+        ~MessagePipelineConfigurator()
+        {
+            Dispose(false);
+        }
 
-			if (_interceptors != null)
-				_interceptors.Dispose();
+        public V Configure<V>(Func<IPipelineConfigurator, V> action)
+        {
+            V result = action(this);
 
-			_pipeline = null;
-			_interceptors = null;
+            return result;
+        }
 
-			_disposed = true;
-		}
+        private UnsubscribeAction Subscribe(Func<ISubscriberContext, IPipelineSubscriber, IEnumerable<UnsubscribeAction>> subscriber)
+        {
+            var context = new SubscriberContext(_pipeline, _builder, this);
 
-		~MessagePipelineConfigurator()
-		{
-			Dispose(false);
-		}
+            UnsubscribeAction result = null;
 
-		public V Configure<V>(Func<IPipelineConfigurator, V> action)
-		{
-			V result = action(this);
+            _interceptors.Each(interceptor =>
+                {
+                    foreach (UnsubscribeAction token in subscriber(context, interceptor))
+                    {
+                        if (result == null)
+                            result = token;
+                        else
+                            result += token;
+                    }
+                });
 
-			return result;
-		}
+            return result ?? _emptyToken;
+        }
 
-		private UnsubscribeAction Subscribe(Func<ISubscriberContext, IPipelineSubscriber, IEnumerable<UnsubscribeAction>> subscriber)
-		{
-			var context = new SubscriberContext(_pipeline, _builder, this);
+        public static MessagePipeline CreateDefault(IObjectBuilder builder)
+        {
+            return new MessagePipelineConfigurator(builder)._pipeline;
+        }
 
-			UnsubscribeAction result = null;
+        public UnsubscribeAction SubscribedTo<T>() where T : class
+        {
+            UnsubscribeAction result = () => true;
 
-			_interceptors.Each(interceptor =>
-				{
-					foreach (UnsubscribeAction token in subscriber(context, interceptor))
-					{
-						if (result == null)
-							result = token;
-						else
-							result += token;
-					}
-				});
+            _subscriptionEventHandlers.Each(x => { result += x.SubscribedTo<T>(); });
 
-			return result ?? _emptyToken;
-		}
+            return result;
+        }
 
-		public static MessagePipeline CreateDefault(IObjectBuilder builder)
-		{
-			return new MessagePipelineConfigurator(builder)._pipeline;
-		}
+        public UnsubscribeAction SubscribedTo<T, K>(K correlationId) where T : class, CorrelatedBy<K>
+        {
+            UnsubscribeAction result = () => true;
 
-		public UnsubscribeAction SubscribedTo<T>() where T : class
-		{
-			UnsubscribeAction result = () => true;
+            _subscriptionEventHandlers.Each(x => { result += x.SubscribedTo<T, K>(correlationId); });
 
-			_subscriptionEventHandlers.Each(x =>
-				{
-					result += x.SubscribedTo<T>();
-				});
-
-			return result;
-		}
-
-		public UnsubscribeAction SubscribedTo<T, K>(K correlationId) where T : class, CorrelatedBy<K>
-		{
-			UnsubscribeAction result = () => true;
-
-			_subscriptionEventHandlers.Each(x =>
-			{
-				result += x.SubscribedTo<T,K>(correlationId);
-			});
-
-			return result;
-		}
-	}
+            return result;
+        }
+    }
 }
