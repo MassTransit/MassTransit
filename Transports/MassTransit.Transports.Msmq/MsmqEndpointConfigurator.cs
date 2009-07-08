@@ -68,12 +68,12 @@ namespace MassTransit.Transports.Msmq
 		{
 			var queueAddress = new QueueAddress(Uri);
 
-			MessageQueue queue = new MessageQueue(queueAddress.FormatName, QueueAccessMode.ReceiveAndAdmin);
+            if (!queueAddress.IsLocal)
+                return; // we can't create non-local queues anyway
+
+		    var queue = new MessageQueue(queueAddress.FormatName, QueueAccessMode.ReceiveAndAdmin);
 			if (!queue.CanRead)
 			{
-				if (!queueAddress.IsLocal)
-					throw new EndpointException(Uri, "The endpoint does not exist and cannot be created because it is not local");
-
 				queue = MessageQueue.Create(queueAddress.LocalName, _defaults.CreateTransactionalQueues);
 			}
 
