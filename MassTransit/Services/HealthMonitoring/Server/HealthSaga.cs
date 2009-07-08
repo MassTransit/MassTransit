@@ -31,6 +31,9 @@ namespace MassTransit.Services.HealthMonitoring.Server
 			Define(() =>
 				{
 					Correlate(EndpointHeartBeats).By((saga, message) => saga.CorrelationId == message.CorrelationId);
+                    Correlate(TimeoutExpires).By((saga, message) => saga.CorrelationId == message.CorrelationId);
+                    Correlate(EndpointGoesOffline).By((saga, message) => saga.CorrelationId == message.CorrelationId);
+                    Correlate(EndpointRespondsToPing).By((saga, message) => saga.CorrelationId == message.CorrelationId);
 
 					Initially(
 						When(EndpointComesOnline)
