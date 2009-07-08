@@ -124,27 +124,5 @@ namespace MassTransit.Tests.Serialization
                 Assert.AreEqual(_message, receivedMessage);
             }
         }
-
-        [Test]
-        public void Choosey_moms_choose_JSON()
-        {
-            byte[] serializedMessageData;
-
-            IMessageSerializer serializer = new JsonMessageSerializer();
-
-            using (var output = new MemoryStream())
-            {
-                serializer.Serialize(output, _message);
-
-                serializedMessageData = output.ToArray();
-                Trace.WriteLine(Encoding.UTF8.GetString(serializedMessageData));
-            }
-
-            using (var input = new MemoryStream(serializedMessageData))
-            {
-                var receivedMessage = serializer.Deserialize(input) as SerializationTestMessage;
-                Assert.AreEqual(_message, receivedMessage);
-            }
-        }
     }
 }
