@@ -48,10 +48,6 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\libs\Microsoft.Practices.ServiceLocation.dll</HintPath>
     </Reference>
-    <Reference Include="Newtonsoft.Json, Version=1.3.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\libs\Newtonsoft.Json.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
@@ -279,6 +275,7 @@
     <Compile Include="Serialization\Custom\TypeSerializers\ULongSerializer.cs" />
     <Compile Include="Serialization\Custom\TypeSerializers\UriSerializer.cs" />
     <Compile Include="Serialization\Custom\TypeSerializers\UShortSerializer.cs" />
+    <Compile Include="Serialization\PreSharedKeyEncryptedMessageSerializer.cs" />
     <Compile Include="Services\HealthMonitoring\Messages\EndpointIsHealthy.cs" />
     <Compile Include="Services\HealthMonitoring\Messages\EndpointIsOffline.cs" />
     <Compile Include="Services\HealthMonitoring\Messages\EndpointMessageBase.cs" />
@@ -430,8 +427,6 @@
     <Compile Include="Serialization\MessageEnvelopeBase.cs" />
     <Compile Include="Serialization\BinaryMessageSerializer.cs" />
     <Compile Include="Serialization\IMessageSerializer.cs" />
-    <Compile Include="Serialization\JsonMessageEnvelope.cs" />
-    <Compile Include="Serialization\JsonMessageSerializer.cs" />
     <Compile Include="Serialization\XmlMessageEnvelope.cs" />
     <Compile Include="Serialization\DotNotXmlMessageSerializer.cs" />
     <Compile Include="Serialization\XmlReceiveMessageEnvelope.cs" />

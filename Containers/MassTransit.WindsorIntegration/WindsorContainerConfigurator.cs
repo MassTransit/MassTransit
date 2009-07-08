@@ -67,9 +67,6 @@ namespace MassTransit.WindsorIntegration
 				Component.For<BinaryMessageSerializer>()
 					.ImplementedBy<BinaryMessageSerializer>()
 					.LifeStyle.Singleton,
-				Component.For<JsonMessageSerializer>()
-					.ImplementedBy<JsonMessageSerializer>()
-					.LifeStyle.Singleton,
 				Component.For<DotNotXmlMessageSerializer>()
 					.ImplementedBy<DotNotXmlMessageSerializer>()
 					.LifeStyle.Singleton,
