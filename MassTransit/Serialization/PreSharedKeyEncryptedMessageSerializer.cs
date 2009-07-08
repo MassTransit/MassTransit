@@ -21,41 +21,39 @@ namespace MassTransit.Serialization
     public class PreSharedKeyEncryptedMessageSerializer :
         IMessageSerializer
     {
-        static readonly ILog _log = LogManager.GetLogger(typeof(PreSharedKeyEncryptedMessageSerializer));
-        readonly IMessageSerializer _wrappedSerializer;
-        ICryptographyService _cryptography;
+        private readonly string _key;
+        private static readonly ILog _log = LogManager.GetLogger(typeof (PreSharedKeyEncryptedMessageSerializer));
+        private readonly IMessageSerializer _xmlSerializer;
 
-        public PreSharedKeyEncryptedMessageSerializer(IMessageSerializer wrappedSerializer, ICryptographyService cryptography)
+        public PreSharedKeyEncryptedMessageSerializer(string key)
         {
-            _wrappedSerializer = wrappedSerializer;
-            _cryptography = cryptography;
+            _key = key;
+            _xmlSerializer = new XmlMessageSerializer();
         }
-
-        #region IMessageSerializer Members
 
         public void Serialize<T>(Stream output, T message)
         {
             try
             {
-                var plainStream = new MemoryStream();
+                using (var clearStream = new MemoryStream())
+                {
+                    _xmlSerializer.Serialize(clearStream, message);
 
-                //turn into XML
-                _wrappedSerializer.Serialize(plainStream, message);
+                    clearStream.Seek(0, SeekOrigin.Begin);
 
-                //encrypt it
-                var encryptionResult = _cryptography.Encrypt(plainStream);
+                    using (ICryptographyService cryptographyService = new RijndaelCryptographyService(_key))
+                    {
+                        EncryptedStream encryptedStream = cryptographyService.Encrypt(clearStream);
 
-                //wrap in envelope
-                var cipherBuffer = new byte[encryptionResult.CipherStream.Length];
-                encryptionResult.CipherStream.Read(cipherBuffer, 0, cipherBuffer.Length);
+                        var encryptedMessage = new EncryptedMessageEnvelope
+                            {
+                                CipheredMessage = Convert.ToBase64String(encryptedStream.GetBytes()),
+                                Iv = Convert.ToBase64String(encryptedStream.Iv),
+                            };
 
-                var msg = new EncryptedMessageEnvelope()
-                          {
-                              CipheredMessage = Convert.ToBase64String(cipherBuffer),
-                              IV = Convert.ToBase64String(encryptionResult.Iv)
-                          };
-
-                _wrappedSerializer.Serialize(output, msg);
+                        _xmlSerializer.Serialize(output, encryptedMessage);
+                    }
+                }
             }
             catch (SerializationException)
             {
@@ -69,35 +67,33 @@ namespace MassTransit.Serialization
 
         public object Deserialize(Stream input)
         {
-            object message = _wrappedSerializer.Deserialize(input);
-
+            object message = _xmlSerializer.Deserialize(input);
             if (message == null)
                 throw new SerializationException("Could not deserialize message.");
 
             if (message is EncryptedMessageEnvelope)
             {
-                EncryptedMessageEnvelope envelope = message as EncryptedMessageEnvelope;
+                var envelope = message as EncryptedMessageEnvelope;
 
-                var iv = Convert.FromBase64String(envelope.IV);
                 var cipherBytes = Convert.FromBase64String(envelope.CipheredMessage);
+                var iv = Convert.FromBase64String(envelope.Iv);
 
-                var cipherStream = new MemoryStream(cipherBytes);
-                var er = new EncryptionStreamResult(cipherStream, iv);
-                var decryptedStream = _cryptography.Decrypt(er);
+                var cipherStream = new EncryptedStream(cipherBytes, iv);
+                using (ICryptographyService cryptographyService = new RijndaelCryptographyService(_key))
+                {
+                    var clearStream = cryptographyService.Decrypt(cipherStream);
 
-                return _wrappedSerializer.Deserialize(decryptedStream);
+                    return _xmlSerializer.Deserialize(clearStream);
+                }
             }
-
             return message;
         }
-
-        #endregion
     }
 
     [Serializable]
     public class EncryptedMessageEnvelope
     {
         public string CipheredMessage { get; set; }
-        public string IV { get; set; }
+        public string Iv { get; set; }
     }
 }

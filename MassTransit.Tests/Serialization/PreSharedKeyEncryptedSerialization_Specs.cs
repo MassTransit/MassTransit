@@ -50,12 +50,10 @@ namespace MassTransit.Tests.Serialization
         {
             byte[] serializedMessageData;
             string key = "eguhidbehumjdemy1234567890123456";
-            var xml = new XmlMessageSerializer();
-            var crypto = new RijndaelCryptographyService(key);
 
-            var serializer = new PreSharedKeyEncryptedMessageSerializer(xml, crypto);
+            var serializer = new PreSharedKeyEncryptedMessageSerializer(key);
 
-            using (MemoryStream output = new MemoryStream())
+            using (var output = new MemoryStream())
             {
                 serializer.Serialize(output, _message);
 
@@ -64,10 +62,11 @@ namespace MassTransit.Tests.Serialization
                 Trace.WriteLine(Encoding.UTF8.GetString(serializedMessageData));
             }
 
-            var deserializer = new PreSharedKeyEncryptedMessageSerializer(new XmlMessageSerializer(), new RijndaelCryptographyService(key));
-            using (MemoryStream input = new MemoryStream(serializedMessageData))
+            var deserializer = new PreSharedKeyEncryptedMessageSerializer(key);
+
+            using (var input = new MemoryStream(serializedMessageData))
             {
-                SerializationTestMessage receivedMessage = deserializer.Deserialize(input) as SerializationTestMessage;
+                var receivedMessage = deserializer.Deserialize(input) as SerializationTestMessage;
 
                 Assert.AreEqual(_message, receivedMessage);
             }
