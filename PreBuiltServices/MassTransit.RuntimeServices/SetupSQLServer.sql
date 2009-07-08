@@ -1,0 +1,4 @@
+﻿create table "HealthSaga" (CorrelationId UNIQUEIDENTIFIER not null, CurrentState NVARCHAR(255) null, ControlUri NVARCHAR(255) null, DataUri NVARCHAR(255) null, LastHeartbeat DATETIME null, HeartbeatIntervalInSeconds INT null, primary key (CorrelationId))
+create table "SubscriptionSaga" (CorrelationId UNIQUEIDENTIFIER not null, ClientId UNIQUEIDENTIFIER null, MessageCorrelationId NVARCHAR(255) null, EndpointUri NVARCHAR(255) null, MessageName NVARCHAR(255) null, SequenceNumber BIGINT null, SubscriptionId UNIQUEIDENTIFIER null, CurrentState NVARCHAR(255) null, primary key (CorrelationId))
+create table "SubscriptionClientSaga" (CorrelationId UNIQUEIDENTIFIER not null, CurrentState NVARCHAR(255) null, ControlUri NVARCHAR(255) null, DataUri NVARCHAR(255) null, primary key (CorrelationId))
+create table "TimeoutSaga" (CorrelationId UNIQUEIDENTIFIER not null, Tag INT not null, CurrentState NVARCHAR(255) null, TimeoutAt DATETIME null, primary key (CorrelationId, Tag))
