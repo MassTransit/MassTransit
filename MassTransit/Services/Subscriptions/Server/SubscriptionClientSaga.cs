@@ -26,7 +26,8 @@ namespace MassTransit.Services.Subscriptions.Server
 		{
 			Define(() =>
 				{
-					Correlate(DuplicateClientAdded)
+				    Correlate(ClientRemoved).By((saga, message) => saga.CorrelationId == message.CorrelationId);
+                    Correlate(DuplicateClientAdded)
 						.By((saga, message) => saga.ControlUri == message.ControlUri &&
 						                       saga.CorrelationId != message.ClientId);
 

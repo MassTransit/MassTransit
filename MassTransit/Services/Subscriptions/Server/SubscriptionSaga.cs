@@ -30,6 +30,7 @@ namespace MassTransit.Services.Subscriptions.Server
 			Define(() =>
 				{
 					Correlate(ClientRemoved).By((saga, message) => saga.SubscriptionInfo.ClientId == message.CorrelationId);
+                    Correlate(SubscriptionRemoved).By((saga, message) => saga.SubscriptionInfo.ClientId == message.CorrelationId);
 
 					Initially(
 						When(SubscriptionAdded)
