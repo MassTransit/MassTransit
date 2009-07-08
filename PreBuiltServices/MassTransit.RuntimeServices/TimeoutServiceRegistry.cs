@@ -62,13 +62,15 @@ namespace MassTransit.RuntimeServices
 		{
 			return Fluently.Configure()
 				.Mappings(m => { m.FluentMappings.Add<TimeoutSagaMap>(); })
-				.ExposeConfiguration(BuildSchema)
+				//.ExposeConfiguration(BuildSchema)
 				.BuildSessionFactory();
 		}
 
 		private static void BuildSchema(NHibernate.Cfg.Configuration config)
 		{
-			var schemaFile = Path.Combine(Path.GetDirectoryName(typeof (TimeoutService).Assembly.Location), typeof (TimeoutService).Name + ".sql");
+            new SchemaUpdate(config).Execute(false, true);
+
+            var schemaFile = Path.Combine(Path.GetDirectoryName(typeof(TimeoutService).Assembly.Location), typeof(TimeoutService).Name + ".sql");
 
 			new SchemaExport(config).SetOutputFile(schemaFile).Execute(false, false, false, true);
 		}

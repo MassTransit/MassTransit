@@ -130,10 +130,14 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="SetupSQLServer.sql" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="MassTransit.RuntimeServices.log4net.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MassTransit.RuntimeServices.sdf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

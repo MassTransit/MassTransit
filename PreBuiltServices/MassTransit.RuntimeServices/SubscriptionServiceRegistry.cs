@@ -55,13 +55,15 @@ namespace MassTransit.RuntimeServices
 						m.FluentMappings.Add<SubscriptionSagaMap>();
 						m.FluentMappings.Add<SubscriptionClientSagaMap>();
 					})
-				.ExposeConfiguration(BuildSchema)
+				//.ExposeConfiguration(BuildSchema)
 				.BuildSessionFactory();
 		}
 
 		private static void BuildSchema(NHibernate.Cfg.Configuration config)
 		{
-			var schemaFile = Path.Combine(Path.GetDirectoryName(typeof (SubscriptionService).Assembly.Location), typeof (SubscriptionService).Name + ".sql");
+            new SchemaUpdate(config).Execute(false, true);
+
+            var schemaFile = Path.Combine(Path.GetDirectoryName(typeof(SubscriptionService).Assembly.Location), typeof(SubscriptionService).Name + ".sql");
 
 			new SchemaExport(config).SetOutputFile(schemaFile).Execute(false, false, false, true);
 		}
