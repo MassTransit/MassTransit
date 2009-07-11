@@ -123,7 +123,7 @@ namespace MassTransit.Transports.Msmq
                 // if we get a message we cannot serialize, we need to do something about it or it will 
                 // hang the service bus forever
 
-                _endpoint.DiscardMessage(_transportMessage.Id, ex.Message);
+                _endpoint.DiscardMessage(_transportMessage.Id);
 
                 throw new MessageException(typeof (object), "An error occurred deserializing a message", ex);
             }
