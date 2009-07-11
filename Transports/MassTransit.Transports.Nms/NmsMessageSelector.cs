@@ -15,6 +15,7 @@ namespace MassTransit.Transports.Nms
     using System;
     using System.IO;
     using System.Runtime.Serialization;
+    using System.Text;
     using Apache.NMS;
     using Exceptions;
     using Internal;
@@ -63,11 +64,11 @@ namespace MassTransit.Transports.Nms
 
             try
             {
-                IBytesMessage bm = _transportMessage as IBytesMessage;
-                if (bm == null)
-                    throw new MessageException(_transportMessage.GetType(), "Message not a IBytesMessage");
+                ITextMessage textMessage = _transportMessage as ITextMessage;
+                if (textMessage == null)
+                    throw new MessageException(_transportMessage.GetType(), "Message not a ITextMessage");
 
-                using (MemoryStream mem = new MemoryStream(bm.Content, false))
+                using (var mem = new MemoryStream(Encoding.UTF8.GetBytes(textMessage.Text), false))
                 {
                     _message = _serializer.Deserialize(mem);
                 }
