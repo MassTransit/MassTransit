@@ -12,7 +12,11 @@ namespace MassTransit.Transports.Msmq.Tests
         [SetUp]
         public void Setup()
         {
-            MsmqEndpointConfigurator.Defaults(x => x.CreateMissingQueues = false);
+            MsmqEndpointConfigurator.Defaults(x =>
+                {
+                    x.CreateMissingQueues = false;
+                    x.PurgeOnStartup = false;
+                });
         }
 
         [Test]
