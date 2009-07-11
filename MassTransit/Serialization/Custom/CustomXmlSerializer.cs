@@ -12,87 +12,113 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Serialization.Custom
 {
-	using System;
-	using System.IO;
-	using System.Linq;
-	using System.Runtime.Serialization;
-	using System.Text;
-	using System.Xml;
-	using Magnum.Monads;
+    using System.IO;
+    using System.Linq;
+    using System.Runtime.Serialization;
+    using System.Text;
+    using System.Xml;
 
-	public class CustomXmlSerializer :
-		IXmlSerializer
-	{
-		private XmlReaderSettings _readerSettings;
-		private XmlWriterSettings _writerSettings;
+    public class CustomXmlSerializer :
+        IXmlSerializer
+    {
+        private readonly XmlReaderSettings _readerSettings;
+        private readonly XmlWriterSettings _writerSettings;
 
-		public CustomXmlSerializer()
-		{
-			_writerSettings = new XmlWriterSettings
-				{
-					Encoding = Encoding.UTF8,
-					Indent = true,
-					NewLineOnAttributes = true,
-					CloseOutput = false,
-				};
+        public CustomXmlSerializer()
+        {
+            _writerSettings = new XmlWriterSettings
+                {
+                    Encoding = Encoding.UTF8,
+                    Indent = true,
+                    NewLineOnAttributes = true,
+                    CloseOutput = false,
+                };
 
-			_readerSettings = new XmlReaderSettings
-				{
-					IgnoreWhitespace = true,
-					CloseInput = false,
-				};
-		}
+            _readerSettings = new XmlReaderSettings
+                {
+                    IgnoreWhitespace = true,
+                    CloseInput = false,
+                };
+        }
 
-		public void Serialize<T>(Stream stream, T message)
-			where T : class
-		{
-			using (var outputStream = new NonClosingStream(stream))
-			using (var streamWriter = new StreamWriter(outputStream))
-			using (var writer = XmlWriter.Create(streamWriter, _writerSettings))
-			{
-				SerializerContext context = new SerializerContext();
+        public void Serialize<T>(Stream stream, T message)
+            where T : class
+        {
+            using (var outputStream = new NonClosingStream(stream))
+            using (var streamWriter = new StreamWriter(outputStream))
+            using (XmlWriter writer = XmlWriter.Create(streamWriter, _writerSettings))
+            {
+                SerializeMessage(message, writer);
+            }
+        }
 
-				foreach (K<Action<XmlWriter>> writerAction in context.Serialize(message).ToArray())
-				{
-					writerAction(x => x(writer));
-				}
-			}
-		}
+        public void Serialize<T>(TextWriter stream, T message)
+            where T : class
+        {
+            using (XmlWriter writer = XmlWriter.Create(stream, _writerSettings))
+            {
+                SerializeMessage(message, writer);
+            }
+        }
 
-		public object Deserialize(Stream input)
-		{
-			using(var inputStream = new NonClosingStream(input))
-			using(var streamReader = new StreamReader(inputStream))
-			using (XmlReader reader = XmlReader.Create(streamReader, _readerSettings))
-			{
-				IDeserializerContext context = new DeserializerContext(reader);
+        public byte[] Serialize<T>(T message)
+            where T : class
+        {
+            using (var output = new MemoryStream())
+            {
+                Serialize(output, message);
 
-				object message = context.Deserialize();
+                return output.ToArray();
+            }
+        }
 
-				if (message == null)
-					throw new SerializationException("Could not deserialize message.");
+        public object Deserialize(Stream input)
+        {
+            using (var inputStream = new NonClosingStream(input))
+            using (var streamReader = new StreamReader(inputStream))
+            using (XmlReader reader = XmlReader.Create(streamReader, _readerSettings))
+            {
+                return DeserializeMessage(reader);
+            }
+        }
 
-				return message;
-			}
-		}
+        public object Deserialize(TextReader textReader)
+        {
+            using (XmlReader reader = XmlReader.Create(textReader, _readerSettings))
+            {
+                return DeserializeMessage(reader);
+            }
+        }
 
-		public byte[] Serialize<T>(T message)
-			where T : class
-		{
-			using (MemoryStream output = new MemoryStream())
-			{
-				Serialize(output, message);
+        public object Deserialize(byte[] data)
+        {
+            using (var input = new MemoryStream(data))
+            {
+                return Deserialize(input);
+            }
+        }
 
-				return output.ToArray();
-			}
-		}
+        private static void SerializeMessage<T>(T message, XmlWriter writer)
+            where T : class
+        {
+            var context = new SerializerContext();
 
-		public object Deserialize(byte[] data)
-		{
-			using (MemoryStream input = new MemoryStream(data))
-			{
-				return Deserialize(input);
-			}
-		}
-	}
+            foreach (var writerAction in context.Serialize(message).ToArray())
+            {
+                writerAction(x => x(writer));
+            }
+        }
+
+        private static object DeserializeMessage(XmlReader reader)
+        {
+            IDeserializerContext context = new DeserializerContext(reader);
+
+            object message = context.Deserialize();
+
+            if (message == null)
+                throw new SerializationException("Could not deserialize message.");
+
+            return message;
+        }
+    }
 }
