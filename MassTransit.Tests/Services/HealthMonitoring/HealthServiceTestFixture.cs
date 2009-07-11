@@ -92,12 +92,12 @@ namespace MassTransit.Tests.Services.HealthMonitoring
 
 			_subscriptionClientSagaRepository = SetupSagaRepository<SubscriptionClientSaga>(ObjectBuilder);
 			SetupInitiateSagaStateMachineSink<SubscriptionClientSaga, AddSubscriptionClient>(SubscriptionBus, _subscriptionClientSagaRepository, ObjectBuilder);
-			SetupOrchestrateSagaStateMachineSink<SubscriptionClientSaga, RemoveSubscriptionClient>(SubscriptionBus, _subscriptionClientSagaRepository, ObjectBuilder);
+            SetupObservesSagaStateMachineSink<SubscriptionClientSaga, RemoveSubscriptionClient>(SubscriptionBus, _subscriptionClientSagaRepository, ObjectBuilder);
 			SetupObservesSagaStateMachineSink<SubscriptionClientSaga, SubscriptionClientAdded>(SubscriptionBus, _subscriptionClientSagaRepository, ObjectBuilder);
 
 			_subscriptionSagaRepository = SetupSagaRepository<SubscriptionSaga>(ObjectBuilder);
 			SetupInitiateSagaStateMachineSink<SubscriptionSaga, AddSubscription>(SubscriptionBus, _subscriptionSagaRepository, ObjectBuilder);
-			SetupOrchestrateSagaStateMachineSink<SubscriptionSaga, RemoveSubscription>(SubscriptionBus, _subscriptionSagaRepository, ObjectBuilder);
+            SetupObservesSagaStateMachineSink<SubscriptionSaga, RemoveSubscription>(SubscriptionBus, _subscriptionSagaRepository, ObjectBuilder);
 			SetupObservesSagaStateMachineSink<SubscriptionSaga, SubscriptionClientRemoved>(SubscriptionBus, _subscriptionSagaRepository, ObjectBuilder);
 
 			SubscriptionService = new SubscriptionService(SubscriptionBus, SubscriptionRepository, EndpointFactory, _subscriptionSagaRepository, _subscriptionClientSagaRepository);
@@ -113,9 +113,9 @@ namespace MassTransit.Tests.Services.HealthMonitoring
 		{
 			_healthSagaRepository = SetupSagaRepository<HealthSaga>(ObjectBuilder);
 			SetupInitiateSagaStateMachineSink<HealthSaga, EndpointCameOnline>(RemoteBus, _healthSagaRepository, ObjectBuilder);
-			SetupOrchestrateSagaStateMachineSink<HealthSaga, EndpointWentOffline>(RemoteBus, _healthSagaRepository, ObjectBuilder);
-			SetupOrchestrateSagaStateMachineSink<HealthSaga, TimeoutExpired>(RemoteBus, _healthSagaRepository, ObjectBuilder);
-			SetupOrchestrateSagaStateMachineSink<HealthSaga, PingEndpointResponse>(RemoteBus, _healthSagaRepository, ObjectBuilder);
+            SetupObservesSagaStateMachineSink<HealthSaga, EndpointWentOffline>(RemoteBus, _healthSagaRepository, ObjectBuilder);
+            SetupObservesSagaStateMachineSink<HealthSaga, TimeoutExpired>(RemoteBus, _healthSagaRepository, ObjectBuilder);
+            SetupObservesSagaStateMachineSink<HealthSaga, PingEndpointResponse>(RemoteBus, _healthSagaRepository, ObjectBuilder);
 			SetupObservesSagaStateMachineSink<HealthSaga, Heartbeat>(RemoteBus, _healthSagaRepository, ObjectBuilder);
 
 			HealthService = new HealthService(RemoteBus, _healthSagaRepository, ObjectBuilder);

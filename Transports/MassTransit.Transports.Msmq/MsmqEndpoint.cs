@@ -148,6 +148,7 @@ namespace MassTransit.Transports.Msmq
 			}
 			catch (MessageQueueException ex)
 			{
+                HandleVariousErrorCodes(ex.MessageQueueErrorCode, ex);
 				throw new EndpointException(this.Uri, "Problem with " + QueuePath, ex);
 			}
 
@@ -169,21 +170,32 @@ namespace MassTransit.Transports.Msmq
 			if (!_queue.CanRead)
 				throw new EndpointException(this.Uri, string.Format("Not allowed to read from endpoint: '{0}'", _queueAddress.ActualUri));
 
-			using (MessageEnumerator enumerator = _queue.GetMessageEnumerator2())
-			{
-				_log.DebugFormat("Enumerating endpoint: {0} ({1}ms)", Uri, timeout.ToString());
+                using (MessageEnumerator enumerator = _queue.GetMessageEnumerator2())
+                {
+                    _log.DebugFormat("Enumerating endpoint: {0} ({1}ms)", Uri, timeout.ToString());
 
-				while (enumerator.MoveNext(timeout))
-				{
-					_log.DebugFormat("Moved Next on {0}", Uri);
+                    bool hasNext = true;
+                    while (hasNext)
+                    {
+                        try
+                        {
+                            hasNext = enumerator.MoveNext(timeout);
+                        }
+                        catch(MessageQueueException ex)
+                        {
+                            HandleVariousErrorCodes(ex.MessageQueueErrorCode, ex);
+                            throw;
+                        }
 
-					using (MsmqMessageSelector selector = new MsmqMessageSelector(this, enumerator, _serializer))
-					{
-						yield return selector;
-					}
-				}
-				enumerator.Close();
-			}
+                        _log.DebugFormat("Moved Next on {0}", Uri);
+
+                        using (MsmqMessageSelector selector = new MsmqMessageSelector(this, enumerator, _serializer))
+                        {
+                            yield return selector;
+                        }
+                    }
+                    enumerator.Close();
+                }
 		}
 
 		/// <summary>
@@ -288,6 +300,7 @@ namespace MassTransit.Transports.Msmq
 					break;
 
 				case MessageQueueErrorCode.InvalidHandle:
+                case MessageQueueErrorCode.StaleHandle:
 					// reopen the queue in case for some reason it is lost (maybe msmq was restarted)
 					_queue = Open(QueueAccessMode.SendAndReceive);
 

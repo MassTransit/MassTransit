@@ -104,12 +104,12 @@ namespace MassTransit.Tests.TextFixtures
 
 			_subscriptionClientSagaRepository = SetupSagaRepository<SubscriptionClientSaga>(builder);
 			SetupInitiateSagaStateMachineSink<SubscriptionClientSaga, AddSubscriptionClient>(SubscriptionBus, _subscriptionClientSagaRepository, builder);
-			SetupOrchestrateSagaStateMachineSink<SubscriptionClientSaga, RemoveSubscriptionClient>(SubscriptionBus, _subscriptionClientSagaRepository, builder);
+            SetupObservesSagaStateMachineSink<SubscriptionClientSaga, RemoveSubscriptionClient>(SubscriptionBus, _subscriptionClientSagaRepository, builder);
 			SetupObservesSagaStateMachineSink<SubscriptionClientSaga, SubscriptionClientAdded>(SubscriptionBus, _subscriptionClientSagaRepository, builder);
 
 			_subscriptionSagaRepository = SetupSagaRepository<SubscriptionSaga>(builder);
 			SetupInitiateSagaStateMachineSink<SubscriptionSaga, AddSubscription>(SubscriptionBus, _subscriptionSagaRepository, builder);
-			SetupOrchestrateSagaStateMachineSink<SubscriptionSaga, RemoveSubscription>(SubscriptionBus, _subscriptionSagaRepository, builder);
+            SetupObservesSagaStateMachineSink<SubscriptionSaga, RemoveSubscription>(SubscriptionBus, _subscriptionSagaRepository, builder);
 			SetupObservesSagaStateMachineSink<SubscriptionSaga, SubscriptionClientRemoved>(SubscriptionBus, _subscriptionSagaRepository, builder);
 
 			SubscriptionService = new SubscriptionService(SubscriptionBus, SubscriptionRepository, EndpointFactory, _subscriptionSagaRepository, _subscriptionClientSagaRepository);
