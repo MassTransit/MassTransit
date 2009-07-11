@@ -20,17 +20,18 @@ namespace MassTransit.ServiceBus
         {
             Define(()=>
             {
+                Correlate(OldCacheUpdateRequested).By((saga,message)=> saga.DataUri == message.RequestingUri);
+                Correlate(OldSubscriptionAdded).By((saga,message)=> saga.DataUri == message.Subscription.EndpointUri);
+                Correlate(OldSubscriptionRemoved).By((saga,message)=> saga.DataUri == message.Subscription.EndpointUri);
+
                 Initially(
-                    When(OldCacheUpdateRequested) //realy this needs to be any old message
-                    .Then((saga, message)=>
-                    {
-                        saga.ControlUri = saga.Bus.Endpoint.Uri;
-                        saga.DataUri = message.RequestingUri;
-
-                        saga.NotifyLegacySubscriptionClientAdded();
-
-                    })
-                    .TransitionTo(Active));
+                    When(OldCacheUpdateRequested) 
+                        .Then(InitialAction)
+                        .TransitionTo(Active),
+                    When(OldSubscriptionAdded)
+                        .Then(InitialAdd),
+                    When(OldSubscriptionRemoved)
+                        .Then(InitialRemoved));
                 
                 During(Active,
                     When(OldCancelSubscriptionUpdates)
@@ -89,6 +90,28 @@ namespace MassTransit.ServiceBus
             };
 
             Bus.Publish(message);
+        }
+
+        static void InitialAction(LegacySubscriptionClientSaga saga, OldCacheUpdateRequest message)
+        {
+            saga.ControlUri = saga.Bus.Endpoint.Uri;
+            saga.DataUri = message.RequestingUri;
+
+            saga.NotifyLegacySubscriptionClientAdded();
+        }
+        static void InitialAdd(LegacySubscriptionClientSaga saga, OldAddSubscription message)
+        {
+            saga.ControlUri = saga.Bus.Endpoint.Uri;
+            saga.DataUri = message.Subscription.EndpointUri; //TODO: is this right?
+
+            saga.NotifyLegacySubscriptionClientAdded();
+        }
+        static void InitialRemoved(LegacySubscriptionClientSaga saga, OldRemoveSubscription message)
+        {
+            saga.ControlUri = saga.Bus.Endpoint.Uri;
+            saga.DataUri = message.Subscription.EndpointUri; //TODO: is this right?
+
+            saga.NotifyLegacySubscriptionClientAdded();
         }
     }
 }
