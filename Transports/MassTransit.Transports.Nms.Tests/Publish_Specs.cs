@@ -44,10 +44,20 @@ namespace MassTransit.Transports.Nms.Tests
 		[Test]
 		public void It_should_be_received_by_one_subscribed_consumer()
 		{
-			log4net.Config.BasicConfigurator.Configure();
-
 			var consumer = new TestMessageConsumer<PingMessage>();
 			RemoteBus.Subscribe(consumer);
+
+			var message = new PingMessage();
+			LocalBus.Publish(message);
+
+			consumer.ShouldHaveReceivedMessage(message, _timeout);
+		}	
+        
+        [Test]
+		public void It_should_be_received_by_one_subscribed_consumer_on_the_same_bus()
+		{
+			var consumer = new TestMessageConsumer<PingMessage>();
+			LocalBus.Subscribe(consumer);
 
 			var message = new PingMessage();
 			LocalBus.Publish(message);

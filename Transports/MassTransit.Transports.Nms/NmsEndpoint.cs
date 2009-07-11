@@ -16,6 +16,7 @@ namespace MassTransit.Transports.Nms
     using System.Collections.Generic;
     using System.IO;
     using System.Runtime.Serialization;
+    using System.Text;
     using Apache.NMS;
     using Apache.NMS.ActiveMQ;
     using Configuration;
@@ -88,26 +89,25 @@ namespace MassTransit.Transports.Nms
                 {
                     var destination = session.GetQueue(_queueName);
 
-                    IBytesMessage bm;
+                    ITextMessage textMessage;
                     using (var producer = session.CreateProducer(destination))
                     {
-                        bm = BuildMessage(session, message);
+                        textMessage = BuildMessage(session, message);
 
                         if (timeToLive < NMSConstants.defaultTimeToLive)
                             producer.TimeToLive = timeToLive;
 
-                        producer.Persistent = true;
+                        producer.DeliveryMode = MsgDeliveryMode.Persistent;
+                        producer.Send(textMessage);
 
-                        producer.Send(bm);
+                        session.Commit();
                     }
 
                     if (SpecialLoggers.Messages.IsInfoEnabled)
-                        SpecialLoggers.Messages.InfoFormat("SEND:{0}:{1}:{2}", Uri, messageType.Name, bm.NMSMessageId);
+                        SpecialLoggers.Messages.InfoFormat("SEND:{0}:{1}:{2}", Uri, messageType.Name, textMessage.NMSMessageId);
 
                     if (_log.IsDebugEnabled)
-                        _log.DebugFormat("Sent {0} from {1} [{2}]", messageType.FullName, Uri, bm.NMSMessageId);
-
-                    session.Commit();
+                        _log.DebugFormat("Sent {0} from {1} [{2}]", messageType.FullName, Uri, textMessage.NMSMessageId);
                 }
             }
             catch (SerializationException sex)
@@ -167,18 +167,16 @@ namespace MassTransit.Transports.Nms
             _disposed = true;
         }
 
-        private IBytesMessage BuildMessage<T>(ISession session, T message)
+        private ITextMessage BuildMessage<T>(ISession session, T message)
         {
-            IBytesMessage bm = session.CreateBytesMessage();
-
             using (MemoryStream mem = new MemoryStream())
             {
                 _serializer.Serialize(mem, message);
 
-                bm.Content = mem.ToArray();
-            }
+                string text = Encoding.UTF8.GetString(mem.ToArray());
 
-            return bm;
+                return session.CreateTextMessage(text);
+            }
         }
 
         private void ConnectionExceptionListener(Exception ex)
