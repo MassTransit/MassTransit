@@ -9,6 +9,12 @@ namespace MassTransit.Transports.Msmq.Tests
     [TestFixture]
     public class When_endpoint_doesnt_exist
     {
+        [SetUp]
+        public void Setup()
+        {
+            MsmqEndpointConfigurator.Defaults(x => x.CreateMissingQueues = false);
+        }
+
         [Test]
         [ExpectedException(typeof(EndpointException))]
         public void Should_throw_an_endpoint_exception()

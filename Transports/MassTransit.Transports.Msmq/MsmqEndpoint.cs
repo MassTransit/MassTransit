@@ -174,19 +174,8 @@ namespace MassTransit.Transports.Msmq
                 {
                     _log.DebugFormat("Enumerating endpoint: {0} ({1}ms)", Uri, timeout.ToString());
 
-                    bool hasNext = true;
-                    while (hasNext)
+                    while (enumerator.MoveNext(timeout))
                     {
-                        try
-                        {
-                            hasNext = enumerator.MoveNext(timeout);
-                        }
-                        catch(MessageQueueException ex)
-                        {
-                            HandleVariousErrorCodes(ex.MessageQueueErrorCode, ex);
-                            throw;
-                        }
-
                         _log.DebugFormat("Moved Next on {0}", Uri);
 
                         using (MsmqMessageSelector selector = new MsmqMessageSelector(this, enumerator, _serializer))
@@ -194,6 +183,7 @@ namespace MassTransit.Transports.Msmq
                             yield return selector;
                         }
                     }
+
                     enumerator.Close();
                 }
 		}
