@@ -24,14 +24,11 @@ namespace MassTransit.RuntimeServices
 	using StructureMap;
 	using StructureMap.Attributes;
 	using StructureMapIntegration;
-	using Transports;
-	using Transports.Msmq;
 
-	public class SubscriptionServiceRegistry :
+    public class SubscriptionServiceRegistry :
 		MassTransitRegistryBase
 	{
 		public SubscriptionServiceRegistry(IContainer container)
-			: base(typeof (MsmqEndpoint), typeof (LoopbackEndpoint))
 		{
 			var configuration = container.GetInstance<IConfiguration>();
 

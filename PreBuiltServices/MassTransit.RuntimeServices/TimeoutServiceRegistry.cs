@@ -24,16 +24,13 @@ namespace MassTransit.RuntimeServices
 	using StructureMap;
 	using StructureMap.Attributes;
 	using StructureMapIntegration;
-	using Transports;
-	using Transports.Msmq;
 
-	public class TimeoutServiceRegistry :
+    public class TimeoutServiceRegistry :
 		MassTransitRegistryBase
 	{
 		private readonly IContainer _container;
 
 		public TimeoutServiceRegistry(IContainer container)
-			: base(typeof (MsmqEndpoint), typeof (LoopbackEndpoint))
 		{
 			_container = container;
 
