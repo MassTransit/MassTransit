@@ -110,6 +110,22 @@ namespace MassTransit.Transports.Nms
                         _log.DebugFormat("Sent {0} from {1} [{2}]", messageType.FullName, Uri, textMessage.NMSMessageId);
                 }
             }
+            catch(InvalidOperationException ex)
+            {
+                try
+                {
+                    _connection.Stop();
+                    _connection.Close();
+                    _connection.Dispose();
+                }
+                finally
+                {
+                    _connection = _factory.CreateConnection();
+                    _connection.ExceptionListener += ConnectionExceptionListener;
+
+                    _connection.Start();
+                }
+            }
             catch (SerializationException sex)
             {
                 throw new MessageException(message.GetType(), "Unable to serialize message", sex);
