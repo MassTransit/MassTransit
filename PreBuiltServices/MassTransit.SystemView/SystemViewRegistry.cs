@@ -14,14 +14,11 @@ namespace MassTransit.SystemView
 {
 	using StructureMap;
 	using StructureMapIntegration;
-	using Transports;
-	using Transports.Msmq;
 
-	public class SystemViewRegistry :
+    public class SystemViewRegistry :
 		MassTransitRegistryBase
 	{
 		public SystemViewRegistry(IContainer container)
-			: base(typeof (LoopbackEndpoint), typeof (MsmqEndpoint))
 		{
 			IConfiguration configuration = container.GetInstance<IConfiguration>();
 

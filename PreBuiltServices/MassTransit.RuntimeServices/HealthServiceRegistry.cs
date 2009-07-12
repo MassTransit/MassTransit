@@ -23,8 +23,6 @@ namespace MassTransit.RuntimeServices
 	using StructureMap;
 	using StructureMap.Attributes;
 	using StructureMapIntegration;
-	using Transports;
-	using Transports.Msmq;
 
 	public class HealthServiceRegistry :
 		MassTransitRegistryBase
@@ -32,7 +30,6 @@ namespace MassTransit.RuntimeServices
 		private readonly IContainer _container;
 
 		public HealthServiceRegistry(IContainer container)
-			: base(typeof (MsmqEndpoint), typeof (LoopbackEndpoint))
 		{
 			_container = container;
 
