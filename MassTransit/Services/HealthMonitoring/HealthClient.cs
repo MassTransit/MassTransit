@@ -32,7 +32,8 @@ namespace MassTransit.Services.HealthMonitoring
 		private Uri _dataUri;
 		private volatile bool _disposed;
 		private Scheduler _scheduler = new ThreadPoolScheduler();
-		private UnsubscribeAction _unsubscribeToken;
+		private UnsubscribeAction _unsubscribe;
+		private Unschedule _unschedule;
 
 		public HealthClient()
 			: this(3)
@@ -73,18 +74,19 @@ namespace MassTransit.Services.HealthMonitoring
 			_controlUri = _bus.ControlBus.Endpoint.Uri;
 			_dataUri = _bus.Endpoint.Uri;
 
-			_unsubscribeToken = _bus.ControlBus.Subscribe(this);
+			_unsubscribe = _bus.ControlBus.Subscribe(this);
 
 			var message = new EndpointCameOnline(SystemId, _controlUri, _dataUri, _heartbeatIntervalInSeconds);
 			_bus.ControlBus.Publish(message);
 
-			_scheduler.Schedule(_heartbeatIntervalInMilliseconds, _heartbeatIntervalInMilliseconds, PublishHeartbeat);
+			_unschedule = _scheduler.Schedule(_heartbeatIntervalInMilliseconds, _heartbeatIntervalInMilliseconds, PublishHeartbeat);
 		}
 
 		public void Stop()
 		{
 			_bus.ControlBus.Publish(new EndpointWentOffline(SystemId, _controlUri, _dataUri, _heartbeatIntervalInSeconds));
-			_unsubscribeToken();
+			_unschedule();
+			_unsubscribe();
 		}
 
 		public virtual void Dispose(bool disposing)
