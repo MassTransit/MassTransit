@@ -95,7 +95,7 @@ namespace MassTransit.SystemView
 
 		public void Consume(SubscriptionRefresh message)
 		{
-            Action<IEnumerable<SubscriptionInformation>> method = x => RefreshSubscriptions(x);
+			Action<IEnumerable<SubscriptionInformation>> method = x => RefreshSubscriptions(x);
 			BeginInvoke(method, new object[] {message.Subscriptions});
 		}
 
@@ -105,20 +105,22 @@ namespace MassTransit.SystemView
 			BeginInvoke(method, new object[] {message});
 		}
 
-	    public void Consume(TimeoutRescheduled message)
+		public void Consume(TimeoutRescheduled message)
 		{
 			Action<TimeoutRescheduled> method = x => AddOrUpdateTimeoutListView(x.CorrelationId, x.Tag, x.TimeoutAt);
 			BeginInvoke(method, new object[] {message});
 		}
 
-	    public void Consume(TimeoutScheduled message)
+		public void Consume(TimeoutScheduled message)
 		{
 			Action<TimeoutScheduled> method = x => AddOrUpdateTimeoutListView(x.CorrelationId, x.Tag, x.TimeoutAt);
 			BeginInvoke(method, new object[] {message});
 		}
 
-	    protected override void OnClosing(CancelEventArgs e)
+		protected override void OnClosing(CancelEventArgs e)
 		{
+			_subscriptionServiceEndpoint.Send(new RemoveSubscriptionClient(_clientId, _bus.Endpoint.Uri, _bus.Endpoint.Uri));
+			
 			_unsubscribe();
 
 			_bus.Dispose();
@@ -127,7 +129,7 @@ namespace MassTransit.SystemView
 			base.OnClosing(e);
 		}
 
-	    private void RefreshHealthView(IEnumerable<HealthInformation> informations)
+		private void RefreshHealthView(IEnumerable<HealthInformation> informations)
 		{
 			var existing = new List<ListViewItem>();
 			foreach (ListViewItem item in healthListView.Items)
@@ -149,7 +151,7 @@ namespace MassTransit.SystemView
 			}
 		}
 
-	    private ListViewItem AddOrUpdateHealthItem(Guid clientId, Uri controlUri, DateTime lastHeartbeat, string state)
+		private ListViewItem AddOrUpdateHealthItem(Guid clientId, Uri controlUri, DateTime lastHeartbeat, string state)
 		{
 			string key = clientId.ToString();
 
@@ -170,7 +172,7 @@ namespace MassTransit.SystemView
 			return item;
 		}
 
-	    private void MainForm_Load(object sender, EventArgs e)
+		private void MainForm_Load(object sender, EventArgs e)
 		{
 			BootstrapContainer();
 
@@ -179,16 +181,15 @@ namespace MassTransit.SystemView
 			ConnectToSubscriptionService();
 		}
 
-	    private void ConnectToSubscriptionService()
+		private void ConnectToSubscriptionService()
 		{
 			_subscriptionServiceEndpoint = _container.GetInstance<IEndpointFactory>()
-				.GetEndpoint(_container.GetInstance<IConfiguration>()
-					.SubscriptionServiceUri);
+				.GetEndpoint(_container.GetInstance<IConfiguration>().SubscriptionServiceUri);
 
 			_subscriptionServiceEndpoint.Send(new AddSubscriptionClient(_clientId, _bus.Endpoint.Uri, _bus.Endpoint.Uri));
 		}
 
-	    private void BootstrapServiceBus()
+		private void BootstrapServiceBus()
 		{
 			MsmqEndpointConfigurator.Defaults(x =>
 			{
@@ -199,7 +200,7 @@ namespace MassTransit.SystemView
 			_unsubscribe = _bus.Subscribe(this);
 		}
 
-	    private void BootstrapContainer()
+		private void BootstrapContainer()
 		{
 			_container = new StructureMap.Container();
 			_container.Configure(x =>
@@ -213,7 +214,7 @@ namespace MassTransit.SystemView
 			_container.Configure(x => x.AddRegistry(registry));
 		}
 
-	    private TreeNode AddSubscriptionToView(SubscriptionInformation subscription)
+		private TreeNode AddSubscriptionToView(SubscriptionInformation subscription)
 		{
 			TreeNode endpointNode;
 			if (!subscriptionView.Nodes.ContainsKey(subscription.EndpointUri.ToString()))
@@ -232,7 +233,7 @@ namespace MassTransit.SystemView
 
 			string description = GetDescription(subscription);
 
-	        TreeNode messageNode;
+			TreeNode messageNode;
 			if (!endpointNode.Nodes.ContainsKey(messageName))
 			{
 				messageNode = new TreeNode(description);
@@ -241,7 +242,7 @@ namespace MassTransit.SystemView
 					messageNode.ForeColor = Color.DimGray;
 
 				messageNode.Name = messageName;
-                messageNode.Tag = subscription;
+				messageNode.Tag = subscription;
 
 				endpointNode.Nodes.Add(messageNode);
 			}
@@ -255,19 +256,19 @@ namespace MassTransit.SystemView
 			return messageNode;
 		}
 
-	    private string GetDescription(SubscriptionInformation subscription)
-	    {
-	        var parts = subscription.MessageName.Split(',');
-	        var d = parts.Length > 0 ? parts[0] : subscription.MessageName;
-	        var dd = d.Split('.');
+		private string GetDescription(SubscriptionInformation subscription)
+		{
+			var parts = subscription.MessageName.Split(',');
+			var d = parts.Length > 0 ? parts[0] : subscription.MessageName;
+			var dd = d.Split('.');
 
-	        string description = dd[dd.Length - 1];
-	        if (!string.IsNullOrEmpty(subscription.CorrelationId))
-	            description += " (" + subscription.CorrelationId + ")";
-	        return description;
-	    }
+			string description = dd[dd.Length - 1];
+			if (!string.IsNullOrEmpty(subscription.CorrelationId))
+				description += " (" + subscription.CorrelationId + ")";
+			return description;
+		}
 
-	    private void RemoveSubscriptionFromView(SubscriptionInformation subscription)
+		private void RemoveSubscriptionFromView(SubscriptionInformation subscription)
 		{
 			if (!subscriptionView.Nodes.ContainsKey(subscription.EndpointUri.ToString()))
 				return;
@@ -283,15 +284,15 @@ namespace MassTransit.SystemView
 
 			messageNode.Remove();
 
-            if (endpointNode.Nodes.Count == 0)
-            {
-                endpointNode.Remove();
-            }
+			if (endpointNode.Nodes.Count == 0)
+			{
+				endpointNode.Remove();
+			}
 		}
 
-	    private void RefreshSubscriptions(IEnumerable<SubscriptionInformation> subscriptions)
+		private void RefreshSubscriptions(IEnumerable<SubscriptionInformation> subscriptions)
 		{
-		    var existingNodes = new List<TreeNode>();
+			var existingNodes = new List<TreeNode>();
 			foreach (TreeNode endpointNode in subscriptionView.Nodes)
 			{
 				foreach (TreeNode subscriptionNode in endpointNode.Nodes)
@@ -314,7 +315,7 @@ namespace MassTransit.SystemView
 			}
 		}
 
-	    private void AddOrUpdateTimeoutListView(Guid correlationId, int tag, DateTime timeoutAt)
+		private void AddOrUpdateTimeoutListView(Guid correlationId, int tag, DateTime timeoutAt)
 		{
 			string key = correlationId + "." + tag;
 
@@ -333,7 +334,7 @@ namespace MassTransit.SystemView
 			}
 		}
 
-	    private void RemoveTimeoutFromListView(Guid correlationId, int tag)
+		private void RemoveTimeoutFromListView(Guid correlationId, int tag)
 		{
 			string key = correlationId + "." + tag;
 
@@ -343,59 +344,59 @@ namespace MassTransit.SystemView
 			}
 		}
 
-	    private void subscriptionView_NodeMouseClick(object sender, TreeNodeMouseClickEventArgs e)
-	    {
-	        subscriptionView.SelectedNode = e.Node;
-	    }
+		private void subscriptionView_NodeMouseClick(object sender, TreeNodeMouseClickEventArgs e)
+		{
+			subscriptionView.SelectedNode = e.Node;
+		}
 
-	    private void removeToolStripMenuItem_Click(object sender, EventArgs e)
-	    {
-            if (subscriptionView.SelectedNode != null)
-            {
-                RemoveSubscriptions(subscriptionView.SelectedNode);
-            }
-	    }
+		private void removeToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			if (subscriptionView.SelectedNode != null)
+			{
+				RemoveSubscriptions(subscriptionView.SelectedNode);
+			}
+		}
 
-	    private void subscriptionView_PreviewKeyDown(object sender, PreviewKeyDownEventArgs e)
-	    {
-	        if (e.KeyCode == Keys.Delete)
-	        {
-	            RemoveSubscriptions(subscriptionView.SelectedNode);
-	        }
-	    }
+		private void subscriptionView_PreviewKeyDown(object sender, PreviewKeyDownEventArgs e)
+		{
+			if (e.KeyCode == Keys.Delete)
+			{
+				RemoveSubscriptions(subscriptionView.SelectedNode);
+			}
+		}
 
-	    public void RemoveSubscriptions(TreeNode node)
-        {
-            var toRemove = new List<SubscriptionInformation>();
-            if (IsRemovable(node))
-            {
-                toRemove.Add((SubscriptionInformation)node.Tag);
-            }
+		public void RemoveSubscriptions(TreeNode node)
+		{
+			var toRemove = new List<SubscriptionInformation>();
+			if (IsRemovable(node))
+			{
+				toRemove.Add((SubscriptionInformation)node.Tag);
+			}
 
-            toRemove.AddRange(node.Nodes.Cast<TreeNode>().Where(IsRemovable).Select(x => x.Tag)
-                .Cast<SubscriptionInformation>().ToList());
+			toRemove.AddRange(node.Nodes.Cast<TreeNode>().Where(IsRemovable).Select(x => x.Tag)
+				.Cast<SubscriptionInformation>().ToList());
 
-            if (toRemove.Count == 0)
-            {
-                return;
-            }
+			if (toRemove.Count == 0)
+			{
+				return;
+			}
 
-            var confirmMessage = string.Format("Are you sure you want to remove these subscriptions?{0}{0}{1}",
-                Environment.NewLine, string.Join(Environment.NewLine, toRemove.Select(x =>
-                string.Format("{0} -> {1}", x.EndpointUri, GetDescription(x))).ToArray()));
+			var confirmMessage = string.Format("Are you sure you want to remove these subscriptions?{0}{0}{1}",
+				Environment.NewLine, string.Join(Environment.NewLine, toRemove.Select(x =>
+				string.Format("{0} -> {1}", x.EndpointUri, GetDescription(x))).ToArray()));
 
-            if (DialogResult.OK != MessageBox.Show(confirmMessage, "Confirm Remove Subscriptions", MessageBoxButtons.OKCancel))
-            {
-                return;
-            }
+			if (DialogResult.OK != MessageBox.Show(confirmMessage, "Confirm Remove Subscriptions", MessageBoxButtons.OKCancel))
+			{
+				return;
+			}
 
-            toRemove.ForEach(x => _subscriptionServiceEndpoint.Send(new RemoveSubscription(x)));
-        }
+			toRemove.ForEach(x => _subscriptionServiceEndpoint.Send(new RemoveSubscription(x)));
+		}
 
-	    private bool IsRemovable(TreeNode node)
-        {
-            return node.Tag is SubscriptionInformation &&
-                   !((SubscriptionInformation)node.Tag).MessageName.StartsWith("MassTransit.Services");
-        }
+		private bool IsRemovable(TreeNode node)
+		{
+			return node.Tag is SubscriptionInformation &&
+				   !((SubscriptionInformation)node.Tag).MessageName.StartsWith("MassTransit.Services");
+		}
 	}
 }
