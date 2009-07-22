@@ -279,6 +279,11 @@ namespace MassTransit.Services.Subscriptions.Client
 
 			ClientSubscriptionInformation clientInfo = _mapper.Transform(info);
 
+			if (clientInfo.Unsubscribe == null)
+			{
+				clientInfo.Unsubscribe = () => true;
+			}
+
 			lock (_subscriptions)
 			{
 				_subscriptions.Add(clientInfo.SubscriptionId, clientInfo);
