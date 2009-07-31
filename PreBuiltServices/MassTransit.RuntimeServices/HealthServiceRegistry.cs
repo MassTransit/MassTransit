@@ -66,7 +66,7 @@ namespace MassTransit.RuntimeServices
 
 			var schemaFile = Path.Combine(Path.GetDirectoryName(typeof (HealthService).Assembly.Location), typeof (HealthService).Name + ".sql");
 
-			new SchemaExport(config).SetOutputFile(schemaFile).Execute(false, false, false, true);
+			new SchemaExport(config).SetOutputFile(schemaFile).Execute(false, false, false);
 		}
 	}
 }

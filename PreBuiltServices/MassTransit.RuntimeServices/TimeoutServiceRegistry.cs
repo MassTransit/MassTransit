@@ -69,7 +69,7 @@ namespace MassTransit.RuntimeServices
 
             var schemaFile = Path.Combine(Path.GetDirectoryName(typeof(TimeoutService).Assembly.Location), typeof(TimeoutService).Name + ".sql");
 
-			new SchemaExport(config).SetOutputFile(schemaFile).Execute(false, false, false, true);
+			new SchemaExport(config).SetOutputFile(schemaFile).Execute(false, false, false);
 		}
 	}
 }

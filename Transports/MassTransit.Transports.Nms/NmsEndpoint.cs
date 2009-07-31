@@ -110,7 +110,7 @@ namespace MassTransit.Transports.Nms
                         _log.DebugFormat("Sent {0} from {1} [{2}]", messageType.FullName, Uri, textMessage.NMSMessageId);
                 }
             }
-            catch(InvalidOperationException ex)
+            catch(InvalidOperationException)
             {
                 try
                 {

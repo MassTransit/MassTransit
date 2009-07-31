@@ -349,7 +349,7 @@ namespace MassTransit
 					}
 				}
 			}
-			catch (ResourceLockException ex)
+			catch (ResourceLockException)
 			{
 				// this is not a big deal, just means we couldn't get the resource
 				// which means we're probably tired and ready to exit

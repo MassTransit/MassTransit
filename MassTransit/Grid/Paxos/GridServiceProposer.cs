@@ -25,7 +25,7 @@ namespace MassTransit.Grid.Paxos
 		Consumes<PrepareRejected<T>>.For<Guid>,
 		Consumes<Accepted<T>>.For<Guid>
 	{
-		private long _highestBallotId;
+		private long _highestBallotId = 0;
 		private long _proposedBallotId;
 
 		private IServiceBus _bus;
@@ -33,11 +33,9 @@ namespace MassTransit.Grid.Paxos
 		private readonly ISagaRepository<GridServiceNode> _serviceNodeRepository;
 		private IServiceBus _controlBus;
 		private List<IEndpoint> _acceptors;
-		private IdempotentList<Uri> _promised;
-		private IdempotentList<Uri> _accepted;
-		private Uri _proposedControlUri;
-		private Uri _proposedDataUri;
-		private int _rejectedPromiseCount;
+		private readonly IdempotentList<Uri> _promised = null;
+		private readonly IdempotentList<Uri> _accepted = null;
+	    private int _rejectedPromiseCount;
 		private long _highestRejectedBallotId;
 		private Guid _serviceId;
 		private T _proposedValue;
