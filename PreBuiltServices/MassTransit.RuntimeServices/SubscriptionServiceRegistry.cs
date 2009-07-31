@@ -62,7 +62,7 @@ namespace MassTransit.RuntimeServices
 
             var schemaFile = Path.Combine(Path.GetDirectoryName(typeof(SubscriptionService).Assembly.Location), typeof(SubscriptionService).Name + ".sql");
 
-			new SchemaExport(config).SetOutputFile(schemaFile).Execute(false, false, false, true);
+			new SchemaExport(config).SetOutputFile(schemaFile).Execute(false, false, false);
 		}
 	}
 }

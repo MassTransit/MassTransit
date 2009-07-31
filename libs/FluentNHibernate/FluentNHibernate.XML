@@ -4,7 +4,11 @@
         <name>FluentNHibernate</name>
     </assembly>
     <members>
-        <!-- Badly formed XML comment ignored for member "T:FluentNHibernate.AutoMap.Alterations.AutoMappingOverrideAlteration" -->
+        <member name="T:FluentNHibernate.AutoMap.Alterations.AutoMappingOverrideAlteration">
+            <summary>
+            Built-in alteration for altering an AutoPersistenceModel with instance of IAutoMappingOverride&lt;T&gt;.
+            </summary>
+        </member>
         <member name="T:FluentNHibernate.AutoMap.Alterations.IAutoMappingAlteration">
             <summary>
             Provides a mechanism for altering an AutoPersistenceModel prior to
@@ -23,7 +27,16 @@
             </summary>
             <param name="overrideAssembly">Assembly to load overrides from.</param>
         </member>
-        <!-- Badly formed XML comment ignored for member "M:FluentNHibernate.AutoMap.Alterations.AutoMappingOverrideAlteration.Alter(FluentNHibernate.AutoMap.AutoPersistenceModel)" -->
+        <member name="M:FluentNHibernate.AutoMap.Alterations.AutoMappingOverrideAlteration.Alter(FluentNHibernate.AutoMap.AutoPersistenceModel)">
+            <summary>
+            Alter the model
+            </summary>
+            <remarks>
+            Finds all types in the assembly (passed in the constructor) that implement IAutoMappingOverride&lt;T&gt;, then
+            creates an AutoMap&lt;T&gt; and applies the override to it.
+            </remarks>
+            <param name="model">AutoPersistenceModel instance to alter</param>
+        </member>
         <member name="T:FluentNHibernate.AutoMap.Alterations.IAutoMappingOverride`1">
             <summary>
             A mapping override for an auto mapped entity.
@@ -40,6 +53,7 @@
             <summary>
             Maps a component
             </summary>
+            <typeparam name="TEntity"></typeparam>
             <typeparam name="TComponent">Type of component</typeparam>
             <param name="expression">Component property</param>
             <param name="action">Component mapping</param>
@@ -48,6 +62,7 @@
             <summary>
             CreateProperties a one-to-many relationship
             </summary>
+            <typeparam name="TEntity"></typeparam>
             <typeparam name="TChild">Child object type</typeparam>
             <param name="expression">Expression to get property from</param>
             <returns>one-to-many part</returns>
@@ -56,6 +71,7 @@
             <summary>
             CreateProperties a one-to-many relationship with a IDictionary
             </summary>
+            <typeparam name="TEntity"></typeparam>
             <typeparam name="TKey">Dictionary key type</typeparam>
             <typeparam name="TChild">Child object type / Dictionary value type</typeparam>
             <param name="expression">Expression to get property from</param>
@@ -65,6 +81,7 @@
             <summary>
             CreateProperties a many-to-many relationship
             </summary>
+            <typeparam name="TEntity"></typeparam>
             <typeparam name="TChild">Child object type</typeparam>
             <param name="expression">Expression to get property from</param>
             <returns>many-to-many part</returns>
@@ -366,6 +383,17 @@
         <member name="P:FluentNHibernate.AutoMap.AutoPersistenceModel.ConventionDiscovery">
             <summary>
             Alter convention discovery
+            </summary>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.ISubclass.LazyLoad">
+            <summary>
+            Sets whether this subclass is lazy loaded
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="P:FluentNHibernate.Mapping.ISubclass.Not">
+            <summary>
+            Inverts the next boolean
             </summary>
         </member>
         <member name="T:FluentNHibernate.Cfg.AutoMappingsContainer">
@@ -1163,6 +1191,18 @@
             Cascade style (Defaults to none)
             </summary>
         </member>
+        <member name="M:FluentNHibernate.Mapping.ComponentPartBase`1.SetAttribute(System.String,System.String)">
+            <summary>
+            Set an attribute on the xml element produced by this component mapping.
+            </summary>
+            <param name="name">Attribute name</param>
+            <param name="value">Attribute value</param>
+        </member>
+        <member name="P:FluentNHibernate.Mapping.ComponentPartBase`1.Access">
+            <summary>
+            Set the access and naming strategy for this component.
+            </summary>
+        </member>
         <member name="M:FluentNHibernate.Mapping.DiscriminatorPart.AlwaysSelectWithValue">
             <summary>
             Force NHibernate to always select using the discriminator value, even when selecting all subclasses. This
@@ -1442,18 +1482,6 @@
             </summary>
             <param name="value">Value for the access attribute</param>
         </member>
-        <member name="M:FluentNHibernate.Mapping.DynamicComponentPart`1.SetAttribute(System.String,System.String)">
-            <summary>
-            Set an attribute on the xml element produced by this component mapping.
-            </summary>
-            <param name="name">Attribute name</param>
-            <param name="value">Attribute value</param>
-        </member>
-        <member name="P:FluentNHibernate.Mapping.DynamicComponentPart`1.Access">
-            <summary>
-            Set the access and naming strategy for this component.
-            </summary>
-        </member>
         <member name="M:FluentNHibernate.Mapping.ICollectionRelationship.Component(System.Action{FluentNHibernate.Mapping.IClasslike})">
             <summary>
             Maps this collection as a collection of components.
@@ -1496,13 +1524,6 @@
             Inverts the next boolean
             </summary>
         </member>
-        <member name="M:FluentNHibernate.Mapping.IComponent.WithParentReference``1(System.Linq.Expressions.Expression{System.Func{``0,System.Object}})">
-            <summary>
-            Maps a property of the component class as a reference back to the containing entity
-            </summary>
-            <param name="exp">Parent reference property</param>
-            <returns>Component being mapped</returns>
-        </member>
         <member name="M:FluentNHibernate.Mapping.INotFoundExpression.Ignore">
             <summary>
             Used to set the Not-Found attribute to ignore.  This tells NHibernate to 
@@ -1518,17 +1539,6 @@
         <member name="T:FluentNHibernate.Mapping.InvalidPrefixException">
             <summary>
             Thrown when a prefix is specified for an access-strategy that isn't supported.
-            </summary>
-        </member>
-        <member name="M:FluentNHibernate.Mapping.ISubclass.LazyLoad">
-            <summary>
-            Sets whether this subclass is lazy loaded
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="P:FluentNHibernate.Mapping.ISubclass.Not">
-            <summary>
-            Inverts the next boolean
             </summary>
         </member>
         <member name="T:FluentNHibernate.Mapping.Prefix">
@@ -1633,7 +1643,12 @@
             </summary>
             <returns></returns>
         </member>
-        <!-- Badly formed XML comment ignored for member "M:FluentNHibernate.Mapping.NotFoundExpression`1.FluentNHibernate#Mapping#INotFoundExpression#Exception" -->
+        <member name="M:FluentNHibernate.Mapping.NotFoundExpression`1.FluentNHibernate#Mapping#INotFoundExpression#Exception">
+            <summary>
+            Used to set the Not-Found attribute to exception (Nhibernate default).  This 
+            tells NHibernate to throw an exception when the join fails
+            </summary>
+        </member>
         <member name="M:FluentNHibernate.Mapping.OptimisticLockBuilder.None">
             <summary>
             Use no locking strategy
@@ -1753,25 +1768,6 @@
             <summary>
             Nullable enum convention. Same behavior as <see cref="T:FluentNHibernate.Conventions.Defaults.EnumerationPropertyConvention"/> but sets the
             property to nullable aswell.
-            </summary>
-        </member>
-        <member name="M:FluentNHibernate.Mapping.ComponentPart`1.SetAttribute(System.String,System.String)">
-            <summary>
-            Set an attribute on the xml element produced by this component mapping.
-            </summary>
-            <param name="name">Attribute name</param>
-            <param name="value">Attribute value</param>
-        </member>
-        <member name="M:FluentNHibernate.Mapping.ComponentPart`1.WithParentReference(System.Linq.Expressions.Expression{System.Func{`0,System.Object}})">
-            <summary>
-            Maps a property of the component class as a reference back to the containing entity
-            </summary>
-            <param name="exp">Parent reference property</param>
-            <returns>Component being mapped</returns>
-        </member>
-        <member name="P:FluentNHibernate.Mapping.ComponentPart`1.Access">
-            <summary>
-            Set the access and naming strategy for this component.
             </summary>
         </member>
         <member name="T:FluentNHibernate.Mapping.CompositeElementPart`1">
@@ -2045,6 +2041,13 @@
             <returns>This property mapping to continue the method chain</returns>
         </member>
         <member name="M:FluentNHibernate.Mapping.PropertyMap.CustomTypeIs(System.Type)">
+            <summary>
+            Specifies that a custom type (an implementation of <see cref="T:NHibernate.UserTypes.IUserType"/>) should be used for this property for mapping it to/from one or more database columns whose format or type doesn't match this .NET property.
+            </summary>
+            <param name="type">A type which implements <see cref="T:NHibernate.UserTypes.IUserType"/>.</param>
+            <returns>This property mapping to continue the method chain</returns>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.PropertyMap.CustomTypeIs(System.String)">
             <summary>
             Specifies that a custom type (an implementation of <see cref="T:NHibernate.UserTypes.IUserType"/>) should be used for this property for mapping it to/from one or more database columns whose format or type doesn't match this .NET property.
             </summary>

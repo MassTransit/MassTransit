@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports.Nms.Tests.TestFixtures
 {
+    using System;
     using Configuration;
     using Internal;
     using MassTransit.Tests.TextFixtures;
@@ -25,6 +26,13 @@ namespace MassTransit.Transports.Nms.Tests.TestFixtures
         protected IServiceBus LocalBus { get; set; }
         protected IServiceBus RemoteBus { get; set; }
 
+        protected string ActiveMQHostName { get; set; }
+
+        protected NmsEndpointTestFixture()
+        {
+            ActiveMQHostName = "dhcp-10-41-162-190.mckesson.com";
+        }
+
         protected override void EstablishContext()
         {
             base.EstablishContext();
@@ -35,14 +43,14 @@ namespace MassTransit.Transports.Nms.Tests.TestFixtures
                 {
                     x.AddService<SubscriptionPublisher>();
                     x.AddService<SubscriptionConsumer>();
-                    x.ReceiveFrom("activemq://192.168.0.195:61616/mt_client");
+                    x.ReceiveFrom(new UriBuilder("activemq", ActiveMQHostName, 61616, "mt_client").Uri);
                 });
 
             RemoteBus = ServiceBusConfigurator.New(x =>
                 {
                     x.AddService<SubscriptionPublisher>();
                     x.AddService<SubscriptionConsumer>();
-                    x.ReceiveFrom("activemq://192.168.0.195:61616/mt_server");
+                    x.ReceiveFrom(new UriBuilder("activemq", ActiveMQHostName, 61616, "mt_server").Uri);
                 });
         }
 

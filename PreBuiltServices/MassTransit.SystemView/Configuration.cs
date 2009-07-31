@@ -53,7 +53,7 @@ namespace MassTransit.SystemView
 			{
 				throw new ConfigurationErrorsException("The " + key + " is not a valid Uri", ex);
 			}
-			catch (ConfigurationErrorsException ex)
+			catch (ConfigurationErrorsException)
 			{
 				throw;
 			}

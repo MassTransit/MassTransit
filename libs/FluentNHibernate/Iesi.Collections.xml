@@ -941,6 +941,22 @@
             Indicates that the given instance is read-only
             </summary>
         </member>
+        <member name="T:Iesi.Collections.Generic.OrderedSet`1">
+            <summary>
+            Implements an ordered <c>Set</c> based on a dictionary.
+            </summary>
+        </member>
+        <member name="M:Iesi.Collections.Generic.OrderedSet`1.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:Iesi.Collections.Generic.OrderedSet`1"/> class.
+            </summary>
+        </member>
+        <member name="M:Iesi.Collections.Generic.OrderedSet`1.#ctor(System.Collections.Generic.ICollection{`0})">
+            <summary>
+            Initializes a new instance of the <see cref="T:Iesi.Collections.Generic.OrderedSet`1"/> class.
+            </summary>
+            <param name="initialValues">A collection of elements that defines the initial set contents.</param>
+        </member>
         <member name="T:Iesi.Collections.Generic.SortedSet`1">
             <summary>
             Implements a <c>Set</c> based on a sorted tree.  This gives good performance for operations on very

@@ -161,6 +161,8 @@ namespace MassTransit.Transports.Msmq
         {
             if (_queue != null)
                 _queue.Dispose();
+
+            _disposed = true;
         }
 
         public IEnumerable<IMessageSelector> SelectiveReceive(TimeSpan timeout)
