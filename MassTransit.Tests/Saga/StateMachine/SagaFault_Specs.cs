@@ -72,10 +72,10 @@ namespace MassTransit.Tests.Saga.StateMachine
 
 					During(
 						WaitingForCustomer,
-						When(CustomerCreated).And(message => message.CreateAgency)
+						When(CustomerCreated).Where(message => message.CreateAgency)
 							.Then((saga, message) => { saga.Bus.Publish(new CreateAgencyMessage()); })
 							.TransitionTo(WaitingForAgency),
-						When(CustomerCreated).And(message => !message.CreateAgency)
+						When(CustomerCreated).Where(message => !message.CreateAgency)
 							.Then((saga, message) => { saga.Bus.Publish(new UpdateAccountMessage()); })
 							.TransitionTo(WaitingForAccount),
 						When(CreateCustomerFailed)

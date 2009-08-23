@@ -16,6 +16,8 @@ namespace MassTransit.Services.Subscriptions.Server
 	using System.Linq;
 	using Exceptions;
 	using log4net;
+	using Magnum.Actors;
+	using Magnum.Actors.CommandQueues;
 	using Messages;
 	using Pipeline.Inspectors;
 	using Saga;
@@ -35,6 +37,7 @@ namespace MassTransit.Services.Subscriptions.Server
 		private IServiceBus _bus;
 		private ISubscriptionRepository _repository;
 		private UnsubscribeAction _unsubscribeToken = () => false;
+		private readonly CommandQueue _queue = new ThreadPoolCommandQueue();
 
 		public SubscriptionService(IServiceBus bus,
 		                           ISubscriptionRepository subscriptionRepository,
@@ -56,7 +59,7 @@ namespace MassTransit.Services.Subscriptions.Server
 
 			var add = new AddSubscription(message.Subscription);
 
-			SendToClients(add);
+			_queue.Enqueue(() => SendToClients(add));
 		}
 
 		public void Consume(SubscriptionClientAdded message)
@@ -64,7 +67,7 @@ namespace MassTransit.Services.Subscriptions.Server
 			if (_log.IsInfoEnabled)
 				_log.InfoFormat("Sending cache update to {0}", message.ControlUri);
 
-			SendCacheUpdateToClient(message.ControlUri);
+			_queue.Enqueue(() => SendCacheUpdateToClient(message.ControlUri));
 		}
 
 		public void Consume(SubscriptionClientRemoved message)
@@ -80,7 +83,7 @@ namespace MassTransit.Services.Subscriptions.Server
 
 			var remove = new RemoveSubscription(message.Subscription);
 
-			SendToClients(remove);
+			_queue.Enqueue(()=>SendToClients(remove));
 		}
 
 		public void Dispose()

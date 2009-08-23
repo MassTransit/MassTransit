@@ -31,36 +31,25 @@ namespace MassTransit.Services.HealthMonitoring.Server
 			Define(() =>
 				{
 					Correlate(EndpointHeartBeats).By((saga, message) => saga.CorrelationId == message.CorrelationId);
-                    Correlate(TimeoutExpires).By((saga, message) => saga.CorrelationId == message.CorrelationId);
-                    Correlate(EndpointGoesOffline).By((saga, message) => saga.CorrelationId == message.CorrelationId);
-                    Correlate(EndpointRespondsToPing).By((saga, message) => saga.CorrelationId == message.CorrelationId);
+					Correlate(TimeoutExpires).By((saga, message) => saga.CorrelationId == message.CorrelationId);
+					Correlate(EndpointGoesOffline).By((saga, message) => saga.CorrelationId == message.CorrelationId);
+					Correlate(EndpointRespondsToPing).By((saga, message) => saga.CorrelationId == message.CorrelationId);
 
 					Initially(
 						When(EndpointComesOnline)
-							.Then((saga, message) =>
-								{
-									_log.DebugFormat("Endpoint came online: {0} ({1})", message.DataUri, message.ControlUri);
-
-									InitializeSagaFromMessage(saga, message.ControlUri, message.DataUri, message.HeartbeatIntervalInSeconds);
-								})
+							.Call((saga, message) => InitializeSagaFromMessage(saga, message.ControlUri, message.DataUri, message.HeartbeatIntervalInSeconds))
 							.Then(saga => saga.NotifyEndpointIsHealthy())
-							.TransitionTo(Healthy) /*,
-						When(EndpointBreathes)
-							.Then((saga, message) =>
-								{
-									saga.EndpointAddress = message.EndpointAddress;
-									saga.TimeBetweenBeatsInSeconds = 10;
-									saga.MarkBeat();
-									saga.ScheduleTimeoutForHeartbeat();
-								})
-							.Then(StatusChange)
-							.TransitionTo(Healthy)*/
+							.TransitionTo(Healthy),
+						When(EndpointHeartBeats)
+							.Call((saga, message) => InitializeSagaFromMessage(saga, message.ControlUri, message.DataUri, message.HeartbeatIntervalInSeconds))
+							.Then(saga => saga.NotifyEndpointIsHealthy())
+							.TransitionTo(Healthy)
 						);
 
 					During(Healthy,
 						When(EndpointHeartBeats)
 							.Then((saga, message) => saga.ResetHeartbeatTimeout()),
-						When(TimeoutExpires).And(msg => msg.Tag == (int) Timeouts.HeartBeatTimeout)
+						When(TimeoutExpires).Where(msg => msg.Tag == (int) Timeouts.HeartBeatTimeout)
 							.Then((saga, message) => saga.PingUnresponsiveEndpoint())
 							.Then(saga => saga.NotifyEndpointIsSuspect())
 							.TransitionTo(Suspect),
@@ -75,7 +64,7 @@ namespace MassTransit.Services.HealthMonitoring.Server
 						When(EndpointRespondsToPing)
 							.Then(saga => saga.NotifyEndpointIsHealthy())
 							.TransitionTo(Healthy),
-						When(TimeoutExpires).And(msg => msg.Tag == (int) Timeouts.PingTimeout)
+						When(TimeoutExpires).Where(msg => msg.Tag == (int) Timeouts.PingTimeout)
 							.Then((saga, message) => saga.NotifyEndpointIsDown())
 							.TransitionTo(Down),
 						When(EndpointGoesOffline)
@@ -156,12 +145,9 @@ namespace MassTransit.Services.HealthMonitoring.Server
 		{
 			LastHeartbeat = DateTime.UtcNow;
 
-			Bus.Publish(new ScheduleTimeout(CorrelationId, TimeSpan.FromSeconds(HeartbeatIntervalInSeconds*2), (int) Timeouts.HeartBeatTimeout));
-		}
+			TimeSpan timeoutIn = TimeSpan.FromSeconds((HeartbeatIntervalInSeconds*3)/2);
 
-		private void MarkBeat()
-		{
-			LastHeartbeat = DateTime.Now;
+			Bus.Publish(new ScheduleTimeout(CorrelationId, timeoutIn, (int) Timeouts.HeartBeatTimeout));
 		}
 
 		private static void InitializeSagaFromMessage(HealthSaga saga, Uri controlUri, Uri dataUri, int heartbeatIntervalInSeconds)

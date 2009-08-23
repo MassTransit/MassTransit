@@ -27,6 +27,7 @@ namespace MassTransit.Saga.Configuration
 	using Pipeline;
 	using Util;
 
+
 	public class SagaStateMachineSubscriptionInspector :
 		ReflectiveVisitorBase<SagaStateMachineSubscriptionInspector>,
 		IStateMachineInspector

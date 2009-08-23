@@ -121,7 +121,7 @@ namespace MassTransit.Tests
 		private static readonly TimeSpan _timeout = TimeSpan.FromSeconds(5);
 		private int _batchSize;
 
-		[Test]
+		[Test, Ignore]
 		public void The_batch_should_throw_an_exception_that_the_timeout_occurred()
 		{
 			_batchSize = 2;
