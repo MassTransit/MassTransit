@@ -19,7 +19,6 @@ namespace MassTransit.Services.Timeout
 	using Magnum.Actors;
 	using Magnum.Actors.CommandQueues;
 	using Magnum.Actors.Schedulers;
-	using Magnum.DateTimeExtensions;
 	using Messages;
 	using Saga;
 	using Server;
@@ -114,7 +113,7 @@ namespace MassTransit.Services.Timeout
 					_unschedule();
 
 				_log.DebugFormat("Scheduling next check at " + DateTime.Now);
-				_unschedule = _scheduler.Schedule(1000, CheckExistingTimeouts);
+				_unschedule = _scheduler.Schedule(1000, ()=> _queue.Enqueue(CheckExistingTimeouts));
 			}
 		}
 

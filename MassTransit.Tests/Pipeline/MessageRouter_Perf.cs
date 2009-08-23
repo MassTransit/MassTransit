@@ -8,6 +8,7 @@ namespace MassTransit.Tests.Pipeline
 	using MassTransit.Pipeline.Sinks;
 	using Messages;
 	using NUnit.Framework;
+	using Rhino.Mocks;
 	using Threading;
 
 	[TestFixture]
@@ -160,4 +161,56 @@ namespace MassTransit.Tests.Pipeline
 			}
 		}
 	}
+
+    [TestFixture]
+    public class Throughput_Specs
+    {
+        [Test, Explicit]
+        public void How_many_messages_can_the_pipe_send_per_second()
+        {
+            long count = 0;
+            long count2 = 0;
+            long limit = 2500000;
+
+            var messageSink = new InstanceMessageSink<ClaimModified>(m => msg => { count++; });
+            var messageSink2 = new InstanceMessageSink<ClaimModified>(m => msg => { count2++; });
+            var router = new MessageRouter<ClaimModified>();
+            router.Connect(messageSink);
+            router.Connect(messageSink2);
+
+
+            var translater = new MessageTranslator<object, ClaimModified>(router);
+            var objectRouter = new MessageRouter<object>();
+            objectRouter.Connect(translater);
+            var pipeline = new MessagePipeline(objectRouter, MockRepository.GenerateMock<IPipelineConfigurator>());
+
+            var message = new ClaimModified();
+
+            for (int i = 0; i < 100; i++)
+            {
+                pipeline.Dispatch(message);
+            }
+
+            count = 0;
+            count2 = 0;
+
+            Stopwatch timer = Stopwatch.StartNew();
+
+            for (int i = 0; i < limit; i++)
+            {
+                pipeline.Dispatch(message);
+            }
+
+            timer.Stop();
+
+            Trace.WriteLine("Received: " + (count+count2) + ", expected " + limit * 2);
+            Trace.WriteLine("Elapsed Time: " + timer.ElapsedMilliseconds + "ms");
+            Trace.WriteLine("Messages Per Second: " + limit*1000/timer.ElapsedMilliseconds);
+        }
+    }
+
+    public class ClaimModified
+    {
+        
+    }
 }

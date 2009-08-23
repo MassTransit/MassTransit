@@ -195,7 +195,13 @@
     <Compile Include="Pipeline\Configuration\MessageInterceptorConfigurator.cs" />
     <Compile Include="Pipeline\Configuration\MessageInterceptorConfiguratorScope.cs" />
     <Compile Include="Pipeline\Sinks\MessageInterceptor.cs" />
+    <Compile Include="Saga\Configuration\EventInspectorResult.cs" />
+    <Compile Include="Saga\Configuration\ISagaPolicyFactory.cs" />
     <Compile Include="Saga\Configuration\ObservesSubscriber.cs" />
+    <Compile Include="Saga\Configuration\SagaEvent.cs" />
+    <Compile Include="Saga\Configuration\SagaEventSubscriber.cs" />
+    <Compile Include="Saga\Configuration\SagaPolicyFactory.cs" />
+    <Compile Include="Saga\Configuration\SagaStateMachineEventInspector.cs" />
     <Compile Include="Saga\CreateOrUseExistingSagaPolicy.cs" />
     <Compile Include="Saga\DataEventBinder.cs" />
     <Compile Include="Saga\EventBinder.cs" />

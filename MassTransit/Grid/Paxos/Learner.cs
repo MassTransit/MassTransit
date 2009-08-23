@@ -27,17 +27,17 @@ namespace MassTransit.Grid.Paxos
 					Correlate(ValueAccepted).By((saga, message) => saga.CorrelationId == message.CorrelationId);
 
 					Initially(
-						When(ValueAccepted).And(message => !message.IsFinal)
+						When(ValueAccepted).Where(message => !message.IsFinal)
 							.Then(UpdateAcceptedValue)
 							.TransitionTo(Active),
-						When(ValueAccepted).And(message => message.IsFinal)
+						When(ValueAccepted).Where(message => message.IsFinal)
 							.Then(UpdateAcceptedValue)
 							.TransitionTo(Completed));
 
 					During(Active,
-					       When(ValueAccepted).And(message => !message.IsFinal)
+						   When(ValueAccepted).Where(message => !message.IsFinal)
 					       	.Then(UpdateAcceptedValue),
-					       When(ValueAccepted).And(message => message.IsFinal)
+						   When(ValueAccepted).Where(message => message.IsFinal)
 					       	.Then(UpdateAcceptedValue)
 					       	.TransitionTo(Completed));
 				});

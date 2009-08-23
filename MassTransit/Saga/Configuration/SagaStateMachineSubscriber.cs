@@ -14,35 +14,23 @@ namespace MassTransit.Saga.Configuration
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Linq.Expressions;
-	using System.Reflection;
-	using Exceptions;
 	using Magnum;
+	using Magnum.Reflection;
 	using MassTransit.Pipeline;
 	using MassTransit.Pipeline.Configuration.Subscribers;
-	using Util;
 
 	public class SagaStateMachineSubscriber :
 		PipelineSubscriberBase
 	{
 		public override IEnumerable<UnsubscribeAction> Subscribe<TComponent>(ISubscriberContext context)
 		{
-			Type componentType = typeof (TComponent);
-
-			Type baseType = componentType.BaseType;
-			if (!baseType.IsGenericType)
+			if (!IsSagaStateMachine<TComponent>())
 				yield break;
 
-			if (baseType.GetGenericTypeDefinition() != typeof (SagaStateMachine<>))
-				yield break;
-
-			MethodInfo genericMethod = FindConnectMethod<TComponent>();
-
-			var connector = BuildConnector(genericMethod);
-
-			foreach (var result in connector(this, context))
+			var results = this.Call<IEnumerable<UnsubscribeAction>>("Connect", new[] {typeof (TComponent)}, context);
+			foreach (var unsubscribeAction in results)
 			{
-				yield return result;
+				yield return unsubscribeAction;
 			}
 		}
 
@@ -56,36 +44,29 @@ namespace MassTransit.Saga.Configuration
 		{
 			var component = (TComponent) Activator.CreateInstance(typeof (TComponent), CombGuid.Generate());
 
-			var subscriber = new SagaStateMachineSubscriptionInspector(context);
+			var inspector = new SagaStateMachineEventInspector<TComponent>();
+			component.Inspect(inspector);
 
-			component.Inspect(subscriber);
+			var subscriber = new SagaEventSubscriber<TComponent>(context, new SagaPolicyFactory());
 
-			return subscriber.Results;
+			foreach (var result in inspector.GetResults())
+			{
+				yield return subscriber.Call<UnsubscribeAction>("Connect", new[] {result.SagaEvent.MessageType}, result.SagaEvent.Event, result.States);
+			}
 		}
 
-		private MethodInfo FindConnectMethod<TComponent>()
+		private static bool IsSagaStateMachine<TComponent>()
 		{
-			var genericMethod = ReflectiveMethodInvoker.FindMethod(GetType(),
-				"Connect",
-				new[] { typeof(TComponent) },
-				new[] { typeof(ISubscriberContext) });
+			Type componentType = typeof (TComponent);
 
-			if (genericMethod == null)
-				throw new ConfigurationException(string.Format("Unable to subscribe for type: '{0}'",
-					typeof(TComponent).FullName));
+			Type baseType = componentType.BaseType;
+			if (!baseType.IsGenericType)
+				return false;
 
-			return genericMethod;
-		}
+			if (baseType.GetGenericTypeDefinition() != typeof (SagaStateMachine<>))
+				return false;
 
-		private Func<SagaStateMachineSubscriber, ISubscriberContext, IEnumerable<UnsubscribeAction>> BuildConnector(MethodInfo genericMethod)
-		{
-			var interceptorParameter = Expression.Parameter(typeof(SagaStateMachineSubscriber), "interceptor");
-			var contextParameter = Expression.Parameter(typeof(ISubscriberContext), "context");
-
-			var call = Expression.Call(interceptorParameter, genericMethod, contextParameter);
-			var connector = Expression.Lambda<Func<SagaStateMachineSubscriber, ISubscriberContext, IEnumerable<UnsubscribeAction>>>(call, new[] { interceptorParameter, contextParameter }).Compile();
-
-			return connector;
+			return true;
 		}
 	}
 }
