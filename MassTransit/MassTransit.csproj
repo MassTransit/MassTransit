@@ -303,7 +303,6 @@
     <Compile Include="Saga\Pipeline\PropertySagaMessageSink.cs" />
     <Compile Include="Saga\Pipeline\PropertySagaStateMachineMessageSink.cs" />
     <Compile Include="Saga\Configuration\SagaStateMachineSubscriber.cs" />
-    <Compile Include="Saga\Configuration\SagaStateMachineSubscriptionInspector.cs" />
     <Compile Include="Saga\Pipeline\SagaMessageSinkBase.cs" />
     <Compile Include="Saga\SagaStateMachine.cs" />
     <Compile Include="Serialization\XmlMessageSerializer.cs" />
