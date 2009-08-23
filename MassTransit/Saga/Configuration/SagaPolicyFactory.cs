@@ -27,6 +27,8 @@ namespace MassTransit.Saga.Configuration
 
 			foreach (var state in states)
 			{
+				if (IsAny<TSaga>(state))
+					includesInitial = includesOther = true;
 				if (IsInitial<TSaga>(state))
 					includesInitial = true;
 				else
@@ -42,7 +44,13 @@ namespace MassTransit.Saga.Configuration
 			return new ExistingOrIgnoreSagaPolicy<TSaga, TMessage>();
 		}
 
-		private bool IsInitial<TSaga>(State state)
+		private static bool IsAny<TSaga>(State state)
+			where TSaga : SagaStateMachine<TSaga>, ISaga
+		{
+			return state.Name == "Any";
+		}
+
+		private static bool IsInitial<TSaga>(State state)
 			where TSaga : SagaStateMachine<TSaga>, ISaga
 		{
 			return state.Name == "Initial";
