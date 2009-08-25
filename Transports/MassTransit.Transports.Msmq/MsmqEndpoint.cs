@@ -14,6 +14,7 @@ namespace MassTransit.Transports.Msmq
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.Messaging;
     using System.Threading;
     using System.Transactions;
@@ -26,6 +27,7 @@ namespace MassTransit.Transports.Msmq
     /// <summary>
     /// A MessageQueueEndpoint is an implementation of an endpoint using the Microsoft Message Queue service.
     /// </summary>
+    [DebuggerDisplay("{Uri}")]
     public class MsmqEndpoint :
         IEndpoint
     {

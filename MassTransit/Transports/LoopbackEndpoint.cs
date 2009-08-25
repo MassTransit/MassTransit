@@ -14,6 +14,7 @@ namespace MassTransit.Transports
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Diagnostics;
 	using System.IO;
 	using System.Threading;
 	using Configuration;
@@ -21,6 +22,7 @@ namespace MassTransit.Transports
 	using log4net;
 	using Serialization;
 
+    [DebuggerDisplay("{Uri}")]
 	public class LoopbackEndpoint :
 		IEndpoint
 	{

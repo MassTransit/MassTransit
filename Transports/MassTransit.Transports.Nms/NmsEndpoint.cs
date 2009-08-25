@@ -14,6 +14,7 @@ namespace MassTransit.Transports.Nms
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.IO;
     using System.Runtime.Serialization;
     using System.Text;
@@ -29,6 +30,7 @@ namespace MassTransit.Transports.Nms
     /// The NMS endpoint is used to communicate with systems like ActiveMQ via the Apache.NMS
     /// project
     /// </summary>
+    [DebuggerDisplay("{Uri}")]
     public class NmsEndpoint :
         IEndpoint
     {

@@ -14,8 +14,10 @@ namespace MassTransit.Internal
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Diagnostics;
 	using Exceptions;
 
+    [DebuggerDisplay("{Uri}")]
 	public class NullEndpoint :
 		IEndpoint
 	{

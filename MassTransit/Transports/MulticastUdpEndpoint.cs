@@ -14,6 +14,7 @@ namespace MassTransit.Transports
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Diagnostics;
 	using System.IO;
 	using System.Net;
 	using System.Net.Sockets;
@@ -24,6 +25,7 @@ namespace MassTransit.Transports
 	using log4net;
 	using Serialization;
 
+    [DebuggerDisplay("{Uri}")]
 	public class MulticastUdpEndpoint :
 		IEndpoint
 	{
