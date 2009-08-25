@@ -14,8 +14,11 @@ namespace MassTransit.Internal
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Diagnostics;
 	using log4net;
 
+
+    [DebuggerDisplay("Poison:{Uri}")]
 	public class PoisonEndpointDecorator :
 		IEndpoint
 	{
