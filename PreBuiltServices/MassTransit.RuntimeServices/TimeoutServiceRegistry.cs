@@ -48,6 +48,7 @@ namespace MassTransit.RuntimeServices
 			RegisterServiceBus(configuration.TimeoutServiceDataUri, x =>
 				{
 					x.UseControlBus(_container.GetInstance<IControlBus>());
+					x.SetConcurrentConsumerLimit(1);
 
 					ConfigureSubscriptionClient(configuration.SubscriptionServiceUri, x);
 

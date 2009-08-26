@@ -40,6 +40,9 @@ namespace MassTransit.Pipeline.Sinks
 		{
 			yield return x =>
 				{
+					if(OutboundMessage.Context.WasEndpointAlreadySent(_endpoint.Uri))
+						return;
+
 					_endpoint.Send(x);
 
 					OutboundMessage.Context.NotifyForMessageConsumer(message, _endpoint);

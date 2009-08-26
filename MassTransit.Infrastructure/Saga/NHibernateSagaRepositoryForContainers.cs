@@ -43,10 +43,13 @@ namespace MassTransit.Infrastructure.Saga
 
 		public IEnumerable<Action<V>> Find<V>(Expression<Func<T, bool>> expression, Action<T, V> action)
 		{
+			if (_log.IsDebugEnabled)
+				_log.DebugFormat("Locating Saga: {0}", expression.ToString());
+
 			using (var session = _sessionFactory.OpenSession())
 			using (var transaction = session.BeginTransaction())
 			{
-				List<T> existingSagas = session.Linq<T>().Where(expression).ToList();
+				IQueryable<T> existingSagas = session.Linq<T>().Where(expression);
 
 				foreach (T saga in existingSagas)
 				{
@@ -56,11 +59,17 @@ namespace MassTransit.Infrastructure.Saga
 					var sagaInstance = saga;
 					yield return x => action(sagaInstance, x);
 
-					session.Update(saga);
+					if (_log.IsDebugEnabled)
+						_log.DebugFormat("Finished saga [{0}] - {1}", typeof (T).ToFriendlyName(), saga.CorrelationId);
 				}
 
+				if (_log.IsDebugEnabled)
+					_log.DebugFormat("Committing Saga: {0}", expression.ToString());
 				transaction.Commit();
 			}
+
+			if (_log.IsDebugEnabled)
+				_log.DebugFormat("Exiting Saga: {0}", expression.ToString());
 		}
 
 		public IEnumerable<Action> Find(Expression<Func<T, bool>> expression, Action<T> action)
@@ -78,7 +87,7 @@ namespace MassTransit.Infrastructure.Saga
 			using (var session = _sessionFactory.OpenSession())
 			using (var transaction = session.BeginTransaction())
 			{
-				var result =  session.Linq<T>().Where(filter).ToList();
+				var result = session.Linq<T>().Where(filter).ToList();
 
 				transaction.Commit();
 
