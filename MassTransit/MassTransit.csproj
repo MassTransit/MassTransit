@@ -286,8 +286,6 @@
     <Compile Include="Services\HealthMonitoring\Messages\EndpointIsOffline.cs" />
     <Compile Include="Services\HealthMonitoring\Messages\EndpointMessageBase.cs" />
     <Compile Include="Services\HealthMonitoring\Messages\EndpointNotificationBase.cs" />
-    <Compile Include="Services\Subscriptions\Client\SubscriptionCache.cs" />
-    <Compile Include="Services\Subscriptions\Client\SubscriptionCacheKey.cs" />
     <Compile Include="Services\Subscriptions\Messages\SubscriptionClientMessageBase.cs" />
     <Compile Include="Services\Timeout\Messages\TimeoutCancelled.cs" />
     <Compile Include="Services\Timeout\Messages\TimeoutMessageBase.cs" />
