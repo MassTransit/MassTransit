@@ -41,7 +41,10 @@ namespace MassTransit.RuntimeServices
 			ForRequestedType<ISubscriptionRepository>()
 				.AddConcreteType<PersistantSubscriptionRepository>();
 
-			RegisterServiceBus(configuration.SubscriptionServiceUri, x => { });
+			RegisterServiceBus(configuration.SubscriptionServiceUri, x =>
+				{
+					//x.SetConcurrentConsumerLimit(1);
+				});
 		}
 
 		private static ISessionFactory CreateSessionFactory()

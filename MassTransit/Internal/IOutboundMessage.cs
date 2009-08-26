@@ -34,5 +34,6 @@ namespace MassTransit.Internal
 	{
 		void NotifyForMessageConsumer<T>(T message, IEndpoint endpoint);
 		void NotifyNoSubscribers<T>(T message);
+		bool WasEndpointAlreadySent(Uri endpointUri);
 	}
 }

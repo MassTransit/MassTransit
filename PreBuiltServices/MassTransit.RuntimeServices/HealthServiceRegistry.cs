@@ -47,6 +47,7 @@ namespace MassTransit.RuntimeServices
 			RegisterServiceBus(configuration.HealthServiceDataUri, x =>
 				{
 					x.UseControlBus(_container.GetInstance<IControlBus>());
+					x.SetConcurrentConsumerLimit(1);
 
 					ConfigureSubscriptionClient(configuration.SubscriptionServiceUri, x);
 				});

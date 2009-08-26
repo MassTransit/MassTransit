@@ -13,6 +13,7 @@
 namespace MassTransit.Internal
 {
 	using System;
+	using System.Collections.Generic;
 	using Magnum;
 
 	public class OutboundMessage :
@@ -21,6 +22,7 @@ namespace MassTransit.Internal
 	{
 		private Action<object, IEndpoint> _eachSubscriberAction = Ignore;
 		private Action<object> _noSubscribersAction = Ignore;
+		private HashSet<Uri> _endpoints = new HashSet<Uri>();
 
 		public static IOutboundMessage Headers
 		{
@@ -68,6 +70,7 @@ namespace MassTransit.Internal
 
 			_noSubscribersAction = Ignore;
 			_eachSubscriberAction = Ignore;
+			_endpoints.Clear();
 		}
 
 		public void IfNoSubscribers<T>(Action<T> action)
@@ -82,7 +85,14 @@ namespace MassTransit.Internal
 
 		public void NotifyForMessageConsumer<T>(T message, IEndpoint endpoint)
 		{
+			_endpoints.Add(endpoint.Uri);
+
 			_eachSubscriberAction(message, endpoint);
+		}
+
+		public bool WasEndpointAlreadySent(Uri endpointUri)
+		{
+			return _endpoints.Contains(endpointUri);
 		}
 
 		public void NotifyNoSubscribers<T>(T message)

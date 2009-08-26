@@ -19,7 +19,6 @@ namespace MassTransit.Services.Subscriptions.Server
 	using Magnum.Actors;
 	using Magnum.Actors.CommandQueues;
 	using Messages;
-	using Pipeline.Inspectors;
 	using Saga;
 	using Subscriptions.Messages;
 
@@ -55,7 +54,7 @@ namespace MassTransit.Services.Subscriptions.Server
 		public void Consume(SubscriptionAdded message)
 		{
 			if (_log.IsInfoEnabled)
-				_log.InfoFormat("Adding Subscription: {0}", message.Subscription);
+				_log.InfoFormat("Subscription Added: {0} [{1}]", message.Subscription, message.Subscription.CorrelationId);
 
 			var add = new AddSubscription(message.Subscription);
 
@@ -65,7 +64,7 @@ namespace MassTransit.Services.Subscriptions.Server
 		public void Consume(SubscriptionClientAdded message)
 		{
 			if (_log.IsInfoEnabled)
-				_log.InfoFormat("Sending cache update to {0}", message.ControlUri);
+				_log.InfoFormat("Subscription Client Added: {0} [{1}]", message.ControlUri, message.ClientId);
 
 			_queue.Enqueue(() => SendCacheUpdateToClient(message.ControlUri));
 		}
@@ -73,13 +72,13 @@ namespace MassTransit.Services.Subscriptions.Server
 		public void Consume(SubscriptionClientRemoved message)
 		{
 			if (_log.IsInfoEnabled)
-				_log.InfoFormat("Removing client: {0}", message.ControlUri);
+				_log.InfoFormat("Subscription Client Removed: {0} [{1}]", message.ControlUri, message.CorrelationId);
 		}
 
 		public void Consume(SubscriptionRemoved message)
 		{
 			if (_log.IsInfoEnabled)
-				_log.InfoFormat("Removing Subscription: {0}", message.Subscription);
+				_log.InfoFormat("Subscription Removed: {0} [{1}]", message.Subscription, message.Subscription.CorrelationId);
 
 			var remove = new RemoveSubscription(message.Subscription);
 

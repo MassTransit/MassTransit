@@ -35,7 +35,10 @@ namespace MassTransit.Saga.Pipeline
 
 		protected override Expression VisitMemberAccess(MemberExpression m)
 		{
-			if (m.Expression.NodeType == ExpressionType.Parameter && m.Expression.Type == typeof (TMessage))
+			if(m == null)
+				return null;
+
+			if (m.Expression != null && (m.Expression.NodeType == ExpressionType.Parameter && m.Expression.Type == typeof (TMessage)))
 			{
 				return EvaluateMemberAccess(m);
 			}

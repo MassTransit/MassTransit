@@ -14,6 +14,7 @@ namespace MassTransit.Saga.Pipeline
 {
 	using System;
 	using System.Linq.Expressions;
+	using log4net;
 	using Magnum.StateMachine;
 	using MassTransit.Pipeline;
 
@@ -22,8 +23,10 @@ namespace MassTransit.Saga.Pipeline
 		where TMessage : class, CorrelatedBy<Guid>
 		where TSaga : SagaStateMachine<TSaga>, ISaga
 	{
+		private static readonly ILog _log = LogManager.GetLogger(typeof(CorrelatedSagaStateMachineMessageSink<TSaga, TMessage>).ToFriendlyName());
+
 		private readonly DataEvent<TSaga, TMessage> _dataEvent;
-		private Expression<Func<TSaga, TMessage, bool>> _selector;
+		private readonly Expression<Func<TSaga, TMessage, bool>> _selector;
 
 		public CorrelatedSagaStateMachineMessageSink(ISubscriberContext context,
 		                                             IServiceBus bus,
@@ -45,6 +48,10 @@ namespace MassTransit.Saga.Pipeline
 		protected override void ConsumerAction(TSaga saga, TMessage message)
 		{
 			saga.Bus = Bus;
+
+			if(_log.IsDebugEnabled)
+				_log.DebugFormat("RaiseEvent: {0} {1} {2}", typeof(TSaga).Name, _dataEvent.Name, saga.CorrelationId);
+
 			saga.RaiseEvent(_dataEvent, message);
 		}
 	}
