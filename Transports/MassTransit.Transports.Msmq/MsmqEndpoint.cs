@@ -220,7 +220,7 @@ namespace MassTransit.Transports.Msmq
             queue.MessageReadPropertyFilter = mpf;
 
             if (!queue.CanRead)
-                throw new EndpointException(Uri, "The endpoint could not be found: " + QueuePath);
+                throw new EndpointException(Uri, "Could not read from the queue: '{0}'. Does this queue exist? You may also want to check the permissions for user '{1}'".FormatWith(QueuePath, Environment.UserName));
 
             return queue;
         }
