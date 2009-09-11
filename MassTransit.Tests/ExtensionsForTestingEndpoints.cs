@@ -13,49 +13,96 @@
 namespace MassTransit.Tests
 {
 	using System;
-	using Magnum.DateTimeExtensions;
+	using Magnum.Actors;
 	using NUnit.Framework;
 
 	public static class ExtensionsForTestingEndpoints
 	{
-		public static void ShouldContain<TMessage>(this IEndpoint endpoint, TMessage expectedMessage)
+		public static void ShouldContain<TMessage>(this IEndpoint endpoint)
+			where TMessage : class
+		{
+			var future = new Future<TMessage>();
+
+			endpoint.Receive(message =>
+				{
+					message.ShouldNotBeNull();
+
+					message.ShouldBeSameType<TMessage>();
+
+					TMessage tm = (TMessage) message;
+
+					future.Complete(tm);
+
+					return null;
+				});
+
+			future.IsAvailable().ShouldBeTrue(endpoint.Address + " should contain a message of type " + typeof (TMessage).Name);
+		}
+
+        public static void ShouldContain<TMessage>(this IEndpoint endpoint, TMessage expectedMessage)
+            where TMessage : CorrelatedBy<Guid>
+        {
+            endpoint.ShouldContain(expectedMessage, TimeSpan.Zero);
+        }
+
+	    public static void ShouldContain<TMessage>(this IEndpoint endpoint, TMessage expectedMessage, TimeSpan timeout)
 			where TMessage : CorrelatedBy<Guid>
 		{
-			foreach (var selector in endpoint.SelectiveReceive(5.Seconds()))
-			{
-				object message = selector.DeserializeMessage();
-				Assert.IsNotNull(message);
+			var future = new Future<TMessage>();
 
-				Assert.IsInstanceOfType(expectedMessage.GetType(), message);
+	        endpoint.Receive(message =>
+	            {
+	                message.ShouldNotBeNull();
 
-				TMessage pingMessage = (TMessage) message;
+	                message.ShouldBeSameType<TMessage>();
 
-				Assert.AreEqual(expectedMessage.CorrelationId, pingMessage.CorrelationId);
+	                TMessage tm = (TMessage) message;
 
-				return;
-			}
+	                Assert.AreEqual(expectedMessage.CorrelationId, tm.CorrelationId);
 
-			Assert.Fail(string.Format("Message ({0}) not found in queue", typeof (TMessage).FullName));
+	                future.Complete(tm);
+
+	                return null;
+	            }, timeout);
+
+			future.IsAvailable().ShouldBeTrue(endpoint.Address + " should contain a message of type " + typeof (TMessage).Name + " with correlation id " + expectedMessage.CorrelationId);
+		}
+
+		public static void ShouldNotContain<TMessage>(this IEndpoint endpoint)
+			where TMessage : class
+		{
+			endpoint.Receive(message =>
+				{
+					message.ShouldNotBeNull();
+
+					if (message.GetType() == typeof (TMessage))
+					{
+						Assert.Fail(endpoint.Address + " should not contain a message of type " + typeof (TMessage).Name);
+					}
+
+					return null;
+				});
 		}
 
 		public static void ShouldNotContain<TMessage>(this IEndpoint endpoint, TMessage expectedMessage)
 			where TMessage : CorrelatedBy<Guid>
 		{
-			foreach (var selector in endpoint.SelectiveReceive(2.Seconds()))
-			{
-				object message = selector.DeserializeMessage();
-				Assert.IsNotNull(message);
+			endpoint.Receive(message =>
+				{
+					message.ShouldNotBeNull();
 
-				if (message.GetType() != expectedMessage.GetType())
-					continue;
+					if (message.GetType() != expectedMessage.GetType())
+						return null;
 
-				TMessage pingMessage = (TMessage) message;
+					TMessage tm = (TMessage) message;
 
-				if (expectedMessage.CorrelationId != pingMessage.CorrelationId)
-					continue;
+					if (tm.CorrelationId != expectedMessage.CorrelationId)
+						return null;
 
-				Assert.Fail(string.Format("The message ({0}) was found in the queue", typeof (TMessage).FullName));
-			}
+					Assert.Fail(endpoint.Address + " should not contain a message of type " + typeof (TMessage).Name + " with correlation id " + expectedMessage.CorrelationId);
+
+					return null;
+				});
 		}
 	}
 }

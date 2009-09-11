@@ -69,7 +69,8 @@
     </Compile>
     <Compile Include="NmsEndpoint.cs" />
     <Compile Include="NmsEndpointConfigurator.cs" />
-    <Compile Include="NmsMessageSelector.cs" />
+    <Compile Include="NmsEndpointFactory.cs" />
+    <Compile Include="NmsTransport.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

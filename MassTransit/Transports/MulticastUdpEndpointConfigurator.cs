@@ -12,35 +12,33 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports
 {
-	using System;
-	using System.Linq.Expressions;
-	using Configuration;
-	using Magnum;
-	using Serialization;
-	using Util;
+    using System;
+    using Configuration;
+    using Magnum;
 
-	public class MulticastUdpEndpointConfigurator :
-		EndpointConfiguratorBase
-	{
-		public static IEndpoint New(Action<IEndpointConfigurator> action)
-		{
-			var configurator = new MulticastUdpEndpointConfigurator();
+    public class MulticastUdpEndpointConfigurator :
+        EndpointConfiguratorBase
+    {
+        public static IEndpoint New(Action<IEndpointConfigurator> action)
+        {
+            var configurator = new MulticastUdpEndpointConfigurator();
 
-			action(configurator);
+            action(configurator);
 
-			return configurator.Create();
-		}
+            return configurator.Create();
+        }
 
-		private IEndpoint Create()
-		{
-			Guard.Against.Null(Uri, "No Uri was specified for the endpoint");
-			Guard.Against.Null(SerializerType, "No serializer type was specified for the endpoint");
+        private IEndpoint Create()
+        {
+            Guard.Against.Null(Uri, "No Uri was specified for the endpoint");
+            Guard.Against.Null(SerializerType, "No serializer type was specified for the endpoint");
 
-			IMessageSerializer serializer = GetSerializer();
+            IEndpoint endpoint = MulticastUdpEndpointFactory.New(new CreateEndpointSettings(Uri)
+                {
+                    Serializer = GetSerializer(),
+                });
 
-			IEndpoint endpoint = new MulticastUdpEndpoint(Uri, serializer);
-
-			return endpoint;
-		}
-	}
+            return endpoint;
+        }
+    }
 }

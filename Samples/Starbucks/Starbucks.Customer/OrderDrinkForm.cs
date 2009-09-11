@@ -17,10 +17,11 @@
 		private Guid _transactionId;
 		private UnsubscribeAction _unsubscribeToken;
 
-
 		public OrderDrinkForm()
 		{
 			InitializeComponent();
+
+			IServiceBus bus = Bus;
 		}
 
 		private IServiceBus Bus

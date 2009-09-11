@@ -36,10 +36,9 @@ namespace HeavyLoad.Load
 
             _bus = _container.Resolve<IServiceBus>();
 
-            MsmqEndpoint endpoint = _bus.Endpoint as MsmqEndpoint;
-            if (endpoint != null)
-                MsmqUtilities.ValidateAndPurgeQueue(endpoint.QueuePath);
-        }
+			var management = MsmqEndpointManagement.New(_bus.Endpoint.Address.Uri);
+			management.Purge();
+		}
 
         public void Dispose()
         {

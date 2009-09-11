@@ -12,43 +12,49 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Diagnostics;
-	using Internal;
+    using System;
 
-	/// <summary>
-	/// IEndpoint is implemented by an endpoint. An endpoint is an addressable location on the network.
-	/// </summary>
-	public interface IEndpoint :
-		IDisposable
-	{
-		/// <summary>
-		/// The address of the endpoint, in URI format
-		/// </summary>
-		Uri Uri { get; }
+    /// <summary>
+    /// IEndpoint is implemented by an endpoint. An endpoint is an addressable location on the network.
+    /// </summary>
+    public interface IEndpoint :
+        IDisposable
+    {
+        /// <summary>
+        /// The address of the endpoint
+        /// </summary>
+        IEndpointAddress Address { get; }
 
-		/// <summary>
-		/// Sends a message to the endpoint
-		/// </summary>
-		/// <typeparam name="T">The type of the message to send</typeparam>
-		/// <param name="message">The message to send</param>
-		void Send<T>(T message) where T : class;
+        /// <summary>
+        /// The URI of the endpoint
+        /// </summary>
+        Uri Uri { get; }
 
-		/// <summary>
-		/// Sends a message to the endpoint
-		/// </summary>
-		/// <typeparam name="T">The type of the message to send</typeparam>
-		/// <param name="message">The message to send</param>
-		/// <param name="timeToLive">The maximum time for the message to be received before it expires</param>
-		void Send<T>(T message, TimeSpan timeToLive) where T : class;
+        /// <summary>
+        /// Send to the endpoint
+        /// </summary>
+        /// <typeparam name="T">The type of the message to send</typeparam>
+        /// <param name="message">The message to send</param>
+        void Send<T>(T message)
+            where T : class;
 
-		/// <summary>
-		/// Receives from the endpoint in a selective manner, making it possible to enumerate
-		/// available messages (when supported) and receive them for distribution
-		/// </summary>
-		/// <param name="timeout"></param>
-		/// <returns></returns>
-		IEnumerable<IMessageSelector> SelectiveReceive(TimeSpan timeout);
-	}
+        /// <summary>
+        /// Receive from the endpoint by passing a function that can preview the message and if the caller
+        /// chooses to accept it, return a method that will consume the message.
+        /// 
+        /// Returns immediately if no message is available.
+        /// </summary>
+        /// <param name="receiver">The function to preview/consume the message</param>
+        void Receive(Func<object, Action<object>> receiver);
+
+        /// <summary>
+        /// Receive from the endpoint by passing a function that can preview the message and if the caller
+        /// chooses to accept it, return a method that will consume the message.
+        /// 
+        /// Returns after the specified timeout if no message is available.
+        /// </summary>
+        /// <param name="receiver">The function to preview/consume the message</param>
+        /// <param name="timeout">The time to wait for a message to be available</param>
+        void Receive(Func<object, Action<object>> receiver, TimeSpan timeout);
+    }
 }

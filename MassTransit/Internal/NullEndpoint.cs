@@ -12,38 +12,38 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Internal
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Diagnostics;
-	using Exceptions;
+    using System;
+    using System.Diagnostics;
 
     [DebuggerDisplay("{Uri}")]
-	public class NullEndpoint :
-		IEndpoint
-	{
-		public void Dispose()
-		{
-			//do nothing
-		}
+    public class NullEndpoint :
+        IEndpoint
+    {
+        public void Dispose()
+        {
+            //do nothing
+        }
 
-		public Uri Uri
-		{
-			get { return new Uri("null://middleof/nowhere"); }
-		}
+        public IEndpointAddress Address
+        {
+            get { return EndpointAddress.Null; }
+        }
 
-		public void Send<T>(T message) where T : class
-		{
-			//do nothing
-		}
+        public Uri Uri
+        {
+            get { return new Uri("null://middleof/nowhere"); }
+        }
 
-		public void Send<T>(T message, TimeSpan timeToLive) where T : class
-		{
-			//do nothing
-		}
+        public void Send<T>(T message) where T : class
+        {
+        }
 
-		public IEnumerable<IMessageSelector> SelectiveReceive(TimeSpan timeout)
-		{
-			throw new System.NotImplementedException();
-		}
-	}
+        public void Receive(Func<object, Action<object>> receiver)
+        {
+        }
+
+        public void Receive(Func<object, Action<object>> receiver, TimeSpan timeout)
+        {
+        }
+    }
 }

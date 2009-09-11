@@ -12,9 +12,11 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests
 {
-	using Magnum.DateTimeExtensions;
+    using System;
+    using Magnum.DateTimeExtensions;
 	using Messages;
 	using NUnit.Framework;
+	using Rhino.Mocks;
 	using TextFixtures;
 
 	[TestFixture]
@@ -50,5 +52,28 @@ namespace MassTransit.Tests
 
 			Assert.IsTrue(future.IsAvailable(5.Seconds()));
 		}
+
+	    [Test]
+	    public void Should_do_something_nicely()
+	    {
+	        var ding = new PingMessage();
+
+            var future = new FutureMessage<PingMessage>();
+
+	        var bus = MockRepository.GenerateMock<IServiceBus>();
+	        bus.Stub(x => x.Publish<PingMessage>(null)).Callback<PingMessage>(message =>
+	            {
+                    if(message != ding )
+                        Assert.Fail("Bugger me");
+
+	                future.Set(message);
+
+	                return true;
+	            });
+
+	        bus.Publish(ding);
+
+	        future.IsAvailable(TimeSpan.Zero).ShouldBeTrue();
+	    }
 	}
 }

@@ -12,112 +12,23 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports.Msmq.Tests.TestFixtures
 {
-	using Configuration;
-	using Internal;
-	using MassTransit.Tests.TextFixtures;
-	using Rhino.Mocks;
-	using Services.Subscriptions;
+	using System;
 
 	public class MsmqTransactionalEndpointTestFixture :
-		EndpointTestFixture<MsmqEndpoint>
+		MsmqEndpointTestFixture
 	{
-		private const string _localEndpointUri = "msmq://localhost/mt_client_tx";
-		private const string _localErrorUri = "msmq://localhost/mt_client_error_tx";
-		private const string _remoteEndpointUri = "msmq://localhost/mt_server_tx";
-
-		private MsmqEndpoint _localEndpoint = new MsmqEndpoint(_localEndpointUri);
-		private MsmqEndpoint _localErrorEndpoint = new MsmqEndpoint(_localErrorUri);
-		private MsmqEndpoint _remoteEndpoint = new MsmqEndpoint(_remoteEndpointUri);
-
-		public string LocalEndpointUri
-		{
-			get { return _localEndpointUri; }
-		}
-
-		public string LocalErrorUri
-		{
-			get { return _localErrorUri; }
-		}
-
-		public MsmqEndpoint LocalEndpoint
-		{
-			get { return _localEndpoint; }
-		}
-
-		public MsmqEndpoint LocalErrorEndpoint
-		{
-			get { return _localErrorEndpoint; }
-		}
-
-		public string RemoteEndpointUri
-		{
-			get { return _remoteEndpointUri; }
-		}
-
-		public MsmqEndpoint RemoteEndpoint
-		{
-			get { return _remoteEndpoint; }
-		}
-
-		public ISubscriptionService SubscriptionService { get; private set; }
-		public IServiceBus LocalBus { get; private set; }
-		public IServiceBus RemoteBus { get; private set; }
-
 		protected override void EstablishContext()
 		{
+			MsmqEndpointConfigurator.Defaults(x =>
+				{
+					x.CreateTransactionalQueues = true;
+				});
+
+			LocalEndpointUri = new Uri("msmq://localhost/mt_client_tx");
+			LocalErrorUri = new Uri("msmq://localhost/mt_client_tx_error");
+			RemoteEndpointUri = new Uri("msmq://localhost/mt_server_tx");
+
 			base.EstablishContext();
-
-			SetupSubscriptionService();
-
-			LocalBus = ServiceBusConfigurator.New(x =>
-				{
-					x.AddService<SubscriptionPublisher>();
-					x.AddService<SubscriptionConsumer>();
-					x.ReceiveFrom(LocalEndpointUri);
-					x.SendErrorsTo(LocalErrorUri);
-				});
-
-			RemoteBus = ServiceBusConfigurator.New(x =>
-				{
-					x.AddService<SubscriptionPublisher>();
-					x.AddService<SubscriptionConsumer>();
-					x.ReceiveFrom(RemoteEndpointUri);
-				});
-		}
-
-		private void SetupSubscriptionService()
-		{
-			SubscriptionService = new LocalSubscriptionService();
-			ObjectBuilder.Stub(x => x.GetInstance<IEndpointSubscriptionEvent>())
-				.Return(SubscriptionService);
-
-			ObjectBuilder.Stub(x => x.GetInstance<SubscriptionPublisher>())
-				.Return(null)
-				.WhenCalled(invocation =>
-				{
-					// Return a unique instance of this class
-					invocation.ReturnValue = new SubscriptionPublisher(SubscriptionService);
-				});
-
-			ObjectBuilder.Stub(x => x.GetInstance<SubscriptionConsumer>())
-				.Return(null)
-				.WhenCalled(invocation =>
-				{
-					// Return a unique instance of this class
-					invocation.ReturnValue = new SubscriptionConsumer(SubscriptionService, EndpointFactory);
-				});
-		}
-
-
-		protected override void TeardownContext()
-		{
-			LocalBus.Dispose();
-			LocalBus = null;
-
-			RemoteBus.Dispose();
-			RemoteBus = null;
-
-			base.TeardownContext();
 		}
 	}
 }

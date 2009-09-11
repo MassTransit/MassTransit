@@ -116,7 +116,7 @@ namespace MassTransit.Transports.Msmq.Tests
 
 		}
 
-		[Test]
+		[Test, Explicit]
 		public void Should_start()
 		{
 		}

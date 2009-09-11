@@ -30,7 +30,7 @@ namespace MassTransit.Transports.Nms.Tests.TestFixtures
 
         protected NmsEndpointTestFixture()
         {
-            ActiveMQHostName = "dhcp-10-41-162-190.mckesson.com";
+            ActiveMQHostName = "192.168.0.195";
         }
 
         protected override void EstablishContext()
