@@ -12,53 +12,54 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Internal
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Diagnostics;
-	using log4net;
-
+    using System;
+    using System.Diagnostics;
+    using Exceptions;
+    using log4net;
 
     [DebuggerDisplay("Poison:{Uri}")]
-	public class PoisonEndpointDecorator :
-		IEndpoint
-	{
-		private readonly ILog _log = LogManager.GetLogger(typeof (PoisonEndpointDecorator));
-		private readonly IEndpoint _wrappedEndpoint;
+    public class PoisonEndpointDecorator :
+        IEndpoint
+    {
+        private readonly ILog _log = LogManager.GetLogger(typeof (PoisonEndpointDecorator));
+        private readonly IEndpoint _wrappedEndpoint;
 
-		public PoisonEndpointDecorator(IEndpoint wrappedEndpoint)
-		{
-			_wrappedEndpoint = wrappedEndpoint;
-		}
+        public PoisonEndpointDecorator(IEndpoint wrappedEndpoint)
+        {
+            _wrappedEndpoint = wrappedEndpoint;
+        }
 
-		public void Dispose()
-		{
-			_wrappedEndpoint.Dispose();
-		}
+        public void Dispose()
+        {
+            _wrappedEndpoint.Dispose();
+        }
 
-		public Uri Uri
-		{
-			get { return _wrappedEndpoint.Uri; }
-		}
+        public IEndpointAddress Address
+        {
+            get { return _wrappedEndpoint.Address; }
+        }
 
-		public void Send<T>(T message) where T : class
-		{
-			if (_log.IsWarnEnabled)
-				_log.WarnFormat("Saving Poison Message {0}", message.GetType());
+        public Uri Uri
+        {
+            get { return _wrappedEndpoint.Uri; }
+        }
 
-			_wrappedEndpoint.Send(message);
-		}
+        public void Send<T>(T message) where T : class
+        {
+            if (_log.IsWarnEnabled)
+                _log.WarnFormat("Saving Poison Message {0}", message.GetType());
 
-		public void Send<T>(T message, TimeSpan timeToLive) where T : class
-		{
-			if (_log.IsWarnEnabled)
-				_log.WarnFormat("Saving Poison Message {0}", message.GetType());
+            _wrappedEndpoint.Send(message);
+        }
 
-			_wrappedEndpoint.Send(message, timeToLive);
-		}
+        public void Receive(Func<object, Action<object>> receiver)
+        {
+            throw new EndpointException(_wrappedEndpoint.Uri, "Receive from poison endpoint is not allowed");
+        }
 
-		public IEnumerable<IMessageSelector> SelectiveReceive(TimeSpan timeout)
-		{
-			throw new System.NotImplementedException();
-		}
-	}
+        public void Receive(Func<object, Action<object>> receiver, TimeSpan timeout)
+        {
+            throw new EndpointException(_wrappedEndpoint.Uri, "Receive from poison endpoint is not allowed");
+        }
+    }
 }

@@ -13,10 +13,13 @@ namespace HeavyLoad
 
 		private static void Main(string[] args)
 		{
-            MsmqUtilities.ValidateAndPurgeQueue(".\\private$\\mt_client");
-
 			_log.Info("HeavyLoad - MassTransit Load Generator");
 
+            MsmqEndpointManagement.Manage(new MsmqEndpointAddress(new Uri("msmq://localhost/mt_client")), q =>
+            {
+                q.Create(false);
+                q.Purge();
+            });
 
             Console.WriteLine("HeavyLoad - MassTransit Load Generator");
             Console.WriteLine();

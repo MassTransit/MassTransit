@@ -78,7 +78,6 @@
     <Compile Include="Services\HealthMonitoring\Messages\HealthInformation.cs" />
     <Compile Include="Internal\IdempotentHashtable.cs" />
     <Compile Include="Internal\IdempotentList.cs" />
-    <Compile Include="Internal\IEndpointResolver.cs" />
     <Compile Include="Saga\ISagaRepository.cs" />
     <Compile Include="Internal\NullEndpoint.cs" />
     <Compile Include="Internal\PoisonEndpointDecorator.cs" />
@@ -139,6 +138,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CurrentMessage.cs" />
+    <Compile Include="EndpointAddress.cs" />
+    <Compile Include="Exceptions\AbstractUriException.cs" />
+    <Compile Include="Exceptions\TransportException.cs" />
     <Compile Include="FutureMessage.cs" />
     <Compile Include="Grid\AvailableGridServiceNode.cs" />
     <Compile Include="Grid\GridServiceInterceptor.cs" />
@@ -155,6 +157,10 @@
     <Compile Include="Grid\IGrid.cs" />
     <Compile Include="Grid\IGridControl.cs" />
     <Compile Include="Grid\IGridServiceInterceptor.cs" />
+    <Compile Include="IEndpointAddress.cs" />
+    <Compile Include="Internal\AbstractEndpoint.cs" />
+    <Compile Include="Internal\IEndpointManagement.cs" />
+    <Compile Include="ITransport.cs" />
     <Compile Include="Parallel\ITask.cs" />
     <Compile Include="Grid\Messages\AddGridServiceToNode.cs" />
     <Compile Include="Grid\Messages\GridServiceAdded.cs" />
@@ -292,6 +298,13 @@
     <Compile Include="Services\Timeout\Messages\TimeoutRescheduled.cs" />
     <Compile Include="Services\Timeout\Messages\TimeoutScheduled.cs" />
     <Compile Include="Services\Timeout\Server\TimeoutSaga.cs" />
+    <Compile Include="Transports\CreateEndpointSettings.cs" />
+    <Compile Include="Transports\LoopbackEndpointFactory.cs" />
+    <Compile Include="Transports\LoopbackTransport.cs" />
+    <Compile Include="Transports\MulticastUdpEndpointFactory.cs" />
+    <Compile Include="Transports\MulticastUdpTransport.cs" />
+    <Compile Include="Transports\NullTransport.cs" />
+    <Compile Include="Transports\StreamEndpoint.cs" />
     <Compile Include="Util\BranchEvaluator.cs" />
     <Compile Include="Util\EvaluationCandidateSelector.cs" />
     <Compile Include="Util\ExpressionVisitor.cs" />
@@ -386,9 +399,7 @@
     <Compile Include="Threading\VariableThreadPool.cs" />
     <Compile Include="Transports\EndpointConfiguratorBase.cs" />
     <Compile Include="Transports\LoopbackEndpointConfigurator.cs" />
-    <Compile Include="Transports\LoopbackMessageSelector.cs" />
     <Compile Include="Transports\MulticastUdpEndpointConfigurator.cs" />
-    <Compile Include="Transports\MulticastUdpMessageSelector.cs" />
     <Compile Include="Internal\ISubscriptionEvent.cs" />
     <Compile Include="Pipeline\Sinks\CorrelatedMessageSinkRouter.cs" />
     <Compile Include="Saga\InMemorySagaRepository.cs" />

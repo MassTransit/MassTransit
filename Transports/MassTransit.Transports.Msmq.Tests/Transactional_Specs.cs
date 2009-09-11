@@ -23,14 +23,6 @@ namespace MassTransit.Transports.Msmq.Tests
 	public class Given_a_message_is_received_from_a_transactional_queue :
 		MsmqTransactionalEndpointTestFixture
 	{
-		protected override void EstablishContext()
-		{
-			LocalEndpoint.Purge();
-			LocalErrorEndpoint.Purge();
-			RemoteEndpoint.Purge();
-
-			base.EstablishContext();
-		}
 	}
 
 	[TestFixture]
@@ -56,22 +48,19 @@ namespace MassTransit.Transports.Msmq.Tests
 		[Test]
 		public void The_message_should_exist_in_the_error_queue()
 		{
-			LocalErrorEndpoint.ShouldContain(_ping);
+			LocalErrorEndpoint.ShouldContain(_ping, 5.Seconds());
 		}
 
 		[Test]
 		public void The_message_should_not_exist_in_the_input_queue()
 		{
-			LocalErrorEndpoint.ShouldContain(_ping);
-
 			LocalEndpoint.ShouldNotContain(_ping);
 		}
 
         [Test]
         public void A_fault_should_be_published()
         {
-            _faultFuture.IsAvailable(3.Seconds())
-                .ShouldBeTrue();
+            _faultFuture.IsAvailable(3.Seconds()).ShouldBeTrue();
         }
 	}
 
@@ -98,8 +87,7 @@ namespace MassTransit.Transports.Msmq.Tests
 		[Test]
 		public void The_message_should_not_exist_in_the_error_queue()
 		{
-            _future.IsAvailable(3.Seconds())
-                .ShouldBeTrue();
+            _future.IsAvailable(3.Seconds()).ShouldBeTrue();
 
 			LocalErrorEndpoint.ShouldNotContain(_ping);
 		}
@@ -107,8 +95,7 @@ namespace MassTransit.Transports.Msmq.Tests
 		[Test]
 		public void The_message_should_not_exist_in_the_input_queue()
 		{
-            _future.IsAvailable(3.Seconds())
-                .ShouldBeTrue();
+            _future.IsAvailable(3.Seconds()).ShouldBeTrue();
 
 			LocalEndpoint.ShouldNotContain(_ping);
 		}

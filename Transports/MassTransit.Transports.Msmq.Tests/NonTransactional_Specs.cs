@@ -23,14 +23,6 @@ namespace MassTransit.Transports.Msmq.Tests
 	public class Given_a_message_is_received_from_a_nontransactional_queue :
 		MsmqEndpointTestFixture
 	{
-		protected override void EstablishContext()
-		{
-			base.EstablishContext();
-
-			LocalEndpoint.Purge();
-			LocalErrorEndpoint.Purge();
-			RemoteEndpoint.Purge();
-		}
 	}
 
 	[TestFixture]
@@ -39,31 +31,40 @@ namespace MassTransit.Transports.Msmq.Tests
 	{
 		private PingMessage _ping;
 	    private FutureMessage<Fault<PingMessage, Guid>> _faultFuture;
+		private FutureMessage<PingMessage, Guid> _future;
 
 		protected override void EstablishContext()
 		{
 			base.EstablishContext();
-            _faultFuture = new FutureMessage<Fault<PingMessage, Guid>>();
 
-			LocalBus.Subscribe<PingMessage>(message => { throw new NotSupportedException("I am a naughty consumer! I go boom!"); });
-		    LocalBus.Subscribe<Fault<PingMessage, Guid>>(message => _faultFuture.Set(message));
-			
-            _ping = new PingMessage();
+			_ping = new PingMessage();
+
+			_faultFuture = new FutureMessage<Fault<PingMessage, Guid>>();
+			_future = new FutureMessage<PingMessage, Guid>(_ping.CorrelationId);
+
+			LocalBus.Subscribe<PingMessage>(message =>
+				{
+					_future.Set(message);
+
+					throw new NotSupportedException("I am a naughty consumer! I go boom!");
+				});
+
+			LocalBus.Subscribe<Fault<PingMessage, Guid>>(message => _faultFuture.Set(message));
 
 			LocalBus.Publish(_ping);
+
+			_future.WaitUntilAvailable(1.Seconds());
 		}
 
 		[Test]
 		public void The_message_should_exist_in_the_error_queue()
 		{
-			LocalErrorEndpoint.ShouldContain(_ping);
+			LocalErrorEndpoint.ShouldContain(_ping, 5.Seconds());
 		}
 
 		[Test]
 		public void The_message_should_not_exist_in_the_input_queue()
 		{
-			LocalErrorEndpoint.ShouldContain(_ping);
-
 			LocalEndpoint.ShouldNotContain(_ping);
 		}
 

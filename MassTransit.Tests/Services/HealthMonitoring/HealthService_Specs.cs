@@ -46,9 +46,9 @@ namespace MassTransit.Tests.Services.HealthMonitoring
 			LocalBus.Publish(new EndpointCameOnline(_id, LocalBus.ControlBus.Endpoint.Uri,LocalBus.Endpoint.Uri, 0));
 			var fm = new FutureMessage<TimeoutExpired>();
 			RemoteBus.Subscribe<TimeoutExpired>(fm.Set);
-			Thread.Sleep(500);
+			Thread.Sleep(5000);
 			LocalBus.Publish(new TimeoutExpired {CorrelationId = _id, Tag = 1});
-			fm.IsAvailable(1.Seconds()).ShouldBeTrue();
+			fm.IsAvailable(5.Seconds()).ShouldBeTrue();
 
 			var saga = Repository.Where(x => x.CorrelationId == _id).FirstOrDefault();
 			saga.ShouldNotBeNull();

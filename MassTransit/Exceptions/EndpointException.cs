@@ -1,10 +1,10 @@
 // Copyright 2007-2008 The Apache Software Foundation.
-// 
+//  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
 // License at 
 // 
-//   http://www.apache.org/licenses/LICENSE-2.0 
+//     http://www.apache.org/licenses/LICENSE-2.0 
 // 
 // Unless required by applicable law or agreed to in writing, software distributed 
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
@@ -17,26 +17,30 @@ namespace MassTransit.Exceptions
 
     [Serializable]
     public class EndpointException :
-        Exception
+        AbstractUriException
     {
-        
-
-        public EndpointException(Uri endpointAddress, string message)
-            : base(message)
-        {
-            Endpoint = endpointAddress;
-        }
-
-        public EndpointException(Uri endpointAddress, string message, Exception innerException)
-            : base(message, innerException)
-        {
-            Endpoint = endpointAddress;
-        }
-
-        protected EndpointException(SerializationInfo info, StreamingContext context) : base(info, context)
+        public EndpointException()
         {
         }
 
-        public Uri Endpoint { get; set; }
+        public EndpointException(Uri uri)
+            : base(uri)
+        {
+        }
+
+        public EndpointException(Uri uri, string message)
+            : base(uri, message)
+        {
+        }
+
+        public EndpointException(Uri uri, string message, Exception innerException)
+            : base(uri, message, innerException)
+        {
+        }
+
+        protected EndpointException(SerializationInfo info, StreamingContext context)
+            : base(info, context)
+        {
+        }
     }
 }

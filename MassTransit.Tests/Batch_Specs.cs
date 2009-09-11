@@ -25,7 +25,7 @@ namespace MassTransit.Tests
 	public class When_a_batch_of_messages_is_published :
 		LoopbackLocalAndRemoteTestFixture
 	{
-		private static readonly TimeSpan _timeout = TimeSpan.FromSeconds(6);
+		private static readonly TimeSpan _timeout = TimeSpan.FromSeconds(30);
 		private int _batchSize;
 
 		protected void RunTest()
@@ -71,7 +71,7 @@ namespace MassTransit.Tests
 	public class When_a_batch_of_message_is_published_to_a_container_based_consumer :
 		LoopbackLocalAndRemoteTestFixture
 	{
-		private static readonly TimeSpan _timeout = TimeSpan.FromSeconds(3);
+		private static readonly TimeSpan _timeout = TimeSpan.FromSeconds(30);
 		private int _batchSize;
 
 		protected void RunTest()

@@ -23,47 +23,6 @@ namespace MassTransit.Transports.Msmq.Tests
     using TestFixtures;
 
     [TestFixture]
-    public class As_a_ServiceBus_working_with_an_endpoint :
-        MsmqEndpointTestFixture
-
-    {
-        Uri inputAddress = new Uri("msmq://localhost/mt_client");
-        Uri errorAddress = new Uri("msmq://localhost/mt_client_error");
-
-        [Test]
-        public void When_an_error_is_thrown_on_publish_the_bus_will_not_rollback_any_messages()
-        {
-            //publish ignores transactional semantics
-        }
-
-        [Test]
-        public void When_an_error_is_encountered_while_publishing_only_the_errorendpoint_is_skipped()
-        {
-            
-        }
-
-        [Test]
-        public void When_an_error_is_encountered_on_read_only_the_errorconsumers_get_skipped()
-        {
-            
-        }
-
-        [Test]
-        public void When_a_consumer_errors_the_message_is_put_in_the_error_queue()
-        {
-            LocalBus.Subscribe(delegate(PingMessage msg)
-                              {
-                                  throw new NotSupportedException("POISON");
-                              });
-            new MsmqEndpoint(inputAddress).Send(new PingMessage());
-
-            //new MsmqEndpoint(errorAddress).VerifyMessageInQueue<PingMessage>();
-        }
-
-        
-    }
-    
-    [TestFixture]
     public class When_a_message_is_published_to_a_transactional_queue :
         MsmqTransactionalEndpointTestFixture
     {
@@ -84,10 +43,21 @@ namespace MassTransit.Transports.Msmq.Tests
         [Test]
         public void It_should_leave_the_message_in_the_queue_if_an_exception_is_thrown()
         {
-            RemoteBus.Subscribe<PingMessage>(m => { throw new ApplicationException("Boing!"); });
+			FutureMessage<PingMessage> future = new FutureMessage<PingMessage>();
+
+            RemoteBus.Subscribe<PingMessage>(m =>
+            	{
+            		future.Set(m);
+
+            		throw new ApplicationException("Boing!");
+            	});
 
             var message = new PingMessage();
             LocalBus.Publish(message);
+
+        	future.IsAvailable(_timeout).ShouldBeTrue("Message was not received");
+
+        	RemoteEndpoint.ShouldNotContain(message);
         }
 
         [Test]
@@ -114,7 +84,6 @@ namespace MassTransit.Transports.Msmq.Tests
     [TestFixture]
     public class When_publishing_a_message :
         MsmqEndpointTestFixture
-
     {
 
         [Test]
@@ -252,19 +221,17 @@ namespace MassTransit.Transports.Msmq.Tests
         [Test]
         public void The_exception_should_not_disrupt_the_flow_of_messages()
         {
-            MsmqEndpoint endpoint = new MsmqEndpoint("msmq://localhost/mt_client");
-
             CrashingService service = new CrashingService();
 
             LocalBus.Subscribe(service);
 
-            endpoint.Send(new BogusMessage());
+            LocalEndpoint.Send(new BogusMessage());
 
             CrashingService.Received.WaitOne(5.Seconds(), true).ShouldBeTrue("No message received");
 
             CrashingService.Received.Reset();
 
-            endpoint.Send(new LegitMessage());
+			LocalEndpoint.Send(new LegitMessage());
 
             CrashingService.LegitReceived.WaitOne(5.Seconds(), true).ShouldBeTrue("No message received");
         }

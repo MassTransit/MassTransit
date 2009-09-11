@@ -12,73 +12,43 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports.Msmq
 {
-	using System;
-	using System.Messaging;
-	using Configuration;
-	using Exceptions;
-	using Magnum;
-	using Serialization;
+    using System;
+    using Configuration;
+    using Magnum;
 
-	public class MsmqEndpointConfigurator :
-		EndpointConfiguratorBase
-	{
-		private static MsmqEndpointConfiguratorDefaults _defaults = new MsmqEndpointConfiguratorDefaults();
+    public class MsmqEndpointConfigurator :
+        EndpointConfiguratorBase
+    {
+        private static readonly MsmqEndpointConfiguratorDefaults _defaults = new MsmqEndpointConfiguratorDefaults();
 
-		public static IEndpoint New(Action<IEndpointConfigurator> action)
-		{
-			var configurator = new MsmqEndpointConfigurator();
+        private IEndpoint Create()
+        {
+            Guard.Against.Null(Uri, "No Uri was specified for the endpoint");
+            Guard.Against.Null(SerializerType, "No serializer type was specified for the endpoint");
 
-			action(configurator);
+            IEndpoint endpoint = MsmqEndpointFactory.New(new CreateMsmqEndpointSettings(Uri)
+                {
+                    Serializer = GetSerializer(),
+                    CreateIfMissing = _defaults.CreateMissingQueues,
+                    PurgeExistingMessages = _defaults.PurgeOnStartup,
+                    Transactional = _defaults.CreateTransactionalQueues,
+                });
 
-			return configurator.Create();
-		}
+            return endpoint;
+        }
 
-		public static void Defaults(Action<IMsmqEndpointDefaults> configureDefaults)
-		{
-			configureDefaults(_defaults);
-		}
+        public static IEndpoint New(Action<IEndpointConfigurator> action)
+        {
+            var configurator = new MsmqEndpointConfigurator();
 
-		private IEndpoint Create()
-		{
-			Guard.Against.Null(Uri, "No Uri was specified for the endpoint");
-			Guard.Against.Null(SerializerType, "No serializer type was specified for the endpoint");
+            action(configurator);
 
-			IMessageSerializer serializer = GetSerializer();
+            return configurator.Create();
+        }
 
-			if (_defaults.CreateMissingQueues)
-				CreateQueueIfMissing();
-
-			if (_defaults.PurgeOnStartup)
-				PurgeQueue();
-
-			var endpoint = new MsmqEndpoint(Uri, serializer);
-
-			return endpoint;
-		}
-
-		private void PurgeQueue()
-		{
-			var queueAddress = new QueueAddress(Uri);
-
-			MessageQueue queue = new MessageQueue(queueAddress.FormatName, QueueAccessMode.ReceiveAndAdmin);
-			queue.Purge();
-		}
-
-		private void CreateQueueIfMissing()
-		{
-			var queueAddress = new QueueAddress(Uri);
-
-            if (!queueAddress.IsLocal)
-                return; // we can't create non-local queues anyway
-
-		    var queue = new MessageQueue(queueAddress.FormatName, QueueAccessMode.ReceiveAndAdmin);
-			if (!queue.CanRead)
-			{
-				queue = MessageQueue.Create(queueAddress.LocalName, _defaults.CreateTransactionalQueues);
-			}
-
-			if (!queue.CanRead)
-				throw new EndpointException(Uri, "The endpoint could not be found or created: " + queueAddress.ActualUri);
-		}
-	}
+        public static void Defaults(Action<IMsmqEndpointDefaults> configureDefaults)
+        {
+            configureDefaults(_defaults);
+        }
+    }
 }

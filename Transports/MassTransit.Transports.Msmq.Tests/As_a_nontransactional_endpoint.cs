@@ -12,97 +12,98 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports.Msmq.Tests
 {
-    using System;
-    using System.Transactions;
-    using MassTransit.Tests;
-    using Messages;
-    using NUnit.Framework;
-    using DeleteMessage = MassTransit.Tests.DeleteMessage;
+	using System.Transactions;
+	using Magnum.Actors;
+	using MassTransit.Tests;
+	using NUnit.Framework;
+	using TestFixtures;
 
+	[TestFixture]
+	public class Writing_to_a_non_transactional_endpoint_within_a_transaction :
+		MsmqEndpointOnlyTestFixture
+	{
+		[Test]
+		public void Should_send_the_message_when_a_transaction_is_completed()
+		{
+			using (TransactionScope transaction = new TransactionScope())
+			{
+				Endpoint.Send(new DeleteMessage());
 
-    //as a non-transactional endpoint
-    [TestFixture]
-    public class When_in_a_transaction_non
-    {
-        private MsmqEndpoint _ep;
+				transaction.Complete();
+			}
 
-        [SetUp]
-        public void SetUp()
-        {
-            MsmqUtilities.ValidateAndPurgeQueue(".\\private$\\mt_client", true);
-            _ep = new MsmqEndpoint("msmq://localhost/mt_client");
-        }
+			Endpoint.ShouldContain<DeleteMessage>();
+		}
 
-        [TearDown]
-        public void TearDown()
-        {
-            _ep.Dispose();
-            _ep = null;
-        }
+		[Test]
+		public void Should_send_the_message_when_a_transaction_is_rolled_back()
+		{
+			using (TransactionScope transaction = new TransactionScope())
+			{
+				Endpoint.Send(new DeleteMessage());
 
+				// do not complete the transaction (implicit rollback)
+			}
 
-        [Test]
-        public void While_writing_it_should_perisist_on_complete()
-        {
-            using (TransactionScope trx = new TransactionScope())
-            {
-                _ep.Send(new DeleteMessage());
-                trx.Complete();
-            }
+			Endpoint.ShouldContain<DeleteMessage>();
+		}
+	}
 
-            _ep.VerifyMessageInQueue<DeleteMessage>();
-        }
+	[TestFixture]
+	public class Writing_to_a_non_transactional_endpoint :
+		MsmqEndpointOnlyTestFixture
+	{
+		[Test]
+		public void Should_send_the_message()
+		{
+			Endpoint.Send(new DeleteMessage());
 
-        [Test]
-        public void While_writing_it_should_perisist_even_on_rollback()
-        {
-            using (TransactionScope trx = new TransactionScope())
-            {
-                _ep.Send(new DeleteMessage());
-                //no complete
-            }
+			Endpoint.ShouldContain<DeleteMessage>();
+		}
+	}
 
-            _ep.VerifyMessageInQueue<DeleteMessage>();
-        }
-    }
+	[TestFixture]
+	public class Reading_from_a_non_transactional_endpoint_within_a_transaction :
+		MsmqEndpointOnlyTestFixture
+	{
+		protected override void EstablishContext()
+		{
+			base.EstablishContext();
 
-    [TestFixture]
-    public class When_outside_a_transaction_non
-    {
-        private MsmqEndpoint _ep;
+			Endpoint.Send(new DeleteMessage());
+		}
 
-        [SetUp]
-        public void SetUp()
-        {
-            MsmqUtilities.ValidateAndPurgeQueue(".\\private$\\mt_client", true);
-            _ep = new MsmqEndpoint("msmq://localhost/mt_client");
-        }
+		[Test]
+		public void Should_receive_the_message_when_a_transaction_is_completed()
+		{
+			var future = new Future<DeleteMessage>();
 
-        [TearDown]
-        public void TearDown()
-        {
-            _ep.Dispose();
-            _ep = null;
-        }
+			using (TransactionScope transaction = new TransactionScope())
+			{
+				Endpoint.Receive(message => m => { future.Complete(m as DeleteMessage); });
 
+				transaction.Complete();
+			}
 
-        [Test]
-        public void While_writing_it_should_persist()
-        {
-            _ep.Send(new DeleteMessage());
+			future.IsAvailable().ShouldBeTrue();
+			Endpoint.ShouldNotContain<DeleteMessage>();
+		}
 
-            _ep.VerifyMessageInQueue<DeleteMessage>();
-        }
+		[Test]
+		public void Should_receive_the_message_when_a_transaction_is_rolled_back()
+		{
+			var future = new Future<DeleteMessage>();
 
-//        [Test]
-//        public void While_reading_it_should_pull_object_from_queue()
-//        {
-//            _ep.Purge();
-//            _ep.Send(new VariableMessage("dru"));
-//            object obj = _ep.Receive(TimeSpan.FromSeconds(30));
-//
-//            obj.ShouldNotBeNull();
-//            obj.ShouldBeSameType<VariableMessage>();
-//        }
-    }
+			using (TransactionScope transaction = new TransactionScope())
+			{
+				Endpoint.Receive(message => m => { future.Complete(m as DeleteMessage); });
+
+				// do not complete the transaction (implicit rollback)
+			}
+
+			future.IsAvailable().ShouldBeTrue();
+			Endpoint.ShouldNotContain<DeleteMessage>();
+		}
+	}
+
 }

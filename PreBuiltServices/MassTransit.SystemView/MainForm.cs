@@ -59,25 +59,25 @@ namespace MassTransit.SystemView
 
 		public void Consume(EndpointIsDown message)
 		{
-			Action<EndpointIsDown> method = x => AddOrUpdateHealthItem(x.CorrelationId, x.ControlUri, x.LastHeartbeat, x.State);
+			Action<EndpointIsDown> method = x => AddOrUpdateHealthItem(x.ControlUri, x.LastHeartbeat, x.State);
 			BeginInvoke(method, new object[] { message });
 		}
 
 		public void Consume(EndpointIsHealthy message)
 		{
-			Action<EndpointIsHealthy> method = x => AddOrUpdateHealthItem(x.CorrelationId, x.ControlUri, x.LastHeartbeat, x.State);
+			Action<EndpointIsHealthy> method = x => AddOrUpdateHealthItem(x.ControlUri, x.LastHeartbeat, x.State);
 			BeginInvoke(method, new object[] { message });
 		}
 
 		public void Consume(EndpointIsOffline message)
 		{
-			Action<EndpointIsOffline> method = x => AddOrUpdateHealthItem(x.CorrelationId, x.ControlUri, x.LastHeartbeat, x.State);
+			Action<EndpointIsOffline> method = x => AddOrUpdateHealthItem(x.ControlUri, x.LastHeartbeat, x.State);
 			BeginInvoke(method, new object[] { message });
 		}
 
 		public void Consume(EndpointIsSuspect message)
 		{
-			Action<EndpointIsSuspect> method = x => AddOrUpdateHealthItem(x.CorrelationId, x.ControlUri, x.LastHeartbeat, x.State);
+			Action<EndpointIsSuspect> method = x => AddOrUpdateHealthItem(x.ControlUri, x.LastHeartbeat, x.State);
 			BeginInvoke(method, new object[] { message });
 		}
 
@@ -139,7 +139,7 @@ namespace MassTransit.SystemView
 
 			foreach (HealthInformation entry in informations)
 			{
-				ListViewItem item = AddOrUpdateHealthItem(entry.ClientId, entry.ControlUri, entry.LastHeartbeat, entry.State);
+				ListViewItem item = AddOrUpdateHealthItem(entry.ControlUri, entry.LastHeartbeat, entry.State);
 
 				if (existing.Contains(item))
 					existing.Remove(item);
@@ -151,12 +151,12 @@ namespace MassTransit.SystemView
 			}
 		}
 
-		private ListViewItem AddOrUpdateHealthItem(Guid clientId, Uri controlUri, DateTime lastHeartbeat, string state)
+		private ListViewItem AddOrUpdateHealthItem(Uri controlUri, DateTime lastHeartbeat, string state)
 		{
-			string key = clientId.ToString();
+			string key = controlUri.ToString();
 
 			ListViewItem item;
-			if (timeoutListView.Items.ContainsKey(key))
+			if (healthListView.Items.ContainsKey(key))
 			{
 				item = healthListView.Items[key];
 				item.SubItems[1].Text = lastHeartbeat.ToLocalTime().ToShortTimeString();
@@ -166,8 +166,8 @@ namespace MassTransit.SystemView
 			{
 				item = healthListView.Items.Add(key, controlUri.ToString(), 0);
 
-				item.SubItems.Add(new ListViewItem.ListViewSubItem(item, state));
 				item.SubItems.Add(new ListViewItem.ListViewSubItem(item, lastHeartbeat.ToLocalTime().ToShortTimeString()));
+				item.SubItems.Add(new ListViewItem.ListViewSubItem(item, state));
 			}
 			return item;
 		}

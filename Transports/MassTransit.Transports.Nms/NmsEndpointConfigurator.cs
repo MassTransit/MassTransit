@@ -15,24 +15,10 @@ namespace MassTransit.Transports.Nms
 	using System;
 	using Configuration;
 	using Magnum;
-	using Serialization;
-	using Util;
 
 	public class NmsEndpointConfigurator :
 		EndpointConfiguratorBase
 	{
-		private IEndpoint Create()
-		{
-			Guard.Against.Null(Uri, "No Uri was specified for the endpoint");
-			Guard.Against.Null(SerializerType, "No serializer type was specified for the endpoint");
-
-			IMessageSerializer serializer = GetSerializer();
-
-			IEndpoint endpoint = new NmsEndpoint(Uri, serializer);
-
-			return endpoint;
-		}
-
 		public static IEndpoint New(Action<IEndpointConfigurator> action)
 		{
 			var configurator = new NmsEndpointConfigurator();
@@ -40,6 +26,19 @@ namespace MassTransit.Transports.Nms
 			action(configurator);
 
 			return configurator.Create();
+		}
+
+		private IEndpoint Create()
+		{
+			Guard.Against.Null(Uri, "No Uri was specified for the endpoint");
+			Guard.Against.Null(SerializerType, "No serializer type was specified for the endpoint");
+
+			IEndpoint endpoint = NmsEndpointFactory.New(new CreateEndpointSettings(Uri)
+				{
+					Serializer = GetSerializer(),
+				});
+
+			return endpoint;
 		}
 	}
 }

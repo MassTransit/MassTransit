@@ -79,17 +79,20 @@
     <Compile Include="Messages\DeleteMessage.cs" />
     <Compile Include="Messages\UpdateAcceptedMessage.cs" />
     <Compile Include="Messages\UpdateMessage.cs" />
-    <Compile Include="MsmqEndpoint_Extensions.cs" />
+    <Compile Include="TestFixtures\MsmqEndpointOnlyTestFixture.cs" />
     <Compile Include="NonTransactional_Specs.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Learning\Receive_Specs.cs" />
     <Compile Include="Learning\TransactionalQueue_Specs.cs" />
+    <Compile Include="ReceiveFromEndpoint_Specs.cs" />
     <Compile Include="Receive_Specs.cs" />
+    <Compile Include="RemoteSend_Specs.cs" />
     <Compile Include="Serialization\ContextSerialization_Specs.cs" />
     <Compile Include="TestFixtures\MsmqEndpointTestFixture.cs" />
     <Compile Include="TestFixtures\MsmqTransactionalEndpointTestFixture.cs" />
     <Compile Include="As_a_queue_address.cs" />
     <Compile Include="ThreeNodeMsmqGridTestFixture.cs" />
+    <Compile Include="TestFixtures\TransactionalMsmqEndpointOnlyTestFixture.cs" />
     <Compile Include="Transactional_Specs.cs" />
   </ItemGroup>
   <ItemGroup>

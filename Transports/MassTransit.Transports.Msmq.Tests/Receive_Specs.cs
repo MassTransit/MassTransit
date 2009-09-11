@@ -14,67 +14,53 @@ namespace MassTransit.Transports.Msmq.Tests
 {
 	using System;
 	using System.Messaging;
-	using Exceptions;
-	using Magnum.DateTimeExtensions;
 	using MassTransit.Tests.Messages;
 	using NUnit.Framework;
+	using TestFixtures;
 
 	[TestFixture]
-	public class Receive_Specs
+	public class Receiving_an_object_from_an_endpoint :
+		MsmqEndpointOnlyTestFixture
 	{
-		[SetUp]
-		public void Setup()
-		{
-			_endpoint = new MsmqEndpoint("msmq://localhost/mt_client");
-			_endpoint.Purge();
-		}
-
-		private MsmqEndpoint _endpoint;
-
 		[Test]
 		public void An_undecipherable_blob_should_be_discarded()
 		{
-			using (MessageQueue queue = new MessageQueue(_endpoint.QueuePath, QueueAccessMode.SendAndReceive))
+			using (var queue = new MessageQueue(EndpointAddress.FormatName, QueueAccessMode.Send))
 			{
 				queue.Send("This is just crap, it will cause pain");
 			}
 
 			try
 			{
-				foreach (var selector in _endpoint.SelectiveReceive(1.Seconds()))
-				{
-					object message = selector.DeserializeMessage();
-				}
+				Endpoint.Receive(message =>
+					{
+						Assert.Fail("Receive should have thrown a serialization exception");
 
-				Assert.Fail("Should have thrown a serialization exception");
-			}
-			catch (MessageException mex)
-			{
+						return null;
+					});
 			}
 			catch (Exception ex)
 			{
-				Assert.Fail("Did not expect " + ex.Message);
+				Assert.Fail("Did not expect " + ex.GetType() + " = " + ex.Message);
 			}
 
-			int count = 0;
-			foreach (var selector in _endpoint.SelectiveReceive(1.Seconds()))
-			{
-				count++;
-			}
-
-			Assert.AreEqual(0, count);
+			Assert.AreEqual(0, EndpointAddress.GetMessageCount(), "Endpoint was not empty");
+			Assert.AreEqual(1, ErrorEndpointAddress.GetMessageCount(), "Error endpoint did not contain bogus message");
 		}
 
 		[Test]
 		public void Reading_a_single_message_should_return_one_message_selector()
 		{
-			_endpoint.Send(new PingMessage());
+			Endpoint.Send(new PingMessage());
 
 			int count = 0;
-			foreach (var selector in _endpoint.SelectiveReceive(1.Seconds()))
-			{
-				count++;
-			}
+			Endpoint.Receive(message =>
+				{
+					Assert.IsInstanceOfType(typeof (PingMessage), message);
+					count++;
+
+					return null;
+				});
 
 			Assert.AreEqual(1, count);
 		}
@@ -83,10 +69,12 @@ namespace MassTransit.Transports.Msmq.Tests
 		public void Reading_from_an_empty_queue_should_just_return_an_empty_enumerator()
 		{
 			int count = 0;
-			foreach (var selector in _endpoint.SelectiveReceive(1.Seconds()))
-			{
-				count++;
-			}
+			Endpoint.Receive(message =>
+				{
+					count++;
+
+					return null;
+				});
 
 			Assert.AreEqual(0, count);
 		}
@@ -94,48 +82,50 @@ namespace MassTransit.Transports.Msmq.Tests
 		[Test]
 		public void Reading_without_receiving_should_return_the_same_set_of_messages()
 		{
-			_endpoint.Send(new PingMessage());
+			Endpoint.Send(new PingMessage());
 
 			int count = 0;
-			foreach (var selector in _endpoint.SelectiveReceive(1.Seconds()))
-			{
-				object message = selector.DeserializeMessage();
-				Assert.IsInstanceOfType(typeof (PingMessage), message);
+			Endpoint.Receive(message =>
+				{
+					Assert.IsInstanceOfType(typeof (PingMessage), message);
+					count++;
 
-				count++;
-			}
+					return null;
+				});
 
 			int secondCount = 0;
-			foreach (var selector in _endpoint.SelectiveReceive(1.Seconds()))
-			{
-				object message = selector.DeserializeMessage();
-				Assert.IsInstanceOfType(typeof (PingMessage), message);
+			Endpoint.Receive(message =>
+				{
+					Assert.IsInstanceOfType(typeof (PingMessage), message);
+					secondCount++;
 
-				secondCount++;
-			}
+					return null;
+				});
 
 			Assert.AreEqual(1, count);
 			Assert.AreEqual(1, secondCount);
 		}
-	
+
 		[Test]
 		public void Receiving_the_message_and_accepting_it_should_make_it_go_away()
 		{
-			_endpoint.Send(new PingMessage());
+			Endpoint.Send(new PingMessage());
 
-			foreach (var selector in _endpoint.SelectiveReceive(1.Seconds()))
-			{
-				object message = selector.DeserializeMessage();
-				Assert.IsInstanceOfType(typeof (PingMessage), message);
+			Endpoint.Receive(message =>
+				{
+					Assert.IsInstanceOfType(typeof (PingMessage), message);
 
-				Assert.IsTrue(selector.AcceptMessage());
-			}
+					return m => { };
+				});
 
 			int count = 0;
-			foreach (var selector in _endpoint.SelectiveReceive(1.Seconds()))
-			{
-				count++;
-			}
+			Endpoint.Receive(message =>
+				{
+					Assert.IsInstanceOfType(typeof (PingMessage), message);
+					count++;
+
+					return null;
+				});
 
 			Assert.AreEqual(0, count);
 		}

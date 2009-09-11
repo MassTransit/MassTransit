@@ -12,331 +12,180 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports.Msmq
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Diagnostics;
-    using System.Messaging;
-    using System.Threading;
-    using System.Transactions;
-    using Configuration;
-    using Exceptions;
-    using Internal;
-    using log4net;
-    using Serialization;
+	using System;
+	using System.Diagnostics;
+	using System.Messaging;
+	using System.Runtime.Serialization;
+	using Configuration;
+	using Internal;
+	using log4net;
+	using Serialization;
 
-    /// <summary>
-    /// A MessageQueueEndpoint is an implementation of an endpoint using the Microsoft Message Queue service.
-    /// </summary>
-    [DebuggerDisplay("{Uri}")]
+    [DebuggerDisplay("{Address}")]
     public class MsmqEndpoint :
-        IEndpoint
-    {
-        private static readonly ILog _log = LogManager.GetLogger(typeof (MsmqEndpoint));
-        private readonly QueueAddress _queueAddress;
-        private readonly IMessageSerializer _serializer;
-        private volatile bool _disposed;
-        private MessageQueue _queue;
-        private MessageQueueTransactionType _receiveTransactionType;
+		AbstractEndpoint
+	{
+		private static readonly ILog _log = LogManager.GetLogger(typeof (MsmqEndpoint));
 
-        private MessageQueueTransactionType _sendTransactionType;
+		private bool _disposed;
+		private IMsmqTransport _errorTransport;
+		private IMsmqTransport _transport;
 
-        /// <summary>
-        /// Initializes a <c ref="MessageQueueEndpoint" /> instance with the specified URI string.
-        /// </summary>
-        /// <param name="uriString">The URI for the endpoint</param>
-        public MsmqEndpoint(string uriString)
-            : this(new Uri(uriString), new XmlMessageSerializer())
-        {
-        }
+		public MsmqEndpoint(IMsmqEndpointAddress address, IMessageSerializer serializer, IMsmqTransport transport, IMsmqTransport errorTransport)
+			: base(address, serializer)
+		{
+			_transport = transport;
+			_errorTransport = errorTransport;
 
-        /// <summary>
-        /// Initializes a <c ref="MessageQueueEndpoint" /> instance with the specified URI.
-        /// </summary>
-        /// <param name="uri">The URI for the endpoint</param>
-        public MsmqEndpoint(Uri uri)
-            : this(uri, new XmlMessageSerializer())
-        {
-        }
+			SetDisposedMessage();
+		}
 
-        /// <summary>
-        /// Initializes a <c ref="MessageQueueEndpoint" /> instance with the specified URI.
-        /// </summary>
-        /// <param name="uri">The URI for the endpoint</param>
-        /// <param name="serializer">The serializer to use for the endpoint</param>
-        public MsmqEndpoint(Uri uri, IMessageSerializer serializer)
-        {
-            ReliableMessaging = true;
+		public override void Send<T>(T message)
+		{
+			if (_disposed) throw NewDisposedException();
 
-            _serializer = serializer;
+			_transport.Send(msg =>
+				{
+					SetOutboundMessageHeaders<T>();
 
-            _queueAddress = new QueueAddress(uri);
-
-            _queue = Open(QueueAccessMode.SendAndReceive);
-
-            Initialize();
-        }
-
-        public MessageQueueTransactionType SendTransactionType
-        {
-            get { return _sendTransactionType; }
-        }
-
-        public MessageQueueTransactionType ReceiveTransactionType
-        {
-            get { return _receiveTransactionType; }
-        }
-
-        public bool ReliableMessaging { get; set; }
-
-        /// <summary>
-        /// The path of the message queue for the endpoint. Suitable for use with <c ref="MessageQueue" />.Open
-        /// to access a message queue.
-        /// </summary>
-        public string QueuePath
-        {
-            get { return _queueAddress.FormatName; }
-        }
-
-        /// <summary>
-        /// The address of the endpoint, in URI format
-        /// </summary>
-        public Uri Uri
-        {
-            get { return _queueAddress.ActualUri; }
-        }
-
-        public void Send<T>(T message) where T : class
-        {
-            Send(message, TimeSpan.MaxValue);
-        }
-
-        public void Send<T>(T message, TimeSpan timeToLive) where T : class
-        {
-            if (_disposed) throw new ObjectDisposedException("The object has been disposed");
-
-            if (!_queue.CanWrite)
-                throw new EndpointException(Uri, "Not allowed to write to endpoint " + _queueAddress.ActualUri);
-
-            Type messageType = typeof (T);
-
-            OutboundMessage.Set(headers =>
-                {
-                    headers.SetMessageType(messageType);
-                    headers.SetDestinationAddress(Uri);
+					PopulateTransportMessage(msg, message);
                 });
+		}
 
-            Message msg = BuildMessage(timeToLive, messageType, message);
+		public override void Receive(Func<object, Action<object>> receiver)
+		{
+			if (_disposed) throw NewDisposedException();
 
-            try
-            {
-                if (SpecialLoggers.Messages.IsInfoEnabled)
-                    SpecialLoggers.Messages.InfoFormat("SEND:{0}:{1}", Uri, messageType.Name);
+			_transport.Receive(ReceiveFromTransport(receiver));
+		}
 
-                if (_sendTransactionType == MessageQueueTransactionType.Automatic)
-                {
-                    if (Transaction.Current == null)
-                    {
-                        _queue.Send(msg, MessageQueueTransactionType.Single);
-                    }
-                    else
-                    {
-                        _queue.Send(msg, _sendTransactionType);
-                    }
-                }
-                else
-                {
-                    _queue.Send(msg, _sendTransactionType);
-                }
-            }
-            catch (MessageQueueException ex)
-            {
-                HandleVariousErrorCodes(ex.MessageQueueErrorCode, ex);
-                throw new EndpointException(Uri, "Problem with " + QueuePath, ex);
-            }
+		public override void Receive(Func<object, Action<object>> receiver, TimeSpan timeout)
+		{
+			if (_disposed) throw NewDisposedException();
 
-            if (_log.IsDebugEnabled)
-                _log.DebugFormat("Sent {0} from {1} [{2}]", messageType.FullName, Uri, msg.Id);
-        }
+			_transport.Receive(ReceiveFromTransport(receiver), timeout);
+		}
 
+		protected override void Dispose(bool disposing)
+		{
+			if (_disposed) return;
+			if (disposing)
+			{
+				_transport.Dispose();
+				_transport = null;
 
-        public void Dispose()
-        {
-            if (_queue != null)
-                _queue.Dispose();
+				_errorTransport.Dispose();
+				_errorTransport = null;
 
-            _disposed = true;
-        }
+				base.Dispose(true);
+			}
 
-        public IEnumerable<IMessageSelector> SelectiveReceive(TimeSpan timeout)
-        {
-            if (_disposed) throw new ObjectDisposedException("The object has been disposed");
+			_disposed = true;
+		}
 
-            if (!_queue.CanRead)
-                throw new EndpointException(Uri, string.Format("Not allowed to read from endpoint: '{0}'", _queueAddress.ActualUri));
+		private void PopulateTransportMessage<T>(Message transportMessage, T message)
+		{
+			Serializer.Serialize(transportMessage.BodyStream, message);
 
-            using (MessageEnumerator enumerator = _queue.GetMessageEnumerator2())
-            {
-                _log.DebugFormat("Enumerating endpoint: {0} ({1}ms)", Uri, timeout.ToString());
+			transportMessage.Label = typeof (T).Name;
 
-                while (GetNextMessage(timeout, enumerator))
-                {
-                    _log.DebugFormat("Moved Next on {0}", Uri);
+			transportMessage.Recoverable = true;
+		}
 
-                    using (MsmqMessageSelector selector = new MsmqMessageSelector(this, enumerator, _serializer))
-                    {
-                        yield return selector;
-                    }
-                }
+		private Func<Message, Action<Message>> ReceiveFromTransport(Func<object, Action<object>> receiver)
+		{
+			return message =>
+				{
+					object messageObj;
 
-                enumerator.Close();
-            }
-        }
+					try
+					{
+						messageObj = Serializer.Deserialize(message.BodyStream);
+					}
+					catch (SerializationException sex)
+					{
+                        if (_log.IsErrorEnabled)
+                            _log.Error("Unrecognized message " + Address + ":" + message.Id, sex);
 
-        private bool GetNextMessage(TimeSpan timeout, MessageEnumerator enumerator)
-        {
-            try
-            {
-                return enumerator.MoveNext(timeout);
-            }
-            catch (MessageQueueException ex)
-            {
-                HandleVariousErrorCodes(ex.MessageQueueErrorCode, ex);
-                throw;
-            }
-        }
+                        return MoveMessageToErrorTransport;
+					}
 
-        /// <summary>
-        /// Opens a message queue
-        /// </summary>
-        /// <param name="mode">The access mode for the queue</param>
-        /// <returns>An open <c ref="MessageQueue" /> object</returns>
-        public MessageQueue Open(QueueAccessMode mode)
-        {
-            MessageQueue queue = new MessageQueue(QueuePath, mode);
+					if (messageObj == null)
+						return null;
 
-            MessagePropertyFilter mpf = new MessagePropertyFilter();
-            mpf.SetAll();
+					Action<object> receive;
+					try
+					{
+						receive = receiver(messageObj);
+						if (receive == null)
+						{
+							if (_log.IsDebugEnabled)
+								_log.DebugFormat("SKIP:{0}:{1}", Address, messageObj.GetType().Name);
 
-            queue.MessageReadPropertyFilter = mpf;
+							if (SpecialLoggers.Messages.IsInfoEnabled)
+								SpecialLoggers.Messages.InfoFormat("SKIP:{0}:{1}", Address, messageObj.GetType().Name);
 
-            if (!queue.CanRead)
-                throw new EndpointException(Uri, "Could not read from the queue: '{0}'. Does this queue exist? You may also want to check the permissions for user '{1}'".FormatWith(QueuePath, Environment.UserName));
+							return null;
+						}
+					}
+					catch (Exception ex)
+					{
+						if (_log.IsErrorEnabled)
+							_log.Error("An exception was thrown preparing the message consumers", ex);
 
-            return queue;
-        }
+						MoveMessageToErrorTransport(message);
+						return null;
+					}
 
-        public void DiscardMessage(string messageId)
-        {
-            try
-            {
-                using (Message discarded = _queue.ReceiveById(messageId, MessageQueueTransactionType.Single))
-                {
-                }
+					return m =>
+					    {
+                            if (_log.IsDebugEnabled)
+                                _log.DebugFormat("RECV:{0}:{1}:{2}", Address, m.Id, messageObj.GetType().Name);
 
-                if (_log.IsWarnEnabled)
-                    _log.WarnFormat("Discarding {1} from {0}", _queueAddress.ActualUri, messageId);
-            }
-            catch (Exception ex)
-            {
-                _log.Error("Unable to purge message id " + messageId, ex);
-            }
-        }
+                            if (SpecialLoggers.Messages.IsInfoEnabled)
+                                SpecialLoggers.Messages.InfoFormat("RECV:{0}:{1}:{2}", Address, m.Id, messageObj.GetType().Name);
 
-        private void Initialize()
-        {
-            _sendTransactionType = _queueAddress.IsLocal && _queue.Transactional ? MessageQueueTransactionType.Automatic : MessageQueueTransactionType.None;
+					        try
+					        {
+					            receive(messageObj);
+					        }
+					        catch (Exception ex)
+					        {
+                                if(_log.IsErrorEnabled)
+									_log.Error("An exception was thrown by a message consumer", ex);
 
-            _receiveTransactionType = _queueAddress.IsLocal && _queue.Transactional ? MessageQueueTransactionType.Automatic : MessageQueueTransactionType.None;
-        }
+                                MoveMessageToErrorTransport(m);
+					        }
+					    };
+				};
+		}
 
-        private Message BuildMessage<T>(TimeSpan timeToLive, Type messageType, T message)
-        {
-            var msg = new Message();
+	    private void MoveMessageToErrorTransport(Message message)
+	    {
+	        _errorTransport.Send(outbound => outbound.BodyStream = message.BodyStream);
 
-            _serializer.Serialize(msg.BodyStream, message);
+	        if (_log.IsDebugEnabled)
+	            _log.DebugFormat("MOVE:{0}:{1}:{2}", Address, _errorTransport.Address, message.Id);
 
-            if (timeToLive < TimeSpan.MaxValue)
-                msg.TimeToBeReceived = timeToLive;
+	        if (SpecialLoggers.Messages.IsInfoEnabled)
+	            SpecialLoggers.Messages.InfoFormat("MOVE:{0}:{1}:{2}", Address, _errorTransport.Address, message.Id);
+	    }
 
-            msg.Label = messageType.Name;
+	    public static IEndpoint ConfigureEndpoint(Uri uri, Action<IEndpointConfigurator> configurator)
+		{
+			if (uri.Scheme.ToLowerInvariant() == "msmq")
+			{
+				IEndpoint endpoint = MsmqEndpointConfigurator.New(x =>
+					{
+						x.SetUri(uri);
 
-            msg.Recoverable = ReliableMessaging;
+						configurator(x);
+					});
 
-            return msg;
-        }
+				return endpoint;
+			}
 
-
-        private void HandleVariousErrorCodes(MessageQueueErrorCode code, Exception ex)
-        {
-            switch (code)
-            {
-                case MessageQueueErrorCode.IOTimeout:
-                    // this is OK its just a normal timeout
-                    break;
-
-                case MessageQueueErrorCode.AccessDenied:
-                case MessageQueueErrorCode.QueueNotAvailable:
-                case MessageQueueErrorCode.ServiceNotAvailable:
-                case MessageQueueErrorCode.QueueDeleted:
-                    if (_log.IsErrorEnabled)
-                        _log.Error("There was a problem accessing the queue", ex);
-
-
-                    // reopen the queue in case for some reason it disappeared
-                    _queue = Open(QueueAccessMode.SendAndReceive);
-
-                    // we don't want to spin the CPU completely
-                    Thread.Sleep(2000);
-                    break;
-
-                case MessageQueueErrorCode.QueueNotFound:
-                case MessageQueueErrorCode.IllegalFormatName:
-                case MessageQueueErrorCode.MachineNotFound:
-                    if (_log.IsErrorEnabled)
-                        _log.Error("The message queue does not exist", ex);
-
-                    // we don't want to spin the CPU completely
-                    Thread.Sleep(2000);
-                    break;
-
-                case MessageQueueErrorCode.MessageAlreadyReceived:
-                    // we are competing with another consumer, no reason to report an error since
-                    // the message has already been handled.
-                    if (_log.IsDebugEnabled)
-                        _log.DebugFormat("Message received by another receiver before it could be retrieved");
-                    break;
-
-                case MessageQueueErrorCode.InvalidHandle:
-                case MessageQueueErrorCode.StaleHandle:
-                    // reopen the queue in case for some reason it is lost (maybe msmq was restarted)
-                    _queue = Open(QueueAccessMode.SendAndReceive);
-
-                    // we don't want to spin the CPU completely
-                    Thread.Sleep(1000);
-                    break;
-
-                default:
-                    if (_log.IsErrorEnabled)
-                        _log.Error("An error occured while communicating with the queue", ex);
-                    break;
-            }
-        }
-
-        public static IEndpoint ConfigureEndpoint(Uri uri, Action<IEndpointConfigurator> configurator)
-        {
-            if (uri.Scheme.ToLowerInvariant() == "msmq")
-            {
-                IEndpoint endpoint = MsmqEndpointConfigurator.New(x =>
-                    {
-                        x.SetUri(uri);
-
-                        configurator(x);
-                    });
-
-                return endpoint;
-            }
-
-            return null;
-        }
-    }
+			return null;
+		}
+	}
 }
