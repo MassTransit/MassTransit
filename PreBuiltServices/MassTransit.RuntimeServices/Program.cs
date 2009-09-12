@@ -56,10 +56,10 @@ namespace MassTransit.RuntimeServices
 							ConfigureService<SubscriptionService, SubscriptionServiceRegistry>(service, start => start.Start(), stop => stop.Stop());
 						});
 
-//					config.ConfigureService<HealthService>(typeof(HealthService).Name, service =>
-//					{
-//						ConfigureService<HealthService, HealthServiceRegistry>(service, start => start.Start(), stop => stop.Stop());
-//					});
+					config.ConfigureService<HealthService>(typeof(HealthService).Name, service =>
+					{
+						ConfigureService<HealthService, HealthServiceRegistry>(service, start => start.Start(), stop => stop.Stop());
+					});
 
 					config.ConfigureService<TimeoutService>(typeof(TimeoutService).Name, service =>
 						{
