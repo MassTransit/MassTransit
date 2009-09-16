@@ -12,17 +12,31 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Serialization.Custom
 {
-	using System.IO;
+	using System;
+	using System.Collections.Generic;
+	using System.Reflection;
 
-	public interface IXmlSerializer
+	public static class ExtensionsForType
 	{
-		void Serialize<T>(Stream stream, T message) where T : class;
-		void Serialize<T>(Stream stream, T message, SerializerTypeMapper typeMapper) where T : class;
-	    void Serialize<T>(TextWriter textWriter, T message) where T : class;
-        byte[] Serialize<T>(T message) where T : class;
+		public static IEnumerable<PropertyInfo> GetAllProperties(this Type type)
+		{
+			const BindingFlags bindingFlags = BindingFlags.Public | BindingFlags.Instance;
 
-        object Deserialize(Stream input);
-	    object Deserialize(TextReader textReader);
-		object Deserialize(byte[] data);
+			foreach (PropertyInfo propertyInfo in type.GetProperties(bindingFlags))
+			{
+				yield return propertyInfo;
+			}
+
+			if (type.IsInterface)
+			{
+				foreach (Type interfaceType in type.GetInterfaces())
+				{
+					foreach (PropertyInfo propertyInfo in interfaceType.GetAllProperties())
+					{
+						yield return propertyInfo;
+					}
+				}
+			}
+		}
 	}
 }

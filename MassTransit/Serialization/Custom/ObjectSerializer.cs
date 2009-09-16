@@ -21,12 +21,12 @@ namespace MassTransit.Serialization.Custom
 		IObjectSerializer
 	{
 		private readonly string _ns;
-		private readonly IObjectPropertyCache<T> _propertyCache;
+		private readonly IEnumerable<SerializeObjectProperty<T>> _propertyCache;
 		private readonly Type _type;
 
 		public ObjectSerializer()
 		{
-			_propertyCache = new ObjectPropertyCache<T>();
+			_propertyCache = new SerializeObjectPropertyCache<T>();
 
 			_type = typeof (T);
 			_ns = _type.AssemblyQualifiedName;//.ToMessageName();
@@ -49,13 +49,14 @@ namespace MassTransit.Serialization.Custom
 						context.WriteNamespaceInformationToXml(writer);
 				});
 
-			foreach (ObjectProperty<T> property in _propertyCache)
+			foreach (SerializeObjectProperty<T> property in _propertyCache)
 			{
 				object obj = property.GetValue((T) value);
 				if (obj == null)
 					continue;
 
-				IEnumerable<K<Action<XmlWriter>>> enumerable = context.SerializeObject(property.Name, obj.GetType(), obj);
+				var serializeType = context.MapType(typeof (T), property.PropertyType, obj);
+				IEnumerable<K<Action<XmlWriter>>> enumerable = context.SerializeObject(property.Name, serializeType, obj);
 				foreach (K<Action<XmlWriter>> action in enumerable)
 				{
 					yield return action;

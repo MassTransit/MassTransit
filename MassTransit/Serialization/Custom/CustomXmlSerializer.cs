@@ -12,7 +12,8 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Serialization.Custom
 {
-    using System.IO;
+	using System;
+	using System.IO;
     using System.Linq;
     using System.Runtime.Serialization;
     using System.Text;
@@ -48,16 +49,27 @@ namespace MassTransit.Serialization.Custom
             using (var streamWriter = new StreamWriter(outputStream))
             using (XmlWriter writer = XmlWriter.Create(streamWriter, _writerSettings))
             {
-                SerializeMessage(message, writer);
+            	SerializeMessage(message, writer, new SerializerContext());
             }
         }
 
-        public void Serialize<T>(TextWriter stream, T message)
+    	public void Serialize<T>(Stream stream, T message, SerializerTypeMapper typeMapper)
+			where T : class
+    	{
+			using (var outputStream = new NonClosingStream(stream))
+			using (var streamWriter = new StreamWriter(outputStream))
+			using (XmlWriter writer = XmlWriter.Create(streamWriter, _writerSettings))
+			{
+				SerializeMessage(message, writer, new SerializerContext(typeMapper));
+			}
+		}
+
+    	public void Serialize<T>(TextWriter stream, T message)
             where T : class
         {
             using (XmlWriter writer = XmlWriter.Create(stream, _writerSettings))
             {
-                SerializeMessage(message, writer);
+            	SerializeMessage(message, writer, new SerializerContext());
             }
         }
 
@@ -98,12 +110,10 @@ namespace MassTransit.Serialization.Custom
             }
         }
 
-        private static void SerializeMessage<T>(T message, XmlWriter writer)
+        private static void SerializeMessage<T>(T message, XmlWriter writer, SerializerContext context)
             where T : class
         {
-            var context = new SerializerContext();
-
-            foreach (var writerAction in context.Serialize(message).ToArray())
+        	foreach (var writerAction in context.Serialize(message).ToArray())
             {
                 writerAction(x => x(writer));
             }

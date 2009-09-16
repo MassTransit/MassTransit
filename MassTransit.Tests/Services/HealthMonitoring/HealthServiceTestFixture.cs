@@ -112,9 +112,9 @@ namespace MassTransit.Tests.Services.HealthMonitoring
 		private void SetupHealthService()
 		{
 			_healthSagaRepository = SetupSagaRepository<HealthSaga>(ObjectBuilder);
-			SetupInitiateSagaStateMachineSink<HealthSaga, EndpointCameOnline>(RemoteBus, _healthSagaRepository, ObjectBuilder);
+			SetupObservesSagaStateMachineSink<HealthSaga, EndpointCameOnline>(RemoteBus, _healthSagaRepository, ObjectBuilder);
             SetupObservesSagaStateMachineSink<HealthSaga, EndpointWentOffline>(RemoteBus, _healthSagaRepository, ObjectBuilder);
-            SetupObservesSagaStateMachineSink<HealthSaga, TimeoutExpired>(RemoteBus, _healthSagaRepository, ObjectBuilder);
+			SetupOrchestrateSagaStateMachineSink<HealthSaga, TimeoutExpired>(RemoteBus, _healthSagaRepository, ObjectBuilder);
             SetupObservesSagaStateMachineSink<HealthSaga, PingEndpointResponse>(RemoteBus, _healthSagaRepository, ObjectBuilder);
 			SetupObservesSagaStateMachineSink<HealthSaga, Heartbeat>(RemoteBus, _healthSagaRepository, ObjectBuilder);
 

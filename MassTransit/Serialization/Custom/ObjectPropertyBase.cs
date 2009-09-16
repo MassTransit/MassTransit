@@ -12,11 +12,26 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Serialization.Custom
 {
-	using System.Collections.Generic;
+	using System;
+	using System.Reflection;
 
-	public interface IObjectPropertyCache<T> :
-		IEnumerable<ObjectProperty<T>>
+	public class ObjectPropertyBase
 	{
-		bool TryGetProperty(string name, out ObjectProperty<T> property);
+		private readonly PropertyInfo _info;
+
+		protected ObjectPropertyBase(PropertyInfo info)
+		{
+			_info = info;
+		}
+
+		public string Name
+		{
+			get { return _info.Name; }
+		}
+
+		public Type PropertyType
+		{
+			get { return _info.PropertyType; }
+		}
 	}
 }

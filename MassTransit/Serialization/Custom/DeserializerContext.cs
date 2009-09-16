@@ -139,7 +139,7 @@ namespace MassTransit.Serialization.Custom
 			return _reader.ReadElementContentAsString();
 		}
 
-		private IObjectDeserializer CreateDeserializerFor(string ns)
+		private static IObjectDeserializer CreateDeserializerFor(string ns)
 		{
 			Type type = Type.GetType(ns, false);
 			if (type == null)
@@ -148,7 +148,7 @@ namespace MassTransit.Serialization.Custom
 			return CreateDeserializerFor(type);
 		}
 
-		private IObjectDeserializer CreateDeserializerFor(Type type)
+		private static IObjectDeserializer CreateDeserializerFor(Type type)
 		{
 			if (type.IsEnum)
 			{
@@ -179,7 +179,16 @@ namespace MassTransit.Serialization.Custom
 				throw new NotSupportedException("Unsupported enumeration type: " + type.FullName);
 			}
 
-			Type deserializerType = typeof (ObjectDeserializer<>).MakeGenericType(type);
+			Type deserializerType;
+			if(type.IsInterface)
+			{
+				var proxyType = InterfaceImplementationBuilder.GetProxyFor(type);
+				deserializerType = typeof (ObjectDeserializer<>).MakeGenericType(proxyType);
+			}
+			else
+			{
+				deserializerType = typeof(ObjectDeserializer<>).MakeGenericType(type);
+			}
 
 			return (IObjectDeserializer) ClassFactory.New(deserializerType);
 		}

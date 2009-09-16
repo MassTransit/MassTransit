@@ -13,36 +13,32 @@
 namespace MassTransit.Serialization.Custom
 {
 	using System;
+	using System.Linq.Expressions;
 	using System.Reflection;
-	using Magnum.Reflection;
 
-	public class ObjectProperty<T>
+	public class SerializeObjectProperty<T> :
+		ObjectPropertyBase
 	{
-		private FastProperty<T> _fastProperty;
+		private readonly Func<T, object> _get;
 
-		public ObjectProperty(PropertyInfo info)
+		public SerializeObjectProperty(PropertyInfo info)
+			: base(info)
 		{
-			_fastProperty = new FastProperty<T>(info, BindingFlags.NonPublic);
-		}
-
-		public string Name
-		{
-			get { return _fastProperty.Property.Name; }
-		}
-
-		public Type PropertyType
-		{
-			get { return _fastProperty.Property.PropertyType; }
+			_get = InitializeGetMethod(info);
 		}
 
 		public object GetValue(T instance)
 		{
-			return _fastProperty.Get(instance);
+			return _get(instance);
 		}
 
-		public void SetValue(T instance, object value)
+		private static Func<T, object> InitializeGetMethod(PropertyInfo info)
 		{
-			_fastProperty.Set(instance, value);
+			var instance = Expression.Parameter(typeof (T), "instance");
+
+			var call = Expression.Call(instance, info.GetGetMethod());
+			var typeAs = Expression.TypeAs(call, typeof (object));
+			return Expression.Lambda<Func<T, object>>(typeAs, instance).Compile();
 		}
 	}
 }

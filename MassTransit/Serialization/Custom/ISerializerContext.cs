@@ -32,6 +32,15 @@ namespace MassTransit.Serialization.Custom
 		string GetPrefix(string localName, string ns);
 
 		/// <summary>
+		/// Returns the type for a property if the property type is to be overridden by the serializer
+		/// </summary>
+		/// <param name="declaringType">The type containing the property</param>
+		/// <param name="propertyType">The type of the property</param>
+		/// <param name="value">The value to use to obtain the type, if necessary</param>
+		/// <returns>The property type, or the overriding type</returns>
+		Type MapType(Type declaringType, Type propertyType, object value);
+
+		/// <summary>
 		/// Writes any namespace information that was collected to the document element attribute
 		/// </summary>
 		/// <param name="writer">The XmlWriter to use for writing the attributes</param>

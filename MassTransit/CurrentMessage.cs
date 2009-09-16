@@ -14,6 +14,7 @@ namespace MassTransit
 {
 	using System;
 	using Internal;
+	using Magnum.Reflection;
 
 	public static class CurrentMessage
 	{
@@ -47,7 +48,8 @@ namespace MassTransit
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <param name="message">The message to send/publish</param>
-		public static void GenerateFault<T>(T message) where T : class
+		public static void GenerateFault<T>(T message) 
+			where T : class
 		{
 			var headers = Headers;
 
@@ -68,7 +70,8 @@ namespace MassTransit
 		/// <typeparam name="T"></typeparam>
 		/// <param name="message">The message to send/publish</param>
 		/// <param name="contextAction">The action to setup the context on the outbound message</param>
-		public static void Respond<T>(T message, Action<IOutboundMessage> contextAction) where T : class
+		public static void Respond<T>(T message, Action<IOutboundMessage> contextAction)
+			where T : class
 		{
 			var context = InboundMessageHeaders.Current;
 
@@ -91,19 +94,11 @@ namespace MassTransit
 		/// </summary>
 		public static void RetryLater()
 		{
-			var context = InboundMessageHeaders.Current;
+			IInboundMessageHeaders context = InboundMessageHeaders.Current;
+			if (context == null)
+				throw new InvalidOperationException("No current message context was found");
 
-			if (context.Message == null)
-				throw new InvalidOperationException("RetryLater can only be called when a message is being consumed");
-
-			context.Bus.Endpoint.Send(context.Message, x =>
-				{
-					x.SetSourceAddress(context.SourceAddress);
-					x.SetDestinationAddress(context.DestinationAddress);
-					x.SendResponseTo(context.ResponseAddress);
-					x.SendFaultTo(context.FaultAddress);
-					x.SetRetryCount(context.RetryCount + 1);
-				});
+			context.RetryLater();
 		}
 
 		private static IEndpoint GetFaultEndpoint(this IInboundMessageHeaders headers)

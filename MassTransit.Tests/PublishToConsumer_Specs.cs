@@ -87,6 +87,8 @@ namespace MassTransit.Tests
 			consumer.ShouldHaveReceivedMessage(message, _timeout);
 		}
 
+
+
 		[Test]
 		public void It_should_be_received_by_one_subscribed_message_handler()
 		{

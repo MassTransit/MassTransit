@@ -107,6 +107,7 @@
     <Compile Include="Grid\IntegerFactorizer_Specs.cs" />
     <Compile Include="Grid\Messages\LongNumberFactored.cs" />
     <Compile Include="Groups\Group_Specs.cs" />
+    <Compile Include="InterfaceSubscription_Specs.cs" />
     <Compile Include="Load\RequestResponse_LoadTest.cs" />
     <Compile Include="MessageContext_Specs.cs" />
     <Compile Include="MessageInterceptor_Specs.cs" />
@@ -144,6 +145,7 @@
     <Compile Include="MessageGroup_Specs.cs" />
     <Compile Include="Messages\RequestMessage.cs" />
     <Compile Include="Messages\SerializationTestMessage.cs" />
+    <Compile Include="Serialization\Interface_Specs.cs" />
     <Compile Include="Serialization\MoreSerialization_Specs.cs" />
     <Compile Include="Serialization\Performance_Specs.cs" />
     <Compile Include="Serialization\PreSharedKeyEncryptedSerialization_Specs.cs" />
@@ -153,6 +155,7 @@
     <Compile Include="Services\Routing\RoutingConfiguration_Specs.cs" />
     <Compile Include="Services\Subscriptions\SubscriptionConsumer_Specs.cs" />
     <Compile Include="Subscriptions\SubscriptionService_Specs.cs" />
+    <Compile Include="TestExtensions.cs" />
     <Compile Include="TextFixtures\SubscriptionServiceTestFixture.cs" />
     <Compile Include="Transports\Multicast_Specs.cs" />
     <Compile Include="Pipeline\BatchConsumer_Specs.cs" />
