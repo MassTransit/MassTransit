@@ -12,7 +12,6 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Serialization.Custom
 {
-	using System.Runtime.Serialization;
 	using System.Xml;
 	using log4net;
 	using Magnum.Reflection;
@@ -22,18 +21,18 @@ namespace MassTransit.Serialization.Custom
 	{
 		private static readonly ILog _log = LogManager.GetLogger(typeof (ObjectDeserializer<T>));
 
-		private IObjectPropertyCache<T> _propertyCache;
+		private readonly IDeserializeObjectPropertyCache<T> _propertyCache;
 
 		public ObjectDeserializer()
 		{
-			_propertyCache = new ObjectPropertyCache<T>();
+			_propertyCache = new DeserializeObjectPropertyCache<T>();
 		}
 
 		public object Deserialize(IDeserializerContext context)
 		{
 			T instance = (T) ClassFactory.New(typeof (T));
 
-			if(context.IsEmptyElement)
+			if (context.IsEmptyElement)
 			{
 				context.Read();
 				return instance;
@@ -61,15 +60,22 @@ namespace MassTransit.Serialization.Custom
 
 		private void ReadProperty(IDeserializerContext context, T instance)
 		{
-			ObjectProperty<T> property;
-			if (!_propertyCache.TryGetProperty(context.LocalName, out property))
+			DeserializeObjectProperty<T> property;
+			if (_propertyCache.TryGetProperty(context.LocalName, out property))
 			{
-				throw new SerializationException("No property " + context.LocalName + " in class " + typeof(T).ToFriendlyName() + " for deserialization");
+				object value = context.Deserialize(context.Namespace);
+
+				property.SetValue(instance, value);
 			}
+			else
+			{
+				if (_log.IsDebugEnabled)
+				{
+					_log.Debug("No property " + context.LocalName + " in class " + typeof (T).ToFriendlyName() + " for deserialization");
+				}
 
-			object value = context.Deserialize(context.Namespace);
-
-			property.SetValue(instance, value);
+				object discardValue = context.Deserialize(context.Namespace);
+			}
 		}
 	}
 }

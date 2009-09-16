@@ -18,5 +18,7 @@ namespace MassTransit.Internal
 		IObjectBuilder ObjectBuilder { get; }
 		IServiceBus Bus { get; }
 		object Message { get; }
+
+		void RetryLater();
 	}
 }

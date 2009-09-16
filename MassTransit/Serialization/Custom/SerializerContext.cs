@@ -31,15 +31,24 @@ namespace MassTransit.Serialization.Custom
 
 		private static readonly Dictionary<Type, IObjectSerializer> _serializers;
 
-		private static Dictionary<Type, IObjectFieldCache> _fieldCaches;
 		private readonly NamespaceTable _namespaceTable = new NamespaceTable();
+		private readonly SerializerTypeMapper _mapper;
 
 		static SerializerContext()
 		{
-			_fieldCaches = new Dictionary<Type, IObjectFieldCache>();
 			_serializers = new Dictionary<Type, IObjectSerializer>();
 
 			LoadBuiltInSerializers();
+		}
+
+		public SerializerContext()
+		{
+			_mapper = (d, p, o) => p == typeof (object) ? o.GetType() : p;
+		}
+
+		public SerializerContext(SerializerTypeMapper mapper)
+		{
+			_mapper = mapper;
 		}
 
 		public string GetPrefix(string localName, string ns)
@@ -47,11 +56,15 @@ namespace MassTransit.Serialization.Custom
 			return _namespaceTable.GetPrefix(localName, ns);
 		}
 
+		public Type MapType(Type declaringType, Type propertyType, object value)
+		{
+			return _mapper(declaringType, propertyType, value);
+		}
+
 		public void WriteNamespaceInformationToXml(XmlWriter writer)
 		{
 			_namespaceTable.Each((ns, prefix) => writer.WriteAttributeString("xmlns", prefix, null, ns));
 		}
-
 
 		public IEnumerable<K<Action<XmlWriter>>> SerializeObject(string localName, Type type, object value)
 		{
@@ -78,7 +91,7 @@ namespace MassTransit.Serialization.Custom
 			}
 		}
 
-		private IObjectSerializer GetSerializerFor(Type type)
+		private static IObjectSerializer GetSerializerFor(Type type)
 		{
 			IObjectSerializer serializer;
 			lock(_serializers)
@@ -89,7 +102,7 @@ namespace MassTransit.Serialization.Custom
 			return serializer;
 		}
 
-		private IObjectSerializer CreateSerializerFor(Type type)
+		private static IObjectSerializer CreateSerializerFor(Type type)
 		{
 			if (type.IsEnum)
 			{
@@ -108,7 +121,7 @@ namespace MassTransit.Serialization.Custom
 			return serializer;
 		}
 
-		private IObjectSerializer CreateEnumerableSerializerFor(Type type)
+		private static IObjectSerializer CreateEnumerableSerializerFor(Type type)
 		{
 			if(type.IsArray)
 			{

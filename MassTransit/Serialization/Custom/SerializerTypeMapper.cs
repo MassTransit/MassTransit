@@ -12,17 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Serialization.Custom
 {
-	using System.IO;
+	using System;
 
-	public interface IXmlSerializer
-	{
-		void Serialize<T>(Stream stream, T message) where T : class;
-		void Serialize<T>(Stream stream, T message, SerializerTypeMapper typeMapper) where T : class;
-	    void Serialize<T>(TextWriter textWriter, T message) where T : class;
-        byte[] Serialize<T>(T message) where T : class;
-
-        object Deserialize(Stream input);
-	    object Deserialize(TextReader textReader);
-		object Deserialize(byte[] data);
-	}
+	public delegate Type SerializerTypeMapper(Type declaringType, Type propertyType, object value);
 }

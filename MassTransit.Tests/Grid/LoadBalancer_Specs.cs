@@ -55,7 +55,7 @@ namespace MassTransit.Tests.Grid
 		}
 
 
-		[Test]
+		[Test, Explicit]
 		public void Should_promote_the_least_busy_node_to_the_preferred_node()
 		{
 			WaitForServiceToBeAvailable<SimpleGridCommand>(5.Seconds(), 1);

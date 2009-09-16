@@ -14,6 +14,7 @@ namespace MassTransit.Internal
 {
 	using System;
 	using Magnum;
+	using Magnum.Reflection;
 
 	public class InboundMessageHeaders :
 		MessageHeadersBase,
@@ -28,6 +29,28 @@ namespace MassTransit.Internal
 		public IObjectBuilder ObjectBuilder { get; private set; }
 
 		public object Message { get; private set; }
+
+		public void RetryLater()
+		{
+			if (Message == null)
+				throw new InvalidOperationException("RetryLater can only be called when a message is being consumed");
+
+			this.Call("RetryLater", new[] {Message});
+		}
+
+		private void RetryLater<T>(T message)
+			where T : class
+		{
+			Bus.Endpoint.Send(message, x =>
+				{
+					x.SetSourceAddress(SourceAddress);
+					x.SetDestinationAddress(DestinationAddress);
+					x.SendResponseTo(ResponseAddress);
+					x.SendFaultTo(FaultAddress);
+					x.SetRetryCount(RetryCount + 1);
+				});
+		}
+
 
 		public IServiceBus Bus { get; private set; }
 
