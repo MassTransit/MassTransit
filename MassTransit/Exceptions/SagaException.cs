@@ -38,6 +38,13 @@ namespace MassTransit.Exceptions
 			_messageType = messageType;
 		}
 
+		public SagaException(string message, Type sagaType, Type messageType, Expression findExpression, Exception innerException)
+			: base(string.Format("{0} {1}({2}) - {3}", sagaType.FullName, message, messageType.FullName, findExpression), innerException)
+		{
+			_sagaType = sagaType;
+			_messageType = messageType;
+		}
+
 		public SagaException(string message, Type sagaType, Type messageType, Guid correlationId, Exception innerException)
 			: base(FormatMessage(sagaType, correlationId, messageType, message), innerException)
 		{

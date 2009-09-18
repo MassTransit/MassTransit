@@ -24,9 +24,9 @@ namespace MassTransit.Saga
 		IDisposable
         where T : ISaga
     {
-		IEnumerable<Action<V>> Create<V>(Guid sagaId, Action<T,V> action);
-		IEnumerable<Action<V>> Find<V>(Expression<Func<T, bool>> expression, Action<T,V> action);
-		IEnumerable<Action> Find(Expression<Func<T, bool>> expression, Action<T> action);
+		void Send<TMessage>(Expression<Func<T, bool>> filter, ISagaPolicy<T, TMessage> policy, TMessage message, Action<T> consumerAction)
+			where TMessage : class;
+
 		IEnumerable<T> Where(Expression<Func<T, bool>> filter);
     }
 }

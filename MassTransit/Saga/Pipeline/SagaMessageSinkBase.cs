@@ -51,39 +51,14 @@ namespace MassTransit.Saga.Pipeline
 			GC.SuppressFinalize(this);
 		}
 
-		public IEnumerable<Action<TMessage>> Enumerate(TMessage item)
+		public IEnumerable<Action<TMessage>> Enumerate(TMessage itemxxx)
 		{
-			int count = 0;
-
-			var filter = CreateFilterExpressionForMessage(item);
-
-			foreach (var consumer in Repository.Find<TMessage>(filter, ConsumerAction))
-			{
-				Policy.ForExistingSaga(item);
-
-				yield return consumer;
-
-				count++;
-			}
-
-			if (count > 0)
-				yield break;
-
-			Policy.ForMissingSaga(item);
-
-			Guid sagaId;
-			if (Policy.CreateSagaWhenMissing(item, out sagaId))
-			{
-				if (_log.IsDebugEnabled)
-					_log.DebugFormat("Created saga [{0}] - {1}", typeof (TSaga).ToFriendlyName(), sagaId);
-
-				foreach (var consumer in Repository.Create<TMessage>(sagaId, ConsumerAction))
+			yield return message =>
 				{
-					yield return consumer;
+					var filter = CreateFilterExpressionForMessage(message);
 
-					count++;
-				}
-			}
+					Repository.Send(filter, Policy, message, saga => ConsumerAction(saga, message));
+				};
 		}
 
 		public bool Inspect(IPipelineInspector inspector)
