@@ -49,6 +49,7 @@ namespace MassTransit.Infrastructure.Tests.Sagas
 					.ConnectionString(s => s.Is("Server=(local);initial catalog=test;Trusted_Connection=yes"))
 					.DefaultSchema("dbo")
 					.ShowSql()
+					.ProxyFactoryFactory("NHibernate.ByteCode.Castle.ProxyFactoryFactory, NHibernate.ByteCode.Castle")
 					.Raw(Environment.Isolation, IsolationLevel.ReadCommitted.ToString()))
 				.Mappings(m => { m.FluentMappings.Add<ConcurrentSagaMap>(); })
 				.ExposeConfiguration(BuildSchema)
@@ -122,7 +123,8 @@ namespace MassTransit.Infrastructure.Tests.Sagas
 					.ConnectionString(s => s.Is("Server=(local);initial catalog=test;Trusted_Connection=yes"))
 					.DefaultSchema("dbo")
 					.ShowSql()
-					.Raw(Environment.Isolation, IsolationLevel.ReadCommitted.ToString()))
+					.Raw(Environment.Isolation, IsolationLevel.ReadCommitted.ToString())
+					.ProxyFactoryFactory("NHibernate.ByteCode.Castle.ProxyFactoryFactory, NHibernate.ByteCode.Castle"))
 				.Mappings(m => { m.FluentMappings.Add<ConcurrentLegacySagaMap>(); })
 				.ExposeConfiguration(BuildSchema)
 				.BuildSessionFactory();

@@ -165,16 +165,17 @@ namespace MassTransit.Grid
 
 		public bool AcceptMessage(Guid serviceId, Guid correlationId)
 		{
-			bool accept = false;
-			bool found = false;
-			_messageNodeRepository.Find<int>(x => x.CorrelationId == correlationId, (saga, message) =>
-				{
-					accept = saga.CurrentState == GridMessageNode.Completed ||
-					         IsAssignedToMessage(saga);
+			var nodes = _messageNodeRepository
+				.Where(x => x.CorrelationId == correlationId).ToArray();
 
-					found = true;
-				})
-				.Each(x => x(0));
+			bool found = nodes.Length > 0;
+
+			bool accept = nodes.Where(x =>
+			                          (x.CurrentState == GridMessageNode.Completed ||
+			                           (x.CurrentState == GridMessageNode.WaitingForCompletion &&
+			                            x.DataUri == DataUri &&
+			                            x.ControlUri == ControlUri
+			                           ))).Count() > 0;
 
 			if (accept)
 				return true;
@@ -192,11 +193,12 @@ namespace MassTransit.Grid
 
 		public bool ConsumeMessage(Guid serviceId, Guid correlationId)
 		{
-			bool consume = false;
-			_messageNodeRepository.Find<int>(x => x.CorrelationId == correlationId, (saga, message) => { consume = IsAssignedToMessage(saga); })
-				.Each(x => x(0));
-
-			return consume;
+			return _messageNodeRepository
+			       	.Where(x => x.CorrelationId == correlationId &&
+			       	            x.CurrentState == GridMessageNode.WaitingForCompletion &&
+			       	            x.DataUri == DataUri &&
+			       	            x.ControlUri == ControlUri
+			       	).Count() > 0;
 		}
 
 		public void NotifyMessageComplete(Guid correlationId)
@@ -257,6 +259,7 @@ namespace MassTransit.Grid
 				neverSurrender.WaitOne(30, true);
 			}
 		}
+
 		public GridMessageNode GetMessageNode(Guid correlationId)
 		{
 			return _messageNodeRepository.Where(x => x.CorrelationId == correlationId).FirstOrDefault();

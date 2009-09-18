@@ -201,6 +201,7 @@
     <Compile Include="Pipeline\Configuration\MessageInterceptorConfigurator.cs" />
     <Compile Include="Pipeline\Configuration\MessageInterceptorConfiguratorScope.cs" />
     <Compile Include="Pipeline\Sinks\MessageInterceptor.cs" />
+    <Compile Include="Saga\AbstractSagaRepository.cs" />
     <Compile Include="Saga\Configuration\EventInspectorResult.cs" />
     <Compile Include="Saga\Configuration\ISagaPolicyFactory.cs" />
     <Compile Include="Saga\Configuration\ObservesSubscriber.cs" />

@@ -16,81 +16,67 @@ namespace MassTransit.Saga
 	using System.Collections.Generic;
 	using System.Linq;
 	using System.Linq.Expressions;
-	using log4net;
 	using Magnum.Data;
 
-	public class InMemorySagaRepository<T> :
-		ISagaRepository<T>
-		where T : class, ISaga
+	public class InMemorySagaRepository<TSaga> : 
+		AbstractSagaRepository<TSaga>,
+		ISagaRepository<TSaga>
+		where TSaga : class, ISaga
 	{
-		private static readonly ILog _log = LogManager.GetLogger(typeof (InMemorySagaRepository<T>).ToFriendlyName());
-		private IRepository<T> _repository;
+		private bool _disposed;
+		private InMemoryRepository<TSaga, Guid> _repository;
 
 		public InMemorySagaRepository()
 		{
-			_log.InfoFormat("Creating saga repository for {0}", typeof (T).FullName);
-
-			_repository = new InMemoryRepository<T, Guid>(x => x.CorrelationId);
+			_repository = new InMemoryRepository<TSaga, Guid>(x => x.CorrelationId);
 		}
 
-		public void Dispose()
+		public void Send<TMessage>(Expression<Func<TSaga, bool>> filter, ISagaPolicy<TSaga, TMessage> policy, TMessage message, Action<TSaga> consumerAction)
+			where TMessage : class
 		{
-			_repository.Dispose();
-			_repository = null;
-		}
+			IEnumerable<TSaga> existingSagas = _repository.Where(filter);
 
-		public IEnumerable<Action<V>> Create<V>(Guid sagaId, Action<T, V> action)
-		{
-			T saga = (T) Activator.CreateInstance(typeof (T), new object[] {sagaId});
+			if (SendMessageToExistingSagas(existingSagas, policy, consumerAction, message))
+				return;
 
-			if (_log.IsDebugEnabled)
-				_log.DebugFormat("Created saga [{0}] - {1}", typeof(T).ToFriendlyName(), sagaId);
-
-			lock(_repository)
-				_repository.Save(saga);
-
-			lock (saga)
-			{
-				yield return x => action(saga, x);
-			}
-		}
-
-		public IEnumerable<Action<V>> Find<V>(Expression<Func<T, bool>> expression, Action<T, V> action)
-		{
-			foreach (T saga in Where(expression))
-			{
-				if (_log.IsDebugEnabled)
-					_log.DebugFormat("Found saga [{0}] - {1}", typeof(T).ToFriendlyName(), expression.ToString());
-
-				T consumer = saga;
-				lock (consumer)
+			SendMessageToNewSaga(policy, message, saga =>
 				{
-					yield return x => action(consumer, x);
-				}
-			}
+					lock (_repository)
+						_repository.Save(saga);
+
+					consumerAction(saga);
+				});
 		}
 
-		public IEnumerable<Action> Find(Expression<Func<T, bool>> expression, Action<T> action)
-		{
-			foreach (T saga in Where(expression))
-			{
-				if (_log.IsDebugEnabled)
-					_log.DebugFormat("Found saga [{0}] - {1}", typeof(T).ToFriendlyName(), expression.ToString());
-
-				T consumer = saga;
-				lock (consumer)
-				{
-					yield return () => action(consumer);
-				}
-			}
-		}
-
-		public IEnumerable<T> Where(Expression<Func<T, bool>> filter)
+		public IEnumerable<TSaga> Where(Expression<Func<TSaga, bool>> filter)
 		{
 			lock (_repository)
 			{
 				return _repository.Where(filter).ToList();
 			}
+		}
+
+		public void Dispose()
+		{
+			Dispose(true);
+			GC.SuppressFinalize(this);
+		}
+
+		private void Dispose(bool disposing)
+		{
+			if (_disposed) return;
+			if (disposing)
+			{
+				_repository.Dispose();
+				_repository = null;
+			}
+
+			_disposed = true;
+		}
+
+		~InMemorySagaRepository()
+		{
+			Dispose(false);
 		}
 	}
 }

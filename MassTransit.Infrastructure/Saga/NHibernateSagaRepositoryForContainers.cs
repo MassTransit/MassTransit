@@ -14,19 +14,17 @@ namespace MassTransit.Infrastructure.Saga
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Data;
 	using System.Linq;
 	using System.Linq.Expressions;
-	using log4net;
 	using MassTransit.Saga;
 	using NHibernate;
 	using NHibernate.Linq;
 
 	public class NHibernateSagaRepositoryForContainers<T> :
+		AbstractSagaRepository<T>,
 		ISagaRepository<T>
 		where T : class, ISaga
 	{
-		private static readonly ILog _log = LogManager.GetLogger(typeof (NHibernateSagaRepositoryForContainers<T>).ToFriendlyName());
 		private volatile bool _disposed;
 		private ISessionFactory _sessionFactory;
 
@@ -41,74 +39,46 @@ namespace MassTransit.Infrastructure.Saga
 			GC.SuppressFinalize(this);
 		}
 
-		public IEnumerable<Action<V>> Find<V>(Expression<Func<T, bool>> expression, Action<T, V> action)
+		public void Send<TMessage>(Expression<Func<T, bool>> filter, ISagaPolicy<T, TMessage> policy, TMessage message, Action<T> consumerAction)
+			where TMessage : class
 		{
-			if (_log.IsDebugEnabled)
-				_log.DebugFormat("Locating Saga: {0}", expression.ToString());
-
-			using (var session = _sessionFactory.OpenSession())
-			using (var transaction = session.BeginTransaction())
+			using (ISession session = _sessionFactory.OpenSession())
+			using (ITransaction transaction = session.BeginTransaction())
 			{
-				IQueryable<T> existingSagas = session.Linq<T>().Where(expression);
+				IQueryable<T> existingSagas = session.Linq<T>()
+					.Where(filter);
 
-				foreach (T saga in existingSagas)
-				{
-					if (_log.IsDebugEnabled)
-						_log.DebugFormat("Found saga [{0}] - {1}", typeof (T).ToFriendlyName(), saga.CorrelationId);
+				bool foundExistingSagas = SendMessageToExistingSagas(existingSagas, policy, consumerAction, message);
 
-					var sagaInstance = saga;
-					yield return x => action(sagaInstance, x);
-
-					if (_log.IsDebugEnabled)
-						_log.DebugFormat("Finished saga [{0}] - {1}", typeof (T).ToFriendlyName(), saga.CorrelationId);
-				}
-
-				if (_log.IsDebugEnabled)
-					_log.DebugFormat("Committing Saga: {0}", expression.ToString());
 				transaction.Commit();
+
+				if (foundExistingSagas)
+					return;
 			}
 
-			if (_log.IsDebugEnabled)
-				_log.DebugFormat("Exiting Saga: {0}", expression.ToString());
-		}
-
-		public IEnumerable<Action> Find(Expression<Func<T, bool>> expression, Action<T> action)
-		{
-			foreach (var item in Find<int>(expression, (s, m) => action(s)))
+			using (ISession session = _sessionFactory.OpenSession())
+			using (ITransaction transaction = session.BeginTransaction())
 			{
-				Action<int> actionItem = item;
+				SendMessageToNewSaga(policy, message, saga =>
+					{
+						consumerAction(saga);
 
-				yield return () => actionItem(0);
+						session.Save(saga);
+						transaction.Commit();
+					});
 			}
 		}
 
 		public IEnumerable<T> Where(Expression<Func<T, bool>> filter)
 		{
-			using (var session = _sessionFactory.OpenSession())
-			using (var transaction = session.BeginTransaction())
+			using (ISession session = _sessionFactory.OpenSession())
+			using (ITransaction transaction = session.BeginTransaction())
 			{
-				var result = session.Linq<T>().Where(filter).ToList();
+				List<T> result = session.Linq<T>().Where(filter).ToList();
 
 				transaction.Commit();
 
 				return result;
-			}
-		}
-
-		public IEnumerable<Action<V>> Create<V>(Guid sagaId, Action<T, V> action)
-		{
-			T saga = (T) Activator.CreateInstance(typeof (T), sagaId);
-
-			if (_log.IsDebugEnabled)
-				_log.DebugFormat("Created saga [{0}] - {1}", typeof (T).ToFriendlyName(), sagaId);
-
-			using (var session = _sessionFactory.OpenSession())
-			using (var transaction = session.BeginTransaction())
-			{
-				yield return x => action(saga, x);
-
-				session.Save(saga);
-				transaction.Commit();
 			}
 		}
 

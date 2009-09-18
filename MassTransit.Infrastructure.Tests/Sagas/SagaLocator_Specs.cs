@@ -15,15 +15,13 @@ namespace MassTransit.Infrastructure.Tests.Sagas
 	using System;
 	using System.Collections.Generic;
 	using System.Data;
-	using System.Linq.Expressions;
+	using System.Linq;
 	using Magnum;
 	using Magnum.Data;
 	using Magnum.Infrastructure.Data;
 	using MassTransit.Saga;
-	using MassTransit.Saga.Pipeline;
 	using MassTransit.Tests.Messages;
 	using MassTransit.Tests.Saga.Locator;
-	using MassTransit.Tests.Saga.Messages;
 	using MassTransit.Tests.Saga.StateMachine;
 	using NHibernate;
 	using NHibernate.Cfg;
@@ -46,6 +44,7 @@ namespace MassTransit.Infrastructure.Tests.Sagas
 			_cfg.SetProperty("dialect", "NHibernate.Dialect.MsSql2005Dialect");
 			_cfg.SetProperty("default_schema", "bus");
 			_cfg.SetProperty("show_sql", "true");
+			_cfg.SetProperty("proxyfactory.factory_class", "NHibernate.ByteCode.Castle.ProxyFactoryFactory, NHibernate.ByteCode.Castle");
 
 			_cfg.AddAssembly(typeof(NHibernateSagaRepository<>).Assembly);
 			_cfg.AddAssembly(typeof(RegisterUserStateMachine).Assembly);
@@ -104,31 +103,28 @@ namespace MassTransit.Infrastructure.Tests.Sagas
 			try
 			{
 				using (IUnitOfWork work = UnitOfWork.Start())
-				using (ITransaction transaction = work.BeginTransaction(IsolationLevel.Serializable))
-				{
 					using (var repository = new NHibernateSagaRepository<TestSaga>())
 					{
 						var ping = new PingMessage(_sagaId);
 
-						repository.Create<PingMessage>(_sagaId, (s, m) => s.Name = "Joe").Each(x => x(ping));
+						var initiatePolicy = new InitiatingSagaPolicy<TestSaga, PingMessage>();
 
-						List<TestSaga> sagas = new List<TestSaga>();
-						repository.Find<PingMessage>(x => x.CorrelationId == _sagaId, (s, m) => sagas.Add(s)).Each(x => x(ping));
+
+						var message = new PingMessage(_sagaId);
+						repository.Send(x => x.CorrelationId == message.CorrelationId, initiatePolicy, message, saga => saga.Name = "Joe");
+
+
+						List<TestSaga> sagas = repository.Where(x => x.CorrelationId == _sagaId).ToList();
 
 						Assert.AreEqual(1, sagas.Count);
 						Assert.IsNotNull(sagas[0]);
 						Assert.AreEqual(_sagaId, sagas[0].CorrelationId);
-
-						transaction.Commit();
-					}
 				}
 			}
 			finally
 			{
 				UnitOfWork.Finish();
 			}
-
-
 		}
 
 		[Test]

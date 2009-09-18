@@ -30,21 +30,23 @@ namespace MassTransit.Tests.Saga.Locator
 		private InMemorySagaRepository<SimpleSaga> _repository;
 		private Guid _otherSagaId;
 		private ObservableSagaMessage _observeSaga;
+		private InitiateSimpleSaga _initiateOtherSaga;
 
 		[SetUp]
 		public void Setup()
 		{
+			_repository = new InMemorySagaRepository<SimpleSaga>();
+			var initiatePolicy = new InitiatingSagaPolicy<SimpleSaga,InitiateSimpleSaga>();
+
 			_sagaId = CombGuid.Generate();
 			_initiateSaga = new InitiateSimpleSaga { CorrelationId = _sagaId, Name = "Chris" };
+			_repository.Send(x => x.CorrelationId == _sagaId, initiatePolicy, _initiateSaga, saga => saga.Consume(_initiateSaga));
 
-			_repository = new InMemorySagaRepository<SimpleSaga>();
-			_repository.Create<InitiateSimpleSaga>(_sagaId, (s, m) => { s.Consume(m); })
-				.Each(x => x(_initiateSaga));
+			_initiateOtherSaga = new InitiateSimpleSaga {CorrelationId = _otherSagaId, Name = "Dru"};
 
 			_otherSagaId = Guid.NewGuid();
-			_repository.Create<InitiateSimpleSaga>(_otherSagaId, (s, m) => { s.Consume(m); })
-				.Each(x => x(new InitiateSimpleSaga { CorrelationId = _otherSagaId, Name = "Dru" }));
-
+			_repository.Send(x => x.CorrelationId == _otherSagaId, initiatePolicy, _initiateOtherSaga, saga => saga.Consume(_initiateOtherSaga));
+	
 			_observeSaga = new ObservableSagaMessage {Name = "Chris"};
 		}
 

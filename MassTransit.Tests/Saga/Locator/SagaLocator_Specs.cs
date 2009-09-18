@@ -31,8 +31,14 @@ namespace MassTransit.Tests.Saga.Locator
 
 			_repository = new InMemorySagaRepository<TestSaga>();
 
-			_repository.Create<PingMessage>(_sagaId, (s, m) => s.Name = "Joe").ToArray();
-			_repository.Create<PingMessage>(CombGuid.Generate(), (s, m) => s.Name = "Chris").ToArray();
+			var initiatePolicy = new InitiatingSagaPolicy<TestSaga, PingMessage>();
+
+
+			var message = new PingMessage(_sagaId);
+			_repository.Send(x => x.CorrelationId == message.CorrelationId, initiatePolicy, message, saga => saga.Name = "Joe");
+			
+			message = new PingMessage(CombGuid.Generate());
+			_repository.Send(x => x.CorrelationId == message.CorrelationId, initiatePolicy, message, saga => saga.Name = "Chris");
 		}
 
 		[TearDown]
