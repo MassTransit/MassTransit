@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<project name="Settings">
+  <property name="environment" value="LOCAL" />
+  <property name="machine" value="MACHINE.NAME" />
+  <property name="database.server" value="(local)" />
+  <property name="database.name" value="NAME" />
+  <property name="log.level" value="INFO" />
+  
+  <!-- Database Deployment -->
+  <property name="dirs.db" value="..\..\db" />
+  <property name="database.action" value="Create" />
+</project>
