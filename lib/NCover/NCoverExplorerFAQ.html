@@ -1,0 +1,303 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+    <head>
+		<script type="text/javascript">
+			<!--
+			function Toggle(id)
+			{
+				var e = document.getElementById(id);
+				if(e.style.display == 'none')
+					e.style.display = 'block';
+				else
+					e.style.display = 'none';
+			}			
+				
+			function SwitchAll(how)
+			{	var len = document.all.length-1;
+				for(i=0;i!=len;i++)	{	
+					var block = document.all[i];
+					if (block != null && block.id != '')
+					{ block.style.display=how;}
+				}
+			}
+
+			function ExpandAll()
+			{SwitchAll('block');}
+	
+			function CollapseAll()
+			{SwitchAll('none');}
+			// -->
+		</script>
+        <title>NCoverExplorer FAQ</title>
+        <meta content="Microsoft Visual Studio .NET 7.1" name="GENERATOR">
+        <meta content="http://schemas.microsoft.com/intellisense/ie5" name="vs_targetSchema">
+        <style> 
+			body { font-size: 10pt; font-family: Verdana; }
+			p.title { font-size: 20pt; font-weight: bold; }
+			.action { color: maroon; font-size: 10pt; font-weight: bold; cursor:pointer }
+			.question { font-weight: bold; cursor:pointer }
+			.answer { margin: 15px; }
+			pre { font-size: 10pt; font-family: Courier; }
+			pre.usage { background-color: #F0F0F0; }
+			.subtitle { color: maroon; font-weight: bold; }
+			.quote { background-color: #F0F0F0; margin-left: 36pt;}
+			.method { color: maroon; font-size: 10pt; font-weight: bold; }
+			.hdrcell { background-color: #DDEEFF; font-size: 10pt; }
+			.datacell { background-color: #FFFFEE; text-align: right; font-size: 10pt; }
+			.hldatacell { background-color: #FFCCCC; text-align: right; font-size: 10pt; }
+			.box { border: 1px solid; padding: 10px; }
+			.treeviewBlack { color: black; }
+			.treeviewGrey { color: grey; }
+			.treeviewRed { color: red; }
+			.treeviewBlue { color: blue; }
+			.sourceBlue { background-color: #E0EDFD; color: black; }
+			.sourceRed { background-color: #E6B0A5; color: black; }
+        </style>
+    </head>
+    <body>
+        <P class="title">NCoverExplorer FAQ</P>
+        <P>The latest version of this document is located <A href="http://www.kiwidude.com/dotnet/NCoverExplorerFAQ.html">here</A>.
+        <BR/>For the latest NCoverExplorer news and updates, visit my <A href="http://www.kiwidude.com/blog/">blog</A>.</P>
+        <P class="action"><a onClick="ExpandAll();">Expand All</a>&nbsp;|&nbsp;<a onClick="CollapseAll();">Collapse All</a></P>
+        <a class="question" onclick="return Toggle('answer1')">1. What is NCoverExplorer?</a><br/>
+        <div id="answer1" style="display:none">
+			<P class="answer">This tool allows you to open a coverage.xml file produced by 
+				<A href="http://ncover.org"/>NCover</A> and navigate the source code. The 
+				source code is highlighted to clearly show which statements were visited
+				and not visited. You can filter, sort and report on the coverage results.
+			</P>
+		</div>
+        <a class="question" onclick="return Toggle('answer2')">2. What versions of the .NET Framework does it work with?</a><br/>
+        <div id="Div1" style="display:none">
+			<P class="answer">NCoverExplorer as of version 1.3.4 requires either .NET 1.1 or .Net 2.0 (it is compiled against
+			.Net 1.1).
+			</P>
+        </div>
+        <a class="question" onclick="return Toggle('answer2')">2. What versions of NCover does it work with?</a><br/>
+        <div id="answer2" style="display:none">
+			<P class="answer">NCoverExplorer has been tested with both NCover 1.3.3 and up to the latest NCover 1.5.7. It will NOT
+				work with NCover 1.4.6.	Note that NCover 1.5.x only works with .NET 2.0 and requires at least NCoverExplorer 1.3.5
+				and/or a TestDriven.Net build > 2.0.1786 due to a limitation in NCover or else you will get duplicate nodes in your 
+				coverage results.
+			</P>
+        </div>
+        <a class="question" onclick="return Toggle('answer3')">3. Can I integrate it with my Visual Studio.Net version XXX IDE?</a><br/>
+        <div id="answer3" style="display:none">
+			<P class="answer">Jamie Cansdale now offers a "Test with... Coverage" feature
+				in the latest version of his excellent <A href="http://www.testdriven.net/">TestDriven.Net</A>
+				tool. This will automatically launch NCoverExplorer to display the results
+				of running unit test(s) under code coverage with NCover. Note that as of build 1341
+				TestDriven.Net now works using both the latest version of NCover (1.5.x) and the earlier NCover 1.3.3 version.
+			</P>
+ 		</div>
+        <a class="question" onclick="return Toggle('answer4')">4. Can I integrate it without TestDriven.Net?</a><br/>
+        <div id="answer4" style="display:none">
+			<P class="answer">My solution I used at work was a combination of NAnt and NAntRunner 
+				(the VS.Net add-in) to perform something similar. I have NAnt tasks to:
+				<UL>
+					<LI>
+						Perform the build.
+					</LI>
+					<LI>
+						Execute NCover while running unit tests (either all unit tests or those for
+						a specific fixture using the /fixture feature of <A href="http://nunit.org/">NUnit</A>).
+					</LI>
+					<LI>
+						Launch NCoverExplorer displaying the output coverage.xml file.
+					</LI>
+				</UL>
+			</P>
+ 			<P class="answer">As of NCoverExplorer 1.3.5 you now have another option. There is now an included GUI for
+ 				running NCover directly from within NCoverExplorer and displaying the results.
+			</P>
+		</div>
+        <a class="question" onclick="return Toggle('answer5')">5. How does it compare to Visual Studio Team System?</a><br/>
+		<div id="answer5" style="display:none">
+			<P class="answer">VSTS features of unit testing and code coverage will only be included with the premium bundles
+				of the Visual Studio product range - and as such will most likely be priced above what many
+				developers and businesses are prepared to pay. For "everyone else" in the market it would seem likely
+				that they will continue to utilise open source alternatives.
+			</P>
+			<P class="answer">Even if you are one of the fortunate developers who can afford VSTS, it still must
+				be measured feature-wise against the open source alternatives which in a lot of cases have now been established
+				for many years. Developers and managers will weigh up for themselves how important those features are
+				as well as other factors such as Microsoft support etc. The nice thing for many of us is that we have a choice...
+			</P>
+ 			<P class="answer">We have had a number of people e-mail us and say they prefer TestDriven.Net and NCoverExplorer
+ 				over the VSTS alternative and want to switch off the VSTS ability - that's rather gratifying from our perspective!
+			</P>
+ 		</div>
+        <a class="question" onclick="return Toggle('answer6')">6. Why didn't you integrate NCoverExplorer directly into the IDE like VSTS or SharpDevelop?</a><br/>
+		<div id="answer6" style="display:none">
+			<P class="answer">A number of reasons. At first glance having your code colour coded within the VS.Net IDE may sound
+				great. However think about what we are trying to achieve - improving our <B>test</B> code to increase our coverage.
+				That means in many cases you want to be editing the unit tests themselves, not the pretty coloured code under test.
+				This then requires either a photographic memory or a penchant for continually resizing your IDE/tab groups, as well as an ability
+				to not find the colours distracting while editing and refactoring code... not my first choice.
+			</P>
+			<P class="answer">You may instead find it more convenient to have a separate application window which can be positioned 
+				on a second screen (you all have at least two don't you?) or ALT-Tab switched between. As of release 1.3.1 
+				NCoverExplorer allows direct code navigation from method coverage in NCoverExplorer to it's corresponding line 
+				in the source code file within the VS.Net IDE.
+			</P>
+			<P class="answer">From a technical perspective an add-in is a non-trivial task - particularly if trying to support all 
+				the variants of the VS.Net IDE. To do it natively requires VSIP skills which is a trip to the dark side. 
+				I won't say "never" however and	if I find some spare time (or you want to volunteer to help me!) then it might 
+				happen one day...
+			</P>
+ 		</div>
+        <a class="question" onclick="return Toggle('answer7')">7. What do the tree node colours mean?</a><br/>
+		<div id="answer7" style="display:none">
+			<P class="answer">The default settings when NCoverExplorer is installed are as follows:
+				<UL>
+					<LI>
+						<SPAN class="treeviewGrey">Grey text</SPAN> - the namespace/class/method has zero coverage. (Icon will be greyed also)
+					</LI>
+					<LI>
+						<SPAN class="treeviewRed">Red text</SPAN> - the namespace/class/method has partial coverage.
+					</LI>
+					<LI>
+						<SPAN class="treeviewBlue">Blue text</SPAN> - the namespace/class/method coverage has partial coverage exceeding a satisfaction threshold (default 95%).
+					</LI>
+					<LI>
+						<SPAN class="treeviewBlack">Black text</SPAN> - the namespace/class/method has 100% coverage.
+					</LI>
+				</UL>
+			</P>
+ 		</div>
+        <a class="question" onclick="return Toggle('answer8')">8. What do the source code highlighting colours mean?<a><br/>
+		<div id="answer8" style="display:none">
+			<P class="answer">The default settings when NCoverExplorer is installed are as follows:
+				<UL>
+					<LI>
+						<SPAN class="sourceBlue">Blue background</SPAN>  - this section of code was visited (a tooltip tells you how many times).
+					</LI>
+					<LI>
+						<SPAN class="sourceRed">Red background</SPAN>  - this section of code was not visited.
+					</LI>
+				</UL>
+				You can change these settings in the View->Options dialog. For instance you may prefer to underline the unvisited code.
+			</P>
+ 		</div>
+        <a class="question" onclick="return Toggle('answer9')">9. What is that "Satisfaction Threshold" all about?</a><br/>
+		<div id="answer9" style="display:none">
+			<P class="answer">Depending on your coverage strategy, the code being tested and the extent of your usage of reflection,
+				mock objects and/or dependency injection you may determine it unfeasible to try
+				to reach 100% coverage everywhere. Some teams readily accept the diminishing returns
+				that can apply and instead set a specific blanket coverage goal such as “85%”.
+			</P>
+			<P class="answer">Assuming you have such a situation and there was no threshold capability, 
+				you would be stuck forever looking at a "danger red" node in the tree every time you open NCoverExplorer. 
+				With this feature enabled (by setting a threshold less than 100% in the View->Options dialog) you see 
+				a more calming mellow “blue” instead...
+			</P>
+			<P class="answer">As of release 1.3.1 you can now also specify the tolerance as a number of unvisited lines.
+				If either of the two threshold conditions are met the node will be coloured appropriately. Note that
+				a visit count of zero will always show as uncovered regardless of your tolerance.
+			</P>
+			<P class="answer">Of course just because you exceed the percentage doesn't mean that the 5% of code unvisited 
+				isn't the most critical!
+			</P>
+		</div>
+        <a class="question" onclick="return Toggle('answer10')">10. I have a killer idea for XYZ feature - can you add it for me?</a><br/>
+        <div id="answer10" style="display:none">
+			<P class="answer">Please leave a comment on my <A href="http://www.kiwidude.com/blog/">blog</A> or in the
+				<A href="http://ncover.org/SITE/forums/default.aspx">NCoverExplorer forums</A> and I will see what I can do. 
+				NCoverExplorer is by no means my "day job" so no promises can be made but if the idea is indeed a good one which 
+				will benefit many others I'm sure I can find time...
+			</P>
+		</div>
+        <a class="question" onclick="return Toggle('answer11')">11. Where can I download the latest version?</a><br/>
+        <div id="answer11" style="display:none">
+			<P class="answer">To download NCoverExplorer <b>without</b> TestDriven.Net, you can find it
+				<A href="http://www.kiwidude.com/dotnet/DownloadPage.html">here</A>.
+			</P>
+			<P class="answer">Download it as part of the install with TestDriven.Net from <A href="http://www.testdriven.net/">here</A>.
+			</P>
+		</div>
+        <a class="question" onclick="return Toggle('answer12')">12. What are the keyboard shortcuts?</a><br/>
+        <div id="answer12" style="display:none">
+			<P class="answer">The following shortcuts exist currently:
+				<PRE class="usage">
+					<SPAN class="treeviewBlue">CTRL+A</SPAN>  - Collapse all nodes recursively.
+					<SPAN class="treeviewBlue">CTRL+E</SPAN>  - Edit in VS.Net at the current caret position.
+					<SPAN class="treeviewBlue">CTRL+F</SPAN>  - Display the Find Class dialog.
+					<SPAN class="treeviewBlue">CTRL+L</SPAN>  - Expand all nodes recursively.
+					<SPAN class="treeviewBlue">CTRL+N</SPAN>  - Run NCover (via configuration dialog).
+					<SPAN class="treeviewBlue">CTRL+O</SPAN>  - Open coverage xml file.
+					<SPAN class="treeviewBlue">CTRL+P</SPAN>  - Print current source code class file.
+					<SPAN class="treeviewBlue">CTRL+Q</SPAN>  - Expand all covered child nodes.
+					<SPAN class="treeviewBlue">CTRL+S</SPAN>  - Save coverage xml file as displayed (without excluded nodes).
+					<SPAN class="treeviewBlue">F2</SPAN>      - Display the options dialog.
+					<SPAN class="treeviewBlue">F4</SPAN>      - Display the statistics summary dialog.
+					<SPAN class="treeviewBlue">F5</SPAN>      - Reload the current source code file.
+					<SPAN class="treeviewBlue">F6</SPAN>      - Display the reports dialog.
+					<SPAN class="treeviewBlue">DEL</SPAN>     - Exclude node and children from coverage tree and recalculate coverage.
+					<SPAN class="treeviewBlue">INS</SPAN>     - Include node and children into coverage tree and recalculate coverage.
+					<BR/>
+					<SPAN class="treeviewBlue">ALT+1</SPAN>   - Filter (hide) all 100% coverage nodes.
+					<SPAN class="treeviewBlue">ALT+2</SPAN>   - Filter (hide) all unvisited (0%) nodes.
+					<SPAN class="treeviewBlue">ALT+3</SPAN>   - Filter (hide) all nodes exceeding satisfactory coverage threshold.
+					<SPAN class="treeviewBlue">ALT+0</SPAN>   - Remove all filters.
+					<BR/>
+					<SPAN class="treeviewBlue">CTRL+1</SPAN>  - Display sequence point coverage report (covered%).
+					<SPAN class="treeviewBlue">CTRL+2</SPAN>  - Display sequence point coverage report (covered%) (unvisited seqpnt#).
+					<SPAN class="treeviewBlue">CTRL+3</SPAN>  - Display sequence point coverage report (unvisited seqpnt#).
+					<SPAN class="treeviewBlue">CTRL+4</SPAN>  - Display function coverage report (visits).
+					<SPAN class="treeviewBlue">CTRL+5</SPAN>  - Display function coverage coverage report (covered%).
+					<SPAN class="treeviewBlue">CTRL+6</SPAN>  - Display function coverage coverage report (covered%) (unvisited function#).
+					<SPAN class="treeviewBlue">CTRL+7</SPAN>  - Display function coverage coverage report (unvisited function#).
+					<BR/>
+					<SPAN class="treeviewBlue">CTRL+SHIFT+1</SPAN>  - Sort by name (default).
+					<SPAN class="treeviewBlue">CTRL+SHIFT+2</SPAN>  - Sort by name down to class level, with methods sorted by line number.
+					<SPAN class="treeviewBlue">CTRL+SHIFT+3</SPAN>  - Sort by coverage percentage ascending.
+					<SPAN class="treeviewBlue">CTRL+SHIFT+4</SPAN>  - Sort by coverage percentage ascending.
+					<SPAN class="treeviewBlue">CTRL+SHIFT+5</SPAN>  - Sort by #unvisited sequence points ascending.
+					<SPAN class="treeviewBlue">CTRL+SHIFT+6</SPAN>  - Sort by #unvisited sequence points ascending.
+					<SPAN class="treeviewBlue">CTRL+SHIFT+7</SPAN>  - Sort by max function visit count ascending.
+					<SPAN class="treeviewBlue">CTRL+SHIFT+8</SPAN>  - Sort by max function visit count ascending.
+					<SPAN class="treeviewBlue">CTRL+SHIFT+9</SPAN>  - Sort by max function coverage percentage ascending.
+					<SPAN class="treeviewBlue">CTRL+SHIFT+0</SPAN>  - Sort by max function coverage percentage descending.
+					<BR/>
+					<SPAN class="treeviewBlue">ALT+RIGHT</SPAN>     - Next unvisited line in the current class.
+					<SPAN class="treeviewBlue">ALT+LEFT</SPAN>      - Previous unvisited line in the current class.
+					<SPAN class="treeviewBlue">ALT+UP</SPAN>        - Next unvisited class in the current namespace.
+					<SPAN class="treeviewBlue">ALT+DOWN</SPAN>      - Previous unvisited class in the current namespace.
+				</PRE>
+			</P>
+		</div>
+        <a class="question" onclick="return Toggle('answer13')">13. Where are my personal settings stored?</a><br/>
+        <div id="answer13" style="display:none">
+			<P class="answer">C:\Documents and Settings\[User Name]\Application Data\KiwiNova\NCoverExplorer\NCoverExplorer.config
+			</P>
+		</div>
+        <a class="question" onclick="return Toggle('answer14')">14. Where can I download the custom NAnt/MSBuild tasks from?</a><br/>
+        <div id="answer14" style="display:none">
+			<P class="answer">A zip file containing the task source code, compiled assemblies and examples can be found
+				<A href="http://www.kiwidude.com/dotnet/DownloadPage.html">here</A>
+			</P>
+		</div>
+        <a class="question" onclick="return Toggle('answer15')">15. I get an "Illegal characters in path" exception - why?</a><br/>
+        <div id="answer15" style="display:none">
+			<P class="answer">NCover 1.4.6 has a bug whereby the filenames that it writes into the xml file contain
+				undesirable characters. Please use either NCover 1.3.3 or NCover 1.5.x. For more details refer to this blog entry
+				<A href="http://www.kiwidude.com/blog/2006/04/illegal-characters-ncover-versions.html">here</A>
+			</P>
+		</div>
+        <a class="question" onclick="return Toggle('answer16')">16. I get a "System.Format" exception - why?</a><br/>
+        <div id="answer16" style="display:none">
+			<P class="answer">One user reported a bizarre issue where on their machines a simple int.Parse("0") would not work.
+				The exact cause is unknown (they had uninstalled some components from their XP installation), however 
+				switching region settings to something else and back again resolved the issue.
+			</P>
+		</div>
+        <a class="question" onclick="return Toggle('answer17')">17. My module thresholds are not working - why?</a><br/>
+        <div id="answer17" style="display:none">
+			<P class="answer">The module names included in the module thresholds should not include any path information,
+			and are currently case sensitive (must exactly match the module names you see on the NCoverExplorer report).
+			The case sensitivity constraint is fixed in NCoverExplorer 1.3.5.
+			</P>
+		</div>
+		<P class="subtitle">---------------------------------<BR/>FAQ last updated Jul 21st 2007.</P>
+    </body>
+</html>
