@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!-- Copyright © 1981-2001 Microsoft Corporation -->
+<assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
+    <noInheritable/>
+    <assemblyIdentity 
+        type="win32" 
+        name="Microsoft.VC80.CRT" 
+        version="8.0.50608.0" 
+        processorArchitecture="x86" 
+        publicKeyToken="1fc8b3b9a1e18e3b"
+    />
+    <file name="msvcr80.dll"/>
+    <file name="msvcp80.dll"/>
+    <file name="msvcm80.dll"/>
+</assembly>
