@@ -4,8 +4,5 @@
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 
-[assembly : AssemblyTitle("MassTransit.ServiceBus.NMS")]
-[assembly : AssemblyDescription("")]
-[assembly : AssemblyConfiguration("")]
-[assembly : AssemblyProduct("MassTransit.ServiceBus.NMS")]
-[assembly : AssemblyCulture("")]
+[assembly: AssemblyConfiguration("")]
+[assembly: AssemblyCulture("")]
