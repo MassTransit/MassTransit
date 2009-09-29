@@ -15,12 +15,12 @@ using System.Security;
 
 [assembly: ComVisibleAttribute(false)]
 [assembly: CLSCompliantAttribute(true)]
-[assembly: AssemblyVersionAttribute("0.0.0.2018")]
+[assembly: AssemblyVersionAttribute("0.0.0.2020")]
 [assembly: AssemblyTitleAttribute("MassTransit-2008")]
 [assembly: AssemblyProductAttribute("MassTransit-2008")]
 [assembly: AssemblyDescriptionAttribute("For the exclusive use of CFT & ACM.")]
 [assembly: AssemblyTrademarkAttribute("All rights reserved, CFT & ACM")]
-[assembly: AssemblyFileVersionAttribute("0.0.0.2018")]
+[assembly: AssemblyFileVersionAttribute("0.0.0.2020")]
 [assembly: AssemblyCopyrightAttribute("CFT & ACM, original author or authors")]
 [assembly: AssemblyCompanyAttribute("CFT & ACM")]
 
