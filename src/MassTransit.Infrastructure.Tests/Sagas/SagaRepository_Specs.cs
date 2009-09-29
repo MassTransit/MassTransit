@@ -12,7 +12,7 @@ namespace MassTransit.Infrastructure.Tests.Sagas
 	using NUnit.Framework;
 	using Saga;
 
-	[TestFixture]
+	[TestFixture, Category("Integration")]
 	public class SagaRepository_Specs
 	{
 		[SetUp]

@@ -20,7 +20,7 @@ namespace MassTransit.Transports.Msmq.Tests
 	using NUnit.Framework;
 	using Rhino.Mocks;
 
-	[TestFixture]
+	[TestFixture, Category("Integration")]
 	public class Calling_receive_on_the_endpoint
 	{
 		[Test]

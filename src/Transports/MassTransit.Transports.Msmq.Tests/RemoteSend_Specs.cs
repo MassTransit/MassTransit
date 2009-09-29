@@ -15,7 +15,7 @@ namespace MassTransit.Transports.Msmq.Tests
     using MassTransit.Serialization;
     using NUnit.Framework;
 
-    [TestFixture]
+    [TestFixture, Category("Integration")]
     public class Sending_to_a_remote_endpoint_that_is_unavailable
     {
         private CreateMsmqEndpointSettings _settings;

@@ -21,7 +21,7 @@ namespace MassTransit.Transports.Msmq.Tests
 	using MassTransit.Tests.Grid;
 	using NUnit.Framework;
 
-	[TestFixture]
+	[TestFixture, Category("Integration")]
 	public class GridOnMsmq_Specs :
 		ThreeNodeMsmqGridTestFixture
 	{

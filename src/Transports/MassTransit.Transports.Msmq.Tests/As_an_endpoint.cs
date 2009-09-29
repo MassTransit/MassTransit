@@ -20,7 +20,7 @@ namespace MassTransit.Transports.Msmq.Tests
 	using NUnit.Framework;
 	using Rhino.Mocks;
 
-	[TestFixture]
+	[TestFixture, Category("Integration")]
 	public class Creating_an_endpoint_that_does_not_exist
 	{
 		private IMessageSerializer _serializer;
@@ -63,7 +63,7 @@ namespace MassTransit.Transports.Msmq.Tests
 		}
 	}
 
-	[TestFixture]
+	[TestFixture, Category("Integration")]
 	public class When_instantiated_endpoints_via_uri
 	{
 		[Test]

@@ -18,7 +18,7 @@ namespace MassTransit.Transports.Msmq.Tests
 	using NUnit.Framework;
 	using Rhino.Mocks;
 
-	[TestFixture]
+	[TestFixture, Category("Integration")]
 	public class ThreeNodeMsmqGridTestFixture :
 		GridTestFixture<MsmqEndpoint>
 	{

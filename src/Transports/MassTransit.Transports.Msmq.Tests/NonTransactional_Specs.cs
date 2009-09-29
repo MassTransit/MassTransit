@@ -19,13 +19,13 @@ namespace MassTransit.Transports.Msmq.Tests
 	using NUnit.Framework;
 	using TestFixtures;
 
-	[TestFixture]
+	[TestFixture, Category("Integration")]
 	public class Given_a_message_is_received_from_a_nontransactional_queue :
 		MsmqEndpointTestFixture
 	{
 	}
 
-	[TestFixture]
+	[TestFixture, Category("Integration")]
 	public class When_a_consumer_throws_an_exception :
 		Given_a_message_is_received_from_a_nontransactional_queue
 	{
@@ -76,7 +76,7 @@ namespace MassTransit.Transports.Msmq.Tests
 	    }
 	}
 	
-	[TestFixture]
+	[TestFixture, Category("Integration")]
 	public class When_a_consumer_receives_the_message :
 		Given_a_message_is_received_from_a_nontransactional_queue
 	{

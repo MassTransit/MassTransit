@@ -19,7 +19,7 @@ namespace MassTransit.Transports.Nms.Tests
 	using NUnit.Framework;
 	using TestFixtures;
 
-    [TestFixture]
+    [TestFixture, Category("Integration")]
 	public class When_publishing_a_message :
 		NmsEndpointTestFixture
 	{

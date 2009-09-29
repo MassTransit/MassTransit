@@ -49,11 +49,10 @@
               </code>
             </example>
         </member>
-        <member name="M:NAnt.MSNet.Tasks.IldasmTask.InitializeTask(System.Xml.XmlNode)">
+        <member name="M:NAnt.MSNet.Tasks.IldasmTask.Initialize">
             <summary>
             Checks whether the task is initialized with valid attributes.
             </summary>
-            <param name="taskNode">The <see cref="T:System.Xml.XmlNode"/> used to initialize the task.</param>
         </member>
         <member name="M:NAnt.MSNet.Tasks.IldasmTask.ExecuteTask">
             <summary>
