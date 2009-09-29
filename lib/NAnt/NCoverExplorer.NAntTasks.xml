@@ -1,0 +1,1364 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>NCoverExplorer.NAntTasks</name>
+    </assembly>
+    <members>
+        <member name="T:NCoverExplorer.NAntTasks.Types.CoverageExclusion">
+            <summary>
+            Represents a coverage exclusion for passing to NCoverExplorer.Console in the configuration file.
+            </summary>
+        </member>
+        <member name="M:NCoverExplorer.NAntTasks.Types.CoverageExclusion.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:NCoverExplorer.NAntTasks.Types.CoverageExclusion"/> class.
+            </summary>
+        </member>
+        <member name="M:NCoverExplorer.NAntTasks.Types.CoverageExclusion.#ctor(System.String,System.String,System.Boolean)">
+            <summary>
+            Initializes a new instance of the <see cref="T:NCoverExplorer.NAntTasks.Types.CoverageExclusion"/> class.
+            </summary>
+        </member>
+        <member name="P:NCoverExplorer.NAntTasks.Types.CoverageExclusion.ExclusionType">
+            <summary>
+            The exclusion type of Assembly, Namespace or Class.
+            </summary>
+        </member>
+        <member name="P:NCoverExplorer.NAntTasks.Types.CoverageExclusion.Pattern">
+            <summary>
+            The pattern to match.
+            </summary>
+        </member>
+        <member name="P:NCoverExplorer.NAntTasks.Types.CoverageExclusion.IsRegex">
+            <summary>
+            Indicates if the pattern is a regular expression.
+            </summary>
+        </member>
+        <member name="P:NCoverExplorer.NAntTasks.Types.CoverageExclusion.Enabled">
+            <summary>
+            Indicates if the exclusion is enabled.
+            </summary>
+        </member>
+        <member name="T:NCoverExplorer.NAntTasks.Types.CoverageExclusionCollection">
+            <summary>
+            Contains a collection of <see cref="T:NCoverExplorer.NAntTasks.Types.CoverageExclusion"/> elements.
+            </summary>
+        </member>
+        <member name="M:NCoverExplorer.NAntTasks.Types.CoverageExclusionCollection.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:NCoverExplorer.NAntTasks.Types.CoverageExclusionCollection"/> class.
+            </summary>
+        </member>
+        <member name="M:NCoverExplorer.NAntTasks.Types.CoverageExclusionCollection.#ctor(NCoverExplorer.NAntTasks.Types.CoverageExclusionCollection)">
+            <summary>
+            Initializes a new instance of the <see cref="T:NCoverExplorer.NAntTasks.Types.CoverageExclusionCollection"/> class
+            with the specified <see cref="T:NCoverExplorer.NAntTasks.Types.CoverageExclusionCollection"/> instance.
+            </summary>
+        </member>
+        <member name="M:NCoverExplorer.NAntTasks.Types.CoverageExclusionCollection.#ctor(NCoverExplorer.NAntTasks.Types.CoverageExclusion[])">
+            <summary>
+            Initializes a new instance of the <see cref="T:NCoverExplorer.NAntTasks.Types.CoverageExclusionCollection"/> class
+            with the specified array of <see cref="T:NCoverExplorer.NAntTasks.Types.CoverageExclusion"/> instances.
+            </summary>
+        </member>
+        <member name="M:NCoverExplorer.NAntTasks.Types.CoverageExclusionCollection.Add(NCoverExplorer.NAntTasks.Types.CoverageExclusion)">
+            <summary>
+            Adds a <see cref="T:NCoverExplorer.NAntTasks.Types.CoverageExclusion"/> to the end of the collection.
+            </summary>
+            <param name="item">The <see cref="T:NCoverExplorer.NAntTasks.Types.CoverageExclusion"/> to be added to the end of the collection.</param> 
+            <returns>The position into which the new element was inserted.</returns>
+        </member>
+        <member name="M:NCoverExplorer.NAntTasks.Types.CoverageExclusionCollection.AddRange(NCoverExplorer.NAntTasks.Types.CoverageExclusion[])">
+            <summary>
+            Adds the elements of a <see cref="T:NCoverExplorer.NAntTasks.Types.CoverageExclusion"/> array to the end of the collection.
+            </summary>
+            <param name="items">The array of <see cref="T:NCoverExplorer.NAntTasks.Types.CoverageExclusion"/> elements to be added to the end of the collection.</param> 
+        </member>
+        <member name="M:NCoverExplorer.NAntTasks.Types.CoverageExclusionCollection.AddRange(NCoverExplorer.NAntTasks.Types.CoverageExclusionCollection)">
+            <summary>
+            Adds the elements of a <see cref="T:NCoverExplorer.NAntTasks.Types.CoverageExclusionCollection"/> to the end of the collection.
+            </summary>
+            <param name="items">The <see cref="T:NCoverExplorer.NAntTasks.Types.CoverageExclusionCollection"/> to be added to the end of the collection.</param> 
+        </member>
+        <member name="M:NCoverExplorer.NAntTasks.Types.CoverageExclusionCollection.Contains(NCoverExplorer.NAntTasks.Types.CoverageExclusion)">
+            <summary>
+            Determines whether a <see cref="T:NCoverExplorer.NAntTasks.Types.CoverageExclusion"/> is in the collection.
+            </summary>
+            <param name="item">The <see cref="T:NCoverExplorer.NAntTasks.Types.CoverageExclusion"/> to locate in the collection.</param> 
+            <returns>
+            <see langword="true"/> if <paramref name="item"/> is found in the 
+            collection; otherwise, <see langword="false"/>.
+            </returns>
+        </member>
+        <member name="M:NCoverExplorer.NAntTasks.Types.CoverageExclusionCollection.CopyTo(NCoverExplorer.NAntTasks.Types.CoverageExclusion[],System.Int32)">
+            <summary>
+            Copies the entire collection to a compatible one-dimensional array, starting at the specified index of the target array.        
+            </summary>
+            <param name="array">The one-dimensional array that is the destination of the elements copied from the collection. The array must have zero-based indexing.</param> 
+            <param name="index">The zero-based index in <paramref name="array"/> at which copying begins.</param>
+        </member>
+        <member name="M:NCoverExplorer.NAntTasks.Types.CoverageExclusionCollection.IndexOf(NCoverExplorer.NAntTasks.Types.CoverageExclusion)">
+            <summary>
+            Retrieves the index of a specified <see cref="T:NCoverExplorer.NAntTasks.Types.CoverageExclusion"/> object in the collection.
+            </summary>
+            <param name="item">The <see cref="T:NCoverExplorer.NAntTasks.Types.CoverageExclusion"/> object for which the index is returned.</param> 
+            <returns>
+            The index of the specified <see cref="T:NCoverExplorer.NAntTasks.Types.CoverageExclusion"/>. If the <see cref="T:NCoverExplorer.NAntTasks.Types.CoverageExclusion"/> is not currently a member of the collection, it returns -1.
+            </returns>
+        </member>
+        <member name="M:NCoverExplorer.NAntTasks.Types.CoverageExclusionCollection.Insert(System.Int32,NCoverExplorer.NAntTasks.Types.CoverageExclusion)">
+            <summary>
+            Inserts a <see cref="T:NCoverExplorer.NAntTasks.Types.CoverageExclusion"/> into the collection at the specified index.
+            </summary>
+            <param name="index">The zero-based index at which <paramref name="item"/> should be inserted.</param>
+            <param name="item">The <see cref="T:NCoverExplorer.NAntTasks.Types.CoverageExclusion"/> to insert.</param>
+        </member>
+        <member name="M:NCoverExplorer.NAntTasks.Types.CoverageExclusionCollection.GetEnumerator">
+            <summary>
+            Returns an enumerator that can iterate through the collection.
+            </summary>
+            <returns>
+            A <see cref="T:NCoverExplorer.NAntTasks.Types.CoverageExclusionEnumerator"/> for the entire collection.
+            </returns>
+        </member>
+        <member name="M:NCoverExplorer.NAntTasks.Types.CoverageExclusionCollection.Remove(NCoverExplorer.NAntTasks.Types.CoverageExclusion)">
+            <summary>
+            Removes a member from the collection.
+            </summary>
+            <param name="item">The <see cref="T:NCoverExplorer.NAntTasks.Types.CoverageExclusion"/> to remove from the collection.</param>
+        </member>
+        <member name="P:NCoverExplorer.NAntTasks.Types.CoverageExclusionCollection.Item(System.Int32)">
+            <summary>
+            Gets or sets the element at the specified index.
+            </summary>
+            <param name="index">The zero-based index of the element to get or set.</param>
+        </member>
+        <member name="T:NCoverExplorer.NAntTasks.Types.CoverageExclusionEnumerator">
+            <summary>
+            Enumerates the <see cref="T:NCoverExplorer.NAntTasks.Types.CoverageExclusion"/> elements of a <see cref="T:NCoverExplorer.NAntTasks.Types.CoverageExclusionCollection"/>.
+            </summary>
+        </member>
+        <member name="M:NCoverExplorer.NAntTasks.Types.CoverageExclusionEnumerator.#ctor(NCoverExplorer.NAntTasks.Types.CoverageExclusionCollection)">
+            <summary>
+            Initializes a new instance of the <see cref="T:NCoverExplorer.NAntTasks.Types.CoverageExclusionEnumerator"/> class
+            with the specified <see cref="T:NCoverExplorer.NAntTasks.Types.CoverageExclusionCollection"/>.
+            </summary>
+            <param name="arguments">The collection that should be enumerated.</param>
+        </member>
+        <member name="M:NCoverExplorer.NAntTasks.Types.CoverageExclusionEnumerator.MoveNext">
+            <summary>
+            Advances the enumerator to the next element of the collection.
+            </summary>
+            <returns>
+            <see langword="true" /> if the enumerator was successfully advanced 
+            to the next element; <see langword="false" /> if the enumerator has 
+            passed the end of the collection.
+            </returns>
+        </member>
+        <member name="M:NCoverExplorer.NAntTasks.Types.CoverageExclusionEnumerator.Reset">
+            <summary>
+            Sets the enumerator to its initial position, which is before the 
+            first element in the collection.
+            </summary>
+        </member>
+        <member name="P:NCoverExplorer.NAntTasks.Types.CoverageExclusionEnumerator.Current">
+            <summary>
+            Gets the current element in the collection.
+            </summary>
+            <returns>
+            The current element in the collection.
+            </returns>
+        </member>
+        <member name="T:NCoverExplorer.NAntTasks.Types.ModuleThreshold">
+            <summary>
+            A module threshold is used by the console application (only currently) to set coverage thresholds
+            at a more granular level than just at project level.
+            </summary>
+        </member>
+        <member name="M:NCoverExplorer.NAntTasks.Types.ModuleThreshold.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:NCoverExplorer.NAntTasks.Types.ModuleThreshold"/> class.
+            </summary>
+        </member>
+        <member name="M:NCoverExplorer.NAntTasks.Types.ModuleThreshold.#ctor(System.String,System.Single)">
+            <summary>
+            Initializes a new instance of the <see cref="T:NCoverExplorer.NAntTasks.Types.ModuleThreshold"/> class.
+            </summary>
+            <param name="moduleName">Name of the module.</param>
+            <param name="satisfactoryCoverage">The coverage threshold.</param>
+        </member>
+        <member name="P:NCoverExplorer.NAntTasks.Types.ModuleThreshold.ModuleName">
+            <summary>
+            Gets or sets the name of the module.
+            </summary>
+            <value>The name of the module.</value>
+        </member>
+        <member name="P:NCoverExplorer.NAntTasks.Types.ModuleThreshold.SatisfactoryCoverage">
+            <summary>
+            Gets or sets the coverage threshold for this module.
+            </summary>
+            <value>The coverage threshold.</value>
+        </member>
+        <member name="T:NCoverExplorer.NAntTasks.Types.ModuleThresholdCollection">
+            <summary>
+            Strongly typed collection of <see cref="T:NCoverExplorer.NAntTasks.Types.ModuleThreshold"/> objects.
+            </summary>
+        </member>
+        <member name="M:NCoverExplorer.NAntTasks.Types.ModuleThresholdCollection.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:NCoverExplorer.NAntTasks.Types.ModuleThresholdCollection"/> class.
+            </summary>
+        </member>
+        <member name="M:NCoverExplorer.NAntTasks.Types.ModuleThresholdCollection.Add(NCoverExplorer.NAntTasks.Types.ModuleThreshold)">
+            <summary>
+            Add a <see cref="T:NCoverExplorer.NAntTasks.Types.ModuleThreshold"/> object to the collection.
+            </summary>
+            <param name="item">The item to add.</param>
+        </member>
+        <member name="M:NCoverExplorer.NAntTasks.Types.ModuleThresholdCollection.Remove(NCoverExplorer.NAntTasks.Types.ModuleThreshold)">
+            <summary>
+            The remove method that takes a <see cref="T:NCoverExplorer.NAntTasks.Types.ModuleThreshold"/> object.
+            </summary>
+            <param name="value">The item to remove.</param>
+        </member>
+        <member name="M:NCoverExplorer.NAntTasks.Types.ModuleThresholdCollection.Insert(System.Int32,NCoverExplorer.NAntTasks.Types.ModuleThreshold)">
+            <summary>
+            Insert object at this position.
+            </summary>
+            <param name="index">Position to insert at.</param>
+            <param name="value">Object to insert.</param>
+        </member>
+        <member name="M:NCoverExplorer.NAntTasks.Types.ModuleThresholdCollection.IndexOf(NCoverExplorer.NAntTasks.Types.ModuleThreshold)">
+            <summary>
+            Returns index position of this object.
+            </summary>
+            <param name="value">The value.</param>
+            <returns></returns>
+        </member>
+        <member name="M:NCoverExplorer.NAntTasks.Types.ModuleThresholdCollection.Contains(NCoverExplorer.NAntTasks.Types.ModuleThreshold)">
+            <summary>
+            Returns whether this collection contains this object.
+            </summary>
+            <param name="value">Object to find.</param>
+            <returns>
+            	<c>true</c> if contains the specified value; otherwise, <c>false</c>.
+            </returns>
+        </member>
+        <member name="M:NCoverExplorer.NAntTasks.Types.ModuleThresholdCollection.Contains(System.String)">
+            <summary>
+            Returns whether this collection contains this object.
+            </summary>
+            <param name="moduleName">Name of the module.</param>
+            <returns>
+            	<c>true</c> if contains the specified value; otherwise, <c>false</c>.
+            </returns>
+        </member>
+        <member name="P:NCoverExplorer.NAntTasks.Types.ModuleThresholdCollection.Item(System.Int32)">
+            <summary>
+            Gets or sets the <see cref="T:NCoverExplorer.NAntTasks.Types.ModuleThreshold"/> object at this ordinal index.
+            </summary>
+        </member>
+        <member name="P:NCoverExplorer.NAntTasks.Types.ModuleThresholdCollection.Item(System.String)">
+            <summary>
+            Gets or sets the <see cref="T:NCoverExplorer.NAntTasks.Types.ModuleThreshold"/> object with this module name.
+            </summary>
+        </member>
+        <member name="T:NCoverExplorer.NAntTasks.Types.ModuleThresholdEnumerator">
+            <summary>
+            Enumerates the <see cref="T:NCoverExplorer.NAntTasks.Types.ModuleThreshold"/> elements of a <see cref="T:NCoverExplorer.NAntTasks.Types.ModuleThresholdCollection"/>.
+            </summary>
+        </member>
+        <member name="M:NCoverExplorer.NAntTasks.Types.ModuleThresholdEnumerator.#ctor(NCoverExplorer.NAntTasks.Types.ModuleThresholdCollection)">
+            <summary>
+            Initializes a new instance of the <see cref="T:NCoverExplorer.NAntTasks.Types.ModuleThresholdEnumerator"/> class
+            with the specified <see cref="T:NCoverExplorer.NAntTasks.Types.ModuleThresholdCollection"/>.
+            </summary>
+            <param name="arguments">The collection that should be enumerated.</param>
+        </member>
+        <member name="M:NCoverExplorer.NAntTasks.Types.ModuleThresholdEnumerator.MoveNext">
+            <summary>
+            Advances the enumerator to the next element of the collection.
+            </summary>
+            <returns>
+            <see langword="true" /> if the enumerator was successfully advanced 
+            to the next element; <see langword="false" /> if the enumerator has 
+            passed the end of the collection.
+            </returns>
+        </member>
+        <member name="M:NCoverExplorer.NAntTasks.Types.ModuleThresholdEnumerator.Reset">
+            <summary>
+            Sets the enumerator to its initial position, which is before the 
+            first element in the collection.
+            </summary>
+        </member>
+        <member name="P:NCoverExplorer.NAntTasks.Types.ModuleThresholdEnumerator.Current">
+            <summary>
+            Gets the current element in the collection.
+            </summary>
+            <returns>
+            The current element in the collection.
+            </returns>
+        </member>
+        <member name="T:NCoverExplorer.Common.NCoverLogLevel">
+            <summary>
+            Logging levels to use within NCover task.
+            </summary>
+        </member>
+        <member name="F:NCoverExplorer.Common.NCoverLogLevel.Quiet">
+            <summary>No logging.</summary>
+        </member>
+        <member name="F:NCoverExplorer.Common.NCoverLogLevel.Normal">
+            <summary>Writes standard log output (Default).</summary>
+        </member>
+        <member name="F:NCoverExplorer.Common.NCoverLogLevel.Verbose">
+            <summary>Writes verbose log output.</summary>
+        </member>
+        <member name="T:NCoverExplorer.Common.NCoverXmlFormat">
+            <summary>
+            New element option introduced in NCover 1.5.7 for use with //x2 argument.
+            </summary>
+        </member>
+        <member name="F:NCoverExplorer.Common.NCoverXmlFormat.Xml1">
+            <summary>
+            Legacy xml format that is the default.
+            </summary>
+        </member>
+        <member name="F:NCoverExplorer.Common.NCoverXmlFormat.Xml2">
+            <summary>
+            New xml format introduced in NCover 1.5.7 that nests method nodes with class nodes.
+            </summary>
+        </member>
+        <member name="T:NCoverExplorer.Common.TreeSortStyle">
+            <summary>
+            Sort order for displaying the coverage results in the tree.
+            </summary>
+        </member>
+        <member name="F:NCoverExplorer.Common.TreeSortStyle.Name">
+            <summary>Sort by name (default). (0)</summary>
+        </member>
+        <member name="F:NCoverExplorer.Common.TreeSortStyle.ClassLine">
+            <summary>Sort by name( down to class level) then by line within the class. (1)</summary>
+        </member>
+        <member name="F:NCoverExplorer.Common.TreeSortStyle.CoveragePercentageAscending">
+            <summary>Sort by coverage percentage ascending. (2)</summary>
+        </member>
+        <member name="F:NCoverExplorer.Common.TreeSortStyle.CoveragePercentageDescending">
+            <summary>Sort by coverage percentage descending. (3)</summary>
+        </member>
+        <member name="F:NCoverExplorer.Common.TreeSortStyle.UnvisitedSequencePointsAscending">
+            <summary>Sort by unvisited lines ascending. (4)</summary>
+        </member>
+        <member name="F:NCoverExplorer.Common.TreeSortStyle.UnvisitedSequencePointsDescending">
+            <summary>Sort by unvisited lines descending. (5)</summary>
+        </member>
+        <member name="F:NCoverExplorer.Common.TreeSortStyle.VisitCountAscending">
+            <summary>Sort by visit count ascending. (6)</summary>
+        </member>
+        <member name="F:NCoverExplorer.Common.TreeSortStyle.VisitCountDescending">
+            <summary>Sort by visit count descending. (7)</summary>
+        </member>
+        <member name="F:NCoverExplorer.Common.TreeSortStyle.FunctionCoverageAscending">
+            <summary>Sort by function coverage ascending. (8)</summary>
+        </member>
+        <member name="F:NCoverExplorer.Common.TreeSortStyle.FunctionCoverageDescending">
+            <summary>Sort by function coverage descending. (9)</summary>
+        </member>
+        <member name="T:NCoverExplorer.Common.TreeFilterStyle">
+            <summary>
+            Filter styles that can be applied to the results. Filtered nodes are not excluded from the coverage
+            statistics.
+            </summary>
+        </member>
+        <member name="F:NCoverExplorer.Common.TreeFilterStyle.None">
+            <summary>No filter applied. (0)</summary>
+        </member>
+        <member name="F:NCoverExplorer.Common.TreeFilterStyle.HideUnvisited">
+            <summary>Hide unvisited nodes. (1)</summary>
+        </member>
+        <member name="F:NCoverExplorer.Common.TreeFilterStyle.HideFullyCovered">
+            <summary>Hide 100% fully covered nodes. (2)</summary>
+        </member>
+        <member name="F:NCoverExplorer.Common.TreeFilterStyle.HideThresholdCovered">
+            <summary>Hide nodes exceeding coverage threshold. (3)</summary>
+        </member>
+        <member name="T:NCoverExplorer.Common.CoverageReportType">
+            <summary>
+            Potential report types.
+            </summary>
+        </member>
+        <member name="F:NCoverExplorer.Common.CoverageReportType.None">
+            <summary>None. (0)</summary>
+        </member>
+        <member name="F:NCoverExplorer.Common.CoverageReportType.ModuleSummary">
+            <summary>Modules summary only. (1)</summary>
+        </member>
+        <member name="F:NCoverExplorer.Common.CoverageReportType.ModuleNamespaceSummary">
+            <summary>Modules summary followed with a namespaces by module summary. (3)</summary>
+        </member>
+        <member name="F:NCoverExplorer.Common.CoverageReportType.ModuleClassSummary">
+            <summary>Modules summary followed with a classes by namespace summary. (4)</summary>
+        </member>
+        <member name="F:NCoverExplorer.Common.CoverageReportType.ModuleClassFunctionSummary">
+            <summary>Modules summary followed with a classes by namespace summary showing function coverage. (5)</summary>
+        </member>
+        <member name="T:NCoverExplorer.NAntTasks.NCoverExplorerTask">
+            <summary>
+            NAnt task for automating NCoverExplorer.Console.
+            Using this task you can merge coverage files from NCover, produce xml coverage reports for use
+            with CruiseControl.Net, produce html report files directly, fail automated builds if coverage
+            thresholds are not met and apply a range of detail to the reports produced such as sorting, 
+            filtering and coverage exclusions.
+            </summary>
+            <example>
+            This example shows producing an xml coverage report at Module/Namespace/Class detail level for
+            inclusion on a CC.Net build server. You would add a merge file task in the publishers section
+            of your CC.Net project file to merge in this "CoverageSummary.xml" file so that it can be 
+            transformed by the NCoverExplorer xsl stylesheets you have copied into the CC.Net folder. Here
+            we have set a satisfactory coverage threshold at 80%.
+                   <code>
+                       <![CDATA[
+                       <ncoverexplorer program="tools\ncoverexplorer\ncoverexplorer.console.exe" 
+            						   projectName="My Project"
+            						   outputDir="${build.reports}"
+            						   satisfactoryCoverage="80"
+                                       reportType="4"
+            						   xmlReportName="CoverageSummary.xml" >
+                           <fileset>
+                               <include name="coverage.xml" />
+                           </fileset>
+            		   </ncoverexplorer>
+                       ]]>
+                   </code>
+            </example>
+            <example>
+            This example shows producing an html function coverage report, excluding the test assemblies. The
+            assemblies excluded are being displayed at the bottom of the report. Note also that this time
+            the reportType is specified by its enum name rather than numeric value - they are interchangable.
+                   <code>
+                       <![CDATA[
+                       <ncoverexplorer program="tools\ncoverexplorer\ncoverexplorer.console.exe" 
+            						   projectName="My Project"
+            						   outputDir="${build.reports}"
+            						   satisfactoryCoverage="80"
+                                       reportType="ModuleClassFunctionSummary"
+            						   htmlReportName="CoverageSummary.html"
+            						   showExcluded="True" >
+                           <fileset>
+                               <include name="coverage.xml" />
+                           </fileset>
+                           <exclusions>
+                               <exclusion type="Assembly" pattern="*.Tests" />
+                           </exclusions>
+            		   </ncoverexplorer>
+                       ]]>
+                   </code>
+            </example>
+            <example>
+            This example shows producing an html module class summary coverage report with exclusions as above.
+            This time we have added applying specific sorting and filtering criteria. This report will show all
+            classes that do not have 100% coverage, sorted within their namespaces by descending coverage %.
+                   <code>
+                       <![CDATA[
+                       <ncoverexplorer program="tools\ncoverexplorer\ncoverexplorer.console.exe" 
+            						   projectName="My Project"
+            						   outputDir="${build.reports}"
+            						   satisfactoryCoverage="80"
+                                       reportType="ModuleClassSummary"
+            						   htmlReportName="CoverageSummary.html"
+            						   showExcluded="True"
+            						   sort="CoveragePercentageDescending"
+            						   filter="HideFullyCovered" >
+                           <fileset>
+                               <include name="coverage.xml" />
+                           </fileset>
+                           <exclusions>
+                               <exclusion type="Assembly" pattern="*.Tests" />
+                           </exclusions>
+            		   </ncoverexplorer>
+                       ]]>
+                   </code>
+            </example>
+            <example>
+            This example shows the merging capability to produce a consolidated merge file from multiple
+            coverage test runs. The results are being stored in a single "MyApp.CoverageMerged.xml" file.
+            Note that you could additionally apply coverage exclusions at this point. Merging files can
+            be useful if your testing process requires multiple coverage runs and you want a single archive
+            which consolidates the results.
+                   <code>
+                       <![CDATA[
+                       <ncoverexplorer program="tools\ncoverexplorer\ncoverexplorer.console.exe" 
+            						   outputDir="${build.reports}"
+            						   reportType="None"
+            						   mergeFileName="MyApp.CoverageMerged.xml" >
+                           <fileset>
+                               <include name="*.coverage.xml" />
+                           </fileset>
+            		   </ncoverexplorer>
+                       ]]>
+                   </code>
+            </example>
+            <example>
+            This example shows failing a build if the overall coverage % does not meet our threshold, without
+            producing a coverage report.
+                   <code>
+                       <![CDATA[
+                       <ncoverexplorer program="tools\ncoverexplorer\ncoverexplorer.console.exe" 
+            						   projectName="My Project"
+            						   reportType="None"
+            						   minimumCoverage="80"
+            						   failMinimum="True" >
+                           <fileset>
+                               <include name="coverage.xml" />
+                           </fileset>
+            		   </ncoverexplorer>
+                       ]]>
+                   </code>
+            </example>
+            <example>
+            This example shows failing a build if either the overall coverage % does not meet our threshold, or
+            if one of the individual module thresholds is not met.
+                   <code>
+                       <![CDATA[
+                       <ncoverexplorer program="tools\ncoverexplorer\ncoverexplorer.console.exe" 
+            						   projectName="My Project"
+            						   reportType="None"
+            						   minimumCoverage="80"
+            						   failMinimum="True" >
+                           <fileset>
+                               <include name="coverage.xml" />
+                           </fileset>
+                           <moduleThresholds>
+                               <moduleThreshold moduleName="MyApp.1.dll" satisfactoryCoverage="75" />
+                               <moduleThreshold moduleName="MyApp.2.dll" satisfactoryCoverage="85" />
+                           </moduleThresholds>
+            		   </ncoverexplorer>
+                       ]]>
+                   </code>
+            </example>
+            <example>
+            This example shows using virtually the whole range of attributes. Shown below is failing a build 
+            if not reaching the overall or module level coverage thresholds. The results of merging multiple 
+            NCover files together are stored as a separate file. We are producing xml and html Namespace per
+            module summary reports (with the exclusions show in the footer). Note that the module thresholds 
+            will also be used in the reports. The reports are sorted by name with no filter applied.
+            We are excluding test assemblies and anything in a presentation layer namespace.
+                   <code>
+                       <![CDATA[
+                       <ncoverexplorer program="tools\ncoverexplorer\ncoverexplorer.console.exe" 
+            						   projectName="My Project" 
+            						   reportType="ModuleNamespaceSummary"
+            						   sort="Name"
+            						   filter="None"
+            						   outputDir="${build.reports}"
+            						   xmlReportName="CoverageSummary.xml"
+            						   htmlReportName="CoverageSummary.html"
+            						   mergeFileName="CoverageMerge.xml"
+            						   showExcluded="True"
+            						   satisfactoryCoverage="80"
+            						   minimumCoverage="80"
+            						   failMinimum="True">
+                           <fileset>
+                               <include name="coverage.xml" />
+                           </fileset>
+                           <exclusions>
+                               <exclusion type="Assembly" pattern="*.Tests" />
+                               <exclusion type="Namespace" pattern="MyApp.SomeNamespace" />
+                               <exclusion type="Namespace" pattern="MyApp\.(\w*\.)?" isRegex="true" />
+                               <exclusion type="Class" pattern="MyApp.SomeNamespace.SomeClass" />
+                           </exclusions>
+                           <moduleThresholds>
+                               <moduleThreshold moduleName="MyApp.1.dll" satisfactoryCoverage="75" />
+                               <moduleThreshold moduleName="MyApp.2.dll" satisfactoryCoverage="85" />
+                           </moduleThresholds>
+            		   </ncoverexplorer>
+                       ]]>
+                   </code>
+            </example>
+        </member>
+        <member name="M:NCoverExplorer.NAntTasks.NCoverExplorerTask.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:NCoverExplorer.NAntTasks.NCoverExplorerTask"/> class.
+            </summary>
+        </member>
+        <member name="M:NCoverExplorer.NAntTasks.NCoverExplorerTask.StartProcess">
+            <summary>
+            Starts the process and handles errors.
+            </summary>
+            <returns>
+            The <see cref="T:System.Diagnostics.Process"/> that was started.
+            </returns>
+        </member>
+        <member name="M:NCoverExplorer.NAntTasks.NCoverExplorerTask.PrepareProcess(System.Diagnostics.Process)">
+            <summary>
+            Performs logic before the external process is started.
+            </summary>
+            <param name="process">Process.</param>
+            <exception cref="T:NAnt.Core.BuildException">Thrown if no matching coverage files.</exception>
+        </member>
+        <member name="M:NCoverExplorer.NAntTasks.NCoverExplorerTask._OnProcessExited(System.Object,System.EventArgs)">
+            <summary>
+            Removes generated config file after process has run.
+            </summary>
+        </member>
+        <member name="M:NCoverExplorer.NAntTasks.NCoverExplorerTask._GetConfigFilename">
+            <summary>
+            Return a temporary filename for the config file for executing NCoverExplorer.Console.
+            </summary>
+            <returns>Configuration filename.</returns>
+        </member>
+        <member name="M:NCoverExplorer.NAntTasks.NCoverExplorerTask._IsLegacyNCoverExplorerConsole(System.String)">
+            <summary>
+            Legacy NCoverExplorer.Console is considered prior to 1.4.0 (as 1.4.0 was when the settings
+            file format was changed).
+            </summary>
+            <param name="exeName">NCoverExplorer.Console.exe path.</param>
+            <returns><c>true</c> if version is prior to 1.4.0</returns>
+        </member>
+        <member name="M:NCoverExplorer.NAntTasks.NCoverExplorerTask._BuildLegacyTempConfigXmlFile(System.String)">
+            <summary>
+            Build the xml config file to pass to the NCoverExplorer.Console executable for legacy versions (prior to 1.4.0).
+            </summary>
+        </member>
+        <member name="M:NCoverExplorer.NAntTasks.NCoverExplorerTask._BuildTempConfigXmlFile(System.String)">
+            <summary>
+            Build the Xml config file to pass to the NCoverExplorer.Console executable.
+            </summary>
+        </member>
+        <member name="M:NCoverExplorer.NAntTasks.NCoverExplorerTask._BuildLegacyArguments">
+            <summary>
+            Build command line for passing to legacy NCoverExplorer.Console versions.
+            </summary>
+        </member>
+        <member name="P:NCoverExplorer.NAntTasks.NCoverExplorerTask.ExeName">
+            <summary>
+            The name of the executable that should be used to launch the
+            external program.
+            </summary>
+            <value>
+            The name of the executable that should be used to launch the external
+            program, or <see langword="null"/> if no name is specified.
+            </value>
+            <remarks>
+            If available, the configured value in the NAnt configuration
+            file will be used if no name is specified.
+            </remarks>
+        </member>
+        <member name="P:NCoverExplorer.NAntTasks.NCoverExplorerTask.OutputDir">
+            <summary>
+            Gets or sets the output directory for the reports.
+            </summary>
+            <value>The output dir.</value>
+        </member>
+        <member name="P:NCoverExplorer.NAntTasks.NCoverExplorerTask.FailMinimum">
+            <summary>
+            Whether to fail the task if the minimumCoverage threshold is not reached on any module. 
+            NCoverExplorer console application will return exit code 3.
+            </summary>
+        </member>
+        <member name="P:NCoverExplorer.NAntTasks.NCoverExplorerTask.FailCombinedMinimum">
+            <summary>
+            Whether to fail the task if the minimumCoverage threshold is not reached on total coverage. 
+            NCoverExplorer console application will return exit code 3.
+            </summary>
+        </member>
+        <member name="P:NCoverExplorer.NAntTasks.NCoverExplorerTask.MinimumCoverage">
+            <summary>
+            The minimum coverage percentage to be used with the failMinimum and failCombinedMinimum options.
+            </summary>
+        </member>
+        <member name="P:NCoverExplorer.NAntTasks.NCoverExplorerTask.SatisfactoryCoverage">
+            <summary>
+            The satisfactory coverage percentage for display in the reports.
+            </summary>
+        </member>
+        <member name="P:NCoverExplorer.NAntTasks.NCoverExplorerTask.ProjectName">
+            <summary>
+            The project name to appear in the report.
+            </summary>
+        </member>
+        <member name="P:NCoverExplorer.NAntTasks.NCoverExplorerTask.ReportType">
+            <summary>
+            The type of report to produce (use numeric value or string name). 
+            0 / None, 1 / ModuleSummary, 3 / ModuleNamespaceSummary, 
+            4 / ModuleClassSummary, 5 / ModuleClassFunctionSummary
+            </summary>
+            <value>The string or textual enum value.</value>
+        </member>
+        <member name="P:NCoverExplorer.NAntTasks.NCoverExplorerTask.Sort">
+            <summary>
+            The sorting if any to apply (use numeric value or string name).
+            0 / Name, 1 / ClassLine, 
+            2 / CoveragePercentageAscending, 3 / CoveragePercentageDescending,
+            4 / UnvisitedSequencePointsAscending, 5 / UnvisitedSequencePointsDescending,
+            6 / VisitCountAscending, 7 / VisitCountDescending,
+            8 / FunctionCoverageAscending, 9 / FunctionCoverageDescending
+            </summary>
+            <value>The string or textual enum value.</value>
+        </member>
+        <member name="P:NCoverExplorer.NAntTasks.NCoverExplorerTask.Filter">
+            <summary>
+            The filtering if any to apply (use numeric value or string name).
+            0 / None, 1 / HideUnvisited, 2 / HideFullyCovered, 3 / HideThresholdCovered
+            </summary>
+            <value>The string or textual enum value.</value>
+        </member>
+        <member name="P:NCoverExplorer.NAntTasks.NCoverExplorerTask.XmlReportName">
+            <summary>
+            The filename for generating an xml report.
+            </summary>
+        </member>
+        <member name="P:NCoverExplorer.NAntTasks.NCoverExplorerTask.HtmlReportName">
+            <summary>
+            The filename for generating an html report.
+            </summary>
+        </member>
+        <member name="P:NCoverExplorer.NAntTasks.NCoverExplorerTask.MergeFileName">
+            <summary>
+            The filename for the merge of the coverage xml files.
+            </summary>
+        </member>
+        <member name="P:NCoverExplorer.NAntTasks.NCoverExplorerTask.ShowExcluded">
+            <summary>
+            Determines whether to include the coverage exclusions in the report. The default is 
+            <see langword="true" />.
+            </summary>
+        </member>
+        <member name="P:NCoverExplorer.NAntTasks.NCoverExplorerTask.CoverageExclusions">
+            <summary>
+            Coverage exclusions to apply.
+            </summary>
+        </member>
+        <member name="P:NCoverExplorer.NAntTasks.NCoverExplorerTask.ModuleThresholds">
+            <summary>
+            Coverage exclusions to apply.
+            </summary>
+        </member>
+        <member name="P:NCoverExplorer.NAntTasks.NCoverExplorerTask.CoverageFiles">
+            <summary>
+            Used to select the coverage xml files to merge into the report. To use a <see cref="T:NAnt.Core.Types.FileSet"/>.
+            </summary>
+        </member>
+        <member name="P:NCoverExplorer.NAntTasks.NCoverExplorerTask.ProgramArguments">
+            <summary>
+            The command-line arguments for the external program.
+            </summary>
+        </member>
+        <member name="T:NCoverExplorer.NAntTasks.NCoverTask">
+            <summary>
+            NAnt task for automating NCover.Console.exe, with both NCover 1.3.3 and 1.5.x support. Note that this task
+            will self register CoverLib.dll by default using the registry (does not require local admin).
+            </summary>
+            <example>
+            This example shows the standard profiling using NCover for standard nunit tests with minimum arguments.
+            Defaults are with no logging, profiling all assemblies, output filename of coverage.xml and this assumes that
+            NCover and NUnit are in the path.
+                   <code>
+                       <![CDATA[
+                       <ncover  commandLineExe="${nunit.path}\nunit-console.exe" 
+            					commandLineArgs="${build.path}\myapp.tests.dll" >
+                       </ncover>
+                       ]]>
+                   </code>
+            </example>
+            <example>
+            If you are using TypeMock, you may experience issues with the registration of coverlib.dll conflicting
+            due to overwriting the registered profiler. You should add the "registerProfiler" attribute below and set it to false.
+                   <code>
+                       <![CDATA[
+                       <ncover  commandLineExe="${nunit.path}\nunit-console.exe" 
+            					commandLineArgs="${build.path}\myapp.tests.dll"
+            					registerProfiler="false" >
+                       </ncover>
+                       ]]>
+                   </code>
+            </example>
+            <example>
+            This example shows the standard profiling using for standard nunit tests with minimal arguments.
+            Defaults are with logging to coverage.log, profiling all assemblies, output filename of coverage.xml and this 
+            example specifies a full path to NCover.Console.exe.
+                   <code>
+                       <![CDATA[
+                       <ncover  program="C:\Program Files\NCover\ncover.console.exe" 
+            					commandLineExe="${nunit.path}\nunit-console.exe" 
+            					commandLineArgs="${build.path}\myapp.tests.dll" >
+                       </ncover>
+                       ]]>
+                   </code>
+            </example>
+            <example>
+            This example for NCover 1.5.8 shows profiling a process which is launched by another process.
+                   <code>
+                       <![CDATA[
+                       <ncover  program="C:\Program Files\NCover\ncover.console.exe" 
+            					commandLineExe="MyLauncher.exe" 
+            					profiledProcessModule="LaunchedProcess.exe" >
+                       </ncover>
+                       ]]>
+                   </code>
+            </example>
+            <example>
+            This example shows using the assemblies attribute inline rather than having child elements, and
+            also showing how child elements of commandLineArgs should be quoted if they contain spaces.
+                   <code>
+                       <![CDATA[
+                       <ncover  program="tools\ncover\ncover.console.exe" 
+            					commandLineExe="${nunit.path}\nunit-console.exe" 
+            					commandLineArgs="myapp.tests.dll /xml=&quot;c:\my results\test.xml&quot;"
+            					assemblyList="myapp.main;myapp.core"
+            					excludeAttributes="CoverageExcludeAttribute" >
+                       </ncover>
+                       ]]>
+                   </code>
+            </example>
+            <example>
+            This example shows the standard profiling using NCover 1.5.x for a Windows application, specifying a coverage
+            exclusion, verbose logging to a named file, specifically named log, output xml and html files. It also shows
+            coverage exclusion attributes, overriding the NCover location to run from and a way of listing assemblies
+            to be included in the profiled NCover results.
+                   <code>
+                       <![CDATA[
+                       <ncover  program="tools\ncover\ncover.console.exe" 
+            					commandLineExe="${nunit.path}\nunit-console.exe" 
+            					commandLineArgs="myapp.tests.dll"
+            					coverageFile="myapp.coverage.xml"
+            					logLevel="Verbose"
+            					logFile="myapp.coverage.log"
+            					workingDirectory="${build.path}"
+            					excludeAttributes="CoverageExcludeAttribute" >
+                           <assemblies basedir="${build.path}">
+                               <include name="myapp.*.dll" />
+                           </assemblies>
+                       </ncover>
+                       ]]>
+                   </code>
+            </example>
+        </member>
+        <member name="M:NCoverExplorer.NAntTasks.NCoverTask.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:NCoverExplorer.NAntTasks.NCoverTask"/> class.
+            </summary>
+        </member>
+        <member name="M:NCoverExplorer.NAntTasks.NCoverTask.StartProcess">
+            <summary>
+            Starts the process and handles errors.
+            </summary>
+            <returns>
+            The <see cref="T:System.Diagnostics.Process"/> that was started.
+            </returns>
+        </member>
+        <member name="M:NCoverExplorer.NAntTasks.NCoverTask.PrepareProcess(System.Diagnostics.Process)">
+            <summary>
+            Performs logic before the external process is started.
+            </summary>
+            <param name="process">Process.</param>
+        </member>
+        <member name="M:NCoverExplorer.NAntTasks.NCoverTask._ConvertStringCollectionToArray(System.Collections.Specialized.StringCollection)">
+            <summary>
+            Convert the NAnt specific StringCollection to a string array for use by NCoverUtilities.
+            </summary>
+            <param name="files"></param>
+            <returns></returns>
+        </member>
+        <member name="M:NCoverExplorer.NAntTasks.NCoverTask._OnProcessExited(System.Object,System.EventArgs)">
+            <summary>
+            Removes generated settings file after process has run.
+            </summary>
+        </member>
+        <member name="P:NCoverExplorer.NAntTasks.NCoverTask.ExeName">
+            <summary>
+            The name of the executable that should be used to launch the external program.
+            </summary>
+            <value>
+            The name of the executable that should be used to launch the external
+            program, or <see langword="null"/> if no name is specified.
+            </value>
+            <remarks>
+            If available, the configured value in the NAnt configuration
+            file will be used if no name is specified.
+            </remarks>
+        </member>
+        <member name="P:NCoverExplorer.NAntTasks.NCoverTask.CommandLineExe">
+            <summary>
+            The command line executable to be launched by NCover (such as nunit-console.exe).
+            </summary>
+        </member>
+        <member name="P:NCoverExplorer.NAntTasks.NCoverTask.CommandLineArgs">
+            <summary>
+            The arguments to pass to the command line executable to be launched by NCover (such as nunit-console.exe).
+            </summary>
+        </member>
+        <member name="P:NCoverExplorer.NAntTasks.NCoverTask.CoverageFile">
+            <summary>
+            The filename for the output coverage.xml file (default).
+            </summary>
+        </member>
+        <member name="P:NCoverExplorer.NAntTasks.NCoverTask.LogLevel">
+            <summary>
+            What level of NCover logging to provide. Values are "Quiet", "Normal" (default) and "Verbose".
+            Note that due to a current bug in NCover 1.5.4 there is no different between Quiet and Normal
+            since the //q argument (NoLog=true) will lock NCover. So logging is always on for NCover 1.5.4
+            </summary>
+        </member>
+        <member name="P:NCoverExplorer.NAntTasks.NCoverTask.LogFile">
+            <summary>
+            Gets or sets the logfile name to write to if logLevel is set to anything other than "Quiet". The default
+            is "coverage.log".
+            </summary>
+        </member>
+        <member name="P:NCoverExplorer.NAntTasks.NCoverTask.WorkingDirectory">
+            <summary>
+            Gets or sets the working directory for the command line executable.
+            </summary>
+        </member>
+        <member name="P:NCoverExplorer.NAntTasks.NCoverTask.ExcludeAttributes">
+            <summary>
+            If coverage exclusion attributes have been applied (NCover 1.5.4 onwards) specify the full namespace
+            to the attribute including the "Attribute" suffix - e.g. "CoverageExcludeAttribute" if defined in no
+            namespace. Separate multiple attributes with semi-colons.
+            </summary>
+        </member>
+        <member name="P:NCoverExplorer.NAntTasks.NCoverTask.ProfileIIS">
+            <summary>
+            Determines whether to profile under IIS (//iis). Default value is <see langword="false" />.
+            </summary>
+        </member>
+        <member name="P:NCoverExplorer.NAntTasks.NCoverTask.ProfileService">
+            <summary>
+            The service name to profile if any (//svc). Default is none.
+            </summary>
+        </member>
+        <member name="P:NCoverExplorer.NAntTasks.NCoverTask.AssemblyList">
+            <summary>
+            Used to specify the assemblies to be profiled by specifically naming them. Values
+            should be separated by semi-colons and not include suffixe or path (and case sensitive)
+            as this is how they are identified by the CLR. e.g. "MyApp.Main;MyApp.Core".
+            </summary>
+        </member>
+        <member name="P:NCoverExplorer.NAntTasks.NCoverTask.Assemblies">
+            <summary>
+            Used to specify the assemblies to be profiled by choosing dynamically from a
+            directory. To use see <see cref="T:NAnt.Core.Types.FileSet"/>.
+            </summary>
+        </member>
+        <member name="P:NCoverExplorer.NAntTasks.NCoverTask.RegisterProfiler">
+            <summary>
+            Determines whether to register NCover CoverLib.dll on each run. The default is <c>true</c>. You
+            would set this to <c>false</c> if using TypeMock due to a conflict in registered profilers.
+            If set to true, the NCover task uses a reference counting approach to minimise the chance
+            of issues when simultaneous builds.
+            </summary>
+        </member>
+        <member name="P:NCoverExplorer.NAntTasks.NCoverTask.XmlFormat">
+            <summary>
+            Gets or sets a value indicating the xml output format to write (new in NCover 1.5.7).
+            Default value is "Xml1", alternate option is "Xml2" which nests method nodes within class
+            nodes. Note however that "Xml2" is for future use and is not yet supported by NCoverExplorer
+            as of version 1.3.6.
+            </summary>
+        </member>
+        <member name="P:NCoverExplorer.NAntTasks.NCoverTask.ProfiledProcessModule">
+            <summary>
+            Gets or sets the profiled process module name. Use this argument when the executable being
+            launched is not the actual process you want to profile coverage for.
+            </summary>
+        </member>
+        <member name="P:NCoverExplorer.NAntTasks.NCoverTask.ProgramArguments">
+            <summary>
+            The command-line arguments for the external program.
+            </summary>
+        </member>
+        <member name="T:NCoverExplorer.Common.NCoverUtilities">
+            <summary>
+            Common utility functions for working with NCover.
+            </summary>
+        </member>
+        <member name="F:NCoverExplorer.Common.NCoverUtilities.NCOVER_PROFILER_CLSID">
+            <summary>
+            Registry key for registering NCover manually - this will all become unnecessary in future versions of NCover (post 1.5.5) hopefully.
+            </summary>
+        </member>
+        <member name="M:NCoverExplorer.Common.NCoverUtilities.BuildTempSettingsXmlFileForNCover(System.String,System.String,System.String,System.String,System.String,System.String,System.String,System.String[],System.String,NCoverExplorer.Common.NCoverLogLevel,System.String,System.String,System.Boolean,System.String,NCoverExplorer.Common.NCoverXmlFormat,System.String)">
+            <summary>
+            Builds the temp settings XML file for NCover.
+            </summary>
+            <param name="version">The version.</param>
+            <param name="ncoverPath">The ncover path.</param>
+            <param name="settingsFile">The settings file.</param>
+            <param name="commandLineExe">The command line exe.</param>
+            <param name="commandLineArgs">The command line args.</param>
+            <param name="workingDirectory">The working directory.</param>
+            <param name="assemblyList">The assembly list.</param>
+            <param name="assemblyFiles">The assembly files.</param>
+            <param name="coverageFile">The coverage file.</param>
+            <param name="logLevel">The log level.</param>
+            <param name="logFile">The log file.</param>
+            <param name="excludeAttributes">The exclude attributes.</param>
+            <param name="profileIIS">If set to <c>true</c> profile IIS.</param>
+            <param name="profileService">The profile service.</param>
+            <param name="xmlFormat">The XML format to write out (new feature in 1.5.7).</param>
+            <param name="profiledProcessModule">Name of the profiled process.</param>
+            <returns>
+            Command line switch necessary for passing as an argument.
+            </returns>
+        </member>
+        <member name="M:NCoverExplorer.Common.NCoverUtilities.CreateCommandLineArguments(System.String,System.String,System.String,System.String,System.String,System.String,System.String,NCoverExplorer.Common.NCoverLogLevel,System.String,System.String,System.Boolean,System.String,System.Boolean,System.Boolean,System.String)">
+            <summary>
+            Creates the command line arguments.
+            </summary>
+            <param name="version">The version.</param>
+            <param name="ncoverPath">The ncover path.</param>
+            <param name="commandLineExe">The command line exe.</param>
+            <param name="commandLineArgs">The command line args.</param>
+            <param name="workingDirectory">The working directory.</param>
+            <param name="assemblyList">The assembly list.</param>
+            <param name="coverageFile">The coverage file.</param>
+            <param name="logLevel">The log level.</param>
+            <param name="logFile">The log file.</param>
+            <param name="excludeAttributes">The exclude attributes.</param>
+            <param name="profileIIS">if set to <c>true</c> [profile IIS].</param>
+            <param name="profileService">The profile service.</param>
+            <param name="includeFormatting">if set to <c>true</c> include formatting.</param>
+            <param name="registerCoverLib">Whether to register CoverLib.dll.</param>
+            <param name="commandLineFormatToken">The command line format token.</param>
+            <returns></returns>
+        </member>
+        <member name="M:NCoverExplorer.Common.NCoverUtilities.RegisterNCover(System.String)">
+            <summary>
+            Registers the NCover coverlib.dll by writing directly into the registry under HKCU.
+            Keeps a reference count so only register if only NCover task currently running.
+            </summary>
+        </member>
+        <member name="M:NCoverExplorer.Common.NCoverUtilities.UnregisterNCover">
+            <summary>
+            Unregisters the NCover coverlib.dll
+            Keeps a reference count so only unregister if last NCover task currently running.
+            </summary>
+        </member>
+        <member name="M:NCoverExplorer.Common.NCoverUtilities._ReadNCoverConsoleVersion(System.String)">
+            <summary>
+            Find path to NCover console and retrieve the version info.
+            </summary>
+        </member>
+        <member name="M:NCoverExplorer.Common.NCoverUtilities.GetFileContents(System.String)">
+            <summary>
+            Reads the file contents and returns as a string.
+            </summary>
+        </member>
+        <member name="M:NCoverExplorer.Common.NCoverUtilities._BuildTempSettingsXmlFileForNCover133(System.String,System.String,System.String,System.String,System.String,System.String[],System.String,NCoverExplorer.Common.NCoverLogLevel,System.String)">
+            <summary>
+            Build the Xml .ncoversettings file to pass to the NCover.Console executable using NCover 1.3.3 syntax.
+            </summary>
+        </member>
+        <member name="M:NCoverExplorer.Common.NCoverUtilities._WriteAssemblyNamesForNCover133(System.String,System.String[],System.Xml.XmlTextWriter)">
+            <summary>
+            Write assembly names as a semi-colon delimited unique assembly name list.
+            Assembly names do not have extensions (how NCover requires them) to match how the
+            CLR identifies them when being profiled.
+            </summary>
+        </member>
+        <member name="M:NCoverExplorer.Common.NCoverUtilities._BuildTempSettingsXmlFileForNCover15(System.Int32,System.String,System.String,System.String,System.String,System.String,System.String[],System.String,NCoverExplorer.Common.NCoverLogLevel,System.String,System.String,System.Boolean,System.String,NCoverExplorer.Common.NCoverXmlFormat,System.String)">
+            <summary>
+            Build the Xml .ncoversettings file to pass to the NCover.Console executable using NCover 1.5 syntax.
+            </summary>
+        </member>
+        <member name="M:NCoverExplorer.Common.NCoverUtilities._WriteAssemblyNodes(System.String,System.String[],System.Xml.XmlTextWriter)">
+            <summary>
+            Writes assembly names as separate Assembly nodes in the settings file. Seems to be a 
+            difference in how NCover 1.5.4 onwards handles from previous versions in the xml.
+            </summary>
+        </member>
+        <member name="M:NCoverExplorer.Common.NCoverUtilities._BuildCommandLineForNCover133(System.String,System.String,System.String,System.String,System.String,NCoverExplorer.Common.NCoverLogLevel,System.String,System.String)">
+            <summary>
+            Build a command line using NCover 1.3.3 syntax.
+            </summary>
+        </member>
+        <member name="M:NCoverExplorer.Common.NCoverUtilities._BuildCommandLineForNCover15(System.Int32,System.String,System.String,System.String,System.String,System.String,NCoverExplorer.Common.NCoverLogLevel,System.String,System.String,System.Boolean,System.String,System.Boolean,System.String)">
+            <summary>
+            Build a command line using NCover 1.5.x syntax.
+            </summary>
+        </member>
+        <member name="M:NCoverExplorer.Common.NCoverUtilities._RegisterNCoverInHKCURegistry(System.String)">
+             <summary>
+            Creates the necessary HKCU entries for the NCover coverlib.dll.
+             </summary>
+             <param name="ncoverPath">The ncover path.</param>
+        </member>
+        <member name="M:NCoverExplorer.Common.NCoverUtilities._ConsoleCtrlCheck(NCoverExplorer.Common.NCoverUtilities.CtrlTypes)">
+            <summary>
+            Handles a control-C style event so we can cleanup our refcount.
+            </summary>
+            <param name="ctrlType">Type of control exit.</param>
+            <returns>Whether to cancel the event.</returns>
+        </member>
+        <member name="T:NCoverExplorer.NAntTasks.NUnitProjectTask">
+            <summary>
+            Create a .nunit project file for all the test assemblies matching the specified pattern.
+            This should be created in the bin folder where your test assemblies are located so that 
+            the assemblies are within the AppDomain path.
+            The .nunit file can then be used by NUnit or NCover based tasks.
+            </summary>
+            <example>
+              <para>
+              Create a .nunit project file in output bin folder for a specified test assembly.
+              </para>
+              <code>
+                <![CDATA[
+            <nunitproject project="C:\MyApp\bin\MyApp.nunit">
+                <fileset basedir="C:\MyApp\bin">
+                    <include name="MyApp.Tests.dll" />
+                </fileset>
+            </nunitproject>
+                ]]>
+              </code>
+            </example>
+            <example>
+              <para>
+              Create a .nunit project file in output bin folder with an associated App.Config file for
+              all test assemblies matching a pattern.
+              </para>
+              <code>
+                <![CDATA[
+            <nunitproject project="C:\MyApp\bin\MyApp.nunit" appConfig="C:\MyApp\bin\App.config">
+                <fileset basedir="C:\MyApp\bin">
+                    <include name="MyApp.*.Tests.dll" />
+                </fileset>
+            </nunitproject>
+                ]]>
+              </code>
+            </example>
+        </member>
+        <member name="M:NCoverExplorer.NAntTasks.NUnitProjectTask.#ctor">
+            <summary>
+            Default constructor.
+            </summary>
+        </member>
+        <member name="M:NCoverExplorer.NAntTasks.NUnitProjectTask.InitializeTask(System.Xml.XmlNode)">
+            <summary>
+            Checks whether the task is initialized with valid attributes.
+            </summary>
+            <param name="taskNode">The <see cref="T:System.Xml.XmlNode"/> used to initialize the task.</param>
+        </member>
+        <member name="M:NCoverExplorer.NAntTasks.NUnitProjectTask.ExecuteTask">
+            <summary>
+            Build the contents of the .nunit file using the test assemblies matching this pattern.
+            </summary>
+        </member>
+        <member name="M:NCoverExplorer.NAntTasks.NUnitProjectTask._CreateNUnitProjectFile(System.String,NAnt.Core.Types.FileSet,System.String,System.String)">
+            <summary>
+            Create a .nunit project file listing the test assemblies.
+            </summary>
+            <param name="nunitProjectFileName">Full filename of the .nunit file.</param>
+            <param name="testFileSet">Fileset containing the test assemblies.</param>
+            <param name="appConfig">Optional path to App.Config file to include in project.</param>
+            <param name="appBase">Optional path to the nunit app base, when included full paths to each assembly (relative to the appbase) are included</param>
+        </member>
+        <member name="P:NCoverExplorer.NAntTasks.NUnitProjectTask.ProjectFile">
+            <summary>
+            The nunit project file to create.
+            </summary>
+        </member>
+        <member name="P:NCoverExplorer.NAntTasks.NUnitProjectTask.AppConfig">
+            <summary>
+            Optional path to an App.Config file to be specified in the .nunit project file.
+            </summary>
+        </member>
+        <member name="P:NCoverExplorer.NAntTasks.NUnitProjectTask.AppBase">
+            <summary>
+            Optional path to the nunit app base, when included full paths to each assembly 
+            (relative to the appbase) are included.
+            </summary>
+        </member>
+        <member name="P:NCoverExplorer.NAntTasks.NUnitProjectTask.TestingFileSet">
+            <summary>
+            Used to select the test assemblies to be included in the .nunit project. To use see <see cref="T:NAnt.Core.Types.FileSet"/>.
+            </summary>
+        </member>
+        <member name="T:NCoverExplorer.Common.PathSearch">
+            <summary>
+            Utility class to scan for an executable in all available paths.
+            Based on CodeProject article at: http://www.codeproject.com/csharp/winwhich.asp
+            </summary>
+        </member>
+        <member name="M:NCoverExplorer.Common.PathSearch.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:NCoverExplorer.Common.PathSearch"/> class.
+            </summary>
+        </member>
+        <member name="M:NCoverExplorer.Common.PathSearch.GetVersionForExecutable(System.String,System.Boolean)">
+            <summary>
+            Return the version information for the executable located at this path. If executable
+            not found at this location (e.g. not a fully qualified path) does a path search to see
+            if it can be found anywhere else.
+            </summary>
+            <param name="executablePath">Path to executable to find.</param>
+            <param name="throwExceptionIfNotFound">Whether to throw exception if not found.</param>
+            <returns>Version number in format Major.Minor.Build</returns>
+        </member>
+        <member name="M:NCoverExplorer.Common.PathSearch.Search(System.String)">
+            <summary>
+            Searches for the specified executable name in all available paths.
+            </summary>
+            <param name="executableName">Name of the executable.</param>
+            <returns></returns>
+        </member>
+        <member name="M:NCoverExplorer.Common.PathSearch._GetRegExString(System.String)">
+            <summary>
+            Form the regular expression string for the matching file.
+            </summary>
+            <param name="executableName">The name of the executable</param>
+            <returns>string that is the regex pattern.</returns>
+        </member>
+        <member name="T:NCoverExplorer.NAntTasks.NDoc2Task">
+            <summary>
+            Runs NDoc2 Alpha to create documentation for .NET 2.0 assemblies. Unlike the original &lt;ndoc&gt; task, this one 
+            simply runs the NDoc.Console.exe with the configuration file created.
+            </summary>
+            <remarks>
+              <para>
+              The easiest way to create the correct contents for this task is to use the NDocGui and save the resulting
+              configuration file. Then just paste in the &lt;documenter&gt; and other sections you want into your NAnt script as is.
+              See the <see href="http://www.kynosarges.de/NDoc.html">NDoc2 Alpha page</see> for more 
+              information about NDoc Alpha.
+              </para>
+            </remarks>
+            <example>
+              <para>
+              Document two assemblies using the MSDN-CHM documenter. The namespaces are documented in <c>NamespaceSummary.xml</c>. 
+              This is assuming that the NDocConsole.exe is in your path. If not, use the "program" attribute on the ndoc2
+              node to specify the path to NDocConsole.exe.
+              </para>
+              <code>
+                <![CDATA[
+            <ndoc2>
+                <assemblies basedir="${build.dir}">
+                    <include name="MyApp.exe" />
+                    <include name="MyApp.dll" />
+                </assemblies>
+                <summaries basedir="${build.dir}">
+                    <include name="NamespaceSummary.xml" />
+                </summaries>
+                <documenters>
+                    <documenter name="MSDN-CHM">
+                        <property name="IncludeFavorites" value="False" />
+                        <property name="OutputDirectory" value="doc\MSDN" />
+                        <property name="HtmlHelpName" value="MyApp" />
+                        <property name="Title" value="MyApp Class Library" />
+                        <property name="Version" value="" />
+            			<property name="UseAssemblyShadowCache" value="False" />
+            			<property name="DocumentExplicitInterfaceImplementations" value="True" />
+            			<property name="AssemblyVersionInfo" value="AssemblyFileVersion" />
+            			<property name="CopyrightText" value="© 2007 KiwiNova" />
+                     </documenter>
+                </documenters> 
+            </ndoc2>
+                ]]>
+              </code>
+              <para>Content of <c>NamespaceSummary.xml</c> :</para>
+              <code>
+                <![CDATA[
+            <namespaces>
+                <namespace name="Foo.Bar">
+                    The <b>Foo.Bar</b> namespace reinvents the wheel.
+                </namespace>
+                <namespace name="Foo.Bar.Tests">
+                    The <b>Foo.Bar.Tests</b> namespace ensures that the Foo.Bar namespace reinvents the wheel correctly.
+                </namespace>
+            </namespaces>
+                ]]>
+              </code>
+            </example>
+        </member>
+        <member name="M:NCoverExplorer.NAntTasks.NDoc2Task.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:NCoverExplorer.NAntTasks.NDoc2Task"/> class.
+            </summary>
+        </member>
+        <member name="M:NCoverExplorer.NAntTasks.NDoc2Task.InitializeTask(System.Xml.XmlNode)">
+            <summary>
+            Initializes the taks and verifies the parameters.
+            </summary>
+            <param name="taskNode"><see cref="T:System.Xml.XmlNode"/> containing the XML fragment used to define this task instance.</param>
+        </member>
+        <member name="M:NCoverExplorer.NAntTasks.NDoc2Task.StartProcess">
+            <summary>
+            Starts the process and handles errors.
+            </summary>
+            <returns>
+            The <see cref="T:System.Diagnostics.Process"/> that was started.
+            </returns>
+        </member>
+        <member name="M:NCoverExplorer.NAntTasks.NDoc2Task.PrepareProcess(System.Diagnostics.Process)">
+            <summary>
+            Performs logic before the external process is started.
+            </summary>
+            <param name="process">Process.</param>
+        </member>
+        <member name="M:NCoverExplorer.NAntTasks.NDoc2Task._OnProcessExited(System.Object,System.EventArgs)">
+            <summary>
+            Removes generated config file after process has run.
+            </summary>
+        </member>
+        <member name="M:NCoverExplorer.NAntTasks.NDoc2Task._GetConfigFilename">
+            <summary>
+            Concatenates variables for complete filename.
+            </summary>
+            <returns>Configuration filename.</returns>
+        </member>
+        <member name="M:NCoverExplorer.NAntTasks.NDoc2Task._ExpandPropertiesInNodes(System.Xml.XmlNodeList)">
+            <summary>
+            Performs macro expansion for the given nodes.
+            </summary>
+            <param name="nodes"><see cref="T:System.Xml.XmlNodeList"/> for which expansion should be performed.</param>
+        </member>
+        <member name="M:NCoverExplorer.NAntTasks.NDoc2Task._BuildArguments">
+            <summary>
+            Builds the arguments to pass to the exe.
+            </summary>
+        </member>
+        <member name="M:NCoverExplorer.NAntTasks.NDoc2Task._BuildTempConfigXmlFile">
+            <summary>
+            Build the Xml config file to pass to the NDoc2 executable.
+            </summary>
+        </member>
+        <member name="P:NCoverExplorer.NAntTasks.NDoc2Task.ExeName">
+            <summary>
+            The name of the executable that should be used to launch the
+            external program.
+            </summary>
+            <value>
+            The name of the executable that should be used to launch the external
+            program, or <see langword="null"/> if no name is specified.
+            </value>
+            <remarks>
+            If available, the configured value in the NAnt configuration
+            file will be used if no name is specified.
+            </remarks>
+        </member>
+        <member name="P:NCoverExplorer.NAntTasks.NDoc2Task.Assemblies">
+            <summary>
+            The set of assemblies to document.
+            </summary>
+        </member>
+        <member name="P:NCoverExplorer.NAntTasks.NDoc2Task.Summaries">
+            <summary>
+            The set of namespace summary files.
+            </summary>
+        </member>
+        <member name="P:NCoverExplorer.NAntTasks.NDoc2Task.Documenters">
+            <summary>
+            Specifies the formats in which the documentation should be generated.
+            </summary>
+        </member>
+        <member name="P:NCoverExplorer.NAntTasks.NDoc2Task.ReferencePaths">
+            <summary>
+            Collection of additional directories to search for referenced 
+            assemblies.
+            </summary>
+        </member>
+        <member name="P:NCoverExplorer.NAntTasks.NDoc2Task.ProgramArguments">
+            <summary>
+            The command-line arguments for the external program.
+            </summary>
+        </member>
+    </members>
+</doc>

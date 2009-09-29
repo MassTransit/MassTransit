@@ -30,7 +30,7 @@ namespace MassTransit.Infrastructure.Tests.Sagas
 	using Saga;
 	using ITransaction=Magnum.Data.ITransaction;
 
-	[TestFixture]
+	[TestFixture, Category("Integration")]
 	public class When_using_the_saga_locator_with_NHibernate
 	{
 		[SetUp]

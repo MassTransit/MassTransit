@@ -4,7 +4,7 @@ namespace MassTransit.Infrastructure.Tests.Sagas
 	using NUnit.Framework;
 	using Rhino.Mocks;
 
-	[TestFixture]
+	[TestFixture, Category("Integration")]
 	public class SagaLoadTest :
 		LoopbackTestFixture
 	{

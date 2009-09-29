@@ -19,13 +19,13 @@ namespace MassTransit.Transports.Msmq.Tests
 	using NUnit.Framework;
 	using TestFixtures;
 
-	[TestFixture]
+	[TestFixture, Category("Integration")]
 	public class Given_a_message_is_received_from_a_transactional_queue :
 		MsmqTransactionalEndpointTestFixture
 	{
 	}
 
-	[TestFixture]
+	[TestFixture, Category("Integration")]
 	public class When_a_consumer_throws_an_exception_in_the_transaction :
 		Given_a_message_is_received_from_a_transactional_queue
 	{
@@ -64,7 +64,7 @@ namespace MassTransit.Transports.Msmq.Tests
         }
 	}
 
-	[TestFixture]
+	[TestFixture, Category("Integration")]
 	public class When_a_consumer_receives_the_message_in_the_transaction :
 		Given_a_message_is_received_from_a_transactional_queue
 	{

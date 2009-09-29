@@ -18,7 +18,7 @@ namespace MassTransit.Transports.Msmq.Tests
 	using NUnit.Framework;
 	using TestFixtures;
 
-	[TestFixture]
+	[TestFixture, Category("Integration")]
 	public class Receiving_an_object_from_an_endpoint :
 		MsmqEndpointOnlyTestFixture
 	{

@@ -19,7 +19,7 @@ namespace MassTransit.Transports.Msmq.Tests.Learning
     using NUnit.Framework;
     using NUnit.Framework.SyntaxHelpers;
 
-    [TestFixture]
+    [TestFixture, Category("Integration")]
     public class When_reading_from_a_transactional_queue
     {
         private readonly ManualResetEvent _txCompleted = new ManualResetEvent(false);

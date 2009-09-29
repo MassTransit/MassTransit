@@ -20,7 +20,7 @@ namespace MassTransit.Transports.Msmq.Tests
     using NUnit.Framework;
 
     //TODO: Remove?
-    [TestFixture]
+    [TestFixture, Category("Integration")]
     public class When_receiving_from_a_transactional_queue
     {
         #region Setup/Teardown
@@ -142,7 +142,7 @@ namespace MassTransit.Transports.Msmq.Tests
         }
     }
 
-    [TestFixture]
+    [TestFixture, Category("Integration")]
     public class When_receiving_from_a_queue
     {
         #region Setup/Teardown

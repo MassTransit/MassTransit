@@ -30,7 +30,7 @@ namespace MassTransit.Infrastructure.Tests.Sagas
 	using Saga;
 	using Environment=NHibernate.Cfg.Environment;
 
-	[TestFixture]
+	[TestFixture, Category("Integration")]
 	public class Sending_multiple_messages_to_the_same_saga_at_the_same_time :
 		LoopbackTestFixture
 	{
@@ -104,7 +104,7 @@ namespace MassTransit.Infrastructure.Tests.Sagas
 		}
 	}
 
-	[TestFixture]
+	[TestFixture, Category("Integration")]
 	public class Sending_multiple_messages_to_the_same_saga_legacy_at_the_same_time :
 		LoopbackTestFixture
 	{
