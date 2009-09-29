@@ -28,7 +28,6 @@ namespace MassTransit.Tests
 		Specification
 	{
 		private IEndpointFactory _endpointFactory;
-		private IEndpoint _endpoint;
 		private IServiceBus _bus;
 		private IObjectBuilder _builder;
 

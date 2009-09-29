@@ -4,12 +4,8 @@ namespace MassTransit.Tests
     using System.Collections;
     using System.Collections.Generic;
     using NUnit.Framework;
-	using System;
-	using System.Collections;
-	using System.Collections.Generic;
-    using NUnit.Framework;
 
-    public static class BddExtensions
+	public static class BddExtensions
     {
         public static void ShouldBeTrue(this bool value)
         {
