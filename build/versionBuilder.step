@@ -94,7 +94,7 @@
         <attribute type="AssemblyCopyrightAttribute" value="${company.name}, original author or authors" />
         <attribute type="AssemblyCompanyAttribute" value="${company.name}" />
         <attribute type="AllowPartiallyTrustedCallers" if="${allow.partially_trusted_callers}" asis="true" />
-        <attribute type="AssemblyKeyFileAttribute" value="${file.key.name.private}" if="${file::exists(file.key.name.private)}" />
+        <attribute type="AssemblyKeyFileAttribute" value="${file.key.name.private}" if="${sign.project_with_key}" />
       </attributes>
     </asminfo>
   </target>
