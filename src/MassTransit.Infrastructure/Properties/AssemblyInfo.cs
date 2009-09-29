@@ -15,13 +15,8 @@ using System.Reflection;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-
-[assembly : AssemblyTitle("MassTransit.Infrastructure")]
-[assembly : AssemblyDescription("")]
-[assembly : AssemblyConfiguration("")]
-[assembly : AssemblyProduct("MassTransit.Infrastructure")]
-[assembly : AssemblyTrademark("")]
-[assembly : AssemblyCulture("")]
+[assembly: AssemblyConfiguration("")]
+[assembly: AssemblyCulture("")]
 
 
 [assembly: log4net.Config.XmlConfigurator(ConfigFile = "test.log4net.xml")]
