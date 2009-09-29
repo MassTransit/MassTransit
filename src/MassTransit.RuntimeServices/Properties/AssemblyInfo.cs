@@ -13,9 +13,6 @@
 using System.Reflection;
 using System.Runtime.InteropServices;
 
-[assembly : AssemblyTitle("MassTransitServices")]
-[assembly : AssemblyDescription("")]
 [assembly : AssemblyConfiguration("")]
-[assembly : AssemblyProduct("MassTransitServices")]
 [assembly : AssemblyCulture("")]
 [assembly : Guid("566b76da-1210-490c-9eba-c9375b579e06")]
