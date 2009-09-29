@@ -88,7 +88,7 @@
         <attribute type="AssemblyVersionAttribute" value="${version.major}.${version.minor}.${version.build}.${version.revision}" />
         <attribute type="AssemblyTitleAttribute" value="${project.name}" />
         <attribute type="AssemblyProductAttribute" value="${project.name}" />
-        <attribute type="AssemblyDescriptionAttribute" value="For the exclusive use of ${company.name}." />
+        <attribute type="AssemblyDescriptionAttribute" value="For everyone." />
         <attribute type="AssemblyTrademarkAttribute" value="All rights reserved, ${company.name}" />
         <attribute type="AssemblyFileVersionAttribute" value="${version.major}.${version.minor}.${version.build}.${version.revision}" />
         <attribute type="AssemblyCopyrightAttribute" value="${company.name}, original author or authors" />
