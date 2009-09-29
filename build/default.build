@@ -105,6 +105,18 @@
       xpath="/info/entry/@revision"
       property="version.revision"
       failonerror="false"/>
+    <exec
+      program="svn"
+      commandline="info ${repository.path} --xml"
+      output="_revision.xml"
+      failonerror="false"
+      if="${version.revision == '0'}"
+      />
+    <xmlpeek
+      file="_revision.xml"
+      xpath="/info/entry/@revision"
+      property="version.revision"
+      failonerror="false"/>
     <delete file="_revision.xml" failonerror="false" />
   </target>
 
