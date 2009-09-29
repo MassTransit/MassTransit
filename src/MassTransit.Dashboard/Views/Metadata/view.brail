@@ -1,5 +1,0 @@
-meta data
-
-<% component capturefor, { @id : "title" }: %>
-<h1>Metadata</h1>
-<% end %> 

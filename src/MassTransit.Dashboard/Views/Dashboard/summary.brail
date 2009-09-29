@@ -1,5 +1,0 @@
-dash body
-
-<% component capturefor, { @id : "title" }: %>
-<h2>Dashboard</h2>
-<% end %> 
