@@ -363,7 +363,7 @@ namespace MassTransit
                                 
                             }, ReceiveTimeout);
                     }
-                    catch (ObjectDisposedException ex)
+                    catch (ObjectDisposedException)
                     {
                         // we need to stop processing
                         return false;

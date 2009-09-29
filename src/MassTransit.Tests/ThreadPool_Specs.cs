@@ -40,10 +40,8 @@ namespace MassTransit.Tests
     public class When_multiple_long_running_jobs_are_queued : 
         Specification
     {
-        private int _counter = 0;
-        private readonly int _numberOfWorkItemsToEnqueue = 5;
-        private readonly int _maxNumberOfThreads = 4;
-        private readonly int _minNumberOfThreads = 1;
+        private int _counter;
+    	private readonly int _minNumberOfThreads = 1;
 
         protected override void Before_each()
         {

@@ -94,7 +94,6 @@ namespace MassTransit.Infrastructure.Tests.Sagas
 
 		private const string _connectionString = "Server=localhost;initial catalog=test;Trusted_Connection=yes";
 		private Configuration _cfg;
-		private IRepository<TestSaga> _repository;
 
 
 		[Test]
