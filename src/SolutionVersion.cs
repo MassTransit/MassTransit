@@ -18,7 +18,7 @@ using System.Security;
 [assembly: AssemblyVersionAttribute("0.8.0.2023")]
 [assembly: AssemblyTitleAttribute("MassTransit")]
 [assembly: AssemblyProductAttribute("MassTransit")]
-[assembly: AssemblyDescriptionAttribute("For the exclusive use of CFT & ACM.")]
+[assembly: AssemblyDescriptionAttribute("For everyone.")]
 [assembly: AssemblyTrademarkAttribute("All rights reserved, CFT & ACM")]
 [assembly: AssemblyFileVersionAttribute("0.8.0.2023")]
 [assembly: AssemblyCopyrightAttribute("CFT & ACM, original author or authors")]
