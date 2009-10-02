@@ -5,7 +5,7 @@ namespace BusDriver.Commands
     using log4net;
     using Magnum.CommandLineParser;
     using MassTransit;
-    using MassTransit.Msmq;
+    using MassTransit.Transports.Msmq;
 
     public class MoveCommand
     {
@@ -17,8 +17,8 @@ namespace BusDriver.Commands
             Uri to = commandLineElements.GetDefinition("to", x => new Uri(x));
 
 
-            ITransport fromQueue = MsmqTransportFactory.New(from);
-            ITransport toQueue = MsmqTransportFactory.New(to);
+            ITransport fromQueue = MsmqTransportFactory.New(From.Uri(from));
+            ITransport toQueue = MsmqTransportFactory.New(From.Uri(to));
 
             fromQueue.Receive(message => msg =>
                                              {
