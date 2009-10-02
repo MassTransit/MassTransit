@@ -1,3 +1,5 @@
+using System.Security.Policy;
+
 namespace BusDriver.Commands
 {
     using System;
@@ -6,7 +8,7 @@ namespace BusDriver.Commands
     using System.Text;
     using log4net;
     using Magnum.CommandLineParser;
-    using MassTransit.Msmq;
+    using MassTransit.Transports.Msmq;
 
     public class ReceiveCommand
     {
@@ -16,7 +18,7 @@ namespace BusDriver.Commands
         {
             Uri uri = commandLineElements.GetDefinition("uri", x => new Uri(x));
 
-            var transport = MsmqTransportFactory.New(uri);
+            var transport = MsmqTransportFactory.New(From.Uri(uri));
 
             transport.Receive(message => msg =>
                                              {

@@ -5,7 +5,7 @@ namespace BusDriver.Commands
     using System.Text;
     using log4net;
     using Magnum.CommandLineParser;
-    using MassTransit.Msmq;
+    using MassTransit.Transports.Msmq;
 
     public class SendTextCommand
     {
@@ -19,7 +19,7 @@ namespace BusDriver.Commands
 
             _log.Info("Sending message " + message + " to " + uri);
 
-            using (var transport = MsmqTransportFactory.New(uri))
+            using (var transport = MsmqTransportFactory.New(From.Uri(uri)))
             {
                 transport.Send(s =>
                                    {
