@@ -37,7 +37,12 @@ namespace MassTransit.StructureMapIntegration
         /// <summary>
         /// Default constructor with not actual registration
         /// </summary>
-        public MassTransitRegistryBase()
+		public MassTransitRegistryBase()
+			: this(x => { })
+		{
+		}
+
+		public MassTransitRegistryBase(Action<IEndpointFactoryConfigurator> configurationAction)
         {
             RegisterBusDependencies();
 
@@ -58,10 +63,12 @@ namespace MassTransit.StructureMapIntegration
                     {
                         x.RegisterTransport(transportType);
                     }
+
+                	configurationAction(x);
                 });
         }
 
-        /// <summary>
+    	/// <summary>
         /// Creates a registry for a service bus listening to an endpoint
         /// </summary>
         public MassTransitRegistryBase(params Type[] transportTypes)
