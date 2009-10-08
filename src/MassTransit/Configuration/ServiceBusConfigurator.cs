@@ -177,6 +177,8 @@ namespace MassTransit.Configuration
 			if (ConcurrentReceiverLimit > 0)
 				bus.ConcurrentReceiveThreads = ConcurrentReceiverLimit;
 
+			bus.MinimumConsumerThreads = MinimumConsumerCount;
+
 			bus.ReceiveTimeout = ReceiveTimeout;
 		}
 

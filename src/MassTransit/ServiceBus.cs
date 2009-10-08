@@ -255,12 +255,12 @@ namespace MassTransit
             {
                 if (_threadPool != null)
                 {
-                    _threadPool.Stop();
+                	_threadPool.Shutdown();
+					_receiveThreadLock.Shutdown();
+					_threadPool.Stop();
                     _threadPool.Dispose();
                     _threadPool = null;
                 }
-
-                _receiveThreadLock.Shutdown();
 
                 if (_serviceContainer != null)
                 {

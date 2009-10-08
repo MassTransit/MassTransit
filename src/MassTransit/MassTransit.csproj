@@ -404,7 +404,7 @@
     <Compile Include="Threading\ResourceLock.cs" />
     <Compile Include="Threading\ResourceLockException.cs" />
     <Compile Include="Threading\ResourceLockScope.cs" />
-    <Compile Include="Threading\VariableThreadPool.cs" />
+    <Compile Include="Threading\DynamicThreadPool.cs" />
     <Compile Include="Transports\EndpointConfiguratorBase.cs" />
     <Compile Include="Transports\LoopbackEndpointConfigurator.cs" />
     <Compile Include="Transports\MulticastUdpEndpointConfigurator.cs" />

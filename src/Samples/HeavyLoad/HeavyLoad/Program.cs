@@ -24,19 +24,19 @@ namespace HeavyLoad
             Console.WriteLine("HeavyLoad - MassTransit Load Generator");
             Console.WriteLine();
 
-			RunLoopbackLoadTest();
+//			RunLoopbackLoadTest();
 
-			RunBatchLoadTest();
+//			RunBatchLoadTest();
 
-			RunTransactionLoadTest();
+//			RunTransactionLoadTest();
 
-			RunLocalMsmqLoadTest();
+//			RunLocalMsmqLoadTest();
 
 			RunContainerLoadTest();
 
 			//RunWcfLoadTest();
 
-			RunCorrelatedMessageTest();
+//			RunCorrelatedMessageTest();
 
 			//RunLocalActiveMqLoadTest();
 
