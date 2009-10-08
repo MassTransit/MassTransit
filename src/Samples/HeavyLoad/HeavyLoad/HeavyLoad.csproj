@@ -50,9 +50,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\lib\log4net.dll</HintPath>
     </Reference>
-    <Reference Include="Magnum, Version=0.1.0.275, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Magnum, Version=0.8.0.383, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\bin\Magnum.dll</HintPath>
+      <HintPath>..\..\..\..\lib\Magnum.dll</HintPath>
     </Reference>
     <Reference Include="Magnum.Infrastructure, Version=0.1.0.348, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>

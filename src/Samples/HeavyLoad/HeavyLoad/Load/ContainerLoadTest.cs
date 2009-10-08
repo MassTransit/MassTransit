@@ -20,7 +20,7 @@ namespace HeavyLoad.Load
 
     public class ContainerLoadTest : IDisposable
 	{
-		private const int _repeatCount = 5000;
+		private const int _repeatCount = 2000;
 		private static readonly ManualResetEvent _completeEvent = new ManualResetEvent(false);
 		private readonly IWindsorContainer _container;
 		private static readonly ManualResetEvent _responseEvent = new ManualResetEvent(false);

@@ -18,11 +18,11 @@ namespace MassTransit.Threading
 	using System.Threading;
 	using log4net;
 	using Magnum;
-	using Util;
 
 	/// <summary>
 	/// A variable size pool of threads
 	/// </summary>
+	[DebuggerDisplay("Thread Count: {CurrentThreadCount}, Min: {MinThreads}, Max: {MaxThreads}")]
 	public class DynamicThreadPool :
 		IDisposable
 	{
@@ -97,6 +97,16 @@ namespace MassTransit.Threading
 			}
 
 			_running = true;
+		}
+
+		public void Shutdown()
+		{
+			if (_disposed) throw new ObjectDisposedException("The object has been disposed");
+
+			if (!_running)
+				return;
+
+			_shutdown.Set();
 		}
 
 		public void Stop()
@@ -175,7 +185,7 @@ namespace MassTransit.Threading
 						bool keepWorking = _handler();
 
 						workload = keepWorking ? Math.Max(1, workload + 1) : Math.Min(0, workload - 1);
-						if(workload > 10)
+						if (workload >= 1)
 						{
 							AddThread();
 							workload = 0;
