@@ -81,6 +81,7 @@
     <Compile Include="Load\LoopbackLoadTest.cs" />
     <Compile Include="Load\TransactionLoadTest.cs" />
     <Compile Include="Load\WcfLoadTest.cs" />
+    <Compile Include="ManagedThreadPool.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Load\SimpleResponse.cs" />

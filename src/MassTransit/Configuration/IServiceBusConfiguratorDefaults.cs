@@ -68,13 +68,5 @@ namespace MassTransit.Configuration
 		/// </summary>
 		/// <param name="concurrentReceiverLimit"></param>
 		void SetConcurrentReceiverLimit(int concurrentReceiverLimit);
-
-		/// <summary>
-		/// Set the minimum number of consumer threads that are active at any time. For consumers that are high-latency,
-		/// settings this to a high number can increase the responsiveness of the application when it is hit with a sudden
-		/// load increase.
-		/// </summary>
-		/// <param name="minimumConsumerCount"></param>
-		void SetMinimumConsumerCount(int minimumConsumerCount);
 	}
 }

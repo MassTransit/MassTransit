@@ -10,22 +10,16 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Threading
+namespace MassTransit.Events
 {
 	using System;
 
-	public interface IResourceLockScope<T> :
-		IDisposable
+	public class MessageReceived
 	{
-		/// <summary>
-		/// The resource for which the lock was acquired
-		/// </summary>
-		T Resource { get; }
+		public Type MessageType { get; set; }
 
-		/// <summary>
-		/// Releases the lock on the resource. Note this should only be called when
-		/// the resource will no longer be accessed.
-		/// </summary>
-		void Release();
+		public TimeSpan ReceiveDuration { get; set; }
+
+		public TimeSpan ConsumeDuration { get; set; }
 	}
 }

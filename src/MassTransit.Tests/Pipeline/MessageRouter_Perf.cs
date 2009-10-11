@@ -1,20 +1,16 @@
 namespace MassTransit.Tests.Pipeline
 {
-	using System;
 	using System.Diagnostics;
 	using System.Threading;
-	using Magnum.DateTimeExtensions;
 	using MassTransit.Pipeline;
 	using MassTransit.Pipeline.Sinks;
 	using Messages;
 	using NUnit.Framework;
 	using Rhino.Mocks;
-	using Threading;
 
 	[TestFixture]
 	public class MessageRouter_Perf
 	{
-		private ManagedThreadPool<int> _threads;
 		private static PerformantConsumer<PingMessage> _consumer;
 
 		internal class PerformantConsumer<T> :
@@ -22,7 +18,7 @@ namespace MassTransit.Tests.Pipeline
 			where T : class
 		{
 			private readonly long _limit;
-			private long _count = 0;
+			private long _count;
 			private readonly ManualResetEvent _complete = new ManualResetEvent(false);
 
 			public ManualResetEvent Complete
@@ -75,33 +71,6 @@ namespace MassTransit.Tests.Pipeline
 
 			const int loopCount = 1500000;
 			SendMessages(router, loopCount);
-
-			timer.Stop();
-
-			Trace.WriteLine("Elapsed Time: " + timer.ElapsedMilliseconds + "ms");
-			Trace.WriteLine("Messages Per Second: " + loopCount*1000/timer.ElapsedMilliseconds);
-		}
-
-		[Test, Explicit]
-		public void Threaded_router_performance_test()
-		{
-			IPipelineSink<object> router = SetupTwoRoutersOnly();
-
-			const int primeLoopCount = 10;
-			SendMessages(router, primeLoopCount);
-
-
-			const int loopCount = 1500000;
-			_threads = new ManagedThreadPool<int>(delegate { SendMessages(router, loopCount / 2); }, 2, 2);
-
-			Stopwatch timer = Stopwatch.StartNew();
-
-			for (int i = 0; i < 2; i++)
-			{
-				_threads.Enqueue(100);
-			}
-
-			_consumer.Complete.WaitOne(20.Seconds(), true);
 
 			timer.Stop();
 

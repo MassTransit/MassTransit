@@ -24,7 +24,6 @@ namespace MassTransit.Configuration
 			AutoStart = true;
 			ReceiveTimeout = 3.Seconds();
 			ConcurrentReceiverLimit = 1;
-			MinimumConsumerCount = 1;
 			ConcurrentConsumerLimit = Environment.ProcessorCount*4;
 		}
 
@@ -32,7 +31,6 @@ namespace MassTransit.Configuration
 		protected TimeSpan ReceiveTimeout { get; private set; }
 		protected int ConcurrentReceiverLimit { get; private set; }
 		protected int ConcurrentConsumerLimit { get; private set; }
-		protected int MinimumConsumerCount { get; private set; }
 		protected bool AutoStart { get; private set; }
 		protected bool AutoSubscribe { get; private set; }
 		protected bool PurgeBeforeStart{get;private set;}
@@ -89,11 +87,6 @@ namespace MassTransit.Configuration
 		public void SetConcurrentReceiverLimit(int concurrentReceiverLimit)
 		{
 			ConcurrentReceiverLimit = concurrentReceiverLimit;
-		}
-
-		public void SetMinimumConsumerCount(int minimumConsumerCount)
-		{
-			MinimumConsumerCount = Math.Min(1, minimumConsumerCount);
 		}
 
 		public void ApplyTo(IServiceBusConfigurator configurator)

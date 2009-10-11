@@ -18,7 +18,6 @@ namespace HeavyLoad.BatchLoad
 	using log4net;
 	using MassTransit;
 	using MassTransit.Batch;
-	using MassTransit.Threading;
 	using MassTransit.Transports.Msmq;
 
     public class BatchLoadTest :

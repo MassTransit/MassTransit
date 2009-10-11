@@ -142,6 +142,10 @@ namespace MassTransit.Tests.Services.HealthMonitoring
 			HealthService.Dispose();
 			HealthService = null;
 
+			SubscriptionService.Stop();
+			SubscriptionService.Dispose();
+			SubscriptionService = null;
+
 			base.TeardownContext();
 		}
 	}

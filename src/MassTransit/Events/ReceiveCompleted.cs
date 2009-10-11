@@ -10,31 +10,9 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Threading
+namespace MassTransit.Events
 {
-	using System;
-	using System.Runtime.Serialization;
-
-	[Serializable]
-	public class ResourceLockException : Exception
+	public class ReceiveCompleted
 	{
-		public ResourceLockException()
-		{
-		}
-
-		public ResourceLockException(string message)
-			: base(message)
-		{
-		}
-
-		public ResourceLockException(string message, Exception innerException)
-			: base(message, innerException)
-		{
-		}
-
-		protected ResourceLockException(SerializationInfo info, StreamingContext context)
-			: base(info, context)
-		{
-		}
 	}
 }
