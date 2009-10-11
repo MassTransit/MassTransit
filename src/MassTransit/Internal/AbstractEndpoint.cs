@@ -12,83 +12,77 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Internal
 {
-    using System;
-    using Serialization;
+	using System;
+	using Serialization;
 
-    public abstract class AbstractEndpoint :
-        IEndpoint
-    {
-        private IEndpointAddress _address;
-        private bool _disposed;
-        private string _disposedMessage;
+	public abstract class AbstractEndpoint :
+		IEndpoint
+	{
+		private readonly IEndpointAddress _address;
+		private bool _disposed;
+		private string _disposedMessage;
 
-        protected AbstractEndpoint(IEndpointAddress address, IMessageSerializer serializer)
-        {
-            _address = address;
-            Serializer = serializer;
-        }
+		protected AbstractEndpoint(IEndpointAddress address, IMessageSerializer serializer)
+		{
+			_address = address;
+			Serializer = serializer;
+		}
 
-        protected IMessageSerializer Serializer { get; set; }
+		protected IMessageSerializer Serializer { get; set; }
 
-        public IEndpointAddress Address
-        {
-            get
-            {
-                return _address;
-            }
-        }
+		public IEndpointAddress Address
+		{
+			get { return _address; }
+		}
 
-        public Uri Uri
-        {
-            get
-            {
-                return Address.Uri;
-            }
-        }
+		public Uri Uri
+		{
+			get { return Address.Uri; }
+		}
 
-        public abstract void Send<T>(T message) where T : class;
-        public abstract void Receive(Func<object, Action<object>> receiver);
-        public abstract void Receive(Func<object, Action<object>> receiver, TimeSpan timeout);
+		public abstract void Send<T>(T message) where T : class;
+		public abstract void Receive(Func<object, Action<object>> receiver);
+		public abstract void Receive(Func<object, Action<object>> receiver, TimeSpan timeout);
 
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
+		public void Dispose()
+		{
+			Dispose(true);
+			GC.SuppressFinalize(this);
+		}
 
-        protected void SetDisposedMessage()
-        {
-            _disposedMessage = "The endpoint has already been disposed: " + _address;
-        }
+		protected void SetDisposedMessage()
+		{
+			_disposedMessage = "The endpoint has already been disposed: " + _address;
+		}
 
-        protected ObjectDisposedException NewDisposedException()
-        {
-            return new ObjectDisposedException(_disposedMessage);
-        }
+		protected ObjectDisposedException NewDisposedException()
+		{
+			return new ObjectDisposedException(_disposedMessage);
+		}
 
-        protected void SetOutboundMessageHeaders<T>()
-        {
-            OutboundMessage.Set(headers =>
-                {
-                    headers.SetMessageType(typeof (T));
-                    headers.SetDestinationAddress(Uri);
-                });
-        }
+		protected void SetOutboundMessageHeaders<T>()
+		{
+			OutboundMessage.Set(headers =>
+				{
+					headers.SetMessageType(typeof (T));
+					headers.SetDestinationAddress(Uri);
+				});
+		}
 
-        protected virtual void Dispose(bool disposing)
-        {
-            if (_disposed) return;
-            if (disposing)
-            {
-                Serializer = null;
-            }
+		protected virtual void Dispose(bool disposing)
+		{
+			if (_disposed) return;
+			if (disposing)
+			{
+				Serializer = null;
+			}
 
-            _disposed = true;
-        }
+			_disposed = true;
+		}
 
-        ~AbstractEndpoint()
-        {
-            Dispose(false);
-        }
-    }
+		~AbstractEndpoint()
+		{
+			Dispose(false);
+		}
+	}
 }

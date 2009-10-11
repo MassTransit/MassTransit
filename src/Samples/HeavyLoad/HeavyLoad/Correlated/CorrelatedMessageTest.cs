@@ -16,7 +16,6 @@ namespace HeavyLoad.Correlated
 	using System.Threading;
 	using Castle.Windsor;
 	using MassTransit;
-	using MassTransit.Threading;
 	using MassTransit.Transports.Msmq;
 
     public class CorrelatedMessageTest : IDisposable

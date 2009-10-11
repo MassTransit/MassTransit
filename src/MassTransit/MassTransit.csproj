@@ -130,8 +130,6 @@
     <Compile Include="Services\Subscriptions\Subscription.cs" />
     <Compile Include="Services\Subscriptions\Client\SubscriptionClient.cs" />
     <Compile Include="Services\Subscriptions\Server\SubscriptionService.cs" />
-    <Compile Include="Threading\ManagedThread.cs" />
-    <Compile Include="Threading\ManagedThreadPool.cs" />
     <Compile Include="TimeoutAttribute.cs" />
     <Compile Include="Transports\MulticastUdpEndpoint.cs" />
     <Compile Include="Util\CheckConvention.cs" />
@@ -160,7 +158,15 @@
     <Compile Include="Grid\IGridServiceInterceptor.cs" />
     <Compile Include="IEndpointAddress.cs" />
     <Compile Include="Internal\AbstractEndpoint.cs" />
+    <Compile Include="Events\ConsumeCompleted.cs" />
+    <Compile Include="Events\ReceiveCompleted.cs" />
+    <Compile Include="Internal\ConsumerThread.cs" />
+    <Compile Include="Internal\ConsumerPool.cs" />
     <Compile Include="Internal\IEndpointManagement.cs" />
+    <Compile Include="Events\MessageConsumed.cs" />
+    <Compile Include="Events\MessageReceived.cs" />
+    <Compile Include="Internal\ServiceBusReceiveContext.cs" />
+    <Compile Include="Internal\ThreadPoolConsumerPool.cs" />
     <Compile Include="ITransport.cs" />
     <Compile Include="Parallel\ITask.cs" />
     <Compile Include="Grid\Messages\AddGridServiceToNode.cs" />
@@ -400,11 +406,6 @@
     <Compile Include="Services\Subscriptions\Messages\SubscriptionInformation.cs" />
     <Compile Include="Services\Subscriptions\LocalSubscriptionService.cs" />
     <Compile Include="Services\Timeout\ScheduledTimeout.cs" />
-    <Compile Include="Threading\IResourceLockScope.cs" />
-    <Compile Include="Threading\ResourceLock.cs" />
-    <Compile Include="Threading\ResourceLockException.cs" />
-    <Compile Include="Threading\ResourceLockScope.cs" />
-    <Compile Include="Threading\DynamicThreadPool.cs" />
     <Compile Include="Transports\EndpointConfiguratorBase.cs" />
     <Compile Include="Transports\LoopbackEndpointConfigurator.cs" />
     <Compile Include="Transports\MulticastUdpEndpointConfigurator.cs" />

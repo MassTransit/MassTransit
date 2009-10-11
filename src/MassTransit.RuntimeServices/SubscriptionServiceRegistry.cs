@@ -43,7 +43,7 @@ namespace MassTransit.RuntimeServices
 
 			RegisterServiceBus(configuration.SubscriptionServiceUri, x =>
 				{
-					//x.SetConcurrentConsumerLimit(1);
+					x.SetConcurrentConsumerLimit(1);
 				});
 		}
 

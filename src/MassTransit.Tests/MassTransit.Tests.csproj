@@ -174,7 +174,6 @@
     <Compile Include="PublishToConsumer_Specs.cs" />
     <Compile Include="RequestReply_Specs.cs" />
     <Compile Include="RequestResponseScope_Specs.cs" />
-    <Compile Include="ResourceLock_Specs.cs" />
     <Compile Include="Saga\Messages\CorrelatedMessage.cs" />
     <Compile Include="Saga\Messages\RegisterUser.cs" />
     <Compile Include="Saga\Messages\SendUserVerificationEmail.cs" />
@@ -209,7 +208,6 @@
     <Compile Include="TextFixtures\LoopbackLocalAndRemoteTestFixture.cs" />
     <Compile Include="TextFixtures\LoopbackTestFixture.cs" />
     <Compile Include="TextFixtures\MulticastUdpTestFixture.cs" />
-    <Compile Include="ThreadPool_Specs.cs" />
     <Compile Include="Timeouts\DeferMessage_Specs.cs" />
     <Compile Include="Timeouts\TimeoutService_Specs.cs" />
     <Compile Include="Transports\EndpointContract.cs" />

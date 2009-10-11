@@ -1,23 +1,23 @@
-/// Copyright 2007-2008 The Apache Software Foundation.
-/// 
-/// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
-/// this file except in compliance with the License. You may obtain a copy of the 
-/// License at 
-/// 
-///   http://www.apache.org/licenses/LICENSE-2.0 
-/// 
-/// Unless required by applicable law or agreed to in writing, software distributed 
-/// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-/// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-/// specific language governing permissions and limitations under the License.
-namespace MassTransit.Threading
+// Copyright 2007-2008 The Apache Software Foundation.
+//  
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
+// this file except in compliance with the License. You may obtain a copy of the 
+// License at 
+// 
+//     http://www.apache.org/licenses/LICENSE-2.0 
+// 
+// Unless required by applicable law or agreed to in writing, software distributed 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// specific language governing permissions and limitations under the License.
+namespace HeavyLoad
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Diagnostics;
 	using System.Threading;
 	using log4net;
 	using Magnum;
-	using Util;
 
 	/// <summary>
 	/// A managed collection of threads for handling tasks
@@ -33,9 +33,9 @@ namespace MassTransit.Threading
 		private readonly Queue<T> _workItems = new Queue<T>();
 		private int _maxThreads;
 		private int _minThreads;
-	    private int _maxQueueDepth = 5000;
+		private int _maxQueueDepth = 5000;
 
-	    public ManagedThreadPool(Action<T> handler)
+		public ManagedThreadPool(Action<T> handler)
 			: this(handler, 1, 10)
 		{
 		}
@@ -82,13 +82,13 @@ namespace MassTransit.Threading
 		/// </summary>
 		public int MaxQueueDepth
 		{
-			[System.Diagnostics.DebuggerStepThrough]
+			[DebuggerStepThrough]
 			get { return _maxQueueDepth; }
 		}
 
 		public int MaxThreads
 		{
-			[System.Diagnostics.DebuggerStepThrough]
+			[DebuggerStepThrough]
 			get { return _maxThreads; }
 			set
 			{
@@ -100,7 +100,7 @@ namespace MassTransit.Threading
 
 		public int MinThreads
 		{
-			[System.Diagnostics.DebuggerStepThrough]
+			[DebuggerStepThrough]
 			get { return _minThreads; }
 			set
 			{
@@ -113,13 +113,13 @@ namespace MassTransit.Threading
 
 		public int CurrentThreadCount
 		{
-			[System.Diagnostics.DebuggerStepThrough]
-			get { lock(_threads) return _threads.Count; }
+			[DebuggerStepThrough]
+			get { lock (_threads) return _threads.Count; }
 		}
 
 		public int QueueDepth
 		{
-			[System.Diagnostics.DebuggerStepThrough]
+			[DebuggerStepThrough]
 			get { lock (_workItems) return _workItems.Count; }
 		}
 
@@ -176,7 +176,7 @@ namespace MassTransit.Threading
 
 			lock (_threads)
 				_threads.Add(thread);
-			
+
 			thread.Start();
 
 			if (_log.IsDebugEnabled)
@@ -187,7 +187,7 @@ namespace MassTransit.Threading
 		{
 			int threadId = Thread.CurrentThread.ManagedThreadId;
 
-			if(_log.IsDebugEnabled)
+			if (_log.IsDebugEnabled)
 				_log.DebugFormat("Starting Thread {0}", threadId);
 
 			WaitHandle[] handles = new WaitHandle[] {_shutdown, _workAvailable};
@@ -197,7 +197,7 @@ namespace MassTransit.Threading
 			{
 				if (result == WaitHandle.WaitTimeout)
 				{
-					lock(_threads)
+					lock (_threads)
 					{
 						if (CurrentThreadCount > MinThreads)
 						{
