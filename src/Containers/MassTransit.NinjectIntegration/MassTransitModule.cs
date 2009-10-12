@@ -1,15 +1,11 @@
-﻿using MassTransit.Internal;
-
-namespace MassTransit.NinjectIntegration
+﻿namespace MassTransit.NinjectIntegration
 {
     using System;
-    using Infrastructure.Subscriptions;
     using Ninject;
     using Ninject.Modules;
-    using Saga.Pipeline;
-    using Services.HealthMonitoring;
-    using Services.Subscriptions.Client;
     using Configuration;
+    using Services.HealthMonitoring.Configuration;
+    using Services.Subscriptions.Configuration;
 
     /// <summary>
     /// This is an extension of the Ninject Module exposing methods to make it easy to get Mass
@@ -18,8 +14,9 @@ namespace MassTransit.NinjectIntegration
     public class MassTransitModule :
         Module
     {
-        // @cbioley :
-        // I moved the ctor implementation in the Load method.
+		public virtual int ConcurrentConsumerLimit { get { return 10; } }
+		public virtual int ConcurrentReceiverLimit { get { return 1; } }
+	
         public override void Load()
         {
             Bind<IObjectBuilder>()
@@ -27,9 +24,10 @@ namespace MassTransit.NinjectIntegration
 
             Bind<IServiceBus>()
                 .To<ServiceBus>();
+
+            ServiceBusConfigurator.Defaults(x => x.SetObjectBuilder(Kernel.Get<IObjectBuilder>()));
         }
 
-        //this at least once
         public void AddTransport<TTransport>() where TTransport : IEndpoint
         {
             AddTransports(typeof(TTransport));
@@ -37,14 +35,23 @@ namespace MassTransit.NinjectIntegration
 
         public void AddTransports(params Type[] transportTypes)
         {
+            RegisterEndpointFactory(x =>
+            {
+                foreach (var transport in transportTypes)
+                {
+                    x.RegisterTransport(transport);
+                }
+            });
+        }
+
+        private void RegisterEndpointFactory(Action<IEndpointFactoryConfigurator> configAction)
+        {
             var endpointFactory = EndpointFactoryConfigurator.New(x =>
             {
                 x.SetObjectBuilder(Kernel.Get<IObjectBuilder>());
-                foreach (var transportType in transportTypes)
-                {
-                    x.RegisterTransport(transportType);
-                }
+                configAction(x);
             });
+
             Bind<IEndpointFactory>()
                 .ToConstant(endpointFactory)
                 .InSingletonScope()
@@ -52,42 +59,69 @@ namespace MassTransit.NinjectIntegration
         }
 
         //at least one of these
-        public void AddBus(string id, Uri endpointToListenOn)
+        public void AddBus(string id, string endpoint, string subscriptionEndPoint)
         {
-            IEndpoint ep = Kernel.Get<IEndpointFactory>().GetEndpoint(endpointToListenOn);
+            RegisterServiceBus(id, endpoint, x =>
+            {
+                ConfigureThreadingModel(x);
+                ConfigureSubscriptionClient(subscriptionEndPoint, x);
+                ConfigureManagementClient(x);
+                ConfigureControlBus(id, endpoint, x);
+            });
+        }
+
+        private void RegisterServiceBus(string id, string endpointUri, Action<IServiceBusConfigurator> configAction)
+        {
+            var bus = ServiceBusConfigurator.New(x =>
+            {
+                x.ReceiveFrom(endpointUri);
+                configAction(x);
+            });
 
             Bind<IServiceBus>()
-                .To<ServiceBus>()
+                .ToConstant(bus)
                 .InSingletonScope()
-                .Named(id)
-                .WithConstructorArgument("endpointToListenOn", ep)
-                .WithPropertyValue("MinimumConsumerThreads", 1)
-                .WithPropertyValue("MaximumConsumerThreads", 10);
+                .Named(id);
         }
 
-        //optional
-        public void TurnOnHealthClient(string busId, int heartbeatInterval)
+        private void ConfigureThreadingModel(IServiceBusConfigurator configurator)
         {
-            Bind<HealthClient>()
-                .ToSelf()
-                .InSingletonScope()
-                .Named("health_client")
-                .WithConstructorArgument("heartbeatInterval", heartbeatInterval)
-                .WithConstructorArgument("bus", Kernel.Get<IServiceBus>(busId))
-                .OnActivation(x => x.Start(Kernel.Get<IServiceBus>(busId)));
+            configurator.SetConcurrentConsumerLimit(ConcurrentConsumerLimit);
+            configurator.SetConcurrentReceiverLimit(ConcurrentReceiverLimit);
         }
 
-        //optional
-        public void TurnOnSubscriptionClient(string busId, Uri subscribedVia)
+        private void ConfigureSubscriptionClient(string subscriptionEndPoint, IServiceBusConfigurator configurator)
         {
-            IEndpoint ep = Kernel.Get<IEndpointFactory>().GetEndpoint(subscribedVia);
-
-            Bind<SubscriptionClient>()
-                .ToSelf()
-                .InSingletonScope()
-                .Named("subscription_client")
-                .WithConstructorArgument("subscriptionServiceEndpoint", ep)
-                .OnActivation(x => x.Start(Kernel.Get<IServiceBus>(busId)));
+            configurator.ConfigureService<SubscriptionClientConfigurator>(x => x.SetSubscriptionServiceEndpoint(subscriptionEndPoint));
         }
+
+        private void ConfigureManagementClient(IServiceBusConfigurator configurator)
+        {
+            configurator.ConfigureService<HealthClientConfigurator>(x => x.SetHeartbeatInterval(3));
+        }
+
+        private void ConfigureControlBus(string id, string endpoint, IServiceBusConfigurator configurator)
+        {
+            var bus = RegisterControlBus(id, endpoint, ConfigureThreadingModel);
+            configurator.UseControlBus(bus);
+        }
+
+        private IControlBus RegisterControlBus(string id, string endpointUri, Action<IServiceBusConfigurator> configAction)
+        {
+            var bus = ControlBusConfigurator.New(x =>
+            {
+                x.ReceiveFrom(endpointUri);
+                x.SetConcurrentReceiverLimit(1);
+                configAction(x);
+            });
+
+            Bind<IControlBus>()
+                .ToConstant(bus)
+                .InSingletonScope()
+                .Named(id);
+
+            return bus;
+        }
+
     }
 }
