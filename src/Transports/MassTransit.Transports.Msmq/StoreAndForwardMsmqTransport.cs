@@ -13,7 +13,6 @@
 namespace MassTransit.Transports.Msmq
 {
 	using System;
-	using System.Diagnostics;
 	using System.Messaging;
 	using System.Transactions;
 	using log4net;
@@ -66,8 +65,6 @@ namespace MassTransit.Transports.Msmq
 			}
 			catch (Exception ex)
 			{
-				Trace.WriteLine(ex.Message);
-
 				_log.Error("Unable to forward message", ex);
 			}
 
@@ -76,7 +73,7 @@ namespace MassTransit.Transports.Msmq
 
 		private Action<Message> TransferMessageFromLocalToRemote(Message local)
 		{
-			Trace.WriteLine("Forwarding message: " + local.Id);
+			_log.Debug("Forwarding message: " + local.Id);
 
 			return outbound => _remoteTransport.Send(remote => remote.BodyStream = outbound.BodyStream);
 		}

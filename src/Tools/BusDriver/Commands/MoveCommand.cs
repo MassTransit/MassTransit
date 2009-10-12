@@ -17,8 +17,8 @@ namespace BusDriver.Commands
             Uri to = commandLineElements.GetDefinition("to", x => new Uri(x));
 
 
-            ITransport fromQueue = MsmqTransportFactory.New(From.Uri(from));
-            ITransport toQueue = MsmqTransportFactory.New(From.Uri(to));
+            ITransport fromQueue = TransportCache.GetTransport(from);
+			ITransport toQueue = TransportCache.GetTransport(to);
 
             fromQueue.Receive(message => msg =>
                                              {

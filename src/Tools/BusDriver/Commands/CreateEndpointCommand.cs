@@ -1,34 +1,24 @@
 namespace BusDriver.Commands
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using Magnum.CommandLineParser;
-    using MassTransit.Transports.Msmq;
+	using System;
+	using System.Collections.Generic;
+	using Magnum.CommandLineParser;
+	using MassTransit.Transports.Msmq;
 
-    public class CreateEndpointCommand
-    {
-        public CreateEndpointCommand(IEnumerable<ICommandLineElement> commandLineElements)
-        {
-            Uri uri = commandLineElements
-                .Where(x => typeof (IDefinitionElement).IsAssignableFrom(x.GetType()))
-                .Select(x => x as IDefinitionElement)
-                .Where(x => x.Key == "uri")
-                .Select(x => new Uri(x.Value))
-                .Single();
+	public class CreateEndpointCommand
+	{
+		public CreateEndpointCommand(IEnumerable<ICommandLineElement> commandLineElements)
+		{
+			Uri uri = commandLineElements.GetDefinition("uri", x => new Uri(x));
 
-            bool transactional = commandLineElements
-                .Where(x => typeof (ISwitchElement).IsAssignableFrom(x.GetType()))
-                .Select(x => x as ISwitchElement)
-                .Where(x => x.Key == 't')
-                .Select(x => true)
-                .SingleOrDefault();
+			bool transactional = commandLineElements.GetSwitch('t');
 
-            Console.WriteLine("Creating queue: " + uri + (transactional ? " (transactional)" : ""));
 
-            var management = MsmqEndpointManagement.New(uri);
+			Console.WriteLine("Creating queue: " + uri + (transactional ? " (transactional)" : ""));
 
-            management.Create(transactional);
-        }
-    }
+			var management = MsmqEndpointManagement.New(uri);
+
+			management.Create(transactional);
+		}
+	}
 }
