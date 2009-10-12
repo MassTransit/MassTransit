@@ -151,9 +151,17 @@ namespace MassTransit.Internal
 		private void CreateAndPublishFault(object message, Exception ex)
 		{
 			if (message.Implements(typeof (CorrelatedBy<>)))
-				_bus.Call("PublishFault", ClassFactory.New(typeof (Fault<,>), message, ex));
+				this.Call("PublishFault", ClassFactory.New(typeof (Fault<,>), message, ex));
 			else
-				_bus.Call("PublishFault", ClassFactory.New(typeof (Fault<>), message, ex));
+				this.Call("PublishFault", ClassFactory.New(typeof (Fault<>), message, ex));
+		}
+
+		// this is called via reflection
+		// ReSharper disable UnusedMember.Local
+		private void PublishFault<T>(T message) where T : class
+		// ReSharper restore UnusedMember.Local
+		{
+			CurrentMessage.GenerateFault(message);
 		}
 
 		private void ReportConsumerTime(Type messageType, TimeSpan receiveTime, TimeSpan consumeTime)
