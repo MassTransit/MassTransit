@@ -161,6 +161,12 @@ namespace MassTransit.Internal
 				Interlocked.Decrement(ref _receiverCount);
 				Interlocked.Decrement(ref _consumerCount);
 			}
+
+			_eventAggregator.Send(new ReceiverQueued
+				{
+					ReceiverCount = _receiverCount,
+					ConsumerCount = _consumerCount,
+				});
 		}
 
 		~ThreadPoolConsumerPool()

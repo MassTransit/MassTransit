@@ -258,7 +258,7 @@ namespace MassTransit.Transports.Msmq.Tests
             {
                 _received.Set();
 
-                throw new NotImplementedException();
+                throw new ApplicationException("Consumer goes boom!");
             }
 
             public void Consume(LegitMessage message)

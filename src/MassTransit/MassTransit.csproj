@@ -138,6 +138,9 @@
   <ItemGroup>
     <Compile Include="CurrentMessage.cs" />
     <Compile Include="EndpointAddress.cs" />
+    <Compile Include="Events\MessagePublished.cs" />
+    <Compile Include="Events\ReceiverQueued.cs" />
+    <Compile Include="Events\ThreadPoolEvent.cs" />
     <Compile Include="Exceptions\AbstractUriException.cs" />
     <Compile Include="Exceptions\TransportException.cs" />
     <Compile Include="FutureMessage.cs" />
@@ -168,6 +171,12 @@
     <Compile Include="Internal\ServiceBusReceiveContext.cs" />
     <Compile Include="Internal\ThreadPoolConsumerPool.cs" />
     <Compile Include="ITransport.cs" />
+    <Compile Include="Monitoring\InstancePerformanceCounter.cs" />
+    <Compile Include="Monitoring\IPerformanceCounter.cs" />
+    <Compile Include="Monitoring\NullPerformanceCounter.cs" />
+    <Compile Include="Monitoring\RuntimePerformanceCounter.cs" />
+    <Compile Include="Monitoring\ServiceBusInstancePerformanceCounters.cs" />
+    <Compile Include="Monitoring\ServiceBusPerformanceCounters.cs" />
     <Compile Include="Parallel\ITask.cs" />
     <Compile Include="Grid\Messages\AddGridServiceToNode.cs" />
     <Compile Include="Grid\Messages\GridServiceAdded.cs" />

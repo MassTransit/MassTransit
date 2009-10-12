@@ -13,17 +13,17 @@
 namespace MassTransit
 {
 	using System;
-	using System.Collections.Generic;
+	using System.Diagnostics;
 	using System.Reflection;
+	using Events;
 	using Exceptions;
 	using Internal;
 	using log4net;
 	using Magnum.DateTimeExtensions;
-	using Magnum.InterfaceExtensions;
 	using Magnum.ObjectExtensions;
 	using Magnum.Pipeline;
 	using Magnum.Pipeline.Segments;
-	using Magnum.Reflection;
+	using Monitoring;
 	using Pipeline;
 	using Pipeline.Configuration;
 
@@ -46,6 +46,8 @@ namespace MassTransit
 		private UnregisterAction _unsubscribeEventDispatchers = () => true;
 		private Pipe _eventAggregator;
 		private ConsumerPool _consumerPool;
+		private ServiceBusInstancePerformanceCounters _counters;
+		private ISubscriptionScope _eventAggregatorScope;
 
 		static ServiceBus()
 		{
@@ -80,6 +82,7 @@ namespace MassTransit
 			EndpointFactory = endpointFactory;
 
 			_eventAggregator = PipeSegment.New();
+			_eventAggregatorScope = _eventAggregator.NewSubscriptionScope();
 
 			_serviceContainer = new ServiceContainer(this);
 
@@ -91,10 +94,14 @@ namespace MassTransit
 			PoisonEndpoint = new PoisonEndpointDecorator(new NullEndpoint());
 
 			ControlBus = this;
+
+			InitializePerformanceCounters();
 		}
 
 		public static IServiceBus Null { get; private set; }
+
 		public IEndpointFactory EndpointFactory { get; private set; }
+
 		public IObjectBuilder ObjectBuilder { get; private set; }
 
 		public TimeSpan ReceiveTimeout
@@ -147,6 +154,8 @@ namespace MassTransit
 		public void Publish<T>(T message)
 			where T : class
 		{
+			Stopwatch publishDuration = Stopwatch.StartNew();
+
 			IOutboundMessageContext context = OutboundMessage.Context;
 
 			context.SetSourceAddress(Endpoint.Uri);
@@ -167,10 +176,19 @@ namespace MassTransit
 				}
 			}
 
+			publishDuration.Stop();
+
 			if (publishedCount == 0)
 			{
 				context.NotifyNoSubscribers(message);
 			}
+
+			_eventAggregator.Send(new MessagePublished
+				{
+					MessageType = typeof (T),
+					ConsumerCount = publishedCount,
+					Duration = publishDuration.Elapsed,
+				});
 
 			context.Reset();
 		}
@@ -297,9 +315,21 @@ namespace MassTransit
 				OutboundPipeline.Dispose();
 				OutboundPipeline = null;
 
+				if (_eventAggregatorScope != null)
+				{
+					_eventAggregatorScope.Dispose();
+					_eventAggregatorScope = null;
+				}
+
 				_eventAggregator = null;
 
 				Endpoint = null;
+
+				if (_counters != null)
+				{
+					_counters.Dispose();
+					_counters = null;
+				}
 
 				if (PoisonEndpoint != null)
 				{
@@ -309,96 +339,45 @@ namespace MassTransit
 			_disposed = true;
 		}
 
+		// ReSharper disable UnusedMember.Local
 		private UnsubscribeAction SometimesGenericsSuck<TComponent>() where TComponent : class
+			// ReSharper restore UnusedMember.Local
 		{
 			return Subscribe<TComponent>();
 		}
 
-		private void ReceiveFromEndpoint()
+		private void InitializePerformanceCounters()
 		{
-			try
-			{
-				Endpoint.Receive(message =>
-					{
-						InboundMessageHeaders.SetCurrent(context =>
-							{
-								context.ReceivedOn(this);
-								context.SetObjectBuilder(ObjectBuilder);
-								context.ReceivedAs(message);
-							});
+			var instanceName = string.Format("{0}_{1}_{2}", Endpoint.Uri.PathAndQuery.Substring(1), Endpoint.Uri.Scheme, Endpoint.Uri.Host);
 
-						IEnumerable<Action<object>> consumers = InboundPipeline.Enumerate(message);
+			_counters = new ServiceBusInstancePerformanceCounters(instanceName);
 
-						IEnumerator<Action<object>> consumerEnumerator = consumers.GetEnumerator();
-						if (!consumerEnumerator.MoveNext())
-						{
-							consumerEnumerator.Dispose();
-							return null;
-						}
+			_eventAggregatorScope.Subscribe<MessageReceived>(message =>
+				{
+					_counters.ReceiveCount.Increment();
+					_counters.ReceiveRate.Increment();
+					_counters.ReceiveDuration.IncrementBy((long) message.ReceiveDuration.TotalMilliseconds);
+					_counters.ReceiveDurationBase.Increment();
+					_counters.ConsumerDuration.IncrementBy((long) message.ConsumeDuration.TotalMilliseconds);
+					_counters.ConsumerDurationBase.Increment();
+				});
 
-						return msg =>
-							{
-								try
-								{
-									bool atLeastOneConsumerFailed = false;
+			_eventAggregatorScope.Subscribe<MessagePublished>(message =>
+				{
+					_counters.PublishCount.Increment();
+					_counters.PublishRate.Increment();
+					_counters.PublishDuration.IncrementBy((long) message.Duration.TotalMilliseconds);
+					_counters.PublishDurationBase.Increment();
 
-									Exception lastException = null;
+					_counters.SentCount.IncrementBy(message.ConsumerCount);
+					_counters.SendRate.IncrementBy(message.ConsumerCount);
+				});
 
-									do
-									{
-										try
-										{
-											consumerEnumerator.Current(msg);
-										}
-										catch (Exception ex)
-										{
-											_log.Error(string.Format("'{0}' threw an exception consuming message '{1}'",
-												consumerEnumerator.Current.GetType().FullName,
-												msg.GetType().FullName), ex);
-
-											atLeastOneConsumerFailed = true;
-											lastException = ex;
-
-											CreateAndPublishFault(msg, ex);
-										}
-									} while (consumerEnumerator.MoveNext());
-
-									if (atLeastOneConsumerFailed)
-									{
-										throw new MessageException(msg.GetType(),
-											"At least one consumer threw an exception",
-											lastException);
-									}
-								}
-								finally
-								{
-									consumerEnumerator.Dispose();
-								}
-							};
-					}, ReceiveTimeout);
-			}
-			catch (ObjectDisposedException ex)
-			{
-				_log.Error("The endpoint has been disposed", ex);
-				throw;
-			}
-			catch (Exception ex)
-			{
-				_log.Error(string.Format("An exception occurred receiving a message from '{0}'", Endpoint.Uri), ex);
-			}
-		}
-
-		private void CreateAndPublishFault(object message, Exception ex)
-		{
-			if (message.Implements(typeof (CorrelatedBy<>)))
-				this.Call("PublishFault", ClassFactory.New(typeof (Fault<,>), message, ex));
-			else
-				this.Call("PublishFault", ClassFactory.New(typeof (Fault<>), message, ex));
-		}
-
-		private void PublishFault<T>(T message) where T : class
-		{
-			CurrentMessage.GenerateFault(message);
+			_eventAggregatorScope.Subscribe<ThreadPoolEvent>(message =>
+				{
+					_counters.ReceiveThreadCount.Set(message.ReceiverCount);
+					_counters.ConsumerThreadCount.Set(message.ConsumerCount);
+				});
 		}
 	}
 }
