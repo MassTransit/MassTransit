@@ -1,105 +1,138 @@
-﻿namespace BusDriver
+﻿// Copyright 2007-2008 The Apache Software Foundation.
+//  
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
+// this file except in compliance with the License. You may obtain a copy of the 
+// License at 
+// 
+//     http://www.apache.org/licenses/LICENSE-2.0 
+// 
+// Unless required by applicable law or agreed to in writing, software distributed 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// specific language governing permissions and limitations under the License.
+namespace BusDriver
 {
-    using System;
-    using System.Linq;
-    using Commands;
-    using log4net;
-    using log4net.Appender;
-    using log4net.Config;
-    using log4net.Core;
-    using log4net.Layout;
-    using log4net.Repository.Hierarchy;
-    using Magnum;
-    using Magnum.CommandLineParser;
+	using System;
+	using System.Collections.Generic;
+	using System.Linq;
+	using Commands;
+	using log4net;
+	using log4net.Appender;
+	using log4net.Config;
+	using log4net.Layout;
+	using Magnum.CommandLineParser;
 
-    internal class Program
-    {
-        private static readonly ILog _log = LogManager.GetLogger(typeof (Program));
-        private static ConsoleAppender _appender;
+	internal class Program
+	{
+		private static readonly ILog _log = LogManager.GetLogger(typeof (Program));
+		private static readonly MonadicCommandLineParser _parser = new MonadicCommandLineParser();
+		private static ConsoleAppender _appender;
 
-        private static void Main(string[] args)
-        {
-            BootstrapLogger();
+		private static void Main(string[] args)
+		{
+			BootstrapLogger();
 
-            _log.Info("Starting up ");
+			_log.Info("Starting up ");
 
-            Console.WriteLine("Hail to the bus driver, bus driver man!");
+			Console.WriteLine("Hail to the bus driver, bus driver man!");
 
+			if (args.Length > 1)
+			{
+				string line = GetUnparsedCommandLine();
 
-            // startup
+				ProcessLine(line);
+			}
+			else
+			{
+				RunInteractiveConsole();
+			}
 
+			Console.WriteLine("Shutting down...");
+		}
 
-            while (ProcessCommand())
-            {
-            }
+		private static string GetUnparsedCommandLine()
+		{
+			string line = Environment.CommandLine;
 
+			string applicationPath = Environment.GetCommandLineArgs()[0];
 
-            Console.WriteLine("Shutting down...");
-        }
+			string quotedApplicationPath = "\"" + applicationPath + "\" ";
 
-        private static bool ProcessCommand()
-        {
-            try
-            {
-                Console.Write("$ ");
+			if (line.Substring(0, applicationPath.Length) == applicationPath)
+				line = line.Substring(applicationPath.Length + 1);
+			else if (line.Substring(0, quotedApplicationPath.Length) == quotedApplicationPath)
+				line = line.Substring(quotedApplicationPath.Length);
+			return line;
+		}
 
-                string line = Console.ReadLine();
+		private static void RunInteractiveConsole()
+		{
+			bool keepGoing = true;
+			do
+			{
+				try
+				{
+					Console.Write("$ ");
 
-                var parser = new MonadicCommandLineParser();
+					string line = Console.ReadLine();
 
-                var elements = parser.Parse(line);
+					keepGoing = ProcessLine(line);
+				}
+				catch (Exception ex)
+				{
+					Console.WriteLine(ex);
+				}
+			} while (keepGoing);
+		}
 
-                _log.Debug("Parsed: " + string.Join(", ", elements.Select(x => x.ToString()).ToArray()));
+		private static bool ProcessLine(string line)
+		{
+			IEnumerable<ICommandLineElement> elements = _parser.Parse(line);
 
-                var element = elements.First();
+			_log.Debug("Parsed: " + string.Join(", ", elements.Select(x => x.ToString()).ToArray()));
 
-                if (element is IArgumentElement)
-                {
-                    var argument = element as IArgumentElement;
+			ICommandLineElement element = elements.First();
 
-                    if (argument.Id == "quit" || argument.Id == "exit")
-                        return false;
+			if (element is IArgumentElement)
+			{
+				var argument = element as IArgumentElement;
 
-                    if (argument.Id == "create")
-                    {
-                        var command = new CreateCommand(elements.Skip(1));
-                    }
+				if (argument.Id == "quit" || argument.Id == "exit")
+					return false;
 
-                    if (argument.Id == "count")
-                    {
-                        var command = new CountEndpointCommand(elements.Skip(1));
-                    }
+				if (argument.Id == "create")
+				{
+					new CreateCommand(elements.Skip(1));
+				}
 
-                    if(argument.Id == "send")
-                    {
-                        new SendTextCommand(elements.Skip(1));
-                    }
+				if (argument.Id == "count")
+				{
+					new CountEndpointCommand(elements.Skip(1));
+				}
 
-                    if(argument.Id == "receive")
-                    {
-                        new ReceiveCommand(elements.Skip(1));
-                    }
+				if (argument.Id == "send")
+				{
+					new SendTextCommand(elements.Skip(1));
+				}
 
-                    if (argument.Id == "move")
-                        new MoveCommand(elements.Skip(1));
-                }
+				if (argument.Id == "receive")
+				{
+					new ReceiveCommand(elements.Skip(1));
+				}
 
-                return true;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex);
-            }
+				if (argument.Id == "move")
+					new MoveCommand(elements.Skip(1));
+			}
 
-            return true;
-        }
+			return true;
+		}
 
-        private static void BootstrapLogger()
-        {
-            _appender = new ConsoleAppender();
-            _appender.Layout = new SimpleLayout();
+		private static void BootstrapLogger()
+		{
+			_appender = new ConsoleAppender();
+			_appender.Layout = new SimpleLayout();
 
-            BasicConfigurator.Configure(_appender);
-        }
-    }
+			BasicConfigurator.Configure(_appender);
+		}
+	}
 }
