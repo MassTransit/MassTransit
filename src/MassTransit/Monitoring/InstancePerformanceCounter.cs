@@ -23,8 +23,10 @@ namespace MassTransit.Monitoring
 
 		public InstancePerformanceCounter(string name, string categoryName, string instanceName)
 		{
-			_pcs = new PerformanceCounter(categoryName, name, instanceName, false);
-			_pcs.RawValue = _pcs.RawValue;
+			_pcs = new PerformanceCounter(categoryName, name, instanceName, false)
+				{
+					RawValue = 0
+				};
 		}
 
 		public string Name

@@ -34,6 +34,7 @@ namespace MassTransit.Internal
 		private int _receiverCount;
 		private ISubscriptionScope _scope;
 		private readonly TimeSpan _receiveTimeout;
+		private readonly object _locker = new object();
 
 		public ThreadPoolConsumerPool(IServiceBus bus, IObjectBuilder objectBuilder, Pipe eventAggregator, TimeSpan receiveTimeout)
 		{
@@ -136,30 +137,33 @@ namespace MassTransit.Internal
 			if (_enabled == false)
 				return;
 
-			if (_receiverCount > 0)
-				return;
-
-			if (_consumerCount >= _maximumThreadCount)
-				return;
-
-			if(_log.IsDebugEnabled)
-				_log.DebugFormat("Queueing receiver for {0}", _bus.Endpoint.Uri);
-
-			var context = new ServiceBusReceiveContext(_bus, _objectBuilder, _eventAggregator, _receiveTimeout);
-
-			Interlocked.Increment(ref _receiverCount);
-			Interlocked.Increment(ref _consumerCount);
-
-			try
+			lock (_locker)
 			{
-				ThreadPool.QueueUserWorkItem(x => context.ReceiveFromEndpoint());
-			}
-			catch (Exception ex)
-			{
-				_log.Error("Unable to queue consumer to thread pool", ex);
+				if (_receiverCount > 0)
+					return;
 
-				Interlocked.Decrement(ref _receiverCount);
-				Interlocked.Decrement(ref _consumerCount);
+				if (_consumerCount >= _maximumThreadCount)
+					return;
+
+				if (_log.IsDebugEnabled)
+					_log.DebugFormat("Queueing receiver for {0}", _bus.Endpoint.Uri);
+
+				var context = new ServiceBusReceiveContext(_bus, _objectBuilder, _eventAggregator, _receiveTimeout);
+
+				Interlocked.Increment(ref _receiverCount);
+				Interlocked.Increment(ref _consumerCount);
+
+				try
+				{
+					ThreadPool.QueueUserWorkItem(x => context.ReceiveFromEndpoint());
+				}
+				catch (Exception ex)
+				{
+					_log.Error("Unable to queue consumer to thread pool", ex);
+
+					Interlocked.Decrement(ref _receiverCount);
+					Interlocked.Decrement(ref _consumerCount);
+				}
 			}
 
 			_eventAggregator.Send(new ReceiverQueued

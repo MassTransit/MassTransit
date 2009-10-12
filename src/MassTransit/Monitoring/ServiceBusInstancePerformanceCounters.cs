@@ -132,6 +132,16 @@ namespace MassTransit.Monitoring
 				ReceiveDurationBase.Dispose();
 				ReceiveDurationBase = null;
 			}
+			if (PublishDuration != null)
+			{
+				PublishDuration.Dispose();
+				PublishDuration = null;
+			}
+			if (PublishDurationBase != null)
+			{
+				PublishDurationBase.Dispose();
+				PublishDurationBase = null;
+			}
 		}
 
 		private IPerformanceCounter CreateCounter(RuntimePerformanceCounter counter)
