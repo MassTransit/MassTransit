@@ -30,24 +30,31 @@ namespace BusDriver
 
 		private static void Main(string[] args)
 		{
-			BootstrapLogger();
-
-			_log.Info("Starting up ");
-
-			Console.WriteLine("Hail to the bus driver, bus driver man!");
-
-			if (args.Length > 1)
+			try
 			{
-				string line = GetUnparsedCommandLine();
+				BootstrapLogger();
 
-				ProcessLine(line);
+				_log.Info("Starting up ");
+
+				Console.WriteLine("Hail to the bus driver, bus driver man!");
+
+				if (args.Length > 1)
+				{
+					string line = GetUnparsedCommandLine();
+
+					ProcessLine(line);
+				}
+				else
+				{
+					RunInteractiveConsole();
+				}
 			}
-			else
+			finally
 			{
-				RunInteractiveConsole();
-			}
+				Console.WriteLine("Shutting down...");
 
-			Console.WriteLine("Shutting down...");
+				TransportCache.Clear();
+			}
 		}
 
 		private static string GetUnparsedCommandLine()
@@ -75,6 +82,8 @@ namespace BusDriver
 					Console.Write("$ ");
 
 					string line = Console.ReadLine();
+					if(line.Trim().Length == 0)
+						continue;
 
 					keepGoing = ProcessLine(line);
 				}

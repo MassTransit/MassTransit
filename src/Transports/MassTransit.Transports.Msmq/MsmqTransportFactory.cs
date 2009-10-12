@@ -24,7 +24,7 @@ namespace MassTransit.Transports.Msmq
                 if (settings.Address.IsLocal)
                     return NewLocalTransport(settings);
 
-                return NewStoreAndForwardTransport(settings);
+                return NewRemoteTransport(settings);
             }
             catch (Exception ex)
             {
@@ -42,14 +42,9 @@ namespace MassTransit.Transports.Msmq
             return new NonTransactionalMsmqTransport(settings.Address);
         }
 
-        private static IMsmqTransport NewStoreAndForwardTransport(CreateMsmqTransportSettings settings)
+        private static IMsmqTransport NewRemoteTransport(CreateMsmqTransportSettings settings)
         {
-            var remoteTransport = new TransactionalMsmqTransport(settings.Address);
-
-            var cacheSettings = GetSettingsForRemoteEndpointCache(settings);
-            ValidateLocalTransport(cacheSettings);
-
-            return new StoreAndForwardMsmqTransport(cacheSettings.Address, remoteTransport);
+			return new TransactionalMsmqTransport(settings.Address);
         }
 
         private static void ValidateLocalTransport(CreateMsmqTransportSettings settings)
@@ -84,6 +79,7 @@ namespace MassTransit.Transports.Msmq
             return new CreateMsmqTransportSettings(new MsmqEndpointAddress(builder.Uri), settings)
                 {
                     CreateIfMissing = true,
+					Transactional = true,
                 };
         }
     }
