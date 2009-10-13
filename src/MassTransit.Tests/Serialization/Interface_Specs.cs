@@ -55,7 +55,7 @@ namespace MassTransit.Tests.Serialization
 		public void Should_dispatch_an_interface_via_the_pipeline()
 		{
 			var builder = MockRepository.GenerateMock<IObjectBuilder>();
-			var pipeline = MessagePipelineConfigurator.CreateDefault(builder);
+			var pipeline = MessagePipelineConfigurator.CreateDefault(builder, null);
 
 			var consumer = new TestMessageConsumer<ComplaintAdded>();
 

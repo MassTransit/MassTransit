@@ -48,8 +48,6 @@ namespace MassTransit.Saga.Pipeline
 
 		protected override void ConsumerAction(TSaga saga, TMessage message)
 		{
-			saga.Bus = Bus;
-
 			if (_log.IsDebugEnabled)
 				_log.DebugFormat("RaiseEvent: {0} {1} {2}", typeof(TSaga).Name, DataEvent.Name, saga.CorrelationId);
 

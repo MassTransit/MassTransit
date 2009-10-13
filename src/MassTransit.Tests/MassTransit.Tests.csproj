@@ -114,6 +114,7 @@
     <Compile Include="Performance\EndpointLoadTest.cs" />
     <Compile Include="Performance\LoadedRequest.cs" />
     <Compile Include="Performance\LoadedResponse.cs" />
+    <Compile Include="Saga\Builder_Specs.cs" />
     <Compile Include="Saga\CompleteSimpleSaga.cs" />
     <Compile Include="Saga\InitiateSimpleSaga.cs" />
     <Compile Include="Pipeline\MessageRouter_Perf.cs" />

@@ -35,10 +35,6 @@ namespace MassTransit.Tests.Saga
 
 			_repository = SetupSagaRepository<SimpleSaga>(ObjectBuilder);
 
-			SetupInitiateSagaSink<SimpleSaga, InitiateSimpleSaga>(LocalBus, _repository, ObjectBuilder);
-			SetupOrchestrateSagaSink<SimpleSaga, CompleteSimpleSaga>(LocalBus, _repository, ObjectBuilder);
-			SetupObservesSagaSink<SimpleSaga, ObservableSagaMessage>(LocalBus, _repository, ObjectBuilder);
-
 			_initiateSimpleSagaUnsubscribe = MockRepository.GenerateMock<UnsubscribeAction>();
 			_completeSimpleSagaUnsubscribe = MockRepository.GenerateMock<UnsubscribeAction>();
 
@@ -98,10 +94,6 @@ namespace MassTransit.Tests.Saga
 
 			_repository = SetupSagaRepository<SimpleSaga>(ObjectBuilder);
 
-			SetupInitiateSagaSink<SimpleSaga, InitiateSimpleSaga>(LocalBus, _repository, ObjectBuilder);
-			SetupOrchestrateSagaSink<SimpleSaga, CompleteSimpleSaga>(LocalBus, _repository, ObjectBuilder);
-			SetupObservesSagaSink<SimpleSaga, ObservableSagaMessage>(LocalBus, _repository, ObjectBuilder);
-
 			_remove = LocalBus.Subscribe<SimpleSaga>();
 
 			PipelineViewer.Trace(LocalBus.InboundPipeline);
@@ -159,10 +151,6 @@ namespace MassTransit.Tests.Saga
 			_sagaId = Guid.NewGuid();
 
 			_repository = SetupSagaRepository<SimpleSaga>(ObjectBuilder);
-
-			SetupInitiateSagaSink<SimpleSaga, InitiateSimpleSaga>(LocalBus, _repository, ObjectBuilder);
-			SetupOrchestrateSagaSink<SimpleSaga, CompleteSimpleSaga>(LocalBus, _repository, ObjectBuilder);
-			SetupObservesSagaSink<SimpleSaga, ObservableSagaMessage>(LocalBus, _repository, ObjectBuilder);
 
 			LocalBus.Subscribe<SimpleSaga>();
 		}

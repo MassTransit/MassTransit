@@ -99,57 +99,31 @@ namespace MassTransit.Tests.Grid
 		private void SetupGridNodeRepository()
 		{
 			GridNodeRepository = EndpointTestFixture<LoopbackEndpoint>.SetupSagaRepository<GridNode>(ObjectBuilder);
-			EndpointTestFixture<LoopbackEndpoint>
-				.SetupObservesSagaStateMachineSink<GridNode, NotifyNodeAvailable>(ControlBus, GridNodeRepository, ObjectBuilder);
-			EndpointTestFixture<LoopbackEndpoint>
-				.SetupObservesSagaStateMachineSink<GridNode, NotifyNodeDown>(ControlBus, GridNodeRepository, ObjectBuilder);
-			EndpointTestFixture<LoopbackEndpoint>
-				.SetupObservesSagaStateMachineSink<GridNode, NotifyNodeWorkload>(ControlBus, GridNodeRepository, ObjectBuilder);
 		}
 
 		private void SetupGridServiceRepository()
 		{
 			GridServiceRepository = EndpointTestFixture<LoopbackEndpoint>.SetupSagaRepository<GridService>(ObjectBuilder);
-			EndpointTestFixture<LoopbackEndpoint>
-				.SetupObservesSagaStateMachineSink<GridService, GridServiceAddedToNode>(ControlBus, GridServiceRepository, ObjectBuilder);
 		}
 
 		private void SetupGridMessageNodeRepository()
 		{
 			GridMessageNodeRepository = EndpointTestFixture<LoopbackEndpoint>.SetupSagaRepository<GridMessageNode>(ObjectBuilder);
-			EndpointTestFixture<LoopbackEndpoint>
-				.SetupObservesSagaStateMachineSink<GridMessageNode, ProposeMessageNode>(ControlBus, GridMessageNodeRepository, ObjectBuilder);
-			EndpointTestFixture<LoopbackEndpoint>
-				.SetupObservesSagaStateMachineSink<GridMessageNode, AcceptProposedMessageNode>(ControlBus, GridMessageNodeRepository, ObjectBuilder);
-			EndpointTestFixture<LoopbackEndpoint>
-				.SetupObservesSagaStateMachineSink<GridMessageNode, MessageCompleted>(ControlBus, GridMessageNodeRepository, ObjectBuilder);
-			EndpointTestFixture<LoopbackEndpoint>
-				.SetupObservesSagaStateMachineSink<GridMessageNode, AcceptedMessageNode>(ControlBus, GridMessageNodeRepository, ObjectBuilder);
 		}
 
 		private void SetupGridListenerRepository()
 		{
 			GridListenerRepository = EndpointTestFixture<LoopbackEndpoint>.SetupSagaRepository<Learner<AvailableGridServiceNode>>(ObjectBuilder);
-			EndpointTestFixture<LoopbackEndpoint>
-				.SetupObservesSagaStateMachineSink<Learner<AvailableGridServiceNode>, Accepted<AvailableGridServiceNode>>(ControlBus, GridListenerRepository, ObjectBuilder);
 		}
 
 		private void SetupGridAcceptorRepository()
 		{
 			GridAcceptorRepository = EndpointTestFixture<LoopbackEndpoint>.SetupSagaRepository<Acceptor<AvailableGridServiceNode>>(ObjectBuilder);
-			EndpointTestFixture<LoopbackEndpoint>
-				.SetupObservesSagaStateMachineSink<Acceptor<AvailableGridServiceNode>, Prepare<AvailableGridServiceNode>>(ControlBus, GridAcceptorRepository, ObjectBuilder);
-			EndpointTestFixture<LoopbackEndpoint>
-				.SetupObservesSagaStateMachineSink<Acceptor<AvailableGridServiceNode>, Accept<AvailableGridServiceNode>>(ControlBus, GridAcceptorRepository, ObjectBuilder);
 		}
 
 		private void SetupGridServiceNodeRepository()
 		{
 			GridServiceNodeRepository = EndpointTestFixture<LoopbackEndpoint>.SetupSagaRepository<GridServiceNode>(ObjectBuilder);
-			EndpointTestFixture<LoopbackEndpoint>
-				.SetupObservesSagaStateMachineSink<GridServiceNode, AddGridServiceToNode>(ControlBus, GridServiceNodeRepository, ObjectBuilder);
-			EndpointTestFixture<LoopbackEndpoint>
-				.SetupObservesSagaStateMachineSink<GridServiceNode, RemoveGridServiceFromNode>(ControlBus, GridServiceNodeRepository, ObjectBuilder);
 		}
 
 		~TestGridNode()

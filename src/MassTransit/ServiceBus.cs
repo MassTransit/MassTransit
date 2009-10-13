@@ -86,9 +86,9 @@ namespace MassTransit
 
 			_serviceContainer = new ServiceContainer(this);
 
-			OutboundPipeline = MessagePipelineConfigurator.CreateDefault(ObjectBuilder);
+			OutboundPipeline = MessagePipelineConfigurator.CreateDefault(ObjectBuilder, this);
 
-			InboundPipeline = MessagePipelineConfigurator.CreateDefault(ObjectBuilder);
+			InboundPipeline = MessagePipelineConfigurator.CreateDefault(ObjectBuilder, this);
 			InboundPipeline.Configure(x => { _unsubscribeEventDispatchers += x.Register(new InboundOutboundSubscriptionBinder(OutboundPipeline, Endpoint)); });
 
 			PoisonEndpoint = new PoisonEndpointDecorator(new NullEndpoint());

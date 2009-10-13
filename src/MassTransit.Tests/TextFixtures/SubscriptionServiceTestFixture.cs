@@ -19,9 +19,7 @@ namespace MassTransit.Tests.TextFixtures
 	using MassTransit.Services.Subscriptions;
 	using MassTransit.Services.Subscriptions.Client;
 	using MassTransit.Services.Subscriptions.Configuration;
-	using MassTransit.Services.Subscriptions.Messages;
 	using MassTransit.Services.Subscriptions.Server;
-	using MassTransit.Services.Subscriptions.Server.Messages;
 	using NUnit.Framework;
 	using Rhino.Mocks;
 
@@ -103,15 +101,9 @@ namespace MassTransit.Tests.TextFixtures
 				.Return(SubscriptionRepository);
 
 			_subscriptionClientSagaRepository = SetupSagaRepository<SubscriptionClientSaga>(builder);
-			SetupInitiateSagaStateMachineSink<SubscriptionClientSaga, AddSubscriptionClient>(SubscriptionBus, _subscriptionClientSagaRepository, builder);
-            SetupObservesSagaStateMachineSink<SubscriptionClientSaga, RemoveSubscriptionClient>(SubscriptionBus, _subscriptionClientSagaRepository, builder);
-			SetupObservesSagaStateMachineSink<SubscriptionClientSaga, SubscriptionClientAdded>(SubscriptionBus, _subscriptionClientSagaRepository, builder);
-
+			
 			_subscriptionSagaRepository = SetupSagaRepository<SubscriptionSaga>(builder);
-			SetupInitiateSagaStateMachineSink<SubscriptionSaga, AddSubscription>(SubscriptionBus, _subscriptionSagaRepository, builder);
-            SetupObservesSagaStateMachineSink<SubscriptionSaga, RemoveSubscription>(SubscriptionBus, _subscriptionSagaRepository, builder);
-			SetupObservesSagaStateMachineSink<SubscriptionSaga, SubscriptionClientRemoved>(SubscriptionBus, _subscriptionSagaRepository, builder);
-
+			
 			SubscriptionService = new SubscriptionService(SubscriptionBus, SubscriptionRepository, EndpointFactory, _subscriptionSagaRepository, _subscriptionClientSagaRepository);
 
 			SubscriptionService.Start();

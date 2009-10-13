@@ -39,7 +39,6 @@ namespace MassTransit.Saga.Pipeline
 
 		protected override void ConsumerAction(TSaga saga, TMessage message)
 		{
-			saga.Bus = Bus;
 			saga.Consume(message);
 		}
 	}

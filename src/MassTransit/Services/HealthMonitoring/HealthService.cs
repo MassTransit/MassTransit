@@ -26,20 +26,13 @@ namespace MassTransit.Services.HealthMonitoring
 	{
 		private static readonly ILog _log = LogManager.GetLogger(typeof (HealthService));
 		private readonly ISagaRepository<HealthSaga> _healthSagas;
-		private static IObjectBuilder _builder;
 		private IServiceBus _bus;
 		private UnsubscribeAction _unsubscribeToken = () => false;
 
-		public HealthService(IServiceBus bus, ISagaRepository<HealthSaga> healthSagas, IObjectBuilder builder)
+		public HealthService(IServiceBus bus, ISagaRepository<HealthSaga> healthSagas)
 		{
 			_bus = bus;
 			_healthSagas = healthSagas;
-			_builder = builder;
-		}
-
-		public static IObjectBuilder Builder
-		{
-			get { return _builder; }
 		}
 
 		public void Consume(HealthUpdateRequest message)

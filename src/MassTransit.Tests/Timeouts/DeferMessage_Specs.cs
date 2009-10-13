@@ -20,7 +20,6 @@ namespace MassTransit.Tests.Timeouts
 	using MassTransit.Services.MessageDeferral;
 	using MassTransit.Services.MessageDeferral.Messages;
 	using MassTransit.Services.Timeout;
-	using MassTransit.Services.Timeout.Messages;
 	using MassTransit.Services.Timeout.Server;
 	using Messages;
 	using NUnit.Framework;
@@ -45,9 +44,6 @@ namespace MassTransit.Tests.Timeouts
 			_correlationId = CombGuid.Generate();
 
 			_timeoutSagaRepository = SetupSagaRepository<TimeoutSaga>(ObjectBuilder);
-			SetupObservesSagaStateMachineSink<TimeoutSaga, ScheduleTimeout>(LocalBus, _timeoutSagaRepository, ObjectBuilder);
-			SetupObservesSagaStateMachineSink<TimeoutSaga, CancelTimeout>(LocalBus, _timeoutSagaRepository, ObjectBuilder);
-			SetupObservesSagaStateMachineSink<TimeoutSaga, TimeoutExpired>(LocalBus, _timeoutSagaRepository, ObjectBuilder);
 
 			_timeoutService = new TimeoutService(RemoteBus, _timeoutSagaRepository);
 			_timeoutService.Start();
