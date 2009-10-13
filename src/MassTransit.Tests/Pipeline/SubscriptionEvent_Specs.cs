@@ -38,7 +38,7 @@ namespace MassTransit.Tests.Pipeline
 			_unsubscribe = MockRepository.GenerateMock<UnsubscribeAction>();
 
 			_subscriptionEvent = MockRepository.GenerateMock<ISubscriptionEvent>();
-			_pipeline = MessagePipelineConfigurator.CreateDefault(_builder);
+			_pipeline = MessagePipelineConfigurator.CreateDefault(_builder, _bus);
 			_pipeline.Configure(x => x.Register(_subscriptionEvent));
 		}
 
@@ -173,7 +173,7 @@ namespace MassTransit.Tests.Pipeline
 			_bus.Stub(x => x.Endpoint).Return(_endpoint);
 
 			_subscriptionEvent = MockRepository.GenerateMock<ISubscriptionEvent>();
-			_pipeline = MessagePipelineConfigurator.CreateDefault(_builder);
+			_pipeline = MessagePipelineConfigurator.CreateDefault(_builder, _bus);
 			_pipeline.Configure(x => x.Register(_subscriptionEvent));
 		}
 

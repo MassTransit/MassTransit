@@ -18,6 +18,7 @@ namespace MassTransit.Pipeline
 	{
 		IObjectBuilder Builder { get; }
 		IMessagePipeline Pipeline { get; }
+		object Data { get; }
 
 		bool HasMessageTypeBeenDefined(Type messageType);
 		void MessageTypeWasDefined(Type messageType);

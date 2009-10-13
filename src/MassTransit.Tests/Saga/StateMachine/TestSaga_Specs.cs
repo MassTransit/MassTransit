@@ -36,10 +36,6 @@ namespace MassTransit.Tests.Saga.StateMachine
 
 			_repository = SetupSagaRepository<TestSaga>(ObjectBuilder);
 
-			SetupInitiateSagaStateMachineSink<TestSaga, InitiateSimpleSaga>(LocalBus, _repository, ObjectBuilder);
-			SetupOrchestrateSagaStateMachineSink<TestSaga, CompleteSimpleSaga>(LocalBus, _repository, ObjectBuilder);
-			SetupObservesSagaStateMachineSink<TestSaga, ObservableSagaMessage>(LocalBus, _repository, ObjectBuilder);
-
 		    _initiateSimpleSagaUnsubscribeCalled = false;
 		    _completeSimpleSagaUnsubscribeCalled = false;
 		    _initiateSimpleSagaUnsubscribe = () => {_initiateSimpleSagaUnsubscribeCalled = true; return true; };
@@ -94,10 +90,6 @@ namespace MassTransit.Tests.Saga.StateMachine
 			_sagaId = Guid.NewGuid();
 
 			_repository = SetupSagaRepository<TestSaga>(ObjectBuilder);
-
-			SetupInitiateSagaStateMachineSink<TestSaga, InitiateSimpleSaga>(LocalBus, _repository, ObjectBuilder);
-			SetupOrchestrateSagaStateMachineSink<TestSaga, CompleteSimpleSaga>(LocalBus, _repository, ObjectBuilder);
-			SetupObservesSagaStateMachineSink<TestSaga, ObservableSagaMessage>(LocalBus, _repository, ObjectBuilder);
 
 			_remove = LocalBus.Subscribe<TestSaga>();
 
@@ -158,10 +150,6 @@ namespace MassTransit.Tests.Saga.StateMachine
 			_sagaId = Guid.NewGuid();
 
 			_repository = SetupSagaRepository<TestSaga>(ObjectBuilder);
-
-			SetupInitiateSagaStateMachineSink<TestSaga, InitiateSimpleSaga>(LocalBus, _repository, ObjectBuilder);
-			SetupOrchestrateSagaStateMachineSink<TestSaga, CompleteSimpleSaga>(LocalBus, _repository, ObjectBuilder);
-			SetupObservesSagaStateMachineSink<TestSaga, ObservableSagaMessage>(LocalBus, _repository, ObjectBuilder);
 
 			LocalBus.Subscribe<TestSaga>();
 		}

@@ -27,9 +27,6 @@ namespace MassTransit.Tests.Saga
 			base.EstablishContext();
 
 			var sagaRepository = SetupSagaRepository<RegisterUserSaga>(ObjectBuilder);
-			SetupInitiateSagaSink<RegisterUserSaga, RegisterUser>(RemoteBus, sagaRepository, ObjectBuilder);
-			SetupOrchestrateSagaSink<RegisterUserSaga, UserVerificationEmailSent>(RemoteBus, sagaRepository, ObjectBuilder);
-			SetupOrchestrateSagaSink<RegisterUserSaga, UserValidated>(RemoteBus, sagaRepository, ObjectBuilder);
 
 			// this just shows that you can easily respond to the message
 			RemoteBus.Subscribe<SendUserVerificationEmail>(

@@ -37,12 +37,10 @@ namespace MassTransit.Saga.Configuration
 
 			var router = routerConfigurator.FindOrCreate<TMessage>();
 
-			var arguments = new Hashtable
-				{
-					{"context", context},
-					{"policy", new InitiatingSagaPolicy<TComponent, TMessage>()},
-				};
-			var sink = context.Builder.GetInstance<CorrelatedSagaMessageSink<TComponent, TMessage>>(arguments);
+			var repository = context.Builder.GetInstance<ISagaRepository<TComponent>>();
+			var policy = new InitiatingSagaPolicy<TComponent, TMessage>();
+
+			var sink = new CorrelatedSagaMessageSink<TComponent, TMessage>(context, context.Data as IServiceBus, repository, policy);
 			if (sink == null)
 				throw new ConfigurationException("Could not build the initiating message sink for " + typeof (TComponent).FullName);
 

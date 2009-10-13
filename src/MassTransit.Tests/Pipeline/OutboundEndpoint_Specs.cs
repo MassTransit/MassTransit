@@ -27,7 +27,7 @@ namespace MassTransit.Tests.Pipeline
 		public void Setup()
 		{
 			_builder = MockRepository.GenerateMock<IObjectBuilder>();
-			_pipeline = MessagePipelineConfigurator.CreateDefault(_builder);
+			_pipeline = MessagePipelineConfigurator.CreateDefault(_builder, null);
 		}
 
 		private IObjectBuilder _builder;

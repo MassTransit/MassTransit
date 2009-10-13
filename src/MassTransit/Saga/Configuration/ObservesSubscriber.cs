@@ -13,7 +13,6 @@
 namespace MassTransit.Saga.Configuration
 {
 	using System;
-	using System.Collections;
 	using System.Collections.Generic;
 	using System.Linq.Expressions;
 	using Exceptions;
@@ -43,17 +42,13 @@ namespace MassTransit.Saga.Configuration
 
 			var router = routerConfigurator.FindOrCreate<TMessage>();
 
-			Observes<TMessage, TComponent> instance = (Observes<TMessage, TComponent>)Activator.CreateInstance(typeof(TComponent), Guid.Empty);
+			var instance = (Observes<TMessage, TComponent>)Activator.CreateInstance(typeof(TComponent), Guid.Empty);
 
 			Expression<Func<TComponent, TMessage, bool>> selector = instance.GetBindExpression();
 
-			var arguments = new Hashtable
-				{
-					{"context", context},
-					{"policy", new ExistingSagaPolicy<TComponent, TMessage>()},
-					{"selector", selector},
-				};
-			var sink = context.Builder.GetInstance<PropertySagaMessageSink<TComponent, TMessage>>(arguments);
+			var repository = context.Builder.GetInstance<ISagaRepository<TComponent>>();
+			var policy = new ExistingSagaPolicy<TComponent, TMessage>();
+			var sink = new PropertySagaMessageSink<TComponent, TMessage>(context, context.Data as IServiceBus, repository, policy, selector);
 			if (sink == null)
 				throw new ConfigurationException("Could not build the message sink for " + typeof (TComponent).FullName);
 

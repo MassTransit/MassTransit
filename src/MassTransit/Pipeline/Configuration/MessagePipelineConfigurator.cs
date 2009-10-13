@@ -33,10 +33,12 @@ namespace MassTransit.Pipeline.Configuration
         private RegistrationList<IPipelineSubscriber> _interceptors = new RegistrationList<IPipelineSubscriber>();
         private RegistrationList<ISubscriptionEvent> _subscriptionEventHandlers = new RegistrationList<ISubscriptionEvent>();
         private MessagePipeline _pipeline;
+    	private object _bus;
 
-        private MessagePipelineConfigurator(IObjectBuilder builder)
+    	private MessagePipelineConfigurator(IObjectBuilder builder, object data)
         {
             _builder = builder;
+        	_bus = data;
 
             var router = new MessageRouter<object>();
 
@@ -131,7 +133,7 @@ namespace MassTransit.Pipeline.Configuration
 
         private UnsubscribeAction Subscribe(Func<ISubscriberContext, IPipelineSubscriber, IEnumerable<UnsubscribeAction>> subscriber)
         {
-            var context = new SubscriberContext(_pipeline, _builder, this);
+        	var context = new SubscriberContext(_pipeline, _builder, this, _bus);
 
             UnsubscribeAction result = null;
 
@@ -149,9 +151,9 @@ namespace MassTransit.Pipeline.Configuration
             return result ?? _emptyToken;
         }
 
-        public static MessagePipeline CreateDefault(IObjectBuilder builder)
+        public static MessagePipeline CreateDefault(IObjectBuilder builder, object data)
         {
-            return new MessagePipelineConfigurator(builder)._pipeline;
+            return new MessagePipelineConfigurator(builder, data)._pipeline;
         }
 
         public UnsubscribeAction SubscribedTo<T>() where T : class

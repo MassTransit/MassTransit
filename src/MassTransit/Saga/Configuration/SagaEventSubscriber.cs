@@ -61,12 +61,9 @@ namespace MassTransit.Saga.Configuration
 		protected virtual UnsubscribeAction ConnectCorrelatedSink<V>(DataEvent<TSaga, V> dataEvent, ISagaPolicy<TSaga, V> policy)
 			where V : class, CorrelatedBy<Guid>
 		{
-			var sink = _context.Builder.GetInstance<CorrelatedSagaStateMachineMessageSink<TSaga, V>>(new Hashtable
-				{
-					{"context", _context},
-					{"dataEvent", dataEvent},
-					{"policy", policy},
-				});
+			var repository = _context.Builder.GetInstance<ISagaRepository<TSaga>>();
+
+			var sink = new CorrelatedSagaStateMachineMessageSink<TSaga, V>(_context, _context.Data as IServiceBus, repository, policy, dataEvent);
 			if (sink == null)
 				throw new ConfigurationException("Could not build the message sink: " + typeof (CorrelatedSagaStateMachineMessageSink<TSaga, V>).ToFriendlyName());
 
@@ -76,13 +73,9 @@ namespace MassTransit.Saga.Configuration
 		protected virtual UnsubscribeAction ConnectSink<V>(DataEvent<TSaga, V> dataEvent, ISagaPolicy<TSaga, V> policy, Expression<Func<TSaga, V, bool>> selector)
 			where V : class
 		{
-			var sink = _context.Builder.GetInstance<PropertySagaStateMachineMessageSink<TSaga, V>>(new Hashtable
-				{
-					{"context", _context},
-					{"dataEvent", dataEvent},
-					{"policy", policy},
-					{"selector", selector},
-				});
+			var repository = _context.Builder.GetInstance<ISagaRepository<TSaga>>();
+
+			var sink = new PropertySagaStateMachineMessageSink<TSaga, V>(_context, _context.Data as IServiceBus, repository, policy, selector, dataEvent);
 			if (sink == null)
 				throw new ConfigurationException("Could not build the message sink: " + typeof (PropertySagaStateMachineMessageSink<TSaga, V>).ToFriendlyName());
 

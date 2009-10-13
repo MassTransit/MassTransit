@@ -33,9 +33,6 @@ namespace MassTransit.Tests.Saga.StateMachine
 			base.EstablishContext();
 
 			_repository = SetupSagaRepository<AutoStateMachineSaga>(ObjectBuilder);
-			SetupInitiateSagaStateMachineSink<AutoStateMachineSaga, RegisterUser>(RemoteBus, _repository, ObjectBuilder);
-			SetupOrchestrateSagaStateMachineSink<AutoStateMachineSaga, UserVerificationEmailSent>(RemoteBus, _repository, ObjectBuilder);
-			SetupOrchestrateSagaStateMachineSink<AutoStateMachineSaga, UserValidated>(RemoteBus, _repository, ObjectBuilder);
 
 			// this just shows that you can easily respond to the message
 			RemoteBus.Subscribe<SendUserVerificationEmail>(
