@@ -156,6 +156,7 @@
     <Compile Include="Services\Routing\RoutingConfiguration_Specs.cs" />
     <Compile Include="Services\Subscriptions\SubscriptionConsumer_Specs.cs" />
     <Compile Include="Subscriptions\SubscriptionService_Specs.cs" />
+    <Compile Include="Subscriptions\CorrelatedSubscription_Specs.cs" />
     <Compile Include="TestExtensions.cs" />
     <Compile Include="TextFixtures\SubscriptionServiceTestFixture.cs" />
     <Compile Include="Transports\Multicast_Specs.cs" />
