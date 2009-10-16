@@ -14,7 +14,8 @@ namespace MassTransit.Services.Subscriptions.Client
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Linq.Expressions;
+	using System.ComponentModel;
+	using System.Linq;
 	using System.Reflection;
 	using System.Threading;
 	using Exceptions;
@@ -32,6 +33,7 @@ namespace MassTransit.Services.Subscriptions.Client
 		Consumes<AddSubscription>.All,
 		Consumes<RemoveSubscription>.All
 	{
+		private const BindingFlags _bindingFlags = BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public;
 		private static readonly HashSet<string> _ignoredSubscriptions;
 		private static readonly ILog _log = LogManager.GetLogger(typeof (SubscriptionClient));
 		private static readonly ClientSubscriptionInfoMapper _mapper = new ClientSubscriptionInfoMapper();
@@ -39,14 +41,15 @@ namespace MassTransit.Services.Subscriptions.Client
 		private readonly IEndpointFactory _endpointFactory;
 		private readonly EndpointList _localEndpoints = new EndpointList();
 		private readonly ManualResetEvent _ready = new ManualResetEvent(false);
+		private readonly SequenceNumberGenerator _sequence = new SequenceNumberGenerator();
 		private readonly IdempotentHashtable<Guid, ClientSubscriptionInformation> _subscriptions = new IdempotentHashtable<Guid, ClientSubscriptionInformation>();
+		private readonly TypeConverter _typeConverter = TypeDescriptor.GetConverter(typeof (string));
 		private IServiceBus _bus;
 
 		private Guid _clientId;
 		private SubscriptionConsumer _consumer;
 		private volatile bool _disposed;
 		private SubscriptionPublisher _publisher;
-		private SequenceNumberGenerator _sequence = new SequenceNumberGenerator();
 		private IEndpoint _subscriptionServiceEndpoint;
 		private UnsubscribeAction _unsubscribeAction;
 
@@ -214,7 +217,7 @@ namespace MassTransit.Services.Subscriptions.Client
 			{
 				if (!_subscriptions.Contains(subscription.SubscriptionId)) return;
 
-				var subscriptionInformation = _subscriptions[subscription.SubscriptionId];
+				ClientSubscriptionInformation subscriptionInformation = _subscriptions[subscription.SubscriptionId];
 
 				try
 				{
@@ -248,17 +251,71 @@ namespace MassTransit.Services.Subscriptions.Client
 				if (_subscriptions.Contains(sub.SubscriptionId))
 					return;
 
-				var clientInfo = _mapper.Transform(sub);
-				MethodInfo addToClientMethod = GetType().GetMethod("AddToClients", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+				ClientSubscriptionInformation clientInfo = _mapper.Transform(sub);
 
-				MethodInfo genericMethod = addToClientMethod.MakeGenericMethod(messageType);
+				UnsubscribeAction unsubscribe;
 
-				var action = GenerateLambda(genericMethod);
+				Type correlatedByType = GetCorrelatedByType(sub.CorrelationId, messageType);
+				if (correlatedByType != null)
+				{
+					unsubscribe = AddCorrelationSubscription(correlatedByType, sub.CorrelationId, messageType, sub.EndpointUri);
+				}
+				else
+				{
+					unsubscribe = (UnsubscribeAction) GetType()
+					                                  	.GetMethod("AddToClients", _bindingFlags)
+					                                  	.MakeGenericMethod(messageType).Invoke(this, new[] {sub.EndpointUri});
+				}
 
-				clientInfo.Unsubscribe = action(this, sub.EndpointUri);
+				clientInfo.Unsubscribe = unsubscribe;
 
 				_subscriptions[sub.SubscriptionId] = clientInfo;
 			}
+		}
+
+		private UnsubscribeAction AddCorrelationSubscription(Type correlatedByType, string correlationValue, Type messageType, Uri endpointUri)
+		{
+			Type keyType = correlatedByType.GetGenericArguments().First();
+
+			object correlationId;
+			if (keyType == typeof (Guid))
+			{
+				try
+				{
+					correlationId = new Guid(correlationValue);
+				}
+				catch (FormatException)
+				{
+					_log.Error("The correlationId in the subscription could not be converted to a Guid: " + correlationValue);
+					return null;
+				}
+			}
+			else
+			{
+				if (!_typeConverter.CanConvertTo(keyType))
+				{
+					_log.Error("The correlationId in the subscription could not be converted to the CorrelatedBy type: " + keyType.FullName);
+					return null;
+				}
+
+				try
+				{
+					correlationId = _typeConverter.ConvertTo(correlationValue, keyType);
+				}
+				catch (Exception)
+				{
+					_log.Error("The correlationId in the subscription failed to be converted to the CorrelatedBy type: " + keyType.FullName);
+					return null;
+				}
+			}
+
+			if (correlationId == null)
+				return null;
+
+			return (UnsubscribeAction) GetType()
+			                           	.GetMethod("AddToClientsWithCorrelation", _bindingFlags)
+			                           	.MakeGenericMethod(messageType, keyType)
+			                           	.Invoke(this, new[] {correlationId, endpointUri});
 		}
 
 		private void VerifyClientAndServiceNotOnSameEndpoint()
@@ -266,7 +323,7 @@ namespace MassTransit.Services.Subscriptions.Client
 			if (!_bus.ControlBus.Endpoint.Uri.Equals(_subscriptionServiceEndpoint.Uri))
 				return;
 
-			var message = "The service bus and subscription service cannot use the same endpoint: " + _bus.ControlBus.Endpoint.Uri;
+			string message = "The service bus and subscription service cannot use the same endpoint: " + _bus.ControlBus.Endpoint.Uri;
 			throw new EndpointException(_bus.ControlBus.Endpoint.Uri, message);
 		}
 
@@ -310,6 +367,16 @@ namespace MassTransit.Services.Subscriptions.Client
 			return result;
 		}
 
+		private UnsubscribeAction AddToClientsWithCorrelation<T, K>(K key, Uri endpointUri)
+			where T : class, CorrelatedBy<K>
+		{
+			UnsubscribeAction result = () => true;
+
+			_clients.Each(x => { result += x.SubscribedTo<T, K>(key, endpointUri); });
+
+			return result;
+		}
+
 		private bool IgnoreIfLocalEndpoint(Uri endpointUri)
 		{
 			return _localEndpoints.Contains(endpointUri);
@@ -320,17 +387,14 @@ namespace MassTransit.Services.Subscriptions.Client
 			Dispose(false);
 		}
 
-		private static Func<SubscriptionClient, Uri, UnsubscribeAction> GenerateLambda(MethodInfo mi)
+		private static Type GetCorrelatedByType(string correlationId, Type messageType)
 		{
-			var instance = Expression.Parameter(typeof (SubscriptionClient), "client");
-			var value = Expression.Parameter(typeof (Uri), "value");
+			if (string.IsNullOrEmpty(correlationId))
+				return null;
 
-			var del = Expression.Lambda<Func<SubscriptionClient, Uri, UnsubscribeAction>>(Expression.Call(instance, mi, value), new[]
-				{
-					instance, value
-				}).Compile();
-
-			return del;
+			return messageType.GetInterfaces()
+				.Where(inteface => inteface.IsGenericType && inteface.GetGenericTypeDefinition() == typeof (CorrelatedBy<>))
+				.FirstOrDefault();
 		}
 	}
 }
