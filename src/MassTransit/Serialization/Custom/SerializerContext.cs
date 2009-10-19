@@ -114,6 +114,13 @@ namespace MassTransit.Serialization.Custom
 				return CreateEnumerableSerializerFor(type);
 			}
 
+			if(type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
+			{
+				Type nullableType = type.GetGenericArguments().First();
+
+				return _serializers.Retrieve(nullableType, () => CreateSerializerFor(nullableType));
+			}
+
 			Type serializerType = typeof (ObjectSerializer<>).MakeGenericType(type);
 
 			var serializer = (IObjectSerializer)ClassFactory.New(serializerType);

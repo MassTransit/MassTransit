@@ -26,6 +26,7 @@ namespace MassTransit.Internal
 		public Uri ResponseAddress { get; private set; }
 		public Uri FaultAddress { get; private set; }
 		public int RetryCount { get; private set; }
+		public DateTime? ExpirationTime{get;private set;}
 		public string MessageType { get; private set; }
 
 		public void SetSourceAddress(Uri uri)
@@ -73,6 +74,11 @@ namespace MassTransit.Internal
 			RetryCount = retryCount;
 		}
 
+		public void SetExpirationTime(DateTime value)
+		{
+			ExpirationTime = value.Kind == DateTimeKind.Utc ? value : value.ToUniversalTime();
+		}
+
 		public void SetMessageType(Type messageType)
 		{
 			MessageType = messageType.ToMessageName();
@@ -90,6 +96,7 @@ namespace MassTransit.Internal
 			ResponseAddress = null;
 			FaultAddress = null;
 			RetryCount = 0;
+			ExpirationTime = null;
 			MessageType = null;
 		}
 

@@ -28,6 +28,8 @@ namespace MassTransit.Serialization
 					headers.SetFaultAddress(envelope.FaultAddress);
 					headers.SetRetryCount(envelope.RetryCount);
 					headers.SetMessageType(envelope.MessageType);
+					if(envelope.ExpirationTime.HasValue)
+						headers.SetExpirationTime(envelope.ExpirationTime.Value);
 				};
 		}
 
@@ -39,6 +41,8 @@ namespace MassTransit.Serialization
 			envelope.FaultAddress = headers.FaultAddress.ToStringOrNull() ?? envelope.FaultAddress;
 			envelope.RetryCount = headers.RetryCount;
 			envelope.MessageType = headers.MessageType ?? envelope.MessageType;
+			if(headers.ExpirationTime.HasValue)
+				envelope.ExpirationTime = headers.ExpirationTime.Value;
 		}
 
 		public static string ToStringOrNull(this Uri uri)

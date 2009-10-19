@@ -162,7 +162,12 @@ namespace MassTransit.Transports.Msmq
 
 	    private void MoveMessageToErrorTransport(Message message)
 	    {
-	        _errorTransport.Send(outbound => outbound.BodyStream = message.BodyStream);
+	        _errorTransport.Send(outbound =>
+	        	{
+	        		outbound.BodyStream = message.BodyStream;
+
+	        		SetMessageExpiration(outbound);
+	        	});
 
 	        if (_log.IsDebugEnabled)
 	            _log.DebugFormat("MOVE:{0}:{1}:{2}", Address, _errorTransport.Address, message.Id);
@@ -171,7 +176,15 @@ namespace MassTransit.Transports.Msmq
 	            SpecialLoggers.Messages.InfoFormat("MOVE:{0}:{1}:{2}", Address, _errorTransport.Address, message.Id);
 	    }
 
-	    public static IEndpoint ConfigureEndpoint(Uri uri, Action<IEndpointConfigurator> configurator)
+    	private static void SetMessageExpiration(Message outbound)
+    	{
+    		if (OutboundMessage.Headers.ExpirationTime.HasValue)
+    		{
+    			outbound.TimeToBeReceived = OutboundMessage.Headers.ExpirationTime.Value - DateTime.UtcNow;
+    		}
+    	}
+
+    	public static IEndpoint ConfigureEndpoint(Uri uri, Action<IEndpointConfigurator> configurator)
 		{
 			if (uri.Scheme.ToLowerInvariant() == "msmq")
 			{

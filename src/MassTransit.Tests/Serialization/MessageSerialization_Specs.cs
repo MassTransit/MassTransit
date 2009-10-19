@@ -40,6 +40,7 @@ namespace MassTransit.Tests.Serialization
                     GuidValue = Guid.NewGuid(),
                     StringValue = "Chris's Sample Code",
                     DoubleValue = 1823.172,
+					MaybeMoney = 567.89m,
                 };
         }
 
@@ -71,7 +72,7 @@ namespace MassTransit.Tests.Serialization
         }
 
         [Test]
-        public void Using_Udis_serializer_should_be_a_start_towards_message_equality()
+        public void The_xml_message_serializer_should_rock_the_house()
         {
             byte[] serializedMessageData;
 

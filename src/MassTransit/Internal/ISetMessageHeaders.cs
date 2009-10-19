@@ -34,6 +34,8 @@ namespace MassTransit.Internal
 
 		void SetRetryCount(int retryCount);
 
+		void SetExpirationTime(DateTime value);
+
 		void SetMessageType(Type messageType);
 		void SetMessageType(string messageType);
 

@@ -28,6 +28,7 @@ namespace MassTransit.Tests.Messages
 		public double DoubleValue { get; set; }
 		public DateTime DateTimeValue { get; set; }
 		public TimeSpan TimeSpanValue { get; set; }
+		public decimal? MaybeMoney { get; set; }
 
 		public bool Equals(SerializationTestMessage obj)
 		{
@@ -42,6 +43,7 @@ namespace MassTransit.Tests.Messages
 			       obj.DecimalValue == DecimalValue &&
 			       obj.DoubleValue == DoubleValue &&
 				   obj.TimeSpanValue == TimeSpanValue &&
+				   obj.MaybeMoney == MaybeMoney &&
 			       obj.DateTimeValue.Equals(DateTimeValue);
 		}
 
@@ -66,6 +68,7 @@ namespace MassTransit.Tests.Messages
 				result = (result*397) ^ DecimalValue.GetHashCode();
 				result = (result*397) ^ DoubleValue.GetHashCode();
 				result = (result*397) ^ DateTimeValue.GetHashCode();
+				result = (result*397) ^ MaybeMoney.GetHashCode();
 				result = (result*397) ^ TimeSpanValue.GetHashCode();
 				return result;
 			}

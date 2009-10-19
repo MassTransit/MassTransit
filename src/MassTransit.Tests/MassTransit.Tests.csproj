@@ -146,6 +146,7 @@
     <Compile Include="MessageGroup_Specs.cs" />
     <Compile Include="Messages\RequestMessage.cs" />
     <Compile Include="Messages\SerializationTestMessage.cs" />
+    <Compile Include="Serialization\Header_Specs.cs" />
     <Compile Include="Serialization\Interface_Specs.cs" />
     <Compile Include="Serialization\MoreSerialization_Specs.cs" />
     <Compile Include="Serialization\Performance_Specs.cs" />

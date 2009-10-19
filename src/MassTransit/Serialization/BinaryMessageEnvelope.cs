@@ -29,6 +29,7 @@ namespace MassTransit.Serialization
 		private const string MessageTypeKey = "MessageType";
 		private const string ResponseAddressKey = "ResponseAddress";
 		private const string RetryCountKey = "RetryCount";
+		private const string ExpirationTimeKey = "ExpirationTime";
 		private const string SourceAddressKey = "SourceAddress";
 
 		private BinaryMessageEnvelope()
@@ -37,7 +38,7 @@ namespace MassTransit.Serialization
 
 		public Header[] ToHeaders()
 		{
-			List<Header> headers = new List<Header>();
+			var headers = new List<Header>();
 
 			var context = OutboundMessage.Headers;
 
@@ -69,6 +70,9 @@ namespace MassTransit.Serialization
 			if (context.RetryCount > 0)
 				headers.Add(new Header(RetryCountKey, context.RetryCount));
 
+			if(context.ExpirationTime.HasValue)
+				headers.Add(new Header(ExpirationTimeKey, context.ExpirationTime.Value));
+
 			return headers.ToArray();
 		}
 
@@ -94,6 +98,10 @@ namespace MassTransit.Serialization
 
 				case RetryCountKey:
 					RetryCount = (int) value;
+					break;
+
+				case ExpirationTimeKey:
+					ExpirationTime = ((DateTime) value);
 					break;
 
 				case MessageTypeKey:
