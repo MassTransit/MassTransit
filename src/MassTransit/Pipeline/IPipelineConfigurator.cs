@@ -24,6 +24,9 @@ namespace MassTransit.Pipeline
 		UnsubscribeAction Subscribe<TMessage>(Action<TMessage> handler, Predicate<TMessage> acceptor)
 			where TMessage : class;
 
+		UnsubscribeAction Subscribe<TMessage>(Func<TMessage, Action<TMessage>> getHandler)
+			where TMessage : class;
+
 		UnsubscribeAction Subscribe<TComponent>(TComponent instance)
 			where TComponent : class;
 

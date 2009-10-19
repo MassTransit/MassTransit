@@ -14,6 +14,7 @@ namespace MassTransit.Tests.Pipeline
 {
 	using System;
 	using System.Diagnostics;
+	using System.Linq.Expressions;
 	using Magnum.Reflection;
 	using Messages;
 	using NUnit.Framework;
@@ -55,6 +56,11 @@ namespace MassTransit.Tests.Pipeline
 		ReflectiveVisitorBase<MyVisitor>,
 		IVisitor
 	{
+		public MyVisitor()
+			: base("Visit")
+		{
+		}
+
 		public bool Visit(IndiscriminantConsumer<PingMessage> obj)
 		{
 			Trace.WriteLine("IndiscriminantConsumer<PingMessage>");

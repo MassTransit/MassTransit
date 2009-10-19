@@ -111,7 +111,6 @@
     <Compile Include="Services\HealthMonitoring\Messages\PingEndpointResponse.cs" />
     <Compile Include="Services\HealthMonitoring\Messages\EndpointIsSuspect.cs" />
     <Compile Include="Services\HealthMonitoring\HealthClient.cs" />
-    <Compile Include="IServiceBusRequest.cs" />
     <Compile Include="Exceptions\EndpointException.cs" />
     <Compile Include="IEndpoint.cs" />
     <Compile Include="IObjectBuilder.cs" />
