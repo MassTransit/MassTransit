@@ -25,6 +25,8 @@ namespace MassTransit.Internal
 		void SendFaultTo(IEndpoint endpoint);
 		void SendFaultTo(Uri uri);
 
+		void ExpiresAt(DateTime value);
+
 		void IfNoSubscribers<T>(Action<T> action);
 		void ForEachSubscriber<T>(Action<T, IEndpoint> action);
 	}

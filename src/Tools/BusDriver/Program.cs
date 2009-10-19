@@ -36,8 +36,6 @@ namespace BusDriver
 
 				_log.Info("Starting up ");
 
-				Console.WriteLine("Hail to the bus driver, bus driver man!");
-
 				if (args.Length > 1)
 				{
 					string line = GetUnparsedCommandLine();
@@ -74,6 +72,8 @@ namespace BusDriver
 
 		private static void RunInteractiveConsole()
 		{
+            _log.Info("Starting interactive console.");
+
 			bool keepGoing = true;
 			do
 			{
@@ -110,28 +110,23 @@ namespace BusDriver
 					return false;
 
 				if (argument.Id == "create")
-				{
 					new CreateCommand(elements.Skip(1));
-				}
-
+				
 				if (argument.Id == "count")
-				{
 					new CountEndpointCommand(elements.Skip(1));
-				}
-
+				
 				if (argument.Id == "send")
-				{
 					new SendTextCommand(elements.Skip(1));
-				}
-
+				
 				if (argument.Id == "receive")
-				{
 					new ReceiveCommand(elements.Skip(1));
-				}
-
+				
 				if (argument.Id == "move")
 					new MoveCommand(elements.Skip(1));
-			}
+
+                if (argument.Id == "moven")
+                    new MoveNCommand(elements.Skip(1));
+            }
 
 			return true;
 		}

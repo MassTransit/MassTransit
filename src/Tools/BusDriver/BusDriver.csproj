@@ -54,6 +54,7 @@
     <Compile Include="Commands\Extens.cs" />
     <Compile Include="Commands\From.cs" />
     <Compile Include="Commands\MoveCommand.cs" />
+    <Compile Include="Commands\MoveNCommand.cs" />
     <Compile Include="Commands\ReceiveCommand.cs" />
     <Compile Include="Commands\SendTextCommand.cs" />
     <Compile Include="Commands\TransportCache.cs" />

@@ -65,6 +65,11 @@ namespace MassTransit.Serialization
 		public int RetryCount { get; set; }
 
 		/// <summary>
+		/// The message envelope base for the binary serializer?
+		/// </summary>
+		public DateTime? ExpirationTime { get; set; }
+
+		/// <summary>
 		/// The type of the message, including the full name and assembly
 		/// </summary>
     	public string MessageType { get; set; }

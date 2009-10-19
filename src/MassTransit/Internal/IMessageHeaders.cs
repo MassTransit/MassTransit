@@ -45,6 +45,11 @@ namespace MassTransit.Internal
 		int RetryCount { get; }
 
 		/// <summary>
+		/// The expiration time of the message, if set, otherwise null
+		/// </summary>
+		DateTime? ExpirationTime { get; }
+
+		/// <summary>
 		/// The type of the message in FullName, Assembly format
 		/// </summary>
 		string MessageType { get; }

@@ -64,6 +64,11 @@ namespace MassTransit.Internal
 			SetFaultAddress(uri);
 		}
 
+		public void ExpiresAt(DateTime value)
+		{
+			SetExpirationTime(value);
+		}
+
 		public override void Reset()
 		{
 			base.Reset();
