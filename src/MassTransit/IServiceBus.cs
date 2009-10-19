@@ -14,8 +14,9 @@ namespace MassTransit
 {
     using System;
     using Pipeline;
+    using Saga;
 
-    /// <summary>
+	/// <summary>
 	/// The action to call to unsubscribe a previously subscribed consumer
 	/// </summary>
 	/// <returns></returns>
@@ -77,6 +78,16 @@ namespace MassTransit
         /// <param name="consumerType">The type of component to add</param>
 		UnsubscribeAction Subscribe(Type consumerType);
 
+
+		/// <summary>
+		/// Subscribe to a message that has a consumer that is retrieved from the specified expression
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="getConsumerAction"></param>
+		/// <returns></returns>
+    	UnsubscribeAction SubscribeConsumer<T>(Func<T,Action<T>> getConsumerAction) where T : class;
+
+
     	/// <summary>
         /// Publishes a message to all subscribed consumers for the message type
         /// </summary>
@@ -97,4 +108,6 @@ namespace MassTransit
 
     	IServiceBus ControlBus { get; }
     }
+
+	public delegate Action<T> GetConsumerAction<T>(T message);
 }

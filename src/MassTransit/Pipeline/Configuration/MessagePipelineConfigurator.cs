@@ -74,26 +74,33 @@ namespace MassTransit.Pipeline.Configuration
         public UnsubscribeAction Subscribe<TMessage>(Action<TMessage> handler, Predicate<TMessage> acceptor)
             where TMessage : class
         {
-            var routerConfigurator = MessageRouterConfigurator.For(_pipeline);
-
-            var router = routerConfigurator.FindOrCreate<TMessage>();
-
             Func<TMessage, Action<TMessage>> consumer;
             if (acceptor != null)
                 consumer = (message => acceptor(message) ? handler : null);
             else
                 consumer = message => handler;
 
-            var sink = new InstanceMessageSink<TMessage>(consumer);
-
-            var result = router.Connect(sink);
-
-            UnsubscribeAction remove = SubscribedTo<TMessage>();
-
-            return () => result() && (router.SinkCount == 0) && remove();
+        	return Subscribe<TMessage>(consumer);
         }
 
-        public UnsubscribeAction Subscribe<TComponent>(TComponent instance)
+    	public UnsubscribeAction Subscribe<TMessage>(Func<TMessage, Action<TMessage>> getHandler) where TMessage : class
+    	{
+			var routerConfigurator = MessageRouterConfigurator.For(_pipeline);
+
+			var router = routerConfigurator.FindOrCreate<TMessage>();
+
+			Func<TMessage, Action<TMessage>> consumer = getHandler;
+
+			var sink = new InstanceMessageSink<TMessage>(consumer);
+
+			var result = router.Connect(sink);
+
+			UnsubscribeAction remove = SubscribedTo<TMessage>();
+
+			return () => result() && (router.SinkCount == 0) && remove();
+		}
+
+    	public UnsubscribeAction Subscribe<TComponent>(TComponent instance)
             where TComponent : class
         {
             return Subscribe((context, interceptor) => interceptor.Subscribe(context, instance));

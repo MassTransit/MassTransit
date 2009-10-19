@@ -260,6 +260,12 @@ namespace MassTransit
 			return (UnsubscribeAction) genericMethod.Invoke(this, null);
 		}
 
+		public UnsubscribeAction SubscribeConsumer<T>(Func<T,Action<T>> getConsumerAction)
+			where T : class
+		{
+			return InboundPipeline.Subscribe<T>(getConsumerAction);
+		}
+
 		public IServiceBus ControlBus { get; set; }
 
 		//Just here to support Subscribe(Type)

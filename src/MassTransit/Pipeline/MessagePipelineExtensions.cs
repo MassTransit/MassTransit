@@ -86,6 +86,12 @@ namespace MassTransit.Pipeline
 			return pipeline.Configure(x => x.Subscribe(handler, acceptor));
 		}
 
+		public static UnsubscribeAction Subscribe<TMessage>(this IMessagePipeline pipeline, Func<TMessage, Action<TMessage>> getHandler) 
+			where TMessage : class
+		{
+			return pipeline.Configure(x => x.Subscribe<TMessage>(getHandler));
+		}
+
 		public static UnsubscribeAction Subscribe<TMessage>(this IMessagePipeline pipeline, IEndpoint endpoint) where TMessage : class
 		{
 			MessageRouterConfigurator routerConfigurator = MessageRouterConfigurator.For(pipeline);
