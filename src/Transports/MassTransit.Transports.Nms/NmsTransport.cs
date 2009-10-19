@@ -138,6 +138,8 @@ namespace MassTransit.Transports.Nms
 
 							ITextMessage textMessage = session.CreateTextMessage(text);
 
+							SetMessageExpiration(textMessage);
+
 							producer.DeliveryMode = MsgDeliveryMode.Persistent;
 							producer.Send(textMessage);
 
@@ -155,6 +157,14 @@ namespace MassTransit.Transports.Nms
 					_log.Error("A problem occurred communicating with the queue", ex);
 
 				Reconnect();
+			}
+		}
+
+		private static void SetMessageExpiration(IMessage outbound)
+		{
+			if (OutboundMessage.Headers.ExpirationTime.HasValue)
+			{
+				outbound.NMSTimeToLive = OutboundMessage.Headers.ExpirationTime.Value - DateTime.UtcNow;
 			}
 		}
 
