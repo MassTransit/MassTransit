@@ -10,44 +10,35 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Saga
+namespace MassTransit.Actors
 {
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
 	using System.Linq.Expressions;
-	using Magnum.Data;
+	using Saga;
+	using Util;
 
-	public class InMemorySagaRepository<TSaga> :
+	public class InMemoryActorRepository<TSaga> :
 		AbstractSagaRepository<TSaga>,
-		ISagaRepository<TSaga>
+		IActorRepository<TSaga>
 		where TSaga : class, ISaga
 	{
+		private readonly IndexedCollection<TSaga> _collection = new IndexedCollection<TSaga>();
 		private bool _disposed;
-		private InMemoryRepository<TSaga, Guid> _repository;
-
-		public InMemoryRepository<TSaga, Guid> Repository
-		{
-			get { return _repository; }
-		}
-
-		public InMemorySagaRepository()
-		{
-			_repository = new InMemoryRepository<TSaga, Guid>(x => x.CorrelationId);
-		}
 
 		public void Send<TMessage>(Expression<Func<TSaga, bool>> filter, ISagaPolicy<TSaga, TMessage> policy, TMessage message, Action<TSaga> consumerAction)
 			where TMessage : class
 		{
-			IEnumerable<TSaga> existingSagas = _repository.Where(filter);
+			IEnumerable<TSaga> existingSagas = _collection.Where(filter);
 
 			if (SendMessageToExistingSagas(existingSagas, policy, consumerAction, message))
 				return;
 
 			SendMessageToNewSaga(policy, message, saga =>
 				{
-					lock (_repository)
-						_repository.Save(saga);
+					lock (_collection)
+						_collection.Add(saga);
 
 					consumerAction(saga);
 				});
@@ -55,9 +46,9 @@ namespace MassTransit.Saga
 
 		public IEnumerable<TSaga> Where(Expression<Func<TSaga, bool>> filter)
 		{
-			lock (_repository)
+			lock (_collection)
 			{
-				return _repository.Where(filter).ToList();
+				return _collection.Where(filter).ToList();
 			}
 		}
 
@@ -67,22 +58,26 @@ namespace MassTransit.Saga
 			GC.SuppressFinalize(this);
 		}
 
+		public void Add(TSaga newItem)
+		{
+			lock (_collection)
+				_collection.Add(newItem);
+		}
+
 		private void Dispose(bool disposing)
 		{
 			if (_disposed) return;
 			if (disposing)
 			{
-				_repository.Dispose();
-				_repository = null;
+				_collection.Clear();
 			}
 
 			_disposed = true;
 		}
 
-		~InMemorySagaRepository()
+		~InMemoryActorRepository()
 		{
 			Dispose(false);
 		}
 	}
-
-	}
+}

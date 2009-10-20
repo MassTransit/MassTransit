@@ -80,6 +80,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Actors\IndexedCollection_Specs.cs" />
+    <Compile Include="Actors\RequestResponseActor.cs" />
+    <Compile Include="Actors\WebActor_Specs.cs" />
     <Compile Include="Batch_Specs.cs" />
     <Compile Include="BddExtensions.cs" />
     <Compile Include="Configuration_Specs.cs" />
