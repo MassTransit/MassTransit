@@ -77,7 +77,7 @@ namespace MassTransit.Tests.TextFixtures
 		{
 		}
 
-		public static ISagaRepository<TSaga> SetupSagaRepository<TSaga>(IObjectBuilder builder)
+		public static InMemorySagaRepository<TSaga> SetupSagaRepository<TSaga>(IObjectBuilder builder)
 			where TSaga : class, ISaga
 		{
 			var sagaRepository = new InMemorySagaRepository<TSaga>();

@@ -135,6 +135,9 @@
     <Compile Include="Util\Tuple.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Actors\IActorRepository.cs" />
+    <Compile Include="Actors\InMemoryActorRepository.cs" />
+    <Compile Include="Actors\StateDrivenActor.cs" />
     <Compile Include="CurrentMessage.cs" />
     <Compile Include="EndpointAddress.cs" />
     <Compile Include="Events\MessagePublished.cs" />
@@ -330,8 +333,11 @@
     <Compile Include="Util\BranchEvaluator.cs" />
     <Compile Include="Util\EvaluationCandidateSelector.cs" />
     <Compile Include="Util\ExpressionVisitor.cs" />
+    <Compile Include="Util\ExtensionsForIndexedCollection.cs" />
     <Compile Include="Util\IEvaluationCandidateSelector.cs" />
     <Compile Include="Util\IExpressionEvaluator.cs" />
+    <Compile Include="Util\IndexedAttribute.cs" />
+    <Compile Include="Util\IndexedCollection.cs" />
     <Compile Include="Util\LocalExpressionEvaluator.cs" />
     <Compile Include="Util\MemberAccessEvaluator.cs" />
     <Compile Include="Util\PredicateBuilder.cs" />

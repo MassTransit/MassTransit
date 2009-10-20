@@ -59,14 +59,16 @@ namespace MassTransit.Saga.Configuration
 		{
 			Type componentType = typeof (TComponent);
 
-			Type baseType = componentType.BaseType;
-			if (!baseType.IsGenericType)
-				return false;
+			while (componentType.BaseType != null)
+			{
+				Type baseType = componentType.BaseType;
+				if (baseType.IsGenericType && baseType.GetGenericTypeDefinition() == typeof (SagaStateMachine<>))
+					return true;
 
-			if (baseType.GetGenericTypeDefinition() != typeof (SagaStateMachine<>))
-				return false;
+				componentType = baseType;
+			}
 
-			return true;
+			return false;
 		}
 	}
 }
