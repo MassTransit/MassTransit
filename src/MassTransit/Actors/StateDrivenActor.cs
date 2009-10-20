@@ -31,27 +31,12 @@ namespace MassTransit.Actors
 		private object _state;
 		private volatile bool _completed;
 
-		protected StateDrivenActor()
-			: this(CombGuid.Generate(), null, null)
-		{
-		}
-
-		protected StateDrivenActor(Guid correlationId, AsyncCallback callback, object state)
+		public StateDrivenActor(Guid correlationId)
 		{
 			CorrelationId = correlationId;
-			_callback = callback;
-			_state = state;
 		}
 
-		protected StateDrivenActor(AsyncCallback callback, object state)
-			: this(CombGuid.Generate(), callback, state)
-		{
-			_callback = callback;
-			_state = state;
-		}
-
-		protected StateDrivenActor(Guid correlationId)
-			: this(correlationId, null, null)
+		protected StateDrivenActor()
 		{
 		}
 

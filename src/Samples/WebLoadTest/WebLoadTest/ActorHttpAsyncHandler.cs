@@ -14,20 +14,22 @@ namespace WebLoadTest
 {
 	using System;
 	using System.Diagnostics;
+	using System.Globalization;
+	using System.Reflection;
 	using System.Web;
 	using Actors;
 	using Magnum;
+	using Magnum.Actors;
 	using MassTransit;
 	using MassTransit.Actors;
 	using StructureMap.Pipeline;
 
 	public class ActorHttpAsyncHandler<T> :
 		IHttpAsyncHandler
-		where T : StateDrivenActor<T>
+		where T : StateDrivenActor<T>, AsyncHttpActor
 	{
 		private readonly IServiceBus _bus;
 		private readonly IActorRepository<T> _actorRepository;
-		private T _actor;
 
 		public ActorHttpAsyncHandler(IServiceBus bus, IActorRepository<T> actorRepository)
 		{
@@ -49,20 +51,28 @@ namespace WebLoadTest
 		{
 			Guid transactionId = CombGuid.Generate();
 
-			_actor = (T) Activator.CreateInstance(typeof (T), new[] {transactionId, context, cb, extraData});
+			T actor = (T)Activator.CreateInstance(typeof(T), new[] { transactionId, context, cb, extraData });
 
-			_actorRepository.Add(_actor);
+			_actorRepository.Add(actor);
 
+			AsyncCallback callback = x =>
+				{
+					_actorRepository.Remove(actor);
+
+					context.Response.Write("Repository Size: " + _actorRepository.Count());
+
+					cb(x);
+				};
+
+			IAsyncResult asyncResult = actor.BeginAction(context, callback, extraData);
+			
 			_bus.Endpoint.Send(new InitiateStockQuoteRequestImpl {RequestId = transactionId, Symbol = "AAPL"});
 
-			return _actor;
+			return asyncResult;
 		}
 
 		public void EndProcessRequest(IAsyncResult result)
 		{
-			_actorRepository.Remove(_actor);
-
-			Trace.WriteLine("Size of repository: " + _actorRepository.Count());
 		}
 	}
 }

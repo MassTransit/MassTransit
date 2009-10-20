@@ -24,7 +24,7 @@ namespace MassTransit.Transports
     {
         private readonly object _messageLock = new object();
         private bool _disposed;
-        private ManualResetEvent _messageReady = new ManualResetEvent(false);
+        private AutoResetEvent _messageReady = new AutoResetEvent(false);
         private LinkedList<MemoryStream> _messages = new LinkedList<MemoryStream>();
 
         public LoopbackTransport(IEndpointAddress address)
