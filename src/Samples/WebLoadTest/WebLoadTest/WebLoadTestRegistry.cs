@@ -13,6 +13,7 @@
 namespace WebLoadTest
 {
 	using MassTransit.StructureMapIntegration;
+	using MassTransit.Transports;
 	using MassTransit.Transports.Msmq;
 
 	public class WebLoadTestRegistry :
@@ -30,9 +31,13 @@ namespace WebLoadTest
 			RegisterEndpointFactory(x =>
 				{
 					x.RegisterTransport<MsmqEndpoint>();
+					x.RegisterTransport<LoopbackEndpoint>();
 				});
 
-			RegisterServiceBus("msmq://localhost/web_load_test", x => { });
+			RegisterServiceBus("loopback://localhost/web_load_test", x =>
+				{
+					x.SetConcurrentConsumerLimit(20);
+				});
 		}
 	}
 }

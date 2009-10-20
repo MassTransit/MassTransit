@@ -61,7 +61,9 @@ namespace MassTransit.Tests.Actors
 
 			Guid id = CombGuid.Generate();
 
-			var actor = new RequestResponseActor(id, asyncResult => { called.Set(); }, null);
+			var actor = new RequestResponseActor(id);
+				
+				actor.BeginAction(asyncResult => { called.Set(); }, null);
 
 			_repository.Add(actor);
 

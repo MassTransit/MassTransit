@@ -15,7 +15,9 @@ namespace WebLoadTest
 	using System;
 	using System.Web.Routing;
 	using Actors;
+	using Magnum;
 	using Magnum.Actors;
+	using Magnum.DateTimeExtensions;
 	using MassTransit;
 	using MassTransit.Pipeline.Inspectors;
 	using StructureMap;
@@ -29,7 +31,7 @@ namespace WebLoadTest
 			var bus = ObjectFactory.GetInstance<IServiceBus>();
 			bus.Subscribe<RequestStockQuote>(request =>
 				{
-					//ThreadUtil.Sleep(500.Milliseconds());
+					//ThreadUtil.Sleep(20.Milliseconds());
 
 					bus.Publish(new StockQuoteReceivedImpl
 						{

@@ -13,11 +13,13 @@
 namespace MassTransit.Tests.Actors
 {
 	using System;
+	using Magnum.Actors;
 	using Magnum.StateMachine;
 	using MassTransit.Actors;
 
 	public class RequestResponseActor :
-		StateDrivenActor<RequestResponseActor>
+		StateDrivenActor<RequestResponseActor>,
+		AsyncActor
 	{
 		static RequestResponseActor()
 		{
@@ -54,12 +56,11 @@ namespace MassTransit.Tests.Actors
 		public RequestResponseActor(Guid correlationId)
 			: base(correlationId)
 		{
-			CorrelationId = correlationId;
 		}
 
-		public RequestResponseActor(Guid correlationId, AsyncCallback callback, object state)
-			: base(correlationId, callback, state)
+		public void BeginAction(AsyncCallback callback, object extraData)
 		{
+			SetAsyncResult(callback, extraData);
 		}
 
 		public static Event<InitiateActorRequest> InitiateRequest { get; set; }

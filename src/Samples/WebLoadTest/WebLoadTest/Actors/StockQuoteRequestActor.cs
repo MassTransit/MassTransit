@@ -84,19 +84,28 @@ namespace WebLoadTest.Actors
 		public static Event<StockQuoteReceived> QuoteReceived { get; set; }
 
 		public StockQuoteRequestActor(Guid correlationId)
+			: base(correlationId)
 		{
 			CorrelationId = correlationId;
 		}
 
 		public StockQuoteRequestActor(Guid id, HttpContext context, AsyncCallback callback, object extraData)
-			: base(id, callback, extraData)
+			: base(id)
 		{
 			_context = context;
 			_body.AppendLine("Actor created on thread: " + Thread.CurrentThread.ManagedThreadId);
 		}
 
+		protected StockQuoteRequestActor()
+		{
+		}
+
 		public IAsyncResult BeginAction(HttpContext context, AsyncCallback callback, object state)
 		{
+			SetAsyncResult(callback, state);
+			
+			_context = context;
+
 			_body.AppendLine("Begin called on thread: " + Thread.CurrentThread.ManagedThreadId);
 
 			return this;
@@ -104,11 +113,15 @@ namespace WebLoadTest.Actors
 
 		private void Complete()
 		{
+			if(!_context.Response.IsClientConnected)
+				return;
+
 			_body.AppendLine("Request duration: " + Stopwatch.ElapsedMilliseconds + "ms");
 			_body.AppendLine("Bid: " + Bid);
 			_body.AppendLine("Ask: " + Ask);
 			_body.AppendLine("Last: " + Last);
 			_body.AppendLine("Callback executed on thread: " + Thread.CurrentThread.ManagedThreadId);
+
 
 			_context.Response.ContentType = "text/plain";
 			_context.Response.Write(_body.ToString());
