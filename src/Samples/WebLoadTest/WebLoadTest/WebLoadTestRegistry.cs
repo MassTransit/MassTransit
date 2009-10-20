@@ -10,17 +10,29 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Actors
+namespace WebLoadTest
 {
-	using Saga;
+	using MassTransit.StructureMapIntegration;
+	using MassTransit.Transports.Msmq;
 
-	public interface IActorRepository<T> :
-		ISagaRepository<T>
-		where T : ISaga
+	public class WebLoadTestRegistry :
+		MassTransitRegistryBase
 	{
-		void Add(T newItem);
-		void Remove(T item);
+		public WebLoadTestRegistry()
+		{
+			MsmqEndpointConfigurator.Defaults(x =>
+				{
+					x.CreateMissingQueues = true;
+					x.CreateTransactionalQueues = true;
+					x.PurgeOnStartup = true;
+				});
 
-		int Count();
+			RegisterEndpointFactory(x =>
+				{
+					x.RegisterTransport<MsmqEndpoint>();
+				});
+
+			RegisterServiceBus("msmq://localhost/web_load_test", x => { });
+		}
 	}
 }

@@ -13,6 +13,7 @@
 namespace MassTransit.Transports.Msmq
 {
 	using System;
+	using System.Net;
 
 	public class MsmqEndpointAddress :
 		EndpointAddress,
@@ -39,7 +40,17 @@ namespace MassTransit.Transports.Msmq
 		private static string BuildQueueFormatName(Uri uri)
 		{
 			string hostName = uri.Host;
+
+			if(IsIpAddress(hostName))
+				return string.Format(@"FormatName:DIRECT=TCP:{0}\private$\{1}", hostName, uri.AbsolutePath.Substring(1));
+
 			return string.Format(@"FormatName:DIRECT=OS:{0}\private$\{1}", hostName, uri.AbsolutePath.Substring(1));
+		}
+
+		private static bool IsIpAddress(string hostName)
+		{
+			IPAddress address;
+			return IPAddress.TryParse(hostName, out address);
 		}
 
 		private static Uri SetUriHostToLocalMachineName(Uri uri)

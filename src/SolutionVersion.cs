@@ -23,5 +23,4 @@ using System.Security;
 [assembly: AssemblyFileVersionAttribute("0.8.0.2030")]
 [assembly: AssemblyCopyrightAttribute("CFT & ACM, original author or authors")]
 [assembly: AssemblyCompanyAttribute("CFT & ACM")]
-[assembly: AssemblyKeyFileAttribute("E:\\Development\\masstransit\\build\\..\\MassTransit.snk")]
 
