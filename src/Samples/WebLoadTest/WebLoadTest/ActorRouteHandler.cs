@@ -10,17 +10,26 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Actors
+namespace WebLoadTest
 {
-	using Saga;
+	using System;
+	using System.Web;
+	using System.Web.Routing;
+	using StructureMap;
 
-	public interface IActorRepository<T> :
-		ISagaRepository<T>
-		where T : ISaga
+	public class ActorRouteHandler :
+		IRouteHandler
 	{
-		void Add(T newItem);
-		void Remove(T item);
+		private readonly Type _handlerType;
 
-		int Count();
+		public ActorRouteHandler(Type type)
+		{
+			_handlerType = typeof (ActorHttpAsyncHandler<>).MakeGenericType(type);
+		}
+
+		public IHttpHandler GetHttpHandler(RequestContext requestContext)
+		{
+			return (IHttpAsyncHandler) ObjectFactory.GetInstance(_handlerType);
+		}
 	}
 }

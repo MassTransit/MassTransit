@@ -56,6 +56,23 @@ namespace MassTransit.Util
 			base.Add(newItem);
 		}
 
+		public new void Remove(T item)
+		{
+			_indices.Keys.Each(key =>
+			{
+				PropertyInfo property = typeof(T).GetProperty(key);
+				if (property != null)
+				{
+					int hashCode = property.GetValue(item, null).GetHashCode();
+					Dictionary<int, List<T>> index = _indices[key];
+					if (index.ContainsKey(hashCode))
+						index[hashCode].Remove(item);
+				}
+			});
+
+			base.Remove(item);
+		}
+
 		public bool PropertyHasIndex(string propertyName)
 		{
 			return _indices.ContainsKey(propertyName);

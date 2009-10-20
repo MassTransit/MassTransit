@@ -64,6 +64,17 @@ namespace MassTransit.Actors
 				_collection.Add(newItem);
 		}
 
+		public void Remove(TSaga item)
+		{
+			lock (_collection)
+				_collection.Remove(item);
+		}
+
+		public int Count()
+		{
+			return _collection.Count;
+		}
+
 		private void Dispose(bool disposing)
 		{
 			if (_disposed) return;

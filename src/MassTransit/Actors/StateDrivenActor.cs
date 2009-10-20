@@ -26,9 +26,9 @@ namespace MassTransit.Actors
 		IAsyncResult
 		where T : SagaStateMachine<T>
 	{
-		private readonly AsyncCallback _callback;
-		private readonly CommandQueue _queue = new ThreadPoolCommandQueue();
-		private readonly object _state;
+		private AsyncCallback _callback;
+		protected readonly CommandQueue _queue = new ThreadPoolCommandQueue();
+		private object _state;
 		private volatile bool _completed;
 
 		protected StateDrivenActor()
@@ -53,6 +53,12 @@ namespace MassTransit.Actors
 		protected StateDrivenActor(Guid correlationId)
 			: this(correlationId, null, null)
 		{
+		}
+
+		protected void SetAsyncResult(AsyncCallback callback, object state)
+		{
+			_callback = callback;
+			_state = state;
 		}
 
 		public bool IsCompleted

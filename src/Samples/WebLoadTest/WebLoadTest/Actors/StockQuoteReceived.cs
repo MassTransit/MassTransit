@@ -10,17 +10,27 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Actors
+namespace WebLoadTest.Actors
 {
-	using Saga;
+	using System;
 
-	public interface IActorRepository<T> :
-		ISagaRepository<T>
-		where T : ISaga
+	public interface StockQuoteReceived
 	{
-		void Add(T newItem);
-		void Remove(T item);
+		string Symbol { get; }
+		decimal Bid { get; }
+		decimal Ask { get; }
+		decimal Last { get; }
+	}
 
-		int Count();
+	public class StockQuoteReceivedImpl : 
+		StockQuoteReceived
+	{
+		public string Symbol { get; set; }
+
+		public decimal Bid { get; set; }
+
+		public decimal Ask { get; set; }
+
+		public decimal Last { get; set; }
 	}
 }
