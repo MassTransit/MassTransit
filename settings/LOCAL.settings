@@ -1,9 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <project name="Settings">
   <property name="environment" value="LOCAL" />
-  <property name="machine" value="MACHINE.NAME" />
+  <property name="machine" value="LOCALHOST" />
   <property name="database.server" value="(local)" />
-  <property name="database.name" value="NAME" />
+  <property name="database.name" value="MassTransit" />
   <property name="log.level" value="INFO" />
   
   <!-- Database Deployment -->
