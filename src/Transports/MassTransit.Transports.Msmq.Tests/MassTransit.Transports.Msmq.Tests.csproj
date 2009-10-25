@@ -38,6 +38,26 @@
     </DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Antlr3.Runtime, Version=3.1.0.39271, Culture=neutral, PublicKeyToken=3a9cab8f8d22bfb7, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\FluentNHibernate\Antlr3.Runtime.dll</HintPath>
+    </Reference>
+    <Reference Include="Castle.Core, Version=1.1.0.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\FluentNHibernate\Castle.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Castle.DynamicProxy2, Version=2.1.0.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\FluentNHibernate\Castle.DynamicProxy2.dll</HintPath>
+    </Reference>
+    <Reference Include="FluentNHibernate, Version=0.1.0.0, Culture=neutral, PublicKeyToken=8aa435e3cb308880, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\FluentNHibernate\FluentNHibernate.dll</HintPath>
+    </Reference>
+    <Reference Include="Iesi.Collections, Version=1.0.1.0, Culture=neutral, PublicKeyToken=aa95f207798dfdb4, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\FluentNHibernate\Iesi.Collections.dll</HintPath>
+    </Reference>
     <Reference Include="log4net, Version=1.2.10.0, Culture=neutral, PublicKeyToken=1b44e1d426115821, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\lib\log4net.dll</HintPath>
@@ -49,6 +69,18 @@
     <Reference Include="Microsoft.Practices.ServiceLocation, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\lib\Microsoft.Practices.ServiceLocation.dll</HintPath>
+    </Reference>
+    <Reference Include="NHibernate, Version=2.1.0.4000, Culture=neutral, PublicKeyToken=aa95f207798dfdb4, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\FluentNHibernate\NHibernate.dll</HintPath>
+    </Reference>
+    <Reference Include="NHibernate.ByteCode.Castle, Version=2.1.0.4000, Culture=neutral, PublicKeyToken=aa95f207798dfdb4, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\FluentNHibernate\NHibernate.ByteCode.Castle.dll</HintPath>
+    </Reference>
+    <Reference Include="NHibernate.Linq, Version=1.0.0.4000, Culture=neutral, PublicKeyToken=444cf6a87fdab271, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\FluentNHibernate\NHibernate.Linq.dll</HintPath>
     </Reference>
     <Reference Include="nunit.framework, Version=2.4.6.0, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -72,6 +104,7 @@
     <Compile Include="As_a_nontransactional_endpoint.cs" />
     <Compile Include="As_a_ServiceBus_working_with_an_endpoint.cs" />
     <Compile Include="As_a_transactional_endpoint.cs" />
+    <Compile Include="ConcurrentSaga_Specs.cs" />
     <Compile Include="ContextSetup.cs" />
     <Compile Include="GridOnMsmq_Specs.cs" />
     <Compile Include="MessageQueue_Extensions.cs" />
@@ -79,6 +112,7 @@
     <Compile Include="Messages\DeleteMessage.cs" />
     <Compile Include="Messages\UpdateAcceptedMessage.cs" />
     <Compile Include="Messages\UpdateMessage.cs" />
+    <Compile Include="TestFixtures\MsmqConcurrencyTestFixture.cs" />
     <Compile Include="TestFixtures\MsmqEndpointOnlyTestFixture.cs" />
     <Compile Include="NonTransactional_Specs.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -96,6 +130,14 @@
     <Compile Include="Transactional_Specs.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\MassTransit.Infrastructure.Tests\MassTransit.Infrastructure.Tests.csproj">
+      <Project>{44E6D06D-B60E-434B-981D-D8139062A6EC}</Project>
+      <Name>MassTransit.Infrastructure.Tests</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\MassTransit.Infrastructure\MassTransit.Infrastructure.csproj">
+      <Project>{073A90FD-9A3E-4704-B3B5-6D8A9F4B442E}</Project>
+      <Name>MassTransit.Infrastructure</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\MassTransit.Tests\MassTransit.Tests.csproj">
       <Project>{76646B96-936B-4D31-A053-35CD630E3C68}</Project>
       <Name>MassTransit.Tests</Name>

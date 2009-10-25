@@ -12,15 +12,13 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Saga
 {
-	using System;
-
 	public class ExistingOrIgnoreSagaPolicy<TSaga, TMessage> :
 		ISagaPolicy<TSaga, TMessage>
-		where TSaga : ISaga
+		where TSaga : class, ISaga
 	{
-		public bool CreateSagaWhenMissing(TMessage message, out Guid sagaId)
+		public bool CreateSagaWhenMissing(TMessage message, out TSaga saga)
 		{
-			sagaId = Guid.Empty;
+			saga = null;
 
 			return false;
 		}

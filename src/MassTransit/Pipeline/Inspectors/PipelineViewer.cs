@@ -152,7 +152,7 @@ namespace MassTransit.Pipeline.Inspectors
 		}
 
 		private string GetPolicy<TComponent, TMessage>(ISagaPolicy<TComponent, TMessage> policy)
-			where TComponent : ISaga
+			where TComponent : class, ISaga
 		{
 			string description;
 			Type policyType = policy.GetType().GetGenericTypeDefinition();

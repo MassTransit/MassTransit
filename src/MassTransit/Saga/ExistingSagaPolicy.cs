@@ -12,16 +12,15 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Saga
 {
-	using System;
 	using Exceptions;
 
 	public class ExistingSagaPolicy<TSaga, TMessage> :
 		ISagaPolicy<TSaga, TMessage>
-		where TSaga : ISaga
+		where TSaga : class, ISaga
 	{
-		public bool CreateSagaWhenMissing(TMessage message, out Guid sagaId)
+		public bool CreateSagaWhenMissing(TMessage message, out TSaga saga)
 		{
-			sagaId = Guid.Empty;
+			saga = null;
 
 			return false;
 		}
@@ -32,7 +31,7 @@ namespace MassTransit.Saga
 
 		public void ForMissingSaga(TMessage message)
 		{
-			throw new SagaException("Saga not found: " + message, typeof(TSaga), typeof(TMessage));
+			throw new SagaException("Saga not found: " + message, typeof (TSaga), typeof (TMessage));
 		}
 	}
 }

@@ -27,6 +27,7 @@ namespace MassTransit.Transports.Msmq
 	{
 		private static readonly ILog _log = LogManager.GetLogger(typeof (MsmqEndpoint));
 
+    	private readonly MessageRetryTracker _tracker;
 		private bool _disposed;
 		private IMsmqTransport _errorTransport;
 		private IMsmqTransport _transport;
@@ -34,6 +35,8 @@ namespace MassTransit.Transports.Msmq
 		public MsmqEndpoint(IMsmqEndpointAddress address, IMessageSerializer serializer, IMsmqTransport transport, IMsmqTransport errorTransport)
 			: base(address, serializer)
 		{
+			_tracker = new MessageRetryTracker(5);
+
 			_transport = transport;
 			_errorTransport = errorTransport;
 
@@ -96,6 +99,14 @@ namespace MassTransit.Transports.Msmq
 		{
 			return message =>
 				{
+					if (_tracker.IsRetryLimitExceeded(message.Id))
+					{
+						if(_log.IsErrorEnabled)
+							_log.ErrorFormat("Message retry limit exceeded {0}:{1}", Address, message.Id);
+
+						return MoveMessageToErrorTransport;
+					}
+
 					object messageObj;
 
 					try
@@ -107,6 +118,7 @@ namespace MassTransit.Transports.Msmq
                         if (_log.IsErrorEnabled)
                             _log.Error("Unrecognized message " + Address + ":" + message.Id, sex);
 
+						_tracker.IncrementRetryCount(message.Id);
                         return MoveMessageToErrorTransport;
 					}
 
@@ -133,7 +145,7 @@ namespace MassTransit.Transports.Msmq
 						if (_log.IsErrorEnabled)
 							_log.Error("An exception was thrown preparing the message consumers", ex);
 
-						MoveMessageToErrorTransport(message);
+						_tracker.IncrementRetryCount(message.Id);
 						return null;
 					}
 
@@ -148,14 +160,17 @@ namespace MassTransit.Transports.Msmq
 					        try
 					        {
 					            receive(messageObj);
+
+					        	_tracker.MessageWasReceivedSuccessfully(message.Id);
 					        }
 					        catch (Exception ex)
 					        {
                                 if(_log.IsErrorEnabled)
 									_log.Error("An exception was thrown by a message consumer", ex);
 
-                                MoveMessageToErrorTransport(m);
-					        }
+								_tracker.IncrementRetryCount(message.Id);
+								MoveMessageToErrorTransport(m);
+							}
 					    };
 				};
 		}

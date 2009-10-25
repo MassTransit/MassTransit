@@ -18,7 +18,7 @@ namespace MassTransit.Saga
 
 	public class CreateOrUseExistingSagaPolicy<TSaga, TMessage> :
 		ISagaPolicy<TSaga, TMessage>
-		where TSaga : ISaga
+		where TSaga : class, ISaga
 	{
 		private readonly bool _useMessageIdForSagaId;
 
@@ -27,12 +27,18 @@ namespace MassTransit.Saga
 			_useMessageIdForSagaId = typeof (TMessage).GetInterfaces().Where(x => x == typeof (CorrelatedBy<Guid>)).Any();
 		}
 
-		public bool CreateSagaWhenMissing(TMessage message, out Guid sagaId)
+		public bool CreateSagaWhenMissing(TMessage message, out TSaga saga)
 		{
-			if (UseMessageIdForSaga(message, out sagaId))
-				return true;
+			Guid sagaId;
+			if (!UseMessageIdForSaga(message, out sagaId))
+			{
+				if (!GenerateNewIdForSaga(out sagaId))
+					throw new InvalidOperationException("Could not generate id for new saga " + typeof (TSaga).Name);
+			}
 
-			return GenerateNewIdForSaga(out sagaId);
+			saga = (TSaga)Activator.CreateInstance(typeof(TSaga), new object[] { sagaId });
+
+			return saga != null;
 		}
 
 		public void ForExistingSaga(TMessage message)

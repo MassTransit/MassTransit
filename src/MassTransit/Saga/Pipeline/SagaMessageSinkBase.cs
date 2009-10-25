@@ -23,7 +23,7 @@ namespace MassTransit.Saga.Pipeline
 
 	public abstract class SagaMessageSinkBase<TSaga, TMessage> :
 		ISagaMessageSink<TSaga, TMessage>
-		where TSaga : ISaga
+		where TSaga : class,ISaga
 		where TMessage : class
 	{
 		private static readonly ILog _log = LogManager.GetLogger(typeof (SagaMessageSinkBase<TSaga, TMessage>).ToFriendlyName());
@@ -44,13 +44,13 @@ namespace MassTransit.Saga.Pipeline
 
 		private Action<TSaga, IObjectBuilder> GetSetBuilderAction()
 		{
-			return typeof(TSaga)
+			return typeof (TSaga)
 				.GetProperties(BindingFlags.Public | BindingFlags.Instance)
 				.Where(x => x.Name == "Builder")
 				.Where(x => x.GetGetMethod(true) != null)
 				.Where(x => x.GetSetMethod(true) != null)
 				.Select(x => new FastProperty<TSaga, IObjectBuilder>(x).SetDelegate)
-				.DefaultIfEmpty((x,y) => { })
+				.DefaultIfEmpty((x, y) => { })
 				.SingleOrDefault();
 		}
 
@@ -77,7 +77,7 @@ namespace MassTransit.Saga.Pipeline
 					Repository.Send(filter, Policy, message, saga =>
 						{
 							saga.Bus = Bus;
-							
+
 							SetBuilder(saga, Builder);
 
 							ConsumerAction(saga, message);

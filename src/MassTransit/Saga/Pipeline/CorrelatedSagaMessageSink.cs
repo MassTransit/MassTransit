@@ -19,7 +19,7 @@ namespace MassTransit.Saga.Pipeline
 	public class CorrelatedSagaMessageSink<TSaga, TMessage> :
 		SagaMessageSinkBase<TSaga, TMessage>
 		where TMessage : class, CorrelatedBy<Guid>
-		where TSaga : ISaga, Consumes<TMessage>.All
+		where TSaga : class, ISaga, Consumes<TMessage>.All
 	{
 		private Expression<Func<TSaga, TMessage, bool>> _selector;
 

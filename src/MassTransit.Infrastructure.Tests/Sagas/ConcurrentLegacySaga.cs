@@ -30,10 +30,13 @@ namespace MassTransit.Infrastructure.Tests.Sagas
 		public ConcurrentLegacySaga(Guid correlationId)
 		{
 			CorrelationId = correlationId;
+
+			Value = -1;
 		}
 
 		protected ConcurrentLegacySaga()
 		{
+			Value = -1;
 		}
 
 		public virtual string Name { get; set; }
@@ -55,6 +58,10 @@ namespace MassTransit.Infrastructure.Tests.Sagas
 		{
 			Trace.WriteLine("Consuming " + message.GetType());
 			Thread.Sleep(1000);
+
+			if (Value == -1)
+				throw new InvalidOperationException("Should not be a -1 dude!!");
+
 			Value = message.Value;
 			Trace.WriteLine("Completed " + message.GetType());
 		}

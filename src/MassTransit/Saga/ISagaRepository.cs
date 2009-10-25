@@ -22,7 +22,7 @@ namespace MassTransit.Saga
 	/// <typeparam name="T"></typeparam>
     public interface ISagaRepository<T> :
 		IDisposable
-        where T : ISaga
+        where T : class, ISaga
     {
 		void Send<TMessage>(Expression<Func<T, bool>> filter, ISagaPolicy<T, TMessage> policy, TMessage message, Action<T> consumerAction)
 			where TMessage : class;

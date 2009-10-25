@@ -45,7 +45,7 @@ namespace MassTransit.Tests.TextFixtures
 			ServiceBusConfigurator.Defaults(x =>
 				{
 					x.SetObjectBuilder(ObjectBuilder);
-					x.SetReceiveTimeout(50.Milliseconds());
+					x.SetReceiveTimeout(500.Milliseconds());
 					x.SetConcurrentConsumerLimit(Environment.ProcessorCount*2);
 				});
 
