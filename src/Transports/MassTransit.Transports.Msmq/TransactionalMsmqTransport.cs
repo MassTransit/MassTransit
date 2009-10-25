@@ -15,18 +15,52 @@ namespace MassTransit.Transports.Msmq
 	using System;
 	using System.Messaging;
 	using System.Transactions;
+	using log4net;
+	using Magnum.DateTimeExtensions;
 
 	public class TransactionalMsmqTransport :
 		AbstractMsmqTransport
 	{
+		private static readonly ILog _log = LogManager.GetLogger(typeof (TransactionalMsmqTransport));
+
 		public TransactionalMsmqTransport(IMsmqEndpointAddress address)
 			: base(address)
 		{
 		}
 
+		public override void Receive(Func<Message, Action<Message>> receiver, TimeSpan timeout)
+		{
+			try
+			{
+				Connect();
+
+				var options = new TransactionOptions
+					{
+						IsolationLevel = IsolationLevel.Serializable,
+						Timeout = 30.Seconds(),
+					};
+
+				using (var scope = new TransactionScope(TransactionScopeOption.Required, options))
+				{
+					if (EnumerateQueue(receiver, timeout))
+						scope.Complete();
+				}
+			}
+			catch (MessageQueueException ex)
+			{
+				HandleMessageQueueException(ex, timeout);
+			}
+		}
+
 		protected override void ReceiveMessage(MessageEnumerator enumerator, TimeSpan timeout, Action<Func<Message>> receiveAction)
 		{
-			receiveAction(() => enumerator.RemoveCurrent(timeout, MessageQueueTransactionType.Automatic));
+			receiveAction(() =>
+				{
+					if (_log.IsDebugEnabled)
+						_log.DebugFormat("Removing message {0} from queue {1}", enumerator.Current.Id, Address);
+
+					return enumerator.RemoveCurrent(timeout, MessageQueueTransactionType.Automatic);
+				});
 		}
 
 		protected override void SendMessage(MessageQueue queue, Message message)

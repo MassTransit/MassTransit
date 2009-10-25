@@ -181,7 +181,7 @@ namespace MassTransit.Tests.Saga
 	public static class SagaTestExtensions
 	{
 		public static TSaga ShouldContainSaga<TSaga>(this ISagaRepository<TSaga> repository, Guid sagaId)
-			where TSaga : ISaga
+			where TSaga : class, ISaga
 		{
 			var sagas = repository.Where(x => x.CorrelationId == sagaId);
 

@@ -29,6 +29,11 @@ namespace MassTransit.Transports.Msmq.Tests.TestFixtures
 			RemoteEndpointUri = new Uri("msmq://localhost/mt_server_tx");
 
 			base.EstablishContext();
+
+			MsmqEndpointConfigurator.Defaults(x =>
+			{
+				x.PurgeOnStartup = false;
+			});
 		}
 	}
 }

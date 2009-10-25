@@ -35,21 +35,21 @@ namespace MassTransit.Infrastructure.Tests.Sagas
 						When(Start)
 							.Then((saga, message) =>
 								{
-									Trace.WriteLine("Consuming " + message.GetType());
+									_log.Info("Consuming " + message.GetType());
 									Thread.Sleep(3000);
 									saga.Name = message.Name;
 									saga.Value = message.Value;
-									Trace.WriteLine("Completed " + message.GetType());
+									_log.Info("Completed " + message.GetType());
 								}).TransitionTo(Active));
 
 					During(Active,
 					       When(Continue)
 					       	.Then((saga, message) =>
 					       		{
-									Trace.WriteLine("Consuming " + message.GetType());
+									_log.Info("Consuming " + message.GetType());
 					       			Thread.Sleep(1000);
 					       			saga.Value = message.Value;
-									Trace.WriteLine("Completed " + message.GetType());
+									_log.Info("Completed " + message.GetType());
 					       		}).Complete());
 				});
 		}

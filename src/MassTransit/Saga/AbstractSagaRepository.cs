@@ -64,14 +64,12 @@ namespace MassTransit.Saga
 
 		protected static void SendMessageToNewSaga<TMessage>(ISagaPolicy<TSaga, TMessage> policy, TMessage message, Action<TSaga> consumerAction)
 		{
-			Guid sagaId;
-			if (!policy.CreateSagaWhenMissing(message, out sagaId))
+			TSaga saga;
+			if (!policy.CreateSagaWhenMissing(message, out saga))
 				return;
 
-			var saga = (TSaga) Activator.CreateInstance(typeof (TSaga), new object[] {sagaId});
-
 			if (_log.IsDebugEnabled)
-				_log.DebugFormat("Created saga [{0}] - {1}", typeof (TSaga).ToFriendlyName(), sagaId);
+				_log.DebugFormat("Created saga [{0}] - {1}", typeof (TSaga).ToFriendlyName(), saga.CorrelationId);
 
 			try
 			{

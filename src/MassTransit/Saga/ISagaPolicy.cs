@@ -22,15 +22,15 @@ namespace MassTransit.Saga
 	/// <typeparam name="TSaga">The saga that will handle the message</typeparam>
 	/// <typeparam name="TMessage">The message that will be handled by the saga</typeparam>
 	public interface ISagaPolicy<TSaga, TMessage>
-		where TSaga : ISaga
+		where TSaga : class, ISaga
 	{
 		/// <summary>
 		/// Determines if the message should result in the creation of a new instance of the saga
 		/// </summary>
 		/// <param name="message">The message that triggered the action</param>
-		/// <param name="sagaId">The sagaId to use for the new saga instance</param>
+		/// <param name="saga">The saga that was created</param>
 		/// <returns>True if the saga should be created, otherwise false</returns>
-		bool CreateSagaWhenMissing(TMessage message, out Guid sagaId);
+		bool CreateSagaWhenMissing(TMessage message, out TSaga saga);
 
 		/// <summary>
 		/// Called when an instance of the saga associated with the message already exists

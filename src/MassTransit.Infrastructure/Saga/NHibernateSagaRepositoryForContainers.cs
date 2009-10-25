@@ -16,6 +16,7 @@ namespace MassTransit.Infrastructure.Saga
 	using System.Collections.Generic;
 	using System.Linq;
 	using System.Linq.Expressions;
+	using log4net;
 	using MassTransit.Saga;
 	using NHibernate;
 	using NHibernate.Linq;
@@ -25,6 +26,7 @@ namespace MassTransit.Infrastructure.Saga
 		ISagaRepository<T>
 		where T : class, ISaga
 	{
+		private static readonly ILog _log = LogManager.GetLogger(typeof (NHibernateSagaRepositoryForContainers<T>).ToFriendlyName());
 		private volatile bool _disposed;
 		private ISessionFactory _sessionFactory;
 
@@ -49,21 +51,17 @@ namespace MassTransit.Infrastructure.Saga
 					.Where(filter);
 
 				bool foundExistingSagas = SendMessageToExistingSagas(existingSagas, policy, consumerAction, message);
-
-				transaction.Commit();
-
 				if (foundExistingSagas)
+				{
+					transaction.Commit();
 					return;
-			}
+				}
 
-			using (ISession session = _sessionFactory.OpenSession())
-			using (ITransaction transaction = session.BeginTransaction())
-			{
 				SendMessageToNewSaga(policy, message, saga =>
 					{
 						consumerAction(saga);
-
 						session.Save(saga);
+
 						transaction.Commit();
 					});
 			}

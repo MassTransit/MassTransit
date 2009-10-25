@@ -54,14 +54,16 @@ namespace MassTransit.Internal
 			try
 			{
 				if(_log.IsDebugEnabled)
-					_log.DebugFormat("Calling Receive on {0} from thread {1} ({2})", _bus.Endpoint.Uri, Thread.CurrentThread.ManagedThreadId, _receiveTimeout);
+					_log.DebugFormat("Calling Receive on {0} from thread {1} ({2})", _bus.Endpoint.Uri, 
+						Thread.CurrentThread.ManagedThreadId, _receiveTimeout);
 
 				_receiveTime.Start();
 
 				_bus.Endpoint.Receive(message =>
 					{
 						if (_log.IsDebugEnabled)
-							_log.DebugFormat("Enumerating pipeline on {0} from thread {1}", _bus.Endpoint.Uri, Thread.CurrentThread.ManagedThreadId);
+							_log.DebugFormat("Enumerating pipeline on {0} from thread {1}", _bus.Endpoint.Uri, 
+								Thread.CurrentThread.ManagedThreadId);
 
 						InboundMessageHeaders.SetCurrent(context =>
 							{

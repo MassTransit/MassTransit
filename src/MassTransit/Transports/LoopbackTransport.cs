@@ -127,6 +127,10 @@ namespace MassTransit.Transports
                         message.Dispose();
                     }
                 }
+
+				// we read to the end and none were accepted, so we are going to wait until we get another in the queue
+				if (!_messageReady.WaitOne(timeout, true))
+					return;
             }
             finally
             {

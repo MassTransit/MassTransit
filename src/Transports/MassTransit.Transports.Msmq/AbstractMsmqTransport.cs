@@ -23,13 +23,14 @@ namespace MassTransit.Transports.Msmq
 	using Magnum.DateTimeExtensions;
 
 	[DebuggerDisplay("{Address}")]
-    public class AbstractMsmqTransport :
+	public class AbstractMsmqTransport :
 		IMsmqTransport
 	{
 		private static readonly ILog _log = LogManager.GetLogger(typeof (NonTransactionalMsmqTransport));
 		private static readonly ILog _messageLog = LogManager.GetLogger("MassTransit.Msmq.MessageLog");
 		private IMsmqEndpointAddress _address;
 		private bool _disposed;
+		private MessageQueue _queue;
 
 		protected AbstractMsmqTransport(IMsmqEndpointAddress address)
 		{
@@ -50,60 +51,72 @@ namespace MassTransit.Transports.Msmq
 
 		public virtual void Receive(Func<Message, Action<Message>> receiver, TimeSpan timeout)
 		{
-			if (_disposed) throw NewDisposedException();
-
 			try
 			{
-				using (var queue = new MessageQueue(_address.FormatName, QueueAccessMode.Receive))
-				using (MessageEnumerator enumerator = queue.GetMessageEnumerator2())
-				{
-					if (_log.IsDebugEnabled)
-						_log.DebugFormat("Enumerating endpoint: {0} ({1}ms)", Address, timeout);
+				Connect();
 
-					while (enumerator.MoveNext(timeout))
-					{
-						Message current = enumerator.Current;
-						if (current == null)
-						{
-							if (_log.IsDebugEnabled)
-								_log.DebugFormat("Current message was null while enumerating endpoint");
-
-							continue;
-						}
-
-						Action<Message> receive = receiver(current);
-						if (receive == null)
-						{
-							if (_log.IsDebugEnabled)
-								_log.DebugFormat("SKIP:{0}:{1}", Address, current.Id);
-
-							if (SpecialLoggers.Messages.IsInfoEnabled)
-								SpecialLoggers.Messages.InfoFormat("SKIP:{0}:{1}", Address, current.Id);
-                        
-							continue;
-						}
-
-						ReceiveMessage(enumerator, timeout, receiveCurrent =>
-							{
-								using (Message message = receiveCurrent())
-								{
-									if (message == null)
-										throw new TransportException(Address.Uri, "Unable to remove message from queue: " + current.Id);
-
-									if (message.Id != current.Id)
-										throw new TransportException(Address.Uri,
-											string.Format("Received message does not match current message: ({0} != {1})", message.Id, current.Id));
-
-									receive(message);
-								}
-							});
-					}
-				}
+				EnumerateQueue(receiver, timeout);
 			}
 			catch (MessageQueueException ex)
 			{
 				HandleMessageQueueException(ex, timeout);
 			}
+		}
+
+		protected virtual bool EnumerateQueue(Func<Message, Action<Message>> receiver, TimeSpan timeout)
+		{
+			if (_disposed) throw NewDisposedException();
+
+			bool received = false;
+
+			using (MessageEnumerator enumerator = _queue.GetMessageEnumerator2())
+			{
+				if (_log.IsDebugEnabled)
+					_log.DebugFormat("Enumerating endpoint: {0} ({1}ms)", Address, timeout);
+
+				while (enumerator.MoveNext(timeout))
+				{
+					Message current = enumerator.Current;
+					if (current == null)
+					{
+						if (_log.IsDebugEnabled)
+							_log.DebugFormat("Current message was null while enumerating endpoint");
+
+						continue;
+					}
+
+					Action<Message> receive = receiver(current);
+					if (receive == null)
+					{
+						if (_log.IsDebugEnabled)
+							_log.DebugFormat("SKIP:{0}:{1}", Address, current.Id);
+
+						if (SpecialLoggers.Messages.IsInfoEnabled)
+							SpecialLoggers.Messages.InfoFormat("SKIP:{0}:{1}", Address, current.Id);
+
+						continue;
+					}
+
+					ReceiveMessage(enumerator, timeout, receiveCurrent =>
+						{
+							using (Message message = receiveCurrent())
+							{
+								if (message == null)
+									throw new TransportException(Address.Uri, "Unable to remove message from queue: " + current.Id);
+
+								if (message.Id != current.Id)
+									throw new TransportException(Address.Uri,
+										string.Format("Received message does not match current message: ({0} != {1})", message.Id, current.Id));
+
+								receive(message);
+
+								received = true;
+							}
+						});
+				}
+			}
+
+			return received;
 		}
 
 		public virtual void Send(Action<Message> sender)
@@ -177,6 +190,8 @@ namespace MassTransit.Transports.Msmq
 			if (_disposed) return;
 			if (disposing)
 			{
+				Disconnect();
+
 				_address = null;
 			}
 
@@ -205,7 +220,7 @@ namespace MassTransit.Transports.Msmq
 				};
 		}
 
-		private void HandleMessageQueueException(MessageQueueException ex, TimeSpan timeout)
+		protected void HandleMessageQueueException(MessageQueueException ex, TimeSpan timeout)
 		{
 			switch (ex.MessageQueueErrorCode)
 			{
@@ -213,7 +228,7 @@ namespace MassTransit.Transports.Msmq
 					break;
 
 				case MessageQueueErrorCode.ServiceNotAvailable:
-					if(_log.IsErrorEnabled)
+					if (_log.IsErrorEnabled)
 						_log.Error("The message queuing service is not available, pausing for timeout period", ex);
 
 					Thread.Sleep(timeout);
@@ -264,9 +279,27 @@ namespace MassTransit.Transports.Msmq
 			}
 		}
 
-    	protected virtual void Reconnect()
-    	{
-			// this is currently not implemented since the queue is opened for each call to receive
-    	}
+		protected virtual void Connect()
+		{
+			if (_queue != null)
+				return;
+
+			_queue = new MessageQueue(_address.FormatName, QueueAccessMode.Receive);
+		}
+
+		protected virtual void Disconnect()
+		{
+			if (_queue != null)
+			{
+				_queue.Dispose();
+				_queue = null;
+			}
+		}
+
+		protected virtual void Reconnect()
+		{
+			Disconnect();
+			Connect();
+		}
 	}
 }
