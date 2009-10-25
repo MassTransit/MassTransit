@@ -16,7 +16,7 @@ namespace MassTransit.Actors
 
 	public interface IActorRepository<T> :
 		ISagaRepository<T>
-		where T : ISaga
+		where T : class, ISaga
 	{
 		void Add(T newItem);
 		void Remove(T item);
