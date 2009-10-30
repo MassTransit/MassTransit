@@ -5,6 +5,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GatewayService", "GatewaySe
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GatewayService.Interfaces", "GatewayService.Interfaces\GatewayService.Interfaces.csproj", "{4C47F44E-8089-4173-AC08-7BD16AFEB74B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GatewayService.Tests", "GatewayService.Tests\GatewayService.Tests.csproj", "{8E88C7FE-D79A-43A1-8DA8-E6FBAF4FC32A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -19,6 +21,10 @@ Global
 		{4C47F44E-8089-4173-AC08-7BD16AFEB74B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4C47F44E-8089-4173-AC08-7BD16AFEB74B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4C47F44E-8089-4173-AC08-7BD16AFEB74B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8E88C7FE-D79A-43A1-8DA8-E6FBAF4FC32A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8E88C7FE-D79A-43A1-8DA8-E6FBAF4FC32A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8E88C7FE-D79A-43A1-8DA8-E6FBAF4FC32A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8E88C7FE-D79A-43A1-8DA8-E6FBAF4FC32A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
