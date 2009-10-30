@@ -58,6 +58,10 @@ namespace GatewayService
 
 							saga.Bus.Publish(new OrderDetails
 								{
+                                   CustomerId = saga.CustomerId,
+								   OrderId = saga.OrderId,
+								   Created = saga.OrderCreated.Value,
+								   Status = saga.OrderStatus,
 								});
 						})
 					.TransitionTo(Completed));
@@ -67,9 +71,13 @@ namespace GatewayService
 
 		protected DateTime? OrderCreated { get; set; }
 
-		protected OrderDetailsRequestSaga(Guid correlationId)
+		public OrderDetailsRequestSaga(Guid correlationId)
 		{
 			CorrelationId = correlationId;
+		}
+
+		protected OrderDetailsRequestSaga()
+		{
 		}
 
 		public virtual string OrderId { get; set; }

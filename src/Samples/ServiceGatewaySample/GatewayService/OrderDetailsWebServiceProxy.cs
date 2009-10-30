@@ -19,9 +19,9 @@ namespace GatewayService
 	using Messages;
 
 	public class OrderDetailsWebServiceProxy :
-		Consumes<RetrieveOrderDetails>.All
+		Consumes<SendOrderDetailsRequest>.All
 	{
-		public void Consume(RetrieveOrderDetails request)
+		public void Consume(SendOrderDetailsRequest request)
 		{
 			// simulate a call to the external service
 
