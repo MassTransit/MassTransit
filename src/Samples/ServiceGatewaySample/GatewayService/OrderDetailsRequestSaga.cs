@@ -69,7 +69,7 @@ namespace GatewayService
 		public static State WaitingForResponse { get; set; }
 		public static State Completed { get; set; }
 
-		public static Event<RequestOrderDetails> RequestReceived { get; set; }
+		public static Event<RetrieveOrderDetails> RequestReceived { get; set; }
 		public static Event<OrderDetailsResponse> ResponseReceived { get; set; }
 		public static Event<OrderDetailsRequestFailed> RequestFailed { get; set; }
 
