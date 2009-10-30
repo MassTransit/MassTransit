@@ -1,12 +1,24 @@
-using System;
-using GatewayService.Interfaces;
-using GatewayService.Messages;
-using Magnum.StateMachine;
-using MassTransit;
-using MassTransit.Saga;
-
+// Copyright 2007-2008 The Apache Software Foundation.
+//  
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
+// this file except in compliance with the License. You may obtain a copy of the 
+// License at 
+// 
+//     http://www.apache.org/licenses/LICENSE-2.0 
+// 
+// Unless required by applicable law or agreed to in writing, software distributed 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// specific language governing permissions and limitations under the License.
 namespace GatewayService
 {
+	using System;
+	using Interfaces;
+	using Magnum.StateMachine;
+	using MassTransit;
+	using MassTransit.Saga;
+	using Messages;
+
 	public class OrderDetailsRequestSaga :
 		SagaStateMachine<OrderDetailsRequestSaga>,
 		ISaga
@@ -18,39 +30,37 @@ namespace GatewayService
 
 		private static void Saga()
 		{
-			Correlate(RequestReceived).By((saga,message) => saga.CustomerId == message.CustomerId && saga.OrderId == message.OrderId);
-			Correlate(ResponseReceived).By((saga,message) => saga.CustomerId == message.CustomerId && saga.OrderId == message.OrderId);
+			Correlate(RequestReceived).By((saga, message) => saga.CustomerId == message.CustomerId && saga.OrderId == message.OrderId);
+			Correlate(ResponseReceived).By((saga, message) => saga.CustomerId == message.CustomerId && saga.OrderId == message.OrderId);
 
 			Initially(
 				When(RequestReceived)
 					.Then((saga, request) =>
-					      	{
-					      		saga.OrderId = request.OrderId;
-					      		saga.CustomerId = request.CustomerId;
+						{
+							saga.OrderId = request.OrderId;
+							saga.CustomerId = request.CustomerId;
 
-								saga.Bus.Publish(new SendOrderDetailsRequest
-								                 	{
-														RequestId = saga.CorrelationId,
-								                 		CustomerId = request.CustomerId,
-														OrderId = request.OrderId,
-								                 	});
-					      	})
+							saga.Bus.Publish(new SendOrderDetailsRequest
+								{
+									RequestId = saga.CorrelationId,
+									CustomerId = request.CustomerId,
+									OrderId = request.OrderId,
+								});
+						})
 					.TransitionTo(WaitingForResponse));
 
 			During(WaitingForResponse,
-			       When(ResponseReceived)
-			       	.Then((saga, response) =>
-			       	      	{
-			       	      		saga.OrderCreated = response.Created;
-			       	      		saga.OrderStatus = response.Status;
+				When(ResponseReceived)
+					.Then((saga, response) =>
+						{
+							saga.OrderCreated = response.Created;
+							saga.OrderStatus = response.Status;
 
-								saga.Bus.Publish(new OrderDetails
-								                 	{
-								                 		
-								                 	});
-			       	      	})
-			       	.TransitionTo(Completed));
-			
+							saga.Bus.Publish(new OrderDetails
+								{
+								});
+						})
+					.TransitionTo(Completed));
 		}
 
 		protected OrderStatus OrderStatus { get; set; }
@@ -73,7 +83,7 @@ namespace GatewayService
 		public static Event<OrderDetailsResponse> ResponseReceived { get; set; }
 		public static Event<OrderDetailsRequestFailed> RequestFailed { get; set; }
 
-		public virtual Guid CorrelationId { get;  set; }
+		public virtual Guid CorrelationId { get; set; }
 		public virtual IServiceBus Bus { get; set; }
 	}
 }

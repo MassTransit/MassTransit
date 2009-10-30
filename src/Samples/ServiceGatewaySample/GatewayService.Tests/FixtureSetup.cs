@@ -10,11 +10,27 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace GatewayService.Interfaces
+namespace GatewayService.Tests
 {
-	public interface RetrieveOrderDetails
+	using System.Diagnostics;
+	using System.IO;
+	using System.Reflection;
+	using log4net.Config;
+	using NUnit.Framework;
+
+	[SetUpFixture]
+	public class FixtureSetup
 	{
-		string OrderId { get; }
-		string CustomerId { get; }
+		[SetUp]
+		public void Before_any()
+		{
+			Trace.WriteLine("Loading Log4net");
+
+			string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+
+			string file = Path.Combine(path, "GatewayService.Tests.log4net.xml");
+
+			XmlConfigurator.Configure(new FileInfo(file));
+		}
 	}
 }
