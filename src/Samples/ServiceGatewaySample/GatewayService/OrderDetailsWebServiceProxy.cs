@@ -6,9 +6,9 @@ using MassTransit;
 namespace GatewayService
 {
 	public class OrderDetailsWebServiceProxy :
-		Consumes<RequestOrderDetails>.All
+		Consumes<RetrieveOrderDetails>.All
 	{
-		public void Consume(RequestOrderDetails request)
+		public void Consume(RetrieveOrderDetails request)
 		{
 			// simulate a call to the external service
 
