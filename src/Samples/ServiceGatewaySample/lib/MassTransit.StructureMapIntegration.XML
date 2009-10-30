@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>MassTransit.StructureMapIntegration</name>
+    </assembly>
+    <members>
+        <member name="T:MassTransit.StructureMapIntegration.MassTransitRegistryBase">
+            <summary>
+            This is an extension of the StrutureMap registry exposing methods to make it easy to get Mass
+            Transit set up.
+            </summary>
+        </member>
+        <member name="M:MassTransit.StructureMapIntegration.MassTransitRegistryBase.#ctor">
+            <summary>
+            Default constructor with not actual registration
+            </summary>
+        </member>
+        <member name="M:MassTransit.StructureMapIntegration.MassTransitRegistryBase.#ctor(System.Type[])">
+            <summary>
+            Creates a registry for a service bus listening to an endpoint
+            </summary>
+        </member>
+        <member name="M:MassTransit.StructureMapIntegration.MassTransitRegistryBase.RegisterInMemorySubscriptionService">
+            <summary>
+            Registers the in-memory subscription service so that all buses created in the same
+            process share subscriptions
+            </summary>
+        </member>
+        <member name="M:MassTransit.StructureMapIntegration.MassTransitRegistryBase.RegisterBusDependencies">
+            <summary>
+            Registers the types used by the service bus internally and as part of the container.
+            These are typically items that are not swapped based on the container implementation
+            </summary>
+        </member>
+    </members>
+</doc>
