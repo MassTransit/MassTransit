@@ -12,14 +12,14 @@
 // specific language governing permissions and limitations under the License.
 namespace GatewayService.Tests
 {
+	using Interfaces;
 	using Magnum.DateTimeExtensions;
 	using MassTransit;
-	using Messages;
 	using NUnit.Framework;
 	using Rhino.Mocks;
 
 	[TestFixture]
-	public class Calling_the_proxy :
+	public class Saga_Specs :
 		LoopbackTestFixture
 	{
 		protected override void EstablishContext()
@@ -30,25 +30,29 @@ namespace GatewayService.Tests
 				.Stub(x => x.GetInstance<OrderDetailsWebServiceProxy>())
 				.Return(new OrderDetailsWebServiceProxy());
 
+			SetupSagaRepository<OrderDetailsRequestSaga>(ObjectBuilder);
+
 			LocalBus.Subscribe<OrderDetailsWebServiceProxy>();
+			LocalBus.Subscribe<OrderDetailsRequestSaga>();
 		}
 
 		[Test]
-		public void Should_return_the_matching_details_for_the_order()
+		public void Should_work_through_the_saga()
 		{
-			var response = new FutureMessage<OrderDetailsResponse>();
+			var response = new FutureMessage<OrderDetailsReceived>();
 
-			LocalBus.Subscribe<OrderDetailsResponse>(response.Set);
+			LocalBus.Subscribe<OrderDetailsReceived>(response.Set);
 
 			const string orderId = "ABC123";
 			const string customerId = "12345";
-			var request = new SendOrderDetailsRequest();
+			RetrieveOrderDetails request = new RetrieveOrderDetailsRequest(customerId, orderId);
 			LocalBus.Publish(request, x => x.SendResponseTo(LocalBus.Endpoint));
 
-			Assert.IsTrue(response.WaitUntilAvailable(5.Seconds()), "The response was not received");
+			Assert.IsTrue(response.WaitUntilAvailable(555.Seconds()), "The response was not received");
 
 			Assert.AreEqual(orderId, response.Message.OrderId);
 			Assert.AreEqual(customerId, response.Message.CustomerId);
+			
 		}
 	}
 }
