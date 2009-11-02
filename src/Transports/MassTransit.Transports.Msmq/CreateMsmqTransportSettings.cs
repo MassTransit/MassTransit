@@ -62,6 +62,7 @@ namespace MassTransit.Transports.Msmq
         {
             Transactional = true;
             CreateIfMissing = true;
+        	RequireTransactional = false;
         }
 
         /// <summary>
@@ -79,5 +80,11 @@ namespace MassTransit.Transports.Msmq
         /// exists and is not transactional, an exception will be thrown.
         /// </summary>
         public bool Transactional { get; set; }
+
+		/// <summary>
+		/// if the transactional queue is requested and required it will throw an exception if the queue 
+		/// exists and is not transactional
+		/// </summary>
+    	public bool RequireTransactional { get; set; }
     }
 }
