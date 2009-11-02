@@ -60,13 +60,12 @@ namespace MassTransit.Transports.Msmq
                         q.Create(settings.Transactional);
                     }
 
-                    if (q.IsTransactional && !settings.Transactional)
-                        throw new TransportException(settings.Address.Uri,
-                            "The transport is transactional but a non-transactional transport was requested");
-
-                    if (!q.IsTransactional && settings.Transactional)
-                        throw new TransportException(settings.Address.Uri,
-                            "The transport is non-transactional but a transactional transport was requested");
+					if (settings.RequireTransactional)
+					{
+						if (!q.IsTransactional && settings.Transactional)
+							throw new TransportException(settings.Address.Uri,
+								"The transport is non-transactional but a transactional transport was requested");
+					}
                 });
         }
 
