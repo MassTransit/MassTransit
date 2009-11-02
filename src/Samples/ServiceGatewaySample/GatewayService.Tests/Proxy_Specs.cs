@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace GatewayService.Tests
 {
+	using Magnum;
 	using Magnum.DateTimeExtensions;
 	using MassTransit;
 	using Messages;
@@ -42,7 +43,12 @@ namespace GatewayService.Tests
 
 			const string orderId = "ABC123";
 			const string customerId = "12345";
-			var request = new SendOrderDetailsRequest();
+			var request = new SendOrderDetailsRequest
+				{
+					RequestId = CombGuid.Generate(),
+					CustomerId = customerId,
+					OrderId = orderId,
+				};
 			LocalBus.Publish(request, x => x.SendResponseTo(LocalBus.Endpoint));
 
 			Assert.IsTrue(response.WaitUntilAvailable(5.Seconds()), "The response was not received");
