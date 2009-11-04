@@ -71,6 +71,7 @@
     <Compile Include="IMsmqEndpointAddress.cs" />
     <Compile Include="IMsmqEndpointDefaults.cs" />
     <Compile Include="IMsmqTransport.cs" />
+    <Compile Include="LocalTransportSettings.cs" />
     <Compile Include="MsmqEndpointAddress.cs" />
     <Compile Include="MsmqEndpoint.cs" />
     <Compile Include="MsmqEndpointConfigurator.cs" />

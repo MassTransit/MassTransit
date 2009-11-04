@@ -34,9 +34,9 @@ namespace MassTransit.Transports.Msmq
 
         private static IMsmqTransport NewLocalTransport(CreateMsmqTransportSettings settings)
         {
-            ValidateLocalTransport(settings);
+        	LocalTransportSettings transportSettings = ValidateLocalTransport(settings);
 
-            if (settings.Transactional)
+        	if (transportSettings.Transactional)
                 return new TransactionalMsmqTransport(settings.Address);
 
             return new NonTransactionalMsmqTransport(settings.Address);
@@ -47,10 +47,17 @@ namespace MassTransit.Transports.Msmq
 			return new TransactionalMsmqTransport(settings.Address);
         }
 
-        private static void ValidateLocalTransport(CreateMsmqTransportSettings settings)
+        private static LocalTransportSettings ValidateLocalTransport(CreateMsmqTransportSettings settings)
         {
+			var result = new LocalTransportSettings
+				{
+					Transactional = false,
+				};
+
             MsmqEndpointManagement.Manage(settings.Address, q =>
                 {
+                	result.Transactional = q.IsTransactional;
+
                     if (!q.Exists)
                     {
                         if (!settings.CreateIfMissing)
@@ -67,6 +74,8 @@ namespace MassTransit.Transports.Msmq
 								"The transport is non-transactional but a transactional transport was requested");
 					}
                 });
+
+        	return result;
         }
 
         public static CreateMsmqTransportSettings GetSettingsForRemoteEndpointCache(CreateMsmqTransportSettings settings)
