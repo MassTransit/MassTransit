@@ -37,9 +37,13 @@ namespace MassTransit.Transports.Msmq
 
                 var transport = MsmqTransportFactory.New(settings);
                 
+				// TODO Does this need to be a bus concern?
                 PurgeExistingMessagesIfRequested(settings);
 
                 var errorSettings = new CreateMsmqTransportSettings(settings.ErrorAddress, settings);
+				if(transport.MsmqAddress.IsTransactional)
+					settings.Transactional = true;
+
                 IMsmqTransport errorTransport = MsmqTransportFactory.New(errorSettings);
 
                 var endpoint = new MsmqEndpoint(settings.Address, settings.Serializer, transport, errorTransport);

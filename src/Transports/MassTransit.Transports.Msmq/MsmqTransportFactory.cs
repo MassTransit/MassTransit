@@ -12,60 +12,61 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports.Msmq
 {
-    using System;
-    using Exceptions;
+	using System;
+	using Exceptions;
 
-    public static class MsmqTransportFactory
-    {
-        public static IMsmqTransport New(CreateMsmqTransportSettings settings)
-        {
-            try
-            {
-                if (settings.Address.IsLocal)
-                    return NewLocalTransport(settings);
+	public static class MsmqTransportFactory
+	{
+		public static IMsmqTransport New(CreateMsmqTransportSettings settings)
+		{
+			try
+			{
+				if (settings.Address.IsLocal)
+					return NewLocalTransport(settings);
 
-                return NewRemoteTransport(settings);
-            }
-            catch (Exception ex)
-            {
-                throw new TransportException(settings.Address.Uri, "Failed to create MSMQ transport", ex);
-            }
-        }
+				return NewRemoteTransport(settings);
+			}
+			catch (Exception ex)
+			{
+				throw new TransportException(settings.Address.Uri, "Failed to create MSMQ transport", ex);
+			}
+		}
 
-        private static IMsmqTransport NewLocalTransport(CreateMsmqTransportSettings settings)
-        {
-        	LocalTransportSettings transportSettings = ValidateLocalTransport(settings);
+		private static IMsmqTransport NewLocalTransport(CreateMsmqTransportSettings settings)
+		{
+			LocalTransportSettings transportSettings = ValidateLocalTransport(settings);
 
-        	if (transportSettings.Transactional)
-                return new TransactionalMsmqTransport(settings.Address);
+			if (transportSettings.Transactional)
+				return new TransactionalMsmqTransport(settings.Address);
 
-            return new NonTransactionalMsmqTransport(settings.Address);
-        }
+			return new NonTransactionalMsmqTransport(settings.Address);
+		}
 
-        private static IMsmqTransport NewRemoteTransport(CreateMsmqTransportSettings settings)
-        {
-			return new TransactionalMsmqTransport(settings.Address);
-        }
+		private static IMsmqTransport NewRemoteTransport(CreateMsmqTransportSettings settings)
+		{
+			if (settings.Address.IsTransactional)
+				return new TransactionalMsmqTransport(settings.Address);
 
-        private static LocalTransportSettings ValidateLocalTransport(CreateMsmqTransportSettings settings)
-        {
+			return new NonTransactionalMsmqTransport(settings.Address);
+		}
+
+		private static LocalTransportSettings ValidateLocalTransport(CreateMsmqTransportSettings settings)
+		{
 			var result = new LocalTransportSettings
 				{
-					Transactional = false,
+					Transactional = settings.Address.IsTransactional,
 				};
 
-            MsmqEndpointManagement.Manage(settings.Address, q =>
-                {
-                	result.Transactional = q.IsTransactional;
+			MsmqEndpointManagement.Manage(settings.Address, q =>
+				{
+					if (!q.Exists)
+					{
+						if (!settings.CreateIfMissing)
+							throw new TransportException(settings.Address.Uri,
+								"The transport does not exist and automatic creation is not enabled");
 
-                    if (!q.Exists)
-                    {
-                        if (!settings.CreateIfMissing)
-                            throw new TransportException(settings.Address.Uri,
-                                "The transport does not exist and automatic creation is not enabled");
-
-                        q.Create(settings.Transactional);
-                    }
+						q.Create(settings.Transactional);
+					}
 
 					if (settings.RequireTransactional)
 					{
@@ -73,22 +74,24 @@ namespace MassTransit.Transports.Msmq
 							throw new TransportException(settings.Address.Uri,
 								"The transport is non-transactional but a transactional transport was requested");
 					}
-                });
 
-        	return result;
-        }
+					result.Transactional = q.IsTransactional;
+				});
 
-        public static CreateMsmqTransportSettings GetSettingsForRemoteEndpointCache(CreateMsmqTransportSettings settings)
-        {
-            string queueName = settings.Address.Uri.PathAndQuery.Substring(1) + "_cache_for_" + settings.Address.Uri.Host;
+			return result;
+		}
 
-            var builder = new UriBuilder(settings.Address.Uri.Scheme, "localhost", settings.Address.Uri.Port, queueName);
+		public static CreateMsmqTransportSettings GetSettingsForRemoteEndpointCache(CreateMsmqTransportSettings settings)
+		{
+			string queueName = settings.Address.Uri.PathAndQuery.Substring(1) + "_cache_for_" + settings.Address.Uri.Host;
 
-            return new CreateMsmqTransportSettings(new MsmqEndpointAddress(builder.Uri), settings)
-                {
-                    CreateIfMissing = true,
+			var builder = new UriBuilder(settings.Address.Uri.Scheme, "localhost", settings.Address.Uri.Port, queueName);
+
+			return new CreateMsmqTransportSettings(new MsmqEndpointAddress(builder.Uri), settings)
+				{
+					CreateIfMissing = true,
 					Transactional = true,
-                };
-        }
-    }
+				};
+		}
+	}
 }

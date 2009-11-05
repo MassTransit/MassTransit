@@ -1,0 +1,66 @@
+// Copyright 2007-2008 The Apache Software Foundation.
+//  
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
+// this file except in compliance with the License. You may obtain a copy of the 
+// License at 
+// 
+//     http://www.apache.org/licenses/LICENSE-2.0 
+// 
+// Unless required by applicable law or agreed to in writing, software distributed 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// specific language governing permissions and limitations under the License.
+namespace MassTransit.Util
+{
+	using System;
+	using System.Linq;
+	using Magnum.ObjectExtensions;
+
+	public static class QueryStringExtensions
+	{
+		public static string GetValueFromQueryString(this string queryString, string key)
+		{
+			if (queryString.IsNullOrEmpty() || queryString.Length <= 1)
+				return null;
+
+			return queryString.Substring(1)
+				.Split('&')
+				.Select(x =>
+					{
+						string[] values = x.Split('=');
+
+						return new {Key = values[0], Value = values[1]};
+					})
+				.Where(x => string.Compare(x.Key, key, true) == 0)
+				.Select(x => x.Value)
+				.DefaultIfEmpty(null)
+				.SingleOrDefault();
+		}
+
+		public static T GetValueFromQueryString<T>(this string queryString, string key, T defaultValue)
+			where T : struct
+		{
+			if (queryString.IsNullOrEmpty())
+				return defaultValue;
+
+			try
+			{
+				string value = GetValueFromQueryString(queryString, key);
+				if (value.IsNullOrEmpty())
+					return defaultValue;
+
+				return (T) Convert.ChangeType(value, typeof (T));
+			}
+			catch
+			{
+				return defaultValue;
+			}
+		}
+
+		public static T GetValueFromQueryString<T>(this string queryString, string key)
+			where T : struct
+		{
+			return queryString.GetValueFromQueryString(key, default(T));
+		}
+	}
+}

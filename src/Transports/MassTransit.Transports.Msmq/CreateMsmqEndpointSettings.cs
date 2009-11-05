@@ -42,7 +42,10 @@ namespace MassTransit.Transports.Msmq
 
         private void SetDefaultErrorAddress()
         {
-            ErrorAddress = new MsmqEndpointAddress(new Uri(Address.Uri + "_error"));
+        	Uri uri = Address.Uri;
+        	var errorUri = new UriBuilder(uri.Scheme, uri.Host, uri.Port, uri.AbsolutePath + "_error", uri.Query);
+
+        	ErrorAddress = new MsmqEndpointAddress(errorUri.Uri);
         }
 
         /// <summary>

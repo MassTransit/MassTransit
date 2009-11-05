@@ -42,6 +42,11 @@ namespace MassTransit.Transports.Msmq
 			get { return _address; }
 		}
 
+		public IMsmqEndpointAddress MsmqAddress
+		{
+			get { return _address; }
+		}
+
 		public virtual void Receive(Func<Message, Action<Message>> receiver)
 		{
 			if (_disposed) throw NewDisposedException();

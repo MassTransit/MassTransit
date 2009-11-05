@@ -62,20 +62,4 @@ namespace MassTransit.Transports.Msmq.Tests
 			ef.GetEndpoint(_uri);
 		}
 	}
-
-	[TestFixture, Category("Integration")]
-	public class When_instantiated_endpoints_via_uri
-	{
-		[Test]
-		public void Should_get_conveted_into_a_fully_qualified_uri()
-		{
-			string uriString = "msmq://localhost/mt_client_tx";
-
-			MsmqEndpointAddress address = new MsmqEndpointAddress(new Uri(uriString));
-
-			string machineEndpointName = uriString.Replace("localhost", Environment.MachineName.ToLowerInvariant());
-
-			address.Uri.Equals(machineEndpointName).ShouldBeTrue();
-		}
-	}
 }

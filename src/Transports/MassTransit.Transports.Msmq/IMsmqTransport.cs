@@ -21,6 +21,8 @@ namespace MassTransit.Transports.Msmq
 	public interface IMsmqTransport :
 		ITransport
 	{
+		IMsmqEndpointAddress MsmqAddress { get; }
+
 		/// <summary>
 		/// Receive a message from the transport
 		/// </summary>
