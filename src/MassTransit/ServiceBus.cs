@@ -354,7 +354,7 @@ namespace MassTransit
 
 		private void InitializePerformanceCounters()
 		{
-			var instanceName = string.Format("{0}_{1}_{2}", Endpoint.Uri.PathAndQuery.Substring(1), Endpoint.Uri.Scheme, Endpoint.Uri.Host);
+			var instanceName = string.Format("{0}_{1}_{2}", Endpoint.Address.Path, Endpoint.Uri.Scheme, Endpoint.Uri.Host);
 
 			_counters = new ServiceBusInstancePerformanceCounters(instanceName);
 

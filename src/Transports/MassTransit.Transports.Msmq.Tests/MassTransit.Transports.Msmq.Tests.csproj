@@ -120,7 +120,6 @@
     <Compile Include="Learning\TransactionalQueue_Specs.cs" />
     <Compile Include="ReceiveFromEndpoint_Specs.cs" />
     <Compile Include="Receive_Specs.cs" />
-    <Compile Include="RemoteSend_Specs.cs" />
     <Compile Include="Serialization\ContextSerialization_Specs.cs" />
     <Compile Include="TestFixtures\MsmqEndpointTestFixture.cs" />
     <Compile Include="TestFixtures\MsmqTransactionalEndpointTestFixture.cs" />
