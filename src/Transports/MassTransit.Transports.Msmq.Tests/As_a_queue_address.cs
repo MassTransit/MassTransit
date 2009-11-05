@@ -23,20 +23,20 @@ namespace MassTransit.Transports.Msmq.Tests
 		[SetUp]
 		public void SetUp()
 		{
-			_address = "msmq://localhost/mt_client";
+			_address = "msmq://localhost/mt_should_not_exist";
 			_uriAddress = new Uri(_address);
 		}
 
 		private string _address;
 		private Uri _uriAddress;
 
-		private readonly Uri _expectedUri = new Uri("msmq://" + Environment.MachineName + "/mt_client");
-		private const string _expectedQueuePath = @"FormatName:DIRECT=OS:localhost\private$\mt_client";
+		private readonly Uri _expectedUri = new Uri("msmq://" + Environment.MachineName + "/mt_should_not_exist?tx=false");
+		private const string _expectedQueuePath = @"FormatName:DIRECT=OS:localhost\private$\mt_should_not_exist";
 
 		[Test]
 		public void A_message_queue_address_should_convert_to_a_queue_path()
 		{
-			MsmqEndpointAddress address = new MsmqEndpointAddress(_uriAddress);
+			var address = new MsmqEndpointAddress(_uriAddress);
 			address.FormatName
 				.ShouldEqual(_expectedQueuePath);
 			address.Uri
@@ -46,9 +46,39 @@ namespace MassTransit.Transports.Msmq.Tests
 		}
 
 		[Test]
+		public void A_message_queue_address_should_not_include_query_string_parameters()
+		{
+			var uriAddress = new Uri("msmq://localhost/mt_should_not_exist?tx=false");
+
+			var address = new MsmqEndpointAddress(uriAddress);
+
+			address.FormatName
+				.ShouldEqual(_expectedQueuePath);
+			address.IsTransactional	
+				.ShouldBeFalse();
+			address.Uri
+				.ShouldEqual(_expectedUri);
+		}
+
+		[Test]
+		public void A_message_queue_address_accept_the_tx_flag_as_a_uri_string()
+		{
+			var uriAddress = new Uri("msmq://localhost/mt_should_not_exist?tx=true");
+
+			var address = new MsmqEndpointAddress(uriAddress);
+
+			address.FormatName
+				.ShouldEqual(_expectedQueuePath);
+			address.Uri
+				.ShouldEqual(new Uri("msmq://" + Environment.MachineName + "/mt_should_not_exist?tx=true"));
+			address.IsTransactional
+				.ShouldBeTrue();
+		}
+
+		[Test]
 		public void A_message_queue_uri_should_convert_to_a_queue_path()
 		{
-			MsmqEndpointAddress address = new MsmqEndpointAddress(_uriAddress);
+			var address = new MsmqEndpointAddress(_uriAddress);
 			address.FormatName
 				.ShouldEqual(_expectedQueuePath);
 			address.Uri
@@ -60,10 +90,10 @@ namespace MassTransit.Transports.Msmq.Tests
 		[Test]
 		public void A_remote_server_should_keep_the_remote_server_name()
 		{
-			Uri remoteUri = new Uri("msmq://remote_server/queue_name");
+			var remoteUri = new Uri("msmq://remote_server/queue_name");
 			const string remoteQueuePath = @"FormatName:DIRECT=OS:remote_server\private$\queue_name";
 
-			MsmqEndpointAddress address = new MsmqEndpointAddress(remoteUri);
+			var address = new MsmqEndpointAddress(remoteUri);
 			address.FormatName
 				.ShouldEqual(remoteQueuePath);
 			address.Uri
@@ -73,7 +103,7 @@ namespace MassTransit.Transports.Msmq.Tests
 		}
 
 
-		[Test, ExpectedException(typeof(NotSupportedException))]
+		[Test, ExpectedException(typeof (NotSupportedException))]
 		public void An_address_cant_contain_a_path_specifier()
 		{
 			const string address = "msmq://localhost/test_endpoint/error_creator";
@@ -88,6 +118,54 @@ namespace MassTransit.Transports.Msmq.Tests
 
 			new MsmqEndpointAddress(new Uri(address));
 		}
+
+		[Test]
+		public void Local_queues_should_be_non_transactional_by_default()
+		{
+			var address = new MsmqEndpointAddress(_uriAddress);
+
+			address.FormatName
+				.ShouldEqual(_expectedQueuePath);
+			address.Uri
+				.ShouldEqual(_expectedUri);
+			address.IsLocal
+				.ShouldBeTrue();
+			address.IsTransactional
+				.ShouldBeFalse();
+		}
+
+		[Test]
+		public void Remote_queue_should_be_non_transactional_when_identified()
+		{
+			var remoteUri = new Uri("msmq://remote_server/queue_name?tx=false");
+			const string remoteQueuePath = @"FormatName:DIRECT=OS:remote_server\private$\queue_name";
+
+			var address = new MsmqEndpointAddress(remoteUri);
+
+			address.FormatName
+				.ShouldEqual(remoteQueuePath);
+			address.Uri
+				.ShouldEqual(remoteUri);
+			address.IsLocal
+				.ShouldBeFalse();
+			address.IsTransactional
+				.ShouldBeFalse();
+		}
+
+		[Test]
+		public void Local_queue_should_be_transactional_when_identified()
+		{
+			var address = new MsmqEndpointAddress(new Uri(_address + "?tx=true"));
+
+			address.FormatName
+				.ShouldEqual(_expectedQueuePath);
+			address.Uri.ToString()
+				.ShouldEqual(new Uri(_expectedUri.ToString().Replace("?tx=false", "?tx=true")));
+			address.IsLocal
+				.ShouldBeTrue();
+			address.IsTransactional
+				.ShouldBeTrue();
+		}
 	}
 
 	[TestFixture, Category("Integration")]
@@ -96,18 +174,18 @@ namespace MassTransit.Transports.Msmq.Tests
 		[Test]
 		public void The_result_Uri_should_match_the_constructor_string()
 		{
-			MsmqEndpointAddress address = new MsmqEndpointAddress(new Uri("msmq://localhost/mt_client"));
+			var address = new MsmqEndpointAddress(new Uri("msmq://localhost/mt_should_not_exist"));
 
-			Assert.That(address.Uri.AbsoluteUri, Is.EqualTo("msmq://" + Environment.MachineName.ToLowerInvariant() + "/mt_client"));
-			Assert.That(address.FormatName, Is.EqualTo(@"FormatName:DIRECT=OS:localhost\private$\mt_client"));
+			Assert.That(address.Uri.AbsoluteUri, Is.EqualTo("msmq://" + Environment.MachineName.ToLowerInvariant() + "/mt_should_not_exist?tx=false"));
+			Assert.That(address.FormatName, Is.EqualTo(@"FormatName:DIRECT=OS:localhost\private$\mt_should_not_exist"));
 		}
 
 		[Test]
 		public void The_resulting_Uri_should_match_the_string()
 		{
-			MsmqEndpointAddress address = new MsmqEndpointAddress(new Uri("msmq://localhost/mt_client"));
+			var address = new MsmqEndpointAddress(new Uri("msmq://localhost/mt_should_not_exist"));
 
-			Assert.That(address.Uri.AbsoluteUri, Is.EqualTo("msmq://" + Environment.MachineName.ToLowerInvariant() + "/mt_client"));
+			Assert.That(address.Uri.AbsoluteUri, Is.EqualTo("msmq://" + Environment.MachineName.ToLowerInvariant() + "/mt_should_not_exist?tx=false"));
 		}
 	}
 }

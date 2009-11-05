@@ -289,6 +289,16 @@
             </summary>
             <param name="intervalInSeconds">The heartbeat interval in seconds</param>
         </member>
+        <member name="M:MassTransit.IServiceBusRequest.Complete">
+            <summary>
+            Called by the consumer class to indicate that the operation is complete
+            </summary>
+        </member>
+        <member name="M:MassTransit.IServiceBusRequest.Cancel">
+            <summary>
+            Cancels a pending asynchronous request. Any messages received after the request is cancelled are ignored.
+            </summary>
+        </member>
         <member name="M:MassTransit.IObjectBuilder.Release``1(``0)">
             <summary>
             Releases an object back to the container
@@ -346,14 +356,6 @@
             Adds a component to the dispatcher that will be created on demand to handle messages
             </summary>
             <param name="consumerType">The type of component to add</param>
-        </member>
-        <member name="M:MassTransit.IServiceBus.SubscribeConsumer``1(System.Func{``0,System.Action{``0}})">
-            <summary>
-            Subscribe to a message that has a consumer that is retrieved from the specified expression
-            </summary>
-            <typeparam name="T"></typeparam>
-            <param name="getConsumerAction"></param>
-            <returns></returns>
         </member>
         <member name="M:MassTransit.IServiceBus.Publish``1(``0)">
             <summary>
@@ -836,12 +838,12 @@
             <typeparam name="TSaga">The saga that will handle the message</typeparam>
             <typeparam name="TMessage">The message that will be handled by the saga</typeparam>
         </member>
-        <member name="M:MassTransit.Saga.ISagaPolicy`2.CreateSagaWhenMissing(`1,`0@)">
+        <member name="M:MassTransit.Saga.ISagaPolicy`2.CreateSagaWhenMissing(`1,System.Guid@)">
             <summary>
             Determines if the message should result in the creation of a new instance of the saga
             </summary>
             <param name="message">The message that triggered the action</param>
-            <param name="saga">The saga that was created</param>
+            <param name="sagaId">The sagaId to use for the new saga instance</param>
             <returns>True if the saga should be created, otherwise false</returns>
         </member>
         <member name="M:MassTransit.Saga.ISagaPolicy`2.ForExistingSaga(`1)">

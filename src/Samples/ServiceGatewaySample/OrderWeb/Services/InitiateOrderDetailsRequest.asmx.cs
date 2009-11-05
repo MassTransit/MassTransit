@@ -10,24 +10,14 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Transports.Msmq
+namespace OrderWeb.Services
 {
-	public interface IMsmqEndpointAddress :
-		IEndpointAddress
+	using System;
+
+	public class InitiateOrderDetailsRequest
 	{
-		/// <summary>
-		/// The format name used to talk to MSMQ
-		/// </summary>
-		string FormatName { get; }
-
-		/// <summary>
-		/// The name of the queue in local format (.\private$\name)
-		/// </summary>
-		string LocalName { get; }
-
-		/// <summary>
-		/// Was transactional requested by the Uri
-		/// </summary>
-		bool IsTransactional { get; }
+		public Guid RequestId { get; set; }
+		public string CustomerId { get; set; }
+		public string OrderId { get; set; }
 	}
 }

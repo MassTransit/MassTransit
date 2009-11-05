@@ -446,6 +446,7 @@
     <Compile Include="Pipeline\IPipelineInspector.cs" />
     <Compile Include="Pipeline\ISubscriberContext.cs" />
     <Compile Include="Pipeline\Configuration\Subscribers\IPipelineSubscriber.cs" />
+    <Compile Include="Util\QueryStringExtensions.cs" />
     <Compile Include="Util\ReflectiveMethodInvoker.cs" />
     <Compile Include="Util\RegistrationList.cs" />
     <Compile Include="Pipeline\MessagePipeline.cs" />
