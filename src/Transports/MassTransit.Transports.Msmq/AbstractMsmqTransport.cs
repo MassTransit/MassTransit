@@ -180,9 +180,7 @@ namespace MassTransit.Transports.Msmq
 
 		protected virtual void SendMessage(MessageQueue queue, Message message)
 		{
-			MessageQueueTransactionType tt = Address.IsLocal ? MessageQueueTransactionType.None : MessageQueueTransactionType.Single;
-
-			queue.Send(message, tt);
+			queue.Send(message, MessageQueueTransactionType.None);
 		}
 
 		protected virtual void ReceiveMessage(MessageEnumerator enumerator, TimeSpan timeout, Action<Func<Message>> receiveAction)

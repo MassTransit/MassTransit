@@ -65,12 +65,12 @@ namespace MassTransit.Transports.Msmq
 							throw new TransportException(settings.Address.Uri,
 								"The transport does not exist and automatic creation is not enabled");
 
-						q.Create(settings.Transactional);
+						q.Create(settings.Transactional || settings.Address.IsTransactional);
 					}
 
 					if (settings.RequireTransactional)
 					{
-						if (!q.IsTransactional && settings.Transactional)
+						if (!q.IsTransactional && (settings.Transactional || settings.Address.IsTransactional))
 							throw new TransportException(settings.Address.Uri,
 								"The transport is non-transactional but a transactional transport was requested");
 					}
