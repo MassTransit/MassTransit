@@ -80,18 +80,5 @@ namespace MassTransit.Transports.Msmq
 
 			return result;
 		}
-
-		public static CreateMsmqTransportSettings GetSettingsForRemoteEndpointCache(CreateMsmqTransportSettings settings)
-		{
-			string queueName = settings.Address.Uri.PathAndQuery.Substring(1) + "_cache_for_" + settings.Address.Uri.Host;
-
-			var builder = new UriBuilder(settings.Address.Uri.Scheme, "localhost", settings.Address.Uri.Port, queueName);
-
-			return new CreateMsmqTransportSettings(new MsmqEndpointAddress(builder.Uri), settings)
-				{
-					CreateIfMissing = true,
-					Transactional = true,
-				};
-		}
 	}
 }

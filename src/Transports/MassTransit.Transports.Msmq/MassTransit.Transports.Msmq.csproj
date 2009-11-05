@@ -83,7 +83,6 @@
     <Compile Include="MsmqTransportFactory.cs" />
     <Compile Include="NonTransactionalMsmqTransport.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="StoreAndForwardMsmqTransport.cs" />
     <Compile Include="TransactionalMsmqTransport.cs" />
   </ItemGroup>
   <ItemGroup>
