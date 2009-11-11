@@ -70,7 +70,7 @@ namespace MassTransit.Transports.Msmq.Tests
 		[Test, Explicit]
 		public void Each_command_should_only_be_processed_one_time()
 		{
-		    const int iterations = 500;
+		    const int iterations = 200;
 			var received = new AutoResetEvent(false);
 			var unsubscribeAction = LocalBus.Subscribe<SimpleGridResult>(message =>
 				{
@@ -128,7 +128,7 @@ namespace MassTransit.Transports.Msmq.Tests
 				});
 
 
-			Assert.AreEqual(100, _responses.Count);
+			Assert.AreEqual(iterations, _responses.Count);
 
 			_responses.Values.Each(x => Assert.AreEqual(1, x, "Too many results received"));
 

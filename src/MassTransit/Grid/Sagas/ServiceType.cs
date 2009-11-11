@@ -13,20 +13,16 @@
 namespace MassTransit.Grid.Sagas
 {
 	using System;
-	using System.Security.Cryptography;
-	using System.Text;
 	using Magnum.StateMachine;
 	using Messages;
 	using Saga;
 	using Util;
 
-	public class GridService :
-		SagaStateMachine<GridService>,
+	public class ServiceType :
+		SagaStateMachine<ServiceType>,
 		ISaga
 	{
-		private static readonly MD5CryptoServiceProvider _cryptoProvider = new MD5CryptoServiceProvider();
-
-		static GridService()
+		static ServiceType()
 		{
 			Define(() =>
 				{
@@ -38,11 +34,17 @@ namespace MassTransit.Grid.Sagas
 								{
 									saga.ServiceName = message.ServiceName;
 
-									saga.NotifyGridServiceAdded();
-								})
-							.TransitionTo(Known));
+									var notification = new ServiceTypeAdded
+										{
+											ServiceId = saga.CorrelationId,
+											ServiceName = saga.ServiceName,
+										};
 
-					During(Known,
+									saga.Bus.Endpoint.Send(notification);
+								})
+							.TransitionTo(Active));
+
+					During(Active,
 						When(ServiceNodeAdded)
 							.Then((saga, message) =>
 								{
@@ -51,47 +53,26 @@ namespace MassTransit.Grid.Sagas
 				});
 		}
 
-		public GridService(Guid correlationId)
+		public ServiceType(Guid correlationId)
 		{
 			CorrelationId = correlationId;
 		}
 
-		protected GridService()
+		protected ServiceType()
 		{
 		}
 
 		public static State Initial { get; set; }
-		public static State Known { get; set; }
+		public static State Active { get; set; }
 		public static State Completed { get; set; }
 
-		public static Event<GridServiceAddedToNode> ServiceNodeAdded { get; set; }
+		public static Event<ServiceNodeAdded> ServiceNodeAdded { get; set; }
 
 		public string ServiceName { get; set; }
 
 		[Indexed]
 		public Guid CorrelationId { get; set; }
+
 		public IServiceBus Bus { get; set; }
-
-		private void NotifyGridServiceAdded()
-		{
-			var message = new GridServiceAdded
-				{
-					ServiceId = CorrelationId,
-					ServiceName = ServiceName,
-				};
-
-			Bus.Endpoint.Send(message);
-		}
-
-		public static Guid GenerateIdForType(Type type)
-		{
-			string key = type.AssemblyQualifiedName;
-
-			var bytes = Encoding.UTF8.GetBytes(key);
-
-			var hash = _cryptoProvider.ComputeHash(bytes);
-
-			return new Guid(hash);
-		}
 	}
 }

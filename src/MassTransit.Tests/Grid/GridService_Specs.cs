@@ -19,6 +19,7 @@ namespace MassTransit.Tests.Grid
 	using log4net;
 	using Magnum;
 	using Magnum.DateTimeExtensions;
+	using MassTransit.Grid;
 	using MassTransit.Grid.Configuration;
 	using MassTransit.Grid.Sagas;
 	using MassTransit.Transports;
@@ -98,7 +99,7 @@ namespace MassTransit.Tests.Grid
 			nodeB.GridServiceRepository.Where(x => true).Count().ShouldEqual(1);
 			nodeC.GridServiceRepository.Where(x => true).Count().ShouldEqual(1);
 
-			var serviceId = GridService.GenerateIdForType(typeof (SimpleGridCommand));
+			var serviceId = typeof (SimpleGridCommand).ToServiceTypeId();
 
 			nodeA.GridServiceNodeRepository.Where(x => x.ServiceId == serviceId).Count().ShouldEqual(2);
 			nodeB.GridServiceNodeRepository.Where(x => x.ServiceId == serviceId).Count().ShouldEqual(2);

@@ -14,11 +14,26 @@ namespace MassTransit.Grid.Messages
 {
 	using System;
 
-	[Serializable]
 	public class NotifyNodeWorkload :
-		NotifyNodeState
+		NotifyNodeMessageBase
 	{
-		public int ActiveJobCount { get; set; }
-		public int PendingJobCount { get; set; }
+		public NotifyNodeWorkload(Uri controlUri, Uri dataUri, DateTime created, DateTime lastUpdated, int activeMessageCount, int waitingMessageCount)
+			: base(controlUri, dataUri, created, lastUpdated)
+		{
+			ActiveMessageCount = activeMessageCount;
+			WaitingMessageCount = waitingMessageCount;
+		}
+
+		public NotifyNodeWorkload(NotifyNodeMessageBase source)
+			: base(source)
+		{
+		}
+
+		protected NotifyNodeWorkload()
+		{
+		}
+
+		public int ActiveMessageCount { get; set; }
+		public int WaitingMessageCount { get; set; }
 	}
 }

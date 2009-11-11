@@ -14,9 +14,21 @@ namespace MassTransit.Grid.Messages
 {
 	using System;
 
-	[Serializable]
 	public class NotifyNodeDown :
-		NotifyNodeState
+		NotifyNodeMessageBase
 	{
+		public NotifyNodeDown(NotifyNodeMessageBase source)
+			: base(source)
+		{
+		}
+
+		public NotifyNodeDown(Uri controlUri, Uri dataUri, DateTime created, DateTime lastUpdated)
+			: base(controlUri, dataUri, created, lastUpdated)
+		{
+		}
+
+		protected NotifyNodeDown()
+		{
+		}
 	}
 }

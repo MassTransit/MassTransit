@@ -31,8 +31,8 @@ namespace MassTransit.Grid.Configuration
 		public IBusService Create(IServiceBus bus, IObjectBuilder builder)
 		{
 			ServiceGrid grid = new ServiceGrid(builder.GetInstance<IEndpointFactory>(),
-				builder.GetInstance<ISagaRepository<GridNode>>(),
-				builder.GetInstance<ISagaRepository<GridServiceNode>>(),
+				builder.GetInstance<ISagaRepository<Node>>(),
+				builder.GetInstance<ISagaRepository<ServiceNode>>(),
 				builder.GetInstance<ISagaRepository<GridMessageNode>>());
 
 			grid.WhenStarted = () => _startActions(bus, grid, builder);
