@@ -162,6 +162,14 @@
     <Compile Include="Grid\IGrid.cs" />
     <Compile Include="Grid\IGridControl.cs" />
     <Compile Include="Grid\IGridServiceInterceptor.cs" />
+    <Compile Include="Grid\Messages\AbstractServiceMessageMessage.cs" />
+    <Compile Include="Grid\Messages\AcceptServiceMessageProposal.cs" />
+    <Compile Include="Grid\Messages\ServiceMessageCompleted.cs" />
+    <Compile Include="Grid\Messages\ServiceMessageReceived.cs" />
+    <Compile Include="Grid\Messages\ProposeServiceMessage.cs" />
+    <Compile Include="Grid\Messages\RejectServiceMessageProposal.cs" />
+    <Compile Include="Grid\Messages\ServiceMessageAccepted.cs" />
+    <Compile Include="Grid\Sagas\QuorumState.cs" />
     <Compile Include="Grid\ServiceTypeExtensions.cs" />
     <Compile Include="IEndpointAddress.cs" />
     <Compile Include="Internal\AbstractEndpoint.cs" />
@@ -202,7 +210,7 @@
     <Compile Include="Grid\Paxos\Promise.cs" />
     <Compile Include="Grid\Sagas\Node.cs" />
     <Compile Include="Grid\Sagas\ServiceType.cs" />
-    <Compile Include="Grid\Sagas\GridMessageNode.cs" />
+    <Compile Include="Grid\Sagas\ServiceMessage.cs" />
     <Compile Include="Grid\Sagas\ServiceNode.cs" />
     <Compile Include="Grid\ServiceGrid.cs" />
     <Compile Include="IControlBus.cs" />

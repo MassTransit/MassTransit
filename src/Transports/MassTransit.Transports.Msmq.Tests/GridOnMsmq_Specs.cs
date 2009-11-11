@@ -120,7 +120,7 @@ namespace MassTransit.Transports.Msmq.Tests
 			GridNodes.Each(x =>
 				{
 					x.GridMessageNodeRepository
-						.Where(command => command.CurrentState != GridMessageNode.Completed && command.CurrentState != GridMessageNode.ConsumeCompleted)
+						.Where(command => command.CurrentState != ServiceMessage.Completed && command.CurrentState != ServiceMessage.WaitingForReceive)
 						.Each(command =>
 							{
 								Trace.WriteLine(x.DataBus.Endpoint.Uri + " Pending Command: " + command.CorrelationId);

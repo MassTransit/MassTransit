@@ -30,14 +30,14 @@ namespace MassTransit.Grid.Configuration
 
 		public IBusService Create(IServiceBus bus, IObjectBuilder builder)
 		{
-			ServiceGrid grid = new ServiceGrid(builder.GetInstance<IEndpointFactory>(),
+			var grid = new ServiceGrid(builder.GetInstance<IEndpointFactory>(),
 				builder.GetInstance<ISagaRepository<Node>>(),
 				builder.GetInstance<ISagaRepository<ServiceNode>>(),
-				builder.GetInstance<ISagaRepository<GridMessageNode>>());
+				builder.GetInstance<ISagaRepository<ServiceMessage>>());
 
 			grid.WhenStarted = () => _startActions(bus, grid, builder);
 
-			if(Proposer)
+			if (Proposer)
 				grid.ProposerUri = bus.ControlBus.Endpoint.Uri;
 
 			return grid;
@@ -48,7 +48,7 @@ namespace MassTransit.Grid.Configuration
 		{
 			var configurator = new GridServiceConfigurator<TMessage>();
 
-			_startActions += (bus, grid, builder) => configurator.Start(bus, grid, builder);
+			_startActions += configurator.Start;
 
 			return configurator;
 		}

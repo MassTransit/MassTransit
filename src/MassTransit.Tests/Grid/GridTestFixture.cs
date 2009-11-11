@@ -18,7 +18,6 @@ namespace MassTransit.Tests.Grid
 	using System.Threading;
 	using MassTransit.Grid;
 	using MassTransit.Grid.Configuration;
-	using MassTransit.Grid.Sagas;
 	using NUnit.Framework;
 	using TextFixtures;
 
