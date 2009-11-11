@@ -31,7 +31,7 @@ namespace MassTransit.Tests.Saga.Locator
 
 			_repository = new InMemorySagaRepository<TestSaga>();
 
-			var initiatePolicy = new InitiatingSagaPolicy<TestSaga, PingMessage>();
+			var initiatePolicy = new InitiatingSagaPolicy<TestSaga, PingMessage>(x => false);
 
 
 			var message = new PingMessage(_sagaId);

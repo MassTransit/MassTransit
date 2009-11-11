@@ -50,7 +50,7 @@ namespace MassTransit.Infrastructure.Saga
 				IQueryable<T> existingSagas = session.Linq<T>()
 					.Where(filter);
 
-				bool foundExistingSagas = SendMessageToExistingSagas(existingSagas, policy, consumerAction, message);
+				bool foundExistingSagas = SendMessageToExistingSagas(existingSagas, policy, consumerAction, message, session.Delete);
 				if (foundExistingSagas)
 				{
 					transaction.Commit();
@@ -62,8 +62,9 @@ namespace MassTransit.Infrastructure.Saga
 						consumerAction(saga);
 						session.Save(saga);
 
-						transaction.Commit();
-					});
+					}, session.Delete);
+
+				transaction.Commit();
 			}
 		}
 

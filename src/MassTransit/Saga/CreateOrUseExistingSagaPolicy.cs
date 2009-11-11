@@ -14,6 +14,7 @@ namespace MassTransit.Saga
 {
 	using System;
 	using System.Linq;
+	using System.Linq.Expressions;
 	using Magnum;
 
 	public class CreateOrUseExistingSagaPolicy<TSaga, TMessage> :
@@ -21,10 +22,12 @@ namespace MassTransit.Saga
 		where TSaga : class, ISaga
 	{
 		private readonly bool _useMessageIdForSagaId;
+		private readonly Func<TSaga, bool> _shouldBeRemoved;
 
-		public CreateOrUseExistingSagaPolicy()
+		public CreateOrUseExistingSagaPolicy(Expression<Func<TSaga, bool>> shouldBeRemoved)
 		{
 			_useMessageIdForSagaId = typeof (TMessage).GetInterfaces().Where(x => x == typeof (CorrelatedBy<Guid>)).Any();
+			_shouldBeRemoved = shouldBeRemoved.Compile();
 		}
 
 		public bool CreateSagaWhenMissing(TMessage message, out TSaga saga)
@@ -49,6 +52,11 @@ namespace MassTransit.Saga
 		public void ForMissingSaga(TMessage message)
 		{
 			// do nothing, we dont' care if the saga is missing
+		}
+
+		public bool ShouldSagaBeRemoved(TSaga saga)
+		{
+			return _shouldBeRemoved(saga);
 		}
 
 		private bool UseMessageIdForSaga(TMessage message, out Guid sagaId)

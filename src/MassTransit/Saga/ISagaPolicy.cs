@@ -43,5 +43,12 @@ namespace MassTransit.Saga
 		/// </summary>
 		/// <param name="message">The message to correlate to the saga</param>
 		void ForMissingSaga(TMessage message);
+
+		/// <summary>
+		/// Checks to see if the saga should be removed based on the current state
+		/// </summary>
+		/// <param name="saga"></param>
+		/// <returns></returns>
+		bool ShouldSagaBeRemoved(TSaga saga);
 	}
 }

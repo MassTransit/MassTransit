@@ -44,7 +44,7 @@ namespace MassTransit.Tests.Saga.StateMachine
 				.Return(MockRepository.GenerateMock<CorrelatedSagaStateMachineMessageSink<TestSaga, InitiateSimpleSaga>>());
 
 			var policy = MockRepository.GenerateMock<ISagaPolicy<TestSaga, InitiateSimpleSaga>>();
-			factory.Stub(x => x.GetPolicy<TestSaga, InitiateSimpleSaga>(initiate.States)).Return(policy);
+			factory.Stub(x => x.GetPolicy<TestSaga, InitiateSimpleSaga>(initiate.States, k => false)).Return(policy);
 
 			var subscriber = new SagaEventSubscriber<TestSaga>(context, factory);
 

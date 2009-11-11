@@ -18,6 +18,7 @@ namespace MassTransit.Grid.Sagas
 	using Magnum.StateMachine;
 	using Messages;
 	using Saga;
+	using Util;
 
 	public class GridService :
 		SagaStateMachine<GridService>,
@@ -67,6 +68,7 @@ namespace MassTransit.Grid.Sagas
 
 		public string ServiceName { get; set; }
 
+		[Indexed]
 		public Guid CorrelationId { get; set; }
 		public IServiceBus Bus { get; set; }
 

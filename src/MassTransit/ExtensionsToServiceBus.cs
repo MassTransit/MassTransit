@@ -43,22 +43,6 @@ namespace MassTransit
 			return new DisposableUnsubscribeAction(action);
 		}
 
-		public static void Execute<T>(this IServiceBus bus, T command, Action<IOutboundMessage> messageHeaderAction)
-			where T : class
-		{
-			var grid = bus.GetService<IGrid>();
-
-			grid.Execute(command, messageHeaderAction);
-		}
-
-		public static void Execute<T>(this IServiceBus bus, T command)
-			where T : class
-		{
-			var grid = bus.GetService<IGrid>();
-
-			grid.Execute(command);
-		}
-
 		public static void Publish<T>(this IServiceBus bus, T message, Action<IOutboundMessage> messageHeaderAction)
 			where T : class
 		{

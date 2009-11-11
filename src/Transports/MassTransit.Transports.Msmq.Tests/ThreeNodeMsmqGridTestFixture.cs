@@ -38,7 +38,7 @@ namespace MassTransit.Transports.Msmq.Tests
 			WaitForServiceToBeAvailable<SimpleGridCommand>(15.Seconds(), 1);
 		}
 
-		protected override void AdditionalEndpointFactoryConfiguration(MassTransit.Configuration.IEndpointFactoryConfigurator x)
+		protected override void AdditionalEndpointFactoryConfiguration(Configuration.IEndpointFactoryConfigurator x)
 		{
 			base.AdditionalEndpointFactoryConfiguration(x);
 

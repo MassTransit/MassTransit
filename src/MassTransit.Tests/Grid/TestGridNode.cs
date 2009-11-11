@@ -60,7 +60,7 @@ namespace MassTransit.Tests.Grid
 						});
 					x.ReceiveFrom(name);
 					x.UseControlBus(ControlBus);
-					x.SetConcurrentConsumerLimit(2);
+					x.SetConcurrentConsumerLimit(4);
 
 					x.ConfigureService(configureGrid);
 				});

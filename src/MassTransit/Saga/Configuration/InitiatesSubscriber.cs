@@ -38,7 +38,7 @@ namespace MassTransit.Saga.Configuration
 			var router = routerConfigurator.FindOrCreate<TMessage>();
 
 			var repository = context.Builder.GetInstance<ISagaRepository<TComponent>>();
-			var policy = new InitiatingSagaPolicy<TComponent, TMessage>();
+			var policy = new InitiatingSagaPolicy<TComponent, TMessage>(x => false);
 
 			var sink = new CorrelatedSagaMessageSink<TComponent, TMessage>(context, context.Data as IServiceBus, repository, policy);
 			if (sink == null)

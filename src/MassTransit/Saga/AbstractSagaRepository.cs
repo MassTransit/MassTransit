@@ -25,7 +25,8 @@ namespace MassTransit.Saga
 		protected static bool SendMessageToExistingSagas<TMessage>(IEnumerable<TSaga> existingSagas,
 		                                                           ISagaPolicy<TSaga, TMessage> policy,
 		                                                           Action<TSaga> consumerAction,
-		                                                           TMessage message)
+		                                                           TMessage message,
+		                                                           Action<TSaga> removeAction)
 		{
 			int sagaCount = 0;
 			Exception lastException = null;
@@ -42,9 +43,10 @@ namespace MassTransit.Saga
 					policy.ForExistingSaga(message);
 
 					lock (saga)
-					{
 						consumerAction(saga);
-					}
+
+					if (policy.ShouldSagaBeRemoved(saga))
+						removeAction(saga);
 				}
 				catch (Exception ex)
 				{
@@ -62,7 +64,7 @@ namespace MassTransit.Saga
 			return sagaCount > 0;
 		}
 
-		protected static void SendMessageToNewSaga<TMessage>(ISagaPolicy<TSaga, TMessage> policy, TMessage message, Action<TSaga> consumerAction)
+		protected static void SendMessageToNewSaga<TMessage>(ISagaPolicy<TSaga, TMessage> policy, TMessage message, Action<TSaga> consumerAction, Action<TSaga> removeAction)
 		{
 			TSaga saga;
 			if (!policy.CreateSagaWhenMissing(message, out saga))
@@ -74,9 +76,10 @@ namespace MassTransit.Saga
 			try
 			{
 				lock (saga)
-				{
 					consumerAction(saga);
-				}
+
+				if (policy.ShouldSagaBeRemoved(saga))
+					removeAction(saga);
 			}
 			catch (Exception ex)
 			{
