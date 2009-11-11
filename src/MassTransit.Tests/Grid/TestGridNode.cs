@@ -68,7 +68,7 @@ namespace MassTransit.Tests.Grid
 
 		public ISagaRepository<Node> GridNodeRepository { get; private set; }
 		public ISagaRepository<ServiceType> GridServiceRepository { get; private set; }
-		public ISagaRepository<GridMessageNode> GridMessageNodeRepository { get; private set; }
+		public ISagaRepository<ServiceMessage> GridMessageNodeRepository { get; private set; }
 		public ISagaRepository<ServiceNode> GridServiceNodeRepository { get; private set; }
 		public ISagaRepository<Learner<AvailableGridServiceNode>> GridListenerRepository { get; private set; }
 		public ISagaRepository<Acceptor<AvailableGridServiceNode>> GridAcceptorRepository { get; private set; }
@@ -108,7 +108,7 @@ namespace MassTransit.Tests.Grid
 
 		private void SetupGridMessageNodeRepository()
 		{
-			GridMessageNodeRepository = EndpointTestFixture<LoopbackEndpoint>.SetupSagaRepository<GridMessageNode>(ObjectBuilder);
+			GridMessageNodeRepository = EndpointTestFixture<LoopbackEndpoint>.SetupSagaRepository<ServiceMessage>(ObjectBuilder);
 		}
 
 		private void SetupGridListenerRepository()
