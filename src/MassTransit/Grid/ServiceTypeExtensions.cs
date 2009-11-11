@@ -10,25 +10,25 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Grid.Messages
+namespace MassTransit.Grid
 {
 	using System;
+	using System.Security.Cryptography;
+	using System.Text;
 
-	public class NotifyNodeAvailable : 
-		NotifyNodeMessageBase
+	public static class ServiceTypeExtensions
 	{
-		public NotifyNodeAvailable(NotifyNodeMessageBase source)
-			: base(source)
-		{
-		}
+		private static readonly MD5CryptoServiceProvider _cryptoProvider = new MD5CryptoServiceProvider();
 
-		public NotifyNodeAvailable(Uri controlUri, Uri dataUri, DateTime created, DateTime lastUpdated)
-			: base(controlUri, dataUri, created, lastUpdated)
+		public static Guid ToServiceTypeId(this Type type)
 		{
-		}
+			string key = type.AssemblyQualifiedName;
 
-		protected NotifyNodeAvailable()
-		{
+			var bytes = Encoding.UTF8.GetBytes(key);
+
+			var hash = _cryptoProvider.ComputeHash(bytes);
+
+			return new Guid(hash);
 		}
 	}
 }

@@ -13,29 +13,19 @@ namespace MassTransit.Tests.Grid
 	{
 		private NotifyNodeAvailable _notifyNodeAvailable;
 		private NotifyNodeDown _notifyNodeDown;
-		private GridNode _state;
+		private Node _state;
 		private IEndpoint _endpoint;
 
 		[SetUp]
 		public void Setup()
 		{
-			_notifyNodeAvailable = new NotifyNodeAvailable
-				{
-					ControlUri = new Uri("loopback://localhost/data"),
-					DataUri = new Uri("loopback://localhost/control"),
-					LastUpdated = 5.Minutes().FromUtcNow(),
-				};
+			_notifyNodeAvailable = new NotifyNodeAvailable(new Uri("loopback://localhost/control"), new Uri("loopback://localhost/data"),DateTime.UtcNow, 5.Minutes().FromUtcNow());
 
-			_notifyNodeDown = new NotifyNodeDown
-				{
-					ControlUri = new Uri("loopback://localhost/data"),
-					DataUri = new Uri("loopback://localhost/control"),
-					LastUpdated = 5.Minutes().FromUtcNow(),
-				};
+			_notifyNodeDown = new NotifyNodeDown(new Uri("loopback://localhost/control"), new Uri("loopback://localhost/data"), DateTime.UtcNow, 5.Minutes().FromUtcNow());
 
 			_endpoint = MockRepository.GenerateMock<IEndpoint>();
 
-			_state = new GridNode(CombGuid.Generate());
+			_state = new Node(CombGuid.Generate());
 			_state.Bus = MockRepository.GenerateMock<IServiceBus>();
 			_state.Bus.Stub(x => x.Endpoint).Return(_endpoint);
 		}
@@ -44,48 +34,48 @@ namespace MassTransit.Tests.Grid
 		public void The_node_should_be_available()
 		{
 
-			_state.RaiseEvent(GridNode.NodeAvailable, _notifyNodeAvailable);
+			_state.RaiseEvent(Node.NodeAvailable, _notifyNodeAvailable);
 
-			Assert.AreEqual(GridNode.Available, _state.CurrentState);
+			Assert.AreEqual(Node.Available, _state.CurrentState);
 		}
 
 		[Test]
 		public void The_node_should_be_down()
 		{
-			_state.RaiseEvent(GridNode.NodeDown, _notifyNodeDown);
+			_state.RaiseEvent(Node.NodeDown, _notifyNodeDown);
 
-			Assert.AreEqual(GridNode.Down, _state.CurrentState);
+			Assert.AreEqual(Node.Down, _state.CurrentState);
 		}
 
 		[Test]
 		public void The_node_should_transition_to_down()
 		{
-			_state.RaiseEvent(GridNode.NodeAvailable, _notifyNodeAvailable);
-			_state.RaiseEvent(GridNode.NodeDown, _notifyNodeDown);
+			_state.RaiseEvent(Node.NodeAvailable, _notifyNodeAvailable);
+			_state.RaiseEvent(Node.NodeDown, _notifyNodeDown);
 
-			Assert.AreEqual(GridNode.Down, _state.CurrentState);
+			Assert.AreEqual(Node.Down, _state.CurrentState);
 		}
 
 		[Test]
 		public void The_node_should_transition_to_up()
 		{
-			_state.RaiseEvent(GridNode.NodeDown, _notifyNodeDown);
-			_state.RaiseEvent(GridNode.NodeAvailable, _notifyNodeAvailable);
+			_state.RaiseEvent(Node.NodeDown, _notifyNodeDown);
+			_state.RaiseEvent(Node.NodeAvailable, _notifyNodeAvailable);
 
-			Assert.AreEqual(GridNode.Available, _state.CurrentState);
+			Assert.AreEqual(Node.Available, _state.CurrentState);
 		}
 
 		[Test]
 		public void The_node_should_recover_after_going_down_and_up()
 		{
-			_state.RaiseEvent(GridNode.NodeAvailable, _notifyNodeAvailable);
-			Assert.AreEqual(GridNode.Available, _state.CurrentState);
+			_state.RaiseEvent(Node.NodeAvailable, _notifyNodeAvailable);
+			Assert.AreEqual(Node.Available, _state.CurrentState);
 
-			_state.RaiseEvent(GridNode.NodeDown, _notifyNodeDown);
-			Assert.AreEqual(GridNode.Down, _state.CurrentState);
+			_state.RaiseEvent(Node.NodeDown, _notifyNodeDown);
+			Assert.AreEqual(Node.Down, _state.CurrentState);
 
-			_state.RaiseEvent(GridNode.NodeAvailable, _notifyNodeAvailable);
-			Assert.AreEqual(GridNode.Available, _state.CurrentState);
+			_state.RaiseEvent(Node.NodeAvailable, _notifyNodeAvailable);
+			Assert.AreEqual(Node.Available, _state.CurrentState);
 		}
 	}
 }

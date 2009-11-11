@@ -14,9 +14,9 @@ namespace MassTransit.Grid.Messages
 {
 	using System;
 
-	[Serializable]
-	public class RemoveGridServiceFromNode :
-		GridServiceMessageBase
+	public class ServiceTypeAdded
 	{
+		public Guid ServiceId { get; set; }
+		public string ServiceName { get; set; }
 	}
 }

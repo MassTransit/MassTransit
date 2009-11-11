@@ -66,10 +66,10 @@ namespace MassTransit.Tests.Grid
 				});
 		}
 
-		public ISagaRepository<GridNode> GridNodeRepository { get; private set; }
-		public ISagaRepository<GridService> GridServiceRepository { get; private set; }
+		public ISagaRepository<Node> GridNodeRepository { get; private set; }
+		public ISagaRepository<ServiceType> GridServiceRepository { get; private set; }
 		public ISagaRepository<GridMessageNode> GridMessageNodeRepository { get; private set; }
-		public ISagaRepository<GridServiceNode> GridServiceNodeRepository { get; private set; }
+		public ISagaRepository<ServiceNode> GridServiceNodeRepository { get; private set; }
 		public ISagaRepository<Learner<AvailableGridServiceNode>> GridListenerRepository { get; private set; }
 		public ISagaRepository<Acceptor<AvailableGridServiceNode>> GridAcceptorRepository { get; private set; }
 
@@ -98,12 +98,12 @@ namespace MassTransit.Tests.Grid
 
 		private void SetupGridNodeRepository()
 		{
-			GridNodeRepository = EndpointTestFixture<LoopbackEndpoint>.SetupSagaRepository<GridNode>(ObjectBuilder);
+			GridNodeRepository = EndpointTestFixture<LoopbackEndpoint>.SetupSagaRepository<Node>(ObjectBuilder);
 		}
 
 		private void SetupGridServiceRepository()
 		{
-			GridServiceRepository = EndpointTestFixture<LoopbackEndpoint>.SetupSagaRepository<GridService>(ObjectBuilder);
+			GridServiceRepository = EndpointTestFixture<LoopbackEndpoint>.SetupSagaRepository<ServiceType>(ObjectBuilder);
 		}
 
 		private void SetupGridMessageNodeRepository()
@@ -123,7 +123,7 @@ namespace MassTransit.Tests.Grid
 
 		private void SetupGridServiceNodeRepository()
 		{
-			GridServiceNodeRepository = EndpointTestFixture<LoopbackEndpoint>.SetupSagaRepository<GridServiceNode>(ObjectBuilder);
+			GridServiceNodeRepository = EndpointTestFixture<LoopbackEndpoint>.SetupSagaRepository<ServiceNode>(ObjectBuilder);
 		}
 
 		~TestGridNode()

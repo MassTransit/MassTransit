@@ -14,12 +14,31 @@ namespace MassTransit.Grid.Messages
 {
 	using System;
 
-	[Serializable]
-	public class NotifyNodeState
+	public abstract class NotifyNodeMessageBase
 	{
+		protected NotifyNodeMessageBase(NotifyNodeMessageBase source)
+		{
+			ControlUri = source.ControlUri;
+			DataUri = source.DataUri;
+			Created = source.Created;
+			LastUpdated = source.LastUpdated;
+		}
+
+		protected NotifyNodeMessageBase(Uri controlUri, Uri dataUri, DateTime created, DateTime lastUpdated)
+		{
+			ControlUri = controlUri;
+			DataUri = dataUri;
+			Created = created;
+			LastUpdated = lastUpdated;
+		}
+
+		protected NotifyNodeMessageBase()
+		{
+		}
+
 		public Uri ControlUri { get; set; }
 		public Uri DataUri { get; set; }
-		public DateTime LastUpdated { get; set; }
 		public DateTime Created { get; set; }
+		public DateTime LastUpdated { get; set; }
 	}
 }

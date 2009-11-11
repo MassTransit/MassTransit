@@ -16,32 +16,27 @@ namespace MassTransit.Grid.Sagas
 	using Magnum.StateMachine;
 	using Messages;
 	using Saga;
-	using Util;
 
-	public class GridServiceNode :
-		SagaStateMachine<GridServiceNode>,
+	public class ServiceNode :
+		SagaStateMachine<ServiceNode>,
 		ISaga
 	{
-		static GridServiceNode()
+		static ServiceNode()
 		{
 			Define(() =>
 				{
-					Correlate(ServiceAddedToNode)
-						.By((saga, message) => saga.ControlUri == message.ControlUri &&
-						                       saga.ServiceId == message.ServiceId);
-					Correlate(ServiceRemovedFromNode)
+					Correlate(Added)
 						.By((saga, message) => saga.ControlUri == message.ControlUri &&
 						                       saga.ServiceId == message.ServiceId);
 
-					// TODO Add key generation script as well
-					// .CreateUsingId(() => CombGuid.Generate())
-					// .CreateUsingId(message => message.ServiceId)
-					// would also be used to define the creation policy if this message if received
-					// and no saga exists
+					Correlate(Removed)
+						.By((saga, message) => saga.ControlUri == message.ControlUri &&
+						                       saga.ServiceId == message.ServiceId);
 
+					RemoveWhen(saga => saga.CurrentState == Completed);
 
 					Initially(
-						When(ServiceAddedToNode)
+						When(Added)
 							.Then((saga, message) =>
 								{
 									saga.ControlUri = message.ControlUri;
@@ -49,34 +44,23 @@ namespace MassTransit.Grid.Sagas
 									saga.ServiceId = message.ServiceId;
 									saga.ServiceName = message.ServiceName;
 
-									saga.NotifyServiceAddedToNode();
+									saga.SendNotificationMessage<ServiceNodeAdded>();
 								})
 							.TransitionTo(Active));
 
 					During(Active,
-						When(ServiceRemovedFromNode)
-							.Then((saga, message) => saga.NotifyServiceRemovedFromNode())
+						When(Removed)
+							.Then((saga, message) => saga.SendNotificationMessage<ServiceNodeRemoved>())
 							.Complete());
-
-					During(Completed,
-						When(ServiceAddedToNode)
-							.Then((saga, message) =>
-								{
-									saga.DataUri = message.DataUri;
-									saga.ServiceName = message.ServiceName;
-
-									saga.NotifyServiceAddedToNode();
-								})
-							.TransitionTo(Active));
 				});
 		}
 
-		public GridServiceNode(Guid correlationId)
+		public ServiceNode(Guid correlationId)
 		{
 			CorrelationId = correlationId;
 		}
 
-		protected GridServiceNode()
+		protected ServiceNode()
 		{
 		}
 
@@ -84,42 +68,30 @@ namespace MassTransit.Grid.Sagas
 		public static State Active { get; set; }
 		public static State Completed { get; set; }
 
-		public static Event<AddGridServiceToNode> ServiceAddedToNode { get; set; }
-		public static Event<RemoveGridServiceFromNode> ServiceRemovedFromNode { get; set; }
+		public static Event<AddServiceNode> Added { get; set; }
+		public static Event<RemoveServiceNode> Removed { get; set; }
 
 		public Uri ControlUri { get; set; }
 		public Uri DataUri { get; set; }
 		public Guid ServiceId { get; set; }
 		public string ServiceName { get; set; }
 
-		[Indexed]
 		public Guid CorrelationId { get; set; }
+
 		public IServiceBus Bus { get; set; }
 
-		private void NotifyServiceAddedToNode()
+		private void SendNotificationMessage<T>()
+			where T : AbstractServiceNodeMessage, new()
 		{
-			var message = CreateMessage<GridServiceAddedToNode>();
-
-			Bus.Endpoint.Send(message);
-		}
-
-		private void NotifyServiceRemovedFromNode()
-		{
-			var message = CreateMessage<GridServiceRemovedFromNode>();
-
-			Bus.Endpoint.Send(message);
-		}
-
-		private T CreateMessage<T>()
-			where T : GridServiceMessageBase, new()
-		{
-			return new T
+			var message = new T
 				{
 					ServiceId = ServiceId,
 					ServiceName = ServiceName,
 					ControlUri = ControlUri,
 					DataUri = DataUri,
 				};
+
+			Bus.Endpoint.Send(message);
 		}
 	}
 }

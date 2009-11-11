@@ -12,11 +12,8 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Grid.Messages
 {
-	using System;
-
-	[Serializable]
-	public class GridServiceRemovedFromNode :
-		GridServiceMessageBase
+	public class RemoveServiceNode :
+		AbstractServiceNodeMessage
 	{
 	}
 }

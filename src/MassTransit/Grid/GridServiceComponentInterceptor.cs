@@ -68,12 +68,12 @@ namespace MassTransit.Grid
 			_random = new Random();
 		}
 
-		public static GridServiceNode SelectNodeToUse(this IList<GridServiceNode> nodes)
+		public static ServiceNode SelectNodeToUse(this IList<ServiceNode> nodes)
 		{
 			return nodes.OrderBy(x => _random.Next()).First();
 		}
 
-		public static IList<GridServiceNode> SelectQuorum(this IEnumerable<GridServiceNode> nodes, Uri controlUri, Uri dataUri)
+		public static IList<ServiceNode> SelectQuorum(this IEnumerable<ServiceNode> nodes, Uri controlUri, Uri dataUri)
 		{
 			var all = nodes.ToList();
 			if (all.Count <= 3)

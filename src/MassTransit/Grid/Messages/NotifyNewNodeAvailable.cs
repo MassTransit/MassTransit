@@ -14,9 +14,21 @@ namespace MassTransit.Grid.Messages
 {
 	using System;
 
-	[Serializable]
 	public class NotifyNewNodeAvailable :
-		NotifyNodeState
+		NotifyNodeAvailable
 	{
+		public NotifyNewNodeAvailable(NotifyNodeMessageBase source)
+			: base(source)
+		{
+		}
+
+		public NotifyNewNodeAvailable(Uri controlUri, Uri dataUri, DateTime created, DateTime lastUpdated)
+			: base(controlUri, dataUri, created, lastUpdated)
+		{
+		}
+
+		protected NotifyNewNodeAvailable()
+		{
+		}
 	}
 }

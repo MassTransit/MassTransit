@@ -14,14 +14,11 @@ namespace MassTransit.Grid.Messages
 {
 	using System;
 
-	[Serializable]
-	public class GridServiceAddedToNode :
-		GridServiceMessageBase,
-		CorrelatedBy<Guid>
+	public abstract class AbstractServiceNodeMessage
 	{
-		public Guid CorrelationId
-		{
-			get { return ServiceId; }
-		}
+		public Guid ServiceId { get; set; }
+		public string ServiceName { get; set; }
+		public Uri ControlUri { get; set; }
+		public Uri DataUri { get; set; }
 	}
 }

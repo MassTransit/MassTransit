@@ -18,64 +18,68 @@ namespace MassTransit.Grid.Sagas
 	using Saga;
 	using Util;
 
-	public class GridNode :
-		SagaStateMachine<GridNode>,
+	public class Node :
+		SagaStateMachine<Node>,
 		ISaga
 	{
-		static GridNode()
+		static Node()
 		{
-			Define(() =>
-				{
-					Correlate(NodeAvailable)
-						.By((saga, message) => saga.ControlUri == message.ControlUri);
-					Correlate(NodeDown)
-						.By((saga, message) => saga.ControlUri == message.ControlUri);
-					Correlate(NodeWorkload)
-						.By((saga, message) => saga.ControlUri == message.ControlUri);
-
-					Initially(
-						When(NodeAvailable)
-							.Then((saga, message) =>
-								{
-									saga.CopyNodeDetails(message);
-									saga.NotifyServiceGridOfNewNode(message);
-								})
-							.TransitionTo(Available),
-						When(NodeDown)
-							.Then((saga, message) =>
-								{
-									saga.CopyNodeDetails(message);
-									saga.NotifyServiceGridOfNewNode(message);
-								})
-							.TransitionTo(Down),
-						When(NodeWorkload)
-							.Then((saga, message) =>
-								{
-									saga.CopyNodeDetails(message);
-									saga.NotifyServiceGridOfNewNode(message);
-									saga.UpdateWorkload(message);
-								})
-							.TransitionTo(Down)
-						);
-
-					During(Available,
-						When(NodeDown)
-							.TransitionTo(Down),
-						When(NodeWorkload)
-							.Then((saga, message) => saga.UpdateWorkload(message)));
-
-					During(Down,
-						When(NodeAvailable)
-							.TransitionTo(Available));
-				});
+			Define(Saga);
 		}
 
-		public GridNode(Guid correlationId)
+		private static void Saga()
+		{
+			Correlate(NodeAvailable)
+				.By((saga, message) => saga.ControlUri == message.ControlUri);
+
+			Correlate(NodeDown)
+				.By((saga, message) => saga.ControlUri == message.ControlUri);
+
+			Correlate(NodeWorkload)
+				.By((saga, message) => saga.ControlUri == message.ControlUri);
+
+			Initially(
+				When(NodeAvailable)
+					.Then((saga, message) =>
+						{
+							saga.CopyNodeDetails(message);
+							saga.NotifyServiceGridOfNewNode();
+						})
+					.TransitionTo(Available),
+				When(NodeDown)
+					.Then((saga, message) =>
+						{
+							saga.CopyNodeDetails(message);
+							saga.NotifyServiceGridOfNewNode();
+						})
+					.TransitionTo(Down),
+				When(NodeWorkload)
+					.Then((saga, message) =>
+						{
+							saga.CopyNodeDetails(message);
+							saga.NotifyServiceGridOfNewNode();
+							saga.UpdateWorkload(message);
+						})
+					.TransitionTo(Down)
+				);
+
+			During(Available,
+				When(NodeDown)
+					.TransitionTo(Down),
+				When(NodeWorkload)
+					.Then((saga, message) => saga.UpdateWorkload(message)));
+
+			During(Down,
+				When(NodeAvailable)
+					.TransitionTo(Available));
+		}
+
+		public Node(Guid correlationId)
 		{
 			CorrelationId = correlationId;
 		}
 
-		protected GridNode()
+		protected Node()
 		{
 		}
 
@@ -100,17 +104,12 @@ namespace MassTransit.Grid.Sagas
 		public Guid CorrelationId { get; set; }
 		public IServiceBus Bus { get; set; }
 
-		private void NotifyServiceGridOfNewNode(NotifyNodeState message)
+		private void NotifyServiceGridOfNewNode()
 		{
-			Bus.Endpoint.Send(new NotifyNewNodeAvailable
-				{
-					ControlUri = message.ControlUri,
-					DataUri = message.DataUri,
-					LastUpdated = message.LastUpdated,
-				});
+			Bus.Endpoint.Send(new NotifyNewNodeAvailable(ControlUri,DataUri,Created,LastUpdated));
 		}
 
-		private void CopyNodeDetails(NotifyNodeState nodeState)
+		private void CopyNodeDetails(NotifyNodeMessageBase nodeState)
 		{
 			ControlUri = nodeState.ControlUri;
 			DataUri = nodeState.DataUri;
@@ -120,8 +119,8 @@ namespace MassTransit.Grid.Sagas
 
 		private void UpdateWorkload(NotifyNodeWorkload workload)
 		{
-			ActiveJobCount = workload.ActiveJobCount;
-			PendingJobCount = workload.PendingJobCount;
+			ActiveJobCount = workload.ActiveMessageCount;
+			PendingJobCount = workload.WaitingMessageCount;
 		}
 	}
 }

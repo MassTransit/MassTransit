@@ -30,7 +30,7 @@ namespace MassTransit.Grid.Paxos
 
 		private IServiceBus _bus;
 		private readonly IEndpointFactory _endpointFactory;
-		private readonly ISagaRepository<GridServiceNode> _serviceNodeRepository;
+		private readonly ISagaRepository<ServiceNode> _serviceNodeRepository;
 		private IServiceBus _controlBus;
 		private List<IEndpoint> _acceptors;
 		private readonly IdempotentList<Uri> _promised = null;
@@ -40,7 +40,7 @@ namespace MassTransit.Grid.Paxos
 		private Guid _serviceId;
 		private T _proposedValue;
 
-		public GridServiceProposer(IServiceBus bus, IEndpointFactory endpointFactory, ISagaRepository<GridServiceNode> serviceNodeRepository)
+		public GridServiceProposer(IServiceBus bus, IEndpointFactory endpointFactory, ISagaRepository<ServiceNode> serviceNodeRepository)
 		{
 			_bus = bus;
 			_endpointFactory = endpointFactory;
@@ -50,7 +50,7 @@ namespace MassTransit.Grid.Paxos
 
 		public void ProposeNextServiceNode(Type serviceType, T value)
 		{
-			_serviceId = GridService.GenerateIdForType(serviceType);
+			_serviceId = serviceType.ToServiceTypeId();
 			_proposedValue = value;
 
 			EnterPreparePhase();
@@ -135,7 +135,7 @@ namespace MassTransit.Grid.Paxos
 
 			_promised.Clear();
 
-			_acceptors = _serviceNodeRepository.Where(x => x.ServiceId == _serviceId && x.CurrentState == GridServiceNode.Active)
+			_acceptors = _serviceNodeRepository.Where(x => x.ServiceId == _serviceId && x.CurrentState == ServiceNode.Active)
 				.Select(x => _endpointFactory.GetEndpoint(x.ControlUri))
 				.ToList();
 

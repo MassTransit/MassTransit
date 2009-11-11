@@ -89,7 +89,7 @@ namespace MassTransit.Tests.Grid
 
 			Thread.Sleep(1500);
 
-			Guid serviceId = GridService.GenerateIdForType(typeof (SimpleGridCommand));
+			Guid serviceId = typeof(SimpleGridCommand).ToServiceTypeId();
 			Guid leaderId = CombGuid.Generate();
 
 			LocalBus.Publish(new Prepare<AvailableGridServiceNode>

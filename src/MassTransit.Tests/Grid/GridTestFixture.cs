@@ -16,6 +16,7 @@ namespace MassTransit.Tests.Grid
 	using System.Diagnostics;
 	using System.Linq;
 	using System.Threading;
+	using MassTransit.Grid;
 	using MassTransit.Grid.Configuration;
 	using MassTransit.Grid.Sagas;
 	using NUnit.Framework;
@@ -62,7 +63,7 @@ namespace MassTransit.Tests.Grid
 
 		protected void WaitForServiceToBeAvailable<TService>(TimeSpan timeout, int nodeCount)
 		{
-			Guid serviceId = GridService.GenerateIdForType(typeof (TService));
+			Guid serviceId = typeof(TService).ToServiceTypeId();
 
 			DateTime giveUpAt = DateTime.Now + timeout;
 			ManualResetEvent neverSurrender = new ManualResetEvent(false);

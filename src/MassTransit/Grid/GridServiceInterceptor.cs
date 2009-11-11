@@ -27,7 +27,7 @@ namespace MassTransit.Grid
 	{
 		static GridServiceInterceptor()
 		{
-			ServiceId = GridService.GenerateIdForType(typeof (TService));
+			ServiceId = typeof (TService).ToServiceTypeId();
 		}
 
 		protected GridServiceInterceptor(IGridControl grid)

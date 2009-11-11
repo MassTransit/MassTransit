@@ -25,7 +25,7 @@ namespace MassTransit.Grid
 	public class ServiceGrid :
 		IGridControl,
 		Consumes<NotifyNewNodeAvailable>.All,
-		Consumes<GridServiceAdded>.All,
+		Consumes<ServiceTypeAdded>.All,
 		Consumes<NullMessage>.All
 	{
 		private static readonly ILog _log = LogManager.GetLogger(typeof (ServiceGrid));
@@ -35,11 +35,11 @@ namespace MassTransit.Grid
 		private DateTime _created;
 		private volatile bool _disposed;
 		private IEndpointFactory _endpointFactory;
-		private ISagaRepository<GridNode> _nodeRepository;
-		private ISagaRepository<GridServiceNode> _serviceNodeRepository;
+		private ISagaRepository<Node> _nodeRepository;
+		private ISagaRepository<ServiceNode> _serviceNodeRepository;
 		private UnsubscribeAction _unsubscribeAction;
 
-		public ServiceGrid(IEndpointFactory endpointFactory, ISagaRepository<GridNode> nodeRepository, ISagaRepository<GridServiceNode> serviceNodeRepository, ISagaRepository<GridMessageNode> messageNodeRepository)
+		public ServiceGrid(IEndpointFactory endpointFactory, ISagaRepository<Node> nodeRepository, ISagaRepository<ServiceNode> serviceNodeRepository, ISagaRepository<GridMessageNode> messageNodeRepository)
 		{
 			_endpointFactory = endpointFactory;
 			_nodeRepository = nodeRepository;
@@ -50,7 +50,7 @@ namespace MassTransit.Grid
 		public Action WhenStarted { get; set; }
 		public Uri ProposerUri { get; set; }
 
-		public void Consume(GridServiceAdded message)
+		public void Consume(ServiceTypeAdded message)
 		{
 			_log.Info("New Grid Service Detected: " + message.ServiceName);
 		}
@@ -100,15 +100,15 @@ namespace MassTransit.Grid
 		{
 			_unsubscribeAction += _bus.Subscribe(interceptor);
 
-			Guid serviceId = GridService.GenerateIdForType(typeof (TService));
+			Guid serviceId = typeof (TService).ToServiceTypeId();
 
-			var future = new SelectedFutureMessage<GridServiceAddedToNode>(x => x.ServiceId == serviceId &&
+			var future = new SelectedFutureMessage<ServiceNodeAdded>(x => x.ServiceId == serviceId &&
 			                                                                    x.ControlUri == _controlBus.Endpoint.Uri);
 
 			UnsubscribeAction unsubscribeFuture = _bus.ControlBus.Subscribe(future);
 			try
 			{
-				var message = new AddGridServiceToNode
+				var message = new AddServiceNode
 					{
 						ControlUri = _controlBus.Endpoint.Uri,
 						DataUri = _bus.Endpoint.Uri,
@@ -117,7 +117,7 @@ namespace MassTransit.Grid
 					};
 
 				_nodeRepository
-					.Where(x => x.CurrentState == GridNode.Available)
+					.Where(x => x.CurrentState == Node.Available)
 					.Select(x => _endpointFactory.GetEndpoint(x.ControlUri))
 					.ToList()
 					.Each(x => x.Send(message));
@@ -195,11 +195,11 @@ namespace MassTransit.Grid
 
 		public void ProposeMessageNodeToQuorum(Guid serviceId, Guid correlationId)
 		{
-			List<GridServiceNode> nodes = _serviceNodeRepository
+			List<ServiceNode> nodes = _serviceNodeRepository
 				.Where(x => x.ServiceId == serviceId)
 				.ToList();
 
-			GridServiceNode selectedNode = nodes.SelectNodeToUse();
+			ServiceNode selectedNode = nodes.SelectNodeToUse();
 
 			if (_log.IsDebugEnabled)
 				_log.DebugFormat("{0} sending proposal message for {1}", ControlUri, correlationId);
@@ -280,7 +280,7 @@ namespace MassTransit.Grid
 
 			_serviceNodeRepository
 				.Where(x => x.ControlUri == _controlBus.Endpoint.Uri)
-				.Each(x => endpoint.Send(new AddGridServiceToNode
+				.Each(x => endpoint.Send(new AddServiceNode
 					{
 						ControlUri = x.ControlUri,
 						DataUri = x.DataUri,
@@ -291,9 +291,9 @@ namespace MassTransit.Grid
 
 		private void SubscribeGridSagas()
 		{
-			_unsubscribeAction += _controlBus.Subscribe<GridNode>();
-			_unsubscribeAction += _controlBus.Subscribe<GridService>();
-			_unsubscribeAction += _controlBus.Subscribe<GridServiceNode>();
+			_unsubscribeAction += _controlBus.Subscribe<Node>();
+			_unsubscribeAction += _controlBus.Subscribe<ServiceType>();
+			_unsubscribeAction += _controlBus.Subscribe<ServiceNode>();
 			_unsubscribeAction += _controlBus.Subscribe<GridMessageNode>();
 		}
 
@@ -317,13 +317,7 @@ namespace MassTransit.Grid
 
 		private NotifyNodeAvailable NewNotifyNodeAvailableMessage()
 		{
-			return new NotifyNodeAvailable
-				{
-					ControlUri = _controlBus.Endpoint.Uri,
-					DataUri = _bus.Endpoint.Uri,
-					LastUpdated = DateTime.UtcNow,
-					Created = _created,
-				};
+			return new NotifyNodeAvailable(_controlBus.Endpoint.Uri, _bus.Endpoint.Uri, _created, DateTime.UtcNow);
 		}
 
 		~ServiceGrid()
