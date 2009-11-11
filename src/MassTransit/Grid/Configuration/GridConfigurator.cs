@@ -32,7 +32,6 @@ namespace MassTransit.Grid.Configuration
 		{
 			ServiceGrid grid = new ServiceGrid(builder.GetInstance<IEndpointFactory>(),
 				builder.GetInstance<ISagaRepository<GridNode>>(),
-				builder.GetInstance<ISagaRepository<GridService>>(),
 				builder.GetInstance<ISagaRepository<GridServiceNode>>(),
 				builder.GetInstance<ISagaRepository<GridMessageNode>>());
 

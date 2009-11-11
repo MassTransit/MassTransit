@@ -20,7 +20,6 @@ namespace MassTransit.Transports.Msmq.Tests
 	using log4net;
 	using Magnum;
 	using NUnit.Framework;
-	using Pipeline.Inspectors;
 	using Rhino.Mocks;
 	using Saga;
 	using TestFixtures;

@@ -23,11 +23,5 @@ namespace MassTransit.Grid
 		Uri DataUri { get; }
 
 		bool IsHealthy { get; }
-
-		void Execute<T>(T command)
-			where T : class;
-
-		void Execute<T>(T command, Action<IOutboundMessage> action)
-			where T : class;
 	}
 }

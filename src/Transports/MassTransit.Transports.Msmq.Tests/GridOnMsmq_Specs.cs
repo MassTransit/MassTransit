@@ -16,6 +16,7 @@ namespace MassTransit.Transports.Msmq.Tests
 	using System.Collections.Generic;
 	using System.Diagnostics;
 	using System.Threading;
+	using Grid.Sagas;
 	using Magnum;
 	using Magnum.DateTimeExtensions;
 	using MassTransit.Tests.Grid;
@@ -69,6 +70,7 @@ namespace MassTransit.Transports.Msmq.Tests
 		[Test, Explicit]
 		public void Each_command_should_only_be_processed_one_time()
 		{
+		    const int iterations = 500;
 			var received = new AutoResetEvent(false);
 			var unsubscribeAction = LocalBus.Subscribe<SimpleGridResult>(message =>
 				{
@@ -86,11 +88,19 @@ namespace MassTransit.Transports.Msmq.Tests
 
 			using (unsubscribeAction.Disposable())
 			{
-				Thread.Sleep(1000);
+				Thread.Sleep(10000);
 
-				for (int i = 0; i < 100; i++)
+                for (int i = 0; i < iterations; i++)
 				{
-					LocalBus.Publish(new SimpleGridCommand(CombGuid.Generate()), context => context.SendResponseTo(LocalBus.Endpoint));
+					LocalBus.Publish(new SimpleGridCommand(CombGuid.Generate()), context =>
+						{
+							context.SendResponseTo(LocalBus.Endpoint);
+							context.IfNoSubscribers<SimpleGridCommand>(x =>
+								{
+									throw new InvalidOperationException("Subscribers were not ready at startup!");
+								});
+						});
+					Thread.Sleep(100);
 				}
 
 				TimeSpan timeout = 60.Seconds();
@@ -106,6 +116,18 @@ namespace MassTransit.Transports.Msmq.Tests
 
 			_sources.Each(x => Trace.WriteLine(x.Key + ": " + x.Value + " results"));
 
+
+			GridNodes.Each(x =>
+				{
+					x.GridMessageNodeRepository
+						.Where(command => command.CurrentState != GridMessageNode.Completed && command.CurrentState != GridMessageNode.ConsumeCompleted)
+						.Each(command =>
+							{
+								Trace.WriteLine(x.DataBus.Endpoint.Uri + " Pending Command: " + command.CorrelationId);
+							});
+				});
+
+
 			Assert.AreEqual(100, _responses.Count);
 
 			_responses.Values.Each(x => Assert.AreEqual(1, x, "Too many results received"));
@@ -114,11 +136,9 @@ namespace MassTransit.Transports.Msmq.Tests
 			Trace.WriteLine("Max Response Time: " + _maxResponseTime.ToString("F4"));
 			Trace.WriteLine("Mean Response Time: " + _meanResponseTime.ToString("F4"));
 
-		}
+            Assert.AreEqual(iterations, _responses.Count);
 
-		[Test, Explicit]
-		public void Should_start()
-		{
+            _responses.Values.Each(x => Assert.AreEqual(1, x, "Too many results received"));
 		}
 	}
 }

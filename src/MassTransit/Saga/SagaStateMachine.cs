@@ -24,6 +24,7 @@ namespace MassTransit.Saga
 		where T : SagaStateMachine<T>
 	{
 		private static readonly Dictionary<Event, EventBinder<T>> _binders = new Dictionary<Event, EventBinder<T>>();
+		private static Expression<Func<T, bool>> _completedExpression = x => false;
 
 		protected SagaStateMachine()
 		{
@@ -44,6 +45,16 @@ namespace MassTransit.Saga
 
 			expression = null;
 			return false;
+		}
+
+		public static Expression<Func<T,bool>> GetCompletedExpression()
+		{
+			return _completedExpression;
+		}
+
+		protected static void RemoveWhen(Expression<Func<T, bool>> expression)
+		{
+			_completedExpression = expression;
 		}
 
 		protected static EventBinder<T, V> Correlate<V>(Event<V> targetEvent)

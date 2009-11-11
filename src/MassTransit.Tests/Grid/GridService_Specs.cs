@@ -62,24 +62,6 @@ namespace MassTransit.Tests.Grid
 		{
 			WaitForServiceToBeAvailable<SimpleGridCommand>(5.Seconds(), 1);
 		}
-
-		[Test, Explicit]
-		public void Should_respond_when_commands_are_executed()
-		{
-			WaitForServiceToBeAvailable<SimpleGridCommand>(5.Seconds(), 1);
-
-			var transactionId = CombGuid.Generate();
-			var command = new SimpleGridCommand(transactionId);
-
-			nodeB.DataBus.MakeRequest(x => nodeB.DataBus.Execute(command, context => context.SendResponseTo(nodeB.DataBus)))
-				.When<SimpleGridResult>().RelatedTo(transactionId).IsReceived(result =>
-					{
-						Trace.WriteLine("Happy ending!");
-					})
-				.TimeoutAfter(2.Seconds())
-				.OnTimeout(() => { throw new ApplicationException("Timeout waiting for response"); })
-				.Send();
-		}
 	}
 
 	[TestFixture]
@@ -137,10 +119,9 @@ namespace MassTransit.Tests.Grid
 
 		public void Consume(SimpleGridCommand message)
 		{
-			_log.InfoFormat("{0} -DONE-: {1}", CurrentMessage.Headers.Bus.Endpoint.Uri,message.CorrelationId);
-
-			Thread.Sleep(10);
-			CurrentMessage.Respond(new SimpleGridResult(message.CorrelationId));
+			_log.InfoFormat("{0} -DO  -: {1}", CurrentMessage.Headers.Bus.Endpoint.Uri,message.CorrelationId);
+			CurrentMessage.Respond(new SimpleGridResult(message.CorrelationId, message.CreatedAt));
+			_log.InfoFormat("{0} -DONE-: {1}", CurrentMessage.Headers.Bus.Endpoint.Uri, message.CorrelationId);
 		}
 	}
 
@@ -151,6 +132,7 @@ namespace MassTransit.Tests.Grid
 		public SimpleGridBase(Guid correlationId)
 		{
 			CorrelationId = correlationId;
+			CreatedAt = DateTime.UtcNow;
 		}
 
 		protected SimpleGridBase()
@@ -158,6 +140,7 @@ namespace MassTransit.Tests.Grid
 		}
 
 		public Guid CorrelationId { get; set; }
+		public DateTime CreatedAt { get; set; }
 	}
 
 	[Serializable]
@@ -178,16 +161,14 @@ namespace MassTransit.Tests.Grid
 	public class SimpleGridResult :
 		SimpleGridBase
 	{
-		public SimpleGridResult(Guid correlationId)
+		public SimpleGridResult(Guid correlationId, DateTime requestCreatedAt)
 			: base(correlationId)
 		{
-			CreatedAt = DateTime.UtcNow;
+			CreatedAt = requestCreatedAt;
 		}
 
 		protected SimpleGridResult()
 		{
 		}
-
-		public DateTime CreatedAt { get; set; }
 	}
 }

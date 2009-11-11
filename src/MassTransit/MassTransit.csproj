@@ -149,6 +149,7 @@
     <Compile Include="Grid\AvailableGridServiceNode.cs" />
     <Compile Include="Grid\GridServiceInterceptor.cs" />
     <Compile Include="Grid\GridServiceLoadBalancer.cs" />
+    <Compile Include="Grid\Messages\NullMessage.cs" />
     <Compile Include="Grid\Paxos\Accept.cs" />
     <Compile Include="Grid\Paxos\Accepted.cs" />
     <Compile Include="Grid\Configuration\GridConfigurator.cs" />

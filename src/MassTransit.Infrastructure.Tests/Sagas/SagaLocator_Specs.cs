@@ -106,8 +106,7 @@ namespace MassTransit.Infrastructure.Tests.Sagas
 					{
 						var ping = new PingMessage(_sagaId);
 
-						var initiatePolicy = new InitiatingSagaPolicy<TestSaga, PingMessage>();
-
+						var initiatePolicy = new InitiatingSagaPolicy<TestSaga, PingMessage>(x => false);
 
 						var message = new PingMessage(_sagaId);
 						repository.Send(x => x.CorrelationId == message.CorrelationId, initiatePolicy, message, saga => saga.Name = "Joe");

@@ -17,7 +17,9 @@ namespace MassTransit.Grid.Sagas
 	using System.Linq;
 	using log4net;
 	using Magnum.StateMachine;
+	using Messages;
 	using Saga;
+	using Util;
 
 	public class GridMessageNode :
 		SagaStateMachine<GridMessageNode>,
@@ -34,13 +36,18 @@ namespace MassTransit.Grid.Sagas
 					Correlate(MessageCompletedByNode).By((saga, message) => saga.CorrelationId == message.CorrelationId);
 					Correlate(MessageNodeAgreed).By((saga, message) => saga.CorrelationId == message.CorrelationId);
 
+					RemoveWhen(saga => saga.CurrentState == Completed);
+
 					Initially(
 						When(MessageProposedByNode)
 							.Call((saga, message) => saga.Initialize(message))
 							.Then((saga, message) =>
 								{
-									_log.InfoFormat("{0} PRPOSE: {1}.{2}:{3}", saga.Bus.Endpoint.Uri,
-									                message.CorrelationId, message.BallotId, message.ControlUri);
+									if (_log.IsDebugEnabled)
+										_log.DebugFormat("{0} PRPOSE: {1}.{2}:{3}", saga.Bus.Endpoint.Uri,
+											message.CorrelationId, message.BallotId, message.ControlUri);
+                                    if (message.ControlUri == saga.Bus.Endpoint.Uri)
+                                        saga.Bus.Endpoint.Send(new NullMessage());
 								})
 							.Call((saga, message) => saga.AcceptProposal())
 							.TransitionTo(WaitingForAgreement),
@@ -52,27 +59,32 @@ namespace MassTransit.Grid.Sagas
 							.Call((saga, message) => saga.Initialize(message))
 							.TransitionTo(WaitingForCompletion),
 						When(MessageCompletedByNode)
-							.TransitionTo(Completed)
+							.TransitionTo(ConsumeCompleted)
 						);
 
 					During(WaitingForAgreement,
-					       When(MessageProposedByNode)
-					       	.Call((saga, message) => saga.IgnoreProposal(message)),
-					       When(MessageAcceptedByNode)
-					       	.Call((saga, message) => saga.ValidateMessageAcceptance(message)),
-					       When(MessageNodeAgreed)
-					       	.Then((saga, message) =>
-					       		{
-					       			_log.InfoFormat("{0} AGREED: {1}.{2}:{3}", saga.Bus.Endpoint.Uri,
-					       			                message.CorrelationId, message.BallotId, message.ControlUri);
-					       		})
-					       	.TransitionTo(WaitingForCompletion)
+						When(MessageProposedByNode)
+							.Call((saga, message) => saga.IgnoreProposal(message)),
+						When(MessageAcceptedByNode)
+							.Call((saga, message) => saga.ValidateMessageAcceptance(message)),
+						When(MessageNodeAgreed)
+							.Then((saga, message) =>
+								{
+									if (_log.IsDebugEnabled)
+										_log.DebugFormat("{0} AGREED: {1}.{2}:{3}", saga.Bus.Endpoint.Uri,
+											message.CorrelationId, message.BallotId, message.ControlUri);
+								})
+							.TransitionTo(WaitingForCompletion)
 						);
 
 					During(WaitingForCompletion,
-					       When(MessageCompletedByNode)
-					       	.TransitionTo(Completed)
+						When(MessageCompletedByNode)
+							.TransitionTo(ConsumeCompleted)
 						);
+
+					During(ConsumeCompleted,
+						When(RemovedFromEndpoint)
+							.TransitionTo(Completed));
 				});
 		}
 
@@ -88,20 +100,24 @@ namespace MassTransit.Grid.Sagas
 		public static State Initial { get; set; }
 		public static State WaitingForAgreement { get; set; }
 		public static State WaitingForCompletion { get; set; }
+		public static State ConsumeCompleted { get; set; }
 		public static State Completed { get; set; }
+
 
 		public static Event<ProposeMessageNode> MessageProposedByNode { get; set; }
 		public static Event<AcceptProposedMessageNode> MessageAcceptedByNode { get; set; }
 		public static Event<MessageCompleted> MessageCompletedByNode { get; set; }
+		public static Event<MessageRemovedFromEndpoint> RemovedFromEndpoint { get; set; }
 		public static Event<AcceptedMessageNode> MessageNodeAgreed { get; set; }
 
 		public long BallotId { get; set; }
 		public Uri ControlUri { get; set; }
 		public Uri DataUri { get; set; }
-		public Guid NodeId { get; set; }
 		protected IList<QuorumState> Quorum { get; set; }
 
+		[Indexed]
 		public Guid CorrelationId { get; set; }
+
 		public IServiceBus Bus { get; set; }
 
 		private void ValidateMessageAcceptance(GridMessageNodeMessageBase message)
@@ -125,17 +141,18 @@ namespace MassTransit.Grid.Sagas
 			}
 
 			int agreed;
-			if(AgreementHasBeenReached(out agreed))
+			if (AgreementHasBeenReached(out agreed))
 			{
 				Bus.Publish(CreateMessage<AcceptedMessageNode>(), c => c.SetSourceAddress(Bus.Endpoint.Uri));
 			}
 			else
 			{
-				_log.InfoFormat("{0} ACCEPT: {1}.{2}:{3} ({4} of {5})", Bus.Endpoint.Uri,
-				                message.CorrelationId, message.BallotId, message.ControlUri,
-								agreed, Quorum.Count);
+				if (_log.IsDebugEnabled)
+					_log.DebugFormat("{0} ACCEPT: {1}.{2}:{3} ({4} of {5})", Bus.Endpoint.Uri,
+						message.CorrelationId, message.BallotId, message.ControlUri,
+						agreed, Quorum.Count);
 
-				if(updateRequired)
+				if (updateRequired)
 					UpdateQuorum<AcceptProposedMessageNode>();
 			}
 		}
@@ -174,10 +191,11 @@ namespace MassTransit.Grid.Sagas
 		{
 			if (message.BallotId < BallotId)
 			{
-				_log.InfoFormat("{0} REJECT: {1}.{2}:{3} {4}:{5} {6}", Bus.Endpoint.Uri,
-				                message.CorrelationId, message.BallotId, message.ControlUri,
-				                BallotId, ControlUri,
-				                "Obsolete");
+				if (_log.IsDebugEnabled)
+					_log.DebugFormat("{0} REJECT: {1}.{2}:{3} {4}:{5} {6}", Bus.Endpoint.Uri,
+						message.CorrelationId, message.BallotId, message.ControlUri,
+						BallotId, ControlUri,
+						"Obsolete");
 
 				UpdateNode<AcceptProposedMessageNode>(CurrentMessage.Headers.SourceAddress);
 				return true;
@@ -193,10 +211,11 @@ namespace MassTransit.Grid.Sagas
 
 			if (ControlUri != message.ControlUri || DataUri != message.DataUri)
 			{
-				_log.InfoFormat("{0} REJECT: {1}.{2}:{3} {4}:{5} {6}", Bus.Endpoint.Uri,
-				                message.CorrelationId, message.BallotId, message.ControlUri,
-				                BallotId, ControlUri,
-				                "Conflict");
+				if (_log.IsDebugEnabled)
+					_log.DebugFormat("{0} REJECT: {1}.{2}:{3} {4}:{5} {6}", Bus.Endpoint.Uri,
+						message.CorrelationId, message.BallotId, message.ControlUri,
+						BallotId, ControlUri,
+						"Conflict");
 
 				BallotId += GetAgreedCount();
 				UpdateQuorum<AcceptProposedMessageNode>();
@@ -212,20 +231,21 @@ namespace MassTransit.Grid.Sagas
 			BallotId = message.BallotId;
 			ControlUri = message.ControlUri;
 			DataUri = message.DataUri;
-			NodeId = message.NodeId;
 			Quorum = message.Quorum.Select(x => new QuorumState {ControlUri = x}).ToList();
 
-			_log.InfoFormat("{0}   INIT: {1}.{2}:{3} {4}", Bus.Endpoint.Uri,
-			                message.CorrelationId, message.BallotId, message.ControlUri,
-			                string.Join(",", Quorum.Select(x => x.ControlUri.ToString()).ToArray()));
+			if (_log.IsDebugEnabled)
+				_log.DebugFormat("{0}   INIT: {1}.{2}:{3} {4}", Bus.Endpoint.Uri,
+					message.CorrelationId, message.BallotId, message.ControlUri,
+					string.Join(",", Quorum.Select(x => x.ControlUri.ToString()).ToArray()));
 		}
 
 		private void IgnoreProposal(GridMessageNodeMessageBase message)
 		{
-			_log.InfoFormat("{0} IGNORE: {1}.{2}:{3} {4}:{5} {6}", Bus.Endpoint.Uri,
-			                message.CorrelationId, message.BallotId, message.ControlUri,
-			                BallotId, ControlUri,
-			                "Accepting");
+			if (_log.IsDebugEnabled)
+				_log.DebugFormat("{0} IGNORE: {1}.{2}:{3} {4}:{5} {6}", Bus.Endpoint.Uri,
+					message.CorrelationId, message.BallotId, message.ControlUri,
+					BallotId, ControlUri,
+					"Accepting");
 		}
 
 		private void AcceptProposal()
@@ -248,7 +268,7 @@ namespace MassTransit.Grid.Sagas
 		}
 
 
-		private void UpdateQuorum<T>() 
+		private void UpdateQuorum<T>()
 			where T : GridMessageNodeMessageBase, new()
 		{
 			var message = CreateMessage<T>();
@@ -256,7 +276,7 @@ namespace MassTransit.Grid.Sagas
 
 			Quorum.Each(x =>
 				{
-					if(x.ControlUri != ControlUri)
+					if (x.ControlUri != ControlUri)
 						endpointFactory.GetEndpoint(x.ControlUri).Send(message, c => c.SetSourceAddress(Bus.Endpoint.Uri));
 				});
 		}
@@ -275,7 +295,6 @@ namespace MassTransit.Grid.Sagas
 					CorrelationId = CorrelationId,
 					ControlUri = ControlUri,
 					DataUri = DataUri,
-					NodeId = NodeId,
 					Quorum = Quorum.Select(x => x.ControlUri).ToList(),
 				};
 		}
@@ -319,7 +338,6 @@ namespace MassTransit.Grid.Sagas
 		CorrelatedBy<Guid>
 	{
 		public long BallotId { get; set; }
-		public Guid NodeId { get; set; }
 		public Uri ControlUri { get; set; }
 		public Uri DataUri { get; set; }
 		public IList<Uri> Quorum { get; set; }
@@ -328,6 +346,13 @@ namespace MassTransit.Grid.Sagas
 
 	[Serializable]
 	public class MessageCompleted :
+		CorrelatedBy<Guid>
+	{
+		public Guid CorrelationId { get; set; }
+	}
+
+	[Serializable]
+	public class MessageRemovedFromEndpoint :
 		CorrelatedBy<Guid>
 	{
 		public Guid CorrelationId { get; set; }

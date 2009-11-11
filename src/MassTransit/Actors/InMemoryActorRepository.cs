@@ -30,9 +30,9 @@ namespace MassTransit.Actors
 		public void Send<TMessage>(Expression<Func<TSaga, bool>> filter, ISagaPolicy<TSaga, TMessage> policy, TMessage message, Action<TSaga> consumerAction)
 			where TMessage : class
 		{
-			IEnumerable<TSaga> existingSagas = _collection.Where(filter);
+			IEnumerable<TSaga> existingSagas = _collection.Where(filter).ToList();
 
-			if (SendMessageToExistingSagas(existingSagas, policy, consumerAction, message))
+			if (SendMessageToExistingSagas(existingSagas, policy, consumerAction, message, RemoveSaga))
 				return;
 
 			SendMessageToNewSaga(policy, message, saga =>
@@ -41,8 +41,15 @@ namespace MassTransit.Actors
 						_collection.Add(saga);
 
 					consumerAction(saga);
-				});
+				}, RemoveSaga);
 		}
+
+		private void RemoveSaga(TSaga saga)
+		{
+			lock (_collection)
+				_collection.Remove(saga);
+		}
+
 
 		public IEnumerable<TSaga> Where(Expression<Func<TSaga, bool>> filter)
 		{

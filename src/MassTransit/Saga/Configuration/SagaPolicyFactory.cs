@@ -12,13 +12,15 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Saga.Configuration
 {
+	using System;
 	using System.Collections.Generic;
+	using System.Linq.Expressions;
 	using Magnum.StateMachine;
 
 	public class SagaPolicyFactory :
 		ISagaPolicyFactory
 	{
-		public ISagaPolicy<TSaga, TMessage> GetPolicy<TSaga, TMessage>(IEnumerable<State> states)
+		public ISagaPolicy<TSaga, TMessage> GetPolicy<TSaga, TMessage>(IEnumerable<State> states, Expression<Func<TSaga, bool>> removeExpression)
 			where TSaga : SagaStateMachine<TSaga>, ISaga
 			where TMessage : class
 		{
@@ -36,12 +38,12 @@ namespace MassTransit.Saga.Configuration
 			}
 
 			if (includesInitial && includesOther)
-				return new CreateOrUseExistingSagaPolicy<TSaga, TMessage>();
+				return new CreateOrUseExistingSagaPolicy<TSaga, TMessage>(removeExpression);
 
 			if (includesInitial)
-				return new InitiatingSagaPolicy<TSaga, TMessage>();
+				return new InitiatingSagaPolicy<TSaga, TMessage>(removeExpression);
 
-			return new ExistingOrIgnoreSagaPolicy<TSaga, TMessage>();
+			return new ExistingOrIgnoreSagaPolicy<TSaga, TMessage>(removeExpression);
 		}
 
 		private static bool IsAny<TSaga>(State state)

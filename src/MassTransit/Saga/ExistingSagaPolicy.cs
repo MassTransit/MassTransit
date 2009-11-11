@@ -12,12 +12,20 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Saga
 {
+	using System;
 	using Exceptions;
 
 	public class ExistingSagaPolicy<TSaga, TMessage> :
 		ISagaPolicy<TSaga, TMessage>
 		where TSaga : class, ISaga
 	{
+		private readonly Func<TSaga, bool> _shouldBeRemoved;
+
+		public ExistingSagaPolicy(Func<TSaga, bool> shouldBeRemoved)
+		{
+			_shouldBeRemoved = shouldBeRemoved;
+		}
+
 		public bool CreateSagaWhenMissing(TMessage message, out TSaga saga)
 		{
 			saga = null;
@@ -32,6 +40,11 @@ namespace MassTransit.Saga
 		public void ForMissingSaga(TMessage message)
 		{
 			throw new SagaException("Saga not found: " + message, typeof (TSaga), typeof (TMessage));
+		}
+
+		public bool ShouldSagaBeRemoved(TSaga saga)
+		{
+			return _shouldBeRemoved(saga);
 		}
 	}
 }

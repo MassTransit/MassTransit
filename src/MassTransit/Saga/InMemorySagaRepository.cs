@@ -16,48 +16,44 @@ namespace MassTransit.Saga
 	using System.Collections.Generic;
 	using System.Linq;
 	using System.Linq.Expressions;
-	using Magnum.Data;
+	using Util;
 
 	public class InMemorySagaRepository<TSaga> :
 		AbstractSagaRepository<TSaga>,
 		ISagaRepository<TSaga>
 		where TSaga : class, ISaga
 	{
+		private IndexedCollection<TSaga> _collection = new IndexedCollection<TSaga>();
 		private bool _disposed;
-		private InMemoryRepository<TSaga, Guid> _repository;
-
-		public InMemoryRepository<TSaga, Guid> Repository
-		{
-			get { return _repository; }
-		}
-
-		public InMemorySagaRepository()
-		{
-			_repository = new InMemoryRepository<TSaga, Guid>(x => x.CorrelationId);
-		}
 
 		public void Send<TMessage>(Expression<Func<TSaga, bool>> filter, ISagaPolicy<TSaga, TMessage> policy, TMessage message, Action<TSaga> consumerAction)
 			where TMessage : class
 		{
-			IEnumerable<TSaga> existingSagas = _repository.Where(filter);
+			IEnumerable<TSaga> existingSagas = _collection.Where(filter).ToList();
 
-			if (SendMessageToExistingSagas(existingSagas, policy, consumerAction, message))
+			if (SendMessageToExistingSagas(existingSagas, policy, consumerAction, message, RemoveSaga))
 				return;
 
 			SendMessageToNewSaga(policy, message, saga =>
 				{
-					lock (_repository)
-						_repository.Save(saga);
+					lock (_collection)
+						_collection.Add(saga);
 
 					consumerAction(saga);
-				});
+				}, RemoveSaga);
+		}
+
+		private void RemoveSaga(TSaga saga)
+		{
+			lock (_collection)
+				_collection.Remove(saga);
 		}
 
 		public IEnumerable<TSaga> Where(Expression<Func<TSaga, bool>> filter)
 		{
-			lock (_repository)
+			lock (_collection)
 			{
-				return _repository.Where(filter).ToList();
+				return _collection.Where(filter).ToList();
 			}
 		}
 
@@ -72,8 +68,7 @@ namespace MassTransit.Saga
 			if (_disposed) return;
 			if (disposing)
 			{
-				_repository.Dispose();
-				_repository = null;
+				_collection = null;
 			}
 
 			_disposed = true;
@@ -84,5 +79,4 @@ namespace MassTransit.Saga
 			Dispose(false);
 		}
 	}
-
-	}
+}

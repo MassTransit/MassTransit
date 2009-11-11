@@ -41,7 +41,9 @@ namespace MassTransit.Saga.Configuration
 		{
 			Type messageType = typeof (V);
 
-			ISagaPolicy<TSaga, V> policy = _policyFactory.GetPolicy<TSaga, V>(states);
+			var removeExpression = SagaStateMachine<TSaga>.GetCompletedExpression();
+
+			ISagaPolicy<TSaga, V> policy = _policyFactory.GetPolicy<TSaga, V>(states, removeExpression);
 
 			Expression<Func<TSaga, V, bool>> expression;
 			if (SagaStateMachine<TSaga>.TryGetCorrelationExpressionForEvent(eevent, out expression))
