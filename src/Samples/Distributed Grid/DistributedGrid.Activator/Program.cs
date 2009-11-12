@@ -13,11 +13,15 @@
 namespace DistributedGrid.Activator
 {
 	using System.Configuration;
+    using System.IO;
+    using log4net.Config;
 
 	internal class Program
 	{
 		private static void Main(string[] args)
 		{
+            XmlConfigurator.ConfigureAndWatch(new FileInfo(@"log4net.config"));
+
 			var service = new ActivorServiceProvider
 				{
 					ServiceName = ConfigurationManager.AppSettings["ServiceName"],

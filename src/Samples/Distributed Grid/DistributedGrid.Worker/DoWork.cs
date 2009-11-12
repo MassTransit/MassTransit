@@ -12,72 +12,74 @@
 // specific language governing permissions and limitations under the License.
 namespace DistributedGrid.Worker
 {
-	using System;
-	using MassTransit;
-	using MassTransit.Configuration;
-	using MassTransit.Grid.Configuration;
-	using MassTransit.Services.Subscriptions.Configuration;
-	using Shared;
-	using Shared.Messages;
+    using System;
+    using MassTransit;
+    using MassTransit.Configuration;
+    using MassTransit.Grid.Configuration;
+    using MassTransit.Services.Subscriptions.Configuration;
+    using Shared;
+    using Shared.Messages;
+    using log4net;
 
-	public class DoWork :
-		IServiceInterface,
-		IDisposable,
-		Consumes<DoSimpleWorkItem>.All
-	{
-		public DoWork(IObjectBuilder objectBuilder)
-		{
-			ObjectBuilder = objectBuilder;
-		}
+    public class DoWork :
+        IServiceInterface,
+        IDisposable,
+        Consumes<DoSimpleWorkItem>.All
+    {
+        private ILog _log = LogManager.GetLogger(typeof(DoWork));
 
-		public void Start()
-		{
-			ControlBus = ControlBusConfigurator.New(x =>
-				{
-					x.SetObjectBuilder(ObjectBuilder);
+        public DoWork(IObjectBuilder objectBuilder)
+        {
+            ObjectBuilder = objectBuilder;
+        }
 
-					x.ReceiveFrom(ObjectBuilder.GetInstance<String>("SourceQueue") + "_control");
+        public void Start()
+        {
+            ControlBus = ControlBusConfigurator.New(x =>
+                {
+                    x.SetObjectBuilder(ObjectBuilder);
 
-					x.PurgeBeforeStarting();
-				});
+                    x.ReceiveFrom(ObjectBuilder.GetInstance<String>("SourceQueue") + "_control");
 
-			DataBus = ServiceBusConfigurator.New(x =>
-				{
-					x.SetObjectBuilder(ObjectBuilder);
-					x.ConfigureService<SubscriptionClientConfigurator>(y =>
-						{
-							// setup endpoint
-							y.SetSubscriptionServiceEndpoint(ObjectBuilder.GetInstance<String>("SubscriptionQueue"));
-						});
-					x.ReceiveFrom(ObjectBuilder.GetInstance<String>("SourceQueue"));
-					x.UseControlBus(ControlBus);
-					x.SetConcurrentConsumerLimit(4);
+                    x.PurgeBeforeStarting();
+                });
 
-					x.ConfigureService<GridConfigurator>(grid =>
-						{
-							grid.SetProposer();
-							grid.For<DoSimpleWorkItem>().Use<DoWork>();
-						});
-				});
-		}
+            DataBus = ServiceBusConfigurator.New(x =>
+                {
+                    x.SetObjectBuilder(ObjectBuilder);
+                    x.ConfigureService<SubscriptionClientConfigurator>(y =>
+                        {
+                            y.SetSubscriptionServiceEndpoint(ObjectBuilder.GetInstance<String>("SubscriptionQueue"));
+                        });
+                    x.ReceiveFrom(ObjectBuilder.GetInstance<String>("SourceQueue"));
+                    x.UseControlBus(ControlBus);
+                    x.SetConcurrentConsumerLimit(4);
 
-		public void Stop()
-		{
-		}
+                    x.ConfigureService<GridConfigurator>(grid =>
+                        {
+                            if (ObjectBuilder.GetInstance<String>("IsProposer").Equals("true"))
+                                grid.SetProposer();
+                            grid.For<DoSimpleWorkItem>().Use<DoWork>();
+                        });
+                });
+        }
 
-		public IServiceBus DataBus { get; private set; }
-		public IControlBus ControlBus { get; private set; }
-		public IObjectBuilder ObjectBuilder { get; private set; }
+        public void Stop()
+        {
+        }
 
+        public IServiceBus DataBus { get; private set; }
+        public IControlBus ControlBus { get; private set; }
+        public IObjectBuilder ObjectBuilder { get; private set; }
 
-		public void Dispose()
-		{
-		}
+        public void Dispose()
+        {
+        }
 
-		public void Consume(DoSimpleWorkItem message)
-		{
-			Console.WriteLine(message.CorrelationId);
-			CurrentMessage.Respond(new CompletedSimpleWorkItem(message.CorrelationId, message.CreatedAt));
-		}
-	}
+        public void Consume(DoSimpleWorkItem message)
+        {
+            _log.InfoFormat("Responding to {0}", message.CorrelationId);
+            CurrentMessage.Respond(new CompletedSimpleWorkItem(message.CorrelationId, message.CreatedAt));
+        }
+    }
 }

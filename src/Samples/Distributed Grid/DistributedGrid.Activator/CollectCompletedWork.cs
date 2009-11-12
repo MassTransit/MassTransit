@@ -17,6 +17,7 @@ namespace DistributedGrid.Activator
 	using MassTransit;
 	using Shared;
 	using Shared.Messages;
+    using log4net;
 
 	public class CollectCompletedWork :
 		Consumes<CompletedSimpleWorkItem>.All,
@@ -24,6 +25,7 @@ namespace DistributedGrid.Activator
 	{
 		private readonly IServiceBus _bus;
 		private UnsubscribeAction _unsubscribeAction;
+	    private ILog _log = LogManager.GetLogger(typeof (CollectCompletedWork));
 
 		public CollectCompletedWork(IServiceBus bus)
 		{
@@ -34,14 +36,14 @@ namespace DistributedGrid.Activator
 			for (int i = 0; i < 100; i++)
 			{
 				var g = Guid.NewGuid();
-				Console.WriteLine("Publishing: " + g);
+				_log.InfoFormat("Publishing: {0}", g);
 				_bus.Publish(new DoSimpleWorkItem(g));
 			}
 		}
 
 		public void Consume(CompletedSimpleWorkItem message)
 		{
-			Console.WriteLine("Got Item");
+            _log.Info("Got Item");
 		}
 
 		public void Start()
