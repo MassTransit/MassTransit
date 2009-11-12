@@ -168,7 +168,7 @@
     <Compile Include="Grid\Messages\ServiceMessageReceived.cs" />
     <Compile Include="Grid\Messages\ProposeServiceMessage.cs" />
     <Compile Include="Grid\Messages\RejectServiceMessageProposal.cs" />
-    <Compile Include="Grid\Messages\ServiceMessageAccepted.cs" />
+    <Compile Include="Grid\Messages\ServiceMessageAgreed.cs" />
     <Compile Include="Grid\Sagas\QuorumState.cs" />
     <Compile Include="Grid\ServiceTypeExtensions.cs" />
     <Compile Include="IEndpointAddress.cs" />

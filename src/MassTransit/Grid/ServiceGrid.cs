@@ -202,20 +202,37 @@ namespace MassTransit.Grid
 			ServiceNode selectedNode = nodes.SelectNodeToUse();
 
 			if (_log.IsDebugEnabled)
-				_log.DebugFormat("{0} sending proposal message for {1}", ControlUri, correlationId);
+				_log.DebugFormat("{0} sending proposal message for {1} recommending {2}", ControlUri, correlationId, selectedNode.ControlUri);
 
-			var message = new ProposeServiceMessage
-				{
-					BallotId = 1,
-					ControlUri = selectedNode.ControlUri,
-					DataUri = selectedNode.DataUri,
-					CorrelationId = correlationId,
-					Quorum = nodes.Select(x => x.ControlUri).ToList(),
-				};
+			List<Uri> quorum = nodes.Select(x => x.ControlUri).ToList();
+			if(quorum.Count == 1)
+			{
+				SendMessageToNodes<ServiceMessageAgreed>(nodes, correlationId, 1, selectedNode.ControlUri, selectedNode.DataUri, quorum);
+			}
+			else
+			{
+				SendMessageToNodes<ProposeServiceMessage>(nodes, correlationId, 1, selectedNode.ControlUri, selectedNode.DataUri, quorum);
+			}
+
+			if (quorum.Contains(ControlUri))
+			{
+				WaitUntilMessageNodeIsAvailable(correlationId);
+			}
+		}
+
+		private void SendMessageToNodes<T>(IEnumerable<ServiceNode> nodes, Guid correlationId, long ballotId, Uri controlUri, Uri dataUri, IList<Uri> quorum)
+			where T : AbstractServiceMessageMessage, new()
+		{
+			var message = new T
+			{
+				BallotId = ballotId,
+				ControlUri = controlUri,
+				DataUri = dataUri,
+				CorrelationId = correlationId,
+				Quorum = quorum,
+			};
 
 			nodes.Each(node => { _endpointFactory.GetEndpoint(node.ControlUri).Send(message, context => context.SetSourceAddress(ControlUri)); });
-
-			WaitUntilMessageNodeIsAvailable(correlationId);
 		}
 
 		public ServiceMessage GetMessageNode(Guid correlationId)

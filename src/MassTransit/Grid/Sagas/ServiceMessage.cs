@@ -96,7 +96,7 @@ namespace MassTransit.Grid.Sagas
 
 		public static Event<ProposeServiceMessage> NodeProposed { get; set; }
 		public static Event<AcceptServiceMessageProposal> NodeAccepted { get; set; }
-		public static Event<ServiceMessageAccepted> NodeAgreed { get; set; }
+		public static Event<ServiceMessageAgreed> NodeAgreed { get; set; }
 		public static Event<ServiceMessageCompleted> NodeCompletedMessage { get; set; }
 		public static Event<ServiceMessageReceived> NodeReceivedMessage { get; set; }
 
@@ -164,7 +164,7 @@ namespace MassTransit.Grid.Sagas
 			int agreed;
 			if (AgreementHasBeenReached(out agreed))
 			{
-				Bus.Publish(CreateMessage<ServiceMessageAccepted>(), c => c.SetSourceAddress(Bus.Endpoint.Uri));
+				Bus.Publish(CreateMessage<ServiceMessageAgreed>(), c => c.SetSourceAddress(Bus.Endpoint.Uri));
 			}
 			else
 			{
