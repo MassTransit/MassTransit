@@ -14,10 +14,10 @@ namespace DistributedGrid.Activator
 {
 	using System;
 	using System.Threading;
+	using log4net;
 	using MassTransit;
 	using Shared;
 	using Shared.Messages;
-    using log4net;
 
 	public class CollectCompletedWork :
 		Consumes<CompletedSimpleWorkItem>.All,
@@ -25,11 +25,25 @@ namespace DistributedGrid.Activator
 	{
 		private readonly IServiceBus _bus;
 		private UnsubscribeAction _unsubscribeAction;
-	    private ILog _log = LogManager.GetLogger(typeof (CollectCompletedWork));
+		private ILog _log = LogManager.GetLogger(typeof (CollectCompletedWork));
+		private int _received;
+		private int _sent;
 
 		public CollectCompletedWork(IServiceBus bus)
 		{
 			_bus = bus;
+		}
+
+		public void Consume(CompletedSimpleWorkItem message)
+		{
+			Interlocked.Increment(ref _received);
+
+			_log.InfoFormat("Received: {0} - {1}", _received, message.CorrelationId);
+		}
+
+		public void Start()
+		{
+			_unsubscribeAction = _bus.Subscribe(this);
 
 			Thread.Sleep(1000);
 
@@ -38,17 +52,9 @@ namespace DistributedGrid.Activator
 				var g = Guid.NewGuid();
 				_log.InfoFormat("Publishing: {0}", g);
 				_bus.Publish(new DoSimpleWorkItem(g));
+
+				Interlocked.Increment(ref _sent);
 			}
-		}
-
-		public void Consume(CompletedSimpleWorkItem message)
-		{
-            _log.Info("Got Item");
-		}
-
-		public void Start()
-		{
-			_unsubscribeAction = _bus.Subscribe(this);
 		}
 
 		public void Stop()
