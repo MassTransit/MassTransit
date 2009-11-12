@@ -1,0 +1,32 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DistributedGrid.Worker", "DistributedGrid.Worker\DistributedGrid.Worker.csproj", "{6670D1F9-EC59-48A3-BCB4-47D4BE6FBC5E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DistributedGrid.Activator", "DistributedGrid.Activator\DistributedGrid.Activator.csproj", "{87194E94-9647-4130-A84F-C495BDF75D39}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DistributedGrid.Shared", "DistributedGrid.Shared\DistributedGrid.Shared.csproj", "{58B505B2-48F6-4D7D-8E65-45DA80EB3A22}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6670D1F9-EC59-48A3-BCB4-47D4BE6FBC5E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6670D1F9-EC59-48A3-BCB4-47D4BE6FBC5E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6670D1F9-EC59-48A3-BCB4-47D4BE6FBC5E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6670D1F9-EC59-48A3-BCB4-47D4BE6FBC5E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{87194E94-9647-4130-A84F-C495BDF75D39}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{87194E94-9647-4130-A84F-C495BDF75D39}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{87194E94-9647-4130-A84F-C495BDF75D39}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{87194E94-9647-4130-A84F-C495BDF75D39}.Release|Any CPU.Build.0 = Release|Any CPU
+		{58B505B2-48F6-4D7D-8E65-45DA80EB3A22}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{58B505B2-48F6-4D7D-8E65-45DA80EB3A22}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{58B505B2-48F6-4D7D-8E65-45DA80EB3A22}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{58B505B2-48F6-4D7D-8E65-45DA80EB3A22}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
