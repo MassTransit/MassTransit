@@ -10,10 +10,14 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
+
+
 namespace DistributedGrid.Activator
 {
 	using System;
 	using System.Threading;
+    using System.Collections.Generic;
+    using System.Linq;
 	using log4net;
 	using MassTransit;
 	using Shared;
@@ -28,6 +32,7 @@ namespace DistributedGrid.Activator
 		private ILog _log = LogManager.GetLogger(typeof (CollectCompletedWork));
 		private int _received;
 		private int _sent;
+        private List<int> values = new List<int>();
 
 		public CollectCompletedWork(IServiceBus bus)
 		{
@@ -38,7 +43,15 @@ namespace DistributedGrid.Activator
 		{
 			Interlocked.Increment(ref _received);
 
-			_log.InfoFormat("Received: {0} - {1}", _received, message.CorrelationId);
+		    int messageMs = DateTime.UtcNow.Subtract(message.RequestCreatedAt).Milliseconds;
+            
+            lock (values)
+            {
+                values.Add(messageMs);
+            }
+
+		    _log.InfoFormat("Received: {0} - {1} [{2}ms]", _received, message.CorrelationId, messageMs);
+            _log.InfoFormat("Stats\n\tMin: {0:0000.0}ms\n\tMax: {1:0000.0}ms\n\tAvg: {2:0000.0}ms", values.Min(), values.Max(), values.Average());
 		}
 
 		public void Start()

@@ -40,10 +40,6 @@ namespace DistributedGrid.Worker
 							AddSagaRepositoryForType<ServiceType>(x);
 							AddSagaRepositoryForType<ServiceMessage>(x);
 							AddSagaRepositoryForType<ServiceNode>(x);
-							x.ForRequestedType<String>()
-								.AlwaysUnique()
-								.MissingNamedInstanceIs
-								.ConstructedBy(ic => ConfigurationManager.AppSettings[ic.RequestedName]);
 						}
 				};
 
