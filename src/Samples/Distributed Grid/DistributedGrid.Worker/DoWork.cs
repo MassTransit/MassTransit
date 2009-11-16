@@ -13,6 +13,7 @@
 namespace DistributedGrid.Worker
 {
     using System;
+    using System.Configuration;
     using MassTransit;
     using MassTransit.Configuration;
     using MassTransit.Grid.Configuration;
@@ -39,7 +40,7 @@ namespace DistributedGrid.Worker
                 {
                     x.SetObjectBuilder(ObjectBuilder);
 
-                    x.ReceiveFrom(ObjectBuilder.GetInstance<String>("SourceQueue") + "_control");
+                    x.ReceiveFrom(ConfigurationManager.AppSettings["SourceQueue"] + "_control");
 
                     x.PurgeBeforeStarting();
                 });
@@ -49,15 +50,15 @@ namespace DistributedGrid.Worker
                     x.SetObjectBuilder(ObjectBuilder);
                     x.ConfigureService<SubscriptionClientConfigurator>(y =>
                         {
-                            y.SetSubscriptionServiceEndpoint(ObjectBuilder.GetInstance<String>("SubscriptionQueue"));
+                            y.SetSubscriptionServiceEndpoint(ConfigurationManager.AppSettings["SubscriptionQueue"]);
                         });
-                    x.ReceiveFrom(ObjectBuilder.GetInstance<String>("SourceQueue"));
+                    x.ReceiveFrom(ConfigurationManager.AppSettings["SourceQueue"]);
                     x.UseControlBus(ControlBus);
                     x.SetConcurrentConsumerLimit(4);
 
                     x.ConfigureService<GridConfigurator>(grid =>
                         {
-                            if (ObjectBuilder.GetInstance<String>("IsProposer").Equals("true"))
+                            if (ConfigurationManager.AppSettings["IsProposer"].Equals("true"))
                                 grid.SetProposer();
                             grid.For<DoSimpleWorkItem>().Use<DoWork>();
                         });
@@ -66,6 +67,7 @@ namespace DistributedGrid.Worker
 
         public void Stop()
         {
+            // need to remove this item from the grid
         }
 
         public IServiceBus DataBus { get; private set; }
