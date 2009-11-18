@@ -10,20 +10,18 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-using System.Linq;
-using MassTransit.Grid;
-using MassTransit.Grid.Messages;
-using MassTransit.Grid.Sagas;
-
 namespace MassTransit.Tests.Grid
 {
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
+    using System.Linq;
     using System.Threading;
     using Magnum;
     using Magnum.DateTimeExtensions;
+    using MassTransit.Grid;
     using MassTransit.Grid.Configuration;
+    using MassTransit.Grid.Messages;
     using MassTransit.Transports;
     using NUnit.Framework;
     using Rhino.Mocks;
@@ -98,7 +96,7 @@ namespace MassTransit.Tests.Grid
         {
             Thread.Sleep(250);
 
-            var nodeRepo = GridNodes[0].GridNodeRepository;
+            var nodeRepo = GridNodes[0].GridServiceNodeRepository;
 
             var message = new RemoveServiceNode()
             {
@@ -115,12 +113,10 @@ namespace MassTransit.Tests.Grid
                     EndpointFactory.GetEndpoint(node.ControlUri).Send(message);
                 });
 
-            Thread.Sleep(1000);
+            Thread.Sleep(250);
 
-            Assert.AreEqual(ServiceNode.Completed, 
-                GridNodes[1].GridNodeRepository.Where(node => node.ControlUri == GridNodes[0].ControlBus.Endpoint.Uri).First().CurrentState);
-            Assert.AreEqual(ServiceNode.Completed, 
-                GridNodes[2].GridNodeRepository.Where(node => node.ControlUri == GridNodes[0].ControlBus.Endpoint.Uri).First().CurrentState);
+            Assert.AreEqual(2, GridNodes[1].GridServiceNodeRepository.Where(node => true).Count());
+            Assert.AreEqual(2, GridNodes[2].GridServiceNodeRepository.Where(node => true).Count());
         }
     }
 
