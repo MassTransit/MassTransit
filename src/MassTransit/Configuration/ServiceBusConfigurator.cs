@@ -72,7 +72,18 @@ namespace MassTransit.Configuration
 				});
 		}
 
-		public void AddService<TService>()
+		public void AddService<TService>(Func<TService> getService)
+			where TService : IBusService
+		{
+			_services.Add((bus, builder, add) =>
+				{
+					var service = getService();
+
+					add(typeof (TService), service);
+				});
+		}
+
+    	public void AddService<TService>()
 			where TService : IBusService
 		{
 			_services.Add((bus, builder, add) =>
