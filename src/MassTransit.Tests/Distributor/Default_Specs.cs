@@ -74,5 +74,13 @@ namespace MassTransit.Tests.Distributor
 
 			future.WaitUntilAvailable(5.Seconds()).ShouldBeTrue("No response received");
 		}
+
+		[Test]
+		public void Using_the_load_generator_should_share_the_load()
+		{
+			var generator = new LoadGenerator<FirstCommand, FirstResponse>();
+
+			generator.Run(RemoteBus, 100);
+		}
 	}
 }
