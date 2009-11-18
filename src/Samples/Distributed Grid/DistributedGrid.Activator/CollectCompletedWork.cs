@@ -29,10 +29,10 @@ namespace DistributedGrid.Activator
 	{
 		private readonly IServiceBus _bus;
 		private UnsubscribeAction _unsubscribeAction;
-		private ILog _log = LogManager.GetLogger(typeof (CollectCompletedWork));
+		private readonly ILog _log = LogManager.GetLogger(typeof (CollectCompletedWork));
 		private int _received;
 		private int _sent;
-        private List<int> values = new List<int>();
+        private readonly List<int> _values = new List<int>();
 
 		public CollectCompletedWork(IServiceBus bus)
 		{
@@ -45,18 +45,18 @@ namespace DistributedGrid.Activator
 
 		    int messageMs = DateTime.UtcNow.Subtract(message.RequestCreatedAt).Milliseconds;
             
-            lock (values)
+            lock (_values)
             {
-                values.Add(messageMs);
+                _values.Add(messageMs);
             }
 
 		    _log.InfoFormat("Received: {0} - {1} [{2}ms]", _received, message.CorrelationId, messageMs);
-            _log.InfoFormat("Stats\n\tMin: {0:0000.0}ms\n\tMax: {1:0000.0}ms\n\tAvg: {2:0000.0}ms", values.Min(), values.Max(), values.Average());
+            _log.InfoFormat("Stats\n\tMin: {0:0000.0}ms\n\tMax: {1:0000.0}ms\n\tAvg: {2:0000.0}ms", _values.Min(), _values.Max(), _values.Average());
 		}
 
 		public void Start()
 		{
-			_unsubscribeAction = _bus.Subscribe(this);
+		    _unsubscribeAction = _bus.Subscribe(this);
 
 			Thread.Sleep(1000);
 

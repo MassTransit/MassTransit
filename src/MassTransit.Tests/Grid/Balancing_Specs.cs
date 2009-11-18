@@ -96,22 +96,7 @@ namespace MassTransit.Tests.Grid
         {
             Thread.Sleep(250);
 
-            var nodeRepo = GridNodes[0].GridServiceNodeRepository;
-
-            var message = new RemoveServiceNode()
-            {
-                ControlUri = GridNodes[0].ControlBus.Endpoint.Uri,
-                DataUri = GridNodes[0].DataBus.Endpoint.Uri,
-                ServiceId = typeof(SimpleGridCommand).ToServiceTypeId(),
-                ServiceName = typeof(SimpleGridCommand).ToFriendlyName()
-            };
-
-            nodeRepo.Where(node => node.ControlUri != GridNodes[0].ControlBus.Endpoint.Uri)
-                .ToList()
-                .ForEach(node =>
-                {
-                    EndpointFactory.GetEndpoint(node.ControlUri).Send(message);
-                });
+            GridNodes[0].DataBus.Dispose(); // unsubscribe all the services when the Bus is disposed
 
             Thread.Sleep(250);
 
