@@ -139,6 +139,16 @@
     <Compile Include="Actors\InMemoryActorRepository.cs" />
     <Compile Include="Actors\StateDrivenActor.cs" />
     <Compile Include="CurrentMessage.cs" />
+    <Compile Include="Distributor\ConfigureDistributedConsumer.cs" />
+    <Compile Include="Distributor\DistributedConsumerSettings.cs" />
+    <Compile Include="Distributor\IDistributorWorker.cs" />
+    <Compile Include="Distributor\Messages\Distributed.cs" />
+    <Compile Include="Distributor\DistributorWorker.cs" />
+    <Compile Include="Distributor\ExtensionsForDistributor.cs" />
+    <Compile Include="Distributor\Messages\WorkerAvailable.cs" />
+    <Compile Include="Distributor\Distributor.cs" />
+    <Compile Include="Distributor\IDistributor.cs" />
+    <Compile Include="Distributor\Messages\Workload.cs" />
     <Compile Include="EndpointAddress.cs" />
     <Compile Include="Events\MessagePublished.cs" />
     <Compile Include="Events\ReceiverQueued.cs" />

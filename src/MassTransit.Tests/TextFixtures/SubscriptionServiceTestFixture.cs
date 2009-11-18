@@ -78,6 +78,8 @@ namespace MassTransit.Tests.TextFixtures
 						});
 					x.ReceiveFrom(ClientUri);
 					x.UseControlBus(LocalControlBus);
+
+					ConfigureLocalBus(x);
 				});
 
 			RemoteBus = ServiceBusConfigurator.New(x =>
@@ -90,6 +92,10 @@ namespace MassTransit.Tests.TextFixtures
 					x.ReceiveFrom(ServerUri);
 					x.UseControlBus(RemoteControlBus);
 				});
+		}
+
+		protected virtual void ConfigureLocalBus(IServiceBusConfigurator configurator)
+		{
 		}
 
 		private void SetupSubscriptionService(IObjectBuilder builder)

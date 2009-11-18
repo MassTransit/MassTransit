@@ -88,6 +88,12 @@
     <Compile Include="Configuration_Specs.cs" />
     <Compile Include="ContextSetup.cs" />
     <Compile Include="ControlBus_Specs.cs" />
+    <Compile Include="Distributor\Default_Specs.cs" />
+    <Compile Include="Distributor\DistributorTestFixture.cs" />
+    <Compile Include="Distributor\LoopbackDistributorTestFixture.cs" />
+    <Compile Include="Distributor\Messages\FirstCommand.cs" />
+    <Compile Include="Distributor\Messages\FirstResponse.cs" />
+    <Compile Include="Distributor\ServiceInstance.cs" />
     <Compile Include="ExtensionsForTestingEndpoints.cs" />
     <Compile Include="Fault_Specs.cs" />
     <Compile Include="FutureMessage.cs" />

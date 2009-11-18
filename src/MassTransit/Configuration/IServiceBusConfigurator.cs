@@ -39,6 +39,9 @@ namespace MassTransit.Configuration
 		void ConfigureService<TServiceConfigurator>(Action<TServiceConfigurator> configure)
 			where TServiceConfigurator : IServiceConfigurator, new();
 
+		void AddService<TService>(Func<TService> getService)
+			where TService : IBusService;
+
 		/// <summary>
 		/// Adds a service for use by the service bus with the default configuration
 		/// </summary>
