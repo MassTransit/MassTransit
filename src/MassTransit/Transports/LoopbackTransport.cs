@@ -89,10 +89,14 @@ namespace MassTransit.Transports
                 messageCount = _messages.Count;
             }
 
+        	bool waited = false;
+
             if (messageCount == 0)
             {
                 if (!_messageReady.WaitOne(timeout, true))
                     return;
+
+            	waited = true;
             }
 
             bool monitorExitNeeded = true;
@@ -128,6 +132,9 @@ namespace MassTransit.Transports
                     }
                 }
 
+				if(waited)
+					return;
+
 				// we read to the end and none were accepted, so we are going to wait until we get another in the queue
 				if (!_messageReady.WaitOne(timeout, true))
 					return;
@@ -138,11 +145,11 @@ namespace MassTransit.Transports
                     Monitor.Exit(_messageLock);
             }
 
-            lock (_messageLock)
-                messageCount = _messages.Count;
+          //  lock (_messageLock)
+            //    messageCount = _messages.Count;
 
-            if (messageCount == 0)
-                _messageReady.WaitOne(timeout, true);
+            //if (messageCount == 0)
+              //  _messageReady.WaitOne(timeout, true);
         }
 
         private void Dispose(bool disposing)

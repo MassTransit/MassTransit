@@ -14,6 +14,7 @@ namespace MassTransit.Distributor
 {
 	using System;
 	using Configuration;
+	using Magnum.DateTimeExtensions;
 
 	public static class ExtensionsForDistributor
 	{
@@ -21,6 +22,8 @@ namespace MassTransit.Distributor
 			where T : class, CorrelatedBy<Guid>
 		{
 			configurator.AddService(() => new Distributor<T>(endpointFactory));
+
+			configurator.SetReceiveTimeout(50.Milliseconds());
 		}
 
 		public static void ImplementDistributorWorker<T>(this IServiceBusConfigurator configurator, Func<T, Action<T>> getConsumer)

@@ -10,27 +10,39 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Tests.Distributor
+namespace MassTransit.Distributor
 {
 	using System;
+	using System.Threading;
 	using Magnum;
 
-	public class CommandInstance
+	public class WorkerDetails
 	{
-		public CommandInstance()
+		public Uri ControlUri { get; set; }
+		public Uri DataUri { get; set; }
+
+		public int InProgress;
+		public int InProgressLimit;
+
+		public DateTime LastUpdate { get; set; }
+
+		public void Add()
 		{
-			Id = CombGuid.Generate();
-			CreatedAt = SystemUtil.UtcNow;
+			Interlocked.Increment(ref InProgress);
+
+			LastUpdate = SystemUtil.UtcNow;
 		}
 
-		public Guid Id { get; set; }
+		public void UpdateInProgress(int inProgress, int inProgressLimit, DateTime updated)
+		{
+			lock (this)
+			{
+				if (updated < LastUpdate)
+					return;
 
-		public DateTime ResponseReceivedAt { get; set; }
-
-		public Uri Worker { get; set; }
-
-		public DateTime CreatedAt { get; set; }
-
-		public DateTime ResponseCreatedAt { get; set; }
+				InProgress = inProgress;
+				InProgressLimit = inProgressLimit;
+			}
+		}
 	}
 }

@@ -10,27 +10,9 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Tests.Distributor
+namespace MassTransit.Distributor
 {
-	using System;
-	using Magnum;
-
-	public class CommandInstance
+	public class PrimeWorker
 	{
-		public CommandInstance()
-		{
-			Id = CombGuid.Generate();
-			CreatedAt = SystemUtil.UtcNow;
-		}
-
-		public Guid Id { get; set; }
-
-		public DateTime ResponseReceivedAt { get; set; }
-
-		public Uri Worker { get; set; }
-
-		public DateTime CreatedAt { get; set; }
-
-		public DateTime ResponseCreatedAt { get; set; }
 	}
 }

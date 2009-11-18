@@ -13,13 +13,15 @@
 namespace MassTransit.Tests.Distributor.Messages
 {
 	using System;
+	using Magnum;
 
 	public class FirstCommand :
-		CorrelatedBy<Guid>
+		First
 	{
 		public FirstCommand(Guid correlationId)
 		{
 			CorrelationId = correlationId;
+			CreatedAt = SystemUtil.UtcNow;
 		}
 
 		protected FirstCommand()
@@ -27,5 +29,6 @@ namespace MassTransit.Tests.Distributor.Messages
 		}
 
 		public Guid CorrelationId { get; private set; }
+		public DateTime CreatedAt { get; private set; }
 	}
 }

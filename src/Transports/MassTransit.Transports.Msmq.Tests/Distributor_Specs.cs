@@ -10,22 +10,23 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Tests.Distributor
+namespace MassTransit.Transports.Msmq.Tests
 {
-	using Messages;
+	using MassTransit.Tests.Distributor;
+	using MassTransit.Tests.Distributor.Messages;
 	using NUnit.Framework;
 
 	[TestFixture]
 	public class Default_distributor_specifications :
-		LoopbackDistributorTestFixture
+		MsmqDistributorTestFixture
 	{
 		protected override void EstablishContext()
 		{
 			base.EstablishContext();
 
-			AddInstance("A", "loopback://localhost/a");
-			AddInstance("B", "loopback://localhost/b");
-			AddInstance("C", "loopback://localhost/c");
+			AddInstance("A", "msmq://localhost/worker_a");
+			AddInstance("B", "msmq://localhost/worker_b");
+			AddInstance("C", "msmq://localhost/worker_c");
 		}
 
 		[Test]

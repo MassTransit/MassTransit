@@ -91,6 +91,7 @@
     <Compile Include="Distributor\CommandInstance.cs" />
     <Compile Include="Distributor\Default_Specs.cs" />
     <Compile Include="Distributor\DistributorTestFixture.cs" />
+    <Compile Include="Distributor\First.cs" />
     <Compile Include="Distributor\LoadGenerator.cs" />
     <Compile Include="Distributor\LoopbackDistributorTestFixture.cs" />
     <Compile Include="Distributor\Messages\FirstCommand.cs" />
