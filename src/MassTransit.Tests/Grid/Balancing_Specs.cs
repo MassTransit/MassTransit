@@ -10,152 +10,187 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
+using System.Linq;
+using MassTransit.Grid;
+using MassTransit.Grid.Messages;
+using MassTransit.Grid.Sagas;
+
 namespace MassTransit.Tests.Grid
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Diagnostics;
-	using System.Threading;
-	using Magnum;
-	using Magnum.DateTimeExtensions;
-	using MassTransit.Grid.Configuration;
-	using MassTransit.Transports;
-	using NUnit.Framework;
-	using Rhino.Mocks;
+    using System;
+    using System.Collections.Generic;
+    using System.Diagnostics;
+    using System.Threading;
+    using Magnum;
+    using Magnum.DateTimeExtensions;
+    using MassTransit.Grid.Configuration;
+    using MassTransit.Transports;
+    using NUnit.Framework;
+    using Rhino.Mocks;
 
-	[TestFixture]
-	public class ThreeNodeGridTestFixture :
-		GridTestFixture<LoopbackEndpoint>
-	{
-		protected override void EstablishContext()
-		{
-			base.EstablishContext();
+    [TestFixture]
+    public class ThreeNodeGridTestFixture :
+        GridTestFixture<LoopbackEndpoint>
+    {
+        protected override void EstablishContext()
+        {
+            base.EstablishContext();
 
-			GridNodes.Each(x => x.ObjectBuilder.Stub(b => b.GetInstance<SimpleGridService>()).Return(new SimpleGridService()));
+            GridNodes.Each(x => x.ObjectBuilder.Stub(b => b.GetInstance<SimpleGridService>()).Return(new SimpleGridService()));
 
-			WaitForServiceToBeAvailable<SimpleGridCommand>(5.Seconds(), 1);
-		}
+            WaitForServiceToBeAvailable<SimpleGridCommand>(5.Seconds(), 1);
+        }
 
-		protected override void ConfigureGridA(IGridConfigurator grid)
-		{
-			grid.For<SimpleGridCommand>()
-				.Use<SimpleGridService>();
-		}
+        protected override void ConfigureGridA(IGridConfigurator grid)
+        {
+            grid.For<SimpleGridCommand>()
+                .Use<SimpleGridService>();
+        }
 
-		protected override void ConfigureGridB(IGridConfigurator grid)
-		{
-			grid.For<SimpleGridCommand>()
-				.Use<SimpleGridService>();
+        protected override void ConfigureGridB(IGridConfigurator grid)
+        {
+            grid.For<SimpleGridCommand>()
+                .Use<SimpleGridService>();
 
-			grid.SetProposer();
-		}
+            grid.SetProposer();
+        }
 
-		protected override void ConfigureGridC(IGridConfigurator grid)
-		{
-			grid.For<SimpleGridCommand>()
-				.Use<SimpleGridService>();
-		}
-	}
+        protected override void ConfigureGridC(IGridConfigurator grid)
+        {
+            grid.For<SimpleGridCommand>()
+                .Use<SimpleGridService>();
+        }
+    }
 
-	[TestFixture]
-	public class When_multiple_nodes_support_the_same_services :
-		ThreeNodeGridTestFixture
-	{
-		[Test, Explicit]
-		public void The_first_available_node_should_be_voted_on_by_the_participating_nodes()
-		{
-			Guid transactionId = CombGuid.Generate();
+    [TestFixture]
+    public class When_multiple_nodes_support_the_same_services :
+        ThreeNodeGridTestFixture
+    {
+        [Test, Explicit]
+        public void The_first_available_node_should_be_voted_on_by_the_participating_nodes()
+        {
+            Guid transactionId = CombGuid.Generate();
 
-			var received = new AutoResetEvent(false);
-			int responseCount = 0;
-			var unsubscribeAction = LocalBus.Subscribe<SimpleGridResult>(message =>
-				{
-					Interlocked.Increment(ref responseCount);
-					received.Set();
-				});
-			using (unsubscribeAction.Disposable())
-			{
-				Thread.Sleep(250);
+            var received = new AutoResetEvent(false);
+            int responseCount = 0;
+            var unsubscribeAction = LocalBus.Subscribe<SimpleGridResult>(message =>
+                {
+                    Interlocked.Increment(ref responseCount);
+                    received.Set();
+                });
+            using (unsubscribeAction.Disposable())
+            {
+                Thread.Sleep(250);
 
-				LocalBus.Publish(new SimpleGridCommand(transactionId), context => context.SendResponseTo(LocalBus.Endpoint));
+                LocalBus.Publish(new SimpleGridCommand(transactionId), context => context.SendResponseTo(LocalBus.Endpoint));
 
-				while (received.WaitOne(5.Seconds(), true))
-				{
-					Trace.WriteLine("Got Something");
-				}
-			}
+                while (received.WaitOne(5.Seconds(), true))
+                {
+                    Trace.WriteLine("Got Something");
+                }
+            }
 
-			Assert.AreEqual(1, responseCount);
-		}
-	}
+            Assert.AreEqual(1, responseCount);
+        }
 
-	[TestFixture]
-	public class When_throwing_a_bunch_of_commands_at_the_grid :
-		ThreeNodeGridTestFixture
-	{
-		private readonly List<Guid> _responseList = new List<Guid>();
-		private readonly List<string> _sourceList = new List<string>();
-		private readonly Dictionary<Guid, int> _responses = new Dictionary<Guid,int>();
-		private readonly Dictionary<string, int> _sources = new Dictionary<string, int>();
+        [Test, Explicit]
+        public void A_grid_node_can_remove_itself_from_the_grid()
+        {
+            Thread.Sleep(250);
 
-		[Test, Explicit]
-		public void Each_command_should_only_be_processed_one_time()
-		{
-			var received = new AutoResetEvent(false);
-			var unsubscribeAction = LocalBus.Subscribe<SimpleGridResult>(message =>
-				{
-					lock(_responseList)
-						_responseList.Add(message.CorrelationId);
+            var nodeRepo = GridNodes[0].GridNodeRepository;
 
-					lock(_sourceList)
-						_sourceList.Add(CurrentMessage.Headers.SourceAddress.ToString());
+            var message = new RemoveServiceNode()
+            {
+                ControlUri = GridNodes[0].ControlBus.Endpoint.Uri,
+                DataUri = GridNodes[0].DataBus.Endpoint.Uri,
+                ServiceId = typeof(SimpleGridCommand).ToServiceTypeId(),
+                ServiceName = typeof(SimpleGridCommand).ToFriendlyName()
+            };
 
-					received.Set();
-				});
+            nodeRepo.Where(node => node.ControlUri != GridNodes[0].ControlBus.Endpoint.Uri)
+                .ToList()
+                .ForEach(node =>
+                {
+                    EndpointFactory.GetEndpoint(node.ControlUri).Send(message);
+                });
 
-			using (unsubscribeAction.Disposable())
-			{
-				Thread.Sleep(250);
+            Thread.Sleep(1000);
 
-				for (int i = 0; i < 100; i++)
-				{
-					LocalBus.Publish(new SimpleGridCommand(CombGuid.Generate()), context => context.SendResponseTo(LocalBus.Endpoint));
-				}
+            Assert.AreEqual(ServiceNode.Completed, 
+                GridNodes[1].GridNodeRepository.Where(node => node.ControlUri == GridNodes[0].ControlBus.Endpoint.Uri).First().CurrentState);
+            Assert.AreEqual(ServiceNode.Completed, 
+                GridNodes[2].GridNodeRepository.Where(node => node.ControlUri == GridNodes[0].ControlBus.Endpoint.Uri).First().CurrentState);
+        }
+    }
 
-				while (received.WaitOne(5.Seconds(), true))
-				{
-					Trace.Write(".");
-				}
-				Trace.WriteLine("");
-			}
+    [TestFixture]
+    public class When_throwing_a_bunch_of_commands_at_the_grid :
+        ThreeNodeGridTestFixture
+    {
+        private readonly List<Guid> _responseList = new List<Guid>();
+        private readonly List<string> _sourceList = new List<string>();
+        private readonly Dictionary<Guid, int> _responses = new Dictionary<Guid, int>();
+        private readonly Dictionary<string, int> _sources = new Dictionary<string, int>();
 
-			TabulateResults();
+        [Test, Explicit]
+        public void Each_command_should_only_be_processed_one_time()
+        {
+            var received = new AutoResetEvent(false);
+            var unsubscribeAction = LocalBus.Subscribe<SimpleGridResult>(message =>
+                {
+                    lock (_responseList)
+                        _responseList.Add(message.CorrelationId);
 
-			Assert.AreEqual(100, _responses.Count);
+                    lock (_sourceList)
+                        _sourceList.Add(CurrentMessage.Headers.SourceAddress.ToString());
 
-			_responses.Values.Each(x => Assert.AreEqual(1, x, "Too many results received"));
+                    received.Set();
+                });
 
-			_sources.Each(x => Trace.WriteLine(x.Key + ": " + x.Value + " results"));
-		}
+            using (unsubscribeAction.Disposable())
+            {
+                Thread.Sleep(250);
 
-		private void TabulateResults()
-		{
-			_responseList.Each(x =>
-				{
-					if (_responses.ContainsKey(x))
-						_responses[x] = _responses[x] + 1;
-					else
-						_responses.Add(x, 1);
-				});
+                for (int i = 0; i < 100; i++)
+                {
+                    LocalBus.Publish(new SimpleGridCommand(CombGuid.Generate()), context => context.SendResponseTo(LocalBus.Endpoint));
+                }
 
-			_sourceList.Each(x =>
-				{
-					if (_sources.ContainsKey(x))
-						_sources[x] = _sources[x] + 1;
-					else
-						_sources.Add(x, 1);
-					
-				});
-		}
-	}
+                while (received.WaitOne(5.Seconds(), true))
+                {
+                    Trace.Write(".");
+                }
+                Trace.WriteLine("");
+            }
+
+            TabulateResults();
+
+            Assert.AreEqual(100, _responses.Count);
+
+            _responses.Values.Each(x => Assert.AreEqual(1, x, "Too many results received"));
+
+            _sources.Each(x => Trace.WriteLine(x.Key + ": " + x.Value + " results"));
+        }
+
+        private void TabulateResults()
+        {
+            _responseList.Each(x =>
+                {
+                    if (_responses.ContainsKey(x))
+                        _responses[x] = _responses[x] + 1;
+                    else
+                        _responses.Add(x, 1);
+                });
+
+            _sourceList.Each(x =>
+                {
+                    if (_sources.ContainsKey(x))
+                        _sources[x] = _sources[x] + 1;
+                    else
+                        _sources.Add(x, 1);
+
+                });
+        }
+    }
 }
