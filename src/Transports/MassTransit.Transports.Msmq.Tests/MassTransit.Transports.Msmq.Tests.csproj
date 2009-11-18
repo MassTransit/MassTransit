@@ -106,12 +106,14 @@
     <Compile Include="As_a_transactional_endpoint.cs" />
     <Compile Include="ConcurrentSaga_Specs.cs" />
     <Compile Include="ContextSetup.cs" />
+    <Compile Include="Distributor_Specs.cs" />
     <Compile Include="GridOnMsmq_Specs.cs" />
     <Compile Include="MessageQueue_Extensions.cs" />
     <Compile Include="Messages\VariableMessage.cs" />
     <Compile Include="Messages\DeleteMessage.cs" />
     <Compile Include="Messages\UpdateAcceptedMessage.cs" />
     <Compile Include="Messages\UpdateMessage.cs" />
+    <Compile Include="MsmqDistributorTestFixture.cs" />
     <Compile Include="TestFixtures\MsmqConcurrencyTestFixture.cs" />
     <Compile Include="TestFixtures\MsmqEndpointOnlyTestFixture.cs" />
     <Compile Include="NonTransactional_Specs.cs" />

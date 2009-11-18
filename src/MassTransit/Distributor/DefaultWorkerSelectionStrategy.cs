@@ -10,27 +10,19 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Tests.Distributor
+namespace MassTransit.Distributor
 {
-	using System;
-	using Magnum;
+	using System.Collections.Generic;
+	using System.Linq;
 
-	public class CommandInstance
+	public class DefaultWorkerSelectionStrategy :
+		IWorkerSelectionStrategy
 	{
-		public CommandInstance()
+		public IEnumerable<WorkerDetails> GetAvailableWorkers(IEnumerable<WorkerDetails> candidates)
 		{
-			Id = CombGuid.Generate();
-			CreatedAt = SystemUtil.UtcNow;
+			return candidates
+				.Where(x => x.InProgress < x.InProgressLimit * 4)
+				.OrderBy(x => x.InProgress);
 		}
-
-		public Guid Id { get; set; }
-
-		public DateTime ResponseReceivedAt { get; set; }
-
-		public Uri Worker { get; set; }
-
-		public DateTime CreatedAt { get; set; }
-
-		public DateTime ResponseCreatedAt { get; set; }
 	}
 }

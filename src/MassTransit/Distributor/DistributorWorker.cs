@@ -15,10 +15,13 @@ namespace MassTransit.Distributor
 	using System;
 	using System.Threading;
 	using Internal;
+	using Magnum.Actors;
+	using Magnum.Actors.CommandQueues;
 	using Messages;
 
 	public class DistributorWorker<T> :
 		IDistributorWorker<T>,
+		Consumes<PrimeWorker>.All,
 		Consumes<Distributed<T>>.Selected
 		where T : class, CorrelatedBy<Guid>
 	{
@@ -30,6 +33,9 @@ namespace MassTransit.Distributor
 		private int _inProgressLimit = 4;
 		private int _pendingLimit = 16;
 		private UnsubscribeAction _unsubscribeAction = () => false;
+		private Uri _dataUri;
+		private Uri _controlUri;
+		private CommandQueue _queue = new ThreadPoolCommandQueue();
 
 		public DistributorWorker(Func<T, Action<T>> getConsumer)
 			: this(getConsumer, new DistributedConsumerSettings())
@@ -61,6 +67,12 @@ namespace MassTransit.Distributor
 			{
 				Interlocked.Decrement(ref _inProgress);
 
+				if (_inProgress == 0)
+				{
+					_queue.Enqueue(PublishWorkerAvailability);
+					_bus.Endpoint.Send(new PrimeWorker());
+				}
+
 				var disposal = consumer as IDisposable;
 				if (disposal != null)
 				{
@@ -88,6 +100,9 @@ namespace MassTransit.Distributor
 			_bus = bus;
 			_controlBus = bus.ControlBus;
 
+			_dataUri = _bus.Endpoint.Uri;
+			_controlUri = _controlBus.Endpoint.Uri;
+
 			_unsubscribeAction = bus.ControlBus.Subscribe<ConfigureDistributedConsumer<T>>(Consume);
 			_unsubscribeAction += bus.Subscribe(this);
 
@@ -112,12 +127,16 @@ namespace MassTransit.Distributor
 
 		private void PublishWorkerAvailability()
 		{
-			_bus.Publish(new WorkerAvailable<T>(_inProgress, _inProgressLimit, _pending, _pendingLimit));
+			_bus.Publish(new WorkerAvailable<T>(_controlUri, _dataUri, _inProgress, _inProgressLimit, _pending, _pendingLimit));
 		}
 
 		private static void RewriteResponseAddress(Uri responseAddress)
 		{
 			InboundMessageHeaders.SetCurrent(x => x.SetResponseAddress(responseAddress));
+		}
+
+		public void Consume(PrimeWorker message)
+		{
 		}
 	}
 }

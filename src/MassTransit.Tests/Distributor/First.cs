@@ -13,24 +13,10 @@
 namespace MassTransit.Tests.Distributor
 {
 	using System;
-	using Magnum;
 
-	public class CommandInstance
+	public interface First :
+		CorrelatedBy<Guid>
 	{
-		public CommandInstance()
-		{
-			Id = CombGuid.Generate();
-			CreatedAt = SystemUtil.UtcNow;
-		}
-
-		public Guid Id { get; set; }
-
-		public DateTime ResponseReceivedAt { get; set; }
-
-		public Uri Worker { get; set; }
-
-		public DateTime CreatedAt { get; set; }
-
-		public DateTime ResponseCreatedAt { get; set; }
+		DateTime CreatedAt { get; }
 	}
 }

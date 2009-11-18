@@ -12,6 +12,9 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Distributor.Messages
 {
+	using System;
+	using Magnum;
+
 	/// <summary>
 	/// Published by workers that can process a message of type T
 	/// </summary>
@@ -19,17 +22,24 @@ namespace MassTransit.Distributor.Messages
 	public class WorkerAvailable<T> :
 		Workload<T>
 	{
-		public WorkerAvailable(int inProgress, int inProgressLimit, int pending, int pendingLimit)
+		public WorkerAvailable(Uri controlUri, Uri dataUri, int inProgress, int inProgressLimit, int pending, int pendingLimit)
 		{
+			ControlUri = controlUri;
+			DataUri = dataUri;
 			InProgress = inProgress;
 			InProgressLimit = inProgressLimit;
 			Pending = pending;
 			PendingLimit = pendingLimit;
+			Updated = SystemUtil.UtcNow;
 		}
 
 		protected WorkerAvailable()
 		{
 		}
+
+		public Uri ControlUri { get; set; }
+
+		public Uri DataUri { get; set; } 
 
 		public int Pending { get; set; }
 
@@ -38,5 +48,7 @@ namespace MassTransit.Distributor.Messages
 		public int InProgress { get; set; }
 
 		public int InProgressLimit { get; set; }
+
+		public DateTime Updated { get; set; }
 	}
 }

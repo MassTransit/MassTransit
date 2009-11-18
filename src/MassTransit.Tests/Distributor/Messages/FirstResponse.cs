@@ -13,18 +13,23 @@
 namespace MassTransit.Tests.Distributor.Messages
 {
 	using System;
+	using Magnum;
 
 	public class FirstResponse :
-		CorrelatedBy<Guid>
+		First
 	{
 		public FirstResponse(Guid correlationId)
 		{
 			CorrelationId = correlationId;
+
+			CreatedAt = SystemUtil.UtcNow;
 		}
 
 		protected FirstResponse()
 		{
 		}
+
+		public DateTime CreatedAt { get; private set; }
 
 		public Guid CorrelationId { get; private set; }
 	}

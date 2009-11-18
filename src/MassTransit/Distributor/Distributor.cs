@@ -13,8 +13,9 @@
 namespace MassTransit.Distributor
 {
 	using System;
-	using System.Collections.Generic;
 	using System.Linq;
+	using Magnum;
+	using Magnum.Threading;
 	using Messages;
 
 	public class Distributor<T> :
@@ -23,17 +24,28 @@ namespace MassTransit.Distributor
 		where T : class, CorrelatedBy<Guid>
 	{
 		private readonly IEndpointFactory _endpointFactory;
-		private readonly IList<Uri> _workers = new List<Uri>();
+		private readonly ReaderWriterLockedDictionary<Uri, WorkerDetails> _workers = new ReaderWriterLockedDictionary<Uri, WorkerDetails>();
+		private IWorkerSelectionStrategy _selectionStrategy;
 		private UnsubscribeAction _unsubscribeAction = () => false;
 
 		public Distributor(IEndpointFactory endpointFactory)
 		{
 			_endpointFactory = endpointFactory;
+			_selectionStrategy = new DefaultWorkerSelectionStrategy();
 		}
 
 		public void Consume(T message)
 		{
-			IEndpoint endpoint = _endpointFactory.GetEndpoint(_workers.First());
+			WorkerDetails worker = _selectionStrategy.GetAvailableWorkers(_workers.Values).FirstOrDefault();
+			if (worker == null)
+			{
+				CurrentMessage.RetryLater();
+				return;
+			}
+
+			worker.Add();
+
+			IEndpoint endpoint = _endpointFactory.GetEndpoint(worker.DataUri);
 
 			var distributed = new Distributed<T>(message, CurrentMessage.Headers.ResponseAddress);
 
@@ -42,15 +54,7 @@ namespace MassTransit.Distributor
 
 		public bool Accept(T message)
 		{
-			return _workers.Count > 0;
-		}
-
-		public void Consume(WorkerAvailable<T> message)
-		{
-			if (_workers.Contains(CurrentMessage.Headers.SourceAddress))
-				return;
-
-			_workers.Add(CurrentMessage.Headers.SourceAddress);
+			return _selectionStrategy.GetAvailableWorkers(_workers.Values).Count() > 0;
 		}
 
 		public void Dispose()
@@ -59,7 +63,7 @@ namespace MassTransit.Distributor
 
 		public void Start(IServiceBus bus)
 		{
-			_unsubscribeAction = bus.ControlBus.Subscribe<WorkerAvailable<T>>(Consume);
+			_unsubscribeAction = bus.Subscribe<WorkerAvailable<T>>(Consume);
 
 			// don't plan to unsubscribe this since it's an important thing
 			bus.Subscribe(this);
@@ -70,6 +74,23 @@ namespace MassTransit.Distributor
 			_workers.Clear();
 
 			_unsubscribeAction();
+		}
+
+		public void Consume(WorkerAvailable<T> message)
+		{
+			WorkerDetails worker = _workers.Retrieve(message.ControlUri, () =>
+				{
+					return new WorkerDetails
+						{
+							ControlUri = message.ControlUri,
+							DataUri = message.DataUri,
+							InProgress = message.InProgress,
+							InProgressLimit = message.InProgressLimit,
+							LastUpdate = SystemUtil.UtcNow,
+						};
+				});
+
+			worker.UpdateInProgress(message.InProgress, message.InProgressLimit, message.Updated);
 		}
 	}
 }

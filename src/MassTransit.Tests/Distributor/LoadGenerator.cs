@@ -22,8 +22,8 @@ namespace MassTransit.Tests.Distributor
 
 	public class LoadGenerator<TRequest, TResponse> :
 		Consumes<TResponse>.All
-		where TRequest : class, CorrelatedBy<Guid>
-		where TResponse : class, CorrelatedBy<Guid>
+		where TRequest : class, First
+		where TResponse : class, First
 
 	{
 		private readonly Dictionary<Guid, CommandInstance> _commands = new Dictionary<Guid, CommandInstance>();
@@ -41,6 +41,7 @@ namespace MassTransit.Tests.Distributor
 					return;
 				}
 
+			instance.ResponseCreatedAt = message.CreatedAt;
 			instance.ResponseReceivedAt = SystemUtil.UtcNow;
 			instance.Worker = CurrentMessage.Headers.SourceAddress;
 			Interlocked.Increment(ref _responseCount);
@@ -61,6 +62,8 @@ namespace MassTransit.Tests.Distributor
 						_commands.Add(commandInstance.Id, commandInstance);
 
 					var command = new FirstCommand(commandInstance.Id);
+
+					ThreadUtil.Sleep(5.Milliseconds());
 
 					bus.Publish(command, x =>
 						{
@@ -92,6 +95,7 @@ namespace MassTransit.Tests.Distributor
 			int received = 0;
 
 			TimeSpan totalDuration = TimeSpan.Zero;
+			TimeSpan receiveDuration = TimeSpan.Zero;
 
 			_commands.Values.Each(command =>
 				{
@@ -101,6 +105,7 @@ namespace MassTransit.Tests.Distributor
 					{
 						received++;
 						totalDuration += (command.ResponseReceivedAt - command.CreatedAt);
+						receiveDuration += (command.ResponseCreatedAt - command.CreatedAt);
 
 						if (sources.ContainsKey(command.Worker))
 							sources[command.Worker] = sources[command.Worker] + 1;
@@ -114,6 +119,10 @@ namespace MassTransit.Tests.Distributor
 			Trace.WriteLine("Total Elapsed Time = " + totalDuration.TotalSeconds + "s");
 			if(received > 0)
 				Trace.WriteLine("Mean Roundtrip Time = " + (totalDuration.TotalMilliseconds/received).ToString("F0") + "ms");
+
+			Trace.WriteLine("Receive Latency = " + receiveDuration.TotalSeconds + "s");
+			if(received > 0)
+				Trace.WriteLine("Mean Receive Latency = " + (receiveDuration.TotalMilliseconds / received).ToString("F0") + "ms");
 
 			Trace.WriteLine("Workers Utilized");
 
