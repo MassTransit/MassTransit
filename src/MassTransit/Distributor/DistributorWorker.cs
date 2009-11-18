@@ -79,7 +79,6 @@ namespace MassTransit.Distributor
 
 		public void Dispose()
 		{
-			_bus = null;
 			_controlBus = null;
 			_getConsumer = null;
 		}
@@ -100,7 +99,7 @@ namespace MassTransit.Distributor
 			_unsubscribeAction();
 		}
 
-		public void Consume(ConfigureDistributedConsumer<T> message)
+		private void Consume(ConfigureDistributedConsumer<T> message)
 		{
 			if (message.InProgressLimit >= 0)
 				_inProgressLimit = message.InProgressLimit;
