@@ -12,334 +12,357 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Grid
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Linq;
-	using System.Threading;
-	using log4net;
-	using Magnum.DateTimeExtensions;
-	using Messages;
-	using Saga;
-	using Sagas;
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Threading;
+    using log4net;
+    using Magnum.DateTimeExtensions;
+    using Messages;
+    using Saga;
+    using Sagas;
 
-	public class ServiceGrid :
-		IGridControl,
-		Consumes<NotifyNewNodeAvailable>.All,
-		Consumes<ServiceTypeAdded>.All,
-		Consumes<NullMessage>.All
-	{
-		private static readonly ILog _log = LogManager.GetLogger(typeof (ServiceGrid));
-		private readonly ISagaRepository<ServiceMessage> _messageNodeRepository;
-		private IServiceBus _bus;
-		private IServiceBus _controlBus;
-		private DateTime _created;
-		private volatile bool _disposed;
-		private IEndpointFactory _endpointFactory;
-		private ISagaRepository<Node> _nodeRepository;
-		private ISagaRepository<ServiceNode> _serviceNodeRepository;
-		private UnsubscribeAction _unsubscribeAction;
+    public class ServiceGrid :
+        IGridControl,
+        Consumes<NotifyNewNodeAvailable>.All,
+        Consumes<ServiceTypeAdded>.All,
+        Consumes<NullMessage>.All
+    {
+        private static readonly ILog _log = LogManager.GetLogger(typeof(ServiceGrid));
+        private readonly ISagaRepository<ServiceMessage> _messageNodeRepository;
+        private IServiceBus _bus;
+        private IServiceBus _controlBus;
+        private DateTime _created;
+        private volatile bool _disposed;
+        private IEndpointFactory _endpointFactory;
+        private ISagaRepository<Node> _nodeRepository;
+        private ISagaRepository<ServiceNode> _serviceNodeRepository;
+        private UnsubscribeAction _unsubscribeAction;
 
-		public ServiceGrid(IEndpointFactory endpointFactory, ISagaRepository<Node> nodeRepository, ISagaRepository<ServiceNode> serviceNodeRepository, ISagaRepository<ServiceMessage> messageNodeRepository)
-		{
-			_endpointFactory = endpointFactory;
-			_nodeRepository = nodeRepository;
-			_serviceNodeRepository = serviceNodeRepository;
-			_messageNodeRepository = messageNodeRepository;
-		}
+        public ServiceGrid(IEndpointFactory endpointFactory, ISagaRepository<Node> nodeRepository, ISagaRepository<ServiceNode> serviceNodeRepository, ISagaRepository<ServiceMessage> messageNodeRepository)
+        {
+            _endpointFactory = endpointFactory;
+            _nodeRepository = nodeRepository;
+            _serviceNodeRepository = serviceNodeRepository;
+            _messageNodeRepository = messageNodeRepository;
+        }
 
-		public Action WhenStarted { get; set; }
-		public Uri ProposerUri { get; set; }
+        public Action WhenStarted { get; set; }
+        public Uri ProposerUri { get; set; }
 
-		public void Consume(ServiceTypeAdded message)
-		{
-			_log.Info("New Grid Service Detected: " + message.ServiceName);
-		}
+        public void Consume(ServiceTypeAdded message)
+        {
+            _log.Info("New Grid Service Detected: " + message.ServiceName);
+        }
 
-		public void Consume(NotifyNewNodeAvailable message)
-		{
-			if (message.ControlUri != _controlBus.Endpoint.Uri)
-			{
-				SendNodeOurServices(message);
-			}
-		}
+        public void Consume(NotifyNewNodeAvailable message)
+        {
+            if (message.ControlUri != _controlBus.Endpoint.Uri)
+            {
+                SendNodeOurServices(message);
+            }
+        }
 
-		public void Consume(NullMessage message)
-		{
-		}
+        public void Consume(NullMessage message)
+        {
+        }
 
-		public Uri ControlUri { get; private set; }
+        public Uri ControlUri { get; private set; }
 
-		public Uri DataUri { get; private set; }
+        public Uri DataUri { get; private set; }
 
-		public bool IsHealthy
-		{
-			get { throw new NotImplementedException(); }
-		}
+        public bool IsHealthy
+        {
+            get { throw new NotImplementedException(); }
+        }
 
-		public void Start(IServiceBus bus)
-		{
-			_bus = bus;
-			_controlBus = bus.ControlBus;
+        public void Start(IServiceBus bus)
+        {
+            _bus = bus;
+            _controlBus = bus.ControlBus;
 
-			ControlUri = _controlBus.Endpoint.Uri;
-			DataUri = _bus.Endpoint.Uri;
+            ControlUri = _controlBus.Endpoint.Uri;
+            DataUri = _bus.Endpoint.Uri;
 
-			_created = DateTime.UtcNow;
+            _created = DateTime.UtcNow;
 
-			_unsubscribeAction = _controlBus.Subscribe(this);
+            _unsubscribeAction = _controlBus.Subscribe(this);
 
-			SubscribeGridSagas();
+            SubscribeGridSagas();
 
-			NotifyAvailable();
+            NotifyAvailable();
 
-			WhenStarted();
-		}
+            WhenStarted();
+        }
 
-		public void RegisterServiceInterceptor<TService>(GridServiceInterceptor<TService> interceptor)
-			where TService : class
-		{
-			_unsubscribeAction += _bus.Subscribe(interceptor);
+        public void RegisterServiceInterceptor<TService>(GridServiceInterceptor<TService> interceptor)
+            where TService : class
+        {
+            _unsubscribeAction += _bus.Subscribe(interceptor);
 
-			Guid serviceId = typeof (TService).ToServiceTypeId();
+            Guid serviceId = typeof(TService).ToServiceTypeId();
 
-			var future = new SelectedFutureMessage<ServiceNodeAdded>(x => x.ServiceId == serviceId &&
-			                                                                    x.ControlUri == _controlBus.Endpoint.Uri);
+            var future = new SelectedFutureMessage<ServiceNodeAdded>(x => x.ServiceId == serviceId &&
+                                                                                x.ControlUri == _controlBus.Endpoint.Uri);
 
-			UnsubscribeAction unsubscribeFuture = _bus.ControlBus.Subscribe(future);
-			try
-			{
-				var message = new AddServiceNode
-					{
-						ControlUri = _controlBus.Endpoint.Uri,
-						DataUri = _bus.Endpoint.Uri,
-						ServiceId = serviceId,
-						ServiceName = typeof (TService).ToMessageName(),
-					};
+            UnsubscribeAction unsubscribeFuture = _bus.ControlBus.Subscribe(future);
+            try
+            {
+                var message = new AddServiceNode
+                    {
+                        ControlUri = _controlBus.Endpoint.Uri,
+                        DataUri = _bus.Endpoint.Uri,
+                        ServiceId = serviceId,
+                        ServiceName = typeof(TService).ToMessageName(),
+                    };
 
-				_nodeRepository
-					.Where(x => x.CurrentState == Node.Available)
-					.Select(x => _endpointFactory.GetEndpoint(x.ControlUri))
-					.ToList()
-					.Each(x => x.Send(message));
+                _nodeRepository
+                    .Where(x => x.CurrentState == Node.Available)
+                    .Select(x => _endpointFactory.GetEndpoint(x.ControlUri))
+                    .ToList()
+                    .Each(x => x.Send(message));
 
-				if (!future.WaitUntilAvailable(10.Seconds()))
-					_log.WarnFormat("Timeout waiting for interceptor to register: " + typeof (TService).Name);
-			}
-			finally
-			{
-				unsubscribeFuture();
-			}
-		}
+                if (!future.WaitUntilAvailable(10.Seconds()))
+                    _log.WarnFormat("Timeout waiting for interceptor to register: " + typeof(TService).Name);
+            }
+            finally
+            {
+                unsubscribeFuture();
+            }
+        }
 
-		public RemoveActiveInterceptor AddActiveInterceptor(Guid serviceId, Guid correlationId, IGridServiceInteceptor interceptor)
-		{
-			return () => { };
-		}
+        public RemoveActiveInterceptor AddActiveInterceptor(Guid serviceId, Guid correlationId, IGridServiceInteceptor interceptor)
+        {
+            return () => { };
+        }
 
-		public bool AcceptMessage(Guid serviceId, Guid correlationId)
-		{
-			ServiceMessage node = _messageNodeRepository
-				.Where(x => x.CorrelationId == correlationId)
-				.SingleOrDefault();
+        public bool AcceptMessage(Guid serviceId, Guid correlationId)
+        {
+            ServiceMessage node = _messageNodeRepository
+                .Where(x => x.CorrelationId == correlationId)
+                .SingleOrDefault();
 
-			if (node == null)
-			{
-				if (ProposerUri != null && ControlUri == ProposerUri)
-				{
-					ProposeMessageNodeToQuorum(serviceId, correlationId);
-				}
+            if (node == null)
+            {
+                if (ProposerUri != null && ControlUri == ProposerUri)
+                {
+                    ProposeMessageNodeToQuorum(serviceId, correlationId);
+                }
 
-				return false;
-			}
+                return false;
+            }
 
-			bool accept = (node.CurrentState == ServiceMessage.WaitingForReceive ||
-			               (node.CurrentState == ServiceMessage.WaitingForCompletion &&
-			                node.DataUri == DataUri &&
-			                node.ControlUri == ControlUri
-			               ));
+            bool accept = (node.CurrentState == ServiceMessage.WaitingForReceive ||
+                           (node.CurrentState == ServiceMessage.WaitingForCompletion &&
+                            node.DataUri == DataUri &&
+                            node.ControlUri == ControlUri
+                           ));
 
-			return accept;
-		}
+            return accept;
+        }
 
-		public bool ConsumeMessage(Guid serviceId, Guid correlationId)
-		{
-			return _messageNodeRepository
-			       	.Where(x => x.CorrelationId == correlationId &&
-			       	            x.CurrentState == ServiceMessage.WaitingForCompletion &&
-			       	            x.DataUri == DataUri &&
-			       	            x.ControlUri == ControlUri
-			       	).Count() > 0;
-		}
+        public bool ConsumeMessage(Guid serviceId, Guid correlationId)
+        {
+            return _messageNodeRepository
+                    .Where(x => x.CorrelationId == correlationId &&
+                                x.CurrentState == ServiceMessage.WaitingForCompletion &&
+                                x.DataUri == DataUri &&
+                                x.ControlUri == ControlUri
+                    ).Count() > 0;
+        }
 
-		public void NotifyMessageComplete(Guid correlationId)
-		{
-			_controlBus.Publish(new ServiceMessageCompleted
-				{
-					CorrelationId = correlationId,
-				});
+        public void NotifyMessageComplete(Guid correlationId)
+        {
+            _controlBus.Publish(new ServiceMessageCompleted
+                {
+                    CorrelationId = correlationId,
+                });
 
-			_controlBus.Endpoint.Send(new ServiceMessageReceived {CorrelationId = correlationId});
-		}
+            _controlBus.Endpoint.Send(new ServiceMessageReceived { CorrelationId = correlationId });
+        }
 
-		public void Stop()
-		{
-			_unsubscribeAction();
-			_unsubscribeAction = () => true;
-		}
+        public void Stop()
+        {
+            _serviceNodeRepository
+                .Where(x => x.ControlUri == ControlUri)
+                .ToList()
+                .ForEach(x =>
+                {
+                    _serviceNodeRepository
+                        .Where(y => y.ServiceId == x.ServiceId && y.ControlUri != x.ControlUri)
+                        .Select(y => y.ControlUri)
+                        .Distinct()
+                        .Select(y => _endpointFactory.GetEndpoint(y))
+                        .ToList()
+                        .ForEach(z =>
+                        {
+                            z.Send(new RemoveServiceNode()
+                            {
+                                ControlUri = x.ControlUri,
+                                DataUri = x.DataUri,
+                                ServiceId = x.ServiceId,
+                                ServiceName = x.ServiceName
+                            });
+                        });
+                });
 
-		public void Dispose()
-		{
-			Dispose(true);
-			GC.SuppressFinalize(this);
-		}
+            _unsubscribeAction();
+            _unsubscribeAction = () => true;
+        }
 
-		public void ProposeMessageNodeToQuorum(Guid serviceId, Guid correlationId)
-		{
-			List<ServiceNode> nodes = _serviceNodeRepository
-				.Where(x => x.ServiceId == serviceId)
-				.ToList();
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
 
-			ServiceNode selectedNode = nodes.SelectNodeToUse();
+        public void ProposeMessageNodeToQuorum(Guid serviceId, Guid correlationId)
+        {
+            List<ServiceNode> nodes = _serviceNodeRepository
+                .Where(x => x.ServiceId == serviceId)
+                .ToList();
 
-			if (_log.IsDebugEnabled)
-				_log.DebugFormat("{0} sending proposal message for {1} recommending {2}", ControlUri, correlationId, selectedNode.ControlUri);
+            ServiceNode selectedNode = nodes.SelectNodeToUse();
 
-			List<Uri> quorum = nodes.Select(x => x.ControlUri).ToList();
-			if(quorum.Count == 1)
-			{
-				SendMessageToNodes<ServiceMessageAgreed>(nodes, correlationId, 1, selectedNode.ControlUri, selectedNode.DataUri, quorum);
-			}
-			else
-			{
-				SendMessageToNodes<ProposeServiceMessage>(nodes, correlationId, 1, selectedNode.ControlUri, selectedNode.DataUri, quorum);
-			}
+            if (_log.IsDebugEnabled)
+                _log.DebugFormat("{0} sending proposal message for {1} recommending {2}", ControlUri, correlationId, selectedNode.ControlUri);
 
-			if (quorum.Contains(ControlUri))
-			{
-				WaitUntilMessageNodeIsAvailable(correlationId);
-			}
-		}
+            List<Uri> quorum = nodes.Select(x => x.ControlUri).ToList();
+            if (quorum.Count == 1)
+            {
+                SendMessageToNodes<ServiceMessageAgreed>(nodes, correlationId, 1, selectedNode.ControlUri, selectedNode.DataUri, quorum);
+            }
+            else
+            {
+                SendMessageToNodes<ProposeServiceMessage>(nodes, correlationId, 1, selectedNode.ControlUri, selectedNode.DataUri, quorum);
+            }
 
-		private void SendMessageToNodes<T>(IEnumerable<ServiceNode> nodes, Guid correlationId, long ballotId, Uri controlUri, Uri dataUri, IList<Uri> quorum)
-			where T : AbstractServiceMessageMessage, new()
-		{
-			var message = new T
-			{
-				BallotId = ballotId,
-				ControlUri = controlUri,
-				DataUri = dataUri,
-				CorrelationId = correlationId,
-				Quorum = quorum,
-			};
+            if (quorum.Contains(ControlUri))
+            {
+                WaitUntilMessageNodeIsAvailable(correlationId);
+            }
+        }
 
-			nodes.Each(node => { _endpointFactory.GetEndpoint(node.ControlUri).Send(message, context => context.SetSourceAddress(ControlUri)); });
-		}
+        private void SendMessageToNodes<T>(IEnumerable<ServiceNode> nodes, Guid correlationId, long ballotId, Uri controlUri, Uri dataUri, IList<Uri> quorum)
+            where T : AbstractServiceMessageMessage, new()
+        {
+            var message = new T
+            {
+                BallotId = ballotId,
+                ControlUri = controlUri,
+                DataUri = dataUri,
+                CorrelationId = correlationId,
+                Quorum = quorum,
+            };
 
-		public ServiceMessage GetMessageNode(Guid correlationId)
-		{
-			return _messageNodeRepository.Where(x => x.CorrelationId == correlationId).FirstOrDefault();
-		}
+            nodes.Each(node => { _endpointFactory.GetEndpoint(node.ControlUri).Send(message, context => context.SetSourceAddress(ControlUri)); });
+        }
 
-		public bool IsAssignedToMessage(ServiceMessage messageNode)
-		{
-			if (messageNode.CurrentState != ServiceMessage.WaitingForCompletion)
-				return false;
+        public ServiceMessage GetMessageNode(Guid correlationId)
+        {
+            return _messageNodeRepository.Where(x => x.CorrelationId == correlationId).FirstOrDefault();
+        }
 
-			_log.InfoFormat("{0} WAITER: {1}.{2}:{3}", ControlUri,
-				messageNode.CorrelationId, messageNode.BallotId, messageNode.ControlUri);
+        public bool IsAssignedToMessage(ServiceMessage messageNode)
+        {
+            if (messageNode.CurrentState != ServiceMessage.WaitingForCompletion)
+                return false;
 
-			return messageNode.CurrentState == ServiceMessage.WaitingForCompletion &&
-			       messageNode.DataUri == DataUri &&
-			       messageNode.ControlUri == ControlUri;
-		}
+            _log.InfoFormat("{0} WAITER: {1}.{2}:{3}", ControlUri,
+                messageNode.CorrelationId, messageNode.BallotId, messageNode.ControlUri);
 
-		public RemoveActiveInterceptor AddActiveInterceptor(Guid serviceId, IGridServiceInteceptor interceptor)
-		{
-			return () => { };
-		}
+            return messageNode.CurrentState == ServiceMessage.WaitingForCompletion &&
+                   messageNode.DataUri == DataUri &&
+                   messageNode.ControlUri == ControlUri;
+        }
 
-		public virtual void Dispose(bool disposing)
-		{
-			if (!disposing || _disposed) return;
+        public RemoveActiveInterceptor AddActiveInterceptor(Guid serviceId, IGridServiceInteceptor interceptor)
+        {
+            return () => { };
+        }
 
-			Stop();
+        public virtual void Dispose(bool disposing)
+        {
+            if (!disposing || _disposed) return;
 
-			_nodeRepository = null;
-			_serviceNodeRepository = null;
-			_bus = null;
-			_controlBus = null;
-			_endpointFactory = null;
+            Stop();
 
-			_disposed = true;
-		}
+            _nodeRepository = null;
+            _serviceNodeRepository = null;
+            _bus = null;
+            _controlBus = null;
+            _endpointFactory = null;
 
-		private void WaitUntilMessageNodeIsAvailable(Guid correlationId)
-		{
-			DateTime giveUpAt = DateTime.Now + 2.Seconds();
-			var neverSurrender = new ManualResetEvent(false);
+            _disposed = true;
+        }
 
-			while (DateTime.Now < giveUpAt)
-			{
-				int count = _messageNodeRepository.Where(x => x.CorrelationId == correlationId).Count();
-				if (count > 0)
-					break;
+        private void WaitUntilMessageNodeIsAvailable(Guid correlationId)
+        {
+            DateTime giveUpAt = DateTime.Now + 2.Seconds();
+            var neverSurrender = new ManualResetEvent(false);
 
-				neverSurrender.WaitOne(30, true);
-			}
-		}
+            while (DateTime.Now < giveUpAt)
+            {
+                int count = _messageNodeRepository.Where(x => x.CorrelationId == correlationId).Count();
+                if (count > 0)
+                    break;
 
-		private void SendNodeOurServices(NotifyNewNodeAvailable message)
-		{
-			_log.InfoFormat("{0} sending node available response to {1}", _controlBus.Endpoint.Uri, message.ControlUri);
+                neverSurrender.WaitOne(30, true);
+            }
+        }
 
-			IEndpoint endpoint = _endpointFactory.GetEndpoint(message.ControlUri);
-			endpoint.Send(NewNotifyNodeAvailableMessage());
+        private void SendNodeOurServices(NotifyNewNodeAvailable message)
+        {
+            _log.InfoFormat("{0} sending node available response to {1}", _controlBus.Endpoint.Uri, message.ControlUri);
 
-			_serviceNodeRepository
-				.Where(x => x.ControlUri == _controlBus.Endpoint.Uri)
-				.Each(x => endpoint.Send(new AddServiceNode
-					{
-						ControlUri = x.ControlUri,
-						DataUri = x.DataUri,
-						ServiceId = x.ServiceId,
-						ServiceName = x.ServiceName,
-					}, context => context.SendResponseTo(_controlBus.Endpoint)));
-		}
+            IEndpoint endpoint = _endpointFactory.GetEndpoint(message.ControlUri);
+            endpoint.Send(NewNotifyNodeAvailableMessage());
 
-		private void SubscribeGridSagas()
-		{
-			_unsubscribeAction += _controlBus.Subscribe<Node>();
-			_unsubscribeAction += _controlBus.Subscribe<ServiceType>();
-			_unsubscribeAction += _controlBus.Subscribe<ServiceNode>();
-			_unsubscribeAction += _controlBus.Subscribe<ServiceMessage>();
-		}
+            _serviceNodeRepository
+                .Where(x => x.ControlUri == _controlBus.Endpoint.Uri)
+                .Each(x => endpoint.Send(new AddServiceNode
+                    {
+                        ControlUri = x.ControlUri,
+                        DataUri = x.DataUri,
+                        ServiceId = x.ServiceId,
+                        ServiceName = x.ServiceName,
+                    }, context => context.SendResponseTo(_controlBus.Endpoint)));
+        }
 
-		private void NotifyAvailable()
-		{
-			var future = new SelectedFutureMessage<NotifyNewNodeAvailable>(x => x.ControlUri == _controlBus.Endpoint.Uri);
+        private void SubscribeGridSagas()
+        {
+            _unsubscribeAction += _controlBus.Subscribe<Node>();
+            _unsubscribeAction += _controlBus.Subscribe<ServiceType>();
+            _unsubscribeAction += _controlBus.Subscribe<ServiceNode>();
+            _unsubscribeAction += _controlBus.Subscribe<ServiceMessage>();
+        }
 
-			UnsubscribeAction unsubscribeFuture = _controlBus.Subscribe(future);
-			try
-			{
-				_controlBus.Publish(NewNotifyNodeAvailableMessage());
+        private void NotifyAvailable()
+        {
+            var future = new SelectedFutureMessage<NotifyNewNodeAvailable>(x => x.ControlUri == _controlBus.Endpoint.Uri);
 
-				if (!future.WaitUntilAvailable(10.Seconds()))
-					_log.Warn("Timeout waiting for node to become available: " + _controlBus.Endpoint.Uri);
-			}
-			finally
-			{
-				unsubscribeFuture();
-			}
-		}
+            UnsubscribeAction unsubscribeFuture = _controlBus.Subscribe(future);
+            try
+            {
+                _controlBus.Publish(NewNotifyNodeAvailableMessage());
 
-		private NotifyNodeAvailable NewNotifyNodeAvailableMessage()
-		{
-			return new NotifyNodeAvailable(_controlBus.Endpoint.Uri, _bus.Endpoint.Uri, _created, DateTime.UtcNow);
-		}
+                if (!future.WaitUntilAvailable(10.Seconds()))
+                    _log.Warn("Timeout waiting for node to become available: " + _controlBus.Endpoint.Uri);
+            }
+            finally
+            {
+                unsubscribeFuture();
+            }
+        }
 
-		~ServiceGrid()
-		{
-			Dispose(false);
-		}
-	}
+        private NotifyNodeAvailable NewNotifyNodeAvailableMessage()
+        {
+            return new NotifyNodeAvailable(_controlBus.Endpoint.Uri, _bus.Endpoint.Uri, _created, DateTime.UtcNow);
+        }
+
+        ~ServiceGrid()
+        {
+            Dispose(false);
+        }
+    }
 }
