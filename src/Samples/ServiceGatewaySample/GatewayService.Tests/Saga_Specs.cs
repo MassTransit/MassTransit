@@ -41,10 +41,15 @@ namespace GatewayService.Tests
 		{
 			var response = new FutureMessage<OrderDetailsReceived>();
 
-			LocalBus.Subscribe<OrderDetailsReceived>(response.Set);
-
 			const string orderId = "ABC123";
 			const string customerId = "12345";
+
+			LocalBus.Subscribe<OrderDetailsReceived>(message =>
+				{
+					response.Set(message);
+				},
+				x => x.OrderId == orderId && x.CustomerId == customerId);
+
 			RetrieveOrderDetails request = new RetrieveOrderDetailsRequest(customerId, orderId);
 			LocalBus.Publish(request, x => x.SendResponseTo(LocalBus.Endpoint));
 

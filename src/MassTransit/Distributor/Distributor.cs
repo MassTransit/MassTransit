@@ -21,7 +21,7 @@ namespace MassTransit.Distributor
 	public class Distributor<T> :
 		IDistributor<T>,
 		Consumes<T>.Selected
-		where T : class, CorrelatedBy<Guid>
+		where T : class
 	{
 		private readonly IEndpointFactory _endpointFactory;
 		private readonly ReaderWriterLockedDictionary<Uri, WorkerDetails> _workers = new ReaderWriterLockedDictionary<Uri, WorkerDetails>();

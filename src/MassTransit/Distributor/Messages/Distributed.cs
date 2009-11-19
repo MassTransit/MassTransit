@@ -20,9 +20,7 @@ namespace MassTransit.Distributor.Messages
 	/// want it getting downgraded to a consumer of T.
 	/// </summary>
 	/// <typeparam name="T">The message type being distributed</typeparam>
-	public class Distributed<T> :
-		CorrelatedBy<Guid>
-		where T : CorrelatedBy<Guid>
+	public class Distributed<T>
 	{
 		public Distributed(T message)
 		{
@@ -41,10 +39,5 @@ namespace MassTransit.Distributor.Messages
 
 		public T Payload { get; set; }
 		public Uri ResponseAddress { get; set; }
-
-		public Guid CorrelationId
-		{
-			get { return Payload.CorrelationId; }
-		}
 	}
 }
