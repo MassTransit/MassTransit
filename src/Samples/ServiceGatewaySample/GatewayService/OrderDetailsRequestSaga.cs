@@ -30,8 +30,15 @@ namespace GatewayService
 
 		private static void Saga()
 		{
-			Correlate(RequestReceived).By((saga, message) => saga.CustomerId == message.CustomerId && saga.OrderId == message.OrderId);
-			Correlate(ResponseReceived).By((saga, message) => saga.CustomerId == message.CustomerId && saga.OrderId == message.OrderId);
+			Correlate(RequestReceived)
+				.By((saga, message) => saga.CustomerId == message.CustomerId &&
+				                       saga.OrderId == message.OrderId &&
+				                       saga.CurrentState == WaitingForResponse);
+
+			Correlate(ResponseReceived)
+				.By((saga, message) => saga.CustomerId == message.CustomerId &&
+				                       saga.OrderId == message.OrderId &&
+				                       saga.CurrentState == WaitingForResponse);
 
 			Initially(
 				When(RequestReceived)
@@ -39,13 +46,12 @@ namespace GatewayService
 						{
 							saga.OrderId = request.OrderId;
 							saga.CustomerId = request.CustomerId;
-
-							saga.Bus.Publish(new SendOrderDetailsRequest
-								{
-									RequestId = saga.CorrelationId,
-									CustomerId = request.CustomerId,
-									OrderId = request.OrderId,
-								});
+						})
+					.Publish((saga, request) => new SendOrderDetailsRequest
+						{
+							RequestId = saga.CorrelationId,
+							CustomerId = saga.CustomerId,
+							OrderId = saga.OrderId,
 						})
 					.TransitionTo(WaitingForResponse));
 
@@ -55,21 +61,16 @@ namespace GatewayService
 						{
 							saga.OrderCreated = response.Created;
 							saga.OrderStatus = response.Status;
-
-							saga.Bus.Publish(new OrderDetails
-								{
-                                   CustomerId = saga.CustomerId,
-								   OrderId = saga.OrderId,
-								   Created = saga.OrderCreated.Value,
-								   Status = saga.OrderStatus,
-								});
+						})
+					.Publish((saga, request) => new OrderDetails
+						{
+							CustomerId = saga.CustomerId,
+							OrderId = saga.OrderId,
+							Created = saga.OrderCreated.Value,
+							Status = saga.OrderStatus,
 						})
 					.TransitionTo(Completed));
 		}
-
-		protected OrderStatus OrderStatus { get; set; }
-
-		protected DateTime? OrderCreated { get; set; }
 
 		public OrderDetailsRequestSaga(Guid correlationId)
 		{
@@ -80,9 +81,6 @@ namespace GatewayService
 		{
 		}
 
-		public virtual string OrderId { get; set; }
-		public virtual string CustomerId { get; set; }
-
 		public static State Initial { get; set; }
 		public static State WaitingForResponse { get; set; }
 		public static State Completed { get; set; }
@@ -91,6 +89,11 @@ namespace GatewayService
 		public static Event<OrderDetailsResponse> ResponseReceived { get; set; }
 		public static Event<OrderDetailsRequestFailed> RequestFailed { get; set; }
 
+		public virtual string CustomerId { get; set; }
+		public virtual string OrderId { get; set; }
+		public virtual OrderStatus OrderStatus { get; set; }
+		public virtual DateTime? OrderCreated { get; set; }
+		
 		public virtual Guid CorrelationId { get; set; }
 		public virtual IServiceBus Bus { get; set; }
 	}

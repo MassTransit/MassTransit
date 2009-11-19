@@ -16,6 +16,7 @@ namespace MassTransit.Saga
 	using System.Collections.Generic;
 	using System.Linq.Expressions;
 	using System.Runtime.Serialization;
+	using Configuration;
 	using Magnum.CollectionExtensions;
 	using Magnum.StateMachine;
 
@@ -89,6 +90,18 @@ namespace MassTransit.Saga
 		{
 			eventAction.Call((saga, message) => CurrentMessage.RetryLater());
 			return eventAction;
+		}
+
+		public static void EnumerateDataEvents<T>(this T saga, Action<Type> messageAction)
+			where T : SagaStateMachine<T>, ISaga
+		{
+			var inspector = new SagaStateMachineEventInspector<T>();
+			saga.Inspect(inspector);
+
+			inspector.GetResults().Each(x =>
+			{
+				messageAction(x.SagaEvent.MessageType);
+			});
 		}
 	}
 }

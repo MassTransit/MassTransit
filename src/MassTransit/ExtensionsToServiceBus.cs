@@ -43,6 +43,24 @@ namespace MassTransit
 			return new DisposableUnsubscribeAction(action);
 		}
 
+		public static UnsubscribeAction Combine(this IEnumerable<UnsubscribeAction> actions)
+		{
+			UnsubscribeAction unsub = null;
+
+			actions.Each(x =>
+			{
+				if (x == null)
+					return;
+
+				if (unsub == null)
+					unsub = x;
+				else
+					unsub += x;
+			});
+
+			return unsub ?? (() => false);
+		}
+
 		public static void Publish<T>(this IServiceBus bus, T message, Action<IOutboundMessage> messageHeaderAction)
 			where T : class
 		{

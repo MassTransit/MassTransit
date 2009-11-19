@@ -15,11 +15,13 @@ namespace MassTransit.Distributor
 	using System;
 	using Configuration;
 	using Magnum.DateTimeExtensions;
+	using MassTransit.Configuration;
+	using Saga;
 
 	public static class ExtensionsForDistributor
 	{
 		public static void UseDistributorFor<T>(this IServiceBusConfigurator configurator, IEndpointFactory endpointFactory)
-			where T : class, CorrelatedBy<Guid>
+			where T : class
 		{
 			configurator.AddService(() => new Distributor<T>(endpointFactory));
 
@@ -27,9 +29,19 @@ namespace MassTransit.Distributor
 		}
 
 		public static void ImplementDistributorWorker<T>(this IServiceBusConfigurator configurator, Func<T, Action<T>> getConsumer)
-			where T : class, CorrelatedBy<Guid>
+			where T : class
 		{
 			configurator.AddService(() => new DistributorWorker<T>(getConsumer));
+		}
+
+		public static void UseDistributorForSaga<T>(this IServiceBusConfigurator configurator, IEndpointFactory endpointFactory)
+			where T : SagaStateMachine<T>, ISaga
+		{
+			T saga = (T) Activator.CreateInstance(typeof (T), Guid.NewGuid());
+
+			var serviceConfigurator = new SagaDistributorConfigurator(configurator, endpointFactory);
+
+			saga.EnumerateDataEvents(serviceConfigurator.AddService);
 		}
 	}
 }

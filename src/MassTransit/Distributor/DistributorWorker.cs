@@ -23,7 +23,7 @@ namespace MassTransit.Distributor
 		IDistributorWorker<T>,
 		Consumes<PrimeWorker>.All,
 		Consumes<Distributed<T>>.Selected
-		where T : class, CorrelatedBy<Guid>
+		where T : class
 	{
 		private readonly int _pending;
 		private IServiceBus _bus;

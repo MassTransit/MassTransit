@@ -152,6 +152,7 @@
     <Compile Include="Distributor\IDistributor.cs" />
     <Compile Include="Distributor\Messages\Workload.cs" />
     <Compile Include="Distributor\PrimeWorker.cs" />
+    <Compile Include="Distributor\Configuration\SagaDistributorConfigurator.cs" />
     <Compile Include="Distributor\WorkerDetails.cs" />
     <Compile Include="EndpointAddress.cs" />
     <Compile Include="Events\MessagePublished.cs" />

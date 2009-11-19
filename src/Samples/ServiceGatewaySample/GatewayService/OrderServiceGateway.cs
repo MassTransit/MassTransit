@@ -16,7 +16,7 @@ namespace GatewayService
 
 	public class OrderServiceGateway
 	{
-		private readonly IServiceBus _bus;
+		private IServiceBus _bus;
 
 		public OrderServiceGateway(IServiceBus bus)
 		{
@@ -26,11 +26,16 @@ namespace GatewayService
 		public void Start()
 		{
 			_bus.Subscribe<OrderDetailsWebServiceProxy>();
+			_bus.Subscribe<OrderDetailsRequestSaga>();
 		}
 
 		public void Stop()
 		{
-			// no need to unsubscribe, we're a service
+			if (_bus != null)
+			{
+				_bus.Dispose();
+				_bus = null;
+			}
 		}
 	}
 }
