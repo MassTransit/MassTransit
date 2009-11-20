@@ -9,7 +9,7 @@ namespace MassTransit.ServiceBus.Tests
     using OldCancelSubscriptionUpdates = Subscriptions.Messages.CancelSubscriptionUpdates;
 
     public class ClientSagaSpecs :
-        WithActiveSaga
+        WithActiveSaga //gonna need a just initial saga too to see what happens when the messages roll in
     {
         Uri _uri = new Uri("http://localhost/bob");
 
