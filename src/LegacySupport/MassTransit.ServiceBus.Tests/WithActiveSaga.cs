@@ -1,7 +1,13 @@
 namespace MassTransit.ServiceBus.Tests
 {
     using System;
+    using Internal;
     using NUnit.Framework;
+    using OldAddSubscription = Subscriptions.Messages.AddSubscription;
+    using OldRemoveSubscription = Subscriptions.Messages.RemoveSubscription;
+    using OldCacheUpdateRequest = Subscriptions.Messages.CacheUpdateRequest;
+    using OldCacheUpdateResponse = Subscriptions.Messages.CacheUpdateResponse;
+    using OldCancelSubscriptionUpdates = Subscriptions.Messages.CancelSubscriptionUpdates;
 
     public abstract class WithActiveSaga
     {
@@ -11,8 +17,9 @@ namespace MassTransit.ServiceBus.Tests
         {
             CorrelationUri = new Uri("msmq://bob/fitzgerald");
             Saga = new LegacySubscriptionClientSaga(CorrelationId);
-            
-            Saga.RaiseEvent(LegacySubscriptionClientSaga.OldCacheUpdateRequested, CorrelationUri);
+            Saga.Bus = new NullServiceBus();
+            var data = new OldCacheUpdateRequest(CorrelationUri);
+            Saga.RaiseEvent(LegacySubscriptionClientSaga.OldCacheUpdateRequested, data);
             BecauseOf();
         }
 
