@@ -24,12 +24,12 @@ namespace MassTransit.Internal
 
 		public IEndpoint Endpoint
 		{
-			get { return null; }
+			get { return new NullEndpoint(); }
 		}
 
 		public IEndpoint PoisonEndpoint
 		{
-			get { return null; }
+            get { return new NullEndpoint(); }
 		}
 
 		public UnsubscribeAction Subscribe<T>(Action<T> callback) where T : class

@@ -17,6 +17,7 @@ namespace MassTransit.ServiceBus
 	using Magnum.StateMachine;
 	using Messages;
 	using Saga;
+	using Subscriptions.Messages;
 	using OldAddSubscription = Subscriptions.Messages.AddSubscription;
 	using OldRemoveSubscription = Subscriptions.Messages.RemoveSubscription;
 	using OldCacheUpdateRequest = Subscriptions.Messages.CacheUpdateRequest;
@@ -41,9 +42,11 @@ namespace MassTransit.ServiceBus
 							.Then(InitialAction)
 							.TransitionTo(Active),
 						When(OldSubscriptionAdded)
-							.Then(InitialAdd),
+							.Then(InitialAdd)
+                            .TransitionTo(Active),
 						When(OldSubscriptionRemoved)
-							.Then(InitialRemoved));
+							.Then(InitialRemoved)
+                            .TransitionTo(Active));
 
 					During(Active,
 						When(OldCancelSubscriptionUpdates)
