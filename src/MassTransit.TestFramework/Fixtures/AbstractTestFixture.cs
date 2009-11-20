@@ -13,7 +13,9 @@
 namespace MassTransit.TestFramework.Fixtures
 {
 	using System;
+	using System.Collections.Generic;
 	using System.Diagnostics;
+	using System.Linq;
 	using log4net;
 	using Magnum.ObjectExtensions;
 	using NUnit.Framework;
@@ -51,18 +53,42 @@ namespace MassTransit.TestFramework.Fixtures
 			Log = LogManager.GetLogger("Test");
 		}
 
-		private int OutputTestName(Type type)
+		private void OutputTestName(Type type)
 		{
-			int depth = 0;
+			string prefix = "";
+			int depth = -1;
+
+			GetTestStack(type)
+				.Where(x => x.GetAttribute<ScenarioAttribute>() != null)
+				.Select(x => x.Name.Replace("_", " "))
+				.Each(x =>
+					{
+						string s = x.Split(' ')[0];
+						if (s != prefix)
+						{
+							depth++;
+							prefix = s;
+						}
+						else
+						{
+							x = "And" + x.Substring(prefix.Length);
+						}
+
+						Log.Info(new string(' ', depth*4) + x);
+					});
+		}
+
+		private static IEnumerable<Type> GetTestStack(Type type)
+		{
 			if (type.BaseType != null)
-				depth += OutputTestName(type.BaseType);
+			{
+				foreach (Type next in GetTestStack(type.BaseType))
+				{
+					yield return next;
+				}
+			}
 
-			if (type.GetAttribute<ScenarioAttribute>() == null)
-				return 0;
-
-			Log.Info(new string(' ', depth * 4) + type.Name.Replace("_", " "));
-
-			return depth + 1;
+			yield return type;
 		}
 	}
 }
