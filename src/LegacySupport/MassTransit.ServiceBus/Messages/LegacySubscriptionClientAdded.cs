@@ -20,5 +20,31 @@ namespace MassTransit.ServiceBus.Messages
         public Guid ClientId { get; set; }
         public Uri ControlUri { get; set; }
         public Uri DataUri { get; set; }
+
+        public bool Equals(LegacySubscriptionClientAdded other)
+        {
+            if (ReferenceEquals(null, other)) return false;
+            if (ReferenceEquals(this, other)) return true;
+            return other.ClientId.Equals(ClientId) && Equals(other.ControlUri, ControlUri) && Equals(other.DataUri, DataUri);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != typeof(LegacySubscriptionClientAdded)) return false;
+            return Equals((LegacySubscriptionClientAdded) obj);
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                int result = ClientId.GetHashCode();
+                result = (result*397) ^ (ControlUri != null ? ControlUri.GetHashCode() : 0);
+                result = (result*397) ^ (DataUri != null ? DataUri.GetHashCode() : 0);
+                return result;
+            }
+        }
     }
 }
