@@ -16,7 +16,7 @@ namespace MassTransit.TestFramework.Examples
 
 	[Scenario]
 	public class Given_a_consumer_is_subscribed_to_a_message_on_the_remote_bus :
-		Given_two_service_buses_with_a_shared_subscription_storage
+		Given_two_service_buses_with_shared_subscriptions
 	{
 		[Given]
 		public void A_consumer_is_subscribed_to_a_message()

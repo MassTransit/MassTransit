@@ -14,18 +14,16 @@ namespace MassTransit.TestFramework
 {
 	using System;
 	using Fixtures;
-	using NUnit.Framework;
 	using Transports;
 
-	[TestFixture]
-	public class Given_a_network_of_two_service_buses :
-		SubscriptionServiceTestFixture<LoopbackEndpoint>
+	[Scenario]
+	public class Given_two_service_buses_with_shared_subscriptions :
+		LocalAndRemoteTestFixture<LoopbackEndpoint>
 	{
-		protected Given_a_network_of_two_service_buses()
+		protected Given_two_service_buses_with_shared_subscriptions()
 		{
 			LocalUri = new Uri("loopback://localhost/mt_client");
 			RemoteUri = new Uri("loopback://localhost/mt_server");
-			SubscriptionUri = new Uri("loopback://localhost/mt_subscriptions");
 		}
 	}
 }

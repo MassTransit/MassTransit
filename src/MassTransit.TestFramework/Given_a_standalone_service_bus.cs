@@ -14,10 +14,9 @@ namespace MassTransit.TestFramework
 {
 	using System;
 	using Fixtures;
-	using NUnit.Framework;
 	using Transports;
 
-	[TestFixture]
+	[Scenario]
 	public class Given_a_standalone_service_bus :
 		LocalTestFixture<LoopbackEndpoint>
 	{
