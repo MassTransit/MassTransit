@@ -17,6 +17,7 @@ namespace MassTransit.TestFramework.Fixtures
 	using NUnit.Framework;
 	using Services.Subscriptions;
 
+	[TestFixture]
 	public class LocalAndRemoteTestFixture<TEndpoint> :
 		EndpointTestFixture<TEndpoint>
 		where TEndpoint : IEndpoint
@@ -45,9 +46,9 @@ namespace MassTransit.TestFramework.Fixtures
 		protected IServiceBus RemoteBus { get; private set; }
 		protected ISubscriptionService SubscriptionService { get; private set; }
 
-		protected override void ConfigureServiceBus(IServiceBusConfigurator configurator)
+		protected override void ConfigureServiceBus(Uri uri, IServiceBusConfigurator configurator)
 		{
-			base.ConfigureServiceBus(configurator);
+			base.ConfigureServiceBus(uri, configurator);
 
 			configurator.AddService<SubscriptionPublisher>();
 			configurator.AddService<SubscriptionConsumer>();
@@ -57,9 +58,9 @@ namespace MassTransit.TestFramework.Fixtures
 		{
 			SubscriptionService = new LocalSubscriptionService();
 
-			ObjectBuilder.Add(() => SubscriptionService);
-			ObjectBuilder.Add(() => new SubscriptionPublisher(SubscriptionService));
-			ObjectBuilder.Add(() => new SubscriptionConsumer(SubscriptionService, EndpointFactory));
+			ObjectBuilder.Add(SubscriptionService);
+			ObjectBuilder.Construct(() => new SubscriptionPublisher(SubscriptionService));
+			ObjectBuilder.Construct(() => new SubscriptionConsumer(SubscriptionService, EndpointFactory));
 		}
 	}
 }

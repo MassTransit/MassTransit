@@ -61,6 +61,11 @@ namespace MassTransit
 			return unsub ?? (() => false);
 		}
 
+		public static Uri AppendToPath(this Uri uri, string value)
+		{
+			return new UriBuilder(uri.Scheme, uri.Host, uri.Port, uri.AbsolutePath + value, uri.Query).Uri;
+		}
+
 		public static void Publish<T>(this IServiceBus bus, T message, Action<IOutboundMessage> messageHeaderAction)
 			where T : class
 		{

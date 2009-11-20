@@ -14,6 +14,7 @@ namespace MassTransit.TestFramework.Fixtures
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Linq;
 	using Configuration;
 	using Magnum.DateTimeExtensions;
 	using NUnit.Framework;
@@ -58,8 +59,7 @@ namespace MassTransit.TestFramework.Fixtures
 
 		protected virtual void SetupMessageSerializer()
 		{
-			var serializer = new XmlMessageSerializer();
-			ObjectBuilder.Stub(x => x.GetInstance<XmlMessageSerializer>()).Return(serializer);
+			ObjectBuilder.Add(new XmlMessageSerializer());
 		}
 
 		protected virtual void SetupEndpointFactory()
@@ -72,7 +72,8 @@ namespace MassTransit.TestFramework.Fixtures
 
 					ConfigureEndpointFactory(x);
 				});
-			ObjectBuilder.Stub(x => x.GetInstance<IEndpointFactory>()).Return(EndpointFactory);
+
+			ObjectBuilder.Add(EndpointFactory);
 		}
 
 		protected virtual void ConfigureEndpointFactory(IEndpointFactoryConfigurator x)
@@ -91,7 +92,7 @@ namespace MassTransit.TestFramework.Fixtures
 
 		private void TeardownBuses()
 		{
-			Buses.Each(bus => { bus.Dispose(); });
+			Buses.Reverse().Each(bus => { bus.Dispose(); });
 			Buses.Clear();
 		}
 
@@ -117,10 +118,10 @@ namespace MassTransit.TestFramework.Fixtures
 
 		protected virtual IServiceBus SetupServiceBus(Uri uri)
 		{
-			return SetupServiceBus(uri, ConfigureServiceBus);
+			return SetupServiceBus(uri, x => ConfigureServiceBus(uri, x));
 		}
 
-		protected virtual void ConfigureServiceBus(IServiceBusConfigurator configurator)
+		protected virtual void ConfigureServiceBus(Uri uri, IServiceBusConfigurator configurator)
 		{
 		}
 	}

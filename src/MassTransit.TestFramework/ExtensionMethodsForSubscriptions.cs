@@ -12,14 +12,30 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.TestFramework
 {
-	using Saga;
+	using System;
+	using System.Threading;
+	using Helpers;
+	using NUnit.Framework;
 
-	public static class ExtensionMethodsForSagas
+	public static class ExtensionMethodsForSubscriptions
 	{
-		public static void SetupSagaRepository<TSaga>(this IObjectBuilder builder)
-			where TSaga : class, ISaga
+		public static void ShouldHaveSubscriptionFor<TMessage>(this IServiceBus bus, TimeSpan timeout)
 		{
-			builder.Add<ISagaRepository<TSaga>>(new InMemorySagaRepository<TSaga>());
+			DateTime giveUpAt = DateTime.Now + timeout;
+
+			while (DateTime.Now < giveUpAt)
+			{
+				var inspector = new EndpointSinkLocator(typeof (TMessage));
+
+				bus.OutboundPipeline.Inspect(inspector);
+
+				if (inspector.DestinationAddress != null)
+					return;
+
+				Thread.Sleep(10);
+			}
+
+			Assert.Fail("A subscription for " + typeof (TMessage).Name + " was not found on " + bus.Endpoint.Uri);
 		}
 	}
 }

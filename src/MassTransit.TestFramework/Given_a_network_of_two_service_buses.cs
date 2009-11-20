@@ -12,14 +12,20 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.TestFramework
 {
-	using Saga;
+	using System;
+	using Fixtures;
+	using NUnit.Framework;
+	using Transports;
 
-	public static class ExtensionMethodsForSagas
+	[TestFixture]
+	public class Given_a_network_of_two_service_buses :
+		SubscriptionServiceTestFixture<LoopbackEndpoint>
 	{
-		public static void SetupSagaRepository<TSaga>(this IObjectBuilder builder)
-			where TSaga : class, ISaga
+		protected Given_a_network_of_two_service_buses()
 		{
-			builder.Add<ISagaRepository<TSaga>>(new InMemorySagaRepository<TSaga>());
+			LocalUri = new Uri("loopback://localhost/mt_client");
+			RemoteUri = new Uri("loopback://localhost/mt_server");
+			SubscriptionUri = new Uri("loopback://localhost/mt_subscriptions");
 		}
 	}
 }
