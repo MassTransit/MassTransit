@@ -10,30 +10,21 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.TestFramework.Fixtures
+namespace MassTransit.TestFramework
 {
 	using System;
+	using Fixtures;
 	using NUnit.Framework;
+	using Transports;
 
 	[TestFixture]
-	public class LocalTestFixture<TEndpoint> :
-		EndpointTestFixture<TEndpoint>
-		where TEndpoint : IEndpoint
+	public class Given_two_service_buses_with_a_shared_subscription_storage :
+		LocalAndRemoteTestFixture<LoopbackEndpoint>
 	{
-		[TestFixtureSetUp]
-		public void LocalTestFixtureSetup()
+		protected Given_two_service_buses_with_a_shared_subscription_storage()
 		{
-			LocalBus = SetupServiceBus(LocalUri);
+			LocalUri = new Uri("loopback://localhost/mt_client");
+			RemoteUri = new Uri("loopback://localhost/mt_server");
 		}
-
-		[TestFixtureTearDown]
-		public void LocalTestFixtureTeardown()
-		{
-			LocalBus = null;
-		}
-
-		protected Uri LocalUri { get; set; }
-
-		protected IServiceBus LocalBus { get; private set; }
 	}
 }

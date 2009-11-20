@@ -84,7 +84,7 @@ namespace MassTransit.TestFramework.Fixtures
 			ServiceBusConfigurator.Defaults(x =>
 				{
 					x.SetObjectBuilder(ObjectBuilder);
-					x.SetReceiveTimeout(500.Milliseconds());
+					x.SetReceiveTimeout(50.Milliseconds());
 					x.SetConcurrentConsumerLimit(Environment.ProcessorCount*2);
 				});
 		}
@@ -100,5 +100,28 @@ namespace MassTransit.TestFramework.Fixtures
 		protected IEndpointFactory EndpointFactory { get; private set; }
 
 		protected IObjectBuilder ObjectBuilder { get; private set; }
+
+		protected virtual IServiceBus SetupServiceBus(Uri uri, Action<IServiceBusConfigurator> configure)
+		{
+			IServiceBus bus = ServiceBusConfigurator.New(x =>
+				{
+					x.ReceiveFrom(uri);
+
+					configure(x);
+				});
+
+			Buses.Add(bus);
+
+			return bus;
+		}
+
+		protected virtual IServiceBus SetupServiceBus(Uri uri)
+		{
+			return SetupServiceBus(uri, ConfigureServiceBus);
+		}
+
+		protected virtual void ConfigureServiceBus(IServiceBusConfigurator configurator)
+		{
+		}
 	}
 }

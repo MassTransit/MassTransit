@@ -12,7 +12,6 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.TestFramework
 {
-	using Rhino.Mocks;
 	using Saga;
 
 	public static class ExtensionMethodsForSagas
@@ -22,8 +21,7 @@ namespace MassTransit.TestFramework
 		{
 			var sagaRepository = new InMemorySagaRepository<TSaga>();
 
-			builder.Stub(x => x.GetInstance<ISagaRepository<TSaga>>())
-				.Return(sagaRepository);
+			builder.Add(() => sagaRepository);
 
 			return sagaRepository;
 		}
