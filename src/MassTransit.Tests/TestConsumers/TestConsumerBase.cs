@@ -6,7 +6,6 @@ namespace MassTransit.Tests.TestConsumers
     using Magnum.DateTimeExtensions;
     using Messages;
     using NUnit.Framework;
-    using NUnit.Framework.SyntaxHelpers;
 
     public class TestConsumerBase<TMessage>
         where TMessage : class

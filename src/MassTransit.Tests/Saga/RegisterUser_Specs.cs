@@ -15,7 +15,6 @@ namespace MassTransit.Tests.Saga
 	using System.Diagnostics;
 	using Messages;
 	using NUnit.Framework;
-	using NUnit.Framework.SyntaxHelpers;
 	using TextFixtures;
 
 	[TestFixture]
