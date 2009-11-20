@@ -17,7 +17,7 @@ namespace MassTransit.TestFramework.Fixtures
 	using NUnit.Framework;
 
 	[TestFixture]
-	public abstract class LocalTestFixture<TEndpoint> :
+	public class LocalTestFixture<TEndpoint> :
 		EndpointTestFixture<TEndpoint>
 		where TEndpoint : IEndpoint
 	{

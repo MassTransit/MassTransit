@@ -55,20 +55,26 @@
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
+    <Reference Include="System.XML" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\SolutionVersion.cs">
       <Link>SolutionVersion.cs</Link>
     </Compile>
+    <Compile Include="Examples\Given_a_consumer_is_subscribed_to_a_message.cs" />
+    <Compile Include="Examples\When_a_message_is_published_to_the_bus.cs" />
     <Compile Include="Fixtures\AbstractTestConsumer.cs" />
     <Compile Include="ExtensionMethodsForAssertions.cs" />
     <Compile Include="ConsumerOf.cs" />
+    <Compile Include="Fixtures\AbstractTestFixture.cs" />
     <Compile Include="Fixtures\EndpointTestFixture.cs" />
     <Compile Include="Examples\Messages\SimpleMessage.cs" />
     <Compile Include="GivenAttribute.cs" />
+    <Compile Include="LogSetup.cs" />
+    <Compile Include="SelectiveConsumerOf.cs" />
     <Compile Include="ThenAttribute.cs" />
     <Compile Include="ScenarioAttribute.cs" />
-    <Compile Include="Examples\Standalone\Sending_a_message_to_the_endpoint.cs" />
+    <Compile Include="Examples\When_a_message_is_sent_to_the_bus_endpoint.cs" />
     <Compile Include="WhenAttribute.cs" />
     <Compile Include="Fixtures\LocalTestFixture.cs" />
     <Compile Include="Given_a_standalone_service_bus.cs" />
@@ -80,6 +86,11 @@
       <Project>{6EFD69FC-CBCC-4F85-AEE0-EFBA73F4D273}</Project>
       <Name>MassTransit</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="MassTransit.TestFramework.log4net.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

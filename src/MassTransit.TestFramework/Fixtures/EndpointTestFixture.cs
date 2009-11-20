@@ -21,7 +21,8 @@ namespace MassTransit.TestFramework.Fixtures
 	using Serialization;
 
 	[TestFixture]
-	public abstract class EndpointTestFixture<TEndpoint>
+	public class EndpointTestFixture<TEndpoint> :
+		AbstractTestFixture
 		where TEndpoint : IEndpoint
 	{
 		[TestFixtureSetUp]

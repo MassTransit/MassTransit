@@ -12,18 +12,25 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.TestFramework
 {
-	using System;
-	using Fixtures;
+	using System.Diagnostics;
+	using System.IO;
+	using System.Reflection;
+	using log4net.Config;
 	using NUnit.Framework;
-	using Transports;
 
-	[TestFixture]
-	public class Given_a_standalone_service_bus :
-		LocalTestFixture<LoopbackEndpoint>
+	[SetUpFixture]
+	public class LogSetup
 	{
-		protected Given_a_standalone_service_bus()
+		[SetUp]
+		public void SetupLog4Net()
 		{
-			LocalUri = new Uri("loopback://localhost/mt_client");
+			Trace.WriteLine("Loading Log4net");
+
+			string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+
+			string file = Path.Combine(path, "MassTransit.TestFramework.log4net.xml");
+
+			XmlConfigurator.Configure(new FileInfo(file));
 		}
 	}
 }

@@ -10,20 +10,25 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.TestFramework
+namespace MassTransit.TestFramework.Examples
 {
-	using System;
-	using Fixtures;
+	using System.Diagnostics;
+	using Messages;
 	using NUnit.Framework;
-	using Transports;
 
-	[TestFixture]
-	public class Given_a_standalone_service_bus :
-		LocalTestFixture<LoopbackEndpoint>
+	[Scenario]
+	public class Given_a_consumer_is_subscribed_to_a_message :
+		Given_a_standalone_service_bus
 	{
-		protected Given_a_standalone_service_bus()
+		[Given]
+		public void A_consumer_is_subscribed_to_a_message()
 		{
-			LocalUri = new Uri("loopback://localhost/mt_client");
+			Trace.WriteLine("Given");
+
+			Consumer = new ConsumerOf<SimpleMessage>();
+			LocalBus.Subscribe(Consumer);
 		}
+
+		protected ConsumerOf<SimpleMessage> Consumer { get; private set; }
 	}
 }
