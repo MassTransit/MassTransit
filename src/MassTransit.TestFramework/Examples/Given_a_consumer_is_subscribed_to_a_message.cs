@@ -14,7 +14,6 @@ namespace MassTransit.TestFramework.Examples
 {
 	using System.Diagnostics;
 	using Messages;
-	using NUnit.Framework;
 
 	[Scenario]
 	public class Given_a_consumer_is_subscribed_to_a_message :
@@ -23,8 +22,6 @@ namespace MassTransit.TestFramework.Examples
 		[Given]
 		public void A_consumer_is_subscribed_to_a_message()
 		{
-			Trace.WriteLine("Given");
-
 			Consumer = new ConsumerOf<SimpleMessage>();
 			LocalBus.Subscribe(Consumer);
 		}

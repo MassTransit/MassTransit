@@ -10,30 +10,29 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.TestFramework.Fixtures
+namespace MassTransit.TestFramework.Examples
 {
-	using System;
-	using NUnit.Framework;
+	using Magnum.DateTimeExtensions;
+	using Messages;
 
-	[TestFixture]
-	public class LocalTestFixture<TEndpoint> :
-		EndpointTestFixture<TEndpoint>
-		where TEndpoint : IEndpoint
+	[Scenario]
+	public class When_a_message_is_published_to_the_local_bus :
+		Given_a_consumer_is_subscribed_to_a_message_on_the_remote_bus
 	{
-		[TestFixtureSetUp]
-		public void LocalTestFixtureSetup()
+		[When]
+		public void A_message_is_published_to_the_local_bus()
 		{
-			LocalBus = SetupServiceBus(LocalUri);
+			Message = new SimpleMessage();
+
+			LocalBus.Publish(Message);
 		}
 
-		[TestFixtureTearDown]
-		public void LocalTestFixtureTeardown()
+		protected SimpleMessage Message { get; private set; }
+
+		[Then]
+		public void The_consumer_should_receive_the_message()
 		{
-			LocalBus = null;
+			Consumer.ShouldHaveReceived(Message, 1.Seconds());
 		}
-
-		protected Uri LocalUri { get; set; }
-
-		protected IServiceBus LocalBus { get; private set; }
 	}
 }

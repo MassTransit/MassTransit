@@ -62,14 +62,19 @@
       <Link>SolutionVersion.cs</Link>
     </Compile>
     <Compile Include="Examples\Given_a_consumer_is_subscribed_to_a_message.cs" />
+    <Compile Include="Examples\Given_a_consumer_is_subscribed_to_a_message_on_the_remote_bus.cs" />
     <Compile Include="Examples\When_a_message_is_published_to_the_bus.cs" />
+    <Compile Include="Examples\When_a_message_is_published_to_the_local_bus.cs" />
+    <Compile Include="ExtensionMethodsForObjectBuilder.cs" />
     <Compile Include="Fixtures\AbstractTestConsumer.cs" />
     <Compile Include="ExtensionMethodsForAssertions.cs" />
     <Compile Include="ConsumerOf.cs" />
     <Compile Include="Fixtures\AbstractTestFixture.cs" />
     <Compile Include="Fixtures\EndpointTestFixture.cs" />
     <Compile Include="Examples\Messages\SimpleMessage.cs" />
+    <Compile Include="Fixtures\LocalAndRemoteTestFixture.cs" />
     <Compile Include="GivenAttribute.cs" />
+    <Compile Include="Given_two_service_buses_with_a_shared_subscription_storage.cs" />
     <Compile Include="LogSetup.cs" />
     <Compile Include="SelectiveConsumerOf.cs" />
     <Compile Include="ThenAttribute.cs" />

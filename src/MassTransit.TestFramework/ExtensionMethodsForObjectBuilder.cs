@@ -10,30 +10,22 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.TestFramework.Fixtures
+namespace MassTransit.TestFramework
 {
 	using System;
-	using NUnit.Framework;
+	using Rhino.Mocks;
 
-	[TestFixture]
-	public class LocalTestFixture<TEndpoint> :
-		EndpointTestFixture<TEndpoint>
-		where TEndpoint : IEndpoint
+	public static class ExtensionMethodsForObjectBuilder
 	{
-		[TestFixtureSetUp]
-		public void LocalTestFixtureSetup()
+		public static void Add<T>(this IObjectBuilder builder, Func<T> getObject)
 		{
-			LocalBus = SetupServiceBus(LocalUri);
+			builder.Stub(x => x.GetInstance<T>())
+				.Return(default(T))
+				.WhenCalled(invocation =>
+					{
+						// Return a unique instance of this class
+						invocation.ReturnValue = getObject();
+					});
 		}
-
-		[TestFixtureTearDown]
-		public void LocalTestFixtureTeardown()
-		{
-			LocalBus = null;
-		}
-
-		protected Uri LocalUri { get; set; }
-
-		protected IServiceBus LocalBus { get; private set; }
 	}
 }
