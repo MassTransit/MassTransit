@@ -12,17 +12,21 @@ namespace MassTransit.ServiceBus.Tests
         WithActiveSaga
     {
         Uri _uri = new Uri("http://localhost/bob");
+
         public override void BecauseOf()
         {
+        }
 
-            var data = new OldCancelSubscriptionUpdates(_uri);
-            Saga.RaiseEvent(LegacySubscriptionClientSaga.OldCancelSubscriptionUpdates,data);
+        [Test]
+        public void StateShouldBeActive()
+        {
+            Assert.That(Saga.CurrentState, Is.EqualTo(LegacySubscriptionClientSaga.Active));
         }
 
         [Test]
         public void NAME()
         {
-            Assert.That(Saga.CorrelationId, Is.EqualTo(CorrelationId));
+            Assert.That(Saga.DataUri, Is.EqualTo(_uri));
         }
 
         //old cache update

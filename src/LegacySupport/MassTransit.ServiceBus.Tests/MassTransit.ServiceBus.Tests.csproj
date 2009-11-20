@@ -51,7 +51,7 @@
   <ItemGroup>
     <Compile Include="ClientSagaSpecs.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ProxySpecs.cs" />
+    <Compile Include="WithActiveSaga.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\MassTransit\MassTransit.csproj">
