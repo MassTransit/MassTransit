@@ -17,7 +17,12 @@ namespace MassTransit.TestFramework
 
 	public static class ExtensionMethodsForObjectBuilder
 	{
-		public static void Add<T>(this IObjectBuilder builder, Func<T> getObject)
+		public static void Add<T>(this IObjectBuilder builder, T instance)
+		{
+			builder.Stub(x => x.GetInstance<T>()).Return(instance);
+		}
+
+		public static void Construct<T>(this IObjectBuilder builder, Func<T> getObject)
 		{
 			builder.Stub(x => x.GetInstance<T>())
 				.Return(default(T))

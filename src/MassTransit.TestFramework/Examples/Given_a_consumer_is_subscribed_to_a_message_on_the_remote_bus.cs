@@ -12,7 +12,6 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.TestFramework.Examples
 {
-	using System.Diagnostics;
 	using Messages;
 
 	[Scenario]

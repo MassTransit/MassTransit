@@ -61,7 +61,10 @@
     <Compile Include="..\SolutionVersion.cs">
       <Link>SolutionVersion.cs</Link>
     </Compile>
+    <Compile Include="ExtensionMethodsForSubscriptions.cs" />
+    <Compile Include="Helpers\EndpointSinkLocator.cs" />
     <Compile Include="Examples\Given_a_consumer_is_subscribed_to_a_message.cs" />
+    <Compile Include="Examples\Given_a_consumer_is_subscribed_to_a_message_on_a_remote_bus.cs" />
     <Compile Include="Examples\Given_a_consumer_is_subscribed_to_a_message_on_the_remote_bus.cs" />
     <Compile Include="Examples\When_a_message_is_published_to_the_bus.cs" />
     <Compile Include="Examples\When_a_message_is_published_to_the_local_bus.cs" />
@@ -73,7 +76,9 @@
     <Compile Include="Fixtures\EndpointTestFixture.cs" />
     <Compile Include="Examples\Messages\SimpleMessage.cs" />
     <Compile Include="Fixtures\LocalAndRemoteTestFixture.cs" />
+    <Compile Include="Fixtures\SubscriptionServiceTestFixture.cs" />
     <Compile Include="GivenAttribute.cs" />
+    <Compile Include="Given_a_network_of_two_service_buses.cs" />
     <Compile Include="Given_two_service_buses_with_a_shared_subscription_storage.cs" />
     <Compile Include="LogSetup.cs" />
     <Compile Include="SelectiveConsumerOf.cs" />
@@ -85,6 +90,7 @@
     <Compile Include="Given_a_standalone_service_bus.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ExtensionMethodsForSagas.cs" />
+    <Compile Include="Examples\When_a_message_is_published_via_the_local_bus.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\MassTransit\MassTransit.csproj">

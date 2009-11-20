@@ -10,16 +10,29 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.TestFramework
+namespace MassTransit.TestFramework.Examples
 {
-	using Saga;
+	using Magnum.DateTimeExtensions;
+	using Messages;
 
-	public static class ExtensionMethodsForSagas
+	[Scenario]
+	public class When_a_message_is_published_via_the_local_bus :
+		Given_a_consumer_is_subscribed_to_a_message_on_a_remote_bus
 	{
-		public static void SetupSagaRepository<TSaga>(this IObjectBuilder builder)
-			where TSaga : class, ISaga
+		[When]
+		public void A_message_is_published_via_the_local_bus()
 		{
-			builder.Add<ISagaRepository<TSaga>>(new InMemorySagaRepository<TSaga>());
+			Message = new SimpleMessage();
+
+			LocalBus.Publish(Message);
 		}
+
+		[Then]
+		public void The_consumer_should_receive_the_message()
+		{
+			Consumer.ShouldHaveReceived(Message, 1.Seconds());
+		}
+
+		protected SimpleMessage Message { get; private set; }
 	}
 }

@@ -10,16 +10,33 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.TestFramework
+namespace MassTransit.TestFramework.Helpers
 {
-	using Saga;
+	using System;
+	using Pipeline.Inspectors;
+	using Pipeline.Sinks;
 
-	public static class ExtensionMethodsForSagas
+	public class EndpointSinkLocator :
+		PipelineInspectorBase<EndpointSinkLocator>
 	{
-		public static void SetupSagaRepository<TSaga>(this IObjectBuilder builder)
-			where TSaga : class, ISaga
+		private readonly Type _messageType;
+
+		public EndpointSinkLocator(Type messageType)
 		{
-			builder.Add<ISagaRepository<TSaga>>(new InMemorySagaRepository<TSaga>());
+			_messageType = messageType;
+		}
+
+		public Uri DestinationAddress { get; private set; }
+
+		public bool Inspect<TMessage>(EndpointMessageSink<TMessage> sink) where TMessage : class
+		{
+			if (typeof (TMessage) == _messageType)
+			{
+				DestinationAddress = sink.Address;
+				return false;
+			}
+
+			return true;
 		}
 	}
 }
