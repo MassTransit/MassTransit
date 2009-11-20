@@ -17,7 +17,6 @@ namespace MassTransit.Tests
 	using System.Threading;
 	using Messages;
 	using NUnit.Framework;
-	using NUnit.Framework.SyntaxHelpers;
 	using Rhino.Mocks;
 	using TextFixtures;
 

@@ -15,7 +15,6 @@ namespace MassTransit.Transports.Msmq.Tests
 	using System;
 	using MassTransit.Tests;
 	using NUnit.Framework;
-	using NUnit.Framework.SyntaxHelpers;
 
 	[TestFixture, Category("Integration")]
 	public class When_specifying_a_message_queue_address_for_an_endpoint

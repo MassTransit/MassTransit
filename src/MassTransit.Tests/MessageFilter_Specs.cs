@@ -5,7 +5,6 @@ namespace MassTransit.Tests
     using MassTransit.Internal;
     using Messages;
     using NUnit.Framework;
-    using NUnit.Framework.SyntaxHelpers;
     using TextFixtures;
 
     [TestFixture]

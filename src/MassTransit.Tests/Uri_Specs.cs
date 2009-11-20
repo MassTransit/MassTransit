@@ -2,7 +2,6 @@ namespace MassTransit.Tests
 {
     using System;
     using NUnit.Framework;
-    using NUnit.Framework.SyntaxHelpers;
 
     [TestFixture]
     public class What_does_the_uri_do :

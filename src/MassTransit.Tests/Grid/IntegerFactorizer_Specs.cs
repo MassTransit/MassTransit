@@ -17,7 +17,6 @@ namespace MassTransit.Tests.Grid
     using System.Diagnostics;
     using System.Text;
     using NUnit.Framework;
-    using NUnit.Framework.SyntaxHelpers;
 
     [TestFixture]
     public class When_factoring_integer_values

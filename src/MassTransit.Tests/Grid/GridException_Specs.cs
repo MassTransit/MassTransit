@@ -16,7 +16,6 @@ namespace MassTransit.Tests.Grid
 	using System.Threading;
 	using log4net;
 	using NUnit.Framework;
-	using NUnit.Framework.SyntaxHelpers;
 	using Parallel;
 
 	[TestFixture]

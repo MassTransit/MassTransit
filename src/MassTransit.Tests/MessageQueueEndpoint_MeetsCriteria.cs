@@ -15,7 +15,6 @@ namespace MassTransit.Tests
     using Magnum.DateTimeExtensions;
     using Messages;
 	using NUnit.Framework;
-	using NUnit.Framework.SyntaxHelpers;
 	using TextFixtures;
 
     [TestFixture]

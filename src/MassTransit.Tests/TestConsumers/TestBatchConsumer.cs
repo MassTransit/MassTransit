@@ -18,7 +18,6 @@ namespace MassTransit.Tests.TestConsumers
 	using Batch;
 	using Messages;
 	using NUnit.Framework;
-	using NUnit.Framework.SyntaxHelpers;
 
 	public class TestBatchConsumer<TMessage, TBatchId> :
 		TestConsumerBase<Batch<TMessage, TBatchId>>,

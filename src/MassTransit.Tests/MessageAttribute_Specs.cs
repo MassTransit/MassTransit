@@ -14,7 +14,6 @@ namespace MassTransit.Tests
 {
     using System;
     using NUnit.Framework;
-    using NUnit.Framework.SyntaxHelpers;
     
 
     [TestFixture]

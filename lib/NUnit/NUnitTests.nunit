@@ -1,14 +1,14 @@
 <NUnitProject>
-  <Settings appbase="." />
-  <Config name="Default" binpathtype="Auto">
-    <assembly path="nunit.framework.tests.dll" />
-    <assembly path="nunit.core.tests.dll" />
-    <assembly path="nunit.util.tests.dll" />
-    <assembly path="nunit.mocks.tests.dll" />
-    <assembly path="nunit.extensions.tests.dll" />
-    <assembly path="nunit-console.tests.dll" />
-    <assembly path="nunit.uikit.tests.dll" />
-    <assembly path="nunit-gui.tests.dll" />
-    <assembly path="nunit.fixtures.tests.dll" />
+  <Settings appbase="."/>
+  <Config name="Default" binpath="lib;tests;framework" runtimeFramework="v2.0">
+    <assembly path="tests/nunit.framework.tests.dll" />
+    <assembly path="tests/nunit.core.tests.dll" />
+    <assembly path="tests/nunit.util.tests.dll" />
+    <assembly path="tests/nunit.mocks.tests.dll" />
+    <assembly path="tests/nunit-console.tests.dll" />
+    <assembly path="tests/nunit.uiexception.tests.dll" />
+    <assembly path="tests/nunit.uikit.tests.dll" />
+    <assembly path="tests/nunit-gui.tests.dll" />
+    <assembly path="tests/nunit.fixtures.tests.dll" />
   </Config>
 </NUnitProject>
