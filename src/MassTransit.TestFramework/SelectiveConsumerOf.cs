@@ -14,16 +14,27 @@ namespace MassTransit.TestFramework
 {
 	using System;
 	using Fixtures;
-	using NUnit.Framework;
-	using Transports;
 
-	[TestFixture]
-	public class Given_a_standalone_service_bus :
-		LocalTestFixture<LoopbackEndpoint>
+	public class SelectiveConsumerOf<TMessage> :
+		AbstractTestConsumer<TMessage>,
+		Consumes<TMessage>.Selected
+		where TMessage : class
 	{
-		protected Given_a_standalone_service_bus()
+		private readonly Predicate<TMessage> _accept;
+
+		public SelectiveConsumerOf(Predicate<TMessage> accept)
 		{
-			LocalUri = new Uri("loopback://localhost/mt_client");
+			_accept = accept;
+		}
+
+		public SelectiveConsumerOf()
+		{
+			_accept = x => true;
+		}
+
+		public bool Accept(TMessage message)
+		{
+			return _accept(message);
 		}
 	}
 }

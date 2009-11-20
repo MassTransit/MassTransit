@@ -18,7 +18,7 @@ namespace MassTransit.TestFramework.Fixtures
 	using Magnum.DateTimeExtensions;
 	using NUnit.Framework;
 
-	public class AbstractTestConsumer<TMessage>
+	public abstract class AbstractTestConsumer<TMessage>
 		where TMessage : class
 	{
 		private static readonly List<TMessage> _allMessages = new List<TMessage>();
@@ -59,12 +59,12 @@ namespace MassTransit.TestFramework.Fixtures
 			_received.Release();
 		}
 
-		public void ShouldHaveReceivedMessage(TMessage message)
+		public void ShouldHaveReceived(TMessage message)
 		{
-			ShouldHaveReceivedMessage(message, 0.Seconds());
+			ShouldHaveReceived(message, 0.Seconds());
 		}
 
-		public void ShouldHaveReceivedMessage(TMessage message, TimeSpan timeout)
+		public void ShouldHaveReceived(TMessage message, TimeSpan timeout)
 		{
 			Assert.That(ReceivedMessage(message, timeout), Is.True, "Message should have been received");
 		}
