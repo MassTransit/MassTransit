@@ -4,13 +4,8 @@ namespace MassTransit.ServiceBus.Tests
     using Internal;
     using NUnit.Framework;
     using Rhino.Mocks;
-    using OldAddSubscription = Subscriptions.Messages.AddSubscription;
-    using OldRemoveSubscription = Subscriptions.Messages.RemoveSubscription;
-    using OldCacheUpdateRequest = Subscriptions.Messages.CacheUpdateRequest;
-    using OldCacheUpdateResponse = Subscriptions.Messages.CacheUpdateResponse;
-    using OldCancelSubscriptionUpdates = Subscriptions.Messages.CancelSubscriptionUpdates;
 
-    public abstract class WithActiveSaga
+    public abstract class WithInitialSaga
     {
 
         [TestFixtureSetUp]
@@ -22,8 +17,6 @@ namespace MassTransit.ServiceBus.Tests
             MockBus = MockRepository.GenerateStub<IServiceBus>();
             MockBus.Stub(x => x.Endpoint).Return(new NullEndpoint());
             Saga.Bus = MockBus;
-            var data = new OldCacheUpdateRequest(CorrelationUri);
-            Saga.RaiseEvent(LegacySubscriptionClientSaga.OldCacheUpdateRequested, data);
             BecauseOf();
         }
 
