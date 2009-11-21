@@ -14,12 +14,14 @@ namespace MassTransit.Saga
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Diagnostics;
 	using System.Linq.Expressions;
 	using System.Runtime.Serialization;
 	using Configuration;
 	using Magnum.CollectionExtensions;
 	using Magnum.StateMachine;
 
+	[DebuggerDisplay("{CurrentState} - {typeof(T).Name}")]
 	public class SagaStateMachine<T> :
 		StateMachine<T>
 		where T : SagaStateMachine<T>

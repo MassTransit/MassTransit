@@ -10,24 +10,31 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.TestFramework
+namespace MassTransit.TestFramework.Examples.Sagas
 {
-	using System.IO;
-	using System.Reflection;
-	using log4net.Config;
-	using NUnit.Framework;
+	using Messages;
 
-	[SetUpFixture]
-	public class LogSetup
+	[Scenario]
+	public class When_an_approval_message_is_published :
+		Given_a_simple_saga_exists_and_is_waiting_for_approval
 	{
-		[SetUp]
-		public void SetupLog4Net()
+		[When]
+		public void A_dynamically_correlated_message_is_published()
 		{
-			string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+			Message = new ApproveSimpleCustomer()
+				{
+					CustomerId = CustomerId,
+				};
 
-			string file = Path.Combine(path, "MassTransit.TestFramework.log4net.xml");
+			LocalBus.Publish(Message);
+		}
 
-			XmlConfigurator.Configure(new FileInfo(file));
+		protected ApproveSimpleCustomer Message { get; set; }
+
+		[Then]
+		public void The_saga_should_be_in_the_waiting_for_finish_state()
+		{
+			Saga.ShouldBeInState(SimpleSaga.WaitingForFinish);
 		}
 	}
 }

@@ -43,12 +43,6 @@ namespace MassTransit.Saga
 				}, RemoveSaga);
 		}
 
-		private void RemoveSaga(TSaga saga)
-		{
-			lock (_collection)
-				_collection.Remove(saga);
-		}
-
 		public IEnumerable<TSaga> Where(Expression<Func<TSaga, bool>> filter)
 		{
 			lock (_collection)
@@ -61,6 +55,18 @@ namespace MassTransit.Saga
 		{
 			Dispose(true);
 			GC.SuppressFinalize(this);
+		}
+
+		public void Add(TSaga newSaga)
+		{
+			lock (_collection)
+				_collection.Add(newSaga);
+		}
+
+		private void RemoveSaga(TSaga saga)
+		{
+			lock (_collection)
+				_collection.Remove(saga);
 		}
 
 		private void Dispose(bool disposing)
