@@ -10,24 +10,13 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.TestFramework
+namespace MassTransit.TestFramework.Examples.Sagas.Messages
 {
-	using System.IO;
-	using System.Reflection;
-	using log4net.Config;
-	using NUnit.Framework;
+	using System;
 
-	[SetUpFixture]
-	public class LogSetup
+	public class FinishSimpleSaga :
+		CorrelatedBy<Guid>
 	{
-		[SetUp]
-		public void SetupLog4Net()
-		{
-			string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-
-			string file = Path.Combine(path, "MassTransit.TestFramework.log4net.xml");
-
-			XmlConfigurator.Configure(new FileInfo(file));
-		}
+		public Guid CorrelationId { get; set; }
 	}
 }

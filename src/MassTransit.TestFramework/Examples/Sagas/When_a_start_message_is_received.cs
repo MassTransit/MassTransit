@@ -10,39 +10,39 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.TestFramework
+namespace MassTransit.TestFramework.Examples.Sagas
 {
-	using NUnit.Framework;
+	using Messages;
 
-	public static class ExtensionMethodsForAssertions
+	[Scenario]
+	public class When_a_start_message_is_received :
+		Given_a_simple_saga_does_not_exist
 	{
-		public static bool ShouldBeTrue(this bool value)
+		[When]
+		public void A_start_message_is_received()
 		{
-			Assert.IsTrue(value);
+			Message = new StartSimpleSaga
+				{
+					CorrelationId = SagaId,
+					CustomerId = CustomerId,
+				};
 
-			return value;
+			LocalBus.Publish(Message);
 		}
 
-		public static bool ShouldBeFalse(this bool value)
-		{
-			Assert.IsFalse(value);
+		protected StartSimpleSaga Message { get; set; }
+		protected const int CustomerId = 47;
 
-			return value;
+		[Then]
+		public void A_new_saga_should_be_created()
+		{
+			Saga.ShouldNotBeNull();
 		}
 
-		public static T ShouldNotBeNull<T>(this T instance)
-			where T : class
+		[Then]
+		public void The_customer_id_should_be_set()
 		{
-			Assert.IsNotNull(instance);
-
-			return instance;
-		}
-
-		public static T ShouldEqual<T>(this T value, T expected)
-		{
-			Assert.AreEqual(expected, value);
-
-			return value;
+			Saga.CustomerId.ShouldEqual(CustomerId);
 		}
 	}
 }
