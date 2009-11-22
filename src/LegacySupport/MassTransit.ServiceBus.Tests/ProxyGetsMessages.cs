@@ -4,7 +4,6 @@ namespace MassTransit.ServiceBus.Tests
     using Messages;
     using NUnit.Framework;
     using Services.Subscriptions.Messages;
-    using Services.Subscriptions.Server.Messages;
     using Rhino.Mocks;
 
     public class ProxyGetsMessages :

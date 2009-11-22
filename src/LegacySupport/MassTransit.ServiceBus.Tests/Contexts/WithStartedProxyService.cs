@@ -1,5 +1,6 @@
 namespace MassTransit.ServiceBus.Tests
 {
+    using Internal;
     using NUnit.Framework;
     using Rhino.Mocks;
     using Saga;
@@ -16,6 +17,7 @@ namespace MassTransit.ServiceBus.Tests
         public void EstablishContext()
         {
             MockBus = MockRepository.GenerateStub<IServiceBus>();
+            MockBus.Stub(b => b.Endpoint).Return(new NullEndpoint());
             MockEndpointFactory = MockRepository.GenerateStub<IEndpointFactory>();
             MockRepo = MockRepository.GenerateStub<ISagaRepository<LegacySubscriptionClientSaga>>();
             MockNewSubEndpoint = MockRepository.GenerateStub<IEndpoint>();

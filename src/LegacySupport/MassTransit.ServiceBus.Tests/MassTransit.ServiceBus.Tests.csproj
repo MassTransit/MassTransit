@@ -54,6 +54,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ClientSagaSpecs.cs" />
+    <Compile Include="NewSubscriptionAdded.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ProxyGetsMessages.cs" />
     <Compile Include="WhenServiceStarts.cs" />
