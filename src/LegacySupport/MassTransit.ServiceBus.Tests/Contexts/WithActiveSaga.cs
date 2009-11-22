@@ -1,4 +1,4 @@
-namespace MassTransit.ServiceBus.Tests
+namespace MassTransit.ServiceBus.Tests.Contexts
 {
     using System;
     using Internal;

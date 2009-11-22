@@ -1,6 +1,6 @@
-namespace MassTransit.ServiceBus.Tests
+namespace MassTransit.ServiceBus.Tests.Saga
 {
-    using System;
+    using Contexts;
     using Messages;
     using NUnit.Framework;
     using OldAddSubscription = Subscriptions.Messages.AddSubscription;

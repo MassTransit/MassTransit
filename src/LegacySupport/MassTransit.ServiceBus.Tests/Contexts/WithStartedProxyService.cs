@@ -1,6 +1,7 @@
 namespace MassTransit.ServiceBus.Tests.Contexts
 {
     using Internal;
+    using MassTransit.Saga;
     using NUnit.Framework;
     using Rhino.Mocks;
     using Saga;

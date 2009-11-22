@@ -1,5 +1,6 @@
 namespace MassTransit.ServiceBus.Tests.Proxy
 {
+    using Contexts;
     using NUnit.Framework;
     using Rhino.Mocks;
 
