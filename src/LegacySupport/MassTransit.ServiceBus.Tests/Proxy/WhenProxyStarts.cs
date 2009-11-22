@@ -1,9 +1,9 @@
-namespace MassTransit.ServiceBus.Tests
+namespace MassTransit.ServiceBus.Tests.Proxy
 {
     using NUnit.Framework;
     using Rhino.Mocks;
 
-    public class WhenServiceStarts :
+    public class WhenProxyStarts :
         WithProxyService
     {
         public override void BecauseOf()
