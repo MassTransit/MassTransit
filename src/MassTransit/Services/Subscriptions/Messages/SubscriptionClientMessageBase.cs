@@ -32,5 +32,31 @@ namespace MassTransit.Services.Subscriptions.Messages
 		public Guid CorrelationId { get; set; }
 		public Uri ControlUri { get; set; }
 		public Uri DataUri { get; set; }
+
+	    public bool Equals(SubscriptionClientMessageBase other)
+	    {
+	        if (ReferenceEquals(null, other)) return false;
+	        if (ReferenceEquals(this, other)) return true;
+	        return other.CorrelationId.Equals(CorrelationId) && Equals(other.ControlUri, ControlUri) && Equals(other.DataUri, DataUri);
+	    }
+
+	    public override bool Equals(object obj)
+	    {
+	        if (ReferenceEquals(null, obj)) return false;
+	        if (ReferenceEquals(this, obj)) return true;
+	        if (obj.GetType() != typeof(SubscriptionClientMessageBase)) return false;
+	        return Equals((SubscriptionClientMessageBase) obj);
+	    }
+
+	    public override int GetHashCode()
+	    {
+	        unchecked
+	        {
+	            int result = CorrelationId.GetHashCode();
+	            result = (result*397) ^ (ControlUri != null ? ControlUri.GetHashCode() : 0);
+	            result = (result*397) ^ (DataUri != null ? DataUri.GetHashCode() : 0);
+	            return result;
+	        }
+	    }
 	}
 }

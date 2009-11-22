@@ -87,11 +87,9 @@ namespace MassTransit.ServiceBus
             _unsubscribeToken += _bus.Subscribe(this);
 
             _unsubscribeToken += _bus.Subscribe<LegacySubscriptionClientSaga>();
-            //_unsubscribeToken += _bus.Subscribe<SubscriptionSaga>();
 
-            // TODO may need to load/prime the subscription repository at this point?
-
-            _subscriptionServiceEndpoint = _endpointFactory.GetEndpoint("HOW DO I GET THIS");
+            //the new service
+            _subscriptionServiceEndpoint = _endpointFactory.GetEndpoint("msmq://localhost/new_subservice");
 
             _log.Info("Legacy Subscription Service Started");
         }
