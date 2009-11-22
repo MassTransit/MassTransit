@@ -54,10 +54,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ClientSagaSpecs.cs" />
-    <Compile Include="NewSubscriptionAdded.cs" />
+    <Compile Include="Proxy\NewSubscriptionAdded.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ProxyGetsMessages.cs" />
-    <Compile Include="WhenServiceStarts.cs" />
+    <Compile Include="Proxy\ProxyGetsMessages.cs" />
+    <Compile Include="Proxy\WhenServiceStarts.cs" />
     <Compile Include="Contexts\WithProxyService.cs" />
     <Compile Include="Contexts\WithActiveSaga.cs" />
     <Compile Include="Contexts\WithInitialSaga.cs" />
