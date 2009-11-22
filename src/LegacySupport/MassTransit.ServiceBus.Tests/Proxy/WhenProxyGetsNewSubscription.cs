@@ -1,7 +1,8 @@
-namespace MassTransit.ServiceBus.Tests
+namespace MassTransit.ServiceBus.Tests.Proxy
 {
     using System;
     using System.Collections.Generic;
+    using Contexts;
     using Internal;
     using NUnit.Framework;
     using Rhino.Mocks;
@@ -9,7 +10,7 @@ namespace MassTransit.ServiceBus.Tests
     using Services.Subscriptions.Server.Messages;
     using OldCacheUpdateRequest = MassTransit.ServiceBus.Subscriptions.Messages.CacheUpdateRequest;
 
-    public class NewSubscriptionAdded :
+    public class WhenProxyGetsNewSubscription :
         WithStartedProxyService
     {
         Guid _clientId = Guid.NewGuid();
