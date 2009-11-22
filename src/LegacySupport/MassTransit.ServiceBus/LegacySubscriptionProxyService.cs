@@ -70,8 +70,8 @@ namespace MassTransit.ServiceBus
 
         void SendToClients<T>(T message) where T : class
         {
-            _subscriptionClientSagas.Where(x => x.CurrentState == LegacySubscriptionClientSaga.Active)
-                .Each(client =>
+            var sagas = _subscriptionClientSagas.Where(x => x.CurrentState == LegacySubscriptionClientSaga.Active);
+            sagas.Each(client =>
                 {
                     IEndpoint endpoint = _endpointFactory.GetEndpoint(client.ControlUri);
 
