@@ -10,15 +10,16 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Pipeline.Sinks
+namespace MassTransit.Distributor.Pipeline
 {
 	using System;
+	using MassTransit.Pipeline.Sinks;
 
-	public class InstanceMessageSink<TMessage> : 
+	public class DistributorWorkerMessageSink<TMessage> :
 		InstanceMessageSinkBase<TMessage>
 		where TMessage : class
 	{
-		public InstanceMessageSink(Func<TMessage, Action<TMessage>> acceptor)
+		public DistributorWorkerMessageSink(Func<TMessage, Action<TMessage>> acceptor)
 			: base(acceptor)
 		{
 		}

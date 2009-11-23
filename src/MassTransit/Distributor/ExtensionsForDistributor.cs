@@ -43,5 +43,13 @@ namespace MassTransit.Distributor
 
 			saga.EnumerateDataEvents(serviceConfigurator.AddService);
 		}
+
+		public static void ImplementDistributorSagaWorker<T>(this IServiceBusConfigurator configurator, ISagaRepository<T> repository)
+			where T: SagaStateMachine<T>, ISaga
+		{
+
+		}
 	}
+
+
 }

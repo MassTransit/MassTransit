@@ -105,5 +105,17 @@ namespace MassTransit.Saga
 				messageAction(x.SagaEvent.MessageType);
 			});
 		}
+
+		public static void EnumerateDataEvents<T>(this T saga, Action<SagaEvent<T>, IEnumerable<State>> messageAction)
+			where T : SagaStateMachine<T>, ISaga
+		{
+			var inspector = new SagaStateMachineEventInspector<T>();
+			saga.Inspect(inspector);
+
+			inspector.GetResults().Each(x =>
+			{
+				messageAction(x.SagaEvent, x.States);
+			});
+		}
 	}
 }
