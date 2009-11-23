@@ -13,13 +13,35 @@
 namespace MassTransit.Pipeline.Sinks
 {
 	using System;
+	using System.Collections.Generic;
 
-	public class InstanceMessageSink<TMessage> : 
-		InstanceMessageSinkBase<TMessage>
+	public class InstanceMessageSinkBase<TMessage> :
+		IPipelineSink<TMessage>
 		where TMessage : class
 	{
-		public InstanceMessageSink(Func<TMessage, Action<TMessage>> acceptor)
-			: base(acceptor)
+		private Func<TMessage, Action<TMessage>> _acceptor;
+
+		public InstanceMessageSinkBase(Func<TMessage, Action<TMessage>> acceptor)
+		{
+			_acceptor = acceptor;
+		}
+
+		public IEnumerable<Action<TMessage>> Enumerate(TMessage message)
+		{
+			var consumer = _acceptor(message);
+			if (consumer != null)
+				yield return consumer;
+		}
+
+		public bool Inspect(IPipelineInspector inspector)
+		{
+			inspector.Inspect(this);
+
+			// since this is the end of the line, we don't visit this one I suppose
+			return true;
+		}
+
+		public void Dispose()
 		{
 		}
 	}

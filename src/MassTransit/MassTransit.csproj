@@ -139,9 +139,11 @@
     <Compile Include="Actors\InMemoryActorRepository.cs" />
     <Compile Include="Actors\StateDrivenActor.cs" />
     <Compile Include="CurrentMessage.cs" />
+    <Compile Include="Distributor\Configuration\DistributorSubscriber.cs" />
     <Compile Include="Distributor\ConfigureDistributedConsumer.cs" />
     <Compile Include="Distributor\DefaultWorkerSelectionStrategy.cs" />
     <Compile Include="Distributor\DistributedConsumerSettings.cs" />
+    <Compile Include="Distributor\DistributorSagaWorker.cs" />
     <Compile Include="Distributor\IDistributorWorker.cs" />
     <Compile Include="Distributor\IWorkerSelectionStrategy.cs" />
     <Compile Include="Distributor\Messages\Distributed.cs" />
@@ -151,6 +153,8 @@
     <Compile Include="Distributor\Distributor.cs" />
     <Compile Include="Distributor\IDistributor.cs" />
     <Compile Include="Distributor\Messages\Workload.cs" />
+    <Compile Include="Distributor\Pipeline\DistributorMessageSink.cs" />
+    <Compile Include="Distributor\Pipeline\DistributorWorkerMessageSink.cs" />
     <Compile Include="Distributor\PrimeWorker.cs" />
     <Compile Include="Distributor\Configuration\SagaDistributorConfigurator.cs" />
     <Compile Include="Distributor\WorkerDetails.cs" />
@@ -243,6 +247,7 @@
     <Compile Include="Configuration\DefaultBusServiceConfigurator.cs" />
     <Compile Include="Pipeline\Configuration\MessageInterceptorConfigurator.cs" />
     <Compile Include="Pipeline\Configuration\MessageInterceptorConfiguratorScope.cs" />
+    <Compile Include="Pipeline\Sinks\InstanceMessageSinkBase.cs" />
     <Compile Include="Pipeline\Sinks\MessageInterceptor.cs" />
     <Compile Include="Saga\AbstractSagaRepository.cs" />
     <Compile Include="Saga\Configuration\EventInspectorResult.cs" />

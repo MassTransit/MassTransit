@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests.Distributor
 {
+	using MassTransit.Pipeline.Inspectors;
 	using Messages;
 	using NUnit.Framework;
 
@@ -34,6 +35,14 @@ namespace MassTransit.Tests.Distributor
 			var generator = new LoadGenerator<FirstCommand, FirstResponse>();
 
 			generator.Run(RemoteBus, 100);
+		}
+
+		[Test]
+		public void The_pipeline_viewer_should_show_the_distributor()
+		{
+			PipelineViewer.Trace(LocalBus.InboundPipeline);
+
+			PipelineViewer.Trace(Instances["A"].DataBus.InboundPipeline);
 		}
 	}
 }
