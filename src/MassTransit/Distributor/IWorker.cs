@@ -12,7 +12,15 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Distributor
 {
-	public class PrimeWorker
+	using Internal;
+
+	public interface IWorker :
+		IBusService
+	{
+	}
+
+	public interface IWorker<T> :
+		IWorker
 	{
 	}
 }

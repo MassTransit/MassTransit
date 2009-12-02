@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests.Distributor
 {
+	using System.Diagnostics;
 	using Load;
 	using Load.Messages;
 	using Load.Sagas;
@@ -19,6 +20,7 @@ namespace MassTransit.Tests.Distributor
 	using MassTransit.Pipeline.Inspectors;
 	using NUnit.Framework;
 	using TestFramework;
+	using MassTransit.Distributor;
 
 	[TestFixture]
 	public class Using_the_distributor_for_a_saga :
@@ -45,19 +47,16 @@ namespace MassTransit.Tests.Distributor
 		{
 			base.EstablishContext();
 
-			ServiceInstance instance = AddInstance("A", "loopback://localhost/a", x =>
-				{
-					//x.ImplementDistributorSagaWorker<FirstSaga>(FirstSagaRepository);
-				});
+			ServiceInstance instance = AddInstance("A", "loopback://localhost/a", 
+				builder => builder.Add(FirstSagaRepository),
+				bus => bus.ImplementSagaDistributorWorker(FirstSagaRepository));
 
-			instance.ObjectBuilder.Add(FirstSagaRepository);
-			instance.DataBus.Subscribe<FirstSaga>();
 
 			//AddFirstCommandInstance("B", "loopback://localhost/b");
 			//AddFirstCommandInstance("C", "loopback://localhost/c");
 		}
 
-		[Test, Explicit]
+		[Test]
 		public void Should_register_the_message_consumers()
 		{
 			Instances["A"].DataBus.ShouldHaveSubscriptionFor<Distributed<FirstCommand>>();
@@ -74,6 +73,9 @@ namespace MassTransit.Tests.Distributor
 		[Test]
 		public void The_pipeline_viewer_should_show_the_distributor()
 		{
+			PipelineViewer.Trace(LocalBus.InboundPipeline);
+			PipelineViewer.Trace(LocalBus.ControlBus.InboundPipeline);
+			PipelineViewer.Trace(RemoteBus.InboundPipeline);
 			PipelineViewer.Trace(Instances["A"].DataBus.InboundPipeline);
 		}
 	}

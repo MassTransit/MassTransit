@@ -16,9 +16,9 @@ namespace MassTransit.Distributor
 	/// These settings are used to configure a distributed consumer if the default
 	/// settings are not sufficient.
 	/// </summary>
-	public class DistributedConsumerSettings
+	public class WorkerSettings
 	{
-		public DistributedConsumerSettings()
+		public WorkerSettings()
 		{
 			InProgressLimit = 4;
 			PendingLimit = 16;

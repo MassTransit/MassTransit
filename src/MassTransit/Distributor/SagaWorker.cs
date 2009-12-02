@@ -13,86 +13,51 @@
 namespace MassTransit.Distributor
 {
 	using System;
+	using System.Collections.Generic;
 	using System.Threading;
-	using Internal;
 	using Magnum.Actors;
 	using Magnum.Actors.CommandQueues;
+	using Magnum.Reflection;
 	using Messages;
+	using Saga;
 
-	public class DistributorWorker<T> :
-		IDistributorWorker<T>,
-		Consumes<PrimeWorker>.All,
-		Consumes<Distributed<T>>.Selected
-		where T : class
+	public class SagaWorker<TSaga> :
+		ISagaWorker<TSaga>,
+		Consumes<WakeUpWorker>.All
+		where TSaga : SagaStateMachine<TSaga>, ISaga
 	{
+		private readonly IList<Type> _messageTypes = new List<Type>();
 		private readonly int _pending;
+		private readonly CommandQueue _queue = new ThreadPoolCommandQueue();
 		private IServiceBus _bus;
 		private IServiceBus _controlBus;
-		private Func<T, Action<T>> _getConsumer;
+		private Uri _controlUri;
+		private Uri _dataUri;
 		private int _inProgress;
 		private int _inProgressLimit = 4;
 		private int _pendingLimit = 16;
 		private UnsubscribeAction _unsubscribeAction = () => false;
-		private Uri _dataUri;
-		private Uri _controlUri;
-		private CommandQueue _queue = new ThreadPoolCommandQueue();
 
-		public DistributorWorker(Func<T, Action<T>> getConsumer)
-			: this(getConsumer, new DistributedConsumerSettings())
+		public SagaWorker()
+			: this(new WorkerSettings())
 		{
 		}
 
-		public DistributorWorker(Func<T, Action<T>> getConsumer, DistributedConsumerSettings settings)
+		public SagaWorker(WorkerSettings settings)
 		{
-			_getConsumer = getConsumer;
-
 			_inProgress = 0;
 			_inProgressLimit = settings.InProgressLimit;
 			_pending = 0;
 			_pendingLimit = settings.PendingLimit;
 		}
 
-		public void Consume(Distributed<T> message)
+		public void Consume(WakeUpWorker message)
 		{
-			Action<T> consumer = _getConsumer(message.Payload);
-
-			Interlocked.Increment(ref _inProgress);
-			try
-			{
-				RewriteResponseAddress(message.ResponseAddress);
-
-				consumer(message.Payload);
-			}
-			finally
-			{
-				Interlocked.Decrement(ref _inProgress);
-
-				if (_inProgress == 0)
-				{
-					_queue.Enqueue(PublishWorkerAvailability);
-					_bus.Endpoint.Send(new PrimeWorker());
-				}
-
-				var disposal = consumer as IDisposable;
-				if (disposal != null)
-				{
-					disposal.Dispose();
-				}
-			}
-		}
-
-		public bool Accept(Distributed<T> message)
-		{
-			if (_inProgress >= _inProgressLimit)
-				return false;
-
-			return true;
 		}
 
 		public void Dispose()
 		{
 			_controlBus = null;
-			_getConsumer = null;
 		}
 
 		public void Start(IServiceBus bus)
@@ -103,8 +68,10 @@ namespace MassTransit.Distributor
 			_dataUri = _bus.Endpoint.Uri;
 			_controlUri = _controlBus.Endpoint.Uri;
 
-			_unsubscribeAction = bus.ControlBus.Subscribe<ConfigureDistributedConsumer<T>>(Consume);
+			_unsubscribeAction = bus.ControlBus.Subscribe<ConfigureWorker<TSaga>>(Consume);
 			_unsubscribeAction += bus.Subscribe(this);
+
+			CacheMessageTypesForSaga();
 
 			PublishWorkerAvailability();
 		}
@@ -114,7 +81,38 @@ namespace MassTransit.Distributor
 			_unsubscribeAction();
 		}
 
-		private void Consume(ConfigureDistributedConsumer<T> message)
+		public bool CanAcceptMessage<TMessage>(Distributed<TMessage> message)
+		{
+			if (_inProgress >= _inProgressLimit)
+				return false;
+
+			return true;
+		}
+
+		public void IncrementInProgress()
+		{
+			Interlocked.Increment(ref _inProgress);
+		}
+
+		public void DecrementInProgress()
+		{
+			Interlocked.Decrement(ref _inProgress);
+
+			if (_inProgress == 0)
+			{
+				_queue.Enqueue(PublishWorkerAvailability);
+				_bus.Endpoint.Send(new WakeUpWorker());
+			}
+		}
+
+		private void CacheMessageTypesForSaga()
+		{
+			var saga = (TSaga) Activator.CreateInstance(typeof (TSaga), Guid.NewGuid());
+
+			saga.EnumerateDataEvents(type => _messageTypes.Add(type));
+		}
+
+		private void Consume(ConfigureWorker<TSaga> message)
 		{
 			if (message.InProgressLimit >= 0)
 				_inProgressLimit = message.InProgressLimit;
@@ -127,16 +125,12 @@ namespace MassTransit.Distributor
 
 		private void PublishWorkerAvailability()
 		{
-			_bus.Publish(new WorkerAvailable<T>(_controlUri, _dataUri, _inProgress, _inProgressLimit, _pending, _pendingLimit));
+			_messageTypes.Each(type => { this.Call("PublishWorkerAvailable", new[] { type }, new object[] { }); });
 		}
 
-		private static void RewriteResponseAddress(Uri responseAddress)
+		private void PublishWorkerAvailable<TMessage>()
 		{
-			InboundMessageHeaders.SetCurrent(x => x.SetResponseAddress(responseAddress));
-		}
-
-		public void Consume(PrimeWorker message)
-		{
+			_bus.Publish(new WorkerAvailable<TMessage>(_controlUri, _dataUri, _inProgress, _inProgressLimit, _pending, _pendingLimit));
 		}
 	}
 }

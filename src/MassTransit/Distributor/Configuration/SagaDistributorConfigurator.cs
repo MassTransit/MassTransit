@@ -16,12 +16,12 @@ namespace MassTransit.Distributor.Configuration
 	using Magnum.Reflection;
 	using MassTransit.Configuration;
 
-	public class DistributorSagaConfigurator
+	public class SagaDistributorConfigurator
 	{
 		private readonly IServiceBusConfigurator _configurator;
 		private readonly IEndpointFactory _endpointFactory;
 
-		public DistributorSagaConfigurator(IServiceBusConfigurator configurator, IEndpointFactory endpointFactory)
+		public SagaDistributorConfigurator(IServiceBusConfigurator configurator, IEndpointFactory endpointFactory)
 		{
 			_configurator = configurator;
 			_endpointFactory = endpointFactory;

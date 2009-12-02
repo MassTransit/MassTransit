@@ -22,10 +22,12 @@ namespace MassTransit.Tests.Distributor
 	{
 		private volatile bool _disposed;
 
-		public ServiceInstance(string name, IEndpointFactory endpointFactory, string subscriptionServiceEndpointAddress, Action<IServiceBusConfigurator> configurator)
+		public ServiceInstance(string name, IEndpointFactory endpointFactory, string subscriptionServiceEndpointAddress, Action<IObjectBuilder> configureBuilder, Action<IServiceBusConfigurator> configurator)
 		{
 			ObjectBuilder = MockRepository.GenerateMock<IObjectBuilder>();
 			ObjectBuilder.Stub(x => x.GetInstance<IEndpointFactory>()).Return(endpointFactory);
+
+			configureBuilder(ObjectBuilder);
 
 			ControlBus = ControlBusConfigurator.New(x =>
 				{

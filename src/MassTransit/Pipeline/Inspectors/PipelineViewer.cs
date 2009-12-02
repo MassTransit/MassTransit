@@ -101,8 +101,15 @@ namespace MassTransit.Pipeline.Inspectors
 			return true;
 		}
 
+		public bool Inspect<TSaga, TMessage>(SagaWorkerMessageSink<TSaga, TMessage> sink) where TMessage : class
+			where TSaga : SagaStateMachine<TSaga>, ISaga
+		{
+			Append(string.Format("Saga Distributor Worker ({0} - {1})", typeof(TSaga).Name, typeof (TMessage).Name));
 
-		public bool Inspect<TMessage>(DistributorWorkerMessageSink<TMessage> sink) where TMessage : class
+			return true;
+		}
+
+		public bool Inspect<TMessage>(WorkerMessageSink<TMessage> sink) where TMessage : class
 		{
 			Type messageType = typeof (TMessage).GetGenericArguments().First();
 
