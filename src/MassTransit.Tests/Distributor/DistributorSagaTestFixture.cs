@@ -34,7 +34,7 @@ namespace MassTransit.Tests.Distributor
 
 		protected override void ConfigureLocalBus(IServiceBusConfigurator configurator)
 		{
-			configurator.UseDistributorForSaga<FirstSaga>(EndpointFactory);
+			configurator.UseSagaDistributorFor<FirstSaga>(EndpointFactory);
 		}
 	}
 }

@@ -31,27 +31,23 @@ namespace MassTransit.Distributor
 		public static void ImplementDistributorWorker<T>(this IServiceBusConfigurator configurator, Func<T, Action<T>> getConsumer)
 			where T : class
 		{
-			configurator.AddService(() => new DistributorWorker<T>(getConsumer));
+			configurator.AddService(() => new Worker<T>(getConsumer));
 		}
 
-		public static void UseDistributorForSaga<T>(this IServiceBusConfigurator configurator, IEndpointFactory endpointFactory)
+		public static void UseSagaDistributorFor<T>(this IServiceBusConfigurator configurator, IEndpointFactory endpointFactory)
 			where T : SagaStateMachine<T>, ISaga
 		{
 			var saga = (T) Activator.CreateInstance(typeof (T), Guid.NewGuid());
 
-			var serviceConfigurator = new DistributorSagaConfigurator(configurator, endpointFactory);
+			var serviceConfigurator = new SagaDistributorConfigurator(configurator, endpointFactory);
 
 			saga.EnumerateDataEvents(serviceConfigurator.AddService);
 		}
 
-		public static void ImplementDistributorSagaWorker<T>(this IServiceBusConfigurator configurator, ISagaRepository<T> repository)
+		public static void ImplementSagaDistributorWorker<T>(this IServiceBusConfigurator configurator, ISagaRepository<T> repository)
 			where T : SagaStateMachine<T>, ISaga
 		{
-			var saga = (T)Activator.CreateInstance(typeof(T), Guid.NewGuid());
-
-			var serviceConfigurator = new DistributorSagaWorkerConfigurator(configurator);
-
-			saga.EnumerateDataEvents(serviceConfigurator.AddService);
+			configurator.AddService(() => new SagaWorker<T>());
 		}
 	}
 }

@@ -124,6 +124,8 @@ namespace MassTransit.Tests.Load
 			Trace.WriteLine("Workers Utilized");
 
 			sources.Each(worker => Trace.WriteLine(worker.Key + ": " + worker.Value + " commands"));
+
+			received.ShouldEqual(sent);
 		}
 	}
 }

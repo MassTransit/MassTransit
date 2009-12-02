@@ -1,24 +1,34 @@
+// Copyright 2007-2008 The Apache Software Foundation.
+//  
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
+// this file except in compliance with the License. You may obtain a copy of the 
+// License at 
+// 
+//     http://www.apache.org/licenses/LICENSE-2.0 
+// 
+// Unless required by applicable law or agreed to in writing, software distributed 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// specific language governing permissions and limitations under the License.
 namespace MassTransit.Distributor
 {
 	using System;
-	using System.Linq;
-	using System.Linq.Expressions;
 	using System.Threading;
 	using Internal;
 	using Magnum.Actors;
 	using Magnum.Actors.CommandQueues;
-	using Magnum.Reflection;
 	using Messages;
-	using Saga;
 
-	public class SagaDistributorWorker<T> :
-		ISagaDistributorWorker<T>,
-		Consumes<PrimeWorker>.All
-		where T : SagaStateMachine<T>, ISaga
+	public class Worker<T> :
+		IWorker<T>,
+		Consumes<WakeUpWorker>.All,
+		Consumes<Distributed<T>>.Selected
+		where T : class
 	{
 		private readonly int _pending;
 		private IServiceBus _bus;
 		private IServiceBus _controlBus;
+		private Func<T, Action<T>> _getConsumer;
 		private int _inProgress;
 		private int _inProgressLimit = 4;
 		private int _pendingLimit = 16;
@@ -27,13 +37,14 @@ namespace MassTransit.Distributor
 		private Uri _controlUri;
 		private CommandQueue _queue = new ThreadPoolCommandQueue();
 
-		public SagaDistributorWorker(Func<T, Action<T>> getConsumer)
-			: this(new DistributedConsumerSettings())
+		public Worker(Func<T, Action<T>> getConsumer)
+			: this(getConsumer, new WorkerSettings())
 		{
 		}
 
-		public SagaDistributorWorker(DistributedConsumerSettings settings)
+		public Worker(Func<T, Action<T>> getConsumer, WorkerSettings settings)
 		{
+			_getConsumer = getConsumer;
 
 			_inProgress = 0;
 			_inProgressLimit = settings.InProgressLimit;
@@ -43,7 +54,7 @@ namespace MassTransit.Distributor
 
 		public void Consume(Distributed<T> message)
 		{
-			Action<T> consumer = null;// _getConsumer(message.Payload);
+			Action<T> consumer = _getConsumer(message.Payload);
 
 			Interlocked.Increment(ref _inProgress);
 			try
@@ -59,7 +70,7 @@ namespace MassTransit.Distributor
 				if (_inProgress == 0)
 				{
 					_queue.Enqueue(PublishWorkerAvailability);
-					_bus.Endpoint.Send(new PrimeWorker());
+					_bus.Endpoint.Send(new WakeUpWorker());
 				}
 
 				var disposal = consumer as IDisposable;
@@ -81,6 +92,7 @@ namespace MassTransit.Distributor
 		public void Dispose()
 		{
 			_controlBus = null;
+			_getConsumer = null;
 		}
 
 		public void Start(IServiceBus bus)
@@ -91,41 +103,18 @@ namespace MassTransit.Distributor
 			_dataUri = _bus.Endpoint.Uri;
 			_controlUri = _controlBus.Endpoint.Uri;
 
-			_unsubscribeAction = bus.ControlBus.Subscribe<ConfigureDistributedConsumer<T>>(Consume);
+			_unsubscribeAction = bus.ControlBus.Subscribe<ConfigureWorker<T>>(Consume);
 			_unsubscribeAction += bus.Subscribe(this);
 
 			PublishWorkerAvailability();
 		}
-
-//		private void frack<V>()
-//		{
-//			Type messageType = typeof (V);
-//
-//			var removeExpression = SagaStateMachine<T>.GetCompletedExpression();
-//
-//			ISagaPolicy<TSaga, V> policy = _policyFactory.GetPolicy<TSaga, V>(states, removeExpression);
-//
-//			Expression<Func<TSaga, V, bool>> expression;
-//			if (SagaStateMachine<TSaga>.TryGetCorrelationExpressionForEvent(eevent, out expression))
-//			{
-//				return this.Call<UnsubscribeAction>("ConnectSink", eevent, policy, expression);
-//			}
-//
-//			// we check for a standard correlation interface second
-//			if (messageType.GetInterfaces().Where(x => x == typeof (CorrelatedBy<Guid>)).Count() > 0)
-//			{
-//				return this.Call<UnsubscribeAction>("ConnectCorrelatedSink", eevent, policy);
-//			}
-//
-//			throw new NotSupportedException("No method to connect to event was found for " + typeof (V).FullName);
-//		}
 
 		public void Stop()
 		{
 			_unsubscribeAction();
 		}
 
-		private void Consume(ConfigureDistributedConsumer<T> message)
+		private void Consume(ConfigureWorker<T> message)
 		{
 			if (message.InProgressLimit >= 0)
 				_inProgressLimit = message.InProgressLimit;
@@ -146,7 +135,7 @@ namespace MassTransit.Distributor
 			InboundMessageHeaders.SetCurrent(x => x.SetResponseAddress(responseAddress));
 		}
 
-		public void Consume(PrimeWorker message)
+		public void Consume(WakeUpWorker message)
 		{
 		}
 	}

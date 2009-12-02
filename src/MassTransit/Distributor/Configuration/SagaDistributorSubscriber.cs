@@ -16,25 +16,41 @@ namespace MassTransit.Distributor.Configuration
 	using System.Collections.Generic;
 	using System.Linq;
 	using Magnum.Reflection;
+	using Magnum.StateMachine;
 	using MassTransit.Pipeline;
 	using MassTransit.Pipeline.Configuration;
 	using MassTransit.Pipeline.Configuration.Subscribers;
-	using MassTransit.Pipeline.Sinks;
 	using Messages;
 	using Pipeline;
+	using Saga;
+	using Saga.Configuration;
 
 	public class SagaDistributorSubscriber :
 		PipelineSubscriberBase
 	{
+		private readonly ISagaPolicyFactory _policyFactory;
+
+		public SagaDistributorSubscriber()
+		{
+			_policyFactory = new SagaPolicyFactory();
+		}
+
 		public override IEnumerable<UnsubscribeAction> Subscribe<TComponent>(ISubscriberContext context, TComponent instance)
 		{
 			Type distributorInterface = typeof (TComponent).GetInterfaces()
-				.Where(x => x.IsGenericType && x.GetGenericTypeDefinition() == typeof (ISagaDistributorWorker<>))
+				.Where(x => x.IsGenericType && x.GetGenericTypeDefinition() == typeof (ISagaWorker<>))
 				.SingleOrDefault();
 
 			if (distributorInterface != null)
 			{
 				Type sagaType = distributorInterface.GetGenericArguments().First();
+
+				var argumentTypes = new[] {typeof (TComponent), sagaType};
+				var results = this.Call<IEnumerable<UnsubscribeAction>>("ConnectSinks", argumentTypes, context, instance);
+				foreach (UnsubscribeAction result in results)
+				{
+					yield return result;
+				}
 			}
 
 			yield break;
@@ -45,32 +61,42 @@ namespace MassTransit.Distributor.Configuration
 			yield break;
 		}
 
-
-		protected virtual UnsubscribeAction ConnectWorker<TComponent, TMessage>(ISubscriberContext context, Consumes<Distributed<TMessage>>.Selected consumer)
-			where TComponent : Consumes<Distributed<TMessage>>.Selected
-			where TMessage : class
+		private IEnumerable<UnsubscribeAction> ConnectSinks<TComponent, TSaga>(ISubscriberContext context, TComponent instance)
+			where TComponent : ISagaWorker<TSaga>
+			where TSaga : SagaStateMachine<TSaga>, ISaga
 		{
-			var sink = new DistributorWorkerMessageSink<Distributed<TMessage>>(message =>
-				{
-					// rock it
-					return consumer.Accept(message) ? (Action<Distributed<TMessage>>) consumer.Consume : null;
-				});
+			var saga = (TSaga) Activator.CreateInstance(typeof (TSaga), Guid.NewGuid());
 
-			return ConnectMessageSink(context, sink);
+			var inspector = new SagaStateMachineEventInspector<TSaga>();
+			saga.Inspect(inspector);
+
+			foreach (var result in inspector.GetResults())
+			{
+				Type distributedType = typeof (Distributed<>).MakeGenericType(result.SagaEvent.MessageType);
+				if (!context.HasMessageTypeBeenDefined(distributedType))
+				{
+					context.MessageTypeWasDefined(distributedType);
+
+					yield return ConnectSink(context, instance, result.SagaEvent.MessageType, result.SagaEvent.Event, result.States);
+				}
+			}
 		}
 
-		private UnsubscribeAction ConnectMessageSink<TMessage>(ISubscriberContext context, IPipelineSink<TMessage> sink)
+		private UnsubscribeAction ConnectSink<TSaga>(ISubscriberContext context, ISagaWorker<TSaga> worker, Type messageType, Event @event, IEnumerable<State> states)
+		{
+			return this.Call<UnsubscribeAction>("ConnectToSink", new[] {typeof(TSaga), messageType}, context, worker, @event, states);
+		}
+
+		private UnsubscribeAction ConnectToSink<TSaga, TMessage>(ISubscriberContext context, ISagaWorker<TSaga> worker, DataEvent<TSaga, TMessage> eevent, IEnumerable<State> states)
+			where TSaga : SagaStateMachine<TSaga>, ISaga
 			where TMessage : class
 		{
-			MessageRouterConfigurator routerConfigurator = MessageRouterConfigurator.For(context.Pipeline);
+			var factory = new SagaStateMachineMessageSinkFactory<TSaga, TMessage>(context, _policyFactory);
+			IPipelineSink<TMessage> sink = factory.Create(eevent, states);
 
-			MessageRouter<TMessage> router = routerConfigurator.FindOrCreate<TMessage>();
+			var workerSink = new SagaWorkerMessageSink<TSaga, TMessage>(worker, sink);
 
-			UnsubscribeAction result = router.Connect(sink);
-
-			UnsubscribeAction remove = context.SubscribedTo<TMessage>();
-
-			return () => result() && (router.SinkCount == 0) && remove();
+			return context.Pipeline.ConnectToRouter(workerSink, () => context.SubscribedTo<Distributed<TMessage>>());
 		}
 	}
 }

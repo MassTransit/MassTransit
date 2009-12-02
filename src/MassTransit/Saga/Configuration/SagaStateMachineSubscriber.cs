@@ -24,7 +24,7 @@ namespace MassTransit.Saga.Configuration
 	{
 		public override IEnumerable<UnsubscribeAction> Subscribe<TComponent>(ISubscriberContext context)
 		{
-			if (!IsSagaStateMachine<TComponent>())
+			if (!typeof(TComponent).IsSagaStateMachine())
 				yield break;
 
 			var results = this.Call<IEnumerable<UnsubscribeAction>>("Connect", new[] {typeof (TComponent)}, context);
@@ -53,22 +53,6 @@ namespace MassTransit.Saga.Configuration
 			{
 				yield return subscriber.Connect(result.SagaEvent.MessageType, result.SagaEvent.Event, result.States);
 			}
-		}
-
-		private static bool IsSagaStateMachine<TComponent>()
-		{
-			Type componentType = typeof (TComponent);
-
-			while (componentType.BaseType != null)
-			{
-				Type baseType = componentType.BaseType;
-				if (baseType.IsGenericType && baseType.GetGenericTypeDefinition() == typeof (SagaStateMachine<>))
-					return true;
-
-				componentType = baseType;
-			}
-
-			return false;
 		}
 	}
 }

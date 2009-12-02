@@ -10,17 +10,9 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Distributor
+namespace MassTransit.Distributor.Messages
 {
-	using Internal;
-
-	public interface IDistributorWorker :
-		IBusService
-	{
-	}
-
-	public interface IDistributorWorker<T> :
-		IDistributorWorker
+	public class WakeUpWorker
 	{
 	}
 }

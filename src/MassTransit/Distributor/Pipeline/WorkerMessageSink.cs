@@ -10,11 +10,18 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Distributor
+namespace MassTransit.Distributor.Pipeline
 {
-	public interface ConfigureDistributedConsumer<T>
+	using System;
+	using MassTransit.Pipeline.Sinks;
+
+	public class WorkerMessageSink<TMessage> :
+		InstanceMessageSinkBase<TMessage>
+		where TMessage : class
 	{
-		int InProgressLimit { get; }
-		int PendingLimit { get; }
+		public WorkerMessageSink(Func<TMessage, Action<TMessage>> acceptor)
+			: base(acceptor)
+		{
+		}
 	}
 }

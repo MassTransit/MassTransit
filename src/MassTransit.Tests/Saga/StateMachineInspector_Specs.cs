@@ -31,7 +31,7 @@ namespace MassTransit.Tests.Saga
 
 			IEndpointFactory endpointFactory = MockRepository.GenerateMock<IEndpointFactory>();
 			;
-			configurator.UseDistributorForSaga<TestSaga>(endpointFactory);
+			configurator.UseSagaDistributorFor<TestSaga>(endpointFactory);
 
 			configurator.VerifyAllExpectations();
 		}

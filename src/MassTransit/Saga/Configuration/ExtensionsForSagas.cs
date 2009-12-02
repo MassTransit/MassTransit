@@ -10,18 +10,26 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Distributor.Pipeline
+namespace MassTransit.Saga.Configuration
 {
 	using System;
-	using MassTransit.Pipeline.Sinks;
 
-	public class DistributorWorkerMessageSink<TMessage> :
-		InstanceMessageSinkBase<TMessage>
-		where TMessage : class
+	public static class ExtensionsForSagas
 	{
-		public DistributorWorkerMessageSink(Func<TMessage, Action<TMessage>> acceptor)
-			: base(acceptor)
+		public static bool IsSagaStateMachine(this Type type)
 		{
+			Type componentType = type;
+
+			while (componentType.BaseType != null)
+			{
+				Type baseType = componentType.BaseType;
+				if (baseType.IsGenericType && baseType.GetGenericTypeDefinition() == typeof (SagaStateMachine<>))
+					return true;
+
+				componentType = baseType;
+			}
+
+			return false;
 		}
 	}
 }
