@@ -12,9 +12,11 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests.TextFixtures
 {
+	using System;
 	using System.Collections.Generic;
 	using System.Threading;
 	using Configuration;
+	using Distributor;
 	using MassTransit.Saga;
 	using MassTransit.Services.Subscriptions;
 	using MassTransit.Services.Subscriptions.Client;
@@ -92,6 +94,19 @@ namespace MassTransit.Tests.TextFixtures
 					x.ReceiveFrom(ServerUri);
 					x.UseControlBus(RemoteControlBus);
 				});
+
+			Instances = new Dictionary<string, ServiceInstance>();
+		}
+
+		protected Dictionary<string, ServiceInstance> Instances { get; private set; }
+
+		protected ServiceInstance AddInstance(string instanceName, string queueName, Action<IServiceBusConfigurator> configureBus)
+		{
+			var instance = new ServiceInstance(queueName, EndpointFactory, SubscriptionServiceUri, configureBus);
+
+			Instances.Add(instanceName, instance);
+
+			return instance;
 		}
 
 		protected virtual void ConfigureLocalBus(IServiceBusConfigurator configurator)
@@ -122,6 +137,10 @@ namespace MassTransit.Tests.TextFixtures
 
 		protected override void TeardownContext()
 		{
+			Instances.Each(x => x.Value.Dispose());
+
+			Instances.Clear();
+
 			RemoteBus.Dispose();
 			RemoteBus = null;
 

@@ -10,7 +10,7 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Tests.Distributor
+namespace MassTransit.Tests.Load
 {
 	using System;
 	using System.Collections.Generic;
@@ -49,19 +49,19 @@ namespace MassTransit.Tests.Distributor
 			_received.Set();
 		}
 
-		public void Run(IServiceBus bus, int iterations)
+		public void Run(IServiceBus bus, int iterations, Func<Guid, TRequest> generateRequest)
 		{
 			using (bus.Subscribe(this).Disposable())
 			{
 				ThreadUtil.Sleep(2.Seconds());
 
-				for (int i = 0; i < iterations; i++ )
+				for (int i = 0; i < iterations; i++)
 				{
 					var commandInstance = new CommandInstance();
 					lock (_commands)
 						_commands.Add(commandInstance.Id, commandInstance);
 
-					var command = new FirstCommand(commandInstance.Id);
+					var command = generateRequest(commandInstance.Id);
 
 					ThreadUtil.Sleep(5.Milliseconds());
 
@@ -69,10 +69,7 @@ namespace MassTransit.Tests.Distributor
 						{
 							x.SendResponseTo(bus.Endpoint);
 
-							x.IfNoSubscribers<FirstCommand>(message =>
-								{
-									throw new InvalidOperationException("No subscriptions were found (timing error?)");
-								});
+							x.IfNoSubscribers<FirstCommand>(message => { throw new InvalidOperationException("No subscriptions were found (timing error?)"); });
 						});
 				}
 
@@ -117,12 +114,12 @@ namespace MassTransit.Tests.Distributor
 			Trace.WriteLine("Total Commands Sent = " + sent);
 			Trace.WriteLine("Total Responses Received = " + received);
 			Trace.WriteLine("Total Elapsed Time = " + totalDuration.TotalSeconds + "s");
-			if(received > 0)
+			if (received > 0)
 				Trace.WriteLine("Mean Roundtrip Time = " + (totalDuration.TotalMilliseconds/received).ToString("F0") + "ms");
 
 			Trace.WriteLine("Receive Latency = " + receiveDuration.TotalSeconds + "s");
-			if(received > 0)
-				Trace.WriteLine("Mean Receive Latency = " + (receiveDuration.TotalMilliseconds / received).ToString("F0") + "ms");
+			if (received > 0)
+				Trace.WriteLine("Mean Receive Latency = " + (receiveDuration.TotalMilliseconds/received).ToString("F0") + "ms");
 
 			Trace.WriteLine("Workers Utilized");
 

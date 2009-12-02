@@ -10,31 +10,31 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Transports.Msmq.Tests
+namespace MassTransit.Tests.Distributor
 {
-	using MassTransit.Tests.Load;
-	using MassTransit.Tests.Load.Messages;
-	using NUnit.Framework;
+	using Configuration;
+	using Load.Sagas;
+	using MassTransit.Distributor;
+	using MassTransit.Saga;
+	using TestFramework;
+	using TextFixtures;
 
-	[TestFixture]
-	public class Default_distributor_specifications :
-		MsmqDistributorTestFixture
+	public class DistributorSagaTestFixture<TEndpoint> :
+		SubscriptionServiceTestFixture<TEndpoint>
+		where TEndpoint : IEndpoint
 	{
+		protected ISagaRepository<FirstSaga> FirstSagaRepository { get; private set; }
+
 		protected override void EstablishContext()
 		{
 			base.EstablishContext();
 
-			AddFirstCommandInstance("A", "msmq://localhost/worker_a");
-			AddFirstCommandInstance("B", "msmq://localhost/worker_b");
-			AddFirstCommandInstance("C", "msmq://localhost/worker_c");
+			FirstSagaRepository = ObjectBuilder.SetupSagaRepository<FirstSaga>();
 		}
 
-		[Test]
-		public void Using_the_load_generator_should_share_the_load()
+		protected override void ConfigureLocalBus(IServiceBusConfigurator configurator)
 		{
-			var generator = new LoadGenerator<FirstCommand, FirstResponse>();
-
-			generator.Run(RemoteBus, 100, x => new FirstCommand(x));
+			configurator.UseDistributorForSaga<FirstSaga>(EndpointFactory);
 		}
 	}
 }

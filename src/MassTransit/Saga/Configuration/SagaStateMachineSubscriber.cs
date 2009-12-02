@@ -51,7 +51,7 @@ namespace MassTransit.Saga.Configuration
 
 			foreach (var result in inspector.GetResults())
 			{
-				yield return subscriber.Call<UnsubscribeAction>("Connect", new[] {result.SagaEvent.MessageType}, result.SagaEvent.Event, result.States);
+				yield return subscriber.Connect(result.SagaEvent.MessageType, result.SagaEvent.Event, result.States);
 			}
 		}
 

@@ -13,16 +13,11 @@
 namespace MassTransit.Saga.Configuration
 {
 	using System;
-	using System.Collections;
 	using System.Collections.Generic;
-	using System.Linq;
-	using System.Linq.Expressions;
-	using Exceptions;
 	using Magnum.Reflection;
 	using Magnum.StateMachine;
 	using MassTransit.Pipeline;
 	using MassTransit.Pipeline.Configuration;
-	using Pipeline;
 
 	public class SagaEventSubscriber<TSaga>
 		where TSaga : SagaStateMachine<TSaga>, ISaga
@@ -36,66 +31,18 @@ namespace MassTransit.Saga.Configuration
 			_policyFactory = policyFactory;
 		}
 
-		public UnsubscribeAction Connect<V>(DataEvent<TSaga, V> eevent, IEnumerable<State> states)
-			where V : class
+		public UnsubscribeAction Connect(Type messageType, Event @event, IEnumerable<State> states)
 		{
-			Type messageType = typeof (V);
-
-			var removeExpression = SagaStateMachine<TSaga>.GetCompletedExpression();
-
-			ISagaPolicy<TSaga, V> policy = _policyFactory.GetPolicy<TSaga, V>(states, removeExpression);
-
-			Expression<Func<TSaga, V, bool>> expression;
-			if (SagaStateMachine<TSaga>.TryGetCorrelationExpressionForEvent(eevent, out expression))
-			{
-				return this.Call<UnsubscribeAction>("ConnectSink", eevent, policy, expression);
-			}
-
-			// we check for a standard correlation interface second
-			if (messageType.GetInterfaces().Where(x => x == typeof (CorrelatedBy<Guid>)).Count() > 0)
-			{
-				return this.Call<UnsubscribeAction>("ConnectCorrelatedSink", eevent, policy);
-			}
-
-			throw new NotSupportedException("No method to connect to event was found for " + typeof (V).FullName);
+			return this.Call<UnsubscribeAction>("ConnectTo", new[] {messageType}, @event, states);
 		}
 
-		protected virtual UnsubscribeAction ConnectCorrelatedSink<V>(DataEvent<TSaga, V> dataEvent, ISagaPolicy<TSaga, V> policy)
-			where V : class, CorrelatedBy<Guid>
+		private UnsubscribeAction ConnectTo<TMessage>(DataEvent<TSaga, TMessage> eevent, IEnumerable<State> states)
+			where TMessage : class
 		{
-			var repository = _context.Builder.GetInstance<ISagaRepository<TSaga>>();
+			var factory = new SagaStateMachineMessageSinkFactory<TSaga, TMessage>(_context, _policyFactory);
+			IPipelineSink<TMessage> sink = factory.Create(eevent, states);
 
-			var sink = new CorrelatedSagaStateMachineMessageSink<TSaga, V>(_context, _context.Data as IServiceBus, repository, policy, dataEvent);
-			if (sink == null)
-				throw new ConfigurationException("Could not build the message sink: " + typeof (CorrelatedSagaStateMachineMessageSink<TSaga, V>).ToFriendlyName());
-
-			return ConnectToRouter<V>(sink);
-		}
-
-		protected virtual UnsubscribeAction ConnectSink<V>(DataEvent<TSaga, V> dataEvent, ISagaPolicy<TSaga, V> policy, Expression<Func<TSaga, V, bool>> selector)
-			where V : class
-		{
-			var repository = _context.Builder.GetInstance<ISagaRepository<TSaga>>();
-
-			var sink = new PropertySagaStateMachineMessageSink<TSaga, V>(_context, _context.Data as IServiceBus, repository, policy, selector, dataEvent);
-			if (sink == null)
-				throw new ConfigurationException("Could not build the message sink: " + typeof (PropertySagaStateMachineMessageSink<TSaga, V>).ToFriendlyName());
-
-			return ConnectToRouter<V>(sink);
-		}
-
-		protected virtual UnsubscribeAction ConnectToRouter<V>(IPipelineSink<V> sink)
-			where V : class
-		{
-			MessageRouterConfigurator routerConfigurator = MessageRouterConfigurator.For(_context.Pipeline);
-
-			var router = routerConfigurator.FindOrCreate<V>();
-
-			var result = router.Connect(sink);
-
-			UnsubscribeAction remove = _context.SubscribedTo<V>();
-
-			return () => result() && (router.SinkCount == 0) && remove();
+			return _context.Pipeline.ConnectToRouter(sink, () => _context.SubscribedTo<TMessage>());
 		}
 	}
 }

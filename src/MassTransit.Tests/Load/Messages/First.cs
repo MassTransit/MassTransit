@@ -10,23 +10,13 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.TestFramework.Examples
+namespace MassTransit.Tests.Load.Messages
 {
-	using Messages;
+	using System;
 
-	[Scenario]
-	public class Given_a_consumer_is_subscribed_to_a_message_on_a_remote_bus :
-		Given_a_subscription_service_and_two_service_buses
+	public interface First :
+		CorrelatedBy<Guid>
 	{
-		[Given]
-		public void A_consumer_is_subscribed_to_a_message()
-		{
-			Consumer = new ConsumerOf<SimpleMessage>();
-			RemoteBus.Subscribe(Consumer);
-
-			LocalBus.ShouldHaveSubscriptionFor<SimpleMessage>();
-		}
-
-		protected ConsumerOf<SimpleMessage> Consumer { get; private set; }
+		DateTime CreatedAt { get; }
 	}
 }

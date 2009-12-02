@@ -15,13 +15,21 @@ namespace MassTransit.TestFramework
 	using System;
 	using System.Threading;
 	using Helpers;
+	using Magnum.DateTimeExtensions;
 	using NUnit.Framework;
 
 	public static class ExtensionMethodsForSubscriptions
 	{
-		public static void ShouldHaveSubscriptionFor<TMessage>(this IServiceBus bus, TimeSpan timeout)
+		public static TimeSpan Timeout { get; set; }
+
+		static ExtensionMethodsForSubscriptions()
 		{
-			DateTime giveUpAt = DateTime.Now + timeout;
+			Timeout = 3.Seconds();
+		}
+
+		public static void ShouldHaveSubscriptionFor<TMessage>(this IServiceBus bus)
+		{
+			DateTime giveUpAt = DateTime.Now + Timeout;
 
 			while (DateTime.Now < giveUpAt)
 			{
@@ -35,7 +43,7 @@ namespace MassTransit.TestFramework
 				Thread.Sleep(10);
 			}
 
-			Assert.Fail("A subscription for " + typeof (TMessage).Name + " was not found on " + bus.Endpoint.Uri);
+			Assert.Fail("A subscription for " + typeof (TMessage).ToFriendlyName() + " was not found on " + bus.Endpoint.Uri);
 		}
 	}
 }
