@@ -54,6 +54,7 @@ namespace MassTransit.Pipeline.Configuration
             _interceptors.Register(new ObservesSubscriber());
             _interceptors.Register(new OrchestratesSubscriber());
             _interceptors.Register(new InitiatesSubscriber());
+    		_interceptors.Register(new SagaDistributorSubscriber());
     		_interceptors.Register(new DistributorSubscriber());
         }
 

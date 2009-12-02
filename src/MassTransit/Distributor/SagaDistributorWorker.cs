@@ -11,16 +11,14 @@ namespace MassTransit.Distributor
 	using Messages;
 	using Saga;
 
-	public class DistributorSagaWorker<T> :
-		IDistributorWorker<T>,
-		Consumes<PrimeWorker>.All,
-		Consumes<Distributed<T>>.Selected
-		where T : class
+	public class SagaDistributorWorker<T> :
+		ISagaDistributorWorker<T>,
+		Consumes<PrimeWorker>.All
+		where T : SagaStateMachine<T>, ISaga
 	{
 		private readonly int _pending;
 		private IServiceBus _bus;
 		private IServiceBus _controlBus;
-		private Func<T, Action<T>> _getConsumer;
 		private int _inProgress;
 		private int _inProgressLimit = 4;
 		private int _pendingLimit = 16;
@@ -29,14 +27,13 @@ namespace MassTransit.Distributor
 		private Uri _controlUri;
 		private CommandQueue _queue = new ThreadPoolCommandQueue();
 
-		public DistributorSagaWorker(Func<T, Action<T>> getConsumer)
-			: this(getConsumer, new DistributedConsumerSettings())
+		public SagaDistributorWorker(Func<T, Action<T>> getConsumer)
+			: this(new DistributedConsumerSettings())
 		{
 		}
 
-		public DistributorSagaWorker(Func<T, Action<T>> getConsumer, DistributedConsumerSettings settings)
+		public SagaDistributorWorker(DistributedConsumerSettings settings)
 		{
-			_getConsumer = getConsumer;
 
 			_inProgress = 0;
 			_inProgressLimit = settings.InProgressLimit;
@@ -46,7 +43,7 @@ namespace MassTransit.Distributor
 
 		public void Consume(Distributed<T> message)
 		{
-			Action<T> consumer = _getConsumer(message.Payload);
+			Action<T> consumer = null;// _getConsumer(message.Payload);
 
 			Interlocked.Increment(ref _inProgress);
 			try
@@ -84,7 +81,6 @@ namespace MassTransit.Distributor
 		public void Dispose()
 		{
 			_controlBus = null;
-			_getConsumer = null;
 		}
 
 		public void Start(IServiceBus bus)

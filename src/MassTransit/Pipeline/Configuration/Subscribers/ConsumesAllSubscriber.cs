@@ -12,43 +12,32 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Pipeline.Configuration.Subscribers
 {
-    using System;
-    using Sinks;
+	using System;
+	using Sinks;
 
-    public class ConsumesAllSubscriber :
-        ConsumesSubscriberBase<ConsumesAllSubscriber>
-    {
-        protected override Type InterfaceType
-        {
-            get { return typeof (Consumes<>.All); }
-        }
+	public class ConsumesAllSubscriber :
+		ConsumesSubscriberBase<ConsumesAllSubscriber>
+	{
+		protected override Type InterfaceType
+		{
+			get { return typeof (Consumes<>.All); }
+		}
 
-        protected virtual UnsubscribeAction Connect<TMessage>(ISubscriberContext context, Consumes<TMessage>.All consumer) where TMessage : class
-        {
-            MessageRouterConfigurator routerConfigurator = MessageRouterConfigurator.For(context.Pipeline);
+		protected virtual UnsubscribeAction Connect<TMessage>(ISubscriberContext context, Consumes<TMessage>.All consumer)
+			where TMessage : class
+		{
+			var sink = new InstanceMessageSink<TMessage>(message => consumer.Consume);
 
-            var router = routerConfigurator.FindOrCreate<TMessage>();
+			return context.Pipeline.ConnectToRouter(sink, () => context.SubscribedTo<TMessage>());
+		}
 
-            UnsubscribeAction result = router.Connect(new InstanceMessageSink<TMessage>(message => consumer.Consume));
+		protected virtual UnsubscribeAction Connect<TComponent, TMessage>(ISubscriberContext context)
+			where TMessage : class
+			where TComponent : class, Consumes<TMessage>.All
+		{
+			var sink = new ComponentMessageSink<TComponent, TMessage>(context);
 
-            UnsubscribeAction remove = context.SubscribedTo<TMessage>();
-
-            return () => result() && ( router.SinkCount == 0 ) && remove();
-        }
-
-        protected virtual UnsubscribeAction Connect<TComponent, TMessage>(ISubscriberContext context)
-            where TMessage : class
-            where TComponent : class, Consumes<TMessage>.All
-        {
-            MessageRouterConfigurator routerConfigurator = MessageRouterConfigurator.For(context.Pipeline);
-
-            var router = routerConfigurator.FindOrCreate<TMessage>();
-
-            UnsubscribeAction result = router.Connect(new ComponentMessageSink<TComponent, TMessage>(context));
-
-            UnsubscribeAction remove = context.SubscribedTo<TMessage>();
-
-            return () => result() && (router.SinkCount == 0) && remove();
-        }
-    }
+			return context.Pipeline.ConnectToRouter(sink, () => context.SubscribedTo<TMessage>());
+		}
+	}
 }

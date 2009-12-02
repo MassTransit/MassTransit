@@ -14,20 +14,53 @@ namespace MassTransit.Tests.Distributor
 {
 	using Load;
 	using Load.Messages;
+	using Load.Sagas;
+	using MassTransit.Distributor.Messages;
 	using MassTransit.Pipeline.Inspectors;
 	using NUnit.Framework;
+	using TestFramework;
 
 	[TestFixture]
-	public class Default_distributor_specifications :
-		LoopbackDistributorTestFixture
+	public class Using_the_distributor_for_a_saga :
+		LoopbackDistributorSagaTestFixture
+	{
+		[Test]
+		public void Should_have_a_subscription_for_the_first_command()
+		{
+			LocalBus.ShouldHaveSubscriptionFor<FirstCommand>();
+		}
+
+		[Test]
+		public void Should_have_a_subscription_for_the_pending_command()
+		{
+			LocalBus.ShouldHaveSubscriptionFor<FirstPending>();
+		}
+	}
+
+	[TestFixture]
+	public class Using_the_distributor_saga_worker_for_a_saga :
+		LoopbackDistributorSagaTestFixture
 	{
 		protected override void EstablishContext()
 		{
 			base.EstablishContext();
 
-			AddFirstCommandInstance("A", "loopback://localhost/a");
-			AddFirstCommandInstance("B", "loopback://localhost/b");
-			AddFirstCommandInstance("C", "loopback://localhost/c");
+			ServiceInstance instance = AddInstance("A", "loopback://localhost/a", x =>
+				{
+					//x.ImplementDistributorSagaWorker<FirstSaga>(FirstSagaRepository);
+				});
+
+			instance.ObjectBuilder.Add(FirstSagaRepository);
+			instance.DataBus.Subscribe<FirstSaga>();
+
+			//AddFirstCommandInstance("B", "loopback://localhost/b");
+			//AddFirstCommandInstance("C", "loopback://localhost/c");
+		}
+
+		[Test, Explicit]
+		public void Should_register_the_message_consumers()
+		{
+			Instances["A"].DataBus.ShouldHaveSubscriptionFor<Distributed<FirstCommand>>();
 		}
 
 		[Test]
@@ -41,8 +74,6 @@ namespace MassTransit.Tests.Distributor
 		[Test]
 		public void The_pipeline_viewer_should_show_the_distributor()
 		{
-			PipelineViewer.Trace(LocalBus.InboundPipeline);
-
 			PipelineViewer.Trace(Instances["A"].DataBus.InboundPipeline);
 		}
 	}

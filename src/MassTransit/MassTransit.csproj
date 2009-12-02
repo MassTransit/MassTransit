@@ -139,11 +139,14 @@
     <Compile Include="Actors\InMemoryActorRepository.cs" />
     <Compile Include="Actors\StateDrivenActor.cs" />
     <Compile Include="CurrentMessage.cs" />
+    <Compile Include="Distributor\Configuration\DistributorSagaWorkerConfigurator.cs" />
     <Compile Include="Distributor\Configuration\DistributorSubscriber.cs" />
+    <Compile Include="Distributor\Configuration\SagaDistributorSubscriber.cs" />
     <Compile Include="Distributor\ConfigureDistributedConsumer.cs" />
     <Compile Include="Distributor\DefaultWorkerSelectionStrategy.cs" />
     <Compile Include="Distributor\DistributedConsumerSettings.cs" />
-    <Compile Include="Distributor\DistributorSagaWorker.cs" />
+    <Compile Include="Distributor\ISagaDistributorWorker.cs" />
+    <Compile Include="Distributor\SagaDistributorWorker.cs" />
     <Compile Include="Distributor\IDistributorWorker.cs" />
     <Compile Include="Distributor\IWorkerSelectionStrategy.cs" />
     <Compile Include="Distributor\Messages\Distributed.cs" />
@@ -156,7 +159,7 @@
     <Compile Include="Distributor\Pipeline\DistributorMessageSink.cs" />
     <Compile Include="Distributor\Pipeline\DistributorWorkerMessageSink.cs" />
     <Compile Include="Distributor\PrimeWorker.cs" />
-    <Compile Include="Distributor\Configuration\SagaDistributorConfigurator.cs" />
+    <Compile Include="Distributor\Configuration\DistributorSagaConfigurator.cs" />
     <Compile Include="Distributor\WorkerDetails.cs" />
     <Compile Include="EndpointAddress.cs" />
     <Compile Include="Events\MessagePublished.cs" />
@@ -253,10 +256,12 @@
     <Compile Include="Saga\Configuration\EventInspectorResult.cs" />
     <Compile Include="Saga\Configuration\ISagaPolicyFactory.cs" />
     <Compile Include="Saga\Configuration\ObservesSubscriber.cs" />
+    <Compile Include="Pipeline\Configuration\ExtensionsForPipelineConfiguration.cs" />
     <Compile Include="Saga\Configuration\SagaEvent.cs" />
     <Compile Include="Saga\Configuration\SagaEventSubscriber.cs" />
     <Compile Include="Saga\Configuration\SagaPolicyFactory.cs" />
     <Compile Include="Saga\Configuration\SagaStateMachineEventInspector.cs" />
+    <Compile Include="Saga\Configuration\SagaStateMachineMessageSinkFactory.cs" />
     <Compile Include="Saga\CreateOrUseExistingSagaPolicy.cs" />
     <Compile Include="Saga\DataEventBinder.cs" />
     <Compile Include="Saga\EventBinder.cs" />
@@ -459,7 +464,6 @@
     <Compile Include="Batch\Pipeline\BatchSubscriber.cs" />
     <Compile Include="Pipeline\Configuration\Subscribers\ConsumesForSubscriber.cs" />
     <Compile Include="Pipeline\Configuration\MessageRouterConfiguratorScope.cs" />
-    <Compile Include="Pipeline\Configuration\Subscribers\EndpointSubscriber.cs" />
     <Compile Include="Saga\Configuration\InitiatesSubscriber.cs" />
     <Compile Include="Saga\Configuration\OrchestratesSubscriber.cs" />
     <Compile Include="Batch\Pipeline\BatchCombiner.cs" />

@@ -50,13 +50,7 @@ namespace MassTransit.Pipeline.Sinks
 					});
 			}
 
-			MessageRouterConfigurator configurator = MessageRouterConfigurator.For(keySink);
-
-			var router = configurator.FindOrCreate<TMessage>();
-
-			UnsubscribeAction remove = router.Connect(sink);
-
-			return () => { return remove() && _sinks.WriteLock(x => DisconnectIfEmpty(x, correlationId)); };
+			return keySink.ConnectToRouter(sink, () => _sinks.WriteLock(x => DisconnectIfEmpty(x, correlationId)));
 		}
 
 		private static bool DisconnectIfEmpty(IDictionary<TKey, IPipelineSink<TMessage>> sinks, TKey correlationId)

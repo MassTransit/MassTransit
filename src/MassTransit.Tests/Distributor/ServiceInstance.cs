@@ -14,9 +14,7 @@ namespace MassTransit.Tests.Distributor
 {
 	using System;
 	using Configuration;
-	using MassTransit.Distributor;
 	using MassTransit.Services.Subscriptions.Configuration;
-	using Messages;
 	using Rhino.Mocks;
 
 	public class ServiceInstance :
@@ -47,7 +45,7 @@ namespace MassTransit.Tests.Distributor
 						});
 					x.ReceiveFrom(name);
 					x.UseControlBus(ControlBus);
-					x.SetConcurrentConsumerLimit(2);
+					x.SetConcurrentConsumerLimit(1);
 
 					configurator(x);
 				});

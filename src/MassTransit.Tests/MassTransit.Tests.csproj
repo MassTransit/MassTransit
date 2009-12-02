@@ -88,14 +88,18 @@
     <Compile Include="Configuration_Specs.cs" />
     <Compile Include="ContextSetup.cs" />
     <Compile Include="ControlBus_Specs.cs" />
-    <Compile Include="Distributor\CommandInstance.cs" />
+    <Compile Include="Distributor\DistributorSagaTestFixture.cs" />
+    <Compile Include="Distributor\DistributorSaga_Specs.cs" />
+    <Compile Include="Distributor\LoopbackDistributorSagaTestFixture.cs" />
+    <Compile Include="Load\CommandInstance.cs" />
     <Compile Include="Distributor\Default_Specs.cs" />
     <Compile Include="Distributor\DistributorTestFixture.cs" />
-    <Compile Include="Distributor\First.cs" />
-    <Compile Include="Distributor\LoadGenerator.cs" />
+    <Compile Include="Load\Messages\First.cs" />
+    <Compile Include="Load\LoadGenerator.cs" />
     <Compile Include="Distributor\LoopbackDistributorTestFixture.cs" />
-    <Compile Include="Distributor\Messages\FirstCommand.cs" />
-    <Compile Include="Distributor\Messages\FirstResponse.cs" />
+    <Compile Include="Load\Messages\FirstCommand.cs" />
+    <Compile Include="Load\Messages\FirstPending.cs" />
+    <Compile Include="Load\Messages\FirstResponse.cs" />
     <Compile Include="Distributor\ServiceInstance.cs" />
     <Compile Include="ExtensionsForTestingEndpoints.cs" />
     <Compile Include="Fault_Specs.cs" />
@@ -121,6 +125,7 @@
     <Compile Include="Groups\Group_Specs.cs" />
     <Compile Include="InterfaceSubscription_Specs.cs" />
     <Compile Include="Load\RequestResponse_LoadTest.cs" />
+    <Compile Include="Load\Sagas\FirstSaga.cs" />
     <Compile Include="MessageContext_Specs.cs" />
     <Compile Include="MessageInterceptor_Specs.cs" />
     <Compile Include="Performance\EndpointLoadTest.cs" />
@@ -232,6 +237,10 @@
     <Compile Include="Uri_Specs.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\MassTransit.TestFramework\MassTransit.TestFramework.csproj">
+      <Project>{3C4B5F1A-69AD-415E-9F40-A7FDBD7A3012}</Project>
+      <Name>MassTransit.TestFramework</Name>
+    </ProjectReference>
     <ProjectReference Include="..\MassTransit\MassTransit.csproj">
       <Project>{6EFD69FC-CBCC-4F85-AEE0-EFBA73F4D273}</Project>
       <Name>MassTransit</Name>

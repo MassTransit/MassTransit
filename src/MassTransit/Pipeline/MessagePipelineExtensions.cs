@@ -94,9 +94,9 @@ namespace MassTransit.Pipeline
 
 		public static UnsubscribeAction Subscribe<TMessage>(this IMessagePipeline pipeline, IEndpoint endpoint) where TMessage : class
 		{
-			MessageRouterConfigurator routerConfigurator = MessageRouterConfigurator.For(pipeline);
+			var sink = new EndpointMessageSink<TMessage>(endpoint);
 
-			return routerConfigurator.FindOrCreate<TMessage>().Connect(new EndpointMessageSink<TMessage>(endpoint));
+			return pipeline.ConnectToRouter(sink);
 		}
 
 		public static UnsubscribeAction Subscribe<TMessage,TKey>(this IMessagePipeline pipeline, TKey correlationId, IEndpoint endpoint) 

@@ -29,7 +29,7 @@ namespace MassTransit.Pipeline.Configuration
 		{
 			MessageRouterConfigurator configurator = MessageRouterConfigurator.For(_sink);
 
-			var router = configurator.FindOrCreate<TMessage>();
+			MessageRouter<TMessage> router = configurator.FindOrCreate<TMessage>();
 
 			var scope = new CorrelatedMessageRouterConfiguratorScope<TMessage, TKey>();
 
@@ -38,23 +38,23 @@ namespace MassTransit.Pipeline.Configuration
 			return scope.Router ?? ConfigureRouter<TMessage, TKey>(router);
 		}
 
+		public static CorrelatedMessageRouterConfigurator For<TMessage>(IPipelineSink<TMessage> sink)
+			where TMessage : class
+		{
+			return new CorrelatedMessageRouterConfigurator(sink.TranslateTo<IPipelineSink<object>>());
+		}
+
 		private static CorrelatedMessageRouter<TMessage, TKey> ConfigureRouter<TMessage, TKey>(MessageRouter<TMessage> messageRouter)
 			where TMessage : class, CorrelatedBy<TKey>
 		{
 			if (messageRouter == null)
 				throw new PipelineException("The base object router was not found");
 
-			CorrelatedMessageRouter<TMessage, TKey> router = new CorrelatedMessageRouter<TMessage, TKey>();
+			var router = new CorrelatedMessageRouter<TMessage, TKey>();
 
 			messageRouter.Connect(router);
 
 			return router;
-		}
-
-		public static CorrelatedMessageRouterConfigurator For<TMessage>(IPipelineSink<TMessage> sink)
-			where TMessage : class
-		{
-			return new CorrelatedMessageRouterConfigurator(sink.TranslateTo<IPipelineSink<object>>());
 		}
 	}
 }
