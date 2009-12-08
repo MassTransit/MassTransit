@@ -22,6 +22,7 @@ namespace MassTransit.Distributor
 	public class Worker<T> :
 		IWorker<T>,
 		Consumes<WakeUpWorker>.All,
+        Consumes<PingWorker>.All,
 		Consumes<Distributed<T>>.Selected
 		where T : class
 	{
@@ -36,7 +37,7 @@ namespace MassTransit.Distributor
 		private Uri _dataUri;
 		private Uri _controlUri;
 		private CommandQueue _queue = new ThreadPoolCommandQueue();
-        private WorkerPendingMessageTracker<Guid> _pendingMessages = new WorkerPendingMessageTracker<Guid>();
+        private readonly WorkerPendingMessageTracker<Guid> _pendingMessages = new WorkerPendingMessageTracker<Guid>();
 
 		public Worker(Func<T, Action<T>> getConsumer)
 			: this(getConsumer, new WorkerSettings())
@@ -109,6 +110,7 @@ namespace MassTransit.Distributor
 			_controlUri = _controlBus.Endpoint.Uri;
 
 			_unsubscribeAction = bus.ControlBus.Subscribe<ConfigureWorker<T>>(Consume);
+		    _unsubscribeAction += bus.ControlBus.Subscribe<PingWorker>(Consume);
 			_unsubscribeAction += bus.Subscribe(this);
 
 			PublishWorkerAvailability();
@@ -144,5 +146,10 @@ namespace MassTransit.Distributor
 		public void Consume(WakeUpWorker message)
 		{
 		}
+
+	    public void Consume(PingWorker message)
+	    {
+	        PublishWorkerAvailability();
+	    }
 	}
 }

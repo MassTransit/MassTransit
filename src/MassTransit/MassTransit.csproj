@@ -143,6 +143,7 @@
     <Compile Include="Distributor\Configuration\SagaDistributorSubscriber.cs" />
     <Compile Include="Distributor\Messages\ConfigureWorker.cs" />
     <Compile Include="Distributor\DefaultWorkerSelectionStrategy.cs" />
+    <Compile Include="Distributor\Messages\PingWorker.cs" />
     <Compile Include="Distributor\Pipeline\SagaWorkerMessageSink.cs" />
     <Compile Include="Distributor\WorkerPendingMessageTracker.cs" />
     <Compile Include="Distributor\WorkerSettings.cs" />
