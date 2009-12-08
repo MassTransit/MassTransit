@@ -19,6 +19,7 @@ namespace MassTransit.Internal
 	using Events;
 	using Exceptions;
 	using log4net;
+	using Magnum.Activator;
 	using Magnum.InterfaceExtensions;
 	using Magnum.Pipeline;
 	using Magnum.Reflection;
@@ -153,9 +154,9 @@ namespace MassTransit.Internal
 		private void CreateAndPublishFault(object message, Exception ex)
 		{
 			if (message.Implements(typeof (CorrelatedBy<>)))
-				this.Call("PublishFault", ClassFactory.New(typeof (Fault<,>), message, ex));
+				this.Call("PublishFault", FastActivator.Create(typeof (Fault<,>), message, ex));
 			else
-				this.Call("PublishFault", ClassFactory.New(typeof (Fault<>), message, ex));
+				this.Call("PublishFault", FastActivator.Create(typeof (Fault<>), message, ex));
 		}
 
 		// this is called via reflection

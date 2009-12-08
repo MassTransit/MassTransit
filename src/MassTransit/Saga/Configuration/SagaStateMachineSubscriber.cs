@@ -15,6 +15,7 @@ namespace MassTransit.Saga.Configuration
 	using System;
 	using System.Collections.Generic;
 	using Magnum;
+	using Magnum.Activator;
 	using Magnum.Reflection;
 	using MassTransit.Pipeline;
 	using MassTransit.Pipeline.Configuration.Subscribers;
@@ -42,7 +43,7 @@ namespace MassTransit.Saga.Configuration
 		protected virtual IEnumerable<UnsubscribeAction> Connect<TComponent>(ISubscriberContext context)
 			where TComponent : SagaStateMachine<TComponent>, ISaga
 		{
-			var component = (TComponent) Activator.CreateInstance(typeof (TComponent), CombGuid.Generate());
+			var component = FastActivator<TComponent>.Create(CombGuid.Generate());
 
 			var inspector = new SagaStateMachineEventInspector<TComponent>();
 			component.Inspect(inspector);

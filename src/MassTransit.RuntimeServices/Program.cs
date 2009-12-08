@@ -16,6 +16,7 @@ namespace MassTransit.RuntimeServices
 	using System.IO;
 	using log4net;
 	using log4net.Config;
+	using Magnum.Activator;
 	using Services.HealthMonitoring;
 	using Services.Subscriptions.Server;
 	using Services.Timeout;
@@ -95,7 +96,7 @@ namespace MassTransit.RuntimeServices
 								.AddInstances(i => i.OfConcreteType<TService>().WithName(typeof (TService).Name));
 						});
 
-					TRegistry registry = (TRegistry) Activator.CreateInstance(typeof (TRegistry), container);
+					TRegistry registry = FastActivator<TRegistry>.Create(container);
 
 					container.Configure(x => x.AddRegistry(registry));
 

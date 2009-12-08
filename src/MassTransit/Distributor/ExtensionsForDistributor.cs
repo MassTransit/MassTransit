@@ -14,6 +14,8 @@ namespace MassTransit.Distributor
 {
 	using System;
 	using Configuration;
+	using Magnum;
+	using Magnum.Activator;
 	using Magnum.DateTimeExtensions;
 	using MassTransit.Configuration;
 	using Saga;
@@ -37,7 +39,8 @@ namespace MassTransit.Distributor
 		public static void UseSagaDistributorFor<T>(this IServiceBusConfigurator configurator, IEndpointFactory endpointFactory)
 			where T : SagaStateMachine<T>, ISaga
 		{
-			var saga = (T) Activator.CreateInstance(typeof (T), Guid.NewGuid());
+			var saga = FastActivator<T>.Create(CombGuid.Generate());
+			//var saga = (T) Activator.CreateInstance(typeof (T), Guid.NewGuid());
 
 			var serviceConfigurator = new SagaDistributorConfigurator(configurator, endpointFactory);
 

@@ -15,6 +15,7 @@ namespace MassTransit.Internal
 	using System;
 	using System.Collections.Generic;
 	using Magnum;
+	using Magnum.Context;
 
 	public class OutboundMessage :
 		MessageHeadersBase,

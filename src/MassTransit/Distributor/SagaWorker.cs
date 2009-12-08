@@ -15,6 +15,8 @@ namespace MassTransit.Distributor
 	using System;
 	using System.Collections.Generic;
 	using System.Threading;
+	using Magnum;
+	using Magnum.Activator;
 	using Magnum.Actors;
 	using Magnum.Actors.CommandQueues;
 	using Magnum.Reflection;
@@ -107,7 +109,7 @@ namespace MassTransit.Distributor
 
 		private void CacheMessageTypesForSaga()
 		{
-			var saga = (TSaga) Activator.CreateInstance(typeof (TSaga), Guid.NewGuid());
+			var saga = FastActivator<TSaga>.Create(CombGuid.Generate());
 
 			saga.EnumerateDataEvents(type => _messageTypes.Add(type));
 		}
