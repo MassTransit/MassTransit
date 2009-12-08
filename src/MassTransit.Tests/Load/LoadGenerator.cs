@@ -86,7 +86,7 @@ namespace MassTransit.Tests.Load
 
 		private void DisplayResults()
 		{
-			var sources = new Dictionary<Uri, int>();
+            var sources = GetWorkerLoad();
 
 			int sent = 0;
 			int received = 0;
@@ -103,11 +103,6 @@ namespace MassTransit.Tests.Load
 						received++;
 						totalDuration += (command.ResponseReceivedAt - command.CreatedAt);
 						receiveDuration += (command.ResponseCreatedAt - command.CreatedAt);
-
-						if (sources.ContainsKey(command.Worker))
-							sources[command.Worker] = sources[command.Worker] + 1;
-						else
-							sources.Add(command.Worker, 1);
 					}
 				});
 
@@ -127,5 +122,23 @@ namespace MassTransit.Tests.Load
 
 			received.ShouldEqual(sent);
 		}
+
+        public Dictionary<Uri, int> GetWorkerLoad()
+        {
+            var sources = new Dictionary<Uri, int>();
+
+            _commands.Values.Each(command =>
+            {
+                if (command.Worker != null)
+                {
+                    if (sources.ContainsKey(command.Worker))
+                        sources[command.Worker] = sources[command.Worker] + 1;
+                    else
+                        sources.Add(command.Worker, 1);
+                }
+            });
+
+            return sources;
+        }
 	}
 }

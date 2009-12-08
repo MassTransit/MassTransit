@@ -13,7 +13,6 @@
 namespace MassTransit.Tests.Distributor
 {
 	using System;
-	using System.Collections.Generic;
 	using Configuration;
 	using Load.Messages;
 	using Magnum;

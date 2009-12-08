@@ -15,10 +15,11 @@ namespace MassTransit.Distributor
 	using System.Collections.Generic;
 	using System.Linq;
 
-	public class DefaultWorkerSelectionStrategy :
-		IWorkerSelectionStrategy
+	public class DefaultWorkerSelectionStrategy<T> :
+		IWorkerSelectionStrategy<T> 
+        where T : class
 	{
-		public IEnumerable<WorkerDetails> GetAvailableWorkers(IEnumerable<WorkerDetails> candidates)
+		public IEnumerable<WorkerDetails> GetAvailableWorkers(IEnumerable<WorkerDetails> candidates, T message)
 		{
 			return candidates
 				.Where(x => x.InProgress < x.InProgressLimit * 4)
