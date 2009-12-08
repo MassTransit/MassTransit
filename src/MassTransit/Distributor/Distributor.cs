@@ -14,8 +14,11 @@ namespace MassTransit.Distributor
 {
 	using System;
 	using System.Linq;
+    using System.Threading;
 	using Magnum;
 	using Magnum.Threading;
+    using Magnum.Actors.Schedulers;
+    using Magnum.DateTimeExtensions;
 	using Messages;
 
 	public class Distributor<T> :
@@ -27,11 +30,15 @@ namespace MassTransit.Distributor
 		private readonly ReaderWriterLockedDictionary<Uri, WorkerDetails> _workers = new ReaderWriterLockedDictionary<Uri, WorkerDetails>();
 		private IWorkerSelectionStrategy<T> _selectionStrategy;
 		private UnsubscribeAction _unsubscribeAction = () => false;
+	    private ThreadPoolScheduler _threadPoolScheduler;
+	    private Timer _pinger;
 
         public Distributor(IEndpointFactory endpointFactory, IWorkerSelectionStrategy<T> workerSelectionStrategy)
         {
             _endpointFactory = endpointFactory;
 			_selectionStrategy = workerSelectionStrategy;
+
+            _threadPoolScheduler = new ThreadPoolScheduler();
         }
 
 	    public Distributor(IEndpointFactory endpointFactory) :
@@ -72,10 +79,15 @@ namespace MassTransit.Distributor
 
 			// don't plan to unsubscribe this since it's an important thing
 			bus.Subscribe(this);
+
+		    int oneMinute = (int) 1.Minutes().TotalMilliseconds;
+            _threadPoolScheduler.Schedule(oneMinute, oneMinute, PingWorkers);
 		}
 
 		public void Stop()
 		{
+            _threadPoolScheduler.Dispose();
+
 			_workers.Clear();
 
 			_unsubscribeAction();
@@ -97,5 +109,16 @@ namespace MassTransit.Distributor
 
 			worker.UpdateInProgress(message.InProgress, message.InProgressLimit, message.Updated);
 		}
+
+        private void PingWorkers()
+        {
+            _workers.Values
+                .Where(x => x.LastUpdate < SystemUtil.UtcNow.Subtract(1.Minutes()))
+                .ToList()
+                .ForEach(x =>
+            {
+                _endpointFactory.GetEndpoint(x.ControlUri).Send(new PingWorker());
+            });
+        }
 	}
 }
