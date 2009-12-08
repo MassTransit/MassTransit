@@ -13,6 +13,7 @@
 namespace MassTransit.Distributor.Messages
 {
 	using System;
+    using Magnum;
 
 	/// <summary>
 	/// Wraps a message type as a distributed message so that it can be sent separately from the actual
@@ -20,17 +21,19 @@ namespace MassTransit.Distributor.Messages
 	/// want it getting downgraded to a consumer of T.
 	/// </summary>
 	/// <typeparam name="T">The message type being distributed</typeparam>
-	public class Distributed<T>
+	public class Distributed<T> :
+        CorrelatedBy<Guid>
 	{
-		public Distributed(T message)
+		public Distributed(T message) :
+            this(message, null)
 		{
-			Payload = message;
 		}
 
 		public Distributed(T message, Uri responseAddress)
 		{
 			Payload = message;
 			ResponseAddress = responseAddress;
+		    CorrelationId = CombGuid.Generate();
 		}
 
 		protected Distributed()
@@ -39,5 +42,6 @@ namespace MassTransit.Distributor.Messages
 
 		public T Payload { get; set; }
 		public Uri ResponseAddress { get; set; }
-	}
+        public Guid CorrelationId { get; set; }
+    }
 }
