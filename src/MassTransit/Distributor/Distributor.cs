@@ -25,18 +25,23 @@ namespace MassTransit.Distributor
 	{
 		private readonly IEndpointFactory _endpointFactory;
 		private readonly ReaderWriterLockedDictionary<Uri, WorkerDetails> _workers = new ReaderWriterLockedDictionary<Uri, WorkerDetails>();
-		private IWorkerSelectionStrategy _selectionStrategy;
+		private IWorkerSelectionStrategy<T> _selectionStrategy;
 		private UnsubscribeAction _unsubscribeAction = () => false;
 
-		public Distributor(IEndpointFactory endpointFactory)
+        public Distributor(IEndpointFactory endpointFactory, IWorkerSelectionStrategy<T> workerSelectionStrategy)
+        {
+            _endpointFactory = endpointFactory;
+			_selectionStrategy = workerSelectionStrategy;
+        }
+
+	    public Distributor(IEndpointFactory endpointFactory) :
+            this(endpointFactory, new DefaultWorkerSelectionStrategy<T>())
 		{
-			_endpointFactory = endpointFactory;
-			_selectionStrategy = new DefaultWorkerSelectionStrategy();
 		}
 
 		public void Consume(T message)
 		{
-			WorkerDetails worker = _selectionStrategy.GetAvailableWorkers(_workers.Values).FirstOrDefault();
+			WorkerDetails worker = _selectionStrategy.GetAvailableWorkers(_workers.Values, message).FirstOrDefault();
 			if (worker == null)
 			{
 				CurrentMessage.RetryLater();
@@ -54,7 +59,7 @@ namespace MassTransit.Distributor
 
 		public bool Accept(T message)
 		{
-			return _selectionStrategy.GetAvailableWorkers(_workers.Values).Count() > 0;
+			return _selectionStrategy.GetAvailableWorkers(_workers.Values, message).Count() > 0;
 		}
 
 		public void Dispose()

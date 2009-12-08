@@ -12,9 +12,15 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests.Distributor
 {
+    using System;
+    using System.Linq;
+    using System.Collections.Generic;
 	using Load;
 	using Load.Messages;
 	using MassTransit.Pipeline.Inspectors;
+    using Configuration;
+    using MassTransit.Distributor;
+    using Rhino.Mocks;
 	using NUnit.Framework;
 
 	[TestFixture]
@@ -34,8 +40,13 @@ namespace MassTransit.Tests.Distributor
 		public void Using_the_load_generator_should_share_the_load()
 		{
 			var generator = new LoadGenerator<FirstCommand, FirstResponse>();
+		    const int count = 100;
 
-			generator.Run(RemoteBus, 100, x => new FirstCommand(x));
+			generator.Run(RemoteBus, count, x => new FirstCommand(x));
+
+		    var results = generator.GetWorkerLoad();
+
+            Assert.That(results.Sum(x => x.Value), Is.EqualTo(count));
 		}
 
 		[Test]
@@ -46,4 +57,57 @@ namespace MassTransit.Tests.Distributor
 			PipelineViewer.Trace(Instances["A"].DataBus.InboundPipeline);
 		}
 	}
+
+    [TestFixture]
+    public class Distributor_with_custom_worker_selection_strategy :
+        LoopbackDistributorTestFixture
+    {
+        private Dictionary<String, Uri> _nodes = new Dictionary<string, Uri>()
+            {
+               { "A", new Uri("loopback://localhost/a") },
+               { "B", new Uri("loopback://localhost/b") },
+               { "C", new Uri("loopback://localhost/c") }
+            };
+
+        protected override void EstablishContext()
+        {
+            base.EstablishContext();
+
+            _nodes.ToList().ForEach(x => AddFirstCommandInstance(x.Key, x.Value.ToString()));
+        }
+
+        protected override void ConfigureLocalBus(IServiceBusConfigurator configurator)
+        {
+            var mock = MockRepository.GenerateStub<IWorkerSelectionStrategy<FirstCommand>>();
+            mock.Stub(x => x.GetAvailableWorkers(null, null))
+                .IgnoreArguments()
+                .Return(new List<WorkerDetails>() 
+                { 
+                    new WorkerDetails() 
+                    { 
+                        ControlUri = _nodes["A"].AppendToPath("_control"), 
+                        DataUri = _nodes["A"],
+                        InProgress = 0,
+                        InProgressLimit = 100,
+                        LastUpdate = DateTime.UtcNow
+                    } 
+                });
+
+            configurator.UseDistributorFor(EndpointFactory, mock);
+        }
+
+        [Test]
+        public void Node_a_should_recieve_all_the_work()
+        {
+            var generator = new LoadGenerator<FirstCommand, FirstResponse>();
+            const int count = 100;
+
+            generator.Run(RemoteBus, count, x => new FirstCommand(x));
+
+            var results = generator.GetWorkerLoad();
+
+            Assert.That(results.Sum(x => x.Value), Is.EqualTo(count));
+            Assert.That(results[_nodes["A"]], Is.EqualTo(count));
+        }
+    }
 }

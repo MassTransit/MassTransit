@@ -14,8 +14,9 @@ namespace MassTransit.Distributor
 {
 	using System.Collections.Generic;
 
-	public interface IWorkerSelectionStrategy
+	public interface IWorkerSelectionStrategy<T>
+        where T : class
 	{
-		IEnumerable<WorkerDetails> GetAvailableWorkers(IEnumerable<WorkerDetails> candidates);
+		IEnumerable<WorkerDetails> GetAvailableWorkers(IEnumerable<WorkerDetails> candidates, T message);
 	}
 }

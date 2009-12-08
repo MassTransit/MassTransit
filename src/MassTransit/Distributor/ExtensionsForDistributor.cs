@@ -22,6 +22,12 @@ namespace MassTransit.Distributor
 
 	public static class ExtensionsForDistributor
 	{
+        /// <summary>
+        /// Implements a distributor-to-worker pattern for the given message type. 
+        /// </summary>
+        /// <typeparam name="T">The type of message to use the distributor</typeparam>
+        /// <param name="configurator">Service bus to implement the distributor</param>
+        /// <param name="endpointFactory">Factory to generate endpoints from a given URL</param>
 		public static void UseDistributorFor<T>(this IServiceBusConfigurator configurator, IEndpointFactory endpointFactory)
 			where T : class
 		{
@@ -29,6 +35,40 @@ namespace MassTransit.Distributor
 
 			configurator.SetReceiveTimeout(50.Milliseconds());
 		}
+
+        /// <summary>
+        /// Implements a distributor-to-worker pattern for the given message type. 
+        /// </summary>
+        /// <typeparam name="T">The type of to use the distributor</typeparam>
+        /// <typeparam name="K">The <code>IWorkerSelectionStrategy</code> used to pick 
+        /// which worker node to send a message</typeparam>
+        /// <param name="configurator">Service bus to implement the distributor</param>
+        /// <param name="endpointFactory">Factory to generate endpoints from a given URL</param>
+        public static void UseDistributorFor<T, K>(this IServiceBusConfigurator configurator, IEndpointFactory endpointFactory)
+            where T : class
+            where K : class, IWorkerSelectionStrategy<T>, new()
+        {
+            configurator.AddService(() => new Distributor<T>(endpointFactory, new K()));
+
+            configurator.SetReceiveTimeout(50.Milliseconds());
+        }
+
+        /// <summary>
+        /// Implements a distributor-to-worker pattern for the given message type. 
+        /// </summary>
+        /// <typeparam name="T">The type of to use the distributor</typeparam>
+        /// <param name="configurator">Service bus to implement the distributor</param>
+        /// <param name="endpointFactory">Factory to generate endpoints from a given URL</param>
+        /// <param name="workerSelectionStrategy">The <code>IWorkerSelectionStrategy</code> 
+        /// used to pick which worker node to send a message</param>
+        public static void UseDistributorFor<T>(this IServiceBusConfigurator configurator, IEndpointFactory endpointFactory, 
+                                                IWorkerSelectionStrategy<T> workerSelectionStrategy)
+            where T : class
+        {
+            configurator.AddService(() => new Distributor<T>(endpointFactory, workerSelectionStrategy));
+
+            configurator.SetReceiveTimeout(50.Milliseconds());
+        }
 
 		public static void ImplementDistributorWorker<T>(this IServiceBusConfigurator configurator, Func<T, Action<T>> getConsumer)
 			where T : class
@@ -40,7 +80,6 @@ namespace MassTransit.Distributor
 			where T : SagaStateMachine<T>, ISaga
 		{
 			var saga = FastActivator<T>.Create(CombGuid.Generate());
-			//var saga = (T) Activator.CreateInstance(typeof (T), Guid.NewGuid());
 
 			var serviceConfigurator = new SagaDistributorConfigurator(configurator, endpointFactory);
 
