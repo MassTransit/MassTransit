@@ -31,7 +31,6 @@ namespace MassTransit.Distributor
 		private IWorkerSelectionStrategy<T> _selectionStrategy;
 		private UnsubscribeAction _unsubscribeAction = () => false;
 	    private ThreadPoolScheduler _threadPoolScheduler;
-	    private Timer _pinger;
 
         public Distributor(IEndpointFactory endpointFactory, IWorkerSelectionStrategy<T> workerSelectionStrategy)
         {
