@@ -17,6 +17,7 @@ namespace MassTransit.Saga
 	using System.Linq.Expressions;
 	using Exceptions;
 	using Magnum;
+	using Magnum.Activator;
 
 	public class InitiatingSagaPolicy<TSaga, TMessage> :
 		ISagaPolicy<TSaga, TMessage>
@@ -41,7 +42,7 @@ namespace MassTransit.Saga
 					throw new InvalidOperationException("Could not generate id for new saga " + typeof(TSaga).Name);
 			}
 
-			saga = (TSaga)Activator.CreateInstance(typeof(TSaga), new object[] { sagaId });
+			saga = FastActivator<TSaga>.Create(sagaId);
 
 			return saga != null;
 		}

@@ -14,6 +14,7 @@ namespace MassTransit.TestFramework.Fixtures
 {
 	using System;
 	using Magnum;
+	using Magnum.Activator;
 	using NUnit.Framework;
 	using Saga;
 	using Transports;
@@ -46,7 +47,7 @@ namespace MassTransit.TestFramework.Fixtures
 
 		protected TSaga AddExistingSaga(Guid sagaId, Action<TSaga> initializer)
 		{
-			TSaga saga = (TSaga) Activator.CreateInstance(typeof (TSaga), sagaId);
+			TSaga saga = FastActivator<TSaga>.Create(sagaId);
 
 			initializer(saga);
 

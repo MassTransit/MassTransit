@@ -19,6 +19,7 @@ namespace MassTransit.Serialization.Custom
 	using System.Reflection;
 	using System.Xml;
 	using log4net;
+	using Magnum.Activator;
 	using Magnum.CollectionExtensions;
 	using Magnum.Monads;
 	using Magnum.Reflection;
@@ -106,7 +107,7 @@ namespace MassTransit.Serialization.Custom
 		{
 			if (type.IsEnum)
 			{
-				return (IObjectSerializer)ClassFactory.New(typeof(EnumSerializer<>).MakeGenericType(type));
+				return (IObjectSerializer)FastActivator.Create(typeof(EnumSerializer<>).MakeGenericType(type));
 			}
 
 			if (typeof (IEnumerable).IsAssignableFrom(type))
@@ -123,7 +124,7 @@ namespace MassTransit.Serialization.Custom
 
 			Type serializerType = typeof (ObjectSerializer<>).MakeGenericType(type);
 
-			var serializer = (IObjectSerializer)ClassFactory.New(serializerType);
+			var serializer = (IObjectSerializer)FastActivator.Create(serializerType);
 
 			return serializer;
 		}
@@ -132,7 +133,7 @@ namespace MassTransit.Serialization.Custom
 		{
 			if(type.IsArray)
 			{
-				return (IObjectSerializer)ClassFactory.New(typeof(ArraySerializer<>).MakeGenericType(type.GetElementType()));				
+				return (IObjectSerializer)FastActivator.Create(typeof(ArraySerializer<>).MakeGenericType(type.GetElementType()));				
 			}
 
 			Type[] genericArguments = type.GetDeclaredGenericArguments().ToArray();
@@ -142,21 +143,21 @@ namespace MassTransit.Serialization.Custom
 
 				Type serializerType = typeof (ArraySerializer<>).MakeGenericType(elementType);
 
-				return (IObjectSerializer)ClassFactory.New(serializerType);
+				return (IObjectSerializer)FastActivator.Create(serializerType);
 			}
 
 			if (type.ImplementsGeneric(typeof(IDictionary<,>)))
 			{
 				Type serializerType = typeof (DictionarySerializer<,>).MakeGenericType(genericArguments);
 
-				return (IObjectSerializer)ClassFactory.New(serializerType);
+				return (IObjectSerializer)FastActivator.Create(serializerType);
 			}
 
 			if (type.ImplementsGeneric(typeof (IList<>)) || type.ImplementsGeneric(typeof (IEnumerable<>)))
 			{
 				Type serializerType = typeof (ListSerializer<>).MakeGenericType(genericArguments[0]);
 
-				return (IObjectSerializer)ClassFactory.New(serializerType);
+				return (IObjectSerializer)FastActivator.Create(serializerType);
 			}
 
 			throw new InvalidOperationException("enumerations not yet supported");
@@ -174,7 +175,7 @@ namespace MassTransit.Serialization.Custom
 
 				_log.DebugFormat("Adding serializer for {0} ({1})", itemType.Name, type.Name);
 
-				_serializers.Add(itemType, ClassFactory.New(type) as IObjectSerializer);
+				_serializers.Add(itemType, FastActivator.Create(type) as IObjectSerializer);
 			}
 		}
 	}

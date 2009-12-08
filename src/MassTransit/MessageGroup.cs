@@ -15,6 +15,7 @@ namespace MassTransit
 	using System;
 	using System.Collections.Generic;
 	using Magnum;
+	using Magnum.Activator;
 	using Magnum.Reflection;
 
 	/// <summary>
@@ -180,7 +181,8 @@ namespace MassTransit
 		/// <returns>A new instance of the message group class</returns>
 		public static implicit operator TBuilder(MessageGroupBuilder<TBuilder> builder)
 		{
-			return Activator.CreateInstance(typeof (TBuilder), builder._messages) as TBuilder;
+			return FastActivator<TBuilder>.Create(builder._messages);
+			//return Activator.CreateInstance(typeof (TBuilder), builder._messages) as TBuilder;
 		}
 	}
 }

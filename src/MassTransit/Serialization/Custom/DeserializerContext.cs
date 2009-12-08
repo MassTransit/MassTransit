@@ -20,6 +20,7 @@ namespace MassTransit.Serialization.Custom
 	using System.Runtime.Serialization;
 	using System.Xml;
 	using log4net;
+	using Magnum.Activator;
 	using Magnum.CollectionExtensions;
 	using Magnum.Reflection;
 	using TypeDeserializers;
@@ -59,7 +60,7 @@ namespace MassTransit.Serialization.Custom
 
 									_log.DebugFormat("Adding deserializer for {0} ({1})", itemType.Name, type.Name);
 
-									_deserializers.Add(itemType.AssemblyQualifiedName/*.ToMessageName()*/, ClassFactory.New(type) as IObjectDeserializer);
+									_deserializers.Add(itemType.AssemblyQualifiedName/*.ToMessageName()*/, FastActivator.Create(type) as IObjectDeserializer);
 								});
 					});
 		}
@@ -152,14 +153,14 @@ namespace MassTransit.Serialization.Custom
 		{
 			if (type.IsEnum)
 			{
-				return (IObjectDeserializer)ClassFactory.New(typeof(EnumDeserializer<>).MakeGenericType(type));
+				return (IObjectDeserializer)FastActivator.Create(typeof(EnumDeserializer<>).MakeGenericType(type));
 			}
 
 			if (typeof (IEnumerable).IsAssignableFrom(type) && type != typeof (string))
 			{
 				if (type.IsArray)
 				{
-					return (IObjectDeserializer)ClassFactory.New(typeof(ArrayDeserializer<>).MakeGenericType(type.GetElementType()));
+					return (IObjectDeserializer)FastActivator.Create(typeof(ArrayDeserializer<>).MakeGenericType(type.GetElementType()));
 				}
 				if (type.IsGenericType)
 				{
@@ -167,12 +168,12 @@ namespace MassTransit.Serialization.Custom
 					Type[] arguments = type.GetGenericArguments();
 					if (genericTypeDefinition == typeof (IList<>) || genericTypeDefinition == typeof (List<>))
 					{
-						return (IObjectDeserializer)ClassFactory.New(typeof(ListDeserializer<>).MakeGenericType(arguments));
+						return (IObjectDeserializer)FastActivator.Create(typeof(ListDeserializer<>).MakeGenericType(arguments));
 					}
 
 					if (genericTypeDefinition == typeof (IDictionary<,>) || genericTypeDefinition == typeof (Dictionary<,>))
 					{
-						return (IObjectDeserializer)ClassFactory.New(typeof(DictionaryDeserializer<,>).MakeGenericType(arguments));
+						return (IObjectDeserializer)FastActivator.Create(typeof(DictionaryDeserializer<,>).MakeGenericType(arguments));
 					}
 				}
 
@@ -190,7 +191,7 @@ namespace MassTransit.Serialization.Custom
 				deserializerType = typeof(ObjectDeserializer<>).MakeGenericType(type);
 			}
 
-			return (IObjectDeserializer) ClassFactory.New(deserializerType);
+			return (IObjectDeserializer)FastActivator.Create(deserializerType);
 		}
 	}
 }

@@ -15,6 +15,8 @@ namespace MassTransit.Distributor.Configuration
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
+	using Magnum;
+	using Magnum.Activator;
 	using Magnum.Reflection;
 	using Magnum.StateMachine;
 	using MassTransit.Pipeline;
@@ -65,7 +67,7 @@ namespace MassTransit.Distributor.Configuration
 			where TComponent : ISagaWorker<TSaga>
 			where TSaga : SagaStateMachine<TSaga>, ISaga
 		{
-			var saga = (TSaga) Activator.CreateInstance(typeof (TSaga), Guid.NewGuid());
+			var saga = FastActivator<TSaga>.Create(CombGuid.Generate());
 
 			var inspector = new SagaStateMachineEventInspector<TSaga>();
 			saga.Inspect(inspector);

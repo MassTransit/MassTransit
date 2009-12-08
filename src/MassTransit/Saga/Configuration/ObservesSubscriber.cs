@@ -16,6 +16,7 @@ namespace MassTransit.Saga.Configuration
 	using System.Collections.Generic;
 	using System.Linq.Expressions;
 	using Exceptions;
+	using Magnum.Activator;
 	using MassTransit.Pipeline;
 	using MassTransit.Pipeline.Configuration;
 	using MassTransit.Pipeline.Configuration.Subscribers;
@@ -42,7 +43,7 @@ namespace MassTransit.Saga.Configuration
 
 			var router = routerConfigurator.FindOrCreate<TMessage>();
 
-			var instance = (Observes<TMessage, TComponent>)Activator.CreateInstance(typeof(TComponent), Guid.Empty);
+			var instance = (Observes<TMessage, TComponent>)FastActivator<TComponent>.Create(Guid.Empty);
 
 			Expression<Func<TComponent, TMessage, bool>> selector = instance.GetBindExpression();
 

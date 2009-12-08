@@ -14,6 +14,7 @@ namespace MassTransit.Internal
 {
 	using System;
 	using Magnum;
+	using Magnum.Context;
 	using Magnum.Reflection;
 
 	public class InboundMessageHeaders :

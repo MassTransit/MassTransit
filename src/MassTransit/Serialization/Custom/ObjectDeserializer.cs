@@ -14,6 +14,7 @@ namespace MassTransit.Serialization.Custom
 {
 	using System.Xml;
 	using log4net;
+	using Magnum.Activator;
 	using Magnum.Reflection;
 
 	public class ObjectDeserializer<T> :
@@ -30,7 +31,7 @@ namespace MassTransit.Serialization.Custom
 
 		public object Deserialize(IDeserializerContext context)
 		{
-			T instance = (T) ClassFactory.New(typeof (T));
+			T instance = FastActivator<T>.Create();
 
 			if (context.IsEmptyElement)
 			{
