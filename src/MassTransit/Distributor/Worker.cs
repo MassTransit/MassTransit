@@ -25,7 +25,7 @@ namespace MassTransit.Distributor
 		Consumes<Distributed<T>>.Selected
 		where T : class
 	{
-		private readonly int _pending;
+		private int _pending;
 		private IServiceBus _bus;
 		private IServiceBus _controlBus;
 		private Func<T, Action<T>> _getConsumer;
@@ -36,6 +36,7 @@ namespace MassTransit.Distributor
 		private Uri _dataUri;
 		private Uri _controlUri;
 		private CommandQueue _queue = new ThreadPoolCommandQueue();
+        private WorkerPendingMessageTracker<Guid> _pendingMessages = new WorkerPendingMessageTracker<Guid>();
 
 		public Worker(Func<T, Action<T>> getConsumer)
 			: this(getConsumer, new WorkerSettings())
@@ -54,6 +55,8 @@ namespace MassTransit.Distributor
 
 		public void Consume(Distributed<T> message)
 		{
+            _pendingMessages.Consumed(message.CorrelationId);
+
 			Action<T> consumer = _getConsumer(message.Payload);
 
 			Interlocked.Increment(ref _inProgress);
@@ -83,6 +86,8 @@ namespace MassTransit.Distributor
 
 		public bool Accept(Distributed<T> message)
 		{
+            _pendingMessages.Viewed(message.CorrelationId);
+
 			if (_inProgress >= _inProgressLimit)
 				return false;
 
@@ -127,6 +132,7 @@ namespace MassTransit.Distributor
 
 		private void PublishWorkerAvailability()
 		{
+		    _pending = _pendingMessages.PendingMessagesCount();
 			_bus.Publish(new WorkerAvailable<T>(_controlUri, _dataUri, _inProgress, _inProgressLimit, _pending, _pendingLimit));
 		}
 
