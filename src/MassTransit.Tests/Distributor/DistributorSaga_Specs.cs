@@ -47,19 +47,25 @@ namespace MassTransit.Tests.Distributor
 		{
 			base.EstablishContext();
 
-			ServiceInstance instance = AddInstance("A", "loopback://localhost/a", 
+			AddInstance("A", "loopback://localhost/a", 
 				builder => builder.Add(FirstSagaRepository),
 				bus => bus.ImplementSagaDistributorWorker(FirstSagaRepository));
-
-
-			//AddFirstCommandInstance("B", "loopback://localhost/b");
-			//AddFirstCommandInstance("C", "loopback://localhost/c");
+			
+			AddInstance("B", "loopback://localhost/b", 
+				builder => builder.Add(FirstSagaRepository),
+				bus => bus.ImplementSagaDistributorWorker(FirstSagaRepository));
+			
+			AddInstance("C", "loopback://localhost/c", 
+				builder => builder.Add(FirstSagaRepository),
+				bus => bus.ImplementSagaDistributorWorker(FirstSagaRepository));
 		}
 
 		[Test]
 		public void Should_register_the_message_consumers()
 		{
 			Instances["A"].DataBus.ShouldHaveSubscriptionFor<Distributed<FirstCommand>>();
+			Instances["B"].DataBus.ShouldHaveSubscriptionFor<Distributed<FirstCommand>>();
+			Instances["C"].DataBus.ShouldHaveSubscriptionFor<Distributed<FirstCommand>>();
 		}
 
 		[Test]

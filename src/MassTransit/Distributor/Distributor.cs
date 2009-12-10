@@ -14,11 +14,10 @@ namespace MassTransit.Distributor
 {
 	using System;
 	using System.Linq;
-    using System.Threading;
 	using Magnum;
+	using Magnum.Actors.Schedulers;
+	using Magnum.DateTimeExtensions;
 	using Magnum.Threading;
-    using Magnum.Actors.Schedulers;
-    using Magnum.DateTimeExtensions;
 	using Messages;
 
 	public class Distributor<T> :
@@ -27,21 +26,20 @@ namespace MassTransit.Distributor
 		where T : class
 	{
 		private readonly IEndpointFactory _endpointFactory;
+		private readonly IWorkerSelectionStrategy<T> _selectionStrategy;
 		private readonly ReaderWriterLockedDictionary<Uri, WorkerDetails> _workers = new ReaderWriterLockedDictionary<Uri, WorkerDetails>();
-		private IWorkerSelectionStrategy<T> _selectionStrategy;
+		private ThreadPoolScheduler _threadPoolScheduler;
 		private UnsubscribeAction _unsubscribeAction = () => false;
-	    private ThreadPoolScheduler _threadPoolScheduler;
 
-        public Distributor(IEndpointFactory endpointFactory, IWorkerSelectionStrategy<T> workerSelectionStrategy)
-        {
-            _endpointFactory = endpointFactory;
+		public Distributor(IEndpointFactory endpointFactory, IWorkerSelectionStrategy<T> workerSelectionStrategy)
+		{
+			_endpointFactory = endpointFactory;
 			_selectionStrategy = workerSelectionStrategy;
+		}
 
-            _threadPoolScheduler = new ThreadPoolScheduler();
-        }
-
-	    public Distributor(IEndpointFactory endpointFactory) :
-            this(endpointFactory, new DefaultWorkerSelectionStrategy<T>())
+		public Distributor(IEndpointFactory endpointFactory)
+			:
+				this(endpointFactory, new DefaultWorkerSelectionStrategy<T>())
 		{
 		}
 
@@ -79,13 +77,15 @@ namespace MassTransit.Distributor
 			// don't plan to unsubscribe this since it's an important thing
 			bus.Subscribe(this);
 
-		    int oneMinute = (int) 1.Minutes().TotalMilliseconds;
-            _threadPoolScheduler.Schedule(oneMinute, oneMinute, PingWorkers);
+			_threadPoolScheduler = new ThreadPoolScheduler();
+
+			var oneMinute = (int) 1.Minutes().TotalMilliseconds;
+			_threadPoolScheduler.Schedule(oneMinute, oneMinute, PingWorkers);
 		}
 
 		public void Stop()
 		{
-            _threadPoolScheduler.Dispose();
+			_threadPoolScheduler.Dispose();
 
 			_workers.Clear();
 
@@ -102,22 +102,21 @@ namespace MassTransit.Distributor
 							DataUri = message.DataUri,
 							InProgress = message.InProgress,
 							InProgressLimit = message.InProgressLimit,
-							LastUpdate = SystemUtil.UtcNow,
+							Pending = message.Pending,
+							PendingLimit = message.PendingLimit,
+							LastUpdate = message.Updated,
 						};
 				});
 
-			worker.UpdateInProgress(message.InProgress, message.InProgressLimit, message.Updated);
+			worker.UpdateInProgress(message.InProgress, message.InProgressLimit, message.Pending, message.PendingLimit, message.Updated);
 		}
 
-        private void PingWorkers()
-        {
-            _workers.Values
-                .Where(x => x.LastUpdate < SystemUtil.UtcNow.Subtract(1.Minutes()))
-                .ToList()
-                .ForEach(x =>
-            {
-                _endpointFactory.GetEndpoint(x.ControlUri).Send(new PingWorker());
-            });
-        }
+		private void PingWorkers()
+		{
+			_workers.Values
+				.Where(x => x.LastUpdate < SystemUtil.UtcNow.Subtract(1.Minutes()))
+				.ToList()
+				.ForEach(x => { _endpointFactory.GetEndpoint(x.ControlUri).Send(new PingWorker()); });
+		}
 	}
 }

@@ -2,7 +2,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.21022</ProductVersion>
+    <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{6EFD69FC-CBCC-4F85-AEE0-EFBA73F4D273}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -141,6 +141,8 @@
     <Compile Include="CurrentMessage.cs" />
     <Compile Include="Distributor\Configuration\DistributorSubscriber.cs" />
     <Compile Include="Distributor\Configuration\SagaDistributorSubscriber.cs" />
+    <Compile Include="Distributor\IPendingMessageCount.cs" />
+    <Compile Include="Distributor\IPendingMessageTracker.cs" />
     <Compile Include="Distributor\Messages\ConfigureWorker.cs" />
     <Compile Include="Distributor\DefaultWorkerSelectionStrategy.cs" />
     <Compile Include="Distributor\Messages\PingWorker.cs" />
