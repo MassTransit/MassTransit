@@ -14,101 +14,101 @@ namespace MassTransit.Batch.Pipeline
 {
 	using System;
 	using System.Collections.Generic;
-    using log4net;
-    using Magnum.Threading;
-    using MassTransit.Pipeline;
-    using MassTransit.Pipeline.Sinks;
+	using log4net;
+	using Magnum.Threading;
+	using MassTransit.Pipeline;
+	using MassTransit.Pipeline.Sinks;
 
-    /// <summary>
-    /// Dispatches batch messages to the appropriate consumers
-    /// </summary>
-    /// <typeparam name="TMessage">The type of the message to be routed</typeparam>
-    /// <typeparam name="TBatchId">The type of the batch id</typeparam>
-    public class BatchMessageRouter<TMessage, TBatchId> :
-        MessageRouterBase<TMessage, TBatchId>
-        where TMessage : class, BatchedBy<TBatchId>
-    {
-        private static readonly ILog _log = LogManager.GetLogger(typeof (BatchMessageRouter<TMessage, TBatchId>));
+	/// <summary>
+	/// Dispatches batch messages to the appropriate consumers
+	/// </summary>
+	/// <typeparam name="TMessage">The type of the message to be routed</typeparam>
+	/// <typeparam name="TBatchId">The type of the batch id</typeparam>
+	public class BatchMessageRouter<TMessage, TBatchId> :
+		MessageRouterBase<TMessage, TBatchId>
+		where TMessage : class, BatchedBy<TBatchId>
+	{
+		private static readonly ILog _log = LogManager.GetLogger(typeof (BatchMessageRouter<TMessage, TBatchId>));
 
-        private ReaderWriterLockedObject<List<IPipelineSink<Batch<TMessage, TBatchId>>>> _consumerSinks;
-        private bool _disposed;
+		private ReaderWriterLockedObject<List<IPipelineSink<Batch<TMessage, TBatchId>>>> _consumerSinks;
+		private bool _disposed;
 
-        public BatchMessageRouter()
-        {
-            _consumerSinks = new ReaderWriterLockedObject<List<IPipelineSink<Batch<TMessage, TBatchId>>>>(new List<IPipelineSink<Batch<TMessage, TBatchId>>>());
-        }
+		public BatchMessageRouter()
+		{
+			_consumerSinks = new ReaderWriterLockedObject<List<IPipelineSink<Batch<TMessage, TBatchId>>>>(new List<IPipelineSink<Batch<TMessage, TBatchId>>>());
+		}
 
-        public int SinkCount
-        {
-            get { return _consumerSinks.ReadLock(x => x.Count); }
-        }
+		public int SinkCount
+		{
+			get { return _consumerSinks.ReadLock(x => x.Count); }
+		}
 
-        public override IEnumerable<Action<TMessage>> Enumerate(TMessage message)
-        {
-            IPipelineSink<TMessage> sink = null;
+		public override IEnumerable<Action<TMessage>> Enumerate(TMessage message)
+		{
+			IPipelineSink<TMessage> sink = null;
 
-            _sinks.UpgradeableReadLock(x =>
-                                           {
-                                               if (x.TryGetValue(message.BatchId, out sink) == false)
-                                               {
-                                                   _sinks.WriteLock(y =>
-                                                                        {
-                                                                            if (x.TryGetValue(message.BatchId, out sink) == false)
-                                                                            {
-                                                                                _log.Debug("Adding a new message router for batchId " + message.BatchId);
-                                                                                var batchMessage = new Batch<TMessage, TBatchId>(message.BatchId, message.BatchLength, null);
+			_sinks.UpgradeableReadLock(x =>
+				{
+					if (x.TryGetValue(message.BatchId, out sink) == false)
+					{
+						_sinks.WriteLock(y =>
+							{
+								if (x.TryGetValue(message.BatchId, out sink) == false)
+								{
+									_log.Debug("Adding a new message router for batchId " + message.BatchId);
+									var batchMessage = new Batch<TMessage, TBatchId>(message.BatchId, message.BatchLength, null);
 
-                                                                                // we need to create a sink for this batch and get it wired up
-                                                                                MessageRouter<TMessage> router = new MessageRouter<TMessage>();
-                                                                                foreach (var messageSink in _consumerSinks.ReadLock(z => z))
-                                                                                {
-                                                                                    foreach (var consumes in messageSink.Enumerate(batchMessage))
-                                                                                    {
-                                                                                        router.Connect(new BatchCombiner<TMessage, TBatchId>(message.BatchId, message.BatchLength, consumes));
-                                                                                    }
-                                                                                }
+									// we need to create a sink for this batch and get it wired up
+									var router = new MessageRouter<TMessage>();
+									foreach (var messageSink in _consumerSinks.ReadLock(z => z))
+									{
+										foreach (var consumes in messageSink.Enumerate(batchMessage))
+										{
+											router.Connect(new BatchCombiner<TMessage, TBatchId>(message.BatchId, message.BatchLength, consumes));
+										}
+									}
 
-                                                                                x.Add(message.BatchId, router);
+									x.Add(message.BatchId, router);
 
-                                                                                sink = router;
-                                                                            }
-                                                                        });
-                                               }
-                                           });
+									sink = router;
+								}
+							});
+					}
+				});
 
-            if (sink == null)
-                yield break;
+			if (sink == null)
+				yield break;
 
-            foreach (Action<TMessage> consumer in sink.Enumerate(message))
-            {
-                yield return consumer;
-            }
-        }
+			foreach (var consumer in sink.Enumerate(message))
+			{
+				yield return consumer;
+			}
+		}
 
 		public UnsubscribeAction Connect(IPipelineSink<Batch<TMessage, TBatchId>> sink)
-        {
-            _consumerSinks.WriteLock(sinks => sinks.Add(sink));
+		{
+			_consumerSinks.WriteLock(sinks => sinks.Add(sink));
 
-            return () => _consumerSinks.WriteLock(sinks => sinks.Remove(sink));
-        }
+			return () => _consumerSinks.WriteLock(sinks => sinks.Remove(sink));
+		}
 
-        protected override void Dispose(bool disposing)
-        {
-            base.Dispose(disposing);
+		protected override void Dispose(bool disposing)
+		{
+			base.Dispose(disposing);
 
-            if (_disposed) return;
-            if (disposing)
-            {
-                _consumerSinks.Dispose();
-                _consumerSinks = null;
-            }
+			if (_disposed) return;
+			if (disposing)
+			{
+				_consumerSinks.Dispose();
+				_consumerSinks = null;
+			}
 
-            _disposed = true;
-        }
+			_disposed = true;
+		}
 
-        ~BatchMessageRouter()
-        {
-            Dispose(false);
-        }
-    }
+		~BatchMessageRouter()
+		{
+			Dispose(false);
+		}
+	}
 }

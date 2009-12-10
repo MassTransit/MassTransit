@@ -12,20 +12,8 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Distributor
 {
-	using Internal;
-	using Messages;
-
-	public interface ISagaWorker :
-		IBusService
+	public interface IPendingMessageCount
 	{
-	}
-
-	public interface ISagaWorker<T> :
-		ISagaWorker
-	{
-		bool CanAcceptMessage<TMessage>(Distributed<TMessage> message);
-		void ConsumingMessage<TMessage>(Distributed<TMessage> message);
-		void IncrementInProgress();
-		void DecrementInProgress();
+		int PendingMessageCount();
 	}
 }

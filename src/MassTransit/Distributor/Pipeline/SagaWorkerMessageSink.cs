@@ -55,6 +55,8 @@ namespace MassTransit.Distributor.Pipeline
 						_worker.IncrementInProgress();
 						try
 						{
+							_worker.ConsumingMessage(message);
+
 							action(message.Payload);
 						}
 						finally

@@ -15,6 +15,7 @@ namespace MassTransit.Tests.Load
 	using System;
 	using System.Collections.Generic;
 	using System.Diagnostics;
+	using System.Linq;
 	using System.Threading;
 	using Magnum;
 	using Magnum.DateTimeExtensions;
@@ -75,10 +76,7 @@ namespace MassTransit.Tests.Load
 
 				while (_received.WaitOne(5.Seconds(), true))
 				{
-					Trace.Write(".");
 				}
-
-				Trace.WriteLine("");
 			}
 
 			DisplayResults();
@@ -115,6 +113,19 @@ namespace MassTransit.Tests.Load
 			Trace.WriteLine("Receive Latency = " + receiveDuration.TotalSeconds + "s");
 			if (received > 0)
 				Trace.WriteLine("Mean Receive Latency = " + (receiveDuration.TotalMilliseconds/received).ToString("F0") + "ms");
+
+			if (received > 0)
+			{
+				var query = _commands.Values.Select(x => x.ResponseReceivedAt - x.CreatedAt).OrderBy(x => x);
+
+				int count = query.Count();
+
+				int offset = Convert.ToInt32(count*0.95);
+
+				TimeSpan value = query.Skip(offset).First();
+
+				Trace.WriteLine("95th Percentile = " + value.TotalMilliseconds + "ms");
+			}
 
 			Trace.WriteLine("Workers Utilized");
 

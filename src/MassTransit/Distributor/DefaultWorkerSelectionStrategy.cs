@@ -22,8 +22,8 @@ namespace MassTransit.Distributor
 		public IEnumerable<WorkerDetails> GetAvailableWorkers(IEnumerable<WorkerDetails> candidates, T message)
 		{
 			return candidates
-				.Where(x => x.InProgress < x.InProgressLimit * 4)
-				.OrderBy(x => x.InProgress);
+				.Where(x => x.InProgress + x.Pending < x.InProgressLimit + x.PendingLimit)
+				.OrderByDescending(x => x.InProgress + x.Pending);
 		}
 	}
 }

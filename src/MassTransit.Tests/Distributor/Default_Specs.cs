@@ -17,11 +17,13 @@ namespace MassTransit.Tests.Distributor
     using System.Collections.Generic;
 	using Load;
 	using Load.Messages;
-	using MassTransit.Pipeline.Inspectors;
+    using MassTransit.Distributor.Messages;
+    using MassTransit.Pipeline.Inspectors;
     using Configuration;
     using MassTransit.Distributor;
     using Rhino.Mocks;
 	using NUnit.Framework;
+    using TestFramework;
 
 	[TestFixture]
 	public class Default_distributor_specifications :
@@ -34,6 +36,8 @@ namespace MassTransit.Tests.Distributor
 			AddFirstCommandInstance("A", "loopback://localhost/a");
 			AddFirstCommandInstance("B", "loopback://localhost/b");
 			AddFirstCommandInstance("C", "loopback://localhost/c");
+
+			RemoteBus.ShouldHaveSubscriptionFor<Distributed<FirstCommand>>();
 		}
 
 		[Test]

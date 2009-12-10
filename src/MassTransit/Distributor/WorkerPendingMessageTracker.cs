@@ -12,38 +12,44 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Distributor
 {
-    using System.Collections.Generic;
-    using Magnum.Threading;
+	using System.Collections.Generic;
+	using log4net;
+	using Magnum.Threading;
 
-    public class WorkerPendingMessageTracker<T>
-    {
-        private readonly ReaderWriterLockedObject<HashSet<T>> _messages = new ReaderWriterLockedObject<HashSet<T>>(new HashSet<T>());
+	/// <summary>
+	/// Keeps track of messages that were not accepted due to worker load in order to provide a pending message count
+	/// </summary>
+	/// <typeparam name="T"></typeparam>
+	public class WorkerPendingMessageTracker<T> :
+		IPendingMessageTracker<T>
+	{
+		private readonly ReaderWriterLockedObject<HashSet<T>> _messages = new ReaderWriterLockedObject<HashSet<T>>(new HashSet<T>());
 
-        public void Viewed(T item)
-        {
-            _messages.WriteLock(x =>
-            {
-                if (!x.Contains(item))
-                    x.Add(item);
-            });
-        }
+		public void Viewed(T item)
+		{
+			_messages.UpgradeableReadLock(x =>
+				{
+					if (!x.Contains(item))
+					{
+						_messages.WriteLock(y => y.Add(item));
+					}
+				});
+		}
 
-        public void Consumed(T item)
-        {
-            _messages.WriteLock(x =>
-            {
-                if (x.Contains(item))
-                    x.Remove(item);
-            });
-        }
+		public void Consumed(T item)
+		{
+			_messages.UpgradeableReadLock(x =>
+				{
+					if (x.Contains(item))
+					{
+						_messages.WriteLock(y => y.Remove(item));
+					}
+				});
+		}
 
-        public int PendingMessagesCount()
-        {
-            int count = 0;
-
-            _messages.ReadLock(x => count = x.Count);
-
-            return count;
-        }
-    }
+		public int PendingMessageCount()
+		{
+			return _messages.ReadLock(x => x.Count);
+		}
+	}
 }

@@ -22,22 +22,23 @@ namespace MassTransit.Distributor
 	public class Worker<T> :
 		IWorker<T>,
 		Consumes<WakeUpWorker>.All,
-        Consumes<PingWorker>.All,
+		Consumes<PingWorker>.All,
 		Consumes<Distributed<T>>.Selected
 		where T : class
 	{
-		private int _pending;
+		private readonly IPendingMessageTracker<Guid> _pendingMessages = new WorkerPendingMessageTracker<Guid>();
 		private IServiceBus _bus;
 		private IServiceBus _controlBus;
+		private Uri _controlUri;
+		private Uri _dataUri;
 		private Func<T, Action<T>> _getConsumer;
 		private int _inProgress;
 		private int _inProgressLimit = 4;
 		private int _pendingLimit = 16;
-		private UnsubscribeAction _unsubscribeAction = () => false;
-		private Uri _dataUri;
-		private Uri _controlUri;
 		private CommandQueue _queue = new ThreadPoolCommandQueue();
-        private readonly WorkerPendingMessageTracker<Guid> _pendingMessages = new WorkerPendingMessageTracker<Guid>();
+		private UnsubscribeAction _unsubscribeAction = () => false;
+		private bool _updatePending;
+		private bool _wakeUpPending;
 
 		public Worker(Func<T, Action<T>> getConsumer)
 			: this(getConsumer, new WorkerSettings())
@@ -50,13 +51,12 @@ namespace MassTransit.Distributor
 
 			_inProgress = 0;
 			_inProgressLimit = settings.InProgressLimit;
-			_pending = 0;
 			_pendingLimit = settings.PendingLimit;
 		}
 
 		public void Consume(Distributed<T> message)
 		{
-            _pendingMessages.Consumed(message.CorrelationId);
+			_pendingMessages.Consumed(message.CorrelationId);
 
 			Action<T> consumer = _getConsumer(message.Payload);
 
@@ -71,11 +71,8 @@ namespace MassTransit.Distributor
 			{
 				Interlocked.Decrement(ref _inProgress);
 
-				if (_inProgress == 0)
-				{
-					_queue.Enqueue(PublishWorkerAvailability);
-					_bus.Endpoint.Send(new WakeUpWorker());
-				}
+				ScheduleUpdate();
+				ScheduleWakeUp();
 
 				var disposal = consumer as IDisposable;
 				if (disposal != null)
@@ -87,12 +84,23 @@ namespace MassTransit.Distributor
 
 		public bool Accept(Distributed<T> message)
 		{
-            _pendingMessages.Viewed(message.CorrelationId);
-
 			if (_inProgress >= _inProgressLimit)
+			{
+				_pendingMessages.Viewed(message.CorrelationId);
 				return false;
+			}
 
 			return true;
+		}
+
+		public void Consume(PingWorker message)
+		{
+			PublishWorkerAvailability();
+		}
+
+		public void Consume(WakeUpWorker message)
+		{
+			_wakeUpPending = false;
 		}
 
 		public void Dispose()
@@ -110,7 +118,7 @@ namespace MassTransit.Distributor
 			_controlUri = _controlBus.Endpoint.Uri;
 
 			_unsubscribeAction = bus.ControlBus.Subscribe<ConfigureWorker<T>>(Consume);
-		    _unsubscribeAction += bus.ControlBus.Subscribe<PingWorker>(Consume);
+			_unsubscribeAction += bus.ControlBus.Subscribe<PingWorker>(Consume);
 			_unsubscribeAction += bus.Subscribe(this);
 
 			PublishWorkerAvailability();
@@ -132,24 +140,34 @@ namespace MassTransit.Distributor
 			PublishWorkerAvailability();
 		}
 
+		private void ScheduleWakeUp()
+		{
+			if (!_wakeUpPending)
+			{
+				_wakeUpPending = true;
+				_queue.Enqueue(() => _bus.Endpoint.Send(new WakeUpWorker()));
+			}
+		}
+
+		private void ScheduleUpdate()
+		{
+			if (!_updatePending)
+			{
+				_updatePending = true;
+				_queue.Enqueue(PublishWorkerAvailability);
+			}
+		}
+
 		private void PublishWorkerAvailability()
 		{
-		    _pending = _pendingMessages.PendingMessagesCount();
-			_bus.Publish(new WorkerAvailable<T>(_controlUri, _dataUri, _inProgress, _inProgressLimit, _pending, _pendingLimit));
+			_updatePending = false;
+
+			_bus.Publish(new WorkerAvailable<T>(_controlUri, _dataUri, _inProgress, _inProgressLimit, _pendingMessages.PendingMessageCount(), _pendingLimit));
 		}
 
 		private static void RewriteResponseAddress(Uri responseAddress)
 		{
 			InboundMessageHeaders.SetCurrent(x => x.SetResponseAddress(responseAddress));
 		}
-
-		public void Consume(WakeUpWorker message)
-		{
-		}
-
-	    public void Consume(PingWorker message)
-	    {
-	        PublishWorkerAvailability();
-	    }
 	}
 }

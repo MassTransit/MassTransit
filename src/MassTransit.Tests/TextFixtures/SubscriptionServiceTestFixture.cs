@@ -79,6 +79,7 @@ namespace MassTransit.Tests.TextFixtures
 							y.SetSubscriptionServiceEndpoint(SubscriptionServiceUri);
 						});
 					x.ReceiveFrom(ClientUri);
+					x.SetConcurrentConsumerLimit(4);
 					x.UseControlBus(LocalControlBus);
 
 					ConfigureLocalBus(x);

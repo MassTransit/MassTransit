@@ -29,7 +29,7 @@ namespace MassTransit.Distributor
 		where TSaga : SagaStateMachine<TSaga>, ISaga
 	{
 		private readonly IList<Type> _messageTypes = new List<Type>();
-		private readonly int _pending;
+		private readonly IPendingMessageTracker<Guid> _pendingMessages = new WorkerPendingMessageTracker<Guid>();
 		private readonly CommandQueue _queue = new ThreadPoolCommandQueue();
 		private IServiceBus _bus;
 		private IServiceBus _controlBus;
@@ -39,6 +39,7 @@ namespace MassTransit.Distributor
 		private int _inProgressLimit = 4;
 		private int _pendingLimit = 16;
 		private UnsubscribeAction _unsubscribeAction = () => false;
+		private bool _updatePending;
 
 		public SagaWorker()
 			: this(new WorkerSettings())
@@ -49,7 +50,6 @@ namespace MassTransit.Distributor
 		{
 			_inProgress = 0;
 			_inProgressLimit = settings.InProgressLimit;
-			_pending = 0;
 			_pendingLimit = settings.PendingLimit;
 		}
 
@@ -86,9 +86,18 @@ namespace MassTransit.Distributor
 		public bool CanAcceptMessage<TMessage>(Distributed<TMessage> message)
 		{
 			if (_inProgress >= _inProgressLimit)
+			{
+				_pendingMessages.Viewed(message.CorrelationId);
+
 				return false;
+			}
 
 			return true;
+		}
+
+		public void ConsumingMessage<TMessage>(Distributed<TMessage> message)
+		{
+			_pendingMessages.Consumed(message.CorrelationId);
 		}
 
 		public void IncrementInProgress()
@@ -101,15 +110,14 @@ namespace MassTransit.Distributor
 			Interlocked.Decrement(ref _inProgress);
 
 			if (_inProgress == 0)
-			{
-				_queue.Enqueue(PublishWorkerAvailability);
 				_bus.Endpoint.Send(new WakeUpWorker());
-			}
+
+			PublishWorkerAvailability();
 		}
 
 		private void CacheMessageTypesForSaga()
 		{
-			var saga = FastActivator<TSaga>.Create(CombGuid.Generate());
+			TSaga saga = FastActivator<TSaga>.Create(CombGuid.Generate());
 
 			saga.EnumerateDataEvents(type => _messageTypes.Add(type));
 		}
@@ -125,14 +133,25 @@ namespace MassTransit.Distributor
 			PublishWorkerAvailability();
 		}
 
+		private void ScheduleUpdate()
+		{
+			if (!_updatePending)
+			{
+				_updatePending = true;
+				_queue.Enqueue(PublishWorkerAvailability);
+			}
+		}
+
 		private void PublishWorkerAvailability()
 		{
-			_messageTypes.Each(type => { this.Call("PublishWorkerAvailable", new[] { type }, new object[] { }); });
+			_updatePending = false;
+
+			_messageTypes.Each(type => { this.Call("PublishWorkerAvailable", new[] {type}, new object[] {}); });
 		}
 
 		private void PublishWorkerAvailable<TMessage>()
 		{
-			_bus.Publish(new WorkerAvailable<TMessage>(_controlUri, _dataUri, _inProgress, _inProgressLimit, _pending, _pendingLimit));
+			_bus.Publish(new WorkerAvailable<TMessage>(_controlUri, _dataUri, _inProgress, _inProgressLimit, _pendingMessages.PendingMessageCount(), _pendingLimit));
 		}
 	}
 }

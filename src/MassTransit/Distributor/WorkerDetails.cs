@@ -18,11 +18,12 @@ namespace MassTransit.Distributor
 
 	public class WorkerDetails
 	{
-		public Uri ControlUri { get; set; }
-		public Uri DataUri { get; set; }
-
 		public int InProgress;
 		public int InProgressLimit;
+		public Uri ControlUri { get; set; }
+		public Uri DataUri { get; set; }
+		public int Pending { get; set; }
+		public int PendingLimit { get; set; }
 
 		public DateTime LastUpdate { get; set; }
 
@@ -33,7 +34,7 @@ namespace MassTransit.Distributor
 			LastUpdate = SystemUtil.UtcNow;
 		}
 
-		public void UpdateInProgress(int inProgress, int inProgressLimit, DateTime updated)
+		public void UpdateInProgress(int inProgress, int inProgressLimit, int pending, int pendingLimit, DateTime updated)
 		{
 			lock (this)
 			{
@@ -42,6 +43,9 @@ namespace MassTransit.Distributor
 
 				InProgress = inProgress;
 				InProgressLimit = inProgressLimit;
+
+				Pending = pending;
+				PendingLimit = pendingLimit;
 			}
 		}
 	}

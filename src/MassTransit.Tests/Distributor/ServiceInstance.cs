@@ -47,7 +47,7 @@ namespace MassTransit.Tests.Distributor
 						});
 					x.ReceiveFrom(name);
 					x.UseControlBus(ControlBus);
-					x.SetConcurrentConsumerLimit(1);
+					x.SetConcurrentConsumerLimit(5);
 
 					configurator(x);
 				});
