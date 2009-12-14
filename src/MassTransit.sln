@@ -45,6 +45,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.ServiceBus.Test
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.TestFramework", "MassTransit.TestFramework\MassTransit.TestFramework.csproj", "{3C4B5F1A-69AD-415E-9F40-A7FDBD7A3012}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.SystemView2", "MassTransit.SystemView2\MassTransit.SystemView2.csproj", "{D2DAE9B1-AB3E-4B4D-9E8E-B394BA5B7EFE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -123,6 +125,10 @@ Global
 		{3C4B5F1A-69AD-415E-9F40-A7FDBD7A3012}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3C4B5F1A-69AD-415E-9F40-A7FDBD7A3012}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3C4B5F1A-69AD-415E-9F40-A7FDBD7A3012}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D2DAE9B1-AB3E-4B4D-9E8E-B394BA5B7EFE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D2DAE9B1-AB3E-4B4D-9E8E-B394BA5B7EFE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D2DAE9B1-AB3E-4B4D-9E8E-B394BA5B7EFE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D2DAE9B1-AB3E-4B4D-9E8E-B394BA5B7EFE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
