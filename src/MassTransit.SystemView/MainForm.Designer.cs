@@ -34,6 +34,7 @@
             this.subscriptionsContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.removeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.horizontalSplit = new System.Windows.Forms.SplitContainer();
+            this.innerHorizontalSplit = new System.Windows.Forms.SplitContainer();
             this.timeoutListView = new System.Windows.Forms.ListView();
             this.timeoutExpiresAt = new System.Windows.Forms.ColumnHeader();
             this.timeoutId = new System.Windows.Forms.ColumnHeader();
@@ -42,6 +43,7 @@
             this.healthUri = new System.Windows.Forms.ColumnHeader();
             this.healthLastHeartbeat = new System.Windows.Forms.ColumnHeader();
             this.healthState = new System.Windows.Forms.ColumnHeader();
+            this.endpointInfo = new MassTransit.SystemView.EndpointInfo();
             this.verticalSplit.Panel1.SuspendLayout();
             this.verticalSplit.Panel2.SuspendLayout();
             this.verticalSplit.SuspendLayout();
@@ -49,6 +51,9 @@
             this.horizontalSplit.Panel1.SuspendLayout();
             this.horizontalSplit.Panel2.SuspendLayout();
             this.horizontalSplit.SuspendLayout();
+            this.innerHorizontalSplit.Panel1.SuspendLayout();
+            this.innerHorizontalSplit.Panel2.SuspendLayout();
+            this.innerHorizontalSplit.SuspendLayout();
             this.SuspendLayout();
             // 
             // verticalSplit
@@ -65,7 +70,7 @@
             // 
             this.verticalSplit.Panel2.Controls.Add(this.horizontalSplit);
             this.verticalSplit.Size = new System.Drawing.Size(679, 508);
-            this.verticalSplit.SplitterDistance = 226;
+            this.verticalSplit.SplitterDistance = 227;
             this.verticalSplit.TabIndex = 0;
             // 
             // subscriptionView
@@ -74,7 +79,7 @@
             this.subscriptionView.Dock = System.Windows.Forms.DockStyle.Fill;
             this.subscriptionView.Location = new System.Drawing.Point(0, 0);
             this.subscriptionView.Name = "subscriptionView";
-            this.subscriptionView.Size = new System.Drawing.Size(226, 508);
+            this.subscriptionView.Size = new System.Drawing.Size(227, 508);
             this.subscriptionView.TabIndex = 0;
             this.subscriptionView.PreviewKeyDown += new System.Windows.Forms.PreviewKeyDownEventHandler(this.subscriptionView_PreviewKeyDown);
             this.subscriptionView.NodeMouseClick += new System.Windows.Forms.TreeNodeMouseClickEventHandler(this.subscriptionView_NodeMouseClick);
@@ -102,14 +107,32 @@
             // 
             // horizontalSplit.Panel1
             // 
-            this.horizontalSplit.Panel1.Controls.Add(this.timeoutListView);
+            this.horizontalSplit.Panel1.Controls.Add(this.innerHorizontalSplit);
             // 
             // horizontalSplit.Panel2
             // 
-            this.horizontalSplit.Panel2.Controls.Add(this.healthListView);
-            this.horizontalSplit.Size = new System.Drawing.Size(449, 508);
+            this.horizontalSplit.Panel2.Controls.Add(this.endpointInfo);
+            this.horizontalSplit.Size = new System.Drawing.Size(448, 508);
             this.horizontalSplit.SplitterDistance = 242;
             this.horizontalSplit.TabIndex = 0;
+            // 
+            // innerHorizontalSplit
+            // 
+            this.innerHorizontalSplit.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.innerHorizontalSplit.Location = new System.Drawing.Point(0, 0);
+            this.innerHorizontalSplit.Name = "innerHorizontalSplit";
+            this.innerHorizontalSplit.Orientation = System.Windows.Forms.Orientation.Horizontal;
+            // 
+            // innerHorizontalSplit.Panel1
+            // 
+            this.innerHorizontalSplit.Panel1.Controls.Add(this.timeoutListView);
+            // 
+            // innerHorizontalSplit.Panel2
+            // 
+            this.innerHorizontalSplit.Panel2.Controls.Add(this.healthListView);
+            this.innerHorizontalSplit.Size = new System.Drawing.Size(448, 242);
+            this.innerHorizontalSplit.SplitterDistance = 120;
+            this.innerHorizontalSplit.TabIndex = 0;
             // 
             // timeoutListView
             // 
@@ -120,8 +143,8 @@
             this.timeoutListView.Dock = System.Windows.Forms.DockStyle.Fill;
             this.timeoutListView.Location = new System.Drawing.Point(0, 0);
             this.timeoutListView.Name = "timeoutListView";
-            this.timeoutListView.Size = new System.Drawing.Size(449, 242);
-            this.timeoutListView.TabIndex = 0;
+            this.timeoutListView.Size = new System.Drawing.Size(448, 120);
+            this.timeoutListView.TabIndex = 1;
             this.timeoutListView.UseCompatibleStateImageBehavior = false;
             this.timeoutListView.View = System.Windows.Forms.View.Details;
             // 
@@ -149,8 +172,8 @@
             this.healthListView.Dock = System.Windows.Forms.DockStyle.Fill;
             this.healthListView.Location = new System.Drawing.Point(0, 0);
             this.healthListView.Name = "healthListView";
-            this.healthListView.Size = new System.Drawing.Size(449, 262);
-            this.healthListView.TabIndex = 0;
+            this.healthListView.Size = new System.Drawing.Size(448, 118);
+            this.healthListView.TabIndex = 1;
             this.healthListView.UseCompatibleStateImageBehavior = false;
             this.healthListView.View = System.Windows.Forms.View.Details;
             // 
@@ -169,6 +192,14 @@
             this.healthState.Text = "State";
             this.healthState.Width = 100;
             // 
+            // endpointInfo
+            // 
+            this.endpointInfo.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.endpointInfo.Location = new System.Drawing.Point(0, 0);
+            this.endpointInfo.Name = "endpointInfo";
+            this.endpointInfo.Size = new System.Drawing.Size(448, 262);
+            this.endpointInfo.TabIndex = 0;
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -185,6 +216,9 @@
             this.horizontalSplit.Panel1.ResumeLayout(false);
             this.horizontalSplit.Panel2.ResumeLayout(false);
             this.horizontalSplit.ResumeLayout(false);
+            this.innerHorizontalSplit.Panel1.ResumeLayout(false);
+            this.innerHorizontalSplit.Panel2.ResumeLayout(false);
+            this.innerHorizontalSplit.ResumeLayout(false);
             this.ResumeLayout(false);
 
 		}
@@ -193,17 +227,19 @@
 
 		private System.Windows.Forms.SplitContainer verticalSplit;
 		private System.Windows.Forms.TreeView subscriptionView;
-		private System.Windows.Forms.SplitContainer horizontalSplit;
-		private System.Windows.Forms.ListView timeoutListView;
-		private System.Windows.Forms.ColumnHeader timeoutId;
-		private System.Windows.Forms.ColumnHeader timeoutTag;
-		private System.Windows.Forms.ColumnHeader timeoutExpiresAt;
-		private System.Windows.Forms.ListView healthListView;
-		private System.Windows.Forms.ColumnHeader healthUri;
-		private System.Windows.Forms.ColumnHeader healthState;
-		private System.Windows.Forms.ColumnHeader healthLastHeartbeat;
+        private System.Windows.Forms.SplitContainer horizontalSplit;
         private System.Windows.Forms.ContextMenuStrip subscriptionsContextMenu;
         private System.Windows.Forms.ToolStripMenuItem removeToolStripMenuItem;
+        private System.Windows.Forms.SplitContainer innerHorizontalSplit;
+        private System.Windows.Forms.ListView timeoutListView;
+        private System.Windows.Forms.ColumnHeader timeoutExpiresAt;
+        private System.Windows.Forms.ColumnHeader timeoutId;
+        private System.Windows.Forms.ColumnHeader timeoutTag;
+        private System.Windows.Forms.ListView healthListView;
+        private System.Windows.Forms.ColumnHeader healthUri;
+        private System.Windows.Forms.ColumnHeader healthLastHeartbeat;
+        private System.Windows.Forms.ColumnHeader healthState;
+	    private EndpointInfo endpointInfo;
 	}
 }
 

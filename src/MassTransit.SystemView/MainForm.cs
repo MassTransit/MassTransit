@@ -10,14 +10,14 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-using System.Linq;
-
 namespace MassTransit.SystemView
 {
+    using Distributor.Messages;
 	using System;
 	using System.Collections.Generic;
 	using System.ComponentModel;
 	using System.Drawing;
+    using System.Linq;
 	using System.Windows.Forms;
 	using Magnum;
 	using Services.HealthMonitoring.Messages;
@@ -38,7 +38,8 @@ namespace MassTransit.SystemView
 		Consumes<EndpointIsHealthy>.All,
 		Consumes<EndpointIsDown>.All,
 		Consumes<EndpointIsSuspect>.All,
-		Consumes<EndpointIsOffline>.All
+		Consumes<EndpointIsOffline>.All,
+        Consumes<IWorkerAvailable>.All
 	{
 		private IServiceBus _bus;
 		private readonly Guid _clientId = CombGuid.Generate();
@@ -51,7 +52,11 @@ namespace MassTransit.SystemView
 			InitializeComponent();
 		}
 
-		public void Consume(AddSubscription message)
+        public void Consume(IWorkerAvailable message)
+        {
+        }
+
+	    public void Consume(AddSubscription message)
 		{
 			Action<SubscriptionInformation> method = x => AddSubscriptionToView(x);
 			BeginInvoke(method, new object[] {message.Subscription});
@@ -129,7 +134,7 @@ namespace MassTransit.SystemView
 			base.OnClosing(e);
 		}
 
-		private void RefreshHealthView(IEnumerable<HealthInformation> informations)
+	    private void RefreshHealthView(IEnumerable<HealthInformation> informations)
 		{
 			var existing = new List<ListViewItem>();
 			foreach (ListViewItem item in healthListView.Items)
@@ -363,6 +368,7 @@ namespace MassTransit.SystemView
 		private void subscriptionView_NodeMouseClick(object sender, TreeNodeMouseClickEventArgs e)
 		{
 			subscriptionView.SelectedNode = e.Node;
+            endpointInfo.Bind(e.Node.Tag as SubscriptionInformation);
 		}
 
 		private void removeToolStripMenuItem_Click(object sender, EventArgs e)
