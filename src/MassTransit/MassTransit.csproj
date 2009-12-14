@@ -145,6 +145,7 @@
     <Compile Include="Distributor\IPendingMessageTracker.cs" />
     <Compile Include="Distributor\Messages\ConfigureWorker.cs" />
     <Compile Include="Distributor\DefaultWorkerSelectionStrategy.cs" />
+    <Compile Include="Distributor\Messages\IWorkerAvailable.cs" />
     <Compile Include="Distributor\Messages\PingWorker.cs" />
     <Compile Include="Distributor\Pipeline\SagaWorkerMessageSink.cs" />
     <Compile Include="Distributor\WorkerPendingMessageTracker.cs" />

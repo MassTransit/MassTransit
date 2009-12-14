@@ -30,6 +30,7 @@ namespace MassTransit.Distributor
 		private readonly ReaderWriterLockedDictionary<Uri, WorkerDetails> _workers = new ReaderWriterLockedDictionary<Uri, WorkerDetails>();
 		private ThreadPoolScheduler _threadPoolScheduler;
 		private UnsubscribeAction _unsubscribeAction = () => false;
+        private readonly int _pingTimeout = (int)1.Minutes().TotalMilliseconds;
 
 		public Distributor(IEndpointFactory endpointFactory, IWorkerSelectionStrategy<T> workerSelectionStrategy)
 		{
@@ -79,8 +80,7 @@ namespace MassTransit.Distributor
 
 			_threadPoolScheduler = new ThreadPoolScheduler();
 
-			var oneMinute = (int) 1.Minutes().TotalMilliseconds;
-			_threadPoolScheduler.Schedule(oneMinute, oneMinute, PingWorkers);
+			_threadPoolScheduler.Schedule(_pingTimeout, _pingTimeout, PingWorkers);
 		}
 
 		public void Stop()
@@ -114,7 +114,7 @@ namespace MassTransit.Distributor
 		private void PingWorkers()
 		{
 			_workers.Values
-				.Where(x => x.LastUpdate < SystemUtil.UtcNow.Subtract(1.Minutes()))
+				.Where(x => x.LastUpdate < SystemUtil.UtcNow.Subtract(_pingTimeout.Milliseconds()))
 				.ToList()
 				.ForEach(x => { _endpointFactory.GetEndpoint(x.ControlUri).Send(new PingWorker()); });
 		}

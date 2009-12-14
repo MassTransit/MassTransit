@@ -7,7 +7,17 @@ namespace MassTransit.Tests
 
 	public static class BddExtensions
     {
-        public static void ShouldBeTrue(this bool value)
+        public static void ShouldBeGreaterThan(this int value, int target)
+        {
+            Assert.That(value, Is.GreaterThan(target));
+        }
+
+        public static void ShouldBeLessThan(this int value, int target)
+        {
+            Assert.That(value, Is.LessThan(target));
+        }
+
+	    public static void ShouldBeTrue(this bool value)
         {
             Assert.IsTrue(value);
         }
@@ -46,7 +56,6 @@ namespace MassTransit.Tests
         {
             Assert.AreEqual(typeof(T), actual.GetType());
         }
-
 
         public static void ShouldBeEmpty<T>(this ICollection<T> collection)
         {

@@ -19,36 +19,42 @@ namespace MassTransit.Distributor.Messages
 	/// Published by workers that can process a message of type T
 	/// </summary>
 	/// <typeparam name="T">The type of message that can be processed.</typeparam>
-	public class WorkerAvailable<T> :
-		Workload<T>
-	{
-		public WorkerAvailable(Uri controlUri, Uri dataUri, int inProgress, int inProgressLimit, int pending, int pendingLimit)
-		{
-			ControlUri = controlUri;
-			DataUri = dataUri;
-			InProgress = inProgress;
-			InProgressLimit = inProgressLimit;
-			Pending = pending;
-			PendingLimit = pendingLimit;
-			Updated = SystemUtil.UtcNow;
-		}
+    public class WorkerAvailable<T> :
+        Workload<T>,
+        IWorkerAvailable
+    {
+        public WorkerAvailable(Uri controlUri, Uri dataUri, int inProgress, int inProgressLimit, int pending, int pendingLimit)
+        {
+            ControlUri = controlUri;
+            DataUri = dataUri;
+            InProgress = inProgress;
+            InProgressLimit = inProgressLimit;
+            Pending = pending;
+            PendingLimit = pendingLimit;
+            Updated = SystemUtil.UtcNow;
+        }
 
-		protected WorkerAvailable()
-		{
-		}
+        protected WorkerAvailable()
+        {
+        }
 
-		public Uri ControlUri { get; set; }
+        public Uri ControlUri { get; set; }
 
-		public Uri DataUri { get; set; } 
+        public Uri DataUri { get; set; }
 
-		public int Pending { get; set; }
+        public int Pending { get; set; }
 
-		public int PendingLimit { get; set; }
+        public int PendingLimit { get; set; }
 
-		public int InProgress { get; set; }
+        public int InProgress { get; set; }
 
-		public int InProgressLimit { get; set; }
+        public int InProgressLimit { get; set; }
 
-		public DateTime Updated { get; set; }
-	}
+        public DateTime Updated { get; set; }
+
+        public string WorkerItemType
+        {
+            get { return typeof(T).Name; }
+        }
+    }
 }

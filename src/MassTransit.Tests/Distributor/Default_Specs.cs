@@ -15,12 +15,15 @@ namespace MassTransit.Tests.Distributor
     using System;
     using System.Linq;
     using System.Collections.Generic;
+    using System.Threading;
 	using Load;
 	using Load.Messages;
     using MassTransit.Distributor.Messages;
     using MassTransit.Pipeline.Inspectors;
     using Configuration;
     using MassTransit.Distributor;
+    using MassTransit.Distributor.Messages;
+    using Magnum.DateTimeExtensions;
     using Rhino.Mocks;
 	using NUnit.Framework;
     using TestFramework;
@@ -51,6 +54,10 @@ namespace MassTransit.Tests.Distributor
 		    var results = generator.GetWorkerLoad();
 
             Assert.That(results.Sum(x => x.Value), Is.EqualTo(count));
+            results.ToList().ForEach(x =>
+                Assert.That(x.Value, Is.GreaterThan(0).And.LessThan(count), 
+                            string.Format("{0} did not consume between 0 and {1}", 
+                                          x.Key.ToString(), count)));
 		}
 
 		[Test]
@@ -60,6 +67,73 @@ namespace MassTransit.Tests.Distributor
 
 			PipelineViewer.Trace(Instances["A"].DataBus.InboundPipeline);
 		}
+
+        [Test]
+        public void Ensure_workers_will_respond_to_ping_request()
+        {
+            int workerAvaiableCountRecieved = 0;
+            var messageRecieved = new ManualResetEvent(false);
+
+            var unsubscribe = LocalBus.Subscribe<WorkerAvailable<FirstCommand>>(message =>
+            {
+                Interlocked.Increment(ref workerAvaiableCountRecieved);
+                messageRecieved.Set();
+            });
+            
+            Instances.ToList().ForEach(x =>
+            {
+                x.Value.ControlBus.Endpoint.Send(new PingWorker());
+            });
+
+            messageRecieved.WaitOne(3.Seconds());
+
+            unsubscribe();
+
+            workerAvaiableCountRecieved.ShouldBeGreaterThan(0);
+        }
+
+        [Test]
+        public void Can_collect_IWorkerAvaiable_messages()
+        {
+            int workerAvaiableCountRecieved = 0;
+            var messageRecieved = new ManualResetEvent(false);
+
+            var unsubscribe = LocalBus.Subscribe<IWorkerAvailable>(message =>
+            {
+                Interlocked.Increment(ref workerAvaiableCountRecieved);
+                messageRecieved.Set();
+            });
+
+            Instances.ToList().ForEach(x =>
+            {
+                x.Value.ControlBus.Endpoint.Send(new PingWorker());
+            });
+
+            messageRecieved.WaitOne(3.Seconds());
+
+            unsubscribe();
+
+            workerAvaiableCountRecieved.ShouldBeGreaterThan(0);
+        }
+
+	    [Test, Explicit]
+        public void Ensure_distributor_sends_ping_request_after_timeout()
+        {
+            int pingRequestsRecieved = 0;
+            var messageRecieved = new ManualResetEvent(false);
+
+            var unsubscribe = Instances["A"].ControlBus.Subscribe<PingWorker>(message =>
+            {
+                Interlocked.Increment(ref pingRequestsRecieved);
+                messageRecieved.Set();
+            });
+
+            messageRecieved.WaitOne(120.Seconds());
+
+            unsubscribe();
+
+            pingRequestsRecieved.ShouldBeGreaterThan(0);
+        }
 	}
 
     [TestFixture]
