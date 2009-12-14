@@ -81,8 +81,8 @@
             this.subscriptionView.Name = "subscriptionView";
             this.subscriptionView.Size = new System.Drawing.Size(227, 508);
             this.subscriptionView.TabIndex = 0;
+            this.subscriptionView.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.subscriptionView_AfterSelect);
             this.subscriptionView.PreviewKeyDown += new System.Windows.Forms.PreviewKeyDownEventHandler(this.subscriptionView_PreviewKeyDown);
-            this.subscriptionView.NodeMouseClick += new System.Windows.Forms.TreeNodeMouseClickEventHandler(this.subscriptionView_NodeMouseClick);
             // 
             // subscriptionsContextMenu
             // 

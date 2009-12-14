@@ -365,11 +365,11 @@ namespace MassTransit.SystemView
 			}
 		}
 
-		private void subscriptionView_NodeMouseClick(object sender, TreeNodeMouseClickEventArgs e)
-		{
-			subscriptionView.SelectedNode = e.Node;
+        private void subscriptionView_AfterSelect(object sender, TreeViewEventArgs e)
+        {
+            subscriptionView.SelectedNode = e.Node;
             endpointInfo.Bind(e.Node.Tag as SubscriptionInformation);
-		}
+        }
 
 		private void removeToolStripMenuItem_Click(object sender, EventArgs e)
 		{
