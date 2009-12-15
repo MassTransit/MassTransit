@@ -1,8 +1,11 @@
 ﻿<UserControl x:Class="MassTransit.SystemView.EndpointDetails"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:dg="clr-namespace:Microsoft.Windows.Controls;assembly=WPFToolkit">
+             xmlns:dg="clr-namespace:Microsoft.Windows.Controls;assembly=WPFToolkit"
+             xmlns:Converters="clr-namespace:MassTransit.SystemView.Converters"
+             xmlns:dgPrimitives="clr-namespace:Microsoft.Windows.Controls.Primitives;assembly=WPFToolkit">
     <UserControl.Resources>
+        <Converters:AofBMultiValueConverter x:Key="aOfBConverter" />
         <Style TargetType="{x:Type TextBlock}">
             <Setter Property="Margin" Value="3, 3, 3, 3" />
             <Setter Property="TextAlignment" Value="Right" />
@@ -13,7 +16,12 @@
             <Setter Property="Width" Value="Auto" />
             <Setter Property="HorizontalAlignment" Value="Stretch" />
         </Style>
-        
+        <Style x:Key="numericalElementStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="HorizontalAlignment" Value="Right" />
+        </Style>
+        <Style x:Key="numericalHeaderStyler" TargetType="{x:Type dgPrimitives:DataGridColumnHeader}">
+            <Setter Property="HorizontalAlignment" Value="Right" />
+        </Style>
     </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>
@@ -29,11 +37,25 @@
         <TextBlock Grid.Column="0" Grid.Row="1" Text="Workers" VerticalAlignment="Top" />
         <dg:DataGrid Grid.Column="1" Grid.Row="1" ItemsSource="{Binding Path=Workers}">
             <dg:DataGrid.Columns>
-                <dg:DataGridTextColumn IsReadOnly="True" Header="Type" Binding="{Binding Path=MessageType}" />
-                <dg:DataGridTextColumn IsReadOnly="True" Header="Pending" Binding="{Binding Path=Pending}" />
-                <dg:DataGridTextColumn IsReadOnly="True" Header="Pending Limit" Binding="{Binding Path=PendingLimit}" />
-                <dg:DataGridTextColumn IsReadOnly="True" Header="In Progress" Binding="{Binding Path=InProgress}" />
-                <dg:DataGridTextColumn IsReadOnly="True" Header="In Progress Limit" Binding="{Binding Path=InProgressLimit}" />
+                <dg:DataGridTextColumn IsReadOnly="True" Header="Type" Binding="{Binding Path=PrettyMessageType}" />
+                <dg:DataGridTextColumn IsReadOnly="True" Header="Pending" ElementStyle="{StaticResource numericalElementStyle}" 
+                                       HeaderStyle="{StaticResource numericalHeaderStyler}">
+                    <dg:DataGridTextColumn.Binding>
+                        <MultiBinding Converter="{StaticResource aOfBConverter}">
+                            <Binding Path="Pending" />
+                            <Binding Path="PendingLimit" />
+                        </MultiBinding>
+                    </dg:DataGridTextColumn.Binding>
+                </dg:DataGridTextColumn>
+                <dg:DataGridTextColumn IsReadOnly="True" Header="In Progress" ElementStyle="{StaticResource numericalElementStyle}" 
+                                       HeaderStyle="{StaticResource numericalHeaderStyler}">
+                    <dg:DataGridTextColumn.Binding>
+                        <MultiBinding Converter="{StaticResource aOfBConverter}">
+                            <Binding Path="InProgress" />
+                            <Binding Path="InProgressLimit" />
+                        </MultiBinding>
+                    </dg:DataGridTextColumn.Binding>
+                </dg:DataGridTextColumn>
                 <dg:DataGridTextColumn IsReadOnly="True" Header="Last Updated (UTC)" Binding="{Binding Path=Updated}" />
             </dg:DataGrid.Columns>
         </dg:DataGrid>

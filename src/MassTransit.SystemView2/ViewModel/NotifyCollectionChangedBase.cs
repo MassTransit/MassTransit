@@ -12,9 +12,11 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.SystemView.ViewModel
 {
+    using System;
+    using System.Windows.Threading;
     using System.Collections.Generic;
     using System.Collections.Specialized;
-    
+
     public class NotifyCollectionChangedBase<T> :
         INotifyCollectionChanged
         where T : class
@@ -23,19 +25,42 @@ namespace MassTransit.SystemView.ViewModel
 
         protected virtual void OnCollectionChanged(NotifyCollectionChangedAction action, T item)
         {
-            var e = CollectionChanged;
-            if (e != null)
-            {
-                e(this, new NotifyCollectionChangedEventArgs(action, item));
-            }
+            OnCollectionChangedThreadSafe(new NotifyCollectionChangedEventArgs(action, item));
+        }
+
+        protected virtual void OnCollectionChanged(NotifyCollectionChangedAction action, T item, int index)
+        {
+            OnCollectionChangedThreadSafe(new NotifyCollectionChangedEventArgs(action, item, index));
         }
 
         protected virtual void OnCollectionChanged(NotifyCollectionChangedAction action, IList<T> items)
         {
-            var e = CollectionChanged;
-            if (e != null)
+            OnCollectionChangedThreadSafe(new NotifyCollectionChangedEventArgs(action, items));
+        }
+
+        protected virtual void OnCollectionChangedThreadSafe(NotifyCollectionChangedEventArgs e)
+        {
+
+            NotifyCollectionChangedEventHandler eventHandler = CollectionChanged;
+
+            if (eventHandler == null)
+                return;
+
+            Delegate[] delegates = eventHandler.GetInvocationList();
+
+            // Walk thru invocation list
+            foreach (NotifyCollectionChangedEventHandler handler in delegates)
             {
-                e(this, new NotifyCollectionChangedEventArgs(action, items));
+                DispatcherObject dispatcherObject = handler.Target as DispatcherObject;
+
+                // If the subscriber is a DispatcherObject and different thread
+                if (dispatcherObject != null && dispatcherObject.CheckAccess() == false)
+                {
+                    // Invoke handler in the target dispatcher's thread
+                    dispatcherObject.Dispatcher.Invoke(DispatcherPriority.DataBind, handler, this, e);
+                }
+                else // Execute handler as is
+                    handler(this, e);
             }
         }
     }

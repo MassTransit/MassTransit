@@ -44,7 +44,8 @@ namespace MassTransit.SystemView.ViewModel
         {
             if (Contains(item)) return;
             Items.Add(item.Key, item);
-            OnCollectionChanged(NotifyCollectionChangedAction.Add, item);
+            var index = IndexOf(item);
+            OnCollectionChanged(NotifyCollectionChangedAction.Add, item, index);
         }
 
         public virtual void Clear()
@@ -71,9 +72,10 @@ namespace MassTransit.SystemView.ViewModel
 
         public virtual bool Remove(T item)
         {
-            item = Items[item.Key];
+            var oldItem = Get(item.Key);
+            var index = IndexOf(oldItem);
             var retValue = Items.Remove(item.Key);
-            OnCollectionChanged(NotifyCollectionChangedAction.Remove, item);
+            OnCollectionChanged(NotifyCollectionChangedAction.Remove, item, index);
             return retValue;
         }
 
@@ -89,17 +91,17 @@ namespace MassTransit.SystemView.ViewModel
 
         public virtual int IndexOf(T item)
         {
-            throw new NotImplementedException();
+            return Items.Values.ToList().IndexOf(item);
         }
 
         public virtual void Insert(int index, T item)
         {
-            throw new NotImplementedException();
+            Add(item);
         }
 
         public virtual void RemoveAt(int index)
         {
-            throw new NotImplementedException();
+            Remove(this[index]);
         }
 
         public virtual T this[int index]
