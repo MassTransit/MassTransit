@@ -12,30 +12,16 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.SystemView.ViewModel
 {
-    using System.Collections.Specialized;
-
-    public class Messages :
-        KeyedCollectionBase<Message, string>
+    public class Workers :
+        KeyedCollectionBase<Worker, string>
     {
-        public bool Remove(string messageName)
+        public void Update(Worker worker)
         {
-            var message = Items[messageName];
-            var retValue = Items.Remove(messageName);
-            OnCollectionChanged(NotifyCollectionChangedAction.Remove, message);
-            return retValue;
-        }
-
-        public void Update(Message message)
-        {
-            if (Items.Keys.Contains(message.MessageName))
+            if (Contains(worker.Key))
             {
-                Remove(message);
-                Add(message);
+                Remove(worker);
             }
-            else
-            {
-                Add(message);
-            }
+            Add(worker);
         }
     }
 }

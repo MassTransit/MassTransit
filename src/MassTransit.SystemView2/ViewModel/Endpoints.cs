@@ -13,109 +13,26 @@
 namespace MassTransit.SystemView.ViewModel
 {
     using System;
-    using System.Collections;
     using System.Collections.Generic;
     using System.Collections.Specialized;
     using System.Linq;
     using Services.Subscriptions.Messages;
+    using Distributor.Messages;
 
     public class Endpoints :
-        NotifyCollectionChangedBase<Endpoint>,
-        IList<Endpoint>
+        KeyedCollectionBase<Endpoint, Uri>
     {
-        private readonly IDictionary<Uri, Endpoint> _endpoints = new Dictionary<Uri, Endpoint>();
-
-        public Endpoint Get(Uri uri)
-        {
-            return _endpoints[uri];
-        }
-
-        public IEnumerator<Endpoint> GetEnumerator()
-        {
-            return _endpoints.Values.GetEnumerator();
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
-
-        public void Add(Endpoint item)
-        {
-            if (!Contains(item))
-            {
-                _endpoints.Add(item.EndpointUri, item);
-                OnCollectionChanged(NotifyCollectionChangedAction.Add, item);
-            }
-        }
-
-        public void Clear()
-        {
-            _endpoints.Clear();
-        }
-
-        public bool Contains(Endpoint item)
-        {
-            return _endpoints.Keys.Contains(item.EndpointUri);
-        }
-
-        public void CopyTo(Endpoint[] array, int arrayIndex)
-        {
-            _endpoints.Values.CopyTo(array, arrayIndex);
-        }
-
-        public bool Remove(Endpoint item)
-        {
-            item = _endpoints[item.EndpointUri];
-            var retValue = _endpoints.Remove(item.EndpointUri);
-            OnCollectionChanged(NotifyCollectionChangedAction.Remove, item);
-            return retValue;
-        }
-
         public bool Remove(Uri endpointUri, string messageName)
         {
-            var retValue = _endpoints[endpointUri].Messages.Remove(messageName);
-            if (_endpoints[endpointUri].Messages.Count == 0)
+            var retValue = Items[endpointUri].Messages.Remove(messageName);
+            if (Items[endpointUri].Messages.Count == 0 && Items[endpointUri].Workers.Count == 0)
             {
-                var endpoint = _endpoints[endpointUri];
-                retValue &= _endpoints.Remove(endpointUri);
+                var endpoint = Items[endpointUri];
+                retValue &= Items.Remove(endpointUri);
                 OnCollectionChanged(NotifyCollectionChangedAction.Remove, endpoint);
             }
             return retValue;
         }
-
-        public int Count
-        {
-            get { return _endpoints.Count; }
-        }
-
-        public bool IsReadOnly
-        {
-            get { return _endpoints.IsReadOnly; }
-        }
-
-        public int IndexOf(Endpoint item)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Insert(int index, Endpoint item)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void RemoveAt(int index)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Endpoint this[int index]
-        {
-            get { return _endpoints.Values.ToList()[index]; }
-            set { throw new NotImplementedException(); }
-        }
-
-        public Endpoint this[Uri uri] { get { return Get(uri); } }
 
         public void Update(IList<SubscriptionInformation> subscriptions)
         {
@@ -124,9 +41,9 @@ namespace MassTransit.SystemView.ViewModel
 
         public void Update(SubscriptionInformation si)
         {
-            if (_endpoints.Keys.Contains(si.EndpointUri))
+            if (Items.Keys.Contains(si.EndpointUri))
             {
-                _endpoints[si.EndpointUri].Messages.Update(new Message
+                Items[si.EndpointUri].Messages.Update(new Message
                 {
                     MessageName = si.MessageName,
                     ClientId = si.ClientId,
@@ -147,6 +64,22 @@ namespace MassTransit.SystemView.ViewModel
                     CorrelationId = si.CorrelationId,
                     SequenceNumber = si.SequenceNumber,
                     SubscriptionId = si.SubscriptionId
+                });
+            }
+        }
+
+        public void Update(IWorkerAvailable wa)
+        {
+            if (Items.Keys.Contains(wa.ControlUri))
+            {
+                Items[wa.ControlUri].Workers.Update(new Worker
+                {
+                    MessageType = wa.WorkerItemType,
+                    Pending = wa.Pending,
+                    InProgress = wa.InProgress,
+                    InProgressLimit = wa.InProgressLimit,
+                    PendingLimit = wa.PendingLimit,
+                    Updated = wa.Updated
                 });
             }
         }
