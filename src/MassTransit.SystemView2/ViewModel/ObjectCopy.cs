@@ -12,21 +12,16 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.SystemView.ViewModel
 {
-    public class Workers :
-        KeyedCollectionBase<Worker, string>
-    {
-        public void Update(Worker worker)
-        {
-            if (!Contains(worker.Key))
-            {
-                Add(worker);
-            }
-            else
-            {
-                var target = Items[worker.Key];
+    using System.Linq;
+    using System.Reflection;
 
-                ObjectCopy.Copy(worker, target);
-            }
+    public class ObjectCopy 
+    {
+        public static void Copy<T>(T source, T target) where T : class
+        {
+            var props = source.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance).Where(x => x.CanRead && x.CanWrite);
+            
+            props.ToList().ForEach(x => x.SetValue(target, x.GetValue(source, null), null));
         }
     }
 }

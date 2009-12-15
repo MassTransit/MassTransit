@@ -100,6 +100,7 @@
   <ItemGroup>
     <Compile Include="Configuration.cs" />
     <Compile Include="Consumer\SubscriptionDataConsumer.cs" />
+    <Compile Include="Converters\AofBMultiValueConverter.cs" />
     <Compile Include="Converters\IsEndpointToVisibilityConverter.cs" />
     <Compile Include="Converters\IsMessageToVisibilityConverter.cs" />
     <Compile Include="Converters\MessageNameToTextColorConverter.cs" />
@@ -134,6 +135,7 @@
     <Compile Include="ViewModel\Messages.cs" />
     <Compile Include="ViewModel\NotifyCollectionChangedBase.cs" />
     <Compile Include="ViewModel\NotifyPropertyChangedBase.cs" />
+    <Compile Include="ViewModel\ObjectCopy.cs" />
     <Compile Include="ViewModel\Worker.cs" />
     <Compile Include="ViewModel\Workers.cs" />
     <EmbeddedResource Include="Properties\Resources.resx">

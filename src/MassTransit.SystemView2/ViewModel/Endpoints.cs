@@ -14,8 +14,8 @@ namespace MassTransit.SystemView.ViewModel
 {
     using System;
     using System.Collections.Generic;
-    using System.Collections.Specialized;
     using System.Linq;
+    using System.Text.RegularExpressions;
     using Services.Subscriptions.Messages;
     using Distributor.Messages;
 
@@ -28,15 +28,14 @@ namespace MassTransit.SystemView.ViewModel
             if (Items[endpointUri].Messages.Count == 0 && Items[endpointUri].Workers.Count == 0)
             {
                 var endpoint = Items[endpointUri];
-                retValue &= Items.Remove(endpointUri);
-                OnCollectionChanged(NotifyCollectionChangedAction.Remove, endpoint);
+                retValue &= Remove(endpoint);
             }
             return retValue;
         }
 
         public void Update(IList<SubscriptionInformation> subscriptions)
         {
-            subscriptions.ToList().ForEach(Update);    
+            subscriptions.ToList().ForEach(Update);
         }
 
         public void Update(SubscriptionInformation si)
@@ -54,7 +53,7 @@ namespace MassTransit.SystemView.ViewModel
             }
             else
             {
-                var endpoint = new Endpoint {EndpointUri = si.EndpointUri};
+                var endpoint = new Endpoint { EndpointUri = si.EndpointUri };
                 Add(endpoint);
 
                 endpoint.Messages.Update(new Message
@@ -70,18 +69,46 @@ namespace MassTransit.SystemView.ViewModel
 
         public void Update(IWorkerAvailable wa)
         {
-            if (Items.Keys.Contains(wa.ControlUri))
+            Update(wa.DataUri, wa);
+            Update(wa.ControlUri, wa);
+
+            Regex regex = new Regex(@"MassTransit\.Distributor\.Messages\.WorkerAvailable`\d+\[\[(?<type>.+), (?<assembly>.+)\]\], MassTransit");
+
+            Items.Values.Where(x =>
             {
-                Items[wa.ControlUri].Workers.Update(new Worker
-                {
-                    MessageType = wa.WorkerItemType,
-                    Pending = wa.Pending,
-                    InProgress = wa.InProgress,
-                    InProgressLimit = wa.InProgressLimit,
-                    PendingLimit = wa.PendingLimit,
-                    Updated = wa.Updated
-                });
+                return x.Messages
+                    .ToList()
+                    .Where(y =>
+                    {
+                        return y.MessageName.StartsWith("MassTransit.Distributor.Messages.WorkerAvailable`");
+                    })
+                    .Where(y =>
+                    {
+                        return regex.Replace(y.MessageName, "${type}") == wa.WorkerItemType;
+                    })
+                    .Count() > 0;
+            })
+            .ToList()
+            .ForEach(x => Update(x.EndpointUri, wa));
+        }
+
+        private void Update(Uri endpointUri, IWorkerAvailable wa)
+        {
+            if (!Items.Keys.Contains(endpointUri))
+            {
+                Add(new Endpoint { EndpointUri = endpointUri });
             }
+
+            Items[endpointUri].Workers.Update(new Worker
+            {
+                MessageType = wa.WorkerItemType,
+                Pending = wa.Pending,
+                InProgress = wa.InProgress,
+                InProgressLimit = wa.InProgressLimit,
+                PendingLimit = wa.PendingLimit,
+                Updated = wa.Updated,
+                ControlUri = wa.ControlUri
+            });
         }
     }
 }

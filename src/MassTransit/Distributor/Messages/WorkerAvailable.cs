@@ -54,7 +54,7 @@ namespace MassTransit.Distributor.Messages
 
         public string WorkerItemType
         {
-            get { return typeof(T).Name; }
+            get { return typeof(T).FullName; }
         }
     }
 }

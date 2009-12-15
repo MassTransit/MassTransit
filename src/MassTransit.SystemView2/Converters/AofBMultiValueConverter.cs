@@ -10,23 +10,29 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.SystemView.ViewModel
+namespace MassTransit.SystemView.Converters
 {
-    public class Workers :
-        KeyedCollectionBase<Worker, string>
-    {
-        public void Update(Worker worker)
-        {
-            if (!Contains(worker.Key))
-            {
-                Add(worker);
-            }
-            else
-            {
-                var target = Items[worker.Key];
+    using System;
+    using System.Globalization;
+    using System.Windows.Data;
+    using System.Linq;
 
-                ObjectCopy.Copy(worker, target);
+    public class AofBMultiValueConverter :
+        IMultiValueConverter 
+    {
+        public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (values.Count() == 2)
+            {
+                return string.Format("{0} of {1}", values);
             }
+
+            return null;
+        }
+
+        public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
         }
     }
 }
