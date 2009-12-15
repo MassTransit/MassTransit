@@ -10,26 +10,28 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.SystemView.ViewModel
+namespace MassTransit.SystemView.Converters
 {
     using System;
+    using System.Globalization;
+    using System.Windows;
+    using System.Windows.Data;
+    using ViewModel;
 
-    public class Endpoint :
-        IKeyedObject<Uri>
+    public class IsEndpointToVisibilityConverter :
+        IValueConverter
     {
-        public Uri EndpointUri { get; set; }
-        public Messages Messages { get; private set; }
-        public Workers Workers { get; private set; }
-        
-        public Uri Key
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            get { return EndpointUri; }
+            if (value is Endpoint)
+                return Visibility.Visible;
+
+            return Visibility.Collapsed;
         }
-        
-        public Endpoint()
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            Messages = new Messages();
-            Workers = new Workers();
+            throw new NotImplementedException();
         }
     }
 }

@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.SystemView.ViewModel
 {
+    using System.Collections.Generic;
     using System.Collections.Specialized;
     
     public class NotifyCollectionChangedBase<T> :
@@ -26,6 +27,15 @@ namespace MassTransit.SystemView.ViewModel
             if (e != null)
             {
                 e(this, new NotifyCollectionChangedEventArgs(action, item));
+            }
+        }
+
+        protected virtual void OnCollectionChanged(NotifyCollectionChangedAction action, IList<T> items)
+        {
+            var e = CollectionChanged;
+            if (e != null)
+            {
+                e(this, new NotifyCollectionChangedEventArgs(action, items));
             }
         }
     }

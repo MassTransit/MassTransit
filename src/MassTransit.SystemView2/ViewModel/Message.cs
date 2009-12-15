@@ -17,7 +17,8 @@ namespace MassTransit.SystemView.ViewModel
     using System.Linq;
 
     public class Message :
-        NotifyPropertyChangedBase
+        NotifyPropertyChangedBase,
+        IKeyedObject<string>
     {
         public string MessageName { get; set; }
 
@@ -52,7 +53,7 @@ namespace MassTransit.SystemView.ViewModel
             }
         }
 
-            private Guid _clientId;
+        private Guid _clientId;
         public Guid ClientId
         {
             get { return _clientId; }
@@ -106,6 +107,11 @@ namespace MassTransit.SystemView.ViewModel
                     OnPropertyChanged("SubscriptionId");
                 }
             }
+        }
+
+        public string Key
+        {
+            get { return MessageName; }
         }
     }
 }

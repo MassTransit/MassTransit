@@ -12,24 +12,8 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.SystemView.ViewModel
 {
-    using System;
-
-    public class Endpoint :
-        IKeyedObject<Uri>
+    public interface IKeyedObject<T>
     {
-        public Uri EndpointUri { get; set; }
-        public Messages Messages { get; private set; }
-        public Workers Workers { get; private set; }
-        
-        public Uri Key
-        {
-            get { return EndpointUri; }
-        }
-        
-        public Endpoint()
-        {
-            Messages = new Messages();
-            Workers = new Workers();
-        }
+        T Key { get; }
     }
 }

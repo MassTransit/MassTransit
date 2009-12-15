@@ -3,13 +3,21 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:ViewModel="clr-namespace:MassTransit.SystemView.ViewModel"
         xmlns:Converters="clr-namespace:MassTransit.SystemView.Converters"
-        Title="MassTransit System View" Height="300" Width="300"
+        xmlns:local="clr-namespace:MassTransit.SystemView"
+        Title="MassTransit System View" Height="500" Width="800"
         Loaded="Window_Loaded">
     <Window.Resources>
         <Converters:MessageNameToTextColorConverter x:Key="messageNameColorConverter" />
+        <Converters:IsEndpointToVisibilityConverter x:Key="isEndpointConverter" />
+        <Converters:IsMessageToVisibilityConverter x:Key="isMessageConverter" />
+        <Converters:TypeFilterConverter x:Key="typeFilterConverter" />
     </Window.Resources>
     <Grid>
-        <TreeView x:Name="tvSubscriptions">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="350" />
+            <ColumnDefinition />
+        </Grid.ColumnDefinitions>
+        <TreeView x:Name="tvSubscriptions" Grid.Column="0">
             <TreeView.Resources>
                 <HierarchicalDataTemplate DataType="{x:Type ViewModel:Endpoint}" ItemsSource="{Binding Path=Messages}">
                     <TextBlock Text="{Binding Path=EndpointUri}" />
@@ -21,5 +29,11 @@
                 </HierarchicalDataTemplate>
             </TreeView.Resources>
         </TreeView>
+        <local:EndpointDetails Visibility="{Binding ElementName=tvSubscriptions, Path=SelectedItem, Converter={StaticResource isEndpointConverter}}"
+                               DataContext="{Binding ElementName=tvSubscriptions, Path=SelectedItem, Converter={StaticResource typeFilterConverter}, ConverterParameter=Endpoint}" 
+                               Grid.Column="1" />
+        <local:MessageDetails Visibility="{Binding ElementName=tvSubscriptions, Path=SelectedItem, Converter={StaticResource isMessageConverter}}"
+                              DataContext="{Binding ElementName=tvSubscriptions, Path=SelectedItem, Converter={StaticResource typeFilterConverter}, ConverterParameter=Message}" 
+                              Grid.Column="1" />
     </Grid>
 </Window>

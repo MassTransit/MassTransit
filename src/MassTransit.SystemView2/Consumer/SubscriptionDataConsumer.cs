@@ -15,9 +15,7 @@ namespace MassTransit.SystemView.Consumer
     using System;
     using Magnum;
     using Distributor.Messages;
-    using Services.HealthMonitoring.Messages;
     using Services.Subscriptions.Messages;
-    using Services.Timeout.Messages;
     using ViewModel;
     using Transports.Msmq;
     using StructureMap.Attributes;
@@ -26,14 +24,6 @@ namespace MassTransit.SystemView.Consumer
         Consumes<SubscriptionRefresh>.All,
         Consumes<AddSubscription>.All,
         Consumes<RemoveSubscription>.All,
-        Consumes<HealthUpdate>.All,
-        Consumes<TimeoutScheduled>.All,
-        Consumes<TimeoutRescheduled>.All,
-        Consumes<TimeoutExpired>.All,
-        Consumes<EndpointIsHealthy>.All,
-        Consumes<EndpointIsDown>.All,
-        Consumes<EndpointIsSuspect>.All,
-        Consumes<EndpointIsOffline>.All,
         Consumes<IWorkerAvailable>.All,
         IDisposable
     {
@@ -101,40 +91,9 @@ namespace MassTransit.SystemView.Consumer
             LocalSubscriptionCache.Endpoints.Remove(message.Subscription.EndpointUri, message.Subscription.MessageName);
         }
 
-        public void Consume(HealthUpdate message)
-        {
-        }
-
-        public void Consume(TimeoutScheduled message)
-        {
-        }
-
-        public void Consume(TimeoutRescheduled message)
-        {
-        }
-
-        public void Consume(TimeoutExpired message)
-        {
-        }
-
-        public void Consume(EndpointIsHealthy message)
-        {
-        }
-
-        public void Consume(EndpointIsDown message)
-        {
-        }
-
-        public void Consume(EndpointIsSuspect message)
-        {
-        }
-
-        public void Consume(EndpointIsOffline message)
-        {
-        }
-
         public void Consume(IWorkerAvailable message)
         {
+            LocalSubscriptionCache.Endpoints.Update(message);
         }
 
         public void Dispose()
