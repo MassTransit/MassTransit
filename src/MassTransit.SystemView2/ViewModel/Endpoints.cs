@@ -107,7 +107,8 @@ namespace MassTransit.SystemView.ViewModel
                 InProgressLimit = wa.InProgressLimit,
                 PendingLimit = wa.PendingLimit,
                 Updated = wa.Updated,
-                ControlUri = wa.ControlUri
+                ControlUri = wa.ControlUri,
+                DataUri = wa.DataUri
             });
         }
     }

@@ -70,7 +70,7 @@ namespace MassTransit.Distributor
 			_dataUri = _bus.Endpoint.Uri;
 			_controlUri = _controlBus.Endpoint.Uri;
 
-			_unsubscribeAction = bus.ControlBus.Subscribe<ConfigureWorker<TSaga>>(Consume);
+			_unsubscribeAction = bus.ControlBus.Subscribe<ConfigureWorker>(Consume, Accept);
 			_unsubscribeAction += bus.Subscribe(this);
 
 			CacheMessageTypesForSaga();
@@ -122,7 +122,12 @@ namespace MassTransit.Distributor
 			saga.EnumerateDataEvents(type => _messageTypes.Add(type));
 		}
 
-		private void Consume(ConfigureWorker<TSaga> message)
+        private bool Accept(ConfigureWorker message)
+        {
+            return typeof(TSaga).GetType().FullName == message.MessageType;
+        }
+
+		private void Consume(ConfigureWorker message)
 		{
 			if (message.InProgressLimit >= 0)
 				_inProgressLimit = message.InProgressLimit;

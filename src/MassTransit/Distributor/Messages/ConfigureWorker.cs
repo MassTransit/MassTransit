@@ -12,9 +12,10 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Distributor.Messages
 {
-	public interface ConfigureWorker<T>
+	public class ConfigureWorker
 	{
-		int InProgressLimit { get; }
-		int PendingLimit { get; }
+        public int InProgressLimit { get; set; }
+        public int PendingLimit { get; set; }
+        public string MessageType { get; set; }
 	}
 }

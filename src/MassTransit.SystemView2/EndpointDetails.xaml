@@ -17,10 +17,13 @@
             <Setter Property="HorizontalAlignment" Value="Stretch" />
         </Style>
         <Style x:Key="numericalElementStyle" TargetType="{x:Type TextBlock}">
-            <Setter Property="HorizontalAlignment" Value="Right" />
+            <Setter Property="TextAlignment" Value="Right" />
         </Style>
         <Style x:Key="numericalHeaderStyler" TargetType="{x:Type dgPrimitives:DataGridColumnHeader}">
-            <Setter Property="HorizontalAlignment" Value="Right" />
+            <Setter Property="HorizontalContentAlignment" Value="Right" />
+        </Style>
+        <Style TargetType="{x:Type dg:DataGridCell}">
+            <Setter Property="VerticalContentAlignment" Value="Center" />
         </Style>
     </UserControl.Resources>
     <Grid>
@@ -57,6 +60,14 @@
                     </dg:DataGridTextColumn.Binding>
                 </dg:DataGridTextColumn>
                 <dg:DataGridTextColumn IsReadOnly="True" Header="Last Updated (UTC)" Binding="{Binding Path=Updated}" />
+                <dg:DataGridTemplateColumn Header="Update Limits">
+                    <dg:DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Button Content="" x:Name="btnChangeLimits" Height="12"
+                                    Click="btnChangeLimits_Click" DataContext="{Binding}" />    
+                        </DataTemplate>
+                    </dg:DataGridTemplateColumn.CellTemplate>
+                </dg:DataGridTemplateColumn>
             </dg:DataGrid.Columns>
         </dg:DataGrid>
     </Grid>

@@ -76,6 +76,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Page Include="DistributorWorkerUpdateWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="MessageDetails.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -105,6 +109,9 @@
     <Compile Include="Converters\IsMessageToVisibilityConverter.cs" />
     <Compile Include="Converters\MessageNameToTextColorConverter.cs" />
     <Compile Include="Converters\TypeFilterConverter.cs" />
+    <Compile Include="DistributorWorkerUpdateWindow.xaml.cs">
+      <DependentUpon>DistributorWorkerUpdateWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="MessageDetails.xaml.cs">
       <DependentUpon>MessageDetails.xaml</DependentUpon>
     </Compile>

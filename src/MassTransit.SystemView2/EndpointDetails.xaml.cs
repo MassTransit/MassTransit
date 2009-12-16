@@ -10,6 +10,8 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
+using MassTransit.SystemView.ViewModel;
+
 namespace MassTransit.SystemView
 {
     using System.Windows.Controls;
@@ -22,6 +24,12 @@ namespace MassTransit.SystemView
         public EndpointDetails()
         {
             InitializeComponent();
+        }
+
+        private void btnChangeLimits_Click(object sender, System.Windows.RoutedEventArgs e)
+        {
+            var window = new DistributorWorkerUpdateWindow((e.Source as Button).DataContext as Worker);
+            window.ShowDialog();
         }
     }
 }

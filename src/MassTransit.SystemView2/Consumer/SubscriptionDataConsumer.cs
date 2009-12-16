@@ -27,7 +27,6 @@ namespace MassTransit.SystemView.Consumer
         Consumes<IWorkerAvailable>.All,
         IDisposable
     {
-
         private IServiceBus _bus;
         private readonly Guid _clientId = CombGuid.Generate();
         private StructureMap.IContainer _container;
@@ -94,6 +93,13 @@ namespace MassTransit.SystemView.Consumer
         public void Consume(IWorkerAvailable message)
         {
             LocalSubscriptionCache.Endpoints.Update(message);
+        }
+
+        public void UpdateWorker(Uri controlUri, string type, int pendingLimit, int inProgressLimit)
+        {
+            var endpoint = _container.GetInstance<IEndpointFactory>().GetEndpoint(controlUri);
+
+            endpoint.Send(new ConfigureWorker() { InProgressLimit = inProgressLimit, MessageType = type, PendingLimit = pendingLimit });
         }
 
         public void Dispose()
