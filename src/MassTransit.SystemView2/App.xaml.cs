@@ -20,17 +20,17 @@ namespace MassTransit.SystemView
     /// </summary>
     public partial class App : Application
     {
-        private SubscriptionDataConsumer _subscriptionDataConsumer;
+        public static SubscriptionDataConsumer SubscriptionDataConsumer { get; set; }
 
         private void Application_Exit(object sender, ExitEventArgs e)
         {
-            if (_subscriptionDataConsumer != null)
-                _subscriptionDataConsumer.Dispose();
+            if (SubscriptionDataConsumer != null)
+                SubscriptionDataConsumer.Dispose();
         }
 
         private void Application_Startup(object sender, StartupEventArgs e)
         {
-            _subscriptionDataConsumer = new SubscriptionDataConsumer();
+            SubscriptionDataConsumer = new SubscriptionDataConsumer();
         }
     }
 }

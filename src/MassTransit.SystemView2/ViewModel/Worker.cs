@@ -125,5 +125,6 @@ namespace MassTransit.SystemView.ViewModel
         }
 
         public Uri ControlUri { get; set; }
+        public Uri DataUri { get; set; }
     }
 }

@@ -117,19 +117,25 @@ namespace MassTransit.Distributor
 			_dataUri = _bus.Endpoint.Uri;
 			_controlUri = _controlBus.Endpoint.Uri;
 
-			_unsubscribeAction = bus.ControlBus.Subscribe<ConfigureWorker<T>>(Consume);
+			_unsubscribeAction = bus.ControlBus.Subscribe<ConfigureWorker>(Consume, Accept);
 			_unsubscribeAction += bus.ControlBus.Subscribe<PingWorker>(Consume);
 			_unsubscribeAction += bus.Subscribe(this);
 
 			PublishWorkerAvailability();
 		}
 
-		public void Stop()
+	    public void Stop()
 		{
 			_unsubscribeAction();
 		}
 
-		private void Consume(ConfigureWorker<T> message)
+        private bool Accept(ConfigureWorker message)
+        {
+            
+            return this.GetType().GetGenericArguments()[0].FullName == message.MessageType;
+        }
+
+		private void Consume(ConfigureWorker message)
 		{
 			if (message.InProgressLimit >= 0)
 				_inProgressLimit = message.InProgressLimit;

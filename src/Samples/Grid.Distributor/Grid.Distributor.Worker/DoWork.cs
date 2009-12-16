@@ -10,22 +10,19 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-using System.Configuration;
-using MassTransit.Configuration;
-using MassTransit.Distributor;
-using MassTransit.Distributor.Configuration;
-using MassTransit.Serialization;
-using MassTransit.Services.Subscriptions.Configuration;
-using MassTransit.Transports.Msmq;
-using StructureMap.Pipeline;
-
 namespace Grid.Distributor.Worker
 {
     using System;
-    using Shared;
-    using Shared.Messages;
+    using System.Configuration;
+    using MassTransit.Configuration;
+    using MassTransit.Distributor;
+    using MassTransit.Serialization;
+    using MassTransit.Services.Subscriptions.Configuration;
+    using MassTransit.Transports.Msmq;
     using log4net;
     using MassTransit;
+    using Shared;
+    using Shared.Messages;
 
     public class DoWork :
         IServiceInterface,
