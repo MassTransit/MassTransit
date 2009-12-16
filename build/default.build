@@ -6,14 +6,17 @@
   <include buildfile="${build.config.settings}" if="${file::exists(build.config.settings)}" />
   <property name="file.current.no_extension" value="default" />
   <property name="dirs.current" value="${directory::get-parent-directory(project::get-buildfile-path())}" />
+  <property name="path.to.toplevel" value=".." />
   <property name="folder.build_scripts" value="build" overwrite="false" />
   <property name="folder.build_scripts_custom" value="build.custom" overwrite="false" />
-  <property name="dirs.build_scripts_custom" value="${dirs.current}\..\${folder.build_scripts_custom}" />
+  <property name="dirs.build_scripts_custom" value="${dirs.current}\${path.to.toplevel}\${folder.build_scripts_custom}" />
   <property name="folder.code_build" value="build_output" overwrite="false" />
-  <property name="dirs.build" value="${dirs.current}\..\${folder.code_build}" />
+  <property name="dirs.build" value="${dirs.current}\${path.to.toplevel}\${folder.code_build}" />
   <property name="folder.code_drop" value="code_drop" overwrite="false" />
-  <property name="dirs.drop" value="${dirs.current}\..\${folder.code_drop}" overwrite="false" />
+  <property name="dirs.drop" value="${dirs.current}\${path.to.toplevel}\${folder.code_drop}" overwrite="false" />
+  <property name="project.name" value="__SOLUTION_NAME_WITHOUT_SLN_EXTENSION__" overwrite="false" />
   <property name="repository.path" value="__REPOSITORY_PATH__" overwrite="false" />
+  <property name="company.name" value="__COMPANY_NAME__" overwrite="false" />
   <property name="source_control_type" value="svn" overwrite="false" />
   <property name="version.uppercut" value="0" />
   <property name="version.revision" value="0" />
@@ -50,8 +53,8 @@
   </target>
 
   <target name="error_check">
-    <fail message="You must provide arguments in your command line call like this: default.build -D:project.name='SOLUTION_NAME_WITHOUT_EXTENSION' -D:repository.path='FULL_PATH_TO_REPOSITORY' or pass the build configuration settings file default.build -D:build.config.settings='settings\Uppercut.config"
-      if="${repository.path=='__REPOSITORY_PATH__'}" />
+    <fail message="You must fill out the project.name, repository.path, and company.name settings in the settings\UppercuT.config file. Please do that and retry the build."
+      if="${project.name=='__SOLUTION_NAME_WITHOUT_SLN_EXTENSION__' or repository.path=='__REPOSITORY_PATH__' or company.name=='__COMPANY_NAME__'}" />
   </target>
 
   <target name="build">
@@ -61,11 +64,22 @@
 
     <nant buildfile="${dirs.current}\policyChecks.step" inheritall="true" />
     <nant buildfile="${dirs.current}\versionBuilder.step" inheritall="true" />
+    <nant buildfile="${dirs.current}\generateBuildInfo.step" inheritall="true" />
     <nant buildfile="${dirs.current}\compile.step" inheritall="true" />
     <nant buildfile="${dirs.current}\environmentBuilder.step" inheritall="true" />
     <nant buildfile="${dirs.current}\analyze.step" inheritall="true" />
-    <nant buildfile="${dirs.current}\generateBuildInfo.step" inheritall="true" />
     <nant buildfile="${dirs.current}\package.step" inheritall="true" />
+  </target>
+
+  <target name="get_revision">
+    <nant buildfile="${dirs.current}\versioners\svn.step" inheritall="true" if="${source_control_type=='svn'}" />
+    <nant buildfile="${dirs.current}\versioners\tfs.step" inheritall="true" if="${source_control_type=='tfs'}" />
+    <!--<nant buildfile="${dirs.current}\versioners\git.step" inheritall="true" if="${source_control_type=='git'}" />-->
+    <!--<nant buildfile="${dirs.current}\versioners\vault.step" inheritall="true" if="${source_control_type=='vault'}" />-->
+    <!--<nant buildfile="${dirs.current}\versioners\vss.step" inheritall="true" if="${source_control_type=='vss'}" />-->
+
+    <property name="version.revision" value="${environment::get-variable('uc.app.revision')}" if="${environment::variable-exists('uc.app.revision')}" />
+    <echo message="Using revision number: ${version.revision}." />
   </target>
 
   <target name="get_build_number">
@@ -88,50 +102,6 @@
   <target name="report_finish_time">
     <echo message="Build finished at ${datetime::now()} with UppercuT version ${version.uppercut}." />
   </target>
-
-  <target name="get_revision">
-    <call target="svn_get_revision" if="${source_control_type=='svn'}" />
-    <call target="git_get_revision" if="${source_control_type=='git'}" />
-    <call target="vss_get_revision" if="${source_control_type=='vss'}" />
-    <call target="tfs_get_revision" if="${source_control_type=='tfs'}" />
-    <call target="vault_get_revision" if="${source_control_type=='vault'}" />
-    <echo message="Using revision number: ${version.revision}." />
-  </target>
-
-  <target name="svn_get_revision" description="Gets the current revision number">
-    <echo message="Getting revision number from working directory ${directory::get-parent-directory(dirs.current)} or remotely at ${repository.path}."/>
-    <!-- try to update the revision -->
-    <exec
-      program="svn"
-      commandline="info ${directory::get-parent-directory(dirs.current)} --xml"
-      output="_revision.xml"
-      failonerror="false"/>
-    <xmlpeek
-      file="_revision.xml"
-      xpath="/info/entry/commit/@revision"
-      property="version.revision"
-      failonerror="false"/>
-    <exec
-      program="svn"
-      commandline="info ${repository.path} --xml"
-      output="_revision.xml"
-      failonerror="false"
-      if="${version.revision == '0'}"
-      />
-    <xmlpeek
-      file="_revision.xml"
-      xpath="/info/entry/@revision"
-      property="version.revision"
-      failonerror="false"
-      if="${version.revision == '0'}"
-      />
-    <delete file="_revision.xml" failonerror="false" />
-  </target>
-
-  <target name="git_get_revision" description="Gets the current revision number"></target>
-  <target name="vss_get_revision" description="Gets the current revision number"></target>
-  <target name="tfs_get_revision" description="Gets the current revision number"></target>
-  <target name="vault_get_revision" description="Gets the current revision number"></target>
 
   <target name="report_uppercut_version">
     <xmlpeek

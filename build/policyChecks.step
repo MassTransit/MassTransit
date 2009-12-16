@@ -6,11 +6,12 @@
   <include buildfile="${build.config.settings}" if="${file::exists(build.config.settings)}" />
   <property name="file.current.no_extension" value="policyChecks" />
   <property name="dirs.current" value="${directory::get-parent-directory(project::get-buildfile-path())}" />
+  <property name="path.to.toplevel" value=".." />
   <property name="folder.build_scripts" value="build" overwrite="false" />
   <property name="folder.build_scripts_custom" value="build.custom" overwrite="false" />
-  <property name="dirs.build_scripts_custom" value="${dirs.current}\..\${folder.build_scripts_custom}" />
+  <property name="dirs.build_scripts_custom" value="${dirs.current}\${path.to.toplevel}\${folder.build_scripts_custom}" />
   <property name="folder.documentation" value="docs" overwrite="false" />
-  <property name="dirs.docs" value="${path::get-full-path(dirs.current)}\..\${folder.documentation}" />
+  <property name="dirs.docs" value="${path::get-full-path(dirs.current)}\${path.to.toplevel}\${folder.documentation}" />
   <property name="project.name" value="__SOLUTION_NAME_WITHOUT_SLN_EXTENSION__" overwrite="false" />
   <property name="file.installation_document" value="${dirs.docs}\Installation\Install.docx" overwrite="false" />
   <property name="fail.if_no_installation_document" value="false" overwrite="false" />

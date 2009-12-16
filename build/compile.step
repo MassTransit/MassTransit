@@ -6,22 +6,24 @@
   <include buildfile="${build.config.settings}" if="${file::exists(build.config.settings)}" />
   <property name="file.current.no_extension" value="compile" />
   <property name="dirs.current" value="${directory::get-parent-directory(project::get-buildfile-path())}" />
+  <property name="path.to.toplevel" value=".." />
   <property name="folder.build_scripts" value="build" overwrite="false" />
   <property name="folder.build_scripts_custom" value="build.custom" overwrite="false" />
-  <property name="dirs.build_scripts_custom" value="${dirs.current}\..\${folder.build_scripts_custom}" />
+  <property name="dirs.build_scripts_custom" value="${dirs.current}\${path.to.toplevel}\${folder.build_scripts_custom}" />
   <property name="folder.code_build" value="build_output" overwrite="false" />
-  <property name="dirs.build" value="${dirs.current}\..\${folder.code_build}" />
+  <property name="dirs.build" value="${dirs.current}\${path.to.toplevel}\${folder.code_build}" />
   <property name="folder.documentation" value="docs" overwrite="false" />
-  <property name="dirs.docs" value="${dirs.current}\..\${folder.documentation}" />
+  <property name="dirs.docs" value="${dirs.current}\${path.to.toplevel}\${folder.documentation}" />
   <property name="folder.database" value="__DATABASE_FOLDER_NAME__" overwrite="false" />
-  <property name="dirs.db" value="${dirs.current}\..\${folder.database}" />
+  <property name="dirs.db" value="${dirs.current}\${path.to.toplevel}\${folder.database}" />
   <property name="project.name" value="__SOLUTION_NAME_WITHOUT_SLN_EXTENSION__" overwrite="false" />
+  <property name="folder.app.drop" value="${project.name}" overwrite="false" />
   <property name="path_to_solution" value="." overwrite="false" />
   <property name="microsoft.framework" value="net-3.5" overwrite="false" />
   <property name="msbuild.configuration" value="Release" overwrite="false" />
   <property name="msbuild.platform" value="Any CPU" overwrite="false" />
-  <property name="solution.path" value="${dirs.current}\..\${path_to_solution}\${project.name}.sln" />
-  <property name="solution.path" value="${dirs.current}\..\${path_to_solution}\${project.name}.vbp" if="${microsoft.framework =='vb6'}" />
+  <property name="solution.path" value="${dirs.current}\${path.to.toplevel}\${path_to_solution}\${project.name}.sln" />
+  <property name="solution.path" value="${dirs.current}\${path.to.toplevel}\${path_to_solution}\${project.name}.vbp" if="${microsoft.framework =='vb6'}" />
   <property name="nant.settings.currentframework" value="${microsoft.framework}" if="${microsoft.framework !='vb6'}" />
   <property name="file.custom.step.before" value="${dirs.build_scripts_custom}\${file.current.no_extension}.pre.step" />
   <property name="file.custom.step.after" value="${dirs.build_scripts_custom}\${file.current.no_extension}.post.step" />
@@ -49,7 +51,7 @@
   </target>
 
   <target name="error_check">
-    <fail message="You must provide arguments to the command line like this default.build -D:project.name='SOLUTION_NAME_WITHOUT_EXTENSION' -D:repository.path='FULL_PATH_TO_REPOSITORY' OR compile.step -D:project.name='SOLUTION_NAME_WITHOUT_EXTENSION' or pass the build configuration settings file default.build -D:build.config.settings='settings\Uppercut.config"
+    <fail message="You must fill out the project.name, repository.path, and company.name settings in the settings\UppercuT.config file. Please do that and retry the build."
       if="${project.name=='__SOLUTION_NAME_WITHOUT_SLN_EXTENSION__'}" />
   </target>
 
@@ -62,13 +64,13 @@
   <target name="build_dotNET_code" >
     <msbuild project="${solution.path}" verbosity="quiet">
       <property name="Configuration" value="${msbuild.configuration}" />
-      <property name="OutputPath" value="${dirs.build}" />
+      <property name="OutputPath" value="${dirs.build}\${folder.app.drop}" />
       <property name="Platform" value="${msbuild.platform}" />
     </msbuild>
   </target>
 
   <target name="build_vb6_code">
-    <vb6 project="${solution.path}" outdir="${dirs.build}" />
+    <vb6 project="${solution.path}" outdir="${dirs.build}\${folder.app.drop}" />
   </target>
 
   <target name="copy_documentation">
