@@ -6,18 +6,22 @@
   <include buildfile="${build.config.settings}" if="${file::exists(build.config.settings)}" />
   <property name="file.current.no_extension" value="ncover" />
   <property name="dirs.current" value="${directory::get-parent-directory(project::get-buildfile-path())}" />
+  <property name="path.to.toplevel" value="..\.." />
   <property name="folder.build_scripts" value="build" overwrite="false" />
   <property name="folder.build_scripts_custom" value="build.custom" overwrite="false" />
-  <property name="dirs.build_scripts_custom" value="${dirs.current}\..\..\${folder.build_scripts_custom}\analyzers" />
+  <property name="dirs.build_scripts_custom" value="${dirs.current}\${path.to.toplevel}\${folder.build_scripts_custom}\analyzers" />
   <property name="folder.code_build" value="build_output" overwrite="false" />
-  <property name="dirs.build" value="${dirs.current}\..\..\${folder.code_build}" />
+  <property name="dirs.build" value="${dirs.current}\${path.to.toplevel}\${folder.code_build}" />
+  <property name="folder.app.drop" value="${project.name}" overwrite="false" />
+  <property name="dirs.build.code" value="${dirs.build}\${folder.app.drop}" overwrite="false" />
   <property name="folder.build_artifacts" value="build_artifacts" overwrite="false" />
   <property name="dirs.build_artifacts" value="${path::get-full-path(dirs.build)}\${folder.build_artifacts}" />
   <property name="project.name" value="__SOLUTION_NAME_WITHOUT_SLN_EXTENSION__" overwrite="false" />
   <property name="test.framework" value="mbunit" overwrite="false" />
   <property name="number.satisfactory_coverage" value="85" overwrite="false" />
   <property name="fail.if_ncover_fails" value="false" overwrite="false" />
-  <property name="dirs.lib" value="${dirs.current}\..\..\lib" overwrite="false" />
+  <property name="folder.references" value="lib" overwrite="false" />
+  <property name="dirs.lib" value="${dirs.current}\${path.to.toplevel}\${folder.references}" overwrite="false" />
   <property name="dirs.ncover_results" value="${path::get-full-path(dirs.build_artifacts)}\ncover" />
   <property name="app.ncover.tester" value="${path::get-full-path(dirs.lib)}\MbUnit2\MbUnit.Cons.exe" overwrite="false" />
   <property name="app.ncover" value="${path::get-full-path(dirs.lib)}\NCover\NCover.Console.exe" overwrite="false" />
@@ -63,15 +67,16 @@
   </target>
 
   <target name="get_test_dlls">
-    <echo message="Getting test dlls based on name in directory ${path::get-full-path(dirs.build)}." />
+    <echo message="Getting test dlls based on name in directory ${path::get-full-path(dirs.build.code)}." />
     <property name="dll.names" value="" />
     <foreach item="File" property="dll.filename">
       <in>
         <items>
-          <exclude name="${dirs.build}\*Database*dll" />
-          <exclude name="${dirs.build}\*.Integration*dll" />
-          <exclude name="${dirs.build}\TestFu.dll" />
-          <include name="${dirs.build}\*Test*dll" />
+          <exclude name="${dirs.build.code}\*Database*dll" />
+          <exclude name="${dirs.build.code}\*.Integration*dll" />
+          <exclude name="${dirs.build.code}\TestFu.dll" />
+          <include name="${dirs.build.code}\*Test*dll" />
+          <include name="${dirs.build.code}\*Spec*dll" />
         </items>
       </in>
       <do>
@@ -90,17 +95,18 @@
     <ncover program="${app.ncover}"
         commandLineExe="${app.ncover.tester}"
         commandLineArgs="${args.test_runner}"
-        workingDirectory="${dirs.build}"
+        workingDirectory="${dirs.build.code}"
         coverageFile="${file.ncover_results}"
         logLevel="Normal"
         logFile="${file.ncover_log}"
         excludeAttributes="CoverageExcludeAttribute"
         failonerror="false"
         verbose="true">
-      <assemblies basedir="${dirs.build}">
-        <exclude name="${dirs.build}\*Test*dll" />
-        <exclude name="${dirs.build}\*Spec*dll" />
-        <include name="${dirs.build}\${project.name}*.dll" />
+      <assemblies basedir="${dirs.build.code}">
+        <exclude name="${dirs.build.code}\TestFu.dll" />
+        <exclude name="${dirs.build.code}\*Test*dll" />
+        <exclude name="${dirs.build.code}\*Spec*dll" />
+        <include name="${dirs.build.code}\${project.name}*.dll" />
       </assemblies>
     </ncover>
   </target>
@@ -124,6 +130,7 @@
       </fileset>
       <exclusions>
         <exclusion enabled="true" isRegex="false" pattern="*Test*" type="Assembly" />
+        <exclusion enabled="true" isRegex="false" pattern="*Spec*" type="Assembly" />
         <exclusion enabled="true" isRegex="false" pattern="*Test*" type="Namespace" />
         <exclusion enabled="true" isRegex="false" pattern="*.My*" type="Namespace" />
         <exclusion enabled="true" isRegex="false" pattern="*.bdd*" type="Namespace" />

@@ -6,11 +6,14 @@
   <include buildfile="${build.config.settings}" if="${file::exists(build.config.settings)}" />
   <property name="file.current.no_extension" value="gallio.test" />
   <property name="dirs.current" value="${directory::get-parent-directory(project::get-buildfile-path())}" />
+  <property name="path.to.toplevel" value="..\.." />
   <property name="folder.build_scripts" value="build" overwrite="false" />
   <property name="folder.build_scripts_custom" value="build.custom" overwrite="false" />
-  <property name="dirs.build_scripts_custom" value="${dirs.current}\..\..\${folder.build_scripts_custom}\analyzers" />
+  <property name="dirs.build_scripts_custom" value="${dirs.current}\${path.to.toplevel}\${folder.build_scripts_custom}\analyzers" />
   <property name="folder.code_build" value="build_output" overwrite="false" />
-  <property name="dirs.build" value="${dirs.current}\..\..\${folder.code_build}" />
+  <property name="dirs.build" value="${dirs.current}\${path.to.toplevel}\${folder.code_build}" />
+  <property name="folder.app.drop" value="${project.name}" overwrite="false" />
+  <property name="dirs.build.code" value="${dirs.build}\${folder.app.drop}" overwrite="false" />
   <property name="folder.build_artifacts" value="build_artifacts" overwrite="false" />
   <property name="dirs.build_artifacts" value="${path::get-full-path(dirs.build)}\${folder.build_artifacts}" />
   <property name="dirs.test_results" value="${dirs.build_artifacts}\gallio" overwrite="false" />
@@ -67,11 +70,11 @@
             filter="exclude Category:Database or Category:Integration or Category:Slow or Category:NotWorking or Categroy:Ignore or Category:database or Category:integration or Category:slow or Category:notworking or Categroy:ignore"
             >
       <files>
-        <exclude name="${dirs.build}\*Database*dll" />
-        <exclude name="${dirs.build}\*.Integration*dll" />
-        <exclude name="${dirs.build}\TestFu.dll" />
-        <include name="${dirs.build}\*Test*dll" />
-        <include name="${dirs.build}\*.Specs*dll" />
+        <exclude name="${dirs.build.code}\*Database*dll" />
+        <exclude name="${dirs.build.code}\*.Integration*dll" />
+        <exclude name="${dirs.build.code}\TestFu.dll" />
+        <include name="${dirs.build.code}\*Test*dll" />
+        <include name="${dirs.build.code}\*.Spec*dll" />
       </files>
     </gallio>
   </target>
@@ -89,9 +92,9 @@
             run-time-limit="${time.limit.in.seconds}"
             >
       <files>
-        <exclude name="${dirs.build}\TestFu.dll" />
-        <include name="${dirs.build}\*Test*dll" />
-        <include name="${dirs.build}\*.Specs*dll" />
+        <exclude name="${dirs.build.code}\TestFu.dll" />
+        <include name="${dirs.build.code}\*Test*dll" />
+        <include name="${dirs.build.code}\*.Spec*dll" />
       </files>
     </gallio>
   </target>

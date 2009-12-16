@@ -6,10 +6,11 @@
   <include buildfile="${build.config.settings}" if="${file::exists(build.config.settings)}" />
   <property name="file.current.no_extension" value="open" />
   <property name="dirs.current" value="${directory::get-parent-directory(project::get-buildfile-path())}" />
+  <property name="path.to.toplevel" value=".." />
   <property name="folder.build_scripts" value="build" overwrite="false" />
   <property name="folder.build_scripts_custom" value="build.custom" overwrite="false" />
-  <property name="dirs.build_scripts_custom" value="${dirs.current}\..\${folder.build_scripts_custom}" />
-  <property name="dirs.solution" value="${dirs.current}\..\${path_to_solution}" />
+  <property name="dirs.build_scripts_custom" value="${dirs.current}\${path.to.toplevel}\${folder.build_scripts_custom}" />
+  <property name="dirs.solution" value="${dirs.current}\${path.to.toplevel}\${path_to_solution}" />
   <property name="solution.path" value="${path::get-full-path(dirs.solution)}\${project.name}.sln" />
   <property name="solution.path.full" value="${path::get-full-path(solution.path)}" />
   <property name="app.visual_studio" value="${environment::get-folder-path('ProgramFiles')}\Common Files\Microsoft Shared\MSEnv\VSLauncher.exe" />

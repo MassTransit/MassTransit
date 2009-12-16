@@ -6,11 +6,14 @@
   <include buildfile="${build.config.settings}" if="${file::exists(build.config.settings)}" />
   <property name="file.current.no_extension" value="mbunit2.test" />
   <property name="dirs.current" value="${directory::get-parent-directory(project::get-buildfile-path())}" />
+  <property name="path.to.toplevel" value="..\.." />
   <property name="folder.build_scripts" value="build" overwrite="false" />
   <property name="folder.build_scripts_custom" value="build.custom" overwrite="false" />
-  <property name="dirs.build_scripts_custom" value="${dirs.current}\..\..\${folder.build_scripts_custom}\analyzers" />
+  <property name="dirs.build_scripts_custom" value="${dirs.current}\${path.to.toplevel}\${folder.build_scripts_custom}\analyzers" />
   <property name="folder.code_build" value="build_output" overwrite="false" />
-  <property name="dirs.build" value="${dirs.current}\..\..\${folder.code_build}" />
+  <property name="dirs.build" value="${dirs.current}\${path.to.toplevel}\${folder.code_build}" />
+  <property name="folder.app.drop" value="${project.name}" overwrite="false" />
+  <property name="dirs.build.code" value="${dirs.build}\${folder.app.drop}" overwrite="false" />
   <property name="folder.build_artifacts" value="build_artifacts" overwrite="false" />
   <property name="dirs.build_artifacts" value="${path::get-full-path(dirs.build)}\${folder.build_artifacts}" />
   <property name="dirs.test_results" value="${dirs.build_artifacts}\mbunit2" overwrite="false" />
@@ -19,6 +22,20 @@
   <property name="file.custom.step.after" value="${dirs.build_scripts_custom}\${file.current.no_extension}.post.step" />
   <property name="file.custom.step.replace" value="${dirs.build_scripts_custom}\${file.current.no_extension}.replace.step" />
 
+  <assemblyfileset id="assemblies.assemblyfileset.testing" basedir="${dirs.build.code}\" >
+    <exclude name="*Database*dll" />
+    <exclude name="*.Integration*dll" />
+    <exclude name="TestFu.dll" />
+    <include name="*Test*dll" />
+    <include name="*.Spec*dll" />
+  </assemblyfileset>
+
+  <assemblyfileset id="assemblies.assemblyfileset.testing.all" basedir="${dirs.build.code}\" >
+    <exclude name="TestFu.dll" />
+    <include name="*Test*dll" />
+    <include name="*.Spec*dll" />
+  </assemblyfileset>
+  
   <target name="go" depends="run_tasks" />
 
   <target name="run_tasks">
@@ -55,13 +72,7 @@
         halt-on-failure="true"
         failonerror="true"
         >
-      <assemblies>
-        <exclude name="${dirs.build}\*Database*dll" />
-        <exclude name="${dirs.build}\*.Integration*dll" />
-        <exclude name="${dirs.build}\TestFu.dll" />
-        <include name="${dirs.build}\*Test*dll" />
-        <include name="${dirs.build}\*.Specs*dll" />
-      </assemblies>
+      <assemblies refid="assemblies.assemblyfileset.testing" />
       <categories>
         <exclude name="Database" />
         <exclude name="Integration" />
@@ -86,11 +97,7 @@
         halt-on-failure="true"
         failonerror="true"
         >
-      <assemblies>
-        <exclude name="${dirs.build}\TestFu.dll" />
-        <include name="${dirs.build}\*Test*dll" />
-        <include name="${dirs.build}\*.Specs*dll" />
-      </assemblies>
+      <assemblies refid="assemblies.assemblyfileset.testing.all" />
     </mbunit>
   </target>
 

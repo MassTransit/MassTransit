@@ -6,16 +6,19 @@
   <include buildfile="${build.config.settings}" if="${file::exists(build.config.settings)}" />
   <property name="file.current.no_extension" value="ndepend" />
   <property name="dirs.current" value="${directory::get-parent-directory(project::get-buildfile-path())}" />
+  <property name="path.to.toplevel" value="..\.." />
   <property name="folder.build_scripts" value="build" overwrite="false" />
   <property name="folder.build_scripts_custom" value="build.custom" overwrite="false" />
-  <property name="dirs.build_scripts_custom" value="${dirs.current}\..\..\${folder.build_scripts_custom}\analyzers" />
+  <property name="dirs.build_scripts_custom" value="${dirs.current}\${path.to.toplevel}\${folder.build_scripts_custom}\analyzers" />
   <property name="folder.code_build" value="build_output" overwrite="false" />
-  <property name="dirs.build" value="${dirs.current}\..\..\${folder.code_build}" />
+  <property name="dirs.build" value="${dirs.current}\${path.to.toplevel}\${folder.code_build}" />
+  <property name="folder.app.drop" value="${project.name}" overwrite="false" />
+  <property name="dirs.build.code" value="${dirs.build}\${folder.app.drop}" overwrite="false" />
   <property name="folder.build_artifacts" value="build_artifacts" overwrite="false" />
   <property name="dirs.build_artifacts" value="${path::get-full-path(dirs.build)}\${folder.build_artifacts}" />
   <property name="app.ndepend" value="C:\Program Files\NDepend\NDepend.Console.exe" overwrite="false" />
   <property name="dirs.ndepend_results" value="${dirs.build_artifacts}\ndepend" />
-  <property name="files.ndepend_config" value="${path::get-full-path(dirs.current)}\..\..\NDepend.xml" />
+  <property name="files.ndepend_config" value="${path::get-full-path(dirs.current)}\${path.to.toplevel}\NDepend.xml" />
   <property name="file.custom.step.before" value="${dirs.build_scripts_custom}\${file.current.no_extension}.pre.step" />
   <property name="file.custom.step.after" value="${dirs.build_scripts_custom}\${file.current.no_extension}.post.step" />
   <property name="file.custom.step.replace" value="${dirs.build_scripts_custom}\${file.current.no_extension}.replace.step" />
@@ -52,7 +55,7 @@
     <echo message="Attempting to run NDepend at ${app.ndepend} for file ${files.ndepend_config}." />
 
     <exec program="${app.ndepend}">
-      <arg line="${files.ndepend_config} /OutDir ${dirs.ndepend_results} /InDirs ${path::get-full-path(dirs.build)} C:\WINDOWS\Microsoft.NET\Framework\v2.0.50727 C:\WINDOWS\Microsoft.NET\Framework\v3.0 C:\WINDOWS\Microsoft.NET\Framework\v3.5" />
+      <arg line="${files.ndepend_config} /OutDir ${dirs.ndepend_results} /InDirs ${path::get-full-path(dirs.build.code)} C:\WINDOWS\Microsoft.NET\Framework\v2.0.50727 C:\WINDOWS\Microsoft.NET\Framework\v3.0 C:\WINDOWS\Microsoft.NET\Framework\v3.5" />
       <!--  /EmitVisualNDependBinXml -->
     </exec>
   </target>
