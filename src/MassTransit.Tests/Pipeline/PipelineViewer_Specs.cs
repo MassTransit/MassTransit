@@ -25,8 +25,6 @@ namespace MassTransit.Tests.Pipeline
 		[SetUp]
 		public void Setup()
 		{
-			_builder = MockRepository.GenerateMock<IObjectBuilder>();
-			_pipeline = MessagePipelineConfigurator.CreateDefault(_builder, null);
 		}
 
 		private IObjectBuilder _builder;
@@ -41,7 +39,11 @@ namespace MassTransit.Tests.Pipeline
 	    [Test]
 	    public void I_want_to_display_a_more_detailed_flow()
 	    {
+			_builder = MockRepository.GenerateMock<IObjectBuilder>();
+			_pipeline = MessagePipelineConfigurator.CreateDefault(_builder, null);
+            _pipeline.Filter<object>(m => true);
             _pipeline.Subscribe<PingMessage>(m => { }, x => { return true; });
+	        
             PipelineViewer.Trace(_pipeline);
 	    }
 	}

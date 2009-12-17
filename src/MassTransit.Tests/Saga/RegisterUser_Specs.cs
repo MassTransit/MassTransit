@@ -13,6 +13,7 @@
 namespace MassTransit.Tests.Saga
 {
 	using System.Diagnostics;
+	using MassTransit.Pipeline.Inspectors;
 	using Messages;
 	using NUnit.Framework;
 	using TextFixtures;
@@ -53,5 +54,9 @@ namespace MassTransit.Tests.Saga
 
 			Assert.That(complete, Is.True, "Should have been completed by now");
 		}
+
+
+        
+
 	}
 }

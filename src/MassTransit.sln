@@ -47,6 +47,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.TestFramework",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.SystemView2", "MassTransit.SystemView2\MassTransit.SystemView2.csproj", "{D2DAE9B1-AB3E-4B4D-9E8E-B394BA5B7EFE}"
 EndProject
+Project("{4F174C21-8C12-11D0-8340-0000F80270F8}") = "MassTransit.RuntimeServices.Database", "MassTransit.RuntimeServices.Database\MassTransit.RuntimeServices.Database.dbp", "{4042D8A0-80AF-403A-B9F0-01EE7C948E0A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
