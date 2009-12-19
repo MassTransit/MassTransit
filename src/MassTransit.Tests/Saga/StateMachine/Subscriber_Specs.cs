@@ -48,7 +48,7 @@ namespace MassTransit.Tests.Saga.StateMachine
 
 			var subscriber = new SagaEventSubscriber<TestSaga>(context, factory);
 
-			subscriber.Call("Connect", new[] {initiate.SagaEvent.MessageType}, initiate.SagaEvent.Event, initiate.States);
+			subscriber.FastInvoke(new[] {initiate.SagaEvent.MessageType}, "Connect", initiate.SagaEvent.Event, initiate.States);
 		}
 	}
 }

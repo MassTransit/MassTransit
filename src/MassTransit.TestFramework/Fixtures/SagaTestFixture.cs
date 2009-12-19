@@ -14,7 +14,7 @@ namespace MassTransit.TestFramework.Fixtures
 {
 	using System;
 	using Magnum;
-	using Magnum.Activator;
+	using Magnum.Reflection;
 	using NUnit.Framework;
 	using Saga;
 	using Transports;

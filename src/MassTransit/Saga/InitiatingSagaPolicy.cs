@@ -17,7 +17,7 @@ namespace MassTransit.Saga
 	using System.Linq.Expressions;
 	using Exceptions;
 	using Magnum;
-	using Magnum.Activator;
+	using Magnum.Reflection;
 
 	public class InitiatingSagaPolicy<TSaga, TMessage> :
 		ISagaPolicy<TSaga, TMessage>

@@ -33,7 +33,7 @@ namespace MassTransit.Saga.Configuration
 
 		public UnsubscribeAction Connect(Type messageType, Event @event, IEnumerable<State> states)
 		{
-			return this.Call<UnsubscribeAction>("ConnectTo", new[] {messageType}, @event, states);
+			return this.FastInvoke<SagaEventSubscriber<TSaga>, UnsubscribeAction>(new[] {messageType}, "ConnectTo", @event, states);
 		}
 
 		private UnsubscribeAction ConnectTo<TMessage>(DataEvent<TSaga, TMessage> eevent, IEnumerable<State> states)

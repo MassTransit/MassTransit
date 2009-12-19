@@ -55,7 +55,7 @@ namespace MassTransit.Tests.Distributor
 
             Assert.That(results.Sum(x => x.Value), Is.EqualTo(count));
             results.ToList().ForEach(x =>
-                Assert.That(x.Value, Is.GreaterThan(0).And.LessThan(count), 
+                Assert.That(x.Value, Is.GreaterThan(0).And.LessThanOrEqualTo(count), 
                             string.Format("{0} did not consume between 0 and {1}", 
                                           x.Key.ToString(), count)));
 		}

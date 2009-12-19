@@ -16,7 +16,7 @@ namespace MassTransit.Saga.Configuration
 	using System.Collections.Generic;
 	using System.Linq.Expressions;
 	using Exceptions;
-	using Magnum.Activator;
+	using Magnum.Reflection;
 	using MassTransit.Pipeline;
 	using MassTransit.Pipeline.Configuration;
 	using MassTransit.Pipeline.Configuration.Subscribers;
