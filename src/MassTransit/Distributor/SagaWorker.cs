@@ -16,10 +16,9 @@ namespace MassTransit.Distributor
 	using System.Collections.Generic;
 	using System.Threading;
 	using Magnum;
-	using Magnum.Activator;
+	using Magnum.Reflection;
 	using Magnum.Actors;
 	using Magnum.Actors.CommandQueues;
-	using Magnum.Reflection;
 	using Messages;
 	using Saga;
 
@@ -151,7 +150,7 @@ namespace MassTransit.Distributor
 		{
 			_updatePending = false;
 
-			_messageTypes.Each(type => { this.Call("PublishWorkerAvailable", new[] {type}, new object[] {}); });
+			_messageTypes.Each(type => { this.FastInvoke(new[] {type}, "PublishWorkerAvailable"); });
 		}
 
 		private void PublishWorkerAvailable<TMessage>()

@@ -45,7 +45,7 @@ namespace MassTransit.Services.MessageDeferral
 
         private void RepublishMessage(object message)
         {
-        	_bus.Call("Publish", message);
+        	_bus.FastInvoke(x => x.Publish(message), message);
         }
     }
 }

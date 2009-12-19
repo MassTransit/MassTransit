@@ -16,7 +16,7 @@ namespace MassTransit.RuntimeServices
 	using System.IO;
 	using log4net;
 	using log4net.Config;
-	using Magnum.Activator;
+	using Magnum.Reflection;
 	using Services.HealthMonitoring;
 	using Services.Subscriptions.Server;
 	using Services.Timeout;

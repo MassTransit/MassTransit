@@ -16,7 +16,6 @@ namespace MassTransit.Distributor.Configuration
 	using System.Collections.Generic;
 	using System.Linq;
 	using Magnum;
-	using Magnum.Activator;
 	using Magnum.Reflection;
 	using Magnum.StateMachine;
 	using MassTransit.Pipeline;
@@ -48,7 +47,7 @@ namespace MassTransit.Distributor.Configuration
 				Type sagaType = distributorInterface.GetGenericArguments().First();
 
 				var argumentTypes = new[] {typeof (TComponent), sagaType};
-				var results = this.Call<IEnumerable<UnsubscribeAction>>("ConnectSinks", argumentTypes, context, instance);
+				var results = this.FastInvoke<SagaDistributorSubscriber, IEnumerable<UnsubscribeAction>>(argumentTypes, "ConnectSinks", context, instance);
 				foreach (UnsubscribeAction result in results)
 				{
 					yield return result;
@@ -86,7 +85,7 @@ namespace MassTransit.Distributor.Configuration
 
 		private UnsubscribeAction ConnectSink<TSaga>(ISubscriberContext context, ISagaWorker<TSaga> worker, Type messageType, Event @event, IEnumerable<State> states)
 		{
-			return this.Call<UnsubscribeAction>("ConnectToSink", new[] {typeof(TSaga), messageType}, context, worker, @event, states);
+			return this.FastInvoke<SagaDistributorSubscriber, UnsubscribeAction>(new[] { typeof(TSaga), messageType }, "ConnectToSink", context, worker, @event, states);
 		}
 
 		private UnsubscribeAction ConnectToSink<TSaga, TMessage>(ISubscriberContext context, ISagaWorker<TSaga> worker, DataEvent<TSaga, TMessage> eevent, IEnumerable<State> states)

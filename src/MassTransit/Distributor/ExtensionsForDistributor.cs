@@ -15,7 +15,7 @@ namespace MassTransit.Distributor
 	using System;
 	using Configuration;
 	using Magnum;
-	using Magnum.Activator;
+	using Magnum.Reflection;
 	using Magnum.DateTimeExtensions;
 	using MassTransit.Configuration;
 	using Saga;

@@ -12,10 +12,8 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Saga.Configuration
 {
-	using System;
 	using System.Collections.Generic;
 	using Magnum;
-	using Magnum.Activator;
 	using Magnum.Reflection;
 	using MassTransit.Pipeline;
 	using MassTransit.Pipeline.Configuration.Subscribers;
@@ -28,7 +26,7 @@ namespace MassTransit.Saga.Configuration
 			if (!typeof(TComponent).IsSagaStateMachine())
 				yield break;
 
-			var results = this.Call<IEnumerable<UnsubscribeAction>>("Connect", new[] {typeof (TComponent)}, context);
+			var results = this.FastInvoke<SagaStateMachineSubscriber, IEnumerable<UnsubscribeAction>>(new[] {typeof (TComponent)}, "Connect", context);
 			foreach (var unsubscribeAction in results)
 			{
 				yield return unsubscribeAction;

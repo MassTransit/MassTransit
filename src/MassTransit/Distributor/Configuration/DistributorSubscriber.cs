@@ -39,7 +39,7 @@ namespace MassTransit.Distributor.Configuration
 				{
 					context.MessageTypeWasDefined(messageType);
 
-					yield return this.Call<UnsubscribeAction>("ConnectDistributor", new[] {typeof (TComponent), messageType}, context, instance);
+					yield return this.FastInvoke<DistributorSubscriber, UnsubscribeAction>(new[] {typeof (TComponent), messageType}, "ConnectDistributor", context, instance);
 				}
 			}
 
@@ -57,7 +57,7 @@ namespace MassTransit.Distributor.Configuration
 				{
 					context.MessageTypeWasDefined(distributedMessageType);
 
-					yield return this.Call<UnsubscribeAction>("ConnectWorker", new[] {typeof (TComponent), messageType}, context, instance);
+					yield return this.FastInvoke<DistributorSubscriber, UnsubscribeAction>(new[] {typeof (TComponent), messageType}, "ConnectWorker", context, instance);
 				}
 			}
 		}

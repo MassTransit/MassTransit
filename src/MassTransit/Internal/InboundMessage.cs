@@ -36,7 +36,7 @@ namespace MassTransit.Internal
 			if (Message == null)
 				throw new InvalidOperationException("RetryLater can only be called when a message is being consumed");
 
-			this.Call("RetryLater", new[] {Message});
+			this.FastInvoke("RetryLater", Message);
 		}
 
 		private void RetryLater<T>(T message)

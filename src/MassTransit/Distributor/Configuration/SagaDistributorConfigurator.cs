@@ -29,7 +29,7 @@ namespace MassTransit.Distributor.Configuration
 
 		public void AddService(Type type)
 		{
-			this.Call("AddServiceForDataEvent", new[] {type});
+			this.FastInvoke(new[] {type}, "AddServiceForDataEvent");
 		}
 
 // ReSharper disable UnusedMember.Local

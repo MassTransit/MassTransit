@@ -50,13 +50,13 @@ namespace MassTransit.Saga.Configuration
 			Expression<Func<TSaga, TMessage, bool>> expression;
 			if (SagaStateMachine<TSaga>.TryGetCorrelationExpressionForEvent(eevent, out expression))
 			{
-				return this.Call<IPipelineSink<TMessage>>("CreateSink", eevent, policy, expression);
+				return this.FastInvoke<SagaStateMachineMessageSinkFactory<TSaga, TMessage>, IPipelineSink<TMessage>>("CreateSink", eevent, policy, expression);
 			}
 
 			// we check for a standard correlation interface second
 			if (messageType.GetInterfaces().Where(x => x == typeof (CorrelatedBy<Guid>)).Count() > 0)
 			{
-				return this.Call<IPipelineSink<TMessage>>("CreateCorrelatedSink", eevent, policy);
+				return this.FastInvoke<SagaStateMachineMessageSinkFactory<TSaga, TMessage>, IPipelineSink<TMessage>>("CreateCorrelatedSink", eevent, policy);
 			}
 
 			throw new NotSupportedException("No method to connect to event was found for " + typeof (TMessage).FullName);

@@ -48,7 +48,7 @@ namespace MassTransit.Tests.Actors
 			StateMachineInspector.Trace(actor);
 		}
 
-		[Test]
+		[Test, Ignore]
 		public void FirstTestName()
 		{
 			LocalBus.Subscribe<ActorRequest>(request => { CurrentMessage.Respond(new ActorResponse {RequestId = request.Id, Age = 27}); });

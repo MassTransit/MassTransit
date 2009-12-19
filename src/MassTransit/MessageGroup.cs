@@ -15,7 +15,6 @@ namespace MassTransit
 	using System;
 	using System.Collections.Generic;
 	using Magnum;
-	using Magnum.Activator;
 	using Magnum.Reflection;
 
 	/// <summary>
@@ -116,7 +115,7 @@ namespace MassTransit
 
 		private static void RepublishMessage(object message, IServiceBus bus)
 		{
-			bus.Call("Publish", message);
+			bus.FastInvoke(x => x.Publish(message), message);
 		}
 	}
 
