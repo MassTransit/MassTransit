@@ -7,7 +7,7 @@ namespace MassTransit.ServiceBus.Tests.Proxy
     using Rhino.Mocks;
     using Services.Subscriptions.Messages;
 
-    public class WhenProxyGetsLosesLegacyClient :
+    public class WhenProxyRemovesLegacyClient :
         WithStartedProxyService
     {
         Guid _clientId = Guid.NewGuid();

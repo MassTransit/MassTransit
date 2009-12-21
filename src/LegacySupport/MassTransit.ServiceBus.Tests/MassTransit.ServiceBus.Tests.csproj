@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.30729</ProductVersion>
+    <ProductVersion>9.0.21022</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{A8C81414-1188-49B5-BC1C-4C00B931AF84}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -53,10 +53,14 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Proxy\WhenOldClientSendsAddSubscription.cs" />
+    <Compile Include="Proxy\WhenOldClientSendsCacheUpdateRequest.cs" />
+    <Compile Include="Proxy\WhenOldClientSendsCancelUpdateRequest.cs" />
+    <Compile Include="Proxy\WhenOldClientSendsRemoveSubscription.cs" />
     <Compile Include="Saga\ClientSagaSpecs.cs" />
     <Compile Include="Proxy\WhenProxyGetsNewSubscription.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Proxy\WhenProxyGetsLosesLegacyClient.cs" />
+    <Compile Include="Proxy\WhenProxyRemovesLegacyClient.cs" />
     <Compile Include="Proxy\WhenProxyGetsNewLegacyClient.cs" />
     <Compile Include="Proxy\WhenProxyStarts.cs" />
     <Compile Include="Contexts\WithProxyService.cs" />
