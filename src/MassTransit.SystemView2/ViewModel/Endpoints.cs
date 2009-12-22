@@ -40,31 +40,15 @@ namespace MassTransit.SystemView.ViewModel
 
         public void Update(SubscriptionInformation si)
         {
-            if (Items.Keys.Contains(si.EndpointUri))
-            {
-                Items[si.EndpointUri].Messages.Update(new Message
-                {
-                    MessageName = si.MessageName,
-                    ClientId = si.ClientId,
-                    CorrelationId = si.CorrelationId,
-                    SequenceNumber = si.SequenceNumber,
-                    SubscriptionId = si.SubscriptionId
-                });
-            }
-            else
-            {
-                var endpoint = new Endpoint { EndpointUri = si.EndpointUri };
-                Add(endpoint);
+            Add(new Endpoint(si.EndpointUri));
 
-                endpoint.Messages.Update(new Message
-                {
-                    MessageName = si.MessageName,
-                    ClientId = si.ClientId,
-                    CorrelationId = si.CorrelationId,
-                    SequenceNumber = si.SequenceNumber,
-                    SubscriptionId = si.SubscriptionId
-                });
-            }
+            Items[si.EndpointUri].Messages.Update(new Message(si.MessageName)
+            {
+                ClientId = si.ClientId,
+                CorrelationId = si.CorrelationId,
+                SequenceNumber = si.SequenceNumber,
+                SubscriptionId = si.SubscriptionId
+            });
         }
 
         public void Update(IWorkerAvailable wa)
@@ -72,36 +56,25 @@ namespace MassTransit.SystemView.ViewModel
             Update(wa.DataUri, wa);
             Update(wa.ControlUri, wa);
 
-            Regex regex = new Regex(@"MassTransit\.Distributor\.Messages\.WorkerAvailable`\d+\[\[(?<type>.+), (?<assembly>.+)\]\], MassTransit");
+            var matchMessageType = new Regex(@"MassTransit\.Distributor\.Messages\.WorkerAvailable`\d+\[\[(?<type>.+), (?<assembly>.+)\]\], MassTransit");
 
-            Items.Values.Where(x =>
-            {
-                return x.Messages
-                    .ToList()
-                    .Where(y =>
-                    {
-                        return y.MessageName.StartsWith("MassTransit.Distributor.Messages.WorkerAvailable`");
-                    })
-                    .Where(y =>
-                    {
-                        return regex.Replace(y.MessageName, "${type}") == wa.WorkerItemType;
-                    })
-                    .Count() > 0;
-            })
-            .ToList()
-            .ForEach(x => Update(x.EndpointUri, wa));
+            Items
+                .Values
+                .Where(x => x.Messages
+                        .ToList()
+                        .Where(y => y.MessageName.StartsWith("MassTransit.Distributor.Messages.WorkerAvailable`"))
+                        .Where(y => matchMessageType.Replace(y.MessageName, "${type}") == wa.WorkerItemType)
+                        .Count() > 0)
+                .ToList()
+                .ForEach(x => Update(x.EndpointUri, wa));
         }
 
         private void Update(Uri endpointUri, IWorkerAvailable wa)
         {
-            if (!Items.Keys.Contains(endpointUri))
-            {
-                Add(new Endpoint { EndpointUri = endpointUri });
-            }
+            Add(new Endpoint(endpointUri));
 
-            Items[endpointUri].Workers.Update(new Worker
+            Items[endpointUri].Workers.Update(new Worker(wa.WorkerItemType)
             {
-                MessageType = wa.WorkerItemType,
                 Pending = wa.Pending,
                 InProgress = wa.InProgress,
                 InProgressLimit = wa.InProgressLimit,

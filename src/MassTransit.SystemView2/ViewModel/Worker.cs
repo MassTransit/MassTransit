@@ -20,32 +20,28 @@ namespace MassTransit.SystemView.ViewModel
         NotifyPropertyChangedBase,
         IKeyedObject<string>
     {
+        private DateTime _updated;
+        private int _pending;
+        private int _pendingLimit;
+        private int _inProgress;
+        private int _inProgressLimit;
+
+        private Worker()
+        {
+        }
+
+        public Worker(string messageType) :
+            this()
+        {
+            MessageType = messageType;
+        }
+
         public string MessageType { get; set; }
         public string PrettyMessageType
         {
             get
             {
-                var parts = MessageType.Split(',');
-                var d = parts.Length > 0 ? parts[0] : MessageType;
-                var dd = d.Split('.');
-
-                string description = dd[dd.Length - 1];
-
-                var gs = MessageType.Split('`');
-                if (gs.Length > 1)
-                {
-                    var generics = new Queue<string>(gs.Reverse().Skip(1).Reverse());
-
-                    while (generics.Count > 0)
-                    {
-                        var g = generics.Dequeue();
-                        var gg = g.Split('.');
-                        var ggg = gg.Length > 0 ? gg[gg.Length - 1] : g;
-
-                        description = string.Format("{0}<{1}>", ggg, description);
-                    }
-                }
-                return description;
+                return TypeNameHelper.ConverTypeStringToPrettyName(MessageType);
             }
         }
 
@@ -54,7 +50,6 @@ namespace MassTransit.SystemView.ViewModel
             get { return MessageType; }
         }
 
-        private int _pending;
         public int Pending
         {
             get { return _pending; }
@@ -68,7 +63,6 @@ namespace MassTransit.SystemView.ViewModel
             }
         }
 
-        private int _pendingLimit;
         public int PendingLimit
         {
             get { return _pendingLimit; }
@@ -82,7 +76,6 @@ namespace MassTransit.SystemView.ViewModel
             }
         }
 
-        private int _inProgress;
         public int InProgress
         {
             get { return _inProgress; }
@@ -96,7 +89,6 @@ namespace MassTransit.SystemView.ViewModel
             }
         }
 
-        private int _inProgressLimit;
         public int InProgressLimit
         {
             get { return _inProgressLimit; }
@@ -110,7 +102,6 @@ namespace MassTransit.SystemView.ViewModel
             }
         }
 
-        private DateTime _updated;
         public DateTime Updated
         {
             get { return _updated; }
