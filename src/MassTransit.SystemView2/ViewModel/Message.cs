@@ -20,32 +20,28 @@ namespace MassTransit.SystemView.ViewModel
         NotifyPropertyChangedBase,
         IKeyedObject<string>
     {
+        private Guid _clientId;
+        private string _correlationId;
+        private long _sequenceNumber;
+        private Guid _subscriptionId;
+
+        private Message()
+        {
+        }
+
+        public Message(string messageName) :
+            this()
+        {
+            MessageName = messageName;
+        }
+
         public string MessageName { get; set; }
 
         public string PrettyMessageName
         {
             get
             {
-                var parts = MessageName.Split(',');
-                var d = parts.Length > 0 ? parts[0] : MessageName;
-                var dd = d.Split('.');
-
-                string description = dd[dd.Length - 1];
-
-                var gs = MessageName.Split('`');
-                if (gs.Length > 1)
-                {
-                    var generics = new Queue<string>(gs.Reverse().Skip(1).Reverse());
-
-                    while (generics.Count > 0)
-                    {
-                        var g = generics.Dequeue();
-                        var gg = g.Split('.');
-                        var ggg = gg.Length > 0 ? gg[gg.Length - 1] : g;
-
-                        description = string.Format("{0}<{1}>", ggg, description);
-                    }
-                }
+                string description = TypeNameHelper.ConverTypeStringToPrettyName(MessageName);
 
                 if (!string.IsNullOrEmpty(CorrelationId))
                     description += " (" + CorrelationId + ")";
@@ -53,7 +49,6 @@ namespace MassTransit.SystemView.ViewModel
             }
         }
 
-        private Guid _clientId;
         public Guid ClientId
         {
             get { return _clientId; }
@@ -67,7 +62,6 @@ namespace MassTransit.SystemView.ViewModel
             }
         }
 
-        private string _correlationId;
         public string CorrelationId
         {
             get { return _correlationId; }
@@ -81,7 +75,6 @@ namespace MassTransit.SystemView.ViewModel
             }
         }
 
-        private long _sequenceNumber;
         public long SequenceNumber
         {
             get { return _sequenceNumber; }
@@ -95,7 +88,6 @@ namespace MassTransit.SystemView.ViewModel
             }
         }
 
-        private Guid _subscriptionId;
         public Guid SubscriptionId
         {
             get { return _subscriptionId; }

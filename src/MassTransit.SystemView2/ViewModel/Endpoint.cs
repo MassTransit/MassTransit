@@ -17,6 +17,18 @@ namespace MassTransit.SystemView.ViewModel
     public class Endpoint :
         IKeyedObject<Uri>
     {
+        public Endpoint(Uri endpointUri) : 
+            this()
+        {
+            EndpointUri = endpointUri;
+        }
+
+        private Endpoint()
+        {
+            Messages = new Messages();
+            Workers = new Workers();
+        }
+
         public Uri EndpointUri { get; set; }
         public Messages Messages { get; private set; }
         public Workers Workers { get; private set; }
@@ -24,12 +36,6 @@ namespace MassTransit.SystemView.ViewModel
         public Uri Key
         {
             get { return EndpointUri; }
-        }
-        
-        public Endpoint()
-        {
-            Messages = new Messages();
-            Workers = new Workers();
         }
     }
 }
