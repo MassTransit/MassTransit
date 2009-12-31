@@ -1,5 +1,6 @@
 ﻿namespace LegacyRuntime
 {
+    using MassTransit.LegacySupport;
     using Topshelf.Configuration;
 
     class Program
@@ -8,7 +9,7 @@
         {
             var cfg = RunnerConfigurator.New(c =>
                                                  {
-                                                    c.ConfigureService<MassTransit.ServiceBus.LegacySubscriptionProxyService>("name", s=>
+                                                    c.ConfigureService<LegacySubscriptionProxyService>("name", s=>
                                                                                    {
                                                                                        
                                                                                    });

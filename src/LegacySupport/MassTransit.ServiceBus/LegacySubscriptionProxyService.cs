@@ -1,23 +1,14 @@
-namespace MassTransit.ServiceBus
+namespace MassTransit.LegacySupport
 {
-    //old stuff
     using System;
     using Exceptions;
     using log4net;
     using Messages;
     using Saga;
     using Services.Subscriptions.Messages;
-    using OldAddSubscription = MassTransit.ServiceBus.Subscriptions.Messages.AddSubscription;
-    using OldRemoveSubscription = MassTransit.ServiceBus.Subscriptions.Messages.RemoveSubscription;
-    using OldCacheUpdateRequest = MassTransit.ServiceBus.Subscriptions.Messages.CacheUpdateRequest;
-    using OldCacheUpdateResponse = MassTransit.ServiceBus.Subscriptions.Messages.CacheUpdateResponse;
-    using OldCancelSubscriptionUpdates = MassTransit.ServiceBus.Subscriptions.Messages.CancelSubscriptionUpdates;
-
-    //new stuff
-    using NewSubscriptionRefresh = MassTransit.Services.Subscriptions.Messages.SubscriptionRefresh;
-    using NewSubscriptionAdded = MassTransit.Services.Subscriptions.Server.Messages.SubscriptionAdded;
-    using NewSubscriptionRemoved = MassTransit.Services.Subscriptions.Server.Messages.SubscriptionRemoved;
-    using NewSubscriptionInformation = MassTransit.Services.Subscriptions.Messages.SubscriptionInformation;
+    using Services.Subscriptions.Server.Messages;
+    using AddSubscription=MassTransit.ServiceBus.Subscriptions.Messages.AddSubscription;
+    using RemoveSubscription=MassTransit.ServiceBus.Subscriptions.Messages.RemoveSubscription;
 
     public class LegacySubscriptionProxyService 
     {
@@ -48,22 +39,22 @@ namespace MassTransit.ServiceBus
             _subscriptionServiceEndpoint.Send(new RemoveSubscriptionClient(message.CorrelationId, message.ControlUri, message.DataUri));
         }
 
-        public void Consume(NewSubscriptionAdded message)
+        public void Consume(SubscriptionAdded message)
         {
             if (_log.IsInfoEnabled)
                 _log.InfoFormat("Proxy New to Old Add Subscription: {0}", message.Subscription);
 
-            var add = new OldAddSubscription(message.Subscription.MessageName, message.Subscription.EndpointUri);
+            var add = new AddSubscription(message.Subscription.MessageName, message.Subscription.EndpointUri);
 
             SendToClients(add);
         }
 
-        public void Consume(NewSubscriptionRemoved message)
+        public void Consume(SubscriptionRemoved message)
         {
             if (_log.IsInfoEnabled)
                 _log.InfoFormat("Proxy New to OLd Removing Subscription: {0}", message.Subscription);
 
-            var remove = new OldRemoveSubscription(message.Subscription.MessageName, message.Subscription.EndpointUri);
+            var remove = new RemoveSubscription(message.Subscription.MessageName, message.Subscription.EndpointUri);
 
             SendToClients(remove);
         }
@@ -72,11 +63,11 @@ namespace MassTransit.ServiceBus
         {
             var sagas = _subscriptionClientSagas.Where(x => x.CurrentState == LegacySubscriptionClientSaga.Active);
             sagas.Each(client =>
-                {
-                    IEndpoint endpoint = _endpointFactory.GetEndpoint(client.ControlUri);
+                           {
+                               IEndpoint endpoint = _endpointFactory.GetEndpoint(client.ControlUri);
 
-                    endpoint.Send(message, x => x.SetSourceAddress(_bus.Endpoint.Uri));
-                });
+                               endpoint.Send(message, x => x.SetSourceAddress(_bus.Endpoint.Uri));
+                           });
         }
 
 

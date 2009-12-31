@@ -1,10 +1,9 @@
-namespace MassTransit.ServiceBus.Tests.Contexts
+namespace MassTransit.LegacySupport.Tests.Contexts
 {
     using Internal;
     using MassTransit.Saga;
     using NUnit.Framework;
     using Rhino.Mocks;
-    using Saga;
 
     public abstract class WithStartedProxyService
     {
