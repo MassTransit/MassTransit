@@ -1,4 +1,4 @@
-namespace MassTransit.ServiceBus.Tests.Proxy
+namespace MassTransit.LegacySupport.Tests.Proxy
 {
     using Contexts;
     using NUnit.Framework;

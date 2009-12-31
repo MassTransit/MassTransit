@@ -1,14 +1,10 @@
-namespace MassTransit.ServiceBus.Tests.Contexts
+namespace MassTransit.LegacySupport.Tests.Contexts
 {
     using System;
     using Internal;
     using NUnit.Framework;
     using Rhino.Mocks;
-    using OldAddSubscription = Subscriptions.Messages.AddSubscription;
-    using OldRemoveSubscription = Subscriptions.Messages.RemoveSubscription;
-    using OldCacheUpdateRequest = Subscriptions.Messages.CacheUpdateRequest;
-    using OldCacheUpdateResponse = Subscriptions.Messages.CacheUpdateResponse;
-    using OldCancelSubscriptionUpdates = Subscriptions.Messages.CancelSubscriptionUpdates;
+    using ServiceBus.Subscriptions.Messages;
 
     public abstract class WithActiveSaga
     {
@@ -22,7 +18,7 @@ namespace MassTransit.ServiceBus.Tests.Contexts
             MockBus = MockRepository.GenerateStub<IServiceBus>();
             MockBus.Stub(x => x.Endpoint).Return(new NullEndpoint());
             Saga.Bus = MockBus;
-            var data = new OldCacheUpdateRequest(CorrelationUri);
+            var data = new CacheUpdateRequest(CorrelationUri);
             Saga.RaiseEvent(LegacySubscriptionClientSaga.OldCacheUpdateRequested, data);
             BecauseOf();
         }

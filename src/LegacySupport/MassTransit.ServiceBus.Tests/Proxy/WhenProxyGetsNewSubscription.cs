@@ -1,4 +1,4 @@
-namespace MassTransit.ServiceBus.Tests.Proxy
+namespace MassTransit.LegacySupport.Tests.Proxy
 {
     using System;
     using System.Collections.Generic;
@@ -6,9 +6,9 @@ namespace MassTransit.ServiceBus.Tests.Proxy
     using Internal;
     using NUnit.Framework;
     using Rhino.Mocks;
+    using ServiceBus.Subscriptions.Messages;
     using Services.Subscriptions.Messages;
     using Services.Subscriptions.Server.Messages;
-    using OldCacheUpdateRequest = MassTransit.ServiceBus.Subscriptions.Messages.CacheUpdateRequest;
 
     public class WhenProxyGetsNewSubscription :
         WithStartedProxyService
@@ -25,13 +25,13 @@ namespace MassTransit.ServiceBus.Tests.Proxy
             var saga = new LegacySubscriptionClientSaga(_clientId);
             saga.Bus = new NullServiceBus();
 
-            var data = new OldCacheUpdateRequest(_dataUri);
+            var data = new CacheUpdateRequest(_dataUri);
 
             saga.RaiseEvent(LegacySubscriptionClientSaga.OldCacheUpdateRequested, data);
             IEnumerable<LegacySubscriptionClientSaga> sagas = new List<LegacySubscriptionClientSaga>()
-                                                              {
-                                                                  saga
-                                                              };
+                                                                  {
+                                                                      saga
+                                                                  };
             
             MockRepo.Stub(r => r.Where(s => s.CurrentState == LegacySubscriptionClientSaga.Active)).IgnoreArguments().Return(sagas);
             MockEndpointFactory.Expect(e => e.GetEndpoint(saga.Bus.Endpoint.Uri)).Return(saga.Bus.Endpoint);

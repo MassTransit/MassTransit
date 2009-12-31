@@ -1,11 +1,11 @@
-namespace MassTransit.ServiceBus.Tests.Proxy
+namespace MassTransit.LegacySupport.Tests.Proxy
 {
     using System;
     using Contexts;
     using Messages;
     using NUnit.Framework;
-    using Services.Subscriptions.Messages;
     using Rhino.Mocks;
+    using Services.Subscriptions.Messages;
 
     public class WhenProxyGetsNewLegacyClient :
         WithStartedProxyService
