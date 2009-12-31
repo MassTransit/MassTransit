@@ -8,8 +8,8 @@
     <ProjectGuid>{A8C81414-1188-49B5-BC1C-4C00B931AF84}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>MassTransit.ServiceBus.Tests</RootNamespace>
-    <AssemblyName>MassTransit.ServiceBus.Tests</AssemblyName>
+    <RootNamespace>MassTransit.LegacySupport.Tests</RootNamespace>
+    <AssemblyName>MassTransit.LegacySupport.Tests</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -73,9 +73,9 @@
       <Project>{6EFD69FC-CBCC-4F85-AEE0-EFBA73F4D273}</Project>
       <Name>MassTransit</Name>
     </ProjectReference>
-    <ProjectReference Include="..\MassTransit.ServiceBus\MassTransit.ServiceBus.csproj">
+    <ProjectReference Include="..\MassTransit.ServiceBus\MassTransit.LegacySupport.csproj">
       <Project>{EBC898FE-E3E4-4599-8DC3-D98A829424AC}</Project>
-      <Name>MassTransit.ServiceBus</Name>
+      <Name>MassTransit.LegacySupport</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
