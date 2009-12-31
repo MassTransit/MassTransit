@@ -3,13 +3,13 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.30729</ProductVersion>
+    <ProductVersion>9.0.21022</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{EBC898FE-E3E4-4599-8DC3-D98A829424AC}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>MassTransit.ServiceBus</RootNamespace>
-    <AssemblyName>MassTransit.ServiceBus</AssemblyName>
+    <RootNamespace>MassTransit.LegacySupport</RootNamespace>
+    <AssemblyName>MassTransit.LegacySupport</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -52,6 +52,9 @@
     <Compile Include="Messages\LegacySubscriptionClientAdded.cs" />
     <Compile Include="Messages\LegacySubscriptionClientRemoved.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SerializationCustomization\LegacyBinder.cs" />
+    <Compile Include="SerializationCustomization\LegacySurrogateSelector.cs" />
+    <Compile Include="SerializationCustomization\NewToOldSerializationSurrogate.cs" />
     <Compile Include="Subscriptions\Messages\AddSubscription.cs" />
     <Compile Include="Subscriptions\Messages\CacheUpdateRequest.cs" />
     <Compile Include="Subscriptions\Messages\CacheUpdateResponse.cs" />

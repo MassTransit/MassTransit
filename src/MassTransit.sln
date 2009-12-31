@@ -31,7 +31,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.UnityIntegratio
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.NinjectIntegration", "Containers\MassTransit.NinjectIntegration\MassTransit.NinjectIntegration.csproj", "{25A2A3C3-27D0-4C55-A9E9-0B82D6B6913F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.ServiceBus", "LegacySupport\MassTransit.ServiceBus\MassTransit.ServiceBus.csproj", "{EBC898FE-E3E4-4599-8DC3-D98A829424AC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.LegacySupport", "LegacySupport\MassTransit.ServiceBus\MassTransit.LegacySupport.csproj", "{EBC898FE-E3E4-4599-8DC3-D98A829424AC}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Legacy Support", "Legacy Support", "{C7764D1D-A0D9-416B-B32F-8DE375D393CB}"
 EndProject
@@ -41,13 +41,15 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.RuntimeServices
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.SystemView", "MassTransit.SystemView\MassTransit.SystemView.csproj", "{85C0F3A0-A689-422C-84EB-A1F5E04FD0AC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.ServiceBus.Tests", "LegacySupport\MassTransit.ServiceBus.Tests\MassTransit.ServiceBus.Tests.csproj", "{A8C81414-1188-49B5-BC1C-4C00B931AF84}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.LegacySupport.Tests", "LegacySupport\MassTransit.ServiceBus.Tests\MassTransit.LegacySupport.Tests.csproj", "{A8C81414-1188-49B5-BC1C-4C00B931AF84}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.TestFramework", "MassTransit.TestFramework\MassTransit.TestFramework.csproj", "{3C4B5F1A-69AD-415E-9F40-A7FDBD7A3012}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.SystemView2", "MassTransit.SystemView2\MassTransit.SystemView2.csproj", "{D2DAE9B1-AB3E-4B4D-9E8E-B394BA5B7EFE}"
 EndProject
 Project("{4F174C21-8C12-11D0-8340-0000F80270F8}") = "MassTransit.RuntimeServices.Database", "MassTransit.RuntimeServices.Database\MassTransit.RuntimeServices.Database.dbp", "{4042D8A0-80AF-403A-B9F0-01EE7C948E0A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LegacyRuntime", "LegacyRuntime\LegacyRuntime.csproj", "{1501B1CE-C525-4003-9A90-208538FAD30B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -131,6 +133,10 @@ Global
 		{D2DAE9B1-AB3E-4B4D-9E8E-B394BA5B7EFE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D2DAE9B1-AB3E-4B4D-9E8E-B394BA5B7EFE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D2DAE9B1-AB3E-4B4D-9E8E-B394BA5B7EFE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1501B1CE-C525-4003-9A90-208538FAD30B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1501B1CE-C525-4003-9A90-208538FAD30B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1501B1CE-C525-4003-9A90-208538FAD30B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1501B1CE-C525-4003-9A90-208538FAD30B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -148,5 +154,6 @@ Global
 		{25A2A3C3-27D0-4C55-A9E9-0B82D6B6913F} = {6C61507E-FF16-45C8-8FE4-350069D9B4C1}
 		{EBC898FE-E3E4-4599-8DC3-D98A829424AC} = {C7764D1D-A0D9-416B-B32F-8DE375D393CB}
 		{A8C81414-1188-49B5-BC1C-4C00B931AF84} = {C7764D1D-A0D9-416B-B32F-8DE375D393CB}
+		{1501B1CE-C525-4003-9A90-208538FAD30B} = {C7764D1D-A0D9-416B-B32F-8DE375D393CB}
 	EndGlobalSection
 EndGlobal
