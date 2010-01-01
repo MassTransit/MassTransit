@@ -49,7 +49,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.SystemView2", "
 EndProject
 Project("{4F174C21-8C12-11D0-8340-0000F80270F8}") = "MassTransit.RuntimeServices.Database", "MassTransit.RuntimeServices.Database\MassTransit.RuntimeServices.Database.dbp", "{4042D8A0-80AF-403A-B9F0-01EE7C948E0A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LegacyRuntime", "LegacyRuntime\LegacyRuntime.csproj", "{1501B1CE-C525-4003-9A90-208538FAD30B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.LegacyServices", "LegacyRuntime\MassTransit.LegacyServices.csproj", "{1501B1CE-C525-4003-9A90-208538FAD30B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
