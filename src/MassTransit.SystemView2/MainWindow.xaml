@@ -11,6 +11,8 @@
         <Converters:IsEndpointToVisibilityConverter x:Key="isEndpointConverter" />
         <Converters:IsMessageToVisibilityConverter x:Key="isMessageConverter" />
         <Converters:TypeFilterConverter x:Key="typeFilterConverter" />
+        <Converters:TreeItemToImageVisibilityConverter x:Key="imageVisibilityConverter" />
+        <Converters:TreeItemToImagePathConverter x:Key="imagePathConverter" />
     </Window.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
@@ -20,7 +22,14 @@
         <TreeView x:Name="tvSubscriptions" Grid.Column="0">
             <TreeView.Resources>
                 <HierarchicalDataTemplate DataType="{x:Type ViewModel:Endpoint}" ItemsSource="{Binding Path=Messages}">
-                    <TextBlock Text="{Binding Path=EndpointUri}" />
+                    <TextBlock>
+                        <Image Visibility="{Binding Converter={StaticResource imageVisibilityConverter}}">
+                            <Image.Source>
+                                <BitmapImage UriSource="{Binding Converter={StaticResource imagePathConverter}}" />
+                            </Image.Source>    
+                        </Image>
+                        <TextBlock Text="{Binding Path=EndpointUri}" />
+                    </TextBlock>
                     <HierarchicalDataTemplate.ItemTemplate>
                         <DataTemplate DataType="{x:Type ViewModel:Message}">
                             <TextBlock Text="{Binding Path=PrettyMessageName}" Foreground="{Binding Path=MessageName, Converter={StaticResource messageNameColorConverter}}" />
