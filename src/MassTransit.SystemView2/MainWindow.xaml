@@ -23,11 +23,7 @@
             <TreeView.Resources>
                 <HierarchicalDataTemplate DataType="{x:Type ViewModel:Endpoint}" ItemsSource="{Binding Path=Messages}">
                     <TextBlock>
-                        <Image Visibility="{Binding Converter={StaticResource imageVisibilityConverter}}">
-                            <Image.Source>
-                                <BitmapImage UriSource="{Binding Converter={StaticResource imagePathConverter}}" />
-                            </Image.Source>    
-                        </Image>
+                        <Image Visibility="{Binding Converter={StaticResource imageVisibilityConverter}}" Source="{Binding Converter={StaticResource imagePathConverter}}" />   
                         <TextBlock Text="{Binding Path=EndpointUri}" />
                     </TextBlock>
                     <HierarchicalDataTemplate.ItemTemplate>
