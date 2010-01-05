@@ -26,11 +26,11 @@ namespace MassTransit.RuntimeServices.Model
 				.GeneratedBy.Assigned();
 
 			Map(x => x.CurrentState)
-				.Access.AsReadOnlyPropertyThroughCamelCaseField(Prefix.Underscore)
-				.CustomTypeIs<StateMachineUserType>();
+				.Access.ReadOnlyPropertyThroughCamelCaseField(Prefix.Underscore)
+				.CustomType<StateMachineUserType>();
 
-			Map(x => x.ControlUri).CustomTypeIs<UriUserType>();
-			Map(x => x.DataUri).CustomTypeIs<UriUserType>(); ;
+			Map(x => x.ControlUri).CustomType<UriUserType>();
+			Map(x => x.DataUri).CustomType<UriUserType>(); ;
 		}
 	}
 }

@@ -26,14 +26,14 @@ namespace MassTransit.RuntimeServices.Model
 				.GeneratedBy.Assigned();
 
 			Map(x => x.CurrentState)
-				.Access.AsReadOnlyPropertyThroughCamelCaseField(Prefix.Underscore)
-				.CustomTypeIs<StateMachineUserType>();
+				.Access.ReadOnlyPropertyThroughCamelCaseField(Prefix.Underscore)
+				.CustomType<StateMachineUserType>();
 
 			Component(x => x.SubscriptionInfo, x =>
 				{
 					x.Map(c => c.ClientId);
 					x.Map(c => c.CorrelationId, "MessageCorrelationId");
-					x.Map(c => c.EndpointUri).CustomTypeIs<UriUserType>(); ;
+					x.Map(c => c.EndpointUri).CustomType<UriUserType>(); ;
 					x.Map(c => c.MessageName);
 					x.Map(c => c.SequenceNumber);
 					x.Map(c => c.SubscriptionId);
