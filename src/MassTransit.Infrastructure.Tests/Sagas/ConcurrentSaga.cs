@@ -103,11 +103,11 @@ namespace MassTransit.Infrastructure.Tests.Sagas
 				.GeneratedBy.Assigned();
 
 			Map(x => x.CurrentState)
-				.Access.AsReadOnlyPropertyThroughCamelCaseField(Prefix.Underscore)
-				.CustomTypeIs<StateMachineUserType>();
+				.Access.ReadOnlyPropertyThroughCamelCaseField(Prefix.Underscore)
+				.CustomType<StateMachineUserType>();
 
 
-			Map(x => x.Name).WithLengthOf(40);
+			Map(x => x.Name).Length(40);
 			Map(x => x.Value);
 		}
 	}

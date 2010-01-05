@@ -75,7 +75,7 @@ namespace MassTransit.Infrastructure.Tests.Sagas
 			Id(x => x.CorrelationId)
 				.GeneratedBy.Assigned();
 
-			Map(x => x.Name).WithLengthOf(40);
+			Map(x => x.Name).Length(40);
 			Map(x => x.Value);
 		}
 	}
