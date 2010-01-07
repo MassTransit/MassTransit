@@ -22,6 +22,7 @@ namespace MassTransit.StructureMapIntegration
     using Services.Subscriptions;
     using Services.Subscriptions.Configuration;
     using Services.Subscriptions.Server;
+    using StructureMap;
     using StructureMap.Attributes;
     using StructureMap.Configuration.DSL;
     using StructureMap.Graph;
@@ -94,28 +95,29 @@ namespace MassTransit.StructureMapIntegration
         /// </summary>
         protected void RegisterInMemorySubscriptionService()
         {
-            ForRequestedType<IEndpointSubscriptionEvent>()
-                .CacheBy(InstanceScope.Singleton)
-                .AddInstances(o => o.OfConcreteType<LocalSubscriptionService>());
+			For<IEndpointSubscriptionEvent>()
+				.Singleton()
+				.Use<LocalSubscriptionService>();
 
-            ForRequestedType<SubscriptionPublisher>()
-                .TheDefault.Is.OfConcreteType<SubscriptionPublisher>();
-            ForRequestedType<SubscriptionConsumer>()
-                .TheDefault.Is.OfConcreteType<SubscriptionConsumer>();
+        	For<SubscriptionPublisher>()
+        		.Use<SubscriptionPublisher>();
+
+        	For<SubscriptionConsumer>()
+        		.Use<SubscriptionConsumer>();
         }
 
         protected void RegisterInMemorySubscriptionRepository()
         {
-            ForRequestedType<ISubscriptionRepository>()
-                .CacheBy(InstanceScope.Singleton)
-                .TheDefault.Is.OfConcreteType<InMemorySubscriptionRepository>();
+        	For<ISubscriptionRepository>()
+        		.Singleton()
+        		.Use<InMemorySubscriptionRepository>();
         }
 
         protected void RegisterInMemorySagaRepository()
         {
-            ForRequestedType(typeof (ISagaRepository<>))
-                .CacheBy(InstanceScope.Singleton)
-                .AddConcreteType(typeof (InMemorySagaRepository<>));
+        	For(typeof (ISagaRepository<>))
+        		.Singleton()
+        		.Use(typeof (InMemorySagaRepository<>));
         }
 
         /// <summary>
@@ -124,9 +126,9 @@ namespace MassTransit.StructureMapIntegration
         /// </summary>
         protected void RegisterBusDependencies()
         {
-            ForRequestedType<IObjectBuilder>()
-                .TheDefaultIsConcreteType<StructureMapObjectBuilder>()
-                .CacheBy(InstanceScope.Singleton);
+        	For<IObjectBuilder>()
+        		.Singleton()
+        		.Use<StructureMapObjectBuilder>();
 
             //we are expecting SM to auto-resolve
             // SubscriptionClient
@@ -138,9 +140,9 @@ namespace MassTransit.StructureMapIntegration
 
         protected void RegisterEndpointFactory(Action<IEndpointFactoryConfigurator> configAction)
         {
-            ForRequestedType<IEndpointFactory>()
-                .CacheBy(InstanceScope.Singleton)
-                .TheDefault.Is.ConstructedBy(context =>
+			For<IEndpointFactory>()
+				.Singleton()
+				.Use(context => 
                     {
                         return EndpointFactoryConfigurator.New(x =>
                             {
@@ -157,9 +159,9 @@ namespace MassTransit.StructureMapIntegration
 
         protected void RegisterServiceBus(Uri endpointUri, Action<IServiceBusConfigurator> configAction)
         {
-            ForRequestedType<IServiceBus>()
-                .CacheBy(InstanceScope.Singleton)
-                .TheDefault.Is.ConstructedBy(context =>
+			For<IServiceBus>()
+				.Singleton()
+				.Use(context =>
                     {
                         return ServiceBusConfigurator.New(x =>
                             {
@@ -178,9 +180,9 @@ namespace MassTransit.StructureMapIntegration
 
         protected void RegisterControlBus(Uri endpointUri, Action<IServiceBusConfigurator> configAction)
         {
-            ForRequestedType<IControlBus>()
-                .CacheBy(InstanceScope.Singleton)
-                .TheDefault.Is.ConstructedBy(context =>
+			For<IControlBus>()
+				.Singleton()
+				.Use(context =>
                     {
                         return ControlBusConfigurator.New(x =>
                             {

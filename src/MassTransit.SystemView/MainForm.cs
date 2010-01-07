@@ -23,7 +23,8 @@ namespace MassTransit.SystemView
 	using Services.HealthMonitoring.Messages;
 	using Services.Subscriptions.Messages;
 	using Services.Timeout.Messages;
-	using StructureMap.Attributes;
+    using StructureMap;
+    using StructureMap.Attributes;
 	using Transports.Msmq;
 
 	public partial class MainForm :
@@ -210,9 +211,9 @@ namespace MassTransit.SystemView
 			_container = new StructureMap.Container();
 			_container.Configure(x =>
 				{
-					x.ForRequestedType<IConfiguration>()
-						.CacheBy(InstanceScope.Singleton)
-						.AddConcreteType<Configuration>();
+					x.For<IConfiguration>()
+						.Singleton()
+						.Use<Configuration>();
 				});
 
 			var registry = new SystemViewRegistry(_container);
