@@ -36,12 +36,9 @@ namespace MassTransit.RuntimeServices
 
 			var configuration = container.GetInstance<IConfiguration>();
 
-			ForRequestedType<ISessionFactory>()
-				.CacheBy(InstanceScope.Singleton)
-				.TheDefault.Is.ConstructedBy(context => CreateSessionFactory());
+			For<ISessionFactory>().Singleton().Use(context => CreateSessionFactory());
 
-			ForRequestedType(typeof (ISagaRepository<>))
-				.AddConcreteType(typeof (NHibernateSagaRepositoryForContainers<>));
+			For(typeof (ISagaRepository<>)).Use(typeof (NHibernateSagaRepositoryForContainers<>));
 
 			RegisterControlBus(configuration.TimeoutServiceControlUri, x => { x.SetConcurrentConsumerLimit(1); });
 
