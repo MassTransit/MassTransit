@@ -66,9 +66,9 @@ namespace MassTransit.SystemView.Consumer
             _container = new StructureMap.Container();
             _container.Configure(x =>
             {
-                x.ForRequestedType<IConfiguration>()
-                    .CacheBy(InstanceScope.Singleton)
-                    .AddConcreteType<Configuration>();
+            	x.For<IConfiguration>()
+            		.Singleton()
+            		.Use<Configuration>();
             });
 
             var registry = new SystemViewRegistry(_container);
