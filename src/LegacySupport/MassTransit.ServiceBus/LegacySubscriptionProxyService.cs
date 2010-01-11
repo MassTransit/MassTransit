@@ -7,8 +7,7 @@ namespace MassTransit.LegacySupport
     using Saga;
     using Services.Subscriptions.Messages;
     using Services.Subscriptions.Server.Messages;
-    using AddSubscription=MassTransit.ServiceBus.Subscriptions.Messages.AddSubscription;
-    using RemoveSubscription=MassTransit.ServiceBus.Subscriptions.Messages.RemoveSubscription;
+    using Subscriptions.Messages;
 
     public class LegacySubscriptionProxyService 
     {
@@ -44,7 +43,7 @@ namespace MassTransit.LegacySupport
             if (_log.IsInfoEnabled)
                 _log.InfoFormat("Proxy New to Old Add Subscription: {0}", message.Subscription);
 
-            var add = new AddSubscription(message.Subscription.MessageName, message.Subscription.EndpointUri);
+            var add = new OldAddSubscription(message.Subscription.MessageName, message.Subscription.EndpointUri);
 
             SendToClients(add);
         }
@@ -54,7 +53,7 @@ namespace MassTransit.LegacySupport
             if (_log.IsInfoEnabled)
                 _log.InfoFormat("Proxy New to OLd Removing Subscription: {0}", message.Subscription);
 
-            var remove = new RemoveSubscription(message.Subscription.MessageName, message.Subscription.EndpointUri);
+            var remove = new OldRemoveSubscription(message.Subscription.MessageName, message.Subscription.EndpointUri);
 
             SendToClients(remove);
         }

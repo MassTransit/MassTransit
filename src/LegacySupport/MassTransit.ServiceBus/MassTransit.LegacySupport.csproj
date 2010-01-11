@@ -55,12 +55,12 @@
     <Compile Include="SerializationCustomization\LegacyBinder.cs" />
     <Compile Include="SerializationCustomization\LegacySurrogate.cs" />
     <Compile Include="SerializationCustomization\LegacySurrogateSelector.cs" />
-    <Compile Include="SerializationCustomization\NewToOldSerializationSurrogate.cs" />
-    <Compile Include="Subscriptions\Messages\AddSubscription.cs" />
-    <Compile Include="Subscriptions\Messages\CacheUpdateRequest.cs" />
-    <Compile Include="Subscriptions\Messages\CacheUpdateResponse.cs" />
-    <Compile Include="Subscriptions\Messages\CancelSubscriptionUpdates.cs" />
-    <Compile Include="Subscriptions\Messages\RemoveSubscription.cs" />
+    <Compile Include="SerializationCustomization\MessageTypeMap.cs" />
+    <Compile Include="Subscriptions\Messages\OldAddSubscription.cs" />
+    <Compile Include="Subscriptions\Messages\OldCacheUpdateRequest.cs" />
+    <Compile Include="Subscriptions\Messages\OldCacheUpdateResponse.cs" />
+    <Compile Include="Subscriptions\Messages\OldCancelSubscriptionUpdates.cs" />
+    <Compile Include="Subscriptions\Messages\OldRemoveSubscription.cs" />
     <Compile Include="Subscriptions\Messages\SubscriptionChange.cs" />
     <Compile Include="Subscriptions\Subscription.cs" />
   </ItemGroup>
