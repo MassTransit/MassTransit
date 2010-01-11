@@ -67,7 +67,9 @@
     <Compile Include="Contexts\WithActiveSaga.cs" />
     <Compile Include="Contexts\WithInitialSaga.cs" />
     <Compile Include="Contexts\WithStartedProxyService.cs" />
+    <Compile Include="StreamAssert.cs" />
     <Compile Include="TestSerialization.cs" />
+    <Compile Include="UriTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\MassTransit\MassTransit.csproj">
@@ -93,6 +95,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="OldSerializedMessages\RemoveSubscription.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="OldSerializedMessages\Uri.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
