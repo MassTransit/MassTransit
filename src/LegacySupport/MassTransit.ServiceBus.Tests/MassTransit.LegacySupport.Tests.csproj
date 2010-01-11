@@ -68,6 +68,8 @@
     <Compile Include="Contexts\WithInitialSaga.cs" />
     <Compile Include="Contexts\WithStartedProxyService.cs" />
     <Compile Include="SerializeAddSubscription.cs" />
+    <Compile Include="SerializeCacheUpdateRequest.cs" />
+    <Compile Include="SerializeCacheUpdateResponse.cs" />
     <Compile Include="SerializeCancelUpdates.cs" />
     <Compile Include="SerializeRemoveSubscription.cs" />
     <Compile Include="StreamAssert.cs" />
