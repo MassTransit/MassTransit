@@ -14,7 +14,6 @@ namespace MassTransit.LegacySupport.Subscriptions.Messages
 {
     using System;
     using ServiceBus.Subscriptions;
-    using ServiceBus.Subscriptions.Messages;
 
     [Serializable]
     public class OldAddSubscription :

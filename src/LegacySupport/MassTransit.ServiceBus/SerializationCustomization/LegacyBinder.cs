@@ -2,6 +2,7 @@ namespace MassTransit.LegacySupport.SerializationCustomization
 {
     using System;
     using System.Collections.Generic;
+    using System.Reflection;
     using System.Runtime.Serialization;
 
     public class LegacyBinder :
@@ -19,7 +20,37 @@ namespace MassTransit.LegacySupport.SerializationCustomization
             if(_map.ContainsKey(typeName))
                 return _map[typeName];
 
-            return Type.GetType("{0}, {1}".FormatWith(assemblyName, typeName));
+            try
+            {
+                Assembly ass = Assembly.Load(assemblyName);
+                return ass.GetType(typeName);
+            }
+            catch (Exception ex)
+            {   
+                throw new LegacySerializationException("Failed serializing {0}, {1}".FormatWith(assemblyName, typeName), ex);
+            }
+            
+        }
+    }
+
+    [Serializable]
+    public class LegacySerializationException :
+        Exception
+    {
+        public LegacySerializationException()
+        {
+        }
+
+        public LegacySerializationException(string message) : base(message)
+        {
+        }
+
+        public LegacySerializationException(string message, Exception innerException) : base(message, innerException)
+        {
+        }
+
+        protected LegacySerializationException(SerializationInfo info, StreamingContext context) : base(info, context)
+        {
         }
     }
 }

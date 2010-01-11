@@ -13,20 +13,38 @@
 namespace MassTransit.LegacySupport.SerializationCustomization
 {
     using System;
+    using System.Collections;
     using System.Collections.Generic;
     using Subscriptions.Messages;
 
-    public class MessageTypeMap
+    public class MessageTypeMap :
+        IEnumerable<KeyValuePair<string, Type>>
     {
         readonly Dictionary<string, Type> _maps;
 
         public MessageTypeMap()
         {
-            _maps.Add("MassTransit.ServiceBus.Services.Subscriptions.Messages.AddSubscription", typeof(OldAddSubscription));
-            _maps.Add("MassTransit.ServiceBus.Services.Subscriptions.Messages.CacheUpdateRequest", typeof(OldCacheUpdateRequest));
-            _maps.Add("MassTransit.ServiceBus.Services.Subscriptions.Messages.CacheUpdateResponse", typeof(OldCacheUpdateResponse));
-            _maps.Add("MassTransit.ServiceBus.Services.Subscriptions.Messages.CancelSubscriptionUpdate", typeof(OldCancelSubscriptionUpdates));
-            _maps.Add("MassTransit.ServiceBus.Services.Subscriptions.Messages.RemoveSubscription", typeof(OldRemoveSubscription));
+            _maps = new Dictionary<string, Type>();
+            _maps.Add("MassTransit.ServiceBus.Subscriptions.Messages.AddSubscription", typeof(OldAddSubscription));
+            _maps.Add("MassTransit.ServiceBus.Subscriptions.Messages.CacheUpdateRequest", typeof(OldCacheUpdateRequest));
+            _maps.Add("MassTransit.ServiceBus.Subscriptions.Messages.CacheUpdateResponse", typeof(OldCacheUpdateResponse));
+            _maps.Add("MassTransit.ServiceBus.Subscriptions.Messages.CancelSubscriptionUpdates", typeof(OldCancelSubscriptionUpdates));
+            _maps.Add("MassTransit.ServiceBus.Subscriptions.Messages.RemoveSubscription", typeof(OldRemoveSubscription));
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
+
+        public IEnumerator<KeyValuePair<string, Type>> GetEnumerator()
+        {
+            foreach (KeyValuePair<string, Type> pair in _maps)
+            {
+                yield return pair;
+            }
+
+            yield break;
         }
     }
 }
