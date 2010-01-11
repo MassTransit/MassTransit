@@ -2,6 +2,7 @@ namespace MassTransit.LegacySupport.SerializationCustomization
 {
     using System;
     using System.Collections.Generic;
+    using System.Reflection;
     using System.Runtime.CompilerServices;
     using System.Runtime.Serialization;
     using Magnum.Reflection;
@@ -19,17 +20,13 @@ namespace MassTransit.LegacySupport.SerializationCustomization
         {
             OtherAssemblyName = otherAssemblyName;
             OtherTypeName = otherTypeName;
-
-            Properties = new List<FastProperty<T>>();
-            foreach (var propertyInfo in typeof(T).GetProperties())
-            {
-                Properties.Add(new FastProperty<T>(propertyInfo));
-            }
+            
+            Members = new List<MemberInfo>(FormatterServices.GetSerializableMembers(typeof (T)));
         }
 
         public string OtherAssemblyName { get; set; }
         public string OtherTypeName { get; set; }
-        public List<FastProperty<T>> Properties { get; set; }
+        public List<MemberInfo> Members { get; set; }
 
         public Type SurrogateType
         {
@@ -43,10 +40,10 @@ namespace MassTransit.LegacySupport.SerializationCustomization
             info.AssemblyName = OtherAssemblyName;
             info.FullTypeName = OtherTypeName;
 
-            foreach (var fp in Properties)
+            foreach (FieldInfo fp in Members)
             {
-                var propName = fp.IsAutoProperty() ? fp.AutoPropertyFieldName() : fp.Property.Name;
-                var value = fp.Get(theReal);
+                var propName = fp.Name;
+                var value = fp.GetValue(theReal);
 
                 info.FastInvoke("AddValue", propName, value);
             }

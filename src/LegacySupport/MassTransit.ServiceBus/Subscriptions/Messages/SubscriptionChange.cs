@@ -1,7 +1,6 @@
 namespace MassTransit.LegacySupport.Subscriptions.Messages
 {
     using System;
-    using ServiceBus.Subscriptions;
 
     [Serializable]
     public abstract class SubscriptionChange

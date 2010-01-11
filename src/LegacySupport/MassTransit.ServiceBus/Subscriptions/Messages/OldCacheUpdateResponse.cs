@@ -14,7 +14,6 @@ namespace MassTransit.LegacySupport.Subscriptions.Messages
 {
     using System;
     using System.Collections.Generic;
-    using ServiceBus.Subscriptions;
 
     [Serializable]
     public class OldCacheUpdateResponse

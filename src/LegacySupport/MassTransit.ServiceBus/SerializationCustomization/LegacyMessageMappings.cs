@@ -15,6 +15,7 @@ namespace MassTransit.LegacySupport.SerializationCustomization
     using System;
     using System.Collections;
     using System.Collections.Generic;
+    using Subscriptions;
     using Subscriptions.Messages;
 
     public class LegacyMessageMappings :
@@ -32,6 +33,7 @@ namespace MassTransit.LegacySupport.SerializationCustomization
             _maps2.Add(new MessageMap("MassTransit.ServiceBus, Version=0.2.2133.0, Culture=neutral, PublicKeyToken=null", "MassTransit.ServiceBus.Subscriptions.Messages.CacheUpdateResponse", typeof(OldCacheUpdateResponse)));
             _maps2.Add(new MessageMap("MassTransit.ServiceBus, Version=0.2.2133.0, Culture=neutral, PublicKeyToken=null", "MassTransit.ServiceBus.Subscriptions.Messages.CancelSubscriptionUpdates", typeof(OldCancelSubscriptionUpdates)));
             _maps2.Add(new MessageMap("MassTransit.ServiceBus, Version=0.2.2133.0, Culture=neutral, PublicKeyToken=null", "MassTransit.ServiceBus.Subscriptions.Messages.RemoveSubscription", typeof(OldRemoveSubscription)));
+            _maps2.Add(new MessageMap("MassTransit.ServiceBus, Version=0.2.2133.0, Culture=neutral, PublicKeyToken=null", "MassTransit.ServiceBus.Subscriptions.Subscription", typeof(Subscription)));
         }
 
         IEnumerator IEnumerable.GetEnumerator()
