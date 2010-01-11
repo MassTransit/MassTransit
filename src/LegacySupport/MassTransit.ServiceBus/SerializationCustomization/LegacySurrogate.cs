@@ -2,6 +2,7 @@ namespace MassTransit.LegacySupport.SerializationCustomization
 {
     using System;
     using System.Collections.Generic;
+    using System.Runtime.CompilerServices;
     using System.Runtime.Serialization;
     using Magnum.Reflection;
 
@@ -44,7 +45,7 @@ namespace MassTransit.LegacySupport.SerializationCustomization
 
             foreach (var fp in Properties)
             {
-                var propName = fp.Property.Name;
+                var propName = fp.IsAutoProperty() ? fp.AutoPropertyFieldName() : fp.Property.Name;
                 var value = fp.Get(theReal);
 
                 info.FastInvoke("AddValue", propName, value);
@@ -53,7 +54,21 @@ namespace MassTransit.LegacySupport.SerializationCustomization
 
         public object SetObjectData(object obj, SerializationInfo info, StreamingContext context, ISurrogateSelector selector)
         {
-            throw new NotImplementedException("bob");
+            throw new NotImplementedException("I cannot implement this.");
+        }
+    }
+
+    public static class FastPropertyExtensions
+    {
+        public static bool IsAutoProperty<T>(this FastProperty<T> fp)
+        {
+            var g = fp.Property.GetGetMethod();
+            return g.GetCustomAttributes(typeof(CompilerGeneratedAttribute), true).Length == 1;
+        }
+
+        public static string AutoPropertyFieldName<T>(this FastProperty<T> fp)
+        {
+            return string.Format("<{0}>k__BackingField", fp.Property.Name);
         }
     }
 }
