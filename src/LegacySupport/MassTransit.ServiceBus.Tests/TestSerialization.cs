@@ -19,14 +19,18 @@ namespace MassTransit.LegacySupport.Tests
             NewWriter = new BinaryFormatter();
 
             //smelly
-            var map = new MessageTypeMap();
+            var map = new LegacyMessageMappings();
             var b = new LegacyBinder();
-            foreach (KeyValuePair<string, Type> pair in map)
+            foreach (MessageMap pair in map)
             {
-                b.AddMap(pair.Key, pair.Value);
+                b.AddMap(pair.FullTypeName, pair.NewType);
             }
 
             NewReader.Binder = b;
+
+            var ss = new LegacySurrogateSelector();
+            ss.AddSurrogate(new LegacySurrogate<OldCancelSubscriptionUpdates>("MassTransit.ServiceBus, Version=0.2.2133.0, Culture=neutral, PublicKeyToken=null", "MassTransit.ServiceBus.Subscriptions.Messages.CancelSubscriptionUpdates"));
+            NewWriter.SurrogateSelector = ss;
         }
 
         public BinaryFormatter NewReader { get; private set; }
@@ -75,20 +79,18 @@ namespace MassTransit.LegacySupport.Tests
                 }
             }
         }
-    }
 
-    public static class StreamAssert
-    {
-        public static void AreEqual(Stream expected, Stream actual)
+        [Test]
+        public void NAME()
         {
-            expected.Position = 0;
-            actual.Position = 0;
+            var e = (char)14;
+            var a = (char)13;
 
-            while(expected.Position < expected.Length)
-            {
-                Assert.AreEqual(expected.ReadByte(), actual.ReadByte(), "The streams vary at position '{0}'", expected.Position);
-            }
+            Console.WriteLine("'{0}'", e);
+            Console.WriteLine("'{0}'", a);
+
         }
+
+
     }
-    
 }

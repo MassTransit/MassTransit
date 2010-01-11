@@ -17,18 +17,18 @@ namespace MassTransit.LegacySupport.Subscriptions.Messages
     [Serializable]
     public class OldCancelSubscriptionUpdates
     {
-        readonly Uri _requestingUri;
+        private readonly Uri _RequestingUri;
 
 
         public OldCancelSubscriptionUpdates(Uri requstingUri)
         {
-            _requestingUri = requstingUri;
+            _RequestingUri = requstingUri;
         }
 
 
         public Uri RequestingUri
         {
-            get { return _requestingUri; }
+            get { return _RequestingUri; }
         }
     }
 }
