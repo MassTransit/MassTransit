@@ -67,6 +67,9 @@
     <Compile Include="Contexts\WithActiveSaga.cs" />
     <Compile Include="Contexts\WithInitialSaga.cs" />
     <Compile Include="Contexts\WithStartedProxyService.cs" />
+    <Compile Include="SerializeAddSubscription.cs" />
+    <Compile Include="SerializeCancelUpdates.cs" />
+    <Compile Include="SerializeRemoveSubscription.cs" />
     <Compile Include="StreamAssert.cs" />
     <Compile Include="TestSerialization.cs" />
     <Compile Include="UriTests.cs" />
