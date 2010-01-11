@@ -1,6 +1,5 @@
 namespace MassTransit.LegacySupport.Tests
 {
-    using System.Collections.Generic;
     using System.Runtime.Serialization.Formatters.Binary;
     using NUnit.Framework;
     using SerializationCustomization;
@@ -32,6 +31,8 @@ namespace MassTransit.LegacySupport.Tests
             ss.AddSurrogate(new LegacySurrogate<OldRemoveSubscription>("MassTransit.ServiceBus, Version=0.2.2133.0, Culture=neutral, PublicKeyToken=null", "MassTransit.ServiceBus.Subscriptions.Messages.RemoveSubscription"));
             ss.AddSurrogate(new LegacySurrogate<OldAddSubscription>("MassTransit.ServiceBus, Version=0.2.2133.0, Culture=neutral, PublicKeyToken=null", "MassTransit.ServiceBus.Subscriptions.Messages.AddSubscription"));
             ss.AddSurrogate(new LegacySurrogate<Subscription>("MassTransit.ServiceBus, Version=0.2.2133.0, Culture=neutral, PublicKeyToken=null", "MassTransit.ServiceBus.Subscriptions.Subscription"));
+            ss.AddSurrogate(new LegacySurrogate<OldCacheUpdateRequest>("MassTransit.ServiceBus, Version=0.2.2133.0, Culture=neutral, PublicKeyToken=null", "MassTransit.ServiceBus.Subscriptions.Messages.CacheUpdateRequest"));
+            ss.AddSurrogate(new LegacySurrogate<OldCacheUpdateResponse>("MassTransit.ServiceBus, Version=0.2.2133.0, Culture=neutral, PublicKeyToken=null", "MassTransit.ServiceBus.Subscriptions.Messages.CacheUpdateResponse"));
             NewWriter.SurrogateSelector = ss;
         }
 
