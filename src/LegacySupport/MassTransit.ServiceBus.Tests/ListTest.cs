@@ -26,17 +26,30 @@ namespace MassTransit.LegacySupport.Tests
         [Test]
         public void HowToTest()
         {
-            var bf = new BinaryFormatter();
-            var ls = new LegacySurrogateSelector();
-            ls.AddSurrogate(new LegacyItemSurrogate("mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", "System.Collections.Generic.List`1[MassTransit.ServiceBus.Subscriptions.Subscription]", typeof(List<Subscription>)));
-            bf.SurrogateSelector = ls;
-           
-            var x = new List<Subscription>();
-            x.Add(new Subscription("message", new Uri("http://bob/bill")));
-            var stream = new MemoryStream();
-            bf.Serialize(stream, x);
-            stream.Position = 1;
-            bf.Deserialize(stream);
+            using (var stream = new MemoryStream())
+            {
+                var writer = new BinaryFormatter();
+
+                var x = new Bob();
+                x.Numbers.Add(1);
+                writer.Serialize(stream, x);
+                stream.Position = 1;
+
+                var reader = new BinaryFormatter();
+                var ls = new LegacySurrogateSelector();
+                //reader.SurrogateSelector = ls;
+                var a = (Bob) reader.Deserialize(stream);
+            }
         }
+    }
+
+    [Serializable]
+    public class Bob
+    {
+        public Bob()
+        {
+            Numbers = new List<int>();
+        }
+        public IList<int> Numbers { get; set; }
     }
 }
