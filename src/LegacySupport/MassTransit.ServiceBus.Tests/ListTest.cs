@@ -38,7 +38,7 @@ namespace MassTransit.LegacySupport.Tests
                 var reader = new BinaryFormatter();
                 var ls = new LegacySurrogateSelector();
                 ls.AddSurrogate(new WeakToStrongArraySurrogate<int>("mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", "System.String[]"));
-                var lb = new LegacyBinder();
+                var lb = new WeakToStrongBinder();
                 var map = new TypeMap("", typeof (Bill).FullName, typeof (Bob));
                 lb.AddMap(map);
 

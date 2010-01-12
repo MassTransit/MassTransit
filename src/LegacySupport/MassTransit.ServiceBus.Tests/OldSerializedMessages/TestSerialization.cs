@@ -14,7 +14,9 @@ namespace MassTransit.LegacySupport.Tests.OldSerializedMessages
 {
     using System.Runtime.Serialization.Formatters.Binary;
     using NUnit.Framework;
+    using System.Collections.Generic;
     using SerializationCustomization;
+    using Subscriptions;
 
     [TestFixture]
     public class TestSerialization
@@ -26,9 +28,16 @@ namespace MassTransit.LegacySupport.Tests.OldSerializedMessages
             NewReader = new BinaryFormatter();
             NewWriter = new BinaryFormatter();
 
+            var readerSelector = new LegacySurrogateSelector();
+            readerSelector.AddSurrogate(new WeakToStrongListSurrogate<List<Subscription>, Subscription>("mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", "System.Collections.Generic.List`1[[MassTransit.ServiceBus.Subscriptions.Subscription, MassTransit.ServiceBus, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"));
+            
+            
+            NewReader.SurrogateSelector = readerSelector;
+            
+            
             //smelly
             var maps = new TypeMappings();
-            var b = new LegacyBinder();
+            var b = new WeakToStrongBinder();
             var ss = new LegacySurrogateSelector();
             foreach (TypeMap map in maps)
             {
