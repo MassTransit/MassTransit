@@ -19,35 +19,26 @@ namespace MassTransit.LegacySupport.SerializationCustomization
     using System.Runtime.Serialization;
     using Magnum.Reflection;
 
-    public interface LegacySurrogate :
-        ISerializationSurrogate
-    {
-        Type SurrogateType { get; }
-    }
-
-    public class LegacyItemSurrogate :
+    public class StrongToWeakItemSurrogate :
         LegacySurrogate
     {
-        public LegacyItemSurrogate(string otherAssemblyName, string otherTypeName, Type newType)
+        public StrongToWeakItemSurrogate(TypeMap map)
         {
-            OtherAssemblyName = otherAssemblyName;
-            OtherTypeName = otherTypeName;
-            SurrogateType = newType;
-            Members = new List<MemberInfo>(FormatterServices.GetSerializableMembers(newType));
+            Map = map;
+            Members = new List<MemberInfo>(FormatterServices.GetSerializableMembers(Map.StrongType));
         }
 
-        public string OtherAssemblyName { get; set; }
-        public string OtherTypeName { get; set; }
+        public TypeMap Map { get; set; }
         public List<MemberInfo> Members { get; set; }
 
         #region LegacySurrogate Members
 
-        public Type SurrogateType { get; private set; }
+        public string SurrogateTypeName { get { return Map.StrongType.FullName; } }
 
         public void GetObjectData(object obj, SerializationInfo info, StreamingContext context)
         {
-            info.AssemblyName = OtherAssemblyName;
-            info.FullTypeName = OtherTypeName;
+            info.AssemblyName = Map.WeakAssemblyName;
+            info.FullTypeName = Map.WeakTypeName;
 
             foreach (FieldInfo fp in Members)
             {

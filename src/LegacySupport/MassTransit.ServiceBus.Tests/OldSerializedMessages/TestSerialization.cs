@@ -27,13 +27,13 @@ namespace MassTransit.LegacySupport.Tests.OldSerializedMessages
             NewWriter = new BinaryFormatter();
 
             //smelly
-            var map = new LegacyMessageMappings();
+            var maps = new TypeMappings();
             var b = new LegacyBinder();
             var ss = new LegacySurrogateSelector();
-            foreach (MessageMap pair in map)
+            foreach (TypeMap map in maps)
             {
-                b.AddMap(pair.FullTypeName, pair.NewType);
-                ss.AddSurrogate(new LegacyItemSurrogate(pair.AssemblyName, pair.FullTypeName, pair.NewType));
+                b.AddMap(map);
+                ss.AddSurrogate(new StrongToWeakItemSurrogate(map));
             }
 
             NewReader.Binder = b;

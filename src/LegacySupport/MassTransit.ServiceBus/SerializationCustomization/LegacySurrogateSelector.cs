@@ -32,10 +32,10 @@ namespace MassTransit.LegacySupport.SerializationCustomization
 
         public ISerializationSurrogate GetSurrogate(Type type, StreamingContext context, out ISurrogateSelector selector)
         {
-            if (_surrogates.Any(x => x.SurrogateType == type))
+            if (_surrogates.Any(x => x.SurrogateTypeName == type.FullName))
             {
                 selector = this;
-                return _surrogates.First(x => x.SurrogateType == type);
+                return _surrogates.First(x => x.SurrogateTypeName == type.FullName);
             }
 
 

@@ -30,15 +30,24 @@ namespace MassTransit.LegacySupport.Tests
             {
                 var writer = new BinaryFormatter();
 
-                var x = new Bob();
-                x.Numbers.Add(1);
-                writer.Serialize(stream, x);
-                stream.Position = 1;
+                var bill = new Bill();
+                bill.Numbers = new []{"1"};
+                writer.Serialize(stream, bill);
+                stream.Position = 0;
 
                 var reader = new BinaryFormatter();
                 var ls = new LegacySurrogateSelector();
-                //reader.SurrogateSelector = ls;
+                ls.AddSurrogate(new WeakToStrongArraySurrogate<int>("mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", "System.String[]"));
+                var lb = new LegacyBinder();
+                var map = new TypeMap("", typeof (Bill).FullName, typeof (Bob));
+                lb.AddMap(map);
+
+
+                reader.SurrogateSelector = ls;
+                reader.Binder = lb;
+
                 var a = (Bob) reader.Deserialize(stream);
+                Assert.Contains(1, a.Numbers);
             }
         }
     }
@@ -48,8 +57,18 @@ namespace MassTransit.LegacySupport.Tests
     {
         public Bob()
         {
-            Numbers = new List<int>();
+            Numbers = new int[]{};
         }
-        public IList<int> Numbers { get; set; }
+        public int[] Numbers { get; set; }
+    }
+
+    [Serializable]
+    public class Bill
+    {
+         public Bill()
+        {
+             Numbers = new string[] {};
+        }
+        public string[] Numbers { get; set; }
     }
 }
