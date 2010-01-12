@@ -34,6 +34,7 @@ namespace MassTransit.LegacySupport.SerializationCustomization
             _maps2.Add(new MessageMap("MassTransit.ServiceBus, Version=0.2.2133.0, Culture=neutral, PublicKeyToken=null", "MassTransit.ServiceBus.Subscriptions.Messages.CancelSubscriptionUpdates", typeof(OldCancelSubscriptionUpdates)));
             _maps2.Add(new MessageMap("MassTransit.ServiceBus, Version=0.2.2133.0, Culture=neutral, PublicKeyToken=null", "MassTransit.ServiceBus.Subscriptions.Messages.RemoveSubscription", typeof(OldRemoveSubscription)));
             _maps2.Add(new MessageMap("MassTransit.ServiceBus, Version=0.2.2133.0, Culture=neutral, PublicKeyToken=null", "MassTransit.ServiceBus.Subscriptions.Subscription", typeof(Subscription)));
+            _maps2.Add(new MessageMap("mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", "System.Collections.Generic.List`1[MassTransit.ServiceBus.Subscriptions.Subscription]", typeof(List<Subscription>)));
         }
 
         IEnumerator IEnumerable.GetEnumerator()

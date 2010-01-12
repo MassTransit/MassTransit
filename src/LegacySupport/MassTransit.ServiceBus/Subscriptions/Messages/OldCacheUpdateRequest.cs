@@ -17,18 +17,18 @@ namespace MassTransit.LegacySupport.Subscriptions.Messages
     [Serializable]
     public class OldCacheUpdateRequest
     {
-        readonly Uri _requestingUri;
+        readonly Uri _RequestingUri;
 
 
         public OldCacheUpdateRequest(Uri requstingUri)
         {
-            _requestingUri = requstingUri;
+            _RequestingUri = requstingUri;
         }
 
 
         public Uri RequestingUri
         {
-            get { return _requestingUri; }
+            get { return _RequestingUri; }
         }
     }
 }
