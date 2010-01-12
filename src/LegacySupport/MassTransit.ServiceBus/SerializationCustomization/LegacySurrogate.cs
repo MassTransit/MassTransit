@@ -38,7 +38,6 @@ namespace MassTransit.LegacySupport.SerializationCustomization
             {
                 var propName = fp.Name;
                 var value = fp.GetValue(obj);
-
                 info.FastInvoke("AddValue", propName, value);
             }
         }
