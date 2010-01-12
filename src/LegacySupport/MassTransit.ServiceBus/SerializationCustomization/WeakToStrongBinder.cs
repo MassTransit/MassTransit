@@ -5,7 +5,7 @@ namespace MassTransit.LegacySupport.SerializationCustomization
     using System.Reflection;
     using System.Runtime.Serialization;
 
-    public class LegacyBinder :
+    public class WeakToStrongBinder :
         SerializationBinder
     {
         Dictionary<string, Type> _map = new Dictionary<string, Type>();

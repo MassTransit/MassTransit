@@ -54,8 +54,8 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SerializationCustomization\LegacySurrogate.cs" />
     <Compile Include="SerializationCustomization\WeakToStrongArraySurrogate.cs" />
-    <Compile Include="SerializationCustomization\LegacyBinder.cs" />
-    <Compile Include="SerializationCustomization\LegacyListSurrogate.cs" />
+    <Compile Include="SerializationCustomization\WeakToStrongBinder.cs" />
+    <Compile Include="SerializationCustomization\WeakToStrongListSurrogate.cs" />
     <Compile Include="SerializationCustomization\LegacySerializationException.cs" />
     <Compile Include="SerializationCustomization\StrongToWeakItemSurrogate.cs" />
     <Compile Include="SerializationCustomization\LegacySurrogateSelector.cs" />

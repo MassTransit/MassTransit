@@ -13,15 +13,14 @@
 namespace MassTransit.LegacySupport.SerializationCustomization
 {
     using System;
-    using System.Collections;
     using System.Collections.Generic;
     using System.Reflection;
     using System.Runtime.Serialization;
 
-    public class LegacyListSurrogate<LIST,ITEM> :
+    public class WeakToStrongListSurrogate<LIST,ITEM> :
         LegacySurrogate where LIST : List<ITEM>
     {
-        public LegacyListSurrogate(string weakAssemblyName, string weakTypeName)
+        public WeakToStrongListSurrogate(string weakAssemblyName, string weakTypeName)
         {
             WeakTypeName = weakTypeName;
             WeakAssemblyName = weakAssemblyName;
@@ -35,7 +34,7 @@ namespace MassTransit.LegacySupport.SerializationCustomization
 
         #region LegacySurrogate Members
 
-        public string SurrogateTypeName{ get { return StrongType.FullName; } }
+        public string SurrogateTypeName{ get { return WeakTypeName; } }
 
         public void GetObjectData(object obj, SerializationInfo info, StreamingContext context)
         {
@@ -44,21 +43,12 @@ namespace MassTransit.LegacySupport.SerializationCustomization
 
         public object SetObjectData(object obj, SerializationInfo info, StreamingContext context, ISurrogateSelector selector)
         {
-            if (!obj.GetType().Equals(SurrogateTypeName))
+            if (!obj.GetType().FullName.Equals(SurrogateTypeName))
                 throw new Exception("something");
 
-            
-            var x = new List<int>();
-            var dataType = Type.GetType(WeakTypeName).MakeArrayType();
-            
-            var value = info.GetValue("_items", dataType);
-            var data =  (Array)value;
-            foreach (var o in data)
-            {
-                x.Add(Convert.ToInt32(o));
-            }
-
-            return x;
+            var value = info.GetValue("_items", typeof(object[]));
+            var data =  (ITEM[])value;
+            return new List<ITEM>(data);
         }
 
         #endregion
