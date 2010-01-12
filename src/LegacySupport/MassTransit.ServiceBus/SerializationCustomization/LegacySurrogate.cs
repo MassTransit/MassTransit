@@ -7,21 +7,16 @@ namespace MassTransit.LegacySupport.SerializationCustomization
     using System.Runtime.Serialization;
     using Magnum.Reflection;
 
-    public interface LegacySurrogate :
+    public class LegacySurrogate :
         ISerializationSurrogate
     {
-        Type SurrogateType { get; }
-    }
-    public class LegacySurrogate<T> :
-        LegacySurrogate
-    {
 
-        public LegacySurrogate(string otherAssemblyName, string otherTypeName)
+        public LegacySurrogate(string otherAssemblyName, string otherTypeName, Type newType)
         {
             OtherAssemblyName = otherAssemblyName;
             OtherTypeName = otherTypeName;
-            
-            Members = new List<MemberInfo>(FormatterServices.GetSerializableMembers(typeof (T)));
+            SurrogateType = newType;
+            Members = new List<MemberInfo>(FormatterServices.GetSerializableMembers(newType));
         }
 
         public string OtherAssemblyName { get; set; }
@@ -30,12 +25,11 @@ namespace MassTransit.LegacySupport.SerializationCustomization
 
         public Type SurrogateType
         {
-            get { return typeof(T); }
+            get; private set;
         }
 
         public void GetObjectData(object obj, SerializationInfo info, StreamingContext context)
         {
-            var theReal = (T)obj;
 
             info.AssemblyName = OtherAssemblyName;
             info.FullTypeName = OtherTypeName;
@@ -43,7 +37,7 @@ namespace MassTransit.LegacySupport.SerializationCustomization
             foreach (FieldInfo fp in Members)
             {
                 var propName = fp.Name;
-                var value = fp.GetValue(theReal);
+                var value = fp.GetValue(obj);
 
                 info.FastInvoke("AddValue", propName, value);
             }

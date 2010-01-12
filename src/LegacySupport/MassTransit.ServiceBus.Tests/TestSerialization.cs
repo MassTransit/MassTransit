@@ -19,20 +19,14 @@ namespace MassTransit.LegacySupport.Tests
             //smelly
             var map = new LegacyMessageMappings();
             var b = new LegacyBinder();
+            var ss = new LegacySurrogateSelector();
             foreach (MessageMap pair in map)
             {
                 b.AddMap(pair.FullTypeName, pair.NewType);
+                ss.AddSurrogate(new LegacySurrogate(pair.AssemblyName, pair.FullTypeName, pair.NewType));
             }
 
             NewReader.Binder = b;
-
-            var ss = new LegacySurrogateSelector();
-            ss.AddSurrogate(new LegacySurrogate<OldCancelSubscriptionUpdates>("MassTransit.ServiceBus, Version=0.2.2133.0, Culture=neutral, PublicKeyToken=null", "MassTransit.ServiceBus.Subscriptions.Messages.CancelSubscriptionUpdates"));
-            ss.AddSurrogate(new LegacySurrogate<OldRemoveSubscription>("MassTransit.ServiceBus, Version=0.2.2133.0, Culture=neutral, PublicKeyToken=null", "MassTransit.ServiceBus.Subscriptions.Messages.RemoveSubscription"));
-            ss.AddSurrogate(new LegacySurrogate<OldAddSubscription>("MassTransit.ServiceBus, Version=0.2.2133.0, Culture=neutral, PublicKeyToken=null", "MassTransit.ServiceBus.Subscriptions.Messages.AddSubscription"));
-            ss.AddSurrogate(new LegacySurrogate<Subscription>("MassTransit.ServiceBus, Version=0.2.2133.0, Culture=neutral, PublicKeyToken=null", "MassTransit.ServiceBus.Subscriptions.Subscription"));
-            ss.AddSurrogate(new LegacySurrogate<OldCacheUpdateRequest>("MassTransit.ServiceBus, Version=0.2.2133.0, Culture=neutral, PublicKeyToken=null", "MassTransit.ServiceBus.Subscriptions.Messages.CacheUpdateRequest"));
-            ss.AddSurrogate(new LegacySurrogate<OldCacheUpdateResponse>("MassTransit.ServiceBus, Version=0.2.2133.0, Culture=neutral, PublicKeyToken=null", "MassTransit.ServiceBus.Subscriptions.Messages.CacheUpdateResponse"));
             NewWriter.SurrogateSelector = ss;
         }
 

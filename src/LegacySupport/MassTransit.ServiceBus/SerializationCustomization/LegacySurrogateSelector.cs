@@ -33,7 +33,7 @@ namespace MassTransit.LegacySupport.SerializationCustomization
             return _inner.GetNextSelector();
         }
 
-        public void AddSurrogate<T>(LegacySurrogate<T> surrogate)
+        public void AddSurrogate(LegacySurrogate surrogate)
         {
             _surrogates.Add(surrogate);
         }
