@@ -28,9 +28,9 @@ namespace MassTransit.LegacySupport.Tests
         {
             var bf = new BinaryFormatter();
             var ls = new LegacySurrogateSelector();
-            ls.AddSurrogate(new LegacySurrogate("mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", "System.Collections.Generic.List`1[MassTransit.ServiceBus.Subscriptions.Subscription]", typeof(List<Subscription>)));
+            ls.AddSurrogate(new LegacyItemSurrogate("mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", "System.Collections.Generic.List`1[MassTransit.ServiceBus.Subscriptions.Subscription]", typeof(List<Subscription>)));
             bf.SurrogateSelector = ls;
-
+           
             var x = new List<Subscription>();
             x.Add(new Subscription("message", new Uri("http://bob/bill")));
             var stream = new MemoryStream();
