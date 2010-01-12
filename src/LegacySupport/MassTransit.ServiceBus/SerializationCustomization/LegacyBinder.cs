@@ -10,9 +10,9 @@ namespace MassTransit.LegacySupport.SerializationCustomization
     {
         Dictionary<string, Type> _map = new Dictionary<string, Type>();
 
-        public void AddMap(string oldTypeName, Type newType)
+        public void AddMap(TypeMap map)
         {
-            _map.Add(oldTypeName, newType);
+            _map.Add(map.WeakTypeName, map.StrongType);
         }
 
         public override Type BindToType(string assemblyName, string typeName)

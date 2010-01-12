@@ -13,30 +13,29 @@
 namespace MassTransit.LegacySupport.SerializationCustomization
 {
     using System;
+    using System.Collections;
     using System.Collections.Generic;
     using System.Reflection;
     using System.Runtime.Serialization;
 
-    public class LegacyListSurrogate :
-        LegacySurrogate
+    public class LegacyListSurrogate<LIST,ITEM> :
+        LegacySurrogate where LIST : List<ITEM>
     {
-        public LegacyListSurrogate(string otherAssemblyName, string listTypeName, string innerTypeName, Type surrogateType)
+        public LegacyListSurrogate(string weakAssemblyName, string weakTypeName)
         {
-            OtherAssemblyName = otherAssemblyName;
-            ListTypeName = listTypeName;
-            InnerTypeName = innerTypeName;
-            SurrogateType = surrogateType;
+            WeakTypeName = weakTypeName;
+            WeakAssemblyName = weakAssemblyName;
+            StrongType = typeof(LIST);
         }
 
-        public string OtherAssemblyName { get; set; }
-        public string ListTypeName { get; set; }
-        public string InnerTypeName { get; set; }
-
+        public string WeakAssemblyName { get; set; }
+        public string WeakTypeName { get; set; }
+        public Type StrongType { get; set; }
         public List<MemberInfo> Members { get; set; }
 
         #region LegacySurrogate Members
 
-        public Type SurrogateType { get; private set; }
+        public string SurrogateTypeName{ get { return StrongType.FullName; } }
 
         public void GetObjectData(object obj, SerializationInfo info, StreamingContext context)
         {
@@ -45,7 +44,21 @@ namespace MassTransit.LegacySupport.SerializationCustomization
 
         public object SetObjectData(object obj, SerializationInfo info, StreamingContext context, ISurrogateSelector selector)
         {
-            throw new NotImplementedException();
+            if (!obj.GetType().Equals(SurrogateTypeName))
+                throw new Exception("something");
+
+            
+            var x = new List<int>();
+            var dataType = Type.GetType(WeakTypeName).MakeArrayType();
+            
+            var value = info.GetValue("_items", dataType);
+            var data =  (Array)value;
+            foreach (var o in data)
+            {
+                x.Add(Convert.ToInt32(o));
+            }
+
+            return x;
         }
 
         #endregion
