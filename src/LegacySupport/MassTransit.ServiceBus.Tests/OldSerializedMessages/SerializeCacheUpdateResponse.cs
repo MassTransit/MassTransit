@@ -26,7 +26,7 @@ namespace MassTransit.LegacySupport.Tests.OldSerializedMessages
         string _pathToFile = @".\OldSerializedMessages\CacheUpdateResponse.txt";
 
         [Test]
-        public void NewToOld()
+        public void NewToOld() //strong to weak
         {
             IList<Subscription> subs = new List<Subscription>();
             subs.Add(new Subscription("the_message", new Uri("http://bob/phil")));
@@ -47,6 +47,11 @@ namespace MassTransit.LegacySupport.Tests.OldSerializedMessages
                         oldStream.Write(buff, 0, buff.Length);
                     }
 
+                    if(File.Exists(".\\my_msg.txt")) File.Delete(".\\my_msg.txt");
+                    using(var fs = File.OpenWrite(".\\my_msg.txt"))
+                    {
+                        fs.Write(newStream.ToArray(), 0, newStream.ToArray().Length);
+                    }
                     StreamAssert.AreEqual(oldStream, newStream);
                 }
             }

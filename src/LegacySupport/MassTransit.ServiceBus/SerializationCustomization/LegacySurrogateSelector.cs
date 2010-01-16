@@ -35,7 +35,9 @@ namespace MassTransit.LegacySupport.SerializationCustomization
             if (_surrogates.Any(x => x.SurrogateTypeName == type.FullName))
             {
                 selector = this;
-                return _surrogates.First(x => x.SurrogateTypeName == type.FullName);
+
+                var result = _surrogates.First(x => x.SurrogateTypeName == type.FullName);
+                return result;
             }
 
 
