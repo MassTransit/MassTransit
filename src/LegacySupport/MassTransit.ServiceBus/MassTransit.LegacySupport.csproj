@@ -52,7 +52,6 @@
     <Compile Include="Messages\LegacySubscriptionClientAdded.cs" />
     <Compile Include="Messages\LegacySubscriptionClientRemoved.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SerializationCustomization\StrongToWeakArraySurrogate.cs" />
     <Compile Include="SerializationCustomization\LegacyBinaryFormatterBuilder.cs" />
     <Compile Include="SerializationCustomization\LegacySurrogate.cs" />
     <Compile Include="SerializationCustomization\WeakToStrongArraySurrogate.cs" />
