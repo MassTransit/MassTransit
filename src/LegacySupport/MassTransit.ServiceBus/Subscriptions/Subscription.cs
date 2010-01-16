@@ -18,8 +18,8 @@ namespace MassTransit.LegacySupport.Subscriptions
     public class Subscription : IEquatable<Subscription>
     {
         readonly string _correlationId;
-        readonly string _messageName;
         protected Uri _endpointUri;
+        readonly string _messageName;
 
         protected Subscription()
         {
