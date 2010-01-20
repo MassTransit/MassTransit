@@ -28,5 +28,7 @@ TestResult.xml
 submit.xml
 *.bak
 
+src/tests/*
+
 SolutionVersion.cs
 
