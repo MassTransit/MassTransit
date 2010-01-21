@@ -1,0 +1,958 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!--This file represents the results of running a test suite-->
+<test-results name="D:\Home\MassTransit\build_output\MassTransit\MassTransit.Tests.dll" total="226" failures="0" not-run="37" date="2010-01-21" time="10:51:07">
+  <environment nunit-version="2.2.8.0" clr-version="2.0.50727.4927" os-version="Microsoft Windows NT 6.1.7600.0" platform="Win32NT" cwd="D:\Home\MassTransit" machine-name="EGQDSPC-2008R2" user="egqdspc" user-domain="NAMCK" />
+  <culture-info current-culture="en-US" current-uiculture="en-US" />
+  <test-suite name="D:\Home\MassTransit\build_output\MassTransit\MassTransit.Tests.dll" success="True" time="204.587" asserts="0">
+    <results>
+      <test-suite name="MassTransit" success="True" time="204.585" asserts="0">
+        <results>
+          <test-suite name="MassTransit.Tests" success="True" time="204.584" asserts="0">
+            <results>
+              <test-suite name="MassTransit.Tests.Actors" success="True" time="3.977" asserts="0">
+                <results>
+                  <test-suite name="MassTransit.Tests.Actors.An_indexed_collection" success="True" time="0.118" asserts="0">
+                    <results>
+                      <test-case name="MassTransit.Tests.Actors.An_indexed_collection.Should_use_indices_to_improve_query_performance" executed="True" success="True" time="0.115" asserts="1" />
+                    </results>
+                  </test-suite>
+                  <test-suite name="MassTransit.Tests.Actors.A_web_actor_should_get_wired" success="True" time="3.858" asserts="0">
+                    <results>
+                      <test-case name="MassTransit.Tests.Actors.A_web_actor_should_get_wired.Trace_Visitor" executed="True" success="True" time="3.856" asserts="0" />
+                      <test-case name="MassTransit.Tests.Actors.A_web_actor_should_get_wired.FirstTestName" executed="False">
+                        <reason>
+                          <message><![CDATA[]]></message>
+                        </reason>
+                      </test-case>
+                    </results>
+                  </test-suite>
+                </results>
+              </test-suite>
+              <test-suite name="MassTransit.Tests.TextFixtures" success="True" time="0.000" asserts="0">
+                <results>
+                  <test-suite name="MassTransit.Tests.TextFixtures.EndpointTestFixture`1" success="True" time="0.000" asserts="0">
+                    <results />
+                  </test-suite>
+                  <test-suite name="MassTransit.Tests.TextFixtures.LoopbackTestFixture" success="True" time="0.000" asserts="0">
+                    <results />
+                  </test-suite>
+                  <test-suite name="MassTransit.Tests.TextFixtures.LoopbackLocalAndRemoteTestFixture" success="True" time="0.000" asserts="0">
+                    <results />
+                  </test-suite>
+                  <test-suite name="MassTransit.Tests.TextFixtures.SubscriptionServiceTestFixture`1" success="True" time="0.000" asserts="0">
+                    <results />
+                  </test-suite>
+                  <test-suite name="MassTransit.Tests.TextFixtures.MulticastUdpTestFixture" success="True" time="0.000" asserts="0">
+                    <results />
+                  </test-suite>
+                </results>
+              </test-suite>
+              <test-suite name="MassTransit.Tests.When_a_batch_of_messages_is_published" success="True" time="3.044" asserts="0">
+                <results>
+                  <test-case name="MassTransit.Tests.When_a_batch_of_messages_is_published.A_batch_with_a_lot_of_messages_should_be_received" executed="True" success="True" time="1.517" asserts="1" />
+                  <test-case name="MassTransit.Tests.When_a_batch_of_messages_is_published.A_batch_with_a_single_message_should_be_received" executed="True" success="True" time="1.013" asserts="1" />
+                  <test-case name="MassTransit.Tests.When_a_batch_of_messages_is_published.A_single_consumer_should_receive_the_entire_batch" executed="True" success="True" time="0.515" asserts="1" />
+                </results>
+              </test-suite>
+              <test-suite name="MassTransit.Tests.When_a_batch_of_message_is_published_to_a_container_based_consumer" success="True" time="3.039" asserts="0">
+                <results>
+                  <test-case name="MassTransit.Tests.When_a_batch_of_message_is_published_to_a_container_based_consumer.A_batch_with_a_lot_of_messages_should_be_received" executed="True" success="True" time="1.015" asserts="4" />
+                  <test-case name="MassTransit.Tests.When_a_batch_of_message_is_published_to_a_container_based_consumer.A_batch_with_a_single_message_should_be_received" executed="True" success="True" time="1.014" asserts="1" />
+                  <test-case name="MassTransit.Tests.When_a_batch_of_message_is_published_to_a_container_based_consumer.A_single_consumer_should_receive_the_entire_batch" executed="True" success="True" time="1.009" asserts="1" />
+                </results>
+              </test-suite>
+              <test-suite name="MassTransit.Tests.When_an_incomplete_batch_is_published" success="True" time="0.002" asserts="0">
+                <results>
+                  <test-case name="MassTransit.Tests.When_an_incomplete_batch_is_published.The_batch_should_throw_an_exception_that_the_timeout_occurred" executed="False">
+                    <reason>
+                      <message><![CDATA[]]></message>
+                    </reason>
+                  </test-case>
+                </results>
+              </test-suite>
+              <test-suite name="MassTransit.Tests.When_the_number_of_messages_in_a_batch_is_zero" success="True" time="0.512" asserts="0">
+                <results>
+                  <test-case name="MassTransit.Tests.When_the_number_of_messages_in_a_batch_is_zero.The_batch_should_not_be_dispatched" executed="True" success="True" time="0.512" asserts="1" />
+                </results>
+              </test-suite>
+              <test-suite name="MassTransit.Tests.When_more_messages_are_sent_than_expected" success="True" time="0.001" asserts="0">
+                <results>
+                  <test-case name="MassTransit.Tests.When_more_messages_are_sent_than_expected.The_batch_should_throw_an_error" executed="False">
+                    <reason>
+                      <message><![CDATA[Not sure how to test, but this is right]]></message>
+                    </reason>
+                  </test-case>
+                </results>
+              </test-suite>
+              <test-suite name="MassTransit.Tests.Configuration_Specs" success="True" time="0.652" asserts="0">
+                <results>
+                  <test-case name="MassTransit.Tests.Configuration_Specs.Setting_a_specific_message_serializer_on_the_endpoint_should_work" executed="True" success="True" time="0.652" asserts="0" />
+                </results>
+              </test-suite>
+              <test-suite name="MassTransit.Tests.ContextSetup" success="True" time="0.000" asserts="0">
+                <results />
+              </test-suite>
+              <test-suite name="MassTransit.Tests.When_creating_a_bus_with_a_separate_control_bus" success="True" time="1.510" asserts="0">
+                <results>
+                  <test-case name="MassTransit.Tests.When_creating_a_bus_with_a_separate_control_bus.Should_purge_messages_on_startup_if_specified" executed="True" success="True" time="1.509" asserts="0" />
+                </results>
+              </test-suite>
+              <test-suite name="MassTransit.Tests.Distributor" success="True" time="44.613" asserts="0">
+                <results>
+                  <test-suite name="MassTransit.Tests.Distributor.DistributorSagaTestFixture`1" success="True" time="0.000" asserts="0">
+                    <results />
+                  </test-suite>
+                  <test-suite name="MassTransit.Tests.Distributor.LoopbackDistributorSagaTestFixture" success="True" time="0.000" asserts="0">
+                    <results />
+                  </test-suite>
+                  <test-suite name="MassTransit.Tests.Distributor.Using_the_distributor_for_a_saga" success="True" time="4.550" asserts="0">
+                    <results>
+                      <test-case name="MassTransit.Tests.Distributor.Using_the_distributor_for_a_saga.Should_have_a_subscription_for_the_first_command" executed="True" success="True" time="2.498" asserts="0" />
+                      <test-case name="MassTransit.Tests.Distributor.Using_the_distributor_for_a_saga.Should_have_a_subscription_for_the_pending_command" executed="True" success="True" time="2.051" asserts="0" />
+                    </results>
+                  </test-suite>
+                  <test-suite name="MassTransit.Tests.Distributor.Using_the_distributor_saga_worker_for_a_saga" success="True" time="6.190" asserts="0">
+                    <results>
+                      <test-case name="MassTransit.Tests.Distributor.Using_the_distributor_saga_worker_for_a_saga.Should_register_the_message_consumers" executed="True" success="True" time="6.190" asserts="0" />
+                      <test-case name="MassTransit.Tests.Distributor.Using_the_distributor_saga_worker_for_a_saga.Using_the_load_generator_should_share_the_load" executed="False">
+                        <reason>
+                          <message><![CDATA[Explicit selection required]]></message>
+                        </reason>
+                      </test-case>
+                      <test-case name="MassTransit.Tests.Distributor.Using_the_distributor_saga_worker_for_a_saga.The_pipeline_viewer_should_show_the_distributor" executed="False">
+                        <reason>
+                          <message><![CDATA[Explicit selection required]]></message>
+                        </reason>
+                      </test-case>
+                    </results>
+                  </test-suite>
+                  <test-suite name="MassTransit.Tests.Distributor.DistributorTestFixture`1" success="True" time="0.000" asserts="0">
+                    <results />
+                  </test-suite>
+                  <test-suite name="MassTransit.Tests.Distributor.LoopbackDistributorTestFixture" success="True" time="0.000" asserts="0">
+                    <results />
+                  </test-suite>
+                  <test-suite name="MassTransit.Tests.Distributor.Default_distributor_specifications" success="True" time="22.966" asserts="0">
+                    <results>
+                      <test-case name="MassTransit.Tests.Distributor.Default_distributor_specifications.Using_the_load_generator_should_share_the_load" executed="True" success="True" time="12.977" asserts="5" />
+                      <test-case name="MassTransit.Tests.Distributor.Default_distributor_specifications.The_pipeline_viewer_should_show_the_distributor" executed="True" success="True" time="3.169" asserts="0" />
+                      <test-case name="MassTransit.Tests.Distributor.Default_distributor_specifications.Ensure_workers_will_respond_to_ping_request" executed="True" success="True" time="3.160" asserts="1" />
+                      <test-case name="MassTransit.Tests.Distributor.Default_distributor_specifications.Can_collect_IWorkerAvaiable_messages" executed="True" success="True" time="3.660" asserts="1" />
+                      <test-case name="MassTransit.Tests.Distributor.Default_distributor_specifications.Ensure_distributor_sends_ping_request_after_timeout" executed="False">
+                        <reason>
+                          <message><![CDATA[Explicit selection required]]></message>
+                        </reason>
+                      </test-case>
+                    </results>
+                  </test-suite>
+                  <test-suite name="MassTransit.Tests.Distributor.Distributor_with_custom_worker_selection_strategy" success="True" time="10.906" asserts="0">
+                    <results>
+                      <test-case name="MassTransit.Tests.Distributor.Distributor_with_custom_worker_selection_strategy.Node_a_should_recieve_all_the_work" executed="True" success="True" time="10.905" asserts="3" />
+                    </results>
+                  </test-suite>
+                </results>
+              </test-suite>
+              <test-suite name="MassTransit.Tests.Specification" success="True" time="0.000" asserts="0">
+                <results />
+              </test-suite>
+              <test-suite name="MassTransit.Tests.When_a_message_fault_occurs" success="True" time="1.093" asserts="0">
+                <results>
+                  <test-case name="MassTransit.Tests.When_a_message_fault_occurs.Test_this" executed="True" success="True" time="0.517" asserts="0" />
+                  <test-case name="MassTransit.Tests.When_a_message_fault_occurs.I_should_receive_a_fault_message" executed="True" success="True" time="0.575" asserts="1" />
+                </results>
+              </test-suite>
+              <test-suite name="MassTransit.Tests.When_a_correlated_message_fault_is_received" success="True" time="6.084" asserts="0">
+                <results>
+                  <test-case name="MassTransit.Tests.When_a_correlated_message_fault_is_received.Open_generics_should_match_properly" executed="True" success="True" time="3.005" asserts="1" />
+                  <test-case name="MassTransit.Tests.When_a_correlated_message_fault_is_received.I_should_receive_a_fault_message" executed="True" success="True" time="3.078" asserts="1" />
+                </results>
+              </test-suite>
+              <test-suite name="MassTransit.Tests.Grid" success="True" time="8.340" asserts="0">
+                <results>
+                  <test-suite name="MassTransit.Tests.Grid.GridTestFixture`1" success="True" time="0.000" asserts="0">
+                    <results />
+                  </test-suite>
+                  <test-suite name="MassTransit.Tests.Grid.ThreeNodeGridTestFixture" success="True" time="0.000" asserts="0">
+                    <results />
+                  </test-suite>
+                  <test-suite name="MassTransit.Tests.Grid.When_multiple_nodes_support_the_same_services" success="True" time="0.001" asserts="0">
+                    <results>
+                      <test-case name="MassTransit.Tests.Grid.When_multiple_nodes_support_the_same_services.The_first_available_node_should_be_voted_on_by_the_participating_nodes" executed="False">
+                        <reason>
+                          <message><![CDATA[Explicit selection required]]></message>
+                        </reason>
+                      </test-case>
+                      <test-case name="MassTransit.Tests.Grid.When_multiple_nodes_support_the_same_services.A_grid_node_can_remove_itself_from_the_grid" executed="False">
+                        <reason>
+                          <message><![CDATA[Explicit selection required]]></message>
+                        </reason>
+                      </test-case>
+                    </results>
+                  </test-suite>
+                  <test-suite name="MassTransit.Tests.Grid.When_throwing_a_bunch_of_commands_at_the_grid" success="True" time="0.002" asserts="0">
+                    <results>
+                      <test-case name="MassTransit.Tests.Grid.When_throwing_a_bunch_of_commands_at_the_grid.Each_command_should_only_be_processed_one_time" executed="False">
+                        <reason>
+                          <message><![CDATA[Explicit selection required]]></message>
+                        </reason>
+                      </test-case>
+                    </results>
+                  </test-suite>
+                  <test-suite name="MassTransit.Tests.Grid.When_the_grid_services_are_attached_to_the_bus" success="True" time="0.000" asserts="0">
+                    <results>
+                      <test-case name="MassTransit.Tests.Grid.When_the_grid_services_are_attached_to_the_bus.A_grid_service_framework_should_run_on_top_of_the_service_bus" executed="False">
+                        <reason>
+                          <message><![CDATA[Explicit selection required]]></message>
+                        </reason>
+                      </test-case>
+                    </results>
+                  </test-suite>
+                  <test-suite name="MassTransit.Tests.Grid.Configuring_a_service_to_run_on_the_grid" success="True" time="4.550" asserts="0">
+                    <results>
+                      <test-case name="MassTransit.Tests.Grid.Configuring_a_service_to_run_on_the_grid.Should_advertise_the_service_to_all_grid_nodes" executed="True" success="True" time="4.550" asserts="0" />
+                    </results>
+                  </test-suite>
+                  <test-suite name="MassTransit.Tests.Grid.Configuring_a_service_to_run_on_multiple_nodes_of_the_grid" success="True" time="3.526" asserts="0">
+                    <results>
+                      <test-case name="MassTransit.Tests.Grid.Configuring_a_service_to_run_on_multiple_nodes_of_the_grid.Multiple_nodes_advertising_should_only_have_one_instance_of_the_service" executed="True" success="True" time="3.526" asserts="6" />
+                    </results>
+                  </test-suite>
+                  <test-suite name="MassTransit.Tests.Grid.When_tracking_the_state_of_a_GridNode" success="True" time="0.080" asserts="0">
+                    <results>
+                      <test-case name="MassTransit.Tests.Grid.When_tracking_the_state_of_a_GridNode.The_node_should_be_available" executed="True" success="True" time="0.074" asserts="1" />
+                      <test-case name="MassTransit.Tests.Grid.When_tracking_the_state_of_a_GridNode.The_node_should_be_down" executed="True" success="True" time="0.002" asserts="1" />
+                      <test-case name="MassTransit.Tests.Grid.When_tracking_the_state_of_a_GridNode.The_node_should_transition_to_down" executed="True" success="True" time="0.001" asserts="1" />
+                      <test-case name="MassTransit.Tests.Grid.When_tracking_the_state_of_a_GridNode.The_node_should_transition_to_up" executed="True" success="True" time="0.001" asserts="1" />
+                      <test-case name="MassTransit.Tests.Grid.When_tracking_the_state_of_a_GridNode.The_node_should_recover_after_going_down_and_up" executed="True" success="True" time="0.001" asserts="3" />
+                    </results>
+                  </test-suite>
+                  <test-suite name="MassTransit.Tests.Grid.Using_the_load_balancer_with_the_grid" success="True" time="0.001" asserts="0">
+                    <results>
+                      <test-case name="MassTransit.Tests.Grid.Using_the_load_balancer_with_the_grid.Should_promote_the_least_busy_node_to_the_preferred_node" executed="False">
+                        <reason>
+                          <message><![CDATA[Explicit selection required]]></message>
+                        </reason>
+                      </test-case>
+                    </results>
+                  </test-suite>
+                  <test-suite name="MassTransit.Tests.Grid.Paxos" success="True" time="0.177" asserts="0">
+                    <results>
+                      <test-suite name="MassTransit.Tests.Grid.Paxos.An_acceptor_receiving_a_prepare" success="True" time="0.145" asserts="0">
+                        <results>
+                          <test-case name="MassTransit.Tests.Grid.Paxos.An_acceptor_receiving_a_prepare.Should_accept_the_value" executed="True" success="True" time="0.145" asserts="4" />
+                        </results>
+                      </test-suite>
+                      <test-suite name="MassTransit.Tests.Grid.Paxos.Sending_an_accepted_value_to_a_listener" success="True" time="0.030" asserts="0">
+                        <results>
+                          <test-case name="MassTransit.Tests.Grid.Paxos.Sending_an_accepted_value_to_a_listener.Should_advance_it_to_a_valid_state_with_that_value" executed="True" success="True" time="0.029" asserts="3" />
+                        </results>
+                      </test-suite>
+                    </results>
+                  </test-suite>
+                  <test-suite name="MassTransit.Tests.Grid.GridContextSpecification" success="True" time="0.000" asserts="0">
+                    <results />
+                  </test-suite>
+                  <test-suite name="MassTransit.Tests.Grid.When_a_worker_throws_an_exception" success="True" time="0.004" asserts="0">
+                    <results>
+                      <test-case name="MassTransit.Tests.Grid.When_a_worker_throws_an_exception.I_want_to_be_able_to_define_a_distributed_task_and_have_it_processed" executed="False">
+                        <reason>
+                          <message><![CDATA[]]></message>
+                        </reason>
+                      </test-case>
+                    </results>
+                  </test-suite>
+                  <test-suite name="MassTransit.Tests.Grid.As_a_developer_that_needs_to_distribute_a_task_across_multiple_servers_for_parallel_processing" success="True" time="0.000" asserts="0">
+                    <results>
+                      <test-case name="MassTransit.Tests.Grid.As_a_developer_that_needs_to_distribute_a_task_across_multiple_servers_for_parallel_processing.I_want_to_be_able_to_define_a_distributed_task_and_have_it_processed" executed="False">
+                        <reason>
+                          <message><![CDATA[]]></message>
+                        </reason>
+                      </test-case>
+                    </results>
+                  </test-suite>
+                  <test-suite name="MassTransit.Tests.Grid.When_factoring_integer_values" success="True" time="0.000" asserts="0">
+                    <results>
+                      <test-case name="MassTransit.Tests.Grid.When_factoring_integer_values.Factor_21" executed="True" success="True" time="0.000" asserts="3" />
+                      <test-case name="MassTransit.Tests.Grid.When_factoring_integer_values.Factor_27" executed="True" success="True" time="0.000" asserts="4" />
+                      <test-case name="MassTransit.Tests.Grid.When_factoring_integer_values.Factor_31" executed="True" success="True" time="0.000" asserts="2" />
+                      <test-case name="MassTransit.Tests.Grid.When_factoring_integer_values.Factor_4" executed="True" success="True" time="0.000" asserts="3" />
+                      <test-case name="MassTransit.Tests.Grid.When_factoring_integer_values.Factor_Huge_Number" executed="False">
+                        <reason>
+                          <message><![CDATA[Explicit selection required]]></message>
+                        </reason>
+                      </test-case>
+                    </results>
+                  </test-suite>
+                </results>
+              </test-suite>
+              <test-suite name="MassTransit.Tests.Groups" success="True" time="1.522" asserts="0">
+                <results>
+                  <test-suite name="MassTransit.Tests.Groups.Group_Specs" success="True" time="1.522" asserts="0">
+                    <results>
+                      <test-case name="MassTransit.Tests.Groups.Group_Specs.It_should_be_easy_to_build_and_send_a_group_of_messages" executed="True" success="True" time="0.507" asserts="1" />
+                      <test-case name="MassTransit.Tests.Groups.Group_Specs.It_should_be_easy_to_build_and_send_a_group_of_messages_with_multiple_messages" executed="True" success="True" time="0.510" asserts="1" />
+                      <test-case name="MassTransit.Tests.Groups.Group_Specs.Multiple_groups_should_be_combinable_into_a_single_group" executed="True" success="True" time="0.506" asserts="1" />
+                    </results>
+                  </test-suite>
+                </results>
+              </test-suite>
+              <test-suite name="MassTransit.Tests.Sending_a_message_that_implements_an_interface" success="True" time="1.572" asserts="0">
+                <results>
+                  <test-case name="MassTransit.Tests.Sending_a_message_that_implements_an_interface.Should_deliver_the_message_to_an_interested_consumer" executed="True" success="True" time="1.044" asserts="1" />
+                  <test-case name="MassTransit.Tests.Sending_a_message_that_implements_an_interface.Should_deliver_the_message_to_an_both_interested_consumers" executed="True" success="True" time="0.527" asserts="2" />
+                </results>
+              </test-suite>
+              <test-suite name="MassTransit.Tests.Load" success="True" time="0.001" asserts="0">
+                <results>
+                  <test-suite name="MassTransit.Tests.Load.RequestResponse_LoadTest" success="True" time="0.001" asserts="0">
+                    <results>
+                      <test-case name="MassTransit.Tests.Load.RequestResponse_LoadTest.Perform_a_large_request_response_pool" executed="False">
+                        <reason>
+                          <message><![CDATA[Explicit selection required]]></message>
+                        </reason>
+                      </test-case>
+                    </results>
+                  </test-suite>
+                </results>
+              </test-suite>
+              <test-suite name="MassTransit.Tests.MessageContext_Specs" success="True" time="5.134" asserts="0">
+                <results>
+                  <test-case name="MassTransit.Tests.MessageContext_Specs.A_response_should_be_published_if_no_reply_address_is_specified" executed="True" success="True" time="0.561" asserts="3" />
+                  <test-case name="MassTransit.Tests.MessageContext_Specs.A_response_should_be_sent_directly_if_a_reply_address_is_specified" executed="True" success="True" time="1.527" asserts="3" />
+                  <test-case name="MassTransit.Tests.MessageContext_Specs.The_destination_address_should_pass" executed="True" success="True" time="1.009" asserts="2" />
+                  <test-case name="MassTransit.Tests.MessageContext_Specs.The_fault_address_should_pass" executed="True" success="True" time="1.014" asserts="2" />
+                  <test-case name="MassTransit.Tests.MessageContext_Specs.The_response_address_should_pass" executed="True" success="True" time="0.510" asserts="2" />
+                  <test-case name="MassTransit.Tests.MessageContext_Specs.The_source_address_should_pass" executed="True" success="True" time="0.514" asserts="2" />
+                </results>
+              </test-suite>
+              <test-suite name="MassTransit.Tests.When_publishing_a_message_with_no_consumers" success="True" time="1.525" asserts="0">
+                <results>
+                  <test-case name="MassTransit.Tests.When_publishing_a_message_with_no_consumers.The_method_should_be_called_to_notify_the_caller" executed="True" success="True" time="1.009" asserts="2" />
+                  <test-case name="MassTransit.Tests.When_publishing_a_message_with_no_consumers.The_method_should_not_carry_over_the_subsequent_calls" executed="True" success="True" time="0.516" asserts="1" />
+                </results>
+              </test-suite>
+              <test-suite name="MassTransit.Tests.When_publishing_a_message_with_an_each_consumer_action_specified" success="True" time="3.049" asserts="0">
+                <results>
+                  <test-case name="MassTransit.Tests.When_publishing_a_message_with_an_each_consumer_action_specified.The_method_should_not_be_called_when_there_are_no_subscribers" executed="True" success="True" time="1.009" asserts="1" />
+                  <test-case name="MassTransit.Tests.When_publishing_a_message_with_an_each_consumer_action_specified.The_method_should_be_called_for_each_destination_endpoint" executed="True" success="True" time="0.515" asserts="2" />
+                  <test-case name="MassTransit.Tests.When_publishing_a_message_with_an_each_consumer_action_specified.The_method_should_not_carry_over_to_the_next_call_context" executed="True" success="True" time="1.010" asserts="1" />
+                  <test-case name="MassTransit.Tests.When_publishing_a_message_with_an_each_consumer_action_specified.The_method_should_be_called_for_each_destination_endpoint_when_there_are_multiple" executed="True" success="True" time="0.517" asserts="3" />
+                </results>
+              </test-suite>
+              <test-suite name="MassTransit.Tests.MessageInterceptor_Specs" success="True" time="0.513" asserts="0">
+                <results>
+                  <test-case name="MassTransit.Tests.MessageInterceptor_Specs.An_interceptor_should_be_called_when_a_message_is_received" executed="True" success="True" time="0.513" asserts="3" />
+                </results>
+              </test-suite>
+              <test-suite name="MassTransit.Tests.Saga" success="True" time="6.626" asserts="0">
+                <results>
+                  <test-suite name="MassTransit.Tests.Saga.When_a_saga_has_a_builder_property" success="True" time="0.001" asserts="0">
+                    <results>
+                      <test-case name="MassTransit.Tests.Saga.When_a_saga_has_a_builder_property.The_object_builder_should_be_set_by_the_framework" executed="True" success="True" time="0.000" asserts="0" />
+                    </results>
+                  </test-suite>
+                  <test-suite name="MassTransit.Tests.Saga.Locator" success="True" time="0.046" asserts="0">
+                    <results>
+                      <test-suite name="MassTransit.Tests.Saga.Locator.SagaExpression_Specs" success="True" time="0.021" asserts="0">
+                        <results>
+                          <test-case name="MassTransit.Tests.Saga.Locator.SagaExpression_Specs.The_saga_expression_should_be_converted_down_to_a_saga_only_filter" executed="True" success="True" time="0.015" asserts="1" />
+                          <test-case name="MassTransit.Tests.Saga.Locator.SagaExpression_Specs.Matching_by_property_should_be_happy" executed="True" success="True" time="0.004" asserts="1" />
+                        </results>
+                      </test-suite>
+                      <test-suite name="MassTransit.Tests.Saga.Locator.When_using_the_state_machine_with_noncorrelated_messages" success="True" time="0.025" asserts="0">
+                        <results>
+                          <test-case name="MassTransit.Tests.Saga.Locator.When_using_the_state_machine_with_noncorrelated_messages.A_nice_interface_should_be_available_for_defining_saga_locators" executed="True" success="True" time="0.024" asserts="0" />
+                        </results>
+                      </test-suite>
+                    </results>
+                  </test-suite>
+                  <test-suite name="MassTransit.Tests.Saga.StateMachineInspector_Specs" success="True" time="0.057" asserts="0">
+                    <results>
+                      <test-case name="MassTransit.Tests.Saga.StateMachineInspector_Specs.FirstTestName" executed="True" success="True" time="0.056" asserts="0" />
+                    </results>
+                  </test-suite>
+                  <test-suite name="MassTransit.Tests.Saga.StateMachine" success="True" time="3.631" asserts="0">
+                    <results>
+                      <test-suite name="MassTransit.Tests.Saga.StateMachine.AutoStateMachine_Specs" success="True" time="1.007" asserts="0">
+                        <results>
+                          <test-case name="MassTransit.Tests.Saga.StateMachine.AutoStateMachine_Specs.A_state_machine_based_saga_should_automatically_wire_up_subscriptions" executed="True" success="True" time="1.005" asserts="5" />
+                        </results>
+                      </test-suite>
+                      <test-suite name="MassTransit.Tests.Saga.StateMachine.Inspecting_a_state_machine_driven_saga" success="True" time="0.009" asserts="0">
+                        <results>
+                          <test-case name="MassTransit.Tests.Saga.StateMachine.Inspecting_a_state_machine_driven_saga.Should_return_all_of_the_events" executed="True" success="True" time="0.001" asserts="1" />
+                          <test-case name="MassTransit.Tests.Saga.StateMachine.Inspecting_a_state_machine_driven_saga.Should_contain_the_initiate_event" executed="True" success="True" time="0.002" asserts="0" />
+                          <test-case name="MassTransit.Tests.Saga.StateMachine.Inspecting_a_state_machine_driven_saga.Should_contain_the_complete_event" executed="True" success="True" time="0.001" asserts="0" />
+                          <test-case name="MassTransit.Tests.Saga.StateMachine.Inspecting_a_state_machine_driven_saga.Should_contain_the_observation_event" executed="True" success="True" time="0.001" asserts="0" />
+                          <test-case name="MassTransit.Tests.Saga.StateMachine.Inspecting_a_state_machine_driven_saga.Should_include_the_initial_state_for_the_initiate_event" executed="True" success="True" time="0.003" asserts="1" />
+                        </results>
+                      </test-suite>
+                      <test-suite name="MassTransit.Tests.Saga.StateMachine.SagaFault_Specs" success="True" time="0.521" asserts="0">
+                        <results>
+                          <test-case name="MassTransit.Tests.Saga.StateMachine.SagaFault_Specs.The_saga_should_be_subscribable" executed="True" success="True" time="0.521" asserts="0" />
+                        </results>
+                      </test-suite>
+                      <test-suite name="MassTransit.Tests.Saga.StateMachine.Subscribing_a_saga_state_machine" success="True" time="0.001" asserts="0">
+                        <results>
+                          <test-case name="MassTransit.Tests.Saga.StateMachine.Subscribing_a_saga_state_machine.Should_handle_data_events_on_the_saga_state_machine" executed="False">
+                            <reason>
+                              <message><![CDATA[Explicit selection required]]></message>
+                            </reason>
+                          </test-case>
+                        </results>
+                      </test-suite>
+                      <test-suite name="MassTransit.Tests.Saga.StateMachine.When_sagas_are_subscribed_to_the_service_bus" success="True" time="0.000" asserts="0">
+                        <results>
+                          <test-case name="MassTransit.Tests.Saga.StateMachine.When_sagas_are_subscribed_to_the_service_bus.Should_publish_subscriptions_for_saga_subscriptions" executed="False">
+                            <reason>
+                              <message><![CDATA[Rhino Mock 3.6 Bug]]></message>
+                            </reason>
+                          </test-case>
+                          <test-case name="MassTransit.Tests.Saga.StateMachine.When_sagas_are_subscribed_to_the_service_bus.Should_remove_subscriptions_for_saga_subscriptions" executed="False">
+                            <reason>
+                              <message><![CDATA[Rhino Mock 3.6 Bug]]></message>
+                            </reason>
+                          </test-case>
+                        </results>
+                      </test-suite>
+                      <test-suite name="MassTransit.Tests.Saga.StateMachine.When_an_initiating_message_for_a_saga_arrives" success="True" time="1.558" asserts="0">
+                        <results>
+                          <test-case name="MassTransit.Tests.Saga.StateMachine.When_an_initiating_message_for_a_saga_arrives.The_saga_should_be_created_when_an_initiating_message_is_received" executed="True" success="True" time="0.526" asserts="2" />
+                          <test-case name="MassTransit.Tests.Saga.StateMachine.When_an_initiating_message_for_a_saga_arrives.The_saga_should_be_loaded_when_an_observed_message_is_received" executed="True" success="True" time="0.517" asserts="2" />
+                          <test-case name="MassTransit.Tests.Saga.StateMachine.When_an_initiating_message_for_a_saga_arrives.The_saga_should_be_loaded_when_an_orchestrated_message_is_received" executed="True" success="True" time="0.515" asserts="2" />
+                        </results>
+                      </test-suite>
+                      <test-suite name="MassTransit.Tests.Saga.StateMachine.When_an_existing_saga_receives_an_initiating_message" success="True" time="0.519" asserts="0">
+                        <results>
+                          <test-case name="MassTransit.Tests.Saga.StateMachine.When_an_existing_saga_receives_an_initiating_message.An_exception_should_be_thrown" executed="True" success="True" time="0.517" asserts="1" />
+                        </results>
+                      </test-suite>
+                      <test-suite name="MassTransit.Tests.Saga.StateMachine.SagaStateMachine_Specs" success="True" time="0.016" asserts="0">
+                        <results>
+                          <test-case name="MassTransit.Tests.Saga.StateMachine.SagaStateMachine_Specs.The_good_times_should_roll" executed="True" success="True" time="0.010" asserts="3" />
+                          <test-case name="MassTransit.Tests.Saga.StateMachine.SagaStateMachine_Specs.The_saga_state_machine_should_add_value_for_sagas" executed="True" success="True" time="0.001" asserts="2" />
+                          <test-case name="MassTransit.Tests.Saga.StateMachine.SagaStateMachine_Specs.The_visualizer_should_work" executed="True" success="True" time="0.004" asserts="0" />
+                        </results>
+                      </test-suite>
+                    </results>
+                  </test-suite>
+                  <test-suite name="MassTransit.Tests.Saga.When_sagas_are_subscribed_to_the_service_bus" success="True" time="0.001" asserts="0">
+                    <results>
+                      <test-case name="MassTransit.Tests.Saga.When_sagas_are_subscribed_to_the_service_bus.Should_publish_subscriptions_for_saga_subscriptions" executed="False">
+                        <reason>
+                          <message><![CDATA[Rhino Mock 3.6 Bug]]></message>
+                        </reason>
+                      </test-case>
+                      <test-case name="MassTransit.Tests.Saga.When_sagas_are_subscribed_to_the_service_bus.Should_remove_subscriptions_for_saga_subscriptions" executed="False">
+                        <reason>
+                          <message><![CDATA[Rhino Mock 3.6 Bug]]></message>
+                        </reason>
+                      </test-case>
+                    </results>
+                  </test-suite>
+                  <test-suite name="MassTransit.Tests.Saga.When_an_initiating_message_for_a_saga_arrives" success="True" time="1.543" asserts="0">
+                    <results>
+                      <test-case name="MassTransit.Tests.Saga.When_an_initiating_message_for_a_saga_arrives.The_saga_should_be_created_when_an_initiating_message_is_received" executed="True" success="True" time="0.510" asserts="1" />
+                      <test-case name="MassTransit.Tests.Saga.When_an_initiating_message_for_a_saga_arrives.The_saga_should_be_loaded_when_an_orchestrated_message_is_received" executed="True" success="True" time="0.519" asserts="2" />
+                      <test-case name="MassTransit.Tests.Saga.When_an_initiating_message_for_a_saga_arrives.The_saga_should_be_loaded_when_an_observed_message_is_received" executed="True" success="True" time="0.514" asserts="2" />
+                    </results>
+                  </test-suite>
+                  <test-suite name="MassTransit.Tests.Saga.When_an_existing_saga_receives_an_initiating_message" success="True" time="0.511" asserts="0">
+                    <results>
+                      <test-case name="MassTransit.Tests.Saga.When_an_existing_saga_receives_an_initiating_message.An_exception_should_be_thrown" executed="True" success="True" time="0.510" asserts="1" />
+                    </results>
+                  </test-suite>
+                  <test-suite name="MassTransit.Tests.Saga.When_a_unknown_user_registers" success="True" time="0.837" asserts="0">
+                    <results>
+                      <test-case name="MassTransit.Tests.Saga.When_a_unknown_user_registers.The_user_should_be_pending" executed="True" success="True" time="0.836" asserts="2" />
+                    </results>
+                  </test-suite>
+                </results>
+              </test-suite>
+              <test-suite name="MassTransit.Tests.Pipeline" success="True" time="0.707" asserts="0">
+                <results>
+                  <test-suite name="MassTransit.Tests.Pipeline.MessageRouter_Perf" success="True" time="0.001" asserts="0">
+                    <results>
+                      <test-case name="MassTransit.Tests.Pipeline.MessageRouter_Perf.Router_performance_measurement" executed="False">
+                        <reason>
+                          <message><![CDATA[Explicit selection required]]></message>
+                        </reason>
+                      </test-case>
+                      <test-case name="MassTransit.Tests.Pipeline.MessageRouter_Perf.Nested_router_performance_measurement" executed="False">
+                        <reason>
+                          <message><![CDATA[Explicit selection required]]></message>
+                        </reason>
+                      </test-case>
+                    </results>
+                  </test-suite>
+                  <test-suite name="MassTransit.Tests.Pipeline.Throughput_Specs" success="True" time="0.000" asserts="0">
+                    <results>
+                      <test-case name="MassTransit.Tests.Pipeline.Throughput_Specs.How_many_messages_can_the_pipe_send_per_second" executed="False">
+                        <reason>
+                          <message><![CDATA[Explicit selection required]]></message>
+                        </reason>
+                      </test-case>
+                    </results>
+                  </test-suite>
+                  <test-suite name="MassTransit.Tests.Pipeline.BatchConsumer_Specs" success="True" time="0.054" asserts="0">
+                    <results>
+                      <test-case name="MassTransit.Tests.Pipeline.BatchConsumer_Specs.A_batch_component_should_be_delivered_messages" executed="True" success="True" time="0.034" asserts="1" />
+                      <test-case name="MassTransit.Tests.Pipeline.BatchConsumer_Specs.A_batch_consumer_should_be_delivered_a_lot_of_messages" executed="True" success="True" time="0.020" asserts="1" />
+                      <test-case name="MassTransit.Tests.Pipeline.BatchConsumer_Specs.A_batch_consumer_should_be_delivered_messages" executed="True" success="True" time="0.000" asserts="1" />
+                    </results>
+                  </test-suite>
+                  <test-suite name="MassTransit.Tests.Pipeline.When_filtering_messages_on_the_pipeline" success="True" time="0.068" asserts="0">
+                    <results>
+                      <test-case name="MassTransit.Tests.Pipeline.When_filtering_messages_on_the_pipeline.A_filter_should_be_nameable" executed="True" success="True" time="0.035" asserts="1" />
+                      <test-case name="MassTransit.Tests.Pipeline.When_filtering_messages_on_the_pipeline.A_filter_should_be_removable" executed="False">
+                        <reason>
+                          <message><![CDATA[This is a planned feature, but is not yet functional.]]></message>
+                        </reason>
+                      </test-case>
+                      <test-case name="MassTransit.Tests.Pipeline.When_filtering_messages_on_the_pipeline.A_filtered_message_should_not_be_received" executed="True" success="True" time="0.003" asserts="1" />
+                      <test-case name="MassTransit.Tests.Pipeline.When_filtering_messages_on_the_pipeline.A_message_should_fall_throuh_happy_filters" executed="True" success="True" time="0.012" asserts="1" />
+                      <test-case name="MassTransit.Tests.Pipeline.When_filtering_messages_on_the_pipeline.An_unfiltered_message_should_be_received" executed="True" success="True" time="0.000" asserts="1" />
+                      <test-case name="MassTransit.Tests.Pipeline.When_filtering_messages_on_the_pipeline.I_should_be_able_to_filter_on_object" executed="True" success="True" time="0.017" asserts="1" />
+                      <test-case name="MassTransit.Tests.Pipeline.When_filtering_messages_on_the_pipeline.An_object_filter_should_pass_the_message_if_allowed" executed="True" success="True" time="0.001" asserts="1" />
+                    </results>
+                  </test-suite>
+                  <test-suite name="MassTransit.Tests.Pipeline.When_pushing_a_message_through_an_outbound_pipeline" success="True" time="0.012" asserts="0">
+                    <results>
+                      <test-case name="MassTransit.Tests.Pipeline.When_pushing_a_message_through_an_outbound_pipeline.The_endpoint_consumer_should_be_returned" executed="True" success="True" time="0.011" asserts="0" />
+                    </results>
+                  </test-suite>
+                  <test-suite name="MassTransit.Tests.Pipeline.When_building_a_pipeline" success="True" time="0.033" asserts="0">
+                    <results>
+                      <test-case name="MassTransit.Tests.Pipeline.When_building_a_pipeline.The_builder_should_stay_with_the_pipeline" executed="True" success="True" time="0.027" asserts="0" />
+                      <test-case name="MassTransit.Tests.Pipeline.When_building_a_pipeline.The_pipeline_should_be_happy" executed="True" success="True" time="0.005" asserts="1" />
+                    </results>
+                  </test-suite>
+                  <test-suite name="MassTransit.Tests.Pipeline.When_subscription_a_component_to_the_pipeline" success="True" time="0.021" asserts="0">
+                    <results>
+                      <test-case name="MassTransit.Tests.Pipeline.When_subscription_a_component_to_the_pipeline.The_appropriate_handler_should_be_added" executed="True" success="True" time="0.003" asserts="1" />
+                      <test-case name="MassTransit.Tests.Pipeline.When_subscription_a_component_to_the_pipeline.The_pipeline_should_have_insertable_items" executed="True" success="True" time="0.010" asserts="2" />
+                      <test-case name="MassTransit.Tests.Pipeline.When_subscription_a_component_to_the_pipeline.The_subscriptions_should_be_a_separate_concern_from_the_pipeline" executed="True" success="True" time="0.002" asserts="1" />
+                      <test-case name="MassTransit.Tests.Pipeline.When_subscription_a_component_to_the_pipeline.When_nobody_wants_the_message_it_should_not_be_accepted" executed="True" success="True" time="0.001" asserts="1" />
+                      <test-case name="MassTransit.Tests.Pipeline.When_subscription_a_component_to_the_pipeline.When_somebody_gets_the_message_it_should_be_accepted" executed="True" success="True" time="0.003" asserts="1" />
+                    </results>
+                  </test-suite>
+                  <test-suite name="MassTransit.Tests.Pipeline.When_working_with_an_existing_pipeline" success="True" time="0.037" asserts="0">
+                    <results>
+                      <test-case name="MassTransit.Tests.Pipeline.When_working_with_an_existing_pipeline.I_want_to_display_the_entire_flow_through_the_pipeline" executed="True" success="True" time="0.002" asserts="0" />
+                      <test-case name="MassTransit.Tests.Pipeline.When_working_with_an_existing_pipeline.I_want_to_display_a_more_detailed_flow" executed="True" success="True" time="0.002" asserts="0" />
+                    </results>
+                  </test-suite>
+                  <test-suite name="MassTransit.Tests.Pipeline.When_visiting_an_object_graph" success="True" time="0.008" asserts="0">
+                    <results>
+                      <test-case name="MassTransit.Tests.Pipeline.When_visiting_an_object_graph.Only_a_single_method_should_dispatch_the_information" executed="True" success="True" time="0.008" asserts="0" />
+                    </results>
+                  </test-suite>
+                  <test-suite name="MassTransit.Tests.Pipeline.When_subscribing_a_consumer_to_the_pipeline" success="True" time="0.165" asserts="0">
+                    <results>
+                      <test-case name="MassTransit.Tests.Pipeline.When_subscribing_a_consumer_to_the_pipeline.A_bunch_of_mixed_subscriber_types_should_work" executed="True" success="True" time="0.008" asserts="5" />
+                      <test-case name="MassTransit.Tests.Pipeline.When_subscribing_a_consumer_to_the_pipeline.A_component_should_be_subscribed_to_the_pipeline" executed="True" success="True" time="0.037" asserts="0" />
+                      <test-case name="MassTransit.Tests.Pipeline.When_subscribing_a_consumer_to_the_pipeline.A_selective_component_should_properly_handle_the_love" executed="True" success="True" time="0.061" asserts="0" />
+                      <test-case name="MassTransit.Tests.Pipeline.When_subscribing_a_consumer_to_the_pipeline.A_component_should_be_subscribed_to_multiple_messages_on_the_pipeline" executed="True" success="True" time="0.036" asserts="0" />
+                      <test-case name="MassTransit.Tests.Pipeline.When_subscribing_a_consumer_to_the_pipeline.The_subscription_should_be_added" executed="True" success="True" time="0.002" asserts="1" />
+                      <test-case name="MassTransit.Tests.Pipeline.When_subscribing_a_consumer_to_the_pipeline.Correlated_subscriptions_should_make_happy_sounds" executed="True" success="True" time="0.014" asserts="2" />
+                      <test-case name="MassTransit.Tests.Pipeline.When_subscribing_a_consumer_to_the_pipeline.Correlated_subscription_benchmark" executed="False">
+                        <reason>
+                          <message><![CDATA[Explicit selection required]]></message>
+                        </reason>
+                      </test-case>
+                      <test-case name="MassTransit.Tests.Pipeline.When_subscribing_a_consumer_to_the_pipeline.The_subscription_should_be_added_for_selective_consumers" executed="True" success="True" time="0.002" asserts="1" />
+                      <test-case name="MassTransit.Tests.Pipeline.When_subscribing_a_consumer_to_the_pipeline.The_subscription_should_be_added_for_selective_consumers_that_are_interested" executed="True" success="True" time="0.003" asserts="1" />
+                      <test-case name="MassTransit.Tests.Pipeline.When_subscribing_a_consumer_to_the_pipeline.The_wrong_type_of_message_should_not_blow_up_the_test" executed="True" success="True" time="0.002" asserts="1" />
+                    </results>
+                  </test-suite>
+                  <test-suite name="MassTransit.Tests.Pipeline.The_SubscriptionPublisher_should_add_subscriptions" success="True" time="0.217" asserts="0">
+                    <results>
+                      <test-case name="MassTransit.Tests.Pipeline.The_SubscriptionPublisher_should_add_subscriptions.for_batch_component_subscriptions" executed="True" success="True" time="0.175" asserts="0" />
+                      <test-case name="MassTransit.Tests.Pipeline.The_SubscriptionPublisher_should_add_subscriptions.for_batch_subscriptions" executed="True" success="True" time="0.006" asserts="0" />
+                      <test-case name="MassTransit.Tests.Pipeline.The_SubscriptionPublisher_should_add_subscriptions.for_component_subscriptions" executed="True" success="True" time="0.005" asserts="0" />
+                      <test-case name="MassTransit.Tests.Pipeline.The_SubscriptionPublisher_should_add_subscriptions.for_correlated_subscriptions" executed="True" success="True" time="0.008" asserts="0" />
+                      <test-case name="MassTransit.Tests.Pipeline.The_SubscriptionPublisher_should_add_subscriptions.for_regular_subscriptions" executed="True" success="True" time="0.005" asserts="0" />
+                      <test-case name="MassTransit.Tests.Pipeline.The_SubscriptionPublisher_should_add_subscriptions.for_selective_component_subscriptions" executed="True" success="True" time="0.008" asserts="0" />
+                      <test-case name="MassTransit.Tests.Pipeline.The_SubscriptionPublisher_should_add_subscriptions.for_selective_subscriptions" executed="True" success="True" time="0.008" asserts="0" />
+                    </results>
+                  </test-suite>
+                  <test-suite name="MassTransit.Tests.Pipeline.The_SubscriptionPublisher_should_remove_subscriptions" success="True" time="0.091" asserts="0">
+                    <results>
+                      <test-case name="MassTransit.Tests.Pipeline.The_SubscriptionPublisher_should_remove_subscriptions.for_batch_subscriptions" executed="True" success="True" time="0.034" asserts="0" />
+                      <test-case name="MassTransit.Tests.Pipeline.The_SubscriptionPublisher_should_remove_subscriptions.for_batch_subscriptions_but_not_when_another_exists" executed="True" success="True" time="0.013" asserts="0" />
+                      <test-case name="MassTransit.Tests.Pipeline.The_SubscriptionPublisher_should_remove_subscriptions.for_component_subscriptions" executed="True" success="True" time="0.004" asserts="0" />
+                      <test-case name="MassTransit.Tests.Pipeline.The_SubscriptionPublisher_should_remove_subscriptions.for_correlated_subscriptions" executed="True" success="True" time="0.009" asserts="0" />
+                      <test-case name="MassTransit.Tests.Pipeline.The_SubscriptionPublisher_should_remove_subscriptions.for_correlated_subscriptions_but_not_when_another_exists" executed="True" success="True" time="0.012" asserts="0" />
+                      <test-case name="MassTransit.Tests.Pipeline.The_SubscriptionPublisher_should_remove_subscriptions.for_regular_subscriptions" executed="True" success="True" time="0.007" asserts="0" />
+                      <test-case name="MassTransit.Tests.Pipeline.The_SubscriptionPublisher_should_remove_subscriptions.for_selective_component_subscriptions" executed="True" success="True" time="0.005" asserts="0" />
+                      <test-case name="MassTransit.Tests.Pipeline.The_SubscriptionPublisher_should_remove_subscriptions.for_selective_subscriptions" executed="True" success="True" time="0.006" asserts="0" />
+                    </results>
+                  </test-suite>
+                </results>
+              </test-suite>
+              <test-suite name="MassTransit.Tests.When_a_message_consumer_specifies_that_it_should_retry_a_message" success="True" time="1.033" asserts="0">
+                <results>
+                  <test-case name="MassTransit.Tests.When_a_message_consumer_specifies_that_it_should_retry_a_message.The_retry_count_should_be_set_on_the_message" executed="True" success="True" time="0.514" asserts="3" />
+                  <test-case name="MassTransit.Tests.When_a_message_consumer_specifies_that_it_should_retry_a_message.Should_do_something_nicely" executed="True" success="True" time="0.511" asserts="1" />
+                </results>
+              </test-suite>
+              <test-suite name="MassTransit.Tests.Serialization" success="True" time="18.090" asserts="0">
+                <results>
+                  <test-suite name="MassTransit.Tests.Serialization.Approach" success="True" time="0.186" asserts="0">
+                    <results>
+                      <test-suite name="MassTransit.Tests.Serialization.Approach.Approach_Specs" success="True" time="0.186" asserts="0">
+                        <results>
+                          <test-case name="MassTransit.Tests.Serialization.Approach.Approach_Specs.A_new_way_to_say_go" executed="True" success="True" time="0.021" asserts="0" />
+                          <test-case name="MassTransit.Tests.Serialization.Approach.Approach_Specs.A_new_way_to_say_gxo" executed="True" success="True" time="0.020" asserts="0" />
+                          <test-case name="MassTransit.Tests.Serialization.Approach.Approach_Specs.A_fully_loaded_object_should_be_serialized" executed="True" success="True" time="0.034" asserts="0" />
+                          <test-case name="MassTransit.Tests.Serialization.Approach.Approach_Specs.Fault_Messages_should_be_properly_serialized" executed="True" success="True" time="0.017" asserts="0" />
+                          <test-case name="MassTransit.Tests.Serialization.Approach.Approach_Specs.A_collection_of_objects_should_be_properly_serialized" executed="True" success="True" time="0.015" asserts="0" />
+                          <test-case name="MassTransit.Tests.Serialization.Approach.Approach_Specs.A_dictionary_of_objects_should_be_properly_serialized" executed="True" success="True" time="0.037" asserts="0" />
+                          <test-case name="MassTransit.Tests.Serialization.Approach.Approach_Specs.A_primitive_array_of_objects_should_be_properly_serialized" executed="True" success="True" time="0.022" asserts="0" />
+                          <test-case name="MassTransit.Tests.Serialization.Approach.Approach_Specs.An_empty_array_of_objects_should_be_properly_serialized" executed="True" success="True" time="0.002" asserts="0" />
+                          <test-case name="MassTransit.Tests.Serialization.Approach.Approach_Specs.An_array_of_objects_should_be_properly_serialized" executed="True" success="True" time="0.018" asserts="0" />
+                        </results>
+                      </test-suite>
+                    </results>
+                  </test-suite>
+                  <test-suite name="MassTransit.Tests.Serialization.When_sending_a_message_using_the_specified_serializer`1" success="True" time="0.000" asserts="0">
+                    <results>
+                      <test-case name="MassTransit.Tests.Serialization.When_sending_a_message_using_the_specified_serializer`1.The_destination_address_should_be_properly_set_on_the_message_envelope" executed="False">
+                        <reason>
+                          <message><![CDATA[Explicit selection required]]></message>
+                        </reason>
+                      </test-case>
+                      <test-case name="MassTransit.Tests.Serialization.When_sending_a_message_using_the_specified_serializer`1.The_fault_address_should_be_properly_set_on_the_message_envelope" executed="False">
+                        <reason>
+                          <message><![CDATA[Explicit selection required]]></message>
+                        </reason>
+                      </test-case>
+                      <test-case name="MassTransit.Tests.Serialization.When_sending_a_message_using_the_specified_serializer`1.The_message_type_should_be_properly_set_on_the_message_envelope" executed="False">
+                        <reason>
+                          <message><![CDATA[Explicit selection required]]></message>
+                        </reason>
+                      </test-case>
+                      <test-case name="MassTransit.Tests.Serialization.When_sending_a_message_using_the_specified_serializer`1.The_response_address_should_be_properly_set_on_the_message_envelope" executed="False">
+                        <reason>
+                          <message><![CDATA[Explicit selection required]]></message>
+                        </reason>
+                      </test-case>
+                      <test-case name="MassTransit.Tests.Serialization.When_sending_a_message_using_the_specified_serializer`1.The_retry_count_should_be_properly_set_on_the_message_envelope" executed="False">
+                        <reason>
+                          <message><![CDATA[Explicit selection required]]></message>
+                        </reason>
+                      </test-case>
+                      <test-case name="MassTransit.Tests.Serialization.When_sending_a_message_using_the_specified_serializer`1.The_source_address_should_be_properly_set_on_the_message_envelope" executed="False">
+                        <reason>
+                          <message><![CDATA[Explicit selection required]]></message>
+                        </reason>
+                      </test-case>
+                    </results>
+                  </test-suite>
+                  <test-suite name="MassTransit.Tests.Serialization.For_the_binary_message_serializer" success="True" time="6.118" asserts="0">
+                    <results>
+                      <test-case name="MassTransit.Tests.Serialization.For_the_binary_message_serializer.When_sending_a_message_using_the_specified_serializer`1.The_destination_address_should_be_properly_set_on_the_message_envelope" executed="True" success="True" time="1.051" asserts="2" />
+                      <test-case name="MassTransit.Tests.Serialization.For_the_binary_message_serializer.When_sending_a_message_using_the_specified_serializer`1.The_fault_address_should_be_properly_set_on_the_message_envelope" executed="True" success="True" time="1.011" asserts="2" />
+                      <test-case name="MassTransit.Tests.Serialization.For_the_binary_message_serializer.When_sending_a_message_using_the_specified_serializer`1.The_message_type_should_be_properly_set_on_the_message_envelope" executed="True" success="True" time="1.024" asserts="2" />
+                      <test-case name="MassTransit.Tests.Serialization.For_the_binary_message_serializer.When_sending_a_message_using_the_specified_serializer`1.The_response_address_should_be_properly_set_on_the_message_envelope" executed="True" success="True" time="1.011" asserts="2" />
+                      <test-case name="MassTransit.Tests.Serialization.For_the_binary_message_serializer.When_sending_a_message_using_the_specified_serializer`1.The_retry_count_should_be_properly_set_on_the_message_envelope" executed="True" success="True" time="1.012" asserts="2" />
+                      <test-case name="MassTransit.Tests.Serialization.For_the_binary_message_serializer.When_sending_a_message_using_the_specified_serializer`1.The_source_address_should_be_properly_set_on_the_message_envelope" executed="True" success="True" time="1.010" asserts="2" />
+                    </results>
+                  </test-suite>
+                  <test-suite name="MassTransit.Tests.Serialization.For_the_XML_message_serializer" success="True" time="6.097" asserts="0">
+                    <results>
+                      <test-case name="MassTransit.Tests.Serialization.For_the_XML_message_serializer.When_sending_a_message_using_the_specified_serializer`1.The_destination_address_should_be_properly_set_on_the_message_envelope" executed="True" success="True" time="1.521" asserts="2" />
+                      <test-case name="MassTransit.Tests.Serialization.For_the_XML_message_serializer.When_sending_a_message_using_the_specified_serializer`1.The_fault_address_should_be_properly_set_on_the_message_envelope" executed="True" success="True" time="0.513" asserts="2" />
+                      <test-case name="MassTransit.Tests.Serialization.For_the_XML_message_serializer.When_sending_a_message_using_the_specified_serializer`1.The_message_type_should_be_properly_set_on_the_message_envelope" executed="True" success="True" time="1.008" asserts="2" />
+                      <test-case name="MassTransit.Tests.Serialization.For_the_XML_message_serializer.When_sending_a_message_using_the_specified_serializer`1.The_response_address_should_be_properly_set_on_the_message_envelope" executed="True" success="True" time="1.011" asserts="2" />
+                      <test-case name="MassTransit.Tests.Serialization.For_the_XML_message_serializer.When_sending_a_message_using_the_specified_serializer`1.The_retry_count_should_be_properly_set_on_the_message_envelope" executed="True" success="True" time="1.011" asserts="2" />
+                      <test-case name="MassTransit.Tests.Serialization.For_the_XML_message_serializer.When_sending_a_message_using_the_specified_serializer`1.The_source_address_should_be_properly_set_on_the_message_envelope" executed="True" success="True" time="1.033" asserts="2" />
+                    </results>
+                  </test-suite>
+                  <test-suite name="MassTransit.Tests.Serialization.For_the_custom_xml_message_serializer" success="True" time="5.570" asserts="0">
+                    <results>
+                      <test-case name="MassTransit.Tests.Serialization.For_the_custom_xml_message_serializer.When_sending_a_message_using_the_specified_serializer`1.The_destination_address_should_be_properly_set_on_the_message_envelope" executed="True" success="True" time="1.010" asserts="2" />
+                      <test-case name="MassTransit.Tests.Serialization.For_the_custom_xml_message_serializer.When_sending_a_message_using_the_specified_serializer`1.The_fault_address_should_be_properly_set_on_the_message_envelope" executed="True" success="True" time="1.021" asserts="2" />
+                      <test-case name="MassTransit.Tests.Serialization.For_the_custom_xml_message_serializer.When_sending_a_message_using_the_specified_serializer`1.The_message_type_should_be_properly_set_on_the_message_envelope" executed="True" success="True" time="1.012" asserts="2" />
+                      <test-case name="MassTransit.Tests.Serialization.For_the_custom_xml_message_serializer.When_sending_a_message_using_the_specified_serializer`1.The_response_address_should_be_properly_set_on_the_message_envelope" executed="True" success="True" time="0.513" asserts="2" />
+                      <test-case name="MassTransit.Tests.Serialization.For_the_custom_xml_message_serializer.When_sending_a_message_using_the_specified_serializer`1.The_retry_count_should_be_properly_set_on_the_message_envelope" executed="True" success="True" time="1.009" asserts="2" />
+                      <test-case name="MassTransit.Tests.Serialization.For_the_custom_xml_message_serializer.When_sending_a_message_using_the_specified_serializer`1.The_source_address_should_be_properly_set_on_the_message_envelope" executed="True" success="True" time="1.007" asserts="2" />
+                    </results>
+                  </test-suite>
+                  <test-suite name="MassTransit.Tests.Serialization.Setting_the_message_expiration" success="True" time="0.004" asserts="0">
+                    <results>
+                      <test-case name="MassTransit.Tests.Serialization.Setting_the_message_expiration.Should_not_impact_others_if_not_set" executed="True" success="True" time="0.002" asserts="0" />
+                      <test-case name="MassTransit.Tests.Serialization.Setting_the_message_expiration.Should_carry_through_the_message_headers" executed="True" success="True" time="0.001" asserts="1" />
+                    </results>
+                  </test-suite>
+                  <test-suite name="MassTransit.Tests.Serialization.Deserializing_an_interface" success="True" time="0.057" asserts="0">
+                    <results>
+                      <test-case name="MassTransit.Tests.Serialization.Deserializing_an_interface.Should_create_a_proxy_for_the_interface" executed="True" success="True" time="0.039" asserts="7" />
+                      <test-case name="MassTransit.Tests.Serialization.Deserializing_an_interface.Should_deserialize_into_the_proxy_object" executed="True" success="True" time="0.003" asserts="1" />
+                      <test-case name="MassTransit.Tests.Serialization.Deserializing_an_interface.Should_dispatch_an_interface_via_the_pipeline" executed="True" success="True" time="0.015" asserts="1" />
+                    </results>
+                  </test-suite>
+                  <test-suite name="MassTransit.Tests.Serialization.MoreSerialization_Specs" success="True" time="0.048" asserts="0">
+                    <results>
+                      <test-case name="MassTransit.Tests.Serialization.MoreSerialization_Specs.A_collection_of_objects_should_be_properly_serialized" executed="True" success="True" time="0.002" asserts="7" />
+                      <test-case name="MassTransit.Tests.Serialization.MoreSerialization_Specs.A_dictionary_of_objects_should_be_properly_serialized" executed="True" success="True" time="0.002" asserts="7" />
+                      <test-case name="MassTransit.Tests.Serialization.MoreSerialization_Specs.A_primitive_array_of_objects_should_be_properly_serialized" executed="True" success="True" time="0.002" asserts="7" />
+                      <test-case name="MassTransit.Tests.Serialization.MoreSerialization_Specs.An_empty_class_should_not_break_the_mold" executed="True" success="True" time="0.007" asserts="7" />
+                      <test-case name="MassTransit.Tests.Serialization.MoreSerialization_Specs.A_private_setter_should_be_serializable" executed="True" success="True" time="0.010" asserts="7" />
+                      <test-case name="MassTransit.Tests.Serialization.MoreSerialization_Specs.An_enumeration_should_be_serializable" executed="True" success="True" time="0.017" asserts="7" />
+                      <test-case name="MassTransit.Tests.Serialization.MoreSerialization_Specs.An_empty_array_of_objects_should_be_properly_serialized" executed="True" success="True" time="0.001" asserts="7" />
+                      <test-case name="MassTransit.Tests.Serialization.MoreSerialization_Specs.An_array_of_objects_should_be_properly_serialized" executed="True" success="True" time="0.003" asserts="7" />
+                      <test-case name="MassTransit.Tests.Serialization.MoreSerialization_Specs.A_nested_object_should_be_properly_serialized" executed="True" success="True" time="0.001" asserts="7" />
+                    </results>
+                  </test-suite>
+                  <test-suite name="MassTransit.Tests.Serialization.Performance_Specs" success="True" time="0.000" asserts="0">
+                    <results>
+                      <test-case name="MassTransit.Tests.Serialization.Performance_Specs.Just_how_fast_is_the_custom_xml_serializer" executed="False">
+                        <reason>
+                          <message><![CDATA[Explicit selection required]]></message>
+                        </reason>
+                      </test-case>
+                    </results>
+                  </test-suite>
+                  <test-suite name="MassTransit.Tests.Serialization.PreSharedKeyEncryptedSerialization_Specs" success="True" time="0.000" asserts="0">
+                    <results>
+                      <test-case name="MassTransit.Tests.Serialization.PreSharedKeyEncryptedSerialization_Specs.The_encrypted_serializer_should_be_awesome" executed="False">
+                        <reason>
+                          <message><![CDATA[Explicit selection required]]></message>
+                        </reason>
+                      </test-case>
+                    </results>
+                  </test-suite>
+                  <test-suite name="MassTransit.Tests.Serialization.MessageSerialization_Specs" success="True" time="0.009" asserts="0">
+                    <results>
+                      <test-case name="MassTransit.Tests.Serialization.MessageSerialization_Specs.The_xml_serializer_should_be_awesome" executed="False">
+                        <reason>
+                          <message><![CDATA[Explicit selection required]]></message>
+                        </reason>
+                      </test-case>
+                      <test-case name="MassTransit.Tests.Serialization.MessageSerialization_Specs.The_xml_message_serializer_should_rock_the_house" executed="True" success="True" time="0.006" asserts="1" />
+                      <test-case name="MassTransit.Tests.Serialization.MessageSerialization_Specs.The_binary_formatter_should_make_mouths_happy" executed="True" success="True" time="0.002" asserts="1" />
+                    </results>
+                  </test-suite>
+                </results>
+              </test-suite>
+              <test-suite name="MassTransit.Tests.Internal" success="True" time="0.009" asserts="0">
+                <results>
+                  <test-suite name="MassTransit.Tests.Internal.IdempotentHashtable_Specs" success="True" time="0.002" asserts="0">
+                    <results>
+                      <test-case name="MassTransit.Tests.Internal.IdempotentHashtable_Specs.Adds" executed="True" success="True" time="0.002" asserts="2" />
+                      <test-case name="MassTransit.Tests.Internal.IdempotentHashtable_Specs.Removes" executed="True" success="True" time="0.000" asserts="1" />
+                    </results>
+                  </test-suite>
+                  <test-suite name="MassTransit.Tests.Internal.IdempotentList_Specs" success="True" time="0.007" asserts="0">
+                    <results>
+                      <test-case name="MassTransit.Tests.Internal.IdempotentList_Specs.Add" executed="True" success="True" time="0.004" asserts="2" />
+                      <test-case name="MassTransit.Tests.Internal.IdempotentList_Specs.Remove" executed="True" success="True" time="0.001" asserts="1" />
+                    </results>
+                  </test-suite>
+                </results>
+              </test-suite>
+              <test-suite name="MassTransit.Tests.When_a_handler_subscription_is_added" success="True" time="0.019" asserts="0">
+                <results>
+                  <test-case name="MassTransit.Tests.When_a_handler_subscription_is_added.A_subscription_should_be_added_for_a_consumer" executed="True" success="True" time="0.009" asserts="0" />
+                  <test-case name="MassTransit.Tests.When_a_handler_subscription_is_added.A_subscription_should_be_added_for_a_selective_consumer" executed="True" success="True" time="0.005" asserts="0" />
+                  <test-case name="MassTransit.Tests.When_a_handler_subscription_is_added.The_bus_should_add_a_subscription_to_the_subscription_cache" executed="True" success="True" time="0.004" asserts="0" />
+                </results>
+              </test-suite>
+              <test-suite name="MassTransit.Tests.When_a_message_is_delivered_to_the_service_bus" success="True" time="1.029" asserts="0">
+                <results>
+                  <test-case name="MassTransit.Tests.When_a_message_is_delivered_to_the_service_bus.A_consumer_object_should_receive_the_message" executed="True" success="True" time="0.512" asserts="1" />
+                  <test-case name="MassTransit.Tests.When_a_message_is_delivered_to_the_service_bus.A_consumer_type_should_be_created_to_receive_the_message" executed="True" success="True" time="0.516" asserts="1" />
+                </results>
+              </test-suite>
+              <test-suite name="MassTransit.Tests.When_a_message_should_expire_after_a_period_of_time" success="True" time="0.002" asserts="0">
+                <results>
+                  <test-case name="MassTransit.Tests.When_a_message_should_expire_after_a_period_of_time.The_message_should_use_an_expiration_attribute" executed="True" success="True" time="0.001" asserts="2" />
+                </results>
+              </test-suite>
+              <test-suite name="MassTransit.Tests.When_a_message_needs_to_be_reliable" success="True" time="0.001" asserts="0">
+                <results>
+                  <test-case name="MassTransit.Tests.When_a_message_needs_to_be_reliable.The_reliable_attribute_should_be_able_to_be_false" executed="True" success="True" time="0.001" asserts="2" />
+                  <test-case name="MassTransit.Tests.When_a_message_needs_to_be_reliable.The_reliable_attribute_should_be_specified" executed="True" success="True" time="0.000" asserts="2" />
+                </results>
+              </test-suite>
+              <test-suite name="MassTransit.Tests.When_a_message_filter_is_subscribed_to_the_service_bus" success="True" time="2.234" asserts="0">
+                <results>
+                  <test-case name="MassTransit.Tests.When_a_message_filter_is_subscribed_to_the_service_bus.A_message_should_only_reach_the_consumer_if_the_filter_passes_it_forward" executed="True" success="True" time="1.530" asserts="1" />
+                  <test-case name="MassTransit.Tests.When_a_message_filter_is_subscribed_to_the_service_bus.A_message_should_only_reach_the_consumer_if_the_filter_passes_it_forward_success" executed="True" success="True" time="0.703" asserts="1" />
+                </results>
+              </test-suite>
+              <test-suite name="MassTransit.Tests.MessageGroup_Specs" success="True" time="3.075" asserts="0">
+                <results>
+                  <test-case name="MassTransit.Tests.MessageGroup_Specs.I_should_be_able_to_join_a_bunch_of_messages_into_a_group" executed="True" success="True" time="0.509" asserts="3" />
+                  <test-case name="MassTransit.Tests.MessageGroup_Specs.I_should_be_able_to_retrieve_a_single_message_by_position" executed="True" success="True" time="0.521" asserts="0" />
+                  <test-case name="MassTransit.Tests.MessageGroup_Specs.I_should_be_able_to_split_a_bunch_of_messages_from_a_group" executed="True" success="True" time="0.506" asserts="1" />
+                  <test-case name="MassTransit.Tests.MessageGroup_Specs.I_should_be_able_to_split_the_group_into_individual_messages_and_handle_each_one_on_its_own" executed="True" success="True" time="0.514" asserts="0" />
+                  <test-case name="MassTransit.Tests.MessageGroup_Specs.I_should_get_an_exception_when_I_try_to_get_an_unmatched_type" executed="True" success="True" time="0.506" asserts="1" />
+                  <test-case name="MassTransit.Tests.MessageGroup_Specs.One" executed="True" success="True" time="0.519" asserts="3" />
+                </results>
+              </test-suite>
+              <test-suite name="MassTransit.Tests.When_a_custom_message_group_is_defined" success="True" time="1.558" asserts="0">
+                <results>
+                  <test-case name="MassTransit.Tests.When_a_custom_message_group_is_defined.I_should_be_able_to_split_a_group_of_messages_into_parts" executed="True" success="True" time="0.538" asserts="3" />
+                  <test-case name="MassTransit.Tests.When_a_custom_message_group_is_defined.I_Should_be_able_to_subscribe" executed="True" success="True" time="0.516" asserts="1" />
+                  <test-case name="MassTransit.Tests.When_a_custom_message_group_is_defined.I_should_only_be_allowed_to_add_valid_message_types" executed="True" success="True" time="0.504" asserts="1" />
+                </results>
+              </test-suite>
+              <test-suite name="MassTransit.Tests.Services" success="True" time="44.896" asserts="0">
+                <results>
+                  <test-suite name="MassTransit.Tests.Services.HealthMonitoring" success="True" time="44.687" asserts="0">
+                    <results>
+                      <test-suite name="MassTransit.Tests.Services.HealthMonitoring.HealthServiceTestFixture" success="True" time="0.000" asserts="0">
+                        <results />
+                      </test-suite>
+                      <test-suite name="MassTransit.Tests.Services.HealthMonitoring.HealthService_Specs" success="True" time="44.687" asserts="0">
+                        <results>
+                          <test-case name="MassTransit.Tests.Services.HealthMonitoring.HealthService_Specs.If_a_heartbeat_is_missed_the_saga_should_mark_the_endpoint_suspect" executed="True" success="True" time="7.275" asserts="4" />
+                          <test-case name="MassTransit.Tests.Services.HealthMonitoring.HealthService_Specs.If_a_saga_is_suspect_a_heartbeat_should_fix" executed="True" success="True" time="8.118" asserts="4" />
+                          <test-case name="MassTransit.Tests.Services.HealthMonitoring.HealthService_Specs.If_a_saga_is_suspect_a_pingtimeout_should_make_it_down" executed="True" success="True" time="8.075" asserts="5" />
+                          <test-case name="MassTransit.Tests.Services.HealthMonitoring.HealthService_Specs.If_a_saga_is_suspect_a_pong_should_fix" executed="True" success="True" time="8.073" asserts="4" />
+                          <test-case name="MassTransit.Tests.Services.HealthMonitoring.HealthService_Specs.If_endpoint_down_a_heartbeat_should_revive" executed="True" success="True" time="10.074" asserts="7" />
+                          <test-case name="MassTransit.Tests.Services.HealthMonitoring.HealthService_Specs.The_HealthClient_should_publish_heartbeats" executed="True" success="True" time="3.071" asserts="2" />
+                        </results>
+                      </test-suite>
+                    </results>
+                  </test-suite>
+                  <test-suite name="MassTransit.Tests.Services.Routing" success="True" time="0.050" asserts="0">
+                    <results>
+                      <test-suite name="MassTransit.Tests.Services.Routing.RoutingConfiguration_Specs" success="True" time="0.050" asserts="0">
+                        <results>
+                          <test-case name="MassTransit.Tests.Services.Routing.RoutingConfiguration_Specs.ConfigurationTest" executed="True" success="True" time="0.050" asserts="0" />
+                        </results>
+                      </test-suite>
+                    </results>
+                  </test-suite>
+                  <test-suite name="MassTransit.Tests.Services.Subscriptions" success="True" time="0.145" asserts="0">
+                    <results>
+                      <test-suite name="MassTransit.Tests.Services.Subscriptions.When_the_consumer_receives_a_subscription" success="True" time="0.145" asserts="0">
+                        <results>
+                          <test-case name="MassTransit.Tests.Services.Subscriptions.When_the_consumer_receives_a_subscription.It_should_be_added_to_the_pipeline_for_remote_subscribers" executed="False">
+                            <reason>
+                              <message><![CDATA[Explicit selection required]]></message>
+                            </reason>
+                          </test-case>
+                          <test-case name="MassTransit.Tests.Services.Subscriptions.When_the_consumer_receives_a_subscription.It_should_not_be_added_to_the_pipeline_for_local_subscribers" executed="True" success="True" time="0.133" asserts="0" />
+                        </results>
+                      </test-suite>
+                    </results>
+                  </test-suite>
+                  <test-suite name="MassTransit.Tests.Services.Metadata" success="True" time="0.014" asserts="0">
+                    <results>
+                      <test-suite name="MassTransit.Tests.Services.Metadata.MessageMetadataExtraction_spec" success="True" time="0.010" asserts="0">
+                        <results>
+                          <test-case name="MassTransit.Tests.Services.Metadata.MessageMetadataExtraction_spec.I_need_to_extract_metadata_from_objects" executed="True" success="True" time="0.003" asserts="6" />
+                          <test-case name="MassTransit.Tests.Services.Metadata.MessageMetadataExtraction_spec.PipelineBuilding" executed="True" success="True" time="0.007" asserts="0" />
+                        </results>
+                      </test-suite>
+                    </results>
+                  </test-suite>
+                </results>
+              </test-suite>
+              <test-suite name="MassTransit.Tests.A_subscribed_consumer" success="True" time="0.706" asserts="0">
+                <results>
+                  <test-case name="MassTransit.Tests.A_subscribed_consumer.Should_request_an_instance_of_the_consumer_for_each_message" executed="True" success="True" time="0.702" asserts="1" />
+                </results>
+              </test-suite>
+              <test-suite name="MassTransit.Tests.Subscriptions" success="True" time="7.599" asserts="0">
+                <results>
+                  <test-suite name="MassTransit.Tests.Subscriptions.SubscriptionService_Specs" success="True" time="5.574" asserts="0">
+                    <results>
+                      <test-case name="MassTransit.Tests.Subscriptions.SubscriptionService_Specs.Removing_a_subscription_twice_should_not_have_a_negative_impact" executed="True" success="True" time="2.528" asserts="0" />
+                      <test-case name="MassTransit.Tests.Subscriptions.SubscriptionService_Specs.The_initial_subscriptions_should_be_read_from_the_repository" executed="False">
+                        <reason>
+                          <message><![CDATA[]]></message>
+                        </reason>
+                      </test-case>
+                      <test-case name="MassTransit.Tests.Subscriptions.SubscriptionService_Specs.The_system_should_be_ready_to_use_before_getting_underway" executed="True" success="True" time="3.046" asserts="1" />
+                    </results>
+                  </test-suite>
+                  <test-suite name="MassTransit.Tests.Subscriptions.Adding_a_correlated_subscription_via_the_subscription_client" success="True" time="2.025" asserts="0">
+                    <results>
+                      <test-case name="MassTransit.Tests.Subscriptions.Adding_a_correlated_subscription_via_the_subscription_client.Should_properly_register_the_consumers_for_each_endpoint" executed="True" success="True" time="2.024" asserts="1" />
+                    </results>
+                  </test-suite>
+                </results>
+              </test-suite>
+              <test-suite name="MassTransit.Tests.Transports" success="True" time="5.199" asserts="0">
+                <results>
+                  <test-suite name="MassTransit.Tests.Transports.When_publishing_a_message_via_multicast" success="True" time="5.199" asserts="0">
+                    <results>
+                      <test-case name="MassTransit.Tests.Transports.When_publishing_a_message_via_multicast.It_should_be_received" executed="False">
+                        <reason>
+                          <message><![CDATA[]]></message>
+                        </reason>
+                      </test-case>
+                      <test-case name="MassTransit.Tests.Transports.When_publishing_a_message_via_multicast.It_should_be_received_by_both_receivers" executed="True" success="True" time="5.199" asserts="2" />
+                    </results>
+                  </test-suite>
+                </results>
+              </test-suite>
+              <test-suite name="MassTransit.Tests.PublishSubscribe_Specs" success="True" time="0.509" asserts="0">
+                <results>
+                  <test-case name="MassTransit.Tests.PublishSubscribe_Specs.A_simple_bus_should_be_able_to_subscribe_and_publish" executed="True" success="True" time="0.509" asserts="1" />
+                </results>
+              </test-suite>
+              <test-suite name="MassTransit.Tests.When_a_message_is_published" success="True" time="10.733" asserts="0">
+                <results>
+                  <test-case name="MassTransit.Tests.When_a_message_is_published.It_should_be_ignored_if_there_are_no_consumers" executed="True" success="True" time="1.149" asserts="0" />
+                  <test-case name="MassTransit.Tests.When_a_message_is_published.It_should_be_received_by_a_component" executed="True" success="True" time="0.515" asserts="1" />
+                  <test-case name="MassTransit.Tests.When_a_message_is_published.It_should_be_received_by_an_interested_correlated_consumer" executed="True" success="True" time="1.009" asserts="1" />
+                  <test-case name="MassTransit.Tests.When_a_message_is_published.It_should_be_received_by_multiple_subscribed_consumers" executed="True" success="True" time="1.011" asserts="2" />
+                  <test-case name="MassTransit.Tests.When_a_message_is_published.It_should_be_received_by_one_subscribed_consumer" executed="True" success="True" time="1.015" asserts="1" />
+                  <test-case name="MassTransit.Tests.When_a_message_is_published.It_should_be_received_by_one_subscribed_message_handler" executed="True" success="True" time="1.009" asserts="1" />
+                  <test-case name="MassTransit.Tests.When_a_message_is_published.It_should_not_be_received_by_an_uninterested_consumer" executed="True" success="True" time="1.513" asserts="2" />
+                  <test-case name="MassTransit.Tests.When_a_message_is_published.It_should_not_be_received_by_an_uninterested_correlated_consumer" executed="True" success="True" time="3.512" asserts="1" />
+                </results>
+              </test-suite>
+              <test-suite name="MassTransit.Tests.When_a_request_message_is_published" success="True" time="0.519" asserts="0">
+                <results>
+                  <test-case name="MassTransit.Tests.When_a_request_message_is_published.A_reply_should_be_received_by_the_requestor" executed="True" success="True" time="0.519" asserts="2" />
+                </results>
+              </test-suite>
+              <test-suite name="MassTransit.Tests.When_creating_a_simple_request_response_handler" success="True" time="9.602" asserts="0">
+                <results>
+                  <test-case name="MassTransit.Tests.When_creating_a_simple_request_response_handler.A_clean_method_of_a_request_reply_should_be_possible" executed="True" success="True" time="1.021" asserts="2" />
+                  <test-case name="MassTransit.Tests.When_creating_a_simple_request_response_handler.A_conditional_consumer_should_not_get_the_message_if_it_is_not_wanted" executed="True" success="True" time="4.021" asserts="2" />
+                  <test-case name="MassTransit.Tests.When_creating_a_simple_request_response_handler.A_timeout_handler_should_be_supported" executed="True" success="True" time="1.012" asserts="1" />
+                  <test-case name="MassTransit.Tests.When_creating_a_simple_request_response_handler.Any_type_of_send_should_be_supported" executed="True" success="True" time="0.518" asserts="2" />
+                  <test-case name="MassTransit.Tests.When_creating_a_simple_request_response_handler.An_asynchronous_model_should_be_supported" executed="True" success="True" time="0.515" asserts="2" />
+                  <test-case name="MassTransit.Tests.When_creating_a_simple_request_response_handler.When_an_asynchronous_timeout_occurs_we_should_get_our_timeout_action_called" executed="True" success="True" time="2.514" asserts="2" />
+                </results>
+              </test-suite>
+              <test-suite name="MassTransit.Tests.MessageQueueEndpoint_MeetsCriteria" success="True" time="1.016" asserts="0">
+                <results>
+                  <test-case name="MassTransit.Tests.MessageQueueEndpoint_MeetsCriteria.Subscring_to_an_endpoint_should_accept_and_dispatch_messages" executed="True" success="True" time="1.015" asserts="1" />
+                </results>
+              </test-suite>
+              <test-suite name="MassTransit.Tests.Timeouts" success="True" time="3.224" asserts="0">
+                <results>
+                  <test-suite name="MassTransit.Tests.Timeouts.When_a_message_is_deferred" success="True" time="1.700" asserts="0">
+                    <results>
+                      <test-case name="MassTransit.Tests.Timeouts.When_a_message_is_deferred.It_should_be_received_after_the_deferral_period_elapses" executed="True" success="True" time="1.700" asserts="1" />
+                    </results>
+                  </test-suite>
+                  <test-suite name="MassTransit.Tests.Timeouts.When_scheduling_a_timeout_for_a_new_id" success="True" time="1.524" asserts="0">
+                    <results>
+                      <test-case name="MassTransit.Tests.Timeouts.When_scheduling_a_timeout_for_a_new_id.The_timeout_should_be_added_to_the_storage" executed="True" success="True" time="1.524" asserts="1" />
+                    </results>
+                  </test-suite>
+                </results>
+              </test-suite>
+              <test-suite name="MassTransit.Tests.What_does_the_uri_do" success="True" time="0.007" asserts="0">
+                <results>
+                  <test-case name="MassTransit.Tests.What_does_the_uri_do.An_address_in_an_invalid_format_should_throw_an_exception" executed="True" success="True" time="0.006" asserts="1" />
+                  <test-case name="MassTransit.Tests.What_does_the_uri_do.The_address_should_be_entered_in_a_URI_style_format" executed="True" success="True" time="0.000" asserts="3" />
+                </results>
+              </test-suite>
+            </results>
+          </test-suite>
+        </results>
+      </test-suite>
+    </results>
+  </test-suite>
+</test-results>

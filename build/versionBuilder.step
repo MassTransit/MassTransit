@@ -23,6 +23,7 @@
   <property name="version.minor" value="0" overwrite="false" />
   <property name="version.build" value="0" overwrite="false" />
   <property name="version.revision" value="0" overwrite="false" />
+  <property name="version.hash" value="${version.revision}" overwrite="false" />
   <property name="assembly.description" value="${project.name} is a product of ${company.name}" overwrite="false" />
   <property name="allow.partially_trusted_callers" value="true" overwrite="false" />
   <property name="sign.project_with_key" value="false" overwrite="false" />
@@ -85,6 +86,7 @@
 
   <target name="generate_assembly_info" description="Generate assembly info">
     <echo message="Generating SolutionVersion.${language.short} with assembly version ${version.major}.${version.minor}.${version.build}.${version.revision}." />
+    <property name="version.hash" value="${environment::get-variable('uc.app.revision.hash')}" if="${environment::variable-exists('uc.app.revision.hash')}" />
     <asminfo output="${path.file.version}" language="${language.long}">
       <imports>
         <import namespace="System" />
@@ -98,7 +100,7 @@
         <attribute type="AssemblyCompanyAttribute" value="${company.name}" />
         <attribute type="AssemblyVersionAttribute" value="${version.major}.${version.minor}.${version.build}.${version.revision}" />
         <attribute type="AssemblyFileVersionAttribute" value="${version.major}.${version.minor}.${version.build}.${version.revision}" />
-        <attribute type="AssemblyInformationalVersionAttribute" value="${version.major}.${version.minor}.${version.build}.${version.revision}" />
+        <attribute type="AssemblyInformationalVersionAttribute" value="${version.major}.${version.minor}.${version.build}.${version.hash}" />
         <attribute type="AssemblyTitleAttribute" value="${project.name}" />
         <attribute type="AssemblyProductAttribute" value="${project.name}" />
         <attribute type="AssemblyDescriptionAttribute" value="${assembly.description}" />

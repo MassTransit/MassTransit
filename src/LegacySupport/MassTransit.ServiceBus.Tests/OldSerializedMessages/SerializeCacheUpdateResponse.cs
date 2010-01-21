@@ -25,7 +25,7 @@ namespace MassTransit.LegacySupport.Tests.OldSerializedMessages
     {
         string _pathToFile = @".\OldSerializedMessages\CacheUpdateResponse.txt";
 
-        [Test]
+        [Test, Ignore]
         public void NewToOld() //strong to weak
         {
             IList<Subscription> subs = new List<Subscription>();

@@ -1,0 +1,10 @@
+Tests run: 1, Failures: 0, Not run: 6, Time: 21.574 seconds
+
+Tests not run:
+1) MassTransit.Transports.Msmq.Tests.Serialization.When_sending_a_message_using_the_specified_serializer`1.The_destination_address_should_be_properly_set_on_the_message_envelope : Explicit selection required
+2) MassTransit.Transports.Msmq.Tests.Serialization.When_sending_a_message_using_the_specified_serializer`1.The_fault_address_should_be_properly_set_on_the_message_envelope : Explicit selection required
+3) MassTransit.Transports.Msmq.Tests.Serialization.When_sending_a_message_using_the_specified_serializer`1.The_message_type_should_be_properly_set_on_the_message_envelope : Explicit selection required
+4) MassTransit.Transports.Msmq.Tests.Serialization.When_sending_a_message_using_the_specified_serializer`1.The_response_address_should_be_properly_set_on_the_message_envelope : Explicit selection required
+5) MassTransit.Transports.Msmq.Tests.Serialization.When_sending_a_message_using_the_specified_serializer`1.The_retry_count_should_be_properly_set_on_the_message_envelope : Explicit selection required
+6) MassTransit.Transports.Msmq.Tests.Serialization.When_sending_a_message_using_the_specified_serializer`1.The_source_address_should_be_properly_set_on_the_message_envelope : Explicit selection required
+

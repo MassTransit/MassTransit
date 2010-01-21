@@ -54,7 +54,7 @@
       destinationDirectory="${dirs.deployment}"
       templateExtension=".BAT"
       keepExtension="true"
-      useEnvironmentSubdirectory="true"
+      useEnvironmentSubdirectory="false"
 	  />
   </target>
   

@@ -68,7 +68,7 @@ namespace MassTransit.Tests.Distributor
 			Instances["C"].DataBus.ShouldHaveSubscriptionFor<Distributed<FirstCommand>>();
 		}
 
-		[Test]
+		[Test, Explicit]
 		public void Using_the_load_generator_should_share_the_load()
 		{
 			var generator = new LoadGenerator<FirstCommand, FirstResponse>();
@@ -76,7 +76,7 @@ namespace MassTransit.Tests.Distributor
 			generator.Run(RemoteBus, 100, x => new FirstCommand(x));
 		}
 
-		[Test]
+		[Test, Explicit]
 		public void The_pipeline_viewer_should_show_the_distributor()
 		{
 			PipelineViewer.Trace(LocalBus.InboundPipeline);
