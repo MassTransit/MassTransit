@@ -38,7 +38,7 @@ namespace MassTransit.Tests.Transports
 			consumer.ShouldHaveReceivedMessage(message, _timeout);
 		}
 
-		[Test]
+		[Test, Explicit]
 		public void It_should_be_received_by_both_receivers()
 		{
 			PingMessage message = new PingMessage();
