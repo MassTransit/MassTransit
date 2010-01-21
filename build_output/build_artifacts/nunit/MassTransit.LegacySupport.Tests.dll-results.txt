@@ -1,0 +1,6 @@
+Tests run: 11, Failures: 0, Not run: 2, Time: 0.310 seconds
+
+Tests not run:
+1) MassTransit.LegacySupport.Tests.ListTest.HowToTest : 
+2) MassTransit.LegacySupport.Tests.OldSerializedMessages.SerializeCacheUpdateResponse.NewToOld : 
+

@@ -1,0 +1,36 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!--This file represents the results of running a test suite-->
+<test-results name="D:\Home\MassTransit\build_output\MassTransit\MassTransit.Transports.Nms.Tests.dll" total="0" failures="0" not-run="0" date="2010-01-21" time="10:51:30">
+  <environment nunit-version="2.2.8.0" clr-version="2.0.50727.4927" os-version="Microsoft Windows NT 6.1.7600.0" platform="Win32NT" cwd="D:\Home\MassTransit" machine-name="EGQDSPC-2008R2" user="egqdspc" user-domain="NAMCK" />
+  <culture-info current-culture="en-US" current-uiculture="en-US" />
+  <test-suite name="D:\Home\MassTransit\build_output\MassTransit\MassTransit.Transports.Nms.Tests.dll" success="True" time="0.004" asserts="0">
+    <results>
+      <test-suite name="MassTransit" success="True" time="0.002" asserts="0">
+        <results>
+          <test-suite name="MassTransit.Transports" success="True" time="0.001" asserts="0">
+            <results>
+              <test-suite name="MassTransit.Transports.Nms" success="True" time="0.001" asserts="0">
+                <results>
+                  <test-suite name="MassTransit.Transports.Nms.Tests" success="True" time="0.001" asserts="0">
+                    <results>
+                      <test-suite name="MassTransit.Transports.Nms.Tests.ContextSetup" success="True" time="0.000" asserts="0">
+                        <results />
+                      </test-suite>
+                      <test-suite name="MassTransit.Transports.Nms.Tests.TestFixtures" success="True" time="0.000" asserts="0">
+                        <results>
+                          <test-suite name="MassTransit.Transports.Nms.Tests.TestFixtures.NmsEndpointTestFixture" success="True" time="0.000" asserts="0">
+                            <results />
+                          </test-suite>
+                        </results>
+                      </test-suite>
+                    </results>
+                  </test-suite>
+                </results>
+              </test-suite>
+            </results>
+          </test-suite>
+        </results>
+      </test-suite>
+    </results>
+  </test-suite>
+</test-results>

@@ -74,7 +74,7 @@
   <target name="get_revision">
     <nant buildfile="${dirs.current}\versioners\svn.step" inheritall="true" if="${source_control_type=='svn'}" />
     <nant buildfile="${dirs.current}\versioners\tfs.step" inheritall="true" if="${source_control_type=='tfs'}" />
-    <!--<nant buildfile="${dirs.current}\versioners\git.step" inheritall="true" if="${source_control_type=='git'}" />-->
+    <nant buildfile="${dirs.current}\versioners\git.step" inheritall="true" if="${source_control_type=='git'}" />
     <!--<nant buildfile="${dirs.current}\versioners\vault.step" inheritall="true" if="${source_control_type=='vault'}" />-->
     <!--<nant buildfile="${dirs.current}\versioners\vss.step" inheritall="true" if="${source_control_type=='vss'}" />-->
 

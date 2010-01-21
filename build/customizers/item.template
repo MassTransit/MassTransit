@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" ?>
+﻿<?xml version="1.0" encoding="utf-8" ?>
 <project name="__REPLACE__" default="go">
   <!-- Project UppercuT - http://projectuppercut.org -->
   <property name="build.config.settings" value="__NONE__" overwrite="false" />

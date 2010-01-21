@@ -85,7 +85,7 @@ namespace MassTransit.Tests
 			bus.VerifyAllExpectations();
 		}
 
-		[Test, ExpectedException(typeof (ArgumentException))]
+		[Test]
 		public void I_should_get_an_exception_when_I_try_to_get_an_unmatched_type()
 		{
 			PingMessage ping = new PingMessage();
@@ -95,7 +95,10 @@ namespace MassTransit.Tests
 				.Add(ping)
 				.Add(pong);
 
-			PingMessage thePing = group.Get<PingMessage>(1);
+			Assert.Throws<ArgumentException>(() =>
+				{
+					PingMessage thePing = group.Get<PingMessage>(1);
+				});
 		}
 
 		[Test]
@@ -231,13 +234,16 @@ namespace MassTransit.Tests
 			Assert.That(c.Received.WaitOne(TimeSpan.FromSeconds(5), true), Is.True, "No message received by consumer");
 		}
 
-		[Test, ExpectedException(typeof (ArgumentException))]
+		[Test]
 		public void I_should_only_be_allowed_to_add_valid_message_types()
 		{
-			SpecialGroup group = MessageGroup.Build<SpecialGroup>()
-				.Add(new PingMessage())
-				.Add(new PongMessage())
-				.Add(new UpdateMessage());
+			Assert.Throws<ArgumentException>(() =>
+				{
+					SpecialGroup group = MessageGroup.Build<SpecialGroup>()
+						.Add(new PingMessage())
+						.Add(new PongMessage())
+						.Add(new UpdateMessage());
+				});
 		}
 	}
 }

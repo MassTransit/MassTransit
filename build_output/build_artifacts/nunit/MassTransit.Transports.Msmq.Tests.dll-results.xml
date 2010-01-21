@@ -1,0 +1,94 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!--This file represents the results of running a test suite-->
+<test-results name="D:\Home\MassTransit\build_output\MassTransit\MassTransit.Transports.Msmq.Tests.dll" total="1" failures="0" not-run="6" date="2010-01-21" time="10:51:30">
+  <environment nunit-version="2.2.8.0" clr-version="2.0.50727.4927" os-version="Microsoft Windows NT 6.1.7600.0" platform="Win32NT" cwd="D:\Home\MassTransit" machine-name="EGQDSPC-2008R2" user="egqdspc" user-domain="NAMCK" />
+  <culture-info current-culture="en-US" current-uiculture="en-US" />
+  <test-suite name="D:\Home\MassTransit\build_output\MassTransit\MassTransit.Transports.Msmq.Tests.dll" success="True" time="21.574" asserts="0">
+    <results>
+      <test-suite name="MassTransit" success="True" time="21.572" asserts="0">
+        <results>
+          <test-suite name="MassTransit.Transports" success="True" time="21.572" asserts="0">
+            <results>
+              <test-suite name="MassTransit.Transports.Msmq" success="True" time="21.572" asserts="0">
+                <results>
+                  <test-suite name="MassTransit.Transports.Msmq.Tests" success="True" time="21.572" asserts="0">
+                    <results>
+                      <test-suite name="MassTransit.Transports.Msmq.Tests.TestFixtures" success="True" time="0.001" asserts="0">
+                        <results>
+                          <test-suite name="MassTransit.Transports.Msmq.Tests.TestFixtures.MsmqEndpointOnlyTestFixture" success="True" time="0.000" asserts="0">
+                            <results />
+                          </test-suite>
+                          <test-suite name="MassTransit.Transports.Msmq.Tests.TestFixtures.MsmqEndpointTestFixture" success="True" time="0.000" asserts="0">
+                            <results />
+                          </test-suite>
+                          <test-suite name="MassTransit.Transports.Msmq.Tests.TestFixtures.MsmqTransactionalEndpointTestFixture" success="True" time="0.000" asserts="0">
+                            <results />
+                          </test-suite>
+                          <test-suite name="MassTransit.Transports.Msmq.Tests.TestFixtures.TransactionalMsmqEndpointOnlyTestFixture" success="True" time="0.000" asserts="0">
+                            <results />
+                          </test-suite>
+                        </results>
+                      </test-suite>
+                      <test-suite name="MassTransit.Transports.Msmq.Tests.ContextSetup" success="True" time="0.001" asserts="0">
+                        <results />
+                      </test-suite>
+                      <test-suite name="MassTransit.Transports.Msmq.Tests.MsmqDistributorTestFixture" success="True" time="0.000" asserts="0">
+                        <results />
+                      </test-suite>
+                      <test-suite name="MassTransit.Transports.Msmq.Tests.Default_distributor_specifications" success="True" time="21.564" asserts="0">
+                        <results>
+                          <test-case name="MassTransit.Transports.Msmq.Tests.Default_distributor_specifications.Using_the_load_generator_should_share_the_load" executed="True" success="True" time="21.561" asserts="1" />
+                        </results>
+                      </test-suite>
+                      <test-suite name="MassTransit.Transports.Msmq.Tests.Learning" success="True" time="0.000" asserts="0">
+                        <results />
+                      </test-suite>
+                      <test-suite name="MassTransit.Transports.Msmq.Tests.Serialization" success="True" time="0.000" asserts="0">
+                        <results>
+                          <test-suite name="MassTransit.Transports.Msmq.Tests.Serialization.When_sending_a_message_using_the_specified_serializer`1" success="True" time="0.000" asserts="0">
+                            <results>
+                              <test-case name="MassTransit.Transports.Msmq.Tests.Serialization.When_sending_a_message_using_the_specified_serializer`1.The_destination_address_should_be_properly_set_on_the_message_envelope" executed="False">
+                                <reason>
+                                  <message><![CDATA[Explicit selection required]]></message>
+                                </reason>
+                              </test-case>
+                              <test-case name="MassTransit.Transports.Msmq.Tests.Serialization.When_sending_a_message_using_the_specified_serializer`1.The_fault_address_should_be_properly_set_on_the_message_envelope" executed="False">
+                                <reason>
+                                  <message><![CDATA[Explicit selection required]]></message>
+                                </reason>
+                              </test-case>
+                              <test-case name="MassTransit.Transports.Msmq.Tests.Serialization.When_sending_a_message_using_the_specified_serializer`1.The_message_type_should_be_properly_set_on_the_message_envelope" executed="False">
+                                <reason>
+                                  <message><![CDATA[Explicit selection required]]></message>
+                                </reason>
+                              </test-case>
+                              <test-case name="MassTransit.Transports.Msmq.Tests.Serialization.When_sending_a_message_using_the_specified_serializer`1.The_response_address_should_be_properly_set_on_the_message_envelope" executed="False">
+                                <reason>
+                                  <message><![CDATA[Explicit selection required]]></message>
+                                </reason>
+                              </test-case>
+                              <test-case name="MassTransit.Transports.Msmq.Tests.Serialization.When_sending_a_message_using_the_specified_serializer`1.The_retry_count_should_be_properly_set_on_the_message_envelope" executed="False">
+                                <reason>
+                                  <message><![CDATA[Explicit selection required]]></message>
+                                </reason>
+                              </test-case>
+                              <test-case name="MassTransit.Transports.Msmq.Tests.Serialization.When_sending_a_message_using_the_specified_serializer`1.The_source_address_should_be_properly_set_on_the_message_envelope" executed="False">
+                                <reason>
+                                  <message><![CDATA[Explicit selection required]]></message>
+                                </reason>
+                              </test-case>
+                            </results>
+                          </test-suite>
+                        </results>
+                      </test-suite>
+                    </results>
+                  </test-suite>
+                </results>
+              </test-suite>
+            </results>
+          </test-suite>
+        </results>
+      </test-suite>
+    </results>
+  </test-suite>
+</test-results>

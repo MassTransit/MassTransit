@@ -21,7 +21,7 @@ namespace MassTransit.LegacySupport.Tests
     [TestFixture]
     public class ListTest
     {
-        [Test]
+        [Test, Ignore]
         public void HowToTest()
         {
             using (var stream = new MemoryStream())
