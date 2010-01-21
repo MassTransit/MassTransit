@@ -20,7 +20,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\..\bin\</OutputPath>
+    <OutputPath>..\..\bin\ActiveMQ\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -28,12 +28,12 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>..\..\bin\</OutputPath>
+    <OutputPath>..\..\bin\ActiveMQ\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <NoWarn>1587,1591</NoWarn>
-    <DocumentationFile>..\bin\MassTransit.ServiceBus.NMS.XML</DocumentationFile>
+    <DocumentationFile>..\..\bin\ActiveMQ\MassTransit.Transports.Nms.XML</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Apache.NMS, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
