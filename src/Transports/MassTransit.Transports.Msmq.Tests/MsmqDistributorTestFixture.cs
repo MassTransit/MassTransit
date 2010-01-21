@@ -16,7 +16,7 @@ namespace MassTransit.Transports.Msmq.Tests
 	using MassTransit.Tests.Distributor;
 	using NUnit.Framework;
 
-	[TestFixture]
+	[TestFixture, Category("Integration")]
 	public class MsmqDistributorTestFixture :
 		DistributorTestFixture<MsmqEndpoint>
 	{
