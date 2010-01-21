@@ -12,72 +12,81 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.SystemView
 {
-	using System;
-	using System.Configuration;
-	using System.Reflection;
+    using System;
+    using System.Configuration;
+    using System.Reflection;
 
-	public class Configuration :
-		IConfiguration
-	{
-		private const string _subscriptionServiceUriKey = "SubscriptionServiceUri";
-		private const string _systemViewControlUriKey = "SystemViewControlUri";
-		private const string _systemViewDataUriKey = "SystemViewDataUri";
+    public class Configuration :
+        IConfiguration
+    {
+        private const string _subscriptionServiceUriKey = "SubscriptionServiceUri";
+        private const string _systemViewControlUriKey = "SystemViewControlUri";
+        private const string _systemViewDataUriKey = "SystemViewDataUri";
 
-		public Uri SubscriptionServiceUri
-		{
-			get { return GetUriApplicationSetting(_subscriptionServiceUriKey); }
-		}
+        public Uri SubscriptionServiceUri
+        {
+            get
+            {
+                return GetUriApplicationSetting(_subscriptionServiceUriKey);
+            }
+        }
 
-		public Uri SystemViewControlUri
-		{
-			get { return GetUriApplicationSetting(_systemViewControlUriKey); }
-		}
+        public Uri SystemViewControlUri
+        {
+            get
+            {
+                return GetUriApplicationSetting(_systemViewControlUriKey);
+            }
+        }
 
-		public Uri SystemViewDataUri
-		{
-			get { return GetUriApplicationSetting(_systemViewDataUriKey); }
-		}
+        public Uri SystemViewDataUri
+        {
+            get
+            {
+                return GetUriApplicationSetting(_systemViewDataUriKey);
+            }
+        }
 
-		private static Uri GetUriApplicationSetting(string key)
-		{
-			try
-			{
-				Uri value = new Uri(GetApplicationSetting(key));
+        private static Uri GetUriApplicationSetting(string key)
+        {
+            try
+            {
+                Uri value = new Uri(GetApplicationSetting(key));
 
-				return value;
-			}
-			catch (UriFormatException ex)
-			{
-				throw new ConfigurationErrorsException("The " + key + " is not a valid Uri", ex);
-			}
-			catch (ConfigurationErrorsException)
-			{
-				throw;
-			}
-			catch (Exception ex)
-			{
-				throw new ConfigurationErrorsException("The " + key + " application setting failed to load", ex);
-			}
-		}
+                return value;
+            }
+            catch (UriFormatException ex)
+            {
+                throw new ConfigurationErrorsException("The " + key + " is not a valid Uri", ex);
+            }
+            catch (ConfigurationErrorsException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                throw new ConfigurationErrorsException("The " + key + " application setting failed to load", ex);
+            }
+        }
 
-		private static string GetApplicationSetting(string key)
-		{
-			string value = ConfigurationManager.AppSettings[key] ?? LocateConfiguration().AppSettings.Settings[key].Value;
+        private static string GetApplicationSetting(string key)
+        {
+            string value = ConfigurationManager.AppSettings[key] ?? LocateConfiguration().AppSettings.Settings[key].Value;
 
-			if (value == null)
-				throw new ConfigurationErrorsException("There are no configuration string configured");
+            if (value == null)
+                throw new ConfigurationErrorsException("There are no configuration string configured");
 
-			return value;
-		}
+            return value;
+        }
 
-		private static System.Configuration.Configuration LocateConfiguration()
-		{
-			ExeConfigurationFileMap map = new ExeConfigurationFileMap
-				{
-					ExeConfigFilename = Assembly.GetExecutingAssembly().Location + ".config"
-				};
+        private static System.Configuration.Configuration LocateConfiguration()
+        {
+            ExeConfigurationFileMap map = new ExeConfigurationFileMap
+                {
+                    ExeConfigFilename = Assembly.GetExecutingAssembly().Location + ".config"
+                };
 
-			return ConfigurationManager.OpenMappedExeConfiguration(map, ConfigurationUserLevel.None);
-		}
-	}
+            return ConfigurationManager.OpenMappedExeConfiguration(map, ConfigurationUserLevel.None);
+        }
+    }
 }
