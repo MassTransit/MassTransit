@@ -56,7 +56,7 @@
       <![CDATA[<?xml version="1.0" ?>
 <buildInfo>
   <projectName>${project.name}</projectName>
-  <companyName>${company.name}</companyName>
+  <companyName>${string::replace(string::replace(company.name,'&amp;','&'),'&','&amp;')}</companyName>
   <versionMajor>${version.major}</versionMajor>
   <versionMinor>${version.minor}</versionMinor>
   <buildNumber>${version.build}</buildNumber>
