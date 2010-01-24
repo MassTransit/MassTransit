@@ -43,7 +43,7 @@ namespace MassTransit.Pipeline.Inspectors
 			_depth--;
 		}
 
-		public bool Inspect(IMessagePipeline element)
+		public bool Inspect(MessagePipeline element)
 		{
 			Append("Pipeline");
 

@@ -9,6 +9,8 @@ CREATE TABLE "HealthSaga"
 	, PRIMARY KEY (CorrelationId)
 )
 
+CREATE INDEX IX_HealthSaga_ ON HealthSaga ( ControlUri, CorrelationId )
+
 CREATE TABLE "SubscriptionSaga" 
 (
 	CorrelationId			UNIQUEIDENTIFIER	NOT NULL
@@ -31,6 +33,8 @@ CREATE TABLE "SubscriptionClientSaga"
 	, PRIMARY KEY (CorrelationId)
 )
 
+CREATE INDEX IX_SubscriptionClientSaga_ControlUri ON SubscriptionClientSaga ( ControlUri, CorrelationId )
+
 CREATE TABLE "TimeoutSaga" 
 (
 	CorrelationId			UNIQUEIDENTIFIER	NOT NULL
@@ -39,3 +43,5 @@ CREATE TABLE "TimeoutSaga"
 	, TimeoutAt				DATETIME			NULL
 	, PRIMARY KEY (CorrelationId, Tag)
 )
+
+CREATE INDEX IX_Timeout_At ON TimeoutSaga ( TimeoutAt, CorrelationId, Tag )
