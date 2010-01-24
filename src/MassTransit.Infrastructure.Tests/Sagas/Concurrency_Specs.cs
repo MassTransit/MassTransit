@@ -49,7 +49,7 @@ namespace MassTransit.Infrastructure.Tests.Sagas
 					.DefaultSchema("dbo")
 					.ShowSql()
 					.ProxyFactoryFactory("NHibernate.ByteCode.Castle.ProxyFactoryFactory, NHibernate.ByteCode.Castle")
-					.Raw(Environment.Isolation, IsolationLevel.RepeatableRead.ToString()))
+					.Raw(Environment.Isolation, IsolationLevel.Serializable.ToString()))
 				.Mappings(m => 
 					{
 						m.FluentMappings.Add<ConcurrentSagaMap>();

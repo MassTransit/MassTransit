@@ -47,8 +47,8 @@ namespace MassTransit.Infrastructure.Saga
 			using (ISession session = _sessionFactory.OpenSession())
 			using (ITransaction transaction = session.BeginTransaction())
 			{
-				IQueryable<T> existingSagas = session.Linq<T>()
-					.Where(filter);
+				T[] existingSagas = session.Linq<T>()
+					.Where(filter).ToArray();
 
 				bool foundExistingSagas = SendMessageToExistingSagas(existingSagas, policy, consumerAction, message, session.Delete);
 				if (foundExistingSagas)
@@ -61,7 +61,6 @@ namespace MassTransit.Infrastructure.Saga
 					{
 						consumerAction(saga);
 						session.Save(saga);
-
 					}, session.Delete);
 
 				transaction.Commit();
