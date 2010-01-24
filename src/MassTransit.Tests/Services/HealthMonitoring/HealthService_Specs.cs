@@ -84,8 +84,8 @@ namespace MassTransit.Tests.Services.HealthMonitoring
 			Thread.Sleep(250);
 			LocalBus.Publish(new TimeoutExpired {CorrelationId = _id, Tag = 2});
 
-			fm.IsAvailable(1.Seconds()).ShouldBeTrue("never got message");
-			Thread.Sleep(100);
+			fm.IsAvailable(100.Seconds()).ShouldBeTrue("never got message");
+			Thread.Sleep(100000);
 			var saga = Repository.Where(x => x.CorrelationId == _id).First();
 			saga.CurrentState.ShouldEqual(HealthSaga.Down);
 		}
