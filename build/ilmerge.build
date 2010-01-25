@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<project name="ILMergeBuilder" default="go">
+  <!-- Project UppercuT - http://projectuppercut.org -->
+  <property name="build.config.settings" value="__NONE__" overwrite="false" />
+  <include buildfile="${build.config.settings}" if="${file::exists(build.config.settings)}" />
+  <property name="file.current.no_extension" value="ilmerge" />
+  <property name="dirs.current" value="${directory::get-parent-directory(project::get-buildfile-path())}" />
+  <property name="path.to.toplevel" value=".." />
+  <property name="folder.build_scripts" value="build" overwrite="false" />
+  <property name="folder.build_scripts_custom" value="build.custom" overwrite="false" />
+  <property name="dirs.build_scripts_custom" value="${dirs.current}\${path.to.toplevel}\${folder.build_scripts_custom}" />
+  <property name="folder.code_drop" value="code_drop" overwrite="false" />
+  <property name="dirs.drop" value="${dirs.current}\${path.to.toplevel}\${folder.code_drop}" overwrite="false" />
+  <property name="folder.app.drop" value="${project.name}" overwrite="false" />
+  <property name="dirs.lib" value="${dirs.current}\${path.to.toplevel}\lib" overwrite="false" />
+  <property name="dirs.ilmerge.folder" value="${dirs.lib}\ILMerge" />
+  <property name="app.ilmerge" value="${dirs.ilmerge.folder}\ILMerge.exe" overwrite="false"  />
+  <property name="dirs.merge.log" value="${dirs.drop}\build_artifacts\ilmerge" />
+  <property name="log.merge" value="ilmerge.log" />
+  
+  <property name="dirs.merge.from" value="${dirs.drop}\${folder.app.drop}" overwrite="false" />
+  <property name="dirs.merge.to" value="${dirs.drop}\merge" overwrite="false" />
+  <property name="file.internalize.ignore" value="ilmerge.internalize.ignore.txt" />
+  <property name="path.file.internalize.ignore" value="${dirs.build_scripts_custom}\${file.internalize.ignore}" />
+  
+  <property name="file.merge.name" value="__REPLACE__" overwrite="false" />
+  <!-- exe winexe dll -->
+  <property name="merge.target.type" value="__REPLACE__" overwrite="false" />
+  <property name="args.ilmerge" value="/internalize /target:${merge.target.type} /out:${dirs.merge.to}\${file.merge.name} /log:${dirs.merge.log}\${log.merge} /ndebug /allowDup ${file.merge.name} " />
+  <property name="args.ilmerge" value="/internalize:${path.file.internalize.ignore} /target:${merge.target.type} /out:${dirs.merge.to}\${file.merge.name} /log:${dirs.merge.log}\${log.merge} /ndebug /allowDup ${file.merge.name} " if="${file::exists(path.file.internalize.ignore)}"/>
+  
+  <property name="file.custom.step.before" value="${dirs.build_scripts_custom}\${file.current.no_extension}.pre.build" />
+  <property name="file.custom.step.after" value="${dirs.build_scripts_custom}\${file.current.no_extension}.post.build" />
+  <property name="file.custom.step.replace" value="${dirs.build_scripts_custom}\${file.current.no_extension}.replace.build" />
+  
+  <target name="go" depends="run_tasks" />
+  
+  <target name="run_tasks">
+    <echo message="Running ${project::get-name()} tasks." />
+    <call target="prepare" if="${target::exists('prepare')}" />
+    <call target="custom_tasks_before" if="${target::exists('custom_tasks_before')}"  />
+    <call target="run_normal_tasks" if="${not file::exists(file.custom.step.replace)}" />
+    <echo message="Running custom tasks instead of normal tasks if ${file.custom.step.replace} exists." />
+    <nant buildfile="${file.custom.step.replace}" inheritall="true" if="${file::exists(file.custom.step.replace)}" />
+    <call target="custom_tasks_after" if="${target::exists('custom_tasks_after')}" />
+  </target>
+  
+  <target name="run_normal_tasks"
+          depends="error_check, get_regular_dlls, run_ilmerge, copy_configs, remove_unneeded_assemblies, copy_from_merge, delete_merge_folder"
+          description="Running ILMerge with UppercuT default.build." />
+
+  <target name="custom_tasks_before">
+    <echo message="Running custom tasks if ${file.custom.step.before} exists." />
+    <nant buildfile="${file.custom.step.before}" inheritall="true" if="${file::exists(file.custom.step.before)}" failonerror="false" />
+  </target>
+  
+  <target name="error_check">
+    <fail message="You must pass in the file.merge.name and the merge.target.type through the command line calling this build. Please do that and retry the build."
+      if="${file.merge.name=='__REPLACE__' or merge.target.type=='__REPLACE__'}" />
+  </target>
+  
+  <target name="prepare">
+    <mkdir dir="${dirs.merge.log}" />
+    <mkdir dir="${dirs.merge.to}" />
+  </target>
+  
+  <target name="get_regular_dlls">
+    <echo message="Getting output dlls based on name in directory ${path::get-full-path(dirs.merge.from)}." />
+    <property name="dll.names" value="" />
+    <foreach item="File" property="dll.filename">
+      <in>
+        <items>
+          <exclude name="${dirs.merge.from}\${file.merge.name}" />
+          <include name="${dirs.merge.from}\*.dll" />
+          <include name="${dirs.merge.from}\*.exe" />
+        </items>
+      </in>
+      <do>
+        <property name="dll.names" value="${dll.names + ' ' + path::get-file-name(dll.filename)}" />
+      </do>
+    </foreach>
+
+    <property name="dlls.regular" value="${dll.names}" />
+    <property name="args.ilmerge" value="${args.ilmerge} ${dlls.regular}" />
+  </target>
+
+  <target name="run_ilmerge">
+    <echo message="Merging the the contents of ${dirs.merge.from} into a single executable - ${dirs.merge.to}\${file.merge.name}. This will fail if all dependencies are not resolved."/>
+    <echo message="Running this: ${app.ilmerge} ${args.ilmerge}"/>
+    <exec program="${app.ilmerge}"
+          workingdir="${dirs.merge.from}"
+          commandline="${args.ilmerge}" />
+  </target>
+
+  <target name="copy_configs">
+    <copy todir="${dirs.merge.to}">
+      <fileset basedir="${dirs.merge.from}">
+        <include name="**/*.config" />
+      </fileset>
+    </copy>
+  </target>
+  
+  <target name="remove_unneeded_assemblies">
+    <echo message="Removing unneeded assemblies before moving the merged assembly back into ${dirs.merge.from}."/>
+    <delete>
+      <fileset basedir="${dirs.merge.from}" >
+        <include name="*.*" />
+      </fileset>
+    </delete>
+  </target>
+
+  <target name="copy_from_merge">
+    <copy todir="${dirs.merge.from}">
+      <fileset basedir="${dirs.merge.to}">
+        <include name="**/*.*" />
+      </fileset>
+    </copy>
+  </target>
+  
+  <target name="delete_merge_folder">
+      <delete dir="${dirs.merge.to}" failonerror="false"  />
+  </target>
+  
+  <target name="custom_tasks_after">
+    <echo message="Running custom tasks if ${file.custom.step.after} exists." />
+    <nant buildfile="${file.custom.step.after}" inheritall="true" if="${file::exists(file.custom.step.after)}" failonerror="false" />
+  </target>
+  
+</project>
