@@ -47,7 +47,8 @@ namespace MassTransit.SystemView.ViewModel
                 ClientId = si.ClientId,
                 CorrelationId = si.CorrelationId,
                 SequenceNumber = si.SequenceNumber,
-                SubscriptionId = si.SubscriptionId
+                SubscriptionId = si.SubscriptionId,
+                EndpointUri = si.EndpointUri
             });
         }
 

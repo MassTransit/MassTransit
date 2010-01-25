@@ -13,6 +13,7 @@
         <Converters:TypeFilterConverter x:Key="typeFilterConverter" />
         <Converters:TreeItemToImageVisibilityConverter x:Key="imageVisibilityConverter" />
         <Converters:TreeItemToImagePathConverter x:Key="imagePathConverter" />
+        <Converters:MessageNameToVisibilityConverter x:Key="messageNameVisibilityConverter" />
     </Window.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
@@ -28,7 +29,13 @@
                     </TextBlock>
                     <HierarchicalDataTemplate.ItemTemplate>
                         <DataTemplate DataType="{x:Type ViewModel:Message}">
-                            <TextBlock Text="{Binding Path=PrettyMessageName}" Foreground="{Binding Path=MessageName, Converter={StaticResource messageNameColorConverter}}" />
+                            <TextBlock Text="{Binding Path=PrettyMessageName}" Foreground="{Binding Path=MessageName, Converter={StaticResource messageNameColorConverter}}">
+                                <TextBlock.ContextMenu>
+                                    <ContextMenu Visibility="{Binding Path=MessageName, Converter={StaticResource messageNameVisibilityConverter}}">
+                                        <MenuItem Header="Remove" x:Name="itemRemove" Click="itemRemove_Click" CommandParameter="{Binding Path=.}" />
+                                    </ContextMenu>
+                                </TextBlock.ContextMenu>
+                            </TextBlock>
                         </DataTemplate>
                     </HierarchicalDataTemplate.ItemTemplate>
                 </HierarchicalDataTemplate>

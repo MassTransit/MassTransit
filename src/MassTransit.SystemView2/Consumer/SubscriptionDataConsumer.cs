@@ -15,6 +15,7 @@ namespace MassTransit.SystemView.Consumer
     using System;
     using Magnum;
     using Distributor.Messages;
+    using Services.Subscriptions;
     using Services.Subscriptions.Messages;
     using ViewModel;
     using Transports.Msmq;
@@ -100,6 +101,11 @@ namespace MassTransit.SystemView.Consumer
             var endpoint = _container.GetInstance<IEndpointFactory>().GetEndpoint(controlUri);
 
             endpoint.Send(new ConfigureWorker() { InProgressLimit = inProgressLimit, MessageType = type, PendingLimit = pendingLimit });
+        }
+
+        public void RemoveSubscription(Guid clientId, string messageName, string correlationId, Uri endpointUri)
+        {
+            _bus.Publish(new RemoveSubscription(new SubscriptionInformation(clientId, 0, messageName, correlationId, endpointUri)));
         }
 
         public void Dispose()

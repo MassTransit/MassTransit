@@ -10,14 +10,27 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.SystemView
+namespace MassTransit.SystemView.Converters
 {
 	using System;
+	using System.Globalization;
+	using System.Windows;
+	using System.Windows.Data;
 
-	public interface IConfiguration
-	{
-		Uri SystemViewControlUri { get; }
-		Uri SystemViewDataUri { get; }
-		Uri SubscriptionServiceUri { get; }
-	}
+	public class MessageNameToVisibilityConverter :
+        IValueConverter
+    {
+		public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+		{
+			if (value is string && (value as string).StartsWith("MassTransit."))
+                return Visibility.Collapsed;
+
+		    return Visibility.Visible;
+		}
+
+		public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+		{
+			throw new NotImplementedException();
+		}
+    }
 }
