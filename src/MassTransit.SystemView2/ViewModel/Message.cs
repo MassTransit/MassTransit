@@ -24,6 +24,7 @@ namespace MassTransit.SystemView.ViewModel
         private string _correlationId;
         private long _sequenceNumber;
         private Guid _subscriptionId;
+        private Uri _endpointUri;
 
         private Message()
         {
@@ -97,6 +98,19 @@ namespace MassTransit.SystemView.ViewModel
                 {
                     _subscriptionId = value;
                     OnPropertyChanged("SubscriptionId");
+                }
+            }
+        }
+
+        public Uri EndpointUri
+        {
+            get { return _endpointUri; }
+            set
+            {
+                if (_endpointUri != value)
+                {
+                    _endpointUri = value;
+                    OnPropertyChanged("EndpointUri");
                 }
             }
         }
