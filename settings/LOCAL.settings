@@ -25,6 +25,5 @@
   <property name="dirs.db" value="..\..\${folder.database}" />
   <property name="file.version" value="${project.name}.dll" overwrite="false" />
   <property name="restore.from.path" value="..\${database.name}.bak" overwrite="false" />
-  <property name="database.action" value="Create" />
   
 </project>
