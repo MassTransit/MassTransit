@@ -21,7 +21,6 @@ namespace MassTransit.RuntimeServices
 	using Services.Subscriptions.Server;
 	using Services.Timeout;
 	using StructureMap;
-	using StructureMap.Attributes;
 	using StructureMap.Configuration.DSL;
 	using StructureMapIntegration;
 	using Topshelf;
@@ -36,36 +35,37 @@ namespace MassTransit.RuntimeServices
 		{
 			BootstrapLogger();
 
-			MsmqEndpointConfigurator.Defaults(x =>
-				{
-					x.CreateMissingQueues = true;
-				});
+			MsmqEndpointConfigurator.Defaults(x => { x.CreateMissingQueues = true; });
 
-			var configuration = RunnerConfigurator.New(config =>
+			ObjectFactory.Initialize(x => { x.For<IConfiguration>().Use<Configuration>(); });
+
+			var serviceConfiguration = ObjectFactory.GetInstance<IConfiguration>();
+
+			IRunConfiguration configuration = RunnerConfigurator.New(config =>
 				{
 					config.SetServiceName(typeof (Program).Namespace);
 					config.SetDisplayName(typeof (Program).Namespace);
-					config.SetDescription("MassTransit Runtime Services (Subscriptions, Timeouts, Health Monitoring, Deferred Messages)");
+					config.SetDescription("MassTransit Runtime Services (Subscription, Timeout, Health Monitoring)");
 
 					config.RunAsLocalSystem();
 
 					config.DependencyOnMsmq();
 					config.DependencyOnMsSql();
 
-					config.ConfigureService<SubscriptionService>(typeof(SubscriptionService).Name, service =>
-						{
-							ConfigureService<SubscriptionService, SubscriptionServiceRegistry>(service, start => start.Start(), stop => stop.Stop());
-						});
-
-					config.ConfigureService<HealthService>(typeof(HealthService).Name, service =>
+					if (serviceConfiguration.SubscriptionServiceEnabled)
 					{
-						ConfigureService<HealthService, HealthServiceRegistry>(service, start => start.Start(), stop => stop.Stop());
-					});
+						config.ConfigureService<SubscriptionService>(typeof (SubscriptionService).Name, service => { ConfigureService<SubscriptionService, SubscriptionServiceRegistry>(service, start => start.Start(), stop => stop.Stop()); });
+					}
 
-					config.ConfigureService<TimeoutService>(typeof(TimeoutService).Name, service =>
-						{
-							ConfigureService<TimeoutService, TimeoutServiceRegistry>(service, start => start.Start(), stop => stop.Stop());
-						});
+					if (serviceConfiguration.HealthServiceEnabled)
+					{
+						config.ConfigureService<HealthService>(typeof (HealthService).Name, service => { ConfigureService<HealthService, HealthServiceRegistry>(service, start => start.Start(), stop => stop.Stop()); });
+					}
+
+					if (serviceConfiguration.TimeoutServiceEnabled)
+					{
+						config.ConfigureService<TimeoutService>(typeof (TimeoutService).Name, service => { ConfigureService<TimeoutService, TimeoutServiceRegistry>(service, start => start.Start(), stop => stop.Stop()); });
+					}
 
 					config.AfterStoppingTheHost(x => { _log.Info("MassTransit Runtime Services are exiting..."); });
 				});
@@ -74,7 +74,7 @@ namespace MassTransit.RuntimeServices
 
 		private static void BootstrapLogger()
 		{
-            var configFileName = AppDomain.CurrentDomain.BaseDirectory + Path.DirectorySeparatorChar + typeof(Program).Namespace + ".log4net.xml";
+			string configFileName = AppDomain.CurrentDomain.BaseDirectory + Path.DirectorySeparatorChar + typeof (Program).Namespace + ".log4net.xml";
 
 			XmlConfigurator.ConfigureAndWatch(new FileInfo(configFileName));
 
