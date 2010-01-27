@@ -94,7 +94,7 @@ namespace MassTransit.Tests.Serialization
 			{
 				using (MemoryStream input = new MemoryStream(sample))
 				{
-					//		serializer.Deserialize(input);
+					serializer.Deserialize(input);
 				}
 			}
 
