@@ -1,4 +1,6 @@
-﻿namespace LegacyRuntime
+﻿using Topshelf.Configuration.Dsl;
+
+namespace LegacyRuntime
 {
     using System;
     using System.IO;
@@ -37,7 +39,7 @@
                 config.DependencyOnMsmq();
                 config.DependencyOnMsSql();
 
-                config.ConfigureService<LegacySubscriptionProxyService>("name", s =>
+                config.ConfigureService<LegacySubscriptionProxyService>(s =>
                 {
                     ConfigureService<LegacySubscriptionProxyService, LegacySupportRegistry>(s, start=>start.Start(), stop=>stop.Stop());
                 });
@@ -58,24 +60,14 @@
         private static void ConfigureService<TService, TRegistry>(IServiceConfigurator<TService> service, Action<TService> start, Action<TService> stop)
     where TRegistry : Registry
         {
-            service.CreateServiceLocator(() =>
-            {
-                var container = new Container(x =>
-                {
-                    x.ForRequestedType<IConfiguration>()
-                        .CacheBy(InstanceScope.Singleton)
-                        .AddConcreteType<Configuration>();
+			var registry = FastActivator<TRegistry>.Create(ObjectFactory.Container);
+			ObjectFactory.Configure(cfg =>
+			{
+				cfg.For<IConfiguration>().Singleton().Use<Configuration>(); 
+				cfg.AddRegistry(registry);
+			});
+			service.HowToBuildService(builder => ObjectFactory.GetInstance<TService>());
 
-                    x.ForRequestedType<TService>()
-                        .AddInstances(i => i.OfConcreteType<TService>().WithName(typeof(TService).Name));
-                });
-
-                TRegistry registry = FastActivator<TRegistry>.Create(container);
-
-                container.Configure(x => x.AddRegistry(registry));
-
-                return new StructureMapObjectBuilder(container);
-            });
             service.WhenStarted(start);
             service.WhenStopped(stop);
         }

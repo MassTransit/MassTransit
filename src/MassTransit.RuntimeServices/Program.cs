@@ -10,6 +10,8 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
+using Topshelf.Configuration.Dsl;
+
 namespace MassTransit.RuntimeServices
 {
 	using System;
@@ -41,7 +43,7 @@ namespace MassTransit.RuntimeServices
 
 			var serviceConfiguration = ObjectFactory.GetInstance<IConfiguration>();
 
-			IRunConfiguration configuration = RunnerConfigurator.New(config =>
+			RunConfiguration configuration = RunnerConfigurator.New(config =>
 				{
 					config.SetServiceName(typeof (Program).Namespace);
 					config.SetDisplayName(typeof (Program).Namespace);
@@ -54,17 +56,17 @@ namespace MassTransit.RuntimeServices
 
 					if (serviceConfiguration.SubscriptionServiceEnabled)
 					{
-						config.ConfigureService<SubscriptionService>(typeof (SubscriptionService).Name, service => { ConfigureService<SubscriptionService, SubscriptionServiceRegistry>(service, start => start.Start(), stop => stop.Stop()); });
+						config.ConfigureService<SubscriptionService>(service => { ConfigureService<SubscriptionService, SubscriptionServiceRegistry>(service, start => start.Start(), stop => stop.Stop()); });
 					}
 
 					if (serviceConfiguration.HealthServiceEnabled)
 					{
-						config.ConfigureService<HealthService>(typeof (HealthService).Name, service => { ConfigureService<HealthService, HealthServiceRegistry>(service, start => start.Start(), stop => stop.Stop()); });
+						config.ConfigureService<HealthService>(service => { ConfigureService<HealthService, HealthServiceRegistry>(service, start => start.Start(), stop => stop.Stop()); });
 					}
 
 					if (serviceConfiguration.TimeoutServiceEnabled)
 					{
-						config.ConfigureService<TimeoutService>(typeof (TimeoutService).Name, service => { ConfigureService<TimeoutService, TimeoutServiceRegistry>(service, start => start.Start(), stop => stop.Stop()); });
+						config.ConfigureService<TimeoutService>(service => { ConfigureService<TimeoutService, TimeoutServiceRegistry>(service, start => start.Start(), stop => stop.Stop()); });
 					}
 
 					config.AfterStoppingTheHost(x => { _log.Info("MassTransit Runtime Services are exiting..."); });
@@ -84,24 +86,13 @@ namespace MassTransit.RuntimeServices
 		private static void ConfigureService<TService, TRegistry>(IServiceConfigurator<TService> service, Action<TService> start, Action<TService> stop)
 			where TRegistry : Registry
 		{
-			service.CreateServiceLocator(() =>
-				{
-					var container = new Container(x =>
-						{
-							x.ForRequestedType<IConfiguration>()
-								.CacheBy(InstanceScope.Singleton)
-								.AddConcreteType<Configuration>();
-
-							x.ForRequestedType<TService>()
-								.AddInstances(i => i.OfConcreteType<TService>().WithName(typeof (TService).Name));
-						});
-
-					TRegistry registry = FastActivator<TRegistry>.Create(container);
-
-					container.Configure(x => x.AddRegistry(registry));
-
-					return new StructureMapObjectBuilder(container);
-				});
+			var registry = FastActivator<TRegistry>.Create(ObjectFactory.Container);
+			ObjectFactory.Configure(cfg =>
+			{
+				cfg.For<IConfiguration>().Singleton().Use<Configuration>(); 
+				cfg.AddRegistry(registry);
+			});
+			service.HowToBuildService(builder => ObjectFactory.GetInstance<TService>());
 			service.WhenStarted(start);
 			service.WhenStopped(stop);
 		}
