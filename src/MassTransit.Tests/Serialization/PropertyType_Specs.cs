@@ -29,21 +29,11 @@ namespace MassTransit.Tests.Serialization
 		}
 
 		[Test]
-		public void Should_handle_a_present_value()
+		public void Should_handle_a_missing_nullable_value()
 		{
-			var obj = new PropertyOfChar {Value = 'A'};
+			var obj = new PropertyOfNullableChar();
 
-			var result = SerializeAndReturn(obj);
-
-			result.Value.ShouldEqual(obj.Value);
-		}
-
-		[Test]
-		public void Should_handle_a_string_null()
-		{
-			var obj = new PropertyOfChar {Value = '\0'};
-
-			var result = SerializeAndReturn(obj);
+			PropertyOfNullableChar result = SerializeAndReturn(obj);
 
 			result.Value.ShouldEqual(obj.Value);
 		}
@@ -53,19 +43,59 @@ namespace MassTransit.Tests.Serialization
 		{
 			var obj = new PropertyOfNullableChar {Value = 'A'};
 
-			var result = SerializeAndReturn(obj);
+			PropertyOfNullableChar result = SerializeAndReturn(obj);
 
 			result.Value.ShouldEqual(obj.Value);
 		}
 
 		[Test]
-		public void Should_handle_a_missing_nullable_value()
+		public void Should_handle_a_present_value()
 		{
-			var obj = new PropertyOfNullableChar();
+			var obj = new PropertyOfChar {Value = 'A'};
 
-			var result = SerializeAndReturn(obj);
+			PropertyOfChar result = SerializeAndReturn(obj);
 
 			result.Value.ShouldEqual(obj.Value);
+		}
+
+		[Test]
+		public void Should_handle_a_string_null()
+		{
+			var obj = new PropertyOfChar {Value = '\0'};
+
+			PropertyOfChar result = SerializeAndReturn(obj);
+
+			result.Value.ShouldEqual(obj.Value);
+		}
+	}
+
+
+	[TestFixture]
+	public class Serializing_a_string_with_an_escaped_character :
+		SerializationTest
+	{
+		public class SimpleMessage
+		{
+			public SimpleMessage(string body)
+			{
+				Body = body;
+			}
+
+			protected SimpleMessage()
+			{
+			}
+
+			public string Body { get; private set; }
+		}
+
+		[Test]
+		public void Should_handle_a_missing_nullable_value()
+		{
+			var obj = new SimpleMessage("");
+
+			SimpleMessage result = SerializeAndReturn(obj);
+
+			result.Body.ShouldEqual(obj.Body);
 		}
 	}
 }
