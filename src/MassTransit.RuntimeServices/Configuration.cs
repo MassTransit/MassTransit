@@ -102,7 +102,10 @@ namespace MassTransit.RuntimeServices
 
 		private string GetApplicationSetting(string key, Func<string> defaultValueProvider)
 		{
-			string value = ConfigurationManager.AppSettings[key] ?? LocateConfiguration().AppSettings.Settings[key].Value;
+			string value = ConfigurationManager.AppSettings[key];
+
+            if (value == null && LocateConfiguration().AppSettings.Settings[key] != null)
+                value = LocateConfiguration().AppSettings.Settings[key].Value;
 
 			return value ?? defaultValueProvider();
 		}
