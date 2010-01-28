@@ -22,29 +22,25 @@ namespace MassTransit.RuntimeServices
 	using Saga;
 	using Services.Subscriptions.Server;
 	using StructureMap;
-	using StructureMap.Attributes;
 	using StructureMapIntegration;
 
-    public class SubscriptionServiceRegistry :
+	public class SubscriptionServiceRegistry :
 		MassTransitRegistryBase
 	{
 		public SubscriptionServiceRegistry(IContainer container)
 		{
 			var configuration = container.GetInstance<IConfiguration>();
 
-			ForRequestedType<ISessionFactory>()
-				.CacheBy(InstanceScope.Singleton)
-				.TheDefault.Is.ConstructedBy(context => CreateSessionFactory());
+			For<ISessionFactory>()
+				.Singleton()
+				.Use(context => CreateSessionFactory());
 
-			ForRequestedType(typeof (ISagaRepository<>))
-				.AddConcreteType(typeof (NHibernateSagaRepositoryForContainers<>));
-			ForRequestedType<ISubscriptionRepository>()
-				.AddConcreteType<PersistantSubscriptionRepository>();
+			For(typeof (ISagaRepository<>))
+				.Add(typeof (NHibernateSagaRepositoryForContainers<>));
+			For<ISubscriptionRepository>()
+				.Add<PersistantSubscriptionRepository>();
 
-			RegisterServiceBus(configuration.SubscriptionServiceUri, x =>
-				{
-					x.SetConcurrentConsumerLimit(1);
-				});
+			RegisterServiceBus(configuration.SubscriptionServiceUri, x => { x.SetConcurrentConsumerLimit(1); });
 		}
 
 		private static ISessionFactory CreateSessionFactory()
@@ -61,9 +57,9 @@ namespace MassTransit.RuntimeServices
 
 		private static void BuildSchema(NHibernate.Cfg.Configuration config)
 		{
-            new SchemaUpdate(config).Execute(false, true);
+			new SchemaUpdate(config).Execute(false, true);
 
-            var schemaFile = Path.Combine(Path.GetDirectoryName(typeof(SubscriptionService).Assembly.Location), typeof(SubscriptionService).Name + ".sql");
+			string schemaFile = Path.Combine(Path.GetDirectoryName(typeof (SubscriptionService).Assembly.Location), typeof (SubscriptionService).Name + ".sql");
 
 			new SchemaExport(config).SetOutputFile(schemaFile).Execute(false, false, false);
 		}

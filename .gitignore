@@ -1,8 +1,10 @@
 build_output/*
 code_drop/*
+*.suo
+*.user
 
-**/*.suo
-**/*.user
+src/logs/*
+
 **/*.sln*
 bin
 obj
