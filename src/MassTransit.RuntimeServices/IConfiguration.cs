@@ -16,11 +16,14 @@ namespace MassTransit.RuntimeServices
 
 	public interface IConfiguration
 	{
+		bool HealthServiceEnabled { get; }
 		Uri HealthServiceControlUri { get; }
 		Uri HealthServiceDataUri { get; }
 
+		bool SubscriptionServiceEnabled { get; }
 		Uri SubscriptionServiceUri { get; }
-	
+
+		bool TimeoutServiceEnabled { get; }
 		Uri TimeoutServiceControlUri { get; }
 		Uri TimeoutServiceDataUri { get; }
 	}

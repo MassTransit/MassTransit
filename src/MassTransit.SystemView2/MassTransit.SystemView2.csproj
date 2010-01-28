@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.30729</ProductVersion>
+    <ProductVersion>9.0.21022</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{D2DAE9B1-AB3E-4B4D-9E8E-B394BA5B7EFE}</ProjectGuid>
     <OutputType>WinExe</OutputType>
@@ -36,6 +36,10 @@
     <Reference Include="Magnum, Version=0.8.0.410, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\lib\Magnum.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Practices.ServiceLocation, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\lib\Microsoft.Practices.ServiceLocation.dll</HintPath>
     </Reference>
     <Reference Include="StructureMap, Version=2.5.4.0, Culture=neutral, PublicKeyToken=e60ad81abae3c223, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -102,12 +106,11 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Configuration.cs" />
-    <Compile Include="Consumer\SubscriptionDataConsumer.cs" />
     <Compile Include="Converters\AofBMultiValueConverter.cs" />
     <Compile Include="Converters\IsEndpointToVisibilityConverter.cs" />
     <Compile Include="Converters\IsMessageToVisibilityConverter.cs" />
     <Compile Include="Converters\MessageNameToTextColorConverter.cs" />
+    <Compile Include="Converters\MessageNameToVisibilityConverter.cs" />
     <Compile Include="Converters\TreeItemToImagePathConverter.cs" />
     <Compile Include="Converters\TreeItemToImageVisibilityConverter.cs" />
     <Compile Include="Converters\TypeFilterConverter.cs" />
@@ -120,13 +123,6 @@
     <Compile Include="EndpointDetails.xaml.cs">
       <DependentUpon>EndpointDetails.xaml</DependentUpon>
     </Compile>
-    <Compile Include="IConfiguration.cs" />
-    <Compile Include="SystemViewRegistry.cs" />
-    <Compile Include="ViewModel\Endpoints.cs" />
-    <Compile Include="ViewModel\Endpoint.cs" />
-    <Compile Include="ViewModel\IKeyedObject.cs" />
-    <Compile Include="ViewModel\KeyedCollectionBase.cs" />
-    <Compile Include="ViewModel\LocalSubscriptionCache.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -140,14 +136,6 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <Compile Include="ViewModel\Message.cs" />
-    <Compile Include="ViewModel\Messages.cs" />
-    <Compile Include="ViewModel\NotifyCollectionChangedBase.cs" />
-    <Compile Include="ViewModel\NotifyPropertyChangedBase.cs" />
-    <Compile Include="ViewModel\ObjectCopy.cs" />
-    <Compile Include="ViewModel\TypeNameHelper.cs" />
-    <Compile Include="ViewModel\Worker.cs" />
-    <Compile Include="ViewModel\Workers.cs" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
@@ -164,6 +152,10 @@
     <ProjectReference Include="..\Containers\MassTransit.StructureMapIntegration\MassTransit.StructureMapIntegration.csproj">
       <Project>{F5E67502-2B30-484C-88C3-97710291F5AA}</Project>
       <Name>MassTransit.StructureMapIntegration</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\MassTransit.SystemView.Core\MassTransit.SystemView.Core.csproj">
+      <Project>{40F4115D-713B-471D-9A6A-39C678F1133C}</Project>
+      <Name>MassTransit.SystemView.Core</Name>
     </ProjectReference>
     <ProjectReference Include="..\MassTransit\MassTransit.csproj">
       <Project>{6EFD69FC-CBCC-4F85-AEE0-EFBA73F4D273}</Project>

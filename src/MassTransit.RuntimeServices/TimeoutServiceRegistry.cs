@@ -22,10 +22,9 @@ namespace MassTransit.RuntimeServices
 	using Services.HealthMonitoring.Configuration;
 	using Services.Timeout;
 	using StructureMap;
-	using StructureMap.Attributes;
 	using StructureMapIntegration;
 
-    public class TimeoutServiceRegistry :
+	public class TimeoutServiceRegistry :
 		MassTransitRegistryBase
 	{
 		private readonly IContainer _container;
@@ -63,9 +62,9 @@ namespace MassTransit.RuntimeServices
 
 		private static void BuildSchema(NHibernate.Cfg.Configuration config)
 		{
-            new SchemaUpdate(config).Execute(false, true);
+			new SchemaUpdate(config).Execute(false, true);
 
-            var schemaFile = Path.Combine(Path.GetDirectoryName(typeof(TimeoutService).Assembly.Location), typeof(TimeoutService).Name + ".sql");
+			string schemaFile = Path.Combine(Path.GetDirectoryName(typeof (TimeoutService).Assembly.Location), typeof (TimeoutService).Name + ".sql");
 
 			new SchemaExport(config).SetOutputFile(schemaFile).Execute(false, false, false);
 		}

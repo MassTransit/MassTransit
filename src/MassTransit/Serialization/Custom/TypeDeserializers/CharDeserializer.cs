@@ -19,7 +19,11 @@ namespace MassTransit.Serialization.Custom.TypeDeserializers
 	{
 		public object Deserialize(IDeserializerContext context)
 		{
-			return XmlConvert.ToChar(context.ReadElementAsString());
+			var s = context.ReadElementAsString();
+			if (string.IsNullOrEmpty(s))
+				return default(char);
+
+			return XmlConvert.ToChar(s);
 		}
 	}
 }

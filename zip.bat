@@ -4,9 +4,8 @@
 ::No edits to this file are required - http://uppercut.pbwiki.com
 
 SET DIR=%~d0%~p0%
-
+::This is gone once teamcity can call multiple files
 call "%DIR%build.bat"
-
 if %ERRORLEVEL% NEQ 0 goto errors
 
 SET NANT="%DIR%lib\Nant\nant.exe"

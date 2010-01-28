@@ -14,8 +14,7 @@ namespace MassTransit.SystemView
 {
     using System;
     using System.Windows;
-    using Consumer;
-    using ViewModel;
+    using Core.ViewModel;
     using StructureMap;
 
     /// <summary>

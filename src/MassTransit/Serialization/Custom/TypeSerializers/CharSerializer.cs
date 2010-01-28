@@ -19,7 +19,11 @@ namespace MassTransit.Serialization.Custom.TypeSerializers
 	{
 		protected override void WriteValue(XmlWriter writer, object value)
 		{
-			writer.WriteValue(XmlConvert.ToString((char) value));
+			var c = (char) value;
+			if(c == default(char))
+				return;
+
+			writer.WriteValue(XmlConvert.ToString(c));
 		}
 	}
 }
