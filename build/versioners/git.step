@@ -44,6 +44,7 @@
     <getVersionFromGit
       gitExecutableWithPath="git"
       repoDirectory="."
+      repoPath="${repository.path}"
       output="_revision.xml"
       failonerror="false"
       />

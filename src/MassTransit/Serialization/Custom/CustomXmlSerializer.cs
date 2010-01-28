@@ -33,12 +33,14 @@ namespace MassTransit.Serialization.Custom
                     Indent = true,
                     NewLineOnAttributes = true,
                     CloseOutput = false,
+					CheckCharacters = false,
                 };
 
-            _readerSettings = new XmlReaderSettings
-                {
-                    IgnoreWhitespace = true,
-                    CloseInput = false,
+        	_readerSettings = new XmlReaderSettings
+        		{
+        			IgnoreWhitespace = true,
+        			CloseInput = false,
+        			CheckCharacters = false,
                 };
         }
 

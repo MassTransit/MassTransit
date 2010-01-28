@@ -13,8 +13,9 @@
 namespace MassTransit.SystemView
 {
     using System.Windows;
-    using ViewModel;
-    
+    using System.Windows.Controls;
+    using Core.ViewModel;
+
     /// <summary>
     /// Interaction logic for Window1.xaml
     /// </summary>
@@ -28,6 +29,27 @@ namespace MassTransit.SystemView
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             tvSubscriptions.ItemsSource = LocalSubscriptionCache.Endpoints;
+        }
+
+        private void itemRemove_Click(object sender, RoutedEventArgs e)
+        {
+            if (e != null)
+            {
+                var source = e.Source as MenuItem;
+                if (source != null)
+                {
+                    var message = source.CommandParameter as Message;
+                    if (message != null)
+                    {
+                        if (MessageBox.Show("Are you sure you want to remove this subscription?", "Confirm", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+                        {
+                            var sdc = App.SubscriptionDataConsumer;
+
+                            sdc.RemoveSubscription(message.ClientId, message.MessageName, message.CorrelationId, message.EndpointUri);
+                        }
+                    }
+                }
+            }
         }
     }
 }
