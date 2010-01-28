@@ -10,8 +10,6 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-using Topshelf.Configuration.Dsl;
-
 namespace MassTransit.RuntimeServices
 {
 	using System;
@@ -24,9 +22,9 @@ namespace MassTransit.RuntimeServices
 	using Services.Timeout;
 	using StructureMap;
 	using StructureMap.Configuration.DSL;
-	using StructureMapIntegration;
 	using Topshelf;
 	using Topshelf.Configuration;
+	using Topshelf.Configuration.Dsl;
 	using Transports.Msmq;
 
 	internal class Program
@@ -86,13 +84,22 @@ namespace MassTransit.RuntimeServices
 		private static void ConfigureService<TService, TRegistry>(IServiceConfigurator<TService> service, Action<TService> start, Action<TService> stop)
 			where TRegistry : Registry
 		{
-			var registry = FastActivator<TRegistry>.Create(ObjectFactory.Container);
-			ObjectFactory.Configure(cfg =>
-			{
-				cfg.For<IConfiguration>().Singleton().Use<Configuration>(); 
-				cfg.AddRegistry(registry);
-			});
-			service.HowToBuildService(builder => ObjectFactory.GetInstance<TService>());
+			var container = new Container(x =>
+				{
+					x.For<IConfiguration>()
+						.Singleton()
+						.Add<Configuration>();
+
+					x.For<TService>()
+						.Singleton()
+						.Use<TService>();
+				});
+
+			TRegistry registry = FastActivator<TRegistry>.Create(container);
+
+			container.Configure(x => x.AddRegistry(registry));
+
+			service.HowToBuildService(builder => container.GetInstance<TService>());
 			service.WhenStarted(start);
 			service.WhenStopped(stop);
 		}

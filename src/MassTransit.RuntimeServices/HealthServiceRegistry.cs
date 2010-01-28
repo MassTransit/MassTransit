@@ -21,7 +21,6 @@ namespace MassTransit.RuntimeServices
 	using Saga;
 	using Services.HealthMonitoring;
 	using StructureMap;
-	using StructureMap.Attributes;
 	using StructureMapIntegration;
 
 	public class HealthServiceRegistry :
@@ -35,12 +34,12 @@ namespace MassTransit.RuntimeServices
 
 			var configuration = container.GetInstance<IConfiguration>();
 
-			ForRequestedType<ISessionFactory>()
-				.CacheBy(InstanceScope.Singleton)
-				.TheDefault.Is.ConstructedBy(context => CreateSessionFactory());
+			For<ISessionFactory>()
+				.Singleton()
+				.Use(context => CreateSessionFactory());
 
-			ForRequestedType(typeof (ISagaRepository<>))
-				.AddConcreteType(typeof (NHibernateSagaRepositoryForContainers<>));
+			For(typeof (ISagaRepository<>))
+				.Add(typeof (NHibernateSagaRepositoryForContainers<>));
 
 			RegisterControlBus(configuration.HealthServiceControlUri, x => { });
 
@@ -63,9 +62,9 @@ namespace MassTransit.RuntimeServices
 
 		private static void BuildSchema(NHibernate.Cfg.Configuration config)
 		{
-		    new SchemaUpdate(config).Execute(false, true);
+			new SchemaUpdate(config).Execute(false, true);
 
-			var schemaFile = Path.Combine(Path.GetDirectoryName(typeof (HealthService).Assembly.Location), typeof (HealthService).Name + ".sql");
+			string schemaFile = Path.Combine(Path.GetDirectoryName(typeof (HealthService).Assembly.Location), typeof (HealthService).Name + ".sql");
 
 			new SchemaExport(config).SetOutputFile(schemaFile).Execute(false, false, false);
 		}
