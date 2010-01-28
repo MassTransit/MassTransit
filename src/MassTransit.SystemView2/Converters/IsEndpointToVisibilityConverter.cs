@@ -16,7 +16,7 @@ namespace MassTransit.SystemView.Converters
     using System.Globalization;
     using System.Windows;
     using System.Windows.Data;
-    using ViewModel;
+    using Core.ViewModel;
 
     public class IsEndpointToVisibilityConverter :
         IValueConverter

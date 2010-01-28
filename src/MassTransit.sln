@@ -51,6 +51,8 @@ Project("{4F174C21-8C12-11D0-8340-0000F80270F8}") = "MassTransit.RuntimeServices
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.LegacyServices", "LegacyRuntime\MassTransit.LegacyServices.csproj", "{1501B1CE-C525-4003-9A90-208538FAD30B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.SystemView.Core", "MassTransit.SystemView.Core\MassTransit.SystemView.Core.csproj", "{40F4115D-713B-471D-9A6A-39C678F1133C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -137,6 +139,10 @@ Global
 		{1501B1CE-C525-4003-9A90-208538FAD30B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1501B1CE-C525-4003-9A90-208538FAD30B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1501B1CE-C525-4003-9A90-208538FAD30B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{40F4115D-713B-471D-9A6A-39C678F1133C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{40F4115D-713B-471D-9A6A-39C678F1133C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{40F4115D-713B-471D-9A6A-39C678F1133C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{40F4115D-713B-471D-9A6A-39C678F1133C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

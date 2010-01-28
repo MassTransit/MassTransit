@@ -10,23 +10,14 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.SystemView.ViewModel
+namespace MassTransit.SystemView.Core
 {
-    public class Workers :
-        KeyedCollectionBase<Worker, string>
-    {
-        public void Update(Worker worker)
-        {
-            if (!Contains(worker.Key))
-            {
-                Add(worker);
-            }
-            else
-            {
-                var target = Items[worker.Key];
+    using System;
 
-                ObjectCopy.Copy(worker, target);
-            }
-        }
+    public interface IConfiguration
+    {
+        Uri SystemViewControlUri { get; }
+        Uri SystemViewDataUri { get; }
+        Uri SubscriptionServiceUri { get; }
     }
 }

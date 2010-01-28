@@ -14,8 +14,8 @@ namespace MassTransit.SystemView
 {
     using System.Windows;
     using System.Windows.Controls;
-    using ViewModel;
-    
+    using Core.ViewModel;
+
     /// <summary>
     /// Interaction logic for Window1.xaml
     /// </summary>

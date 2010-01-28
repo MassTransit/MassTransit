@@ -10,10 +10,32 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.SystemView.ViewModel
+namespace MassTransit.SystemView.Core.ViewModel
 {
-    public interface IKeyedObject<T>
+    using System;
+
+    public class Endpoint :
+        IKeyedObject<Uri>
     {
-        T Key { get; }
+        public Endpoint(Uri endpointUri) : 
+            this()
+        {
+            EndpointUri = endpointUri;
+        }
+
+        private Endpoint()
+        {
+            Messages = new Messages();
+            Workers = new Workers();
+        }
+
+        public Uri EndpointUri { get; set; }
+        public Messages Messages { get; private set; }
+        public Workers Workers { get; private set; }
+        
+        public Uri Key
+        {
+            get { return EndpointUri; }
+        }
     }
 }

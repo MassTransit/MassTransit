@@ -10,27 +10,16 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.SystemView
+namespace MassTransit.SystemView.Core.ViewModel
 {
-	using StructureMap;
-	using StructureMapIntegration;
+    public class LocalSubscriptionCache :
+        NotifyPropertyChangedBase
+    {
+        public static Endpoints Endpoints { get; private set; }
 
-    public class SystemViewRegistry :
-		MassTransitRegistryBase
-	{
-		public SystemViewRegistry(IContainer container)
-		{
-			IConfiguration configuration = container.GetInstance<IConfiguration>();
-
-			RegisterControlBus(configuration.SystemViewControlUri, x => { });
-
-			RegisterServiceBus(configuration.SystemViewDataUri, x =>
-				{
-					x.SetConcurrentConsumerLimit(1);
-					x.UseControlBus(container.GetInstance<IControlBus>());
-
-					ConfigureSubscriptionClient(configuration.SubscriptionServiceUri, x);
-				});
-		}
-	}
+        static LocalSubscriptionCache()
+        {
+            Endpoints = new Endpoints();
+        }
+    }
 }
