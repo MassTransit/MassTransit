@@ -106,8 +106,6 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Configuration.cs" />
-    <Compile Include="Consumer\SubscriptionDataConsumer.cs" />
     <Compile Include="Converters\AofBMultiValueConverter.cs" />
     <Compile Include="Converters\IsEndpointToVisibilityConverter.cs" />
     <Compile Include="Converters\IsMessageToVisibilityConverter.cs" />
@@ -125,13 +123,6 @@
     <Compile Include="EndpointDetails.xaml.cs">
       <DependentUpon>EndpointDetails.xaml</DependentUpon>
     </Compile>
-    <Compile Include="IConfiguration.cs" />
-    <Compile Include="SystemViewRegistry.cs" />
-    <Compile Include="ViewModel\Endpoints.cs" />
-    <Compile Include="ViewModel\Endpoint.cs" />
-    <Compile Include="ViewModel\IKeyedObject.cs" />
-    <Compile Include="ViewModel\KeyedCollectionBase.cs" />
-    <Compile Include="ViewModel\LocalSubscriptionCache.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -145,14 +136,6 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <Compile Include="ViewModel\Message.cs" />
-    <Compile Include="ViewModel\Messages.cs" />
-    <Compile Include="ViewModel\NotifyCollectionChangedBase.cs" />
-    <Compile Include="ViewModel\NotifyPropertyChangedBase.cs" />
-    <Compile Include="ViewModel\ObjectCopy.cs" />
-    <Compile Include="ViewModel\TypeNameHelper.cs" />
-    <Compile Include="ViewModel\Worker.cs" />
-    <Compile Include="ViewModel\Workers.cs" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
@@ -169,6 +152,10 @@
     <ProjectReference Include="..\Containers\MassTransit.StructureMapIntegration\MassTransit.StructureMapIntegration.csproj">
       <Project>{F5E67502-2B30-484C-88C3-97710291F5AA}</Project>
       <Name>MassTransit.StructureMapIntegration</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\MassTransit.SystemView.Core\MassTransit.SystemView.Core.csproj">
+      <Project>{40F4115D-713B-471D-9A6A-39C678F1133C}</Project>
+      <Name>MassTransit.SystemView.Core</Name>
     </ProjectReference>
     <ProjectReference Include="..\MassTransit\MassTransit.csproj">
       <Project>{6EFD69FC-CBCC-4F85-AEE0-EFBA73F4D273}</Project>

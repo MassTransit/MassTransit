@@ -13,7 +13,7 @@
 namespace MassTransit.SystemView
 {
     using System.Windows;
-    using Consumer;
+    using Core.Consumer;
 
     /// <summary>
     /// Interaction logic for App.xaml
