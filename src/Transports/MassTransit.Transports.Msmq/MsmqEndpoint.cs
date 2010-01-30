@@ -93,6 +93,8 @@ namespace MassTransit.Transports.Msmq
 			transportMessage.Label = typeof (T).Name;
 
 			transportMessage.Recoverable = true;
+
+			SetMessageExpiration(transportMessage);
 		}
 
 		private Func<Message, Action<Message>> ReceiveFromTransport(Func<object, Action<object>> receiver)
