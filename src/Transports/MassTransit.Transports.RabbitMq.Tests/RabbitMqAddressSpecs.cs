@@ -29,7 +29,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
             Assert.AreEqual(new Uri("amqp-0-8://localhost:5672/dru"), addr.RabbitMqAddress);
         }
 
-        [Test]
+		[Test, Category("Integration")]
         public void Send()
         {
             var t = new RabbitMqTransport(new RabbitMqEndpointAddress(_address));
@@ -40,8 +40,8 @@ namespace MassTransit.Transports.RabbitMq.Tests
             });
         }
 
-        [Test]
-        public void Receive()
+		[Test, Category("Integration")]
+		public void Receive()
         {
             var t = new RabbitMqTransport(new RabbitMqEndpointAddress(new Uri("rabbitmq://localhost/dru")));
             t.Receive(s=>
@@ -57,7 +57,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
             });
         }
 
-        [Test]
+		[Test, Category("Integration")]
         public void EndpointSend()
         {
             var addr = new RabbitMqEndpointAddress(_address);
@@ -74,7 +74,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
             e.Send(new BugsBunny() {Food = "Carrot"});
         }
 
-        [Test]
+		[Test, Category("Integration")]
         public void EndpointReceive()
         {
             var addr = new RabbitMqEndpointAddress(_address);
