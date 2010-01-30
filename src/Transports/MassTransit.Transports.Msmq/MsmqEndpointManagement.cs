@@ -154,7 +154,7 @@ namespace MassTransit.Transports.Msmq
 			}
 			catch (UriFormatException ex)
 			{
-				throw new MsmqEndpointException(uri, "The queue address is invalid.", ex);
+				throw new EndpointException(uri, "The MSMQ queue address is invalid.", ex);
 			}
 		}
 
