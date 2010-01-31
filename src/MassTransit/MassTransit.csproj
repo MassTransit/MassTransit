@@ -370,10 +370,12 @@
     <Compile Include="Transports\CreateEndpointSettings.cs" />
     <Compile Include="Transports\LoopbackEndpointFactory.cs" />
     <Compile Include="Transports\LoopbackTransport.cs" />
+    <Compile Include="Transports\MessageRetryTracker.cs" />
     <Compile Include="Transports\MulticastUdpEndpointFactory.cs" />
     <Compile Include="Transports\MulticastUdpTransport.cs" />
     <Compile Include="Transports\NullTransport.cs" />
     <Compile Include="Transports\StreamEndpoint.cs" />
+    <Compile Include="Transports\TransportBase.cs" />
     <Compile Include="Util\BranchEvaluator.cs" />
     <Compile Include="Util\EvaluationCandidateSelector.cs" />
     <Compile Include="Util\ExpressionVisitor.cs" />
@@ -519,6 +521,9 @@
     <Compile Include="Services\MessageDeferral\Messages\NewDeferMessageReceived.cs" />
     <Compile Include="Services\Timeout\RemoteTimeoutViewer.cs" />
     <Compile Include="Util\SequenceNumberGenerator.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Transports\_readme.txt" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Services\HealthMonitoring\Client\" />
