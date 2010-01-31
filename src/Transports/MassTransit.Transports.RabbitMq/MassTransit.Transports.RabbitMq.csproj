@@ -53,10 +53,12 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\..\SolutionVersion.cs">
+      <Link>SolutionVersion.cs</Link>
+    </Compile>
     <Compile Include="Configuration\RabbitMqEndpointConfigurator.cs" />
     <Compile Include="RabbitMqEndpoint.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RabbitMqEndpointAddress.cs" />
     <Compile Include="RabbitMqEndpointConfigurator.cs" />
     <Compile Include="RabbitMqEndpointFactory.cs" />
     <Compile Include="RabbitMqTransport.cs" />

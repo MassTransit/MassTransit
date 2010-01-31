@@ -13,34 +13,28 @@
 namespace MassTransit.Transports
 {
     using System;
-    using System.Diagnostics;
     using System.IO;
 
-    [DebuggerDisplay("{Address}")]
     public class NullTransport :
-        ITransport
+        TransportBase
     {
-        public NullTransport(IEndpointAddress address)
-        {
-            Address = address;
-        }
-
-        public void Dispose()
+        public NullTransport(IEndpointAddress address) : base(address)
         {
         }
 
-        public IEndpointAddress Address { get; private set; }
-
-        public void Send(Action<Stream> sender)
+        public override void OnDisposing()
         {
+            //no-op
         }
 
-        public void Receive(Func<Stream, Action<Stream>> receiver)
+        public override void Send(Action<Stream> sender)
         {
+            //no-op
         }
 
-        public void Receive(Func<Stream, Action<Stream>> receiver, TimeSpan timeout)
+        public override void Receive(Func<Stream, Action<Stream>> receiver, TimeSpan timeout)
         {
+            //no-op
         }
     }
 }
