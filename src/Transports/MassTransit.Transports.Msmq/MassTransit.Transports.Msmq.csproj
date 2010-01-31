@@ -79,10 +79,8 @@
     <Compile Include="MsmqEndpoint.cs" />
     <Compile Include="MsmqEndpointConfigurator.cs" />
     <Compile Include="MsmqEndpointConfiguratorDefaults.cs" />
-    <Compile Include="MsmqEndpointException.cs" />
     <Compile Include="MsmqEndpointFactory.cs" />
     <Compile Include="MsmqEndpointManagement.cs" />
-    <Compile Include="MsmqMessageExceptionTracker.cs" />
     <Compile Include="MsmqTransportFactory.cs" />
     <Compile Include="NonTransactionalMsmqTransport.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -14,35 +14,23 @@ namespace MassTransit.Transports
 {
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics;
     using System.IO;
     using System.Threading;
 
-    [DebuggerDisplay("{Address}")]
     public class LoopbackTransport :
-        ITransport
+        TransportBase
     {
         private readonly object _messageLock = new object();
-        private bool _disposed;
         private AutoResetEvent _messageReady = new AutoResetEvent(false);
         private LinkedList<MemoryStream> _messages = new LinkedList<MemoryStream>();
 
-        public LoopbackTransport(IEndpointAddress address)
+        public LoopbackTransport(IEndpointAddress address) : base(address)
         {
-            Address = address;
         }
 
-        public void Dispose()
+        public override void Send(Action<Stream> sender)
         {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        public IEndpointAddress Address { get; private set; }
-
-        public void Send(Action<Stream> sender)
-        {
-            if (_disposed) throw NewDisposedException();
+            EnsureNotDisposed();
 
             MemoryStream bodyStream = null;
             try
@@ -53,7 +41,7 @@ namespace MassTransit.Transports
 
                 lock (_messageLock)
                 {
-                    if (_disposed) throw NewDisposedException();
+                    EnsureNotDisposed();
 
                     _messages.AddLast(bodyStream);
                 }
@@ -69,16 +57,9 @@ namespace MassTransit.Transports
             _messageReady.Set();
         }
 
-        public void Receive(Func<Stream, Action<Stream>> receiver)
+        public override void Receive(Func<Stream, Action<Stream>> receiver, TimeSpan timeout)
         {
-            if (_disposed) throw NewDisposedException();
-
-            Receive(receiver, TimeSpan.Zero);
-        }
-
-        public void Receive(Func<Stream, Action<Stream>> receiver, TimeSpan timeout)
-        {
-            if (_disposed) throw NewDisposedException();
+            EnsureNotDisposed();
 
             int messageCount;
             lock (_messageLock)
@@ -144,41 +125,19 @@ namespace MassTransit.Transports
                 if (monitorExitNeeded)
                     Monitor.Exit(_messageLock);
             }
-
-          //  lock (_messageLock)
-            //    messageCount = _messages.Count;
-
-            //if (messageCount == 0)
-              //  _messageReady.WaitOne(timeout, true);
         }
 
-        private void Dispose(bool disposing)
+        public override void OnDisposing()
         {
-            if (_disposed) return;
-            if (disposing)
+            lock (_messageLock)
             {
-                lock (_messageLock)
-                {
-                    _messages.Each(x => x.Dispose());
-                    _messages.Clear();
-                    _messages = null;
-                }
-
-                _messageReady.Close();
-                _messageReady = null;
+                _messages.Each(x => x.Dispose());
+                _messages.Clear();
+                _messages = null;
             }
 
-            _disposed = true;
-        }
-
-        private ObjectDisposedException NewDisposedException()
-        {
-            return new ObjectDisposedException("The transport has already been disposed: " + Address);
-        }
-
-        ~LoopbackTransport()
-        {
-            Dispose(false);
+            _messageReady.Close();
+            _messageReady = null;
         }
     }
 }
