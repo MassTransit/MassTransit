@@ -13,40 +13,27 @@
 namespace MassTransit.Transports
 {
     using System;
-    using System.Diagnostics;
     using System.IO;
     using System.Net;
     using System.Net.Sockets;
     using Exceptions;
 
-    [DebuggerDisplay("{Address}")]
     public class MulticastUdpTransport :
-        ITransport
+        TransportBase
     {
-        private bool _disposed;
         private IPAddress _groupAddress;
         private UdpClient _receiveClient;
         private UdpClient _sendClient;
         private IPEndPoint _sendIpEndPoint;
 
-        public MulticastUdpTransport(IEndpointAddress address)
+        public MulticastUdpTransport(IEndpointAddress address) : base(address)
         {
-            Address = address;
-
             Initialize();
         }
 
-        public void Dispose()
+        public override void Send(Action<Stream> sender)
         {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        public IEndpointAddress Address { get; private set; }
-
-        public void Send(Action<Stream> sender)
-        {
-            if (_disposed) throw NewDisposedException();
+            EnsureNotDisposed();
 
             using (var bodyStream = new MemoryStream())
             {
@@ -64,16 +51,9 @@ namespace MassTransit.Transports
             }
         }
 
-        public void Receive(Func<Stream, Action<Stream>> receiver)
+        public override void Receive(Func<Stream, Action<Stream>> receiver, TimeSpan timeout)
         {
-            if (_disposed) throw NewDisposedException();
-
-            Receive(receiver, TimeSpan.Zero);
-        }
-
-        public void Receive(Func<Stream, Action<Stream>> receiver, TimeSpan timeout)
-        {
-            if (_disposed) throw NewDisposedException();
+            EnsureNotDisposed();
 
             var endPoint = new IPEndPoint(IPAddress.Any, Address.Uri.Port);
 
@@ -105,18 +85,6 @@ namespace MassTransit.Transports
 
             StartSender();
             StartReceiver();
-        }
-
-        private void Dispose(bool disposing)
-        {
-            if (_disposed) return;
-            if (disposing)
-            {
-                StopReceiver();
-                StopSender();
-            }
-
-            _disposed = true;
         }
 
         private void StartSender()
@@ -168,14 +136,15 @@ namespace MassTransit.Transports
             }
         }
 
+        public override void OnDisposing()
+        {
+            StopSender();
+            StopReceiver();
+        }
+
         private ObjectDisposedException NewDisposedException()
         {
             return new ObjectDisposedException("The transport has already been disposed: " + Address);
-        }
-
-        ~MulticastUdpTransport()
-        {
-            Dispose(false);
         }
     }
 }

@@ -22,7 +22,7 @@ namespace MassTransit.Transports
 	public class StreamEndpoint :
 		AbstractEndpoint
 	{
-		private static readonly ILog _log = LogManager.GetLogger(typeof (LoopbackEndpoint));
+        private static readonly ILog _log = LogManager.GetLogger(typeof(StreamEndpoint));
 		private bool _disposed;
 		private ITransport _errorTransport;
 		private ITransport _transport;

@@ -14,7 +14,6 @@ namespace MassTransit.Transports.RabbitMq
 {
     using System;
     using System.Diagnostics;
-    using Configuration;
     using MassTransit.Configuration;
     using Serialization;
 

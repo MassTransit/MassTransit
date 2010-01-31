@@ -13,50 +13,28 @@
 namespace MassTransit.Transports.RabbitMq
 {
     using System;
-    using System.Diagnostics;
     using System.IO;
-    using Exceptions;
     using Internal;
     using log4net;
     using RabbitMQ.Client;
-    using RabbitMQ.Client.Events;
-    using RabbitMQ.Client.Impl;
 
-    [DebuggerDisplay("{Address}")]
     public class RabbitMqTransport :
-        ITransport
+        TransportBase
     {
         static readonly ILog _log = LogManager.GetLogger(typeof(RabbitMqTransport));
-        
-        readonly IEndpointAddress _address;
-        IConnection _connection;
-        bool _disposed;
-        ConnectionFactory _factory;
+
+        readonly IConnection _connection;
 
         static string _directSendMessageExchange = "";
 
-        public RabbitMqTransport(IEndpointAddress address)
+        public RabbitMqTransport(IEndpointAddress address, IConnection connection) : base(address)
         {
-            _address = address;
-
-            Initialize();
+            _connection = connection;
         }
 
-        public IEndpointAddress Address
+        public override void Receive(Func<Stream, Action<Stream>> receiver, TimeSpan timeout)
         {
-            get { return _address; }
-        }
-
-        public void Receive(Func<Stream, Action<Stream>> receiver)
-        {
-            if (_disposed) throw NewDisposedException();
-
-            Receive(receiver, TimeSpan.Zero);
-        }
-
-        public void Receive(Func<Stream, Action<Stream>> receiver, TimeSpan timeout)
-        {
-            if (_disposed) throw NewDisposedException();
+            EnsureNotDisposed();
 
             using(var channel = _connection.CreateModel())
             {
@@ -84,12 +62,11 @@ namespace MassTransit.Transports.RabbitMq
             }
         }
 
-        public void Send(Action<Stream> sender)
+        public override void Send(Action<Stream> sender)
         {
-            if (_disposed) throw NewDisposedException();
+            EnsureNotDisposed();
 
-
-            using (IModel channel = _connection.CreateModel())
+            using (var channel = _connection.CreateModel())
             {
                 var properties = channel.CreateBasicProperties();
                 SetMessageExpiration(properties);
@@ -97,7 +74,7 @@ namespace MassTransit.Transports.RabbitMq
                 {
                     sender(bodyStream);
 
-                    channel.BasicPublish(_directSendMessageExchange, _address.Path, properties, bodyStream.ToArray());
+                    channel.BasicPublish(_directSendMessageExchange, Address.Path, properties, bodyStream.ToArray());
 
                 }
                 channel.Close(200, "ok");
@@ -117,99 +94,9 @@ namespace MassTransit.Transports.RabbitMq
 			}
         }
 
-        private Uri GenerateServerUri()
+        public override void OnDisposing()
         {
-            return new UriBuilder("amqp-0-8", Address.Uri.Host, Address.Uri.Port).Uri;
+            //no-op
         }
-        
-        private void Initialize()
-        {
-            try
-            {
-                _factory = new ConnectionFactory();
-
-                Connect();
-            }
-            catch (Exception ex)
-            {
-                throw new TransportException(Address.Uri, "Failed to initialize transport", ex);
-            }
-        }
-
-        private void Connect()
-        {
-            Disconnect();
-
-            _connection = _factory.CreateConnection(GenerateServerUri());
-            
-            _connection.CallbackException += ConnectionExceptionListener;
-        }
-
-        private void Disconnect()
-        {
-            if (_connection == null) return;
-
-            try
-            {
-                _connection.CallbackException -= ConnectionExceptionListener;
-                _connection.Close();
-                _connection.Dispose();
-                _connection = null;
-            }
-            catch (Exception ex)
-            {
-                _log.Error("Failed to close existing connection", ex);
-            }
-        }
-
-        private void Reconnect()
-        {
-            try
-            {
-                Disconnect();
-            }
-            catch (Exception ex)
-            {
-                _log.Error("Failed to disconnect from " + Address, ex);
-            }
-            finally
-            {
-                Connect();
-            }
-        }
-
-        private void ConnectionExceptionListener(object sender, CallbackExceptionEventArgs ex)
-        {
-            _log.Error("An exception occurred on the endpoint: " + Address, ex.Exception);
-
-            Reconnect();
-        }
-
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (_disposed) return;
-            if (disposing)
-            {
-                //Disconnect();
-            }
-
-            _disposed = true;
-        }
-        
-        private ObjectDisposedException NewDisposedException()
-        {
-            return new ObjectDisposedException("The transport has already been disposed: " + Address);
-        }
-
-        ~RabbitMqTransport()
-		{
-			Dispose(false);
-		}
     }
 }
