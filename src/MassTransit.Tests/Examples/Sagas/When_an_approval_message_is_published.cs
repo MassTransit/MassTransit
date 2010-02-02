@@ -10,15 +10,32 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.TestFramework.Examples.Sagas.Messages
+namespace MassTransit.Tests.Examples.Sagas
 {
-	using System;
+	using Messages;
+	using TestFramework;
 
-	public class StartSimpleSaga :
-		CorrelatedBy<Guid>
+	[Scenario]
+	public class When_an_approval_message_is_published :
+		Given_a_simple_saga_exists_and_is_waiting_for_approval
 	{
-		public Guid CorrelationId { get; set; }
+		[When]
+		public void A_dynamically_correlated_message_is_published()
+		{
+			Message = new ApproveSimpleCustomer()
+				{
+					CustomerId = CustomerId,
+				};
 
-		public int CustomerId { get; set; }
+			LocalBus.Publish(Message);
+		}
+
+		protected ApproveSimpleCustomer Message { get; set; }
+
+		[Then]
+		public void The_saga_should_be_in_the_waiting_for_finish_state()
+		{
+			Saga.ShouldBeInState(SimpleSaga.WaitingForFinish);
+		}
 	}
 }

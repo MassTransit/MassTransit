@@ -10,9 +10,10 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.TestFramework.Examples.Sagas
+namespace MassTransit.Tests.Examples.Sagas
 {
 	using Messages;
+	using TestFramework;
 
 	[Scenario]
 	public class When_a_start_message_is_received :
@@ -36,13 +37,13 @@ namespace MassTransit.TestFramework.Examples.Sagas
 		[Then]
 		public void A_new_saga_should_be_created()
 		{
-			Saga.ShouldNotBeNull();
+			ExtensionMethodsForAssertions.ShouldNotBeNull(Saga);
 		}
 
 		[Then]
 		public void The_customer_id_should_be_set()
 		{
-			Saga.CustomerId.ShouldEqual(CustomerId);
+			ExtensionMethodsForAssertions.ShouldEqual(Saga.CustomerId, CustomerId);
 		}
 	}
 }
