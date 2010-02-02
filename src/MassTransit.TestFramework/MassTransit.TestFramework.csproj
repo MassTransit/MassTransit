@@ -69,29 +69,15 @@
     <Compile Include="..\SolutionVersion.cs">
       <Link>SolutionVersion.cs</Link>
     </Compile>
-    <Compile Include="Examples\Sagas\Given_a_simple_saga_does_not_exist.cs" />
-    <Compile Include="Examples\Sagas\Given_a_simple_saga_exists_and_is_waiting_for_approval.cs" />
-    <Compile Include="Examples\Sagas\Messages\ApproveSimpleCustomer.cs" />
-    <Compile Include="Examples\Sagas\Messages\FinishSimpleSaga.cs" />
-    <Compile Include="Examples\Sagas\SimpleSaga.cs" />
-    <Compile Include="Examples\Sagas\Messages\StartSimpleSaga.cs" />
-    <Compile Include="Examples\Sagas\When_an_approval_message_is_published.cs" />
-    <Compile Include="Examples\Sagas\When_a_start_message_is_received.cs" />
     <Compile Include="ExtensionMethodsForSubscriptions.cs" />
     <Compile Include="Fixtures\SagaTestFixture.cs" />
     <Compile Include="Helpers\EndpointSinkLocator.cs" />
-    <Compile Include="Examples\Given_a_consumer_is_subscribed_to_a_message.cs" />
-    <Compile Include="Examples\Given_a_consumer_is_subscribed_to_a_message_on_a_remote_bus.cs" />
-    <Compile Include="Examples\Given_a_consumer_is_subscribed_to_a_message_on_the_remote_bus.cs" />
-    <Compile Include="Examples\When_a_message_is_published_to_the_bus.cs" />
-    <Compile Include="Examples\When_a_message_is_published_to_the_local_bus.cs" />
     <Compile Include="ExtensionMethodsForObjectBuilder.cs" />
     <Compile Include="Fixtures\AbstractTestConsumer.cs" />
     <Compile Include="ExtensionMethodsForAssertions.cs" />
     <Compile Include="ConsumerOf.cs" />
     <Compile Include="Fixtures\AbstractTestFixture.cs" />
     <Compile Include="Fixtures\EndpointTestFixture.cs" />
-    <Compile Include="Examples\Messages\SimpleMessage.cs" />
     <Compile Include="Fixtures\LocalAndRemoteTestFixture.cs" />
     <Compile Include="Fixtures\SubscriptionServiceTestFixture.cs" />
     <Compile Include="GivenAttribute.cs" />
@@ -101,13 +87,11 @@
     <Compile Include="SelectiveConsumerOf.cs" />
     <Compile Include="ThenAttribute.cs" />
     <Compile Include="ScenarioAttribute.cs" />
-    <Compile Include="Examples\When_a_message_is_sent_to_the_bus_endpoint.cs" />
     <Compile Include="WhenAttribute.cs" />
     <Compile Include="Fixtures\LocalTestFixture.cs" />
     <Compile Include="Given_a_standalone_service_bus.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ExtensionMethodsForSagas.cs" />
-    <Compile Include="Examples\When_a_message_is_published_via_the_local_bus.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\MassTransit\MassTransit.csproj">

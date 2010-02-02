@@ -10,23 +10,27 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.TestFramework
+namespace MassTransit.Tests.Examples.Sagas
 {
-	using System;
-	using Fixtures;
+	using TestFramework;
+	using TestFramework.Fixtures;
 
-	public class ConsumerOf<TMessage> :
-		AbstractTestConsumer<TMessage>,
-		Consumes<TMessage>.All
-		where TMessage : class
+	[Scenario]
+	public class Given_a_simple_saga_exists_and_is_waiting_for_approval :
+		SagaTestFixture<SimpleSaga>
 	{
-		public ConsumerOf()
+		[Given]
+		public void A_simple_saga_exists_and_is_waiting_for_approval()
 		{
+			LocalBus.Subscribe<SimpleSaga>();
+
+			AddExistingSaga(SagaId, x =>
+				{
+					x.CustomerId = CustomerId;
+					x.SetCurrentState(SimpleSaga.WaitingForApproval);
+				});
 		}
 
-		public ConsumerOf(Action<TMessage> consumerAction)
-			: base(consumerAction)
-		{
-		}
+		protected const int CustomerId = 47;
 	}
 }

@@ -10,18 +10,30 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.TestFramework.Examples.Sagas
+namespace MassTransit.Tests.Examples
 {
-	using Fixtures;
+	using Magnum.DateTimeExtensions;
+	using Messages;
+	using TestFramework;
 
 	[Scenario]
-	public class Given_a_simple_saga_does_not_exist :
-		SagaTestFixture<SimpleSaga>
+	public class When_a_message_is_published_to_the_bus :
+		Given_a_consumer_is_subscribed_to_a_message
 	{
-		[Given]
-		public void A_simple_saga_does_not_exist()
+		[When]
+		public void A_message_is_published_to_the_bus()
 		{
-			LocalBus.Subscribe<SimpleSaga>();
+			Message = new SimpleMessage();
+
+			LocalBus.Publish(Message);
+		}
+
+		protected SimpleMessage Message { get; private set; }
+
+		[Then]
+		public void The_consumer_should_receive_the_message()
+		{
+			Consumer.ShouldHaveReceived(Message, 1.Seconds());
 		}
 	}
 }

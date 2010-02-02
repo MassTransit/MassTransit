@@ -10,9 +10,10 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.TestFramework.Examples
+namespace MassTransit.Tests.Examples
 {
 	using Messages;
+	using TestFramework;
 
 	[Scenario]
 	public class Given_a_consumer_is_subscribed_to_a_message_on_the_remote_bus :
