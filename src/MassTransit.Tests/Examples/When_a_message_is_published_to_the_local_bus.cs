@@ -10,29 +10,30 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.TestFramework.Examples
+namespace MassTransit.Tests.Examples
 {
 	using Magnum.DateTimeExtensions;
 	using Messages;
+	using TestFramework;
 
 	[Scenario]
-	public class When_a_message_is_published_via_the_local_bus :
-		Given_a_consumer_is_subscribed_to_a_message_on_a_remote_bus
+	public class When_a_message_is_published_to_the_local_bus :
+		Given_a_consumer_is_subscribed_to_a_message_on_the_remote_bus
 	{
 		[When]
-		public void A_message_is_published_via_the_local_bus()
+		public void A_message_is_published_to_the_local_bus()
 		{
 			Message = new SimpleMessage();
 
 			LocalBus.Publish(Message);
 		}
 
+		protected SimpleMessage Message { get; private set; }
+
 		[Then]
 		public void The_consumer_should_receive_the_message()
 		{
 			Consumer.ShouldHaveReceived(Message, 1.Seconds());
 		}
-
-		protected SimpleMessage Message { get; private set; }
 	}
 }

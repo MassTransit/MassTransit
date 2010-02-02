@@ -10,31 +10,26 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.TestFramework.Examples.Sagas
+namespace MassTransit.Tests.Examples
 {
-	using Messages;
+	using TestFramework;
+	using TestFramework.Examples.Messages;
 
 	[Scenario]
-	public class When_an_approval_message_is_published :
-		Given_a_simple_saga_exists_and_is_waiting_for_approval
+	public class Given_a_pong_service :
+		Given_two_service_buses_with_shared_subscriptions
 	{
-		[When]
-		public void A_dynamically_correlated_message_is_published()
+		[Given]
+		public void A_pong_service()
 		{
-			Message = new ApproveSimpleCustomer()
+			PingService = new ConsumerOf<Ping>(ping =>
 				{
-					CustomerId = CustomerId,
-				};
-
-			LocalBus.Publish(Message);
+					// Response with a pong to the ping
+					CurrentMessage.Respond(new Pong(ping.CorrelationId));
+				});
+			RemoteBus.Subscribe(PingService);
 		}
 
-		protected ApproveSimpleCustomer Message { get; set; }
-
-		[Then]
-		public void The_saga_should_be_in_the_waiting_for_finish_state()
-		{
-			Saga.ShouldBeInState(SimpleSaga.WaitingForFinish);
-		}
+		protected ConsumerOf<Ping> PingService { get; private set; }
 	}
 }

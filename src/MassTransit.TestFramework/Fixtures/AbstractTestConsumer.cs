@@ -28,7 +28,18 @@ namespace MassTransit.TestFramework.Fixtures
 		private readonly List<TMessage> _messages = new List<TMessage>();
 		private readonly Semaphore _received = new Semaphore(0, 100);
 
+		private Action<TMessage> _consumerAction;
 		private int _receivedMessageCount;
+
+		protected AbstractTestConsumer()
+		{
+			_consumerAction = x => { };
+		}
+
+		protected AbstractTestConsumer(Action<TMessage> consumerAction)
+		{
+			_consumerAction = consumerAction;
+		}
 
 		public static int AllReceivedCount
 		{
@@ -45,6 +56,8 @@ namespace MassTransit.TestFramework.Fixtures
 		{
 			Interlocked.Increment(ref _receivedMessageCount);
 			Interlocked.Increment(ref _allReceivedCount);
+
+			_consumerAction(message);
 
 			_messages.Add(message);
 			_received.Release();

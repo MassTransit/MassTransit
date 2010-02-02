@@ -10,13 +10,22 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.TestFramework.Examples.Sagas.Messages
+namespace MassTransit.Tests.Examples
 {
-	using System;
+	using Messages;
+	using TestFramework;
 
-	public class FinishSimpleSaga :
-		CorrelatedBy<Guid>
+	[Scenario]
+	public class Given_a_consumer_is_subscribed_to_a_message :
+		Given_a_standalone_service_bus
 	{
-		public Guid CorrelationId { get; set; }
+		[Given]
+		public void A_consumer_is_subscribed_to_a_message()
+		{
+			Consumer = new ConsumerOf<SimpleMessage>();
+			LocalBus.Subscribe(Consumer);
+		}
+
+		protected ConsumerOf<SimpleMessage> Consumer { get; private set; }
 	}
 }
