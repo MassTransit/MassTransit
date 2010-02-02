@@ -10,26 +10,30 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.TestFramework.Examples.Sagas
+namespace MassTransit.Tests.Examples
 {
-	using Fixtures;
+	using Magnum.DateTimeExtensions;
+	using Messages;
+	using TestFramework;
 
 	[Scenario]
-	public class Given_a_simple_saga_exists_and_is_waiting_for_approval :
-		SagaTestFixture<SimpleSaga>
+	public class When_a_message_is_published_via_the_local_bus :
+		Given_a_consumer_is_subscribed_to_a_message_on_a_remote_bus
 	{
-		[Given]
-		public void A_simple_saga_exists_and_is_waiting_for_approval()
+		[When]
+		public void A_message_is_published_via_the_local_bus()
 		{
-			LocalBus.Subscribe<SimpleSaga>();
+			Message = new SimpleMessage();
 
-			AddExistingSaga(SagaId, x =>
-				{
-					x.CustomerId = CustomerId;
-					x.SetCurrentState(SimpleSaga.WaitingForApproval);
-				});
+			LocalBus.Publish(Message);
 		}
 
-		protected const int CustomerId = 47;
+		[Then]
+		public void The_consumer_should_receive_the_message()
+		{
+			Consumer.ShouldHaveReceived(Message, 1.Seconds());
+		}
+
+		protected SimpleMessage Message { get; private set; }
 	}
 }
