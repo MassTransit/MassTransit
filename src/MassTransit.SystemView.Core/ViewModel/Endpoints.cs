@@ -24,6 +24,8 @@ namespace MassTransit.SystemView.Core.ViewModel
     {
         public bool Remove(Uri endpointUri, string messageName)
         {
+            if (!Items.Keys.Contains(endpointUri)) return true;
+
             var retValue = Items[endpointUri].Messages.Remove(messageName);
             if (Items[endpointUri].Messages.Count == 0 && Items[endpointUri].Workers.Count == 0)
             {
