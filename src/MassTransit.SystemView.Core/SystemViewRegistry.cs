@@ -18,10 +18,8 @@ namespace MassTransit.SystemView.Core
     public class SystemViewRegistry :
         MassTransitRegistryBase
     {
-        public SystemViewRegistry(IContainer container)
+        public SystemViewRegistry(IConfiguration configuration, IContainer container)
         {
-            IConfiguration configuration = container.GetInstance<IConfiguration>();
-
             RegisterControlBus(configuration.SystemViewControlUri, x => { });
 
             RegisterServiceBus(configuration.SystemViewDataUri, x =>
