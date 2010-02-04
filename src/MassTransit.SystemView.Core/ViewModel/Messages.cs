@@ -17,6 +17,8 @@ namespace MassTransit.SystemView.Core.ViewModel
     {
         public bool Remove(string messageName)
         {
+            if (!Items.Keys.Contains(messageName)) return true;
+
             var message = Items[messageName];
             return Remove(message);
         }
