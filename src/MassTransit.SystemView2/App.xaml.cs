@@ -13,7 +13,9 @@
 namespace MassTransit.SystemView
 {
     using System.Windows;
+    using Core;
     using Core.Consumer;
+    using StructureMap;
 
     /// <summary>
     /// Interaction logic for App.xaml
@@ -30,7 +32,18 @@ namespace MassTransit.SystemView
 
         private void Application_Startup(object sender, StartupEventArgs e)
         {
-            SubscriptionDataConsumer = new SubscriptionDataConsumer();
+            var configuration = new Configuration();
+
+            ObjectFactory.Configure(config =>
+                {
+                    config.For<IConfiguration>()
+                        .Singleton()
+                        .Add(context => configuration);
+
+                    config.AddRegistry(new SystemViewRegistry(configuration, ObjectFactory.Container));
+                });
+
+            SubscriptionDataConsumer = ObjectFactory.GetInstance<SubscriptionDataConsumer>();
         }
     }
 }

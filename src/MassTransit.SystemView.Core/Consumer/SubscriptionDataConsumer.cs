@@ -28,13 +28,13 @@ namespace MassTransit.SystemView.Core.Consumer
     {
         private IServiceBus _bus;
         private readonly Guid _clientId = CombGuid.Generate();
-        private StructureMap.IContainer _container;
         private IEndpoint _subscriptionServiceEndpoint;
         private UnsubscribeAction _unsubscribe;
+        private readonly IObjectBuilder _objectBuilder;
 
-        public SubscriptionDataConsumer()
+        public SubscriptionDataConsumer(IObjectBuilder objectBuilder)
         {
-            BootstrapContainer();
+            _objectBuilder = objectBuilder;
 
             BootstrapServiceBus();
 
@@ -43,8 +43,8 @@ namespace MassTransit.SystemView.Core.Consumer
 
         private void ConnectToSubscriptionService()
         {
-            _subscriptionServiceEndpoint = _container.GetInstance<IEndpointFactory>()
-                .GetEndpoint(_container.GetInstance<IConfiguration>().SubscriptionServiceUri);
+            _subscriptionServiceEndpoint = _objectBuilder.GetInstance<IEndpointFactory>()
+                .GetEndpoint(_objectBuilder.GetInstance<IConfiguration>().SubscriptionServiceUri);
 
             _subscriptionServiceEndpoint.Send(new AddSubscriptionClient(_clientId, _bus.Endpoint.Uri, _bus.Endpoint.Uri));
         }
@@ -56,22 +56,8 @@ namespace MassTransit.SystemView.Core.Consumer
                     x.CreateMissingQueues = true;
                 });
 
-            _bus = _container.GetInstance<IServiceBus>();
+            _bus = _objectBuilder.GetInstance<IServiceBus>();
             _unsubscribe = _bus.Subscribe(this);
-        }
-
-        private void BootstrapContainer()
-        {
-            _container = new StructureMap.Container();
-            _container.Configure(x =>
-                {
-                    x.For<IConfiguration>()
-                        .Singleton()
-                        .Use<Configuration>();
-                });
-
-            var registry = new SystemViewRegistry(_container);
-            _container.Configure(x => x.AddRegistry(registry));
         }
 
         public void Consume(SubscriptionRefresh message)
@@ -96,7 +82,7 @@ namespace MassTransit.SystemView.Core.Consumer
 
         public void UpdateWorker(Uri controlUri, string type, int pendingLimit, int inProgressLimit)
         {
-            var endpoint = _container.GetInstance<IEndpointFactory>().GetEndpoint(controlUri);
+            var endpoint = _objectBuilder.GetInstance<IEndpointFactory>().GetEndpoint(controlUri);
 
             endpoint.Send(new ConfigureWorker() { InProgressLimit = inProgressLimit, MessageType = type, PendingLimit = pendingLimit });
         }
