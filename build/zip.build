@@ -18,13 +18,14 @@
   <property name="version.build" value="0" overwrite="false" />
   <property name="version.revision" value="0" overwrite="false" />
   <property name="version" value="0" />
+  <property name="file.uppercut.assembly" value="uppercut.exe" />
   <property name="zip.file" value="${dirs.drop}\${project.name}.zip" />
   <property name="zip.file.rename" value="${dirs.drop}\${project.name}.v${version}.zip" />
   <property name="file.custom.step.before" value="${dirs.build_scripts_custom}\${file.current.no_extension}.pre.build" />
   <property name="file.custom.step.after" value="${dirs.build_scripts_custom}\${file.current.no_extension}.post.build" />
   <property name="file.custom.step.replace" value="${dirs.build_scripts_custom}\${file.current.no_extension}.replace.build" />
 
-  <target name="go" depends="run_tasks" />
+  <target name="go" depends="load_uppercut_assemblies, run_tasks" />
 
   <target name="run_tasks">
     <echo message="Running ${project::get-name()} tasks." />
@@ -83,6 +84,7 @@
     <!--<nant buildfile="${dirs.current}\versioners\vss.step" inheritall="true" if="${source_control_type=='vss'}" />-->
 
     <property name="version.revision" value="${environment::get-variable('uc.app.revision')}" if="${environment::variable-exists('uc.app.revision')}" />
+    <property name="version.revision" value="${environment::get-variable('BUILD_VCS_NUMBER')}" if="${version.revision == '0' and environment::variable-exists('BUILD_VCS_NUMBER')}" />
     <echo message="Using revision number: ${version.revision}." />
   </target>
 
@@ -101,5 +103,9 @@
     <echo message="Running custom tasks if ${file.custom.step.after} exists." />
     <nant buildfile="${file.custom.step.after}" inheritall="true" if="${file::exists(file.custom.step.after)}" failonerror="false" />
   </target>
-
+  
+  <target name="load_uppercut_assemblies">
+    <loadtasks assembly="${file.uppercut.assembly}" if="${file::exists(file.uppercut.assembly)}" />
+  </target>
+  
 </project>
