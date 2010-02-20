@@ -32,5 +32,5 @@ Documentation is located at [http://masstransit.pbworks.com/](http://masstransit
 
 
 # CREDITS
-Logo Design by [The Agile Badger](http://www.theagilebadger.com) 
+Logo Design by [The Agile Badger](http://www.theagilebadger.com)  
 UppercuT - Automated Builds in moments, not days! [Project UppercuT](http://projectuppercut.org)
