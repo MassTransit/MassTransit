@@ -14,12 +14,13 @@
   <property name="dirs.drop" value="${dirs.current}\${path.to.toplevel}\${folder.code_drop}" overwrite="false" />
   <property name="folder.app.drop" value="${project.name}" overwrite="false" />
   <property name="project.name" value="__SOLUTION_NAME_WITHOUT_SLN_EXTENSION__" overwrite="false" />
+  <property name="file.uppercut.assembly" value="uppercut.exe" />
   <property name="dirs.assemblies" value="${dirs.current}\${path.to.toplevel}\assemblies" overwrite="false" />
   <property name="file.custom.step.before" value="${dirs.build_scripts_custom}\${file.current.no_extension}.pre.build" />
   <property name="file.custom.step.after" value="${dirs.build_scripts_custom}\${file.current.no_extension}.post.build" />
   <property name="file.custom.step.replace" value="${dirs.build_scripts_custom}\${file.current.no_extension}.replace.build" />
 
-  <target name="go" depends="run_tasks" />
+  <target name="go" depends="load_uppercut_assemblies, run_tasks" />
 
   <target name="run_tasks">
     <echo message="Running ${project::get-name()} tasks." />
@@ -58,5 +59,9 @@
     <echo message="Running custom tasks if ${file.custom.step.after} exists." />
     <nant buildfile="${file.custom.step.after}" inheritall="true" if="${file::exists(file.custom.step.after)}" failonerror="false" />
   </target>
-
+  
+  <target name="load_uppercut_assemblies">
+    <loadtasks assembly="${file.uppercut.assembly}" if="${file::exists(file.uppercut.assembly)}" />
+  </target>
+  
 </project>
