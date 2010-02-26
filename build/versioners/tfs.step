@@ -29,7 +29,7 @@
   </target>
 
   <target name="run_normal_tasks"
-          depends="get_revision,set_version_environment_variable"
+          depends="get_revision, get_externally_provided_revision, set_version_environment_variable"
           description="Generating Assembly File." />
 
   <target name="custom_tasks_before">
@@ -59,6 +59,10 @@
     <delete file="_revision.xml" failonerror="false" />
   </target>
 
+  <target name="get_externally_provided_revision">
+    <property name="version.revision" value="${environment::get-variable('BUILD_VCS_NUMBER')}" if="${version.revision == '0' and environment::variable-exists('BUILD_VCS_NUMBER')}" />
+  </target>
+  
   <target name="set_version_environment_variable">
     <setenv name="uc.app.revision" value="${version.revision}"/>
   </target>
