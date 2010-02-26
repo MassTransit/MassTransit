@@ -40,6 +40,9 @@ namespace MassTransit.Transports.Msmq
 			using (MessageQueue queue = MessageQueue.Create(_address.LocalName, transactional))
 			{
 				_log.Debug("A queue was created: " + _address + (transactional ? " (transactional)" : ""));
+
+                queue.SetPermissions("Administrators", MessageQueueAccessRights.FullControl, AccessControlEntryType.Allow);
+                queue.SetPermissions("Everyone", MessageQueueAccessRights.WriteMessage, AccessControlEntryType.Allow);
 			}
 
 			VerifyQueueSendAndReceive();
