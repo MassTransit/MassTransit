@@ -13,7 +13,9 @@
 namespace MassTransit.Transports.Msmq
 {
 	using System;
+	using System.Collections.Generic;
 	using System.Messaging;
+    using System.Security.Principal;
 	using Exceptions;
 	using Internal;
 	using log4net;
@@ -23,6 +25,10 @@ namespace MassTransit.Transports.Msmq
 	{
 		private static readonly ILog _log = LogManager.GetLogger(typeof (MsmqEndpointManagement));
 		private readonly IMsmqEndpointAddress _address;
+        
+        // WellKnowSidType.WorldSid == "Everyone"; whoda thunk (http://social.msdn.microsoft.com/forums/en-US/netfxbcl/thread/0737f978-a998-453d-9a6a-c348285d7ea3/)
+        private static readonly string EveryoneAccountName = (new SecurityIdentifier(WellKnownSidType.WorldSid, null)).Translate(typeof(NTAccount)).ToString();
+        private static readonly string AdministratorsGroupName = (new SecurityIdentifier(WellKnownSidType.BuiltinAdministratorsSid, null)).Translate(typeof(NTAccount)).ToString();
 
 		private MsmqEndpointManagement(IMsmqEndpointAddress address)
 		{
@@ -41,8 +47,8 @@ namespace MassTransit.Transports.Msmq
 			{
 				_log.Debug("A queue was created: " + _address + (transactional ? " (transactional)" : ""));
 
-                queue.SetPermissions("Administrators", MessageQueueAccessRights.FullControl, AccessControlEntryType.Allow);
-                queue.SetPermissions("Everyone", MessageQueueAccessRights.WriteMessage, AccessControlEntryType.Allow);
+                queue.SetPermissions(AdministratorsGroupName, MessageQueueAccessRights.FullControl, AccessControlEntryType.Allow);
+                queue.SetPermissions(EveryoneAccountName, MessageQueueAccessRights.WriteMessage, AccessControlEntryType.Allow);
 			}
 
 			VerifyQueueSendAndReceive();
