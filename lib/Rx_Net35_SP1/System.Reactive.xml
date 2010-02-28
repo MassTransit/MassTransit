@@ -1,0 +1,2286 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>System.Reactive</name>
+    </assembly>
+    <members>
+        <member name="T:System.IObserver`1">
+            <summary>
+            Supports push-style iteration over an observable sequence.
+            </summary>
+        </member>
+        <member name="M:System.IObserver`1.OnNext(`0)">
+            <summary>
+            Notifies the observer of a new value in the sequence.
+            </summary>
+        </member>
+        <member name="M:System.IObserver`1.OnError(System.Exception)">
+            <summary>
+            Notifies the observer that an exception has occurred.
+            </summary>
+        </member>
+        <member name="M:System.IObserver`1.OnCompleted">
+            <summary>
+            Notifies the observer of the end of the sequence.
+            </summary>
+        </member>
+        <member name="T:System.Threading.ControlScheduler">
+            <summary>
+            Represents an object that schedules units of work on the message loop associated with a control.
+            </summary>
+        </member>
+        <member name="T:System.Threading.IScheduler">
+            <summary>
+            Represents an object that schedules units of work.
+            </summary>
+        </member>
+        <member name="M:System.Threading.IScheduler.Schedule(System.Action)">
+            <summary>
+            Schedules action to be executed.
+            </summary>
+        </member>
+        <member name="M:System.Threading.IScheduler.Schedule(System.Action,System.TimeSpan)">
+            <summary>
+            Schedules action to be executed after dueTime.
+            </summary>
+        </member>
+        <member name="M:System.Threading.ControlScheduler.#ctor(System.Windows.Forms.Control)">
+            <summary>
+            Constructs a ControlScheduler that schedules units of work on the message loop associated with control.
+            </summary>
+        </member>
+        <member name="M:System.Threading.ControlScheduler.Schedule(System.Action)">
+            <summary>
+            Schedules action to be executed on the message loop associated with the control.
+            </summary>
+        </member>
+        <member name="M:System.Threading.ControlScheduler.Schedule(System.Action,System.TimeSpan)">
+            <summary>
+            Schedules action to be executed after dueTime on the message loop associated with the control.
+            </summary>
+        </member>
+        <member name="P:System.Threading.ControlScheduler.Control">
+            <summary>
+            Gets the control associated with the ControlScheduler.
+            </summary>
+        </member>
+        <member name="T:System.Threading.DispatcherScheduler">
+            <summary>
+            Represents an object that schedules units of work on a Dispatcher.
+            </summary>
+        </member>
+        <member name="M:System.Threading.DispatcherScheduler.#ctor(System.Windows.Threading.Dispatcher)">
+            <summary>
+            Constructs an DispatcherScheduler that schedules units of work on dispatcher.
+            </summary>
+        </member>
+        <member name="M:System.Threading.DispatcherScheduler.System#Threading#IScheduler#Schedule(System.Action)">
+            <summary>
+            Schedules action to be executed on the dispatcher.
+            </summary>
+        </member>
+        <member name="M:System.Threading.DispatcherScheduler.System#Threading#IScheduler#Schedule(System.Action,System.TimeSpan)">
+            <summary>
+            Schedules action to be executed after dueTime on the dispatcher.
+            </summary>
+        </member>
+        <member name="P:System.Threading.DispatcherScheduler.Dispatcher">
+            <summary>
+            Gets the dispatcher associated with the DispatcherScheduler.
+            </summary>
+        </member>
+        <member name="T:System.IObservable`1">
+            <summary>
+            Represents a push-style collection.
+            </summary>
+        </member>
+        <member name="M:System.IObservable`1.Subscribe(System.IObserver{`0})">
+            <summary>
+            Subscribes an observer to the observable sequence.
+            </summary>
+        </member>
+        <member name="T:System.Collections.Generic.AsyncSubject`1">
+            <summary>
+            Represents the result of an asynchronous operation.
+            </summary>
+        </member>
+        <member name="T:System.Collections.Generic.ISubject`1">
+            <summary>
+            Represents an object that is both an observable sequence as well as an observer.
+            </summary>
+        </member>
+        <member name="T:System.Collections.Generic.ISubject`2">
+            <summary>
+            Represents an object that is both an observable sequence as well as an observer.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.AsyncSubject`1.#ctor">
+            <summary>
+            Creates a subject that can only receive one value and that value is cached for all future observations.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.AsyncSubject`1.OnNext(`0)">
+            <summary>
+            Notifies all subscribed observers with the value.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.AsyncSubject`1.OnError(System.Exception)">
+            <summary>
+            Notifies all subscribed observers with the exception. 
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.AsyncSubject`1.OnCompleted">
+            <summary>
+            Notifies all subscribed observers of the end of the sequence.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.AsyncSubject`1.Dispose">
+            <summary>
+            Disposes the subject and unsubscribes of all the subscribed observers.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.AsyncSubject`1.Subscribe(System.IObserver{`0})">
+            <summary>
+            Subscribes an observer to the subject.
+            </summary>
+        </member>
+        <member name="T:System.Collections.Generic.BehaviorSubject`1">
+            <summary>
+            Represents a value that changes over time.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.BehaviorSubject`1.#ctor(`0)">
+            <summary>
+            Creates a subject that caches its last value and starts with the specified value.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.BehaviorSubject`1.OnNext(`0)">
+            <summary>
+            Notifies all subscribed observers with the value.  
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.BehaviorSubject`1.OnError(System.Exception)">
+            <summary>
+            Notifies all subscribed observers with the exception.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.BehaviorSubject`1.OnCompleted">
+            <summary>
+            Notifies all subscribed observers of the end of the sequence.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.BehaviorSubject`1.Dispose">
+            <summary>
+            Disposes the subject and unsubscribes of all the subscribed observers.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.BehaviorSubject`1.Subscribe(System.IObserver{`0})">
+            <summary>
+            Subscribes an observer to the subject.
+            </summary>
+        </member>
+        <member name="T:System.Disposables.CancellationDisposable">
+            <summary>
+            Represents an IDisposable that can be checked for cancellation status.
+            </summary>
+        </member>
+        <member name="M:System.Disposables.CancellationDisposable.#ctor(System.Threading.CancellationTokenSource)">
+            <summary>
+            Constructs a new CancellationDisposable that uses an existing CancellationTokenSource.
+            </summary>
+        </member>
+        <member name="M:System.Disposables.CancellationDisposable.#ctor">
+            <summary>
+            Constructs a new CancellationDisposable that uses a new CancellationTokenSource.
+            </summary>
+        </member>
+        <member name="M:System.Disposables.CancellationDisposable.Dispose">
+            <summary>
+            Cancels the CancellationTokenSource.
+            </summary>
+        </member>
+        <member name="P:System.Disposables.CancellationDisposable.Token">
+            <summary>
+            Gets the CancellationToken used by this CancellationDisposable.
+            </summary>
+        </member>
+        <member name="T:System.Disposables.ContextDisposable">
+            <summary>
+            Represents a thread-affine IDisposable.
+            </summary>
+        </member>
+        <member name="M:System.Disposables.ContextDisposable.#ctor(System.Threading.SynchronizationContext,System.IDisposable)">
+            <summary>
+            Constructs a ContextDisposable that uses a SynchronziationContext on which to dipose the disposable.
+            </summary>
+        </member>
+        <member name="M:System.Disposables.ContextDisposable.Dispose">
+            <summary>
+            Disposes the wrapped disposable on the provided SynchronizationContext.
+            </summary>
+        </member>
+        <member name="P:System.Disposables.ContextDisposable.Context">
+            <summary>
+            Gets the provided SynchronizationContext.
+            </summary>
+        </member>
+        <member name="T:System.Disposables.Disposable">
+            <summary>
+            Provides a set of static methods for creating Disposables.
+            </summary>
+        </member>
+        <member name="M:System.Disposables.Disposable.Create(System.Action)">
+            <summary>
+            Creates the disposable that invokes dispose when disposed.
+            </summary>
+        </member>
+        <member name="P:System.Disposables.Disposable.Empty">
+            <summary>
+            Represents the disposable that does nothing when disposed.
+            </summary>
+        </member>
+        <member name="T:System.Collections.Generic.EventSubject`1">
+            <summary>
+            Represents a .NET event.
+            </summary>
+        </member>
+        <member name="T:System.Collections.Generic.Subject`1">
+            <summary>
+            Represents an object that is both an observable sequence as well as an observer.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.Subject`1.#ctor">
+            <summary>
+            Creates a subject.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.Subject`1.OnNext(`0)">
+            <summary>
+            Notifies all subscribed observers with the value.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.Subject`1.OnError(System.Exception)">
+            <summary>
+            Notifies all subscribed observers with the exception.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.Subject`1.OnCompleted">
+            <summary>
+            Notifies all subscribed observers of the end of the sequence.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.Subject`1.Dispose">
+            <summary>
+            Disposes the subject and unsubscribes of all the subscribed observers.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.Subject`1.Subscribe(System.IObserver{`0})">
+            <summary>
+            Subscribes an observer to the subject.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.EventSubject`1.#ctor">
+            <summary>
+            Creates a subject that represents a .NET event.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.EventSubject`1.OnNext(System.Object,`0)">
+            <summary>
+            Notifies all subscribed observers with the event values.  
+            </summary>
+        </member>
+        <member name="T:System.Disposables.BooleanDisposable">
+            <summary>
+            Represents an IDisposable that can be checked for status.
+            </summary>
+        </member>
+        <member name="M:System.Disposables.BooleanDisposable.#ctor">
+            <summary>
+            Constructs a new undisposed BooleanDisposable. 
+            </summary>
+        </member>
+        <member name="M:System.Disposables.BooleanDisposable.Dispose">
+            <summary>
+            Sets the status to Disposed.
+            </summary>
+        </member>
+        <member name="P:System.Disposables.BooleanDisposable.IsDisposed">
+            <summary>
+            Gets a value indicating whether the object is disposed.
+            </summary>
+        </member>
+        <member name="T:System.Disposables.FutureDisposable">
+            <summary>
+            Represents a disposable that can be disposed before the underlying resource has been created.
+            </summary>
+        </member>
+        <member name="M:System.Disposables.FutureDisposable.#ctor">
+            <summary>
+            Constructs a FutureDisposable.
+            </summary>
+        </member>
+        <member name="M:System.Disposables.FutureDisposable.Set(System.IDisposable)">
+            <summary>
+            Sets the underlying disposable. If the FutureDisposable is already disposed, the underlying disposable is immediately disposed.
+            </summary>
+        </member>
+        <member name="M:System.Disposables.FutureDisposable.Dispose">
+            <summary>
+            Disposes the underlying disposable as soon as it is available.
+            </summary>
+        </member>
+        <member name="T:System.Disposables.GroupDisposable">
+            <summary>
+            Represents a group of Disposables that are disposed together.
+            </summary>
+        </member>
+        <member name="M:System.Disposables.GroupDisposable.#ctor(System.IDisposable[])">
+            <summary>
+            Constructs a GroupDisposable from a group of disposables.
+            </summary>
+        </member>
+        <member name="M:System.Disposables.GroupDisposable.Add(System.IDisposable)">
+            <summary>
+            Adds a disposable to the GroupDisposable or disposes the disposable if the GroupDisposable is disposed.
+            </summary>
+        </member>
+        <member name="M:System.Disposables.GroupDisposable.Remove(System.IDisposable)">
+            <summary>
+            Removes and disposes the first occurrence of a disposable from the GroupDisposable.
+            </summary>
+        </member>
+        <member name="M:System.Disposables.GroupDisposable.Dispose">
+            <summary>
+            Disposes all disposables in the group and removes them from the group.
+            </summary>
+        </member>
+        <member name="M:System.Disposables.GroupDisposable.Clear">
+            <summary>
+            Removes and disposes all disposables from the GroupDisposable, but does not dispose the GroupDisposable.
+            </summary>
+        </member>
+        <member name="M:System.Disposables.GroupDisposable.Contains(System.IDisposable)">
+            <summary>
+            Determines whether the GroupDisposable contains a specific disposable.
+            </summary>
+        </member>
+        <member name="M:System.Disposables.GroupDisposable.CopyTo(System.IDisposable[],System.Int32)">
+            <summary>
+            Copies the disposables contained in the GroupDisposable to an Array, starting at a particular Array index.
+            </summary>
+        </member>
+        <member name="M:System.Disposables.GroupDisposable.GetEnumerator">
+            <summary>
+            Returns an enumerator that iterates through the GroupDisposable.
+            </summary>
+        </member>
+        <member name="M:System.Disposables.GroupDisposable.System#Collections#IEnumerable#GetEnumerator">
+            <summary>
+            Returns an enumerator that iterates through the GroupDisposable.
+            </summary>
+        </member>
+        <member name="P:System.Disposables.GroupDisposable.Count">
+            <summary>
+            Gets the number of disposables contained in the GroupDisposable.
+            </summary>
+        </member>
+        <member name="P:System.Disposables.GroupDisposable.IsReadOnly">
+            <summary>
+            Always returns false.
+            </summary>
+        </member>
+        <member name="T:System.Joins.Pattern">
+            <summary>
+            Represents a join pattern.
+            </summary>
+        </member>
+        <member name="T:System.Joins.Pattern`1">
+            <summary>
+            Represents a join pattern.
+            </summary>
+        </member>
+        <member name="M:System.Joins.Pattern`1.And``1(System.IObservable{``0})">
+            <summary>
+            Matches when all observable sequences have an available value.
+            </summary>
+        </member>
+        <member name="M:System.Joins.Pattern`1.Then``1(System.Func{`0,``0})">
+            <summary>
+            Matches when all observable sequences have an available value and projects the values.
+            </summary>
+        </member>
+        <member name="T:System.Joins.Pattern`2">
+            <summary>
+            Represents a join pattern.
+            </summary>
+        </member>
+        <member name="M:System.Joins.Pattern`2.And``1(System.IObservable{``0})">
+            <summary>
+            Matches when all observable sequences have an available value.
+            </summary>
+        </member>
+        <member name="M:System.Joins.Pattern`2.Then``1(System.Func{`0,`1,``0})">
+            <summary>
+            Matches when all observable sequences have an available value and projects the values.
+            </summary>
+        </member>
+        <member name="T:System.Joins.Pattern`3">
+            <summary>
+            Represents a join pattern.
+            </summary>
+        </member>
+        <member name="M:System.Joins.Pattern`3.And``1(System.IObservable{``0})">
+            <summary>
+            Matches when all observable sequences have an available value.
+            </summary>
+        </member>
+        <member name="M:System.Joins.Pattern`3.Then``1(System.Func{`0,`1,`2,``0})">
+            <summary>
+            Matches when all observable sequences have an available value and projects the values.
+            </summary>
+        </member>
+        <member name="T:System.Joins.Pattern`4">
+            <summary>
+            Represents a join pattern.
+            </summary>
+        </member>
+        <member name="M:System.Joins.Pattern`4.And``1(System.IObservable{``0})">
+            <summary>
+            Matches when all observable sequences have an available value.
+            </summary>
+        </member>
+        <member name="M:System.Joins.Pattern`4.Then``1(System.Func{`0,`1,`2,`3,``0})">
+            <summary>
+            Matches when all observable sequences have an available value and projects the values.
+            </summary>
+        </member>
+        <member name="T:System.Joins.Pattern`5">
+            <summary>
+            Represents a join pattern.
+            </summary>    
+        </member>
+        <member name="M:System.Joins.Pattern`5.And``1(System.IObservable{``0})">
+            <summary>
+            Matches when all observable sequences have an available value.
+            </summary>
+        </member>
+        <member name="M:System.Joins.Pattern`5.Then``1(System.Func{`0,`1,`2,`3,`4,``0})">
+            <summary>
+            Matches when all observable sequences have an available value and projects the values.
+            </summary>
+        </member>
+        <member name="T:System.Joins.Pattern`6">
+            <summary>
+            Represents a join pattern.
+            </summary>    
+        </member>
+        <member name="M:System.Joins.Pattern`6.And``1(System.IObservable{``0})">
+            <summary>
+            Matches when all observable sequences have an available value.
+            </summary>
+        </member>
+        <member name="M:System.Joins.Pattern`6.Then``1(System.Func{`0,`1,`2,`3,`4,`5,``0})">
+            <summary>
+            Matches when all observable sequences have an available value and projects the values.
+            </summary>
+        </member>
+        <member name="T:System.Joins.Pattern`7">
+            <summary>
+            Represents a join pattern.
+            </summary>    
+        </member>
+        <member name="M:System.Joins.Pattern`7.And``1(System.IObservable{``0})">
+            <summary>
+            Matches when all observable sequences have an available value.
+            </summary>
+        </member>
+        <member name="M:System.Joins.Pattern`7.Then``1(System.Func{`0,`1,`2,`3,`4,`5,`6,``0})">
+            <summary>
+            Matches when all observable sequences have an available value and projects the values.
+            </summary>
+        </member>
+        <member name="T:System.Joins.Pattern`8">
+            <summary>
+            Represents a join pattern.
+            </summary>    
+        </member>
+        <member name="M:System.Joins.Pattern`8.And``1(System.IObservable{``0})">
+            <summary>
+            Matches when all observable sequences have an available value.
+            </summary>
+        </member>
+        <member name="M:System.Joins.Pattern`8.Then``1(System.Func{`0,`1,`2,`3,`4,`5,`6,`7,``0})">
+            <summary>
+            Matches when all observable sequences have an available value and projects the values.
+            </summary>
+        </member>
+        <member name="T:System.Joins.Pattern`9">
+            <summary>
+            Represents a join pattern.
+            </summary>    
+        </member>
+        <member name="M:System.Joins.Pattern`9.And``1(System.IObservable{``0})">
+            <summary>
+            Matches when all observable sequences have an available value.
+            </summary>
+        </member>
+        <member name="M:System.Joins.Pattern`9.Then``1(System.Func{`0,`1,`2,`3,`4,`5,`6,`7,`8,``0})">
+            <summary>
+            Matches when all observable sequences have an available value and projects the values.
+            </summary>
+        </member>
+        <member name="T:System.Joins.Pattern`10">
+            <summary>
+            Represents a join pattern.
+            </summary>    
+        </member>
+        <member name="M:System.Joins.Pattern`10.And``1(System.IObservable{``0})">
+            <summary>
+            Matches when all observable sequences have an available value.
+            </summary>
+        </member>
+        <member name="M:System.Joins.Pattern`10.Then``1(System.Func{`0,`1,`2,`3,`4,`5,`6,`7,`8,`9,``0})">
+            <summary>
+            Matches when all observable sequences have an available value and projects the values.
+            </summary>
+        </member>
+        <member name="T:System.Joins.Pattern`11">
+            <summary>
+            Represents a join pattern.
+            </summary>    
+        </member>
+        <member name="M:System.Joins.Pattern`11.And``1(System.IObservable{``0})">
+            <summary>
+            Matches when all observable sequences have an available value.
+            </summary>
+        </member>
+        <member name="M:System.Joins.Pattern`11.Then``1(System.Func{`0,`1,`2,`3,`4,`5,`6,`7,`8,`9,`10,``0})">
+            <summary>
+            Matches when all observable sequences have an available value and projects the values.
+            </summary>
+        </member>
+        <member name="T:System.Joins.Pattern`12">
+            <summary>
+            Represents a join pattern.
+            </summary>    
+        </member>
+        <member name="M:System.Joins.Pattern`12.And``1(System.IObservable{``0})">
+            <summary>
+            Matches when all observable sequences have an available value.
+            </summary>
+        </member>
+        <member name="M:System.Joins.Pattern`12.Then``1(System.Func{`0,`1,`2,`3,`4,`5,`6,`7,`8,`9,`10,`11,``0})">
+            <summary>
+            Matches when all observable sequences have an available value and projects the values.
+            </summary>
+        </member>
+        <member name="T:System.Joins.Pattern`13">
+            <summary>
+            Represents a join pattern.
+            </summary>    
+        </member>
+        <member name="M:System.Joins.Pattern`13.And``1(System.IObservable{``0})">
+            <summary>
+            Matches when all observable sequences have an available value.
+            </summary>
+        </member>
+        <member name="M:System.Joins.Pattern`13.Then``1(System.Func{`0,`1,`2,`3,`4,`5,`6,`7,`8,`9,`10,`11,`12,``0})">
+            <summary>
+            Matches when all observable sequences have an available value and projects the values.
+            </summary>
+        </member>
+        <member name="T:System.Joins.Pattern`14">
+            <summary>
+            Represents a join pattern.
+            </summary>    
+        </member>
+        <member name="M:System.Joins.Pattern`14.And``1(System.IObservable{``0})">
+            <summary>
+            Matches when all observable sequences have an available value.
+            </summary>
+        </member>
+        <member name="M:System.Joins.Pattern`14.Then``1(System.Func{`0,`1,`2,`3,`4,`5,`6,`7,`8,`9,`10,`11,`12,`13,``0})">
+            <summary>
+            Matches when all observable sequences have an available value and projects the values.
+            </summary>
+        </member>
+        <member name="T:System.Joins.Pattern`15">
+            <summary>
+            Represents a join pattern.
+            </summary>    
+        </member>
+        <member name="M:System.Joins.Pattern`15.And``1(System.IObservable{``0})">
+            <summary>
+            Matches when all observable sequences have an available value.
+            </summary>
+        </member>
+        <member name="M:System.Joins.Pattern`15.Then``1(System.Func{`0,`1,`2,`3,`4,`5,`6,`7,`8,`9,`10,`11,`12,`13,`14,``0})">
+            <summary>
+            Matches when all observable sequences have an available value and projects the values.
+            </summary>
+        </member>
+        <member name="T:System.Joins.Pattern`16">
+            <summary>
+            Represents a join pattern.
+            </summary>    
+        </member>
+        <member name="M:System.Joins.Pattern`16.Then``1(System.Func{`0,`1,`2,`3,`4,`5,`6,`7,`8,`9,`10,`11,`12,`13,`14,`15,``0})">
+            <summary>
+            Matches when all observable sequences have an available value and projects the values.
+            </summary>
+        </member>
+        <member name="T:System.Disposables.LockDisposable">
+            <summary>
+            Represents a disposable that will dispose the underlying disposable under a given lock object.
+            </summary>
+        </member>
+        <member name="M:System.Disposables.LockDisposable.#ctor(System.Object,System.IDisposable)">
+            <summary>
+            Constructs a LockDisposable using provided lock object and underlying disposable.
+            </summary>
+        </member>
+        <member name="M:System.Disposables.LockDisposable.Dispose">
+            <summary>
+            Disposes the underlying disposable under the provided lock object.
+            </summary>
+        </member>
+        <member name="T:System.Linq.Notification">
+            <summary>
+            Provides a set of static methods for subscribing delegates to observables.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Notification.AsObservable``1(System.Collections.Generic.Notification{``0})">
+            <summary>
+            Returns an observable sequence with a single notification.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Notification.Accept``1(System.Collections.Generic.Notification{``0},System.IObserver{``0})">
+            <summary>
+            Subscribes an observer to the notification.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.FromAsyncPattern``1(System.Func{System.AsyncCallback,System.Object,System.IAsyncResult},System.Func{System.IAsyncResult,``0})">
+            <summary>
+            Converts a Begin/End invoke function pair into a asynchronous function.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.FromAsyncPattern``2(System.Func{``0,System.AsyncCallback,System.Object,System.IAsyncResult},System.Func{System.IAsyncResult,``1})">
+            <summary>
+            Converts a Begin/End invoke function pair into a asynchronous function.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.FromAsyncPattern``3(System.Func{``0,``1,System.AsyncCallback,System.Object,System.IAsyncResult},System.Func{System.IAsyncResult,``2})">
+            <summary>
+            Converts a Begin/End invoke function pair into a asynchronous function.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.FromAsyncPattern``4(System.Func{``0,``1,``2,System.AsyncCallback,System.Object,System.IAsyncResult},System.Func{System.IAsyncResult,``3})">
+            <summary>
+            Converts a Begin/End invoke function pair into a asynchronous function.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.FromAsyncPattern``5(System.Func{``0,``1,``2,``3,System.AsyncCallback,System.Object,System.IAsyncResult},System.Func{System.IAsyncResult,``4})">
+            <summary>
+            Converts a Begin/End invoke function pair into a asynchronous function.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.FromAsyncPattern``6(System.Func{``0,``1,``2,``3,``4,System.AsyncCallback,System.Object,System.IAsyncResult},System.Func{System.IAsyncResult,``5})">
+            <summary>
+            Converts a Begin/End invoke function pair into a asynchronous function.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.FromAsyncPattern``7(System.Func{``0,``1,``2,``3,``4,``5,System.AsyncCallback,System.Object,System.IAsyncResult},System.Func{System.IAsyncResult,``6})">
+            <summary>
+            Converts a Begin/End invoke function pair into a asynchronous function.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.FromAsyncPattern``8(System.Func{``0,``1,``2,``3,``4,``5,``6,System.AsyncCallback,System.Object,System.IAsyncResult},System.Func{System.IAsyncResult,``7})">
+            <summary>
+            Converts a Begin/End invoke function pair into a asynchronous function.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.FromAsyncPattern``9(System.Func{``0,``1,``2,``3,``4,``5,``6,``7,System.AsyncCallback,System.Object,System.IAsyncResult},System.Func{System.IAsyncResult,``8})">
+            <summary>
+            Converts a Begin/End invoke function pair into a asynchronous function.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.FromAsyncPattern``10(System.Func{``0,``1,``2,``3,``4,``5,``6,``7,``8,System.AsyncCallback,System.Object,System.IAsyncResult},System.Func{System.IAsyncResult,``9})">
+            <summary>
+            Converts a Begin/End invoke function pair into a asynchronous function.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.FromAsyncPattern``11(System.Func{``0,``1,``2,``3,``4,``5,``6,``7,``8,``9,System.AsyncCallback,System.Object,System.IAsyncResult},System.Func{System.IAsyncResult,``10})">
+            <summary>
+            Converts a Begin/End invoke function pair into a asynchronous function.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.FromAsyncPattern``12(System.Func{``0,``1,``2,``3,``4,``5,``6,``7,``8,``9,``10,System.AsyncCallback,System.Object,System.IAsyncResult},System.Func{System.IAsyncResult,``11})">
+            <summary>
+            Converts a Begin/End invoke function pair into a asynchronous function.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.FromAsyncPattern``13(System.Func{``0,``1,``2,``3,``4,``5,``6,``7,``8,``9,``10,``11,System.AsyncCallback,System.Object,System.IAsyncResult},System.Func{System.IAsyncResult,``12})">
+            <summary>
+            Converts a Begin/End invoke function pair into a asynchronous function.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.FromAsyncPattern``14(System.Func{``0,``1,``2,``3,``4,``5,``6,``7,``8,``9,``10,``11,``12,System.AsyncCallback,System.Object,System.IAsyncResult},System.Func{System.IAsyncResult,``13})">
+            <summary>
+            Converts a Begin/End invoke function pair into a asynchronous function.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.FromAsyncPattern``15(System.Func{``0,``1,``2,``3,``4,``5,``6,``7,``8,``9,``10,``11,``12,``13,System.AsyncCallback,System.Object,System.IAsyncResult},System.Func{System.IAsyncResult,``14})">
+            <summary>
+            Converts a Begin/End invoke function pair into a asynchronous function.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.ToAsync``1(System.Func{``0})">
+            <summary>
+            Converts the function into an asynchronous function.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.ToAsync``2(System.Func{``0,``1})">
+            <summary>
+            Converts the function into an asynchronous function.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.ToAsync``3(System.Func{``0,``1,``2})">
+            <summary>
+            Converts the function into an asynchronous function.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.ToAsync``4(System.Func{``0,``1,``2,``3})">
+            <summary>
+            Converts the function into an asynchronous function.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.ToAsync``5(System.Func{``0,``1,``2,``3,``4})">
+            <summary>
+            Converts the function into an asynchronous function.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.ToAsync``6(System.Func{``0,``1,``2,``3,``4,``5})">
+            <summary>
+            Converts the function into an asynchronous function.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.ToAsync``7(System.Func{``0,``1,``2,``3,``4,``5,``6})">
+            <summary>
+            Converts the function into an asynchronous function.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.ToAsync``8(System.Func{``0,``1,``2,``3,``4,``5,``6,``7})">
+            <summary>
+            Converts the function into an asynchronous function.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.ToAsync``9(System.Func{``0,``1,``2,``3,``4,``5,``6,``7,``8})">
+            <summary>
+            Converts the function into an asynchronous function.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.ToAsync``10(System.Func{``0,``1,``2,``3,``4,``5,``6,``7,``8,``9})">
+            <summary>
+            Converts the function into an asynchronous function.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.ToAsync``11(System.Func{``0,``1,``2,``3,``4,``5,``6,``7,``8,``9,``10})">
+            <summary>
+            Converts the function into an asynchronous function.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.ToAsync``12(System.Func{``0,``1,``2,``3,``4,``5,``6,``7,``8,``9,``10,``11})">
+            <summary>
+            Converts the function into an asynchronous function.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.ToAsync``13(System.Func{``0,``1,``2,``3,``4,``5,``6,``7,``8,``9,``10,``11,``12})">
+            <summary>
+            Converts the function into an asynchronous function.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.ToAsync``14(System.Func{``0,``1,``2,``3,``4,``5,``6,``7,``8,``9,``10,``11,``12,``13})">
+            <summary>
+            Converts the function into an asynchronous function.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.ToAsync``15(System.Func{``0,``1,``2,``3,``4,``5,``6,``7,``8,``9,``10,``11,``12,``13,``14})">
+            <summary>
+            Converts the function into an asynchronous function.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.ToAsync``16(System.Func{``0,``1,``2,``3,``4,``5,``6,``7,``8,``9,``10,``11,``12,``13,``14,``15})">
+            <summary>
+            Converts the function into an asynchronous function.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.ToAsync``17(System.Func{``0,``1,``2,``3,``4,``5,``6,``7,``8,``9,``10,``11,``12,``13,``14,``15,``16})">
+            <summary>
+            Converts the function into an asynchronous function.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.ToAsync(System.Action)">
+            <summary>
+            Converts the action into an asynchronous function.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.ToAsync``1(System.Action{``0})">
+            <summary>
+            Converts the action into an asynchronous function.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.ToAsync``2(System.Action{``0,``1})">
+            <summary>
+            Converts the action into an asynchronous function.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.ToAsync``3(System.Action{``0,``1,``2})">
+            <summary>
+            Converts the action into an asynchronous function.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.ToAsync``4(System.Action{``0,``1,``2,``3})">
+            <summary>
+            Converts the action into an asynchronous function.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.ToAsync``5(System.Action{``0,``1,``2,``3,``4})">
+            <summary>
+            Converts the action into an asynchronous function.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.ToAsync``6(System.Action{``0,``1,``2,``3,``4,``5})">
+            <summary>
+            Converts the action into an asynchronous function.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.ToAsync``7(System.Action{``0,``1,``2,``3,``4,``5,``6})">
+            <summary>
+            Converts the action into an asynchronous function.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.ToAsync``8(System.Action{``0,``1,``2,``3,``4,``5,``6,``7})">
+            <summary>
+            Converts the action into an asynchronous function.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.ToAsync``9(System.Action{``0,``1,``2,``3,``4,``5,``6,``7,``8})">
+            <summary>
+            Converts the action into an asynchronous function.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.ToAsync``10(System.Action{``0,``1,``2,``3,``4,``5,``6,``7,``8,``9})">
+            <summary>
+            Converts the action into an asynchronous function.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.ToAsync``11(System.Action{``0,``1,``2,``3,``4,``5,``6,``7,``8,``9,``10})">
+            <summary>
+            Converts the action into an asynchronous function.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.ToAsync``12(System.Action{``0,``1,``2,``3,``4,``5,``6,``7,``8,``9,``10,``11})">
+            <summary>
+            Converts the action into an asynchronous function.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.ToAsync``13(System.Action{``0,``1,``2,``3,``4,``5,``6,``7,``8,``9,``10,``11,``12})">
+            <summary>
+            Converts the action into an asynchronous function.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.ToAsync``14(System.Action{``0,``1,``2,``3,``4,``5,``6,``7,``8,``9,``10,``11,``12,``13})">
+            <summary>
+            Converts the action into an asynchronous function.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.ToAsync``15(System.Action{``0,``1,``2,``3,``4,``5,``6,``7,``8,``9,``10,``11,``12,``13,``14})">
+            <summary>
+            Converts the action into an asynchronous function.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.ToAsync``16(System.Action{``0,``1,``2,``3,``4,``5,``6,``7,``8,``9,``10,``11,``12,``13,``14,``15})">
+            <summary>
+            Converts the action into an asynchronous function.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Start``1(System.Func{``0})">
+            <summary>
+            Invokes the function asynchronously.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Start(System.Action)">
+            <summary>
+            Invokes the action asynchronously.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.FromAsyncPattern(System.Func{System.AsyncCallback,System.Object,System.IAsyncResult},System.Action{System.IAsyncResult})">
+            <summary>
+            Converts a Begin/End invoke function pair into a asynchronous function.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.FromAsyncPattern``1(System.Func{``0,System.AsyncCallback,System.Object,System.IAsyncResult},System.Action{System.IAsyncResult})">
+            <summary>
+            Converts a Begin/End invoke function pair into a asynchronous function.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.FromAsyncPattern``2(System.Func{``0,``1,System.AsyncCallback,System.Object,System.IAsyncResult},System.Action{System.IAsyncResult})">
+            <summary>
+            Converts a Begin/End invoke function pair into a asynchronous function.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.FromAsyncPattern``3(System.Func{``0,``1,``2,System.AsyncCallback,System.Object,System.IAsyncResult},System.Action{System.IAsyncResult})">
+            <summary>
+            Converts a Begin/End invoke function pair into a asynchronous function.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.FromAsyncPattern``4(System.Func{``0,``1,``2,``3,System.AsyncCallback,System.Object,System.IAsyncResult},System.Action{System.IAsyncResult})">
+            <summary>
+            Converts a Begin/End invoke function pair into a asynchronous function.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.FromAsyncPattern``5(System.Func{``0,``1,``2,``3,``4,System.AsyncCallback,System.Object,System.IAsyncResult},System.Action{System.IAsyncResult})">
+            <summary>
+            Converts a Begin/End invoke function pair into a asynchronous function.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.FromAsyncPattern``6(System.Func{``0,``1,``2,``3,``4,``5,System.AsyncCallback,System.Object,System.IAsyncResult},System.Action{System.IAsyncResult})">
+            <summary>
+            Converts a Begin/End invoke function pair into a asynchronous function.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.FromAsyncPattern``7(System.Func{``0,``1,``2,``3,``4,``5,``6,System.AsyncCallback,System.Object,System.IAsyncResult},System.Action{System.IAsyncResult})">
+            <summary>
+            Converts a Begin/End invoke function pair into a asynchronous function.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.FromAsyncPattern``8(System.Func{``0,``1,``2,``3,``4,``5,``6,``7,System.AsyncCallback,System.Object,System.IAsyncResult},System.Action{System.IAsyncResult})">
+            <summary>
+            Converts a Begin/End invoke function pair into a asynchronous function.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.FromAsyncPattern``9(System.Func{``0,``1,``2,``3,``4,``5,``6,``7,``8,System.AsyncCallback,System.Object,System.IAsyncResult},System.Action{System.IAsyncResult})">
+            <summary>
+            Converts a Begin/End invoke function pair into a asynchronous function.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.FromAsyncPattern``10(System.Func{``0,``1,``2,``3,``4,``5,``6,``7,``8,``9,System.AsyncCallback,System.Object,System.IAsyncResult},System.Action{System.IAsyncResult})">
+            <summary>
+            Converts a Begin/End invoke function pair into a asynchronous function.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.FromAsyncPattern``11(System.Func{``0,``1,``2,``3,``4,``5,``6,``7,``8,``9,``10,System.AsyncCallback,System.Object,System.IAsyncResult},System.Action{System.IAsyncResult})">
+            <summary>
+            Converts a Begin/End invoke function pair into a asynchronous function.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.FromAsyncPattern``12(System.Func{``0,``1,``2,``3,``4,``5,``6,``7,``8,``9,``10,``11,System.AsyncCallback,System.Object,System.IAsyncResult},System.Action{System.IAsyncResult})">
+            <summary>
+            Converts a Begin/End invoke function pair into a asynchronous function.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.FromAsyncPattern``13(System.Func{``0,``1,``2,``3,``4,``5,``6,``7,``8,``9,``10,``11,``12,System.AsyncCallback,System.Object,System.IAsyncResult},System.Action{System.IAsyncResult})">
+            <summary>
+            Converts a Begin/End invoke function pair into a asynchronous function.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.FromAsyncPattern``14(System.Func{``0,``1,``2,``3,``4,``5,``6,``7,``8,``9,``10,``11,``12,``13,System.AsyncCallback,System.Object,System.IAsyncResult},System.Action{System.IAsyncResult})">
+            <summary>
+            Converts a Begin/End invoke function pair into a asynchronous function.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Let``2(System.IObservable{``0},System.Func{System.IObservable{``0},System.IObservable{``1}})">
+            <summary>
+            Bind the source to the parameter without sharing subscription side-effects.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Let``2(System.IObservable{``0},System.Func{System.IObservable{``0},System.IObservable{``1}},System.Func{System.Collections.Generic.ISubject{``0}})">
+            <summary>
+            Bind the source to the parameter so that it can be used multiple
+            times without duplication of subscription side-effects.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Publish``2(System.IObservable{``0},System.Func{System.IObservable{``0},System.IObservable{``1}})">
+            <summary>
+            Publishes the values of source to each use of the bound parameter.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Publish``2(System.IObservable{``0},System.Func{System.IObservable{``0},System.IObservable{``1}},``0)">
+            <summary>
+            Publishes the values of single to each use of the bound parameter starting with an intial value.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Prune``2(System.IObservable{``0},System.Func{System.IObservable{``0},System.IObservable{``1}})">
+            <summary>
+            Replays the first value of source to each use of the bound parameter.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Replay``2(System.IObservable{``0},System.Func{System.IObservable{``0},System.IObservable{``1}},System.Int32)">
+            <summary>
+            Replays bufferSize values of source to each use of the bound parameter.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Replay``2(System.IObservable{``0},System.Func{System.IObservable{``0},System.IObservable{``1}},System.TimeSpan)">
+            <summary>
+            Replays the values of source within window to each use of the bound parameter.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Replay``2(System.IObservable{``0},System.Func{System.IObservable{``0},System.IObservable{``1}})">
+            <summary>
+            Replays the values of source to each use of the bound parameter.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Publish``1(System.IObservable{``0})">
+            <summary>
+            Publishes the source observable sequence to a Subject. 
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Publish``1(System.IObservable{``0},``0)">
+            <summary>
+            Publishes the source observable sequence to a Subject starting with an initial value. 
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Prune``1(System.IObservable{``0})">
+            <summary>
+            Publishes the first value of the source observable sequence to a Subject. 
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Replay``1(System.IObservable{``0},System.Int32,System.TimeSpan)">
+            <summary>
+            Publishes the source observable sequence to a Subject which can replay all values. 
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Replay``1(System.IObservable{``0},System.Int32)">
+            <summary>
+            Publishes the source observable sequence to a Subject which can replay bufferSize values. 
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Replay``1(System.IObservable{``0},System.TimeSpan)">
+            <summary>
+            Publishes the source observable sequence to a Subject which can replay all values. 
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Replay``1(System.IObservable{``0})">
+            <summary>
+            Publishes the source observable sequence to a Subject which can replay all values. 
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.ToEnumerable``1(System.IObservable{``0})">
+            <summary>
+            Converts an observable sequence to an enumerable sequence.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.GetEnumerator``1(System.IObservable{``0})">
+            <summary>
+            Returns an enumerator that enumerates all values of the observable sequence.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.MostRecent``1(System.IObservable{``0},``0)">
+            <summary>
+            Samples the most recent value (buffer of size one without consumption) in an observable sequence.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Next``1(System.IObservable{``0})">
+            <summary>
+            Samples the next value (blocking without buffering) from in an observable sequence.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Latest``1(System.IObservable{``0})">
+            <summary>
+            Samples the most recent value (buffer of size one with consumption) in an observable sequence.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.MostRecentValue``1(System.IObservable{``0},``0)">
+            <summary>
+            Samples the most recent value (buffer of size one without consumption) in an observable sequence.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.NextValue``1(System.IObservable{``0})">
+            <summary>
+            Samples the next value (blocking without buffering) from in an observable sequence.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.LatestValue``1(System.IObservable{``0})">
+            <summary>
+            Samples the most recent value (buffer of size one with consumption) in an observable sequence.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Aggregate``2(System.IObservable{``0},``1,System.Func{``1,``0,``1})">
+            <summary>
+            Applies an accumulator function over an observable sequence.  The specified seed value is used as the initial accumulator value.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Aggregate``1(System.IObservable{``0},System.Func{``0,``0,``0})">
+            <summary>
+            Applies an accumulator function over an observable sequence.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.First``1(System.IObservable{``0})">
+            <summary>
+            Returns the first value of an observable sequence.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.FirstOrDefault``1(System.IObservable{``0})">
+            <summary>
+            Returns the first value of an observable sequence, or a default value if no value is found.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Last``1(System.IObservable{``0})">
+            <summary>
+            Returns the last value of an observable sequence.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.LastOrDefault``1(System.IObservable{``0})">
+            <summary>
+            Returns the last value of an observable sequence, or a default value if no value is found.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Single``1(System.IObservable{``0})">
+            <summary>
+            Returns the only value of an observable sequence, and throws an exception if there is not exactly one value in the observable sequence.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.SingleOrDefault``1(System.IObservable{``0})">
+            <summary>
+            Returns the only value of an observable sequence, or a default value if the observable sequence is empty; this method throws an exception if there is more than one value in the observable sequence.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.IsEmpty``1(System.IObservable{``0})">
+            <summary>
+            Determins if an observable collection contains values.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Count``1(System.IObservable{``0})">
+            <summary>
+            Returns the number of values in an observable sequence.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.LongCount``1(System.IObservable{``0})">
+            <summary>
+            Returns an Int64 that represents the total number of values in an observable sequence.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Any``1(System.IObservable{``0})">
+            <summary>
+            Determines whether an observable sequence contains any values.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Any``1(System.IObservable{``0},System.Func{``0,System.Boolean})">
+            <summary>
+            Determines whether any value of an observable sequence satisfies a condition.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.All``1(System.IObservable{``0},System.Func{``0,System.Boolean})">
+            <summary>
+            Determines whether all values of an observable sequence satisfy a condition.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Contains``1(System.IObservable{``0},``0,System.Collections.Generic.IEqualityComparer{``0})">
+            <summary>
+            Determines whether an observable sequence contains a specified value by using a specified comparer.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Contains``1(System.IObservable{``0},``0)">
+            <summary>
+            Determines whether an observable sequence contains a specified value by using the default equality comparer.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.ObserveOn``1(System.IObservable{``0},System.Threading.DispatcherScheduler)">
+            <summary>
+            Asynchronously notify observers using the scheduler.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.ObserveOn``1(System.IObservable{``0},System.Windows.Threading.Dispatcher)">
+            <summary>
+            Asynchronously notify observers using the dispatcher.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.ObserveOnDispatcher``1(System.IObservable{``0})">
+            <summary>
+            Asynchronously notify observers using the current dispatcher.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.SubscribeOnDispatcher``1(System.IObservable{``0})">
+            <summary>
+            Asynchronously subscribes and unsubscribes observers using the current dispatcher.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.SubscribeOn``1(System.IObservable{``0},System.Threading.DispatcherScheduler)">
+            <summary>
+            Asynchronously subscribes and unsubscribes observers using the scheduler.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.SubscribeOn``1(System.IObservable{``0},System.Windows.Threading.Dispatcher)">
+            <summary>
+            Asynchronously subscribes and unsubscribes observers using the dispatcher.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.SubscribeOn``1(System.IObservable{``0},System.Threading.SynchronizationContext)">
+            <summary>
+            Asynchronously subscribes and unsubscribes observers on the synchronization context.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.ObserveOn``1(System.IObservable{``0},System.Threading.SynchronizationContext)">
+            <summary>
+            Asynchronously notify observers on the synchronization context.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.SubscribeOn``1(System.IObservable{``0},System.Windows.Forms.Control)">
+            <summary>
+            Asynchronously subscribes and unsubscribes observers using the Windows Forms control.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.ObserveOn``1(System.IObservable{``0},System.Windows.Forms.Control)">
+            <summary>
+            Asynchronously notify observers using the Windows Forms control.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.SubscribeOn``1(System.IObservable{``0},System.Threading.ControlScheduler)">
+            <summary>
+            Asynchronously subscribes and unsubscribes observers using the scheduler.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.ObserveOn``1(System.IObservable{``0},System.Threading.ControlScheduler)">
+            <summary>
+            Asynchronously notify observers using the scheduler.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Synchronize``1(System.IObservable{``0})">
+            <summary>
+            Synchronizes the observable sequence.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Synchronize``1(System.IObservable{``0},System.Object)">
+            <summary>
+            Synchronizes the observable sequence.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Never``1">
+            <summary>
+            Returns a non-terminating observable sequence.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Empty``1">
+            <summary>
+            Returns an empty observable sequence.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Empty``1(System.Threading.IScheduler)">
+            <summary>
+            Returns an empty observable sequence.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Return``1(``0)">
+            <summary>
+            Returns an observable sequence that contains a single value.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Return``1(System.Threading.IScheduler,``0)">
+            <summary>
+            Returns an observable sequence that contains a single value.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Throw``1(System.Exception)">
+            <summary>
+            Returns an observable sequence that terminates with an exception.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Throw``1(System.Threading.IScheduler,System.Exception)">
+            <summary>
+            Returns an observable sequence that terminates with an exception.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Subscribe``1(System.Collections.Generic.IEnumerable{``0},System.IObserver{``0})">
+            <summary>
+            Subscribes an observer to an enumerable sequence.  Returns an object that can be used to unsubscribe the observer from the enumerable.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Subscribe``1(System.Collections.Generic.IEnumerable{``0},System.Threading.IScheduler,System.IObserver{``0})">
+            <summary>
+            Subscribes an observer to an enumerable sequence.  Returns an object that can be used to unsubscribe the observer from the enumerable.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.FromEvent``2(System.Func{System.EventHandler{``1},``0},System.Action{``0},System.Action{``0})">
+            <summary>
+            Returns an observable sequence that contains the values of the underlying .NET event.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.FromEvent``1(System.Action{System.EventHandler{``0}},System.Action{System.EventHandler{``0}})">
+            <summary>
+            Returns an observable sequence that contains the values of the underlying .NET event.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.FromEvent``1(System.Object,System.String)">
+            <summary>
+            Returns an observable sequence that contains the values of the underlying .NET event.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Generate``1(System.Threading.IScheduler,System.Collections.Generic.IEnumerable{System.Collections.Generic.Notification{``0}})">
+            <summary>
+            Generates an observable sequence by enumerating the sequence.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Generate``1(System.Threading.IScheduler,System.Func{System.Collections.Generic.Notification{``0}})">
+            <summary>
+            Generates an observable sequence by repeatedly calling the function.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Generate``1(System.Func{System.Collections.Generic.Notification{``0}})">
+            <summary>
+            Generates an observable sequence by repeatedly calling the function.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Generate``1(System.Collections.Generic.IEnumerable{System.Collections.Generic.Notification{``0}})">
+            <summary>
+            Generates an observable sequence by enumerating the sequence.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Generate``2(``0,System.Func{``0,System.Collections.Generic.Notification{``1}},System.Func{``0,``0})">
+            <summary>
+            Generates an observable sequence by iterating a state from an initial state until a completion notification is sent.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Generate``2(``0,System.Func{``0,System.Boolean},System.Func{``0,``1},System.Func{``0,``0})">
+            <summary>
+            Generates an observable sequence by iterating a state from an initial state until
+            the condition fails.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Generate``2(``0,System.Func{``0,System.IObservable{``1}},System.Func{``0,``0})">
+            <summary>
+            Generates an observable sequence by iterating a state from an initial state until
+            the condition fails.  For each state, a value is generated.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Generate``2(``0,System.Func{``0,System.Boolean},System.Func{``0,System.IObservable{``1}},System.Func{``0,``0})">
+            <summary>
+            Generates an observable sequence by iterating a state from an initial state until
+            the condition fails.  For each state, a value is generated.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Generate``2(System.Threading.IScheduler,``0,System.Func{``0,System.Collections.Generic.Notification{``1}},System.Func{``0,``0})">
+            <summary>
+            Generates an observable sequence by iterating a state from an initial state until a completion notification is sent.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Generate``2(System.Threading.IScheduler,``0,System.Func{``0,System.Boolean},System.Func{``0,``1},System.Func{``0,``0})">
+            <summary>
+            Generates an observable sequence by iterating a state from an initial state until
+            the condition fails.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Generate``2(System.Threading.IScheduler,``0,System.Func{``0,System.IObservable{``1}},System.Func{``0,``0})">
+            <summary>
+            Generates an observable sequence by iterating a state from an initial state until
+            the condition fails.  For each state, a value is generated.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Generate``2(System.Threading.IScheduler,``0,System.Func{``0,System.Boolean},System.Func{``0,System.IObservable{``1}},System.Func{``0,``0})">
+            <summary>
+            Generates an observable sequence by iterating a state from an initial state until
+            the condition fails.  For each state, a value is generated.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.GenerateInSequence``2(``0,System.Func{``0,System.IObservable{``1}},System.Func{``0,``0})">
+            <summary>
+            Generates an observable sequence by iterating a state from an initial state until
+            the condition fails.  For each state, a value is generated.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.GenerateInSequence``2(``0,System.Func{``0,System.Boolean},System.Func{``0,System.IObservable{``1}},System.Func{``0,``0})">
+            <summary>
+            Generates an observable sequence by iterating a state from an initial state until
+            the condition fails.  For each state, a value is generated.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.ToObservable(System.Threading.Tasks.Task)">
+            <summary>
+            Returns an observable sequence that contains the values of the underlying task.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.ToObservable``1(System.Threading.Tasks.Task{``0})">
+            <summary>
+            Returns an observable sequence that contains the values of the underlying task.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Defer``1(System.Func{System.IObservable{``0}})">
+            <summary>
+            Returns an observable sequence that invokes the observableFactory function whenever a new observer subscribes.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Using``2(System.Func{``1},System.Func{``1,System.IObservable{``0}})">
+            <summary>
+            Retrieves resource from resourceSelector for use in resourceUsage and disposes 
+            the resource once the resulting observable sequence terminates.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.ToObservable``1(System.Collections.Generic.IEnumerable{``0})">
+            <summary>
+            Converts an enumerable sequence to an observable sequence.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.ToObservable``1(System.Collections.Generic.IEnumerable{``0},System.Threading.IScheduler)">
+            <summary>
+            Converts an enumerable sequence to an observable sequence.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.CreateWithDisposable``1(System.Func{System.IObserver{``0},System.IDisposable})">
+            <summary>
+            Creates an observable sequence from the subscribe implementation.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Create``1(System.Func{System.IObserver{``0},System.Action})">
+            <summary>
+            Creates an observable sequence from the subscribe implementation.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.ToObservable``1(System.IPropertyGetter{``0})">
+            <summary>
+            Converts a property getter to an observable sequence.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Range(System.Int32,System.Int32)">
+            <summary>
+            Generates an observable sequence of integral numbers within a specified range.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Range(System.Threading.IScheduler,System.Int32,System.Int32)">
+            <summary>
+            Generates an observable sequence of integral numbers within a specified range.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Repeat``1(System.IObservable{``0},System.Threading.IScheduler)">
+            <summary>
+            Repeats the observable sequence indefinitely.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Repeat``1(System.IObservable{``0},System.Threading.IScheduler,System.Int32)">
+            <summary>
+            Repeats the observable sequence repeatCount times.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Retry``1(System.IObservable{``0},System.Threading.IScheduler)">
+            <summary>
+            Repeats the source observable sequence until it successfully terminates.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Retry``1(System.IObservable{``0},System.Threading.IScheduler,System.Int32)">
+            <summary>
+            Repeats the source observable sequence the retryCount times or until it successfully terminates.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Repeat``1(System.Threading.IScheduler,``0)">
+            <summary>
+            Generates an observable sequence that contains one repeated value.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Repeat``1(System.Threading.IScheduler,``0,System.Int32)">
+            <summary>
+            Generates an observable sequence that contains one repeated value.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Repeat``1(System.IObservable{``0})">
+            <summary>
+            Repeats the observable sequence indefinitely.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Repeat``1(System.IObservable{``0},System.Int32)">
+            <summary>
+            Repeats the observable sequence repeatCount times.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Retry``1(System.IObservable{``0})">
+            <summary>
+            Repeats the source observable sequence until it successfully terminates.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Retry``1(System.IObservable{``0},System.Int32)">
+            <summary>
+            Repeats the source observable sequence the retryCount times or until it successfully terminates.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Repeat``1(``0)">
+            <summary>
+            Generates an observable sequence that contains one repeated value.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Repeat``1(``0,System.Int32)">
+            <summary>
+            Generates an observable sequence that contains one repeated value.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.And``2(System.IObservable{``0},System.IObservable{``1})">
+            <summary>
+            Matches when both observable sequences have an available value.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Then``2(System.IObservable{``0},System.Func{``0,``1})">
+            <summary>
+            Matches when the observable sequence has an available value and projects the value.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Join``1(System.Joins.Plan{``0}[])">
+            <summary>
+            Joins together the results from several patterns.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Join``1(System.Collections.Generic.IEnumerable{System.Joins.Plan{``0}})">
+            <summary>
+            Joins together the results from several patterns.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Merge``1(System.IObservable{System.IObservable{``0}})">
+            <summary>
+            Merges an observable sequence of observable sequences into an observable sequence.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Switch``1(System.IObservable{System.IObservable{``0}})">
+            <summary>
+            Transforms an observable sequence of observable sequences into an observable sequence producing values only from the most recent observable sequence.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Concat``1(System.IObservable{``0},System.IObservable{``0})">
+            <summary>
+            Concatenates two observable sequences.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Concat``1(System.IObservable{``0},System.Threading.IScheduler,System.IObservable{``0})">
+            <summary>
+            Concatenates two observable sequences.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Concat``1(System.Threading.IScheduler,System.IObservable{``0}[])">
+            <summary>
+            Concatenates all the observable sequences.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Concat``1(System.IObservable{``0}[])">
+            <summary>
+            Concatenates all the observable sequences.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Concat``1(System.Collections.Generic.IEnumerable{System.IObservable{``0}},System.Threading.IScheduler)">
+            <summary>
+            Concatenates all the observable sequences.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Concat``1(System.Collections.Generic.IEnumerable{System.IObservable{``0}})">
+            <summary>
+            Concatenates all the observable sequences.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Catch``2(System.IObservable{``0},System.Func{``1,System.IObservable{``0}})">
+            <summary>
+            Continues an observable sequence that is terminated by an exception of the specified type with the observable sequence
+            produced by the handler.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Catch``1(System.IObservable{``0},System.IObservable{``0})">
+            <summary>
+            Continues an observable sequence that is terminated by an exception with the next observable sequence.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Catch``1(System.IObservable{``0}[])">
+            <summary>
+            Continues an observable sequence that is terminated by an exception with the next observable sequence.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Catch``1(System.Collections.Generic.IEnumerable{System.IObservable{``0}})">
+            <summary>
+            Continues an observable sequence that is terminated by an exception with the next observable sequence.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Catch``1(System.IObservable{``0},System.Threading.IScheduler,System.IObservable{``0})">
+            <summary>
+            Continues an observable sequence that is terminated by an exception with the next observable sequence.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Catch``1(System.Threading.IScheduler,System.IObservable{``0}[])">
+            <summary>
+            Continues an observable sequence that is terminated by an exception with the next observable sequence.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Catch``1(System.Collections.Generic.IEnumerable{System.IObservable{``0}},System.Threading.IScheduler)">
+            <summary>
+            Continues an observable sequence that is terminated by an exception with the next observable sequence.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.OnErrorResumeNext``1(System.IObservable{``0},System.Threading.IScheduler,System.IObservable{``0})">
+            <summary>
+            Continues an observable sequence that is terminated normally or by an exception with the next observable sequence.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.OnErrorResumeNext``1(System.Threading.IScheduler,System.IObservable{``0}[])">
+            <summary>
+            Continues an observable sequence that is terminated normally or by an exception with the next observable sequence.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.OnErrorResumeNext``1(System.Collections.Generic.IEnumerable{System.IObservable{``0}},System.Threading.IScheduler)">
+            <summary>
+            Continues an observable sequence that is terminated normally or by an exception with the next observable sequence.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.OnErrorResumeNext``1(System.IObservable{``0},System.IObservable{``0})">
+            <summary>
+            Continues an observable sequence that is terminated normally or by an exception with the next observable sequence.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.OnErrorResumeNext``1(System.IObservable{``0}[])">
+            <summary>
+            Continues an observable sequence that is terminated normally or by an exception with the next observable sequence.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.OnErrorResumeNext``1(System.Collections.Generic.IEnumerable{System.IObservable{``0}})">
+            <summary>
+            Continues an observable sequence that is terminated normally or by an exception with the next observable sequence.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Zip``3(System.IObservable{``0},System.IObservable{``1},System.Func{``0,``1,``2})">
+            <summary>
+            Merges two observable sequences into one observable sequence by using the selector function.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.CombineLatest``3(System.IObservable{``0},System.IObservable{``1},System.Func{``0,``1,``2})">
+            <summary>
+            Merges two observable sequences into one observable sequence by using the selector function
+            whenever one of the observable sequences has a new value.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Amb``1(System.IObservable{``0},System.IObservable{``0})">
+            <summary>
+            Returns the observable sequence that reacts first.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Amb``1(System.IObservable{``0}[])">
+            <summary>
+            Returns the observable sequence that reacts first.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Amb``1(System.Collections.Generic.IEnumerable{System.IObservable{``0}})">
+            <summary>
+            Returns the observable sequence that reacts first.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.ForkJoin``3(System.IObservable{``0},System.IObservable{``1},System.Func{``0,``1,``2})">
+            <summary>
+            Runs two observable sequences in parallel and combines their first values.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.ForkJoin``1(System.IObservable{``0}[])">
+            <summary>
+            Runs all observable sequences in parallel and combines their first values.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.ForkJoin``1(System.Collections.Generic.IEnumerable{System.IObservable{``0}})">
+            <summary>
+            Runs all observable sequences in parallel and combines their first values.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.TakeUntil``2(System.IObservable{``0},System.IObservable{``1})">
+            <summary>
+            Returns the values from the source observable sequence until the other observable sequence produces a value.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.SkipUntil``2(System.IObservable{``0},System.IObservable{``1})">
+            <summary>
+            Returns the values from the source observable sequence only after the other observable sequence produces a value.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Merge``1(System.IObservable{``0},System.IObservable{``0})">
+            <summary>
+            Merges two observable sequences into a single observable sequence.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Merge``1(System.IObservable{``0}[])">
+            <summary>
+            Merges all the observable sequences into a single observable sequence.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Merge``1(System.Collections.Generic.IEnumerable{System.IObservable{``0}})">
+            <summary>
+            Merges all the observable sequences into a single observable sequence.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Remotable``1(System.IObservable{``0})">
+            <summary>
+            Makes an observable sequence remotable.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Materialize``1(System.IObservable{``0})">
+            <summary>
+            Materializes the implicit notifications of an observable sequence as explicit notification values.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Dematerialize``1(System.IObservable{System.Collections.Generic.Notification{``0}})">
+            <summary>
+            Dematerializes the explicit notification values of an observable sequence as implicit notifications.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Hide``1(System.IObservable{``0})">
+            <summary>
+            Hides the identity of an observable sequence.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Buffer``1(System.IObservable{``0},System.Int32,System.Int32)">
+            <summary>
+            Projects each value of an observable sequence into a buffer.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Buffer``1(System.IObservable{``0},System.Int32)">
+            <summary>
+            Projects each value of an observable sequence into a buffer.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.StartWith``1(System.IObservable{``0},``0[])">
+            <summary>
+            Prepends a sequence values to an observable sequence.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.StartWith``1(System.IObservable{``0},System.Threading.IScheduler,``0[])">
+            <summary>
+            Prepends a sequence values to an observable sequence.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Scan``2(System.IObservable{``0},``1,System.Func{``1,``0,``1})">
+            <summary>
+            Applies an accumulator function over an observable sequence and returns each intermediate result.  
+            The specified seed value is used as the initial accumulator value.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Scan``1(System.IObservable{``0},System.Func{``0,``0,``0})">
+            <summary>
+            Applies an accumulator function over an observable sequence and returns each intermediate result.  
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.HoldUntilChanged``2(System.IObservable{``0},System.Func{``0,``1},System.Collections.Generic.IEqualityComparer{``1})">
+            <summary>
+            Returns an observable sequence that contains only distinct contiguous values according to the keySelector and comparer.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.HoldUntilChanged``1(System.IObservable{``0},System.Collections.Generic.IEqualityComparer{``0})">
+            <summary>
+            Returns an observable sequence that contains only distinct contiguous values according to the comparer.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.HoldUntilChanged``2(System.IObservable{``0},System.Func{``0,``1})">
+            <summary>
+            Returns an observable sequence that contains only distinct contiguous values according to the keySelector.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.HoldUntilChanged``1(System.IObservable{``0})">
+            <summary>
+            Returns an observable sequence that contains only distinct contiguous values.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Finally``1(System.IObservable{``0},System.Action)">
+            <summary>
+            Invokes finallyAction after source observable sequence terminates normally or by an exception.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Do``1(System.IObservable{``0},System.Action{``0})">
+            <summary>
+            Invokes the action for its side-effects on each value in the observable sequence.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Select``2(System.IObservable{``0},System.Func{``0,``1})">
+            <summary>
+            Projects each value of an observable sequence into a new form.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Select``2(System.IObservable{``0},System.Func{``0,System.Int32,``1})">
+            <summary>
+            Projects each value of an observable sequence into a new form by incorporating the element's index.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Where``1(System.IObservable{``0},System.Func{``0,System.Boolean})">
+            <summary>
+            Filters the values of an observable sequence based on a predicate.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Where``1(System.IObservable{``0},System.Func{``0,System.Int32,System.Boolean})">
+            <summary>
+            Filters the values of an observable sequence based on a predicate by incorporating the element's index.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.GroupBy``3(System.IObservable{``0},System.Func{``0,``1},System.Func{``0,``2})">
+            <summary>
+            Groups the elements of an observable sequence and selects the resulting elements by using a specified function.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.GroupBy``2(System.IObservable{``0},System.Func{``0,``1},System.Collections.Generic.IEqualityComparer{``1})">
+            <summary>
+            Groups the elements of an observable sequence according to a specified key selector function and comparer.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.GroupBy``2(System.IObservable{``0},System.Func{``0,``1})">
+            <summary>
+            Groups the elements of an observable sequence according to a specified key selector function.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.GroupBy``3(System.IObservable{``0},System.Func{``0,``1},System.Func{``0,``2},System.Collections.Generic.IEqualityComparer{``1})">
+            <summary>
+            Groups the elements of an observable sequence according to a specified key selector function and comparer and selects the resulting elements by using a specified function.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Take``1(System.IObservable{``0},System.Int32)">
+            <summary>
+            Returns a specified number of contiguous values from the start of an observable sequence.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Skip``1(System.IObservable{``0},System.Int32)">
+            <summary>
+            Bypasses a specified number of values in an observable sequence and then returns the remaining values.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.TakeWhile``1(System.IObservable{``0},System.Func{``0,System.Boolean})">
+            <summary>
+            Returns values from an observable sequence as long as a specified condition is true, and then skips the remaining values.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.SkipWhile``1(System.IObservable{``0},System.Func{``0,System.Boolean})">
+            <summary>
+            Bypasses values in an observable sequence as long as a specified condition is true and then returns the remaining values.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.SelectMany``2(System.IObservable{``0},System.IObservable{``1})">
+            <summary>
+            Projects each value of an observable sequence to an observable sequence and flattens the resulting observable sequences into one observable sequence.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.SelectMany``2(System.IObservable{``0},System.Func{``0,System.IObservable{``1}})">
+            <summary>
+            Projects each value of an observable sequence to an observable sequence and flattens the resulting observable sequences into one observable sequence.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.SelectMany``2(System.IObservable{``0},System.Func{``0,System.IObservable{``1}},System.Func{System.Exception,System.IObservable{``1}},System.Func{System.IObservable{``1}})">
+            <summary>
+            Projects each value of an observable sequence to an observable sequence and flattens the resulting observable sequences into one observable sequence.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.SelectMany``2(System.IObservable{``0},System.Func{``0,System.Collections.Generic.IEnumerable{``1}})">
+            <summary>
+            Projects each value of an observable sequence to an observable sequence and flattens the resulting observable sequences into one observable sequence.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.SelectMany``3(System.IObservable{``0},System.Func{``0,System.IObservable{``1}},System.Func{``0,``1,``2})">
+            <summary>
+            Projects each value of an observable sequence to an observable sequence, flattens the resulting observable sequences into one observable sequence, and invokes a result selector function on each value therein.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Interval(System.TimeSpan)">
+            <summary>
+            Returns an observable sequence that produces a value after each duration.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Interval(System.Threading.IScheduler,System.TimeSpan)">
+            <summary>
+            Returns an observable sequence that produces a value after each duration.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Timer(System.TimeSpan)">
+            <summary>
+            Returns an observable sequence that produces a value after the dueTime has elapsed.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Timer(System.DateTimeOffset)">
+            <summary>
+            Returns an observable sequence that produces a value at dueTime.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Timer(System.TimeSpan,System.TimeSpan)">
+            <summary>
+            Returns an observable sequence that produces a value after dueTime has elapsed and then after each interval.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Timer(System.DateTimeOffset,System.TimeSpan)">
+            <summary>
+            Returns an observable sequence that produces a value at dueTime and then after each interval.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Timer(System.Threading.IScheduler,System.TimeSpan)">
+            <summary>
+            Returns an observable sequence that produces a value after the dueTime has elapsed.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Timer(System.Threading.IScheduler,System.DateTimeOffset)">
+            <summary>
+            Returns an observable sequence that produces a value at dueTime.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Timer(System.Threading.IScheduler,System.TimeSpan,System.TimeSpan)">
+            <summary>
+            Returns an observable sequence that produces a value after dueTime has elapsed and then after each interval.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Timer(System.Threading.IScheduler,System.DateTimeOffset,System.TimeSpan)">
+            <summary>
+            Returns an observable sequence that produces a value at dueTime and then after each interval.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Delay``1(System.IObservable{``0},System.TimeSpan)">
+            <summary>
+            Time shifts the observable sequence by dueTime.
+            The relative time intervals between the values are preserved.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Delay``1(System.IObservable{``0},System.DateTimeOffset)">
+            <summary>
+            Time shifts the observable sequence by dueTime.
+            The relative time intervals between the values are preserved.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Delay``1(System.IObservable{``0},System.Threading.IScheduler,System.TimeSpan)">
+            <summary>
+            Time shifts the observable sequence by dueTime.
+            The relative time intervals between the values are preserved.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Delay``1(System.IObservable{``0},System.Threading.IScheduler,System.DateTimeOffset)">
+            <summary>
+            Time shifts the observable sequence by dueTime.
+            The relative time intervals between the values are preserved.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Throttle``1(System.IObservable{``0},System.TimeSpan)">
+            <summary>
+            Ignores values from an observable sequence which are followed by another value before dueTime.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Throttle``1(System.IObservable{``0},System.Threading.IScheduler,System.TimeSpan)">
+            <summary>
+            Ignores values from an observable sequence which are followed by another value before dueTime.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Generate``1(System.Threading.IScheduler,System.Collections.Generic.IEnumerable{System.Linq.TimeInterval{System.Collections.Generic.Notification{``0}}})">
+            <summary>
+            Generates an observable sequence by enumerating the sequence.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Generate``1(System.Threading.IScheduler,System.Func{System.Linq.TimeInterval{System.Collections.Generic.Notification{``0}}})">
+            <summary>
+            Generates an observable sequence by repeatedly calling the function.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Generate``2(System.Threading.IScheduler,``0,System.Func{``0,System.Linq.TimeInterval{System.Collections.Generic.Notification{``1}}},System.Func{``0,``0})">
+            <summary>
+            Generates an observable sequence by iterating a state from an initial state until a completion notification is sent.
+            For each state, a timestamped notification is generated at a time interval dependent on the state.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Generate``2(System.Threading.IScheduler,``0,System.Func{``0,System.Boolean},System.Func{``0,``1},System.Func{``0,System.TimeSpan},System.Func{``0,``0})">
+            <summary>
+            Generates an observable sequence by iterating a state from an initial state until
+            the condition fails.  For each state, a value is generated at a time interval dependent
+            on the state.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Generate``1(System.Collections.Generic.IEnumerable{System.Linq.TimeInterval{System.Collections.Generic.Notification{``0}}})">
+            <summary>
+            Generates an observable sequence by enumerating the sequence.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Generate``1(System.Func{System.Linq.TimeInterval{System.Collections.Generic.Notification{``0}}})">
+            <summary>
+            Generates an observable sequence by repeatedly calling the function.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Generate``2(``0,System.Func{``0,System.Linq.TimeInterval{System.Collections.Generic.Notification{``1}}},System.Func{``0,``0})">
+            <summary>
+            Generates an observable sequence by iterating a state from an initial state until a completion notification is sent.
+            For each state, a timestamped notification is generated at a time interval dependent on the state.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Generate``2(``0,System.Func{``0,System.Boolean},System.Func{``0,``1},System.Func{``0,System.TimeSpan},System.Func{``0,``0})">
+            <summary>
+            Generates an observable sequence by iterating a state from an initial state until
+            the condition fails.  For each state, a value is generated at a time interval dependent
+            on the state.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Buffer``1(System.IObservable{``0},System.Threading.IScheduler,System.TimeSpan,System.TimeSpan)">
+            <summary>
+            Projects each value of an observable sequence into a buffer.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Buffer``1(System.IObservable{``0},System.Threading.IScheduler,System.TimeSpan)">
+            <summary>
+            Projects each value of an observable sequence into a buffer.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Buffer``1(System.IObservable{``0},System.TimeSpan,System.TimeSpan)">
+            <summary>
+            Projects each value of an observable sequence into a buffer.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Buffer``1(System.IObservable{``0},System.TimeSpan)">
+            <summary>
+            Projects each value of an observable sequence into a buffer.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.TimeInterval``1(System.IObservable{``0})">
+            <summary>
+            Records the time interval for each value of an observable sequence.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.RemoveTimeInterval``1(System.IObservable{System.Linq.TimeInterval{``0}})">
+            <summary>
+            Removes the timestamp from each value of an observable sequence.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Timestamp``1(System.IObservable{``0})">
+            <summary>
+            Records the timestamp for each value of an observable sequence.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.RemoveTimestamp``1(System.IObservable{System.Linq.Timestamped{``0}})">
+            <summary>
+            Removes the timestamp from each value of an observable sequence.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Sample``1(System.IObservable{``0},System.Threading.IScheduler,System.TimeSpan)">
+            <summary>
+            Samples the observable sequence at each interval.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Sample``1(System.IObservable{``0},System.TimeSpan)">
+            <summary>
+            Samples the observable sequence at each interval.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Timeout``1(System.IObservable{``0},System.TimeSpan)">
+            <summary>
+            Returns either the observable sequence or an TimeoutException if dueTime elapses.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Timeout``1(System.IObservable{``0},System.TimeSpan,System.IObservable{``0})">
+            <summary>
+            Returns the source observable sequence or the other observable sequence if dueTime elapses.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Timeout``1(System.IObservable{``0},System.DateTimeOffset)">
+            <summary>
+            Returns either the observable sequence or an TimeoutException if dueTime elapses.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Timeout``1(System.IObservable{``0},System.DateTimeOffset,System.IObservable{``0})">
+            <summary>
+            Returns the source observable sequence or the other observable sequence if dueTime elapses.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Timeout``1(System.IObservable{``0},System.Threading.IScheduler,System.TimeSpan)">
+            <summary>
+            Returns either the observable sequence or an TimeoutException if dueTime elapses.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Timeout``1(System.IObservable{``0},System.Threading.IScheduler,System.TimeSpan,System.IObservable{``0})">
+            <summary>
+            Returns the source observable sequence or the other observable sequence if dueTime elapses.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Timeout``1(System.IObservable{``0},System.Threading.IScheduler,System.DateTimeOffset)">
+            <summary>
+            Returns either the observable sequence or an TimeoutException if dueTime elapses.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Timeout``1(System.IObservable{``0},System.Threading.IScheduler,System.DateTimeOffset,System.IObservable{``0})">
+            <summary>
+            Returns the source observable sequence or the other observable sequence if dueTime elapses.
+            </summary>
+        </member>
+        <member name="T:System.Collections.Generic.ReplaySubject`1">
+            <summary>
+            Represents an object that is both an observable sequence as well as an observer.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.ReplaySubject`1.#ctor(System.Int32,System.TimeSpan)">
+            <summary>
+            Creates a replayable subject.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.ReplaySubject`1.#ctor">
+            <summary>
+            Creates a replayable subject.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.ReplaySubject`1.#ctor(System.Int32)">
+            <summary>
+            Creates a replayable subject.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.ReplaySubject`1.#ctor(System.TimeSpan)">
+            <summary>
+            Creates a replayable subject.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.ReplaySubject`1.OnNext(`0)">
+            <summary>
+            Notifies all subscribed observers with the value.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.ReplaySubject`1.OnError(System.Exception)">
+            <summary>
+            Notifies all subscribed observers with the exception.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.ReplaySubject`1.OnCompleted">
+            <summary>
+            Notifies all subscribed observers of the end of the sequence.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.ReplaySubject`1.Dispose">
+            <summary>
+            Disposes the subject and unsubscribes of all the subscribed observers.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.ReplaySubject`1.Subscribe(System.IObserver{`0})">
+            <summary>
+            Subscribes an observer to the subject.
+            </summary>
+        </member>
+        <member name="T:System.ObservableExtensions">
+            <summary>
+            Provides a set of static methods for subscribing delegates to observables.
+            </summary>
+        </member>
+        <member name="M:System.ObservableExtensions.Subscribe``1(System.IObservable{``0})">
+            <summary>
+            Evaluates the observable sequence.
+            </summary>
+        </member>
+        <member name="M:System.ObservableExtensions.Subscribe``1(System.IObservable{``0},System.Action{``0})">
+            <summary>
+            Subscribes a value handler to an observable sequence.
+            </summary>
+        </member>
+        <member name="M:System.ObservableExtensions.Subscribe``1(System.IObservable{``0},System.Action{``0},System.Action{System.Exception})">
+            <summary>
+            Subscribes a value handler and an exception handler to an observable sequence.
+            </summary>
+        </member>
+        <member name="M:System.ObservableExtensions.Subscribe``1(System.IObservable{``0},System.Action{``0},System.Action)">
+            <summary>
+            Subscribes a value handler and a completion handler to an observable sequence.
+            </summary>
+        </member>
+        <member name="M:System.ObservableExtensions.Subscribe``1(System.IObservable{``0},System.Action{``0},System.Action{System.Exception},System.Action)">
+            <summary>
+            Subscribes a value handler, an exception handler, and a completion handler to an observable sequence.
+            </summary>
+        </member>
+        <member name="T:System.Linq.Observer">
+            <summary>
+            Provides a set of static methods for creating observers.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observer.ToObserver``1(System.Action{System.Collections.Generic.Notification{``0}})">
+            <summary>
+            Creates an observer from a notification callback.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observer.ToNotifier``1(System.IObserver{``0})">
+            <summary>
+            Creates a notification callback from an observer.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observer.Create``1(System.Action{``0})">
+            <summary>
+            Creates an observer from the specified OnNext action.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observer.Create``1(System.Action{``0},System.Action{System.Exception})">
+            <summary>
+            Creates an observer from the specified OnNext and OnError actions.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observer.Create``1(System.Action{``0},System.Action)">
+            <summary>
+            Creates an observer from the specified OnNext and OnCompleted actions.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observer.Create``1(System.Action{``0},System.Action{System.Exception},System.Action)">
+            <summary>
+            Creates an observer from the specified OnNext, OnError, and OnCompleted actions.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observer.ToObserver``1(System.IPropertySetter{``0})">
+            <summary>
+            Converts a property setter to an observer.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observer.ToProperty``1(System.IObserver{``0})">
+            <summary>
+            Converts an observer to a property setter.
+            </summary>
+        </member>
+        <member name="T:System.Disposables.MutableDisposable">
+            <summary>
+            Represents a disposable whose underlying disposable can be swapped for another disposable.
+            </summary>
+        </member>
+        <member name="M:System.Disposables.MutableDisposable.#ctor">
+            <summary>
+            Constructs a new MutableDisposable with no current underlying disposable.
+            </summary>
+        </member>
+        <member name="M:System.Disposables.MutableDisposable.Replace(System.IDisposable)">
+            <summary>
+            Swaps and disposes the current disposable with the new disposable. 
+            </summary>
+        </member>
+        <member name="M:System.Disposables.MutableDisposable.Dispose">
+            <summary>
+            Disposes the underlying disposable as well as all future replacements.
+            </summary>
+        </member>
+        <member name="P:System.Disposables.MutableDisposable.HasDisposable">
+            <summary>
+            Gets a value indicating whether the MutableDisposable has an underlying disposable.
+            </summary>
+        </member>
+        <member name="T:System.Threading.Scheduler">
+            <summary>
+            Provides a set of static methods for creating Schedulers.
+            </summary>
+        </member>
+        <member name="F:System.Threading.Scheduler.Now">
+            <summary>
+            Gets the scheduler that schedules work as soon as possible on the current thread.
+            </summary>
+        </member>
+        <member name="F:System.Threading.Scheduler.Later">
+            <summary>
+            Gets the scheduler that schedules work on the ThreadPool.
+            </summary>
+        </member>
+        <member name="F:System.Threading.Scheduler.Dispatcher">
+            <summary>
+            Gets the scheduler that schedules work on the current Dispatcher.
+            </summary>
+        </member>
+        <member name="M:System.Threading.Scheduler.Schedule(System.Threading.IScheduler,System.Action{System.Action})">
+            <summary>
+            Schedules action to be executed recursively.
+            </summary>
+        </member>
+        <member name="M:System.Threading.Scheduler.Schedule(System.Threading.IScheduler,System.Action{System.Action{System.TimeSpan}},System.TimeSpan)">
+            <summary>
+            Schedules action to be executed recursively after each dueTime.
+            </summary>
+        </member>
+        <member name="F:System.Threading.Scheduler.Default">
+            <summary>
+            Gets the default scheduler for this platform.
+            </summary>
+        </member>
+        <member name="T:System.Linq.IGroupedObservable`2">
+            <summary>
+            Represents an observable sequence of values that have a common key.
+            </summary>
+        </member>
+        <member name="P:System.Linq.IGroupedObservable`2.Key">
+            <summary>
+            Gets the common key.
+            </summary>
+        </member>
+    </members>
+</doc>
