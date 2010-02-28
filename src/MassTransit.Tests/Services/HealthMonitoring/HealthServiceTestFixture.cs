@@ -23,7 +23,6 @@ namespace MassTransit.Tests.Services.HealthMonitoring
 	using MassTransit.Services.Subscriptions.Configuration;
 	using MassTransit.Services.Subscriptions.Server;
 	using MassTransit.Transports;
-	using Microsoft.Practices.ServiceLocation;
 	using NUnit.Framework;
 	using Rhino.Mocks;
 	using TextFixtures;
@@ -46,7 +45,6 @@ namespace MassTransit.Tests.Services.HealthMonitoring
 		{
 			base.EstablishContext();
 
-			ServiceLocator.SetLocatorProvider(() => ObjectBuilder);
 			const string subscriptionServiceEndpointAddress = "loopback://localhost/mt_subscriptions";
 
 			SubscriptionBus = ServiceBusConfigurator.New(x => { x.ReceiveFrom(subscriptionServiceEndpointAddress); });
