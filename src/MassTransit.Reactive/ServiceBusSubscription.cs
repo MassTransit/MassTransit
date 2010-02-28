@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2008 The Apache Software Foundation.
 // 
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,16 +14,24 @@ namespace MassTransit.Reactive
 {
     using System;
 
-    public static class ServiceBusExtensions
+    public class ServiceBusSubscription<T> : 
+        IDisposable where T : class
     {
-        public static IObservable<T> AsObservable<T>(this IServiceBus bus) where T : class
+        readonly UnsubscribeAction _unsubscribeAction;
+
+        public ServiceBusSubscription(IServiceBus bus, IObserver<T> observer, Predicate<T> condition)
         {
-            return new ServiceBusObservable<T>(bus);
+            _unsubscribeAction = condition == null ?
+                bus.Subscribe<T>(observer.OnNext) :
+                bus.Subscribe(observer.OnNext, condition);
+
+            // TODO: Hook for observer.OnError?
         }
 
-        public static IObservable<T> AsObservable<T>(this IServiceBus bus, Predicate<T> condition) where T : class
+
+        public void Dispose()
         {
-            return new ServiceBusObservable<T>(bus, condition);
+            _unsubscribeAction();
         }
     }
 }
