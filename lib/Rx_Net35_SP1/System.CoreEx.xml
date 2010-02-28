@@ -1,0 +1,473 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>System.CoreEx</name>
+    </assembly>
+    <members>
+        <member name="T:System.Action`5">
+            <summary>
+            Encapsulates a method that has five parameters and does not return a value.
+            </summary>
+        </member>
+        <member name="T:System.Action`6">
+            <summary>
+            Encapsulates a method that has six parameters and does not return a value.
+            </summary>
+        </member>
+        <member name="T:System.Action`7">
+            <summary>
+            Encapsulates a method that has seven parameters and does not return a value.
+            </summary>    
+        </member>
+        <member name="T:System.Action`8">
+            <summary>
+            Encapsulates a method that has eight parameters and does not return a value.
+            </summary>    
+        </member>
+        <member name="T:System.Action`9">
+            <summary>
+            Encapsulates a method that has nine parameters and does not return a value.
+            </summary>    
+        </member>
+        <member name="T:System.Action`10">
+            <summary>
+            Encapsulates a method that has ten parameters and does not return a value.
+            </summary>    
+        </member>
+        <member name="T:System.Action`11">
+            <summary>
+            Encapsulates a method that has eleven parameters and does not return a value.
+            </summary>    
+        </member>
+        <member name="T:System.Action`12">
+            <summary>
+            Encapsulates a method that has twelve parameters and does not return a value.
+            </summary>    
+        </member>
+        <member name="T:System.Action`13">
+            <summary>
+            Encapsulates a method that has thirteen parameters and does not return a value.
+            </summary>    
+        </member>
+        <member name="T:System.Action`14">
+            <summary>
+            Encapsulates a method that has fourteen parameters and does not return a value.
+            </summary>    
+        </member>
+        <member name="T:System.Action`15">
+            <summary>
+            Encapsulates a method that has fifteen parameters and does not return a value.
+            </summary>    
+        </member>
+        <member name="T:System.Action`16">
+            <summary>
+            Encapsulates a method that has sixteen parameters and does not return a value.
+            </summary>    
+        </member>
+        <member name="T:System.Diagnostics.ExceptionExtensions">
+            <summary>
+            Provides a set of static methods for exceptions.
+            </summary>
+        </member>
+        <member name="M:System.Diagnostics.ExceptionExtensions.IsCritical(System.Exception)">
+            <summary>
+            Checks if the exception is an exception that should be rethrown.
+            </summary>
+        </member>
+        <member name="M:System.Diagnostics.ExceptionExtensions.PrepareForRethrow(System.Exception)">
+            <summary>
+            Preserve callstack when rethrowing.
+            </summary>
+        </member>
+        <member name="T:System.Func`6">
+            <summary>
+            Encapsulates a method that has five parameters and returns a value of the type specified by the TResult parameter.
+            </summary>
+        </member>
+        <member name="T:System.Func`7">
+            <summary>
+            Encapsulates a method that has six parameters and returns a value of the type specified by the TResult parameter.
+            </summary>
+        </member>
+        <member name="T:System.Func`8">
+            <summary>
+            Encapsulates a method that has seven parameters and returns a value of the type specified by the TResult parameter.
+            </summary>
+        </member>
+        <member name="T:System.Func`9">
+            <summary>
+            Encapsulates a method that has eigth parameters and returns a value of the type specified by the TResult parameter.
+            </summary>
+        </member>
+        <member name="T:System.Func`10">
+            <summary>
+            Encapsulates a method that has nine parameters and returns a value of the type specified by the TResult parameter.
+            </summary>
+        </member>
+        <member name="T:System.Func`11">
+            <summary>
+            Encapsulates a method that has ten parameters and returns a value of the type specified by the TResult parameter.
+            </summary>    
+        </member>
+        <member name="T:System.Func`12">
+            <summary>
+            Encapsulates a method that has eleven parameters and returns a value of the type specified by the TResult parameter.
+            </summary>
+        </member>
+        <member name="T:System.Func`13">
+            <summary>
+            Encapsulates a method that has twelve parameters and returns a value of the type specified by the TResult parameter.
+            </summary>
+        </member>
+        <member name="T:System.Func`14">
+            <summary>
+            Encapsulates a method that has thirteen parameters and returns a value of the type specified by the TResult parameter.
+            </summary>
+        </member>
+        <member name="T:System.Func`15">
+            <summary>
+            Encapsulates a method that has fourteen parameters and returns a value of the type specified by the TResult parameter.
+            </summary>
+        </member>
+        <member name="T:System.Func`16">
+            <summary>
+            Encapsulates a method that has fifteen parameters and returns a value of the type specified by the TResult parameter.
+            </summary>
+        </member>
+        <member name="T:System.Func`17">
+            <summary>
+            Encapsulates a method that has sixteen parameters and returns a value of the type specified by the TResult parameter.
+            </summary>
+        </member>
+        <member name="T:System.Collections.Generic.Notification`1">
+            <summary>
+            Represents a notification to an observer.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.Notification`1.TryGetCurrent(`0@)">
+            <summary>
+            Retrieves value. The return value indicates if the sequence is empty or not.
+            </summary>
+        </member>
+        <member name="P:System.Collections.Generic.Notification`1.Current">
+            <summary>
+            Returns the current value.
+            </summary>
+        </member>
+        <member name="P:System.Collections.Generic.Notification`1.Kind">
+            <summary>
+            Gets the kind of notification that is represented.
+            </summary>
+        </member>
+        <member name="T:System.Collections.Generic.Notification`1.OnNext">
+            <summary>
+            Represents a OnNext notification to an observer.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.Notification`1.OnNext.#ctor(`0)">
+            <summary>
+            Constructs a notification of a new value.
+            </summary>
+        </member>
+        <member name="P:System.Collections.Generic.Notification`1.OnNext.Value">
+            <summary>
+            Gets the value corresponding to the notification.
+            </summary>
+        </member>
+        <member name="T:System.Collections.Generic.Notification`1.OnError">
+            <summary>
+            Represents a OnError notification to an observer.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.Notification`1.OnError.#ctor(System.Exception)">
+            <summary>
+            Constructs a notification of an exception.
+            </summary>
+        </member>
+        <member name="P:System.Collections.Generic.Notification`1.OnError.Exception">
+            <summary>
+            Gets the exception corresponding to the notification.
+            </summary>
+        </member>
+        <member name="T:System.Collections.Generic.Notification`1.OnCompleted">
+            <summary>
+            Represents a OnCompleted notification to an observer.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.Notification`1.OnCompleted.#ctor">
+            <summary>
+            Constructs a notification of the end of a sequence.
+            </summary>
+        </member>
+        <member name="T:System.IPropertyGetter`1">
+            <summary>
+            Represents a property getter.
+            </summary>
+        </member>
+        <member name="M:System.IPropertyGetter`1.Get">
+            <summary>
+            Gets the current value.
+            </summary>
+        </member>
+        <member name="E:System.IPropertyGetter`1.Changed">
+            <summary>
+            Occurs when the current value changes.
+            </summary>
+        </member>
+        <member name="T:System.PropertyChangedEventArgs`1">
+            <summary>
+            Provides data for the property changed event.
+            </summary>
+        </member>
+        <member name="M:System.PropertyChangedEventArgs`1.#ctor(`0)">
+            <summary>
+            Constructs a PropertyChangedEventArgs from value.
+            </summary>
+        </member>
+        <member name="M:System.PropertyChangedEventArgs`1.#ctor(System.Collections.Generic.Notification{`0})">
+            <summary>
+            Constructs a PropertyChangedEventArgs from notification.
+            </summary>
+        </member>
+        <member name="P:System.PropertyChangedEventArgs`1.Value">
+            <summary>
+            Gets the current value.
+            </summary>
+        </member>
+        <member name="T:System.IPropertySetter`1">
+            <summary>
+            Represents a property setter.
+            </summary>
+        </member>
+        <member name="M:System.IPropertySetter`1.Set(`0)">
+            <summary>
+            Sets the current value.
+            </summary>
+        </member>
+        <member name="T:System.IProperty`2">
+            <summary>
+            Represents a property.
+            </summary>
+        </member>
+        <member name="T:System.IProperty`1">
+            <summary>
+            Represents a property.
+            </summary>
+        </member>
+        <member name="T:System.Property`1">
+            <summary>
+            Represents a property.
+            </summary>
+        </member>
+        <member name="M:System.Property`1.#ctor(`0)">
+            <summary>
+            Constructs a property with initialValue.
+            </summary>
+        </member>
+        <member name="M:System.Property`1.#ctor">
+            <summary>
+            Constructs a property.
+            </summary>
+        </member>
+        <member name="M:System.Property`1.Get">
+            <summary>
+            Gets the current value.
+            </summary>
+        </member>
+        <member name="M:System.Property`1.Set(`0)">
+            <summary>
+            Sets the current value.
+            </summary>
+        </member>
+        <member name="M:System.Property`1.Dispose">
+            <summary>
+            Releases all resources used by the Property.
+            </summary>
+        </member>
+        <member name="M:System.Property`1.Dispose(System.Boolean)">
+            <summary>
+            Releases all resources used by the Property.
+            </summary>
+        </member>
+        <member name="P:System.Property`1.Value">
+            <summary>
+            Gets and sets the current value.
+            </summary>
+        </member>
+        <member name="E:System.Property`1.Changed">
+            <summary>
+            Occurs when the current value changes.
+            </summary>
+        </member>
+        <member name="E:System.Property`1.System#ComponentModel#INotifyPropertyChanged#PropertyChanged">
+            <summary>
+            Occurs when the current value changes.
+            </summary>
+        </member>
+        <member name="T:System.Property">
+            <summary>
+            Provides a set of static methods for properties.
+            </summary>
+        </member>
+        <member name="M:System.Property.Create``1(System.Action{``0,System.Action{System.PropertyChangedEventArgs{``0}}},System.Func{``0},System.Action)">
+            <summary>
+            Creates a property from the set, get, and dispose implementations.
+            </summary>
+        </member>
+        <member name="M:System.Property.Create``1(System.Action{``0,System.Action{System.PropertyChangedEventArgs{``0}}},System.Func{``0})">
+            <summary>
+            Creates a property from the set and get implementations.
+            </summary>
+        </member>
+        <member name="M:System.Property.ReadOnly``1(System.IPropertyGetter{``0})">
+            <summary>
+            Converts a property to a property getter.
+            </summary>
+        </member>
+        <member name="M:System.Property.WriteOnly``1(System.IPropertySetter{``0})">
+            <summary>
+            Converts a property to a property setter.
+            </summary>
+        </member>
+        <member name="M:System.Property.Create``1(System.IPropertyGetter{``0},System.IPropertySetter{``0})">
+            <summary>
+            Creates a property from the property getter and setter.
+            </summary>
+        </member>
+        <member name="T:System.PropertySetter">
+            <summary>
+            Provides a set of static methods for property setters.
+            </summary>
+        </member>
+        <member name="M:System.PropertySetter.Create``1(System.Action{``0},System.Action)">
+            <summary>
+            Creates a property setter from the set and dispose implementations.
+            </summary>
+        </member>
+        <member name="M:System.PropertySetter.Create``1(System.Action{``0})">
+            <summary>
+            Creates a property setter from the set implementation.
+            </summary>
+        </member>
+        <member name="M:System.PropertySetter.FromProperty``1(System.Object,System.String)">
+            <summary>
+            Returns a property setter which sets the underlying property setter.
+            </summary>
+        </member>
+        <member name="T:System.PropertyGetter">
+            <summary>
+            Provides a set of static methods for property getters.
+            </summary>
+        </member>
+        <member name="M:System.PropertyGetter.Create``1(System.Func{``0},System.Action,System.Action{System.PropertyChangedEventArgs{``0}}@)">
+            <summary>
+            Creates a property getter and a change listener from the get and dispose implementations.
+            </summary>
+        </member>
+        <member name="M:System.PropertyGetter.Create``1(System.Func{``0},System.Action{System.PropertyChangedEventArgs{``0}}@)">
+            <summary>
+            Creates a property getter and a change listener from the get implementation.
+            </summary>
+        </member>
+        <member name="M:System.PropertyGetter.CreateWithDisposable``1(System.Func{System.Action{``0},System.IDisposable})">
+            <summary>
+            Creates a property getter from readablePropertyFactory.
+            </summary>
+        </member>
+        <member name="M:System.PropertyGetter.Create``1(System.Func{System.Action{``0},System.Action})">
+            <summary>
+            Creates a property getter from readablePropertyFactory.
+            </summary>
+        </member>
+        <member name="T:System.Linq.TimeInterval`1">
+            <summary>
+            Represents a time interval value.
+            </summary>
+        </member>
+        <member name="M:System.Linq.TimeInterval`1.#ctor(`0,System.TimeSpan)">
+            <summary>
+            Constructs a timestamped value.
+            </summary>
+        </member>
+        <member name="P:System.Linq.TimeInterval`1.Interval">
+            <summary>
+            Gets the interval.
+            </summary>
+        </member>
+        <member name="P:System.Linq.TimeInterval`1.Value">
+            <summary>
+            Gets the value.
+            </summary>
+        </member>
+        <member name="T:System.Linq.Timestamped`1">
+            <summary>
+            Represents a timestamped value.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Timestamped`1.#ctor(`0,System.DateTimeOffset)">
+            <summary>
+            Constructs a timestamped value.
+            </summary>
+        </member>
+        <member name="P:System.Linq.Timestamped`1.Timestamp">
+            <summary>
+            Gets the timestamp.
+            </summary>
+        </member>
+        <member name="P:System.Linq.Timestamped`1.Value">
+            <summary>
+            Gets the value.
+            </summary>
+        </member>
+        <member name="T:System.Unit">
+            <summary>
+            Represents void.
+            </summary>
+        </member>
+        <member name="M:System.Unit.Equals(System.Unit)">
+            <summary>
+            Always returns true.
+            </summary>
+        </member>
+        <member name="M:System.Unit.Equals(System.Object)">
+            <summary>
+            Check equality between a unit value and other objects.
+            </summary>
+        </member>
+        <member name="M:System.Unit.GetHashCode">
+            <summary>
+            Gets the unit value's hash code.
+            </summary>
+        </member>
+        <member name="M:System.Unit.op_Equality(System.Unit,System.Unit)">
+            <summary>
+            Always returns true.
+            </summary>
+        </member>
+        <member name="M:System.Unit.op_Inequality(System.Unit,System.Unit)">
+            <summary>
+            Always returns false.
+            </summary>
+        </member>
+        <member name="T:System.Collections.Generic.IEvent`1">
+            <summary>
+            Represents the Sender and EventArg values of a .NET event.
+            </summary>
+        </member>
+        <member name="P:System.Collections.Generic.IEvent`1.Sender">
+            <summary>
+            Gets the sender value of the event.
+            </summary>
+        </member>
+        <member name="P:System.Collections.Generic.IEvent`1.EventArgs">
+            <summary>
+            Gets the event arguments value of the event.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.Event.Create``1(System.Object,``0)">
+            <summary>
+            Creates an instance of the IEvent interface.
+            </summary>
+        </member>
+    </members>
+</doc>
