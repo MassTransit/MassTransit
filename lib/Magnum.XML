@@ -11271,6 +11271,51 @@
             </summary>
             <param name="wrapped">IEnumerable to wrap.</param>
         </member>
+        <member name="T:Magnum.CommandLineParser.CommandLine">
+            <summary>
+            Tools for parsing the command line
+            </summary>
+        </member>
+        <member name="M:Magnum.CommandLineParser.CommandLine.GetUnparsedCommandLine">
+            <summary>
+            Gets the command line from the Environment.CommandLine, removing the application name if present
+            </summary>
+            <returns>The complete, unparsed command line that was specified when the program was executed</returns>
+        </member>
+        <member name="M:Magnum.CommandLineParser.CommandLine.Parse">
+            <summary>
+            Parses the command line
+            </summary>
+            <returns>The command line elements that were found</returns>
+        </member>
+        <member name="M:Magnum.CommandLineParser.CommandLine.Parse(System.String)">
+            <summary>
+            Parses the command line
+            </summary>
+            <param name="commandLine">The command line to parse</param>
+            <returns>The command line elements that were found</returns>
+        </member>
+        <member name="M:Magnum.CommandLineParser.CommandLine.Parse``1(System.String,System.Action{Magnum.CommandLineParser.ICommandLineElementParser{``0}})">
+            <summary>
+            Parses the command line and matches any specified patterns
+            </summary>
+            <typeparam name="T">The output type of the parser</typeparam>
+            <param name="commandLine">The command line text</param>
+            <param name="initializer">Used by the caller to add patterns and object generators</param>
+            <returns>The elements that were found on the command line</returns>
+        </member>
+        <member name="T:Magnum.CommandLineParser.ICommandLineElementParser`1">
+            <summary>
+            Used to configure the command line element parser
+            </summary>
+            <typeparam name="TResult">The type of object returned as a result of the parse</typeparam>
+        </member>
+        <member name="M:Magnum.CommandLineParser.ICommandLineElementParser`1.Add(Magnum.Monads.Parser.Parser{System.Collections.Generic.IEnumerable{Magnum.CommandLineParser.ICommandLineElement},`0})">
+            <summary>
+            Adds a new pattern to the parser
+            </summary>
+            <param name="parser">The pattern to match and return the resulting object</param>
+        </member>
         <member name="T:Magnum.Concurrency.SingleLinkNode`1">
             <summary>
             Used by the concurrent collections for interlocked operations
@@ -11352,6 +11397,39 @@
             <param name="key"></param>
             <param name="valueProvider">The function to return the value to add if the key is not found</param>
             <returns></returns>
+        </member>
+        <member name="T:Magnum.Logging.LoggerFacade">
+            <summary>
+            Abstract base class which provides most logging method
+            overloads for an <see cref="T:Magnum.Logging.ILogger"/> implementation.
+            </summary>
+        </member>
+        <member name="T:Magnum.Logging.ILogProvider">
+            <summary>
+            Implemented by a logging provider to obtain log sinks by name
+            </summary>
+        </member>
+        <member name="T:Magnum.Logging.ILogWriter">
+            <summary>
+            These are only provided in the action syntax since it can be inefficient to generate
+            the format string if the log level is not set to a level that will allow the output
+            to be generated.
+            </summary>
+        </member>
+        <member name="T:Magnum.Logging.ILogSource">
+            <summary>
+            Provides the relevant context for a log provider to output the log message
+            </summary>
+        </member>
+        <member name="P:Magnum.Logging.ILogSource.Name">
+            <summary>
+            The name of the logger (usually the type generating the log message)
+            </summary>
+        </member>
+        <member name="P:Magnum.Logging.ILogSource.Level">
+            <summary>
+            The level of the message
+            </summary>
         </member>
         <member name="M:Magnum.ILocalContext.Store``1(``0)">
             <summary>
