@@ -25,7 +25,7 @@ namespace MassTransit.LegacySupport.Tests.OldSerializedMessages
     {
         string _pathToFile = @".\OldSerializedMessages\CacheUpdateResponse.txt";
 
-        [Test, Ignore]
+        [Test]
         public void NewToOld() //strong to weak
         {
             IList<Subscription> subs = new List<Subscription>();
@@ -66,6 +66,14 @@ namespace MassTransit.LegacySupport.Tests.OldSerializedMessages
                 oldMsg = (OldCacheUpdateResponse) NewReader.Deserialize(str);
             }
             Assert.AreEqual(new Uri("http://bob/phil"), oldMsg.Subscriptions[0].EndpointUri);
+        }
+
+
+        [Test]
+        public void ArraySerialization()
+        {
+            List<int> bob = new List<int>();
+
         }
     }
 }
