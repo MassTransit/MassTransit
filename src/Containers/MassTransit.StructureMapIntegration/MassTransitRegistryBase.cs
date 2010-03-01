@@ -22,8 +22,6 @@ namespace MassTransit.StructureMapIntegration
     using Services.Subscriptions;
     using Services.Subscriptions.Configuration;
     using Services.Subscriptions.Server;
-    using StructureMap;
-    using StructureMap.Attributes;
     using StructureMap.Configuration.DSL;
     using StructureMap.Graph;
     using Transports;

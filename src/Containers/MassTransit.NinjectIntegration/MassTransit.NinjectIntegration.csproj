@@ -39,7 +39,6 @@
     <Reference Include="Microsoft.Practices.ServiceLocation, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\lib\Microsoft.Practices.ServiceLocation.dll</HintPath>
-      <Private>False</Private>
     </Reference>
     <Reference Include="Ninject, Version=2.0.0.151, Culture=neutral, PublicKeyToken=c7192dc5380945e7, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -55,7 +54,7 @@
     <Compile Include="..\..\SolutionVersion.cs">
       <Link>SolutionVersion.cs</Link>
     </Compile>
-    <Compile Include="MassTransitModule.cs" />
+    <Compile Include="MassTransitModuleBase.cs" />
     <Compile Include="NinjectObjectBuilder.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
