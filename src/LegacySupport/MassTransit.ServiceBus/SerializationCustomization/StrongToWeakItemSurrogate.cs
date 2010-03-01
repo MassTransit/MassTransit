@@ -20,7 +20,7 @@ namespace MassTransit.LegacySupport.SerializationCustomization
     using System.Runtime.Serialization;
     using Magnum.Reflection;
 
-    [DebuggerDisplay("{SurrogateTypeName}")]
+    [DebuggerDisplay("Strong:{SurrogateTypeName}")]
     public class StrongToWeakItemSurrogate :
         LegacySurrogate
     {

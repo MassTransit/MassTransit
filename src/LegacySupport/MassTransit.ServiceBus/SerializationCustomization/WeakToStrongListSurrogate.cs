@@ -14,9 +14,11 @@ namespace MassTransit.LegacySupport.SerializationCustomization
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.Reflection;
     using System.Runtime.Serialization;
 
+    [DebuggerDisplay("Weak:List:{SurrogateTypeName}")]
     public class WeakToStrongListSurrogate<LIST,ITEM> :
         LegacySurrogate where LIST : List<ITEM>
     {
