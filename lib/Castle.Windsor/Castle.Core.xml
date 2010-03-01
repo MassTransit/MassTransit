@@ -220,51 +220,188 @@
             </summary>
             <value>The type of the lifestyle handler.</value>
         </member>
+        <member name="T:Castle.DynamicProxy.IAttributeDisassembler">
+            <summary>
+            Provides functionality for disassembling instances of attributes to CustomAttributeBuilder form, during the process of emiting new types by Dynamic Proxy.
+            </summary>
+        </member>
+        <member name="M:Castle.DynamicProxy.IAttributeDisassembler.Disassemble(System.Attribute)">
+            <summary>
+            Disassembles given attribute instance back to corresponding CustomAttributeBuilder.
+            </summary>
+            <param name="attribute">An instance of attribute to disassemble</param>
+            <returns><see cref="T:System.Reflection.Emit.CustomAttributeBuilder"/> corresponding 1 to 1 to given attribute instance, or null reference.</returns>
+            <remarks>
+            Implementers should return <see cref="T:System.Reflection.Emit.CustomAttributeBuilder"/> that corresponds to given attribute instance 1 to 1,
+            that is after calling specified constructor with specified arguments, and setting specified properties and fields with values specified
+            we should be able to get an attribute instance identical to the one passed in <paramref name="attribute"/>. Implementer can return null
+            if it wishes to opt out of replicating the attribute. Notice however, that for some cases, like attributes passed explicitly by the user
+            it is illegal to return null, and doing so will result in exception.
+            </remarks>
+        </member>
+        <member name="T:Castle.Core.Interceptor.IChangeProxyTarget">
+            <summary>
+            Exposes means to change target objects of proxies and invocations
+            </summary>
+        </member>
+        <member name="M:Castle.Core.Interceptor.IChangeProxyTarget.ChangeInvocationTarget(System.Object)">
+            <summary>
+            Changes the target object (<see cref="P:Castle.Core.Interceptor.IInvocation.InvocationTarget"/>) of current <see cref="T:Castle.Core.Interceptor.IInvocation"/>.
+            </summary>
+            <param name="target">The new value of target of invocation.</param>
+            <remarks>
+            Although the method takes <see cref="T:System.Object"/> the actual instance must be of type assignable to <see cref="P:Castle.Core.Interceptor.IInvocation.TargetType"/>, otherwise an <see cref="T:System.InvalidCastException"/> will be thrown.
+            Also while it's technically legal to pass null reference (Nothing in Visual Basic) as <paramref name="target"/>, for obvious reasons Dynamic Proxy will not be able to call the intercepted method on such target.
+            In this case last interceptor in the pipeline mustn't call <see cref="M:Castle.Core.Interceptor.IInvocation.Proceed"/> or a <see cref="T:System.NotImplementedException"/> will be throws.
+            Also while it's technically legal to pass proxy itself as <paramref name="target"/>, this would create stack overflow.
+            In this case last interceptor in the pipeline mustn't call <see cref="M:Castle.Core.Interceptor.IInvocation.Proceed"/> or a <see cref="T:System.InvalidOperationException"/> will be throws.
+            </remarks>
+            <exception cref="T:System.InvalidCastException">Thrown when <paramref name="target"/> is not assignable to the proxied type.</exception>
+        </member>
+        <member name="M:Castle.Core.Interceptor.IChangeProxyTarget.ChangeProxyTarget(System.Object)">
+            <summary>
+            Permanently changes the target object of the proxy. This does not affect target of the current invocation.
+            </summary>
+            <param name="target">The new value of target of the proxy.</param>
+            <remarks>
+            Although the method takes <see cref="T:System.Object"/> the actual instance must be of type assignable to proxy's target type, otherwise an <see cref="T:System.InvalidCastException"/> will be thrown.
+            Also while it's technically legal to pass null reference (Nothing in Visual Basic) as <paramref name="target"/>, for obvious reasons Dynamic Proxy will not be able to call the intercepted method on such target.
+            In this case last interceptor in the pipeline mustn't call <see cref="M:Castle.Core.Interceptor.IInvocation.Proceed"/> or a <see cref="T:System.NotImplementedException"/> will be throws.
+            Also while it's technically legal to pass proxy itself as <paramref name="target"/>, this would create stack overflow.
+            In this case last interceptor in the pipeline mustn't call <see cref="M:Castle.Core.Interceptor.IInvocation.Proceed"/> or a <see cref="T:System.InvalidOperationException"/> will be throws.
+            </remarks>
+            <exception cref="T:System.InvalidCastException">Thrown when <paramref name="target"/> is not assignable to the proxied type.</exception>
+        </member>
         <member name="T:Castle.Core.Interceptor.IInterceptor">
             <summary>
             New interface that is going to be used by DynamicProxy 2
             </summary>
         </member>
+        <member name="T:Castle.Core.Interceptor.IInterceptorSelector">
+            <summary>
+            Provides an extension point that allows proxies to choose specific interceptors on
+            a per method basis.
+            </summary>
+        </member>
+        <member name="M:Castle.Core.Interceptor.IInterceptorSelector.SelectInterceptors(System.Type,System.Reflection.MethodInfo,Castle.Core.Interceptor.IInterceptor[])">
+            <summary>
+            Selects the interceptors that should intercept calls to the given <paramref name="method"/>.
+            </summary>
+            <param name="type">The type declaring the method to intercept.</param>
+            <param name="method">The method that will be intercepted.</param>
+            <param name="interceptors">All interceptors registered with the proxy.</param>
+            <returns>An array of interceptors to invoke upon calling the <paramref name="method"/>.</returns>
+            <remarks>
+            This method is called only once per proxy instance, upon the first call to the
+            <paramref name="method"/>. Either an empty array or null are valid return values to indicate
+            that no interceptor should intercept calls to the method. Although it is not advised, it is
+            legal to return other <see cref="T:Castle.Core.Interceptor.IInterceptor"/> implementations than these provided in
+            <paramref name="interceptors"/>.
+            </remarks>
+        </member>
         <member name="T:Castle.Core.Interceptor.IInvocation">
             <summary>
-            New interface that is going to be used by DynamicProxy 2
+            Encapsulates an invocation of a proxied method.
             </summary>
+        </member>
+        <member name="M:Castle.Core.Interceptor.IInvocation.SetArgumentValue(System.Int32,System.Object)">
+            <summary>
+            Overrides the value of an argument at the given <paramref name="index"/> with the
+            new <paramref name="value"/> provided.
+            </summary>
+            <remarks>
+            This method accepts an <see cref="T:System.Object"/>, however the value provided must be compatible
+            with the type of the argument defined on the method, otherwise an exception will be thrown.
+            </remarks>
+            <param name="index">The index of the argument to override.</param>
+            <param name="value">The new value for the argument.</param>
+        </member>
+        <member name="M:Castle.Core.Interceptor.IInvocation.GetArgumentValue(System.Int32)">
+            <summary>
+            Gets the value of the argument at the specified <paramref name="index"/>.
+            </summary>
+            <param name="index">The index.</param>
+            <returns>The value of the argument at the specified <paramref name="index"/>.</returns>
         </member>
         <member name="M:Castle.Core.Interceptor.IInvocation.GetConcreteMethod">
             <summary>
-            Returns the concrete instantiation of <see cref="P:Castle.Core.Interceptor.IInvocation.Method"/>, with any generic parameters bound to real types.
+            Returns the concrete instantiation of the <see cref="P:Castle.Core.Interceptor.IInvocation.Method"/>, with any generic
+            parameters bound to real types.
             </summary>
-            <returns>The concrete instantiation of <see cref="P:Castle.Core.Interceptor.IInvocation.Method"/>, or <see cref="P:Castle.Core.Interceptor.IInvocation.Method"/> if not a generic method.</returns>
+            <returns>
+            The concrete instantiation of the <see cref="P:Castle.Core.Interceptor.IInvocation.Method"/>, or the <see cref="P:Castle.Core.Interceptor.IInvocation.Method"/> if
+            not a generic method.
+            </returns>
             <remarks>Can be slower than calling <see cref="P:Castle.Core.Interceptor.IInvocation.Method"/>.</remarks>
         </member>
         <member name="M:Castle.Core.Interceptor.IInvocation.GetConcreteMethodInvocationTarget">
             <summary>
-            Returns the concrete instantiation of <see cref="P:Castle.Core.Interceptor.IInvocation.MethodInvocationTarget"/>, with any generic parameters bound to real types.
+            Returns the concrete instantiation of <see cref="P:Castle.Core.Interceptor.IInvocation.MethodInvocationTarget"/>, with any
+            generic parameters bound to real types.
             </summary>
-            <returns>The concrete instantiation of <see cref="P:Castle.Core.Interceptor.IInvocation.MethodInvocationTarget"/>, or <see cref="P:Castle.Core.Interceptor.IInvocation.MethodInvocationTarget"/> if not a generic method.</returns>
+            <returns>The concrete instantiation of <see cref="P:Castle.Core.Interceptor.IInvocation.MethodInvocationTarget"/>, or
+            <see cref="P:Castle.Core.Interceptor.IInvocation.MethodInvocationTarget"/> if not a generic method.</returns>
             <remarks>Can be slower than calling <see cref="P:Castle.Core.Interceptor.IInvocation.MethodInvocationTarget"/>.</remarks>
         </member>
         <member name="M:Castle.Core.Interceptor.IInvocation.Proceed">
             <summary>
-            
+            Proceeds the call to the next interceptor in line, and ultimately to the target method.
             </summary>
-            <returns></returns>
+            <remarks>
+            Since interface proxies without a target don't have the target implementation to proceed to,
+            it is important, that the last interceptor does not call this method, otherwise a
+            <see cref="T:System.NotImplementedException"/> will be thrown.
+            </remarks>
+        </member>
+        <member name="P:Castle.Core.Interceptor.IInvocation.Proxy">
+            <summary>
+            Gets the proxy object on which the intercepted method is invoked.
+            </summary>
+            <value>Proxy object on which the intercepted method is invoked.</value>
+        </member>
+        <member name="P:Castle.Core.Interceptor.IInvocation.InvocationTarget">
+            <summary>
+            Gets the object on which the invocation is performed. This is different from proxy object
+            because most of the time this will be the proxy target object.
+            </summary>
+            <seealso cref="T:Castle.Core.Interceptor.IChangeProxyTarget"/>
+            <value>The invocation target.</value>
+        </member>
+        <member name="P:Castle.Core.Interceptor.IInvocation.TargetType">
+            <summary>
+            Gets the type of the target object for the intercepted method.
+            </summary>
+            <value>The type of the target object.</value>
+        </member>
+        <member name="P:Castle.Core.Interceptor.IInvocation.Arguments">
+            <summary>
+            Gets the arguments that the <see cref="P:Castle.Core.Interceptor.IInvocation.Method"/> has been invoked with.
+            </summary>
+            <value>The arguments the method was invoked with.</value>
         </member>
         <member name="P:Castle.Core.Interceptor.IInvocation.GenericArguments">
             <summary>
-            The generic arguments of the method, or null if not a generic method.
+            Gets the generic arguments of the method.
             </summary>
+            <value>The generic arguments, or null if not a generic method.</value>
         </member>
         <member name="P:Castle.Core.Interceptor.IInvocation.Method">
             <summary>
-            
+            Gets the <see cref="T:System.Reflection.MethodInfo"/> representing the method being invoked.
             </summary>
+            <value>The <see cref="T:System.Reflection.MethodInfo"/> representing the method being invoked.</value>
         </member>
         <member name="P:Castle.Core.Interceptor.IInvocation.MethodInvocationTarget">
             <summary>
-            For interface proxies, this will point to the
-            <see cref="T:System.Reflection.MethodInfo"/> on the target class
+            For interface proxies, this will point to the <see cref="T:System.Reflection.MethodInfo"/> on the target class.
             </summary>
+            <value>The method invocation target.</value>
+        </member>
+        <member name="P:Castle.Core.Interceptor.IInvocation.ReturnValue">
+            <summary>
+            Gets or sets the return value of the method.
+            </summary>
+            <value>The return value of the method.</value>
         </member>
         <member name="T:Castle.Core.Interceptor.IOnBehalfAware">
             <summary>
@@ -347,6 +484,12 @@
             <exception cref="T:System.ArgumentOutOfRangeException">
             If the index is invalid.
             </exception>
+        </member>
+        <member name="M:Castle.Core.Internal.Lock.Create">
+            <summary>
+            Creates a new lock.
+            </summary>
+            <returns></returns>
         </member>
         <member name="T:Castle.Core.IInitializable">
             <summary>
@@ -2077,14 +2220,14 @@
             instance in a pool instead of always creating them.
             </summary>
         </member>
-        <member name="F:Castle.Core.LifestyleType.Custom">
-            <summary>
-            Any other logic to create/release components.
-            </summary>
-        </member>
         <member name="F:Castle.Core.LifestyleType.PerWebRequest">
             <summary>
             PerWebRequest components are created once per Http Request
+            </summary>
+        </member>
+        <member name="F:Castle.Core.LifestyleType.Custom">
+            <summary>
+            Any other logic to create/release components.
             </summary>
         </member>
         <member name="T:Castle.Core.PropertiesInspectionBehavior">
@@ -2716,11 +2859,6 @@
             Collection of <see cref="T:Castle.Core.ParameterModel"/>
             </summary>
         </member>
-        <member name="M:Castle.Core.ParameterModelCollection.#ctor">
-            <summary>
-            Initializes a new instance of the <see cref="T:Castle.Core.ParameterModelCollection"/> class.
-            </summary>
-        </member>
         <member name="M:Castle.Core.ParameterModelCollection.Add(System.String,System.String)">
             <summary>
             Adds the specified name.
@@ -3000,6 +3138,126 @@
             <summary>
             Enable access to files on network shares
             </summary>
+        </member>
+        <member name="T:Castle.Core.Smtp.DefaultSmtpSender">
+            <summary>
+            Default <see cref="T:Castle.Core.Smtp.IEmailSender"/> implementation.
+            </summary>
+        </member>
+        <member name="T:Castle.Core.Smtp.IEmailSender">
+            <summary>
+            Email sender abstraction.
+            </summary>
+        </member>
+        <member name="M:Castle.Core.Smtp.IEmailSender.Send(System.String,System.String,System.String,System.String)">
+            <summary>
+            Sends a mail message.
+            </summary>
+            <param name="from">From field</param>
+            <param name="to">To field</param>
+            <param name="subject">E-mail's subject</param>
+            <param name="messageText">message's body</param>
+        </member>
+        <member name="M:Castle.Core.Smtp.IEmailSender.Send(System.Net.Mail.MailMessage)">
+            <summary>
+            Sends a <see cref="T:System.Net.Mail.MailMessage">message</see>. 
+            </summary>
+            <param name="message"><see cref="T:System.Net.Mail.MailMessage">Message</see> instance</param>
+        </member>
+        <member name="M:Castle.Core.Smtp.IEmailSender.Send(System.Collections.Generic.IEnumerable{System.Net.Mail.MailMessage})">
+            <summary>
+            Sends multiple <see cref="T:System.Net.Mail.MailMessage">messages</see>. 
+            </summary>
+            <param name="messages">List of <see cref="T:System.Net.Mail.MailMessage">messages</see></param>
+        </member>
+        <member name="M:Castle.Core.Smtp.DefaultSmtpSender.#ctor(System.String)">
+            <summary>
+            This service implementation
+            requires a host name in order to work
+            </summary>
+            <param name="hostname">The smtp server name</param>
+        </member>
+        <member name="M:Castle.Core.Smtp.DefaultSmtpSender.Send(System.String,System.String,System.String,System.String)">
+            <summary>
+            Sends a message. 
+            </summary>
+            <exception cref="T:System.ArgumentNullException">If any of the parameters is null</exception>
+            <param name="from">From field</param>
+            <param name="to">To field</param>
+            <param name="subject">e-mail's subject</param>
+            <param name="messageText">message's body</param>
+        </member>
+        <member name="M:Castle.Core.Smtp.DefaultSmtpSender.Send(System.Net.Mail.MailMessage)">
+            <summary>
+            Sends a message. 
+            </summary>
+            <exception cref="T:System.ArgumentNullException">If the message is null</exception>
+            <param name="message">Message instance</param>
+        </member>
+        <member name="M:Castle.Core.Smtp.DefaultSmtpSender.Configure(System.Net.Mail.SmtpClient)">
+            <summary>
+            Configures the sender
+            with port information and eventual credential
+            informed
+            </summary>
+            <param name="smtpClient">Message instance</param>
+        </member>
+        <member name="P:Castle.Core.Smtp.DefaultSmtpSender.Port">
+            <summary>
+            Gets or sets the port used to 
+            access the SMTP server
+            </summary>
+        </member>
+        <member name="P:Castle.Core.Smtp.DefaultSmtpSender.Hostname">
+            <summary>
+            Gets the hostname.
+            </summary>
+            <value>The hostname.</value>
+        </member>
+        <member name="P:Castle.Core.Smtp.DefaultSmtpSender.AsyncSend">
+            <summary>
+            Gets or sets a value which is used to 
+            configure if emails are going to be sent asyncrhonously or not.
+            </summary>
+        </member>
+        <member name="P:Castle.Core.Smtp.DefaultSmtpSender.Timeout">
+            <summary>
+            Gets or sets a value that specifies 
+            the amount of time after which a synchronous Send call times out.
+            </summary>
+        </member>
+        <member name="P:Castle.Core.Smtp.DefaultSmtpSender.UseSsl">
+            <summary>
+            Gets or sets a value indicating whether the email should be sent using 
+            a secure communication channel.
+            </summary>
+            <value><c>true</c> if should use SSL; otherwise, <c>false</c>.</value>
+        </member>
+        <member name="P:Castle.Core.Smtp.DefaultSmtpSender.Domain">
+            <summary>
+            Gets or sets the domain.
+            </summary>
+            <value>The domain.</value>
+        </member>
+        <member name="P:Castle.Core.Smtp.DefaultSmtpSender.UserName">
+            <summary>
+            Gets or sets the name of the user.
+            </summary>
+            <value>The name of the user.</value>
+        </member>
+        <member name="P:Castle.Core.Smtp.DefaultSmtpSender.Password">
+            <summary>
+            Gets or sets the password.
+            </summary>
+            <value>The password.</value>
+        </member>
+        <member name="P:Castle.Core.Smtp.DefaultSmtpSender.HasCredentials">
+            <summary>
+            Gets a value indicating whether credentials were informed.
+            </summary>
+            <value>
+            <see langword="true"/> if this instance has credentials; otherwise, <see langword="false"/>.
+            </value>
         </member>
         <member name="T:Castle.Core.IServiceEnabledComponent">
             <summary>

@@ -206,11 +206,16 @@
             Initializes a new instance of the <see cref="T:Castle.MicroKernel.CreationContext"/> class.
             </summary>
         </member>
-        <member name="M:Castle.MicroKernel.CreationContext.HandlerIsCurrentlyBeingResolved(Castle.MicroKernel.IHandler)">
+        <member name="M:Castle.MicroKernel.CreationContext.IsInResolutionContext(Castle.MicroKernel.IHandler)">
             <summary>
-            Check if we are now in the middle of resolving this handler, 
-            and as such, we shouldn't try to resolve that.
+            Method used by handlers to test whether they are being resolved in the context.
             </summary>
+            <param name="handler"></param>
+            <returns></returns>
+            <remarks>
+            This method is provided as part of double dispatch mechanism for use by handlers.
+            Outside of handlers, call <see cref="M:Castle.MicroKernel.IHandler.IsBeingResolvedInContext(Castle.MicroKernel.CreationContext)"/> instead.
+            </remarks>
         </member>
         <member name="P:Castle.MicroKernel.CreationContext.Empty">
             <summary>Creates a new, empty <see cref="T:Castle.MicroKernel.CreationContext"/> instance.</summary>
@@ -768,15 +773,60 @@
             <param name="model">The model.</param>
             <param name="component">The component.</param>
         </member>
+        <member name="M:Castle.MicroKernel.Facilities.TypedFactory.ITypedFactoryComponentSelector.SelectComponent(System.Reflection.MethodInfo,System.Type,System.Object[])">
+            <summary>
+            Selects one or both of component name and type, for given method 
+            called on given typed factory type.
+            When component should be requested by type only,
+            componentName should be null.
+            When component should be requested by name only,
+            componentType should be null.
+            
+            </summary>
+            <param name="method"></param>
+            <param name="type"></param>
+            <param name="arguments"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Castle.MicroKernel.Facilities.TypedFactory.ITypedFactoryMethod.Invoke(Castle.Core.Interceptor.IInvocation)">
+            <summary>
+            Performs actual invocation of typed factory method.
+            </summary>
+            <param name="invocation"></param>
+        </member>
         <member name="T:Castle.Facilities.TypedFactory.FactoryInterceptor">
             <summary>
             Summary description for FactoryInterceptor.
+            </summary>
+        </member>
+        <member name="T:Castle.MicroKernel.Facilities.TypedFactory.Release">
+            <summary>
+            Releases components passed as arguments from the container.
+            </summary>
+        </member>
+        <member name="T:Castle.MicroKernel.Facilities.TypedFactory.Resolve">
+            <summary>
+            resolves componet selected by given <see cref="T:Castle.MicroKernel.Facilities.TypedFactory.ITypedFactoryComponentSelector"/> from the container
             </summary>
         </member>
         <member name="T:Castle.Facilities.TypedFactory.TypedFactoryFacility">
             <summary>
             Summary description for TypedFactoryFacility.
             </summary>
+        </member>
+        <member name="M:Castle.Facilities.TypedFactory.TypedFactoryRegistrationExtensions.AsFactory``1(Castle.MicroKernel.Registration.ComponentRegistration{``0})">
+            <summary>
+            Marks the component as typed factory.
+            </summary>
+            <typeparam name="S"></typeparam>
+            <param name="registration"></param>
+            <returns></returns>
+            <remarks>
+            Only interfaces are legal to use as typed factories. Methods with out parameters are not allowed.
+            When registering component as typed factory no implementation should be provided (in case there is any it will be ignored).
+            Typed factories rely on <see cref="T:Castle.Core.Interceptor.IInterceptorSelector"/> set internally, so users should not set interceptor selectors explicitly;
+            otherwise the factory will not function correctly.
+            </remarks>
         </member>
         <member name="T:Castle.MicroKernel.Handlers.AbstractHandler">
             <summary>
@@ -811,6 +861,7 @@
             Implementors should dispose the component instance
             </summary>
             <param name="instance"></param>
+            <returns>true if destroyed.</returns>
         </member>
         <member name="M:Castle.MicroKernel.IHandler.AddCustomDependencyValue(System.String,System.Object)">
             <summary>
@@ -836,6 +887,11 @@
             </summary>
             <param name="key"></param>
             <returns></returns>
+        </member>
+        <member name="M:Castle.MicroKernel.IHandler.IsBeingResolvedInContext(Castle.MicroKernel.CreationContext)">
+            <summary>
+            Tests whether the handler is already being resolved in given context.
+            </summary>
         </member>
         <member name="P:Castle.MicroKernel.IHandler.CurrentState">
             <summary>
@@ -911,19 +967,36 @@
         </member>
         <member name="M:Castle.MicroKernel.Handlers.AbstractHandler.Resolve(Castle.MicroKernel.CreationContext)">
             <summary>
-            Should be implemented by derived classes: 
-            returns an instance of the component this handler
+            Returns an instance of the component this handler
             is responsible for
             </summary>
             <param name="context"></param>
             <returns></returns>
         </member>
+        <member name="M:Castle.MicroKernel.Handlers.AbstractHandler.ResolveCore(Castle.MicroKernel.CreationContext,System.Boolean)">
+            <summary>
+            Should be implemented by derived classes: 
+            returns an instance of the component this handler
+            is responsible for
+            </summary>
+            <param name="context"></param>
+            <param name="track"></param>
+            <returns></returns>
+        </member>
         <member name="M:Castle.MicroKernel.Handlers.AbstractHandler.Release(System.Object)">
+            <summary>
+             disposes the component instance (or recycle it).
+            </summary>
+            <param name="instance"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Castle.MicroKernel.Handlers.AbstractHandler.ReleaseCore(System.Object)">
             <summary>
             Should be implemented by derived classes: 
             disposes the component instance (or recycle it)
             </summary>
             <param name="instance"></param>
+            <returns>true if destroyed.</returns>
         </member>
         <member name="M:Castle.MicroKernel.Handlers.AbstractHandler.AddCustomDependencyValue(System.String,System.Object)">
             <summary>
@@ -984,7 +1057,7 @@
             </remarks>
             <param name="dependency"></param>
         </member>
-        <member name="M:Castle.MicroKernel.Handlers.AbstractHandler.DependencySatisfied(Castle.MicroKernel.IHandler,System.Boolean@)">
+        <member name="M:Castle.MicroKernel.Handlers.AbstractHandler.DependencySatisfied(System.Boolean@)">
             <summary>
             Invoked by the kernel
             when one of registered dependencies were satisfied by 
@@ -993,7 +1066,6 @@
             <remarks>
             Handler for the event <see cref="E:Castle.MicroKernel.IKernelEvents.HandlerRegistered"/>
             </remarks>
-            <param name="handler"></param>
             <param name="stateChanged"></param>
         </member>
         <member name="M:Castle.MicroKernel.Handlers.AbstractHandler.OnAddedAsChildKernel(System.Object,System.EventArgs)">
@@ -1072,19 +1144,21 @@
             </summary>
             <param name="model"></param>
         </member>
-        <member name="M:Castle.MicroKernel.Handlers.DefaultHandler.Resolve(Castle.MicroKernel.CreationContext)">
+        <member name="M:Castle.MicroKernel.Handlers.DefaultHandler.ResolveCore(Castle.MicroKernel.CreationContext,System.Boolean)">
             <summary>
             Returns an instance of the component this handler
             is responsible for
             </summary>
             <param name="context"></param>
+            <param name="track"></param>
             <returns></returns>
         </member>
-        <member name="M:Castle.MicroKernel.Handlers.DefaultHandler.Release(System.Object)">
+        <member name="M:Castle.MicroKernel.Handlers.DefaultHandler.ReleaseCore(System.Object)">
             <summary>
             disposes the component instance (or recycle it)
             </summary>
             <param name="instance"></param>
+            <returns>true if destroyed</returns>
         </member>
         <member name="T:Castle.MicroKernel.Handlers.DefaultHandlerFactory">
             <summary>
@@ -1243,6 +1317,16 @@
             
             </summary>
         </member>
+        <member name="T:Castle.MicroKernel.Lifestyle.PerThreadThreadStaticLifestyleManager">
+            <summary>
+            per thread LifestyleManager implementation compatibile with Silverlight.
+            </summary>
+        </member>
+        <member name="M:Castle.MicroKernel.Lifestyle.PerThreadThreadStaticLifestyleManager.Dispose">
+            <summary>
+            
+            </summary>
+        </member>
         <member name="T:Castle.MicroKernel.Lifestyle.PerWebRequestLifestyleManager">
             <summary>
             Implements a Lifestyle Manager for Web Apps that
@@ -1290,7 +1374,7 @@
             component configuration and verifies it implements the <see cref="T:Castle.MicroKernel.IComponentActivator"/> 
             interface. 
             </summary>
-            <exception cref="T:System.Configuration.ConfigurationException">
+            <exception cref="T:System.Exception">
             If the type does not implement the proper interface
             </exception>
             <param name="model"></param>
@@ -1332,7 +1416,7 @@
             Reads the proxy behavior associated with the 
             component configuration/type and applies it to the model.
             </summary>
-            <exception cref="T:System.Configuration.ConfigurationException">
+            <exception cref="T:System.Exception">
             If the conversion fails
             </exception>
             <param name="kernel"></param>
@@ -1386,11 +1470,6 @@
             <summary>
             Only to hold internal constants and get rid of 
             magic numbers and hardcode names.
-            </summary>
-        </member>
-        <member name="T:Castle.MicroKernel.ModelBuilder.Inspectors.GenericInspector">
-            <summary>
-            
             </summary>
         </member>
         <member name="T:Castle.MicroKernel.ModelBuilder.Inspectors.InterceptorInspector">
@@ -1730,6 +1809,11 @@
         <member name="P:Castle.MicroKernel.Proxy.ProxyOptions.Hook">
             <summary>
             Gets or sets the proxy hook.
+            </summary>
+        </member>
+        <member name="P:Castle.MicroKernel.Proxy.ProxyOptions.Selector">
+            <summary>
+            Gets or sets the interceptor selector.
             </summary>
         </member>
         <member name="P:Castle.MicroKernel.Proxy.ProxyOptions.OmitTarget">
@@ -2569,6 +2653,38 @@
             <param name="interceptors">The interceptors.</param>
             <returns></returns>
         </member>
+        <member name="M:Castle.MicroKernel.Registration.ComponentRegistration`1.Interceptors(System.Type[])">
+            <summary>
+            Set the interceptors for this component.
+            </summary>
+            <param name="interceptors">The interceptors.</param>
+            <returns></returns>
+        </member>
+        <member name="M:Castle.MicroKernel.Registration.ComponentRegistration`1.Interceptors``1">
+            <summary>
+            Set the interceptor for this component.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Castle.MicroKernel.Registration.ComponentRegistration`1.Interceptors``2">
+            <summary>
+            Set the interceptor for this component.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Castle.MicroKernel.Registration.ComponentRegistration`1.Interceptors(System.String[])">
+            <summary>
+            Set the interceptor for this component.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Castle.MicroKernel.Registration.ComponentRegistration`1.SelectInterceptorsWith(Castle.Core.Interceptor.IInterceptorSelector)">
+            <summary>
+            Sets the interceptor selector for this component.
+            </summary>
+            <param name="selector"></param>
+            <returns></returns>
+        </member>
         <member name="M:Castle.MicroKernel.Registration.ComponentRegistration`1.Startable">
             <summary>
             Marks the component as startable.
@@ -2594,6 +2710,27 @@
             <returns></returns>
             <remarks>Be sure that you first added the <see cref="T:Castle.Facilities.Startable.StartableFacility"/> 
             to the kernel, before registering this component.</remarks>
+        </member>
+        <member name="M:Castle.MicroKernel.Registration.ComponentRegistration`1.OnCreate(Castle.MicroKernel.LifecycleConcerns.OnCreateActionDelegate{`0}[])">
+            <summary>
+            Stores a set of <see cref="T:Castle.MicroKernel.LifecycleConcerns.OnCreateActionDelegate`1"/> which will be invoked when the component
+            is created and before it's returned from the container.
+            </summary>
+            <param name="actions">A set of actions to be executed right after the component is created and before it's returned from the container.</param>
+        </member>
+        <member name="M:Castle.MicroKernel.Registration.ComponentRegistration`1.DynamicParameters(Castle.MicroKernel.Registration.DynamicParametersDelegate)">
+            <summary>
+            Allows custom dependencies to by defined dyncamically.
+            </summary>
+            <param name="resolve">The delegate used for providing dynamic parameters.</param>
+            <returns></returns>
+        </member>
+        <member name="M:Castle.MicroKernel.Registration.ComponentRegistration`1.DynamicParameters(Castle.MicroKernel.Registration.DynamicParametersResolveDelegate)">
+            <summary>
+            Allows custom dependencies to by defined dyncamically with releasing capability.
+            </summary>
+            <param name="resolve">The delegate used for providing dynamic parameters.</param>
+            <returns></returns>
         </member>
         <member name="M:Castle.MicroKernel.Registration.ComponentRegistration`1.ActAs(System.Object[])">
             <summary>
@@ -2653,6 +2790,15 @@
             <returns></returns>
         </member>
         <member name="M:Castle.MicroKernel.Registration.ComponentRegistration`1.UsingFactoryMethod``1(System.Converter{Castle.MicroKernel.IKernel,``0})">
+            <summary>
+            Uses a factory method to instantiate the component.
+            Requires the <see cref="T:Castle.Facilities.FactorySupport.FactorySupportFacility"/> to be installed.
+            </summary>
+            <typeparam name="T">Implementation type</typeparam>
+            <param name="factoryMethod">Factory method</param>
+            <returns></returns>
+        </member>
+        <member name="M:Castle.MicroKernel.Registration.ComponentRegistration`1.UsingFactoryMethod``1(System.Func{Castle.MicroKernel.IKernel,Castle.MicroKernel.CreationContext,``0})">
             <summary>
             Uses a factory method to instantiate the component.
             Requires the <see cref="T:Castle.Facilities.FactorySupport.FactorySupportFacility"/> to be installed.
@@ -2724,13 +2870,19 @@
             </summary>
             <typeparam name="T"></typeparam>
         </member>
-        <member name="T:Castle.MicroKernel.Registration.GenericFactoryWithKernel`1">
+        <member name="T:Castle.MicroKernel.Registration.GenericFactory`1">
             <summary>
             Helper factory class
             </summary>
             <typeparam name="T"></typeparam>
         </member>
-        <member name="T:Castle.MicroKernel.Registration.GenericFactory`1">
+        <member name="T:Castle.MicroKernel.Registration.GenericFactoryWithContext`1">
+            <summary>
+            Helper factory class
+            </summary>
+            <typeparam name="T"></typeparam>
+        </member>
+        <member name="T:Castle.MicroKernel.Registration.GenericFactoryWithKernel`1">
             <summary>
             Helper factory class
             </summary>
@@ -2874,6 +3026,12 @@
             Applies the configuration node.
             </summary>
             <param name="configuration">The configuration.</param>
+        </member>
+        <member name="T:Castle.MicroKernel.Registration.OnCreateComponentDescriptor`1">
+            <summary>
+            Adds the actions to ExtendedProperties.
+            </summary>
+            <typeparam name="S"></typeparam>
         </member>
         <member name="T:Castle.MicroKernel.Registration.Parameter">
             <summary>
@@ -3245,6 +3403,30 @@
             </summary>
             <param name="info">The object that holds the serialized object data.</param>
             <param name="context">The contextual information about the source or destination.</param>
+        </member>
+        <member name="T:Castle.MicroKernel.Resolvers.ILazyComponentLoader">
+            <summary>
+            Provides lazy registration capabilities to the container.
+            </summary>
+            <remarks>
+            When a component is requested from a container and it was not registered, 
+            container loads up all registered implementers of this interface and asks 
+            them in turn whethere they can provide that component, until it finds one that will.
+            </remarks>
+        </member>
+        <member name="M:Castle.MicroKernel.Resolvers.ILazyComponentLoader.Load(System.String,System.Type)">
+            <summary>
+            Used by container to allow the loader gister component for given <paramref name="key"/> and <paramref name="service"/> to the container at the time when it is requested
+            </summary>
+            <param name="key">Key of the requested component or null</param>
+            <param name="service">Type of requested service or null</param>
+            <returns>Registration that registers component for given key and/or service or null.</returns>
+            <remarks>
+            While either key or service can be null reference it is guaranteed that at least one of them will not be null.
+            When implementer opts in to provide the requested component (by returning not-null registration) it is required
+            to register component for requested key/service combination (when one of the elements is null, it should be ignored as well).
+            When implementer does not want to register the requested component it nust return null.
+            </remarks>
         </member>
         <member name="T:Castle.MicroKernel.SubSystems.Configuration.DefaultConfigurationStore">
             <summary>
@@ -3743,9 +3925,9 @@
             </summary>
             <param name="properties">Property list.</param>
         </member>
-        <member name="M:Castle.MicroKernel.SubSystems.Naming.ComponentName.SetupProperties(System.Collections.IDictionary)">
+        <member name="M:Castle.MicroKernel.SubSystems.Naming.ComponentName.SetupProperties(System.Collections.Generic.IDictionary{System.String,System.String})">
             <summary>
-            Validates a properties Hashtable.
+            Validates a properties IDictionary.
             </summary>
             <param name="properties">Property list.</param>
         </member>
@@ -4131,6 +4313,12 @@
             </summary>
         </member>
         <member name="E:Castle.MicroKernel.IKernelEvents.HandlerRegistered">
+            <summary>
+            Event fired when a new handler is registered 
+            (it might be in a valid or waiting dependency state)
+            </summary>
+        </member>
+        <member name="E:Castle.MicroKernel.IKernelEvents.HandlersChanged">
             <summary>
             Event fired when a new handler is registered 
             (it might be in a valid or waiting dependency state)
