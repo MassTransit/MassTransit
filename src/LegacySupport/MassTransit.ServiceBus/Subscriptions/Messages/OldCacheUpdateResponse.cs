@@ -21,8 +21,9 @@ namespace MassTransit.LegacySupport.Subscriptions.Messages
         readonly List<Subscription> _subscriptions;
 
         //xml serialization
-        OldCacheUpdateResponse()
+        public OldCacheUpdateResponse()
         {
+            _subscriptions = new List<Subscription>();
         }
 
         public OldCacheUpdateResponse(IEnumerable<Subscription> subscriptions)
