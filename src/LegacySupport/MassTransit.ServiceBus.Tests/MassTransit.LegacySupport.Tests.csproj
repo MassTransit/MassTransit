@@ -3,11 +3,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-<<<<<<< HEAD
     <ProductVersion>9.0.30729</ProductVersion>
-=======
-    <ProductVersion>9.0.21022</ProductVersion>
->>>>>>> facd3758533caa10bf6db4c65bbdf864ef0d2d87
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{A8C81414-1188-49B5-BC1C-4C00B931AF84}</ProjectGuid>
     <OutputType>Library</OutputType>

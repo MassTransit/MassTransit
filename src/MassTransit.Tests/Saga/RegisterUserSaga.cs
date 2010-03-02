@@ -17,7 +17,6 @@ namespace MassTransit.Tests.Saga
 	using MassTransit.Saga;
 	using MassTransit.Services.Timeout.Messages;
 	using Messages;
-	using Microsoft.Practices.ServiceLocation;
 
 	/// <summary>
 	/// 
@@ -59,7 +58,7 @@ namespace MassTransit.Tests.Saga
 			get { return CorrelationId; }
 		}
 
-		public IServiceLocator ServiceLocator { get; set; }
+		public IObjectBuilder ServiceLocator { get; set; }
 
 		public void Consume(RegisterUser message)
 		{

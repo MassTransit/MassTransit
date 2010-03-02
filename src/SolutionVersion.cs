@@ -16,9 +16,9 @@ using System.Security;
 [assembly: ComVisibleAttribute(false)]
 [assembly: CLSCompliantAttribute(true)]
 [assembly: AssemblyCompanyAttribute("CFT & ACM")]
-[assembly: AssemblyVersionAttribute("0.8.0.0")]
-[assembly: AssemblyFileVersionAttribute("0.8.0.0")]
-[assembly: AssemblyInformationalVersionAttribute("0.8.0.0")]
+[assembly: AssemblyVersionAttribute("0.8.0.18")]
+[assembly: AssemblyFileVersionAttribute("0.8.0.18")]
+[assembly: AssemblyInformationalVersionAttribute("0.8.0.gb6cf2b01fd2b231cb573ee54c6fa2c6858987a4e")]
 [assembly: AssemblyTitleAttribute("MassTransit")]
 [assembly: AssemblyProductAttribute("MassTransit")]
 [assembly: AssemblyDescriptionAttribute("MassTransit is a product of CFT & ACM. See more at http://masstransit-project.com" +

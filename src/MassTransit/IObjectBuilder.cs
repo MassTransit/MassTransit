@@ -12,13 +12,14 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
-	using System.Collections;
-	using Microsoft.Practices.ServiceLocation;
+    using System;
+    using System.Collections;
 
-    public interface IObjectBuilder :
-        IServiceLocator
+    public interface IObjectBuilder
 	{
         T GetInstance<T>(IDictionary arguments);
+        object GetInstance(Type type);
+        T GetInstance<T>();
 
 		/// <summary>
 		/// Releases an object back to the container
