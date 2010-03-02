@@ -15,6 +15,9 @@ namespace MassTransit.LegacySupport.Tests.OldSerializedMessages
     using System;
     using System.Collections.Generic;
     using System.IO;
+    using System.Reflection;
+    using System.Runtime.Serialization.Formatters.Binary;
+    using AutoMapper;
     using NUnit.Framework;
     using Subscriptions;
     using Subscriptions.Messages;
@@ -55,6 +58,51 @@ namespace MassTransit.LegacySupport.Tests.OldSerializedMessages
                     StreamAssert.AreEqual(oldStream, newStream);
                 }
             }
+        }
+
+        [Test,Ignore]
+        public void bob()
+        {
+            AppDomain.CurrentDomain.AssemblyResolve += CurrentDomainOnAssemblyResolve;
+
+            //get an instance of the old object. 
+            //set the properties
+
+            //serialize and test
+            //can auto mapper help?
+            Console.WriteLine(typeof(MassTransit.ServiceBus));
+            using (var stream = File.OpenRead(_pathToFile))
+            {
+                var deserialize = new BinaryFormatter().Deserialize(stream);
+
+                var weakCacheUpdateResponse = Type.GetType("MassTransit.ServiceBus.Subscriptions.Messages.CacheUpdateResponse, MassTransit.ServiceBus, Version=0.2.2133.0, Culture=neutral, PublicKeyToken=null");
+                var weakSubscriptionType = Type.GetType("MassTransit.ServiceBus.Subscriptions.Subscription, MassTransit.ServiceBus, Version=0.2.2133.0, Culture=neutral, PublicKeyToken=null");
+                var weakIListSubscriptionType = typeof(IList<>).MakeGenericType(weakSubscriptionType);
+                var weakListSubscriptionType = typeof(List<>).MakeGenericType(weakSubscriptionType);
+
+                Mapper.CreateMap(weakSubscriptionType, typeof(Subscription));
+                Mapper.CreateMap(weakListSubscriptionType, typeof(List<Subscription>));
+                Mapper.CreateMap(weakIListSubscriptionType, typeof(IList<Subscription>));
+                Mapper.CreateMap(weakCacheUpdateResponse,typeof(OldCacheUpdateResponse));
+                
+                var o = (OldCacheUpdateResponse)Mapper.Map(deserialize, weakCacheUpdateResponse, typeof(OldCacheUpdateResponse));
+                Console.WriteLine(o.Subscriptions.Count);
+            }
+        }
+
+        private static Assembly CurrentDomainOnAssemblyResolve(object sender, ResolveEventArgs args)
+        {
+            if (args.Name != "MassTransit.ServiceBus, Version=0.2.2133.0, Culture=neutral, PublicKeyToken=null")
+                return null;
+            var assembly = Assembly.GetAssembly(typeof(LegacySubscriptionProxyService));
+            var resourceStream = assembly.GetManifestResourceStream("MassTransit.LegacySupport.OldDll.MassTransit.ServiceBus.dll");
+            var buffer = new byte[resourceStream.Length];
+            int read = 0;
+            while (read < resourceStream.Length)
+            {
+                read = resourceStream.Read(buffer, read, buffer.Length - read);
+            }
+            return Assembly.Load(buffer);
         }
 
         [Test]
