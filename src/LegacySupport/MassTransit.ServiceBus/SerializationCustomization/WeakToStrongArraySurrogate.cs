@@ -2,8 +2,10 @@ namespace MassTransit.LegacySupport.SerializationCustomization
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.Runtime.Serialization;
 
+    [DebuggerDisplay("Weak:{SurrogateTypeName}")]
     public class WeakToStrongArraySurrogate<T> :
         LegacySurrogate
     {

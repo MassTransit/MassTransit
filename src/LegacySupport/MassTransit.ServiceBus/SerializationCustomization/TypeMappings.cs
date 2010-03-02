@@ -21,19 +21,19 @@ namespace MassTransit.LegacySupport.SerializationCustomization
     public class TypeMappings :
         IEnumerable<TypeMap>
     {
-        private readonly List<TypeMap> _maps2;
+        private readonly List<TypeMap> _typeMaps;
 
         public TypeMappings()
         {
-            _maps2 = new List<TypeMap>();
-            _maps2.Add(new TypeMap("MassTransit.ServiceBus, Version=0.2.2133.0, Culture=neutral, PublicKeyToken=null", "MassTransit.ServiceBus.Subscriptions.Subscription", typeof(Subscription)));
-            _maps2.Add(new TypeMap("MassTransit.ServiceBus, Version=0.2.2133.0, Culture=neutral, PublicKeyToken=null", "MassTransit.ServiceBus.Subscriptions.Subscription[]", typeof(Subscription[])));
-            _maps2.Add(new TypeMap("mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", "System.Collections.Generic.List`1[[MassTransit.ServiceBus.Subscriptions.Subscription, MassTransit.ServiceBus, Version=0.2.2133.0, Culture=neutral, PublicKeyToken=null]]", typeof(List<Subscription>)));
-            _maps2.Add(new TypeMap("MassTransit.ServiceBus, Version=0.2.2133.0, Culture=neutral, PublicKeyToken=null", "MassTransit.ServiceBus.Subscriptions.Messages.CacheUpdateResponse", typeof(OldCacheUpdateResponse)));
-            _maps2.Add(new TypeMap("MassTransit.ServiceBus, Version=0.2.2133.0, Culture=neutral, PublicKeyToken=null", "MassTransit.ServiceBus.Subscriptions.Messages.AddSubscription", typeof(OldAddSubscription)));
-            _maps2.Add(new TypeMap("MassTransit.ServiceBus, Version=0.2.2133.0, Culture=neutral, PublicKeyToken=null", "MassTransit.ServiceBus.Subscriptions.Messages.CacheUpdateRequest", typeof(OldCacheUpdateRequest)));
-            _maps2.Add(new TypeMap("MassTransit.ServiceBus, Version=0.2.2133.0, Culture=neutral, PublicKeyToken=null", "MassTransit.ServiceBus.Subscriptions.Messages.CancelSubscriptionUpdates", typeof(OldCancelSubscriptionUpdates)));
-            _maps2.Add(new TypeMap("MassTransit.ServiceBus, Version=0.2.2133.0, Culture=neutral, PublicKeyToken=null", "MassTransit.ServiceBus.Subscriptions.Messages.RemoveSubscription", typeof(OldRemoveSubscription)));
+            _typeMaps = new List<TypeMap>();
+            _typeMaps.Add(new TypeMap("MassTransit.ServiceBus, Version=0.2.2133.0, Culture=neutral, PublicKeyToken=null", "MassTransit.ServiceBus.Subscriptions.Subscription", typeof(Subscription)));
+            _typeMaps.Add(new TypeMap("MassTransit.ServiceBus, Version=0.2.2133.0, Culture=neutral, PublicKeyToken=null", "MassTransit.ServiceBus.Subscriptions.Subscription[]", typeof(Subscription[])));
+            _typeMaps.Add(new TypeMap("mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", "System.Collections.Generic.List`1[[MassTransit.ServiceBus.Subscriptions.Subscription, MassTransit.ServiceBus, Version=0.2.2133.0, Culture=neutral, PublicKeyToken=null]]", typeof(List<Subscription>)));
+            _typeMaps.Add(new TypeMap("MassTransit.ServiceBus, Version=0.2.2133.0, Culture=neutral, PublicKeyToken=null", "MassTransit.ServiceBus.Subscriptions.Messages.CacheUpdateResponse", typeof(OldCacheUpdateResponse)));
+            _typeMaps.Add(new TypeMap("MassTransit.ServiceBus, Version=0.2.2133.0, Culture=neutral, PublicKeyToken=null", "MassTransit.ServiceBus.Subscriptions.Messages.AddSubscription", typeof(OldAddSubscription)));
+            _typeMaps.Add(new TypeMap("MassTransit.ServiceBus, Version=0.2.2133.0, Culture=neutral, PublicKeyToken=null", "MassTransit.ServiceBus.Subscriptions.Messages.CacheUpdateRequest", typeof(OldCacheUpdateRequest)));
+            _typeMaps.Add(new TypeMap("MassTransit.ServiceBus, Version=0.2.2133.0, Culture=neutral, PublicKeyToken=null", "MassTransit.ServiceBus.Subscriptions.Messages.CancelSubscriptionUpdates", typeof(OldCancelSubscriptionUpdates)));
+            _typeMaps.Add(new TypeMap("MassTransit.ServiceBus, Version=0.2.2133.0, Culture=neutral, PublicKeyToken=null", "MassTransit.ServiceBus.Subscriptions.Messages.RemoveSubscription", typeof(OldRemoveSubscription)));
         }
 
         IEnumerator IEnumerable.GetEnumerator()
@@ -43,7 +43,7 @@ namespace MassTransit.LegacySupport.SerializationCustomization
 
         public IEnumerator<TypeMap> GetEnumerator()
         {
-            foreach (TypeMap map in _maps2)
+            foreach (TypeMap map in _typeMaps)
             {
                 yield return map;
             }
