@@ -13,7 +13,7 @@ namespace MassTransit.LegacySupport.Tests.OldSerializedMessages
     {
         string _pathToFile = @".\OldSerializedMessages\ListSubscription.txt";
 
-        [Test]
+        [Test,Ignore]
         public void NewToOld()
         {
             var oldSub = new Subscription("the message", new Uri("http://bob/phil"));
