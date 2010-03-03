@@ -77,12 +77,8 @@ namespace MassTransit.LegacySupport.Tests.OldSerializedMessages
 
                 var weakCacheUpdateResponse = Type.GetType("MassTransit.ServiceBus.Subscriptions.Messages.CacheUpdateResponse, MassTransit.ServiceBus, Version=0.2.2133.0, Culture=neutral, PublicKeyToken=null");
                 var weakSubscriptionType = Type.GetType("MassTransit.ServiceBus.Subscriptions.Subscription, MassTransit.ServiceBus, Version=0.2.2133.0, Culture=neutral, PublicKeyToken=null");
-                var weakIListSubscriptionType = typeof(IList<>).MakeGenericType(weakSubscriptionType);
-                var weakListSubscriptionType = typeof(List<>).MakeGenericType(weakSubscriptionType);
 
                 Mapper.CreateMap(weakSubscriptionType, typeof(Subscription));
-                Mapper.CreateMap(weakListSubscriptionType, typeof(List<Subscription>));
-                Mapper.CreateMap(weakIListSubscriptionType, typeof(IList<Subscription>));
                 Mapper.CreateMap(weakCacheUpdateResponse,typeof(OldCacheUpdateResponse));
                 
                 var o = (OldCacheUpdateResponse)Mapper.Map(deserialize, weakCacheUpdateResponse, typeof(OldCacheUpdateResponse));
