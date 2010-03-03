@@ -17,9 +17,9 @@ namespace MassTransit.LegacySupport.Subscriptions
     [Serializable]
     public class Subscription : IEquatable<Subscription>
     {
-        readonly string _correlationId;
+        string _correlationId;
         protected Uri _endpointUri;
-        readonly string _messageName;
+        string _messageName;
 
         protected Subscription()
         {
@@ -48,16 +48,19 @@ namespace MassTransit.LegacySupport.Subscriptions
         public Uri EndpointUri
         {
             get { return _endpointUri; }
+            set { _endpointUri = value; }
         }
 
         public string MessageName
         {
             get { return _messageName; }
+            set { _messageName = value; }
         }
 
         public string CorrelationId
         {
             get { return _correlationId; }
+            set { _correlationId = value;}
         }
 
         #region IEquatable<Subscription> Members

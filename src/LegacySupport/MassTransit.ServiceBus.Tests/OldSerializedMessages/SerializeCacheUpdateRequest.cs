@@ -27,9 +27,10 @@ namespace MassTransit.LegacySupport.Tests.OldSerializedMessages
         public void NewToOld()
         {
             var oldMsg = new OldCacheUpdateRequest(new Uri("http://bob/phil"));
+            var oldold = Factory.ConvertToOldCacheUpdateRequest(oldMsg);
             using (var newStream = new MemoryStream())
             {
-                NewWriter.Serialize(newStream, oldMsg);
+                PlainFormatter.Serialize(newStream, oldold);
 
                 newStream.Position = 0;
 
@@ -53,7 +54,8 @@ namespace MassTransit.LegacySupport.Tests.OldSerializedMessages
             OldCacheUpdateRequest oldMsg;
             using (var str = File.OpenRead(_pathToFile))
             {
-                oldMsg = (OldCacheUpdateRequest) NewReader.Deserialize(str);
+                var o = PlainFormatter.Deserialize(str);
+                oldMsg = Factory.ConvertToNewCacheUpdateRequest(o);
             }
             Assert.AreEqual(new Uri("http://bob/phil"), oldMsg.RequestingUri);
         }

@@ -5,7 +5,7 @@ namespace MassTransit.LegacySupport.Subscriptions.Messages
     [Serializable]
     public abstract class SubscriptionChange
     {
-        private readonly Subscription _subscription;
+        Subscription _subscription;
 
         //xml serialization
         protected SubscriptionChange()
@@ -25,6 +25,7 @@ namespace MassTransit.LegacySupport.Subscriptions.Messages
         public Subscription Subscription
         {
             get { return _subscription; }
+            set { _subscription = value;}
         }
     }
 }
