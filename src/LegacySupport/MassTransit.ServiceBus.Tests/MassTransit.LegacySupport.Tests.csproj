@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.30729</ProductVersion>
+    <ProductVersion>9.0.21022</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{A8C81414-1188-49B5-BC1C-4C00B931AF84}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -58,7 +58,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ListTest.cs" />
-    <Compile Include="OldSerializedMessages\SerializeListOfSubscription.cs" />
     <Compile Include="Proxy\WhenOldClientSendsAddSubscription.cs" />
     <Compile Include="Proxy\WhenOldClientSendsCacheUpdateRequest.cs" />
     <Compile Include="Proxy\WhenOldClientSendsCancelUpdateRequest.cs" />
@@ -80,7 +79,6 @@
     <Compile Include="OldSerializedMessages\SerializeRemoveSubscription.cs" />
     <Compile Include="StreamAssert.cs" />
     <Compile Include="OldSerializedMessages\TestSerialization.cs" />
-    <Compile Include="OldSerializedMessages\UriTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\MassTransit\MassTransit.csproj">
@@ -109,9 +107,6 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="OldSerializedMessages\RemoveSubscription.txt">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="OldSerializedMessages\Uri.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

@@ -27,9 +27,10 @@ namespace MassTransit.LegacySupport.Tests.OldSerializedMessages
         public void NewToOld()
         {
             var oldMsg = new OldAddSubscription("the message", new Uri("http://bob/phil"));
+            var oldold = Factory.ConvertToOldAddSubscription(oldMsg);
             using (var newStream = new MemoryStream())
             {
-                NewWriter.Serialize(newStream, oldMsg);
+                PlainFormatter.Serialize(newStream, oldold);
 
                 newStream.Position = 0;
 
@@ -53,7 +54,8 @@ namespace MassTransit.LegacySupport.Tests.OldSerializedMessages
             OldAddSubscription oldMsg;
             using (var str = File.OpenRead(_pathToFile))
             {
-                oldMsg = (OldAddSubscription) NewReader.Deserialize(str);
+                var o = PlainFormatter.Deserialize(str);
+                oldMsg = Factory.ConvertToNewAddSubscription(o) ;
             }
             Assert.AreEqual(new Uri("http://bob/phil"), oldMsg.Subscription.EndpointUri);
         }

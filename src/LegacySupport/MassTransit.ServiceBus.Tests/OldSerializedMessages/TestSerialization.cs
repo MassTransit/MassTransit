@@ -15,6 +15,7 @@ namespace MassTransit.LegacySupport.Tests.OldSerializedMessages
     using System.Runtime.Serialization.Formatters.Binary;
     using NUnit.Framework;
     using SerializationCustomization;
+    using Subscriptions.Messages;
 
     [TestFixture]
     public class TestSerialization
@@ -22,13 +23,18 @@ namespace MassTransit.LegacySupport.Tests.OldSerializedMessages
         [TestFixtureSetUp]
         public void Setup()
         {
+            LegacySubscriptionProxyService.SetupAssemblyRedirectForOldMessages();
             Old = new BinaryFormatter();
             NewReader = LegacyBinaryFormatterBuilder.BuildReader();
             NewWriter = LegacyBinaryFormatterBuilder.BuildWriter();
+            PlainFormatter = new BinaryFormatter();
+            Factory = new OldMessageFactory();
         }
 
+        public BinaryFormatter PlainFormatter { get; private set; }
         public BinaryFormatter NewReader { get; private set; }
         public BinaryFormatter NewWriter { get; private set; }
         public BinaryFormatter Old { get; private set; }
+        public OldMessageFactory Factory { get; private set; }
     }
 }

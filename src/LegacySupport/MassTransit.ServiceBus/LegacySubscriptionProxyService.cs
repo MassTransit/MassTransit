@@ -1,6 +1,7 @@
 namespace MassTransit.LegacySupport
 {
     using System;
+    using System.Reflection;
     using Exceptions;
     using log4net;
     using Messages;
@@ -17,6 +18,12 @@ namespace MassTransit.LegacySupport
         IEndpointFactory _endpointFactory;
         IServiceBus _bus;
         private UnsubscribeAction _unsubscribeToken = () => false;
+
+        public static void SetupAssemblyRedirectForOldMessages()
+        {
+
+            AppDomain.CurrentDomain.AssemblyResolve += CurrentDomainOnAssemblyResolve;
+        }
 
         public LegacySubscriptionProxyService(ISagaRepository<LegacySubscriptionClientSaga> subscriptionClientSagas, IEndpointFactory endpointFactory, IServiceBus bus)
         {
@@ -108,6 +115,21 @@ namespace MassTransit.LegacySupport
                 _log.Error(message, exp);
                 throw exp;
             }
+        }
+
+        private static Assembly CurrentDomainOnAssemblyResolve(object sender, ResolveEventArgs args)
+        {
+            if (args.Name != "MassTransit.ServiceBus, Version=0.2.2133.0, Culture=neutral, PublicKeyToken=null")
+                return null;
+            var assembly = Assembly.GetAssembly(typeof(LegacySubscriptionProxyService));
+            var resourceStream = assembly.GetManifestResourceStream("MassTransit.LegacySupport.OldDll.MassTransit.ServiceBus.dll");
+            var buffer = new byte[resourceStream.Length];
+            int read = 0;
+            while (read < resourceStream.Length)
+            {
+                read = resourceStream.Read(buffer, read, buffer.Length - read);
+            }
+            return Assembly.Load(buffer);
         }
     }
 }

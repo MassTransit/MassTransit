@@ -18,7 +18,7 @@ namespace MassTransit.LegacySupport.Subscriptions.Messages
     [Serializable]
     public class OldCacheUpdateResponse
     {
-        readonly List<Subscription> _subscriptions;
+        List<Subscription> _subscriptions;
 
         //xml serialization
         public OldCacheUpdateResponse()
@@ -31,9 +31,10 @@ namespace MassTransit.LegacySupport.Subscriptions.Messages
             _subscriptions = new List<Subscription>(subscriptions);
         }
 
-        public IList<Subscription> Subscriptions
+        public List<Subscription> Subscriptions
         {
             get { return _subscriptions; }
+            set { _subscriptions = value;}
         }
     }
 }
