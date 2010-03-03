@@ -22,16 +22,36 @@ namespace MassTransit.Internal.RequestResponse
 		private readonly IServiceBus _bus;
 		private readonly Action<IServiceBus> _requestAction;
 		private readonly List<IResponseAction> _responseActions = new List<IResponseAction>();
-		private TimeSpan _responseTimeout = TimeSpan.MaxValue;
 		private readonly ManualResetEvent _responseReceived = new ManualResetEvent(false);
-		private Action _timeoutAction;
+		private TimeSpan _responseTimeout = TimeSpan.MaxValue;
 		private object _state;
+		private Action _timeoutAction;
 		private RegisteredWaitHandle _waitHandle;
 
 		public RequestResponseScope(IServiceBus bus, Action<IServiceBus> requestAction)
 		{
 			_bus = bus;
 			_requestAction = requestAction;
+		}
+
+		public bool IsCompleted
+		{
+			get { return _responseReceived.WaitOne(0, false); }
+		}
+
+		public WaitHandle AsyncWaitHandle
+		{
+			get { return _responseReceived; }
+		}
+
+		public object AsyncState
+		{
+			get { return _state; }
+		}
+
+		public bool CompletedSynchronously
+		{
+			get { return false; }
 		}
 
 		public void AddResponseAction(IResponseAction responseAction)
@@ -60,25 +80,6 @@ namespace MassTransit.Internal.RequestResponse
 			}
 		}
 
-		private bool WaitForResponseAction()
-		{
-			return _responseReceived.WaitOne(_responseTimeout, true);
-		}
-
-		private void InvokeRequestAction()
-		{
-			_requestAction(_bus);
-		}
-
-		private UnsubscribeAction SubscribeToResponseMessages(UnsubscribeAction unsubscribeToken)
-		{
-			for (int i = 0; i < _responseActions.Count; i++)
-			{
-				unsubscribeToken += _responseActions[i].SubscribeTo(_bus);
-			}
-			return unsubscribeToken;
-		}
-
 		public RequestResponseScope TimeoutAfter(TimeSpan span)
 		{
 			_responseTimeout = span;
@@ -86,7 +87,7 @@ namespace MassTransit.Internal.RequestResponse
 			return this;
 		}
 
-		public void SetResponseReceived<TMessage>(TMessage message) 
+		public void SetResponseReceived<TMessage>(TMessage message)
 			where TMessage : class
 		{
 			_responseReceived.Set();
@@ -106,15 +107,13 @@ namespace MassTransit.Internal.RequestResponse
 			UnsubscribeAction unsubscribeToken = () => true;
 			unsubscribeToken = SubscribeToResponseMessages(unsubscribeToken);
 
-			InvokeRequestAction();
-
 			WaitOrTimerCallback timerCallback = (s, timedOut) =>
 				{
 					unsubscribeToken();
 
 					if (timedOut)
 					{
-						if(_timeoutAction != null)
+						if (_timeoutAction != null)
 							_timeoutAction();
 					}
 
@@ -123,27 +122,39 @@ namespace MassTransit.Internal.RequestResponse
 
 			_waitHandle = ThreadPool.RegisterWaitForSingleObject(_responseReceived, timerCallback, state, _responseTimeout, true);
 
+			InvokeRequestAction();
+
 			return this;
 		}
 
-		public bool IsCompleted
+		private bool WaitForResponseAction()
 		{
-			get { return _responseReceived.WaitOne(0, false); }
+			return _responseReceived.WaitOne(_responseTimeout, true);
 		}
 
-		public WaitHandle AsyncWaitHandle
+		private void InvokeRequestAction()
 		{
-			get { return _responseReceived; }
+			_requestAction(_bus);
 		}
 
-		public object AsyncState
+		private UnsubscribeAction SubscribeToResponseMessages(UnsubscribeAction unsubscribeToken)
 		{
-			get { return _state; }
+			for (int i = 0; i < _responseActions.Count; i++)
+			{
+				unsubscribeToken += _responseActions[i].SubscribeTo(_bus);
+			}
+			return unsubscribeToken;
 		}
 
-		public bool CompletedSynchronously
+		~RequestResponseScope()
 		{
-			get { return false; }
+			if (_waitHandle != null)
+			{
+				_waitHandle.Unregister(_responseReceived);
+				_waitHandle = null;
+			}
+
+			_responseReceived.Close();
 		}
 	}
 }
