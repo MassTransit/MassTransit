@@ -1,0 +1,89 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<log4net>
+	<appender name="RollingFile"
+			  type="log4net.Appender.RollingFileAppender">
+		<file value="app_name.log" />
+		<appendToFile value="true" />
+		<rollingStyle value="Date" />
+		<datePattern value="yyyyMMdd" />
+		<!-- files rolled at day -->
+		<maxSizeRollBackups value="10" />
+		<!-- only 10 days kept -->
+		<maximumFileSize value="1MB" />
+		<!-- file size capped at 1MB -->
+
+		<layout type="log4net.Layout.PatternLayout">
+			<conversionPattern value="%-5p %d{hh:mm:ss} %message%newline" />
+		</layout>
+	</appender>
+
+	<appender name="ColoredConsoleAppender"
+			  type="log4net.Appender.ColoredConsoleAppender">
+		<mapping>
+			<level value="ERROR" />
+			<foreColor value="Red, HighIntensity" />
+		</mapping>
+		<mapping>
+			<level value="INFO" />
+			<foreColor value="White" />
+		</mapping>
+		<mapping>
+			<level value="DEBUG" />
+			<foreColor value="Cyan" />
+		</mapping>
+		<layout type="log4net.Layout.PatternLayout">
+			<conversionPattern value="%message%newline" />
+		</layout>
+	</appender>
+
+	<!-- Custom appender for MassTransit's Messages -->
+	<appender name="MT.Messages"
+			  type="log4net.Appender.FileAppender">
+		<file value="masstransit.messages.log" />
+		<appendToFile value="false" />
+		<layout type="log4net.Layout.PatternLayout">
+			<conversionPattern value="%-5p %d{hh:mm:ss} %message%newline" />
+		</layout>
+	</appender>
+
+	<!-- Custom appender for MassTransit's Messages -->
+	<appender name="NH.SQL"
+			  type="log4net.Appender.FileAppender">
+		<file value="nhibernate.sql.log" />
+		<appendToFile value="false" />
+		<layout type="log4net.Layout.PatternLayout">
+			<conversionPattern value="%d{hh:mm:ss} %message%newline" />
+		</layout>
+	</appender>
+
+	<!-- Set root logger level to DEBUG and its only appender to Console -->
+	<root>
+		<level value="INFO" />
+		<appender-ref ref="ColoredConsoleAppender" />
+	</root>
+
+	<!-- Seeing service messages would be good here -->
+	<logger name="MassTransit.Host2">
+		<level value="INFO"/>
+	</logger>
+
+	<!-- Standard NHibernate Logging Settings -->
+	<logger name="NHibernate">
+		<level value="OFF" />
+	</logger>
+
+	<logger name="NHibernate.SQL">
+		<level value="OFF" />
+		<appender-ref ref="NH.SQL" />
+	</logger>
+
+	<!-- Standard MassTransit Logging Settings -->
+	<logger name="MassTransit">
+		<level value="OFF" />
+	</logger>
+
+	<logger name="MassTransit.Messages">
+		<level value="OFF" />
+		<appender-ref ref="MT.Messages" />
+	</logger>
+</log4net>
