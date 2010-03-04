@@ -13,6 +13,10 @@
 namespace MassTransit.WindsorIntegration
 {
     using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Linq;
+    using System.Reflection;
     using Castle.MicroKernel.Facilities;
     using Castle.MicroKernel.Registration;
     using Configuration;
@@ -26,7 +30,7 @@ namespace MassTransit.WindsorIntegration
     /// <summary>
     /// Facility to simplify the use of MT
     /// </summary>
-    public class MassTransitFacilityBase :
+    public abstract class MassTransitFacilityBase :
         AbstractFacility
     {
         /// <summary>
@@ -41,26 +45,26 @@ namespace MassTransit.WindsorIntegration
         {
             RegisterBusDependencies();
 
-//            var typeScanner = new EndpointTypeScanner();
-//
-//            Scan(scanner =>
-//            {
-//                string assemblyPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-//
-//                scanner.AssembliesFromPath(assemblyPath, assembly => { return assembly.GetName().Name.StartsWith("MassTransit.Transports."); });
-//
-//                scanner.With(typeScanner);
-//            });
 
-//            RegisterEndpointFactory(x =>
-//                {
-//                    foreach (Type transportType in typeScanner.TransportTypes)
-//                    {
-//                        x.RegisterTransport(transportType);
-//                    }
-//
-//                	configurationAction(x);
-//                });
+
+            //type scanning
+            string assemblyPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            var files = from f in Directory.GetFiles(assemblyPath)
+            where f.StartsWith("MassTransit.Transports.")
+            select f;
+
+            var types = new List<Type>();
+            foreach (var file in files)
+            {
+                Kernel.Register( AllTypes.Of<IEndpoint>()
+                    .FromAssemblyNamed(file).Configure(c=> types.Add(c.Implementation)));
+            }
+
+            RegisterEndpointFactory(x =>
+            {
+                types.Each(x.RegisterTransport);
+                configurationAction(x);
+            });
         }
 
         /// <summary>
@@ -196,12 +200,6 @@ namespace MassTransit.WindsorIntegration
                 // this is fairly easy inline, but wanted to include the example for completeness
                 y.SetSubscriptionServiceEndpoint(subscriptionServiceEndpointAddress);
             });
-        }
-
-
-        protected override void Init()
-        {
-            //no-op
         }
     }
 }
