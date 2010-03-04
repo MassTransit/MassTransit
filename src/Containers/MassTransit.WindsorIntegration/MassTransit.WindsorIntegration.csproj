@@ -66,8 +66,8 @@
     <Compile Include="..\..\SolutionVersion.cs">
       <Link>SolutionVersion.cs</Link>
     </Compile>
-    <Compile Include="CodeConfigFacility.cs" />
     <Compile Include="DefaultMassTransitContainer.cs" />
+    <Compile Include="MassTransitFacility.cs" />
     <Compile Include="MassTransitFacilityBase.cs" />
     <Compile Include="WindsorContainerConfigurator.cs" />
     <Compile Include="WindsorObjectBuilder.cs" />

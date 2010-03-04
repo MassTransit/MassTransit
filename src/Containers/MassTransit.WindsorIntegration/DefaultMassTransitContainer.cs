@@ -63,7 +63,7 @@ namespace MassTransit.WindsorIntegration
 
 	    private void AddMassTransitFacility()
 		{
-			AddFacility("masstransit", new MassTransitFacilityBase());
+			AddFacility("masstransit", new MassTransitFacility());
 		}
 	}
 }
