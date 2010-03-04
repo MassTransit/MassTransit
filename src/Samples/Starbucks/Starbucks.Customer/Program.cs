@@ -15,6 +15,7 @@ namespace Starbucks.Customer
 	using System;
 	using System.Windows.Forms;
 	using Castle.Windsor;
+	using MassTransit;
 	using MassTransit.Transports.Msmq;
 	using MassTransit.WindsorIntegration;
 
@@ -28,18 +29,19 @@ namespace Starbucks.Customer
 		{
 			MsmqEndpointConfigurator.Defaults(x => { x.CreateMissingQueues = true; });
 
-			BootstrapContainer();
+			var c = BootstrapContainer();
 
 			Application.EnableVisualStyles();
 			Application.SetCompatibleTextRenderingDefault(false);
-			Application.Run(new OrderDrinkForm());
+			Application.Run(new OrderDrinkForm(c.Resolve<IServiceBus>()));
 		}
 
-		private static void BootstrapContainer()
+		private static IWindsorContainer BootstrapContainer()
 		{
 			IWindsorContainer container = new DefaultMassTransitContainer("Starbucks.Customer.Castle.xml");
 			container.AddComponent<CustomerService>(typeof (CustomerService).Name);
 			container.AddComponent<OrderDrinkForm>();
+		    return container;
 		}
 	}
 }

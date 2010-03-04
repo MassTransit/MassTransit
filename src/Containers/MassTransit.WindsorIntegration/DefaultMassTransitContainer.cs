@@ -12,7 +12,8 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.WindsorIntegration
 {
-	using Castle.Windsor;
+    using Castle.Facilities.FactorySupport;
+    using Castle.Windsor;
 	using Castle.Windsor.Configuration;
 
 	public class DefaultMassTransitContainer :
@@ -30,6 +31,7 @@ namespace MassTransit.WindsorIntegration
 		{
 			Initialize();
 
+		    AddFactoryFacility();
 			AddMassTransitFacility();
 		}
 
@@ -38,6 +40,7 @@ namespace MassTransit.WindsorIntegration
 		{
 			Initialize();
 
+            AddFactoryFacility();
 			AddMassTransitFacility();
 		}
 
@@ -61,6 +64,10 @@ namespace MassTransit.WindsorIntegration
 	        get { return _objectBuilder; }
 	    }
 
+        private void AddFactoryFacility()
+        {
+            AddFacility("factory", new FactorySupportFacility());
+        }
 	    private void AddMassTransitFacility()
 		{
 			AddFacility("masstransit", new MassTransitFacility());

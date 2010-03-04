@@ -33,47 +33,43 @@ namespace MassTransit.WindsorIntegration
     public abstract class MassTransitFacilityBase :
         AbstractFacility
     {
-        /// <summary>
-        /// Default constructor with not actual registration
-        /// </summary>
-        public MassTransitFacilityBase()
-            : this(x => { })
-        {
-        }
+        Action<IEndpointFactoryConfigurator> _configurationAction;
+        Type[] _transportTypes;
 
-        public MassTransitFacilityBase(Action<IEndpointFactoryConfigurator> configurationAction)
+        protected override void Init()
         {
             RegisterBusDependencies();
 
-
-
             //type scanning
+            if(_transportTypes == null) 
+                LoadTypesByScan();
+            else 
+                LoadTransports(_transportTypes);
+        }
+
+        void LoadTypesByScan()
+        {
             string assemblyPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             var files = from f in Directory.GetFiles(assemblyPath)
-            where f.StartsWith("MassTransit.Transports.")
-            select f;
+                        where f.StartsWith("MassTransit.Transports.")
+                        select f;
 
             var types = new List<Type>();
             foreach (var file in files)
             {
-                Kernel.Register( AllTypes.Of<IEndpoint>()
-                    .FromAssemblyNamed(file).Configure(c=> types.Add(c.Implementation)));
+                Kernel.Register(AllTypes.Of<IEndpoint>()
+                    .FromAssemblyNamed(file).Configure(c => types.Add(c.Implementation)));
             }
+
 
             RegisterEndpointFactory(x =>
             {
                 types.Each(x.RegisterTransport);
-                configurationAction(x);
+                _configurationAction(x);
             });
         }
-
-        /// <summary>
-        /// Creates a registry for a service bus listening to an endpoint
-        /// </summary>
-        public MassTransitFacilityBase(params Type[] transportTypes)
+        void LoadTransports(params Type[] transportTypes)
         {
-            RegisterBusDependencies();
-
             RegisterEndpointFactory(x =>
             {
                 x.RegisterTransport<LoopbackEndpoint>();
@@ -84,6 +80,16 @@ namespace MassTransit.WindsorIntegration
                     x.RegisterTransport(type);
                 }
             });
+        }
+        protected MassTransitFacilityBase(Action<IEndpointFactoryConfigurator> configurationAction)
+        {
+            _configurationAction = configurationAction;
+        }
+
+
+        protected MassTransitFacilityBase(params Type[] transportTypes)
+        {
+            _transportTypes = transportTypes;
         }
 
 
