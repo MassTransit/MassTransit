@@ -11,11 +11,11 @@
 	using MassTransit.Services.Timeout.Server;
 	using MassTransit.Transports.Msmq;
 	using MassTransit.WindsorIntegration;
-	using Microsoft.Practices.ServiceLocation;
 	using Topshelf;
 	using Topshelf.Configuration;
+	using Topshelf.Configuration.Dsl;
 
-	internal static class Program
+    internal static class Program
 	{
 		private static readonly ILog _log = LogManager.GetLogger(typeof (Program));
 
@@ -30,7 +30,7 @@
 					x.SetDescription("Coordinates subscriptions between multiple systems");
 					x.DependencyOnMsmq();
 					x.RunAsLocalSystem();
-					x.UseWinFormHost<SubscriptionManagerForm>();
+					//x.UseWinFormHost<SubscriptionManagerForm>();
 
 					x.BeforeStartingServices(s =>
 						{
@@ -46,21 +46,20 @@
 							container.AddComponent<SubscriptionManagerForm>();
 
 							var wob = new WindsorObjectBuilder(container.Kernel);
-							ServiceLocator.SetLocatorProvider(() => wob);
 						});
 
-					x.ConfigureService<SubscriptionService>(typeof(SubscriptionService).Name, ConfigureSubscriptionService);
+					x.ConfigureService<SubscriptionService>(ConfigureSubscriptionService);
 
-					x.ConfigureService<TimeoutService>(typeof(TimeoutService).Name, ConfigureTimeoutService);
+					x.ConfigureService<TimeoutService>(ConfigureTimeoutService);
 
-					x.ConfigureService<HealthService>(typeof(HealthService).Name, ConfigureHealthService);
+					x.ConfigureService<HealthService>(ConfigureHealthService);
 				});
 			Runner.Host(cfg, args);
 		}
 
 		private static void ConfigureSubscriptionService(IServiceConfigurator<SubscriptionService> configurator)
 		{
-			configurator.CreateServiceLocator(() =>
+			configurator.HowToBuildService(name =>
 				{
 					var container = new DefaultMassTransitContainer();
 
@@ -87,7 +86,7 @@
 
 					container.Kernel.AddComponentInstance("bus", typeof (IServiceBus), bus);
 
-				    return container.ObjectBuilder;
+				    return container.ObjectBuilder.GetInstance<SubscriptionService>();
 				});
 
 			configurator.WhenStarted(service => service.Start());
@@ -101,7 +100,7 @@
 
 		private static void ConfigureTimeoutService(IServiceConfigurator<TimeoutService> configurator)
 		{
-			configurator.CreateServiceLocator(() =>
+			configurator.HowToBuildService(name =>
 				{
 					var container = new DefaultMassTransitContainer();
 
@@ -129,7 +128,7 @@
 						});
 					container.Kernel.AddComponentInstance("bus", typeof (IServiceBus), bus);
 
-					return container.Resolve<IObjectBuilder>();
+					return container.Resolve<IObjectBuilder>().GetInstance<TimeoutService>();
 				});
 
 			configurator.WhenStarted(service => { service.Start(); });
@@ -143,7 +142,7 @@
 
 		private static void ConfigureHealthService(IServiceConfigurator<HealthService> configurator)
 		{
-			configurator.CreateServiceLocator(() =>
+			configurator.HowToBuildService(name =>
 				{
 					var container = new DefaultMassTransitContainer();
 
@@ -172,7 +171,7 @@
 
 					container.Kernel.AddComponentInstance("bus", typeof (IServiceBus), bus);
 
-					return container.Resolve<IObjectBuilder>();
+					return container.Resolve<IObjectBuilder>().GetInstance<HealthService>();
 				});
 
 			configurator.WhenStarted(service => { service.Start(); });
