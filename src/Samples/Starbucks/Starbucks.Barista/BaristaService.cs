@@ -1,16 +1,19 @@
 namespace Starbucks.Barista
 {
     using MassTransit;
-    using Microsoft.Practices.ServiceLocation;
 
     public class BaristaService
     {
     	private IServiceBus _bus;
     	private UnsubscribeAction _unsubscribeAction;
 
-    	public void Start()
+        public BaristaService(IServiceBus bus)
         {
-    		_bus = ServiceLocator.Current.GetInstance<IServiceBus>();
+            _bus = bus;
+        }
+
+        public void Start()
+        {
     		_unsubscribeAction = _bus.Subscribe<DrinkPreparationSaga>();
         }
 
