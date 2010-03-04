@@ -1,0 +1,1 @@
+﻿create table "LegacySaga" (CorrelationId UNIQUEIDENTIFIER not null, CurrentState NVARCHAR(255) null, ControlUri NVARCHAR(255) null, DataUri NVARCHAR(255) null, primary key (CorrelationId))
