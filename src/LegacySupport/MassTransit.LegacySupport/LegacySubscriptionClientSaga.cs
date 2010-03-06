@@ -42,7 +42,7 @@ namespace MassTransit.LegacySupport
                                    .TransitionTo(Active));
 
                            During(Active,
-                                  When(OldCancelSubscriptionUpdates)
+                                  When(OnOldCancelSubscriptionUpdates)
                                       .Then((saga, message) => saga.NotifyLegacySubscriptionClientRemoved())
                                       .Complete());
                        });
@@ -65,7 +65,7 @@ namespace MassTransit.LegacySupport
         public static Event<OldAddSubscription> OldSubscriptionAdded { get; set; }
         public static Event<OldRemoveSubscription> OldSubscriptionRemoved { get; set; }
         public static Event<OldCacheUpdateRequest> OldCacheUpdateRequested { get; set; }
-        public static Event<OldCancelSubscriptionUpdates> OldCancelSubscriptionUpdates { get; set; }
+        public static Event<OldCancelSubscriptionUpdates> OnOldCancelSubscriptionUpdates { get; set; }
 
 
         public virtual Uri ControlUri { get; set; }

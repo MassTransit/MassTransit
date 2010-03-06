@@ -14,7 +14,7 @@ namespace MassTransit.LegacySupport.Tests.Saga
         public void OldCancelReceived()
         {
             var data = new OldCancelSubscriptionUpdates(CorrelationUri);
-            Saga.RaiseEvent(LegacySubscriptionClientSaga.OldCancelSubscriptionUpdates, data);
+            Saga.RaiseEvent(LegacySubscriptionClientSaga.OnOldCancelSubscriptionUpdates, data);
         }
 
         [Then]

@@ -83,7 +83,7 @@ namespace MassTransit.LegacySupport
             _unsubscribeToken += _bus.Subscribe<LegacySubscriptionClientSaga>();
 
             //the new service
-            _subscriptionServiceEndpoint = _endpointFactory.GetEndpoint("msmq://localhost/new_subservice");
+            _subscriptionServiceEndpoint = _endpointFactory.GetEndpoint("msmq://localhost/mt_subscriptions");
 
             _log.Info("Legacy Subscription Service Started");
         }

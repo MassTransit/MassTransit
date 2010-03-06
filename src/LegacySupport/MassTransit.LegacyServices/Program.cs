@@ -39,6 +39,8 @@ namespace LegacyRuntime
                 x.CreateMissingQueues = true;
             });
 
+            ObjectFactory.Initialize(x => { x.For<IConfiguration>().Use<Configuration>(); });
+
             var cfg = RunnerConfigurator.New(config =>
             {
                 config.SetServiceName(typeof(Program).Namespace);
@@ -69,7 +71,7 @@ namespace LegacyRuntime
             _log.Info("Loading " + typeof(Program).Namespace + " Services...");
         }
         private static void ConfigureService<TService, TRegistry>(IServiceConfigurator<TService> service, Action<TService> start, Action<TService> stop)
-    where TRegistry : Registry
+            where TRegistry : Registry
         {
 			var registry = FastActivator<TRegistry>.Create(ObjectFactory.Container);
 			ObjectFactory.Configure(cfg =>
