@@ -1,21 +1,13 @@
 namespace LegacyRuntime
 {
-    using StructureMap.Configuration.DSL;
+    using System;
 
     public interface IConfiguration
     {
-        
-    }
+        bool LegacyServiceEnabled { get; }
+        Uri LegacyServiceControlUri { get; }
+        Uri LegacyServiceDataUri { get; }
 
-    public class Configuration :
-        IConfiguration
-    {
-        
-    }
-
-    public class LegacySupportRegistry :
-        Registry
-    {
-        
+        Uri SubscriptionServiceUri { get; }
     }
 }
