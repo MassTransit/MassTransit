@@ -10,29 +10,31 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.LegacySupport.ProxyMessages
+namespace MassTransit.ServiceBus.Subscriptions.Messages
 {
     using System;
+    using System.Collections.Generic;
 
     [Serializable]
-    public class OldCacheUpdateRequest
+    public class CacheUpdateResponse
     {
-        Uri _RequestingUri;
+        List<Subscription> _subscriptions;
 
-        public OldCacheUpdateRequest()
+        //xml serialization
+        public CacheUpdateResponse()
         {
+            _subscriptions = new List<Subscription>();
         }
 
-        public OldCacheUpdateRequest(Uri requstingUri)
+        public CacheUpdateResponse(IEnumerable<Subscription> subscriptions)
         {
-            _RequestingUri = requstingUri;
+            _subscriptions = new List<Subscription>(subscriptions);
         }
 
-
-        public Uri RequestingUri
+        public List<Subscription> Subscriptions
         {
-            get { return _RequestingUri; }
-            set { _RequestingUri = value;}
+            get { return _subscriptions; }
+            set { _subscriptions = value;}
         }
     }
 }

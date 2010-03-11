@@ -15,8 +15,8 @@ namespace MassTransit.LegacySupport
     using System;
     using Magnum.StateMachine;
     using Messages;
-    using ProxyMessages;
     using Saga;
+    using ServiceBus.Subscriptions.Messages;
 
     public class LegacySubscriptionClientSaga :
         SagaStateMachine<LegacySubscriptionClientSaga>,
@@ -29,6 +29,7 @@ namespace MassTransit.LegacySupport
                            Correlate(OldCacheUpdateRequested).By((saga, message) => saga.DataUri == message.RequestingUri);
                            Correlate(OldSubscriptionAdded).By((saga, message) => saga.DataUri == message.Subscription.EndpointUri);
                            Correlate(OldSubscriptionRemoved).By((saga, message) => saga.DataUri == message.Subscription.EndpointUri);
+                           Correlate(OnOldCancelSubscriptionUpdates).By((saga, message) => saga.DataUri == message.RequestingUri);
 
                            Initially(
                                When(OldCacheUpdateRequested)
@@ -62,10 +63,10 @@ namespace MassTransit.LegacySupport
         public static State Active { get; set; }
         public static State Completed { get; set; }
 
-        public static Event<OldAddSubscription> OldSubscriptionAdded { get; set; }
-        public static Event<OldRemoveSubscription> OldSubscriptionRemoved { get; set; }
-        public static Event<OldCacheUpdateRequest> OldCacheUpdateRequested { get; set; }
-        public static Event<OldCancelSubscriptionUpdates> OnOldCancelSubscriptionUpdates { get; set; }
+        public static Event<AddSubscription> OldSubscriptionAdded { get; set; }
+        public static Event<RemoveSubscription> OldSubscriptionRemoved { get; set; }
+        public static Event<CacheUpdateRequest> OldCacheUpdateRequested { get; set; }
+        public static Event<CancelSubscriptionUpdates> OnOldCancelSubscriptionUpdates { get; set; }
 
 
         public virtual Uri ControlUri { get; set; }
@@ -98,7 +99,7 @@ namespace MassTransit.LegacySupport
             Bus.Publish(message);
         }
 
-        private static void InitialAction(LegacySubscriptionClientSaga saga, OldCacheUpdateRequest message)
+        private static void InitialAction(LegacySubscriptionClientSaga saga, CacheUpdateRequest message)
         {
             saga.ControlUri = saga.Bus.Endpoint.Uri;
             saga.DataUri = message.RequestingUri;
@@ -106,7 +107,7 @@ namespace MassTransit.LegacySupport
             saga.NotifyLegacySubscriptionClientAdded();
         }
 
-        private static void InitialAdd(LegacySubscriptionClientSaga saga, OldAddSubscription message)
+        private static void InitialAdd(LegacySubscriptionClientSaga saga, AddSubscription message)
         {
             saga.ControlUri = saga.Bus.Endpoint.Uri;
             saga.DataUri = message.Subscription.EndpointUri; //TODO: is this right?
@@ -114,7 +115,7 @@ namespace MassTransit.LegacySupport
             saga.NotifyLegacySubscriptionClientAdded();
         }
 
-        private static void InitialRemoved(LegacySubscriptionClientSaga saga, OldRemoveSubscription message)
+        private static void InitialRemoved(LegacySubscriptionClientSaga saga, RemoveSubscription message)
         {
             saga.ControlUri = saga.Bus.Endpoint.Uri;
             saga.DataUri = message.Subscription.EndpointUri; //TODO: is this right?

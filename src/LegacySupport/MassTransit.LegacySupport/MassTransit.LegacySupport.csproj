@@ -58,12 +58,12 @@
     <Compile Include="Messages\LegacySubscriptionClientAdded.cs" />
     <Compile Include="Messages\LegacySubscriptionClientRemoved.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ProxyMessages\OldAddSubscription.cs" />
-    <Compile Include="ProxyMessages\OldCacheUpdateRequest.cs" />
-    <Compile Include="ProxyMessages\OldCacheUpdateResponse.cs" />
-    <Compile Include="ProxyMessages\OldCancelSubscriptionUpdates.cs" />
+    <Compile Include="ProxyMessages\AddSubscription.cs" />
+    <Compile Include="ProxyMessages\CacheUpdateRequest.cs" />
+    <Compile Include="ProxyMessages\CacheUpdateResponse.cs" />
+    <Compile Include="ProxyMessages\CancelSubscriptionUpdates.cs" />
     <Compile Include="OldMessageFactory.cs" />
-    <Compile Include="ProxyMessages\OldRemoveSubscription.cs" />
+    <Compile Include="ProxyMessages\RemoveSubscription.cs" />
     <Compile Include="ProxyMessages\SubscriptionChange.cs" />
     <Compile Include="ProxyMessages\Subscription.cs" />
   </ItemGroup>

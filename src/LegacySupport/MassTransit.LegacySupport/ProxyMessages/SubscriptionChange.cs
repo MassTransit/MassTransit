@@ -1,4 +1,4 @@
-namespace MassTransit.LegacySupport.ProxyMessages
+namespace MassTransit.ServiceBus.Subscriptions.Messages
 {
     using System;
 

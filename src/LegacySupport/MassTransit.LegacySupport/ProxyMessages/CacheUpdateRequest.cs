@@ -10,26 +10,29 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.LegacySupport.ProxyMessages
+namespace MassTransit.ServiceBus.Subscriptions.Messages
 {
     using System;
 
     [Serializable]
-    public class OldRemoveSubscription :
-        SubscriptionChange
+    public class CacheUpdateRequest
     {
-        protected OldRemoveSubscription()
+        Uri _RequestingUri;
+
+        public CacheUpdateRequest()
         {
         }
 
-        public OldRemoveSubscription(string messageName, Uri address)
-            : base(messageName, address)
+        public CacheUpdateRequest(Uri requstingUri)
         {
+            _RequestingUri = requstingUri;
         }
 
-        public OldRemoveSubscription(Subscription subscription)
-            : base(subscription)
+
+        public Uri RequestingUri
         {
+            get { return _RequestingUri; }
+            set { _RequestingUri = value;}
         }
     }
 }

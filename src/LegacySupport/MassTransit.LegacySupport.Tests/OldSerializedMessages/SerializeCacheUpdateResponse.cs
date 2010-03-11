@@ -16,7 +16,6 @@ namespace MassTransit.LegacySupport.Tests.OldSerializedMessages
     using System.Collections.Generic;
     using System.IO;
     using NUnit.Framework;
-    using ProxyMessages;
 
     [TestFixture]
     public class SerializeCacheUpdateResponse :
@@ -27,9 +26,9 @@ namespace MassTransit.LegacySupport.Tests.OldSerializedMessages
         [Test]
         public void NewToOld() //strong to weak
         {
-            IList<Subscription> subs = new List<Subscription>();
-            subs.Add(new Subscription("the_message", new Uri("http://bob/phil")));
-            var oldMsg = new OldCacheUpdateResponse(subs);
+            IList<MassTransit.ServiceBus.Subcriptions.Subscription> subs = new List<MassTransit.ServiceBus.Subcriptions.Subscription>();
+            subs.Add(new MassTransit.ServiceBus.Subcriptions.Messages.Subscription("the_message", new Uri("http://bob/phil")));
+            var oldMsg = new MassTransit.ServiceBus.Subcriptions.Messages.OldCacheUpdateResponse(subs);
             var oldold = Factory.ConvertToOldCacheUpdateResponse(oldMsg);
 
             using (var newStream = new MemoryStream())
