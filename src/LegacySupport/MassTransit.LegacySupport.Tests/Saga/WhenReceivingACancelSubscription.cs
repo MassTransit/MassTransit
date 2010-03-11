@@ -3,7 +3,6 @@ namespace MassTransit.LegacySupport.Tests.Saga
     using Contexts;
     using Messages;
     using NUnit.Framework;
-    using ProxyMessages;
     using Rhino.Mocks;
     using TestFramework;
 
@@ -13,7 +12,7 @@ namespace MassTransit.LegacySupport.Tests.Saga
         [When]
         public void OldCancelReceived()
         {
-            var data = new OldCancelSubscriptionUpdates(CorrelationUri);
+            var data = new MassTransit.ServiceBus.Subcriptions.Messages.OldCancelSubscriptionUpdates(CorrelationUri);
             Saga.RaiseEvent(LegacySubscriptionClientSaga.OnOldCancelSubscriptionUpdates, data);
         }
 

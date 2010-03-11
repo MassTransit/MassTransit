@@ -2,7 +2,8 @@ namespace MassTransit.LegacySupport
 {
     using System;
     using AutoMapper;
-    using ProxyMessages;
+    using ServiceBus.Subscriptions;
+    using ServiceBus.Subscriptions.Messages;
 
     public class OldMessageFactory
     {
@@ -23,67 +24,67 @@ namespace MassTransit.LegacySupport
             _weakCancelSubscriptionUpdatesType = Type.GetType("MassTransit.ServiceBus.Subscriptions.Messages.CancelSubscriptionUpdates, MassTransit.ServiceBus, Version=0.2.2133.0, Culture=neutral, PublicKeyToken=null");
             
             Mapper.CreateMap(_weakSubscriptionType, typeof(Subscription));
-            Mapper.CreateMap(_weakCacheUpdateResponseType, typeof(OldCacheUpdateResponse));
-            Mapper.CreateMap(_weakCacheUpdateRequestType, typeof(OldCacheUpdateRequest));
-            Mapper.CreateMap(_weakAddSubscriptionType, typeof(OldAddSubscription));
-            Mapper.CreateMap(_weakRemoveSubscriptionType, typeof(OldRemoveSubscription));
-            Mapper.CreateMap(_weakCancelSubscriptionUpdatesType, typeof(OldCancelSubscriptionUpdates));
+            Mapper.CreateMap(_weakCacheUpdateResponseType, typeof(CacheUpdateResponse));
+            Mapper.CreateMap(_weakCacheUpdateRequestType, typeof(CacheUpdateRequest));
+            Mapper.CreateMap(_weakAddSubscriptionType, typeof(AddSubscription));
+            Mapper.CreateMap(_weakRemoveSubscriptionType, typeof(RemoveSubscription));
+            Mapper.CreateMap(_weakCancelSubscriptionUpdatesType, typeof(CancelSubscriptionUpdates));
 
             Mapper.CreateMap(typeof(Subscription), _weakSubscriptionType);
-            Mapper.CreateMap(typeof(OldCacheUpdateResponse), _weakCacheUpdateResponseType);
-            Mapper.CreateMap(typeof(OldCacheUpdateRequest), _weakCacheUpdateRequestType);
-            Mapper.CreateMap(typeof(OldAddSubscription), _weakAddSubscriptionType);
-            Mapper.CreateMap(typeof(OldRemoveSubscription), _weakRemoveSubscriptionType);
-            Mapper.CreateMap(typeof(OldCancelSubscriptionUpdates), _weakCancelSubscriptionUpdatesType);
+            Mapper.CreateMap(typeof(CacheUpdateResponse), _weakCacheUpdateResponseType);
+            Mapper.CreateMap(typeof(CacheUpdateRequest), _weakCacheUpdateRequestType);
+            Mapper.CreateMap(typeof(AddSubscription), _weakAddSubscriptionType);
+            Mapper.CreateMap(typeof(RemoveSubscription), _weakRemoveSubscriptionType);
+            Mapper.CreateMap(typeof(CancelSubscriptionUpdates), _weakCancelSubscriptionUpdatesType);
         }
 
-        public OldCacheUpdateResponse ConvertToNewCacheUpdateResponse(object old)
+        public CacheUpdateResponse ConvertToNewCacheUpdateResponse(object old)
         {
-            return (OldCacheUpdateResponse)Mapper.Map(old, _weakCacheUpdateResponseType, typeof(OldCacheUpdateResponse));
+            return (CacheUpdateResponse)Mapper.Map(old, _weakCacheUpdateResponseType, typeof(CacheUpdateResponse));
         }
-        public object ConvertToOldCacheUpdateResponse(OldCacheUpdateResponse response)
+        public object ConvertToOldCacheUpdateResponse(CacheUpdateResponse response)
         {
-            return Mapper.Map(response, typeof(OldCacheUpdateResponse), _weakCacheUpdateResponseType);
-        }
-
-        public object ConvertToOldAddSubscription(OldAddSubscription subscription)
-        {
-            return Mapper.Map(subscription, typeof (OldAddSubscription), _weakAddSubscriptionType);
+            return Mapper.Map(response, typeof(CacheUpdateResponse), _weakCacheUpdateResponseType);
         }
 
-        public OldAddSubscription ConvertToNewAddSubscription(object o)
+        public object ConvertToOldAddSubscription(AddSubscription subscription)
         {
-            return (OldAddSubscription)Mapper.Map(o,  _weakAddSubscriptionType, typeof(OldAddSubscription));
+            return Mapper.Map(subscription, typeof (AddSubscription), _weakAddSubscriptionType);
         }
 
-        public object ConvertToOldCancelSubscriptionUpdates(OldCancelSubscriptionUpdates updates)
+        public AddSubscription ConvertToNewAddSubscription(object o)
         {
-            return Mapper.Map(updates, typeof (OldCancelSubscriptionUpdates), _weakCancelSubscriptionUpdatesType);
+            return (AddSubscription)Mapper.Map(o,  _weakAddSubscriptionType, typeof(AddSubscription));
         }
 
-        public OldCancelSubscriptionUpdates ConvertToNewCancelSubscriptionUpdates(object updates)
+        public object ConvertToOldCancelSubscriptionUpdates(CancelSubscriptionUpdates updates)
         {
-            return (OldCancelSubscriptionUpdates)Mapper.Map(updates, _weakCancelSubscriptionUpdatesType, typeof (OldCancelSubscriptionUpdates));
+            return Mapper.Map(updates, typeof (CancelSubscriptionUpdates), _weakCancelSubscriptionUpdatesType);
         }
 
-        public object ConvertToOldRemoveSubscription(OldRemoveSubscription subscription)
+        public CancelSubscriptionUpdates ConvertToNewCancelSubscriptionUpdates(object updates)
         {
-            return Mapper.Map(subscription, typeof (OldRemoveSubscription), _weakRemoveSubscriptionType);
+            return (CancelSubscriptionUpdates)Mapper.Map(updates, _weakCancelSubscriptionUpdatesType, typeof (CancelSubscriptionUpdates));
         }
 
-        public OldRemoveSubscription ConvertToNewRemoveSubscription(object subscription)
+        public object ConvertToOldRemoveSubscription(RemoveSubscription subscription)
         {
-            return (OldRemoveSubscription)Mapper.Map(subscription, _weakRemoveSubscriptionType, typeof(OldRemoveSubscription));
+            return Mapper.Map(subscription, typeof (RemoveSubscription), _weakRemoveSubscriptionType);
         }
 
-        public object ConvertToOldCacheUpdateRequest(OldCacheUpdateRequest request)
+        public RemoveSubscription ConvertToNewRemoveSubscription(object subscription)
         {
-            return Mapper.Map(request, typeof (OldCacheUpdateRequest), _weakCacheUpdateRequestType);
+            return (RemoveSubscription)Mapper.Map(subscription, _weakRemoveSubscriptionType, typeof(RemoveSubscription));
         }
 
-        public OldCacheUpdateRequest ConvertToNewCacheUpdateRequest(object request)
+        public object ConvertToOldCacheUpdateRequest(CacheUpdateRequest request)
         {
-            return (OldCacheUpdateRequest)Mapper.Map(request, _weakCacheUpdateRequestType, typeof(OldCacheUpdateRequest));
+            return Mapper.Map(request, typeof (CacheUpdateRequest), _weakCacheUpdateRequestType);
+        }
+
+        public CacheUpdateRequest ConvertToNewCacheUpdateRequest(object request)
+        {
+            return (CacheUpdateRequest)Mapper.Map(request, _weakCacheUpdateRequestType, typeof(CacheUpdateRequest));
         }
     }
 }
