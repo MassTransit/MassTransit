@@ -11,8 +11,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Transports.Msmq
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebRequestReply.UI", "WebRequestReply.UI\WebRequestReply.UI.csproj", "{FE61B228-A4FF-4B11-BA08-63C0BB022A77}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebRequestReply.UI.MonoRail", "WebRequestReply.UI.MonoRail\WebRequestReply.UI.MonoRail.csproj", "{B1C5D685-57A5-4DE1-9D19-CB1E0E1149CE}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.WindsorIntegration", "..\..\Containers\MassTransit.WindsorIntegration\MassTransit.WindsorIntegration.csproj", "{98D5A59C-96FA-4A1B-A653-EA5A35C45FC9}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Infrastructure", "..\..\MassTransit.Infrastructure\MassTransit.Infrastructure.csproj", "{073A90FD-9A3E-4704-B3B5-6D8A9F4B442E}"
@@ -67,16 +65,6 @@ Global
 		{FE61B228-A4FF-4B11-BA08-63C0BB022A77}.Release|Any CPU.Build.0 = Release|Any CPU
 		{FE61B228-A4FF-4B11-BA08-63C0BB022A77}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{FE61B228-A4FF-4B11-BA08-63C0BB022A77}.Release|Mixed Platforms.Build.0 = Release|Any CPU
-		{B1C5D685-57A5-4DE1-9D19-CB1E0E1149CE}.Debug|.NET.ActiveCfg = Debug|Any CPU
-		{B1C5D685-57A5-4DE1-9D19-CB1E0E1149CE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B1C5D685-57A5-4DE1-9D19-CB1E0E1149CE}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B1C5D685-57A5-4DE1-9D19-CB1E0E1149CE}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{B1C5D685-57A5-4DE1-9D19-CB1E0E1149CE}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
-		{B1C5D685-57A5-4DE1-9D19-CB1E0E1149CE}.Release|.NET.ActiveCfg = Release|Any CPU
-		{B1C5D685-57A5-4DE1-9D19-CB1E0E1149CE}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B1C5D685-57A5-4DE1-9D19-CB1E0E1149CE}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B1C5D685-57A5-4DE1-9D19-CB1E0E1149CE}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{B1C5D685-57A5-4DE1-9D19-CB1E0E1149CE}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{98D5A59C-96FA-4A1B-A653-EA5A35C45FC9}.Debug|.NET.ActiveCfg = Debug|Any CPU
 		{98D5A59C-96FA-4A1B-A653-EA5A35C45FC9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{98D5A59C-96FA-4A1B-A653-EA5A35C45FC9}.Debug|Any CPU.Build.0 = Debug|Any CPU

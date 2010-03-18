@@ -6,7 +6,6 @@
 	using Magnum;
 	using MassTransit;
 	using Messages;
-	using Microsoft.Practices.ServiceLocation;
 
 	public partial class OrderDrinkForm :
 		Form,
@@ -17,19 +16,20 @@
 		private Guid _transactionId;
 		private UnsubscribeAction _unsubscribeToken;
 
-		public OrderDrinkForm()
+		public OrderDrinkForm(IServiceBus bus)
 		{
 			InitializeComponent();
 
-			IServiceBus bus = Bus;
+		    _bus = bus;
 		}
 
 		private IServiceBus Bus
 		{
 			get
 			{
-				if (_bus == null)
-					_bus = ServiceLocator.Current.GetInstance<IServiceBus>();
+                //todo bob
+//				if (_bus == null)
+//					_bus = ServiceLocator.Current.GetInstance<IServiceBus>();
 
 				return _bus;
 			}

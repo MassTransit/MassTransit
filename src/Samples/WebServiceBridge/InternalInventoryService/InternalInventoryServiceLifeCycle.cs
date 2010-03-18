@@ -1,17 +1,19 @@
 namespace InternalInventoryService
 {
 	using MassTransit;
-    using Microsoft.Practices.ServiceLocation;
 
     public class InternalInventoryServiceLifeCycle
     {
         private IServiceBus _bus;
     	private UnsubscribeAction _unsubscribeToken;
 
+        public InternalInventoryServiceLifeCycle(IServiceBus bus)
+        {
+            _bus = bus;
+        }
 
         public void Start()
         {
-            _bus = ServiceLocator.Current.GetInstance<IServiceBus>("server");
 
         	_unsubscribeToken = _bus.Subscribe<InventoryLevelService>();
         }
