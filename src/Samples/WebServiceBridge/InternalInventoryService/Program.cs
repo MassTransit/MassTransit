@@ -1,14 +1,15 @@
 ﻿namespace InternalInventoryService
 {
-	using log4net;
+    using Castle.Windsor;
+    using log4net;
 	using MassTransit.WindsorIntegration;
-	using Microsoft.Practices.ServiceLocation;
 	using Topshelf;
-	using Topshelf.Configuration;
+	using Topshelf.Configuration.Dsl;
 
-	internal static class Program
+    internal static class Program
 	{
 		private static readonly ILog _log = LogManager.GetLogger(typeof (Program));
+        static IWindsorContainer _container;
 
 		private static void Main(string[] args)
 		{
@@ -28,12 +29,12 @@
 							var container = new DefaultMassTransitContainer("InternalInventoryService.Castle.xml");
 							container.AddComponent<InventoryLevelService>();
 							container.AddComponent<InternalInventoryServiceLifeCycle>(typeof (InternalInventoryServiceLifeCycle).Name);
-							var wob = new WindsorObjectBuilder(container.Kernel);
-							ServiceLocator.SetLocatorProvider(() => wob);
+						    _container = container;
 						});
 
-					c.ConfigureService<InternalInventoryServiceLifeCycle>(typeof(InternalInventoryServiceLifeCycle).Name, s =>
+					c.ConfigureService<InternalInventoryServiceLifeCycle>(s =>
 						{
+                            s.HowToBuildService(name=>_container.Resolve<InternalInventoryServiceLifeCycle>());
 							s.WhenStarted(o => o.Start());
 							s.WhenStopped(o => o.Stop());
 						});
