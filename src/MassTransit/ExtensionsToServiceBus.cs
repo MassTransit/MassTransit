@@ -14,7 +14,6 @@ namespace MassTransit
 {
 	using System;
 	using System.Collections.Generic;
-	using Grid;
 	using Internal;
 	using Internal.RequestResponse;
 

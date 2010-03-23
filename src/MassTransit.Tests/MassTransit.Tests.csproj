@@ -136,24 +136,6 @@
     <Compile Include="ExtensionsForTestingEndpoints.cs" />
     <Compile Include="Fault_Specs.cs" />
     <Compile Include="FutureMessage.cs" />
-    <Compile Include="Grid\Balancing_Specs.cs" />
-    <Compile Include="Grid\GridService_Specs.cs" />
-    <Compile Include="Grid\GridTestFixture.cs" />
-    <Compile Include="Grid\GridNode_Specs.cs" />
-    <Compile Include="Grid\LoadBalancer_Specs.cs" />
-    <Compile Include="Grid\Paxos\Acceptor_Specs.cs" />
-    <Compile Include="Grid\Paxos\Listener_Specs.cs" />
-    <Compile Include="Grid\TestGridNode.cs" />
-    <Compile Include="Grid\Workers\ExceptionalWorker.cs" />
-    <Compile Include="Grid\Messages\FactorLongNumber.cs" />
-    <Compile Include="Grid\Tasks\FactorLongNumbersTask.cs" />
-    <Compile Include="Grid\Workers\FactorLongNumberWorker.cs" />
-    <Compile Include="Grid\GridContextSpecification.cs" />
-    <Compile Include="Grid\GridException_Specs.cs" />
-    <Compile Include="Grid\Grid_Specs.cs" />
-    <Compile Include="Grid\Workers\IntegerFactorizer.cs" />
-    <Compile Include="Grid\IntegerFactorizer_Specs.cs" />
-    <Compile Include="Grid\Messages\LongNumberFactored.cs" />
     <Compile Include="Groups\Group_Specs.cs" />
     <Compile Include="InterfaceSubscription_Specs.cs" />
     <Compile Include="Load\RequestResponse_LoadTest.cs" />
@@ -290,9 +272,6 @@
     <Content Include="test.log4net.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <None Include="Grid\grid.log4net.config">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <Content Include="loopback.castle.xml">
@@ -308,7 +287,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Formatters\" />
-    <Folder Include="Grid\Configuration\" />
     <Folder Include="Services\LoadBalancer\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />

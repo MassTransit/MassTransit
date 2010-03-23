@@ -103,7 +103,6 @@
     <Compile Include="ConcurrentSaga_Specs.cs" />
     <Compile Include="ContextSetup.cs" />
     <Compile Include="Distributor_Specs.cs" />
-    <Compile Include="GridOnMsmq_Specs.cs" />
     <Compile Include="MessageQueue_Extensions.cs" />
     <Compile Include="Messages\VariableMessage.cs" />
     <Compile Include="Messages\DeleteMessage.cs" />
@@ -122,7 +121,6 @@
     <Compile Include="TestFixtures\MsmqEndpointTestFixture.cs" />
     <Compile Include="TestFixtures\MsmqTransactionalEndpointTestFixture.cs" />
     <Compile Include="As_a_queue_address.cs" />
-    <Compile Include="ThreeNodeMsmqGridTestFixture.cs" />
     <Compile Include="TestFixtures\TransactionalMsmqEndpointOnlyTestFixture.cs" />
     <Compile Include="Transactional_Specs.cs" />
   </ItemGroup>
