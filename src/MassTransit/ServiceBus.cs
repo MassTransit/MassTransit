@@ -354,36 +354,43 @@ namespace MassTransit
 
 		private void InitializePerformanceCounters()
 		{
-			var instanceName = string.Format("{0}_{1}_{2}", Endpoint.Address.Path, Endpoint.Uri.Scheme, Endpoint.Uri.Host);
+			try
+			{
+				var instanceName = string.Format("{0}_{1}_{2}", Endpoint.Address.Path, Endpoint.Uri.Scheme, Endpoint.Uri.Host);
 
-			_counters = new ServiceBusInstancePerformanceCounters(instanceName);
+				_counters = new ServiceBusInstancePerformanceCounters(instanceName);
 
-			_eventAggregatorScope.Subscribe<MessageReceived>(message =>
-				{
-					_counters.ReceiveCount.Increment();
-					_counters.ReceiveRate.Increment();
-					_counters.ReceiveDuration.IncrementBy((long) message.ReceiveDuration.TotalMilliseconds);
-					_counters.ReceiveDurationBase.Increment();
-					_counters.ConsumerDuration.IncrementBy((long) message.ConsumeDuration.TotalMilliseconds);
-					_counters.ConsumerDurationBase.Increment();
-				});
+				_eventAggregatorScope.Subscribe<MessageReceived>(message =>
+					{
+						_counters.ReceiveCount.Increment();
+						_counters.ReceiveRate.Increment();
+						_counters.ReceiveDuration.IncrementBy((long) message.ReceiveDuration.TotalMilliseconds);
+						_counters.ReceiveDurationBase.Increment();
+						_counters.ConsumerDuration.IncrementBy((long) message.ConsumeDuration.TotalMilliseconds);
+						_counters.ConsumerDurationBase.Increment();
+					});
 
-			_eventAggregatorScope.Subscribe<MessagePublished>(message =>
-				{
-					_counters.PublishCount.Increment();
-					_counters.PublishRate.Increment();
-					_counters.PublishDuration.IncrementBy((long) message.Duration.TotalMilliseconds);
-					_counters.PublishDurationBase.Increment();
+				_eventAggregatorScope.Subscribe<MessagePublished>(message =>
+					{
+						_counters.PublishCount.Increment();
+						_counters.PublishRate.Increment();
+						_counters.PublishDuration.IncrementBy((long) message.Duration.TotalMilliseconds);
+						_counters.PublishDurationBase.Increment();
 
-					_counters.SentCount.IncrementBy(message.ConsumerCount);
-					_counters.SendRate.IncrementBy(message.ConsumerCount);
-				});
+						_counters.SentCount.IncrementBy(message.ConsumerCount);
+						_counters.SendRate.IncrementBy(message.ConsumerCount);
+					});
 
-			_eventAggregatorScope.Subscribe<ThreadPoolEvent>(message =>
-				{
-					_counters.ReceiveThreadCount.Set(message.ReceiverCount);
-					_counters.ConsumerThreadCount.Set(message.ConsumerCount);
-				});
+				_eventAggregatorScope.Subscribe<ThreadPoolEvent>(message =>
+					{
+						_counters.ReceiveThreadCount.Set(message.ReceiverCount);
+						_counters.ConsumerThreadCount.Set(message.ConsumerCount);
+					});
+			}
+			catch (Exception ex)
+			{
+				_log.Warn("The performance counters could not be created", ex);
+			}
 		}
 	}
 }
