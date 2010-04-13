@@ -40,17 +40,26 @@ namespace MassTransit.WindsorIntegration
             {
                 var ep = bus.Attributes["endpoint"];
 
+                string sub = "";
                 //if subscription service
-                var sub = bus.Children["subscriptionService"].Attributes["endpoint"];
+                if(bus.Children["subscriptionService"] != null)
+                {
+                    sub = bus.Children["subscriptionService"].Attributes["endpoint"];
+                }
                 
                 //if management service
-                var mgmt = bus.Children["managementService"].Attributes["heartbeatInterval"];
-                var interval = mgmt.IsNullOrEmpty() ? 60 : int.Parse(mgmt);
+                var mgmt = "";
+                var interval = 0;
+                if (bus.Children["managementService"] != null)
+                {
+                    mgmt = bus.Children["managementService"].Attributes["heartbeatInterval"];
+                    interval = mgmt.IsNullOrEmpty() ? 60 : int.Parse(mgmt);
+                }
 
                 base.RegisterServiceBus(ep,a=>
                 {
-                    if(!sub.IsNullOrEmpty() )a.ConfigureService<SubscriptionClientConfigurator>(s=>s.SetSubscriptionServiceEndpoint(sub));
-                    a.ConfigureService<HealthClientConfigurator>(s=>s.SetHeartbeatInterval(interval));
+                    if(!sub.IsNullOrEmpty())a.ConfigureService<SubscriptionClientConfigurator>(s=>s.SetSubscriptionServiceEndpoint(sub));
+                    if(!mgmt.IsNullOrEmpty()) a.ConfigureService<HealthClientConfigurator>(s=>s.SetHeartbeatInterval(interval));
                 });
             });
 
