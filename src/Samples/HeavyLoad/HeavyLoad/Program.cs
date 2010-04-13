@@ -32,7 +32,9 @@ namespace HeavyLoad
 
 //			RunLocalMsmqLoadTest();
 
-			RunContainerLoadTest();
+			//RunContainerLoadTest();
+
+		    RunLocalRabbitMqLoadTest();
 
 			//RunWcfLoadTest();
 
@@ -56,6 +58,20 @@ namespace HeavyLoad
             Console.WriteLine(stopWatch.ToString());
             Console.WriteLine();
 		}
+
+        private static void RunLocalRabbitMqLoadTest()
+        {
+            var stopWatch = new StopWatch();
+
+            using (var test = new RabbitMQLoadTest())
+            {
+                test.Run(stopWatch);
+            }
+
+            Console.WriteLine("RabbitMQ Load Test: ");
+            Console.WriteLine(stopWatch.ToString());
+            Console.WriteLine();
+        }
 
 		private static void RunBatchLoadTest()
 		{
