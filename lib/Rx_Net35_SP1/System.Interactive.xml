@@ -29,17 +29,52 @@
             Invokes the action for its side-effects on each value in the sequence.
             </summary>
         </member>
+        <member name="M:System.Linq.EnumerableEx.Do``1(System.Collections.Generic.IEnumerable{``0},System.Action{``0},System.Action)">
+            <summary>
+            Invokes the action for its side-effects on each value in the sequence.
+            </summary>
+        </member>
+        <member name="M:System.Linq.EnumerableEx.Do``1(System.Collections.Generic.IEnumerable{``0},System.Action{``0},System.Action{System.Exception})">
+            <summary>
+            Invokes the action for its side-effects on each value in the sequence.
+            </summary>
+        </member>
+        <member name="M:System.Linq.EnumerableEx.Do``1(System.Collections.Generic.IEnumerable{``0},System.Action{``0},System.Action{System.Exception},System.Action)">
+            <summary>
+            Invokes the action for its side-effects on each value in the sequence.
+            </summary>
+        </member>
         <member name="M:System.Linq.EnumerableEx.Run``1(System.Collections.Generic.IEnumerable{``0})">
             <summary>
-            Evaluates the sequence.
+            Evaluates the sequence for its side-effects.
             </summary>
         </member>
         <member name="M:System.Linq.EnumerableEx.Run``1(System.Collections.Generic.IEnumerable{``0},System.Action{``0})">
             <summary>
-            Evaluates the sequence and invoes the action for its side-effects on each value in the sequence.
+            Evaluates the sequence and invokes the action for its side-effects on each value in the sequence.
+            </summary>
+        </member>
+        <member name="M:System.Linq.EnumerableEx.Run``1(System.Collections.Generic.IEnumerable{``0},System.Action{``0},System.Action{System.Exception})">
+            <summary>
+            Evaluates the sequence and invokes the action for its side-effects on each value in the sequence.
+            </summary>
+        </member>
+        <member name="M:System.Linq.EnumerableEx.Run``1(System.Collections.Generic.IEnumerable{``0},System.Action{``0},System.Action)">
+            <summary>
+            Evaluates the sequence and invokes the action for its side-effects on each value in the sequence.
+            </summary>
+        </member>
+        <member name="M:System.Linq.EnumerableEx.Run``1(System.Collections.Generic.IEnumerable{``0},System.Action{``0},System.Action{System.Exception},System.Action)">
+            <summary>
+            Evaluates the sequence and invokes the action for its side-effects on each value in the sequence.
             </summary>
         </member>
         <member name="M:System.Linq.EnumerableEx.Merge``1(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0})">
+            <summary>
+            Merges two sequences into a single sequence.
+            </summary>
+        </member>
+        <member name="M:System.Linq.EnumerableEx.Merge``1(System.Collections.Generic.IEnumerable{``0},System.Concurrency.IScheduler,System.Collections.Generic.IEnumerable{``0})">
             <summary>
             Merges two sequences into a single sequence.
             </summary>
@@ -49,7 +84,17 @@
             Merges all the sequences into a single sequence.
             </summary>
         </member>
+        <member name="M:System.Linq.EnumerableEx.Merge``1(System.Concurrency.IScheduler,System.Collections.Generic.IEnumerable{``0}[])">
+            <summary>
+            Merges all the sequences into a single sequence.
+            </summary>
+        </member>
         <member name="M:System.Linq.EnumerableEx.Merge``1(System.Collections.Generic.IEnumerable{System.Collections.Generic.IEnumerable{``0}})">
+            <summary>
+            Merges all the sequences into a single sequence.
+            </summary>
+        </member>
+        <member name="M:System.Linq.EnumerableEx.Merge``1(System.Collections.Generic.IEnumerable{System.Collections.Generic.IEnumerable{``0}},System.Concurrency.IScheduler)">
             <summary>
             Merges all the sequences into a single sequence.
             </summary>
@@ -70,12 +115,27 @@
             Returns the sequence that responds first.
             </summary>
         </member>
+        <member name="M:System.Linq.EnumerableEx.Amb``1(System.Collections.Generic.IEnumerable{``0},System.Concurrency.IScheduler,System.Collections.Generic.IEnumerable{``0})">
+            <summary>
+            Returns the sequence that responds first.
+            </summary>
+        </member>
         <member name="M:System.Linq.EnumerableEx.Amb``1(System.Collections.Generic.IEnumerable{``0}[])">
             <summary>
             Returns the sequence that responds first.
             </summary>
         </member>
+        <member name="M:System.Linq.EnumerableEx.Amb``1(System.Concurrency.IScheduler,System.Collections.Generic.IEnumerable{``0}[])">
+            <summary>
+            Returns the sequence that responds first.
+            </summary>
+        </member>
         <member name="M:System.Linq.EnumerableEx.Amb``1(System.Collections.Generic.IEnumerable{System.Collections.Generic.IEnumerable{``0}})">
+            <summary>
+            Returns the sequence that responds first.
+            </summary>
+        </member>
+        <member name="M:System.Linq.EnumerableEx.Amb``1(System.Collections.Generic.IEnumerable{System.Collections.Generic.IEnumerable{``0}},System.Concurrency.IScheduler)">
             <summary>
             Returns the sequence that responds first.
             </summary>
@@ -105,6 +165,70 @@
             <summary>
             Retrieves resource from resourceSelector for use in resourceUsage and disposes 
             the resource once the resulting sequence terminates.
+            </summary>
+        </member>
+        <member name="M:System.Linq.EnumerableEx.BufferWithCount``1(System.Collections.Generic.IEnumerable{``0},System.Int32,System.Int32)">
+            <summary>
+            Projects each value of an enumerable sequence into a buffer.
+            </summary>
+        </member>
+        <member name="M:System.Linq.EnumerableEx.BufferWithCount``1(System.Collections.Generic.IEnumerable{``0},System.Int32)">
+            <summary>
+            Projects each value of an enumerable sequence into a buffer.
+            </summary>
+        </member>
+        <member name="M:System.Linq.EnumerableEx.Delay``1(System.Collections.Generic.IEnumerable{``0},System.TimeSpan)">
+            <summary>
+            Time shifts the enumerable sequence by dueTime.
+            The relative time intervals between the values are preserved.
+            </summary>
+        </member>
+        <member name="M:System.Linq.EnumerableEx.Delay``1(System.Collections.Generic.IEnumerable{``0},System.DateTimeOffset)">
+            <summary>
+            Time shifts the enumerable sequence by dueTime.
+            The relative time intervals between the values are preserved.
+            </summary>
+        </member>
+        <member name="M:System.Linq.EnumerableEx.Delay``1(System.Collections.Generic.IEnumerable{``0},System.Concurrency.IScheduler,System.TimeSpan)">
+            <summary>
+            Time shifts the enumerable sequence by dueTime.
+            The relative time intervals between the values are preserved.
+            </summary>
+        </member>
+        <member name="M:System.Linq.EnumerableEx.Delay``1(System.Collections.Generic.IEnumerable{``0},System.Concurrency.IScheduler,System.DateTimeOffset)">
+            <summary>
+            Time shifts the enumerable sequence by dueTime.
+            The relative time intervals between the values are preserved.
+            </summary>
+        </member>
+        <member name="M:System.Linq.EnumerableEx.Min``1(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IComparer{``0})">
+            <summary>
+            Returns the element with the minimum value by using a specified comparer.
+            </summary>
+        </member>
+        <member name="M:System.Linq.EnumerableEx.MinBy``2(System.Collections.Generic.IEnumerable{``0},System.Func{``0,``1})">
+            <summary>
+            Returns the element with the minimum key value by using the default comparer for keys.
+            </summary>
+        </member>
+        <member name="M:System.Linq.EnumerableEx.MinBy``2(System.Collections.Generic.IEnumerable{``0},System.Func{``0,``1},System.Collections.Generic.IComparer{``1})">
+            <summary>
+            Returns the element with the minimum key value by using a specified key comparer.
+            </summary>
+        </member>
+        <member name="M:System.Linq.EnumerableEx.Max``1(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IComparer{``0})">
+            <summary>
+            Returns the element with the minimum value by using a specified comparer.
+            </summary>
+        </member>
+        <member name="M:System.Linq.EnumerableEx.MaxBy``2(System.Collections.Generic.IEnumerable{``0},System.Func{``0,``1})">
+            <summary>
+            Returns the element with the maximum key value by using the default comparer for keys.
+            </summary>
+        </member>
+        <member name="M:System.Linq.EnumerableEx.MaxBy``2(System.Collections.Generic.IEnumerable{``0},System.Func{``0,``1},System.Collections.Generic.IComparer{``1})">
+            <summary>
+            Returns the element with the maximum key value by using a specified key comparer.
             </summary>
         </member>
         <member name="M:System.Linq.EnumerableEx.Concat``1(System.Collections.Generic.IEnumerable{``0}[])">
@@ -222,6 +346,16 @@
             Dematerializes the explicit notification values of a sequence as implicit notifications.
             </summary>
         </member>
+        <member name="M:System.Linq.EnumerableEx.Catch``1(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0})">
+            <summary>
+            Continues a sequence that is terminated by an exception with the next sequence.
+            </summary>
+        </member>
+        <member name="M:System.Linq.EnumerableEx.Catch``1(System.Collections.Generic.IEnumerable{``0}[])">
+            <summary>
+            Continues a sequence that is terminated by an exception with the next sequence.
+            </summary>
+        </member>
         <member name="M:System.Linq.EnumerableEx.Catch``1(System.Collections.Generic.IEnumerable{System.Collections.Generic.IEnumerable{``0}})">
             <summary>
             Continues a sequence that is terminated by an exception with the next sequence.
@@ -247,7 +381,7 @@
         </member>
         <member name="M:System.Linq.EnumerableEx.Generate``2(``0,System.Func{``0,System.Collections.Generic.Notification{``1}},System.Func{``0,``0})">
             <summary>
-            Generates an observable sequence by iterating a state from an initial state until a completion notification is sent.
+            Generates a sequence by iterating a state from an initial state until a completion notification is sent.
             </summary>
         </member>
         <member name="M:System.Linq.EnumerableEx.Generate``2(``0,System.Func{``0,System.Collections.Generic.IEnumerable{``1}},System.Func{``0,``0})">
@@ -267,6 +401,16 @@
             Repeats the sequence until it successfully terminates.
             </summary>
         </member>
+        <member name="M:System.Linq.EnumerableEx.Timeout``1(System.Collections.Generic.IEnumerable{``0},System.TimeSpan)">
+            <summary>
+            Generates a sequence that upon iteration will either yield a value or throw an exception within the specified timeout.
+            </summary>
+        </member>
+        <member name="M:System.Linq.EnumerableEx.Timeout``1(System.Collections.Generic.IEnumerable{``0},System.TimeSpan,System.Concurrency.IScheduler)">
+            <summary>
+            Generates a sequence that upon iteration will either yield a value or throw an exception within the specified timeout.
+            </summary>
+        </member>
         <member name="M:System.Linq.EnumerableEx.Retry``1(System.Collections.Generic.IEnumerable{``0},System.Int32)">
             <summary>
             Repeats the source  sequence the retryCount times or until it successfully terminates.
@@ -280,6 +424,16 @@
         <member name="M:System.Linq.EnumerableEx.Remotable``1(System.Collections.Generic.IEnumerable{``0})">
             <summary>
             Makes a sequence remotable.
+            </summary>
+        </member>
+        <member name="T:System.Linq.Enumerator">
+            <summary>
+            Provides a set of static methods for creating enumerators.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Enumerator.AsEnumerator``1(System.Collections.Generic.IEnumerator{``0})">
+            <summary>
+            Hides the identity of an enumerator.
             </summary>
         </member>
     </members>

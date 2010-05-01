@@ -2328,6 +2328,11 @@
             current exception.
             </summary>
         </member>
+        <member name="T:System.Func_`6">
+            <summary>
+            Encapsulates a method that has five parameters and returns a value of the type specified by the TResult parameter.
+            </summary>
+        </member>
         <member name="T:System.Threading.CancellationToken">
             <summary>
             Propogates notification that operations should be canceled.
@@ -8976,7 +8981,7 @@
             This method throws any exceptions thrown by the <paramref name="beginMethod"/>.
             </remarks>
         </member>
-        <member name="M:System.Threading.Tasks.TaskFactory`1.FromAsync``3(System.Func{``0,``1,``2,System.AsyncCallback,System.Object,System.IAsyncResult},System.Func{System.IAsyncResult,`0},``0,``1,``2,System.Object)">
+        <member name="M:System.Threading.Tasks.TaskFactory`1.FromAsync``3(System.Func_{``0,``1,``2,System.AsyncCallback,System.Object,System.IAsyncResult},System.Func{System.IAsyncResult,`0},``0,``1,``2,System.Object)">
             <summary>
             Creates a <see cref="T:System.Threading.Tasks.Task{TResult}">Task</see> that represents a pair of
             begin and end methods that conform to the Asynchronous Programming Model pattern.
@@ -9007,7 +9012,7 @@
             This method throws any exceptions thrown by the <paramref name="beginMethod"/>.
             </remarks>
         </member>
-        <member name="M:System.Threading.Tasks.TaskFactory`1.FromAsync``3(System.Func{``0,``1,``2,System.AsyncCallback,System.Object,System.IAsyncResult},System.Func{System.IAsyncResult,`0},``0,``1,``2,System.Object,System.Threading.Tasks.TaskCreationOptions)">
+        <member name="M:System.Threading.Tasks.TaskFactory`1.FromAsync``3(System.Func_{``0,``1,``2,System.AsyncCallback,System.Object,System.IAsyncResult},System.Func{System.IAsyncResult,`0},``0,``1,``2,System.Object,System.Threading.Tasks.TaskCreationOptions)">
             <summary>
             Creates a <see cref="T:System.Threading.Tasks.Task{TResult}">Task</see> that represents a pair of
             begin and end methods that conform to the Asynchronous Programming Model pattern.
@@ -10595,7 +10600,7 @@
             This method throws any exceptions thrown by the <paramref name="beginMethod"/>.
             </remarks>
         </member>
-        <member name="M:System.Threading.Tasks.TaskFactory.FromAsync``3(System.Func{``0,``1,``2,System.AsyncCallback,System.Object,System.IAsyncResult},System.Action{System.IAsyncResult},``0,``1,``2,System.Object)">
+        <member name="M:System.Threading.Tasks.TaskFactory.FromAsync``3(System.Func_{``0,``1,``2,System.AsyncCallback,System.Object,System.IAsyncResult},System.Action{System.IAsyncResult},``0,``1,``2,System.Object)">
             <summary>
             Creates a <see cref="T:System.Threading.Tasks.Task">Task</see> that represents a pair of begin
             and end methods that conform to the Asynchronous Programming Model pattern.
@@ -10627,7 +10632,7 @@
             This method throws any exceptions thrown by the <paramref name="beginMethod"/>.
             </remarks>
         </member>
-        <member name="M:System.Threading.Tasks.TaskFactory.FromAsync``3(System.Func{``0,``1,``2,System.AsyncCallback,System.Object,System.IAsyncResult},System.Action{System.IAsyncResult},``0,``1,``2,System.Object,System.Threading.Tasks.TaskCreationOptions)">
+        <member name="M:System.Threading.Tasks.TaskFactory.FromAsync``3(System.Func_{``0,``1,``2,System.AsyncCallback,System.Object,System.IAsyncResult},System.Action{System.IAsyncResult},``0,``1,``2,System.Object,System.Threading.Tasks.TaskCreationOptions)">
             <summary>
             Creates a <see cref="T:System.Threading.Tasks.Task">Task</see> that represents a pair of begin
             and end methods that conform to the Asynchronous Programming Model pattern.
@@ -10905,7 +10910,7 @@
             This method throws any exceptions thrown by the <paramref name="beginMethod"/>.
             </remarks>
         </member>
-        <member name="M:System.Threading.Tasks.TaskFactory.FromAsync``4(System.Func{``0,``1,``2,System.AsyncCallback,System.Object,System.IAsyncResult},System.Func{System.IAsyncResult,``3},``0,``1,``2,System.Object)">
+        <member name="M:System.Threading.Tasks.TaskFactory.FromAsync``4(System.Func_{``0,``1,``2,System.AsyncCallback,System.Object,System.IAsyncResult},System.Func{System.IAsyncResult,``3},``0,``1,``2,System.Object)">
             <summary>
             Creates a <see cref="T:System.Threading.Tasks.Task{TResult}">Task</see> that represents a pair of
             begin and end methods that conform to the Asynchronous Programming Model pattern.
@@ -10939,7 +10944,7 @@
             This method throws any exceptions thrown by the <paramref name="beginMethod"/>.
             </remarks>
         </member>
-        <member name="M:System.Threading.Tasks.TaskFactory.FromAsync``4(System.Func{``0,``1,``2,System.AsyncCallback,System.Object,System.IAsyncResult},System.Func{System.IAsyncResult,``3},``0,``1,``2,System.Object,System.Threading.Tasks.TaskCreationOptions)">
+        <member name="M:System.Threading.Tasks.TaskFactory.FromAsync``4(System.Func_{``0,``1,``2,System.AsyncCallback,System.Object,System.IAsyncResult},System.Func{System.IAsyncResult,``3},``0,``1,``2,System.Object,System.Threading.Tasks.TaskCreationOptions)">
             <summary>
             Creates a <see cref="T:System.Threading.Tasks.Task{TResult}">Task</see> that represents a pair of
             begin and end methods that conform to the Asynchronous Programming Model pattern.
