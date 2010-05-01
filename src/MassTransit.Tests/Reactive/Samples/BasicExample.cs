@@ -2,10 +2,9 @@ namespace MassTransit.Tests.Reactive.Samples
 {
     using System;
     using System.Linq;
-    using MassTransit.Transports;
+    using MassTransit.Reactive;
     using Messages;
     using NUnit.Framework;
-    using MassTransit.Reactive;
     using TestFramework;
 
     [Scenario]
@@ -15,10 +14,9 @@ namespace MassTransit.Tests.Reactive.Samples
         [Given]
         public void A_Rx_Query_Is_Setup()
         {
+            obs = LocalBus.AsObservable<PingMessage>();
 
-            obs = from c in LocalBus.AsObservable<PingMessage>()
-                    let observered = true
-                    select c;
+            obs.Subscribe(m => _observed = true);
         }
 
         IObservable<PingMessage> obs;
@@ -33,7 +31,7 @@ namespace MassTransit.Tests.Reactive.Samples
         [Then]
         public void Then_One_Message_should_be_observed()
         {
-            Assert.AreEqual(1, obs.Count());
+            Assert.AreEqual(1, obs.Take(1).ToEnumerable().Count());
             Assert.IsTrue(_observed);
         }
     }
