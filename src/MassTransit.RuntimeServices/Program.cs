@@ -50,8 +50,7 @@ namespace MassTransit.RuntimeServices
 					config.RunAsLocalSystem();
 
 					config.DependencyOnMsmq();
-					config.DependencyOnMsSql();
-
+					
 					if (serviceConfiguration.SubscriptionServiceEnabled)
 					{
 						config.ConfigureService<SubscriptionService>(service => { ConfigureService<SubscriptionService, SubscriptionServiceRegistry>(service, start => start.Start(), stop => stop.Stop()); });
