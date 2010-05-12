@@ -32,7 +32,7 @@
   <property name="dirs.lib" value="${dirs.current}\${path.to.toplevel}\${folder.references}" overwrite="false" />
   <property name="dirs.rh" value="${dirs.lib}\RoundhousE" overwrite="false" />
   
-  <target name="go" depends="package_roundhouse" />
+  <target name="go" depends="package_roundhouse, package_legacy, package_runtime" />
 
   <target name="package_roundhouse">
     <echo message="Packaging roundhouse files to ${dirs.drop}\${folder.deployment}."/>
@@ -44,5 +44,94 @@
     
     <move file="${dirs.drop}\${folder.deployment}\rh.exe" tofile="${dirs.drop}\${folder.deployment}\tools\rh.exe" />
   </target>
+  <target name="package_legacy">
+    <echo message="Packaging legacy support application to ${dirs.drop}\legacy."/>
+    <copy todir="${dirs.drop}\legacy">
+      <fileset basedir="${dirs.drop}\MassTransit">
+        <include name="Antlr3.Runtime.dll" />
+		<include name="Castle.Core.dll" />
+		<include name="Castle.Core.xml" />
+		<include name="Castle.DynamicProxy2.dll" />
+		<include name="Castle.DynamicProxy2.xml" />
+		<include name="FluentNHibernate.dll" />
+		<include name="FluentNHibernate.xml" />
+		<include name="Iesi.Collections.dll" />
+		<include name="Iesi.Collections.xml" />
+		<include name="log4net.dll" />
+		<include name="log4net.xml" />
+		<include name="Magnum.dll" />
+		<include name="Magnum.pdb" />
+		<include name="Magnum.xml" />
+		<include name="Magnum.Infrastructure.dll" />
+		<include name="Magnum.Infrastructure.pdb" />
+		<include name="Magnum.Infrastructure.xml" />
+		<include name="MassTransit.dll" />
+		<include name="MassTransit.Infrastructure.dll" />
+		<include name="MassTransit.Infrastructure.pdb" />
+		<include name="MassTransit.LegacySupport.dll" />
+		<include name="MassTransit.LegacySupport.log4net.xml" />
+		<include name="MassTransit.LegacySupport.pdb" />
+		<include name="MassTransit.StructureMapIntegration.XML" />
+		<include name="MassTransit.StructureMapIntegration.dll" />
+		<include name="MassTransit.StructureMapIntegration.pdb" />
+		<include name="MassTransit.Transports.Msmq.XML" />
+		<include name="MassTransit.Transports.Msmq.dll" />
+		<include name="MassTransit.Transports.Msmq.pdb" />
+		<include name="NHibernate.dll" />
+		<include name="NHibernate.ByteCode.Castle.dll" />
+		<include name="NHibernate.Linq.dll" />
+		<include name="StructureMap.dll" />
+		<include name="Topshelf.dll" />
+
+		<!-- move? -->
+		<include name="LegacyRuntime.exe" />
+		<include name="LegacyRuntime.exe.config" />
+		<include name="LegacyRuntime.pdb" />
+      </fileset>
+    </copy>
+  </target>
   
+   <target name="package_runtime">
+    <echo message="Packaging runtime support application to ${dirs.drop}\runtime."/>
+    <copy todir="${dirs.drop}\runtime">
+      <fileset basedir="${dirs.drop}\MassTransit">
+        <include name="Antlr3.Runtime.dll" />
+		<include name="Castle.Core.dll" />
+		<include name="Castle.Core.xml" />
+		<include name="Castle.DynamicProxy2.dll" />
+		<include name="Castle.DynamicProxy2.xml" />
+		<include name="FluentNHibernate.dll" />
+		<include name="FluentNHibernate.xml" />
+		<include name="Iesi.Collections.dll" />
+		<include name="Iesi.Collections.xml" />
+		<include name="log4net.dll" />
+		<include name="log4net.xml" />
+		<include name="Magnum.dll" />
+		<include name="Magnum.pdb" />
+		<include name="Magnum.xml" />
+		<include name="Magnum.Infrastructure.dll" />
+		<include name="Magnum.Infrastructure.pdb" />
+		<include name="Magnum.Infrastructure.xml" />
+		<include name="MassTransit.dll" />
+		<include name="MassTransit.Infrastructure.dll" />
+		<include name="MassTransit.Infrastructure.pdb" />
+		<include name="MassTransit.StructureMapIntegration.XML" />
+		<include name="MassTransit.StructureMapIntegration.dll" />
+		<include name="MassTransit.StructureMapIntegration.pdb" />
+		<include name="MassTransit.Transports.Msmq.XML" />
+		<include name="MassTransit.Transports.Msmq.dll" />
+		<include name="MassTransit.Transports.Msmq.pdb" />
+		<include name="NHibernate.dll" />
+		<include name="NHibernate.ByteCode.Castle.dll" />
+		<include name="NHibernate.Linq.dll" />
+		<include name="StructureMap.dll" />
+		<include name="Topshelf.dll" />
+
+		<!-- move? -->
+		<include name="MassTransit.RuntimeServices.exe" />
+		<include name="MassTransit.RuntimeServices.exe.config" />
+		<include name="MassTransit.RuntimeServices.pdb" />
+      </fileset>
+    </copy>
+  </target>
 </project>
