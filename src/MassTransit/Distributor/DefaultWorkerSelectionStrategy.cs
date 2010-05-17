@@ -19,7 +19,7 @@ namespace MassTransit.Distributor
 		IWorkerSelectionStrategy<T> 
         where T : class
 	{
-		public IEnumerable<WorkerDetails> GetAvailableWorkers(IEnumerable<WorkerDetails> candidates, T message)
+		public IEnumerable<WorkerDetails> GetAvailableWorkers(IEnumerable<WorkerDetails> candidates, T message, bool fromAccept)
 		{
 			return candidates
 				.Where(x => x.InProgress + x.Pending < x.InProgressLimit + x.PendingLimit)
