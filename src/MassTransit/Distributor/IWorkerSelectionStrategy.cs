@@ -17,6 +17,6 @@ namespace MassTransit.Distributor
 	public interface IWorkerSelectionStrategy<T>
         where T : class
 	{
-		IEnumerable<WorkerDetails> GetAvailableWorkers(IEnumerable<WorkerDetails> candidates, T message);
+		IEnumerable<WorkerDetails> GetAvailableWorkers(IEnumerable<WorkerDetails> candidates, T message, bool fromAccept);
 	}
 }

@@ -157,11 +157,11 @@ namespace MassTransit.Tests.Distributor
         protected override void ConfigureLocalBus(IServiceBusConfigurator configurator)
         {
             var mock = MockRepository.GenerateStub<IWorkerSelectionStrategy<FirstCommand>>();
-            mock.Stub(x => x.GetAvailableWorkers(null, null))
+            mock.Stub(x => x.GetAvailableWorkers(null, null, false))
                 .IgnoreArguments()
-                .Return(new List<WorkerDetails>() 
+                .Return(new List<WorkerDetails>
                 { 
-                    new WorkerDetails() 
+                    new WorkerDetails
                     { 
                         ControlUri = _nodes["A"].AppendToPath("_control"), 
                         DataUri = _nodes["A"],
