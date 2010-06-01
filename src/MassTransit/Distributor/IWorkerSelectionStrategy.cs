@@ -12,26 +12,11 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Distributor
 {
-    using System.Collections.Generic;
+	using System.Collections.Generic;
 
-    public interface IWorkerSelectionStrategy<T>
+	public interface IWorkerSelectionStrategy<T>
         where T : class
-    {
-        /// <summary>
-        /// Indicates if a given message can be assigned to a worker in distribution
-        /// </summary>
-        /// <param name="workerCandidates">List of possible candidates</param>
-        /// <param name="message">Message in question</param>
-        /// <returns>True if there is a worker avaiable to send the message to</returns>
-        bool CanBeAssignedToWorker(IEnumerable<WorkerDetails> workerCandidates, T message);
-
-        /// <summary>
-        /// Finds a worker avaiable to send a given message to
-        /// </summary>
-        /// <param name="workerCandidates">List of possible candidates</param>
-        /// <param name="message">Message in question</param>
-        /// <returns>A worker, if one is avaiable. If there are no acceptable workers in the 
-        /// candidate list, <c>null</c> is returned.</returns>
-        WorkerDetails AssignToWorker(IEnumerable<WorkerDetails> workerCandidates, T message);
-    }
+	{
+		IEnumerable<WorkerDetails> GetAvailableWorkers(IEnumerable<WorkerDetails> candidates, T message, bool fromAccept);
+	}
 }
