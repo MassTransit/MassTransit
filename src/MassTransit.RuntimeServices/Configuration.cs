@@ -30,8 +30,25 @@ namespace MassTransit.RuntimeServices
 		private const string TimeoutServiceControlUriKey = "TimeoutServiceControlUri";
 		private const string TimeoutServiceDataUriKey = "TimeoutServiceDataUri";
 		private const string TimeoutServiceEnabledKey = "TimeoutServiceEnabled";
+        private const string ServiceUsernameKey = "ServiceUsername";
+        private const string ServicePasswordKey = "ServicePassword";
 
 		private static readonly ILog _log = LogManager.GetLogger(typeof (Configuration));
+
+        public bool UseServiceCredentials
+        {
+            get { return (ServiceUsername != string.Empty) && (ServicePassword != string.Empty); }
+        }
+
+        public string ServiceUsername
+        {
+            get { return GetApplicationSetting(ServiceUsernameKey, string.Empty); }
+        }
+
+        public string ServicePassword
+        {
+            get { return GetApplicationSetting(ServicePasswordKey, string.Empty); }
+        }
 
 		public bool SubscriptionServiceEnabled
 		{
