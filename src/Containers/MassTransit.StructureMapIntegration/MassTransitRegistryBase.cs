@@ -22,6 +22,7 @@ namespace MassTransit.StructureMapIntegration
     using Services.Subscriptions;
     using Services.Subscriptions.Configuration;
     using Services.Subscriptions.Server;
+    using StructureMap;
     using StructureMap.Configuration.DSL;
     using StructureMap.Graph;
     using Transports;
@@ -169,6 +170,27 @@ namespace MassTransit.StructureMapIntegration
                                 configAction(x);
                             });
                     });
+        }
+
+        protected void RegisterServiceBus(string endpointUri, Action<IServiceBusConfigurator, IContext> configAction)
+        {
+            RegisterServiceBus(new Uri(endpointUri), configAction);
+        }
+
+        protected void RegisterServiceBus(Uri endpointUri, Action<IServiceBusConfigurator, IContext> configAction)
+        {
+            For<IServiceBus>()
+                .Singleton()
+                .Use(context =>
+                {
+                    return ServiceBusConfigurator.New(x =>
+                    {
+                        x.SetObjectBuilder(context.GetInstance<IObjectBuilder>());
+                        x.ReceiveFrom(endpointUri);
+
+                        configAction(x, context);
+                    });
+                });
         }
 
         protected void RegisterControlBus(string endpointUri, Action<IServiceBusConfigurator> configAction)
