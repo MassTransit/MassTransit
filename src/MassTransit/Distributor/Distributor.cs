@@ -38,15 +38,14 @@ namespace MassTransit.Distributor
 			_selectionStrategy = workerSelectionStrategy;
 		}
 
-		public Distributor(IEndpointFactory endpointFactory)
-			:
+		public Distributor(IEndpointFactory endpointFactory) :
 				this(endpointFactory, new DefaultWorkerSelectionStrategy<T>())
 		{
 		}
 
 		public void Consume(T message)
 		{
-		    WorkerDetails worker = _selectionStrategy.AssignToWorker(_workers.Values, message);
+			WorkerDetails worker = _selectionStrategy.GetAvailableWorkers(_workers.Values, message, false).FirstOrDefault();
 			if (worker == null)
 			{
 				CurrentMessage.RetryLater();
@@ -64,7 +63,7 @@ namespace MassTransit.Distributor
 
 		public bool Accept(T message)
 		{
-		    return _selectionStrategy.CanBeAssignedToWorker(_workers.Values, message);
+			return _selectionStrategy.GetAvailableWorkers(_workers.Values, message, true).Count() > 0;
 		}
 
 		public void Dispose()

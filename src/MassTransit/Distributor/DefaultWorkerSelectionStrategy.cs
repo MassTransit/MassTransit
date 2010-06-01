@@ -19,19 +19,11 @@ namespace MassTransit.Distributor
 		IWorkerSelectionStrategy<T> 
         where T : class
 	{
-	    public bool CanBeAssignedToWorker(IEnumerable<WorkerDetails> workerCandidates, T message)
-	    {
-            return workerCandidates
-                .Where(x => x.InProgress + x.Pending < x.InProgressLimit + x.PendingLimit)
-                .Count() > 1;
-	    }
-
-	    public WorkerDetails AssignToWorker(IEnumerable<WorkerDetails> workerCandidates, T message)
-	    {
-            return workerCandidates
-                .Where(x => x.InProgress + x.Pending < x.InProgressLimit + x.PendingLimit)
-                .OrderByDescending(x => x.InProgress + x.Pending)
-                .FirstOrDefault();
-	    }
+		public IEnumerable<WorkerDetails> GetAvailableWorkers(IEnumerable<WorkerDetails> candidates, T message, bool fromAccept)
+		{
+			return candidates
+				.Where(x => x.InProgress + x.Pending < x.InProgressLimit + x.PendingLimit)
+				.OrderByDescending(x => x.InProgress + x.Pending);
+		}
 	}
 }

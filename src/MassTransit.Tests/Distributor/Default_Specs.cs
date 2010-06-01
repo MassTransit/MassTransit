@@ -16,56 +16,57 @@ namespace MassTransit.Tests.Distributor
     using System.Linq;
     using System.Collections.Generic;
     using System.Threading;
-    using Load;
-    using Load.Messages;
+	using Load;
+	using Load.Messages;
     using MassTransit.Distributor.Messages;
     using MassTransit.Pipeline.Inspectors;
     using Configuration;
     using MassTransit.Distributor;
+    using MassTransit.Distributor.Messages;
     using Magnum.DateTimeExtensions;
     using Rhino.Mocks;
-    using NUnit.Framework;
+	using NUnit.Framework;
     using TestFramework;
 
-    [TestFixture]
-    public class Default_distributor_specifications :
-        LoopbackDistributorTestFixture
-    {
-        protected override void EstablishContext()
-        {
-            base.EstablishContext();
+	[TestFixture]
+	public class Default_distributor_specifications :
+		LoopbackDistributorTestFixture
+	{
+		protected override void EstablishContext()
+		{
+			base.EstablishContext();
 
-            AddFirstCommandInstance("A", "loopback://localhost/a");
-            AddFirstCommandInstance("B", "loopback://localhost/b");
-            AddFirstCommandInstance("C", "loopback://localhost/c");
+			AddFirstCommandInstance("A", "loopback://localhost/a");
+			AddFirstCommandInstance("B", "loopback://localhost/b");
+			AddFirstCommandInstance("C", "loopback://localhost/c");
 
-            RemoteBus.ShouldHaveSubscriptionFor<Distributed<FirstCommand>>();
-        }
+			RemoteBus.ShouldHaveSubscriptionFor<Distributed<FirstCommand>>();
+		}
 
-        [Test]
-        public void Using_the_load_generator_should_share_the_load()
-        {
-            var generator = new LoadGenerator<FirstCommand, FirstResponse>();
-            const int count = 100;
+		[Test]
+		public void Using_the_load_generator_should_share_the_load()
+		{
+			var generator = new LoadGenerator<FirstCommand, FirstResponse>();
+		    const int count = 100;
 
-            generator.Run(RemoteBus, count, x => new FirstCommand(x));
+			generator.Run(RemoteBus, count, x => new FirstCommand(x));
 
-            var results = generator.GetWorkerLoad();
+		    var results = generator.GetWorkerLoad();
 
             Assert.That(results.Sum(x => x.Value), Is.EqualTo(count));
             results.ToList().ForEach(x =>
-                Assert.That(x.Value, Is.GreaterThan(0).And.LessThanOrEqualTo(count),
-                            string.Format("{0} did not consume between 0 and {1}",
+                Assert.That(x.Value, Is.GreaterThan(0).And.LessThanOrEqualTo(count), 
+                            string.Format("{0} did not consume between 0 and {1}", 
                                           x.Key.ToString(), count)));
-        }
+		}
 
-        [Test]
-        public void The_pipeline_viewer_should_show_the_distributor()
-        {
-            PipelineViewer.Trace(LocalBus.InboundPipeline);
+		[Test]
+		public void The_pipeline_viewer_should_show_the_distributor()
+		{
+			PipelineViewer.Trace(LocalBus.InboundPipeline);
 
-            PipelineViewer.Trace(Instances["A"].DataBus.InboundPipeline);
-        }
+			PipelineViewer.Trace(Instances["A"].DataBus.InboundPipeline);
+		}
 
         [Test]
         public void Ensure_workers_will_respond_to_ping_request()
@@ -78,7 +79,7 @@ namespace MassTransit.Tests.Distributor
                 Interlocked.Increment(ref workerAvaiableCountRecieved);
                 messageRecieved.Set();
             });
-
+            
             Instances.ToList().ForEach(x =>
             {
                 x.Value.ControlBus.Endpoint.Send(new PingWorker());
@@ -115,7 +116,7 @@ namespace MassTransit.Tests.Distributor
             workerAvaiableCountRecieved.ShouldBeGreaterThan(0);
         }
 
-        [Test, Explicit]
+	    [Test, Explicit]
         public void Ensure_distributor_sends_ping_request_after_timeout()
         {
             int pingRequestsRecieved = 0;
@@ -133,7 +134,7 @@ namespace MassTransit.Tests.Distributor
 
             pingRequestsRecieved.ShouldBeGreaterThan(0);
         }
-    }
+	}
 
     [TestFixture]
     public class Distributor_with_custom_worker_selection_strategy :
@@ -156,20 +157,19 @@ namespace MassTransit.Tests.Distributor
         protected override void ConfigureLocalBus(IServiceBusConfigurator configurator)
         {
             var mock = MockRepository.GenerateStub<IWorkerSelectionStrategy<FirstCommand>>();
-            mock.Stub(x => x.AssignToWorker(null, null))
+            mock.Stub(x => x.GetAvailableWorkers(null, null, false))
                 .IgnoreArguments()
-                .Return(new WorkerDetails
-                    {
-                        ControlUri = _nodes["A"].AppendToPath("_control"),
+                .Return(new List<WorkerDetails>
+                { 
+                    new WorkerDetails
+                    { 
+                        ControlUri = _nodes["A"].AppendToPath("_control"), 
                         DataUri = _nodes["A"],
                         InProgress = 0,
                         InProgressLimit = 100,
                         LastUpdate = DateTime.UtcNow
-                    });
-
-            mock.Stub(x => x.CanBeAssignedToWorker(null, null))
-                .IgnoreArguments()
-                .Return(true);
+                    } 
+                });
 
             configurator.UseDistributorFor(EndpointFactory, mock);
         }
