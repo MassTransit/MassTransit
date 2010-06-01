@@ -47,7 +47,12 @@ namespace MassTransit.RuntimeServices
 					config.SetDisplayName(typeof (Program).Namespace);
 					config.SetDescription("MassTransit Runtime Services (Subscription, Timeout, Health Monitoring)");
 
-					config.RunAsLocalSystem();
+                    if (serviceConfiguration.UseServiceCredentials)
+                    {
+                        config.RunAs(serviceConfiguration.ServiceUsername, serviceConfiguration.ServicePassword);
+                    }
+                    else
+                        config.RunAsLocalSystem();
 
 					config.DependencyOnMsmq();
 					

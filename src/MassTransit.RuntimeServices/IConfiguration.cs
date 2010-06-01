@@ -26,5 +26,9 @@ namespace MassTransit.RuntimeServices
 		bool TimeoutServiceEnabled { get; }
 		Uri TimeoutServiceControlUri { get; }
 		Uri TimeoutServiceDataUri { get; }
+
+        bool UseServiceCredentials { get; }
+        string ServiceUsername { get; }
+        string ServicePassword { get; }
 	}
 }
