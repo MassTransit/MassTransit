@@ -18,7 +18,6 @@ namespace MassTransit.NinjectIntegration
     using Ninject;
     using Ninject.Modules;
     using Saga;
-    using Services.HealthMonitoring.Configuration;
     using Services.Subscriptions;
     using Services.Subscriptions.Configuration;
     using Services.Subscriptions.Server;
@@ -38,18 +37,15 @@ namespace MassTransit.NinjectIntegration
             
         }
 
-
         public MassTransitModuleBase(Action<IEndpointFactoryConfigurator> configurationAction)
         {
-            RegisterBusDependencies();
-
-
+            // Save action to Load() if we need it? We can't do stuff in the constructor
             //structure map scanner stuff?
 		}
 
         public override void Load()
         {
-            //no-op
+            RegisterBusDependencies();
         }
 
         /// <summary>
@@ -188,6 +184,5 @@ namespace MassTransit.NinjectIntegration
                 y.SetSubscriptionServiceEndpoint(subscriptionServiceEndpointAddress);
             });
         }
-
     }
 }
