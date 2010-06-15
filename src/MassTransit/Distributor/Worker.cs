@@ -17,6 +17,8 @@ namespace MassTransit.Distributor
 	using Internal;
 	using Magnum.Actors;
 	using Magnum.Actors.CommandQueues;
+	using Magnum.Actors.Schedulers;
+	using Magnum.DateTimeExtensions;
 	using Messages;
 
 	public class Worker<T> :
@@ -35,10 +37,11 @@ namespace MassTransit.Distributor
 		private int _inProgress;
 		private int _inProgressLimit = 4;
 		private int _pendingLimit = 16;
-		private CommandQueue _queue = new ThreadPoolCommandQueue();
+		private readonly CommandQueue _queue = new ThreadPoolCommandQueue();
 		private UnsubscribeAction _unsubscribeAction = () => false;
 		private bool _updatePending;
 		private bool _wakeUpPending;
+	    private ThreadPoolScheduler _threadPoolScheduler;
 
 		public Worker(Func<T, Action<T>> getConsumer)
 			: this(getConsumer, new WorkerSettings())
@@ -121,18 +124,20 @@ namespace MassTransit.Distributor
 			_unsubscribeAction += bus.ControlBus.Subscribe<PingWorker>(Consume);
 			_unsubscribeAction += bus.Subscribe(this);
 
-			PublishWorkerAvailability();
+            _threadPoolScheduler = new ThreadPoolScheduler();
+
+		    _threadPoolScheduler.Schedule((int) 3.Seconds().TotalMilliseconds, (int) 1.Minutes().TotalMilliseconds, PublishWorkerAvailability);
 		}
 
 	    public void Stop()
 		{
+	        _threadPoolScheduler.Dispose();
 			_unsubscribeAction();
 		}
 
         private bool Accept(ConfigureWorker message)
         {
-            
-            return this.GetType().GetGenericArguments()[0].FullName == message.MessageType;
+            return GetType().GetGenericArguments()[0].FullName == message.MessageType;
         }
 
 		private void Consume(ConfigureWorker message)
