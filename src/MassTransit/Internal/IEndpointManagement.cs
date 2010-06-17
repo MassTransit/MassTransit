@@ -12,7 +12,9 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Internal
 {
-	/// <summary>
+    using System.Collections.Generic;
+
+    /// <summary>
 	/// Provides a management interface to an endpoint
 	/// Since this has more than one method, these may get broken up
 	/// into individual interfaces such as ICreateEndpoint, ICountEndpoint, etc.
@@ -47,6 +49,11 @@ namespace MassTransit.Internal
 		/// Returns true if the endpoint exists
 		/// </summary>
 		bool Exists { get; }
+
+        /// <summary>
+        /// Returns a dictionary containing the message types and the number of messages for each type. 
+        /// </summary>
+        Dictionary<string, int> MessageTypes();
 
 		/// <summary>
 		/// Returns true if the endpoint supports transactions
