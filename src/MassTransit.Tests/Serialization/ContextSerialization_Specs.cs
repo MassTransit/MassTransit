@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2010 The Apache Software Foundation.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,9 +13,8 @@
 namespace MassTransit.Tests.Serialization
 {
 	using Configuration;
-	using Magnum.DateTimeExtensions;
+	using Magnum.Extensions;
 	using MassTransit.Serialization;
-	using MassTransit.Serialization.Custom;
 	using Messages;
 	using NUnit.Framework;
 	using TextFixtures;

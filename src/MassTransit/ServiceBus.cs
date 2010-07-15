@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2010 The Apache Software Foundation.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -19,8 +19,8 @@ namespace MassTransit
 	using Exceptions;
 	using Internal;
 	using log4net;
-	using Magnum.DateTimeExtensions;
-	using Magnum.ObjectExtensions;
+	using Magnum;
+	using Magnum.Extensions;
 	using Magnum.Pipeline;
 	using Magnum.Pipeline.Segments;
 	using Monitoring;
@@ -73,9 +73,9 @@ namespace MassTransit
 		                  IEndpointFactory endpointFactory)
 		{
 			ReceiveTimeout = TimeSpan.FromSeconds(3);
-			endpointToListenOn.MustNotBeNull("endpointToListenOn", "This parameter cannot be null");
-			objectBuilder.MustNotBeNull("objectBuilder", "This parameter cannot be null");
-			endpointFactory.MustNotBeNull("endpointFactory", "This parameter cannot be null");
+			Guard.AgainstNull(endpointToListenOn, "endpointToListenOn", "This parameter cannot be null");
+			Guard.AgainstNull(objectBuilder, "objectBuilder", "This parameter cannot be null");
+			Guard.AgainstNull(endpointFactory, "endpointFactory", "This parameter cannot be null");
 
 			Endpoint = endpointToListenOn;
 			ObjectBuilder = objectBuilder;

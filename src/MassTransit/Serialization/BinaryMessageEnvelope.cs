@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2010 The Apache Software Foundation.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -16,9 +16,8 @@ namespace MassTransit.Serialization
 	using System.Collections.Generic;
 	using System.Runtime.Remoting.Messaging;
 	using Internal;
-	using Magnum.ObjectExtensions;
 
-	public class BinaryMessageEnvelope :
+    public class BinaryMessageEnvelope :
 		MessageEnvelopeBase
 	{
 		private const string ConversationIdKey = "ConversationId";
@@ -62,7 +61,7 @@ namespace MassTransit.Serialization
 				headers.Add(new Header(FaultAddressKey, context.FaultAddress));
 			}
 
-			if (!context.MessageType.IsNullOrEmpty())
+			if (!string.IsNullOrEmpty(context.MessageType))
 			{
 				headers.Add(new Header(MessageTypeKey, context.MessageType));
 			}
