@@ -4,6 +4,48 @@
         <name>Magnum.Infrastructure</name>
     </assembly>
     <members>
+        <member name="T:Magnum.Infrastructure.Channels.Configuration.NHibernateChannelProviderConfigurator`2">
+            <summary>
+            Configures an NHibernate channel provider
+            </summary>
+            <typeparam name="TInstance"></typeparam>
+            <typeparam name="TChannel"></typeparam>
+        </member>
+        <member name="T:Magnum.Infrastructure.Channels.Configuration.NHibernateChannelProviderConfigurator`3">
+            <summary>
+            Configures an NHibernate channel provider
+            </summary>
+            <typeparam name="TInstance"></typeparam>
+            <typeparam name="TChannel"></typeparam>
+            <typeparam name="TKey"></typeparam>
+        </member>
+        <member name="T:Magnum.Infrastructure.Channels.NHibernateInstanceChannel`3">
+            <summary>
+            A channel that sends a message to a persistent instance that implements
+            the channel
+            </summary>
+            <typeparam name="TInstance">The class type stored in the database</typeparam>
+            <typeparam name="TChannel">The channel type of the message</typeparam>
+            <typeparam name="TKey">The key type used by the message and the class</typeparam>
+        </member>
+        <member name="T:Magnum.Infrastructure.Channels.NHibernateInstanceChannelProvider`3">
+            <summary>
+            Gets an instance of a class from the InstanceProvider and returns the channel
+            from that class
+            </summary>
+            <typeparam name="TInstance">The instance type</typeparam>
+            <typeparam name="TChannel">The channel type</typeparam>
+            <typeparam name="TKey"></typeparam>
+        </member>
+        <member name="T:Magnum.Infrastructure.Channels.SessionProvider`1">
+            <summary>
+            Defines a delegate that returns an NHibernate session appropriate for the message
+            that was received.
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="message"></param>
+            <returns></returns>
+        </member>
         <member name="T:Magnum.Infrastructure.StateMachine.StateMachineUserType">
             <summary>
             An NHibernate user type for persisting state machines current state
