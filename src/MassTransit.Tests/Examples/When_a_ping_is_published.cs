@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2010 The Apache Software Foundation.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,8 +13,7 @@
 namespace MassTransit.Tests.Examples
 {
 	using Magnum;
-	using Magnum.Actors;
-	using Magnum.DateTimeExtensions;
+	using Magnum.Extensions;
 	using NUnit.Framework;
 	using TestFramework;
 	using TestFramework.Examples.Messages;
@@ -43,7 +42,7 @@ namespace MassTransit.Tests.Examples
 		[Then]
 		public void The_response_should_have_been_received()
 		{
-			ExtensionMethodsForAssertions.ShouldBeTrue(Response.IsAvailable());
+			ExtensionMethodsForAssertions.ShouldBeTrue(Response.IsCompleted);
 		}
 
 		protected Ping Message { get; private set; }

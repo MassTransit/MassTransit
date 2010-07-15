@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2010 The Apache Software Foundation.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -15,8 +15,8 @@ namespace MassTransit.Distributor
 	using System;
 	using System.Linq;
 	using Magnum;
-	using Magnum.Actors.Schedulers;
-	using Magnum.DateTimeExtensions;
+	using Magnum.Extensions;
+	using Magnum.Fibers;
 	using Magnum.Threading;
 	using Messages;
 
@@ -28,7 +28,7 @@ namespace MassTransit.Distributor
 		private readonly IEndpointFactory _endpointFactory;
 		private readonly IWorkerSelectionStrategy<T> _selectionStrategy;
 		private readonly ReaderWriterLockedDictionary<Uri, WorkerDetails> _workers = new ReaderWriterLockedDictionary<Uri, WorkerDetails>();
-		private ThreadPoolScheduler _threadPoolScheduler;
+		private Scheduler _threadPoolScheduler;
 		private UnsubscribeAction _unsubscribeAction = () => false;
         private readonly int _pingTimeout = (int)1.Minutes().TotalMilliseconds;
 
@@ -77,14 +77,14 @@ namespace MassTransit.Distributor
 			// don't plan to unsubscribe this since it's an important thing
 			bus.Subscribe(this);
 
-			_threadPoolScheduler = new ThreadPoolScheduler();
+			_threadPoolScheduler = new TimerScheduler(new ThreadPoolFiber() );
 
-			_threadPoolScheduler.Schedule(_pingTimeout, _pingTimeout, PingWorkers);
+			_threadPoolScheduler.Schedule(_pingTimeout, _pingTimeout, new ThreadPoolFiber(), PingWorkers);
 		}
 
 		public void Stop()
 		{
-			_threadPoolScheduler.Dispose();
+			_threadPoolScheduler.Stop();
 
 			_workers.Clear();
 

@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-20010 The Apache Software Foundation.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -16,9 +16,8 @@ namespace MassTransit.Distributor
 	using System.Collections.Generic;
 	using System.Threading;
 	using Magnum;
+	using Magnum.Fibers;
 	using Magnum.Reflection;
-	using Magnum.Actors;
-	using Magnum.Actors.CommandQueues;
 	using Messages;
 	using Saga;
 
@@ -29,7 +28,7 @@ namespace MassTransit.Distributor
 	{
 		private readonly IList<Type> _messageTypes = new List<Type>();
 		private readonly IPendingMessageTracker<Guid> _pendingMessages = new WorkerPendingMessageTracker<Guid>();
-		private readonly CommandQueue _queue = new ThreadPoolCommandQueue();
+		private readonly Fiber _queue = new ThreadPoolFiber();
 		private IServiceBus _bus;
 		private IServiceBus _controlBus;
 		private Uri _controlUri;
@@ -58,6 +57,7 @@ namespace MassTransit.Distributor
 
 		public void Dispose()
 		{
+		    _queue.Stop();
 			_controlBus = null;
 		}
 
@@ -142,7 +142,7 @@ namespace MassTransit.Distributor
 			if (!_updatePending)
 			{
 				_updatePending = true;
-				_queue.Enqueue(PublishWorkerAvailability);
+				_queue.Add(PublishWorkerAvailability);
 			}
 		}
 

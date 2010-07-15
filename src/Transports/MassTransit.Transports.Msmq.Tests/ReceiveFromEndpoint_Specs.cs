@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2010 The Apache Software Foundation.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -15,6 +15,7 @@ namespace MassTransit.Transports.Msmq.Tests
 	using System;
 	using System.IO;
 	using System.Messaging;
+	using Magnum;
 	using Magnum.Actors;
 	using MassTransit.Serialization;
 	using NUnit.Framework;
@@ -46,7 +47,7 @@ namespace MassTransit.Transports.Msmq.Tests
 			                 		future.Complete(message);
 			                 	});
 
-			Assert.IsTrue(future.IsAvailable(), "Receive was not called");
+            Assert.IsTrue(future.IsCompleted, "Receive was not called");
 		}
 
 		private bool Forwarder(Func<Message, Action<Message>> arg)

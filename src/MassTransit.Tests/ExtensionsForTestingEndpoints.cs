@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2010 The Apache Software Foundation.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,7 +13,7 @@
 namespace MassTransit.Tests
 {
 	using System;
-	using Magnum.Actors;
+	using Magnum;
 	using NUnit.Framework;
 
 	public static class ExtensionsForTestingEndpoints
@@ -36,7 +36,7 @@ namespace MassTransit.Tests
 					return null;
 				});
 
-			future.IsAvailable().ShouldBeTrue(endpoint.Address + " should contain a message of type " + typeof (TMessage).Name);
+			future.IsCompleted.ShouldBeTrue(endpoint.Address + " should contain a message of type " + typeof (TMessage).Name);
 		}
 
         public static void ShouldContain<TMessage>(this IEndpoint endpoint, TMessage expectedMessage)
@@ -65,7 +65,7 @@ namespace MassTransit.Tests
 	                return null;
 	            }, timeout);
 
-			future.IsAvailable().ShouldBeTrue(endpoint.Address + " should contain a message of type " + typeof (TMessage).Name + " with correlation id " + expectedMessage.CorrelationId);
+			future.IsCompleted.ShouldBeTrue(endpoint.Address + " should contain a message of type " + typeof (TMessage).Name + " with correlation id " + expectedMessage.CorrelationId);
 		}
 
 		public static void ShouldNotContain<TMessage>(this IEndpoint endpoint)
