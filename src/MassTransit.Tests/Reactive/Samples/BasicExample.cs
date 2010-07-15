@@ -2,6 +2,7 @@ namespace MassTransit.Tests.Reactive.Samples
 {
     using System;
     using System.Linq;
+    using Magnum.Extensions;
     using MassTransit.Reactive;
     using Messages;
     using NUnit.Framework;
@@ -31,7 +32,7 @@ namespace MassTransit.Tests.Reactive.Samples
         [Then]
         public void Then_One_Message_should_be_observed()
         {
-            Assert.AreEqual(1, obs.Take(1).ToEnumerable().Count());
+            Assert.AreEqual(1, obs.Timeout(3.Seconds()).Take(1).ToEnumerable().Count());
             Assert.IsTrue(_observed);
         }
     }

@@ -38,9 +38,12 @@ namespace MassTransit.TestFramework.Fixtures
 		[TestFixtureTearDown]
 		public void AbstractTestFixtureTeardown()
 		{
-			_timer.Stop();
-
-			Log.InfoFormat("Elapsed Time: {0}ms", _timer.ElapsedMilliseconds);
+            if (_timer != null)
+            {
+                _timer.Stop();
+                Log.InfoFormat("Elapsed Time: {0}ms", _timer.ElapsedMilliseconds);
+            }
+		    
 			Log.Info("");
 		}
 
