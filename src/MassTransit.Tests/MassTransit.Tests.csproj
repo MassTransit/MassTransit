@@ -76,22 +76,6 @@
       <HintPath>..\..\lib\Rx_Net35_SP1\System.CoreEx.dll</HintPath>
     </Reference>
     <Reference Include="System.Data" />
-    <Reference Include="System.Interactive, Version=1.0.2.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\lib\Rx_Net35_SP1\System.Interactive.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Observable, Version=1.0.2.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\lib\Rx_Net35_SP1\System.Observable.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Reactive, Version=1.0.2.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\lib\Rx_Net35_SP1\System.Reactive.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Threading, Version=1.0.2.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\lib\Rx_Net35_SP1\System.Threading.dll</HintPath>
-    </Reference>
     <Reference Include="System.Transactions" />
     <Reference Include="System.Xml" />
   </ItemGroup>
@@ -146,8 +130,8 @@
     <Compile Include="Performance\EndpointLoadTest.cs" />
     <Compile Include="Performance\LoadedRequest.cs" />
     <Compile Include="Performance\LoadedResponse.cs" />
-    <Compile Include="Reactive\Samples\BasicExample.cs" />
-    <Compile Include="Reactive\ServiceBusSubscriptionSpecs.cs" />
+    <None Include="Reactive\Samples\BasicExample.cs" />
+    <None Include="Reactive\ServiceBusSubscriptionSpecs.cs" />
     <Compile Include="Saga\Builder_Specs.cs" />
     <Compile Include="Saga\CompleteSimpleSaga.cs" />
     <Compile Include="Saga\InitiateSimpleSaga.cs" />
@@ -256,10 +240,6 @@
     <Compile Include="Uri_Specs.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\MassTransit.Reactive\MassTransit.Reactive.csproj">
-      <Project>{BAE719BF-A142-4EF4-84DC-788742ED7FF8}</Project>
-      <Name>MassTransit.Reactive</Name>
-    </ProjectReference>
     <ProjectReference Include="..\MassTransit.TestFramework\MassTransit.TestFramework.csproj">
       <Project>{3C4B5F1A-69AD-415E-9F40-A7FDBD7A3012}</Project>
       <Name>MassTransit.TestFramework</Name>

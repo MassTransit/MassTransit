@@ -164,7 +164,7 @@ namespace MassTransit.Tests
 				{
 					x.IfNoSubscribers<PingMessage>(message =>
 						{
-							Assert.IsInstanceOfType(typeof (PingMessage), message);
+							Assert.IsInstanceOf<PingMessage>(message);
 							noConsumers = true;
 						});
 				});
