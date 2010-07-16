@@ -217,6 +217,40 @@
             Context for binding to a model
             </summary>
         </member>
+        <member name="M:Magnum.Channels.Configuration.Internal.ChannelConfiguratorConnection.AddDisposable(System.IDisposable)">
+            <summary>
+            Add a disposable item to the connection
+            </summary>
+            <param name="disposable"></param>
+        </member>
+        <member name="P:Magnum.Channels.Configuration.Internal.ChannelConfiguratorConnection.Channel">
+            <summary>
+            The channel to which connections are being added
+            </summary>
+        </member>
+        <member name="M:Magnum.Channels.Configuration.Internal.ChannelConfiguratorConnection`1.AddDisposable(System.IDisposable)">
+            <summary>
+            Add a disposable item to the connection
+            </summary>
+            <param name="disposable"></param>
+        </member>
+        <member name="T:Magnum.Channels.Configuration.ChannelConnectionConfigurator`1">
+            <summary>
+            A fluent syntax for configuration the options of a channel subscription
+            </summary>
+            <typeparam name="TChannel">The channel type</typeparam>
+        </member>
+        <member name="T:Magnum.Channels.Configuration.Internal.ChannelConfigurator">
+            <summary>
+            Configures a channel on an untyped channel
+            </summary>
+        </member>
+        <member name="M:Magnum.Channels.Configuration.Configurator.ValidateConfiguration">
+            <summary>
+            Validate the configuration, throwing an exception if the configuration settings
+            are insufficient or invalid based on the type of configuration being performed.
+            </summary>
+        </member>
         <member name="T:Magnum.Channels.Configuration.Internal.DistributedInstanceChannelConfiguratorImpl`3">
             <summary>
             Implements the factory that creates the instance channel backed by a 
@@ -242,20 +276,15 @@
             <typeparam name="TInstance">The consumer type</typeparam>
             <typeparam name="TChannel">The channel type</typeparam>
         </member>
+        <member name="T:Magnum.Channels.Configuration.Internal.ChannelConfigurator`1">
+            <summary>
+            Configures a channel on a typed channel
+            </summary>
+            <typeparam name="TChannel"></typeparam>
+        </member>
         <member name="T:Magnum.Channels.Configuration.Internal.WcfChannelConnectionConfiguratorImpl">
             <summary>
             Exposes the configuration options for a WcfProxy
-            </summary>
-        </member>
-        <member name="T:Magnum.Channels.Configuration.Internal.ChannelConfigurator">
-            <summary>
-            Configures a channel on an untyped channel
-            </summary>
-        </member>
-        <member name="M:Magnum.Channels.Configuration.Configurator.ValidateConfiguration">
-            <summary>
-            Validate the configuration, throwing an exception if the configuration settings
-            are insufficient or invalid based on the type of configuration being performed.
             </summary>
         </member>
         <member name="T:Magnum.Channels.Configuration.Internal.CreateChannelConnection">
@@ -338,24 +367,21 @@
             Thrown when an invalid configuration is supplied when configuring a channel
             </summary>
         </member>
-        <member name="T:Magnum.Channels.Configuration.ChannelConnectionConfigurator`1">
-            <summary>
-            A fluent syntax for configuration the options of a channel subscription
-            </summary>
-            <typeparam name="TChannel">The channel type</typeparam>
-        </member>
-        <member name="T:Magnum.Channels.Configuration.Internal.ChannelConfigurator`1">
-            <summary>
-            Configures a channel on a typed channel
-            </summary>
-            <typeparam name="T"></typeparam>
-        </member>
         <member name="T:Magnum.Channels.Configuration.Internal.DistinctChannelConfigurator`2">
             <summary>
             Used to configure the options on a channel that delivers messages at regular
             intervals
             </summary>
             <typeparam name="TChannel"></typeparam>
+        </member>
+        <member name="M:Magnum.Channels.ExtensionsForConsumerChannel.AddConsumer``1(Magnum.Channels.Configuration.ConnectionConfigurator{``0},Magnum.Channels.Consumer{``0})">
+            <summary>
+            Add a consumer to the channel using the message type defined for the channel
+            </summary>
+            <typeparam name="TChannel">The channel type, specifies the type of message sent by the channel</typeparam>
+            <param name="connectionConfigurator">The connection configurator</param>
+            <param name="consumer">The consumer to add to the channel</param>
+            <returns>A consumer configurator to customize the consumer settings</returns>
         </member>
         <member name="M:Magnum.Channels.ExtensionsForConsumerChannel.UsingConsumer``1(Magnum.Channels.Configuration.ChannelConnectionConfigurator{``0},Magnum.Channels.Consumer{``0})">
             <summary>
@@ -374,6 +400,15 @@
             <param name="interval">The time period of each interval</param>
             <returns></returns>
         </member>
+        <member name="M:Magnum.Channels.ExtensionsForSelectiveConsumerChannel.AddSelectiveConsumer``1(Magnum.Channels.Configuration.ConnectionConfigurator{``0},Magnum.Channels.SelectiveConsumer{``0})">
+            <summary>
+            Add a consumer to the channel using the message type defined for the channel
+            </summary>
+            <typeparam name="TChannel">The channel type, specifies the type of message sent by the channel</typeparam>
+            <param name="connectionConfigurator">The connection configurator</param>
+            <param name="consumer">The consumer to add to the channel</param>
+            <returns>A consumer configurator to customize the consumer settings</returns>
+        </member>
         <member name="M:Magnum.Channels.ExtensionsForSelectiveConsumerChannel.UsingSelectiveConsumer``1(Magnum.Channels.Configuration.ChannelConnectionConfigurator{``0},Magnum.Channels.SelectiveConsumer{``0})">
             <summary>
             Consumes the message on a SelectiveConsumerChannel given the specified delegate
@@ -384,7 +419,7 @@
         </member>
         <member name="M:Magnum.Channels.ExtensionsForAddConsumer.AddConsumerOf``1(Magnum.Channels.Configuration.ConnectionConfigurator)">
             <summary>
-            Configures a new consumer
+            Add a consumer of the specified message type
             </summary>
             <typeparam name="TChannel">The channel type</typeparam>
             <returns>A chainable method to configure additional options</returns>
@@ -712,6 +747,28 @@
             Thrown when an invalid configuration is supplied when configuring a channel
             </summary>
         </member>
+        <member name="T:Magnum.Fibers.DisposeCallback">
+            <summary>
+            Wraps a callback as an IDisposable to allow it to be called when the object is disposed.
+            </summary>
+        </member>
+        <member name="M:Magnum.Fibers.ExtensionsToFiber.GetShutdownDisposable(Magnum.Fibers.Fiber,System.TimeSpan)">
+            <summary>
+            Creates a disposable object that calls Shutdown on the fiber when it is
+            disposed
+            </summary>
+            <param name="fiber">The fiber to shutdown</param>
+            <param name="timeout">The timeout to wait for the shutdown to complete</param>
+            <returns>An IDisposable object</returns>
+        </member>
+        <member name="M:Magnum.Fibers.ExtensionsToFiber.GetStopDisposable(Magnum.Fibers.Fiber)">
+            <summary>
+            Creates a disposable object that calls Stop on the fiber when it is
+            disposed
+            </summary>
+            <param name="fiber">The fiber to stop</param>
+            <returns>An IDisposable object</returns>
+        </member>
         <member name="T:Magnum.Fibers.FiberCache`1">
             <summary>
             Keeps track of a keyed fiber collection
@@ -964,6 +1021,14 @@
             A BroadcastChannel sends a message to zero or more listeners
             </summary>
             <typeparam name = "T">Channel type</typeparam>
+        </member>
+        <member name="T:Magnum.Channels.SynchronizedChannel">
+            <summary>
+            Using the specified SynchronizationContext, messages sent through this channel
+            will be delivered on the specified user interface thread, to avoid issues when
+            writing to the UI
+            </summary>
+            <typeparam name="T">The channel type</typeparam>
         </member>
         <member name="T:Magnum.Channels.SynchronizedChannel`1">
             <summary>
