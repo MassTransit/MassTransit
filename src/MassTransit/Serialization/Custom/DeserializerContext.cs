@@ -29,11 +29,13 @@ namespace MassTransit.Serialization.Custom
 	{
 		private readonly XmlReader _reader;
 		private static readonly Dictionary<string, IObjectDeserializer> _deserializers;
+		private static readonly Dictionary<Type, IObjectDeserializer> _deserializersByType;
 		private static readonly ILog _log = LogManager.GetLogger(typeof (DeserializerContext));
 
 		static DeserializerContext()
 		{
 			_deserializers = new Dictionary<string, IObjectDeserializer>();
+			_deserializersByType = new Dictionary<Type, IObjectDeserializer>();
 
 			LoadBuiltInDeserializers();
 		}
@@ -59,7 +61,10 @@ namespace MassTransit.Serialization.Custom
 
 									_log.DebugFormat("Adding deserializer for {0} ({1})", itemType.Name, type.Name);
 
-									_deserializers.Add(itemType.AssemblyQualifiedName/*.ToMessageName()*/, FastActivator.Create(type) as IObjectDeserializer);
+									var deserializer = FastActivator.Create(type) as IObjectDeserializer;
+
+									_deserializers.Add(itemType.AssemblyQualifiedName, deserializer);
+									_deserializersByType.Add(itemType, deserializer);
 								});
 					});
 		}
@@ -145,7 +150,16 @@ namespace MassTransit.Serialization.Custom
 			if (type == null)
 				throw new SerializationException("Unable to deserialize an unknown type: " + ns);
 
-			return CreateDeserializerFor(type);
+			IObjectDeserializer deserializer;
+			if(_deserializersByType.TryGetValue(type, out deserializer))
+				return deserializer;
+
+			deserializer = CreateDeserializerFor(type);
+
+			if(!_deserializersByType.ContainsKey(type))
+				_deserializersByType.Add(type, deserializer);
+
+			return deserializer;
 		}
 
 		private static IObjectDeserializer CreateDeserializerFor(Type type)

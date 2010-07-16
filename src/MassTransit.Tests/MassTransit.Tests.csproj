@@ -173,6 +173,7 @@
     <Compile Include="Serialization\PropertyType_Specs.cs" />
     <Compile Include="Serialization\SerializationSpecificationBase.cs" />
     <Compile Include="Serialization\SerializationTest.cs" />
+    <Compile Include="Serialization\Version_Specs.cs" />
     <Compile Include="Services\HealthMonitoring\HealthServiceTestFixture.cs" />
     <Compile Include="Services\HealthMonitoring\HealthService_Specs.cs" />
     <Compile Include="Services\Routing\RoutingConfiguration_Specs.cs" />
