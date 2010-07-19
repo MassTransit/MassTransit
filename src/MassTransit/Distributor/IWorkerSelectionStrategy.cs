@@ -17,7 +17,21 @@ namespace MassTransit.Distributor
 	public interface IWorkerSelectionStrategy<T>
         where T : class
 	{
-	    bool HasAvailableWorker(IEnumerable<WorkerDetails> candidates, T message);
-	    WorkerDetails SelectWorker(IEnumerable<WorkerDetails> candidates, T message);
+		/// <summary>
+		/// Using the list of candidate workers, indicates if one is available. 
+		/// </summary>
+		/// <param name="candidates">The list of candidates to process</param>
+		/// <param name="message">The message in question</param>
+		/// <returns><c>True</c> if there are acceptable candidates, <c>false</c> otherwise.</returns>
+		bool HasAvailableWorker(IEnumerable<WorkerDetails> candidates, T message);
+
+		/// <summary>
+		/// Using the list of candidate workers, find the best candidate available.
+		/// </summary>
+		/// <param name="candidates">The list of candidates to process</param>
+		/// <param name="message">The message in question</param>
+		/// <returns><c>null</c> if no candidates are acceptable, otherwise the best
+		/// acceptable candidate for the message</returns>
+		WorkerDetails SelectWorker(IEnumerable<WorkerDetails> candidates, T message);
 	}
 }
