@@ -123,9 +123,9 @@ namespace MassTransit.Distributor
 			_unsubscribeAction += bus.Subscribe(this);
 
 
-            _threadPoolScheduler = new ThreadPoolScheduler();
+            _threadPoolScheduler = new TimerScheduler(new ThreadPoolFiber());
 
-		    _threadPoolScheduler.Schedule((int) 3.Seconds().TotalMilliseconds, (int) 1.Minutes().TotalMilliseconds, PublishWorkerAvailability);
+		    _threadPoolScheduler.Schedule(3.Seconds(), 1.Minutes(), new ThreadPoolFiber(), PublishWorkerAvailability);
 		}
 
 	    public void Stop()
