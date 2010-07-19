@@ -22,8 +22,7 @@ namespace MassTransit.Tests.Distributor
     using Magnum.Extensions;
     using MassTransit.Distributor.Messages;
     using MassTransit.Pipeline.Inspectors;
-    using Configuration;
-    using MassTransit.Distributor;
+	using MassTransit.Distributor;
     using Rhino.Mocks;
 	using NUnit.Framework;
 	using TestFramework;
@@ -151,11 +150,9 @@ namespace MassTransit.Tests.Distributor
 		protected override void ConfigureLocalBus(IServiceBusConfigurator configurator)
 		{
 			var mock = MockRepository.GenerateStub<IWorkerSelectionStrategy<FirstCommand>>();
-			mock.Stub(x => x.GetAvailableWorkers(null, null, false))
+			mock.Stub(x => x.SelectWorker(null, null))
 				.IgnoreArguments()
-				.Return(new List<WorkerDetails>
-					{
-						new WorkerDetails
+				.Return(new WorkerDetails
 							{
 								ControlUri = _nodes["A"].AppendToPath("_control"),
 								DataUri = _nodes["A"],
@@ -163,7 +160,11 @@ namespace MassTransit.Tests.Distributor
 								InProgressLimit = 100,
 								LastUpdate = DateTime.UtcNow
 							}
-					});
+					);
+
+		    mock.Stub(x => x.HasAvailableWorker(null, null))
+		        .IgnoreArguments()
+		        .Return(true);
 
 			configurator.UseDistributorFor(EndpointFactory, mock);
 		}

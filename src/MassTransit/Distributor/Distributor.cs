@@ -45,7 +45,7 @@ namespace MassTransit.Distributor
 
 		public void Consume(T message)
 		{
-			WorkerDetails worker = _selectionStrategy.GetAvailableWorkers(_workers.Values, message, false).FirstOrDefault();
+			WorkerDetails worker = _selectionStrategy.SelectWorker(_workers.Values, message);
 			if (worker == null)
 			{
 				CurrentMessage.RetryLater();
@@ -63,7 +63,7 @@ namespace MassTransit.Distributor
 
 		public bool Accept(T message)
 		{
-			return _selectionStrategy.GetAvailableWorkers(_workers.Values, message, true).Count() > 0;
+			return _selectionStrategy.HasAvailableWorker(_workers.Values, message);
 		}
 
 		public void Dispose()
