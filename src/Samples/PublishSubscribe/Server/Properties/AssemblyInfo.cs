@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 
-[assembly : AssemblyTitle("Server")]
-[assembly : AssemblyDescription("")]
+//[assembly : AssemblyTitle("Server")]
+//[assembly : AssemblyDescription("")]
 [assembly : AssemblyConfiguration("")]
-[assembly : AssemblyProduct("Server")]
-[assembly : AssemblyTrademark("")]
+//[assembly : AssemblyProduct("Server")]
+//[assembly : AssemblyTrademark("")]
 [assembly : AssemblyCulture("")]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
