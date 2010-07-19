@@ -122,14 +122,16 @@ namespace MassTransit.Distributor
 			_unsubscribeAction += bus.ControlBus.Subscribe<PingWorker>(Consume);
 			_unsubscribeAction += bus.Subscribe(this);
 
-            _threadPoolScheduler = new TimerScheduler(new ThreadPoolFiber());
 
-		    _threadPoolScheduler.Schedule(3.Seconds(), 1.Minutes(), new ThreadPoolFiber(), PublishWorkerAvailability);
+            _threadPoolScheduler = new ThreadPoolScheduler();
+
+		    _threadPoolScheduler.Schedule((int) 3.Seconds().TotalMilliseconds, (int) 1.Minutes().TotalMilliseconds, PublishWorkerAvailability);
 		}
 
 	    public void Stop()
 		{
 	        _threadPoolScheduler.Stop();
+
 			_unsubscribeAction();
 		}
 

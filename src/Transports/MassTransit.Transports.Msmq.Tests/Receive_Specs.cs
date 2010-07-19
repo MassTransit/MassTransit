@@ -56,7 +56,7 @@ namespace MassTransit.Transports.Msmq.Tests
 			int count = 0;
 			Endpoint.Receive(message =>
 				{
-					Assert.IsInstanceOfType(typeof (PingMessage), message);
+					Assert.IsInstanceOf<PingMessage>(message);
 					count++;
 
 					return null;
@@ -87,7 +87,7 @@ namespace MassTransit.Transports.Msmq.Tests
 			int count = 0;
 			Endpoint.Receive(message =>
 				{
-					Assert.IsInstanceOfType(typeof (PingMessage), message);
+					Assert.IsInstanceOf<PingMessage>(message);
 					count++;
 
 					return null;
@@ -96,7 +96,7 @@ namespace MassTransit.Transports.Msmq.Tests
 			int secondCount = 0;
 			Endpoint.Receive(message =>
 				{
-					Assert.IsInstanceOfType(typeof (PingMessage), message);
+					Assert.IsInstanceOf<PingMessage>(message);
 					secondCount++;
 
 					return null;
@@ -113,7 +113,7 @@ namespace MassTransit.Transports.Msmq.Tests
 
 			Endpoint.Receive(message =>
 				{
-					Assert.IsInstanceOfType(typeof (PingMessage), message);
+					Assert.IsInstanceOf<PingMessage>(message);
 
 					return m => { };
 				});
@@ -121,7 +121,7 @@ namespace MassTransit.Transports.Msmq.Tests
 			int count = 0;
 			Endpoint.Receive(message =>
 				{
-					Assert.IsInstanceOfType(typeof (PingMessage), message);
+					Assert.IsInstanceOf<PingMessage>(message);
 					count++;
 
 					return null;
