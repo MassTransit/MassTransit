@@ -40,7 +40,7 @@ namespace MassTransit.Transports.Msmq.Tests
 			endpoint.Receive(m =>
 			                 message =>
 			                 	{
-			                 		Assert.IsInstanceOfType(typeof (SimpleMessage), message);
+			                 		Assert.IsInstanceOf<SimpleMessage>(message);
 
 			                 		Assert.AreEqual(((SimpleMessage) message).Name, "Chris");
 

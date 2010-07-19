@@ -20,7 +20,7 @@ namespace MassTransit.Tests.Subscriptions
 			var secondSub = new SecondSubsystem();
 			LocalBus.Subscribe(firstSub);
 			LocalBus.Subscribe(secondSub);
-			Thread.Sleep(250);
+			Thread.Sleep(2500);
 			var inspector = new CorrelatedRouterPipelineInspector();
 			RemoteBus.OutboundPipeline.Inspect(inspector);
 			inspector.PipelineHasRightRoutings.ShouldBeTrue("OutboundPipeline on publisher should contains 'CorrelatedMessageSinkRouter' for IncomingMessage with 'FirstSybsystemCorrelationId' and 'SecondSubsystemCorrelationId' correlations id's.");
