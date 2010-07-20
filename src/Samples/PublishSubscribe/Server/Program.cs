@@ -8,7 +8,6 @@ namespace Server
 	using MassTransit.Services.Subscriptions.Configuration;
 	using MassTransit.Transports.Msmq;
 	using MassTransit.WindsorIntegration;
-	using Microsoft.Practices.ServiceLocation;
 	using Topshelf;
 	using Topshelf.Configuration.Dsl;
 
@@ -53,7 +52,7 @@ namespace Server
                                     o.Start(bus);
                                 });
                             s.WhenStopped(o => o.Stop());
-                            s.HowToBuildService(a => container.GetService<PasswordUpdateService>());
+                            s.HowToBuildService(a => container.ObjectBuilder.GetInstance<PasswordUpdateService>());
                         });
                 });
 			Runner.Host(cfg, args);

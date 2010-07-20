@@ -6,7 +6,6 @@ namespace Client
 	using MassTransit.Services.Subscriptions.Configuration;
 	using MassTransit.Transports.Msmq;
 	using MassTransit.WindsorIntegration;
-	using Microsoft.Practices.ServiceLocation;
 	using Topshelf;
 	using Topshelf.Configuration.Dsl;
 
@@ -56,7 +55,10 @@ namespace Client
 								});
 							s.WhenStopped(o => o.Stop());
 
-                            s.HowToBuildService(b => container.GetService<ClientService>());
+                            s.HowToBuildService(b =>
+                            {
+                            	return container.ObjectBuilder.GetInstance<ClientService>();
+                            });
 						});
 				});
 			Runner.Host(cfg, args);
