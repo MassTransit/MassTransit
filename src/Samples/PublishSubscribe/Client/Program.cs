@@ -15,7 +15,7 @@ namespace Client
 
 		private static void Main(string[] args)
 		{
-			_log.Info("Server Loading");
+			_log.Info("Client Loading");
 
             var container = new DefaultMassTransitContainer();
             IEndpointFactory endpointFactory = EndpointFactoryConfigurator.New(e =>
@@ -23,7 +23,13 @@ namespace Client
                 e.SetObjectBuilder(container.ObjectBuilder);
                 e.RegisterTransport<MsmqEndpoint>();
             });
-            container.Kernel.AddComponentInstance("endpointFactory", typeof(IEndpointFactory), endpointFactory);
+
+			MsmqEndpointConfigurator.Defaults(def =>
+			{
+				def.CreateMissingQueues = true;
+			});
+      
+			container.Kernel.AddComponentInstance("endpointFactory", typeof(IEndpointFactory), endpointFactory);
             container.AddComponent<ClientService>(typeof(ClientService).Name);
             container.AddComponent<PasswordUpdater>();
 									
@@ -46,7 +52,7 @@ namespace Client
 											servicesBus.ReceiveFrom("msmq://localhost/mt_client");
 											servicesBus.ConfigureService<SubscriptionClientConfigurator>(client =>
 												{
-													// need to add the ability to read from configuratino settings somehow
+													// need to add the ability to read from configuration settings somehow
 													client.SetSubscriptionServiceEndpoint("msmq://localhost/mt_subscriptions");
 												});
 										});
