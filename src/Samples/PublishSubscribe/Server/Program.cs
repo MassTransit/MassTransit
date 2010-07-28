@@ -26,6 +26,12 @@ namespace Server
                     x.SetObjectBuilder(container.ObjectBuilder);
                     x.RegisterTransport<MsmqEndpoint>();
                 });
+
+			MsmqEndpointConfigurator.Defaults(def =>
+			{
+				def.CreateMissingQueues = true;
+			});
+
             container.Kernel.AddComponentInstance("endpointFactory", typeof(IEndpointFactory), endpointFactory);
             container.AddComponent<PasswordUpdateService>(typeof(PasswordUpdateService).Name);
 
