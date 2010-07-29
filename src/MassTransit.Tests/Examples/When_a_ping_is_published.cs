@@ -14,8 +14,8 @@ namespace MassTransit.Tests.Examples
 {
 	using Magnum;
 	using Magnum.Extensions;
+	using Magnum.TestFramework;
 	using NUnit.Framework;
-	using TestFramework;
 	using TestFramework.Examples.Messages;
 
 	[Scenario]
@@ -42,7 +42,7 @@ namespace MassTransit.Tests.Examples
 		[Then]
 		public void The_response_should_have_been_received()
 		{
-			ExtensionMethodsForAssertions.ShouldBeTrue(Response.IsCompleted);
+			Response.IsCompleted.ShouldBeTrue();
 		}
 
 		protected Ping Message { get; private set; }

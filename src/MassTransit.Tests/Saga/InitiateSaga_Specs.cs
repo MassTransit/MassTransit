@@ -15,6 +15,7 @@ namespace MassTransit.Tests.Saga
 	using System;
 	using System.Linq;
 	using Exceptions;
+	using Magnum.TestFramework;
 	using MassTransit.Internal;
 	using MassTransit.Pipeline;
 	using MassTransit.Pipeline.Inspectors;

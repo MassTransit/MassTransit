@@ -18,6 +18,7 @@ namespace MassTransit.TestFramework.Fixtures
 	using System.Linq;
 	using log4net;
 	using Magnum.Extensions;
+	using Magnum.TestFramework;
 	using NUnit.Framework;
 
 	[TestFixture]
