@@ -14,6 +14,7 @@ namespace MassTransit.Tests
 {
 	using System;
 	using Magnum.Extensions;
+	using Magnum.TestFramework;
 	using Messages;
 	using NUnit.Framework;
 	using Rhino.Mocks;

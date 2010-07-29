@@ -14,6 +14,7 @@ namespace MassTransit.Tests
 {
     using System.Threading;
     using Configuration;
+    using Magnum.TestFramework;
     using MassTransit.Transports;
     using Messages;
     using NUnit.Framework;

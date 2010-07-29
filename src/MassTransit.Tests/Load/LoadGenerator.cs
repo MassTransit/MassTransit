@@ -19,6 +19,7 @@ namespace MassTransit.Tests.Load
 	using System.Threading;
 	using Magnum;
 	using Magnum.Extensions;
+	using Magnum.TestFramework;
 	using Messages;
 
 	public class LoadGenerator<TRequest, TResponse> :

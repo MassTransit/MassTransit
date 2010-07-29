@@ -14,7 +14,8 @@ namespace MassTransit.Tests
 {
     using Magnum;
 	using Magnum.Extensions;
-	using MassTransit.Pipeline.Inspectors;
+    using Magnum.TestFramework;
+    using MassTransit.Pipeline.Inspectors;
 	using NUnit.Framework;
 	using TextFixtures;
 

@@ -16,6 +16,7 @@ namespace MassTransit.Tests.Services.HealthMonitoring
 	using System.Linq;
 	using System.Threading;
 	using Magnum.Extensions;
+	using Magnum.TestFramework;
 	using MassTransit.Services.HealthMonitoring.Messages;
 	using MassTransit.Services.HealthMonitoring.Server;
 	using MassTransit.Services.Timeout.Messages;

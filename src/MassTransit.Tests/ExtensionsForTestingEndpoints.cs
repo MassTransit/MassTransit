@@ -14,6 +14,7 @@ namespace MassTransit.Tests
 {
 	using System;
 	using Magnum;
+	using Magnum.TestFramework;
 	using NUnit.Framework;
 
 	public static class ExtensionsForTestingEndpoints
@@ -27,7 +28,7 @@ namespace MassTransit.Tests
 				{
 					message.ShouldNotBeNull();
 
-					message.ShouldBeSameType<TMessage>();
+					message.ShouldBeAnInstanceOf<TMessage>();
 
 					TMessage tm = (TMessage) message;
 
@@ -54,7 +55,7 @@ namespace MassTransit.Tests
 	            {
 	                message.ShouldNotBeNull();
 
-	                message.ShouldBeSameType<TMessage>();
+					message.ShouldBeAnInstanceOf<TMessage>();
 
 	                TMessage tm = (TMessage) message;
 

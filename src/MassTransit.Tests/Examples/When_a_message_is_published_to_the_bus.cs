@@ -13,8 +13,8 @@
 namespace MassTransit.Tests.Examples
 {
 	using Magnum.Extensions;
+	using Magnum.TestFramework;
 	using Messages;
-	using TestFramework;
 
 	[Scenario]
 	public class When_a_message_is_published_to_the_bus :

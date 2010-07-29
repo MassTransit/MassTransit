@@ -13,10 +13,10 @@
 namespace MassTransit.Transports.Msmq.Tests
 {
 	using System;
-	using MassTransit.Tests;
+	using Magnum.TestFramework;
 	using NUnit.Framework;
 
-	[TestFixture, Category("Integration")]
+	[TestFixture, Intergration]
 	public class When_specifying_a_message_queue_address_for_an_endpoint
 	{
 		[SetUp]
@@ -158,7 +158,7 @@ namespace MassTransit.Transports.Msmq.Tests
 
 			address.FormatName
 				.ShouldEqual(_expectedQueuePath);
-			address.Uri.ToString()
+			address.Uri
 				.ShouldEqual(new Uri(_expectedUri.ToString().Replace("?tx=false", "?tx=true")));
 			address.IsLocal
 				.ShouldBeTrue();
@@ -167,7 +167,7 @@ namespace MassTransit.Transports.Msmq.Tests
 		}
 	}
 
-	[TestFixture, Category("Integration")]
+	[TestFixture, Intergration]
 	public class When_creating_a_MessageQueueEndpoint_from_a_Uri_string
 	{
 		[Test]

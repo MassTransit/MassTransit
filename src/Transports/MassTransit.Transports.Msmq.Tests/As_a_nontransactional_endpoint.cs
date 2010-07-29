@@ -14,12 +14,12 @@ namespace MassTransit.Transports.Msmq.Tests
 {
 	using System.Transactions;
 	using Magnum;
-	using Magnum.Actors;
+	using Magnum.TestFramework;
 	using MassTransit.Tests;
 	using NUnit.Framework;
 	using TestFixtures;
 
-	[TestFixture, Category("Integration")]
+	[TestFixture, Intergration]
 	public class Writing_to_a_non_transactional_endpoint_within_a_transaction :
 		MsmqEndpointOnlyTestFixture
 	{
@@ -50,7 +50,7 @@ namespace MassTransit.Transports.Msmq.Tests
 		}
 	}
 
-	[TestFixture, Category("Integration")]
+	[TestFixture, Intergration]
 	public class Writing_to_a_non_transactional_endpoint :
 		MsmqEndpointOnlyTestFixture
 	{
@@ -63,7 +63,7 @@ namespace MassTransit.Transports.Msmq.Tests
 		}
 	}
 
-	[TestFixture, Category("Integration")]
+	[TestFixture, Intergration]
 	public class Reading_from_a_non_transactional_endpoint_within_a_transaction :
 		MsmqEndpointOnlyTestFixture
 	{
