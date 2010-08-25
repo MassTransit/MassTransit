@@ -42,20 +42,40 @@ namespace MassTransit.StructureMapIntegration
         {
         }
 
+        /// <summary>
+        /// Scan the executing assemblies current directory for assemblies containing MassTransit transports.
+        /// </summary>
+        /// <param name="configurationAction"></param>
         public MassTransitRegistryBase(Action<IEndpointFactoryConfigurator> configurationAction)
+            : this(configurationAction, localDirAssemblyScanner =>
+                {
+                    string assemblyPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+
+                    localDirAssemblyScanner.AssembliesFromPath(assemblyPath, assembly =>
+                        assembly.GetName().Name.StartsWith("MassTransit.Transports."));
+                })
+        {
+        }
+
+        /// <summary>
+        /// Overload to allow explicit assembly scanning specification.
+        /// 
+        /// EX: since Assembly.GetExecutingAssembly().Location could return null if the Assembly.GetExecutingAssembly() was dynamically loaded from a resource, this overload allows for explicit assemblies scanning strategies.
+        /// </summary>
+        /// <param name="configurationAction"></param>
+        /// <param name="transportAssemblyScanner"></param>
+        public MassTransitRegistryBase(Action<IEndpointFactoryConfigurator> configurationAction, Action<IAssemblyScanner> transportAssemblyScanner)
         {
             RegisterBusDependencies();
 
             var typeScanner = new EndpointTypeScanner();
 
             Scan(scanner =>
-            {
-                string assemblyPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+                {
+                    transportAssemblyScanner(scanner);
 
-                scanner.AssembliesFromPath(assemblyPath, assembly => { return assembly.GetName().Name.StartsWith("MassTransit.Transports."); });
-
-                scanner.With(typeScanner);
-            });
+                    scanner.With(typeScanner);
+                });
 
             RegisterEndpointFactory(x =>
                 {
