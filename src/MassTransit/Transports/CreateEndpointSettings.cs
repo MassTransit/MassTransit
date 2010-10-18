@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2010 The Apache Software Foundation.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -21,7 +21,8 @@ namespace MassTransit.Transports
         public CreateEndpointSettings(string uri)
             : this()
         {
-            Guard.Against.NullOrEmpty(uri, "The URI cannot be null or empty");
+            Guard.AgainstNull(uri, "The URI cannot be null or empty");
+            Guard.AgainstEmpty(uri, "The URI cannot be null or empty");
 
             try
             {
@@ -36,7 +37,7 @@ namespace MassTransit.Transports
         public CreateEndpointSettings(Uri uri)
             : this()
         {
-            Guard.Against.Null(uri, "The URI cannot be null");
+            Guard.AgainstNull(uri, "The URI cannot be null");
 
             Address = new EndpointAddress(uri);
 
@@ -46,7 +47,7 @@ namespace MassTransit.Transports
         public CreateEndpointSettings(IEndpointAddress address)
             : this()
         {
-            Guard.Against.Null(address, "The address cannot be null");
+            Guard.AgainstNull(address, "The address cannot be null");
 
             Address = new EndpointAddress(address.Uri);
 
@@ -56,8 +57,8 @@ namespace MassTransit.Transports
         public CreateEndpointSettings(IEndpointAddress address, CreateEndpointSettings source)
             : this()
         {
-            Guard.Against.Null(address, "The address cannot be null");
-            Guard.Against.Null(source, "The source settings cannot be null");
+            Guard.AgainstNull(address, "The address cannot be null");
+            Guard.AgainstNull(source, "The source settings cannot be null");
 
             Address = new EndpointAddress(address.Uri);
             SetDefaultErrorAddress();

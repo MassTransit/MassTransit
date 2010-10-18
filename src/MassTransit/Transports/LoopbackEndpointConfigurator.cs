@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2010 The Apache Software Foundation.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -30,8 +30,8 @@ namespace MassTransit.Transports
 
         private IEndpoint Create()
         {
-            Guard.Against.Null(Uri, "No Uri was specified for the endpoint");
-            Guard.Against.Null(SerializerType, "No serializer type was specified for the endpoint");
+            Guard.AgainstNull(Uri, "No Uri was specified for the endpoint");
+            Guard.AgainstNull(SerializerType, "No serializer type was specified for the endpoint");
 
             IEndpoint endpoint = LoopbackEndpointFactory.New(new CreateEndpointSettings(Uri)
                 {

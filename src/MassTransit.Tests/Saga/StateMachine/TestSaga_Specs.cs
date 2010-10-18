@@ -16,6 +16,7 @@ namespace MassTransit.Tests.Saga.StateMachine
 	using System.Linq;
 	using Exceptions;
 	using Locator;
+	using Magnum.TestFramework;
 	using MassTransit.Internal;
 	using MassTransit.Pipeline;
 	using MassTransit.Pipeline.Inspectors;

@@ -15,6 +15,7 @@ namespace MassTransit.Tests.Saga.StateMachine
 	using System;
 	using Magnum;
 	using Magnum.StateMachine;
+	using Magnum.TestFramework;
 	using Messages;
 	using NUnit.Framework;
 

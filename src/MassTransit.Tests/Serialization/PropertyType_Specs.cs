@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests.Serialization
 {
+	using Magnum.TestFramework;
 	using NUnit.Framework;
 
 	[TestFixture]

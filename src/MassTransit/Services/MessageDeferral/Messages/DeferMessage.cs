@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2010 The Apache Software Foundation.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,7 +14,6 @@ namespace MassTransit.Services.MessageDeferral.Messages
 {
     using System;
     using Magnum;
-    using Util;
 
     [Serializable]
     public class DeferMessage
@@ -35,7 +34,7 @@ namespace MassTransit.Services.MessageDeferral.Messages
 
         public DeferMessage(Guid correlationId, DateTime deliverAt, object message)
         {
-            Guard.Against.Null(message, "Message must not be null");
+            Guard.AgainstNull(message, "Message must not be null");
 
             _correlationId = correlationId;
             _message = message;

@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2010 The Apache Software Foundation.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,19 +13,20 @@
 namespace MassTransit.Transports.Msmq.Tests
 {
 	using System;
-	using Magnum.DateTimeExtensions;
+	using Magnum.Extensions;
+	using Magnum.TestFramework;
 	using MassTransit.Tests;
 	using MassTransit.Tests.Messages;
 	using NUnit.Framework;
 	using TestFixtures;
 
-	[TestFixture, Category("Integration")]
+	[TestFixture, Intergration]
 	public class Given_a_message_is_received_from_a_nontransactional_queue :
 		MsmqEndpointTestFixture
 	{
 	}
 
-	[TestFixture, Category("Integration")]
+	[TestFixture, Intergration]
 	public class When_a_consumer_throws_an_exception :
 		Given_a_message_is_received_from_a_nontransactional_queue
 	{
@@ -76,7 +77,7 @@ namespace MassTransit.Transports.Msmq.Tests
 	    }
 	}
 	
-	[TestFixture, Category("Integration")]
+	[TestFixture, Intergration]
 	public class When_a_consumer_receives_the_message :
 		Given_a_message_is_received_from_a_nontransactional_queue
 	{
