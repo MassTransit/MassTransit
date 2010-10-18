@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<DeploymentConfigurationSettings xmlns="urn:Microsoft.VisualStudio.Data.Schema.Package.DeploymentConfigurationSettings" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <Version>1.0</Version>
+  <Properties>
+    <AlwaysCreateNewDatabase>False</AlwaysCreateNewDatabase>
+    <BlockIncrementalDeploymentIfDataLoss>True</BlockIncrementalDeploymentIfDataLoss>
+    <DeployDatabaseProperties>True</DeployDatabaseProperties>
+    <DeploymentCollationPreference>UseSourceModelCollation</DeploymentCollationPreference>
+    <DoNotUseAlterAssemblyStatementsToUpdateCLRTypes>False</DoNotUseAlterAssemblyStatementsToUpdateCLRTypes>
+    <GenerateDropsIfNotInProject>False</GenerateDropsIfNotInProject>
+    <PerformDatabaseBackup>False</PerformDatabaseBackup>
+    <SingleUserMode>False</SingleUserMode>
+  </Properties>
+</DeploymentConfigurationSettings>
