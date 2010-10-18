@@ -148,6 +148,9 @@ namespace MassTransit.Serialization.Custom
 		{
 			Type type = Type.GetType(ns, false);
 			if (type == null)
+				type = GetTypeWithoutVersionString(ns);
+
+			if (type == null)
 				throw new SerializationException("Unable to deserialize an unknown type: " + ns);
 
 			IObjectDeserializer deserializer;
@@ -160,6 +163,27 @@ namespace MassTransit.Serialization.Custom
 				_deserializersByType.Add(type, deserializer);
 
 			return deserializer;
+		}
+
+		private static Type GetTypeWithoutVersionString(string ns)
+		{
+			int assemblyIndex = ns.IndexOf(",");
+			if (assemblyIndex <= 0)
+				return null;
+
+			var assemblyName = new AssemblyName(ns.Substring(assemblyIndex + 1));
+
+			var assembly = AppDomain.CurrentDomain.GetAssemblies()
+				.Where(x => x.GetName().Name == assemblyName.Name
+				            && x.GetName().GetPublicKeyToken().SequenceEqual(assemblyName.GetPublicKeyToken()))
+				.FirstOrDefault();
+
+			if(assembly == null)
+				return null;
+
+			string typeName = ns.Substring(0, assemblyIndex);
+
+			return assembly.GetType(typeName, false);
 		}
 
 		private static IObjectDeserializer CreateDeserializerFor(Type type)

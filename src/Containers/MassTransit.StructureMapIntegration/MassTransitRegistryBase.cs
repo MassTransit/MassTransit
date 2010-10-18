@@ -37,25 +37,45 @@ namespace MassTransit.StructureMapIntegration
         /// <summary>
         /// Default constructor with not actual registration
         /// </summary>
-		public MassTransitRegistryBase()
-			: this(x => { })
-		{
-		}
+        public MassTransitRegistryBase()
+            : this(x => { })
+        {
+        }
 
-		public MassTransitRegistryBase(Action<IEndpointFactoryConfigurator> configurationAction)
+        /// <summary>
+        /// Scan the executing assemblies current directory for assemblies containing MassTransit transports.
+        /// </summary>
+        /// <param name="configurationAction"></param>
+        public MassTransitRegistryBase(Action<IEndpointFactoryConfigurator> configurationAction)
+            : this(configurationAction, localDirAssemblyScanner =>
+                {
+                    string assemblyPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+
+                    localDirAssemblyScanner.AssembliesFromPath(assemblyPath, assembly =>
+                        assembly.GetName().Name.StartsWith("MassTransit.Transports."));
+                })
+        {
+        }
+
+        /// <summary>
+        /// Overload to allow explicit assembly scanning specification.
+        /// 
+        /// EX: since Assembly.GetExecutingAssembly().Location could return null if the Assembly.GetExecutingAssembly() was dynamically loaded from a resource, this overload allows for explicit assemblies scanning strategies.
+        /// </summary>
+        /// <param name="configurationAction"></param>
+        /// <param name="transportAssemblyScanner"></param>
+        public MassTransitRegistryBase(Action<IEndpointFactoryConfigurator> configurationAction, Action<IAssemblyScanner> transportAssemblyScanner)
         {
             RegisterBusDependencies();
 
             var typeScanner = new EndpointTypeScanner();
 
             Scan(scanner =>
-            {
-                string assemblyPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+                {
+                    transportAssemblyScanner(scanner);
 
-                scanner.AssembliesFromPath(assemblyPath, assembly => { return assembly.GetName().Name.StartsWith("MassTransit.Transports."); });
-
-                scanner.With(typeScanner);
-            });
+                    scanner.With(typeScanner);
+                });
 
             RegisterEndpointFactory(x =>
                 {
@@ -64,11 +84,11 @@ namespace MassTransit.StructureMapIntegration
                         x.RegisterTransport(transportType);
                     }
 
-                	configurationAction(x);
+                    configurationAction(x);
                 });
         }
 
-    	/// <summary>
+        /// <summary>
         /// Creates a registry for a service bus listening to an endpoint
         /// </summary>
         public MassTransitRegistryBase(params Type[] transportTypes)
@@ -94,29 +114,29 @@ namespace MassTransit.StructureMapIntegration
         /// </summary>
         protected void RegisterInMemorySubscriptionService()
         {
-			For<IEndpointSubscriptionEvent>()
-				.Singleton()
-				.Use<LocalSubscriptionService>();
+            For<IEndpointSubscriptionEvent>()
+                .Singleton()
+                .Use<LocalSubscriptionService>();
 
-        	For<SubscriptionPublisher>()
-        		.Use<SubscriptionPublisher>();
+            For<SubscriptionPublisher>()
+                .Use<SubscriptionPublisher>();
 
-        	For<SubscriptionConsumer>()
-        		.Use<SubscriptionConsumer>();
+            For<SubscriptionConsumer>()
+                .Use<SubscriptionConsumer>();
         }
 
         protected void RegisterInMemorySubscriptionRepository()
         {
-        	For<ISubscriptionRepository>()
-        		.Singleton()
-        		.Use<InMemorySubscriptionRepository>();
+            For<ISubscriptionRepository>()
+                .Singleton()
+                .Use<InMemorySubscriptionRepository>();
         }
 
         protected void RegisterInMemorySagaRepository()
         {
-        	For(typeof (ISagaRepository<>))
-        		.Singleton()
-        		.Use(typeof (InMemorySagaRepository<>));
+            For(typeof(ISagaRepository<>))
+                .Singleton()
+                .Use(typeof(InMemorySagaRepository<>));
         }
 
         /// <summary>
@@ -125,9 +145,9 @@ namespace MassTransit.StructureMapIntegration
         /// </summary>
         protected void RegisterBusDependencies()
         {
-        	For<IObjectBuilder>()
-        		.Singleton()
-        		.Use<StructureMapObjectBuilder>();
+            For<IObjectBuilder>()
+                .Singleton()
+                .Use<StructureMapObjectBuilder>();
 
             //we are expecting SM to auto-resolve
             // SubscriptionClient
@@ -139,9 +159,9 @@ namespace MassTransit.StructureMapIntegration
 
         protected void RegisterEndpointFactory(Action<IEndpointFactoryConfigurator> configAction)
         {
-			For<IEndpointFactory>()
-				.Singleton()
-				.Use(context => 
+            For<IEndpointFactory>()
+                .Singleton()
+                .Use(context =>
                     {
                         return EndpointFactoryConfigurator.New(x =>
                             {
@@ -158,9 +178,9 @@ namespace MassTransit.StructureMapIntegration
 
         protected void RegisterServiceBus(Uri endpointUri, Action<IServiceBusConfigurator> configAction)
         {
-			For<IServiceBus>()
-				.Singleton()
-				.Use(context =>
+            For<IServiceBus>()
+                .Singleton()
+                .Use(context =>
                     {
                         return ServiceBusConfigurator.New(x =>
                             {
@@ -200,9 +220,9 @@ namespace MassTransit.StructureMapIntegration
 
         protected void RegisterControlBus(Uri endpointUri, Action<IServiceBusConfigurator> configAction)
         {
-			For<IControlBus>()
-				.Singleton()
-				.Use(context =>
+            For<IControlBus>()
+                .Singleton()
+                .Use(context =>
                     {
                         return ControlBusConfigurator.New(x =>
                             {
@@ -241,7 +261,7 @@ namespace MassTransit.StructureMapIntegration
 
             public void Process(Type type, PluginGraph graph)
             {
-                if (typeof (IEndpoint).IsAssignableFrom(type))
+                if (typeof(IEndpoint).IsAssignableFrom(type))
                 {
                     graph.AddType(type);
                     TransportTypes.Add(type);
