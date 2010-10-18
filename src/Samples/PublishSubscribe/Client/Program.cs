@@ -8,7 +8,7 @@ namespace Client
 	using MassTransit.WindsorIntegration;
 	using Microsoft.Practices.ServiceLocation;
 	using Topshelf;
-	using Topshelf.Configuration;
+	using Topshelf.Configuration.Dsl;
 
 	internal class Program
 	{
@@ -27,7 +27,7 @@ namespace Client
 					c.RunAsLocalSystem();
 
 
-					c.ConfigureService<ClientService>(typeof(ClientService).Name, s =>
+					c.ConfigureService<ClientService>(s =>
 						{
 							s.WhenStarted(o =>
 								{
@@ -44,7 +44,7 @@ namespace Client
 									o.Start(bus);
 								});
 							s.WhenStopped(o => o.Stop());
-							s.CreateServiceLocator(() =>
+							s.HowToBuildService(name =>
 								{
 									var container = new DefaultMassTransitContainer();
 									IEndpointFactory endpointFactory = EndpointFactoryConfigurator.New(e =>
@@ -55,7 +55,7 @@ namespace Client
 									container.Kernel.AddComponentInstance("endpointFactory", typeof (IEndpointFactory), endpointFactory);
 									container.AddComponent<ClientService>(typeof(ClientService).Name);
 									container.AddComponent<PasswordUpdater>();
-									return ServiceLocator.Current; //set in the DefaultMTContainer
+								    return container.Resolve<ClientService>();
 								});
 						});
 				});

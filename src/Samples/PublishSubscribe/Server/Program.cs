@@ -10,7 +10,7 @@ namespace Server
 	using MassTransit.WindsorIntegration;
 	using Microsoft.Practices.ServiceLocation;
 	using Topshelf;
-	using Topshelf.Configuration;
+	using Topshelf.Configuration.Dsl;
 
 	internal class Program
 	{
@@ -21,7 +21,7 @@ namespace Server
 			XmlConfigurator.ConfigureAndWatch(new FileInfo("server.log4net.xml"));
 			_log.Info("Server Loading");
 
-			IRunConfiguration cfg = RunnerConfigurator.New(c =>
+			var cfg = RunnerConfigurator.New(c =>
 				{
 					c.SetServiceName("SampleService");
 					c.SetServiceName("Sample Service");
@@ -30,7 +30,7 @@ namespace Server
 
 					c.RunAsLocalSystem();
 
-					c.ConfigureService<PasswordUpdateService>(typeof(PasswordUpdateService).Name, s =>
+					c.ConfigureService<PasswordUpdateService>(s =>
 						{
 							s.WhenStarted(o =>
 								{
@@ -42,7 +42,7 @@ namespace Server
 									o.Start(bus);
 								});
 							s.WhenStopped(o => o.Stop());
-							s.CreateServiceLocator(() =>
+							s.HowToBuildService(name =>
 								{
 									var container = new DefaultMassTransitContainer();
 									IEndpointFactory endpointFactory = EndpointFactoryConfigurator
@@ -53,7 +53,7 @@ namespace Server
 											});
 									container.Kernel.AddComponentInstance("endpointFactory", typeof (IEndpointFactory), endpointFactory);
 									container.AddComponent<PasswordUpdateService>(typeof(PasswordUpdateService).Name);
-									return ServiceLocator.Current; //set in DefaultMTContainer
+								    return container.Resolve<PasswordUpdateService>();
 								});
 						});
 				});
