@@ -1,6 +1,7 @@
 namespace Client
 {
-	using log4net;
+    using Castle.MicroKernel.Registration;
+    using log4net;
 	using MassTransit;
 	using MassTransit.Configuration;
 	using MassTransit.Services.Subscriptions.Configuration;
@@ -33,7 +34,7 @@ namespace Client
 								{
 
 								    var container = new DefaultMassTransitContainer("castle.xml");
-								    container.AddComponent<PasswordUpdater>();
+								    container.Register(Component.For<PasswordUpdater>());
 								    var wob = new WindsorObjectBuilder(container.Kernel);
 
 								    var endpointFactory = EndpointFactoryConfigurator.New(e =>
