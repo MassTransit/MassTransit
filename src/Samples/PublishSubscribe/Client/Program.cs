@@ -1,6 +1,7 @@
 namespace Client
 {
-	using log4net;
+    using Castle.MicroKernel.Registration;
+    using log4net;
 	using MassTransit;
 	using MassTransit.Configuration;
 	using MassTransit.Services.Subscriptions.Configuration;
@@ -42,13 +43,19 @@ namespace Client
 					c.DependencyOnMsmq();
 					c.RunAsLocalSystem();
 
+
 					c.ConfigureService<ClientService>(s =>
 						{
                             s.Named(typeof(ClientService).Name);
 							s.WhenStarted(o =>
 								{
+
+								    container.Register(Component.For<PasswordUpdater>());
+								    var wob = new WindsorObjectBuilder(container.Kernel);
+
 									var bus = ServiceBusConfigurator.New(servicesBus =>
 										{
+                                            servicesBus.SetObjectBuilder(wob);
 											servicesBus.ReceiveFrom("msmq://localhost/mt_client");
 											servicesBus.ConfigureService<SubscriptionClientConfigurator>(client =>
 												{
@@ -61,10 +68,7 @@ namespace Client
 								});
 							s.WhenStopped(o => o.Stop());
 
-                            s.HowToBuildService(b =>
-                            {
-                            	return container.ObjectBuilder.GetInstance<ClientService>();
-                            });
+							s.HowToBuildService(name => new ClientService());
 						});
 				});
 			Runner.Host(cfg, args);
