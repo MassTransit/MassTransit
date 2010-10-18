@@ -11,7 +11,7 @@ namespace BusDriver.Commands
 		{
 			Uri uri = commandLineElements.GetDefinition("uri", x => new Uri(x));
 
-			bool transactional = commandLineElements.GetSwitch('t');
+			bool transactional = commandLineElements.GetSwitch("t");
 
 
 			Console.WriteLine("Creating queue: " + uri + (transactional ? " (transactional)" : ""));

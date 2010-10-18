@@ -17,7 +17,7 @@ namespace BusDriver.Commands
 				.Single();
 		}
 
-		public static bool GetSwitch(this IEnumerable<ICommandLineElement> elements, char key)
+		public static bool GetSwitch(this IEnumerable<ICommandLineElement> elements, string key)
 		{
 			return elements
 				.Where(x => typeof(ISwitchElement).IsAssignableFrom(x.GetType()))
