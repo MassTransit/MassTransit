@@ -15,10 +15,6 @@ namespace Grid.Distributor.Worker
     using System.Configuration;
     using System.IO;
     using log4net.Config;
-    using MassTransit.Grid.Sagas;
-    using MassTransit.Saga;
-    using StructureMap;
-    using StructureMap.Attributes;
 
     internal class Program
     {
