@@ -1,6 +1,8 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 10.00
-# Visual Studio 2008
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "References", "References", "{1FEFCD44-83A0-4240-B321-A73A53C6DC9E}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Starbucks.Messages", "Starbucks.Messages\Starbucks.Messages.csproj", "{D9486A62-4F12-4018-802B-517DD11DE66A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Starbucks.Cashier", "Starbucks.Cashier\Starbucks.Cashier.csproj", "{26E7E3DF-9479-4D93-9A96-7D91845A332B}"
@@ -8,8 +10,6 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Starbucks.Barista", "Starbucks.Barista\Starbucks.Barista.csproj", "{E6AAB944-BFB0-4DD1-A3A0-D4D4E32A6A3A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Starbucks.Customer", "Starbucks.Customer\Starbucks.Customer.csproj", "{6E544992-6DE1-4AA0-A055-6E1381992B79}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "References", "References", "{1FEFCD44-83A0-4240-B321-A73A53C6DC9E}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit", "..\..\MassTransit\MassTransit.csproj", "{6EFD69FC-CBCC-4F85-AEE0-EFBA73F4D273}"
 EndProject
