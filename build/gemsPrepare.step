@@ -36,6 +36,8 @@
   <property name="version.revision" value="0" overwrite="false" />
   <property name="assembly.version.full" value="${version.major}.${version.minor}.${version.build}.${version.revision}" />
   <property name="assembly.version.full" value="${version.major}.${version.minor}.${version.patch}.0"  if="${version.use_semanticversioning}" />
+  <property name="version.gem.suffix" value="" overwrite="false" />
+  <property name="use.gem.build_date" value="false" overwrite="false" />
   <property name="gem.build.date" value="20100801" overwrite="false" />
   <property name="file.gems.version" value="${dirs.drop.gems}${path.separator}VERSION" />
   
@@ -142,8 +144,10 @@
   </target>
   
   <target name="generate_version_file">
-    <echo message="Generating ${file.gems.version} with ${assembly.version.full} and ${gem.build.date} for the version" />
-    <echo file="${file.gems.version}" append="false" failonerror="false">${assembly.version.full}.${gem.build.date}</echo>
+    <echo message="Generating ${file.gems.version} with ${assembly.version.full}${version.gem.suffix} for the version" if="${not use.gem.build_date}" />
+    <echo file="${file.gems.version}" if="${not use.gem.build_date}" append="false" failonerror="false">${assembly.version.full}${version.gem.suffix}</echo>
+    <echo message="Generating ${file.gems.version} with ${assembly.version.full}.${gem.build.date}${version.gem.suffix} for the version" if="${use.gem.build_date}" />
+    <echo file="${file.gems.version}" if="${use.gem.build_date}" append="false" failonerror="false">${assembly.version.full}.${gem.build.date}${version.gem.suffix}</echo>
   </target>
   
   <target name="custom_tasks_after">
