@@ -2,7 +2,6 @@ namespace PostalService.Host
 {
 	using System;
 	using MassTransit;
-	using Microsoft.Practices.ServiceLocation;
 
     public class PostalService
     {
@@ -11,7 +10,8 @@ namespace PostalService.Host
 
         public void Start()
         {
-            _bus = ServiceLocator.Current.GetInstance<IServiceBus>("server");
+            //TODO: fix this
+            //_bus = ServiceLocator.Current.GetInstance<IServiceBus>("server");
 
             _unsubscribe = _bus.Subscribe<SendEmailConsumer>();
 

@@ -15,10 +15,9 @@ namespace DistributedGrid.Shared
     using System;
     using MassTransit.StructureMapIntegration;
     using MassTransit.Transports.Msmq;
-    using Microsoft.Practices.ServiceLocation;
     using StructureMap;
     using Topshelf;
-    using Topshelf.Configuration;
+    using Topshelf.Configuration.Dsl;
 
     public interface IServiceInterface
     {
@@ -37,7 +36,7 @@ namespace DistributedGrid.Shared
 
         public void ConfigureService<T>(string[] args) where T : class, IServiceInterface
         {
-            IRunConfiguration cfg = RunnerConfigurator.New(c =>
+            var cfg = RunnerConfigurator.New(c =>
             {
                 c.SetServiceName(ServiceName);
                 c.SetDisplayName(DisplayName);
@@ -46,10 +45,10 @@ namespace DistributedGrid.Shared
                 c.RunAsLocalSystem();
                 c.DependencyOnMsmq();
 
-                c.ConfigureService<T>(typeof(T).Name, s =>
+                c.ConfigureService<T>(s =>
                 {
                     MsmqEndpointConfigurator.Defaults(def => def.CreateMissingQueues = true);
-                    s.CreateServiceLocator(() =>
+                    s.HowToBuildService(name =>
                     {
                         Container container = new Container(x =>
                         {
@@ -58,9 +57,8 @@ namespace DistributedGrid.Shared
                             ContainerSetup(x);
                         });
 
-                        IServiceLocator objectBuilder = new StructureMapObjectBuilder(container);
-                        ServiceLocator.SetLocatorProvider(() => objectBuilder);
-                        return objectBuilder;
+                        var objectBuilder = new StructureMapObjectBuilder(container);
+                        return objectBuilder.GetInstance<T>();
                     });
 
                     s.WhenStarted(start => start.Start());
