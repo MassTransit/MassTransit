@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2010 The Apache Software Foundation.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -15,9 +15,7 @@ namespace MassTransit.Services.HealthMonitoring
 	using System;
 	using Internal;
 	using Magnum;
-	using Magnum.Actors;
-	using Magnum.Actors.CommandQueues;
-	using Magnum.Actors.Schedulers;
+	using Magnum.Fibers;
 	using Messages;
 
 	public class HealthClient :
@@ -26,14 +24,13 @@ namespace MassTransit.Services.HealthMonitoring
 	{
 		private readonly int _heartbeatIntervalInMilliseconds;
 		private readonly int _heartbeatIntervalInSeconds;
-		private readonly CommandQueue _queue = new ThreadPoolCommandQueue();
-		private IServiceBus _bus;
+	    private IServiceBus _bus;
 		private Uri _controlUri;
 		private Uri _dataUri;
 		private volatile bool _disposed;
-		private Scheduler _scheduler = new ThreadPoolScheduler();
+		private Scheduler _scheduler = new TimerScheduler(new ThreadPoolFiber());
 		private UnsubscribeAction _unsubscribe;
-		private Unschedule _unschedule;
+		private ScheduledAction _unschedule;
 
 		public HealthClient()
 			: this(3)
@@ -79,13 +76,13 @@ namespace MassTransit.Services.HealthMonitoring
 			var message = new EndpointCameOnline(SystemId, _controlUri, _dataUri, _heartbeatIntervalInSeconds);
 			_bus.ControlBus.Publish(message);
 
-			_unschedule = _scheduler.Schedule(_heartbeatIntervalInMilliseconds, _heartbeatIntervalInMilliseconds, PublishHeartbeat);
+            _unschedule = _scheduler.Schedule(_heartbeatIntervalInMilliseconds, _heartbeatIntervalInMilliseconds, new ThreadPoolFiber(), PublishHeartbeat);
 		}
 
 		public void Stop()
 		{
 			_bus.ControlBus.Publish(new EndpointWentOffline(SystemId, _controlUri, _dataUri, _heartbeatIntervalInSeconds));
-			_unschedule();
+			_unschedule.Cancel();
 			_unsubscribe();
 		}
 
@@ -93,10 +90,8 @@ namespace MassTransit.Services.HealthMonitoring
 		{
 			if (!disposing || _disposed) return;
 
-			_scheduler.Dispose();
+			_scheduler.Stop();
 			_scheduler = null;
-
-			_queue.Disable();
 
 			_disposed = true;
 		}

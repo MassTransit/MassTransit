@@ -13,7 +13,7 @@
 namespace MassTransit.Tests.Examples.Sagas
 {
 	using Messages;
-	using TestFramework;
+	using Magnum.TestFramework;
 
 	[Scenario]
 	public class When_a_start_message_is_received :
@@ -37,13 +37,13 @@ namespace MassTransit.Tests.Examples.Sagas
 		[Then]
 		public void A_new_saga_should_be_created()
 		{
-			ExtensionMethodsForAssertions.ShouldNotBeNull(Saga);
+			Saga.ShouldNotBeNull();
 		}
 
 		[Then]
 		public void The_customer_id_should_be_set()
 		{
-			ExtensionMethodsForAssertions.ShouldEqual(Saga.CustomerId, CustomerId);
+			Saga.CustomerId.ShouldEqual(CustomerId);
 		}
 	}
 }

@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2010 The Apache Software Foundation.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -19,7 +19,6 @@ namespace MassTransit.Serialization
 	using System.Runtime.Serialization.Formatters.Binary;
 	using Internal;
 	using log4net;
-	using Magnum.ObjectExtensions;
 	using Util;
 
 	/// <summary>
@@ -154,7 +153,7 @@ namespace MassTransit.Serialization
 
 		public static void Add(this List<Header> headers, string key, string value)
 		{
-			if (value.IsNullOrEmpty())
+			if (string.IsNullOrEmpty(value))
 				return;
 
 			headers.Add(new Header(key, value));

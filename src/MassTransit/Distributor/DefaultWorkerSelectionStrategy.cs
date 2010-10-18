@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2010 The Apache Software Foundation.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,18 +12,26 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Distributor
 {
-	using System.Collections.Generic;
+    using System.Collections.Generic;
 	using System.Linq;
 
 	public class DefaultWorkerSelectionStrategy<T> :
 		IWorkerSelectionStrategy<T> 
         where T : class
 	{
-		public IEnumerable<WorkerDetails> GetAvailableWorkers(IEnumerable<WorkerDetails> candidates, T message, bool fromAccept)
-		{
-			return candidates
-				.Where(x => x.InProgress + x.Pending < x.InProgressLimit + x.PendingLimit)
-				.OrderByDescending(x => x.InProgress + x.Pending);
-		}
+	    public bool HasAvailableWorker(IEnumerable<WorkerDetails> candidates, T message)
+	    {
+            return candidates
+                .Where(x => x.InProgress + x.Pending < x.InProgressLimit + x.PendingLimit)
+                .Any();
+	    }
+
+	    public WorkerDetails SelectWorker(IEnumerable<WorkerDetails> candidates, T message)
+	    {
+	        return candidates
+	            .Where(x => x.InProgress + x.Pending < x.InProgressLimit + x.PendingLimit)
+	            .OrderByDescending(x => x.InProgress + x.Pending)
+	            .FirstOrDefault();
+        }
 	}
 }

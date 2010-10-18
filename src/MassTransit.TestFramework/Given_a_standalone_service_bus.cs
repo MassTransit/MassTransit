@@ -14,6 +14,7 @@ namespace MassTransit.TestFramework
 {
 	using System;
 	using Fixtures;
+	using Magnum.TestFramework;
 	using Transports;
 
 	[Scenario]

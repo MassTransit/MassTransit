@@ -1,6 +1,7 @@
 namespace MassTransit.Tests.Services.Metadata
 {
     using System;
+    using Magnum.TestFramework;
     using MassTransit.Pipeline;
     using MassTransit.Pipeline.Configuration;
     using MassTransit.Pipeline.Inspectors;
@@ -58,7 +59,7 @@ namespace MassTransit.Tests.Services.Metadata
         {
             public void Consume(object message)
             {
-                throw new System.NotImplementedException();
+                throw new NotImplementedException();
             }
         }
 
@@ -67,7 +68,7 @@ namespace MassTransit.Tests.Services.Metadata
         {
             public void Consume(PingMessage message)
             {
-                throw new System.NotImplementedException();
+                throw new NotImplementedException();
             }
         }
     }

@@ -7,7 +7,6 @@ namespace Client
 	using MassTransit.Services.Subscriptions.Configuration;
 	using MassTransit.Transports.Msmq;
 	using MassTransit.WindsorIntegration;
-	using Microsoft.Practices.ServiceLocation;
 	using Topshelf;
 	using Topshelf.Configuration.Dsl;
 
@@ -17,31 +16,42 @@ namespace Client
 
 		private static void Main(string[] args)
 		{
-			_log.Info("Server Loading");
+			_log.Info("Client Loading");
 
+            var container = new DefaultMassTransitContainer();
+            IEndpointFactory endpointFactory = EndpointFactoryConfigurator.New(e =>
+            {
+                e.SetObjectBuilder(container.ObjectBuilder);
+                e.RegisterTransport<MsmqEndpoint>();
+            });
+
+			MsmqEndpointConfigurator.Defaults(def =>
+			{
+				def.CreateMissingQueues = true;
+			});
+      
+			container.Kernel.AddComponentInstance("endpointFactory", typeof(IEndpointFactory), endpointFactory);
+            container.AddComponent<ClientService>(typeof(ClientService).Name);
+            container.AddComponent<PasswordUpdater>();
+									
 			var cfg = RunnerConfigurator.New(c =>
 				{
 					c.SetServiceName("SampleClientService");
 					c.SetDisplayName("SampleClientService");
 					c.SetDescription("SampleClientService");
+
 					c.DependencyOnMsmq();
 					c.RunAsLocalSystem();
 
 
 					c.ConfigureService<ClientService>(s =>
 						{
+                            s.Named(typeof(ClientService).Name);
 							s.WhenStarted(o =>
 								{
 
-								    var container = new DefaultMassTransitContainer("castle.xml");
 								    container.Register(Component.For<PasswordUpdater>());
 								    var wob = new WindsorObjectBuilder(container.Kernel);
-
-								    var endpointFactory = EndpointFactoryConfigurator.New(e =>
-								    {
-								        e.SetObjectBuilder(wob);
-								        e.RegisterTransport<MsmqEndpoint>();
-								    });
 
 									var bus = ServiceBusConfigurator.New(servicesBus =>
 										{
@@ -49,7 +59,7 @@ namespace Client
 											servicesBus.ReceiveFrom("msmq://localhost/mt_client");
 											servicesBus.ConfigureService<SubscriptionClientConfigurator>(client =>
 												{
-													// need to add the ability to read from configuratino settings somehow
+													// need to add the ability to read from configuration settings somehow
 													client.SetSubscriptionServiceEndpoint("msmq://localhost/mt_subscriptions");
 												});
 										});

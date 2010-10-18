@@ -65,6 +65,10 @@
       <HintPath>..\..\lib\Magnum.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="Magnum.TestFramework, Version=1.0.0.230, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\lib\Magnum.TestFramework.dll</HintPath>
+    </Reference>
     <Reference Include="nunit.framework, Version=2.5.2.9222, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\lib\NUnit\nunit.framework.dll</HintPath>
@@ -90,20 +94,15 @@
     <Compile Include="Helpers\EndpointSinkLocator.cs" />
     <Compile Include="ExtensionMethodsForObjectBuilder.cs" />
     <Compile Include="Fixtures\AbstractTestConsumer.cs" />
-    <Compile Include="ExtensionMethodsForAssertions.cs" />
     <Compile Include="ConsumerOf.cs" />
     <Compile Include="Fixtures\AbstractTestFixture.cs" />
     <Compile Include="Fixtures\EndpointTestFixture.cs" />
     <Compile Include="Fixtures\LocalAndRemoteTestFixture.cs" />
     <Compile Include="Fixtures\SubscriptionServiceTestFixture.cs" />
-    <Compile Include="GivenAttribute.cs" />
     <Compile Include="Given_a_subscription_service_and_two_service_buses.cs" />
     <Compile Include="Given_two_service_buses_with_shared_subscriptions.cs" />
     <Compile Include="LogSetup.cs" />
     <Compile Include="SelectiveConsumerOf.cs" />
-    <Compile Include="ThenAttribute.cs" />
-    <Compile Include="ScenarioAttribute.cs" />
-    <Compile Include="WhenAttribute.cs" />
     <Compile Include="Fixtures\LocalTestFixture.cs" />
     <Compile Include="Given_a_standalone_service_bus.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

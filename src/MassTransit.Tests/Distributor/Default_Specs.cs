@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2010 The Apache Software Foundation.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -19,12 +19,12 @@ namespace MassTransit.Tests.Distributor
 	using Configuration;
 	using Load;
 	using Load.Messages;
-	using Magnum.DateTimeExtensions;
+    using Magnum.Extensions;
+    using MassTransit.Distributor.Messages;
+    using MassTransit.Pipeline.Inspectors;
 	using MassTransit.Distributor;
-	using MassTransit.Distributor.Messages;
-	using MassTransit.Pipeline.Inspectors;
+    using Rhino.Mocks;
 	using NUnit.Framework;
-	using Rhino.Mocks;
 	using TestFramework;
 
 	[TestFixture]
@@ -150,11 +150,9 @@ namespace MassTransit.Tests.Distributor
 		protected override void ConfigureLocalBus(IServiceBusConfigurator configurator)
 		{
 			var mock = MockRepository.GenerateStub<IWorkerSelectionStrategy<FirstCommand>>();
-			mock.Stub(x => x.GetAvailableWorkers(null, null, false))
+			mock.Stub(x => x.SelectWorker(null, null))
 				.IgnoreArguments()
-				.Return(new List<WorkerDetails>
-					{
-						new WorkerDetails
+				.Return(new WorkerDetails
 							{
 								ControlUri = _nodes["A"].AppendToPath("_control"),
 								DataUri = _nodes["A"],
@@ -162,7 +160,11 @@ namespace MassTransit.Tests.Distributor
 								InProgressLimit = 100,
 								LastUpdate = DateTime.UtcNow
 							}
-					});
+					);
+
+		    mock.Stub(x => x.HasAvailableWorker(null, null))
+		        .IgnoreArguments()
+		        .Return(true);
 
 			configurator.UseDistributorFor(EndpointFactory, mock);
 		}
