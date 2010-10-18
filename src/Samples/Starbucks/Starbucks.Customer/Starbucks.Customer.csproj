@@ -56,14 +56,6 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\lib\Castle.Windsor\Castle.Core.dll</HintPath>
     </Reference>
-    <Reference Include="Castle.DynamicProxy2, Version=2.2.0.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\lib\Castle.Windsor\Castle.DynamicProxy2.dll</HintPath>
-    </Reference>
-    <Reference Include="Castle.MicroKernel, Version=2.1.0.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\lib\Castle.Windsor\Castle.MicroKernel.dll</HintPath>
-    </Reference>
     <Reference Include="Castle.Windsor, Version=2.1.0.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\lib\Castle.Windsor\Castle.Windsor.dll</HintPath>

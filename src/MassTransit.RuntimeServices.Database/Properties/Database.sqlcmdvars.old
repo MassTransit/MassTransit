@@ -1,0 +1,6 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<SqlCommandVariables xmlns="urn:Microsoft.VisualStudio.Data.Schema.Package.SqlCmdVars" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <Version>1.0</Version>
+  <Properties>
+  </Properties>
+</SqlCommandVariables>

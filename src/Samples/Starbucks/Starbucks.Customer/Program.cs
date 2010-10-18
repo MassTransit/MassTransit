@@ -14,6 +14,7 @@ namespace Starbucks.Customer
 {
 	using System;
 	using System.Windows.Forms;
+	using Castle.MicroKernel.Registration;
 	using Castle.Windsor;
 	using MassTransit;
 	using MassTransit.Transports.Msmq;
@@ -39,8 +40,8 @@ namespace Starbucks.Customer
 		private static IWindsorContainer BootstrapContainer()
 		{
 			IWindsorContainer container = new DefaultMassTransitContainer("Starbucks.Customer.Castle.xml");
-			container.AddComponent<CustomerService>(typeof (CustomerService).Name);
-			container.AddComponent<OrderDrinkForm>();
+		    container.Register(Component.For<CustomerService>().Named(typeof(CustomerService).Name));
+		    container.Register(Component.For<OrderDrinkForm>());
 		    return container;
 		}
 	}
