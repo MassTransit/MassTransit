@@ -11,7 +11,7 @@ namespace Client
 
 		public void Consume(PasswordUpdateComplete message)
         {
-			_log.InfoFormat("Global password update complete: {0} ({1})", message.ErrorCode, message.CorrelationId);
+			_log.InfoFormat("Global password update complete: ({0})", message.CorrelationId);
         }
     }
 }

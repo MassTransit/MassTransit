@@ -48,7 +48,7 @@ namespace MassTransit.Transports.Msmq
 				_log.Debug("A queue was created: " + _address + (transactional ? " (transactional)" : ""));
 
                 queue.SetPermissions(AdministratorsGroupName, MessageQueueAccessRights.FullControl, AccessControlEntryType.Allow);
-                queue.SetPermissions(EveryoneAccountName, MessageQueueAccessRights.WriteMessage, AccessControlEntryType.Allow);
+                queue.SetPermissions(EveryoneAccountName, MessageQueueAccessRights.GenericWrite, AccessControlEntryType.Allow);
 			}
 
 			VerifyQueueSendAndReceive();

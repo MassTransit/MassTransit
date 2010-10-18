@@ -17,7 +17,7 @@ namespace CodeCamp.Web
 
         protected void submitButton_Click(object sender, EventArgs e)
         {
-            using (var timer = new FunctionTimer("_Default submiteButton_Click", x => timerLabel.Text = x))
+            using (var timer = new FunctionTimer("_Default submiteButton_Click", x => timerLabel.Text = x.Text))
             {
                 User user;
                 using (IRepository<User> repository = DomainContext.ServiceLocator.GetInstance<IRepositoryFactory>().GetRepository<User>())

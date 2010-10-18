@@ -20,47 +20,44 @@ namespace Server
 			XmlConfigurator.ConfigureAndWatch(new FileInfo("server.log4net.xml"));
 			_log.Info("Server Loading");
 
-            var container = new DefaultMassTransitContainer();
-            IEndpointFactory endpointFactory = EndpointFactoryConfigurator.New(x =>
-                {
-                    x.SetObjectBuilder(container.ObjectBuilder);
-                    x.RegisterTransport<MsmqEndpoint>();
-                });
+			var cfg = RunnerConfigurator.New(c =>
+				{
+					c.SetServiceName("SampleService");
+					c.SetServiceName("Sample Service");
+					c.SetServiceName("Something");
+					c.DependencyOnMsmq();
 
 			MsmqEndpointConfigurator.Defaults(def =>
 			{
 				def.CreateMissingQueues = true;
 			});
 
-            container.Kernel.AddComponentInstance("endpointFactory", typeof(IEndpointFactory), endpointFactory);
-            container.AddComponent<PasswordUpdateService>(typeof(PasswordUpdateService).Name);
+					c.ConfigureService<PasswordUpdateService>(s =>
+						{
+							s.WhenStarted(o =>
+								{
+								    var container = new DefaultMassTransitContainer("server.castle.xml");
+								    var wob = new WindsorObjectBuilder(container.Kernel);
 
-            var cfg = RunnerConfigurator.New(c =>
-                {
-                    c.SetServiceName("SampleServer");
-                    c.SetDisplayName("SampleServer");
-                    c.SetDescription("SampleServer");
+								    var endpointFactory = EndpointFactoryConfigurator.New(e =>
+								    {
+								        e.SetObjectBuilder(wob);
+								        e.RegisterTransport<MsmqEndpoint>();
+								    });
 
-                    c.DependencyOnMsmq();
+									var bus = ServiceBusConfigurator.New(x =>
+										{
+                                            x.SetObjectBuilder(wob);
+											x.ReceiveFrom("msmq://localhost/mt_server");
+											x.ConfigureService<SubscriptionClientConfigurator>(b => { b.SetSubscriptionServiceEndpoint("msmq://localhost/mt_subscriptions"); });
+										});
+									o.Start(bus);
+								});
+							s.WhenStopped(o => o.Stop());
 
-                    c.RunAsLocalSystem();
-
-                    c.ConfigureService<PasswordUpdateService>(s =>
-                        {
-                            s.Named(typeof(PasswordUpdateService).Name);
-                            s.WhenStarted(o =>
-                                {
-                                    IServiceBus bus = ServiceBusConfigurator.New(x =>
-                                        {
-                                            x.ReceiveFrom("msmq://localhost/mt_server");
-                                            x.ConfigureService<SubscriptionClientConfigurator>(b => { b.SetSubscriptionServiceEndpoint("msmq://localhost/mt_subscriptions"); });
-                                        });
-                                    o.Start(bus);
-                                });
-                            s.WhenStopped(o => o.Stop());
-                            s.HowToBuildService(a => container.ObjectBuilder.GetInstance<PasswordUpdateService>());
-                        });
-                });
+                            s.HowToBuildService(name => new PasswordUpdateService());
+						});
+				});
 			Runner.Host(cfg, args);
 		}
 	}

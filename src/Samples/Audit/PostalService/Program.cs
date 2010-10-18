@@ -5,7 +5,7 @@
 	using log4net.Config;
 	using MassTransit.WindsorIntegration;
 	using Topshelf;
-	using Topshelf.Configuration;
+    using Topshelf.Configuration.Dsl;
 
 	internal class Program
 	{
@@ -29,7 +29,7 @@
 							container.AddComponent<PostalService>();
 						});
 
-					c.ConfigureService<PostalService>(typeof(PostalService).Name, a =>
+					c.ConfigureService<PostalService>(a =>
 						{
 							a.WhenStarted(o => o.Start());
 							a.WhenStopped(o => o.Stop());
