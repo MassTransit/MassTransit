@@ -14,6 +14,7 @@ namespace MassTransit.Tests.Saga.StateMachine
 {
 	using System.Linq;
 	using Locator;
+	using Magnum.TestFramework;
 	using NUnit.Framework;
 
 	[TestFixture]

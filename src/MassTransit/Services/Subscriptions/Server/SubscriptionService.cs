@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2010 The Apache Software Foundation.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -16,8 +16,7 @@ namespace MassTransit.Services.Subscriptions.Server
 	using System.Linq;
 	using Exceptions;
 	using log4net;
-	using Magnum.Actors;
-	using Magnum.Actors.CommandQueues;
+	using Magnum.Fibers;
 	using Messages;
 	using Saga;
 	using Subscriptions.Messages;
@@ -36,7 +35,7 @@ namespace MassTransit.Services.Subscriptions.Server
 		private IServiceBus _bus;
 		private ISubscriptionRepository _repository;
 		private UnsubscribeAction _unsubscribeToken = () => false;
-		private readonly CommandQueue _queue = new ThreadPoolCommandQueue();
+		private readonly Fiber _queue = new ThreadPoolFiber();
 
 		public SubscriptionService(IServiceBus bus,
 		                           ISubscriptionRepository subscriptionRepository,
@@ -58,7 +57,7 @@ namespace MassTransit.Services.Subscriptions.Server
 
 			var add = new AddSubscription(message.Subscription);
 
-			_queue.Enqueue(() => SendToClients(add));
+			_queue.Add(() => SendToClients(add));
 		}
 
 		public void Consume(SubscriptionClientAdded message)
@@ -66,7 +65,7 @@ namespace MassTransit.Services.Subscriptions.Server
 			if (_log.IsInfoEnabled)
 				_log.InfoFormat("Subscription Client Added: {0} [{1}]", message.ControlUri, message.ClientId);
 
-			_queue.Enqueue(() => SendCacheUpdateToClient(message.ControlUri));
+			_queue.Add(() => SendCacheUpdateToClient(message.ControlUri));
 		}
 
 		public void Consume(SubscriptionClientRemoved message)
@@ -82,7 +81,7 @@ namespace MassTransit.Services.Subscriptions.Server
 
 			var remove = new RemoveSubscription(message.Subscription);
 
-			_queue.Enqueue(()=>SendToClients(remove));
+			_queue.Add(()=>SendToClients(remove));
 		}
 
 		public void Dispose()

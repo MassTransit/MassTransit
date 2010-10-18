@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2010 The Apache Software Foundation.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -15,10 +15,8 @@ namespace MassTransit.Distributor
 	using System;
 	using System.Threading;
 	using Internal;
-	using Magnum.Actors;
-	using Magnum.Actors.CommandQueues;
-	using Magnum.Actors.Schedulers;
-	using Magnum.DateTimeExtensions;
+	using Magnum.Extensions;
+	using Magnum.Fibers;
 	using Messages;
 
 	public class Worker<T> :
@@ -37,11 +35,11 @@ namespace MassTransit.Distributor
 		private int _inProgress;
 		private int _inProgressLimit = 4;
 		private int _pendingLimit = 16;
-		private readonly CommandQueue _queue = new ThreadPoolCommandQueue();
+		private readonly Fiber _queue = new ThreadPoolFiber();
 		private UnsubscribeAction _unsubscribeAction = () => false;
 		private bool _updatePending;
 		private bool _wakeUpPending;
-	    private ThreadPoolScheduler _threadPoolScheduler;
+	    private Scheduler _threadPoolScheduler;
 
 		public Worker(Func<T, Action<T>> getConsumer)
 			: this(getConsumer, new WorkerSettings())
@@ -124,14 +122,16 @@ namespace MassTransit.Distributor
 			_unsubscribeAction += bus.ControlBus.Subscribe<PingWorker>(Consume);
 			_unsubscribeAction += bus.Subscribe(this);
 
-            _threadPoolScheduler = new ThreadPoolScheduler();
 
-		    _threadPoolScheduler.Schedule((int) 3.Seconds().TotalMilliseconds, (int) 1.Minutes().TotalMilliseconds, PublishWorkerAvailability);
+            _threadPoolScheduler = new TimerScheduler(new ThreadPoolFiber());
+
+		    _threadPoolScheduler.Schedule(3.Seconds(), 1.Minutes(), new ThreadPoolFiber(), PublishWorkerAvailability);
 		}
 
 	    public void Stop()
 		{
-	        _threadPoolScheduler.Dispose();
+	        _threadPoolScheduler.Stop();
+
 			_unsubscribeAction();
 		}
 
@@ -156,7 +156,7 @@ namespace MassTransit.Distributor
 			if (!_wakeUpPending)
 			{
 				_wakeUpPending = true;
-				_queue.Enqueue(() => _bus.Endpoint.Send(new WakeUpWorker()));
+				_queue.Add(() => _bus.Endpoint.Send(new WakeUpWorker()));
 			}
 		}
 
@@ -165,7 +165,7 @@ namespace MassTransit.Distributor
 			if (!_updatePending)
 			{
 				_updatePending = true;
-				_queue.Enqueue(PublishWorkerAvailability);
+				_queue.Add(PublishWorkerAvailability);
 			}
 		}
 

@@ -24,3 +24,5 @@ TestResult.xml
 submit.xml
 src/tests/*
 SolutionVersion.cs
+src/SolutionVersion.cs
+tests

@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2010 The Apache Software Foundation.
 // 
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -17,7 +17,6 @@ namespace MassTransit.WindsorIntegration
     using Services.HealthMonitoring.Configuration;
     using Services.Subscriptions.Configuration;
     using Transports;
-    using Magnum.ObjectExtensions;
 
     public class MassTransitFacility :
         MassTransitFacilityBase
@@ -53,13 +52,13 @@ namespace MassTransit.WindsorIntegration
                 if (bus.Children["managementService"] != null)
                 {
                     mgmt = bus.Children["managementService"].Attributes["heartbeatInterval"];
-                    interval = mgmt.IsNullOrEmpty() ? 60 : int.Parse(mgmt);
+                    interval = string.IsNullOrEmpty(mgmt) ? 60 : int.Parse(mgmt);
                 }
 
                 base.RegisterServiceBus(ep,a=>
                 {
-                    if(!sub.IsNullOrEmpty())a.ConfigureService<SubscriptionClientConfigurator>(s=>s.SetSubscriptionServiceEndpoint(sub));
-                    if(!mgmt.IsNullOrEmpty()) a.ConfigureService<HealthClientConfigurator>(s=>s.SetHeartbeatInterval(interval));
+                    if(!string.IsNullOrEmpty(sub))a.ConfigureService<SubscriptionClientConfigurator>(s=>s.SetSubscriptionServiceEndpoint(sub));
+                    if(!string.IsNullOrEmpty(mgmt)) a.ConfigureService<HealthClientConfigurator>(s=>s.SetHeartbeatInterval(interval));
                 });
             });
 

@@ -8,7 +8,6 @@ namespace Server
 	using MassTransit.Services.Subscriptions.Configuration;
 	using MassTransit.Transports.Msmq;
 	using MassTransit.WindsorIntegration;
-	using Microsoft.Practices.ServiceLocation;
 	using Topshelf;
 	using Topshelf.Configuration.Dsl;
 
@@ -28,7 +27,10 @@ namespace Server
 					c.SetServiceName("Something");
 					c.DependencyOnMsmq();
 
-					c.RunAsLocalSystem();
+			MsmqEndpointConfigurator.Defaults(def =>
+			{
+				def.CreateMissingQueues = true;
+			});
 
 					c.ConfigureService<PasswordUpdateService>(s =>
 						{

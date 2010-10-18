@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2010 The Apache Software Foundation.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -17,9 +17,8 @@ namespace MassTransit.RuntimeServices
 	using System.Configuration;
 	using System.Reflection;
 	using log4net;
-	using Magnum.ObjectExtensions;
 
-	public class Configuration :
+    public class Configuration :
 		IConfiguration
 	{
 		private const string HealthServiceControlUriKey = "HealthServiceControlUri";
@@ -141,7 +140,7 @@ namespace MassTransit.RuntimeServices
 			if (value == null)
 				return defaultValue;
 
-			if (value.IsNullOrEmpty())
+			if (string.IsNullOrEmpty(value))
 				return defaultValue;
 
 			return ConvertStringToValue<T>(key, value);

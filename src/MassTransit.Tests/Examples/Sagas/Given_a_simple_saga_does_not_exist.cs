@@ -12,7 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests.Examples.Sagas
 {
-	using TestFramework;
+	using Magnum.TestFramework;
 	using TestFramework.Fixtures;
 
 	[Scenario]

@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2010 The Apache Software Foundation.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -20,7 +20,7 @@ namespace MassTransit.Transports.Msmq
         public CreateMsmqTransportSettings(string uri)
             : this()
         {
-            Guard.Against.NullOrEmpty(uri, "The URI cannot be null or empty");
+            Guard.AgainstEmpty(uri, "The URI cannot be null or empty");
 
             try
             {
@@ -35,7 +35,7 @@ namespace MassTransit.Transports.Msmq
         public CreateMsmqTransportSettings(Uri uri)
             : this()
         {
-            Guard.Against.Null(uri, "The URI cannot be null");
+            Guard.AgainstNull(uri, "The URI cannot be null");
 
             Address = new MsmqEndpointAddress(uri);
         }
@@ -43,7 +43,7 @@ namespace MassTransit.Transports.Msmq
         public CreateMsmqTransportSettings(IEndpointAddress address)
             : this()
         {
-            Guard.Against.Null(address, "The address cannot be null");
+            Guard.AgainstNull(address, "The address cannot be null");
 
             Address = new MsmqEndpointAddress(address.Uri);
         }
@@ -51,8 +51,8 @@ namespace MassTransit.Transports.Msmq
         public CreateMsmqTransportSettings(IEndpointAddress address, CreateMsmqTransportSettings source)
             : this()
         {
-            Guard.Against.Null(address, "The address cannot be null");
-            Guard.Against.Null(source, "The source settings cannot be null");
+            Guard.AgainstNull(address, "The address cannot be null");
+            Guard.AgainstNull(source, "The source settings cannot be null");
 
             Address = new MsmqEndpointAddress(address.Uri);
             Transactional = source.Transactional;

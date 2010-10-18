@@ -1,13 +1,14 @@
-using System;
-using System.Threading;
-using MassTransit.Pipeline.Inspectors;
-using MassTransit.Pipeline.Sinks;
-using MassTransit.Tests.TextFixtures;
-using MassTransit.Transports;
-using NUnit.Framework;
-
 namespace MassTransit.Tests.Subscriptions
 {
+	using System;
+	using System.Threading;
+	using MassTransit.Pipeline.Inspectors;
+	using MassTransit.Pipeline.Sinks;
+	using TextFixtures;
+	using MassTransit.Transports;
+	using NUnit.Framework;
+	using Magnum.TestFramework;
+
 	[TestFixture]
 	public class Adding_a_correlated_subscription_via_the_subscription_client: //Not bdd style.
 		SubscriptionServiceTestFixture<LoopbackEndpoint>

@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2010 The Apache Software Foundation.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -17,6 +17,21 @@ namespace MassTransit.Distributor
 	public interface IWorkerSelectionStrategy<T>
         where T : class
 	{
-		IEnumerable<WorkerDetails> GetAvailableWorkers(IEnumerable<WorkerDetails> candidates, T message, bool fromAccept);
+		/// <summary>
+		/// Using the list of candidate workers, indicates if one is available. 
+		/// </summary>
+		/// <param name="candidates">The list of candidates to process</param>
+		/// <param name="message">The message in question</param>
+		/// <returns><c>True</c> if there are acceptable candidates, <c>false</c> otherwise.</returns>
+		bool HasAvailableWorker(IEnumerable<WorkerDetails> candidates, T message);
+
+		/// <summary>
+		/// Using the list of candidate workers, find the best candidate available.
+		/// </summary>
+		/// <param name="candidates">The list of candidates to process</param>
+		/// <param name="message">The message in question</param>
+		/// <returns><c>null</c> if no candidates are acceptable, otherwise the best
+		/// acceptable candidate for the message</returns>
+		WorkerDetails SelectWorker(IEnumerable<WorkerDetails> candidates, T message);
 	}
 }

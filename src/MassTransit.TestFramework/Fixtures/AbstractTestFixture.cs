@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2010 The Apache Software Foundation.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -17,7 +17,8 @@ namespace MassTransit.TestFramework.Fixtures
 	using System.Diagnostics;
 	using System.Linq;
 	using log4net;
-	using Magnum.ObjectExtensions;
+	using Magnum.Extensions;
+	using Magnum.TestFramework;
 	using NUnit.Framework;
 
 	[TestFixture]
@@ -38,9 +39,12 @@ namespace MassTransit.TestFramework.Fixtures
 		[TestFixtureTearDown]
 		public void AbstractTestFixtureTeardown()
 		{
-			_timer.Stop();
-
-			Log.InfoFormat("Elapsed Time: {0}ms", _timer.ElapsedMilliseconds);
+            if (_timer != null)
+            {
+                _timer.Stop();
+                Log.InfoFormat("Elapsed Time: {0}ms", _timer.ElapsedMilliseconds);
+            }
+		    
 			Log.Info("");
 		}
 
