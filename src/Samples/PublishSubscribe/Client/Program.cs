@@ -31,8 +31,20 @@ namespace Client
 						{
 							s.WhenStarted(o =>
 								{
+
+								    var container = new DefaultMassTransitContainer("castle.xml");
+								    container.AddComponent<PasswordUpdater>();
+								    var wob = new WindsorObjectBuilder(container.Kernel);
+
+								    var endpointFactory = EndpointFactoryConfigurator.New(e =>
+								    {
+								        e.SetObjectBuilder(wob);
+								        e.RegisterTransport<MsmqEndpoint>();
+								    });
+
 									var bus = ServiceBusConfigurator.New(servicesBus =>
 										{
+                                            servicesBus.SetObjectBuilder(wob);
 											servicesBus.ReceiveFrom("msmq://localhost/mt_client");
 											servicesBus.ConfigureService<SubscriptionClientConfigurator>(client =>
 												{
@@ -44,19 +56,8 @@ namespace Client
 									o.Start(bus);
 								});
 							s.WhenStopped(o => o.Stop());
-							s.HowToBuildService(name =>
-								{
-									var container = new DefaultMassTransitContainer();
-									IEndpointFactory endpointFactory = EndpointFactoryConfigurator.New(e =>
-										{
-											e.SetObjectBuilder(ServiceLocator.Current.GetInstance<IObjectBuilder>());
-											e.RegisterTransport<MsmqEndpoint>();
-										});
-									container.Kernel.AddComponentInstance("endpointFactory", typeof (IEndpointFactory), endpointFactory);
-									container.AddComponent<ClientService>(typeof(ClientService).Name);
-									container.AddComponent<PasswordUpdater>();
-								    return container.Resolve<ClientService>();
-								});
+
+							s.HowToBuildService(name => new ClientService());
 						});
 				});
 			Runner.Host(cfg, args);

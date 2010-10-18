@@ -26,7 +26,7 @@ namespace Client
 
             _bus.Publish(message);
 
-            Console.WriteLine("Waiting For Reply");
+            Console.WriteLine("Waiting For Reply with CorrelationId '{0}'", message.CorrelationId);
             Console.WriteLine(new string('-', 20));
         }
 
