@@ -3,7 +3,6 @@ namespace CodeCamp.Service
     using System;
     using Domain;
     using MassTransit;
-    using Microsoft.Practices.ServiceLocation;
 
     public class AuditService
     {
@@ -11,7 +10,8 @@ namespace CodeCamp.Service
 
         public void Start()
         {
-            _bus = ServiceLocator.Current.GetInstance<IServiceBus>("server");
+            //TODO: Fix
+            //_bus = ServiceLocator.Current.GetInstance<IServiceBus>("server");
 
             _bus.Subscribe<Responder>();
             _bus.Subscribe<RegisterUserSaga>();

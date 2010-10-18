@@ -11,7 +11,7 @@ namespace CodeCamp.Service
 	using NHibernate;
 	using NHibernate.Cfg;
 	using Topshelf;
-	using Topshelf.Configuration;
+	using Topshelf.Configuration.Dsl;
 
 	internal class Program
 	{
@@ -48,7 +48,7 @@ namespace CodeCamp.Service
 							container.AddComponent<AuditService>(typeof (AuditService).Name);
 						});
 
-					c.ConfigureService<AuditService>(typeof(AuditService).Name, a =>
+					c.ConfigureService<AuditService>(a =>
 						{
 							a.WhenStarted(o => o.Start());
 							a.WhenStopped(o => o.Stop());
