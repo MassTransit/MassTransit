@@ -1,0 +1,2191 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>FluentNHibernate</name>
+    </assembly>
+    <members>
+        <member name="F:FluentNHibernate.AutoMappingExpressions.FindIdentity">
+            <summary>
+            Determines whether a property is the identity of an entity.
+            </summary>
+        </member>
+        <member name="F:FluentNHibernate.AutoMappingExpressions.AbstractClassIsLayerSupertype">
+            <summary>
+            Determines whether an abstract class is a layer supertype or part of a mapped inheritance hierarchy.
+            </summary>
+        </member>
+        <member name="T:FluentNHibernate.Automapping.Alterations.AutoMappingOverrideAlteration">
+            <summary>
+            Built-in alteration for altering an AutoPersistenceModel with instance of IAutoMappingOverride&lt;T&gt;.
+            </summary>
+        </member>
+        <member name="T:FluentNHibernate.Automapping.Alterations.IAutoMappingAlteration">
+            <summary>
+            Provides a mechanism for altering an AutoPersistenceModel prior to
+            the generation of mappings.
+            </summary>
+        </member>
+        <member name="M:FluentNHibernate.Automapping.Alterations.IAutoMappingAlteration.Alter(FluentNHibernate.Automapping.AutoPersistenceModel)">
+            <summary>
+            Alter the model
+            </summary>
+            <param name="model">AutoPersistenceModel instance to alter</param>
+        </member>
+        <member name="M:FluentNHibernate.Automapping.Alterations.AutoMappingOverrideAlteration.#ctor(System.Reflection.Assembly)">
+            <summary>
+            Constructor for AutoMappingOverrideAlteration.
+            </summary>
+            <param name="overrideAssembly">Assembly to load overrides from.</param>
+        </member>
+        <member name="M:FluentNHibernate.Automapping.Alterations.AutoMappingOverrideAlteration.Alter(FluentNHibernate.Automapping.AutoPersistenceModel)">
+            <summary>
+            Alter the model
+            </summary>
+            <remarks>
+            Finds all types in the assembly (passed in the constructor) that implement IAutoMappingOverride&lt;T&gt;, then
+            creates an AutoMapping&lt;T&gt; and applies the override to it.
+            </remarks>
+            <param name="model">AutoPersistenceModel instance to alter</param>
+        </member>
+        <member name="T:FluentNHibernate.Automapping.Alterations.IAutoMappingOverride`1">
+            <summary>
+            A mapping override for an auto mapped entity.
+            </summary>
+            <typeparam name="T">Entity who's auto-mapping you're overriding</typeparam>
+        </member>
+        <member name="M:FluentNHibernate.Automapping.Alterations.IAutoMappingOverride`1.Override(FluentNHibernate.Automapping.AutoMapping{`0})">
+            <summary>
+            Alter the automapping for this type
+            </summary>
+            <param name="mapping">Automapping</param>
+        </member>
+        <member name="T:FluentNHibernate.Automapping.ITypeSource">
+            <summary>
+            A source for Type instances, used for locating types that should be
+            automapped.
+            </summary>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.CompositeIdentityPart`1.KeyProperty(System.Linq.Expressions.Expression{System.Func{`0,System.Object}})">
+            <summary>
+            Defines a property to be used as a key for this composite-id.
+            </summary>
+            <param name="expression">A member access lambda expression for the property</param>
+            <returns>The composite identity part fluent interface</returns>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.CompositeIdentityPart`1.KeyProperty(System.Linq.Expressions.Expression{System.Func{`0,System.Object}},System.String)">
+            <summary>
+            Defines a property to be used as a key for this composite-id with an explicit column name.
+            </summary>
+            <param name="expression">A member access lambda expression for the property</param>
+            <param name="columnName">The column name in the database to use for this key, or null to use the property name</param>
+            <returns>The composite identity part fluent interface</returns>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.CompositeIdentityPart`1.KeyReference(System.Linq.Expressions.Expression{System.Func{`0,System.Object}})">
+            <summary>
+            Defines a reference to be used as a many-to-one key for this composite-id with an explicit column name.
+            </summary>
+            <param name="expression">A member access lambda expression for the property</param>
+            <returns>The composite identity part fluent interface</returns>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.CompositeIdentityPart`1.KeyReference(System.Linq.Expressions.Expression{System.Func{`0,System.Object}},System.String)">
+            <summary>
+            Defines a reference to be used as a many-to-one key for this composite-id with an explicit column name.
+            </summary>
+            <param name="expression">A member access lambda expression for the property</param>
+            <param name="columnName">The column name in the database to use for this key, or null to use the property name</param>
+            <returns>The composite identity part fluent interface</returns>
+        </member>
+        <member name="P:FluentNHibernate.Mapping.CompositeIdentityPart`1.Access">
+            <summary>
+            Set the access and naming strategy for this identity.
+            </summary>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.ClasslikeMapBase`1.Component``1(System.Linq.Expressions.Expression{System.Func{`0,``0}},System.Action{FluentNHibernate.Mapping.ComponentPart{``0}})">
+            <summary>
+            Maps a component
+            </summary>
+            <typeparam name="TComponent">Type of component</typeparam>
+            <param name="expression">Component property</param>
+            <param name="action">Component mapping</param>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.ClasslikeMapBase`1.Component``1(System.Linq.Expressions.Expression{System.Func{`0,System.Object}},System.Action{FluentNHibernate.Mapping.ComponentPart{``0}})">
+            <summary>
+            Maps a component
+            </summary>
+            <typeparam name="TComponent">Type of component</typeparam>
+            <param name="expression">Component property</param>
+            <param name="action">Component mapping</param>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.ClasslikeMapBase`1.MapHasMany``2(System.Linq.Expressions.Expression{System.Func{`0,``1}})">
+            <summary>
+            CreateProperties a one-to-many relationship
+            </summary>
+            <typeparam name="TChild">Child object type</typeparam>
+            <typeparam name="TReturn">Property return type</typeparam>
+            <param name="expression">Expression to get property from</param>
+            <returns>one-to-many part</returns>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.ClasslikeMapBase`1.HasMany``1(System.Linq.Expressions.Expression{System.Func{`0,System.Collections.Generic.IEnumerable{``0}}})">
+            <summary>
+            CreateProperties a one-to-many relationship
+            </summary>
+            <typeparam name="TChild">Child object type</typeparam>
+            <param name="expression">Expression to get property from</param>
+            <returns>one-to-many part</returns>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.ClasslikeMapBase`1.HasMany``2(System.Linq.Expressions.Expression{System.Func{`0,System.Collections.Generic.IDictionary{``0,``1}}})">
+            <summary>
+            CreateProperties a one-to-many relationship with a IDictionary
+            </summary>
+            <typeparam name="TKey">Dictionary key type</typeparam>
+            <typeparam name="TChild">Child object type / Dictionary value type</typeparam>
+            <param name="expression">Expression to get property from</param>
+            <returns>one-to-many part</returns>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.ClasslikeMapBase`1.HasMany``1(System.Linq.Expressions.Expression{System.Func{`0,System.Object}})">
+            <summary>
+            CreateProperties a one-to-many relationship
+            </summary>
+            <typeparam name="TChild">Child object type</typeparam>
+            <param name="expression">Expression to get property from</param>
+            <returns>one-to-many part</returns>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.ClasslikeMapBase`1.MapHasManyToMany``2(System.Linq.Expressions.Expression{System.Func{`0,``1}})">
+            <summary>
+            CreateProperties a many-to-many relationship
+            </summary>
+            <typeparam name="TChild">Child object type</typeparam>
+            <typeparam name="TReturn">Property return type</typeparam>
+            <param name="expression">Expression to get property from</param>
+            <returns>many-to-many part</returns>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.ClasslikeMapBase`1.HasManyToMany``1(System.Linq.Expressions.Expression{System.Func{`0,System.Collections.Generic.IEnumerable{``0}}})">
+            <summary>
+            CreateProperties a many-to-many relationship
+            </summary>
+            <typeparam name="TChild">Child object type</typeparam>
+            <param name="expression">Expression to get property from</param>
+            <returns>many-to-many part</returns>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.ClasslikeMapBase`1.HasManyToMany``1(System.Linq.Expressions.Expression{System.Func{`0,System.Object}})">
+            <summary>
+            CreateProperties a many-to-many relationship
+            </summary>
+            <typeparam name="TChild">Child object type</typeparam>
+            <param name="expression">Expression to get property from</param>
+            <returns>many-to-many part</returns>
+        </member>
+        <member name="P:FluentNHibernate.Mapping.JoinedSubClassPart`1.Not">
+            <summary>
+            Inverts the next boolean
+            </summary>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.ClassMap`1.Schema(System.String)">
+            <summary>
+            Sets the hibernate-mapping schema for this class.
+            </summary>
+            <param name="schema">Schema name</param>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.ClassMap`1.Table(System.String)">
+            <summary>
+            Sets the table for the class.
+            </summary>
+            <param name="tableName">Table name</param>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.ClassMap`1.LazyLoad">
+            <summary>
+            Sets this entity to be lazy-loaded (overrides the default lazy load configuration).
+            </summary>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.ClassMap`1.Join(System.String,System.Action{FluentNHibernate.Mapping.JoinPart{`0}})">
+            <summary>
+            Sets additional tables for the class via the NH 2.0 Join element.
+            </summary>
+            <param name="tableName">Joined table name</param>
+            <param name="action">Joined table mapping</param>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.ClassMap`1.ImportType``1">
+            <summary>
+            Imports an existing type for use in the mapping.
+            </summary>
+            <typeparam name="TImport">Type to import.</typeparam>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.ClassMap`1.ReadOnly">
+            <summary>
+            Set the mutability of this class, sets the mutable attribute.
+            </summary>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.ClassMap`1.DynamicUpdate">
+            <summary>
+            Sets this entity to be dynamic update
+            </summary>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.ClassMap`1.DynamicInsert">
+            <summary>
+            Sets this entity to be dynamic insert
+            </summary>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.ClassMap`1.Where(System.String)">
+            <summary>
+            Defines a SQL 'where' clause used when retrieving objects of this type.
+            </summary>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.ClassMap`1.Subselect(System.String)">
+            <summary>
+            Sets the SQL statement used in subselect fetching.
+            </summary>
+            <param name="subselectSql">Subselect SQL Query</param>
+        </member>
+        <member name="P:FluentNHibernate.Mapping.ClassMap`1.Cache">
+            <summary>
+            Specify caching for this entity.
+            </summary>
+        </member>
+        <member name="P:FluentNHibernate.Mapping.ClassMap`1.Not">
+            <summary>
+            Inverse next boolean
+            </summary>
+        </member>
+        <member name="P:FluentNHibernate.Mapping.ClassMap`1.OptimisticLock">
+            <summary>
+            Sets the optimistic locking strategy
+            </summary>
+        </member>
+        <member name="M:FluentNHibernate.Automapping.AutoMapper.FlagAsMapped(System.Type)">
+            <summary>
+            Flags a type as already mapped, stop it from being auto-mapped.
+            </summary>
+        </member>
+        <member name="M:FluentNHibernate.Automapping.AutoMappingAlterationCollection.Add(System.Type)">
+            <summary>
+            Creates an instance of an IAutoMappingAlteration from a type instance, then adds it to the alterations collection.
+            </summary>
+            <param name="type">Type of an IAutoMappingAlteration</param>
+        </member>
+        <member name="M:FluentNHibernate.Automapping.AutoMappingAlterationCollection.Add``1">
+            <summary>
+            Creates an instance of an IAutoMappingAlteration from a generic type parameter, then adds it to the alterations collection.
+            </summary>
+            <typeparam name="T">Type of an IAutoMappingAlteration</typeparam>
+            <returns>Container</returns>
+        </member>
+        <member name="M:FluentNHibernate.Automapping.AutoMappingAlterationCollection.Add(FluentNHibernate.Automapping.Alterations.IAutoMappingAlteration)">
+            <summary>
+            Adds an alteration
+            </summary>
+            <param name="alteration">Alteration to add</param>
+            <returns>Container</returns>
+        </member>
+        <member name="M:FluentNHibernate.Automapping.AutoMappingAlterationCollection.AddFromAssembly(System.Reflection.Assembly)">
+            <summary>
+            Adds all alterations from an assembly
+            </summary>
+            <param name="assembly">Assembly to search</param>
+            <returns>Container</returns>
+        </member>
+        <member name="M:FluentNHibernate.Automapping.AutoMappingAlterationCollection.AddFromAssemblyOf``1">
+            <summary>
+            Adds all alterations from an assembly that contains T.
+            </summary>
+            <typeparam name="T">Type who's assembly to search</typeparam>
+            <returns>Container</returns>
+        </member>
+        <member name="M:FluentNHibernate.Automapping.AutoMappingAlterationCollection.Apply(FluentNHibernate.Automapping.AutoPersistenceModel)">
+            <summary>
+            Apply alterations to an AutoPersisteceModel
+            </summary>
+            <param name="model">AutoPersistenceModel instance to apply alterations to</param>
+        </member>
+        <member name="M:FluentNHibernate.Automapping.AutoPersistenceModel.Alterations(System.Action{FluentNHibernate.Automapping.AutoMappingAlterationCollection})">
+            <summary>
+            Specify alterations to be used with this AutoPersisteceModel
+            </summary>
+            <param name="alterationDelegate">Lambda to declare alterations</param>
+            <returns>AutoPersistenceModel</returns>
+        </member>
+        <member name="M:FluentNHibernate.Automapping.AutoPersistenceModel.UseOverridesFromAssemblyOf``1">
+            <summary>
+            Use auto mapping overrides defined in the assembly of T.
+            </summary>
+            <typeparam name="T">Type to get assembly from</typeparam>
+            <returns>AutoPersistenceModel</returns>
+        </member>
+        <member name="M:FluentNHibernate.Automapping.AutoPersistenceModel.Setup(System.Action{FluentNHibernate.AutoMappingExpressions})">
+            <summary>
+            Alter some of the configuration options that control how the automapper works
+            </summary>
+        </member>
+        <member name="M:FluentNHibernate.Automapping.AutoPersistenceModel.AddEntityAssembly(System.Reflection.Assembly)">
+            <summary>
+            Adds all entities from a specific assembly.
+            </summary>
+            <param name="assembly">Assembly to load from</param>
+        </member>
+        <member name="M:FluentNHibernate.Automapping.AutoPersistenceModel.AddTypeSource(FluentNHibernate.Automapping.ITypeSource)">
+            <summary>
+            Adds all entities from the <see cref="T:FluentNHibernate.Automapping.ITypeSource"/>.
+            </summary>
+            <param name="source"><see cref="T:FluentNHibernate.Automapping.ITypeSource"/> to load from</param>
+        </member>
+        <member name="M:FluentNHibernate.Automapping.AutoPersistenceModel.Override``1(System.Action{FluentNHibernate.Automapping.AutoMapping{``0}})">
+            <summary>
+            Override the mapping of a specific entity.
+            </summary>
+            <remarks>This may affect subclasses, depending on the alterations you do.</remarks>
+            <typeparam name="T">Entity who's mapping to override</typeparam>
+            <param name="populateMap">Lambda performing alterations</param>
+        </member>
+        <member name="M:FluentNHibernate.Automapping.AutoPersistenceModel.OverrideAll(System.Action{FluentNHibernate.Automapping.IPropertyIgnorer})">
+            <summary>
+            Override all mappings.
+            </summary>
+            <remarks>Currently only supports ignoring properties on all entities.</remarks>
+            <param name="alteration">Lambda performing alterations</param>
+        </member>
+        <member name="M:FluentNHibernate.Automapping.AutoPersistenceModel.IgnoreBase``1">
+            <summary>
+            Ignore a base type. This removes it from any mapped inheritance hierarchies, good for non-abstract layer
+            supertypes.
+            </summary>
+            <typeparam name="T">Type to ignore</typeparam>
+        </member>
+        <member name="M:FluentNHibernate.Automapping.AutoPersistenceModel.IgnoreBase(System.Type)">
+            <summary>
+            Ignore a base type. This removes it from any mapped inheritance hierarchies, good for non-abstract layer
+            supertypes.
+            </summary>
+            <param name="baseType">Type to ignore</param>
+        </member>
+        <member name="M:FluentNHibernate.Automapping.AutoPersistenceModel.IncludeBase``1">
+            <summary>
+            Explicitly includes a type to be used as part of a mapped inheritance hierarchy.
+            </summary>
+            <remarks>
+            Abstract classes are probably what you'll be using this method with. Fluent NHibernate considers abstract
+            classes to be layer supertypes, so doesn't automatically map them as part of an inheritance hierarchy. You
+            can use this method to override that behavior for a specific type; otherwise you should consider using the
+            <see cref="F:FluentNHibernate.AutoMappingExpressions.AbstractClassIsLayerSupertype"/> setting.
+            </remarks>
+            <typeparam name="T">Type to include</typeparam>
+        </member>
+        <member name="M:FluentNHibernate.Automapping.AutoPersistenceModel.IncludeBase(System.Type)">
+            <summary>
+            Explicitly includes a type to be used as part of a mapped inheritance hierarchy.
+            </summary>
+            <remarks>
+            Abstract classes are probably what you'll be using this method with. Fluent NHibernate considers abstract
+            classes to be layer supertypes, so doesn't automatically map them as part of an inheritance hierarchy. You
+            can use this method to override that behavior for a specific type; otherwise you should consider using the
+            <see cref="F:FluentNHibernate.AutoMappingExpressions.AbstractClassIsLayerSupertype"/> setting.
+            </remarks>
+            <param name="baseType">Type to include</param>
+        </member>
+        <member name="P:FluentNHibernate.Automapping.AutoPersistenceModel.Conventions">
+            <summary>
+            Alter convention discovery
+            </summary>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.SubClassPart`1.LazyLoad">
+            <summary>
+            Sets whether this subclass is lazy loaded
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="P:FluentNHibernate.Mapping.SubClassPart`1.Not">
+            <summary>
+            Inverts the next boolean
+            </summary>
+        </member>
+        <member name="T:FluentNHibernate.Conventions.IHibernateMappingConvention">
+            <summary>
+            Convention for the hibernate-mapping container for a class, this can be used to
+            set some class-wide settings such as lazy-load and access strategies.
+            </summary>
+        </member>
+        <member name="T:FluentNHibernate.Conventions.IConvention`2">
+            <summary>
+            Basic convention interface. Don't use directly.
+            </summary>
+            <typeparam name="TInspector">Inspector instance for use in retrieving values and setting expectations</typeparam>
+            <typeparam name="TInstance">Apply instance</typeparam>
+        </member>
+        <member name="T:FluentNHibernate.Conventions.IConvention">
+            <summary>
+            Ignore - this is used for generic restrictions only
+            </summary>
+        </member>
+        <member name="M:FluentNHibernate.Conventions.IConvention`2.Apply(`1)">
+            <summary>
+            Apply changes to the target
+            </summary>
+        </member>
+        <member name="T:FluentNHibernate.Conventions.IReferenceConvention">
+            <summary>
+            Reference convention, implement this interface to apply changes to Reference/many-to-one
+            relationships.
+            </summary>
+        </member>
+        <member name="T:FluentNHibernate.Conventions.IJoinedSubclassConvention">
+            <summary>
+            Joined subclass convention, implement this interface to alter joined-subclass mappings.
+            </summary>
+        </member>
+        <member name="T:FluentNHibernate.Conventions.IJoinConvention">
+            <summary>
+            Join convention, implement this interface to alter join mappings.
+            </summary>
+        </member>
+        <member name="T:FluentNHibernate.Conventions.ISubclassConvention">
+            <summary>
+            Subclass convention, implement this interface to alter subclass mappings.
+            </summary>
+        </member>
+        <member name="T:FluentNHibernate.Conventions.IHasOneConvention">
+            <summary>
+            HasOne convention, used for applying changes to one-to-one relationships.
+            </summary>
+        </member>
+        <member name="T:FluentNHibernate.Conventions.IVersionConvention">
+            <summary>
+            Version convention, implement this interface to apply changes to vesion mappings.
+            </summary>
+        </member>
+        <member name="T:FluentNHibernate.Conventions.IComponentConvention">
+            <summary>
+            Convention for a component mapping. Implement this interface to
+            apply changes to components.
+            </summary>
+        </member>
+        <member name="T:FluentNHibernate.Conventions.IDynamicComponentConvention">
+            <summary>
+            Convention for dynamic components. Implement this member to apply changes
+            to dynamic components.
+            </summary>
+        </member>
+        <member name="M:FluentNHibernate.Conventions.IConventionAcceptance`1.Accept(FluentNHibernate.Conventions.AcceptanceCriteria.IAcceptanceCriteria{`0})">
+            <summary>
+            Whether this convention will be applied to the target.
+            </summary>
+            <param name="criteria">Instace that could be supplied</param>
+            <returns>Apply on this target?</returns>
+        </member>
+        <member name="P:FluentNHibernate.Conventions.Inspections.IInspector.StringIdentifierForModel">
+            <summary>
+            Represents a string identifier for the model instance, used in conventions for a lazy
+            shortcut.
+            
+            e.g. for a ColumnMapping the StringIdentifierForModel would be the Name attribute,
+            this allows the user to find any columns with the matching name.
+            </summary>
+        </member>
+        <member name="M:FluentNHibernate.Conventions.Inspections.CollectionInspector.IsSet(System.Reflection.PropertyInfo)">
+            <summary>
+            Represents a string identifier for the model instance, used in conventions for a lazy
+            shortcut.
+            
+            e.g. for a ColumnMapping the StringIdentifierForModel would be the Name attribute,
+            this allows the user to find any columns with the matching name.
+            </summary>
+        </member>
+        <member name="M:FluentNHibernate.Conventions.Inspections.ColumnBasedInspector.GetValueFromColumns``1(System.Func{FluentNHibernate.MappingModel.ColumnMapping,System.Object})">
+            <summary>
+            Gets the requested value off the first column, as all columns are (currently) created equal
+            </summary>
+            <typeparam name="T"></typeparam>
+            <returns></returns>
+        </member>
+        <member name="M:FluentNHibernate.Conventions.Instances.GeneratorInstance.Increment">
+            <summary>
+            generates identifiers of any integral type that are unique only when no other 
+            process is inserting data into the same table. Do not use in a cluster.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:FluentNHibernate.Conventions.Instances.GeneratorInstance.Increment(System.Action{FluentNHibernate.Mapping.ParamBuilder})">
+            <summary>
+            generates identifiers of any integral type that are unique only when no other 
+            process is inserting data into the same table. Do not use in a cluster.
+            </summary>
+            <param name="paramValues">Params configuration</param>
+        </member>
+        <member name="M:FluentNHibernate.Conventions.Instances.GeneratorInstance.Identity">
+            <summary>
+            supports identity columns in DB2, MySQL, MS SQL Server and Sybase.
+            The identifier returned by the database is converted to the property type using 
+            Convert.ChangeType. Any integral property type is thus supported.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:FluentNHibernate.Conventions.Instances.GeneratorInstance.Identity(System.Action{FluentNHibernate.Mapping.ParamBuilder})">
+            <summary>
+            supports identity columns in DB2, MySQL, MS SQL Server and Sybase.
+            The identifier returned by the database is converted to the property type using 
+            Convert.ChangeType. Any integral property type is thus supported.
+            </summary>
+            <param name="paramValues">Params configuration</param>
+        </member>
+        <member name="M:FluentNHibernate.Conventions.Instances.GeneratorInstance.Sequence(System.String)">
+            <summary>
+            uses a sequence in DB2, PostgreSQL, Oracle or a generator in Firebird.
+            The identifier returned by the database is converted to the property type 
+            using Convert.ChangeType. Any integral property type is thus supported.
+            </summary>
+            <param name="sequenceName"></param>
+            <returns></returns>
+        </member>
+        <member name="M:FluentNHibernate.Conventions.Instances.GeneratorInstance.Sequence(System.String,System.Action{FluentNHibernate.Mapping.ParamBuilder})">
+            <summary>
+            uses a sequence in DB2, PostgreSQL, Oracle or a generator in Firebird.
+            The identifier returned by the database is converted to the property type 
+            using Convert.ChangeType. Any integral property type is thus supported.
+            </summary>
+            <param name="sequenceName"></param>
+            <param name="paramValues">Params configuration</param>
+        </member>
+        <member name="M:FluentNHibernate.Conventions.Instances.GeneratorInstance.HiLo(System.String,System.String,System.String)">
+            <summary>
+            uses a hi/lo algorithm to efficiently generate identifiers of any integral type, 
+            given a table and column (by default hibernate_unique_key and next_hi respectively) 
+            as a source of hi values. The hi/lo algorithm generates identifiers that are unique 
+            only for a particular database. Do not use this generator with a user-supplied connection.
+            requires a "special" database table to hold the next available "hi" value
+            </summary>
+            <param name="table"></param>
+            <param name="column"></param>
+            <param name="maxLo"></param>
+            <returns></returns>
+        </member>
+        <member name="M:FluentNHibernate.Conventions.Instances.GeneratorInstance.HiLo(System.String,System.String,System.String,System.Action{FluentNHibernate.Mapping.ParamBuilder})">
+            <summary>
+            uses a hi/lo algorithm to efficiently generate identifiers of any integral type, 
+            given a table and column (by default hibernate_unique_key and next_hi respectively) 
+            as a source of hi values. The hi/lo algorithm generates identifiers that are unique 
+            only for a particular database. Do not use this generator with a user-supplied connection.
+            requires a "special" database table to hold the next available "hi" value
+            </summary>
+            <param name="table"></param>
+            <param name="column"></param>
+            <param name="maxLo"></param>
+            <param name="paramValues">Params configuration</param>
+        </member>
+        <member name="M:FluentNHibernate.Conventions.Instances.GeneratorInstance.HiLo(System.String)">
+            <summary>
+            uses a hi/lo algorithm to efficiently generate identifiers of any integral type, 
+            given a table and column (by default hibernate_unique_key and next_hi respectively) 
+            as a source of hi values. The hi/lo algorithm generates identifiers that are unique 
+            only for a particular database. Do not use this generator with a user-supplied connection.
+            requires a "special" database table to hold the next available "hi" value
+            </summary>
+            <param name="maxLo"></param>
+            <returns></returns>
+        </member>
+        <member name="M:FluentNHibernate.Conventions.Instances.GeneratorInstance.HiLo(System.String,System.Action{FluentNHibernate.Mapping.ParamBuilder})">
+            <summary>
+            uses a hi/lo algorithm to efficiently generate identifiers of any integral type, 
+            given a table and column (by default hibernate_unique_key and next_hi respectively) 
+            as a source of hi values. The hi/lo algorithm generates identifiers that are unique 
+            only for a particular database. Do not use this generator with a user-supplied connection.
+            requires a "special" database table to hold the next available "hi" value
+            </summary>
+            <param name="maxLo"></param>
+            <param name="paramValues">Params configuration</param>
+        </member>
+        <member name="M:FluentNHibernate.Conventions.Instances.GeneratorInstance.SeqHiLo(System.String,System.String)">
+            <summary>
+            uses an Oracle-style sequence (where supported)
+            </summary>
+            <param name="sequence"></param>
+            <param name="maxLo"></param>
+            <returns></returns>
+        </member>
+        <member name="M:FluentNHibernate.Conventions.Instances.GeneratorInstance.SeqHiLo(System.String,System.String,System.Action{FluentNHibernate.Mapping.ParamBuilder})">
+            <summary>
+            uses an Oracle-style sequence (where supported)
+            </summary>
+            <param name="sequence"></param>
+            <param name="maxLo"></param>
+            <param name="paramValues">Params configuration</param>
+        </member>
+        <member name="M:FluentNHibernate.Conventions.Instances.GeneratorInstance.UuidHex(System.String)">
+            <summary>
+            uses System.Guid and its ToString(string format) method to generate identifiers
+            of type string. The length of the string returned depends on the configured format. 
+            </summary>
+            <param name="format">http://msdn.microsoft.com/en-us/library/97af8hh4.aspx</param>
+            <returns></returns>
+        </member>
+        <member name="M:FluentNHibernate.Conventions.Instances.GeneratorInstance.UuidHex(System.String,System.Action{FluentNHibernate.Mapping.ParamBuilder})">
+            <summary>
+            uses System.Guid and its ToString(string format) method to generate identifiers
+            of type string. The length of the string returned depends on the configured format. 
+            </summary>
+            <param name="format">http://msdn.microsoft.com/en-us/library/97af8hh4.aspx</param>
+            <param name="paramValues">Params configuration</param>
+        </member>
+        <member name="M:FluentNHibernate.Conventions.Instances.GeneratorInstance.UuidString">
+            <summary>
+            uses a new System.Guid to create a byte[] that is converted to a string.  
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:FluentNHibernate.Conventions.Instances.GeneratorInstance.UuidString(System.Action{FluentNHibernate.Mapping.ParamBuilder})">
+            <summary>
+            uses a new System.Guid to create a byte[] that is converted to a string.  
+            </summary>
+            <param name="paramValues">Params configuration</param>
+        </member>
+        <member name="M:FluentNHibernate.Conventions.Instances.GeneratorInstance.Guid">
+            <summary>
+            uses a new System.Guid as the identifier. 
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:FluentNHibernate.Conventions.Instances.GeneratorInstance.Guid(System.Action{FluentNHibernate.Mapping.ParamBuilder})">
+            <summary>
+            uses a new System.Guid as the identifier. 
+            </summary>
+            <param name="paramValues">Params configuration</param>
+        </member>
+        <member name="M:FluentNHibernate.Conventions.Instances.GeneratorInstance.GuidComb">
+            <summary>
+            Recommended for Guid identifiers!
+            uses the algorithm to generate a new System.Guid described by Jimmy Nilsson 
+            in the article http://www.informit.com/articles/article.asp?p=25862. 
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:FluentNHibernate.Conventions.Instances.GeneratorInstance.GuidComb(System.Action{FluentNHibernate.Mapping.ParamBuilder})">
+            <summary>
+            Recommended for Guid identifiers!
+            uses the algorithm to generate a new System.Guid described by Jimmy Nilsson 
+            in the article http://www.informit.com/articles/article.asp?p=25862. 
+            </summary>
+            <param name="paramValues">Params configuration</param>
+        </member>
+        <member name="M:FluentNHibernate.Conventions.Instances.GeneratorInstance.Assigned">
+            <summary>
+            lets the application to assign an identifier to the object before Save() is called. 
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:FluentNHibernate.Conventions.Instances.GeneratorInstance.Assigned(System.Action{FluentNHibernate.Mapping.ParamBuilder})">
+            <summary>
+            lets the application to assign an identifier to the object before Save() is called. 
+            </summary>
+            <param name="paramValues">Params configuration</param>
+        </member>
+        <member name="M:FluentNHibernate.Conventions.Instances.GeneratorInstance.Native">
+            <summary>
+            picks identity, sequence or hilo depending upon the capabilities of the underlying database. 
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:FluentNHibernate.Conventions.Instances.GeneratorInstance.Native(System.Action{FluentNHibernate.Mapping.ParamBuilder})">
+            <summary>
+            picks identity, sequence or hilo depending upon the capabilities of the underlying database. 
+            </summary>
+            <param name="paramValues">Params configuration</param>
+        </member>
+        <member name="M:FluentNHibernate.Conventions.Instances.GeneratorInstance.Native(System.String)">
+            <summary>
+            picks identity, sequence or hilo depending upon the capabilities of the underlying database. 
+            </summary>
+        </member>
+        <member name="M:FluentNHibernate.Conventions.Instances.GeneratorInstance.Native(System.String,System.Action{FluentNHibernate.Mapping.ParamBuilder})">
+            <summary>
+            picks identity, sequence or hilo depending upon the capabilities of the underlying database. 
+            </summary>
+        </member>
+        <member name="M:FluentNHibernate.Conventions.Instances.GeneratorInstance.Foreign(System.String)">
+            <summary>
+            uses the identifier of another associated object. Usually used in conjunction with a one-to-one primary key association. 
+            </summary>
+            <param name="property"></param>
+            <returns></returns>
+        </member>
+        <member name="M:FluentNHibernate.Conventions.Instances.GeneratorInstance.Foreign(System.String,System.Action{FluentNHibernate.Mapping.ParamBuilder})">
+            <summary>
+            uses the identifier of another associated object. Usually used in conjunction with a one-to-one primary key association. 
+            </summary>
+            <param name="property"></param>
+            <param name="paramValues">Params configuration</param>
+        </member>
+        <member name="M:FluentNHibernate.Conventions.Instances.IndexInstance.Column(System.String)">
+            <summary>
+            Adds a column to the index if columns have not yet been specified
+            </summary>
+            <param name="columnName">The column name to add</param>
+        </member>
+        <member name="M:FluentNHibernate.Conventions.Instances.IndexManyToManyInstance.Column(System.String)">
+            <summary>
+            Adds a column to the index if columns have not yet been specified
+            </summary>
+            <param name="columnName">The column name to add</param>
+        </member>
+        <member name="T:FluentNHibernate.Conventions.IClassConvention">
+            <summary>
+            Convention for a single class mapping. Implement this interface to apply
+            changes to class mappings.
+            </summary>
+        </member>
+        <member name="T:FluentNHibernate.Conventions.IIdConvention">
+            <summary>
+            Convention for identities, implement this interface to apply changes to
+            identity mappings.
+            </summary>
+        </member>
+        <member name="T:FluentNHibernate.Conventions.IPropertyConvention">
+            <summary>
+            Property convention, implement this interface to apply changes to
+            property mappings.
+            </summary>
+        </member>
+        <member name="M:FluentNHibernate.Conventions.EnumerableExtensionsForConventions.Contains``1(System.Collections.Generic.IEnumerable{``0},System.String)">
+            <summary>
+            Checks whether a collection contains an inspector identified by the string value.
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="collection"></param>
+            <param name="expected"></param>
+            <returns></returns>
+        </member>
+        <member name="M:FluentNHibernate.Conventions.EnumerableExtensionsForConventions.Contains``1(System.Collections.Generic.IEnumerable{``0},System.Func{``0,System.Boolean})">
+            <summary>
+            Checks whether a collection contains an inspector identified by a predicate.
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="collection"></param>
+            <param name="prediate"></param>
+            <returns></returns>
+        </member>
+        <member name="T:FluentNHibernate.Conventions.ManyToManyTableNameConvention">
+            <summary>
+            Base convention for specifying your own many-to-many table naming style. Implement
+            the abstract members defined by this class to control how your join tables are named
+            for uni and bi-directional many-to-many's.
+            </summary>
+        </member>
+        <member name="M:FluentNHibernate.Conventions.ManyToManyTableNameConvention.GetBiDirectionalTableName(FluentNHibernate.Conventions.Inspections.IManyToManyCollectionInspector,FluentNHibernate.Conventions.Inspections.IManyToManyCollectionInspector)">
+            <summary>
+            Gets the name used for bi-directional many-to-many tables. Implement this member to control how
+            your join table is named for bi-directional relationships.
+            </summary>
+            <remarks>
+            This method will be called once per bi-directional relationship; once one side of the relationship
+            has been saved, then the other side will assume that name aswell.
+            </remarks>
+            <param name="collection">Main collection</param>
+            <param name="otherSide">Inverse collection</param>
+            <returns>Many-to-many table name</returns>
+        </member>
+        <member name="M:FluentNHibernate.Conventions.ManyToManyTableNameConvention.GetUniDirectionalTableName(FluentNHibernate.Conventions.Inspections.IManyToManyCollectionInspector)">
+            <summary>
+            Gets the name used for uni-directional many-to-many tables. Implement this member to control how
+            your join table is named for uni-directional relationships.
+            </summary>
+            <param name="collection">Main collection</param>
+            <returns>Many-to-many table name</returns>
+        </member>
+        <member name="M:FluentNHibernate.SeparateSubclassVisitor.SortByDistanceFrom(System.Type,System.Collections.Generic.IEnumerable{FluentNHibernate.Mapping.Providers.IIndeterminateSubclassMappingProvider})">
+            <summary>
+            Takes a type that represents the level in the class/subclass-hiearchy that we're starting from, the parent,
+            this can be a class or subclass; also takes a list of subclass providers. The providers are then iterated
+            and added to a dictionary key'd by the types "distance" from the parentType; distance being the number of levels
+            between parentType and the subclass-type.
+            </summary>
+            <param name="parentType">Starting point, parent type.</param>
+            <param name="providers">List of subclasses</param>
+            <returns>Dictionary key'd by the distance from the parentType.</returns>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.GeneratorBuilder.Identity">
+            <summary>
+            supports identity columns in DB2, MySQL, MS SQL Server and Sybase.
+            The identifier returned by the database is converted to the property type using 
+            Convert.ChangeType. Any integral property type is thus supported.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.GeneratorBuilder.Identity(System.Action{FluentNHibernate.Mapping.ParamBuilder})">
+            <summary>
+            supports identity columns in DB2, MySQL, MS SQL Server and Sybase.
+            The identifier returned by the database is converted to the property type using 
+            Convert.ChangeType. Any integral property type is thus supported.
+            </summary>
+            <param name="paramValues">Params configuration</param>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.GeneratorBuilder.Sequence(System.String)">
+            <summary>
+            uses a sequence in DB2, PostgreSQL, Oracle or a generator in Firebird.
+            The identifier returned by the database is converted to the property type 
+            using Convert.ChangeType. Any integral property type is thus supported.
+            </summary>
+            <param name="sequenceName"></param>
+            <returns></returns>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.GeneratorBuilder.Sequence(System.String,System.Action{FluentNHibernate.Mapping.ParamBuilder})">
+            <summary>
+            uses a sequence in DB2, PostgreSQL, Oracle or a generator in Firebird.
+            The identifier returned by the database is converted to the property type 
+            using Convert.ChangeType. Any integral property type is thus supported.
+            </summary>
+            <param name="sequenceName"></param>
+            <param name="paramValues">Params configuration</param>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.GeneratorBuilder.HiLo(System.String,System.String,System.String)">
+            <summary>
+            uses a hi/lo algorithm to efficiently generate identifiers of any integral type, 
+            given a table and column (by default hibernate_unique_key and next_hi respectively) 
+            as a source of hi values. The hi/lo algorithm generates identifiers that are unique 
+            only for a particular database. Do not use this generator with a user-supplied connection.
+            requires a "special" database table to hold the next available "hi" value
+            </summary>
+            <param name="table"></param>
+            <param name="column"></param>
+            <param name="maxLo"></param>
+            <returns></returns>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.GeneratorBuilder.HiLo(System.String,System.String,System.String,System.Action{FluentNHibernate.Mapping.ParamBuilder})">
+            <summary>
+            uses a hi/lo algorithm to efficiently generate identifiers of any integral type, 
+            given a table and column (by default hibernate_unique_key and next_hi respectively) 
+            as a source of hi values. The hi/lo algorithm generates identifiers that are unique 
+            only for a particular database. Do not use this generator with a user-supplied connection.
+            requires a "special" database table to hold the next available "hi" value
+            </summary>
+            <param name="table"></param>
+            <param name="column"></param>
+            <param name="maxLo"></param>
+            <param name="paramValues">Params configuration</param>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.GeneratorBuilder.HiLo(System.String)">
+            <summary>
+            uses a hi/lo algorithm to efficiently generate identifiers of any integral type, 
+            given a table and column (by default hibernate_unique_key and next_hi respectively) 
+            as a source of hi values. The hi/lo algorithm generates identifiers that are unique 
+            only for a particular database. Do not use this generator with a user-supplied connection.
+            requires a "special" database table to hold the next available "hi" value
+            </summary>
+            <param name="maxLo"></param>
+            <returns></returns>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.GeneratorBuilder.HiLo(System.String,System.Action{FluentNHibernate.Mapping.ParamBuilder})">
+            <summary>
+            uses a hi/lo algorithm to efficiently generate identifiers of any integral type, 
+            given a table and column (by default hibernate_unique_key and next_hi respectively) 
+            as a source of hi values. The hi/lo algorithm generates identifiers that are unique 
+            only for a particular database. Do not use this generator with a user-supplied connection.
+            requires a "special" database table to hold the next available "hi" value
+            </summary>
+            <param name="maxLo"></param>
+            <param name="paramValues">Params configuration</param>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.GeneratorBuilder.SeqHiLo(System.String,System.String)">
+            <summary>
+            uses an Oracle-style sequence (where supported)
+            </summary>
+            <param name="sequence"></param>
+            <param name="maxLo"></param>
+            <returns></returns>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.GeneratorBuilder.SeqHiLo(System.String,System.String,System.Action{FluentNHibernate.Mapping.ParamBuilder})">
+            <summary>
+            uses an Oracle-style sequence (where supported)
+            </summary>
+            <param name="sequence"></param>
+            <param name="maxLo"></param>
+            <param name="paramValues">Params configuration</param>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.GeneratorBuilder.UuidHex(System.String)">
+            <summary>
+            uses System.Guid and its ToString(string format) method to generate identifiers
+            of type string. The length of the string returned depends on the configured format. 
+            </summary>
+            <param name="format">http://msdn.microsoft.com/en-us/library/97af8hh4.aspx</param>
+            <returns></returns>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.GeneratorBuilder.UuidHex(System.String,System.Action{FluentNHibernate.Mapping.ParamBuilder})">
+            <summary>
+            uses System.Guid and its ToString(string format) method to generate identifiers
+            of type string. The length of the string returned depends on the configured format. 
+            </summary>
+            <param name="format">http://msdn.microsoft.com/en-us/library/97af8hh4.aspx</param>
+            <param name="paramValues">Params configuration</param>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.GeneratorBuilder.UuidString">
+            <summary>
+            uses a new System.Guid to create a byte[] that is converted to a string.  
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.GeneratorBuilder.UuidString(System.Action{FluentNHibernate.Mapping.ParamBuilder})">
+            <summary>
+            uses a new System.Guid to create a byte[] that is converted to a string.  
+            </summary>
+            <param name="paramValues">Params configuration</param>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.GeneratorBuilder.Guid">
+            <summary>
+            uses a new System.Guid as the identifier. 
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.SubclassMap`1.Join(System.String,System.Action{FluentNHibernate.Mapping.JoinPart{`0}})">
+            <summary>
+            Sets additional tables for the class via the NH 2.0 Join element, this only works if
+            the hierarchy you're mapping has a discriminator.
+            </summary>
+            <param name="tableName">Joined table name</param>
+            <param name="action">Joined table mapping</param>
+        </member>
+        <member name="T:FluentNHibernate.Cfg.AutoMappingsContainer">
+            <summary>
+            Container for automatic mappings
+            </summary>
+        </member>
+        <member name="M:FluentNHibernate.Cfg.AutoMappingsContainer.Add(System.Func{FluentNHibernate.Automapping.AutoPersistenceModel})">
+            <summary>
+            Add automatic mappings
+            </summary>
+            <param name="model">Lambda returning an auto mapping setup</param>
+            <returns>Auto mappings configuration</returns>
+        </member>
+        <member name="M:FluentNHibernate.Cfg.AutoMappingsContainer.Add(FluentNHibernate.Automapping.AutoPersistenceModel)">
+            <summary>
+            Add automatic mappings
+            </summary>
+            <param name="model">Auto mapping setup</param>
+            <returns>Auto mappings configuration</returns>
+        </member>
+        <member name="M:FluentNHibernate.Cfg.AutoMappingsContainer.ExportTo(System.String)">
+            <summary>
+            Sets the export location for generated mappings
+            </summary>
+            <param name="path">Path to folder for mappings</param>
+            <returns>Auto mappings configuration</returns>
+        </member>
+        <member name="M:FluentNHibernate.Cfg.AutoMappingsContainer.Apply(NHibernate.Cfg.Configuration)">
+            <summary>
+            Applies any added mappings to the NHibernate Configuration
+            </summary>
+            <param name="cfg">NHibernate Configuration instance</param>
+        </member>
+        <member name="P:FluentNHibernate.Cfg.AutoMappingsContainer.WasUsed">
+            <summary>
+            Gets whether any mappings were added
+            </summary>
+        </member>
+        <member name="M:FluentNHibernate.Cfg.Db.PersistenceConfiguration`2.ProxyFactoryFactory(System.String)">
+            <summary>
+            Sets the proxyfactory.factory_class property.
+            NOTE: NHibernate 2.1 only
+            </summary>
+            <param name="proxyFactoryFactoryClass">factory class</param>
+            <returns>Configuration</returns>
+        </member>
+        <member name="M:FluentNHibernate.Cfg.Db.PersistenceConfiguration`2.AdoNetBatchSize(System.Int32)">
+            <summary>
+            Sets the adonet.batch_size property.
+            </summary>
+            <param name="size">Batch size</param>
+            <returns>Configuration</returns>
+        </member>
+        <member name="M:FluentNHibernate.Cfg.Db.PersistenceConfiguration`2.CurrentSessionContext(System.String)">
+            <summary>
+            Sets the current_session_context_class property.
+            </summary>
+            <param name="currentSessionContextClass">current session context class</param>
+            <returns>Configuration</returns>
+        </member>
+        <member name="M:FluentNHibernate.Cfg.Db.PersistenceConfiguration`2.CurrentSessionContext``1">
+            <summary>
+            Sets the current_session_context_class property.
+            </summary>
+            <typeparam name="TSessionContext">Implementation of ICurrentSessionContext to use</typeparam>
+            <returns>Configuration</returns>
+        </member>
+        <member name="P:FluentNHibernate.Cfg.Db.OracleClientConfiguration.Oracle9">
+            <summary>
+            Initializes a new instance of the <see cref="T:FluentNHibernate.Cfg.Db.OracleClientConfiguration"/> class using the
+            MS Oracle Client (System.Data.OracleClient) library specifying the Oracle 9i dialect.
+            </summary>
+        </member>
+        <member name="P:FluentNHibernate.Cfg.Db.OracleClientConfiguration.Oracle10">
+            <summary>
+            Initializes a new instance of the <see cref="T:FluentNHibernate.Cfg.Db.OracleClientConfiguration"/> class using the
+            MS Oracle Client (System.Data.OracleClient) library specifying the Oracle 10g dialect.
+            This allows for ANSI join syntax.
+            </summary>
+        </member>
+        <member name="P:FluentNHibernate.Cfg.Db.OracleConfiguration.Oracle9">
+            <summary>
+            Initializes a new instance of the <see cref="T:FluentNHibernate.Cfg.Db.OracleConfiguration"/> class using the
+            Oracle Data Provider (Oracle.DataAccess) library specifying the Oracle 9i dialect.
+            The Oracle.DataAccess library must be available to the calling application/library.
+            </summary>
+        </member>
+        <member name="P:FluentNHibernate.Cfg.Db.OracleConfiguration.Oracle10">
+            <summary>
+            Initializes a new instance of the <see cref="T:FluentNHibernate.Cfg.Db.OracleConfiguration"/> class using the
+            Oracle Data Provider (Oracle.DataAccess) library specifying the Oracle 10g dialect.
+            The Oracle.DataAccess library must be available to the calling application/library.
+            This allows for ANSI join syntax.
+            </summary>
+        </member>
+        <member name="M:FluentNHibernate.Cfg.Db.OracleConnectionStringBuilder.Server(System.String)">
+            <summary>
+            Specifies the server to connect. This can be either the DNS name of the
+            server or the IP (as a string).
+            </summary>
+            <param name="server">The server.</param>
+            <returns></returns>
+        </member>
+        <member name="M:FluentNHibernate.Cfg.Db.OracleConnectionStringBuilder.Instance(System.String)">
+            <summary>
+            Specifies the instance (database name) to use.  This can be the short name or the
+            fully qualified name (Oracle service name).
+            </summary>
+            <param name="instance">The instance.</param>
+            <returns></returns>
+        </member>
+        <member name="M:FluentNHibernate.Cfg.Db.OracleConnectionStringBuilder.Username(System.String)">
+            <summary>
+            Specifies the name of the user account accessing the database.
+            </summary>
+            <param name="username">The username.</param>
+            <returns></returns>
+        </member>
+        <member name="M:FluentNHibernate.Cfg.Db.OracleConnectionStringBuilder.Password(System.String)">
+            <summary>
+            Specifies the password of the user account accessing the database.
+            </summary>
+            <param name="password">The password.</param>
+            <returns></returns>
+        </member>
+        <member name="M:FluentNHibernate.Cfg.Db.OracleConnectionStringBuilder.Port(System.Int32)">
+            <summary>
+            Optional. Ports the specified port the oracle database is running on.  This defaults to 1521.
+            </summary>
+            <param name="port">The port.</param>
+            <returns></returns>
+        </member>
+        <member name="M:FluentNHibernate.Cfg.Db.OracleConnectionStringBuilder.Pooling(System.Boolean)">
+            <summary>
+            Enable or disable pooling connections for this data configuration.
+            </summary>
+            <param name="pooling">if set to <c>true</c> enable pooling.</param>
+            <returns></returns>
+        </member>
+        <member name="M:FluentNHibernate.Cfg.Db.OracleConnectionStringBuilder.StatementCacheSize(System.Int32)">
+            <summary>
+            Specifies the SQL statement cache size to use for this connection.
+            </summary>
+            <param name="cacheSize">Size of the cache.</param>
+            <returns></returns>
+        </member>
+        <member name="M:FluentNHibernate.Cfg.Db.OracleConnectionStringBuilder.OtherOptions(System.String)">
+            <summary>
+            Specifies, as a string, other Oracle options to pass to the connection.
+            </summary>
+            <param name="otherOptions">The other options.</param>
+            <returns></returns>
+        </member>
+        <member name="P:FluentNHibernate.Cfg.Db.OracleDataClientConfiguration.Oracle9">
+            <summary>
+            Initializes a new instance of the <see cref="T:FluentNHibernate.Cfg.Db.OracleDataClientConfiguration"/> class using the
+            Oracle Data Provider (Oracle.DataAccess) library specifying the Oracle 9i dialect. 
+            The Oracle.DataAccess library must be available to the calling application/library. 
+            </summary>
+        </member>
+        <member name="P:FluentNHibernate.Cfg.Db.OracleDataClientConfiguration.Oracle10">
+            <summary>
+            Initializes a new instance of the <see cref="T:FluentNHibernate.Cfg.Db.OracleDataClientConfiguration"/> class using the
+            Oracle Data Provider (Oracle.DataAccess) library specifying the Oracle 10g dialect. 
+            The Oracle.DataAccess library must be available to the calling application/library. 
+            </summary>
+        </member>
+        <member name="T:FluentNHibernate.Cfg.FluentConfiguration">
+            <summary>
+            Fluent configuration API for NHibernate
+            </summary>
+        </member>
+        <member name="M:FluentNHibernate.Cfg.FluentConfiguration.Database(System.Func{FluentNHibernate.Cfg.Db.IPersistenceConfigurer})">
+            <summary>
+            Apply database settings
+            </summary>
+            <param name="config">Lambda returning database configuration</param>
+            <returns>Fluent configuration</returns>
+        </member>
+        <member name="M:FluentNHibernate.Cfg.FluentConfiguration.Database(FluentNHibernate.Cfg.Db.IPersistenceConfigurer)">
+            <summary>
+            Apply database settings
+            </summary>
+            <param name="config">Database configuration instance</param>
+            <returns>Fluent configuration</returns>
+        </member>
+        <member name="M:FluentNHibernate.Cfg.FluentConfiguration.Mappings(System.Action{FluentNHibernate.Cfg.MappingConfiguration})">
+            <summary>
+            Apply mappings to NHibernate
+            </summary>
+            <param name="mappings">Lambda used to apply mappings</param>
+            <returns>Fluent configuration</returns>
+        </member>
+        <member name="M:FluentNHibernate.Cfg.FluentConfiguration.ExposeConfiguration(System.Action{NHibernate.Cfg.Configuration})">
+            <summary>
+            Allows altering of the raw NHibernate Configuration object before creation
+            </summary>
+            <param name="config">Lambda used to alter Configuration</param>
+            <returns>Fluent configuration</returns>
+        </member>
+        <member name="M:FluentNHibernate.Cfg.FluentConfiguration.BuildSessionFactory">
+            <summary>
+            Verify's the configuration and instructs NHibernate to build a SessionFactory.
+            </summary>
+            <returns>ISessionFactory from supplied settings.</returns>
+        </member>
+        <member name="M:FluentNHibernate.Cfg.FluentConfiguration.BuildConfiguration">
+            <summary>
+            Verifies the configuration and populates the NHibernate Configuration instance.
+            </summary>
+            <returns>NHibernate Configuration instance</returns>
+        </member>
+        <member name="M:FluentNHibernate.Cfg.FluentConfiguration.CreateConfigurationException(System.Exception)">
+            <summary>
+            Creates an exception based on the current state of the configuration.
+            </summary>
+            <param name="innerException">Inner exception</param>
+            <returns>FluentConfigurationException with state</returns>
+        </member>
+        <member name="T:FluentNHibernate.Cfg.Fluently">
+            <summary>
+            Fluently configure NHibernate
+            </summary>
+        </member>
+        <member name="M:FluentNHibernate.Cfg.Fluently.Configure">
+            <summary>
+            Begin fluently configuring NHibernate
+            </summary>
+            <returns>Fluent Configuration</returns>
+        </member>
+        <member name="M:FluentNHibernate.Cfg.Fluently.Configure(NHibernate.Cfg.Configuration)">
+            <summary>
+            Begin fluently configuring NHibernate
+            </summary>
+            <param name="cfg">Instance of an NHibernate Configuration</param>
+            <returns>Fluent Configuration</returns>
+        </member>
+        <member name="T:FluentNHibernate.Cfg.FluentMappingsContainer">
+            <summary>
+            Container for fluent mappings
+            </summary>
+        </member>
+        <member name="M:FluentNHibernate.Cfg.FluentMappingsContainer.AddFromAssemblyOf``1">
+            <summary>
+            Add all fluent mappings in the assembly that contains T.
+            </summary>
+            <typeparam name="T">Type from the assembly</typeparam>
+            <returns>Fluent mappings configuration</returns>
+        </member>
+        <member name="M:FluentNHibernate.Cfg.FluentMappingsContainer.AddFromAssembly(System.Reflection.Assembly)">
+            <summary>
+            Add all fluent mappings in the assembly
+            </summary>
+            <param name="assembly">Assembly to add mappings from</param>
+            <returns>Fluent mappings configuration</returns>
+        </member>
+        <member name="M:FluentNHibernate.Cfg.FluentMappingsContainer.Add``1">
+            <summary>
+            Adds a single <see cref="!:IClassMap"/> represented by the specified type.
+            </summary>
+            <returns>Fluent mappings configuration</returns>
+        </member>
+        <member name="M:FluentNHibernate.Cfg.FluentMappingsContainer.Add(System.Type)">
+            <summary>
+            Adds a single <see cref="!:IClassMap"/> represented by the specified type.
+            </summary>
+            <param name="type">The type.</param>
+            <returns>Fluent mappings configuration</returns>
+        </member>
+        <member name="M:FluentNHibernate.Cfg.FluentMappingsContainer.ExportTo(System.String)">
+            <summary>
+            Sets the export location for generated mappings
+            </summary>
+            <param name="path">Path to folder for mappings</param>
+            <returns>Fluent mappings configuration</returns>
+        </member>
+        <member name="M:FluentNHibernate.Cfg.FluentMappingsContainer.Apply(NHibernate.Cfg.Configuration)">
+            <summary>
+            Applies any added mappings to the NHibernate Configuration
+            </summary>
+            <param name="cfg">NHibernate Configuration instance</param>
+        </member>
+        <member name="P:FluentNHibernate.Cfg.FluentMappingsContainer.Conventions">
+            <summary>
+            Alter convention discovery
+            </summary>
+        </member>
+        <member name="P:FluentNHibernate.Cfg.FluentMappingsContainer.WasUsed">
+            <summary>
+            Gets whether any mappings were added
+            </summary>
+        </member>
+        <member name="T:FluentNHibernate.Cfg.HbmMappingsContainer">
+            <summary>
+            Container for Hbm mappings
+            </summary>
+        </member>
+        <member name="M:FluentNHibernate.Cfg.HbmMappingsContainer.AddClasses(System.Type[])">
+            <summary>
+            Add explicit classes with Hbm mappings
+            </summary>
+            <param name="types">List of types to map</param>
+            <returns>Hbm mappings configuration</returns>
+        </member>
+        <member name="M:FluentNHibernate.Cfg.HbmMappingsContainer.AddFromAssemblyOf``1">
+            <summary>
+            Add all Hbm mappings in the assembly that contains T.
+            </summary>
+            <typeparam name="T">Type from the assembly</typeparam>
+            <returns>Hbm mappings configuration</returns>
+        </member>
+        <member name="M:FluentNHibernate.Cfg.HbmMappingsContainer.AddFromAssembly(System.Reflection.Assembly)">
+            <summary>
+            Add all Hbm mappings in the assembly
+            </summary>
+            <param name="assembly">Assembly to add mappings from</param>
+            <returns>Hbm mappings configuration</returns>
+        </member>
+        <member name="M:FluentNHibernate.Cfg.HbmMappingsContainer.Apply(NHibernate.Cfg.Configuration)">
+            <summary>
+            Applies any added mappings to the NHibernate Configuration
+            </summary>
+            <param name="cfg">NHibernate Configuration instance</param>
+        </member>
+        <member name="P:FluentNHibernate.Cfg.HbmMappingsContainer.WasUsed">
+            <summary>
+            Gets whether any mappings were added
+            </summary>
+        </member>
+        <member name="T:FluentNHibernate.Cfg.MappingConfiguration">
+            <summary>
+            Fluent mapping configuration
+            </summary>
+        </member>
+        <member name="M:FluentNHibernate.Cfg.MappingConfiguration.Apply(NHibernate.Cfg.Configuration)">
+            <summary>
+            Applies any mappings to the NHibernate Configuration
+            </summary>
+            <param name="cfg">NHibernate Configuration instance</param>
+        </member>
+        <member name="P:FluentNHibernate.Cfg.MappingConfiguration.FluentMappings">
+            <summary>
+            Fluent mappings
+            </summary>
+        </member>
+        <member name="P:FluentNHibernate.Cfg.MappingConfiguration.AutoMappings">
+            <summary>
+            Automatic mapping configurations
+            </summary>
+        </member>
+        <member name="P:FluentNHibernate.Cfg.MappingConfiguration.HbmMappings">
+            <summary>
+            Hbm mappings
+            </summary>
+        </member>
+        <member name="P:FluentNHibernate.Cfg.MappingConfiguration.WasUsed">
+            <summary>
+            Get whether any mappings of any kind were added
+            </summary>
+        </member>
+        <member name="T:FluentNHibernate.Conventions.IConventionFinder">
+            <summary>
+            Convention finder - used to search through assemblies for types that implement a specific convention interface.
+            </summary>
+        </member>
+        <member name="M:FluentNHibernate.Conventions.IConventionFinder.AddAssembly(System.Reflection.Assembly)">
+            <summary>
+            Add an assembly to be queried.
+            </summary>
+            <remarks>
+            All convention types must have a parameterless constructor, or a single parameter of <see cref="T:FluentNHibernate.Conventions.IConventionFinder"/>.
+            </remarks>
+            <param name="assembly">Assembly instance to query</param>
+        </member>
+        <member name="M:FluentNHibernate.Conventions.IConventionFinder.AddFromAssemblyOf``1">
+            <summary>
+            Adds all conventions found in the assembly that contains <typeparam name="T"/>.
+            </summary>
+            <remarks>
+            All convention types must have a parameterless constructor, or a single parameter of <see cref="T:FluentNHibernate.Conventions.IConventionFinder"/>.
+            </remarks>
+        </member>
+        <member name="M:FluentNHibernate.Conventions.IConventionFinder.Add``1">
+            <summary>
+            Add a single convention by type.
+            </summary>
+            <remarks>
+            Type must have a parameterless constructor, or a single parameter of <see cref="T:FluentNHibernate.Conventions.IConventionFinder"/>.
+            </remarks>
+            <typeparam name="T">Convention type</typeparam>
+        </member>
+        <member name="M:FluentNHibernate.Conventions.IConventionFinder.Add(System.Type)">
+            <summary>
+            Add a single convention by type.
+            </summary>
+            <remarks>
+            Types must have a parameterless constructor, or a single parameter of <see cref="T:FluentNHibernate.Conventions.IConventionFinder"/>.
+            </remarks>
+            <param name="type">Type of convention</param>
+        </member>
+        <member name="M:FluentNHibernate.Conventions.IConventionFinder.Add``1(``0)">
+            <summary>
+            Add an instance of a convention.
+            </summary>
+            <remarks>
+            Useful for supplying conventions that require extra constructor parameters.
+            </remarks>
+            <typeparam name="T">Convention type</typeparam>
+            <param name="instance">Instance of convention</param>
+        </member>
+        <member name="M:FluentNHibernate.Conventions.IConventionFinder.Find``1">
+            <summary>
+            Find any conventions implementing T.
+            </summary>
+            <typeparam name="T">Convention interface type</typeparam>
+            <returns>IEnumerable of T</returns>
+        </member>
+        <member name="T:FluentNHibernate.Conventions.DefaultConventionFinder">
+            <summary>
+            Default convention finder - doesn't do anything special.
+            </summary>
+        </member>
+        <member name="M:FluentNHibernate.Conventions.DefaultConventionFinder.Find``1">
+            <summary>
+            Find any conventions implementing T.
+            </summary>
+            <typeparam name="T">Convention interface type</typeparam>
+            <returns>IEnumerable of T</returns>
+        </member>
+        <member name="M:FluentNHibernate.Conventions.DefaultConventionFinder.AddAssembly(System.Reflection.Assembly)">
+            <summary>
+            Add an assembly to be queried.
+            </summary>
+            <remarks>
+            All convention types must have a parameterless constructor, or a single parameter of IConventionFinder.
+            </remarks>
+            <param name="assembly">Assembly instance to query</param>
+        </member>
+        <member name="M:FluentNHibernate.Conventions.DefaultConventionFinder.AddFromAssemblyOf``1">
+            <summary>
+            Adds all conventions found in the assembly that contains T.
+            </summary>
+            <remarks>
+            All convention types must have a parameterless constructor, or a single parameter of IConventionFinder.
+            </remarks>
+        </member>
+        <member name="M:FluentNHibernate.Conventions.DefaultConventionFinder.Add``1">
+            <summary>
+            Add a single convention by type.
+            </summary>
+            <remarks>
+            Type must have a parameterless constructor, or a single parameter of IConventionFinder.
+            </remarks>
+            <typeparam name="T">Convention type</typeparam>
+        </member>
+        <member name="M:FluentNHibernate.Conventions.DefaultConventionFinder.Add(System.Type)">
+            <summary>
+            Add a single convention by type.
+            </summary>
+            <remarks>
+            Types must have a parameterless constructor, or a single parameter of <see cref="T:FluentNHibernate.Conventions.IConventionFinder"/>.
+            </remarks>
+            <param name="type">Type of convention</param>
+        </member>
+        <member name="M:FluentNHibernate.Conventions.DefaultConventionFinder.Add``1(``0)">
+            <summary>
+            Add an instance of a convention.
+            </summary>
+            <remarks>
+            Useful for supplying conventions that require extra constructor parameters.
+            </remarks>
+            <typeparam name="T">Convention type</typeparam>
+            <param name="instance">Instance of convention</param>
+        </member>
+        <member name="M:FluentNHibernate.Data.Entity.Equals(FluentNHibernate.Data.Entity)">
+            <summary>
+            Indicates whether the current <see cref="T:FluentNHibernate.Data.Entity" /> is equal to another <see cref="T:FluentNHibernate.Data.Entity" />.
+            </summary>
+            <returns>
+            true if the current object is equal to the <paramref name="obj" /> parameter; otherwise, false.
+            </returns>
+            <param name="obj">An Entity to compare with this object.</param>
+        </member>
+        <member name="M:FluentNHibernate.Data.Entity.Equals(System.Object)">
+            <summary>
+            Determines whether the specified <see cref="T:FluentNHibernate.Data.Entity" /> is equal to the current <see cref="T:System.Object" />.
+            </summary>
+            <returns>
+            true if the specified <see cref="T:FluentNHibernate.Data.Entity" /> is equal to the current <see cref="T:System.Object" />; otherwise, false.
+            </returns>
+            <param name="obj">The <see cref="T:System.Object" /> to compare with the current <see cref="T:System.Object" />. </param>
+            <exception cref="T:System.NullReferenceException">The <paramref name="obj" /> parameter is null.</exception><filterpriority>2</filterpriority>
+        </member>
+        <member name="M:FluentNHibernate.Data.Entity.GetHashCode">
+            <summary>
+            Serves as a hash function for a Entity. 
+            </summary>
+            <returns>
+            A hash code for the current <see cref="T:System.Object" />.
+            </returns>
+            <filterpriority>2</filterpriority>
+        </member>
+        <member name="T:FluentNHibernate.Mapping.AnyPart`1">
+            <summary>
+            Represents the "Any" mapping in NHibernate. It is impossible to specify a foreign key constraint for this kind of association. For more information
+            please reference chapter 5.2.4 in the NHibernate online documentation
+            </summary>
+        </member>
+        <member name="P:FluentNHibernate.Mapping.AnyPart`1.Access">
+            <summary>
+            Defines how NHibernate will access the object for persisting/hydrating (Defaults to Property)
+            </summary>
+        </member>
+        <member name="P:FluentNHibernate.Mapping.AnyPart`1.Cascade">
+            <summary>
+            Cascade style (Defaults to none)
+            </summary>
+        </member>
+        <member name="T:FluentNHibernate.Mapping.AccessStrategyBuilder">
+            <summary>
+            Access strategy mapping builder.
+            </summary>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.AccessStrategyBuilder.#ctor(System.Action{System.String})">
+            <summary>
+            Access strategy mapping builder.
+            </summary>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.AccessStrategyBuilder.Property">
+            <summary>
+            Sets the access-strategy to property.
+            </summary>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.AccessStrategyBuilder.Field">
+            <summary>
+            Sets the access-strategy to field.
+            </summary>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.AccessStrategyBuilder.BackingField">
+            <summary>
+            Sets the access-strategy to use the backing-field of an auto-property.
+            </summary>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.AccessStrategyBuilder.CamelCaseField">
+            <summary>
+            Sets the access-strategy to field and the naming-strategy to camelcase (field.camelcase).
+            </summary>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.AccessStrategyBuilder.CamelCaseField(FluentNHibernate.Mapping.Prefix)">
+            <summary>
+            Sets the access-strategy to field and the naming-strategy to camelcase, with the specified prefix.
+            </summary>
+            <param name="prefix">Naming-strategy prefix</param>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.AccessStrategyBuilder.LowerCaseField">
+            <summary>
+            Sets the access-strategy to field and the naming-strategy to lowercase.
+            </summary>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.AccessStrategyBuilder.LowerCaseField(FluentNHibernate.Mapping.Prefix)">
+            <summary>
+            Sets the access-strategy to field and the naming-strategy to lowercase, with the specified prefix.
+            </summary>
+            <param name="prefix">Naming-strategy prefix</param>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.AccessStrategyBuilder.PascalCaseField(FluentNHibernate.Mapping.Prefix)">
+            <summary>
+            Sets the access-strategy to field and the naming-strategy to pascalcase, with the specified prefix.
+            </summary>
+            <param name="prefix">Naming-strategy prefix</param>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.AccessStrategyBuilder.ReadOnlyPropertyThroughCamelCaseField">
+            <summary>
+            Sets the access-strategy to read-only property (nosetter) and the naming-strategy to camelcase.
+            </summary>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.AccessStrategyBuilder.ReadOnlyPropertyThroughCamelCaseField(FluentNHibernate.Mapping.Prefix)">
+            <summary>
+            Sets the access-strategy to read-only property (nosetter) and the naming-strategy to camelcase, with the specified prefix.
+            </summary>
+            <param name="prefix">Naming-strategy prefix</param>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.AccessStrategyBuilder.ReadOnlyPropertyThroughLowerCaseField">
+            <summary>
+            Sets the access-strategy to read-only property (nosetter) and the naming-strategy to lowercase.
+            </summary>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.AccessStrategyBuilder.ReadOnlyPropertyThroughLowerCaseField(FluentNHibernate.Mapping.Prefix)">
+            <summary>
+            Sets the access-strategy to read-only property (nosetter) and the naming-strategy to lowercase.
+            </summary>
+            <param name="prefix">Naming-strategy prefix</param>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.AccessStrategyBuilder.ReadOnlyPropertyThroughPascalCaseField(FluentNHibernate.Mapping.Prefix)">
+            <summary>
+            Sets the access-strategy to read-only property (nosetter) and the naming-strategy to pascalcase, with the specified prefix.
+            </summary>
+            <param name="prefix">Naming-strategy prefix</param>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.AccessStrategyBuilder.Using(System.String)">
+            <summary>
+            Sets the access-strategy to use the type referenced.
+            </summary>
+            <param name="propertyAccessorAssemblyQualifiedClassName">Assembly qualified name of the type to use as the access-strategy</param>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.AccessStrategyBuilder.Using(System.Type)">
+            <summary>
+            Sets the access-strategy to use the type referenced.
+            </summary>
+            <param name="propertyAccessorClassType">Type to use as the access-strategy</param>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.AccessStrategyBuilder.Using``1">
+            <summary>
+            Sets the access-strategy to use the type referenced.
+            </summary>
+            <typeparam name="TPropertyAccessorClass">Type to use as the access-strategy</typeparam>
+        </member>
+        <member name="P:FluentNHibernate.Mapping.ComponentPartBase`1.Access">
+            <summary>
+            Set the access and naming strategy for this component.
+            </summary>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.DiscriminatorPart.AlwaysSelectWithValue">
+            <summary>
+            Force NHibernate to always select using the discriminator value, even when selecting all subclasses. This
+            can be useful when your table contains more discriminator values than you have classes (legacy).
+            </summary>
+            <remarks>Sets the "force" attribute.</remarks>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.DiscriminatorPart.ReadOnly">
+            <summary>
+            Set this discriminator as read-only. Call this if your discriminator column is also part of a mapped composite identifier.
+            </summary>
+            <returns>Sets the "insert" attribute.</returns>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.DiscriminatorPart.Formula(System.String)">
+            <summary>
+            An arbitrary SQL expression that is executed when a type has to be evaluated. Allows content-based discrimination.
+            </summary>
+            <param name="sql">SQL expression</param>
+        </member>
+        <member name="T:FluentNHibernate.Conventions.UserTypeConvention`1">
+            <summary>
+            Base class for user type conventions. Create a subclass of this to automatically
+            map all properties that the user type can be used against. Override Accept or
+            Apply to alter the behavior.
+            </summary>
+            <typeparam name="TUserType">IUserType implementation</typeparam>
+        </member>
+        <member name="T:FluentNHibernate.Conventions.AttributePropertyConvention`1">
+            <summary>
+            Base class for attribute based conventions. Create a subclass of this to supply your own
+            attribute based conventions.
+            </summary>
+            <typeparam name="T">Attribute identifier</typeparam>
+        </member>
+        <member name="M:FluentNHibernate.Conventions.AttributePropertyConvention`1.Apply(`0,FluentNHibernate.Conventions.Instances.IPropertyInstance)">
+            <summary>
+            Apply changes to a property with an attribute matching T.
+            </summary>
+            <param name="attribute">Instance of attribute found on property.</param>
+            <param name="instance">Property with attribute</param>
+        </member>
+        <member name="P:FluentNHibernate.Mapping.DynamicComponentPart`1.Access">
+            <summary>
+            Set the access and naming strategy for this component.
+            </summary>
+        </member>
+        <member name="T:FluentNHibernate.Mapping.InvalidPrefixException">
+            <summary>
+            Thrown when a prefix is specified for an access-strategy that isn't supported.
+            </summary>
+        </member>
+        <member name="T:FluentNHibernate.Mapping.Prefix">
+            <summary>
+            Naming strategy prefix.
+            </summary>
+        </member>
+        <member name="M:FluentNHibernate.Testing.PersistenceSpecification`1.CheckComponentList``1(System.Linq.Expressions.Expression{System.Func{`0,System.Object}},System.Collections.Generic.IList{``0})">
+            <summary>
+            Checks a list of components for validity.
+            </summary>
+            <typeparam name="TList">Type of list element</typeparam>
+            <param name="expression">Property</param>
+            <param name="propertyValue">Value to save</param>
+        </member>
+        <member name="T:FluentNHibernate.Utils.ExpressionToSql">
+            <summary>
+            Converts an expression to a best guess SQL string
+            </summary>
+        </member>
+        <member name="M:FluentNHibernate.Utils.ExpressionToSql.Convert``1(System.Linq.Expressions.Expression{System.Func{``0,System.Object}})">
+            <summary>
+            Converts a Func expression to a best guess SQL string
+            </summary>
+        </member>
+        <member name="M:FluentNHibernate.Utils.ExpressionToSql.Convert``1(System.Linq.Expressions.Expression{System.Func{``0,System.Boolean}})">
+            <summary>
+            Converts a boolean Func expression to a best guess SQL string
+            </summary>
+        </member>
+        <member name="M:FluentNHibernate.Utils.ExpressionToSql.Convert(System.Linq.Expressions.MethodCallExpression)">
+            <summary>
+            Gets the value of a method call.
+            </summary>
+            <param name="body">Method call expression</param>
+        </member>
+        <member name="T:FluentNHibernate.Mapping.JoinPart`1">
+            <summary>
+            Maps to the Join element in NH 2.0
+            </summary>
+            <typeparam name="T"></typeparam>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.NotFoundExpression`1.Ignore">
+            <summary>
+            Used to set the Not-Found attribute to ignore.  This tells NHibernate to 
+            return a null object rather then throw an exception when the join fails
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.NotFoundExpression`1.Exception">
+            <summary>
+            Used to set the Not-Found attribute to exception (Nhibernate default).  This 
+            tells NHibernate to throw an exception when the join fails
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.OptimisticLockBuilder`1.None">
+            <summary>
+            Use no locking strategy
+            </summary>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.OptimisticLockBuilder`1.Version">
+            <summary>
+            Use version locking
+            </summary>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.OptimisticLockBuilder`1.Dirty">
+            <summary>
+            Use dirty locking
+            </summary>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.OptimisticLockBuilder`1.All">
+            <summary>
+            Use all locking
+            </summary>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.ToManyBase`3.Component(System.Action{FluentNHibernate.Mapping.CompositeElementPart{`1}})">
+            <summary>
+            Maps this collection as a collection of components.
+            </summary>
+            <param name="action">Component mapping</param>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.ToManyBase`3.Table(System.String)">
+            <summary>
+            Sets the table name for this one-to-many.
+            </summary>
+            <param name="name">Table name</param>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.ToManyBase`3.Where(System.Linq.Expressions.Expression{System.Func{`1,System.Boolean}})">
+            <summary>
+            Sets the where clause for this one-to-many relationship.
+            Note: This only supports simple cases, use the string overload for more complex clauses.
+            </summary>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.ToManyBase`3.Where(System.String)">
+            <summary>
+            Sets the where clause for this one-to-many relationship.
+            </summary>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.ToManyBase`3.CollectionType``1">
+            <summary>
+            Sets a custom collection type
+            </summary>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.ToManyBase`3.CollectionType(System.Type)">
+            <summary>
+            Sets a custom collection type
+            </summary>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.ToManyBase`3.CollectionType(System.String)">
+            <summary>
+            Sets a custom collection type
+            </summary>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.ToManyBase`3.CollectionType(FluentNHibernate.MappingModel.TypeReference)">
+            <summary>
+            Sets a custom collection type
+            </summary>
+        </member>
+        <member name="P:FluentNHibernate.Mapping.ToManyBase`3.Cache">
+            <summary>
+            Specify caching for this entity.
+            </summary>
+        </member>
+        <member name="P:FluentNHibernate.Mapping.ToManyBase`3.Access">
+            <summary>
+            Set the access and naming strategy for this one-to-many.
+            </summary>
+        </member>
+        <member name="P:FluentNHibernate.Mapping.ToManyBase`3.Not">
+            <summary>
+            Inverts the next boolean
+            </summary>
+        </member>
+        <member name="T:FluentNHibernate.Mapping.AccessStrategyBuilder`1">
+            <summary>
+            Access strategy mapping builder.
+            </summary>
+            <typeparam name="T">Mapping part to be applied to</typeparam>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.AccessStrategyBuilder`1.#ctor(`0,System.Action{System.String})">
+            <summary>
+            Access strategy mapping builder.
+            </summary>
+            <param name="parent">Instance of the parent mapping part.</param>
+            <param name="setter">Setter for altering the model</param>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.AccessStrategyBuilder`1.Property">
+            <summary>
+            Sets the access-strategy to property.
+            </summary>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.AccessStrategyBuilder`1.Field">
+            <summary>
+            Sets the access-strategy to field.
+            </summary>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.AccessStrategyBuilder`1.BackingField">
+            <summary>
+            Sets the access-strategy to use the backing-field of an auto-property.
+            </summary>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.AccessStrategyBuilder`1.CamelCaseField">
+            <summary>
+            Sets the access-strategy to field and the naming-strategy to camelcase (field.camelcase).
+            </summary>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.AccessStrategyBuilder`1.CamelCaseField(FluentNHibernate.Mapping.Prefix)">
+            <summary>
+            Sets the access-strategy to field and the naming-strategy to camelcase, with the specified prefix.
+            </summary>
+            <param name="prefix">Naming-strategy prefix</param>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.AccessStrategyBuilder`1.LowerCaseField">
+            <summary>
+            Sets the access-strategy to field and the naming-strategy to lowercase.
+            </summary>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.AccessStrategyBuilder`1.LowerCaseField(FluentNHibernate.Mapping.Prefix)">
+            <summary>
+            Sets the access-strategy to field and the naming-strategy to lowercase, with the specified prefix.
+            </summary>
+            <param name="prefix">Naming-strategy prefix</param>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.AccessStrategyBuilder`1.PascalCaseField(FluentNHibernate.Mapping.Prefix)">
+            <summary>
+            Sets the access-strategy to field and the naming-strategy to pascalcase, with the specified prefix.
+            </summary>
+            <param name="prefix">Naming-strategy prefix</param>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.AccessStrategyBuilder`1.ReadOnlyPropertyThroughCamelCaseField">
+            <summary>
+            Sets the access-strategy to read-only property (nosetter) and the naming-strategy to camelcase.
+            </summary>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.AccessStrategyBuilder`1.ReadOnlyPropertyThroughCamelCaseField(FluentNHibernate.Mapping.Prefix)">
+            <summary>
+            Sets the access-strategy to read-only property (nosetter) and the naming-strategy to camelcase, with the specified prefix.
+            </summary>
+            <param name="prefix">Naming-strategy prefix</param>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.AccessStrategyBuilder`1.ReadOnlyPropertyThroughLowerCaseField">
+            <summary>
+            Sets the access-strategy to read-only property (nosetter) and the naming-strategy to lowercase.
+            </summary>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.AccessStrategyBuilder`1.ReadOnlyPropertyThroughLowerCaseField(FluentNHibernate.Mapping.Prefix)">
+            <summary>
+            Sets the access-strategy to read-only property (nosetter) and the naming-strategy to lowercase.
+            </summary>
+            <param name="prefix">Naming-strategy prefix</param>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.AccessStrategyBuilder`1.ReadOnlyPropertyThroughPascalCaseField(FluentNHibernate.Mapping.Prefix)">
+            <summary>
+            Sets the access-strategy to read-only property (nosetter) and the naming-strategy to pascalcase, with the specified prefix.
+            </summary>
+            <param name="prefix">Naming-strategy prefix</param>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.AccessStrategyBuilder`1.Using(System.String)">
+            <summary>
+            Sets the access-strategy to use the type referenced.
+            </summary>
+            <param name="propertyAccessorAssemblyQualifiedClassName">Assembly qualified name of the type to use as the access-strategy</param>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.AccessStrategyBuilder`1.Using(System.Type)">
+            <summary>
+            Sets the access-strategy to use the type referenced.
+            </summary>
+            <param name="propertyAccessorClassType">Type to use as the access-strategy</param>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.AccessStrategyBuilder`1.Using``1">
+            <summary>
+            Sets the access-strategy to use the type referenced.
+            </summary>
+            <typeparam name="TPropertyAccessorClass">Type to use as the access-strategy</typeparam>
+        </member>
+        <member name="P:FluentNHibernate.Mapping.ComponentPart`1.Access">
+            <summary>
+            Set the access and naming strategy for this component.
+            </summary>
+        </member>
+        <member name="T:FluentNHibernate.Mapping.CompositeElementPart`1">
+            <summary>
+            Component-element for component HasMany's.
+            </summary>
+            <typeparam name="T">Component type</typeparam>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.CompositeElementPart`1.ParentReference(System.Linq.Expressions.Expression{System.Func{`0,System.Object}})">
+            <summary>
+            Maps a property of the component class as a reference back to the containing entity
+            </summary>
+            <param name="exp">Parent reference property</param>
+            <returns>Component being mapped</returns>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.IdentityGenerationStrategyBuilder`1.Increment">
+            <summary>
+            generates identifiers of any integral type that are unique only when no other 
+            process is inserting data into the same table. Do not use in a cluster.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.IdentityGenerationStrategyBuilder`1.Increment(System.Action{FluentNHibernate.Mapping.ParamBuilder})">
+            <summary>
+            generates identifiers of any integral type that are unique only when no other 
+            process is inserting data into the same table. Do not use in a cluster.
+            </summary>
+            <param name="paramValues">Params configuration</param>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.IdentityGenerationStrategyBuilder`1.Identity">
+            <summary>
+            supports identity columns in DB2, MySQL, MS SQL Server and Sybase.
+            The identifier returned by the database is converted to the property type using 
+            Convert.ChangeType. Any integral property type is thus supported.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.IdentityGenerationStrategyBuilder`1.Identity(System.Action{FluentNHibernate.Mapping.ParamBuilder})">
+            <summary>
+            supports identity columns in DB2, MySQL, MS SQL Server and Sybase.
+            The identifier returned by the database is converted to the property type using 
+            Convert.ChangeType. Any integral property type is thus supported.
+            </summary>
+            <param name="paramValues">Params configuration</param>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.IdentityGenerationStrategyBuilder`1.Sequence(System.String)">
+            <summary>
+            uses a sequence in DB2, PostgreSQL, Oracle or a generator in Firebird.
+            The identifier returned by the database is converted to the property type 
+            using Convert.ChangeType. Any integral property type is thus supported.
+            </summary>
+            <param name="sequenceName"></param>
+            <returns></returns>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.IdentityGenerationStrategyBuilder`1.Sequence(System.String,System.Action{FluentNHibernate.Mapping.ParamBuilder})">
+            <summary>
+            uses a sequence in DB2, PostgreSQL, Oracle or a generator in Firebird.
+            The identifier returned by the database is converted to the property type 
+            using Convert.ChangeType. Any integral property type is thus supported.
+            </summary>
+            <param name="sequenceName"></param>
+            <param name="paramValues">Params configuration</param>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.IdentityGenerationStrategyBuilder`1.HiLo(System.String,System.String,System.String)">
+            <summary>
+            uses a hi/lo algorithm to efficiently generate identifiers of any integral type, 
+            given a table and column (by default hibernate_unique_key and next_hi respectively) 
+            as a source of hi values. The hi/lo algorithm generates identifiers that are unique 
+            only for a particular database. Do not use this generator with a user-supplied connection.
+            requires a "special" database table to hold the next available "hi" value
+            </summary>
+            <param name="table"></param>
+            <param name="column"></param>
+            <param name="maxLo"></param>
+            <returns></returns>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.IdentityGenerationStrategyBuilder`1.HiLo(System.String,System.String,System.String,System.Action{FluentNHibernate.Mapping.ParamBuilder})">
+            <summary>
+            uses a hi/lo algorithm to efficiently generate identifiers of any integral type, 
+            given a table and column (by default hibernate_unique_key and next_hi respectively) 
+            as a source of hi values. The hi/lo algorithm generates identifiers that are unique 
+            only for a particular database. Do not use this generator with a user-supplied connection.
+            requires a "special" database table to hold the next available "hi" value
+            </summary>
+            <param name="table"></param>
+            <param name="column"></param>
+            <param name="maxLo"></param>
+            <param name="paramValues">Params configuration</param>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.IdentityGenerationStrategyBuilder`1.HiLo(System.String)">
+            <summary>
+            uses a hi/lo algorithm to efficiently generate identifiers of any integral type, 
+            given a table and column (by default hibernate_unique_key and next_hi respectively) 
+            as a source of hi values. The hi/lo algorithm generates identifiers that are unique 
+            only for a particular database. Do not use this generator with a user-supplied connection.
+            requires a "special" database table to hold the next available "hi" value
+            </summary>
+            <param name="maxLo"></param>
+            <returns></returns>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.IdentityGenerationStrategyBuilder`1.HiLo(System.String,System.Action{FluentNHibernate.Mapping.ParamBuilder})">
+            <summary>
+            uses a hi/lo algorithm to efficiently generate identifiers of any integral type, 
+            given a table and column (by default hibernate_unique_key and next_hi respectively) 
+            as a source of hi values. The hi/lo algorithm generates identifiers that are unique 
+            only for a particular database. Do not use this generator with a user-supplied connection.
+            requires a "special" database table to hold the next available "hi" value
+            </summary>
+            <param name="maxLo"></param>
+            <param name="paramValues">Params configuration</param>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.IdentityGenerationStrategyBuilder`1.SeqHiLo(System.String,System.String)">
+            <summary>
+            uses an Oracle-style sequence (where supported)
+            </summary>
+            <param name="sequence"></param>
+            <param name="maxLo"></param>
+            <returns></returns>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.IdentityGenerationStrategyBuilder`1.SeqHiLo(System.String,System.String,System.Action{FluentNHibernate.Mapping.ParamBuilder})">
+            <summary>
+            uses an Oracle-style sequence (where supported)
+            </summary>
+            <param name="sequence"></param>
+            <param name="maxLo"></param>
+            <param name="paramValues">Params configuration</param>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.IdentityGenerationStrategyBuilder`1.UuidHex(System.String)">
+            <summary>
+            uses System.Guid and its ToString(string format) method to generate identifiers
+            of type string. The length of the string returned depends on the configured format. 
+            </summary>
+            <param name="format">http://msdn.microsoft.com/en-us/library/97af8hh4.aspx</param>
+            <returns></returns>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.IdentityGenerationStrategyBuilder`1.UuidHex(System.String,System.Action{FluentNHibernate.Mapping.ParamBuilder})">
+            <summary>
+            uses System.Guid and its ToString(string format) method to generate identifiers
+            of type string. The length of the string returned depends on the configured format. 
+            </summary>
+            <param name="format">http://msdn.microsoft.com/en-us/library/97af8hh4.aspx</param>
+            <param name="paramValues">Params configuration</param>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.IdentityGenerationStrategyBuilder`1.UuidString">
+            <summary>
+            uses a new System.Guid to create a byte[] that is converted to a string.  
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.IdentityGenerationStrategyBuilder`1.UuidString(System.Action{FluentNHibernate.Mapping.ParamBuilder})">
+            <summary>
+            uses a new System.Guid to create a byte[] that is converted to a string.  
+            </summary>
+            <param name="paramValues">Params configuration</param>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.IdentityGenerationStrategyBuilder`1.Guid">
+            <summary>
+            uses a new System.Guid as the identifier. 
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.IdentityGenerationStrategyBuilder`1.Guid(System.Action{FluentNHibernate.Mapping.ParamBuilder})">
+            <summary>
+            uses a new System.Guid as the identifier. 
+            </summary>
+            <param name="paramValues">Params configuration</param>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.IdentityGenerationStrategyBuilder`1.GuidComb">
+            <summary>
+            Recommended for Guid identifiers!
+            uses the algorithm to generate a new System.Guid described by Jimmy Nilsson 
+            in the article http://www.informit.com/articles/article.asp?p=25862. 
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.IdentityGenerationStrategyBuilder`1.GuidComb(System.Action{FluentNHibernate.Mapping.ParamBuilder})">
+            <summary>
+            Recommended for Guid identifiers!
+            uses the algorithm to generate a new System.Guid described by Jimmy Nilsson 
+            in the article http://www.informit.com/articles/article.asp?p=25862. 
+            </summary>
+            <param name="paramValues">Params configuration</param>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.IdentityGenerationStrategyBuilder`1.Assigned">
+            <summary>
+            lets the application to assign an identifier to the object before Save() is called. 
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.IdentityGenerationStrategyBuilder`1.Assigned(System.Action{FluentNHibernate.Mapping.ParamBuilder})">
+            <summary>
+            lets the application to assign an identifier to the object before Save() is called. 
+            </summary>
+            <param name="paramValues">Params configuration</param>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.IdentityGenerationStrategyBuilder`1.Native">
+            <summary>
+            picks identity, sequence or hilo depending upon the capabilities of the underlying database. 
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.IdentityGenerationStrategyBuilder`1.Native(System.Action{FluentNHibernate.Mapping.ParamBuilder})">
+            <summary>
+            picks identity, sequence or hilo depending upon the capabilities of the underlying database. 
+            </summary>
+            <param name="paramValues">Params configuration</param>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.IdentityGenerationStrategyBuilder`1.Native(System.String)">
+            <summary>
+            picks identity, sequence or hilo depending upon the capabilities of the underlying database. 
+            </summary>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.IdentityGenerationStrategyBuilder`1.Native(System.String,System.Action{FluentNHibernate.Mapping.ParamBuilder})">
+            <summary>
+            picks identity, sequence or hilo depending upon the capabilities of the underlying database. 
+            </summary>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.IdentityGenerationStrategyBuilder`1.Foreign(System.String)">
+            <summary>
+            uses the identifier of another associated object. Usually used in conjunction with a one-to-one primary key association. 
+            </summary>
+            <param name="property"></param>
+            <returns></returns>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.IdentityGenerationStrategyBuilder`1.Foreign(System.String,System.Action{FluentNHibernate.Mapping.ParamBuilder})">
+            <summary>
+            uses the identifier of another associated object. Usually used in conjunction with a one-to-one primary key association. 
+            </summary>
+            <param name="property"></param>
+            <param name="paramValues">Params configuration</param>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.IdentityPart.UnsavedValue(System.Object)">
+            <summary>
+            Sets the unsaved-value of the identity.
+            </summary>
+            <param name="unsavedValue">Value that represents an unsaved value.</param>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.IdentityPart.Column(System.String)">
+            <summary>
+            Sets the column name for the identity field.
+            </summary>
+            <param name="columnName">Column name</param>
+        </member>
+        <member name="P:FluentNHibernate.Mapping.IdentityPart.Access">
+            <summary>
+            Set the access and naming strategy for this identity.
+            </summary>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.ManyToManyPart`1.OrderBy(System.String)">
+            <summary>
+            Sets the order-by clause for this one-to-many relationship.
+            </summary>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.ManyToOnePart`1.UniqueKey(System.String)">
+            <summary>
+            Specifies the name of a multi-column unique constraint.
+            </summary>
+            <param name="keyName">Name of constraint</param>
+        </member>
+        <member name="P:FluentNHibernate.Mapping.ManyToOnePart`1.Not">
+            <summary>
+            Inverts the next boolean
+            </summary>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.OneToManyPart`1.OrderBy(System.String)">
+            <summary>
+            Sets the order-by clause for this one-to-many relationship.
+            </summary>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.PropertyPart.CustomType``1">
+            <summary>
+            Specifies that a custom type (an implementation of <see cref="T:NHibernate.UserTypes.IUserType"/>) should be used for this property for mapping it to/from one or more database columns whose format or type doesn't match this .NET property.
+            </summary>
+            <typeparam name="TCustomtype">A type which implements <see cref="T:NHibernate.UserTypes.IUserType"/>.</typeparam>
+            <returns>This property mapping to continue the method chain</returns>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.PropertyPart.CustomType(System.Type)">
+            <summary>
+            Specifies that a custom type (an implementation of <see cref="T:NHibernate.UserTypes.IUserType"/>) should be used for this property for mapping it to/from one or more database columns whose format or type doesn't match this .NET property.
+            </summary>
+            <param name="type">A type which implements <see cref="T:NHibernate.UserTypes.IUserType"/>.</param>
+            <returns>This property mapping to continue the method chain</returns>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.PropertyPart.CustomType(System.String)">
+            <summary>
+            Specifies that a custom type (an implementation of <see cref="T:NHibernate.UserTypes.IUserType"/>) should be used for this property for mapping it to/from one or more database columns whose format or type doesn't match this .NET property.
+            </summary>
+            <param name="type">A type which implements <see cref="T:NHibernate.UserTypes.IUserType"/>.</param>
+            <returns>This property mapping to continue the method chain</returns>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.PropertyPart.UniqueKey(System.String)">
+            <summary>
+            Specifies the name of a multi-column unique constraint.
+            </summary>
+            <param name="keyName">Name of constraint</param>
+        </member>
+        <member name="P:FluentNHibernate.Mapping.PropertyPart.Access">
+            <summary>
+            Set the access and naming strategy for this property.
+            </summary>
+        </member>
+        <member name="P:FluentNHibernate.Mapping.PropertyPart.Not">
+            <summary>
+            Inverts the next boolean
+            </summary>
+        </member>
+        <member name="M:FluentNHibernate.MappingModel.AttributeStore`1.IsSpecified``1(System.Linq.Expressions.Expression{System.Func{`0,``0}})">
+            <summary>
+            Returns whether the user has set a value for a property.
+            </summary>
+        </member>
+        <member name="M:FluentNHibernate.MappingModel.AttributeStore`1.IsSpecified(System.String)">
+            <summary>
+            Returns whether the user has set a value for a property.
+            </summary>
+        </member>
+        <member name="M:FluentNHibernate.MappingModel.AttributeStore`1.HasValue``1(System.Linq.Expressions.Expression{System.Func{`0,``0}})">
+            <summary>
+            Returns whether a property has any value, default or user specified.
+            </summary>
+            <typeparam name="TResult"></typeparam>
+            <param name="exp"></param>
+            <returns></returns>
+        </member>
+        <member name="M:FluentNHibernate.Reveal.Property``1(System.String)">
+            <summary>
+            Reveals a hidden property for use instead of expressions.
+            </summary>
+            <typeparam name="TEntity">Entity type</typeparam>
+            <param name="propertyName">Name of property</param>
+            <returns>Expression for the hidden property</returns>
+        </member>
+        <member name="M:FluentNHibernate.Reveal.Property``2(System.String)">
+            <summary>
+            Reveals a hidden property with a specific return type for use instead of expressions.
+            </summary>
+            <typeparam name="TEntity">Entity type</typeparam>
+            <typeparam name="TReturn">Property return type</typeparam>
+            <param name="propertyName">Name of property</param>
+            <returns>Expression for the hidden property</returns>
+        </member>
+    </members>
+</doc>

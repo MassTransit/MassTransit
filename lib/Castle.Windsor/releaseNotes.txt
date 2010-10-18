@@ -1,0 +1,6 @@
+You can find full list of changes in changes.txt, list of breaking changes in breakingchanges.txt.
+
+Issue tracker: http://issues.castleproject.org/dashboard
+Online release note: http://stw.castleproject.org/Windsor.Windsor_25_release_notes.ashx
+Documentation: http://stw.castleproject.org/Windsor.MainPage.ashx
+Samples: http://stw.castleproject.org/Windsor.MainPage.ashx?#Samples_8

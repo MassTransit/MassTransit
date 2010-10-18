@@ -1,0 +1,876 @@
+2.5.1 (2010-09-21)
+==================
+
+- added "Potential lifestyle mismatches" debugger view item, that will detect and list situations where Singleton depends on Transient or PerWebRequest component (which is usually a bug)
+
+- fixed issue where forwarding main type would create additional, superfluous handler
+
+- WebLogger/WebLoggerFactory was removed from Castle.Core so all references to that are removed from Windsor as well
+
+- obseleted UseSingleProxyInterface in preference over IProxyGenerationHook
+
+- fixed IOC-220 Composite pattern with CollectionResolver should be properly supported without throwing "cycle detected" exception
+
+- fixed IOC-218 Enable methods that take arguments as anonymous objects in Silverlight version. This works in SL, but requires [assembly: InternalsVisibleTo(Castle.Core.Internal.InternalsVisible.ToCastleCore)]
+
+- fixed IOC-217 Enable ISupportInitialize support as lifecyclecle concern in Silverlight 4
+
+- implemented IOC-216 Make it possible to specify service overrides in DependsOn, either via Property, or ServiceOverride entry class
+
+- implemented IOC-215 Hide obsolete members from IntelliSense (in basic view. By default in VB they won't be showed, but will in C# :( )
+
+- fixed IOC-214 Missing bracket in obsolete warning text
+
+- implemented IOC-212 Add ability to make IProxyGenerationHooks and IInterceptoSelectors IOnBehalfAware
+
+- fixed IOC-211 Resolve doesn't work with constructor's ref argument
+
+- fixed IOC-210 Typed Factory Facility treats constructor dependency as non-optional if resolved as a TFF component
+
+- fixed IOC-209 Bug in constructor selection when resolving - Windsor would pick unresolvable constructor
+
+- reverted back (to the way it was in v2.1) conditional registration of helper components used by TypedFactoryFacility as it would cause issues when used with nested containers (see the new test and thread "Typed Factories in sub Container (differences between 2.5 and 2.1)" on users group)
+
+- added framework information the assembly was built for to the AssemblyTitle attribute
+
+- improved how late bound types are displayed in debugger
+
+- fixed bug where count of potentially misconfigured components would show invalid value
+
+- added raw handler access to default component view in debugger
+
+- changed how status message is displayed for potentially misconfigured components so that an actual visualizer for strings can be used to view this potentially long piece of text
+
+2.5.0 (2010-08-21)
+==================
+
+- debugger view support has been extracted to a separate subsystem (IContainerDebuggerExtensionHost) and can be extended by users code via IContainerDebuggerExtension and IComponentDebuggerExtension
+
+- calling IHandler.TryStart will no longer silently ignore all the exceptions.
+
+- added CollectionResolver which is a more general version of ArrayResolver and ListResolver and supports in addition ICollection<Foo> and IEnumerable<Foo>
+
+- fixed issue where dependencies would not be cleaned up when component creation failed
+
+- fixed issue where startable component would be created twice when property dependency could not be resolved
+
+- passing arguments to ILazyComponentLoader (see breakingchanges.txt)
+
+- fixed bug that caused exception when proxied component and it's proxied property dependency shared interceptor
+
+2.5.0 beta2 (2010-07-21)
+==================
+
+- added support for selecting components based on custom attributes and their properties. See Component.HasAttribute<T>() methods
+
+- added WithService.DefaultInterface() to fluent API.IT matches Foo to IFoo, SuperFooExtended to IFoo and IFooExtended etc
+
+- added support for CastleComponentAttribute in fluent Api. Also added helper filter method Component.IsCastleComponent
+
+- added ability to specify interceptors selector as a service, not just as instance
+
+- added ability to specify proxy hook in fluent API: 
+
+- indexers on IKernel are now obsolete.
+
+- added WithAppConfig() method to logging facility to point to loging configuration in AppDomain's config file (web.config or app.config)
+
+- Restructured lifecycle concerns - introduced ICommissionConcern and IDecommissionConcern and favors them over old enum driven style.
+
+- Fixed how contextual arguments are handled. Null is no longer considered a valid value (That would cause an exception later on, now it's ignored).
+
+- Changed method DeferredStart on StartableFacility. It now does not take a bool parameter. A DeferredTryStart() method was introduced instead.
+
+2.5.0 beta1 (2010-07-05)
+==================
+- Typed Factories will not implicitly pick default ITypedFactoryComponentSelector registered in the container anymore
+
+- Obsoleted all the AddComponent* methods in favor of using Installers and fluent registration API
+
+- ServiceSelector delegate (used in WithService.Select calls) changed signature to fix a bug: http://3.ly/eP5Q
+
+- moved IWindsorInstaller to Castle.MicroKernel.Registration namespace
+
+- typed factories will now obey container release policy, that is if the container does not track the component, so won't the factory.
+
+- added helper methods to fluently configure logging facility using: container.AddFacility<LoggingFacility>( f = > f.Fluent().Magic().Here() );
+
+- added overload for UsingFactoryMethod which exposees ComponentModel of component to the factory
+
+- added generic overloads for ITypeConverter.PerformConversion to reduce casting.
+
+- it is now possible to call WithService.Foo().WithService.Bar() and both services will be used. Also more methods were added: WithService.Self() and WithService.AllInterfaces()
+
+- added simple debugger visualizer to help diagnosing misconfigured components.
+
+- added optimized mode to StartableFacility for Single-call-to-Install scenario that won't start anything before the end of Install (at which point the container is assumed to be completely configured and all components should be there) and it will throw if it can't resolve and start the component.
+
+- added OptimizeDependencyResolution around calls to Install
+
+- Component.IsInNamespace and its sister methods have now overload that let you include components from subnamespaces as well.
+
+- added ability to load assemblies from designated directory (with fair bit of optional filtering using new AssemblyFilter class). It works in three places:
+	- AllTypes.FromAssemblyInDirectory() - picks assemblies for registration
+	- FromAssembly.InDirectory() - installs installers from assemblies in the directory
+	- <install directory="" /> - installs installers from assemblies in directory via XML
+
+- TypedFactoryFacility - added ability to configure factory inline: Component.For<IFooFactory>().AsFactory(f => f.SelectedWith("selectorKey")) 
+
+- Changed IModelInterceptorSelector's signature and behavior (see breakingChanges.txt for details)
+
+- removed IProxyHook interface (see breakingchanges.txt)
+
+- added support for specifying typed factory component selectors on a per-factory basis
+
+- added support for using services as mixins
+
+- added autogenerated delegate-based factories. Taking dependency on Func<IFoo> and calling the delegate will return IFoo from the container
+
+- implemented IOC-ISSUE-203 - Add to fluent API scanning assemblies for IWindsorInstallers and installing them
+
+- added fluent API for EventWiringFacility
+
+- added ability to specify assemblies that will be scanned for types when shorthened type name is using via XML using the following syntax:
+	<using assembly="Assembly name or path to file.dll" />
+
+- added ability to specify installers (IWindsorInstaller) via XML using either of the following:
+  <installers>
+	<install type="Castle.Windsor.Tests.Installers.CustomerInstaller"/>
+	<install assembly="Castle.Windsor.Tests"/>
+  </installers>
+  installers must be public and have default constructor.
+
+- Xml config does not require assembly qualified type name any more - specifying just type name, or typename+namespace should be enough. Works only for types in already loaded assemblies.
+
+- ResolveAll will now resolve components that are not in Valid state when inline/dynamic arguments are provided
+
+- TypedFactoryFacility: TypedFactoryComponent will now fallback to resolving by type if no component with designated name can be found
+
+- fixed issue with per-web-request components not being released properly in some cases
+
+- fixed IOC-ISSUE-199 - NamingPartsSubSystem broken when RegisterHandlerForwarding is used
+
+- TypedFactoryFacility: added ability to resolve multiple components
+
+- TypedFactoryFacility: added ability to put custom resolving logic
+
+- fixed another case of IoC-168 where a component with two constructors of different parameter length couldn't be resolved when the fewer parameter constructor was not satisfied
+
+- If and Unless functions on fluent registration API are now cumulative - it is legal to call them multiple times and all conditions will be checked. This is a minor breaking change from previous behavior where last call would win.
+
+- added typed arguments (specified by type rather than by name).
+	It works for:
+	- call site (Resolve with Dictionary, specifying System.Type as value of key. A helper class 'Arguments' should be used for this.)
+	- DynamicParameters - there's an extension method Insert that should make using it nicer
+	- fluent Api (DependsOn(Property.ForKey<string>().Eq("typed"))
+
+- added 'Insert' extension method on IDictionary, specifically so simplify usage in DynamicParameters method and similar situations. It behaves like IDictionary's indexer setter
+
+- added 'Arguments' class to carry inline arguments (typed or named) for components. It is recommended to use this class rather than Hashtable or Dictionary<>
+
+- added strongly typed overloads for StartUsingMethod and StopUsingMethod from startable facility's registration API. It is now possible to call .StartUsingMethod(x => x.Start).StopUsingMethod(x => x.Stop)
+
+- moved StartUsingMethod/StopUsingMethod to extension methods in StartableFacility's namespace. Startable() method was removed as superfluous.
+
+- changed the UsingFactoryMethod (and UsingFactory) methods in fluent registration API to not rely on FactorySupportFacility. They now work even if facility is not used.
+
+- fixed IOC-ISSUE-190 - "Resolve with argumentsAsAnonymousType overload is now case sensitive".
+	This fixed a regression bug introduced in v2.1, and brings the behavior back to what it was in v2.0.
+
+- added support for specifying interceptorsSelector, proxyHook and mixins from config (see new tests for example). This also means some small impact breaking changes:
+	- DefaultProxyFactory.CreateProxyGenerationOptionsFrom protected method has changed signature - it now also takes IKernel and CreationContext, to be used by IReferences to do resolve (see below)
+	- DefaultProxyFactory.CustomizeProxy protected virtual method has changed signature, for the same reason as above
+	- ProxyOption's properties changed types: 
+		Selector, from IInterceptorSelector to IReference<IInterceptorSelector>
+		Hook from IProxyHook to IReference<IProxyHook>
+		MixIns from object[] to IEnumerable<IReference<object>>
+	IReference abstraction allows to use components resolved from the container, similar to InterceptorReferences.
+
+- Moved several types from Core:
+	ComponentActivatorAttribute
+	ComponentProxyBehaviorAttribute
+	CustomLifestyleAttribute
+	DoNotWireAttribute      
+	InterceptorAttribute    
+	LifestyleAttribute
+	PooledAttribute
+	TransientAttribute
+	GraphNode
+	IVertex
+	IRecyclable
+	IStartable
+	ComponentModel
+	ConstructorCandidate
+	ConstructorCandidateCollection
+	DependencyModel
+	DependencyModelCollection
+	InterceptorReference
+	InterceptorReferenceCollection
+	LifecycleStepCollection
+	MethodMetaModel
+	MethodMetaModelCollection
+	ParameterModel
+	ParameterModelCollection
+	PropertySet
+	PropertySetCollection
+	TopologicalSortAlgo
+	IOnBehalfAware
+	GraphSets
+	GraphTestCase
+
+
+2.1.1 (2010-01-13)
+==================
+- Reverted factory support facility changes in r6595, r6596 and r6653 which fixed IOC-ISSUE-153, however caused other bugs
+  reported on the mailing list (http://groups.google.com/group/castle-project-users/browse_thread/thread/3f2b602e738a08c6?hl=en)
+
+2.1.0 (2010-01-12)
+==================
+- Moved the logging facility project into the Windsor project:
+  - Applied Tom Allard's patch fixing FACILITIES-93
+	"Extra constructors on LoggingFacility"
+  - Added test case supplied by chris ortman
+  - Register base logger and factory when using extended logger.
+  - Fixed FACILITIES-77
+	"ILoggerFactory instance creation requires constructor with one argument"
+
+- simplified API for attaching interceptors.
+
+- added support for forwarded types in XML config
+
+- added WithParameters method to fluent registration that enables inspecting and modifying arguments passed to Resolve method.
+- BREAKING CHANGE - AbstractHandler.Resolve method is no longer abstract and instead a ResolveCore protected abstract method was added. To fix this, implementers should override ResolveCore instead of Resolve.
+
+- added OnCreate method (refactored from OnCreateFacility created by Tehlike) which allows to specify actions to be invoked on the component right after it is created, and before it's returned from the container
+
+2.0
+====
+
+- Updated FactorySupportFacility and fluent registration to allow propagation 
+  of CreationContext to factory methods
+
+- Fixed Burden release issue in which children were being released if the
+  component was not destroyed
+
+- Automatically configure proxy to omit target if no implementation
+
+- Fluent interface for factory support
+
+- Fixed an issue with of not considering unregistered service dependencies in arrays
+
+- Will not try to convert values that are already a match to the parameter type
+
+- XmlProcessor now properly dispose of the stream reader
+
+- The kernel will now check if trying to register null types
+
+RC 4
+====
+
+- Update FromInterface Registration policy to only consider toplevel interfaces
+  and allow multiple services.
+
+- Fixed bug in AllComponentsReleasePolicy in which burden not properly handled
+  on dispose.
+
+- Applied patch from Joao Braganca to allow abstract types in DefaultComponentActivator if proxied.
+
+- Added additional AddFacility overrides to improve fluent configuration of facilities.
+
+- Moved DefaultComponentActivator check for abstract so it can be better overriden.
+  
+- Added Attribute to Component Registration fluent interface.
+
+- Add ability to use Configure components based on implementation type when
+  using AllTypesOf.
+
+- Do not return forward handlers in ResolveAll since you will get duplicate services.
+
+- Applied patch (with mods) from Martin Nllsson to select registration interface from
+  containing interface.
+
+- Added shortcut to AllTypes to accept a where.
+
+- Added ability to include non-public types in registration.
+
+- Updated registration to support providing multiple service types.
+
+- Add registration support for mixins.
+
+- Do not allow registering components with the same name in fluent interface.
+
+- Applied Ayendes patch to introduce component service type forwarding to
+  support multiple service interfaces for a component.
+  Extended the Component Registration interface to support service forwarding.
+
+- Avoid to register abstract component via IKernel.AddComponent, now throws when trying to add instead of while resolving component
+
+- Removed sealed qualifier from CreationContext and made ISubDependencyResolver
+  methods virtual so they can be overriden.
+
+- Made IKernel.AddFacility fluent.
+
+- Added StartMethod/StartMethod to ComponentRegistration.
+
+- Add if/unless support for ComponentRegistration.
+
+- Applied Daniel Jins patch to not proxy internal interfaces.
+
+- Fixed IOC-126
+  "PoolableLifestyleManager creates pool in constructor" 
+
+- Fixed IOC-125
+  "DefaultGenericHandler does not properly handle proxied generic components"
+
+- Updated AllTypes strategy to support types based on generic type definitions.
+
+- Updated AllTypes strategy to support multiple registrations from a single set of types.
+
+- Collection handlers from parent container for GetAssignableHandlers.
+
+- Added ability to change invocation target to DefaultProxyFactory.
+
+- Fixed bug with ComponentRegistration.Instance in which the instance type was not assigned as the ComponentModel implementation.
+
+- Replaced AllTypesOf<T> syntax with AllTypes.Of<T> so a non-generic version can be consistently provided.  
+
+- Added generic AddFacility methods to kernel.
+
+- Added generalized configuration support to ComponentRegistration.
+
+- Added IWindsorInstaller interface to enhance Windsor component installation.
+
+- Added AllTypesOf registration stratgey to simplify custom registration
+  scenarios.
+
+- Added IRegistration interface to allow alternate registration mechanisms.
+
+- Fixed CORE-16 (Should be Facilities) 
+ "The FactorySupportFacility does not create proxies if interceptors are present"
+
+- Added support for list service overrides using the fluent registration interface.
+  Added support for specifying configuration parameters using the fluent interface to allow any complex
+  registration scenarios.
+
+- Restructured the registration fluent interface to be a little more readable,
+  better support component registrations and prevent errors resulting from 
+  forgetting to call ComponentRegistration.Register
+
+- Fixed Facilities-97
+  "EventWiring Facility fails to create some components"
+  
+- Added support for non-generic usage of fluent-interface.  Needed for dynamic registrations scenarios (Binsor)
+  Automatically register the component between consecutive AddComponentEx (Saves a few strokes).
+
+- Initial version of MicroKernel/Windsor fluent interface IOC-99
+
+- Applied patch from Jacob Lewallen improving the locking performance in the DefaultNamingSubsystem under high load.
+
+- Applied Philippe Tremblay's patch fixing IOC-94 
+  "Copy LifeStyle from generic interface"
+
+- Added support for copying interceptors defined on the geneirc interface handler.
+
+- Fixed IOC-80
+  "StartableFacility erroneously tries to start a component before
+  RegisterCustomDependency can be called"
+
+- Added ComponentModelConverter to utilize System.ComponentModel TypeConverters
+  Very useful for converting things like Fonts and Colors
+
+- Updated DefaultComplexConverter to support interfaces and derived types
+
+- Fixed IOC-96
+  "FactorySupport fails to create components if the factory instance is a proxy"
+
+- Fixed IOC-93
+  "GenericListConverter does not handle service overrides properly" 
+
+- Fixed IOC-91
+  "ContextBoundObject's context is not bound when object is created by MicroKernel"
+
+- Fixed build from IContainerAccessor change
+
+- Applied Ron Grabowski's patch fixing IOC-89
+  "Make DefaultKernel implement IServiceProvider"
+
+- Check for required Properties before determining the Handlers initial state
+
+- Fixed IoC-87
+  "DefaultComplextConverter does not properly handle nested components"
+
+- Applied Lee Henson's patch fixing IOC-86
+  "Additional generic AddComponent overloads"
+
+- Applied Ido Samuelson patch fixing IOC-85
+  "IKernel to support generics to add/resolve components."
+
+- Refactored proxy options support. Now you can use the attribute 'marshalByRefProxy' 
+  on the external configuration, or the ComponentProxyBehaviorAttribute
+
+- Fixed IOC-79
+  "Kernel.GetHandlers(Type) does not consider generic handlers when satisfying the type"
+
+- Updated StartableFacilityTestCase to correctly demonstrate the facility and
+  added a unit test to demonstrate IOC-80
+ 
+- Applied Alex Henderson's patch that makes the ComponentModel available
+  to the ILifestyleManager
+
+- Applied Adam Mills's patch fixing IOC-74
+  "BinaryComponentName VisitNode null check"
+
+- Fixed IOC-67
+  "RemoveComponent needs to unwire handlers and remove them"
+
+- Fixed IOC-59
+  "Child component unable to correctly resolve parent service added after the component"
+
+- Fixed IOC-47
+  "Components created by FactoryActivator have their dependencies checked"
+
+- Applied Marcus Widerberg's patch fixing FACILITIES-84
+  "FactorySupport - Allow parameters to factory method to be set at resolvetime"
+
+- Applied Marcus Widerberg's patch fixing FACILITIES-82
+  "Programmatic configuration for FactorySupport"
+
+- Reverted by Henry -> Apply patch from Sam Camp that fixes problems with Remoting Facility Sample and RecoverableComponent. 
+
+- Updated TypedFactoryFacility to not require a target instance
+  when proxying.
+
+- Added Windsor proxy support to create proxies without targets.
+
+- Removed relationship between ProxyOptions and ProxyGeneration options
+  and moved ProxyOptions into the MicroKernel.  ProxyGeneration options
+  are created from the ProxyOptions and will probably need to be updated
+  as facilities demand more proxy generation customizations.
+
+- Added ProxyOptions to allow facilities to easily add proxy interfaces
+  without having to create custom proxy factories.  The ProxyOptions
+  are obtained via the ProxyUtil.
+
+- Fixed IOC-65
+  "DictionaryConverter should use the alternate overload of the 
+   PerformConversion method in order to support dictionaries that contain 
+   custom types"
+
+- Moved ProxyComponentInspector from Castle.MicroKernel to here and added
+  support to supply ProxyGenerationOptions on a ComponentModel basis.  This
+  provides the needed ability to provide proxy options in facilities.
+
+- Fixed IOC-69 - DefaultDependencyResolver issue with Service Overrides.
+
+- Added ComponentProxyBehaviorAttribute and ComponentProxyInspector 
+  to control the creation of component proxies.
+
+- Added eval support to configuration. Currently it only supports 
+  BaseDirectory as a content to evaluate
+
+  <?eval $BaseDirectory ?>
+
+- Added IEnvironmentInfo in an attempt to solve complex 
+  configuration/environment issues.
+
+- Fixing IOC-63 - source order of constructors should not matter
+
+- Fixed IOC-62
+  "Interceptors don't work properly on generic components"
+
+- Applied Norbert Wagner's patch fixing IOC-55
+  "Generic Type Converters: Set default entry types to generic arguments of property type"
+
+- Applied Jeff Brown's patch fixing IOC-54
+  "Empty component parameter values cause runtime exception during component resolution."
+
+- Applied patch by Bill Pierce that
+
+-- Introduces the WebUserControlComponentActivator
+
+-- Introduces the KeySearchNamingSubSystem
+
+-- Allows you to associate a custom component activator using
+	1. componentActivatorType on component node
+	2. ComponentActivatorAttribute
+
+-- Allows you to create and configure child containers 
+   through the configuration, using
+
+  <configuration>
+	<containers>
+		<container name="child1">
+		  <configuration>
+				<facilities>
+					...
+				</facilities>
+		  
+				<components>
+					...
+				</components>
+				
+			</configuration>
+		</container>
+	</containers>
+  </configuration>
+
+- Applied AndyD's patch fixing IOC-52
+  "Remote access to generic components"
+
+- Fixed IOC-45
+  "Proxying a component that has an interface that is extended from another interface throws an exception"
+
+- Applied patch by Ernst Naezer fixing IOC-37
+  "Resolving with arguments in Windsor"
+
+- Fixed IOC-43 
+  "Creation of an Attribute in the Kernel that allows one property to be ignored by the dependency builder"
+  
+  Introduced DoNotWireAttribute that marks a property and prevents it
+  from being considered by the container
+
+- Changed Windsor to use DynamicProxy 2
+
+- Applied patch by Adam Mills fixing IOC-42
+  "ResolveServices", new method added to IKernel
+
+- Applied patch by Adam Mills fixing IOC-41
+  "Bug Fix BinaryTreeComponentName - Assumed Lesser nodes went to left"
+
+- Applied patch by Adam Mills fixing IOC-40
+  "Provided an Implementation for BinaryTreeComponentName.Remove"
+
+- Applied patch by Adam Mills fixing IOC-39
+  "Fix for Null Reference when accessing empty BinaryTreeComponentName"
+
+- Fixed IOC-35 
+  "Add bootstrap section to configuration file"
+
+- Fixed issue where KeyAlreadyAdded exception would be throw for 
+  components accepting two parameters of the same type, without overrides
+
+- Fixed IOC-36 
+  "Transient components with multliple constructors throw 
+   unresolved dependency exceptions."
+
+  Removed best candidate reference, as the kernel is dynamic it should
+  not cache best constructors as components can be added or removed
+  at any time
+  
+  Removed Points from candidates, as in a multithreaded scenario
+  this would lead to failures
+  
+
+- Fixed IOC-34 
+  "Cannot use types having their own base type as constructor argument"
+
+  See revision r2787
+
+- IOC-32, Support generic collections. 
+  Supported collections are: ICollection<T>, IList<T>, List<T>, IDictionary<K,V>, Dictionary<K,V>, IEnumerable<T> 
+
+RC 3
+====
+ 
+- Applied patch by William C. Pierce <wcpierce@gmail.com> adding PerWebRequestAttribute
+
+- Added setter to ReleasePolicy property
+
+- Applied Curtis Schlak's patch fixing IOC-30
+  "Add overload to Windsor AddComponent to specify the Lifestyle"
+
+- Refactored AbstractHandler to use IDependencyResolver
+
+- Dependencies can be resolved now in three levels:
+
+  * CreationContext (which now implements ISubDependencyResolver)
+  * IHandler (which now implements ISubDependencyResolver)
+  * IKernel which is the normal flow
+
+- Implemented IoC-29 using a different approach
+
+- Renamed IKernel.AddComponentWithProperties to AddComponentExtendedProperties.
+  The old method name misled the programmer about its purpose.
+
+- Added a PerWebRequestLifestyleManager which creates at most one instance of
+  an object per web request.  To use it you must add the following http module
+
+  <httpModules>
+	  ...
+	  <add name="PerWebRequest" type="Castle.MicroKernel.Lifestyle.PerWebRequestLifestyleManager , Castle.MicroKernel,Version=0.0.1.7, Culture=neutral, PublicKeyToken=407dd0808d44fbdc"/>
+
+  <httpModules>
+
+  The strong name could be omitted if not in the GAC
+
+- Added checks to handle cycles in dependencies graphs and avoid deadly Stack Overflow Exceptions.
+
+- Fixed IOC-24: "Allow user to provide an attribute which will customize how to inspect properties (PropertiesDependenciesModelInspector)"
+  Now users can add an 'inspectionBehavior' attribute to the component node that defines
+  the inspection strategy. Possible values are
+  
+  - None: No properties inspection should happen
+  - All: All properties will be inspected and collected (on the class and on the superclasses). 
+		 This is the default behavior
+  - DeclaredOnly: Only properties specified on type are checked (superclasses will be ignored) 
+
+- Added overload to ITypeConvertor that accept the current node configuration as well as the type in CanHandleType()
+
+- Change: Better error message when there's an exception 
+  setting up properties
+
+- Fixed IOC-25: Overrides on the configuration should be considered a non-optional dependency
+
+  This fix changes a little the MicroKernel behavior. Now if you specify an service override
+  through external configuration, it will be considered a _non-optional_ dependency
+
+- Uri usage replaced by CustomUri which, differently than MS' Uri class, has the same
+  behavior on net-1.1, net-2.0 and mono
+
+- EventWiring Facility: now when a publisher is requested, the subscribers
+  are automatically started. 
+  
+  The side effects are: 
+  
+  - when a subscriber is requested it won't be wired automatically. 
+  - There no much sense in having a subscriber with a lifestyle other than singleton
+  
+  I'm still evaluating this idea. Sometimes wiring only when the subscriber is requested
+  might make sense, but supporting both approaches is kinda hard.
+  
+
+- Applied patch by Alex Henderson <webmaster@bittercoder.com> adding
+	IWindsorContainer.RemoveChildContainer(IWindsorContainer childContainer)
+	and IKernel.RemoveChildKernel(IKernel kernel)
+
+- Applied fix by Ahmed. Now defines can be used on properties nodes like
+
+  <properties>
+   <?if DEBUG?>
+	<item>x</item>
+   <?end?>
+  </properties>
+
+- Now with DictionaryConverter you can specify the keyType and valueType on each entry (kudos to Ahmed)
+
+- xmlinterpreter will throw an exception if a property is not defined but referenced
+using #{propertyName} syntax.(Patch from Ahmed)
+
+- XmlProcessor refactored from XmlInterpreter (kudos to Ahmed)
+  Now PI are also supported (don't forget to document this on the wiki)
+
+- Support for nested nodes on the properties. (kudos to Ahmed)
+  Example:
+
+  <configuration>
+	<properties>
+	   <MyComponentParams>
+		 <user>Joe</user>
+		 <pwd>Doe</pwd>
+	   </MyComponentParams>
+	 </properties>
+	 <components id=??Component
+	   <parameters>#{ MyComponentParams }</parameters>
+	 </components>
+  </configuration>
+  
+  Will result in 
+
+	 <components id=??Component
+	   <parameters>
+		 <user>Joe</user>
+		 <pwd>Doe</pwd>
+	   </parameters>
+	 </components>
+
+- Type converter for kernel components. This allows a usage like this:
+
+  <component id="mycomp">
+  
+	<parameters>
+	  <servicelist>
+		<list type="IMyService, MyAssembly">
+		  <item>${keytocomponent1}</item>
+		  <item>${keytocomponent2}</item>
+		</list>
+	  </servicelist>
+	</parameters>
+
+- Removed support for MethodMeta on ComponentModel. The design decision here 
+  is to make the facilities interested on it to extend MethodMetaInspector
+  reading from a specific node.
+
+RC 2
+====
+
+- AsyncInitializationContainer introduced. Special container flavor that installs the
+  facilities and components using a background thread.
+
+- Support for evaluation of expressions within the xml configuration (kudos to Ahmed)
+  The following "statements" are supported:
+  
+	<define flag="DEBUG" />
+	<undef flag="DEBUG"/>
+	
+	<if defined="DEBUG">
+		component/facility nodes
+	</if>
+	
+	<choose>
+		<when defined="DEBUG">
+			<component id="debug"/>
+		</when>
+		<when defined="Qa">
+			<component id="qa"/>
+		</when>
+		<when defined="Prod">
+			<component id="prod"/>
+		</when>
+		<otherwise>
+			<component id="default"/>
+		</otherwise>
+	</choose>
+
+- Startable facility: support to specify the attribute startable=true on the configuration
+
+- Better error messages: now the components waiting for dependencies will recursively 
+  report what they are waiting for.
+
+- Support for custom lifestyle through configuration (kudos to Bawer Dagdeviren):
+
+  <component id="my.component"
+				   type="MyLib.MyComponent, MyLib"
+				   lifestyle="custom"
+				   customLifestyleType="MyLib.MyCustomLifestyle, MyLib" />
+
+- Added Type converter for enums
+
+- Support to associate configuration nodes to methods. Usage:
+
+	<component>
+		<methods>
+			<save />
+			<save signature="System.String, mscorlib" />
+			<save signature="System.String, mscorlib;System.Int32, mscorlib" />
+		</methods>
+	</component>
+
+  Which is equivalent to
+
+	<component>
+		<methods>
+			<method name="save" />
+			<method name="save" signature="System.String, mscorlib" />
+			<method name="save" signature="System.String, mscorlib;System.Int32, mscorlib" />
+		</methods>
+	</component> 
+
+- IResource introduced (FileResource, AssemblyResource, ConfigResource and UncResource)
+  which are accessible through Uris:
+
+  - FileResource:  
+	file://pathtofile 
+	(For example: file://c:\mydir\file.txt)
+
+  - AssemblyResource:  
+	assembly://AssemblyName/ExtendingNamespace/filename 
+	(For example: assembly://Castle.Windsor.Tests/Configuration2/include1.xml)
+
+  - ConfigResource:  
+	config://sectioname 
+	(For example: config://castle will fetch the 
+	<configuration><castle> entry in the configuration)
+
+  - UncResource:  
+	\\server\file 
+	(For example: \\mysharedplace\myconfig.xml)
+
+- IResource, IResourceFactory and IResourceSubSystem introduced
+
+- Ability to use <properties> in configuration files. Usage
+
+	<properties>	
+		<prop1>prop1 value</prop1>
+		<prop2>prop2 value</prop2>
+	</properties>
+
+	<facilities>
+	
+		<facility id="testidengine" >
+			<item>#{prop1}</item>
+		</facility>
+
+		<facility id="testidengine2" >
+			<item value="#{prop2}"/>
+		</facility>
+	
+	</facilities>
+
+
+- Ability to use <include> in configuration files. Usage
+
+  Main file:
+
+	<configuration>
+
+		<include uri="file://include1.xml"/>
+
+	</configuration>
+
+  include1.xml:
+
+	<configuration>
+
+		<components>
+
+			<component id="testidcomponent1">
+			</component>
+
+			<component id="testidcomponent2">
+			</component>
+
+		</components>
+
+	</configuration>
+
+
+Beta 3
+======
+
+- Bug in dependency resolution (when chained) fixed
+- Better message description on exceptions related to unresolved dependencies.
+- Fixed bug in AddComponentWithProperties
+
+Beta 2  - 10/apr/2005
+======
+
+- Bug fixes
+
+- Configuration object model separated into interpreters and sources
+
+- AbstractFacility added
+
+
+Beta 1  - 21/jan/2005
+======
+
+- Changed: from #{} to ${} - way of referencing to another component
+  on the configuration.
+
+- Added: support for dictionaries, lists and arrays on the configuration file.
+
+  <component>
+	<parameters>
+	  <properties>
+		<dictionary>
+		  <item key="mykey">value</item>
+		</dictionary>
+	  </properties>
+	</parameters>
+  </component>
+
+- Added: Component Graph (used by the Remove method and to dispose the components)
+
+- Fixed: Remove method
+
+- Fixed: Windsor: Proxy for components with (service != impl)
