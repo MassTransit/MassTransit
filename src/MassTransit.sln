@@ -1,9 +1,13 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 10.00
-# Visual Studio 2008
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Infrastructure", "Infrastructure", "{56F516D7-BC3C-49E1-A639-83C5F14953F8}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Transports", "Transports", "{0006D6BB-1382-4B32-AD32-CA037F5CD4F6}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Containers", "Containers", "{6C61507E-FF16-45C8-8FE4-350069D9B4C1}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Legacy Support", "Legacy Support", "{C7764D1D-A0D9-416B-B32F-8DE375D393CB}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit", "MassTransit\MassTransit.csproj", "{6EFD69FC-CBCC-4F85-AEE0-EFBA73F4D273}"
 EndProject
@@ -19,8 +23,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Transports.Nms.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.WindsorIntegration", "Containers\MassTransit.WindsorIntegration\MassTransit.WindsorIntegration.csproj", "{98D5A59C-96FA-4A1B-A653-EA5A35C45FC9}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Containers", "Containers", "{6C61507E-FF16-45C8-8FE4-350069D9B4C1}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.StructureMapIntegration", "Containers\MassTransit.StructureMapIntegration\MassTransit.StructureMapIntegration.csproj", "{F5E67502-2B30-484C-88C3-97710291F5AA}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Infrastructure", "MassTransit.Infrastructure\MassTransit.Infrastructure.csproj", "{073A90FD-9A3E-4704-B3B5-6D8A9F4B442E}"
@@ -33,8 +35,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.NinjectIntegrat
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.LegacySupport", "LegacySupport\MassTransit.LegacySupport\MassTransit.LegacySupport.csproj", "{EBC898FE-E3E4-4599-8DC3-D98A829424AC}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Legacy Support", "Legacy Support", "{C7764D1D-A0D9-416B-B32F-8DE375D393CB}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Visualizers", "MassTransit.Visualizers\MassTransit.Visualizers.csproj", "{DD031A51-CC4B-4375-AF6B-4F3ADBE23C07}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.RuntimeServices", "MassTransit.RuntimeServices\MassTransit.RuntimeServices.csproj", "{8AFA8821-2851-4134-8E0A-F9E7E10D28D9}"
@@ -45,7 +45,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.TestFramework",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.SystemView2", "MassTransit.SystemView2\MassTransit.SystemView2.csproj", "{D2DAE9B1-AB3E-4B4D-9E8E-B394BA5B7EFE}"
 EndProject
-Project("{4F174C21-8C12-11D0-8340-0000F80270F8}") = "MassTransit.RuntimeServices.Database", "MassTransit.RuntimeServices.Database\MassTransit.RuntimeServices.Database.dbp", "{4042D8A0-80AF-403A-B9F0-01EE7C948E0A}"
+Project("{C8D11400-126E-41CD-887F-60BD40844F9E}") = "MassTransit.RuntimeServices.Database", "MassTransit.RuntimeServices.Database\MassTransit.RuntimeServices.Database.dbproj", "{67CBC824-A49E-4E9B-A947-360F3DFE65C3}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.LegacyServices", "LegacySupport\MassTransit.LegacyServices\MassTransit.LegacyServices.csproj", "{1501B1CE-C525-4003-9A90-208538FAD30B}"
 EndProject
@@ -135,6 +135,8 @@ Global
 		{D2DAE9B1-AB3E-4B4D-9E8E-B394BA5B7EFE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D2DAE9B1-AB3E-4B4D-9E8E-B394BA5B7EFE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D2DAE9B1-AB3E-4B4D-9E8E-B394BA5B7EFE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{67CBC824-A49E-4E9B-A947-360F3DFE65C3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{67CBC824-A49E-4E9B-A947-360F3DFE65C3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1501B1CE-C525-4003-9A90-208538FAD30B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{1501B1CE-C525-4003-9A90-208538FAD30B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1501B1CE-C525-4003-9A90-208538FAD30B}.Release|Any CPU.ActiveCfg = Release|Any CPU

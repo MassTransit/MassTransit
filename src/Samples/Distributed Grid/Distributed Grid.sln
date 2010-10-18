@@ -1,6 +1,6 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 10.00
-# Visual Studio 2008
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DistributedGrid.Worker", "DistributedGrid.Worker\DistributedGrid.Worker.csproj", "{6670D1F9-EC59-48A3-BCB4-47D4BE6FBC5E}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DistributedGrid.Activator", "DistributedGrid.Activator\DistributedGrid.Activator.csproj", "{87194E94-9647-4130-A84F-C495BDF75D39}"
@@ -22,6 +22,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Transports.Msmq.Tests", "..\..\Transports\MassTransit.Transports.Msmq.Tests\MassTransit.Transports.Msmq.Tests.csproj", "{AF3C3E95-BA6C-41FF-873D-7C2E8994EE9D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Tests", "..\..\MassTransit.Tests\MassTransit.Tests.csproj", "{76646B96-936B-4D31-A053-35CD630E3C68}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "References", "References", "{8A63B686-7673-4393-996B-F43E28CE7560}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -76,5 +78,15 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{6EFD69FC-CBCC-4F85-AEE0-EFBA73F4D273} = {8A63B686-7673-4393-996B-F43E28CE7560}
+		{073A90FD-9A3E-4704-B3B5-6D8A9F4B442E} = {8A63B686-7673-4393-996B-F43E28CE7560}
+		{8AFA8821-2851-4134-8E0A-F9E7E10D28D9} = {8A63B686-7673-4393-996B-F43E28CE7560}
+		{F5E67502-2B30-484C-88C3-97710291F5AA} = {8A63B686-7673-4393-996B-F43E28CE7560}
+		{85C0F3A0-A689-422C-84EB-A1F5E04FD0AC} = {8A63B686-7673-4393-996B-F43E28CE7560}
+		{76646B96-936B-4D31-A053-35CD630E3C68} = {8A63B686-7673-4393-996B-F43E28CE7560}
+		{6F90867C-E092-4EDC-B3DE-600D39DF0335} = {8A63B686-7673-4393-996B-F43E28CE7560}
+		{AF3C3E95-BA6C-41FF-873D-7C2E8994EE9D} = {8A63B686-7673-4393-996B-F43E28CE7560}
 	EndGlobalSection
 EndGlobal

@@ -2,12 +2,11 @@ namespace CodeCamp.Domain
 {
     using System;
     using Magnum.Data;
-    using Magnum.DateTimeExtensions;
+    using Magnum.Extensions;
     using MassTransit;
     using MassTransit.Saga;
     using MassTransit.Services.Timeout.Messages;
     using Messages;
-    using Microsoft.Practices.ServiceLocation;
     using PostalService.Messages;
 
     public class RegisterUserSaga :
@@ -57,7 +56,7 @@ namespace CodeCamp.Domain
 
         public IServiceBus Bus { get; set; }
 
-        public IServiceLocator ServiceLocator { get; set; }
+        public IObjectBuilder ServiceLocator { get; set; }
 
         #endregion
 

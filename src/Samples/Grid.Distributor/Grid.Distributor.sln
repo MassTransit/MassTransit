@@ -1,6 +1,8 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 10.00
-# Visual Studio 2008
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "MT", "MT", "{A9CBE7DC-AD66-4891-9C4C-C18E8D3E0E0D}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Grid.Distributor.Shared", "Grid.Distributor.Shared\Grid.Distributor.Shared.csproj", "{DA5B48BC-3647-4E92-BEE5-58D920C75393}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Grid.Distributor.Activator", "Grid.Distributor.Activator\Grid.Distributor.Activator.csproj", "{57CBC0A8-B439-4960-93A2-682D94D737AE}"
@@ -8,8 +10,6 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Grid.Distributor.Worker", "Grid.Distributor.Worker\Grid.Distributor.Worker.csproj", "{F5898375-3A9C-4996-A570-871789C39C63}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit", "..\..\MassTransit\MassTransit.csproj", "{6EFD69FC-CBCC-4F85-AEE0-EFBA73F4D273}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "MT", "MT", "{A9CBE7DC-AD66-4891-9C4C-C18E8D3E0E0D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Transports.Msmq", "..\..\Transports\MassTransit.Transports.Msmq\MassTransit.Transports.Msmq.csproj", "{6F90867C-E092-4EDC-B3DE-600D39DF0335}"
 EndProject

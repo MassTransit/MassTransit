@@ -16,7 +16,7 @@
 
         protected void submitButton_Click(object sender, EventArgs e)
         {
-            using (var timer = new FunctionTimer("Registration submiteButton_Click", x => timerLabel.Text = x))
+            using (var timer = new FunctionTimer("Registration submiteButton_Click", x => timerLabel.Text = x.Text))
             {
                 var msg = new RegisterUser(CombGuid.Generate(), inputName.Text, inputUsername.Text, inputPassword.Text, inputEmail.Text);
 

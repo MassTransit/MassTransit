@@ -10,7 +10,7 @@ namespace Server
 	using MassTransit.WindsorIntegration;
 	using Microsoft.Practices.ServiceLocation;
 	using Topshelf;
-	using Topshelf.Configuration;
+	using Topshelf.Configuration.Dsl;
 
 	internal class Program
 	{
@@ -21,7 +21,7 @@ namespace Server
 			XmlConfigurator.ConfigureAndWatch(new FileInfo("server.log4net.xml"));
 			_log.Info("Server Loading");
 
-			IRunConfiguration cfg = RunnerConfigurator.New(c =>
+			var cfg = RunnerConfigurator.New(c =>
 				{
 					c.SetServiceName("SampleService");
 					c.SetServiceName("Sample Service");
@@ -30,31 +30,30 @@ namespace Server
 
 					c.RunAsLocalSystem();
 
-					c.ConfigureService<PasswordUpdateService>(typeof(PasswordUpdateService).Name, s =>
+					c.ConfigureService<PasswordUpdateService>(s =>
 						{
 							s.WhenStarted(o =>
 								{
-									IServiceBus bus = ServiceBusConfigurator.New(x =>
+								    var container = new DefaultMassTransitContainer("server.castle.xml");
+								    var wob = new WindsorObjectBuilder(container.Kernel);
+
+								    var endpointFactory = EndpointFactoryConfigurator.New(e =>
+								    {
+								        e.SetObjectBuilder(wob);
+								        e.RegisterTransport<MsmqEndpoint>();
+								    });
+
+									var bus = ServiceBusConfigurator.New(x =>
 										{
+                                            x.SetObjectBuilder(wob);
 											x.ReceiveFrom("msmq://localhost/mt_server");
 											x.ConfigureService<SubscriptionClientConfigurator>(b => { b.SetSubscriptionServiceEndpoint("msmq://localhost/mt_subscriptions"); });
 										});
 									o.Start(bus);
 								});
 							s.WhenStopped(o => o.Stop());
-							s.CreateServiceLocator(() =>
-								{
-									var container = new DefaultMassTransitContainer();
-									IEndpointFactory endpointFactory = EndpointFactoryConfigurator
-										.New(x =>
-											{
-												x.SetObjectBuilder(ServiceLocator.Current.GetInstance<IObjectBuilder>());
-												x.RegisterTransport<MsmqEndpoint>();
-											});
-									container.Kernel.AddComponentInstance("endpointFactory", typeof (IEndpointFactory), endpointFactory);
-									container.AddComponent<PasswordUpdateService>(typeof(PasswordUpdateService).Name);
-									return ServiceLocator.Current; //set in DefaultMTContainer
-								});
+
+                            s.HowToBuildService(name => new PasswordUpdateService());
 						});
 				});
 			Runner.Host(cfg, args);
