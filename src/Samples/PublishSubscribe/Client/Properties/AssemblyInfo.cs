@@ -6,11 +6,11 @@ using log4net.Config;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 
-[assembly : AssemblyTitle("Client")]
-[assembly : AssemblyDescription("")]
+//[assembly : AssemblyTitle("Client")]
+//[assembly : AssemblyDescription("")]
 [assembly : AssemblyConfiguration("")]
-[assembly : AssemblyProduct("Client")]
-[assembly : AssemblyTrademark("")]
+//[assembly : AssemblyProduct("Client")]
+//[assembly : AssemblyTrademark("")]
 [assembly : AssemblyCulture("")]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM

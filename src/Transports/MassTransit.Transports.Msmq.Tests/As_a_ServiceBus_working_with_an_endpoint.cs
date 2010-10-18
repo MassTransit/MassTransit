@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2010 The Apache Software Foundation.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,14 +14,15 @@ namespace MassTransit.Transports.Msmq.Tests
 {
     using System;
     using System.Threading;
-    using Magnum.DateTimeExtensions;
+    using Magnum.Extensions;
+    using Magnum.TestFramework;
     using MassTransit.Tests;
     using MassTransit.Tests.Messages;
     using MassTransit.Tests.TestConsumers;
     using NUnit.Framework;
     using TestFixtures;
 
-    [TestFixture, Category("Integration")]
+    [TestFixture, Intergration]
     public class When_a_message_is_published_to_a_transactional_queue :
         MsmqTransactionalEndpointTestFixture
     {
@@ -80,7 +81,7 @@ namespace MassTransit.Transports.Msmq.Tests
         }
     }
 
-    [TestFixture, Category("Integration")]
+    [TestFixture, Intergration]
     public class When_publishing_a_message :
         MsmqEndpointTestFixture
     {
@@ -213,7 +214,7 @@ namespace MassTransit.Transports.Msmq.Tests
         }
     }
 
-    [TestFixture, Category("Integration")]
+    [TestFixture, Intergration]
     public class When_an_accept_method_throws_an_exception :
         MsmqEndpointTestFixture
     {
@@ -277,7 +278,7 @@ namespace MassTransit.Transports.Msmq.Tests
         }
     }
 
-    [TestFixture, Category("Integration")]
+    [TestFixture, Intergration]
     public class When_receiving_messages_slowly :
         MsmqEndpointTestFixture
     {

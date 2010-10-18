@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2010 The Apache Software Foundation.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,9 +14,8 @@ namespace MassTransit.Internal
 {
 	using System;
 	using log4net;
-	using Magnum.ObjectExtensions;
 
-	public class MessageHeadersBase :
+    public class MessageHeadersBase :
 		ISetMessageHeaders
 	{
 		private static readonly ILog _log = LogManager.GetLogger(typeof (MessageHeadersBase));
@@ -104,7 +103,7 @@ namespace MassTransit.Internal
 		{
 			try
 			{
-				return uriString.IsNullOrEmpty() ? null : new Uri(uriString);
+				return string.IsNullOrEmpty(uriString) ? null : new Uri(uriString);
 			}
 			catch (UriFormatException ex)
 			{

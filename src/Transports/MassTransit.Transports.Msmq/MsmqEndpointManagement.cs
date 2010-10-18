@@ -139,6 +139,28 @@ namespace MassTransit.Transports.Msmq
 			return true;
 		}
 
+        public Dictionary<string, int> MessageTypes()
+        {
+            var dict = new Dictionary<string, int>();
+
+            using (var queue = new MessageQueue(_address.FormatName, QueueAccessMode.Receive))
+            {
+                using (MessageEnumerator enumerator = queue.GetMessageEnumerator2())
+                {
+                    while (enumerator.MoveNext(TimeSpan.Zero))
+                    {
+                        var q = enumerator.Current;
+                        if (!dict.ContainsKey(q.Label))
+                            dict.Add(q.Label, 0);
+
+                        dict[q.Label]++;
+                    }
+                }
+            }
+
+            return dict;
+        }
+
         public static void Manage(IMsmqEndpointAddress address, Action<IEndpointManagement> action)
         {
             try
