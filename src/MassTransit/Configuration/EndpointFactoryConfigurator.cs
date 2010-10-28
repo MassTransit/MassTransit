@@ -123,7 +123,8 @@ namespace MassTransit.Configuration
 			_disposed = true;
 		}
 
-		private IEndpointFactory Create()
+        //CHANGED TO SUPPORT THE MOVE TO THE NEW MODEL
+		internal IEndpointFactory Create()
 		{
 			IEndpointFactory endpointFactory = new EndpointFactory(_objectBuilder, _defaultSerializer, _transportTypes.ReadLock(x => x), _endpointConfigurators);
 

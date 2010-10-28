@@ -28,6 +28,7 @@ namespace MassTransit.Configuration
 		}
 
 		protected IObjectBuilder ObjectBuilder { get; private set; }
+        protected IEndpointFactory EndpointFactory { get; private set; }
 		protected TimeSpan ReceiveTimeout { get; private set; }
 		protected int ConcurrentReceiverLimit { get; private set; }
 		protected int ConcurrentConsumerLimit { get; private set; }
@@ -41,6 +42,10 @@ namespace MassTransit.Configuration
 			ObjectBuilder = objectBuilder;
 		}
 
+        public void SetEndpointFactory(IEndpointFactory endpointFactory)
+        {
+            EndpointFactory = endpointFactory;
+        }
 		public void SendErrorsTo(string uriString)
 		{
 			try
@@ -93,6 +98,9 @@ namespace MassTransit.Configuration
 		{
 			if (ObjectBuilder != null)
 				configurator.SetObjectBuilder(ObjectBuilder);
+
+            if(EndpointFactory != null)
+                configurator.SetEndpointFactory(EndpointFactory);
 
 			if (ErrorUri != null)
 				configurator.SendErrorsTo(ErrorUri);
