@@ -13,44 +13,28 @@
 namespace MassTransit
 {
     using System;
-    using System.IO;
-    using System.Linq;
-    using System.Reflection;
     using Configuration;
 
-    [Obsolete("Don't use yet")]
     public static class Bus
     {
-        public static void Initialize(Action<IEndpointFactoryConfigurator> cfg, Action<IServiceBusConfigurator> action)
+        static IServiceBus _instance;
+
+        public static void Initialize(Action<IEndpointFactoryConfigurator> endpointConfig, Action<IServiceBusConfigurator> busConfig, Func<IObjectBuilder> wob)
         {
-            cfg = c =>
-            {
-                //add what we found in the dir
-                cfg(c);
-            };
+            //clear out the instance
+            _instance = null;
 
-            //endpoints
-            Endpoints = EndpointFactoryConfigurator.New(cfg);
+            //setup the transport stuff
+            IEndpointFactory endpointFactory = EndpointFactoryConfigurator.New(endpointConfig);
 
-            //get the factory rocking
-            Instance = ServiceBusConfigurator.New(action);
+            ServiceBusConfigurator.Defaults(c => c.SetObjectBuilder(wob()));
+
+            _instance = ServiceBusConfigurator.New(busConfig);
         }
 
-        public static IServiceBus Instance { get; private set; }
-        public static IEndpointFactory Endpoints { get; private set; }
-
-        private static void FindTransports()
+        public static IServiceBus Instance()
         {
-            string assemblyPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            var files = Directory.GetFiles(assemblyPath);
-            var transportFiles = files.Where(f=> f.StartsWith("MassTransit.Transport."));
-
+            return _instance;
         }
     }
-
-    //Use this so that we can track down where ever we are using factory stuff?
-    //also this should make more sense that Func<Type, object> ?
-    //
-    public delegate object BuilderFunc(Type typeToBuild);
-
 }
