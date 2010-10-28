@@ -61,7 +61,7 @@ namespace Server
                                        bc =>
                                        {
                                            bc.ReceiveFrom("msmq://localhost/mt_server");
-                                           bc.ConfigureService<SubscriptionClientConfigurator>(subCfg=> subCfg.SetSubscriptionServiceEndpoint("msmq://localhost/mt_subscriptions"));
+                                           bc.UseSubscriptionService("msmq://localhost/mt_subscriptions");
                                        },
                                        () => wob);
                         IServiceBus bus = Bus.Instance();

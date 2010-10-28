@@ -18,6 +18,7 @@ namespace MassTransit
     public static class Bus
     {
         static IServiceBus _instance;
+        static IEndpointFactory _endpointFactory;
 
         public static void Initialize(Action<IEndpointFactoryConfigurator> endpointConfig, Action<IServiceBusConfigurator> busConfig, Func<IObjectBuilder> wob)
         {
@@ -35,7 +36,7 @@ namespace MassTransit
             };
 
             
-            IEndpointFactory endpointFactory = EndpointFactoryConfigurator.New(ecc);
+            _endpointFactory = EndpointFactoryConfigurator.New(ecc);
 
             ServiceBusConfigurator.Defaults(c => c.SetObjectBuilder(objectBuilder));
 
