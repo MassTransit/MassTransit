@@ -14,7 +14,6 @@ namespace MassTransit
 {
 	using System;
 	using Internal;
-	using Magnum.Reflection;
 
 	public static class CurrentMessage
 	{
@@ -113,7 +112,7 @@ namespace MassTransit
 		{
 			if (headers.ResponseAddress == null)
 				throw new InvalidOperationException("No response address was contained in the message");
-
+            
 			return headers.ObjectBuilder.GetInstance<IEndpointFactory>().GetEndpoint(headers.ResponseAddress);
 		}
 	}

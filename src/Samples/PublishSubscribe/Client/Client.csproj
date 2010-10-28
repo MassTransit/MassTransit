@@ -122,7 +122,7 @@
     <Content Include="castle.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="log4net.xml">
+    <Content Include="client.log4net.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

@@ -81,6 +81,7 @@
     <Compile Include="AllowMessageTypeAttribute.cs" />
     <Compile Include="Batch\BatchedBy.cs" />
     <Compile Include="Batch\BatchTimeout.cs" />
+    <Compile Include="Bus.cs" />
     <Compile Include="Exceptions\SagaException.cs" />
     <Compile Include="ExpiresInAttribute.cs" />
     <Compile Include="Fault.cs" />

@@ -57,7 +57,7 @@ namespace LegacyRuntime
                     ConfigureService<LegacySubscriptionProxyService, LegacySupportRegistry>(s, start=>start.Start(), stop=>stop.Stop());
                 });
 
-                config.AfterStoppingTheHost(x => { _log.Info("MassTransit Legacy Services are exiting..."); });
+                config.AfterStoppingServices(x => { _log.Info("MassTransit Legacy Services are exiting..."); });
             });
 
             Runner.Host(cfg, args);
@@ -72,6 +72,7 @@ namespace LegacyRuntime
         }
         private static void ConfigureService<TService, TRegistry>(IServiceConfigurator<TService> service, Action<TService> start, Action<TService> stop)
             where TRegistry : Registry
+            where TService : class
         {
 			var registry = FastActivator<TRegistry>.Create(ObjectFactory.Container);
 			ObjectFactory.Configure(cfg =>

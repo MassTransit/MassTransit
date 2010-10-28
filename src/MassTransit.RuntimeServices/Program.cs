@@ -71,7 +71,7 @@ namespace MassTransit.RuntimeServices
 						config.ConfigureService<TimeoutService>(service => { ConfigureService<TimeoutService, TimeoutServiceRegistry>(service, start => start.Start(), stop => stop.Stop()); });
 					}
 
-					config.AfterStoppingTheHost(x => { _log.Info("MassTransit Runtime Services are exiting..."); });
+					config.AfterStoppingServices(x => { _log.Info("MassTransit Runtime Services are exiting..."); });
 				});
 			Runner.Host(configuration, args);
 		}
@@ -87,6 +87,7 @@ namespace MassTransit.RuntimeServices
 
 		private static void ConfigureService<TService, TRegistry>(IServiceConfigurator<TService> service, Action<TService> start, Action<TService> stop)
 			where TRegistry : Registry
+            where TService : class
 		{
 			var container = new Container(x =>
 				{
