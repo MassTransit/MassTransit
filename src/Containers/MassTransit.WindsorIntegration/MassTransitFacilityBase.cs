@@ -57,8 +57,9 @@ namespace MassTransit.WindsorIntegration
             var types = new List<Type>();
             foreach (var file in files)
             {
-                Kernel.Register(AllTypes.Of<IEndpoint>()
-                    .FromAssemblyNamed(file).Configure(c => types.Add(c.Implementation)));
+                Kernel.Register(AllTypes.FromAssemblyNamed(file)
+                    .BasedOn<IEndpoint>()
+                    .Configure(c=>types.Add(c.Implementation)));
             }
 
 
