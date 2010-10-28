@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2010 The Apache Software Foundation.
 // 
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -27,8 +27,8 @@ namespace MassTransit.WindsorIntegration
         {
             var wob = new WindsorObjectBuilder(container.Kernel);
 
-            container.Kernel.AddComponentInstance("kernel", typeof(IKernel), container.Kernel);
-            container.Kernel.AddComponentInstance("objectBuilder", typeof(IObjectBuilder), wob);
+            container.Register(Component.For<IKernel>().Instance(container.Kernel).Named("kernel"));
+            container.Register(Component.For<IObjectBuilder>().Instance(wob).Named("objectBuilder"));
 
             container.Register(
                 Component.For<IObjectBuilder>()
@@ -67,8 +67,8 @@ namespace MassTransit.WindsorIntegration
         public static void RegisterInMemorySagaRepository(IWindsorContainer container)
         {
             container.Kernel.Register(
-                Component.For(typeof(ISagaRepository<>))
-                    .ImplementedBy(typeof(InMemorySagaRepository<>))
+                Component.For(typeof (ISagaRepository<>))
+                    .ImplementedBy(typeof (InMemorySagaRepository<>))
                     .LifeStyle.Singleton
                 );
         }
