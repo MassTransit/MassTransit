@@ -16,7 +16,6 @@ namespace MassTransit.WindsorIntegration
     using System.Linq;
     using Services.HealthMonitoring.Configuration;
     using Services.Subscriptions.Configuration;
-    using Transports;
 
     public class MassTransitFacility :
         MassTransitFacilityBase
@@ -66,9 +65,6 @@ namespace MassTransit.WindsorIntegration
 
             RegisterEndpointFactory(x =>
             {
-                x.RegisterTransport<LoopbackEndpoint>();
-                x.RegisterTransport<MulticastUdpEndpoint>();
-
                 FacilityConfig.Children["transports"].Children
                 .Where(n => n.Name == "transport")
                 .Each(transport =>

@@ -14,6 +14,7 @@ namespace MassTransit.Configuration
 {
     using System;
     using Serialization;
+    using Transports;
 
     public class MassTransitConfiguration //what to name?
         : BusConfiguration
@@ -28,6 +29,9 @@ namespace MassTransit.Configuration
 
             _epc.SetObjectBuilder(builder);
             _sbc.SetObjectBuilder(builder);
+
+            _epc.RegisterTransport<LoopbackEndpoint>();
+            _epc.RegisterTransport<MulticastUdpEndpoint>();
         }
 
         public void RegisterTransport(Type transportType)

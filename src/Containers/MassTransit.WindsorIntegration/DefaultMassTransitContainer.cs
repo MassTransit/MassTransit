@@ -31,7 +31,6 @@ namespace MassTransit.WindsorIntegration
 		{
 			Initialize();
 
-		    AddFactoryFacility();
 			AddMassTransitFacility();
 		}
 
@@ -40,7 +39,6 @@ namespace MassTransit.WindsorIntegration
 		{
 			Initialize();
 
-            AddFactoryFacility();
 			AddMassTransitFacility();
 		}
 
@@ -64,10 +62,6 @@ namespace MassTransit.WindsorIntegration
 	        get { return _objectBuilder; }
 	    }
 
-        private void AddFactoryFacility()
-        {
-            AddFacility("factory", new FactorySupportFacility());
-        }
 	    private void AddMassTransitFacility()
 		{
 			AddFacility("masstransit", new MassTransitFacility());
