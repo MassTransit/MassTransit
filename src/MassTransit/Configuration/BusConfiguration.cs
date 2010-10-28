@@ -36,7 +36,8 @@ namespace MassTransit.Configuration
         void EnableAutoSubscribe();
 
         void Advanced(Action<AdvancedConfiguration> advCfg);
-        ////advanced settings
+        ////// advanced settings
         // saga persistors?
+        // subscription repo
     }
 }
