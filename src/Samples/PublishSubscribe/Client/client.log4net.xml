@@ -62,11 +62,6 @@
 		<appender-ref ref="ColoredConsoleAppender" />
 	</root>
 
-	<!-- Seeing service messages would be good here -->
-	<logger name="MassTransit.Host2">
-		<level value="INFO"/>
-	</logger>
-
 	<!-- Standard NHibernate Logging Settings -->
 	<logger name="NHibernate">
 		<level value="OFF" />
@@ -79,11 +74,11 @@
 
 	<!-- Standard MassTransit Logging Settings -->
 	<logger name="MassTransit">
-		<level value="OFF" />
+		<level value="DEBUG" />
+    <appender-ref ref="RollingFile" />
 	</logger>
 
 	<logger name="MassTransit.Messages">
-		<level value="OFF" />
-		<appender-ref ref="MT.Messages" />
+		<level value="DEBUG" />
 	</logger>
 </log4net>
