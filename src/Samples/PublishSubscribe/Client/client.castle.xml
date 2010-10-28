@@ -1,7 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <castle>
 	<components>
-
 	</components>
 
 	<facilities>
@@ -10,6 +9,7 @@
 			<bus id="main"
 				 endpoint="msmq://localhost/mt_client">
 				<subscriptionService endpoint="msmq://localhost/mt_subscriptions" />
+        <managementService heartbeatInterval="3" />
 			</bus>
 
 			<transports>
