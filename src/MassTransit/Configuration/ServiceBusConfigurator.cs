@@ -31,7 +31,8 @@ namespace MassTransit.Configuration
 	    private Action _beforeConsume;
 	    private Action _afterConsume;
 
-	    protected ServiceBusConfigurator()
+        //CHANGED TO SUPPORT THE MOVE TO THE NEXT CONFIG MODEL
+	    internal ServiceBusConfigurator()
 		{
 			_services = new List<Action<IServiceBus, IObjectBuilder, Action<Type, IBusService>>>();
 
@@ -171,7 +172,8 @@ namespace MassTransit.Configuration
 			}
 		}
 
-		private ServiceBus CreateServiceBus()
+        //TO SUPPORT THE NEW MODEL
+		internal ServiceBus CreateServiceBus()
 		{
 			var endpointFactory = ObjectBuilder.GetInstance<IEndpointFactory>();
 

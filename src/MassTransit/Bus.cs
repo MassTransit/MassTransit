@@ -14,6 +14,7 @@ namespace MassTransit
 {
     using System;
     using Configuration;
+    using Serialization;
 
     public static class Bus
     {
@@ -22,6 +23,8 @@ namespace MassTransit
 
         public static void Initialize(Action<IEndpointFactoryConfigurator> endpointConfig, Action<IServiceBusConfigurator> busConfig, Func<IObjectBuilder> wob)
         {
+            var busConfiguration = new BusConfiguration(wob());
+
             //clear out the instance
             _instance = null;
 
@@ -55,4 +58,63 @@ namespace MassTransit
             return _instance;
         }
     }
+
+    public interface BusConfiguration
+    {
+        
+    }
+
+    public class XBusConfiguration //what to name?
+    {
+        EndpointFactoryConfigurator _epc;
+        ServiceBusConfigurator _sbc;
+
+        public XBusConfiguration(IObjectBuilder builder)
+        {
+            _epc = new EndpointFactoryConfigurator();
+            _sbc = new ServiceBusConfigurator();
+
+            _epc.SetObjectBuilder(builder);
+            _sbc.SetObjectBuilder(builder);
+        }
+
+        public void ReceiveFrom(string uriString)
+        {
+            _sbc.ReceiveFrom(uriString);
+        }
+
+        public void ReceiveFrom(Uri uri)
+        {
+            _sbc.ReceiveFrom(uri);
+        }
+
+        public void UseDotNetXmlSerilaizer()
+        {
+            UseCustomSerializer<DotNotXmlMessageSerializer>();
+        }
+
+        public void UseXmlSerializer()
+        {
+            UseCustomSerializer<XmlMessageSerializer>();
+        }
+        public void UseBinarySerializer()
+        {
+            UseCustomSerializer<BinaryMessageSerializer>();
+        }
+
+        public void UseCustomSerializer<TSerializer>() where TSerializer : IMessageSerializer
+        {
+            _epc.SetDefaultSerializer<TSerializer>();
+        }
+
+        public IServiceBus CreateBus()
+        {
+          
+            return _sbc.CreateServiceBus();
+        }
+    }
+
+
+    //extension method per transport
+    //
 }
