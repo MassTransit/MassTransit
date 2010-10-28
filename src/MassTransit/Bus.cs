@@ -24,10 +24,27 @@ namespace MassTransit
             //clear out the instance
             _instance = null;
 
-            //setup the transport stuff
-            IEndpointFactory endpointFactory = EndpointFactoryConfigurator.New(endpointConfig);
+            var objectBuilder = wob();
 
-            ServiceBusConfigurator.Defaults(c => c.SetObjectBuilder(wob()));
+            //setup the transport stuff
+            
+            Action<IEndpointFactoryConfigurator> ecc = ec =>
+            {
+                endpointConfig(ec);
+                ec.SetObjectBuilder(objectBuilder);
+            };
+
+            
+            IEndpointFactory endpointFactory = EndpointFactoryConfigurator.New(ecc);
+
+            ServiceBusConfigurator.Defaults(c => c.SetObjectBuilder(objectBuilder));
+
+            //TODO: Need to allow the setting of the EF here
+            Action<IServiceBusConfigurator> bcc = bc =>
+            {
+                busConfig(bc);
+                bc.SetObjectBuilder(objectBuilder);
+            };
 
             _instance = ServiceBusConfigurator.New(busConfig);
         }

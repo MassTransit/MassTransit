@@ -17,7 +17,6 @@ namespace Client
     using log4net;
     using log4net.Config;
     using MassTransit;
-    using MassTransit.Configuration;
     using MassTransit.Services.Subscriptions.Configuration;
     using MassTransit.Transports.Msmq;
     using MassTransit.WindsorIntegration;
@@ -35,7 +34,7 @@ namespace Client
             _log.Info("Client Loading");
 
 
-            var cfg = RunnerConfigurator.New(c =>
+            RunConfiguration cfg = RunnerConfigurator.New(c =>
             {
                 c.SetServiceName("SampleClientService");
                 c.SetDisplayName("SampleClientService");
@@ -61,19 +60,15 @@ namespace Client
 
                         container.Register(Component.For<PasswordUpdater>());
 
-                        Bus.Initialize(ec=>
-                        {
-                            ec.SetObjectBuilder(container.ObjectBuilder);
-                            ec.RegisterTransport<MsmqEndpoint>();
-                        },
-                        bc=>
-                        {
-                            
-                            bc.SetObjectBuilder(wob);
-                            bc.ReceiveFrom("msmq://localhost/mt_client");
-                            bc.ConfigureService<SubscriptionClientConfigurator>(client => client.SetSubscriptionServiceEndpoint("msmq://localhost/mt_subscriptions"));
-                        },
-                        ()=>wob);
+                        //all config is in the container
+                        Bus.Initialize(ec => ec.RegisterTransport<MsmqEndpoint>(),
+                                       bc =>
+                                       {
+                                           bc.ReceiveFrom("msmq://localhost/mt_client");
+                                           bc.ConfigureService<SubscriptionClientConfigurator>(subCfg=> subCfg.SetSubscriptionServiceEndpoint("msmq://localhost/mt_subscriptions"));
+                                       },
+                                       () => wob);
+
                         var bus = Bus.Instance();
                         o.Start(bus);
                     });

@@ -56,16 +56,12 @@ namespace Server
                         var container = new DefaultMassTransitContainer("server.castle.xml");
                         var wob = new WindsorObjectBuilder(container.Kernel);
 
-                        Bus.Initialize(ec =>
-                        {
-                            ec.SetObjectBuilder(wob);
-                            ec.RegisterTransport<MsmqEndpoint>();
-                        },
+                        //all config is in the container
+                        Bus.Initialize(ec => ec.RegisterTransport<MsmqEndpoint>(),
                                        bc =>
                                        {
-                                           bc.SetObjectBuilder(wob);
                                            bc.ReceiveFrom("msmq://localhost/mt_server");
-                                           bc.ConfigureService<SubscriptionClientConfigurator>(b => b.SetSubscriptionServiceEndpoint("msmq://localhost/mt_subscriptions"));
+                                           bc.ConfigureService<SubscriptionClientConfigurator>(subCfg=> subCfg.SetSubscriptionServiceEndpoint("msmq://localhost/mt_subscriptions"));
                                        },
                                        () => wob);
                         IServiceBus bus = Bus.Instance();
