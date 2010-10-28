@@ -23,7 +23,7 @@ namespace MassTransit
 
         public static void Initialize(Action<IEndpointFactoryConfigurator> endpointConfig, Action<IServiceBusConfigurator> busConfig, Func<IObjectBuilder> wob)
         {
-            var busConfiguration = new BusConfiguration(wob());
+            var busConfiguration = new XBusConfiguration(wob());
 
             //clear out the instance
             _instance = null;
@@ -32,11 +32,7 @@ namespace MassTransit
 
             //setup the transport stuff
             
-            Action<IEndpointFactoryConfigurator> ecc = ec =>
-            {
-                endpointConfig(ec);
-                ec.SetObjectBuilder(objectBuilder);
-            };
+            Action<IEndpointFactoryConfigurator> ecc = endpointConfig;
 
             
             _endpointFactory = EndpointFactoryConfigurator.New(ecc);
@@ -44,13 +40,9 @@ namespace MassTransit
             ServiceBusConfigurator.Defaults(c => c.SetObjectBuilder(objectBuilder));
 
             //TODO: Need to allow the setting of the EF here
-            Action<IServiceBusConfigurator> bcc = bc =>
-            {
-                busConfig(bc);
-                bc.SetObjectBuilder(objectBuilder);
-            };
+            Action<IServiceBusConfigurator> bcc = busConfig;
 
-            _instance = ServiceBusConfigurator.New(busConfig);
+            _instance = busConfiguration.CreateBus();
         }
 
         public static IServiceBus Instance()
@@ -61,10 +53,26 @@ namespace MassTransit
 
     public interface BusConfiguration
     {
-        
+        void ReceiveFrom(string uriString);
+        void ReceiveFrom(Uri uri);
+        void RegisterTransport(Type transportType);
+        void RegisterTransport<TTransport>() where TTransport : IEndpoint;
+
+        //serialization. should it be a sub thingy?
+        void UseDotNetXmlSerilaizer();
+        void UseXmlSerializer();
+        void UseBinarySerializer();
+        void UseCustomSerializer<TSerializer>() where TSerializer : IMessageSerializer;
+
+        ////advanced settings
+        // threading
+        // configuring specific endpoints
+
+
     }
 
     public class XBusConfiguration //what to name?
+        : BusConfiguration
     {
         EndpointFactoryConfigurator _epc;
         ServiceBusConfigurator _sbc;
@@ -76,6 +84,16 @@ namespace MassTransit
 
             _epc.SetObjectBuilder(builder);
             _sbc.SetObjectBuilder(builder);
+        }
+
+        public void RegisterTransport(Type transportType)
+        {
+            _epc.RegisterTransport(transportType);
+        }
+
+        public void RegisterTransport<TTransport>() where TTransport : IEndpoint
+        {
+            _epc.RegisterTransport<TTransport>();
         }
 
         public void ReceiveFrom(string uriString)
@@ -109,7 +127,9 @@ namespace MassTransit
 
         public IServiceBus CreateBus()
         {
-          
+            var epf = _epc.Create();
+            //need to pass the epf into the sbc
+            _sbc.SetEndpointFactory(epf);
             return _sbc.CreateServiceBus();
         }
     }
@@ -117,4 +137,6 @@ namespace MassTransit
 
     //extension method per transport
     //
+
+   
 }

@@ -30,6 +30,7 @@ namespace MassTransit.Configuration
 		private Uri _receiveFromUri;
 	    private Action _beforeConsume;
 	    private Action _afterConsume;
+        IEndpointFactory _endpointFactory;
 
         //CHANGED TO SUPPORT THE MOVE TO THE NEXT CONFIG MODEL
 	    internal ServiceBusConfigurator()
@@ -175,11 +176,12 @@ namespace MassTransit.Configuration
         //TO SUPPORT THE NEW MODEL
 		internal ServiceBus CreateServiceBus()
 		{
-			var endpointFactory = ObjectBuilder.GetInstance<IEndpointFactory>();
+            if(_endpointFactory == null)
+                throw new ConfigurationException("You must call 'SetEndpointFactory(IEndpointFactory)' on the ServiceBusConfiguration class");
 
-			var endpoint = endpointFactory.GetEndpoint(_receiveFromUri);
+			var endpoint = _endpointFactory.GetEndpoint(_receiveFromUri);
 
-			return new ServiceBus(endpoint, ObjectBuilder, endpointFactory);
+			return new ServiceBus(endpoint, ObjectBuilder, _endpointFactory);
 		}
 
 		private void ConfigureThreadLimits(ServiceBus bus)
@@ -214,6 +216,11 @@ namespace MassTransit.Configuration
 		{
 			action(_defaults);
 		}
+
+        public void SetEndpointFactory(IEndpointFactory epf)
+        {
+            _endpointFactory = epf;
+        }
 	}
 
 	public class ControlBusConfigurator :
