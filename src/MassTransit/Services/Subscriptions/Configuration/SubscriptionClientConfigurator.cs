@@ -28,6 +28,16 @@ namespace MassTransit.Services.Subscriptions.Configuration
         {
             bc.ConfigureService<SubscriptionClientConfigurator>(subCfg => subCfg.SetSubscriptionServiceEndpoint(subscriptionServiceUri));
         }
+
+        public static void UseSubscriptionService(this BusConfiguration cfg, string subscriptionServiceUri)
+        {
+            UseSubscriptionService(cfg, new Uri(subscriptionServiceUri));
+        }
+
+        public static void UseSubscriptionService(this BusConfiguration cfg, Uri subscriptionServiceUri)
+        {
+            cfg.ConfigureService<SubscriptionClientConfigurator>(subCfg => subCfg.SetSubscriptionServiceEndpoint(subscriptionServiceUri));
+        }
     }
 	public class SubscriptionClientConfigurator :
 		IServiceConfigurator

@@ -48,23 +48,20 @@ namespace Server
                     s.Named(serviceName);
                     s.WhenStarted(o =>
                     {
-                        MsmqEndpointConfigurator.Defaults(def =>
-                        {
-                            def.CreateMissingQueues = true;
-                        });
-
                         var container = new DefaultMassTransitContainer("server.castle.xml");
                         var wob = new WindsorObjectBuilder(container.Kernel);
 
                         //all config is in the container
-                        Bus.Initialize(ec => ec.RegisterTransport<MsmqEndpoint>(),
-                                       bc =>
-                                       {
-                                           bc.ReceiveFrom("msmq://localhost/mt_server");
-                                           bc.UseSubscriptionService("msmq://localhost/mt_subscriptions");
-                                       },
-                                       () => wob);
-                        IServiceBus bus = Bus.Instance();
+                        Bus.Initialize(bc =>
+                        {
+                            bc.ReceiveFrom("msmq://localhost/mt_server");
+                            bc.UseMsmq(def=>
+                            {
+                                def.CreateMissingQueues = true;
+                            });
+                            bc.UseSubscriptionService("msmq://localhost/mt_subscriptions");
+                        }, () => wob);
+                        var bus = Bus.Instance();
                         o.Start(bus);
                     });
                     s.WhenStopped(o => o.Stop());

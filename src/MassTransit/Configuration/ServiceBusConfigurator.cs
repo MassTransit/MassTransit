@@ -59,8 +59,7 @@ namespace MassTransit.Configuration
 			_receiveFromUri = uri;
 		}
 
-		public void ConfigureService<TServiceConfigurator>(Action<TServiceConfigurator> configure)
-			where TServiceConfigurator : IServiceConfigurator, new()
+		public void ConfigureService<TServiceConfigurator>(Action<TServiceConfigurator> configure) where TServiceConfigurator : IServiceConfigurator, new()
 		{
 			_services.Add((bus, builder, add) =>
 				{

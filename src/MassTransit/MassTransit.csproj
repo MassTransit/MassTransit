@@ -82,6 +82,10 @@
     <Compile Include="Batch\BatchedBy.cs" />
     <Compile Include="Batch\BatchTimeout.cs" />
     <Compile Include="Bus.cs" />
+    <Compile Include="Configuration\AdvancedConfiguration.cs" />
+    <Compile Include="Configuration\BusConfiguration.cs" />
+    <Compile Include="Configuration\CrazyAdvancedShit.cs" />
+    <Compile Include="Configuration\MassTransitConfiguration.cs" />
     <Compile Include="Exceptions\SagaException.cs" />
     <Compile Include="ExpiresInAttribute.cs" />
     <Compile Include="Fault.cs" />
