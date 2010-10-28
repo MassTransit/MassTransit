@@ -35,7 +35,7 @@ namespace Client
             _log.Info("Client Loading");
 
 
-            RunConfiguration cfg = RunnerConfigurator.New(c =>
+            var cfg = RunnerConfigurator.New(c =>
             {
                 c.SetServiceName("SampleClientService");
                 c.SetDisplayName("SampleClientService");
@@ -44,7 +44,6 @@ namespace Client
                 c.DependencyOnMsmq();
                 c.RunAsLocalSystem();
 
-
                 c.ConfigureService<ClientService>(s =>
                 {
                     string serviceName = typeof (ClientService).Name;
@@ -52,25 +51,16 @@ namespace Client
                     s.Named(serviceName);
                     s.WhenStarted(o =>
                     {
-                        var container = new DefaultMassTransitContainer();
-                        IEndpointFactory endpointFactory = EndpointFactoryConfigurator.New(e =>
-                        {
-                            e.SetObjectBuilder(container.ObjectBuilder);
-                            e.RegisterTransport<MsmqEndpoint>();
-                        });
-
                         MsmqEndpointConfigurator.Defaults(def =>
                         {
                             def.CreateMissingQueues = true;
                         });
 
-                        container.Register(Component.For<IEndpointFactory>().Named("endpointFactory").Instance(endpointFactory));
-                        container.Register(Component.For<ClientService>().Named(serviceName));
-                        container.Register(Component.For<PasswordUpdater>());
-
+                        var container = new DefaultMassTransitContainer("client.castle.xml");
                         var wob = new WindsorObjectBuilder(container.Kernel);
 
-                        
+                        container.Register(Component.For<PasswordUpdater>());
+
                         Bus.Initialize(ec=>
                         {
                             ec.SetObjectBuilder(container.ObjectBuilder);
@@ -81,11 +71,7 @@ namespace Client
                             
                             bc.SetObjectBuilder(wob);
                             bc.ReceiveFrom("msmq://localhost/mt_client");
-                            bc.ConfigureService<SubscriptionClientConfigurator>(client =>
-                            {
-                                // need to add the ability to read from configuration settings somehow
-                                client.SetSubscriptionServiceEndpoint("msmq://localhost/mt_subscriptions");
-                            });
+                            bc.ConfigureService<SubscriptionClientConfigurator>(client => client.SetSubscriptionServiceEndpoint("msmq://localhost/mt_subscriptions"));
                         },
                         ()=>wob);
                         var bus = Bus.Instance();

@@ -16,7 +16,6 @@ namespace Server
     using log4net;
     using log4net.Config;
     using MassTransit;
-    using MassTransit.Configuration;
     using MassTransit.Services.Subscriptions.Configuration;
     using MassTransit.Transports.Msmq;
     using MassTransit.WindsorIntegration;
@@ -38,25 +37,24 @@ namespace Server
                 c.SetServiceName("SampleService");
                 c.SetServiceName("Sample Service");
                 c.SetServiceName("Something");
-                c.DependencyOnMsmq();
 
-                MsmqEndpointConfigurator.Defaults(def =>
-                {
-                    def.CreateMissingQueues = true;
-                });
+                c.DependencyOnMsmq();
+                c.RunAsLocalSystem();
 
                 c.ConfigureService<PasswordUpdateService>(s =>
                 {
+                    string serviceName = typeof (PasswordUpdateService).Name;
+
+                    s.Named(serviceName);
                     s.WhenStarted(o =>
                     {
+                        MsmqEndpointConfigurator.Defaults(def =>
+                        {
+                            def.CreateMissingQueues = true;
+                        });
+
                         var container = new DefaultMassTransitContainer("server.castle.xml");
                         var wob = new WindsorObjectBuilder(container.Kernel);
-
-                        var endpointFactory = EndpointFactoryConfigurator.New(e =>
-                        {
-                            e.SetObjectBuilder(wob);
-                            e.RegisterTransport<MsmqEndpoint>();
-                        });
 
                         Bus.Initialize(ec =>
                         {
@@ -70,8 +68,8 @@ namespace Server
                                            bc.ConfigureService<SubscriptionClientConfigurator>(b => b.SetSubscriptionServiceEndpoint("msmq://localhost/mt_subscriptions"));
                                        },
                                        () => wob);
-                        IServiceBus b2 = Bus.Instance();
-                        o.Start(b2);
+                        IServiceBus bus = Bus.Instance();
+                        o.Start(bus);
                     });
                     s.WhenStopped(o => o.Stop());
 
