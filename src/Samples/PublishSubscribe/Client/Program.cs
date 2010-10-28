@@ -65,7 +65,7 @@ namespace Client
                                        bc =>
                                        {
                                            bc.ReceiveFrom("msmq://localhost/mt_client");
-                                           bc.ConfigureService<SubscriptionClientConfigurator>(subCfg=> subCfg.SetSubscriptionServiceEndpoint("msmq://localhost/mt_subscriptions"));
+                                           bc.UseSubscriptionService("msmq://localhost/mt_subscriptions");
                                        },
                                        () => wob);
 
