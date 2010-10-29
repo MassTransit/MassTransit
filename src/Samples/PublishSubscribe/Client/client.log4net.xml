@@ -45,11 +45,11 @@
 
 	<!-- Standard MassTransit Logging Settings -->
 	<logger name="MassTransit">
-		<level value="DEBUG" />
+		<level value="OFF" />
     <appender-ref ref="RollingFile" />
 	</logger>
 
 	<logger name="MassTransit.Messages">
-		<level value="DEBUG" />
+		<level value="OFF" />
 	</logger>
 </log4net>
