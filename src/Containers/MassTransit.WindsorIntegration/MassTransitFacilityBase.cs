@@ -28,10 +28,15 @@ namespace MassTransit.WindsorIntegration
 
         protected override void Init()
         {
-            RegisterBusDependencies();
         }
 
 
+            //we are expecting SM to auto-resolve
+            // SubscriptionClient
+            // InitiateSagaMessageSink<,>
+            // OrchestrateSagaMessageSink<,>)
+            // InitiateSagaStateMachineSink<,>)
+            // OrchestrateSagaStateMachineSink<,>)
 
         /// <summary>
         /// Registers the in-memory subscription service so that all buses created in the same
@@ -58,24 +63,6 @@ namespace MassTransit.WindsorIntegration
             Kernel.Register(
                 Component.For(typeof(ISagaRepository<>)).ImplementedBy(typeof(InMemorySagaRepository<>)).LifeStyle.Singleton
                 );
-        }
-
-        /// <summary>
-        /// Registers the types used by the service bus internally and as part of the container.
-        /// These are typically items that are not swapped based on the container implementation
-        /// </summary>
-        protected void RegisterBusDependencies()
-        {
-            Kernel.Register(
-                Component.For<IObjectBuilder>().ImplementedBy<WindsorObjectBuilder>().LifeStyle.Singleton
-                );
-
-            //we are expecting SM to auto-resolve
-            // SubscriptionClient
-            // InitiateSagaMessageSink<,>
-            // OrchestrateSagaMessageSink<,>)
-            // InitiateSagaStateMachineSink<,>)
-            // OrchestrateSagaStateMachineSink<,>)
         }
     }
 }
