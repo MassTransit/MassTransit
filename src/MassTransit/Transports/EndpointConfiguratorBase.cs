@@ -48,6 +48,7 @@ namespace MassTransit.Transports
 
 		protected IMessageSerializer GetSerializer()
 		{
+            //TODO: Remove this.
 			IMessageSerializer serializer;
 			if(ObjectBuilder != null)
 			{

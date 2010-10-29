@@ -14,11 +14,10 @@ namespace Client
 {
     using System.IO;
     using Castle.MicroKernel.Registration;
+    using Castle.Windsor;
     using log4net;
     using log4net.Config;
     using MassTransit;
-    using MassTransit.Services.Subscriptions.Configuration;
-    using MassTransit.Transports.Msmq;
     using MassTransit.WindsorIntegration;
     using Topshelf;
     using Topshelf.Configuration;
@@ -33,6 +32,7 @@ namespace Client
             XmlConfigurator.ConfigureAndWatch(new FileInfo("client.log4net.xml"));
             _log.Info("Client Loading");
 
+            WindsorContainer container;
 
             RunConfiguration cfg = RunnerConfigurator.New(c =>
             {
@@ -50,8 +50,12 @@ namespace Client
                     s.Named(serviceName);
                     s.WhenStarted(o =>
                     {
-                        var container = new DefaultMassTransitContainer("client.castle.xml");
-
+                        container = new WindsorContainer("client.castle.xml");
+                        container.Install(
+                            new MassTransitInstaller(),
+                            new MassTransitInMemorySagaRepositoryInstaller(), 
+                            new MassTransitInMemorySubscriptionsInstaller()
+                            );
                         container.Register(Component.For<PasswordUpdater>());
 
                         var bus = Bus.Instance();

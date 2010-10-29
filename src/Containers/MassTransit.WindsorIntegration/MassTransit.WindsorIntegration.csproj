@@ -68,6 +68,7 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.configuration" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
@@ -76,10 +77,9 @@
     <Compile Include="..\..\SolutionVersion.cs">
       <Link>SolutionVersion.cs</Link>
     </Compile>
-    <Compile Include="DefaultMassTransitContainer.cs" />
-    <Compile Include="MassTransitFacility.cs" />
-    <Compile Include="MassTransitFacilityBase.cs" />
-    <Compile Include="WindsorContainerConfigurator.cs" />
+    <Compile Include="MassTransitInMemorySagaRepositoryInstaller.cs" />
+    <Compile Include="MassTransitInMemorySubscriptionsInstaller.cs" />
+    <Compile Include="MassTransitInstaller.cs" />
     <Compile Include="WindsorObjectBuilder.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
