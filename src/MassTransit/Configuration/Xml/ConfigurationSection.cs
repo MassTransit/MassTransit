@@ -28,7 +28,7 @@ namespace MassTransit.Configuration.Xml
      * </masstransit>
      */
 
-    public class MConfigurationSection :
+    public class ConfigurationSection :
         IConfigurationSectionHandler
     {
         public static SettingsOptions GetSettings()

@@ -17,6 +17,7 @@ namespace MassTransit.WindsorIntegration
     using Castle.MicroKernel.SubSystems.Configuration;
     using Castle.Windsor;
     using Configuration;
+    using Configuration.Xml;
     using Serialization;
     using Services.HealthMonitoring.Configuration;
     using Services.Subscriptions.Client;
@@ -28,49 +29,37 @@ namespace MassTransit.WindsorIntegration
     public class MassTransitInstaller :
         IWindsorInstaller
     {
-            //we are expecting SM to auto-resolve
-            // SubscriptionClient
-            // InitiateSagaMessageSink<,>
-            // OrchestrateSagaMessageSink<,>)
-            // InitiateSagaStateMachineSink<,>)
-            // OrchestrateSagaStateMachineSink<,>)
+        //we are expecting SM to auto-resolve
+        // SubscriptionClient
+        // InitiateSagaMessageSink<,>
+        // OrchestrateSagaMessageSink<,>)
+        // InitiateSagaStateMachineSink<,>)
+        // OrchestrateSagaStateMachineSink<,>)
         public void Install(IWindsorContainer container, IConfigurationStore store)
         {
             var wob = new WindsorObjectBuilder(container.Kernel);
             ServiceBusConfigurator.Defaults(x => x.SetObjectBuilder(wob));
             container.Register(
                 Component.For<IObjectBuilder>().Named("objectBuilder").Instance(wob).LifeStyle.Singleton,
-
-
+                
+                //TODO: Can this be removed
                 // The subscription client
                 Component.For<SubscriptionClient>()
                     .ImplementedBy<SubscriptionClient>()
-                    .LifeStyle.Transient,
-
-                // Message Serializers - this can be removed eventually.
-                Component.For<BinaryMessageSerializer>()
-                    .ImplementedBy<BinaryMessageSerializer>()
-                    .LifeStyle.Singleton,
-                Component.For<DotNotXmlMessageSerializer>()
-                    .ImplementedBy<DotNotXmlMessageSerializer>()
-                    .LifeStyle.Singleton,
-                Component.For<XmlMessageSerializer>()
-                    .ImplementedBy<XmlMessageSerializer>()
-                    .LifeStyle.Singleton
+                    .LifeStyle.Transient
                 );
 
-            var xmlCfg = MassTransit.Configuration.Xml.MConfigurationSection.GetSettings();
+            SettingsOptions xmlCfg = ConfigurationSection.GetSettings();
             Bus.Initialize(cfg =>
             {
-
                 xmlCfg.Transports
                     .Each(transport => cfg.RegisterTransport(Type.GetType(transport)));
 
                 //this is because the init hasn't completed yet
                 container.Register(Component.For<IEndpointFactory>()
-                                    .Named("endpointFactory")
-                                    .Instance(Bus.Factory())
-                                    .LifeStyle.Singleton);
+                                       .Named("endpointFactory")
+                                       .Instance(Bus.Factory())
+                                       .LifeStyle.Singleton);
 
                 cfg.ReceiveFrom(xmlCfg.ReceiveFrom);
 
@@ -85,21 +74,21 @@ namespace MassTransit.WindsorIntegration
                 //if management service
                 if (xmlCfg.HealthServiceInterval != null)
                 {
-                    var mgmt = xmlCfg.HealthServiceInterval; 
-                    var interval = string.IsNullOrEmpty(mgmt) ? 60 : int.Parse(mgmt);
+                    string mgmt = xmlCfg.HealthServiceInterval;
+                    int interval = string.IsNullOrEmpty(mgmt) ? 60 : int.Parse(mgmt);
                     cfg.UseHealthMonitoring(interval);
                 }
             }, () => container.Resolve<IObjectBuilder>());
 
             container.Register(Component.For<IServiceBus>()
-                                .Named("serviceBus")
-                                .Instance(Bus.Instance())
-                                .LifeStyle.Singleton);
+                                   .Named("serviceBus")
+                                   .Instance(Bus.Instance())
+                                   .LifeStyle.Singleton);
 
             container.Register(Component.For<IControlBus>()
-                                .Named("controlBus")
-                                .Instance((IControlBus) Bus.Instance().ControlBus)
-                                .LifeStyle.Singleton);
+                                   .Named("controlBus")
+                                   .Instance((IControlBus) Bus.Instance().ControlBus)
+                                   .LifeStyle.Singleton);
         }
     }
 }
