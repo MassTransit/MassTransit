@@ -50,7 +50,7 @@ namespace Client
                     s.Named(serviceName);
                     s.WhenStarted(o =>
                     {
-                        container = new WindsorContainer("client.castle.xml");
+                        container = new WindsorContainer();
                         container.Install(
                             new MassTransitInstaller(),
                             new MassTransitInMemorySagaRepositoryInstaller(), 
