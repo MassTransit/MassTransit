@@ -84,11 +84,16 @@ namespace MassTransit.Configuration
             _sbc.SendErrorsTo(uri);
         }
 
+        //needed for sends
+        public IEndpointFactory Factory { get; private set; }
         public IServiceBus CreateBus()
         {
-            IEndpointFactory epf = _epc.Create();
+            Factory = _epc.Create();
             //need to pass the epf into the sbc
-            _sbc.SetEndpointFactory(epf);
+            _sbc.SetEndpointFactory(Factory);
+
+            //TODO: Control Bus needs a concurrent receiver of 1
+
             return _sbc.CreateServiceBus();
         }
 

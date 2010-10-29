@@ -23,9 +23,7 @@ namespace MassTransit.WindsorIntegration
     using Internal;
     using Saga;
     using Services.Subscriptions;
-    using Services.Subscriptions.Configuration;
     using Services.Subscriptions.Server;
-    using Transports;
 
     /// <summary>
     /// Facility to simplify the use of MT
@@ -40,11 +38,7 @@ namespace MassTransit.WindsorIntegration
         {
             RegisterBusDependencies();
 
-            //type scanning
-            if(_transportTypes == null) 
-                LoadTypesByScan();
-            else 
-                LoadTransports(_transportTypes);
+            LoadTypesByScan();
         }
 
         void LoadTypesByScan()
@@ -61,27 +55,8 @@ namespace MassTransit.WindsorIntegration
                     .BasedOn<IEndpoint>()
                     .Configure(c=>types.Add(c.Implementation)));
             }
-
-
-            RegisterEndpointFactory(x =>
-            {
-                types.Each(x.RegisterTransport);
-                _configurationAction(x);
-            });
         }
-        void LoadTransports(params Type[] transportTypes)
-        {
-            RegisterEndpointFactory(x =>
-            {
-                x.RegisterTransport<LoopbackEndpoint>();
-                x.RegisterTransport<MulticastUdpEndpoint>();
 
-                foreach (Type type in transportTypes)
-                {
-                    x.RegisterTransport(type);
-                }
-            });
-        }
         protected MassTransitFacilityBase(Action<IEndpointFactoryConfigurator> configurationAction)
         {
             _configurationAction = configurationAction;
@@ -137,76 +112,6 @@ namespace MassTransit.WindsorIntegration
             // OrchestrateSagaMessageSink<,>)
             // InitiateSagaStateMachineSink<,>)
             // OrchestrateSagaStateMachineSink<,>)
-        }
-
-        protected void RegisterEndpointFactory(Action<IEndpointFactoryConfigurator> configAction)
-        {
-            Kernel.Register(
-                Component.For<IEndpointFactory>().UsingFactoryMethod((kernel, context) =>
-                {
-                    return EndpointFactoryConfigurator.New(x =>
-                    {
-                        x.SetObjectBuilder(kernel.Resolve<IObjectBuilder>());
-                        configAction(x);
-                    });
-                }).LifeStyle.Singleton
-                );
-        }
-
-        protected void RegisterServiceBus(string endpointUri, Action<IServiceBusConfigurator> configAction)
-        {
-            RegisterServiceBus(new Uri(endpointUri), configAction);
-        }
-
-        protected void RegisterServiceBus(Uri endpointUri, Action<IServiceBusConfigurator> configAction)
-        {
-            Kernel.Register(
-                Component.For<IServiceBus>().UsingFactoryMethod((kernel, context) =>
-                {
-                    return ServiceBusConfigurator.New(x =>
-                    {
-                        x.SetObjectBuilder(kernel.Resolve<IObjectBuilder>());
-                        x.ReceiveFrom(endpointUri);
-
-                        configAction(x);
-                    });
-                }).LifeStyle.Singleton);
-        }
-
-        protected void RegisterControlBus(string endpointUri, Action<IServiceBusConfigurator> configAction)
-        {
-            RegisterControlBus(new Uri(endpointUri), configAction);
-        }
-
-        protected void RegisterControlBus(Uri endpointUri, Action<IServiceBusConfigurator> configAction)
-        {
-            Kernel.Register(
-                Component.For<IControlBus>().UsingFactoryMethod((kernel, context) =>
-                {
-                    return ControlBusConfigurator.New(x =>
-                    {
-                        x.SetObjectBuilder(kernel.Resolve<IObjectBuilder>());
-                        x.ReceiveFrom(endpointUri);
-                        x.SetConcurrentConsumerLimit(1);
-
-                        configAction(x);
-                    });
-                }).LifeStyle.Singleton
-                );
-        }
-
-        protected static void ConfigureSubscriptionClient(string subscriptionServiceEndpointAddress, IServiceBusConfigurator configurator)
-        {
-            ConfigureSubscriptionClient(new Uri(subscriptionServiceEndpointAddress), configurator);
-        }
-
-        protected static void ConfigureSubscriptionClient(Uri subscriptionServiceEndpointAddress, IServiceBusConfigurator configurator)
-        {
-            configurator.ConfigureService<SubscriptionClientConfigurator>(y =>
-            {
-                // this is fairly easy inline, but wanted to include the example for completeness
-                y.SetSubscriptionServiceEndpoint(subscriptionServiceEndpointAddress);
-            });
         }
     }
 }

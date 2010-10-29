@@ -18,6 +18,7 @@ namespace MassTransit
     public static class Bus
     {
         static IServiceBus _instance;
+        static IEndpointFactory _factory;
 
         public static void Initialize(Action<BusConfiguration> cfg, Func<IObjectBuilder> objectBuilder)
         {
@@ -32,6 +33,14 @@ namespace MassTransit
             cfg(busConfig);
 
             _instance = busConfig.CreateBus();
+
+            //TODO: Programming by Coincidence. Fix this.
+            _factory = busConfig.Factory;
+        }
+
+        public static IEndpointFactory Factory()
+        {
+            return _factory;
         }
 
         public static IServiceBus Instance()
