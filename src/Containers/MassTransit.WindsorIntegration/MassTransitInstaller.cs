@@ -20,7 +20,6 @@ namespace MassTransit.WindsorIntegration
     using Configuration;
     using Configuration.Xml;
     using Services.HealthMonitoring.Configuration;
-    using Services.Subscriptions.Client;
     using Services.Subscriptions.Configuration;
 
     //doesn't support configuration.

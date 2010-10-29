@@ -30,16 +30,17 @@ namespace MassTransit.WindsorIntegration
                     .ImplementedBy<InMemorySubscriptionRepository>()
                     .LifeStyle.Singleton
                 );
-            // <summary>
-            // Registers the in-memory subscription service so that all buses created in the same
-            // process share subscriptions
-            // </summary>
-            //protected void RegisterInMemorySubscriptionService()
-            //{
-            //    Kernel.Register(
-            //        Component.For<IEndpointSubscriptionEvent>().ImplementedBy<LocalSubscriptionService>().LifeStyle.Singleton,
-            //        );
-            //}
         }
+
+        // <summary>
+        // Registers the in-memory subscription service so that all buses created in the same
+        // process share subscriptions
+        // </summary>
+        //protected void RegisterInMemorySubscriptionService()
+        //{
+        //    Kernel.Register(
+        //        Component.For<IEndpointSubscriptionEvent>().ImplementedBy<LocalSubscriptionService>().LifeStyle.Singleton,
+        //        );
+        //}
     }
 }
