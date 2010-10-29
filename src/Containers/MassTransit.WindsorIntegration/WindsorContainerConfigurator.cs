@@ -28,7 +28,6 @@ namespace MassTransit.WindsorIntegration
             var wob = new WindsorObjectBuilder(container.Kernel);
 
             container.Register(Component.For<IKernel>().Instance(container.Kernel).Named("kernel"));
-            container.Register(Component.For<IObjectBuilder>().Instance(wob).Named("objectBuilder"));
 
             container.Register(
                 Component.For<IObjectBuilder>()
