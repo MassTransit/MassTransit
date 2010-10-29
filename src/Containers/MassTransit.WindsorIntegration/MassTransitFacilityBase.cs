@@ -12,14 +12,8 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.WindsorIntegration
 {
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-    using System.Linq;
-    using System.Reflection;
     using Castle.MicroKernel.Facilities;
     using Castle.MicroKernel.Registration;
-    using Configuration;
     using Internal;
     using Saga;
     using Services.Subscriptions;
@@ -31,42 +25,12 @@ namespace MassTransit.WindsorIntegration
     public abstract class MassTransitFacilityBase :
         AbstractFacility
     {
-        Action<IEndpointFactoryConfigurator> _configurationAction;
-        Type[] _transportTypes;
 
         protected override void Init()
         {
             RegisterBusDependencies();
-
-            LoadTypesByScan();
         }
 
-        void LoadTypesByScan()
-        {
-            string assemblyPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            var files = from f in Directory.GetFiles(assemblyPath)
-                        where f.StartsWith("MassTransit.Transports.")
-                        select f;
-
-            var types = new List<Type>();
-            foreach (var file in files)
-            {
-                Kernel.Register(AllTypes.FromAssemblyNamed(file)
-                    .BasedOn<IEndpoint>()
-                    .Configure(c=>types.Add(c.Implementation)));
-            }
-        }
-
-        protected MassTransitFacilityBase(Action<IEndpointFactoryConfigurator> configurationAction)
-        {
-            _configurationAction = configurationAction;
-        }
-
-
-        protected MassTransitFacilityBase(params Type[] transportTypes)
-        {
-            _transportTypes = transportTypes;
-        }
 
 
         /// <summary>

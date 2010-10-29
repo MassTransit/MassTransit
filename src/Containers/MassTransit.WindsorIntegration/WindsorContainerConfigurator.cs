@@ -32,12 +32,14 @@ namespace MassTransit.WindsorIntegration
 
             container.Register(
                 Component.For<IObjectBuilder>()
-                    .ImplementedBy<WindsorObjectBuilder>()
+                    .Instance(wob)
                     .LifeStyle.Singleton,
+                
                 // The subscription client
                 Component.For<SubscriptionClient>()
                     .ImplementedBy<SubscriptionClient>()
                     .LifeStyle.Transient,
+
                 // Message Serializers
                 Component.For<BinaryMessageSerializer>()
                     .ImplementedBy<BinaryMessageSerializer>()
