@@ -51,22 +51,8 @@ namespace Client
                     s.WhenStarted(o =>
                     {
                         var container = new DefaultMassTransitContainer("client.castle.xml");
-                        var wob = new WindsorObjectBuilder(container.Kernel);
 
                         container.Register(Component.For<PasswordUpdater>());
-
-                        //all config is in the container
-                        Bus.Initialize(busc=>
-                        {
-                            busc.ReceiveFrom("msmq://localhost/mt_client");
-                            busc.UseMsmq(def=>
-                            {
-                                def.CreateMissingQueues = true;
-                            });
-                            busc.UseSubscriptionService("msmq://localhost/mt_subscriptions");
-
-                        },
-                        ()=>wob);
 
                         var bus = Bus.Instance();
                         o.Start(bus);

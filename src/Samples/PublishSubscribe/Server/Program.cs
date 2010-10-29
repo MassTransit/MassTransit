@@ -49,18 +49,7 @@ namespace Server
                     s.WhenStarted(o =>
                     {
                         var container = new DefaultMassTransitContainer("server.castle.xml");
-                        var wob = new WindsorObjectBuilder(container.Kernel);
 
-                        //all config is in the container
-                        Bus.Initialize(bc =>
-                        {
-                            bc.ReceiveFrom("msmq://localhost/mt_server");
-                            bc.UseMsmq(def=>
-                            {
-                                def.CreateMissingQueues = true;
-                            });
-                            bc.UseSubscriptionService("msmq://localhost/mt_subscriptions");
-                        }, () => wob);
                         var bus = Bus.Instance();
                         o.Start(bus);
                     });

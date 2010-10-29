@@ -14,6 +14,7 @@ namespace MassTransit
 {
     using System;
     using Configuration;
+    using Exceptions;
 
     public static class Bus
     {
@@ -45,6 +46,10 @@ namespace MassTransit
 
         public static IServiceBus Instance()
         {
+            if(_instance == null) 
+                throw new ConfigurationException("You must call initialize before trying to access the Bus instance.");
+
+
             return _instance;
         }
     }

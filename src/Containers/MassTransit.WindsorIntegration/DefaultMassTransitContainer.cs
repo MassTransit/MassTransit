@@ -12,7 +12,6 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.WindsorIntegration
 {
-    using Castle.Facilities.FactorySupport;
     using Castle.Windsor;
 	using Castle.Windsor.Configuration;
 
