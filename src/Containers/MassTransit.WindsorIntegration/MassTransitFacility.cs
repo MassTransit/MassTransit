@@ -14,6 +14,8 @@ namespace MassTransit.WindsorIntegration
 {
     using System;
     using System.Linq;
+    using Castle.MicroKernel.Registration;
+    using Exceptions;
     using Services.HealthMonitoring.Configuration;
     using Services.Subscriptions.Configuration;
 
@@ -32,46 +34,51 @@ namespace MassTransit.WindsorIntegration
         //    </facility>
         protected override void Init()
         {
-            base.FacilityConfig.Children
-                .Where(x => x.Name == "bus")
-                .Each(bus =>
-            {
-                var ep = bus.Attributes["endpoint"];
+            if (FacilityConfig.Children.Where(n => n.Name == "bus").Count() > 1)
+                throw new ConfigurationException("You can only have one bus node in the castle xml in the 'MassTransit' facility");
 
-                string sub = "";
+
+            Bus.Initialize(cfg =>
+            {
+                var bus = FacilityConfig.Children["bus"];
+
+                var ep = bus.Attributes["endpoint"];
+                cfg.ReceiveFrom(ep);
+
                 //if subscription service
-                if(bus.Children["subscriptionService"] != null)
+                if (bus.Children["subscriptionService"] != null)
                 {
-                    sub = bus.Children["subscriptionService"].Attributes["endpoint"];
+                    var sub = bus.Children["subscriptionService"].Attributes["endpoint"];
+                    cfg.UseSubscriptionService(sub);
                 }
-                
+
+                FacilityConfig.Children["transports"].Children
+                    .Where(n => n.Name == "transport")
+                    .Each(transport => cfg.RegisterTransport(Type.GetType(transport.Value)));
+
                 //if management service
-                var mgmt = "";
-                var interval = 0;
                 if (bus.Children["managementService"] != null)
                 {
-                    mgmt = bus.Children["managementService"].Attributes["heartbeatInterval"];
-                    interval = string.IsNullOrEmpty(mgmt) ? 60 : int.Parse(mgmt);
+                    var mgmt = bus.Children["managementService"].Attributes["heartbeatInterval"];
+                    var interval = string.IsNullOrEmpty(mgmt) ? 60 : int.Parse(mgmt);
+                    cfg.UseHealthMonitoring(interval);
                 }
+            }, () => Kernel.Resolve<IObjectBuilder>());
 
-                base.RegisterServiceBus(ep,a=>
-                {
-                    if(!string.IsNullOrEmpty(sub))a.ConfigureService<SubscriptionClientConfigurator>(s=>s.SetSubscriptionServiceEndpoint(sub));
-                    if(!string.IsNullOrEmpty(mgmt)) a.ConfigureService<HealthClientConfigurator>(s=>s.SetHeartbeatInterval(interval));
-                });
-            });
+            Kernel.Register(Component.For<IServiceBus>()
+                                .Named("serviceBus")
+                                .Instance(Bus.Instance())
+                                .LifeStyle.Singleton);
 
-            
+            Kernel.Register(Component.For<IControlBus>()
+                                .Named("controlBus")
+                                .Instance((IControlBus) Bus.Instance().ControlBus)
+                                .LifeStyle.Singleton);
+            Kernel.Register(Component.For<IEndpointFactory>()
+                                .Named("endpointFactory")
+                                .Instance(Bus.Factory())
+                                .LifeStyle.Singleton);
 
-            RegisterEndpointFactory(x =>
-            {
-                FacilityConfig.Children["transports"].Children
-                .Where(n => n.Name == "transport")
-                .Each(transport =>
-                {
-                    x.RegisterTransport(Type.GetType(transport.Value));
-                });
-            });
         }
     }
 }
