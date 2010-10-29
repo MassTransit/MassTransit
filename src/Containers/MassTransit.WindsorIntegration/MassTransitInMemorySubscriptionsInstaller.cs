@@ -38,8 +38,6 @@ namespace MassTransit.WindsorIntegration
             //{
             //    Kernel.Register(
             //        Component.For<IEndpointSubscriptionEvent>().ImplementedBy<LocalSubscriptionService>().LifeStyle.Singleton,
-            //        Component.For<SubscriptionPublisher>().ImplementedBy<SubscriptionPublisher>(),
-            //        Component.For<SubscriptionConsumer>().ImplementedBy<SubscriptionConsumer>()
             //        );
             //}
         }

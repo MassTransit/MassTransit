@@ -13,12 +13,12 @@
 namespace MassTransit.WindsorIntegration
 {
     using System;
+    using System.Linq;
     using Castle.MicroKernel.Registration;
     using Castle.MicroKernel.SubSystems.Configuration;
     using Castle.Windsor;
     using Configuration;
     using Configuration.Xml;
-    using Serialization;
     using Services.HealthMonitoring.Configuration;
     using Services.Subscriptions.Client;
     using Services.Subscriptions.Configuration;
@@ -40,25 +40,17 @@ namespace MassTransit.WindsorIntegration
             var wob = new WindsorObjectBuilder(container.Kernel);
             ServiceBusConfigurator.Defaults(x => x.SetObjectBuilder(wob));
             container.Register(
-                Component.For<IObjectBuilder>().Named("objectBuilder").Instance(wob).LifeStyle.Singleton,
-                
-                //TODO: Can this be removed
-                // The subscription client
-                Component.For<SubscriptionClient>()
-                    .ImplementedBy<SubscriptionClient>()
-                    .LifeStyle.Transient
+                Component.For<IObjectBuilder>().Named("objectBuilder").Instance(wob).LifeStyle.Singleton
                 );
 
-            SettingsOptions xmlCfg = ConfigurationSection.GetSettings();
-            Bus.Initialize(cfg =>
+            var xmlCfg = ConfigurationSection.GetSettings();
+            Bus.Initialize(wob, (cfg, ep) =>
             {
-                xmlCfg.Transports
-                    .Each(transport => cfg.RegisterTransport(Type.GetType(transport)));
 
                 //this is because the init hasn't completed yet
                 container.Register(Component.For<IEndpointFactory>()
                                        .Named("endpointFactory")
-                                       .Instance(Bus.Factory())
+                                       .Instance(ep)
                                        .LifeStyle.Singleton);
 
                 cfg.ReceiveFrom(xmlCfg.ReceiveFrom);
@@ -78,7 +70,7 @@ namespace MassTransit.WindsorIntegration
                     int interval = string.IsNullOrEmpty(mgmt) ? 60 : int.Parse(mgmt);
                     cfg.UseHealthMonitoring(interval);
                 }
-            }, () => container.Resolve<IObjectBuilder>());
+            }, xmlCfg.Transports.Select(Type.GetType).ToArray());
 
             container.Register(Component.For<IServiceBus>()
                                    .Named("serviceBus")

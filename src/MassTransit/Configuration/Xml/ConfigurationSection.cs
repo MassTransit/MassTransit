@@ -40,19 +40,19 @@ namespace MassTransit.Configuration.Xml
         public object Create(object parent, object configContext, XmlNode section)
         {
             var opts = new SettingsOptions();
-            string reciveFrom = section.SelectSingleNode("ReceiveFrom").InnerText;
-            opts.ReceiveFrom = reciveFrom;
+            string receiveFrom = section.SelectSingleNode("ReceiveFrom").InnerText;
+            opts.ReceiveFrom = receiveFrom.Trim();
 
             XmlNode transports = section.SelectSingleNode("Transports");
             foreach (XmlNode transport in transports.ChildNodes)
             {
-                opts.Transports.Add(transport.InnerText);
+                opts.Transports.Add(transport.InnerText.Trim());
             }
 
-            string sub = section.SelectSingleNode("SubscriptionService").InnerText;
+            string sub = section.SelectSingleNode("SubscriptionService").InnerText.Trim();
             opts.Subscriptions = sub;
 
-            string health = section.SelectSingleNode("HealthService").InnerText;
+            string health = section.SelectSingleNode("HealthService").InnerText.Trim();
             opts.HealthServiceInterval = health;
 
             return opts;

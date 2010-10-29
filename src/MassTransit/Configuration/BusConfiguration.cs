@@ -19,12 +19,15 @@ namespace MassTransit.Configuration
     {
         void ReceiveFrom(string uriString);
         void ReceiveFrom(Uri uri);
-        void RegisterTransport(Type transportType);
-        void RegisterTransport<TTransport>() where TTransport : IEndpoint;
         void SendErrorsTo(string uriString);
         void SendErrorsTo(Uri uri);
 
+        //TODO: I may have to move these around
+        void RegisterTransport<TTransport>() where TTransport : IEndpoint;
+        void RegisterTransport(Type transportType);
+
         //serialization. should it be a sub thingy?
+        //this maynot be able to be here?
         void UseDotNetXmlSerilaizer();
         void UseXmlSerializer();
         void UseBinarySerializer();
