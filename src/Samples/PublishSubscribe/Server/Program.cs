@@ -13,11 +13,10 @@
 namespace Server
 {
     using System.IO;
+    using Castle.Windsor;
     using log4net;
     using log4net.Config;
     using MassTransit;
-    using MassTransit.Services.Subscriptions.Configuration;
-    using MassTransit.Transports.Msmq;
     using MassTransit.WindsorIntegration;
     using Topshelf;
     using Topshelf.Configuration;
@@ -30,6 +29,7 @@ namespace Server
         static void Main(string[] args)
         {
             XmlConfigurator.ConfigureAndWatch(new FileInfo("server.log4net.xml"));
+            WindsorContainer container;
             _log.Info("Server Loading");
 
             RunConfiguration cfg = RunnerConfigurator.New(c =>
@@ -48,7 +48,12 @@ namespace Server
                     s.Named(serviceName);
                     s.WhenStarted(o =>
                     {
-                        var container = new DefaultMassTransitContainer("server.castle.xml");
+                        container = new WindsorContainer("server.castle.xml");
+                        container.Install(
+                            new MassTransitInstaller(),
+                            new MassTransitInMemorySagaRepositoryInstaller(), 
+                            new MassTransitInMemorySubscriptionsInstaller()
+                            );
 
                         var bus = Bus.Instance();
                         o.Start(bus);

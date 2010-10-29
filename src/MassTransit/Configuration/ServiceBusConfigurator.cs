@@ -173,17 +173,19 @@ namespace MassTransit.Configuration
 		}
 
         //TO SUPPORT THE NEW MODEL
-		internal ServiceBus CreateServiceBus()
-		{
-            if(_endpointFactory == null)
+        internal ServiceBus CreateServiceBus()
+        {
+            if (_endpointFactory == null)
                 throw new ConfigurationException("You must call 'SetEndpointFactory(IEndpointFactory)' on the ServiceBusConfiguration class");
 
-			var endpoint = _endpointFactory.GetEndpoint(_receiveFromUri);
+            var endpoint = _endpointFactory.GetEndpoint(_receiveFromUri);
 
-			return new ServiceBus(endpoint, ObjectBuilder, _endpointFactory);
-		}
+            var serviceBus = new ServiceBus(endpoint, ObjectBuilder, _endpointFactory);
+            
+            return serviceBus;
+        }
 
-		private void ConfigureThreadLimits(ServiceBus bus)
+        private void ConfigureThreadLimits(ServiceBus bus)
 		{
 			if (ConcurrentConsumerLimit > 0)
 				bus.MaximumConsumerThreads = ConcurrentConsumerLimit;

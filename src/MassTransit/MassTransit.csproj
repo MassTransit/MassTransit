@@ -66,6 +66,7 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.configuration" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
@@ -86,6 +87,8 @@
     <Compile Include="Configuration\BusConfiguration.cs" />
     <Compile Include="Configuration\CrazyAdvancedShit.cs" />
     <Compile Include="Configuration\MassTransitConfiguration.cs" />
+    <Compile Include="Configuration\Xml\ConfigurationSection.cs" />
+    <Compile Include="Configuration\Xml\SettingsOptions.cs" />
     <Compile Include="Exceptions\SagaException.cs" />
     <Compile Include="ExpiresInAttribute.cs" />
     <Compile Include="Fault.cs" />

@@ -86,15 +86,24 @@ namespace MassTransit.Configuration
 
         //needed for sends
         public IEndpointFactory Factory { get; private set; }
+
+        public IEndpointFactory CreateFactory()
+        {
+            if(Factory == null)
+                Factory = _epc.Create();
+
+            return Factory;
+        }
         public IServiceBus CreateBus()
         {
-            Factory = _epc.Create();
+            CreateFactory();
+
             //need to pass the epf into the sbc
             _sbc.SetEndpointFactory(Factory);
 
             //TODO: Control Bus needs a concurrent receiver of 1
 
-            return _sbc.CreateServiceBus();
+            return _sbc.Create();
         }
 
         public void ConfigureService<TService>(Action<TService> configure) where TService : IServiceConfigurator, new()

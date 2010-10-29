@@ -33,14 +33,13 @@ namespace MassTransit
 
             cfg(busConfig);
 
+            _factory = busConfig.CreateFactory();
             _instance = busConfig.CreateBus();
-
-            //TODO: Programming by Coincidence. Fix this.
-            _factory = busConfig.Factory;
         }
 
         public static IEndpointFactory Factory()
         {
+            
             return _factory;
         }
 
