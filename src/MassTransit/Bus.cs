@@ -21,25 +21,30 @@ namespace MassTransit
         static IServiceBus _instance;
         static IEndpointFactory _factory;
 
-        public static void Initialize(Action<BusConfiguration> cfg, Func<IObjectBuilder> objectBuilder)
+        public static void Initialize(IObjectBuilder builder, Action<BusConfiguration, IEndpointFactory> cfg, params Type[] transports)
         {
             if(_instance != null)
                 _instance.Dispose();
 
             _instance = null;
 
+            _factory = EndpointFactoryConfigurator.New(e =>
+            {
+                foreach (var transport in transports)
+                    e.RegisterTransport(transport);
 
-            var busConfig = new MassTransitConfiguration(objectBuilder());
+            });
 
-            cfg(busConfig);
+            var busConfig = new MassTransitConfiguration(builder, _factory);
+            cfg(busConfig, _factory);
 
-            _factory = busConfig.CreateFactory();
             _instance = busConfig.CreateBus();
         }
 
         public static IEndpointFactory Factory()
         {
-            
+            if(_instance == null) 
+                throw new ConfigurationException("You must call initialize before trying to access the Factory instance.");
             return _factory;
         }
 

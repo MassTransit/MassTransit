@@ -21,8 +21,8 @@ namespace MassTransit.Configuration
     {
         readonly EndpointFactoryConfigurator _epc;
         readonly ServiceBusConfigurator _sbc;
-
-        public MassTransitConfiguration(IObjectBuilder builder)
+        readonly IEndpointFactory _factory;
+        public MassTransitConfiguration(IObjectBuilder builder, IEndpointFactory factory)
         {
             _epc = new EndpointFactoryConfigurator();
             _sbc = new ServiceBusConfigurator();
@@ -32,6 +32,7 @@ namespace MassTransit.Configuration
 
             _epc.RegisterTransport<LoopbackEndpoint>();
             _epc.RegisterTransport<MulticastUdpEndpoint>();
+            _factory = factory;
         }
 
         public void RegisterTransport(Type transportType)
@@ -84,22 +85,11 @@ namespace MassTransit.Configuration
             _sbc.SendErrorsTo(uri);
         }
 
-        //needed for sends
-        public IEndpointFactory Factory { get; private set; }
 
-        public IEndpointFactory CreateFactory()
-        {
-            if(Factory == null)
-                Factory = _epc.Create();
-
-            return Factory;
-        }
         public IServiceBus CreateBus()
         {
-            CreateFactory();
-
             //need to pass the epf into the sbc
-            _sbc.SetEndpointFactory(Factory);
+            _sbc.SetEndpointFactory(_factory);
 
             //TODO: Control Bus needs a concurrent receiver of 1
 
