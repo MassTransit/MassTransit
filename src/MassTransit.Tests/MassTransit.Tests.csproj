@@ -147,6 +147,7 @@
     <Compile Include="Performance\EndpointLoadTest.cs" />
     <Compile Include="Performance\LoadedRequest.cs" />
     <Compile Include="Performance\LoadedResponse.cs" />
+    <None Include="app.config" />
     <None Include="Reactive\Samples\BasicExample.cs" />
     <Compile Include="Reactive\ServiceBusSubscriptionSpecs.cs" />
     <Compile Include="Saga\Builder_Specs.cs" />
