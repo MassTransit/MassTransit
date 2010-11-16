@@ -51,7 +51,7 @@ namespace MassTransit.Tests
 
 			LocalBus.Publish(new PingMessage());
 
-			Assert.IsTrue(future.IsAvailable(5.Seconds()));
+			Assert.IsTrue(future.IsAvailable(15.Seconds()));
 		}
 
 	    [Test]
