@@ -16,7 +16,7 @@ namespace MassTransit.Infrastructure.Saga
 	using System.Collections.Generic;
 	using System.Linq;
 	using System.Linq.Expressions;
-	using Magnum.Infrastructure.Data;
+	using Magnum.ForNHibernate.Data;
 	using MassTransit.Saga;
 	using NHibernate;
 	using NHibernate.Linq;

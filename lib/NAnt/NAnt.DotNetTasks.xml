@@ -648,7 +648,7 @@
             <param name="name">The name of the option which should be passed to the compiler.</param>
             <param name="value">The value of the option which should be passed to the compiler.</param>
             <remarks>
-            The combination of <paramref name="option"/> and 
+            The combination of <paramref name="name"/> and 
             <paramref name="value"/> (separated by a colon) is quoted
             unless <paramref name="value"/> is already surrounded by quotes.
             </remarks>
@@ -4142,7 +4142,7 @@
             Inserts a <see cref="T:NAnt.DotNet.Types.EmbeddedResource"/> into the collection at the
             specified index.
             </summary>
-            <param name="index">The zero-based index at which <paramref name="item"/> should be inserted.</param>
+            <param name="index">The zero-based index at which <paramref name="value"/> should be inserted.</param>
             <param name="value">The <see cref="T:NAnt.DotNet.Types.EmbeddedResource"/> to insert.</param>
         </member>
         <member name="M:NAnt.DotNet.Types.EmbeddedResourceCollection.System#Collections#IList#Remove(System.Object)">
@@ -4205,7 +4205,7 @@
             Inserts a <see cref="T:NAnt.DotNet.Types.EmbeddedResource"/> into the collection at the
             specified index.
             </summary>
-            <param name="index">The zero-based index at which <paramref name="item"/> should be inserted.</param>
+            <param name="index">The zero-based index at which <paramref name="value"/> should be inserted.</param>
             <param name="value">The <see cref="T:NAnt.DotNet.Types.EmbeddedResource"/> to insert.</param>
         </member>
         <member name="M:NAnt.DotNet.Types.EmbeddedResourceCollection.Remove(NAnt.DotNet.Types.EmbeddedResource)">
@@ -4382,7 +4382,7 @@
             Inserts a <see cref="T:NAnt.DotNet.Types.Module"/> into the collection at the
             specified index.
             </summary>
-            <param name="index">The zero-based index at which <paramref name="item"/> should be inserted.</param>
+            <param name="index">The zero-based index at which <paramref name="value"/> should be inserted.</param>
             <param name="value">The <see cref="T:NAnt.DotNet.Types.Module"/> to insert.</param>
         </member>
         <member name="M:NAnt.DotNet.Types.ModuleCollection.System#Collections#IList#Remove(System.Object)">
@@ -4460,7 +4460,7 @@
             Inserts a <see cref="T:NAnt.DotNet.Types.Module"/> into the collection at the
             specified index.
             </summary>
-            <param name="index">The zero-based index at which <paramref name="item"/> should be inserted.</param>
+            <param name="index">The zero-based index at which <paramref name="value"/> should be inserted.</param>
             <param name="value">The <see cref="T:NAnt.DotNet.Types.Module"/> to insert.</param>
         </member>
         <member name="M:NAnt.DotNet.Types.ModuleCollection.Remove(NAnt.DotNet.Types.Module)">
@@ -4750,7 +4750,7 @@
             Inserts a <see cref="T:NAnt.DotNet.Types.NamespaceImport"/> into the collection at the
             specified index.
             </summary>
-            <param name="index">The zero-based index at which <paramref name="item"/> should be inserted.</param>
+            <param name="index">The zero-based index at which <paramref name="value"/> should be inserted.</param>
             <param name="value">The <see cref="T:NAnt.DotNet.Types.NamespaceImport"/> to insert.</param>
         </member>
         <member name="M:NAnt.DotNet.Types.NamespaceImportCollection.System#Collections#IList#Remove(System.Object)">
@@ -4813,7 +4813,7 @@
             Inserts a <see cref="T:NAnt.DotNet.Types.NamespaceImport"/> into the collection at the
             specified index.
             </summary>
-            <param name="index">The zero-based index at which <paramref name="item"/> should be inserted.</param>
+            <param name="index">The zero-based index at which <paramref name="value"/> should be inserted.</param>
             <param name="value">The <see cref="T:NAnt.DotNet.Types.NamespaceImport"/> to insert.</param>
         </member>
         <member name="M:NAnt.DotNet.Types.NamespaceImportCollection.Remove(NAnt.DotNet.Types.NamespaceImport)">

@@ -3488,6 +3488,9 @@
         <member name="F:NHibernate.Cfg.MappingSchema.HbmKeyManyToOne.lazySpecified">
             <remarks/>
         </member>
+        <member name="F:NHibernate.Cfg.MappingSchema.HbmKeyManyToOne.notfound">
+            <remarks/>
+        </member>
         <member name="T:NHibernate.Cfg.MappingSchema.HbmKeyProperty">
             <remarks/>
         </member>
@@ -5234,6 +5237,9 @@
         <member name="T:NHibernate.Cfg.MappingSchema.HbmDefinition">
             <remarks/>
         </member>
+        <member name="F:NHibernate.Cfg.MappingSchema.HbmDefinition.param">
+            <remarks/>
+        </member>
         <member name="F:NHibernate.Cfg.MappingSchema.HbmDefinition.class">
             <remarks/>
         </member>
@@ -5265,6 +5271,9 @@
             <remarks/>
         </member>
         <member name="F:NHibernate.Cfg.MappingSchema.HbmFilterDef.condition">
+            <remarks/>
+        </member>
+        <member name="F:NHibernate.Cfg.MappingSchema.HbmFilterDef.usemanytoone">
             <remarks/>
         </member>
         <member name="T:NHibernate.Cfg.MappingSchema.HbmFilterParam">
@@ -8242,6 +8251,11 @@
             </summary>
         </member>
         <member name="M:NHibernate.Criterion.DetachedCriteria.GetExecutableCriteria(NHibernate.ISession)">
+            <summary>
+            Get an executable instance of <c>Criteria</c>,
+            to actually run the query.</summary>
+        </member>
+        <member name="M:NHibernate.Criterion.DetachedCriteria.GetExecutableCriteria(NHibernate.IStatelessSession)">
             <summary>
             Get an executable instance of <c>Criteria</c>,
             to actually run the query.</summary>
@@ -13175,6 +13189,13 @@
             <param name="sqlType">The SqlType to set for IDbDataParameter.</param>
             <returns>An IDbDataParameter ready to be added to an IDbCommand.</returns>
         </member>
+        <member name="M:NHibernate.Driver.DriverBase.OnBeforePrepare(System.Data.IDbCommand)">
+            <summary>
+            Override to make any adjustments to the IDbCommand object.  (e.g., Oracle custom OUT parameter)
+            Parameters have been bound by this point, so their order can be adjusted too.
+            This is analagous to the RegisterResultSetOutParameter() function in Hibernate.
+            </summary>
+        </member>
         <member name="P:NHibernate.Driver.DriverBase.UseNamedPrefixInSql">
             <summary>
             Does this Driver require the use of a Named Prefix in the SQL statement.  
@@ -15455,14 +15476,15 @@
             information includes its name as well as its defined parameters (name and type).
             </summary>
         </member>
-        <member name="M:NHibernate.Engine.FilterDefinition.#ctor(System.String,System.String,System.Collections.Generic.IDictionary{System.String,NHibernate.Type.IType})">
+        <member name="M:NHibernate.Engine.FilterDefinition.#ctor(System.String,System.String,System.Collections.Generic.IDictionary{System.String,NHibernate.Type.IType},System.Boolean)">
             <summary>
-            Set the named parameter's value list for this filter. 
+            Set the named parameter's value list for this filter.
             </summary>
             <param name="name">The name of the filter for which this configuration is in effect.</param>
             <param name="defaultCondition">The default filter condition.</param>
             <param name="parameterTypes">A dictionary storing the NHibernate <see cref="T:NHibernate.Type.IType"/> type
             of each parameter under its name.</param>
+            <param name="useManyToOne">if set to <c>true</c> used in many to one rel</param>
         </member>
         <member name="M:NHibernate.Engine.FilterDefinition.GetParameterType(System.String)">
             <summary>
@@ -15470,6 +15492,12 @@
             </summary>
             <param name="parameterName">The name of the filter parameter for which to return the type.</param>
             <returns>The type of the named parameter.</returns>
+        </member>
+        <member name="P:NHibernate.Engine.FilterDefinition.UseInManyToOne">
+            <summary>
+            Gets a value indicating whether to use this filter-def in manytoone refs.
+            </summary>
+            <value><c>true</c> if [use in many to one]; otherwise, <c>false</c>.</value>
         </member>
         <member name="P:NHibernate.Engine.FilterDefinition.FilterName">
             <summary>
@@ -16481,33 +16509,21 @@
         <member name="P:NHibernate.Engine.ISessionImplementor.EntityMode">
             <summary> Retrieve the entity mode in effect for this session. </summary>
         </member>
-        <member name="M:NHibernate.Engine.JoinHelper.GetAliasedLHSColumnNames(NHibernate.Type.IAssociationType,System.String,System.Int32,NHibernate.Persister.Entity.IOuterJoinLoadable,NHibernate.Engine.IMapping)">
-            <summary>
-            Get the aliased columns of the owning entity which are to 
-            be used in the join
-            </summary>
-        </member>
-        <member name="M:NHibernate.Engine.JoinHelper.GetLHSColumnNames(NHibernate.Type.IAssociationType,System.Int32,NHibernate.Persister.Entity.IOuterJoinLoadable,NHibernate.Engine.IMapping)">
-            <summary>
-            Get the columns of the owning entity which are to 
-            be used in the join
-            </summary>
-        </member>
-        <member name="M:NHibernate.Engine.JoinHelper.GetAliasedLHSColumnNames(NHibernate.Type.IAssociationType,System.String,System.Int32,System.Int32,NHibernate.Persister.Entity.IOuterJoinLoadable,NHibernate.Engine.IMapping)">
-            <summary>
-            Get the aliased columns of the owning entity which are to 
-            be used in the join
-            </summary>
-        </member>
-        <member name="M:NHibernate.Engine.JoinHelper.GetLHSColumnNames(NHibernate.Type.IAssociationType,System.Int32,System.Int32,NHibernate.Persister.Entity.IOuterJoinLoadable,NHibernate.Engine.IMapping)">
-            <summary>
-            Get the columns of the owning entity which are to 
-            be used in the join
-            </summary>
-        </member>
         <member name="M:NHibernate.Engine.JoinHelper.GetRHSColumnNames(NHibernate.Type.IAssociationType,NHibernate.Engine.ISessionFactoryImplementor)">
             <summary>
             Get the columns of the associated table which are to 
+            be used in the join
+            </summary>
+        </member>
+        <member name="M:NHibernate.Engine.ILhsAssociationTypeSqlInfo.GetAliasedColumnNames(NHibernate.Type.IAssociationType,System.Int32)">
+            <summary>
+            Get the aliased columns of the owning entity which are to 
+            be used in the join
+            </summary>
+        </member>
+        <member name="M:NHibernate.Engine.ILhsAssociationTypeSqlInfo.GetColumnNames(NHibernate.Type.IAssociationType,System.Int32)">
+            <summary>
+            Get the columns of the owning entity which are to 
             be used in the join
             </summary>
         </member>
@@ -18038,6 +18054,12 @@
             Defines a base class for Session generated events.
             </summary>
         </member>
+        <member name="P:NHibernate.Event.IDatabaseEventArgs.Session">
+            <summary> 
+            Returns the session event source for this event.  
+            This is the underlying session from which this event was generated.
+            </summary>
+        </member>
         <member name="M:NHibernate.Event.AbstractEvent.#ctor(NHibernate.Event.IEventSource)">
             <summary> 
             Constructs an event from the given event session.
@@ -18083,9 +18105,59 @@
             collection and does not include the entity's ID)
             </value>
         </member>
+        <member name="T:NHibernate.Event.AbstractPostDatabaseOperationEvent">
+            <summary> 
+            Represents an operation we performed against the database. 
+            </summary>
+        </member>
+        <member name="T:NHibernate.Event.IPostDatabaseOperationEventArgs">
+            <summary> 
+            Represents an operation we performed against the database. 
+            </summary>
+        </member>
+        <member name="P:NHibernate.Event.IPostDatabaseOperationEventArgs.Entity">
+            <summary> The entity involved in the database operation. </summary>
+        </member>
+        <member name="P:NHibernate.Event.IPostDatabaseOperationEventArgs.Id">
+            <summary> The id to be used in the database operation. </summary>
+        </member>
+        <member name="P:NHibernate.Event.IPostDatabaseOperationEventArgs.Persister">
+            <summary> 
+            The persister for the <see cref="P:NHibernate.Event.IPostDatabaseOperationEventArgs.Entity"/>. 
+            </summary>
+        </member>
+        <member name="M:NHibernate.Event.AbstractPostDatabaseOperationEvent.#ctor(NHibernate.Event.IEventSource,System.Object,System.Object,NHibernate.Persister.Entity.IEntityPersister)">
+            <summary> Constructs an event containing the pertinent information. </summary>
+            <param name="source">The session from which the event originated. </param>
+            <param name="entity">The entity to be invloved in the database operation. </param>
+            <param name="id">The entity id to be invloved in the database operation. </param>
+            <param name="persister">The entity's persister. </param>
+        </member>
+        <member name="P:NHibernate.Event.AbstractPostDatabaseOperationEvent.Entity">
+            <summary> The entity involved in the database operation. </summary>
+        </member>
+        <member name="P:NHibernate.Event.AbstractPostDatabaseOperationEvent.Id">
+            <summary> The id to be used in the database operation. </summary>
+        </member>
+        <member name="P:NHibernate.Event.AbstractPostDatabaseOperationEvent.Persister">
+            <summary> 
+            The persister for the <see cref="P:NHibernate.Event.AbstractPostDatabaseOperationEvent.Entity"/>. 
+            </summary>
+        </member>
         <member name="T:NHibernate.Event.AbstractPreDatabaseOperationEvent">
             <summary> 
             Represents an operation we are about to perform against the database. 
+            </summary>
+        </member>
+        <member name="P:NHibernate.Event.IPreDatabaseOperationEventArgs.Entity">
+            <summary> The entity involved in the database operation. </summary>
+        </member>
+        <member name="P:NHibernate.Event.IPreDatabaseOperationEventArgs.Id">
+            <summary> The id to be used in the database operation. </summary>
+        </member>
+        <member name="P:NHibernate.Event.IPreDatabaseOperationEventArgs.Persister">
+            <summary> 
+            The persister for the <see cref="P:NHibernate.Event.IPreDatabaseOperationEventArgs.Entity"/>. 
             </summary>
         </member>
         <member name="M:NHibernate.Event.AbstractPreDatabaseOperationEvent.#ctor(NHibernate.Event.IEventSource,System.Object,System.Object,NHibernate.Persister.Entity.IEntityPersister)">
@@ -21967,6 +22039,35 @@
             Wraps SessionFactoryImpl, adding more lookup behaviors and encapsulating some of the error handling.
             </summary>
         </member>
+        <member name="M:NHibernate.Hql.Util.SessionFactoryHelper.GetCollectionPersister(System.String)">
+            <summary>
+            Locate the collection persister by the collection role.
+            </summary>
+            <param name="role">The collection role name.</param>
+            <returns>The defined CollectionPersister for this collection role, or null.</returns>
+        </member>
+        <member name="M:NHibernate.Hql.Util.SessionFactoryHelper.RequireClassPersister(System.String)">
+            <summary>
+            Locate the persister by class or entity name, requiring that such a persister
+            exists
+            </summary>
+            <param name="name">The class or entity name</param>
+            <returns>The defined persister for this entity</returns>
+        </member>
+        <member name="M:NHibernate.Hql.Util.SessionFactoryHelper.FindEntityPersisterByName(System.String)">
+            <summary>
+            Locate the persister by class or entity name.
+            </summary>
+            <param name="name">The class or entity name</param>
+            <returns>The defined persister for this entity, or null if none found.</returns>
+        </member>
+        <member name="M:NHibernate.Hql.Util.SessionFactoryHelper.GetCollectionPropertyMapping(System.String)">
+            <summary>
+            Retreive a PropertyMapping describing the given collection role.
+            </summary>
+            <param name="role">The collection role for whcih to retrieve the property mapping.</param>
+            <returns>The property mapping.</returns>
+        </member>
         <member name="T:NHibernate.Hql.NameGenerator">
             <summary>
             Provides utility methods for generating HQL / SQL names.
@@ -24655,6 +24756,13 @@
             </summary>
             <returns>The clone of the root criteria.</returns>
         </member>
+        <member name="P:NHibernate.Impl.CurrentSessionIdLoggingContext.SessionId">
+            <summary>
+            Error handling in this case will only kick in if we cannot set values on the TLS
+            this is usally the case if we are called from the finalizer, since this is something
+            that we do only for logging, we ignore the error.
+            </summary>
+        </member>
         <member name="T:NHibernate.Impl.DbCommandSet`2">
             <summary>
             Expose the batch functionality in ADO.Net 2.0
@@ -25628,9 +25736,6 @@
             you are serializing in the same AppDomain then there will be no problem because the uid will
             be in this object.
             </para>
-            <para>
-            TODO: verify that the AppDomain statements are correct.
-            </para>
             </remarks>
         </member>
         <member name="M:NHibernate.Impl.SessionFactoryObjectFactory.#cctor">
@@ -25669,9 +25774,11 @@
         </member>
         <member name="P:NHibernate.Impl.SessionIdLoggingContext.SessionId">
             <summary>
-            Error handling in this case will only kick in if we cannot set values on the TLS
-            this is usally the case if we are called from the finalizer, since this is something
-            that we do only for logging, we ignore the error.
+            We always set the result to use a thread static variable, on the face of it,
+            it looks like it is not a valid choice, since ASP.Net and WCF may decide to switch
+            threads on us. But, since SessionIdLoggingContext is only used inside NH calls, and since
+            NH calls are never async, this isn't an issue for us.
+            In addition to that, attempting to match to the current context has proven to be performance hit.
             </summary>
         </member>
         <member name="T:NHibernate.Impl.SessionImpl">
@@ -26477,7 +26584,7 @@
             by outerjoin
             </summary>
         </member>
-        <member name="M:NHibernate.Loader.JoinWalker.WalkComponentTree(NHibernate.Type.IAbstractComponentType,System.Int32,System.Int32,NHibernate.Persister.Entity.IOuterJoinLoadable,System.String,System.String,System.Int32)">
+        <member name="M:NHibernate.Loader.JoinWalker.WalkComponentTree(NHibernate.Type.IAbstractComponentType,System.Int32,System.String,System.String,System.Int32,NHibernate.Engine.ILhsAssociationTypeSqlInfo)">
             <summary>
             For a component, add to a list of associations to be fetched by outerjoin
             </summary>
@@ -30777,6 +30884,11 @@
         <member name="M:NHibernate.Persister.Entity.IOuterJoinLoadable.GetPropertyTableName(System.String)">
             <summary>
             Get the table name for the given property path
+            </summary>
+        </member>
+        <member name="M:NHibernate.Persister.Entity.IOuterJoinLoadable.ToIdentifierColumns(System.String)">
+            <summary>
+            Return the alised identifier column names
             </summary>
         </member>
         <member name="T:NHibernate.Persister.Entity.IQueryable">
@@ -37928,6 +38040,13 @@
         </member>
         <member name="T:NHibernate.Util.FilterHelper">
             <summary></summary>
+        </member>
+        <member name="M:NHibernate.Util.FilterHelper.GetEnabledForManyToOne(System.Collections.Generic.IDictionary{System.String,NHibernate.IFilter})">
+            <summary>
+            Get only filters enabled for many-to-one association.
+            </summary>
+            <param name="enabledFilters">All enabled filters</param>
+            <returns>A new <see cref="T:System.Collections.Generic.IDictionary`2"/> for filters enabled for many to one.</returns>
         </member>
         <member name="T:NHibernate.Util.IdentityMap">
             <summary>

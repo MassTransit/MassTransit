@@ -16,7 +16,7 @@ namespace MassTransit.Transports.Msmq.Tests
 	using Magnum.TestFramework;
 	using NUnit.Framework;
 
-	[TestFixture, Intergration]
+	[TestFixture, Integration]
 	public class When_specifying_a_message_queue_address_for_an_endpoint
 	{
 		[SetUp]
@@ -167,7 +167,7 @@ namespace MassTransit.Transports.Msmq.Tests
 		}
 	}
 
-	[TestFixture, Intergration]
+	[TestFixture, Integration]
 	public class When_creating_a_MessageQueueEndpoint_from_a_Uri_string
 	{
 		[Test]

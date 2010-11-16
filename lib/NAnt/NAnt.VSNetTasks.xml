@@ -899,6 +899,155 @@
             assembly; otherwise, <see langword="false" />.
             </value>
         </member>
+        <member name="M:NAnt.VSNet.ConfigurationBase.#ctor(NAnt.VSNet.ProjectBase)">
+            <summary>
+            Initializes a new instance of the <see cref="T:NAnt.VSNet.ConfigurationBase"/> 
+            class with the given <see cref="T:NAnt.VSNet.ProjectBase"/>.
+            </summary>
+            <param name="project">The project of the configuration.</param>
+        </member>
+        <member name="M:NAnt.VSNet.ConfigurationBase.ExpandMacro(System.String)">
+            <summary>
+            Expands the given macro.
+            </summary>
+            <param name="macro">The macro to expand.</param>
+            <returns>
+            The expanded macro.
+            </returns>
+            <exception cref="T:NAnt.Core.BuildException">
+              <para>The macro is not supported.</para>
+              <para>-or-</para>
+              <para>The macro is not implemented.</para>
+              <para>-or-</para>
+              <para>The macro cannot be expanded.</para>
+            </exception>
+            <exception cref="T:System.NotImplementedException">
+              <para>Expansion of a given macro is not yet implemented.</para>
+            </exception>
+        </member>
+        <member name="M:NAnt.VSNet.ConfigurationBase.EvaluateMacro(System.Text.RegularExpressions.Match)">
+            <summary>
+            Is called each time a regular expression match is found during a 
+            <see cref="M:System.Text.RegularExpressions.Regex.Replace(System.String,System.Text.RegularExpressions.MatchEvaluator)"/> operation.
+            </summary>
+            <param name="m">The <see cref="T:System.Text.RegularExpressions.Match"/> resulting from a single regular expression match during a <see cref="M:System.Text.RegularExpressions.Regex.Replace(System.String,System.Text.RegularExpressions.MatchEvaluator)"/>.</param>
+            <returns>
+            The expanded <see cref="T:System.Text.RegularExpressions.Match"/>.
+            </returns>
+        </member>
+        <member name="P:NAnt.VSNet.ConfigurationBase.Project">
+            <summary>
+            Gets the project.
+            </summary>
+        </member>
+        <member name="P:NAnt.VSNet.ConfigurationBase.Name">
+            <summary>
+            Gets the name of the configuration.
+            </summary>
+        </member>
+        <member name="P:NAnt.VSNet.ConfigurationBase.ObjectDir">
+            <summary>
+            Get the directory in which intermediate build output will be stored 
+            for this configuration.
+            </summary>
+            <remarks>
+            <para>
+            This is a directory relative to the project directory named 
+            <c>obj\&lt;configuration name&gt;</c>.
+            </para>
+            <para>
+            <c>.resx</c> and <c>.licx</c> files will only be recompiled if the
+            compiled resource files in the <see cref="P:NAnt.VSNet.ConfigurationBase.ObjectDir"/> are not 
+            uptodate.
+            </para>
+            </remarks>
+        </member>
+        <member name="P:NAnt.VSNet.ConfigurationBase.OutputDir">
+            <summary>
+            Gets the output directory.
+            </summary>
+        </member>
+        <member name="P:NAnt.VSNet.ConfigurationBase.OutputPath">
+            <summary>
+            Gets the path for the output file.
+            </summary>
+        </member>
+        <member name="P:NAnt.VSNet.ConfigurationBase.BuildPath">
+            <summary>
+            Gets the path in which the output file will be created before its
+            copied to the actual output path.
+            </summary>
+        </member>
+        <member name="P:NAnt.VSNet.ConfigurationBase.RelativeOutputDir">
+            <summary>
+            Get the path of the output directory relative to the project
+            directory.
+            </summary>
+        </member>
+        <member name="P:NAnt.VSNet.ConfigurationBase.PlatformName">
+            <summary>
+            Gets the platform that the configuration targets.
+            </summary>
+            <value>
+            The platform targeted by the configuration.
+            </value>
+        </member>
+        <member name="P:NAnt.VSNet.ConfigurationBase.ExtraOutputFiles">
+            <summary>
+            Gets the set of output files that is specific to the project
+            configuration.
+            </summary>
+            <value>
+            The set of output files that is specific to the project
+            configuration.
+            </value>
+            <remarks>
+            The key of the case-insensitive <see cref="T:System.Collections.Hashtable"/> is the 
+            full path of the output file and the value is the path relative to
+            the output directory.
+            </remarks>
+        </member>
+        <member name="M:NAnt.VSNet.ConfigurationDictionary.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:NAnt.VSNet.ConfigurationDictionary"/> class.
+            </summary>
+        </member>
+        <member name="M:NAnt.VSNet.ConfigurationMap.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:NAnt.VSNet.ConfigurationMap"/> class.
+            </summary>
+        </member>
+        <member name="M:NAnt.VSNet.ConfigurationMap.#ctor(System.Int32)">
+            <summary>
+            Initializes a new instance of the <see cref="T:NAnt.VSNet.ConfigurationMap"/>
+            class with the specified initial capacity. 
+            </summary>
+            <param name="capacity">The appropriate number of entries that the <see cref="T:NAnt.VSNet.ConfigurationMap"/> can initially contain.</param>
+        </member>
+        <member name="P:NAnt.VSNet.ConfigurationSettings.PlatformName">
+            <summary>
+            Gets the platform that the configuration targets.
+            </summary>
+            <value>
+            The platform targeted by the configuration.
+            </value>
+        </member>
+        <member name="P:NAnt.VSNet.ConfigurationSettings.BuildPath">
+            <summary>
+            Gets the path in which the output file will be created before its
+            copied to the actual output path.
+            </summary>
+        </member>
+        <member name="P:NAnt.VSNet.ConfigurationSettings.RegisterForComInterop">
+            <summary>
+            Gets a value indicating whether to register the project output for
+            use with COM components.
+            </summary>
+            <value>
+            <see langword="true" /> if the project output should be registered
+            for use with COM components; otherwise, <see langword="false" />.
+            </value>
+        </member>
         <member name="T:NAnt.VSNet.ProjectBase">
             <summary>
             Base class for all project classes.
@@ -1479,155 +1628,6 @@
             </summary>
             <value>
             For C# projects, the default file extension is &quot;.cs&quot;.
-            </value>
-        </member>
-        <member name="M:NAnt.VSNet.ConfigurationBase.#ctor(NAnt.VSNet.ProjectBase)">
-            <summary>
-            Initializes a new instance of the <see cref="T:NAnt.VSNet.ConfigurationBase"/> 
-            class with the given <see cref="T:NAnt.VSNet.ProjectBase"/>.
-            </summary>
-            <param name="project">The project of the configuration.</param>
-        </member>
-        <member name="M:NAnt.VSNet.ConfigurationBase.ExpandMacro(System.String)">
-            <summary>
-            Expands the given macro.
-            </summary>
-            <param name="macro">The macro to expand.</param>
-            <returns>
-            The expanded macro.
-            </returns>
-            <exception cref="T:NAnt.Core.BuildException">
-              <para>The macro is not supported.</para>
-              <para>-or-</para>
-              <para>The macro is not implemented.</para>
-              <para>-or-</para>
-              <para>The macro cannot be expanded.</para>
-            </exception>
-            <exception cref="T:System.NotImplementedException">
-              <para>Expansion of a given macro is not yet implemented.</para>
-            </exception>
-        </member>
-        <member name="M:NAnt.VSNet.ConfigurationBase.EvaluateMacro(System.Text.RegularExpressions.Match)">
-            <summary>
-            Is called each time a regular expression match is found during a 
-            <see cref="M:System.Text.RegularExpressions.Regex.Replace(System.String,System.Text.RegularExpressions.MatchEvaluator)"/> operation.
-            </summary>
-            <param name="m">The <see cref="T:System.Text.RegularExpressions.Match"/> resulting from a single regular expression match during a <see cref="M:System.Text.RegularExpressions.Regex.Replace(System.String,System.Text.RegularExpressions.MatchEvaluator)"/>.</param>
-            <returns>
-            The expanded <see cref="T:System.Text.RegularExpressions.Match"/>.
-            </returns>
-        </member>
-        <member name="P:NAnt.VSNet.ConfigurationBase.Project">
-            <summary>
-            Gets the project.
-            </summary>
-        </member>
-        <member name="P:NAnt.VSNet.ConfigurationBase.Name">
-            <summary>
-            Gets the name of the configuration.
-            </summary>
-        </member>
-        <member name="P:NAnt.VSNet.ConfigurationBase.ObjectDir">
-            <summary>
-            Get the directory in which intermediate build output will be stored 
-            for this configuration.
-            </summary>
-            <remarks>
-            <para>
-            This is a directory relative to the project directory named 
-            <c>obj\&lt;configuration name&gt;</c>.
-            </para>
-            <para>
-            <c>.resx</c> and <c>.licx</c> files will only be recompiled if the
-            compiled resource files in the <see cref="P:NAnt.VSNet.ConfigurationBase.ObjectDir"/> are not 
-            uptodate.
-            </para>
-            </remarks>
-        </member>
-        <member name="P:NAnt.VSNet.ConfigurationBase.OutputDir">
-            <summary>
-            Gets the output directory.
-            </summary>
-        </member>
-        <member name="P:NAnt.VSNet.ConfigurationBase.OutputPath">
-            <summary>
-            Gets the path for the output file.
-            </summary>
-        </member>
-        <member name="P:NAnt.VSNet.ConfigurationBase.BuildPath">
-            <summary>
-            Gets the path in which the output file will be created before its
-            copied to the actual output path.
-            </summary>
-        </member>
-        <member name="P:NAnt.VSNet.ConfigurationBase.RelativeOutputDir">
-            <summary>
-            Get the path of the output directory relative to the project
-            directory.
-            </summary>
-        </member>
-        <member name="P:NAnt.VSNet.ConfigurationBase.PlatformName">
-            <summary>
-            Gets the platform that the configuration targets.
-            </summary>
-            <value>
-            The platform targeted by the configuration.
-            </value>
-        </member>
-        <member name="P:NAnt.VSNet.ConfigurationBase.ExtraOutputFiles">
-            <summary>
-            Gets the set of output files that is specific to the project
-            configuration.
-            </summary>
-            <value>
-            The set of output files that is specific to the project
-            configuration.
-            </value>
-            <remarks>
-            The key of the case-insensitive <see cref="T:System.Collections.Hashtable"/> is the 
-            full path of the output file and the value is the path relative to
-            the output directory.
-            </remarks>
-        </member>
-        <member name="M:NAnt.VSNet.ConfigurationDictionary.#ctor">
-            <summary>
-            Initializes a new instance of the <see cref="T:NAnt.VSNet.ConfigurationDictionary"/> class.
-            </summary>
-        </member>
-        <member name="M:NAnt.VSNet.ConfigurationMap.#ctor">
-            <summary>
-            Initializes a new instance of the <see cref="T:NAnt.VSNet.ConfigurationMap"/> class.
-            </summary>
-        </member>
-        <member name="M:NAnt.VSNet.ConfigurationMap.#ctor(System.Int32)">
-            <summary>
-            Initializes a new instance of the <see cref="T:NAnt.VSNet.ConfigurationMap"/>
-            class with the specified initial capacity. 
-            </summary>
-            <param name="capacity">The appropriate number of entries that the <see cref="T:NAnt.VSNet.ConfigurationMap"/> can initially contain.</param>
-        </member>
-        <member name="P:NAnt.VSNet.ConfigurationSettings.PlatformName">
-            <summary>
-            Gets the platform that the configuration targets.
-            </summary>
-            <value>
-            The platform targeted by the configuration.
-            </value>
-        </member>
-        <member name="P:NAnt.VSNet.ConfigurationSettings.BuildPath">
-            <summary>
-            Gets the path in which the output file will be created before its
-            copied to the actual output path.
-            </summary>
-        </member>
-        <member name="P:NAnt.VSNet.ConfigurationSettings.RegisterForComInterop">
-            <summary>
-            Gets a value indicating whether to register the project output for
-            use with COM components.
-            </summary>
-            <value>
-            <see langword="true" /> if the project output should be registered
-            for use with COM components; otherwise, <see langword="false" />.
             </value>
         </member>
         <member name="T:NAnt.VSNet.GenericSolution">
@@ -3354,7 +3354,7 @@
             <param name="projectDefault">The value to return if setting is not defined in both the file and project configuration.</param>
             <returns>
             The value of a setting for the specified tool, or 
-            <paramref name="defaultValue"/> if the setting is not defined in
+            <paramref name="settingName"/> if the setting is not defined in
             both the file and project configuration.
             </returns>
             <remarks>

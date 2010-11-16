@@ -13,8 +13,8 @@
 namespace MassTransit.RuntimeServices.Model
 {
 	using FluentNHibernate.Mapping;
-	using Magnum.Infrastructure;
-	using Magnum.Infrastructure.StateMachine;
+	using Magnum.ForNHibernate;
+	using Magnum.ForNHibernate.StateMachine;
 	using Services.Subscriptions.Server;
 
 	public class SubscriptionSagaMap :

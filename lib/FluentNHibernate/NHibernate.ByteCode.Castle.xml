@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>NHibernate.ByteCode.Castle</name>
+    </assembly>
+    <members>
+        <member name="T:NHibernate.ByteCode.Castle.LazyInitializer">
+            <summary>
+            A <see cref="T:NHibernate.Proxy.ILazyInitializer"/> for use with the Castle Dynamic Class Generator.
+            </summary>
+        </member>
+        <member name="M:NHibernate.ByteCode.Castle.LazyInitializer.#ctor(System.String,System.Type,System.Object,System.Reflection.MethodInfo,System.Reflection.MethodInfo,NHibernate.Type.IAbstractComponentType,NHibernate.Engine.ISessionImplementor)">
+            <summary>
+            Initializes a new <see cref="T:NHibernate.ByteCode.Castle.LazyInitializer"/> object.
+            </summary>
+            <param name="entityName"></param>
+            <param name="persistentClass">The Class to Proxy.</param>
+            <param name="id">The Id of the Object we are Proxying.</param>
+            <param name="getIdentifierMethod"></param>
+            <param name="setIdentifierMethod"></param>
+            <param name="componentIdType"></param>
+            <param name="session">The ISession this Proxy is in.</param>
+        </member>
+        <member name="M:NHibernate.ByteCode.Castle.LazyInitializer.Intercept(Castle.Core.Interceptor.IInvocation)">
+            <summary>
+            Invoke the actual Property/Method using the Proxy or instantiate the actual
+            object and use it when the Proxy can't handle the method. 
+            </summary>
+            <param name="invocation">The <see cref="T:Castle.Core.Interceptor.IInvocation"/> from the generated Castle.DynamicProxy.</param>
+        </member>
+        <member name="M:NHibernate.ByteCode.Castle.ProxyFactory.GetProxy(System.Object,NHibernate.Engine.ISessionImplementor)">
+            <summary>
+            Build a proxy using the Castle.DynamicProxy library.
+            </summary>
+            <param name="id">The value for the Id.</param>
+            <param name="session">The Session the proxy is in.</param>
+            <returns>A fully built <c>INHibernateProxy</c>.</returns>
+        </member>
+    </members>
+</doc>
