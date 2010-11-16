@@ -222,136 +222,6 @@
             The current element in the collection.
             </returns>
         </member>
-        <member name="T:NAnt.NUnit2.Types.NUnit2TestCollection">
-            <summary>
-            Contains a strongly typed collection of <see cref="T:NAnt.NUnit2.Types.NUnit2Test"/> objects.
-            </summary>
-        </member>
-        <member name="M:NAnt.NUnit2.Types.NUnit2TestCollection.#ctor">
-            <summary>
-            Initializes a new instance of the <see cref="T:NAnt.NUnit2.Types.NUnit2TestCollection"/> class.
-            </summary>
-        </member>
-        <member name="M:NAnt.NUnit2.Types.NUnit2TestCollection.#ctor(NAnt.NUnit2.Types.NUnit2TestCollection)">
-            <summary>
-            Initializes a new instance of the <see cref="T:NAnt.NUnit2.Types.NUnit2TestCollection"/> class
-            with the specified <see cref="T:NAnt.NUnit2.Types.NUnit2TestCollection"/> instance.
-            </summary>
-        </member>
-        <member name="M:NAnt.NUnit2.Types.NUnit2TestCollection.#ctor(NAnt.NUnit2.Types.NUnit2Test[])">
-            <summary>
-            Initializes a new instance of the <see cref="T:NAnt.NUnit2.Types.NUnit2TestCollection"/> class
-            with the specified array of <see cref="T:NAnt.NUnit2.Types.NUnit2Test"/> instances.
-            </summary>
-        </member>
-        <member name="M:NAnt.NUnit2.Types.NUnit2TestCollection.Add(NAnt.NUnit2.Types.NUnit2Test)">
-            <summary>
-            Adds a <see cref="T:NAnt.NUnit2.Types.NUnit2Test"/> to the end of the collection.
-            </summary>
-            <param name="item">The <see cref="T:NAnt.NUnit2.Types.NUnit2Test"/> to be added to the end of the collection.</param> 
-            <returns>The position into which the new element was inserted.</returns>
-        </member>
-        <member name="M:NAnt.NUnit2.Types.NUnit2TestCollection.AddRange(NAnt.NUnit2.Types.NUnit2Test[])">
-            <summary>
-            Adds the elements of a <see cref="T:NAnt.NUnit2.Types.NUnit2Test"/> array to the end of the collection.
-            </summary>
-            <param name="items">The array of <see cref="T:NAnt.NUnit2.Types.NUnit2Test"/> elements to be added to the end of the collection.</param> 
-        </member>
-        <member name="M:NAnt.NUnit2.Types.NUnit2TestCollection.AddRange(NAnt.NUnit2.Types.NUnit2TestCollection)">
-            <summary>
-            Adds the elements of a <see cref="T:NAnt.NUnit2.Types.NUnit2TestCollection"/> to the end of the collection.
-            </summary>
-            <param name="items">The <see cref="T:NAnt.NUnit2.Types.NUnit2TestCollection"/> to be added to the end of the collection.</param> 
-        </member>
-        <member name="M:NAnt.NUnit2.Types.NUnit2TestCollection.Contains(NAnt.NUnit2.Types.NUnit2Test)">
-            <summary>
-            Determines whether a <see cref="T:NAnt.NUnit2.Types.NUnit2Test"/> is in the collection.
-            </summary>
-            <param name="item">The <see cref="T:NAnt.NUnit2.Types.NUnit2Test"/> to locate in the collection.</param> 
-            <returns>
-            <see langword="true"/> if <paramref name="item"/> is found in the 
-            collection; otherwise, <see langword="false"/>.
-            </returns>
-        </member>
-        <member name="M:NAnt.NUnit2.Types.NUnit2TestCollection.CopyTo(NAnt.NUnit2.Types.NUnit2Test[],System.Int32)">
-            <summary>
-            Copies the entire collection to a compatible one-dimensional array, starting at the specified index of the target array.        
-            </summary>
-            <param name="array">The one-dimensional array that is the destination of the elements copied from the collection. The array must have zero-based indexing.</param> 
-            <param name="index">The zero-based index in <paramref name="array"/> at which copying begins.</param>
-        </member>
-        <member name="M:NAnt.NUnit2.Types.NUnit2TestCollection.IndexOf(NAnt.NUnit2.Types.NUnit2Test)">
-            <summary>
-            Retrieves the index of a specified <see cref="T:NAnt.NUnit2.Types.NUnit2Test"/> object in the collection.
-            </summary>
-            <param name="item">The <see cref="T:NAnt.NUnit2.Types.NUnit2Test"/> object for which the index is returned.</param> 
-            <returns>
-            The index of the specified <see cref="T:NAnt.NUnit2.Types.NUnit2Test"/>. If the <see cref="T:NAnt.NUnit2.Types.NUnit2Test"/> is not currently a member of the collection, it returns -1.
-            </returns>
-        </member>
-        <member name="M:NAnt.NUnit2.Types.NUnit2TestCollection.Insert(System.Int32,NAnt.NUnit2.Types.NUnit2Test)">
-            <summary>
-            Inserts a <see cref="T:NAnt.NUnit2.Types.NUnit2Test"/> into the collection at the specified index.
-            </summary>
-            <param name="index">The zero-based index at which <paramref name="item"/> should be inserted.</param>
-            <param name="item">The <see cref="T:NAnt.NUnit2.Types.NUnit2Test"/> to insert.</param>
-        </member>
-        <member name="M:NAnt.NUnit2.Types.NUnit2TestCollection.GetEnumerator">
-            <summary>
-            Returns an enumerator that can iterate through the collection.
-            </summary>
-            <returns>
-            A <see cref="T:NAnt.NUnit2.Types.NUnit2TestEnumerator"/> for the entire collection.
-            </returns>
-        </member>
-        <member name="M:NAnt.NUnit2.Types.NUnit2TestCollection.Remove(NAnt.NUnit2.Types.NUnit2Test)">
-            <summary>
-            Removes a member from the collection.
-            </summary>
-            <param name="item">The <see cref="T:NAnt.NUnit2.Types.NUnit2Test"/> to remove from the collection.</param>
-        </member>
-        <member name="P:NAnt.NUnit2.Types.NUnit2TestCollection.Item(System.Int32)">
-            <summary>
-            Gets or sets the element at the specified index.
-            </summary>
-            <param name="index">The zero-based index of the element to get or set.</param>
-        </member>
-        <member name="T:NAnt.NUnit2.Types.NUnit2TestEnumerator">
-            <summary>
-            Enumerates the <see cref="T:NAnt.NUnit2.Types.NUnit2Test"/> elements of a <see cref="T:NAnt.NUnit2.Types.NUnit2TestCollection"/>.
-            </summary>
-        </member>
-        <member name="M:NAnt.NUnit2.Types.NUnit2TestEnumerator.#ctor(NAnt.NUnit2.Types.NUnit2TestCollection)">
-            <summary>
-            Initializes a new instance of the <see cref="T:NAnt.NUnit2.Types.NUnit2TestEnumerator"/> class
-            with the specified <see cref="T:NAnt.NUnit2.Types.NUnit2TestCollection"/>.
-            </summary>
-            <param name="arguments">The collection that should be enumerated.</param>
-        </member>
-        <member name="M:NAnt.NUnit2.Types.NUnit2TestEnumerator.MoveNext">
-            <summary>
-            Advances the enumerator to the next element of the collection.
-            </summary>
-            <returns>
-            <see langword="true" /> if the enumerator was successfully advanced 
-            to the next element; <see langword="false" /> if the enumerator has 
-            passed the end of the collection.
-            </returns>
-        </member>
-        <member name="M:NAnt.NUnit2.Types.NUnit2TestEnumerator.Reset">
-            <summary>
-            Sets the enumerator to its initial position, which is before the 
-            first element in the collection.
-            </summary>
-        </member>
-        <member name="P:NAnt.NUnit2.Types.NUnit2TestEnumerator.Current">
-            <summary>
-            Gets the current element in the collection.
-            </summary>
-            <returns>
-            The current element in the collection.
-            </returns>
-        </member>
         <member name="T:NAnt.NUnit2.Tasks.NUnit2Task">
             <summary>
             Runs tests using the NUnit V2.2 framework.
@@ -507,6 +377,136 @@
             </summary>
             <returns>
             All assemblies specified for these tests.
+            </returns>
+        </member>
+        <member name="T:NAnt.NUnit2.Types.NUnit2TestCollection">
+            <summary>
+            Contains a strongly typed collection of <see cref="T:NAnt.NUnit2.Types.NUnit2Test"/> objects.
+            </summary>
+        </member>
+        <member name="M:NAnt.NUnit2.Types.NUnit2TestCollection.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:NAnt.NUnit2.Types.NUnit2TestCollection"/> class.
+            </summary>
+        </member>
+        <member name="M:NAnt.NUnit2.Types.NUnit2TestCollection.#ctor(NAnt.NUnit2.Types.NUnit2TestCollection)">
+            <summary>
+            Initializes a new instance of the <see cref="T:NAnt.NUnit2.Types.NUnit2TestCollection"/> class
+            with the specified <see cref="T:NAnt.NUnit2.Types.NUnit2TestCollection"/> instance.
+            </summary>
+        </member>
+        <member name="M:NAnt.NUnit2.Types.NUnit2TestCollection.#ctor(NAnt.NUnit2.Types.NUnit2Test[])">
+            <summary>
+            Initializes a new instance of the <see cref="T:NAnt.NUnit2.Types.NUnit2TestCollection"/> class
+            with the specified array of <see cref="T:NAnt.NUnit2.Types.NUnit2Test"/> instances.
+            </summary>
+        </member>
+        <member name="M:NAnt.NUnit2.Types.NUnit2TestCollection.Add(NAnt.NUnit2.Types.NUnit2Test)">
+            <summary>
+            Adds a <see cref="T:NAnt.NUnit2.Types.NUnit2Test"/> to the end of the collection.
+            </summary>
+            <param name="item">The <see cref="T:NAnt.NUnit2.Types.NUnit2Test"/> to be added to the end of the collection.</param> 
+            <returns>The position into which the new element was inserted.</returns>
+        </member>
+        <member name="M:NAnt.NUnit2.Types.NUnit2TestCollection.AddRange(NAnt.NUnit2.Types.NUnit2Test[])">
+            <summary>
+            Adds the elements of a <see cref="T:NAnt.NUnit2.Types.NUnit2Test"/> array to the end of the collection.
+            </summary>
+            <param name="items">The array of <see cref="T:NAnt.NUnit2.Types.NUnit2Test"/> elements to be added to the end of the collection.</param> 
+        </member>
+        <member name="M:NAnt.NUnit2.Types.NUnit2TestCollection.AddRange(NAnt.NUnit2.Types.NUnit2TestCollection)">
+            <summary>
+            Adds the elements of a <see cref="T:NAnt.NUnit2.Types.NUnit2TestCollection"/> to the end of the collection.
+            </summary>
+            <param name="items">The <see cref="T:NAnt.NUnit2.Types.NUnit2TestCollection"/> to be added to the end of the collection.</param> 
+        </member>
+        <member name="M:NAnt.NUnit2.Types.NUnit2TestCollection.Contains(NAnt.NUnit2.Types.NUnit2Test)">
+            <summary>
+            Determines whether a <see cref="T:NAnt.NUnit2.Types.NUnit2Test"/> is in the collection.
+            </summary>
+            <param name="item">The <see cref="T:NAnt.NUnit2.Types.NUnit2Test"/> to locate in the collection.</param> 
+            <returns>
+            <see langword="true"/> if <paramref name="item"/> is found in the 
+            collection; otherwise, <see langword="false"/>.
+            </returns>
+        </member>
+        <member name="M:NAnt.NUnit2.Types.NUnit2TestCollection.CopyTo(NAnt.NUnit2.Types.NUnit2Test[],System.Int32)">
+            <summary>
+            Copies the entire collection to a compatible one-dimensional array, starting at the specified index of the target array.        
+            </summary>
+            <param name="array">The one-dimensional array that is the destination of the elements copied from the collection. The array must have zero-based indexing.</param> 
+            <param name="index">The zero-based index in <paramref name="array"/> at which copying begins.</param>
+        </member>
+        <member name="M:NAnt.NUnit2.Types.NUnit2TestCollection.IndexOf(NAnt.NUnit2.Types.NUnit2Test)">
+            <summary>
+            Retrieves the index of a specified <see cref="T:NAnt.NUnit2.Types.NUnit2Test"/> object in the collection.
+            </summary>
+            <param name="item">The <see cref="T:NAnt.NUnit2.Types.NUnit2Test"/> object for which the index is returned.</param> 
+            <returns>
+            The index of the specified <see cref="T:NAnt.NUnit2.Types.NUnit2Test"/>. If the <see cref="T:NAnt.NUnit2.Types.NUnit2Test"/> is not currently a member of the collection, it returns -1.
+            </returns>
+        </member>
+        <member name="M:NAnt.NUnit2.Types.NUnit2TestCollection.Insert(System.Int32,NAnt.NUnit2.Types.NUnit2Test)">
+            <summary>
+            Inserts a <see cref="T:NAnt.NUnit2.Types.NUnit2Test"/> into the collection at the specified index.
+            </summary>
+            <param name="index">The zero-based index at which <paramref name="item"/> should be inserted.</param>
+            <param name="item">The <see cref="T:NAnt.NUnit2.Types.NUnit2Test"/> to insert.</param>
+        </member>
+        <member name="M:NAnt.NUnit2.Types.NUnit2TestCollection.GetEnumerator">
+            <summary>
+            Returns an enumerator that can iterate through the collection.
+            </summary>
+            <returns>
+            A <see cref="T:NAnt.NUnit2.Types.NUnit2TestEnumerator"/> for the entire collection.
+            </returns>
+        </member>
+        <member name="M:NAnt.NUnit2.Types.NUnit2TestCollection.Remove(NAnt.NUnit2.Types.NUnit2Test)">
+            <summary>
+            Removes a member from the collection.
+            </summary>
+            <param name="item">The <see cref="T:NAnt.NUnit2.Types.NUnit2Test"/> to remove from the collection.</param>
+        </member>
+        <member name="P:NAnt.NUnit2.Types.NUnit2TestCollection.Item(System.Int32)">
+            <summary>
+            Gets or sets the element at the specified index.
+            </summary>
+            <param name="index">The zero-based index of the element to get or set.</param>
+        </member>
+        <member name="T:NAnt.NUnit2.Types.NUnit2TestEnumerator">
+            <summary>
+            Enumerates the <see cref="T:NAnt.NUnit2.Types.NUnit2Test"/> elements of a <see cref="T:NAnt.NUnit2.Types.NUnit2TestCollection"/>.
+            </summary>
+        </member>
+        <member name="M:NAnt.NUnit2.Types.NUnit2TestEnumerator.#ctor(NAnt.NUnit2.Types.NUnit2TestCollection)">
+            <summary>
+            Initializes a new instance of the <see cref="T:NAnt.NUnit2.Types.NUnit2TestEnumerator"/> class
+            with the specified <see cref="T:NAnt.NUnit2.Types.NUnit2TestCollection"/>.
+            </summary>
+            <param name="arguments">The collection that should be enumerated.</param>
+        </member>
+        <member name="M:NAnt.NUnit2.Types.NUnit2TestEnumerator.MoveNext">
+            <summary>
+            Advances the enumerator to the next element of the collection.
+            </summary>
+            <returns>
+            <see langword="true" /> if the enumerator was successfully advanced 
+            to the next element; <see langword="false" /> if the enumerator has 
+            passed the end of the collection.
+            </returns>
+        </member>
+        <member name="M:NAnt.NUnit2.Types.NUnit2TestEnumerator.Reset">
+            <summary>
+            Sets the enumerator to its initial position, which is before the 
+            first element in the collection.
+            </summary>
+        </member>
+        <member name="P:NAnt.NUnit2.Types.NUnit2TestEnumerator.Current">
+            <summary>
+            Gets the current element in the collection.
+            </summary>
+            <returns>
+            The current element in the collection.
             </returns>
         </member>
         <member name="T:NAnt.NUnit2.Tasks.NUnit2TestDomain">
