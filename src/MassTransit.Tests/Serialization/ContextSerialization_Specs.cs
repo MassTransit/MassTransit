@@ -45,7 +45,7 @@ namespace MassTransit.Tests.Serialization
 
 			LocalBus.Publish(ping);
 
-			Assert.IsTrue(received.IsAvailable(3.Seconds()), "Timeout waiting for message");
+			Assert.IsTrue(received.IsAvailable(10.Seconds()), "Timeout waiting for message");
 		}
 
 		[Test]
@@ -64,7 +64,7 @@ namespace MassTransit.Tests.Serialization
 
 			LocalBus.Publish(ping, context => context.SendFaultTo(LocalBus.Endpoint.Uri));
 
-			Assert.IsTrue(received.IsAvailable(3.Seconds()), "Timeout waiting for message");
+			Assert.IsTrue(received.IsAvailable(10.Seconds()), "Timeout waiting for message");
 		}
 
 		[Test]
@@ -83,7 +83,7 @@ namespace MassTransit.Tests.Serialization
 
 			LocalBus.Publish(ping);
 
-			Assert.IsTrue(received.IsAvailable(3.Seconds()), "Timeout waiting for message");
+			Assert.IsTrue(received.IsAvailable(10.Seconds()), "Timeout waiting for message");
 		}
 
 		[Test]
@@ -102,7 +102,7 @@ namespace MassTransit.Tests.Serialization
 
 			LocalBus.Publish(ping, context => context.SendResponseTo(LocalBus.Endpoint.Uri));
 
-			Assert.IsTrue(received.IsAvailable(3.Seconds()), "Timeout waiting for message");
+			Assert.IsTrue(received.IsAvailable(10.Seconds()), "Timeout waiting for message");
 		}
 
 		[Test]
@@ -122,7 +122,7 @@ namespace MassTransit.Tests.Serialization
 
 			LocalBus.Publish(ping, context => context.SetRetryCount(retryCount));
 
-			Assert.IsTrue(received.IsAvailable(3.Seconds()), "Timeout waiting for message");
+			Assert.IsTrue(received.IsAvailable(10.Seconds()), "Timeout waiting for message");
 		}
 
 		[Test]
@@ -141,7 +141,7 @@ namespace MassTransit.Tests.Serialization
 
 			LocalBus.Publish(ping);
 
-			Assert.IsTrue(received.IsAvailable(3.Seconds()), "Timeout waiting for message");
+			Assert.IsTrue(received.IsAvailable(10.Seconds()), "Timeout waiting for message");
 		}
 	}
 
