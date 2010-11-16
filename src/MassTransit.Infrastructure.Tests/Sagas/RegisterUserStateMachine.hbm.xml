@@ -10,7 +10,7 @@
       <generator class="assigned" />
     </id>
 
-    <property name="CurrentState" access="field.camelcase-underscore" type="Magnum.Infrastructure.StateMachine.StateMachineUserType, Magnum.Infrastructure" />
+    <property name="CurrentState" access="field.camelcase-underscore" type="Magnum.ForNHibernate.StateMachine.StateMachineUserType, Magnum.ForNHibernate" />
 
     <property name="Username" length="40"/>
     <property name="Password" length="40"/>
