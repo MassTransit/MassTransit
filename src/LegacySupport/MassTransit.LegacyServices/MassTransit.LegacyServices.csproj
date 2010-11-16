@@ -74,7 +74,7 @@
     </Reference>
     <Reference Include="Magnum, Version=0.8.0.446, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\lib\Magnum.dll</HintPath>
+      <HintPath>..\..\..\lib\Magnum\Magnum.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Magnum.ForNHibernate">

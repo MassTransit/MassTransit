@@ -65,7 +65,7 @@
     </Reference>
     <Reference Include="Magnum, Version=0.0.0.372, Culture=neutral, PublicKeyToken=b800c4cfcdeea87b, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\lib\Magnum.dll</HintPath>
+      <HintPath>..\..\..\lib\Magnum\Magnum.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="System" />
