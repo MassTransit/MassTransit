@@ -56,6 +56,9 @@
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Magnum">
+      <HintPath>..\..\..\lib\Magnum\Magnum.dll</HintPath>
+    </Reference>
     <Reference Include="Magnum.ForNHibernate">
       <HintPath>..\..\..\lib\Magnum\Magnum.ForNHibernate.dll</HintPath>
     </Reference>

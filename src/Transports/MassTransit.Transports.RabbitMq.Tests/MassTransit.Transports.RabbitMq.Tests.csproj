@@ -58,7 +58,10 @@
     </Reference>
     <Reference Include="Magnum, Version=0.8.0.446, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\lib\Magnum.dll</HintPath>
+      <HintPath>..\..\..\lib\Magnum\Magnum.dll</HintPath>
+    </Reference>
+    <Reference Include="Magnum.TestFramework">
+      <HintPath>..\..\..\lib\Magnum\Magnum.TestFramework.dll</HintPath>
     </Reference>
     <Reference Include="nunit.framework">
       <HintPath>..\..\..\lib\NUnit\nunit.framework.dll</HintPath>
