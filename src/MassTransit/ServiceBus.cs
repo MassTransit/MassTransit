@@ -18,7 +18,7 @@ namespace MassTransit
 	using Events;
 	using Exceptions;
 	using Internal;
-	using log4net;
+	using Common.Logging;
 	using Magnum;
 	using Magnum.Extensions;
 	using Magnum.Pipeline;
@@ -59,7 +59,7 @@ namespace MassTransit
 			}
 			catch (Exception ex)
 			{
-				throw new ConfigurationException("log4net isn't referenced", ex);
+				throw new MassTransit.Exceptions.ConfigurationException("log4net isn't referenced", ex);
 			}
 		}
 
@@ -110,7 +110,7 @@ namespace MassTransit
 			set
 			{
 				if (_started)
-					throw new ConfigurationException("The receive timeout cannot be changed once the bus is in motion. Beep! Beep!");
+					throw new MassTransit.Exceptions.ConfigurationException("The receive timeout cannot be changed once the bus is in motion. Beep! Beep!");
 
 				_receiveTimeout = value;
 			}
@@ -122,7 +122,7 @@ namespace MassTransit
 			set
 			{
 				if (_started)
-					throw new ConfigurationException("The consumer thread limit cannot be changed once the bus is in motion. Beep! Beep!");
+					throw new MassTransit.Exceptions.ConfigurationException("The consumer thread limit cannot be changed once the bus is in motion. Beep! Beep!");
 
 				_consumerThreadLimit = value;
 			}
@@ -134,7 +134,7 @@ namespace MassTransit
 			set
 			{
 				if (_started)
-					throw new ConfigurationException("The receive thread limit cannot be changed once the bus is in motion. Beep! Beep!");
+					throw new MassTransit.Exceptions.ConfigurationException("The receive thread limit cannot be changed once the bus is in motion. Beep! Beep!");
 
 				_receiveThreadLimit = value;
 			}

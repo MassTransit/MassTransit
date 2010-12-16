@@ -14,7 +14,7 @@ namespace MassTransit.Transports.Msmq.Tests
 {
 	using System.IO;
 	using System.Reflection;
-	using log4net.Config;
+	using Common.Logging;
 	using NUnit.Framework;
 
 	[SetUpFixture]
@@ -23,11 +23,15 @@ namespace MassTransit.Transports.Msmq.Tests
 		[SetUp]
 		public void Before_any()
 		{
-			string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+			//string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+			//string file = Path.Combine(path, "log4net.config");
 
-			string file = Path.Combine(path, "log4net.config");
+			string file = "test.log4net.xml";
 
-			XmlConfigurator.Configure(new FileInfo(file));
+			System.Collections.Specialized.NameValueCollection properties = new System.Collections.Specialized.NameValueCollection();
+			properties.Add("configType", "File");
+			properties.Add("configFile", file);
+			Common.Logging.LogManager.Adapter = new Common.Logging.Log4Net.Log4NetLoggerFactoryAdapter(properties);
 		}
 	}
 }

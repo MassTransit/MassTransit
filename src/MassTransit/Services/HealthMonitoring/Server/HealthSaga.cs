@@ -13,7 +13,7 @@
 namespace MassTransit.Services.HealthMonitoring.Server
 {
 	using System;
-	using log4net;
+	using Common.Logging;
 	using Magnum.Extensions;
 	using Magnum.StateMachine;
 	using Messages;

@@ -19,7 +19,7 @@ namespace MassTransit.Infrastructure.Tests.Sagas
 	using System.Threading;
 	using FluentNHibernate.Cfg;
 	using FluentNHibernate.Cfg.Db;
-	using log4net;
+	using Common.Logging;
 	using Magnum;
 	using MassTransit.Saga;
 	using MassTransit.Tests.TextFixtures;

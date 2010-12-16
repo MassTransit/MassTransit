@@ -15,7 +15,7 @@ namespace MassTransit.Transports.Msmq
 	using System;
 	using System.Messaging;
 	using System.Transactions;
-	using log4net;
+	using Common.Logging;
 	using Magnum.Extensions;
 
 	public class TransactionalMsmqTransport :

@@ -16,7 +16,7 @@ namespace MassTransit.Monitoring
 	using System.Diagnostics;
 	using System.Linq;
 	using System.Security;
-	using log4net;
+	using Common.Logging;
 
 
 	public class ServiceBusPerformanceCounters

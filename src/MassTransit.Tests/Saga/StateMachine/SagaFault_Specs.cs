@@ -13,7 +13,7 @@
 namespace MassTransit.Tests.Saga.StateMachine
 {
 	using System;
-	using log4net;
+	using Common.Logging;
 	using Magnum.StateMachine;
 	using MassTransit.Saga;
 	using NUnit.Framework;

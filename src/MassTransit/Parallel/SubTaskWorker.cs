@@ -13,7 +13,7 @@
 namespace MassTransit.Parallel
 {
 	using System.Threading;
-	using log4net;
+	using Common.Logging;
 	using Messages;
 
 	public class SubTaskWorker<TWorker, TInput, TOutput> :

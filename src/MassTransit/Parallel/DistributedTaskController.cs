@@ -14,7 +14,7 @@ namespace MassTransit.Parallel
 {
 	using System;
 	using System.Collections.Generic;
-	using log4net;
+	using Common.Logging;
 	using Messages;
 
 	public class DistributedTaskController<TTask, TInput, TOutput> :

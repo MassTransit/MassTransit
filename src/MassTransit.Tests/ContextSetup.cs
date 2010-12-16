@@ -14,23 +14,27 @@ namespace MassTransit.Tests
 {
 	using System.Diagnostics;
 	using System.IO;
-    using System.Reflection;
-    using log4net.Config;
-    using NUnit.Framework;
+	using System.Reflection;
+	using Common.Logging;
+	using NUnit.Framework;
 
-    [SetUpFixture]
-    public class ContextSetup
-    {
-        [SetUp]
-        public void Before_any()
-        {
-        	Trace.WriteLine("Loading Log4net");
+	[SetUpFixture]
+	public class ContextSetup
+	{
+		[SetUp]
+		public void Before_any()
+		{
+			Trace.WriteLine("Loading Log4net");
 
-            string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+			//string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+			//string file = Path.Combine(path, "test.log4net.xml");
 
-            string file = Path.Combine(path, "test.log4net.xml");
+			string file = "test.log4net.xml";
 
-            XmlConfigurator.Configure(new FileInfo(file));
-        }
-    }
+			System.Collections.Specialized.NameValueCollection properties = new System.Collections.Specialized.NameValueCollection();
+			properties.Add("configType", "File");
+			properties.Add("configFile", file);
+			Common.Logging.LogManager.Adapter = new Common.Logging.Log4Net.Log4NetLoggerFactoryAdapter(properties);
+		}
+	}
 }

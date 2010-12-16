@@ -3,7 +3,7 @@ namespace MassTransit.LegacySupport
     using System;
     using System.Reflection;
     using Exceptions;
-    using log4net;
+    using Common.Logging;
     using Messages;
     using Saga;
     using ServiceBus.Subscriptions.Messages;

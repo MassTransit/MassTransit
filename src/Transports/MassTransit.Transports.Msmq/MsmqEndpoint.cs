@@ -18,7 +18,7 @@ namespace MassTransit.Transports.Msmq
 	using System.Runtime.Serialization;
 	using Configuration;
 	using Internal;
-	using log4net;
+	using Common.Logging;
 	using Serialization;
 
     [DebuggerDisplay("{Address}")]

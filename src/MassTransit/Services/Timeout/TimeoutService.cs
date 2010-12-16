@@ -15,7 +15,7 @@ namespace MassTransit.Services.Timeout
 	using System;
 	using System.Linq;
 	using Exceptions;
-	using log4net;
+	using Common.Logging;
 	using Magnum.Fibers;
 	using Messages;
 	using Saga;

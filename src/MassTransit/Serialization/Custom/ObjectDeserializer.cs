@@ -13,7 +13,7 @@
 namespace MassTransit.Serialization.Custom
 {
 	using System.Xml;
-	using log4net;
+	using Common.Logging;
 	using Magnum.Reflection;
 
 	public class ObjectDeserializer<T> :

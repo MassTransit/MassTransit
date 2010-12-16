@@ -15,7 +15,7 @@ namespace MassTransit.Infrastructure.Tests.Sagas
     using System;
     using System.Threading;
     using FluentNHibernate.Mapping;
-    using log4net;
+    using Common.Logging;
     using Magnum.ForNHibernate.StateMachine;
     using Magnum.StateMachine;
     using MassTransit.Saga;

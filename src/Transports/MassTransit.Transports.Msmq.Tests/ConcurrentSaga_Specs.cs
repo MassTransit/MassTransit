@@ -17,7 +17,7 @@ namespace MassTransit.Transports.Msmq.Tests
 	using System.Threading;
 	using Infrastructure.Saga;
 	using Infrastructure.Tests.Sagas;
-	using log4net;
+	using Common.Logging;
 	using Magnum;
 	using NUnit.Framework;
 	using Rhino.Mocks;

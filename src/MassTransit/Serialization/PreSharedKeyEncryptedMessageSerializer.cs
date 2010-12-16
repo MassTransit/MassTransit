@@ -15,7 +15,7 @@ namespace MassTransit.Serialization
     using System;
     using System.IO;
     using System.Runtime.Serialization;
-    using log4net;
+    using Common.Logging;
     using Magnum.Cryptography;
 
     public class PreSharedKeyEncryptedMessageSerializer :

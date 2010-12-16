@@ -16,7 +16,7 @@ namespace MassTransit.Configuration
 	using System.Collections.Generic;
 	using Exceptions;
 	using Internal;
-	using log4net;
+	using Common.Logging;
 	using Pipeline.Configuration;
 
     public class ServiceBusConfigurator :
@@ -48,7 +48,7 @@ namespace MassTransit.Configuration
 			}
 			catch (UriFormatException ex)
 			{
-				throw new ConfigurationException("The Uri for the receive endpoint is invalid: " + uriString, ex);
+				throw new MassTransit.Exceptions.ConfigurationException("The Uri for the receive endpoint is invalid: " + uriString, ex);
 			}
 		}
 

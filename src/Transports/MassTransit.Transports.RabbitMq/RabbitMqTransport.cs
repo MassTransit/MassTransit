@@ -15,7 +15,7 @@ namespace MassTransit.Transports.RabbitMq
     using System;
     using System.IO;
     using Internal;
-    using log4net;
+    using Common.Logging;
     using RabbitMQ.Client;
 
     public class RabbitMqTransport :

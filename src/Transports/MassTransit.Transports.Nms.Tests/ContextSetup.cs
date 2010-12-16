@@ -12,22 +12,26 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports.Nms.Tests
 {
-    using System.IO;
-    using System.Reflection;
-    using log4net.Config;
-    using NUnit.Framework;
+	using System.IO;
+	using System.Reflection;
+	using Common.Logging;
+	using NUnit.Framework;
 
-    [SetUpFixture]
-    public class ContextSetup
-    {
-        [SetUp]
-        public void Before_any()
-        {
-            string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+	[SetUpFixture]
+	public class ContextSetup
+	{
+		[SetUp]
+		public void Before_any()
+		{
+			//string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+			//string file = Path.Combine(path, "nms.test.log4net.xml");
 
-            string file = Path.Combine(path, "nms.test.log4net.xml");
+			string file = "nms.test.log4net.xml";
 
-            XmlConfigurator.Configure(new FileInfo(file));
-        }
-    }
+			System.Collections.Specialized.NameValueCollection properties = new System.Collections.Specialized.NameValueCollection();
+			properties.Add("configType", "File");
+			properties.Add("configFile", file);
+			Common.Logging.LogManager.Adapter = new Common.Logging.Log4Net.Log4NetLoggerFactoryAdapter(properties);
+		}
+	}
 }

@@ -16,7 +16,7 @@ namespace MassTransit.Transports
 	using System.IO;
 	using System.Runtime.Serialization;
 	using Internal;
-	using log4net;
+	using Common.Logging;
 	using Serialization;
 
 	public class StreamEndpoint :

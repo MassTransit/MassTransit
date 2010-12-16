@@ -15,7 +15,7 @@ namespace MassTransit.Internal
 	using System;
 	using System.Threading;
 	using Events;
-	using log4net;
+	using Common.Logging;
 	using Magnum.Extensions;
 	using Magnum.Pipeline;
 

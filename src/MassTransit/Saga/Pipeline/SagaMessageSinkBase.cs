@@ -17,7 +17,7 @@ namespace MassTransit.Saga.Pipeline
 	using System.Linq;
 	using System.Linq.Expressions;
 	using System.Reflection;
-	using log4net;
+	using Common.Logging;
 	using Magnum.Reflection;
 	using MassTransit.Pipeline;
 

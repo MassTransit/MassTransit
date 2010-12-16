@@ -13,7 +13,7 @@
 namespace MassTransit.Services.MessageDeferral
 {
 	using System;
-	using log4net;
+	using Common.Logging;
 
     public class MessageDeferralService
     {

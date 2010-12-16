@@ -14,7 +14,7 @@ namespace MassTransit.Batch
 {
 	using System.Collections;
 	using System.Collections.Generic;
-	using log4net;
+	using Common.Logging;
 
 	public class Batch<TMessage, TBatchId> :
 		BatchedBy<TBatchId>,

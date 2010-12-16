@@ -14,7 +14,7 @@ namespace MassTransit.RuntimeServices
 {
 	using System;
 	using System.IO;
-	using log4net;
+	using Common.Logging;
 	using log4net.Config;
 	using Magnum.Reflection;
 	using Services.HealthMonitoring;
@@ -29,7 +29,7 @@ namespace MassTransit.RuntimeServices
 
 	internal class Program
 	{
-		private static readonly ILog _log = LogManager.GetLogger(typeof (Program));
+		private static readonly ILog _log = LogManager.GetLogger(typeof(Program));
 
 		private static void Main(string[] args)
 		{
@@ -43,19 +43,19 @@ namespace MassTransit.RuntimeServices
 
 			RunConfiguration configuration = RunnerConfigurator.New(config =>
 				{
-					config.SetServiceName(typeof (Program).Namespace);
-					config.SetDisplayName(typeof (Program).Namespace);
+					config.SetServiceName(typeof(Program).Namespace);
+					config.SetDisplayName(typeof(Program).Namespace);
 					config.SetDescription("MassTransit Runtime Services (Subscription, Timeout, Health Monitoring)");
 
-                    if (serviceConfiguration.UseServiceCredentials)
-                    {
-                        config.RunAs(serviceConfiguration.ServiceUsername, serviceConfiguration.ServicePassword);
-                    }
-                    else
-                        config.RunAsLocalSystem();
+					if (serviceConfiguration.UseServiceCredentials)
+					{
+						config.RunAs(serviceConfiguration.ServiceUsername, serviceConfiguration.ServicePassword);
+					}
+					else
+						config.RunAsLocalSystem();
 
 					config.DependencyOnMsmq();
-					
+
 					if (serviceConfiguration.SubscriptionServiceEnabled)
 					{
 						config.ConfigureService<SubscriptionService>(service => { ConfigureService<SubscriptionService, SubscriptionServiceRegistry>(service, start => start.Start(), stop => stop.Stop()); });
@@ -78,16 +78,16 @@ namespace MassTransit.RuntimeServices
 
 		private static void BootstrapLogger()
 		{
-			string configFileName = AppDomain.CurrentDomain.BaseDirectory + Path.DirectorySeparatorChar + typeof (Program).Namespace + ".log4net.xml";
+			//string configFileName = AppDomain.CurrentDomain.BaseDirectory + Path.DirectorySeparatorChar + typeof(Program).Namespace + ".log4net.xml";
 
-			XmlConfigurator.ConfigureAndWatch(new FileInfo(configFileName));
+			//XmlConfigurator.ConfigureAndWatch(new FileInfo(configFileName));
 
-			_log.Info("Loading " + typeof (Program).Namespace + " Services...");
+			//_log.Info("Loading " + typeof(Program).Namespace + " Services...");
 		}
 
 		private static void ConfigureService<TService, TRegistry>(IServiceConfigurator<TService> service, Action<TService> start, Action<TService> stop)
 			where TRegistry : Registry
-            where TService : class
+			where TService : class
 		{
 			var container = new Container(x =>
 				{

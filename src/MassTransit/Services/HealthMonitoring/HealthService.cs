@@ -14,7 +14,7 @@ namespace MassTransit.Services.HealthMonitoring
 {
 	using System;
 	using System.Linq;
-	using log4net;
+	using Common.Logging;
 	using Messages;
 	using Pipeline.Inspectors;
 	using Saga;

@@ -13,7 +13,7 @@
 namespace MassTransit.Services.Subscriptions.Server
 {
     using System.Collections.Generic;
-    using log4net;
+    using Common.Logging;
 
     public class InMemorySubscriptionRepository :
         ISubscriptionRepository

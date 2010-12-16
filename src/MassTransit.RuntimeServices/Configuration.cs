@@ -16,7 +16,7 @@ namespace MassTransit.RuntimeServices
 	using System.ComponentModel;
 	using System.Configuration;
 	using System.Reflection;
-	using log4net;
+	using Common.Logging;
 
     public class Configuration :
 		IConfiguration

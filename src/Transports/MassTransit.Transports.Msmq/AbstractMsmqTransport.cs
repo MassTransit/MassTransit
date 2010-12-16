@@ -19,7 +19,7 @@ namespace MassTransit.Transports.Msmq
 	using System.Threading;
 	using Exceptions;
 	using Internal;
-	using log4net;
+	using Common.Logging;
 	using Magnum.Extensions;
 
     [DebuggerDisplay("{Address}")]

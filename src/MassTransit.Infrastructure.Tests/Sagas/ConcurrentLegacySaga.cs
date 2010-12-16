@@ -16,7 +16,7 @@ namespace MassTransit.Infrastructure.Tests.Sagas
 	using System.Diagnostics;
 	using System.Threading;
 	using FluentNHibernate.Mapping;
-	using log4net;
+	using Common.Logging;
 	using MassTransit.Saga;
 
 	public class ConcurrentLegacySaga :

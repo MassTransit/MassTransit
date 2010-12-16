@@ -12,7 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
-	using log4net;
+	using Common.Logging;
 
 	/// <summary>
 	/// Marker interface used to assist identification in IoC containers.

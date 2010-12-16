@@ -64,10 +64,8 @@
       <HintPath>..\..\..\lib\activemq-nms\Apache.NMS.ActiveMQ.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="log4net, Version=1.2.10.0, Culture=neutral, PublicKeyToken=1b44e1d426115821, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\lib\log4net.dll</HintPath>
-      <Private>False</Private>
+    <Reference Include="Common.Logging">
+      <HintPath>..\..\..\lib\Common.Logging\Common.Logging.dll</HintPath>
     </Reference>
     <Reference Include="Magnum, Version=0.1.0.289, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>

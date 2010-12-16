@@ -15,7 +15,7 @@ namespace MassTransit.SystemView
 	using System;
 	using System.Configuration;
 	using System.Reflection;
-	using log4net;
+	using Common.Logging;
 
 	public class Configuration :
 		IConfiguration

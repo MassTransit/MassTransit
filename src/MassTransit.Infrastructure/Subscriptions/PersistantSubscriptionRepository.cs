@@ -14,7 +14,7 @@ namespace MassTransit.Infrastructure.Subscriptions
 {
 	using System;
 	using System.Collections.Generic;
-	using log4net;
+	using Common.Logging;
 	using NHibernate;
 	using NHibernate.Criterion;
 	using Services.Subscriptions;

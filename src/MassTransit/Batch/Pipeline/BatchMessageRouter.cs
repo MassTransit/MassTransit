@@ -14,7 +14,7 @@ namespace MassTransit.Batch.Pipeline
 {
 	using System;
 	using System.Collections.Generic;
-	using log4net;
+	using Common.Logging;
 	using Magnum.Threading;
 	using MassTransit.Pipeline;
 	using MassTransit.Pipeline.Sinks;

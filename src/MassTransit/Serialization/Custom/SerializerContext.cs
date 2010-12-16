@@ -18,7 +18,7 @@ namespace MassTransit.Serialization.Custom
 	using System.Linq;
 	using System.Reflection;
 	using System.Xml;
-	using log4net;
+	using Common.Logging;
 	using Magnum.Monads;
 	using Magnum.Reflection;
     using Magnum.Extensions;

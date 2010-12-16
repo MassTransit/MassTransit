@@ -12,7 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Internal
 {
-    using log4net;
+    using Common.Logging;
 
     public class SpecialLoggers
     {

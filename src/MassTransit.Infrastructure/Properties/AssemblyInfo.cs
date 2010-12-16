@@ -19,4 +19,4 @@ using System.Reflection;
 [assembly: AssemblyCulture("")]
 
 
-[assembly: log4net.Config.XmlConfigurator(ConfigFile = "test.log4net.xml")]
+//[assembly: log4net.Config.XmlConfigurator(ConfigFile = "test.log4net.xml")]
