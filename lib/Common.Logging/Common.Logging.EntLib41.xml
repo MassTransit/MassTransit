@@ -1,0 +1,438 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Common.Logging.EntLib41</name>
+    </assembly>
+    <members>
+        <member name="T:Common.Logging.EntLib.CommonLoggingEntlibTraceListener">
+            <summary>
+            Use this <see cref="T:System.Diagnostics.TraceListener"/> implementation to route all Entlib logging events to the
+            Common.Logging infrastructure.
+            </summary>
+            <remarks>
+            See <see cref="T:Common.Logging.EntLib.CommonLoggingEntlibTraceListenerData"/> for a list of properties to configure.
+            </remarks>
+            <example>
+            To route all <see cref="T:Microsoft.Practices.EnterpriseLibrary.Logging.Logger"/> events to Common.Logging, configure <see cref="T:Common.Logging.EntLib.CommonLoggingEntlibTraceListener"/>:
+            <code lang="XML">
+            &lt;?xml version="1.0" encoding="utf-8"?&gt;
+            &lt;configuration&gt;
+                &lt;configSections&gt;
+                    &lt;section name="loggingConfiguration" 
+            type="Microsoft.Practices.EnterpriseLibrary.Logging.Configuration.LoggingSettings, 
+            Microsoft.Practices.EnterpriseLibrary.Logging, Version=4.1.0.0, Culture=neutral, 
+            PublicKeyToken=b03f5f7f11d50a3a" /&gt;
+                &lt;/configSections&gt;
+                &lt;loggingConfiguration name="Logging Application Block" tracingEnabled="true"
+                    defaultCategory="General" logWarningsWhenNoCategoriesMatch="true"&gt;
+                    &lt;listeners&gt;
+                        &lt;add name="Common.Logging Listener" 
+                             type="Common.Logging.EntLib.CommonLoggingEntlibTraceListener, Common.Logging.EntLib"
+                             listenerDataType="Common.Logging.EntLib.CommonLoggingEntlibTraceListenerData, 
+            Common.Logging.EntLib"
+                             loggerNameFormat="{listenerName}.{sourceName}"
+                             formatter="Text Formatter"
+                             /&gt;
+                    &lt;/listeners&gt;
+                    &lt;formatters&gt;
+                        &lt;add template="Timestamp: {timestamp}&amp;#xD;&amp;#xA;Message: {message}&amp;#xD;&amp;#xA;Category: 
+            {category}&amp;#xD;&amp;#xA;Priority: {priority}&amp;#xD;&amp;#xA;EventId: {eventid}&amp;#xD;&amp;#xA;Severity: 
+            {severity}&amp;#xD;&amp;#xA;Title:{title}&amp;#xD;&amp;#xA;Machine: {machine}&amp;#xD;&amp;#xA;Application Domain: 
+            {appDomain}&amp;#xD;&amp;#xA;Process Id: {processId}&amp;#xD;&amp;#xA;Process Name: {processName}&amp;#xD;&amp;#xA;Win32 
+            Thread Id: {win32ThreadId}&amp;#xD;&amp;#xA;Thread Name: {threadName}&amp;#xD;&amp;#xA;Extended Properties: 
+            {dictionary({key} - {value}&amp;#xD;&amp;#xA;)}"
+                            type="Microsoft.Practices.EnterpriseLibrary.Logging.Formatters.TextFormatter, 
+            Microsoft.Practices.EnterpriseLibrary.Logging, Version=4.1.0.0, Culture=neutral, 
+            PublicKeyToken=b03f5f7f11d50a3a"
+                            name="Text Formatter" /&gt;
+                    &lt;/formatters&gt;
+                    &lt;specialSources&gt;
+                        &lt;allEvents switchValue="All" name="All Events"&gt;
+                            &lt;listeners&gt;
+                                &lt;add name="Test Capturing Listener" /&gt;
+                            &lt;/listeners&gt;
+                        &lt;/allEvents&gt;
+                    &lt;/specialSources&gt;
+                &lt;/loggingConfiguration&gt;
+            &lt;/configuration&gt;
+            </code>
+            </example>
+            <author>Erich Eichinger</author>
+        </member>
+        <member name="M:Common.Logging.EntLib.CommonLoggingEntlibTraceListener.#ctor(Common.Logging.EntLib.CommonLoggingEntlibTraceListenerData,Microsoft.Practices.EnterpriseLibrary.Logging.Formatters.ILogFormatter)">
+            <summary>
+            Initializes this instance from <see cref="T:Common.Logging.EntLib.CommonLoggingEntlibTraceListenerData"/> configuration
+            information.
+            </summary>
+        </member>
+        <member name="M:Common.Logging.EntLib.CommonLoggingEntlibTraceListener.Write(System.String)">
+            <summary>
+            NOT USED BY ENTLIB
+            </summary>
+            <exception cref="T:System.NotImplementedException"/>
+        </member>
+        <member name="M:Common.Logging.EntLib.CommonLoggingEntlibTraceListener.WriteLine(System.String)">
+            <summary>
+            NOT USED BY ENTLIB
+            </summary>
+            <exception cref="T:System.NotImplementedException"/>
+        </member>
+        <member name="M:Common.Logging.EntLib.CommonLoggingEntlibTraceListener.TraceData(System.Diagnostics.TraceEventCache,System.String,System.Diagnostics.TraceEventType,System.Int32,System.Object)">
+            <summary>
+            Overridden to redirect to call <see cref="M:Common.Logging.EntLib.CommonLoggingEntlibTraceListener.Log(System.Diagnostics.TraceEventType,System.String,System.Int32,System.String,System.Object[])"/>.
+            </summary>
+        </member>
+        <member name="M:Common.Logging.EntLib.CommonLoggingEntlibTraceListener.Log(System.Diagnostics.TraceEventType,System.String,System.Int32,System.String,System.Object[])">
+            <summary>
+            Logs the given message to the Common.Logging infrastructure
+            </summary>
+        </member>
+        <member name="P:Common.Logging.EntLib.CommonLoggingEntlibTraceListener.LoggerNameFormat">
+            <summary>
+            Format to use for creating the logger name. Defaults to "{listenerName}.{sourceName}".
+            </summary>
+            <remarks>
+            Available placeholders are:
+            <list type="bullet">
+            <item>{listenerName}: the configured name of this listener instance.</item>
+            <item>{sourceName}: the trace source name an event originates from (see e.g. <see cref="M:System.Diagnostics.TraceListener.TraceEvent(System.Diagnostics.TraceEventCache,System.String,System.Diagnostics.TraceEventType,System.Int32,System.String,System.Object[])"/>.</item>
+            </list>
+            </remarks>
+        </member>
+        <member name="T:Common.Logging.EntLib.CommonLoggingEntlibTraceListener.LogEntryMessage">
+            <summary>
+            The message object to be logged. Overrides <see cref="M:Common.Logging.EntLib.CommonLoggingEntlibTraceListener.LogEntryMessage.ToString"/> to format 
+            the associated <see cref="T:Microsoft.Practices.EnterpriseLibrary.Logging.LogEntry"/>
+            </summary>
+        </member>
+        <member name="T:Common.Logging.EntLib.CommonLoggingEntlibTraceListenerAssembler">
+            <summary>
+             This type supports the Enterprise Library infrastructure and is not intended to be used directly from your code. 
+             Represents the process to build a <see cref="T:Common.Logging.EntLib.CommonLoggingEntlibTraceListener"/> described by a 
+             <see cref="T:Common.Logging.EntLib.CommonLoggingEntlibTraceListenerData"/> configuration object. 
+            </summary>
+        </member>
+        <member name="M:Common.Logging.EntLib.CommonLoggingEntlibTraceListenerAssembler.Assemble(Microsoft.Practices.ObjectBuilder2.IBuilderContext,Microsoft.Practices.EnterpriseLibrary.Logging.Configuration.TraceListenerData,Microsoft.Practices.EnterpriseLibrary.Common.Configuration.IConfigurationSource,Microsoft.Practices.EnterpriseLibrary.Common.Configuration.ObjectBuilder.ConfigurationReflectionCache)">
+            <summary>
+             This method supports the Enterprise Library infrastructure and is not intended to be used directly from your code. 
+             Builds a <see cref="T:Common.Logging.EntLib.CommonLoggingEntlibTraceListener"/> described by a 
+             <see cref="T:Common.Logging.EntLib.CommonLoggingEntlibTraceListenerData"/> configuration object. 
+            </summary>
+        </member>
+        <member name="T:Common.Logging.EntLib.CommonLoggingEntlibTraceListenerData">
+            <summary>
+            Represents the configuration settings that describe a <see cref="T:Common.Logging.EntLib.CommonLoggingEntlibTraceListener"/>.
+            </summary>
+        </member>
+        <member name="P:Common.Logging.EntLib.CommonLoggingEntlibTraceListenerData.LoggerNameFormat">
+            <summary>
+            The logger name format to use for creating logger names from <see cref="P:Microsoft.Practices.EnterpriseLibrary.Common.Configuration.NamedConfigurationElement.Name"/> and 
+            </summary>
+        </member>
+        <member name="P:Common.Logging.EntLib.CommonLoggingEntlibTraceListenerData.Formatter">
+            <summary>
+            Gets or Sets the formatter name
+            </summary>
+        </member>
+        <member name="T:Common.Logging.EntLib.EntLibLogger">
+            <summary>
+            Concrete implementation of <see cref="T:Common.Logging.ILog"/> interface specific to Enterprise Logging 4.1.
+            </summary>
+            <remarks>
+            Instances are created by the <see cref="T:Common.Logging.EntLib.EntLibLoggerFactoryAdapter"/>. <see cref="P:Common.Logging.EntLib.EntLibLoggerFactoryAdapter.DefaultPriority"/>
+            is used for logging a <see cref="T:Microsoft.Practices.EnterpriseLibrary.Logging.LogEntry"/> to <see cref="M:Microsoft.Practices.EnterpriseLibrary.Logging.LogWriter.Write(Microsoft.Practices.EnterpriseLibrary.Logging.LogEntry)"/>.
+            The category name used is the name passed into <see cref="M:Common.Logging.LogManager.GetLogger(System.String)"/>. For configuring logging, see <see cref="T:Common.Logging.EntLib.EntLibLoggerFactoryAdapter"/>.
+            </remarks>
+            <seealso cref="T:Common.Logging.ILog"/>
+            <seealso cref="T:Common.Logging.EntLib.EntLibLoggerFactoryAdapter"/>
+            <author>Mark Pollack</author>
+            <author>Erich Eichinger</author>
+        </member>
+        <member name="M:Common.Logging.EntLib.EntLibLogger.#ctor(System.String,Microsoft.Practices.EnterpriseLibrary.Logging.LogWriter,Common.Logging.EntLib.EntLibLoggerSettings)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Common.Logging.EntLib.EntLibLogger"/> class.
+            </summary>
+            <param name="category">The category.</param>
+            <param name="logWriter">the <see cref="P:Common.Logging.EntLib.EntLibLogger.LogWriter"/> to write log events to.</param>
+            <param name="settings">the logger settings</param>
+        </member>
+        <member name="M:Common.Logging.EntLib.EntLibLogger.WriteInternal(Common.Logging.LogLevel,System.Object,System.Exception)">
+            <summary>
+            Actually sends the message to the EnterpriseLogging log system.
+            </summary>
+            <param name="logLevel">the level of this log event.</param>
+            <param name="message">the message to log</param>
+            <param name="exception">the exception to log (may be null)</param>
+        </member>
+        <member name="M:Common.Logging.EntLib.EntLibLogger.ShouldLog(Microsoft.Practices.EnterpriseLibrary.Logging.LogEntry)">
+            <summary>
+            May be overridden for custom filter logic
+            </summary>
+            <param name="log"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Common.Logging.EntLib.EntLibLogger.WriteLog(Microsoft.Practices.EnterpriseLibrary.Logging.LogEntry)">
+            <summary>
+            Write the fully populated event to the log.
+            </summary>
+        </member>
+        <member name="M:Common.Logging.EntLib.EntLibLogger.GetTraceEventType(Common.Logging.LogLevel)">
+            <summary>
+            Translates a <see cref="T:Common.Logging.LogLevel"/> to a <see cref="T:System.Diagnostics.TraceEventType"/>.
+            </summary>
+        </member>
+        <member name="M:Common.Logging.EntLib.EntLibLogger.CreateLogEntry(System.Diagnostics.TraceEventType)">
+            <summary>
+            Creates a minimal log entry instance that will be passed into <see cref="M:Microsoft.Practices.EnterpriseLibrary.Logging.Logger.ShouldLog(Microsoft.Practices.EnterpriseLibrary.Logging.LogEntry)"/>
+            to asap decide, whether this event should be logged.
+            </summary>
+            <param name="traceEventType">trace event severity.</param>
+            <returns></returns>
+        </member>
+        <member name="M:Common.Logging.EntLib.EntLibLogger.PopulateLogEntry(Microsoft.Practices.EnterpriseLibrary.Logging.LogEntry,System.Object,System.Exception)">
+            <summary>
+            Configures the log entry.
+            </summary>
+            <param name="log">The log.</param>
+            <param name="message">The message.</param>
+            <param name="ex">The ex.</param>
+        </member>
+        <member name="M:Common.Logging.EntLib.EntLibLogger.AddExceptionInfo(Microsoft.Practices.EnterpriseLibrary.Logging.LogEntry,System.Exception)">
+            <summary>
+            Adds the exception info.
+            </summary>
+            <param name="log">The log entry.</param>
+            <param name="exception">The exception.</param>
+            <returns></returns>
+        </member>
+        <member name="P:Common.Logging.EntLib.EntLibLogger.Category">
+            <summary>
+            The category of this logger
+            </summary>
+        </member>
+        <member name="P:Common.Logging.EntLib.EntLibLogger.Settings">
+            <summary>
+            The settings used by this logger
+            </summary>
+        </member>
+        <member name="P:Common.Logging.EntLib.EntLibLogger.LogWriter">
+            <summary>
+            The <see cref="P:Common.Logging.EntLib.EntLibLogger.LogWriter"/> used by this logger.
+            </summary>
+        </member>
+        <member name="P:Common.Logging.EntLib.EntLibLogger.IsTraceEnabled">
+            <summary>
+            Gets a value indicating whether this instance is trace enabled.  
+            </summary>
+        </member>
+        <member name="P:Common.Logging.EntLib.EntLibLogger.IsDebugEnabled">
+            <summary>
+            Gets a value indicating whether this instance is debug enabled. 
+            </summary>
+        </member>
+        <member name="P:Common.Logging.EntLib.EntLibLogger.IsInfoEnabled">
+            <summary>
+            Gets a value indicating whether this instance is info enabled.
+            </summary>
+        </member>
+        <member name="P:Common.Logging.EntLib.EntLibLogger.IsWarnEnabled">
+            <summary>
+            Gets a value indicating whether this instance is warn enabled.
+            </summary>
+        </member>
+        <member name="P:Common.Logging.EntLib.EntLibLogger.IsErrorEnabled">
+            <summary>
+            Gets a value indicating whether this instance is error enabled.
+            </summary>
+        </member>
+        <member name="P:Common.Logging.EntLib.EntLibLogger.IsFatalEnabled">
+            <summary>
+            Gets a value indicating whether this instance is fatal enabled.
+            </summary>
+        </member>
+        <member name="T:Common.Logging.EntLib.EntLibLoggerFactoryAdapter">
+            <summary>
+            Adapts the EnterpriseLibrary 4.1 logging system to Common.Logging.
+            </summary>
+            <remarks>
+            The following configuration property values may be configured:
+            <list type="bullet">
+                <item>DefaultPriority (see <see cref="P:Common.Logging.EntLib.EntLibLoggerFactoryAdapter.DefaultPriority"/>)</item>
+                <item>ExceptionFormat (see <see cref="P:Common.Logging.EntLib.EntLibLoggerFactoryAdapter.ExceptionFormat"/>)</item>
+            </list>
+            </remarks>
+            <example>
+            The following snippet shows how to configure EntLib logging for Common.Logging:
+            <code>
+            &lt;configuration&gt;
+              &lt;configSections&gt;
+                  &lt;section name="logging" type="Common.Logging.ConfigurationSectionHandler, Common.Logging" /&gt;
+                  &lt;section name="loggingConfiguration" type="Microsoft.Practices.EnterpriseLibrary.Logging.Configuration.LoggingSettings, Microsoft.Practices.EnterpriseLibrary.Logging, Version=4.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35" /&gt;
+              &lt;/configSections&gt;
+              &lt;common&gt;
+                &lt;logging&gt;
+                  &lt;factoryAdapter type="Common.Logging.EntLib.EntLibLoggerFactoryAdapter, Common.Logging.EntLib41"&gt;
+                    &lt;arg key="DefaultPriority" value="-1" /&gt;
+                  &lt;/factoryAdapter&gt;
+                &lt;/logging&gt;
+              &lt;/common&gt;
+              &lt;loggingConfiguration name="Logging Application Block"
+            &lt;-- configure enterprise logging application block here --&gt;
+            ...
+              &lt;/loggingConfiguration&gt;
+            &lt;/configuration&gt;
+            </code>
+            </example>
+            <author>Mark Pollack</author>
+            <author>Erich Eichinger</author>
+        </member>
+        <member name="M:Common.Logging.EntLib.EntLibLoggerFactoryAdapter.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:Common.Logging.EntLib.EntLibLoggerFactoryAdapter"/> class.
+            </summary>
+        </member>
+        <member name="M:Common.Logging.EntLib.EntLibLoggerFactoryAdapter.#ctor(System.Int32,System.String,Microsoft.Practices.EnterpriseLibrary.Logging.LogWriter)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Common.Logging.EntLib.EntLibLoggerFactoryAdapter"/> class
+            with the specified configuration parameters.
+            </summary>
+        </member>
+        <member name="M:Common.Logging.EntLib.EntLibLoggerFactoryAdapter.#ctor(System.Collections.Specialized.NameValueCollection)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Common.Logging.EntLib.EntLibLoggerFactoryAdapter"/> class.
+            </summary>
+            <remarks>passed in values are not used, configuration is external to EntLib logging API</remarks>
+            <param name="properties">The properties.</param>
+        </member>
+        <member name="M:Common.Logging.EntLib.EntLibLoggerFactoryAdapter.CreateLogger(System.String)">
+            <summary>
+            Creates a new <see cref="T:Common.Logging.EntLib.EntLibLogger"/> instance.
+            </summary>
+        </member>
+        <member name="M:Common.Logging.EntLib.EntLibLoggerFactoryAdapter.CreateLogger(System.String,Microsoft.Practices.EnterpriseLibrary.Logging.LogWriter,Common.Logging.EntLib.EntLibLoggerSettings)">
+            <summary>
+            Creates a new <see cref="T:Common.Logging.EntLib.EntLibLogger"/> instance.
+            </summary>
+        </member>
+        <member name="P:Common.Logging.EntLib.EntLibLoggerFactoryAdapter.DefaultPriority">
+            <summary>
+            The default priority used to log events.
+            </summary>
+            <remarks>defaults to <see cref="F:Common.Logging.EntLib.EntLibLoggerSettings.DEFAULTPRIORITY"/></remarks>
+        </member>
+        <member name="P:Common.Logging.EntLib.EntLibLoggerFactoryAdapter.ExceptionFormat">
+            <summary>
+            The format string used for formatting exceptions
+            </summary>
+            <remarks>
+            defaults to <see cref="F:Common.Logging.EntLib.EntLibLoggerSettings.DEFAULTEXCEPTIONFORMAT"/>
+            </remarks>
+        </member>
+        <member name="P:Common.Logging.EntLib.EntLibLoggerFactoryAdapter.LogWriter">
+            <summary>
+            the <see cref="F:Common.Logging.EntLib.EntLibLoggerFactoryAdapter._logWriter"/> to write log events to.
+            </summary>
+            <remarks>
+            defaults to <see cref="P:Microsoft.Practices.EnterpriseLibrary.Logging.Logger.Writer"/>.
+            </remarks>
+        </member>
+        <member name="T:Common.Logging.EntLib.EntLibLoggerSettings">
+            <summary>
+            Holds configuration settings for <see cref="T:Common.Logging.EntLib.EntLibLogger"/>s.
+            </summary>
+            <author>Erich Eichinger</author>
+        </member>
+        <member name="F:Common.Logging.EntLib.EntLibLoggerSettings.DEFAULTPRIORITY">
+            <summary>
+            the default priority used for logging. 
+            </summary>
+        </member>
+        <member name="F:Common.Logging.EntLib.EntLibLoggerSettings.DEFAULTEXCEPTIONFORMAT">
+            <summary>
+            the default <see cref="F:Common.Logging.EntLib.EntLibLoggerSettings.exceptionFormat"/> used for formatting error message
+            </summary>
+            <remarks>
+            "Exception[ message = $(exception.message), source = $(exception.source), targetsite = $(exception.targetsite), stacktrace = $(exception.stacktrace) ]"
+            </remarks>
+        </member>
+        <member name="F:Common.Logging.EntLib.EntLibLoggerSettings.priority">
+            <summary>
+            the default priority to be used.
+            </summary>
+        </member>
+        <member name="F:Common.Logging.EntLib.EntLibLoggerSettings.exceptionFormat">
+            <summary>
+            the exception format to be used.
+            </summary>
+        </member>
+        <member name="M:Common.Logging.EntLib.EntLibLoggerSettings.#ctor(System.Int32,System.String)">
+            <summary>
+            Initializes a new instance.
+            </summary>
+        </member>
+        <member name="T:Common.Logging.EntLib.NamespaceDoc">
+            <summary>
+            <para>
+            This namespace contains the implementations to plug Microsoft Enterprise Logging Library 4.1. into the Common.Logging infrastructure.
+            </para>
+            <para>For an example on how to configure
+            <list type="bullet">
+            <item>Common.Logging to render its output to Entlib, see <see cref="T:Common.Logging.EntLib.EntLibLoggerFactoryAdapter"/>.</item>
+            <item>Entlib to render its output to Common.Logging use <see cref="T:Common.Logging.EntLib.CommonLoggingEntlibTraceListener"/>.</item>
+            </list>
+            </para>
+            </summary>
+        </member>
+        <member name="T:Common.Logging.EntLib.SeverityFilter">
+            <summary>
+            Filters <see cref="T:Microsoft.Practices.EnterpriseLibrary.Logging.LogEntry"/>s by severity (see <see cref="T:System.Diagnostics.TraceEventType"/>).
+            </summary>
+            <author>Erich Eichinger</author>
+        </member>
+        <member name="M:Common.Logging.EntLib.SeverityFilter.#ctor(System.String,System.Int32)">
+            <summary>
+            Creates a new filter instance
+            </summary>
+        </member>
+        <member name="M:Common.Logging.EntLib.SeverityFilter.#ctor(System.String,System.Diagnostics.TraceEventType)">
+            <summary>
+            Creates a new filter instance
+            </summary>
+        </member>
+        <member name="M:Common.Logging.EntLib.SeverityFilter.#ctor(System.Collections.Specialized.NameValueCollection)">
+            <summary>
+            Creates a new filter instance
+            </summary>
+        </member>
+        <member name="M:Common.Logging.EntLib.SeverityFilter.Filter(Microsoft.Practices.EnterpriseLibrary.Logging.LogEntry)">
+            <summary>
+            Check, if <paramref name="log"/> severity matches <see cref="F:Common.Logging.EntLib.SeverityFilter.severityMask"/>.
+            </summary>
+            <param name="log"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Common.Logging.EntLib.SeverityFilter.ShouldLog(System.Diagnostics.TraceEventType)">
+            <summary>
+            Checks, whether the specified severity is allowed to log.
+            </summary>
+        </member>
+        <member name="P:Common.Logging.EntLib.SeverityFilter.SeverityMask">
+            <summary>
+            Bitmask to identify severity levels that should be logged.
+            </summary>
+        </member>
+        <member name="T:AssemblyDoc">
+            <summary>
+            <para>
+            This assembly contains the adapter to plug Microsoft Enterprise Logging Library 4.1. into the Common.Logging infrastructure.
+            </para>
+            <para>For an example on how to configure
+            <list type="bullet">
+            <item>Common.Logging to render its output to Entlib, see <see cref="T:Common.Logging.EntLib.EntLibLoggerFactoryAdapter"/>.</item>
+            <item>Entlib to render its output to Common.Logging use <see cref="T:Common.Logging.EntLib.CommonLoggingEntlibTraceListener"/>.</item>
+            </list>
+            </para>
+            </summary>
+        </member>
+    </members>
+</doc>

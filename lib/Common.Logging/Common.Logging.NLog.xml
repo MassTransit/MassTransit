@@ -1,0 +1,187 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Common.Logging.NLog</name>
+    </assembly>
+    <members>
+        <member name="T:Common.Logging.NLog.CommonLoggingTarget">
+            <summary>
+            Routes all log events logged through NLog into the Common.Logging infrastructure.
+            </summary>
+            <remarks>
+            <example>
+            To route all NLog events to Common.Logging, you must add this target to your configuration:
+            <code>
+            LoggingConfiguration cfg = new LoggingConfiguration();
+            CommonLoggingTarget target = new CommonLoggingTarget(&quot;${level:uppercase=true}|${logger}|${message}&quot;);
+            cfg.LoggingRules.Add(new LoggingRule(&quot;*&quot;, LogLevel.Trace, target));
+            
+            LogManager.Configuration = cfg;
+            
+            Logger log = LogManager.GetLogger(&quot;mylogger&quot;);
+            log.Debug(&quot;some message&quot;);
+            </code>
+            </example>
+            </remarks>
+            <author>Erich Eichinger</author>
+        </member>
+        <member name="M:Common.Logging.NLog.CommonLoggingTarget.#ctor">
+            <summary>
+            Creates this target using the default layout.
+            </summary>
+        </member>
+        <member name="M:Common.Logging.NLog.CommonLoggingTarget.#ctor(System.String)">
+            <summary>
+            Creates this target using a custom layout.
+            </summary>
+        </member>
+        <member name="M:Common.Logging.NLog.CommonLoggingTarget.Write(NLog.LogEventInfo)">
+            <summary>
+            Writes the event to the Common.Logging infrastructure
+            </summary>
+        </member>
+        <member name="T:Common.Logging.NLog.NamespaceDoc">
+            <summary>
+            <para>This namespace contains the implementations to plug NLog 1.0.0.505 into Common.Logging.</para>
+            <para>For an example on how to configure
+            <list type="bullet">
+            <item>Common.Logging to render its output to Entlib, see <see cref="T:Common.Logging.NLog.NLogLoggerFactoryAdapter"/>.</item>
+            <item>NLog to render its output to Common.Logging use <see cref="T:Common.Logging.NLog.CommonLoggingTarget"/>.</item>
+            </list>
+            </para>
+            </summary>
+        </member>
+        <member name="T:Common.Logging.NLog.NLogLogger">
+            <summary>
+            Concrete implementation of <see cref="T:Common.Logging.ILog"/> interface specific to NLog 1.0.0.505.
+            </summary>
+            <remarks>
+            NLog is a .NET logging library designed with simplicity and flexibility in mind.
+            http://www.nlog-project.org/
+            </remarks>
+            <author>Bruno Baia</author>
+        </member>
+        <member name="M:Common.Logging.NLog.NLogLogger.#ctor(NLog.Logger)">
+            <summary>
+            Constructor
+            </summary>
+        </member>
+        <member name="M:Common.Logging.NLog.NLogLogger.WriteInternal(Common.Logging.LogLevel,System.Object,System.Exception)">
+            <summary>
+            Actually sends the message to the underlying log system.
+            </summary>
+            <param name="logLevel">the level of this log event.</param>
+            <param name="message">the message to log</param>
+            <param name="exception">the exception to log (may be null)</param>
+        </member>
+        <member name="P:Common.Logging.NLog.NLogLogger.IsTraceEnabled">
+            <summary>
+            Gets a value indicating whether this instance is trace enabled.
+            </summary>
+            <value>
+            	<c>true</c> if this instance is trace enabled; otherwise, <c>false</c>.
+            </value>
+        </member>
+        <member name="P:Common.Logging.NLog.NLogLogger.IsDebugEnabled">
+            <summary>
+            Gets a value indicating whether this instance is debug enabled.
+            </summary>
+            <value>
+            	<c>true</c> if this instance is debug enabled; otherwise, <c>false</c>.
+            </value>
+        </member>
+        <member name="P:Common.Logging.NLog.NLogLogger.IsInfoEnabled">
+            <summary>
+            Gets a value indicating whether this instance is info enabled.
+            </summary>
+            <value>
+            	<c>true</c> if this instance is info enabled; otherwise, <c>false</c>.
+            </value>
+        </member>
+        <member name="P:Common.Logging.NLog.NLogLogger.IsWarnEnabled">
+            <summary>
+            Gets a value indicating whether this instance is warn enabled.
+            </summary>
+            <value>
+            	<c>true</c> if this instance is warn enabled; otherwise, <c>false</c>.
+            </value>
+        </member>
+        <member name="P:Common.Logging.NLog.NLogLogger.IsErrorEnabled">
+            <summary>
+            Gets a value indicating whether this instance is error enabled.
+            </summary>
+            <value>
+            	<c>true</c> if this instance is error enabled; otherwise, <c>false</c>.
+            </value>
+        </member>
+        <member name="P:Common.Logging.NLog.NLogLogger.IsFatalEnabled">
+            <summary>
+            Gets a value indicating whether this instance is fatal enabled.
+            </summary>
+            <value>
+            	<c>true</c> if this instance is fatal enabled; otherwise, <c>false</c>.
+            </value>
+        </member>
+        <member name="T:Common.Logging.NLog.NLogLoggerFactoryAdapter">
+            <summary>
+            Concrete subclass of ILoggerFactoryAdapter specific to NLog 1.0.0.505.
+            </summary>
+            <remarks>
+            The following configuration property values may be configured:
+            <list type="bullet">
+                <item><c>configType</c>: <c>INLINE|FILE</c></item>
+                <item><c>configFile</c>: NLog XML configuration file path in case of FILE</item>
+            </list>
+            The configType values have the following implications:
+            <list type="bullet">
+                <item>FILE: calls <c>NLog.LogManager.Configuration = new NLog.Config.XmlLoggingConfiguration(configFile)</c>.</item>
+                <item>&lt;any other value&gt;: expects NLog to be configured externally</item>
+            </list>
+            </remarks>
+            <example>
+            The following snippet shows how to configure EntLib logging for Common.Logging:
+            <code>
+            &lt;configuration&gt;
+              &lt;configSections&gt;
+                  &lt;section name=&quot;logging&quot; type=&quot;Common.Logging.ConfigurationSectionHandler, Common.Logging&quot; /&gt;
+              &lt;/configSections&gt;
+              &lt;common&gt;
+                &lt;logging&gt;
+                  &lt;factoryAdapter type=&quot;Common.Logging.NLog.NLogLoggerFactoryAdapter, Common.Logging.NLog&quot;&gt;
+                    &lt;arg key=&quot;configType&quot; value=&quot;FILE&quot; /&gt;
+                    &lt;arg key=&quot;configFile&quot; value=&quot;~/nlog.config&quot; /&gt;
+                  &lt;/factoryAdapter&gt;
+                &lt;/logging&gt;
+              &lt;/common&gt;
+            &lt;/configuration&gt;
+            </code>
+            </example>
+            <author>Bruno Baia</author>
+            <author>Erich Eichinger</author>
+        </member>
+        <member name="M:Common.Logging.NLog.NLogLoggerFactoryAdapter.#ctor(System.Collections.Specialized.NameValueCollection)">
+            <summary>
+            Constructor
+            </summary>
+            <param name="properties"></param>
+        </member>
+        <member name="M:Common.Logging.NLog.NLogLoggerFactoryAdapter.CreateLogger(System.String)">
+            <summary>
+            Get a ILog instance by type name 
+            </summary>
+            <param name="name"></param>
+            <returns></returns>
+        </member>
+        <member name="T:AssemblyDoc">
+            <summary>
+            <para>This assembly contains the implementations to plug NLog 1.0.0.505 into Common.Logging.</para>
+            <para>For an example on how to configure
+            <list type="bullet">
+            <item>Common.Logging to render its output to Entlib, see <see cref="T:Common.Logging.NLog.NLogLoggerFactoryAdapter"/>.</item>
+            <item>NLog to render its output to Common.Logging use <see cref="T:Common.Logging.NLog.CommonLoggingTarget"/>.</item>
+            </list>
+            </para>
+            </summary>
+        </member>
+    </members>
+</doc>
