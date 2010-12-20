@@ -69,7 +69,7 @@ namespace MassTransit.WindsorIntegration
                     int interval = string.IsNullOrEmpty(mgmt) ? 60 : int.Parse(mgmt);
                     cfg.UseHealthMonitoring(interval);
                 }
-            }, xmlCfg.Transports.Select(Type.GetType).ToArray());
+            }, xmlCfg.Transports.Select<string, Type>(Type.GetType).ToArray());
 
             container.Register(Component.For<IServiceBus>()
                                    .Named("serviceBus")
