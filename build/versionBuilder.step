@@ -37,6 +37,8 @@
   <property name="file.key.name.private" value="${dirs.current}${path.separator}${path.to.toplevel}${path.separator}${project.name}.snk" overwrite="false" />
   <property name="file.key.name.private" value="${path.to.toplevel}${path.separator}${project.name}.snk" overwrite="false" if="${sign.key.use_relative_pathing}" />
   <property name="file.key.name.public" value="${dirs.build}${path.separator}public.${project.name}.snk" overwrite="false" />
+  <property name="obfuscate" value="false" overwrite="false" />
+
   <property name="file.custom.step.before" value="${dirs.build_scripts_custom}${path.separator}${file.current.no_extension}.pre.step" />
   <property name="file.custom.step.after" value="${dirs.build_scripts_custom}${path.separator}${file.current.no_extension}.post.step" />
   <property name="file.custom.step.replace" value="${dirs.build_scripts_custom}${path.separator}${file.current.no_extension}.replace.step" />
@@ -123,6 +125,7 @@
         <import namespace="System" />
         <import namespace="System.Reflection" />
         <import namespace="System.Runtime.InteropServices" />
+        <import namespace="System.Runtime.CompilerServices" />
         <import namespace="System.Security" />
       </imports>
       <attributes>
@@ -140,6 +143,8 @@
         <attribute type="AllowPartiallyTrustedCallers" if="${allow.partially_trusted_callers}" asis="true" />
         <attribute type="AssemblyKeyFileAttribute" value="${file.key.name.private}" if="${sign.project_with_key and not sign.key.use_relative_pathing}" />
         <attribute type="AssemblyKeyFileAttribute" value="${sign.key.relative_path_from_projects}${path.separator}${path::get-file-name(file.key.name.private)}" if="${sign.project_with_key and sign.key.use_relative_pathing}" />
+         <!--attribute type="SuppressIldasmAttribute" value="true" if="${obsfuscate}" /-->
+        <attribute type="ObfuscateAssemblyAttribute" value="false" if="${obfuscate}" />
       </attributes>
     </asminfo>
   </target>
