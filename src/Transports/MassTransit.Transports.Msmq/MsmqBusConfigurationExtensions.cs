@@ -1,5 +1,5 @@
-// Copyright 2007-2008 The Apache Software Foundation.
-//  
+// Copyright 2007-2010 The Apache Software Foundation.
+// 
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
 // License at 
@@ -10,19 +10,21 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Tests.Examples.Sagas
+namespace MassTransit.Transports.Msmq
 {
-	using Magnum.TestFramework;
-	using TestFramework.Fixtures;
+    using System;
+    using Configuration;
 
-	[Scenario]
-	public class Given_a_simple_saga_does_not_exist :
-		SagaTestFixture<SimpleSaga>
-	{
-		[Given]
-		public void A_simple_saga_does_not_exist()
-		{
-			LocalBus.Subscribe<SimpleSaga>();
-		}
-	}
+    public static class MsmqBusConfigurationExtensions
+    {
+        public static void UseMsmq(this BusConfiguration config)
+        {
+            config.RegisterTransport<MsmqEndpoint>();
+        }
+        public static void UseMsmq(this BusConfiguration config, Action<IMsmqEndpointDefaults> defaults)
+        {
+            MsmqEndpointConfigurator.Defaults(defaults);
+            UseMsmq(config);
+        }
+    }
 }

@@ -16,6 +16,14 @@ namespace MassTransit.Services.HealthMonitoring.Configuration
 	using Internal;
 	using MassTransit.Configuration;
 
+    public static class HealthClientConfiguratorExtensions
+    {
+        public static void UseHealthMonitoring(this BusConfiguration cfg, int interval)
+        {
+            cfg.ConfigureService<HealthClientConfigurator>(s=>s.SetHeartbeatInterval(interval));
+        }
+    }
+
 	public class HealthClientConfigurator :
 		IServiceConfigurator
 	{

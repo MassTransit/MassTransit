@@ -76,8 +76,8 @@
 
   <target name="load_tasks">
     <echo message="Loading Gallio Nant Tasks from Program Files." />
-    <loadtasks assembly="C:${path.separator}Program Files (x86)${path.separator}Gallio${path.separator}bin${path.separator}Gallio.NAntTasks.dll" if="${file::exists('C:${path.separator}Program Files (x86)${path.separator}Gallio${path.separator}bin${path.separator}Gallio.NAntTasks.dll')}" />
-    <loadtasks assembly="C:${path.separator}Program Files${path.separator}Gallio${path.separator}bin${path.separator}Gallio.NAntTasks.dll" if="${file::exists('C:${path.separator}Program Files${path.separator}Gallio${path.separator}bin${path.separator}Gallio.NAntTasks.dll')}" />
+    <loadtasks assembly="C:${path.separator}Program Files (x86)${path.separator}Gallio${path.separator}bin${path.separator}Gallio.NAntTasks.dll" if="${file::exists('C:' + path.separator + 'Program Files (x86)' + path.separator + 'Gallio' + path.separator + 'bin' + path.separator + 'Gallio.NAntTasks.dll')}" />
+    <loadtasks assembly="C:${path.separator}Program Files${path.separator}Gallio${path.separator}bin${path.separator}Gallio.NAntTasks.dll" if="${file::exists('C:' + path.separator + 'Program Files' + path.separator + 'Gallio' + path.separator + 'bin' + path.separator + 'Gallio.NAntTasks.dll')}" />
   </target>
 
   <target name="run_tests" depends="prepare,load_tasks" description="Running Unit Tests">

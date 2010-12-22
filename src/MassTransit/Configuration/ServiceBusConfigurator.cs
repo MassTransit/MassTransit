@@ -30,8 +30,10 @@ namespace MassTransit.Configuration
 		private Uri _receiveFromUri;
 	    private Action _beforeConsume;
 	    private Action _afterConsume;
+        IEndpointFactory _endpointFactory;
 
-	    protected ServiceBusConfigurator()
+        //CHANGED TO SUPPORT THE MOVE TO THE NEXT CONFIG MODEL
+	    internal ServiceBusConfigurator()
 		{
 			_services = new List<Action<IServiceBus, IObjectBuilder, Action<Type, IBusService>>>();
 
@@ -57,8 +59,7 @@ namespace MassTransit.Configuration
 			_receiveFromUri = uri;
 		}
 
-		public void ConfigureService<TServiceConfigurator>(Action<TServiceConfigurator> configure)
-			where TServiceConfigurator : IServiceConfigurator, new()
+		public void ConfigureService<TServiceConfigurator>(Action<TServiceConfigurator> configure) where TServiceConfigurator : IServiceConfigurator, new()
 		{
 			_services.Add((bus, builder, add) =>
 				{
@@ -171,16 +172,20 @@ namespace MassTransit.Configuration
 			}
 		}
 
-		private ServiceBus CreateServiceBus()
-		{
-			var endpointFactory = ObjectBuilder.GetInstance<IEndpointFactory>();
+        //TO SUPPORT THE NEW MODEL
+        internal ServiceBus CreateServiceBus()
+        {
+            if (_endpointFactory == null)
+                throw new ConfigurationException("You must call 'SetEndpointFactory(IEndpointFactory)' on the ServiceBusConfiguration class");
 
-			var endpoint = endpointFactory.GetEndpoint(_receiveFromUri);
+            var endpoint = _endpointFactory.GetEndpoint(_receiveFromUri);
 
-			return new ServiceBus(endpoint, ObjectBuilder, endpointFactory);
-		}
+            var serviceBus = new ServiceBus(endpoint, ObjectBuilder, _endpointFactory);
+            
+            return serviceBus;
+        }
 
-		private void ConfigureThreadLimits(ServiceBus bus)
+        private void ConfigureThreadLimits(ServiceBus bus)
 		{
 			if (ConcurrentConsumerLimit > 0)
 				bus.MaximumConsumerThreads = ConcurrentConsumerLimit;
@@ -212,6 +217,11 @@ namespace MassTransit.Configuration
 		{
 			action(_defaults);
 		}
+
+        public void SetEndpointFactory(IEndpointFactory epf)
+        {
+            _endpointFactory = epf;
+        }
 	}
 
 	public class ControlBusConfigurator :

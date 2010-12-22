@@ -30,7 +30,8 @@ namespace MassTransit.Configuration
 		private IObjectBuilder _objectBuilder;
 		private ReaderWriterLockedObject<HashSet<Type>> _transportTypes;
 
-		private EndpointFactoryConfigurator()
+        //CHANGED to internal to help the move to the next configuration model
+		internal EndpointFactoryConfigurator()
 		{
 			_transportTypes = new ReaderWriterLockedObject<HashSet<Type>>(new HashSet<Type>());
 			_endpointConfigurators = new ReaderWriterLockedDictionary<Uri, Action<IEndpointConfigurator>>();
@@ -122,7 +123,8 @@ namespace MassTransit.Configuration
 			_disposed = true;
 		}
 
-		private IEndpointFactory Create()
+        //CHANGED TO SUPPORT THE MOVE TO THE NEW MODEL
+		internal IEndpointFactory Create()
 		{
 			IEndpointFactory endpointFactory = new EndpointFactory(_objectBuilder, _defaultSerializer, _transportTypes.ReadLock(x => x), _endpointConfigurators);
 
