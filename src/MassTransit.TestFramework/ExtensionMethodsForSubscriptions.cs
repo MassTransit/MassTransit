@@ -45,5 +45,24 @@ namespace MassTransit.TestFramework
 
 			Assert.Fail("A subscription for " + typeof (TMessage).ToFriendlyName() + " was not found on " + bus.Endpoint.Uri);
 		}
+
+		public static void ShouldNotHaveSubscriptionFor<TMessage>(this IServiceBus bus)
+		{
+			DateTime giveUpAt = DateTime.Now + Timeout;
+
+			while (DateTime.Now < giveUpAt)
+			{
+				var inspector = new EndpointSinkLocator(typeof (TMessage));
+
+				bus.OutboundPipeline.Inspect(inspector);
+
+				if (inspector.DestinationAddress == null)
+					return;
+
+				Thread.Sleep(10);
+			}
+
+			Assert.Fail("A subscription for " + typeof (TMessage).ToFriendlyName() + " was found on " + bus.Endpoint.Uri);
+		}
 	}
 }

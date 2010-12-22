@@ -26,4 +26,29 @@ namespace MassTransit.Tests.Subscriptions
 		class A
 		{ }
 	}
+
+	[TestFixture]
+	public class Removing_a_subscription_client_and_readding_it :
+		SubscriptionServiceTestFixture<LoopbackEndpoint>
+	{
+		[Test]
+		public void Should_remove_any_previous_subscriptions()
+		{
+			RemoteBus.Subscribe<A>(x => { });
+
+			LocalBus.ShouldHaveSubscriptionFor<A>();
+
+			RemoteBus.Dispose();
+
+			ThreadUtil.Sleep(1.Seconds());
+
+			SetupRemoteBus();
+
+			LocalBus.ShouldNotHaveSubscriptionFor<A>();
+		}
+
+
+		class A
+		{ }
+	}
 }
