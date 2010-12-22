@@ -2,7 +2,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.21022</ProductVersion>
+    <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{6EFD69FC-CBCC-4F85-AEE0-EFBA73F4D273}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -306,6 +306,7 @@
     <Compile Include="Services\HealthMonitoring\Messages\EndpointMessageBase.cs" />
     <Compile Include="Services\HealthMonitoring\Messages\EndpointNotificationBase.cs" />
     <Compile Include="Services\Subscriptions\Messages\SubscriptionClientMessageBase.cs" />
+    <Compile Include="Services\Subscriptions\Server\Messages\DuplicateSubscriptionClientRemoved.cs" />
     <Compile Include="Services\Timeout\Messages\TimeoutCancelled.cs" />
     <Compile Include="Services\Timeout\Messages\TimeoutMessageBase.cs" />
     <Compile Include="Services\Timeout\Messages\TimeoutRescheduled.cs" />
