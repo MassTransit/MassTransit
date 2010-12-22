@@ -84,6 +84,7 @@ namespace MassTransit.TestFramework.Fixtures
 		{
 			ServiceBusConfigurator.Defaults(x =>
 				{
+                    x.SetEndpointFactory(EndpointFactory);
 					x.SetObjectBuilder(ObjectBuilder);
 					x.SetReceiveTimeout(50.Milliseconds());
 					x.SetConcurrentConsumerLimit(Environment.ProcessorCount*2);

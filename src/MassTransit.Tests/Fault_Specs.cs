@@ -43,6 +43,7 @@ namespace MassTransit.Tests
 			_builder.Stub(x => x.GetInstance<IEndpointFactory>()).Return(_endpointFactory);
 			_bus = ServiceBusConfigurator.New(x =>
 				{
+                    x.SetEndpointFactory(_endpointFactory);
 					x.SetObjectBuilder(_builder);
 					x.ReceiveFrom("loopback://localhost/servicebus");
 				});

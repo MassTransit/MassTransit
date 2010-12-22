@@ -22,14 +22,19 @@ namespace MassTransit.Transports.RabbitMq.Tests
     [TestFixture]
     public class RabbitMqAddressSpecs
     {
-        Uri _address = new Uri("rabbitmq://localhost/dru");
-        Uri _rabbitAddress = new Uri("amqp-0-8://localhost:5672/dru");
+        Uri _address = new Uri("rabbitmq://10.0.1.19/dru");
+        Uri _rabbitAddress = new Uri("amqp-0-8://10.0.1.19:5672");
         ConnectionFactory _factory = new ConnectionFactory();
 
 		[Test, Category("Integration")]
         public void Send()
-        {
-            var t = new RabbitMqTransport(new EndpointAddress(_address), _factory.CreateConnection(_rabbitAddress));
+		{
+		    _factory.UserName = "guest";
+		    _factory.Password = "guest";
+		    _factory.VirtualHost = @"/";
+		    _factory.HostName = "10.0.1.19";
+
+            var t = new RabbitMqTransport(new EndpointAddress(_address), _factory.CreateConnection());
             t.Send((s)=>
             {
                 var b = Encoding.UTF8.GetBytes("dru");
@@ -40,7 +45,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
 		[Test, Category("Integration")]
 		public void Receive()
         {
-            var t = new RabbitMqTransport(new EndpointAddress(new Uri("rabbitmq://localhost/dru")), _factory.CreateConnection(_rabbitAddress));
+            var t = new RabbitMqTransport(new EndpointAddress(new Uri("rabbitmq://localhost/dru")), _factory.CreateConnection());
             t.Receive(s=>
             {
                 return ss =>
@@ -67,7 +72,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
             {
                 ser.Serialize(stream, msg);
             }
-            var e = new RabbitMqEndpoint(addr, ser, new RabbitMqTransport(addr, _factory.CreateConnection(_rabbitAddress)), null);
+            var e = new RabbitMqEndpoint(addr, ser, new RabbitMqTransport(addr, _factory.CreateConnection()), null);
             e.Send(new BugsBunny() {Food = "Carrot"});
         }
 
@@ -79,7 +84,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
             IMessageSerializer ser = new XmlMessageSerializer();
 
 
-            var e = new RabbitMqEndpoint(addr, ser, new RabbitMqTransport(addr, _factory.CreateConnection(_rabbitAddress)), null);
+            var e = new RabbitMqEndpoint(addr, ser, new RabbitMqTransport(addr, _factory.CreateConnection()), null);
             e.Receive(o=>
             {
                 return b =>
