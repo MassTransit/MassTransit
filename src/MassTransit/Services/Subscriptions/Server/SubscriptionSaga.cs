@@ -29,11 +29,20 @@ namespace MassTransit.Services.Subscriptions.Server
 		{
 			Define(() =>
 				{
-					Correlate(ClientRemoved)
+					//Correlate(ClientRemoved)
+					//    .By((saga, message) => saga.SubscriptionInfo.ClientId == message.CorrelationId && saga.CurrentState == Active);
+
+					Correlate(DuplicateClientRemoved)
 						.By((saga, message) => saga.SubscriptionInfo.ClientId == message.CorrelationId && saga.CurrentState == Active);
 
-                    Correlate(SubscriptionRemoved)
+					Correlate(SubscriptionRemoved)
 						.By((saga, message) => saga.SubscriptionInfo.SubscriptionId == message.CorrelationId && saga.CurrentState == Active);
+
+					Correlate(DuplicateSubscriptionAdded)
+						.By((saga, message) => saga.SubscriptionInfo.EndpointUri == message.Subscription.EndpointUri
+											&& saga.SubscriptionInfo.MessageName == message.Subscription.MessageName
+											&& saga.SubscriptionInfo.ClientId != message.Subscription.ClientId
+											&& saga.CurrentState == Active);
 
 					Initially(
 						When(SubscriptionAdded)
@@ -49,6 +58,12 @@ namespace MassTransit.Services.Subscriptions.Server
 							.Then((saga, message) => { saga.NotifySubscriptionRemoved(message.Subscription); })
 							.Complete(),
 						When(ClientRemoved)
+							.Then((saga, message) => saga.NotifySubscriptionRemoved())
+							.Complete(),
+						When(DuplicateClientRemoved)
+							.Then((saga, message) => saga.NotifySubscriptionRemoved())
+							.Complete(),
+						When(DuplicateSubscriptionAdded)
 							.Then((saga, message) => saga.NotifySubscriptionRemoved())
 							.Complete()
 						);
@@ -72,7 +87,10 @@ namespace MassTransit.Services.Subscriptions.Server
 		public static Event<AddSubscription> SubscriptionAdded { get; set; }
 		public static Event<RemoveSubscription> SubscriptionRemoved { get; set; }
 
+		public static Event<AddSubscription> DuplicateSubscriptionAdded { get; set; }
+
 		public static Event<SubscriptionClientRemoved> ClientRemoved { get; set; }
+		public static Event<DuplicateSubscriptionClientRemoved> DuplicateClientRemoved { get; set; }
 
 		public virtual SubscriptionInformation SubscriptionInfo { get; set; }
 
@@ -81,7 +99,7 @@ namespace MassTransit.Services.Subscriptions.Server
 
 		private void NotifySubscriptionAdded()
 		{
-			Bus.Publish(new SubscriptionAdded {Subscription = SubscriptionInfo});
+			Bus.Publish(new SubscriptionAdded { Subscription = SubscriptionInfo });
 		}
 
 		private void NotifySubscriptionRemoved()
@@ -91,7 +109,7 @@ namespace MassTransit.Services.Subscriptions.Server
 
 		private void NotifySubscriptionRemoved(SubscriptionInformation subscription)
 		{
-			Bus.Publish(new SubscriptionRemoved {Subscription = subscription});
+			Bus.Publish(new SubscriptionRemoved { Subscription = subscription });
 		}
 	}
 }

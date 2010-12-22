@@ -26,13 +26,13 @@ namespace MassTransit.Services.Subscriptions.Server
 		{
 			Define(() =>
 				{
-				    Correlate(ClientRemoved)
+					Correlate(ClientRemoved)
 						.By((saga, message) => saga.CorrelationId == message.CorrelationId && saga.CurrentState == Active);
 
 					Correlate(DuplicateClientAdded)
 						.By((saga, message) => saga.ControlUri == message.ControlUri &&
-						                       saga.CorrelationId != message.ClientId &&
-						                       saga.CurrentState == Active);
+											   saga.CorrelationId != message.ClientId &&
+											   saga.CurrentState == Active);
 
 					Initially(
 						When(ClientAdded)
@@ -46,12 +46,12 @@ namespace MassTransit.Services.Subscriptions.Server
 							.TransitionTo(Active));
 
 					During(Active,
-					       When(ClientRemoved)
-					       	.Then((saga, message) => saga.NotifySubscriptionClientRemoved())
-					       	.Complete(),
-					       When(DuplicateClientAdded)
-					       	.Then((saga, message) => saga.NotifySubscriptionClientRemoved())
-					       	.Complete());
+						   When(ClientRemoved)
+							.Then((saga, message) => saga.NotifySubscriptionClientRemoved())
+							.Complete(),
+						   When(DuplicateClientAdded)
+							.Then((saga, message) => saga.NotifyDuplicateSubscriptionClientRemoved())
+							.Complete());
 				});
 		}
 
@@ -98,6 +98,18 @@ namespace MassTransit.Services.Subscriptions.Server
 					ControlUri = ControlUri,
 					DataUri = DataUri,
 				};
+
+			Bus.Publish(message);
+		}
+
+		private void NotifyDuplicateSubscriptionClientRemoved()
+		{
+			var message = new DuplicateSubscriptionClientRemoved
+			{
+				CorrelationId = CorrelationId,
+				ControlUri = ControlUri,
+				DataUri = DataUri,
+			};
 
 			Bus.Publish(message);
 		}

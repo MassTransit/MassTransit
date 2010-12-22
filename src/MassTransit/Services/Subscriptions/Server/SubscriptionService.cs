@@ -27,9 +27,10 @@ namespace MassTransit.Services.Subscriptions.Server
 		Consumes<SubscriptionClientRemoved>.All,
 		Consumes<SubscriptionAdded>.All,
 		Consumes<SubscriptionRemoved>.All,
+		Consumes<DuplicateSubscriptionClientRemoved>.All,
 		IDisposable
 	{
-		private static readonly ILog _log = LogManager.GetLogger(typeof (SubscriptionService));
+		private static readonly ILog _log = LogManager.GetLogger(typeof(SubscriptionService));
 		private readonly IEndpointFactory _endpointFactory;
 		private readonly ISagaRepository<SubscriptionClientSaga> _subscriptionClientSagas;
 		private readonly ISagaRepository<SubscriptionSaga> _subscriptionSagas;
@@ -39,10 +40,10 @@ namespace MassTransit.Services.Subscriptions.Server
 		private readonly CommandQueue _queue = new ThreadPoolCommandQueue();
 
 		public SubscriptionService(IServiceBus bus,
-		                           ISubscriptionRepository subscriptionRepository,
-		                           IEndpointFactory endpointFactory,
-		                           ISagaRepository<SubscriptionSaga> subscriptionSagas,
-		                           ISagaRepository<SubscriptionClientSaga> subscriptionClientSagas)
+								   ISubscriptionRepository subscriptionRepository,
+								   IEndpointFactory endpointFactory,
+								   ISagaRepository<SubscriptionSaga> subscriptionSagas,
+								   ISagaRepository<SubscriptionClientSaga> subscriptionClientSagas)
 		{
 			_bus = bus;
 			_repository = subscriptionRepository;
@@ -75,6 +76,12 @@ namespace MassTransit.Services.Subscriptions.Server
 				_log.InfoFormat("Subscription Client Removed: {0} [{1}]", message.ControlUri, message.CorrelationId);
 		}
 
+		public void Consume(DuplicateSubscriptionClientRemoved message)
+		{
+			if (_log.IsInfoEnabled)
+				_log.InfoFormat("Duplicate Subscription Client Removed: {0} [{1}]", message.ControlUri, message.CorrelationId);
+		}
+
 		public void Consume(SubscriptionRemoved message)
 		{
 			if (_log.IsInfoEnabled)
@@ -82,7 +89,7 @@ namespace MassTransit.Services.Subscriptions.Server
 
 			var remove = new RemoveSubscription(message.Subscription);
 
-			_queue.Enqueue(()=>SendToClients(remove));
+			_queue.Enqueue(() => SendToClients(remove));
 		}
 
 		public void Dispose()
@@ -149,5 +156,7 @@ namespace MassTransit.Services.Subscriptions.Server
 
 			endpoint.Send(response, x => x.SetSourceAddress(_bus.Endpoint.Uri));
 		}
+
+
 	}
 }
