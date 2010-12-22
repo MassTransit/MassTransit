@@ -184,6 +184,7 @@ namespace MassTransit.StructureMapIntegration
                     {
                         return ServiceBusConfigurator.New(x =>
                             {
+                                x.SetEndpointFactory(context.GetInstance<IEndpointFactory>());
                                 x.SetObjectBuilder(context.GetInstance<IObjectBuilder>());
                                 x.ReceiveFrom(endpointUri);
 
@@ -205,6 +206,7 @@ namespace MassTransit.StructureMapIntegration
                 {
                     return ServiceBusConfigurator.New(x =>
                     {
+                        x.SetEndpointFactory(context.GetInstance<IEndpointFactory>());
                         x.SetObjectBuilder(context.GetInstance<IObjectBuilder>());
                         x.ReceiveFrom(endpointUri);
 
@@ -226,6 +228,7 @@ namespace MassTransit.StructureMapIntegration
                     {
                         return ControlBusConfigurator.New(x =>
                             {
+                                x.SetEndpointFactory(context.GetInstance<IEndpointFactory>());
                                 x.SetObjectBuilder(context.GetInstance<IObjectBuilder>());
                                 x.ReceiveFrom(endpointUri);
                                 x.SetConcurrentConsumerLimit(1);

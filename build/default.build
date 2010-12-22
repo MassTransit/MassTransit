@@ -30,6 +30,8 @@
   <property name="run.ilmerge" value="false" overwrite="false" />
   <property name="file.uppercut.assembly" value="uppercut.tasks.dll" />
   <property name="path.uppercut.assembly" value="${dirs.current}${path.separator}${file.uppercut.assembly}" />
+    <property name="obfuscate" value="false" overwrite="false" />
+  
   <property name="file.custom.step.before" value="${dirs.build_scripts_custom}${path.separator}${file.current.no_extension}.pre.build" />
   <property name="file.custom.step.after" value="${dirs.build_scripts_custom}${path.separator}${file.current.no_extension}.post.build" />
   <property name="file.custom.step.replace" value="${dirs.build_scripts_custom}${path.separator}${file.current.no_extension}.replace.build" />
@@ -98,6 +100,7 @@
     <nant buildfile="${dirs.current}${path.separator}compile.step" inheritall="true" />
     <nant buildfile="${dirs.current}${path.separator}environmentBuilder.step" inheritall="true" />
     <nant buildfile="${dirs.current}${path.separator}analyze.step" inheritall="true" />
+    <nant buildfile="${dirs.current}${path.separator}obfuscate.step" inheritall="true" if="${obfuscate}" />
     <nant buildfile="${dirs.current}${path.separator}package.step" inheritall="true" />
     <nant buildfile="${dirs.current}${path.separator}ilmerge.build" inheritall="true" if="${run.ilmerge}" />
     <nant buildfile="${dirs.current}${path.separator}gemsPrepare.step" inheritall="true" failonerror="false" />

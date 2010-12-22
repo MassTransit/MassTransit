@@ -23,7 +23,6 @@ namespace MassTransit.Transports
 	{
 		protected Type SerializerType { get; private set; }
 		protected Uri Uri { get; private set; }
-		protected IObjectBuilder ObjectBuilder { get; private set; }
 
 		public void SetSerializer<T>()
 			where T : IMessageSerializer
@@ -31,35 +30,23 @@ namespace MassTransit.Transports
 			SerializerType = typeof (T);
 		}
 
-		public void SetSerializer(Type serializerType)
-		{
-			SerializerType = serializerType;
-		}
+        public void SetSerializer(Type serializerType)
+        {
+            SerializerType = serializerType;
+        }
 
-		public void SetObjectBuilder(IObjectBuilder objectBuilder)
-		{
-			ObjectBuilder = objectBuilder;
-		}
-
-		public void SetUri(Uri uri)
+	    public void SetUri(Uri uri)
 		{
 			Uri = uri;
 		}
 
 		protected IMessageSerializer GetSerializer()
 		{
-			IMessageSerializer serializer;
-			if(ObjectBuilder != null)
-			{
-				serializer = ObjectBuilder.GetInstance(SerializerType) as IMessageSerializer;
-				if(serializer != null)
-					return serializer;
-			}
-
-			var newExpression = Expression.New(SerializerType);
+		    var newExpression = Expression.New(SerializerType);
 			Func<IMessageSerializer> maker = Expression.Lambda<Func<IMessageSerializer>>(newExpression).Compile();
 
-			serializer = maker();
+			IMessageSerializer serializer = maker();
+
 			if (serializer == null)
 				throw new ConfigurationException("Unable to create message serializer " + SerializerType.FullName);
 

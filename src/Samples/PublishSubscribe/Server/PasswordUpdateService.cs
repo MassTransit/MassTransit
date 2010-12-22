@@ -36,6 +36,7 @@ namespace Server
 
 		#endregion
 
+        //if the queue is transactional the transaction will already be started.
 		public void Consume(RequestPasswordUpdate message)
 		{
 			_log.InfoFormat("Received password update: {0} ({1})", message.NewPassword, message.CorrelationId);

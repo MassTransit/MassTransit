@@ -25,6 +25,12 @@ namespace MassTransit.Configuration
 		/// <param name="objectBuilder"></param>
 		void SetObjectBuilder(IObjectBuilder objectBuilder);
 
+	    /// <summary>
+	    /// Specify the IEndpointFactory to use
+	    /// </summary>
+	    /// <param name="endpointFactory"></param>
+        void SetEndpointFactory(IEndpointFactory endpointFactory);
+
 		/// <summary>
 		/// Specify the endpoint where errors should be sent
 		/// </summary>

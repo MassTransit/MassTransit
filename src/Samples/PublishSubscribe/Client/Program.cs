@@ -1,77 +1,72 @@
+// Copyright 2007-2010 The Apache Software Foundation.
+// 
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
+// this file except in compliance with the License. You may obtain a copy of the 
+// License at 
+// 
+//     http://www.apache.org/licenses/LICENSE-2.0 
+// 
+// Unless required by applicable law or agreed to in writing, software distributed 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// specific language governing permissions and limitations under the License.
 namespace Client
 {
+    using System.IO;
     using Castle.MicroKernel.Registration;
+    using Castle.Windsor;
     using log4net;
-	using MassTransit;
-	using MassTransit.Configuration;
-	using MassTransit.Services.Subscriptions.Configuration;
-	using MassTransit.Transports.Msmq;
-	using MassTransit.WindsorIntegration;
-	using Topshelf;
-	using Topshelf.Configuration.Dsl;
+    using log4net.Config;
+    using MassTransit;
+    using MassTransit.WindsorIntegration;
+    using Topshelf;
+    using Topshelf.Configuration;
+    using Topshelf.Configuration.Dsl;
 
-	internal class Program
-	{
-		private static readonly ILog _log = LogManager.GetLogger(typeof (Program));
+    internal class Program
+    {
+        static readonly ILog _log = LogManager.GetLogger(typeof (Program));
 
-		private static void Main(string[] args)
-		{
-			_log.Info("Client Loading");
+        static void Main(string[] args)
+        {
+            XmlConfigurator.ConfigureAndWatch(new FileInfo("client.log4net.xml"));
+            _log.Info("Client Loading");
 
-            var container = new DefaultMassTransitContainer();
-            IEndpointFactory endpointFactory = EndpointFactoryConfigurator.New(e =>
+            WindsorContainer container;
+
+            RunConfiguration cfg = RunnerConfigurator.New(c =>
             {
-                e.SetObjectBuilder(container.ObjectBuilder);
-                e.RegisterTransport<MsmqEndpoint>();
+                c.SetServiceName("SampleClientService");
+                c.SetDisplayName("SampleClientService");
+                c.SetDescription("SampleClientService");
+
+                c.DependencyOnMsmq();
+                c.RunAsLocalSystem();
+
+                c.ConfigureService<ClientService>(s =>
+                {
+                    string serviceName = typeof (ClientService).Name;
+
+                    s.Named(serviceName);
+                    s.WhenStarted(o =>
+                    {
+                        container = new WindsorContainer();
+                        container.Install(
+                            new MassTransitInstaller(),
+                            new MassTransitInMemorySagaRepositoryInstaller(), 
+                            new MassTransitInMemorySubscriptionsInstaller()
+                            );
+                        container.Register(Component.For<PasswordUpdater>());
+
+                        var bus = Bus.Instance();
+                        o.Start(bus);
+                    });
+                    s.WhenStopped(o => o.Stop());
+
+                    s.HowToBuildService(name => new ClientService());
+                });
             });
-
-			MsmqEndpointConfigurator.Defaults(def =>
-			{
-				def.CreateMissingQueues = true;
-			});
-      
-			container.Kernel.AddComponentInstance("endpointFactory", typeof(IEndpointFactory), endpointFactory);
-            container.AddComponent<ClientService>(typeof(ClientService).Name);
-            container.AddComponent<PasswordUpdater>();
-									
-			var cfg = RunnerConfigurator.New(c =>
-				{
-					c.SetServiceName("SampleClientService");
-					c.SetDisplayName("SampleClientService");
-					c.SetDescription("SampleClientService");
-
-					c.DependencyOnMsmq();
-					c.RunAsLocalSystem();
-
-
-					c.ConfigureService<ClientService>(s =>
-						{
-                            s.Named(typeof(ClientService).Name);
-							s.WhenStarted(o =>
-								{
-
-								    container.Register(Component.For<PasswordUpdater>());
-								    var wob = new WindsorObjectBuilder(container.Kernel);
-
-									var bus = ServiceBusConfigurator.New(servicesBus =>
-										{
-                                            servicesBus.SetObjectBuilder(wob);
-											servicesBus.ReceiveFrom("msmq://localhost/mt_client");
-											servicesBus.ConfigureService<SubscriptionClientConfigurator>(client =>
-												{
-													// need to add the ability to read from configuration settings somehow
-													client.SetSubscriptionServiceEndpoint("msmq://localhost/mt_subscriptions");
-												});
-										});
-
-									o.Start(bus);
-								});
-							s.WhenStopped(o => o.Stop());
-
-							s.HowToBuildService(name => new ClientService());
-						});
-				});
-			Runner.Host(cfg, args);
-		}
-	}
+            Runner.Host(cfg, args);
+        }
+    }
 }

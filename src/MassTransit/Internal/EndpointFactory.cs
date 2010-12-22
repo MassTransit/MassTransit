@@ -149,7 +149,6 @@ namespace MassTransit.Internal
 			return x =>
 				{
 					x.SetSerializer(_defaultSerializer);
-					x.SetObjectBuilder(_objectBuilder);
 
 					Action<IEndpointConfigurator> endpointConfigurator;
 					if (_endpointConfigurators.TryGetValue(key, out endpointConfigurator))

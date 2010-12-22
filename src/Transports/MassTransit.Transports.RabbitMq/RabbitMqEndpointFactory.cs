@@ -22,7 +22,14 @@ namespace MassTransit.Transports.RabbitMq
     {
         private static ConnectionFactory _factory = new ConnectionFactory();
         static IProtocol _protocol = Protocols.AMQP_0_8;
-       
+      
+        public static void Connect()
+        {
+            _factory.UserName = "guest";
+            _factory.Password = "guest";
+            _factory.VirtualHost = @"/";
+            _factory.HostName = "";
+        }
         public static IEndpoint New(IEndpointAddress address, IMessageSerializer serializer)
         {
             return New(new CreateEndpointSettings(address)
@@ -65,7 +72,7 @@ namespace MassTransit.Transports.RabbitMq
         private static IConnection GetConnection(Uri address)
         {
             var rabbitMqAddress = new UriBuilder("amqp-{0}-{1}".FormatWith(_protocol.MajorVersion, _protocol.MinorVersion), address.Host, _protocol.DefaultPort).Uri;
-            return _factory.CreateConnection(rabbitMqAddress);
+            return _factory.CreateConnection();
         }
     }
 }
