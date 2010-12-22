@@ -17,8 +17,9 @@ namespace MassTransit.Tests
 	using MassTransit.Transports;
 	using NUnit.Framework;
 	using Rhino.Mocks;
+	using Magnum.TestFramework;
 
-	[TestFixture]
+    [TestFixture]
 	public class Configuration_Specs
 	{
 		[Test]
@@ -34,12 +35,9 @@ namespace MassTransit.Tests
 					x.ConfigureEndpoint("loopback://localhost/mt_client", y => { y.SetSerializer<DotNotXmlMessageSerializer>(); });
 				});
 
-			objectBuilder.Stub(x => x.GetInstance<IEndpointFactory>()).Return(endpointFactory);
-			objectBuilder.Expect(x => x.GetInstance(typeof (DotNotXmlMessageSerializer))).Return(new DotNotXmlMessageSerializer());
-
 			IEndpoint endpoint = endpointFactory.GetEndpoint("loopback://localhost/mt_client");
 
-			objectBuilder.VerifyAllExpectations();
+		    endpoint.ShouldNotBeNull();
 		}
 	}
 }
