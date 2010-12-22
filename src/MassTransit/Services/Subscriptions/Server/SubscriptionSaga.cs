@@ -72,7 +72,7 @@ namespace MassTransit.Services.Subscriptions.Server
 		public static Event<AddSubscription> SubscriptionAdded { get; set; }
 		public static Event<RemoveSubscription> SubscriptionRemoved { get; set; }
 
-		public static Event<SubscriptionClientRemoved> ClientRemoved { get; set; }
+		public static Event<DuplicateSubscriptionClientRemoved> ClientRemoved { get; set; }
 
 		public virtual SubscriptionInformation SubscriptionInfo { get; set; }
 

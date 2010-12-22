@@ -50,7 +50,7 @@ namespace MassTransit.Services.Subscriptions.Server
 					       	.Then((saga, message) => saga.NotifySubscriptionClientRemoved())
 					       	.Complete(),
 					       When(DuplicateClientAdded)
-					       	.Then((saga, message) => saga.NotifySubscriptionClientRemoved())
+					       	.Then((saga, message) => saga.NotifyDuplicateSubscriptionClientRemoved())
 					       	.Complete());
 				});
 		}
@@ -93,6 +93,18 @@ namespace MassTransit.Services.Subscriptions.Server
 		private void NotifySubscriptionClientRemoved()
 		{
 			var message = new SubscriptionClientRemoved
+				{
+					CorrelationId = CorrelationId,
+					ControlUri = ControlUri,
+					DataUri = DataUri,
+				};
+
+			Bus.Publish(message);
+		}
+
+		private void NotifyDuplicateSubscriptionClientRemoved()
+		{
+			var message = new DuplicateSubscriptionClientRemoved
 				{
 					CorrelationId = CorrelationId,
 					ControlUri = ControlUri,
