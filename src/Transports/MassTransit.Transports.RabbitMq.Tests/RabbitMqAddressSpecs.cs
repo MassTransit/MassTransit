@@ -26,13 +26,31 @@ namespace MassTransit.Transports.RabbitMq.Tests
         Uri _rabbitAddress = new Uri("amqp-0-8://10.0.1.19:5672");
         ConnectionFactory _factory = new ConnectionFactory();
 
+        [Test, Explicit]
+        public void Bob()
+        {
+		    _factory.UserName = "guest";
+		    _factory.Password = "guest";
+		    _factory.VirtualHost = @"/";
+		    _factory.HostName = "192.168.0.111";
+
+            using (var conn = _factory.CreateConnection())
+            {
+                using (var m = conn.CreateModel())
+                {
+                    m.QueueDeclare("igby", true);
+                }
+            }
+
+        }
+
 		[Test, Category("Integration")]
         public void Send()
 		{
 		    _factory.UserName = "guest";
 		    _factory.Password = "guest";
 		    _factory.VirtualHost = @"/";
-		    _factory.HostName = "10.0.1.19";
+		    _factory.HostName = "192.168.0.111";
 
             var t = new RabbitMqTransport(new EndpointAddress(_address), _factory.CreateConnection());
             t.Send((s)=>
