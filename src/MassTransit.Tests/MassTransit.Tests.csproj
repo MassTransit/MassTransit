@@ -144,6 +144,7 @@
     <Compile Include="Load\Sagas\FirstSaga.cs" />
     <Compile Include="MessageContext_Specs.cs" />
     <Compile Include="MessageInterceptor_Specs.cs" />
+    <Compile Include="Messages\PartialSerializationTestMessage.cs" />
     <Compile Include="Performance\EndpointLoadTest.cs" />
     <Compile Include="Performance\LoadedRequest.cs" />
     <Compile Include="Performance\LoadedResponse.cs" />
@@ -183,6 +184,8 @@
     <Compile Include="MessageGroup_Specs.cs" />
     <Compile Include="Messages\RequestMessage.cs" />
     <Compile Include="Messages\SerializationTestMessage.cs" />
+    <Compile Include="Serialization\GivenAComplexMessage.cs" />
+    <Compile Include="Serialization\GivenASimpleMessage.cs" />
     <Compile Include="Serialization\Header_Specs.cs" />
     <Compile Include="Serialization\Interface_Specs.cs" />
     <Compile Include="Serialization\MoreSerialization_Specs.cs" />

@@ -22,9 +22,9 @@ namespace MassTransit.Tests.Serialization
 	using Messages;
 	using NUnit.Framework;
 
-	[TestFixture]
-	public class Setting_the_message_expiration
-		: SerializationSpecificationBase
+
+	public abstract class Setting_the_message_expiration<TSerializer> 
+		: SerializationSpecificationBase<TSerializer> where TSerializer : IMessageSerializer, new()
 	{
 		[Test]
 		public void Should_not_impact_others_if_not_set()
@@ -68,4 +68,25 @@ namespace MassTransit.Tests.Serialization
 			}
 		}
 	}
+
+    [TestFixture]
+    public class WhenUsingCustomXmlAndHeaders :
+        Setting_the_message_expiration<CustomXmlMessageSerializer>
+    {
+    }
+    [TestFixture]
+    public class WhenUsingDotNotXmlAndHeaders :
+        Setting_the_message_expiration<DotNotXmlMessageSerializer>
+    {
+    }
+    [TestFixture]
+    public class WhenUsingBinaryAndHeaders :
+        Setting_the_message_expiration<BinaryMessageSerializer>
+    {
+    }
+    [TestFixture]
+    public class WhenUsingJsonAndHeaders :
+        Setting_the_message_expiration<JsonMessageSerializer>
+    {
+    }
 }

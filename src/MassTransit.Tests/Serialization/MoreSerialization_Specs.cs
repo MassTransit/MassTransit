@@ -14,11 +14,12 @@ namespace MassTransit.Tests.Serialization
 {
 	using System;
 	using System.Collections.Generic;
+	using MassTransit.Serialization;
 	using NUnit.Framework;
 
 	[TestFixture]
-	public class MoreSerialization_Specs :
-		SerializationSpecificationBase
+	public class MoreSerialization_Specs<TSerializer> :
+		SerializationSpecificationBase<TSerializer> where TSerializer : IMessageSerializer, new()
 	{
 		public class ContainerClass
 		{

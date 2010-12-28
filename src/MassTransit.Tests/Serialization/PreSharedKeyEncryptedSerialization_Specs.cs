@@ -21,13 +21,12 @@ namespace MassTransit.Tests.Serialization
     using Messages;
     using NUnit.Framework;
 
-    [TestFixture]
-    public class PreSharedKeyEncryptedSerialization_Specs
+    public abstract class PreSharedKeyEncryptedSerialization_Specs<TSerializer> where TSerializer : IMessageSerializer, new()
     {
         [SetUp]
         public void SetupContext()
         {
-            _message = new SerializationTestMessage
+            _message = new PartialSerializationTestMessage
                        {
                            DecimalValue = 123.45m,
                            LongValue = 098123213,
@@ -35,22 +34,21 @@ namespace MassTransit.Tests.Serialization
                            ByteValue = 127,
                            IntValue = 123,
                            DateTimeValue = new DateTime(2008, 9, 8, 7, 6, 5, 4),
-                           TimeSpanValue = 30.Seconds(),
                            GuidValue = new Guid("B00C3BD0-3CE9-4B14-9EC6-E7348084EF1F"),
                            StringValue = "Chris's Sample Code",
                            DoubleValue = 1823.172,
                        };
         }
 
-        private SerializationTestMessage _message;
+        private PartialSerializationTestMessage _message;
 
-        [Test, Explicit]
+        [Test]
         public void The_encrypted_serializer_should_be_awesome()
         {
             byte[] serializedMessageData;
             string key = "eguhidbehumjdemy1234567890123456";
 
-            var serializer = new PreSharedKeyEncryptedMessageSerializer(key);
+            var serializer = new PreSharedKeyEncryptedMessageSerializer(key, new TSerializer());
 
             using (var output = new MemoryStream())
             {
@@ -61,14 +59,35 @@ namespace MassTransit.Tests.Serialization
                 Trace.WriteLine(Encoding.UTF8.GetString(serializedMessageData));
             }
 
-            var deserializer = new PreSharedKeyEncryptedMessageSerializer(key);
+            var deserializer = new PreSharedKeyEncryptedMessageSerializer(key, new TSerializer());
 
             using (var input = new MemoryStream(serializedMessageData))
             {
-                var receivedMessage = deserializer.Deserialize(input) as SerializationTestMessage;
+                var receivedMessage = deserializer.Deserialize(input) as PartialSerializationTestMessage;
 
                 Assert.AreEqual(_message, receivedMessage);
             }
         }
+    }
+
+    [TestFixture]
+    public class WhenUsingCustomXmlWithEncryption : 
+        PreSharedKeyEncryptedSerialization_Specs<CustomXmlMessageSerializer>
+    {
+    }
+    [TestFixture]
+    public class WhenUsingDotNotXmlWithEncryption : 
+        PreSharedKeyEncryptedSerialization_Specs<DotNotXmlMessageSerializer>
+    {
+    }
+    [TestFixture]
+    public class WhenUsingBinaryWithEncryption : 
+        PreSharedKeyEncryptedSerialization_Specs<BinaryMessageSerializer>
+    {
+    }
+    [TestFixture]
+    public class WhenUsingJsonWithEncryption : 
+        PreSharedKeyEncryptedSerialization_Specs<JsonMessageSerializer>
+    {
     }
 }
