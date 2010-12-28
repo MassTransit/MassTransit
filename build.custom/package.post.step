@@ -32,7 +32,7 @@
   <property name="dirs.lib" value="${dirs.current}\${path.to.toplevel}\${folder.references}" overwrite="false" />
   <property name="dirs.rh" value="${dirs.lib}\RoundhousE" overwrite="false" />
   
-  <target name="go" depends="package_roundhouse, package_legacy, package_runtime" />
+  <target name="go" depends="package_roundhouse, package_legacy, package_runtime, package_containers, package_transports, package_systemview, the_cleaner" />
 
   <target name="package_roundhouse">
     <echo message="Packaging roundhouse files to ${dirs.drop}\${folder.deployment}."/>
@@ -82,13 +82,17 @@
 		<include name="NHibernate.Linq.dll" />
 		<include name="StructureMap.dll" />
 		<include name="Topshelf.dll" />
-
-		<!-- move? -->
+      </fileset>
+    </copy>
+    <move todir="${dirs.drop}\legacy">
+      <fileset basedir="${dirs.drop}\MassTransit">
+		<include name="AutoMapper.dll" />
+		<include name="MassTransit.LegacySupport.*" />
 		<include name="LegacyRuntime.exe" />
 		<include name="LegacyRuntime.exe.config" />
 		<include name="LegacyRuntime.pdb" />
       </fileset>
-    </copy>
+    </move>
   </target>
   
    <target name="package_runtime">
@@ -126,12 +130,106 @@
 		<include name="NHibernate.Linq.dll" />
 		<include name="StructureMap.dll" />
 		<include name="Topshelf.dll" />
+      </fileset>
+    </copy>
+	<move todir="${dirs.drop}\runtime">
+      <fileset basedir="${dirs.drop}\MassTransit">
 
-		<!-- move? -->
+		<include name="MassTransit.RuntimeServices.log4net.xml" />
 		<include name="MassTransit.RuntimeServices.exe" />
 		<include name="MassTransit.RuntimeServices.exe.config" />
 		<include name="MassTransit.RuntimeServices.pdb" />
       </fileset>
-    </copy>
+    </move>
+  </target>
+  
+  <target name="package_containers">
+    <echo message="Packaging Windsor Support to ${dirs.drop}\containers\windsor."/>
+    <move todir="${dirs.drop}\containers\windsor">
+      <fileset basedir="${dirs.drop}\MassTransit">
+		<include name="Castle.*" />
+		
+		<include name="MassTransit.WindsorIntegration.*" />
+      </fileset>
+    </move>
+	
+	<echo message="Packaging StructureMap Support to ${dirs.drop}\containers\structuremap."/>
+    <move todir="${dirs.drop}\containers\structuremap">
+      <fileset basedir="${dirs.drop}\MassTransit">
+		<include name="StructureMap.*" />
+		
+		<include name="MassTransit.StructureMapIntegration.*" />
+      </fileset>
+    </move>
+	
+	<echo message="Packaging Ninject Support to ${dirs.drop}\containers\ninject."/>
+    <move todir="${dirs.drop}\containers\ninject">
+      <fileset basedir="${dirs.drop}\MassTransit">
+		<include name="Ninject.*" />
+		
+		<include name="MassTransit.NinjectIntegration.*" />
+      </fileset>
+    </move>
+	
+	<echo message="Packaging Unity Support to ${dirs.drop}\containers\unity." />
+	<move todir="${dirs.drop}\containers.unity">
+		<fileset basedir="${dirs.drop}\MassTransit">
+			<include name="MassTransit.UnityIntegration.*" />
+		</fileset>
+	</move>
+  </target>
+  
+  <target name="package_systemview">
+  	<echo message="Packaging System View to ${dirs.drop}\systemview."/>
+    <move todir="${dirs.drop}\systemview">
+      <fileset basedir="${dirs.drop}\MassTransit">
+		<include name="MassTransit.SystemView*" />
+		<include name="WPFToolkit.*" />
+      </fileset>
+    </move>
+  </target>
+  
+  <target name="package_transports">
+  
+    <echo message="Packaging RabbitMQ Support to ${dirs.drop}\transports\rabbitmq."/>
+    <move todir="${dirs.drop}\transports\rabbitmq">
+      <fileset basedir="${dirs.drop}\MassTransit">
+		<include name="MassTransit.Transports.RabbitMq.*" />
+		
+		<include name="RabbitMQ.Client.*" />
+      </fileset>
+    </move>
+	
+	<echo message="Packaging MSMQ Support to ${dirs.drop}\transports\msmq."/>
+    <move todir="${dirs.drop}\transports\msmq">
+      <fileset basedir="${dirs.drop}\MassTransit">
+		
+		<include name="MassTransit.Transports.Msmq.*" />
+		<include name="install_msmq.bat" />
+      </fileset>
+    </move>
+	
+	<echo message="Packaging NMS Support to ${dirs.drop}\transports\nms."/>
+    <move todir="${dirs.drop}\transports\nms">
+      <fileset basedir="${dirs.drop}\MassTransit">
+		<include name="Ninject.*" />
+		
+		<include name="MassTransit.Transports.Nms.*" />
+      </fileset>
+    </move>
+  </target>
+  
+  <target name="the_cleaner">
+	<echo message="cleaning up the MassTransit directory" />
+	<delete>
+		<fileset basedir="${dirs.drop}\MassTransit">
+			<include name="Topshelf.*" />
+			<include name="*.sdf" />
+			<include name="activemq.castle.xml" />
+			<include name="loopback.castle.xml" />
+			<include name="subscriptions.castle.xml" />
+		</fileset>
+	</delete>
+	<delete dir="${dirs.drop}\MassTransit\Saga" />
   </target>
 </project>
