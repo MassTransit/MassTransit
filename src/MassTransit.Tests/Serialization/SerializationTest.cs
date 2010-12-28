@@ -18,14 +18,14 @@ namespace MassTransit.Tests.Serialization
 	using MassTransit.Serialization;
 	using NUnit.Framework;
 
-	public abstract class SerializationTest
+	public abstract class SerializationTest<TSerializer> where TSerializer : IMessageSerializer, new()
 	{
-		private XmlMessageSerializer _serializer;
+		private IMessageSerializer _serializer;
 
 		[TestFixtureSetUp]
 		public void Setup()
 		{
-			_serializer = new XmlMessageSerializer();
+			_serializer = new TSerializer();
 		}
 
 		protected T SerializeAndReturn<T>(T obj)

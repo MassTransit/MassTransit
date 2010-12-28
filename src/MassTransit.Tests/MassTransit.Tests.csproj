@@ -234,7 +234,6 @@
     <Compile Include="Saga\RegisterUser_Specs.cs" />
     <Compile Include="Saga\StateMachine\RegisterUserStateMachine.cs" />
     <Compile Include="Saga\StateMachine\SagaStateMachine_Specs.cs" />
-    <Compile Include="Serialization\MessageSerialization_Specs.cs" />
     <Compile Include="Services\Metadata\MessageMetadataExtraction_spec.cs" />
     <Compile Include="Specification.cs" />
     <Compile Include="Messages\ClientMessage.cs" />
