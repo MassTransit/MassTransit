@@ -1,5 +1,5 @@
-// Copyright 2007-2008 The Apache Software Foundation.
-//  
+// Copyright 2007-2010 The Apache Software Foundation.
+// 
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
 // License at 
@@ -12,53 +12,53 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Serialization
 {
-	using System.IO;
-	using System.Runtime.Serialization;
-	using Custom;
-	using Internal;
-	using log4net;
+    using System.IO;
+    using System.Runtime.Serialization;
+    using Custom;
+    using Internal;
+    using log4net;
 
-	public class CustomXmlMessageSerializer :
-		IMessageSerializer
-	{
-		private static readonly ILog _log = LogManager.GetLogger(typeof (CustomXmlMessageSerializer));
+    public class CustomXmlMessageSerializer :
+        IMessageSerializer
+    {
+        static readonly ILog _log = LogManager.GetLogger(typeof (CustomXmlMessageSerializer));
 
-		private static CustomXmlSerializer _serializer = new CustomXmlSerializer();
+        static readonly CustomXmlSerializer _serializer = new CustomXmlSerializer();
 
-		public CustomXmlMessageSerializer()
-		{
-			Namespace = "http://tempuri.org/";
-		}
+        public CustomXmlMessageSerializer()
+        {
+            Namespace = "http://tempuri.org/";
+        }
 
-		/// <summary>
-		/// The namespace to place in outgoing XML.
-		/// </summary>
-		public string Namespace { get; set; }
+        /// <summary>
+        ///   The namespace to place in outgoing XML.
+        /// </summary>
+        public string Namespace { get; set; }
 
-		public void Serialize<T>(Stream stream, T message)
-		{
-			var envelope = XmlMessageEnvelope.Create(message);
+        public void Serialize<T>(Stream stream, T message)
+        {
+            var envelope = XmlMessageEnvelope.Create(message);
 
-			_serializer.Serialize(stream, envelope);
-		}
+            _serializer.Serialize(stream, envelope);
+        }
 
-		public object Deserialize(Stream stream)
-		{
-			object message = _serializer.Deserialize(stream);
+        public object Deserialize(Stream stream)
+        {
+            object message = _serializer.Deserialize(stream);
 
-			if (message == null)
-				throw new SerializationException("Could not deserialize message.");
+            if (message == null)
+                throw new SerializationException("Could not deserialize message.");
 
-			if (message is XmlMessageEnvelope)
-			{
-				XmlMessageEnvelope envelope = message as XmlMessageEnvelope;
+            if (message is XmlMessageEnvelope)
+            {
+                XmlMessageEnvelope envelope = message as XmlMessageEnvelope;
 
-				InboundMessageHeaders.SetCurrent(envelope.GetMessageHeadersSetAction());
+                InboundMessageHeaders.SetCurrent(envelope.GetMessageHeadersSetAction());
 
-				return envelope.Message;
-			}
+                return envelope.Message;
+            }
 
-			return message;
-		}
-	}
+            return message;
+        }
+    }
 }

@@ -29,6 +29,7 @@ namespace MassTransit.Configuration
         //serialization. should it be a sub thingy?
         //this maynot be able to be here?
         void UseDotNetXmlSerilaizer();
+        void UseJsonSerializer();
         void UseXmlSerializer();
         void UseBinarySerializer();
         void UseCustomSerializer<TSerializer>() where TSerializer : IMessageSerializer;

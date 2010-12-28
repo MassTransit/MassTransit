@@ -60,6 +60,11 @@ namespace MassTransit.Configuration
             UseCustomSerializer<DotNotXmlMessageSerializer>();
         }
 
+        public void UseJsonSerializer()
+        {
+            UseCustomSerializer<JsonMessageSerializer>();
+        }
+
         public void UseXmlSerializer()
         {
             UseCustomSerializer<XmlMessageSerializer>();

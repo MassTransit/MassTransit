@@ -19,10 +19,10 @@ namespace MassTransit.Tests.Serialization
 	using NUnit.Framework;
 	using TextFixtures;
 
-	[TestFixture, Explicit]
-	public class When_sending_a_message_using_the_specified_serializer<TSerializer> :
+	[TestFixture]
+	public abstract class When_sending_a_message_using_the_specified_serializer<TSerializer> :
 		LoopbackLocalAndRemoteTestFixture
-		where TSerializer : IMessageSerializer
+		where TSerializer : IMessageSerializer, new()
 	{
 		protected override void AdditionalEndpointFactoryConfiguration(IEndpointFactoryConfigurator x)
 		{
@@ -145,21 +145,28 @@ namespace MassTransit.Tests.Serialization
 		}
 	}
 
-	[TestFixture]
+	[TestFixture][Explicit]
 	public class For_the_binary_message_serializer :
 		When_sending_a_message_using_the_specified_serializer<BinaryMessageSerializer>
 	{
 	}
 
-	[TestFixture]
+	[TestFixture][Explicit]
 	public class For_the_XML_message_serializer :
 		When_sending_a_message_using_the_specified_serializer<DotNotXmlMessageSerializer>
 	{
 	}
 
-	[TestFixture]
+	[TestFixture][Explicit]
 	public class For_the_custom_xml_message_serializer :
 		When_sending_a_message_using_the_specified_serializer<XmlMessageSerializer>
 	{
 	}	
+
+    [TestFixture][Explicit]
+    public class For_the_json_message_serializer :
+        When_sending_a_message_using_the_specified_serializer<JsonMessageSerializer>
+    {
+        
+    }
 }

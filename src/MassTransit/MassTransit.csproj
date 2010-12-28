@@ -64,6 +64,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\lib\Magnum\Magnum.dll</HintPath>
     </Reference>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\..\lib\Newtonsoft.Json\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.configuration" />
     <Reference Include="System.Core">
@@ -99,6 +102,9 @@
     <Compile Include="Parallel\Messages\SubTaskComplete.cs" />
     <Compile Include="Parallel\Messages\SubTaskWorkerAvailable.cs" />
     <Compile Include="Parallel\SubTaskWorker.cs" />
+    <Compile Include="Serialization\CustomXmlMessageSerializer.cs" />
+    <Compile Include="Serialization\JsonMessageEnvelope.cs" />
+    <Compile Include="Serialization\JsonMessageSerializer.cs" />
     <Compile Include="Services\HealthMonitoring\Messages\HealthInformation.cs" />
     <Compile Include="Internal\IdempotentHashtable.cs" />
     <Compile Include="Internal\IdempotentList.cs" />

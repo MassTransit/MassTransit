@@ -1,4 +1,4 @@
-// Copyright 2007-2010 The Apache Software Foundation.
+﻿// Copyright 2007-2010 The Apache Software Foundation.
 // 
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,34 +13,28 @@
 namespace MassTransit.Serialization
 {
     using System;
-    using System.Xml.Serialization;
     using Internal;
 
-    /// <summary>
-    ///   The envelope that is used to wrap messages serialized using Xml
-    /// </summary>
-    [XmlRoot(ElementName = "MessageEnvelope")]
-    public class XmlMessageEnvelope :
+    public class JsonMessageEnvelope :
         MessageEnvelopeBase
     {
-        protected XmlMessageEnvelope()
+        public JsonMessageEnvelope()
         {
         }
 
-        XmlMessageEnvelope(Type messageType, object message)
+        JsonMessageEnvelope(Type messageType, string message)
         {
             Message = message;
-
             MessageType = messageType.ToMessageName();
 
             this.CopyFrom(OutboundMessage.Headers);
         }
 
-        public object Message { get; set; }
+        public string Message { get; set; }
 
-        public static XmlMessageEnvelope Create<T>(T message)
+        public static JsonMessageEnvelope Create<T>(string message)
         {
-            return new XmlMessageEnvelope(typeof (T), message);
+            return new JsonMessageEnvelope(typeof (T), message);
         }
     }
 }
