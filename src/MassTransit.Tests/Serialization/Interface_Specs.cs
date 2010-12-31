@@ -25,7 +25,7 @@ namespace MassTransit.Tests.Serialization
 
 	
 	public abstract class Deserializing_an_interface<TSerializer> :
-	SerializationSpecificationBase<TSerializer> where TSerializer : IMessageSerializer, new()
+	    SerializationSpecificationBase<TSerializer> where TSerializer : IMessageSerializer, new()
 	{
 		[Test]
 		public void Should_create_a_proxy_for_the_interface()
