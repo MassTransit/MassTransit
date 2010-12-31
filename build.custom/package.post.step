@@ -32,7 +32,7 @@
   <property name="dirs.lib" value="${dirs.current}\${path.to.toplevel}\${folder.references}" overwrite="false" />
   <property name="dirs.rh" value="${dirs.lib}\RoundhousE" overwrite="false" />
   
-  <target name="go" depends="package_roundhouse, package_legacy, package_runtime, package_containers, package_transports, package_systemview, the_cleaner" />
+  <target name="go" depends="package_roundhouse, package_legacy, package_runtime, package_containers, package_viz, package_nh, package_transports, package_systemview, the_cleaner" />
 
   <target name="package_roundhouse">
     <echo message="Packaging roundhouse files to ${dirs.drop}\${folder.deployment}."/>
@@ -68,9 +68,6 @@
 		<include name="MassTransit.dll" />
 		<include name="MassTransit.Infrastructure.dll" />
 		<include name="MassTransit.Infrastructure.pdb" />
-		<include name="MassTransit.LegacySupport.dll" />
-		<include name="MassTransit.LegacySupport.log4net.xml" />
-		<include name="MassTransit.LegacySupport.pdb" />
 		<include name="MassTransit.StructureMapIntegration.XML" />
 		<include name="MassTransit.StructureMapIntegration.dll" />
 		<include name="MassTransit.StructureMapIntegration.pdb" />
@@ -86,6 +83,9 @@
     </copy>
     <move todir="${dirs.drop}\legacy">
       <fileset basedir="${dirs.drop}\MassTransit">
+		<include name="MassTransit.LegacySupport.dll" />
+		<include name="MassTransit.LegacySupport.log4net.xml" />
+		<include name="MassTransit.LegacySupport.pdb" />
 		<include name="AutoMapper.dll" />
 		<include name="MassTransit.LegacySupport.*" />
 		<include name="LegacyRuntime.exe" />
@@ -172,7 +172,7 @@
     </move>
 	
 	<echo message="Packaging Unity Support to ${dirs.drop}\containers\unity." />
-	<move todir="${dirs.drop}\containers.unity">
+	<move todir="${dirs.drop}\containers\unity">
 		<fileset basedir="${dirs.drop}\MassTransit">
 			<include name="MassTransit.UnityIntegration.*" />
 		</fileset>
@@ -217,6 +217,28 @@
 		<include name="MassTransit.Transports.Nms.*" />
       </fileset>
     </move>
+  </target>
+  <target name="package_nh">
+	<echo message="Packaging NHibernate to ${dirs.drop}\ForNHibernate" />
+	<move todir="${dirs.drop}\ForNHibernate">
+		<fileset basedir="${dirs.drop}\MassTransit">
+			<include name="NHibernate.*" />
+			<include name="FluentNHibernate.*" />
+			<include name="Iesi.Collections.*" />
+			<include name="Antlr3.Runtime.*" />
+			<include name="Magnum.ForNHibernate.*" />
+			<include name="MassTransit.Infrastructure.*" />
+		</fileset>
+	</move>
+  </target>
+  
+  <target name="package_viz">
+	<echo message="Packaging the visualizers"/>
+	<move todir="${dirs.drop}\Visualizers">
+		<fileset basedir="${dirs.drop}\MassTransit">
+			<include name="MassTransit.Visualizers.*" />
+		</fileset>
+	</move>
   </target>
   
   <target name="the_cleaner">
