@@ -30,7 +30,7 @@ namespace MassTransit.Configuration
 		private Uri _receiveFromUri;
 	    private Action _beforeConsume;
 	    private Action _afterConsume;
-        IEndpointFactory _endpointFactory;
+        IEndpointResolver _endpointResolver;
 
         //CHANGED TO SUPPORT THE MOVE TO THE NEXT CONFIG MODEL
 	    internal ServiceBusConfigurator()
@@ -168,19 +168,19 @@ namespace MassTransit.Configuration
 		{
 			if (ErrorUri != null)
 			{
-				bus.PoisonEndpoint = bus.EndpointFactory.GetEndpoint(ErrorUri);
+				bus.PoisonEndpoint = bus.EndpointResolver.GetEndpoint(ErrorUri);
 			}
 		}
 
         //TO SUPPORT THE NEW MODEL
         internal ServiceBus CreateServiceBus()
         {
-            if (_endpointFactory == null)
+            if (_endpointResolver == null)
                 throw new ConfigurationException("You must call 'SetEndpointFactory(IEndpointFactory)' on the ServiceBusConfiguration class");
 
-            var endpoint = _endpointFactory.GetEndpoint(_receiveFromUri);
+            var endpoint = _endpointResolver.GetEndpoint(_receiveFromUri);
 
-            var serviceBus = new ServiceBus(endpoint, ObjectBuilder, _endpointFactory);
+            var serviceBus = new ServiceBus(endpoint, ObjectBuilder, _endpointResolver);
             
             return serviceBus;
         }
@@ -218,9 +218,9 @@ namespace MassTransit.Configuration
 			action(_defaults);
 		}
 
-        public void SetEndpointFactory(IEndpointFactory epf)
+        public void SetEndpointFactory(IEndpointResolver epf)
         {
-            _endpointFactory = epf;
+            _endpointResolver = epf;
         }
 	}
 

@@ -27,23 +27,23 @@ namespace MassTransit.Tests
 	public class When_a_message_fault_occurs :
 		Specification
 	{
-		private IEndpointFactory _endpointFactory;
+		private IEndpointResolver _endpointResolver;
 		private IServiceBus _bus;
 		private IObjectBuilder _builder;
 
 		protected override void Before_each()
 		{
 			_builder = MockRepository.GenerateMock<IObjectBuilder>();
-			_endpointFactory = EndpointFactoryConfigurator.New(x =>
+			_endpointResolver = EndpointFactoryConfigurator.New(x =>
 				{
 					x.SetObjectBuilder(_builder);
 					x.SetDefaultSerializer<XmlMessageSerializer>();
 					x.RegisterTransport<LoopbackEndpoint>();
 				});
-			_builder.Stub(x => x.GetInstance<IEndpointFactory>()).Return(_endpointFactory);
+			_builder.Stub(x => x.GetInstance<IEndpointResolver>()).Return(_endpointResolver);
 			_bus = ServiceBusConfigurator.New(x =>
 				{
-                    x.SetEndpointFactory(_endpointFactory);
+                    x.SetEndpointFactory(_endpointResolver);
 					x.SetObjectBuilder(_builder);
 					x.ReceiveFrom("loopback://localhost/servicebus");
 				});
@@ -52,7 +52,7 @@ namespace MassTransit.Tests
 		protected override void After_each()
 		{
 			_bus.Dispose();
-			_endpointFactory.Dispose();
+			_endpointResolver.Dispose();
 		}
 
 		public class SmartConsumer :
@@ -123,7 +123,7 @@ namespace MassTransit.Tests
 		Specification
 	{
 
-		private IEndpointFactory _resolver;
+		private IEndpointResolver _resolver;
 		private IEndpoint _endpoint;
 		private ServiceBus _bus;
 		private IObjectBuilder _builder;

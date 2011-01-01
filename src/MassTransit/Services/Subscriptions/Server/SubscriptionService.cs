@@ -29,7 +29,7 @@ namespace MassTransit.Services.Subscriptions.Server
 		IDisposable
 	{
 		private static readonly ILog _log = LogManager.GetLogger(typeof (SubscriptionService));
-		private readonly IEndpointFactory _endpointFactory;
+		private readonly IEndpointResolver _endpointResolver;
 		private readonly ISagaRepository<SubscriptionClientSaga> _subscriptionClientSagas;
 		private readonly ISagaRepository<SubscriptionSaga> _subscriptionSagas;
 		private IServiceBus _bus;
@@ -39,13 +39,13 @@ namespace MassTransit.Services.Subscriptions.Server
 
 		public SubscriptionService(IServiceBus bus,
 		                           ISubscriptionRepository subscriptionRepository,
-		                           IEndpointFactory endpointFactory,
+		                           IEndpointResolver endpointResolver,
 		                           ISagaRepository<SubscriptionSaga> subscriptionSagas,
 		                           ISagaRepository<SubscriptionClientSaga> subscriptionClientSagas)
 		{
 			_bus = bus;
 			_repository = subscriptionRepository;
-			_endpointFactory = endpointFactory;
+			_endpointResolver = endpointResolver;
 			_subscriptionSagas = subscriptionSagas;
 			_subscriptionClientSagas = subscriptionClientSagas;
 		}
@@ -131,7 +131,7 @@ namespace MassTransit.Services.Subscriptions.Server
 			_subscriptionClientSagas.Where(x => x.CurrentState == SubscriptionClientSaga.Active)
 				.Each(client =>
 					{
-						IEndpoint endpoint = _endpointFactory.GetEndpoint(client.ControlUri);
+						IEndpoint endpoint = _endpointResolver.GetEndpoint(client.ControlUri);
 
 						endpoint.Send(message, x => x.SetSourceAddress(_bus.Endpoint.Uri));
 					});
@@ -144,7 +144,7 @@ namespace MassTransit.Services.Subscriptions.Server
 
 			var response = new SubscriptionRefresh(subscriptions);
 
-			IEndpoint endpoint = _endpointFactory.GetEndpoint(uri);
+			IEndpoint endpoint = _endpointResolver.GetEndpoint(uri);
 
 			endpoint.Send(response, x => x.SetSourceAddress(_bus.Endpoint.Uri));
 		}

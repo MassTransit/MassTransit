@@ -8,7 +8,7 @@ namespace MassTransit.Tests.Transports
     public abstract class TransactionalEndpointContract<TEndpoint> where TEndpoint : IEndpoint
     {
         private IEndpoint _ep;
-        private IEndpointFactory _endpointFactory;
+        private IEndpointResolver _endpointResolver;
         public IObjectBuilder ObjectBuilder { get; set; }
         public Uri Address { get; set; }
         public Action<Uri> VerifyMessageIsInQueue { get; set; }
@@ -17,12 +17,12 @@ namespace MassTransit.Tests.Transports
         [SetUp]
         public void SetUp()
         {
-            _endpointFactory = EndpointFactoryConfigurator.New(c =>
+            _endpointResolver = EndpointFactoryConfigurator.New(c =>
                                                                    {
                                                                        c.RegisterTransport<TEndpoint>();
                                                                        c.SetObjectBuilder(ObjectBuilder);
                                                                    });
-            _ep = _endpointFactory.GetEndpoint(Address);
+            _ep = _endpointResolver.GetEndpoint(Address);
         }
 
         [TearDown]

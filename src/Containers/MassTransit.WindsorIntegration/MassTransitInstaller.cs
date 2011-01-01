@@ -47,7 +47,7 @@ namespace MassTransit.WindsorIntegration
             {
 
                 //this is because the init hasn't completed yet
-                container.Register(Component.For<IEndpointFactory>()
+                container.Register(Component.For<IEndpointResolver>()
                                        .Named("endpointFactory")
                                        .Instance(ep)
                                        .LifeStyle.Singleton);

@@ -40,8 +40,8 @@ namespace MassTransit.Transports.Msmq.Tests.TestFixtures
                     x.PurgeOnStartup = true;
                 });
 
-            Endpoint = EndpointFactory.GetEndpoint(EndpointAddress.Uri);
-            ErrorEndpoint = EndpointFactory.GetEndpoint(ErrorEndpointAddress.Uri);
+            Endpoint = EndpointResolver.GetEndpoint(EndpointAddress.Uri);
+            ErrorEndpoint = EndpointResolver.GetEndpoint(ErrorEndpointAddress.Uri);
         }
 
         protected override void TeardownContext()

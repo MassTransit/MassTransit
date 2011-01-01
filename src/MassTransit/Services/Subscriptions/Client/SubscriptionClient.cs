@@ -38,7 +38,7 @@ namespace MassTransit.Services.Subscriptions.Client
 		private static readonly ILog _log = LogManager.GetLogger(typeof (SubscriptionClient));
 		private static readonly ClientSubscriptionInfoMapper _mapper = new ClientSubscriptionInfoMapper();
 		private readonly RegistrationList<IEndpointSubscriptionEvent> _clients = new RegistrationList<IEndpointSubscriptionEvent>();
-		private readonly IEndpointFactory _endpointFactory;
+		private readonly IEndpointResolver _endpointResolver;
 		private readonly EndpointList _localEndpoints = new EndpointList();
 		private readonly ManualResetEvent _ready = new ManualResetEvent(false);
 		private readonly SequenceNumberGenerator _sequence = new SequenceNumberGenerator();
@@ -65,9 +65,9 @@ namespace MassTransit.Services.Subscriptions.Client
 				};
 		}
 
-		public SubscriptionClient(IEndpointFactory endpointFactory)
+		public SubscriptionClient(IEndpointResolver endpointResolver)
 		{
-			_endpointFactory = endpointFactory;
+			_endpointResolver = endpointResolver;
 
 			StartTimeout = 30.Seconds();
 		}
@@ -112,7 +112,7 @@ namespace MassTransit.Services.Subscriptions.Client
 			if (_log.IsDebugEnabled)
 				_log.DebugFormat("Getting endpoint for subscription service at {0}", SubscriptionServiceUri);
 
-			_subscriptionServiceEndpoint = _endpointFactory.GetEndpoint(SubscriptionServiceUri);
+			_subscriptionServiceEndpoint = _endpointResolver.GetEndpoint(SubscriptionServiceUri);
 
 			VerifyClientAndServiceNotOnSameEndpoint();
 
@@ -202,7 +202,7 @@ namespace MassTransit.Services.Subscriptions.Client
 			_publisher = new SubscriptionPublisher(this);
 			_publisher.Start(bus);
 
-			_consumer = new SubscriptionConsumer(this, _endpointFactory);
+			_consumer = new SubscriptionConsumer(this, _endpointResolver);
 			_consumer.Start(bus);
 		}
 

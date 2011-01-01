@@ -70,16 +70,16 @@ namespace MassTransit
 		/// </summary>
 		public ServiceBus(IEndpoint endpointToListenOn,
 		                  IObjectBuilder objectBuilder,
-		                  IEndpointFactory endpointFactory)
+		                  IEndpointResolver endpointResolver)
 		{
 			ReceiveTimeout = TimeSpan.FromSeconds(3);
 			Guard.AgainstNull(endpointToListenOn, "endpointToListenOn", "This parameter cannot be null");
 			Guard.AgainstNull(objectBuilder, "objectBuilder", "This parameter cannot be null");
-			Guard.AgainstNull(endpointFactory, "endpointFactory", "This parameter cannot be null");
+			Guard.AgainstNull(endpointResolver, "endpointFactory", "This parameter cannot be null");
 
 			Endpoint = endpointToListenOn;
 			ObjectBuilder = objectBuilder;
-			EndpointFactory = endpointFactory;
+			EndpointResolver = endpointResolver;
 
 			_eventAggregator = PipeSegment.New();
 			_eventAggregatorScope = _eventAggregator.NewSubscriptionScope();
@@ -100,7 +100,7 @@ namespace MassTransit
 
 		public static IServiceBus Null { get; private set; }
 
-		public IEndpointFactory EndpointFactory { get; private set; }
+		public IEndpointResolver EndpointResolver { get; private set; }
 
 		public IObjectBuilder ObjectBuilder { get; private set; }
 

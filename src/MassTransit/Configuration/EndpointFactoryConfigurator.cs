@@ -124,14 +124,14 @@ namespace MassTransit.Configuration
 		}
 
         //CHANGED TO SUPPORT THE MOVE TO THE NEW MODEL
-		internal IEndpointFactory Create()
+		internal IEndpointResolver Create()
 		{
-			IEndpointFactory endpointFactory = new EndpointFactory(_defaultSerializer, _transportTypes.ReadLock(x => x), _endpointConfigurators);
+			IEndpointResolver endpointResolver = new EndpointResolver(_defaultSerializer, _transportTypes.ReadLock(x => x), _endpointConfigurators);
 
-			return endpointFactory;
+			return endpointResolver;
 		}
 
-		public static IEndpointFactory New(Action<IEndpointFactoryConfigurator> action)
+		public static IEndpointResolver New(Action<IEndpointFactoryConfigurator> action)
 		{
 			using (var configurator = new EndpointFactoryConfigurator())
 			{

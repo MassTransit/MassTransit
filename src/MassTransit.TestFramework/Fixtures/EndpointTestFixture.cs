@@ -43,8 +43,8 @@ namespace MassTransit.TestFramework.Fixtures
 		{
 			TeardownBuses();
 
-			EndpointFactory.Dispose();
-			EndpointFactory = null;
+			EndpointResolver.Dispose();
+			EndpointResolver = null;
 		}
 
 		protected EndpointTestFixture()
@@ -64,7 +64,7 @@ namespace MassTransit.TestFramework.Fixtures
 
 		protected virtual void SetupEndpointFactory()
 		{
-			EndpointFactory = EndpointFactoryConfigurator.New(x =>
+			EndpointResolver = EndpointFactoryConfigurator.New(x =>
 				{
 					x.SetObjectBuilder(ObjectBuilder);
 					x.RegisterTransport<TEndpoint>();
@@ -73,7 +73,7 @@ namespace MassTransit.TestFramework.Fixtures
 					ConfigureEndpointFactory(x);
 				});
 
-			ObjectBuilder.Add(EndpointFactory);
+			ObjectBuilder.Add(EndpointResolver);
 		}
 
 		protected virtual void ConfigureEndpointFactory(IEndpointFactoryConfigurator x)
@@ -84,7 +84,7 @@ namespace MassTransit.TestFramework.Fixtures
 		{
 			ServiceBusConfigurator.Defaults(x =>
 				{
-                    x.SetEndpointFactory(EndpointFactory);
+                    x.SetEndpointFactory(EndpointResolver);
 					x.SetObjectBuilder(ObjectBuilder);
 					x.SetReceiveTimeout(50.Milliseconds());
 					x.SetConcurrentConsumerLimit(Environment.ProcessorCount*2);
@@ -99,7 +99,7 @@ namespace MassTransit.TestFramework.Fixtures
 
 		protected IList<IServiceBus> Buses { get; private set; }
 
-		protected IEndpointFactory EndpointFactory { get; private set; }
+		protected IEndpointResolver EndpointResolver { get; private set; }
 
 		protected IObjectBuilder ObjectBuilder { get; private set; }
 

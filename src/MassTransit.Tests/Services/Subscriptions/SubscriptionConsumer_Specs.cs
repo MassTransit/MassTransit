@@ -29,7 +29,7 @@ namespace MassTransit.Tests.Services.Subscriptions
 			_builder = MockRepository.GenerateMock<IObjectBuilder>();
 
 			_service = MockRepository.GenerateMock<ISubscriptionService>();
-			_endpointFactory = MockRepository.GenerateMock<IEndpointFactory>();
+			_endpointResolver = MockRepository.GenerateMock<IEndpointResolver>();
 			
 			_endpoint = MockRepository.GenerateMock<IEndpoint>();
 			_endpoint.Stub(x => x.Uri).Return(_testUri);
@@ -40,11 +40,11 @@ namespace MassTransit.Tests.Services.Subscriptions
 			_pipeline = MessagePipelineConfigurator.CreateDefault(_builder, _bus);
 			_bus.Stub(x => x.OutboundPipeline).Return(_pipeline);
 
-			_consumer = new SubscriptionConsumer(_service, _endpointFactory);
+			_consumer = new SubscriptionConsumer(_service, _endpointResolver);
 			_consumer.Start(_bus);
 
 			_remoteEndpoint = MockRepository.GenerateMock<IEndpoint>();
-			_endpointFactory.Stub(x => x.GetEndpoint(_remoteUri)).Return(_remoteEndpoint);
+			_endpointResolver.Stub(x => x.GetEndpoint(_remoteUri)).Return(_remoteEndpoint);
 
 			_service.AssertWasCalled(x => x.Register(_consumer));
 		}
@@ -53,12 +53,12 @@ namespace MassTransit.Tests.Services.Subscriptions
 		public void Teardown()
 		{
 			_consumer = null;
-			_endpointFactory = null;
+			_endpointResolver = null;
 			_service = null;
 		}
 
 		private ISubscriptionService _service;
-		private IEndpointFactory _endpointFactory;
+		private IEndpointResolver _endpointResolver;
 		private SubscriptionConsumer _consumer;
 		private readonly Uri _testUri = new Uri("loopback://localhost/queue");
 		private IServiceBus _bus;

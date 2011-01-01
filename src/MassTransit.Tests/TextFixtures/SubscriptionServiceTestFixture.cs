@@ -103,7 +103,7 @@ namespace MassTransit.Tests.TextFixtures
 
 		protected ServiceInstance AddInstance(string instanceName, string queueName, Action<IObjectBuilder> configureBuilder, Action<IServiceBusConfigurator> configureBus)
 		{
-			var instance = new ServiceInstance(queueName, EndpointFactory, SubscriptionServiceUri, configureBuilder, configureBus);
+			var instance = new ServiceInstance(queueName, EndpointResolver, SubscriptionServiceUri, configureBuilder, configureBus);
 
 			Instances.Add(instanceName, instance);
 
@@ -126,13 +126,13 @@ namespace MassTransit.Tests.TextFixtures
 			
 			_subscriptionSagaRepository = SetupSagaRepository<SubscriptionSaga>(builder);
 			
-			SubscriptionService = new SubscriptionService(SubscriptionBus, SubscriptionRepository, EndpointFactory, _subscriptionSagaRepository, _subscriptionClientSagaRepository);
+			SubscriptionService = new SubscriptionService(SubscriptionBus, SubscriptionRepository, EndpointResolver, _subscriptionSagaRepository, _subscriptionClientSagaRepository);
 
 			SubscriptionService.Start();
 
 			builder.Stub(x => x.GetInstance<SubscriptionClient>())
 				.Return(null)
-				.WhenCalled(invocation => { invocation.ReturnValue = new SubscriptionClient(EndpointFactory); });
+				.WhenCalled(invocation => { invocation.ReturnValue = new SubscriptionClient(EndpointResolver); });
 		}
 
 

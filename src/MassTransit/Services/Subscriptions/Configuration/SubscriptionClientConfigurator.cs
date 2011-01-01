@@ -51,7 +51,7 @@ namespace MassTransit.Services.Subscriptions.Configuration
 
 		public IBusService Create(IServiceBus bus, IObjectBuilder builder)
 		{
-			var endpointFactory = builder.GetInstance<IEndpointFactory>();
+			var endpointFactory = builder.GetInstance<IEndpointResolver>();
 
 			var service = new SubscriptionClient(endpointFactory)
 				{
