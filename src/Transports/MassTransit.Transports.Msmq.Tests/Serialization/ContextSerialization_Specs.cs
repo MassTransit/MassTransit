@@ -25,7 +25,7 @@ namespace MassTransit.Transports.Msmq.Tests.Serialization
 		MsmqEndpointTestFixture
 		where TSerializer : IMessageSerializer
 	{
-		protected override void AdditionalEndpointFactoryConfiguration(IEndpointFactoryConfigurator x)
+		protected override void AdditionalEndpointFactoryConfiguration(IEndpointResolverConfigurator x)
 		{
 			x.SetDefaultSerializer<TSerializer>();
 		}

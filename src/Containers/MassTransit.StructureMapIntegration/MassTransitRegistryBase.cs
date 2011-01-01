@@ -46,7 +46,7 @@ namespace MassTransit.StructureMapIntegration
         /// Scan the executing assemblies current directory for assemblies containing MassTransit transports.
         /// </summary>
         /// <param name="configurationAction"></param>
-        public MassTransitRegistryBase(Action<IEndpointFactoryConfigurator> configurationAction)
+        public MassTransitRegistryBase(Action<IEndpointResolverConfigurator> configurationAction)
             : this(configurationAction, localDirAssemblyScanner =>
                 {
                     string assemblyPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
@@ -64,7 +64,7 @@ namespace MassTransit.StructureMapIntegration
         /// </summary>
         /// <param name="configurationAction"></param>
         /// <param name="transportAssemblyScanner"></param>
-        public MassTransitRegistryBase(Action<IEndpointFactoryConfigurator> configurationAction, Action<IAssemblyScanner> transportAssemblyScanner)
+        public MassTransitRegistryBase(Action<IEndpointResolverConfigurator> configurationAction, Action<IAssemblyScanner> transportAssemblyScanner)
         {
             RegisterBusDependencies();
 
@@ -157,13 +157,13 @@ namespace MassTransit.StructureMapIntegration
             // OrchestrateSagaStateMachineSink<,>)
         }
 
-        protected void RegisterEndpointFactory(Action<IEndpointFactoryConfigurator> configAction)
+        protected void RegisterEndpointFactory(Action<IEndpointResolverConfigurator> configAction)
         {
             For<IEndpointResolver>()
                 .Singleton()
                 .Use(context =>
                     {
-                        return EndpointFactoryConfigurator.New(x =>
+                        return EndpointResolverConfigurator.New(x =>
                             {
                                 x.SetObjectBuilder(context.GetInstance<IObjectBuilder>());
                                 configAction(x);

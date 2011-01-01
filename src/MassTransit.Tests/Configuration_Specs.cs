@@ -27,7 +27,7 @@ namespace MassTransit.Tests
 		{
 			var objectBuilder = MockRepository.GenerateMock<IObjectBuilder>();
 
-			var endpointFactory = EndpointFactoryConfigurator.New(x =>
+			var endpointFactory = EndpointResolverConfigurator.New(x =>
 				{
 					x.SetObjectBuilder(objectBuilder);
 					x.RegisterTransport<LoopbackEndpoint>();

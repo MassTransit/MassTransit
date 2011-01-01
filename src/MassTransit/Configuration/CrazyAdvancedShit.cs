@@ -17,10 +17,10 @@ namespace MassTransit.Configuration
     public class CrazyAdvancedShit :
         AdvancedConfiguration
     {
-        readonly EndpointFactoryConfigurator _epc;
+        readonly EndpointResolverConfigurator _epc;
         readonly ServiceBusConfigurator _sbc;
 
-        public CrazyAdvancedShit(EndpointFactoryConfigurator epc, ServiceBusConfigurator sbc)
+        public CrazyAdvancedShit(EndpointResolverConfigurator epc, ServiceBusConfigurator sbc)
         {
             _epc = epc;
             _sbc = sbc;

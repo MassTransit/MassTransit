@@ -19,12 +19,12 @@ namespace MassTransit.Configuration
     public class MassTransitConfiguration //what to name?
         : BusConfiguration
     {
-        readonly EndpointFactoryConfigurator _epc;
+        readonly EndpointResolverConfigurator _epc;
         readonly ServiceBusConfigurator _sbc;
         readonly IEndpointResolver _resolver;
         public MassTransitConfiguration(IObjectBuilder builder, IEndpointResolver resolver)
         {
-            _epc = new EndpointFactoryConfigurator();
+            _epc = new EndpointResolverConfigurator();
             _sbc = new ServiceBusConfigurator();
 
             _epc.SetObjectBuilder(builder);

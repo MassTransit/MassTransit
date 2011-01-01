@@ -18,7 +18,7 @@ namespace MassTransit.Configuration
 	/// <summary>
 	/// Allows for the configuration of the EndpointFactory through the use of an EndpointFactoryConfigurator
 	/// </summary>
-	public interface IEndpointFactoryConfigurator
+	public interface IEndpointResolverConfigurator
 	{
 		/// <summary>
 		/// Sets the object builder to use when creating objects. Also passed to endpoints when they are created.
