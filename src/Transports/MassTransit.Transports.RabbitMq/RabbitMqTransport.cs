@@ -26,10 +26,12 @@ namespace MassTransit.Transports.RabbitMq
         readonly IConnection _connection;
 
         static string _directSendMessageExchange = "";
+        RabbitMqAddress _address;
 
         public RabbitMqTransport(IEndpointAddress address, IConnection connection) : base(address)
         {
             _connection = connection;
+            _address = new RabbitMqAddress(address.Uri);
         }
 
         public override void Receive(Func<Stream, Action<Stream>> receiver, TimeSpan timeout)
@@ -38,8 +40,9 @@ namespace MassTransit.Transports.RabbitMq
 
             using(var channel = _connection.CreateModel())
             {
-                var result = channel.BasicGet(Address.Uri.PathAndQuery.Replace("/",""), true);
-
+                channel.QueueDeclare(_address.Queue, true);
+                var result = channel.BasicGet(_address.Queue, true);
+                
                 using(var body = new MemoryStream(result.Body))
                 {
                     Action<Stream> receive = receiver(body);
@@ -73,8 +76,8 @@ namespace MassTransit.Transports.RabbitMq
                 using (var bodyStream = new MemoryStream())
                 {
                     sender(bodyStream);
-
-                    channel.BasicPublish(_directSendMessageExchange, Address.Path, properties, bodyStream.ToArray());
+                    channel.ExchangeDeclare(_address.Queue, "fanout", true);
+                    channel.BasicPublish(_address.Queue, "msg", properties, bodyStream.ToArray());
 
                 }
                 channel.Close(200, "ok");

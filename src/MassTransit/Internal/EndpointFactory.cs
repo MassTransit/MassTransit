@@ -26,14 +26,12 @@ namespace MassTransit.Internal
 	{
 		private static readonly IEndpoint _null = new NullEndpoint();
 		private readonly Type _defaultSerializer;
-		private readonly IObjectBuilder _objectBuilder;
 		private volatile bool _disposed;
 		private ReaderWriterLockedDictionary<Uri, Action<IEndpointConfigurator>> _endpointConfigurators;
 		private ReaderWriterLockedDictionary<Uri, IEndpoint> _endpoints;
 		private ReaderWriterLockedDictionary<Type, Func<Uri, Action<IEndpointConfigurator>, IEndpoint>> _transportConfigurators;
 
-		public EndpointFactory(IObjectBuilder objectBuilder,
-		                       Type defaultSerializer,
+		public EndpointFactory(Type defaultSerializer,
 		                       IEnumerable<Type> transportTypes,
 		                       IEnumerable<KeyValuePair<Uri, Action<IEndpointConfigurator>>> endpointConfigurators)
 		{
@@ -42,7 +40,6 @@ namespace MassTransit.Internal
 			_endpoints = new ReaderWriterLockedDictionary<Uri, IEndpoint>();
 
 			_defaultSerializer = defaultSerializer;
-			_objectBuilder = objectBuilder;
 
 			ConnectTransportConfigurators(transportTypes);
 		}

@@ -126,7 +126,7 @@ namespace MassTransit.Configuration
         //CHANGED TO SUPPORT THE MOVE TO THE NEW MODEL
 		internal IEndpointFactory Create()
 		{
-			IEndpointFactory endpointFactory = new EndpointFactory(_objectBuilder, _defaultSerializer, _transportTypes.ReadLock(x => x), _endpointConfigurators);
+			IEndpointFactory endpointFactory = new EndpointFactory(_defaultSerializer, _transportTypes.ReadLock(x => x), _endpointConfigurators);
 
 			return endpointFactory;
 		}
