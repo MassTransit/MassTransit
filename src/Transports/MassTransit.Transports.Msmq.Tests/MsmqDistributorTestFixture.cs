@@ -31,7 +31,7 @@ namespace MassTransit.Transports.Msmq.Tests
 			base.EstablishContext();
 		}
 
-		protected override void AdditionalEndpointFactoryConfiguration(IEndpointFactoryConfigurator x)
+		protected override void AdditionalEndpointFactoryConfiguration(IEndpointResolverConfigurator x)
 		{
 			base.AdditionalEndpointFactoryConfiguration(x);
 

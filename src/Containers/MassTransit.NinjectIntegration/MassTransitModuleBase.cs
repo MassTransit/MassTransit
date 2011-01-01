@@ -37,7 +37,7 @@ namespace MassTransit.NinjectIntegration
             
         }
 
-        public MassTransitModuleBase(Action<IEndpointFactoryConfigurator> configurationAction)
+        public MassTransitModuleBase(Action<IEndpointResolverConfigurator> configurationAction)
         {
             // Save action to Load() if we need it? We can't do stuff in the constructor
             //structure map scanner stuff?
@@ -116,12 +116,12 @@ namespace MassTransit.NinjectIntegration
             // OrchestrateSagaStateMachineSink<,>)
         }
 
-        protected void RegisterEndpointFactory(Action<IEndpointFactoryConfigurator> configAction)
+        protected void RegisterEndpointFactory(Action<IEndpointResolverConfigurator> configAction)
         {
             Bind<IEndpointResolver>()
                 .ToMethod(cxt =>
                 {
-                    return EndpointFactoryConfigurator.New(x =>
+                    return EndpointResolverConfigurator.New(x =>
                     {
                         x.SetObjectBuilder(cxt.Kernel.Get<IObjectBuilder>());
                         configAction(x);

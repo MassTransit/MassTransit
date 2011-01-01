@@ -24,7 +24,7 @@ namespace MassTransit.Tests.Serialization
 		LoopbackLocalAndRemoteTestFixture
 		where TSerializer : IMessageSerializer, new()
 	{
-		protected override void AdditionalEndpointFactoryConfiguration(IEndpointFactoryConfigurator x)
+		protected override void AdditionalEndpointFactoryConfiguration(IEndpointResolverConfigurator x)
 		{
 			x.SetDefaultSerializer<TSerializer>();
 		}

@@ -28,7 +28,7 @@ namespace MassTransit
 
             _instance = null;
 
-            _resolver = EndpointFactoryConfigurator.New(e =>
+            _resolver = EndpointResolverConfigurator.New(e =>
             {
                 foreach (var transport in transports)
                     e.RegisterTransport(transport);

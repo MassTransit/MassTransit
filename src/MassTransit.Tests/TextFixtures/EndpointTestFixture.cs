@@ -32,7 +32,7 @@ namespace MassTransit.Tests.TextFixtures
 			XmlMessageSerializer serializer = new XmlMessageSerializer();
 			ObjectBuilder.Stub(x => x.GetInstance<XmlMessageSerializer>()).Return(serializer);
 
-			EndpointResolver = EndpointFactoryConfigurator.New(x =>
+			EndpointResolver = EndpointResolverConfigurator.New(x =>
 				{
 					x.SetObjectBuilder(ObjectBuilder);
 					x.RegisterTransport<TTransport>();
@@ -62,7 +62,7 @@ namespace MassTransit.Tests.TextFixtures
 			EndpointResolver = null;
 		}
 
-		protected virtual void AdditionalEndpointFactoryConfiguration(IEndpointFactoryConfigurator x)
+		protected virtual void AdditionalEndpointFactoryConfiguration(IEndpointResolverConfigurator x)
 		{
 		}
 

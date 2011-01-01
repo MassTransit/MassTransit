@@ -224,7 +224,7 @@
     <Compile Include="Internal\IInboundMessageHeaders.cs" />
     <Compile Include="Internal\IMessageHeaders.cs" />
     <Compile Include="Internal\InboundMessage.cs" />
-    <Compile Include="Configuration\EndpointFactoryConfigurator.cs" />
+    <Compile Include="Configuration\EndpointResolverConfigurator.cs" />
     <Compile Include="Internal\IBusService.cs" />
     <Compile Include="Configuration\IEndpointConfigurator.cs" />
     <Compile Include="Internal\IOutboundMessage.cs" />
@@ -391,7 +391,7 @@
     <Compile Include="Internal\MessageHeadersBase.cs" />
     <Compile Include="Internal\OutboundMessage.cs" />
     <Compile Include="IEndpointResolver.cs" />
-    <Compile Include="Configuration\IEndpointFactoryConfigurator.cs" />
+    <Compile Include="Configuration\IEndpointResolverConfigurator.cs" />
     <Compile Include="Configuration\IServiceBusConfigurator.cs" />
     <Compile Include="Configuration\IServiceBusConfiguratorDefaults.cs" />
     <Compile Include="Configuration\IServiceConfigurator.cs" />

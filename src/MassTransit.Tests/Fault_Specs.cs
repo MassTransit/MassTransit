@@ -34,7 +34,7 @@ namespace MassTransit.Tests
 		protected override void Before_each()
 		{
 			_builder = MockRepository.GenerateMock<IObjectBuilder>();
-			_endpointResolver = EndpointFactoryConfigurator.New(x =>
+			_endpointResolver = EndpointResolverConfigurator.New(x =>
 				{
 					x.SetObjectBuilder(_builder);
 					x.SetDefaultSerializer<XmlMessageSerializer>();
@@ -131,7 +131,7 @@ namespace MassTransit.Tests
 		protected override void Before_each()
 		{
 			_builder = MockRepository.GenerateMock<IObjectBuilder>();
-			_resolver = EndpointFactoryConfigurator.New(x =>
+			_resolver = EndpointResolverConfigurator.New(x =>
 				{
 					x.SetObjectBuilder(_builder);
 					x.SetDefaultSerializer<XmlMessageSerializer>();

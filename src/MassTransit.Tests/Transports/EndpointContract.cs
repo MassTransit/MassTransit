@@ -17,7 +17,7 @@ namespace MassTransit.Tests.Transports
         [SetUp]
         public void SetUp()
         {
-            _endpointResolver = EndpointFactoryConfigurator.New(c =>
+            _endpointResolver = EndpointResolverConfigurator.New(c =>
             {
                 c.RegisterTransport<TEndpoint>();
                 c.SetObjectBuilder(ObjectBuilder);

@@ -64,7 +64,7 @@ namespace MassTransit.TestFramework.Fixtures
 
 		protected virtual void SetupEndpointFactory()
 		{
-			EndpointResolver = EndpointFactoryConfigurator.New(x =>
+			EndpointResolver = EndpointResolverConfigurator.New(x =>
 				{
 					x.SetObjectBuilder(ObjectBuilder);
 					x.RegisterTransport<TEndpoint>();
@@ -76,7 +76,7 @@ namespace MassTransit.TestFramework.Fixtures
 			ObjectBuilder.Add(EndpointResolver);
 		}
 
-		protected virtual void ConfigureEndpointFactory(IEndpointFactoryConfigurator x)
+		protected virtual void ConfigureEndpointFactory(IEndpointResolverConfigurator x)
 		{
 		}
 

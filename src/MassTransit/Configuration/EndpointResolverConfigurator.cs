@@ -20,8 +20,8 @@ namespace MassTransit.Configuration
 	using Magnum.Threading;
 	using Serialization;
 
-	public class EndpointFactoryConfigurator :
-		IEndpointFactoryConfigurator,
+	public class EndpointResolverConfigurator :
+		IEndpointResolverConfigurator,
 		IDisposable
 	{
 		private Type _defaultSerializer = typeof (XmlMessageSerializer);
@@ -31,7 +31,7 @@ namespace MassTransit.Configuration
 		private ReaderWriterLockedObject<HashSet<Type>> _transportTypes;
 
         //CHANGED to internal to help the move to the next configuration model
-		internal EndpointFactoryConfigurator()
+		internal EndpointResolverConfigurator()
 		{
 			_transportTypes = new ReaderWriterLockedObject<HashSet<Type>>(new HashSet<Type>());
 			_endpointConfigurators = new ReaderWriterLockedDictionary<Uri, Action<IEndpointConfigurator>>();
@@ -98,7 +98,7 @@ namespace MassTransit.Configuration
 			_objectBuilder = objectBuilder;
 		}
 
-		~EndpointFactoryConfigurator()
+		~EndpointResolverConfigurator()
 		{
 			Dispose(false);
 		}
@@ -131,9 +131,9 @@ namespace MassTransit.Configuration
 			return endpointResolver;
 		}
 
-		public static IEndpointResolver New(Action<IEndpointFactoryConfigurator> action)
+		public static IEndpointResolver New(Action<IEndpointResolverConfigurator> action)
 		{
-			using (var configurator = new EndpointFactoryConfigurator())
+			using (var configurator = new EndpointResolverConfigurator())
 			{
 				action(configurator);
 
