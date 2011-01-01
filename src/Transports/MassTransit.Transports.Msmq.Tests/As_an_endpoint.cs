@@ -54,7 +54,7 @@ namespace MassTransit.Transports.Msmq.Tests
 		[ExpectedException(typeof (EndpointException))]
 		public void Should_throw_an_endpoint_exception_from_the_endpoint_factory()
 		{
-			IEndpointFactory ef = EndpointFactoryConfigurator.New(x =>
+			IEndpointResolver ef = EndpointFactoryConfigurator.New(x =>
 			    {
 			        x.RegisterTransport<MsmqEndpoint>();
 			    });

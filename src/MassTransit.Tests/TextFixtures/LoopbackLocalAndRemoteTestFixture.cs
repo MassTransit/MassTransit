@@ -67,7 +67,7 @@ namespace MassTransit.Tests.TextFixtures
 				.WhenCalled(invocation =>
 					{
 						// Return a unique instance of this class
-						invocation.ReturnValue = new SubscriptionConsumer(SubscriptionService, EndpointFactory);
+						invocation.ReturnValue = new SubscriptionConsumer(SubscriptionService, EndpointResolver);
 					});
 		}
 

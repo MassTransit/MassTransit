@@ -21,8 +21,8 @@ namespace MassTransit.Internal
 	using Magnum;
 	using Magnum.Threading;
 
-    public class EndpointFactory :
-		IEndpointFactory
+    public class EndpointResolver :
+		IEndpointResolver
 	{
 		private static readonly IEndpoint _null = new NullEndpoint();
 		private readonly Type _defaultSerializer;
@@ -31,7 +31,7 @@ namespace MassTransit.Internal
 		private ReaderWriterLockedDictionary<Uri, IEndpoint> _endpoints;
 		private ReaderWriterLockedDictionary<Type, Func<Uri, Action<IEndpointConfigurator>, IEndpoint>> _transportConfigurators;
 
-		public EndpointFactory(Type defaultSerializer,
+		public EndpointResolver(Type defaultSerializer,
 		                       IEnumerable<Type> transportTypes,
 		                       IEnumerable<KeyValuePair<Uri, Action<IEndpointConfigurator>>> endpointConfigurators)
 		{
@@ -155,7 +155,7 @@ namespace MassTransit.Internal
 				};
 		}
 
-		~EndpointFactory()
+		~EndpointResolver()
 		{
 			Dispose(false);
 		}

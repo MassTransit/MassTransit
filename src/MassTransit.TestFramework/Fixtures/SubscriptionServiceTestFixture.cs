@@ -48,13 +48,13 @@ namespace MassTransit.TestFramework.Fixtures
 
 			SubscriptionService = new SubscriptionService(SubscriptionBus,
 				ObjectBuilder.GetInstance<ISubscriptionRepository>(),
-				EndpointFactory,
+				EndpointResolver,
 				ObjectBuilder.GetInstance<ISagaRepository<SubscriptionSaga>>(),
 				ObjectBuilder.GetInstance<ISagaRepository<SubscriptionClientSaga>>());
 
 			SubscriptionService.Start();
 
-			ObjectBuilder.Construct(() => new SubscriptionClient(EndpointFactory));
+			ObjectBuilder.Construct(() => new SubscriptionClient(EndpointResolver));
 		}
 
 		private void SetupSubscriptionRepository()

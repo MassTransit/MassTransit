@@ -25,21 +25,21 @@ namespace MassTransit.Distributor
 		Consumes<T>.Selected
 		where T : class
 	{
-		private readonly IEndpointFactory _endpointFactory;
+		private readonly IEndpointResolver _endpointResolver;
 		private readonly IWorkerSelectionStrategy<T> _selectionStrategy;
 		private readonly ReaderWriterLockedDictionary<Uri, WorkerDetails> _workers = new ReaderWriterLockedDictionary<Uri, WorkerDetails>();
 		private Scheduler _threadPoolScheduler;
 		private UnsubscribeAction _unsubscribeAction = () => false;
         private readonly int _pingTimeout = (int)1.Minutes().TotalMilliseconds;
 
-		public Distributor(IEndpointFactory endpointFactory, IWorkerSelectionStrategy<T> workerSelectionStrategy)
+		public Distributor(IEndpointResolver endpointResolver, IWorkerSelectionStrategy<T> workerSelectionStrategy)
 		{
-			_endpointFactory = endpointFactory;
+			_endpointResolver = endpointResolver;
 			_selectionStrategy = workerSelectionStrategy;
 		}
 
-		public Distributor(IEndpointFactory endpointFactory) :
-				this(endpointFactory, new DefaultWorkerSelectionStrategy<T>())
+		public Distributor(IEndpointResolver endpointResolver) :
+				this(endpointResolver, new DefaultWorkerSelectionStrategy<T>())
 		{
 		}
 
@@ -54,7 +54,7 @@ namespace MassTransit.Distributor
 
 			worker.Add();
 
-			IEndpoint endpoint = _endpointFactory.GetEndpoint(worker.DataUri);
+			IEndpoint endpoint = _endpointResolver.GetEndpoint(worker.DataUri);
 
 			var distributed = new Distributed<T>(message, CurrentMessage.Headers.ResponseAddress);
 
@@ -115,7 +115,7 @@ namespace MassTransit.Distributor
 			_workers.Values
 				.Where(x => x.LastUpdate < SystemUtil.UtcNow.Subtract(_pingTimeout.Milliseconds()))
 				.ToList()
-				.ForEach(x => { _endpointFactory.GetEndpoint(x.ControlUri).Send(new PingWorker()); });
+				.ForEach(x => { _endpointResolver.GetEndpoint(x.ControlUri).Send(new PingWorker()); });
 		}
 	}
 }

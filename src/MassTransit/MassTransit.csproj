@@ -390,7 +390,7 @@
     <Compile Include="Services\Subscriptions\SubscriptionPublisher.cs" />
     <Compile Include="Internal\MessageHeadersBase.cs" />
     <Compile Include="Internal\OutboundMessage.cs" />
-    <Compile Include="IEndpointFactory.cs" />
+    <Compile Include="IEndpointResolver.cs" />
     <Compile Include="Configuration\IEndpointFactoryConfigurator.cs" />
     <Compile Include="Configuration\IServiceBusConfigurator.cs" />
     <Compile Include="Configuration\IServiceBusConfiguratorDefaults.cs" />
@@ -402,7 +402,7 @@
     <Compile Include="Services\Subscriptions\Configuration\SubscriptionClientConfigurator.cs" />
     <Compile Include="Exceptions\ConfigurationException.cs" />
     <Compile Include="Internal\IMessageSelector.cs" />
-    <Compile Include="Internal\EndpointFactory.cs" />
+    <Compile Include="Internal\EndpointResolver.cs" />
     <Compile Include="Internal\RequestResponse\ConditionalResponseAction.cs" />
     <Compile Include="Internal\RequestResponse\ConditionalResponseActionBuilder.cs" />
     <Compile Include="Internal\RequestResponse\CorrelatedResponseAction.cs" />

@@ -28,8 +28,8 @@ namespace MassTransit.Configuration
 	    /// <summary>
 	    /// Specify the IEndpointFactory to use
 	    /// </summary>
-	    /// <param name="endpointFactory"></param>
-        void SetEndpointFactory(IEndpointFactory endpointFactory);
+	    /// <param name="endpointResolver"></param>
+        void SetEndpointFactory(IEndpointResolver endpointResolver);
 
 		/// <summary>
 		/// Specify the endpoint where errors should be sent

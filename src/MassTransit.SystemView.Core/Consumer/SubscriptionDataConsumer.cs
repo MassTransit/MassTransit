@@ -43,7 +43,7 @@ namespace MassTransit.SystemView.Core.Consumer
 
         private void ConnectToSubscriptionService()
         {
-            _subscriptionServiceEndpoint = _objectBuilder.GetInstance<IEndpointFactory>()
+            _subscriptionServiceEndpoint = _objectBuilder.GetInstance<IEndpointResolver>()
                 .GetEndpoint(_objectBuilder.GetInstance<IConfiguration>().SubscriptionServiceUri);
 
             _subscriptionServiceEndpoint.Send(new AddSubscriptionClient(_clientId, _bus.Endpoint.Uri, _bus.Endpoint.Uri));
@@ -82,7 +82,7 @@ namespace MassTransit.SystemView.Core.Consumer
 
         public void UpdateWorker(Uri controlUri, string type, int pendingLimit, int inProgressLimit)
         {
-            var endpoint = _objectBuilder.GetInstance<IEndpointFactory>().GetEndpoint(controlUri);
+            var endpoint = _objectBuilder.GetInstance<IEndpointResolver>().GetEndpoint(controlUri);
 
             endpoint.Send(new ConfigureWorker() { InProgressLimit = inProgressLimit, MessageType = type, PendingLimit = pendingLimit });
         }

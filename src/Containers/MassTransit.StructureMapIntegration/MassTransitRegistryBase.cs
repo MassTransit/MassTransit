@@ -159,7 +159,7 @@ namespace MassTransit.StructureMapIntegration
 
         protected void RegisterEndpointFactory(Action<IEndpointFactoryConfigurator> configAction)
         {
-            For<IEndpointFactory>()
+            For<IEndpointResolver>()
                 .Singleton()
                 .Use(context =>
                     {
@@ -184,7 +184,7 @@ namespace MassTransit.StructureMapIntegration
                     {
                         return ServiceBusConfigurator.New(x =>
                             {
-                                x.SetEndpointFactory(context.GetInstance<IEndpointFactory>());
+                                x.SetEndpointFactory(context.GetInstance<IEndpointResolver>());
                                 x.SetObjectBuilder(context.GetInstance<IObjectBuilder>());
                                 x.ReceiveFrom(endpointUri);
 
@@ -206,7 +206,7 @@ namespace MassTransit.StructureMapIntegration
                 {
                     return ServiceBusConfigurator.New(x =>
                     {
-                        x.SetEndpointFactory(context.GetInstance<IEndpointFactory>());
+                        x.SetEndpointFactory(context.GetInstance<IEndpointResolver>());
                         x.SetObjectBuilder(context.GetInstance<IObjectBuilder>());
                         x.ReceiveFrom(endpointUri);
 
@@ -228,7 +228,7 @@ namespace MassTransit.StructureMapIntegration
                     {
                         return ControlBusConfigurator.New(x =>
                             {
-                                x.SetEndpointFactory(context.GetInstance<IEndpointFactory>());
+                                x.SetEndpointFactory(context.GetInstance<IEndpointResolver>());
                                 x.SetObjectBuilder(context.GetInstance<IObjectBuilder>());
                                 x.ReceiveFrom(endpointUri);
                                 x.SetConcurrentConsumerLimit(1);

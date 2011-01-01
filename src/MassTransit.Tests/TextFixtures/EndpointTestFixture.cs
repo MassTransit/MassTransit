@@ -32,7 +32,7 @@ namespace MassTransit.Tests.TextFixtures
 			XmlMessageSerializer serializer = new XmlMessageSerializer();
 			ObjectBuilder.Stub(x => x.GetInstance<XmlMessageSerializer>()).Return(serializer);
 
-			EndpointFactory = EndpointFactoryConfigurator.New(x =>
+			EndpointResolver = EndpointFactoryConfigurator.New(x =>
 				{
 					x.SetObjectBuilder(ObjectBuilder);
 					x.RegisterTransport<TTransport>();
@@ -40,11 +40,11 @@ namespace MassTransit.Tests.TextFixtures
 
 					AdditionalEndpointFactoryConfiguration(x);
 				});
-			ObjectBuilder.Stub(x => x.GetInstance<IEndpointFactory>()).Return(EndpointFactory);
+			ObjectBuilder.Stub(x => x.GetInstance<IEndpointResolver>()).Return(EndpointResolver);
 
 			ServiceBusConfigurator.Defaults(x =>
 				{
-                    x.SetEndpointFactory(EndpointFactory);
+                    x.SetEndpointFactory(EndpointResolver);
 					x.SetObjectBuilder(ObjectBuilder);
 					x.SetReceiveTimeout(500.Milliseconds());
 					x.SetConcurrentConsumerLimit(Environment.ProcessorCount*2);
@@ -58,15 +58,15 @@ namespace MassTransit.Tests.TextFixtures
 		{
 			TeardownContext();
 
-			EndpointFactory.Dispose();
-			EndpointFactory = null;
+			EndpointResolver.Dispose();
+			EndpointResolver = null;
 		}
 
 		protected virtual void AdditionalEndpointFactoryConfiguration(IEndpointFactoryConfigurator x)
 		{
 		}
 
-		protected IEndpointFactory EndpointFactory { get; set; }
+		protected IEndpointResolver EndpointResolver { get; set; }
 
 		protected IObjectBuilder ObjectBuilder { get; private set; }
 

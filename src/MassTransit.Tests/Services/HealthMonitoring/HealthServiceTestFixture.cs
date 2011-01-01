@@ -88,13 +88,13 @@ namespace MassTransit.Tests.Services.HealthMonitoring
 
 			_subscriptionSagaRepository = SetupSagaRepository<SubscriptionSaga>(ObjectBuilder);
 
-			SubscriptionService = new SubscriptionService(SubscriptionBus, SubscriptionRepository, EndpointFactory, _subscriptionSagaRepository, _subscriptionClientSagaRepository);
+			SubscriptionService = new SubscriptionService(SubscriptionBus, SubscriptionRepository, EndpointResolver, _subscriptionSagaRepository, _subscriptionClientSagaRepository);
 
 			SubscriptionService.Start();
 
 			ObjectBuilder.Stub(x => x.GetInstance<SubscriptionClient>())
 				.Return(null)
-				.WhenCalled(invocation => { invocation.ReturnValue = new SubscriptionClient(EndpointFactory); });
+				.WhenCalled(invocation => { invocation.ReturnValue = new SubscriptionClient(EndpointResolver); });
 		}
 
 		private void SetupHealthService()

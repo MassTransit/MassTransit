@@ -118,7 +118,7 @@ namespace MassTransit.NinjectIntegration
 
         protected void RegisterEndpointFactory(Action<IEndpointFactoryConfigurator> configAction)
         {
-            Bind<IEndpointFactory>()
+            Bind<IEndpointResolver>()
                 .ToMethod(cxt =>
                 {
                     return EndpointFactoryConfigurator.New(x =>

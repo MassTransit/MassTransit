@@ -21,8 +21,8 @@ namespace MassTransit.Configuration
     {
         readonly EndpointFactoryConfigurator _epc;
         readonly ServiceBusConfigurator _sbc;
-        readonly IEndpointFactory _factory;
-        public MassTransitConfiguration(IObjectBuilder builder, IEndpointFactory factory)
+        readonly IEndpointResolver _resolver;
+        public MassTransitConfiguration(IObjectBuilder builder, IEndpointResolver resolver)
         {
             _epc = new EndpointFactoryConfigurator();
             _sbc = new ServiceBusConfigurator();
@@ -32,7 +32,7 @@ namespace MassTransit.Configuration
 
             _epc.RegisterTransport<LoopbackEndpoint>();
             _epc.RegisterTransport<MulticastUdpEndpoint>();
-            _factory = factory;
+            _resolver = resolver;
         }
 
         public void RegisterTransport(Type transportType)
@@ -94,7 +94,7 @@ namespace MassTransit.Configuration
         public IServiceBus CreateBus()
         {
             //need to pass the epf into the sbc
-            _sbc.SetEndpointFactory(_factory);
+            _sbc.SetEndpointFactory(_resolver);
 
             //TODO: Control Bus needs a concurrent receiver of 1
 

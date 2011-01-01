@@ -60,7 +60,7 @@ namespace MassTransit.TestFramework.Fixtures
 
 			ObjectBuilder.Add(SubscriptionService);
 			ObjectBuilder.Construct(() => new SubscriptionPublisher(SubscriptionService));
-			ObjectBuilder.Construct(() => new SubscriptionConsumer(SubscriptionService, EndpointFactory));
+			ObjectBuilder.Construct(() => new SubscriptionConsumer(SubscriptionService, EndpointResolver));
 		}
 	}
 }
