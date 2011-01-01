@@ -26,13 +26,18 @@ namespace MassTransit.Transports.RabbitMq.Tests
         Uri _rabbitAddress = new Uri("amqp-0-8://10.0.1.19:5672");
         ConnectionFactory _factory = new ConnectionFactory();
 
-        [Test, Explicit]
-        public void Bob()
+        [SetUp]
+        public void Setup()
         {
 		    _factory.UserName = "guest";
 		    _factory.Password = "guest";
 		    _factory.VirtualHost = @"/";
-		    _factory.HostName = "192.168.0.111";
+            _factory.HostName = "10.0.1.19";
+        }
+
+        [Test, Explicit]
+        public void Bob()
+        {
 
             using (var conn = _factory.CreateConnection())
             {
@@ -44,14 +49,9 @@ namespace MassTransit.Transports.RabbitMq.Tests
 
         }
 
-		[Test, Category("Integration")]
+		[Test, Explicit]
         public void Send()
 		{
-		    _factory.UserName = "guest";
-		    _factory.Password = "guest";
-		    _factory.VirtualHost = @"/";
-		    _factory.HostName = "192.168.0.111";
-
             var t = new RabbitMqTransport(new EndpointAddress(_address), _factory.CreateConnection());
             t.Send((s)=>
             {
@@ -60,10 +60,10 @@ namespace MassTransit.Transports.RabbitMq.Tests
             });
         }
 
-		[Test, Category("Integration")]
+		[Test, Explicit]
 		public void Receive()
         {
-            var t = new RabbitMqTransport(new EndpointAddress(new Uri("rabbitmq://localhost/dru")), _factory.CreateConnection());
+            var t = new RabbitMqTransport(new EndpointAddress(new Uri("rabbitmq://10.0.1.19/bob")), _factory.CreateConnection());
             t.Receive(s=>
             {
                 return ss =>
@@ -77,7 +77,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
             });
         }
 
-		[Test, Category("Integration")]
+		[Test,Explicit]
         public void EndpointSend()
         {
             var addr = new EndpointAddress(_address);
@@ -94,7 +94,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
             e.Send(new BugsBunny() {Food = "Carrot"});
         }
 
-		[Test, Category("Integration")]
+		[Test, Explicit]
         public void EndpointReceive()
         {
             var addr = new EndpointAddress(_address);
