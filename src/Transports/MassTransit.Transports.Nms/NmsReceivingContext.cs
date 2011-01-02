@@ -31,7 +31,7 @@ namespace MassTransit.Transports.Nms
             throw new NotImplementedException();
         }
 
-        public object GetMessageId()
+        public string GetMessageId()
         {
             return _textMessage.NMSMessageId;
         }

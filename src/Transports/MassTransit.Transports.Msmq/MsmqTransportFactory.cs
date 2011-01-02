@@ -17,7 +17,7 @@ namespace MassTransit.Transports.Msmq
 
 	public static class MsmqTransportFactory
 	{
-		public static IMsmqTransport New(CreateMsmqTransportSettings settings)
+		public static ITransport New(CreateMsmqTransportSettings settings)
 		{
 			try
 			{
@@ -32,7 +32,7 @@ namespace MassTransit.Transports.Msmq
 			}
 		}
 
-		private static IMsmqTransport NewLocalTransport(CreateMsmqTransportSettings settings)
+		private static ITransport NewLocalTransport(CreateMsmqTransportSettings settings)
 		{
 			LocalTransportSettings transportSettings = ValidateLocalTransport(settings);
 
@@ -42,7 +42,7 @@ namespace MassTransit.Transports.Msmq
 			return new NonTransactionalMsmqTransport(settings.Address);
 		}
 
-		private static IMsmqTransport NewRemoteTransport(CreateMsmqTransportSettings settings)
+		private static ITransport NewRemoteTransport(CreateMsmqTransportSettings settings)
 		{
 			if (settings.Address.IsTransactional)
 				return new TransactionalMsmqTransport(settings.Address);

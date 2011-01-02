@@ -28,12 +28,12 @@ namespace MassTransit.Transports.Msmq
 
         public string GetLabel()
         {
-            throw new NotImplementedException();
+            return _message.Label;
         }
 
-        public object GetMessageId()
+        public string GetMessageId()
         {
-            throw new NotImplementedException();
+            return _message.Id;
         }
 
         public Stream Body

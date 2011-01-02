@@ -214,20 +214,4 @@ namespace MassTransit.Transports
             _messageReady = null;
         }
     }
-
-    public class LoopbackReceivingContext :
-        IReceivingContext
-    {
-        public string GetLabel()
-        {
-            throw new NotImplementedException();
-        }
-
-        public object GetMessageId()
-        {
-            throw new NotImplementedException();
-        }
-
-        public Stream Body { get; set; }
-    }
 }

@@ -14,8 +14,6 @@ namespace MassTransit.Transports.Msmq
 {
 	using System;
 	using System.Diagnostics;
-	using System.IO;
-	using System.Messaging;
 	using System.Runtime.Serialization;
 	using Configuration;
 	using Internal;
@@ -30,10 +28,10 @@ namespace MassTransit.Transports.Msmq
 
     	private readonly MessageRetryTracker _tracker;
 		private bool _disposed;
-		private IMsmqTransport _errorTransport;
-		private IMsmqTransport _transport;
+		private ITransport _errorTransport;
+		private ITransport _transport;
 
-		public MsmqEndpoint(IEndpointAddress address, IMessageSerializer serializer, IMsmqTransport transport, IMsmqTransport errorTransport)
+		public MsmqEndpoint(IEndpointAddress address, IMessageSerializer serializer, ITransport transport, ITransport errorTransport)
 			: base(address, serializer)
 		{
 			_tracker = new MessageRetryTracker(5);
@@ -99,14 +97,16 @@ namespace MassTransit.Transports.Msmq
                 sendingContext.SetMessageExpiration(OutboundMessage.Headers.ExpirationTime.Value);
 		}
 
-        private Func<Message, Action<Message>> ReceiveFromTransport(Func<object, Action<object>> receiver)
+
+
+        private Func<IReceivingContext, Action<IReceivingContext>> ReceiveFromTransport(Func<object, Action<object>> receiver)
 		{
-			return msmqMessage =>
+			return receivingContext =>
 				{
-					if (_tracker.IsRetryLimitExceeded(msmqMessage.Id))
+					if (_tracker.IsRetryLimitExceeded(receivingContext.GetMessageId()))
 					{
 						if(_log.IsErrorEnabled)
-							_log.ErrorFormat("Message retry limit exceeded {0}:{1}", Address, msmqMessage.Id);
+							_log.ErrorFormat("Message retry limit exceeded {0}:{1}", Address, receivingContext.GetMessageId());
 
 						return MoveMessageToErrorTransport;
 					}
@@ -115,14 +115,14 @@ namespace MassTransit.Transports.Msmq
 
 					try
 					{
-						messageObj = Serializer.Deserialize(msmqMessage.BodyStream);
+						messageObj = Serializer.Deserialize(receivingContext.Body);
 					}
 					catch (SerializationException sex)
 					{
                         if (_log.IsErrorEnabled)
-                            _log.Error("Unrecognized message " + Address + ":" + msmqMessage.Id, sex);
+                            _log.Error("Unrecognized message " + Address + ":" + receivingContext.GetMessageId(), sex);
 
-						_tracker.IncrementRetryCount(msmqMessage.Id);
+						_tracker.IncrementRetryCount(receivingContext.GetMessageId());
                         return MoveMessageToErrorTransport;
 					}
 
@@ -149,50 +149,50 @@ namespace MassTransit.Transports.Msmq
 						if (_log.IsErrorEnabled)
 							_log.Error("An exception was thrown preparing the message consumers", ex);
 
-						_tracker.IncrementRetryCount(msmqMessage.Id);
+						_tracker.IncrementRetryCount(receivingContext.GetMessageId());
 						return null;
 					}
 
 					return m =>
 					    {
                             if (_log.IsDebugEnabled)
-                                _log.DebugFormat("RECV:{0}:{1}:{2}", Address, m.Id, messageObj.GetType().Name);
+                                _log.DebugFormat("RECV:{0}:{1}:{2}", Address, m.GetMessageId(), messageObj.GetType().Name);
 
                             if (SpecialLoggers.Messages.IsInfoEnabled)
-                                SpecialLoggers.Messages.InfoFormat("RECV:{0}:{1}:{2}", Address, m.Id, messageObj.GetType().Name);
+                                SpecialLoggers.Messages.InfoFormat("RECV:{0}:{1}:{2}", Address, m.GetMessageId(), messageObj.GetType().Name);
 
 					        try
 					        {
 					            receive(messageObj);
 
-					        	_tracker.MessageWasReceivedSuccessfully(msmqMessage.Id);
+					        	_tracker.MessageWasReceivedSuccessfully(receivingContext.GetMessageId());
 					        }
 					        catch (Exception ex)
 					        {
                                 if(_log.IsErrorEnabled)
 									_log.Error("An exception was thrown by a message consumer", ex);
 
-								_tracker.IncrementRetryCount(msmqMessage.Id);
+								_tracker.IncrementRetryCount(receivingContext.GetMessageId());
 								MoveMessageToErrorTransport(m);
 							}
 					    };
 				};
 		}
 
-	    private void MoveMessageToErrorTransport(Message message)
+	    private void MoveMessageToErrorTransport(IReceivingContext message)
 	    {
             _errorTransport.Send(context=>
             {
-                message.BodyStream.CopyTo(context.Body);
+                message.Body.CopyTo(context.Body);
                 if(OutboundMessage.Headers.ExpirationTime.HasValue)
                     context.SetMessageExpiration(OutboundMessage.Headers.ExpirationTime.Value);
             });
 
 	        if (_log.IsDebugEnabled)
-	            _log.DebugFormat("MOVE:{0}:{1}:{2}", Address, _errorTransport.Address, message.Id);
+	            _log.DebugFormat("MOVE:{0}:{1}:{2}", Address, _errorTransport.Address, message.GetMessageId());
 
 	        if (SpecialLoggers.Messages.IsInfoEnabled)
-	            SpecialLoggers.Messages.InfoFormat("MOVE:{0}:{1}:{2}", Address, _errorTransport.Address, message.Id);
+	            SpecialLoggers.Messages.InfoFormat("MOVE:{0}:{1}:{2}", Address, _errorTransport.Address, message.GetMessageId());
 	    }
 
     	public static IEndpoint ConfigureEndpoint(Uri uri, Action<IEndpointConfigurator> configurator)

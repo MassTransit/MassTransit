@@ -162,8 +162,10 @@
     <Compile Include="Services\Subscriptions\Client\SubscriptionClient.cs" />
     <Compile Include="Services\Subscriptions\Server\SubscriptionService.cs" />
     <Compile Include="TimeoutAttribute.cs" />
+    <Compile Include="Transports\LoopbackReceivingContext.cs" />
     <Compile Include="Transports\LoopbackSendingContext.cs" />
     <Compile Include="Transports\MulticastUdpEndpoint.cs" />
+    <Compile Include="Transports\MulticastUdpReceivingContext.cs" />
     <Compile Include="Transports\MulticastUdpSendingContext.cs" />
     <Compile Include="Util\CheckConvention.cs" />
     <Compile Include="Util\Tuple.cs" />

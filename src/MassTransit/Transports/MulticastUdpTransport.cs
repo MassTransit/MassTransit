@@ -174,20 +174,4 @@ namespace MassTransit.Transports
             return new ObjectDisposedException("The transport has already been disposed: " + Address);
         }
     }
-
-    public class MulticastUdpReceivingContext : 
-        IReceivingContext
-    {
-        public string GetLabel()
-        {
-            throw new NotImplementedException();
-        }
-
-        public object GetMessageId()
-        {
-            throw new NotImplementedException();
-        }
-
-        public Stream Body { get; set; }
-    }
 }
