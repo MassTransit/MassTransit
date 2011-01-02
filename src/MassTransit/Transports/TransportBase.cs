@@ -29,8 +29,14 @@ namespace MassTransit.Transports
 
         public IEndpointAddress Address { get; private set; }
 
-        public abstract void Send(Action<Stream> sender);
         public abstract void Send(Action<ISendingContext> sender);
+
+        public void Receive(Func<IReceivingContext, Action<IReceivingContext>> receiver)
+        {
+            EnsureNotDisposed();
+
+            Receive(receiver, TimeSpan.Zero);
+        }
 
         public void Receive(Func<Stream, Action<Stream>> receiver)
         {
@@ -40,6 +46,7 @@ namespace MassTransit.Transports
         }
 
         public abstract void Receive(Func<Stream, Action<Stream>> receiver, TimeSpan timeout);
+        public abstract void Receive(Func<IReceivingContext, Action<IReceivingContext>> receiver, TimeSpan timeout);
 
         protected void EnsureNotDisposed()
         {

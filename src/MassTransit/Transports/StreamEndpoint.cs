@@ -44,7 +44,7 @@ namespace MassTransit.Transports
 				{
 					SetOutboundMessageHeaders<T>();
 
-					PopulateTransportMessage(msg, message);
+					PopulateTransportMessage(msg.Body, message);
 
 					if (SpecialLoggers.Messages.IsInfoEnabled)
 						SpecialLoggers.Messages.InfoFormat("SEND:{0}:{1}", Address, typeof (T).Name);
@@ -163,7 +163,7 @@ namespace MassTransit.Transports
 					message.Seek(0, SeekOrigin.Begin);
 					message.Read(data, 0, data.Length);
 
-					outbound.Write(data, 0, data.Length);
+					outbound.Body.Write(data, 0, data.Length);
 				});
 
 			if (_log.IsDebugEnabled)

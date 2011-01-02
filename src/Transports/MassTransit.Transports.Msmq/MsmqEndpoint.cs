@@ -49,11 +49,11 @@ namespace MassTransit.Transports.Msmq
 			if (_disposed) throw NewDisposedException();
 
 
-			_transport.Send(str =>
+			_transport.Send(cxt =>
 				{
 					SetOutboundMessageHeaders<T>();
 
-					PopulateTransportMessage(str, message);
+					PopulateTransportMessage(cxt, message);
                 });
 		}
 
@@ -68,7 +68,7 @@ namespace MassTransit.Transports.Msmq
 		{
 			if (_disposed) throw NewDisposedException();
 
-			_transport.Receive(ReceiveFromTransport(receiver), timeout);
+            _transport.Receive(ReceiveFromTransport(receiver), timeout);
 		}
 
 		protected override void Dispose(bool disposing)
@@ -88,28 +88,25 @@ namespace MassTransit.Transports.Msmq
 			_disposed = true;
 		}
 
-		private void PopulateTransportMessage<T>(Stream transportMessage, T message)
+		private void PopulateTransportMessage<T>(ISendingContext sendingContext, T message)
 		{
-			Serializer.Serialize(transportMessage, message);
+			Serializer.Serialize(sendingContext.Body, message);
 
-            //cxt.SetLabel
-			//transportMessage.Label = typeof (T).Name;
+            sendingContext.SetLabel(typeof(T).Name);
+            sendingContext.MarkRecoverable();
 
-            //cxt.SetRecoverable
-			//transportMessage.Recoverable = true;
-
-            //
-			//SetMessageExpiration(transportMessage);
+            if(OutboundMessage.Headers.ExpirationTime.HasValue)
+                sendingContext.SetMessageExpiration(OutboundMessage.Headers.ExpirationTime.Value);
 		}
 
-		private Func<Message, Action<Message>> ReceiveFromTransport(Func<object, Action<object>> receiver)
+        private Func<Message, Action<Message>> ReceiveFromTransport(Func<object, Action<object>> receiver)
 		{
-			return message =>
+			return msmqMessage =>
 				{
-					if (_tracker.IsRetryLimitExceeded(message.Id))
+					if (_tracker.IsRetryLimitExceeded(msmqMessage.Id))
 					{
 						if(_log.IsErrorEnabled)
-							_log.ErrorFormat("Message retry limit exceeded {0}:{1}", Address, message.Id);
+							_log.ErrorFormat("Message retry limit exceeded {0}:{1}", Address, msmqMessage.Id);
 
 						return MoveMessageToErrorTransport;
 					}
@@ -118,14 +115,14 @@ namespace MassTransit.Transports.Msmq
 
 					try
 					{
-						messageObj = Serializer.Deserialize(message.BodyStream);
+						messageObj = Serializer.Deserialize(msmqMessage.BodyStream);
 					}
 					catch (SerializationException sex)
 					{
                         if (_log.IsErrorEnabled)
-                            _log.Error("Unrecognized message " + Address + ":" + message.Id, sex);
+                            _log.Error("Unrecognized message " + Address + ":" + msmqMessage.Id, sex);
 
-						_tracker.IncrementRetryCount(message.Id);
+						_tracker.IncrementRetryCount(msmqMessage.Id);
                         return MoveMessageToErrorTransport;
 					}
 
@@ -152,7 +149,7 @@ namespace MassTransit.Transports.Msmq
 						if (_log.IsErrorEnabled)
 							_log.Error("An exception was thrown preparing the message consumers", ex);
 
-						_tracker.IncrementRetryCount(message.Id);
+						_tracker.IncrementRetryCount(msmqMessage.Id);
 						return null;
 					}
 
@@ -168,14 +165,14 @@ namespace MassTransit.Transports.Msmq
 					        {
 					            receive(messageObj);
 
-					        	_tracker.MessageWasReceivedSuccessfully(message.Id);
+					        	_tracker.MessageWasReceivedSuccessfully(msmqMessage.Id);
 					        }
 					        catch (Exception ex)
 					        {
                                 if(_log.IsErrorEnabled)
 									_log.Error("An exception was thrown by a message consumer", ex);
 
-								_tracker.IncrementRetryCount(message.Id);
+								_tracker.IncrementRetryCount(msmqMessage.Id);
 								MoveMessageToErrorTransport(m);
 							}
 					    };
@@ -184,11 +181,11 @@ namespace MassTransit.Transports.Msmq
 
 	    private void MoveMessageToErrorTransport(Message message)
 	    {
-            _errorTransport.Send(str=>
+            _errorTransport.Send(context=>
             {
-                message.BodyStream.CopyTo(str);
-                //set the headers on the outbound
-                //SetMessageExpiration();
+                message.BodyStream.CopyTo(context.Body);
+                if(OutboundMessage.Headers.ExpirationTime.HasValue)
+                    context.SetMessageExpiration(OutboundMessage.Headers.ExpirationTime.Value);
             });
 
 	        if (_log.IsDebugEnabled)

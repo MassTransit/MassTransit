@@ -56,7 +56,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
             t.Send((s)=>
             {
                 var b = Encoding.UTF8.GetBytes("dru");
-                s.Write(b, 0,b.Length);
+                s.Body.Write(b, 0,b.Length);
             });
         }
 

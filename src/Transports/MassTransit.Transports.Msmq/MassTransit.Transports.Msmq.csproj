@@ -92,6 +92,8 @@
     <Compile Include="MsmqEndpointConfiguratorDefaults.cs" />
     <Compile Include="MsmqEndpointFactory.cs" />
     <Compile Include="MsmqEndpointManagement.cs" />
+    <Compile Include="MsmqReceivingContext.cs" />
+    <Compile Include="MsmqSendingContext.cs" />
     <Compile Include="MsmqTransportFactory.cs" />
     <Compile Include="MsmqUriParser.cs" />
     <Compile Include="NonTransactionalMsmqTransport.cs" />

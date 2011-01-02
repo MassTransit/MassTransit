@@ -65,6 +65,62 @@ namespace MassTransit.Transports.Msmq
 			}
 		}
 
+        protected virtual bool EnumerateQueue(Func<IReceivingContext, Action<IReceivingContext>> receiver, TimeSpan timeout)
+        {
+            if (_disposed) throw NewDisposedException();
+
+            bool received = false;
+
+            using (MessageEnumerator enumerator = _queue.GetMessageEnumerator2())
+            {
+                if (_log.IsDebugEnabled)
+                    _log.DebugFormat("Enumerating endpoint: {0} ({1}ms)", Address, timeout);
+
+                while (enumerator.MoveNext(timeout))
+                {
+                    Message current = enumerator.Current;
+                    if (current == null)
+                    {
+                        if (_log.IsDebugEnabled)
+                            _log.DebugFormat("Current message was null while enumerating endpoint");
+
+                        continue;
+                    }
+
+                    var cxt = new MsmqReceivingContext(current);
+                    Action<IReceivingContext> receive = receiver(cxt);
+                    if (receive == null)
+                    {
+                        if (_log.IsDebugEnabled)
+                            _log.DebugFormat("SKIP:{0}:{1}", Address, current.Id);
+
+                        if (SpecialLoggers.Messages.IsInfoEnabled)
+                            SpecialLoggers.Messages.InfoFormat("SKIP:{0}:{1}", Address, current.Id);
+
+                        continue;
+                    }
+
+                    ReceiveMessage(enumerator, timeout, receiveCurrent =>
+                    {
+                        using (Message message = receiveCurrent())
+                        {
+                            if (message == null)
+                                throw new TransportException(Address.Uri, "Unable to remove message from queue: " + current.Id);
+
+                            if (message.Id != current.Id)
+                                throw new TransportException(Address.Uri,
+                                    string.Format("Received message does not match current message: ({0} != {1})", message.Id, current.Id));
+                            var cxt2 = new MsmqReceivingContext(message);
+                            receive(cxt2);
+
+                            received = true;
+                        }
+                    });
+                }
+            }
+
+            return received;
+        }
 		protected virtual bool EnumerateQueue(Func<Message, Action<Message>> receiver, TimeSpan timeout)
 		{
 			if (_disposed) throw NewDisposedException();
@@ -186,14 +242,36 @@ namespace MassTransit.Transports.Msmq
 			Receive(receiver, TimeSpan.Zero);
 		}
 
-		public virtual void Receive(Func<Stream, Action<Stream>> receiver, TimeSpan timeout)
+        public void Receive(Func<IReceivingContext, Action<IReceivingContext>> receiver)
+        {
+            if (_disposed) throw NewDisposedException();
+
+            Receive(receiver, TimeSpan.Zero);
+        }
+
+        public virtual void Receive(Func<Stream, Action<Stream>> receiver, TimeSpan timeout)
 		{
 			if (_disposed) throw NewDisposedException();
 
 			Receive(ReceiveAsStream(receiver), timeout);
 		}
 
-		public virtual void Send(Action<Stream> sender)
+        public void Receive(Func<IReceivingContext, Action<IReceivingContext>> receiver, TimeSpan timeout)
+        {
+            try
+            {
+                Connect();
+
+                EnumerateQueue(receiver, timeout);
+            }
+            catch (MessageQueueException ex)
+            {
+
+                HandleMessageQueueException(ex, timeout);
+            }
+        }
+
+        public virtual void Send(Action<Stream> sender)
 		{
 			if (_disposed) throw NewDisposedException();
 
@@ -329,36 +407,4 @@ namespace MassTransit.Transports.Msmq
 			Connect();
 		}
 	}
-
-    public class MsmqSendingContext :
-        ISendingContext
-    {
-        Message _msg;
-
-        public MsmqSendingContext(Message msg)
-        {
-            _msg = msg;
-        }
-
-        public Stream Body
-        {
-            get { return _msg.BodyStream; }
-            set { _msg.BodyStream = value; }
-        }
-
-        public void MarkRecoverable()
-        {
-            _msg.Recoverable = true;
-        }
-
-        public void SetLabel(string label)
-        {
-            _msg.Label = label;
-        }
-
-        public void SetMessageExpiration(DateTime d)
-        {
-            //_msg.TimeToBeReceived = d;
-        }
-    }
 }

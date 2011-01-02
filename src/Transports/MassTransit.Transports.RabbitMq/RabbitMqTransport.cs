@@ -34,6 +34,40 @@ namespace MassTransit.Transports.RabbitMq
             _address = new RabbitMqAddress(address.Uri);
         }
 
+
+        public override void Receive(Func<IReceivingContext, Action<IReceivingContext>> receiver, TimeSpan timeout)
+        {
+
+            EnsureNotDisposed();
+
+            using(var channel = _connection.CreateModel())
+            {
+                channel.QueueDeclare(_address.Queue, true);
+                var result = channel.BasicGet(_address.Queue, true);
+                
+                using(var body = new MemoryStream(result.Body))
+                {
+                    var cxt = new RabbitMqReceivingContext(result);
+                    cxt.Body = body;
+                    Action<IReceivingContext> receive = receiver(cxt);
+                    if(receive==null)
+                    {
+                        if (_log.IsDebugEnabled)
+                            _log.DebugFormat("SKIP:{0}:{1}", Address, result.BasicProperties.MessageId);
+
+                        if (SpecialLoggers.Messages.IsInfoEnabled)
+                            SpecialLoggers.Messages.InfoFormat("SKIP:{0}:{1}", Address, result.BasicProperties.MessageId);
+                    }
+                    else
+                    {
+                        receive(cxt);
+                    }
+                }
+
+                channel.BasicAck(result.DeliveryTag, false);
+                channel.Close(200,"ok");
+            }
+        }
         public override void Receive(Func<Stream, Action<Stream>> receiver, TimeSpan timeout)
         {
             EnsureNotDisposed();
@@ -90,28 +124,6 @@ namespace MassTransit.Transports.RabbitMq
             }
         }
 
-        public override void Send(Action<Stream> sender)
-        {
-            EnsureNotDisposed();
-
-            using (var channel = _connection.CreateModel())
-            {
-                var properties = channel.CreateBasicProperties();
-                SetMessageExpiration(properties);
-                using (var bodyStream = new MemoryStream())
-                {
-                    sender(bodyStream);
-                    channel.ExchangeDeclare(_address.Queue, "fanout", true);
-                    channel.BasicPublish(_address.Queue, "msg", properties, bodyStream.ToArray());
-
-                }
-                channel.Close(200, "ok");
-
-                if (SpecialLoggers.Messages.IsInfoEnabled)
-                    SpecialLoggers.Messages.InfoFormat("SEND:{0}:{1}", Address, properties.MessageId);
-
-            }
-        }
 
         private static void SetMessageExpiration(IBasicProperties properties)
         {
@@ -125,31 +137,6 @@ namespace MassTransit.Transports.RabbitMq
         public override void OnDisposing()
         {
             //no-op
-        }
-    }
-
-    public class RabbitMqSendingContext :
-        ISendingContext
-    {
-        public Stream Body
-        {
-            get { throw new NotImplementedException(); }
-            set { throw new NotImplementedException(); }
-        }
-
-        public void MarkRecoverable()
-        {
-            throw new NotImplementedException();
-        }
-
-        public void SetLabel(string label)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void SetMessageExpiration(DateTime d)
-        {
-            throw new NotImplementedException();
         }
     }
 }

@@ -58,34 +58,78 @@ namespace MassTransit.Transports
             _messageReady.Set();
         }
 
-        public override void Send(Action<Stream> sender)
+        public override void Receive(Func<IReceivingContext, Action<IReceivingContext>> receiver, TimeSpan timeout)
         {
+
             EnsureNotDisposed();
 
-            MemoryStream bodyStream = null;
+            int messageCount;
+            lock (_messageLock)
+            {
+                if (_disposed)
+                    return;
+
+                messageCount = _messages.Count;
+            }
+
+            bool waited = false;
+
+            if (messageCount == 0)
+            {
+                if (!_messageReady.WaitOne(timeout, true))
+                    return;
+
+                waited = true;
+            }
+
+            bool monitorExitNeeded = true;
+            if (!Monitor.TryEnter(_messageLock, timeout))
+                return;
+
             try
             {
-                bodyStream = new MemoryStream();
-
-                sender(bodyStream);
-
-                lock (_messageLock)
+                for (LinkedListNode<MemoryStream> iterator = _messages.First; iterator != null; iterator = iterator.Next)
                 {
-                    EnsureNotDisposed();
+                    iterator.Value.Seek(0, SeekOrigin.Begin);
+                    var cxt = new LoopbackReceivingContext();
+                    cxt.Body = iterator.Value;
+                    Action<IReceivingContext> receive = receiver(cxt);
+                    if (receive == null)
+                        continue;
 
-                    _messages.AddLast(bodyStream);
+                    MemoryStream message = iterator.Value;
+                    message.Seek(0, SeekOrigin.Begin);
+
+                    _messages.Remove(iterator);
+
+                    try
+                    {
+                        Monitor.Exit(_messageLock);
+                        monitorExitNeeded = false;
+
+                        receive(cxt);
+                        return;
+                    }
+                    finally
+                    {
+                        message.Dispose();
+                    }
                 }
 
-                bodyStream = null;
+                if (waited)
+                    return;
+
+                // we read to the end and none were accepted, so we are going to wait until we get another in the queue
+                if (!_messageReady.WaitOne(timeout, true))
+                    return;
             }
             finally
             {
-                if (bodyStream != null)
-                    bodyStream.Dispose();
+                if (monitorExitNeeded)
+                    Monitor.Exit(_messageLock);
             }
-
-            _messageReady.Set();
         }
+
 
         public override void Receive(Func<Stream, Action<Stream>> receiver, TimeSpan timeout)
         {
@@ -169,5 +213,21 @@ namespace MassTransit.Transports
             _messageReady.Close();
             _messageReady = null;
         }
+    }
+
+    public class LoopbackReceivingContext :
+        IReceivingContext
+    {
+        public string GetLabel()
+        {
+            throw new NotImplementedException();
+        }
+
+        public object GetMessageId()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Stream Body { get; set; }
     }
 }
