@@ -1,4 +1,4 @@
-// Copyright 2007-2011 The Apache Software Foundation.
+﻿// Copyright 2007-2011 The Apache Software Foundation.
 // 
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -10,23 +10,32 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit
+namespace MassTransit.Transports.Nms
 {
     using System;
     using System.IO;
-    using Transports;
+    using Apache.NMS;
 
-    public interface ITransport :
-        IDisposable
+    public class NmsReceivingContext :
+        IReceivingContext
     {
-        IEndpointAddress Address { get; }
+        readonly ITextMessage _textMessage;
 
-        void Send(Action<ISendingContext> sender);
+        public NmsReceivingContext(ITextMessage textMessage)
+        {
+            _textMessage = textMessage;
+        }
 
-        void Receive(Func<Stream, Action<Stream>> receiver);
-        void Receive(Func<IReceivingContext, Action<IReceivingContext>> receiver);
+        public string GetLabel()
+        {
+            throw new NotImplementedException();
+        }
 
-        void Receive(Func<Stream, Action<Stream>> receiver, TimeSpan timeout);
-        void Receive(Func<IReceivingContext, Action<IReceivingContext>> receiver, TimeSpan timeout);
+        public object GetMessageId()
+        {
+            return _textMessage.NMSMessageId;
+        }
+
+        public Stream Body { get; set; }
     }
 }

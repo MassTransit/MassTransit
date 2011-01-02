@@ -1,4 +1,4 @@
-// Copyright 2007-2011 The Apache Software Foundation.
+﻿// Copyright 2007-2011 The Apache Software Foundation.
 // 
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -10,23 +10,32 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit
+namespace MassTransit.Transports.RabbitMq
 {
     using System;
     using System.IO;
-    using Transports;
+    using RabbitMQ.Client;
 
-    public interface ITransport :
-        IDisposable
+    public class RabbitMqReceivingContext :
+        IReceivingContext
     {
-        IEndpointAddress Address { get; }
+        readonly BasicGetResult _result;
 
-        void Send(Action<ISendingContext> sender);
+        public RabbitMqReceivingContext(BasicGetResult result)
+        {
+            _result = result;
+        }
 
-        void Receive(Func<Stream, Action<Stream>> receiver);
-        void Receive(Func<IReceivingContext, Action<IReceivingContext>> receiver);
+        public string GetLabel()
+        {
+            throw new NotImplementedException();
+        }
 
-        void Receive(Func<Stream, Action<Stream>> receiver, TimeSpan timeout);
-        void Receive(Func<IReceivingContext, Action<IReceivingContext>> receiver, TimeSpan timeout);
+        public object GetMessageId()
+        {
+            return _result.BasicProperties.MessageId;
+        }
+
+        public Stream Body { get; set; }
     }
 }

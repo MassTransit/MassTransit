@@ -52,7 +52,83 @@ namespace MassTransit.Transports.Nms
 			Receive(receiver, TimeSpan.Zero);
 		}
 
-		public virtual void Receive(Func<Stream, Action<Stream>> receiver, TimeSpan timeout)
+	    public void Receive(Func<IReceivingContext, Action<IReceivingContext>> receiver)
+	    {
+            if (_disposed) throw NewDisposedException();
+
+            Receive(receiver, TimeSpan.Zero);
+	    }
+
+	    public void Receive(Func<IReceivingContext, Action<IReceivingContext>> receiver, TimeSpan timeout)
+	    {
+            if (_disposed) throw NewDisposedException();
+
+			try
+			{
+				using (ISession session = _connection.CreateSession(AcknowledgementMode.Transactional))
+				{
+					IQueue destination = session.GetQueue(Address.Path);
+
+					using (IMessageConsumer consumer = session.CreateConsumer(destination))
+					{
+						IMessage message = consumer.Receive(timeout);
+						if (message == null)
+						{
+							if (_log.IsDebugEnabled)
+								_log.DebugFormat("NULL:{0}", Address);
+
+							if (SpecialLoggers.Messages.IsInfoEnabled)
+								SpecialLoggers.Messages.InfoFormat("NULL:{0}", Address);
+						}
+						else
+						{
+							var textMessage = message as ITextMessage;
+							if (textMessage == null)
+							{
+								if (_log.IsDebugEnabled)
+									_log.DebugFormat("UNKN:{0}:{1}", Address, message.GetType());
+
+								if (SpecialLoggers.Messages.IsInfoEnabled)
+									SpecialLoggers.Messages.InfoFormat("NULL:{0}:{1}", Address, message.GetType());
+							}
+							else
+							{
+								using (var bodyStream = new MemoryStream(Encoding.UTF8.GetBytes(textMessage.Text), false))
+								{
+								    var cxt = new NmsReceivingContext(textMessage);
+								    cxt.Body = bodyStream;
+									Action<IReceivingContext> receive = receiver(cxt);
+									if (receive == null)
+									{
+										if (_log.IsDebugEnabled)
+											_log.DebugFormat("SKIP:{0}:{1}", Address, message.NMSMessageId);
+
+										if (SpecialLoggers.Messages.IsInfoEnabled)
+											SpecialLoggers.Messages.InfoFormat("SKIP:{0}:{1}", Address, message.NMSMessageId);
+									}
+									else
+									{
+										receive(cxt);
+									}
+								}
+							}
+						}
+					}
+
+					session.Commit();
+				}
+			}
+			catch (InvalidOperationException ex)
+			{
+				if (_log.IsErrorEnabled)
+					_log.Error("A problem occurred communicating with the queue", ex);
+
+				Reconnect();
+			}
+	        throw new NotImplementedException();
+	    }
+
+	    public virtual void Receive(Func<Stream, Action<Stream>> receiver, TimeSpan timeout)
 		{
 			if (_disposed) throw NewDisposedException();
 
@@ -307,44 +383,4 @@ namespace MassTransit.Transports.Nms
 			Dispose(false);
 		}
 	}
-
-    public class NmsSendingContext :
-        ISendingContext
-    {
-        readonly IMessageProducer _msgProducer;
-        readonly ITextMessage _msg;
-
-        public NmsSendingContext(IMessageProducer msgProducer)
-        {
-            _msgProducer = msgProducer;
-            _msg = _msgProducer.CreateTextMessage();
-        }
-
-        public Stream Body { get; set; }
-
-        public void MarkRecoverable()
-        {
-            _msg.NMSDeliveryMode = MsgDeliveryMode.Persistent;
-        }
-
-        public void SetLabel(string label)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void SetMessageExpiration(DateTime d)
-        {
-            if (OutboundMessage.Headers.ExpirationTime.HasValue)
-            {
-                _msg.NMSTimeToLive = d - DateTime.UtcNow;
-            }
-        }
-
-        public IMessage GetMessage()
-        {
-            string text = Encoding.UTF8.GetString(((MemoryStream) Body).ToArray());
-            _msg.Text = text;
-            return _msg;
-        }
-    }
 }

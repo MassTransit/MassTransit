@@ -53,23 +53,28 @@ namespace MassTransit.Transports
             }
         }
 
-        public override void Send(Action<Stream> sender)
+        public override void Receive(Func<IReceivingContext, Action<IReceivingContext>> receiver, TimeSpan timeout)
         {
             EnsureNotDisposed();
 
-            using (var bodyStream = new MemoryStream())
-            {
-                sender(bodyStream);
+            var endPoint = new IPEndPoint(IPAddress.Any, Address.Uri.Port);
 
-                try
+            byte[] data = _receiveClient.Receive(ref endPoint);
+            if (data == null || data.Length <= 0)
+                return;
+
+            using (var bodyStream = new MemoryStream(data))
+            {
+                var cxt = new MulticastUdpReceivingContext();
+                cxt.Body = bodyStream;
+                Action<IReceivingContext> receive = receiver(cxt);
+                if (receive == null)
                 {
-                    byte[] data = bodyStream.ToArray();
-                    _sendClient.Send(data, data.Length, _sendIpEndPoint);
+                    // SKIPPED
+                    return;
                 }
-                catch (Exception ex)
-                {
-                    throw new TransportException(Address.Uri, "Unable to send to transport: " + _sendIpEndPoint, ex);
-                }
+
+                receive(cxt);
             }
         }
 
@@ -168,5 +173,21 @@ namespace MassTransit.Transports
         {
             return new ObjectDisposedException("The transport has already been disposed: " + Address);
         }
+    }
+
+    public class MulticastUdpReceivingContext : 
+        IReceivingContext
+    {
+        public string GetLabel()
+        {
+            throw new NotImplementedException();
+        }
+
+        public object GetMessageId()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Stream Body { get; set; }
     }
 }
