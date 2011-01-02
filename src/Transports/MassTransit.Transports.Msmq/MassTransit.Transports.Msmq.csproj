@@ -80,7 +80,6 @@
       <Link>SolutionVersion.cs</Link>
     </Compile>
     <Compile Include="AbstractMsmqTransport.cs" />
-    <Compile Include="CreateMsmqEndpointSettings.cs" />
     <Compile Include="IMsmqEndpointDefaults.cs" />
     <Compile Include="LocalTransportSettings.cs" />
     <Compile Include="MsmqBusConfigurationExtensions.cs" />

@@ -22,6 +22,7 @@ namespace MassTransit.Transports.Msmq.Tests.TestFixtures
 			var settings = new CreateEndpointSettings(new Uri("msmq://localhost/mt_client_tx"));
             EndpointAddress = settings.Address;
             ErrorEndpointAddress = settings.ErrorAddress;
+            settings.Transactional = true;
             Transactional = true;
         }
     }
