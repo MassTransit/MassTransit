@@ -70,7 +70,7 @@ namespace MassTransit.Transports
         {
         }
 
-        private void SetDefaultErrorAddress()
+        protected void SetDefaultErrorAddress()
         {
             ErrorAddress = new EndpointAddress(new Uri(Address.Uri + "_error"));
         }
@@ -90,5 +90,23 @@ namespace MassTransit.Transports
         /// The serializer to use for messages on the endpoint
         /// </summary>
         public IMessageSerializer Serializer { get; set; }
+
+        public bool Transactional { get; set; }
+
+        /// <summary>
+        /// True if any existing messages at the endpoint should be purged when the endpoint is created
+        /// </summary>
+        public bool PurgeExistingMessages { get; set; }
+
+        public bool CreateIfMissing { get; set; }
+
+        public CreateTransportSettings ToTransportSettings()
+        {
+            return new CreateTransportSettings(Address)
+                {
+                    CreateIfMissing = CreateIfMissing,
+                    RequireTransactional = Transactional
+                };
+        }
     }
 }
