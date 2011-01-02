@@ -28,21 +28,18 @@ namespace MassTransit.Transports.Msmq
 	{
 		private static readonly ILog _log = LogManager.GetLogger(typeof (NonTransactionalMsmqTransport));
 		private static readonly ILog _messageLog = LogManager.GetLogger("MassTransit.Msmq.MessageLog");
-		private IMsmqEndpointAddress _address;
+		private IEndpointAddress _address;
+        string _formatName;
 		private bool _disposed;
 		private MessageQueue _queue;
 
-		protected AbstractMsmqTransport(IMsmqEndpointAddress address)
+		protected AbstractMsmqTransport(IEndpointAddress address)
 		{
 			_address = address;
+		    _formatName = MsmqUriParser.GetFormatName(_address.Uri);
 		}
 
 		public IEndpointAddress Address
-		{
-			get { return _address; }
-		}
-
-		public IMsmqEndpointAddress MsmqAddress
 		{
 			get { return _address; }
 		}
@@ -134,7 +131,7 @@ namespace MassTransit.Transports.Msmq
 
 				try
 				{
-					using (var queue = new MessageQueue(_address.FormatName, QueueAccessMode.Send))
+					using (var queue = new MessageQueue(_formatName, QueueAccessMode.Send))
 					{
 						SendMessage(queue, message);
 
@@ -242,7 +239,7 @@ namespace MassTransit.Transports.Msmq
 				case MessageQueueErrorCode.AccessDenied:
 				case MessageQueueErrorCode.QueueDeleted:
 					if (_log.IsErrorEnabled)
-						_log.Error("The message queue was not available: " + _address.FormatName, ex);
+						_log.Error("The message queue was not available: " + _formatName, ex);
 
 					Thread.Sleep(timeout);
 					Reconnect();
@@ -252,7 +249,7 @@ namespace MassTransit.Transports.Msmq
 				case MessageQueueErrorCode.IllegalFormatName:
 				case MessageQueueErrorCode.MachineNotFound:
 					if (_log.IsErrorEnabled)
-						_log.Error("The message queue was not found or is improperly named: " + _address.FormatName, ex);
+						_log.Error("The message queue was not found or is improperly named: " + _formatName, ex);
 
 					Thread.Sleep(timeout);
 					Reconnect();
@@ -268,7 +265,7 @@ namespace MassTransit.Transports.Msmq
 				case MessageQueueErrorCode.InvalidHandle:
 				case MessageQueueErrorCode.StaleHandle:
 					if (_log.IsErrorEnabled)
-						_log.Error("The message queue handle is stale or no longer valid due to a restart of the message queuing service: " + _address.FormatName, ex);
+						_log.Error("The message queue handle is stale or no longer valid due to a restart of the message queuing service: " + _formatName, ex);
 
 					Reconnect();
 
@@ -277,7 +274,7 @@ namespace MassTransit.Transports.Msmq
 
 				default:
 					if (_log.IsErrorEnabled)
-						_log.Error("There was a problem communicating with the message queue: " + _address.FormatName, ex);
+						_log.Error("There was a problem communicating with the message queue: " + _formatName, ex);
 					break;
 			}
 		}
@@ -287,7 +284,7 @@ namespace MassTransit.Transports.Msmq
 			if (_queue != null)
 				return;
 
-			_queue = new MessageQueue(_address.FormatName, QueueAccessMode.Receive);
+			_queue = new MessageQueue(_formatName, QueueAccessMode.Receive);
 		}
 
 		protected virtual void Disconnect()

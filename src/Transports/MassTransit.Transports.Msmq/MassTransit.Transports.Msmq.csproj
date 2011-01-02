@@ -83,7 +83,6 @@
     <Compile Include="AbstractMsmqTransport.cs" />
     <Compile Include="CreateMsmqEndpointSettings.cs" />
     <Compile Include="CreateMsmqTransportSettings.cs" />
-    <Compile Include="IMsmqEndpointAddress.cs" />
     <Compile Include="IMsmqEndpointDefaults.cs" />
     <Compile Include="IMsmqTransport.cs" />
     <Compile Include="LocalTransportSettings.cs" />
@@ -95,6 +94,7 @@
     <Compile Include="MsmqEndpointFactory.cs" />
     <Compile Include="MsmqEndpointManagement.cs" />
     <Compile Include="MsmqTransportFactory.cs" />
+    <Compile Include="MsmqUriParser.cs" />
     <Compile Include="NonTransactionalMsmqTransport.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TransactionalMsmqTransport.cs" />

@@ -68,7 +68,7 @@ namespace MassTransit.Transports.Msmq
         /// <summary>
         /// The address of the endpoint
         /// </summary>
-        public IMsmqEndpointAddress Address { get; set; }
+        public IEndpointAddress Address { get; set; }
 
         /// <summary>
         /// The transport should be created if it was not found

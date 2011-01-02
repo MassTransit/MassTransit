@@ -52,8 +52,8 @@ namespace MassTransit.Transports.Msmq.Tests.TestFixtures
             base.TeardownContext();
         }
 
-        protected IMsmqEndpointAddress EndpointAddress { get; set; }
-        protected IMsmqEndpointAddress ErrorEndpointAddress { get; set; }
+        protected IEndpointAddress EndpointAddress { get; set; }
+        protected IEndpointAddress ErrorEndpointAddress { get; set; }
         protected IEndpoint Endpoint { get; private set; }
         protected IEndpoint ErrorEndpoint { get; private set; }
     }

@@ -27,6 +27,7 @@ namespace MassTransit
         {
             Uri = uri;
             _isLocal = () => DetermineIfEndpointIsLocal(uri);
+            IsTransactional = false;
         }
 
         public static IEndpointAddress Null
@@ -62,5 +63,7 @@ namespace MassTransit
 
             return local;
         }
+
+        public bool IsTransactional { get; set; }
     }
 }

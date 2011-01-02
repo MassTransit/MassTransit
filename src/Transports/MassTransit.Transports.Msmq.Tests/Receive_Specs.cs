@@ -25,7 +25,8 @@ namespace MassTransit.Transports.Msmq.Tests
 		[Test]
 		public void An_undecipherable_blob_should_be_discarded()
 		{
-			using (var queue = new MessageQueue(EndpointAddress.FormatName, QueueAccessMode.Send))
+		    var formatName = MsmqUriParser.GetFormatName(Endpoint.Uri);
+			using (var queue = new MessageQueue(formatName, QueueAccessMode.Send))
 			{
 				queue.Send("This is just crap, it will cause pain");
 			}
@@ -44,8 +45,8 @@ namespace MassTransit.Transports.Msmq.Tests
 				Assert.Fail("Did not expect " + ex.GetType() + " = " + ex.Message);
 			}
 
-			Assert.AreEqual(0, EndpointAddress.GetMessageCount(), "Endpoint was not empty");
-			Assert.AreEqual(1, ErrorEndpointAddress.GetMessageCount(), "Error endpoint did not contain bogus message");
+			Assert.AreEqual(0, EndpointAddress.GetMsmqMessageCount(), "Endpoint was not empty");
+			Assert.AreEqual(1, ErrorEndpointAddress.GetMsmqMessageCount(), "Error endpoint did not contain bogus message");
 		}
 
 		[Test]

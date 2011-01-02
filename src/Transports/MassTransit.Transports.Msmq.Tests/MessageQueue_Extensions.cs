@@ -30,7 +30,7 @@ namespace MassTransit.Transports.Msmq.Tests
             }
         }
 
-		public static long GetMessageCount(this IMsmqEndpointAddress address)
+		public static long GetMsmqMessageCount(this IEndpointAddress address)
 		{
 			IEndpointManagement management = MsmqEndpointManagement.New(address.Uri);
 			return management.Count();

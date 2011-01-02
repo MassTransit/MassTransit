@@ -31,7 +31,7 @@ namespace MassTransit.Transports.Msmq.Tests
 			transport.Stub(x => x.Receive(null))
 				.Callback(new Func<Func<Message, Action<Message>>, bool>(Forwarder));
 
-			var address = MockRepository.GenerateMock<IMsmqEndpointAddress>();
+			var address = MockRepository.GenerateMock<IEndpointAddress>();
 
 			IEndpoint endpoint = new MsmqEndpoint(address, new XmlMessageSerializer(), transport, MockRepository.GenerateMock<IMsmqTransport>());
 

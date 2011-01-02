@@ -127,6 +127,8 @@
     <Compile Include="Services\Timeout\Messages\ScheduleTimeout.cs" />
     <Compile Include="Services\Timeout\Messages\TimeoutExpired.cs" />
     <Compile Include="Services\Timeout\TimeoutService.cs" />
+    <Compile Include="StreamExtensions.cs" />
+    <Compile Include="Transports\ISendingContext.cs" />
     <Compile Include="Transports\LoopbackEndpoint.cs" />
     <Compile Include="Internal\SpecialLoggers.cs" />
     <Compile Include="Consumes.cs" />

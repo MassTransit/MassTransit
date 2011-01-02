@@ -18,15 +18,14 @@ namespace MassTransit.Transports.Msmq
 	using Util;
 
 	public class MsmqEndpointAddress :
-		EndpointAddress,
-		IMsmqEndpointAddress
+		EndpointAddress
 	{
 		public MsmqEndpointAddress(Uri uri)
 			: base(uri)
 		{
 			PublicQueuesNotAllowed();
 
-			FormatName = BuildQueueFormatName();
+			FormatName = MsmqUriParser.GetFormatName(uri);
 
 			IsTransactional = CheckForTransactionalHint();
 		
@@ -34,7 +33,7 @@ namespace MassTransit.Transports.Msmq
 			{
 				IsTransactional = IsLocalQueueTransactional();
 
-				LocalName = @".\private$\" + Path;
+				LocalName = MsmqUriParser.GetLocalName(uri);
 
 				Uri = SetUriHostToLocalMachineName();
 			}
@@ -60,17 +59,6 @@ namespace MassTransit.Transports.Msmq
 
 		public string LocalName { get; private set; }
 
-		public bool IsTransactional { get; private set; }
-
-		private string BuildQueueFormatName()
-		{
-			string hostName = Uri.Host;
-
-			if (IsIpAddress(hostName))
-				return string.Format(@"FormatName:DIRECT=TCP:{0}\private$\{1}", hostName, Path);
-
-			return string.Format(@"FormatName:DIRECT=OS:{0}\private$\{1}", hostName, Path);
-		}
 
 		private void PublicQueuesNotAllowed()
 		{
@@ -87,11 +75,6 @@ namespace MassTransit.Transports.Msmq
 				"Bad: msmq://machinename/round_file/queue_name");
 		}
 
-		private static bool IsIpAddress(string hostName)
-		{
-			IPAddress address;
-			return IPAddress.TryParse(hostName, out address);
-		}
 
 		private bool CheckForTransactionalHint()
 		{

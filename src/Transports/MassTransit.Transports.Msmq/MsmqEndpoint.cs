@@ -14,6 +14,7 @@ namespace MassTransit.Transports.Msmq
 {
 	using System;
 	using System.Diagnostics;
+	using System.IO;
 	using System.Messaging;
 	using System.Runtime.Serialization;
 	using Configuration;
@@ -32,7 +33,7 @@ namespace MassTransit.Transports.Msmq
 		private IMsmqTransport _errorTransport;
 		private IMsmqTransport _transport;
 
-		public MsmqEndpoint(IMsmqEndpointAddress address, IMessageSerializer serializer, IMsmqTransport transport, IMsmqTransport errorTransport)
+		public MsmqEndpoint(IEndpointAddress address, IMessageSerializer serializer, IMsmqTransport transport, IMsmqTransport errorTransport)
 			: base(address, serializer)
 		{
 			_tracker = new MessageRetryTracker(5);
@@ -47,11 +48,12 @@ namespace MassTransit.Transports.Msmq
 		{
 			if (_disposed) throw NewDisposedException();
 
-			_transport.Send(msg =>
+
+			_transport.Send(str =>
 				{
 					SetOutboundMessageHeaders<T>();
 
-					PopulateTransportMessage(msg, message);
+					PopulateTransportMessage(str, message);
                 });
 		}
 
@@ -86,15 +88,18 @@ namespace MassTransit.Transports.Msmq
 			_disposed = true;
 		}
 
-		private void PopulateTransportMessage<T>(Message transportMessage, T message)
+		private void PopulateTransportMessage<T>(Stream transportMessage, T message)
 		{
-			Serializer.Serialize(transportMessage.BodyStream, message);
+			Serializer.Serialize(transportMessage, message);
 
-			transportMessage.Label = typeof (T).Name;
+            //cxt.SetLabel
+			//transportMessage.Label = typeof (T).Name;
 
-			transportMessage.Recoverable = true;
+            //cxt.SetRecoverable
+			//transportMessage.Recoverable = true;
 
-			SetMessageExpiration(transportMessage);
+            //
+			//SetMessageExpiration(transportMessage);
 		}
 
 		private Func<Message, Action<Message>> ReceiveFromTransport(Func<object, Action<object>> receiver)
@@ -179,12 +184,12 @@ namespace MassTransit.Transports.Msmq
 
 	    private void MoveMessageToErrorTransport(Message message)
 	    {
-	        _errorTransport.Send(outbound =>
-	        	{
-	        		outbound.BodyStream = message.BodyStream;
-
-	        		SetMessageExpiration(outbound);
-	        	});
+            _errorTransport.Send(str=>
+            {
+                message.BodyStream.CopyTo(str);
+                //set the headers on the outbound
+                //SetMessageExpiration();
+            });
 
 	        if (_log.IsDebugEnabled)
 	            _log.DebugFormat("MOVE:{0}:{1}:{2}", Address, _errorTransport.Address, message.Id);

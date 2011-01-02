@@ -51,7 +51,7 @@ namespace MassTransit.Transports.Msmq
         /// <summary>
         /// The address of the endpoint where invalid messages should be moved
         /// </summary>
-        public IMsmqEndpointAddress ErrorAddress { get; set; }
+        public IEndpointAddress ErrorAddress { get; set; }
 
         /// <summary>
         /// True if any existing messages at the endpoint should be purged when the endpoint is created

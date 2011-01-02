@@ -19,7 +19,7 @@ namespace MassTransit.Transports.Msmq
 
     public static class MsmqEndpointFactory
     {
-        public static IEndpoint New(IMsmqEndpointAddress address, IMessageSerializer serializer)
+        public static IEndpoint New(IEndpointAddress address, IMessageSerializer serializer)
         {
             return New(new CreateMsmqEndpointSettings(address)
                 {
@@ -41,7 +41,7 @@ namespace MassTransit.Transports.Msmq
                 PurgeExistingMessagesIfRequested(settings);
 
                 var errorSettings = new CreateMsmqTransportSettings(settings.ErrorAddress, settings);
-				if(transport.MsmqAddress.IsTransactional)
+				if(transport.Address.IsTransactional)
 					settings.Transactional = true;
 
                 IMsmqTransport errorTransport = MsmqTransportFactory.New(errorSettings);
