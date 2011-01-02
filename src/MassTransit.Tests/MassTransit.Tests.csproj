@@ -199,6 +199,7 @@
     <Compile Include="Services\HealthMonitoring\HealthService_Specs.cs" />
     <Compile Include="Services\Routing\RoutingConfiguration_Specs.cs" />
     <Compile Include="Services\Subscriptions\SubscriptionConsumer_Specs.cs" />
+    <Compile Include="StreamExtensionsTests.cs" />
     <Compile Include="SubscribeConsumer_Specs.cs" />
     <Compile Include="Subscriptions\SubscriptionService_Specs.cs" />
     <Compile Include="Subscriptions\CorrelatedSubscription_Specs.cs" />

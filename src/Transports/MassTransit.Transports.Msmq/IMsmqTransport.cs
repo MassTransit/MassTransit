@@ -21,8 +21,6 @@ namespace MassTransit.Transports.Msmq
 	public interface IMsmqTransport :
 		ITransport
 	{
-		IMsmqEndpointAddress MsmqAddress { get; }
-
 		/// <summary>
 		/// Receive a message from the transport
 		/// </summary>
@@ -31,6 +29,6 @@ namespace MassTransit.Transports.Msmq
 
 		void Receive(Func<Message, Action<Message>> receiver, TimeSpan timeout);
 
-		void Send(Action<Message> sender);
+		//void Send(Action<Message> sender);
 	}
 }

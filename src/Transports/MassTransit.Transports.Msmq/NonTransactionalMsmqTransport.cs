@@ -15,7 +15,7 @@ namespace MassTransit.Transports.Msmq
 	public class NonTransactionalMsmqTransport :
 		AbstractMsmqTransport
 	{
-		public NonTransactionalMsmqTransport(IMsmqEndpointAddress address)
+		public NonTransactionalMsmqTransport(IEndpointAddress address)
 			: base(address)
 		{
 		}

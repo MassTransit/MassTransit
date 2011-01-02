@@ -23,7 +23,7 @@ namespace MassTransit.Transports.Msmq
 	{
 		private static readonly ILog _log = LogManager.GetLogger(typeof (TransactionalMsmqTransport));
 
-		public TransactionalMsmqTransport(IMsmqEndpointAddress address)
+		public TransactionalMsmqTransport(IEndpointAddress address)
 			: base(address)
 		{
 		}
