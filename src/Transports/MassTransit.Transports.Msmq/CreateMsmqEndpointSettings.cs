@@ -15,8 +15,8 @@ namespace MassTransit.Transports.Msmq
     using System;
     using Serialization;
 
-    public class CreateMsmqEndpointSettings :
-        CreateMsmqTransportSettings
+    public class CreateMsmqEndpointSettings:
+        CreateTransportSettings
     {
         public CreateMsmqEndpointSettings(string endpointUri)
             : base(endpointUri)

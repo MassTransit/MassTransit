@@ -128,8 +128,11 @@
     <Compile Include="Services\Timeout\Messages\TimeoutExpired.cs" />
     <Compile Include="Services\Timeout\TimeoutService.cs" />
     <Compile Include="StreamExtensions.cs" />
+    <Compile Include="Transports\CreateTransportSettings.cs" />
+    <Compile Include="Transports\IEndpointFactory.cs" />
     <Compile Include="Transports\IReceivingContext.cs" />
     <Compile Include="Transports\ISendingContext.cs" />
+    <Compile Include="Transports\ITransportFactory.cs" />
     <Compile Include="Transports\LoopbackEndpoint.cs" />
     <Compile Include="Internal\SpecialLoggers.cs" />
     <Compile Include="Consumes.cs" />
