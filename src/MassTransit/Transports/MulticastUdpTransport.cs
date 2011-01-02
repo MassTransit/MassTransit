@@ -78,29 +78,6 @@ namespace MassTransit.Transports
             }
         }
 
-        public override void Receive(Func<Stream, Action<Stream>> receiver, TimeSpan timeout)
-        {
-            EnsureNotDisposed();
-
-            var endPoint = new IPEndPoint(IPAddress.Any, Address.Uri.Port);
-
-            byte[] data = _receiveClient.Receive(ref endPoint);
-            if (data == null || data.Length <= 0)
-                return;
-
-            using (var bodyStream = new MemoryStream(data))
-            {
-                Action<Stream> receive = receiver(bodyStream);
-                if (receive == null)
-                {
-                    // SKIPPED
-                    return;
-                }
-
-                receive(bodyStream);
-            }
-        }
-
         private void Initialize()
         {
             _groupAddress = IPAddress.Parse(Address.Uri.Host);

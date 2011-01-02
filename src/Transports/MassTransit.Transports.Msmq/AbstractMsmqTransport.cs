@@ -44,13 +44,6 @@ namespace MassTransit.Transports.Msmq
 			get { return _address; }
 		}
 
-		public virtual void Receive(Func<Message, Action<Message>> receiver)
-		{
-			if (_disposed) throw NewDisposedException();
-
-			Receive(receiver, TimeSpan.Zero);
-		}
-
 		public virtual void Receive(Func<Message, Action<Message>> receiver, TimeSpan timeout)
 		{
 			try
@@ -204,42 +197,10 @@ namespace MassTransit.Transports.Msmq
             }
         }
 
-		public virtual void Send(Action<Message> sender)
-		{
-			if (_disposed) throw NewDisposedException();
-
-			using (var message = new Message())
-			{
-				sender(message);
-
-				try
-				{
-					using (var queue = new MessageQueue(_formatName, QueueAccessMode.Send))
-					{
-						SendMessage(queue, message);
-
-						if (_messageLog.IsDebugEnabled)
-							_messageLog.DebugFormat("SEND:{0}:{1}", Address, message.Id);
-					}
-				}
-				catch (MessageQueueException ex)
-				{
-					HandleMessageQueueException(ex, 2.Seconds());
-				}
-			}
-		}
-
 		public void Dispose()
 		{
 			Dispose(true);
 			GC.SuppressFinalize(this);
-		}
-
-		public virtual void Receive(Func<Stream, Action<Stream>> receiver)
-		{
-			if (_disposed) throw NewDisposedException();
-
-			Receive(receiver, TimeSpan.Zero);
 		}
 
         public void Receive(Func<IReceivingContext, Action<IReceivingContext>> receiver)
@@ -248,13 +209,6 @@ namespace MassTransit.Transports.Msmq
 
             Receive(receiver, TimeSpan.Zero);
         }
-
-        public virtual void Receive(Func<Stream, Action<Stream>> receiver, TimeSpan timeout)
-		{
-			if (_disposed) throw NewDisposedException();
-
-			Receive(ReceiveAsStream(receiver), timeout);
-		}
 
         public void Receive(Func<IReceivingContext, Action<IReceivingContext>> receiver, TimeSpan timeout)
         {
@@ -270,15 +224,6 @@ namespace MassTransit.Transports.Msmq
                 HandleMessageQueueException(ex, timeout);
             }
         }
-
-        public virtual void Send(Action<Stream> sender)
-		{
-			if (_disposed) throw NewDisposedException();
-
-			Action<Message> messageSender = m => sender(m.BodyStream);
-
-			Send(messageSender);
-		}
 
 		protected virtual void SendMessage(MessageQueue queue, Message message)
 		{

@@ -68,37 +68,7 @@ namespace MassTransit.Transports.RabbitMq
                 channel.Close(200,"ok");
             }
         }
-        public override void Receive(Func<Stream, Action<Stream>> receiver, TimeSpan timeout)
-        {
-            EnsureNotDisposed();
-
-            using(var channel = _connection.CreateModel())
-            {
-                channel.QueueDeclare(_address.Queue, true);
-                var result = channel.BasicGet(_address.Queue, true);
-                
-                using(var body = new MemoryStream(result.Body))
-                {
-                    Action<Stream> receive = receiver(body);
-                    if(receive==null)
-                    {
-                        if (_log.IsDebugEnabled)
-                            _log.DebugFormat("SKIP:{0}:{1}", Address, result.BasicProperties.MessageId);
-
-                        if (SpecialLoggers.Messages.IsInfoEnabled)
-                            SpecialLoggers.Messages.InfoFormat("SKIP:{0}:{1}", Address, result.BasicProperties.MessageId);
-                    }
-                    else
-                    {
-                        receive(body);
-                    }
-                }
-
-                channel.BasicAck(result.DeliveryTag, false);
-                channel.Close(200,"ok");
-            }
-        }
-
+        
         public override void Send(Action<ISendingContext> sender)
         {
             EnsureNotDisposed();

@@ -69,7 +69,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
                 return ss =>
                 {
                     var buff = new byte[3];
-                    ss.Read(buff, 0, buff.Length);
+                    ss.Body.Read(buff, 0, buff.Length);
                     var name = Encoding.UTF8.GetString(buff);
                     Assert.AreEqual("dru", name);
                     Console.WriteLine(name);

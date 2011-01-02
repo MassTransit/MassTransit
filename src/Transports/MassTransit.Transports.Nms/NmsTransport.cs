@@ -45,13 +45,6 @@ namespace MassTransit.Transports.Nms
 			get { return _address; }
 		}
 
-		public virtual void Receive(Func<Stream, Action<Stream>> receiver)
-		{
-			if (_disposed) throw NewDisposedException();
-
-			Receive(receiver, TimeSpan.Zero);
-		}
-
 	    public void Receive(Func<IReceivingContext, Action<IReceivingContext>> receiver)
 	    {
             if (_disposed) throw NewDisposedException();
@@ -125,74 +118,9 @@ namespace MassTransit.Transports.Nms
 
 				Reconnect();
 			}
-	        throw new NotImplementedException();
 	    }
 
-	    public virtual void Receive(Func<Stream, Action<Stream>> receiver, TimeSpan timeout)
-		{
-			if (_disposed) throw NewDisposedException();
 
-			try
-			{
-				using (ISession session = _connection.CreateSession(AcknowledgementMode.Transactional))
-				{
-					IQueue destination = session.GetQueue(Address.Path);
-
-					using (IMessageConsumer consumer = session.CreateConsumer(destination))
-					{
-						IMessage message = consumer.Receive(timeout);
-						if (message == null)
-						{
-							if (_log.IsDebugEnabled)
-								_log.DebugFormat("NULL:{0}", Address);
-
-							if (SpecialLoggers.Messages.IsInfoEnabled)
-								SpecialLoggers.Messages.InfoFormat("NULL:{0}", Address);
-						}
-						else
-						{
-							var textMessage = message as ITextMessage;
-							if (textMessage == null)
-							{
-								if (_log.IsDebugEnabled)
-									_log.DebugFormat("UNKN:{0}:{1}", Address, message.GetType());
-
-								if (SpecialLoggers.Messages.IsInfoEnabled)
-									SpecialLoggers.Messages.InfoFormat("NULL:{0}:{1}", Address, message.GetType());
-							}
-							else
-							{
-								using (var bodyStream = new MemoryStream(Encoding.UTF8.GetBytes(textMessage.Text), false))
-								{
-									Action<Stream> receive = receiver(bodyStream);
-									if (receive == null)
-									{
-										if (_log.IsDebugEnabled)
-											_log.DebugFormat("SKIP:{0}:{1}", Address, message.NMSMessageId);
-
-										if (SpecialLoggers.Messages.IsInfoEnabled)
-											SpecialLoggers.Messages.InfoFormat("SKIP:{0}:{1}", Address, message.NMSMessageId);
-									}
-									else
-									{
-										receive(bodyStream);
-									}
-								}
-							}
-						}
-					}
-
-					session.Commit();
-				}
-			}
-			catch (InvalidOperationException ex)
-			{
-				if (_log.IsErrorEnabled)
-					_log.Error("A problem occurred communicating with the queue", ex);
-
-				Reconnect();
-			}
-		}
 
         public virtual void Send(Action<ISendingContext> sender)
         {
@@ -236,55 +164,7 @@ namespace MassTransit.Transports.Nms
                 Reconnect();
             }
         }
-		public virtual void Send(Action<Stream> sender)
-		{
-			if (_disposed) throw NewDisposedException();
-
-			try
-			{
-				using (ISession session = _connection.CreateSession(AcknowledgementMode.Transactional))
-				{
-					IQueue destination = session.GetQueue(Address.Path);
-
-					using (IMessageProducer producer = session.CreateProducer(destination))
-					{
-						using (var bodyStream = new MemoryStream())
-						{
-							sender(bodyStream);
-
-							string text = Encoding.UTF8.GetString(bodyStream.ToArray());
-
-							ITextMessage textMessage = session.CreateTextMessage(text);
-
-							SetMessageExpiration(textMessage);
-
-							producer.DeliveryMode = MsgDeliveryMode.Persistent;
-							producer.Send(textMessage);
-
-							session.Commit();
-
-							if (SpecialLoggers.Messages.IsInfoEnabled)
-								SpecialLoggers.Messages.InfoFormat("SEND:{0}:{1}", Address, textMessage.NMSMessageId);
-						}
-					}
-				}
-			}
-			catch (InvalidOperationException ex)
-			{
-				if (_log.IsErrorEnabled)
-					_log.Error("A problem occurred communicating with the queue", ex);
-
-				Reconnect();
-			}
-		}
-
-		private static void SetMessageExpiration(IMessage outbound)
-		{
-			if (OutboundMessage.Headers.ExpirationTime.HasValue)
-			{
-				outbound.NMSTimeToLive = OutboundMessage.Headers.ExpirationTime.Value - DateTime.UtcNow;
-			}
-		}
+		
 
 		public void Dispose()
 		{
