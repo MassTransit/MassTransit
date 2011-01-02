@@ -38,14 +38,8 @@ namespace MassTransit.Transports
             Receive(receiver, TimeSpan.Zero);
         }
 
-        public void Receive(Func<Stream, Action<Stream>> receiver)
-        {
-            EnsureNotDisposed();
 
-            Receive(receiver, TimeSpan.Zero);
-        }
 
-        public abstract void Receive(Func<Stream, Action<Stream>> receiver, TimeSpan timeout);
         public abstract void Receive(Func<IReceivingContext, Action<IReceivingContext>> receiver, TimeSpan timeout);
 
         protected void EnsureNotDisposed()

@@ -36,10 +36,5 @@ namespace MassTransit.Transports
         {
             //no-op
         }
-
-        public override void Receive(Func<Stream, Action<Stream>> receiver, TimeSpan timeout)
-        {
-            //no-op
-        }
     }
 }
