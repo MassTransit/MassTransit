@@ -15,6 +15,7 @@ namespace MassTransit.Transports.Nms
 	using System;
 	using System.Diagnostics;
 	using Configuration;
+	using Internal;
 	using Serialization;
 
 	/// <summary>
@@ -23,7 +24,7 @@ namespace MassTransit.Transports.Nms
 	/// </summary>
 	[DebuggerDisplay("{Address}")]
 	public class NmsEndpoint :
-		StreamEndpoint
+		AbstractEndpoint
 	{
 		public NmsEndpoint(IEndpointAddress address, IMessageSerializer serializer, ITransport transport, ITransport errorTransport)
 			: base(address, serializer, transport, errorTransport)

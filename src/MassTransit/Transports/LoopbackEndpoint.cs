@@ -15,11 +15,12 @@ namespace MassTransit.Transports
     using System;
     using System.Diagnostics;
     using Configuration;
+    using Internal;
     using Serialization;
 
     [DebuggerDisplay("{Address}")]
     public class LoopbackEndpoint :
-        StreamEndpoint
+        AbstractEndpoint
     {
         public LoopbackEndpoint(IEndpointAddress address, IMessageSerializer serializer, ITransport transport, ITransport errorTransport)
             : base(address, serializer, transport, errorTransport)

@@ -14,12 +14,13 @@ namespace MassTransit.Transports.RabbitMq
 {
     using System;
     using System.Diagnostics;
+    using Internal;
     using MassTransit.Configuration;
     using Serialization;
 
     [DebuggerDisplay("{Address}")]
     public class RabbitMqEndpoint :
-        StreamEndpoint
+        AbstractEndpoint
     {
         public RabbitMqEndpoint(IEndpointAddress address, IMessageSerializer serializer, ITransport transport, ITransport errorTransport) : base(address, serializer, transport, errorTransport)
         {
