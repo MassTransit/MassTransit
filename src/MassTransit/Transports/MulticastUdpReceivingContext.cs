@@ -10,22 +10,14 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Transports.RabbitMq
+namespace MassTransit.Transports
 {
     using System;
     using System.IO;
-    using RabbitMQ.Client;
 
-    public class RabbitMqReceivingContext :
+    public class MulticastUdpReceivingContext :
         IReceivingContext
     {
-        readonly BasicGetResult _result;
-
-        public RabbitMqReceivingContext(BasicGetResult result)
-        {
-            _result = result;
-        }
-
         public string GetLabel()
         {
             throw new NotImplementedException();
@@ -33,7 +25,7 @@ namespace MassTransit.Transports.RabbitMq
 
         public string GetMessageId()
         {
-            return _result.BasicProperties.MessageId;
+            throw new NotImplementedException();
         }
 
         public Stream Body { get; set; }

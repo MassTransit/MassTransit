@@ -17,7 +17,7 @@ namespace MassTransit.Transports
     public interface IReceivingContext
     {
         string GetLabel();
-        object GetMessageId();
+        string GetMessageId();
         Stream Body { get; }
     }
 }

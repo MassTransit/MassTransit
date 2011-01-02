@@ -24,7 +24,7 @@ namespace MassTransit.Transports.Msmq
 
     [DebuggerDisplay("{Address}")]
 	public class AbstractMsmqTransport :
-		IMsmqTransport
+		ITransport
 	{
 		private static readonly ILog _log = LogManager.GetLogger(typeof (NonTransactionalMsmqTransport));
 		private static readonly ILog _messageLog = LogManager.GetLogger("MassTransit.Msmq.MessageLog");

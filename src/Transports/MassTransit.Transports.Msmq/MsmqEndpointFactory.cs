@@ -44,7 +44,7 @@ namespace MassTransit.Transports.Msmq
 				if(transport.Address.IsTransactional)
 					settings.Transactional = true;
 
-                IMsmqTransport errorTransport = MsmqTransportFactory.New(errorSettings);
+                ITransport errorTransport = MsmqTransportFactory.New(errorSettings);
 
                 var endpoint = new MsmqEndpoint(settings.Address, settings.Serializer, transport, errorTransport);
 
