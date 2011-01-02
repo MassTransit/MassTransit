@@ -43,7 +43,7 @@ namespace MassTransit.Transports.Msmq.Tests
 		[ExpectedException(typeof (EndpointException))]
 		public void Should_throw_an_endpoint_exception_from_the_msmq_endpoint_factory()
 		{
-		    MsmqEndpointFactory.New(new CreateMsmqEndpointSettings(_uri)
+		    MsmqEndpointFactory.New(new CreateEndpointSettings(_uri)
 		        {
 		            Serializer = _serializer,
 		            CreateIfMissing = false,

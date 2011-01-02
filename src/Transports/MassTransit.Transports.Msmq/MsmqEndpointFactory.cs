@@ -21,13 +21,13 @@ namespace MassTransit.Transports.Msmq
     {
         public static IEndpoint New(IEndpointAddress address, IMessageSerializer serializer)
         {
-            return New(new CreateMsmqEndpointSettings(address)
+            return New(new CreateEndpointSettings(address)
                 {
                     Serializer = serializer,
                 });
         }
 
-        public static IEndpoint New(CreateMsmqEndpointSettings settings)
+        public static IEndpoint New(CreateEndpointSettings settings)
         {
             try
             {
@@ -36,12 +36,12 @@ namespace MassTransit.Transports.Msmq
                 Guard.AgainstNull(settings.Serializer, "A message serializer for the endpoint must be specified");
 
                 var tf = new MsmqTransportFactory();
-                var transport = tf.New(settings);
+                var transport = tf.New(settings.ToTransportSettings());
                 
 				// TODO Does this need to be a bus concern?
                 PurgeExistingMessagesIfRequested(settings);
 
-                var errorSettings = new CreateTransportSettings(settings.ErrorAddress, settings);
+                var errorSettings = new CreateTransportSettings(settings.ErrorAddress, settings.ToTransportSettings());
 				if(transport.Address.IsTransactional)
 					settings.Transactional = true;
 
@@ -57,7 +57,7 @@ namespace MassTransit.Transports.Msmq
             }
         }
 
-        private static void PurgeExistingMessagesIfRequested(CreateMsmqEndpointSettings settings)
+        private static void PurgeExistingMessagesIfRequested(CreateEndpointSettings settings)
         {
             if(settings.Address.IsLocal && settings.PurgeExistingMessages)
             {

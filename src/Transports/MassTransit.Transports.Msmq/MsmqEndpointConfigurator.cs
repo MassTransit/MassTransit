@@ -26,7 +26,7 @@ namespace MassTransit.Transports.Msmq
             Guard.AgainstNull(Uri, "No Uri was specified for the endpoint");
             Guard.AgainstNull(SerializerType, "No serializer type was specified for the endpoint");
 
-            IEndpoint endpoint = MsmqEndpointFactory.New(new CreateMsmqEndpointSettings(Uri)
+            IEndpoint endpoint = MsmqEndpointFactory.New(new CreateEndpointSettings(Uri)
                 {
                     Serializer = GetSerializer(),
                     CreateIfMissing = _defaults.CreateMissingQueues,
