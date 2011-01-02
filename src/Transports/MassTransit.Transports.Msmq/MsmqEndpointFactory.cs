@@ -35,16 +35,17 @@ namespace MassTransit.Transports.Msmq
                 Guard.AgainstNull(settings.ErrorAddress, "An error address for the endpoint must be specified");
                 Guard.AgainstNull(settings.Serializer, "A message serializer for the endpoint must be specified");
 
-                var transport = MsmqTransportFactory.New(settings);
+                var tf = new MsmqTransportFactory();
+                var transport = tf.New(settings);
                 
 				// TODO Does this need to be a bus concern?
                 PurgeExistingMessagesIfRequested(settings);
 
-                var errorSettings = new CreateMsmqTransportSettings(settings.ErrorAddress, settings);
+                var errorSettings = new CreateTransportSettings(settings.ErrorAddress, settings);
 				if(transport.Address.IsTransactional)
 					settings.Transactional = true;
 
-                ITransport errorTransport = MsmqTransportFactory.New(errorSettings);
+                ITransport errorTransport = tf.New(errorSettings);
 
                 var endpoint = new MsmqEndpoint(settings.Address, settings.Serializer, transport, errorTransport);
 
