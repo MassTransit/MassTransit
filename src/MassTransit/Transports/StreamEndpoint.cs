@@ -55,7 +55,7 @@ namespace MassTransit.Transports
 		{
 			if (_disposed) throw NewDisposedException();
 
-			_transport.Receive(ReceiveFromTransport(receiver));
+			_transport.Receive(ReceiveFromTransport(receiver), TimeSpan.Zero);
 		}
 
 		public override void Receive(Func<object, Action<object>> receiver, TimeSpan timeout)
@@ -87,7 +87,7 @@ namespace MassTransit.Transports
 			Serializer.Serialize(transportMessage, message);
 		}
 
-		private Func<Stream, Action<Stream>> ReceiveFromTransport(Func<object, Action<object>> receiver)
+		private Func<IReceivingContext, Action<IReceivingContext>> ReceiveFromTransport(Func<object, Action<object>> receiver)
 		{
 			return message =>
 				{
@@ -95,7 +95,7 @@ namespace MassTransit.Transports
 
 					try
 					{
-						messageObj = Serializer.Deserialize(message);
+						messageObj = Serializer.Deserialize(message.Body);
 					}
 					catch (SerializationException sex)
 					{
@@ -155,13 +155,13 @@ namespace MassTransit.Transports
 				};
 		}
 
-		private void MoveMessageToErrorTransport(Stream message)
+		private void MoveMessageToErrorTransport(IReceivingContext message)
 		{
 			_errorTransport.Send(outbound =>
 				{
-					var data = new byte[message.Length];
-					message.Seek(0, SeekOrigin.Begin);
-					message.Read(data, 0, data.Length);
+					var data = new byte[message.Body.Length];
+					message.Body.Seek(0, SeekOrigin.Begin);
+					message.Body.Read(data, 0, data.Length);
 
 					outbound.Body.Write(data, 0, data.Length);
 				});
