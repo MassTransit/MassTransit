@@ -359,7 +359,6 @@
     <Compile Include="Transports\MulticastUdpEndpointFactory.cs" />
     <Compile Include="Transports\MulticastUdpTransport.cs" />
     <Compile Include="Transports\NullTransport.cs" />
-    <Compile Include="Transports\StreamEndpoint.cs" />
     <Compile Include="Transports\TransportBase.cs" />
     <Compile Include="Util\BranchEvaluator.cs" />
     <Compile Include="Util\EvaluationCandidateSelector.cs" />
