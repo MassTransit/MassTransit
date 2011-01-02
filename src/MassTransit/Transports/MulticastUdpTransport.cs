@@ -31,6 +31,28 @@ namespace MassTransit.Transports
             Initialize();
         }
 
+        public override void Send(Action<ISendingContext> cxt)
+        {
+            EnsureNotDisposed();
+
+            using (var bodyStream = new MemoryStream())
+            {
+                var context = new MulticastUdpSendingContext();
+                context.Body = bodyStream;
+                cxt(context);
+
+                try
+                {
+                    byte[] data = bodyStream.ToArray();
+                    _sendClient.Send(data, data.Length, _sendIpEndPoint);
+                }
+                catch (Exception ex)
+                {
+                    throw new TransportException(Address.Uri, "Unable to send to transport: " + _sendIpEndPoint, ex);
+                }
+            }
+        }
+
         public override void Send(Action<Stream> sender)
         {
             EnsureNotDisposed();

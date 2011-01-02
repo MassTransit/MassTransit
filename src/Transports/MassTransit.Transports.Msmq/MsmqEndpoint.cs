@@ -198,14 +198,6 @@ namespace MassTransit.Transports.Msmq
 	            SpecialLoggers.Messages.InfoFormat("MOVE:{0}:{1}:{2}", Address, _errorTransport.Address, message.Id);
 	    }
 
-    	private static void SetMessageExpiration(Message outbound)
-    	{
-    		if (OutboundMessage.Headers.ExpirationTime.HasValue)
-    		{
-    			outbound.TimeToBeReceived = OutboundMessage.Headers.ExpirationTime.Value - DateTime.UtcNow;
-    		}
-    	}
-
     	public static IEndpoint ConfigureEndpoint(Uri uri, Action<IEndpointConfigurator> configurator)
 		{
 			if (uri.Scheme.ToLowerInvariant() == "msmq")

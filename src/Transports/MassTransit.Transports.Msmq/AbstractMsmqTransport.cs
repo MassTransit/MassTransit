@@ -121,6 +121,33 @@ namespace MassTransit.Transports.Msmq
 			return received;
 		}
 
+
+        public virtual void Send(Action<ISendingContext> sender)
+        {
+            if (_disposed) throw NewDisposedException();
+
+            using (var message = new Message())
+            {
+                var cxt = new MsmqSendingContext(message);
+                sender(cxt);
+
+                try
+                {
+                    using (var queue = new MessageQueue(_formatName, QueueAccessMode.Send))
+                    {
+                        SendMessage(queue, message);
+
+                        if (_messageLog.IsDebugEnabled)
+                            _messageLog.DebugFormat("SEND:{0}:{1}", Address, message.Id);
+                    }
+                }
+                catch (MessageQueueException ex)
+                {
+                    HandleMessageQueueException(ex, 2.Seconds());
+                }
+            }
+        }
+
 		public virtual void Send(Action<Message> sender)
 		{
 			if (_disposed) throw NewDisposedException();
@@ -302,4 +329,36 @@ namespace MassTransit.Transports.Msmq
 			Connect();
 		}
 	}
+
+    public class MsmqSendingContext :
+        ISendingContext
+    {
+        Message _msg;
+
+        public MsmqSendingContext(Message msg)
+        {
+            _msg = msg;
+        }
+
+        public Stream Body
+        {
+            get { return _msg.BodyStream; }
+            set { _msg.BodyStream = value; }
+        }
+
+        public void MarkRecoverable()
+        {
+            _msg.Recoverable = true;
+        }
+
+        public void SetLabel(string label)
+        {
+            _msg.Label = label;
+        }
+
+        public void SetMessageExpiration(DateTime d)
+        {
+            //_msg.TimeToBeReceived = d;
+        }
+    }
 }

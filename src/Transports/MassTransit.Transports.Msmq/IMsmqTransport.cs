@@ -28,7 +28,5 @@ namespace MassTransit.Transports.Msmq
 		void Receive(Func<Message, Action<Message>> receiver);
 
 		void Receive(Func<Message, Action<Message>> receiver, TimeSpan timeout);
-
-		//void Send(Action<Message> sender);
 	}
 }

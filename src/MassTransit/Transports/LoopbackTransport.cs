@@ -28,6 +28,36 @@ namespace MassTransit.Transports
         {
         }
 
+        public override void Send(Action<ISendingContext> context)
+        {
+            EnsureNotDisposed();
+
+            MemoryStream bodyStream = null;
+            try
+            {
+                bodyStream = new MemoryStream();
+                var cxt = new LoopbackSendingContext();
+                cxt.Body = bodyStream;
+                context(cxt);
+
+                lock (_messageLock)
+                {
+                    EnsureNotDisposed();
+
+                    _messages.AddLast(bodyStream);
+                }
+
+                bodyStream = null;
+            }
+            finally
+            {
+                if (bodyStream != null)
+                    bodyStream.Dispose();
+            }
+
+            _messageReady.Set();
+        }
+
         public override void Send(Action<Stream> sender)
         {
             EnsureNotDisposed();

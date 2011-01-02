@@ -65,6 +65,31 @@ namespace MassTransit.Transports.RabbitMq
             }
         }
 
+        public override void Send(Action<ISendingContext> sender)
+        {
+            EnsureNotDisposed();
+
+            using (var channel = _connection.CreateModel())
+            {
+                var properties = channel.CreateBasicProperties();
+                SetMessageExpiration(properties);
+                using (var bodyStream = new MemoryStream())
+                {
+                    var cxt = new RabbitMqSendingContext();
+                    cxt.Body = bodyStream;
+                    sender(cxt);
+                    channel.ExchangeDeclare(_address.Queue, "fanout", true);
+                    channel.BasicPublish(_address.Queue, "msg", properties, bodyStream.ToArray());
+
+                }
+                channel.Close(200, "ok");
+
+                if (SpecialLoggers.Messages.IsInfoEnabled)
+                    SpecialLoggers.Messages.InfoFormat("SEND:{0}:{1}", Address, properties.MessageId);
+
+            }
+        }
+
         public override void Send(Action<Stream> sender)
         {
             EnsureNotDisposed();
@@ -100,6 +125,31 @@ namespace MassTransit.Transports.RabbitMq
         public override void OnDisposing()
         {
             //no-op
+        }
+    }
+
+    public class RabbitMqSendingContext :
+        ISendingContext
+    {
+        public Stream Body
+        {
+            get { throw new NotImplementedException(); }
+            set { throw new NotImplementedException(); }
+        }
+
+        public void MarkRecoverable()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void SetLabel(string label)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void SetMessageExpiration(DateTime d)
+        {
+            throw new NotImplementedException();
         }
     }
 }
