@@ -13,7 +13,6 @@
 namespace MassTransit
 {
     using System;
-    using System.IO;
     using Transports;
 
     public interface ITransport :
@@ -23,10 +22,8 @@ namespace MassTransit
 
         void Send(Action<ISendingContext> sender);
 
-        void Receive(Func<Stream, Action<Stream>> receiver);
         void Receive(Func<IReceivingContext, Action<IReceivingContext>> receiver);
 
-        void Receive(Func<Stream, Action<Stream>> receiver, TimeSpan timeout);
         void Receive(Func<IReceivingContext, Action<IReceivingContext>> receiver, TimeSpan timeout);
     }
 }
