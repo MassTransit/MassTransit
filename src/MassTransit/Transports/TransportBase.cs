@@ -30,6 +30,7 @@ namespace MassTransit.Transports
         public IEndpointAddress Address { get; private set; }
 
         public abstract void Send(Action<Stream> sender);
+        public abstract void Send(Action<ISendingContext> sender);
 
         public void Receive(Func<Stream, Action<Stream>> receiver)
         {

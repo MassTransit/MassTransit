@@ -14,6 +14,7 @@ namespace MassTransit
 {
     using System;
     using System.Threading;
+    using Util;
 
     public class EndpointAddress :
         IEndpointAddress
@@ -27,7 +28,7 @@ namespace MassTransit
         {
             Uri = uri;
             _isLocal = () => DetermineIfEndpointIsLocal(uri);
-            IsTransactional = false;
+			IsTransactional = CheckForTransactionalHint();
         }
 
         public static IEndpointAddress Null
@@ -65,5 +66,10 @@ namespace MassTransit
         }
 
         public bool IsTransactional { get; set; }
+
+        protected bool CheckForTransactionalHint()
+        {
+            return Uri.Query.GetValueFromQueryString("tx", false);
+        }
     }
 }

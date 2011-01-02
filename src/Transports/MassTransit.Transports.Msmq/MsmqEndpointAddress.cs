@@ -76,12 +76,7 @@ namespace MassTransit.Transports.Msmq
 		}
 
 
-		private bool CheckForTransactionalHint()
-		{
-			return Uri.Query.GetValueFromQueryString("tx", false);
-		}
-
-		private Uri SetUriHostToLocalMachineName()
+	    private Uri SetUriHostToLocalMachineName()
 		{
 			string query = "?tx=" + IsTransactional.ToString().ToLowerInvariant();
 

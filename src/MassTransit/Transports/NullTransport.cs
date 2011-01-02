@@ -27,6 +27,11 @@ namespace MassTransit.Transports
             //no-op
         }
 
+        public override void Send(Action<ISendingContext> sender)
+        {
+            //no-op
+        }
+
         public override void Send(Action<Stream> sender)
         {
             //no-op

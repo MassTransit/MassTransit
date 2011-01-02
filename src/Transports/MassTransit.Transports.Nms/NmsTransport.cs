@@ -118,6 +118,48 @@ namespace MassTransit.Transports.Nms
 			}
 		}
 
+        public virtual void Send(Action<ISendingContext> sender)
+        {
+            if (_disposed) throw NewDisposedException();
+
+            try
+            {
+                using (ISession session = _connection.CreateSession(AcknowledgementMode.Transactional))
+                {
+                    IQueue destination = session.GetQueue(Address.Path);
+
+                    using (IMessageProducer producer = session.CreateProducer(destination))
+                    {
+                        using (var bodyStream = new MemoryStream())
+                        {
+                            
+                            var cxt = new NmsSendingContext(producer);
+                            cxt.Body = bodyStream;
+                            sender(cxt);
+
+                            if(OutboundMessage.Headers.ExpirationTime.HasValue)
+                                cxt.SetMessageExpiration(OutboundMessage.Headers.ExpirationTime.Value);
+
+                            producer.DeliveryMode = MsgDeliveryMode.Persistent;
+                            var msg = cxt.GetMessage();
+                            producer.Send(msg);
+
+                            session.Commit();
+
+                            if (SpecialLoggers.Messages.IsInfoEnabled)
+                                SpecialLoggers.Messages.InfoFormat("SEND:{0}:{1}", Address, msg.NMSMessageId);
+                        }
+                    }
+                }
+            }
+            catch (InvalidOperationException ex)
+            {
+                if (_log.IsErrorEnabled)
+                    _log.Error("A problem occurred communicating with the queue", ex);
+
+                Reconnect();
+            }
+        }
 		public virtual void Send(Action<Stream> sender)
 		{
 			if (_disposed) throw NewDisposedException();
@@ -265,4 +307,44 @@ namespace MassTransit.Transports.Nms
 			Dispose(false);
 		}
 	}
+
+    public class NmsSendingContext :
+        ISendingContext
+    {
+        readonly IMessageProducer _msgProducer;
+        readonly ITextMessage _msg;
+
+        public NmsSendingContext(IMessageProducer msgProducer)
+        {
+            _msgProducer = msgProducer;
+            _msg = _msgProducer.CreateTextMessage();
+        }
+
+        public Stream Body { get; set; }
+
+        public void MarkRecoverable()
+        {
+            _msg.NMSDeliveryMode = MsgDeliveryMode.Persistent;
+        }
+
+        public void SetLabel(string label)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void SetMessageExpiration(DateTime d)
+        {
+            if (OutboundMessage.Headers.ExpirationTime.HasValue)
+            {
+                _msg.NMSTimeToLive = d - DateTime.UtcNow;
+            }
+        }
+
+        public IMessage GetMessage()
+        {
+            string text = Encoding.UTF8.GetString(((MemoryStream) Body).ToArray());
+            _msg.Text = text;
+            return _msg;
+        }
+    }
 }
