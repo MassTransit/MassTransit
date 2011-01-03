@@ -39,7 +39,6 @@ namespace MassTransit.Transports
         }
 
 
-
         public abstract void Receive(Func<IReceivingContext, Action<IReceivingContext>> receiver, TimeSpan timeout);
 
         protected void EnsureNotDisposed()

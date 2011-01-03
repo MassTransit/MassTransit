@@ -48,7 +48,7 @@ namespace MassTransit.Transports.Msmq
                 var tf = new MsmqTransportFactory();
                 var transport = tf.New(settings.ToTransportSettings());
 
-                PurgeExistingMessagesIfRequested(settings);
+                tf.PurgeExistingMessagesIfRequested(settings);
 
                 var errorSettings = new CreateTransportSettings(settings.ErrorAddress, settings.ToTransportSettings());
                 if (transport.Address.IsTransactional)
@@ -71,12 +71,6 @@ namespace MassTransit.Transports.Msmq
             configureDefaults(_defaults);
         }
 
-        static void PurgeExistingMessagesIfRequested(CreateEndpointSettings settings)
-        {
-            if (settings.Address.IsLocal && settings.PurgeExistingMessages)
-            {
-                MsmqEndpointManagement.Manage(settings.Address, x => x.Purge());
-            }
-        }
+        
     }
 }

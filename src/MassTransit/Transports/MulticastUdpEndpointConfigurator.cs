@@ -48,7 +48,7 @@ namespace MassTransit.Transports
                 var tf = new MulticastUdpTransportFactory();
                 ITransport transport = tf.New(settings.ToTransportSettings());
 
-                PurgeExistingMessagesIfRequested(settings);
+                tf.PurgeExistingMessagesIfRequested(settings);
 
                 var errorSettings = new CreateTransportSettings(settings.ErrorAddress, settings.ToTransportSettings());
                 if (transport.Address.IsTransactional)
@@ -66,12 +66,11 @@ namespace MassTransit.Transports
             }
         }
 
-        static void PurgeExistingMessagesIfRequested(CreateEndpointSettings settings)
+       
+
+        public static void Defaults(Action<IEndpointDefaults> configureDefaults)
         {
-            if (settings.Address.IsLocal && settings.PurgeExistingMessages)
-            {
-                //
-            }
+            configureDefaults(_defaults);
         }
     }
 }
