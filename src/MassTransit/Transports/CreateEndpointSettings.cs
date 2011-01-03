@@ -62,8 +62,13 @@ namespace MassTransit.Transports
 
         protected void SetAddresses(IEndpointAddress address)
         {
+            Transactional = address.IsTransactional;
+
             Address = address;
-            ErrorAddress = new EndpointAddress(new Uri(Address.Uri + "_error"));
+
+            var errorPath = Address.Uri.AbsolutePath + "_error";
+            var errorUri = new UriBuilder(Address.Uri.Scheme, Address.Uri.Host, Address.Uri.Port, errorPath).Uri;
+            ErrorAddress = new EndpointAddress(errorUri);
         }
 
         /// <summary>
@@ -97,7 +102,8 @@ namespace MassTransit.Transports
                 {
                     CreateIfMissing = CreateIfMissing,
                     RequireTransactional = Transactional,
-                    Transactional =  Transactional
+                    Transactional =  Transactional,
+                    PurgeExistingMessages = PurgeExistingMessages
                 };
         }
     }

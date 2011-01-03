@@ -38,9 +38,11 @@ namespace MassTransit.Transports.Msmq
 			}
 		}
 
-		private static ITransport NewLocalTransport(CreateTransportSettings settings)
+		private ITransport NewLocalTransport(CreateTransportSettings settings)
 		{
 			ValidateLocalTransport(settings);
+
+            PurgeExistingMessagesIfRequested(settings);
 
 			if (settings.Transactional)
 				return new TransactionalMsmqTransport(settings.Address);
@@ -79,7 +81,7 @@ namespace MassTransit.Transports.Msmq
 				});
 		}
 
-        public void PurgeExistingMessagesIfRequested(CreateEndpointSettings settings)
+        public void PurgeExistingMessagesIfRequested(CreateTransportSettings settings)
         {
             if (settings.Address.IsLocal && settings.PurgeExistingMessages)
             {

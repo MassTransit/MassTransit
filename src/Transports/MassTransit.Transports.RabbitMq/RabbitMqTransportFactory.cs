@@ -53,7 +53,7 @@ namespace MassTransit.Transports.RabbitMq
             return _factory.CreateConnection();
         }
         
-        public void PurgeExistingMessagesIfRequested(CreateEndpointSettings settings)
+        public void PurgeExistingMessagesIfRequested(CreateTransportSettings settings)
         {
             if(settings.Address.IsLocal && settings.PurgeExistingMessages)
             {
