@@ -167,13 +167,13 @@
     <Compile Include="Services\Subscriptions\Client\SubscriptionClient.cs" />
     <Compile Include="Services\Subscriptions\Server\SubscriptionService.cs" />
     <Compile Include="TimeoutAttribute.cs" />
-    <Compile Include="Transports\LoopbackReceivingContext.cs" />
-    <Compile Include="Transports\LoopbackSendingContext.cs" />
-    <Compile Include="Transports\LoopbackTransportFactory.cs" />
+    <Compile Include="Transports\Loopback\LoopbackReceivingContext.cs" />
+    <Compile Include="Transports\Loopback\LoopbackSendingContext.cs" />
+    <Compile Include="Transports\Loopback\LoopbackTransportFactory.cs" />
     <Compile Include="Transports\EndpointDefaults.cs" />
-    <Compile Include="Transports\MulticastUdpReceivingContext.cs" />
-    <Compile Include="Transports\MulticastUdpSendingContext.cs" />
-    <Compile Include="Transports\MulticastUdpTransportFactory.cs" />
+    <Compile Include="Transports\MulticastUdp\MulticastUdpReceivingContext.cs" />
+    <Compile Include="Transports\MulticastUdp\MulticastUdpSendingContext.cs" />
+    <Compile Include="Transports\MulticastUdp\MulticastUdpTransportFactory.cs" />
     <Compile Include="Util\CheckConvention.cs" />
     <Compile Include="Util\Tuple.cs" />
   </ItemGroup>
@@ -357,9 +357,9 @@
     <Compile Include="Services\Timeout\Messages\TimeoutScheduled.cs" />
     <Compile Include="Services\Timeout\Server\TimeoutSaga.cs" />
     <Compile Include="Transports\CreateEndpointSettings.cs" />
-    <Compile Include="Transports\LoopbackTransport.cs" />
+    <Compile Include="Transports\Loopback\LoopbackTransport.cs" />
     <Compile Include="Transports\MessageRetryTracker.cs" />
-    <Compile Include="Transports\MulticastUdpTransport.cs" />
+    <Compile Include="Transports\MulticastUdp\MulticastUdpTransport.cs" />
     <Compile Include="Transports\NullTransport.cs" />
     <Compile Include="Transports\TransportBase.cs" />
     <Compile Include="Util\BranchEvaluator.cs" />
