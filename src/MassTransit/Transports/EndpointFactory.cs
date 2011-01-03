@@ -52,7 +52,7 @@ namespace MassTransit.Transports
                 }
                 catch (Exception ex)
                 {
-                    throw new EndpointException(uri, "Error");
+                    throw new EndpointException(uri, "Error", ex);
                 }
             }
 
