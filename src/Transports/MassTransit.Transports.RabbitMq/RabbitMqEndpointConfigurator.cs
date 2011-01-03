@@ -22,7 +22,7 @@ namespace MassTransit.Transports.RabbitMq
     public class RabbitMqEndpointConfigurator :
         EndpointConfiguratorBase
     {
-        static readonly RabbitMqEndpointConfiguratorDefaults _defaults = new RabbitMqEndpointConfiguratorDefaults();
+        static readonly EndpointDefaults _defaults = new EndpointDefaults();
 
         public IEndpoint New(Action<IEndpointConfigurator> action)
         {
@@ -37,7 +37,7 @@ namespace MassTransit.Transports.RabbitMq
                     Serializer = GetSerializer(),
                     CreateIfMissing = _defaults.CreateMissingQueues,
                     PurgeExistingMessages = _defaults.PurgeOnStartup,
-                    Transactional = _defaults.CreateTransactionalQueue,
+                    Transactional = _defaults.CreateTransactionalQueues,
                 };
 
             try
@@ -116,14 +116,5 @@ namespace MassTransit.Transports.RabbitMq
             var rabbitMqAddress = new UriBuilder("amqp-{0}-{1}".FormatWith(_protocol.MajorVersion, _protocol.MinorVersion), address.Host, _protocol.DefaultPort).Uri;
             return _factory.CreateConnection();
         }
-    }
-
-    public class RabbitMqEndpointConfiguratorDefaults
-    {
-        public bool CreateMissingQueues { get; set; }
-
-        public bool PurgeOnStartup { get; set; }
-
-        public bool CreateTransactionalQueue { get; set; }
     }
 }

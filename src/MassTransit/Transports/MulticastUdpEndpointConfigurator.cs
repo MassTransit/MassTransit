@@ -1,5 +1,5 @@
-// Copyright 2007-2010 The Apache Software Foundation.
-//  
+// Copyright 2007-2011 The Apache Software Foundation.
+// 
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
 // License at 
@@ -21,7 +21,7 @@ namespace MassTransit.Transports
     public class MulticastUdpEndpointConfigurator :
         EndpointConfiguratorBase
     {
-        static readonly MulticastUdpEndpointConfiguratorDefaults _defaults = new MulticastUdpEndpointConfiguratorDefaults();
+        static readonly EndpointDefaults _defaults = new EndpointDefaults();
 
         public IEndpoint New(Action<IEndpointConfigurator> action)
         {
@@ -32,13 +32,13 @@ namespace MassTransit.Transports
                 Guard.AgainstNull(SerializerType, "No serializer type was specified for the endpoint");
 
             var settings = new CreateEndpointSettings(Uri)
-                {
-                    Serializer = GetSerializer(),
-                    CreateIfMissing = _defaults.CreateMissingQueues,
-                    PurgeExistingMessages = _defaults.PurgeOnStartup,
-                    Transactional = _defaults.CreateTransactionalQueues,
-                };
-            
+                               {
+                                   Serializer = GetSerializer(),
+                                   CreateIfMissing = _defaults.CreateMissingQueues,
+                                   PurgeExistingMessages = _defaults.PurgeOnStartup,
+                                   Transactional = _defaults.CreateTransactionalQueues,
+                               };
+
             try
             {
                 Guard.AgainstNull(settings.Address, "An address for the endpoint must be specified");
@@ -46,10 +46,15 @@ namespace MassTransit.Transports
                 Guard.AgainstNull(settings.Serializer, "A message serializer for the endpoint must be specified");
 
                 var tf = new MulticastUdpTransportFactory();
-                var transport = tf.New(settings.ToTransportSettings());
+                ITransport transport = tf.New(settings.ToTransportSettings());
 
                 PurgeExistingMessagesIfRequested(settings);
-                var errorTransport = new NullTransport(settings.ErrorAddress);
+
+                var errorSettings = new CreateTransportSettings(settings.ErrorAddress, settings.ToTransportSettings());
+                if (transport.Address.IsTransactional)
+                    settings.Transactional = true;
+
+                ITransport errorTransport = tf.New(errorSettings);
 
                 var endpoint = new Endpoint(settings.Address, settings.Serializer, transport, errorTransport);
 
@@ -68,6 +73,5 @@ namespace MassTransit.Transports
                 //
             }
         }
-
     }
 }

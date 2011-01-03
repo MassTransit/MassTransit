@@ -130,6 +130,7 @@
     <Compile Include="StreamExtensions.cs" />
     <Compile Include="Transports\CreateTransportSettings.cs" />
     <Compile Include="Transports\EndpointFactory.cs" />
+    <Compile Include="Transports\IEndpointDefaults.cs" />
     <Compile Include="Transports\IEndpointFactory.cs" />
     <Compile Include="Transports\IReceivingContext.cs" />
     <Compile Include="Transports\ISendingContext.cs" />
@@ -165,11 +166,10 @@
     <Compile Include="Services\Subscriptions\Client\SubscriptionClient.cs" />
     <Compile Include="Services\Subscriptions\Server\SubscriptionService.cs" />
     <Compile Include="TimeoutAttribute.cs" />
-    <Compile Include="Transports\LoopbackEndpointConfiguratorDefaults.cs" />
     <Compile Include="Transports\LoopbackReceivingContext.cs" />
     <Compile Include="Transports\LoopbackSendingContext.cs" />
     <Compile Include="Transports\LoopbackTransportFactory.cs" />
-    <Compile Include="Transports\MulticastUdpEndpointConfiguratorDefaults.cs" />
+    <Compile Include="Transports\EndpointDefaults.cs" />
     <Compile Include="Transports\MulticastUdpReceivingContext.cs" />
     <Compile Include="Transports\MulticastUdpSendingContext.cs" />
     <Compile Include="Transports\MulticastUdpTransportFactory.cs" />

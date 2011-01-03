@@ -21,7 +21,7 @@ namespace MassTransit.Transports.Msmq
     public class MsmqEndpointConfigurator :
         EndpointConfiguratorBase
     {
-        static readonly MsmqEndpointConfiguratorDefaults _defaults = new MsmqEndpointConfiguratorDefaults();
+        static readonly EndpointDefaults _defaults = new EndpointDefaults();
 
         public IEndpoint New(Action<IEndpointConfigurator> action)
         {
@@ -66,7 +66,7 @@ namespace MassTransit.Transports.Msmq
             }
         }
 
-        public static void Defaults(Action<IMsmqEndpointDefaults> configureDefaults)
+        public static void Defaults(Action<IEndpointDefaults> configureDefaults)
         {
             configureDefaults(_defaults);
         }
