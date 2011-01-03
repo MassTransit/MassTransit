@@ -20,9 +20,14 @@ namespace MassTransit.Transports
     public class EndpointFactory :
         IEndpointFactory
     {
-        IEnumerable<ITransportFactory> _factories;
+        readonly IEnumerable<ITransportFactory> _factories;
 
-        public IEndpoint ConfigureEndpoint(Uri uri, Action<IEndpointConfigurator> configurator)
+        public EndpointFactory(IEnumerable<ITransportFactory> factories)
+        {
+            _factories = factories;
+        }
+
+        public IEndpoint BuildEndpoint(Uri uri, Action<IEndpointConfigurator> configurator)
         {
             var address = new EndpointAddress(uri);
             var epc = new EndpointConfigurator();
@@ -33,7 +38,7 @@ namespace MassTransit.Transports
 
 
             var s = ep.ToTransportSettings();
-            var e = ep.ToTransportSettings();
+            var e = new CreateTransportSettings(ep.ErrorAddress, s);
 
             foreach (var fac in _factories)
             {

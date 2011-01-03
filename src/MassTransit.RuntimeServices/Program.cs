@@ -25,6 +25,7 @@ namespace MassTransit.RuntimeServices
 	using Topshelf;
 	using Topshelf.Configuration;
 	using Topshelf.Configuration.Dsl;
+	using Transports;
 	using Transports.Msmq;
 
 	internal class Program
@@ -35,7 +36,7 @@ namespace MassTransit.RuntimeServices
 		{
 			BootstrapLogger();
 
-			MsmqEndpointConfigurator.Defaults(x => { x.CreateMissingQueues = true; });
+			EndpointConfigurator.Defaults(x => { x.CreateMissingQueues = true; });
 
 			ObjectFactory.Initialize(x => { x.For<IConfiguration>().Use<Configuration>(); });
 

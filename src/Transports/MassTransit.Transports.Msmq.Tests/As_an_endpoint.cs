@@ -29,7 +29,7 @@ namespace MassTransit.Transports.Msmq.Tests
 		[SetUp]
 		public void Setup()
 		{
-			MsmqEndpointConfigurator.Defaults(x =>
+			EndpointConfigurator.Defaults(x =>
 				{
 					x.CreateMissingQueues = false;
 					x.PurgeOnStartup = false;
@@ -44,7 +44,7 @@ namespace MassTransit.Transports.Msmq.Tests
 		public void Should_throw_an_endpoint_exception_from_the_msmq_endpoint_factory()
 		{
 		    var ef = new MsmqEndpointFactory();
-		    ef.ConfigureEndpoint(_uri, cfg =>
+		    ef.BuildEndpoint(_uri, cfg =>
 		    {
 		        cfg.SetSerializer(_serializer);
 		    });

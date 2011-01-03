@@ -92,11 +92,11 @@ namespace MassTransit.Internal
 
         IEndpoint BuildEndpoint(Uri uri)
         {
-            var configurator = BuildEndpointConfigurationAction(uri);
+            var configurator = BuildEndpointConfiguration(uri);
 
             foreach (var fact in _factories)
             {
-                IEndpoint ep = fact.ConfigureEndpoint(uri, configurator);
+                IEndpoint ep = fact.BuildEndpoint(uri, configurator);
                 if (ep != null)
                     return ep;
             }
@@ -104,7 +104,7 @@ namespace MassTransit.Internal
             throw new ConfigurationException("No transport could handle: '{0}'".FormatWith(uri));
         }
 
-        Action<IEndpointConfigurator> BuildEndpointConfigurationAction(Uri uri)
+        Action<IEndpointConfigurator> BuildEndpointConfiguration(Uri uri)
         {
             Uri key = new Uri(uri.ToString().ToLowerInvariant());
 

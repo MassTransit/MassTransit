@@ -74,7 +74,6 @@
     </Compile>
     <Compile Include="RabbitMqAddress.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RabbitMqEndpointConfigurator.cs" />
     <Compile Include="RabbitMqEndpointFactory.cs" />
     <Compile Include="RabbitMqReceivingContext.cs" />
     <Compile Include="RabbitMqSendingContext.cs" />

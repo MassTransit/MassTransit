@@ -18,11 +18,11 @@ namespace MassTransit.Transports
     public class MulticastUdpEndpointFactory :
         IEndpointFactory
     {
-        public IEndpoint ConfigureEndpoint(Uri uri, Action<IEndpointConfigurator> configurator)
+        public IEndpoint BuildEndpoint(Uri uri, Action<IEndpointConfigurator> configurator)
         {
             if (uri.Scheme.ToLowerInvariant() == "multicast")
             {
-                var cfg = new MulticastUdpEndpointConfigurator();
+                var cfg = new EndpointConfigurator(new MulticastUdpTransportFactory());
                 IEndpoint endpoint = cfg.New(x =>
                 {
                     x.SetUri(uri);

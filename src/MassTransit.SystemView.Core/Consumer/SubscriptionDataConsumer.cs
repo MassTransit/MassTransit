@@ -16,6 +16,7 @@ namespace MassTransit.SystemView.Core.Consumer
     using Distributor.Messages;
     using Magnum;
     using Services.Subscriptions.Messages;
+    using Transports;
     using Transports.Msmq;
     using ViewModel;
 
@@ -51,7 +52,7 @@ namespace MassTransit.SystemView.Core.Consumer
 
         private void BootstrapServiceBus()
         {
-            MsmqEndpointConfigurator.Defaults(x =>
+            EndpointConfigurator.Defaults(x =>
                 {
                     x.CreateMissingQueues = true;
                 });

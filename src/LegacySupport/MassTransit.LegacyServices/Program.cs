@@ -19,6 +19,7 @@ namespace LegacyRuntime
     using Magnum.Reflection;
     using MassTransit.LegacySupport;
     using MassTransit.StructureMapIntegration;
+    using MassTransit.Transports;
     using MassTransit.Transports.Msmq;
     using StructureMap;
     using StructureMap.Configuration.DSL;
@@ -34,7 +35,7 @@ namespace LegacyRuntime
         {
             BootstrapLogger();
 
-            MsmqEndpointConfigurator.Defaults(x =>
+            EndpointConfigurator.Defaults(x =>
             {
                 x.CreateMissingQueues = true;
             });

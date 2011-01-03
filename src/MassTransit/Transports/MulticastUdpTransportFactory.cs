@@ -17,7 +17,7 @@ namespace MassTransit.Transports
     {
         public string Scheme
         {
-            get { return "udp"; }
+            get { return "multicast"; }
         }
 
         public ITransport New(CreateTransportSettings settings)
