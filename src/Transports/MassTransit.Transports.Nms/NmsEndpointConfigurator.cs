@@ -17,53 +17,43 @@ namespace MassTransit.Transports.Nms
     using Exceptions;
     using Internal;
     using Magnum;
-    using Serialization;
 
     public class NmsEndpointConfigurator :
         EndpointConfiguratorBase
     {
-        public static IEndpoint New(Action<IEndpointConfigurator> action)
+        static readonly NmsEndpointConfiguratorDefaults _defaults = new NmsEndpointConfiguratorDefaults();
+        public IEndpoint New(Action<IEndpointConfigurator> action)
         {
-            var configurator = new NmsEndpointConfigurator();
+            action(this);
 
-            action(configurator);
-
-            return configurator.Create();
-        }
-
-        IEndpoint Create()
-        {
             Guard.AgainstNull(Uri, "No Uri was specified for the endpoint");
-            Guard.AgainstNull(SerializerType, "No serializer type was specified for the endpoint");
+            if(MessageSerializer == null)
+                Guard.AgainstNull(SerializerType, "No serializer type was specified for the endpoint");
 
-            IEndpoint endpoint = New(new CreateEndpointSettings(Uri)
+
+            var settings = new CreateEndpointSettings(Uri)
                 {
                     Serializer = GetSerializer(),
-                });
+                    CreateIfMissing = _defaults.CreateMissingQueues,
+                    PurgeExistingMessages = _defaults.PurgeOnStartUp,
+                    Transactional = _defaults.CreateTransactionalQueues
+                };
 
-            return endpoint;
-        }
 
-        public IEndpoint New(IEndpointAddress address, IMessageSerializer serializer)
-        {
-            return New(new CreateEndpointSettings(address)
-                {
-                    Serializer = serializer,
-                });
-        }
 
-        public IEndpoint New(CreateEndpointSettings settings)
-        {
             try
             {
                 Guard.AgainstNull(settings.Address, "An address for the endpoint must be specified");
                 Guard.AgainstNull(settings.ErrorAddress, "An error address for the endpoint must be specified");
                 Guard.AgainstNull(settings.Serializer, "A message serializer for the endpoint must be specified");
 
-                var transport = new NmsTransport(settings.Address);
+                var tf = new NmsTransportFactory();
+                var transport = tf.New(settings.ToTransportSettings());
+
+                PurgeExistingMessagesIfRequested(settings);
 
                 var errorSettings = new CreateEndpointSettings(settings.ErrorAddress, settings);
-                ITransport errorTransport = new NmsTransport(errorSettings.Address);
+                ITransport errorTransport = tf.New(errorSettings.ToTransportSettings());
 
                 var endpoint = new Endpoint(settings.Address, settings.Serializer, transport, errorTransport);
 
@@ -72,6 +62,14 @@ namespace MassTransit.Transports.Nms
             catch (Exception ex)
             {
                 throw new EndpointException(settings.Address.Uri, "Failed to create NMS endpoint", ex);
+            }
+        }
+
+        void PurgeExistingMessagesIfRequested(CreateEndpointSettings settings)
+        {
+            if(settings.Address.IsLocal && settings.PurgeExistingMessages)
+            {
+                //purge queue
             }
         }
     }

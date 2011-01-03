@@ -86,10 +86,12 @@
       <Link>SolutionVersion.cs</Link>
     </Compile>
     <Compile Include="NmsEndpointConfigurator.cs" />
+    <Compile Include="NmsEndpointConfiguratorDefaults.cs" />
     <Compile Include="NmsEndpointFactory.cs" />
     <Compile Include="NmsReceivingContext.cs" />
     <Compile Include="NmsSendingContext.cs" />
     <Compile Include="NmsTransport.cs" />
+    <Compile Include="NmsTransportFactory.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

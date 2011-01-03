@@ -1,5 +1,5 @@
-// Copyright 2007-2010 The Apache Software Foundation.
-//  
+// Copyright 2007-2011 The Apache Software Foundation.
+// 
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
 // License at 
@@ -21,35 +21,24 @@ namespace MassTransit.Transports.Msmq
     public class MsmqEndpointConfigurator :
         EndpointConfiguratorBase
     {
-        private static readonly MsmqEndpointConfiguratorDefaults _defaults = new MsmqEndpointConfiguratorDefaults();
+        static readonly MsmqEndpointConfiguratorDefaults _defaults = new MsmqEndpointConfiguratorDefaults();
 
-        public static IEndpoint New(Action<IEndpointConfigurator> action)
+        public IEndpoint New(Action<IEndpointConfigurator> action)
         {
-            var configurator = new MsmqEndpointConfigurator();
+            action(this);
 
-            action(configurator);
-
-            return configurator.Create();
-        }
-
-        private IEndpoint Create()
-        {
             Guard.AgainstNull(Uri, "No Uri was specified for the endpoint");
-            Guard.AgainstNull(SerializerType, "No serializer type was specified for the endpoint");
+            if (MessageSerializer == null)
+                Guard.AgainstNull(SerializerType, "No serializer type was specified for the endpoint");
 
-            IEndpoint endpoint = New(new CreateEndpointSettings(Uri)
+            var settings = new CreateEndpointSettings(Uri)
                 {
                     Serializer = GetSerializer(),
                     CreateIfMissing = _defaults.CreateMissingQueues,
                     PurgeExistingMessages = _defaults.PurgeOnStartup,
                     Transactional = _defaults.CreateTransactionalQueues,
-                });
+                };
 
-            return endpoint;
-        }
-
-        public static IEndpoint New(CreateEndpointSettings settings)
-        {
             try
             {
                 Guard.AgainstNull(settings.Address, "An address for the endpoint must be specified");
@@ -59,6 +48,7 @@ namespace MassTransit.Transports.Msmq
                 var tf = new MsmqTransportFactory();
                 var transport = tf.New(settings.ToTransportSettings());
 
+                PurgeExistingMessagesIfRequested(settings);
 
                 var errorSettings = new CreateTransportSettings(settings.ErrorAddress, settings.ToTransportSettings());
                 if (transport.Address.IsTransactional)
@@ -79,6 +69,14 @@ namespace MassTransit.Transports.Msmq
         public static void Defaults(Action<IMsmqEndpointDefaults> configureDefaults)
         {
             configureDefaults(_defaults);
+        }
+
+        static void PurgeExistingMessagesIfRequested(CreateEndpointSettings settings)
+        {
+            if (settings.Address.IsLocal && settings.PurgeExistingMessages)
+            {
+                MsmqEndpointManagement.Manage(settings.Address, x => x.Purge());
+            }
         }
     }
 }

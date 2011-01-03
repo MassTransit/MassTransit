@@ -17,51 +17,38 @@ namespace MassTransit.Transports
     using Exceptions;
     using Internal;
     using Magnum;
-    using Serialization;
 
     public class MulticastUdpEndpointConfigurator :
         EndpointConfiguratorBase
     {
-        public static IEndpoint New(Action<IEndpointConfigurator> action)
+        static readonly MulticastUdpEndpointConfiguratorDefaults _defaults = new MulticastUdpEndpointConfiguratorDefaults();
+
+        public IEndpoint New(Action<IEndpointConfigurator> action)
         {
-            var configurator = new MulticastUdpEndpointConfigurator();
+            action(this);
 
-            action(configurator);
-
-            return configurator.Create();
-        }
-
-        private IEndpoint Create()
-        {
             Guard.AgainstNull(Uri, "No Uri was specified for the endpoint");
-            Guard.AgainstNull(SerializerType, "No serializer type was specified for the endpoint");
+            if (MessageSerializer == null)
+                Guard.AgainstNull(SerializerType, "No serializer type was specified for the endpoint");
 
-            IEndpoint endpoint = New(new CreateEndpointSettings(Uri)
+            var settings = new CreateEndpointSettings(Uri)
                 {
                     Serializer = GetSerializer(),
-                });
-
-            return endpoint;
-        }
-
-        public IEndpoint New(IEndpointAddress address, IMessageSerializer serializer)
-        {
-            return New(new CreateEndpointSettings(address)
-                {
-                    Serializer = serializer,
-                });
-        }
-
-        public IEndpoint New(CreateEndpointSettings settings)
-        {
+                    CreateIfMissing = _defaults.CreateMissingQueues,
+                    PurgeExistingMessages = _defaults.PurgeOnStartup,
+                    Transactional = _defaults.CreateTransactionalQueues,
+                };
+            
             try
             {
                 Guard.AgainstNull(settings.Address, "An address for the endpoint must be specified");
                 Guard.AgainstNull(settings.ErrorAddress, "An error address for the endpoint must be specified");
                 Guard.AgainstNull(settings.Serializer, "A message serializer for the endpoint must be specified");
 
-                var transport = new MulticastUdpTransport(settings.Address);
+                var tf = new MulticastUdpTransportFactory();
+                var transport = tf.New(settings.ToTransportSettings());
 
+                PurgeExistingMessagesIfRequested(settings);
                 var errorTransport = new NullTransport(settings.ErrorAddress);
 
                 var endpoint = new Endpoint(settings.Address, settings.Serializer, transport, errorTransport);
@@ -71,6 +58,14 @@ namespace MassTransit.Transports
             catch (Exception ex)
             {
                 throw new EndpointException(settings.Address.Uri, "Failed to create multicast endpoint", ex);
+            }
+        }
+
+        static void PurgeExistingMessagesIfRequested(CreateEndpointSettings settings)
+        {
+            if (settings.Address.IsLocal && settings.PurgeExistingMessages)
+            {
+                //
             }
         }
 

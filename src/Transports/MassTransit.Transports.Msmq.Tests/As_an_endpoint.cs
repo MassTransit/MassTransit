@@ -44,11 +44,10 @@ namespace MassTransit.Transports.Msmq.Tests
 		public void Should_throw_an_endpoint_exception_from_the_msmq_endpoint_factory()
 		{
 		    var ef = new MsmqEndpointFactory();
-		    ef.New(new CreateEndpointSettings(_uri)
-		        {
-		            Serializer = _serializer,
-		            CreateIfMissing = false,
-		        });
+		    ef.ConfigureEndpoint(_uri, cfg =>
+		    {
+		        cfg.SetSerializer(_serializer);
+		    });
 		}
 
 		[Test]
