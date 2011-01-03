@@ -43,8 +43,10 @@ namespace MassTransit.Transports.Msmq.Tests
 		[ExpectedException(typeof (EndpointException))]
 		public void Should_throw_an_endpoint_exception_from_the_msmq_endpoint_factory()
 		{
-		    var ef = new MsmqEndpointFactory();
-		    ef.BuildEndpoint(_uri, cfg =>
+		    var tfs = new[] {new MsmqTransportFactory()};
+		    var epf = new EndpointFactory(tfs);
+            
+		    epf.BuildEndpoint(_uri, cfg =>
 		    {
 		        cfg.SetSerializer(_serializer);
 		    });
@@ -56,7 +58,7 @@ namespace MassTransit.Transports.Msmq.Tests
 		{
 			IEndpointResolver ef = EndpointResolverConfigurator.New(x =>
 			    {
-			        x.RegisterTransport<MsmqEndpointFactory>();
+			        x.RegisterTransport<MsmqTransportFactory>();
 			    });
 
 			ef.GetEndpoint(_uri);

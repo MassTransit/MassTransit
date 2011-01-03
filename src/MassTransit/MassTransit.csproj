@@ -130,6 +130,7 @@
     <Compile Include="StreamExtensions.cs" />
     <Compile Include="Transports\CreateTransportSettings.cs" />
     <Compile Include="Transports\EndpointFactory.cs" />
+    <Compile Include="Transports\EndpointSettings.cs" />
     <Compile Include="Transports\IEndpointDefaults.cs" />
     <Compile Include="Transports\IEndpointFactory.cs" />
     <Compile Include="Transports\IReceivingContext.cs" />
@@ -356,10 +357,8 @@
     <Compile Include="Services\Timeout\Messages\TimeoutScheduled.cs" />
     <Compile Include="Services\Timeout\Server\TimeoutSaga.cs" />
     <Compile Include="Transports\CreateEndpointSettings.cs" />
-    <Compile Include="Transports\LoopbackEndpointFactory.cs" />
     <Compile Include="Transports\LoopbackTransport.cs" />
     <Compile Include="Transports\MessageRetryTracker.cs" />
-    <Compile Include="Transports\MulticastUdpEndpointFactory.cs" />
     <Compile Include="Transports\MulticastUdpTransport.cs" />
     <Compile Include="Transports\NullTransport.cs" />
     <Compile Include="Transports\TransportBase.cs" />

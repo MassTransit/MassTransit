@@ -15,7 +15,7 @@ namespace MassTransit.Tests.Distributor
 	using MassTransit.Transports;
 
 	public class LoopbackDistributorSagaTestFixture :
-		DistributorSagaTestFixture<LoopbackEndpointFactory>
+		DistributorSagaTestFixture<LoopbackTransportFactory>
 	{
 	}
 }

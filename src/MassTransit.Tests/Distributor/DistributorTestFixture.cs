@@ -21,9 +21,9 @@ namespace MassTransit.Tests.Distributor
 	using MassTransit.Transports;
 	using TextFixtures;
 
-	public class DistributorTestFixture<TEndpointFactory> :
-		SubscriptionServiceTestFixture<TEndpointFactory>
-		where TEndpointFactory : IEndpointFactory
+	public class DistributorTestFixture<TTransportFactory> :
+		SubscriptionServiceTestFixture<TTransportFactory>
+		where TTransportFactory : ITransportFactory
 	{
 		protected override void ConfigureLocalBus(IServiceBusConfigurator configurator)
 		{

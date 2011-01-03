@@ -28,7 +28,7 @@ namespace MassTransit.Tests.Subscriptions
 
 	[TestFixture]
 	public class SubscriptionService_Specs :
-		SubscriptionServiceTestFixture<LoopbackEndpointFactory>
+		SubscriptionServiceTestFixture<LoopbackTransportFactory>
 	{
 		private void DumpPipelines()
 		{

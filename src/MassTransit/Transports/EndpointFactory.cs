@@ -15,6 +15,7 @@ namespace MassTransit.Transports
     using System;
     using System.Collections.Generic;
     using Configuration;
+    using Exceptions;
     using Internal;
 
     public class EndpointFactory :
@@ -29,32 +30,24 @@ namespace MassTransit.Transports
 
         public IEndpoint BuildEndpoint(Uri uri, Action<IEndpointConfigurator> configurator)
         {
-            var address = new EndpointAddress(uri);
-            var epc = new EndpointConfigurator();
-            epc.SetUri(uri);
-            configurator(epc);
-
-            var ep = new CreateEndpointSettings(address);
-
-
-            var s = ep.ToTransportSettings();
-            var e = new CreateTransportSettings(ep.ErrorAddress, s);
-
             foreach (var fac in _factories)
             {
                 if (uri.Scheme.ToLowerInvariant() == fac.Scheme)
                 {
-                    var transport = fac.New(s);
-                    var errorTransport = fac.New(e);
+                    var epc = new EndpointConfigurator();
+                    epc.SetUri(uri);
+                    var s = epc.New(configurator);
 
-                    var endpoint = new Endpoint(address, null, transport, errorTransport);
+                    var transport = fac.New(s.Normal);
+                    var errorTransport = fac.New(s.Error);
 
+                    var endpoint = new Endpoint(new EndpointAddress(uri), epc.GetSerializer(), transport, errorTransport);
 
                     return endpoint;
                 }
             }
 
-            return null;
+            throw new ConfigurationException("No transport could handle: '{0}'".FormatWith(uri));
         }
     }
 }

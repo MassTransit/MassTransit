@@ -21,7 +21,7 @@ namespace MassTransit.TestFramework.Fixtures
 
 	[TestFixture]
 	public class SagaTestFixture<TSaga> :
-		LocalTestFixture<LoopbackEndpointFactory>
+		LocalTestFixture<LoopbackTransportFactory>
 		where TSaga : class, ISaga
 	{
 		private InMemorySagaRepository<TSaga> _repository;

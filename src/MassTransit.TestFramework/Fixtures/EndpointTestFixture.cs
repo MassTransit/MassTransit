@@ -23,9 +23,9 @@ namespace MassTransit.TestFramework.Fixtures
 	using Transports;
 
     [TestFixture]
-	public class EndpointTestFixture<TEndpointFactory> :
+	public class EndpointTestFixture<TTransportFactory> :
 		AbstractTestFixture
-		where TEndpointFactory : IEndpointFactory
+		where TTransportFactory : ITransportFactory
 	{
 		[TestFixtureSetUp]
 		public void EndpointTestFixtureSetup()
@@ -68,7 +68,7 @@ namespace MassTransit.TestFramework.Fixtures
 			EndpointResolver = EndpointResolverConfigurator.New(x =>
 				{
 					x.SetObjectBuilder(ObjectBuilder);
-					x.RegisterTransport<TEndpointFactory>();
+					x.RegisterTransport<TTransportFactory>();
 					x.SetDefaultSerializer<XmlMessageSerializer>();
 
 					ConfigureEndpointFactory(x);

@@ -42,7 +42,7 @@ namespace MassTransit.Configuration
 		/// Register a transport so that it can be used to build endpoints for supported Uris
 		/// </summary>
 		/// <typeparam name="T">The class supporting the ConfigureEndpoint method</typeparam>
-		void RegisterTransport<TTransportFactory>() where TTransportFactory : IEndpointFactory;
+		void RegisterTransport<TTransportFactory>() where TTransportFactory : ITransportFactory;
 
 		/// <summary>
 		/// Register a transport so that it can be used to build endpoints for supported Uris

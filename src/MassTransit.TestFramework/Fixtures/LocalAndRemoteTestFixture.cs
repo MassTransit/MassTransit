@@ -19,9 +19,9 @@ namespace MassTransit.TestFramework.Fixtures
 	using Transports;
 
     [TestFixture]
-	public class LocalAndRemoteTestFixture<TEndpointFactory> :
-		EndpointTestFixture<TEndpointFactory>
-		where TEndpointFactory : IEndpointFactory
+	public class LocalAndRemoteTestFixture<TTransportFactory> :
+		EndpointTestFixture<TTransportFactory>
+		where TTransportFactory : ITransportFactory
 	{
 		[TestFixtureSetUp]
 		public void LocalAndRemoteTestFixtureSetup()

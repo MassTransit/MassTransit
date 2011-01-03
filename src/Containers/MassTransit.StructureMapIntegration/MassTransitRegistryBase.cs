@@ -97,8 +97,8 @@ namespace MassTransit.StructureMapIntegration
 
             RegisterEndpointFactory(x =>
                 {
-                    x.RegisterTransport<LoopbackEndpointFactory>();
-                    x.RegisterTransport<MulticastUdpEndpointFactory>();
+                    x.RegisterTransport<LoopbackTransportFactory>();
+                    x.RegisterTransport<MulticastUdpTransportFactory>();
 
                     foreach (Type type in transportTypes)
                     {

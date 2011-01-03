@@ -24,7 +24,7 @@ namespace MassTransit.Configuration
         void SendErrorsTo(Uri uri);
 
         //TODO: I may have to move these around
-        void RegisterTransport<TTransportFactory>() where TTransportFactory : IEndpointFactory;
+        void RegisterTransport<TTransportFactory>() where TTransportFactory : ITransportFactory;
         void RegisterTransport(Type transportFactoryType);
 
         //serialization. should it be a sub thingy?

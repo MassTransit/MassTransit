@@ -30,8 +30,8 @@ namespace MassTransit.Configuration
             _epc.SetObjectBuilder(builder);
             _sbc.SetObjectBuilder(builder);
 
-            _epc.RegisterTransport<LoopbackEndpointFactory>();
-            _epc.RegisterTransport<MulticastUdpEndpointFactory>();
+            _epc.RegisterTransport<LoopbackTransportFactory>();
+            _epc.RegisterTransport<MulticastUdpTransportFactory>();
             _resolver = resolver;
         }
 
@@ -40,7 +40,7 @@ namespace MassTransit.Configuration
             _epc.RegisterTransport(transportFactoryType);
         }
 
-        public void RegisterTransport<TTransportFactory>() where TTransportFactory : IEndpointFactory
+        public void RegisterTransport<TTransportFactory>() where TTransportFactory : ITransportFactory
         {
             _epc.RegisterTransport<TTransportFactory>();
         }

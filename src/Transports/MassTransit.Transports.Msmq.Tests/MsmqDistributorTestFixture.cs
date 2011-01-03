@@ -18,7 +18,7 @@ namespace MassTransit.Transports.Msmq.Tests
 
 	[TestFixture, Category("Integration")]
 	public class MsmqDistributorTestFixture :
-		DistributorTestFixture<MsmqEndpointFactory>
+		DistributorTestFixture<MsmqTransportFactory>
 	{
 		protected override void EstablishContext()
 		{
