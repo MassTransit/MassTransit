@@ -25,5 +25,6 @@ namespace MassTransit
         void Receive(Func<IReceivingContext, Action<IReceivingContext>> receiver);
 
         void Receive(Func<IReceivingContext, Action<IReceivingContext>> receiver, TimeSpan timeout);
+
     }
 }

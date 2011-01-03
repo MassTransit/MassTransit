@@ -51,7 +51,7 @@ namespace MassTransit.Transports.Nms
                 var tf = new NmsTransportFactory();
                 var transport = tf.New(settings.ToTransportSettings());
 
-                PurgeExistingMessagesIfRequested(settings);
+                tf.PurgeExistingMessagesIfRequested(settings);
 
                 var errorSettings = new CreateEndpointSettings(settings.ErrorAddress, settings);
                 ITransport errorTransport = tf.New(errorSettings.ToTransportSettings());
@@ -66,12 +66,10 @@ namespace MassTransit.Transports.Nms
             }
         }
 
-        void PurgeExistingMessagesIfRequested(CreateEndpointSettings settings)
+        public static void Defaults(Action<IEndpointDefaults> configureDefaults)
         {
-            if(settings.Address.IsLocal && settings.PurgeExistingMessages)
-            {
-                //purge queue
-            }
+            configureDefaults(_defaults);
         }
+        
     }
 }

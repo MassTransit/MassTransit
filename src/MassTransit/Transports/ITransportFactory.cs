@@ -16,5 +16,6 @@ namespace MassTransit.Transports
     {
         string Scheme { get; }
         ITransport New(CreateTransportSettings settings);
+        void PurgeExistingMessagesIfRequested(CreateEndpointSettings settings);
     }
 }

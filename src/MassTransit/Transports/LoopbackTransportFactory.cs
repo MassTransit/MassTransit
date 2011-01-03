@@ -24,5 +24,13 @@ namespace MassTransit.Transports
         {
             return new LoopbackTransport(settings.Address);
         }
+
+        public void PurgeExistingMessagesIfRequested(CreateEndpointSettings settings)
+        {
+            if (settings.Address.IsLocal && settings.PurgeExistingMessages)
+            {
+                //
+            }
+        }
     }
 }

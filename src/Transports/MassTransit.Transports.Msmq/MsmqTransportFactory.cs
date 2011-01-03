@@ -78,5 +78,13 @@ namespace MassTransit.Transports.Msmq
 					}
 				});
 		}
+
+        public void PurgeExistingMessagesIfRequested(CreateEndpointSettings settings)
+        {
+            if (settings.Address.IsLocal && settings.PurgeExistingMessages)
+            {
+                MsmqEndpointManagement.Manage(settings.Address, x => x.Purge());
+            }
+        }
 	}
 }

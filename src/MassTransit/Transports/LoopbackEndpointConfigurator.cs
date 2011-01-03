@@ -48,7 +48,7 @@ namespace MassTransit.Transports
                 var tf = new LoopbackTransportFactory();
                 var transport = tf.New(settings.ToTransportSettings());
 
-                PurgeExistingMessagesIfRequested(settings);
+                tf.PurgeExistingMessagesIfRequested(settings);
 
                 var errorSettings = new CreateEndpointSettings(settings.ErrorAddress, settings);
                 ITransport errorTransport = tf.New(errorSettings.ToTransportSettings());
@@ -63,12 +63,10 @@ namespace MassTransit.Transports
             }
         }
 
-        static void PurgeExistingMessagesIfRequested(CreateEndpointSettings settings)
+     
+        public static void Defaults(Action<IEndpointDefaults> configureDefaults)
         {
-            if (settings.Address.IsLocal && settings.PurgeExistingMessages)
-            {
-                //
-            }
+            configureDefaults(_defaults);
         }
     }
 }
