@@ -28,10 +28,11 @@ namespace MassTransit.Internal
         volatile bool _disposed;
         ReaderWriterLockedDictionary<Uri, Action<IEndpointConfigurator>> _endpointConfigurators;
         ReaderWriterLockedDictionary<Uri, IEndpoint> _endpoints;
-        readonly IEnumerable<IEndpointFactory> _factories;
+        readonly IEnumerable<ITransportFactory> _factories;
+        readonly IEndpointFactory _factory;
 
         public EndpointResolver(Type defaultSerializer,
-                                IEnumerable<IEndpointFactory> transportFactories,
+                                IEnumerable<ITransportFactory> transportFactories,
                                 IEnumerable<KeyValuePair<Uri, Action<IEndpointConfigurator>>> endpointConfigurators)
         {
             _endpointConfigurators = new ReaderWriterLockedDictionary<Uri, Action<IEndpointConfigurator>>(endpointConfigurators);
@@ -40,6 +41,7 @@ namespace MassTransit.Internal
             _defaultSerializer = defaultSerializer;
 
             _factories = transportFactories;
+            _factory = new EndpointFactory(_factories);
         }
 
         public static IEndpoint Null
@@ -94,14 +96,7 @@ namespace MassTransit.Internal
         {
             var configurator = BuildEndpointConfiguration(uri);
 
-            foreach (var fact in _factories)
-            {
-                IEndpoint ep = fact.BuildEndpoint(uri, configurator);
-                if (ep != null)
-                    return ep;
-            }
-
-            throw new ConfigurationException("No transport could handle: '{0}'".FormatWith(uri));
+            return _factory.BuildEndpoint(uri, configurator);
         }
 
         Action<IEndpointConfigurator> BuildEndpointConfiguration(Uri uri)

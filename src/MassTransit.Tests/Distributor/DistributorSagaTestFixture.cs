@@ -20,9 +20,9 @@ namespace MassTransit.Tests.Distributor
 	using TestFramework;
 	using TextFixtures;
 
-	public class DistributorSagaTestFixture<TEndpointFactory> :
-		SubscriptionServiceTestFixture<TEndpointFactory>
-		where TEndpointFactory : IEndpointFactory
+	public class DistributorSagaTestFixture<TTransportFactory> :
+		SubscriptionServiceTestFixture<TTransportFactory>
+		where TTransportFactory : ITransportFactory
 	{
 		protected ISagaRepository<FirstSaga> FirstSagaRepository { get; private set; }
 

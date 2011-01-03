@@ -38,7 +38,7 @@ namespace MassTransit.Tests
 				{
 					x.SetObjectBuilder(_builder);
 					x.SetDefaultSerializer<XmlMessageSerializer>();
-					x.RegisterTransport<LoopbackEndpointFactory>();
+					x.RegisterTransport<LoopbackTransportFactory>();
 				});
 			_builder.Stub(x => x.GetInstance<IEndpointResolver>()).Return(_endpointResolver);
 			_bus = ServiceBusConfigurator.New(x =>
@@ -135,7 +135,7 @@ namespace MassTransit.Tests
 				{
 					x.SetObjectBuilder(_builder);
 					x.SetDefaultSerializer<XmlMessageSerializer>();
-					x.RegisterTransport<LoopbackEndpointFactory>();
+					x.RegisterTransport<LoopbackTransportFactory>();
 				});
 			_endpoint = _resolver.GetEndpoint(new Uri("loopback://localhost/servicebus"));
 			_bus = new ServiceBus(_endpoint, _builder, _resolver);

@@ -16,24 +16,22 @@ namespace MassTransit.Transports
     using System.Linq.Expressions;
     using Configuration;
     using Exceptions;
-    using Internal;
     using Magnum;
     using Serialization;
 
     public class EndpointConfigurator :
-        EndpointConfiguratorBase
+        IEndpointConfigurator
     {
+        protected Type SerializerType { get; private set; }
+        protected IMessageSerializer MessageSerializer { get; private set; }
+        protected Uri Uri { get; private set; }
+
         static readonly EndpointDefaults _defaults = new EndpointDefaults();
-        readonly ITransportFactory _factory;
 
-        public EndpointConfigurator(ITransportFactory factory)
+        public EndpointSettings New(Action<IEndpointConfigurator> action)
         {
-            _factory = factory;
-        }
+            var es = new EndpointSettings();
 
-
-        public IEndpoint New(Action<IEndpointConfigurator> action)
-        {
             action(this);
 
             Guard.AgainstNull(Uri, "No Uri was specified for the endpoint");
@@ -54,23 +52,22 @@ namespace MassTransit.Transports
                 Guard.AgainstNull(settings.ErrorAddress, "An error address for the endpoint must be specified");
                 Guard.AgainstNull(settings.Serializer, "A message serializer for the endpoint must be specified");
 
-                ITransport transport = _factory.New(settings.ToTransportSettings());
 
-                _factory.PurgeExistingMessagesIfRequested(settings);
+
 
                 var errorSettings = new CreateEndpointSettings(settings.ErrorAddress, settings);
-                if (transport.Address.IsTransactional)
-                    settings.Transactional = true;
-                ITransport errorTransport = _factory.New(errorSettings.ToTransportSettings());
+                
+                
 
-                var endpoint = new Endpoint(settings.Address, settings.Serializer, transport, errorTransport);
+                es.Normal = settings.ToTransportSettings();
+                es.Error = errorSettings.ToTransportSettings();
 
-                return endpoint;
+                return es;
             }
             catch (Exception ex)
             {
                 throw new EndpointException(settings.Address.Uri,
-                                            "Failed to create '{0}' endpoint".FormatWith(_factory.Scheme), ex);
+                                            "Failed to create '{0}' endpoint".FormatWith(Uri), ex);
             }
         }
 
@@ -79,14 +76,7 @@ namespace MassTransit.Transports
         {
             configureDefaults(_defaults);
         }
-    }
 
-    public class EndpointConfiguratorBase :
-        IEndpointConfigurator
-    {
-        protected Type SerializerType { get; private set; }
-        protected IMessageSerializer MessageSerializer { get; private set; }
-        protected Uri Uri { get; private set; }
 
         public void SetSerializer<T>()
             where T : IMessageSerializer
@@ -109,7 +99,7 @@ namespace MassTransit.Transports
             Uri = uri;
         }
 
-        protected IMessageSerializer GetSerializer()
+        public IMessageSerializer GetSerializer()
         {
             if (MessageSerializer != null) return MessageSerializer;
 
@@ -123,5 +113,16 @@ namespace MassTransit.Transports
 
             return serializer;
         }
+
+        public CreateTransportSettings NormalSettings()
+        {
+            return null;
+        }
+
+        public CreateTransportSettings ErrorSettings()
+        {
+            return null;
+        }
+
     }
 }

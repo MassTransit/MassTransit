@@ -15,7 +15,7 @@ namespace MassTransit.Transports.Msmq.Tests.TestFixtures
     using MassTransit.Tests.TextFixtures;
 
     public class MsmqEndpointOnlyTestFixture :
-        EndpointTestFixture<MsmqEndpointFactory>
+        EndpointTestFixture<MsmqTransportFactory>
     {
         public MsmqEndpointOnlyTestFixture() :
             this(new CreateEndpointSettings("msmq://localhost/mt_client"))

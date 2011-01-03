@@ -23,7 +23,7 @@ namespace MassTransit.Tests.TextFixtures
 
 	[TestFixture]
 	public abstract class EndpointTestFixture<TTransportFactory>
-		where TTransportFactory : IEndpointFactory
+		where TTransportFactory : ITransportFactory
 	{
 		[SetUp]
 		public void Setup()

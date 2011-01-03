@@ -27,9 +27,9 @@ namespace MassTransit.Tests.TextFixtures
 	using Rhino.Mocks;
 
 	[TestFixture]
-	public class SubscriptionServiceTestFixture<TEndpointFactory> :
-		EndpointTestFixture<TEndpointFactory>
-		where TEndpointFactory : IEndpointFactory
+	public class SubscriptionServiceTestFixture<TTransportFactory> :
+		EndpointTestFixture<TTransportFactory>
+		where TTransportFactory : ITransportFactory
 	{
 		private ISagaRepository<SubscriptionClientSaga> _subscriptionClientSagaRepository;
 		private ISagaRepository<SubscriptionSaga> _subscriptionSagaRepository;

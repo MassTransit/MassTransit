@@ -30,12 +30,12 @@ namespace MassTransit.Configuration
 		private volatile bool _disposed;
 		private ReaderWriterLockedDictionary<Uri, Action<IEndpointConfigurator>> _endpointConfigurators;
 		private IObjectBuilder _objectBuilder;
-		private ReaderWriterLockedObject<HashSet<IEndpointFactory>> _transportTypes;
+		private ReaderWriterLockedObject<HashSet<ITransportFactory>> _transportTypes;
 
         //CHANGED to internal to help the move to the next configuration model
 		internal EndpointResolverConfigurator()
 		{
-			_transportTypes = new ReaderWriterLockedObject<HashSet<IEndpointFactory>>(new HashSet<IEndpointFactory>());
+			_transportTypes = new ReaderWriterLockedObject<HashSet<ITransportFactory>>(new HashSet<ITransportFactory>());
 			_endpointConfigurators = new ReaderWriterLockedDictionary<Uri, Action<IEndpointConfigurator>>();
 		}
 
@@ -51,14 +51,14 @@ namespace MassTransit.Configuration
 		}
 
 		public void RegisterTransport<TTransportFactory>()
-			where TTransportFactory : IEndpointFactory
+			where TTransportFactory : ITransportFactory
 		{
 			RegisterTransport(typeof (TTransportFactory));
 		}
 
 		public void RegisterTransport(Type transportType)
 		{
-		    var f = (IEndpointFactory)FastActivator.Create(transportType);
+		    var f = (ITransportFactory)FastActivator.Create(transportType);
 			_transportTypes.WriteLock(x =>
 				{
 					if (x.Contains(f))
