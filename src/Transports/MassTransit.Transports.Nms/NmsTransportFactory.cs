@@ -25,7 +25,7 @@ namespace MassTransit.Transports.Nms
             return new NmsTransport(settings.Address);
         }
         
-        public void PurgeExistingMessagesIfRequested(CreateEndpointSettings settings)
+        public void PurgeExistingMessagesIfRequested(CreateTransportSettings settings)
         {
             if(settings.Address.IsLocal && settings.PurgeExistingMessages)
             {

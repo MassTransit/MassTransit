@@ -25,7 +25,7 @@ namespace MassTransit.Transports
             return new MulticastUdpTransport(settings.Address);
         }
 
-        public void PurgeExistingMessagesIfRequested(CreateEndpointSettings settings)
+        public void PurgeExistingMessagesIfRequested(CreateTransportSettings settings)
         {
             if (settings.Address.IsLocal && settings.PurgeExistingMessages)
             {

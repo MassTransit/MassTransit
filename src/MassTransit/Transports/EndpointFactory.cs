@@ -32,18 +32,27 @@ namespace MassTransit.Transports
         {
             foreach (var fac in _factories)
             {
-                if (uri.Scheme.ToLowerInvariant() == fac.Scheme)
+                try
                 {
-                    var epc = new EndpointConfigurator();
-                    epc.SetUri(uri);
-                    var s = epc.New(configurator);
 
-                    var transport = fac.New(s.Normal);
-                    var errorTransport = fac.New(s.Error);
+                    if (uri.Scheme.ToLowerInvariant() == fac.Scheme)
+                    {
+                        var epc = new EndpointConfigurator();
+                        epc.SetUri(uri);
+                        var s = epc.New(configurator);
 
-                    var endpoint = new Endpoint(new EndpointAddress(uri), epc.GetSerializer(), transport, errorTransport);
+                        var transport = fac.New(s.Normal);
+                        var errorTransport = fac.New(s.Error);
 
-                    return endpoint;
+                        var endpoint = new Endpoint(new EndpointAddress(uri), epc.GetSerializer(), transport,
+                                                    errorTransport);
+
+                        return endpoint;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    throw new EndpointException(uri, "Error");
                 }
             }
 

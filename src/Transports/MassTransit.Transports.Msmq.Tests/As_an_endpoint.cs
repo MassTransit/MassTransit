@@ -16,7 +16,6 @@ namespace MassTransit.Transports.Msmq.Tests
 	using Configuration;
 	using Exceptions;
 	using MassTransit.Serialization;
-	using MassTransit.Tests;
 	using NUnit.Framework;
 	using Rhino.Mocks;
 

@@ -87,5 +87,7 @@ namespace MassTransit.Transports
 		/// exists and is not transactional
 		/// </summary>
     	public bool RequireTransactional { get; set; }
+
+        public bool PurgeExistingMessages { get; set; }
     }
 }
