@@ -23,7 +23,8 @@ namespace MassTransit.Transports.Nms
 		{
 			if (uri.Scheme.ToLowerInvariant() == "activemq")
 			{
-				IEndpoint endpoint = NmsEndpointConfigurator.New(x =>
+			    var cfg = new NmsEndpointConfigurator();
+				IEndpoint endpoint = cfg.New(x =>
 					{
 						x.SetUri(uri);
 

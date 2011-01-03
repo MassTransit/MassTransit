@@ -17,53 +17,41 @@ namespace MassTransit.Transports
     using Exceptions;
     using Internal;
     using Magnum;
-    using Serialization;
 
     public class LoopbackEndpointConfigurator :
         EndpointConfiguratorBase
     {
-        public static IEndpoint New(Action<IEndpointConfigurator> action)
+        static readonly LoopbackEndpointConfiguratorDefaults _defaults = new LoopbackEndpointConfiguratorDefaults();
+
+        public IEndpoint New(Action<IEndpointConfigurator> action)
         {
-            var configurator = new LoopbackEndpointConfigurator();
+            action(this);
 
-            action(configurator);
-
-            return configurator.Create();
-        }
-
-        IEndpoint Create()
-        {
             Guard.AgainstNull(Uri, "No Uri was specified for the endpoint");
-            Guard.AgainstNull(SerializerType, "No serializer type was specified for the endpoint");
+            if (MessageSerializer == null)
+                Guard.AgainstNull(SerializerType, "No serializer type was specified for the endpoint");
 
-            IEndpoint endpoint = New(new CreateEndpointSettings(Uri)
+            var settings = new CreateEndpointSettings(Uri)
                 {
                     Serializer = GetSerializer(),
-                });
+                    CreateIfMissing = _defaults.CreateMissingQueues,
+                    PurgeExistingMessages = _defaults.PurgeOnStartup,
+                    Transactional = _defaults.CreateTransactionalQueues,
+                };
 
-            return endpoint;
-        }
-
-        public IEndpoint New(IEndpointAddress address, IMessageSerializer serializer)
-        {
-            return New(new CreateEndpointSettings(address)
-                {
-                    Serializer = serializer,
-                });
-        }
-
-        public IEndpoint New(CreateEndpointSettings settings)
-        {
             try
             {
                 Guard.AgainstNull(settings.Address, "An address for the endpoint must be specified");
                 Guard.AgainstNull(settings.ErrorAddress, "An error address for the endpoint must be specified");
                 Guard.AgainstNull(settings.Serializer, "A message serializer for the endpoint must be specified");
 
-                var transport = new LoopbackTransport(settings.Address);
+                var tf = new LoopbackTransportFactory();
+                var transport = tf.New(settings.ToTransportSettings());
+
+                PurgeExistingMessagesIfRequested(settings);
 
                 var errorSettings = new CreateEndpointSettings(settings.ErrorAddress, settings);
-                ITransport errorTransport = new LoopbackTransport(errorSettings.Address);
+                ITransport errorTransport = tf.New(errorSettings.ToTransportSettings());
 
                 var endpoint = new Endpoint(settings.Address, settings.Serializer, transport, errorTransport);
 
@@ -72,6 +60,14 @@ namespace MassTransit.Transports
             catch (Exception ex)
             {
                 throw new EndpointException(settings.Address.Uri, "Failed to create loopback endpoint", ex);
+            }
+        }
+
+        static void PurgeExistingMessagesIfRequested(CreateEndpointSettings settings)
+        {
+            if (settings.Address.IsLocal && settings.PurgeExistingMessages)
+            {
+                //
             }
         }
     }

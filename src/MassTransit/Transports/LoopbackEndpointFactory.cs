@@ -22,7 +22,8 @@ namespace MassTransit.Transports
         {
             if (uri.Scheme.ToLowerInvariant() == "loopback")
             {
-                IEndpoint endpoint = LoopbackEndpointConfigurator.New(x =>
+                var cfg = new LoopbackEndpointConfigurator();
+                IEndpoint endpoint = cfg.New(x =>
                 {
                     x.SetUri(uri);
 

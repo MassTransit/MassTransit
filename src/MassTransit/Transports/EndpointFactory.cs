@@ -13,24 +13,40 @@
 namespace MassTransit.Transports
 {
     using System;
+    using System.Collections.Generic;
     using Configuration;
+    using Internal;
 
-    public class MulticastUdpEndpointFactory :
+    public class EndpointFactory :
         IEndpointFactory
     {
+        IEnumerable<ITransportFactory> _factories;
+
         public IEndpoint ConfigureEndpoint(Uri uri, Action<IEndpointConfigurator> configurator)
         {
-            if (uri.Scheme.ToLowerInvariant() == "multicast")
+            var address = new EndpointAddress(uri);
+            var epc = new EndpointConfigurator();
+            epc.SetUri(uri);
+            configurator(epc);
+
+            var ep = new CreateEndpointSettings(address);
+
+
+            var s = ep.ToTransportSettings();
+            var e = ep.ToTransportSettings();
+
+            foreach (var fac in _factories)
             {
-                var cfg = new MulticastUdpEndpointConfigurator();
-                IEndpoint endpoint = cfg.New(x =>
+                if (uri.Scheme.ToLowerInvariant() == fac.Scheme)
                 {
-                    x.SetUri(uri);
+                    var transport = fac.New(s);
+                    var errorTransport = fac.New(e);
 
-                    configurator(x);
-                });
+                    var endpoint = new Endpoint(address, null, transport, errorTransport);
 
-                return endpoint;
+
+                    return endpoint;
+                }
             }
 
             return null;

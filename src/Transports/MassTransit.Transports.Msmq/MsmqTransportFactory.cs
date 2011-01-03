@@ -18,7 +18,12 @@ namespace MassTransit.Transports.Msmq
 	public class MsmqTransportFactory :
         ITransportFactory
 	{
-		public ITransport New(CreateTransportSettings settings)
+	    public string Scheme
+	    {
+            get { return "msmq"; }
+	    }
+
+	    public ITransport New(CreateTransportSettings settings)
 		{
 			try
 			{
@@ -35,9 +40,9 @@ namespace MassTransit.Transports.Msmq
 
 		private static ITransport NewLocalTransport(CreateTransportSettings settings)
 		{
-			LocalTransportSettings transportSettings = ValidateLocalTransport(settings);
+			ValidateLocalTransport(settings);
 
-			if (transportSettings.Transactional)
+			if (settings.Transactional)
 				return new TransactionalMsmqTransport(settings.Address);
 
 			return new NonTransactionalMsmqTransport(settings.Address);
@@ -51,12 +56,8 @@ namespace MassTransit.Transports.Msmq
 			return new NonTransactionalMsmqTransport(settings.Address);
 		}
 
-		private static LocalTransportSettings ValidateLocalTransport(CreateTransportSettings settings)
+		private static void ValidateLocalTransport(CreateTransportSettings settings)
 		{
-			var result = new LocalTransportSettings
-				{
-					Transactional = settings.Address.IsTransactional,
-				};
 
 			MsmqEndpointManagement.Manage(settings.Address, q =>
 				{
@@ -75,11 +76,7 @@ namespace MassTransit.Transports.Msmq
 							throw new TransportException(settings.Address.Uri,
 								"The transport is non-transactional but a transactional transport was requested");
 					}
-
-					result.Transactional = q.IsTransactional;
 				});
-
-			return result;
 		}
 	}
 }

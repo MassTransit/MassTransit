@@ -22,7 +22,8 @@ namespace MassTransit.Transports.RabbitMq
         {
             if (uri.Scheme.ToLowerInvariant() == "rabbitmq")
             {
-                IEndpoint endpoint = RabbitMqEndpointConfigurator.New(x =>
+                var cfg = new RabbitMqEndpointConfigurator();
+                IEndpoint endpoint = cfg.New(x =>
                 {
                     x.SetUri(uri);
 

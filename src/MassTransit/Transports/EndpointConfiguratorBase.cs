@@ -18,10 +18,17 @@ namespace MassTransit.Transports
 	using Exceptions;
 	using Serialization;
 
+    public class EndpointConfigurator :
+        EndpointConfiguratorBase
+    {
+        
+    }
+
 	public class EndpointConfiguratorBase :
 		IEndpointConfigurator
 	{
 		protected Type SerializerType { get; private set; }
+        protected IMessageSerializer MessageSerializer { get; private set; }
 		protected Uri Uri { get; private set; }
 
 		public void SetSerializer<T>()
@@ -29,6 +36,11 @@ namespace MassTransit.Transports
 		{
 			SerializerType = typeof (T);
 		}
+
+        public void SetSerializer(IMessageSerializer serializer)
+        {
+            MessageSerializer = serializer;
+        }
 
         public void SetSerializer(Type serializerType)
         {
@@ -42,6 +54,8 @@ namespace MassTransit.Transports
 
 		protected IMessageSerializer GetSerializer()
 		{
+            if (MessageSerializer != null) return MessageSerializer;
+
 		    var newExpression = Expression.New(SerializerType);
 			Func<IMessageSerializer> maker = Expression.Lambda<Func<IMessageSerializer>>(newExpression).Compile();
 
