@@ -1,5 +1,5 @@
-// Copyright 2007-2008 The Apache Software Foundation.
-//  
+// Copyright 2007-2011 The Apache Software Foundation.
+// 
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
 // License at 
@@ -12,21 +12,21 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports.Msmq.Tests.TestFixtures
 {
-    using System;
     using MassTransit.Tests.TextFixtures;
 
     public class MsmqEndpointOnlyTestFixture :
-        EndpointTestFixture<MsmqEndpoint>
+        EndpointTestFixture<MsmqEndpointFactory>
     {
-        protected bool Transactional { get; set; }
-
-        public MsmqEndpointOnlyTestFixture()
+        public MsmqEndpointOnlyTestFixture() :
+            this(new CreateEndpointSettings("msmq://localhost/mt_client"))
         {
-        	var settings = new CreateEndpointSettings(new Uri("msmq://localhost/mt_client"));
+        }
 
-        	EndpointAddress = settings.Address;
+        public MsmqEndpointOnlyTestFixture(CreateEndpointSettings settings)
+        {
+            Transactional = settings.Transactional;
+            EndpointAddress = settings.Address;
             ErrorEndpointAddress = settings.ErrorAddress;
-            Transactional = false;
         }
 
         protected override void EstablishContext()
@@ -34,11 +34,11 @@ namespace MassTransit.Transports.Msmq.Tests.TestFixtures
             base.EstablishContext();
 
             MsmqEndpointConfigurator.Defaults(x =>
-                {
-                    x.CreateMissingQueues = true;
-                    x.CreateTransactionalQueues = Transactional;
-                    x.PurgeOnStartup = true;
-                });
+            {
+                x.CreateMissingQueues = true;
+                x.CreateTransactionalQueues = Transactional;
+                x.PurgeOnStartup = true;
+            });
 
             Endpoint = EndpointResolver.GetEndpoint(EndpointAddress.Uri);
             ErrorEndpoint = EndpointResolver.GetEndpoint(ErrorEndpointAddress.Uri);
@@ -52,6 +52,7 @@ namespace MassTransit.Transports.Msmq.Tests.TestFixtures
             base.TeardownContext();
         }
 
+        protected bool Transactional { get; private set; }
         protected IEndpointAddress EndpointAddress { get; set; }
         protected IEndpointAddress ErrorEndpointAddress { get; set; }
         protected IEndpoint Endpoint { get; private set; }

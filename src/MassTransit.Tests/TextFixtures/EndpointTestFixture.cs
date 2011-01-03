@@ -17,12 +17,13 @@ namespace MassTransit.Tests.TextFixtures
 	using Magnum.Extensions;
 	using MassTransit.Saga;
 	using MassTransit.Serialization;
+	using MassTransit.Transports;
 	using NUnit.Framework;
 	using Rhino.Mocks;
 
 	[TestFixture]
-	public abstract class EndpointTestFixture<TTransport>
-		where TTransport : IEndpoint
+	public abstract class EndpointTestFixture<TTransportFactory>
+		where TTransportFactory : IEndpointFactory
 	{
 		[SetUp]
 		public void Setup()
@@ -35,7 +36,7 @@ namespace MassTransit.Tests.TextFixtures
 			EndpointResolver = EndpointResolverConfigurator.New(x =>
 				{
 					x.SetObjectBuilder(ObjectBuilder);
-					x.RegisterTransport<TTransport>();
+					x.RegisterTransport<TTransportFactory>();
 					x.SetDefaultSerializer<XmlMessageSerializer>();
 
 					AdditionalEndpointFactoryConfiguration(x);

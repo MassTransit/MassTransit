@@ -19,7 +19,7 @@ namespace MassTransit.TestFramework
 
 	[Scenario]
 	public class Given_a_subscription_service_and_two_service_buses :
-		SubscriptionServiceTestFixture<LoopbackEndpoint>
+		SubscriptionServiceTestFixture<LoopbackEndpointFactory>
 	{
 		protected Given_a_subscription_service_and_two_service_buses()
 		{

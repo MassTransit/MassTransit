@@ -15,6 +15,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
     using System;
     using System.IO;
     using System.Text;
+    using Internal;
     using NUnit.Framework;
     using RabbitMQ.Client;
     using Serialization;
@@ -90,7 +91,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
             {
                 ser.Serialize(stream, msg);
             }
-            var e = new RabbitMqEndpoint(addr, ser, new RabbitMqTransport(addr, _factory.CreateConnection()), null);
+            var e = new Endpoint(addr, ser, new RabbitMqTransport(addr, _factory.CreateConnection()), null);
             e.Send(new BugsBunny() {Food = "Carrot"});
         }
 
@@ -102,7 +103,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
             IMessageSerializer ser = new XmlMessageSerializer();
 
 
-            var e = new RabbitMqEndpoint(addr, ser, new RabbitMqTransport(addr, _factory.CreateConnection()), null);
+            var e = new Endpoint(addr, ser, new RabbitMqTransport(addr, _factory.CreateConnection()), null);
             e.Receive(o=>
             {
                 return b =>

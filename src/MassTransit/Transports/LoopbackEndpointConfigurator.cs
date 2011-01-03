@@ -1,5 +1,5 @@
-// Copyright 2007-2010 The Apache Software Foundation.
-//  
+// Copyright 2007-2011 The Apache Software Foundation.
+// 
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
 // License at 
@@ -14,7 +14,10 @@ namespace MassTransit.Transports
 {
     using System;
     using Configuration;
+    using Exceptions;
+    using Internal;
     using Magnum;
+    using Serialization;
 
     public class LoopbackEndpointConfigurator :
         EndpointConfiguratorBase
@@ -28,17 +31,48 @@ namespace MassTransit.Transports
             return configurator.Create();
         }
 
-        private IEndpoint Create()
+        IEndpoint Create()
         {
             Guard.AgainstNull(Uri, "No Uri was specified for the endpoint");
             Guard.AgainstNull(SerializerType, "No serializer type was specified for the endpoint");
 
-            IEndpoint endpoint = LoopbackEndpointFactory.New(new CreateEndpointSettings(Uri)
+            IEndpoint endpoint = New(new CreateEndpointSettings(Uri)
                 {
                     Serializer = GetSerializer(),
                 });
 
             return endpoint;
+        }
+
+        public IEndpoint New(IEndpointAddress address, IMessageSerializer serializer)
+        {
+            return New(new CreateEndpointSettings(address)
+                {
+                    Serializer = serializer,
+                });
+        }
+
+        public IEndpoint New(CreateEndpointSettings settings)
+        {
+            try
+            {
+                Guard.AgainstNull(settings.Address, "An address for the endpoint must be specified");
+                Guard.AgainstNull(settings.ErrorAddress, "An error address for the endpoint must be specified");
+                Guard.AgainstNull(settings.Serializer, "A message serializer for the endpoint must be specified");
+
+                var transport = new LoopbackTransport(settings.Address);
+
+                var errorSettings = new CreateEndpointSettings(settings.ErrorAddress, settings);
+                ITransport errorTransport = new LoopbackTransport(errorSettings.Address);
+
+                var endpoint = new Endpoint(settings.Address, settings.Serializer, transport, errorTransport);
+
+                return endpoint;
+            }
+            catch (Exception ex)
+            {
+                throw new EndpointException(settings.Address.Uri, "Failed to create loopback endpoint", ex);
+            }
         }
     }
 }

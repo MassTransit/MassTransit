@@ -10,7 +10,7 @@ namespace MassTransit.Tests
 
 	[TestFixture]
 	public class When_creating_a_bus_with_a_separate_control_bus :
-		EndpointTestFixture<LoopbackEndpoint>
+		EndpointTestFixture<LoopbackEndpointFactory>
 	{
 		public ISubscriptionService SubscriptionService { get; private set; }
 		public IServiceBus LocalBus { get; private set; }

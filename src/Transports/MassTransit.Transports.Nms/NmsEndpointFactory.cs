@@ -1,5 +1,5 @@
-// Copyright 2007-2010 The Apache Software Foundation.
-//  
+// Copyright 2007-2011 The Apache Software Foundation.
+// 
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
 // License at 
@@ -12,42 +12,28 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports.Nms
 {
-	using System;
-	using Exceptions;
-	using Magnum;
-	using Serialization;
+    using System;
+    using Configuration;
 
-	public static class NmsEndpointFactory
-	{
-		public static IEndpoint New(IEndpointAddress address, IMessageSerializer serializer)
+    public class NmsEndpointFactory :
+        IEndpointFactory
+    {
+       
+		public IEndpoint ConfigureEndpoint(Uri uri, Action<IEndpointConfigurator> configurator)
 		{
-			return New(new CreateEndpointSettings(address)
-				{
-					Serializer = serializer,
-				});
-		}
-
-		public static IEndpoint New(CreateEndpointSettings settings)
-		{
-			try
+			if (uri.Scheme.ToLowerInvariant() == "activemq")
 			{
-				Guard.AgainstNull(settings.Address, "An address for the endpoint must be specified");
-				Guard.AgainstNull(settings.ErrorAddress, "An error address for the endpoint must be specified");
-				Guard.AgainstNull(settings.Serializer, "A message serializer for the endpoint must be specified");
+				IEndpoint endpoint = NmsEndpointConfigurator.New(x =>
+					{
+						x.SetUri(uri);
 
-				var transport = new NmsTransport(settings.Address);
-
-				var errorSettings = new CreateEndpointSettings(settings.ErrorAddress, settings);
-				ITransport errorTransport = new NmsTransport(errorSettings.Address);
-
-				var endpoint = new NmsEndpoint(settings.Address, settings.Serializer, transport, errorTransport);
+						configurator(x);
+					});
 
 				return endpoint;
 			}
-			catch (Exception ex)
-			{
-				throw new EndpointException(settings.Address.Uri, "Failed to create NMS endpoint", ex);
-			}
-		}
-	}
+
+			return null;
+		} 
+    }
 }

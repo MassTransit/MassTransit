@@ -20,11 +20,12 @@ namespace MassTransit.TestFramework.Fixtures
 	using NUnit.Framework;
 	using Rhino.Mocks;
 	using Serialization;
+	using Transports;
 
-	[TestFixture]
-	public class EndpointTestFixture<TEndpoint> :
+    [TestFixture]
+	public class EndpointTestFixture<TEndpointFactory> :
 		AbstractTestFixture
-		where TEndpoint : IEndpoint
+		where TEndpointFactory : IEndpointFactory
 	{
 		[TestFixtureSetUp]
 		public void EndpointTestFixtureSetup()
@@ -67,7 +68,7 @@ namespace MassTransit.TestFramework.Fixtures
 			EndpointResolver = EndpointResolverConfigurator.New(x =>
 				{
 					x.SetObjectBuilder(ObjectBuilder);
-					x.RegisterTransport<TEndpoint>();
+					x.RegisterTransport<TEndpointFactory>();
 					x.SetDefaultSerializer<XmlMessageSerializer>();
 
 					ConfigureEndpointFactory(x);

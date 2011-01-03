@@ -17,10 +17,12 @@ namespace MassTransit.Configuration
 	using Exceptions;
 	using Internal;
 	using Magnum;
+	using Magnum.Reflection;
 	using Magnum.Threading;
 	using Serialization;
+	using Transports;
 
-	public class EndpointResolverConfigurator :
+    public class EndpointResolverConfigurator :
 		IEndpointResolverConfigurator,
 		IDisposable
 	{
@@ -28,12 +30,12 @@ namespace MassTransit.Configuration
 		private volatile bool _disposed;
 		private ReaderWriterLockedDictionary<Uri, Action<IEndpointConfigurator>> _endpointConfigurators;
 		private IObjectBuilder _objectBuilder;
-		private ReaderWriterLockedObject<HashSet<Type>> _transportTypes;
+		private ReaderWriterLockedObject<HashSet<IEndpointFactory>> _transportTypes;
 
         //CHANGED to internal to help the move to the next configuration model
 		internal EndpointResolverConfigurator()
 		{
-			_transportTypes = new ReaderWriterLockedObject<HashSet<Type>>(new HashSet<Type>());
+			_transportTypes = new ReaderWriterLockedObject<HashSet<IEndpointFactory>>(new HashSet<IEndpointFactory>());
 			_endpointConfigurators = new ReaderWriterLockedDictionary<Uri, Action<IEndpointConfigurator>>();
 		}
 
@@ -48,20 +50,21 @@ namespace MassTransit.Configuration
 			_defaultSerializer = serializerType;
 		}
 
-		public void RegisterTransport<TTransport>()
-			where TTransport : IEndpoint
+		public void RegisterTransport<TTransportFactory>()
+			where TTransportFactory : IEndpointFactory
 		{
-			RegisterTransport(typeof (TTransport));
+			RegisterTransport(typeof (TTransportFactory));
 		}
 
 		public void RegisterTransport(Type transportType)
 		{
+		    var f = (IEndpointFactory)FastActivator.Create(transportType);
 			_transportTypes.WriteLock(x =>
 				{
-					if (x.Contains(transportType))
+					if (x.Contains(f))
 						return;
 
-					x.Add(transportType);
+					x.Add(f);
 				});
 		}
 

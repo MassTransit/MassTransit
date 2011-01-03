@@ -16,11 +16,12 @@ namespace MassTransit.TestFramework.Fixtures
 	using Configuration;
 	using NUnit.Framework;
 	using Services.Subscriptions;
+	using Transports;
 
-	[TestFixture]
-	public class LocalAndRemoteTestFixture<TEndpoint> :
-		EndpointTestFixture<TEndpoint>
-		where TEndpoint : IEndpoint
+    [TestFixture]
+	public class LocalAndRemoteTestFixture<TEndpointFactory> :
+		EndpointTestFixture<TEndpointFactory>
+		where TEndpointFactory : IEndpointFactory
 	{
 		[TestFixtureSetUp]
 		public void LocalAndRemoteTestFixtureSetup()

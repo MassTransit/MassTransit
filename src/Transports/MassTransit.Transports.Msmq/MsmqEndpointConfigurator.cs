@@ -14,6 +14,8 @@ namespace MassTransit.Transports.Msmq
 {
     using System;
     using Configuration;
+    using Exceptions;
+    using Internal;
     using Magnum;
 
     public class MsmqEndpointConfigurator :
@@ -21,12 +23,21 @@ namespace MassTransit.Transports.Msmq
     {
         private static readonly MsmqEndpointConfiguratorDefaults _defaults = new MsmqEndpointConfiguratorDefaults();
 
+        public static IEndpoint New(Action<IEndpointConfigurator> action)
+        {
+            var configurator = new MsmqEndpointConfigurator();
+
+            action(configurator);
+
+            return configurator.Create();
+        }
+
         private IEndpoint Create()
         {
             Guard.AgainstNull(Uri, "No Uri was specified for the endpoint");
             Guard.AgainstNull(SerializerType, "No serializer type was specified for the endpoint");
 
-            IEndpoint endpoint = MsmqEndpointFactory.New(new CreateEndpointSettings(Uri)
+            IEndpoint endpoint = New(new CreateEndpointSettings(Uri)
                 {
                     Serializer = GetSerializer(),
                     CreateIfMissing = _defaults.CreateMissingQueues,
@@ -37,13 +48,32 @@ namespace MassTransit.Transports.Msmq
             return endpoint;
         }
 
-        public static IEndpoint New(Action<IEndpointConfigurator> action)
+        public static IEndpoint New(CreateEndpointSettings settings)
         {
-            var configurator = new MsmqEndpointConfigurator();
+            try
+            {
+                Guard.AgainstNull(settings.Address, "An address for the endpoint must be specified");
+                Guard.AgainstNull(settings.ErrorAddress, "An error address for the endpoint must be specified");
+                Guard.AgainstNull(settings.Serializer, "A message serializer for the endpoint must be specified");
 
-            action(configurator);
+                var tf = new MsmqTransportFactory();
+                var transport = tf.New(settings.ToTransportSettings());
 
-            return configurator.Create();
+
+                var errorSettings = new CreateTransportSettings(settings.ErrorAddress, settings.ToTransportSettings());
+                if (transport.Address.IsTransactional)
+                    settings.Transactional = true;
+
+                ITransport errorTransport = tf.New(errorSettings);
+
+                var endpoint = new Endpoint(settings.Address, settings.Serializer, transport, errorTransport);
+
+                return endpoint;
+            }
+            catch (Exception ex)
+            {
+                throw new EndpointException(settings.Address.Uri, "Failed to create MSMQ endpoint", ex);
+            }
         }
 
         public static void Defaults(Action<IMsmqEndpointDefaults> configureDefaults)

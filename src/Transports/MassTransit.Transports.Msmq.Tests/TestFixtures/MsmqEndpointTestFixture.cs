@@ -20,7 +20,7 @@ namespace MassTransit.Transports.Msmq.Tests.TestFixtures
 	using Services.Subscriptions;
 
 	public class MsmqEndpointTestFixture :
-		EndpointTestFixture<MsmqEndpoint>
+		EndpointTestFixture<MsmqEndpointFactory>
 	{
 		protected Uri LocalEndpointUri { get; set; }
 		protected Uri LocalErrorUri { get; set; }

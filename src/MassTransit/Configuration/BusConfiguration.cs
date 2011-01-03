@@ -14,6 +14,7 @@ namespace MassTransit.Configuration
 {
     using System;
     using Serialization;
+    using Transports;
 
     public interface BusConfiguration
     {
@@ -23,8 +24,8 @@ namespace MassTransit.Configuration
         void SendErrorsTo(Uri uri);
 
         //TODO: I may have to move these around
-        void RegisterTransport<TTransport>() where TTransport : IEndpoint;
-        void RegisterTransport(Type transportType);
+        void RegisterTransport<TTransportFactory>() where TTransportFactory : IEndpointFactory;
+        void RegisterTransport(Type transportFactoryType);
 
         //serialization. should it be a sub thingy?
         //this maynot be able to be here?

@@ -3,9 +3,10 @@ namespace MassTransit.Tests.Transports
     using System;
     using System.Transactions;
     using Configuration;
+    using MassTransit.Transports;
     using NUnit.Framework;
 
-    public abstract class TransactionalEndpointContract<TEndpoint> where TEndpoint : IEndpoint
+    public abstract class TransactionalEndpointContract<TEndpointFactory> where TEndpointFactory : IEndpointFactory
     {
         private IEndpoint _ep;
         private IEndpointResolver _endpointResolver;
@@ -19,7 +20,7 @@ namespace MassTransit.Tests.Transports
         {
             _endpointResolver = EndpointResolverConfigurator.New(c =>
                                                                    {
-                                                                       c.RegisterTransport<TEndpoint>();
+                                                                       c.RegisterTransport<TEndpointFactory>();
                                                                        c.SetObjectBuilder(ObjectBuilder);
                                                                    });
             _ep = _endpointResolver.GetEndpoint(Address);

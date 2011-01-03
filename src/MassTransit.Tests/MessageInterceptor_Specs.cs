@@ -22,7 +22,7 @@ namespace MassTransit.Tests
 
     [TestFixture]
     public class MessageInterceptor_Specs
-        : EndpointTestFixture<LoopbackEndpoint>
+        : EndpointTestFixture<LoopbackEndpointFactory>
     {
         public IServiceBus LocalBus { get; private set; }
 

@@ -20,7 +20,7 @@ namespace MassTransit.Transports.Nms.Tests.TestFixtures
     using Services.Subscriptions;
 
     public class NmsEndpointTestFixture :
-        EndpointTestFixture<NmsEndpoint>
+        EndpointTestFixture<NmsEndpointFactory>
     {
         protected ISubscriptionService SubscriptionService { get; set; }
         protected IServiceBus LocalBus { get; set; }

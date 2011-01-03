@@ -30,7 +30,7 @@ namespace MassTransit.Tests
 			var endpointFactory = EndpointResolverConfigurator.New(x =>
 				{
 					x.SetObjectBuilder(objectBuilder);
-					x.RegisterTransport<LoopbackEndpoint>();
+					x.RegisterTransport<LoopbackEndpointFactory>();
 
 					x.ConfigureEndpoint("loopback://localhost/mt_client", y => { y.SetSerializer<DotNotXmlMessageSerializer>(); });
 				});

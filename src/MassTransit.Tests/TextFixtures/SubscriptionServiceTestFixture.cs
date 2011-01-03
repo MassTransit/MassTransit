@@ -22,13 +22,14 @@ namespace MassTransit.Tests.TextFixtures
 	using MassTransit.Services.Subscriptions.Client;
 	using MassTransit.Services.Subscriptions.Configuration;
 	using MassTransit.Services.Subscriptions.Server;
+	using MassTransit.Transports;
 	using NUnit.Framework;
 	using Rhino.Mocks;
 
 	[TestFixture]
-	public class SubscriptionServiceTestFixture<TEndpoint> :
-		EndpointTestFixture<TEndpoint>
-		where TEndpoint : IEndpoint
+	public class SubscriptionServiceTestFixture<TEndpointFactory> :
+		EndpointTestFixture<TEndpointFactory>
+		where TEndpointFactory : IEndpointFactory
 	{
 		private ISagaRepository<SubscriptionClientSaga> _subscriptionClientSagaRepository;
 		private ISagaRepository<SubscriptionSaga> _subscriptionSagaRepository;

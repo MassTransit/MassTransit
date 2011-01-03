@@ -19,14 +19,14 @@ namespace MassTransit.Transports
     public class CreateEndpointSettings
     {
         public CreateEndpointSettings(string uri)
-            : this()
         {
             Guard.AgainstNull(uri, "The URI cannot be null or empty");
             Guard.AgainstEmpty(uri, "The URI cannot be null or empty");
 
             try
             {
-                Address = new EndpointAddress(new Uri(uri));
+                var address = new EndpointAddress(new Uri(uri));
+                SetAddresses(address);
             }
             catch (UriFormatException ex)
             {
@@ -35,43 +35,34 @@ namespace MassTransit.Transports
         }
 
         public CreateEndpointSettings(Uri uri)
-            : this()
         {
             Guard.AgainstNull(uri, "The URI cannot be null");
 
-            Address = new EndpointAddress(uri);
-
-            SetDefaultErrorAddress();
+            var address = new EndpointAddress(uri);
+            SetAddresses(address);
         }
 
         public CreateEndpointSettings(IEndpointAddress address)
-            : this()
         {
             Guard.AgainstNull(address, "The address cannot be null");
 
-            Address = new EndpointAddress(address.Uri);
-
-            SetDefaultErrorAddress();
+            SetAddresses(address);
         }
 
         public CreateEndpointSettings(IEndpointAddress address, CreateEndpointSettings source)
-            : this()
         {
             Guard.AgainstNull(address, "The address cannot be null");
             Guard.AgainstNull(source, "The source settings cannot be null");
 
-            Address = new EndpointAddress(address.Uri);
-            SetDefaultErrorAddress();
-
             Serializer = source.Serializer;
+
+            SetAddresses(address);
         }
 
-        public CreateEndpointSettings()
-        {
-        }
 
-        protected void SetDefaultErrorAddress()
+        protected void SetAddresses(IEndpointAddress address)
         {
+            Address = address;
             ErrorAddress = new EndpointAddress(new Uri(Address.Uri + "_error"));
         }
 

@@ -19,7 +19,7 @@ namespace MassTransit.TestFramework
 
 	[Scenario]
 	public class Given_two_service_buses_with_shared_subscriptions :
-		LocalAndRemoteTestFixture<LoopbackEndpoint>
+		LocalAndRemoteTestFixture<LoopbackEndpointFactory>
 	{
 		protected Given_two_service_buses_with_shared_subscriptions()
 		{

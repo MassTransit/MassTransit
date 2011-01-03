@@ -16,12 +16,13 @@ namespace MassTransit.Tests.Distributor
 	using Load.Sagas;
 	using MassTransit.Distributor;
 	using MassTransit.Saga;
+	using MassTransit.Transports;
 	using TestFramework;
 	using TextFixtures;
 
-	public class DistributorSagaTestFixture<TEndpoint> :
-		SubscriptionServiceTestFixture<TEndpoint>
-		where TEndpoint : IEndpoint
+	public class DistributorSagaTestFixture<TEndpointFactory> :
+		SubscriptionServiceTestFixture<TEndpointFactory>
+		where TEndpointFactory : IEndpointFactory
 	{
 		protected ISagaRepository<FirstSaga> FirstSagaRepository { get; private set; }
 
