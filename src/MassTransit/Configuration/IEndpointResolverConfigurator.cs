@@ -14,8 +14,9 @@ namespace MassTransit.Configuration
 {
 	using System;
 	using Serialization;
+	using Transports;
 
-	/// <summary>
+    /// <summary>
 	/// Allows for the configuration of the EndpointFactory through the use of an EndpointFactoryConfigurator
 	/// </summary>
 	public interface IEndpointResolverConfigurator
@@ -41,13 +42,13 @@ namespace MassTransit.Configuration
 		/// Register a transport so that it can be used to build endpoints for supported Uris
 		/// </summary>
 		/// <typeparam name="T">The class supporting the ConfigureEndpoint method</typeparam>
-		void RegisterTransport<T>() where T : IEndpoint;
+		void RegisterTransport<TTransportFactory>() where TTransportFactory : IEndpointFactory;
 
 		/// <summary>
 		/// Register a transport so that it can be used to build endpoints for supported Uris
 		/// </summary>
 		/// <param name="transportType">The type supporting the ConfigureEndpoint method</param>
-		void RegisterTransport(Type transportType);
+		void RegisterTransport(Type transportFactoryType);
 
 		/// <summary>
 		/// Specifies a configuration action to perform on a particular endpoint when it is created.

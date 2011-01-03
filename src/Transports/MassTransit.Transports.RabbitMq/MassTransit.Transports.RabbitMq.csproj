@@ -72,9 +72,7 @@
     <Compile Include="..\..\SolutionVersion.cs">
       <Link>SolutionVersion.cs</Link>
     </Compile>
-    <Compile Include="Configuration\RabbitMqEndpointConfigurator.cs" />
     <Compile Include="RabbitMqAddress.cs" />
-    <Compile Include="RabbitMqEndpoint.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RabbitMqEndpointConfigurator.cs" />
     <Compile Include="RabbitMqEndpointFactory.cs" />

@@ -1,5 +1,5 @@
-// Copyright 2007-2010 The Apache Software Foundation.
-//  
+// Copyright 2007-2011 The Apache Software Foundation.
+// 
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
 // License at 
@@ -13,40 +13,26 @@
 namespace MassTransit.Transports
 {
     using System;
-    using Exceptions;
-    using Magnum;
-    using Serialization;
+    using Configuration;
 
-    public static class MulticastUdpEndpointFactory
+    public class MulticastUdpEndpointFactory :
+        IEndpointFactory
     {
-        public static IEndpoint New(IEndpointAddress address, IMessageSerializer serializer)
+        public IEndpoint ConfigureEndpoint(Uri uri, Action<IEndpointConfigurator> configurator)
         {
-            return New(new CreateEndpointSettings(address)
-                {
-                    Serializer = serializer,
-                });
-        }
-
-        public static IEndpoint New(CreateEndpointSettings settings)
-        {
-            try
+            if (uri.Scheme.ToLowerInvariant() == "multicast")
             {
-                Guard.AgainstNull(settings.Address, "An address for the endpoint must be specified");
-                Guard.AgainstNull(settings.ErrorAddress, "An error address for the endpoint must be specified");
-                Guard.AgainstNull(settings.Serializer, "A message serializer for the endpoint must be specified");
+                IEndpoint endpoint = MulticastUdpEndpointConfigurator.New(x =>
+                {
+                    x.SetUri(uri);
 
-                var transport = new MulticastUdpTransport(settings.Address);
-
-                var errorTransport = new NullTransport(settings.ErrorAddress);
-
-                var endpoint = new MulticastUdpEndpoint(settings.Address, settings.Serializer, transport, errorTransport);
+                    configurator(x);
+                });
 
                 return endpoint;
             }
-            catch (Exception ex)
-            {
-                throw new EndpointException(settings.Address.Uri, "Failed to create multicast endpoint", ex);
-            }
+
+            return null;
         }
     }
 }

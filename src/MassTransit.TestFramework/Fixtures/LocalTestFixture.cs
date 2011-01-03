@@ -14,11 +14,12 @@ namespace MassTransit.TestFramework.Fixtures
 {
 	using System;
 	using NUnit.Framework;
+	using Transports;
 
-	[TestFixture]
-	public class LocalTestFixture<TEndpoint> :
-		EndpointTestFixture<TEndpoint>
-		where TEndpoint : IEndpoint
+    [TestFixture]
+	public class LocalTestFixture<TEndpointFactory> :
+		EndpointTestFixture<TEndpointFactory>
+		where TEndpointFactory : IEndpointFactory
 	{
 		[TestFixtureSetUp]
 		public void LocalTestFixtureSetup()

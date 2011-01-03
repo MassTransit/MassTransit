@@ -14,7 +14,10 @@ namespace MassTransit.Transports
 {
     using System;
     using Configuration;
+    using Exceptions;
+    using Internal;
     using Magnum;
+    using Serialization;
 
     public class MulticastUdpEndpointConfigurator :
         EndpointConfiguratorBase
@@ -33,12 +36,43 @@ namespace MassTransit.Transports
             Guard.AgainstNull(Uri, "No Uri was specified for the endpoint");
             Guard.AgainstNull(SerializerType, "No serializer type was specified for the endpoint");
 
-            IEndpoint endpoint = MulticastUdpEndpointFactory.New(new CreateEndpointSettings(Uri)
+            IEndpoint endpoint = New(new CreateEndpointSettings(Uri)
                 {
                     Serializer = GetSerializer(),
                 });
 
             return endpoint;
         }
+
+        public IEndpoint New(IEndpointAddress address, IMessageSerializer serializer)
+        {
+            return New(new CreateEndpointSettings(address)
+                {
+                    Serializer = serializer,
+                });
+        }
+
+        public IEndpoint New(CreateEndpointSettings settings)
+        {
+            try
+            {
+                Guard.AgainstNull(settings.Address, "An address for the endpoint must be specified");
+                Guard.AgainstNull(settings.ErrorAddress, "An error address for the endpoint must be specified");
+                Guard.AgainstNull(settings.Serializer, "A message serializer for the endpoint must be specified");
+
+                var transport = new MulticastUdpTransport(settings.Address);
+
+                var errorTransport = new NullTransport(settings.ErrorAddress);
+
+                var endpoint = new Endpoint(settings.Address, settings.Serializer, transport, errorTransport);
+
+                return endpoint;
+            }
+            catch (Exception ex)
+            {
+                throw new EndpointException(settings.Address.Uri, "Failed to create multicast endpoint", ex);
+            }
+        }
+
     }
 }

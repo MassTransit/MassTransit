@@ -20,10 +20,10 @@ namespace MassTransit.Internal
 	using Transports;
 
     [DebuggerDisplay("{Address}")]
-    public abstract class AbstractEndpoint :
+    public class Endpoint :
 		IEndpoint
 	{
-		private static readonly ILog _log = LogManager.GetLogger(typeof (AbstractEndpoint));
+		private static readonly ILog _log = LogManager.GetLogger(typeof (Endpoint));
 		private readonly IEndpointAddress _address;
         protected ITransport _transport;
         protected ITransport _errorTransport;
@@ -31,7 +31,7 @@ namespace MassTransit.Internal
 		private string _disposedMessage;
         MessageRetryTracker _tracker;
 
-        protected AbstractEndpoint(IEndpointAddress address, IMessageSerializer serializer, ITransport transport, ITransport errorTransport)
+        public Endpoint(IEndpointAddress address, IMessageSerializer serializer, ITransport transport, ITransport errorTransport)
 		{
 			_address = address;
 		    _transport = transport;
@@ -112,7 +112,7 @@ namespace MassTransit.Internal
 			_disposed = true;
 		}
 
-		~AbstractEndpoint()
+		~Endpoint()
 		{
 			Dispose(false);
 		}

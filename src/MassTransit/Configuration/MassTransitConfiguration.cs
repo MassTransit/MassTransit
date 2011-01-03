@@ -30,19 +30,19 @@ namespace MassTransit.Configuration
             _epc.SetObjectBuilder(builder);
             _sbc.SetObjectBuilder(builder);
 
-            _epc.RegisterTransport<LoopbackEndpoint>();
-            _epc.RegisterTransport<MulticastUdpEndpoint>();
+            _epc.RegisterTransport<LoopbackEndpointFactory>();
+            _epc.RegisterTransport<MulticastUdpEndpointFactory>();
             _resolver = resolver;
         }
 
-        public void RegisterTransport(Type transportType)
+        public void RegisterTransport(Type transportFactoryType)
         {
-            _epc.RegisterTransport(transportType);
+            _epc.RegisterTransport(transportFactoryType);
         }
 
-        public void RegisterTransport<TTransport>() where TTransport : IEndpoint
+        public void RegisterTransport<TTransportFactory>() where TTransportFactory : IEndpointFactory
         {
-            _epc.RegisterTransport<TTransport>();
+            _epc.RegisterTransport<TTransportFactory>();
         }
 
         public void ReceiveFrom(string uriString)

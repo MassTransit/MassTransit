@@ -18,11 +18,12 @@ namespace MassTransit.Tests.Distributor
 	using Magnum;
 	using Magnum.Extensions;
 	using MassTransit.Distributor;
+	using MassTransit.Transports;
 	using TextFixtures;
 
-	public class DistributorTestFixture<TEndpoint> :
-		SubscriptionServiceTestFixture<TEndpoint>
-		where TEndpoint : IEndpoint
+	public class DistributorTestFixture<TEndpointFactory> :
+		SubscriptionServiceTestFixture<TEndpointFactory>
+		where TEndpointFactory : IEndpointFactory
 	{
 		protected override void ConfigureLocalBus(IServiceBusConfigurator configurator)
 		{

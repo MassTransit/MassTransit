@@ -22,11 +22,12 @@ namespace MassTransit.TestFramework.Fixtures
 	using Services.Subscriptions.Client;
 	using Services.Subscriptions.Configuration;
 	using Services.Subscriptions.Server;
+	using Transports;
 
-	[TestFixture]
-	public class SubscriptionServiceTestFixture<TEndpoint> :
-		EndpointTestFixture<TEndpoint>
-		where TEndpoint : IEndpoint
+    [TestFixture]
+	public class SubscriptionServiceTestFixture<TEndpointFactory> :
+		EndpointTestFixture<TEndpointFactory>
+		where TEndpointFactory : IEndpointFactory
 	{
 		[TestFixtureSetUp]
 		public void LocalAndRemoteTestFixtureSetup()

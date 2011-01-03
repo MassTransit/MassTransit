@@ -29,7 +29,7 @@ namespace MassTransit.Tests.Services.HealthMonitoring
 
 	[TestFixture]
 	public class HealthServiceTestFixture :
-		EndpointTestFixture<LoopbackEndpoint>
+		EndpointTestFixture<LoopbackEndpointFactory>
 	{
 		private ISagaRepository<HealthSaga> _healthSagaRepository;
 		private ISagaRepository<SubscriptionSaga> _subscriptionSagaRepository;

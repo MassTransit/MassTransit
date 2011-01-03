@@ -13,13 +13,16 @@
 namespace MassTransit.Transports.Msmq
 {
     using System;
+    using Configuration;
     using Exceptions;
+    using Internal;
     using Magnum;
     using Serialization;
 
-    public static class MsmqEndpointFactory
+    public class MsmqEndpointFactory :
+        IEndpointFactory
     {
-        public static IEndpoint New(IEndpointAddress address, IMessageSerializer serializer)
+        public IEndpoint New(IEndpointAddress address, IMessageSerializer serializer)
         {
             return New(new CreateEndpointSettings(address)
                 {
@@ -27,7 +30,7 @@ namespace MassTransit.Transports.Msmq
                 });
         }
 
-        public static IEndpoint New(CreateEndpointSettings settings)
+        public IEndpoint New(CreateEndpointSettings settings)
         {
             try
             {
@@ -47,7 +50,7 @@ namespace MassTransit.Transports.Msmq
 
                 ITransport errorTransport = tf.New(errorSettings);
 
-                var endpoint = new MsmqEndpoint(settings.Address, settings.Serializer, transport, errorTransport);
+                var endpoint = new Endpoint(settings.Address, settings.Serializer, transport, errorTransport);
 
                 return endpoint;
             }
@@ -63,6 +66,22 @@ namespace MassTransit.Transports.Msmq
             {
                 MsmqEndpointManagement.Manage(settings.Address, x => x.Purge());
             }
+        }
+
+        public IEndpoint ConfigureEndpoint(Uri uri, Action<IEndpointConfigurator> configurator)
+        {
+            if(uri.Scheme.ToLowerInvariant() == "msmq")
+            {
+                IEndpoint endpoint = MsmqEndpointConfigurator.New(x =>
+                {
+                    x.SetUri(uri);
+
+                    configurator(x);
+                });
+                return endpoint;
+            }
+
+            return null;
         }
     }
 }

@@ -57,8 +57,8 @@ namespace MassTransit.NinjectIntegration
 
             RegisterEndpointFactory(x =>
                 {
-                    x.RegisterTransport<LoopbackEndpoint>();
-                    x.RegisterTransport<MulticastUdpEndpoint>();
+                    x.RegisterTransport<LoopbackEndpointFactory>();
+                    x.RegisterTransport<MulticastUdpEndpointFactory>();
 
                     foreach (Type type in transportTypes)
                     {

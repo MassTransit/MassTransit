@@ -19,7 +19,7 @@ namespace MassTransit.TestFramework
 
 	[Scenario]
 	public class Given_a_standalone_service_bus :
-		LocalTestFixture<LoopbackEndpoint>
+		LocalTestFixture<LoopbackEndpointFactory>
 	{
 		protected Given_a_standalone_service_bus()
 		{

@@ -18,7 +18,7 @@ namespace MassTransit.Tests.TextFixtures
 
 	[TestFixture]
 	public class LoopbackTestFixture :
-		EndpointTestFixture<LoopbackEndpoint>
+		EndpointTestFixture<LoopbackEndpointFactory>
 	{
 		public IServiceBus LocalBus { get; private set; }
 

@@ -15,6 +15,7 @@ namespace MassTransit.Transports.Msmq.Tests
 	using System;
 	using System.IO;
 	using System.Messaging;
+	using Internal;
 	using Magnum;
 	using Magnum.Actors;
 	using MassTransit.Serialization;
@@ -33,7 +34,7 @@ namespace MassTransit.Transports.Msmq.Tests
 
 			var address = MockRepository.GenerateMock<IEndpointAddress>();
 
-			IEndpoint endpoint = new MsmqEndpoint(address, new XmlMessageSerializer(), transport, MockRepository.GenerateMock<ITransport>());
+			IEndpoint endpoint = new Endpoint(address, new XmlMessageSerializer(), transport, MockRepository.GenerateMock<ITransport>());
 
 			var future = new Future<object>();
 

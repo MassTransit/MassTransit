@@ -133,7 +133,6 @@
     <Compile Include="Transports\IReceivingContext.cs" />
     <Compile Include="Transports\ISendingContext.cs" />
     <Compile Include="Transports\ITransportFactory.cs" />
-    <Compile Include="Transports\LoopbackEndpoint.cs" />
     <Compile Include="Internal\SpecialLoggers.cs" />
     <Compile Include="Consumes.cs" />
     <Compile Include="CorrelatedBy.cs" />
@@ -167,7 +166,6 @@
     <Compile Include="TimeoutAttribute.cs" />
     <Compile Include="Transports\LoopbackReceivingContext.cs" />
     <Compile Include="Transports\LoopbackSendingContext.cs" />
-    <Compile Include="Transports\MulticastUdpEndpoint.cs" />
     <Compile Include="Transports\MulticastUdpReceivingContext.cs" />
     <Compile Include="Transports\MulticastUdpSendingContext.cs" />
     <Compile Include="Util\CheckConvention.cs" />
@@ -210,7 +208,7 @@
     <Compile Include="Exceptions\TransportException.cs" />
     <Compile Include="FutureMessage.cs" />
     <Compile Include="IEndpointAddress.cs" />
-    <Compile Include="Internal\AbstractEndpoint.cs" />
+    <Compile Include="Internal\Endpoint.cs" />
     <Compile Include="Events\ConsumeCompleted.cs" />
     <Compile Include="Events\ReceiveCompleted.cs" />
     <Compile Include="Internal\ConsumerThread.cs" />

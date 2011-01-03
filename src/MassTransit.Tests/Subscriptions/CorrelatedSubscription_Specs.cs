@@ -11,7 +11,7 @@ namespace MassTransit.Tests.Subscriptions
 
 	[TestFixture]
 	public class Adding_a_correlated_subscription_via_the_subscription_client: //Not bdd style.
-		SubscriptionServiceTestFixture<LoopbackEndpoint>
+		SubscriptionServiceTestFixture<LoopbackEndpointFactory>
 	{
         
 		[Test]

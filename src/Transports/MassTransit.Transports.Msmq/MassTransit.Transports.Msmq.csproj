@@ -84,7 +84,6 @@
     <Compile Include="LocalTransportSettings.cs" />
     <Compile Include="MsmqBusConfigurationExtensions.cs" />
     <Compile Include="MsmqEndpointAddress.cs" />
-    <Compile Include="MsmqEndpoint.cs" />
     <Compile Include="MsmqEndpointConfigurator.cs" />
     <Compile Include="MsmqEndpointConfiguratorDefaults.cs" />
     <Compile Include="MsmqEndpointFactory.cs" />

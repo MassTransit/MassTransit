@@ -12,11 +12,11 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports
 {
-    using Serialization;
+    using System;
+    using Configuration;
 
     public interface IEndpointFactory
     {
-        IEndpoint New(IEndpointAddress address, IMessageSerializer serializer);
-        IEndpoint New(CreateEndpointSettings settings);
+        IEndpoint ConfigureEndpoint(Uri uri, Action<IEndpointConfigurator> configurator);
     }
 }
