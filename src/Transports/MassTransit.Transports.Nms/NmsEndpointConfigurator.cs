@@ -21,7 +21,8 @@ namespace MassTransit.Transports.Nms
     public class NmsEndpointConfigurator :
         EndpointConfiguratorBase
     {
-        static readonly NmsEndpointConfiguratorDefaults _defaults = new NmsEndpointConfiguratorDefaults();
+        static readonly EndpointDefaults _defaults = new EndpointDefaults();
+
         public IEndpoint New(Action<IEndpointConfigurator> action)
         {
             action(this);
@@ -35,7 +36,7 @@ namespace MassTransit.Transports.Nms
                 {
                     Serializer = GetSerializer(),
                     CreateIfMissing = _defaults.CreateMissingQueues,
-                    PurgeExistingMessages = _defaults.PurgeOnStartUp,
+                    PurgeExistingMessages = _defaults.PurgeOnStartup,
                     Transactional = _defaults.CreateTransactionalQueues
                 };
 

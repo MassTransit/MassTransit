@@ -21,7 +21,7 @@ namespace MassTransit.Transports
     public class LoopbackEndpointConfigurator :
         EndpointConfiguratorBase
     {
-        static readonly LoopbackEndpointConfiguratorDefaults _defaults = new LoopbackEndpointConfiguratorDefaults();
+        static readonly EndpointDefaults _defaults = new EndpointDefaults();
 
         public IEndpoint New(Action<IEndpointConfigurator> action)
         {

@@ -84,7 +84,6 @@
     <Compile Include="MsmqBusConfigurationExtensions.cs" />
     <Compile Include="MsmqEndpointAddress.cs" />
     <Compile Include="MsmqEndpointConfigurator.cs" />
-    <Compile Include="MsmqEndpointConfiguratorDefaults.cs" />
     <Compile Include="MsmqEndpointFactory.cs" />
     <Compile Include="MsmqEndpointManagement.cs" />
     <Compile Include="MsmqReceivingContext.cs" />
