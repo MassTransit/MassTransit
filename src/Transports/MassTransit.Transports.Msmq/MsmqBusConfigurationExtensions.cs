@@ -23,7 +23,7 @@ namespace MassTransit.Transports.Msmq
         }
         public static void UseMsmq(this BusConfiguration config, Action<IEndpointDefaults> defaults)
         {
-            MsmqEndpointConfigurator.Defaults(defaults);
+            EndpointConfigurator.Defaults(defaults);
             UseMsmq(config);
         }
     }

@@ -35,7 +35,7 @@ namespace MassTransit.Transports.Msmq.Tests
 		{
 			base.AdditionalEndpointFactoryConfiguration(x);
 
-			MsmqEndpointConfigurator.Defaults(y =>
+			EndpointConfigurator.Defaults(y =>
 				{
 					y.CreateMissingQueues = true;
 					y.CreateTransactionalQueues = false;

@@ -18,11 +18,11 @@ namespace MassTransit.Transports.Msmq
     public class MsmqEndpointFactory :
         IEndpointFactory
     {
-        public IEndpoint ConfigureEndpoint(Uri uri, Action<IEndpointConfigurator> configurator)
+        public IEndpoint BuildEndpoint(Uri uri, Action<IEndpointConfigurator> configurator)
         {
             if(uri.Scheme.ToLowerInvariant() == "msmq")
             {
-                var cfg = new MsmqEndpointConfigurator();
+                var cfg = new EndpointConfigurator(new MsmqTransportFactory());
                 IEndpoint endpoint = cfg.New(x =>
                 {
                     x.SetUri(uri);

@@ -21,6 +21,7 @@ namespace MassTransit.Transports
             : this()
         {
             Guard.AgainstEmpty(uri, "The URI cannot be null or empty");
+            Guard.AgainstEmpty(uri, "The URI cannot be null or empty");
 
             try
             {

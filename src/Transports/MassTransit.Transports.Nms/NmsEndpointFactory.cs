@@ -19,11 +19,11 @@ namespace MassTransit.Transports.Nms
         IEndpointFactory
     {
        
-		public IEndpoint ConfigureEndpoint(Uri uri, Action<IEndpointConfigurator> configurator)
+		public IEndpoint BuildEndpoint(Uri uri, Action<IEndpointConfigurator> configurator)
 		{
 			if (uri.Scheme.ToLowerInvariant() == "activemq")
 			{
-			    var cfg = new NmsEndpointConfigurator();
+			    var cfg = new EndpointConfigurator(new NmsTransportFactory());
 				IEndpoint endpoint = cfg.New(x =>
 					{
 						x.SetUri(uri);

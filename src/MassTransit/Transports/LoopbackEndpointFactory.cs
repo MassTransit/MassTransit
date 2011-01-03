@@ -18,11 +18,11 @@ namespace MassTransit.Transports
     public class LoopbackEndpointFactory :
         IEndpointFactory
     {
-        public IEndpoint ConfigureEndpoint(Uri uri, Action<IEndpointConfigurator> configurator)
+        public IEndpoint BuildEndpoint(Uri uri, Action<IEndpointConfigurator> configurator)
         {
             if (uri.Scheme.ToLowerInvariant() == "loopback")
             {
-                var cfg = new LoopbackEndpointConfigurator();
+                var cfg = new EndpointConfigurator(new LoopbackTransportFactory());
                 IEndpoint endpoint = cfg.New(x =>
                 {
                     x.SetUri(uri);

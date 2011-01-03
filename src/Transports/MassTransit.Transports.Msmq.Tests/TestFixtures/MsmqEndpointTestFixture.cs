@@ -33,7 +33,7 @@ namespace MassTransit.Transports.Msmq.Tests.TestFixtures
 
 	    public MsmqEndpointTestFixture()
 		{
-			MsmqEndpointConfigurator.Defaults(x =>
+			EndpointConfigurator.Defaults(x =>
 			{
 				x.CreateMissingQueues = true;
 				x.CreateTransactionalQueues = false;

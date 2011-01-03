@@ -454,8 +454,6 @@
     <Compile Include="Services\Subscriptions\LocalSubscriptionService.cs" />
     <Compile Include="Services\Timeout\ScheduledTimeout.cs" />
     <Compile Include="Transports\EndpointConfiguratorBase.cs" />
-    <Compile Include="Transports\LoopbackEndpointConfigurator.cs" />
-    <Compile Include="Transports\MulticastUdpEndpointConfigurator.cs" />
     <Compile Include="Internal\ISubscriptionEvent.cs" />
     <Compile Include="Pipeline\Sinks\CorrelatedMessageSinkRouter.cs" />
     <Compile Include="Saga\InMemorySagaRepository.cs" />

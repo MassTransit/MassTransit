@@ -23,7 +23,8 @@ namespace MassTransit.SystemView
 	using Services.HealthMonitoring.Messages;
 	using Services.Subscriptions.Messages;
 	using Services.Timeout.Messages;
-	using Transports.Msmq;
+    using Transports;
+    using Transports.Msmq;
 
 	public partial class MainForm :
 		Form,
@@ -195,7 +196,7 @@ namespace MassTransit.SystemView
 
 		private void BootstrapServiceBus()
 		{
-			MsmqEndpointConfigurator.Defaults(x =>
+			EndpointConfigurator.Defaults(x =>
 			{
 				x.CreateMissingQueues = true;
 			});
