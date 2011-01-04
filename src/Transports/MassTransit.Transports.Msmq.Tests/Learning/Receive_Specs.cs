@@ -30,8 +30,12 @@ namespace MassTransit.Transports.Msmq.Tests
             if (!MessageQueue.Exists(_queueName))
                 MessageQueue.Create(_queueName, true);
 
+            using(var purgeq = new MessageQueue(_queueName))
+                purgeq.Purge();
+            
+
             _queue = new MessageQueue(_queueName, false, true, QueueAccessMode.SendAndReceive);
-            _queue.Purge();
+            
 
             _firstMsg = new Message {Label = 0.Days().FromUtcNow().ToString()};
             _secondMsg = new Message {Label = 1.Days().FromUtcNow().ToString()};
@@ -45,11 +49,13 @@ namespace MassTransit.Transports.Msmq.Tests
         {
             try
             {
-                _queue.Close();
+                if(_queue != null)
+                    _queue.Close();
             }
             finally
             {
-                _queue.Dispose();
+                if(_queue != null)
+                    _queue.Dispose();
                 _queue = null;
             }
         }
