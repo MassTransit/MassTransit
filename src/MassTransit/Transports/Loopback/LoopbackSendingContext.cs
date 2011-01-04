@@ -18,7 +18,20 @@ namespace MassTransit.Transports
     public class LoopbackSendingContext :
         ISendingContext
     {
-        public Stream Body { get; set; }
+        readonly LoopbackMessage _msg;
+
+        public LoopbackSendingContext(LoopbackMessage msg)
+        {
+            _msg = msg;
+        }
+
+        public Stream Body
+        {
+            get
+            {
+                return _msg.Stream;
+            } set { _msg.Stream = (MemoryStream)value; }
+        }
 
         public void MarkRecoverable()
         {

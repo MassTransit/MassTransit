@@ -22,7 +22,7 @@ namespace MassTransit.Transports
     {
         private readonly object _messageLock = new object();
         private AutoResetEvent _messageReady = new AutoResetEvent(false);
-        private LinkedList<MemoryStream> _messages = new LinkedList<MemoryStream>();
+        private LinkedList<LoopbackMessage> _messages = new LinkedList<LoopbackMessage>();
 
         public LoopbackTransport(IEndpointAddress address) : base(address)
         {
@@ -36,15 +36,15 @@ namespace MassTransit.Transports
             try
             {
                 bodyStream = new MemoryStream();
-                var cxt = new LoopbackSendingContext();
-                cxt.Body = bodyStream;
+                var msg = new LoopbackMessage(bodyStream, Guid.NewGuid().ToString(),"");
+                var cxt = new LoopbackSendingContext(msg);
                 context(cxt);
 
                 lock (_messageLock)
                 {
                     EnsureNotDisposed();
 
-                    _messages.AddLast(bodyStream);
+                    _messages.AddLast(msg);
                 }
 
                 bodyStream = null;
@@ -88,31 +88,34 @@ namespace MassTransit.Transports
 
             try
             {
-                for (LinkedListNode<MemoryStream> iterator = _messages.First; iterator != null; iterator = iterator.Next)
+                for (LinkedListNode<LoopbackMessage> iterator = _messages.First; iterator != null; iterator = iterator.Next)
                 {
-                    iterator.Value.Seek(0, SeekOrigin.Begin);
-                    var cxt = new LoopbackReceivingContext();
-                    cxt.Body = iterator.Value;
-                    Action<IReceivingContext> receive = receiver(cxt);
-                    if (receive == null)
-                        continue;
-
-                    MemoryStream message = iterator.Value;
-                    message.Seek(0, SeekOrigin.Begin);
-
-                    _messages.Remove(iterator);
-
-                    try
+                    iterator.Value.Stream.Seek(0, SeekOrigin.Begin);
+                    if (iterator.Value != null)
                     {
-                        Monitor.Exit(_messageLock);
-                        monitorExitNeeded = false;
+                        var cxt = new LoopbackReceivingContext(iterator.Value);
+                        cxt.Body = iterator.Value.Stream;
+                        Action<IReceivingContext> receive = receiver(cxt);
+                        if (receive == null)
+                            continue;
 
-                        receive(cxt);
-                        return;
-                    }
-                    finally
-                    {
-                        message.Dispose();
+                        MemoryStream message = iterator.Value.Stream;
+                        message.Seek(0, SeekOrigin.Begin);
+
+                        _messages.Remove(iterator);
+
+                        try
+                        {
+                            Monitor.Exit(_messageLock);
+                            monitorExitNeeded = false;
+
+                            receive(cxt);
+                            return;
+                        }
+                        finally
+                        {
+                            message.Dispose();
+                        }
                     }
                 }
 
@@ -134,7 +137,7 @@ namespace MassTransit.Transports
         {
             lock (_messageLock)
             {
-                _messages.Each(x => x.Dispose());
+                _messages.Each(x => x.Stream.Dispose());
                 _messages.Clear();
                 _messages = null;
             }

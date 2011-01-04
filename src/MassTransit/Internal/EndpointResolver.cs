@@ -73,7 +73,7 @@ namespace MassTransit.Internal
 
         public IEndpoint GetEndpoint(Uri uri)
         {
-            Guard.AgainstNull(uri);
+            Guard.AgainstNull(uri, "uri", "Uri cannot be null");
             if (_disposed) throw new ObjectDisposedException("The object has been disposed");
 
             try

@@ -18,6 +18,13 @@ namespace MassTransit.Transports
     public class LoopbackReceivingContext :
         IReceivingContext
     {
+        readonly LoopbackMessage _msg;
+
+        public LoopbackReceivingContext(LoopbackMessage msg)
+        {
+            _msg = msg;
+        }
+
         public string GetLabel()
         {
             throw new NotImplementedException();
@@ -25,9 +32,13 @@ namespace MassTransit.Transports
 
         public string GetMessageId()
         {
-            throw new NotImplementedException();
+            return _msg.MessageId;
         }
 
-        public Stream Body { get; set; }
+        public Stream Body
+        {
+            get { return _msg.Stream; }
+            set { _msg.Stream = (MemoryStream) value; }
+        }
     }
 }
