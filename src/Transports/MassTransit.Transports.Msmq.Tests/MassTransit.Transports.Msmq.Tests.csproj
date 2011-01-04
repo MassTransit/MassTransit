@@ -131,6 +131,7 @@
     <Compile Include="Messages\UpdateAcceptedMessage.cs" />
     <Compile Include="Messages\UpdateMessage.cs" />
     <Compile Include="MsmqDistributorTestFixture.cs" />
+    <Compile Include="MsmqTransportContract.cs" />
     <Compile Include="TestFixtures\MsmqConcurrencyTestFixture.cs" />
     <Compile Include="TestFixtures\MsmqEndpointOnlyTestFixture.cs" />
     <Compile Include="NonTransactional_Specs.cs" />

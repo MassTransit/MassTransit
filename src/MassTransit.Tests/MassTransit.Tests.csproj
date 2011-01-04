@@ -205,6 +205,7 @@
     <Compile Include="Subscriptions\CorrelatedSubscription_Specs.cs" />
     <Compile Include="TestExtensions.cs" />
     <Compile Include="TextFixtures\SubscriptionServiceTestFixture.cs" />
+    <Compile Include="Transports\LoopbackTransportContract.cs" />
     <Compile Include="Transports\Multicast_Specs.cs" />
     <Compile Include="Pipeline\BatchConsumer_Specs.cs" />
     <Compile Include="Saga\InitiateSaga_Specs.cs" />
@@ -257,7 +258,7 @@
     <Compile Include="TextFixtures\MulticastUdpTestFixture.cs" />
     <Compile Include="Timeouts\DeferMessage_Specs.cs" />
     <Compile Include="Timeouts\TimeoutService_Specs.cs" />
-    <Compile Include="Transports\EndpointContract.cs" />
+    <Compile Include="Transports\TransportContract.cs" />
     <Compile Include="Transports\TransactionalEndpointContract.cs" />
     <Compile Include="Uri_Specs.cs" />
   </ItemGroup>
@@ -293,7 +294,6 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Formatters\" />
     <Folder Include="Services\LoadBalancer\" />
   </ItemGroup>
   <ItemGroup>

@@ -167,6 +167,7 @@
     <Compile Include="Services\Subscriptions\Client\SubscriptionClient.cs" />
     <Compile Include="Services\Subscriptions\Server\SubscriptionService.cs" />
     <Compile Include="TimeoutAttribute.cs" />
+    <Compile Include="Transports\Loopback\LoopbackMessage.cs" />
     <Compile Include="Transports\Loopback\LoopbackReceivingContext.cs" />
     <Compile Include="Transports\Loopback\LoopbackSendingContext.cs" />
     <Compile Include="Transports\Loopback\LoopbackTransportFactory.cs" />
