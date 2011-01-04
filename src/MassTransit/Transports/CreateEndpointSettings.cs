@@ -55,6 +55,10 @@ namespace MassTransit.Transports
             Guard.AgainstNull(source, "The source settings cannot be null");
 
             Serializer = source.Serializer;
+            Transactional = source.Transactional;
+            PurgeExistingMessages = source.PurgeExistingMessages;
+            CreateIfMissing = source.CreateIfMissing;
+
 
             SetAddresses(address);
         }
@@ -62,7 +66,8 @@ namespace MassTransit.Transports
 
         protected void SetAddresses(IEndpointAddress address)
         {
-            Transactional = address.IsTransactional;
+            if(address.IsTransactional)
+                Transactional = true;
 
             Address = address;
 
