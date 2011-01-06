@@ -135,7 +135,6 @@
     <Compile Include="Load\Messages\FirstPending.cs" />
     <Compile Include="Load\Messages\FirstResponse.cs" />
     <Compile Include="Distributor\ServiceInstance.cs" />
-    <Compile Include="ExtensionsForTestingEndpoints.cs" />
     <Compile Include="Fault_Specs.cs" />
     <Compile Include="FutureMessage.cs" />
     <Compile Include="Groups\Group_Specs.cs" />
@@ -258,7 +257,6 @@
     <Compile Include="TextFixtures\MulticastUdpTestFixture.cs" />
     <Compile Include="Timeouts\DeferMessage_Specs.cs" />
     <Compile Include="Timeouts\TimeoutService_Specs.cs" />
-    <Compile Include="Transports\TransportContract.cs" />
     <Compile Include="Transports\TransactionalEndpointContract.cs" />
     <Compile Include="Uri_Specs.cs" />
   </ItemGroup>

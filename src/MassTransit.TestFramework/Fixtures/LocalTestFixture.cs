@@ -13,6 +13,7 @@
 namespace MassTransit.TestFramework.Fixtures
 {
 	using System;
+	using MassTransit.Transports;
 	using NUnit.Framework;
 	using Transports;
 

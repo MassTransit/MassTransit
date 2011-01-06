@@ -12,6 +12,8 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports
 {
+    using System;
+
     public class LoopbackTransportFactory :
         ITransportFactory
     {
@@ -20,7 +22,17 @@ namespace MassTransit.Transports
             get { return "loopback"; }
         }
 
-        public ITransport New(CreateTransportSettings settings)
+        public ILoopbackTransport BuildLoopback(CreateTransportSettings settings)
+        {
+            return new LoopbackTransport(settings.Address);
+        }
+
+        public IInboundTransport BuildInbound(CreateTransportSettings settings)
+        {
+            return new LoopbackTransport(settings.Address);
+        }
+
+        public IOutboundTransport BuildOutbound(CreateTransportSettings settings)
         {
             return new LoopbackTransport(settings.Address);
         }

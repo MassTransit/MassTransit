@@ -24,7 +24,7 @@ namespace MassTransit.Transports.Nms
 
 	[DebuggerDisplay("{Address}")]
 	public class NmsTransport :
-		ITransport
+		ILoopbackTransport
 	{
 		private static readonly ILog _log = LogManager.GetLogger(typeof (NmsTransport));
 

@@ -23,7 +23,7 @@ namespace MassTransit.Transports.Msmq
             get { return "msmq"; }
 	    }
 
-	    public ITransport New(CreateTransportSettings settings)
+	    public ILoopbackTransport BuildLoopback(CreateTransportSettings settings)
 		{
 			try
 			{
@@ -38,7 +38,85 @@ namespace MassTransit.Transports.Msmq
 			}
 		}
 
-		private ITransport NewLocalTransport(CreateTransportSettings settings)
+	    public IInboundTransport BuildInbound(CreateTransportSettings settings)
+	    {
+	        try
+	        {
+                if (settings.Address.IsLocal)
+                    return NewLocalInboundTransport(settings);
+
+	            return NewRemoteInboundTrasport(settings);
+	        }
+	        catch (Exception ex)
+	        {
+	            throw new TransportException(settings.Address.Uri, "Failed to create MSMQ inbound transport", ex);
+	            
+	        }
+	    }
+
+	    public IOutboundTransport BuildOutbound(CreateTransportSettings settings)
+	    {
+         try
+            {
+                if (settings.Address.IsLocal)
+                    return NewLocalOutboundTransport(settings);
+
+                return NewRemoteOutboundTransport(settings);
+            }
+            catch (Exception ex)
+            {
+                throw new TransportException(settings.Address.Uri, "Failed to create MSMQ inbound transport", ex);
+
+            }
+	    }
+
+	    static IInboundTransport NewRemoteInboundTrasport(CreateTransportSettings settings)
+	    {
+            if (settings.Address.IsTransactional)
+                return new TransactionalInboundMsmqTransport(settings.Address);
+
+	        return new NonTransactionalInboundMsmqTransport(settings.Address);
+
+	    }
+
+
+
+        IOutboundTransport NewLocalOutboundTransport(CreateTransportSettings settings)
+        {
+            ValidateLocalTransport(settings);
+
+            PurgeExistingMessagesIfRequested(settings);
+
+            if (settings.Transactional)
+                return new TransactionalOutboundMsmqTransport(settings.Address);
+
+            return new NonTransactionalOutboundMsmqTransport(settings.Address);
+        }
+
+        static IOutboundTransport NewRemoteOutboundTransport(CreateTransportSettings settings)
+        {
+            if (settings.Address.IsTransactional)
+                return new TransactionalOutboundMsmqTransport(settings.Address);
+
+            return new NonTransactionalOutboundMsmqTransport(settings.Address);
+
+        }
+
+
+        IInboundTransport NewLocalInboundTransport(CreateTransportSettings settings)
+        {
+            ValidateLocalTransport(settings);
+
+            PurgeExistingMessagesIfRequested(settings);
+
+            if (settings.Transactional)
+                return new TransactionalInboundMsmqTransport(settings.Address);
+
+            return new NonTransactionalMsmqTransport(settings.Address);
+        }
+
+
+	    ILoopbackTransport NewLocalTransport(CreateTransportSettings settings)
 		{
 			ValidateLocalTransport(settings);
 
@@ -50,7 +128,7 @@ namespace MassTransit.Transports.Msmq
 			return new NonTransactionalMsmqTransport(settings.Address);
 		}
 
-		private static ITransport NewRemoteTransport(CreateTransportSettings settings)
+		static ILoopbackTransport NewRemoteTransport(CreateTransportSettings settings)
 		{
 			if (settings.Address.IsTransactional)
 				return new TransactionalMsmqTransport(settings.Address);
@@ -58,7 +136,7 @@ namespace MassTransit.Transports.Msmq
 			return new NonTransactionalMsmqTransport(settings.Address);
 		}
 
-		private static void ValidateLocalTransport(CreateTransportSettings settings)
+		static void ValidateLocalTransport(CreateTransportSettings settings)
 		{
 
 			MsmqEndpointManagement.Manage(settings.Address, q =>

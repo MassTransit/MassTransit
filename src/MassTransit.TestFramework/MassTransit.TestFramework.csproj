@@ -81,6 +81,7 @@
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
+    <Reference Include="System.Transactions" />
     <Reference Include="System.XML" />
   </ItemGroup>
   <ItemGroup>
@@ -88,6 +89,7 @@
       <Link>SolutionVersion.cs</Link>
     </Compile>
     <Compile Include="ExtensionMethodsForSubscriptions.cs" />
+    <Compile Include="ExtensionsForTestingEndpoints.cs" />
     <Compile Include="Fixtures\SagaTestFixture.cs" />
     <Compile Include="Helpers\EndpointSinkLocator.cs" />
     <Compile Include="ExtensionMethodsForObjectBuilder.cs" />
@@ -100,11 +102,15 @@
     <Compile Include="Given_a_subscription_service_and_two_service_buses.cs" />
     <Compile Include="Given_two_service_buses_with_shared_subscriptions.cs" />
     <Compile Include="LogSetup.cs" />
+    <Compile Include="Messages\DeleteMessage.cs" />
     <Compile Include="SelectiveConsumerOf.cs" />
     <Compile Include="Fixtures\LocalTestFixture.cs" />
     <Compile Include="Given_a_standalone_service_bus.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ExtensionMethodsForSagas.cs" />
+    <Compile Include="Transports\TransportContract.cs" />
+    <Compile Include="Transports\TransportReceivingContract.cs" />
+    <Compile Include="Transports\NonTransactionalTransportSendingContract.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\MassTransit\MassTransit.csproj">

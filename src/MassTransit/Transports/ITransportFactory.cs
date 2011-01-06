@@ -15,7 +15,12 @@ namespace MassTransit.Transports
     public interface ITransportFactory
     {
         string Scheme { get; }
-        ITransport New(CreateTransportSettings settings);
+
+        ILoopbackTransport BuildLoopback(CreateTransportSettings settings);
+        IInboundTransport BuildInbound(CreateTransportSettings settings);
+        IOutboundTransport BuildOutbound(CreateTransportSettings settings);
+
+        //TODO: should this move to ITransport?
         void PurgeExistingMessagesIfRequested(CreateTransportSettings settings);
     }
 }

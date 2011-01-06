@@ -19,8 +19,9 @@ namespace MassTransit.Transports.Msmq.Tests
 	using MassTransit.Tests.Messages;
 	using NUnit.Framework;
 	using TestFixtures;
+	using TestFramework;
 
-	[TestFixture, Integration]
+    [TestFixture, Integration]
 	public class Given_a_message_is_received_from_a_nontransactional_queue :
 		MsmqEndpointTestFixture
 	{

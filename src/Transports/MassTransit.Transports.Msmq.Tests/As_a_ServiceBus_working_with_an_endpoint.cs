@@ -21,6 +21,7 @@ namespace MassTransit.Transports.Msmq.Tests
     using MassTransit.Tests.TestConsumers;
     using NUnit.Framework;
     using TestFixtures;
+    using TestFramework;
 
     [TestFixture, Integration]
     public class When_a_message_is_published_to_a_transactional_queue :

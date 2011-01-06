@@ -10,19 +10,12 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Transports.Msmq.Tests
+namespace MassTransit.TestFramework.Messages
 {
     using System;
-    using MassTransit.Tests.Transports;
-    using NUnit.Framework;
-    using TestFramework.Transports;
 
-    [TestFixture]
-    public class MsmqTransportContract :
-        TransportContract<MsmqTransportFactory>
+    [Serializable]
+    public class DeleteMessage
     {
-        public MsmqTransportContract() : base(new Uri("msmq://localhost/mt_client"))
-        {
-        }
     }
 }

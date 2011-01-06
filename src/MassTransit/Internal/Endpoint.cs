@@ -25,13 +25,13 @@ namespace MassTransit.Internal
 	{
 		private static readonly ILog _log = LogManager.GetLogger(typeof (Endpoint));
 		private readonly IEndpointAddress _address;
-        protected ITransport _transport;
-        protected ITransport _errorTransport;
+        protected ILoopbackTransport _transport;
+        protected ILoopbackTransport _errorTransport;
         protected bool _disposed;
 		private string _disposedMessage;
         MessageRetryTracker _tracker;
 
-        public Endpoint(IEndpointAddress address, IMessageSerializer serializer, ITransport transport, ITransport errorTransport)
+        public Endpoint(IEndpointAddress address, IMessageSerializer serializer, ILoopbackTransport transport, ILoopbackTransport errorTransport)
 		{
 			_address = address;
 		    _transport = transport;
@@ -63,7 +63,13 @@ namespace MassTransit.Internal
 				{
 					SetOutboundMessageHeaders<T>();
 
-					PopulateTransportMessage(context, message);
+                    Serializer.Serialize(context.Body, message);
+
+                    context.SetLabel(typeof(T).Name);
+                    context.MarkRecoverable();
+
+                    if (OutboundMessage.Headers.ExpirationTime.HasValue)
+                        context.SetMessageExpiration(OutboundMessage.Headers.ExpirationTime.Value);
 
 					if (SpecialLoggers.Messages.IsInfoEnabled)
 						SpecialLoggers.Messages.InfoFormat("SEND:{0}:{1}", Address, typeof (T).Name);
@@ -117,7 +123,7 @@ namespace MassTransit.Internal
 			Dispose(false);
 		}
 
-	    protected void PopulateTransportMessage<T>(ISendingContext sendingContext, T message)
+	    void PopulateTransportMessage<T>(ISendingContext sendingContext, T message)
 	    {
 	        Serializer.Serialize(sendingContext.Body, message);
 

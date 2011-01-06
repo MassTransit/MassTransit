@@ -15,6 +15,7 @@ namespace MassTransit.TestFramework.Fixtures
 	using System;
 	using System.Collections.Generic;
 	using Configuration;
+	using MassTransit.Transports;
 	using NUnit.Framework;
 	using Rhino.Mocks;
 	using Saga;

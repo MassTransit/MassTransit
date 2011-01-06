@@ -14,6 +14,7 @@ namespace MassTransit.TestFramework.Fixtures
 {
 	using System;
 	using Configuration;
+	using MassTransit.Transports;
 	using NUnit.Framework;
 	using Services.Subscriptions;
 	using Transports;

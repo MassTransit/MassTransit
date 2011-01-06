@@ -15,9 +15,9 @@ namespace MassTransit.TestFramework.Fixtures
 	using System;
 	using Magnum;
 	using Magnum.Reflection;
+	using MassTransit.Transports;
 	using NUnit.Framework;
 	using Saga;
-	using Transports;
 
 	[TestFixture]
 	public class SagaTestFixture<TSaga> :

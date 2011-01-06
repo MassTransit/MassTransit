@@ -12,6 +12,8 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports.Nms
 {
+    using System;
+
     public class NmsTransportFactory :
         ITransportFactory
     {
@@ -20,11 +22,21 @@ namespace MassTransit.Transports.Nms
             get { return "activemq"; }
         }
 
-        public ITransport New(CreateTransportSettings settings)
+        public ILoopbackTransport BuildLoopback(CreateTransportSettings settings)
         {
             return new NmsTransport(settings.Address);
         }
-        
+
+        public IInboundTransport BuildInbound(CreateTransportSettings settings)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IOutboundTransport BuildOutbound(CreateTransportSettings settings)
+        {
+            throw new NotImplementedException();
+        }
+
         public void PurgeExistingMessagesIfRequested(CreateTransportSettings settings)
         {
             if(settings.Address.IsLocal && settings.PurgeExistingMessages)
