@@ -27,13 +27,13 @@ namespace MassTransit.Transports.Msmq.Tests
 		[Test,Ignore("Not testing as I think it was about the old lambda stuff")]
 		public void Should_invoke_the_continuation()
 		{
-			var transport = MockRepository.GenerateStub<ITransport>();
+			var transport = MockRepository.GenerateStub<ILoopbackTransport>();
 			transport.Stub(x => x.Receive(null))
 				.Callback(new Func<Func<IReceivingContext, Action<IReceivingContext>>, bool>(Forwarder));
 
 			var address = MockRepository.GenerateMock<IEndpointAddress>();
 
-			IEndpoint endpoint = new Endpoint(address, new XmlMessageSerializer(), transport, MockRepository.GenerateMock<ITransport>());
+			IEndpoint endpoint = new Endpoint(address, new XmlMessageSerializer(), transport, MockRepository.GenerateMock<ILoopbackTransport>());
 
 			var future = new Future<object>();
 

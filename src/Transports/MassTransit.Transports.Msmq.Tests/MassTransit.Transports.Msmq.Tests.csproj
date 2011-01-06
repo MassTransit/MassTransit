@@ -131,6 +131,7 @@
     <Compile Include="Messages\UpdateAcceptedMessage.cs" />
     <Compile Include="Messages\UpdateMessage.cs" />
     <Compile Include="MsmqDistributorTestFixture.cs" />
+    <Compile Include="MsmqNonTransactionalSendingContract.cs" />
     <Compile Include="MsmqTransportContract.cs" />
     <Compile Include="TestFixtures\MsmqConcurrencyTestFixture.cs" />
     <Compile Include="TestFixtures\MsmqEndpointOnlyTestFixture.cs" />
@@ -155,6 +156,10 @@
     <ProjectReference Include="..\..\MassTransit.Infrastructure\MassTransit.Infrastructure.csproj">
       <Project>{073A90FD-9A3E-4704-B3B5-6D8A9F4B442E}</Project>
       <Name>MassTransit.Infrastructure</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\MassTransit.TestFramework\MassTransit.TestFramework.csproj">
+      <Project>{3C4B5F1A-69AD-415E-9F40-A7FDBD7A3012}</Project>
+      <Name>MassTransit.TestFramework</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\MassTransit.Tests\MassTransit.Tests.csproj">
       <Project>{76646B96-936B-4D31-A053-35CD630E3C68}</Project>

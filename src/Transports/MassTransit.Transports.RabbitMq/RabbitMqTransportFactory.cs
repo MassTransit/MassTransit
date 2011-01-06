@@ -28,7 +28,7 @@ namespace MassTransit.Transports.RabbitMq
             get { return "rabbitmq"; }
         }
 
-        public ITransport New(CreateTransportSettings settings)
+        public ILoopbackTransport BuildLoopback(CreateTransportSettings settings)
         {
             EnsureProtocolIsCorrect(settings.Address.Uri);
 
@@ -36,6 +36,15 @@ namespace MassTransit.Transports.RabbitMq
             return transport;
         }
 
+        public IInboundTransport BuildInbound(CreateTransportSettings settings)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IOutboundTransport BuildOutbound(CreateTransportSettings settings)
+        {
+            throw new NotImplementedException();
+        }
 
         public static void Connect()
         {

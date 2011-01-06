@@ -15,6 +15,7 @@ namespace MassTransit.Tests.Transports
     using System;
     using MassTransit.Transports;
     using NUnit.Framework;
+    using TestFramework.Transports;
 
     [TestFixture]
     public class LoopbackTransportContract :

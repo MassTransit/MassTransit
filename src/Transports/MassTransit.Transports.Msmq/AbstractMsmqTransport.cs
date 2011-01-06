@@ -14,8 +14,7 @@ namespace MassTransit.Transports.Msmq
 {
 	using System;
 	using System.Diagnostics;
-	using System.IO;
-	using System.Messaging;
+    using System.Messaging;
 	using System.Threading;
 	using Exceptions;
 	using Internal;
@@ -24,7 +23,7 @@ namespace MassTransit.Transports.Msmq
 
     [DebuggerDisplay("{Address}")]
 	public class AbstractMsmqTransport :
-		ITransport
+		ILoopbackTransport
 	{
 		private static readonly ILog _log = LogManager.GetLogger(typeof (NonTransactionalMsmqTransport));
 		private static readonly ILog _messageLog = LogManager.GetLogger("MassTransit.Msmq.MessageLog");
@@ -44,20 +43,74 @@ namespace MassTransit.Transports.Msmq
 			get { return _address; }
 		}
 
-		public virtual void Receive(Func<Message, Action<Message>> receiver, TimeSpan timeout)
-		{
-			try
-			{
-				Connect();
 
-				EnumerateQueue(receiver, timeout);
-			}
-			catch (MessageQueueException ex)
-			{
-				HandleMessageQueueException(ex, timeout);
-			}
+        public virtual void Send(Action<ISendingContext> sender)
+        {
+            if (_disposed) throw NewDisposedException();
+
+            using (var message = new Message())
+            {
+                var cxt = new MsmqSendingContext(message);
+                sender(cxt);
+
+                try
+                {
+                    using (var queue = new MessageQueue(_formatName, QueueAccessMode.Send))
+                    {
+                        SendMessage(queue, message);
+
+                        if (_messageLog.IsDebugEnabled)
+                            _messageLog.DebugFormat("SEND:{0}:{1}", Address, message.Id);
+                    }
+                }
+                catch (MessageQueueException ex)
+                {
+                    HandleMessageQueueException(ex, 2.Seconds());
+                }
+            }
+        }
+
+		protected virtual void SendMessage(MessageQueue queue, Message message)
+		{
+			queue.Send(message, MessageQueueTransactionType.None);
 		}
 
+
+
+        public void Receive(Func<IReceivingContext, Action<IReceivingContext>> receiver)
+        {
+            if (_disposed) throw NewDisposedException();
+
+            Receive(receiver, TimeSpan.Zero);
+        }
+
+        public void Receive(Func<IReceivingContext, Action<IReceivingContext>> receiver, TimeSpan timeout)
+        {
+            try
+            {
+                Connect();
+
+                EnumerateQueue(receiver, timeout);
+            }
+            catch (MessageQueueException ex)
+            {
+
+                HandleMessageQueueException(ex, timeout);
+            }
+        }
+        public virtual void Receive(Func<Message, Action<Message>> receiver, TimeSpan timeout)
+        {
+            try
+            {
+                Connect();
+
+                EnumerateQueue(receiver, timeout);
+            }
+            catch (MessageQueueException ex)
+            {
+                HandleMessageQueueException(ex, timeout);
+            }
+        }
         protected virtual bool EnumerateQueue(Func<IReceivingContext, Action<IReceivingContext>> receiver, TimeSpan timeout)
         {
             if (_disposed) throw NewDisposedException();
@@ -170,69 +223,15 @@ namespace MassTransit.Transports.Msmq
 			return received;
 		}
 
-
-        public virtual void Send(Action<ISendingContext> sender)
-        {
-            if (_disposed) throw NewDisposedException();
-
-            using (var message = new Message())
-            {
-                var cxt = new MsmqSendingContext(message);
-                sender(cxt);
-
-                try
-                {
-                    using (var queue = new MessageQueue(_formatName, QueueAccessMode.Send))
-                    {
-                        SendMessage(queue, message);
-
-                        if (_messageLog.IsDebugEnabled)
-                            _messageLog.DebugFormat("SEND:{0}:{1}", Address, message.Id);
-                    }
-                }
-                catch (MessageQueueException ex)
-                {
-                    HandleMessageQueueException(ex, 2.Seconds());
-                }
-            }
-        }
+		protected virtual void ReceiveMessage(MessageEnumerator enumerator, TimeSpan timeout, Action<Func<Message>> receiveAction)
+		{
+			receiveAction(() => enumerator.RemoveCurrent(timeout, MessageQueueTransactionType.None));
+		}
 
 		public void Dispose()
 		{
 			Dispose(true);
 			GC.SuppressFinalize(this);
-		}
-
-        public void Receive(Func<IReceivingContext, Action<IReceivingContext>> receiver)
-        {
-            if (_disposed) throw NewDisposedException();
-
-            Receive(receiver, TimeSpan.Zero);
-        }
-
-        public void Receive(Func<IReceivingContext, Action<IReceivingContext>> receiver, TimeSpan timeout)
-        {
-            try
-            {
-                Connect();
-
-                EnumerateQueue(receiver, timeout);
-            }
-            catch (MessageQueueException ex)
-            {
-
-                HandleMessageQueueException(ex, timeout);
-            }
-        }
-
-		protected virtual void SendMessage(MessageQueue queue, Message message)
-		{
-			queue.Send(message, MessageQueueTransactionType.None);
-		}
-
-		protected virtual void ReceiveMessage(MessageEnumerator enumerator, TimeSpan timeout, Action<Func<Message>> receiveAction)
-		{
-			receiveAction(() => enumerator.RemoveCurrent(timeout, MessageQueueTransactionType.None));
 		}
 
 		protected virtual void Dispose(bool disposing)
@@ -256,18 +255,6 @@ namespace MassTransit.Transports.Msmq
 		~AbstractMsmqTransport()
 		{
 			Dispose(false);
-		}
-
-		private static Func<Message, Action<Message>> ReceiveAsStream(Func<Stream, Action<Stream>> receiver)
-		{
-			return message =>
-				{
-					Action<Stream> receive = receiver(message.BodyStream);
-					if (receive == null)
-						return null;
-
-					return m => receive(m.BodyStream);
-				};
 		}
 
 		protected void HandleMessageQueueException(MessageQueueException ex, TimeSpan timeout)

@@ -41,8 +41,8 @@ namespace MassTransit.Transports
                         epc.SetUri(uri);
                         var s = epc.New(configurator);
 
-                        var transport = fac.New(s.Normal);
-                        var errorTransport = fac.New(s.Error);
+                        var transport = fac.BuildLoopback(s.Normal);
+                        var errorTransport = fac.BuildLoopback(s.Error);
 
                         var endpoint = new Endpoint(new EndpointAddress(uri), epc.GetSerializer(), transport,
                                                     errorTransport);

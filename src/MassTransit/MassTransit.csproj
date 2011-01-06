@@ -31,6 +31,8 @@
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
+    <TargetFrameworkProfile>
+    </TargetFrameworkProfile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -74,7 +76,6 @@
     </Reference>
     <Reference Include="System.Data" />
     <Reference Include="System.Transactions" />
-    <Reference Include="System.Web" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
@@ -225,7 +226,7 @@
     <Compile Include="Events\MessageReceived.cs" />
     <Compile Include="Internal\ServiceBusReceiveContext.cs" />
     <Compile Include="Internal\ThreadPoolConsumerPool.cs" />
-    <Compile Include="ITransport.cs" />
+    <Compile Include="ILoopbackTransport.cs" />
     <Compile Include="Monitoring\InstancePerformanceCounter.cs" />
     <Compile Include="Monitoring\IPerformanceCounter.cs" />
     <Compile Include="Monitoring\NullPerformanceCounter.cs" />

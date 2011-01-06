@@ -18,8 +18,9 @@ namespace MassTransit.Transports.Msmq.Tests
 	using MassTransit.Tests;
 	using NUnit.Framework;
 	using TestFixtures;
+	using TestFramework;
 
-	[TestFixture, Integration]
+    [TestFixture, Integration]
 	public class Writing_to_a_non_transactional_endpoint_within_a_transaction :
 		MsmqEndpointOnlyTestFixture
 	{

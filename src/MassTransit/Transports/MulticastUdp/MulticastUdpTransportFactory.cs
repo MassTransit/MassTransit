@@ -12,6 +12,8 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports
 {
+    using System;
+
     public class MulticastUdpTransportFactory :
         ITransportFactory
     {
@@ -20,9 +22,19 @@ namespace MassTransit.Transports
             get { return "multicast"; }
         }
 
-        public ITransport New(CreateTransportSettings settings)
+        public ILoopbackTransport BuildLoopback(CreateTransportSettings settings)
         {
             return new MulticastUdpTransport(settings.Address);
+        }
+
+        public IInboundTransport BuildInbound(CreateTransportSettings settings)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IOutboundTransport BuildOutbound(CreateTransportSettings settings)
+        {
+            throw new NotImplementedException();
         }
 
         public void PurgeExistingMessagesIfRequested(CreateTransportSettings settings)

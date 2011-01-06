@@ -10,17 +10,18 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.TestFramework.Fixtures
+namespace MassTransit.TestFramework.Transports
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Linq;
-	using Configuration;
-	using Magnum.Extensions;
-	using NUnit.Framework;
-	using Rhino.Mocks;
-	using Serialization;
-	using Transports;
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using Fixtures;
+    using MassTransit.Configuration;
+    using Magnum.Extensions;
+    using NUnit.Framework;
+    using Rhino.Mocks;
+    using MassTransit.Serialization;
+    using MassTransit.Transports;
 
     [TestFixture]
 	public class EndpointTestFixture<TTransportFactory> :
