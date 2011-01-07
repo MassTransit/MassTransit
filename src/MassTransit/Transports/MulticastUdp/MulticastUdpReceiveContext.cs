@@ -1,5 +1,5 @@
 ﻿// Copyright 2007-2011 The Apache Software Foundation.
-// 
+//  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
 // License at 
@@ -10,32 +10,29 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Transports.RabbitMq
+namespace MassTransit.Transports.MulticastUdp
 {
-    using System;
-    using System.IO;
-    using RabbitMQ.Client;
+	using System;
+	using System.IO;
 
-    public class RabbitMqReceivingContext :
-        IReceivingContext
-    {
-        readonly BasicGetResult _result;
+	public class MulticastUdpReceiveContext :
+		IReceiveContext
+	{
+		public string MessageId
+		{
+			get { return ""; }
+		}
 
-        public RabbitMqReceivingContext(BasicGetResult result)
-        {
-            _result = result;
-        }
+		public Stream Body { get; set; }
 
-        public string GetLabel()
-        {
-            throw new NotImplementedException();
-        }
+		public void Dispose()
+		{
+			throw new NotImplementedException();
+		}
 
-        public string GetMessageId()
-        {
-            return _result.BasicProperties.MessageId;
-        }
-
-        public Stream Body { get; set; }
-    }
+		public string GetLabel()
+		{
+			throw new NotImplementedException();
+		}
+	}
 }

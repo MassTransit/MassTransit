@@ -28,8 +28,8 @@ namespace MassTransit.Transports.Msmq.Tests
 		public void Should_invoke_the_continuation()
 		{
 			var transport = MockRepository.GenerateStub<ILoopbackTransport>();
-			transport.Stub(x => x.Receive(null))
-				.Callback(new Func<Func<IReceivingContext, Action<IReceivingContext>>, bool>(Forwarder));
+			transport.Stub(x => x.Receive(null,TimeSpan.Zero))
+				.Callback(new Func<Func<IReceiveContext, Action<IReceiveContext>>, bool>(Forwarder));
 
 			var address = MockRepository.GenerateMock<IEndpointAddress>();
 
@@ -45,20 +45,20 @@ namespace MassTransit.Transports.Msmq.Tests
 			                 		Assert.AreEqual(((SimpleMessage) message).Name, "Chris");
 
 			                 		future.Complete(message);
-			                 	});
+								}, TimeSpan.Zero);
 
             Assert.IsTrue(future.IsCompleted, "Receive was not called");
 		}
 
-		private bool Forwarder(Func<IReceivingContext, Action<IReceivingContext>> arg)
+		private bool Forwarder(Func<IReceiveContext, Action<IReceiveContext>> arg)
 		{
 			using (Message message = CreateSimpleMessage())
 			{
-				Action<IReceivingContext> func = arg(new MsmqReceivingContext(message));
+				Action<IReceiveContext> func = arg(new MsmqReceiveContext(message));
 				if (func == null)
 					return true;
 
-				func(new MsmqReceivingContext(message));
+				func(new MsmqReceiveContext(message));
 			}
 
 			return true;

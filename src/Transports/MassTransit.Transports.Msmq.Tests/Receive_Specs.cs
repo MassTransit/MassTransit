@@ -38,7 +38,7 @@ namespace MassTransit.Transports.Msmq.Tests
 						Assert.Fail("Receive should have thrown a serialization exception");
 
 						return null;
-					});
+					}, TimeSpan.Zero);
 			}
 			catch (Exception ex)
 			{
@@ -61,7 +61,7 @@ namespace MassTransit.Transports.Msmq.Tests
 					count++;
 
 					return null;
-				});
+				}, TimeSpan.Zero);
 
 			Assert.AreEqual(1, count);
 		}
@@ -75,7 +75,7 @@ namespace MassTransit.Transports.Msmq.Tests
 					count++;
 
 					return null;
-				});
+				}, TimeSpan.Zero);
 
 			Assert.AreEqual(0, count);
 		}
@@ -92,7 +92,7 @@ namespace MassTransit.Transports.Msmq.Tests
 					count++;
 
 					return null;
-				});
+				}, TimeSpan.Zero);
 
 			int secondCount = 0;
 			Endpoint.Receive(message =>
@@ -101,7 +101,7 @@ namespace MassTransit.Transports.Msmq.Tests
 					secondCount++;
 
 					return null;
-				});
+				}, TimeSpan.Zero);
 
 			Assert.AreEqual(1, count);
 			Assert.AreEqual(1, secondCount);
@@ -117,7 +117,7 @@ namespace MassTransit.Transports.Msmq.Tests
 					Assert.IsInstanceOf<PingMessage>(message);
 
 					return m => { };
-				});
+				}, TimeSpan.Zero);
 
 			int count = 0;
 			Endpoint.Receive(message =>
@@ -126,7 +126,7 @@ namespace MassTransit.Transports.Msmq.Tests
 					count++;
 
 					return null;
-				});
+				}, TimeSpan.Zero);
 
 			Assert.AreEqual(0, count);
 		}

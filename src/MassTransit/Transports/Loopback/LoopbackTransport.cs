@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 The Apache Software Foundation.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,138 +12,118 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports
 {
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-    using System.Threading;
+	using System;
+	using System.Collections.Generic;
+	using System.Threading;
+	using Loopback;
 
-    public class LoopbackTransport :
-        TransportBase
-    {
-        private readonly object _messageLock = new object();
-        private AutoResetEvent _messageReady = new AutoResetEvent(false);
-        private LinkedList<LoopbackMessage> _messages = new LinkedList<LoopbackMessage>();
+	public class LoopbackTransport :
+		TransportBase
+	{
+		private readonly object _messageLock = new object();
+		private AutoResetEvent _messageReady = new AutoResetEvent(false);
+		private LinkedList<LoopbackMessage> _messages = new LinkedList<LoopbackMessage>();
 
-        public LoopbackTransport(IEndpointAddress address) : base(address)
-        {
-        }
+		public LoopbackTransport(IEndpointAddress address)
+			: base(address)
+		{
+		}
 
-        public override void Send(Action<ISendingContext> context)
-        {
-            EnsureNotDisposed();
+		public override void Send(Action<ISendContext> callback)
+		{
+			EnsureNotDisposed();
 
-            MemoryStream bodyStream = null;
-            try
-            {
-                bodyStream = new MemoryStream();
-                var msg = new LoopbackMessage(bodyStream, Guid.NewGuid().ToString(),"");
-                var cxt = new LoopbackSendingContext(msg);
-                context(cxt);
+			using (var context = new LoopbackSendContext())
+			{
+				callback(context);
 
-                lock (_messageLock)
-                {
-                    EnsureNotDisposed();
+				lock (_messageLock)
+				{
+					EnsureNotDisposed();
 
-                    _messages.AddLast(msg);
-                }
+					_messages.AddLast(context.GetMessage());
+				}
+			}
 
-                bodyStream = null;
-            }
-            finally
-            {
-                if (bodyStream != null)
-                    bodyStream.Dispose();
-            }
+			_messageReady.Set();
+		}
 
-            _messageReady.Set();
-        }
+		public override void Receive(Func<IReceiveContext, Action<IReceiveContext>> callback, TimeSpan timeout)
+		{
+			EnsureNotDisposed();
 
-        public override void Receive(Func<IReceivingContext, Action<IReceivingContext>> receiver, TimeSpan timeout)
-        {
+			int messageCount;
+			lock (_messageLock)
+			{
+				if (_disposed)
+					return;
 
-            EnsureNotDisposed();
+				messageCount = _messages.Count;
+			}
 
-            int messageCount;
-            lock (_messageLock)
-            {
-                if (_disposed)
-                    return;
+			bool waited = false;
 
-                messageCount = _messages.Count;
-            }
+			if (messageCount == 0)
+			{
+				if (!_messageReady.WaitOne(timeout, true))
+					return;
 
-            bool waited = false;
+				waited = true;
+			}
 
-            if (messageCount == 0)
-            {
-                if (!_messageReady.WaitOne(timeout, true))
-                    return;
+			bool monitorExitNeeded = true;
+			if (!Monitor.TryEnter(_messageLock, timeout))
+				return;
 
-                waited = true;
-            }
+			try
+			{
+				for (LinkedListNode<LoopbackMessage> iterator = _messages.First; iterator != null; iterator = iterator.Next)
+				{
+					if (iterator.Value != null)
+					{
+						var context = new LoopbackReceiveContext(iterator.Value);
+						Action<IReceiveContext> receive = callback(context);
+						if (receive == null)
+							continue;
 
-            bool monitorExitNeeded = true;
-            if (!Monitor.TryEnter(_messageLock, timeout))
-                return;
+						_messages.Remove(iterator);
 
-            try
-            {
-                for (LinkedListNode<LoopbackMessage> iterator = _messages.First; iterator != null; iterator = iterator.Next)
-                {
-                    iterator.Value.Stream.Seek(0, SeekOrigin.Begin);
-                    if (iterator.Value != null)
-                    {
-                        var cxt = new LoopbackReceivingContext(iterator.Value);
-                        cxt.Body = iterator.Value.Stream;
-                        Action<IReceivingContext> receive = receiver(cxt);
-                        if (receive == null)
-                            continue;
+						using (context)
+						{
+							Monitor.Exit(_messageLock);
+							monitorExitNeeded = false;
 
-                        MemoryStream message = iterator.Value.Stream;
-                        message.Seek(0, SeekOrigin.Begin);
+							receive(context);
+							return;
+						}
+					}
+				}
 
-                        _messages.Remove(iterator);
+				if (waited)
+					return;
 
-                        try
-                        {
-                            Monitor.Exit(_messageLock);
-                            monitorExitNeeded = false;
+				// we read to the end and none were accepted, so we are going to wait until we get another in the queue
+				if (!_messageReady.WaitOne(timeout, true))
+					return;
+			}
+			finally
+			{
+				if (monitorExitNeeded)
+					Monitor.Exit(_messageLock);
+			}
+		}
 
-                            receive(cxt);
-                            return;
-                        }
-                        finally
-                        {
-                            message.Dispose();
-                        }
-                    }
-                }
+		public override void OnDisposing()
+		{
+			lock (_messageLock)
+			{
+				_messages.Each(x => x.Dispose());
+				_messages.Clear();
+				_messages = null;
+			}
 
-                if (waited)
-                    return;
-
-                // we read to the end and none were accepted, so we are going to wait until we get another in the queue
-                if (!_messageReady.WaitOne(timeout, true))
-                    return;
-            }
-            finally
-            {
-                if (monitorExitNeeded)
-                    Monitor.Exit(_messageLock);
-            }
-        }
-
-        public override void OnDisposing()
-        {
-            lock (_messageLock)
-            {
-                _messages.Each(x => x.Stream.Dispose());
-                _messages.Clear();
-                _messages = null;
-            }
-
-            _messageReady.Close();
-            _messageReady = null;
-        }
-    }
+			_messageReady.Close();
+			_messageReady = null;
+		}
+	}
 }

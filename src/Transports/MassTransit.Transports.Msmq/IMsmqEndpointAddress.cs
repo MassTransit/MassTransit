@@ -1,5 +1,5 @@
 ﻿// Copyright 2007-2011 The Apache Software Foundation.
-// 
+//  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
 // License at 
@@ -10,32 +10,19 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Transports.Nms
+namespace MassTransit.Transports.Msmq
 {
-    using System;
-    using System.IO;
-    using Apache.NMS;
+	public interface IMsmqEndpointAddress :
+		IEndpointAddress
+	{
+		/// <summary>
+		/// The format name used to talk to MSMQ
+		/// </summary>
+		string FormatName { get; }
 
-    public class NmsReceivingContext :
-        IReceivingContext
-    {
-        readonly ITextMessage _textMessage;
-
-        public NmsReceivingContext(ITextMessage textMessage)
-        {
-            _textMessage = textMessage;
-        }
-
-        public string GetLabel()
-        {
-            throw new NotImplementedException();
-        }
-
-        public string GetMessageId()
-        {
-            return _textMessage.NMSMessageId;
-        }
-
-        public Stream Body { get; set; }
-    }
+		/// <summary>
+		/// The name of the queue in local format (.\private$\name)
+		/// </summary>
+		string LocalName { get; }
+	}
 }

@@ -17,8 +17,9 @@ namespace MassTransit.Transports
     using System.Net;
     using System.Net.Sockets;
     using Exceptions;
+    using MulticastUdp;
 
-    public class MulticastUdpTransport :
+	public class MulticastUdpTransport :
         TransportBase
     {
         private IPAddress _groupAddress;
@@ -31,13 +32,13 @@ namespace MassTransit.Transports
             Initialize();
         }
 
-        public override void Send(Action<ISendingContext> cxt)
+        public override void Send(Action<ISendContext> cxt)
         {
             EnsureNotDisposed();
 
             using (var bodyStream = new MemoryStream())
             {
-                var context = new MulticastUdpSendingContext();
+                var context = new MulticastUdpSendContext();
                 context.Body = bodyStream;
                 cxt(context);
 
@@ -53,7 +54,7 @@ namespace MassTransit.Transports
             }
         }
 
-        public override void Receive(Func<IReceivingContext, Action<IReceivingContext>> receiver, TimeSpan timeout)
+        public override void Receive(Func<IReceiveContext, Action<IReceiveContext>> callback, TimeSpan timeout)
         {
             EnsureNotDisposed();
 
@@ -65,9 +66,9 @@ namespace MassTransit.Transports
 
             using (var bodyStream = new MemoryStream(data))
             {
-                var cxt = new MulticastUdpReceivingContext();
+                var cxt = new MulticastUdpReceiveContext();
                 cxt.Body = bodyStream;
-                Action<IReceivingContext> receive = receiver(cxt);
+                Action<IReceiveContext> receive = callback(cxt);
                 if (receive == null)
                 {
                     // SKIPPED
