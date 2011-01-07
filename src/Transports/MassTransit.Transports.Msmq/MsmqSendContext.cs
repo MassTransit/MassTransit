@@ -10,27 +10,55 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Transports.Loopback
+namespace MassTransit.Transports.Msmq
 {
 	using System;
 	using System.IO;
+	using System.Messaging;
 	using Magnum;
 
-	public class LoopbackMessage :
-		IDisposable
+	public class MsmqSendContext :
+		ISendContext
 	{
-		public LoopbackMessage()
+		private Message _message;
+
+		public MsmqSendContext()
 		{
-			Body = new MemoryStream();
-			MessageId = CombGuid.Generate().ToString();
+			_message = new Message();
 		}
 
-		public string MessageId { get; private set; }
-		public Stream Body { get; private set; }
+		public Message Message
+		{
+			get { return _message; }
+		}
+
+		public Stream Body
+		{
+			get { return _message.BodyStream; }
+		}
+
+		public void MarkRecoverable()
+		{
+			_message.Recoverable = true;
+		}
+
+		public void SetLabel(string label)
+		{
+			_message.Label = label;
+		}
+
+		public void SetMessageExpiration(DateTime d)
+		{
+			_message.TimeToBeReceived = d.Kind == DateTimeKind.Utc ? d - SystemUtil.UtcNow : d - SystemUtil.Now;
+		}
 
 		public void Dispose()
 		{
-			Body.Dispose();
+			if (_message != null)
+			{
+				_message.Dispose();
+				_message = null;
+			}
 		}
 	}
 }

@@ -10,27 +10,40 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Transports.Loopback
+namespace MassTransit.Transports.RabbitMq
 {
-	using System;
 	using System.IO;
-	using Magnum;
+	using RabbitMQ.Client;
 
-	public class LoopbackMessage :
-		IDisposable
+	public class RabbitMqReceiveContext :
+		IReceiveContext
 	{
-		public LoopbackMessage()
+		private readonly BasicGetResult _result;
+		private MemoryStream _body;
+
+		public RabbitMqReceiveContext(BasicGetResult result)
 		{
-			Body = new MemoryStream();
-			MessageId = CombGuid.Generate().ToString();
+			_result = result;
+			_body = new MemoryStream(result.Body, false);
 		}
 
-		public string MessageId { get; private set; }
-		public Stream Body { get; private set; }
+		public string MessageId
+		{
+			get { return _result.BasicProperties.MessageId; }
+		}
+
+		public Stream Body
+		{
+			get { return _body; }
+		}
 
 		public void Dispose()
 		{
-			Body.Dispose();
+			if (_body != null)
+			{
+				_body.Dispose();
+				_body = null;
+			}
 		}
 	}
 }

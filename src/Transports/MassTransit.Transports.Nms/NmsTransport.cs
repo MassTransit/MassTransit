@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 The Apache Software Foundation.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,8 +14,6 @@ namespace MassTransit.Transports.Nms
 {
 	using System;
 	using System.Diagnostics;
-	using System.IO;
-	using System.Text;
 	using Apache.NMS;
 	using Apache.NMS.ActiveMQ;
 	using Exceptions;
@@ -45,16 +43,9 @@ namespace MassTransit.Transports.Nms
 			get { return _address; }
 		}
 
-	    public void Receive(Func<IReceivingContext, Action<IReceivingContext>> receiver)
-	    {
-            if (_disposed) throw NewDisposedException();
-
-            Receive(receiver, TimeSpan.Zero);
-	    }
-
-	    public void Receive(Func<IReceivingContext, Action<IReceivingContext>> receiver, TimeSpan timeout)
-	    {
-            if (_disposed) throw NewDisposedException();
+		public void Receive(Func<IReceiveContext, Action<IReceiveContext>> callback, TimeSpan timeout)
+		{
+			if (_disposed) throw NewDisposedException();
 
 			try
 			{
@@ -86,11 +77,9 @@ namespace MassTransit.Transports.Nms
 							}
 							else
 							{
-								using (var bodyStream = new MemoryStream(Encoding.UTF8.GetBytes(textMessage.Text), false))
+								using (var context = new NmsReceiveContext(textMessage))
 								{
-								    var cxt = new NmsReceivingContext(textMessage);
-								    cxt.Body = bodyStream;
-									Action<IReceivingContext> receive = receiver(cxt);
+									Action<IReceiveContext> receive = callback(context);
 									if (receive == null)
 									{
 										if (_log.IsDebugEnabled)
@@ -101,7 +90,7 @@ namespace MassTransit.Transports.Nms
 									}
 									else
 									{
-										receive(cxt);
+										receive(context);
 									}
 								}
 							}
@@ -118,53 +107,44 @@ namespace MassTransit.Transports.Nms
 
 				Reconnect();
 			}
-	    }
+		}
 
 
+		public virtual void Send(Action<ISendContext> callback)
+		{
+			if (_disposed) throw NewDisposedException();
 
-        public virtual void Send(Action<ISendingContext> sender)
-        {
-            if (_disposed) throw NewDisposedException();
+			try
+			{
+				using (ISession session = _connection.CreateSession(AcknowledgementMode.Transactional))
+				{
+					IQueue destination = session.GetQueue(Address.Path);
 
-            try
-            {
-                using (ISession session = _connection.CreateSession(AcknowledgementMode.Transactional))
-                {
-                    IQueue destination = session.GetQueue(Address.Path);
+					using (IMessageProducer producer = session.CreateProducer(destination))
+					{
+						using (var context = new NmsSendContext(producer))
+						{
+							callback(context);
 
-                    using (IMessageProducer producer = session.CreateProducer(destination))
-                    {
-                        using (var bodyStream = new MemoryStream())
-                        {
-                            
-                            var cxt = new NmsSendingContext(producer);
-                            cxt.Body = bodyStream;
-                            sender(cxt);
+							context.Send();
 
-                            if(OutboundMessage.Headers.ExpirationTime.HasValue)
-                                cxt.SetMessageExpiration(OutboundMessage.Headers.ExpirationTime.Value);
+							session.Commit();
 
-                            producer.DeliveryMode = MsgDeliveryMode.Persistent;
-                            var msg = cxt.GetMessage();
-                            producer.Send(msg);
+							if (SpecialLoggers.Messages.IsInfoEnabled)
+								SpecialLoggers.Messages.InfoFormat("SEND:{0}:{1}", Address, context.Message.NMSMessageId);
+						}
+					}
+				}
+			}
+			catch (InvalidOperationException ex)
+			{
+				if (_log.IsErrorEnabled)
+					_log.Error("A problem occurred communicating with the queue", ex);
 
-                            session.Commit();
+				Reconnect();
+			}
+		}
 
-                            if (SpecialLoggers.Messages.IsInfoEnabled)
-                                SpecialLoggers.Messages.InfoFormat("SEND:{0}:{1}", Address, msg.NMSMessageId);
-                        }
-                    }
-                }
-            }
-            catch (InvalidOperationException ex)
-            {
-                if (_log.IsErrorEnabled)
-                    _log.Error("A problem occurred communicating with the queue", ex);
-
-                Reconnect();
-            }
-        }
-		
 
 		public void Dispose()
 		{

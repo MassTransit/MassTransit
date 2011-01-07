@@ -12,25 +12,36 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports.Loopback
 {
-	using System;
 	using System.IO;
-	using Magnum;
 
-	public class LoopbackMessage :
-		IDisposable
+	public class LoopbackReceiveContext :
+		IReceiveContext
 	{
-		public LoopbackMessage()
+		private LoopbackMessage _message;
+
+		public LoopbackReceiveContext(LoopbackMessage message)
 		{
-			Body = new MemoryStream();
-			MessageId = CombGuid.Generate().ToString();
+			_message = message;
+			_message.Body.Seek(0, SeekOrigin.Begin);
 		}
 
-		public string MessageId { get; private set; }
-		public Stream Body { get; private set; }
+		public string MessageId
+		{
+			get { return _message.MessageId; }
+		}
+
+		public Stream Body
+		{
+			get { return _message.Body; }
+		}
 
 		public void Dispose()
 		{
-			Body.Dispose();
+			if (_message != null)
+			{
+				_message.Dispose();
+				_message = null;
+			}
 		}
 	}
 }

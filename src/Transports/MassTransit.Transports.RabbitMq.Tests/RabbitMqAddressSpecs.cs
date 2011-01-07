@@ -111,7 +111,7 @@ namespace MassTransit.Transports.RabbitMq.Tests
                     var bb = (BugsBunny) b;
                     Console.WriteLine(bb.Food);
                 };
-            });
+            }, TimeSpan.Zero);
         }
     }
 

@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 The Apache Software Foundation.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,11 +14,10 @@ namespace MassTransit.Transports.Msmq
 {
 	using System;
 	using System.Messaging;
-	using System.Net;
-	using Util;
 
 	public class MsmqEndpointAddress :
-		EndpointAddress
+		EndpointAddress,
+		IMsmqEndpointAddress
 	{
 		public MsmqEndpointAddress(Uri uri)
 			: base(uri)
@@ -28,7 +27,7 @@ namespace MassTransit.Transports.Msmq
 			FormatName = MsmqUriParser.GetFormatName(uri);
 
 			IsTransactional = CheckForTransactionalHint();
-		
+
 			if (IsLocal)
 			{
 				IsTransactional = IsLocalQueueTransactional();
@@ -39,11 +38,15 @@ namespace MassTransit.Transports.Msmq
 			}
 		}
 
+		public string FormatName { get; private set; }
+
+		public string LocalName { get; private set; }
+
 		private bool IsLocalQueueTransactional()
 		{
 			try
 			{
-				using(var queue = new MessageQueue(FormatName, QueueAccessMode.PeekAndAdmin))
+				using (var queue = new MessageQueue(FormatName, QueueAccessMode.PeekAndAdmin))
 				{
 					return queue.Transactional;
 				}
@@ -54,10 +57,6 @@ namespace MassTransit.Transports.Msmq
 
 			return IsTransactional;
 		}
-
-		public string FormatName { get; private set; }
-
-		public string LocalName { get; private set; }
 
 
 		private void PublicQueuesNotAllowed()
@@ -76,7 +75,7 @@ namespace MassTransit.Transports.Msmq
 		}
 
 
-	    private Uri SetUriHostToLocalMachineName()
+		private Uri SetUriHostToLocalMachineName()
 		{
 			string query = "?tx=" + IsTransactional.ToString().ToLowerInvariant();
 

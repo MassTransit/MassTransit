@@ -29,17 +29,17 @@ namespace MassTransit.Transports
 
         public IEndpointAddress Address { get; private set; }
 
-        public abstract void Send(Action<ISendingContext> sender);
+        public abstract void Send(Action<ISendContext> callback);
 
-        public void Receive(Func<IReceivingContext, Action<IReceivingContext>> receiver)
+        public void Receive(Func<IReceiveContext, Action<IReceiveContext>> callback)
         {
             EnsureNotDisposed();
 
-            Receive(receiver, TimeSpan.Zero);
+            Receive(callback, TimeSpan.Zero);
         }
 
 
-        public abstract void Receive(Func<IReceivingContext, Action<IReceivingContext>> receiver, TimeSpan timeout);
+        public abstract void Receive(Func<IReceiveContext, Action<IReceiveContext>> callback, TimeSpan timeout);
 
         protected void EnsureNotDisposed()
         {

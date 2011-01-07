@@ -42,15 +42,6 @@ namespace MassTransit
         /// Receive from the endpoint by passing a function that can preview the message and if the caller
         /// chooses to accept it, return a method that will consume the message.
         /// 
-        /// Returns immediately if no message is available.
-        /// </summary>
-        /// <param name="receiver">The function to preview/consume the message</param>
-        void Receive(Func<object, Action<object>> receiver);
-
-        /// <summary>
-        /// Receive from the endpoint by passing a function that can preview the message and if the caller
-        /// chooses to accept it, return a method that will consume the message.
-        /// 
         /// Returns after the specified timeout if no message is available.
         /// </summary>
         /// <param name="receiver">The function to preview/consume the message</param>

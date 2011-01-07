@@ -123,19 +123,19 @@ namespace MassTransit.Internal
 			Dispose(false);
 		}
 
-	    void PopulateTransportMessage<T>(ISendingContext sendingContext, T message)
+	    void PopulateTransportMessage<T>(ISendContext sendContext, T message)
 	    {
-	        Serializer.Serialize(sendingContext.Body, message);
+	        Serializer.Serialize(sendContext.Body, message);
 
 
-	        sendingContext.SetLabel(typeof(T).Name);
-	        sendingContext.MarkRecoverable();
+	        sendContext.SetLabel(typeof(T).Name);
+	        sendContext.MarkRecoverable();
 
 	        if(OutboundMessage.Headers.ExpirationTime.HasValue)
-	            sendingContext.SetMessageExpiration(OutboundMessage.Headers.ExpirationTime.Value);
+	            sendContext.SetMessageExpiration(OutboundMessage.Headers.ExpirationTime.Value);
 	    }
 
-        protected void MoveMessageToErrorTransport(IReceivingContext message)
+        protected void MoveMessageToErrorTransport(IReceiveContext message)
         {
             _errorTransport.Send(context=>
             {
@@ -145,17 +145,10 @@ namespace MassTransit.Internal
             });
 
             if (_log.IsDebugEnabled)
-                _log.DebugFormat("MOVE:{0}:{1}:{2}", Address, _errorTransport.Address, message.GetMessageId());
+                _log.DebugFormat("MOVE:{0}:{1}:{2}", Address, _errorTransport.Address, message.MessageId);
 
             if (SpecialLoggers.Messages.IsInfoEnabled)
-                SpecialLoggers.Messages.InfoFormat("MOVE:{0}:{1}:{2}", Address, _errorTransport.Address, message.GetMessageId());
-        }
-
-        public virtual void Receive(Func<object, Action<object>> receiver)
-        {
-            if (_disposed) throw NewDisposedException();
-
-            _transport.Receive(ReceiveFromTransport(receiver), TimeSpan.Zero);
+                SpecialLoggers.Messages.InfoFormat("MOVE:{0}:{1}:{2}", Address, _errorTransport.Address, message.MessageId);
         }
 
         public virtual void Receive(Func<object, Action<object>> receiver, TimeSpan timeout)
@@ -165,14 +158,14 @@ namespace MassTransit.Internal
             _transport.Receive(ReceiveFromTransport(receiver), timeout);
         }
 
-        Func<IReceivingContext, Action<IReceivingContext>> ReceiveFromTransport(Func<object, Action<object>> receiver)
+        Func<IReceiveContext, Action<IReceiveContext>> ReceiveFromTransport(Func<object, Action<object>> receiver)
         {
             return receivingContext =>
             {
-                if(_tracker.IsRetryLimitExceeded(receivingContext.GetMessageId()))
+                if(_tracker.IsRetryLimitExceeded(receivingContext.MessageId))
                 {
                     if(_log.IsErrorEnabled)
-                        _log.ErrorFormat("Message retry limit exceeded {0}:{1}", Address, receivingContext.GetMessageId());
+                        _log.ErrorFormat("Message retry limit exceeded {0}:{1}", Address, receivingContext.MessageId);
 
                     return MoveMessageToErrorTransport;
                 }
@@ -186,9 +179,9 @@ namespace MassTransit.Internal
                 catch (SerializationException sex)
                 {
                     if (_log.IsErrorEnabled)
-                        _log.Error("Unrecognized message " + Address + ":" + receivingContext.GetMessageId(), sex);
+                        _log.Error("Unrecognized message " + Address + ":" + receivingContext.MessageId, sex);
 
-                    _tracker.IncrementRetryCount(receivingContext.GetMessageId());
+                    _tracker.IncrementRetryCount(receivingContext.MessageId);
                     return MoveMessageToErrorTransport;
                 }
 
@@ -215,14 +208,14 @@ namespace MassTransit.Internal
                     if (_log.IsErrorEnabled)
                         _log.Error("An exception was thrown preparing the message consumers", ex);
 
-                    _tracker.IncrementRetryCount(receivingContext.GetMessageId());
+                    _tracker.IncrementRetryCount(receivingContext.MessageId);
                     return null;
                 }
 
                 return m =>
                 {
                     if (_log.IsDebugEnabled)
-                        _log.DebugFormat("RECV:{0}:{1}:{2}", Address, m.GetMessageId(), messageObj.GetType().Name);
+                        _log.DebugFormat("RECV:{0}:{1}:{2}", Address, m.MessageId, messageObj.GetType().Name);
 
                     if (SpecialLoggers.Messages.IsInfoEnabled)
                         SpecialLoggers.Messages.InfoFormat("RECV:{0}:{1}", Address, messageObj.GetType().Name);
@@ -231,14 +224,14 @@ namespace MassTransit.Internal
                     {
                         receive(messageObj);
 
-                        _tracker.MessageWasReceivedSuccessfully(receivingContext.GetMessageId());
+                        _tracker.MessageWasReceivedSuccessfully(receivingContext.MessageId);
                     }
                     catch (Exception ex)
                     {
                         if (_log.IsErrorEnabled)
                             _log.Error("An exception was thrown by a message consumer", ex);
 
-                        _tracker.IncrementRetryCount(receivingContext.GetMessageId());
+                        _tracker.IncrementRetryCount(receivingContext.MessageId);
                         MoveMessageToErrorTransport(m);
                     }
                 };

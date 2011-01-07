@@ -79,18 +79,23 @@
     <Compile Include="..\..\SolutionVersion.cs">
       <Link>SolutionVersion.cs</Link>
     </Compile>
-    <Compile Include="AbstractMsmqTransport.cs" />
-    <Compile Include="InboundTransactionalMsmqTransport.cs" />
+    <Compile Include="IMsmqEndpointAddress.cs" />
+    <Compile Include="InboundMsmqTransport.cs" />
+    <Compile Include="NonTransactionalOutboundMsmqTransport.cs" />
+    <Compile Include="OutboundMsmqTransport.cs" />
+    <Compile Include="NonTransactionalInboundMsmqTransport.cs" />
     <Compile Include="MsmqBusConfigurationExtensions.cs" />
     <Compile Include="MsmqEndpointAddress.cs" />
     <Compile Include="MsmqEndpointManagement.cs" />
-    <Compile Include="MsmqReceivingContext.cs" />
-    <Compile Include="MsmqSendingContext.cs" />
+    <Compile Include="MsmqReceiveContext.cs" />
+    <Compile Include="MsmqSendContext.cs" />
     <Compile Include="MsmqTransportFactory.cs" />
     <Compile Include="MsmqUriParser.cs" />
     <Compile Include="NonTransactionalMsmqTransport.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TransactionalInboundMsmqTransport.cs" />
     <Compile Include="TransactionalMsmqTransport.cs" />
+    <Compile Include="TransactionalOutboundMsmqTransport.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\MassTransit\MassTransit.csproj">

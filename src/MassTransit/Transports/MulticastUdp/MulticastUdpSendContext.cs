@@ -10,24 +10,31 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Transports
+namespace MassTransit.Transports.MulticastUdp
 {
-    using System;
-    using System.IO;
+	using System;
+	using System.IO;
 
-    public class MulticastUdpReceivingContext :
-        IReceivingContext
+	public class MulticastUdpSendContext :
+        ISendContext
     {
-        public string GetLabel()
-        {
-            throw new NotImplementedException();
-        }
-
-        public string GetMessageId()
-        {
-            throw new NotImplementedException();
-        }
-
         public Stream Body { get; set; }
+
+        public void MarkRecoverable()
+        {
+        }
+
+        public void SetLabel(string label)
+        {
+        }
+
+        public void SetMessageExpiration(DateTime d)
+        {
+        }
+
+    	public void Dispose()
+    	{
+    		
+    	}
     }
 }

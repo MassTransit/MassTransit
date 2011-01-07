@@ -10,27 +10,28 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Transports.Loopback
+namespace MassTransit.Transports.Msmq
 {
-	using System;
-	using System.IO;
-	using Magnum;
+	using System.Diagnostics;
+	using System.Messaging;
+	using System.Transactions;
 
-	public class LoopbackMessage :
-		IDisposable
+	[DebuggerDisplay("OUT:TX:{Address}")]
+	public class TransactionalOutboundMsmqTransport :
+		OutboundMsmqTransport
 	{
-		public LoopbackMessage()
+		public TransactionalOutboundMsmqTransport(IMsmqEndpointAddress address)
+			: base(address)
 		{
-			Body = new MemoryStream();
-			MessageId = CombGuid.Generate().ToString();
 		}
 
-		public string MessageId { get; private set; }
-		public Stream Body { get; private set; }
-
-		public void Dispose()
+		protected override void SendMessage(MessageQueue queue, Message message)
 		{
-			Body.Dispose();
+			MessageQueueTransactionType tt = (Transaction.Current != null)
+			                                 	? MessageQueueTransactionType.Automatic
+			                                 	: MessageQueueTransactionType.Single;
+
+			queue.Send(message, tt);
 		}
 	}
 }

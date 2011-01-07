@@ -14,23 +14,53 @@ namespace MassTransit.Transports.Loopback
 {
 	using System;
 	using System.IO;
-	using Magnum;
 
-	public class LoopbackMessage :
-		IDisposable
+	public class LoopbackSendContext :
+		ISendContext
 	{
-		public LoopbackMessage()
+		private LoopbackMessage _message;
+
+		public LoopbackSendContext()
 		{
-			Body = new MemoryStream();
-			MessageId = CombGuid.Generate().ToString();
+			_message = new LoopbackMessage();
 		}
 
-		public string MessageId { get; private set; }
-		public Stream Body { get; private set; }
+		public Stream Body
+		{
+			get { return _message.Body; }
+		}
+
+		public void MarkRecoverable()
+		{
+		}
+
+		public void SetLabel(string label)
+		{
+		}
+
+		public void SetMessageExpiration(DateTime d)
+		{
+		}
+
 
 		public void Dispose()
 		{
-			Body.Dispose();
+			if (_message != null)
+			{
+				_message.Body.Dispose();
+				_message = null;
+			}
+		}
+
+		public LoopbackMessage GetMessage()
+		{
+			_message.Body.Seek(0, SeekOrigin.Begin);
+
+			LoopbackMessage message = _message;
+
+			_message = null;
+
+			return message;
 		}
 	}
 }

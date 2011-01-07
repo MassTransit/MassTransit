@@ -1,4 +1,4 @@
-// Copyright 2007-2010 The Apache Software Foundation.
+// Copyright 2007-2011 The Apache Software Foundation.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,33 +12,34 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.TestFramework
 {
-    using System;
-    using Magnum;
-    using Magnum.TestFramework;
-    using NUnit.Framework;
+	using System;
+	using Magnum;
+	using Magnum.TestFramework;
+	using NUnit.Framework;
 
-    public static class ExtensionsForTestingEndpoints
+	public static class ExtensionsForTestingEndpoints
 	{
-        public static void ShouldContain<TMessage>(this IInboundTransport transport)
-            where TMessage : class
-        {
-            var future = new Future<TMessage>();
+		public static void ShouldContain<TMessage>(this IInboundTransport transport)
+			where TMessage : class
+		{
+			var future = new Future<TMessage>();
 
-            transport.Receive(message =>
-            {
-                message.ShouldNotBeNull();
+			transport.Receive(message =>
+				{
+					message.ShouldNotBeNull();
 
-                message.ShouldBeAnInstanceOf<TMessage>();
+					message.ShouldBeAnInstanceOf<TMessage>();
 
-                TMessage tm = (TMessage)message;
+					var tm = (TMessage) message;
 
-                future.Complete(tm);
+					future.Complete(tm);
 
-                return null;
-            });
+					return null;
+				}, TimeSpan.Zero);
 
-            future.IsCompleted.ShouldBeTrue(transport.Address + " should contain a message of type " + typeof(TMessage).Name);
-        }
+			future.IsCompleted.ShouldBeTrue(transport.Address + " should contain a message of type " + typeof (TMessage).Name);
+		}
+
 		public static void ShouldContain<TMessage>(this IEndpoint endpoint)
 			where TMessage : class
 		{
@@ -50,41 +51,41 @@ namespace MassTransit.TestFramework
 
 					message.ShouldBeAnInstanceOf<TMessage>();
 
-					TMessage tm = (TMessage) message;
+					var tm = (TMessage) message;
 
 					future.Complete(tm);
 
 					return null;
-				});
+				}, TimeSpan.Zero);
 
 			future.IsCompleted.ShouldBeTrue(endpoint.Address + " should contain a message of type " + typeof (TMessage).Name);
 		}
 
-        public static void ShouldContain<TMessage>(this IEndpoint endpoint, TMessage expectedMessage)
-            where TMessage : CorrelatedBy<Guid>
-        {
-            endpoint.ShouldContain(expectedMessage, TimeSpan.Zero);
-        }
+		public static void ShouldContain<TMessage>(this IEndpoint endpoint, TMessage expectedMessage)
+			where TMessage : CorrelatedBy<Guid>
+		{
+			endpoint.ShouldContain(expectedMessage, TimeSpan.Zero);
+		}
 
-	    public static void ShouldContain<TMessage>(this IEndpoint endpoint, TMessage expectedMessage, TimeSpan timeout)
+		public static void ShouldContain<TMessage>(this IEndpoint endpoint, TMessage expectedMessage, TimeSpan timeout)
 			where TMessage : CorrelatedBy<Guid>
 		{
 			var future = new Future<TMessage>();
 
-	        endpoint.Receive(message =>
-	            {
-	                message.ShouldNotBeNull();
+			endpoint.Receive(message =>
+				{
+					message.ShouldNotBeNull();
 
 					message.ShouldBeAnInstanceOf<TMessage>();
 
-	                TMessage tm = (TMessage) message;
+					var tm = (TMessage) message;
 
-	                Assert.AreEqual(expectedMessage.CorrelationId, tm.CorrelationId);
+					Assert.AreEqual(expectedMessage.CorrelationId, tm.CorrelationId);
 
-	                future.Complete(tm);
+					future.Complete(tm);
 
-	                return null;
-	            }, timeout);
+					return null;
+				}, timeout);
 
 			future.IsCompleted.ShouldBeTrue(endpoint.Address + " should contain a message of type " + typeof (TMessage).Name + " with correlation id " + expectedMessage.CorrelationId);
 		}
@@ -102,7 +103,7 @@ namespace MassTransit.TestFramework
 					}
 
 					return null;
-				});
+				}, TimeSpan.Zero);
 		}
 
 		public static void ShouldNotContain<TMessage>(this IEndpoint endpoint, TMessage expectedMessage)
@@ -115,7 +116,7 @@ namespace MassTransit.TestFramework
 					if (message.GetType() != expectedMessage.GetType())
 						return null;
 
-					TMessage tm = (TMessage) message;
+					var tm = (TMessage) message;
 
 					if (tm.CorrelationId != expectedMessage.CorrelationId)
 						return null;
@@ -123,7 +124,7 @@ namespace MassTransit.TestFramework
 					Assert.Fail(endpoint.Address + " should not contain a message of type " + typeof (TMessage).Name + " with correlation id " + expectedMessage.CorrelationId);
 
 					return null;
-				});
+				}, TimeSpan.Zero);
 		}
 	}
 }

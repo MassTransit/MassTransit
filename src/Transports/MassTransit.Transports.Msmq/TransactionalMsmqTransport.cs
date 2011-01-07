@@ -1,4 +1,4 @@
-// Copyright 2007-2010 The Apache Software Foundation.
+// Copyright 2007-2011 The Apache Software Foundation.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,61 +13,38 @@
 namespace MassTransit.Transports.Msmq
 {
 	using System;
-	using System.Messaging;
-	using System.Transactions;
-	using log4net;
-	using Magnum.Extensions;
 
 	public class TransactionalMsmqTransport :
-		AbstractMsmqTransport
+		ILoopbackTransport
 	{
-		private static readonly ILog _log = LogManager.GetLogger(typeof (TransactionalMsmqTransport));
+		private readonly IInboundTransport _inbound;
+		private readonly IOutboundTransport _outbound;
 
-		public TransactionalMsmqTransport(IEndpointAddress address)
-			: base(address)
+		public TransactionalMsmqTransport(IMsmqEndpointAddress address)
 		{
+			_inbound = new TransactionalInboundMsmqTransport(address);
+			_outbound = new TransactionalOutboundMsmqTransport(address);
 		}
 
-		public override void Receive(Func<Message, Action<Message>> receiver, TimeSpan timeout)
+		public void Dispose()
 		{
-			try
-			{
-				Connect();
-
-				var options = new TransactionOptions
-					{
-						IsolationLevel = IsolationLevel.Serializable,
-						Timeout = 30.Seconds(),
-					};
-
-				using (var scope = new TransactionScope(TransactionScopeOption.Required, options))
-				{
-					if (EnumerateQueue(receiver, timeout))
-						scope.Complete();
-				}
-			}
-			catch (MessageQueueException ex)
-			{
-				HandleMessageQueueException(ex, timeout);
-			}
+			_inbound.Dispose();
+			_outbound.Dispose();
 		}
 
-		protected override void ReceiveMessage(MessageEnumerator enumerator, TimeSpan timeout, Action<Func<Message>> receiveAction)
+		public IEndpointAddress Address
 		{
-			receiveAction(() =>
-				{
-					if (_log.IsDebugEnabled)
-						_log.DebugFormat("Removing message {0} from queue {1}", enumerator.Current.Id, Address);
-
-					return enumerator.RemoveCurrent(timeout, MessageQueueTransactionType.Automatic);
-				});
+			get { return _inbound.Address; }
 		}
 
-		protected override void SendMessage(MessageQueue queue, Message message)
+		public void Send(Action<ISendContext> callback)
 		{
-			var tt = (Transaction.Current != null) ? MessageQueueTransactionType.Automatic : MessageQueueTransactionType.Single;
+			_outbound.Send(callback);
+		}
 
-			queue.Send(message, tt);
+		public void Receive(Func<IReceiveContext, Action<IReceiveContext>> callback, TimeSpan timeout)
+		{
+			_inbound.Receive(callback, timeout);
 		}
 	}
 }

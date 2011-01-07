@@ -10,27 +10,41 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Transports.Loopback
+namespace MassTransit.Transports.Nms
 {
-	using System;
 	using System.IO;
-	using Magnum;
+	using System.Text;
+	using Apache.NMS;
 
-	public class LoopbackMessage :
-		IDisposable
+	public class NmsReceiveContext :
+		IReceiveContext
 	{
-		public LoopbackMessage()
+		private Stream _body;
+		private readonly ITextMessage _message;
+
+		public NmsReceiveContext(ITextMessage message)
 		{
-			Body = new MemoryStream();
-			MessageId = CombGuid.Generate().ToString();
+			_message = message;
+			_body = new MemoryStream(Encoding.UTF8.GetBytes(message.Text), false);
 		}
 
-		public string MessageId { get; private set; }
-		public Stream Body { get; private set; }
+		public string MessageId
+		{
+			get { return _message.NMSMessageId; }
+		}
+
+		public Stream Body
+		{
+			get { return _body; }
+		}
 
 		public void Dispose()
 		{
-			Body.Dispose();
+			if (_body != null)
+			{
+				_body.Dispose();
+				_body = null;
+			}
 		}
 	}
 }

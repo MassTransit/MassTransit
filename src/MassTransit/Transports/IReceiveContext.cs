@@ -1,5 +1,5 @@
 // Copyright 2007-2011 The Apache Software Foundation.
-// 
+//  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
 // License at 
@@ -12,12 +12,14 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports
 {
-    using System.IO;
+	using System;
+	using System.IO;
 
-    public interface IReceivingContext
-    {
-        string GetLabel();
-        string GetMessageId();
-        Stream Body { get; }
-    }
+	public interface IReceiveContext :
+		IDisposable
+	{
+		Stream Body { get; }
+
+		string MessageId { get; }
+	}
 }
