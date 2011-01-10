@@ -12,7 +12,6 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports.Msmq
 {
-	using System;
 	using System.IO;
 	using System.Messaging;
 
@@ -26,24 +25,19 @@ namespace MassTransit.Transports.Msmq
 			_message = message;
 		}
 
-		public string MessageId
-		{
-			get
-			{
-					return _message.Id;
-			}
-		}
-
-			public Stream Body
-		{
-			get { return _message.BodyStream; }
-		}
-
 		public Message Message
 		{
-			get {
-				return _message;
-			}
+			get { return _message; }
+		}
+
+		public string MessageId
+		{
+			get { return _message.Id; }
+		}
+
+		public Stream Body
+		{
+			get { return _message.BodyStream; }
 		}
 
 		public void Dispose()

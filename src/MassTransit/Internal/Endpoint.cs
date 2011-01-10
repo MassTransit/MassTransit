@@ -224,14 +224,14 @@ namespace MassTransit.Internal
                     {
                         receive(messageObj);
 
-                        _tracker.MessageWasReceivedSuccessfully(receivingContext.MessageId);
+						_tracker.MessageWasReceivedSuccessfully(m.MessageId);
                     }
                     catch (Exception ex)
                     {
                         if (_log.IsErrorEnabled)
                             _log.Error("An exception was thrown by a message consumer", ex);
 
-                        _tracker.IncrementRetryCount(receivingContext.MessageId);
+						_tracker.IncrementRetryCount(m.MessageId);
                         MoveMessageToErrorTransport(m);
                     }
                 };

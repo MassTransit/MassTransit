@@ -80,9 +80,10 @@ namespace MassTransit.Transports.Msmq
 					}
 
 					string acceptedMessageId;
+					Action<IReceiveContext> receive;
 					using (var context = new MsmqReceiveContext(enumerator.Current))
 					{
-						Action<IReceiveContext> receive = receiver(context);
+						receive = receiver(context);
 						if (receive == null)
 						{
 							if (_log.IsDebugEnabled)
@@ -110,7 +111,7 @@ namespace MassTransit.Transports.Msmq
 										string.Format(
 											"Received message does not match current message: ({0} != {1})",
 											context.MessageId, acceptedMessageId));
-								receiver(context);
+								receive(context);
 
 								received = true;
 							}
