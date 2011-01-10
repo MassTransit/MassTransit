@@ -19,6 +19,7 @@ namespace MassTransit.Transports.Msmq.Tests.Serialization
 	using MassTransit.Tests.Messages;
 	using NUnit.Framework;
 	using TestFixtures;
+	using TestFramework;
 
 	[TestFixture, Explicit]
 	public class When_sending_a_message_using_the_specified_serializer<TSerializer> :
@@ -62,6 +63,8 @@ namespace MassTransit.Transports.Msmq.Tests.Serialization
 
 				received.Set(message);
 			});
+
+//			LocalBus.ShouldHaveSubscriptionFor<PingMessage>();
 
 			LocalBus.Publish(ping, context => context.SendFaultTo(LocalBus.Endpoint.Uri));
 

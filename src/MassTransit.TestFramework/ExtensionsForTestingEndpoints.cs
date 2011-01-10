@@ -15,11 +15,13 @@ namespace MassTransit.TestFramework
 	using System;
 	using Magnum;
 	using Magnum.TestFramework;
+	using MassTransit.Transports;
 	using NUnit.Framework;
+	using Serialization;
 
 	public static class ExtensionsForTestingEndpoints
 	{
-		public static void ShouldContain<TMessage>(this IInboundTransport transport)
+		public static void ShouldContain<TMessage>(this IInboundTransport transport, IMessageSerializer serializer)
 			where TMessage : class
 		{
 			var future = new Future<TMessage>();
@@ -27,12 +29,13 @@ namespace MassTransit.TestFramework
 			transport.Receive(message =>
 				{
 					message.ShouldNotBeNull();
+					message.ShouldBeAnInstanceOf<IReceiveContext>();
 
-					message.ShouldBeAnInstanceOf<TMessage>();
+					var messageObj = serializer.Deserialize(message.Body);
 
-					var tm = (TMessage) message;
-
-					future.Complete(tm);
+					var tm = messageObj as TMessage;
+					if(tm != null)
+						future.Complete(tm);
 
 					return null;
 				}, TimeSpan.Zero);
