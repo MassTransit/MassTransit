@@ -30,41 +30,87 @@ namespace MassTransit.NinjectIntegration
     public class MassTransitModuleBase :
         NinjectModule
     {
+        private readonly Action<IEndpointFactoryConfigurator> _ConfigurationAction;
+        private readonly Type[] _TransportTypes;
+        private IObjectBuilder _Builder;
 
-        public MassTransitModuleBase() :
-            this(x=> { })
+        protected IObjectBuilder Builder { get { return _Builder; } }
+
+        public MassTransitModuleBase(IObjectBuilder builder)
+            : this(builder, null, (Type[])null)
         {
-            
         }
 
-        public MassTransitModuleBase(Action<IEndpointFactoryConfigurator> configurationAction)
+        public MassTransitModuleBase(IObjectBuilder builder,
+            Action<IEndpointFactoryConfigurator> configurationAction)
+            : this(builder, configurationAction, null)
         {
-            // Save action to Load() if we need it? We can't do stuff in the constructor
-            //structure map scanner stuff?
-		}
-
-        public override void Load()
-        {
-            RegisterBusDependencies();
         }
 
         /// <summary>
         /// Creates a registry for a service bus listening to an endpoint
         /// </summary>
-        public MassTransitModuleBase(params Type[] transportTypes)
+        public MassTransitModuleBase(IObjectBuilder builder,
+            params Type[] transportTypes)
+            : this(builder, null, transportTypes)
+        {
+        }
+
+        /// <summary>
+        /// Creates a new instance of MassTransitModuleBase.
+        /// </summary>
+        /// <remarks>
+        /// With NInject, its not possible to actually build anything yet,
+        /// because the underlying binding mechanism does not exist at
+        /// construction time. We will save the values and do the setup later
+        /// when Load() is called.
+        /// </remarks>
+        /// <param name="builder">
+        /// </param>
+        /// <param name="configurationAction">
+        /// The endpoint factory configuration action to use when creating an
+        /// endpoint factory.
+        /// </param>
+        /// <param name="transportTypes">
+        /// The transport types to configure.
+        /// </param>
+        public MassTransitModuleBase(IObjectBuilder builder,
+            Action<IEndpointFactoryConfigurator> configurationAction,
+            params Type[] transportTypes)
+        {
+            _Builder = builder;
+
+            if (configurationAction == null)
+            {
+                _ConfigurationAction = DefaultEndpointFactoryConfigurator;
+            }
+            else
+            {
+                _ConfigurationAction = configurationAction;
+            }
+
+            _TransportTypes = transportTypes;
+        }
+
+        public override void Load()
         {
             RegisterBusDependencies();
 
-            RegisterEndpointFactory(x =>
-                {
-                    x.RegisterTransport<LoopbackEndpoint>();
-                    x.RegisterTransport<MulticastUdpEndpoint>();
+            if (_TransportTypes != null)
+            {
+                RegisterEndpointFactory(x => _ConfigurationAction(x));
+            }
+        }
 
-                    foreach (Type type in transportTypes)
-                    {
-                        x.RegisterTransport(type);
-                    }
-                });
+        protected void DefaultEndpointFactoryConfigurator(IEndpointFactoryConfigurator endpointFactoryConfigurator)
+        {
+            endpointFactoryConfigurator.RegisterTransport<LoopbackEndpoint>();
+            endpointFactoryConfigurator.RegisterTransport<MulticastUdpEndpoint>();
+
+            foreach (Type type in _TransportTypes)
+            {
+                endpointFactoryConfigurator.RegisterTransport(type);
+            }
         }
 
         /// <summary>
@@ -105,7 +151,7 @@ namespace MassTransit.NinjectIntegration
         protected void RegisterBusDependencies()
         {
             //how singlton
-            base.Bind<IObjectBuilder>().To<NinjectObjectBuilder>().InSingletonScope();
+            Bind<IObjectBuilder>().To<NinjectObjectBuilder>().InSingletonScope();
 
 
             //we are expecting NINJECT to auto-resolve
@@ -137,7 +183,7 @@ namespace MassTransit.NinjectIntegration
         protected void RegisterServiceBus(Uri endpointUri, Action<IServiceBusConfigurator> configAction)
         {
             Bind<IServiceBus>()
-                .ToMethod(context=>
+                .ToMethod(context =>
                 {
                     return ServiceBusConfigurator.New(x =>
                     {
