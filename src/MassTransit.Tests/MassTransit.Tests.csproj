@@ -131,6 +131,7 @@
     <Compile Include="Load\Sagas\FirstSaga.cs" />
     <Compile Include="MessageContext_Specs.cs" />
     <Compile Include="MessageInterceptor_Specs.cs" />
+	<Compile Include="MessageRetryTracker_Specs.cs" />
     <Compile Include="Performance\EndpointLoadTest.cs" />
     <Compile Include="Performance\LoadedRequest.cs" />
     <Compile Include="Performance\LoadedResponse.cs" />
