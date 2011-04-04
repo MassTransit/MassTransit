@@ -15,14 +15,12 @@ namespace Starbucks.Cashier
 	using System;
 	using System.Diagnostics;
 	using System.IO;
-	using Castle.Windsor;
 	using log4net.Config;
 	using Magnum;
 	using Magnum.StateMachine;
 	using MassTransit.Saga;
 	using MassTransit.Transports;
-	using MassTransit.Transports.Msmq;
-	using MassTransit.WindsorIntegration;
+	using StructureMap;
 	using Topshelf;
 	using Topshelf.Configuration;
 	using Topshelf.Configuration.Dsl;
@@ -48,13 +46,23 @@ namespace Starbucks.Cashier
 
 					EndpointConfigurator.Defaults(x => { x.CreateMissingQueues = true; });
 
-					IWindsorContainer container = BootstrapContainer();
+					var container = new Container(x =>
+						{
+							x.AddType(typeof (CashierSaga));
+							x.AddType(typeof (CashierService));
+
+							x.For<CashierService>()
+								.Singleton()
+								.Use<CashierService>();
+						});
+
+					container.Configure(x => x.AddRegistry(new CashierRegistry(container)));
 
 					DisplayStateMachine();
 
 					c.ConfigureService<CashierService>(s =>
 						{
-							s.HowToBuildService(builder => container.Resolve<CashierService>());
+							s.HowToBuildService(builder => container.GetInstance<CashierService>());
 							s.WhenStarted(o => o.Start());
 							s.WhenStopped(o => o.Stop());
 						});
@@ -67,20 +75,6 @@ namespace Starbucks.Cashier
 			Trace.Listeners.Add(new TextWriterTraceListener(Console.Out));
 
 			StateMachineInspector.Trace(new CashierSaga(CombGuid.Generate()));
-		}
-
-		private static IWindsorContainer BootstrapContainer()
-		{
-			var container = new WindsorContainer("Starbucks.Cashier.Castle.xml");
-			var installer = new MassTransitInstaller();
-			container.Install(installer);
-
-			container.AddComponent("sagaRepository", typeof(ISagaRepository<>), typeof(InMemorySagaRepository<>));
-
-			container.AddComponent<CashierSaga>();
-			container.AddComponent<CashierService>(typeof(CashierService).Name);
-
-			return container;
 		}
 	}
 }
