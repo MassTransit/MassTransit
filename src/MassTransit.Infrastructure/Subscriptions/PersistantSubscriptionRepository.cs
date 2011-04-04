@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 The Apache Software Foundation.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -20,7 +20,7 @@ namespace MassTransit.Infrastructure.Subscriptions
 	using Services.Subscriptions;
 	using Services.Subscriptions.Server;
 
-    public class PersistantSubscriptionRepository :
+	public class PersistantSubscriptionRepository :
 		ISubscriptionRepository
 	{
 		private static readonly ILog _log = LogManager.GetLogger(typeof (SubscriptionService));
@@ -30,8 +30,6 @@ namespace MassTransit.Infrastructure.Subscriptions
 		{
 			_factory = factory;
 		}
-
-		#region ISubscriptionRepository Members
 
 		public void Save(Subscription subscription)
 		{
@@ -45,7 +43,7 @@ namespace MassTransit.Infrastructure.Subscriptions
 					criteria.Add(Restrictions.Eq("Address", subscription.EndpointUri.ToString()))
 						.Add(Restrictions.Eq("MessageName", subscription.MessageName));
 
-					PersistentSubscription obj = criteria.UniqueResult<PersistentSubscription>();
+					var obj = criteria.UniqueResult<PersistentSubscription>();
 					if (obj == null)
 					{
 						obj = new PersistentSubscription(subscription);
@@ -79,7 +77,7 @@ namespace MassTransit.Infrastructure.Subscriptions
 					criteria.Add(Restrictions.Eq("Address", subscription.EndpointUri.ToString()))
 						.Add(Restrictions.Eq("MessageName", subscription.MessageName));
 
-					PersistentSubscription obj = criteria.UniqueResult<PersistentSubscription>();
+					var obj = criteria.UniqueResult<PersistentSubscription>();
 					if (obj != null)
 					{
 						obj.IsActive = false;
@@ -103,7 +101,7 @@ namespace MassTransit.Infrastructure.Subscriptions
 				ICriteria criteria = session.CreateCriteria(typeof (PersistentSubscription))
 					.Add(Restrictions.Eq("IsActive", true));
 
-				List<Subscription> result = new List<Subscription>();
+				var result = new List<Subscription>();
 
 				IList<PersistentSubscription> activeSubscriptions = criteria.List<PersistentSubscription>();
 				foreach (PersistentSubscription subscription in activeSubscriptions)
@@ -119,7 +117,5 @@ namespace MassTransit.Infrastructure.Subscriptions
 		{
 			_factory.Dispose();
 		}
-
-		#endregion
 	}
 }
