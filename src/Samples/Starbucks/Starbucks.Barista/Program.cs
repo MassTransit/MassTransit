@@ -21,7 +21,6 @@ namespace Starbucks.Barista
 	using Magnum.StateMachine;
 	using MassTransit.Saga;
 	using MassTransit.Transports;
-	using MassTransit.Transports.Msmq;
 	using MassTransit.WindsorIntegration;
 	using Topshelf;
 	using Topshelf.Configuration;
@@ -71,11 +70,15 @@ namespace Starbucks.Barista
 
 		private static IWindsorContainer BootstrapContainer()
 		{
-			IWindsorContainer container = new DefaultMassTransitContainer("Starbucks.Barista.Castle.xml");
+			var container = new WindsorContainer("Starbucks.Barista.Castle.xml");
+			var installer = new MassTransitInstaller();
+			container.Install(installer);
+
 			container.AddComponent("sagaRepository", typeof (ISagaRepository<>), typeof (InMemorySagaRepository<>));
 
 			container.AddComponent<DrinkPreparationSaga>();
 			container.AddComponent<BaristaService>(typeof (BaristaService).Name);
+			
 			return container;
 		}
 	}
