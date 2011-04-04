@@ -7,7 +7,7 @@ require 'albacore'
 require File.dirname(__FILE__) + "/build_support/ilmergeconfig.rb"
 require File.dirname(__FILE__) + "/build_support/ilmerge.rb"
 
-BUILD_NUMBER_BASE = '1.0.0'
+BUILD_NUMBER_BASE = '1.3.0'
 PRODUCT = 'MassTransit'
 CLR_TOOLS_VERSION = 'v4.0.30319'
 
@@ -95,10 +95,27 @@ desc "Cleans, versions, compiles the application and generates build_output/."
 task :compile => [:global_version, :build] do
 	puts 'Copying unmerged dependencies to output folder'
 #	copyOutputFiles File.join(props[:src], "Stact.ServerFramework/bin/#{BUILD_CONFIG}"), "Stact.ServerFramework.{dll,pdb,xml}", props[:output]
+	copyOutputFiles File.join(props[:src], "MassTransit/bin/#{BUILD_CONFIG}"), "log4net.{dll,pdb,xml}", props[:output]
+	copyOutputFiles File.join(props[:src], "MassTransit/bin/#{BUILD_CONFIG}"), "Magnum.{dll,pdb,xml}", props[:output]
 
+	copyOutputFiles File.join(props[:src], "MassTransit.Infrastructure/bin/#{BUILD_CONFIG}"), "MassTransit.Infrastructure.{dll,pdb,xml}", File.join(props[:output], "NHibernate")
+	outc = File.join(props[:output], "Containers")
+
+	copyOutputFiles File.join(props[:src], "Containers/MassTransit.StructureMapIntegration/bin/#{BUILD_CONFIG}"), "MassTransit*.{dll,pdb,xml}", outc
+	copyOutputFiles File.join(props[:src], "Containers/MassTransit.UnityIntegration/bin/#{BUILD_CONFIG}"), "MassTransit*.{dll,pdb,xml}", outc
+	copyOutputFiles File.join(props[:src], "Containers/MassTransit.WindsorIntegration/bin/#{BUILD_CONFIG}"), "MassTransit*.{dll,pdb,xml}", outc
+	copyOutputFiles File.join(props[:src], "Containers/MassTransit.NinjectIntegration/bin/#{BUILD_CONFIG}"), "MassTransit*.{dll,pdb,xml}", outc
+	
+	outt = File.join(props[:output], "Transports")
+
+	copyOutputFiles File.join(props[:src], "Transports/MassTransit.Transports.MSMQ/bin/#{BUILD_CONFIG}"), "MassTransit*.{dll,pdb,xml}", File.join(outt, "MSMQ")
+	copyOutputFiles File.join(props[:src], "Transports/MassTransit.Transports.Nms/bin/#{BUILD_CONFIG}"), "MassTransit*.{dll,pdb,xml}", File.join(outt, "ActiveMQ")
+	copyOutputFiles File.join(props[:src], "Transports/MassTransit.Transports.Nms/bin/#{BUILD_CONFIG}"), "MassTransit*.{dll,pdb,xml}", File.join(outt, "ActiveMQ")
+	copyOutputFiles File.join(props[:src], "Transports/MassTransit.Transports.RabbitMq/bin/#{BUILD_CONFIG}"), "MassTransit*.{dll,pdb,xml}", File.join(outt, "RabbitMQ")
+	copyOutputFiles File.join(props[:src], "Transports/MassTransit.Transports.RabbitMq/bin/#{BUILD_CONFIG}"), "RabbitMQ*.{dll,pdb,xml}", File.join(outt, "RabbitMQ")
 end
 
-task :ilmerge => [:ilmerge_masstransit] do
+task :ilmerge => [:ilmerge_masstransit, :copy_services] do
 end
 
 
@@ -111,7 +128,7 @@ ilmerge :ilmerge_masstransit do |ilm|
         ilm.use MSB_USE
 	ilm.log = File.join( props[:src], "MassTransit","bin","#{BUILD_CONFIG}", 'ilmerge.log' )
 	ilm.allow_dupes = true
-	ilm.references = [ 'MassTransit.dll', 'Magnum.dll', 'Newtonsoft.Json.dll']
+	ilm.references = [ 'MassTransit.dll', 'Stact.dll', 'Newtonsoft.Json.dll']
 end
 
 
@@ -125,6 +142,40 @@ ilmerge :ilmerge_stact do |ilm|
 	ilm.log = File.join( props[:src], "Stact","bin","#{BUILD_CONFIG}", 'ilmerge.log' )
 	ilm.allow_dupes = true
 	ilm.references = [ 'Stact.dll', 'Magnum.dll']
+end
+
+desc "Copying Services"
+task :copy_services => [:compile] do
+	puts "Copying services"
+	targ = File.join(props[:stage], 'Services', 'RuntimeServices')
+	src = File.join(props[:src], "MassTransit.RuntimeServices/bin/#{BUILD_CONFIG}")
+
+	copyOutputFiles src, "MassTransit.*.{dll,exe,config,log4net.xml}", targ
+	copyOutputFiles props[:output], 'MassTransit.dll', targ
+     	copyOutputFiles src, "Castle*.dll", targ	
+     	copyOutputFiles src, "log4net.dll", targ	
+     	copyOutputFiles src, "FluentNHibernate.dll", targ	
+     	copyOutputFiles src, "NHibernate*.dll", targ	
+     	copyOutputFiles src, "Iesi.Collections.dll", targ	
+     	copyOutputFiles src, "StructureMap.dll", targ	
+     	copyOutputFiles src, "Topshelf.dll", targ	
+
+	targ = File.join(props[:stage], 'Services', 'SystemView')
+	src = File.join(props[:src], "MassTransit.SystemView/bin/#{BUILD_CONFIG}")
+
+	copyOutputFiles src, "MassTransit.*.{dll,exe,config}", targ
+	copyOutputFiles props[:output], 'MassTransit.dll', targ
+     	copyOutputFiles src, "log4net.dll", targ	
+     	copyOutputFiles src, "StructureMap.dll", targ	
+
+	targ = File.join(props[:stage], 'Services', 'SystemView2')
+	src = File.join(props[:src], "MassTransit.SystemView2/bin/#{BUILD_CONFIG}")
+
+	copyOutputFiles src, "MassTransit.*.{dll,exe,config}", targ
+	copyOutputFiles props[:output], 'MassTransit.dll', targ
+     	copyOutputFiles src, "log4net.dll", targ	
+     	copyOutputFiles src, "StructureMap.dll", targ	
+     	copyOutputFiles src, "WPFToolkit.dll", targ	
 end
 
 
