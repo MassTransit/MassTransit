@@ -14,7 +14,6 @@ namespace MassTransit.Infrastructure.Tests.Sagas
 {
     using Magnum;
     using Magnum.Data;
-    using Magnum.ForNHibernate.Data;
     using MassTransit.Tests.Saga.StateMachine;
     using NHibernate;
     using NHibernate.Cfg;
@@ -43,10 +42,6 @@ namespace MassTransit.Infrastructure.Tests.Sagas
             ISessionFactory _sessionFactory = _cfg.BuildSessionFactory();
 
             LocalContext.Current.Store(_sessionFactory);
-
-            NHibernateUnitOfWork.SetSessionProvider(() => LocalContext.Current.Retrieve<ISessionFactory>().OpenSession());
-
-            UnitOfWork.SetUnitOfWorkProvider(NHibernateUnitOfWork.Create);
         }
 
         [Test, Explicit]

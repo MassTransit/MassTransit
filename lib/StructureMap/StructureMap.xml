@@ -4,6 +4,14 @@
         <name>StructureMap</name>
     </assembly>
     <members>
+        <member name="M:StructureMap.IContext.BuildUp(System.Object)">
+            <summary>
+            The "BuildUp" method takes in an already constructed object
+            and uses Setter Injection to push in configured dependencies
+            of that object
+            </summary>
+            <param name="target"></param>
+        </member>
         <member name="M:StructureMap.IContext.GetInstance``1">
             <summary>
             Get the object of type T that is valid for this build session.
@@ -367,19 +375,6 @@
             </summary>
             <param name="scanner"></param>
         </member>
-        <member name="M:StructureMap.Graph.IAssemblyScanner.WithDefaultConventions">
-            <summary>
-            Adds the DefaultConventionScanner to the scanning operations.  I.e., a concrete
-            class named "Something" that implements "ISomething" will be automatically 
-            added to PluginType "ISomething"
-            </summary>
-        </member>
-        <member name="M:StructureMap.Graph.IAssemblyScanner.RegisterConcreteTypesAgainstTheFirstInterface">
-            <summary>
-            Automatically registers all concrete types without primitive arguments
-            against its first interface, if any
-            </summary>
-        </member>
         <member name="M:StructureMap.Graph.IAssemblyScanner.With``1">
             <summary>
             Creates and adds a new ITypeScanner of type T to this scanning operation
@@ -454,22 +449,6 @@
             </summary>
             <typeparam name="T"></typeparam>
         </member>
-        <member name="M:StructureMap.Graph.IAssemblyScanner.ConnectImplementationsToTypesClosing(System.Type)">
-            <summary>
-            Scans for PluginType's and Concrete Types that close the given open generic type
-            </summary>
-            <example>
-            
-            </example>
-            <param name="openGenericType"></param>
-        </member>
-        <member name="M:StructureMap.Graph.IAssemblyScanner.SingleImplementationsOfInterface">
-            <summary>
-            Directs the scanning to automatically register any type that is the single
-            implementation of an interface against that interface.
-            The filters apply
-            </summary>
-        </member>
         <member name="M:StructureMap.Graph.IAssemblyScanner.Convention``1">
             <summary>
             Adds a registration convention to be applied to all the types in this
@@ -481,6 +460,64 @@
             <summary>
             Adds a registration convention to be applied to all the types in this
             logical "scan" operation
+            </summary>
+        </member>
+        <member name="M:StructureMap.Graph.IAssemblyScanner.WithDefaultConventions">
+            <summary>
+            Adds the DefaultConventionScanner to the scanning operations.  I.e., a concrete
+            class named "Something" that implements "ISomething" will be automatically 
+            added to PluginType "ISomething"
+            </summary>
+        </member>
+        <member name="M:StructureMap.Graph.IAssemblyScanner.ConnectImplementationsToTypesClosing(System.Type)">
+            <summary>
+            Scans for PluginType's and Concrete Types that close the given open generic type
+            </summary>
+            <example>
+            
+            </example>
+            <param name="openGenericType"></param>
+        </member>
+        <member name="M:StructureMap.Graph.IAssemblyScanner.RegisterConcreteTypesAgainstTheFirstInterface">
+            <summary>
+            Automatically registers all concrete types without primitive arguments
+            against its first interface, if any
+            </summary>
+        </member>
+        <member name="M:StructureMap.Graph.IAssemblyScanner.SingleImplementationsOfInterface">
+            <summary>
+            Directs the scanning to automatically register any type that is the single
+            implementation of an interface against that interface.
+            The filters apply
+            </summary>
+        </member>
+        <member name="M:StructureMap.Graph.AssemblyScanner.WithDefaultConventions">
+            <summary>
+            Adds the DefaultConventionScanner to the scanning operations.  I.e., a concrete
+            class named "Something" that implements "ISomething" will be automatically 
+            added to PluginType "ISomething"
+            </summary>
+        </member>
+        <member name="M:StructureMap.Graph.AssemblyScanner.ConnectImplementationsToTypesClosing(System.Type)">
+            <summary>
+            Scans for PluginType's and Concrete Types that close the given open generic type
+            </summary>
+            <example>
+            
+            </example>
+            <param name="openGenericType"></param>
+        </member>
+        <member name="M:StructureMap.Graph.AssemblyScanner.RegisterConcreteTypesAgainstTheFirstInterface">
+            <summary>
+            Automatically registers all concrete types without primitive arguments
+            against its first interface, if any
+            </summary>
+        </member>
+        <member name="M:StructureMap.Graph.AssemblyScanner.SingleImplementationsOfInterface">
+            <summary>
+            Directs the scanning to automatically register any type that is the single
+            implementation of an interface against that interface.
+            The filters apply
             </summary>
         </member>
         <member name="T:StructureMap.Interceptors.TypeInterceptor">
@@ -849,6 +886,27 @@
             <param name="action"></param>
             <returns></returns>
         </member>
+        <member name="M:StructureMap.Configuration.DSL.Expressions.CreatePluginFamilyExpression`1.ConditionallyUse(System.Action{StructureMap.Pipeline.ConditionalInstance{`0}.ConditionalInstanceExpression})">
+            <summary>
+            Conditional binding of instances
+            </summary>
+            <param name="configuration"></param>
+            <returns></returns>
+        </member>
+        <member name="M:StructureMap.Configuration.DSL.Expressions.CreatePluginFamilyExpression`1.UseSpecial(System.Action{StructureMap.Configuration.DSL.Expressions.IInstanceExpression{`0}})">
+            <summary>
+            Access to all of the uncommon Instance types
+            </summary>
+            <param name="configure"></param>
+            <returns></returns>
+        </member>
+        <member name="M:StructureMap.Configuration.DSL.Expressions.CreatePluginFamilyExpression`1.AddSpecial(System.Action{StructureMap.Configuration.DSL.Expressions.IInstanceExpression{`0}})">
+            <summary>
+            Access to all of the uncommon Instance types
+            </summary>
+            <param name="configure"></param>
+            <returns></returns>
+        </member>
         <member name="M:StructureMap.Configuration.DSL.Expressions.CreatePluginFamilyExpression`1.TheDefaultIsConcreteType``1">
             <summary>
             Convenience method that sets the default concrete type of the PluginType.  Type T
@@ -860,6 +918,13 @@
         </member>
         <!-- Badly formed XML comment ignored for member "M:StructureMap.Configuration.DSL.Expressions.CreatePluginFamilyExpression`1.Use``1" -->
         <member name="M:StructureMap.Configuration.DSL.Expressions.CreatePluginFamilyExpression`1.Use(System.Func{StructureMap.IContext,`0})">
+            <summary>
+            Shorthand to say TheDefault.Is.ConstructedBy(func)
+            </summary>
+            <param name="func"></param>
+            <returns></returns>
+        </member>
+        <member name="M:StructureMap.Configuration.DSL.Expressions.CreatePluginFamilyExpression`1.Use(System.Func{`0})">
             <summary>
             Shorthand to say TheDefault.Is.ConstructedBy(func)
             </summary>
@@ -907,6 +972,14 @@
             <param name="handler"></param>
             <returns></returns>
         </member>
+        <member name="M:StructureMap.Configuration.DSL.Expressions.CreatePluginFamilyExpression`1.OnCreationForAll(System.Action{`0})">
+            <summary>
+            Register an Action to run against any object of this PluginType immediately after
+            it is created, but before the new object is passed back to the caller
+            </summary>
+            <param name="handler"></param>
+            <returns></returns>
+        </member>
         <member name="M:StructureMap.Configuration.DSL.Expressions.CreatePluginFamilyExpression`1.InterceptWith(StructureMap.Interceptors.InstanceInterceptor)">
             <summary>
             Adds an Interceptor to only this PluginType
@@ -915,6 +988,14 @@
             <returns></returns>
         </member>
         <member name="M:StructureMap.Configuration.DSL.Expressions.CreatePluginFamilyExpression`1.OnCreation(System.Action{StructureMap.IContext,`0})">
+            <summary>
+            Register an Action to run against any object of this PluginType immediately after
+            it is created, but before the new object is passed back to the caller
+            </summary>
+            <param name="handler"></param>
+            <returns></returns>
+        </member>
+        <member name="M:StructureMap.Configuration.DSL.Expressions.CreatePluginFamilyExpression`1.OnCreationForAll(System.Action{StructureMap.IContext,`0})">
             <summary>
             Register an Action to run against any object of this PluginType immediately after
             it is created, but before the new object is passed back to the caller
@@ -932,7 +1013,27 @@
             <param name="handler"></param>
             <returns></returns>
         </member>
+        <member name="M:StructureMap.Configuration.DSL.Expressions.CreatePluginFamilyExpression`1.EnrichAllWith(StructureMap.Interceptors.EnrichmentHandler{`0})">
+            <summary>
+            Register a Func to run against any object of this PluginType immediately after it is created,
+            but before the new object is passed back to the caller.  Unlike <see cref="M:StructureMap.Configuration.DSL.Expressions.CreatePluginFamilyExpression`1.OnCreation(System.Action{`0})">OnCreation()</see>,
+            EnrichWith() gives the the ability to return a different object.  Use this method for runtime AOP
+            scenarios or to return a decorator.
+            </summary>
+            <param name="handler"></param>
+            <returns></returns>
+        </member>
         <member name="M:StructureMap.Configuration.DSL.Expressions.CreatePluginFamilyExpression`1.EnrichWith(StructureMap.Interceptors.ContextEnrichmentHandler{`0})">
+            <summary>
+            Register a Func to run against any object of this PluginType immediately after it is created,
+            but before the new object is passed back to the caller.  Unlike <see cref="M:StructureMap.Configuration.DSL.Expressions.CreatePluginFamilyExpression`1.OnCreation(System.Action{StructureMap.IContext,`0})">OnCreation()</see>,
+            EnrichWith() gives the the ability to return a different object.  Use this method for runtime AOP
+            scenarios or to return a decorator.
+            </summary>
+            <param name="handler"></param>
+            <returns></returns>
+        </member>
+        <member name="M:StructureMap.Configuration.DSL.Expressions.CreatePluginFamilyExpression`1.EnrichAllWith(StructureMap.Interceptors.ContextEnrichmentHandler{`0})">
             <summary>
             Register a Func to run against any object of this PluginType immediately after it is created,
             but before the new object is passed back to the caller.  Unlike <see cref="M:StructureMap.Configuration.DSL.Expressions.CreatePluginFamilyExpression`1.OnCreation(System.Action{StructureMap.IContext,`0})">OnCreation()</see>,
@@ -1117,6 +1218,12 @@
             <param name="t"></param>
             <returns></returns>
         </member>
+        <member name="M:StructureMap.Configuration.DSL.Expressions.ProfileExpression.InstanceDefaultExpression`1.UseSpecial(System.Action{StructureMap.Configuration.DSL.Expressions.IInstanceExpression{`0}})">
+            <summary>
+            Access to the uncommon types of Instance
+            </summary>
+            <param name="configure"></param>
+        </member>
         <member name="M:StructureMap.Configuration.DSL.Expressions.ProfileExpression.InstanceDefaultExpression`1.UseConcreteType``1">
             <summary>
             For this Profile, use the Concrete Type
@@ -1201,7 +1308,7 @@
             <summary>
             This method is a shortcut for specifying the default constructor and 
             setter arguments for a ConcreteType.  ForConcreteType is shorthand for:
-            ForRequestedType[T]().TheDefault.Is.OfConcreteType[T].**************
+            ForRequestedType[T]().Use[T].**************
             when the PluginType and ConcreteType are the same Type
             </summary>
             <typeparam name="T"></typeparam>
@@ -2430,6 +2537,11 @@
             Restarts ObjectFactory and blows away all Singleton's and cached instances.  Use with caution.
             </summary>
         </member>
+        <member name="M:StructureMap.ObjectFactory.ReleaseAndDisposeAllHttpScopedObjects">
+            <summary>
+            Remove and dispose all objects scoped by HttpContext.  Call this method at the *end* of an Http request to clean up resources
+            </summary>
+        </member>
         <member name="M:StructureMap.ObjectFactory.Inject(System.Type,System.Object)">
             <summary>
             Injects the given object into a Container as the default for the designated
@@ -2998,6 +3110,16 @@
             Base class for creating an object instance from an InstanceMemento.  SubClasses are
             emitted for each concrete Plugin with constructor parameters.
             </summary>
+        </member>
+        <member name="T:StructureMap.Graph.ConfigurableRegistrationConvention">
+            <summary>
+            Allows built-in registration conventions to be configurable through the assembly scanning DSL
+            </summary>
+            <remarks>
+            Intended for StructureMap internal use only. 
+            Custom registration convention instances can be directly configured 
+            before being passed to IAssemblyScanner.With(IRegistrationConvention).
+            </remarks>
         </member>
         <member name="M:StructureMap.Query.IPluginTypeConfiguration.HasImplementations">
             <summary>

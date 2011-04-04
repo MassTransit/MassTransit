@@ -47,7 +47,7 @@ namespace MassTransit.Infrastructure.Saga
 			using (ISession session = _sessionFactory.OpenSession())
 			using (ITransaction transaction = session.BeginTransaction())
 			{
-				T[] existingSagas = session.Linq<T>()
+				T[] existingSagas = session.Query<T>()
 					.Where(filter).ToArray();
 
 				bool foundExistingSagas = SendMessageToExistingSagas(existingSagas, policy, consumerAction, message, session.Delete);
@@ -72,7 +72,7 @@ namespace MassTransit.Infrastructure.Saga
 			using (ISession session = _sessionFactory.OpenSession())
 			using (ITransaction transaction = session.BeginTransaction())
 			{
-				List<T> result = session.Linq<T>().Where(filter).ToList();
+				List<T> result = session.Query<T>().Where(filter).ToList();
 
 				transaction.Commit();
 
