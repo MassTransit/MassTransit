@@ -1,2 +1,2 @@
-Stact.*
+MassTransit.*
 log4net.dll
