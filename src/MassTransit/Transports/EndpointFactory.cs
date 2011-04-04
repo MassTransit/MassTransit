@@ -30,21 +30,21 @@ namespace MassTransit.Transports
 
         public IEndpoint BuildEndpoint(Uri uri, Action<IEndpointConfigurator> configurator)
         {
-            foreach (var fac in _factories)
+            foreach (var factory in _factories)
             {
                 try
                 {
 
-                    if (uri.Scheme.ToLowerInvariant() == fac.Scheme)
+                    if (uri.Scheme.ToLowerInvariant() == factory.Scheme)
                     {
                         var epc = new EndpointConfigurator();
                         epc.SetUri(uri);
                         var s = epc.New(configurator);
 
-                        var transport = fac.BuildLoopback(s.Normal);
-                        var errorTransport = fac.BuildLoopback(s.Error);
+                        var transport = factory.BuildLoopback(s.Normal);
+                        var errorTransport = factory.BuildLoopback(s.Error);
 
-                        var endpoint = new Endpoint(new EndpointAddress(uri), epc.GetSerializer(), transport,
+                        var endpoint = new Endpoint(transport.Address, epc.GetSerializer(), transport,
                                                     errorTransport);
 
                         return endpoint;
