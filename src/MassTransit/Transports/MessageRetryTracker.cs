@@ -29,7 +29,7 @@ namespace MassTransit.Transports
 		public bool IsRetryLimitExceeded(string id)
 		{
 			int retryCount = 0;
-			if (_messages.ReadLock(x => x.TryGetValue(id, out retryCount)))
+			if (!_messages.ReadLock(x => x.TryGetValue(id, out retryCount)))
 				return false;
 
 			return retryCount >= _retryLimit;

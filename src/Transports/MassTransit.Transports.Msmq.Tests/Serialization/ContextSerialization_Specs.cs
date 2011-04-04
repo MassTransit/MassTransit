@@ -1,5 +1,5 @@
-// Copyright 2007-2010 The Apache Software Foundation.
-// 
+// Copyright 2007-2011 The Apache Software Foundation.
+//  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
 // License at 
@@ -19,7 +19,6 @@ namespace MassTransit.Transports.Msmq.Tests.Serialization
 	using MassTransit.Tests.Messages;
 	using NUnit.Framework;
 	using TestFixtures;
-	using TestFramework;
 
 	[TestFixture, Explicit]
 	public class When_sending_a_message_using_the_specified_serializer<TSerializer> :
@@ -34,16 +33,16 @@ namespace MassTransit.Transports.Msmq.Tests.Serialization
 		[Test]
 		public void The_destination_address_should_be_properly_set_on_the_message_envelope()
 		{
-			PingMessage ping = new PingMessage();
+			var ping = new PingMessage();
 
-			FutureMessage<PingMessage> received = new FutureMessage<PingMessage>();
+			var received = new FutureMessage<PingMessage>();
 
 			RemoteBus.Subscribe<PingMessage>(message =>
-			{
-				Assert.AreEqual(RemoteBus.Endpoint.Uri, CurrentMessage.Headers.DestinationAddress);
+				{
+					Assert.AreEqual(RemoteBus.Endpoint.Uri, CurrentMessage.Headers.DestinationAddress);
 
-				received.Set(message);
-			});
+					received.Set(message);
+				});
 
 			LocalBus.Publish(ping);
 
@@ -53,16 +52,16 @@ namespace MassTransit.Transports.Msmq.Tests.Serialization
 		[Test]
 		public void The_fault_address_should_be_properly_set_on_the_message_envelope()
 		{
-			PingMessage ping = new PingMessage();
+			var ping = new PingMessage();
 
-			FutureMessage<PingMessage> received = new FutureMessage<PingMessage>();
+			var received = new FutureMessage<PingMessage>();
 
 			RemoteBus.Subscribe<PingMessage>(message =>
-			{
-				Assert.AreEqual(LocalBus.Endpoint.Uri, CurrentMessage.Headers.FaultAddress);
+				{
+					Assert.AreEqual(LocalBus.Endpoint.Uri, CurrentMessage.Headers.FaultAddress);
 
-				received.Set(message);
-			});
+					received.Set(message);
+				});
 
 //			LocalBus.ShouldHaveSubscriptionFor<PingMessage>();
 
@@ -74,16 +73,16 @@ namespace MassTransit.Transports.Msmq.Tests.Serialization
 		[Test]
 		public void The_message_type_should_be_properly_set_on_the_message_envelope()
 		{
-			PingMessage ping = new PingMessage();
+			var ping = new PingMessage();
 
-			FutureMessage<PingMessage> received = new FutureMessage<PingMessage>();
+			var received = new FutureMessage<PingMessage>();
 
 			RemoteBus.Subscribe<PingMessage>(message =>
-			{
-				Assert.AreEqual(typeof(PingMessage).ToMessageName(), CurrentMessage.Headers.MessageType);
+				{
+					Assert.AreEqual(typeof (PingMessage).ToMessageName(), CurrentMessage.Headers.MessageType);
 
-				received.Set(message);
-			});
+					received.Set(message);
+				});
 
 			LocalBus.Publish(ping);
 
@@ -93,16 +92,16 @@ namespace MassTransit.Transports.Msmq.Tests.Serialization
 		[Test]
 		public void The_response_address_should_be_properly_set_on_the_message_envelope()
 		{
-			PingMessage ping = new PingMessage();
+			var ping = new PingMessage();
 
-			FutureMessage<PingMessage> received = new FutureMessage<PingMessage>();
+			var received = new FutureMessage<PingMessage>();
 
 			RemoteBus.Subscribe<PingMessage>(message =>
-			{
-				Assert.AreEqual(LocalBus.Endpoint.Uri, CurrentMessage.Headers.ResponseAddress);
+				{
+					Assert.AreEqual(LocalBus.Endpoint.Uri, CurrentMessage.Headers.ResponseAddress);
 
-				received.Set(message);
-			});
+					received.Set(message);
+				});
 
 			LocalBus.Publish(ping, context => context.SendResponseTo(LocalBus.Endpoint.Uri));
 
@@ -112,17 +111,17 @@ namespace MassTransit.Transports.Msmq.Tests.Serialization
 		[Test]
 		public void The_retry_count_should_be_properly_set_on_the_message_envelope()
 		{
-			PingMessage ping = new PingMessage();
+			var ping = new PingMessage();
 
-			FutureMessage<PingMessage> received = new FutureMessage<PingMessage>();
+			var received = new FutureMessage<PingMessage>();
 
-			var retryCount = 69;
+			int retryCount = 69;
 			RemoteBus.Subscribe<PingMessage>(message =>
-			{
-				Assert.AreEqual(retryCount, CurrentMessage.Headers.RetryCount);
+				{
+					Assert.AreEqual(retryCount, CurrentMessage.Headers.RetryCount);
 
-				received.Set(message);
-			});
+					received.Set(message);
+				});
 
 			LocalBus.Publish(ping, context => context.SetRetryCount(retryCount));
 
@@ -132,16 +131,16 @@ namespace MassTransit.Transports.Msmq.Tests.Serialization
 		[Test]
 		public void The_source_address_should_be_properly_set_on_the_message_envelope()
 		{
-			PingMessage ping = new PingMessage();
+			var ping = new PingMessage();
 
-			FutureMessage<PingMessage> received = new FutureMessage<PingMessage>();
+			var received = new FutureMessage<PingMessage>();
 
 			RemoteBus.Subscribe<PingMessage>(message =>
-			{
-				Assert.AreEqual(LocalBus.Endpoint.Uri, CurrentMessage.Headers.SourceAddress);
+				{
+					Assert.AreEqual(LocalBus.Endpoint.Uri, CurrentMessage.Headers.SourceAddress);
 
-				received.Set(message);
-			});
+					received.Set(message);
+				});
 
 			LocalBus.Publish(ping);
 
@@ -156,13 +155,13 @@ namespace MassTransit.Transports.Msmq.Tests.Serialization
 	}
 
 	[TestFixture, Category("Integration")]
-	public class For_the_XML_message_serializer :
+	public class For_the_DotNetXml_message_serializer :
 		When_sending_a_message_using_the_specified_serializer<DotNotXmlMessageSerializer>
 	{
 	}
 
 	[TestFixture, Category("Integration")]
-	public class For_the_custom_xml_message_serializer :
+	public class For_the_xml_message_serializer :
 		When_sending_a_message_using_the_specified_serializer<XmlMessageSerializer>
 	{
 	}

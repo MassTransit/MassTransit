@@ -40,7 +40,7 @@ namespace MassTransit.Tests
 			_endpointResolver = EndpointResolverConfigurator.New(x =>
 			{
 				x.SetObjectBuilder(_builder);
-				x.RegisterTransport<LoopbackTransportFactory>();
+				x.AddTransportFactory<LoopbackTransportFactory>();
 			});
 
             _mockEndpoint = _endpointResolver.GetEndpoint(queueUri);

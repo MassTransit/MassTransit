@@ -60,7 +60,8 @@ namespace MassTransit.Transports.Msmq
 		protected bool EnumerateQueue(Func<IReceiveContext, Action<IReceiveContext>> receiver,
 		                              TimeSpan timeout)
 		{
-			if (_disposed) throw NewDisposedException();
+			if (_disposed) 
+				throw new ObjectDisposedException("The transport has been disposed: '{0}'".FormatWith(Address));
 
 			bool received = false;
 
@@ -133,27 +134,23 @@ namespace MassTransit.Transports.Msmq
 		{
 			if (_queue != null)
 				return;
+
 			_queue = new MessageQueue(_address.FormatName, QueueAccessMode.Receive);
 		}
 
-		protected void Disconnect()
+		private void Disconnect()
 		{
-			if (_queue != null)
-			{
-				_queue.Dispose();
-				_queue = null;
-			}
+			if (_queue == null) 
+				return;
+
+			_queue.Dispose();
+			_queue = null;
 		}
 
-		protected void Reconnect()
+		private void Reconnect()
 		{
 			Disconnect();
 			Connect();
-		}
-
-		protected ObjectDisposedException NewDisposedException()
-		{
-			return new ObjectDisposedException("The transport has already been disposed: '{0}'".FormatWith(Address));
 		}
 
 		protected void HandleInboundMessageQueueException(MessageQueueException ex, TimeSpan timeout)
@@ -206,9 +203,9 @@ namespace MassTransit.Transports.Msmq
 							"The message queue handle is stale or no longer valid due to a restart of the message queuing service: " +
 							_address.FormatName, ex);
 
-					Reconnect();
 
 					Thread.Sleep(timeout);
+					Reconnect();
 					break;
 
 				default:
@@ -218,7 +215,7 @@ namespace MassTransit.Transports.Msmq
 			}
 		}
 
-		protected virtual void Dispose(bool disposing)
+		private void Dispose(bool disposing)
 		{
 			if (_disposed) return;
 			if (disposing)

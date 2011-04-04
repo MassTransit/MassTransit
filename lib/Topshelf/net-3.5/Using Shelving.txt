@@ -1,0 +1,27 @@
+Run `Topshelf.Host install` in order to install the service host.
+
+It will look in the directory it is installed in, for the directory called Services. 
+Every folder in Services gets launched as a service under the service host.
+
+(this file is copied from the /doc folder)
+
+If you want to see the messages in the Windows log and have installed the host as a service, you can add this to the log4net.config file.
+
+<appender name="EventLogAppender" type="log4net.Appender.EventLogAppender" >
+	<applicationName value="Topshelf.Host" />
+	<layout type="log4net.Layout.PatternLayout">
+		<conversionPattern value="%date [%thread] %-5level %logger - %message%newline" />
+	</layout>
+</appender>
+
+You can then make the appender configuration something like this:
+<root>
+	<level value="ALL" />
+	<appender-ref ref="LogFileAppender" />
+	<appender-ref ref="ColoredConsoleAppender" />
+	<appender-ref ref="EventLogAppender" />
+</root>
+
+<logger name="Topshelf">
+	<level value="INFO" /> 
+</logger>

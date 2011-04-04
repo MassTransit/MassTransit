@@ -36,7 +36,7 @@ namespace MassTransit.Tests.TextFixtures
 			EndpointResolver = EndpointResolverConfigurator.New(x =>
 				{
 					x.SetObjectBuilder(ObjectBuilder);
-					x.RegisterTransport<TTransportFactory>();
+					x.AddTransportFactory<TTransportFactory>();
 					x.SetDefaultSerializer<XmlMessageSerializer>();
 
 					AdditionalEndpointFactoryConfiguration(x);

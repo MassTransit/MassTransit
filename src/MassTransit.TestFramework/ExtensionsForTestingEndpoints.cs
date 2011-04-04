@@ -13,7 +13,6 @@
 namespace MassTransit.TestFramework
 {
 	using System;
-	using Magnum;
 	using Magnum.TestFramework;
 	using MassTransit.Transports;
 	using NUnit.Framework;
@@ -31,10 +30,10 @@ namespace MassTransit.TestFramework
 					message.ShouldNotBeNull();
 					message.ShouldBeAnInstanceOf<IReceiveContext>();
 
-					var messageObj = serializer.Deserialize(message.Body);
+					object messageObj = serializer.Deserialize(message.Body);
 
 					var tm = messageObj as TMessage;
-					if(tm != null)
+					if (tm != null)
 						future.Complete(tm);
 
 					return null;

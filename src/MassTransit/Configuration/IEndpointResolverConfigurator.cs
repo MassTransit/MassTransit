@@ -1,4 +1,4 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2011 The Apache Software Foundation.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -16,7 +16,7 @@ namespace MassTransit.Configuration
 	using Serialization;
 	using Transports;
 
-    /// <summary>
+	/// <summary>
 	/// Allows for the configuration of the EndpointFactory through the use of an EndpointFactoryConfigurator
 	/// </summary>
 	public interface IEndpointResolverConfigurator
@@ -31,7 +31,8 @@ namespace MassTransit.Configuration
 		/// Sets the default serializer for the endpoints (current default is BinaryMessageSerializer)
 		/// </summary>
 		/// <typeparam name="TSerializer">The class to use for serialization</typeparam>
-		void SetDefaultSerializer<TSerializer>() where TSerializer : IMessageSerializer;
+		void SetDefaultSerializer<TSerializer>()
+			where TSerializer : IMessageSerializer;
 
 		/// <summary>
 		/// Sets the default serializer for the endpoints (current default is BinaryMessageSerializer)
@@ -41,14 +42,15 @@ namespace MassTransit.Configuration
 		/// <summary>
 		/// Register a transport so that it can be used to build endpoints for supported Uris
 		/// </summary>
-		/// <typeparam name="T">The class supporting the ConfigureEndpoint method</typeparam>
-		void RegisterTransport<TTransportFactory>() where TTransportFactory : ITransportFactory;
+		/// <typeparam name="TTransportFactory">The class supporting the ConfigureEndpoint method</typeparam>
+		void AddTransportFactory<TTransportFactory>()
+			where TTransportFactory : ITransportFactory;
 
 		/// <summary>
 		/// Register a transport so that it can be used to build endpoints for supported Uris
 		/// </summary>
-		/// <param name="transportType">The type supporting the ConfigureEndpoint method</param>
-		void RegisterTransport(Type transportFactoryType);
+		/// <param name="transportFactoryType">The type supporting the ConfigureEndpoint method</param>
+		void AddTransportFactory(Type transportFactoryType);
 
 		/// <summary>
 		/// Specifies a configuration action to perform on a particular endpoint when it is created.

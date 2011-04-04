@@ -17,6 +17,7 @@ namespace Starbucks.Customer
 	using Castle.MicroKernel.Registration;
 	using Castle.Windsor;
 	using MassTransit;
+	using MassTransit.Transports;
 	using MassTransit.Transports.Msmq;
 	using MassTransit.WindsorIntegration;
 
@@ -28,7 +29,7 @@ namespace Starbucks.Customer
 		[STAThread]
 		private static void Main(string[] args)
 		{
-			MsmqEndpointConfigurator.Defaults(x => { x.CreateMissingQueues = true; });
+			EndpointConfigurator.Defaults(x => { x.CreateMissingQueues = true; });
 
 			var c = BootstrapContainer();
 

@@ -16,6 +16,7 @@ namespace MassTransit.Tests.Examples
 	using Magnum.Extensions;
 	using Magnum.TestFramework;
 	using NUnit.Framework;
+	using TestFramework;
 	using TestFramework.Examples.Messages;
 
 	[Scenario]

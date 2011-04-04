@@ -34,7 +34,7 @@ namespace MassTransit.Transports
 
         public override void Send(Action<ISendContext> cxt)
         {
-            EnsureNotDisposed();
+            GuardAgainstDisposed();
 
             using (var bodyStream = new MemoryStream())
             {
@@ -56,7 +56,7 @@ namespace MassTransit.Transports
 
         public override void Receive(Func<IReceiveContext, Action<IReceiveContext>> callback, TimeSpan timeout)
         {
-            EnsureNotDisposed();
+            GuardAgainstDisposed();
 
             var endPoint = new IPEndPoint(IPAddress.Any, Address.Uri.Port);
 
@@ -145,11 +145,6 @@ namespace MassTransit.Transports
         {
             StopSender();
             StopReceiver();
-        }
-
-        private ObjectDisposedException NewDisposedException()
-        {
-            return new ObjectDisposedException("The transport has already been disposed: " + Address);
         }
     }
 }

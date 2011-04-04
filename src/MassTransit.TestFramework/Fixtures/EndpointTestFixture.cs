@@ -1,4 +1,4 @@
-// Copyright 2007-2010 The Apache Software Foundation.
+// Copyright 2007-2011 The Apache Software Foundation.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,18 +12,18 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.TestFramework.Transports
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using Fixtures;
-    using MassTransit.Configuration;
-    using Magnum.Extensions;
-    using NUnit.Framework;
-    using Rhino.Mocks;
-    using MassTransit.Serialization;
-    using MassTransit.Transports;
+	using System;
+	using System.Collections.Generic;
+	using System.Linq;
+	using Configuration;
+	using Fixtures;
+	using Magnum.Extensions;
+	using MassTransit.Transports;
+	using NUnit.Framework;
+	using Rhino.Mocks;
+	using Serialization;
 
-    [TestFixture]
+	[TestFixture]
 	public class EndpointTestFixture<TTransportFactory> :
 		AbstractTestFixture
 		where TTransportFactory : ITransportFactory
@@ -69,7 +69,7 @@ namespace MassTransit.TestFramework.Transports
 			EndpointResolver = EndpointResolverConfigurator.New(x =>
 				{
 					x.SetObjectBuilder(ObjectBuilder);
-					x.RegisterTransport<TTransportFactory>();
+					x.AddTransportFactory<TTransportFactory>();
 					x.SetDefaultSerializer<XmlMessageSerializer>();
 
 					ConfigureEndpointFactory(x);
@@ -86,7 +86,7 @@ namespace MassTransit.TestFramework.Transports
 		{
 			ServiceBusConfigurator.Defaults(x =>
 				{
-                    x.SetEndpointFactory(EndpointResolver);
+					x.SetEndpointFactory(EndpointResolver);
 					x.SetObjectBuilder(ObjectBuilder);
 					x.SetReceiveTimeout(50.Milliseconds());
 					x.SetConcurrentConsumerLimit(Environment.ProcessorCount*2);

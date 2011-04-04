@@ -14,9 +14,7 @@ namespace MassTransit.Transports.Msmq
 {
 	using System;
 	using System.Messaging;
-	using System.Threading;
 	using log4net;
-	using Magnum.Extensions;
 
 	public abstract class OutboundMsmqTransport :
 		IOutboundTransport
@@ -24,7 +22,6 @@ namespace MassTransit.Transports.Msmq
 		private static readonly ILog _log = LogManager.GetLogger(typeof (OutboundMsmqTransport));
 		private static readonly ILog _messageLog = LogManager.GetLogger("MassTransit.Msmq.MessageLog");
 		private readonly IMsmqEndpointAddress _address;
-		private bool _disposed;
 
 		protected OutboundMsmqTransport(IMsmqEndpointAddress address)
 		{
@@ -39,8 +36,6 @@ namespace MassTransit.Transports.Msmq
 
 		public void Send(Action<ISendContext> callback)
 		{
-			if (_disposed) throw NewDisposedException();
-
 			using (var context = new MsmqSendContext())
 			{
 				callback(context);
@@ -57,15 +52,13 @@ namespace MassTransit.Transports.Msmq
 				}
 				catch (MessageQueueException ex)
 				{
-					HandleOutboundMessageQueueException(ex, 2.Seconds());
+					HandleOutboundMessageQueueException(ex);
 				}
 			}
 		}
 
 		public void Dispose()
 		{
-			Dispose(true);
-			GC.SuppressFinalize(this);
 		}
 
 		protected virtual void SendMessage(MessageQueue queue, Message message)
@@ -73,12 +66,7 @@ namespace MassTransit.Transports.Msmq
 			queue.Send(message, MessageQueueTransactionType.None);
 		}
 
-		protected ObjectDisposedException NewDisposedException()
-		{
-			return new ObjectDisposedException("The transport has already been disposed: '{0}'".FormatWith(Address));
-		}
-
-		protected void HandleOutboundMessageQueueException(MessageQueueException ex, TimeSpan timeout)
+		private void HandleOutboundMessageQueueException(MessageQueueException ex)
 		{
 			switch (ex.MessageQueueErrorCode)
 			{
@@ -88,8 +76,6 @@ namespace MassTransit.Transports.Msmq
 				case MessageQueueErrorCode.ServiceNotAvailable:
 					if (_log.IsErrorEnabled)
 						_log.Error("The message queuing service is not available, pausing for timeout period", ex);
-
-					Thread.Sleep(timeout);
 					break;
 
 				case MessageQueueErrorCode.QueueNotAvailable:
@@ -97,8 +83,6 @@ namespace MassTransit.Transports.Msmq
 				case MessageQueueErrorCode.QueueDeleted:
 					if (_log.IsErrorEnabled)
 						_log.Error("The message queue was not available: " + _address.FormatName, ex);
-
-					Thread.Sleep(timeout);
 					break;
 
 				case MessageQueueErrorCode.QueueNotFound:
@@ -106,16 +90,6 @@ namespace MassTransit.Transports.Msmq
 				case MessageQueueErrorCode.MachineNotFound:
 					if (_log.IsErrorEnabled)
 						_log.Error("The message queue was not found or is improperly named: " + _address.FormatName, ex);
-
-					Thread.Sleep(timeout);
-					break;
-
-				case MessageQueueErrorCode.MessageAlreadyReceived:
-					// we are competing with another consumer, no reason to report an error since
-					// the message has already been handled.
-					if (_log.IsDebugEnabled)
-						_log.Debug(
-							"The message was removed from the queue before it could be received. This could be the result of another service reading from the same queue.");
 					break;
 
 				case MessageQueueErrorCode.InvalidHandle:
@@ -124,9 +98,6 @@ namespace MassTransit.Transports.Msmq
 						_log.Error(
 							"The message queue handle is stale or no longer valid due to a restart of the message queuing service: " +
 							_address.FormatName, ex);
-
-
-					Thread.Sleep(timeout);
 					break;
 
 				default:
@@ -134,21 +105,6 @@ namespace MassTransit.Transports.Msmq
 						_log.Error("There was a problem communicating with the message queue: " + _address.FormatName, ex);
 					break;
 			}
-		}
-
-		protected virtual void Dispose(bool disposing)
-		{
-			if (_disposed) return;
-			if (disposing)
-			{
-			}
-
-			_disposed = true;
-		}
-
-		~OutboundMsmqTransport()
-		{
-			Dispose(false);
 		}
 	}
 }

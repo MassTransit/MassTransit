@@ -16,9 +16,10 @@ namespace MassTransit.Services.Subscriptions.Server
 	using System.Linq;
 	using Exceptions;
 	using log4net;
-	using Magnum.Fibers;
+	using Magnum.Extensions;
 	using Messages;
 	using Saga;
+	using Stact;
 	using Subscriptions.Messages;
 
 	public class SubscriptionService :
@@ -35,7 +36,7 @@ namespace MassTransit.Services.Subscriptions.Server
 		private IServiceBus _bus;
 		private ISubscriptionRepository _repository;
 		private UnsubscribeAction _unsubscribeToken = () => false;
-		private readonly Fiber _queue = new ThreadPoolFiber();
+		private readonly Fiber _fiber = new PoolFiber();
 
 		public SubscriptionService(IServiceBus bus,
 		                           ISubscriptionRepository subscriptionRepository,
@@ -57,7 +58,7 @@ namespace MassTransit.Services.Subscriptions.Server
 
 			var add = new AddSubscription(message.Subscription);
 
-			_queue.Add(() => SendToClients(add));
+			_fiber.Add(() => SendToClients(add));
 		}
 
 		public void Consume(SubscriptionClientAdded message)
@@ -65,7 +66,7 @@ namespace MassTransit.Services.Subscriptions.Server
 			if (_log.IsInfoEnabled)
 				_log.InfoFormat("Subscription Client Added: {0} [{1}]", message.ControlUri, message.ClientId);
 
-			_queue.Add(() => SendCacheUpdateToClient(message.ControlUri));
+			_fiber.Add(() => SendCacheUpdateToClient(message.ControlUri));
 		}
 
 		public void Consume(SubscriptionClientRemoved message)
@@ -81,13 +82,15 @@ namespace MassTransit.Services.Subscriptions.Server
 
 			var remove = new RemoveSubscription(message.Subscription);
 
-			_queue.Add(()=>SendToClients(remove));
+			_fiber.Add(()=>SendToClients(remove));
 		}
 
 		public void Dispose()
 		{
 			try
 			{
+				_fiber.Shutdown(60.Seconds());
+
 				_bus.Dispose();
 				_bus = null;
 

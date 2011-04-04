@@ -64,9 +64,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\lib\log4net.dll</HintPath>
     </Reference>
-    <Reference Include="Magnum, Version=1.0.192.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Magnum, Version=1.0.0.225, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\lib\Magnum\Magnum.dll</HintPath>
+      <HintPath>..\..\..\..\lib\Magnum\net-3.5\Magnum.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
@@ -75,9 +75,9 @@
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
-    <Reference Include="Topshelf, Version=0.8.0.78, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Topshelf, Version=1.0.0.141, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\lib\Topshelf\Topshelf.dll</HintPath>
+      <HintPath>..\..\..\..\lib\Topshelf\net-3.5\Topshelf.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>

@@ -1,0 +1,2833 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Apache.NMS</name>
+    </assembly>
+    <members>
+        <member name="T:Apache.NMS.Policies.RedeliveryPolicy">
+            <summary>
+            A policy used to customize exactly how you want the redelivery to work.
+            </summary>
+        </member>
+        <member name="M:Apache.NMS.IRedeliveryPolicy.RedeliveryDelay(System.Int32)">
+            <summary>
+            The time in milliseconds to delay a redelivery
+            </summary>
+            <param name="redeliveredCounter">The redelivered counter.</param>
+            <returns></returns>
+        </member>
+        <member name="P:Apache.NMS.IRedeliveryPolicy.CollisionAvoidancePercent">
+            <summary>
+            Gets or sets the collision avoidance percent.  This causes the redelivery delay
+            to be adjusted in order to avoid possible collision when messages are redelivered
+            to concurrent consumers.
+            </summary>
+            <value>The collision avoidance factor.</value>
+        </member>
+        <member name="P:Apache.NMS.IRedeliveryPolicy.UseCollisionAvoidance">
+            <summary>
+            Gets or sets a value indicating whether to [use collision avoidance].
+            </summary>
+            <value>
+                <c>true</c> if [use collision avoidance]; otherwise, <c>false</c>.
+            </value>
+        </member>
+        <member name="P:Apache.NMS.IRedeliveryPolicy.InitialRedeliveryDelay">
+            <summary>
+            The time in milliseconds to initially delay a redelivery
+            </summary>
+            <value>The initial redelivery delay.</value>
+        </member>
+        <member name="P:Apache.NMS.IRedeliveryPolicy.MaximumRedeliveries">
+            <summary>
+            Gets or sets the maximum redeliveries.  A value less than zero indicates
+            that there is no maximum and the NMS provider should retry forever.
+            </summary>
+            <value>The maximum redeliveries.</value>
+        </member>
+        <member name="P:Apache.NMS.IRedeliveryPolicy.UseExponentialBackOff">
+            <summary>
+            Gets or sets a value indicating whether [use exponential back off].
+            </summary>
+            <value>
+                <c>true</c> if [use exponential back off]; otherwise, <c>false</c>.
+            </value>
+        </member>
+        <member name="P:Apache.NMS.IRedeliveryPolicy.BackOffMultiplier">
+            <summary>
+            Gets or sets the back off multiplier.
+            </summary>
+            <value>The back off multiplier.</value>
+        </member>
+        <member name="M:Apache.NMS.Policies.RedeliveryPolicy.Clone">
+            <summery>
+            Clone this object and return a new instance that the caller now owns.
+            </summery>
+        </member>
+        <member name="P:Apache.NMS.Policies.RedeliveryPolicy.RandomNumberGenerator">
+            <summary>
+            Gets the random number generator.
+            </summary>
+            <value>The random number generator.</value>
+        </member>
+        <member name="P:Apache.NMS.Policies.RedeliveryPolicy.NextBool">
+            <summary>
+            Gets the next boolean
+            </summary>
+            <value><c>true</c> if [next bool]; otherwise, <c>false</c>.</value>
+        </member>
+        <member name="M:Apache.NMS.Util.NMSConvert.ToAcknowledgementMode(System.String)">
+            <summary>
+            Convert the acknowledgment mode string into AcknowledgementMode enum.
+            </summary>
+            <param name="ackText"></param>
+            <returns>Equivalent enum value.  If unknown string is encounted, it will default to AutoAcknowledge.</returns>
+        </member>
+        <member name="M:Apache.NMS.Util.NMSConvert.ToXmlMessage(Apache.NMS.IMessageProducer,System.Object)">
+            <summary>
+            Convert an object into a text message.  The object must be serializable to XML.
+            </summary>
+        </member>
+        <member name="M:Apache.NMS.Util.NMSConvert.ToXmlMessage(Apache.NMS.ISession,System.Object)">
+            <summary>
+            Convert an object into a text message.  The object must be serializable to XML.
+            </summary>
+        </member>
+        <member name="M:Apache.NMS.Util.NMSConvert.FromXmlMessage(Apache.NMS.IMessage)">
+            <summary>
+            Convert a text message into an object.  The object must be serializable from XML.
+            </summary>
+        </member>
+        <member name="M:Apache.NMS.Util.NMSConvert.SerializeObjToMessage(Apache.NMS.ITextMessage,System.Object)">
+            <summary>
+            Serialize the object as XML into the Text body of the message.
+            Set the NMSType to the full name of the object type.
+            </summary>
+            <param name="message"></param>
+            <param name="obj"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Apache.NMS.Util.NMSConvert.DeserializeObjFromMessage(Apache.NMS.IMessage)">
+            <summary>
+            Deserialize the object from the text message.  The object must be serializable from XML.
+            </summary>
+            <param name="message"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Apache.NMS.Util.NMSConvert.GetRuntimeType(System.String)">
+            <summary>
+            Get the runtime type for the class name.  This routine will search all loaded
+            assemblies in the current App Domain to find the type.
+            </summary>
+            <param name="typeName">Full name of the type.</param>
+            <returns>Type object if found, or null if not found.</returns>
+        </member>
+        <member name="M:Apache.NMS.Util.CountDownLatch.countDown">
+            <summary>
+            Decrement the count, releasing any waiting Threads when the count reaches Zero.
+            </summary>
+        </member>
+        <member name="M:Apache.NMS.Util.CountDownLatch.await">
+            <summary>
+            Causes the current Thread to wait for the count to reach zero, unless
+            the Thread is interrupted.
+            </summary>
+        </member>
+        <member name="M:Apache.NMS.Util.CountDownLatch.await(System.TimeSpan)">
+            <summary>
+            Causes the current thread to wait until the latch has counted down to zero, unless
+            the thread is interrupted, or the specified waiting time elapses.
+            </summary>
+        </member>
+        <member name="P:Apache.NMS.Util.CountDownLatch.Remaining">
+            <summary>
+            Gets the current count for this Latch.
+            </summary>
+        </member>
+        <member name="F:Apache.NMS.Util.DateUtils.windowsEpoch">
+            <summary>
+            The start of the Windows epoch
+            </summary>
+        </member>
+        <member name="F:Apache.NMS.Util.DateUtils.javaEpoch">
+            <summary>
+            The start of the Java epoch
+            </summary>
+        </member>
+        <member name="F:Apache.NMS.Util.DateUtils.epochDiff">
+            <summary>
+            The difference between the Windows epoch and the Java epoch
+            in milliseconds.
+            </summary>
+        </member>
+        <member name="T:Apache.NMS.Util.EndianBinaryReader">
+            <summary>
+            A BinaryWriter that switches the endian orientation of the read operations so that they
+            are compatible across platforms.
+            </summary>
+        </member>
+        <member name="M:Apache.NMS.Util.EndianBinaryReader.Read(System.Char[],System.Int32,System.Int32)">
+            <summary>
+            Method Read
+            </summary>
+            <returns>An int</returns>
+            <param name="buffer">A  char[]</param>
+            <param name="index">An int</param>
+            <param name="count">An int</param>
+        </member>
+        <member name="M:Apache.NMS.Util.EndianBinaryReader.ReadChars(System.Int32)">
+            <summary>
+            Method ReadChars
+            </summary>
+            <returns>A char[]</returns>
+            <param name="count">An int</param>
+        </member>
+        <member name="M:Apache.NMS.Util.EndianBinaryReader.ReadInt16">
+            <summary>
+            Method ReadInt16
+            </summary>
+            <returns>A short</returns>
+        </member>
+        <member name="M:Apache.NMS.Util.EndianBinaryReader.ReadChar">
+            <summary>
+            Method ReadChar
+            </summary>
+            <returns>A char</returns>
+        </member>
+        <member name="M:Apache.NMS.Util.EndianBinaryReader.ReadInt64">
+            <summary>
+            Method ReadInt64
+            </summary>
+            <returns>A long</returns>
+        </member>
+        <member name="M:Apache.NMS.Util.EndianBinaryReader.ReadUInt64">
+            <summary>
+            Method ReadUInt64
+            </summary>
+            <returns>An ulong</returns>
+        </member>
+        <member name="M:Apache.NMS.Util.EndianBinaryReader.ReadUInt32">
+            <summary>
+            Method ReadUInt32
+            </summary>
+            <returns>An uint</returns>
+        </member>
+        <member name="M:Apache.NMS.Util.EndianBinaryReader.ReadUInt16">
+            <summary>
+            Method ReadUInt16
+            </summary>
+            <returns>An ushort</returns>
+        </member>
+        <member name="M:Apache.NMS.Util.EndianBinaryReader.ReadInt32">
+            <summary>
+            Method ReadInt32
+            </summary>
+            <returns>An int</returns>
+        </member>
+        <member name="M:Apache.NMS.Util.EndianBinaryReader.ReadString">
+            <summary>
+            Method ReadString
+            </summary>
+            <returns>A string</returns>
+        </member>
+        <member name="M:Apache.NMS.Util.EndianBinaryReader.ReadString16">
+            <summary>
+            Method ReadString16, reads a String value encoded in the Java modified
+            UTF-8 format with a length index encoded as a 16bit unsigned short.
+            </summary>
+            <returns>A string</returns>
+        </member>
+        <member name="M:Apache.NMS.Util.EndianBinaryReader.ReadString32">
+            <summary>
+            Method ReadString32, reads a String value encoded in the Java modified 
+            UTF-8 format with a length index encoded as a singed integer value.
+            </summary>
+            <returns>A string</returns>
+        </member>
+        <member name="T:Apache.NMS.Util.EndianBinaryWriter">
+            <summary>
+            A BinaryWriter that switches the endian orientation of the write operations so that they
+            are compatible across platforms.
+            </summary>
+        </member>
+        <member name="M:Apache.NMS.Util.EndianBinaryWriter.Write(System.Int64)">
+            <summary>
+            Method Write
+            </summary>
+            <param name="value">A  long</param>
+        </member>
+        <member name="M:Apache.NMS.Util.EndianBinaryWriter.Write(System.UInt16)">
+            <summary>
+            Method Write
+            </summary>
+            <param name="value">An ushort</param>
+        </member>
+        <member name="M:Apache.NMS.Util.EndianBinaryWriter.Write(System.Int32)">
+            <summary>
+            Method Write
+            </summary>
+            <param name="value">An int</param>
+        </member>
+        <member name="M:Apache.NMS.Util.EndianBinaryWriter.Write(System.Char[],System.Int32,System.Int32)">
+            <summary>
+            Method Write
+            </summary>
+            <param name="chars">A  char[]</param>
+            <param name="index">An int</param>
+            <param name="count">An int</param>
+        </member>
+        <member name="M:Apache.NMS.Util.EndianBinaryWriter.Write(System.Char[])">
+            <summary>
+            Method Write
+            </summary>
+            <param name="chars">A  char[]</param>
+        </member>
+        <member name="M:Apache.NMS.Util.EndianBinaryWriter.Write(System.UInt32)">
+            <summary>
+            Method Write
+            </summary>
+            <param name="value">An uint</param>
+        </member>
+        <member name="M:Apache.NMS.Util.EndianBinaryWriter.Write(System.Char)">
+            <summary>
+            Method Write
+            </summary>
+            <param name="ch">A  char</param>
+        </member>
+        <member name="M:Apache.NMS.Util.EndianBinaryWriter.Write(System.UInt64)">
+            <summary>
+            Method Write
+            </summary>
+            <param name="value">An ulong</param>
+        </member>
+        <member name="M:Apache.NMS.Util.EndianBinaryWriter.Write(System.Int16)">
+            <summary>
+            Method Write
+            </summary>
+            <param name="value">A  short</param>
+        </member>
+        <member name="M:Apache.NMS.Util.EndianBinaryWriter.Write(System.String)">
+            <summary>
+            Method Write, writes a string to the output using the WriteString16
+            method.
+            </summary>
+            <param name="text">A  string</param>
+        </member>
+        <member name="M:Apache.NMS.Util.EndianBinaryWriter.WriteString16(System.String)">
+            <summary>
+            Method WriteString16, writes a string to the output using the Java 
+            standard modified UTF-8 encoding with an unsigned short value written first to 
+            indicate the length of the encoded data, the short is read as an unsigned 
+            value so the max amount of data this method can write is 65535 encoded bytes.
+            
+            Unlike the WriteString32 method this method does not encode the length
+            value to -1 if the string is null, this is to match the behaviour of 
+            the Java DataOuputStream class's writeUTF method.	
+            
+            Because modified UTF-8 encding can result in a number of bytes greater that 
+            the size of the String this method must first check that the encoding proces 
+            will not result in a value that cannot be written becuase it is greater than
+            the max value of an unsigned short.
+            </summary>
+            <param name="text">A  string</param>
+        </member>
+        <member name="M:Apache.NMS.Util.EndianBinaryWriter.WriteString32(System.String)">
+            <summary>
+            Method WriteString32, writes a string to the output using the Openwire 
+            standard modified UTF-8 encoding which an int value written first to 
+            indicate the length of the encoded data, the int is read as an signed 
+            value so the max amount of data this method can write is 2^31 encoded bytes.
+            
+            In the case of a null value being passed this method writes a -1 to the 
+            stream to indicate that the string is null.
+            
+            Because modified UTF-8 encding can result in a number of bytes greater that 
+            the size of the String this method must first check that the encoding proces 
+            will not result in a value that cannot be written becuase it is greater than
+            the max value of an int.
+            </summary>
+            <param name="text">A  string</param>
+        </member>
+        <member name="M:Apache.NMS.Util.EndianBinaryWriter.Write(System.Single)">
+            <summary>
+            Method Write
+            </summary>
+            <param name="value">A  double</param>
+        </member>
+        <member name="M:Apache.NMS.Util.EndianBinaryWriter.Write(System.Double)">
+            <summary>
+            Method Write
+            </summary>
+            <param name="value">A  double</param>
+        </member>
+        <member name="T:Apache.NMS.Util.EndianSupport">
+            <summary>
+            Support class that switches from one endian to the other.
+            </summary>
+        </member>
+        <member name="T:Apache.NMS.Util.MessagePropertyIntercepter">
+             <summary>
+             Utility class used to set NMS properties via introspection for IMessage derived
+             instances.  This class allows IMessage classes to define Message specific properties
+             that can be accessed using the standard property get / set semantics.
+            
+             This is especially useful for NMSX type properties which can vary by provider and
+             are obtianed via a call to IConnectionMetaData.NMSXPropertyNames.  The client can
+             set the properties on an IMessage instance without a direct cast to the providers
+             specific Message types.
+            
+             Properties accessed in this way are treated as NMS Message headers which are never
+             read-only therefore there is no exception thrown if the message itself is in the
+             read-only property mode.
+             </summary>
+        </member>
+        <member name="T:Apache.NMS.Util.PrimitiveMapInterceptor">
+             <summary>
+             This class provides a mechanism to intercept calls to a IPrimitiveMap
+             instance and perform validation, handle type conversion, or some other
+             function necessary to use the PrimitiveMap in a Message or other NMS
+             object.
+            
+             Be default this class enforces the standard conversion policy for primitive
+             types in NMS shown in the table below:
+            
+               |        | boolean byte short char int long float double String byte[]
+               |----------------------------------------------------------------------
+               |boolean |    X                                            X
+               |byte    |          X     X         X   X                  X
+               |short   |                X         X   X                  X
+               |char    |                     X                           X
+               |int     |                          X   X                  X
+               |long    |                              X                  X
+               |float   |                                    X     X      X
+               |double  |                                          X      X
+               |String  |    X     X     X         X   X     X     X      X
+               |byte[]  |                                                       X
+               |----------------------------------------------------------------------
+            
+             </summary>
+        </member>
+        <member name="T:Apache.NMS.IPrimitiveMap">
+            <summary>
+            Represents a Map of primitive types where the keys are all string instances
+            and the values are strings or numbers.
+            </summary>
+        </member>
+        <member name="T:Apache.NMS.Util.MessageTransformation">
+            <summary>
+            Base Utility class for conversion between IMessage type objects for different
+            NMS providers.
+            </summary>
+        </member>
+        <member name="M:Apache.NMS.Util.MessageTransformation.CopyProperties(Apache.NMS.IMessage,Apache.NMS.IMessage)">
+            <summary>
+            Copies the standard NMS and user defined properties from the givem
+            message to the specified message, the class version transforms the
+            Destination instead of just doing a straight copy.
+            </summary>
+        </member>
+        <member name="M:Apache.NMS.Util.MessageTransformation.CopyNMSMessageProperties(Apache.NMS.IMessage,Apache.NMS.IMessage)">
+            <summary>
+            Copies the standard NMS and user defined properties from the givem
+            message to the specified message, this method makes no attempt to convert
+            the values in the Message to native provider implementations.
+            </summary>
+        </member>
+        <member name="T:Apache.NMS.Util.PrimitiveMap">
+            <summary>
+            A default implementation of IPrimitiveMap
+            </summary>
+        </member>
+        <member name="M:Apache.NMS.Util.PrimitiveMap.ToString">
+            <summary>
+            Method ToString
+            </summary>
+            <returns>A string</returns>
+        </member>
+        <member name="M:Apache.NMS.Util.PrimitiveMap.Unmarshal(System.Byte[])">
+            <summary>
+            Unmarshalls the map from the given data or if the data is null just
+            return an empty map
+            </summary>
+        </member>
+        <member name="M:Apache.NMS.Util.PrimitiveMap.Unmarshal(System.IO.Stream)">
+            <summary>
+            Unmarshals a PrimitiveMap directly from a Stream object.  This 
+            allows for clients to read PrimitiveMaps from Compressed or other
+            wise encoded streams without this class needing to know about it.
+            </summary>
+            <param name="source">
+            A <see cref="T:System.IO.Stream"/>
+            </param>
+            <returns>
+            A <see cref="T:Apache.NMS.Util.PrimitiveMap"/>
+            </returns>
+        </member>
+        <member name="M:Apache.NMS.Util.PrimitiveMap.Marshal(System.IO.Stream)">
+            <summary>
+            Marshals a PrimitiveMap directly to a Stream object.  This
+            allows a client to write a PrimitiveMap in a compressed or 
+            otherwise encoded form without this class needing to know 
+            about it.
+            </summary>
+            <param name="destination">
+            A <see cref="T:System.IO.Stream"/>
+            </param>
+        </member>
+        <member name="M:Apache.NMS.Util.PrimitiveMap.MarshalPrimitiveMap(System.Collections.IDictionary)">
+            <summary>
+            Marshals the primitive type map to a byte array
+            </summary>
+        </member>
+        <member name="M:Apache.NMS.Util.PrimitiveMap.UnmarshalPrimitiveMap(System.Byte[])">
+            <summary>
+            Unmarshals the primitive type map from the given byte array
+            </summary>
+        </member>
+        <member name="T:Apache.NMS.Util.SessionUtil">
+            <summary>
+            Class to provide support for working with Session objects.
+            </summary>
+        </member>
+        <member name="M:Apache.NMS.Util.SessionUtil.GetDestination(Apache.NMS.ISession,System.String)">
+            <summary>
+            Get the destination by parsing the embedded type prefix.  Default is Queue if no prefix is
+            embedded in the destinationName.
+            </summary>
+            <param name="session">Session object to use to get the destination.</param>
+            <param name="destinationName">Name of destination with embedded prefix.  The embedded prefix can be one of the following:
+            	<list type="bullet">
+            		<item>queue://</item>
+            		<item>topic://</item>
+            		<item>temp-queue://</item>
+            		<item>temp-topic://</item>
+            	</list>
+            </param>
+            <returns></returns>
+        </member>
+        <member name="M:Apache.NMS.Util.SessionUtil.GetDestination(Apache.NMS.ISession,System.String,Apache.NMS.DestinationType)">
+            <summary>
+            Get the destination by parsing the embedded type prefix.
+            </summary>
+            <param name="session">Session object to use to get the destination.</param>
+            <param name="destinationName">Name of destination with embedded prefix.  The embedded prefix can be one of the following:
+            	<list type="bullet">
+            		<item>queue://</item>
+            		<item>topic://</item>
+            		<item>temp-queue://</item>
+            		<item>temp-topic://</item>
+            	</list>
+            </param>
+            <param name="defaultType">Default type if no embedded prefix is specified.</param>
+            <returns></returns>
+        </member>
+        <member name="M:Apache.NMS.Util.SessionUtil.DeleteDestination(Apache.NMS.ISession,System.String)">
+            <summary>
+            Delete the named destination by parsing the embedded type prefix.  Default is Queue if no prefix is
+            embedded in the destinationName.
+            </summary>
+            <param name="session">Session object to use to get the destination.</param>
+            <param name="destinationName">Name of destination with embedded prefix.  The embedded prefix can be one of the following:
+            	<list type="bullet">
+            		<item>queue://</item>
+            		<item>topic://</item>
+            		<item>temp-queue://</item>
+            		<item>temp-topic://</item>
+            	</list>
+            </param>
+            <returns></returns>
+        </member>
+        <member name="M:Apache.NMS.Util.SessionUtil.DeleteDestination(Apache.NMS.ISession,System.String,Apache.NMS.DestinationType)">
+            <summary>
+            Delete the named destination by parsing the embedded type prefix.
+            </summary>
+            <param name="session">Session object to use to get the destination.</param>
+            <param name="destinationName">Name of destination with embedded prefix.  The embedded prefix can be one of the following:
+            	<list type="bullet">
+            		<item>queue://</item>
+            		<item>topic://</item>
+            		<item>temp-queue://</item>
+            		<item>temp-topic://</item>
+            	</list>
+            </param>
+            <param name="defaultType">Default type if no embedded prefix is specified.</param>
+            <returns></returns>
+        </member>
+        <member name="T:Apache.NMS.Util.URISupport">
+            <summary>
+            Class to provide support for Uri query parameters which uses .Net reflection
+            to identify and set properties.
+            </summary>
+        </member>
+        <member name="M:Apache.NMS.Util.URISupport.CreateCompatibleUri(System.String)">
+            <summary>
+            Given a string that could be a Composite Uri that uses syntax not compatible
+            with the .NET Uri class such as an ActiveMQ failover Uri formatted as
+            "failover://(tcp://localhost:61616)", the initial '://' must be changed
+            to ':(' so that the Uri class doesn't attempt to parse the '(tcp:' as
+            the Uri's Authority as that is not a valid host name.
+            </summary>
+            <param name="uriString">
+            A string that could be a Composite Uri that uses syntax not compatible
+            with the .NET Uri class
+            </param>
+        </member>
+        <member name="M:Apache.NMS.Util.URISupport.ParseQuery(System.String)">
+            <summary>
+            Parse a Uri query string of the form ?x=y&amp;z=0
+            into a map of name/value pairs.
+            </summary>
+            <param name="query">The query string to parse. This string should not contain
+            Uri escape characters.</param>
+        </member>
+        <member name="M:Apache.NMS.Util.URISupport.SetProperties(System.Object,System.Collections.Specialized.StringDictionary)">
+            <summary>
+            Sets the public properties of a target object using a string map.
+            This method uses .Net reflection to identify public properties of
+            the target object matching the keys from the passed map.
+            </summary>
+            <param name="target">The object whose properties will be set.</param>
+            <param name="map">Map of key/value pairs.</param>
+        </member>
+        <member name="M:Apache.NMS.Util.URISupport.SetProperties(System.Object,System.Collections.Specialized.StringDictionary,System.String)">
+            <summary>
+            Sets the public properties of a target object using a string map.
+            This method uses .Net reflection to identify public properties of
+            the target object matching the keys from the passed map.
+            </summary>
+            <param name="target">The object whose properties will be set.</param>
+            <param name="map">Map of key/value pairs.</param>
+            <param name="prefix">Key value prefix.  This is prepended to the property name
+            before searching for a matching key value.</param>
+        </member>
+        <member name="M:Apache.NMS.Util.URISupport.ParseComposite(System.Uri,Apache.NMS.Util.URISupport.CompositeData,System.String)">
+            <summary>
+            </summary>
+            <param name="uri"></param>
+            <param name="rc"></param>
+            <param name="ssp"></param>
+        </member>
+        <member name="M:Apache.NMS.Util.URISupport.SplitComponents(System.String)">
+            <summary>
+            </summary>
+            <param name="componentString"></param>
+        </member>
+        <member name="T:Apache.NMS.Util.XmlUtil">
+            <summary>
+            Class to provide support for working with Xml objects.
+            </summary>
+        </member>
+        <member name="F:Apache.NMS.Util.XmlUtil.invalidXMLMatch">
+            <summary>
+            From xml spec valid chars:
+            #x9 | #xA | #xD | [#x20-#xD7FF] | [#xE000-#xFFFD] | [#x10000-#x10FFFF]    
+            any Unicode character, excluding the surrogate blocks, FFFE, and FFFF.
+            </summary>
+        </member>
+        <member name="M:Apache.NMS.Util.XmlUtil.#cctor">
+            <summary>
+            Static class constructor.
+            </summary>
+        </member>
+        <member name="M:Apache.NMS.Util.XmlUtil.Serialize(System.Object)">
+            <summary>
+            Serialize the object to XML format.  The XML encoding will be UTF-8.  A Byte Order Mark (BOM)
+            will NOT be placed at the beginning of the string.
+            </summary>
+            <param name="obj"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Apache.NMS.Util.XmlUtil.CleanInvalidXmlChars(System.String)">
+            <summary>
+            This removes characters that are invalid for xml encoding
+            </summary>
+            <param name="text">Text to be encoded.</param>
+            <returns>Text with invalid xml characters removed.</returns>
+        </member>
+        <member name="T:Apache.NMS.IBytesMessage">
+             <summary>
+            
+             A BytesMessage object is used to send a message containing a stream of uninterpreted
+             bytes. It inherits from the Message interface and adds a bytes message body. The
+             receiver of the message supplies the interpretation of the bytes.
+            
+             This message type is for client encoding of existing message formats. If possible,
+             one of the other self-defining message types should be used instead.
+            
+             Although the NMS API allows the use of message properties with byte messages, they
+             are typically not used, since the inclusion of properties may affect the format.
+            
+             When the message is first created, and when ClearBody is called, the body of the
+             message is in write-only mode. After the first call to Reset has been made, the
+             message body is in read-only mode. After a message has been sent, the client that
+             sent it can retain and modify it without affecting the message that has been sent.
+             The same message object can be sent multiple times. When a message has been received,
+             the provider has called Reset so that the message body is in read-only mode for the
+             client.
+            
+             If ClearBody is called on a message in read-only mode, the message body is cleared and
+             the message is in write-only mode.
+            
+             If a client attempts to read a message in write-only mode, a MessageNotReadableException
+             is thrown.
+            
+             If a client attempts to write a message in read-only mode, a MessageNotWriteableException
+             is thrown.
+             </summary>
+        </member>
+        <member name="T:Apache.NMS.IMessage">
+            <summary>
+            Represents a message either to be sent to a message broker or received from a message broker.
+            </summary>
+        </member>
+        <member name="M:Apache.NMS.IMessage.Acknowledge">
+            <summary>
+            If using client acknowledgement mode on the session, then this method will acknowledge that the
+            message has been processed correctly.
+            </summary>
+        </member>
+        <member name="M:Apache.NMS.IMessage.ClearBody">
+             <summary>
+             Clears out the message body. Clearing a message's body does not clear its header
+             values or property entries.
+            
+             If this message body was read-only, calling this method leaves the message body in
+             the same state as an empty body in a newly created message.
+             </summary>
+        </member>
+        <member name="M:Apache.NMS.IMessage.ClearProperties">
+             <summary>
+             Clears a message's properties.
+            
+             The message's header fields and body are not cleared.
+             </summary>
+        </member>
+        <member name="P:Apache.NMS.IMessage.Properties">
+            <summary>
+            Provides access to the message properties (headers).
+            </summary>
+        </member>
+        <member name="P:Apache.NMS.IMessage.NMSCorrelationID">
+            <summary>
+            The correlation ID used to correlate messages from conversations or long running business processes.
+            </summary>
+        </member>
+        <member name="P:Apache.NMS.IMessage.NMSDestination">
+            <summary>
+            The destination of the message.  This property is set by the IMessageProducer.
+            </summary>
+        </member>
+        <member name="P:Apache.NMS.IMessage.NMSTimeToLive">
+            <summary>
+            The amount of time for which this message is valid.  Zero if this message does not expire.
+            </summary>
+        </member>
+        <member name="P:Apache.NMS.IMessage.NMSMessageId">
+            <summary>
+            The message ID which is set by the provider.
+            </summary>
+        </member>
+        <member name="P:Apache.NMS.IMessage.NMSDeliveryMode">
+            <summary>
+            Whether or not this message is persistent.
+            </summary>
+        </member>
+        <member name="P:Apache.NMS.IMessage.NMSPriority">
+            <summary>
+            The Priority of this message.
+            </summary>
+        </member>
+        <member name="P:Apache.NMS.IMessage.NMSRedelivered">
+            <summary>
+            Returns true if this message has been redelivered to this or another consumer before being acknowledged successfully.
+            </summary>
+        </member>
+        <member name="P:Apache.NMS.IMessage.NMSReplyTo">
+            <summary>
+            The destination that the consumer of this message should send replies to
+            </summary>
+        </member>
+        <member name="P:Apache.NMS.IMessage.NMSTimestamp">
+            <summary>
+            The timestamp of when the message was pubished in UTC time.  If the publisher disables setting
+            the timestamp on the message, the time will be set to the start of the UNIX epoc (1970-01-01 00:00:00).
+            </summary>
+        </member>
+        <member name="P:Apache.NMS.IMessage.NMSType">
+            <summary>
+            The type name of this message.
+            </summary>
+        </member>
+        <member name="M:Apache.NMS.IBytesMessage.ReadByte">
+            <summary>
+            Reads a byte from the Message Stream.
+            </summary>
+            <returns>
+            A <see cref="T:System.Byte"/>
+            </returns>
+            <exception cref="T:Apache.NMS.MessageNotReadableException">
+            Thrown when the Message is in write-only mode.
+            </exception>
+            <exception cref="T:Apache.NMS.MessageEOFException">
+            Thrown when an unexpected end of bytes has been reached.
+            </exception>
+            <exception cref="T:Apache.NMS.NMSException">
+            Thrown when there is an unhandled exception thrown from the provider.
+            </exception>
+        </member>
+        <member name="M:Apache.NMS.IBytesMessage.WriteByte(System.Byte)">
+            <summary>
+            Writes a byte to the Message stream.
+            </summary>
+            <param name="value">
+            A <see cref="T:System.Byte"/>
+            </param>
+            <exception cref="T:Apache.NMS.MessageNotWriteableException">
+            Thrown when the Message is in read-only mode.
+            </exception>
+            <exception cref="T:Apache.NMS.NMSException">
+            Thrown when there is an unhandled exception thrown from the provider.
+            </exception>
+        </member>
+        <member name="M:Apache.NMS.IBytesMessage.ReadBoolean">
+            <summary>
+            Reads a boolean from the Message Stream.
+            </summary>
+            <returns>
+            A <see cref="T:System.Boolean"/>
+            </returns>
+            <exception cref="T:Apache.NMS.MessageNotReadableException">
+            Thrown when the Message is in write-only mode.
+            </exception>
+            <exception cref="T:Apache.NMS.MessageEOFException">
+            Thrown when an unexpected end of bytes has been reached.
+            </exception>
+            <exception cref="T:Apache.NMS.NMSException">
+            Thrown when there is an unhandled exception thrown from the provider.
+            </exception>
+        </member>
+        <member name="M:Apache.NMS.IBytesMessage.WriteBoolean(System.Boolean)">
+            <summary>
+            Write a one byte value to the message stream representing the boolean
+            value passed.
+            </summary>
+            <param name="value">
+            A <see cref="T:System.Boolean"/>
+            </param>
+            <exception cref="T:Apache.NMS.MessageNotWriteableException">
+            Thrown when the Message is in read-only mode.
+            </exception>
+            <exception cref="T:Apache.NMS.NMSException">
+            Thrown when there is an unhandled exception thrown from the provider.
+            </exception>
+        </member>
+        <member name="M:Apache.NMS.IBytesMessage.ReadChar">
+            <summary>
+            Reads a char from the Message Stream.
+            </summary>
+            <returns>
+            A <see cref="T:System.Char"/>
+            </returns>
+            <exception cref="T:Apache.NMS.MessageNotReadableException">
+            Thrown when the Message is in write-only mode.
+            </exception>
+            <exception cref="T:Apache.NMS.MessageEOFException">
+            Thrown when an unexpected end of bytes has been reached.
+            </exception>
+            <exception cref="T:Apache.NMS.NMSException">
+            Thrown when there is an unhandled exception thrown from the provider.
+            </exception>
+        </member>
+        <member name="M:Apache.NMS.IBytesMessage.WriteChar(System.Char)">
+            <summary>
+            Write a two byte value to the message stream representing the character
+            value passed.  High byte first.
+            </summary>
+            <param name="value">
+            A <see cref="T:System.Char"/>
+            </param>
+            <exception cref="T:Apache.NMS.MessageNotWriteableException">
+            Thrown when the Message is in read-only mode.
+            </exception>
+            <exception cref="T:Apache.NMS.NMSException">
+            Thrown when there is an unhandled exception thrown from the provider.
+            </exception>
+        </member>
+        <member name="M:Apache.NMS.IBytesMessage.ReadInt16">
+            <summary>
+            Reads a Short from the Message Stream.
+            </summary>
+            <returns>
+            A <see cref="T:System.Int16"/>
+            </returns>
+            <exception cref="T:Apache.NMS.MessageNotReadableException">
+            Thrown when the Message is in write-only mode.
+            </exception>
+            <exception cref="T:Apache.NMS.MessageEOFException">
+            Thrown when an unexpected end of bytes has been reached.
+            </exception>
+            <exception cref="T:Apache.NMS.NMSException">
+            Thrown when there is an unhandled exception thrown from the provider.
+            </exception>
+        </member>
+        <member name="M:Apache.NMS.IBytesMessage.WriteInt16(System.Int16)">
+            <summary>
+            Write a two byte value to the message stream representing the short
+            value passed.  High byte first.
+            </summary>
+            <param name="value">
+            A <see cref="T:System.Int16"/>
+            </param>
+            <exception cref="T:Apache.NMS.MessageNotWriteableException">
+            Thrown when the Message is in read-only mode.
+            </exception>
+            <exception cref="T:Apache.NMS.NMSException">
+            Thrown when there is an unhandled exception thrown from the provider.
+            </exception>
+        </member>
+        <member name="M:Apache.NMS.IBytesMessage.ReadInt32">
+            <summary>
+            Reads an int from the Message Stream.
+            </summary>
+            <returns>
+            A <see cref="T:System.Int32"/>
+            </returns>
+            <exception cref="T:Apache.NMS.MessageNotReadableException">
+            Thrown when the Message is in write-only mode.
+            </exception>
+            <exception cref="T:Apache.NMS.MessageEOFException">
+            Thrown when an unexpected end of bytes has been reached.
+            </exception>
+            <exception cref="T:Apache.NMS.NMSException">
+            Thrown when there is an unhandled exception thrown from the provider.
+            </exception>
+        </member>
+        <member name="M:Apache.NMS.IBytesMessage.WriteInt32(System.Int32)">
+            <summary>
+            Write a four byte value to the message stream representing the integer
+            value passed.  High byte first.
+            </summary>
+            <param name="value">
+            A <see cref="T:System.Int32"/>
+            </param>
+            <exception cref="T:Apache.NMS.MessageNotWriteableException">
+            Thrown when the Message is in read-only mode.
+            </exception>
+            <exception cref="T:Apache.NMS.NMSException">
+            Thrown when there is an unhandled exception thrown from the provider.
+            </exception>
+        </member>
+        <member name="M:Apache.NMS.IBytesMessage.ReadInt64">
+            <summary>
+            Reads a long from the Message Stream.
+            </summary>
+            <returns>
+            A <see cref="T:System.Int64"/>
+            </returns>
+            <exception cref="T:Apache.NMS.MessageNotReadableException">
+            Thrown when the Message is in write-only mode.
+            </exception>
+            <exception cref="T:Apache.NMS.MessageEOFException">
+            Thrown when an unexpected end of bytes has been reached.
+            </exception>
+            <exception cref="T:Apache.NMS.NMSException">
+            Thrown when there is an unhandled exception thrown from the provider.
+            </exception>
+        </member>
+        <member name="M:Apache.NMS.IBytesMessage.WriteInt64(System.Int64)">
+            <summary>
+            Write a eight byte value to the message stream representing the long
+            value passed.  High byte first.
+            </summary>
+            <param name="value">
+            A <see cref="T:System.Int64"/>
+            </param>
+            <exception cref="T:Apache.NMS.MessageNotWriteableException">
+            Thrown when the Message is in read-only mode.
+            </exception>
+            <exception cref="T:Apache.NMS.NMSException">
+            Thrown when there is an unhandled exception thrown from the provider.
+            </exception>
+        </member>
+        <member name="M:Apache.NMS.IBytesMessage.ReadSingle">
+            <summary>
+            Reads a float from the Message Stream.
+            </summary>
+            <returns>
+            A <see cref="T:System.Single"/>
+            </returns>
+            <exception cref="T:Apache.NMS.MessageNotReadableException">
+            Thrown when the Message is in write-only mode.
+            </exception>
+            <exception cref="T:Apache.NMS.MessageEOFException">
+            Thrown when an unexpected end of bytes has been reached.
+            </exception>
+            <exception cref="T:Apache.NMS.NMSException">
+            Thrown when there is an unhandled exception thrown from the provider.
+            </exception>
+        </member>
+        <member name="M:Apache.NMS.IBytesMessage.WriteSingle(System.Single)">
+            <summary>
+            Write a four byte value to the message stream representing the float
+            value passed.  High byte first.
+            </summary>
+            <param name="value">
+            A <see cref="T:System.Single"/>
+            </param>
+            <exception cref="T:Apache.NMS.MessageNotWriteableException">
+            Thrown when the Message is in read-only mode.
+            </exception>
+            <exception cref="T:Apache.NMS.NMSException">
+            Thrown when there is an unhandled exception thrown from the provider.
+            </exception>
+        </member>
+        <member name="M:Apache.NMS.IBytesMessage.ReadDouble">
+            <summary>
+            Reads an double from the Message Stream.
+            </summary>
+            <returns>
+            A <see cref="T:System.Double"/>
+            </returns>
+            <exception cref="T:Apache.NMS.MessageNotReadableException">
+            Thrown when the Message is in write-only mode.
+            </exception>
+            <exception cref="T:Apache.NMS.MessageEOFException">
+            Thrown when an unexpected end of bytes has been reached.
+            </exception>
+            <exception cref="T:Apache.NMS.NMSException">
+            Thrown when there is an unhandled exception thrown from the provider.
+            </exception>
+        </member>
+        <member name="M:Apache.NMS.IBytesMessage.WriteDouble(System.Double)">
+            <summary>
+            Write a eight byte value to the message stream representing the double
+            value passed.  High byte first.
+            </summary>
+            <param name="value">
+            A <see cref="T:System.Double"/>
+            </param>
+            <exception cref="T:Apache.NMS.MessageNotWriteableException">
+            Thrown when the Message is in read-only mode.
+            </exception>
+            <exception cref="T:Apache.NMS.NMSException">
+            Thrown when there is an unhandled exception thrown from the provider.
+            </exception>
+        </member>
+        <member name="M:Apache.NMS.IBytesMessage.ReadBytes(System.Byte[])">
+             <summary>
+             Reads a byte array from the bytes message stream.
+            
+             If the length of array value is less than the number of bytes remaining to
+             be read from the stream, the array should be filled. A subsequent call reads
+             the next increment, and so on.
+            
+             If the number of bytes remaining in the stream is less than the length of array
+             value, the bytes should be read into the array. The return value of the total number
+             of bytes read will be less than the length of the array, indicating that there are
+             no more bytes left to be read from the stream. The next read of the stream returns -1.
+             </summary>
+             <param name="value">
+             The byte array that will be used as a buffer to read into.
+             </param>
+             <returns>
+             A <see cref="T:System.Int32"/>
+             The number of bytes read into the passed byte array, or -1 if there are no more
+             bytes left to be read from the stream.
+             </returns>
+             <exception cref="T:Apache.NMS.NMSException">
+             Thrown when there is an unhandled exception thrown from the provider.
+             </exception>
+             <exception cref="T:Apache.NMS.MessageNotReadableException">
+             Thrown when the Message is in write-only mode.
+             </exception>
+        </member>
+        <member name="M:Apache.NMS.IBytesMessage.ReadBytes(System.Byte[],System.Int32)">
+             <summary>
+             Reads a portion of the bytes message stream.
+            
+             If the length of array value is less than the number of bytes remaining to be
+             read from the stream, the array should be filled. A subsequent call reads the
+             next increment, and so on.
+            
+             If the number of bytes remaining in the stream is less than the length of array
+             value, the bytes should be read into the array. The return value of the total
+             number of bytes read will be less than the length of the array, indicating that
+             there are no more bytes left to be read from the stream. The next read of the
+             stream returns -1.
+            
+             If length is negative, or length is greater than the length of the array value,
+             then an Exception is thrown. No bytes will be read from the stream for this
+             exception case.
+             </summary>
+             <param name="value">
+             The byte array that will be used as a buffer to read into.
+             </param>
+             <param name="length">
+             The amount of bytes to read into the buffer.
+             </param>
+             <returns>
+             A <see cref="T:System.Int32"/>
+             The number of bytes read into the passed byte array, or -1 if there are no more
+             bytes left to be read from the stream.
+             </returns>
+             <exception cref="T:Apache.NMS.MessageNotReadableException">
+             Thrown when the Message is in write-only mode.
+             </exception>
+             <exception cref="T:Apache.NMS.NMSException">
+             Thrown when there is an unhandled exception thrown from the provider.
+             </exception>
+        </member>
+        <member name="M:Apache.NMS.IBytesMessage.WriteBytes(System.Byte[])">
+            <summary>
+            Writes a byte array to the bytes message stream.
+            </summary>
+            <param name="value">
+            A <see cref="T:System.Byte"/>
+            </param>
+            <exception cref="T:Apache.NMS.MessageNotWriteableException">
+            Thrown when the Message is in read-only mode.
+            </exception>
+            <exception cref="T:Apache.NMS.NMSException">
+            Thrown when there is an unhandled exception thrown from the provider.
+            </exception>
+        </member>
+        <member name="M:Apache.NMS.IBytesMessage.WriteBytes(System.Byte[],System.Int32,System.Int32)">
+            <summary>
+            Writes a portion of a byte array to the bytes message stream.
+            </summary>
+            <param name="value">
+            A <see cref="T:System.Byte"/>
+            </param>
+            <param name="offset">
+            A <see cref="T:System.Int32"/>
+            </param>
+            <param name="length">
+            A <see cref="T:System.Int32"/>
+            </param>
+            <exception cref="T:Apache.NMS.MessageNotWriteableException">
+            Thrown when the Message is in read-only mode.
+            </exception>
+            <exception cref="T:Apache.NMS.NMSException">
+            Thrown when there is an unhandled exception thrown from the provider.
+            </exception>
+        </member>
+        <member name="M:Apache.NMS.IBytesMessage.ReadString">
+            <summary>
+            Reads a string that has been encoded using a modified UTF-8 format from the bytes
+            message stream.
+            </summary>
+            <returns>
+            A <see cref="T:System.String"/>
+            </returns>
+            <exception cref="T:Apache.NMS.MessageNotReadableException">
+            Thrown when the Message is in write-only mode.
+            </exception>
+            <exception cref="T:Apache.NMS.MessageEOFException">
+            Thrown when an unexpected end of bytes has been reached.
+            </exception>
+            <exception cref="T:Apache.NMS.NMSException">
+            Thrown when there is an unhandled exception thrown from the provider.
+            </exception>
+        </member>
+        <member name="M:Apache.NMS.IBytesMessage.WriteString(System.String)">
+            <summary>
+            Writes a string to the bytes message stream using UTF-8 encoding in a
+            machine-independent manner.
+            </summary>
+            <param name="value">
+            A <see cref="T:System.String"/>
+            </param>
+            <exception cref="T:Apache.NMS.MessageNotWriteableException">
+            Thrown when the Message is in read-only mode.
+            </exception>
+            <exception cref="T:Apache.NMS.NMSException">
+            Thrown when there is an unhandled exception thrown from the provider.
+            </exception>
+        </member>
+        <member name="M:Apache.NMS.IBytesMessage.WriteObject(System.Object)">
+             <summary>
+             Writes an object to the bytes message stream.
+            
+             This method works only for the objectified primitive object types
+             (Int32, Double, Boolean ...), String objects, and byte arrays.
+             </summary>
+             <param name="value">
+             A <see cref="T:System.Object"/>
+             the object in the .NET programming language to be written; it must not be null
+             </param>
+             <exception cref="T:Apache.NMS.MessageFormatException">
+             Thrown when the Message has an invalid format.
+             </exception>
+             <exception cref="T:Apache.NMS.MessageNotWriteableException">
+             Thrown when the Message is in read-only mode.
+             </exception>
+             <exception cref="T:Apache.NMS.NMSException">
+             Thrown when there is an unhandled exception thrown from the provider.
+             </exception>
+        </member>
+        <member name="M:Apache.NMS.IBytesMessage.Reset">
+            <summary>
+            Puts the message body in read-only mode and repositions the stream of bytes to the beginning.
+            </summary>
+            <exception cref="T:Apache.NMS.MessageFormatException">
+            Thrown when the Message has an invalid format.
+            </exception>
+            <exception cref="T:Apache.NMS.NMSException">
+            Thrown when there is an unhandled exception thrown from the provider.
+            </exception>
+        </member>
+        <member name="P:Apache.NMS.IBytesMessage.BodyLength">
+            <value>
+            Gets the number of bytes of the message body when the message is in read-only mode.
+            The value returned can be used to allocate a byte array. The value returned is the
+            entire length of the message body, regardless of where the pointer for reading the
+            message is currently located.
+            </value>
+            <exception cref="T:Apache.NMS.MessageNotReadableException">
+            Thrown when the Message is in write-only mode.
+            </exception>
+            <exception cref="T:Apache.NMS.NMSException">
+            Thrown when there is an unhandled exception thrown from the provider.
+            </exception>
+        </member>
+        <member name="T:Apache.NMS.AcknowledgementMode">
+            <summary>
+            The mode used to acknowledge messages after they are consumed
+            </summary>
+        </member>
+        <member name="F:Apache.NMS.AcknowledgementMode.AutoAcknowledge">
+            <summary>
+            With this acknowledgment mode, the session will not
+            acknowledge receipt of a message since the broker assumes
+            successful receipt of a message after the onMessage handler
+            has returned without error.
+            </summary>
+        </member>
+        <member name="F:Apache.NMS.AcknowledgementMode.DupsOkAcknowledge">
+            <summary>
+            With this acknowledgment mode, the session automatically
+            acknowledges a client's receipt of a message either when
+            the session has successfully returned from a call to receive
+            or when the message listener the session has called to
+            process the message successfully returns.  Acknowlegements
+            may be delayed in this mode to increase performance at
+            the cost of the message being redelivered this client fails.
+            </summary>
+        </member>
+        <member name="F:Apache.NMS.AcknowledgementMode.ClientAcknowledge">
+            <summary>
+            With this acknowledgment mode, the client acknowledges a
+            consumed message by calling the message's acknowledge method.
+            This acknowledgement acknowledges the given message and all
+            unacknowedged messages that have preceeded it for the session
+            in which the message was delivered.
+            </summary>
+        </member>
+        <member name="F:Apache.NMS.AcknowledgementMode.Transactional">
+            <summary>
+            Messages will be consumed when the transaction commits.
+            </summary>
+        </member>
+        <member name="F:Apache.NMS.AcknowledgementMode.IndividualAcknowledge">
+            <summary>
+            With this acknowledgment mode, the client acknowledges a
+            consumed message by calling the message's acknowledge method.
+            This acknowledgement mode allows the client to acknowledge a
+            single message.  This mode is not required to be supported by
+            all NMS providers, however the provider should throw an appropriate
+            exception to indicate that the mode is unsupported.
+            </summary>
+        </member>
+        <member name="T:Apache.NMS.ExceptionListener">
+            <summary>
+            A delegate that can receive transport level exceptions.
+            </summary>
+        </member>
+        <member name="T:Apache.NMS.ConnectionInterruptedListener">
+            <summary>
+            A delegate that is used by Fault tolerant NMS Implementation to notify their
+            clients that the Connection is not currently active to due some error.
+            </summary>
+        </member>
+        <member name="T:Apache.NMS.ConnectionResumedListener">
+            <summary>
+            A delegate that is used by Fault tolerant NMS Implementation to notify their
+            clients that the Connection that was interrupted has now been restored.
+            </summary>
+        </member>
+        <member name="T:Apache.NMS.IConnection">
+            <summary>
+            Represents a connection with a message broker
+            </summary>
+        </member>
+        <member name="T:Apache.NMS.IStartable">
+            <summary>
+            A lifecycle for NMS objects to indicate they can be started
+            </summary>
+        </member>
+        <member name="T:Apache.NMS.IStoppable">
+            <summary>
+            A lifecycle for NMS objects to indicate they can be stopped
+            </summary>
+        </member>
+        <member name="M:Apache.NMS.IConnection.CreateSession">
+            <summary>
+            Creates a new session to work on this connection
+            </summary>
+        </member>
+        <member name="M:Apache.NMS.IConnection.CreateSession(Apache.NMS.AcknowledgementMode)">
+            <summary>
+            Creates a new session to work on this connection
+            </summary>
+        </member>
+        <member name="M:Apache.NMS.IConnection.Close">
+            <summary>
+            Closes the connection.
+            </summary>
+        </member>
+        <member name="E:Apache.NMS.IConnection.ExceptionListener">
+            <summary>
+            An asynchronous listener which can be notified if an error occurs
+            </summary>
+        </member>
+        <member name="E:Apache.NMS.IConnection.ConnectionInterruptedListener">
+            <summary>
+            An asynchronous listener that is notified when a Fault tolerant connection
+            has been interrupted.
+            </summary>
+        </member>
+        <member name="E:Apache.NMS.IConnection.ConnectionResumedListener">
+            <summary>
+            An asynchronous listener that is notified when a Fault tolerant connection
+            has been resumed.
+            </summary>
+        </member>
+        <member name="P:Apache.NMS.IConnection.ConsumerTransformer">
+            <summary>
+            A Delegate that is called each time a Message is dispatched to allow the client to do
+            any necessary transformations on the received message before it is delivered.  The
+            Connection sets the provided delegate instance on each Session it creates which then
+            passes that along to the Consumers it creates.
+            </summary>
+        </member>
+        <member name="P:Apache.NMS.IConnection.ProducerTransformer">
+            <summary>
+            A delegate that is called each time a Message is sent from this Producer which allows
+            the application to perform any needed transformations on the Message before it is sent.
+            The Connection sets the provided delegate instance on each Session it creates which then
+            passes that along to the Producer it creates.
+            </summary>
+        </member>
+        <member name="P:Apache.NMS.IConnection.RequestTimeout">
+            <summary>
+            The default timeout for network requests.
+            </summary>
+        </member>
+        <member name="P:Apache.NMS.IConnection.AcknowledgementMode">
+            <summary>
+            The default acknowledgement mode
+            </summary>
+        </member>
+        <member name="P:Apache.NMS.IConnection.ClientId">
+            <summary>
+            Sets the unique clienet ID for this connection before Start() or returns the
+            unique client ID after the connection has started
+            </summary>
+        </member>
+        <member name="P:Apache.NMS.IConnection.RedeliveryPolicy">
+            <summary>
+            Get/or set the redelivery policy for this connection.
+            </summary>
+        </member>
+        <member name="P:Apache.NMS.IConnection.MetaData">
+            <summary>
+            Gets the Meta Data for the NMS Connection instance.
+            </summary>
+        </member>
+        <member name="T:Apache.NMS.IConnectionFactory">
+            <summary>
+            A Factory of IConnection objects
+            </summary>
+        </member>
+        <member name="M:Apache.NMS.IConnectionFactory.CreateConnection">
+            <summary>
+            Creates a new connection
+            </summary>
+        </member>
+        <member name="M:Apache.NMS.IConnectionFactory.CreateConnection(System.String,System.String)">
+            <summary>
+            Creates a new connection with the given user name and password
+            </summary>
+        </member>
+        <member name="P:Apache.NMS.IConnectionFactory.BrokerUri">
+            <summary>
+            Get/or set the broker Uri.
+            </summary>
+        </member>
+        <member name="P:Apache.NMS.IConnectionFactory.RedeliveryPolicy">
+            <summary>
+            Get/or set the redelivery policy that new IConnection objects are
+            assigned upon creation.
+            </summary>
+        </member>
+        <member name="P:Apache.NMS.IConnectionFactory.ConsumerTransformer">
+            <summary>
+            A Delegate that is called each time a Message is dispatched to allow the client to do
+            any necessary transformations on the received message before it is delivered.  The
+            ConnectionFactory sets the provided delegate instance on each Connection instance that
+            is created from this factory, each connection in turn passes the delegate along to each
+            Session it creates which then passes that along to the Consumers it creates.
+            </summary>
+        </member>
+        <member name="P:Apache.NMS.IConnectionFactory.ProducerTransformer">
+            <summary>
+            A delegate that is called each time a Message is sent from this Producer which allows
+            the application to perform any needed transformations on the Message before it is sent.
+            The ConnectionFactory sets the provided delegate instance on each Connection instance that
+            is created from this factory, each connection in turn passes the delegate along to each
+            Session it creates which then passes that along to the Producers it creates.
+            </summary>
+        </member>
+        <member name="T:Apache.NMS.IConnectionMetaData">
+            <summary>
+            Provides information describing the NMS IConnection instance.
+            </summary>
+        </member>
+        <member name="P:Apache.NMS.IConnectionMetaData.NMSMajorVersion">
+            <value>
+            Get the Major version number of the NMS API this Provider supports.
+            </value>
+        </member>
+        <member name="P:Apache.NMS.IConnectionMetaData.NMSMinorVersion">
+            <value>
+            Get the Minor version number of the NMS API this Provider supports.
+            </value>
+        </member>
+        <member name="P:Apache.NMS.IConnectionMetaData.NMSProviderName">
+            <value>
+            Get the name of this NMS Provider. 
+            </value>
+        </member>
+        <member name="P:Apache.NMS.IConnectionMetaData.NMSVersion">
+            <value>
+            Gets a formatted string detailing the NMS API version this Provider supports.  
+            </value>
+        </member>
+        <member name="P:Apache.NMS.IConnectionMetaData.NMSXPropertyNames">
+            <value>
+            Gets a String array of all the NMSX property names this NMS Provider supports.
+            </value>
+        </member>
+        <member name="P:Apache.NMS.IConnectionMetaData.ProviderMajorVersion">
+            <value>
+            Gets the Providers Major version number. 
+            </value>
+        </member>
+        <member name="P:Apache.NMS.IConnectionMetaData.ProviderMinorVersion">
+            <value>
+            Gets the Providers Minor version number. 
+            </value>
+        </member>
+        <member name="P:Apache.NMS.IConnectionMetaData.ProviderVersion">
+            <value>
+            Gets a formatted string detailing the version of this NMS Provider.  
+            </value>
+        </member>
+        <member name="T:Apache.NMS.DestinationType">
+            <summary>
+            Represents the type of the destination such as a queue or topic.
+            </summary>
+        </member>
+        <member name="T:Apache.NMS.IDestination">
+            <summary>
+            A base interface for destinations such as queues or topics
+            </summary>
+        </member>
+        <member name="T:Apache.NMS.NMSException">
+            <summary>
+            Represents an NMS exception
+            </summary>
+        </member>
+        <member name="M:Apache.NMS.NMSException.#ctor(System.Runtime.Serialization.SerializationInfo,System.Runtime.Serialization.StreamingContext)">
+            <summary>
+            Initializes a new instance of the NMSException class with serialized data.
+            Throws System.ArgumentNullException if the info parameter is null.
+            Throws System.Runtime.Serialization.SerializationException if the class name is null or System.Exception.HResult is zero (0).
+            </summary>
+            <param name="info">The SerializationInfo that holds the serialized object data about the exception being thrown.</param>
+            <param name="context">The StreamingContext that contains contextual information about the source or destination.</param>
+        </member>
+        <member name="M:Apache.NMS.NMSException.GetObjectData(System.Runtime.Serialization.SerializationInfo,System.Runtime.Serialization.StreamingContext)">
+            <summary>
+            When overridden in a derived class, sets the SerializationInfo with information about the exception.
+            </summary>
+            <param name="info">The SerializationInfo that holds the serialized object data about the exception being thrown.</param>
+            <param name="context">The StreamingContext that contains contextual information about the source or destination.</param>
+        </member>
+        <member name="P:Apache.NMS.NMSException.ErrorCode">
+            <summary>
+            Returns the error code for the exception, if one has been provided.
+            </summary>
+        </member>
+        <member name="M:Apache.NMS.IllegalStateException.#ctor(System.Runtime.Serialization.SerializationInfo,System.Runtime.Serialization.StreamingContext)">
+            <summary>
+            Initializes a new instance of the IllegalStateException class with serialized data.
+            Throws System.ArgumentNullException if the info parameter is null.
+            Throws System.Runtime.Serialization.SerializationException if the class name is null or System.Exception.HResult is zero (0).
+            </summary>
+            <param name="info">The SerializationInfo that holds the serialized object data about the exception being thrown.</param>
+            <param name="context">The StreamingContext that contains contextual information about the source or destination.</param>
+        </member>
+        <member name="T:Apache.NMS.IMapMessage">
+            <summary>
+            Represents a Map message which contains key and value pairs which are
+            of primitive types
+            </summary>
+        </member>
+        <member name="T:Apache.NMS.MessageListener">
+            <summary>
+            A delegate that can receive messages async.
+            </summary>
+        </member>
+        <member name="T:Apache.NMS.ConsumerTransformerDelegate">
+            <summary>
+            A delegate that a client can register that will be called each time a consumer dispatches a message
+            to the client code to allow the client to Transform a received message from one type to another,
+            StreamMessage to TextMessage, ObjectMessage to TextMessage containing XML, etc.  This allows a
+            client to create a consumer that will automatically transform a message to a type that the client is
+            capable of processing or adding additional information to a received message.  For messages that do
+            not need to be processed the client should return null from this method, in this case the original
+            message will be dispatched to the client.
+            </summary>
+        </member>
+        <member name="T:Apache.NMS.IMessageConsumer">
+            <summary>
+            A consumer of messages
+            </summary>
+        </member>
+        <member name="M:Apache.NMS.IMessageConsumer.Receive">
+            <summary>
+            Waits until a message is available and returns it
+            </summary>
+        </member>
+        <member name="M:Apache.NMS.IMessageConsumer.Receive(System.TimeSpan)">
+            <summary>
+            If a message is available within the timeout duration it is returned otherwise this method returns null
+            </summary>
+        </member>
+        <member name="M:Apache.NMS.IMessageConsumer.ReceiveNoWait">
+            <summary>
+            Receives the next message if one is immediately available for delivery on the client side
+            otherwise this method returns null. It is never an error for this method to return null, the
+            time of Message availability varies so your client cannot rely on this method to receive a
+            message immediately after one has been sent.
+            </summary>
+        </member>
+        <member name="M:Apache.NMS.IMessageConsumer.Close">
+            <summary>
+            Closes the message consumer.
+            </summary>
+            <remarks>
+            Clients should close message consumers them when they are not needed.
+            This call blocks until a receive or message listener in progress has completed.
+            A blocked message consumer receive call returns null when this message consumer is closed.
+            </remarks>
+        </member>
+        <member name="E:Apache.NMS.IMessageConsumer.Listener">
+            <summary>
+            An asynchronous listener which can be used to consume messages asynchronously
+            </summary>
+        </member>
+        <member name="P:Apache.NMS.IMessageConsumer.ConsumerTransformer">
+            <summary>
+            A Delegate that is called each time a Message is dispatched to allow the client to do
+            any necessary transformations on the received message before it is delivered.
+            </summary>
+        </member>
+        <member name="T:Apache.NMS.ProducerTransformerDelegate">
+            <summary>
+            A delegate that a client can register that will be called each time a Producer's send method is
+            called to allow the client to Transform a sent message from one type to another, StreamMessage to
+            TextMessage, ObjectMessage to TextMessage containing XML, etc.  This allows a client to create a
+            producer that will automatically transform a message to a type that some receiving client is
+            capable of processing or adding additional information to a sent message such as additional message
+            headers, etc.  For messages that do not need to be processed the client should return null from
+            this method, in this case the original message will be sent.
+            </summary>
+        </member>
+        <member name="T:Apache.NMS.IMessageProducer">
+            <summary>
+            An object capable of sending messages to some destination
+            </summary>
+        </member>
+        <member name="M:Apache.NMS.IMessageProducer.Send(Apache.NMS.IMessage)">
+            <summary>
+            Sends the message to the default destination for this producer
+            </summary>
+        </member>
+        <member name="M:Apache.NMS.IMessageProducer.Send(Apache.NMS.IMessage,Apache.NMS.MsgDeliveryMode,Apache.NMS.MsgPriority,System.TimeSpan)">
+            <summary>
+            Sends the message to the default destination with the explicit QoS configuration
+            </summary>
+        </member>
+        <member name="M:Apache.NMS.IMessageProducer.Send(Apache.NMS.IDestination,Apache.NMS.IMessage)">
+            <summary>
+            Sends the message to the given destination
+            </summary>
+        </member>
+        <member name="M:Apache.NMS.IMessageProducer.Send(Apache.NMS.IDestination,Apache.NMS.IMessage,Apache.NMS.MsgDeliveryMode,Apache.NMS.MsgPriority,System.TimeSpan)">
+            <summary>
+            Sends the message to the given destination with the explicit QoS configuration
+            </summary>
+        </member>
+        <member name="M:Apache.NMS.IMessageProducer.Close">
+            <summary>
+            Close the producer.
+            </summary>
+        </member>
+        <member name="M:Apache.NMS.IMessageProducer.CreateMessage">
+            <summary>
+            Creates a new message with an empty body
+            </summary>
+        </member>
+        <member name="M:Apache.NMS.IMessageProducer.CreateTextMessage">
+            <summary>
+            Creates a new text message with an empty body
+            </summary>
+        </member>
+        <member name="M:Apache.NMS.IMessageProducer.CreateTextMessage(System.String)">
+            <summary>
+            Creates a new text message with the given body
+            </summary>
+        </member>
+        <member name="M:Apache.NMS.IMessageProducer.CreateMapMessage">
+            <summary>
+            Creates a new Map message which contains primitive key and value pairs
+            </summary>
+        </member>
+        <member name="M:Apache.NMS.IMessageProducer.CreateObjectMessage(System.Object)">
+            <summary>
+            Creates a new Object message containing the given .NET object as the body
+            </summary>
+        </member>
+        <member name="M:Apache.NMS.IMessageProducer.CreateBytesMessage">
+            <summary>
+            Creates a new binary message
+            </summary>
+        </member>
+        <member name="M:Apache.NMS.IMessageProducer.CreateBytesMessage(System.Byte[])">
+            <summary>
+            Creates a new binary message with the given body
+            </summary>
+        </member>
+        <member name="M:Apache.NMS.IMessageProducer.CreateStreamMessage">
+            <summary>
+            Creates a new stream message
+            </summary>
+        </member>
+        <member name="P:Apache.NMS.IMessageProducer.ProducerTransformer">
+            <summary>
+            A delegate that is called each time a Message is sent from this Producer which allows
+            the application to perform any needed transformations on the Message before it is sent.
+            </summary>
+        </member>
+        <member name="T:Apache.NMS.INetTxConnection">
+             <summary>
+             The INetTxConnection extends the functionality of the IConnection interface by
+             adding the createNetTxSession method (optional).
+            
+             The INetTxConnection interface is optional. NMS providers are not required to support this
+             interface. This interface is for use by NMS providers to support transactional environments.
+             </summary>
+        </member>
+        <member name="M:Apache.NMS.INetTxConnection.CreateNetTxSession">
+            <summary>
+            Creates a INetTxSession object.
+            </summary>
+        </member>
+        <member name="T:Apache.NMS.INetTxConnectionFactory">
+             <summary>
+             Some application servers provide support for use in a .NET transactions (optional).
+            
+             To include NMS API transactions in a MSDTC transaction, an application server requires a
+             .NET Transaction aware NMS provider that is capable of mapping the MSDTC transaction model
+             into operations that are supported by the application server. An NMS provider exposes its
+             .NET Transaction support using an INetTxConnectionFactory object, which an application
+             server uses to create INetTxConnection objects.
+            
+             The INetTxConnectionFactory interface is optional. NMS providers are not required to support this
+             interface. This interface is for use by NMS providers to support transactional environments.
+             </summary>
+        </member>
+        <member name="M:Apache.NMS.INetTxConnectionFactory.CreateNetTxConnection">
+            <summary>
+            Creates a new connection
+            </summary>
+        </member>
+        <member name="M:Apache.NMS.INetTxConnectionFactory.CreateNetTxConnection(System.String,System.String)">
+            <summary>
+            Creates a new connection with the given user name and password
+            </summary>
+        </member>
+        <member name="T:Apache.NMS.INetTxSession">
+             <summary>
+             The INetTxSession interface extends the capability of Session by adding access to a NMS
+             provider's support for the Distributed Transactions (optional).  The transaction support
+             leverages the .NET Frameworks System.Transactions API.
+            
+             The NMS Provider implements this interface by participating in the current ambient transaction
+             as defined by the System.Transactions.Transaction.Current static member.  Whenever a new
+             Transaction is entered the NMS provider should enlist in that transaction.  When there is no
+             ambient transaction then the NMS Prodiver should allow the INetTxSession instance to behave
+             as a session that is in Auto Acknowledge mode.
+            
+             Calling the Commit or Rollback methods on a INetTxSession instance should throw an exception
+             as those operations are controlled by the Transaction Manager.
+            
+             The INetTxSession interface is optional. NMS providers are not required to support this
+             interface. This interface is for use by NMS providers to support transactional environments.
+             </summary>
+        </member>
+        <member name="T:Apache.NMS.ISession">
+            <summary>
+            Represents a single unit of work on an IConnection.
+            So the ISession can be used to perform transactional receive and sends
+            </summary>
+        </member>
+        <member name="M:Apache.NMS.ISession.CreateProducer">
+            <summary>
+            Creates a producer of messages
+            </summary>
+        </member>
+        <member name="M:Apache.NMS.ISession.CreateProducer(Apache.NMS.IDestination)">
+            <summary>
+            Creates a producer of messages on a given destination
+            </summary>
+        </member>
+        <member name="M:Apache.NMS.ISession.CreateConsumer(Apache.NMS.IDestination)">
+            <summary>
+            Creates a consumer of messages on a given destination
+            </summary>
+        </member>
+        <member name="M:Apache.NMS.ISession.CreateConsumer(Apache.NMS.IDestination,System.String)">
+            <summary>
+            Creates a consumer of messages on a given destination with a selector
+            </summary>
+        </member>
+        <member name="M:Apache.NMS.ISession.CreateConsumer(Apache.NMS.IDestination,System.String,System.Boolean)">
+            <summary>
+            Creates a consumer of messages on a given destination with a selector
+            </summary>
+        </member>
+        <member name="M:Apache.NMS.ISession.CreateDurableConsumer(Apache.NMS.ITopic,System.String,System.String,System.Boolean)">
+            <summary>
+            Creates a named durable consumer of messages on a given destination with a selector
+            </summary>
+        </member>
+        <member name="M:Apache.NMS.ISession.DeleteDurableConsumer(System.String)">
+            <summary>
+            Deletes a durable consumer created with CreateDurableConsumer().
+            </summary>
+            <param name="name">Name of the durable consumer</param>
+        </member>
+        <member name="M:Apache.NMS.ISession.CreateBrowser(Apache.NMS.IQueue)">
+            <summary>
+            Creates a QueueBrowser object to peek at the messages on the specified queue.
+            </summary>
+            <param name="queue">
+            A <see cref="T:Apache.NMS.IQueue"/>
+            </param>
+            <returns>
+            A <see cref="T:Apache.NMS.IQueueBrowser"/>
+            </returns>
+            <exception cref="T:System.NotSupportedException">
+            If the Prodiver does not support creation of Queue Browsers.
+            </exception>
+        </member>
+        <member name="M:Apache.NMS.ISession.CreateBrowser(Apache.NMS.IQueue,System.String)">
+            <summary>
+            Creates a QueueBrowser object to peek at the messages on the specified queue
+            using a message selector.
+            </summary>
+            <param name="queue">
+            A <see cref="T:Apache.NMS.IQueue"/>
+            </param>
+            <param name="selector">
+            A <see cref="T:System.String"/>
+            </param>
+            <returns>
+            A <see cref="T:Apache.NMS.IQueueBrowser"/>
+            </returns>
+            <exception cref="T:System.NotSupportedException">
+            If the Prodiver does not support creation of Queue Browsers.
+            </exception>
+        </member>
+        <member name="M:Apache.NMS.ISession.GetQueue(System.String)">
+            <summary>
+            Returns the queue for the given name
+            </summary>
+        </member>
+        <member name="M:Apache.NMS.ISession.GetTopic(System.String)">
+            <summary>
+            Returns the topic for the given name
+            </summary>
+        </member>
+        <member name="M:Apache.NMS.ISession.CreateTemporaryQueue">
+            <summary>
+            Creates a temporary queue
+            </summary>
+        </member>
+        <member name="M:Apache.NMS.ISession.CreateTemporaryTopic">
+            <summary>
+            Creates a temporary topic
+            </summary>
+        </member>
+        <member name="M:Apache.NMS.ISession.DeleteDestination(Apache.NMS.IDestination)">
+            <summary>
+            Delete a destination (Queue, Topic, Temp Queue, Temp Topic).
+            </summary>
+        </member>
+        <member name="M:Apache.NMS.ISession.CreateMessage">
+            <summary>
+            Creates a new message with an empty body
+            </summary>
+        </member>
+        <member name="M:Apache.NMS.ISession.CreateTextMessage">
+            <summary>
+            Creates a new text message with an empty body
+            </summary>
+        </member>
+        <member name="M:Apache.NMS.ISession.CreateTextMessage(System.String)">
+            <summary>
+            Creates a new text message with the given body
+            </summary>
+        </member>
+        <member name="M:Apache.NMS.ISession.CreateMapMessage">
+            <summary>
+            Creates a new Map message which contains primitive key and value pairs
+            </summary>
+        </member>
+        <member name="M:Apache.NMS.ISession.CreateObjectMessage(System.Object)">
+            <summary>
+            Creates a new Object message containing the given .NET object as the body
+            </summary>
+        </member>
+        <member name="M:Apache.NMS.ISession.CreateBytesMessage">
+            <summary>
+            Creates a new binary message
+            </summary>
+        </member>
+        <member name="M:Apache.NMS.ISession.CreateBytesMessage(System.Byte[])">
+            <summary>
+            Creates a new binary message with the given body
+            </summary>
+        </member>
+        <member name="M:Apache.NMS.ISession.CreateStreamMessage">
+            <summary>
+            Creates a new stream message
+            </summary>
+        </member>
+        <member name="M:Apache.NMS.ISession.Close">
+            <summary>
+            Closes the session.  There is no need to close the producers and consumers
+            of a closed session.
+            </summary>
+        </member>
+        <member name="M:Apache.NMS.ISession.Commit">
+            <summary>
+            If this is a transactional session then commit all message
+            send and acknowledgements for producers and consumers in this session
+            </summary>
+        </member>
+        <member name="M:Apache.NMS.ISession.Rollback">
+            <summary>
+            If this is a transactional session then rollback all message
+            send and acknowledgements for producers and consumers in this session
+            </summary>
+        </member>
+        <member name="P:Apache.NMS.ISession.ConsumerTransformer">
+            <summary>
+            A Delegate that is called each time a Message is dispatched to allow the client to do
+            any necessary transformations on the received message before it is delivered.
+            The Session instance sets the delegate on each Consumer it creates.
+            </summary>
+        </member>
+        <member name="P:Apache.NMS.ISession.ProducerTransformer">
+            <summary>
+            A delegate that is called each time a Message is sent from this Producer which allows
+            the application to perform any needed transformations on the Message before it is sent.
+            The Session instance sets the delegate on each Producer it creates.
+            </summary>
+        </member>
+        <member name="M:Apache.NMS.InvalidClientIDException.#ctor(System.Runtime.Serialization.SerializationInfo,System.Runtime.Serialization.StreamingContext)">
+            <summary>
+            Initializes a new instance of the InvalidClientIDException class with serialized data.
+            Throws System.ArgumentNullException if the info parameter is null.
+            Throws System.Runtime.Serialization.SerializationException if the class name is null or System.Exception.HResult is zero (0).
+            </summary>
+            <param name="info">The SerializationInfo that holds the serialized object data about the exception being thrown.</param>
+            <param name="context">The StreamingContext that contains contextual information about the source or destination.</param>
+        </member>
+        <member name="T:Apache.NMS.InvalidDestinationException">
+            <summary>
+            An attempt is made to access an invalid destination
+            </summary>
+        </member>
+        <member name="M:Apache.NMS.InvalidDestinationException.#ctor(System.Runtime.Serialization.SerializationInfo,System.Runtime.Serialization.StreamingContext)">
+            <summary>
+            Initializes a new instance of the InvalidDestinationException class with serialized data.
+            Throws System.ArgumentNullException if the info parameter is null.
+            Throws System.Runtime.Serialization.SerializationException if the class name is null or System.Exception.HResult is zero (0).
+            </summary>
+            <param name="info">The SerializationInfo that holds the serialized object data about the exception being thrown.</param>
+            <param name="context">The StreamingContext that contains contextual information about the source or destination.</param>
+        </member>
+        <member name="M:Apache.NMS.InvalidSelectorException.#ctor(System.Runtime.Serialization.SerializationInfo,System.Runtime.Serialization.StreamingContext)">
+            <summary>
+            Initializes a new instance of the InvalidSelectorException class with serialized data.
+            Throws System.ArgumentNullException if the info parameter is null.
+            Throws System.Runtime.Serialization.SerializationException if the class name is null or System.Exception.HResult is zero (0).
+            </summary>
+            <param name="info">The SerializationInfo that holds the serialized object data about the exception being thrown.</param>
+            <param name="context">The StreamingContext that contains contextual information about the source or destination.</param>
+        </member>
+        <member name="T:Apache.NMS.IObjectMessage">
+            <summary>
+            Represents an Object message which contains a serializable .Net object.
+            </summary>
+        </member>
+        <member name="T:Apache.NMS.IQueue">
+            <summary>
+            Represents a queue in a message broker. A message sent to a queue is delivered
+            to at most one consumer on the queue.
+            </summary>
+        </member>
+        <member name="T:Apache.NMS.IQueueBrowser">
+             <summary>
+             A client uses a QueueBrowser object to look at messages on a queue without removing them.
+            
+             The Enumeration method returns a java.util.Enumeration that is used to scan the queue's
+             messages. It may be an enumeration of the entire content of a queue, or it may contain
+             only the messages matching a message selector.
+            
+             Messages may be arriving and expiring while the scan is done. The NMS API does not
+             require the content of an enumeration to be a static snapshot of queue content. Whether
+             these changes are visible or not depends on the NMS provider.
+             </summary>
+        </member>
+        <member name="M:Apache.NMS.IQueueBrowser.Close">
+            <summary>
+            Closes the QueueBrowser.
+            </summary>
+            <exception cref="T:Apache.NMS.NMSException">
+            If NMS Provider fails to close the Browser for some reason.
+            </exception>
+        </member>
+        <member name="P:Apache.NMS.IQueueBrowser.MessageSelector">
+            <value>
+            Gets this queue browser's message selector expression.  If no Message
+            selector was specified than this method returns null.
+            </value>
+            <exception cref="T:Apache.NMS.NMSException">
+            If NMS Provider fails to get the Message Selector for some reason.
+            </exception>
+        </member>
+        <member name="P:Apache.NMS.IQueueBrowser.Queue">
+            <value>
+            Gets the queue associated with this queue browser.
+            </value>
+            <exception cref="T:Apache.NMS.NMSException">
+            If NMS Provider fails to retrieve the IQueue associated with the Browser
+            doe to some internal error.
+            </exception>
+        </member>
+        <member name="T:Apache.NMS.IStreamMessage">
+            <summary>
+            A StreamMessage object is used to send a stream of primitive types in the 
+            .NET programming language. It is filled and read sequentially. It inherits 
+            from the Message interface and adds a stream message body.
+            
+            The primitive types can be read or written explicitly using methods for each 
+            type. They may also be read or written generically as objects. For instance, 
+            a call to IStreamMessage.WriteInt32(6) is equivalent to 
+            StreamMessage.WriteObject( (Int32)6 ). Both forms are provided, because the 
+            explicit form is convenient for static programming, and the object form is 
+            needed when types are not known at compile time.
+            
+            When the message is first created, and when ClearBody is called, the body of 
+            the message is in write-only mode. After the first call to reset has been made, 
+            the message body is in read-only mode. After a message has been sent, the 
+            client that sent it can retain and modify it without affecting the message 
+            that has been sent. The same message object can be sent multiple times. When a 
+            message has been received, the provider has called reset so that the message 
+            body is in read-only mode for the client.
+            
+            If ClearBody is called on a message in read-only mode, the message body is 
+            cleared and the message body is in write-only mode.
+            
+            If a client attempts to read a message in write-only mode, a 
+            MessageNotReadableException is thrown.
+            
+            If a client attempts to write a message in read-only mode, a 
+            MessageNotWriteableException is thrown.
+            
+            IStreamMessage objects support the following conversion table. The marked cases 
+            must be supported. The unmarked cases must throw a NMSException. The 
+            String-to-primitive conversions may throw a runtime exception if the primitive's 
+            valueOf() method does not accept it as a valid String representation of the 
+            primitive.
+            
+            A value written as the row type can be read as the column type.
+            
+             |        | boolean byte short char int long float double String byte[]
+             |----------------------------------------------------------------------
+             |boolean |    X                                            X
+             |byte    |          X     X         X   X                  X   
+             |short   |                X         X   X                  X   
+             |char    |                     X                           X
+             |int     |                          X   X                  X   
+             |long    |                              X                  X   
+             |float   |                                    X     X      X   
+             |double  |                                          X      X   
+             |String  |    X     X     X         X   X     X     X      X   
+             |byte[]  |                                                        X
+             |----------------------------------------------------------------------
+            
+            </summary>
+        </member>
+        <member name="M:Apache.NMS.IStreamMessage.ReadBoolean">
+            <summary>
+            Reads a boolean from the stream message.
+            </summary>
+            <returns>
+            A <see cref="T:System.Boolean"/>
+            </returns>
+            <exception cref="T:Apache.NMS.NMSException">
+            if the NMS provider fails to read the message due to some internal error.
+            </exception>
+            <exception cref="T:Apache.NMS.MessageEOFException">
+            if unexpected end of message stream has been reached.
+            </exception>
+            <exception cref="T:Apache.NMS.MessageFormatException">
+            if this type conversion is invalid.
+            </exception>
+            <exception cref="T:Apache.NMS.MessageNotReadableException">
+            if the message is in write-only mode.
+            </exception>
+        </member>
+        <member name="M:Apache.NMS.IStreamMessage.ReadByte">
+            <summary>
+            Reads a byte from the stream message.
+            </summary>
+            <returns>
+            A <see cref="T:System.Byte"/>
+            </returns>
+            <exception cref="T:Apache.NMS.NMSException">
+            if the NMS provider fails to read the message due to some internal error.
+            </exception>
+            <exception cref="T:Apache.NMS.MessageEOFException">
+            if unexpected end of message stream has been reached.
+            </exception>
+            <exception cref="T:Apache.NMS.MessageFormatException">
+            if this type conversion is invalid.
+            </exception>
+            <exception cref="T:Apache.NMS.MessageNotReadableException">
+            if the message is in write-only mode.
+            </exception>        
+        </member>
+        <member name="M:Apache.NMS.IStreamMessage.ReadBytes(System.Byte[])">
+            <summary>
+            Reads a byte array field from the stream message into the specified byte[] 
+            object (the read buffer).
+            
+            To read the field value, ReadBytes should be successively called until it returns 
+            a value less than the length of the read buffer. The value of the bytes in the 
+            buffer following the last byte read is undefined.
+            
+            If ReadBytes returns a value equal to the length of the buffer, a subsequent 
+            ReadBytes call must be made. If there are no more bytes to be read, this call 
+            returns -1.
+            
+            If the byte array field value is null, ReadBytes returns -1.
+            If the byte array field value is empty, ReadBytes returns 0.
+            
+            Once the first ReadBytes call on a byte[] field value has been made, the full 
+            value of the field must be read before it is valid to read the next field. 
+            An attempt to read the next field before that has been done will throw a 
+            MessageFormatException.
+            
+            To read the byte field value into a new byte[] object, use the ReadObject method.
+            </summary>
+            <param name="value">
+            A <see cref="T:System.Byte"/>
+            </param>
+            <returns>
+            A <see cref="T:System.Byte"/>
+            the total number of bytes read into the buffer, or -1 if there is no more data 
+            because the end of the byte field has been reached
+            </returns>
+            <exception cref="T:Apache.NMS.NMSException">
+            if the NMS provider fails to read the message due to some internal error.
+            </exception>
+            <exception cref="T:Apache.NMS.MessageEOFException">
+            if unexpected end of message stream has been reached.
+            </exception>
+            <exception cref="T:Apache.NMS.MessageFormatException">
+            if this type conversion is invalid.
+            </exception>
+            <exception cref="T:Apache.NMS.MessageNotReadableException">
+            if the message is in write-only mode.
+            </exception>     
+            <seealso cref="M:Apache.NMS.IStreamMessage.ReadObject"/>
+        </member>
+        <member name="M:Apache.NMS.IStreamMessage.ReadChar">
+            <summary>
+            Reads a char from the stream message.
+            </summary>
+            <returns>
+            A <see cref="T:System.Char"/>
+            </returns>
+            <exception cref="T:Apache.NMS.NMSException">
+            if the NMS provider fails to read the message due to some internal error.
+            </exception>
+            <exception cref="T:Apache.NMS.MessageEOFException">
+            if unexpected end of message stream has been reached.
+            </exception>
+            <exception cref="T:Apache.NMS.MessageFormatException">
+            if this type conversion is invalid.
+            </exception>
+            <exception cref="T:Apache.NMS.MessageNotReadableException">
+            if the message is in write-only mode.
+            </exception>                
+        </member>
+        <member name="M:Apache.NMS.IStreamMessage.ReadInt16">
+            <summary>
+            Reads a short from the stream message.
+            </summary>
+            <returns>
+            A <see cref="T:System.Int16"/>
+            </returns>
+            <exception cref="T:Apache.NMS.NMSException">
+            if the NMS provider fails to read the message due to some internal error.
+            </exception>
+            <exception cref="T:Apache.NMS.MessageEOFException">
+            if unexpected end of message stream has been reached.
+            </exception>
+            <exception cref="T:Apache.NMS.MessageFormatException">
+            if this type conversion is invalid.
+            </exception>
+            <exception cref="T:Apache.NMS.MessageNotReadableException">
+            if the message is in write-only mode.
+            </exception>        
+        </member>
+        <member name="M:Apache.NMS.IStreamMessage.ReadInt32">
+            <summary>
+            Reads a int from the stream message.
+            </summary>
+            <returns>
+            A <see cref="T:System.Int32"/>
+            </returns>
+            <exception cref="T:Apache.NMS.NMSException">
+            if the NMS provider fails to read the message due to some internal error.
+            </exception>
+            <exception cref="T:Apache.NMS.MessageEOFException">
+            if unexpected end of message stream has been reached.
+            </exception>
+            <exception cref="T:Apache.NMS.MessageFormatException">
+            if this type conversion is invalid.
+            </exception>
+            <exception cref="T:Apache.NMS.MessageNotReadableException">
+            if the message is in write-only mode.
+            </exception>        
+        </member>
+        <member name="M:Apache.NMS.IStreamMessage.ReadInt64">
+            <summary>
+            Reads a long from the stream message.
+            </summary>
+            <returns>
+            A <see cref="T:System.Int64"/>
+            </returns>
+            <exception cref="T:Apache.NMS.NMSException">
+            if the NMS provider fails to read the message due to some internal error.
+            </exception>
+            <exception cref="T:Apache.NMS.MessageEOFException">
+            if unexpected end of message stream has been reached.
+            </exception>
+            <exception cref="T:Apache.NMS.MessageFormatException">
+            if this type conversion is invalid.
+            </exception>
+            <exception cref="T:Apache.NMS.MessageNotReadableException">
+            if the message is in write-only mode.
+            </exception>        
+        </member>
+        <member name="M:Apache.NMS.IStreamMessage.ReadSingle">
+            <summary>
+            Reads a float from the stream message.
+            </summary>
+            <returns>
+            A <see cref="T:System.Single"/>
+            </returns>
+            <exception cref="T:Apache.NMS.NMSException">
+            if the NMS provider fails to read the message due to some internal error.
+            </exception>
+            <exception cref="T:Apache.NMS.MessageEOFException">
+            if unexpected end of message stream has been reached.
+            </exception>
+            <exception cref="T:Apache.NMS.MessageFormatException">
+            if this type conversion is invalid.
+            </exception>
+            <exception cref="T:Apache.NMS.MessageNotReadableException">
+            if the message is in write-only mode.
+            </exception>        
+        </member>
+        <member name="M:Apache.NMS.IStreamMessage.ReadDouble">
+            <summary>
+            Reads a double from the stream message.
+            </summary>
+            <returns>
+            A <see cref="T:System.Double"/>
+            </returns>
+            <exception cref="T:Apache.NMS.NMSException">
+            if the NMS provider fails to read the message due to some internal error.
+            </exception>
+            <exception cref="T:Apache.NMS.MessageEOFException">
+            if unexpected end of message stream has been reached.
+            </exception>
+            <exception cref="T:Apache.NMS.MessageFormatException">
+            if this type conversion is invalid.
+            </exception>
+            <exception cref="T:Apache.NMS.MessageNotReadableException">
+            if the message is in write-only mode.
+            </exception>        
+        </member>
+        <member name="M:Apache.NMS.IStreamMessage.ReadString">
+            <summary>
+            Reads a string from the stream message.
+            </summary>
+            <returns>
+            A <see cref="T:System.String"/>
+            </returns>
+            <exception cref="T:Apache.NMS.NMSException">
+            if the NMS provider fails to read the message due to some internal error.
+            </exception>
+            <exception cref="T:Apache.NMS.MessageEOFException">
+            if unexpected end of message stream has been reached.
+            </exception>
+            <exception cref="T:Apache.NMS.MessageFormatException">
+            if this type conversion is invalid.
+            </exception>
+            <exception cref="T:Apache.NMS.MessageNotReadableException">
+            if the message is in write-only mode.
+            </exception>        
+        </member>
+        <member name="M:Apache.NMS.IStreamMessage.ReadObject">
+            <summary>
+            Reads a Object from the stream message.
+            </summary>
+            <returns>
+            A <see cref="T:System.Object"/>
+            </returns>
+            <exception cref="T:Apache.NMS.NMSException">
+            if the NMS provider fails to read the message due to some internal error.
+            </exception>
+            <exception cref="T:Apache.NMS.MessageEOFException">
+            if unexpected end of message stream has been reached.
+            </exception>
+            <exception cref="T:Apache.NMS.MessageFormatException">
+            if this type conversion is invalid.
+            </exception>
+            <exception cref="T:Apache.NMS.MessageNotReadableException">
+            if the message is in write-only mode.
+            </exception>        
+        </member>
+        <member name="M:Apache.NMS.IStreamMessage.WriteBoolean(System.Boolean)">
+            <summary>
+            Writes a boolean to the stream message.
+            </summary>
+            <param name="value">
+            A <see cref="T:System.Boolean"/>
+            </param>
+            <exception cref="T:Apache.NMS.NMSException">
+            if the NMS provider fails to write to the message due to some internal error.
+            </exception>
+            <exception cref="T:Apache.NMS.MessageNotWriteableException">
+            if the message is in read-only mode.
+            </exception>
+        </member>
+        <member name="M:Apache.NMS.IStreamMessage.WriteByte(System.Byte)">
+            <summary>
+            Writes a byte to the stream message.
+            </summary>
+            <param name="value">
+            A <see cref="T:System.Byte"/>
+            </param>
+            <exception cref="T:Apache.NMS.NMSException">
+            if the NMS provider fails to write to the message due to some internal error.
+            </exception>
+            <exception cref="T:Apache.NMS.MessageNotWriteableException">
+            if the message is in read-only mode.
+            </exception>
+        </member>
+        <member name="M:Apache.NMS.IStreamMessage.WriteBytes(System.Byte[])">
+            <summary>
+            Writes a byte array field to the stream message.
+            
+            The byte array value is written to the message as a byte array field. 
+            Consecutively written byte array fields are treated as two distinct 
+            fields when the fields are read.
+            </summary>
+            <param name="value">
+            A <see cref="T:System.Byte"/>
+            </param>
+            <exception cref="T:Apache.NMS.NMSException">
+            if the NMS provider fails to write to the message due to some internal error.
+            </exception>
+            <exception cref="T:Apache.NMS.MessageNotWriteableException">
+            if the message is in read-only mode.
+            </exception>
+        </member>
+        <member name="M:Apache.NMS.IStreamMessage.WriteBytes(System.Byte[],System.Int32,System.Int32)">
+            <summary>
+            Writes a portion of a byte array as a byte array field to the stream message.
+            
+            The a portion of the byte array value is written to the message as a byte 
+            array field. Consecutively written byte array fields are treated as two distinct 
+            fields when the fields are read.
+            </summary>
+            <param name="value">
+            A <see cref="T:System.Byte"/>
+            </param>
+            <param name="offset">
+            A <see cref="T:System.Int32"/> value that indicates the point in the buffer to 
+            begin writing to the stream message.
+            </param>
+            <param name="length">
+            A <see cref="T:System.Int32"/> value that indicates how many bytes in the buffer
+            to write to the stream message.
+            </param>
+            <exception cref="T:Apache.NMS.NMSException">
+            if the NMS provider fails to write to the message due to some internal error.
+            </exception>
+            <exception cref="T:Apache.NMS.MessageNotWriteableException">
+            if the message is in read-only mode.
+            </exception>
+        </member>
+        <member name="M:Apache.NMS.IStreamMessage.WriteChar(System.Char)">
+            <summary>
+            Writes a char to the stream message.
+            </summary>
+            <param name="value">
+            A <see cref="T:System.Char"/>
+            </param>
+            <exception cref="T:Apache.NMS.NMSException">
+            if the NMS provider fails to write to the message due to some internal error.
+            </exception>
+            <exception cref="T:Apache.NMS.MessageNotWriteableException">
+            if the message is in read-only mode.
+            </exception>
+        </member>
+        <member name="M:Apache.NMS.IStreamMessage.WriteInt16(System.Int16)">
+            <summary>
+            Writes a short to the stream message.
+            </summary>
+            <param name="value">
+            A <see cref="T:System.Int16"/>
+            </param>
+            <exception cref="T:Apache.NMS.NMSException">
+            if the NMS provider fails to write to the message due to some internal error.
+            </exception>
+            <exception cref="T:Apache.NMS.MessageNotWriteableException">
+            if the message is in read-only mode.
+            </exception>
+        </member>
+        <member name="M:Apache.NMS.IStreamMessage.WriteInt32(System.Int32)">
+            <summary>
+            Writes a int to the stream message.
+            </summary>
+            <param name="value">
+            A <see cref="T:System.Int32"/>
+            </param>
+            <exception cref="T:Apache.NMS.NMSException">
+            if the NMS provider fails to write to the message due to some internal error.
+            </exception>
+            <exception cref="T:Apache.NMS.MessageNotWriteableException">
+            if the message is in read-only mode.
+            </exception>
+        </member>
+        <member name="M:Apache.NMS.IStreamMessage.WriteInt64(System.Int64)">
+            <summary>
+            Writes a long to the stream message.
+            </summary>
+            <param name="value">
+            A <see cref="T:System.Int64"/>
+            </param>
+            <exception cref="T:Apache.NMS.NMSException">
+            if the NMS provider fails to write to the message due to some internal error.
+            </exception>
+            <exception cref="T:Apache.NMS.MessageNotWriteableException">
+            if the message is in read-only mode.
+            </exception>
+        </member>
+        <member name="M:Apache.NMS.IStreamMessage.WriteSingle(System.Single)">
+            <summary>
+            Writes a float to the stream message.
+            </summary>
+            <param name="value">
+            A <see cref="T:System.Single"/>
+            </param>
+            <exception cref="T:Apache.NMS.NMSException">
+            if the NMS provider fails to write to the message due to some internal error.
+            </exception>
+            <exception cref="T:Apache.NMS.MessageNotWriteableException">
+            if the message is in read-only mode.
+            </exception>
+        </member>
+        <member name="M:Apache.NMS.IStreamMessage.WriteDouble(System.Double)">
+            <summary>
+            Writes a double to the stream message.
+            </summary>
+            <param name="value">
+            A <see cref="T:System.Double"/>
+            </param>
+            <exception cref="T:Apache.NMS.NMSException">
+            if the NMS provider fails to write to the message due to some internal error.
+            </exception>
+            <exception cref="T:Apache.NMS.MessageNotWriteableException">
+            if the message is in read-only mode.
+            </exception>
+        </member>
+        <member name="M:Apache.NMS.IStreamMessage.WriteString(System.String)">
+            <summary>
+            Writes a string to the stream message.
+            </summary>
+            <param name="value">
+            A <see cref="T:System.String"/>
+            </param>
+            <exception cref="T:Apache.NMS.NMSException">
+            if the NMS provider fails to write to the message due to some internal error.
+            </exception>
+            <exception cref="T:Apache.NMS.MessageNotWriteableException">
+            if the message is in read-only mode.
+            </exception>
+        </member>
+        <member name="M:Apache.NMS.IStreamMessage.WriteObject(System.Object)">
+            <summary>
+            Writes a boolean to the stream message.
+            </summary>
+            <param name="value">
+            A <see cref="T:System.Boolean"/>
+            </param>
+            <exception cref="T:Apache.NMS.NMSException">
+            if the NMS provider fails to write to the message due to some internal error.
+            </exception>
+            <exception cref="T:Apache.NMS.MessageNotWriteableException">
+            if the message is in read-only mode.
+            </exception>
+        </member>
+        <member name="M:Apache.NMS.IStreamMessage.Reset">
+            <summary>
+            Puts the message body in read-only mode and repositions the stream to the beginning.
+            </summary>
+            <exception cref="T:Apache.NMS.MessageFormatException">
+            Thrown when the Message has an invalid format.
+            </exception> 
+            <exception cref="T:Apache.NMS.NMSException">
+            Thrown when there is an unhandled exception thrown from the provider.
+            </exception>          
+        </member>
+        <member name="T:Apache.NMS.ITemporaryQueue">
+            <summary>
+            Represents a temporary queue which exists for the duration 
+            of the IConnection which created it.
+            </summary>
+        </member>
+        <member name="M:Apache.NMS.ITemporaryQueue.Delete">
+            <summary>
+            Deletes this Temporary Destination, If there are existing receivers 
+            still using it, a NMSException will be thrown.
+            </summary>
+            <exception cref="T:Apache.NMS.NMSException">
+            If NMS Provider fails to Delete the Temp Destination or the client does
+            not support this operation.
+            </exception>
+        </member>
+        <member name="T:Apache.NMS.ITemporaryTopic">
+            <summary>
+            Represents a temporary topic which exists for the duration 
+            of the IConnection which created it.
+            </summary>
+        </member>
+        <member name="T:Apache.NMS.ITopic">
+            <summary>
+            Represents a topic in a message broker. A message sent to a topic
+            is delivered to all consumers on the topic who are interested in the message.
+            </summary>
+        </member>
+        <member name="M:Apache.NMS.ITemporaryTopic.Delete">
+            <summary>
+            Deletes this Temporary Destination, If there are existing receivers 
+            still using it, a NMSException will be thrown.
+            </summary>
+            <exception cref="T:Apache.NMS.NMSException">
+            If NMS Provider fails to Delete the Temp Destination or the client does
+            not support this operation.
+            </exception>
+        </member>
+        <member name="T:Apache.NMS.ITextMessage">
+            <summary>
+            Represents a text based message
+            </summary>
+        </member>
+        <member name="T:Apache.NMS.ITrace">
+            <summary>
+            The ITrace interface is used internally by ActiveMQ to log messages.
+            The client aplication may provide an implementation of ITrace if it wishes to
+            route messages to a specific destination.
+            </summary>
+            <remarks>
+            <para>
+            Use the <see cref="T:Apache.NMS.Tracer"/> class to register an instance of ITrace as the
+            active trace destination.
+            </para>
+            </remarks>
+        </member>
+        <member name="M:Apache.NMS.MessageConsumerExtensions.Receive``1(Apache.NMS.IMessageConsumer)">
+            <summary>
+            Receives the message from the destination for this consumer.  The object must be de-serializable from XML.
+            </summary>
+        </member>
+        <member name="M:Apache.NMS.MessageConsumerExtensions.Receive``1(Apache.NMS.IMessageConsumer,System.TimeSpan)">
+            <summary>
+            Receives the message from the destination for this consumer.  The object must be de-serializable from XML.
+            </summary>
+        </member>
+        <member name="M:Apache.NMS.MessageConsumerExtensions.ReceiveNoWait``1(Apache.NMS.IMessageConsumer)">
+            <summary>
+            Receives the message from the destination for this consumer.  The object must be de-serializable from XML.
+            </summary>
+        </member>
+        <member name="M:Apache.NMS.MessageEOFException.#ctor(System.Runtime.Serialization.SerializationInfo,System.Runtime.Serialization.StreamingContext)">
+            <summary>
+            Initializes a new instance of the MessageEOFException class with serialized data.
+            Throws System.ArgumentNullException if the info parameter is null.
+            Throws System.Runtime.Serialization.SerializationException if the class name is null or System.Exception.HResult is zero (0).
+            </summary>
+            <param name="info">The SerializationInfo that holds the serialized object data about the exception being thrown.</param>
+            <param name="context">The StreamingContext that contains contextual information about the source or destination.</param>
+        </member>
+        <member name="M:Apache.NMS.MessageExtensions.ToObject(Apache.NMS.IMessage)">
+            <summary>
+            Deserializes the object from Xml, and returns it.
+            </summary>
+        </member>
+        <member name="M:Apache.NMS.MessageExtensions.ToObject``1(Apache.NMS.IMessage)">
+            <summary>
+            Deserializes the object from Xml, and returns it.
+            </summary>
+        </member>
+        <member name="M:Apache.NMS.MessageFormatException.#ctor(System.Runtime.Serialization.SerializationInfo,System.Runtime.Serialization.StreamingContext)">
+            <summary>
+            Initializes a new instance of the MessageFormatException class with serialized data.
+            Throws System.ArgumentNullException if the info parameter is null.
+            Throws System.Runtime.Serialization.SerializationException if the class name is null or System.Exception.HResult is zero (0).
+            </summary>
+            <param name="info">The SerializationInfo that holds the serialized object data about the exception being thrown.</param>
+            <param name="context">The StreamingContext that contains contextual information about the source or destination.</param>
+        </member>
+        <member name="M:Apache.NMS.MessageNotReadableException.#ctor(System.Runtime.Serialization.SerializationInfo,System.Runtime.Serialization.StreamingContext)">
+            <summary>
+            Initializes a new instance of the MessageNotReadableException class with serialized data.
+            Throws System.ArgumentNullException if the info parameter is null.
+            Throws System.Runtime.Serialization.SerializationException if the class name is null or System.Exception.HResult is zero (0).
+            </summary>
+            <param name="info">The SerializationInfo that holds the serialized object data about the exception being thrown.</param>
+            <param name="context">The StreamingContext that contains contextual information about the source or destination.</param>
+        </member>
+        <member name="M:Apache.NMS.MessageNotWriteableException.#ctor(System.Runtime.Serialization.SerializationInfo,System.Runtime.Serialization.StreamingContext)">
+            <summary>
+            Initializes a new instance of the MessageNotWriteableException class with serialized data.
+            Throws System.ArgumentNullException if the info parameter is null.
+            Throws System.Runtime.Serialization.SerializationException if the class name is null or System.Exception.HResult is zero (0).
+            </summary>
+            <param name="info">The SerializationInfo that holds the serialized object data about the exception being thrown.</param>
+            <param name="context">The StreamingContext that contains contextual information about the source or destination.</param>
+        </member>
+        <member name="M:Apache.NMS.MessageProducerExtensions.CreateXmlMessage(Apache.NMS.IMessageProducer,System.Object)">
+            <summary>
+            Extension function to create a text message from an object.  The object must be serializable to XML.
+            </summary>
+        </member>
+        <member name="M:Apache.NMS.MessageProducerExtensions.Send(Apache.NMS.IMessageProducer,System.Object)">
+            <summary>
+            Sends the message to the default destination for this producer.  The object must be serializable to XML.
+            </summary>
+        </member>
+        <member name="M:Apache.NMS.MessageProducerExtensions.Send(Apache.NMS.IMessageProducer,System.Object,Apache.NMS.MsgDeliveryMode,Apache.NMS.MsgPriority,System.TimeSpan)">
+            <summary>
+            Sends the message to the default destination with the explicit QoS configuration.  The object must be serializable to XML.
+            </summary>
+        </member>
+        <member name="M:Apache.NMS.MessageProducerExtensions.Send(Apache.NMS.IMessageProducer,Apache.NMS.IDestination,System.Object)">
+            <summary>
+            Sends the message to the given destination
+            </summary>
+        </member>
+        <member name="M:Apache.NMS.MessageProducerExtensions.Send(Apache.NMS.IMessageProducer,Apache.NMS.IDestination,System.Object,Apache.NMS.MsgDeliveryMode,Apache.NMS.MsgPriority,System.TimeSpan)">
+            <summary>
+            Sends the message to the given destination with the explicit QoS configuration.  The object must be serializable to XML.
+            </summary>
+        </member>
+        <member name="T:Apache.NMS.NMSConnectionException">
+            <summary>
+            Represents a connection failure.
+            </summary>
+        </member>
+        <member name="M:Apache.NMS.NMSConnectionException.#ctor(System.Runtime.Serialization.SerializationInfo,System.Runtime.Serialization.StreamingContext)">
+            <summary>
+            Initializes a new instance of the NMSConnectionException class with serialized data.
+            Throws System.ArgumentNullException if the info parameter is null.
+            Throws System.Runtime.Serialization.SerializationException if the class name is null or System.Exception.HResult is zero (0).
+            </summary>
+            <param name="info">The SerializationInfo that holds the serialized object data about the exception being thrown.</param>
+            <param name="context">The StreamingContext that contains contextual information about the source or destination.</param>
+        </member>
+        <member name="T:Apache.NMS.ProviderFactoryInfo">
+            <summary>
+            Provider implementation mapping class.
+            </summary>
+        </member>
+        <member name="T:Apache.NMS.NMSConnectionFactory">
+            <summary>
+            Implementation of a factory for <see cref="T:Apache.NMS.IConnection"/> instances.
+            </summary>
+        </member>
+        <member name="M:Apache.NMS.NMSConnectionFactory.#cctor">
+            <summary>
+            Static class constructor
+            </summary>
+        </member>
+        <member name="M:Apache.NMS.NMSConnectionFactory.#ctor(System.String,System.Object[])">
+            <summary>
+            The ConnectionFactory object must define a constructor that takes as a minimum a Uri object.
+            Any additional parameters are optional, but will typically include a Client ID string.
+            </summary>
+            <param name="providerURI">The URI for the ActiveMQ provider.</param>
+            <param name="constructorParams">Optional parameters to use when creating the ConnectionFactory.</param>
+        </member>
+        <member name="M:Apache.NMS.NMSConnectionFactory.#ctor(System.Uri,System.Object[])">
+            <summary>
+            The ConnectionFactory object must define a constructor that takes as a minimum a Uri object.
+            Any additional parameters are optional, but will typically include a Client ID string.
+            </summary>
+            <param name="uriProvider">The URI for the ActiveMQ provider.</param>
+            <param name="constructorParams">Optional parameters to use when creating the ConnectionFactory.</param>
+        </member>
+        <member name="M:Apache.NMS.NMSConnectionFactory.CreateConnectionFactory(System.Uri,System.Object[])">
+            <summary>
+            Create a connection factory that can create connections for the given scheme in the URI.
+            </summary>
+            <param name="uriProvider">The URI for the ActiveMQ provider.</param>
+            <param name="constructorParams">Optional parameters to use when creating the ConnectionFactory.</param>
+            <returns>A <see cref="T:Apache.NMS.IConnectionFactory"/> implementation that will be used.</returns>
+        </member>
+        <member name="M:Apache.NMS.NMSConnectionFactory.GetTypeForScheme(System.String)">
+            <summary>
+            Finds the <see cref="T:System.Type"/> associated with the given scheme.
+            </summary>
+            <param name="scheme">The scheme (e.g. <c>tcp</c>, <c>activemq</c> or <c>stomp</c>).</param>
+            <returns>The <see cref="T:System.Type"/> of the ConnectionFactory that will be used
+            to create the connection for the specified <paramref name="scheme"/>.</returns>
+        </member>
+        <member name="M:Apache.NMS.NMSConnectionFactory.LookupConnectionFactoryInfo(System.String[],System.String,System.String@,System.String@)">
+             <summary>
+             Lookup the connection factory assembly filename and class name.
+             Read an external configuration file that maps scheme to provider implementation.
+             Load XML config files named: nmsprovider-{scheme}.config
+             Following is a sample configuration file named nmsprovider-jms.config.  Replace
+             the parenthesis with angle brackets for proper XML formatting.
+            
+                 (?xml version="1.0" encoding="utf-8" ?)
+                 (configuration)
+                     (provider assembly="MyCompany.NMS.JMSProvider.dll" classFactory="MyCompany.NMS.JMSProvider.ConnectionFactory"/)
+                 (/configuration)
+            
+             This configuration file would be loaded and parsed when a connection uri with a scheme of 'jms'
+             is used for the provider.  In this example the connection string might look like:
+                 jms://localhost:7222
+            
+             </summary>
+             <param name="paths">Folder paths to look in.</param>
+             <param name="scheme">The scheme.</param>
+             <param name="assemblyFileName">Name of the assembly file.</param>
+             <param name="factoryClassName">Name of the factory class.</param>
+             <returns><c>true</c> if the configuration file for the specified <paramref name="scheme" /> could
+             be found; otherwise, <c>false</c>.</returns>
+        </member>
+        <member name="M:Apache.NMS.NMSConnectionFactory.GetConfigSearchPaths">
+            <summary>
+            Get an array of search paths to look for config files.
+            </summary>
+            <returns>
+            A collection of search paths, including the current directory, the current AppDomain's
+            BaseDirectory and the current AppDomain's RelativeSearchPath.
+            </returns>
+        </member>
+        <member name="M:Apache.NMS.NMSConnectionFactory.MakeParameterArray(System.Object,System.Object[])">
+            <summary>
+            Converts a <c>params object[]</c> collection into a plain <c>object[]</c>s, to pass to the constructor.
+            </summary>
+            <param name="firstParam">The first parameter in the collection.</param>
+            <param name="varParams">The remaining parameters.</param>
+            <returns>An array of <see cref="T:System.Object"/> instances.</returns>
+        </member>
+        <member name="M:Apache.NMS.NMSConnectionFactory.CreateConnection">
+            <summary>
+            Creates a new connection.
+            </summary>
+            <returns>An <see cref="T:Apache.NMS.IConnection"/> created by the requested ConnectionFactory.</returns>
+        </member>
+        <member name="M:Apache.NMS.NMSConnectionFactory.CreateConnection(System.String,System.String)">
+            <summary>
+            Creates a new connection with the given <paramref name="userName"/> and <paramref name="password"/> credentials.
+            </summary>
+            <param name="userName">The username to use when establishing the connection.</param>
+            <param name="password">The password to use when establishing the connection.</param>
+            <returns>An <see cref="T:Apache.NMS.IConnection"/> created by the requested ConnectionFactory.</returns>
+        </member>
+        <member name="P:Apache.NMS.NMSConnectionFactory.BrokerUri">
+            <summary>
+            Get/or set the broker Uri.
+            </summary>
+        </member>
+        <member name="P:Apache.NMS.NMSConnectionFactory.ConnectionFactory">
+            <summary>
+            The actual IConnectionFactory implementation that is being used.  This implementation
+            depends on the scheme of the URI used when constructed.
+            </summary>
+        </member>
+        <member name="P:Apache.NMS.NMSConnectionFactory.RedeliveryPolicy">
+            <summary>
+            Get/or Set the IRedeliveryPolicy instance using the IConnectionFactory implementation
+            that is being used.
+            </summary>
+        </member>
+        <member name="P:Apache.NMS.NMSConnectionFactory.ConsumerTransformer">
+            <summary>
+            Get/or Set the ConsumerTransformerDelegate using the IConnectionFactory implementation
+            that is currently being used.
+            </summary>
+        </member>
+        <member name="P:Apache.NMS.NMSConnectionFactory.ProducerTransformer">
+            <summary>
+            Get/or Set the ProducerTransformerDelegate using the IConnectionFactory implementation
+            that is currently being used.
+            </summary>
+        </member>
+        <member name="T:Apache.NMS.MsgPriority">
+            <summary>
+            Define an enumerated array of message priorities.
+            </summary>
+        </member>
+        <member name="T:Apache.NMS.MsgDeliveryMode">
+            <summary>
+            Define an enumerated array of message delivery modes.  Provider-specific
+            values can be used to extend this enumerated mode.  TIBCO is known to
+            provide a third value of ReliableDelivery.  At minimum, a provider must
+            support Persistent and NonPersistent.
+            </summary>
+        </member>
+        <member name="T:Apache.NMS.NMSConstants">
+            <summary>
+            Defines a number of constants
+            </summary>
+        </member>
+        <member name="T:Apache.NMS.NMSSecurityException">
+            <summary>
+            Represents a security failure.
+            </summary>
+        </member>
+        <member name="M:Apache.NMS.NMSSecurityException.#ctor(System.Runtime.Serialization.SerializationInfo,System.Runtime.Serialization.StreamingContext)">
+            <summary>
+            Initializes a new instance of the NMSSecurityException class with serialized data.
+            Throws System.ArgumentNullException if the info parameter is null.
+            Throws System.Runtime.Serialization.SerializationException if the class name is null or System.Exception.HResult is zero (0).
+            </summary>
+            <param name="info">The SerializationInfo that holds the serialized object data about the exception being thrown.</param>
+            <param name="context">The StreamingContext that contains contextual information about the source or destination.</param>
+        </member>
+        <member name="M:Apache.NMS.ResourceAllocationException.#ctor(System.Runtime.Serialization.SerializationInfo,System.Runtime.Serialization.StreamingContext)">
+            <summary>
+            Initializes a new instance of the ResourceAllocationException class with serialized data.
+            Throws System.ArgumentNullException if the info parameter is null.
+            Throws System.Runtime.Serialization.SerializationException if the class name is null or System.Exception.HResult is zero (0).
+            </summary>
+            <param name="info">The SerializationInfo that holds the serialized object data about the exception being thrown.</param>
+            <param name="context">The StreamingContext that contains contextual information about the source or destination.</param>
+        </member>
+        <member name="M:Apache.NMS.SessionExtensions.CreateXmlMessage(Apache.NMS.ISession,System.Object)">
+            <summary>
+            Extension function to create a text message from an object.  The object must be serializable to XML.
+            </summary>
+        </member>
+        <member name="M:Apache.NMS.SessionExtensions.GetDestination(Apache.NMS.ISession,System.String)">
+            <summary>
+            Extension function to get the destination by parsing the embedded type prefix.  Default is Queue if no prefix is
+            embedded in the destinationName.
+            </summary>
+        </member>
+        <member name="M:Apache.NMS.SessionExtensions.GetDestination(Apache.NMS.ISession,System.String,Apache.NMS.DestinationType)">
+            <summary>
+            Extension function to get the destination by parsing the embedded type prefix.
+            </summary>
+        </member>
+        <member name="M:Apache.NMS.SessionExtensions.GetQueue(Apache.NMS.ISession,System.String)">
+            <summary>
+            Extension function to get the destination by parsing the embedded type prefix.
+            </summary>
+        </member>
+        <member name="M:Apache.NMS.SessionExtensions.GetTopic(Apache.NMS.ISession,System.String)">
+            <summary>
+            Extension function to get the destination by parsing the embedded type prefix.
+            </summary>
+        </member>
+        <member name="M:Apache.NMS.SessionExtensions.DeleteDestination(Apache.NMS.ISession,System.String)">
+            <summary>
+            Extension function to delete the named destination by parsing the embedded type prefix.  Default is Queue if no prefix is
+            embedded in the destinationName.
+            </summary>
+        </member>
+        <member name="M:Apache.NMS.SessionExtensions.DeleteDestination(Apache.NMS.ISession,System.String,Apache.NMS.DestinationType)">
+            <summary>
+            Extension function to delete the named destination by parsing the embedded type prefix.
+            </summary>
+        </member>
+        <member name="M:Apache.NMS.SessionExtensions.DeleteQueue(Apache.NMS.ISession,System.String)">
+            <summary>
+            Extension function to delete the named destination by parsing the embedded type prefix.
+            </summary>
+        </member>
+        <member name="M:Apache.NMS.SessionExtensions.DeleteTopic(Apache.NMS.ISession,System.String)">
+            <summary>
+            Extension function to delete the named destination by parsing the embedded type prefix.
+            </summary>
+        </member>
+        <member name="M:Apache.NMS.TransactionInProgressException.#ctor(System.Runtime.Serialization.SerializationInfo,System.Runtime.Serialization.StreamingContext)">
+            <summary>
+            Initializes a new instance of the TransactionInProgressException class with serialized data.
+            Throws System.ArgumentNullException if the info parameter is null.
+            Throws System.Runtime.Serialization.SerializationException if the class name is null or System.Exception.HResult is zero (0).
+            </summary>
+            <param name="info">The SerializationInfo that holds the serialized object data about the exception being thrown.</param>
+            <param name="context">The StreamingContext that contains contextual information about the source or destination.</param>
+        </member>
+        <member name="M:Apache.NMS.TransactionRolledBackException.#ctor(System.Runtime.Serialization.SerializationInfo,System.Runtime.Serialization.StreamingContext)">
+            <summary>
+            Initializes a new instance of the TransactionRolledBackException class with serialized data.
+            Throws System.ArgumentNullException if the info parameter is null.
+            Throws System.Runtime.Serialization.SerializationException if the class name is null or System.Exception.HResult is zero (0).
+            </summary>
+            <param name="info">The SerializationInfo that holds the serialized object data about the exception being thrown.</param>
+            <param name="context">The StreamingContext that contains contextual information about the source or destination.</param>
+        </member>
+    </members>
+</doc>
