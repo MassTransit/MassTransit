@@ -131,19 +131,6 @@ ilmerge :ilmerge_masstransit do |ilm|
 	ilm.references = [ 'MassTransit.dll', 'Stact.dll', 'Newtonsoft.Json.dll']
 end
 
-
-ilmerge :ilmerge_stact do |ilm|
-	out = File.join(props[:output], 'Stact.dll')
-	ilm.output = out
-	ilm.internalize = File.join(props[:build_support], 'internalize.txt')
-	ilm.working_directory = File.join(props[:src], "Stact/bin/#{BUILD_CONFIG}")
-	ilm.target = :library
-        ilm.use MSB_USE
-	ilm.log = File.join( props[:src], "Stact","bin","#{BUILD_CONFIG}", 'ilmerge.log' )
-	ilm.allow_dupes = true
-	ilm.references = [ 'Stact.dll', 'Magnum.dll']
-end
-
 desc "Copying Services"
 task :copy_services => [:compile] do
 	puts "Copying services"
@@ -154,6 +141,7 @@ task :copy_services => [:compile] do
 	copyOutputFiles props[:output], 'MassTransit.dll', targ
      	copyOutputFiles src, "Castle*.dll", targ	
      	copyOutputFiles src, "log4net.dll", targ	
+     	copyOutputFiles src, "Magnum.dll", targ	
      	copyOutputFiles src, "FluentNHibernate.dll", targ	
      	copyOutputFiles src, "NHibernate*.dll", targ	
      	copyOutputFiles src, "Iesi.Collections.dll", targ	
@@ -166,6 +154,7 @@ task :copy_services => [:compile] do
 	copyOutputFiles src, "MassTransit.*.{dll,exe,config}", targ
 	copyOutputFiles props[:output], 'MassTransit.dll', targ
      	copyOutputFiles src, "log4net.dll", targ	
+     	copyOutputFiles src, "Magnum.dll", targ	
      	copyOutputFiles src, "StructureMap.dll", targ	
 
 	targ = File.join(props[:stage], 'Services', 'SystemView2')
@@ -174,6 +163,7 @@ task :copy_services => [:compile] do
 	copyOutputFiles src, "MassTransit.*.{dll,exe,config}", targ
 	copyOutputFiles props[:output], 'MassTransit.dll', targ
      	copyOutputFiles src, "log4net.dll", targ	
+     	copyOutputFiles src, "Magnum.dll", targ	
      	copyOutputFiles src, "StructureMap.dll", targ	
      	copyOutputFiles src, "WPFToolkit.dll", targ	
 end
