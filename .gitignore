@@ -1,5 +1,5 @@
 build_output/*
-code_drop/*
+build_artifacts/*
 *.suo
 *.user
 
@@ -22,7 +22,7 @@ _ReSharper*
 
 TestResult.xml
 submit.xml
-src/tests/*
+tests/*
 SolutionVersion.cs
 src/SolutionVersion.cs
 tests

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?> 
+<package> 
+  <metadata> 
+    <id>MassTransit</id> 
+    <version>1.3.0.0</version> 
+    <authors>Chris Patterson, Dru Sellers, Travis Smith</authors>
+    <description>MassTransit is a distributed application framework for .NET, including support for MSMQ, ActiveMQ, and RabbitMQ.</description> 
+    <language>en-US</language>
+    <licenseUrl>https://github.com/MassTransit/MassTransit/blob/master/LICENSE</licenseUrl>
+    <projectUrl>http://masstransit-project.com</projectUrl>
+  </metadata> 
+  <files>
+    <file src="build_output\**\*" target="lib" />
+  </files>
+</package>
+
