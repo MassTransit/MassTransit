@@ -13,7 +13,7 @@
 namespace MassTransit.RuntimeServices.Model
 {
     using FluentNHibernate.Mapping;
-    using Magnum.ForNHibernate.StateMachine;
+    using Infrastructure;
     using Services.Timeout.Server;
 
     public class TimeoutSagaMap :

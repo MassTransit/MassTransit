@@ -13,8 +13,7 @@
 namespace LegacyRuntime.Model
 {
     using FluentNHibernate.Mapping;
-    using Magnum.ForNHibernate;
-    using Magnum.ForNHibernate.StateMachine;
+    using MassTransit.Infrastructure;
     using MassTransit.LegacySupport;
 
     public sealed class LegacySubscriptionClientSagaMap :

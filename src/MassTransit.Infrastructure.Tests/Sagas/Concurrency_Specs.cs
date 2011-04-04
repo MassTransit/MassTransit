@@ -24,12 +24,10 @@ namespace MassTransit.Infrastructure.Tests.Sagas
 	using MassTransit.Saga;
 	using MassTransit.Tests.TextFixtures;
 	using NHibernate;
-	using NHibernate.Cfg;
 	using NHibernate.Tool.hbm2ddl;
 	using NUnit.Framework;
 	using Rhino.Mocks;
 	using Saga;
-	using Environment=NHibernate.Cfg.Environment;
 
 	[TestFixture, Category("Integration")]
 	public class ConcurrentSagaTestFixtureBase :
@@ -49,7 +47,7 @@ namespace MassTransit.Infrastructure.Tests.Sagas
 					.DefaultSchema("dbo")
 					.ShowSql()
 					.ProxyFactoryFactory("NHibernate.ByteCode.Castle.ProxyFactoryFactory, NHibernate.ByteCode.Castle")
-					.Raw(Environment.Isolation, IsolationLevel.Serializable.ToString()))
+					.Raw(NHibernate.Cfg.Environment.Isolation, IsolationLevel.Serializable.ToString()))
 				.Mappings(m => 
 					{
 						m.FluentMappings.Add<ConcurrentSagaMap>();
@@ -59,7 +57,7 @@ namespace MassTransit.Infrastructure.Tests.Sagas
 				.BuildSessionFactory();
 		}
 
-		private static void BuildSchema(Configuration config)
+		private static void BuildSchema(NHibernate.Cfg.Configuration config)
 		{
 			new SchemaExport(config).Create(false, true);
 		}

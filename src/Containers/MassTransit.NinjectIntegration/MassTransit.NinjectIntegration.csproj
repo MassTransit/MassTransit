@@ -59,7 +59,7 @@
     </Reference>
     <Reference Include="Ninject, Version=2.0.0.151, Culture=neutral, PublicKeyToken=c7192dc5380945e7, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\lib\Ninject-2.0\Ninject.dll</HintPath>
+      <HintPath>..\..\..\lib\Ninject-2.0\net-3.5\Ninject.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="System" />
