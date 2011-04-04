@@ -14,10 +14,9 @@ namespace Starbucks.Customer
 {
 	using System;
 	using System.Windows.Forms;
-	using Castle.Windsor;
 	using MassTransit;
 	using MassTransit.Transports;
-	using MassTransit.WindsorIntegration;
+	using StructureMap;
 
 	internal static class Program
 	{
@@ -29,21 +28,21 @@ namespace Starbucks.Customer
 		{
 			EndpointConfigurator.Defaults(x => { x.CreateMissingQueues = true; });
 
-			IWindsorContainer c = BootstrapContainer();
+			IContainer c = BootstrapContainer();
 
 			Application.EnableVisualStyles();
 			Application.SetCompatibleTextRenderingDefault(false);
-			Application.Run(new OrderDrinkForm(c.Resolve<IServiceBus>()));
+			Application.Run(new OrderDrinkForm(c.GetInstance<IServiceBus>()));
 		}
 
-		private static IWindsorContainer BootstrapContainer()
+		private static IContainer BootstrapContainer()
 		{
-			var container = new WindsorContainer("Starbucks.Customer.Castle.xml");
-			var installer = new MassTransitInstaller();
-			container.Install(installer);
+			var container = new Container(x =>
+				{
+					x.AddType(typeof (OrderDrinkForm));
+				});
 
-			container.AddComponent<OrderDrinkForm>();
-			container.AddComponent<CustomerService>(typeof (CustomerService).Name);
+			container.Configure(x => x.AddRegistry(new CustomerRegistry(container)));
 
 			return container;
 		}
