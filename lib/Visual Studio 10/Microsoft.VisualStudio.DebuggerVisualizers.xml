@@ -1,0 +1,99 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<doc>
+  <assembly>
+    <name>Microsoft.VisualStudio.DebuggerVisualizers</name>
+  </assembly>
+  <members>
+    <member name="T:Microsoft.VisualStudio.DebuggerVisualizers.DialogDebuggerVisualizer"></member>
+    <member name="M:Microsoft.VisualStudio.DebuggerVisualizers.DialogDebuggerVisualizer.#ctor"></member>
+    <member name="M:Microsoft.VisualStudio.DebuggerVisualizers.DialogDebuggerVisualizer.Show(Microsoft.VisualStudio.DebuggerVisualizers.IDialogVisualizerService,Microsoft.VisualStudio.DebuggerVisualizers.IVisualizerObjectProvider)">
+      <param name="windowService">An object of type <see cref="T:Microsoft.VisualStudio.DebuggerVisualizers.IDialogVisualizerService" />, which provides methods your visualizer can use to display Windows forms, controls, and dialogs.</param>
+      <param name="objectProvider">An object of type <see cref="T:Microsoft.VisualStudio.DebuggerVisualizers.IVisualizerObjectProvider" />. This object provides communication from the debugger side of the visualizer to the object source (<see cref="T:Microsoft.VisualStudio.DebuggerVisualizers.VisualizerObjectSource" />) on the debuggee side.</param>
+    </member>
+    <member name="T:Microsoft.VisualStudio.DebuggerVisualizers.IDialogVisualizerService"></member>
+    <member name="M:Microsoft.VisualStudio.DebuggerVisualizers.IDialogVisualizerService.ShowDialog(System.Windows.Forms.CommonDialog)">
+      <param name="dialog">Any dialog derived from System.Windows.Forms.CommonDialog.</param>
+    </member>
+    <member name="M:Microsoft.VisualStudio.DebuggerVisualizers.IDialogVisualizerService.ShowDialog(System.Windows.Forms.Control)">
+      <param name="control">Any control derived from System.Windows.Forms.Control.</param>
+    </member>
+    <member name="M:Microsoft.VisualStudio.DebuggerVisualizers.IDialogVisualizerService.ShowDialog(System.Windows.Forms.Form)">
+      <returns>Displays a Windows Form.</returns>
+      <param name="form">Any Windows Form object derived from System.Windows.Forms.Form.</param>
+    </member>
+    <member name="T:Microsoft.VisualStudio.DebuggerVisualizers.IVisualizerObjectProvider"></member>
+    <member name="M:Microsoft.VisualStudio.DebuggerVisualizers.IVisualizerObjectProvider.GetData">
+      <returns>A stream of data containing the contents of the object being visualized. Calling this method results in <see cref="M:Microsoft.VisualStudio.DebuggerVisualizers.VisualizerObjectSource.GetData(System.Object,System.IO.Stream)" /> being called on the VisualizerObjectSource. The return value of that GetData call is then returned to the caller of this method.</returns>
+    </member>
+    <member name="M:Microsoft.VisualStudio.DebuggerVisualizers.IVisualizerObjectProvider.GetObject">
+      <returns>The data object being visualized. This is actually a debugger-side copy of the object you are visualizing in the debuggee. If you modify the contents of this object, the changes will not be reflected back in the debuggee unless you use the <see cref="M:Microsoft.VisualStudio.DebuggerVisualizers.IVisualizerObjectProvider.ReplaceData(System.IO.Stream)" />/<see cref="M:Microsoft.VisualStudio.DebuggerVisualizers.IVisualizerObjectProvider.ReplaceObject(System.Object)" /> or <see cref="M:Microsoft.VisualStudio.DebuggerVisualizers.IVisualizerObjectProvider.TransferData(System.IO.Stream)" />/<see cref="M:Microsoft.VisualStudio.DebuggerVisualizers.IVisualizerObjectProvider.TransferObject(System.Object)" />. </returns>
+    </member>
+    <member name="P:Microsoft.VisualStudio.DebuggerVisualizers.IVisualizerObjectProvider.IsObjectReplaceable">
+      <returns>Determines whether the data object being visualized is replaceable (read/write) or nonreplaceable (read only).</returns>
+    </member>
+    <member name="M:Microsoft.VisualStudio.DebuggerVisualizers.IVisualizerObjectProvider.ReplaceData(System.IO.Stream)">
+      <param name="newObjectData">A stream containing data to be used to create a new object, replacing the object currently being visualized.</param>
+    </member>
+    <member name="M:Microsoft.VisualStudio.DebuggerVisualizers.IVisualizerObjectProvider.ReplaceObject(System.Object)">
+      <param name="newObject">The new object to replace the object currently being visualized.</param>
+    </member>
+    <member name="M:Microsoft.VisualStudio.DebuggerVisualizers.IVisualizerObjectProvider.TransferData(System.IO.Stream)">
+      <returns>Returns the data stream filled in by VisualizerObjectSource's TransferData method. There is no two-way stream-based communication between the debugger side and debuggee side (object source.)</returns>
+      <param name="outgoingData">A stream of data that is to be transferred back to the debuggee side.</param>
+    </member>
+    <member name="M:Microsoft.VisualStudio.DebuggerVisualizers.IVisualizerObjectProvider.TransferObject(System.Object)">
+      <returns>The result of deserializing the return value of <see cref="M:Microsoft.VisualStudio.DebuggerVisualizers.IVisualizerObjectProvider.TransferData(System.IO.Stream)" />.</returns>
+      <param name="outgoingObject">An object that is to be transferred back to the debuggee side.</param>
+    </member>
+    <member name="T:Microsoft.VisualStudio.DebuggerVisualizers.VisualizerDevelopmentHost"></member>
+    <member name="M:Microsoft.VisualStudio.DebuggerVisualizers.VisualizerDevelopmentHost.#ctor(System.Object,System.Type)">
+      <param name="objectToVisualize">The data object you want to show in the visualizer. If you are testing a String visualizer, for example, this parameter would be a String that you want to show in the visualizer.</param>
+      <param name="visualizer"></param>
+    </member>
+    <member name="M:Microsoft.VisualStudio.DebuggerVisualizers.VisualizerDevelopmentHost.#ctor(System.Object,System.Type,System.Type)">
+      <param name="objectToVisualize">The data object you want to show in the visualizer. If you are testing a String visualizer, for example, this parameter would be a String that you want to show in the visualizer.</param>
+      <param name="visualizer"></param>
+      <param name="visualizerObjectSource"></param>
+    </member>
+    <member name="M:Microsoft.VisualStudio.DebuggerVisualizers.VisualizerDevelopmentHost.#ctor(System.Object,System.Type,System.Type,System.Boolean)">
+      <param name="objectToVisualize">The data object you want to show in the visualizer. If you are testing a String visualizer, for example, this parameter would be a String that you want to show in the visualizer.</param>
+      <param name="visualizer"></param>
+      <param name="visualizerObjectSource"></param>
+      <param name="replacementOK">This Boolean value determines the visualizer can replace (edit) the data object. Setting this value to false tells the visualizer host to treat the data object as read-only.</param>
+    </member>
+    <member name="P:Microsoft.VisualStudio.DebuggerVisualizers.VisualizerDevelopmentHost.DebuggeeObject"></member>
+    <member name="M:Microsoft.VisualStudio.DebuggerVisualizers.VisualizerDevelopmentHost.ShowVisualizer"></member>
+    <member name="M:Microsoft.VisualStudio.DebuggerVisualizers.VisualizerDevelopmentHost.ShowVisualizer(System.Windows.Forms.Control)">
+      <param name="parentControl">A control that you want the visualizer parented to.</param>
+    </member>
+    <member name="M:Microsoft.VisualStudio.DebuggerVisualizers.VisualizerDevelopmentHost.ShowVisualizer(System.Windows.Forms.IWin32Window)">
+      <param name="parentWindow">A window that you want the visualizer parented to.</param>
+    </member>
+    <member name="T:Microsoft.VisualStudio.DebuggerVisualizers.VisualizerObjectSource"></member>
+    <member name="M:Microsoft.VisualStudio.DebuggerVisualizers.VisualizerObjectSource.#ctor"></member>
+    <member name="M:Microsoft.VisualStudio.DebuggerVisualizers.VisualizerObjectSource.CreateReplacementObject(System.Object,System.IO.Stream)">
+      <returns>An object, with contents constructed from the incoming data stream, that can replace the <paramref name="target" /> object. This method does not actually replace <paramref name="target" /> but rather provides a replacement object for the debugger to do the actual replacement.</returns>
+      <param name="target">Object being visualized.</param>
+      <param name="incomingData">Incoming data stream.</param>
+    </member>
+    <member name="M:Microsoft.VisualStudio.DebuggerVisualizers.VisualizerObjectSource.Deserialize(System.IO.Stream)">
+      <returns>An object constructed from the data in <paramref name="serializationStream" />.</returns>
+      <param name="serializationStream">Incoming object stream.</param>
+    </member>
+    <member name="M:Microsoft.VisualStudio.DebuggerVisualizers.VisualizerObjectSource.GetData(System.Object,System.IO.Stream)">
+      <param name="target">Object being visualized.</param>
+      <param name="outgoingData">Outgoing data stream.</param>
+    </member>
+    <member name="M:Microsoft.VisualStudio.DebuggerVisualizers.VisualizerObjectSource.Serialize(System.IO.Stream,System.Object)">
+      <param name="serializationStream">Outgoing data stream.</param>
+      <param name="target">Object being visualized.</param>
+    </member>
+    <member name="M:Microsoft.VisualStudio.DebuggerVisualizers.VisualizerObjectSource.TransferData(System.Object,System.IO.Stream,System.IO.Stream)">
+      <param name="target">Object being visualized.</param>
+      <param name="incomingData">Incoming data stream from the debugger side.</param>
+      <param name="outgoingData">Outgoing data stream going to the debugger side.</param>
+    </member>
+    <member name="T:Microsoft.VisualStudio.DebuggerVisualizers.DebugViewerShim.ManagedShim"></member>
+    <member name="M:Microsoft.VisualStudio.DebuggerVisualizers.DebugViewerShim.ManagedShim.#ctor"></member>
+  </members>
+</doc>

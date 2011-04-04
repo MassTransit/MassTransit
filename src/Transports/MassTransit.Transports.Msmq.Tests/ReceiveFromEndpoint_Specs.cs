@@ -16,10 +16,10 @@ namespace MassTransit.Transports.Msmq.Tests
 	using System.IO;
 	using System.Messaging;
 	using Internal;
-	using Magnum;
 	using MassTransit.Serialization;
 	using NUnit.Framework;
 	using Rhino.Mocks;
+	using TestFramework;
 
 	[TestFixture, Category("Integration")]
 	public class Calling_receive_on_the_endpoint

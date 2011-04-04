@@ -30,7 +30,7 @@ namespace MassTransit.Transports
 
         public EndpointSettings New(Action<IEndpointConfigurator> action)
         {
-            var es = new EndpointSettings();
+            var endpointSettings = new EndpointSettings();
 
             action(this);
 
@@ -52,17 +52,12 @@ namespace MassTransit.Transports
                 Guard.AgainstNull(settings.ErrorAddress, "An error address for the endpoint must be specified");
                 Guard.AgainstNull(settings.Serializer, "A message serializer for the endpoint must be specified");
 
+                var errorEndpointSettings = new CreateEndpointSettings(settings.ErrorAddress, settings);
 
+                endpointSettings.Normal = settings.ToTransportSettings();
+                endpointSettings.Error = errorEndpointSettings.ToTransportSettings();
 
-
-                var errorSettings = new CreateEndpointSettings(settings.ErrorAddress, settings);
-                
-                
-
-                es.Normal = settings.ToTransportSettings();
-                es.Error = errorSettings.ToTransportSettings();
-
-                return es;
+                return endpointSettings;
             }
             catch (Exception ex)
             {

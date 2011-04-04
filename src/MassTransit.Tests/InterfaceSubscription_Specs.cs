@@ -12,12 +12,12 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests
 {
-    using Magnum;
 	using Magnum.Extensions;
     using Magnum.TestFramework;
     using MassTransit.Pipeline.Inspectors;
 	using NUnit.Framework;
-	using TextFixtures;
+    using TestFramework;
+    using TextFixtures;
 
 	[TestFixture]
 	public class Sending_a_message_that_implements_an_interface :

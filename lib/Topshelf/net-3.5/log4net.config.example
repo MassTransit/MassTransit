@@ -1,0 +1,54 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<log4net>
+	<root>
+		<level value="ALL" />
+		<appender-ref ref="LogFileAppender" />
+		<appender-ref ref="ColoredConsoleAppender" />
+		<appender-ref ref="EventLogAppender" />
+	</root>
+
+	<logger name="Topshelf">
+		<level value="INFO" />
+	</logger>
+
+	<appender name="ColoredConsoleAppender"
+		   type="log4net.Appender.ColoredConsoleAppender">
+		<mapping>
+			<level value="ERROR" />
+			<foreColor value="Red, HighIntensity" />
+		</mapping>
+		<mapping>
+			<level value="INFO" />
+			<foreColor value="White" />
+		</mapping>
+		<mapping>
+			<level value="DEBUG" />
+			<foreColor value="Cyan" />
+		</mapping>
+		<layout type="log4net.Layout.PatternLayout">
+			<conversionPattern value="%message%newline" />
+		</layout>
+	</appender>
+	
+	<appender name="LogFileAppender"
+		  type="log4net.Appender.RollingFileAppender" >
+		<param name="AppendToFile"
+			 value="true" />
+		<file type="log4net.Util.PatternString" value="log\Topshelf.Host.%appdomain.log" />
+		<rollingStyle value="Size" />
+		<maxSizeRollBackups value="4" />
+		<maximumFileSize value="10MB" />
+		<staticLogFileName value="true" />
+		<layout type="log4net.Layout.PatternLayout">
+			<param name="ConversionPattern"
+				 value="%-5p %d{yyyy-MM-dd hh:mm:ss} - %m%n" />
+		</layout>
+	</appender>
+
+	<appender name="EventLogAppender" type="log4net.Appender.EventLogAppender" >
+		<applicationName value="Topshelf.Host" />
+		<layout type="log4net.Layout.PatternLayout">
+			<conversionPattern value="%d{yyyy-MM-dd hh:mm:ss} [%thread] %-5level %logger - %message%newline" />
+		</layout>
+	</appender>
+</log4net>

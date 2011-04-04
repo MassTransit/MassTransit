@@ -54,15 +54,11 @@
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Apache.NMS, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\lib\activemq-nms\Apache.NMS.dll</HintPath>
-      <Private>False</Private>
+    <Reference Include="Apache.NMS">
+      <HintPath>..\..\..\lib\Apache.NMS\net-3.5\release\Apache.NMS.dll</HintPath>
     </Reference>
-    <Reference Include="Apache.NMS.ActiveMQ, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\lib\activemq-nms\Apache.NMS.ActiveMQ.dll</HintPath>
-      <Private>False</Private>
+    <Reference Include="Apache.NMS.ActiveMQ">
+      <HintPath>..\..\..\lib\Apache.NMS\ActiveMQ\net-3.5\release\Apache.NMS.ActiveMQ.dll</HintPath>
     </Reference>
     <Reference Include="log4net, Version=1.2.10.0, Culture=neutral, PublicKeyToken=1b44e1d426115821, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -71,7 +67,7 @@
     </Reference>
     <Reference Include="Magnum, Version=0.1.0.289, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\lib\Magnum\Magnum.dll</HintPath>
+      <HintPath>..\..\..\lib\Magnum\net-3.5\Magnum.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="System" />

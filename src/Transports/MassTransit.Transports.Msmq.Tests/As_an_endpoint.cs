@@ -57,7 +57,7 @@ namespace MassTransit.Transports.Msmq.Tests
 		{
 			IEndpointResolver ef = EndpointResolverConfigurator.New(x =>
 			    {
-			        x.RegisterTransport<MsmqTransportFactory>();
+			        x.AddTransportFactory<MsmqTransportFactory>();
 			    });
 
 			ef.GetEndpoint(_uri);

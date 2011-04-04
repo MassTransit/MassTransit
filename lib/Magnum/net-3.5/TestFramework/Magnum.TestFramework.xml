@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Magnum.TestFramework</name>
+    </assembly>
+    <members>
+        <member name="T:Magnum.TestFramework.GivenAttribute">
+            <summary>
+            Called once per scenario to establish the context
+            </summary>
+        </member>
+        <member name="T:Magnum.TestFramework.ThenAttribute">
+            <summary>
+            Assert your expectations here
+            </summary>
+        </member>
+        <member name="T:Magnum.TestFramework.WhenAttribute">
+            <summary>
+            Called once per scenario to perform the action
+            </summary>
+        </member>
+    </members>
+</doc>

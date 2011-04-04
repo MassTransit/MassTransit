@@ -57,10 +57,10 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Magnum">
-      <HintPath>..\..\..\lib\Magnum\Magnum.dll</HintPath>
+      <HintPath>..\..\..\lib\Magnum\net-3.5\Magnum.dll</HintPath>
     </Reference>
     <Reference Include="Magnum.ForNHibernate">
-      <HintPath>..\..\..\lib\Magnum\Magnum.ForNHibernate.dll</HintPath>
+      <HintPath>..\..\..\lib\Magnum\net-3.5\NHibernate\Magnum.ForNHibernate.dll</HintPath>
     </Reference>
     <Reference Include="StructureMap, Version=2.4.9.0, Culture=neutral, PublicKeyToken=e60ad81abae3c223, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>

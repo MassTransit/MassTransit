@@ -47,7 +47,7 @@ namespace MassTransit.Transports.Loopback
 		{
 			if (_message != null)
 			{
-				_message.Body.Dispose();
+				_message.Dispose();
 				_message = null;
 			}
 		}

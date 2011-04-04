@@ -20,6 +20,7 @@ namespace Starbucks.Barista
 	using Magnum;
 	using Magnum.StateMachine;
 	using MassTransit.Saga;
+	using MassTransit.Transports;
 	using MassTransit.Transports.Msmq;
 	using MassTransit.WindsorIntegration;
 	using Topshelf;
@@ -45,7 +46,7 @@ namespace Starbucks.Barista
 					c.DependencyOnMsmq();
 					c.RunAsFromInteractive();
 
-					MsmqEndpointConfigurator.Defaults(x => { x.CreateMissingQueues = true; });
+					EndpointConfigurator.Defaults(x => { x.CreateMissingQueues = true; });
 
 					IWindsorContainer container = BootstrapContainer();
 

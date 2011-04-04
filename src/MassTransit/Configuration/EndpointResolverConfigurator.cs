@@ -50,13 +50,13 @@ namespace MassTransit.Configuration
 			_defaultSerializer = serializerType;
 		}
 
-		public void RegisterTransport<TTransportFactory>()
+		public void AddTransportFactory<TTransportFactory>()
 			where TTransportFactory : ITransportFactory
 		{
-			RegisterTransport(typeof (TTransportFactory));
+			AddTransportFactory(typeof (TTransportFactory));
 		}
 
-		public void RegisterTransport(Type transportType)
+		public void AddTransportFactory(Type transportType)
 		{
 		    var f = (ITransportFactory)FastActivator.Create(transportType);
 			_transportTypes.WriteLock(x =>

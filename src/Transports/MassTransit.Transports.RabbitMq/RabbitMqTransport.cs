@@ -36,7 +36,7 @@ namespace MassTransit.Transports.RabbitMq
 
 		public override void Receive(Func<IReceiveContext, Action<IReceiveContext>> callback, TimeSpan timeout)
 		{
-			EnsureNotDisposed();
+			GuardAgainstDisposed();
 
 			using (IModel channel = _connection.CreateModel())
 			{
@@ -67,7 +67,7 @@ namespace MassTransit.Transports.RabbitMq
 
 		public override void Send(Action<ISendContext> callback)
 		{
-			EnsureNotDisposed();
+			GuardAgainstDisposed();
 
 			using (IModel channel = _connection.CreateModel())
 			{

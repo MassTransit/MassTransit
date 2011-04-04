@@ -79,7 +79,7 @@ namespace MassTransit.TestFramework.Fixtures
 
 		public void ShouldHaveReceived(TMessage message, TimeSpan timeout)
 		{
-			Assert.That(ReceivedMessage(message, timeout), Is.True, "Message should have been received");
+			Assert.IsTrue(ReceivedMessage(message, timeout), "Message should have been received");
 		}
 
 		public void ShouldNotHaveReceivedMessage(TMessage message)

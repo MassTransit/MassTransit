@@ -46,11 +46,11 @@ namespace MassTransit.Infrastructure.Tests.Sagas
             _cfg.SetProperty("show_sql", "true");
             _cfg.SetProperty("proxyfactory.factory_class", "NHibernate.ByteCode.Castle.ProxyFactoryFactory, NHibernate.ByteCode.Castle");
 
-            _cfg.AddAssembly(typeof (NHibernateSagaRepository<>).Assembly);
+            _cfg.AddAssembly(typeof (NHibernateSagaRepositoryForContainers<>).Assembly);
             _cfg.AddAssembly(typeof (RegisterUserStateMachine).Assembly);
             _cfg.AddAssembly(typeof (When_using_the_saga_locator_with_NHibernate).Assembly);
 
-            ISessionFactory _sessionFactory = _cfg.BuildSessionFactory();
+            _sessionFactory = _cfg.BuildSessionFactory();
 
             LocalContext.Current.Store(_sessionFactory);
 
@@ -93,15 +93,13 @@ namespace MassTransit.Infrastructure.Tests.Sagas
 
         const string _connectionString = "Server=localhost;initial catalog=test;Trusted_Connection=yes";
         Configuration _cfg;
+    	private ISessionFactory _sessionFactory;
 
 
-        [Test]
+    	[Test]
         public void A_correlated_message_should_find_the_correct_saga()
         {
-            try
-            {
-                using (IUnitOfWork work = UnitOfWork.Start())
-                using (var repository = new NHibernateSagaRepository<TestSaga>())
+                using (var repository = new NHibernateSagaRepositoryForContainers<TestSaga>(_sessionFactory))
                 {
                     var ping = new PingMessage(_sagaId);
 
@@ -117,11 +115,6 @@ namespace MassTransit.Infrastructure.Tests.Sagas
                     Assert.IsNotNull(sagas[0]);
                     Assert.AreEqual(_sagaId, sagas[0].CorrelationId);
                 }
-            }
-            finally
-            {
-                UnitOfWork.Finish();
-            }
         }
 
         [Test]

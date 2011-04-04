@@ -21,7 +21,7 @@ namespace MassTransit.Tests.Transports
         {
             _endpointResolver = EndpointResolverConfigurator.New(c =>
                                                                    {
-                                                                       c.RegisterTransport<TTransportFactory>();
+                                                                       c.AddTransportFactory<TTransportFactory>();
                                                                        c.SetObjectBuilder(ObjectBuilder);
                                                                    });
             _ep = _endpointResolver.GetEndpoint(Address);

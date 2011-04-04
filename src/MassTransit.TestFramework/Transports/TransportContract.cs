@@ -41,7 +41,7 @@ namespace MassTransit.TestFramework.Transports
             ObjectBuilder = MockRepository.GenerateStub<IObjectBuilder>();
             _endpointResolver = EndpointResolverConfigurator.New(c =>
             {
-                c.RegisterTransport<TTransportFactory>();
+                c.AddTransportFactory<TTransportFactory>();
                 c.SetObjectBuilder(ObjectBuilder);
             });
             _ep = _endpointResolver.GetEndpoint(Address);

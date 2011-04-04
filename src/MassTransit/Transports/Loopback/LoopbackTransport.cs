@@ -31,7 +31,7 @@ namespace MassTransit.Transports
 
 		public override void Send(Action<ISendContext> callback)
 		{
-			EnsureNotDisposed();
+			GuardAgainstDisposed();
 
 			using (var context = new LoopbackSendContext())
 			{
@@ -39,7 +39,7 @@ namespace MassTransit.Transports
 
 				lock (_messageLock)
 				{
-					EnsureNotDisposed();
+					GuardAgainstDisposed();
 
 					_messages.AddLast(context.GetMessage());
 				}
@@ -50,13 +50,10 @@ namespace MassTransit.Transports
 
 		public override void Receive(Func<IReceiveContext, Action<IReceiveContext>> callback, TimeSpan timeout)
 		{
-			EnsureNotDisposed();
-
 			int messageCount;
 			lock (_messageLock)
 			{
-				if (_disposed)
-					return;
+				GuardAgainstDisposed();
 
 				messageCount = _messages.Count;
 			}

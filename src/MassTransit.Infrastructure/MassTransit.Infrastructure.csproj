@@ -80,10 +80,10 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="Magnum">
-      <HintPath>..\..\lib\Magnum\Magnum.dll</HintPath>
+      <HintPath>..\..\lib\Magnum\net-3.5\Magnum.dll</HintPath>
     </Reference>
     <Reference Include="Magnum.ForNHibernate">
-      <HintPath>..\..\lib\Magnum\Magnum.ForNHibernate.dll</HintPath>
+      <HintPath>..\..\lib\Magnum\net-3.5\NHibernate\Magnum.ForNHibernate.dll</HintPath>
     </Reference>
     <Reference Include="NHibernate, Version=2.0.1.4000, Culture=neutral, PublicKeyToken=aa95f207798dfdb4, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -106,11 +106,9 @@
     <Compile Include="..\SolutionVersion.cs">
       <Link>SolutionVersion.cs</Link>
     </Compile>
-    <Compile Include="Saga\NHibernateSagaRepository.cs" />
     <Compile Include="Saga\NHibernateSagaRepositoryForContainers.cs" />
     <Compile Include="Subscriptions\PersistentSubscription.cs" />
     <Compile Include="Metadata\InMemoryMetadataRepository.cs" />
-    <Compile Include="Metadata\PersistantMetadataRepository.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Subscriptions\PersistantSubscriptionRepository.cs" />
     <Compile Include="MessageDeferral\PersistantDeferredMessageRepository.cs" />

@@ -22,7 +22,7 @@ namespace MassTransit.Infrastructure.Tests.Sagas
     using NUnit.Framework;
     using Saga;
 
-    [TestFixture, Category("Integration")]
+	[TestFixture, Category("Integration")]
     public class SagaRepository_Specs
     {
         [SetUp]
@@ -36,7 +36,7 @@ namespace MassTransit.Infrastructure.Tests.Sagas
             _cfg.SetProperty("dialect", "NHibernate.Dialect.MsSql2005Dialect");
             _cfg.SetProperty("default_schema", "bus");
 
-            _cfg.AddAssembly(typeof (NHibernateSagaRepository<>).Assembly);
+            _cfg.AddAssembly(typeof (NHibernateSagaRepositoryForContainers<>).Assembly);
             _cfg.AddAssembly(typeof (RegisterUserStateMachine).Assembly);
             _cfg.AddAssembly(typeof (SagaRepository_Specs).Assembly);
 
