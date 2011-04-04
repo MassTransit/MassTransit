@@ -71,11 +71,15 @@ namespace Starbucks.Cashier
 
 		private static IWindsorContainer BootstrapContainer()
 		{
-			IWindsorContainer container = new DefaultMassTransitContainer("Starbucks.Cashier.Castle.xml");
-			container.AddComponent("sagaRepository", typeof (ISagaRepository<>), typeof (InMemorySagaRepository<>));
+			var container = new WindsorContainer("Starbucks.Cashier.Castle.xml");
+			var installer = new MassTransitInstaller();
+			container.Install(installer);
 
-			container.AddComponent<CashierService>(typeof (CashierService).Name);
+			container.AddComponent("sagaRepository", typeof(ISagaRepository<>), typeof(InMemorySagaRepository<>));
+
 			container.AddComponent<CashierSaga>();
+			container.AddComponent<CashierService>(typeof(CashierService).Name);
+
 			return container;
 		}
 	}
