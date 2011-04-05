@@ -13,7 +13,9 @@
 namespace Starbucks.Customer
 {
 	using System;
+	using System.IO;
 	using System.Windows.Forms;
+	using log4net.Config;
 	using MassTransit;
 	using MassTransit.Transports;
 	using StructureMap;
@@ -26,6 +28,8 @@ namespace Starbucks.Customer
 		[STAThread]
 		private static void Main(string[] args)
 		{
+			XmlConfigurator.Configure(new FileInfo("customer.log4net.xml"));
+			
 			EndpointConfigurator.Defaults(x => { x.CreateMissingQueues = true; });
 
 			IContainer c = BootstrapContainer();
