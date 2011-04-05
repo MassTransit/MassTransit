@@ -18,14 +18,11 @@ namespace LegacyRuntime
     using log4net.Config;
     using Magnum.Reflection;
     using MassTransit.LegacySupport;
-    using MassTransit.StructureMapIntegration;
     using MassTransit.Transports;
-    using MassTransit.Transports.Msmq;
     using StructureMap;
     using StructureMap.Configuration.DSL;
     using Topshelf;
-    using Topshelf.Configuration;
-	using Topshelf.Configuration.Dsl;
+    using Topshelf.Configuration.Dsl;
 
     class Program
     {
