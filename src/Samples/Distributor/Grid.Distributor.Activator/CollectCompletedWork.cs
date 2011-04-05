@@ -45,9 +45,9 @@ namespace Grid.Distributor.Activator
         {
             ObjectBuilder = objectBuilder;
 
-            var endpointFactory = EndpointFactoryConfigurator.New(x =>
+            var endpointFactory = EndpointResolverConfigurator.New(x =>
             {
-                x.RegisterTransport<MsmqEndpoint>();
+                x.AddTransportFactory<MsmqTransportFactory>();
                 x.SetObjectBuilder(objectBuilder);
                 x.SetDefaultSerializer<XmlMessageSerializer>();
             });
@@ -55,6 +55,7 @@ namespace Grid.Distributor.Activator
             ControlBus = ControlBusConfigurator.New(x =>
             {
                 x.SetObjectBuilder(ObjectBuilder);
+            	x.SetEndpointFactory(endpointFactory);
 
                 x.ReceiveFrom(new Uri(ConfigurationManager.AppSettings["SourceQueue"]).AppendToPath("_control"));
 
@@ -71,6 +72,7 @@ namespace Grid.Distributor.Activator
                 x.ReceiveFrom(ConfigurationManager.AppSettings["SourceQueue"]);
                 x.UseControlBus(ControlBus);
                 x.SetConcurrentConsumerLimit(4);
+            	x.SetEndpointFactory(endpointFactory);
                 x.UseDistributorFor<DoSimpleWorkItem>(endpointFactory);
             });
         }

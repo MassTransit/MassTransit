@@ -7,7 +7,7 @@ namespace Grid.Distributor.Shared
     {
         public IocRegistry(string receiverQueue, string subscriptionQueue)
         {
-            RegisterEndpointFactory(efc => efc.RegisterTransport<MsmqEndpoint>());
+            RegisterEndpointFactory(efc => efc.AddTransportFactory<MsmqTransportFactory>());
             RegisterServiceBus(receiverQueue, x => ConfigureSubscriptionClient(subscriptionQueue, x));
         }
     }
