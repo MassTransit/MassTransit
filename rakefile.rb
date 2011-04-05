@@ -92,9 +92,9 @@ task :clean do
 end
 
 desc "Cleans, versions, compiles the application and generates build_output/."
-task :compile => [:global_version, :build] do
+task :compile => [:global_version, :build, :build_starbucks] do
 	puts 'Copying unmerged dependencies to output folder'
-#	copyOutputFiles File.join(props[:src], "Stact.ServerFramework/bin/#{BUILD_CONFIG}"), "Stact.ServerFramework.{dll,pdb,xml}", props[:output]
+
 	copyOutputFiles File.join(props[:src], "MassTransit/bin/#{BUILD_CONFIG}"), "log4net.{dll,pdb,xml}", props[:output]
 	copyOutputFiles File.join(props[:src], "MassTransit/bin/#{BUILD_CONFIG}"), "Magnum.{dll,pdb,xml}", props[:output]
 
@@ -166,6 +166,20 @@ task :copy_services => [:compile] do
      	copyOutputFiles src, "Magnum.dll", targ	
      	copyOutputFiles src, "StructureMap.dll", targ	
      	copyOutputFiles src, "WPFToolkit.dll", targ	
+
+	targ = File.join(props[:stage], 'Samples', 'Starbucks')
+	src = File.join(props[:src], "Samples", "Starbucks")
+
+	copyOutputFiles props[:output], "MassTransit.dll", targ
+
+	copyOutputFiles File.join(src, "Starbucks.Cashier/bin/#{BUILD_CONFIG}"), "{log4net,Magnum,MassTransit.StructureMapIntegration,MassTransit.Transports.Msmq,StructureMap,Topshelf}.dll", targ
+	copyOutputFiles File.join(src, "Starbucks.Cashier/bin/#{BUILD_CONFIG}"), "Starbucks.Cashier.exe", targ
+	copyOutputFiles File.join(src, "Starbucks.Cashier/bin/#{BUILD_CONFIG}"), "cashier.log4net.xml", targ
+	copyOutputFiles File.join(src, "Starbucks.Barista/bin/#{BUILD_CONFIG}"), "Starbucks.Barista.exe", targ
+	copyOutputFiles File.join(src, "Starbucks.Barista/bin/#{BUILD_CONFIG}"), "barista.log4net.xml", targ
+	copyOutputFiles File.join(src, "Starbucks.Customer/bin/#{BUILD_CONFIG}"), "Starbucks.Customer.exe", targ
+	copyOutputFiles File.join(src, "Starbucks.Customer/bin/#{BUILD_CONFIG}"), "customer.log4net.xml", targ
+	copyOutputFiles File.join(src, "Starbucks.Customer/bin/#{BUILD_CONFIG}"), "Starbucks.Messages.dll", targ
 end
 
 
@@ -195,6 +209,18 @@ msbuild :build do |msb|
 	msb.use :net4 #MSB_USE
 	msb.targets :Clean, :Build
 	msb.solution = 'src/MassTransit.sln'
+end
+
+desc "Only compiles the application."
+msbuild :build_starbucks do |msb|
+	msb.properties :Configuration => "Build", 
+	    :BuildConfigKey => BUILD_CONFIG_KEY,
+	    :TargetFrameworkVersion => TARGET_FRAMEWORK_VERSION,
+	    :Platform => 'Any CPU'
+	msb.properties[:TargetFrameworkVersion] = TARGET_FRAMEWORK_VERSION unless BUILD_CONFIG_KEY == 'NET35'
+	msb.use :net4 #MSB_USE
+	msb.targets :Clean, :Build
+	msb.solution = 'src/Samples/Starbucks/Starbucks.sln'
 end
 
 def copyOutputFiles(fromDir, filePattern, outDir)
