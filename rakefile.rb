@@ -51,7 +51,7 @@ desc "Cleans, compiles, il-merges, unit tests, prepares examples, packages zip a
 task :all => [:default, :package, :moma]
 
 desc "**Default**, compiles and runs tests"
-task :default => [:clean, :compile, :ilmerge, :tests]
+task :default => [:clean, :compile, :compile_samples, :ilmerge, :copy_services, :tests]
 
 desc "**DOOES NOT CLEAR OUTPUT FOLDER**, compiles and runs tests"
 task :unclean => [:compile, :ilmerge, :tests]
@@ -91,8 +91,12 @@ task :clean do
 	Dir.mkdir props[:artifacts]
 end
 
+task :compile_samples => [:compile, :build_starbucks, :build_distributor] do
+
+end
+
 desc "Cleans, versions, compiles the application and generates build_output/."
-task :compile => [:global_version, :build, :build_starbucks, :build_distributor] do
+task :compile => [:global_version, :build] do
 	puts 'Copying unmerged dependencies to output folder'
 
 	copyOutputFiles File.join(props[:src], "MassTransit/bin/#{BUILD_CONFIG}"), "log4net.{dll,pdb,xml}", props[:output]
@@ -115,7 +119,7 @@ task :compile => [:global_version, :build, :build_starbucks, :build_distributor]
 	copyOutputFiles File.join(props[:src], "Transports/MassTransit.Transports.RabbitMq/bin/#{BUILD_CONFIG}"), "RabbitMQ*.{dll,pdb,xml}", File.join(outt, "RabbitMQ")
 end
 
-task :ilmerge => [:ilmerge_masstransit, :copy_services] do
+task :ilmerge => [:ilmerge_masstransit] do
 end
 
 

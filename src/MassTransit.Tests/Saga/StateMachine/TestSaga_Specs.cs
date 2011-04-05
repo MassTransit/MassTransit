@@ -23,6 +23,7 @@ namespace MassTransit.Tests.Saga.StateMachine
 	using MassTransit.Saga;
 	using NUnit.Framework;
 	using Rhino.Mocks;
+	using TestFramework;
 	using TextFixtures;
 
 	[TestFixture]
@@ -175,21 +176,6 @@ namespace MassTransit.Tests.Saga.StateMachine
 			{
 				Assert.AreEqual(sex.MessageType, typeof (InitiateSimpleSaga));
 			}
-		}
-	}
-
-	public static class SagaTestExtensions
-	{
-		public static TSaga ShouldContainSaga<TSaga>(this ISagaRepository<TSaga> repository, Guid sagaId)
-			where TSaga : class, ISaga
-		{
-			var sagas = repository.Where(x => x.CorrelationId == sagaId);
-
-			var count = sagas.Count();
-
-			Assert.AreEqual(1, count, "The saga does not exist");
-
-			return sagas.First();
 		}
 	}
 }

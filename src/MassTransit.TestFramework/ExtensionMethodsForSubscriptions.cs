@@ -24,7 +24,7 @@ namespace MassTransit.TestFramework
 
 		static ExtensionMethodsForSubscriptions()
 		{
-			Timeout = 3.Seconds();
+			Timeout = 8.Seconds();
 		}
 
 		public static void ShouldHaveSubscriptionFor<TMessage>(this IServiceBus bus)

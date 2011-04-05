@@ -177,9 +177,15 @@ namespace MassTransit.Distributor
 
 		private void PublishWorkerAvailability()
 		{
-			_updatePending = false;
+			try
+			{
+				_updatePending = false;
 
-			_messageTypes.Each(type => { this.FastInvoke(new[] {type}, "PublishWorkerAvailable"); });
+				_messageTypes.Each(type => { this.FastInvoke(new[] {type}, "PublishWorkerAvailable"); });
+			}
+			catch
+			{
+			}
 		}
 
 		private void PublishWorkerAvailable<TMessage>()
