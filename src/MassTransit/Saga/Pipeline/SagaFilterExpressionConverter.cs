@@ -17,7 +17,7 @@ namespace MassTransit.Saga.Pipeline
 	using Util;
 
 	public class SagaFilterExpressionConverter<TSaga, TMessage> :
-		ExpressionVisitor
+		MassTransit.Util.ExpressionVisitor
 	{
 		private TMessage _message;
 
