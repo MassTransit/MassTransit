@@ -56,7 +56,7 @@ namespace MassTransit.Tests.Services.HealthMonitoring
 			saga.CurrentState.ShouldEqual(HealthSaga.Suspect, "MakeSagaSuspect failed");
 		}
 
-		[Test]
+		[Test, Explicit]
 		public void If_a_heartbeat_is_missed_the_saga_should_mark_the_endpoint_suspect()
 		{
 			MakeSagaSuspect();
