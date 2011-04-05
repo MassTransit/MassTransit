@@ -76,6 +76,13 @@ namespace MassTransit.Distributor
 			configurator.AddService(() => new Worker<T>(getConsumer));
 		}
 
+		public static void ImplementDistributorWorker<T>(this IServiceBusConfigurator configurator, Func<T, Action<T>> getConsumer, int inProgressLimit, int pendingLimit)
+			where T : class
+		{
+			var settings = new WorkerSettings {InProgressLimit = inProgressLimit, PendingLimit = pendingLimit};
+			configurator.AddService(() => new Worker<T>(getConsumer, settings));
+		}
+
 		public static void UseSagaDistributorFor<T>(this IServiceBusConfigurator configurator, IEndpointResolver endpointResolver)
 			where T : SagaStateMachine<T>, ISaga
 		{

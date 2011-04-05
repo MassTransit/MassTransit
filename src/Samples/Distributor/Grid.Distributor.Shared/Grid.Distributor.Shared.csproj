@@ -54,6 +54,9 @@
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Magnum">
+      <HintPath>..\..\..\..\lib\Magnum\net-3.5\Magnum.dll</HintPath>
+    </Reference>
     <Reference Include="StructureMap, Version=2.5.4.0, Culture=neutral, PublicKeyToken=e60ad81abae3c223, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\lib\StructureMap\StructureMap.dll</HintPath>
@@ -63,17 +66,10 @@
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
     <Reference Include="System.Windows.Forms" />
-    <Reference Include="System.Xml.Linq">
-      <RequiredTargetFramework>3.5</RequiredTargetFramework>
-    </Reference>
-    <Reference Include="System.Data.DataSetExtensions">
-      <RequiredTargetFramework>3.5</RequiredTargetFramework>
-    </Reference>
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
-    <Reference Include="Topshelf, Version=0.8.0.89, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\lib\Topshelf\Topshelf.dll</HintPath>
+    <Reference Include="Topshelf">
+      <HintPath>..\..\..\..\lib\Topshelf\net-3.5\Topshelf.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
