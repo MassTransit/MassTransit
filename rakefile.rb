@@ -92,7 +92,7 @@ task :clean do
 end
 
 desc "Cleans, versions, compiles the application and generates build_output/."
-task :compile => [:global_version, :build, :build_starbucks] do
+task :compile => [:global_version, :build, :build_starbucks, :build_distributor] do
 	puts 'Copying unmerged dependencies to output folder'
 
 	copyOutputFiles File.join(props[:src], "MassTransit/bin/#{BUILD_CONFIG}"), "log4net.{dll,pdb,xml}", props[:output]
@@ -180,6 +180,18 @@ task :copy_services => [:compile] do
 	copyOutputFiles File.join(src, "Starbucks.Customer/bin/#{BUILD_CONFIG}"), "Starbucks.Customer.exe", targ
 	copyOutputFiles File.join(src, "Starbucks.Customer/bin/#{BUILD_CONFIG}"), "customer.log4net.xml", targ
 	copyOutputFiles File.join(src, "Starbucks.Customer/bin/#{BUILD_CONFIG}"), "Starbucks.Messages.dll", targ
+	
+	targ = File.join(props[:stage], 'Samples', 'Distributor')
+	src = File.join(props[:src], "Samples", "Distributor")
+
+	copyOutputFiles props[:output], "MassTransit.dll", targ
+
+	copyOutputFiles File.join(src, "Grid.Distributor.Activator/bin/#{BUILD_CONFIG}"), "{log4net,Magnum,MassTransit.StructureMapIntegration,MassTransit.Transports.Msmq,StructureMap,Topshelf}.dll", targ
+	copyOutputFiles File.join(src, "Grid.Distributor.Activator/bin/#{BUILD_CONFIG}"), "Grid.Distributor.Activator.exe", targ
+	copyOutputFiles File.join(src, "Grid.Distributor.Activator/bin/#{BUILD_CONFIG}"), "Grid.Distributor.Shared.dll", targ
+	copyOutputFiles File.join(src, "Grid.Distributor.Activator/bin/#{BUILD_CONFIG}"), "*.config", targ
+	copyOutputFiles File.join(src, "Grid.Distributor.Worker/bin/#{BUILD_CONFIG}"), "Grid.Distributor.Worker.exe", targ
+	copyOutputFiles File.join(src, "Grid.Distributor.Worker/bin/#{BUILD_CONFIG}"), "*.config", targ
 end
 
 
@@ -211,7 +223,6 @@ msbuild :build do |msb|
 	msb.solution = 'src/MassTransit.sln'
 end
 
-desc "Only compiles the application."
 msbuild :build_starbucks do |msb|
 	msb.properties :Configuration => "Build", 
 	    :BuildConfigKey => BUILD_CONFIG_KEY,
@@ -221,6 +232,17 @@ msbuild :build_starbucks do |msb|
 	msb.use :net4 #MSB_USE
 	msb.targets :Clean, :Build
 	msb.solution = 'src/Samples/Starbucks/Starbucks.sln'
+end
+
+msbuild :build_distributor do |msb|
+	msb.properties :Configuration => "Build", 
+	    :BuildConfigKey => BUILD_CONFIG_KEY,
+	    :TargetFrameworkVersion => TARGET_FRAMEWORK_VERSION,
+	    :Platform => 'Any CPU'
+	msb.properties[:TargetFrameworkVersion] = TARGET_FRAMEWORK_VERSION unless BUILD_CONFIG_KEY == 'NET35'
+	msb.use :net4 #MSB_USE
+	msb.targets :Clean, :Build
+	msb.solution = 'src/Samples/Distributor/Grid.Distributor.sln'
 end
 
 def copyOutputFiles(fromDir, filePattern, outDir)
