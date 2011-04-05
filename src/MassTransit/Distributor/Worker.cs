@@ -178,7 +178,16 @@ namespace MassTransit.Distributor
 			if (!_wakeUpPending)
 			{
 				_wakeUpPending = true;
-				_fiber.Add(() => _bus.Endpoint.Send(new WakeUpWorker()));
+				_fiber.Add(() =>
+					{
+						try
+						{
+							_bus.Endpoint.Send(new WakeUpWorker());
+						}
+						catch
+						{
+						}
+					});
 			}
 		}
 
@@ -193,9 +202,15 @@ namespace MassTransit.Distributor
 
 		private void PublishWorkerAvailability()
 		{
-			_updatePending = false;
+			try
+			{
+				_updatePending = false;
 
-			_bus.Publish(new WorkerAvailable<T>(_controlUri, _dataUri, _inProgress, _inProgressLimit, _pendingMessages.PendingMessageCount(), _pendingLimit));
+				_bus.Publish(new WorkerAvailable<T>(_controlUri, _dataUri, _inProgress, _inProgressLimit, _pendingMessages.PendingMessageCount(), _pendingLimit));
+			}
+			catch
+			{
+			}
 		}
 
 		private static void RewriteResponseAddress(Uri responseAddress)

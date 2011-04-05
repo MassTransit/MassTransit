@@ -17,15 +17,18 @@ namespace MassTransit.Tests.Services.HealthMonitoring
 	using Configuration;
 	using MassTransit.Saga;
 	using MassTransit.Services.HealthMonitoring;
+	using MassTransit.Services.HealthMonitoring.Messages;
 	using MassTransit.Services.HealthMonitoring.Server;
 	using MassTransit.Services.Subscriptions;
 	using MassTransit.Services.Subscriptions.Client;
 	using MassTransit.Services.Subscriptions.Configuration;
 	using MassTransit.Services.Subscriptions.Server;
+	using MassTransit.Services.Timeout.Messages;
 	using MassTransit.Transports;
 	using NUnit.Framework;
 	using Rhino.Mocks;
 	using TextFixtures;
+	using TestFramework;
 
 	[TestFixture]
 	public class HealthServiceTestFixture :
@@ -73,7 +76,7 @@ namespace MassTransit.Tests.Services.HealthMonitoring
 
 			SetupHealthService();
 
-			Thread.Sleep(1000);
+			Thread.Sleep(500);
 		}
 
 		private void SetupSubscriptionService()
@@ -104,6 +107,12 @@ namespace MassTransit.Tests.Services.HealthMonitoring
 			HealthService = new HealthService(RemoteBus, _healthSagaRepository);
 
 			HealthService.Start();
+
+			LocalBus.ShouldHaveSubscriptionFor<EndpointCameOnline>();
+			LocalBus.ShouldHaveSubscriptionFor<Heartbeat>();
+			LocalBus.ShouldHaveSubscriptionFor<EndpointWentOffline>();
+			LocalBus.ShouldHaveSubscriptionFor<TimeoutExpired>();
+			LocalBus.ShouldHaveSubscriptionFor<PingEndpointResponse>();
 		}
 
 		public ISagaRepository<HealthSaga> Repository

@@ -5,3 +5,7 @@ System.CoreEx.dll
 System.Reactive.dll
 System.Interactive.dll
 System.Threading.dll
+System.Linq.Async.dll
+System.Reactive.Testing.dll
+System.Reactive.ClientProfile.dll
+System.Reactive.ExtendedProfile.dll

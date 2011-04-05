@@ -129,7 +129,7 @@
             Creates a subject that caches its last value and starts with the specified value.
             </summary>
         </member>
-        <member name="T:System.Collections.Generic.ConnectableObservable`1">
+        <member name="T:System.Collections.Generic.ConnectableObservable`2">
             <summary>
             Represents an observable that can be connected and disconnected from its source.
             </summary>
@@ -144,24 +144,64 @@
             Connects the observable.
             </summary>
         </member>
+        <member name="M:System.Collections.Generic.ConnectableObservable`2.#ctor(System.IObservable{`1},System.Collections.Generic.ISubject{`1,`0})">
+            <summary>
+            Creates an observable that can be connected and disconnected from its source.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.ConnectableObservable`2.Connect">
+            <summary>
+            Connects the observable to its source.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.ConnectableObservable`2.Subscribe(System.IObserver{`0})">
+            <summary>
+            Subscribes an observer to the observable sequence.
+            </summary>
+        </member>
+        <member name="T:System.Collections.Generic.ConnectableObservable`1">
+            <summary>
+            Represents an observable that can be connected and disconnected from its source.
+            </summary>
+        </member>
         <member name="M:System.Collections.Generic.ConnectableObservable`1.#ctor(System.IObservable{`0},System.Collections.Generic.ISubject{`0})">
             <summary>
             Creates an observable that can be connected and disconnected from its source.
             </summary>
         </member>
-        <member name="M:System.Collections.Generic.ConnectableObservable`1.#ctor(System.IObservable{`0})">
+        <member name="T:System.IQbservable`1">
             <summary>
-            Creates an observable that can be connected and disconnected from its source.
+            Provides functionality to evaluate queries against a specific data source wherein the type of the data is known.
             </summary>
         </member>
-        <member name="M:System.Collections.Generic.ConnectableObservable`1.Connect">
+        <member name="T:System.IQbservable">
             <summary>
-            Connects the observable to its source.
+            Provides functionality to evaluate queries against a specific data source wherein the type of the data is not specified.
             </summary>
         </member>
-        <member name="M:System.Collections.Generic.ConnectableObservable`1.Subscribe(System.IObserver{`0})">
+        <member name="P:System.IQbservable.ElementType">
             <summary>
-            Subscribes an observer to the observable sequence.
+            Gets the type of the element(s) that are returned when the expression tree associated with this instance of IQbservable is executed.
+            </summary>
+        </member>
+        <member name="P:System.IQbservable.Expression">
+            <summary>
+            Gets the expression tree that is associated with the instance of IQbservable.
+            </summary>
+        </member>
+        <member name="P:System.IQbservable.Provider">
+            <summary>
+            Gets the query provider that is associated with this data source.
+            </summary>
+        </member>
+        <member name="T:System.IQbservableProvider">
+            <summary>
+            Defines methods to create and execute queries that are described by an IQbservable object.
+            </summary>
+        </member>
+        <member name="M:System.IQbservableProvider.CreateQuery``1(System.Linq.Expressions.Expression)">
+            <summary>
+            Constructs an IQbservable&gt;TResult&lt; object that can evaluate the query represented by a specified expression tree.
             </summary>
         </member>
         <member name="T:System.Joins.Pattern">
@@ -715,6 +755,66 @@
             Computes the average of an observable sequence of nullable System.Int64 values.
             </summary>
         </member>
+        <member name="M:System.Linq.Observable.ToList``1(System.IObservable{``0})">
+            <summary>
+            Creates an list from an observable sequence.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.ToArray``1(System.IObservable{``0})">
+            <summary>
+            Creates an array from an observable sequence.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.ToDictionary``3(System.IObservable{``0},System.Func{``0,``1},System.Func{``0,``2},System.Collections.Generic.IEqualityComparer{``1})">
+            <summary>
+            Creates a dictionary from an observable sequence.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.ToDictionary``3(System.IObservable{``0},System.Func{``0,``1},System.Func{``0,``2})">
+            <summary>
+            Creates a dictionary from an observable sequence.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.ToDictionary``2(System.IObservable{``0},System.Func{``0,``1},System.Collections.Generic.IEqualityComparer{``1})">
+            <summary>
+            Creates a dictionary from an observable sequence.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.ToDictionary``2(System.IObservable{``0},System.Func{``0,``1})">
+            <summary>
+            Creates a dictionary from an observable sequence.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.ToLookup``3(System.IObservable{``0},System.Func{``0,``1},System.Func{``0,``2},System.Collections.Generic.IEqualityComparer{``1})">
+            <summary>
+            Creates a lookup from an observable sequence.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.ToLookup``2(System.IObservable{``0},System.Func{``0,``1},System.Collections.Generic.IEqualityComparer{``1})">
+            <summary>
+            Creates a lookup from an observable sequence.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.ToLookup``3(System.IObservable{``0},System.Func{``0,``1},System.Func{``0,``2})">
+            <summary>
+            Creates a lookup from an observable sequence.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.ToLookup``2(System.IObservable{``0},System.Func{``0,``1})">
+            <summary>
+            Creates a lookup from an observable sequence.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.SequenceEqual``1(System.IObservable{``0},System.IObservable{``0},System.Collections.Generic.IEqualityComparer{``0})">
+            <summary>
+            Determines whether two sequences are equal by comparing the elements pair-wise.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.SequenceEqual``1(System.IObservable{``0},System.IObservable{``0})">
+            <summary>
+            Determines whether two sequences are equal by comparing the elements pair-wise.
+            </summary>
+        </member>
         <member name="M:System.Linq.Observable.FromAsyncPattern``1(System.Func{System.AsyncCallback,System.Object,System.IAsyncResult},System.Func{System.IAsyncResult,``0})">
             <summary>
             Converts a Begin/End invoke function pair into a asynchronous function.
@@ -1200,11 +1300,6 @@
             Converts a Begin/End invoke function pair into a asynchronous function.
             </summary>
         </member>
-        <member name="M:System.Linq.Observable.FromAsyncPattern``10(System.Func{``0,``1,``2,``3,``4,``5,``6,``7,``8,``9,System.AsyncCallback,System.Object,System.IAsyncResult})">
-            <summary>
-            Converts a Begin/End invoke function pair into a asynchronous function.
-            </summary>
-        </member>
         <member name="M:System.Linq.Observable.FromAsyncPattern``10(System.Func{``0,``1,``2,``3,``4,``5,``6,``7,``8,``9,System.AsyncCallback,System.Object,System.IAsyncResult},System.Action{System.IAsyncResult})">
             <summary>
             Converts a Begin/End invoke function pair into a asynchronous function.
@@ -1230,6 +1325,11 @@
             Converts a Begin/End invoke function pair into a asynchronous function.
             </summary>
         </member>
+        <member name="M:System.Linq.Observable.GetAwaiter``1(System.IObservable{``0})">
+            <summary>
+            Returns an awaiter that lists all values of the observable sequence.
+            </summary>
+        </member>
         <member name="M:System.Linq.Observable.Let``2(System.IObservable{``0},System.Func{System.IObservable{``0},System.IObservable{``1}})">
             <summary>
             Bind the source to the parameter without sharing subscription side-effects.
@@ -1240,12 +1340,32 @@
             Returns an observable sequence that stays connected to the source as long as there is at least one subscription to the observable sequence.
             </summary>
         </member>
+        <member name="M:System.Linq.Observable.Multicast``2(System.IObservable{``0},System.Collections.Generic.ISubject{``0,``1})">
+            <summary>
+            Returns an observable sequence that stays connected to the source as long as there is at least one subscription to the observable sequence.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Multicast``3(System.IObservable{``0},System.Func{System.Collections.Generic.ISubject{``0,``1}},System.Func{System.IObservable{``1},System.IObservable{``2}})">
+            <summary>
+            Returns an observable sequence that stays connected to the source as long as there is at least one subscription to the observable sequence.
+            </summary>
+        </member>
         <member name="M:System.Linq.Observable.Publish``1(System.IObservable{``0})">
             <summary>
             Returns a connectable observable sequence that shares a single subscription to the underlying source.
             </summary>
         </member>
+        <member name="M:System.Linq.Observable.Publish``1(System.IObservable{``0},System.Concurrency.IScheduler)">
+            <summary>
+            Returns a connectable observable sequence that shares a single subscription to the underlying source.
+            </summary>
+        </member>
         <member name="M:System.Linq.Observable.Publish``2(System.IObservable{``0},System.Func{System.IObservable{``0},System.IObservable{``1}})">
+            <summary>
+            Returns an observable sequence that is the result of invoking the selector on a connectable observable sequence that shares a single subscription to the underlying source.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Publish``2(System.IObservable{``0},System.Func{System.IObservable{``0},System.IObservable{``1}},System.Concurrency.IScheduler)">
             <summary>
             Returns an observable sequence that is the result of invoking the selector on a connectable observable sequence that shares a single subscription to the underlying source.
             </summary>
@@ -1472,12 +1592,12 @@
         </member>
         <member name="M:System.Linq.Observable.ObserveOnDispatcher``1(System.IObservable{``0})">
             <summary>
-            Asynchronously notify observers using the current dispatcher.
+            Asynchronously notify observers using the dispatcher from the current thread.
             </summary>
         </member>
         <member name="M:System.Linq.Observable.SubscribeOnDispatcher``1(System.IObservable{``0})">
             <summary>
-            Asynchronously subscribes and unsubscribes observers using the current dispatcher.
+            Asynchronously subscribes and unsubscribes observers using the dispatcher from the current thread.
             </summary>
         </member>
         <member name="M:System.Linq.Observable.SubscribeOn``1(System.IObservable{``0},System.Concurrency.DispatcherScheduler)">
@@ -1560,6 +1680,11 @@
             Subscribes an observer to an enumerable sequence.  Returns an object that can be used to unsubscribe the observer from the enumerable.
             </summary>
         </member>
+        <member name="M:System.Linq.Observable.FromEvent(System.Action{System.EventHandler},System.Action{System.EventHandler})">
+            <summary>
+            Returns an observable sequence that contains the values of the underlying .NET event.
+            </summary>
+        </member>
         <member name="M:System.Linq.Observable.FromEvent``2(System.Func{System.EventHandler{``1},``0},System.Action{``0},System.Action{``0})">
             <summary>
             Returns an observable sequence that contains the values of the underlying .NET event.
@@ -1575,13 +1700,13 @@
             Returns an observable sequence that contains the values of the underlying .NET event.
             </summary>
         </member>
-        <member name="M:System.Linq.Observable.Generate``2(``0,System.Func{``0,System.Boolean},System.Func{``0,``1},System.Func{``0,``0},System.Concurrency.IScheduler)">
+        <member name="M:System.Linq.Observable.Generate``2(``0,System.Func{``0,System.Boolean},System.Func{``0,``0},System.Func{``0,``1},System.Concurrency.IScheduler)">
             <summary>
             Generates an observable sequence by iterating a state from an initial state until
             the condition fails.
             </summary>
         </member>
-        <member name="M:System.Linq.Observable.Generate``2(``0,System.Func{``0,System.Boolean},System.Func{``0,``1},System.Func{``0,``0})">
+        <member name="M:System.Linq.Observable.Generate``2(``0,System.Func{``0,System.Boolean},System.Func{``0,``0},System.Func{``0,``1})">
             <summary>
             Generates an observable sequence by iterating a state from an initial state until
             the condition fails.
@@ -1713,6 +1838,16 @@
             Concatenates all the observable sequences.
             </summary>
         </member>
+        <member name="M:System.Linq.Observable.Merge``1(System.IObservable{System.IObservable{``0}},System.Int32)">
+            <summary>
+            Merges an observable sequence of observable sequences into an observable sequence.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Concat``1(System.IObservable{System.IObservable{``0}})">
+            <summary>
+            Concatenates all the observable sequences.
+            </summary>
+        </member>
         <member name="M:System.Linq.Observable.Catch``2(System.IObservable{``0},System.Func{``1,System.IObservable{``0}})">
             <summary>
             Continues an observable sequence that is terminated by an exception of the specified type with the observable sequence
@@ -1835,6 +1970,26 @@
             Merges an observable sequence of observable sequences into an observable sequence.
             </summary>
         </member>
+        <member name="M:System.Linq.Observable.Window``3(System.IObservable{``0},System.IObservable{``1},System.Func{``1,System.IObservable{``2}})">
+            <summary>
+            Projects each value in source to the windows defined by windowOpenings and windowClosing.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Window``2(System.IObservable{``0},System.Func{System.IObservable{``1}},System.Concurrency.IScheduler)">
+            <summary>
+            Projects each value in source to the windows defined by windowClosing.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Window``2(System.IObservable{``0},System.Func{System.IObservable{``1}})">
+            <summary>
+            Projects each value in source to the windows defined by windowClosing.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.AsQbservable``1(System.IObservable{``0})">
+            <summary>
+            Converts an observable sequence into a queryable observable sequence.
+            </summary>
+        </member>
         <member name="M:System.Linq.Observable.Remotable``1(System.IObservable{``0})">
             <summary>
             Makes an observable sequence remotable.
@@ -1855,12 +2010,42 @@
             Hides the identity of an observable sequence.
             </summary>
         </member>
+        <member name="M:System.Linq.Observable.WindowWithCount``1(System.IObservable{``0},System.Int32,System.Int32)">
+            <summary>
+            Projects each value of an observable sequence into a window.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.WindowWithCount``1(System.IObservable{``0},System.Int32,System.Int32,System.Concurrency.IScheduler)">
+            <summary>
+            Projects each value of an observable sequence into a window.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.WindowWithCount``1(System.IObservable{``0},System.Int32)">
+            <summary>
+            Projects each value of an observable sequence into a window.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.WindowWithCount``1(System.IObservable{``0},System.Int32,System.Concurrency.IScheduler)">
+            <summary>
+            Projects each value of an observable sequence into a window.
+            </summary>
+        </member>
         <member name="M:System.Linq.Observable.BufferWithCount``1(System.IObservable{``0},System.Int32,System.Int32)">
             <summary>
             Projects each value of an observable sequence into a buffer.
             </summary>
         </member>
+        <member name="M:System.Linq.Observable.BufferWithCount``1(System.IObservable{``0},System.Int32,System.Int32,System.Concurrency.IScheduler)">
+            <summary>
+            Projects each value of an observable sequence into a buffer.
+            </summary>
+        </member>
         <member name="M:System.Linq.Observable.BufferWithCount``1(System.IObservable{``0},System.Int32)">
+            <summary>
+            Projects each value of an observable sequence into a buffer.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.BufferWithCount``1(System.IObservable{``0},System.Int32,System.Concurrency.IScheduler)">
             <summary>
             Projects each value of an observable sequence into a buffer.
             </summary>
@@ -1937,6 +2122,56 @@
             Invokes the action for its side-effects on each value in the observable sequence.
             </summary>
         </member>
+        <member name="M:System.Linq.Observable.Do``1(System.IObservable{``0},System.IObserver{``0})">
+            <summary>
+            Invokes the observer's methods for their side-effects.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.While``1(System.Func{System.Boolean},System.IObservable{``0})">
+            <summary>
+            Repeats source as long as condition holds.
+            </summary>        
+        </member>
+        <member name="M:System.Linq.Observable.If``1(System.Func{System.Boolean},System.IObservable{``0},System.IObservable{``0})">
+            <summary>
+            If condition is true, then thenSource else elseSource.
+            </summary>        
+        </member>
+        <member name="M:System.Linq.Observable.If``1(System.Func{System.Boolean},System.IObservable{``0})">
+            <summary>
+            If condition is true, then thenSource else elseSource.
+            </summary>        
+        </member>
+        <member name="M:System.Linq.Observable.DoWhile``1(System.IObservable{``0},System.Func{System.Boolean})">
+            <summary>
+            Repeats source as long as condition holds.
+            </summary>   
+        </member>
+        <member name="M:System.Linq.Observable.Case``2(System.Func{``0},System.Collections.Generic.IDictionary{``0,System.IObservable{``1}},System.IObservable{``1})">
+            <summary>
+            Uses selector to determine which source in sources to use, uses defaultSource if no match is found.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Case``2(System.Func{``0},System.Collections.Generic.IDictionary{``0,System.IObservable{``1}},System.Concurrency.IScheduler)">
+            <summary>
+            Uses selector to determine which source in sources to use, empty if no match is found.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Case``2(System.Func{``0},System.Collections.Generic.IDictionary{``0,System.IObservable{``1}})">
+            <summary>
+            Uses selector to determine which source in sources to use, empty if no match is found.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.For``2(System.Collections.Generic.IEnumerable{``0},System.Func{``0,System.IObservable{``1}})">
+            <summary>
+            Concatenates the observable sequences obtained by running the resultSelector for each element in source.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Let``2(``0,System.Func{``0,System.IObservable{``1}})">
+            <summary>
+            Returns an observable sequence that invokes selector with value whenever a new observer subscribes.
+            </summary>
+        </member>
         <member name="M:System.Linq.Observable.SkipLast``1(System.IObservable{``0},System.Int32)">
             <summary>
             Bypasses a specified number of values at the end of an observable sequence.
@@ -1945,6 +2180,36 @@
         <member name="M:System.Linq.Observable.TakeLast``1(System.IObservable{``0},System.Int32)">
             <summary>
             Returns a specified number of contiguous values from the end of an observable sequence.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Iterate``1(System.Func{System.IObserver{``0},System.Collections.Generic.IEnumerable{System.IObservable{System.Object}}})">
+            <summary>
+            Subscribes to each observable sequence returned by the iteratorMethod in sequence and returns the observable sequence of values sent to the observer given to the iteratorMethod.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Iterate(System.Func{System.Collections.Generic.IEnumerable{System.IObservable{System.Object}}})">
+            <summary>
+            Subscribes to each observable sequence returned by the iteratorMethod in sequence and returns the observable sequence of values sent to the observer given to the iteratorMethod.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Start``1(System.IObservable{``0})">
+            <summary>
+            Immediately subscribes to source and retains the values in the observable sequence.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Expand``1(System.IObservable{``0},System.Func{``0,System.IObservable{``0}},System.Concurrency.IScheduler)">
+            <summary>
+            Expands an observable sequence by recursively invoking selector.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Expand``1(System.IObservable{``0},System.Func{``0,System.IObservable{``0}})">
+            <summary>
+            Expands an observable sequence by recursively invoking selector.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.IgnoreValues``1(System.IObservable{``0})">
+            <summary>
+            Ignores all values in an observable sequence leaving on the termination messages.
             </summary>
         </member>
         <member name="M:System.Linq.Observable.Select``2(System.IObservable{``0},System.Func{``0,``1})">
@@ -1988,11 +2253,6 @@
             </summary>
         </member>
         <member name="M:System.Linq.Observable.Take``1(System.IObservable{``0},System.Int32)">
-            <summary>
-            Returns a specified number of contiguous values from the start of an observable sequence.
-            </summary>
-        </member>
-        <member name="M:System.Linq.Observable.Take``1(System.IObservable{``0},System.Int32,System.Concurrency.IScheduler)">
             <summary>
             Returns a specified number of contiguous values from the start of an observable sequence.
             </summary>
@@ -2045,6 +2305,16 @@
         <member name="M:System.Linq.Observable.Cast``1(System.IObservable{System.Object})">
             <summary>
             Casts values to the given type.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.Join``5(System.IObservable{``0},System.IObservable{``1},System.Func{``0,System.IObservable{``2}},System.Func{``1,System.IObservable{``3}},System.Func{``0,``1,``4})">
+            <summary>
+            Correlates the elements of two sequences based on overlapping durations.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.GroupJoin``5(System.IObservable{``0},System.IObservable{``1},System.Func{``0,System.IObservable{``2}},System.Func{``1,System.IObservable{``3}},System.Func{``0,System.IObservable{``1},``4})">
+            <summary>
+            Correlates the elements of two sequences based on overlapping durations, and groups the results.
             </summary>
         </member>
         <member name="M:System.Linq.Observable.Interval(System.TimeSpan)">
@@ -2129,6 +2399,36 @@
         <member name="M:System.Linq.Observable.Throttle``1(System.IObservable{``0},System.TimeSpan,System.Concurrency.IScheduler)">
             <summary>
             Ignores values from an observable sequence which are followed by another value before dueTime.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.WindowWithTime``1(System.IObservable{``0},System.TimeSpan,System.TimeSpan,System.Concurrency.IScheduler)">
+            <summary>
+            Projects each value of an observable sequence into a buffer.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.WindowWithTime``1(System.IObservable{``0},System.TimeSpan,System.Concurrency.IScheduler)">
+            <summary>
+            Projects each value of an observable sequence into a window.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.WindowWithTime``1(System.IObservable{``0},System.TimeSpan,System.TimeSpan)">
+            <summary>
+            Projects each value of an observable sequence into a window.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.WindowWithTime``1(System.IObservable{``0},System.TimeSpan)">
+            <summary>
+            Projects each value of an observable sequence into a window.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.WindowWithTimeOrCount``1(System.IObservable{``0},System.TimeSpan,System.Int32,System.Concurrency.IScheduler)">
+            <summary>
+            Projects each value of an observable sequence into a window that is completed when either it's full or a given amount of time has elapsed.
+            </summary>
+        </member>
+        <member name="M:System.Linq.Observable.WindowWithTimeOrCount``1(System.IObservable{``0},System.TimeSpan,System.Int32)">
+            <summary>
+            Projects each value of an observable sequence into a window that is completed when either it's full or a given amount of time has elapsed.
             </summary>
         </member>
         <member name="M:System.Linq.Observable.BufferWithTime``1(System.IObservable{``0},System.TimeSpan,System.TimeSpan,System.Concurrency.IScheduler)">
@@ -2241,28 +2541,48 @@
             Returns the source observable sequence or the other observable sequence if dueTime elapses.
             </summary>
         </member>
-        <member name="M:System.Linq.Observable.GenerateWithTime``2(``0,System.Func{``0,System.Boolean},System.Func{``0,``1},System.Func{``0,System.TimeSpan},System.Func{``0,``0},System.Concurrency.IScheduler)">
+        <member name="M:System.Linq.Observable.GenerateWithTime``2(``0,System.Func{``0,System.Boolean},System.Func{``0,``0},System.Func{``0,``1},System.Func{``0,System.TimeSpan},System.Concurrency.IScheduler)">
             <summary>
             Generates an observable sequence by iterating a state from an initial state until
             the condition fails.
             </summary>
         </member>
-        <member name="M:System.Linq.Observable.GenerateWithTime``2(``0,System.Func{``0,System.Boolean},System.Func{``0,``1},System.Func{``0,System.TimeSpan},System.Func{``0,``0})">
+        <member name="M:System.Linq.Observable.GenerateWithTime``2(``0,System.Func{``0,System.Boolean},System.Func{``0,``0},System.Func{``0,``1},System.Func{``0,System.TimeSpan})">
             <summary>
             Generates an observable sequence by iterating a state from an initial state until
             the condition fails.
             </summary>
         </member>
-        <member name="M:System.Linq.Observable.GenerateWithTime``2(``0,System.Func{``0,System.Boolean},System.Func{``0,``1},System.Func{``0,System.DateTimeOffset},System.Func{``0,``0},System.Concurrency.IScheduler)">
+        <member name="M:System.Linq.Observable.GenerateWithTime``2(``0,System.Func{``0,System.Boolean},System.Func{``0,``0},System.Func{``0,``1},System.Func{``0,System.DateTimeOffset},System.Concurrency.IScheduler)">
             <summary>
             Generates an observable sequence by iterating a state from an initial state until
             the condition fails.
             </summary>
         </member>
-        <member name="M:System.Linq.Observable.GenerateWithTime``2(``0,System.Func{``0,System.Boolean},System.Func{``0,``1},System.Func{``0,System.DateTimeOffset},System.Func{``0,``0})">
+        <member name="M:System.Linq.Observable.GenerateWithTime``2(``0,System.Func{``0,System.Boolean},System.Func{``0,``0},System.Func{``0,``1},System.Func{``0,System.DateTimeOffset})">
             <summary>
             Generates an observable sequence by iterating a state from an initial state until
             the condition fails.
+            </summary>
+        </member>
+        <member name="P:System.Linq.Observable.Provider">
+            <summary>
+            Gets the local Qbservable provider.
+            </summary>
+        </member>
+        <member name="T:System.Linq.ObservableAwaiter`1">
+            <summary>
+            Represents an awaiter that lists all values of the underlying observable sequence.
+            </summary>
+        </member>
+        <member name="M:System.Linq.ObservableAwaiter`1.BeginAwait(System.Action)">
+            <summary>
+            Starts the subscription of the underlying observable sequence and calls callback upon completion of the observable sequence.
+            </summary>
+        </member>
+        <member name="M:System.Linq.ObservableAwaiter`1.EndAwait">
+            <summary>
+            Returns a list containing all values of the underlying observable sequence.
             </summary>
         </member>
         <member name="T:System.ObservableExtensions">
@@ -2335,9 +2655,251 @@
             Hides the identity of an observer.
             </summary>
         </member>
+        <member name="T:System.Collections.Generic.ListObservable`1">
+            <summary>
+            Represents an object that retains the values of the observable sequence and signals the end of the sequence.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.ListObservable`1.#ctor(System.IObservable{`0})">
+            <summary>
+            Constructs an object that retains the values of source and signals the end of the sequence.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.ListObservable`1.IndexOf(`0)">
+            <summary>
+            Determines the index of a specific item in the ListObservable.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.ListObservable`1.Insert(System.Int32,`0)">
+            <summary>
+            Inserts an item to the ListObservable at the specified index.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.ListObservable`1.RemoveAt(System.Int32)">
+            <summary>
+            Removes the ListObservable item at the specified index.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.ListObservable`1.Add(`0)">
+            <summary>
+            Adds an item to the ListObservable.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.ListObservable`1.Clear">
+            <summary>
+            Removes all items from the ListObservable.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.ListObservable`1.Contains(`0)">
+            <summary>
+            Determines whether the ListObservable contains a specific value.
+            </summary>
+            <param name="item"></param>
+            <returns></returns>
+        </member>
+        <member name="M:System.Collections.Generic.ListObservable`1.CopyTo(`0[],System.Int32)">
+            <summary>
+            Copies the elements of the ListObservable to an System.Array, starting at a particular System.Array index.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.ListObservable`1.Remove(`0)">
+            <summary>
+            Removes the first occurrence of a specific object from the ListObservable.
+            </summary>        
+        </member>
+        <member name="M:System.Collections.Generic.ListObservable`1.GetEnumerator">
+            <summary>
+            Returns an enumerator that iterates through the collection.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.ListObservable`1.Subscribe(System.IObserver{System.Object})">
+            <summary>
+            Subscribes an observer to the ListObservable which will be notified upon completion.
+            </summary>
+        </member>
+        <member name="P:System.Collections.Generic.ListObservable`1.Value">
+            <summary>
+            Returns the last value of the observable sequence.
+            </summary>
+        </member>
+        <member name="P:System.Collections.Generic.ListObservable`1.Item(System.Int32)">
+            <summary>
+            Gets or sets the element at the specified index.
+            </summary>
+        </member>
+        <member name="P:System.Collections.Generic.ListObservable`1.Count">
+            <summary>
+            Gets the number of elements contained in the ListObservable.
+            </summary>
+        </member>
+        <member name="P:System.Collections.Generic.ListObservable`1.IsReadOnly">
+            <summary>
+            Gets a value indicating whether the ListObservable is read-only.
+            </summary>
+        </member>
+        <member name="T:System.Collections.Generic.FastAsyncSubject`1">
+            <summary>
+            Represents the result of an asynchronous operation.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.FastAsyncSubject`1.#ctor">
+            <summary>
+            Creates a subject that can only receive one value and that value is cached for all future observations.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.FastAsyncSubject`1.OnCompleted">
+            <summary>
+            Notifies all subscribed observers of the end of the sequence.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.FastAsyncSubject`1.OnError(System.Exception)">
+            <summary>
+            Notifies all subscribed observers with the exception.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.FastAsyncSubject`1.OnNext(`0)">
+            <summary>
+            Notifies all subscribed observers with the value.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.FastAsyncSubject`1.Subscribe(System.IObserver{`0})">
+            <summary>
+            Subscribes an observer to the subject.
+            </summary>
+        </member>
+        <member name="T:System.Collections.Generic.FastBehaviorSubject`1">
+            <summary>
+            Represents a value that changes over time.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.FastBehaviorSubject`1.#ctor(`0)">
+            <summary>
+            Creates a subject that caches its last value and starts with the specified value.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.FastBehaviorSubject`1.OnCompleted">
+            <summary>
+            Notifies all subscribed observers of the end of the sequence.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.FastBehaviorSubject`1.OnError(System.Exception)">
+            <summary>
+            Notifies all subscribed observers with the exception.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.FastBehaviorSubject`1.OnNext(`0)">
+            <summary>
+            Notifies all subscribed observers with the value.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.FastBehaviorSubject`1.Subscribe(System.IObserver{`0})">
+            <summary>
+            Subscribes an observer to the subject.
+            </summary>
+        </member>
+        <member name="T:System.Collections.Generic.FastReplaySubject`1">
+            <summary>
+            Represents an object that is both an observable sequence as well as an observer.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.FastReplaySubject`1.#ctor(System.Int32,System.TimeSpan,System.Concurrency.IScheduler)">
+            <summary>
+            Creates a replayable subject.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.FastReplaySubject`1.#ctor(System.Int32,System.TimeSpan)">
+            <summary>
+            Creates a replayable subject.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.FastReplaySubject`1.#ctor">
+            <summary>
+            Creates a replayable subject.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.FastReplaySubject`1.#ctor(System.Concurrency.IScheduler)">
+            <summary>
+            Creates a replayable subject.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.FastReplaySubject`1.#ctor(System.Int32,System.Concurrency.IScheduler)">
+            <summary>
+            Creates a replayable subject.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.FastReplaySubject`1.#ctor(System.Int32)">
+            <summary>
+            Creates a replayable subject.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.FastReplaySubject`1.#ctor(System.TimeSpan,System.Concurrency.IScheduler)">
+            <summary>
+            Creates a replayable subject.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.FastReplaySubject`1.#ctor(System.TimeSpan)">
+            <summary>
+            Creates a replayable subject.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.FastReplaySubject`1.OnNext(`0)">
+            <summary>
+            Notifies all subscribed observers with the value.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.FastReplaySubject`1.OnError(System.Exception)">
+            <summary>
+            Notifies all subscribed observers with the exception.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.FastReplaySubject`1.OnCompleted">
+            <summary>
+            Notifies all subscribed observers of the end of the sequence.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.FastReplaySubject`1.Subscribe(System.IObserver{`0})">
+            <summary>
+            Subscribes an observer to the subject.
+            </summary>
+        </member>
+        <member name="T:System.Collections.Generic.FastSubject`1">
+            <summary>
+            Represents an object that is both an observable sequence as well as an observer.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.FastSubject`1.#ctor">
+            <summary>
+            Creates a subject.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.FastSubject`1.OnCompleted">
+            <summary>
+            Notifies all subscribed observers of the end of the sequence.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.FastSubject`1.OnError(System.Exception)">
+            <summary>
+            Notifies all subscribed observers with the exception.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.FastSubject`1.OnNext(`0)">
+            <summary>
+            Notifies all subscribed observers with the value.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.FastSubject`1.Subscribe(System.IObserver{`0})">
+            <summary>
+            Subscribes an observer to the subject.
+            </summary>
+        </member>
         <member name="T:System.Collections.Generic.Subject`1">
             <summary>
             Represents an object that is both an observable sequence as well as an observer.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.Subject`1.#ctor(System.Concurrency.IScheduler)">
+            <summary>
+            Creates a subject.
             </summary>
         </member>
         <member name="M:System.Collections.Generic.Subject`1.#ctor">
@@ -2403,6 +2965,46 @@
         <member name="M:System.Threading.Tasks.TaskObservableExtensions.ToObservable``1(System.Threading.Tasks.Task{``0})">
             <summary>
             Returns an observable sequence that contains the values of the underlying task.
+            </summary>
+        </member>
+        <member name="M:System.Threading.Tasks.TaskObservableExtensions.ToTaskLast``1(System.IObservable{``0})">
+            <summary>
+            Returns a task that contains the last value of the underlying observable sequence.
+            </summary>
+        </member>
+        <member name="M:System.Threading.Tasks.TaskObservableExtensions.ToTaskLast``1(System.IObservable{``0},System.Object)">
+            <summary>
+            Returns a task that contains the last value of the underlying observable sequence.
+            </summary>
+        </member>
+        <member name="M:System.Threading.Tasks.TaskObservableExtensions.ToTaskLast``1(System.IObservable{``0},System.Threading.CancellationToken)">
+            <summary>
+            Returns a task that contains the last value of the underlying observable sequence.
+            </summary>
+        </member>
+        <member name="M:System.Threading.Tasks.TaskObservableExtensions.ToTaskLast``1(System.IObservable{``0},System.Threading.CancellationToken,System.Object)">
+            <summary>
+            Returns a task that contains the last value of the underlying observable sequence.
+            </summary>
+        </member>
+        <member name="M:System.Threading.Tasks.TaskObservableExtensions.ToTask``1(System.IObservable{``0})">
+            <summary>
+            Returns a task that contains all values of the underlying observable sequence.
+            </summary>
+        </member>
+        <member name="M:System.Threading.Tasks.TaskObservableExtensions.ToTask``1(System.IObservable{``0},System.Object)">
+            <summary>
+            Returns a task that contains all values of the underlying observable sequence.
+            </summary>
+        </member>
+        <member name="M:System.Threading.Tasks.TaskObservableExtensions.ToTask``1(System.IObservable{``0},System.Threading.CancellationToken)">
+            <summary>
+            Returns a task that contains all values of the underlying observable sequence.
+            </summary>
+        </member>
+        <member name="M:System.Threading.Tasks.TaskObservableExtensions.ToTask``1(System.IObservable{``0},System.Threading.CancellationToken,System.Object)">
+            <summary>
+            Returns a task that contains all values of the underlying observable sequence.
             </summary>
         </member>
         <member name="T:System.Windows.Forms.ControlObservableExtensions">

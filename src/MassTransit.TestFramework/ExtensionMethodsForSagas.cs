@@ -27,7 +27,7 @@ namespace MassTransit.TestFramework
 
 		static ExtensionMethodsForSagas()
 		{
-			Timeout = 8.Seconds();
+			Timeout = 20.Seconds();
 		}
 
 		public static InMemorySagaRepository<TSaga> SetupSagaRepository<TSaga>(this IObjectBuilder builder)
@@ -59,7 +59,7 @@ namespace MassTransit.TestFramework
 					return saga;
 				}
 
-				Thread.Sleep(10);
+				Thread.Sleep(30);
 			}
 
 			return null;
@@ -81,7 +81,7 @@ namespace MassTransit.TestFramework
 				if (saga.CurrentState == state)
 					return;
 
-				Thread.Sleep(10);
+				Thread.Sleep(30);
 			}
 
 			Assert.Fail("The saga was not in the expected state: " + state.Name + " (" + saga.CurrentState.Name + ")");
