@@ -63,7 +63,7 @@ namespace MassTransit.Tests.Timeouts
 
             Stopwatch watch = Stopwatch.StartNew();
 
-            Assert.IsTrue(_timedOut.WaitOne(TimeSpan.FromSeconds(5), true));
+            Assert.IsTrue(_timedOut.WaitOne(TimeSpan.FromSeconds(10), true));
 
             watch.Stop();
 

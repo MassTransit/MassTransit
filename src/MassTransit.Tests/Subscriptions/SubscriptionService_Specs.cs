@@ -80,14 +80,14 @@ namespace MassTransit.Tests.Subscriptions
 			var consumer = new TestMessageConsumer<PingMessage>();
 			var unsubscribeAction = RemoteBus.Subscribe(consumer);
 
-			Thread.Sleep(1000);
+			Thread.Sleep(3000);
 
 			DumpPipelines();
 
 			var message = new PingMessage();
 			LocalBus.Publish(message);
 
-			consumer.ShouldHaveReceivedMessage(message, 500.Milliseconds());
+			consumer.ShouldHaveReceivedMessage(message, 1500.Milliseconds());
 
 			unsubscribeAction();
 		}

@@ -68,13 +68,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\lib\log4net.dll</HintPath>
     </Reference>
-    <Reference Include="Magnum, Version=0.8.0.446, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Magnum, Version=1.1.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\lib\Magnum\Magnum.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Magnum.ForNHibernate">
-      <HintPath>..\..\..\lib\Magnum\Magnum.ForNHibernate.dll</HintPath>
+      <HintPath>..\..\..\lib\Magnum\net-3.5\Magnum.dll</HintPath>
     </Reference>
     <Reference Include="NHibernate, Version=2.1.2.4000, Culture=neutral, PublicKeyToken=aa95f207798dfdb4, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -95,9 +91,9 @@
     </Reference>
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.XML" />
-    <Reference Include="Topshelf, Version=0.8.0.89, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Topshelf, Version=2.1.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\lib\Topshelf\Topshelf.dll</HintPath>
+      <HintPath>..\..\..\lib\Topshelf\net-3.5\Topshelf.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -110,31 +106,6 @@
     <Compile Include="Model\LegacySubscriptionClientSagaMap.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\Containers\MassTransit.StructureMapIntegration\MassTransit.StructureMapIntegration.csproj">
-      <Project>{F5E67502-2B30-484C-88C3-97710291F5AA}</Project>
-      <Name>MassTransit.StructureMapIntegration</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\MassTransit.LegacySupport\MassTransit.LegacySupport.csproj">
-      <Project>{EBC898FE-E3E4-4599-8DC3-D98A829424AC}</Project>
-      <Name>MassTransit.LegacySupport</Name>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\..\MassTransit.Infrastructure\MassTransit.Infrastructure.csproj">
-      <Project>{073A90FD-9A3E-4704-B3B5-6D8A9F4B442E}</Project>
-      <Name>MassTransit.Infrastructure</Name>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\..\MassTransit\MassTransit.csproj">
-      <Project>{6EFD69FC-CBCC-4F85-AEE0-EFBA73F4D273}</Project>
-      <Name>MassTransit</Name>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\..\Transports\MassTransit.Transports.Msmq\MassTransit.Transports.Msmq.csproj">
-      <Project>{6F90867C-E092-4EDC-B3DE-600D39DF0335}</Project>
-      <Name>MassTransit.Transports.Msmq</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -161,6 +132,28 @@
       <ProductName>Windows Installer 3.1</ProductName>
       <Install>true</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Containers\MassTransit.StructureMapIntegration\MassTransit.StructureMapIntegration.csproj">
+      <Project>{F5E67502-2B30-484C-88C3-97710291F5AA}</Project>
+      <Name>MassTransit.StructureMapIntegration</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\MassTransit.Infrastructure\MassTransit.Infrastructure.csproj">
+      <Project>{073A90FD-9A3E-4704-B3B5-6D8A9F4B442E}</Project>
+      <Name>MassTransit.Infrastructure</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\MassTransit\MassTransit.csproj">
+      <Project>{6EFD69FC-CBCC-4F85-AEE0-EFBA73F4D273}</Project>
+      <Name>MassTransit</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Transports\MassTransit.Transports.Msmq\MassTransit.Transports.Msmq.csproj">
+      <Project>{6F90867C-E092-4EDC-B3DE-600D39DF0335}</Project>
+      <Name>MassTransit.Transports.Msmq</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\MassTransit.LegacySupport\MassTransit.LegacySupport.csproj">
+      <Project>{EBC898FE-E3E4-4599-8DC3-D98A829424AC}</Project>
+      <Name>MassTransit.LegacySupport</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
