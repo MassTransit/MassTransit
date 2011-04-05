@@ -110,7 +110,7 @@ task :compile => [:global_version, :build, :build_starbucks] do
 
 	copyOutputFiles File.join(props[:src], "Transports/MassTransit.Transports.MSMQ/bin/#{BUILD_CONFIG}"), "MassTransit*.{dll,pdb,xml}", File.join(outt, "MSMQ")
 	copyOutputFiles File.join(props[:src], "Transports/MassTransit.Transports.Nms/bin/#{BUILD_CONFIG}"), "MassTransit*.{dll,pdb,xml}", File.join(outt, "ActiveMQ")
-	copyOutputFiles File.join(props[:src], "Transports/MassTransit.Transports.Nms/bin/#{BUILD_CONFIG}"), "MassTransit*.{dll,pdb,xml}", File.join(outt, "ActiveMQ")
+	copyOutputFiles File.join(props[:src], "Transports/MassTransit.Transports.Nms/bin/#{BUILD_CONFIG}"), "Apache*.{dll,pdb,xml}", File.join(outt, "ActiveMQ")
 	copyOutputFiles File.join(props[:src], "Transports/MassTransit.Transports.RabbitMq/bin/#{BUILD_CONFIG}"), "MassTransit*.{dll,pdb,xml}", File.join(outt, "RabbitMQ")
 	copyOutputFiles File.join(props[:src], "Transports/MassTransit.Transports.RabbitMq/bin/#{BUILD_CONFIG}"), "RabbitMQ*.{dll,pdb,xml}", File.join(outt, "RabbitMQ")
 end
