@@ -20,7 +20,6 @@ namespace MassTransit.NinjectIntegration
 	using Saga;
 	using Services.Subscriptions;
 	using Services.Subscriptions.Configuration;
-	using Services.Subscriptions.Server;
 	using Transports;
 
 	/// <summary>
@@ -131,13 +130,6 @@ namespace MassTransit.NinjectIntegration
 
 			Bind<SubscriptionConsumer>()
 				.To<SubscriptionConsumer>();
-		}
-
-		protected void RegisterInMemorySubscriptionRepository()
-		{
-			Bind<ISubscriptionRepository>()
-				.To<InMemorySubscriptionRepository>()
-				.InSingletonScope();
 		}
 
 		protected void RegisterInMemorySagaRepository()

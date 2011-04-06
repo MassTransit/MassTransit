@@ -34,18 +34,15 @@ namespace MassTransit.Services.Subscriptions.Server
 		private readonly ISagaRepository<SubscriptionClientSaga> _subscriptionClientSagas;
 		private readonly ISagaRepository<SubscriptionSaga> _subscriptionSagas;
 		private IServiceBus _bus;
-		private ISubscriptionRepository _repository;
 		private UnsubscribeAction _unsubscribeToken = () => false;
 		private readonly Fiber _fiber = new PoolFiber();
 
 		public SubscriptionService(IServiceBus bus,
-		                           ISubscriptionRepository subscriptionRepository,
 		                           IEndpointResolver endpointResolver,
 		                           ISagaRepository<SubscriptionSaga> subscriptionSagas,
 		                           ISagaRepository<SubscriptionClientSaga> subscriptionClientSagas)
 		{
 			_bus = bus;
-			_repository = subscriptionRepository;
 			_endpointResolver = endpointResolver;
 			_subscriptionSagas = subscriptionSagas;
 			_subscriptionClientSagas = subscriptionClientSagas;
@@ -93,9 +90,6 @@ namespace MassTransit.Services.Subscriptions.Server
 
 				_bus.Dispose();
 				_bus = null;
-
-				_repository.Dispose();
-				_repository = null;
 			}
 			catch (Exception ex)
 			{

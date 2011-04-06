@@ -13,13 +13,10 @@
 namespace MassTransit.TestFramework.Fixtures
 {
 	using System;
-	using System.Collections.Generic;
 	using Configuration;
 	using MassTransit.Transports;
 	using NUnit.Framework;
-	using Rhino.Mocks;
 	using Saga;
-	using Services.Subscriptions;
 	using Services.Subscriptions.Client;
 	using Services.Subscriptions.Configuration;
 	using Services.Subscriptions.Server;
@@ -41,15 +38,12 @@ namespace MassTransit.TestFramework.Fixtures
 
 		private void SetupSubscriptionService()
 		{
-			SetupSubscriptionRepository();
-
 			ObjectBuilder.SetupSagaRepository<SubscriptionClientSaga>();
 			ObjectBuilder.SetupSagaRepository<SubscriptionSaga>();
 
 			SubscriptionBus = SetupServiceBus(SubscriptionUri, x => { x.SetConcurrentConsumerLimit(1); });
 
 			SubscriptionService = new SubscriptionService(SubscriptionBus,
-				ObjectBuilder.GetInstance<ISubscriptionRepository>(),
 				EndpointResolver,
 				ObjectBuilder.GetInstance<ISagaRepository<SubscriptionSaga>>(),
 				ObjectBuilder.GetInstance<ISagaRepository<SubscriptionClientSaga>>());
@@ -57,13 +51,6 @@ namespace MassTransit.TestFramework.Fixtures
 			SubscriptionService.Start();
 
 			ObjectBuilder.Construct(() => new SubscriptionClient(EndpointResolver));
-		}
-
-		private void SetupSubscriptionRepository()
-		{
-			var subscriptionRepository = MockRepository.GenerateMock<ISubscriptionRepository>();
-			subscriptionRepository.Stub(x => x.List()).Return(new List<Subscription>());
-			ObjectBuilder.Add(subscriptionRepository);
 		}
 
 		[TestFixtureTearDown]
