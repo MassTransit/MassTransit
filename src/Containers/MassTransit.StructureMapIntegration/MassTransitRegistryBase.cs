@@ -118,13 +118,6 @@ namespace MassTransit.StructureMapIntegration
 				.Use<SubscriptionConsumer>();
 		}
 
-		protected void RegisterInMemorySubscriptionRepository()
-		{
-			For<ISubscriptionRepository>()
-				.Singleton()
-				.Use<InMemorySubscriptionRepository>();
-		}
-
 		protected void RegisterInMemorySagaRepository()
 		{
 			For(typeof (ISagaRepository<>))

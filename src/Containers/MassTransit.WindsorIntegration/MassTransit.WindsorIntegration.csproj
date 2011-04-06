@@ -79,7 +79,6 @@
       <Link>SolutionVersion.cs</Link>
     </Compile>
     <Compile Include="MassTransitInMemorySagaRepositoryInstaller.cs" />
-    <Compile Include="MassTransitInMemorySubscriptionsInstaller.cs" />
     <Compile Include="MassTransitInstaller.cs" />
     <Compile Include="WindsorObjectBuilder.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

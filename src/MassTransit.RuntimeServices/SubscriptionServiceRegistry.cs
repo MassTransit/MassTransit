@@ -15,7 +15,6 @@ namespace MassTransit.RuntimeServices
 	using System.IO;
 	using FluentNHibernate.Cfg;
 	using Infrastructure.Saga;
-	using Infrastructure.Subscriptions;
 	using Model;
 	using NHibernate;
 	using NHibernate.Tool.hbm2ddl;
@@ -37,8 +36,6 @@ namespace MassTransit.RuntimeServices
 
 			For(typeof (ISagaRepository<>))
 				.Add(typeof (NHibernateSagaRepositoryForContainers<>));
-			For<ISubscriptionRepository>()
-				.Add<PersistantSubscriptionRepository>();
 
 			RegisterServiceBus(configuration.SubscriptionServiceUri, x => { x.SetConcurrentConsumerLimit(1); });
 		}

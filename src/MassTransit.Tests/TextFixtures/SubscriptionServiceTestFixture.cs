@@ -44,7 +44,6 @@ namespace MassTransit.Tests.TextFixtures
 		public IServiceBus RemoteBus { get; private set; }
 		public IControlBus RemoteControlBus { get; private set; }
 		public IServiceBus SubscriptionBus { get; private set; }
-		public ISubscriptionRepository SubscriptionRepository { get; private set; }
 
 		protected override void EstablishContext()
 		{
@@ -117,17 +116,11 @@ namespace MassTransit.Tests.TextFixtures
 
 		private void SetupSubscriptionService(IObjectBuilder builder)
 		{
-			//SubscriptionRepository = new InMemorySubscriptionRepository();
-			SubscriptionRepository = MockRepository.GenerateMock<ISubscriptionRepository>();
-			SubscriptionRepository.Expect(x => x.List()).Return(new List<Subscription>());
-			builder.Stub(x => x.GetInstance<ISubscriptionRepository>())
-				.Return(SubscriptionRepository);
-
 			_subscriptionClientSagaRepository = SetupSagaRepository<SubscriptionClientSaga>(builder);
 			
 			_subscriptionSagaRepository = SetupSagaRepository<SubscriptionSaga>(builder);
 			
-			SubscriptionService = new SubscriptionService(SubscriptionBus, SubscriptionRepository, EndpointResolver, _subscriptionSagaRepository, _subscriptionClientSagaRepository);
+			SubscriptionService = new SubscriptionService(SubscriptionBus, EndpointResolver, _subscriptionSagaRepository, _subscriptionClientSagaRepository);
 
 			SubscriptionService.Start();
 

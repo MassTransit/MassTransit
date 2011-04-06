@@ -160,10 +160,8 @@
     <Compile Include="IObjectBuilder.cs" />
     <Compile Include="IServiceBus.cs" />
     <Compile Include="MessageFilter.cs" />
-    <Compile Include="Services\Subscriptions\Server\InMemorySubscriptionRepository.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ServiceBus.cs" />
-    <Compile Include="Services\Subscriptions\Server\ISubscriptionRepository.cs" />
     <Compile Include="Services\Subscriptions\Messages\AddSubscription.cs" />
     <Compile Include="Services\Subscriptions\Messages\SubscriptionRefresh.cs" />
     <Compile Include="Services\Subscriptions\Messages\AddSubscriptionClient.cs" />
