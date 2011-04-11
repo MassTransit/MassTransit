@@ -18,13 +18,14 @@ namespace MassTransit.Tests.TextFixtures
 	using Configuration;
 	using Distributor;
 	using MassTransit.Saga;
-	using MassTransit.Services.Subscriptions;
 	using MassTransit.Services.Subscriptions.Client;
 	using MassTransit.Services.Subscriptions.Configuration;
+	using MassTransit.Services.Subscriptions.Messages;
 	using MassTransit.Services.Subscriptions.Server;
 	using MassTransit.Transports;
 	using NUnit.Framework;
 	using Rhino.Mocks;
+	using TestFramework;
 
 	[TestFixture]
 	public class SubscriptionServiceTestFixture<TTransportFactory> :
@@ -94,6 +95,8 @@ namespace MassTransit.Tests.TextFixtures
 						});
 					x.ReceiveFrom(ServerUri);
 					x.UseControlBus(RemoteControlBus);
+
+					ConfigureRemoteBus(x);
 				});
 
 			Instances = new Dictionary<string, ServiceInstance>();
@@ -111,6 +114,10 @@ namespace MassTransit.Tests.TextFixtures
 		}
 
 		protected virtual void ConfigureLocalBus(IServiceBusConfigurator configurator)
+		{
+		}
+
+		protected virtual void ConfigureRemoteBus(IServiceBusConfigurator configurator)
 		{
 		}
 

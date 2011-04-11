@@ -80,6 +80,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\lib\Rhino.Mocks.dll</HintPath>
     </Reference>
+    <Reference Include="Stact, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\lib\Stact\net-3.5\Stact.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
@@ -109,6 +113,8 @@
     <Compile Include="Distributor\DistributorSagaTestFixture.cs" />
     <Compile Include="Distributor\DistributorSaga_Specs.cs" />
     <Compile Include="Distributor\LoopbackDistributorSagaTestFixture.cs" />
+    <Compile Include="Distributor\LoopbackMultipleDistributorSagaTestFixture.cs" />
+    <Compile Include="Distributor\MultipleDistributorSagaTestFixture.cs" />
     <Compile Include="Examples\Given_a_consumer_is_subscribed_to_a_message.cs" />
     <Compile Include="Examples\Given_a_consumer_is_subscribed_to_a_message_on_a_remote_bus.cs" />
     <Compile Include="Examples\Given_a_consumer_is_subscribed_to_a_message_on_the_remote_bus.cs" />
